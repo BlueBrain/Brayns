@@ -13,7 +13,22 @@ set(VERSION_MINOR "1")
 set(VERSION_PATCH "0")
 set(VERSION_ABI 1)
 
+set(BRAYNS_DESCRIPTION "Ray-Tracing Scalable Engine")
+
 include(Common)
+
+# Make BRayns optional when OSPRay is not available and:
+# - building as a subproject
+# - building on Ubuntu Jenkins VM
+if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
+        (TRAVIS AND LSB_DISTRIBUTOR_ID MATCHES "Ubuntu"))
+  common_package(OSPRay)
+  if(NOT OSPRAY_FOUND)
+      message(WARNING "[BRayns] OSPRay not found, the project will not be built")
+    include(CommonPackageConfig)
+    return()
+  endif()
+endif()
 
 if(APPLE)
   cmake_policy(SET CMP0042 NEW)
@@ -22,9 +37,9 @@ if(APPLE)
   set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures" FORCE)
 endif()
 
-#set(BRAYNS_namespace brayns)
-#set(BRAYNS_INCLUDE_NAME brayns)
-set(BRAYNS_DESCRIPTION "Ray-Tracing Scalable Engine")
+common_package(OSPRay REQUIRED SYSTEM)
+common_package(GLUT REQUIRED SYSTEM)
+common_package(OpenGL REQUIRED)
 
 option(ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ON)
 if(ASSIMP_ENABLED)
@@ -50,9 +65,6 @@ if(REST_ENABLED)
   common_package(zeq)
 endif()
 
-common_package(OSPRay REQUIRED SYSTEM)
-common_package(GLUT REQUIRED SYSTEM)
-common_package(OpenGL REQUIRED)
 common_package_post()
 
 # ------------------------------------------------------------------------------
@@ -93,5 +105,5 @@ if(BRAYNSSERVICE_ENABLED)
   add_subdirectory(apps/BRaynsService)
 endif()
 
-include(PackageConfig)
+include(CommonPackageConfig)
 #set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)

@@ -32,7 +32,7 @@ find_path(OSPRAY_ROOT ospray
   DOC "OSPRay base directory"
   )
 
-if(NOT OSPRAY_ROOT)
+if(NOT OSPRAY_ROOT AND NOT OSPRay_FIND_QUIETLY)
   message("Could not find OSPRay base directory. Please set OSPRAY_ROOT to the root of your local OSPRay git repository.")
 endif()
 
@@ -40,7 +40,7 @@ find_path(OSPRAY_ROOT/bin ospModelViewer
   HINTS ${OSPRAY_ROOT}/build ${PROJECT_SOURCE_DIR}/../OSPRay/build ${PROJECT_SOURCE_DIR}/../OSPRay ${PROJECT_SOURCE_DIR}/../../../OSPRay/build ${PROJECT_SOURCE_DIR}/../../../OSPRay
   DOC "OSPRay build directory"
   )
-if(NOT OSPRAY_ROOT)
+if(NOT OSPRAY_ROOT AND NOT OSPRay_FIND_QUIETLY)
   message("Could not find OSPRay build directory. Please set OSPRAY_ROOT to the directory where OSPRay was built.")
 endif()
 
@@ -82,6 +82,6 @@ set(OSPRAY_LIBRARIES
   )
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(OSPRAY DEFAULT_MSG
+find_package_handle_standard_args(OSPRay DEFAULT_MSG
                                   OSPRAY_LIBRARIES
                                   OSPRAY_INCLUDE_DIRS)

@@ -1,0 +1,12 @@
+CMake/common/
+Deflect/
+FlatBuffers/
+RESTBridge/
+Servus/
+ZeroBuf/
+build/
+zeq/
+.DS_Store
+*~
+*#
+*.autosave

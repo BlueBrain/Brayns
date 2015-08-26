@@ -1,25 +1,26 @@
 # Copyright (c) HBP 2014-2015 cyrille.favreau@epfl.ch
 # All rights reserved. Do not distribute without further notice.
-
-set(ASSIMP_FOUND FALSE)
-set(ASSIMP_NAME assimp)
+#
+# Once done this will define:
+#
+#  ASSIMP_FOUND - system has Assimp
+#  ASSIMP_INCLUDE_DIRS - the Assimp include directory
+#  ASSIMP_LIBRARIES - Link these to use Assimp
 
 set(ASSIMP_ROOT $ENV{ASSIMP_ROOT})
 
 find_path(ASSIMP_INCLUDE_DIRS
-  NAMES scene.h
+  NAMES assimp/scene.h
   HINTS ${ASSIMP_ROOT}/include
-  /usr/include/
+  /usr/include
 )
 
 find_library(ASSIMP_LIBRARIES
-  NAMES ${ASSIMP_NAME}
+  NAMES assimp
   HINTS ${ASSIMP_ROOT}/lib
   /usr/local/lib/
   /usr/lib/
 )
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(assimp DEFAULT_MSG
-                                  ASSIMP_LIBRARIES
-                                  ASSIMP_INCLUDE_DIR)
+find_package_handle_standard_args(ASSIMP DEFAULT_MSG ASSIMP_INCLUDE_DIRS ASSIMP_LIBRARIES)

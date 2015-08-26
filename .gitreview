@@ -1,0 +1,5 @@
+[gerrit]
+host=bbpcode.epfl.ch
+project=viz/BRayns
+defaultbranch=master
+port=22
