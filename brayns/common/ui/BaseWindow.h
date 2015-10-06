@@ -33,16 +33,6 @@
 #include <unistd.h>
 #endif
 
-#ifdef BRAYNS_USE_RESTBRIDGE
-#  include <restbridge/RestBridge.h>
-#  include <zeq/zeq.h>
-#  include <zeq/hbp/hbp.h>
-#endif
-
-#ifdef BRAYNS_USE_DEFLECT
-#  include <brayns/common/extensions/DeflectManager.h>
-#endif
-
 #include <brayns/common/types.h>
 #include <brayns/common/parameters/ApplicationParameters.h>
 #include <brayns/common/parameters/RenderingParameters.h>
@@ -286,29 +276,13 @@ public:
     float getRotateSpeed() { return rotateSpeed_; }
     float getMotionSpeed() { return motionSpeed_; }
 
+    uint32* getFrameBuffer() { return ucharFB_; }
+
+    ospray::vec2i getWindowSize() { return windowSize_; }
 
 protected:
-#ifdef BRAYNS_USE_DEFLECT
-    void initializeDeflect();
-#endif
 
-#ifdef BRAYNS_USE_RESTBRIDGE
-    void initializeRest();
-    void onCamera( const zeq::Event& event );
-    void onRequest( const zeq::Event &event );
-
-    /**
-     * Converts RGBA RAW image into JPeg
-     * @return A pointer to the buffer containing the JPeg image
-     */
-    uint8_t* _encodeJpeg( const uint32_t width, const uint32_t height,
-                          const uint8_t* rawData, unsigned long& jpSize );
-#endif
-
-    void generateMetaballs( float threshold );
-#ifdef BRAYNS_USE_ASSIMP
-    void exportOBJToFile( const std::string& filename );
-#endif
+    void generateMetaballs_( float threshold );
 
     ospray::vec2i lastMousePos_; /*! last mouse screen position of mouse before
                                     current motion */
@@ -327,14 +301,13 @@ protected:
      * _rotates_ with each unit on the screen */
     float rotateSpeed_;
 
-    union {
-        /*! uchar[4] RGBA-framebuffer, if applicable */
-        uint32 *ucharFB_;
-        /*! float[4] RGBA-framebuffer, if applicable */
-        ospray::vec3fa *floatFB_;
-        /*! floating point depth framebuffer, if applicable */
-        float *depthFB_;
-    };
+    /*! uchar[4] RGBA-framebuffer, if applicable */
+    uint32 *ucharFB_;
+    /*! float[4] RGBA-framebuffer, if applicable */
+    ospray::vec3fa *floatFB_;
+    /*! floating point depth framebuffer, if applicable */
+    float *depthFB_;
+
     FrameBufferMode frameBufferMode_;
 
     ApplicationParameters applicationParameters_;
@@ -384,19 +357,13 @@ protected:
     OSPDataCollections ospNormals_;
     OSPDataCollections ospColors_;
 
-    tjhandle handleCompress_;
-
-#ifdef BRAYNS_USE_DEFLECT
-    std::unique_ptr<brayns::DeflectManager> deflectManager_;
-#endif
-#ifdef BRAYNS_USE_RESTBRIDGE
-    std::unique_ptr<restbridge::RestBridge> restBridge_;
-    std::unique_ptr<zeq::Subscriber> rcSubscriber_;
-    std::unique_ptr<zeq::Publisher> rcPublisher_;
-#endif
+    bool running_;
 
 private:
-    void setRendererParameters();
+
+    void setRendererParameters_();
+
+    std::unique_ptr< ExtensionController > extensionController_;
 };
 
 std::ostream &operator<<(std::ostream &o, const BaseWindow::ViewPort &cam);

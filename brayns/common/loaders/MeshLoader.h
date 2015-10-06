@@ -74,7 +74,7 @@ public:
 
 private:
 
-    void createMaterials(
+    void createMaterials_(
         const aiScene *scene,
         MaterialsCollection& materials,
         int defaultMaterial );

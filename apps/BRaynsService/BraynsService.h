@@ -26,21 +26,8 @@
 #include <brayns/common/parameters/RenderingParameters.h>
 #include <brayns/common/parameters/GeometryParameters.h>
 
-#ifdef BRAYNS_USE_RESTBRIDGE
-#  include <restbridge/RestBridge.h>
-#  include <zeq/zeq.h>
-#  include <zeq/hbp/hbp.h>
-typedef void* tjhandle;
-#endif
-
-#ifdef BRAYNS_USE_DEFLECT
-#  include <brayns/common/extensions/DeflectManager.h>
-#endif
-
 namespace brayns
 {
-
-class DeflectManager;
 
 /** Off-screen rendering service processing ZeroEQ and REST events
  * for interactive CPU based ray-tracing
@@ -49,7 +36,7 @@ class BraynsService
 {
 public:
 
-    BraynsService(const ApplicationParameters& applicationParameters);
+    BraynsService( const ApplicationParameters& applicationParameters );
     ~BraynsService();
 
     /** Sets the rendering parameters and renders the current frame
@@ -94,29 +81,13 @@ public:
      */
     void processEvents();
 
-#ifdef BRAYNS_USE_RESTBRIDGE
-protected:
-    /** Registers ZeroEQ application specific vocabulary
+    /** Returns true if the service is serving events. False otherwise.
      */
-    void registerVocabulary();
+    bool isServingEvents() { return servingEvents_; }
 
-    /** Implements the CAMERA event
+    /** Activates the processing of events
      */
-    void onCamera( const zeq::Event& event );
-
-    /** Implements the REQUEST event
-     */
-    void onRequest( const zeq::Event &event );
-
-    /** Implements the EXIT event
-     */
-    void onExit( const zeq::Event &event );
-
-    /** Encodes a raw image buffer into a JPEG compressed buffer
-     */
-    uint8_t* _encodeJpeg( const uint32_t width, const uint32_t height,
-                          const uint8_t* rawData, unsigned long& jpSize );
-#endif
+    void serveEvents( bool value ) { servingEvents_ = value; }
 
 protected:
     /** Saves current frame to disk. The filename is defined by a prefix and a
@@ -126,7 +97,7 @@ protected:
      * @param frameIndex index of the current frame
      * @param prefix prefix used for the filename
      */
-    void saveFrameToDisk(
+    void saveFrameToDisk_(
             const size_t frameIndex,
             const std::string& prefix );
 
@@ -161,19 +132,9 @@ private:
     OSPLight         light_;
     OSPData          lightData_;
 
-#ifdef BRAYNS_USE_RESTBRIDGE
-private:
-    tjhandle handleCompress_;
-    restbridge::RestBridge* restBridge_;
-    zeq::Subscriber* rcSubscriber_;
-    zeq::Publisher* rcPublisher_;
-#endif
+    bool servingEvents_;
 
-#ifdef BRAYNS_USE_DEFLECT
-private:
-    brayns::DeflectManager* deflectManager_;
-#endif
-
+    std::unique_ptr< ExtensionController > extensionController_;
 };
 
 }

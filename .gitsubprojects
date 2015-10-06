@@ -1,5 +1,5 @@
 # -*- mode: cmake -*-
-git_subproject(RESTBridge https://github.com/BlueBrain/RESTBridge.git fef7761)
+git_subproject(RESTBridge https://github.com/BlueBrain/RESTBridge.git a1260907)
 git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 5ef6ac4)
 git_subproject(zeq https://github.com/HBPVis/zeq.git 350be6e)
 git_subproject(FlatBuffers https://github.com/Bluebrain/flatbuffers.git ae9b391)

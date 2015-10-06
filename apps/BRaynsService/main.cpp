@@ -34,27 +34,8 @@
 brayns::ExtendedOBJRenderer __r__;
 #endif
 
-brayns::BraynsService* braynsService = NULL;
-
-/** Define the function to be called when ctrl-c (SIGINT) signal is sent
- * to process
- */
-void signal_callback_handler(int signum)
-{
-    switch( signum )
-    {
-    case SIGTERM:
-        BRAYNS_INFO << "Gently closing application" << std::endl;
-        delete braynsService;
-        break;
-    }
-    exit(signum);
-}
-
 int main(int argc, const char **argv)
 {
-    signal(SIGTERM, signal_callback_handler);
-
     brayns::ApplicationParameters applicationParameters;
     brayns::RenderingParameters renderingParameters;
     brayns::GeometryParameters geometryParameters;
@@ -74,25 +55,19 @@ int main(int argc, const char **argv)
         ospLoadModule(applicationParameters.getModule().c_str());
 
     BRAYNS_INFO << "Initializing Service..." << std::endl;
-    braynsService = new brayns::BraynsService(applicationParameters);
-    if( braynsService )
-    {
-        braynsService->setRenderingParameters(renderingParameters);
-        braynsService->setGeometryParameters(geometryParameters);
+    brayns::BraynsService braynsService(applicationParameters);
+    braynsService.setRenderingParameters(renderingParameters);
+    braynsService.setGeometryParameters(geometryParameters);
 
-        BRAYNS_INFO << "Loading data" << std::endl;
-        braynsService->loadData();
-        BRAYNS_INFO << "Building Geometry" << std::endl;
-        braynsService->buildGeometry();
-        BRAYNS_INFO << "Processing events..." << std::endl;
-        while( true )
-        {
-            braynsService->processEvents();
-        }
-        delete braynsService;
-    }
-    else
+    BRAYNS_INFO << "Loading data" << std::endl;
+    braynsService.loadData();
+    BRAYNS_INFO << "Building Geometry" << std::endl;
+    braynsService.buildGeometry();
+    BRAYNS_INFO << "Processing events..." << std::endl;
+    braynsService.serveEvents(true);
+    while( braynsService.isServingEvents() )
     {
-        BRAYNS_ERROR << "Failed to create braynsService" << std::endl;
+        braynsService.processEvents();
     }
+    return 0;
 }

@@ -23,6 +23,7 @@
 #include "AbstractParameters.h"
 
 #include <string>
+#include <vector>
 
 namespace brayns
 {
@@ -35,6 +36,8 @@ enum SceneEnvironment
     seGround,
     seBox
 };
+
+typedef std::vector< std::string > Arguments;
 
 /** Manages application parameters
  */
@@ -76,23 +79,16 @@ public:
     /** Scene environment (0: none, 1: ground, 2: box ) */
     SceneEnvironment getSceneEnvironment() const { return sceneEnvironment_; }
 
-#ifdef BRAYNS_USE_RESTBRIDGE
-    /** REST interface parameters */
-    /** http host name */
-    std::string getRESTHostname() const { return restHostname_; }
-    /** http port */
-    size_t getRESTPort() const { return restPort_; }
     /** ZeroEQ schema name */
     std::string getZeqSchema() const { return zeqSchema_; }
-#endif
 
-#ifdef BRAYNS_USE_DEFLECT
     /** Deflect parameters */
     /** DisplayCluster server host */
     std::string getDeflectHostname() const { return deflectHostname_; }
     /** Application stream name for DisplayCluster */
     std::string getDeflectStreamname() const { return deflectStreamname_; }
-#endif
+
+    Arguments getArguments() const { return arguments_; }
 
 protected:
 
@@ -108,15 +104,12 @@ protected:
     size_t windowWidth_;
     size_t windowHeight_;
 
-#ifdef BRAYNS_USE_RESTBRIDGE
-    std::string restHostname_;
-    size_t      restPort_;
     std::string zeqSchema_;
-#endif
-#ifdef BRAYNS_USE_DEFLECT
+
     std::string deflectHostname_;
     std::string deflectStreamname_;
-#endif
+
+    Arguments arguments_;
 };
 
 }

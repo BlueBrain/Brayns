@@ -59,7 +59,7 @@ bool MeshLoader::importMeshFromFile(
         return false;
     }
 
-    createMaterials( scene, materials, defaultMaterial );
+    createMaterials_( scene, materials, defaultMaterial );
 
     size_t nbVertices = 0;
     size_t nbFaces = 0;
@@ -188,7 +188,7 @@ bool MeshLoader::exportMeshToFile(
 }
 #endif
 
-void MeshLoader::createMaterials(
+void MeshLoader::createMaterials_(
         const aiScene *scene,
         MaterialsCollection& materials,
         const int defaultMaterial )

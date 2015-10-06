@@ -14,6 +14,7 @@ set(BRAYNSCOMMON_SOURCES
   parameters/RenderingParameters.cpp
   parameters/GeometryParameters.cpp
   parameters/ApplicationParameters.cpp
+  extensions/ExtensionController.cpp
 )
 
 set(BRAYNSCOMMON_HEADERS
@@ -31,6 +32,7 @@ set(BRAYNSCOMMON_HEADERS
   parameters/RenderingParameters.h
   parameters/GeometryParameters.h
   parameters/ApplicationParameters.h
+  extensions/ExtensionController.h
 )
 
 set(BRAYNSCOMMON_LINK_LIBRARIES

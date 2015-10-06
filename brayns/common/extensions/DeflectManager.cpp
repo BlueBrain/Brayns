@@ -17,8 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <signal.h>
-
 #include <brayns/common/ui/BaseWindow.h>
 #include <brayns/common/log.h>
 
@@ -81,62 +79,13 @@ void DeflectManager::send(
     if(!success)
     {
         if (!deflectStream_->isConnected())
-        {
             BRAYNS_ERROR << "Stream closed, exiting." << std::endl;
-        }
         else
-        {
             BRAYNS_ERROR << "failure in deflectStreamSend()" << std::endl;
-        }
-        raise(SIGTERM);
     }
 }
 
-void DeflectManager::handleTouchEvents( BaseWindow* window )
-{
-    if( !deflectStream_ )
-        return;
-
-    /* increment rotation angle according to interaction, or by a constant rate
-     * if interaction is not enabled note that mouse position is in normalized
-     * window coordinates: (0,0) to (1,1)
-     */
-    if (deflectStream_->isRegisteredForEvents() ||
-            deflectStream_->registerForEvents())
-    {
-        /* Note: there is a risk of missing events since we only process the
-         * latest state available. For more advanced applications, event
-         * processing should be done in a separate thread.
-         */
-        while (deflectStream_->hasEvent())
-        {
-            const deflect::Event& event = deflectStream_->getEvent();
-            if (event.type == deflect::Event::EVT_CLOSE)
-            {
-                BRAYNS_INFO << "Received close..." << std::endl;
-                raise(SIGTERM);
-            }
-
-            int button;
-            button = event.mouseLeft ? 1 : 0;
-            button |= event.mouseRight ? 2 : 0;
-            button |= event.mouseMiddle ? 4 : 0;
-
-            ospray::vec2i newPos;
-            newPos.x = 1000.*event.mouseX;
-            newPos.y = 1000.*event.mouseY;
-
-            if (event.type == deflect::Event::EVT_PRESS && event.mouseLeft)
-                window->mouseButton(button, false, newPos);
-            if (event.type == deflect::Event::EVT_RELEASE && event.mouseLeft)
-                window->mouseButton(button, true, newPos);
-            if (event.type == deflect::Event::EVT_MOVE && event.mouseLeft)
-                window->motion(newPos);
-        }
-    }
-}
-
-void DeflectManager::handleTouchEvents( ospray::vec3f& cameraPos )
+void DeflectManager::handleTouchEvents( ospray::vec3f& cameraPos, bool &closeApplication )
 {
     if( !deflectStream_ )
         return;
@@ -158,7 +107,7 @@ void DeflectManager::handleTouchEvents( ospray::vec3f& cameraPos )
             if (event.type == deflect::Event::EVT_CLOSE)
             {
                 BRAYNS_INFO << "Received close..." << std::endl;
-                raise(SIGTERM);
+                closeApplication = true;
             }
 
             cameraPos.x = 1000.*event.mouseX;

@@ -28,24 +28,16 @@ brayns::ExtendedOBJRenderer __r__;
 #endif
 
 #include "BaseWindow.h"
+#include <signal.h>
 #include <brayns/common/log.h>
 #include <brayns/common/algorithms/MetaballsGenerator.h>
+#include <brayns/common/extensions/ExtensionController.h>
 
 #ifdef __APPLE__
 #  include "GLUT/glut.h"
 #  include <unistd.h>
 #else
 #  include "GL/glut.h"
-#endif
-
-#ifdef BRAYNS_USE_DEFLECT
-#  include "../extensions/DeflectManager.h"
-#endif
-
-#ifdef BRAYNS_USE_RESTBRIDGE
-#  include <turbojpeg.h>
-#  include <servus/uri.h>
-#  include <boost/bind.hpp>
 #endif
 
 #ifdef BRAYNS_USE_ASSIMP
@@ -111,7 +103,7 @@ void glut3dMouseFunc(int32 whichButton, int32 released, int32 x, int32 y)
 {
     if (BaseWindow::activeWindow_)
         BaseWindow::activeWindow_->mouseButton(
-                    whichButton,released,ospray::vec2i(x,y));
+                    whichButton, released, ospray::vec2i(x,y));
 }
 
 // ------------------------------------------------------------------
@@ -134,12 +126,7 @@ BaseWindow::BaseWindow(
     windowID_(-1), windowSize_(-1,-1), fullScreen_(false),
     fb_(NULL), renderer_(NULL), camera_(NULL), model_(NULL),
     frameNumber_(inf), frameCounter_(0),
-    metaballsGridDimension_(0)
-    #ifdef BRAYNS_USE_RESTBRIDGE
-    , handleCompress_( tjInitCompress() )
-    #else
-    , handleCompress_( 0 )
-    #endif
+    metaballsGridDimension_(0), running_(false)
 {
     worldBounds_.lower = ospray::vec3f(-1);
     worldBounds_.upper = ospray::vec3f(+1);
@@ -159,15 +146,15 @@ BaseWindow::BaseWindow(
         manipulator = inspectCenterManipulator;
         break;
     }
-    Assert2(manipulator != NULL,"invalid initial manipulator mode");
+    Assert2( manipulator != NULL, "invalid initial manipulator mode ");
+
+    // Application is now running
+    running_ = true;
 }
+
 
 BaseWindow::~BaseWindow()
 {
-#ifdef BRAYNS_USE_RESTBRIDGE
-    if( handleCompress_ )
-        tjDestroy(handleCompress_);
-#endif
 }
 
 void BaseWindow::mouseButton(
@@ -258,7 +245,7 @@ void BaseWindow::forceRedraw()
     glutPostRedisplay();
 }
 
-void BaseWindow::setRendererParameters()
+void BaseWindow::setRendererParameters_()
 {
     ospSet1i(renderer_, "shadowsEnabled",
              renderingParameters_.getShadows());
@@ -313,15 +300,7 @@ void BaseWindow::setRendererParameters()
 
 void BaseWindow::display()
 {
-#ifdef BRAYNS_USE_DEFLECT
-    initializeDeflect();
-#endif
-
-#ifdef BRAYNS_USE_RESTBRIDGE
-    initializeRest();
-#endif
-
-    setRendererParameters();
+    setRendererParameters_();
 
     fps_.startRender();
     ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_ACCUM);
@@ -352,10 +331,15 @@ void BaseWindow::display()
     glDrawPixels(windowSize_.x, windowSize_.y, format, type, buffer);
     glutSwapBuffers();
 
-#ifdef BRAYNS_USE_DEFLECT
-    if( deflectManager_)
-        deflectManager_->send(windowSize_, ucharFB_, true);
-#endif
+    if( !extensionController_ )
+    {
+        ExtensionParameters extensionParameters = {
+            camera_, ucharFB_, fb_, windowSize_, bounds_, running_ };
+        extensionController_.reset(new ExtensionController(
+            applicationParameters_, extensionParameters ));
+    }
+    extensionController_->execute();
+
     ++frameCounter_;
 }
 
@@ -457,6 +441,11 @@ void BaseWindow::setViewPort(const ospray::vec3f from,
     viewPort_.frame.p    = from;
     viewPort_.snapUp();
     viewPort_.modified = true;
+
+    ospSetVec3f(camera_, "pos", viewPort_.from);
+    ospSetVec3f(camera_, "dir", viewPort_.at - viewPort_.from);
+    ospCommit(camera_);
+    ospFrameBufferClear(fb_,OSP_FB_ACCUM);
 }
 
 void BaseWindow::setWorldBounds(const ospray::box3f &worldBounds)
@@ -733,173 +722,7 @@ void BaseWindow::loadSceneFromBinaryFile( const std::string& fn )
     }
 }
 
-#ifdef BRAYNS_USE_DEFLECT
-void BaseWindow::initializeDeflect()
-{
-    if( !deflectManager_ && applicationParameters_.getDeflectHostname() != "" )
-    {
-        deflectManager_.reset(new DeflectManager(
-                    applicationParameters_.getDeflectHostname(),
-                    applicationParameters_.getDeflectStreamname(),
-                    true, 100 ));
-    }
-
-    if( deflectManager_)
-        deflectManager_->handleTouchEvents(this);
-}
-#endif
-
-#ifdef BRAYNS_USE_RESTBRIDGE
-void BaseWindow::initializeRest()
-{
-    if(!rcSubscriber_)
-    {
-        rcSubscriber_.reset(new zeq::Subscriber( servus::URI(
-                        applicationParameters_.getZeqSchema() + "cmd://" )));
-        rcSubscriber_->registerHandler( zeq::hbp::EVENT_CAMERA,
-                                        boost::bind( &BaseWindow::onCamera,
-                                                     this, _1 ));
-        rcSubscriber_->registerHandler( zeq::vocabulary::EVENT_REQUEST,
-                                        boost::bind( &BaseWindow::onRequest,
-                                                     this, _1 ));
-    }
-    if(!rcPublisher_)
-        rcPublisher_.reset(new zeq::Publisher( servus::URI(
-                       applicationParameters_.getZeqSchema() + "resp://" )));
-
-    while(rcSubscriber_->receive( 0 ));
-    rcPublisher_->publish( zeq::Event( zeq::vocabulary::EVENT_HEARTBEAT ));
-
-    // The RESTBridge should only be created once the zeq layer is fully
-    // initialized
-    if( !restBridge_ )
-    {
-        restBridge_.reset(new restbridge::RestBridge(
-                    applicationParameters_.getRESTHostname(),
-                    applicationParameters_.getRESTPort()));
-
-        restBridge_->run( applicationParameters_.getZeqSchema() );
-        BRAYNS_INFO << "Initializing restBridge " <<
-                       applicationParameters_.getZeqSchema() <<
-                       "://" << applicationParameters_.getRESTHostname() <<
-                       ":" << applicationParameters_.getRESTPort() <<
-                       std::endl;
-    }
-}
-
-void BaseWindow::onCamera( const zeq::Event& event )
-{
-    if( event.getType() != zeq::hbp::EVENT_CAMERA ) return;
-    const std::vector< float >& matrix = zeq::hbp::deserializeCamera(event);
-    viewPort_.from = ospray::vec3f(matrix[0], matrix[1], matrix[2]);
-    viewPort_.from = viewPort_.from * bounds_.size();
-
-    ospSetVec3f(camera_, "pos", viewPort_.from);
-    ospSetVec3f(camera_, "dir", viewPort_.at - viewPort_.from);
-    ospCommit(camera_);
-    ospFrameBufferClear(fb_,OSP_FB_ACCUM);
-}
-
-void BaseWindow::onRequest( const zeq::Event& event )
-{
-    const zeq::uint128_t& eventType =
-            zeq::vocabulary::deserializeRequest( event );
-    if( eventType == zeq::hbp::EVENT_IMAGEJPEG )
-    {
-        unsigned int* colorBuffer = (unsigned int*)ucharFB_;
-
-        size_t nBytes = sizeof(colorBuffer) * 4;
-        uint8_t* fb = new uint8_t[nBytes];
-        uint8_t* fbPtr = (uint8_t*) &colorBuffer;
-        for(size_t i=0; i<nBytes; i++)
-        {
-            fb[i] = *fbPtr;
-            fbPtr++;
-        }
-        unsigned long jpegSize =
-                windowSize_.x*windowSize_.y*sizeof(uint32);
-        uint8_t* jpegData = _encodeJpeg(
-                    (uint32_t)windowSize_.x, (uint32_t)windowSize_.y,
-                    (uint8_t*)colorBuffer, jpegSize);
-
-        const zeq::hbp::data::ImageJPEG image( jpegSize, jpegData );
-        const zeq::Event& image_event = zeq::hbp::serializeImageJPEG( image );
-        rcPublisher_->publish( image_event );
-        delete [] fb;
-    }
-    else if( eventType == zeq::vocabulary::EVENT_VOCABULARY )
-    {
-        BRAYNS_INFO << "Registering application vocabulary" << std::endl;
-        zeq::EventDescriptors vocabulary;
-        vocabulary.push_back( zeq::EventDescriptor(
-                                  zeq::hbp::IMAGEJPEG,
-                                  zeq::hbp::EVENT_IMAGEJPEG,
-                                  zeq::hbp::SCHEMA_IMAGEJPEG,
-                                  zeq::PUBLISHER ) );
-        vocabulary.push_back( zeq::EventDescriptor(
-                                  zeq::hbp::CAMERA,
-                                  zeq::hbp::EVENT_CAMERA,
-                                  zeq::hbp::SCHEMA_CAMERA,
-                                  zeq::SUBSCRIBER ) );
-        vocabulary.push_back( zeq::EventDescriptor(
-                                  zeq::hbp::CAMERA,
-                                  zeq::hbp::EVENT_CAMERA,
-                                  zeq::hbp::SCHEMA_CAMERA,
-                                  zeq::PUBLISHER ) );
-
-        const zeq::Event& vocEvent =
-                zeq::vocabulary::serializeVocabulary( vocabulary );
-
-        rcPublisher_->publish( vocEvent );
-    }
-    else if( eventType == zeq::hbp::EVENT_CAMERA )
-    {
-        std::vector<float> matrix;
-        vec3f pos = viewPort_.from / bounds_.size();
-        vec3f target = viewPort_.at / bounds_.size();
-        matrix.push_back(-pos.x);
-        matrix.push_back(pos.y);
-        matrix.push_back(-pos.z);
-        matrix.push_back(-target.x);
-        matrix.push_back(target.y);
-        matrix.push_back(-target.z);
-        for( int i(0); i<10; ++i) matrix.push_back(0);
-        const zeq::Event& camera_event = zeq::hbp::serializeCamera( matrix );
-        rcPublisher_->publish( camera_event );
-    }
-}
-
-uint8_t* BaseWindow::_encodeJpeg( const uint32_t width,
-                                  const uint32_t height,
-                                  const uint8_t* rawData,
-                                  unsigned long& dataSize )
-{
-    uint8_t* tjSrcBuffer = const_cast< uint8_t* >(rawData);
-    const int32_t pixelFormat = TJPF_RGBA;
-    const int32_t color_components = 4; // Color Depth
-    const int32_t tjPitch = width * color_components;
-    const int32_t tjPixelFormat = pixelFormat;
-
-    uint8_t* tjJpegBuf = 0;
-    const int32_t tjJpegSubsamp = TJSAMP_444;
-    const int32_t tjJpegQual = 100; // Image Quality
-    const int32_t tjFlags = TJXOP_ROT180;
-
-    const int32_t success =
-            tjCompress2( handleCompress_, tjSrcBuffer, width, tjPitch, height,
-                         tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
-                         tjJpegQual, tjFlags);
-
-    if(success != 0)
-    {
-        BRAYNS_INFO << "libjpeg-turbo image conversion failure" << std::endl;
-        return 0;
-    }
-    return static_cast<uint8_t *>(tjJpegBuf);
-}
-#endif
-
-void BaseWindow::generateMetaballs( const float threshold )
+void BaseWindow::generateMetaballs_( const float threshold )
 {
     // Metaballs
     MetaballSpheres metaballs;

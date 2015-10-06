@@ -64,15 +64,9 @@ public:
 
     /** Handles touch events provided by DisplayCluster
      *
-     * @param window window handling the event
-     */
-    void handleTouchEvents( BaseWindow* window );
-
-    /** Handles touch events provided by DisplayCluster
-     *
      * @param cameraPos new camera position
      */
-    void handleTouchEvents( ospray::vec3f& cameraPos );
+    void handleTouchEvents( ospray::vec3f& cameraPos, bool &closeApplication );
 
 private:
     bool deflectInteraction_;

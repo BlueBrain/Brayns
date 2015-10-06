@@ -25,29 +25,10 @@
 #include <brayns/common/log.h>
 #include "BraynsViewer.h"
 
-brayns::BraynsViewer* braynsViewer = NULL;
-
-/** Define the function to be called when ctrl-c (SIGINT) signal is sent
- * to process
- */
-void signal_callback_handler(int signum)
-{
-    switch( signum )
-    {
-    case SIGTERM:
-        BRAYNS_INFO << "Gently closing application" << std::endl;
-        delete braynsViewer;
-        break;
-    }
-    exit(signum);
-}
-
 const ospray::vec3f DEFAULT_ENV_SCALE = {5,0.5,5};
 
 int main(int argc, const char **argv)
 {
-    signal(SIGTERM, signal_callback_handler);
-
     brayns::ApplicationParameters applicationParameters;
     brayns::RenderingParameters renderingParameters;
     brayns::GeometryParameters geometryParameters;
@@ -68,27 +49,19 @@ int main(int argc, const char **argv)
         ospLoadModule(applicationParameters.getModule().c_str());
 
     brayns::initGLUT(&argc,argv);
-    braynsViewer = new brayns::BraynsViewer( applicationParameters );
-    if(braynsViewer)
-    {
-        BRAYNS_INFO << "Initializing Application..." << std::endl;
-        braynsViewer->create( "BRayns Viewer",
-            applicationParameters.getWindowWidth(),
-            applicationParameters.getWindowHeight(), false);
-        braynsViewer->setRenderingParameters(renderingParameters);
-        braynsViewer->setGeometryParameters(geometryParameters);
+    brayns::BraynsViewer braynsViewer( applicationParameters );
+    BRAYNS_INFO << "Initializing Application..." << std::endl;
+    braynsViewer.create( "BRayns Viewer",
+        applicationParameters.getWindowWidth(),
+        applicationParameters.getWindowHeight(), false);
+    braynsViewer.setRenderingParameters(renderingParameters);
+    braynsViewer.setGeometryParameters(geometryParameters);
 
-        BRAYNS_INFO << "Loading data..." << std::endl;
-        braynsViewer->loadData();
-        braynsViewer->buildEnvironment( DEFAULT_ENV_SCALE );
+    BRAYNS_INFO << "Loading data..." << std::endl;
+    braynsViewer.loadData();
+    braynsViewer.buildEnvironment( DEFAULT_ENV_SCALE );
 
-        BRAYNS_INFO << "Building Geometry" << std::endl;
-        braynsViewer->buildGeometry();
-        brayns::runGLUT();
-        delete braynsViewer;
-    }
-    else
-    {
-        BRAYNS_ERROR << "Failed to create braynsViewer" << std::endl;
-    }
+    BRAYNS_INFO << "Building Geometry" << std::endl;
+    braynsViewer.buildGeometry();
+    brayns::runGLUT();
 }

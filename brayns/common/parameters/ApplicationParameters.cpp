@@ -40,22 +40,11 @@ const std::string PARAM_SCENE_ENVIRONMENT= "scene-environment";
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 
-#ifdef BRAYNS_USE_DEFLECT
 const std::string PARAM_DEFLECT_HOSTNAME   = "deflect-hostname";
-
 const std::string DEFAULT_DEFLECT_HOSTNAME   = "localhost";
 const std::string DEFAULT_DEFLECT_STREAMNAME = "brayns";
-#endif
 
-#ifdef BRAYNS_USE_RESTBRIDGE
-const std::string PARAM_REST_HOSTNAME    = "rest-hostname";
-const std::string PARAM_REST_PORT        = "rest-port";
-const std::string PARAM_REST_SCHEMA      = "rest-schema";
-
-const std::string DEFAULT_REST_HOSTNAME = "localhost";
-const size_t      DEFAULT_REST_PORT     = 3000;
-const std::string DEFAULT_ZEQ_SCHEMA    = "restSchema";
-#endif
+const std::string PARAM_ZEQ_SCHEMA  = "zeq-schema";
 
 const std::string DEFAULT_RENDERER = "raycast_eyelight";
 const std::string DEFAULT_CAMERA   = "perspective";
@@ -65,16 +54,9 @@ ApplicationParameters::ApplicationParameters()
     camera_(DEFAULT_CAMERA),
     sceneEnvironment_(seNone),
     windowWidth_(DEFAULT_WINDOW_WIDTH),
-    windowHeight_(DEFAULT_WINDOW_HEIGHT)
-#ifdef BRAYNS_USE_RESTBRIDGE
-    , restHostname_(DEFAULT_REST_HOSTNAME)
-    , restPort_(DEFAULT_REST_PORT)
-    , zeqSchema_(DEFAULT_ZEQ_SCHEMA)
-#endif
-#ifdef BRAYNS_USE_DEFLECT
-    , deflectHostname_(DEFAULT_DEFLECT_HOSTNAME)
-    , deflectStreamname_(DEFAULT_DEFLECT_STREAMNAME)
-#endif
+    windowHeight_(DEFAULT_WINDOW_HEIGHT),
+    deflectHostname_(DEFAULT_DEFLECT_HOSTNAME),
+    deflectStreamname_(DEFAULT_DEFLECT_STREAMNAME)
 {
     parameters_[PARAM_MODULE] =
         {ptString, "Name of the OSPRay module"};
@@ -99,25 +81,21 @@ ApplicationParameters::ApplicationParameters()
          "(0: Atoms, 1: Chains, 2: Residues)"};
     parameters_[PARAM_SCENE_ENVIRONMENT] =
         {ptInteger, "Scene environment (0: none, 1: ground, 2: box)"};
-
-#ifdef BRAYNS_USE_DEFLECT
     parameters_[PARAM_DEFLECT_HOSTNAME] =
         {ptString, "Name of host running DisplayCluster"};
     parameters_[DEFAULT_DEFLECT_STREAMNAME] =
         {ptString, "Name of DisplayCluster stream"};
-#endif
-#ifdef BRAYNS_USE_RESTBRIDGE
-    parameters_[PARAM_REST_HOSTNAME] =
-        {ptString, "Hostname of imbedded REST http server"};
-    parameters_[PARAM_REST_PORT]     =
-        {ptInteger, "Port of imbedded REST http server"};
-    parameters_[PARAM_REST_SCHEMA] =
+    parameters_[PARAM_ZEQ_SCHEMA] =
         {ptString, "Schema name for ZeroEQ communication"};
-#endif
 }
 
 void ApplicationParameters::parse(int argc, const char **argv)
 {
+    // Save arguments for later use
+    for (int i=0;i<argc;i++)
+        arguments_.push_back(argv[i]);
+
+    // Parse arguments and populate class members accordingly
     for (int i=1;i<argc;i++)
     {
         std::string arg = argv[i];
@@ -142,20 +120,12 @@ void ApplicationParameters::parse(int argc, const char **argv)
             windowHeight_ = atoi(argv[++i]);
         else if (arg == PARAM_SCENE_ENVIRONMENT)
             sceneEnvironment_ = static_cast<SceneEnvironment>(atoi(argv[++i]));
-#ifdef BRAYNS_USE_RESTBRIDGE
-        if(arg==PARAM_REST_HOSTNAME)
-            restHostname_ = argv[++i];
-        if(arg==PARAM_REST_PORT)
-            restPort_ = atoi(argv[++i]);
-        if(arg==PARAM_REST_SCHEMA)
+        if(arg==PARAM_ZEQ_SCHEMA)
             zeqSchema_ = argv[++i];
-#endif
-#ifdef BRAYNS_USE_DEFLECT
         if(arg==PARAM_DEFLECT_HOSTNAME)
             deflectHostname_ = argv[++i];
         if(arg==DEFAULT_DEFLECT_STREAMNAME)
             deflectStreamname_ = argv[++i];
-#endif
     }
 }
 
@@ -171,15 +141,9 @@ void ApplicationParameters::display() const
     BRAYNS_INFO << "- Window size   : " << windowWidth_ << "x" <<
                                            windowHeight_ << std::endl;
     BRAYNS_INFO << "- Camera        : " << camera_ << std::endl;
-#ifdef BRAYNS_USE_RESTBRIDGE
-    BRAYNS_INFO << "- REST          : " << zeqSchema_ << "://" <<
-                                           restHostname_ << ":" <<
-                                           restPort_ << std::endl;
-#endif
-#ifdef BRAYNS_USE_DEFLECT
+    BRAYNS_INFO << "- Rest schema   : " << zeqSchema_ << std::endl;
     BRAYNS_INFO << "- Deflect       : " << deflectHostname_ << ":" <<
                                            deflectStreamname_ << std::endl;
-#endif
 }
 
 }

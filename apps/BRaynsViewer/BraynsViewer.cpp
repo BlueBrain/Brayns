@@ -33,9 +33,10 @@ namespace brayns
 {
 
 BraynsViewer::BraynsViewer( const ApplicationParameters& applicationParameters )
-    : BaseWindow( applicationParameters,
-                  FRAMEBUFFER_NONE, INSPECT_CENTER_MODE,
-                  INSPECT_CENTER_MODE|MOVE_MODE)
+ : BaseWindow( applicationParameters,
+    FRAMEBUFFER_NONE,
+    INSPECT_CENTER_MODE,
+    INSPECT_CENTER_MODE|MOVE_MODE)
 {
     const std::string cameraName = applicationParameters.getCamera();
 
@@ -124,7 +125,7 @@ void BraynsViewer::display()
         ospFrameBufferClear(fb_,OSP_FB_ACCUM);
     }
 
-    ucharFB_ = (unsigned int *)ospMapFrameBuffer(fb_);
+    ucharFB_ = (uint32 *)ospMapFrameBuffer(fb_);
     frameBufferMode_ = FRAMEBUFFER_UCHAR;
     BaseWindow::display();
     ospUnmapFrameBuffer(ucharFB_, fb_);
@@ -144,10 +145,18 @@ void BraynsViewer::createMaterials()
         materials_[i] = ospNewMaterial(renderer_, "ExtendedOBJMaterial");
         if (materials_[i])
         {
-            ospSet3f(materials_[i], "kd",
-                     float(rand()%nbMaterials)/nbMaterials,
-                     float(rand()%nbMaterials)/nbMaterials,
-                     float(rand()%nbMaterials)/nbMaterials);
+            switch( i )
+            {
+            case 0:
+                ospSet3f(materials_[i], "kd", 1.f, 1.f, 1.f );
+                break;
+            default:
+                ospSet3f(materials_[i], "kd",
+                         float(rand()%nbMaterials)/nbMaterials,
+                         float(rand()%nbMaterials)/nbMaterials,
+                         float(rand()%nbMaterials)/nbMaterials);
+                break;
+            }
             ospCommit(materials_[i]);
         }
     }
@@ -297,7 +306,7 @@ void BraynsViewer::loadData()
 void BraynsViewer::buildGeometry()
 {
     if( metaballsGridDimension_!=0 )
-        generateMetaballs(0.01);
+        generateMetaballs_(0.01);
 
     if (!bounds_.empty())
     {

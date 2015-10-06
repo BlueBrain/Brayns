@@ -35,6 +35,8 @@ typedef void* tjhandle;
 namespace brayns
 {
 
+class ExtensionController;
+
 // Geometry
 enum GeometryType
 {
