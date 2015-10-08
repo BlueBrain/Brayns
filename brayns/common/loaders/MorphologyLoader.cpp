@@ -49,6 +49,7 @@ void MorphologyLoader::importH5Morphologies(
     Morphologies morphologies;
     std::map<uint16_t, float> sectionsLengths;
 
+    ospray::vec3f somaPosition(0.f,0.f,0.f);
     vec3f randomPosition(0.f,0.f,0.f);
     for( size_t c=0; c<geometryParameters_.getReplicas(); ++c )
     {
@@ -79,10 +80,11 @@ void MorphologyLoader::importH5Morphologies(
                     v += randomPosition+position;
                     if( count_sections == 0 )
                     {
+                        somaPosition = v;
                         geometries.push_back(
                                     (brayns::Geometry){
                                         gt_sphere, v, v,
-                                        geometryParameters_.getRadius(), 0,
+                                        0.5f*soma.max_radius()*geometryParameters_.getRadius(), 0,
                                         static_cast<float>(frameId), material});
                         bounds.extend(v);
                     }
@@ -96,25 +98,22 @@ void MorphologyLoader::importH5Morphologies(
                         bbp::Cross_Section cs = segment.cross_section(1.0);
                         vec3f vb(b[0],b[1],b[2]);
                         vb += randomPosition+position;
-                        float r = cs.radius() * geometryParameters_.getRadius();
+
+                        float r = cs.radius()*geometryParameters_.getRadius();
                         frameId = length(vb-v);
 
-                        if( count_segments!=0 )
-                        {
-                            if( va != vb && va != v && vb != v)
-                            {
-                                geometries.push_back(
-                                            (brayns::Geometry){
-                                                gt_sphere, vb, vb, r, 0,
-                                                static_cast<float>(frameId), material});
-                                geometries.push_back(
-                                            (brayns::Geometry){
-                                                gt_cylinder, va, vb, r, 0,
-                                                static_cast<float>(frameId), material});
-                                bounds.extend(va);
-                                bounds.extend(vb);
-                            }
-                        }
+                        // Branches
+                        geometries.push_back(
+                                    (brayns::Geometry){
+                                        gt_sphere, vb, vb, r, 0,
+                                        static_cast<float>(frameId), material});
+                        geometries.push_back(
+                                    (brayns::Geometry){
+                                        gt_cylinder, va, vb, r, 0,
+                                        static_cast<float>(frameId), material});
+                        bounds.extend(va);
+                        bounds.extend(vb);
+
                         va = vb;
                         ++count_segments;
                     }

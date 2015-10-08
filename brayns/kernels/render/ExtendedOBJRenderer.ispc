@@ -487,12 +487,11 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 traceRay(self->super.model,ao_ray);
                 if( ao_ray.t != ray.t )
                     local_shade_color =
-                            local_shade_color - make_vec3f(abs(d)/2.f);
+                            local_shade_color - make_vec3f(abs(d));
             }
 
             // Fake ambient color
-            local_shade_color = local_shade_color +
-                    self->bgColor*0.2f/self->spp;
+            local_shade_color = local_shade_color + self->bgColor*0.5f;
 
             if( d>0.f)
             {

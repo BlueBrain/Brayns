@@ -42,8 +42,6 @@ BraynsViewer::BraynsViewer( const ApplicationParameters& applicationParameters )
 
     camera_ = ospNewCamera(cameraName.c_str());
     Assert2(camera_,"could not create camera");
-    ospSet3f(camera_,"pos",0,0,-1);
-    ospSet3f(camera_,"dir",0,0, 1);
 
     rendererType_ = applicationParameters.getRenderer();
     renderer_ = ospNewRenderer(rendererType_.c_str());
@@ -56,7 +54,7 @@ BraynsViewer::BraynsViewer( const ApplicationParameters& applicationParameters )
     Assert2(renderer_,"could not create renderer_");
     ospSetObject(renderer_,"world",model_);
     ospSetObject(renderer_,"camera",camera_);
-    ospSet3f(renderer_, "bgColor", 0.5f, 0.5f, 0.5f);
+    ospSet3f(renderer_, "bgColor", 1.f, 1.f, 1.f);
     ospCommit(renderer_);
 }
 
@@ -453,6 +451,17 @@ void BraynsViewer::buildGeometry()
     ospCommit(renderer_);
 
     setWorldBounds(bounds_);
+
+    // Initial camera position
+    ospray::vec3f center = embree::center(bounds_);
+    ospray::vec3f diag   = bounds_.size();
+    diag = max(diag,ospray::vec3f(0.5f*length(diag)));
+    ospray::vec3f cameraPos = center;
+    cameraPos.x -= diag.x;
+    cameraPos.y += diag.y;
+    cameraPos.z -= diag.z;
+    viewPort_.from = cameraPos;
+    viewPort_.at = center;
 }
 
 void BraynsViewer::buildEnvironment( const ospray::vec3f& scale )

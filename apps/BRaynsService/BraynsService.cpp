@@ -53,20 +53,13 @@ BraynsService::BraynsService(
     renderer_ = ospNewRenderer(applicationParameters.getRenderer().c_str());
     Assert(renderer_ );
 
-    // Background color
-    ospSet3f(renderer_, "bgColor", 0.f, 0.f, 0.f);
-
-    ospCommit(renderer_);
-
     model_ = ospNewModel();
     createMaterials();
     ospCommit(model_);
 
     camera_ = ospNewCamera("perspective");
     Assert2(camera_,"could not create camera");
-    ospSet3f(camera_,"pos",0,0,-1000);
-    ospSet3f(camera_,"dir",0,0, 1);
-    ospSetf(camera_,"aspect",windowSize_.x/float(windowSize_.y));
+    ospSetf(camera_, "aspect", float(windowSize_[0])/float(windowSize_[1]));
     ospCommit(camera_);
 
     Assert2(renderer_,"could not create renderer_");
@@ -236,11 +229,7 @@ void BraynsService::render()
         ospFrameBufferClear(fb_,OSP_FB_ACCUM);
     }
 
-    if( renderingParameters_.getAmbientOcclusion() )
-        ospSet3f(renderer_, "bgColor", 0.f, 0.f, 0.f);
-    else
-        ospSet3f(renderer_, "bgColor", 0.7f, 0.7f, 0.7f);
-
+    ospSet3f(renderer_, "bgColor", 1.f, 1.f, 1.f);
     ospSet1i(renderer_, "shadowsEnabled",
              renderingParameters_.getShadows());
     ospSet1i(renderer_, "softShadowsEnabled",
@@ -480,12 +469,16 @@ void BraynsService::buildGeometry()
     ospCommit(renderer_);
 
     // Initial camera position
-    cameraTarget_ = embree::center(bounds_);
+    ospray::vec3f center = embree::center(bounds_);
     ospray::vec3f diag   = bounds_.size();
-    diag         = max(diag,ospray::vec3f(0.3f*length(diag)));
-    cameraPos_.z -= diag.z*0.5f;
+    diag         = max(diag,ospray::vec3f(0.5f*length(diag)));
+    cameraPos_ = center;
+    cameraPos_.x -= diag.x;
+    cameraPos_.y += diag.y;
+    cameraPos_.z -= diag.z;
+    cameraTarget_ = center - cameraPos_;
     ospSetVec3f(camera_,"pos",cameraPos_);
-    ospSetVec3f(camera_,"dir",cameraTarget_ - cameraPos_);
+    ospSetVec3f(camera_,"dir",cameraTarget_);
     ospCommit(camera_);
 }
 

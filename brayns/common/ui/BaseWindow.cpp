@@ -282,10 +282,10 @@ void BaseWindow::setRendererParameters_()
         ospCommit(camera_);
     }
 
-    if ( viewPort_.modified)
+    if( viewPort_.modified )
     {
         ospSet1i(renderer_, "shadingEnabled", true);
-        Assert2(camera_,"ospshadowRayray camera is null");
+        Assert2(camera_,"ospray camera is null");
         ospSetVec3f(camera_,"pos",viewPort_.from);
         ospSetVec3f(camera_,"dir",viewPort_.at-viewPort_.from);
         ospSetVec3f(camera_,"up",viewPort_.up);

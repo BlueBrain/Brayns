@@ -160,13 +160,10 @@ private:
 
         const std::vector< float >& matrix =
                 zeq::hbp::deserializeCamera(event);
+        ospray::vec3f center = embree::center(_extensionParameters.bounds);
         vec3f cameraPos    = ospray::vec3f(matrix[0], matrix[1], matrix[2]);
-        vec3f cameraTarget = ospray::vec3f(matrix[3], matrix[4], matrix[5]);
-        cameraPos    = cameraPos*_extensionParameters.bounds.size();
-        cameraTarget = cameraTarget*_extensionParameters.bounds.size();
-
+        cameraPos    = (cameraPos*_extensionParameters.bounds.size())+center;
         ospSetVec3f( _extensionParameters.camera, "pos", cameraPos );
-        ospSetVec3f( _extensionParameters.camera, "dir", cameraTarget - cameraPos );
         ospCommit( _extensionParameters.camera );
         ospFrameBufferClear( _extensionParameters.frameBuffer, OSP_FB_ACCUM );
     }
@@ -225,10 +222,12 @@ private:
 
             vec3f cameraPos;
             vec3f cameraTarget;
+            ospray::vec3f center = embree::center(_extensionParameters.bounds);
             ospGetVec3f( _extensionParameters.camera, "pos", &cameraPos );
             ospGetVec3f( _extensionParameters.camera, "dir", &cameraTarget );
-            vec3f pos = cameraPos / size;
-            vec3f target = cameraTarget / size;
+
+            vec3f pos = (cameraPos-center) / size;
+            vec3f target = (cameraTarget-center) / size;
             matrix.push_back(-pos.x);
             matrix.push_back(pos.y);
             matrix.push_back(-pos.z);
