@@ -48,6 +48,13 @@ DeflectManager::DeflectManager(
         delete deflectStream_;
         deflectStream_ = NULL;
     }
+
+    if( deflectStream_ && !deflectStream_->registerForEvents( ))
+    {
+        std::cerr << "Could not register for events!" << std::endl;
+        delete deflectStream_;
+        deflectStream_ = NULL;
+    }
 }
 
 DeflectManager::~DeflectManager()
@@ -85,35 +92,42 @@ void DeflectManager::send(
     }
 }
 
-void DeflectManager::handleTouchEvents( ospray::vec3f& cameraPos, bool &closeApplication )
+bool DeflectManager::handleTouchEvents(
+    ospray::vec2f& position,
+    ospray::vec2f& wheelDelta,
+    bool &pressed,
+    bool &closeApplication )
 {
-    if( !deflectStream_ )
-        return;
+    if(!deflectStream_ || !deflectStream_->isRegisteredForEvents())
+        return false;
 
     /* increment rotation angle according to interaction, or by a constant rate
      * if interaction is not enabled. Note that mouse position is in normalized
      * window coordinates: (0,0) to (1,1)
+     * Note: there is a risk of missing events since we only process the
+     * latest state available. For more advanced applications, event
+     * processing should be done in a separate thread.
      */
-    if (deflectStream_->isRegisteredForEvents() ||
-            deflectStream_->registerForEvents())
+    while (deflectStream_->hasEvent())
     {
-        /* Note: there is a risk of missing events since we only process the
-         * latest state available. For more advanced applications, event
-         * processing should be done in a separate thread.
-         */
-        while (deflectStream_->hasEvent())
+        const deflect::Event& event = deflectStream_->getEvent();
+        if (event.type == deflect::Event::EVT_CLOSE)
         {
-            const deflect::Event& event = deflectStream_->getEvent();
-            if (event.type == deflect::Event::EVT_CLOSE)
-            {
-                BRAYNS_INFO << "Received close..." << std::endl;
-                closeApplication = true;
-            }
-
-            cameraPos.x = 1000.*event.mouseX;
-            cameraPos.y = 1000.*event.mouseY;
+            BRAYNS_INFO << "Received close..." << std::endl;
+            closeApplication = true;
         }
+
+        pressed =  (event.type == deflect::Event::EVT_PRESS);
+
+        if (event.type == deflect::Event::EVT_WHEEL)
+        {
+            wheelDelta.x = event.dx;
+            wheelDelta.y = event.dy;
+        }
+        position.x = event.mouseX;
+        position.y = event.mouseY;
     }
+    return true;
 }
 
 }

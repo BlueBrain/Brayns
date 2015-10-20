@@ -105,5 +105,5 @@ if(BRAYNSSERVICE_ENABLED)
   add_subdirectory(apps/BRaynsService)
 endif()
 
-include(CommonPackageConfig)
+#include(CommonPackageConfig)
 #set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)

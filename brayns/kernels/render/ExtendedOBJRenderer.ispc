@@ -394,7 +394,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                         // Electron shading
                         vec3f me = normalize(ray.org - P);
                         float el = max(0.f,dot(me, normal));
-                        cosNL = 1.f-(el*el);
+                        cosNL = el*el;
                     }
                     else
                     {
@@ -487,11 +487,11 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 traceRay(self->super.model,ao_ray);
                 if( ao_ray.t != ray.t )
                     local_shade_color =
-                            local_shade_color - make_vec3f(abs(d));
+                            local_shade_color - 2.f*make_vec3f(abs(d));
             }
 
             // Fake ambient color
-            local_shade_color = local_shade_color + self->bgColor*0.5f;
+            local_shade_color = local_shade_color + 0.2f + self->bgColor*0.5f;
 
             if( d>0.f)
             {
@@ -638,9 +638,8 @@ export void ExtendedOBJRenderer_set(
     self->moving = moving;
     self->frameNumber = frameNumber;
     self->spp = spp;
-    self->electronShadingEnabled = electronShadingEnabled;
-    self->lightEmittingMaterialsEnabled =
-            lightEmittingMaterialsEnabled && !moving;
+    self->electronShadingEnabled = electronShadingEnabled || moving;
+    self->lightEmittingMaterialsEnabled = lightEmittingMaterialsEnabled && !moving;
     self->gradientBackgroundEnabled = gradientBackgroundEnabled;
     self->lights = (const uniform Light *uniform *uniform)lights;
     self->numLights = numLights;

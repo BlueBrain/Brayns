@@ -48,7 +48,7 @@ namespace brayns
 {
 
 const float DEFAULT_GAMMA   = 2.2f;
-const float DEFAULT_EPSILON = 1e-4f;
+const float DEFAULT_EPSILON = 1e-2f;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const float DEFAULT_MOUSE_SPEED = 1e-3f;
 
@@ -259,7 +259,7 @@ void BaseWindow::setRendererParameters_()
              frameNumber_);
     ospSet1i(renderer_, "randomNumber",
              rand()%1000);
-    //ospSet1i(renderer_, "moving", viewPort_.modified);
+    ospSet1i(renderer_, "moving", false);
     ospSet1i(renderer_, "spp",
              renderingParameters_.getSamplesPerPixel());
     ospSet1i(renderer_, "electronShading",
@@ -302,6 +302,15 @@ void BaseWindow::display()
 {
     setRendererParameters_();
 
+    if( !extensionController_ )
+    {
+        ExtensionParameters extensionParameters = {
+            renderer_, camera_, ucharFB_, fb_, windowSize_, bounds_, running_ };
+        extensionController_.reset(new ExtensionController(
+            applicationParameters_, extensionParameters ));
+    }
+    extensionController_->execute();
+
     fps_.startRender();
     ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_ACCUM);
     fps_.doneRender();
@@ -330,15 +339,6 @@ void BaseWindow::display()
     }
     glDrawPixels(windowSize_.x, windowSize_.y, format, type, buffer);
     glutSwapBuffers();
-
-    if( !extensionController_ )
-    {
-        ExtensionParameters extensionParameters = {
-            camera_, ucharFB_, fb_, windowSize_, bounds_, running_ };
-        extensionController_.reset(new ExtensionController(
-            applicationParameters_, extensionParameters ));
-    }
-    extensionController_->execute();
 
     ++frameCounter_;
 }

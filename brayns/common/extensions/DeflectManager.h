@@ -64,9 +64,17 @@ public:
 
     /** Handles touch events provided by DisplayCluster
      *
-     * @param cameraPos new camera position
+     * @param position Camera position provided by deflect
+     * @param position Wheel delta provided by Deflect
+     * @param closeApplication True if and EXIT event was received from
+     *        Deflect. False otherwise
+     * @return True if Deflect is available, false otherwise.
      */
-    void handleTouchEvents( ospray::vec3f& cameraPos, bool &closeApplication );
+    bool handleTouchEvents(
+        ospray::vec2f& position,
+        ospray::vec2f& wheelDelta,
+        bool &pressed,
+        bool &closeApplication );
 
 private:
     bool deflectInteraction_;

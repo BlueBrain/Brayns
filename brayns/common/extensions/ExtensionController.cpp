@@ -47,11 +47,19 @@ public:
         ExtensionParameters& extensionParameters)
   : _applicationParameters(applicationParameters),
     _extensionParameters(extensionParameters)
+#ifdef BRAYNS_USE_DEFLECT
+    ,_alpha(0), _theta(0), _previousCameraPosition(vec3f(0.f))
+#endif
     {
         _initialize();
 #ifdef BRAYNS_USE_RESTBRIDGE
         _compressor =  tjInitCompress();
 #endif
+
+#ifdef BRAYNS_USE_DEFLECT
+        _previousCameraPosition.z = -_extensionParameters.bounds.size().z;
+#endif
+
     }
 
     ~ExtensionControllerImpl()
@@ -75,14 +83,7 @@ public:
 #ifdef BRAYNS_USE_DEFLECT
         if( _deflectManager )
         {
-            bool closeApplication(false);
-            _deflectManager->send(
-                _extensionParameters.windowSize, _extensionParameters.imageBuffer, true );
-
-            vec3f cameraPos;
-            ospGetVec3f(_extensionParameters.camera, "pos", &cameraPos);
-            _deflectManager->handleTouchEvents( cameraPos, closeApplication );
-            _extensionParameters.running = !closeApplication;
+            _handleDeflectEvents();
         }
 #endif
     }
@@ -113,6 +114,62 @@ private:
                                       _applicationParameters.getDeflectHostname(),
                                       _applicationParameters.getDeflectStreamname(),
                                       true, 100 ));
+        }
+    }
+
+    void _handleDeflectEvents()
+    {
+        bool pressed = false;
+        bool closeApplication = false;
+        _deflectManager->send(
+            _extensionParameters.windowSize, _extensionParameters.imageBuffer, true );
+
+        vec2f position = vec2f(0.f);
+        vec2f wheelDelta = vec2f(0.f);
+
+        if( _deflectManager->handleTouchEvents( position, wheelDelta, pressed, closeApplication ))
+        {
+            _extensionParameters.running = !closeApplication;
+
+            if( pressed )
+            {
+                _previousCameraPosition.x = position.x;
+                _previousCameraPosition.y = position.y;
+            }
+            else
+            {
+                if( length(position)>std::numeric_limits<float>::epsilon() ||
+                    wheelDelta.y>std::numeric_limits<float>::epsilon() )
+                {
+                    const float dx = _previousCameraPosition.x - position.x;
+                    const float dy = _previousCameraPosition.y - position.y;
+                    if( std::abs(dx)<=1.f )
+                        _theta -= _extensionParameters.windowSize.x/100.f*asin(dx);
+                    if( std::abs(dy)<=1.f )
+                        _alpha += _extensionParameters.windowSize.y/100.f*asin(dy);
+                    _previousCameraPosition.x = position.x;
+                    _previousCameraPosition.y = position.y;
+                    _previousCameraPosition.z -= wheelDelta.y*5.f;
+                    if( dx!=0.f || dy!=0.f || wheelDelta.y!=0.f )
+                    {
+                        const ospray::vec3f center = embree::center(_extensionParameters.bounds);
+                        const vec3f p = {
+                            center.x + _previousCameraPosition.z*cosf(_alpha)*cosf(_theta),
+                            center.y + _previousCameraPosition.z*sinf(_alpha)*cosf(_theta),
+                            center.z + _previousCameraPosition.z*sinf(_theta) };
+
+                        ospSet3f(_extensionParameters.camera, "pos", p.x, p.y, p.z);
+                        ospSet3f(_extensionParameters.camera, "dir",
+                            center.x - p.x,
+                            center.y - p.y,
+                            center.z - p.z);
+                        ospCommit(_extensionParameters.camera);
+                        ospSet1i(_extensionParameters.renderer, "moving", true);
+                        ospCommit(_extensionParameters.renderer);
+                        ospFrameBufferClear(_extensionParameters.frameBuffer,OSP_FB_ACCUM);
+                    }
+                }
+            }
         }
     }
 #endif
@@ -283,6 +340,9 @@ private:
 
 #ifdef BRAYNS_USE_DEFLECT
     std::unique_ptr<brayns::DeflectManager> _deflectManager;
+    float _alpha;
+    float _theta;
+    vec3f _previousCameraPosition;
 #endif
 #ifdef BRAYNS_USE_RESTBRIDGE
     tjhandle _compressor;

@@ -40,6 +40,8 @@
 namespace brayns
 {
 
+const float DEFAULT_EPSILON = 1e-2f;
+
 BraynsService::BraynsService(
     const ApplicationParameters& applicationParameters )
  : applicationParameters_(applicationParameters),
@@ -229,7 +231,7 @@ void BraynsService::render()
         ospFrameBufferClear(fb_,OSP_FB_ACCUM);
     }
 
-    ospSet3f(renderer_, "bgColor", 1.f, 1.f, 1.f);
+    ospSet3f(renderer_, "bgColor", 0.f, 0.f, 0.f);
     ospSet1i(renderer_, "shadowsEnabled",
              renderingParameters_.getShadows());
     ospSet1i(renderer_, "softShadowsEnabled",
@@ -241,11 +243,11 @@ void BraynsService::render()
     ospSet1i(renderer_, "frameNumber",
              frameNumber_);
     ospSet1i(renderer_, "randomNumber", rand()%1000);
-    ospSet1i(renderer_, "moving", false);
     ospSet1i(renderer_, "spp",
              renderingParameters_.getSamplesPerPixel());
     ospSet1i(renderer_, "electronShading",
              renderingParameters_.getElectronShading());
+    ospSet1f(renderer_, "epsilon", DEFAULT_EPSILON);
     ospCommit(renderer_);
 
     for( int i(0); i<quality_; ++i)
@@ -265,10 +267,11 @@ void BraynsService::render()
     }
     ucharFB_ = (uint32 *)ospMapFrameBuffer(fb_);
 
+    ospSet1i(renderer_, "moving", false);
     if( !extensionController_ )
     {
         ExtensionParameters extensionParameters = {
-            camera_, ucharFB_, fb_, windowSize_, bounds_, servingEvents_ };
+            renderer_, camera_, ucharFB_, fb_, windowSize_, bounds_, servingEvents_ };
         extensionController_.reset(new ExtensionController(
             applicationParameters_, extensionParameters ));
     }

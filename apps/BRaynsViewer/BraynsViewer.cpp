@@ -54,7 +54,7 @@ BraynsViewer::BraynsViewer( const ApplicationParameters& applicationParameters )
     Assert2(renderer_,"could not create renderer_");
     ospSetObject(renderer_,"world",model_);
     ospSetObject(renderer_,"camera",camera_);
-    ospSet3f(renderer_, "bgColor", 1.f, 1.f, 1.f);
+    ospSet3f(renderer_, "bgColor", 0.f, 0.f, 0.f);
     ospCommit(renderer_);
 }
 

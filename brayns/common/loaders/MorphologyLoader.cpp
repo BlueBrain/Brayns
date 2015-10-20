@@ -197,7 +197,7 @@ void MorphologyLoader::importH5Morphologies(
 
 void MorphologyLoader::importSWCMorphologies(
         const std::string &filename,
-        const int morphologyIndex,
+        const int /*morphologyIndex*/,
         const vec3f& position,
         Geometries& geometries,
         box3f& bounds)
@@ -244,7 +244,8 @@ void MorphologyLoader::importSWCMorphologies(
         morphology.y += position.y;
         morphology.z += position.z;
         morphology.id = idx;
-        morphology.branch = geometryParameters_.getColored() ? morphologyIndex : 0;
+        if( !geometryParameters_.getColored() )
+            morphology.branch = 0;
         morphology.frame = mapIdTime[idx];
         morphology.used = false;
 
@@ -277,35 +278,36 @@ void MorphologyLoader::importSWCMorphologies(
         Morphologies::iterator it=morphologies.begin();
         while( it!=morphologies.end())
         {
-            Morphology& a = (*it).second;
-            vec3f va(a.x,a.y,a.z);
-            va += randomPosition;
+            Morphology& morphology = (*it).second;
+            vec3f morphologyPosition(morphology.x,morphology.y,morphology.z);
+            morphologyPosition += randomPosition;
 
-            if (a.parent == -1) // root soma, just one sphere
+            if (morphology.parent == -1) // root soma, just one sphere
             {
                 geometries.push_back(
                             (brayns::Geometry){
-                                gt_sphere, va, va,
-                                a.radius*geometryParameters_.getRadius(), 0,
-                                static_cast<float>(a.frame), a.branch});
-                bounds.extend(va);
-                a.used = true;
+                                gt_sphere, morphologyPosition, morphologyPosition,
+                                morphology.radius*geometryParameters_.getRadius(), 0.f,
+                                static_cast<float>(morphology.frame),
+                                morphology.branch});
+                bounds.extend(morphologyPosition);
+                morphology.used = true;
             }
             else
             {
-                Morphology& b = morphologies[a.parent];
-                if( b.parent!=-1 )
+                Morphology& parentMorphology = morphologies[morphology.parent];
+                if( parentMorphology.parent!=-1 )
                 {
-                    vec3f vb(b.x,b.y,b.z);
-                    vb += randomPosition;
-                    vec3f up = vb - va;
-                    vec3f v = va + up*4.f;
+                    vec3f parentPosition(parentMorphology.x,parentMorphology.y,parentMorphology.z);
+                    parentPosition += randomPosition;
+                    vec3f up = parentPosition - morphologyPosition;
+                    vec3f v = morphologyPosition + up*4.f;
                     geometries.push_back(
                                 (brayns::Geometry){
-                                    gt_cylinder, va, v,
-                                    b.radius * geometryParameters_.getRadius(),
-                                    0, static_cast<float>(b.frame),
-                                    b.branch});
+                                    gt_sphere, morphologyPosition, v,
+                                    parentMorphology.radius * geometryParameters_.getRadius(), 0.f,
+                                    static_cast<float>(parentMorphology.frame),
+                                    parentMorphology.branch});
                 }
             }
             ++it;

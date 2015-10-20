@@ -30,12 +30,13 @@ class ExtensionControllerImpl;
 
 struct ExtensionParameters
 {
-    OSPCamera&     camera;
-    uint32*        imageBuffer;
-    OSPFrameBuffer frameBuffer;
-    vec2i          windowSize;
-    box3f          bounds;
-    bool           running;
+    OSPRenderer&    renderer;
+    OSPCamera&      camera;
+    uint32*         imageBuffer;
+    OSPFrameBuffer& frameBuffer;
+    vec2i           windowSize;
+    box3f           bounds;
+    bool            running;
 };
 
 /** Manages extensions such as the RESTBridge of the Deflect Streamer
