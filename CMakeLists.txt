@@ -29,11 +29,6 @@ if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
   endif()
 endif()
 
-if(APPLE)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Deployment target for OSX" FORCE)
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-endif()
-
 common_find_package(Boost REQUIRED COMPONENTS program_options)
 common_find_package(OSPRay REQUIRED SYSTEM)
 common_find_package(GLUT REQUIRED SYSTEM)
