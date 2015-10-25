@@ -17,157 +17,85 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef HBP_COMMON_TYPES_H
-#define HBP_COMMON_TYPES_H
+#ifndef TYPES_H
+#define TYPES_H
 
-#include <ospray/ospray.h>
-#include <ospray/common/OSPCommon.h>
+#include <brayns/common/mathTypes.h>
+
+#include <memory>
 #include <map>
 #include <vector>
-
-using namespace ospray;
-
-// Use GCC intrinsics rather than OSPRay ones
-#define _X86INTRIN_H_INCLUDED
-
-typedef void* tjhandle;
 
 namespace brayns
 {
 
+// Forward declarations
+class Brayns;
+typedef std::unique_ptr<Brayns> BraynsPtr;
+
+class Scene;
+typedef std::shared_ptr<Scene> ScenePtr;
+
+class Camera;
+typedef std::shared_ptr<Camera> CameraPtr;
+
+class Renderer;
+typedef std::shared_ptr<Renderer> RendererPtr;
+
+class FrameBuffer;
+typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
+
+class ApplicationParameters;
+typedef std::shared_ptr<ApplicationParameters> ApplicationParametersPtr;
+
+class GeometryParameters;
+typedef std::shared_ptr<GeometryParameters> GeometryParametersPtr;
+
+class RenderingParameters;
+typedef std::shared_ptr<RenderingParameters> RenderingParametersPtr;
+
 class ExtensionController;
+typedef std::shared_ptr<ExtensionController> ExtensionControllerPtr;
 
-// Geometry
-enum GeometryType
-{
-    gt_undefined = 0,
-    gt_sphere,
-    gt_cylinder,
-    gt_cone,
-    gt_triangle,
-    gt_streamline
-};
+class Geometry;
+typedef std::vector<Geometry *> Geometries;
 
-struct Geometry
-{
-    GeometryType  type;
-    vec3f v0;
-    vec3f v1;
-    float r;
-    float l;
-    float frame;
-    int   materialId;
-};
-typedef std::vector<Geometry> Geometries;
+class Primitive;
+typedef std::shared_ptr<Primitive> PrimitivePtr;
+typedef std::vector<PrimitivePtr> Primitives;
+typedef std::map<size_t, Primitives> PrimitivesCollection;
 
-// Cylinders
-struct Cylinder
-{
-    vec3f v0;
-    vec3f v1;
-    float r;
-    float frame;
-};
-typedef std::vector<Cylinder> Cylinders;
-typedef std::map< size_t, Cylinders > CylindersCollection;
+class Sphere;
+typedef std::shared_ptr<Sphere> SpherePtr;
+typedef std::vector<SpherePtr> Spheres;
+typedef std::map<size_t, Spheres> SpheresCollection;
 
-// Spheres
-struct Sphere
-{
-    vec3f v;
-    float r;
-    float frame;
-};
-typedef std::vector< Sphere > Spheres;
-typedef std::map< size_t, Spheres > SpheresCollection;
+class Cylinder;
+typedef std::shared_ptr<Cylinder> CylinderPtr;
+typedef std::vector<CylinderPtr> Cylinders;
+typedef std::map<size_t, Cylinders> CylindersCollection;
 
-// Cones
-struct Cone
-{
-    vec3f center;
-    vec3f up;
-    float r;
-    float length;
-    float frame;
-};
-typedef std::vector<Cone> Cones;
-typedef std::map< size_t, Cones > ConesCollection;
+class Cone;
+typedef std::shared_ptr<Cone> ConePtr;
+typedef std::vector<ConePtr> Cones;
+typedef std::map<size_t, Cones> ConesCollection;
 
-// Triangles
-struct Triangles
-{
-    std::vector<vec3fa> vertex;
-    std::vector<vec3fa> normal;
-    std::vector<vec4f>  color;
-    std::vector<vec3i>  index;
-    std::vector<vec2f>  texcoord;
-};
-typedef std::map< size_t, Triangles > TrianglesCollection;
+class TrianglesMesh;
+typedef std::map<size_t, TrianglesMesh> TrianglesMeshCollection;
 
-// Streamlines
-struct StreamLines
-{
-  std::vector<vec3fa> vertex;
-  std::vector<int>    index;
-  float radius;
-  StreamLines() : radius(0.001f) {};
-};
-typedef std::map< size_t, StreamLines > StreamLinesCollection;
+class Material;
+typedef std::shared_ptr<Material> MaterialPtr;
+typedef std::vector<MaterialPtr> Materials;
+typedef std::map<size_t, Materials> MaterialsCollection;
 
-// Materials
-typedef std::map< size_t, OSPMaterial > MaterialsCollection;
+class Texture2D;
+typedef std::shared_ptr<Texture2D> Texture2DPtr;
+typedef std::map<std::string, Texture2DPtr> TexturesCollection;
 
-// File formats for morphologies
-enum FileFormat
-{
-    ff_unknown = 0,
-    ff_h5,
-    ff_swc
-};
-
-struct Branch
-{
-    std::vector< size_t > segments;
-};
-typedef std::vector< Branch > Branches;
-
-struct Morphology
-{
-    int   id;
-    int   branch;
-    float x;
-    float y;
-    float z;
-    float radius;
-    int   parent;
-    int   frame;
-    bool  used;
-    std::vector< size_t > children;
-};
-typedef std::map< size_t, Morphology > Morphologies;
-
-#if USE_TEXTURES
-struct Texture2D : public RefCount {
-    Texture2D()
-      : channels(0)
-      , depth(0)
-      , width(0)
-      , height(0)
-      , data(NULL)
-    {}
-
-    int channels; //Number of color channels per pixel
-    int depth;    //Bytes per color channel
-    int width;    //Pixels per row
-    int height;   //Pixels per column
-    void *data;   //Pointer to binary texture data
-};
-#endif
-
-// OSPRay Specific collections
-typedef std::map<int, OSPGeometry> OSPGeometryCollections;
-typedef std::map<int, OSPData> OSPDataCollections;
+typedef std::vector<float> floats;
+typedef std::vector<int> ints;
+typedef std::vector<uint8_t> uint8_ts;
 
 }
 
-#endif // HBP_COMMON_TYPES_H
+#endif // TYPES_H

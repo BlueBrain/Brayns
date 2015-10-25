@@ -21,26 +21,40 @@
 #include <brayns/common/log.h>
 #include <brayns/common/exceptions.h>
 
+#include <boost/lexical_cast.hpp>
+
 namespace brayns
 {
 
-const std::string PARAM_RADIUS                   = "radius";
-const std::string PARAM_COLORED                  = "colored";
-const std::string PARAM_TIMED_GEOMETRY_INCREMENT = "timed-geometry-increment";
-const std::string PARAM_REPLICAS                 = "replicas";
+const std::string PARAM_SWC_FOLDER = "--swc-folder";
+const std::string PARAM_H5_FOLDER = "--h5-folder";
+const std::string PARAM_PDB_FOLDER = "--pdb-folder";
+const std::string PARAM_MESH_FOLDER = "--mesh-folder";
+const std::string PARAM_RADIUS = "--radius";
+const std::string PARAM_COLORED = "--colored";
+const std::string PARAM_TIMED_GEOMETRY_INCREMENT = "--timed-geometry-increment";
+const std::string PARAM_SCENE_ENVIRONMENT = "--scene-environment";
 
 GeometryParameters::GeometryParameters()
-  : radius_(1), colored_(false), timedGeometry_(false),
-    timedGeometryIncrement_(1), replicas_(1)
+    : _radius(1), _colored(false), _timedGeometry(false)
+    , _timedGeometryIncrement(1), _sceneEnvironment(SE_NONE)
 {
-    parameters_[PARAM_RADIUS] =
-        {ptFloat, "Radius multiplier for spheres, cones and cylinders"};
-    parameters_[PARAM_COLORED] =
-        {ptBoolean, "Sets different color to every morphology"};
-    parameters_[PARAM_TIMED_GEOMETRY_INCREMENT] =
-        {ptInteger, "Increment between frames"};
-    parameters_[PARAM_REPLICAS] =
-        {ptInteger, "Number of random replicas for every morphology"};
+    _parameters[PARAM_SWC_FOLDER] =
+        {PMT_STRING, "Folder containing SWC files"};
+    _parameters[PARAM_H5_FOLDER] =
+        {PMT_STRING, "Folder containing H5 files"};
+    _parameters[PARAM_PDB_FOLDER] =
+        {PMT_STRING, "Folder containing PDB files with positions"};
+    _parameters[PARAM_MESH_FOLDER] =
+        {PMT_STRING, "Folder containing PARAM_BENCHMARKINGmeshes"};
+    _parameters[PARAM_RADIUS] =
+        {PMT_FLOAT, "Radius multiplier for spheres, cones and cylinders"};
+    _parameters[PARAM_COLORED] =
+        {PMT_BOOLEAN, "Sets different color to every morphology"};
+    _parameters[PARAM_TIMED_GEOMETRY_INCREMENT] =
+        {PMT_INTEGER, "Increment between frames"};
+    _parameters[PARAM_SCENE_ENVIRONMENT] =
+        {PMT_INTEGER, "Scene environment (0: none, 1: ground, 2: wall, 3: box)"};
 }
 
 void GeometryParameters::parse(int argc, const char **argv)
@@ -48,32 +62,46 @@ void GeometryParameters::parse(int argc, const char **argv)
     for (int i=1;i<argc;i++)
     {
         std::string arg = argv[i];
-        arg.erase(0,2);
-        if (arg==PARAM_COLORED)
-            colored_ = true;
+        if(arg == PARAM_SWC_FOLDER)
+            _swcFolder = argv[++i];
+        else if (arg == PARAM_H5_FOLDER)
+            _h5Folder = argv[++i];
+        else if (arg == PARAM_PDB_FOLDER)
+        {
+            _pdbFolder = argv[++i];
+            _pdbCells = argv[++i];
+            _pdbPositions = argv[++i];
+        }
+        else if (arg == PARAM_MESH_FOLDER)
+            _meshFolder = argv[++i];
+        else if (arg==PARAM_COLORED)
+            _colored = true;
         else if (arg==PARAM_RADIUS)
-            radius_ = atof(argv[++i]);
+            _radius = boost::lexical_cast<float>(argv[++i]);
         else if (arg==PARAM_TIMED_GEOMETRY_INCREMENT)
         {
-            timedGeometry_ = true;
-            timedGeometryIncrement_ = atoi(argv[++i]);
+            _timedGeometry = true;
+            _timedGeometryIncrement = boost::lexical_cast<float>(argv[++i]);
         }
-        else if (arg == PARAM_REPLICAS)
-            replicas_ = atoi(argv[++i]);
+        else if (arg == PARAM_SCENE_ENVIRONMENT)
+            _sceneEnvironment = static_cast<SceneEnvironment>(
+                boost::lexical_cast<size_t>(argv[++i]));
     }
 }
 
 void GeometryParameters::display() const
 {
     BRAYNS_INFO << "Geometry options: " << std::endl;
+    BRAYNS_INFO << "- SWC folder    : " << _swcFolder << std::endl;
+    BRAYNS_INFO << "- PDB folder    : " << _pdbFolder << std::endl;
+    BRAYNS_INFO << "- H5 folder     : " << _h5Folder << std::endl;
+    BRAYNS_INFO << "- Mesh folder   : " << _meshFolder << std::endl;
     BRAYNS_INFO << "- Colored                  : " <<
-                   (colored_ ? "on": "off") << std::endl;
+                   (_colored ? "on": "off") << std::endl;
     BRAYNS_INFO << "- Radius                   : " <<
-                   radius_ << std::endl;
+                   _radius << std::endl;
     BRAYNS_INFO << "- Timed geometry increment : " <<
-                   timedGeometryIncrement_ << std::endl;
-    BRAYNS_INFO << "- Number of replicas       : " <<
-                   replicas_ << std::endl;
+                   _timedGeometryIncrement << std::endl;
 }
 
 }

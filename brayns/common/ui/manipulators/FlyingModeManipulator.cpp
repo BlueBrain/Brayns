@@ -17,7 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <ospray/common/OSPCommon.h>
 #include <brayns/common/ui/BaseWindow.h>
 
 #include "FlyingModeManipulator.h"
@@ -27,94 +26,66 @@ namespace brayns
 
 void FlyingModeManipulator::keypress( int32 key )
 {
-    BaseWindow::ViewPort &cam = window_->getViewPort();
+    Viewport& viewport = _window.getViewPort();
+    const Vector3f dir = normalize(viewport.getTarget() - viewport.getPosition());
     switch(key) {
-    case 'w':
-    {
-        float fwd = 1 * window_->getMotionSpeed();
-        cam.from = cam.from + fwd * cam.frame.l.vy;
-        cam.at   = cam.at   + fwd * cam.frame.l.vy;
-        cam.frame.p = cam.from;
-        cam.modified = true;
-    } return;
-    case 's':
-    {
-        float fwd = 1 * window_->getMotionSpeed();
-        cam.from = cam.from - fwd * cam.frame.l.vy;
-        cam.at   = cam.at   - fwd * cam.frame.l.vy;
-        cam.frame.p = cam.from;
-        cam.modified = true;
-    } return;
-    case 'd':
-    {
-        float fwd = 1 * window_->getMotionSpeed();
-        cam.from = cam.from + fwd * cam.frame.l.vx;
-        cam.at   = cam.at   + fwd * cam.frame.l.vx;
-        cam.frame.p = cam.from;
-        cam.modified = true;
-    } return;
-    case 'a':
-    {
-        float fwd = 1 * window_->getMotionSpeed();
-        cam.from = cam.from - fwd * cam.frame.l.vx;
-        cam.at   = cam.at   - fwd * cam.frame.l.vx;
-        cam.frame.p = cam.from;
-        cam.modified = true;
-    } return;
+        case 'w':
+        {
+            const float fwd = _window.getMotionSpeed();
+            viewport.translate(dir*fwd);
+            break;
+        }
+        case 's':
+        {
+            const float fwd = _window.getMotionSpeed();
+            viewport.translate(-dir*fwd);
+            break;
+        }
+        case 'd':
+        {
+            const float fwd = _window.getMotionSpeed();
+            viewport.translate(dir.cross(viewport.getUp())*fwd);
+            break;
+        }
+        case 'a':
+        {
+            const float fwd = _window.getMotionSpeed();
+            viewport.translate(-dir.cross(viewport.getUp())*fwd);
+            break;
+        }
     }
     AbstractManipulator::keypress( key );
 }
 
 void FlyingModeManipulator::dragRight(
-        const ospray::vec2i &to,
-        const ospray::vec2i &from)
+        const Vector2i& to,
+        const Vector2i& from)
 {
-    BaseWindow::ViewPort &cam = window_->getViewPort();
-    float fwd =- (to.y - from.y) * 4 * window_->getMotionSpeed();
-    cam.from = cam.from + fwd * cam.frame.l.vy;
-    cam.at   = cam.at   + fwd * cam.frame.l.vy;
-    cam.frame.p = cam.from;
-    cam.modified = true;
+    const float fwd =- (to.y() - from.y()) * _window.getMotionSpeed();
+    Viewport& viewport = _window.getViewPort();
+    const Vector3f dir = normalize(viewport.getTarget() - viewport.getPosition());
+    viewport.translate(dir*fwd);
 }
 
 void FlyingModeManipulator::dragMiddle(
-        const ospray::vec2i &to,
-        const ospray::vec2i &from)
+        const Vector2i& to,
+        const Vector2i& from )
 {
-    BaseWindow::ViewPort &cam = window_->getViewPort();
-    float du = (to.x - from.x);
-    float dv = (to.y - from.y);
-
-    AffineSpace3fa xfm = AffineSpace3fa::translate(
-                window_->getMotionSpeed() * dv * cam.frame.l.vz ) *
-                AffineSpace3fa::translate(
-                    -1.0 * window_->getMotionSpeed() * du * cam.frame.l.vx );
-
-    cam.frame = xfm * cam.frame;
-    cam.from = xfmPoint(xfm, cam.from);
-    cam.at = xfmPoint(xfm, cam.at);
-    cam.modified = true;
+    Viewport& viewport = _window.getViewPort();
+    const float x = (to.x() - from.x()) * _window.getMotionSpeed();
+    const float y = (to.y() - from.y()) * _window.getMotionSpeed();
+    const Vector3f dir = normalize(viewport.getTarget() - viewport.getPosition());
+    viewport.translate(Vector3f(-y,x,0.f).cross(dir), true);
 }
 
 void FlyingModeManipulator::dragLeft(
-        const ospray::vec2i &to,
-        const ospray::vec2i &from)
+        const Vector2i& to,
+        const Vector2i& from)
 {
-    BaseWindow::ViewPort &cam = window_->getViewPort();
-    float du = (to.x - from.x) * window_->getRotateSpeed();
-    float dv = (to.y - from.y) * window_->getRotateSpeed();
-
-    const ospray::vec3f pivot = cam.from;
-    AffineSpace3fa xfm
-            = AffineSpace3fa::translate(pivot)
-            * AffineSpace3fa::rotate(cam.frame.l.vx,-dv)
-            * AffineSpace3fa::rotate(cam.frame.l.vz,-du)
-            * AffineSpace3fa::translate(-pivot);
-    cam.frame = xfm * cam.frame;
-    cam.from  = xfmPoint(xfm,cam.from);
-    cam.at    = xfmPoint(xfm,cam.at);
-    cam.snapUp();
-    cam.modified = true;
+    const float du = (to.x() - from.x()) * _window.getRotateSpeed();
+    const float dv = (to.y() - from.y()) * _window.getRotateSpeed();
+    Viewport& viewport = _window.getViewPort();
+    viewport.rotate(viewport.getPosition(), du, dv);
 }
 
 }

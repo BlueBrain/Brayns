@@ -13,7 +13,7 @@ set(VERSION_MINOR "1")
 set(VERSION_PATCH "0")
 set(VERSION_ABI 1)
 
-set(BRAYNS_DESCRIPTION "Ray-Tracing Scalable Engine")
+set(BRAYNS_DESCRIPTION "Ray-tracing engine")
 
 include(Common)
 
@@ -40,6 +40,12 @@ endif()
 common_package(OSPRay REQUIRED SYSTEM)
 common_package(GLUT REQUIRED SYSTEM)
 common_package(OpenGL REQUIRED)
+common_package(vmmlib REQUIRED)
+
+option(IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)
+if(IMAGEMAGICK_ENABLED)
+  common_package(Magick++)
+endif()
 
 option(ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ON)
 if(ASSIMP_ENABLED)
@@ -84,16 +90,12 @@ endif()
 set(BRAYNS_BUILD_ISA "ALL" CACHE STRING "Target ISA (SSE,AVX,AVX2,or ALL)")
 set_property(CACHE BRAYNS_BUILD_ISA PROPERTY STRINGS ALL SSE AVX AVX2)
 
-#if(APPLE)
-#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wdeprecated-declarations")
-#endif()
-
 # ------------------------------------------------------------------------------
 # BRAYNS applications and libraries
 # ------------------------------------------------------------------------------
 
-add_subdirectory(brayns/common)
-add_subdirectory(brayns/kernels)
+add_subdirectory(plugins)
+add_subdirectory(brayns)
 
 option(BRAYNSVIEWER_ENABLED "BRayns Viewer" ON)
 if(BRAYNSVIEWER_ENABLED)
@@ -104,6 +106,3 @@ option(BRAYNSSERVICE_ENABLED "BRayns Service" ON)
 if(BRAYNSSERVICE_ENABLED)
   add_subdirectory(apps/BRaynsService)
 endif()
-
-#include(CommonPackageConfig)
-#set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)

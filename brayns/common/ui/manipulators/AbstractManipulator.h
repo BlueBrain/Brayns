@@ -32,7 +32,7 @@ class BaseWindow;
 class AbstractManipulator
 {
 public:
-    AbstractManipulator( BaseWindow* window ) : window_(window) {}
+    AbstractManipulator( BaseWindow& window ) : _window(window) {}
     virtual ~AbstractManipulator() {}
 
     /** This is the fct that gets called when the mouse moved in the
@@ -43,7 +43,7 @@ public:
     /** This is the fct that gets called when any mouse button got
      * pressed or released in the associated window
      */
-    virtual void button(const ospray::vec2i &) {}
+    virtual void button(const Vector2i &) {}
 
     virtual void keypress(int32 key);
 
@@ -52,18 +52,18 @@ public:
 protected:
     /** helper functions called from the default 'motion' function */
     virtual void dragLeft(
-            const ospray::vec2i&,
-            const ospray::vec2i&) {}
+            const Vector2i&,
+            const Vector2i&) = 0;
 
     virtual void dragRight(
-            const ospray::vec2i&,
-            const ospray::vec2i&) {}
+            const Vector2i&,
+            const Vector2i&) = 0;
 
     virtual void dragMiddle(
-            const ospray::vec2i&,
-            const ospray::vec2i&) {}
+            const Vector2i&,
+            const Vector2i&) = 0;
 
-    BaseWindow *window_;
+    BaseWindow& _window;
 };
 
 }

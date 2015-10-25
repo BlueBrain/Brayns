@@ -23,143 +23,88 @@
 namespace brayns
 {
 
-InspectCenterManipulator::InspectCenterManipulator( BaseWindow *window )
+InspectCenterManipulator::InspectCenterManipulator(BaseWindow& window)
     : AbstractManipulator(window)
-    , pivot_(center(window_->getWorldBounds()))
+    , _pivot(_window.getWorldBounds().getCenter())
 {
 }
 
 void InspectCenterManipulator::keypress( int32 key )
 {
+    Viewport& viewport = _window.getViewPort();
     switch(key)
     {
-    case 'a':
-    {
-        rotate(+10.f*window_->getRotateSpeed(),0);
-    }
-    return;
-    case 'd':
-    {
-        rotate(-10.f*window_->getRotateSpeed(),0);
-    }
-    return;
-    case 'w':
-    {
-        rotate(0,+10.f*window_->getRotateSpeed());
-    }
-    return;
-    case 's':
-    {
-        rotate(0,-10.f*window_->getRotateSpeed());
-    }
-    return;
+        case 'a':
+            viewport.rotate(viewport.getTarget(), _window.getRotateSpeed(),0);
+            break;
+        case 'd':
+            viewport.rotate(viewport.getTarget(),-_window.getRotateSpeed(),0);
+            break;
+        case 'w':
+            viewport.rotate(viewport.getTarget(),0, _window.getRotateSpeed());
+            break;
+        case 's':
+            viewport.rotate(viewport.getTarget(),0,-_window.getRotateSpeed());
+            break;
     }
 
     AbstractManipulator::keypress(key);
 }
 
-void InspectCenterManipulator::button( const ospray::vec2i& )
+void InspectCenterManipulator::button( const Vector2i& )
 {
-}
-
-void InspectCenterManipulator::rotate( float du, float dv )
-{
-    BaseWindow::ViewPort &cam = window_->getViewPort();
-    const ospray::vec3f pivot = window_->getViewPort().at;
-    AffineSpace3fa xfm
-            = AffineSpace3fa::translate(pivot)
-            * AffineSpace3fa::rotate(cam.frame.l.vx,-dv)
-            * AffineSpace3fa::rotate(cam.frame.l.vz,-du)
-            * AffineSpace3fa::translate(-pivot);
-    cam.frame = xfm * cam.frame;
-    cam.from  = xfmPoint(xfm,cam.from);
-    cam.at    = xfmPoint(xfm,cam.at);
-    cam.snapUp();
-    cam.modified = true;
 }
 
 void InspectCenterManipulator::specialkey( int32 key )
 {
+    Viewport& viewport = _window.getViewPort();
     switch(key)
     {
-    case GLUT_KEY_LEFT:
-    {
-        rotate(+10.f*window_->getRotateSpeed(),0);
-    } return;
-    case GLUT_KEY_RIGHT:
-    {
-        rotate(-10.f*window_->getRotateSpeed(),0);
-    } return;
-    case GLUT_KEY_UP:
-    {
-        rotate(0,+10.f*window_->getRotateSpeed());
-    } return;
-    case GLUT_KEY_DOWN:
-    {
-        rotate(0,-10.f*window_->getRotateSpeed());
-    } return;
+        case GLUT_KEY_LEFT:
+            viewport.rotate(viewport.getPosition(), _window.getRotateSpeed(),0);
+            break;
+        case GLUT_KEY_RIGHT:
+            viewport.rotate(viewport.getPosition(), -_window.getRotateSpeed(),0);
+            break;
+        case GLUT_KEY_UP:
+            viewport.rotate(viewport.getPosition(), 0, _window.getRotateSpeed());
+            break;
+        case GLUT_KEY_DOWN:
+            viewport.rotate(viewport.getPosition(), 0, -_window.getRotateSpeed());
+            break;
     }
     AbstractManipulator::specialkey( key );
 }
 
-/*! INSPECT_CENTER::RightButton: move lookfrom/viewPort positoin
-      forward/backward on right mouse button */
 void InspectCenterManipulator::dragRight(
-        const ospray::vec2i &to,
-        const ospray::vec2i &from)
+        const Vector2i& to,
+        const Vector2i& from)
 {
-    BaseWindow::ViewPort &cam = window_->getViewPort();
-    float fwd = -(to.y - from.y) * 4 * window_->getMotionSpeed();
-    float oldDist = length(cam.at - cam.from);
-    float newDist = oldDist - fwd;
-    if (newDist < 1e-3)
-        return;
-    cam.from = cam.at - newDist * cam.frame.l.vy;
-    cam.frame.p = cam.from;
-    cam.modified = true;
+    const float fwd =- (to.y() - from.y()) * _window.getMotionSpeed();
+    Viewport& viewport = _window.getViewPort();
+    const Vector3f dir = normalize(viewport.getTarget() - viewport.getPosition());
+    viewport.translate(dir*fwd);
 }
 
-/*! INSPECT_CENTER::MiddleButton: move lookat/center of interest
-      forward/backward on middle mouse button */
 void InspectCenterManipulator::dragMiddle(
-        const ospray::vec2i &to,
-        const ospray::vec2i &from)
+        const Vector2i& to,
+        const Vector2i& from)
 {
-    BaseWindow::ViewPort &cam = window_->getViewPort();
-    float du = (to.x - from.x);
-    float dv = (to.y - from.y);
-
-    AffineSpace3fa xfm =
-            AffineSpace3fa::translate(
-                window_->getMotionSpeed() * dv * cam.frame.l.vz ) *
-            AffineSpace3fa::translate(
-                -1.0 * window_->getMotionSpeed() * du * cam.frame.l.vx );
-
-    cam.frame = xfm * cam.frame;
-    cam.from = xfmPoint(xfm, cam.from);
-    cam.at = xfmPoint(xfm, cam.at);
-    cam.modified = true;
+    Viewport& viewport = _window.getViewPort();
+    const float x = (to.x() - from.x()) * _window.getMotionSpeed();
+    const float y = (to.y() - from.y()) * _window.getMotionSpeed();
+    const Vector3f dir = normalize(viewport.getTarget() - viewport.getPosition());
+    viewport.translate(Vector3f(-y,x,0.f).cross(dir), true);
 }
 
 void InspectCenterManipulator::dragLeft(
-        const ospray::vec2i &to,
-        const ospray::vec2i &from)
+        const Vector2i& to,
+        const Vector2i& from)
 {
-    BaseWindow::ViewPort &cam = window_->getViewPort();
-    float du = (to.x - from.x) * window_->getRotateSpeed();
-    float dv = (to.y - from.y) * window_->getRotateSpeed();
-
-    const ospray::vec3f pivot = cam.at;
-    AffineSpace3fa xfm
-            = AffineSpace3fa::translate(pivot)
-            * AffineSpace3fa::rotate(cam.frame.l.vx,-dv)
-            * AffineSpace3fa::rotate(cam.frame.l.vz,-du)
-            * AffineSpace3fa::translate(-pivot);
-    cam.frame = xfm * cam.frame;
-    cam.from  = xfmPoint(xfm,cam.from);
-    cam.at    = xfmPoint(xfm,cam.at);
-    cam.snapUp();
-    cam.modified = true;
+    Viewport& viewport = _window.getViewPort();
+    const float du = (to.x() - from.x()) * _window.getRotateSpeed();
+    const float dv = (to.y() - from.y()) * _window.getRotateSpeed();
+    viewport.rotate(viewport.getTarget(), du, dv);
 }
 
 }

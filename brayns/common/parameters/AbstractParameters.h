@@ -30,11 +30,12 @@ namespace brayns
  */
 enum ParameterType
 {
-    ptUndefined,
-    ptString,
-    ptInteger,
-    ptFloat,
-    ptBoolean,
+    PMT_UNDEFINED = 0,
+    PMT_STRING,
+    PMT_INTEGER,
+    PMT_FLOAT,
+    PMT_BOOLEAN,
+    PMT_FLOAT3
 };
 
 /** Base class defining parameters
@@ -50,10 +51,11 @@ public:
     {
         switch( param.type )
         {
-        case ptString : os << "<string>"; break;
-        case ptInteger: os << "<integer>"; break;
-        case ptFloat  : os << "<float>"; break;
-        case ptBoolean: os << "<boolean>"; break;
+        case PMT_STRING: os << "<string>"; break;
+        case PMT_INTEGER: os << "<integer>"; break;
+        case PMT_FLOAT: os << "<float>"; break;
+        case PMT_BOOLEAN: os << "<boolean>"; break;
+        case PMT_FLOAT3: os << "<float3>"; break;
         default:
             os << "<undefined>"; break;
         }
@@ -87,7 +89,7 @@ public:
     virtual void usage() const;
 
 protected:
-    Parameters parameters_;
+    Parameters _parameters;
 };
 
 }

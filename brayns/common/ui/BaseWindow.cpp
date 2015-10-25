@@ -18,20 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __APPLE__
-// GCC automtically removes the library if the application does not
-// make an explicit use of one of its classes. In the case of OSPRay
-// classes are loaded dynamicaly. The following line is only to make
-// sure that the hbpKernel library is loaded.
-#  include <brayns/kernels/render/ExtendedOBJRenderer.h>
-brayns::ExtendedOBJRenderer __r__;
-#endif
-
 #include "BaseWindow.h"
-#include <signal.h>
+
+#include <brayns/Brayns.h>
 #include <brayns/common/log.h>
-#include <brayns/common/algorithms/MetaballsGenerator.h>
-#include <brayns/common/extensions/ExtensionController.h>
+#include <brayns/common/parameters/RenderingParameters.h>
+#include <brayns/common/scene/Scene.h>
+
+#include <assert.h>
 
 #ifdef __APPLE__
 #  include "GLUT/glut.h"
@@ -40,17 +34,12 @@ brayns::ExtendedOBJRenderer __r__;
 #  include "GL/glut.h"
 #endif
 
-#ifdef BRAYNS_USE_ASSIMP
-#  include <brayns/common/loaders/MeshLoader.h>
-#endif
-
 namespace brayns
 {
 
-const float DEFAULT_GAMMA   = 2.2f;
-const float DEFAULT_EPSILON = 1e-1f;
+const float DEFAULT_EPSILON = 1e-4f;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
-const float DEFAULT_MOUSE_SPEED = 1e-3f;
+const float DEFAULT_MOUSE_SPEED = 0.005f;
 
 void runGLUT()
 {
@@ -67,89 +56,85 @@ void initGLUT(int32 *ac, const char **av)
 // ------------------------------------------------------------------
 void glut3dReshape(int32 x, int32 y)
 {
-    if (BaseWindow::activeWindow_)
-        BaseWindow::activeWindow_->reshape(ospray::vec2i(x,y));
+    if (BaseWindow::_activeWindow)
+        BaseWindow::_activeWindow->reshape(Vector2i(x,y));
 }
 
 void glut3dDisplay( void )
 {
-    if (BaseWindow::activeWindow_)
-        BaseWindow::activeWindow_->display();
+    if(BaseWindow::_activeWindow)
+       BaseWindow::_activeWindow->display();
 }
 
 void glut3dKeyboard(unsigned char key, int32 x, int32 y)
 {
-    if (BaseWindow::activeWindow_)
-        BaseWindow::activeWindow_->keypress(key,ospray::vec2i(x,y));
+    if(BaseWindow::_activeWindow)
+       BaseWindow::_activeWindow->keypress(key,Vector2i(x,y));
 }
 void glut3dSpecial(int32 key, int32 x, int32 y)
 {
-    if (BaseWindow::activeWindow_)
-        BaseWindow::activeWindow_->specialkey(key,ospray::vec2i(x,y));
+    if(BaseWindow::_activeWindow)
+       BaseWindow::_activeWindow->specialkey(key,Vector2i(x,y));
 }
 
 void glut3dIdle( void )
 {
-    if (BaseWindow::activeWindow_)
-        BaseWindow::activeWindow_->idle();
+    if(BaseWindow::_activeWindow)
+       BaseWindow::_activeWindow->idle();
 }
 void glut3dMotionFunc(int32 x, int32 y)
 {
-    if (BaseWindow::activeWindow_)
-        BaseWindow::activeWindow_->motion(ospray::vec2i(x,y));
+    if(BaseWindow::_activeWindow)
+       BaseWindow::_activeWindow->motion(Vector2i(x,y));
 }
 
 void glut3dMouseFunc(int32 whichButton, int32 released, int32 x, int32 y)
 {
-    if (BaseWindow::activeWindow_)
-        BaseWindow::activeWindow_->mouseButton(
-                    whichButton, released, ospray::vec2i(x,y));
+    if(BaseWindow::_activeWindow)
+       BaseWindow::_activeWindow->mouseButton(
+                   whichButton, released, Vector2i(x,y));
 }
 
 // ------------------------------------------------------------------
 // Base window
 // ------------------------------------------------------------------
 /*! currently active window */
-BaseWindow *BaseWindow::activeWindow_ = NULL;
+BaseWindow *BaseWindow::_activeWindow = nullptr;
 
 BaseWindow::BaseWindow(
-        const ApplicationParameters& applicationParameters,
+        const int argc, const char **argv,
         const FrameBufferMode frameBufferMode,
         const ManipulatorMode initialManipulator,
         const int allowedManipulators)
-  : lastMousePos_(-1,-1), currMousePos_(-1,-1),
-    lastButtonState_(0), currButtonState_(0),
-    currModifiers_(0), upVectorFromCmdLine_(0,1,0),
-    motionSpeed_(DEFAULT_MOUSE_SPEED), rotateSpeed_(DEFAULT_MOUSE_SPEED),
-    ucharFB_(NULL), frameBufferMode_(frameBufferMode),
-    applicationParameters_(applicationParameters),
-    windowID_(-1), windowSize_(-1,-1), fullScreen_(false),
-    fb_(NULL), renderer_(NULL), camera_(NULL), model_(NULL),
-    frameNumber_(inf), frameCounter_(0),
-    metaballsGridDimension_(0), running_(false)
+  : _lastMousePos(-1,-1), _currMousePos(-1,-1),
+    _lastButtonState(0), _currButtonState(0),
+    _currModifiers(0), _upVectorFromCmdLine(0,1,0),
+    _motionSpeed(DEFAULT_MOUSE_SPEED), _rotateSpeed(DEFAULT_MOUSE_SPEED),
+    _frameBufferMode(frameBufferMode),
+    _windowID(-1), _windowSize(-1,-1), fullScreen_(false),
+    frameCounter_(0)
 {
-    worldBounds_.lower = ospray::vec3f(-1);
-    worldBounds_.upper = ospray::vec3f(+1);
+    // Initialize brayns
+    _brayns.reset(new Brayns(argc, argv));
+    setViewPort();
 
-    if (allowedManipulators & INSPECT_CENTER_MODE)
-        inspectCenterManipulator = new InspectCenterManipulator(this);
+    // Initialize manipulators
+    if(allowedManipulators & INSPECT_CENTER_MODE)
+        _inspectCenterManipulator.reset(new InspectCenterManipulator(*this));
 
-    if (allowedManipulators & MOVE_MODE)
-        flyingModeManipulator = new FlyingModeManipulator(this);
+    if(allowedManipulators & MOVE_MODE)
+        _flyingModeManipulator.reset(new FlyingModeManipulator(*this));
 
     switch(initialManipulator)
     {
     case MOVE_MODE:
-        manipulator = flyingModeManipulator;
+        _manipulator.reset(_flyingModeManipulator.get());
         break;
     case INSPECT_CENTER_MODE:
-        manipulator = inspectCenterManipulator;
+        _manipulator.reset(_inspectCenterManipulator.get());
         break;
     }
-    Assert2( manipulator != NULL, "invalid initial manipulator mode ");
-
-    // Application is now running
-    running_ = true;
+    assert(_manipulator);
 }
 
 
@@ -160,55 +145,36 @@ BaseWindow::~BaseWindow()
 void BaseWindow::mouseButton(
         int32 whichButton,
         bool released,
-        const ospray::vec2i& pos)
+        const Vector2i& pos)
 {
-
-    if (pos != currMousePos_)
+    if(pos != _currMousePos)
         motion(pos);
-    lastButtonState_ = currButtonState_;
+    _lastButtonState = _currButtonState;
 
-    if (released)
-        currButtonState_ = currButtonState_ & ~(1<<whichButton);
+    if(released)
+        _currButtonState = _currButtonState & ~(1<<whichButton);
     else
-        currButtonState_ = currButtonState_ |  (1<<whichButton);
-    currModifiers_ = glutGetModifiers();
+        _currButtonState = _currButtonState |  (1<<whichButton);
+    _currModifiers = glutGetModifiers();
 
-    manipulator->button( pos );
+    _manipulator->button( pos );
 }
 
-void BaseWindow::motion(const ospray::vec2i& pos)
+void BaseWindow::motion(const Vector2i& pos)
 {
-    currMousePos_ = pos;
-    if(currButtonState_ != lastButtonState_)
+    _currMousePos = pos;
+    if(_currButtonState != _lastButtonState)
     {
         // some button got pressed; reset 'old' pos to new pos.
-        lastMousePos_ = currMousePos_;
-        lastButtonState_ = currButtonState_;
+        _lastMousePos = _currMousePos;
+        _lastButtonState = _currButtonState;
     }
 
-    manipulator->motion();
-    lastMousePos_ = currMousePos_;
-    if (viewPort_.modified)
-        forceRedraw();
-}
-
-void BaseWindow::computeFrame()
-{
-    viewPort_.frame.l.vy = normalize(viewPort_.at - viewPort_.from);
-    viewPort_.frame.l.vx = normalize(
-                cross(viewPort_.frame.l.vy,viewPort_.up));
-    viewPort_.frame.l.vz = normalize(
-                cross(viewPort_.frame.l.vx,viewPort_.frame.l.vy));
-    viewPort_.frame.p    = viewPort_.from;
-    viewPort_.snapUp();
-    viewPort_.modified = true;
-}
-
-void BaseWindow::setZUp(const ospray::vec3f &up)
-{
-    viewPort_.up = up;
-    if (up != ospray::vec3f(0.f)) {
-        viewPort_.snapUp();
+    _manipulator->motion();
+    _lastMousePos = _currMousePos;
+    if(_viewPort.getModified())
+    {
+        _brayns->commit();
         forceRedraw();
     }
 }
@@ -218,26 +184,18 @@ void BaseWindow::idle()
     usleep(1000);
 }
 
-void BaseWindow::reshape(const ospray::vec2i &newSize)
+void BaseWindow::reshape(const Vector2i& newSize)
 {
-    windowSize_ = newSize;
-    viewPort_.aspect = newSize.x/float(newSize.y);
-    if (fb_) ospFreeFrameBuffer(fb_);
-    fb_ = ospNewFrameBuffer(
-                newSize, OSP_RGBA_I8, OSP_FB_COLOR|OSP_FB_DEPTH|OSP_FB_ACCUM );
-    ospSet1f(fb_, "gamma", DEFAULT_GAMMA);
-    ospCommit(fb_);
-    ospFrameBufferClear(fb_,OSP_FB_ACCUM);
-    ospSetf(camera_,"aspect",viewPort_.aspect);
-    ospCommit(camera_);
-    viewPort_.modified = true;
+    _windowSize = newSize;
+    _viewPort.setAspect(float(newSize.x())/float(newSize.y()));
+    _brayns->resize(newSize);
     forceRedraw();
 }
 
 void BaseWindow::activate()
 {
-    activeWindow_ = this;
-    glutSetWindow(windowID_);
+    _activeWindow = this;
+    glutSetWindow(_windowID);
 }
 
 void BaseWindow::forceRedraw()
@@ -245,171 +203,39 @@ void BaseWindow::forceRedraw()
     glutPostRedisplay();
 }
 
-void BaseWindow::setRendererParameters_()
-{
-    ospSet1i(renderer_, "shadowsEnabled",
-             renderingParameters_.getShadows());
-    ospSet1i(renderer_, "softShadowsEnabled",
-             renderingParameters_.getSoftShadows());
-    ospSet1f(renderer_, "ambientOcclusionStrength",
-             renderingParameters_.getAmbientOcclusionStrength());
-    ospSet1i(renderer_, "shadingEnabled",
-             renderingParameters_.getLightShading());
-    ospSet1i(renderer_, "frameNumber",
-             frameNumber_);
-    ospSet1i(renderer_, "randomNumber",
-             rand()%1000);
-    ospSet1i(renderer_, "moving", false /*viewPort_.modified*/);
-    ospSet1i(renderer_, "spp",
-             renderingParameters_.getSamplesPerPixel());
-    ospSet1i(renderer_, "electronShading",
-             renderingParameters_.getElectronShading());
-    ospSet1i(renderer_, "lightEmittingMaterialsEnabled",
-             renderingParameters_.getLightEmittingMaterials());
-    ospSet1i(renderer_, "gradientBackgroundEnabled",
-             renderingParameters_.getGradientBackground());
-    ospSet1f(renderer_, "epsilon", DEFAULT_EPSILON);
-
-    if( renderingParameters_.getDepthOfField() != 0.f )
-    {
-        ospray::vec3f pos = viewPort_.from;
-        float dofStrength = renderingParameters_.getDepthOfFieldStrength();
-        pos.x += dofStrength*(rand()%100-50);
-        pos.y += dofStrength*(rand()%100-50);
-        pos.z += dofStrength*(rand()%100-50);
-        ospSetVec3f(camera_,"dir",viewPort_.at-pos);
-        ospSetVec3f(camera_,"pos",pos);
-        ospCommit(camera_);
-    }
-
-    if( viewPort_.modified )
-    {
-        Assert2(camera_,"ospray camera is null");
-        ospSetVec3f(camera_,"pos",viewPort_.from);
-        ospSetVec3f(camera_,"dir",viewPort_.at-viewPort_.from);
-        ospSetVec3f(camera_,"up",viewPort_.up);
-        ospSetf(camera_,"aspect",viewPort_.aspect);
-        ospCommit(camera_);
-        viewPort_.modified = false;
-        ospFrameBufferClear(fb_,OSP_FB_ACCUM);
-    }
-
-    ospCommit(renderer_);
-}
-
 void BaseWindow::display()
 {
-    setRendererParameters_();
+    RenderInput renderInput;
+    RenderOutput renderOutput;
 
-    if( !extensionController_ )
-    {
-        ExtensionParameters extensionParameters = {
-            renderer_, camera_, ucharFB_, fb_, windowSize_, bounds_, running_ };
-        extensionController_.reset(new ExtensionController(
-            applicationParameters_, extensionParameters ));
-    }
-    extensionController_->execute();
+    renderInput.position = _viewPort.getPosition();
+    renderInput.target = _viewPort.getTarget()-_viewPort.getPosition();
+    renderInput.up = _viewPort.getUp();
 
-    if( applicationParameters_.isBenchmarking() ) fps_.startRender();
+    _brayns->render(renderInput, renderOutput);
 
     GLenum format = GL_RGBA;
     GLenum type   = GL_FLOAT;
     GLvoid* buffer = 0;
-    switch( frameBufferMode_ )
+    switch(_frameBufferMode)
     {
-    case BaseWindow::FRAMEBUFFER_UCHAR:
-        {
-            ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_ACCUM|OSP_FB_ALPHA);
-            type = GL_UNSIGNED_BYTE;
-            ucharFB_ = (uint32 *)ospMapFrameBuffer(fb_, OSP_FB_COLOR);
-            buffer = ucharFB_;
-            break;
-        }
-    case BaseWindow::FRAMEBUFFER_FLOAT:
-        {
-            ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_ACCUM|OSP_FB_ALPHA);
-            floatFB_ = (vec3fa *)ospMapFrameBuffer(fb_, OSP_FB_COLOR);
-            buffer = floatFB_;
-            break;
-        }
+    case BaseWindow::FRAMEBUFFER_COLOR:
+        type = GL_UNSIGNED_BYTE;
+        buffer = renderOutput.colorBuffer.data();
+        break;
     case BaseWindow::FRAMEBUFFER_DEPTH:
-        {
-            ospRenderFrame(fb_,renderer_,OSP_FB_DEPTH);
-            depthFB_ = (float *)ospMapFrameBuffer(fb_, OSP_FB_DEPTH);
-            buffer = depthFB_;
-            format = GL_LUMINANCE;
-            break;
-        }
+        format = GL_LUMINANCE;
+        buffer = renderOutput.depthBuffer.data();
+        break;
     default:
-        glClearColor(1.f,0.f,0.f,1.f);
+        glClearColor(0.f,0.f,0.f,1.f);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     }
-    if( applicationParameters_.isBenchmarking() ) fps_.doneRender();
 
-    glDrawPixels(windowSize_.x, windowSize_.y, format, type, buffer);
+    glDrawPixels(_windowSize.x(), _windowSize.y(), format, type, buffer);
     glutSwapBuffers();
-    ospUnmapFrameBuffer(buffer, fb_);
 
     ++frameCounter_;
-}
-
-void BaseWindow::saveFrameToDisk(
-        const size_t frameIndex,
-        const std::string& prefix )
-{
-    char tmpFileName[] = "frame";
-    static const char *dumpFileRoot;
-    if (!dumpFileRoot)
-        dumpFileRoot = getenv("OSPRAY_SCREEN_DUMP_ROOT");
-
-    if (!dumpFileRoot)
-    {
-        if( mkstemp(tmpFileName) )
-            dumpFileRoot = tmpFileName;
-        else
-        {
-            BRAYNS_ERROR << "Failed to generated filename" << std::endl;
-            return;
-        }
-    }
-
-    char fileName[2048];
-    std::string format = prefix + "_%s_%08d.ppm";
-    sprintf(fileName, format.c_str(), dumpFileRoot,
-            static_cast<int>(frameIndex));
-
-    FILE *file = fopen(fileName,"wb");
-    if (!file)
-    {
-        BRAYNS_ERROR << "Could not create screen shot file '"
-                     << fileName << "'" << std::endl;
-        return;
-    }
-
-    // Write file header
-    fprintf(file,"P6\n%i %i\n255\n",windowSize_.x,windowSize_.y);
-
-    // Write file contents
-    std::vector<unsigned char> out;
-    for (int y=0; y<windowSize_.y; ++y)
-    {
-        const unsigned char *in =
-                (const unsigned char *)&ucharFB_[
-                (windowSize_.y-1-y)*windowSize_.x];
-
-        for (int x=0; x<windowSize_.x; ++x)
-        {
-            out.push_back(in[4*x+0]);
-            out.push_back(in[4*x+1]);
-            out.push_back(in[4*x+2]);
-        }
-        fwrite(out.data(),3*windowSize_.x,sizeof(char),file);
-        out.clear();
-    }
-    fprintf(file,"\n");
-    fclose(file);
-
-    BRAYNS_INFO << "Saved framebuffer to file " << fileName << std::endl;
 }
 
 void BaseWindow::clearPixels()
@@ -419,76 +245,48 @@ void BaseWindow::clearPixels()
     glutSwapBuffers();
 }
 
-void BaseWindow::drawPixels(const uint32 *framebuffer)
+void BaseWindow::drawPixels(const uint32* framebuffer)
 {
-    glDrawPixels( windowSize_.x, windowSize_.y,
-                  GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
+    glDrawPixels(_windowSize.x(), _windowSize.y(),
+                 GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
     glutSwapBuffers();
 }
 
-void BaseWindow::drawPixels(const ospray::vec3fa *framebuffer)
+void BaseWindow::drawPixels(const Vector3f* framebuffer)
 {
-    glDrawPixels(windowSize_.x, windowSize_.y,
+    glDrawPixels(_windowSize.x(), _windowSize.y(),
                  GL_RGBA, GL_FLOAT, framebuffer);
     glutSwapBuffers();
 }
 
-void BaseWindow::setViewPort(const ospray::vec3f from,
-                             const ospray::vec3f at,
-                             const ospray::vec3f up)
+Boxf BaseWindow::getWorldBounds()
 {
-    const ospray::vec3f dir = at - from;
-    viewPort_.at    = at;
-    viewPort_.from  = from;
-    viewPort_.up    = up;
-
-    viewPort_.frame.l.vy = normalize(dir);
-    viewPort_.frame.l.vx = normalize(
-                cross(viewPort_.frame.l.vy,up));
-    viewPort_.frame.l.vz = normalize(
-                cross(viewPort_.frame.l.vx,viewPort_.frame.l.vy));
-    viewPort_.frame.p    = from;
-    viewPort_.snapUp();
-    viewPort_.modified = true;
+    return _brayns->getScene()->getWorldBounds();
 }
 
-void BaseWindow::setWorldBounds(const ospray::box3f &worldBounds)
+void BaseWindow::setViewPort()
 {
-    worldBounds_ = worldBounds;
-    ospray::vec3f center = embree::center(worldBounds_);
-    ospray::vec3f diag   = worldBounds_.size();
-    diag         = max(diag,vec3f(0.3f*length(diag)));
-    vec3f from   = center - .75f*vec3f(-.6*diag.x,-1.2*diag.y,.8*diag.z);
-    from.z -= diag.z;
-    ospray::vec3f dir = center - from;
-    ospray::vec3f up  = viewPort_.up;
+    Boxf worldBounds = _brayns->getScene()->getWorldBounds();
+    Vector3f center = worldBounds.getCenter();
+    Vector3f diag   = worldBounds.getDimension();
+    diag = max(diag,Vector3f(0.3f*diag.length()));
+    Vector3f from = center; // - 0.75f*Vector3f(-0.6f*diag.x(), -1.2f*diag.y(), 0.8f*diag.z());
+    from.z() -= diag.z();
 
-    viewPort_.at    = center;
-    viewPort_.from  = from;
-    viewPort_.up    = up;
+    Vector3f up  = Vector3f(0.f,1.f,0.f);
 
-    if (length(up) < DEFAULT_EPSILON)
-        up = ospray::vec3f(0,0,1.f);
+    _viewPort.initialize(from, center, up);
 
-    viewPort_.frame.l.vy = normalize(dir);
-    viewPort_.frame.l.vx = normalize(
-                cross(viewPort_.frame.l.vy,up));
-    viewPort_.frame.l.vz = normalize(
-                cross(viewPort_.frame.l.vx,viewPort_.frame.l.vy));
-    viewPort_.frame.p    = from;
-    viewPort_.snapUp();
-    viewPort_.modified = true;
-
-    motionSpeed_ = length(diag) * 0.001f;
-    BRAYNS_INFO << "World bounds " << worldBounds_ <<
-                   ", motion speed " << motionSpeed_ << std::endl;
+    _motionSpeed = diag.length() * 0.001f;
+    BRAYNS_INFO << "World bounds :" << worldBounds << std::endl;
+    BRAYNS_INFO << "Viewport     :" << _viewPort << std::endl;
+    BRAYNS_INFO << "Motion speed :" << _motionSpeed << std::endl;
 }
 
 void BaseWindow::setTitle(const char *title)
 {
-    Assert2(windowID_ >= 0,
-            "must call BaseWindow::create() before calling setTitle()");
-    glutSetWindow( windowID_ );
+    assert(_windowID>=0);
+    glutSetWindow( _windowID );
     glutSetWindowTitle( title );
 }
 
@@ -496,75 +294,93 @@ void BaseWindow::create(const char *title,
                         const size_t width, const size_t height,
                         bool fullScreen)
 {
-    glutInitWindowSize( width, height );
-    windowID_ = glutCreateWindow( title );
-    activeWindow_ = this;
-    glutDisplayFunc( glut3dDisplay );
-    glutReshapeFunc( glut3dReshape );
-    glutKeyboardFunc(glut3dKeyboard );
-    glutSpecialFunc( glut3dSpecial );
-    glutMotionFunc(  glut3dMotionFunc );
-    glutMouseFunc(   glut3dMouseFunc );
-    glutIdleFunc(    glut3dIdle );
+    glutInitWindowSize(width, height);
+    _windowID = glutCreateWindow(title);
+    _activeWindow = this;
+    glutDisplayFunc(glut3dDisplay);
+    glutReshapeFunc(glut3dReshape);
+    glutKeyboardFunc(glut3dKeyboard);
+    glutSpecialFunc(glut3dSpecial);
+    glutMotionFunc(glut3dMotionFunc);
+    glutMouseFunc(glut3dMouseFunc);
+    glutIdleFunc(glut3dIdle);
 
-    if (fullScreen)
+    if(fullScreen)
         glutFullScreen();
 }
 
-void BaseWindow::specialkey( int32 key, const ospray::vec2f )
+void BaseWindow::specialkey( int32 key, const Vector2f& )
 {
-    if (manipulator)
-        manipulator->specialkey( key );
+    if(_manipulator)
+        _manipulator->specialkey( key );
 }
 
-void BaseWindow::keypress( char key, const ospray::vec2f )
+void BaseWindow::keypress( char key, const Vector2f& )
 {
     switch( key )
     {
     case '+':
-        motionSpeed_ *= DEFAULT_MOTION_ACCELERATION;
+        _motionSpeed *= DEFAULT_MOTION_ACCELERATION;
+        BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
         break;
     case '-':
-        motionSpeed_ /= DEFAULT_MOTION_ACCELERATION;
+        _motionSpeed /= DEFAULT_MOTION_ACCELERATION;
+        BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
         break;
     case '1':
-        ospSet3f(renderer_, "bgColor", 0.5f, 0.5f, 0.5f);
+        _brayns->getRenderingParameters()->setBackgroundColor(Vector3f(.5f,.5f,.5f));
+        BRAYNS_INFO << "Setting grey background" << std::endl;
         break;
     case '2':
-        ospSet3f(renderer_, "bgColor", 1.0f, 1.0f, 1.0f);
+        _brayns->getRenderingParameters()->setBackgroundColor(Vector3f(1.f,1.f,1.f));
+        BRAYNS_INFO << "Setting white background" << std::endl;
         break;
     case '3':
-        ospSet3f(renderer_, "bgColor", 0.f, 0.f, 0.f);
-        ospCommit(renderer_);
+        _brayns->getRenderingParameters()->setBackgroundColor(Vector3f(0.f,0.f,0.f));
+        BRAYNS_INFO << "Setting black background" << std::endl;
         break;
     case 'C':
-        BRAYNS_INFO << viewPort_ << std::endl;
+        BRAYNS_INFO << _viewPort << std::endl;
         break;
     case 'D':
-        renderingParameters_.setDepthOfField(
-                    !renderingParameters_.getDepthOfField());
+        _brayns->getRenderingParameters()->setDepthOfField(
+            !_brayns->getRenderingParameters()->getDepthOfField());
+        BRAYNS_INFO << "Detph of field: " << _brayns->getRenderingParameters()->getDepthOfField()
+                    << std::endl;
         break;
     case 'E':
-        renderingParameters_.setElectronShading(
-                    !renderingParameters_.getElectronShading());
+        _brayns->getRenderingParameters()->setElectronShading(
+            !_brayns->getRenderingParameters()->getElectronShading());
+        BRAYNS_INFO << "Electron shading: " <<
+            (_brayns->getRenderingParameters()->getElectronShading() ? "On" : "Off") << std::endl;
         break;
     case 'F':
         // 'f'ly mode
-        if( flyingModeManipulator )
-            manipulator = flyingModeManipulator;
+        if( _flyingModeManipulator )
+        {
+            BRAYNS_INFO << "Switching to flying mode" << std::endl;
+            _manipulator = std::move(_flyingModeManipulator);
+        }
         break;
     case 'G':
-        renderingParameters_.setGradientBackground(
-                    !renderingParameters_.getGradientBackground());
+        _brayns->getRenderingParameters()->setGradientBackground(
+            !_brayns->getRenderingParameters()->getGradientBackground());
+        BRAYNS_INFO << "Gradient background: " <<
+            (_brayns->getRenderingParameters()->getGradientBackground() ? "On" : "Off") << std::endl;
         break;
     case 'H':
-        renderingParameters_.setSoftShadows(
-                    !renderingParameters_.getSoftShadows());
+        _brayns->getRenderingParameters()->setSoftShadows(
+            !_brayns->getRenderingParameters()->getSoftShadows());
+        BRAYNS_INFO << "Soft shadows " <<
+            (_brayns->getRenderingParameters()->getSoftShadows() ? "On" : "Off") << std::endl;
         break;
     case 'I':
         // 'i'nspect mode
-        if( inspectCenterManipulator)
-            manipulator = inspectCenterManipulator;
+        if( _inspectCenterManipulator)
+        {
+            BRAYNS_INFO << "Switching to inspect mode" << std::endl;
+            _manipulator = std::move(_inspectCenterManipulator);
+        }
         break;
     case 'L':
     {
@@ -578,209 +394,62 @@ void BaseWindow::keypress( char key, const ospray::vec2f )
     case 'o':
     {
         float aaStrength =
-                renderingParameters_.getAmbientOcclusionStrength();
+            _brayns->getRenderingParameters()->getAmbientOcclusionStrength();
         aaStrength += 0.1f;
         if( aaStrength>1.f ) aaStrength=1.f;
-        renderingParameters_.setAmbientOcclusionStrength( aaStrength );
-        BRAYNS_INFO << "Ambient occlusion strength: " <<
-                       aaStrength << std::endl;
+        _brayns->getRenderingParameters()->setAmbientOcclusionStrength( aaStrength );
+        BRAYNS_INFO << "Ambient occlusion strength: " << aaStrength << std::endl;
         break;
     }
     case 'O':
     {
         float aaStrength =
-                renderingParameters_.getAmbientOcclusionStrength();
+            _brayns->getRenderingParameters()->getAmbientOcclusionStrength();
         aaStrength -= 0.1f;
         if( aaStrength<0.f ) aaStrength=0.f;
-        renderingParameters_.setAmbientOcclusionStrength( aaStrength );
-        BRAYNS_INFO << "Ambient occlusion strength: " <<
-                       aaStrength << std::endl;
+        _brayns->getRenderingParameters()->setAmbientOcclusionStrength( aaStrength );
+        BRAYNS_INFO << "Ambient occlusion strength: " << aaStrength << std::endl;
         break;
     }
     case 'P':
-        renderingParameters_.setLightShading(
-                    !renderingParameters_.getLightShading());
+        _brayns->getRenderingParameters()->setLightShading(
+                    !_brayns->getRenderingParameters()->getLightShading());
+        BRAYNS_INFO << "Light shading: " <<
+            (_brayns->getRenderingParameters()->getLightShading() ? "On" : "Off") << std::endl;
         break;
     case 'r':
-        frameNumber_ = 0;
+        _brayns->getRenderingParameters()->setFrameNumber(0);
+        BRAYNS_INFO << "Frame number: " <<
+            _brayns->getRenderingParameters()->getFrameNumber() << std::endl;
         break;
     case 'R':
-        frameNumber_ = inf;
+        _brayns->getRenderingParameters()->setFrameNumber(std::numeric_limits<uint16_t>::max());
+        BRAYNS_INFO << "Frame number: " <<
+            _brayns->getRenderingParameters()->getFrameNumber() << std::endl;
         break;
     case 'S':
-        renderingParameters_.setShadows(!renderingParameters_.getShadows());
+        _brayns->getRenderingParameters()->setShadows(
+            !_brayns->getRenderingParameters()->getShadows());
+        BRAYNS_INFO << "Shadows: " <<
+            (_brayns->getRenderingParameters()->getShadows() ? "On" : "Off") << std::endl;
         break;
     case 'V':
-        ospSet3f(renderer_, "bgColor", rand()%200/100.f-1.f,
-                 rand()%200/100.f-1.f, rand()%200/100.0-1.f);
-
-        ospCommit(renderer_);
-        break;
-    case 'v':
-        lightDirection_.x = rand()%100/100.f,
-        lightDirection_.y = -rand()%100/100.f;
-        lightDirection_.z = rand()%100/100.f;
-        ospSet3f(light_,"direction",
-                 lightDirection_.x, lightDirection_.y, lightDirection_.z );
-        ospCommit(light_);
+        _brayns->getRenderingParameters()->setBackgroundColor(
+            Vector3f(rand()%200/100.f-1.f, rand()%200/100.f-1.f, rand()%200/100.0-1.f));
         break;
     case 'Y':
-        renderingParameters_.setLightEmittingMaterials(
-                    !renderingParameters_.getLightEmittingMaterials());
+        _brayns->getRenderingParameters()->setLightEmittingMaterials(
+            !_brayns->getRenderingParameters()->getLightEmittingMaterials());
         break;
     case 'Z':
-        if( frameBufferMode_==FRAMEBUFFER_DEPTH )
-            frameBufferMode_ = FRAMEBUFFER_UCHAR;
+        if( _frameBufferMode==FRAMEBUFFER_DEPTH )
+            _frameBufferMode = FRAMEBUFFER_COLOR;
         else
-            frameBufferMode_ = FRAMEBUFFER_DEPTH;
+            _frameBufferMode = FRAMEBUFFER_DEPTH;
         break;
     }
-    if (manipulator)
-        manipulator->keypress( key );
-}
-
-void BaseWindow::resetBounds()
-{
-    bounds_ = embree::empty;
-}
-
-ospray::box3f BaseWindow::getBounds() const
-{
-    return bounds_;
-}
-
-void BaseWindow::saveSceneToBinaryFile( const std::string& fn )
-{
-    BRAYNS_INFO << "Saving binary scene to " << fn << std::endl;
-    FILE* file = fopen(fn.c_str(),"wb");
-    size_t nb = materials_.size();
-    fwrite(&nb, sizeof(size_t), 1, file);
-    for( size_t i=0; i<nb; ++i )
-    {
-        size_t len = spheres_[i].size();
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(&spheres_[i][0], sizeof(Sphere), len, file );
-    }
-    fwrite(&bounds_, sizeof(ospray::box3f), 1, file );
-    fclose(file);
-}
-
-void BaseWindow::loadSceneFromBinaryFile( const std::string& fn )
-{
-    FILE* file = fopen(fn.c_str(),"rb");
-    if( file )
-    {
-        size_t nb;
-        size_t status = fread(&nb, 1, sizeof(size_t), file);
-        for( size_t i=0; status==0 && i<nb; ++i )
-        {
-            size_t s;
-            status = fread(&s, sizeof(size_t), 1, file);
-            BRAYNS_INFO << "[" << i << "] " << s << " spheres" << std::endl;
-
-            spheres_[i].reserve(s);
-            for( size_t n=0; n<s; ++n )
-            {
-                Sphere sphere;
-                status = fread(&sphere, 1, sizeof(Sphere), file);
-                spheres_[i].push_back(sphere);
-            }
-        }
-        status = fread(&bounds_, sizeof(ospray::box3f), 1, file );
-        fclose(file);
-    }
-}
-
-void BaseWindow::generateMetaballs_( const float threshold )
-{
-    // Metaballs
-    MetaballSpheres metaballs;
-    for( size_t i=0; i<materials_.size(); ++i )
-    {
-        brayns::Spheres::iterator it = spheres_[i].begin();
-        while( it<spheres_[i].end() )
-        {
-            MetaballSphere metaball;
-            metaball.sphere = (*it);
-            metaball.sphere.r *= 10;
-            metaball.materialId = i;
-            metaballs.push_back(metaball);
-            ++it;
-        }
-    }
-
-    MetaballsGenerator mg(bounds_, metaballs, triangles_,
-                          metaballsGridDimension_, threshold);
-
-    size_t nbTriangles(0);
-    for( size_t i=0; i<materials_.size(); ++i )
-    {
-        if( triangles_[i].vertex.size() != 0)
-        {
-            nbTriangles += triangles_[i].vertex.size();
-            ospTriangles_[i] = ospNewTriangleMesh();
-            BRAYNS_INFO << "Triangles[" << i
-                        << "] vertices =" << triangles_[i].vertex.size()
-                        << ", normals =" << triangles_[i].normal.size()
-                        << ", indices =" << triangles_[i].index.size()
-                        << std::endl;
-
-            ospVertices_[i] = ospNewData(
-                        triangles_[i].vertex.size(),OSP_FLOAT3A,
-                        &triangles_[i].vertex[0],OSP_DATA_SHARED_BUFFER);
-            ospSetObject(ospTriangles_[i],"vertex",ospVertices_[i]);
-
-            ospIndices_[i] = ospNewData(
-                        triangles_[i].index.size(),OSP_INT3,
-                        &triangles_[i].index[0],OSP_DATA_SHARED_BUFFER);
-            ospSetObject(ospTriangles_[i],"index",ospIndices_[i]);
-
-            if( triangles_[i].normal.size()>0)
-            {
-                ospNormals_[i] = ospNewData(
-                            triangles_[i].normal.size(),OSP_FLOAT3A,
-                            &triangles_[i].normal[0],OSP_DATA_SHARED_BUFFER);
-                ospSetObject(ospTriangles_[i],"vertex.normal",ospNormals_[i]);
-            }
-
-            if( true && triangles_[i].color.size()>0)
-            {
-                ospColors_[i] = ospNewData(
-                            triangles_[i].color.size(),OSP_FLOAT4,
-                            &triangles_[i].color[0],OSP_DATA_SHARED_BUFFER);
-                ospSetObject(ospTriangles_[i],"vertex.color",ospColors_[i]);
-            }
-
-            if (materials_[i])
-                ospSetMaterial(ospTriangles_[i], materials_[i]);
-            ospCommit(ospTriangles_[i]);
-            ospAddGeometry(model_, ospTriangles_[i]);
-        }
-    }
-    BRAYNS_INFO << "Number of generated faces: " << nbTriangles << std::endl;
-}
-
-// ------------------------------------------------------------------
-// Window viewport
-// ------------------------------------------------------------------
-BaseWindow::ViewPort::ViewPort()
-    : modified(true),
-      from(0,0,-1),
-      up(0,1,0),
-      at(0,0,0),
-      openingAngle(60.f*M_PI/360.f),
-      aspect(1.f)
-{
-    frame = AffineSpace3fa::translate(from) * AffineSpace3fa(embree::one);
-}
-
-void BaseWindow::ViewPort::snapUp()
-{
-    if (fabsf(dot(up,frame.l.vz)) < 1e-3f)
-        return;
-    frame.l.vx = normalize(cross(frame.l.vy,up));
-    frame.l.vz = normalize(cross(frame.l.vx,frame.l.vy));
-    frame.l.vy = normalize(cross(frame.l.vz,frame.l.vx));
+    if(_manipulator)
+        _manipulator->keypress( key );
 }
 
 }

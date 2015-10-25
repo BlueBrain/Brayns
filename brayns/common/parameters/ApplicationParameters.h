@@ -28,15 +28,6 @@
 namespace brayns
 {
 
-/** Command line parameter data types
- */
-enum SceneEnvironment
-{
-    seNone,
-    seGround,
-    seBox
-};
-
 typedef std::vector< std::string > Arguments;
 
 /** Manages application parameters
@@ -49,72 +40,44 @@ public:
     void parse(int argc, const char **argv) final;
     void display() const final;
 
-    /** OSPRay module */
-    std::string getModule() const { return module_; }
-
-    /** OSPRay renderer */
-    std::string getRenderer() const { return renderer_; }
-
-    /** folder containing SWC files */
-    std::string getSWCFolder() const { return swcFolder_; }
-
-    /** folder containing PDB files */
-    std::string getPDBFolder() const { return pdbFolder_; }
-
-    /** folder containing H5 files */
-    std::string getH5Folder() const { return h5Folder_; }
-
-    /** folder containing mesh files */
-    std::string getMeshFolder() const { return meshFolder_; }
-
     /** window width */
-    size_t getWindowWidth() const { return windowWidth_; }
+    size_t getWindowWidth() const { return _windowWidth; }
 
     /** window height */
-    size_t getWindowHeight() const { return windowHeight_; }
+    size_t getWindowHeight() const { return _windowHeight; }
 
     /** camera name (e.g. Perspective, Stereo, etc. ) */
-    std::string getCamera() const { return camera_; }
-
-    /** Scene environment (0: none, 1: ground, 2: box ) */
-    SceneEnvironment getSceneEnvironment() const { return sceneEnvironment_; }
+    std::string getCamera() const { return _camera; }
 
     /** ZeroEQ schema name */
-    std::string getZeqSchema() const { return zeqSchema_; }
+    std::string getZeqSchema() const { return _zeqSchema; }
 
     /** Deflect parameters */
     /** DisplayCluster server host */
-    std::string getDeflectHostname() const { return deflectHostname_; }
+    std::string getDeflectHostname() const { return _deflectHostname; }
     /** Application stream name for DisplayCluster */
-    std::string getDeflectStreamname() const { return deflectStreamname_; }
+    std::string getDeflectStreamname() const { return _deflectStreamname; }
 
     /** Benchmarking */
-    bool isBenchmarking() const { return benchmarking_; }
+    bool isBenchmarking() const { return _benchmarking; }
 
-    Arguments getArguments() const { return arguments_; }
+    Arguments getArguments() const { return _arguments; }
 
 protected:
 
-    std::string module_;
-    std::string renderer_;
-    std::string camera_;
-    SceneEnvironment sceneEnvironment_;
+    std::string _camera;
 
-    std::string swcFolder_;
-    std::string pdbFolder_;
-    std::string h5Folder_;
-    std::string meshFolder_;
-    size_t windowWidth_;
-    size_t windowHeight_;
+    size_t _windowWidth;
+    size_t _windowHeight;
 
-    std::string zeqSchema_;
+    std::string _zeqSchema;
 
-    std::string deflectHostname_;
-    std::string deflectStreamname_;
+    std::string _deflectHostname;
+    std::string _deflectStreamname;
 
-    bool benchmarking_;
+    bool _benchmarking;
 
-    Arguments arguments_;
+    Arguments _arguments;
 };
 
 }

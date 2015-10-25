@@ -1,0 +1,90 @@
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of BRayns
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#ifndef DEFLECTMANAGER_H
+#define DEFLECTMANAGER_H
+
+#include <brayns/common/types.h>
+#include <iostream>
+#include <deflect/Stream.h>
+
+namespace brayns
+{
+
+class BaseWindow;
+
+/** Handles the bidirectional communication with the DisplayCluster server
+ */
+class DeflectManager
+{
+
+public:
+
+    /** Constructs and initializes the connection to DisplayCluser server
+     *
+     * @param hostname name of the machine hosting DisplayCluster server
+     * @param streamName arbitraty stream name for current application
+     * @param compressionQuality percentage of quality of the compressed
+     * image sent to DisplayCluster
+     */
+    DeflectManager(
+            const std::string& hostname,
+            const std::string& streamName,
+            bool activateCompression,
+            int compressionQuality);
+
+    ~DeflectManager();
+
+    /** Send an image to DisplayCluster
+     *
+     * @param imageSize size of the image
+     * @param buffer containing the image
+     * @param swapXAxis enables a horizontal flip operation on the image
+     */
+    void send(
+            const Vector2i& imageSize,
+            uint32 *imageData,
+            bool swapXAxis);
+
+    /** Handles touch events provided by DisplayCluster
+     *
+     * @param position Camera position provided by deflect
+     * @param position Wheel delta provided by Deflect
+     * @param closeApplication True if and EXIT event was received from
+     *        Deflect. False otherwise
+     * @return True if Deflect is available, false otherwise.
+     */
+    bool handleTouchEvents(
+        Vector2f& position,
+        Vector2f& wheelDelta,
+        bool& pressed,
+        bool& closeApplication );
+
+private:
+    bool _interaction;
+    bool _compressImage;
+    size_t _compressionQuality;
+    std::string _hostname;
+    std::string _streamName;
+    std::unique_ptr<deflect::Stream> _stream;
+};
+
+}
+
+#endif // DEFLECTMANAGER_H

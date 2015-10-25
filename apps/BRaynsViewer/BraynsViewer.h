@@ -28,63 +28,30 @@ namespace brayns
 
 class DeflectManager;
 
-// Defines how materials should be created
-enum MaterialType
-{
-    mt_default,        // Random colors
-    mt_random,         // Random materials including transparency, reflection,
-                       // and light emition
-    mt_shadesOfGrey,   // 255 shades of grey
-    mt_gradient,       // Gradient from black to white
-    mt_pastel          // Random pastel colors
-};
-
 class BraynsViewer : public BaseWindow
 {
 public:
 
-    BraynsViewer( const ApplicationParameters& applicationParameters );
+    BraynsViewer( int argc, const char **argv );
 
     /** Sets the rendering parameters and renders the current frame
      */
     void display();
 
-    /** Creates intial materials with random values
-     */
-    void createMaterials( MaterialType materialType );
-
-    /** Loads data specified in the command line arguments. This includes
-     * SWC, H5, PDB and all mesh files supported by the assimp library
-     */
-    void loadData();
-
-    /** Builds the OSPRay specific geometry from loaded data
-     */
-    void buildGeometry();
-
-    /** Builds a scene environment around the loaded data (e.g. Ground,
-     * Box, etc.)
-     *
-     * @param scale Scales factor applied to geometry bounding box
-     */
-    void buildEnvironment( const ospray::vec3f& scale );
-
-
-    /** Reshapes the current window with specified new size
-     *
-     * @param newSize new window size in pixels
-     */
-    void reshape(const ospray::vec2i& newSize);
-
     /** Handles keyboard interaction
+     * '4' : Creates gradient materials from red to yellow
+     * '5' : Creates random pastel-colored materials
+     * '6' : Creates random materials including reflection and transparency
+     * '7' : Creates shades of grey materials
+     * 'g' : Enables/Disables geometry timestamp feature
+     * '[' : Decreases the geometry timestamp
+     * ']' : Increases the geometry timestamp
+     * '*' : Displays the application parameters in the console
      *
      * @param key key pressed
      * @param where location of the window cursor
      */
-    void keypress(char key, const ospray::vec2f where);
-
-private:
-    std::string rendererType_;
+    void keypress(char key, const Vector2f& where) final;
 };
 
 }

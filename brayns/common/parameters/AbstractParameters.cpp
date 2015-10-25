@@ -26,14 +26,13 @@
 namespace brayns
 {
 
-const std::string PARAM_HELP = "help";
+const std::string PARAM_HELP = "--help";
 
 void AbstractParameters::parse(int argc, const char **argv)
 {
     for (int i=1;i<argc;i++)
     {
         std::string arg = argv[i];
-        arg.erase(0,2);
         if (arg == PARAM_HELP)
             usage();
     }
@@ -42,13 +41,13 @@ void AbstractParameters::parse(int argc, const char **argv)
 void AbstractParameters::usage() const
 {
     size_t maxLen(0);
-    for( Parameters::const_iterator it=parameters_.begin();
-         it!=parameters_.end(); ++it )
+    for( Parameters::const_iterator it=_parameters.begin();
+         it!=_parameters.end(); ++it )
         maxLen = std::max(maxLen, (*it).first.length());
 
     BRAYNS_INFO << "Usage: " << std::endl;
-    for( Parameters::const_iterator it=parameters_.begin();
-         it!=parameters_.end(); ++it )
+    for( Parameters::const_iterator it=_parameters.begin();
+         it!=_parameters.end(); ++it )
     {
         BRAYNS_INFO <<
             (*it).first << std::string(maxLen-(*it).first.length()+1, ' ') <<

@@ -15,8 +15,10 @@ set(BRAYNSVIEWER_HEADERS
 )
 
 set(BRAYNSVIEWER_LINK_LIBRARIES
+  brayns
   braynsCommon
-  braynsKernels
+  braynsPlugins
+  braynsOSPRayPlugin
   ${OSPRAY_DEPENDENT_LIBRARIES}
   ${OSPRAY_LIBRARIES}
   ${GLUT_LIBRARIES}

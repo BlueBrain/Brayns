@@ -17,57 +17,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <signal.h>
-
-#include <brayns/common/loaders/MorphologyLoader.h>
-#include <brayns/common/parameters/ApplicationParameters.h>
 #include <brayns/common/log.h>
-
-#include "BraynsService.h"
-
-#ifndef __APPLE__
-// GCC automtically removes the library if the application does not
-// make an explicit use of one of its classes. In the case of OSPRay
-// classes are loaded dynamicaly. The following line is only to make
-// sure that the hbpKernel library is loaded.
-#include <brayns/kernels/render/ExtendedOBJRenderer.h>
-brayns::ExtendedOBJRenderer __r__;
-#endif
+#include <brayns/Brayns.h>
 
 int main(int argc, const char **argv)
 {
-    brayns::ApplicationParameters applicationParameters;
-    brayns::RenderingParameters renderingParameters;
-    brayns::GeometryParameters geometryParameters;
-
-    applicationParameters.parse(argc, argv);
-    applicationParameters.display();
-
-    renderingParameters.parse(argc,argv);
-    renderingParameters.display();
-
-    geometryParameters.parse(argc,argv);
-    geometryParameters.display();
-
-    BRAYNS_INFO << "Initializing OSPRay..." << std::endl;
-    ospInit(&argc,argv);
-    if( applicationParameters.getModule() != "" )
-        ospLoadModule(applicationParameters.getModule().c_str());
-
     BRAYNS_INFO << "Initializing Service..." << std::endl;
-    brayns::BraynsService braynsService(applicationParameters);
-    braynsService.setRenderingParameters(renderingParameters);
-    braynsService.setGeometryParameters(geometryParameters);
+    brayns::Brayns brayns(argc, argv);
 
-    BRAYNS_INFO << "Loading data" << std::endl;
-    braynsService.loadData();
-    BRAYNS_INFO << "Building Geometry" << std::endl;
-    braynsService.buildGeometry();
-    BRAYNS_INFO << "Processing events..." << std::endl;
-    braynsService.serveEvents(true);
-    while( braynsService.isServingEvents() )
+    brayns::RenderInput renderInput;
+    brayns::RenderOutput renderOutput;
+
+    while( true )
     {
-        braynsService.processEvents();
+        renderInput.position = brayns::Vector3f(0,0,-1);
+        renderInput.target = brayns::Vector3f(0,0,0);
+        renderInput.up = brayns::Vector3f(0,1,0);
+
+        brayns.render(renderInput, renderOutput);
     }
+
     return 0;
 }

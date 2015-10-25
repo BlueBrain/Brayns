@@ -6,25 +6,14 @@ if(THIS_IS_MIC)
 endif()
 
 set(BRAYNSSERVICE_SOURCES
-  BraynsService.cpp
-  main.cpp
-)
-
-set(BRAYNSSERVICE_HEADERS
-  BraynsService.h
+    main.cpp
 )
 
 set(BRAYNSSERVICE_LINK_LIBRARIES
+  brayns
   braynsCommon
-  braynsKernels
-  ${OSPRAY_DEPENDENT_LIBRARIES}
-  ${OSPRAY_LIBRARIES}
+  braynsPlugins
+  braynsOSPRayPlugin
 )
-
-if(ASSIMP_FOUND)
-  list(APPEND BRAYNSSERVICE_LINK_LIBRARIES
-    ${ASSIMP_LIBRARIES}
-  )
-endif()
 
 common_application(braynsService)

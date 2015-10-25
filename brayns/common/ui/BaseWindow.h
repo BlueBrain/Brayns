@@ -21,8 +21,6 @@
 #ifndef BASEWINDOW_H
 #define BASEWINDOW_H
 
-#include /*embree*/"common/math/affinespace.h"
-
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -34,9 +32,7 @@
 #endif
 
 #include <brayns/common/types.h>
-#include <brayns/common/parameters/ApplicationParameters.h>
-#include <brayns/common/parameters/RenderingParameters.h>
-#include <brayns/common/parameters/GeometryParameters.h>
+#include <brayns/common/ui/Viewport.h>
 #include <brayns/common/ui/manipulators/InspectCenterManipulator.h>
 #include <brayns/common/ui/manipulators/FlyingModeManipulator.h>
 
@@ -49,8 +45,6 @@ void initGLUT(int32 *ac, const char **av);
 
 /*! switch over to GLUT for control flow. This functoin will not return */
 void runGLUT();
-
-using embree::AffineSpace3fa;
 
 /*! helper class that allows for easily computing (smoothed) frame rate */
 struct FPSCounter
@@ -65,12 +59,16 @@ struct FPSCounter
         smooth_den = 0.;
         frameStartTime = 0.;
     }
-    void startRender() { frameStartTime = ospray::getSysTime(); }
-    void doneRender() {
-        double seconds = ospray::getSysTime() - frameStartTime;
+
+    void startRender() { frameStartTime = std::time(0); }
+
+    void doneRender()
+    {
+        const double seconds = std::time(0) - frameStartTime;
         smooth_nom = smooth_nom * 0.8f + seconds;
         smooth_den = smooth_den * 0.8f + 1.f;
     }
+
     double getFPS() const { return smooth_den / smooth_nom; }
 };
 
@@ -78,12 +76,11 @@ class BaseWindow
 {
 public:
 
-    static BaseWindow *activeWindow_;
+    static BaseWindow *_activeWindow;
 
     typedef enum
     {
-        FRAMEBUFFER_UCHAR,
-        FRAMEBUFFER_FLOAT,
+        FRAMEBUFFER_COLOR,
         FRAMEBUFFER_DEPTH,
         FRAMEBUFFER_NONE
     } FrameBufferMode;
@@ -94,53 +91,24 @@ public:
         INSPECT_CENTER_MODE =(1<<1)
     } ManipulatorMode;
 
-    BaseWindow(const ApplicationParameters& applicationParameters,
+    BaseWindow(int argc, const char **argv,
                const FrameBufferMode frameBufferMode,
                const ManipulatorMode initialManipulator=INSPECT_CENTER_MODE,
                int allowedManipulators=INSPECT_CENTER_MODE|MOVE_MODE);
     virtual ~BaseWindow();
 
-    /*! internal viewPort class */
-    class ViewPort
-    {
-    public:
-        bool modified; /* the viewPort will set this flag any time any of
-                          its values get changed. */
-
-        ospray::vec3f from;
-        ospray::vec3f up;
-        ospray::vec3f at;
-        /*! opening angle, in radians, along Y direction */
-        float openingAngle;
-        /*! aspect ration i Y:X */
-        float aspect;
-        // float focalDistance;
-
-        /*! camera frame in which the Y axis is the depth axis, and X
-          and Z axes are parallel to the screen X and Y axis. The frame
-          itself remains normalized. */
-        AffineSpace3fa frame;
-
-        /*! set 'up' vector. if this vector is '0,0,0' the viewer will
-         *not* apply the up-vector after camera manipulation */
-        void snapUp();
-
-        ViewPort();
-    };
-
-    // static InspectCenter INSPECT_CENTER;
-    InspectCenterManipulator *inspectCenterManipulator;
-    FlyingModeManipulator *flyingModeManipulator;
+    std::unique_ptr<InspectCenterManipulator> _inspectCenterManipulator;
+    std::unique_ptr<FlyingModeManipulator> _flyingModeManipulator;
 
     /*! current manipulator */
-    AbstractManipulator *manipulator;
+    std::unique_ptr<AbstractManipulator> _manipulator;
 
     /*! size we'll create a window at */
-    static ospray::vec2i defaultInitSize;
+    static Vector2i _defaultInitSize;
 
     /*! set a default camera position that views given bounds from the
         top left front */
-    virtual void setWorldBounds(const ospray::box3f &worldBounds);
+    void setViewPort();
 
     /*! tell GLUT that this window is 'dirty' and needs redrawing */
     virtual void forceRedraw();
@@ -152,11 +120,7 @@ public:
     void setTitle(const std::string &title) { setTitle(title.c_str()); }
 
     /*! set viewport to given values */
-    ViewPort& getViewPort() { return viewPort_; }
-    void setViewPort(
-            const ospray::vec3f from,
-            const ospray::vec3f at,
-            const ospray::vec3f up);
+    Viewport& getViewPort() { return _viewPort; }
 
     // ------------------------------------------------------------------
     // event handling - override this to change this widgets behavior
@@ -165,13 +129,12 @@ public:
     virtual void mouseButton(
             int32 which,
             bool released,
-            const ospray::vec2i& pos);
+            const Vector2i& pos);
 
     virtual void motion(
-            const ospray::vec2i& pos);
+            const Vector2i& pos);
 
-    virtual void reshape(
-            const ospray::vec2i& newSize);
+    virtual void reshape( const Vector2i& newSize );
 
     virtual void idle();
 
@@ -200,7 +163,7 @@ public:
 
     /*! draw float4 pixels into the GLUT window (assumes window and buffer
      * dimensions are equal) */
-    void drawPixels(const ospray::vec3fa *framebuffer);
+    void drawPixels(const Vector3f *framebuffer);
 
     // ------------------------------------------------------------------
     // camera helper code
@@ -208,8 +171,6 @@ public:
     void snapUp();
     /*! set 'up' vector. if this vector is '0,0,0' the viewer will
        *not* apply the up-vector after camera manipulation */
-    virtual void setZUp(const ospray::vec3f &up);
-    void noZUp() { setZUp(ospray::vec3f(0.f)); }
 
     friend void glut3dReshape(int32 x, int32 y);
     friend void glut3dDisplay(void);
@@ -219,30 +180,8 @@ public:
     friend void glut3dMouseFunc(int32 whichButton, int32 released,
                                 int32 x, int32 y);
 
-    virtual void keypress(char key, const ospray::vec2f where);
-    virtual void specialkey(int32 key, const ospray::vec2f where);
-
-    void setRenderingParameters(
-            const RenderingParameters& renderingParameters )
-    {
-        renderingParameters_ = renderingParameters;
-    }
-
-    void setGeometryParameters(
-            const GeometryParameters& geometryParameters )
-    {
-        geometryParameters_ = geometryParameters;
-    }
-
-    void setMetaballsGridDimension( size_t metaballsGridDimension )
-    {
-        metaballsGridDimension_ = metaballsGridDimension;
-    }
-
-    void resetBounds();
-    ospray::box3f getBounds() const;
-
-    void resetFrame() { frameNumber_ = 0; }
+    virtual void keypress(char key, const Vector2f& where);
+    virtual void specialkey(int32 key, const Vector2f& where);
 
     /** Saves current frame to disk. The filename is defined by a prefix and a
      * frame index (<prefix>_<frame>_%08d.ppm). The file uses the ppm encoding
@@ -256,117 +195,57 @@ public:
     void saveSceneToBinaryFile( const std::string& fn );
     void loadSceneFromBinaryFile( const std::string& fn );
 
-    /*! recompute current viewPort's frame from cameras 'from',
-     * 'at', 'up' values. */
-    void computeFrame();
-
     /*! last mouse screen position of mouse before current motion */
-    ospray::vec2i getLastMousePos()        { return lastMousePos_; }
+    Vector2i getLastMousePos() { return _lastMousePos; }
 
     /*! current screen position of mouse */
-    ospray::vec2i getCurrentMousePos()     { return currMousePos_; }
-    ospray::int64 getLastButtonState()     { return lastButtonState_; }
-    ospray::int64 getCurrentButtonState()  { return currButtonState_; }
-    ospray::int64 getCurrentModifiers()    { return currModifiers_; }
-    ospray::vec3f getUpVectorFromCmdLine() { return upVectorFromCmdLine_; }
+    Vector2i getCurrentMousePos() { return _currMousePos; }
+    int64_t getLastButtonState() { return _lastButtonState; }
+    int64_t getCurrentButtonState() { return _currButtonState; }
+    int64_t getCurrentModifiers() { return _currModifiers; }
+    Vector3f getUpVectorFromCmdLine() { return _upVectorFromCmdLine; }
 
     /*!< world bounds, to automatically set viewPort lookat, mouse speed, etc */
-    ospray::box3f getWorldBounds()         { return worldBounds_; }
+    Boxf getWorldBounds();
 
-    float getRotateSpeed() { return rotateSpeed_; }
-    float getMotionSpeed() { return motionSpeed_; }
+    float getRotateSpeed() { return _rotateSpeed; }
+    float getMotionSpeed() { return _motionSpeed; }
 
-    uint32* getFrameBuffer() { return ucharFB_; }
-
-    ospray::vec2i getWindowSize() { return windowSize_; }
+    Vector2i getWindowSize() { return _windowSize; }
 
 protected:
 
-    void generateMetaballs_( float threshold );
-
-    ospray::vec2i lastMousePos_; /*! last mouse screen position of mouse before
+    Vector2i _lastMousePos; /*! last mouse screen position of mouse before
                                     current motion */
-    ospray::vec2i currMousePos_; /*! current screen position of mouse */
-    ospray::int64 lastButtonState_;
-    ospray::int64 currButtonState_;
-    ospray::int64 currModifiers_;
-    ospray::vec3f upVectorFromCmdLine_;
-    ospray::box3f worldBounds_; /*!< world bounds, to automatically set viewPort
-                                    lookat, mouse speed, etc */
+    Vector2i _currMousePos; /*! current screen position of mouse */
+    u_int64_t _lastButtonState;
+    u_int64_t _currButtonState;
+    u_int64_t _currModifiers;
+    Vector3f _upVectorFromCmdLine;
 
     /*! camera speed modifier - affects how many units the camera _moves_ with
      * each unit on the screen */
-    float motionSpeed_;
+    float _motionSpeed;
     /*! camera rotation speed modifier - affects how many units the camera
      * _rotates_ with each unit on the screen */
-    float rotateSpeed_;
+    float _rotateSpeed;
 
-    /*! uchar[4] RGBA-framebuffer, if applicable */
-    uint32* ucharFB_;
-    /*! float[4] RGBA-framebuffer, if applicable */
-    ospray::vec3fa* floatFB_;
-    /*! floating point depth framebuffer, if applicable */
-    float* depthFB_;
+    FrameBufferMode _frameBufferMode;
 
-    FrameBufferMode frameBufferMode_;
+    Viewport _viewPort;
+    int32 _windowID;
+    Vector2i _windowSize;
 
-    ApplicationParameters applicationParameters_;
-    RenderingParameters renderingParameters_;
-    GeometryParameters  geometryParameters_;
+    bool fullScreen_;
+    int resampleSize_;
+    int frameCounter_;
 
-    ViewPort       viewPort_;
-    int32          windowID_;
-    ospray::vec2i  windowSize_;
+    FPSCounter _fps;
 
-    bool           fullScreen_;
-    OSPFrameBuffer fb_;
-    OSPRenderer    renderer_;
-    OSPCamera      camera_;
-    OSPModel       model_;
-    ospray::box3f  bounds_;
+protected:
+    BraynsPtr _brayns;
 
-    int            resampleSize_;
-    int            frameNumber_;
-    int            frameCounter_;
-    size_t         metaballsGridDimension_;
-
-    FPSCounter fps_;
-
-    ospray::vec3f    lightDirection_;
-    OSPLight         light_;
-    OSPData          lightData_;
-
-    // Model
-    SpheresCollection   spheres_;
-    CylindersCollection cylinders_;
-    TrianglesCollection triangles_;
-    ConesCollection cones_;
-    StreamLinesCollection streamlines_;
-    MaterialsCollection materials_;
-
-    // OSP geometry
-    OSPGeometryCollections extendedSpheres_;
-    OSPGeometryCollections extendedCylinders_;
-
-    OSPDataCollections spheresData_;
-    OSPDataCollections cylindersData_;
-
-    OSPGeometryCollections ospTriangles_;
-    OSPDataCollections ospVertices_;
-    OSPDataCollections ospIndices_;
-    OSPDataCollections ospNormals_;
-    OSPDataCollections ospColors_;
-
-    bool running_;
-
-private:
-
-    void setRendererParameters_();
-
-    std::unique_ptr< ExtensionController > extensionController_;
 };
-
-std::ostream &operator<<(std::ostream &o, const BaseWindow::ViewPort &cam);
 
 }
 

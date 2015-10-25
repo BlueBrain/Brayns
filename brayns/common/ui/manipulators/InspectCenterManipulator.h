@@ -30,27 +30,17 @@ namespace brayns
 class InspectCenterManipulator : public AbstractManipulator
 {
 public:
-    InspectCenterManipulator(BaseWindow *window);
+    InspectCenterManipulator(BaseWindow& window);
 
-    virtual void dragLeft(const ospray::vec2i &to,
-                          const ospray::vec2i &from);
-
-    virtual void dragRight(const ospray::vec2i &to,
-                           const ospray::vec2i &from);
-
-    virtual void dragMiddle(const ospray::vec2i &to,
-                            const ospray::vec2i &from);
-
-    virtual void specialkey(int32 key);
-
-    virtual void keypress(int32 key);
-
-    virtual void button(const ospray::vec2i &pos);
-
-    void rotate(float du, float dv);
+    void dragLeft(const Vector2i &to, const Vector2i &from) final;
+    void dragRight(const Vector2i &to, const Vector2i &from) final;
+    void dragMiddle(const Vector2i &to, const Vector2i &from) final;
+    void specialkey(int32 key) final;
+    void keypress(int32 key) final;
+    void button(const Vector2i &pos) final;
 
 protected:
-    ospray::vec3f pivot_;
+    Vector3f _pivot;
 };
 
 }

@@ -1,0 +1,45 @@
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of BRayns
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "FrameBuffer.h"
+
+namespace brayns
+{
+
+FrameBuffer::FrameBuffer(const Vector2i& frameSize, const FrameBufferFormat frameBufferFormat)
+    : _frameSize(frameSize)
+    , _frameBufferFormat(frameBufferFormat)
+{
+}
+
+size_t FrameBuffer::getColorDepth()
+{
+    switch(_frameBufferFormat)
+    {
+        case FBF_RGBA_I8:
+        case FBF_RGBA_F32:
+            return 4;
+        case FBF_RGB_I8:
+            return 3;
+        default:
+            return 0;
+    }
+}
+
+}

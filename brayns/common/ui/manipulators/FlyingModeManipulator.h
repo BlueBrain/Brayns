@@ -31,26 +31,16 @@ class FlyingModeManipulator : public AbstractManipulator
 {
 public:
 
-    FlyingModeManipulator(BaseWindow *window) :
+    FlyingModeManipulator(BaseWindow& window) :
         AbstractManipulator(window) {}
 
 protected:
 
-    virtual void dragLeft(
-            const ospray::vec2i &to,
-            const ospray::vec2i &from);
-
-    virtual void dragRight(
-            const ospray::vec2i &to,
-            const ospray::vec2i &from);
-
-    virtual void dragMiddle(
-            const ospray::vec2i &to,
-            const ospray::vec2i &from);
-
-    virtual void keypress( int32 key);
-
-    virtual void button( const ospray::vec2i& ) {}
+    void dragLeft(const Vector2i&, const Vector2i&) final;
+    void dragRight(const Vector2i&, const Vector2i&) final;
+    void dragMiddle(const Vector2i&,const Vector2i&) final;
+    void keypress(int32 key) final;
+    void button(const Vector2i&) final {}
 };
 
 }

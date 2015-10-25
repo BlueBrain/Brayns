@@ -10,3 +10,6 @@ zeq/
 *~
 *#
 *.autosave
+*.files
+*.config
+*.includes

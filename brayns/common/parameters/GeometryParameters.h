@@ -27,6 +27,16 @@
 namespace brayns
 {
 
+/** Command line parameter data types
+ */
+enum SceneEnvironment
+{
+    SE_NONE = 0,
+    SE_GROUND,
+    SE_WALL,
+    SE_BOX
+};
+
 /** Manages geometry parameters
  */
 class GeometryParameters : public AbstractParameters
@@ -45,40 +55,60 @@ public:
      */
     void display() const final;
 
+    /** folder containing SWC files */
+    std::string getSWCFolder() const { return _swcFolder; }
+
+    /** folder containing PDB files */
+    std::string getPDBFolder() const { return _pdbFolder; }
+
+    /** folder containing PDB cells */
+    std::string getPDBCells() const { return _pdbCells; }
+
+    /** folder containing PDB positions */
+    std::string getPDBPositions() const { return _pdbPositions; }
+
+    /** folder containing H5 files */
+    std::string getH5Folder() const { return _h5Folder; }
+
+    /** folder containing mesh files */
+    std::string getMeshFolder() const { return _meshFolder; }
+
     /** Radius multiplier applied to spheres, cones and cylinders */
-    float getRadius() const { return radius_; }
-    void setRadius( float value) { radius_ = value; }
+    float getRadius() const { return _radius; }
+    void setRadius(float value) { _radius = value; }
 
     /** Enables a different color for every morphology/mesh when
     * loading them from a given folder
     */
-    bool getColored() const { return colored_; }
-    void setColored( bool value) { colored_ = value; }
+    bool getColored() const { return _colored; }
+    void setColored(bool value) { _colored = value; }
 
     /** Enables timed geometries by incrementing the timestamp for
      * every computer frame */
-    bool getTimedGeometry() const { return timedGeometry_; }
-    void setTimedGeometry( bool value) { timedGeometry_ = value; }
+    bool getTimedGeometry() const { return _timedGeometry; }
+    void setTimedGeometry(bool value) { _timedGeometry = value; }
 
     /** Defines the timestamp increment between two frames */
     size_t getTimedGeometryIncrement() const
-    { return timedGeometryIncrement_; }
+    { return _timedGeometryIncrement; }
     void setTimedGeometryIncrement( size_t value)
-    { timedGeometryIncrement_ = value; }
+    { _timedGeometryIncrement = value; }
 
-    /** For testing purpose only: Multiplies the number of instances of a
-     * morphology and randomly sets its position. This is used to simulate
-     * large data sets as well as performance testing
-     */
-    size_t getReplicas() const { return replicas_; }
-    void setReplicas( size_t value) { replicas_ = value; }
+    /** Scene environment (0: none, 1: ground, 2: box ) */
+    SceneEnvironment getSceneEnvironment() const { return _sceneEnvironment; }
 
 protected:
-    float  radius_;
-    bool   colored_;
-    bool   timedGeometry_;
-    size_t timedGeometryIncrement_;
-    size_t replicas_;
+    std::string _swcFolder;
+    std::string _pdbFolder;
+    std::string _pdbCells;
+    std::string _pdbPositions;
+    std::string _h5Folder;
+    std::string _meshFolder;
+    float  _radius;
+    bool   _colored;
+    bool   _timedGeometry;
+    size_t _timedGeometryIncrement;
+    SceneEnvironment _sceneEnvironment;
 };
 
 }
