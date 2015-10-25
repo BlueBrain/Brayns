@@ -193,11 +193,14 @@ struct ExtendedOBJRenderer {
 
     const uniform Light *uniform *uniform lights;
     uint32        numLights;
+    const uniform ExtendedOBJMaterial *uniform *uniform materials;
+    uint32        numMaterials;
     vec3f         bgColor;
+    vec3f         scale;
     bool          shadowsEnabled;
     bool          shadingEnabled;
     bool          softShadowsEnabled;
-    bool          ambientOcclusionEnabled;
+    float         ambientOcclusionStrength;
     bool          electronShadingEnabled;
     bool          lightEmittingMaterialsEnabled;
     bool          gradientBackgroundEnabled;
@@ -205,7 +208,32 @@ struct ExtendedOBJRenderer {
     bool          moving;
     int           frameNumber;
     int           spp;
+    float         dof;
 };
+
+/*
+________________________________________________________________________________
+
+Skybox mapping
+________________________________________________________________________________
+*/
+vec4f skyboxMapping(
+        const uniform ExtendedOBJRenderer *uniform self,
+        Ray &ray)
+{
+    vec4f result=make_vec4f(self->bgColor);
+    if( self->gradientBackgroundEnabled )
+    {
+        // Background
+        vec3f normal = make_vec3f(0.f,-1.f,0.f);
+        vec3f dir = normalize(ray.dir);
+        float angle = 0.5f-dot( normal, dir);
+        angle = (angle>1.f) ? 1.f: angle;
+        result = make_vec4f(angle*self->bgColor);
+
+    }
+    return result;
+}
 
 inline float lightAlpha(
         Ray &ray, uniform Model *uniform model,
@@ -230,13 +258,15 @@ inline float lightAlpha(
 
         float material_opacity = 1.f;
 
-        if(objMaterial == NULL) {
+        if(objMaterial == NULL)
+        {
             material_opacity = 1.0 - dg.color.w;
         }
         else
         {
             foreach_unique( mat in objMaterial )
             {
+                material_opacity = mat->d;
                 if (mat->map_d != NULL) {
                     vec4f d_map;
                     mat->map_d->get(mat->map_d, d_map, dg.st);
@@ -268,11 +298,56 @@ inline float lightAlpha(
     }
 }
 
+inline bool launchRandomRay(
+        const uniform ExtendedOBJRenderer *uniform self,
+        Ray &ray, varying ScreenSample &sample,
+        const vec3f& origin, const vec3f& normal,
+        DifferentialGeometry& dg,
+        const int offset)
+{
+    vec3f biNormU,biNormV;
+    getGIBinormals(biNormU,biNormV,normal);
+    int accumID = sample.sampleID.z;
+    float rot_x = 1.f-precomputedHalton3(accumID);
+    float rot_y = 1.f-precomputedHalton5(accumID);
+
+    const int sindex_x = sample.sampleID.x & 0x3;
+    const int sindex_y = sample.sampleID.y & 0x3;
+    const int sindex =
+            self->randomNumber + offset + (sindex_x) * 4 + (sindex_y);
+    vec3f ao_dir = getRandomDir(
+                sindex%16,
+                (3*sindex_x+5*sindex_y)%16,
+                biNormU,biNormV,normal,rot_x,rot_y,
+                self->super.epsilon);
+
+    if( dot(ao_dir, normal)<0.f)
+        ao_dir = ao_dir * -1.f;
+    Ray ao_ray = ray;
+    ao_ray.org = origin;
+    ao_ray.dir = ao_dir;
+    ao_ray.t0 = self->super.epsilon;
+    ao_ray.t = ray.t;
+
+    traceRay(self->super.model,ao_ray);
+    if( ao_ray.t != ray.t )
+    {
+        postIntersect(self->super.model, dg,
+                      ao_ray,
+                      DG_NG|DG_NS|DG_NORMALIZE|DG_FACEFORWARD|DG_MATERIALID|
+                      DG_COLOR|DG_TEXCOORD);
+        return true;
+    }
+    return false;
+}
+
+
+
 inline vec3f ExtendedOBJRenderer_shadeRay(
         const uniform ExtendedOBJRenderer *uniform self,
         varying ScreenSample &sample)
 {
-    Ray &ray = sample.ray;
+    Ray ray = sample.ray;
 
     // ISPC issue #703. Switch to 'nice' code once ISPC #703 is fixed.
     // print("ray.dir % % %\n",ray.dir.x,ray.dir.y,ray.dir.z);
@@ -281,6 +356,17 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
     int max_depth = self->moving ? 2 : 10;
     uniform int depth = 0;
     vec3f colorKs = make_vec3f(0.f);
+    vec3f local_emitted_color = make_vec3f(0.f);
+
+    if( self->dof>0.f )
+    {
+        ray.org.x += self->dof*self->scale.x*(
+                    SimpleGI__randomV[(self->randomNumber+0)%16]
+                                     [(self->randomNumber+1)%16]-0.5f);
+        ray.org.y += self->dof*self->scale.y*(
+                    SimpleGI__randomV[(self->randomNumber+2)%16]
+                                     [(self->randomNumber+3)%16]-0.5f);
+    }
 
     while (1)
     {
@@ -288,19 +374,8 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
 
         if (ray.geomID < 0)
         {
-            if( self->gradientBackgroundEnabled )
-            {
-                // Background
-                vec3f normal = make_vec3f(0.f,-1.f,0.f);
-                vec3f dir = normalize(ray.dir);
-                float angle = 0.5f-dot( normal, dir);
-                angle = (angle>1.f) ? 1.f: angle;
-                color = color + path_opacity * angle*self->bgColor;
-
-            }
-            else
-                color = color + path_opacity * self->bgColor;
-
+            // No intersection. Return skybox color
+            color = color + path_opacity * make_vec3f(skyboxMapping(self, ray));
             sample.z = 1;
             return color + colorKs;
         }
@@ -308,7 +383,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         sample.z = log(ray.t) / 10;
 
         vec3f local_shade_color = make_vec3f(0.f);
-        vec3f local_emitted_color = make_vec3f(0.f);
 
         DifferentialGeometry dg;
         postIntersect(
@@ -324,14 +398,16 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
 
         float a = 0.f;
         float refraction = 1.f;
-        float d = 1.f;
+        float reflection = 0.f;
+        float opacity = 1.f;
         float Ns = 0.f;
-        vec3f Kd = make_vec3f(0.f,1.f,0.f);
+        vec3f Kd = make_vec3f(0.f,0.f,0.f);
         vec3f Ks = make_vec3f(0.f);
+        vec3f normal = dg.Ns;
 
         if (!objMaterial)
         {
-            d = dg.color.w;
+            opacity = dg.color.w;
             Kd = make_vec3f(dg.color);
         }
         else
@@ -341,23 +417,38 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 // textures modify (mul) values,
                 // see http://paulbourke.net/dataformats/mtl/
                 a = mat->a;
-                refraction = mat->r;
-                d = mat->d * get1f(mat->map_d, dg.st, 1.f);
+                refraction = mat->refraction;
+                opacity = mat->d * get1f(mat->map_d, dg.st, 1.f);
                 Kd = mat->Kd * make_vec3f(dg.color);
                 if (mat->map_Kd)
                 {
                     vec4f Kd_from_map = get4f(mat->map_Kd,dg.st);
                     Kd = Kd * make_vec3f(Kd_from_map);
-                    d *= 1.f - Kd_from_map.w;
+                    opacity *= 1.f - Kd_from_map.w;
                 }
                 Ks = max(Ks, mat->Ks * get3f(
                              mat->map_Ks, dg.st, make_vec3f(1.f)));
                 Ns = max(Ns, mat->Ns * get1f(
                              mat->map_Ns, dg.st, 1.f));
+                if( mat->map_Normal )
+                {
+                    vec3f n = get3f(mat->map_Normal, dg.st, make_vec3f(0.f))-0.5f;
+                    normal.x -= n.x;
+                    normal.y -= n.y;
+                }
+
+                reflection = mat->reflection;
+                if( mat->map_reflection )
+                {
+                    vec3f n = get3f(mat->map_reflection, dg.st, make_vec3f(0.f));
+                    reflection *= (n.x+n.y+n.z)/3.f;
+                }
+
                 // bump = get3f(mat->map_Bump, dg.st, make_vec3f(0.f));
             }
         }
-        const float local_opacity = path_opacity * abs(d);
+
+        const float local_opacity = path_opacity * abs(opacity);
 
         max_depth -= 1;
         if (max_depth <= 0) return color;
@@ -367,7 +458,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         if (local_opacity > 0.01f)
         {
             // worth shading?
-            const vec3f R = ray.dir - (2.f * dot(ray.dir, dg.Ns))*dg.Ns;
+            const vec3f R = ray.dir - (2.f * dot(ray.dir, normal))*normal;
 
             //calculate shading for all lights
             for (uniform int i = 0; self->lights && i < self->numLights; i++)
@@ -385,8 +476,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 if (reduce_max(radiance) > 0.f)
                 {
                     // any potential contribution?
-
-                    vec3f normal = dg.Ns;
                     float cosNL = 0.0;
                     float cosLR = 0.0;
                     if( self->electronShadingEnabled )
@@ -394,7 +483,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                         // Electron shading
                         vec3f me = normalize(ray.org - P);
                         float el = max(0.f,dot(me, normal));
-                        cosNL = el*el;
+                        cosNL = 1.f-(el*el);
                     }
                     else
                     {
@@ -408,10 +497,11 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                     }
 
                     const vec3f unshaded_light_contrib =
-                            local_opacity * Kd * cosNL * radiance / self->spp;
+                            local_opacity * Kd * cosNL * radiance;
                     // Specular
                     if( self->shadingEnabled )
-                        colorKs = max(colorKs, Ks * powf(cosLR, Ns));
+                        //colorKs = max(colorKs, Ks * powf(cosLR, Ns));
+                        colorKs = Ks * powf(cosLR, Ns);
 
                     if (self->shadowsEnabled && a==0.f)
                     {
@@ -419,7 +509,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                         {
                             // Soft shadows
                             vec3f biNormU,biNormV;
-                            getGIBinormals(biNormU,biNormV,dg.Ns);
+                            getGIBinormals(biNormU,biNormV,normal);
                             int accumID = sample.sampleID.z;
                             float rot_x = 1.f-precomputedHalton3(accumID);
                             float rot_y = 1.f-precomputedHalton5(accumID);
@@ -433,9 +523,9 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                                     getRandomDir(sindex%16,
                                                  (3*sindex_x+5*sindex_y)%16,
                                                  biNormU,biNormV,
-                                                 dg.Ns,rot_x,rot_y,
+                                                 normal,rot_x,rot_y,
                                                  self->super.epsilon);
-                            L = L + ss*0.05f;
+                            L = L + ss*0.1f;
                         }
 
                         const float max_contrib =
@@ -457,105 +547,82 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 }
             }
 
-            if (self->ambientOcclusionEnabled)
+            if (self->ambientOcclusionStrength!=0.f)
             {
                 // Ambient occulusion
-                vec3f biNormU,biNormV;
-                getGIBinormals(biNormU,biNormV,dg.Ns);
-                int accumID = sample.sampleID.z;
-                float rot_x = 1.f-precomputedHalton3(accumID);
-                float rot_y = 1.f-precomputedHalton5(accumID);
-
-                const int sindex_x = sample.sampleID.x & 0x3;
-                const int sindex_y = sample.sampleID.y & 0x3;
-                const int sindex =
-                        self->randomNumber + 1 + (sindex_x) * 4 + (sindex_y);
-                vec3f ao_dir = getRandomDir(
-                            sindex%16,
-                            (3*sindex_x+5*sindex_y)%16,
-                            biNormU,biNormV,dg.Ns,rot_x,rot_y,
-                            self->super.epsilon);
-
-                if( dot(ao_dir, dg.Ns)<0.f)
-                    ao_dir = ao_dir * -1.f;
-                Ray ao_ray = ray;
-                ao_ray.org = P;
-                ao_ray.dir = ao_dir;
-                ao_ray.t0 = self->super.epsilon;
-                ao_ray.t = ray.t;
-
-                traceRay(self->super.model,ao_ray);
-                if( ao_ray.t != ray.t )
-                    local_shade_color =
-                            local_shade_color - 2.f*make_vec3f(abs(d));
+                DifferentialGeometry geometry;
+                if( launchRandomRay(self, ray, sample, P, normal, geometry, 1))
+                {
+                    material = dg.material;
+                    objMaterial = (uniform ExtendedOBJMaterial *)material;
+                    if (objMaterial)
+                        foreach_unique (mat in objMaterial)
+                        {
+                            local_shade_color = local_shade_color -
+                                    make_vec3f(
+                                        self->ambientOcclusionStrength *
+                                        opacity * mat->d);
+                        }
+                    else
+                        local_shade_color = local_shade_color -
+                                make_vec3f(
+                                    self->ambientOcclusionStrength *
+                                    opacity);
+                }
             }
 
             // Fake ambient color
-            local_shade_color = local_shade_color + 0.2f + self->bgColor*0.5f;
+            //local_shade_color = local_shade_color + self->bgColor*0.2f;
 
-            if( d>0.f)
+            float weight = path_opacity*light_alpha;
+            color = (1.f-weight)*color +
+                    weight*(max(make_vec3f(0.f),local_shade_color));
+            color = color + colorKs + max(make_vec3f(0.f),local_emitted_color);
+
+            if( opacity<1.f)
             {
                 vec3f refract = ray.dir;
                 float eta = refraction;
-                float c1 = -dot(ray.dir,dg.Ns);
+                float c1 = -dot(ray.dir,normal);
                 float cs2 = 1.f-eta*eta*(1.f-c1*c1);
                 if( cs2>0.f )
-                    refract = eta*ray.dir + (eta*c1-sqrt(cs2))*dg.Ns;
+                    refract = eta*ray.dir + (eta*c1-sqrt(cs2))*normal;
                 ray.dir = refract;
                 ray.t0 = ray.t + self->super.epsilon;
+                path_opacity = path_opacity - opacity;
             }
-            else if (d<0.f)
+            else if (reflection>0.f)
             {
                 ray.dir = R;
                 ray.t0 = self->super.epsilon;
                 ray.org = P;
+                path_opacity = path_opacity - abs(1.f-reflection);
             }
-            else continue;
+            else
+            {
+                path_opacity = 0.f;
+            }
         }
 
         if (self->lightEmittingMaterialsEnabled)
         {
-            vec3f biNormU,biNormV;
-            getGIBinormals(biNormU,biNormV,dg.Ns);
-            int accumID = sample.sampleID.z;
-            float rot_x = 1.f-precomputedHalton3(accumID);
-            float rot_y = 1.f-precomputedHalton5(accumID);
-
-            const int sindex_x = sample.sampleID.x & 0x3;
-            const int sindex_y = sample.sampleID.y & 0x3;
-            const int sindex =
-                    self->randomNumber + 2 + (sindex_x) * 4 + (sindex_y);
-
-            vec3f gi_dir = getRandomDir(
-                        sindex%16,
-                        (3*sindex_x+5*sindex_y)%16,
-                        biNormU,biNormV,dg.Ns,rot_x,rot_y,
-                        self->super.epsilon);
-
-            Ray gi_ray = ray;
-            gi_ray.org = P;
-            gi_ray.dir = gi_dir;
-            gi_ray.t0 = self->super.epsilon * 10.f;
-            gi_ray.t = ray.t;
-
-            traceRay(self->super.model,gi_ray);
-            if( gi_ray.t != ray.t )
+            // Compute impact of light emitting material
+            DifferentialGeometry geometry;
+            if( launchRandomRay( self, ray, sample, P, normal, geometry, 2 ))
             {
-                postIntersect(self->super.model, dg,
-                              gi_ray, DG_MATERIALID|DG_COLOR);
-
                 material = dg.material;
                 objMaterial = (uniform ExtendedOBJMaterial *)material;
 
-                float a = 0.f;
+                vec3f Ka = make_vec3f(0.f);
                 Kd = make_vec3f(dg.color);
                 if (objMaterial)
                 {
                     foreach_unique (mat in objMaterial)
                     {
-                        a += mat->a;
-                        // should those with-map/without-map material values get
-                        // *multiplied* rather than used alternatively
+                        if (mat->map_a)
+                            Ka = Ka + mat->a*get3f(mat->map_a,dg.st);
+                        else
+                            Ka = Ka + make_vec3f(mat->a);
                         if (mat->map_Kd)
                         {
                             vec4f Kd_from_map = get4f(mat->map_Kd,dg.st);
@@ -565,19 +632,12 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                             Kd = mat->Kd;
                     }
                 }
-                local_emitted_color = local_emitted_color + a*Kd;
+                local_emitted_color = local_emitted_color + Ka*Kd;
             }
         }
-
-        float weight = path_opacity*light_alpha;
-        color = (1.f-weight)*color +
-                weight*(max(make_vec3f(0.f),local_shade_color));
-        color = color + max(make_vec3f(0.f),local_emitted_color);
-
-        path_opacity = path_opacity - abs(d);
         if (path_opacity < 0.01f)
             //remaining contribution too low kill path
-            return color + colorKs;
+            return color + local_emitted_color;
 
         ray.t = infinity;
         ray.primID = -1;
@@ -585,7 +645,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         ray.instID = -1;
     }
 
-    return color + colorKs;
+    return color + local_emitted_color;
 }
 
 void ExtendedOBJRenderer_renderSample(uniform Renderer *uniform _self,
@@ -612,19 +672,23 @@ export void *uniform ExtendedOBJRenderer_create(void *uniform cppE)
 export void ExtendedOBJRenderer_set(
         void *uniform _self,
         const uniform vec3f &bgColor,
-        const uniform bool &shadowsEnabled,
-        const uniform bool &softShadowsEnabled,
-        const uniform bool &ambientOcclusionEnabled,
-        const uniform bool &shadingEnabled,
-        const uniform int  &randomNumber,
-        const uniform bool &moving,
-        const uniform int  &frameNumber,
-        const uniform int  &spp,
-        const uniform bool &electronShadingEnabled,
-        const uniform bool &lightEmittingMaterialsEnabled,
-        const uniform bool &gradientBackgroundEnabled,
+        const uniform vec3f &scale,
+        const uniform bool  &shadowsEnabled,
+        const uniform bool  &softShadowsEnabled,
+        const uniform float &ambientOcclusionStrength,
+        const uniform bool  &shadingEnabled,
+        const uniform int   &randomNumber,
+        const uniform bool  &moving,
+        const uniform int   &frameNumber,
+        const uniform int   &spp,
+        const uniform bool  &electronShadingEnabled,
+        const uniform bool  &lightEmittingMaterialsEnabled,
+        const uniform bool  &gradientBackgroundEnabled,
+        const uniform float dof,
         void **uniform lights,
-        uniform int32  numLights)
+        uniform int32  numLights,
+        void **uniform materials,
+        uniform int32  numMaterials)
 {
     uniform ExtendedOBJRenderer *uniform self =
             (uniform ExtendedOBJRenderer *uniform)_self;
@@ -632,15 +696,23 @@ export void ExtendedOBJRenderer_set(
     self->bgColor = bgColor;
     self->shadowsEnabled = shadowsEnabled && !moving;
     self->softShadowsEnabled = softShadowsEnabled && !moving;
-    self->ambientOcclusionEnabled = ambientOcclusionEnabled && !moving;
+    self->ambientOcclusionStrength = ambientOcclusionStrength;
     self->shadingEnabled = shadingEnabled && !moving;
     self->randomNumber = randomNumber;
     self->moving = moving;
     self->frameNumber = frameNumber;
     self->spp = spp;
     self->electronShadingEnabled = electronShadingEnabled || moving;
-    self->lightEmittingMaterialsEnabled = lightEmittingMaterialsEnabled && !moving;
+    self->lightEmittingMaterialsEnabled =
+            lightEmittingMaterialsEnabled && !moving;
     self->gradientBackgroundEnabled = gradientBackgroundEnabled;
+
     self->lights = (const uniform Light *uniform *uniform)lights;
     self->numLights = numLights;
+
+    self->materials = (const uniform ExtendedOBJMaterial *uniform *uniform)materials;
+    self->numMaterials = numMaterials;
+
+    self->scale = scale;
+    self->dof = dof;
 }

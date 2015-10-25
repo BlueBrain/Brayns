@@ -36,6 +36,7 @@ const std::string PARAM_METABALLS        = "metaballs";
 const std::string PARAM_STEREO_CAMERA    = "stereo-camera";
 const std::string PARAM_MATERIAL_SCHEME  = "material-scheme";
 const std::string PARAM_SCENE_ENVIRONMENT= "scene-environment";
+const std::string PARAM_BENCHMARKING     = "enable-benchmark";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -56,7 +57,8 @@ ApplicationParameters::ApplicationParameters()
     windowWidth_(DEFAULT_WINDOW_WIDTH),
     windowHeight_(DEFAULT_WINDOW_HEIGHT),
     deflectHostname_(DEFAULT_DEFLECT_HOSTNAME),
-    deflectStreamname_(DEFAULT_DEFLECT_STREAMNAME)
+    deflectStreamname_(DEFAULT_DEFLECT_STREAMNAME),
+    benchmarking_(false)
 {
     parameters_[PARAM_MODULE] =
         {ptString, "Name of the OSPRay module"};
@@ -67,7 +69,7 @@ ApplicationParameters::ApplicationParameters()
     parameters_[PARAM_H5_FOLDER] =
         {ptString, "Folder containing H5 files"};
     parameters_[PARAM_MESH_FOLDER] =
-        {ptString, "Folder containing meshes"};
+        {ptString, "Folder containing PARAM_BENCHMARKINGmeshes"};
     parameters_[PARAM_BUFFER_HEIGHT] =
         {ptInteger, "Height of rendering buffer"};
     parameters_[PARAM_BUFFER_WIDTH] =
@@ -87,6 +89,8 @@ ApplicationParameters::ApplicationParameters()
         {ptString, "Name of DisplayCluster stream"};
     parameters_[PARAM_ZEQ_SCHEMA] =
         {ptString, "Schema name for ZeroEQ communication"};
+    parameters_[PARAM_BENCHMARKING] =
+        {ptString, "Activates application benchmarking"};
 }
 
 void ApplicationParameters::parse(int argc, const char **argv)
@@ -126,6 +130,8 @@ void ApplicationParameters::parse(int argc, const char **argv)
             deflectHostname_ = argv[++i];
         if(arg==DEFAULT_DEFLECT_STREAMNAME)
             deflectStreamname_ = argv[++i];
+        if(arg==PARAM_BENCHMARKING)
+            benchmarking_ = true;
     }
 }
 
@@ -144,6 +150,8 @@ void ApplicationParameters::display() const
     BRAYNS_INFO << "- Rest schema   : " << zeqSchema_ << std::endl;
     BRAYNS_INFO << "- Deflect       : " << deflectHostname_ << ":" <<
                                            deflectStreamname_ << std::endl;
+    BRAYNS_INFO << "- Benchmarking  : " <<
+                   (benchmarking_ ? "On" : "Off") << std::endl;
 }
 
 }

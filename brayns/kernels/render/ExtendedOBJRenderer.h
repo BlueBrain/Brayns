@@ -35,26 +35,28 @@ struct ExtendedOBJRenderer : public ospray::Renderer {
     virtual std::string toString() const { return "ospray::OBJRenderer"; }
 
     std::vector<void*> lightArray;
+    std::vector<void*> materialArray;
 
     Model        *world;
     Camera       *camera;
+    ospray::Data *materialData;
     ospray::Data *lightData;
 
-    virtual void commit() final;
+    virtual void commit();
 
-    virtual ospray::Material *createMaterial(const char *type) final;
+    virtual ospray::Material *createMaterial(const char *type);
 
-    bool shadowsEnabled;
-    bool softShadowsEnabled;
-    bool ambientOcclusionEnabled;
-    bool shadingEnabled;
-    bool electronShadingEnabled;
-    bool lightEmittingMaterialsEnabled;
-    bool gradientBackgroundEnabled;
-    int  randomNumber;
-    bool moving;
-    int  frameNumber;
-    int  spp;
+    bool  shadowsEnabled;
+    bool  softShadowsEnabled;
+    float ambientOcclusionStrength;
+    bool  shadingEnabled;
+    bool  electronShadingEnabled;
+    bool  lightEmittingMaterialsEnabled;
+    bool  gradientBackgroundEnabled;
+    int   randomNumber;
+    bool  moving;
+    int   frameNumber;
+    int   spp;
 };
 
 } // ::brayns

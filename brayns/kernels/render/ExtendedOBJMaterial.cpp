@@ -31,7 +31,10 @@ void ExtendedOBJMaterial::commit()
         ispcEquivalent = ispc::ExtendedOBJMaterial_create(this);
 
     map_d  = (Texture2D*)getParamObject("map_d", NULL);
-    map_r  = (Texture2D*)getParamObject("map_r", NULL);
+    map_refraction = (Texture2D*)getParamObject(
+                "map_Refraction", getParamObject("map_refraction", NULL));
+    map_reflection = (Texture2D*)getParamObject(
+                "map_Reflection", getParamObject("map_reflection", NULL));
     map_a  = (Texture2D*)getParamObject("map_a", NULL);
     map_Kd = (Texture2D*)getParamObject("map_Kd",
                                         getParamObject("map_kd", NULL));
@@ -41,9 +44,12 @@ void ExtendedOBJMaterial::commit()
                                         getParamObject("map_ns", NULL));
     map_Bump = (Texture2D*)getParamObject("map_Bump",
                                           getParamObject("map_bump", NULL));
+    map_Normal = (Texture2D*)getParamObject("map_Normal",
+                                          getParamObject("map_normal", NULL));
 
     d  = getParam1f("d", 1.f);
-    r  = getParam1f("r", 0.f);
+    refraction = getParam1f("refraction", 0.f);
+    reflection = getParam1f("reflection", 0.f);
     a  = getParam1f("a", 0.f);
     Kd = getParam3f("kd", getParam3f("Kd", vec3f(.8f)));
     Ks = getParam3f("ks", getParam3f("Ks", vec3f(0.f)));
@@ -53,8 +59,10 @@ void ExtendedOBJMaterial::commit()
                 getIE(),
                 map_d ? map_d->getIE() : NULL,
                 d,
-                map_r ? map_r->getIE() : NULL,
-                r,
+                map_refraction ? map_refraction->getIE() : NULL,
+                refraction,
+                map_reflection ? map_reflection->getIE() : NULL,
+                reflection,
                 map_a ? map_a->getIE() : NULL,
                 a,
                 map_Kd ? map_Kd->getIE() : NULL,
@@ -63,7 +71,8 @@ void ExtendedOBJMaterial::commit()
                 (ispc::vec3f&)Ks,
                 map_Ns ? map_Ns->getIE() : NULL,
                 Ns,
-                map_Bump != NULL ? map_Bump->getIE() : NULL );
+                map_Bump != NULL ? map_Bump->getIE() : NULL,
+                map_Normal != NULL ? map_Normal->getIE() : NULL);
 }
 
 OSP_REGISTER_MATERIAL(ExtendedOBJMaterial,ExtendedOBJMaterial);

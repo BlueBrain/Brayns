@@ -112,7 +112,7 @@ void InspectCenterManipulator::dragRight(
     float fwd = -(to.y - from.y) * 4 * window_->getMotionSpeed();
     float oldDist = length(cam.at - cam.from);
     float newDist = oldDist - fwd;
-    if (newDist < 1e-3f)
+    if (newDist < 1e-3)
         return;
     cam.from = cam.at - newDist * cam.frame.l.vy;
     cam.frame.p = cam.from;
@@ -129,8 +129,9 @@ void InspectCenterManipulator::dragMiddle(
     float du = (to.x - from.x);
     float dv = (to.y - from.y);
 
-    AffineSpace3fa xfm = AffineSpace3fa::translate(
-            window_->getMotionSpeed() * dv * cam.frame.l.vz ) *
+    AffineSpace3fa xfm =
+            AffineSpace3fa::translate(
+                window_->getMotionSpeed() * dv * cam.frame.l.vz ) *
             AffineSpace3fa::translate(
                 -1.0 * window_->getMotionSpeed() * du * cam.frame.l.vx );
 

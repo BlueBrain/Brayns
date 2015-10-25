@@ -29,8 +29,10 @@ struct ExtendedOBJMaterial
 
     const uniform Texture2D *map_d;
     float d;
-    const uniform Texture2D *map_r;
-    float r;
+    const uniform Texture2D *map_refraction;
+    float refraction;
+    const uniform Texture2D *map_reflection;
+    float reflection;
     const uniform Texture2D *map_a;
     float a;
     const uniform Texture2D *map_Kd;
@@ -40,4 +42,5 @@ struct ExtendedOBJMaterial
     const uniform Texture2D *map_Ns;
     float Ns;
     const uniform Texture2D *map_Bump;
+    const uniform Texture2D *map_Normal;
 };

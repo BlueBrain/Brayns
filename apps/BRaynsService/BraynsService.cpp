@@ -236,8 +236,8 @@ void BraynsService::render()
              renderingParameters_.getShadows());
     ospSet1i(renderer_, "softShadowsEnabled",
              renderingParameters_.getSoftShadows());
-    ospSet1i(renderer_, "ambientOcclusionEnabled",
-             renderingParameters_.getAmbientOcclusion());
+    ospSet1f(renderer_, "ambientOcclusionStrength",
+             renderingParameters_.getAmbientOcclusionStrength());
     ospSet1i(renderer_, "shadingEnabled",
              renderingParameters_.getLightShading());
     ospSet1i(renderer_, "frameNumber",

@@ -31,7 +31,7 @@ const std::string PARAM_REPLICAS                 = "replicas";
 
 GeometryParameters::GeometryParameters()
   : radius_(1), colored_(false), timedGeometry_(false),
-    timedGeometryIncrement_(0), replicas_(1)
+    timedGeometryIncrement_(1), replicas_(1)
 {
     parameters_[PARAM_RADIUS] =
         {ptFloat, "Radius multiplier for spheres, cones and cylinders"};

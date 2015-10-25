@@ -42,7 +42,6 @@ void ExtendedOBJRenderer::commit()
     Renderer::commit();
 
     lightData = (ospray::Data*)getParamData("lights");
-
     lightArray.clear();
 
     if (lightData)
@@ -58,8 +57,8 @@ void ExtendedOBJRenderer::commit()
             bool(getParam1i("shadowsEnabled", 1));
     softShadowsEnabled =
             bool(getParam1i("softShadowsEnabled", 1));
-    ambientOcclusionEnabled =
-            bool(getParam1i("ambientOcclusionEnabled", 1));
+    ambientOcclusionStrength =
+            getParam1f("ambientOcclusionStrength", 0.f);
     shadingEnabled =
             bool(getParam1i("shadingEnabled", 1));
     randomNumber =
@@ -76,13 +75,25 @@ void ExtendedOBJRenderer::commit()
             bool(getParam1i("lightEmittingMaterialsEnabled", 0));
     gradientBackgroundEnabled =
             bool(getParam1i("gradientBackgroundEnabled", 0));
+    vec3f scale = getParam3f("scale", vec3f(1.f));
+    float dof = getParam1f("dof", 0.f);
+
+    materialData = (ospray::Data*)getParamData("material");
+    materialArray.clear();
+    if (materialData)
+        for (size_t i=0; i < materialData->size(); ++i)
+        {
+            materialArray.push_back(((Material**)materialData->data)[i]->getIE());
+        }
+    void **materialPtr = materialArray.empty() ? NULL : &materialArray[0];
 
     ispc::ExtendedOBJRenderer_set(
                 getIE(),
                 (ispc::vec3f&)bgColor,
+                (ispc::vec3f&)scale,
                 shadowsEnabled,
                 softShadowsEnabled,
-                ambientOcclusionEnabled,
+                ambientOcclusionStrength,
                 shadingEnabled,
                 randomNumber,
                 moving,
@@ -91,7 +102,9 @@ void ExtendedOBJRenderer::commit()
                 electronShadingEnabled,
                 lightEmittingMaterialsEnabled,
                 gradientBackgroundEnabled,
-                lightPtr, lightArray.size());
+                dof,
+                lightPtr, lightArray.size(),
+                materialPtr, materialArray.size());
 }
 
 ExtendedOBJRenderer::ExtendedOBJRenderer()

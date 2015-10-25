@@ -197,7 +197,7 @@ void MorphologyLoader::importH5Morphologies(
 
 void MorphologyLoader::importSWCMorphologies(
         const std::string &filename,
-        const int /*morphologyIndex*/,
+        const int morphologyIndex,
         const vec3f& position,
         Geometries& geometries,
         box3f& bounds)
@@ -244,8 +244,8 @@ void MorphologyLoader::importSWCMorphologies(
         morphology.y += position.y;
         morphology.z += position.z;
         morphology.id = idx;
-        if( !geometryParameters_.getColored() )
-            morphology.branch = 0;
+        morphology.branch = geometryParameters_.getColored() ?
+                    morphologyIndex : 0;
         morphology.frame = mapIdTime[idx];
         morphology.used = false;
 
@@ -301,10 +301,16 @@ void MorphologyLoader::importSWCMorphologies(
                     vec3f parentPosition(parentMorphology.x,parentMorphology.y,parentMorphology.z);
                     parentPosition += randomPosition;
                     vec3f up = parentPosition - morphologyPosition;
-                    vec3f v = morphologyPosition + up*4.f;
+                    vec3f v = morphologyPosition + up;
                     geometries.push_back(
                                 (brayns::Geometry){
                                     gt_sphere, morphologyPosition, v,
+                                    parentMorphology.radius * geometryParameters_.getRadius(), 0.f,
+                                    static_cast<float>(parentMorphology.frame),
+                                    parentMorphology.branch});
+                    geometries.push_back(
+                                (brayns::Geometry){
+                                    gt_cylinder, morphologyPosition, v,
                                     parentMorphology.radius * geometryParameters_.getRadius(), 0.f,
                                     static_cast<float>(parentMorphology.frame),
                                     parentMorphology.branch});

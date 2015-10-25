@@ -56,8 +56,10 @@ public:
     void setSoftShadows( bool value) { softShadows_ = value; }
 
     /** Ambient occlusion */
-    bool getAmbientOcclusion() const { return ambientOcclusion_; }
-    void setAmbientOcclusion( bool value ) { ambientOcclusion_ = value; }
+    float getAmbientOcclusionStrength() const {
+        return ambientOcclusionStrength_; }
+    void setAmbientOcclusionStrength( float value ) {
+        ambientOcclusionStrength_ = value; }
 
     /** Geometry shaded by light sources. No shading coupled with ambient
      * occlusion gives great results!
@@ -99,7 +101,7 @@ public:
 
 
 protected:
-    bool   ambientOcclusion_;
+    float  ambientOcclusionStrength_;
     bool   dof_;
     float  dofStrength_;
     bool   electronShading_;

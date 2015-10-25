@@ -22,12 +22,13 @@
 #include <ospray/common/Material.h>
 #include <ospray/texture/Texture2D.h>
 
-using namespace ospray;
-
 namespace brayns
 {
 namespace obj
 {
+
+using namespace ospray;
+
 typedef vec3f Color;
 
 struct ExtendedOBJMaterial : public Material
@@ -36,9 +37,13 @@ struct ExtendedOBJMaterial : public Material
     Texture2D *map_d;
     float d;
 
-    /*! refaction index */
-    Texture2D *map_r;
-    float r;
+    /*! refraction index */
+    Texture2D *map_refraction;
+    float refraction;
+
+    /*! reflection index */
+    Texture2D *map_reflection;
+    float reflection;
 
     /*! radiance: 0 (none), 1 (full) */
     Texture2D *map_a;
@@ -55,6 +60,9 @@ struct ExtendedOBJMaterial : public Material
     /*! specular exponent: 0 (diffuse), infinity (specular) */
     Texture2D *map_Ns;
     float Ns;
+
+    /*! normal map */
+    Texture2D *map_Normal;
 
     /*! bump map */
     Texture2D *map_Bump;

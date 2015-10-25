@@ -48,7 +48,7 @@ namespace brayns
 {
 
 const float DEFAULT_GAMMA   = 2.2f;
-const float DEFAULT_EPSILON = 1e-2f;
+const float DEFAULT_EPSILON = 1e-1f;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const float DEFAULT_MOUSE_SPEED = 1e-3f;
 
@@ -251,15 +251,15 @@ void BaseWindow::setRendererParameters_()
              renderingParameters_.getShadows());
     ospSet1i(renderer_, "softShadowsEnabled",
              renderingParameters_.getSoftShadows());
-    ospSet1i(renderer_, "ambientOcclusionEnabled",
-             renderingParameters_.getAmbientOcclusion());
+    ospSet1f(renderer_, "ambientOcclusionStrength",
+             renderingParameters_.getAmbientOcclusionStrength());
     ospSet1i(renderer_, "shadingEnabled",
              renderingParameters_.getLightShading());
     ospSet1i(renderer_, "frameNumber",
              frameNumber_);
     ospSet1i(renderer_, "randomNumber",
              rand()%1000);
-    ospSet1i(renderer_, "moving", false);
+    ospSet1i(renderer_, "moving", false /*viewPort_.modified*/);
     ospSet1i(renderer_, "spp",
              renderingParameters_.getSamplesPerPixel());
     ospSet1i(renderer_, "electronShading",
@@ -284,7 +284,6 @@ void BaseWindow::setRendererParameters_()
 
     if( viewPort_.modified )
     {
-        ospSet1i(renderer_, "shadingEnabled", true);
         Assert2(camera_,"ospray camera is null");
         ospSetVec3f(camera_,"pos",viewPort_.from);
         ospSetVec3f(camera_,"dir",viewPort_.at-viewPort_.from);
@@ -311,9 +310,9 @@ void BaseWindow::display()
     }
     extensionController_->execute();
 
-    fps_.startRender();
-    ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_ACCUM);
-    fps_.doneRender();
+    if( applicationParameters_.isBenchmarking() ) fps_.startRender();
+    ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_DEPTH|OSP_FB_ACCUM);
+    if( applicationParameters_.isBenchmarking() ) fps_.doneRender();
 
     GLenum format = GL_RGBA;
     GLenum type   = GL_FLOAT;
@@ -432,7 +431,6 @@ void BaseWindow::setViewPort(const ospray::vec3f from,
     viewPort_.from  = from;
     viewPort_.up    = up;
 
-    this->worldBounds_ = worldBounds_;
     viewPort_.frame.l.vy = normalize(dir);
     viewPort_.frame.l.vx = normalize(
                 cross(viewPort_.frame.l.vy,up));
@@ -441,19 +439,15 @@ void BaseWindow::setViewPort(const ospray::vec3f from,
     viewPort_.frame.p    = from;
     viewPort_.snapUp();
     viewPort_.modified = true;
-
-    ospSetVec3f(camera_, "pos", viewPort_.from);
-    ospSetVec3f(camera_, "dir", viewPort_.at - viewPort_.from);
-    ospCommit(camera_);
-    ospFrameBufferClear(fb_,OSP_FB_ACCUM);
 }
 
 void BaseWindow::setWorldBounds(const ospray::box3f &worldBounds)
 {
-    ospray::vec3f center = embree::center(worldBounds);
-    ospray::vec3f diag   = worldBounds.size();
-    diag         = max(diag,ospray::vec3f(0.3f*length(diag)));
-    ospray::vec3f from   = center;
+    worldBounds_ = worldBounds;
+    ospray::vec3f center = embree::center(worldBounds_);
+    ospray::vec3f diag   = worldBounds_.size();
+    diag         = max(diag,vec3f(0.3f*length(diag)));
+    vec3f from   = center - .75f*vec3f(-.6*diag.x,-1.2*diag.y,.8*diag.z);
     from.z -= diag.z;
     ospray::vec3f dir = center - from;
     ospray::vec3f up  = viewPort_.up;
@@ -465,7 +459,6 @@ void BaseWindow::setWorldBounds(const ospray::box3f &worldBounds)
     if (length(up) < DEFAULT_EPSILON)
         up = ospray::vec3f(0,0,1.f);
 
-    this->worldBounds_ = worldBounds_;
     viewPort_.frame.l.vy = normalize(dir);
     viewPort_.frame.l.vx = normalize(
                 cross(viewPort_.frame.l.vy,up));
@@ -475,7 +468,7 @@ void BaseWindow::setWorldBounds(const ospray::box3f &worldBounds)
     viewPort_.snapUp();
     viewPort_.modified = true;
 
-    motionSpeed_ = length(diag) * DEFAULT_EPSILON;
+    motionSpeed_ = length(diag) * 0.001f;
     BRAYNS_INFO << "World bounds " << worldBounds_ <<
                    ", motion speed " << motionSpeed_ << std::endl;
 }
@@ -523,10 +516,13 @@ void BaseWindow::keypress( char key, const ospray::vec2f )
     case '-':
         motionSpeed_ /= DEFAULT_MOTION_ACCELERATION;
         break;
-    case 'B':
+    case '1':
+        ospSet3f(renderer_, "bgColor", 0.5f, 0.5f, 0.5f);
+        break;
+    case '2':
         ospSet3f(renderer_, "bgColor", 1.0f, 1.0f, 1.0f);
         break;
-    case 'b':
+    case '3':
         ospSet3f(renderer_, "bgColor", 0.f, 0.f, 0.f);
         ospCommit(renderer_);
         break;
@@ -566,74 +562,30 @@ void BaseWindow::keypress( char key, const ospray::vec2f )
             glutFullScreen();
         else
             glutPositionWindow(0,10);
+        break;
     }
+    case 'o':
+    {
+        float aaStrength =
+                renderingParameters_.getAmbientOcclusionStrength();
+        aaStrength += 0.1f;
+        if( aaStrength>1.f ) aaStrength=1.f;
+        renderingParameters_.setAmbientOcclusionStrength( aaStrength );
+        BRAYNS_INFO << "Ambient occlusion strength: " <<
+                       aaStrength << std::endl;
         break;
-    case 'W':
-        for (size_t i=0;i<materials_.size();++i)
-        {
-            float a = float(rand()%255/255.0);
-            ospSet3f(materials_[i], "kd", a, a, a);
-            ospCommit(materials_[i]);
-        }
-        ospFrameBufferClear(fb_,OSP_FB_ACCUM);
-        break;
-    case 'M':
-        for (size_t i=0;i<materials_.size();++i)
-        {
-            float d;
-            ospGetf(materials_[i], "d", &d);
-            if( d==1.f )
-            {
-                // Reflector
-                ospSet1f(materials_[i], "d", -0.7);
-                ospSet3f(materials_[i], "ks", 0.1, 0.1, 0.1);
-                ospSet1f(materials_[i], "ns", 5);
-            }
-            ospCommit(materials_[i]);
-        }
-        ospFrameBufferClear(fb_,OSP_FB_ACCUM);
-        break;
-    case 'm':
-        for (size_t  i=0;i<materials_.size();++i)
-        {
-            ospSet3f(materials_[i], "kd",
-                     (rand()%255/255.0),
-                     (rand()%255/255.0),
-                     (rand()%255/255.0));
-            if( i==materials_.size()-1 )
-                // last material is set to black
-                ospSet3f(materials_[i], "kd", 0, 0, 0);
-
-            ospSet1f(materials_[i], "d", 1.0);
-            ospSet1f(materials_[i], "a", 0.0);
-            switch( rand()%4 )
-            {
-            case 0:
-                // Transparent
-                ospSet1f(materials_[i], "d", 0.1);
-                ospSet1f(materials_[i], "r", 0.98);
-                ospSet3f(materials_[i], "ks", 0.01, 0.01, 0.01);
-                ospSet1f(materials_[i], "ns", 10);
-                break;
-            case 1:
-                // Light emmitter
-                ospSet1f(materials_[i], "a", 5.0);
-                break;
-            case 2:
-                // Reflector
-                ospSet1f(materials_[i], "d", -0.7);
-                ospSet3f(materials_[i], "ks", 0.01, 0.01, 0.01);
-                ospSet1f(materials_[i], "ns", 10);
-                break;
-            }
-            ospCommit(materials_[i]);
-        }
-        ospFrameBufferClear(fb_,OSP_FB_ACCUM);
-        break;
+    }
     case 'O':
-        renderingParameters_.setAmbientOcclusion(
-                    !renderingParameters_.getAmbientOcclusion());
+    {
+        float aaStrength =
+                renderingParameters_.getAmbientOcclusionStrength();
+        aaStrength -= 0.1f;
+        if( aaStrength<0.f ) aaStrength=0.f;
+        renderingParameters_.setAmbientOcclusionStrength( aaStrength );
+        BRAYNS_INFO << "Ambient occlusion strength: " <<
+                       aaStrength << std::endl;
         break;
+    }
     case 'P':
         renderingParameters_.setLightShading(
                     !renderingParameters_.getLightShading());

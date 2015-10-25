@@ -35,7 +35,7 @@ namespace brayns
 {
 
 RenderingParameters::RenderingParameters()
-    : ambientOcclusion_(false), dof_(false), dofStrength_(0.f),
+    : ambientOcclusionStrength_(0.f), dof_(false), dofStrength_(0.f),
       electronShading_(false), gradientBackground_(false),
       lightShading_(true), lightEmittingMaterials_(false),
       spp_(1), shadows_(false), softShadows_(false)
@@ -45,7 +45,7 @@ RenderingParameters::RenderingParameters()
     parameters_[PARAM_DOF] =
         {ptFloat, "Depth of field strength"};
     parameters_[PARAM_AMBIENT_OCCLUSION] =
-        {ptBoolean, "Enables ambient occlusion"};
+        {ptFloat, "Ambient occlusion strength"};
     parameters_[PARAM_NO_LIGHT_SHADING] =
         {ptBoolean, "Disables light shading"};
     parameters_[PARAM_SHADOWS] =
@@ -69,7 +69,7 @@ void RenderingParameters::parse(int argc, const char **argv)
         if (arg == PARAM_SPP)
             spp_ = atoi(argv[++i]);
         else if (arg==PARAM_AMBIENT_OCCLUSION)
-            ambientOcclusion_ = true;
+            ambientOcclusionStrength_ = atof(argv[++i]);
         else if (arg==PARAM_SHADOWS)
             shadows_ = true;
         else if (arg == PARAM_SOFT_SHADOWS)
@@ -94,7 +94,7 @@ void RenderingParameters::display() const
     BRAYNS_INFO << "- Samples per pixel       : " <<
                    spp_ << std::endl;
     BRAYNS_INFO << "- Ambient occlusion       : " <<
-                   (ambientOcclusion_ ? "on": "off") << std::endl;
+                   ambientOcclusionStrength_ << std::endl;
     BRAYNS_INFO << "- Shadows                 : " <<
                    (shadows_ ? "on": "off") << std::endl;
     BRAYNS_INFO << "- Soft shadows            : " <<

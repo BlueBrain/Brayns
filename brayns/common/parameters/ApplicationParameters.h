@@ -88,6 +88,9 @@ public:
     /** Application stream name for DisplayCluster */
     std::string getDeflectStreamname() const { return deflectStreamname_; }
 
+    /** Benchmarking */
+    bool isBenchmarking() const { return benchmarking_; }
+
     Arguments getArguments() const { return arguments_; }
 
 protected:
@@ -108,6 +111,8 @@ protected:
 
     std::string deflectHostname_;
     std::string deflectStreamname_;
+
+    bool benchmarking_;
 
     Arguments arguments_;
 };

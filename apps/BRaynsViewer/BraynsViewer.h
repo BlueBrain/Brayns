@@ -28,6 +28,17 @@ namespace brayns
 
 class DeflectManager;
 
+// Defines how materials should be created
+enum MaterialType
+{
+    mt_default,        // Random colors
+    mt_random,         // Random materials including transparency, reflection,
+                       // and light emition
+    mt_shadesOfGrey,   // 255 shades of grey
+    mt_gradient,       // Gradient from black to white
+    mt_pastel          // Random pastel colors
+};
+
 class BraynsViewer : public BaseWindow
 {
 public:
@@ -40,7 +51,7 @@ public:
 
     /** Creates intial materials with random values
      */
-    void createMaterials();
+    void createMaterials( MaterialType materialType );
 
     /** Loads data specified in the command line arguments. This includes
      * SWC, H5, PDB and all mesh files supported by the assimp library

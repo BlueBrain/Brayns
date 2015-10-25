@@ -48,7 +48,7 @@ BraynsViewer::BraynsViewer( const ApplicationParameters& applicationParameters )
     Assert(renderer_ );
 
     model_ = ospNewModel();
-    createMaterials();
+    createMaterials( mt_default );
     ospCommit(model_);
 
     Assert2(renderer_,"could not create renderer_");
@@ -76,6 +76,18 @@ void BraynsViewer::keypress(char key, const ospray::vec2f where)
 {
     switch (key)
     {
+    case '4':
+        createMaterials( mt_gradient );
+        break;
+    case '5':
+        createMaterials( mt_pastel );
+        break;
+    case '6':
+        createMaterials( mt_random );
+        break;
+    case '7':
+        createMaterials( mt_shadesOfGrey );
+        break;
     case 'R':
         frameNumber_ = 100000;
         break;
@@ -129,34 +141,76 @@ void BraynsViewer::display()
     ospUnmapFrameBuffer(ucharFB_, fb_);
 
     char title[1000];
-    sprintf( title, "BRayns Viewer - Interactive Ray-Tracing @ %f fps",
-             fps_.getFPS());
+    if( applicationParameters_.isBenchmarking() )
+        sprintf( title, "BRayns Viewer - Interactive Ray-Tracing @ %f fps",
+                 fps_.getFPS());
+    else
+        sprintf( title, "BRayns Viewer - Interactive Ray-Tracing");
+
     setTitle(title);
     forceRedraw();
 }
 
-void BraynsViewer::createMaterials()
+void BraynsViewer::createMaterials( const MaterialType materialType )
 {
     const size_t nbMaterials = 200;
     for( size_t i=0; i<nbMaterials; ++i)
     {
-        materials_[i] = ospNewMaterial(renderer_, "ExtendedOBJMaterial");
-        if (materials_[i])
+        if (!materials_[i])
+            materials_[i] = ospNewMaterial(renderer_, "ExtendedOBJMaterial");
+        ospSet1f(materials_[i], "a", 0);
+        ospSet1f(materials_[i], "d", 1);
+        ospSet1f(materials_[i], "refraction", 0);
+        ospSet1f(materials_[i], "reflection", 0);
+        switch( materialType )
         {
-            switch( i )
+        case mt_default:
+            ospSet3f(materials_[i], "kd",
+                     float(rand()%255)/255,
+                     float(rand()%255)/255,
+                     float(rand()%255)/255);
+            break;
+        case mt_gradient:
+            ospSet3f(materials_[i], "kd",
+                     1.f,
+                     float(rand()%nbMaterials)/nbMaterials,
+                     0.f);
+            break;
+        case mt_pastel:
+            ospSet3f(materials_[i], "kd",
+                     0.5f+float(rand()%127)/255,
+                     0.5f+float(rand()%127)/255,
+                     0.5f+float(rand()%127)/255);
+            break;
+        case mt_random:
+            ospSet3f(materials_[i], "kd",
+                     float(rand()%255)/255,
+                     float(rand()%255)/255,
+                     float(rand()%255)/255);
+            switch( rand()%4 )
             {
             case 0:
-                ospSet3f(materials_[i], "kd", 1.f, 1.f, 1.f );
-                break;
-            default:
-                ospSet3f(materials_[i], "kd",
-                         float(rand()%nbMaterials)/nbMaterials,
-                         float(rand()%nbMaterials)/nbMaterials,
-                         float(rand()%nbMaterials)/nbMaterials);
-                break;
+                // Transparent
+                ospSet1f(materials_[i], "d", float(rand()%100)/100.f);
+                ospSet1f(materials_[i], "refraction", 0.98);
+                ospSet3f(materials_[i], "ks", 0.01, 0.01, 0.01);
+                ospSet1f(materials_[i], "ns", 10);
+            case 1:
+                // Light emmitter
+                ospSet1f(materials_[i], "a", 1.0);
+            case 2:
+                // Reflector
+                ospSet1f(materials_[i], "reflection", float(rand()%100)/100.f);
+                ospSet3f(materials_[i], "ks", 0.01, 0.01, 0.01);
+                ospSet1f(materials_[i], "ns", 10);
             }
-            ospCommit(materials_[i]);
+            break;
+        case mt_shadesOfGrey:
+            float a = float(rand()%255/255.0);
+            ospSet3f(materials_[i], "kd", a, a, a);
+            break;
         }
+        ospCommit(materials_[i]);
     }
 }
 
@@ -251,7 +305,7 @@ void BraynsViewer::loadData()
         struct dirent **namelist;
         size_t n = scandir(folder.c_str(), &namelist, 0, alphasort);
         size_t meshIndex = 0;
-        float scale = 0.1f;
+        const float scale = 1.f;
         while(n--)
         {
             std::string filename = namelist[n]->d_name;
@@ -451,17 +505,6 @@ void BraynsViewer::buildGeometry()
     ospCommit(renderer_);
 
     setWorldBounds(bounds_);
-
-    // Initial camera position
-    ospray::vec3f center = embree::center(bounds_);
-    ospray::vec3f diag   = bounds_.size();
-    diag = max(diag,ospray::vec3f(0.5f*length(diag)));
-    ospray::vec3f cameraPos = center;
-    cameraPos.x -= diag.x;
-    cameraPos.y += diag.y;
-    cameraPos.z -= diag.z;
-    viewPort_.from = cameraPos;
-    viewPort_.at = center;
 }
 
 void BraynsViewer::buildEnvironment( const ospray::vec3f& scale )
