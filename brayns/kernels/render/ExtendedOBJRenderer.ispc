@@ -380,7 +380,8 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
             return color + colorKs;
         }
 
-        sample.z = log(ray.t) / 10;
+        if( depth==0 )
+            sample.z = ray.t;
 
         vec3f local_shade_color = make_vec3f(0.f);
 

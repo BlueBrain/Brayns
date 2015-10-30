@@ -311,33 +311,44 @@ void BaseWindow::display()
     extensionController_->execute();
 
     if( applicationParameters_.isBenchmarking() ) fps_.startRender();
-    ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_DEPTH|OSP_FB_ACCUM);
-    if( applicationParameters_.isBenchmarking() ) fps_.doneRender();
 
     GLenum format = GL_RGBA;
     GLenum type   = GL_FLOAT;
     GLvoid* buffer = 0;
-    if (frameBufferMode_ == BaseWindow::FRAMEBUFFER_UCHAR && ucharFB_)
+    switch( frameBufferMode_ )
     {
-        type = GL_UNSIGNED_BYTE;
-        buffer = ucharFB_;
-    }
-    else if (frameBufferMode_ == BaseWindow::FRAMEBUFFER_FLOAT && floatFB_)
-    {
-        buffer = floatFB_;
-    }
-    else if (frameBufferMode_ == BaseWindow::FRAMEBUFFER_DEPTH && depthFB_)
-    {
-        format = GL_LUMINANCE;
-        buffer = depthFB_;
-    }
-    else
-    {
-        glClearColor(0.f,0.f,0.f,1.f);
+    case BaseWindow::FRAMEBUFFER_UCHAR:
+        {
+            ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_ACCUM|OSP_FB_ALPHA);
+            type = GL_UNSIGNED_BYTE;
+            ucharFB_ = (uint32 *)ospMapFrameBuffer(fb_, OSP_FB_COLOR);
+            buffer = ucharFB_;
+            break;
+        }
+    case BaseWindow::FRAMEBUFFER_FLOAT:
+        {
+            ospRenderFrame(fb_,renderer_,OSP_FB_COLOR|OSP_FB_ACCUM|OSP_FB_ALPHA);
+            floatFB_ = (vec3fa *)ospMapFrameBuffer(fb_, OSP_FB_COLOR);
+            buffer = floatFB_;
+            break;
+        }
+    case BaseWindow::FRAMEBUFFER_DEPTH:
+        {
+            ospRenderFrame(fb_,renderer_,OSP_FB_DEPTH);
+            depthFB_ = (float *)ospMapFrameBuffer(fb_, OSP_FB_DEPTH);
+            buffer = depthFB_;
+            format = GL_LUMINANCE;
+            break;
+        }
+    default:
+        glClearColor(1.f,0.f,0.f,1.f);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     }
+    if( applicationParameters_.isBenchmarking() ) fps_.doneRender();
+
     glDrawPixels(windowSize_.x, windowSize_.y, format, type, buffer);
     glutSwapBuffers();
+    ospUnmapFrameBuffer(buffer, fb_);
 
     ++frameCounter_;
 }
@@ -616,6 +627,12 @@ void BaseWindow::keypress( char key, const ospray::vec2f )
     case 'Y':
         renderingParameters_.setLightEmittingMaterials(
                     !renderingParameters_.getLightEmittingMaterials());
+        break;
+    case 'Z':
+        if( frameBufferMode_==FRAMEBUFFER_DEPTH )
+            frameBufferMode_ = FRAMEBUFFER_UCHAR;
+        else
+            frameBufferMode_ = FRAMEBUFFER_DEPTH;
         break;
     }
     if (manipulator)

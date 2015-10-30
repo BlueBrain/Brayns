@@ -302,11 +302,11 @@ protected:
     float rotateSpeed_;
 
     /*! uchar[4] RGBA-framebuffer, if applicable */
-    uint32 *ucharFB_;
+    uint32* ucharFB_;
     /*! float[4] RGBA-framebuffer, if applicable */
-    ospray::vec3fa *floatFB_;
+    ospray::vec3fa* floatFB_;
     /*! floating point depth framebuffer, if applicable */
-    float *depthFB_;
+    float* depthFB_;
 
     FrameBufferMode frameBufferMode_;
 

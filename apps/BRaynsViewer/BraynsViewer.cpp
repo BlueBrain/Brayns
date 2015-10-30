@@ -34,7 +34,7 @@ namespace brayns
 
 BraynsViewer::BraynsViewer( const ApplicationParameters& applicationParameters )
  : BaseWindow( applicationParameters,
-    FRAMEBUFFER_NONE,
+    FRAMEBUFFER_UCHAR,
     INSPECT_CENTER_MODE,
     INSPECT_CENTER_MODE|MOVE_MODE)
 {
@@ -66,7 +66,7 @@ void BraynsViewer::reshape(const ospray::vec2i &newSize)
         ospFreeFrameBuffer( fb_ );
 
     fb_ = ospNewFrameBuffer(newSize, OSP_RGBA_I8,
-                            OSP_FB_COLOR|OSP_FB_ACCUM|OSP_FB_ALPHA);
+            OSP_FB_COLOR|OSP_FB_DEPTH|OSP_FB_ACCUM|OSP_FB_ALPHA);
 
     ospSetf( camera_, "aspect", viewPort_.aspect );
     ospCommit(camera_);
@@ -135,10 +135,7 @@ void BraynsViewer::display()
         ospFrameBufferClear(fb_,OSP_FB_ACCUM);
     }
 
-    ucharFB_ = (uint32 *)ospMapFrameBuffer(fb_);
-    frameBufferMode_ = FRAMEBUFFER_UCHAR;
     BaseWindow::display();
-    ospUnmapFrameBuffer(ucharFB_, fb_);
 
     char title[1000];
     if( applicationParameters_.isBenchmarking() )
@@ -172,8 +169,8 @@ void BraynsViewer::createMaterials( const MaterialType materialType )
             break;
         case mt_gradient:
             ospSet3f(materials_[i], "kd",
-                     1.f,
                      float(rand()%nbMaterials)/nbMaterials,
+                     1.f,
                      0.f);
             break;
         case mt_pastel:
@@ -210,6 +207,8 @@ void BraynsViewer::createMaterials( const MaterialType materialType )
             ospSet3f(materials_[i], "kd", a, a, a);
             break;
         }
+        if( i==nbMaterials-1 )
+            ospSet3f(materials_[i], "kd", 1, 1, 1);
         ospCommit(materials_[i]);
     }
 }
