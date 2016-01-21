@@ -71,7 +71,8 @@ bool MorphologyLoader::_importH5File(
         int morphologyIndex,
         const Vector3f& position,
         PrimitivesCollection& primitives,
-        Boxf& bounds)
+        Boxf& bounds
+        )
 {
     Morphologies morphologies;
 
@@ -176,9 +177,7 @@ bool MorphologyLoader::_importH5File(
         bool carryon = true;
         while( carryon )
         {
-            Vector3f va(
-                morphology.x, morphology.y, morphology.z,
-                morphology.radius * _geometryParameters.getRadius());
+            Vector3f va(morphology.x, morphology.y, morphology.z);
 
             if( segment>0 )
             {

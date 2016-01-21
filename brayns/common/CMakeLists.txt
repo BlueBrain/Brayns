@@ -51,10 +51,8 @@ set(BRAYNSCOMMON_HEADERS
   renderer/FrameBuffer.h
 )
 
-set(BRAYNSCOMMON_LINK_LIBRARIES
-  boost_filesystem
-  ${GLUT_LIBRARIES}
-  ${OSPRAY_LIBRARIES}
+set(BRAYNSCOMMON_LINK_LIBRARIES PUBLIC boost_filesystem vmmlib
+                                PRIVATE ${GLUT_LIBRARIES} ${OSPRAY_LIBRARIES}
 )
 
 if(RESTBRIDGE_FOUND)

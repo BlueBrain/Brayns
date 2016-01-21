@@ -13,10 +13,8 @@ set(BRAYNSPLUGINS_HEADERS
   extensions/ExtensionController.h
 )
 
-set(BRAYNSPLUGINS_LINK_LIBRARIES
-  ${GLUT_LIBRARIES}
-  ${OSPRAY_LIBRARIES}
-  ${BBPSDK_LIBRARIES}
+set(BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsCommon vmmlib
+                                 PRIVATE ${GLUT_LIBRARIES} ${OSPRAY_LIBRARIES} ${BBPSDK_LIBRARIES}
 )
 
 if(ASSIMP_FOUND)
@@ -59,17 +57,6 @@ if(IMAGEMAGICK_FOUND)
     loaders/TextureLoader.h
   )
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES ${IMAGEMAGICK_LIBRARIES})
-endif()
-
-
-set( BRAYNS_LINK_LIBRARIES
-  braynsPlugins
-  ${OSPRAY_DEPENDENT_LIBRARIES}
-  ${OSPRAY_LIBRARIES}
-)
-
-if( ASSIMP_FOUND )
-  list(APPEND BRAYNS_LINK_LIBRARIES ${ASSIMP_LIBRARIES})
 endif()
 
 add_subdirectory(renderers/ospray)

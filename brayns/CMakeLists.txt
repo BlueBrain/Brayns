@@ -3,19 +3,16 @@
 
 add_subdirectory(common)
 
-set( BRAYNS_PUBLIC_HEADERS
+set(BRAYNS_PUBLIC_HEADERS
   Brayns.h)
 
-set( BRAYNS_SOURCES
+set(BRAYNS_SOURCES
   Brayns.cpp)
 
-set( BRAYNS_HEADERS
+set(BRAYNS_HEADERS
   Brayns.h)
 
-set( BRAYNS_LINK_LIBRARIES
-  braynsCommon
-  ${OSPRAY_DEPENDENT_LIBRARIES}
-  ${OSPRAY_LIBRARIES})
+set(BRAYNS_LINK_LIBRARIES PUBLIC braynsCommon ${OSPRAY_DEPENDENT_LIBRARIES} ${OSPRAY_LIBRARIES})
 
 
 common_library(brayns)

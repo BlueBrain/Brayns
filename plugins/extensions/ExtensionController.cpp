@@ -138,8 +138,8 @@ private:
     {
         if(!_deflectManager) return;
 
-        Vector2f position(0.f, 0.f, 0.f);
-        Vector2f wheelDelta(0.f, 0.f, 0.f);
+        Vector2f position(0.f, 0.f);
+        Vector2f wheelDelta(0.f, 0.f);
         const Vector2i frameSize = _extensionParameters.frameBuffer->getSize();
         bool pressed = false;
         bool closeApplication = false;
