@@ -47,7 +47,7 @@ class ExtensionControllerImpl
 {
 public:
     ExtensionControllerImpl(
-        ApplicationParametersPtr applicationParameters,
+        ApplicationParameters& applicationParameters,
         ExtensionParameters& extensionParameters)
     : _applicationParameters(applicationParameters)
     , _extensionParameters(extensionParameters)
@@ -116,11 +116,11 @@ private:
 #ifdef BRAYNS_USE_DEFLECT
     void _initializeDeflect()
     {
-        if(!_deflectManager && _applicationParameters->getDeflectHostname() != "")
+        if(!_deflectManager && _applicationParameters.getDeflectHostname() != "")
         {
             _deflectManager.reset(new DeflectManager(
-                                      _applicationParameters->getDeflectHostname(),
-                                      _applicationParameters->getDeflectStreamname(),
+                                      _applicationParameters.getDeflectHostname(),
+                                      _applicationParameters.getDeflectStreamname(),
                                       true, 100 ));
         }
     }
@@ -198,10 +198,10 @@ private:
         if(_rcPublisher)
             return;
 
-        zeq::URI zeqSchema(_applicationParameters->getZeqSchema());
+        zeq::URI zeqSchema(_applicationParameters.getZeqSchema());
         _rcPublisher.reset(new ::zeq::Publisher(zeqSchema));
 
-        Arguments args = _applicationParameters->getArguments();
+        Arguments args = _applicationParameters.getArguments();
         char** argv= new char*[args.size()];
         for( size_t i(0); i<args.size(); ++i )
             argv[i] = const_cast<char *>(args[i].c_str());
@@ -235,10 +235,7 @@ private:
 
         const std::vector< float >& matrix = zeq::hbp::deserializeCamera(event);
         Vector3f position(matrix[0], matrix[1], matrix[2]);
-        Vector3f target(matrix[3], matrix[4], matrix[5]);
-        Vector3f up(matrix[6], matrix[7], matrix[8]);
-
-        _extensionParameters.camera->set(position, target, up);
+        _extensionParameters.camera->setPosition(position);
         _extensionParameters.frameBuffer->clear();
     }
 
@@ -295,7 +292,7 @@ private:
         {
             std::vector<float> matrix;
 
-            Vector3f cameraPos = _extensionParameters.camera->getTarget();
+            Vector3f cameraPos = _extensionParameters.camera->getPosition();
             Vector3f cameraTarget = _extensionParameters.camera->getTarget();
             Vector3f cameraUp = _extensionParameters.camera->getUp();
 
@@ -352,7 +349,7 @@ private:
 
 private:
 
-    ApplicationParametersPtr _applicationParameters;
+    ApplicationParameters& _applicationParameters;
     ExtensionParameters _extensionParameters;
 
 #ifdef BRAYNS_USE_DEFLECT
@@ -371,7 +368,7 @@ private:
 };
 
 ExtensionController::ExtensionController(
-        ApplicationParametersPtr applicationParameters,
+        ApplicationParameters& applicationParameters,
         ExtensionParameters& extensionParameters )
   : _impl(new ExtensionControllerImpl(applicationParameters, extensionParameters))
 {

@@ -25,8 +25,8 @@
 namespace brayns
 {
 
-OSPRayCamera::OSPRayCamera( const CameraType cameraType, const Vector2i& frameSize )
-   : Camera(cameraType, frameSize)
+OSPRayCamera::OSPRayCamera( const CameraType cameraType )
+   : Camera( cameraType )
 {
     std::string cameraAsString;
     switch( _cameraType )
@@ -38,57 +38,49 @@ OSPRayCamera::OSPRayCamera( const CameraType cameraType, const Vector2i& frameSi
         cameraAsString = "perspective";
         break;
     }
-
-    _camera = ospNewCamera( cameraAsString.c_str());
-    float aspect=static_cast<float>(_frameSize[0])/static_cast<float>(_frameSize[1]);
-    ospSetf(_camera, "aspect", aspect);
+    _camera = ospNewCamera( cameraAsString.c_str( ));
     commit();
 }
 
-void OSPRayCamera::set( const Vector3f& position, const Vector3f& target, const Vector3f& up )
+void OSPRayCamera::set( const Vector3f& position, const Vector3f& target,
+                        const Vector3f& up )
 {
-    ospSet3f(_camera,"pos", position.x(), position.y(), position.z());
-    ospSet3f(_camera,"dir", target.x(), target.y(), target.z());
-    ospSet3f(_camera,"up", up.x(), up.y(), up.z());
+    _position = position;
+    _target = target;
+    _up = up;
     commit();
 }
 
 void OSPRayCamera::commit()
 {
-    ospCommit(_camera);
+    ospSet3f( _camera,"pos", _position.x(), _position.y(), _position.z( ));
+    ospSet3f( _camera,"dir", _target.x(), _target.y(), _target.z( ));
+    ospSet3f( _camera,"up", _up.x(), _up.y(), _up.z( ));
+    ospCommit( _camera );
 }
 
-void OSPRayCamera::resize( const Vector2i& frameSize )
+void OSPRayCamera::setAspectRatio( float aspectRatio )
 {
-    _frameSize = frameSize;
-    float aspect=static_cast<float>(_frameSize[0])/static_cast<float>(_frameSize[1]);
-    ospSetf(_camera, "aspect", aspect);
+    ospSetf( _camera, "aspect", aspectRatio );
     commit();
 }
 
-const Vector3f& OSPRayCamera::getPosition()
+void OSPRayCamera::setPosition( const Vector3f& position )
 {
-    ospray::vec3f position;
-    ospGetVec3f(_camera, "pos", &position);
-    _position = Vector3f(position.x, position.y, position.z);
-    return _position;
+    _position = position;
+    commit();
 }
 
-const Vector3f& OSPRayCamera::getTarget()
+void OSPRayCamera::setTarget( const Vector3f& target )
 {
-    ospray::vec3f target;
-    ospGetVec3f(_camera, "dir", &target);
-    _target = Vector3f(target.x, target.y, target.z);
-    return _target;
+    _target = target;
+    commit();
 }
 
-const Vector3f& OSPRayCamera::getUp()
+void OSPRayCamera::setUp( const Vector3f& up )
 {
-    ospray::vec3f up;
-    ospGetVec3f(_camera, "up", &up);
-    _up = Vector3f(up.x, up.y, up.z);
-    return _up;
+    _up = up;
+    commit();
 }
-
 
 }

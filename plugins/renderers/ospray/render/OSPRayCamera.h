@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -26,20 +26,52 @@
 namespace brayns
 {
 
+/**
+   OPSRAY specific camera
+
+   This object is the OSPRay specific implementation of a Camera
+*/
 class OSPRayCamera : public brayns::Camera
 {
 public:
-    OSPRayCamera( const CameraType cameraType, const Vector2i& frameSize );
+    OSPRayCamera( const CameraType cameraType );
 
-    void set( const Vector3f& position, const Vector3f& target, const Vector3f& up ) final;
-    const Vector3f& getPosition() final;
-    const Vector3f& getTarget() final;
-    const Vector3f& getUp() final;
+    /** @copydoc Camera::set */
+    void set( const Vector3f& position, const Vector3f& target,
+              const Vector3f& up ) final;
 
+    /** @copydoc Camera::setPosition */
+    void setPosition(const Vector3f&) final;
+
+    /** @copydoc Camera::getPosition */
+    const Vector3f& getPosition() final { return _position; };
+
+    /** @copydoc Camera::setTarget */
+    void setTarget(const Vector3f&) final;
+
+    /** @copydoc Camera::getTarget */
+    const Vector3f& getTarget() final { return _target; };
+
+    /** @copydoc Camera::setUp */
+    void setUp(const Vector3f&) final;
+
+    /** @copydoc Camera::getUp */
+    const Vector3f& getUp() final { return _up; };
+
+    /**
+       Commits the changes held by the camera object so that
+       attributes become available to the OSPRay rendering engine
+    */
     void commit() final;
-    void resize( const Vector2i& frameSize ) final;
 
-    OSPCamera impl() {return _camera;}
+    /** @copydoc Camera::setAspectRatio */
+    void setAspectRatio( float aspectRatio ) final;
+
+    /**
+       Gets the OSPRay implementation of the camera object
+       @return OSPRay implementation of the camera object
+    */
+    OSPCamera impl() { return _camera; }
 
 private:
     OSPCamera _camera;

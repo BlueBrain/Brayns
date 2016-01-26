@@ -24,10 +24,8 @@
 namespace brayns
 {
 
-Renderer::Renderer(
-        int, const char **,
-        RenderingParametersPtr renderingParameters )
-    : _renderingParameters(renderingParameters)
+Renderer::Renderer( RenderingParameters& renderingParameters )
+    : _renderingParameters( renderingParameters )
 {
 }
 

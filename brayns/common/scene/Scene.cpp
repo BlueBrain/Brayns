@@ -34,7 +34,7 @@
 namespace brayns
 {
 
-Scene::Scene( RendererPtr renderer, GeometryParametersPtr geometryParameters )
+Scene::Scene( RendererPtr renderer, GeometryParameters& geometryParameters )
     : _geometryParameters(geometryParameters)
     , _renderer(renderer)
 {
@@ -114,9 +114,9 @@ MaterialPtr Scene::getMaterial( size_t index )
 
 void Scene::loadSWCFolder()
 {
-    const boost::filesystem::path& folder = _geometryParameters->getSWCFolder();
+    const boost::filesystem::path& folder = _geometryParameters.getSWCFolder();
     BRAYNS_INFO << "Loading SWC morphologies from " << folder << std::endl;
-    MorphologyLoader morphologyLoader(*_geometryParameters);
+    MorphologyLoader morphologyLoader(_geometryParameters);
 
     size_t fileIndex = 0;
     boost::filesystem::directory_iterator endIter;
@@ -147,9 +147,9 @@ void Scene::loadSWCFolder()
 void Scene::loadPDBFolder()
 {
     // Load PDB Folder
-    const boost::filesystem::path& folder = _geometryParameters->getPDBFolder();
+    const boost::filesystem::path& folder = _geometryParameters.getPDBFolder();
     BRAYNS_INFO << "Loading PDB files from " << folder << std::endl;
-    ProteinLoader proteinLoader(*_geometryParameters);
+    ProteinLoader proteinLoader(_geometryParameters);
     if(!proteinLoader.importPDBFolder(MS_CHAINS, 0, _materials, true, _primitives, _bounds))
         BRAYNS_ERROR << "Failed to import " << folder << std::endl;
 
@@ -166,10 +166,10 @@ void Scene::loadH5Folder()
 {
 #ifdef BRAYNS_USE_BBPSDK
     // Load h5 files
-    const std::string& folder = _geometryParameters->getH5Folder();
+    const std::string& folder = _geometryParameters.getH5Folder();
     BRAYNS_INFO << "Loading H5 morphologies from " << folder << std::endl;
     const Vector3f position(0.f,0.f,0.f);
-    MorphologyLoader morphologyLoader(*_geometryParameters);
+    MorphologyLoader morphologyLoader(_geometryParameters);
     if(!morphologyLoader.importMorphologies(MFF_SWC, folder, 0, position, _primitives, _bounds))
         BRAYNS_ERROR << "Failed to import folder " << folder << std::endl;
 #endif
@@ -178,7 +178,7 @@ void Scene::loadH5Folder()
 void Scene::loadMeshFolder()
 {
 #ifdef BRAYNS_USE_ASSIMP
-    const boost::filesystem::path& folder = _geometryParameters->getMeshFolder();
+    const boost::filesystem::path& folder = _geometryParameters.getMeshFolder();
     BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
     MeshLoader meshLoader;
     size_t meshIndex = 0;
@@ -199,7 +199,7 @@ void Scene::loadMeshFolder()
                     BRAYNS_INFO << "- " << filename << std::endl;
                     if(!meshLoader.importMeshFromFile(
                         filename, scale, _trianglesMeshes, _materials,
-                        _geometryParameters->getColored() ? meshIndex : NO_MATERIAL,
+                        _geometryParameters.getColored() ? meshIndex : NO_MATERIAL,
                         MQ_FAST, _bounds))
                     {
                         BRAYNS_ERROR << "Failed to import " << filename << std::endl;
@@ -214,7 +214,7 @@ void Scene::loadMeshFolder()
 
 void Scene::buildEnvironment()
 {
-    switch( _geometryParameters->getSceneEnvironment() )
+    switch( _geometryParameters.getSceneEnvironment() )
     {
     case SE_NONE:
         break;

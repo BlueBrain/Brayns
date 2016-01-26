@@ -35,8 +35,9 @@ const std::string PARAM_COLORED = "--colored";
 const std::string PARAM_TIMED_GEOMETRY_INCREMENT = "--timed-geometry-increment";
 const std::string PARAM_SCENE_ENVIRONMENT = "--scene-environment";
 
-GeometryParameters::GeometryParameters()
-    : _radius(1), _colored(false), _timedGeometry(false)
+GeometryParameters::GeometryParameters(int argc, const char **argv)
+    : AbstractParameters(argc, argv)
+    ,_radius(1), _colored(false), _timedGeometry(false)
     , _timedGeometryIncrement(1), _sceneEnvironment(SE_NONE)
 {
     _parameters[PARAM_SWC_FOLDER] =
@@ -55,10 +56,7 @@ GeometryParameters::GeometryParameters()
         {PMT_INTEGER, "Increment between frames"};
     _parameters[PARAM_SCENE_ENVIRONMENT] =
         {PMT_INTEGER, "Scene environment (0: none, 1: ground, 2: wall, 3: box)"};
-}
 
-void GeometryParameters::parse(int argc, const char **argv)
-{
     for (int i=1;i<argc;i++)
     {
         std::string arg = argv[i];

@@ -35,14 +35,13 @@ class AbstractParameters;
 class RenderingParameters : public AbstractParameters
 {
 public:
-    RenderingParameters();
-
-    /** Parse the command line parameters and populates according class members
+    /**
+     *  Parse the command line parameters and populates according class members
      *
      * @param argc number of command line parameters
      * @param argv actual command line parameters
      */
-    void parse(int argc, const char **argv) final;
+    RenderingParameters(int argc, const char **argv);
 
     /** Displays parameters managed by the class
      */

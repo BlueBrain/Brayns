@@ -46,7 +46,7 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[6] =
     {TT_REFLECTION, "map_Reflection"}
 };
 
-OSPRayScene::OSPRayScene(RendererPtr renderer, GeometryParametersPtr geometryParameters)
+OSPRayScene::OSPRayScene(RendererPtr renderer, GeometryParameters& geometryParameters)
     : Scene(renderer, geometryParameters),
     _scene(ospNewModel())
 {
@@ -59,16 +59,16 @@ void OSPRayScene::commit()
 
 void OSPRayScene::loadData()
 {
-    if( _geometryParameters->getSWCFolder() != "" )
+    if(!_geometryParameters.getSWCFolder().empty())
         loadSWCFolder();
 
-    if( _geometryParameters->getPDBFolder() != "" )
+    if(!_geometryParameters.getPDBFolder().empty())
         loadPDBFolder();
 
-    if( _geometryParameters->getH5Folder() != "" )
+    if(!_geometryParameters.getH5Folder().empty())
         loadH5Folder();
 
-    if( _geometryParameters->getMeshFolder() != "" )
+    if(!_geometryParameters.getMeshFolder().empty())
         loadMeshFolder();
 }
 

@@ -35,7 +35,7 @@ namespace brayns
 class Scene
 {
 public:
-    BRAYNS_API Scene(RendererPtr renderer, GeometryParametersPtr geometryParameters);
+    BRAYNS_API Scene(RendererPtr renderer, GeometryParameters& geometryParameters);
     BRAYNS_API virtual ~Scene();
 
     BRAYNS_API virtual void commit() = 0;
@@ -60,7 +60,7 @@ public:
 
 protected:
     // Parameters
-    GeometryParametersPtr _geometryParameters;
+    GeometryParameters& _geometryParameters;
     RendererPtr _renderer;
 
     // Model

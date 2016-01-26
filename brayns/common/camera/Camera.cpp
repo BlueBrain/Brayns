@@ -22,9 +22,12 @@
 namespace brayns
 {
 
-Camera::Camera( const CameraType cameraType, const Vector2i& frameSize )
-    : _cameraType(cameraType)
-    , _frameSize(frameSize)
+Camera::Camera( const CameraType cameraType )
+    : _position( 0.f, 0.f, -1.f )
+    , _target( 0.f, 0.f, 0.f )
+    , _up( 0.f, 1.f, 0.f )
+    , _cameraType( cameraType )
+    , _aspectRatio( 1.f )
 {
 }
 

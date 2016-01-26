@@ -29,19 +29,17 @@ namespace brayns
 class Renderer
 {
 public:
-    BRAYNS_API Renderer(
-        int argc, const char **argv,
-        RenderingParametersPtr renderingParameters );
+    BRAYNS_API Renderer( RenderingParameters& renderingParameters );
     BRAYNS_API virtual ~Renderer() {}
 
-    BRAYNS_API virtual void render(FrameBufferPtr frameBuffer) = 0;
+    BRAYNS_API virtual void render( FrameBufferPtr frameBuffer ) = 0;
 
     BRAYNS_API virtual void commit() =  0;
-    BRAYNS_API virtual void setScene(ScenePtr scene) =  0;
-    BRAYNS_API virtual void setCamera(CameraPtr camera) =  0;
+    BRAYNS_API virtual void setScene( ScenePtr scene ) =  0;
+    BRAYNS_API virtual void setCamera( CameraPtr camera ) =  0;
 
 protected:
-    RenderingParametersPtr _renderingParameters;
+    RenderingParameters& _renderingParameters;
 };
 
 }

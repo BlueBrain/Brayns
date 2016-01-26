@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -34,26 +34,84 @@ enum CameraType
     CT_ORTHOGRAPHIC
 };
 
+/**
+   Camera object
+
+   This object in an abstract interface to a camera which is defined by a position, target and
+   up vector
+*/
 class Camera
 {
 public:
-    BRAYNS_API Camera(const CameraType cameraType, const Vector2i& frameSize);
+    BRAYNS_API Camera(const CameraType cameraType);
     BRAYNS_API virtual ~Camera() {}
 
+    /**
+       Sets position, target and up vector
+       @param position The x, y, z coordinates of the camera position
+       @param target The x, y, z coordinates of the camera target: the point the camera is "looking
+              at" or focused on
+       @param up the x, y, z coordinates of the up vector's end point
+    */
     BRAYNS_API virtual void set(
         const Vector3f& position, const Vector3f& target, const Vector3f& up) = 0;
+
+    /**
+       Sets camera position
+       @param position The x, y, z coordinates of the camera position
+    */
+    BRAYNS_API virtual void setPosition(const Vector3f&) = 0;
+
+    /**
+       Gets camera position
+       @return The x, y, z coordinates of the camera position
+    */
     BRAYNS_API virtual const Vector3f& getPosition() = 0;
+
+    /**
+       Sets camera target
+       @param target The x, y, z coordinates of the camera target: the point the camera is "looking
+              at" or focused on
+    */
+    BRAYNS_API virtual void setTarget(const Vector3f&) = 0;
+
+    /**
+       Gets camera target
+       @return The x, y, z coordinates of the camera target: the point the camera is "looking at" or
+               focused on
+    */
     BRAYNS_API virtual const Vector3f& getTarget() = 0;
+
+    /**
+       Sets camera up vector
+       @param up the x, y, z coordinates of the up vector's end point
+    */
+    BRAYNS_API virtual void setUp(const Vector3f&) = 0;
+
+    /**
+       Gets camera up vector
+       @return the x, y, z coordinates of the up vector's end point
+    */
     BRAYNS_API virtual const Vector3f& getUp() = 0;
+
+    /**
+       Commits the changes held by the camera object so that
+       attributes become available to the underlying rendering engine
+    */
     BRAYNS_API virtual void commit() =  0;
-    BRAYNS_API virtual void resize(const Vector2i& frameSize) = 0;
+
+    /**
+       Set the aspec ratio of the camera
+       @param aspectRatio The new aspect ratio
+    */
+    BRAYNS_API virtual void setAspectRatio(float aspectRatio) = 0;
 
 protected:
     Vector3f _position;
     Vector3f _target;
     Vector3f _up;
     CameraType _cameraType;
-    Vector2ui _frameSize;
+    float _aspectRatio;
 };
 
 }

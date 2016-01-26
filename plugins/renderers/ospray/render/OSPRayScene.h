@@ -31,7 +31,7 @@ namespace brayns
 class OSPRayScene: public brayns::Scene
 {
 public:
-    OSPRayScene( RendererPtr renderer, GeometryParametersPtr geometryParameters );
+    OSPRayScene( RendererPtr renderer, GeometryParameters& geometryParameters );
 
     void commit() final;
     void loadData() final;

@@ -44,13 +44,14 @@ const std::string PARAM_ZEQ_SCHEMA = "--zeq-schema";
 
 const std::string DEFAULT_CAMERA = "perspective";
 
-ApplicationParameters::ApplicationParameters()
-  : _camera(DEFAULT_CAMERA),
-    _windowWidth(DEFAULT_WINDOW_WIDTH),
-    _windowHeight(DEFAULT_WINDOW_HEIGHT),
-    _deflectHostname(DEFAULT_DEFLECT_HOSTNAME),
-    _deflectStreamname(DEFAULT_DEFLECT_STREAMNAME),
-    _benchmarking(false)
+ApplicationParameters::ApplicationParameters(int argc, const char **argv)
+    : AbstractParameters(argc, argv)
+    , _camera(DEFAULT_CAMERA)
+    , _windowWidth(DEFAULT_WINDOW_WIDTH)
+    , _windowHeight(DEFAULT_WINDOW_HEIGHT)
+    , _deflectHostname(DEFAULT_DEFLECT_HOSTNAME)
+    , _deflectStreamname(DEFAULT_DEFLECT_STREAMNAME)
+    , _benchmarking(false)
 {
     _parameters[PARAM_BUFFER_HEIGHT] =
         {PMT_INTEGER, "Height of rendering buffer"};
@@ -71,10 +72,7 @@ ApplicationParameters::ApplicationParameters()
         {PMT_STRING, "Schema name for ZeroEQ communication"};
     _parameters[PARAM_BENCHMARKING] =
         {PMT_STRING, "Activates application benchmarking"};
-}
 
-void ApplicationParameters::parse(int argc, const char **argv)
-{
     // Save arguments for later use
     for (int i=0;i<argc;i++)
         _arguments.push_back(argv[i]);

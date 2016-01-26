@@ -28,7 +28,7 @@ namespace brayns
 
 const std::string PARAM_HELP = "--help";
 
-void AbstractParameters::parse(int argc, const char **argv)
+AbstractParameters::AbstractParameters(int argc, const char **argv)
 {
     for (int i=1;i<argc;i++)
     {

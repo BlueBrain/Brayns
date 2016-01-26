@@ -42,29 +42,23 @@ namespace brayns
 struct Brayns::Impl
 {
     Impl( int argc, const char **argv )
-         : _applicationParameters()
+         : _applicationParameters(argc, argv)
+         , _renderingParameters(argc,argv)
+         , _geometryParameters(argc,argv)
          , _frameSize(0,0)
          , _frameNumber(0)
          , _rendering(false)
          , _sceneModified(true)
     {
-        _applicationParameters.reset(new ApplicationParameters);
-        _applicationParameters->parse(argc, argv);
-        _applicationParameters->display();
+        _applicationParameters.display();
+        _renderingParameters.display();
+        _geometryParameters.display();
 
-        _frameSize.x() = _applicationParameters->getWindowWidth();
-        _frameSize.y() = _applicationParameters->getWindowHeight();
-
-        _renderingParameters.reset(new RenderingParameters);
-        _renderingParameters->parse(argc,argv);
-        _renderingParameters->display();
-
-        _geometryParameters.reset(new GeometryParameters);
-        _geometryParameters->parse(argc,argv);
-        _geometryParameters->display();
+        _frameSize.x() = _applicationParameters.getWindowWidth();
+        _frameSize.y() = _applicationParameters.getWindowHeight();
 
         // Should be implemented with a plugin factory
-        _renderer.reset(new OSPRayRenderer(argc, argv, _renderingParameters));
+        _renderer.reset(new OSPRayRenderer(_renderingParameters));
 
         _scene.reset(new OSPRayScene(_renderer, _geometryParameters));
         _scene->setMaterials(MT_DEFAULT, 200);
@@ -76,7 +70,7 @@ struct Brayns::Impl
         _renderer->setScene(_scene);
 
         _frameBuffer.reset(new OSPRayFrameBuffer(_frameSize, FBF_RGBA_I8));
-        _camera.reset(new OSPRayCamera(CT_PERSPECTIVE, _frameSize));
+        _camera.reset(new OSPRayCamera(CT_PERSPECTIVE));
         _renderer->setCamera(_camera);
         _renderer->commit();
     }
@@ -89,6 +83,18 @@ struct Brayns::Impl
                  RenderOutput& renderOutput )
     {
         _camera->set( renderInput.position, renderInput.target, renderInput.up );
+
+#if(BRAYNS_USE_REST || BRAYNS_USE_DEFLECT)
+        if( !_extensionController )
+        {
+            ExtensionParameters extensionParameters = {
+                _scene, _renderer, _camera, _frameBuffer };
+
+            _extensionController.reset(new ExtensionController(
+                _applicationParameters, extensionParameters ));
+        }
+        _extensionController->execute();
+#endif
         _render();
 
         uint8_t* colorBuffer = _frameBuffer->getColorBuffer();
@@ -100,24 +106,24 @@ struct Brayns::Impl
         renderOutput.depthBuffer.assign(depthBuffer, depthBuffer+size);
     }
 
-    void resize( const Vector2i& frameSize )
+    void reshape( const Vector2i& frameSize )
     {
         _frameSize = frameSize;
         _frameBuffer->resize(_frameSize);
-        _camera->resize(_frameSize);
+        _camera->setAspectRatio(_frameSize[1]/_frameSize[0]);
     }
 
-    RenderingParametersPtr getRenderingParameters()
+    RenderingParameters& getRenderingParameters()
     {
         return _renderingParameters;
     }
 
-    GeometryParametersPtr getGeometryParameters()
+    GeometryParameters& getGeometryParameters()
     {
         return _geometryParameters;
     }
 
-    ApplicationParametersPtr getApplicationParameters()
+    ApplicationParameters& getApplicationParameters()
     {
         return _applicationParameters;
     }
@@ -135,9 +141,14 @@ struct Brayns::Impl
         _camera->commit();
     }
 
-    ScenePtr getScene() const
+    Scene& getScene()
     {
-        return _scene;
+        return *_scene;
+    }
+
+    Camera& getCamera()
+    {
+        return *_camera;
     }
 
 private:
@@ -151,9 +162,9 @@ private:
             return;
         }
 
-        if( _geometryParameters->getTimedGeometry() )
+        if( _geometryParameters.getTimedGeometry() )
         {
-            _frameNumber += _geometryParameters->getTimedGeometryIncrement();
+            _frameNumber += _geometryParameters.getTimedGeometryIncrement();
             _frameBuffer->clear();
         }
 
@@ -161,24 +172,12 @@ private:
         _renderer->render( _frameBuffer );
         _frameBuffer->map();
 
-#if(BRAYNS_USE_REST || BRAYNS_USE_DEFLECT)
-        if( !_extensionController )
-        {
-            ExtensionParameters extensionParameters = {
-                _scene, _renderer, _camera, _frameBuffer };
-
-            _extensionController.reset(new ExtensionController(
-                _applicationParameters, extensionParameters ));
-        }
-        _extensionController->execute();
-#endif
-
         _rendering = false;
     }
 
-    ApplicationParametersPtr _applicationParameters;
-    RenderingParametersPtr _renderingParameters;
-    GeometryParametersPtr _geometryParameters;
+    ApplicationParameters _applicationParameters;
+    RenderingParameters _renderingParameters;
+    GeometryParameters _geometryParameters;
 
     ScenePtr _scene;
     CameraPtr _camera;
@@ -209,9 +208,9 @@ void Brayns::render( const RenderInput& renderInput,
     _impl->render(renderInput, renderOutput);
 }
 
-void Brayns::resize( const Vector2i& size )
+void Brayns::reshape( const Vector2i& size )
 {
-    _impl->resize(size);
+    _impl->reshape(size);
 }
 
 void Brayns::commit()
@@ -219,17 +218,17 @@ void Brayns::commit()
     _impl->commit();
 }
 
-ApplicationParametersPtr Brayns::getApplicationParameters()
+ApplicationParameters& Brayns::getApplicationParameters()
 {
     return _impl->getApplicationParameters();
 }
 
-RenderingParametersPtr Brayns::getRenderingParameters()
+RenderingParameters& Brayns::getRenderingParameters()
 {
     return _impl->getRenderingParameters();
 }
 
-GeometryParametersPtr Brayns::getGeometryParameters()
+GeometryParameters& Brayns::getGeometryParameters()
 {
     return _impl->getGeometryParameters();
 }
@@ -239,9 +238,14 @@ void Brayns::setMaterials(const MaterialType materialType, const size_t nbMateri
     _impl->setMaterials(materialType, nbMaterials);
 }
 
-const ScenePtr Brayns::getScene() const
+Scene& Brayns::getScene()
 {
     return _impl->getScene();
+}
+
+Camera& Brayns::getCamera()
+{
+    return _impl->getCamera();
 }
 
 }

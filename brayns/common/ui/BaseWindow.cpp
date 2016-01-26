@@ -24,6 +24,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/parameters/RenderingParameters.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/camera/Camera.h>
 
 #include <assert.h>
 
@@ -188,7 +189,7 @@ void BaseWindow::reshape(const Vector2i& newSize)
 {
     _windowSize = newSize;
     _viewPort.setAspect(float(newSize.x())/float(newSize.y()));
-    _brayns->resize(newSize);
+    _brayns->reshape(newSize);
     forceRedraw();
 }
 
@@ -235,6 +236,9 @@ void BaseWindow::display()
     glDrawPixels(_windowSize.x(), _windowSize.y(), format, type, buffer);
     glutSwapBuffers();
 
+#if(BRAYNS_USE_REST || BRAYNS_USE_DEFLECT)
+    _viewPort.setPosition(_brayns->getCamera().getPosition());
+#endif
     ++frameCounter_;
 }
 
@@ -261,16 +265,16 @@ void BaseWindow::drawPixels(const Vector3f* framebuffer)
 
 Boxf BaseWindow::getWorldBounds()
 {
-    return _brayns->getScene()->getWorldBounds();
+    return _brayns->getScene().getWorldBounds();
 }
 
 void BaseWindow::setViewPort()
 {
-    Boxf worldBounds = _brayns->getScene()->getWorldBounds();
+    Boxf worldBounds = _brayns->getScene().getWorldBounds();
     Vector3f center = worldBounds.getCenter();
     Vector3f diag   = worldBounds.getDimension();
     diag = max(diag,Vector3f(0.3f*diag.length()));
-    Vector3f from = center; // - 0.75f*Vector3f(-0.6f*diag.x(), -1.2f*diag.y(), 0.8f*diag.z());
+    Vector3f from = center;
     from.z() -= diag.z();
 
     Vector3f up  = Vector3f(0.f,1.f,0.f);
@@ -328,31 +332,31 @@ void BaseWindow::keypress( char key, const Vector2f& )
         BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
         break;
     case '1':
-        _brayns->getRenderingParameters()->setBackgroundColor(Vector3f(.5f,.5f,.5f));
+        _brayns->getRenderingParameters().setBackgroundColor(Vector3f(.5f,.5f,.5f));
         BRAYNS_INFO << "Setting grey background" << std::endl;
         break;
     case '2':
-        _brayns->getRenderingParameters()->setBackgroundColor(Vector3f(1.f,1.f,1.f));
+        _brayns->getRenderingParameters().setBackgroundColor(Vector3f(1.f,1.f,1.f));
         BRAYNS_INFO << "Setting white background" << std::endl;
         break;
     case '3':
-        _brayns->getRenderingParameters()->setBackgroundColor(Vector3f(0.f,0.f,0.f));
+        _brayns->getRenderingParameters().setBackgroundColor(Vector3f(0.f,0.f,0.f));
         BRAYNS_INFO << "Setting black background" << std::endl;
         break;
     case 'C':
         BRAYNS_INFO << _viewPort << std::endl;
         break;
     case 'D':
-        _brayns->getRenderingParameters()->setDepthOfField(
-            !_brayns->getRenderingParameters()->getDepthOfField());
-        BRAYNS_INFO << "Detph of field: " << _brayns->getRenderingParameters()->getDepthOfField()
+        _brayns->getRenderingParameters().setDepthOfField(
+            !_brayns->getRenderingParameters().getDepthOfField());
+        BRAYNS_INFO << "Detph of field: " << _brayns->getRenderingParameters().getDepthOfField()
                     << std::endl;
         break;
     case 'E':
-        _brayns->getRenderingParameters()->setElectronShading(
-            !_brayns->getRenderingParameters()->getElectronShading());
+        _brayns->getRenderingParameters().setElectronShading(
+            !_brayns->getRenderingParameters().getElectronShading());
         BRAYNS_INFO << "Electron shading: " <<
-            (_brayns->getRenderingParameters()->getElectronShading() ? "On" : "Off") << std::endl;
+            (_brayns->getRenderingParameters().getElectronShading() ? "On" : "Off") << std::endl;
         break;
     case 'F':
         // 'f'ly mode
@@ -363,16 +367,16 @@ void BaseWindow::keypress( char key, const Vector2f& )
         }
         break;
     case 'G':
-        _brayns->getRenderingParameters()->setGradientBackground(
-            !_brayns->getRenderingParameters()->getGradientBackground());
+        _brayns->getRenderingParameters().setGradientBackground(
+            !_brayns->getRenderingParameters().getGradientBackground());
         BRAYNS_INFO << "Gradient background: " <<
-            (_brayns->getRenderingParameters()->getGradientBackground() ? "On" : "Off") << std::endl;
+            (_brayns->getRenderingParameters().getGradientBackground() ? "On" : "Off") << std::endl;
         break;
     case 'H':
-        _brayns->getRenderingParameters()->setSoftShadows(
-            !_brayns->getRenderingParameters()->getSoftShadows());
+        _brayns->getRenderingParameters().setSoftShadows(
+            !_brayns->getRenderingParameters().getSoftShadows());
         BRAYNS_INFO << "Soft shadows " <<
-            (_brayns->getRenderingParameters()->getSoftShadows() ? "On" : "Off") << std::endl;
+            (_brayns->getRenderingParameters().getSoftShadows() ? "On" : "Off") << std::endl;
         break;
     case 'I':
         // 'i'nspect mode
@@ -394,52 +398,52 @@ void BaseWindow::keypress( char key, const Vector2f& )
     case 'o':
     {
         float aaStrength =
-            _brayns->getRenderingParameters()->getAmbientOcclusionStrength();
+            _brayns->getRenderingParameters().getAmbientOcclusionStrength();
         aaStrength += 0.1f;
         if( aaStrength>1.f ) aaStrength=1.f;
-        _brayns->getRenderingParameters()->setAmbientOcclusionStrength( aaStrength );
+        _brayns->getRenderingParameters().setAmbientOcclusionStrength( aaStrength );
         BRAYNS_INFO << "Ambient occlusion strength: " << aaStrength << std::endl;
         break;
     }
     case 'O':
     {
         float aaStrength =
-            _brayns->getRenderingParameters()->getAmbientOcclusionStrength();
+            _brayns->getRenderingParameters().getAmbientOcclusionStrength();
         aaStrength -= 0.1f;
         if( aaStrength<0.f ) aaStrength=0.f;
-        _brayns->getRenderingParameters()->setAmbientOcclusionStrength( aaStrength );
+        _brayns->getRenderingParameters().setAmbientOcclusionStrength( aaStrength );
         BRAYNS_INFO << "Ambient occlusion strength: " << aaStrength << std::endl;
         break;
     }
     case 'P':
-        _brayns->getRenderingParameters()->setLightShading(
-                    !_brayns->getRenderingParameters()->getLightShading());
+        _brayns->getRenderingParameters().setLightShading(
+                    !_brayns->getRenderingParameters().getLightShading());
         BRAYNS_INFO << "Light shading: " <<
-            (_brayns->getRenderingParameters()->getLightShading() ? "On" : "Off") << std::endl;
+            (_brayns->getRenderingParameters().getLightShading() ? "On" : "Off") << std::endl;
         break;
     case 'r':
-        _brayns->getRenderingParameters()->setFrameNumber(0);
+        _brayns->getRenderingParameters().setFrameNumber(0);
         BRAYNS_INFO << "Frame number: " <<
-            _brayns->getRenderingParameters()->getFrameNumber() << std::endl;
+            _brayns->getRenderingParameters().getFrameNumber() << std::endl;
         break;
     case 'R':
-        _brayns->getRenderingParameters()->setFrameNumber(std::numeric_limits<uint16_t>::max());
+        _brayns->getRenderingParameters().setFrameNumber(std::numeric_limits<uint16_t>::max());
         BRAYNS_INFO << "Frame number: " <<
-            _brayns->getRenderingParameters()->getFrameNumber() << std::endl;
+            _brayns->getRenderingParameters().getFrameNumber() << std::endl;
         break;
     case 'S':
-        _brayns->getRenderingParameters()->setShadows(
-            !_brayns->getRenderingParameters()->getShadows());
+        _brayns->getRenderingParameters().setShadows(
+            !_brayns->getRenderingParameters().getShadows());
         BRAYNS_INFO << "Shadows: " <<
-            (_brayns->getRenderingParameters()->getShadows() ? "On" : "Off") << std::endl;
+            (_brayns->getRenderingParameters().getShadows() ? "On" : "Off") << std::endl;
         break;
     case 'V':
-        _brayns->getRenderingParameters()->setBackgroundColor(
+        _brayns->getRenderingParameters().setBackgroundColor(
             Vector3f(rand()%200/100.f-1.f, rand()%200/100.f-1.f, rand()%200/100.0-1.f));
         break;
     case 'Y':
-        _brayns->getRenderingParameters()->setLightEmittingMaterials(
-            !_brayns->getRenderingParameters()->getLightEmittingMaterials());
+        _brayns->getRenderingParameters().setLightEmittingMaterials(
+            !_brayns->getRenderingParameters().getLightEmittingMaterials());
         break;
     case 'Z':
         if( _frameBufferMode==FRAMEBUFFER_DEPTH )

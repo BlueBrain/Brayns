@@ -71,14 +71,14 @@ typedef std::map< std::string, Parameter > Parameters;
 class AbstractParameters
 {
 public:
-    virtual ~AbstractParameters() {}
-
-    /** Parse the command line parameters and populates according class members
+    /** Initializes and parses the command line parameters and populates according class members
      *
      * @param argc number of command line parameters
      * @param argv actual command line parameters
      */
-    virtual void parse(int argc, const char **argv);
+    AbstractParameters(int argc, const char **argv);
+
+    virtual ~AbstractParameters() {}
 
     /** Displays parameters managed by the class
      */

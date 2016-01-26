@@ -106,3 +106,5 @@ option(BRAYNSSERVICE_ENABLED "BRayns Service" ON)
 if(BRAYNSSERVICE_ENABLED)
   add_subdirectory(apps/BRaynsService)
 endif()
+
+include(DoxygenRule)

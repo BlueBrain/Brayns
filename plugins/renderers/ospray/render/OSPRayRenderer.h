@@ -31,8 +31,7 @@ namespace brayns
 class OSPRayRenderer : public brayns::Renderer
 {
 public:
-    OSPRayRenderer( int argc, const char **argv,
-                    RenderingParametersPtr renderingParameters );
+    OSPRayRenderer( RenderingParameters& renderingParameters );
 
     void render( FrameBufferPtr frameBuffer ) final;
     void commit() final;

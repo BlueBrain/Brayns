@@ -58,28 +58,28 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
         _brayns->setMaterials(MT_SHADES_OF_GREY);
         break;
     case 'g':
-        _brayns->getGeometryParameters()->setTimedGeometry(
-            !_brayns->getGeometryParameters()->getTimedGeometry());
+        _brayns->getGeometryParameters().setTimedGeometry(
+            !_brayns->getGeometryParameters().getTimedGeometry());
         BRAYNS_INFO << "Timed geometry: " <<
-            (_brayns->getGeometryParameters()->getTimedGeometry() ? "On" : "Off") << std::endl;
+            (_brayns->getGeometryParameters().getTimedGeometry() ? "On" : "Off") << std::endl;
         break;
     case ']':
-        _brayns->getRenderingParameters()->setFrameNumber(
-            _brayns->getRenderingParameters()->getFrameNumber() +
-            _brayns->getGeometryParameters()->getTimedGeometryIncrement());
+        _brayns->getRenderingParameters().setFrameNumber(
+            _brayns->getRenderingParameters().getFrameNumber() +
+            _brayns->getGeometryParameters().getTimedGeometryIncrement());
         BRAYNS_INFO << "Frame number: " <<
-            _brayns->getRenderingParameters()->getFrameNumber() << std::endl;
+            _brayns->getRenderingParameters().getFrameNumber() << std::endl;
         break;
     case '[':
-        _brayns->getRenderingParameters()->setFrameNumber(
-            _brayns->getRenderingParameters()->getFrameNumber() -
-            _brayns->getGeometryParameters()->getTimedGeometryIncrement());
+        _brayns->getRenderingParameters().setFrameNumber(
+            _brayns->getRenderingParameters().getFrameNumber() -
+            _brayns->getGeometryParameters().getTimedGeometryIncrement());
         BRAYNS_INFO << "Frame number: " <<
-            _brayns->getRenderingParameters()->getFrameNumber() << std::endl;
+            _brayns->getRenderingParameters().getFrameNumber() << std::endl;
         break;
     case '*':
-        _brayns->getRenderingParameters()->display();
-        _brayns->getGeometryParameters()->display();
+        _brayns->getRenderingParameters().display();
+        _brayns->getGeometryParameters().display();
         break;
     default:
         BaseWindow::keypress(key,where);
@@ -93,7 +93,7 @@ void BraynsViewer::display()
 
     std::stringstream s;
     s << "BRayns Viewer - Interactive Ray-Tracing";
-    if(_brayns->getApplicationParameters()->isBenchmarking())
+    if(_brayns->getApplicationParameters().isBenchmarking())
         s << "@ " << _fps.getFPS();
     setTitle(s.str());
     forceRedraw();

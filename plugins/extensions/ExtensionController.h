@@ -53,7 +53,7 @@ public:
      * @param argv Arguments to pass to the extensions
      */
     ExtensionController(
-        ApplicationParametersPtr applicationParameters,
+        ApplicationParameters& applicationParameters,
         ExtensionParameters& extensionParameters );
 
     ~ExtensionController();

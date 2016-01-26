@@ -35,9 +35,8 @@ typedef std::vector< std::string > Arguments;
 class ApplicationParameters : public AbstractParameters
 {
 public:
-    ApplicationParameters();
+    ApplicationParameters(int argc, const char **argv);
 
-    void parse(int argc, const char **argv) final;
     void display() const final;
 
     /** window width */
