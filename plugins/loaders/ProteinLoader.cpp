@@ -20,6 +20,7 @@
 #include "ProteinLoader.h"
 
 #include <brayns/common/log.h>
+#include <brayns/common/types.h>
 #include <brayns/common/geometry/Sphere.h>
 
 #include <assert.h>
@@ -306,7 +307,6 @@ ProteinLoader::ProteinLoader(
 }
 
 bool ProteinLoader::importPDBFolder(
-    const MaterialScheme materialScheme,
     const int material,
     const Materials& materials,
     const int positionsOnly,
@@ -401,7 +401,7 @@ bool ProteinLoader::importPDBFolder(
                 {
                     const std::string pdbFilename(
                         _geometryParameters.getPDBFolder() + '/' + proteins[id] + ".pdb");
-                    if(!importPDBFile(pdbFilename, cellPositions.position, materialScheme,
+                    if(!importPDBFile(pdbFilename, cellPositions.position,
                         material, materials, primitives, bounds))
                         BRAYNS_WARN << "Failed to import " << pdbFilename << std::endl;
 
@@ -426,7 +426,6 @@ bool ProteinLoader::importPDBFolder(
 bool ProteinLoader::importPDBFile(
     const std::string &filename,
     const Vector3f& position,
-    const MaterialScheme materialScheme,
     const int material,
     const Materials& materials,
     PrimitivesCollection& primitives,
@@ -512,26 +511,28 @@ bool ProteinLoader::importPDBFile(
                 atom.materialId = 0;
                 i=0;
                 bool found(false);
-                if( materialScheme == MS_BACKBONE )
+                const ColorScheme colorScheme =
+                    _geometryParameters.getColorScheme( );
+                if( colorScheme == CS_PROTEIN_BACKBONE )
                     atom.materialId = material;
                 else
                 {
                     while(!found && i<colorMapSize)
                     {
-                        if(atomName == colorMap[i].symbol)
+                        if( atomName == colorMap[i].symbol )
                         {
                             found = true;
-                            switch( materialScheme )
+                            switch( colorScheme )
                             {
-                            case MS_CHAINS:
+                            case CS_PROTEIN_CHAINS:
                                 atom.materialId =
                                         abs(atom.chainId) % materials.size();
                                 break;
-                            case MS_RESIDUES:
+                            case CS_PROTEIN_RESIDUES:
                                 atom.materialId =
                                         abs(atom.residue) % materials.size();
                                 break;
-                            case MS_BACKBONE:
+                            case CS_PROTEIN_BACKBONE:
                                 atom.materialId = 0;
                                 break;
                             default:
@@ -563,7 +564,7 @@ bool ProteinLoader::importPDBFile(
                         position[2] + 0.01*atom.position[2]),
                     0.0001 * atom.radius * _geometryParameters.getRadius(), 0));
 
-                if(materialScheme==MS_BACKBONE)
+                if( colorScheme == CS_PROTEIN_BACKBONE )
                 {
                     Vector3f inView( sphere->getCenter() - inViewPos );
                     float dist = inView.length();

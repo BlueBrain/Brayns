@@ -37,6 +37,7 @@ if(APPLE)
   set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures" FORCE)
 endif()
 
+common_package(Boost REQUIRED COMPONENTS program_options)
 common_package(OSPRay REQUIRED SYSTEM)
 common_package(GLUT REQUIRED SYSTEM)
 common_package(OpenGL REQUIRED)

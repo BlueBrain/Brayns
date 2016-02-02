@@ -35,17 +35,13 @@ class AbstractParameters;
 class RenderingParameters : public AbstractParameters
 {
 public:
-    /**
-     *  Parse the command line parameters and populates according class members
-     *
-     * @param argc number of command line parameters
-     * @param argv actual command line parameters
-     */
-    RenderingParameters(int argc, const char **argv);
+    RenderingParameters( );
 
-    /** Displays parameters managed by the class
-     */
-    void display( ) const final;
+    /** @copydoc AbstractParameters::parse */
+    bool parse( int argc, const char **argv) final;
+
+    /** @copydoc AbstractParameters::print */
+    void print( ) final;
 
     /** OSPRay module */
     const std::string& getModule( ) const { return _module; }

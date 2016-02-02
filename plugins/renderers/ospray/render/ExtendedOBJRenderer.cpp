@@ -58,6 +58,7 @@ void ExtendedOBJRenderer::commit()
     bgColor = getParam3f("bgColor", osp::vec3f(1.f));
 
     shadowsEnabled = bool(getParam1i("shadowsEnabled", 1));
+
     softShadowsEnabled = bool(getParam1i("softShadowsEnabled", 1));
     ambientOcclusionStrength = getParam1f("ambientOcclusionStrength", 0.f);
     shadingEnabled = bool(getParam1i("shadingEnabled", 1));

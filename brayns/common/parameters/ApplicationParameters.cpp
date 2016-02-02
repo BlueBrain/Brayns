@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -18,97 +18,100 @@
  */
 
 #include "ApplicationParameters.h"
-#include <brayns/common/exceptions.h>
 #include <brayns/common/log.h>
+#include <brayns/common/parameters/ParametersManager.h>
 
 #include <boost/lexical_cast.hpp>
+
+namespace
+{
+
+const std::string PARAM_HELP = "help";
+const std::string PARAM_WINDOW_SIZE = "window-size";
+const std::string PARAM_CAMERA = "camera";
+const std::string PARAM_BENCHMARKING = "enable-benchmark";
+const std::string PARAM_DEFLECT_HOST_NAME = "deflect-hostname";
+const std::string PARAM_DEFLECT_STREAM_NAME = "deflect-streamname";
+const std::string PARAM_ZEQ_SCHEMA = "zeq-schema";
+
+const size_t DEFAULT_WINDOW_WIDTH = 800;
+const size_t DEFAULT_WINDOW_HEIGHT = 600;
+const std::string DEFAULT_DEFLECT_HOST_NAME = "localhost";
+const std::string DEFAULT_DEFLECT_STREAM_NAME = "brayns";
+const std::string DEFAULT_CAMERA = "perspective";
+
+}
 
 namespace brayns
 {
 
-const std::string PARAM_BUFFER_WIDTH = "--buffer-width";
-const std::string PARAM_BUFFER_HEIGHT = "--buffer-height";
-const std::string PARAM_METABALLS = "--metaballs";
-const std::string PARAM_STEREO_CAMERA = "--stereo-camera";
-const std::string PARAM_MATERIAL_SCHEME = "--material-scheme";
-const std::string PARAM_BENCHMARKING = "--enable-benchmark";
+namespace po = boost::program_options;
 
-const size_t DEFAULT_WINDOW_WIDTH = 800;
-const size_t DEFAULT_WINDOW_HEIGHT = 600;
-
-const std::string PARAM_DEFLECT_HOSTNAME = "deflect-hostname";
-const std::string DEFAULT_DEFLECT_HOSTNAME = "localhost";
-const std::string DEFAULT_DEFLECT_STREAMNAME = "brayns";
-
-const std::string PARAM_ZEQ_SCHEMA = "--zeq-schema";
-
-const std::string DEFAULT_CAMERA = "perspective";
-
-ApplicationParameters::ApplicationParameters(int argc, const char **argv)
-    : AbstractParameters(argc, argv)
-    , _camera(DEFAULT_CAMERA)
-    , _windowWidth(DEFAULT_WINDOW_WIDTH)
-    , _windowHeight(DEFAULT_WINDOW_HEIGHT)
-    , _deflectHostname(DEFAULT_DEFLECT_HOSTNAME)
-    , _deflectStreamname(DEFAULT_DEFLECT_STREAMNAME)
-    , _benchmarking(false)
+ApplicationParameters::ApplicationParameters( )
+    : AbstractParameters( "Application" )
+    , _camera( DEFAULT_CAMERA )
+    , _windowSize( DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT )
+    , _deflectHostname( DEFAULT_DEFLECT_HOST_NAME )
+    , _deflectStreamname( DEFAULT_DEFLECT_STREAM_NAME )
+    , _benchmarking( false )
 {
-    _parameters[PARAM_BUFFER_HEIGHT] =
-        {PMT_INTEGER, "Height of rendering buffer"};
-    _parameters[PARAM_BUFFER_WIDTH] =
-        {PMT_INTEGER, "Width of rendering buffer"};
-    _parameters[PARAM_METABALLS] =
-        {PMT_BOOLEAN, "Generates metaballs from morphologies"};
-    _parameters[PARAM_STEREO_CAMERA] =
-        {PMT_BOOLEAN, "Generates metaballs from morphologies"};
-    _parameters[PARAM_MATERIAL_SCHEME] =
-        {PMT_INTEGER, "Material scheme for molecular visualization "\
-         "(0: Atoms, 1: Chains, 2: Residues)"};
-    _parameters[PARAM_DEFLECT_HOSTNAME] =
-        {PMT_STRING, "Name of host running DisplayCluster"};
-    _parameters[DEFAULT_DEFLECT_STREAMNAME] =
-        {PMT_STRING, "Name of DisplayCluster stream"};
-    _parameters[PARAM_ZEQ_SCHEMA] =
-        {PMT_STRING, "Schema name for ZeroEQ communication"};
-    _parameters[PARAM_BENCHMARKING] =
-        {PMT_STRING, "Activates application benchmarking"};
-
-    // Save arguments for later use
-    for (int i=0;i<argc;i++)
-        _arguments.push_back(argv[i]);
-
-    // Parse arguments and populate class members accordingly
-    for (int i=1;i<argc;i++)
-    {
-        std::string arg = argv[i];
-        if (arg == PARAM_STEREO_CAMERA)
-            _camera = "stereo";
-        else if (arg == PARAM_BUFFER_WIDTH)
-            _windowWidth = boost::lexical_cast<size_t>(argv[++i]);
-        else if (arg == PARAM_BUFFER_HEIGHT)
-            _windowHeight = boost::lexical_cast<size_t>(argv[++i]);
-        else if(arg==PARAM_ZEQ_SCHEMA)
-            _zeqSchema = argv[++i];
-        else if(arg==PARAM_DEFLECT_HOSTNAME)
-            _deflectHostname = argv[++i];
-        else if(arg==DEFAULT_DEFLECT_STREAMNAME)
-            _deflectStreamname = argv[++i];
-        else if(arg==PARAM_BENCHMARKING)
-            _benchmarking = true;
-    }
+    _parameters.add_options( )
+        ( PARAM_HELP.c_str( ), "Help screen" )
+        ( PARAM_WINDOW_SIZE.c_str( ), po::value< uint8_ts >( ),
+            "Window size" )
+        ( PARAM_CAMERA.c_str( ), po::value< std::string >( ),
+            "Camera name" )
+        ( PARAM_DEFLECT_HOST_NAME.c_str( ), po::value< std::string >( ),
+            "Name of host running DisplayCluster" )
+        ( PARAM_DEFLECT_STREAM_NAME.c_str( ), po::value< std::string >( ),
+            "Name of DisplayCluster stream" )
+        ( PARAM_ZEQ_SCHEMA.c_str( ), po::value< std::string >( ),
+            "Schema name for ZeroEQ communication" )
+        ( PARAM_BENCHMARKING.c_str( ), po::value< std::string >( ),
+            "Activates application benchmarking" );
 }
 
-void ApplicationParameters::display() const
+bool ApplicationParameters::parse( int argc, const char **argv )
 {
-    BRAYNS_INFO << "Application options: " << std::endl;
-    BRAYNS_INFO << "- Window size   : " << _windowWidth << "x" <<
-                                           _windowHeight << std::endl;
-    BRAYNS_INFO << "- Camera        : " << _camera << std::endl;
-    BRAYNS_INFO << "- Rest schema   : " << _zeqSchema << std::endl;
-    BRAYNS_INFO << "- Deflect       : " << _deflectHostname << ":" <<
-                                           _deflectStreamname << std::endl;
-    BRAYNS_INFO << "- Benchmarking  : " <<
-                   (_benchmarking ? "On" : "Off") << std::endl;
+    AbstractParameters::parse( argc, argv );
+
+    if( _vm.count( PARAM_HELP ))
+        return false;
+    if( _vm.count( PARAM_WINDOW_SIZE ))
+    {
+        uint8_ts values = _vm[PARAM_WINDOW_SIZE].as< uint8_ts >( );
+        if( values.size() == 2 )
+        {
+            _windowSize.x( ) = values[0];
+            _windowSize.y( ) = values[1];
+        }
+    }
+    if( _vm.count( PARAM_CAMERA ))
+        _camera = _vm[PARAM_CAMERA].as< std::string >( );
+    if( _vm.count( PARAM_DEFLECT_HOST_NAME ))
+        _deflectHostname = _vm[PARAM_DEFLECT_HOST_NAME].as< std::string >( );
+    if( _vm.count( PARAM_DEFLECT_STREAM_NAME ))
+        _deflectStreamname = _vm[PARAM_DEFLECT_STREAM_NAME].as< std::string >( );
+    if( _vm.count( PARAM_ZEQ_SCHEMA ))
+        _zeqSchema = _vm[PARAM_ZEQ_SCHEMA].as< std::string >( );
+    if( _vm.count( PARAM_BENCHMARKING ))
+        _benchmarking = _vm[PARAM_BENCHMARKING].as< bool >( );
+
+    return true;
+}
+
+void ApplicationParameters::print( )
+{
+    AbstractParameters::print( );
+    BRAYNS_INFO << "Window size             : " << _windowSize << std::endl;
+    BRAYNS_INFO << "Camera                  : " << _camera << std::endl;
+    BRAYNS_INFO << "Deflect host name       : " <<
+        _deflectHostname << std::endl;
+    BRAYNS_INFO << "Deflect stream name     : " <<
+        _deflectStreamname << std::endl;
+    BRAYNS_INFO << "Zeq schema              : " << _zeqSchema << std::endl;
+    BRAYNS_INFO << "Benchmarking            : " <<
+        ( _benchmarking ? "on" : "off" ) << std::endl;
 }
 
 }

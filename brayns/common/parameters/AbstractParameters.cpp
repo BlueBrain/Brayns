@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -18,41 +18,35 @@
  */
 
 #include "AbstractParameters.h"
-
-#include <brayns/common/log.h>
-#include <string>
-#include <iostream>
+#include <brayns/common/types.h>
+#include <boost/program_options.hpp>
+#include <ostream>
 
 namespace brayns
 {
 
-const std::string PARAM_HELP = "--help";
+namespace po = boost::program_options;
 
-AbstractParameters::AbstractParameters(int argc, const char **argv)
+bool AbstractParameters::parse( int argc, const char **argv )
 {
-    for (int i=1;i<argc;i++)
-    {
-        std::string arg = argv[i];
-        if (arg == PARAM_HELP)
-            usage();
-    }
+    po::parsed_options parsedOptions =
+        po::command_line_parser( argc, argv ).options( _parameters ).
+        allow_unregistered( ).run( );
+    po::store( parsedOptions, _vm );
+    po::notify(_vm);
+    return true;
 }
 
-void AbstractParameters::usage() const
+void AbstractParameters::usage( )
 {
-    size_t maxLen(0);
-    for( Parameters::const_iterator it=_parameters.begin();
-         it!=_parameters.end(); ++it )
-        maxLen = std::max(maxLen, (*it).first.length());
+    BRAYNS_INFO << _name << " parameters:" <<
+        std::endl << _parameters << std::endl;
+}
 
-    BRAYNS_INFO << "Usage: " << std::endl;
-    for( Parameters::const_iterator it=_parameters.begin();
-         it!=_parameters.end(); ++it )
-    {
-        BRAYNS_INFO <<
-            (*it).first << std::string(maxLen-(*it).first.length()+1, ' ') <<
-            (*it).second << std::endl;
-    }
+void AbstractParameters::print( )
+{
+    BRAYNS_INFO << "-= " << _name << " parameters =-" << std::endl;
 }
 
 }
+

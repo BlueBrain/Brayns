@@ -40,20 +40,20 @@ namespace brayns
 
 const float DEFAULT_EPSILON = 1e-2f;
 
-OSPRayRenderer::OSPRayRenderer( RenderingParameters& renderingParamaters )
-    : Renderer( renderingParamaters )
+OSPRayRenderer::OSPRayRenderer( RenderingParameters& renderingParameters )
+    : Renderer( renderingParameters )
 {
     int nbArguments = 2;
     const char* argv[2] =
     {
-        "--renderer", renderingParamaters.getRenderer().c_str()
+        "--renderer", _renderingParameters.getRenderer( ).c_str( )
     };
     ospInit( &nbArguments, argv );
 
-    if( _renderingParameters.getModule() != "" )
-        ospLoadModule( _renderingParameters.getModule().c_str( ));
+    if( _renderingParameters.getModule( ) != "" )
+        ospLoadModule( _renderingParameters.getModule( ).c_str( ));
 
-    _renderer = ospNewRenderer( _renderingParameters.getRenderer().c_str( ));
+    _renderer = ospNewRenderer( _renderingParameters.getRenderer( ).c_str( ));
     assert( _renderer );
 }
 
@@ -62,10 +62,11 @@ void OSPRayRenderer::render( FrameBufferPtr frameBuffer )
     OSPRayFrameBuffer* osprayFrameBuffer =
         dynamic_cast< OSPRayFrameBuffer* >( frameBuffer.get( ));
     ospRenderFrame(
-        osprayFrameBuffer->impl(), _renderer, OSP_FB_COLOR | OSP_FB_ACCUM );
+        osprayFrameBuffer->impl( ), _renderer,
+        OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM );
 }
 
-void OSPRayRenderer::commit()
+void OSPRayRenderer::commit( )
 {
     Vector3f color = _renderingParameters.getBackgroundColor( );
     ospSet3f( _renderer, "bgColor", color.x( ), color.y( ), color.z( ));
@@ -77,7 +78,7 @@ void OSPRayRenderer::commit()
     ospSet1i( _renderer, "shadingEnabled",
         _renderingParameters.getLightShading( ));
     ospSet1i( _renderer, "frameNumber", _renderingParameters.getFrameNumber( ));
-    ospSet1i( _renderer, "randomNumber", rand( ) % 1000 );
+    ospSet1i( _renderer, "randomNumber", rand() % 1000 );
     ospSet1i( _renderer, "spp", _renderingParameters.getSamplesPerPixel( ));
     ospSet1i( _renderer, "electronShading",
         _renderingParameters.getElectronShading( ));

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -20,76 +20,49 @@
 #ifndef ABSTRACTPARAMETERS_H
 #define ABSTRACTPARAMETERS_H
 
-#include <map>
-#include <iostream>
+#include <boost/program_options.hpp>
+#include <brayns/common/log.h>
 
 namespace brayns
 {
 
-/** Command line parameter data types
- */
-enum ParameterType
-{
-    PMT_UNDEFINED = 0,
-    PMT_STRING,
-    PMT_INTEGER,
-    PMT_FLOAT,
-    PMT_BOOLEAN,
-    PMT_FLOAT3
-};
-
-/** Base class defining parameters
- */
-class Parameter
-{
-public:
-
-    ParameterType type;
-    std::string description;
-
-    friend std::ostream& operator<<(std::ostream& os, const Parameter& param)
-    {
-        switch( param.type )
-        {
-        case PMT_STRING: os << "<string>"; break;
-        case PMT_INTEGER: os << "<integer>"; break;
-        case PMT_FLOAT: os << "<float>"; break;
-        case PMT_BOOLEAN: os << "<boolean>"; break;
-        case PMT_FLOAT3: os << "<float3>"; break;
-        default:
-            os << "<undefined>"; break;
-        }
-        os << " " << param.description;
-        return os;
-    }
-
-};
-typedef std::map< std::string, Parameter > Parameters;
-
-/** Base class defining command line parameters
+/**
+   Base class defining command line parameters
  */
 class AbstractParameters
 {
 public:
-    /** Initializes and parses the command line parameters and populates according class members
-     *
-     * @param argc number of command line parameters
-     * @param argv actual command line parameters
+    /**
+       Constructor
+       @param name Display name for the set of parameters
      */
-    AbstractParameters(int argc, const char **argv);
+    AbstractParameters( const std::string& name ) : _name(name) {};
 
-    virtual ~AbstractParameters() {}
+    virtual ~AbstractParameters( ) {}
 
-    /** Displays parameters managed by the class
+    /**
+       Parses parameters managed by the class
+       @param argc number of command line parameters
+       @param argv actual command line parameters
+       @return false if the parsing requires application termination. This can
+               help stopping the application if a mandatory parameter is missing
      */
-    virtual void display() const = 0;
+    virtual bool parse( int argc, const char **argv );
 
-    /** Displays usage for parameters managed by the class
+    /**
+       Displays the usage of registered parameters
      */
-    virtual void usage() const;
+    void usage( );
+
+    /**
+       Displays values of registered parameters
+     */
+    virtual void print( );
 
 protected:
-    Parameters _parameters;
+    std::string _name;
+    boost::program_options::options_description _parameters;
+    boost::program_options::variables_map _vm;
 };
 
 }

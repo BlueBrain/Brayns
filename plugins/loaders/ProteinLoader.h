@@ -29,39 +29,29 @@
 namespace brayns
 {
 
-enum MaterialScheme
-{
-    MS_ATOMS,
-    MS_CHAINS,
-    MS_RESIDUES,
-    MS_BACKBONE
-};
-
 /** Loads protein from PDB files
  * http://www.rcsb.org
  */
 class ProteinLoader
 {
 public:
-    ProteinLoader(const GeometryParameters& geometryParameters);
+    ProteinLoader( const GeometryParameters& geometryParameters );
 
     /** Imports atoms from a given PDB folder
      *
      * @param geometries resulting geometries
      */
     bool importPDBFolder(
-        const MaterialScheme materialScheme,
         int material,
         const Materials& materials,
         int positionsOnly,
         PrimitivesCollection& primitives,
-        Boxf& bounds);
+        Boxf& bounds );
 
     /** Imports atoms from a given PDB file
      *
      * @param filename filename of the PDB file
      * @param position translates the protein to the given position
-     * @param materialScheme scheme used for materials
      * @param materials materials to assign to atoms
      * @param geometries resulting geometries
      * @param bounds resulting bounding of the scene
@@ -70,11 +60,10 @@ public:
     bool importPDBFile(
         const std::string &filename,
         const Vector3f& position,
-        const MaterialScheme materialScheme,
         int material,
         const Materials& materials,
         PrimitivesCollection& primitives,
-        Boxf& bounds);
+        Boxf& bounds );
 
     /** Returns the RGB composants for a given atom index, and according to the
      * JMol scheme
@@ -88,7 +77,7 @@ public:
         size_t index,
         float& r,
         float& g,
-        float& b);
+        float& b );
 
 private:
 

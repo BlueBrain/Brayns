@@ -92,9 +92,39 @@ class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;
 typedef std::map<std::string, Texture2DPtr> TexturesCollection;
 
-typedef std::vector<float> floats;
-typedef std::vector<int> ints;
-typedef std::vector<uint8_t> uint8_ts;
+typedef std::vector< std::string > strings;
+typedef std::vector< float > floats;
+typedef std::vector< int > ints;
+typedef std::vector< uint8_t > uint8_ts;
+
+class ParametersManager;
+class AbstractParameters;
+class ApplicationParameters;
+class GeometryParameters;
+class RenderingParameters;
+
+/** Define the color scheme to be applied to the geometry */
+enum ColorScheme
+{
+    CS_NONE,
+    CS_PROTEIN_ATOMS,
+    CS_PROTEIN_CHAINS,
+    CS_PROTEIN_RESIDUES,
+    CS_PROTEIN_BACKBONE,
+    CS_NEURON_DEFAULT,
+    CS_NEURON_BY_ID,
+    CS_NEURON_BY_TYPE,
+    CS_NEURON_BY_SEGMENT_TYPE,
+};
+
+/** Define the environment that is added to the default scene */
+enum SceneEnvironment
+{
+    SE_NONE = 0,
+    SE_GROUND,
+    SE_WALL,
+    SE_BOX
+};
 
 }
 

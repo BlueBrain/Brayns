@@ -26,9 +26,7 @@
 // Plugins
 #include <plugins/extensions/ExtensionController.h>
 
-#include <brayns/common/parameters/ApplicationParameters.h>
-#include <brayns/common/parameters/RenderingParameters.h>
-#include <brayns/common/parameters/GeometryParameters.h>
+#include <brayns/common/parameters/ParametersManager.h>
 
 // OSPray specific -> Must be changed to a dynamic plugin
 #include <plugins/renderers/ospray/render/OSPRayRenderer.h>
@@ -42,47 +40,47 @@ namespace brayns
 struct Brayns::Impl
 {
     Impl( int argc, const char **argv )
-         : _applicationParameters(argc, argv)
-         , _renderingParameters(argc,argv)
-         , _geometryParameters(argc,argv)
-         , _frameSize(0,0)
-         , _frameNumber(0)
-         , _rendering(false)
-         , _sceneModified(true)
+         : _frameSize( 0, 0 )
+         , _frameNumber( 0 )
+         , _rendering( false )
+         , _sceneModified( true )
     {
-        _applicationParameters.display();
-        _renderingParameters.display();
-        _geometryParameters.display();
+        _parametersManager.parse( argc, argv );
+        _parametersManager.print( );
 
-        _frameSize.x() = _applicationParameters.getWindowWidth();
-        _frameSize.y() = _applicationParameters.getWindowHeight();
+        _frameSize =
+            _parametersManager.getApplicationParameters( ).getWindowSize( );
 
         // Should be implemented with a plugin factory
-        _renderer.reset(new OSPRayRenderer(_renderingParameters));
+        _renderer.reset(
+            new OSPRayRenderer( _parametersManager.getRenderingParameters( )));
 
-        _scene.reset(new OSPRayScene(_renderer, _geometryParameters));
-        _scene->setMaterials(MT_DEFAULT, 200);
-        _scene->loadData();
-        _scene->buildEnvironment();
-        _scene->buildGeometry();
-        _scene->commit();
+        _scene.reset( new OSPRayScene( _renderer,
+            _parametersManager.getGeometryParameters( )));
 
-        _renderer->setScene(_scene);
+        _scene->setMaterials( MT_DEFAULT, 200 );
+        _scene->loadData( );
+        _scene->buildEnvironment( );
+        _scene->buildGeometry( );
+        _scene->commit( );
 
-        _frameBuffer.reset(new OSPRayFrameBuffer(_frameSize, FBF_RGBA_I8));
-        _camera.reset(new OSPRayCamera(CT_PERSPECTIVE));
-        _renderer->setCamera(_camera);
-        _renderer->commit();
+        _renderer->setScene( _scene );
+
+        _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8 ));
+        _camera.reset( new OSPRayCamera( CT_PERSPECTIVE ));
+        _renderer->setCamera( _camera );
+        _renderer->commit( );
     }
 
-    ~Impl()
+    ~Impl( )
     {
     }
 
     void render( const RenderInput& renderInput,
                  RenderOutput& renderOutput )
     {
-        _camera->set( renderInput.position, renderInput.target, renderInput.up );
+        _camera->set(
+            renderInput.position, renderInput.target, renderInput.up );
 
 #if(BRAYNS_USE_REST || BRAYNS_USE_DEFLECT)
         if( !_extensionController )
@@ -90,94 +88,82 @@ struct Brayns::Impl
             ExtensionParameters extensionParameters = {
                 _scene, _renderer, _camera, _frameBuffer };
 
-            _extensionController.reset(new ExtensionController(
-                _applicationParameters, extensionParameters ));
+            _extensionController.reset( new ExtensionController(
+                _parametersManager.getApplicationParameters( ),
+                extensionParameters ));
         }
-        _extensionController->execute();
+        _extensionController->execute( );
 #endif
-        _render();
+        _render( );
 
-        uint8_t* colorBuffer = _frameBuffer->getColorBuffer();
-        size_t size = _frameSize.x()*_frameSize.y()*sizeof(uint8_t)*_frameBuffer->getColorDepth();
-        renderOutput.colorBuffer.assign(colorBuffer, colorBuffer+size);
+        uint8_t* colorBuffer = _frameBuffer->getColorBuffer( );
+        size_t size =
+            _frameSize.x( ) * _frameSize.y( ) *
+            sizeof(uint8_t) * _frameBuffer->getColorDepth( );
+        renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
 
-        float* depthBuffer = _frameBuffer->getDepthBuffer();
-        size = _frameSize.x()*_frameSize.y()*sizeof(float);
-        renderOutput.depthBuffer.assign(depthBuffer, depthBuffer+size);
+        float* depthBuffer = _frameBuffer->getDepthBuffer( );
+        size = _frameSize.x( )*_frameSize.y( )*sizeof( float );
+        renderOutput.depthBuffer.assign( depthBuffer, depthBuffer + size );
     }
 
-    void reshape( const Vector2i& frameSize )
+    void reshape( const Vector2ui& frameSize )
     {
         _frameSize = frameSize;
-        _frameBuffer->resize(_frameSize);
-        _camera->setAspectRatio(_frameSize[1]/_frameSize[0]);
+        _frameBuffer->resize( _frameSize );
+        _camera->setAspectRatio( _frameSize[1] / _frameSize[0] );
     }
 
-    RenderingParameters& getRenderingParameters()
+    void setMaterials(
+        const MaterialType materialType,
+        const size_t nbMaterials )
     {
-        return _renderingParameters;
+        _scene->setMaterials( materialType, nbMaterials );
+        _scene->commit( );
     }
 
-    GeometryParameters& getGeometryParameters()
+    void commit( )
     {
-        return _geometryParameters;
+        _frameBuffer->clear( );
+        _renderer->commit( );
+        _camera->commit( );
     }
 
-    ApplicationParameters& getApplicationParameters()
+    ParametersManager& getParametersManager( )
     {
-        return _applicationParameters;
+        return _parametersManager;
     }
 
-    void setMaterials(const MaterialType materialType, const size_t nbMaterials)
-    {
-        _scene->setMaterials(materialType, nbMaterials);
-        _scene->commit();
-    }
-
-    void commit()
-    {
-        _frameBuffer->clear();
-        _renderer->commit();
-        _camera->commit();
-    }
-
-    Scene& getScene()
+    Scene& getScene( )
     {
         return *_scene;
     }
 
-    Camera& getCamera()
+    Camera& getCamera( )
     {
         return *_camera;
     }
 
 private:
-    void _render()
+    void _render( )
     {
         _rendering = true;
 
-        if (!_frameBuffer || !_renderer)
+        if( _parametersManager.getGeometryParameters( ).getTimedGeometry( ))
         {
-            BRAYNS_ERROR << "Oops..." << std::endl;
-            return;
+            _frameNumber += _parametersManager.getGeometryParameters( ).
+                getTimedGeometryIncrement( );
+            _frameBuffer->clear( );
         }
 
-        if( _geometryParameters.getTimedGeometry() )
-        {
-            _frameNumber += _geometryParameters.getTimedGeometryIncrement();
-            _frameBuffer->clear();
-        }
-
-        _frameBuffer->unmap();
+        _frameBuffer->unmap( );
         _renderer->render( _frameBuffer );
-        _frameBuffer->map();
+        _frameBuffer->map( );
 
         _rendering = false;
     }
 
-    ApplicationParameters _applicationParameters;
-    RenderingParameters _renderingParameters;
-    GeometryParameters _geometryParameters;
+    ParametersManager _parametersManager;
 
     ScenePtr _scene;
     CameraPtr _camera;
@@ -199,53 +185,45 @@ Brayns::Brayns( int argc, const char **argv )
     : _impl( new Impl( argc, argv ))
 {}
 
-Brayns::~Brayns()
+Brayns::~Brayns( )
 {}
 
 void Brayns::render( const RenderInput& renderInput,
                      RenderOutput& renderOutput )
 {
-    _impl->render(renderInput, renderOutput);
+    _impl->render( renderInput, renderOutput );
 }
 
-void Brayns::reshape( const Vector2i& size )
+void Brayns::reshape( const Vector2ui& size )
 {
-    _impl->reshape(size);
+    _impl->reshape( size );
 }
 
-void Brayns::commit()
+void Brayns::commit( )
 {
-    _impl->commit();
+    _impl->commit( );
 }
 
-ApplicationParameters& Brayns::getApplicationParameters()
+ParametersManager& Brayns::getParametersManager( )
 {
-    return _impl->getApplicationParameters();
+    return _impl->getParametersManager( );
 }
 
-RenderingParameters& Brayns::getRenderingParameters()
+void Brayns::setMaterials(
+    const MaterialType materialType,
+    const size_t nbMaterials )
 {
-    return _impl->getRenderingParameters();
+    _impl->setMaterials( materialType, nbMaterials );
 }
 
-GeometryParameters& Brayns::getGeometryParameters()
+Scene& Brayns::getScene( )
 {
-    return _impl->getGeometryParameters();
+    return _impl->getScene( );
 }
 
-void Brayns::setMaterials(const MaterialType materialType, const size_t nbMaterials)
+Camera& Brayns::getCamera( )
 {
-    _impl->setMaterials(materialType, nbMaterials);
-}
-
-Scene& Brayns::getScene()
-{
-    return _impl->getScene();
-}
-
-Camera& Brayns::getCamera()
-{
-    return _impl->getCamera();
+    return _impl->getCamera( );
 }
 
 }

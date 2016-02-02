@@ -7,6 +7,7 @@ set(BRAYNSCOMMON_SOURCES
   ui/manipulators/AbstractManipulator.cpp
   ui/manipulators/InspectCenterManipulator.cpp
   ui/manipulators/FlyingModeManipulator.cpp
+  parameters/ParametersManager.cpp
   parameters/AbstractParameters.cpp
   parameters/RenderingParameters.cpp
   parameters/GeometryParameters.cpp
@@ -33,6 +34,7 @@ set(BRAYNSCOMMON_HEADERS
   ui/manipulators/AbstractManipulator.h
   ui/manipulators/InspectCenterManipulator.h
   ui/manipulators/FlyingModeManipulator.h
+  parameters/ParametersManager.h
   parameters/AbstractParameters.h
   parameters/RenderingParameters.h
   parameters/GeometryParameters.h
@@ -51,8 +53,9 @@ set(BRAYNSCOMMON_HEADERS
   renderer/FrameBuffer.h
 )
 
-set(BRAYNSCOMMON_LINK_LIBRARIES PUBLIC boost_filesystem vmmlib
-                                PRIVATE ${GLUT_LIBRARIES} ${OSPRAY_LIBRARIES}
+set(BRAYNSCOMMON_LINK_LIBRARIES
+    PUBLIC boost_filesystem vmmlib boost_program_options
+    PRIVATE ${GLUT_LIBRARIES} ${OSPRAY_LIBRARIES}
 )
 
 if(RESTBRIDGE_FOUND)

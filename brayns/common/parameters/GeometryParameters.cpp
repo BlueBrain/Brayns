@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -18,88 +18,109 @@
  */
 
 #include "GeometryParameters.h"
+#include <brayns/common/types.h>
 #include <brayns/common/log.h>
 #include <brayns/common/exceptions.h>
 
 #include <boost/lexical_cast.hpp>
 
+namespace
+{
+
+const std::string PARAM_SWC_FOLDER = "swc-folder";
+const std::string PARAM_H5_FOLDER = "h5-folder";
+const std::string PARAM_PDB_FOLDER = "pdb-folder";
+const std::string PARAM_MESH_FOLDER = "mesh-folder";
+const std::string PARAM_RADIUS = "radius";
+const std::string PARAM_COLOR_SCHEME = "color-scheme";
+const std::string PARAM_TIMED_GEOMETRY_INCREMENT = "timed-geometry-increment";
+const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
+
+}
+
 namespace brayns
 {
 
-const std::string PARAM_SWC_FOLDER = "--swc-folder";
-const std::string PARAM_H5_FOLDER = "--h5-folder";
-const std::string PARAM_PDB_FOLDER = "--pdb-folder";
-const std::string PARAM_MESH_FOLDER = "--mesh-folder";
-const std::string PARAM_RADIUS = "--radius";
-const std::string PARAM_COLORED = "--colored";
-const std::string PARAM_TIMED_GEOMETRY_INCREMENT = "--timed-geometry-increment";
-const std::string PARAM_SCENE_ENVIRONMENT = "--scene-environment";
+namespace po = boost::program_options;
 
-GeometryParameters::GeometryParameters(int argc, const char **argv)
-    : AbstractParameters(argc, argv)
-    ,_radius(1), _colored(false), _timedGeometry(false)
+GeometryParameters::GeometryParameters( )
+    : AbstractParameters( "Geometry" )
+    ,_radius(1), _colorScheme(CS_NONE), _timedGeometry(false)
     , _timedGeometryIncrement(1), _sceneEnvironment(SE_NONE)
 {
-    _parameters[PARAM_SWC_FOLDER] =
-        {PMT_STRING, "Folder containing SWC files"};
-    _parameters[PARAM_H5_FOLDER] =
-        {PMT_STRING, "Folder containing H5 files"};
-    _parameters[PARAM_PDB_FOLDER] =
-        {PMT_STRING, "Folder containing PDB files with positions"};
-    _parameters[PARAM_MESH_FOLDER] =
-        {PMT_STRING, "Folder containing PARAM_BENCHMARKINGmeshes"};
-    _parameters[PARAM_RADIUS] =
-        {PMT_FLOAT, "Radius multiplier for spheres, cones and cylinders"};
-    _parameters[PARAM_COLORED] =
-        {PMT_BOOLEAN, "Sets different color to every morphology"};
-    _parameters[PARAM_TIMED_GEOMETRY_INCREMENT] =
-        {PMT_INTEGER, "Increment between frames"};
-    _parameters[PARAM_SCENE_ENVIRONMENT] =
-        {PMT_INTEGER, "Scene environment (0: none, 1: ground, 2: wall, 3: box)"};
-
-    for (int i=1;i<argc;i++)
-    {
-        std::string arg = argv[i];
-        if(arg == PARAM_SWC_FOLDER)
-            _swcFolder = argv[++i];
-        else if (arg == PARAM_H5_FOLDER)
-            _h5Folder = argv[++i];
-        else if (arg == PARAM_PDB_FOLDER)
-        {
-            _pdbFolder = argv[++i];
-            _pdbCells = argv[++i];
-            _pdbPositions = argv[++i];
-        }
-        else if (arg == PARAM_MESH_FOLDER)
-            _meshFolder = argv[++i];
-        else if (arg==PARAM_COLORED)
-            _colored = true;
-        else if (arg==PARAM_RADIUS)
-            _radius = boost::lexical_cast<float>(argv[++i]);
-        else if (arg==PARAM_TIMED_GEOMETRY_INCREMENT)
-        {
-            _timedGeometry = true;
-            _timedGeometryIncrement = boost::lexical_cast<float>(argv[++i]);
-        }
-        else if (arg == PARAM_SCENE_ENVIRONMENT)
-            _sceneEnvironment = static_cast<SceneEnvironment>(
-                boost::lexical_cast<size_t>(argv[++i]));
-    }
+    _parameters.add_options()
+        ( PARAM_SWC_FOLDER.c_str(), po::value< std::string >( ),
+            "Folder containing SWC files" )
+        ( PARAM_H5_FOLDER.c_str(), po::value< std::string >( ),
+            "Folder containing H5 files" )
+        ( PARAM_MESH_FOLDER.c_str(), po::value< std::string >( ),
+            "Folder containing mesh files" )
+        ( PARAM_PDB_FOLDER.c_str(), po::value< strings >( )->multitoken(),
+            "Folder containing PDB files" )
+        ( PARAM_RADIUS.c_str(), po::value< float >( ),
+            "Radius multiplier for spheres, cones and cylinders" )
+        ( PARAM_COLOR_SCHEME.c_str( ), po::value< size_t >( ),
+            "Color scheme to be applied to the geometry" )
+        ( PARAM_TIMED_GEOMETRY_INCREMENT.c_str(), po::value< int >( ),
+            "Increment between frames" )
+        ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< int >( ),
+            "Scene environment (0: none, 1: ground, 2: wall, 3: box)" );
 }
 
-void GeometryParameters::display() const
+bool GeometryParameters::parse( int argc, const char **argv )
 {
-    BRAYNS_INFO << "Geometry options: " << std::endl;
-    BRAYNS_INFO << "- SWC folder    : " << _swcFolder << std::endl;
-    BRAYNS_INFO << "- PDB folder    : " << _pdbFolder << std::endl;
-    BRAYNS_INFO << "- H5 folder     : " << _h5Folder << std::endl;
-    BRAYNS_INFO << "- Mesh folder   : " << _meshFolder << std::endl;
-    BRAYNS_INFO << "- Colored                  : " <<
-                   (_colored ? "on": "off") << std::endl;
-    BRAYNS_INFO << "- Radius                   : " <<
-                   _radius << std::endl;
-    BRAYNS_INFO << "- Timed geometry increment : " <<
-                   _timedGeometryIncrement << std::endl;
+    AbstractParameters::parse( argc, argv );
+
+    if( _vm.count( PARAM_SWC_FOLDER ))
+        _swcFolder = _vm[PARAM_SWC_FOLDER].as< std::string >( );
+    if( _vm.count( PARAM_H5_FOLDER ))
+        _h5Folder = _vm[PARAM_H5_FOLDER].as< std::string >( );
+    if( _vm.count( PARAM_PDB_FOLDER ))
+    {
+        strings values = _vm[PARAM_PDB_FOLDER].as< strings >( );
+        if( values.size( ) == 3 )
+        {
+            _pdbFolder = values[0];
+            _pdbCells = values[1];
+            _pdbPositions = values[2];
+        }
+    }
+    if( _vm.count( PARAM_MESH_FOLDER ))
+        _meshFolder = _vm[PARAM_MESH_FOLDER].as< std::string >( );
+    if( _vm.count( PARAM_COLOR_SCHEME ))
+        _colorScheme = static_cast< ColorScheme >(
+            _vm[PARAM_COLOR_SCHEME].as< size_t >( ));
+    if( _vm.count( PARAM_RADIUS))
+        _radius = _vm[PARAM_RADIUS].as< float >( );
+    if( _vm.count( PARAM_TIMED_GEOMETRY_INCREMENT ))
+    {
+        _timedGeometry = true;
+        _timedGeometryIncrement = _vm[PARAM_TIMED_GEOMETRY_INCREMENT].as< float >();
+    }
+    if( _vm.count( PARAM_SCENE_ENVIRONMENT ))
+        _sceneEnvironment = static_cast< SceneEnvironment >(
+            _vm[PARAM_SCENE_ENVIRONMENT].as< size_t >( ));
+
+    return true;
+}
+
+void GeometryParameters::print( )
+{
+    AbstractParameters::print( );
+    BRAYNS_INFO << "SWC folder              : " << _swcFolder << std::endl;
+    BRAYNS_INFO << "H5 folder               : " << _h5Folder << std::endl;
+    BRAYNS_INFO << "PDB datasource          : " << std::endl;
+    BRAYNS_INFO << "- Folder                : " << _pdbFolder << std::endl;
+    BRAYNS_INFO << "- Cells                 : " << _pdbCells << std::endl;
+    BRAYNS_INFO << "- Positions             : " << _pdbPositions << std::endl;
+    BRAYNS_INFO << "Mesh folder             : " << _meshFolder << std::endl;
+    BRAYNS_INFO << "Color scheme            : " <<
+        static_cast<size_t>( _colorScheme ) << std::endl;
+    BRAYNS_INFO << "Radius                  : " << _radius << std::endl;
+    BRAYNS_INFO << "Timed geometry          : " <<
+        ( _timedGeometry ? "on" : "off" ) << std::endl;
+    BRAYNS_INFO << "Scene environment       : " <<
+        static_cast<size_t>( _sceneEnvironment ) << std::endl;
 }
 
 }

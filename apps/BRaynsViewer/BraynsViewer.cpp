@@ -22,9 +22,7 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/log.h>
-#include <brayns/common/parameters/ApplicationParameters.h>
-#include <brayns/common/parameters/RenderingParameters.h>
-#include <brayns/common/parameters/GeometryParameters.h>
+#include <brayns/common/parameters/ParametersManager.h>
 
 namespace brayns
 {
@@ -39,6 +37,11 @@ BraynsViewer::BraynsViewer(int argc, const char **argv)
 
 void BraynsViewer::keypress(char key, const Vector2f& where)
 {
+    GeometryParameters& geoParams =
+        _brayns->getParametersManager( ).getGeometryParameters( );
+    RenderingParameters& renderParams =
+        _brayns->getParametersManager( ).getRenderingParameters( );
+
     switch (key)
     {
     case '4':
@@ -58,45 +61,46 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
         _brayns->setMaterials(MT_SHADES_OF_GREY);
         break;
     case 'g':
-        _brayns->getGeometryParameters().setTimedGeometry(
-            !_brayns->getGeometryParameters().getTimedGeometry());
+        geoParams.setTimedGeometry( !geoParams.getTimedGeometry( ));
         BRAYNS_INFO << "Timed geometry: " <<
-            (_brayns->getGeometryParameters().getTimedGeometry() ? "On" : "Off") << std::endl;
+            ( geoParams.getTimedGeometry( ) ? "On" : "Off" ) << std::endl;
         break;
     case ']':
-        _brayns->getRenderingParameters().setFrameNumber(
-            _brayns->getRenderingParameters().getFrameNumber() +
-            _brayns->getGeometryParameters().getTimedGeometryIncrement());
+        renderParams.setFrameNumber(
+            renderParams.getFrameNumber( ) +
+            geoParams.getTimedGeometryIncrement( ));
         BRAYNS_INFO << "Frame number: " <<
-            _brayns->getRenderingParameters().getFrameNumber() << std::endl;
+            renderParams.getFrameNumber( ) << std::endl;
         break;
     case '[':
-        _brayns->getRenderingParameters().setFrameNumber(
-            _brayns->getRenderingParameters().getFrameNumber() -
-            _brayns->getGeometryParameters().getTimedGeometryIncrement());
+        renderParams.setFrameNumber(
+            renderParams.getFrameNumber( ) -
+            geoParams.getTimedGeometryIncrement( ));
         BRAYNS_INFO << "Frame number: " <<
-            _brayns->getRenderingParameters().getFrameNumber() << std::endl;
+            renderParams.getFrameNumber( ) << std::endl;
         break;
     case '*':
-        _brayns->getRenderingParameters().display();
-        _brayns->getGeometryParameters().display();
+        _brayns->getParametersManager( ).printHelp( );
         break;
     default:
         BaseWindow::keypress(key,where);
     }
-    _brayns->commit();
+    _brayns->commit( );
 }
 
-void BraynsViewer::display()
+void BraynsViewer::display( )
 {
-    BaseWindow::display();
+    BaseWindow::display( );
 
-    std::stringstream s;
-    s << "BRayns Viewer - Interactive Ray-Tracing";
-    if(_brayns->getApplicationParameters().isBenchmarking())
-        s << "@ " << _fps.getFPS();
-    setTitle(s.str());
-    forceRedraw();
+    std::stringstream ss;
+    ss << "BRayns Viewer - Interactive Ray-Tracing";
+    if( _brayns->getParametersManager().getApplicationParameters( ).
+        isBenchmarking( ))
+    {
+        ss << "@ " << _fps.getFPS( );
+    }
+    setTitle(ss.str( ));
+    forceRedraw( );
 }
 
 }

@@ -94,7 +94,8 @@ bool MorphologyLoader::_importH5File(
             size_t frameId = 0;
             size_t count_sections = 0;
             const size_t material =
-                _geometryParameters.getColored() ? (morphologyIndex%100) : 0;
+                ( _geometryParameters.getColorScheme() == CS_NEURON_BY_ID) ?
+                ( morphologyIndex%100 ) : 0;
 
             const bbp::Morphology morphology = (*it);
             const bbp::Sections& sections = morphology.sections();
@@ -276,7 +277,9 @@ bool MorphologyLoader::_importSWCFile(
             morphology.y += position[1];
             morphology.z += position[2];
             morphology.id = idx;
-            morphology.branch = _geometryParameters.getColored() ? morphologyIndex : 0;
+            morphology.branch =
+                ( _geometryParameters.getColorScheme() ==  CS_NEURON_BY_ID ?
+                morphologyIndex : 0 );
             morphology.frame = mapIdTime[idx];
             morphology.used = false;
 

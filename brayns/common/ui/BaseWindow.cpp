@@ -22,7 +22,7 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/log.h>
-#include <brayns/common/parameters/RenderingParameters.h>
+#include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/camera/Camera.h>
 
@@ -42,9 +42,9 @@ const float DEFAULT_EPSILON = 1e-4f;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const float DEFAULT_MOUSE_SPEED = 0.005f;
 
-void runGLUT()
+void runGLUT( )
 {
-    glutMainLoop();
+    glutMainLoop( );
 }
 
 void initGLUT(int32 *ac, const char **av)
@@ -64,7 +64,7 @@ void glut3dReshape(int32 x, int32 y)
 void glut3dDisplay( void )
 {
     if(BaseWindow::_activeWindow)
-       BaseWindow::_activeWindow->display();
+       BaseWindow::_activeWindow->display( );
 }
 
 void glut3dKeyboard(unsigned char key, int32 x, int32 y)
@@ -81,7 +81,7 @@ void glut3dSpecial(int32 key, int32 x, int32 y)
 void glut3dIdle( void )
 {
     if(BaseWindow::_activeWindow)
-       BaseWindow::_activeWindow->idle();
+       BaseWindow::_activeWindow->idle( );
 }
 void glut3dMotionFunc(int32 x, int32 y)
 {
@@ -117,7 +117,7 @@ BaseWindow::BaseWindow(
 {
     // Initialize brayns
     _brayns.reset(new Brayns(argc, argv));
-    setViewPort();
+    setViewPort( );
 
     // Initialize manipulators
     if(allowedManipulators & INSPECT_CENTER_MODE)
@@ -129,17 +129,17 @@ BaseWindow::BaseWindow(
     switch(initialManipulator)
     {
     case MOVE_MODE:
-        _manipulator.reset(_flyingModeManipulator.get());
+        _manipulator.reset(_flyingModeManipulator.get( ));
         break;
     case INSPECT_CENTER_MODE:
-        _manipulator.reset(_inspectCenterManipulator.get());
+        _manipulator.reset(_inspectCenterManipulator.get( ));
         break;
     }
     assert(_manipulator);
 }
 
 
-BaseWindow::~BaseWindow()
+BaseWindow::~BaseWindow( )
 {
 }
 
@@ -156,7 +156,7 @@ void BaseWindow::mouseButton(
         _currButtonState = _currButtonState & ~(1<<whichButton);
     else
         _currButtonState = _currButtonState |  (1<<whichButton);
-    _currModifiers = glutGetModifiers();
+    _currModifiers = glutGetModifiers( );
 
     _manipulator->button( pos );
 }
@@ -171,16 +171,16 @@ void BaseWindow::motion(const Vector2i& pos)
         _lastButtonState = _currButtonState;
     }
 
-    _manipulator->motion();
+    _manipulator->motion( );
     _lastMousePos = _currMousePos;
-    if(_viewPort.getModified())
+    if(_viewPort.getModified( ))
     {
-        _brayns->commit();
-        forceRedraw();
+        _brayns->commit( );
+        forceRedraw( );
     }
 }
 
-void BaseWindow::idle()
+void BaseWindow::idle( )
 {
     usleep(1000);
 }
@@ -188,30 +188,30 @@ void BaseWindow::idle()
 void BaseWindow::reshape(const Vector2i& newSize)
 {
     _windowSize = newSize;
-    _viewPort.setAspect(float(newSize.x())/float(newSize.y()));
+    _viewPort.setAspect(float(newSize.x( ))/float(newSize.y( )));
     _brayns->reshape(newSize);
-    forceRedraw();
+    forceRedraw( );
 }
 
-void BaseWindow::activate()
+void BaseWindow::activate( )
 {
     _activeWindow = this;
     glutSetWindow(_windowID);
 }
 
-void BaseWindow::forceRedraw()
+void BaseWindow::forceRedraw( )
 {
-    glutPostRedisplay();
+    glutPostRedisplay( );
 }
 
-void BaseWindow::display()
+void BaseWindow::display( )
 {
     RenderInput renderInput;
     RenderOutput renderOutput;
 
-    renderInput.position = _viewPort.getPosition();
-    renderInput.target = _viewPort.getTarget()-_viewPort.getPosition();
-    renderInput.up = _viewPort.getUp();
+    renderInput.position = _viewPort.getPosition( );
+    renderInput.target = _viewPort.getTarget( )-_viewPort.getPosition( );
+    renderInput.up = _viewPort.getUp( );
 
     _brayns->render(renderInput, renderOutput);
 
@@ -222,66 +222,66 @@ void BaseWindow::display()
     {
     case BaseWindow::FRAMEBUFFER_COLOR:
         type = GL_UNSIGNED_BYTE;
-        buffer = renderOutput.colorBuffer.data();
+        buffer = renderOutput.colorBuffer.data( );
         break;
     case BaseWindow::FRAMEBUFFER_DEPTH:
         format = GL_LUMINANCE;
-        buffer = renderOutput.depthBuffer.data();
+        buffer = renderOutput.depthBuffer.data( );
         break;
     default:
         glClearColor(0.f,0.f,0.f,1.f);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     }
 
-    glDrawPixels(_windowSize.x(), _windowSize.y(), format, type, buffer);
-    glutSwapBuffers();
+    glDrawPixels(_windowSize.x( ), _windowSize.y( ), format, type, buffer);
+    glutSwapBuffers( );
 
 #if(BRAYNS_USE_REST || BRAYNS_USE_DEFLECT)
-    _viewPort.setPosition(_brayns->getCamera().getPosition());
+    _viewPort.setPosition(_brayns->getCamera( ).getPosition( ));
 #endif
     ++frameCounter_;
 }
 
-void BaseWindow::clearPixels()
+void BaseWindow::clearPixels( )
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glutSwapBuffers();
+    glutSwapBuffers( );
 }
 
 void BaseWindow::drawPixels(const uint32* framebuffer)
 {
-    glDrawPixels(_windowSize.x(), _windowSize.y(),
+    glDrawPixels(_windowSize.x( ), _windowSize.y( ),
                  GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
-    glutSwapBuffers();
+    glutSwapBuffers( );
 }
 
 void BaseWindow::drawPixels(const Vector3f* framebuffer)
 {
-    glDrawPixels(_windowSize.x(), _windowSize.y(),
+    glDrawPixels(_windowSize.x( ), _windowSize.y( ),
                  GL_RGBA, GL_FLOAT, framebuffer);
-    glutSwapBuffers();
+    glutSwapBuffers( );
 }
 
-Boxf BaseWindow::getWorldBounds()
+Boxf BaseWindow::getWorldBounds( )
 {
-    return _brayns->getScene().getWorldBounds();
+    return _brayns->getScene( ).getWorldBounds( );
 }
 
-void BaseWindow::setViewPort()
+void BaseWindow::setViewPort( )
 {
-    Boxf worldBounds = _brayns->getScene().getWorldBounds();
-    Vector3f center = worldBounds.getCenter();
-    Vector3f diag   = worldBounds.getDimension();
-    diag = max(diag,Vector3f(0.3f*diag.length()));
+    Boxf worldBounds = _brayns->getScene( ).getWorldBounds( );
+    Vector3f center = worldBounds.getCenter( );
+    Vector3f diag   = worldBounds.getDimension( );
+    diag = max(diag,Vector3f(0.3f*diag.length( )));
     Vector3f from = center;
-    from.z() -= diag.z();
+    from.z( ) -= diag.z( );
 
     Vector3f up  = Vector3f(0.f,1.f,0.f);
 
     _viewPort.initialize(from, center, up);
 
-    _motionSpeed = diag.length() * 0.001f;
+    _motionSpeed = diag.length( ) * 0.001f;
     BRAYNS_INFO << "World bounds :" << worldBounds << std::endl;
     BRAYNS_INFO << "Viewport     :" << _viewPort << std::endl;
     BRAYNS_INFO << "Motion speed :" << _motionSpeed << std::endl;
@@ -310,7 +310,7 @@ void BaseWindow::create(const char *title,
     glutIdleFunc(glut3dIdle);
 
     if(fullScreen)
-        glutFullScreen();
+        glutFullScreen( );
 }
 
 void BaseWindow::specialkey( int32 key, const Vector2f& )
@@ -321,6 +321,9 @@ void BaseWindow::specialkey( int32 key, const Vector2f& )
 
 void BaseWindow::keypress( char key, const Vector2f& )
 {
+    RenderingParameters& renderParams =
+        _brayns->getParametersManager( ).getRenderingParameters( );
+
     switch( key )
     {
     case '+':
@@ -332,31 +335,29 @@ void BaseWindow::keypress( char key, const Vector2f& )
         BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
         break;
     case '1':
-        _brayns->getRenderingParameters().setBackgroundColor(Vector3f(.5f,.5f,.5f));
+        renderParams.setBackgroundColor(Vector3f(.5f,.5f,.5f));
         BRAYNS_INFO << "Setting grey background" << std::endl;
         break;
     case '2':
-        _brayns->getRenderingParameters().setBackgroundColor(Vector3f(1.f,1.f,1.f));
+        renderParams.setBackgroundColor(Vector3f(1.f,1.f,1.f));
         BRAYNS_INFO << "Setting white background" << std::endl;
         break;
     case '3':
-        _brayns->getRenderingParameters().setBackgroundColor(Vector3f(0.f,0.f,0.f));
+        renderParams.setBackgroundColor(Vector3f(0.f,0.f,0.f));
         BRAYNS_INFO << "Setting black background" << std::endl;
         break;
     case 'C':
         BRAYNS_INFO << _viewPort << std::endl;
         break;
     case 'D':
-        _brayns->getRenderingParameters().setDepthOfField(
-            !_brayns->getRenderingParameters().getDepthOfField());
-        BRAYNS_INFO << "Detph of field: " << _brayns->getRenderingParameters().getDepthOfField()
-                    << std::endl;
+        renderParams.setDepthOfField( !renderParams.getDepthOfField( ));
+        BRAYNS_INFO << "Detph of field: " <<
+            renderParams.getDepthOfField( ) << std::endl;
         break;
     case 'E':
-        _brayns->getRenderingParameters().setElectronShading(
-            !_brayns->getRenderingParameters().getElectronShading());
+        renderParams.setElectronShading( !renderParams.getElectronShading( ));
         BRAYNS_INFO << "Electron shading: " <<
-            (_brayns->getRenderingParameters().getElectronShading() ? "On" : "Off") << std::endl;
+            (renderParams.getElectronShading( ) ? "On" : "Off") << std::endl;
         break;
     case 'F':
         // 'f'ly mode
@@ -367,16 +368,15 @@ void BaseWindow::keypress( char key, const Vector2f& )
         }
         break;
     case 'G':
-        _brayns->getRenderingParameters().setGradientBackground(
-            !_brayns->getRenderingParameters().getGradientBackground());
+        renderParams.setGradientBackground(
+            !renderParams.getGradientBackground( ));
         BRAYNS_INFO << "Gradient background: " <<
-            (_brayns->getRenderingParameters().getGradientBackground() ? "On" : "Off") << std::endl;
+            (renderParams.getGradientBackground( ) ? "On" : "Off") << std::endl;
         break;
     case 'H':
-        _brayns->getRenderingParameters().setSoftShadows(
-            !_brayns->getRenderingParameters().getSoftShadows());
+        renderParams.setSoftShadows( !renderParams.getSoftShadows( ));
         BRAYNS_INFO << "Soft shadows " <<
-            (_brayns->getRenderingParameters().getSoftShadows() ? "On" : "Off") << std::endl;
+            (renderParams.getSoftShadows( ) ? "On" : "Off") << std::endl;
         break;
     case 'I':
         // 'i'nspect mode
@@ -390,60 +390,61 @@ void BaseWindow::keypress( char key, const Vector2f& )
     {
         fullScreen_ = !fullScreen_;
         if(fullScreen_)
-            glutFullScreen();
+            glutFullScreen( );
         else
             glutPositionWindow(0,10);
         break;
     }
     case 'o':
     {
-        float aaStrength =
-            _brayns->getRenderingParameters().getAmbientOcclusionStrength();
+        float aaStrength = _brayns->getParametersManager( ).
+            getRenderingParameters( ).getAmbientOcclusionStrength( );
         aaStrength += 0.1f;
         if( aaStrength>1.f ) aaStrength=1.f;
-        _brayns->getRenderingParameters().setAmbientOcclusionStrength( aaStrength );
-        BRAYNS_INFO << "Ambient occlusion strength: " << aaStrength << std::endl;
+        renderParams.setAmbientOcclusionStrength( aaStrength );
+        BRAYNS_INFO << "Ambient occlusion strength: " <<
+            aaStrength << std::endl;
         break;
     }
     case 'O':
     {
-        float aaStrength =
-            _brayns->getRenderingParameters().getAmbientOcclusionStrength();
+        float aaStrength = renderParams.getAmbientOcclusionStrength( );
         aaStrength -= 0.1f;
         if( aaStrength<0.f ) aaStrength=0.f;
-        _brayns->getRenderingParameters().setAmbientOcclusionStrength( aaStrength );
-        BRAYNS_INFO << "Ambient occlusion strength: " << aaStrength << std::endl;
+        renderParams.setAmbientOcclusionStrength( aaStrength );
+        BRAYNS_INFO << "Ambient occlusion strength: "
+            << aaStrength << std::endl;
         break;
     }
     case 'P':
-        _brayns->getRenderingParameters().setLightShading(
-                    !_brayns->getRenderingParameters().getLightShading());
+        renderParams.setLightShading( !renderParams.getLightShading( ));
         BRAYNS_INFO << "Light shading: " <<
-            (_brayns->getRenderingParameters().getLightShading() ? "On" : "Off") << std::endl;
+            (renderParams.getLightShading( ) ? "On" : "Off") << std::endl;
         break;
     case 'r':
-        _brayns->getRenderingParameters().setFrameNumber(0);
+        renderParams.setFrameNumber(0);
         BRAYNS_INFO << "Frame number: " <<
-            _brayns->getRenderingParameters().getFrameNumber() << std::endl;
+            renderParams.getFrameNumber( ) << std::endl;
         break;
     case 'R':
-        _brayns->getRenderingParameters().setFrameNumber(std::numeric_limits<uint16_t>::max());
+        renderParams.setFrameNumber(std::numeric_limits<uint16_t>::max( ));
         BRAYNS_INFO << "Frame number: " <<
-            _brayns->getRenderingParameters().getFrameNumber() << std::endl;
+            renderParams.getFrameNumber( ) << std::endl;
         break;
     case 'S':
-        _brayns->getRenderingParameters().setShadows(
-            !_brayns->getRenderingParameters().getShadows());
+        renderParams.setShadows(
+            !renderParams.getShadows( ));
         BRAYNS_INFO << "Shadows: " <<
-            (_brayns->getRenderingParameters().getShadows() ? "On" : "Off") << std::endl;
+            (renderParams.getShadows( ) ? "On" : "Off") << std::endl;
         break;
     case 'V':
-        _brayns->getRenderingParameters().setBackgroundColor(
-            Vector3f(rand()%200/100.f-1.f, rand()%200/100.f-1.f, rand()%200/100.0-1.f));
+        renderParams.
+            setBackgroundColor( Vector3f( rand( ) % 200 / 100.f - 1.f,
+            rand( ) % 200 / 100.f - 1.f, rand( ) % 200 / 100.f - 1.f ));
         break;
     case 'Y':
-        _brayns->getRenderingParameters().setLightEmittingMaterials(
-            !_brayns->getRenderingParameters().getLightEmittingMaterials());
+        renderParams.setLightEmittingMaterials(
+            !renderParams.getLightEmittingMaterials( ));
         break;
     case 'Z':
         if( _frameBufferMode==FRAMEBUFFER_DEPTH )

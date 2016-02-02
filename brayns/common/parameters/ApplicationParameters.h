@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -22,6 +22,7 @@
 
 #include "AbstractParameters.h"
 
+#include <brayns/common/types.h>
 #include <string>
 #include <vector>
 
@@ -35,15 +36,16 @@ typedef std::vector< std::string > Arguments;
 class ApplicationParameters : public AbstractParameters
 {
 public:
-    ApplicationParameters(int argc, const char **argv);
+    ApplicationParameters( );
 
-    void display() const final;
+    /** @copydoc AbstractParameters::parse */
+    bool parse( int argc, const char **argv) final;
 
-    /** window width */
-    size_t getWindowWidth() const { return _windowWidth; }
+    /** @copydoc AbstractParameters::print */
+    void print( ) final;
 
-    /** window height */
-    size_t getWindowHeight() const { return _windowHeight; }
+    /** window size */
+    const Vector2ui& getWindowSize() const { return _windowSize; }
 
     /** camera name (e.g. Perspective, Stereo, etc. ) */
     std::string getCamera() const { return _camera; }
@@ -51,7 +53,6 @@ public:
     /** ZeroEQ schema name */
     std::string getZeqSchema() const { return _zeqSchema; }
 
-    /** Deflect parameters */
     /** DisplayCluster server host */
     std::string getDeflectHostname() const { return _deflectHostname; }
     /** Application stream name for DisplayCluster */
@@ -66,8 +67,7 @@ protected:
 
     std::string _camera;
 
-    size_t _windowWidth;
-    size_t _windowHeight;
+    Vector2ui _windowSize;
 
     std::string _zeqSchema;
 

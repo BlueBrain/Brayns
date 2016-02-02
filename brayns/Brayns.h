@@ -93,26 +93,10 @@ public:
     BRAYNS_API void commit();
 
     /**
-       Gets rendering parameters
-       @return Rendering parameters for the current scene
-
-       @todo Must be removed (VIZTM-572)
+       Gets parameters manager
+       @return Parameters manager for the current scene
     */
-    BRAYNS_API RenderingParameters& getRenderingParameters();
-
-    /**
-       Gets geometry parameters
-       @return Geometry parameters for the current scene
-
-       @todo Must be removed (VIZTM-572)
-    */
-    BRAYNS_API GeometryParameters& getGeometryParameters();
-
-    /**
-       Gets application parameters
-       @return Application parameters for the current scene
-    */
-    BRAYNS_API ApplicationParameters& getApplicationParameters();
+    BRAYNS_API ParametersManager& getParametersManager();
 
     /**
        Sets materials for the current scene
@@ -137,7 +121,7 @@ public:
 
        @todo Must be removed and held by the render method above
     */
-    BRAYNS_API void reshape(const Vector2i& frameSize);
+    BRAYNS_API void reshape( const Vector2ui& frameSize );
 
     /**
        Gets the current scene

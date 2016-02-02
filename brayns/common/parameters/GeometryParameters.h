@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -22,78 +22,68 @@
 
 #include "AbstractParameters.h"
 
-#include <stdio.h>
+#include <brayns/common/types.h>
 
 namespace brayns
 {
-
-/** Command line parameter data types
- */
-enum SceneEnvironment
-{
-    SE_NONE = 0,
-    SE_GROUND,
-    SE_WALL,
-    SE_BOX
-};
 
 /** Manages geometry parameters
  */
 class GeometryParameters : public AbstractParameters
 {
 public:
-    /** Parse the command line parameters and populates according class members
-     *
-     * @param argc number of command line parameters
-     * @param argv actual command line parameters
+    /**
+       Parse the command line parameters and populates according class members
      */
-    GeometryParameters(int argc, const char **argv);
+    GeometryParameters( );
 
-    /** Displays parameters managed by the class
-     */
-    void display() const final;
+    /** @copydoc AbstractParameters::parse */
+    virtual bool parse( int argc, const char **argv ) final;
+
+    /** @copydoc AbstractParameters::print */
+    void print( ) final;
 
     /** folder containing SWC files */
-    std::string getSWCFolder() const { return _swcFolder; }
+    std::string getSWCFolder( ) const { return _swcFolder; }
 
     /** folder containing PDB files */
-    std::string getPDBFolder() const { return _pdbFolder; }
+    std::string getPDBFolder( ) const { return _pdbFolder; }
 
     /** folder containing PDB cells */
-    std::string getPDBCells() const { return _pdbCells; }
+    std::string getPDBCells( ) const { return _pdbCells; }
 
     /** folder containing PDB positions */
-    std::string getPDBPositions() const { return _pdbPositions; }
+    std::string getPDBPositions( ) const { return _pdbPositions; }
 
     /** folder containing H5 files */
-    std::string getH5Folder() const { return _h5Folder; }
+    std::string getH5Folder( ) const { return _h5Folder; }
 
     /** folder containing mesh files */
-    std::string getMeshFolder() const { return _meshFolder; }
+    std::string getMeshFolder( ) const { return _meshFolder; }
 
     /** Radius multiplier applied to spheres, cones and cylinders */
-    float getRadius() const { return _radius; }
-    void setRadius(float value) { _radius = value; }
+    float getRadius( ) const { return _radius; }
+    void setRadius( const float value ) { _radius = value; }
 
     /** Enables a different color for every morphology/mesh when
     * loading them from a given folder
     */
-    bool getColored() const { return _colored; }
-    void setColored(bool value) { _colored = value; }
+    ColorScheme getColorScheme( ) const { return _colorScheme; }
+    void setColorScheme( const ColorScheme value ) { _colorScheme = value; }
 
     /** Enables timed geometries by incrementing the timestamp for
      * every computer frame */
-    bool getTimedGeometry() const { return _timedGeometry; }
-    void setTimedGeometry(bool value) { _timedGeometry = value; }
+    bool getTimedGeometry( ) const { return _timedGeometry; }
+    void setTimedGeometry( const bool value ) { _timedGeometry = value; }
 
     /** Defines the timestamp increment between two frames */
-    size_t getTimedGeometryIncrement() const
+    size_t getTimedGeometryIncrement( ) const
     { return _timedGeometryIncrement; }
-    void setTimedGeometryIncrement( size_t value)
+    void setTimedGeometryIncrement( const size_t value )
     { _timedGeometryIncrement = value; }
 
     /** Scene environment (0: none, 1: ground, 2: box ) */
-    SceneEnvironment getSceneEnvironment() const { return _sceneEnvironment; }
+    SceneEnvironment getSceneEnvironment( ) const { return _sceneEnvironment; }
 
 protected:
     std::string _swcFolder;
@@ -103,7 +93,7 @@ protected:
     std::string _h5Folder;
     std::string _meshFolder;
     float  _radius;
-    bool   _colored;
+    ColorScheme _colorScheme;
     bool   _timedGeometry;
     size_t _timedGeometryIncrement;
     SceneEnvironment _sceneEnvironment;
