@@ -60,7 +60,7 @@ public:
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
 
-    Arguments getArguments() const { return _arguments; }
+    const Arguments& getArguments() const { return _arguments; }
 
 protected:
 

@@ -30,7 +30,9 @@
 // classes are loaded dynamicaly. The following line is only to make
 // sure that the hbpKernel library is loaded.
 #  include <plugins/renderers/ospray/render/ExtendedOBJRenderer.h>
-brayns::ExtendedOBJRenderer __r__;
+#  include <plugins/renderers/ospray/render/ProximityRenderer.h>
+brayns::ExtendedOBJRenderer extendedObjRenderer;
+brayns::ProximityRenderer proximityRenderer;
 #endif
 
 namespace brayns
@@ -42,7 +44,8 @@ OSPRayRenderer::OSPRayRenderer( RenderingParameters& renderingParamaters )
     : Renderer( renderingParamaters )
 {
     int nbArguments = 2;
-    const char* argv[2] = {
+    const char* argv[2] =
+    {
         "--renderer", renderingParamaters.getRenderer().c_str()
     };
     ospInit( &nbArguments, argv );
@@ -64,8 +67,8 @@ void OSPRayRenderer::render( FrameBufferPtr frameBuffer )
 
 void OSPRayRenderer::commit()
 {
-    Vector3f bgColor = _renderingParameters.getBackgroundColor();
-    ospSet3f( _renderer, "bgColor", bgColor.x(), bgColor.y(), bgColor.z( ));
+    Vector3f color = _renderingParameters.getBackgroundColor( );
+    ospSet3f( _renderer, "bgColor", color.x( ), color.y( ), color.z( ));
     ospSet1i( _renderer, "shadowsEnabled", _renderingParameters.getShadows( ));
     ospSet1i( _renderer, "softShadowsEnabled",
         _renderingParameters.getSoftShadows( ));
@@ -74,12 +77,22 @@ void OSPRayRenderer::commit()
     ospSet1i( _renderer, "shadingEnabled",
         _renderingParameters.getLightShading( ));
     ospSet1i( _renderer, "frameNumber", _renderingParameters.getFrameNumber( ));
-    ospSet1i( _renderer, "randomNumber", rand() % 1000 );
+    ospSet1i( _renderer, "randomNumber", rand( ) % 1000 );
     ospSet1i( _renderer, "spp", _renderingParameters.getSamplesPerPixel( ));
     ospSet1i( _renderer, "electronShading",
         _renderingParameters.getElectronShading( ));
     ospSet1f( _renderer, "epsilon", DEFAULT_EPSILON );
     ospSet1i( _renderer, "moving", false );
+    ospSet1f( _renderer, "detectionDistance",
+        _renderingParameters.getDetectionDistance( ));
+    ospSet1i( _renderer, "detectionOnDifferentMaterial",
+        _renderingParameters.getDetectionOnDifferentMaterial( ));
+    color = _renderingParameters.getDetectionNearColor( );
+    ospSet3f( _renderer, "detectionNearColor",
+        color.x( ), color.y( ), color.z( ));
+    color = _renderingParameters.getDetectionFarColor( );
+    ospSet3f( _renderer, "detectionFarColor",
+        color.x( ), color.y( ), color.z( ));
     ospCommit( _renderer );
 }
 

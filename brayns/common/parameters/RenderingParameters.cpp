@@ -23,6 +23,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+namespace
+{
 const std::string DEFAULT_RENDERER = "raycast_eyelight";
 
 const std::string PARAM_MODULE = "--module";
@@ -38,6 +40,13 @@ const std::string PARAM_GRADIENT_BACKGROUND = "--gradient-background";
 const std::string PARAM_RADIANCE = "--radiance";
 const std::string PARAM_BACKGROUND_COLOR = "--background-color";
 const std::string PARAM_FRAME_NUMBER = "--frame-number";
+const std::string PARAM_DETECTION_DISTANCE = "--detection-distance";
+const std::string PARAM_DETECTION_ON_DIFFERENT_MATERIAL =
+    "--detection-on-different-material";
+const std::string PARAM_DETECTION_NEAR_COLOR = "--detection-near-color";
+const std::string PARAM_DETECTION_FAR_COLOR = "--detection-far-color";
+
+}
 
 namespace brayns
 {
@@ -57,6 +66,10 @@ RenderingParameters::RenderingParameters( int argc, const char **argv )
     , _softShadows( false )
     , _backgroundColor( Vector3f( .8f, .8f, .8f ))
     , _frameNumber( std::numeric_limits<uint16_t>::max( ))
+    , _detectionDistance( 1.f )
+    , _detectionOnDifferentMaterial( false )
+    , _detectionNearColor( 1.f, 0.f, 0.f )
+    , _detectionFarColor( 0.f, 1.f, 0.f )
 {
     _parameters[PARAM_MODULE] =
         { PMT_STRING, "Name of the OSPRay module" };
@@ -84,8 +97,16 @@ RenderingParameters::RenderingParameters( int argc, const char **argv )
         { PMT_FLOAT3, "Background color" };
     _parameters[PARAM_FRAME_NUMBER] =
         { PMT_INTEGER, "Frame number" };
+    _parameters[PARAM_DETECTION_DISTANCE] =
+        {PMT_FLOAT, "Detection distance"};
+    _parameters[PARAM_DETECTION_ON_DIFFERENT_MATERIAL] =
+        {PMT_BOOLEAN, "Detection considered for different materials only"};
+    _parameters[PARAM_DETECTION_NEAR_COLOR] =
+        {PMT_FLOAT3, "Detection near color"};
+    _parameters[PARAM_DETECTION_FAR_COLOR] =
+        {PMT_FLOAT3, "Detection far color"};
 
-    for( int i=1; i < argc; i++ )
+    for( int i=1; i < argc; ++i )
     {
         std::string arg = argv[i];
         if( arg == PARAM_RENDERER )
@@ -93,9 +114,10 @@ RenderingParameters::RenderingParameters( int argc, const char **argv )
         else if( arg == PARAM_MODULE )
             _module = argv[++i];
         else if( arg == PARAM_SPP )
-            _spp = atoi(argv[++i]);
+            _spp = atoi( argv[++i] );
         else if( arg == PARAM_AMBIENT_OCCLUSION )
-            _ambientOcclusionStrength = boost::lexical_cast<float>( argv[++i] );
+            _ambientOcclusionStrength =
+                boost::lexical_cast< float >( argv[++i] );
         else if( arg == PARAM_SHADOWS )
             _shadows = true;
         else if( arg == PARAM_SOFT_SHADOWS )
@@ -111,15 +133,33 @@ RenderingParameters::RenderingParameters( int argc, const char **argv )
         }
         else if( arg == PARAM_GRADIENT_BACKGROUND )
             _gradientBackground = true;
-        else if( arg == PARAM_BACKGROUND_COLOR )
+        else if( arg == PARAM_BACKGROUND_COLOR && i < argc - 3 )
+        {
+            float r = boost::lexical_cast< float >( argv[++i] );
+            float g = boost::lexical_cast< float >( argv[++i] );
+            float b = boost::lexical_cast< float >( argv[++i] );
+            _backgroundColor = Vector3f( r, g, b );
+        }
+        else if( arg == PARAM_FRAME_NUMBER )
+            _frameNumber = boost::lexical_cast< size_t >( argv[++i] );
+        else if( arg == PARAM_DETECTION_DISTANCE )
+            _detectionDistance = boost::lexical_cast< float >(argv[++i]);
+        else if( arg == PARAM_DETECTION_ON_DIFFERENT_MATERIAL )
+            _detectionOnDifferentMaterial = true;
+        else if( arg == PARAM_DETECTION_NEAR_COLOR && i < argc - 3 )
         {
             float r = boost::lexical_cast<float>( argv[++i] );
             float g = boost::lexical_cast<float>( argv[++i] );
             float b = boost::lexical_cast<float>( argv[++i] );
-            _backgroundColor = Vector3f(r, g, b);
+            _detectionNearColor = Vector3f( r, g, b );
         }
-        else if( arg == PARAM_FRAME_NUMBER )
-            _frameNumber = boost::lexical_cast<size_t>( argv[++i] );
+        else if( arg == PARAM_DETECTION_FAR_COLOR && i < argc - 3 )
+        {
+            float r = boost::lexical_cast< float >( argv[++i] );
+            float g = boost::lexical_cast< float >( argv[++i] );
+            float b = boost::lexical_cast< float >( argv[++i] );
+            _detectionFarColor = Vector3f( r, g, b );
+        }
     }
 }
 
@@ -128,26 +168,34 @@ void RenderingParameters::display() const
     BRAYNS_INFO << "Rendering options: " << std::endl;
     BRAYNS_INFO << "- OSPRay Module : " << _module << std::endl;
     BRAYNS_INFO << "- Renderer      : " << _renderer << std::endl;
-    BRAYNS_INFO << "- Samples per pixel       : " <<
-                   _spp << std::endl;
-    BRAYNS_INFO << "- Ambient occlusion       : " <<
-                   _ambientOcclusionStrength << std::endl;
-    BRAYNS_INFO << "- Shadows                 : " <<
-                   ( _shadows ? "on": "off" ) << std::endl;
-    BRAYNS_INFO << "- Soft shadows            : " <<
-                   ( _softShadows ? "on": "off" ) << std::endl;
-    BRAYNS_INFO << "- Light shading           : " <<
-                   ( _lightShading ? "on": "off" ) << std::endl;
-    BRAYNS_INFO << "- Electron shading        : " <<
-                   ( _electronShading ? "on": "off" ) << std::endl;
-    BRAYNS_INFO << "- Depth of field          : " <<
-                   ( _dof ? "on": "off") << std::endl;
-    BRAYNS_INFO << "- Depth of field strength : " <<
-                   _dofStrength << std::endl;
-    BRAYNS_INFO << "- Gradient background     : " <<
-                   ( _gradientBackground ? "on": "off" ) << std::endl;
-    BRAYNS_INFO << "- Frame number            : " <<
-                   _frameNumber << std::endl;
+    BRAYNS_INFO << "- Samples per pixel               : " <<
+       _spp << std::endl;
+    BRAYNS_INFO << "- Ambient occlusion               : " <<
+       _ambientOcclusionStrength << std::endl;
+    BRAYNS_INFO << "- Shadows                         : " <<
+       ( _shadows ? "on": "off" ) << std::endl;
+    BRAYNS_INFO << "- Soft shadows                    : " <<
+       ( _softShadows ? "on": "off" ) << std::endl;
+    BRAYNS_INFO << "- Light shading                   : " <<
+       ( _lightShading ? "on": "off" ) << std::endl;
+    BRAYNS_INFO << "- Electron shading                : " <<
+       ( _electronShading ? "on": "off" ) << std::endl;
+    BRAYNS_INFO << "- Depth of field                  : " <<
+       ( _dof ? "on": "off") << std::endl;
+    BRAYNS_INFO << "- Depth of field strength         : " <<
+       _dofStrength << std::endl;
+    BRAYNS_INFO << "- Gradient background             : " <<
+       ( _gradientBackground ? "on": "off" ) << std::endl;
+    BRAYNS_INFO << "- Frame number                    : " <<
+       _frameNumber << std::endl;
+    BRAYNS_INFO << "- Detection distance              : " <<
+       _detectionDistance << std::endl;
+    BRAYNS_INFO << "- Detection on different material : " <<
+       ( _detectionOnDifferentMaterial ? "on" : "off" ) << std::endl;
+    BRAYNS_INFO << "- Detection near color            : " <<
+       _detectionNearColor << std::endl;
+    BRAYNS_INFO << "- Detection far color             : " <<
+       _detectionFarColor << std::endl;
 }
 
 }

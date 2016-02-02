@@ -56,24 +56,6 @@ MACRO(get_ispc_target_list)
   ENDIF()
 ENDMACRO()
 
-set(BRAYNSOSPRAYPLUGIN_SOURCES
-  geometry/ExtendedCylinders.cpp
-  geometry/ExtendedCones.cpp
-  geometry/ExtendedSpheres.cpp
-  camera/StereoCamera.cpp
-  render/ExtendedOBJMaterial.cpp
-  render/ExtendedOBJRenderer.cpp
-)
-
-set(BRAYNSOSPRAYPLUGIN_HEADERS
-  geometry/ExtendedCylinders.h
-  geometry/ExtendedCones.h
-  geometry/ExtendedSpheres.h
-  camera/StereoCamera.h
-  render/ExtendedOBJMaterial.h
-  render/ExtendedOBJRenderer.h
-)
-
 set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   geometry/ExtendedCylinders.ispc
   geometry/ExtendedCones.ispc
@@ -81,6 +63,7 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   camera/StereoCamera.ispc
   render/ExtendedOBJMaterial.ispc
   render/ExtendedOBJRenderer.ispc
+  render/ProximityRenderer.ispc
 )
 
 set(BRAYNSOSPRAYPLUGIN_SOURCES
@@ -90,6 +73,7 @@ set(BRAYNSOSPRAYPLUGIN_SOURCES
   geometry/ExtendedSpheres.cpp
   render/ExtendedOBJMaterial.cpp
   render/ExtendedOBJRenderer.cpp
+  render/ProximityRenderer.cpp
   render/OSPRayScene.cpp
   render/OSPRayRenderer.cpp
   render/OSPRayFrameBuffer.cpp
@@ -103,6 +87,7 @@ set(BRAYNSOSPRAYPLUGIN_HEADERS
   geometry/ExtendedSpheres.h
   render/ExtendedOBJMaterial.h
   render/ExtendedOBJRenderer.h
+  render/ProximityRenderer.h
   render/OSPRayScene.h
   render/OSPRayRenderer.h
   render/OSPRayFrameBuffer.h
