@@ -310,7 +310,7 @@ bool ProteinLoader::importPDBFolder(
     const int material,
     const Materials& materials,
     const int positionsOnly,
-    PrimitivesCollection& primitives,
+    PrimitivesMap& primitives,
     Boxf& bounds)
 {
     BRAYNS_INFO << "Folder   : " << _geometryParameters.getPDBFolder() << std::endl;
@@ -428,7 +428,7 @@ bool ProteinLoader::importPDBFile(
     const Vector3f& position,
     const int material,
     const Materials& materials,
-    PrimitivesCollection& primitives,
+    PrimitivesMap& primitives,
     Boxf& bounds)
 {
     Vector3f inViewPos(0,0,0);

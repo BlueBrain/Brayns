@@ -64,7 +64,7 @@ public:
     bool importMeshFromFile(
             const std::string& filename,
             float scale,
-            TrianglesMeshCollection& triangles,
+            TrianglesMeshMap& triangles,
             Materials& materials,
             int material,
             MeshQuality meshQuality,
@@ -79,7 +79,7 @@ public:
      */
     bool exportMeshToFile(
             const std::string& filename,
-            TrianglesMeshCollection& triangles,
+            TrianglesMeshMap& triangles,
             Materials& materials ) const;
 #endif
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -17,39 +17,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYSCENE_H
-#define OSPRAYSCENE_H
-
-#include <brayns/common/types.h>
-#include <brayns/common/scene/Scene.h>
-#include <ospray/ospray.h>
-#include <ospray/common/OSPCommon.h>
+#include "PointLight.h"
 
 namespace brayns
 {
 
-class OSPRayScene: public brayns::Scene
+PointLight::PointLight(
+    const Vector3f& color,
+    const Vector3f& position,
+    const float intensity,
+    const float cutoffDistance )
+    : Light( color, intensity )
+    , _position( position )
+    , _cutoffDistance( cutoffDistance )
 {
-public:
-    OSPRayScene( RendererPtr renderer, GeometryParameters& geometryParameters );
-
-    void commit() final;
-    void loadData() final;
-    void buildGeometry() final;
-
-    OSPModel impl() {return _scene;}
-
-private:
-    void _commitLights();
-    void _commitMaterials();
-
-    OSPTexture2D _createTexture2D(const std::string& textureName);
-
-    OSPModel _scene;
-    std::map<size_t, OSPMaterial> _ospMaterials;
-    std::map<std::string, OSPTexture2D> _ospTextures;
-    OSPData _ospLightData;
-};
+}
 
 }
-#endif // OSPRAYSCENE_H

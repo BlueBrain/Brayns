@@ -37,7 +37,7 @@ MeshLoader::MeshLoader()
 bool MeshLoader::importMeshFromFile(
         const std::string& filename,
         const float scale,
-        TrianglesMeshCollection& triangles,
+        TrianglesMeshMap& triangles,
         Materials& materials,
         const int defaultMaterial,
         const MeshQuality meshQuality,
@@ -139,7 +139,7 @@ bool MeshLoader::importMeshFromFile(
 #ifdef __APPLE__
 bool MeshLoader::exportMeshToFile(
         const std::string& filename,
-        TrianglesMeshCollection& triangles,
+        TrianglesMeshMap& triangles,
         Materials& materials ) const
 {
     // Save to OBJ

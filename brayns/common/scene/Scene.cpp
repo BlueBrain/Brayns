@@ -394,4 +394,22 @@ void Scene::buildEnvironment( )
     }
 }
 
+void Scene::addLight( LightPtr light )
+{
+    removeLight( light );
+    _lights.push_back( light );
+}
+
+void Scene::removeLight( LightPtr light )
+{
+    Lights::iterator it = std::find( _lights.begin( ), _lights.end( ), light );
+    if( it != _lights.end( ))
+        _lights.erase( it );
+}
+
+void Scene::clearLights( )
+{
+    _lights.clear();
+}
+
 }

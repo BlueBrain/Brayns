@@ -81,7 +81,7 @@ etries
         const std::string& filename,
         int morphologyIndex,
         const Vector3f& position,
-        PrimitivesCollection& primitives,
+        PrimitivesMap& primitives,
         Boxf& bounds);
 
 private:
@@ -89,14 +89,14 @@ private:
         const std::string& filename,
         int morphologyIndex,
         const Vector3f& position,
-        PrimitivesCollection& primitives,
+        PrimitivesMap& primitives,
         Boxf& bounds);
 
     bool _importH5File(
         const std::string &filename,
         int morphologyIndex,
         const Vector3f& position,
-        PrimitivesCollection& primitives,
+        PrimitivesMap& primitives,
         Boxf& bounds);
 
     GeometryParameters _geometryParameters;

@@ -63,34 +63,45 @@ typedef std::vector<Geometry *> Geometries;
 class Primitive;
 typedef std::shared_ptr<Primitive> PrimitivePtr;
 typedef std::vector<PrimitivePtr> Primitives;
-typedef std::map<size_t, Primitives> PrimitivesCollection;
+typedef std::map<size_t, Primitives> PrimitivesMap;
 
 class Sphere;
 typedef std::shared_ptr<Sphere> SpherePtr;
 typedef std::vector<SpherePtr> Spheres;
-typedef std::map<size_t, Spheres> SpheresCollection;
+typedef std::map<size_t, Spheres> SpheresMap;
 
 class Cylinder;
 typedef std::shared_ptr<Cylinder> CylinderPtr;
 typedef std::vector<CylinderPtr> Cylinders;
-typedef std::map<size_t, Cylinders> CylindersCollection;
+typedef std::map<size_t, Cylinders> CylindersMap;
 
 class Cone;
 typedef std::shared_ptr<Cone> ConePtr;
 typedef std::vector<ConePtr> Cones;
-typedef std::map<size_t, Cones> ConesCollection;
+typedef std::map<size_t, Cones> ConesMap;
 
 class TrianglesMesh;
-typedef std::map<size_t, TrianglesMesh> TrianglesMeshCollection;
+typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 
 class Material;
 typedef std::shared_ptr<Material> MaterialPtr;
 typedef std::vector<MaterialPtr> Materials;
-typedef std::map<size_t, Materials> MaterialsCollection;
+typedef std::map<size_t, Materials> MaterialsMap;
 
 class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;
-typedef std::map<std::string, Texture2DPtr> TexturesCollection;
+typedef std::map<std::string, Texture2DPtr> TexturesMap;
+
+class Light;
+typedef std::shared_ptr< Light > LightPtr;
+typedef std::vector< LightPtr > Lights;
+typedef std::map< size_t, LightPtr > LightsMap;
+
+class DirectionalLight;
+typedef std::shared_ptr< DirectionalLight > DirectionalLightPtr;
+
+class PointLight;
+typedef std::shared_ptr< PointLight > PointLightPtr;
 
 typedef std::vector< std::string > strings;
 typedef std::vector< float > floats;
@@ -124,6 +135,13 @@ enum SceneEnvironment
     SE_GROUND,
     SE_WALL,
     SE_BOX
+};
+
+/** Define light types */
+enum LightType
+{
+    LT_POINT = 0,
+    LT_DIRECTIONAL,
 };
 
 }

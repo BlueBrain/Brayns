@@ -23,6 +23,8 @@
 #include <brayns/common/log.h>
 #include <brayns/common/parameters/GeometryParameters.h>
 #include <brayns/common/material/Texture2D.h>
+#include <brayns/common/light/PointLight.h>
+#include <brayns/common/light/DirectionalLight.h>
 #ifdef BRAYNS_USE_MAGICKCPP
 #  include <plugins/loaders/TextureLoader.h>
 #endif
@@ -74,7 +76,8 @@ void OSPRayScene::loadData()
 
 void OSPRayScene::buildGeometry()
 {
-    // Make sure materials have been initialized before assigning the geometry
+    // Make sure lights and materials have been initialized before assigning
+    // the geometry
     _commitMaterials();
 
     BRAYNS_INFO << "Building OSPRay geometry" << std::endl;
@@ -174,23 +177,60 @@ void OSPRayScene::buildGeometry()
     delete extendedSpheres;
     delete extendedCylinders;
 
-    OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>(_renderer.get());
-    _light = ospNewLight(osprayRenderer->impl(), "DirectionalLight");
-    ospray::vec3f position =
-        ospray::vec3f(_bounds.getMax().x(), _bounds.getMax().y()/2.f, _bounds.getMin().z()/2.f);
-    ospSet3f(_light, "position", position.x, position.y, position.z);
-    ospSet3f(_light, "color", 1.f, 1.f, 1.f);
-    ospSet3f(_light, "direction", 1.f, -1.f, 1.f );
-    ospSet1f(_light, "intensity", 1.f);
-    ospSet1f(_light, "halfAngle", 15.f);
-    ospSet1f(_light, "range", _bounds.getDimension().x());
-    BRAYNS_INFO << "Unique default light added at position " << position << std::endl;
+    _commitLights();
+}
 
-    _lightData = ospNewData(1, OSP_OBJECT, &_light);
-    ospCommit(_lightData);
+void OSPRayScene::_commitLights()
+{
+    OSPRayRenderer* osprayRenderer =
+        dynamic_cast< OSPRayRenderer* >( _renderer.get( ));
 
-    ospSetData(osprayRenderer->impl(), "lights", _lightData);
-    ospCommit(_light);
+    std::vector< OSPLight > ospLights;
+    for( auto light: _lights )
+    {
+        OSPLight ospLight;
+        DirectionalLight* directionalLight =
+            dynamic_cast< DirectionalLight* >( light.get( ));
+        if( directionalLight != 0 )
+        {
+            ospLight =
+                ospNewLight( osprayRenderer->impl(), "DirectionalLight" );
+            const Vector3f color = directionalLight->getColor( );
+            ospSet3f( ospLight, "color",
+                color.x( ), color.y( ), color.z( ));
+            const Vector3f direction = directionalLight->getDirection( );
+            ospSet3f( ospLight, "direction",
+                direction.x( ), direction.y( ), direction.z( ));
+            ospSet1f( ospLight, "intensity",
+                directionalLight->getIntensity( ));
+            ospCommit( ospLight );
+            ospLights.push_back( ospLight );
+        }
+        else
+        {
+            PointLight* pointLight = dynamic_cast< PointLight* >( light.get( ));
+            if( pointLight != 0 )
+            {
+                ospLight =
+                    ospNewLight( osprayRenderer->impl(), "PointLight" );
+                const Vector3f position = pointLight->getPosition( );
+                ospSet3f( ospLight, "position",
+                    position.x( ), position.y( ), position.z( ));
+                const Vector3f color = pointLight->getColor( );
+                ospSet3f( ospLight, "color",
+                    color.x( ), color.y( ), color.z( ));
+                ospSet1f( ospLight, "intensity",
+                    pointLight->getIntensity( ));
+                ospSet1f( ospLight, "radius",
+                    pointLight->getCutoffDistance( ));
+                ospCommit( ospLight );
+                ospLights.push_back( ospLight );
+            }
+        }
+    }
+    _ospLightData = ospNewData( _lights.size(), OSP_OBJECT, &ospLights[0] );
+    ospCommit( _ospLightData );
+    ospSetData( osprayRenderer->impl(), "lights", _ospLightData );
 }
 
 void OSPRayScene::_commitMaterials()
