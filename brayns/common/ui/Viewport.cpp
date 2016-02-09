@@ -45,9 +45,9 @@ void Viewport::initialize(
 
     const Vector3f dir = normalize(_target - _position);
 
-    const Vector3f x = normalize(dir.cross(_up));
-    const Vector3f y = normalize(dir.cross(x));
-    const Vector3f z = normalize(dir);
+    const Vector3f x = normalize( vmml::cross( dir, _up ));
+    const Vector3f y = normalize( vmml::cross( dir, x ));
+    const Vector3f z = normalize( dir );
 
     _viewMatrix.set_column(0, x);
     _viewMatrix.set_column(1, y);
@@ -72,9 +72,9 @@ void Viewport::_snapUp()
 
     if (fabsf(dot(_up,vz)) < 1e-3f)
         return;
-    _viewMatrix.set_column(0, normalize(vy.cross(_up)));
-    _viewMatrix.set_column(1, normalize(vx.cross(vy)));
-    _viewMatrix.set_column(2, normalize(vz.cross(vx)));
+    _viewMatrix.set_column(0, normalize( vmml::cross( vy, _up )));
+    _viewMatrix.set_column(1, normalize( vmml::cross( vx, vy )));
+    _viewMatrix.set_column(2, normalize( vmml::cross( vz, vx )));
 
     _modified = true;
 }

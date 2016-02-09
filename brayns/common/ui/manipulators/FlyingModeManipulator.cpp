@@ -44,13 +44,13 @@ void FlyingModeManipulator::keypress( int32 key )
         case 'd':
         {
             const float fwd = _window.getMotionSpeed();
-            viewport.translate(dir.cross(viewport.getUp())*fwd);
+            viewport.translate( vmml::cross( dir, viewport.getUp( ))*fwd);
             break;
         }
         case 'a':
         {
             const float fwd = _window.getMotionSpeed();
-            viewport.translate(-dir.cross(viewport.getUp())*fwd);
+            viewport.translate(-vmml::cross( dir, viewport.getUp( ))*fwd);
             break;
         }
     }
