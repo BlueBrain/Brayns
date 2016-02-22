@@ -20,8 +20,10 @@
 #ifndef ABSTRACTPARAMETERS_H
 #define ABSTRACTPARAMETERS_H
 
-#include <boost/program_options.hpp>
 #include <brayns/common/log.h>
+#include <brayns/common/types.h>
+
+#include <boost/program_options.hpp>
 
 namespace brayns
 {
@@ -59,10 +61,13 @@ public:
      */
     virtual void print( );
 
+    const strings& arguments() const;
+
 protected:
     std::string _name;
     boost::program_options::options_description _parameters;
     boost::program_options::variables_map _vm;
+    strings _arguments;
 };
 
 }

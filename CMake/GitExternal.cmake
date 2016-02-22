@@ -23,6 +23,9 @@
 #    when only a specific branch of a repo is required and the full history
 #    is not required. Note that the SHALLOW option will only work for a branch
 #    or tag and cannot be used for an arbitrary SHA.
+#  OPTIONAL, when present, this option makes this operation optional.
+#    The function will output a warning and return if the repo could not be
+#    cloned.
 #
 # Targets:
 #  * <directory>-rebase: fetches latest updates and rebases the given external
@@ -74,7 +77,7 @@ function(JOIN VALUES GLUE OUTPUT)
 endfunction()
 
 function(GIT_EXTERNAL DIR REPO tag)
-  cmake_parse_arguments(GIT_EXTERNAL_LOCAL "VERBOSE;SHALLOW" "" "RESET" ${ARGN})
+  cmake_parse_arguments(GIT_EXTERNAL_LOCAL "VERBOSE;SHALLOW;OPTIONAL" "" "RESET" ${ARGN})
   set(TAG ${tag})
   if(GIT_EXTERNAL_TAG AND "${tag}" MATCHES "^[0-9a-f]+$")
     set(TAG ${GIT_EXTERNAL_TAG})
@@ -115,7 +118,12 @@ function(GIT_EXTERNAL DIR REPO tag)
       RESULT_VARIABLE nok ERROR_VARIABLE error
       WORKING_DIRECTORY "${GIT_EXTERNAL_DIR}")
     if(nok)
-      message(FATAL_ERROR "${DIR} clone failed: ${error}\n")
+      if(GIT_EXTERNAL_LOCAL_OPTIONAL)
+        message(STATUS "${DIR} clone failed: ${error}\n")
+        return()
+      else()
+        message(FATAL_ERROR "${DIR} clone failed: ${error}\n")
+      endif()
     endif()
 
     # checkout requested tag

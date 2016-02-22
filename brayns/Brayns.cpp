@@ -24,9 +24,7 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/light/DirectionalLight.h>
 
-// Plugins
-#include <plugins/extensions/ExtensionController.h>
-
+#include <plugins/extensions/ExtensionPluginFactory.h>
 #include <brayns/common/parameters/ParametersManager.h>
 
 // OSPray specific -> Must be changed to a dynamic plugin
@@ -59,17 +57,15 @@ struct Brayns::Impl
         _scene.reset( new OSPRayScene( _renderer,
             _parametersManager.getGeometryParameters( )));
 
-        _scene->setMaterials( MT_DEFAULT, 200 );
-
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
             Vector3f( 1.f, -1.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
         _scene->addLight( sunLight );
 
+        _scene->setMaterials( MT_DEFAULT, 200 );
         _scene->loadData( );
         _scene->buildEnvironment( );
         _scene->buildGeometry( );
-
         _scene->commit( );
 
         _renderer->setScene( _scene );
@@ -90,18 +86,10 @@ struct Brayns::Impl
         _camera->set(
             renderInput.position, renderInput.target, renderInput.up );
 
-#if(BRAYNS_USE_REST || BRAYNS_USE_DEFLECT)
-        if( !_extensionController )
-        {
-            ExtensionParameters extensionParameters = {
-                _scene, _renderer, _camera, _frameBuffer };
+        if( !_extensionPluginFactory )
+            _intializeExtensionPluginFactory( );
+        _extensionPluginFactory->execute( );
 
-            _extensionController.reset( new ExtensionController(
-                _parametersManager.getApplicationParameters( ),
-                extensionParameters ));
-        }
-        _extensionController->execute( );
-#endif
         _render( );
 
         uint8_t* colorBuffer = _frameBuffer->getColorBuffer( );
@@ -113,6 +101,18 @@ struct Brayns::Impl
         float* depthBuffer = _frameBuffer->getDepthBuffer( );
         size = _frameSize.x( )*_frameSize.y( )*sizeof( float );
         renderOutput.depthBuffer.assign( depthBuffer, depthBuffer + size );
+    }
+
+    void _intializeExtensionPluginFactory( )
+    {
+        _extensionParameters.scene = _scene;
+        _extensionParameters.renderer = _renderer;
+        _extensionParameters.camera = _camera;
+        _extensionParameters.frameBuffer = _frameBuffer;
+
+        _extensionPluginFactory.reset( new ExtensionPluginFactory(
+            _parametersManager.getApplicationParameters( ),
+            _extensionParameters ));
     }
 
     void reshape( const Vector2ui& frameSize )
@@ -184,7 +184,8 @@ private:
     bool _rendering;
     bool _sceneModified;
 
-    ExtensionControllerPtr _extensionController;
+    ExtensionPluginFactoryPtr _extensionPluginFactory;
+    ExtensionParameters _extensionParameters;
 };
 
 // -------------------------------------------------------------------------------------------------

@@ -213,7 +213,8 @@ void BaseWindow::display( )
     renderInput.target = _viewPort.getTarget( )-_viewPort.getPosition( );
     renderInput.up = _viewPort.getUp( );
 
-    _brayns->render(renderInput, renderOutput);
+    _brayns->getCamera().commit();
+    _brayns->render( renderInput, renderOutput );
 
     GLenum format = GL_RGBA;
     GLenum type   = GL_FLOAT;
@@ -236,8 +237,11 @@ void BaseWindow::display( )
     glDrawPixels(_windowSize.x( ), _windowSize.y( ), format, type, buffer);
     glutSwapBuffers( );
 
-#if(BRAYNS_USE_REST || BRAYNS_USE_DEFLECT)
-    _viewPort.setPosition(_brayns->getCamera( ).getPosition( ));
+#if(BRAYNS_USE_ZEQ || BRAYNS_USE_DEFLECT)
+    Camera& camera = _brayns->getCamera( );
+    _viewPort.setPosition( camera.getPosition( ) );
+    _viewPort.setTarget( camera.getTarget( ) + camera.getPosition( ) );
+    _viewPort.setUp( camera.getUpVector( ) );
 #endif
     ++frameCounter_;
 }

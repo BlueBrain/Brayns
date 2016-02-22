@@ -29,7 +29,7 @@ OSPRayCamera::OSPRayCamera( const CameraType cameraType )
    : Camera( cameraType )
 {
     std::string cameraAsString;
-    switch( _cameraType )
+    switch( getType() )
     {
     case CT_STEREO:
         cameraAsString = "stereo";
@@ -39,48 +39,22 @@ OSPRayCamera::OSPRayCamera( const CameraType cameraType )
         break;
     }
     _camera = ospNewCamera( cameraAsString.c_str( ));
-    commit();
-}
-
-void OSPRayCamera::set( const Vector3f& position, const Vector3f& target,
-                        const Vector3f& up )
-{
-    _position = position;
-    _target = target;
-    _up = up;
-    commit();
 }
 
 void OSPRayCamera::commit()
 {
-    ospSet3f( _camera,"pos", _position.x(), _position.y(), _position.z( ));
-    ospSet3f( _camera,"dir", _target.x(), _target.y(), _target.z( ));
-    ospSet3f( _camera,"up", _up.x(), _up.y(), _up.z( ));
+    const Vector3f& position = getPosition();
+    ospSet3f( _camera,"pos", position.x(), position.y(), position.z( ));
+    const Vector3f& target = getTarget();
+    ospSet3f( _camera,"dir", target.x(), target.y(), target.z( ));
+    const Vector3f& upVector = getUpVector();
+    ospSet3f( _camera,"up", upVector.x(), upVector.y(), upVector.z( ));
     ospCommit( _camera );
 }
 
 void OSPRayCamera::setAspectRatio( float aspectRatio )
 {
     ospSetf( _camera, "aspect", aspectRatio );
-    commit();
-}
-
-void OSPRayCamera::setPosition( const Vector3f& position )
-{
-    _position = position;
-    commit();
-}
-
-void OSPRayCamera::setTarget( const Vector3f& target )
-{
-    _target = target;
-    commit();
-}
-
-void OSPRayCamera::setUp( const Vector3f& up )
-{
-    _up = up;
-    commit();
 }
 
 }

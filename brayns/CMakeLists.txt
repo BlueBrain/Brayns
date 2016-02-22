@@ -13,7 +13,8 @@ set(BRAYNS_HEADERS
   Brayns.h)
 
 set(BRAYNS_LINK_LIBRARIES
-    PUBLIC braynsCommon ${OSPRAY_DEPENDENT_LIBRARIES} ${OSPRAY_LIBRARIES}
+  PUBLIC braynsCommon braynsPlugins
+  ${OSPRAY_DEPENDENT_LIBRARIES} ${OSPRAY_LIBRARIES}
 )
 
 common_library(brayns)

@@ -65,10 +65,9 @@ endif()
 
 option(REST_ENABLED "Activate REST" ON)
 if(REST_ENABLED)
-  common_package(cppnetlib)
   common_package(FlatBuffers)
+  common_package(ZeroBuf)
   common_package(LibJpegTurbo)
-  common_package(RESTBridge)
   common_package(zeq)
 endif()
 

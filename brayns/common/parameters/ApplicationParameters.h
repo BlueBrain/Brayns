@@ -50,9 +50,6 @@ public:
     /** camera name (e.g. Perspective, Stereo, etc. ) */
     std::string getCamera() const { return _camera; }
 
-    /** ZeroEQ schema name */
-    std::string getZeqSchema() const { return _zeqSchema; }
-
     /** DisplayCluster server host */
     std::string getDeflectHostname() const { return _deflectHostname; }
     /** Application stream name for DisplayCluster */
@@ -61,22 +58,12 @@ public:
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
 
-    const Arguments& getArguments() const { return _arguments; }
-
 protected:
-
     std::string _camera;
-
     Vector2ui _windowSize;
-
-    std::string _zeqSchema;
-
     std::string _deflectHostname;
     std::string _deflectStreamname;
-
     bool _benchmarking;
-
-    Arguments _arguments;
 };
 
 }

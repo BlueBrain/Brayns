@@ -17,43 +17,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYCAMERA_H
-#define OSPRAYCAMERA_H
+#ifndef EXTENSIONPLUGIN_H
+#define EXTENSIONPLUGIN_H
 
-#include <brayns/common/camera/Camera.h>
-#include <ospray.h>
+#include <brayns/api.h>
+#include <brayns/common/types.h>
+#include <brayns/common/parameters/ApplicationParameters.h>
 
 namespace brayns
 {
 
 /**
-   OPSRAY specific camera
-
-   This object is the OSPRay specific implementation of a Camera
-*/
-class OSPRayCamera : public brayns::Camera
+   Defines the abstract representation of a extension plug-in. What we mean by
+   extension is a set a functionalities that are not provided by the core of
+   the application. For example, exposing a REST interface via HTTP, or
+   streaming images to an distant display.
+ */
+class ExtensionPlugin
 {
 public:
-    OSPRayCamera( const CameraType cameraType );
+    virtual ~ExtensionPlugin() {}
 
     /**
-       Commits the changes held by the camera object so that
-       attributes become available to the OSPRay rendering engine
+        Executes the core functionnalities of the plugin and modifies the
+        ExtensionParameters accordingly
     */
-    void commit() final;
+    BRAYNS_API virtual void run( ) = 0;
 
-    /** @copydoc Camera::setAspectRatio */
-    void setAspectRatio( float aspectRatio ) final;
+protected:
+    ExtensionPlugin( ApplicationParameters&, ExtensionParameters& );
 
-    /**
-       Gets the OSPRay implementation of the camera object
-       @return OSPRay implementation of the camera object
-    */
-    OSPCamera ospImpl() { return _camera; }
-
-private:
-    OSPCamera _camera;
+    ApplicationParameters& _applicationParameters;
+    ExtensionParameters& _extensionParameters;
 };
 
 }
-#endif // OSPRAYCAMERA_H
+#endif // EXTENSIONPLUGIN_H

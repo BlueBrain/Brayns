@@ -1,7 +1,7 @@
 # -*- mode: cmake -*-
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git aaa1445)
-git_subproject(RESTBridge https://github.com/BlueBrain/RESTBridge.git 8892648)
+git_subproject(Servus https://github.com/HBPVIS/Servus.git 7b2931e)
+git_subproject(ZeroEQ https://github.com/HBPVIS/ZeroEQ.git dd90579)
+git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 0c5beb5)
 git_subproject(Deflect https://github.com/BlueBrain/Deflect.git a13ab01)
-git_subproject(zeq https://github.com/HBPVis/zeq.git dd90579)
-git_subproject(FlatBuffers https://github.com/Bluebrain/flatbuffers.git f0ca636)
 git_subproject(BBPSDK ssh://bbpcode.epfl.ch/common/BBPSDK 3f89e34)

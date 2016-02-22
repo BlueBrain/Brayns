@@ -4,45 +4,39 @@
 set(BRAYNSPLUGINS_SOURCES
   loaders/MorphologyLoader.cpp
   loaders/ProteinLoader.cpp
-  extensions/ExtensionController.cpp
+  extensions/ExtensionPluginFactory.cpp
+  extensions/plugins/ExtensionPlugin.cpp
 )
 
 set(BRAYNSPLUGINS_HEADERS
   loaders/MorphologyLoader.h
   loaders/ProteinLoader.h
-  extensions/ExtensionController.h
+  extensions/ExtensionPluginFactory.h
+  extensions/plugins/ExtensionPlugin.h
 )
 
-set(BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsCommon vmmlib
-                                 PRIVATE ${GLUT_LIBRARIES} ${OSPRAY_LIBRARIES} ${BBPSDK_LIBRARIES}
+set(BRAYNSPLUGINS_LINK_LIBRARIES
+    PUBLIC braynsCommon vmmlib
+    PRIVATE ${GLUT_LIBRARIES} ${OSPRAY_LIBRARIES} ${BBPSDK_LIBRARIES}
 )
 
 if(ASSIMP_FOUND)
-  list(APPEND BRAYNSPLUGINS_SOURCES
-    loaders/MeshLoader.cpp
-  )
-  list(APPEND BRAYNSPLUGINS_HEADERS
-    loaders/MeshLoader.h
-  )
+  list(APPEND BRAYNSPLUGINS_SOURCES loaders/MeshLoader.cpp)
+  list(APPEND BRAYNSPLUGINS_HEADERS loaders/MeshLoader.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES ${ASSIMP_LIBRARIES})
 endif()
 
 if(DEFLECT_FOUND)
-  list(APPEND BRAYNSPLUGINS_SOURCES
-    extensions/DeflectManager.cpp
-  )
-  list(APPEND BRAYNSPLUGINS_HEADERS
-    extensions/DeflectManager.h
-  )
+  list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/DeflectPlugin.cpp)
+  list(APPEND BRAYNSPLUGINS_HEADERS extensions/plugins/DeflectPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
 endif()
 
-if(RESTBRIDGE_FOUND)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES RESTBridge ${LibJpegTurbo_LIBRARIES})
-endif()
-
-if(ZEQ_FOUND)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES zeq zeqHBP)
+if(TARGET ZeroBuf AND TARGET zeq)
+  list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroBufPlugin.cpp)
+  list(APPEND BRAYNSPLUGINS_HEADERS extensions/plugins/ZeroBufPlugin.h)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
+    PUBLIC zeq zeqHBP ZeroBuf ZeroBufRender ${LibJpegTurbo_LIBRARIES})
 endif()
 
 if(BBPSDK_FOUND)
@@ -50,12 +44,8 @@ if(BBPSDK_FOUND)
 endif()
 
 if(IMAGEMAGICK_FOUND)
-  list(APPEND BRAYNSPLUGINS_SOURCES
-    loaders/TextureLoader.cpp
-  )
-  list(APPEND BRAYNSPLUGINS_HEADERS
-    loaders/TextureLoader.h
-  )
+  list(APPEND BRAYNSPLUGINS_SOURCES loaders/TextureLoader.cpp)
+  list(APPEND BRAYNSPLUGINS_HEADERS loaders/TextureLoader.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES ${IMAGEMAGICK_LIBRARIES})
 endif()
 

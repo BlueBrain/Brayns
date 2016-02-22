@@ -34,7 +34,7 @@ int main(int argc, const char **argv)
         renderInput.target = brayns::Vector3f(0,0,0);
         renderInput.up = brayns::Vector3f(0,1,0);
 
-        brayns.render(renderInput, renderOutput);
+        brayns.render( renderInput, renderOutput );
     }
 
     return 0;

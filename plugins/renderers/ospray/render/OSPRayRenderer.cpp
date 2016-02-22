@@ -108,7 +108,7 @@ void OSPRayRenderer::setCamera( CameraPtr camera )
 {
     OSPRayCamera* osprayCamera = static_cast<OSPRayCamera*>( camera.get( ));
     assert( osprayCamera );
-    ospSetObject( _renderer, "camera", osprayCamera->impl( ));
+    ospSetObject( _renderer, "camera", osprayCamera->ospImpl( ));
 }
 
 }

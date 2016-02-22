@@ -32,11 +32,9 @@ const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
 const std::string PARAM_DEFLECT_HOST_NAME = "deflect-hostname";
 const std::string PARAM_DEFLECT_STREAM_NAME = "deflect-streamname";
-const std::string PARAM_ZEQ_SCHEMA = "zeq-schema";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
-const std::string DEFAULT_DEFLECT_HOST_NAME = "localhost";
 const std::string DEFAULT_DEFLECT_STREAM_NAME = "brayns";
 const std::string DEFAULT_CAMERA = "perspective";
 
@@ -51,7 +49,6 @@ ApplicationParameters::ApplicationParameters( )
     : AbstractParameters( "Application" )
     , _camera( DEFAULT_CAMERA )
     , _windowSize( DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT )
-    , _deflectHostname( DEFAULT_DEFLECT_HOST_NAME )
     , _deflectStreamname( DEFAULT_DEFLECT_STREAM_NAME )
     , _benchmarking( false )
 {
@@ -65,8 +62,6 @@ ApplicationParameters::ApplicationParameters( )
             "Name of host running DisplayCluster" )
         ( PARAM_DEFLECT_STREAM_NAME.c_str( ), po::value< std::string >( ),
             "Name of DisplayCluster stream" )
-        ( PARAM_ZEQ_SCHEMA.c_str( ), po::value< std::string >( ),
-            "Schema name for ZeroEQ communication" )
         ( PARAM_BENCHMARKING.c_str( ), po::value< std::string >( ),
             "Activates application benchmarking" );
 }
@@ -92,8 +87,6 @@ bool ApplicationParameters::parse( int argc, const char **argv )
         _deflectHostname = _vm[PARAM_DEFLECT_HOST_NAME].as< std::string >( );
     if( _vm.count( PARAM_DEFLECT_STREAM_NAME ))
         _deflectStreamname = _vm[PARAM_DEFLECT_STREAM_NAME].as< std::string >( );
-    if( _vm.count( PARAM_ZEQ_SCHEMA ))
-        _zeqSchema = _vm[PARAM_ZEQ_SCHEMA].as< std::string >( );
     if( _vm.count( PARAM_BENCHMARKING ))
         _benchmarking = _vm[PARAM_BENCHMARKING].as< bool >( );
 
@@ -109,7 +102,6 @@ void ApplicationParameters::print( )
         _deflectHostname << std::endl;
     BRAYNS_INFO << "Deflect stream name     : " <<
         _deflectStreamname << std::endl;
-    BRAYNS_INFO << "Zeq schema              : " << _zeqSchema << std::endl;
     BRAYNS_INFO << "Benchmarking            : " <<
         ( _benchmarking ? "on" : "off" ) << std::endl;
 }

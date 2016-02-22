@@ -29,6 +29,9 @@ namespace po = boost::program_options;
 
 bool AbstractParameters::parse( int argc, const char **argv )
 {
+    for( int i = 1; i < argc; ++i )
+        _arguments.push_back(argv[i]);
+
     po::parsed_options parsedOptions =
         po::command_line_parser( argc, argv ).options( _parameters ).
         allow_unregistered( ).run( );
@@ -46,6 +49,11 @@ void AbstractParameters::usage( )
 void AbstractParameters::print( )
 {
     BRAYNS_INFO << "-= " << _name << " parameters =-" << std::endl;
+}
+
+const strings& AbstractParameters::arguments() const
+{
+    return _arguments;
 }
 
 }

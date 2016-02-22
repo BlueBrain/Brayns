@@ -17,43 +17,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYCAMERA_H
-#define OSPRAYCAMERA_H
-
-#include <brayns/common/camera/Camera.h>
-#include <ospray.h>
+#include "ExtensionPlugin.h"
 
 namespace brayns
 {
 
-/**
-   OPSRAY specific camera
-
-   This object is the OSPRay specific implementation of a Camera
-*/
-class OSPRayCamera : public brayns::Camera
+ExtensionPlugin::ExtensionPlugin(
+    ApplicationParameters& applicationParameters,
+    ExtensionParameters& extensionParameters )
+    : _applicationParameters( applicationParameters )
+    , _extensionParameters( extensionParameters )
 {
-public:
-    OSPRayCamera( const CameraType cameraType );
-
-    /**
-       Commits the changes held by the camera object so that
-       attributes become available to the OSPRay rendering engine
-    */
-    void commit() final;
-
-    /** @copydoc Camera::setAspectRatio */
-    void setAspectRatio( float aspectRatio ) final;
-
-    /**
-       Gets the OSPRay implementation of the camera object
-       @return OSPRay implementation of the camera object
-    */
-    OSPCamera ospImpl() { return _camera; }
-
-private:
-    OSPCamera _camera;
-};
+}
 
 }
-#endif // OSPRAYCAMERA_H

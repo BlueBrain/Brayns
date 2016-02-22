@@ -31,34 +31,31 @@ namespace brayns
 
 // Forward declarations
 class Brayns;
-typedef std::unique_ptr<Brayns> BraynsPtr;
+typedef std::unique_ptr< Brayns > BraynsPtr;
 
 class Scene;
-typedef std::shared_ptr<Scene> ScenePtr;
+typedef std::shared_ptr< Scene > ScenePtr;
 
 class Camera;
-typedef std::shared_ptr<Camera> CameraPtr;
+typedef std::shared_ptr< Camera > CameraPtr;
 
 class Renderer;
-typedef std::shared_ptr<Renderer> RendererPtr;
+typedef std::shared_ptr< Renderer > RendererPtr;
 
 class FrameBuffer;
-typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
+typedef std::shared_ptr< FrameBuffer > FrameBufferPtr;
 
 class ApplicationParameters;
-typedef std::shared_ptr<ApplicationParameters> ApplicationParametersPtr;
+typedef std::shared_ptr< ApplicationParameters > ApplicationParametersPtr;
 
 class GeometryParameters;
-typedef std::shared_ptr<GeometryParameters> GeometryParametersPtr;
+typedef std::shared_ptr< GeometryParameters > GeometryParametersPtr;
 
 class RenderingParameters;
-typedef std::shared_ptr<RenderingParameters> RenderingParametersPtr;
-
-class ExtensionController;
-typedef std::shared_ptr<ExtensionController> ExtensionControllerPtr;
+typedef std::shared_ptr< RenderingParameters > RenderingParametersPtr;
 
 class Geometry;
-typedef std::vector<Geometry *> Geometries;
+typedef std::vector< Geometry* > Geometries;
 
 class Primitive;
 typedef std::shared_ptr<Primitive> PrimitivePtr;
@@ -114,6 +111,19 @@ class ApplicationParameters;
 class GeometryParameters;
 class RenderingParameters;
 
+class ExtensionPlugin;
+typedef std::shared_ptr< ExtensionPlugin > ExtensionPluginPtr;
+typedef std::vector< ExtensionPluginPtr > ExtensionPlugins;
+
+class ExtensionPluginFactory;
+typedef std::unique_ptr< ExtensionPluginFactory > ExtensionPluginFactoryPtr;
+
+class ZeroBufPlugin;
+typedef std::shared_ptr< ZeroBufPlugin > ZeroBufPluginPtr;
+
+class DeflectPlugin;
+typedef std::shared_ptr< DeflectPlugin > DeflectPluginPtr;
+
 /** Define the color scheme to be applied to the geometry */
 enum ColorScheme
 {
@@ -142,6 +152,14 @@ enum LightType
 {
     LT_POINT = 0,
     LT_DIRECTIONAL,
+};
+
+struct ExtensionParameters
+{
+    ScenePtr scene;
+    RendererPtr renderer;
+    CameraPtr camera;
+    FrameBufferPtr frameBuffer;
 };
 
 }
