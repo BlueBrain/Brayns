@@ -21,7 +21,8 @@
 #include <brayns/Brayns.h>
 
 #include <brayns/common/log.h>
-#include <plugins/extensions/ExtensionController.h>
+#include <brayns/common/scene/Scene.h>
+#include <brayns/common/light/DirectionalLight.h>
 
 // Plugins
 #include <plugins/extensions/ExtensionController.h>
@@ -59,9 +60,16 @@ struct Brayns::Impl
             _parametersManager.getGeometryParameters( )));
 
         _scene->setMaterials( MT_DEFAULT, 200 );
+
+        // Default sun light
+        DirectionalLightPtr sunLight( new DirectionalLight(
+            Vector3f( 1.f, -1.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
+        _scene->addLight( sunLight );
+
         _scene->loadData( );
         _scene->buildEnvironment( );
         _scene->buildGeometry( );
+
         _scene->commit( );
 
         _renderer->setScene( _scene );

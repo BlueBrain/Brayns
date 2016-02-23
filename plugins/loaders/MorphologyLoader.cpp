@@ -46,7 +46,7 @@ bool MorphologyLoader::importMorphologies(
         const std::string& filename,
         int morphologyIndex,
         const Vector3f& position,
-        PrimitivesCollection& primitives,
+        PrimitivesMap& primitives,
         Boxf& bounds)
 {
     switch(fileFormat)
@@ -70,7 +70,7 @@ bool MorphologyLoader::_importH5File(
         const std::string &filename,
         int morphologyIndex,
         const Vector3f& position,
-        PrimitivesCollection& primitives,
+        PrimitivesMap& primitives,
         Boxf& bounds
         )
 {
@@ -220,7 +220,7 @@ bool MorphologyLoader::_importSWCFile(
         const std::string &filename,
         const int morphologyIndex,
         const Vector3f& position,
-        PrimitivesCollection& primitives,
+        PrimitivesMap& primitives,
         Boxf& bounds)
 {
     Morphologies morphologies;

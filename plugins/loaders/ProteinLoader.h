@@ -45,7 +45,7 @@ public:
         int material,
         const Materials& materials,
         int positionsOnly,
-        PrimitivesCollection& primitives,
+        PrimitivesMap& primitives,
         Boxf& bounds );
 
     /** Imports atoms from a given PDB file
@@ -62,7 +62,7 @@ public:
         const Vector3f& position,
         int material,
         const Materials& materials,
-        PrimitivesCollection& primitives,
+        PrimitivesMap& primitives,
         Boxf& bounds );
 
     /** Returns the RGB composants for a given atom index, and according to the

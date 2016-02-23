@@ -24,6 +24,9 @@ set(BRAYNSCOMMON_SOURCES
   material/Texture2D.cpp
   renderer/Renderer.cpp
   renderer/FrameBuffer.cpp
+  light/Light.cpp
+  light/PointLight.cpp
+  light/DirectionalLight.cpp
 )
 
 set(BRAYNSCOMMON_HEADERS
@@ -51,6 +54,9 @@ set(BRAYNSCOMMON_HEADERS
   material/Texture2D.h
   renderer/Renderer.h
   renderer/FrameBuffer.h
+  light/Light.h
+  light/PointLight.h
+  light/DirectionalLight.h
 )
 
 set(BRAYNSCOMMON_LINK_LIBRARIES
