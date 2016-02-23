@@ -23,6 +23,7 @@
 #include <brayns/Brayns.h>
 #include <brayns/common/log.h>
 #include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/common/scene/Scene.h>
 
 namespace brayns
 {
@@ -32,16 +33,12 @@ BraynsViewer::BraynsViewer(int argc, const char **argv)
                  FRAMEBUFFER_COLOR,
                  INSPECT_CENTER_MODE,
                  INSPECT_CENTER_MODE|MOVE_MODE)
+    , _timestampIncrement( 0.f )
 {
 }
 
 void BraynsViewer::keypress(char key, const Vector2f& where)
 {
-    GeometryParameters& geoParams =
-        _brayns->getParametersManager( ).getGeometryParameters( );
-    RenderingParameters& renderParams =
-        _brayns->getParametersManager( ).getRenderingParameters( );
-
     switch (key)
     {
     case '4':
@@ -61,23 +58,21 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
         _brayns->setMaterials(MT_SHADES_OF_GREY);
         break;
     case 'g':
-        geoParams.setTimedGeometry( !geoParams.getTimedGeometry( ));
-        BRAYNS_INFO << "Timed geometry: " <<
-            ( geoParams.getTimedGeometry( ) ? "On" : "Off" ) << std::endl;
+        _timestampIncrement = ( _timestampIncrement == 0.f ) ? 1.f : 0.f;
+        BRAYNS_INFO << "Timestamp increment: " <<
+            _timestampIncrement << std::endl;
         break;
     case ']':
-        renderParams.setFrameNumber(
-            renderParams.getFrameNumber( ) +
-            geoParams.getTimedGeometryIncrement( ));
-        BRAYNS_INFO << "Frame number: " <<
-            renderParams.getFrameNumber( ) << std::endl;
+        _brayns->getScene( ).setTimestamp(
+            _brayns->getScene( ).getTimestamp( ) + _timestampIncrement);
+        BRAYNS_INFO << "Timestamp: " <<
+            _brayns->getScene( ).getTimestamp( ) << std::endl;
         break;
     case '[':
-        renderParams.setFrameNumber(
-            renderParams.getFrameNumber( ) -
-            geoParams.getTimedGeometryIncrement( ));
-        BRAYNS_INFO << "Frame number: " <<
-            renderParams.getFrameNumber( ) << std::endl;
+        _brayns->getScene( ).setTimestamp(
+            _brayns->getScene( ).getTimestamp( ) - _timestampIncrement);
+        BRAYNS_INFO << "Timestamp: " <<
+            _brayns->getScene( ).getTimestamp( ) << std::endl;
         break;
     case '*':
         _brayns->getParametersManager( ).printHelp( );
@@ -90,6 +85,13 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
 
 void BraynsViewer::display( )
 {
+    if( _timestampIncrement != 0.f )
+    {
+        _brayns->getScene( ).setTimestamp(
+            _brayns->getScene( ).getTimestamp( ) + _timestampIncrement );
+        _brayns->commit( );
+    }
+
     BaseWindow::display( );
 
     std::stringstream ss;

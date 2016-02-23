@@ -42,7 +42,6 @@ struct Brayns::Impl
 {
     Impl( int argc, const char **argv )
          : _frameSize( 0, 0 )
-         , _frameNumber( 0 )
          , _rendering( false )
          , _sceneModified( true )
     {
@@ -157,13 +156,6 @@ private:
     {
         _rendering = true;
 
-        if( _parametersManager.getGeometryParameters( ).getTimedGeometry( ))
-        {
-            _frameNumber += _parametersManager.getGeometryParameters( ).
-                getTimedGeometryIncrement( );
-            _frameBuffer->clear( );
-        }
-
         _frameBuffer->unmap( );
         _renderer->render( _frameBuffer );
         _frameBuffer->map( );
@@ -179,7 +171,7 @@ private:
     FrameBufferPtr _frameBuffer;
 
     Vector2i _frameSize;
-    uint32_t _frameNumber;
+    float _timestamp;
 
     bool _rendering;
     bool _sceneModified;

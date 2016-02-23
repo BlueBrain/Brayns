@@ -422,14 +422,14 @@ void BaseWindow::keypress( char key, const Vector2f& )
             (renderParams.getLightShading( ) ? "On" : "Off") << std::endl;
         break;
     case 'r':
-        renderParams.setFrameNumber(0);
-        BRAYNS_INFO << "Frame number: " <<
-            renderParams.getFrameNumber( ) << std::endl;
+        _brayns->getScene().setTimestamp( 0.f );
+        BRAYNS_INFO << "Timestamp: " <<
+            _brayns->getScene().getTimestamp( ) << std::endl;
         break;
     case 'R':
-        renderParams.setFrameNumber(std::numeric_limits<uint16_t>::max( ));
-        BRAYNS_INFO << "Frame number: " <<
-            renderParams.getFrameNumber( ) << std::endl;
+        _brayns->getScene().setTimestamp( std::numeric_limits< float >::max( ));
+        BRAYNS_INFO << "Timestamp: " <<
+            _brayns->getScene().getTimestamp( ) << std::endl;
         break;
     case 'S':
         renderParams.setShadows(

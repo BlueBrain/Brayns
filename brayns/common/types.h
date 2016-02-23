@@ -113,6 +113,7 @@ class AbstractParameters;
 class ApplicationParameters;
 class GeometryParameters;
 class RenderingParameters;
+class SceneParameters;
 
 /** Define the color scheme to be applied to the geometry */
 enum ColorScheme

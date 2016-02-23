@@ -35,11 +35,12 @@ public:
     BRAYNS_API virtual void render( FrameBufferPtr frameBuffer ) = 0;
 
     BRAYNS_API virtual void commit( ) =  0;
-    BRAYNS_API virtual void setScene( ScenePtr scene ) =  0;
+    BRAYNS_API void setScene( ScenePtr scene ) { _scene = scene; };
     BRAYNS_API virtual void setCamera( CameraPtr camera ) =  0;
 
 protected:
     RenderingParameters& _renderingParameters;
+    ScenePtr _scene;
 };
 
 }

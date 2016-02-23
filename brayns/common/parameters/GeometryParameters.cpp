@@ -33,7 +33,6 @@ const std::string PARAM_PDB_FOLDER = "pdb-folder";
 const std::string PARAM_MESH_FOLDER = "mesh-folder";
 const std::string PARAM_RADIUS = "radius";
 const std::string PARAM_COLOR_SCHEME = "color-scheme";
-const std::string PARAM_TIMED_GEOMETRY_INCREMENT = "timed-geometry-increment";
 const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 
 }
@@ -45,8 +44,8 @@ namespace po = boost::program_options;
 
 GeometryParameters::GeometryParameters( )
     : AbstractParameters( "Geometry" )
-    ,_radius(1), _colorScheme(CS_NONE), _timedGeometry(false)
-    , _timedGeometryIncrement(1), _sceneEnvironment(SE_NONE)
+    ,_radius(1), _colorScheme(CS_NONE)
+    , _sceneEnvironment(SE_NONE)
 {
     _parameters.add_options()
         ( PARAM_SWC_FOLDER.c_str(), po::value< std::string >( ),
@@ -61,8 +60,6 @@ GeometryParameters::GeometryParameters( )
             "Radius multiplier for spheres, cones and cylinders" )
         ( PARAM_COLOR_SCHEME.c_str( ), po::value< size_t >( ),
             "Color scheme to be applied to the geometry" )
-        ( PARAM_TIMED_GEOMETRY_INCREMENT.c_str(), po::value< int >( ),
-            "Increment between frames" )
         ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< int >( ),
             "Scene environment (0: none, 1: ground, 2: wall, 3: box)" );
 }
@@ -92,11 +89,6 @@ bool GeometryParameters::parse( int argc, const char **argv )
             _vm[PARAM_COLOR_SCHEME].as< size_t >( ));
     if( _vm.count( PARAM_RADIUS))
         _radius = _vm[PARAM_RADIUS].as< float >( );
-    if( _vm.count( PARAM_TIMED_GEOMETRY_INCREMENT ))
-    {
-        _timedGeometry = true;
-        _timedGeometryIncrement = _vm[PARAM_TIMED_GEOMETRY_INCREMENT].as< float >();
-    }
     if( _vm.count( PARAM_SCENE_ENVIRONMENT ))
         _sceneEnvironment = static_cast< SceneEnvironment >(
             _vm[PARAM_SCENE_ENVIRONMENT].as< size_t >( ));
@@ -117,8 +109,6 @@ void GeometryParameters::print( )
     BRAYNS_INFO << "Color scheme            : " <<
         static_cast<size_t>( _colorScheme ) << std::endl;
     BRAYNS_INFO << "Radius                  : " << _radius << std::endl;
-    BRAYNS_INFO << "Timed geometry          : " <<
-        ( _timedGeometry ? "on" : "off" ) << std::endl;
     BRAYNS_INFO << "Scene environment       : " <<
         static_cast<size_t>( _sceneEnvironment ) << std::endl;
 }

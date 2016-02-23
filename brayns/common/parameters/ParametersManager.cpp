@@ -73,4 +73,9 @@ GeometryParameters& ParametersManager::getGeometryParameters()
     return _geometryParameters;
 }
 
+SceneParameters& ParametersManager::getSceneParameters()
+{
+    return _sceneParameters;
+}
+
 }

@@ -45,15 +45,15 @@ typedef std::vector< Branch > Branches;
 
 struct Morphology
 {
-    int   id;
-    int   branch;
+    int id;
+    int branch;
     float x;
     float y;
     float z;
     float radius;
-    int   parent;
-    int   frame;
-    bool  used;
+    int parent;
+    float timestamp;
+    bool used;
     std::vector< size_t > children;
 };
 typedef std::map< size_t, Morphology > Morphologies;

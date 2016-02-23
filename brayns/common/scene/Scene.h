@@ -143,6 +143,15 @@ public:
     */
     BRAYNS_API void clearLights();
 
+    /**
+        Timestamp of the scene
+    */
+    BRAYNS_API void setTimestamp( const float timestamp )
+    {
+        _timestamp = timestamp;
+    }
+    BRAYNS_API float getTimestamp( ) const { return _timestamp; }
+
 protected:
     // Parameters
     GeometryParameters& _geometryParameters;
@@ -154,6 +163,7 @@ protected:
     Materials _materials;
     TexturesMap _textures;
     Lights _lights;
+    float _timestamp;
 
     Boxf _bounds;
 };

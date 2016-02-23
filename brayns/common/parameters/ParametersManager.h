@@ -26,6 +26,7 @@
 #include <brayns/common/parameters/ApplicationParameters.h>
 #include <brayns/common/parameters/RenderingParameters.h>
 #include <brayns/common/parameters/GeometryParameters.h>
+#include <brayns/common/parameters/SceneParameters.h>
 
 namespace brayns
 {
@@ -83,12 +84,19 @@ public:
     */
     BRAYNS_API ApplicationParameters& getApplicationParameters();
 
+    /**
+       Gets scene parameters
+       @return Parameters for the current scene
+    */
+    BRAYNS_API SceneParameters& getSceneParameters();
+
 private:
     std::vector< AbstractParameters* > _parameterSets;
     boost::program_options::options_description _parameters;
     ApplicationParameters _applicationParameters;
     RenderingParameters _renderingParameters;
     GeometryParameters _geometryParameters;
+    SceneParameters _sceneParameters;
 };
 
 }

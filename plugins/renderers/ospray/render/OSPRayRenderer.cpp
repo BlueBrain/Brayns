@@ -77,7 +77,7 @@ void OSPRayRenderer::commit( )
         _renderingParameters.getAmbientOcclusionStrength( ));
     ospSet1i( _renderer, "shadingEnabled",
         _renderingParameters.getLightShading( ));
-    ospSet1i( _renderer, "frameNumber", _renderingParameters.getFrameNumber( ));
+    ospSet1f( _renderer, "timestamp", _scene->getTimestamp( ));
     ospSet1i( _renderer, "randomNumber", rand() % 1000 );
     ospSet1i( _renderer, "spp", _renderingParameters.getSamplesPerPixel( ));
     ospSet1i( _renderer, "electronShading",
@@ -94,14 +94,12 @@ void OSPRayRenderer::commit( )
     color = _renderingParameters.getDetectionFarColor( );
     ospSet3f( _renderer, "detectionFarColor",
         color.x( ), color.y( ), color.z( ));
-    ospCommit( _renderer );
-}
 
-void OSPRayRenderer::setScene( ScenePtr scene )
-{
-    OSPRayScene* osprayScene = static_cast< OSPRayScene* >( scene.get( ));
+    OSPRayScene* osprayScene = static_cast< OSPRayScene* >( _scene.get( ));
     assert( osprayScene );
     ospSetObject( _renderer, "world", osprayScene->impl( ));
+
+    ospCommit( _renderer );
 }
 
 void OSPRayRenderer::setCamera( CameraPtr camera )
