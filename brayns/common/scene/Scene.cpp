@@ -239,8 +239,8 @@ void Scene::buildEnvironment( )
         const Vector3f scale( 4.f, 0.5f, 4.f );
         const float tiles = 8.f;
         const float S = 0.5f * std::min(
-            _bounds.getDimension( ).x( ), _bounds.getDimension( ).z( ));
-        const Vector3f s( S,_bounds.getDimension( ).y( ), S );
+            _bounds.getSize( ).x( ), _bounds.getSize( ).z( ));
+        const Vector3f s( S,_bounds.getSize( ).y( ), S );
         const Vector3f c = _bounds.getCenter( );
 
         Vector3i i;
@@ -317,8 +317,8 @@ void Scene::buildEnvironment( )
         const Vector3f scale( 1.f, 1.f, 1.f );
         const float tiles = 4.f;
         const float S = 0.5f * std::min(
-            _bounds.getDimension( ).x( ), _bounds.getDimension( ).z( ));
-        const Vector3f s( S, _bounds.getDimension( ).y( ), S );
+            _bounds.getSize( ).x( ), _bounds.getSize( ).z( ));
+        const Vector3f s( S, _bounds.getSize( ).y( ), S );
         const Vector3f c = _bounds.getCenter( );
         Vector3i i;
         const size_t material = 0;

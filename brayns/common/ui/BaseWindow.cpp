@@ -272,7 +272,7 @@ void BaseWindow::setViewPort( )
 {
     Boxf worldBounds = _brayns->getScene( ).getWorldBounds( );
     Vector3f center = worldBounds.getCenter( );
-    Vector3f diag   = worldBounds.getDimension( );
+    Vector3f diag   = worldBounds.getSize( );
     diag = max(diag,Vector3f(0.3f*diag.length( )));
     Vector3f from = center;
     from.z( ) -= diag.z( );

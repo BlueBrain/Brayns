@@ -64,7 +64,7 @@ public:
 
 #ifdef BRAYNS_USE_DEFLECT
         _previousCameraPosition.z() =
-            -_extensionParameters.scene->getWorldBounds().getDimension().z();
+            -_extensionParameters.scene->getWorldBounds().getSize().z();
 #endif
 
     }
@@ -156,7 +156,7 @@ private:
                     const Vector3f& center =
                         _extensionParameters.scene->getWorldBounds().getCenter();
                     const Vector3f& size =
-                        _extensionParameters.scene->getWorldBounds().getDimension();
+                        _extensionParameters.scene->getWorldBounds().getSize();
 
                     const float dx = _previousCameraPosition.x() - position.x();
                     const float dy = _previousCameraPosition.y() - position.y();
