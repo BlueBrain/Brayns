@@ -71,17 +71,6 @@ public:
     ColorScheme getColorScheme( ) const { return _colorScheme; }
     void setColorScheme( const ColorScheme value ) { _colorScheme = value; }
 
-    /** Enables timed geometries by incrementing the timestamp for
-     * every computer frame */
-    bool getTimedGeometry( ) const { return _timedGeometry; }
-    void setTimedGeometry( const bool value ) { _timedGeometry = value; }
-
-    /** Defines the timestamp increment between two frames */
-    size_t getTimedGeometryIncrement( ) const
-    { return _timedGeometryIncrement; }
-    void setTimedGeometryIncrement( const size_t value )
-    { _timedGeometryIncrement = value; }
-
     /** Scene environment (0: none, 1: ground, 2: box ) */
     SceneEnvironment getSceneEnvironment( ) const { return _sceneEnvironment; }
 
@@ -94,8 +83,6 @@ protected:
     std::string _meshFolder;
     float  _radius;
     ColorScheme _colorScheme;
-    bool   _timedGeometry;
-    size_t _timedGeometryIncrement;
     SceneEnvironment _sceneEnvironment;
 };
 

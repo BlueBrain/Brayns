@@ -12,6 +12,7 @@ set(BRAYNSCOMMON_SOURCES
   parameters/RenderingParameters.cpp
   parameters/GeometryParameters.cpp
   parameters/ApplicationParameters.cpp
+  parameters/SceneParameters.cpp
   camera/Camera.cpp
   scene/Scene.cpp
   geometry/Primitive.cpp
@@ -42,6 +43,7 @@ set(BRAYNSCOMMON_HEADERS
   parameters/RenderingParameters.h
   parameters/GeometryParameters.h
   parameters/ApplicationParameters.h
+  parameters/SceneParameters.h
   camera/Camera.h
   scene/Scene.h
   geometry/Primitive.h

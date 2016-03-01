@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -17,33 +17,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYRENDERER_H
-#define OSPRAYRENDERER_H
+#ifndef SCENEPARAMETERS_H
+#define SCENEPARAMETERS_H
 
-#include <brayns/common/types.h>
-#include <brayns/common/renderer/Renderer.h>
-
-#include <ospray.h>
+#include "AbstractParameters.h"
 
 namespace brayns
 {
 
-class OSPRayRenderer : public brayns::Renderer
+class SceneParameters final : public AbstractParameters
 {
 public:
-    OSPRayRenderer( RenderingParameters& renderingParameters );
+    SceneParameters();
 
-    void render( FrameBufferPtr frameBuffer ) final;
-    void commit() final;
+    /** @copydoc AbstractParameters::parse */
+    bool parse( int argc, const char **argv ) final;
 
-    void setCamera( CameraPtr camera ) final;
+    /** @copydoc AbstractParameters::print */
+    void print( ) final;
 
-    OSPRenderer impl() { return _renderer; }
+    /**
+       Defines the current timestamp for the scene. The unit is not universally
+       specified and is therefore specific to the scene.
+    */
+    float getTimestamp( ) const { return _timestamp; }
+    void setTimestamp( const float value ) { _timestamp = value; }
 
 private:
-    OSPRenderer _renderer;
+    float _timestamp;
 };
 
 }
-
-#endif // OSPRAYRENDERER_H
+#endif // SCENEPARAMETERS_H

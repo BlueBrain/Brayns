@@ -207,7 +207,7 @@ struct ExtendedOBJRenderer
     bool gradientBackgroundEnabled;
     int randomNumber;
     bool moving;
-    int frameNumber;
+    float timestamp;
     int spp;
     float dof;
 };
@@ -657,7 +657,7 @@ void ExtendedOBJRenderer_renderSample(
 {
     uniform ExtendedOBJRenderer* uniform self =
             ( uniform ExtendedOBJRenderer* uniform )_self;
-    sample.ray.time = self->frameNumber;
+    sample.ray.time = self->timestamp;
     sample.rgb = ExtendedOBJRenderer_shadeRay( self, sample );
 }
 
@@ -682,7 +682,7 @@ export void ExtendedOBJRenderer_set(
         const uniform bool& shadingEnabled,
         const uniform int& randomNumber,
         const uniform bool& moving,
-        const uniform int& frameNumber,
+        const uniform float& timestamp,
         const uniform int& spp,
         const uniform bool& electronShadingEnabled,
         const uniform bool& lightEmittingMaterialsEnabled,
@@ -703,7 +703,7 @@ export void ExtendedOBJRenderer_set(
     self->shadingEnabled = shadingEnabled && !moving;
     self->randomNumber = randomNumber;
     self->moving = moving;
-    self->frameNumber = frameNumber;
+    self->timestamp = timestamp;
     self->spp = spp;
     self->electronShadingEnabled = electronShadingEnabled || moving;
     self->lightEmittingMaterialsEnabled =

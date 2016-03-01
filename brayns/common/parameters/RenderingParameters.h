@@ -123,9 +123,6 @@ public:
         _backgroundColor = value;
     }
 
-    size_t getFrameNumber( ) const { return _frameNumber; }
-    void setFrameNumber( const size_t value ) { _frameNumber = value; }
-
     /**
        Defines the maximum distance between intersection and surrounding
        geometry for touch detection rendering
@@ -184,7 +181,6 @@ protected:
     bool _shadows;
     bool _softShadows;
     Vector3f _backgroundColor;
-    size_t _frameNumber;
     float _detectionDistance;
     bool _detectionOnDifferentMaterial;
     Vector3f _detectionNearColor;

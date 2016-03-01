@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -17,33 +17,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYRENDERER_H
-#define OSPRAYRENDERER_H
+#include "SceneParameters.h"
 
-#include <brayns/common/types.h>
-#include <brayns/common/renderer/Renderer.h>
 
-#include <ospray.h>
+namespace
+{
+const std::string PARAM_TIMESTAMP = "timestamp";
+}
 
 namespace brayns
 {
 
-class OSPRayRenderer : public brayns::Renderer
+namespace po = boost::program_options;
+
+SceneParameters::SceneParameters()
+    : AbstractParameters( "Scene" )
+    , _timestamp( std::numeric_limits<float>::max( ))
 {
-public:
-    OSPRayRenderer( RenderingParameters& renderingParameters );
-
-    void render( FrameBufferPtr frameBuffer ) final;
-    void commit() final;
-
-    void setCamera( CameraPtr camera ) final;
-
-    OSPRenderer impl() { return _renderer; }
-
-private:
-    OSPRenderer _renderer;
-};
-
+    _parameters.add_options()
+        (PARAM_TIMESTAMP.c_str(), po::value< float >( ), "Timestamp");
 }
 
-#endif // OSPRAYRENDERER_H
+bool SceneParameters::parse( int argc, const char **argv )
+{
+    AbstractParameters::parse( argc, argv );
+
+    if( _vm.count( PARAM_TIMESTAMP ))
+        _timestamp = _vm[PARAM_TIMESTAMP].as< float >( );
+
+    return true;
+}
+
+void SceneParameters::print( )
+{
+    AbstractParameters::print( );
+    BRAYNS_INFO << "Timestamp :" <<
+        _timestamp << std::endl;
+}
+
+}

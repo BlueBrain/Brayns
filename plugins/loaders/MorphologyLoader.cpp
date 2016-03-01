@@ -52,10 +52,12 @@ bool MorphologyLoader::importMorphologies(
     switch(fileFormat)
     {
     case MFF_SWC:
-        return _importSWCFile(filename, morphologyIndex, position, primitives, bounds);
+        return _importSWCFile(
+            filename, morphologyIndex, position, primitives, bounds);
         break;
     case MFF_H5:
-        return _importH5File(filename, morphologyIndex, position, primitives, bounds);
+        return _importH5File(
+            filename, morphologyIndex, position, primitives, bounds);
         break;
     default:
         BRAYNS_ERROR << "Unsupported file format. " <<
@@ -91,7 +93,7 @@ bool MorphologyLoader::_importH5File(
         bbp::Morphologies::const_iterator it =  bbpMorphologies.begin();
         while( it != bbpMorphologies.end() )
         {
-            size_t frameId = 0;
+            float timestamp = 0.f;
             size_t count_sections = 0;
             const size_t material =
                 ( _geometryParameters.getColorScheme() == CS_NEURON_BY_ID) ?
@@ -112,8 +114,9 @@ bool MorphologyLoader::_importH5File(
 
                     primitives[material].push_back(SpherePtr(
                         new Sphere(material, v,
-                            soma.max_radius()*_geometryParameters.getRadius(),
-                            static_cast<float>(frameId))));
+                            soma.max_radius()*
+                                _geometryParameters.getRadius(),
+                                timestamp)));
                     bounds.merge(v);
                 }
                 Vector3f va = v;
@@ -127,16 +130,17 @@ bool MorphologyLoader::_importH5File(
                     Vector3f vb(b[0],b[1],b[2]);
                     vb += randomPosition+position;
 
-                    const float r = cs.radius()*_geometryParameters.getRadius();
+                    const float r = cs.radius()*
+                        _geometryParameters.getRadius();
 
-                    frameId = Vector3f(vb-v).length();
+                    timestamp = Vector3f(vb-v).length();
 
                     // Branches
                     primitives[material].push_back(SpherePtr(
-                        new Sphere(material, vb, r, static_cast<float>(frameId))));
+                        new Sphere(material, vb, r, timestamp)));
 
                     primitives[material].push_back(CylinderPtr(
-                        new Cylinder(material, va, vb, r, static_cast<float>(frameId))));
+                        new Cylinder(material, va, vb, r, timestamp)));
 
                     bounds.merge(va);
                     bounds.merge(vb);
@@ -185,7 +189,7 @@ bool MorphologyLoader::_importH5File(
                 primitives[morphology.branch].push_back(SpherePtr(
                     new Sphere(morphology.branch, va,
                         morphology.radius*_geometryParameters.getRadius(),
-                        static_cast<float>(morphology.frame))));
+                        morphology.timestamp)));
                 bounds.merge(va);
             }
             vb = va;
@@ -197,8 +201,9 @@ bool MorphologyLoader::_importH5File(
             {
                 primitives[morphology.branch].push_back(SpherePtr(
                     new Sphere(morphology.branch, va,
-                        morphology.radius*_geometryParameters.getRadius()*morphology.children.size(),
-                        static_cast<float>(morphology.frame))));
+                        morphology.radius*_geometryParameters.getRadius()*
+                            morphology.children.size(),
+                        morphology.timestamp)));
                 bounds.merge(va);
                 carryon = false;
             }
@@ -226,7 +231,7 @@ bool MorphologyLoader::_importSWCFile(
     Morphologies morphologies;
 
     // DAT file
-    std::map<int,int> mapIdTime;
+    std::map< int, float > mapIdTime;
     std::string datFilename(filename);
 
     size_t pos = datFilename.find( ".swc" );
@@ -234,8 +239,8 @@ bool MorphologyLoader::_importSWCFile(
         datFilename.replace( pos, 4, ".dat");
     }
 
-    std::ifstream datFile(datFilename);
-    if(!datFile.is_open())
+    std::ifstream datFile( datFilename );
+    if( datFile.is_open( ))
     {
         while(datFile.good())
         {
@@ -244,26 +249,27 @@ bool MorphologyLoader::_importSWCFile(
             if (line[0] == '#') continue;
 
             std::istringstream iss(line);
-            int id, t;
-            iss >> id >> t;
-            mapIdTime[id] = t;
+            int id;
+            float timestamp;
+            iss >> id >> timestamp;
+            mapIdTime[id] = timestamp;
         }
         datFile.close();
     }
 
     // SWC file
-    std::ifstream swcFile(filename);
-    if(!datFile.is_open())
+    std::ifstream swcFile( filename );
+    if( !swcFile.is_open( ))
         return false;
     else
     {
-        while(swcFile.good())
+        while( swcFile.good( ))
         {
             std::string line;
-            std::getline(swcFile, line);
-            if (line[0] == '#') continue;
+            std::getline( swcFile, line );
+            if( line[0] == '#' ) continue;
 
-            std::istringstream iss(line);
+            std::istringstream iss( line );
             int idx;
             Morphology morphology;
             iss >>
@@ -280,7 +286,7 @@ bool MorphologyLoader::_importSWCFile(
             morphology.branch =
                 ( _geometryParameters.getColorScheme() ==  CS_NEURON_BY_ID ?
                 morphologyIndex : 0 );
-            morphology.frame = mapIdTime[idx];
+            morphology.timestamp = mapIdTime[idx];
             morphology.used = false;
 
             if(morphology.parent > 0)
@@ -294,7 +300,7 @@ bool MorphologyLoader::_importSWCFile(
                 m.z = morphology.z;
                 m.id = morphology.id;
                 m.branch = morphology.branch;
-                m.frame = morphology.frame;
+                m.timestamp = morphology.timestamp;
                 m.used = morphology.used;
                 m.parent = morphology.parent;
                 m.radius = morphology.radius;
@@ -317,7 +323,7 @@ bool MorphologyLoader::_importSWCFile(
                 new Sphere(morphology.branch,
                    morphologyPosition,
                    morphology.radius*_geometryParameters.getRadius(),
-                   static_cast<float>(morphology.frame))));
+                   morphology.timestamp)));
             bounds.merge(morphologyPosition);
             morphology.used = true;
         }
@@ -334,13 +340,13 @@ bool MorphologyLoader::_importSWCFile(
                     new Sphere(morphology.branch,
                         morphologyPosition,
                         morphology.radius*_geometryParameters.getRadius(),
-                        static_cast<float>(morphology.frame))));
+                        morphology.timestamp)));
 
                 primitives[morphology.branch].push_back(CylinderPtr(
                     new Cylinder(morphology.branch,
                         morphologyPosition, v,
                         morphology.radius*_geometryParameters.getRadius(),
-                        static_cast<float>(morphology.frame))));
+                        morphology.timestamp)));
 
                 bounds.merge(morphologyPosition);
                 bounds.merge(v);

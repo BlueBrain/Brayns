@@ -39,7 +39,6 @@ const std::string PARAM_ELECTRON_SHADING = "electron-shading";
 const std::string PARAM_GRADIENT_BACKGROUND = "gradient-background";
 const std::string PARAM_RADIANCE = "radiance";
 const std::string PARAM_BACKGROUND_COLOR = "background-color";
-const std::string PARAM_FRAME_NUMBER = "frame-number";
 const std::string PARAM_DETECTION_DISTANCE = "detection-distance";
 const std::string PARAM_DETECTION_ON_DIFFERENT_MATERIAL =
     "detection-on-different-material";
@@ -67,7 +66,6 @@ RenderingParameters::RenderingParameters( )
     , _shadows( false )
     , _softShadows( false )
     , _backgroundColor( Vector3f( .8f, .8f, .8f ))
-    , _frameNumber( std::numeric_limits<uint16_t>::max( ))
     , _detectionDistance( 1.f )
     , _detectionOnDifferentMaterial( false )
     , _detectionNearColor( 1.f, 0.f, 0.f )
@@ -98,8 +96,6 @@ RenderingParameters::RenderingParameters( )
             "Radiance enabled")
         (PARAM_BACKGROUND_COLOR.c_str(), po::value< floats >( ),
             "Background color")
-        (PARAM_FRAME_NUMBER.c_str(), po::value< size_t >( ),
-            "Frame number");
         (PARAM_DETECTION_DISTANCE.c_str(), po::value< float >( ),
             "Detection distance");
         (PARAM_DETECTION_ON_DIFFERENT_MATERIAL.c_str(), po::value< bool >( ),
@@ -143,8 +139,6 @@ bool RenderingParameters::parse( int argc, const char **argv )
         if( values.size() == 3 )
             _backgroundColor = Vector3f( values[0], values[1], values[2] );
     }
-    if( _vm.count( PARAM_FRAME_NUMBER ))
-        _frameNumber = _vm[PARAM_FRAME_NUMBER].as< size_t >( );
 
     return true;
 }
@@ -172,8 +166,6 @@ void RenderingParameters::print( )
         ( _gradientBackground ? "on" : "off" ) << std::endl;
     BRAYNS_INFO << "Background color        :" <<
         _backgroundColor << std::endl;
-    BRAYNS_INFO << "Frame number            :" <<
-        _frameNumber << std::endl;
 }
 
 }

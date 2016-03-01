@@ -110,6 +110,7 @@ class AbstractParameters;
 class ApplicationParameters;
 class GeometryParameters;
 class RenderingParameters;
+class SceneParameters;
 
 class ExtensionPlugin;
 typedef std::shared_ptr< ExtensionPlugin > ExtensionPluginPtr;
