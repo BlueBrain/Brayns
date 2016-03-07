@@ -75,12 +75,6 @@ typedef vmml::vector<4, double> Vector4d;
 typedef std::vector<Vector4d> Vector4ds;
 
 /**
- * Frustum definitions
- */
-using vmml::Frustumf; //!< Float frustum.
-typedef vmml::frustum_culler<float> FrustumCullerf; //!< Float frustum culler.
-
-/**
  * Quaternion definitions
  */
 typedef vmml::quaternion<float> Quaternionf; //!< Float quaternion.
