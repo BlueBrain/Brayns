@@ -65,7 +65,7 @@ RenderingParameters::RenderingParameters( )
     , _spp( 1 )
     , _shadows( false )
     , _softShadows( false )
-    , _backgroundColor( Vector3f( .8f, .8f, .8f ))
+    , _backgroundColor( Vector3f( 0.f, 0.f, 0.f ))
     , _detectionDistance( 1.f )
     , _detectionOnDifferentMaterial( false )
     , _detectionNearColor( 1.f, 0.f, 0.f )
@@ -94,16 +94,16 @@ RenderingParameters::RenderingParameters( )
             "Gradient background enabled")
         (PARAM_RADIANCE.c_str(), po::value< bool >( ),
             "Radiance enabled")
-        (PARAM_BACKGROUND_COLOR.c_str(), po::value< floats >( ),
+        (PARAM_BACKGROUND_COLOR.c_str(), po::value< floats >( )->multitoken(),
             "Background color")
         (PARAM_DETECTION_DISTANCE.c_str(), po::value< float >( ),
-            "Detection distance");
+            "Detection distance")
         (PARAM_DETECTION_ON_DIFFERENT_MATERIAL.c_str(), po::value< bool >( ),
-            "Detection considered for different materials only");
-        (PARAM_DETECTION_NEAR_COLOR.c_str(), po::value< floats >( ),
-            "Detection near color");
-        (PARAM_DETECTION_FAR_COLOR.c_str(), po::value< floats >( ),
-            "Detection far color");
+            "Detection considered for different materials only")
+        (PARAM_DETECTION_NEAR_COLOR.c_str(),
+            po::value< floats >( )->multitoken(), "Detection near color")
+        (PARAM_DETECTION_FAR_COLOR.c_str(),
+            po::value< floats >( )->multitoken(), "Detection far color");
 }
 
 bool RenderingParameters::parse( int argc, const char **argv )
@@ -133,13 +133,29 @@ bool RenderingParameters::parse( int argc, const char **argv )
         _electronShading = _vm[PARAM_ELECTRON_SHADING].as< bool >( );
     if( _vm.count( PARAM_GRADIENT_BACKGROUND ))
         _gradientBackground = _vm[PARAM_GRADIENT_BACKGROUND].as< bool >( );
-    if( _vm.count( PARAM_GRADIENT_BACKGROUND ))
+    if( _vm.count( PARAM_BACKGROUND_COLOR ))
     {
-        floats values = _vm[PARAM_GRADIENT_BACKGROUND].as< floats >( );
+        floats values = _vm[PARAM_BACKGROUND_COLOR].as< floats >( );
         if( values.size() == 3 )
             _backgroundColor = Vector3f( values[0], values[1], values[2] );
     }
-
+    if( _vm.count( PARAM_DETECTION_DISTANCE ))
+        _detectionDistance = _vm[PARAM_DETECTION_DISTANCE].as< float >( );
+    if( _vm.count( PARAM_DETECTION_ON_DIFFERENT_MATERIAL ))
+        _detectionOnDifferentMaterial =
+            _vm[PARAM_DETECTION_ON_DIFFERENT_MATERIAL].as< bool >( );
+    if( _vm.count( PARAM_DETECTION_NEAR_COLOR ))
+    {
+        floats values = _vm[PARAM_DETECTION_NEAR_COLOR].as< floats >( );
+        if( values.size() == 3 )
+            _detectionNearColor  = Vector3f( values[0], values[1], values[2] );
+    }
+    if( _vm.count( PARAM_DETECTION_FAR_COLOR ))
+    {
+        floats values = _vm[PARAM_DETECTION_FAR_COLOR].as< floats >( );
+        if( values.size() == 3 )
+            _detectionFarColor  = Vector3f( values[0], values[1], values[2] );
+    }
     return true;
 }
 
@@ -166,6 +182,15 @@ void RenderingParameters::print( )
         ( _gradientBackground ? "on" : "off" ) << std::endl;
     BRAYNS_INFO << "Background color        :" <<
         _backgroundColor << std::endl;
+    BRAYNS_INFO << "Detection: " <<
+    BRAYNS_INFO << "- Detection distance              : " <<
+       _detectionDistance << std::endl;
+    BRAYNS_INFO << "- Detection on different material : " <<
+       ( _detectionOnDifferentMaterial ? "on" : "off" ) << std::endl;
+    BRAYNS_INFO << "- Detection near color            : " <<
+       _detectionNearColor << std::endl;
+    BRAYNS_INFO << "- Detection far color             : " <<
+       _detectionFarColor << std::endl;
 }
 
 }

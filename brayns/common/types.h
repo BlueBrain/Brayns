@@ -54,6 +54,9 @@ typedef std::shared_ptr< GeometryParameters > GeometryParametersPtr;
 class RenderingParameters;
 typedef std::shared_ptr< RenderingParameters > RenderingParametersPtr;
 
+class ExtensionController;
+typedef std::shared_ptr<ExtensionController> ExtensionControllerPtr;
+
 class Geometry;
 typedef std::vector< Geometry* > Geometries;
 
@@ -103,6 +106,7 @@ typedef std::shared_ptr< PointLight > PointLightPtr;
 typedef std::vector< std::string > strings;
 typedef std::vector< float > floats;
 typedef std::vector< int > ints;
+typedef std::vector< unsigned int > uints;
 typedef std::vector< uint8_t > uint8_ts;
 
 class ParametersManager;
@@ -126,6 +130,7 @@ class DeflectPlugin;
 typedef std::shared_ptr< DeflectPlugin > DeflectPluginPtr;
 
 /** Define the color scheme to be applied to the geometry */
+const size_t DEFAULT_NB_MATERIALS = 200;
 enum ColorScheme
 {
     CS_NONE,
@@ -155,6 +160,26 @@ enum LightType
     LT_DIRECTIONAL,
 };
 
+/** Geometry quality */
+enum GeometryQuality
+{
+    GQ_FAST,
+    GQ_QUALITY,
+    GQ_MAX_QUALITY
+};
+
+/** Morphology element types */
+enum MorphologySectionType
+{
+    MST_UNDEFINED = 0x00,
+    MST_SOMA = 0x01,
+    MST_AXON = 0x02,
+    MST_DENDRITE = 0x04,
+    MST_APICAL_DENDRITE = 0x08,
+    MST_ALL = 0xff
+};
+
+/** Extension parameters */
 struct ExtensionParameters
 {
     ScenePtr scene;

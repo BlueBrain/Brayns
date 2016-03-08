@@ -117,7 +117,7 @@ BaseWindow::BaseWindow(
 {
     // Initialize brayns
     _brayns.reset(new Brayns(argc, argv));
-    setViewPort( );
+    _setViewPort( );
 
     // Initialize manipulators
     if(allowedManipulators & INSPECT_CENTER_MODE)
@@ -129,10 +129,10 @@ BaseWindow::BaseWindow(
     switch(initialManipulator)
     {
     case MOVE_MODE:
-        _manipulator.reset(_flyingModeManipulator.get( ));
+        _manipulator = _flyingModeManipulator.get( );
         break;
     case INSPECT_CENTER_MODE:
-        _manipulator.reset(_inspectCenterManipulator.get( ));
+        _manipulator = _inspectCenterManipulator.get( );
         break;
     }
     assert(_manipulator);
@@ -209,11 +209,11 @@ void BaseWindow::display( )
     RenderInput renderInput;
     RenderOutput renderOutput;
 
+    renderInput.windowSize = _windowSize;
     renderInput.position = _viewPort.getPosition( );
-    renderInput.target = _viewPort.getTarget( )-_viewPort.getPosition( );
+    renderInput.target = _viewPort.getTarget( );
     renderInput.up = _viewPort.getUp( );
 
-    _brayns->getCamera().commit();
     _brayns->render( renderInput, renderOutput );
 
     GLenum format = GL_RGBA;
@@ -234,13 +234,13 @@ void BaseWindow::display( )
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     }
 
-    glDrawPixels(_windowSize.x( ), _windowSize.y( ), format, type, buffer);
+    glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
     glutSwapBuffers( );
 
 #if(BRAYNS_USE_ZEQ || BRAYNS_USE_DEFLECT)
     Camera& camera = _brayns->getCamera( );
     _viewPort.setPosition( camera.getPosition( ) );
-    _viewPort.setTarget( camera.getTarget( ) + camera.getPosition( ) );
+    _viewPort.setTarget( camera.getTarget( ) );
     _viewPort.setUp( camera.getUpVector( ) );
 #endif
     ++frameCounter_;
@@ -272,23 +272,17 @@ Boxf BaseWindow::getWorldBounds( )
     return _brayns->getScene( ).getWorldBounds( );
 }
 
-void BaseWindow::setViewPort( )
+void BaseWindow::_setViewPort( )
 {
-    Boxf worldBounds = _brayns->getScene( ).getWorldBounds( );
-    Vector3f center = worldBounds.getCenter( );
-    Vector3f diag   = worldBounds.getSize( );
-    diag = max(diag,Vector3f(0.3f*diag.length( )));
-    Vector3f from = center;
-    from.z( ) -= diag.z( );
+    Camera& camera = _brayns->getCamera();
+    const Vector3f& position = camera.getPosition();
+    const Vector3f& target = camera.getTarget();
+    _viewPort.initialize( position, target, camera.getUpVector());
 
-    Vector3f up  = Vector3f(0.f,1.f,0.f);
-
-    _viewPort.initialize(from, center, up);
-
-    _motionSpeed = diag.length( ) * 0.001f;
-    BRAYNS_INFO << "World bounds :" << worldBounds << std::endl;
+    _motionSpeed = Vector3f(target-position).length( ) * 0.001f;
     BRAYNS_INFO << "Viewport     :" << _viewPort << std::endl;
     BRAYNS_INFO << "Motion speed :" << _motionSpeed << std::endl;
+    camera.commit();
 }
 
 void BaseWindow::setTitle(const char *title)
@@ -368,7 +362,7 @@ void BaseWindow::keypress( char key, const Vector2f& )
         if( _flyingModeManipulator )
         {
             BRAYNS_INFO << "Switching to flying mode" << std::endl;
-            _manipulator = std::move(_flyingModeManipulator);
+            _manipulator = _flyingModeManipulator.get();
         }
         break;
     case 'G':
@@ -387,7 +381,7 @@ void BaseWindow::keypress( char key, const Vector2f& )
         if( _inspectCenterManipulator)
         {
             BRAYNS_INFO << "Switching to inspect mode" << std::endl;
-            _manipulator = std::move(_inspectCenterManipulator);
+            _manipulator = _inspectCenterManipulator.get();
         }
         break;
     case 'L':

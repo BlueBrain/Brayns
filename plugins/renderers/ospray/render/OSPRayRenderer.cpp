@@ -82,6 +82,8 @@ void OSPRayRenderer::commit( )
     ospSet1i( _renderer, "spp", _renderingParameters.getSamplesPerPixel( ));
     ospSet1i( _renderer, "electronShading",
         _renderingParameters.getElectronShading( ));
+    ospSet1i( _renderer, "gradientBackgroundEnabled",
+        _renderingParameters.getGradientBackground( ));
     ospSet1f( _renderer, "epsilon", DEFAULT_EPSILON );
     ospSet1i( _renderer, "moving", false );
     ospSet1f( _renderer, "detectionDistance",

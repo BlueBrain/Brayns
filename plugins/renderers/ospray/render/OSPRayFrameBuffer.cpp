@@ -70,7 +70,7 @@ void OSPRayFrameBuffer::resize(const Vector2i& frameSize)
 
     ospray::vec2i size(_frameSize.x(), _frameSize.y());
     _frameBuffer = ospNewFrameBuffer( size,
-        format, OSP_FB_COLOR|OSP_FB_DEPTH|OSP_FB_ACCUM|OSP_FB_ALPHA );
+        format, OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM | OSP_FB_ALPHA );
     ospSet1f(_frameBuffer, "gamma", DEFAULT_GAMMA);
     ospCommit(_frameBuffer);
     clear();
@@ -92,13 +92,13 @@ void OSPRayFrameBuffer::unmap()
     if( _colorBuffer )
     {
         ospUnmapFrameBuffer( _colorBuffer, _frameBuffer );
-        _colorBuffer  = 0;
+        _colorBuffer = 0;
     }
 
     if( _depthBuffer )
     {
         ospUnmapFrameBuffer( _depthBuffer, _frameBuffer );
-        _depthBuffer  = 0;
+        _depthBuffer = 0;
     }
 }
 

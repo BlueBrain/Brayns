@@ -88,9 +88,9 @@ private:
      */
     bool _handleTouchEvents( HandledEvents& handledEvents );
 
-    float _alpha;
     float _theta;
-    Vector3f _previousCameraPosition;
+    float _phi;
+    Vector3f _previousTouchPosition;
     bool _interaction;
     bool _compressImage;
     size_t _compressionQuality;

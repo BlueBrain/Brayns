@@ -35,9 +35,9 @@ DeflectPlugin::DeflectPlugin(
     ApplicationParameters& applicationParameters,
     ExtensionParameters& extensionParameters )
     : ExtensionPlugin( applicationParameters, extensionParameters )
-    , _alpha( 0 )
-    , _theta( 0 )
-    , _previousCameraPosition( 0.f, 0.f, 0.f )
+    , _theta( 0.f )
+    , _phi( 0.f )
+    , _previousTouchPosition( 0.5f, 0.5f, -1.f )
     , _interaction(false)
     , _compressImage( DEFAULT_COMPRESSION_QUALITY != 0 )
     , _compressionQuality( DEFAULT_COMPRESSION_QUALITY )
@@ -46,8 +46,7 @@ DeflectPlugin::DeflectPlugin(
     , _stream( nullptr )
 
 {
-    _previousCameraPosition.z( ) =
-        -_extensionParameters.scene->getWorldBounds( ).getSize().z( );
+    BRAYNS_INFO << "Initial: " << _previousTouchPosition << std::endl;
     _initializeDeflect( );
 }
 
@@ -77,13 +76,11 @@ void DeflectPlugin::_sendDeflectFrame()
 {
     const Vector2i frameSize = _extensionParameters.frameBuffer->getSize();
     _send( frameSize, (unsigned long*)
-        _extensionParameters.frameBuffer->getColorBuffer(), false);
+        _extensionParameters.frameBuffer->getColorBuffer(), true);
 }
 
 void DeflectPlugin::_handleDeflectEvents()
 {
-    const Vector2i frameSize = _extensionParameters.frameBuffer->getSize();
-
     HandledEvents handledEvents(
         Vector2f( 0.f, 0.f ),
         Vector2f( 0.f, 0.f ),
@@ -93,8 +90,10 @@ void DeflectPlugin::_handleDeflectEvents()
     if( _handleTouchEvents( handledEvents ))
     {
         if( handledEvents.pressed )
-            _previousCameraPosition = Vector3f(
-                handledEvents.position.x(), handledEvents.position.y(), 0.f);
+        {
+            _previousTouchPosition.x() = handledEvents.position.x();
+            _previousTouchPosition.y() = handledEvents.position.y();
+        }
         else
         {
             if( handledEvents.position.length() >
@@ -107,37 +106,37 @@ void DeflectPlugin::_handleDeflectEvents()
                 const Vector3f& size = _extensionParameters.scene->
                     getWorldBounds().getSize();
 
-                const float dx =
-                    _previousCameraPosition.x() - handledEvents.position.x();
-                const float dy =
-                    _previousCameraPosition.y() - handledEvents.position.y();
+                const float du =
+                    _previousTouchPosition.x() -
+                    handledEvents.position.x();
+                const float dv =
+                    _previousTouchPosition.y() -
+                    handledEvents.position.y();
 
-                if(std::abs(dx)<=1.f)
-                    _theta -= frameSize.x()/100.f*std::asin(dx);
-                if(std::abs(dy)<=1.f)
-                    _alpha += frameSize.y()/100.f*std::asin(dy);
+                _theta -= std::asin( du );
+                _phi += std::asin( dv );
 
-                _previousCameraPosition.x() = handledEvents.position.x();
-                _previousCameraPosition.y() = handledEvents.position.y();
-                _previousCameraPosition.z() -= handledEvents.wheelDelta.y()*5.f;
+                _previousTouchPosition.x() = handledEvents.position.x();
+                _previousTouchPosition.y() = handledEvents.position.y();
+                _previousTouchPosition.z() +=
+                    handledEvents.wheelDelta.y() / size.z();
+                _previousTouchPosition.z() =
+                    std::min(0.f, _previousTouchPosition.z());
 
-                if(dx!=0.f || dy!=0.f || handledEvents.wheelDelta.y()!=0.f)
+                if( du!=0.f || dv!=0.f || handledEvents.wheelDelta.y() != 0.f )
                 {
-                    Vector3f cameraPosition = size*Vector3f(
-                        _previousCameraPosition.z( ) * std::cos( _alpha ) *
+                    const Vector3f cameraPosition = center + size * Vector3f(
+                        _previousTouchPosition.z( ) *
+                            std::cos( _phi ) *
                             std::cos( _theta ),
-                        _previousCameraPosition.z( ) * std::sin( _alpha ) *
+                        _previousTouchPosition.z( ) *
+                            std::sin( _phi ) *
                             std::cos( _theta ),
-                        _previousCameraPosition.z( ) * std::sin( _theta ));
+                        _previousTouchPosition.z( ) *
+                            std::sin( _theta ));
 
-                    BRAYNS_INFO << "[" << _alpha << ", " << _theta
-                        << "] " << cameraPosition << std::endl;
-
-                    _extensionParameters.camera->set(
-                        center + cameraPosition,
-                        center,
-                        _extensionParameters.camera->getUpVector());
-
+                   _extensionParameters.camera->setPosition( cameraPosition );
+                   _extensionParameters.camera->setTarget( center );
                    _extensionParameters.frameBuffer->clear();
                 }
             }

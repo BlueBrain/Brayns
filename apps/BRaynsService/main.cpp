@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/common/types.h>
 #include <brayns/common/log.h>
 #include <brayns/Brayns.h>
 
@@ -25,17 +26,8 @@ int main(int argc, const char **argv)
     BRAYNS_INFO << "Initializing Service..." << std::endl;
     brayns::Brayns brayns(argc, argv);
 
-    brayns::RenderInput renderInput;
-    brayns::RenderOutput renderOutput;
-
     while( true )
-    {
-        renderInput.position = brayns::Vector3f(0,0,-1);
-        renderInput.target = brayns::Vector3f(0,0,0);
-        renderInput.up = brayns::Vector3f(0,1,0);
-
-        brayns.render( renderInput, renderOutput );
-    }
+        brayns.render( );
 
     return 0;
 }

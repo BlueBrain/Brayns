@@ -25,6 +25,8 @@
 #include <plugins/loaders/MorphologyLoader.h>
 #include <plugins/loaders/ProteinLoader.h>
 
+#include <servus/uri.h>
+
 #include <boost/filesystem.hpp>
 
 #ifdef BRAYNS_USE_ASSIMP
@@ -115,10 +117,11 @@ MaterialPtr Scene::getMaterial( size_t index )
     return _materials[index];
 }
 
-void Scene::loadSWCFolder( )
+void Scene::loadMorphologyFolder( )
 {
-    const boost::filesystem::path& folder = _geometryParameters.getSWCFolder( );
-    BRAYNS_INFO << "Loading SWC morphologies from " << folder << std::endl;
+    const boost::filesystem::path& folder =
+        _geometryParameters.getMorphologyFolder( );
+    BRAYNS_INFO << "Loading morphologies from " << folder << std::endl;
     MorphologyLoader morphologyLoader( _geometryParameters );
 
     size_t fileIndex = 0;
@@ -133,14 +136,12 @@ void Scene::loadSWCFolder( )
             {
                 boost::filesystem::path fileExtension =
                     dirIter->path( ).extension( );
-                if( fileExtension==".swc")
+                if( fileExtension==".swc" || fileExtension==".h5" )
                 {
                     const std::string& filename = dirIter->path( ).string( );
-                    BRAYNS_INFO << "- " << filename << std::endl;
-                    Vector3f position(0.f,0.f,0.f);
-                    if( !morphologyLoader.importMorphologies(
-                         MFF_SWC, filename, ++fileIndex,
-                         position, _primitives, _bounds ))
+                    const servus::URI uri( filename );
+                    if( !morphologyLoader.importMorphology(
+                        uri, ++fileIndex, _primitives, _bounds ))
                     {
                         BRAYNS_ERROR << "Failed to import " <<
                             filename << std::endl;
@@ -170,20 +171,6 @@ void Scene::loadPDBFolder( )
         MaterialPtr material = getMaterial( i );
         material->setColor( Vector3f( r, g, b ));
     }
-}
-
-void Scene::loadH5Folder( )
-{
-#ifdef BRAYNS_USE_BBPSDK
-    // Load h5 files
-    const std::string& folder = _geometryParameters.getH5Folder( );
-    BRAYNS_INFO << "Loading H5 morphologies from " << folder << std::endl;
-    const Vector3f position( 0.f, 0.f, 0.f );
-    MorphologyLoader morphologyLoader(_geometryParameters);
-    if( !morphologyLoader.importMorphologies( MFF_SWC, folder, 0, position,
-         _primitives, _bounds))
-        BRAYNS_ERROR << "Failed to import folder " << folder << std::endl;
-#endif
 }
 
 void Scene::loadMeshFolder( )
@@ -226,6 +213,20 @@ void Scene::loadMeshFolder( )
         }
     }
 #endif
+}
+
+void Scene::loadCircuitConfiguration( )
+{
+    const std::string& filename =
+        _geometryParameters.getCircuitConfiguration( );
+    const std::string& target =
+        _geometryParameters.getTarget( );
+    BRAYNS_INFO << "Loading circuit configuration from " <<
+        filename << std::endl;
+    MorphologyLoader morphologyLoader( _geometryParameters );
+    const servus::URI uri( filename );
+    morphologyLoader.importCircuit(
+        uri, target, _primitives, _bounds );
 }
 
 void Scene::buildEnvironment( )

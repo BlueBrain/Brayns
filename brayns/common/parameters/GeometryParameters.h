@@ -43,23 +43,28 @@ public:
     /** @copydoc AbstractParameters::print */
     void print( ) final;
 
-    /** folder containing SWC files */
-    std::string getSWCFolder( ) const { return _swcFolder; }
+    /** folder containing SWC and H5 files */
+    const std::string& getMorphologyFolder( ) const
+    { return _morphologyFolder; }
 
     /** folder containing PDB files */
-    std::string getPDBFolder( ) const { return _pdbFolder; }
+    const std::string& getPDBFolder( ) const { return _pdbFolder; }
 
     /** folder containing PDB cells */
-    std::string getPDBCells( ) const { return _pdbCells; }
+    const std::string& getPDBCells( ) const { return _pdbCells; }
 
     /** folder containing PDB positions */
-    std::string getPDBPositions( ) const { return _pdbPositions; }
-
-    /** folder containing H5 files */
-    std::string getH5Folder( ) const { return _h5Folder; }
+    const std::string& getPDBPositions( ) const { return _pdbPositions; }
 
     /** folder containing mesh files */
-    std::string getMeshFolder( ) const { return _meshFolder; }
+    const std::string& getMeshFolder( ) const { return _meshFolder; }
+
+    /** file containing circuit configuration */
+    const std::string& getCircuitConfiguration( ) const
+    { return _circuitConfig; }
+
+    /** Circuit target */
+    const std::string& getTarget( ) const { return _target; }
 
     /** Radius multiplier applied to spheres, cones and cylinders */
     float getRadius( ) const { return _radius; }
@@ -74,16 +79,28 @@ public:
     /** Scene environment (0: none, 1: ground, 2: box ) */
     SceneEnvironment getSceneEnvironment( ) const { return _sceneEnvironment; }
 
+    /** Morphology quality */
+    GeometryQuality getGeometryQuality( ) const { return _geometryQuality; }
+
+    /** Morphology section types*/
+    size_t getMorphologySectionTypes( ) const
+    {
+        return _morphologySectionTypes;
+    }
+
 protected:
-    std::string _swcFolder;
+    std::string _morphologyFolder;
     std::string _pdbFolder;
     std::string _pdbCells;
     std::string _pdbPositions;
-    std::string _h5Folder;
     std::string _meshFolder;
+    std::string _circuitConfig;
+    std::string _target;
     float  _radius;
     ColorScheme _colorScheme;
     SceneEnvironment _sceneEnvironment;
+    GeometryQuality _geometryQuality;
+    size_t _morphologySectionTypes;
 };
 
 }

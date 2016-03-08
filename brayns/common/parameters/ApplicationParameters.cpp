@@ -54,7 +54,7 @@ ApplicationParameters::ApplicationParameters( )
 {
     _parameters.add_options( )
         ( PARAM_HELP.c_str( ), "Help screen" )
-        ( PARAM_WINDOW_SIZE.c_str( ), po::value< uint8_ts >( ),
+        ( PARAM_WINDOW_SIZE.c_str( ), po::value< uints >( )->multitoken( ),
             "Window size" )
         ( PARAM_CAMERA.c_str( ), po::value< std::string >( ),
             "Camera name" )
@@ -74,7 +74,7 @@ bool ApplicationParameters::parse( int argc, const char **argv )
         return false;
     if( _vm.count( PARAM_WINDOW_SIZE ))
     {
-        uint8_ts values = _vm[PARAM_WINDOW_SIZE].as< uint8_ts >( );
+        uints values = _vm[PARAM_WINDOW_SIZE].as< uints >( );
         if( values.size() == 2 )
         {
             _windowSize.x( ) = values[0];

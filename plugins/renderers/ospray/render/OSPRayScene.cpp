@@ -61,17 +61,17 @@ void OSPRayScene::commit()
 
 void OSPRayScene::loadData()
 {
-    if(!_geometryParameters.getSWCFolder().empty())
-        loadSWCFolder();
+    if(!_geometryParameters.getMorphologyFolder().empty())
+        loadMorphologyFolder();
 
     if(!_geometryParameters.getPDBFolder().empty())
         loadPDBFolder();
 
-    if(!_geometryParameters.getH5Folder().empty())
-        loadH5Folder();
-
     if(!_geometryParameters.getMeshFolder().empty())
         loadMeshFolder();
+
+    if(!_geometryParameters.getCircuitConfiguration().empty())
+        loadCircuitConfiguration();
 }
 
 void OSPRayScene::buildGeometry()

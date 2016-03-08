@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -23,13 +23,9 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/Cylinder.h>
 
-#include <sstream>
-
-#ifdef BRAYNS_USE_BBPSDK
-#  include <BBP/Readers/Morphology_Reader.h>
-#  include <BBP/Containers/Morphologies.h>
-#  include <BBP/Soma.h>
-#  include <boost/foreach.hpp>
+#ifdef BRAYNS_USE_BRION
+#  include <brain/brain.h>
+#  include <brion/brion.h>
 #endif
 
 namespace brayns
@@ -41,320 +37,186 @@ MorphologyLoader::MorphologyLoader(
 {
 }
 
-bool MorphologyLoader::importMorphologies(
-        MorphologyFileFormat fileFormat,
-        const std::string& filename,
-        int morphologyIndex,
-        const Vector3f& position,
-        PrimitivesMap& primitives,
-        Boxf& bounds)
+#ifdef BRAYNS_USE_BRION
+bool MorphologyLoader::importMorphology(
+    const servus::URI& uri,
+    const int morphologyIndex,
+    PrimitivesMap& primitives,
+    Boxf& bounds)
 {
-    switch(fileFormat)
-    {
-    case MFF_SWC:
-        return _importSWCFile(
-            filename, morphologyIndex, position, primitives, bounds);
-        break;
-    case MFF_H5:
-        return _importH5File(
-            filename, morphologyIndex, position, primitives, bounds);
-        break;
-    default:
-        BRAYNS_ERROR << "Unsupported file format. " <<
-            filename << " could not be imported" <<
-            std::endl;
-    }
-    return false;
+    return _importMorphology(
+        uri, morphologyIndex, Matrix4f::IDENTITY, primitives, bounds );
 }
 
-#ifdef BRAYNS_USE_BBPSDK
-bool MorphologyLoader::_importH5File(
-        const std::string &filename,
-        int morphologyIndex,
-        const Vector3f& position,
-        PrimitivesMap& primitives,
-        Boxf& bounds
-        )
+bool MorphologyLoader::_importMorphology(
+    const servus::URI& source,
+    const size_t morphologyIndex,
+    const Matrix4f& transformation,
+    PrimitivesMap& primitives,
+    Boxf& bounds)
 {
-    Morphologies morphologies;
-
-    Vector3f somaPosition(0.f,0.f,0.f);
-    Vector3f randomPosition(0.f,0.f,0.f);
-    bbp::Morphology_Reader reader;
-    reader.open(filename.c_str());
-    if( !reader.is_open() )
-        return false;
-    else
+    try
     {
-        bbp::Morphologies bbpMorphologies;
-        reader.read( bbpMorphologies );
-        reader.close();
+        brain::neuron::Morphology morphology( source, transformation );
+        brain::SectionTypes sectionTypes;
 
-        bbp::Morphologies::const_iterator it =  bbpMorphologies.begin();
-        while( it != bbpMorphologies.end() )
+        const size_t morphologySectionTypes =
+            _geometryParameters.getMorphologySectionTypes();
+        if( morphologySectionTypes & MST_SOMA )
+            sectionTypes.push_back( brain::SECTION_SOMA );
+        if( morphologySectionTypes & MST_AXON )
+            sectionTypes.push_back( brain::SECTION_AXON );
+        if( morphologySectionTypes & MST_DENDRITE )
+            sectionTypes.push_back( brain::SECTION_DENDRITE );
+        if( morphologySectionTypes & MST_APICAL_DENDRITE )
+            sectionTypes.push_back( brain::SECTION_APICAL_DENDRITE );
+
+        const brain::neuron::Sections& sections =
+            morphology.getSections( sectionTypes );
+
+        if( morphologySectionTypes & MST_SOMA )
         {
-            float timestamp = 0.f;
-            size_t count_sections = 0;
+            // Soma
+            const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material =
-                ( _geometryParameters.getColorScheme() == CS_NEURON_BY_ID) ?
-                ( morphologyIndex%100 ) : 0;
-
-            const bbp::Morphology morphology = (*it);
-            const bbp::Sections& sections = morphology.sections();
-            for(bbp::Section section: sections )
-            {
-                // Soma
-                const bbp::Soma soma = morphology.soma();
-                const bbp::Vector3f pos = soma.position();
-                Vector3f v(pos[0],pos[1],pos[2]);
-                v += randomPosition+position;
-                if( count_sections == 0 )
-                {
-                    somaPosition = v;
-
-                    primitives[material].push_back(SpherePtr(
-                        new Sphere(material, v,
-                            soma.max_radius()*
-                                _geometryParameters.getRadius(),
-                                timestamp)));
-                    bounds.merge(v);
-                }
-                Vector3f va = v;
-
-                size_t count_segments = 0;
-                const bbp::Segments& segments = section.segments();
-                for(bbp::Segment segment: segments )
-                {
-                    const bbp::Vector3f b = segment.end().center();
-                    bbp::Cross_Section cs = segment.cross_section(1.0);
-                    Vector3f vb(b[0],b[1],b[2]);
-                    vb += randomPosition+position;
-
-                    const float r = cs.radius()*
-                        _geometryParameters.getRadius();
-
-                    timestamp = Vector3f(vb-v).length();
-
-                    // Branches
-                    primitives[material].push_back(SpherePtr(
-                        new Sphere(material, vb, r, timestamp)));
-
-                    primitives[material].push_back(CylinderPtr(
-                        new Cylinder(material, va, vb, r, timestamp)));
-
-                    bounds.merge(va);
-                    bounds.merge(vb);
-
-                    va = vb;
-                    ++count_segments;
-                }
-                ++count_sections;
-            }
-            ++morphologyIndex;
-            ++it;
+                _material( morphologyIndex, brain::SECTION_SOMA );
+            const Vector3f& center = soma.getCentroid();
+            primitives[material].push_back( SpherePtr(
+                new Sphere( material, center,
+                    soma.getMeanRadius()* _geometryParameters.getRadius(), 0.f )));
+            bounds.merge( center );
         }
-    }
 
-    Branches branches;
-    Morphologies::const_iterator itm=morphologies.begin();
-    while( itm!=morphologies.end())
-    {
-        const Morphology& a = (*itm).second;
-        if( a.children.size()>1 )
+        // Axon and dendrites
+        for( const auto& section: sections )
         {
-            for( size_t i=0; i<a.children.size(); ++i )
+            const size_t material =
+                _material( morphologyIndex, section.getType( ));
+            const Vector4fs& samples = section.getSamples();
+            if( samples.size() == 0 )
+                continue;
+
+            Vector4f previousSample = samples[0];
+            const size_t step =
+                ( _geometryParameters.getGeometryQuality() == GQ_FAST ) ?
+                    samples.size()-1 : 1;
+            const float distanceToSoma = section.getDistanceToSoma();
+            const floats& distancesToSoma = section.getSampleDistancesToSoma();
+
+            for( size_t i = step; i < samples.size(); i += step )
             {
-                Branch b;
-                b.segments.push_back(a.children[i]);
-                branches.push_back(b);
+                Vector4f sample =  samples[i];
+                const float radius =
+                    sample.w() * _geometryParameters.getRadius();
+                const float previousRadius =
+                    previousSample.w() * _geometryParameters.getRadius();
+                const float distance =
+                    distanceToSoma + distancesToSoma[i];
+
+                const Vector3f position( sample.x(), sample.y(), sample.z());
+                const Vector3f target(
+                    previousSample.x(), previousSample.y(), previousSample.z());
+                primitives[material].push_back( SpherePtr(
+                    new Sphere( material, position,
+                        std::max( radius, previousRadius ),
+                        distance )));
+                bounds.merge( position );
+
+                if( position != target )
+                {
+                    primitives[material].push_back( CylinderPtr(
+                        new Cylinder( material, position, target,
+                            previousRadius, distance )));
+                    bounds.merge( target );
+                }
+
+                previousSample = sample;
             }
         }
-        ++itm;
     }
-
-    Branches::const_iterator itb=branches.begin();
-    while( itb!=branches.end())
+    catch( const std::runtime_error& e )
     {
-        int segment(0);
-        Vector3f vb;
-        const Branch& branch = (*itb);
-        Morphology& morphology = morphologies[branch.segments[0]];
-        bool carryon = true;
-        while( carryon )
-        {
-            Vector3f va(morphology.x, morphology.y, morphology.z);
-
-            if( segment>0 )
-            {
-                primitives[morphology.branch].push_back(SpherePtr(
-                    new Sphere(morphology.branch, va,
-                        morphology.radius*_geometryParameters.getRadius(),
-                        morphology.timestamp)));
-                bounds.merge(va);
-            }
-            vb = va;
-            ++segment;
-
-            if(morphology.children.size()==1)
-                morphology = morphologies[morphology.children[0]];
-            else
-            {
-                primitives[morphology.branch].push_back(SpherePtr(
-                    new Sphere(morphology.branch, va,
-                        morphology.radius*_geometryParameters.getRadius()*
-                            morphology.children.size(),
-                        morphology.timestamp)));
-                bounds.merge(va);
-                carryon = false;
-            }
-        }
-        ++itb;
+        BRAYNS_ERROR << e.what() << std::endl;
+        return false;
     }
+
+    return true;
+}
+
+bool MorphologyLoader::importCircuit(
+    const servus::URI& circuitConfig,
+    const std::string& target,
+    PrimitivesMap& primitives,
+    Boxf& bounds)
+{
+    const std::string& filename = circuitConfig.getPath();
+    const brion::BlueConfig bc( filename );
+    const brain::Circuit circuit( bc );
+    const brain::GIDSet gids = circuit.getGIDs( target );
+    if( gids.empty() )
+    {
+        BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
+        return false;
+    }
+    const brain::URIs& uris = circuit.getMorphologyURIs( gids );
+    const Matrix4fs& transforms = circuit.getTransforms( gids );
+
+#pragma omp parallel
+    {
+        PrimitivesMap private_primitives;
+        #pragma omp for nowait
+        for( size_t i = 0; i < uris.size(); ++i )
+        {
+            const auto& uri = uris[i];
+            _importMorphology(
+                uri, i, transforms[i], private_primitives, bounds );
+        }
+        #pragma omp critical
+        for( const auto& p: private_primitives )
+        {
+            const size_t material = p.first;
+            primitives[material].insert(
+                primitives[material].end(),
+                private_primitives[material].begin(),
+                private_primitives[material].end());
+        }
+    }
+
     return true;
 }
 #else
-bool MorphologyLoader::_importH5File(
-        const std::string &, int, const Vector3f&, PrimitivesCollection&, Boxf&)
+bool MorphologyLoader::importMorphology(
+    const servus::URI&, const int, PrimitivesMap& , Boxf& )
 {
-    BRAYNS_ERROR << "BBPSDK is neededstring to import H5 files" << std::endl;
+    BRAYNS_ERROR << "Brion is required to load morphologies" << std::endl;
+    return false;
+}
+
+bool MorphologyLoader::importCircuit(
+    const servus::URI&, const std::string&, PrimitivesMap&, Boxf& )
+{
+    BRAYNS_ERROR << "Brion is required to load morphologies" << std::endl;
     return false;
 }
 #endif
 
-bool MorphologyLoader::_importSWCFile(
-        const std::string &filename,
-        const int morphologyIndex,
-        const Vector3f& position,
-        PrimitivesMap& primitives,
-        Boxf& bounds)
+size_t MorphologyLoader::_material(
+    const size_t morphologyIndex,
+    const size_t sectionType )
 {
-    Morphologies morphologies;
-
-    // DAT file
-    std::map< int, float > mapIdTime;
-    std::string datFilename(filename);
-
-    size_t pos = datFilename.find( ".swc" );
-    if ( pos != std::string::npos ) {
-        datFilename.replace( pos, 4, ".dat");
-    }
-
-    std::ifstream datFile( datFilename );
-    if( datFile.is_open( ))
+    size_t material;
+    switch( _geometryParameters.getColorScheme() )
     {
-        while(datFile.good())
-        {
-            std::string line;
-            std::getline(datFile, line);
-            if (line[0] == '#') continue;
-
-            std::istringstream iss(line);
-            int id;
-            float timestamp;
-            iss >> id >> timestamp;
-            mapIdTime[id] = timestamp;
-        }
-        datFile.close();
+    case CS_NEURON_BY_ID:
+        material = morphologyIndex % DEFAULT_NB_MATERIALS;
+        break;
+    case CS_NEURON_BY_SEGMENT_TYPE:
+        material = (1 + sectionType) % DEFAULT_NB_MATERIALS;
+        break;
+    default:
+        material = 0;
     }
-
-    // SWC file
-    std::ifstream swcFile( filename );
-    if( !swcFile.is_open( ))
-        return false;
-    else
-    {
-        while( swcFile.good( ))
-        {
-            std::string line;
-            std::getline( swcFile, line );
-            if( line[0] == '#' ) continue;
-
-            std::istringstream iss( line );
-            int idx;
-            Morphology morphology;
-            iss >>
-               idx >>
-               morphology.branch >>
-               morphology.x >> morphology.z >> morphology.y >>
-               morphology.radius >>
-               morphology.parent;
-
-            morphology.x += position[0];
-            morphology.y += position[1];
-            morphology.z += position[2];
-            morphology.id = idx;
-            morphology.branch =
-                ( _geometryParameters.getColorScheme() ==  CS_NEURON_BY_ID ?
-                morphologyIndex : 0 );
-            morphology.timestamp = mapIdTime[idx];
-            morphology.used = false;
-
-            if(morphology.parent > 0)
-                morphologies[morphology.parent].children.push_back(idx);
-
-            if( morphologies.find(idx) != morphologies.end() )
-            {
-                Morphology& m = morphologies[idx];
-                m.x = morphology.x;
-                m.y = morphology.y;
-                m.z = morphology.z;
-                m.id = morphology.id;
-                m.branch = morphology.branch;
-                m.timestamp = morphology.timestamp;
-                m.used = morphology.used;
-                m.parent = morphology.parent;
-                m.radius = morphology.radius;
-            }
-            else
-                morphologies[idx] = morphology;
-        }
-        swcFile.close();
-    }
-
-    Morphologies::iterator it=morphologies.begin();
-    while( it!=morphologies.end())
-    {
-        Morphology& morphology = (*it).second;
-        Vector3f morphologyPosition(morphology.x,morphology.y,morphology.z);
-
-        if (morphology.parent == -1) // root soma, just one sphere
-        {
-            primitives[morphology.branch].push_back(SpherePtr(
-                new Sphere(morphology.branch,
-                   morphologyPosition,
-                   morphology.radius*_geometryParameters.getRadius(),
-                   morphology.timestamp)));
-            bounds.merge(morphologyPosition);
-            morphology.used = true;
-        }
-        else
-        {
-            Morphology& parentMorphology = morphologies[morphology.parent];
-            if( parentMorphology.parent!=-1 )
-            {
-                Vector3f parentPosition(parentMorphology.x,parentMorphology.y,parentMorphology.z);
-                Vector3f up = parentPosition - morphologyPosition;
-                Vector3f v = morphologyPosition + up;
-
-                primitives[morphology.branch].push_back(SpherePtr(
-                    new Sphere(morphology.branch,
-                        morphologyPosition,
-                        morphology.radius*_geometryParameters.getRadius(),
-                        morphology.timestamp)));
-
-                primitives[morphology.branch].push_back(CylinderPtr(
-                    new Cylinder(morphology.branch,
-                        morphologyPosition, v,
-                        morphology.radius*_geometryParameters.getRadius(),
-                        morphology.timestamp)));
-
-                bounds.merge(morphologyPosition);
-                bounds.merge(v);
-            }
-        }
-        ++it;
-    }
-    return true;
+    return material;
 }
 
 }

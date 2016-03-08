@@ -43,6 +43,9 @@ using vmml::Matrix4f;
 using vmml::Matrix3d;
 using vmml::Matrix4d;
 
+using vmml::Matrix4f;
+typedef std::vector< Matrix4f > Matrix4fs;
+
 /**
  * Vector definitions
  */

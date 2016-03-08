@@ -53,9 +53,9 @@ if(ASSIMP_ENABLED)
   common_package(assimp)
 endif()
 
-option(BBPSDK_ENABLED "Activate BBPSDK" ON)
-if(BBPSDK_ENABLED)
-  common_package(BBPSDK)
+option(BRION_ENABLED "Activate Brion" ON)
+if(BRION_ENABLED)
+  common_package(Brion)
 endif()
 
 option(DEFLECT_ENABLED "Activate streaming to display wall" ON)

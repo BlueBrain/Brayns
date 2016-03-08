@@ -74,7 +74,10 @@ void ZeroBufPlugin::_setupHTTPServer()
     delete [] argv;
 
     if( !_httpServer )
+    {
+        BRAYNS_ERROR << "HTTP could not be initialized" << std::endl;
         return;
+    }
 
     BRAYNS_INFO << "Registering handlers on " <<
         _httpServer->getURI() << std::endl;

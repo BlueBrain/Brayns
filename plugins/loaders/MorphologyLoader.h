@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
@@ -24,39 +24,12 @@
 #include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/parameters/GeometryParameters.h>
 
+#include <servus/types.h>
+
 #include <vector>
 
 namespace brayns
 {
-
-// File formats for morphologies
-enum MorphologyFileFormat
-{
-    MFF_UNKNOWN = 0,
-    MFF_H5,
-    MFF_SWC
-};
-
-struct Branch
-{
-    std::vector< size_t > segments;
-};
-typedef std::vector< Branch > Branches;
-
-struct Morphology
-{
-    int id;
-    int branch;
-    float x;
-    float y;
-    float z;
-    float radius;
-    int parent;
-    float timestamp;
-    bool used;
-    std::vector< size_t > children;
-};
-typedef std::map< size_t, Morphology > Morphologies;
 
 /** Loads morphologies from SWC and H5 files
  */
@@ -66,38 +39,49 @@ public:
     MorphologyLoader(
             const GeometryParameters& geometryParameters);
 
-    /** Imports morphology from a given SWC file into spheres, cones and
-     *  cylinders
+    /** Imports morphology from a given SWC or H5 file
      *
-     * @param filename name of the file containing the morphology
+     * @param uri URI of the morphology
      * @param morphologyIndex specifies an index for the morphology. This is
      *        mainly used to give a specific color to every morphology.
-     * @param position translates the morphology to the given position
-     * @param geometries resulting geom
-etries
+     * @param primitives Resulting primitives (spheres, cones, etc)
+     * @param bounds Bounding box of the morphology
+     * @return True if the morphology is successfully loaded, false otherwise
      */
-    bool importMorphologies(
-        MorphologyFileFormat fileFormat,
-        const std::string& filename,
+    bool importMorphology(
+        const servus::URI& uri,
         int morphologyIndex,
-        const Vector3f& position,
+        PrimitivesMap& primitives,
+        Boxf& bounds);
+
+    /** Imports morphology from a circuit for the given target name
+     *
+     * @param uri URI of the Circuit Config file
+     * @param target Target to be loaded. If empty, the target specified in the
+     *        circuit configuration file is used. If such an entry does not
+     *        exist, all neurons are loaded.
+     * @param primitives Resulting primitives (spheres, cones, etc)
+     * @param bounds Bounding box of the whole circuit
+     * @return True if the circuit is successfully loaded, false if the circuit
+     *         contains no cells.
+     */
+    bool importCircuit(
+        const servus::URI& circuitConfig,
+        const std::string& target,
         PrimitivesMap& primitives,
         Boxf& bounds);
 
 private:
-    bool _importSWCFile(
-        const std::string& filename,
-        int morphologyIndex,
-        const Vector3f& position,
+    bool _importMorphology(
+        const servus::URI& source,
+        size_t morphologyIndex,
+        const Matrix4f& transformation,
         PrimitivesMap& primitives,
         Boxf& bounds);
 
-    bool _importH5File(
-        const std::string &filename,
-        int morphologyIndex,
-        const Vector3f& position,
-        PrimitivesMap& primitives,
-        Boxf& bounds);
+    size_t _material(
+        size_t morphologyIndex,
+        size_t sectionType );
 
     GeometryParameters _geometryParameters;
 };

@@ -44,10 +44,12 @@ OSPRayCamera::OSPRayCamera( const CameraType cameraType )
 void OSPRayCamera::commit()
 {
     const Vector3f& position = getPosition();
-    ospSet3f( _camera,"pos", position.x(), position.y(), position.z( ));
     const Vector3f& target = getTarget();
-    ospSet3f( _camera,"dir", target.x(), target.y(), target.z( ));
+    const Vector3f dir = normalize( target - position );
     const Vector3f& upVector = getUpVector();
+
+    ospSet3f( _camera,"pos", position.x(), position.y(), position.z( ));
+    ospSet3f( _camera,"dir", dir.x(), dir.y(), dir.z( ));
     ospSet3f( _camera,"up", upVector.x(), upVector.y(), upVector.z( ));
     ospCommit( _camera );
 }

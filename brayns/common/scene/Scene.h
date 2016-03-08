@@ -94,10 +94,10 @@ public:
     BRAYNS_API const Boxf& getWorldBounds() const { return _bounds; }
 
     /**
-        Loads data from SWC files located in the folder specified in the
-        geometry parameters (command line parameter --swc-folder)
+        Loads data from SWC and H5 files located in the folder specified in the
+        geometry parameters (command line parameter --morphology-folder)
     */
-    BRAYNS_API void loadSWCFolder();
+    BRAYNS_API void loadMorphologyFolder();
 
     /**
         Loads data from PDB files located in the folder specified in the
@@ -106,16 +106,16 @@ public:
     BRAYNS_API void loadPDBFolder();
 
     /**
-        Loads data from H5 files located in the folder specified in the
-        geometry parameters (command line parameter --h5-folder)
-    */
-    BRAYNS_API void loadH5Folder();
-
-    /**
         Loads data from mesh files located in the folder specified in the
         geometry parameters (command line parameter --mesh-folder)
     */
     BRAYNS_API void loadMeshFolder();
+
+    /**
+        Loads morphologies from circuit configuration (command line parameter
+        --circuit-configuration)
+    */
+    BRAYNS_API void loadCircuitConfiguration();
 
     /**
         Build an environment in addition to the loaded data, and according to

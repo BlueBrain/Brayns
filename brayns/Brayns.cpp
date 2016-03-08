@@ -25,6 +25,7 @@
 #include <brayns/common/light/DirectionalLight.h>
 
 #include <plugins/extensions/ExtensionPluginFactory.h>
+
 #include <brayns/common/parameters/ParametersManager.h>
 
 // OSPray specific -> Must be changed to a dynamic plugin
@@ -40,7 +41,6 @@ struct Brayns::Impl
 {
     Impl( int argc, const char **argv )
          : _frameSize( 0, 0 )
-         , _rendering( false )
          , _sceneModified( true )
     {
         _parametersManager.parse( argc, argv );
@@ -56,15 +56,17 @@ struct Brayns::Impl
         _scene.reset( new OSPRayScene( _renderer,
             _parametersManager.getGeometryParameters( )));
 
+        _scene->setMaterials( MT_DEFAULT, DEFAULT_NB_MATERIALS );
+
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
             Vector3f( 1.f, -1.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
         _scene->addLight( sunLight );
 
-        _scene->setMaterials( MT_DEFAULT, 200 );
         _scene->loadData( );
         _scene->buildEnvironment( );
         _scene->buildGeometry( );
+
         _scene->commit( );
 
         _renderer->setScene( _scene );
@@ -72,6 +74,7 @@ struct Brayns::Impl
         _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8 ));
         _camera.reset( new OSPRayCamera( CT_PERSPECTIVE ));
         _renderer->setCamera( _camera );
+        _setDefaultCamera( );
         _renderer->commit( );
     }
 
@@ -82,6 +85,9 @@ struct Brayns::Impl
     void render( const RenderInput& renderInput,
                  RenderOutput& renderOutput )
     {
+        reshape( renderInput.windowSize );
+
+        _frameBuffer->map( );
         _camera->set(
             renderInput.position, renderInput.target, renderInput.up );
 
@@ -89,17 +95,33 @@ struct Brayns::Impl
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
 
+        _camera->commit();
         _render( );
 
         uint8_t* colorBuffer = _frameBuffer->getColorBuffer( );
         size_t size =
-            _frameSize.x( ) * _frameSize.y( ) *
-            sizeof(uint8_t) * _frameBuffer->getColorDepth( );
+            _frameSize.x( ) * _frameSize.y( ) * _frameBuffer->getColorDepth( );
         renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
 
         float* depthBuffer = _frameBuffer->getDepthBuffer( );
-        size = _frameSize.x( )*_frameSize.y( )*sizeof( float );
+        size = _frameSize.x( ) * _frameSize.y( );
         renderOutput.depthBuffer.assign( depthBuffer, depthBuffer + size );
+
+        _frameBuffer->unmap( );
+    }
+
+    void render()
+    {
+        _frameBuffer->map( );
+
+        if( !_extensionPluginFactory )
+            _intializeExtensionPluginFactory( );
+        _extensionPluginFactory->execute( );
+
+        _camera->commit();
+        _render( );
+
+        _frameBuffer->unmap( );
     }
 
     void _intializeExtensionPluginFactory( )
@@ -116,9 +138,14 @@ struct Brayns::Impl
 
     void reshape( const Vector2ui& frameSize )
     {
+        if( _frameBuffer->getSize() == frameSize )
+            return;
+
         _frameSize = frameSize;
         _frameBuffer->resize( _frameSize );
-        _camera->setAspectRatio( _frameSize[1] / _frameSize[0] );
+        _camera->setAspectRatio(
+            static_cast< float >( _frameSize.x()) /
+            static_cast< float >( _frameSize.y()));
     }
 
     void setMaterials(
@@ -154,13 +181,23 @@ struct Brayns::Impl
 private:
     void _render( )
     {
-        _rendering = true;
-
-        _frameBuffer->unmap( );
         _renderer->render( _frameBuffer );
-        _frameBuffer->map( );
+    }
 
-        _rendering = false;
+    void _setDefaultCamera()
+    {
+        const Boxf& worldBounds = _scene->getWorldBounds( );
+        const Vector3f& target = worldBounds.getCenter( );
+        Vector3f diag   = worldBounds.getSize( );
+        diag = std::max(diag,Vector3f(0.3f*diag.length( )));
+        Vector3f position = target;
+        position.z( ) -= diag.z( );
+
+        Vector3f up  = Vector3f(0.f,1.f,0.f);
+        _camera->set(position, target, up);
+        _camera->setAspectRatio(
+            static_cast< float >( _frameSize.x()) /
+            static_cast< float >( _frameSize.y()));
     }
 
     ParametersManager _parametersManager;
@@ -173,7 +210,6 @@ private:
     Vector2i _frameSize;
     float _timestamp;
 
-    bool _rendering;
     bool _sceneModified;
 
     ExtensionPluginFactoryPtr _extensionPluginFactory;
@@ -193,6 +229,11 @@ void Brayns::render( const RenderInput& renderInput,
                      RenderOutput& renderOutput )
 {
     _impl->render( renderInput, renderOutput );
+}
+
+void Brayns::render()
+{
+    _impl->render();
 }
 
 void Brayns::reshape( const Vector2ui& size )
