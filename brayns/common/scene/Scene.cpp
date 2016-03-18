@@ -181,7 +181,6 @@ void Scene::loadMeshFolder( )
     BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
     MeshLoader meshLoader;
     size_t meshIndex = 0;
-    const float scale = 1.f;
 
     boost::filesystem::directory_iterator endIter;
     if( boost::filesystem::exists(folder) &&
@@ -192,22 +191,19 @@ void Scene::loadMeshFolder( )
         {
             if( boost::filesystem::is_regular_file(dirIter->status( )))
             {
-                boost::filesystem::path fileExtension =
-                    dirIter->path( ).extension( );
-                if( fileExtension==".obj" || fileExtension==".ply" ||
-                    fileExtension==".dae" || fileExtension==".3ds" )
+                const std::string& filename = dirIter->path( ).string( );
+                BRAYNS_INFO << "- " << filename << std::endl;
+                MeshContainer MeshContainer =
                 {
-                    const std::string& filename = dirIter->path( ).string( );
-                    BRAYNS_INFO << "- " << filename << std::endl;
-                    if(!meshLoader.importMeshFromFile(
-                        filename, scale, _trianglesMeshes, _materials,
-                        NO_MATERIAL, MQ_FAST, _bounds))
-                    {
-                        BRAYNS_ERROR << "Failed to import " <<
-                            filename << std::endl;
-                    }
-                    ++meshIndex;
+                    _trianglesMeshes, _materials, _bounds
+                };
+                if(!meshLoader.importMeshFromFile(
+                    filename, MeshContainer, MQ_QUALITY, NO_MATERIAL ))
+                {
+                    BRAYNS_ERROR << "Failed to import " <<
+                    filename << std::endl;
                 }
+                ++meshIndex;
             }
         }
     }

@@ -188,6 +188,15 @@ struct ExtensionParameters
     FrameBufferPtr frameBuffer;
 };
 
+#define NO_MATERIAL -1
+
+enum MeshQuality
+{
+    MQ_FAST = 0,
+    MQ_QUALITY,
+    MQ_MAX_QUALITY
+};
+
 }
 
 #endif // TYPES_H

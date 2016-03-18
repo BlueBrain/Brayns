@@ -28,18 +28,19 @@
 
 #include <string>
 
-#define NO_MATERIAL -1
-
 class aiScene;
 
 namespace brayns
 {
 
-enum MeshQuality
+/** structure containing references to triangles, materials and bounding for
+    for all meshes
+*/
+struct MeshContainer
 {
-    MQ_FAST = 0,
-    MQ_QUALITY,
-    MQ_MAX_QUALITY
+    TrianglesMeshMap& triangles;
+    Materials& materials;
+    Boxf& bounds;
 };
 
 /** Loads meshes from files using the assimp library
@@ -53,42 +54,39 @@ public:
     /** Imports meshes from a given file
      *
      * @param filename name of the file containing the meshes
-     * @param scale scale ratio applied to mesh geometry
-     * @param triangles triangles to populate
-     * @param materials materials to populate
-     * @param bounds resulting bounding box of the loaded meshes
+     * @param meshContainer structure containing references to triangles and
+     *        materials imported from the file, as well as the bounding box of
+     *        all meshes.
      * @param material is set to NO_MATERIAL, materials defined in the source
      *        file are used. Otherwise, the specified material is assigned to
      *        all imported meshes.
+     * @param meshQuality can be MQ_FAST, MQ_QUALITY or MQ_MAX_QUALITY. Appart
+     *        from MQ_FAST, normals are automatically generated is not in the
+     *        file.
+     * @param bounds resulting bounding box of the loaded meshes
      */
     bool importMeshFromFile(
             const std::string& filename,
-            float scale,
-            TrianglesMeshMap& triangles,
-            Materials& materials,
-            int material,
+            MeshContainer& meshContainer,
             MeshQuality meshQuality,
-            Boxf& bounds);
+            int material);
 
-#ifdef __APPLE__
     /** Exports meshes to a given file
      *
      * @param filename destination file name
-     * @param triangles triangles defining the mesh
-     * @param materials mesh materials
+     * @param meshContainer structure containing references to triangles and
+     *        materials imported from the file, as well as the bounding box of
+     *        all meshes.
      */
     bool exportMeshToFile(
             const std::string& filename,
-            TrianglesMeshMap& triangles,
-            Materials& materials ) const;
-#endif
+            MeshContainer& meshContainer ) const;
 
 private:
     void _createMaterials(
         const aiScene *scene,
         const std::string& folder,
-        Materials& materials,
-        const int defaultMaterial );
+        Materials& materials );
 
     std::map<size_t, size_t> _meshIndex;
 };
