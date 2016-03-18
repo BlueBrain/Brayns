@@ -81,13 +81,16 @@ bool MorphologyLoader::_importMorphology(
             const size_t material =
                 _material( morphologyIndex, brain::SECTION_SOMA );
             const Vector3f& center = soma.getCentroid();
+
+            const float radius = ( _geometryParameters.getRadius() < 0.f ?
+                - _geometryParameters.getRadius() :
+                soma.getMeanRadius() * _geometryParameters.getRadius() );
             primitives[material].push_back( SpherePtr(
-                new Sphere( material, center,
-                    soma.getMeanRadius()* _geometryParameters.getRadius(), 0.f )));
+                new Sphere( material, center, radius, 0.f )));
             bounds.merge( center );
         }
 
-        // Axon and dendrites
+        // Dendrites and axon
         for( const auto& section: sections )
         {
             const size_t material =
@@ -106,10 +109,12 @@ bool MorphologyLoader::_importMorphology(
             for( size_t i = step; i < samples.size(); i += step )
             {
                 Vector4f sample =  samples[i];
-                const float radius =
-                    sample.w() * _geometryParameters.getRadius();
-                const float previousRadius =
-                    previousSample.w() * _geometryParameters.getRadius();
+                const float radius = (_geometryParameters.getRadius() < 0.f ?
+                    -_geometryParameters.getRadius() :
+                    sample.w() * _geometryParameters.getRadius( ));
+                const float previousRadius = (_geometryParameters.getRadius() < 0.f ?
+                    -_geometryParameters.getRadius() :
+                    previousSample.w() * _geometryParameters.getRadius( ));
                 const float distance =
                     distanceToSoma + distancesToSoma[i];
 
@@ -152,7 +157,8 @@ bool MorphologyLoader::importCircuit(
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc( filename );
     const brain::Circuit circuit( bc );
-    const brain::GIDSet gids = circuit.getGIDs( target );
+    const brain::GIDSet& gids =
+        ( target.empty() ? circuit.getGIDs() : circuit.getGIDs( target ));
     if( gids.empty() )
     {
         BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;

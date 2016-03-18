@@ -28,8 +28,8 @@
 namespace brayns
 {
 
-BraynsViewer::BraynsViewer(int argc, const char **argv)
-    : BaseWindow(argc, argv,
+BraynsViewer::BraynsViewer(BraynsPtr brayns, int argc, const char **argv)
+    : BaseWindow(brayns, argc, argv,
                  FRAMEBUFFER_COLOR,
                  INSPECT_CENTER_MODE,
                  INSPECT_CENTER_MODE|MOVE_MODE)

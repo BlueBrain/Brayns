@@ -38,18 +38,11 @@ brayns::ProximityRenderer proximityRenderer;
 namespace brayns
 {
 
-const float DEFAULT_EPSILON = 1e-2f;
+const float DEFAULT_EPSILON = 1e-3f;
 
 OSPRayRenderer::OSPRayRenderer( RenderingParameters& renderingParameters )
     : Renderer( renderingParameters )
 {
-    int nbArguments = 2;
-    const char* argv[2] =
-    {
-        "--renderer", _renderingParameters.getRenderer( ).c_str( )
-    };
-    ospInit( &nbArguments, argv );
-
     if( _renderingParameters.getModule( ) != "" )
         ospLoadModule( _renderingParameters.getModule( ).c_str( ));
 

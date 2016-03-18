@@ -22,12 +22,8 @@
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <zerobuf/render/camera.h>
+#include <zerobuf/render/frameBuffers.h>
 #include <zeq/hbp/vocabulary.h>
-
-namespace
-{
-    const size_t DEFAULT_COMPRESSION_QUALITY = 100;
-}
 
 namespace brayns
 {
@@ -37,6 +33,7 @@ ZeroBufPlugin::ZeroBufPlugin(
     ExtensionParameters& extensionParameters )
     : ExtensionPlugin( applicationParameters, extensionParameters )
     , _compressor( tjInitCompress( ))
+    , _jpegCompression( applicationParameters.getJpegCompression( ))
 {
     _setupRequests( );
     _setupHTTPServer( );
@@ -50,7 +47,7 @@ ZeroBufPlugin::~ZeroBufPlugin( )
 
     if( _httpServer )
     {
-        _httpServer->remove( _extensionParameters.camera->getSerializable( ));
+        _httpServer->remove( *_extensionParameters.camera->getSerializable( ));
         _httpServer->remove( _remoteImageJPEG );
     }
 }
@@ -82,13 +79,17 @@ void ZeroBufPlugin::_setupHTTPServer()
     BRAYNS_INFO << "Registering handlers on " <<
         _httpServer->getURI() << std::endl;
 
-    servus::Serializable& cam = _extensionParameters.camera->getSerializable( );
+    servus::Serializable& cam = *_extensionParameters.camera->getSerializable( );
     _httpServer->add( cam );
     cam.setUpdatedFunction( std::bind( &ZeroBufPlugin::_cameraUpdated, this ));
 
     _httpServer->add( _remoteImageJPEG );
     _remoteImageJPEG.setRequestedFunction(
         std::bind( &ZeroBufPlugin::_requestImageJPEG, this ));
+
+    _httpServer->add( _remoteFrameBuffers );
+    _remoteFrameBuffers.setRequestedFunction(
+        std::bind( &ZeroBufPlugin::_requestFrameBuffers, this ));
 }
 
 void ZeroBufPlugin::_setupRequests()
@@ -96,11 +97,16 @@ void ZeroBufPlugin::_setupRequests()
     ::zerobuf::render::Camera camera;
     _requests[ camera.getTypeIdentifier() ] = [&]
         { return _publisher.publish(
-            _extensionParameters.camera->getSerializable( ));
+            *_extensionParameters.camera->getSerializable( ));
         };
+
     ::zerobuf::render::ImageJPEG imageJPEG;
     _requests[ imageJPEG.getTypeIdentifier() ] =
         std::bind( &ZeroBufPlugin::_requestImageJPEG, this );
+
+    ::zerobuf::render::FrameBuffers frameBuffers;
+    _requests[ frameBuffers.getTypeIdentifier() ] =
+        std::bind( &ZeroBufPlugin::_requestFrameBuffers, this );
 }
 
 void ZeroBufPlugin::_cameraUpdated()
@@ -129,6 +135,50 @@ bool ZeroBufPlugin::_requestImageJPEG()
     return true;
 }
 
+bool ZeroBufPlugin::_requestFrameBuffers()
+{
+    const Vector2i frameSize = _extensionParameters.frameBuffer->getSize( );
+    const size_t dataSize = frameSize.x( ) * frameSize.y( );
+    _remoteFrameBuffers.setWidth( frameSize.x( ));
+    _remoteFrameBuffers.setHeight( frameSize.y( ));
+
+    uint8_t* colorBuffer = _extensionParameters.frameBuffer->getColorBuffer( );
+    if( colorBuffer )
+    {
+        size_t jpegSize;
+        uint8_t* jpegData = _encodeJpeg(
+                ( uint32_t )frameSize.x( ),
+                ( uint32_t )frameSize.y( ),
+                ( uint8_t* )colorBuffer, jpegSize );
+
+        _remoteFrameBuffers.setDiffuse( jpegData, jpegSize );
+        tjFree(jpegData);
+    }
+
+    float* depthBuffer = _extensionParameters.frameBuffer->getDepthBuffer( );
+    if( depthBuffer )
+    {
+        uint8_ts depths;
+        for( size_t i = 0; i < dataSize; ++i )
+        {
+            uint8_t l = uint8_t(255.f * depthBuffer[i]);
+            depths.push_back( l );
+            depths.push_back( l );
+            depths.push_back( l );
+            depths.push_back( 0.f );
+        }
+        size_t jpegSize;
+        uint8_t* jpegData = _encodeJpeg(
+                ( uint32_t )frameSize.x( ),
+                ( uint32_t )frameSize.y( ),
+                ( uint8_t* )depths.data(), jpegSize );
+
+        _remoteFrameBuffers.setDepth( jpegData, jpegSize );
+        tjFree(jpegData);
+    }
+    return true;
+}
+
 bool ZeroBufPlugin::_onRequest( const ::zeq::Event& event )
 {
     const auto& eventType = ::zeq::vocabulary::deserializeRequest( event );
@@ -151,13 +201,12 @@ uint8_t* ZeroBufPlugin::_encodeJpeg(const uint32_t width,
 
     uint8_t* tjJpegBuf = 0;
     const int32_t tjJpegSubsamp = TJSAMP_444;
-    const int32_t tjJpegQual = DEFAULT_COMPRESSION_QUALITY;
     const int32_t tjFlags = TJXOP_ROT180;
 
     const int32_t success =
             tjCompress2( _compressor, tjSrcBuffer, width, tjPitch, height,
                         tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
-                        tjJpegQual, tjFlags);
+                        _jpegCompression, tjFlags);
 
     if(success != 0)
     {

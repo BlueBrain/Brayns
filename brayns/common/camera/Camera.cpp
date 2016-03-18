@@ -173,9 +173,13 @@ CameraType Camera::getType( ) const
     return _impl->getType( );
 }
 
-servus::Serializable& Camera::getSerializable( )
+servus::Serializable* Camera::getSerializable( )
 {
-    return *_impl.get();
+#ifdef BRAYNS_USE_ZEROBUF
+    return _impl.get();
+#else
+    return 0;
+#endif
 }
 
 }

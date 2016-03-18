@@ -23,11 +23,6 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/camera/Camera.h>
 
-namespace
-{
-    const size_t DEFAULT_COMPRESSION_QUALITY = 100;
-}
-
 namespace brayns
 {
 
@@ -39,14 +34,13 @@ DeflectPlugin::DeflectPlugin(
     , _phi( 0.f )
     , _previousTouchPosition( 0.5f, 0.5f, -1.f )
     , _interaction(false)
-    , _compressImage( DEFAULT_COMPRESSION_QUALITY != 0 )
-    , _compressionQuality( DEFAULT_COMPRESSION_QUALITY )
+    , _compressImage( applicationParameters.getJpegCompression( ) != 100 )
+    , _compressionQuality( applicationParameters.getJpegCompression( ))
     , _hostname( _applicationParameters.getDeflectHostname( ))
     , _streamName( _applicationParameters.getDeflectStreamname( ))
     , _stream( nullptr )
 
 {
-    BRAYNS_INFO << "Initial: " << _previousTouchPosition << std::endl;
     _initializeDeflect( );
 }
 

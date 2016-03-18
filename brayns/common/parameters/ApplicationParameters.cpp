@@ -32,10 +32,12 @@ const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
 const std::string PARAM_DEFLECT_HOST_NAME = "deflect-hostname";
 const std::string PARAM_DEFLECT_STREAM_NAME = "deflect-streamname";
+const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const std::string DEFAULT_DEFLECT_STREAM_NAME = "brayns";
+const size_t DEFAULT_JPEG_COMPRESSION = 100;
 const std::string DEFAULT_CAMERA = "perspective";
 
 }
@@ -51,6 +53,7 @@ ApplicationParameters::ApplicationParameters( )
     , _windowSize( DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT )
     , _deflectStreamname( DEFAULT_DEFLECT_STREAM_NAME )
     , _benchmarking( false )
+    , _jpegCompression( DEFAULT_JPEG_COMPRESSION )
 {
     _parameters.add_options( )
         ( PARAM_HELP.c_str( ), "Help screen" )
@@ -63,7 +66,9 @@ ApplicationParameters::ApplicationParameters( )
         ( PARAM_DEFLECT_STREAM_NAME.c_str( ), po::value< std::string >( ),
             "Name of DisplayCluster stream" )
         ( PARAM_BENCHMARKING.c_str( ), po::value< std::string >( ),
-            "Activates application benchmarking" );
+            "Activates application benchmarking" )
+        ( PARAM_JPEG_COMPRESSION.c_str( ), po::value< size_t >( ),
+            "JPeg compression rate (100 = full quality)" );
 }
 
 bool ApplicationParameters::parse( int argc, const char **argv )
@@ -89,6 +94,8 @@ bool ApplicationParameters::parse( int argc, const char **argv )
         _deflectStreamname = _vm[PARAM_DEFLECT_STREAM_NAME].as< std::string >( );
     if( _vm.count( PARAM_BENCHMARKING ))
         _benchmarking = _vm[PARAM_BENCHMARKING].as< bool >( );
+    if( _vm.count( PARAM_JPEG_COMPRESSION ))
+        _jpegCompression = _vm[PARAM_JPEG_COMPRESSION].as< size_t >( );
 
     return true;
 }
@@ -104,6 +111,8 @@ void ApplicationParameters::print( )
         _deflectStreamname << std::endl;
     BRAYNS_INFO << "Benchmarking            : " <<
         ( _benchmarking ? "on" : "off" ) << std::endl;
+    BRAYNS_INFO << "JPEG Compression        : " <<
+        _jpegCompression << std::endl;
 }
 
 }

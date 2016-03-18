@@ -126,7 +126,7 @@ public:
        Returns the serializable of the Camera
        @param A serializable of the Camera
     */
-    BRAYNS_API servus::Serializable& getSerializable( );
+    BRAYNS_API servus::Serializable* getSerializable( );
 
 private:
     struct Impl;

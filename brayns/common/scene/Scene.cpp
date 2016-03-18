@@ -139,7 +139,7 @@ void Scene::loadMorphologyFolder( )
                 if( fileExtension==".swc" || fileExtension==".h5" )
                 {
                     const std::string& filename = dirIter->path( ).string( );
-                    const servus::URI uri( filename );
+                    servus::URI uri( filename );
                     if( !morphologyLoader.importMorphology(
                         uri, ++fileIndex, _primitives, _bounds ))
                     {
@@ -201,8 +201,7 @@ void Scene::loadMeshFolder( )
                     BRAYNS_INFO << "- " << filename << std::endl;
                     if(!meshLoader.importMeshFromFile(
                         filename, scale, _trianglesMeshes, _materials,
-                        _geometryParameters.getColorScheme( ) == CS_NEURON_BY_ID
-                        ? meshIndex : NO_MATERIAL, MQ_FAST, _bounds))
+                        NO_MATERIAL, MQ_FAST, _bounds))
                     {
                         BRAYNS_ERROR << "Failed to import " <<
                             filename << std::endl;

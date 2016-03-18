@@ -1,0 +1,14 @@
+// Copyright (c) 2016, Human Brain Project
+//                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+
+namespace zerobuf.render;
+
+table FrameBuffers
+{
+  width: int;
+  height: int;
+  diffuse:[ubyte];
+  depth:[ubyte];
+}
+
+root_type FrameBuffers;

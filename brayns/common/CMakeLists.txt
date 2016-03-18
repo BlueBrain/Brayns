@@ -63,12 +63,11 @@ set(BRAYNSCOMMON_HEADERS
 
 set(BRAYNSCOMMON_LINK_LIBRARIES
     PUBLIC boost_filesystem vmmlib boost_program_options
-    PRIVATE ${GLUT_LIBRARIES} ${OSPRAY_LIBRARIES}
+    PRIVATE ${GLUT_LIBRARIES}
 )
 
 if(TARGET ZeroBuf)
-  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES
-    ZeroBuf ZeroBufRender ${LibJpegTurbo_LIBRARIES})
+  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES ZeroBuf ZeroBufRender)
 endif()
 
 common_library(braynsCommon)

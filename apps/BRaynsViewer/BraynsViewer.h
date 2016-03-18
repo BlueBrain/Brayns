@@ -32,7 +32,7 @@ class BraynsViewer : public BaseWindow
 {
 public:
 
-    BraynsViewer( int argc, const char **argv );
+    BraynsViewer( BraynsPtr brayns, int argc, const char **argv );
 
     /** Sets the rendering parameters and renders the current frame
      */

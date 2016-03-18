@@ -21,7 +21,7 @@
 
 #include <brayns/common/log.h>
 
-#ifdef BRAYNS_USE_IMAGEMAGICK
+#ifdef BRAYNS_USE_MAGICKPP
 #  define MAGICKCORE_HDRI_ENABLE true
 #  define MAGICKCORE_QUANTUM_DEPTH 32
 #  include <Magick++.h>
@@ -34,15 +34,15 @@ TextureLoader::TextureLoader()
 {
 }
 
+#ifdef BRAYNS_USE_MAGICKPP
 bool TextureLoader::loadTexture(
-    TexturesCollection& textures,
+    TexturesMap& textures,
     const TextureType textureType,
     const std::string& filename)
 {
     if (textures.find(filename) != textures.end())
         return true;
 
-#ifdef BRAYNS_USE_IMAGEMAGICK
     try
     {
         Magick::Image image(filename);
@@ -78,10 +78,14 @@ bool TextureLoader::loadTexture(
         return false;
     }
     return true;
+}
 #else
+bool TextureLoader::loadTexture(
+    TexturesMap&, const TextureType const std::string& filename )
+{
     BRAYNS_ERROR << "ImageMagick is required to load " << filename << std::endl;
     return false;
-#endif
 }
+#endif
 
 }

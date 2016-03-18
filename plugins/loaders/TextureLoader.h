@@ -32,7 +32,7 @@ public:
     TextureLoader();
 
     bool loadTexture(
-        TexturesCollection& textures,
+        TexturesMap& textures,
         TextureType textureType,
         const std::string& filename);
 };

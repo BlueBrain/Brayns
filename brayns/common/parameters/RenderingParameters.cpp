@@ -182,7 +182,7 @@ void RenderingParameters::print( )
         ( _gradientBackground ? "on" : "off" ) << std::endl;
     BRAYNS_INFO << "Background color        :" <<
         _backgroundColor << std::endl;
-    BRAYNS_INFO << "Detection: " <<
+    BRAYNS_INFO << "Detection: " << std::endl;
     BRAYNS_INFO << "- Detection distance              : " <<
        _detectionDistance << std::endl;
     BRAYNS_INFO << "- Detection on different material : " <<

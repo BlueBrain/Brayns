@@ -25,7 +25,6 @@
 #include <brayns/common/light/DirectionalLight.h>
 
 #include <plugins/extensions/ExtensionPluginFactory.h>
-
 #include <brayns/common/parameters/ParametersManager.h>
 
 // OSPray specific -> Must be changed to a dynamic plugin
@@ -43,6 +42,8 @@ struct Brayns::Impl
          : _frameSize( 0, 0 )
          , _sceneModified( true )
     {
+        ospInit( &argc, argv );
+
         _parametersManager.parse( argc, argv );
         _parametersManager.print( );
 
@@ -66,7 +67,6 @@ struct Brayns::Impl
         _scene->loadData( );
         _scene->buildEnvironment( );
         _scene->buildGeometry( );
-
         _scene->commit( );
 
         _renderer->setScene( _scene );
@@ -186,10 +186,10 @@ private:
 
     void _setDefaultCamera()
     {
-        const Boxf& worldBounds = _scene->getWorldBounds( );
-        const Vector3f& target = worldBounds.getCenter( );
+        Boxf worldBounds = _scene->getWorldBounds( );
+        Vector3f target = worldBounds.getCenter( );
         Vector3f diag   = worldBounds.getSize( );
-        diag = std::max(diag,Vector3f(0.3f*diag.length( )));
+        diag = max(diag,Vector3f(0.3f*diag.length( )));
         Vector3f position = target;
         position.z( ) -= diag.z( );
 
@@ -210,6 +210,7 @@ private:
     Vector2i _frameSize;
     float _timestamp;
 
+    bool _rendering;
     bool _sceneModified;
 
     ExtensionPluginFactoryPtr _extensionPluginFactory;

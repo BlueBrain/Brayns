@@ -31,6 +31,8 @@ const std::string PARAM_MORPHOLOGY_FOLDER = "morphology-folder";
 const std::string PARAM_PDB_FOLDER = "pdb-folder";
 const std::string PARAM_MESH_FOLDER = "mesh-folder";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
+const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
+const std::string PARAM_SAVE_CACHE_FILE = "save-cache-file";
 const std::string PARAM_RADIUS = "radius";
 const std::string PARAM_COLOR_SCHEME = "color-scheme";
 const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
@@ -62,11 +64,15 @@ GeometryParameters::GeometryParameters( )
             "Folder containing PDB files" )
         ( PARAM_CIRCUIT_CONFIG.c_str(), po::value< std::string >( ),
             "Circuit configuration file" )
+        ( PARAM_LOAD_CACHE_FILE.c_str(), po::value< std::string >( ),
+            "Load binary container of a scene" )
+        ( PARAM_SAVE_CACHE_FILE.c_str(), po::value< std::string >( ),
+            "Save binary container of a scene" )
         ( PARAM_RADIUS.c_str(), po::value< float >( ),
             "Radius multiplier for spheres, cones and cylinders" )
         ( PARAM_COLOR_SCHEME.c_str( ), po::value< size_t >( ),
             "Color scheme to be applied to the geometry" )
-        ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< int >( ),
+        ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< size_t >( ),
             "Scene environment (0: none, 1: ground, 2: wall, 3: box)" )
         ( PARAM_GEOMETRY_QUALITY.c_str(), po::value< size_t >( ),
             "Geometry rendering quality (0: Fast rendering, "
@@ -99,6 +105,10 @@ bool GeometryParameters::parse( int argc, const char **argv )
         _meshFolder = _vm[PARAM_MESH_FOLDER].as< std::string >( );
     if( _vm.count( PARAM_CIRCUIT_CONFIG ))
         _circuitConfig = _vm[PARAM_CIRCUIT_CONFIG].as< std::string >( );
+    if( _vm.count( PARAM_LOAD_CACHE_FILE ))
+        _loadCacheFile = _vm[PARAM_LOAD_CACHE_FILE].as< std::string >( );
+    if( _vm.count( PARAM_SAVE_CACHE_FILE ))
+        _saveCacheFile = _vm[PARAM_SAVE_CACHE_FILE].as< std::string >( );
     if( _vm.count( PARAM_COLOR_SCHEME ))
         _colorScheme = static_cast< ColorScheme >(
             _vm[PARAM_COLOR_SCHEME].as< size_t >( ));
@@ -129,6 +139,8 @@ void GeometryParameters::print( )
     BRAYNS_INFO << "- Cells                 : " << _pdbCells << std::endl;
     BRAYNS_INFO << "- Positions             : " << _pdbPositions << std::endl;
     BRAYNS_INFO << "Mesh folder             : " << _meshFolder << std::endl;
+    BRAYNS_INFO << "Cache file to load      : " << _loadCacheFile << std::endl;
+    BRAYNS_INFO << "Cache file to save      : " << _saveCacheFile << std::endl;
     BRAYNS_INFO << "Circuit configuration   : " << _circuitConfig << std::endl;
     BRAYNS_INFO << "Color scheme            : " <<
         static_cast<size_t>( _colorScheme ) << std::endl;

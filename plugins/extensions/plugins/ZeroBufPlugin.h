@@ -26,6 +26,7 @@
 #include <zeq/zeq.h>
 #include <turbojpeg.h>
 #include <zerobuf/render/imageJPEG.h>
+#include <zerobuf/render/frameBuffers.h>
 
 namespace brayns
 {
@@ -54,6 +55,8 @@ private:
 
     bool _requestImageJPEG( );
 
+    bool _requestFrameBuffers( );
+
     bool _onRequest( const ::zeq::Event& event );
 
     uint8_t* _encodeJpeg(const uint32_t width,
@@ -68,8 +71,10 @@ private:
     typedef std::function< bool() > RequestFunc;
     typedef std::map< ::zeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
+    size_t _jpegCompression;
 
     ::zerobuf::render::ImageJPEG _remoteImageJPEG;
+    ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
 
 };
 

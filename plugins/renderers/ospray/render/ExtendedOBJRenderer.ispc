@@ -230,7 +230,7 @@ vec4f skyboxMapping(
         vec3f dir = normalize( ray.dir );
         float angle = 0.5f-dot( normal, dir );
         angle = ( angle > 1.f ) ? 1.f: angle;
-        result = make_vec4f( angle * self->bgColor );
+        result = make_vec4f( 1.f - (0.5f * angle * self->bgColor) );
     }
     return result;
 }
@@ -352,7 +352,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
-
     vec3f color = make_vec3f( 0.f );
     float path_opacity = 1.f;
     int max_depth = self->moving ? 2 : 10;
@@ -384,7 +383,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         }
 
         if( depth == 0 )
-            sample.z = ray.t;
+            sample.z = log( ray.t ) / 10.f;
 
         vec3f local_shade_color = make_vec3f( 0.f );
 

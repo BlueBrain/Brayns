@@ -90,14 +90,14 @@ bool MeshLoader::importMeshFromFile(
         for(size_t i=0; i<mesh->mNumVertices; ++i)
         {
             aiVector3D v = mesh->mVertices[i];
-            Vector3f vertex = {v.x*scale, v.y*scale, -v.z*scale};
+            Vector3f vertex = {v.x*scale, v.y*scale, v.z*scale};
             triangles[index].getVertices().push_back(vertex);
             bounds.merge(vertex);
 
             if(mesh->HasNormals())
             {
                 v = mesh->mNormals[i];
-                Vector3f normal = {v.x, v.y, -v.z};
+                Vector3f normal = {v.x, v.y, v.z};
                 triangles[index].getNormals().push_back(normal);
             }
 
@@ -278,7 +278,6 @@ void MeshLoader::_createMaterials(
 
             value1f = 1.f;
             material->Get(AI_MATKEY_OPACITY,value1f);
-            if( value1f != 1.f ) value1f /= 2.f;
             materials[m]->setOpacity(value1f);
 
             value1f = 0.9f;

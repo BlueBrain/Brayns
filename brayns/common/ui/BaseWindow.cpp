@@ -103,11 +103,11 @@ void glut3dMouseFunc(int32 whichButton, int32 released, int32 x, int32 y)
 BaseWindow *BaseWindow::_activeWindow = nullptr;
 
 BaseWindow::BaseWindow(
-        const int argc, const char **argv,
+        BraynsPtr brayns, const int , const char **,
         const FrameBufferMode frameBufferMode,
         const ManipulatorMode initialManipulator,
         const int allowedManipulators)
-  : _lastMousePos(-1,-1), _currMousePos(-1,-1),
+  : _brayns(brayns), _lastMousePos(-1,-1), _currMousePos(-1,-1),
     _lastButtonState(0), _currButtonState(0),
     _currModifiers(0), _upVectorFromCmdLine(0,1,0),
     _motionSpeed(DEFAULT_MOUSE_SPEED), _rotateSpeed(DEFAULT_MOUSE_SPEED),
@@ -115,8 +115,6 @@ BaseWindow::BaseWindow(
     _windowID(-1), _windowSize(-1,-1), fullScreen_(false),
     frameCounter_(0)
 {
-    // Initialize brayns
-    _brayns.reset(new Brayns(argc, argv));
     _setViewPort( );
 
     // Initialize manipulators
@@ -211,9 +209,10 @@ void BaseWindow::display( )
 
     renderInput.windowSize = _windowSize;
     renderInput.position = _viewPort.getPosition( );
-    renderInput.target = _viewPort.getTarget( );
+    renderInput.target = _viewPort.getTarget( ); // - _viewPort.getPosition( );
     renderInput.up = _viewPort.getUp( );
 
+    _brayns->getCamera().commit();
     _brayns->render( renderInput, renderOutput );
 
     GLenum format = GL_RGBA;

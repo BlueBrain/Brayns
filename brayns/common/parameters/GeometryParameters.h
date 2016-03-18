@@ -44,27 +44,31 @@ public:
     void print( ) final;
 
     /** folder containing SWC and H5 files */
-    const std::string& getMorphologyFolder( ) const
-    { return _morphologyFolder; }
+    std::string getMorphologyFolder( ) const { return _morphologyFolder; }
 
     /** folder containing PDB files */
-    const std::string& getPDBFolder( ) const { return _pdbFolder; }
+    std::string getPDBFolder( ) const { return _pdbFolder; }
 
     /** folder containing PDB cells */
-    const std::string& getPDBCells( ) const { return _pdbCells; }
+    std::string getPDBCells( ) const { return _pdbCells; }
 
     /** folder containing PDB positions */
-    const std::string& getPDBPositions( ) const { return _pdbPositions; }
+    std::string getPDBPositions( ) const { return _pdbPositions; }
 
     /** folder containing mesh files */
-    const std::string& getMeshFolder( ) const { return _meshFolder; }
+    std::string getMeshFolder( ) const { return _meshFolder; }
 
     /** file containing circuit configuration */
-    const std::string& getCircuitConfiguration( ) const
-    { return _circuitConfig; }
+    std::string getCircuitConfiguration( ) const { return _circuitConfig; }
+
+    /** Binary representation of a scene to load */
+    std::string getLoadCacheFile( ) const { return _loadCacheFile; }
+
+    /** Binary representation of a scene to save */
+    std::string getSaveCacheFile( ) const { return _saveCacheFile; }
 
     /** Circuit target */
-    const std::string& getTarget( ) const { return _target; }
+    std::string getTarget( ) const { return _target; }
 
     /** Radius multiplier applied to spheres, cones and cylinders */
     float getRadius( ) const { return _radius; }
@@ -93,8 +97,11 @@ protected:
     std::string _pdbFolder;
     std::string _pdbCells;
     std::string _pdbPositions;
+    std::string _h5Folder;
     std::string _meshFolder;
     std::string _circuitConfig;
+    std::string _loadCacheFile;
+    std::string _saveCacheFile;
     std::string _target;
     float  _radius;
     ColorScheme _colorScheme;

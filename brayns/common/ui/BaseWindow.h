@@ -91,7 +91,7 @@ public:
         INSPECT_CENTER_MODE =(1<<1)
     } ManipulatorMode;
 
-    BaseWindow(int argc, const char **argv,
+    BaseWindow(BraynsPtr brayns, int argc, const char **argv,
                const FrameBufferMode frameBufferMode,
                const ManipulatorMode initialManipulator=INSPECT_CENTER_MODE,
                int allowedManipulators=INSPECT_CENTER_MODE|MOVE_MODE);
@@ -105,6 +105,10 @@ public:
 
     /*! size we'll create a window at */
     static Vector2i _defaultInitSize;
+
+    /*! set a default camera position that views given bounds from the
+        top left front */
+    void setViewPort();
 
     /*! tell GLUT that this window is 'dirty' and needs redrawing */
     virtual void forceRedraw();
@@ -183,8 +187,8 @@ public:
      * frame index (<prefix>_<frame>_%08d.ppm). The file uses the ppm encoding
      * and is written to the working folder of the application.
      *
-     * @param frameIndex Current frame
-     * @param prefix Used for the filename
+     * @param frameIndex index of the current frame
+     * @param prefix prefix used for the filename
      */
     void saveFrameToDisk( size_t frameIndex, const std::string& prefix );
 
@@ -210,6 +214,8 @@ public:
     Vector2i getWindowSize() { return _windowSize; }
 
 protected:
+
+    BraynsPtr _brayns;
 
     Vector2i _lastMousePos; /*! last mouse screen position of mouse before
                                     current motion */
@@ -237,7 +243,6 @@ protected:
     int frameCounter_;
 
     FPSCounter _fps;
-    BraynsPtr _brayns;
 
 private:
     /*! set a default camera position that views given bounds from the

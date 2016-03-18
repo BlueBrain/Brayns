@@ -58,12 +58,16 @@ public:
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
 
+    /** JPeg compression quality */
+    size_t getJpegCompression() const { return _jpegCompression; }
+
 protected:
     std::string _camera;
     Vector2ui _windowSize;
     std::string _deflectHostname;
     std::string _deflectStreamname;
     bool _benchmarking;
+    size_t _jpegCompression;
 };
 
 }

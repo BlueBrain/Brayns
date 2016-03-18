@@ -1,6 +1,8 @@
 # Copyright (c) HBP 2014-2015 cyrille.favreau@epfl.ch
 # All rights reserved. Do not distribute without further notice.
 
+set(BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsCommon vmmlib)
+
 set(BRAYNSPLUGINS_SOURCES
   loaders/MorphologyLoader.cpp
   loaders/ProteinLoader.cpp
@@ -15,10 +17,6 @@ set(BRAYNSPLUGINS_HEADERS
   extensions/plugins/ExtensionPlugin.h
 )
 
-set(BRAYNSPLUGINS_LINK_LIBRARIES
-  PUBLIC braynsCommon vmmlib
-)
-
 if(TARGET Brion)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Brion Brain)
 endif()
@@ -26,7 +24,7 @@ endif()
 if(ASSIMP_FOUND)
   list(APPEND BRAYNSPLUGINS_SOURCES loaders/MeshLoader.cpp)
   list(APPEND BRAYNSPLUGINS_HEADERS loaders/MeshLoader.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES ${ASSIMP_LIBRARIES})
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES assimp)
 endif()
 
 if(DEFLECT_FOUND)
@@ -39,13 +37,14 @@ if(TARGET ZeroBuf AND TARGET zeq)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroBufPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_HEADERS extensions/plugins/ZeroBufPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
-    PUBLIC zeq zeqHBP ZeroBuf ZeroBufRender ${LibJpegTurbo_LIBRARIES})
+    PUBLIC zeq zeqHBP ZeroBuf ZeroBufRender BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
+  add_subdirectory(extensions/vocabulary)
 endif()
 
-if(IMAGEMAGICK_FOUND)
+if(MAGICK++_FOUND)
   list(APPEND BRAYNSPLUGINS_SOURCES loaders/TextureLoader.cpp)
   list(APPEND BRAYNSPLUGINS_HEADERS loaders/TextureLoader.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES ${IMAGEMAGICK_LIBRARIES})
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Magick++)
 endif()
 
 add_subdirectory(renderers/ospray)

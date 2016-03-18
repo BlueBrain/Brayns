@@ -31,7 +31,7 @@ namespace brayns
 
 // Forward declarations
 class Brayns;
-typedef std::unique_ptr< Brayns > BraynsPtr;
+typedef std::shared_ptr< Brayns > BraynsPtr;
 
 class Scene;
 typedef std::shared_ptr< Scene > ScenePtr;
