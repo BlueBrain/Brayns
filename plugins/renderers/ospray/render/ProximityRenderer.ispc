@@ -225,9 +225,11 @@ inline vec3f ProximityRenderer_shadeRay(
     {
         // No more intersections
         sample.z = 1;
+        sample.alpha = 0.f;
         return self->bgColor + color + colorKs;
     }
 
+    sample.alpha = 1.f;
     sample.z = log( ray.t ) / 10.f;
 
     DifferentialGeometry dg;

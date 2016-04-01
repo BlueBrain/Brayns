@@ -138,44 +138,36 @@ bool ZeroBufPlugin::_requestImageJPEG()
 bool ZeroBufPlugin::_requestFrameBuffers()
 {
     const Vector2i frameSize = _extensionParameters.frameBuffer->getSize( );
-    const size_t dataSize = frameSize.x( ) * frameSize.y( );
+    const float* depthBuffer =
+        _extensionParameters.frameBuffer->getDepthBuffer( );
+
     _remoteFrameBuffers.setWidth( frameSize.x( ));
     _remoteFrameBuffers.setHeight( frameSize.y( ));
-
-    uint8_t* colorBuffer = _extensionParameters.frameBuffer->getColorBuffer( );
-    if( colorBuffer )
-    {
-        size_t jpegSize;
-        uint8_t* jpegData = _encodeJpeg(
-                ( uint32_t )frameSize.x( ),
-                ( uint32_t )frameSize.y( ),
-                ( uint8_t* )colorBuffer, jpegSize );
-
-        _remoteFrameBuffers.setDiffuse( jpegData, jpegSize );
-        tjFree(jpegData);
-    }
-
-    float* depthBuffer = _extensionParameters.frameBuffer->getDepthBuffer( );
     if( depthBuffer )
     {
-        uint8_ts depths;
-        for( size_t i = 0; i < dataSize; ++i )
-        {
-            uint8_t l = uint8_t(255.f * depthBuffer[i]);
-            depths.push_back( l );
-            depths.push_back( l );
-            depths.push_back( l );
-            depths.push_back( 0.f );
-        }
-        size_t jpegSize;
-        uint8_t* jpegData = _encodeJpeg(
-                ( uint32_t )frameSize.x( ),
-                ( uint32_t )frameSize.y( ),
-                ( uint8_t* )depths.data(), jpegSize );
-
-        _remoteFrameBuffers.setDepth( jpegData, jpegSize );
-        tjFree(jpegData);
+        typedef std::vector< uint16_t > uint16_ts;
+        uint16_ts depths;
+        const size_t size = frameSize.x( ) * frameSize.y( );
+        depths.reserve( size  );
+        for( size_t i = 0; i < size; ++i )
+            depths.push_back(
+                std::numeric_limits< uint16_t >::max() * depthBuffer[ i ] );
+        _remoteFrameBuffers.setDepth(
+            reinterpret_cast< const uint8_t *>( depths.data( )),
+            depths.size() * sizeof( uint16_t ));
     }
+    else
+        _remoteFrameBuffers.setDepth( 0, 0 );
+
+    const uint8_t* colorBuffer =
+        _extensionParameters.frameBuffer->getColorBuffer( );
+    if( colorBuffer )
+        _remoteFrameBuffers.setDiffuse(
+            colorBuffer, frameSize.x( ) * frameSize.y( ) *
+              _extensionParameters.frameBuffer->getColorDepth( ));
+    else
+        _remoteFrameBuffers.setDiffuse( 0, 0 );
+
     return true;
 }
 

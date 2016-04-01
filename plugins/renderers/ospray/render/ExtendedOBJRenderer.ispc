@@ -331,11 +331,12 @@ inline bool launchRandomRay(
     Ray ao_ray = ray;
     ao_ray.org = origin;
     ao_ray.dir = ao_dir;
-    ao_ray.t0 = self->super.epsilon;
-    ao_ray.t = ray.t;
+    ao_ray.t0 = self->super.epsilon * 100.f;
+    const float maxDistance = self->super.epsilon * 100000.f;
+    ao_ray.t = maxDistance;
 
     traceRay( self->super.model, ao_ray );
-    if( ao_ray.t != ray.t )
+    if( ao_ray.t != maxDistance )
     {
         postIntersect(
             self->super.model, dg,
@@ -379,9 +380,11 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
             color = color +
                 path_opacity * make_vec3f( skyboxMapping( self, ray ));
             sample.z = 1;
+            sample.alpha = 0.f;
             return color + colorKs;
         }
 
+        sample.alpha = 1.f;
         if( depth == 0 )
             sample.z = log( ray.t ) / 10.f;
 

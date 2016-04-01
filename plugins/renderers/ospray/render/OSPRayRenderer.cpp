@@ -38,7 +38,7 @@ brayns::ProximityRenderer proximityRenderer;
 namespace brayns
 {
 
-const float DEFAULT_EPSILON = 1e-3f;
+const float DEFAULT_EPSILON = 1e-2f;
 
 OSPRayRenderer::OSPRayRenderer( RenderingParameters& renderingParameters )
     : Renderer( renderingParameters )
