@@ -39,6 +39,7 @@ const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_TARGET = "target";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
+const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 
 }
 
@@ -82,7 +83,10 @@ GeometryParameters::GeometryParameters( )
         ( PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value< size_t > ( ),
             "Morphology section types (1: soma, 2: axon, 4: dendrite, "
             "8: apical dendrite). Values can be added to select more than "
-            "one type of section" );
+            "one type of section" )
+        ( PARAM_MORPHOLOGY_LAYOUT.c_str(), po::value< size_ts >()->multitoken(),
+            "Morphology layout (number of lines, number of columns, "
+            "vertical spacing, horizontal spacing)" );
 }
 
 bool GeometryParameters::parse( int argc, const char **argv )
@@ -125,6 +129,17 @@ bool GeometryParameters::parse( int argc, const char **argv )
     if( _vm.count( PARAM_MORPHOLOGY_SECTION_TYPES ))
         _morphologySectionTypes =
             _vm[PARAM_MORPHOLOGY_SECTION_TYPES].as< size_t >( );
+    if( _vm.count( PARAM_MORPHOLOGY_LAYOUT ))
+    {
+        size_ts values = _vm[PARAM_MORPHOLOGY_LAYOUT].as< size_ts >( );
+        if( values.size( ) == 3 )
+        {
+            _morphologyLayout.type = ML_GRID;
+            _morphologyLayout.nbColumns = values[0];
+            _morphologyLayout.verticalSpacing = values[1];
+            _morphologyLayout.horizontalSpacing = values[2];
+        }
+    }
 
     return true;
 }
@@ -153,6 +168,13 @@ void GeometryParameters::print( )
         _target << std::endl;
     BRAYNS_INFO << "Morphology section types: " <<
         _morphologySectionTypes << std::endl;
+    BRAYNS_INFO << "Morphology Layout       : " << std::endl;
+    BRAYNS_INFO << " - Columns              : " <<
+        _morphologyLayout.nbColumns << std::endl;
+    BRAYNS_INFO << " - Vertical spacing     : " <<
+        _morphologyLayout.verticalSpacing << std::endl;
+    BRAYNS_INFO << " - Horizontal spacing   : " <<
+        _morphologyLayout.horizontalSpacing << std::endl;
 }
 
 }

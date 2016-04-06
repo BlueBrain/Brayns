@@ -57,8 +57,34 @@ bool MorphologyLoader::_importMorphology(
 {
     try
     {
+        Vector3f translation = { 0.f, 0.f, 0.f };
+
         brain::neuron::Morphology morphology( source, transformation );
         brain::SectionTypes sectionTypes;
+
+        const MorphologyLayout& layout =
+            _geometryParameters.getMorphologyLayout();
+
+        if( layout.type != ML_NONE )
+        {
+            Boxf morphologyAABB;
+            const brain::Vector4fs& points = morphology.getPoints();
+            for( Vector4f point: points )
+            {
+                const Vector3f p = { point.x(), point.y(), point.z() };
+                morphologyAABB.merge( p );
+            }
+
+            const Vector3f positionInGrid =
+            {
+                -layout.horizontalSpacing * static_cast< float >(
+                    morphologyIndex % layout.nbColumns ),
+                -layout.verticalSpacing * static_cast< float >(
+                    morphologyIndex / layout.nbColumns),
+                0.f
+            };
+            translation = positionInGrid - morphologyAABB.getCenter();
+        }
 
         const size_t morphologySectionTypes =
             _geometryParameters.getMorphologySectionTypes();
@@ -80,7 +106,7 @@ bool MorphologyLoader::_importMorphology(
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material =
                 _material( morphologyIndex, brain::SECTION_SOMA );
-            const Vector3f& center = soma.getCentroid();
+            const Vector3f& center = soma.getCentroid() + translation;
 
             const float radius = ( _geometryParameters.getRadius() < 0.f ?
                 - _geometryParameters.getRadius() :
@@ -118,9 +144,11 @@ bool MorphologyLoader::_importMorphology(
                 const float distance =
                     distanceToSoma + distancesToSoma[i];
 
-                const Vector3f position( sample.x(), sample.y(), sample.z());
-                const Vector3f target(
+                Vector3f position( sample.x(), sample.y(), sample.z());
+                position += translation;
+                Vector3f target(
                     previousSample.x(), previousSample.y(), previousSample.z());
+                target += translation;
                 primitives[material].push_back( SpherePtr(
                     new Sphere( material, position,
                         std::max( radius, previousRadius ),
@@ -217,7 +245,7 @@ size_t MorphologyLoader::_material(
         material = morphologyIndex % DEFAULT_NB_MATERIALS;
         break;
     case CS_NEURON_BY_SEGMENT_TYPE:
-        material = (1 + sectionType) % DEFAULT_NB_MATERIALS;
+        material = sectionType % DEFAULT_NB_MATERIALS;
         break;
     default:
         material = 0;

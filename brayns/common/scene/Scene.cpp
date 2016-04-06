@@ -60,11 +60,28 @@ void Scene::setMaterials(
         switch( materialType )
         {
         case MT_DEFAULT:
-            material->setColor( Vector3f(
-                float( std::rand( ) % 255 ) / 255.f,
-                float( std::rand( ) % 255 ) / 255.f,
-                float( std::rand( ) % 255 ) / 255.f ));
+            switch( i )
+            {
+                case 0: // Soma
+                    material->setColor( Vector3f( 1.f, 1.f, 1.f ));
+                    break;
+                case 1: // Axon
+                    material->setColor( Vector3f( 0.1f, 0.1f, 0.9f ));
+                    break;
+                case 2: // Dendrite
+                    material->setColor( Vector3f( 0.9f, 0.1f, 0.1f ));
+                    break;
+                case 3: // Apical dendrite
+                    material->setColor( Vector3f( 0.9f, 0.1f, 0.9f ));
+                    break;
+                default:
+                    material->setColor( Vector3f(
+                        float( std::rand( ) % 255 ) / 255.f,
+                        float( std::rand( ) % 255 ) / 255.f,
+                        float( std::rand( ) % 255 ) / 255.f ));
+            }
             break;
+
         case MT_GRADIENT:
             material->setColor( Vector3f(
                 float( std::rand( ) % nbMaterials ) / float( nbMaterials ),
@@ -141,7 +158,7 @@ void Scene::loadMorphologyFolder( )
                     const std::string& filename = dirIter->path( ).string( );
                     servus::URI uri( filename );
                     if( !morphologyLoader.importMorphology(
-                        uri, ++fileIndex, _primitives, _bounds ))
+                        uri, fileIndex++, _primitives, _bounds ))
                     {
                         BRAYNS_ERROR << "Failed to import " <<
                             filename << std::endl;

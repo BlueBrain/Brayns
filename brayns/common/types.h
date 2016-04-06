@@ -108,6 +108,7 @@ typedef std::vector< float > floats;
 typedef std::vector< int > ints;
 typedef std::vector< unsigned int > uints;
 typedef std::vector< uint8_t > uint8_ts;
+typedef std::vector< size_t > size_ts;
 
 class ParametersManager;
 class AbstractParameters;
@@ -195,6 +196,12 @@ enum MeshQuality
     MQ_FAST = 0,
     MQ_QUALITY,
     MQ_MAX_QUALITY
+};
+
+enum MorphologyLayoutType
+{
+    ML_NONE = 0,
+    ML_GRID,
 };
 
 }

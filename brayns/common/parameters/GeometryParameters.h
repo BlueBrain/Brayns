@@ -27,6 +27,22 @@
 namespace brayns
 {
 
+/**
+ * Defines how morphologies should be organized in space when the layout mode is
+ * selected. The idea is to present the morphology in a grid with a given number
+ * of columns, and a spacing in between. The spacing scale is the same as the
+ * one from the morphologies.
+ */
+struct MorphologyLayout
+{
+    MorphologyLayout() : type( ML_NONE ) {}
+
+    MorphologyLayoutType type;
+    size_t nbColumns;
+    size_t verticalSpacing;
+    size_t horizontalSpacing;
+};
+
 /** Manages geometry parameters
  */
 class GeometryParameters : public AbstractParameters
@@ -92,6 +108,12 @@ public:
         return _morphologySectionTypes;
     }
 
+    /** Morphology layout */
+    const MorphologyLayout& getMorphologyLayout() const
+    {
+        return _morphologyLayout;
+    }
+
 protected:
     std::string _morphologyFolder;
     std::string _pdbFolder;
@@ -108,6 +130,7 @@ protected:
     SceneEnvironment _sceneEnvironment;
     GeometryQuality _geometryQuality;
     size_t _morphologySectionTypes;
+    MorphologyLayout _morphologyLayout;
 };
 
 }
