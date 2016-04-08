@@ -79,7 +79,7 @@ set(BRAYNSOSPRAYPLUGIN_SOURCES
   render/OSPRayCamera.cpp
 )
 
-set(BRAYNSOSPRAYPLUGIN_HEADERS
+set(BRAYNSOSPRAYPLUGIN_PUBLIC_HEADERS
   camera/StereoCamera.h
   geometry/ExtendedCones.h
   geometry/ExtendedCylinders.h

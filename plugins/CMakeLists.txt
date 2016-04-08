@@ -13,7 +13,7 @@ set(BRAYNSPLUGINS_SOURCES
   extensions/plugins/ExtensionPlugin.cpp
 )
 
-set(BRAYNSPLUGINS_HEADERS
+set(BRAYNSPLUGINS_PUBLIC_HEADERS
   loaders/MorphologyLoader.h
   loaders/ProteinLoader.h
   extensions/ExtensionPluginFactory.h
@@ -26,19 +26,19 @@ endif()
 
 if(ASSIMP_FOUND)
   list(APPEND BRAYNSPLUGINS_SOURCES loaders/MeshLoader.cpp)
-  list(APPEND BRAYNSPLUGINS_HEADERS loaders/MeshLoader.h)
+  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS loaders/MeshLoader.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES assimp)
 endif()
 
 if(DEFLECT_FOUND)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/DeflectPlugin.cpp)
-  list(APPEND BRAYNSPLUGINS_HEADERS extensions/plugins/DeflectPlugin.h)
+  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/DeflectPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
 endif()
 
 if(TARGET ZeroBuf AND TARGET zeq)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroBufPlugin.cpp)
-  list(APPEND BRAYNSPLUGINS_HEADERS extensions/plugins/ZeroBufPlugin.h)
+  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/ZeroBufPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
     PUBLIC zeq zeqHBP ZeroBuf ZeroBufRender BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
   add_subdirectory(extensions/vocabulary)
@@ -46,7 +46,7 @@ endif()
 
 if(MAGICK++_FOUND)
   list(APPEND BRAYNSPLUGINS_SOURCES loaders/TextureLoader.cpp)
-  list(APPEND BRAYNSPLUGINS_HEADERS loaders/TextureLoader.h)
+  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS loaders/TextureLoader.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Magick++)
 endif()
 

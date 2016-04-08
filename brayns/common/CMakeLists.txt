@@ -33,7 +33,7 @@ set(BRAYNSCOMMON_SOURCES
   light/DirectionalLight.cpp
 )
 
-set(BRAYNSCOMMON_HEADERS
+set(BRAYNSCOMMON_PUBLIC_HEADERS
   exceptions.h
   log.h
   ui/Viewport.h
