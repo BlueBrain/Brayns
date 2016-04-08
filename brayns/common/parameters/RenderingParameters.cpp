@@ -32,6 +32,7 @@ const std::string PARAM_DETECTION_ON_DIFFERENT_MATERIAL =
     "detection-on-different-material";
 const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
 const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
+const std::string PARAM_EPSILON = "epsilon";
 
 }
 
@@ -58,6 +59,7 @@ RenderingParameters::RenderingParameters( )
     , _detectionOnDifferentMaterial( false )
     , _detectionNearColor( 1.f, 0.f, 0.f )
     , _detectionFarColor( 0.f, 1.f, 0.f )
+    , _epsilon(1.e-4f)
 {
     _parameters.add_options()
         (PARAM_MODULE.c_str(), po::value< std::string >( ),
@@ -91,7 +93,10 @@ RenderingParameters::RenderingParameters( )
         (PARAM_DETECTION_NEAR_COLOR.c_str(),
             po::value< floats >( )->multitoken(), "Detection near color")
         (PARAM_DETECTION_FAR_COLOR.c_str(),
-            po::value< floats >( )->multitoken(), "Detection far color");
+            po::value< floats >( )->multitoken(), "Detection far color")
+        (PARAM_EPSILON.c_str(),
+            po::value< float >( ), "All intersection distances less than the "
+            "epsilon value are ignored by the raytracer");
 }
 
 bool RenderingParameters::parse( int argc, const char **argv )
@@ -144,6 +149,8 @@ bool RenderingParameters::parse( int argc, const char **argv )
         if( values.size() == 3 )
             _detectionFarColor  = Vector3f( values[0], values[1], values[2] );
     }
+    if( _vm.count( PARAM_EPSILON ))
+        _epsilon = _vm[PARAM_EPSILON].as< float >( );
     return true;
 }
 
@@ -179,6 +186,8 @@ void RenderingParameters::print( )
        _detectionNearColor << std::endl;
     BRAYNS_INFO << "- Detection far color             : " <<
        _detectionFarColor << std::endl;
+    BRAYNS_INFO << "Epsilon                           : " <<
+       _epsilon << std::endl;
 }
 
 }

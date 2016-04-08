@@ -155,6 +155,22 @@ public:
         _detectionFarColor = value;
     }
 
+    /**
+        Raytracers have to deal with the finite precision of computer
+        calculations. Since the origin of the reflected ray lies on the surface
+        of the object, there will be an intersection point at zero distance.
+        Since we do not want that, all intersection distances less than the
+        epsilon value are ignored.
+     */
+    float getEpsilon() const
+    {
+        return _epsilon;
+    }
+    void setEpsilon( const float epsilon )
+    {
+        _epsilon = epsilon;
+    }
+
 protected:
     std::string _module;
     std::string _renderer;
@@ -173,6 +189,7 @@ protected:
     bool _detectionOnDifferentMaterial;
     Vector3f _detectionNearColor;
     Vector3f _detectionFarColor;
+    float _epsilon;
 };
 
 }

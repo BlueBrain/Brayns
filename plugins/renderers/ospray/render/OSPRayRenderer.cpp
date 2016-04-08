@@ -26,8 +26,6 @@ brayns::ProximityRenderer proximityRenderer;
 namespace brayns
 {
 
-const float DEFAULT_EPSILON = 1e-2f;
-
 OSPRayRenderer::OSPRayRenderer( RenderingParameters& renderingParameters )
     : Renderer( renderingParameters )
 {
@@ -65,7 +63,7 @@ void OSPRayRenderer::commit( )
         _renderingParameters.getElectronShading( ));
     ospSet1i( _renderer, "gradientBackgroundEnabled",
         _renderingParameters.getGradientBackground( ));
-    ospSet1f( _renderer, "epsilon", DEFAULT_EPSILON );
+    ospSet1f( _renderer, "epsilon", _renderingParameters.getEpsilon( ));
     ospSet1i( _renderer, "moving", false );
     ospSet1f( _renderer, "detectionDistance",
         _renderingParameters.getDetectionDistance( ));
