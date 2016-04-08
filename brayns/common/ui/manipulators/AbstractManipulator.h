@@ -32,7 +32,7 @@ class BaseWindow;
 class AbstractManipulator
 {
 public:
-    AbstractManipulator( BaseWindow& window ) : _window(window) {}
+    AbstractManipulator( BaseWindow& window ) : _window( window ) {}
     virtual ~AbstractManipulator() {}
 
     /** This is the fct that gets called when the mouse moved in the
@@ -45,9 +45,9 @@ public:
      */
     virtual void button(const Vector2i &) {}
 
-    virtual void keypress(int32 key);
+    virtual void keypress( int32 key );
 
-    virtual void specialkey(int32 key);
+    virtual void specialkey( int32 key );
 
 protected:
     /** helper functions called from the default 'motion' function */

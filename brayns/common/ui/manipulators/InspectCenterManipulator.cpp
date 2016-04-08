@@ -35,16 +35,20 @@ void InspectCenterManipulator::keypress( int32 key )
     switch(key)
     {
         case 'a':
-            viewport.rotate(viewport.getTarget(), _window.getRotateSpeed(),0);
+            viewport.rotate(
+                viewport.getTarget(), _window.getRotateSpeed(), 0, false );
             break;
         case 'd':
-            viewport.rotate(viewport.getTarget(),-_window.getRotateSpeed(),0);
+            viewport.rotate(
+                viewport.getTarget(),-_window.getRotateSpeed(), 0, false );
             break;
         case 'w':
-            viewport.rotate(viewport.getTarget(),0, _window.getRotateSpeed());
+            viewport.rotate(
+                viewport.getTarget(),0, _window.getRotateSpeed(), false );
             break;
         case 's':
-            viewport.rotate(viewport.getTarget(),0,-_window.getRotateSpeed());
+            viewport.rotate(
+                viewport.getTarget(),0,-_window.getRotateSpeed(), false );
             break;
     }
 
@@ -61,16 +65,20 @@ void InspectCenterManipulator::specialkey( int32 key )
     switch(key)
     {
         case GLUT_KEY_LEFT:
-            viewport.rotate(viewport.getPosition(), _window.getRotateSpeed(),0);
+            viewport.rotate(
+                viewport.getPosition(), _window.getRotateSpeed(), 0, false );
             break;
         case GLUT_KEY_RIGHT:
-            viewport.rotate(viewport.getPosition(), -_window.getRotateSpeed(),0);
+            viewport.rotate(
+                viewport.getPosition(), -_window.getRotateSpeed(), 0, false );
             break;
         case GLUT_KEY_UP:
-            viewport.rotate(viewport.getPosition(), 0, _window.getRotateSpeed());
+            viewport.rotate(
+                viewport.getPosition(), 0, _window.getRotateSpeed(), false );
             break;
         case GLUT_KEY_DOWN:
-            viewport.rotate(viewport.getPosition(), 0, -_window.getRotateSpeed());
+            viewport.rotate(
+                viewport.getPosition(), 0, -_window.getRotateSpeed(), false );
             break;
     }
     AbstractManipulator::specialkey( key );
@@ -82,8 +90,9 @@ void InspectCenterManipulator::dragRight(
 {
     const float fwd =- (to.y() - from.y()) * _window.getMotionSpeed();
     Viewport& viewport = _window.getViewPort();
-    const Vector3f dir = normalize(viewport.getTarget() - viewport.getPosition());
-    viewport.translate(dir*fwd);
+    const Vector3f dir =
+        normalize( viewport.getTarget() - viewport.getPosition( ));
+    viewport.translate(dir*fwd, false);
 }
 
 void InspectCenterManipulator::dragMiddle(
@@ -93,7 +102,8 @@ void InspectCenterManipulator::dragMiddle(
     Viewport& viewport = _window.getViewPort();
     const float x = (to.x() - from.x()) * _window.getMotionSpeed();
     const float y = (to.y() - from.y()) * _window.getMotionSpeed();
-    const Vector3f dir = normalize(viewport.getTarget() - viewport.getPosition());
+    const Vector3f dir =
+        normalize( viewport.getTarget() - viewport.getPosition( ));
     viewport.translate(Vector3f(-y,x,0.f).cross(dir), true);
 }
 
@@ -104,7 +114,7 @@ void InspectCenterManipulator::dragLeft(
     Viewport& viewport = _window.getViewPort();
     const float du = (to.x() - from.x()) * _window.getRotateSpeed();
     const float dv = (to.y() - from.y()) * _window.getRotateSpeed();
-    viewport.rotate(viewport.getTarget(), du, dv);
+    viewport.rotate(viewport.getTarget(), du, dv, false);
 }
 
 }

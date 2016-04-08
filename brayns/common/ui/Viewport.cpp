@@ -17,20 +17,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/common/log.h>
+
 #include "Viewport.h"
 
 namespace brayns
 {
 
+const Vector3f INITIAL_UP = { 0, 1, 0 };
+const Vector3f INITIAL_POSITION = { 0, 0, -1 };
+const Vector3f INITIAL_DIRECTION = { 0, 0, 1 };
+const Vector3f ZERO = { 0, 0, 0 };
+
 Viewport::Viewport()
-    : _modified(true)
-    , _position(0,0,-1)
-    , _up(0,1,0)
-    , _target(0,0,0)
-    , _openingAngle(60.f*M_PI/360.f)
+    : _modified( true )
+    , _position( INITIAL_POSITION )
+    , _up( INITIAL_UP )
+    , _target( ZERO )
+    , _openingAngle( 60.f*M_PI/360.f )
     , _aspect(1.f)
+    , _matrix( Matrix4f::IDENTITY )
 {
-    _viewMatrix = Matrix4f::IDENTITY;
 }
 
 void Viewport::initialize(
@@ -38,98 +45,56 @@ void Viewport::initialize(
     const Vector3f& target,
     const Vector3f& up )
 {
-    _viewMatrix = Matrix4f::IDENTITY;
     _position = position;
     _target = target;
     _up = up;
-
-    const Vector3f dir = normalize(_target - _position);
-
-    const Vector3f x = normalize( vmml::cross( dir, _up ));
-    const Vector3f y = normalize( vmml::cross( dir, x ));
-    const Vector3f z = normalize( dir );
-
-    _viewMatrix.set_column(0, x);
-    _viewMatrix.set_column(1, y);
-    _viewMatrix.set_column(2, z);
-    _viewMatrix.set_column(3, _position);
-
-    _viewMatrix.set_row(3, Vector4f(0,0,0,1));
-
-    _snapUp();
+    _modify();
 }
 
-void Viewport::_snapUp()
+void Viewport::_modify()
 {
-    Vector4f _vx, _vy, _vz;
-    _viewMatrix.get_column(0, _vx);
-    _viewMatrix.get_column(1, _vy);
-    _viewMatrix.get_column(2, _vz);
-
-    const Vector3f vx( _vx[0], _vx[1], _vx[2] );
-    const Vector3f vy( _vy[0], _vy[1], _vy[2] );
-    const Vector3f vz( _vz[0], _vz[1], _vz[2] );
-
-    if (fabsf(dot(_up,vz)) < 1e-3f)
-        return;
-    _viewMatrix.set_column(0, normalize( vmml::cross( vy, _up )));
-    _viewMatrix.set_column(1, normalize( vmml::cross( vx, vy )));
-    _viewMatrix.set_column(2, normalize( vmml::cross( vz, vx )));
-
     _modified = true;
 }
 
-void Viewport::translate(const Vector3f& vector, bool updateTarget)
+void Viewport::translate( const Vector3f& vector, bool updateTarget )
 {
-    Matrix4f xfm( Matrix4f::IDENTITY );
-    xfm.set_translation(vector);
+     _position = vector + _position;
+     if( updateTarget )
+        _target = vector + _target;
+    _modify();
+}
 
-    _viewMatrix = xfm * _viewMatrix;
-    const Vector4f position( _position[0], _position[1], _position[2], 1.0f );
-    _position = xfm * position;
+void Viewport::rotate(
+    const Vector3f& pivot, float du, float dv, bool updateTarget)
+{
+    _matrix.rotate_x( dv );
+    _matrix.rotate_y( -du * std::copysign( 1.f, _up.y( )));
+
+    const Vector3f dir =  _target - _position ;
+    const float l = dir.length();
     if( updateTarget )
     {
-        const Vector4f target( _target[0], _target[1], _target[2], 1.0f );
-        _target = xfm * target;
+        const Vector3f target = _matrix * ( l * INITIAL_DIRECTION );
+        _target = _position + target;
     }
+    else
+    {
+        _position = _position - pivot;
+        _position = _matrix * ( l * INITIAL_POSITION );
+        _position = _position + pivot;
+    }
+    _up = _matrix * INITIAL_UP;
 
-    _snapUp();
+    _modify();
 }
 
-void Viewport::rotate(const Vector3f& pivot, float du, float dv)
-{
-    Matrix4f xfm1( Matrix4f::IDENTITY );
-    Matrix4f xfm2( Matrix4f::IDENTITY );
-    Matrix4f xfm3( Matrix4f::IDENTITY );
-    Matrix4f xfm4( Matrix4f::IDENTITY );
-
-    xfm1.set_translation(pivot);
-    xfm2.rotate_x(dv);
-    xfm3.rotate_y(-du);
-    xfm4.set_translation(-pivot);
-
-    const Matrix4f xfm = xfm1 * xfm2 * xfm3 * xfm4;
-
-    _viewMatrix = xfm * _viewMatrix;
-    Vector4f position( _position[0], _position[1], _position[2], 1.0f );
-    Vector4f target( _target[0], _target[1], _target[2], 1.0f );
-    _position = xfm * position;
-    _target = xfm * target;
-
-    _snapUp();
-}
-
-std::ostream &operator<<(std::ostream &os, Viewport &viewport)
+std::ostream &operator << ( std::ostream &os, Viewport &viewport )
 {
     os << std::endl <<
         "Position:" << viewport.getPosition() << std::endl <<
         "Target  :" << viewport.getTarget() << std::endl <<
         "Up      :" << viewport.getUp() << std::endl <<
-        "Aspect  :" << viewport.getAspect() << std::endl <<
-        "Matrix  :" << viewport.getViewMatrix().get_row(0) << std::endl <<
-        "         " << viewport.getViewMatrix().get_row(1) << std::endl <<
-        "         " << viewport.getViewMatrix().get_row(2) << std::endl <<
-        "         " << viewport.getViewMatrix().get_row(3) << std::endl;
+        "Aspect  :" << viewport.getAspect() << std::endl;
     return os;
 }
 

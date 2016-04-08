@@ -35,33 +35,71 @@ public:
         const Vector3f& target,
         const Vector3f& up );
 
-    void translate(const Vector3f& v, bool updateTarget = false);
-    void rotate(const Vector3f& pivot, float du, float dv);
+    void translate( const Vector3f& v, bool updateTarget );
+    void rotate( const Vector3f& pivot, float du, float dv, bool updateTarget );
 
-    bool getModified() const { return _modified; }
-    void setModified(bool value) { _modified = value; }
+    bool getModified() const
+    {
+        return _modified;
+    }
+    void setModified( const bool value )
+    {
+        _modified = value;
+    }
 
-    void setPosition(const Vector3f& value) { _position = value; _modified=true; }
-    Vector3f getPosition() const { return _position; }
+    void setPosition( const Vector3f& value )\
+    {
+        _position = value;
+        _modified = true;
+    }
+    Vector3f getPosition() const
+    {
+        return _position;
+    }
 
-    void setTarget(const Vector3f& value) { _target = value; _modified=true; }
-    Vector3f getTarget() const { return _target; }
+    void setTarget( const Vector3f& value )
+    {
+        _target = value;
+        _modified = true;
+    }
+    Vector3f getTarget() const
+    {
+        return _target;
+    }
 
-    void setUp(const Vector3f& value) { _up = value; _modified=true; }
-    Vector3f getUp() const { return _up; }
+    void setUp( const Vector3f& value )
+    {
+        _up = value;
+        _modified = true;
+    }
+    Vector3f getUp() const
+    {
+        return _up;
+    }
 
-    void setOpeningAngle(float openingAngle) { _openingAngle=openingAngle; _modified=true; }
-    float getOpeningAngle() const { return _openingAngle; }
+    void setOpeningAngle( const float openingAngle )
+    {
+        _openingAngle=openingAngle;
+        _modified=true;
+    }
+    float getOpeningAngle() const
+    {
+        return _openingAngle;
+    }
 
-    void setAspect(float value) { _aspect = value; _modified=true; }
-    float getAspect() const { return _aspect; }
-
-    void setViewMatrix(const Matrix4f& matrix) { _viewMatrix=matrix; _modified=true; }
-    Matrix4f getViewMatrix() const { return _viewMatrix; }
+    void setAspect( const float value)
+    {
+        _aspect = value;
+        _modified = true;
+    }
+    float getAspect() const
+    {
+        return _aspect;
+    }
 
     /*! set 'up' vector. if this vector is '0,0,0' the viewer will
      *not* apply the up-vector after camera manipulation */
-    void _snapUp();
+    void _modify();
 
 private:
     bool _modified; /* the viewPort will set this flag any time any of
@@ -77,14 +115,12 @@ private:
     /*! aspect ration i Y:X */
     float _aspect;
 
-    /*! camera viw matrix in which the Z axis is the depth axis, and X
-      and Y axes are parallel to the screen X and Y axis. The frame
-      itself remains normalized. */
-    Matrix4f _viewMatrix;
+    /*! rotation matrice along x and y axis */
+    Matrix4f _matrix;
 
 };
 
-std::ostream &operator<<(std::ostream &o, Viewport &viewport);
+std::ostream& operator << ( std::ostream &o, Viewport &viewport );
 
 }
 

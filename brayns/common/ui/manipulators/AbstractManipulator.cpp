@@ -36,9 +36,9 @@
 namespace brayns
 {
 
-void AbstractManipulator::keypress(const int32 key)
+void AbstractManipulator::keypress( const int32 key )
 {
-    switch(key)
+    switch( key )
     {
     case 'Q':
         glutLeaveMainLoop();
@@ -46,7 +46,7 @@ void AbstractManipulator::keypress(const int32 key)
     }
 }
 
-void AbstractManipulator::specialkey(const int32)
+void AbstractManipulator::specialkey( const int32 )
 {
 }
 
@@ -55,15 +55,15 @@ void AbstractManipulator::specialkey(const int32)
 // ------------------------------------------------------------------
 void AbstractManipulator::motion()
 {
-    if ((_window.getCurrentButtonState() == (1<<GLUT_RIGHT_BUTTON)) ||
-            ((_window.getCurrentButtonState() == (1<<GLUT_LEFT_BUTTON)) &&
-             (_window.getCurrentModifiers() & GLUT_ACTIVE_ALT)))
+    if(( _window.getCurrentButtonState() == (1 << GLUT_RIGHT_BUTTON )) ||
+      (( _window.getCurrentButtonState() == ( 1 << GLUT_LEFT_BUTTON )) &&
+      ( _window.getCurrentModifiers() & GLUT_ACTIVE_ALT )))
     {
         dragRight( _window.getCurrentMousePos(), _window.getLastMousePos() );
     }
-    else if ((_window.getCurrentButtonState() == (1<<GLUT_MIDDLE_BUTTON)) ||
-               ((_window.getCurrentButtonState() == (1<<GLUT_LEFT_BUTTON)) &&
-                (_window.getCurrentModifiers() & GLUT_ACTIVE_CTRL)))
+    else if(( _window.getCurrentButtonState() == ( 1 << GLUT_MIDDLE_BUTTON )) ||
+           (( _window.getCurrentButtonState() == ( 1 << GLUT_LEFT_BUTTON )) &&
+           ( _window.getCurrentModifiers() & GLUT_ACTIVE_CTRL )))
     {
         dragMiddle( _window.getCurrentMousePos(), _window.getLastMousePos() );
     }
