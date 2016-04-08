@@ -70,16 +70,12 @@ endif()
 
 set(LIB_OSPRAY_EMBREE LIB_OSPRAY_EMBREE-NOTFOUND)
 set(LIB_OSPRAY LIB_OSPRAY-NOTFOUND)
-find_library(LIB_OSPRAY_EMBREE ospray_embree ${OSPRAY_ROOT}/lib)
 find_library(LIB_OSPRAY ospray ${OSPRAY_ROOT}/lib)
 if(OSPRAY_MIC)
   # Xeon Phi specific build ops here
 endif()
 
-set(OSPRAY_LIBRARIES
-  ${LIB_OSPRAY_EMBREE}
-  ${LIB_OSPRAY}
-  )
+set(OSPRAY_LIBRARIES ${LIB_OSPRAY})
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OSPRay DEFAULT_MSG

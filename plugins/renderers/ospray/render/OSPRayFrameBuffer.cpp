@@ -1,20 +1,8 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License version 3.0 as published
- * by the Free Software Foundation.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "OSPRayFrameBuffer.h"
@@ -68,9 +56,9 @@ void OSPRayFrameBuffer::resize(const Vector2i& frameSize)
             format = OSP_RGBA_NONE;
     }
 
-    ospray::vec2i size(_frameSize.x(), _frameSize.y());
+    osp::vec2i size = { _frameSize.x(), _frameSize.y() };
     _frameBuffer = ospNewFrameBuffer( size,
-        format, OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM | OSP_FB_ALPHA );
+        format, OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM );
     ospSet1f(_frameBuffer, "gamma", DEFAULT_GAMMA);
     ospCommit(_frameBuffer);
     clear();

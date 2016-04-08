@@ -1,5 +1,8 @@
-# Copyright (c) HBP 2014-2015 cyrille.favreau@epfl.ch
-# All rights reserved. Do not distribute without further notice.
+# Copyright (c) 2011-2016, EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#
+# This file is part of BRayns
 
 cmake_minimum_required(VERSION 2.8)
 

@@ -1,20 +1,8 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License version 3.0 as published
- * by the Free Software Foundation.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 // ospray
@@ -25,6 +13,7 @@
 #include <ospray/texture/Texture2D.ih>
 #include <ospray/lights/Light.ih>
 #include <ospray/render/Renderer.ih>
+
 // obj renderer
 #include <ospray/render/obj/OBJMaterial.ih>
 #include "ExtendedOBJMaterial.ih"
@@ -271,14 +260,12 @@ inline float lightAlpha(
                 material_opacity = mat->d;
                 if( mat->map_d != 0 )
                 {
-                    vec4f d_map;
-                    mat->map_d->get( mat->map_d, d_map, dg.st );
+                    vec4f d_map = mat->map_d->get( mat->map_d, dg.st );
                     material_opacity = d_map.x;
                 }
                 else if( mat->map_Kd != 0 )
                 {
-                    vec4f kd_map;
-                    mat->map_Kd->get( mat->map_Kd, kd_map, dg.st );
+                    vec4f kd_map = mat->map_Kd->get( mat->map_Kd, dg.st );
                     material_opacity = 1.f - kd_map.w;
                 }
             }
@@ -655,6 +642,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
 
 void ExtendedOBJRenderer_renderSample(
     uniform Renderer* uniform _self,
+    void * uniform perFrameData,
     varying ScreenSample& sample)
 {
     uniform ExtendedOBJRenderer* uniform self =

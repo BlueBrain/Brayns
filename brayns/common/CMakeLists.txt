@@ -1,5 +1,8 @@
-# Copyright (c) HBP 2014-2015 cyrille.favreau@epfl.ch
-# All rights reserved. Do not distribute without further notice.
+# Copyright (c) 2011-2016, EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#
+# This file is part of BRayns
 
 set(BRAYNSCOMMON_SOURCES
   ui/Viewport.cpp
@@ -63,7 +66,7 @@ set(BRAYNSCOMMON_HEADERS
 
 set(BRAYNSCOMMON_LINK_LIBRARIES
     PUBLIC boost_filesystem vmmlib boost_program_options
-    PRIVATE ${GLUT_LIBRARIES}
+    PRIVATE ${GLUT_LIBRARIES} Brion
 )
 
 if(TARGET ZeroBuf)

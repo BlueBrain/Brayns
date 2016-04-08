@@ -1,21 +1,8 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
- *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License version 3.0 as published
- * by the Free Software Foundation.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef BASEWINDOW_H
@@ -41,7 +28,7 @@ namespace brayns
 
 //! dedicated namespace for 3D glut viewer widget
 /*! initialize everything GLUT-related */
-void initGLUT(int32 *ac, const char **av);
+void initGLUT(int *ac, const char **av);
 
 /*! switch over to GLUT for control flow. This functoin will not return */
 void runGLUT();
@@ -127,7 +114,7 @@ public:
     // to input events
     // ------------------------------------------------------------------
     virtual void mouseButton(
-            int32 which,
+            int which,
             bool released,
             const Vector2i& pos);
 
@@ -157,9 +144,9 @@ public:
     /*! clear the frame buffer color and depth bits */
     void clearPixels();
 
-    /*! draw uint32 pixels into the GLUT window (assumes window and buffer
+    /*! draw uint pixels into the GLUT window (assumes window and buffer
      * dimensions are equal) */
-    void drawPixels(const uint32 *framebuffer);
+    void drawPixels(const int *framebuffer);
 
     /*! draw float4 pixels into the GLUT window (assumes window and buffer
      * dimensions are equal) */
@@ -172,16 +159,16 @@ public:
     /*! set 'up' vector. if this vector is '0,0,0' the viewer will
        *not* apply the up-vector after camera manipulation */
 
-    friend void glut3dReshape(int32 x, int32 y);
+    friend void glut3dReshape(int x, int y);
     friend void glut3dDisplay(void);
-    friend void glut3dKeyboard(char key, int32 x, int32 y);
+    friend void glut3dKeyboard(char key, int x, int y);
     friend void glut3dIdle(void);
-    friend void glut3dMotionFunc(int32 x, int32 y);
-    friend void glut3dMouseFunc(int32 whichButton, int32 released,
-                                int32 x, int32 y);
+    friend void glut3dMotionFunc(int x, int y);
+    friend void glut3dMouseFunc(int whichButton, int released,
+                                int x, int y);
 
     virtual void keypress(char key, const Vector2f& where);
-    virtual void specialkey(int32 key, const Vector2f& where);
+    virtual void specialkey(int key, const Vector2f& where);
 
     /** Saves current frame to disk. The filename is defined by a prefix and a
      * frame index (<prefix>_<frame>_%08d.ppm). The file uses the ppm encoding
@@ -235,7 +222,7 @@ protected:
     FrameBufferMode _frameBufferMode;
 
     Viewport _viewPort;
-    int32 _windowID;
+    int _windowID;
     Vector2i _windowSize;
 
     bool fullScreen_;

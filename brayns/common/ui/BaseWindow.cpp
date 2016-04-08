@@ -1,21 +1,8 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
- *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License version 3.0 as published
- * by the Free Software Foundation.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "BaseWindow.h"
@@ -25,6 +12,7 @@
 #include <brayns/common/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/camera/Camera.h>
+#include <brayns/common/renderer/FrameBuffer.h>
 
 #include <assert.h>
 
@@ -47,15 +35,15 @@ void runGLUT( )
     glutMainLoop( );
 }
 
-void initGLUT(int32 *ac, const char **av)
+void initGLUT(int *ac, const char **av)
 {
-    glutInit(ac, (char **) av);
+    glutInit( ac, (char **) av);
 }
 
 // ------------------------------------------------------------------
 // glut event handlers
 // ------------------------------------------------------------------
-void glut3dReshape(int32 x, int32 y)
+void glut3dReshape(int x, int y)
 {
     if (BaseWindow::_activeWindow)
         BaseWindow::_activeWindow->reshape(Vector2i(x,y));
@@ -67,12 +55,12 @@ void glut3dDisplay( void )
        BaseWindow::_activeWindow->display( );
 }
 
-void glut3dKeyboard(unsigned char key, int32 x, int32 y)
+void glut3dKeyboard(unsigned char key, int x, int y)
 {
     if(BaseWindow::_activeWindow)
        BaseWindow::_activeWindow->keypress(key,Vector2i(x,y));
 }
-void glut3dSpecial(int32 key, int32 x, int32 y)
+void glut3dSpecial(int key, int x, int y)
 {
     if(BaseWindow::_activeWindow)
        BaseWindow::_activeWindow->specialkey(key,Vector2i(x,y));
@@ -83,13 +71,13 @@ void glut3dIdle( void )
     if(BaseWindow::_activeWindow)
        BaseWindow::_activeWindow->idle( );
 }
-void glut3dMotionFunc(int32 x, int32 y)
+void glut3dMotionFunc(int x, int y)
 {
     if(BaseWindow::_activeWindow)
        BaseWindow::_activeWindow->motion(Vector2i(x,y));
 }
 
-void glut3dMouseFunc(int32 whichButton, int32 released, int32 x, int32 y)
+void glut3dMouseFunc(int whichButton, int released, int x, int y)
 {
     if(BaseWindow::_activeWindow)
        BaseWindow::_activeWindow->mouseButton(
@@ -142,7 +130,7 @@ BaseWindow::~BaseWindow( )
 }
 
 void BaseWindow::mouseButton(
-        int32 whichButton,
+        int whichButton,
         bool released,
         const Vector2i& pos)
 {
@@ -171,11 +159,6 @@ void BaseWindow::motion(const Vector2i& pos)
 
     _manipulator->motion( );
     _lastMousePos = _currMousePos;
-    if(_viewPort.getModified( ))
-    {
-        _brayns->commit( );
-        forceRedraw( );
-    }
 }
 
 void BaseWindow::idle( )
@@ -204,12 +187,18 @@ void BaseWindow::forceRedraw( )
 
 void BaseWindow::display( )
 {
+    if(_viewPort.getModified( ))
+    {
+        _brayns->getFrameBuffer().clear();
+        _viewPort.setModified(false);
+    }
+
     RenderInput renderInput;
     RenderOutput renderOutput;
 
     renderInput.windowSize = _windowSize;
     renderInput.position = _viewPort.getPosition( );
-    renderInput.target = _viewPort.getTarget( ); // - _viewPort.getPosition( );
+    renderInput.target = _viewPort.getTarget( );
     renderInput.up = _viewPort.getUp( );
 
     _brayns->getCamera().commit();
@@ -238,9 +227,12 @@ void BaseWindow::display( )
 
 #if(BRAYNS_USE_ZEQ || BRAYNS_USE_DEFLECT)
     Camera& camera = _brayns->getCamera( );
-    _viewPort.setPosition( camera.getPosition( ) );
-    _viewPort.setTarget( camera.getTarget( ) );
-    _viewPort.setUp( camera.getUpVector( ) );
+    if( camera.getPosition( ) != _viewPort.getPosition( ))
+        _viewPort.setPosition( camera.getPosition( ) );
+    if( camera.getTarget( ) != _viewPort.getTarget( ))
+        _viewPort.setTarget( camera.getTarget( ) );
+    if( camera.getUpVector( ) != _viewPort.getUp( ))
+        _viewPort.setUp( camera.getUpVector( ) );
 #endif
     ++frameCounter_;
 }
@@ -252,7 +244,7 @@ void BaseWindow::clearPixels( )
     glutSwapBuffers( );
 }
 
-void BaseWindow::drawPixels(const uint32* framebuffer)
+void BaseWindow::drawPixels(const int* framebuffer)
 {
     glDrawPixels(_windowSize.x( ), _windowSize.y( ),
                  GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
@@ -310,7 +302,7 @@ void BaseWindow::create(const char *title,
         glutFullScreen( );
 }
 
-void BaseWindow::specialkey( int32 key, const Vector2f& )
+void BaseWindow::specialkey( int key, const Vector2f& )
 {
     if(_manipulator)
         _manipulator->specialkey( key );

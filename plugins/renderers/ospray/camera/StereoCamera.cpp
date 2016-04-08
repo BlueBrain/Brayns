@@ -1,20 +1,8 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of BRayns
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License version 3.0 as published
- * by the Free Software Foundation.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "StereoCamera.h"
@@ -37,9 +25,9 @@ StereoCamera::StereoCamera()
 
 void StereoCamera::commit()
 {
-    pos = getParam3f("pos",osp::vec3fa(0.f));
-    dir = getParam3f("dir",osp::vec3fa(0.f,0.0f,1.f));
-    up = getParam3f("up", osp::vec3fa(0.f,1.0f,0.f));
+    pos = getParam3f("pos", ospray::vec3fa(0.f, 0.f, 0.f));
+    dir = getParam3f("dir", ospray::vec3fa(0.f, 0.f, 1.f));
+    up = getParam3f("up", ospray::vec3fa(0.f, 1.f, 0.f));
     near = getParamf("near",0.f);
     far = getParamf("far", std::numeric_limits<float>::infinity());
     fovy = getParamf("fovy",60.f);
@@ -48,9 +36,9 @@ void StereoCamera::commit()
     stereo = getParamf("stereo",0.f);
     separation = getParamf("separation",0.f);
 
-    osp::vec3f dz = normalize(dir);
-    osp::vec3f dx = normalize(cross(dz,up));
-    osp::vec3f dy = normalize(cross(dx,dz));
+    ospray::vec3f dz = normalize(dir);
+    ospray::vec3f dx = normalize(cross(dz,up));
+    ospray::vec3f dy = normalize(cross(dx,dz));
 
     float imgPlane_size_y = 2.f*sinf(fovy/2.f*M_PI/180.);
     float imgPlane_size_x = imgPlane_size_y * aspect;

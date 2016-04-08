@@ -1,9 +1,8 @@
-#
-# Copyright (c) 2011-2015, EPFL/Blue Brain Project
-#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Copyright (c) 2011-2016, EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of BRayns
-#
 
 # Configure the output directories. To allow IMPI to do its magic we
 # will put *executables* into the (same) build directory, but tag
