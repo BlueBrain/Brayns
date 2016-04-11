@@ -40,7 +40,6 @@ struct ExtendedOBJRenderer : public ospray::Renderer
     float ambientOcclusionStrength;
     bool shadingEnabled;
     bool electronShadingEnabled;
-    bool lightEmittingMaterialsEnabled;
     bool gradientBackgroundEnabled;
     int randomNumber;
     bool moving;

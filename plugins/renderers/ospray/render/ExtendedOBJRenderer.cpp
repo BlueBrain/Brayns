@@ -55,8 +55,6 @@ void ExtendedOBJRenderer::commit( )
     timestamp = getParam1f( "timestamp", 0.f );
     spp = getParam1i("spp", 1);
     electronShadingEnabled = bool( getParam1i( "electronShading", 0 ));
-    lightEmittingMaterialsEnabled =
-        bool( getParam1i( "lightEmittingMaterialsEnabled", 0 ));
     gradientBackgroundEnabled =
         bool( getParam1i( "gradientBackgroundEnabled", 0 ));
     ospray::vec3f scale = getParam3f( "scale", ospray::vec3f( 1.f ));
@@ -86,7 +84,6 @@ void ExtendedOBJRenderer::commit( )
                 timestamp,
                 spp,
                 electronShadingEnabled,
-                lightEmittingMaterialsEnabled,
                 gradientBackgroundEnabled,
                 dof,
                 lightPtr, lightArray.size( ),

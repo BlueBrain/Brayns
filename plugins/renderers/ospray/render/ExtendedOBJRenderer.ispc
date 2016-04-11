@@ -192,7 +192,6 @@ struct ExtendedOBJRenderer
     bool softShadowsEnabled;
     float ambientOcclusionStrength;
     bool electronShadingEnabled;
-    bool lightEmittingMaterialsEnabled;
     bool gradientBackgroundEnabled;
     int randomNumber;
     bool moving;
@@ -345,7 +344,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
     int max_depth = self->moving ? 2 : 10;
     uniform int depth = 0;
     vec3f colorKs = make_vec3f( 0.f );
-    vec3f local_emitted_color = make_vec3f( 0.f );
 
     if( self->dof > 0.f )
     {
@@ -543,20 +541,32 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 }
             }
 
-            if( self->ambientOcclusionStrength != 0.f )
+            if( lightEmission == 0.f && self->ambientOcclusionStrength != 0.f )
             {
-                // Ambient occulusion
+                // Ambient occulusion and light emission
                 DifferentialGeometry geometry;
                 if( launchRandomRay( self, ray, sample, P, normal, geometry, 1))
                 {
-                    material = dg.material;
+                    material = geometry.material;
                     objMaterial = ( uniform ExtendedOBJMaterial* )material;
                     if( objMaterial )
                         foreach_unique( mat in objMaterial )
                         {
-                            local_shade_color = local_shade_color -
-                                make_vec3f( self->ambientOcclusionStrength *
-                                    opacity * mat->d );
+                            if( mat->a != 0.f )
+                            {
+                                vec3f Kd = mat->Kd;
+                                if( mat->map_Kd )
+                                    Kd = get3f( mat->map_Kd, dg.st );
+                                vec3f Ka = make_vec3f( mat->a );
+                                if( mat->map_a )
+                                    Ka = get3f( mat->map_a, dg.st );
+                                local_shade_color = local_shade_color +
+                                    make_vec3f( Kd * Ka * opacity * mat->d );
+                            }
+                            else
+                                local_shade_color = local_shade_color -
+                                    make_vec3f( self->ambientOcclusionStrength *
+                                        opacity * mat->d );
                         }
                     else
                         local_shade_color = local_shade_color -
@@ -569,8 +579,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
             float weight = path_opacity * light_alpha;
             color = ( 1.f - weight ) * color +
                     weight * ( max( make_vec3f( 0.f ), local_shade_color ));
-            color = color + colorKs + max(
-                make_vec3f( 0.f ), local_emitted_color );
 
             if( opacity < 1.f )
             {
@@ -596,40 +604,9 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 path_opacity = 0.f;
         }
 
-        if( self->lightEmittingMaterialsEnabled )
-        {
-            // Compute impact of light emitting material
-            DifferentialGeometry geometry;
-            if( launchRandomRay( self, ray, sample, P, normal, geometry, 2 ))
-            {
-                material = dg.material;
-                objMaterial = ( uniform ExtendedOBJMaterial* ) material;
-
-                vec3f Ka = make_vec3f( 0.f );
-                Kd = make_vec3f( dg.color );
-                if( objMaterial )
-                {
-                    foreach_unique( mat in objMaterial )
-                    {
-                        if( mat->map_a )
-                            Ka = Ka + mat->a * get3f( mat->map_a, dg.st );
-                        else
-                            Ka = Ka + make_vec3f( mat->a );
-                        if( mat->map_Kd )
-                        {
-                            vec4f Kd_from_map = get4f( mat->map_Kd, dg.st );
-                            Kd = make_vec3f( Kd_from_map );
-                        }
-                        else
-                            Kd = mat->Kd;
-                    }
-                }
-                local_emitted_color = local_emitted_color + Ka * Kd;
-            }
-        }
         if( path_opacity < 0.01f )
             //remaining contribution too low kill path
-            return color + local_emitted_color;
+            return color;
 
         ray.t = infinity;
         ray.primID = -1;
@@ -637,7 +614,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         ray.instID = -1;
     }
 
-    return color + local_emitted_color;
+    return color;
 }
 
 void ExtendedOBJRenderer_renderSample(
@@ -675,7 +652,6 @@ export void ExtendedOBJRenderer_set(
         const uniform float& timestamp,
         const uniform int& spp,
         const uniform bool& electronShadingEnabled,
-        const uniform bool& lightEmittingMaterialsEnabled,
         const uniform bool& gradientBackgroundEnabled,
         const uniform float& dof,
         void** uniform lights,
@@ -696,8 +672,6 @@ export void ExtendedOBJRenderer_set(
     self->timestamp = timestamp;
     self->spp = spp;
     self->electronShadingEnabled = electronShadingEnabled || moving;
-    self->lightEmittingMaterialsEnabled =
-        lightEmittingMaterialsEnabled && !moving;
     self->gradientBackgroundEnabled = gradientBackgroundEnabled;
 
     self->lights =
