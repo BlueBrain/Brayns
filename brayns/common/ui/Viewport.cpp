@@ -78,11 +78,22 @@ void Viewport::rotate(
 
 std::ostream &operator << ( std::ostream &os, Viewport &viewport )
 {
-    os << std::endl <<
-        "Position:" << viewport.getPosition() << std::endl <<
-        "Target  :" << viewport.getTarget() << std::endl <<
-        "Up      :" << viewport.getUp() << std::endl <<
-        "Aspect  :" << viewport.getAspect() << std::endl;
+    const Vector3f& position = viewport.getPosition();
+    const Vector3f& target = viewport.getTarget();
+    const Vector3f& up = viewport.getUp();
+    os <<
+        "{\"origin\": {" <<
+        "\"x\": " << position.x() << "," <<
+        "\"y\": " << position.y() << "," <<
+        "\"z\": " << position.z() << "}," <<
+        "\"lookAt\": {" <<
+        "\"x\": " << target.x() << "," <<
+        "\"y\": " << target.y() << "," <<
+        "\"z\": " << target.z() << "}," <<
+        "\"up\": {" <<
+        "\"x\": " << up.x() << "," <<
+        "\"y\": " << up.y() << "," <<
+        "\"z\": " << up.z() << "}}";
     return os;
 }
 
