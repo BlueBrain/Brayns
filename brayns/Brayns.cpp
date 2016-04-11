@@ -60,7 +60,8 @@ struct Brayns::Impl
         _renderer->setScene( _scene );
 
         _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8 ));
-        _camera.reset( new OSPRayCamera( CT_PERSPECTIVE ));
+        _camera.reset( new OSPRayCamera(
+            _parametersManager.getRenderingParameters().getCameraType( )));
         _renderer->setCamera( _camera );
         _setDefaultCamera( );
         _renderer->commit( );

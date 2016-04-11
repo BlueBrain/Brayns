@@ -33,6 +33,7 @@ const std::string PARAM_DETECTION_ON_DIFFERENT_MATERIAL =
 const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
 const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
 const std::string PARAM_EPSILON = "epsilon";
+const std::string PARAM_CAMERA_TYPE = "camera-type";
 
 }
 
@@ -59,7 +60,8 @@ RenderingParameters::RenderingParameters( )
     , _detectionOnDifferentMaterial( false )
     , _detectionNearColor( 1.f, 0.f, 0.f )
     , _detectionFarColor( 0.f, 1.f, 0.f )
-    , _epsilon(1.e-4f)
+    , _epsilon( 1.e-4f )
+    , _cameraType( CT_PERSPECTIVE )
 {
     _parameters.add_options()
         (PARAM_MODULE.c_str(), po::value< std::string >( ),
@@ -96,7 +98,10 @@ RenderingParameters::RenderingParameters( )
             po::value< floats >( )->multitoken(), "Detection far color")
         (PARAM_EPSILON.c_str(),
             po::value< float >( ), "All intersection distances less than the "
-            "epsilon value are ignored by the raytracer");
+            "epsilon value are ignored by the raytracer")
+        (PARAM_CAMERA_TYPE.c_str(),
+            po::value< size_t >( ), "Camera type (0: perspective, "
+            "1: perspective stereo, 2: orthographic, 3: panoramic)");
 }
 
 bool RenderingParameters::parse( int argc, const char **argv )
@@ -151,6 +156,9 @@ bool RenderingParameters::parse( int argc, const char **argv )
     }
     if( _vm.count( PARAM_EPSILON ))
         _epsilon = _vm[PARAM_EPSILON].as< float >( );
+    if( _vm.count( PARAM_CAMERA_TYPE ))
+        _cameraType = static_cast< CameraType > (
+            _vm[PARAM_CAMERA_TYPE].as< size_t >( ));
     return true;
 }
 
@@ -188,6 +196,8 @@ void RenderingParameters::print( )
        _detectionFarColor << std::endl;
     BRAYNS_INFO << "Epsilon                           : " <<
        _epsilon << std::endl;
+    BRAYNS_INFO << "Camera type                       : " <<
+       static_cast< size_t > (_cameraType) << std::endl;
 }
 
 }

@@ -17,14 +17,6 @@
 namespace brayns
 {
 
-enum CameraType
-{
-    CT_UNDEFINED = 0,
-    CT_PERSPECTIVE,
-    CT_STEREO,
-    CT_ORTHOGRAPHIC
-};
-
 /**
    Camera object
 
@@ -109,7 +101,37 @@ public:
        Set the aspec ratio of the camera
        @param aspectRatio The new aspect ratio
     */
-    BRAYNS_API virtual void setAspectRatio( float aspectRatio ) = 0;
+    BRAYNS_API void setAspectRatio( float aspectRatio );
+
+    /** @copydoc Camera::setAspectRatio */
+    BRAYNS_API float getAspectRatio( ) const;
+
+    /**
+       The aperture determines how collimated the admitted rays are, which is of
+       great importance for the appearance at the image plane. If an aperture is
+       narrow, then highly collimated rays are admitted, resulting in a sharp
+       focus at the image plane. If an aperture is wide, then uncollimated rays
+       are admitted, resulting in a sharp focus only for rays with a certain
+       focal length.
+       @param aperture
+    */
+    BRAYNS_API void setAperture( float aperture );
+
+    /** @copydoc Camera::setAperture */
+    BRAYNS_API float getAperture( ) const;
+
+    /**
+      The focal length of an optical system is a measure of how strongly the
+      system converges or diverges light. For an optical system in air, it is
+      the distance over which initially collimated rays are brought to a focus.
+      A system with a shorter focal length has greater optical power than one
+      with a long focal length; that is, it bends the rays more sharply,
+      bringing them to a focus in a shorter distance.
+    */
+    BRAYNS_API void setFocalLength( float FocalLength );
+
+    /** @copydoc Camera::getFocalLength */
+    BRAYNS_API float getFocalLength( ) const;
 
     /**
        Returns the serializable of the Camera

@@ -17,10 +17,16 @@ OSPRayCamera::OSPRayCamera( const CameraType cameraType )
    : Camera( cameraType )
 {
     std::string cameraAsString;
-    switch( getType() )
+    switch( getType( ))
     {
     case CT_STEREO:
         cameraAsString = "stereo";
+        break;
+    case CT_ORTHOGRAPHIC:
+        cameraAsString = "orthographic";
+        break;
+    case CT_PANORAMIC:
+        cameraAsString = "panoramic";
         break;
     default:
         cameraAsString = "perspective";
@@ -39,12 +45,10 @@ void OSPRayCamera::commit()
     ospSet3f( _camera,"pos", position.x(), position.y(), position.z( ));
     ospSet3f( _camera,"dir", dir.x(), dir.y(), dir.z( ));
     ospSet3f( _camera,"up", upVector.x(), upVector.y(), upVector.z( ));
+    ospSetf( _camera, "aspect", getAspectRatio( ));
+    ospSetf( _camera, "apertureRadius", getAperture( ));
+    ospSetf( _camera, "focusDistance", getFocalLength( ));
     ospCommit( _camera );
-}
-
-void OSPRayCamera::setAspectRatio( float aspectRatio )
-{
-    ospSetf( _camera, "aspect", aspectRatio );
 }
 
 }

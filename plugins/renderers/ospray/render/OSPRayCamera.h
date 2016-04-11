@@ -30,9 +30,6 @@ public:
     */
     void commit() final;
 
-    /** @copydoc Camera::setAspectRatio */
-    void setAspectRatio( float aspectRatio ) final;
-
     /**
        Gets the OSPRay implementation of the camera object
        @return OSPRay implementation of the camera object

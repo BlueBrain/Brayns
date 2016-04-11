@@ -203,6 +203,16 @@ enum MorphologyLayoutType
     ML_GRID,
 };
 
+enum CameraType
+{
+    CT_UNDEFINED = 0,
+    CT_PERSPECTIVE,
+    CT_STEREO,
+    CT_ORTHOGRAPHIC,
+    CT_PANORAMIC
+};
+
+
 }
 
 #endif // TYPES_H

@@ -27,6 +27,8 @@ public:
         , _up( 0.f, 1.f, 0.f )
         , _cameraType( cameraType )
         , _aspectRatio( 1.f )
+        , _aperture( 0.f )
+        , _focalLength( 0.f )
     {
     }
 
@@ -102,12 +104,44 @@ public:
         return _cameraType;
     }
 
+    void setAspectRatio( const float aspectRatio )
+    {
+        _aspectRatio = aspectRatio;
+    }
+
+    float getAspectRatio( ) const
+    {
+        return _aspectRatio;
+    }
+
+    void setAperture( const float aperture )
+    {
+        _aperture = aperture;
+    }
+
+    float getAperture( ) const
+    {
+        return _aperture;
+    }
+
+    void setFocalLength( const float focalLength )
+    {
+        _focalLength = focalLength;
+    }
+
+    float getFocalLength( ) const
+    {
+        return _focalLength;
+    }
+
 private:
     Vector3f _position;
     Vector3f _target;
     Vector3f _up;
     CameraType _cameraType;
     float _aspectRatio;
+    float _aperture;
+    float _focalLength;
 };
 
 Camera::Camera( const CameraType cameraType )
@@ -160,6 +194,36 @@ void Camera::setUpVector( const Vector3f& upVector )
 CameraType Camera::getType( ) const
 {
     return _impl->getType( );
+}
+
+void Camera::setAspectRatio( const float aspectRatio )
+{
+    _impl->setAspectRatio( aspectRatio );
+}
+
+float Camera::getAspectRatio( ) const
+{
+    return _impl->getAspectRatio( );
+}
+
+void Camera::setAperture( const float aperture )
+{
+    _impl->setAperture( aperture );
+}
+
+float Camera::getAperture( ) const
+{
+    return _impl->getAperture( );
+}
+
+void Camera::setFocalLength( const float focalLength )
+{
+    _impl->setFocalLength( focalLength );
+}
+
+float Camera::getFocalLength( ) const
+{
+    return _impl->getFocalLength( );
 }
 
 servus::Serializable* Camera::getSerializable( )

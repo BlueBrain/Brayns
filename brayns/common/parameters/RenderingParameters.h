@@ -171,6 +171,19 @@ public:
         _epsilon = epsilon;
     }
 
+    /**
+       Camera type
+    */
+    CameraType getCameraType() const
+    {
+        return _cameraType;
+    }
+
+    void setEpsilon( const CameraType cameraType )
+    {
+        _cameraType = cameraType;
+    }
+
 protected:
     std::string _module;
     std::string _renderer;
@@ -190,6 +203,7 @@ protected:
     Vector3f _detectionNearColor;
     Vector3f _detectionFarColor;
     float _epsilon;
+    CameraType _cameraType;
 };
 
 }
