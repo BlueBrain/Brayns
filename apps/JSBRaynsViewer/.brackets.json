@@ -1,0 +1,6 @@
+{
+    "jscodehints.detectedExclusions": [
+        "/home/favreau/git/BRayns/apps/JSViewer/app/scripts/main.js",
+        "/home/favreau/git/BRayns/apps/JSViewer/Gruntfile.js"
+    ]
+}

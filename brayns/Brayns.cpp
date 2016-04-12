@@ -32,18 +32,26 @@ struct Brayns::Impl
     {
         ospInit( &argc, argv );
 
-        _parametersManager.parse( argc, argv );
-        _parametersManager.print( );
+        _parametersManager.reset( new ParametersManager( ));
+        _parametersManager->parse( argc, argv );
+        _parametersManager->print( );
 
         _frameSize =
-            _parametersManager.getApplicationParameters( ).getWindowSize( );
+            _parametersManager->getApplicationParameters( ).getWindowSize( );
 
         // Should be implemented with a plugin factory
-        _renderer.reset(
-            new OSPRayRenderer( _parametersManager.getRenderingParameters( )));
+        _activeRenderer =
+            _parametersManager->getRenderingParameters().getRenderer();
 
-        _scene.reset( new OSPRayScene( _renderer,
-            _parametersManager.getGeometryParameters( )));
+        const strings& renderers =
+            _parametersManager->getRenderingParameters().getRenderers();
+
+        for( std::string renderer: renderers )
+            _renderers[renderer].reset(
+                new OSPRayRenderer( renderer, *_parametersManager ));
+
+        _scene.reset( new OSPRayScene( _renderers,
+            _parametersManager->getGeometryParameters( )));
 
         _scene->setMaterials( MT_DEFAULT, DEFAULT_NB_MATERIALS );
 
@@ -57,14 +65,17 @@ struct Brayns::Impl
         _scene->buildGeometry( );
         _scene->commit( );
 
-        _renderer->setScene( _scene );
-
         _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8 ));
         _camera.reset( new OSPRayCamera(
-            _parametersManager.getRenderingParameters().getCameraType( )));
-        _renderer->setCamera( _camera );
+            _parametersManager->getRenderingParameters().getCameraType( )));
         _setDefaultCamera( );
-        _renderer->commit( );
+
+        for( std::string renderer: renderers )
+        {
+            _renderers[renderer]->setScene( _scene );
+            _renderers[renderer]->setCamera( _camera );
+            _renderers[renderer]->commit( );
+        }
     }
 
     ~Impl( )
@@ -115,13 +126,14 @@ struct Brayns::Impl
 
     void _intializeExtensionPluginFactory( )
     {
+        _extensionParameters.parametersManager = _parametersManager;
         _extensionParameters.scene = _scene;
-        _extensionParameters.renderer = _renderer;
+        _extensionParameters.renderer = _renderers[_activeRenderer];
         _extensionParameters.camera = _camera;
         _extensionParameters.frameBuffer = _frameBuffer;
 
         _extensionPluginFactory.reset( new ExtensionPluginFactory(
-            _parametersManager.getApplicationParameters( ),
+            _parametersManager->getApplicationParameters( ),
             _extensionParameters ));
     }
 
@@ -148,13 +160,13 @@ struct Brayns::Impl
     void commit( )
     {
         _frameBuffer->clear( );
-        _renderer->commit( );
+        _renderers[_activeRenderer]->commit( );
         _camera->commit( );
     }
 
     ParametersManager& getParametersManager( )
     {
-        return _parametersManager;
+        return *_parametersManager;
     }
 
     Scene& getScene( )
@@ -175,7 +187,14 @@ struct Brayns::Impl
 private:
     void _render( )
     {
-        _renderer->render( _frameBuffer );
+        const std::string& renderer =
+            _parametersManager->getRenderingParameters().getRenderer();
+        if( _activeRenderer != renderer )
+        {
+            _activeRenderer = renderer;
+            _extensionParameters.renderer = _renderers[_activeRenderer];
+        }
+        _renderers[_activeRenderer]->render( _frameBuffer );
     }
 
     void _setDefaultCamera()
@@ -194,15 +213,15 @@ private:
             static_cast< float >( _frameSize.y()));
     }
 
-    ParametersManager _parametersManager;
+    ParametersManagerPtr _parametersManager;
 
     ScenePtr _scene;
     CameraPtr _camera;
-    RendererPtr _renderer;
+    std::string _activeRenderer;
+    RendererMap _renderers;
     FrameBufferPtr _frameBuffer;
 
     Vector2i _frameSize;
-    float _timestamp;
 
     bool _rendering;
     bool _sceneModified;

@@ -15,6 +15,7 @@
 #include <turbojpeg.h>
 #include <zerobuf/render/imageJPEG.h>
 #include <zerobuf/render/frameBuffers.h>
+#include <zerobuf/render/attribute.h>
 
 namespace brayns
 {
@@ -41,6 +42,8 @@ private:
 
     void _cameraUpdated( );
 
+    void _attributeUpdated( );
+
     bool _requestImageJPEG( );
 
     bool _requestFrameBuffers( );
@@ -63,7 +66,7 @@ private:
 
     ::zerobuf::render::ImageJPEG _remoteImageJPEG;
     ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
-
+    ::zerobuf::render::Attribute _remoteAttribute;
 };
 
 }

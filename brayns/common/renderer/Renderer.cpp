@@ -12,8 +12,8 @@
 namespace brayns
 {
 
-Renderer::Renderer( RenderingParameters& renderingParameters )
-    : _renderingParameters( renderingParameters )
+Renderer::Renderer( ParametersManager& parametersManager )
+    : _parametersManager( parametersManager )
 {
 }
 

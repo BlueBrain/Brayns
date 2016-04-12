@@ -10,6 +10,8 @@
 
 #include <brayns/common/mathTypes.h>
 
+#include <boost/program_options.hpp>
+
 #include <memory>
 #include <map>
 #include <vector>
@@ -40,6 +42,7 @@ typedef std::shared_ptr< Camera > CameraPtr;
 
 class Renderer;
 typedef std::shared_ptr< Renderer > RendererPtr;
+typedef std::map< std::string, RendererPtr > RendererMap;
 
 class FrameBuffer;
 typedef std::shared_ptr< FrameBuffer > FrameBufferPtr;
@@ -109,12 +112,14 @@ typedef std::vector< unsigned int > uints;
 typedef std::vector< uint8_t > uint8_ts;
 typedef std::vector< size_t > size_ts;
 
-class ParametersManager;
 class AbstractParameters;
 class ApplicationParameters;
 class GeometryParameters;
 class RenderingParameters;
 class SceneParameters;
+
+class ParametersManager;
+typedef std::shared_ptr< ParametersManager > ParametersManagerPtr;
 
 class ExtensionPlugin;
 typedef std::shared_ptr< ExtensionPlugin > ExtensionPluginPtr;
@@ -182,6 +187,7 @@ enum MorphologySectionType
 /** Extension parameters */
 struct ExtensionParameters
 {
+    ParametersManagerPtr parametersManager;
     ScenePtr scene;
     RendererPtr renderer;
     CameraPtr camera;

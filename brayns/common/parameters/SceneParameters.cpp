@@ -26,12 +26,17 @@ SceneParameters::SceneParameters()
         (PARAM_TIMESTAMP.c_str(), po::value< float >( ), "Timestamp");
 }
 
-bool SceneParameters::parse( int argc, const char **argv )
+po::variables_map SceneParameters::parse( int argc, const char **argv )
 {
-    AbstractParameters::parse( argc, argv );
+    po::variables_map vm = AbstractParameters::parse( argc, argv );
+    _parse( vm );
+    return vm;
+}
 
-    if( _vm.count( PARAM_TIMESTAMP ))
-        _timestamp = _vm[PARAM_TIMESTAMP].as< float >( );
+bool SceneParameters::_parse( const boost::program_options::variables_map& vm )
+{
+    if( vm.count( PARAM_TIMESTAMP ))
+        _timestamp = vm[PARAM_TIMESTAMP].as< float >( );
 
     return true;
 }

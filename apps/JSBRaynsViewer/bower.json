@@ -1,0 +1,7 @@
+{
+    "name": "braynsViewer",
+    "version": "0.1.0",
+    "dependencies": {
+        "threejs": "r75"
+    }
+}

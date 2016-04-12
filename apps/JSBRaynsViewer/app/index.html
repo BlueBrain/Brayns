@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Visualisation UI</title>
+
+    <!-- build:css(app) css/main.css -->
+    <link rel="stylesheet" href="css/main.css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="css/visualisation.css" rel="stylesheet"/>
+    <link href="css/bootstrap-slider.css" rel="stylesheet"/>
+    <link href="css/bootstrap-switch.css" rel="stylesheet"/>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet' type='text/css'/>
+    <!-- endbuild -->
+</head>
+
+<body>
+    <div class="viewport">
+        <span class="helper"></span><img class="image-streamer" id="rendering" src="./images/hippocampus_light.png" height="720">
+    </div>
+
+    <div class="ui-container">
+        <div class="left-panel panel">
+            <h4 class="window-title">Blue Brain Project</h4>
+            <p class="vis-description">Hippocampus region, rattus norvegicus.</p>
+            <hr/>
+            <h4>Visualisation presets</h4>
+            <div class="btn-group-vertical" data-toggle="buttons" id="presets">
+                <label class="btn btn-default active">
+                    <input type="radio" name="options" id="presetsgrow" checked> Growing neurons
+                </label>
+                <label class="btn btn-default">
+                    <input type="radio" name="options" id="presetstouch"> Proximity detection
+                </label>
+                <label class="btn btn-default" disabled>
+                    <input type="radio" name="options" id="presetssimulation"> Neuronal activity
+                </label>
+            </div>
+            <hr/>
+            <button class="btn btn-default" type="button" disabled>Reload circuit</button>
+        </div>
+
+        <div class="right-panel panel">
+
+            <h4 class="category">Environment</h4>
+            <div class="row">
+                <div class="col-md-6 setting">Ambient occlusion
+                    <input type="checkbox" value="" name="ambientocclusion" id="ambientocclusion">
+                </div>
+                <div class="col-md-6 setting">Shadows
+                    <input type="checkbox" value="" name="shadows" id="shadows">
+                </div>
+                <div class="col-md-6 setting">Directional light
+                    <input type="checkbox" value="" name="shading" id="shading" checked>
+                </div>
+            </div>
+
+            <h4 class="category">Appearance</h4>
+            <div class="row">
+                <div class="col-md-6 setting">"Electron" shading
+                    <input type="checkbox" value="" name="electron-shading" id="electronshading">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="bottom-ui-container">
+        <div class="bottom-ui">
+            <div class="col-xs-12 col-sm-12 bottom-panel">
+                <a class="btn btn-default" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">  Animation settings</a>
+                <div class="collapse" id="collapseExample">
+                    <h4>Timeline</h4>
+                    <input id="timer" data-slider-id='timerSlider' type="text" data-slider-min="0" data-slider-max="1000" data-slider-step="1" data-slider-value="0"/>
+                    <span id="currentSliderLabel"> 
+                        <span id="timerSliderVal">0</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- build:js({.,app}) scripts/framevendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/threejs/build/three.js"></script>
+    <script src="scripts/vendors/jquery-1.12.2.min.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js(app) scripts/app.js -->
+    <script src="scripts/vendors/bootstrap.min.js"></script>
+    <script src="scripts/vendors/bootstrap-slider.js"></script>
+    <script src="scripts/vendors/bootstrap-switch.js"></script>
+    <script src="scripts/vendors/visualisation.js"></script>
+    <script src="scripts/vendors/OrbitControls.js"></script>
+    <script src="scripts/jbrayns.js"></script>
+    <!-- endbuild -->
+</body>
+
+</html>

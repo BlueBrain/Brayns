@@ -27,6 +27,9 @@ BraynsViewer::BraynsViewer(BraynsPtr brayns, int argc, const char **argv)
 
 void BraynsViewer::keypress(char key, const Vector2f& where)
 {
+    SceneParameters& sceneParams =
+        _brayns->getParametersManager().getSceneParameters();
+
     switch (key)
     {
     case '4':
@@ -51,16 +54,16 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
             _timestampIncrement << std::endl;
         break;
     case ']':
-        _brayns->getScene( ).setTimestamp(
-            _brayns->getScene( ).getTimestamp( ) + _timestampIncrement);
+        sceneParams.setTimestamp(
+            sceneParams.getTimestamp( ) + _timestampIncrement);
         BRAYNS_INFO << "Timestamp: " <<
-            _brayns->getScene( ).getTimestamp( ) << std::endl;
+            sceneParams.getTimestamp( ) << std::endl;
         break;
     case '[':
-        _brayns->getScene( ).setTimestamp(
-            _brayns->getScene( ).getTimestamp( ) - _timestampIncrement);
+        sceneParams.setTimestamp(
+            sceneParams.getTimestamp( ) - _timestampIncrement);
         BRAYNS_INFO << "Timestamp: " <<
-            _brayns->getScene( ).getTimestamp( ) << std::endl;
+            sceneParams.getTimestamp( ) << std::endl;
         break;
     case '*':
         _brayns->getParametersManager( ).printHelp( );
@@ -75,8 +78,10 @@ void BraynsViewer::display( )
 {
     if( _timestampIncrement != 0.f )
     {
-        _brayns->getScene( ).setTimestamp(
-            _brayns->getScene( ).getTimestamp( ) + _timestampIncrement );
+        SceneParameters& sceneParams =
+            _brayns->getParametersManager().getSceneParameters();
+        sceneParams.setTimestamp(
+            sceneParams.getTimestamp( ) + _timestampIncrement );
         _brayns->commit( );
     }
 

@@ -59,31 +59,36 @@ ApplicationParameters::ApplicationParameters( )
             "JPeg compression rate (100 = full quality)" );
 }
 
-bool ApplicationParameters::parse( int argc, const char **argv )
+po::variables_map ApplicationParameters::parse( int argc, const char **argv )
 {
-    AbstractParameters::parse( argc, argv );
+    po::variables_map vm = AbstractParameters::parse( argc, argv );
+    _parse( vm );
+    return vm;
+}
 
-    if( _vm.count( PARAM_HELP ))
+bool ApplicationParameters::_parse( const boost::program_options::variables_map& vm )
+{
+    if( vm.count( PARAM_HELP ))
         return false;
-    if( _vm.count( PARAM_WINDOW_SIZE ))
+    if( vm.count( PARAM_WINDOW_SIZE ))
     {
-        uints values = _vm[PARAM_WINDOW_SIZE].as< uints >( );
+        uints values = vm[PARAM_WINDOW_SIZE].as< uints >( );
         if( values.size() == 2 )
         {
             _windowSize.x( ) = values[0];
             _windowSize.y( ) = values[1];
         }
     }
-    if( _vm.count( PARAM_CAMERA ))
-        _camera = _vm[PARAM_CAMERA].as< std::string >( );
-    if( _vm.count( PARAM_DEFLECT_HOST_NAME ))
-        _deflectHostname = _vm[PARAM_DEFLECT_HOST_NAME].as< std::string >( );
-    if( _vm.count( PARAM_DEFLECT_STREAM_NAME ))
-        _deflectStreamname = _vm[PARAM_DEFLECT_STREAM_NAME].as< std::string >( );
-    if( _vm.count( PARAM_BENCHMARKING ))
-        _benchmarking = _vm[PARAM_BENCHMARKING].as< bool >( );
-    if( _vm.count( PARAM_JPEG_COMPRESSION ))
-        _jpegCompression = _vm[PARAM_JPEG_COMPRESSION].as< size_t >( );
+    if( vm.count( PARAM_CAMERA ))
+        _camera = vm[PARAM_CAMERA].as< std::string >( );
+    if( vm.count( PARAM_DEFLECT_HOST_NAME ))
+        _deflectHostname = vm[PARAM_DEFLECT_HOST_NAME].as< std::string >( );
+    if( vm.count( PARAM_DEFLECT_STREAM_NAME ))
+        _deflectStreamname = vm[PARAM_DEFLECT_STREAM_NAME].as< std::string >( );
+    if( vm.count( PARAM_BENCHMARKING ))
+        _benchmarking = vm[PARAM_BENCHMARKING].as< bool >( );
+    if( vm.count( PARAM_JPEG_COMPRESSION ))
+        _jpegCompression = vm[PARAM_JPEG_COMPRESSION].as< size_t >( );
 
     return true;
 }

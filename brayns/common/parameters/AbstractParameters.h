@@ -11,7 +11,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 
-#include <boost/program_options.hpp>
+namespace po = boost::program_options;
 
 namespace brayns
 {
@@ -34,10 +34,9 @@ public:
        Parses parameters managed by the class
        @param argc number of command line parameters
        @param argv actual command line parameters
-       @return false if the parsing requires application termination. This can
-               help stopping the application if a mandatory parameter is missing
+       @return a map of the variables identified by the parsing
      */
-    virtual bool parse( int argc, const char **argv );
+    virtual po::variables_map  parse( int argc, const char **argv );
 
     /**
        Displays the usage of registered parameters
@@ -49,12 +48,22 @@ public:
      */
     virtual void print( );
 
+    /**
+       Sets a parameter. If the parameter is not registered, Action is ignored
+       and a warning message is traced
+       @param key Name of the parameter
+       @param value Value of the parameter
+     */
+    void set( const std::string& key, const std::string& value );
+
     const strings& arguments() const;
 
 protected:
+
+    virtual bool _parse( const po::variables_map& ) = 0;
+
     std::string _name;
-    boost::program_options::options_description _parameters;
-    boost::program_options::variables_map _vm;
+    po::options_description _parameters;
     strings _arguments;
 };
 

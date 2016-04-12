@@ -26,13 +26,17 @@ brayns::ProximityRenderer proximityRenderer;
 namespace brayns
 {
 
-OSPRayRenderer::OSPRayRenderer( RenderingParameters& renderingParameters )
-    : Renderer( renderingParameters )
+OSPRayRenderer::OSPRayRenderer(
+    const std::string& name,
+    ParametersManager& parametersManager )
+    : Renderer( parametersManager )
+    , _camera( 0 )
 {
-    if( _renderingParameters.getModule( ) != "" )
-        ospLoadModule( _renderingParameters.getModule( ).c_str( ));
+    RenderingParameters& rp = _parametersManager.getRenderingParameters();
+    if( rp.getModule( ) != "" )
+        ospLoadModule( rp.getModule( ).c_str( ));
 
-    _renderer = ospNewRenderer( _renderingParameters.getRenderer( ).c_str( ));
+    _renderer = ospNewRenderer( name.c_str( ));
     assert( _renderer );
 }
 
@@ -47,32 +51,35 @@ void OSPRayRenderer::render( FrameBufferPtr frameBuffer )
 
 void OSPRayRenderer::commit( )
 {
-    Vector3f color = _renderingParameters.getBackgroundColor( );
+    RenderingParameters& rp = _parametersManager.getRenderingParameters();
+    SceneParameters& sp = _parametersManager.getSceneParameters();
+
+    Vector3f color = rp.getBackgroundColor( );
     ospSet3f( _renderer, "bgColor", color.x( ), color.y( ), color.z( ));
-    ospSet1i( _renderer, "shadowsEnabled", _renderingParameters.getShadows( ));
+    ospSet1i( _renderer, "shadowsEnabled", rp.getShadows( ));
     ospSet1i( _renderer, "softShadowsEnabled",
-        _renderingParameters.getSoftShadows( ));
+        rp.getSoftShadows( ));
     ospSet1f( _renderer, "ambientOcclusionStrength",
-        _renderingParameters.getAmbientOcclusionStrength( ));
+        rp.getAmbientOcclusionStrength( ));
     ospSet1i( _renderer, "shadingEnabled",
-        _renderingParameters.getLightShading( ));
-    ospSet1f( _renderer, "timestamp", _scene->getTimestamp( ));
+        rp.getLightShading( ));
+    ospSet1f( _renderer, "timestamp", sp.getTimestamp( ));
     ospSet1i( _renderer, "randomNumber", rand() % 1000 );
-    ospSet1i( _renderer, "spp", _renderingParameters.getSamplesPerPixel( ));
+    ospSet1i( _renderer, "spp", rp.getSamplesPerPixel( ));
     ospSet1i( _renderer, "electronShading",
-        _renderingParameters.getElectronShading( ));
+        rp.getElectronShading( ));
     ospSet1i( _renderer, "gradientBackgroundEnabled",
-        _renderingParameters.getGradientBackground( ));
-    ospSet1f( _renderer, "epsilon", _renderingParameters.getEpsilon( ));
+        rp.getGradientBackground( ));
+    ospSet1f( _renderer, "epsilon", rp.getEpsilon( ));
     ospSet1i( _renderer, "moving", false );
     ospSet1f( _renderer, "detectionDistance",
-        _renderingParameters.getDetectionDistance( ));
+        rp.getDetectionDistance( ));
     ospSet1i( _renderer, "detectionOnDifferentMaterial",
-        _renderingParameters.getDetectionOnDifferentMaterial( ));
-    color = _renderingParameters.getDetectionNearColor( );
+        rp.getDetectionOnDifferentMaterial( ));
+    color = rp.getDetectionNearColor( );
     ospSet3f( _renderer, "detectionNearColor",
         color.x( ), color.y( ), color.z( ));
-    color = _renderingParameters.getDetectionFarColor( );
+    color = rp.getDetectionFarColor( );
     ospSet3f( _renderer, "detectionFarColor",
         color.x( ), color.y( ), color.z( ));
 
@@ -85,9 +92,9 @@ void OSPRayRenderer::commit( )
 
 void OSPRayRenderer::setCamera( CameraPtr camera )
 {
-    OSPRayCamera* osprayCamera = static_cast<OSPRayCamera*>( camera.get( ));
-    assert( osprayCamera );
-    ospSetObject( _renderer, "camera", osprayCamera->ospImpl( ));
+    _camera = static_cast<OSPRayCamera*>( camera.get( ));
+    assert( _camera );
+    ospSetObject( _renderer, "camera", _camera->ospImpl( ));
 }
 
 }

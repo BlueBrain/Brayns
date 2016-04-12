@@ -24,10 +24,9 @@
 namespace brayns
 {
 
-Scene::Scene( RendererPtr renderer, GeometryParameters& geometryParameters )
+Scene::Scene( RendererMap renderers, GeometryParameters& geometryParameters )
     : _geometryParameters( geometryParameters )
-    , _renderer( renderer )
-    , _timestamp( std::numeric_limits< float >::max( ))
+    , _renderers( renderers )
 {
 }
 

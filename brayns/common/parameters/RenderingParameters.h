@@ -26,7 +26,7 @@ public:
     RenderingParameters( );
 
     /** @copydoc AbstractParameters::parse */
-    bool parse( int argc, const char **argv) final;
+    po::variables_map  parse( int argc, const char **argv ) final;
 
     /** @copydoc AbstractParameters::print */
     void print( ) final;
@@ -36,6 +36,9 @@ public:
 
     /** OSPRay renderer */
     const std::string& getRenderer( ) const { return _renderer; }
+
+    /** OSPRay supported renderers */
+    const strings& getRenderers( ) const { return _renderers; }
 
     /** Shadows */
     bool getShadows( ) const { return _shadows; }
@@ -185,8 +188,12 @@ public:
     }
 
 protected:
+
+    bool _parse( const boost::program_options::variables_map& vm ) final;
+
     std::string _module;
     std::string _renderer;
+    strings _renderers;
     float _ambientOcclusionStrength;
     bool _dof;
     float _dofStrength;
