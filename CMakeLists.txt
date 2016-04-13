@@ -4,17 +4,14 @@
 #
 # This file is part of BRayns
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
-project(BRayns)
+project(BRayns VERSION 0.1.0)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
   ${CMAKE_SOURCE_DIR}/CMake/common)
 include(GitExternal)
 
-set(VERSION_MAJOR "0")
-set(VERSION_MINOR "1")
-set(VERSION_PATCH "0")
-set(VERSION_ABI 1)
+set(BRayns_VERSION_ABI 1)
 
 set(BRAYNS_DESCRIPTION "Ray-tracing engine")
 
@@ -25,7 +22,7 @@ include(Common)
 # - building on Ubuntu Jenkins VM
 if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
         (TRAVIS AND LSB_DISTRIBUTOR_ID MATCHES "Ubuntu"))
-  common_package(OSPRay)
+  common_find_package(OSPRay)
   if(NOT OSPRAY_FOUND)
       message(WARNING "[BRayns] OSPRay not found, the project will not be built")
     include(CommonPackageConfig)
@@ -34,48 +31,46 @@ if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
 endif()
 
 if(APPLE)
-  cmake_policy(SET CMP0042 NEW)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Deployment target for OSX" FORCE)
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-  set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OSX Architectures" FORCE)
 endif()
 
-common_package(Boost REQUIRED COMPONENTS program_options)
-common_package(OSPRay REQUIRED SYSTEM)
-common_package(GLUT REQUIRED SYSTEM)
-common_package(OpenGL REQUIRED)
-common_package(vmmlib REQUIRED)
+common_find_package(Boost REQUIRED COMPONENTS program_options)
+common_find_package(OSPRay REQUIRED SYSTEM)
+common_find_package(GLUT REQUIRED SYSTEM)
+common_find_package(OpenGL REQUIRED)
+common_find_package(vmmlib REQUIRED)
 
 option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)
 if(BRAYNS_IMAGEMAGICK_ENABLED)
-  common_package(Magick++)
+  common_find_package(Magick++)
 endif()
 
 option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ON)
 if(BRAYNS_ASSIMP_ENABLED)
-  common_package(assimp)
+  common_find_package(assimp)
 endif()
 
 option(BRAYNS_BRION_ENABLED "Activate Brion" ON)
 if(BRAYNS_BRION_ENABLED)
-  common_package(Brion)
+  common_find_package(Brion)
 endif()
 
 option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
 if(BRAYNS_DEFLECT_ENABLED)
-  common_package(Deflect)
+  common_find_package(Deflect)
 endif()
 
 option(BRAYNS_REST_ENABLED "Activate REST" ON)
 if(BRAYNS_REST_ENABLED)
-  common_package(Servus REQUIRED)
-  common_package(FlatBuffers REQUIRED)
-  common_package(ZeroBuf REQUIRED)
-  common_package(LibJpegTurbo REQUIRED)
-  common_package(ZeroEQ REQUIRED)
+  common_find_package(Servus REQUIRED)
+  common_find_package(FlatBuffers REQUIRED)
+  common_find_package(ZeroBuf REQUIRED)
+  common_find_package(LibJpegTurbo REQUIRED)
+  common_find_package(ZeroEQ REQUIRED)
 endif()
 
-common_package_post()
+common_find_package_post()
 
 # ------------------------------------------------------------------------------
 # OSPRAY specific settings

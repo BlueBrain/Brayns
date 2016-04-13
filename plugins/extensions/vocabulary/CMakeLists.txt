@@ -15,7 +15,7 @@ set(BRAYNSZEROBUFRENDER_NAMESPACE zerobufrender)
 include(zerobufGenerateCxx)
 zerobuf_generate_cxx(
   BRAYNSZEROBUFRENDER
-  ${OUTPUT_INCLUDE_DIR}/${BRAYNSZEROBUFRENDER_INCLUDE_NAME}
+  ${PROJECT_BINARY_DIR}/include/${BRAYNSZEROBUFRENDER_INCLUDE_NAME}
   attribute.fbs
   frameBuffers.fbs
 )
