@@ -33,7 +33,7 @@ bool MorphologyLoader::importMorphology(
     Boxf& bounds)
 {
     return _importMorphology(
-        uri, morphologyIndex, Matrix4f::IDENTITY, primitives, bounds );
+        uri, morphologyIndex, Matrix4f(), primitives, bounds );
 }
 
 bool MorphologyLoader::_importMorphology(

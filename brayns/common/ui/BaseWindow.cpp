@@ -225,7 +225,7 @@ void BaseWindow::display( )
     glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
     glutSwapBuffers( );
 
-#if(BRAYNS_USE_ZEQ || BRAYNS_USE_DEFLECT)
+#if(BRAYNS_USE_ZEROEQ || BRAYNS_USE_DEFLECT)
     Camera& camera = _brayns->getCamera( );
     if( camera.getPosition( ) != _viewPort.getPosition( ))
         _viewPort.setPosition( camera.getPosition( ) );

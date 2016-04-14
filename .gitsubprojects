@@ -1,7 +1,7 @@
 # -*- mode: cmake -*-
-git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 9455489)
-git_subproject(Servus https://github.com/HBPVIS/Servus.git ea759d8)
-git_subproject(zeq https://github.com/HBPVIS/ZeroEQ.git c336d36)
-git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 5dfac70)
-git_subproject(Deflect https://github.com/BlueBrain/Deflect.git a3f1948)
-git_subproject(Brion https://github.com/BlueBrain/Brion.git 836bf7d)
+git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 0f8ac35)
+git_subproject(Servus https://github.com/HBPVIS/Servus.git c81b017)
+git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git a67bbfa)
+git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 934f68e)
+git_subproject(Deflect https://github.com/BlueBrain/Deflect.git e35b137)
+git_subproject(Brion https://github.com/BlueBrain/Brion.git 6b7c94e)

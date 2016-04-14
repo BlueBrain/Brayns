@@ -24,7 +24,6 @@ Viewport::Viewport()
     , _target( ZERO )
     , _openingAngle( 60.f*M_PI/360.f )
     , _aspect(1.f)
-    , _matrix( Matrix4f::IDENTITY )
 {
 }
 

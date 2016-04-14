@@ -36,11 +36,11 @@ if(DEFLECT_FOUND)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
 endif()
 
-if(TARGET ZeroBuf AND TARGET zeq)
+if(TARGET ZeroBuf AND TARGET ZeroEQ)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroBufPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/ZeroBufPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
-    PUBLIC zeq zeqHBP ZeroBuf ZeroBufRender BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
+    PUBLIC ZeroEQ ZeroEQHBP ZeroBuf ZeroBufRender BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
   add_subdirectory(extensions/vocabulary)
 endif()
 

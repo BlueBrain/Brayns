@@ -12,6 +12,7 @@
 #include <brayns/common/geometry/Sphere.h>
 
 #include <assert.h>
+#include <fstream>
 
 namespace brayns
 {

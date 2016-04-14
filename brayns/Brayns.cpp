@@ -180,14 +180,13 @@ private:
 
     void _setDefaultCamera()
     {
-        Boxf worldBounds = _scene->getWorldBounds( );
-        Vector3f target = worldBounds.getCenter( );
-        Vector3f diag   = worldBounds.getSize( );
-        diag = max(diag,Vector3f(0.3f*diag.length( )));
+        const Boxf worldBounds = _scene->getWorldBounds( );
+        const Vector3f target = worldBounds.getCenter( );
+        const Vector3f diag   = worldBounds.getSize( );
         Vector3f position = target;
         position.z( ) -= diag.z( );
 
-        Vector3f up  = Vector3f(0.f,1.f,0.f);
+        const Vector3f up  = Vector3f(0.f,1.f,0.f);
         _camera->set(position, target, up);
         _camera->setAspectRatio(
             static_cast< float >( _frameSize.x()) /

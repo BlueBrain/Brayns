@@ -11,7 +11,7 @@
 #include "ExtensionPlugin.h"
 
 #include <brayns/api.h>
-#include <zeq/zeq.h>
+#include <zeroeq/zeroeq.h>
 #include <turbojpeg.h>
 #include <zerobuf/render/imageJPEG.h>
 #include <zerobuf/render/frameBuffers.h>
@@ -20,7 +20,7 @@ namespace brayns
 {
 
 /**
-   The ZeroBufPlugin is in charge of exposing a both a http/REST and a Zeq
+   The ZeroBufPlugin is in charge of exposing a both a http/REST and a ZeroEQ
    interface to the outside world. The http server is configured according
    to the --http-server parameter provided by ApplicationParameters.
  */
@@ -45,7 +45,7 @@ private:
 
     bool _requestFrameBuffers( );
 
-    bool _onRequest( const ::zeq::Event& event );
+    bool _onRequest( const ::zeroeq::Event& event );
 
     uint8_t* _encodeJpeg(const uint32_t width,
                          const uint32_t height,
@@ -53,11 +53,11 @@ private:
                          unsigned long& dataSize);
 
     tjhandle _compressor;
-    ::zeq::Subscriber _subscriber;
-    ::zeq::Publisher _publisher;
-    std::unique_ptr< ::zeq::http::Server > _httpServer;
+    ::zeroeq::Subscriber _subscriber;
+    ::zeroeq::Publisher _publisher;
+    std::unique_ptr< ::zeroeq::http::Server > _httpServer;
     typedef std::function< bool() > RequestFunc;
-    typedef std::map< ::zeq::uint128_t, RequestFunc > RequestFuncs;
+    typedef std::map< ::zeroeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
     size_t _jpegCompression;
 

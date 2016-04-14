@@ -66,8 +66,8 @@ typedef std::vector<Vector4d> Vector4ds;
 /**
  * Quaternion definitions
  */
-typedef vmml::quaternion<float> Quaternionf; //!< Float quaternion.
-typedef vmml::quaternion<double> Quaterniond; //!< Double quaternion.
+typedef vmml::Quaternion<float> Quaternionf; //!< Float quaternion.
+typedef vmml::Quaternion<double> Quaterniond; //!< Double quaternion.
 
 }
 

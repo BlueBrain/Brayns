@@ -11,7 +11,7 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <zerobuf/render/camera.h>
 #include <zerobuf/render/frameBuffers.h>
-#include <zeq/hbp/vocabulary.h>
+#include <zeroeq/hbp/vocabulary.h>
 
 namespace brayns
 {
@@ -31,7 +31,7 @@ ZeroBufPlugin::~ZeroBufPlugin( )
 {
     if( _compressor )
         tjDestroy( _compressor );
-    _subscriber.deregisterHandler( ::zeq::vocabulary::EVENT_EXIT );
+    _subscriber.deregisterHandler( ::zeroeq::vocabulary::EVENT_EXIT );
 
     if( _httpServer )
     {
@@ -42,7 +42,7 @@ ZeroBufPlugin::~ZeroBufPlugin( )
 
 void ZeroBufPlugin::run()
 {
-    _publisher.publish( zeq::Event( zeq::vocabulary::EVENT_HEARTBEAT ));
+    _publisher.publish( zeroeq::Event( zeroeq::vocabulary::EVENT_HEARTBEAT ));
 
     while( _subscriber.receive( 0 )) {}
 }
@@ -54,7 +54,7 @@ void ZeroBufPlugin::_setupHTTPServer()
     for( size_t i = 0; i < arguments.size( ); ++i )
         argv[ i ] = const_cast< char* >( arguments[ i ].c_str( ));
 
-    _httpServer = ::zeq::http::Server::parse(
+    _httpServer = ::zeroeq::http::Server::parse(
         arguments.size(), const_cast< const char** >( argv ), _subscriber );
     delete [] argv;
 
@@ -159,9 +159,9 @@ bool ZeroBufPlugin::_requestFrameBuffers()
     return true;
 }
 
-bool ZeroBufPlugin::_onRequest( const ::zeq::Event& event )
+bool ZeroBufPlugin::_onRequest( const ::zeroeq::Event& event )
 {
-    const auto& eventType = ::zeq::vocabulary::deserializeRequest( event );
+    const auto& eventType = ::zeroeq::vocabulary::deserializeRequest( event );
     const auto& i = _requests.find( eventType );
     if( i == _requests.end( ))
         return false;
