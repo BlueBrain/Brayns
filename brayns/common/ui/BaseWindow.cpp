@@ -10,6 +10,7 @@
 #include <brayns/Brayns.h>
 #include <brayns/common/log.h>
 #include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/common/parameters/SceneParameters.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/renderer/FrameBuffer.h>
@@ -312,6 +313,8 @@ void BaseWindow::keypress( char key, const Vector2f& )
 {
     RenderingParameters& renderParams =
         _brayns->getParametersManager( ).getRenderingParameters( );
+    SceneParameters& sceneParams =
+        _brayns->getParametersManager().getSceneParameters();
 
     switch( key )
     {
@@ -411,14 +414,14 @@ void BaseWindow::keypress( char key, const Vector2f& )
             (renderParams.getLightShading( ) ? "On" : "Off") << std::endl;
         break;
     case 'r':
-        _brayns->getScene().setTimestamp( 0.f );
+        sceneParams.setTimestamp( 0.f );
         BRAYNS_INFO << "Timestamp: " <<
-            _brayns->getScene().getTimestamp( ) << std::endl;
+            sceneParams.getTimestamp( ) << std::endl;
         break;
     case 'R':
-        _brayns->getScene().setTimestamp( std::numeric_limits< float >::max( ));
+        sceneParams.setTimestamp( std::numeric_limits< float >::max( ));
         BRAYNS_INFO << "Timestamp: " <<
-            _brayns->getScene().getTimestamp( ) << std::endl;
+            sceneParams.getTimestamp( ) << std::endl;
         break;
     case 'S':
         renderParams.setShadows(

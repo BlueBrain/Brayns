@@ -9,7 +9,7 @@
 #define RENDERER_H
 
 #include <brayns/api.h>
-#include <brayns/common/parameters/RenderingParameters.h>
+#include <brayns/common/parameters/ParametersManager.h>
 
 namespace brayns
 {
@@ -17,7 +17,7 @@ namespace brayns
 class Renderer
 {
 public:
-    BRAYNS_API Renderer( RenderingParameters& renderingParameters );
+    BRAYNS_API Renderer( ParametersManager& parametersManager );
     BRAYNS_API virtual ~Renderer( ) {}
 
     BRAYNS_API virtual void render( FrameBufferPtr frameBuffer ) = 0;
@@ -27,7 +27,7 @@ public:
     BRAYNS_API virtual void setCamera( CameraPtr camera ) =  0;
 
 protected:
-    RenderingParameters& _renderingParameters;
+    ParametersManager& _parametersManager;
     ScenePtr _scene;
 };
 

@@ -1,9 +1,0 @@
-namespace brayns.vocabulary;
-
-table Attribute {
-  entity: integer;
-  parameter: string;
-  value: string;
-}
-
-root_type Attribute;

@@ -41,9 +41,9 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[6] =
 };
 
 OSPRayScene::OSPRayScene(
-    RendererPtr renderer,
+    RendererMap renderers,
     GeometryParameters& geometryParameters )
-    : Scene( renderer, geometryParameters ),
+    : Scene( renderers, geometryParameters ),
     _scene( ospNewModel( ))
 {
 }
@@ -315,102 +315,108 @@ void OSPRayScene::buildGeometry()
 
 void OSPRayScene::_commitLights()
 {
-    OSPRayRenderer* osprayRenderer =
-        dynamic_cast< OSPRayRenderer* >( _renderer.get( ));
-
-    std::vector< OSPLight > ospLights;
-    for( auto light: _lights )
+    for( auto renderer: _renderers )
     {
-        OSPLight ospLight;
-        DirectionalLight* directionalLight =
-            dynamic_cast< DirectionalLight* >( light.get( ));
-        if( directionalLight != 0 )
+        OSPRayRenderer* osprayRenderer =
+            dynamic_cast< OSPRayRenderer* >( renderer.second.get( ));
+
+        std::vector< OSPLight > ospLights;
+        for( auto light: _lights )
         {
-            ospLight =
-                ospNewLight( osprayRenderer->impl(), "DirectionalLight" );
-            const Vector3f color = directionalLight->getColor( );
-            ospSet3f( ospLight, "color",
-                color.x( ), color.y( ), color.z( ));
-            const Vector3f direction = directionalLight->getDirection( );
-            ospSet3f( ospLight, "direction",
-                direction.x( ), direction.y( ), direction.z( ));
-            ospSet1f( ospLight, "intensity",
-                directionalLight->getIntensity( ));
-            ospCommit( ospLight );
-            ospLights.push_back( ospLight );
-        }
-        else
-        {
-            PointLight* pointLight = dynamic_cast< PointLight* >( light.get( ));
-            if( pointLight != 0 )
+            OSPLight ospLight;
+            DirectionalLight* directionalLight =
+                dynamic_cast< DirectionalLight* >( light.get( ));
+            if( directionalLight != 0 )
             {
                 ospLight =
-                    ospNewLight( osprayRenderer->impl(), "PointLight" );
-                const Vector3f position = pointLight->getPosition( );
-                ospSet3f( ospLight, "position",
-                    position.x( ), position.y( ), position.z( ));
-                const Vector3f color = pointLight->getColor( );
+                    ospNewLight( osprayRenderer->impl(), "DirectionalLight" );
+                const Vector3f color = directionalLight->getColor( );
                 ospSet3f( ospLight, "color",
                     color.x( ), color.y( ), color.z( ));
+                const Vector3f direction = directionalLight->getDirection( );
+                ospSet3f( ospLight, "direction",
+                    direction.x( ), direction.y( ), direction.z( ));
                 ospSet1f( ospLight, "intensity",
-                    pointLight->getIntensity( ));
-                ospSet1f( ospLight, "radius",
-                    pointLight->getCutoffDistance( ));
+                    directionalLight->getIntensity( ));
                 ospCommit( ospLight );
                 ospLights.push_back( ospLight );
             }
+            else
+            {
+                PointLight* pointLight = dynamic_cast< PointLight* >( light.get( ));
+                if( pointLight != 0 )
+                {
+                    ospLight =
+                        ospNewLight( osprayRenderer->impl(), "PointLight" );
+                    const Vector3f position = pointLight->getPosition( );
+                    ospSet3f( ospLight, "position",
+                        position.x( ), position.y( ), position.z( ));
+                    const Vector3f color = pointLight->getColor( );
+                    ospSet3f( ospLight, "color",
+                        color.x( ), color.y( ), color.z( ));
+                    ospSet1f( ospLight, "intensity",
+                        pointLight->getIntensity( ));
+                    ospSet1f( ospLight, "radius",
+                        pointLight->getCutoffDistance( ));
+                    ospCommit( ospLight );
+                    ospLights.push_back( ospLight );
+                }
+            }
         }
+        _ospLightData = ospNewData( _lights.size(), OSP_OBJECT, &ospLights[0] );
+        ospCommit( _ospLightData );
+        ospSetData( osprayRenderer->impl(), "lights", _ospLightData );
     }
-    _ospLightData = ospNewData( _lights.size(), OSP_OBJECT, &ospLights[0] );
-    ospCommit( _ospLightData );
-    ospSetData( osprayRenderer->impl(), "lights", _ospLightData );
 }
 
 void OSPRayScene::_commitMaterials()
 {
-    OSPRayRenderer* osprayRenderer =
-        dynamic_cast<OSPRayRenderer*>(_renderer.get());
-    for( size_t index=0; index < _materials.size(); ++index )
+    for( auto renderer: _renderers )
     {
-        if( !_ospMaterials[index] )
+        OSPRayRenderer* osprayRenderer =
+            dynamic_cast<OSPRayRenderer*>( renderer.second.get( ));
+        for( size_t index=0; index < _materials.size(); ++index )
         {
-            _ospMaterials[index] =
-                ospNewMaterial(osprayRenderer->impl(), "ExtendedOBJMaterial");
-        }
+            if( !_ospMaterials[index] )
+            {
+                _ospMaterials[index] =
+                    ospNewMaterial(osprayRenderer->impl(), "ExtendedOBJMaterial");
+            }
 
-        MaterialPtr material = _materials[index];
-        assert(material);
+            MaterialPtr material = _materials[index];
+            assert(material);
 
-        OSPMaterial& ospMaterial = _ospMaterials[index];
-        Vector3f value3f = material->getColor();
-        ospSet3f(ospMaterial, "kd", value3f.x(), value3f.y(), value3f.z());
-        value3f = material->getSpecularColor();
-        ospSet3f(ospMaterial, "ks", value3f.x(), value3f.y(), value3f.z());
-        ospSet1f(ospMaterial, "ns", material->getSpecularExponent());
-        ospSet1f(ospMaterial, "d", material->getOpacity());
-        ospSet1f(ospMaterial, "refraction", material->getRefractionIndex());
-        ospSet1f(ospMaterial, "reflection", material->getReflectionIndex());
-        ospSet1f(ospMaterial, "a", material->getEmission());
+            OSPMaterial& ospMaterial = _ospMaterials[index];
+            Vector3f value3f = material->getColor();
+            ospSet3f(ospMaterial, "kd", value3f.x(), value3f.y(), value3f.z());
+            value3f = material->getSpecularColor();
+            ospSet3f(ospMaterial, "ks", value3f.x(), value3f.y(), value3f.z());
+            ospSet1f(ospMaterial, "ns", material->getSpecularExponent());
+            ospSet1f(ospMaterial, "d", material->getOpacity());
+            ospSet1f(ospMaterial, "refraction", material->getRefractionIndex());
+            ospSet1f(ospMaterial, "reflection", material->getReflectionIndex());
+            ospSet1f(ospMaterial, "a", material->getEmission());
 
 #ifdef BRAYNS_USE_MAGICKCPP
-        // Textures
-        for(auto texture: material->getTextures())
-        {
-            TextureLoader textureLoader;
-            textureLoader.loadTexture(_textures, texture.first, texture.second);
+            // Textures
+            for(auto texture: material->getTextures())
+            {
+                TextureLoader textureLoader;
+                textureLoader.loadTexture(_textures, texture.first, texture.second);
 
-            OSPTexture2D ospTexture = _createTexture2D(texture.second);
-            ospSetObject(
-                ospMaterial,
-                textureTypeMaterialAttribute[texture.first].attribute.c_str(),
-                ospTexture);
+                OSPTexture2D ospTexture = _createTexture2D(texture.second);
+                ospSetObject(
+                    ospMaterial,
+                    textureTypeMaterialAttribute[texture.first].attribute.c_str(),
+                    ospTexture);
 
-            BRAYNS_DEBUG << "OSPRay texture assigned to " <<
-                textureTypeMaterialAttribute[texture.first].attribute <<
-                " of material " << index << std::endl;
-        }
+                BRAYNS_DEBUG << "OSPRay texture assigned to " <<
+                    textureTypeMaterialAttribute[texture.first].attribute <<
+                    " of material " << index << std::endl;
+            }
 #endif
-        ospCommit(ospMaterial);
+            ospCommit(ospMaterial);
+        }
     }
 }
 

@@ -78,6 +78,12 @@ public:
     */
     BRAYNS_API SceneParameters& getSceneParameters();
 
+    /**
+       Sets a parameter (application, geometry, rendering, etc). If the
+       parameter is not registered, the setting is ignored.
+     */
+    void set( const std::string& key, const std::string& value );
+
 private:
     std::vector< AbstractParameters* > _parameterSets;
     boost::program_options::options_description _parameters;
