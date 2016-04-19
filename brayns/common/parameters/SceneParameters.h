@@ -18,9 +18,6 @@ class SceneParameters final : public AbstractParameters
 public:
     SceneParameters();
 
-    /** @copydoc AbstractParameters::parse */
-    po::variables_map  parse( int argc, const char **argv ) final;
-
     /** @copydoc AbstractParameters::print */
     void print( ) final;
 

@@ -221,6 +221,7 @@ private:
     FrameBufferPtr _frameBuffer;
 
     Vector2i _frameSize;
+    float _timestamp;
 
     bool _rendering;
     bool _sceneModified;

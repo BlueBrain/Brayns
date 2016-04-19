@@ -25,9 +25,6 @@ class RenderingParameters : public AbstractParameters
 public:
     RenderingParameters( );
 
-    /** @copydoc AbstractParameters::parse */
-    po::variables_map  parse( int argc, const char **argv ) final;
-
     /** @copydoc AbstractParameters::print */
     void print( ) final;
 
@@ -189,7 +186,7 @@ public:
 
 protected:
 
-    bool _parse( const boost::program_options::variables_map& vm ) final;
+    bool _parse( const po::variables_map& vm ) final;
 
     std::string _module;
     std::string _renderer;

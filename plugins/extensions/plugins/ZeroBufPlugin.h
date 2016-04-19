@@ -67,6 +67,7 @@ private:
     ::zerobuf::render::ImageJPEG _remoteImageJPEG;
     ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
     ::zerobuf::render::Attribute _remoteAttribute;
+
 };
 
 }

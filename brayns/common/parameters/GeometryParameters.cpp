@@ -34,8 +34,6 @@ const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 namespace brayns
 {
 
-namespace po = boost::program_options;
-
 GeometryParameters::GeometryParameters( )
     : AbstractParameters( "Geometry" )
     , _radius(1)
@@ -77,14 +75,7 @@ GeometryParameters::GeometryParameters( )
             "vertical spacing, horizontal spacing)" );
 }
 
-po::variables_map  GeometryParameters::parse( int argc, const char **argv )
-{
-    po::variables_map vm = AbstractParameters::parse( argc, argv );
-    _parse( vm );
-    return vm;
-}
-
-bool GeometryParameters::_parse( const boost::program_options::variables_map& vm )
+bool GeometryParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_MORPHOLOGY_FOLDER ))
         _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as< std::string >( );
