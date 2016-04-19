@@ -16,6 +16,7 @@ namespace
 const std::string DEFAULT_RENDERER = "raycast_eyelight";
 
 const std::string PARAM_MODULE = "module";
+const std::string PARAM_RENDERERS = "renderers";
 const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "spp";
 const std::string PARAM_DOF = "dof";
@@ -57,7 +58,7 @@ RenderingParameters::RenderingParameters( )
     , _softShadows( false )
     , _backgroundColor( Vector3f( 0.f, 0.f, 0.f ))
     , _detectionDistance( 1.f )
-    , _detectionOnDifferentMaterial( false )
+    , _detectionOnDifferentMaterial( true )
     , _detectionNearColor( 1.f, 0.f, 0.f )
     , _detectionFarColor( 0.f, 1.f, 0.f )
     , _epsilon( 1.e-4f )
@@ -67,7 +68,9 @@ RenderingParameters::RenderingParameters( )
         (PARAM_MODULE.c_str(), po::value< std::string >( ),
             "OSPRay module name")
         (PARAM_RENDERER.c_str(), po::value< std::string >( ),
-            "Renderer name")
+            "Active renderer")
+        (PARAM_RENDERERS.c_str(), po::value< strings >( )->multitoken(),
+            "Renderers")
         (PARAM_SPP.c_str(), po::value< size_t >( ),
             "Number of samples per pixel")
         (PARAM_DOF.c_str(), po::value< float >( ),
@@ -102,63 +105,71 @@ RenderingParameters::RenderingParameters( )
         (PARAM_CAMERA_TYPE.c_str(),
             po::value< size_t >( ), "Camera type (0: perspective, "
             "1: perspective stereo, 2: orthographic, 3: panoramic)");
+
+    _renderers.push_back("exobj");
+    _renderers.push_back("proximityrenderer");
 }
 
-bool RenderingParameters::parse( int argc, const char **argv )
+po::variables_map RenderingParameters::parse( int argc, const char **argv )
 {
-    AbstractParameters::parse( argc, argv );
+    po::variables_map vm = AbstractParameters::parse( argc, argv );
+    _parse( vm );
+    return vm;
+}
 
-    if( _vm.count( PARAM_MODULE ))
-        _module = _vm[PARAM_MODULE].as< std::string >( );
-    if( _vm.count( PARAM_RENDERER ))
-        _renderer = _vm[PARAM_RENDERER].as< std::string >( );
-    if( _vm.count( PARAM_SPP ))
-        _spp = _vm[PARAM_SPP].as< size_t >( );
-    if( _vm.count( PARAM_DOF ))
+bool RenderingParameters::_parse( const boost::program_options::variables_map& vm )
+{
+    if( vm.count( PARAM_MODULE ))
+        _module = vm[PARAM_MODULE].as< std::string >( );
+    if( vm.count( PARAM_RENDERER ))
+        _renderer = vm[PARAM_RENDERER].as< std::string >( );
+    if( vm.count( PARAM_SPP ))
+        _spp = vm[PARAM_SPP].as< size_t >( );
+    if( vm.count( PARAM_DOF ))
     {
         _dof = true;
-        _dofStrength = _vm[PARAM_DOF].as< float >( );
+        _dofStrength = vm[PARAM_DOF].as< float >( );
     }
-    if( _vm.count( PARAM_AMBIENT_OCCLUSION ))
-        _ambientOcclusionStrength = _vm[PARAM_AMBIENT_OCCLUSION].as< float >( );
-    if( _vm.count( PARAM_NO_LIGHT_SHADING ))
-        _lightShading = !_vm[PARAM_NO_LIGHT_SHADING].as< bool >( );
-    if( _vm.count( PARAM_SHADOWS ))
-        _shadows = _vm[PARAM_SHADOWS].as< bool >( );
-    if( _vm.count( PARAM_SOFT_SHADOWS ))
-        _softShadows = _vm[PARAM_SOFT_SHADOWS].as< bool >( );
-    if( _vm.count( PARAM_ELECTRON_SHADING ))
-        _electronShading = _vm[PARAM_ELECTRON_SHADING].as< bool >( );
-    if( _vm.count( PARAM_GRADIENT_BACKGROUND ))
-        _gradientBackground = _vm[PARAM_GRADIENT_BACKGROUND].as< bool >( );
-    if( _vm.count( PARAM_BACKGROUND_COLOR ))
+    if( vm.count( PARAM_AMBIENT_OCCLUSION ))
+        _ambientOcclusionStrength = vm[PARAM_AMBIENT_OCCLUSION].as< float >( );
+    if( vm.count( PARAM_NO_LIGHT_SHADING ))
+        _lightShading = !vm[PARAM_NO_LIGHT_SHADING].as< bool >( );
+    if( vm.count( PARAM_SHADOWS ))
+        _shadows = vm[PARAM_SHADOWS].as< bool >( );
+    if( vm.count( PARAM_SOFT_SHADOWS ))
+        _softShadows = vm[PARAM_SOFT_SHADOWS].as< bool >( );
+    if( vm.count( PARAM_ELECTRON_SHADING ))
+        _electronShading = vm[PARAM_ELECTRON_SHADING].as< bool >( );
+    if( vm.count( PARAM_GRADIENT_BACKGROUND ))
+        _gradientBackground = vm[PARAM_GRADIENT_BACKGROUND].as< bool >( );
+    if( vm.count( PARAM_BACKGROUND_COLOR ))
     {
-        floats values = _vm[PARAM_BACKGROUND_COLOR].as< floats >( );
+        floats values = vm[PARAM_BACKGROUND_COLOR].as< floats >( );
         if( values.size() == 3 )
             _backgroundColor = Vector3f( values[0], values[1], values[2] );
     }
-    if( _vm.count( PARAM_DETECTION_DISTANCE ))
-        _detectionDistance = _vm[PARAM_DETECTION_DISTANCE].as< float >( );
-    if( _vm.count( PARAM_DETECTION_ON_DIFFERENT_MATERIAL ))
+    if( vm.count( PARAM_DETECTION_DISTANCE ))
+        _detectionDistance = vm[PARAM_DETECTION_DISTANCE].as< float >( );
+    if( vm.count( PARAM_DETECTION_ON_DIFFERENT_MATERIAL ))
         _detectionOnDifferentMaterial =
-            _vm[PARAM_DETECTION_ON_DIFFERENT_MATERIAL].as< bool >( );
-    if( _vm.count( PARAM_DETECTION_NEAR_COLOR ))
+            vm[PARAM_DETECTION_ON_DIFFERENT_MATERIAL].as< bool >( );
+    if( vm.count( PARAM_DETECTION_NEAR_COLOR ))
     {
-        floats values = _vm[PARAM_DETECTION_NEAR_COLOR].as< floats >( );
+        floats values = vm[PARAM_DETECTION_NEAR_COLOR].as< floats >( );
         if( values.size() == 3 )
             _detectionNearColor  = Vector3f( values[0], values[1], values[2] );
     }
-    if( _vm.count( PARAM_DETECTION_FAR_COLOR ))
+    if( vm.count( PARAM_DETECTION_FAR_COLOR ))
     {
-        floats values = _vm[PARAM_DETECTION_FAR_COLOR].as< floats >( );
+        floats values = vm[PARAM_DETECTION_FAR_COLOR].as< floats >( );
         if( values.size() == 3 )
             _detectionFarColor  = Vector3f( values[0], values[1], values[2] );
     }
-    if( _vm.count( PARAM_EPSILON ))
-        _epsilon = _vm[PARAM_EPSILON].as< float >( );
-    if( _vm.count( PARAM_CAMERA_TYPE ))
+    if( vm.count( PARAM_EPSILON ))
+        _epsilon = vm[PARAM_EPSILON].as< float >( );
+    if( vm.count( PARAM_CAMERA_TYPE ))
         _cameraType = static_cast< CameraType > (
-            _vm[PARAM_CAMERA_TYPE].as< size_t >( ));
+            vm[PARAM_CAMERA_TYPE].as< size_t >( ));
     return true;
 }
 
@@ -167,6 +178,9 @@ void RenderingParameters::print( )
     AbstractParameters::print( );
     BRAYNS_INFO << "Module                  :" <<
         _module << std::endl;
+    BRAYNS_INFO << "Supported renderers     :" << std::endl;
+    for( std::string renderer: _renderers )
+        BRAYNS_INFO << "- " << renderer << std::endl;
     BRAYNS_INFO << "Renderer                :" <<
         _renderer << std::endl;
     BRAYNS_INFO << "Samples per pixel       :" <<

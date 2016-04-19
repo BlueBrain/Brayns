@@ -8,7 +8,9 @@
 #include "ZeroBufPlugin.h"
 
 #include <brayns/common/camera/Camera.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/parameters/ParametersManager.h>
 #include <zerobuf/render/camera.h>
 #include <zerobuf/render/frameBuffers.h>
 #include <zeroeq/hbp/vocabulary.h>
@@ -78,6 +80,10 @@ void ZeroBufPlugin::_setupHTTPServer()
     _httpServer->add( _remoteFrameBuffers );
     _remoteFrameBuffers.setRequestedFunction(
         std::bind( &ZeroBufPlugin::_requestFrameBuffers, this ));
+
+    _httpServer->add( _remoteAttribute );
+    _remoteAttribute.setUpdatedFunction(
+        std::bind( &ZeroBufPlugin::_attributeUpdated, this ));
 }
 
 void ZeroBufPlugin::_setupRequests()
@@ -102,6 +108,25 @@ void ZeroBufPlugin::_cameraUpdated()
     _extensionParameters.frameBuffer->clear();
     _extensionParameters.camera->commit();
 }
+
+void ZeroBufPlugin::_attributeUpdated( )
+{
+    _extensionParameters.parametersManager->set(
+        _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
+    _extensionParameters.renderer->commit();
+
+    const Vector2ui currentSize = _extensionParameters.frameBuffer->getSize();
+    const Vector2ui newSize = _extensionParameters.parametersManager->
+        getApplicationParameters().getWindowSize();
+    if( currentSize != newSize )
+    {
+        _extensionParameters.frameBuffer->resize( newSize );
+        _extensionParameters.camera->setAspectRatio(
+            float(newSize.x())/float(newSize.y( )));
+    }
+    _extensionParameters.frameBuffer->clear();
+}
+
 
 bool ZeroBufPlugin::_requestImageJPEG()
 {

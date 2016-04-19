@@ -13,13 +13,16 @@
 
 #include <ospray.h>
 
+#include "OSPRayCamera.h"
+
 namespace brayns
 {
 
 class OSPRayRenderer : public brayns::Renderer
 {
 public:
-    OSPRayRenderer( RenderingParameters& renderingParameters );
+    OSPRayRenderer(
+        const std::string& name, ParametersManager& parametersMamager );
 
     void render( FrameBufferPtr frameBuffer ) final;
     void commit() final;
@@ -29,6 +32,7 @@ public:
     OSPRenderer impl() { return _renderer; }
 
 private:
+    OSPRayCamera* _camera;
     OSPRenderer _renderer;
 };
 

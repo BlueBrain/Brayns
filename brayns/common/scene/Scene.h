@@ -42,7 +42,7 @@ public:
               https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
     */
     BRAYNS_API Scene(
-        RendererPtr renderer,
+        RendererMap renderers,
         GeometryParameters& geometryParameters);
     BRAYNS_API virtual ~Scene();
 
@@ -131,19 +131,10 @@ public:
     */
     BRAYNS_API void clearLights();
 
-    /**
-        Timestamp of the scene
-    */
-    BRAYNS_API void setTimestamp( const float timestamp )
-    {
-        _timestamp = timestamp;
-    }
-    BRAYNS_API float getTimestamp( ) const { return _timestamp; }
-
 protected:
     // Parameters
     GeometryParameters& _geometryParameters;
-    RendererPtr _renderer;
+    RendererMap _renderers;
 
     // Model
     PrimitivesMap _primitives;
@@ -151,7 +142,6 @@ protected:
     Materials _materials;
     TexturesMap _textures;
     Lights _lights;
-    float _timestamp;
 
     Boxf _bounds;
 };

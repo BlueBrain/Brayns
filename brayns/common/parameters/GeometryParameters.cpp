@@ -77,15 +77,20 @@ GeometryParameters::GeometryParameters( )
             "vertical spacing, horizontal spacing)" );
 }
 
-bool GeometryParameters::parse( int argc, const char **argv )
+po::variables_map  GeometryParameters::parse( int argc, const char **argv )
 {
-    AbstractParameters::parse( argc, argv );
+    po::variables_map vm = AbstractParameters::parse( argc, argv );
+    _parse( vm );
+    return vm;
+}
 
-    if( _vm.count( PARAM_MORPHOLOGY_FOLDER ))
-        _morphologyFolder = _vm[PARAM_MORPHOLOGY_FOLDER].as< std::string >( );
-    if( _vm.count( PARAM_PDB_FOLDER ))
+bool GeometryParameters::_parse( const boost::program_options::variables_map& vm )
+{
+    if( vm.count( PARAM_MORPHOLOGY_FOLDER ))
+        _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as< std::string >( );
+    if( vm.count( PARAM_PDB_FOLDER ))
     {
-        strings values = _vm[PARAM_PDB_FOLDER].as< strings >( );
+        strings values = vm[PARAM_PDB_FOLDER].as< strings >( );
         if( values.size( ) == 3 )
         {
             _pdbFolder = values[0];
@@ -93,33 +98,33 @@ bool GeometryParameters::parse( int argc, const char **argv )
             _pdbPositions = values[2];
         }
     }
-    if( _vm.count( PARAM_MESH_FOLDER ))
-        _meshFolder = _vm[PARAM_MESH_FOLDER].as< std::string >( );
-    if( _vm.count( PARAM_CIRCUIT_CONFIG ))
-        _circuitConfig = _vm[PARAM_CIRCUIT_CONFIG].as< std::string >( );
-    if( _vm.count( PARAM_LOAD_CACHE_FILE ))
-        _loadCacheFile = _vm[PARAM_LOAD_CACHE_FILE].as< std::string >( );
-    if( _vm.count( PARAM_SAVE_CACHE_FILE ))
-        _saveCacheFile = _vm[PARAM_SAVE_CACHE_FILE].as< std::string >( );
-    if( _vm.count( PARAM_COLOR_SCHEME ))
+    if( vm.count( PARAM_MESH_FOLDER ))
+        _meshFolder = vm[PARAM_MESH_FOLDER].as< std::string >( );
+    if( vm.count( PARAM_CIRCUIT_CONFIG ))
+        _circuitConfig = vm[PARAM_CIRCUIT_CONFIG].as< std::string >( );
+    if( vm.count( PARAM_LOAD_CACHE_FILE ))
+        _loadCacheFile = vm[PARAM_LOAD_CACHE_FILE].as< std::string >( );
+    if( vm.count( PARAM_SAVE_CACHE_FILE ))
+        _saveCacheFile = vm[PARAM_SAVE_CACHE_FILE].as< std::string >( );
+    if( vm.count( PARAM_COLOR_SCHEME ))
         _colorScheme = static_cast< ColorScheme >(
-            _vm[PARAM_COLOR_SCHEME].as< size_t >( ));
-    if( _vm.count( PARAM_RADIUS))
-        _radius = _vm[PARAM_RADIUS].as< float >( );
-    if( _vm.count( PARAM_SCENE_ENVIRONMENT ))
+            vm[PARAM_COLOR_SCHEME].as< size_t >( ));
+    if( vm.count( PARAM_RADIUS))
+        _radius = vm[PARAM_RADIUS].as< float >( );
+    if( vm.count( PARAM_SCENE_ENVIRONMENT ))
         _sceneEnvironment = static_cast< SceneEnvironment >(
-            _vm[PARAM_SCENE_ENVIRONMENT].as< size_t >( ));
-    if( _vm.count( PARAM_GEOMETRY_QUALITY ))
+            vm[PARAM_SCENE_ENVIRONMENT].as< size_t >( ));
+    if( vm.count( PARAM_GEOMETRY_QUALITY ))
         _geometryQuality = static_cast< GeometryQuality >(
-            _vm[PARAM_GEOMETRY_QUALITY].as< size_t >( ));
-    if( _vm.count( PARAM_TARGET ))
-        _target = _vm[PARAM_TARGET].as< std::string >( );
-    if( _vm.count( PARAM_MORPHOLOGY_SECTION_TYPES ))
+            vm[PARAM_GEOMETRY_QUALITY].as< size_t >( ));
+    if( vm.count( PARAM_TARGET ))
+        _target = vm[PARAM_TARGET].as< std::string >( );
+    if( vm.count( PARAM_MORPHOLOGY_SECTION_TYPES ))
         _morphologySectionTypes =
-            _vm[PARAM_MORPHOLOGY_SECTION_TYPES].as< size_t >( );
-    if( _vm.count( PARAM_MORPHOLOGY_LAYOUT ))
+            vm[PARAM_MORPHOLOGY_SECTION_TYPES].as< size_t >( );
+    if( vm.count( PARAM_MORPHOLOGY_LAYOUT ))
     {
-        size_ts values = _vm[PARAM_MORPHOLOGY_LAYOUT].as< size_ts >( );
+        size_ts values = vm[PARAM_MORPHOLOGY_LAYOUT].as< size_ts >( );
         if( values.size( ) == 3 )
         {
             _morphologyLayout.type = ML_GRID;

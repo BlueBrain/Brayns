@@ -1,0 +1,141 @@
+/* Shared
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+}
+
+.viewport {
+    background-color: #aaaaaa;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    color: #fff;
+    z-index: -100;
+    text-align: center; 
+    white-space: nowrap;
+}
+
+.helper {
+    height: 50%;
+    display: inline-block;
+}
+
+.image-streamer {
+    /*
+    background-image: url('../images/hippocampus_light.png');
+    background-size: cover;
+    */
+    max-width:100% !important;
+    height: auto;
+    margin: 0 auto;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.ui-container {
+    height: 100%;
+    width: 100%;
+    padding: 24px 24px 0 24px;
+}
+
+.bottom-ui-container {
+    /*height: 100%;
+    padding: 24px 0px 0 24px;*/
+    width: 100%;
+}
+
+.bottom-ui {
+    height: 100%;
+    z-index: 1;
+    position: relative;
+}
+
+.bottom-panel {
+    background-color: rgba(245, 245, 245, 0.9);
+    border-radius: 0 !important;
+    padding: 24px 24px 48px 24px;
+    overflow: hidden;
+    position: absolute;
+    display: inline-block;
+    bottom: 0;
+}
+
+.panel {
+    background-color: rgba(245, 245, 245, 0.9);
+    border-radius: 0 !important;
+    padding: 0px 24px 32px 24px;
+    margin-top: 30px;
+}
+
+.left-panel {
+    width: 250px;
+}
+
+.right-panel {
+    width: 250px;
+    right: 0;
+}
+
+.timer {
+    width: 100%;
+}
+
+.primary {
+    border-color: #da7639;
+    border-width: 4px;
+}
+
+.slider-selection {
+	background: #BABABA;
+}
+
+.category {
+    margin-top: 24px;
+    margin-bottom: 0px;
+}
+
+.window-title {
+    margin-top: 24px;
+}
+
+.setting {
+    margin-top: 12px;
+}
+
+hr {
+    border-color: #bbb;   
+}
+
+
+/* Sections
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.start {
+	position: relative;
+	background: #c9530b;
+    margin-right:16px;
+}
+
+.start:after {
+	top: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+	border-color: rgba(0, 0, 0, 0);
+	border-top-color: #da7639;
+	border-width: 12px;
+	margin-left: -12px;
+}
+
+.start:hover:after {
+	border-top-color: #c9530b;
+}

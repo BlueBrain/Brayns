@@ -19,7 +19,7 @@ public:
     SceneParameters();
 
     /** @copydoc AbstractParameters::parse */
-    bool parse( int argc, const char **argv ) final;
+    po::variables_map  parse( int argc, const char **argv ) final;
 
     /** @copydoc AbstractParameters::print */
     void print( ) final;
@@ -31,7 +31,10 @@ public:
     float getTimestamp( ) const { return _timestamp; }
     void setTimestamp( const float value ) { _timestamp = value; }
 
-private:
+protected:
+
+    bool _parse( const po::variables_map& vm ) final;
+
     float _timestamp;
 };
 

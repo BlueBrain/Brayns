@@ -27,7 +27,7 @@ public:
     ApplicationParameters( );
 
     /** @copydoc AbstractParameters::parse */
-    bool parse( int argc, const char **argv) final;
+    po::variables_map  parse( int argc, const char **argv) final;
 
     /** @copydoc AbstractParameters::print */
     void print( ) final;
@@ -50,6 +50,8 @@ public:
     size_t getJpegCompression() const { return _jpegCompression; }
 
 protected:
+    bool _parse( const boost::program_options::variables_map& vm ) final;
+
     std::string _camera;
     Vector2ui _windowSize;
     std::string _deflectHostname;
