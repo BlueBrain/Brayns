@@ -33,7 +33,7 @@
 #  * rebase: Rebases all git externals, including sub projects
 #
 # Options (global) which control behaviour:
-#  GIT_EXTERNAL_VERBOSE
+#  COMMON_GIT_EXTERNAL_VERBOSE
 #    This is a global option which has the same effect as the VERBOSE option,
 #    with the difference that output information will be produced for all
 #    external repos when set.
@@ -56,7 +56,7 @@ if(NOT GIT_EXECUTABLE)
 endif()
 
 include(CMakeParseArguments)
-option(GIT_EXTERNAL_VERBOSE "Print git commands as they are executed" OFF)
+option(COMMON_GIT_EXTERNAL_VERBOSE "Print git commands as they are executed" OFF)
 
 if(NOT GITHUB_USER AND DEFINED ENV{GITHUB_USER})
   set(GITHUB_USER $ENV{GITHUB_USER} CACHE STRING
@@ -64,7 +64,7 @@ if(NOT GITHUB_USER AND DEFINED ENV{GITHUB_USER})
 endif()
 
 macro(GIT_EXTERNAL_MESSAGE msg)
-  if(GIT_EXTERNAL_VERBOSE OR GIT_EXTERNAL_LOCAL_VERBOSE)
+  if(COMMON_GIT_EXTERNAL_VERBOSE)
     message(STATUS "${NAME}: ${msg}")
   endif()
 endmacro()

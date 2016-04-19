@@ -14,18 +14,19 @@
 namespace brayns
 {
 
-po::variables_map AbstractParameters::parse( int argc, const char **argv )
+bool AbstractParameters::parse( int argc, const char **argv )
 {
     for( int i = 1; i < argc; ++i )
         _arguments.push_back(argv[i]);
 
-    boost::program_options::variables_map vm;
+    po::variables_map vm;
     po::parsed_options parsedOptions =
         po::command_line_parser( argc, argv ).options( _parameters ).
         allow_unregistered( ).run( );
     po::store( parsedOptions, vm );
     po::notify(vm);
-    return vm;
+    _parse( vm );
+    return true;
 }
 
 void AbstractParameters::usage( )
@@ -57,7 +58,7 @@ void AbstractParameters::set( const std::string& key, const std::string& value )
     for( size_t i = 0; i < strs.size(); ++i )
         argv[2+i] = strs[i].c_str();
 
-    boost::program_options::variables_map vm;
+    po::variables_map vm;
     po::parsed_options parsedOptions =
         po::command_line_parser( argc, argv ).options( _parameters ).
         allow_unregistered( ).run( );

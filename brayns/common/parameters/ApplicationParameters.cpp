@@ -33,8 +33,6 @@ const std::string DEFAULT_CAMERA = "perspective";
 namespace brayns
 {
 
-namespace po = boost::program_options;
-
 ApplicationParameters::ApplicationParameters( )
     : AbstractParameters( "Application" )
     , _camera( DEFAULT_CAMERA )
@@ -59,14 +57,7 @@ ApplicationParameters::ApplicationParameters( )
             "JPeg compression rate (100 = full quality)" );
 }
 
-po::variables_map ApplicationParameters::parse( int argc, const char **argv )
-{
-    po::variables_map vm = AbstractParameters::parse( argc, argv );
-    _parse( vm );
-    return vm;
-}
-
-bool ApplicationParameters::_parse( const boost::program_options::variables_map& vm )
+bool ApplicationParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_HELP ))
         return false;

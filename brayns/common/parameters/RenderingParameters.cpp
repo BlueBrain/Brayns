@@ -41,8 +41,6 @@ const std::string PARAM_CAMERA_TYPE = "camera-type";
 namespace brayns
 {
 
-namespace po = boost::program_options;
-
 RenderingParameters::RenderingParameters( )
     : AbstractParameters( "Rendering" )
     , _renderer( DEFAULT_RENDERER )
@@ -58,7 +56,7 @@ RenderingParameters::RenderingParameters( )
     , _softShadows( false )
     , _backgroundColor( Vector3f( 0.f, 0.f, 0.f ))
     , _detectionDistance( 1.f )
-    , _detectionOnDifferentMaterial( true )
+    , _detectionOnDifferentMaterial( false )
     , _detectionNearColor( 1.f, 0.f, 0.f )
     , _detectionFarColor( 0.f, 1.f, 0.f )
     , _epsilon( 1.e-4f )
@@ -105,19 +103,11 @@ RenderingParameters::RenderingParameters( )
         (PARAM_CAMERA_TYPE.c_str(),
             po::value< size_t >( ), "Camera type (0: perspective, "
             "1: perspective stereo, 2: orthographic, 3: panoramic)");
-
     _renderers.push_back("exobj");
     _renderers.push_back("proximityrenderer");
 }
 
-po::variables_map RenderingParameters::parse( int argc, const char **argv )
-{
-    po::variables_map vm = AbstractParameters::parse( argc, argv );
-    _parse( vm );
-    return vm;
-}
-
-bool RenderingParameters::_parse( const boost::program_options::variables_map& vm )
+bool RenderingParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_MODULE ))
         _module = vm[PARAM_MODULE].as< std::string >( );

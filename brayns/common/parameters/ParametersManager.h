@@ -86,7 +86,7 @@ public:
 
 private:
     std::vector< AbstractParameters* > _parameterSets;
-    boost::program_options::options_description _parameters;
+    po::options_description _parameters;
     ApplicationParameters _applicationParameters;
     RenderingParameters _renderingParameters;
     GeometryParameters _geometryParameters;
