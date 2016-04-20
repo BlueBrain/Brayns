@@ -69,7 +69,7 @@ bool TextureLoader::loadTexture(
 }
 #else
 bool TextureLoader::loadTexture(
-    TexturesMap&, const TextureType const std::string& filename )
+    TexturesMap&, const TextureType, const std::string& filename )
 {
     BRAYNS_ERROR << "ImageMagick is required to load " << filename << std::endl;
     return false;

@@ -42,11 +42,14 @@ private:
     std::map<size_t, OSPMaterial> _ospMaterials;
     std::map<std::string, OSPTexture2D> _ospTextures;
     OSPData _ospLightData;
+    OSPData _ospMaterialData;
 
     std::map<size_t, floats> _serializedSpheresData;
     std::map<size_t, floats> _serializedCylindersData;
+    std::map<size_t, floats> _serializedConesData;
     std::map<size_t, size_t> _serializedSpheresDataSize;
     std::map<size_t, size_t> _serializedCylindersDataSize;
+    std::map<size_t, size_t> _serializedConesDataSize;
 };
 
 }

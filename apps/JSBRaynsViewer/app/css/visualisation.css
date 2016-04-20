@@ -59,7 +59,7 @@ body {
 .bottom-panel {
     background-color: rgba(245, 245, 245, 0.9);
     border-radius: 0 !important;
-    padding: 24px 24px 48px 24px;
+    padding: 12px 12px 12px 12px;
     overflow: hidden;
     position: absolute;
     display: inline-block;
@@ -75,11 +75,12 @@ body {
 
 .left-panel {
     width: 250px;
+    float: left;
 }
 
 .right-panel {
     width: 250px;
-    right: 0;
+    float: right;
 }
 
 .timer {

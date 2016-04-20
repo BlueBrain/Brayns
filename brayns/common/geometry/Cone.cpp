@@ -29,18 +29,21 @@ Cone::Cone(
 
 size_t Cone::serializeData(floats& serializedData)
 {
-    floats data;
-    data.push_back( _center.x() );
-    data.push_back( _center.y() );
-    data.push_back( _center.z() );
-    data.push_back( _up.x() );
-    data.push_back( _up.y() );
-    data.push_back( _up.z() );
-    data.push_back( _centerRadius );
-    data.push_back( _upRadius );
-    data.push_back( _timestamp );
-    serializedData.insert(std::end(serializedData), std::begin(data), std::end(data));
-    return data.size();
+    serializedData.push_back( _center.x() );
+    serializedData.push_back( _center.y() );
+    serializedData.push_back( _center.z() );
+    serializedData.push_back( _up.x() );
+    serializedData.push_back( _up.y() );
+    serializedData.push_back( _up.z() );
+    serializedData.push_back( _centerRadius );
+    serializedData.push_back( _upRadius );
+    serializedData.push_back( _timestamp );
+    return getSerializationSize();
+}
+
+size_t Cone::getSerializationSize()
+{
+    return 9;
 }
 
 }

@@ -103,8 +103,11 @@ RenderingParameters::RenderingParameters( )
         (PARAM_CAMERA_TYPE.c_str(),
             po::value< size_t >( ), "Camera type (0: perspective, "
             "1: perspective stereo, 2: orthographic, 3: panoramic)");
+
+    // Add default renderers
     _renderers.push_back("exobj");
     _renderers.push_back("proximityrenderer");
+    _renderers.push_back("simulationrenderer");
 }
 
 bool RenderingParameters::_parse( const po::variables_map& vm )

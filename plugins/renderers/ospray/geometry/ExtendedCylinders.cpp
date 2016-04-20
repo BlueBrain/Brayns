@@ -23,11 +23,12 @@ void ExtendedCylinders::finalize(ospray::Model *model)
 {
     radius            = getParam1f("radius",0.01f);
     materialID        = getParam1i("materialID",0);
-    bytesPerCylinder  = getParam1i("bytes_per_cylinder",8*sizeof(float));
+    bytesPerCylinder  = getParam1i("bytes_per_cylinder",9*sizeof(float));
     offset_v0         = getParam1i("offset_v0",0);
     offset_v1         = getParam1i("offset_v1",3*sizeof(float));
     offset_radius     = getParam1i("offset_radius",6*sizeof(float));
-    offset_frame      = getParam1i("offset_frame",7*sizeof(float));
+    offset_timestamp  = getParam1i("offset_timestamp",7*sizeof(float));
+    offset_value      = getParam1i("offset_value",8*sizeof(float));
     offset_materialID = getParam1i("offset_materialID",-1);
     data              = getParamData("extendedcylinders",nullptr);
 
@@ -46,7 +47,8 @@ void ExtendedCylinders::finalize(ospray::Model *model)
                 offset_v0,
                 offset_v1,
                 offset_radius,
-                offset_frame,
+                offset_timestamp,
+                offset_value,
                 offset_materialID);
 }
 

@@ -111,6 +111,8 @@ void ZeroBufPlugin::_cameraUpdated()
 
 void ZeroBufPlugin::_attributeUpdated( )
 {
+    BRAYNS_INFO << _remoteAttribute.getKeyString() << " = " <<
+        _remoteAttribute.getValueString() << std::endl;
     _extensionParameters.parametersManager->set(
         _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
     _extensionParameters.renderer->commit();
@@ -158,7 +160,6 @@ bool ZeroBufPlugin::_requestFrameBuffers()
     _remoteFrameBuffers.setHeight( frameSize.y( ));
     if( depthBuffer )
     {
-        typedef std::vector< uint16_t > uint16_ts;
         uint16_ts depths;
         const size_t size = frameSize.x( ) * frameSize.y( );
         depths.reserve( size  );
@@ -211,7 +212,7 @@ uint8_t* ZeroBufPlugin::_encodeJpeg(const uint32_t width,
     const int32_t success =
             tjCompress2( _compressor, tjSrcBuffer, width, tjPitch, height,
                         tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
-                        _jpegCompression, tjFlags);
+                        _applicationParameters.getJpegCompression( ), tjFlags);
 
     if(success != 0)
     {

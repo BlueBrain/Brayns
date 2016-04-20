@@ -1,3 +1,12 @@
+<!--
+  Copyright (c) 2011-2016, EPFL/Blue Brain Project
+  All rights reserved. Do not distribute without permission.
+  Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+                      Nicolas Antille <nicolas.antille@epfl.ch>
+ 
+  This file is part of BRayns
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,59 +19,76 @@
 
     <!-- build:css(app) css/main.css -->
     <link rel="stylesheet" href="css/main.css" />
-    <link href="css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="css/visualisation.css" rel="stylesheet"/>
-    <link href="css/bootstrap-slider.css" rel="stylesheet"/>
-    <link href="css/bootstrap-switch.css" rel="stylesheet"/>
-    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet' type='text/css'/>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/visualisation.css" rel="stylesheet" />
+    <link href="css/bootstrap-slider.css" rel="stylesheet" />
+    <link href="css/bootstrap-switch.css" rel="stylesheet" />
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet' type='text/css' />
     <!-- endbuild -->
 </head>
 
 <body>
     <div class="viewport">
-        <span class="helper"></span><img class="image-streamer" id="rendering" src="./images/hippocampus_light.png" height="720">
+        <span class="helper"></span><img class="image-streamer" id="rendering" src="">
     </div>
 
     <div class="ui-container">
         <div class="left-panel panel">
             <h4 class="window-title">Blue Brain Project</h4>
-            <p class="vis-description">Hippocampus region, rattus norvegicus.</p>
-            <hr/>
-            <h4>Visualisation presets</h4>
-            <div class="btn-group-vertical" data-toggle="buttons" id="presets">
-                <label class="btn btn-default active">
-                    <input type="radio" name="options" id="presetsgrow" checked> Growing neurons
-                </label>
-                <label class="btn btn-default">
-                    <input type="radio" name="options" id="presetstouch"> Proximity detection
-                </label>
-                <label class="btn btn-default" disabled>
-                    <input type="radio" name="options" id="presetssimulation"> Neuronal activity
-                </label>
-            </div>
-            <hr/>
-            <button class="btn btn-default" type="button" disabled>Reload circuit</button>
+            <p class="vis-description" align="justify">One of the keys towards understanding how the brain works as a whole is visualisation of how the individual cells function.
+                <br/> The Blue Brain Project has made major efforts to create morphologically accurate neurons to simulate sub-cellular and electrical activities, e.g. molecular simulations of neuron biochemistry or multi-scale simulations of neuronal function. In combination with ‘global illumination’, which uses light, shadow, and depth of field effects to simulate photo-realistic images, ray-tracing makes it easier to visualise how the neurons function.
+                <hr/>
+                <h4>Visualisation presets</h4>
+                <div class="btn-group-vertical" data-toggle="buttons" id="presets">
+                    <label class="btn btn-default active">
+                        <input type="radio" name="options" id="presetsgrow" checked> Default
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="options" id="presetstouch"> Proximity detection
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="options" id="presetssimulation"> Neuronal activity
+                    </label>
+                </div>
         </div>
 
         <div class="right-panel panel">
 
-            <h4 class="category">Environment</h4>
+            <h4 class="category">Global illumination</h4>
             <div class="row">
-                <div class="col-md-6 setting">Ambient occlusion
-                    <input type="checkbox" value="" name="ambientocclusion" id="ambientocclusion">
+                <div class="col-md-2 setting">
+                    <p>
+                        <input type="checkbox" value="" name="ambientocclusion" id="ambientocclusion"> Ambient occlusion
+                    </p>
                 </div>
-                <div class="col-md-6 setting">Shadows
-                    <input type="checkbox" value="" name="shadows" id="shadows">
-                </div>
-                <div class="col-md-6 setting">Directional light
-                    <input type="checkbox" value="" name="shading" id="shading" checked>
+                <div class="col-md-1 setting">
+                    <p>
+                        <input type="checkbox" value="" name="shadows" id="shadows"> Shadows
+                    </p>
                 </div>
             </div>
 
-            <h4 class="category">Appearance</h4>
+            <hr/>
+            <h4 class="category">Shading</h4>
             <div class="row">
-                <div class="col-md-6 setting">"Electron" shading
-                    <input type="checkbox" value="" name="electron-shading" id="electronshading">
+                <div class="col-md-1 setting">
+                    <p>
+                        <input type="checkbox" value="" name="electron-shading" id="electronshading"> Electron</p>
+                </div>
+                <div class="col-md-1 setting">
+                    <p>
+                        <input type="checkbox" value="" name="shading" id="shading" checked> Directional light
+                    </p>
+                </div>
+            </div>
+
+            <hr/>
+            <h4 class="category">Proximity detection</h4>
+            <div class="row">
+                <div class="col-md-1 setting">
+                    <p>
+                        <input type="checkbox" value="" name="detectiononmaterials" id="detectiononmaterials"> Self detection
+                    </p>
                 </div>
             </div>
 
@@ -71,14 +97,19 @@
 
     <div class="bottom-ui-container">
         <div class="bottom-ui">
-            <div class="col-xs-12 col-sm-12 bottom-panel">
-                <a class="btn btn-default" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">  Animation settings</a>
+            <div class="col-xs-1 col-sm-4 bottom-panel">
+                <a class="btn btn-default" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Timeline</a>
                 <div class="collapse" id="collapseExample">
-                    <h4>Timeline</h4>
-                    <input id="timer" data-slider-id='timerSlider' type="text" data-slider-min="0" data-slider-max="1000" data-slider-step="1" data-slider-value="0"/>
-                    <span id="currentSliderLabel"> 
-                        <span id="timerSliderVal">0</span>
-                    </span>
+                    <div class="btn-group-horizontal" data-toggle="buttons" id="presets" align=center>
+                        <input id="timer" data-slider-id='timerSlider' type="text" data-slider-min="0" data-slider-max="10000" data-slider-step="1" data-slider-value="0"/>
+                        <br/>
+                        <label class="btn btn-default">
+                            <input type="radio" name="options" id="play">play
+                        </label>
+                        <label class="btn btn-default active">
+                            <input type="radio" name="options" id="pause" checked>pause
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>

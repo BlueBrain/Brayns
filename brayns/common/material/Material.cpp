@@ -21,4 +21,10 @@ Material::Material()
 {
 }
 
+void Material::setTexture( const TextureType& type,
+                           const std::string& filename )
+{
+    _textures[type] = filename;
+}
+
 }

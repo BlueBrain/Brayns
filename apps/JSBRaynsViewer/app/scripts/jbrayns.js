@@ -20,7 +20,8 @@
 
 'use strict';
 
-var braynsUrl = 'http://128.178.97.241:5000/';
+//var braynsUrl = 'http://128.178.97.241:5000/';
+var braynsUrl = 'http://bbpviz003.cscs.ch:5000/';
 
 // constants
 var SESSION_STATUS_STOPPED = 0;
@@ -44,14 +45,15 @@ var cbElectron = document.getElementById('electronshading');
 var sldTimestamp = document.getElementById('timer');
 var btnPresetsGrow = document.getElementById('presetsgrow');
 var btnPresetsTouch = document.getElementById('presetstouch');
+var btnPresetsSimulation = document.getElementById('presetssimulation');
 
 var currentCameraPos = new THREE.Vector3(0,0,0);
 var initialCameraPos = new THREE.Vector3(0,0,0);
 var initialCameraTarget = new THREE.Vector3(0,0,0);
 var scale = 1.0;
 var accumulation = 0;
-var maxAccumulation = 25;
-var fps = 15;
+var maxAccumulation = 20;
+var fps = 10;
 
 init();
 
@@ -78,6 +80,7 @@ function init() {
     sldTimestamp.onchange = onTimestampChanged;
     btnPresetsGrow.onchange = onPresetsGrowChanged;
     btnPresetsTouch.onchange = onPresetsTouchChanged;
+    btnPresetsSimulation.onchange = onPresetsTouchSimulation;
     onWindowResize();
 }
 
@@ -125,6 +128,11 @@ function onPresetsGrowChanged() {
 
 function onPresetsTouchChanged() {
     sendParameter('renderer', 'proximityrenderer');
+    clearFrame();
+}
+
+function onPresetsTouchSimulation() {
+    sendParameter('renderer', 'simulationrenderer');
     clearFrame();
 }
 
@@ -201,7 +209,7 @@ var statusImage = setInterval(function getImage() {
                 if (event.target.status === 200) {
                     var jsonObject = JSON.parse(event.target.responseText);
                     renderedImage.src = "data:image/jpg;base64," + jsonObject.data;
-                    console.log(accumulation);
+                    console.log('accumulation: ' + accumulation);
                     accumulation = accumulation + 1;
                 }
             });

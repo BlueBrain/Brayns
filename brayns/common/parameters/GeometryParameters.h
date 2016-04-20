@@ -71,9 +71,16 @@ public:
     /** Circuit target */
     std::string getTarget( ) const { return _target; }
 
-    /** Radius multiplier applied to spheres, cones and cylinders */
-    float getRadius( ) const { return _radius; }
+    /** Circuit compartment report */
+    std::string getReport( ) const { return _report; }
+
+    /** Radius multiplier applied to spheres, cones and cylinders.
+     * @param value Radius multiplier. If a negative value is specified, the
+     *        radius contained in the data source is ignored and all geometries
+     *        will use the absolute value of the specified radius.
+     */
     void setRadius( const float value ) { _radius = value; }
+    float getRadius( ) const { return _radius; }
 
     /** Enables a different color for every morphology/mesh when
     * loading them from a given folder
@@ -113,6 +120,7 @@ protected:
     std::string _loadCacheFile;
     std::string _saveCacheFile;
     std::string _target;
+    std::string _report;
     float  _radius;
     ColorScheme _colorScheme;
     SceneEnvironment _sceneEnvironment;

@@ -19,6 +19,17 @@
 namespace brayns
 {
 
+/** Simulation data hold the pointers to data contained by one single frame
+ * of the simulation.
+ * comparmentCounts: Number of compartments per section
+ * comparmentOffsets: Offset for every compartments
+ */
+struct SimulationData
+{
+    const uint16_ts* compartmentCounts;
+    const uint64_ts* compartmentOffsets;
+};
+
 /** Loads morphologies from SWC and H5 files
  */
 class MorphologyLoader
@@ -48,6 +59,25 @@ public:
      * @param target Target to be loaded. If empty, the target specified in the
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
+     * @param report Compartment report to be loaded
+     * @param primitives Resulting primitives (spheres, cones, etc)
+     * @param bounds Bounding box of the whole circuit
+     * @return True if the circuit is successfully loaded, false if the circuit
+     *         contains no cells.
+     */
+    bool importCircuit(
+        const servus::URI& circuitConfig,
+        const std::string& target,
+        const std::string& report,
+        PrimitivesMap& primitives,
+        Boxf& bounds);
+
+    /** Imports morphology from a circuit for the given target name
+     *
+     * @param uri URI of the Circuit Config file
+     * @param target Target to be loaded. If empty, the target specified in the
+     *        circuit configuration file is used. If such an entry does not
+     *        exist, all neurons are loaded.
      * @param primitives Resulting primitives (spheres, cones, etc)
      * @param bounds Bounding box of the whole circuit
      * @return True if the circuit is successfully loaded, false if the circuit
@@ -59,11 +89,32 @@ public:
         PrimitivesMap& primitives,
         Boxf& bounds);
 
+    /** Imports simulation data into a texture. Each frame of the simulation
+     *  is a line of the texture, and simulation values are stored in columns.
+     *  In the current implementation, RGB values are all equal to the
+     *  normalized value of the data againt the whole simulation. In future
+     *  work, R, G and B can be used to store different pieces of information
+     *  that can then be interpreted by simulation renderer.
+     * @param uri URI of the Circuit Config file
+     * @param target Target to be loaded. If empty, the target specified in the
+     *        circuit configuration file is used. If such an entry does not
+     *        exist, all neurons are loaded.
+     * @param report report to be loaded.
+     * @return True if the report is successfully loaded and texture is added
+     *         to cache.
+     */
+    bool importSimulationIntoTexture(
+        const servus::URI& circuitConfig,
+        const std::string& target,
+        const std::string& report,
+        TexturesMap& textures );
+
 private:
     bool _importMorphology(
         const servus::URI& source,
         size_t morphologyIndex,
         const Matrix4f& transformation,
+        const SimulationData* simulationData,
         PrimitivesMap& primitives,
         Boxf& bounds);
 

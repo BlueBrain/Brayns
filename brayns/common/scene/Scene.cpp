@@ -44,21 +44,34 @@ void Scene::setMaterials(
     for( size_t i = 0; i < nbMaterials; ++i )
     {
         MaterialPtr material( new Material );
+
+        // Special materials (Simulation, skybox, etc)
+        switch( i )
+        {
+            case MATERIAL_SIMULATION:
+                if( !_geometryParameters.getReport().empty( ))
+                    material->setTexture( TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
+                break;
+            default:
+                break;
+        }
+
+        // Other materials
         switch( materialType )
         {
         case MT_DEFAULT:
             switch( i )
             {
-                case 0: // Soma
+                case 1: // Soma
                     material->setColor( Vector3f( 1.f, 1.f, 1.f ));
                     break;
-                case 1: // Axon
+                case 2: // Axon
                     material->setColor( Vector3f( 0.1f, 0.1f, 0.9f ));
                     break;
-                case 2: // Dendrite
+                case 3: // Dendrite
                     material->setColor( Vector3f( 0.9f, 0.1f, 0.1f ));
                     break;
-                case 3: // Apical dendrite
+                case 4: // Apical dendrite
                     material->setColor( Vector3f( 0.9f, 0.1f, 0.9f ));
                     break;
                 default:
@@ -222,10 +235,32 @@ void Scene::loadCircuitConfiguration( )
         _geometryParameters.getTarget( );
     BRAYNS_INFO << "Loading circuit configuration from " <<
         filename << std::endl;
+    const std::string& report =
+        _geometryParameters.getReport( );
     MorphologyLoader morphologyLoader( _geometryParameters );
     const servus::URI uri( filename );
-    morphologyLoader.importCircuit(
-        uri, target, _primitives, _bounds );
+    if( report.empty() )
+        morphologyLoader.importCircuit(
+            uri, target, _primitives, _bounds );
+    else
+        morphologyLoader.importCircuit(
+            uri, target, report, _primitives, _bounds );
+}
+
+void Scene::loadCompartmentReport( )
+{
+    const std::string& filename =
+        _geometryParameters.getCircuitConfiguration( );
+    const std::string& target =
+        _geometryParameters.getTarget( );
+    const std::string& report =
+        _geometryParameters.getReport( );
+    BRAYNS_INFO << "Loading compartment report from " <<
+        filename << std::endl;
+    MorphologyLoader morphologyLoader( _geometryParameters );
+    const servus::URI uri( filename );
+    morphologyLoader.importSimulationIntoTexture(
+        uri, target, report, _textures );
 }
 
 void Scene::buildEnvironment( )

@@ -25,20 +25,24 @@ public:
         const Vector3f& center,
         const Vector3f& up,
         float radius,
-        float timestamp = 0.f);
+        float timestamp,
+        float value);
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
     BRAYNS_API const Vector3f& getUp() const { return _up; }
     BRAYNS_API float getRadius() const { return _radius; }
     BRAYNS_API float getTimestamp() const { return _timestamp; }
+    BRAYNS_API float getValue() const { return _value; }
 
     BRAYNS_API virtual size_t serializeData(floats& serializedData);
+    BRAYNS_API static size_t getSerializationSize();
 
 private:
     Vector3f _center;
     Vector3f _up;
     float _radius;
     float _timestamp;
+    float _value;
 };
 
 }

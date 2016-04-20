@@ -9,6 +9,7 @@ set(BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsCommon vmmlib)
 set(BRAYNSPLUGINS_SOURCES
   loaders/MorphologyLoader.cpp
   loaders/ProteinLoader.cpp
+  loaders/TextureLoader.cpp
   extensions/ExtensionPluginFactory.cpp
   extensions/plugins/ExtensionPlugin.cpp
 )
@@ -16,6 +17,7 @@ set(BRAYNSPLUGINS_SOURCES
 set(BRAYNSPLUGINS_PUBLIC_HEADERS
   loaders/MorphologyLoader.h
   loaders/ProteinLoader.h
+  loaders/TextureLoader.h
   extensions/ExtensionPluginFactory.h
   extensions/plugins/ExtensionPlugin.h
 )
@@ -45,8 +47,6 @@ if(TARGET ZeroBuf AND TARGET ZeroEQ)
 endif()
 
 if(MAGICK++_FOUND)
-  list(APPEND BRAYNSPLUGINS_SOURCES loaders/TextureLoader.cpp)
-  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS loaders/TextureLoader.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Magick++)
 endif()
 

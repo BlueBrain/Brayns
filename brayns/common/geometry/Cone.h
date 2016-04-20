@@ -34,6 +34,7 @@ public:
     BRAYNS_API float getUpRadius() const { return _upRadius; }
 
     BRAYNS_API virtual size_t serializeData(floats& serializedData);
+    BRAYNS_API static size_t getSerializationSize();
 
 private:
     Vector3f _center;

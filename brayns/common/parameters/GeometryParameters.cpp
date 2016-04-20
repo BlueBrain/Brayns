@@ -26,6 +26,7 @@ const std::string PARAM_COLOR_SCHEME = "color-scheme";
 const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_TARGET = "target";
+const std::string PARAM_REPORT = "report";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 
@@ -66,6 +67,8 @@ GeometryParameters::GeometryParameters( )
                 "1: Medium rendering, 2: Max quality)" )
         ( PARAM_TARGET.c_str(), po::value< std::string >( ),
             "Circuit target to load" )
+        ( PARAM_REPORT.c_str(), po::value< std::string >( ),
+            "Circuit report to load" )
         ( PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value< size_t > ( ),
             "Morphology section types (1: soma, 2: axon, 4: dendrite, "
             "8: apical dendrite). Values can be added to select more than "
@@ -110,6 +113,8 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
             vm[PARAM_GEOMETRY_QUALITY].as< size_t >( ));
     if( vm.count( PARAM_TARGET ))
         _target = vm[PARAM_TARGET].as< std::string >( );
+    if( vm.count( PARAM_REPORT ))
+        _report = vm[PARAM_REPORT].as< std::string >( );
     if( vm.count( PARAM_MORPHOLOGY_SECTION_TYPES ))
         _morphologySectionTypes =
             vm[PARAM_MORPHOLOGY_SECTION_TYPES].as< size_t >( );
@@ -150,6 +155,8 @@ void GeometryParameters::print( )
         static_cast<size_t>( _geometryQuality ) << std::endl;
     BRAYNS_INFO << "Target                  : " <<
         _target << std::endl;
+    BRAYNS_INFO << "Report                  : " <<
+        _report << std::endl;
     BRAYNS_INFO << "Morphology section types: " <<
         _morphologySectionTypes << std::endl;
     BRAYNS_INFO << "Morphology Layout       : " << std::endl;

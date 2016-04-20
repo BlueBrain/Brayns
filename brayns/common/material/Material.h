@@ -16,17 +16,6 @@
 namespace brayns
 {
 
-// Defines how materials should be created
-enum MaterialType
-{
-    MT_DEFAULT,        // Random colors
-    MT_RANDOM,         // Random materials including transparency, reflection,
-                       // and light emission
-    MT_SHADES_OF_GREY, // 255 shades of grey
-    MT_GRADIENT,       // Gradient from red to yellow
-    MT_PASTEL_COLORS   // Random pastel colors
-};
-
 typedef std::map<TextureType, std::string> TextureTypes;
 
 class Material
@@ -37,13 +26,16 @@ public:
     BRAYNS_API void setColor(const Vector3f& value) { _color = value; }
     BRAYNS_API Vector3f& getColor() { return _color; }
 
-    BRAYNS_API void setSpecularColor(const Vector3f& value) { _specularColor = value; }
+    BRAYNS_API void setSpecularColor(const Vector3f& value)
+    { _specularColor = value; }
     BRAYNS_API Vector3f& getSpecularColor() { return _specularColor; }
 
-    BRAYNS_API void setSpecularExponent(float value) { _specularExponent = value; }
+    BRAYNS_API void setSpecularExponent(float value)
+    { _specularExponent = value; }
     BRAYNS_API float getSpecularExponent() const { return _specularExponent; }
 
-    BRAYNS_API void setReflectionIndex(float value) { _reflectionIndex = value; }
+    BRAYNS_API void setReflectionIndex(float value)
+    { _reflectionIndex = value; }
     BRAYNS_API float getReflectionIndex() const { return _reflectionIndex; }
 
     BRAYNS_API void setOpacity(float value) { _opacity = value; }
@@ -56,6 +48,8 @@ public:
     BRAYNS_API float getEmission() const { return _emission; }
 
     BRAYNS_API TextureTypes& getTextures() { return _textures; }
+    BRAYNS_API void setTexture( const TextureType& type,
+                                const std::string& filename );
 
 private:
     Vector3f _color;

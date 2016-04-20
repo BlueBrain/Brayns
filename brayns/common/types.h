@@ -110,6 +110,8 @@ typedef std::vector< float > floats;
 typedef std::vector< int > ints;
 typedef std::vector< unsigned int > uints;
 typedef std::vector< uint8_t > uint8_ts;
+typedef std::vector< uint16_t > uint16_ts;
+typedef std::vector< uint64_t > uint64_ts;
 typedef std::vector< size_t > size_ts;
 
 class AbstractParameters;
@@ -194,7 +196,23 @@ struct ExtensionParameters
     FrameBufferPtr frameBuffer;
 };
 
-#define NO_MATERIAL -1
+/** Some 'special' materials are used by BRayns to acomplish specific features
+ *  such as simulations, or skyboxes.
+ */
+const size_t NO_MATERIAL = -1;
+const size_t MATERIAL_SIMULATION = 199;
+const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
+
+/** Defines how materials should be created */
+enum MaterialType
+{
+    MT_DEFAULT,        // Random colors
+    MT_RANDOM,         // Random materials including transparency, reflection,
+                       // and light emission
+    MT_SHADES_OF_GREY, // 255 shades of grey
+    MT_GRADIENT,       // Gradient from red to yellow
+    MT_PASTEL_COLORS   // Random pastel colors
+};
 
 enum MeshQuality
 {
@@ -217,7 +235,6 @@ enum CameraType
     CT_ORTHOGRAPHIC,
     CT_PANORAMIC
 };
-
 
 }
 

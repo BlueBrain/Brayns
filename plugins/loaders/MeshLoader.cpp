@@ -26,7 +26,7 @@ bool MeshLoader::importMeshFromFile(
         const std::string& filename,
         MeshContainer& meshContainer,
         MeshQuality meshQuality,
-        const int defaultMaterial )
+        const size_t defaultMaterial )
 {
     const boost::filesystem::path file = filename;
     Assimp::Importer importer;

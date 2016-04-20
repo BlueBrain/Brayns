@@ -106,6 +106,12 @@ public:
     BRAYNS_API void loadCircuitConfiguration();
 
     /**
+        Loads compartment report from circuit configuration (command line
+        parameter --report)
+    */
+    BRAYNS_API void loadCompartmentReport();
+
+    /**
         Build an environment in addition to the loaded data, and according to
         the geometry parameters (command line parameter --scene-environment).
     */

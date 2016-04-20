@@ -27,8 +27,11 @@ public:
     BRAYNS_API size_t getMaterialId() const { return _materialId; }
 
     BRAYNS_API virtual size_t serializeData(floats& serializedData) = 0;
+    BRAYNS_API static size_t getSerializationSize()
+    { return _serializationSize; }
 
 protected:
+    static size_t _serializationSize;
     size_t _materialId;
 };
 

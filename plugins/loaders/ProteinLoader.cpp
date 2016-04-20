@@ -382,7 +382,7 @@ bool ProteinLoader::importPDBFolder(
                 {
                     const size_t defaultMaterial = id%materials.size();
                     SpherePtr sphere(
-                        new Sphere(defaultMaterial, cellPositions.position, 0.05f, 0));
+                        new Sphere(defaultMaterial, cellPositions.position, 0.05f, 0.f, 0.f));
                     primitives[defaultMaterial].push_back(sphere);
                     bounds.merge(sphere->getCenter());
                 }
@@ -548,10 +548,11 @@ bool ProteinLoader::importPDBFile(
 
                 SpherePtr sphere(new Sphere(
                     0, Vector3f(
-                        position[0] + 0.01*atom.position[0],
-                        position[1] + 0.01*atom.position[1],
-                        position[2] + 0.01*atom.position[2]),
-                    0.0001 * atom.radius * _geometryParameters.getRadius(), 0));
+                        position[0] + 0.01f*atom.position[0],
+                        position[1] + 0.01f*atom.position[1],
+                        position[2] + 0.01f*atom.position[2]),
+                    0.0001f * atom.radius * _geometryParameters.getRadius(),
+                    0.f, 0.f));
 
                 if( colorScheme == CS_PROTEIN_BACKBONE )
                 {

@@ -14,25 +14,31 @@ Sphere::Sphere(
     const size_t materialId,
     const Vector3f& center,
     const float radius,
-    const float timestamp)
+    const float timestamp,
+    const float value)
     : Primitive(materialId)
     , _center(center)
     , _radius(radius)
     , _timestamp(timestamp)
+    , _value(value)
 {
     _geometryType = GT_SPHERE;
 }
 
 size_t Sphere::serializeData(floats& serializedData)
 {
-    floats data;
-    data.push_back(_center.x());
-    data.push_back(_center.y());
-    data.push_back(_center.z());
-    data.push_back(_radius);
-    data.push_back(_timestamp);
-    serializedData.insert(std::end(serializedData), std::begin(data), std::end(data));
-    return data.size();
+    serializedData.push_back(_center.x());
+    serializedData.push_back(_center.y());
+    serializedData.push_back(_center.z());
+    serializedData.push_back(_radius);
+    serializedData.push_back(_timestamp);
+    serializedData.push_back(_value);
+    return getSerializationSize();
+}
+
+size_t Sphere::getSerializationSize()
+{
+    return 6;
 }
 
 }
