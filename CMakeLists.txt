@@ -5,13 +5,12 @@
 # This file is part of BRayns
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-
-project(BRayns VERSION 0.1.0)
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
-  ${CMAKE_SOURCE_DIR}/CMake/common)
-include(GitExternal)
-
 set(BRayns_VERSION_ABI 1)
+project(BRayns VERSION 0.1.0)
+
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
+                              ${CMAKE_SOURCE_DIR}/CMake/common)
+include(GitExternal)
 
 set(BRAYNS_DESCRIPTION "Ray-tracing engine")
 
