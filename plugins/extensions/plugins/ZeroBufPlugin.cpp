@@ -71,19 +71,18 @@ void ZeroBufPlugin::_setupHTTPServer()
 
     servus::Serializable& cam = *_extensionParameters.camera->getSerializable( );
     _httpServer->add( cam );
-    cam.setUpdatedFunction( std::bind( &ZeroBufPlugin::_cameraUpdated, this ));
+    cam.registerDeserializedCallback( [this]{ _attributeUpdated(); });
 
     _httpServer->add( _remoteImageJPEG );
-    _remoteImageJPEG.setRequestedFunction(
-        std::bind( &ZeroBufPlugin::_requestImageJPEG, this ));
+    _remoteImageJPEG.registerSerializeCallback( [this]{ _requestImageJPEG(); });
 
     _httpServer->add( _remoteFrameBuffers );
-    _remoteFrameBuffers.setRequestedFunction(
-        std::bind( &ZeroBufPlugin::_requestFrameBuffers, this ));
+    _remoteFrameBuffers.registerSerializeCallback(
+        [this]{ _requestFrameBuffers(); });
 
     _httpServer->add( _remoteAttribute );
-    _remoteAttribute.setUpdatedFunction(
-        std::bind( &ZeroBufPlugin::_attributeUpdated, this ));
+    _remoteAttribute.registerDeserializedCallback(
+        [this]{ _attributeUpdated(); });
 }
 
 void ZeroBufPlugin::_setupRequests()
