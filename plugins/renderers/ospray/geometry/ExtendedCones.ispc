@@ -1,6 +1,9 @@
 /* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Author: Jafet Villafranca Díaz <jafet.villafrancadiaz@epfl.ch>
+ *
+ * Ray-cone intersection:
+ * based on Ching-Kuang Shene (Graphics Gems 5, p. 227-230)
  *
  * This file is part of BRayns
  */
@@ -27,15 +30,13 @@ struct ExtendedCones
     int   materialID;
     int   offset_center;
     int   offset_up;
-    int   offset_radius;
-    int   offset_length;
+    int   offset_centerRadius;
+    int   offset_upRadius;
     int   offset_frame;
     int   offset_materialID;
     int32 numExtendedCones;
     int32 bytesPerCone;
 };
-
-typedef uniform float uniform_float;
 
 void ExtendedCones_bounds(uniform ExtendedCones *uniform geometry,
                           uniform size_t primID,
@@ -43,14 +44,21 @@ void ExtendedCones_bounds(uniform ExtendedCones *uniform geometry,
 {
     uniform uint8 *uniform conePtr =
             geometry->data + geometry->bytesPerCone*primID;
-    uniform float radius = geometry->radius;
-    if (geometry->offset_radius >= 0)
-        radius = *((uniform float *)(conePtr+geometry->offset_radius));
+    uniform float extent = geometry->radius;
+    if (geometry->offset_centerRadius >= 0)
+        extent = *((uniform float *)(conePtr+geometry->offset_centerRadius));
 
+    if (geometry->offset_upRadius >= 0)
+    {
+        uniform float upRadius =
+                *((uniform float *)(conePtr+geometry->offset_upRadius));
+        if (upRadius > extent)
+            extent = upRadius;
+    }
     uniform vec3f v0 = *((uniform vec3f*)(conePtr+geometry->offset_center));
     uniform vec3f v1 = *((uniform vec3f*)(conePtr+geometry->offset_up));
-    bbox = make_box3fa(min(v0,v1)-make_vec3f(radius),
-                       max(v0,v1)+make_vec3f(radius));
+    bbox = make_box3fa(min(v0,v1)-make_vec3f(extent),
+                       max(v0,v1)+make_vec3f(extent));
 }
 
 void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
@@ -60,70 +68,123 @@ void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
     uniform uint8 *uniform conePtr =
             geometry->data + geometry->bytesPerCone*primID;
 
-    uniform float radius = geometry->radius;
-    if (geometry->offset_radius >= 0)
-        radius = *((uniform float *)(conePtr+geometry->offset_radius));
+    uniform float radius0 = geometry->radius;
+    if (geometry->offset_centerRadius >= 0)
+        radius0 = *((uniform float *)(conePtr+geometry->offset_centerRadius));
 
-    uniform float length = geometry->length;
-    if (geometry->offset_length >= 0)
-        length = *((uniform float *)(conePtr+geometry->offset_length));
+    uniform float radius1 = geometry->radius;
+    if (geometry->offset_upRadius >= 0)
+        radius1 = *((uniform float *)(conePtr+geometry->offset_upRadius));
 
     uniform float frame = *((uniform float *)(conePtr+geometry->offset_frame));
     if( frame>ray.time ) return;
 
     uniform vec3f v0 = *((uniform vec3f*)(conePtr+geometry->offset_center));
-    uniform vec3f v1 = v0 + *((uniform vec3f*)(conePtr+geometry->offset_up));
-    const vec3f A = v0 - ray.org;
-    const vec3f B = v1 - ray.org;
-    const float r = radius;
+    uniform vec3f v1 = *((uniform vec3f*)(conePtr+geometry->offset_up));
 
-    const vec3f O = make_vec3f(0.f);
-    const vec3f V = ray.dir;
+    if (radius0 < radius1)
+    {
+        // swap radii and positions, so radius0 and v0 are always at the bottom
+        uniform float tmpRadius = radius1;
+        radius1 = radius0;
+        radius0 = tmpRadius;
 
-    const vec3f AB = B - A;
-    const vec3f AO = O - A;
+        uniform vec3f tmpPos = v1;
+        v1 = v0;
+        v0 = tmpPos;
+    }
 
-    const vec3f AOxAB  = cross(AO,AB);
-    const vec3f VxAB   = cross(V,AB);
-    const float ab2    = dot(AB,AB);
-    const float a      = dot(VxAB,VxAB);
-    const float b      = 2 * dot(VxAB,AOxAB);
-    const float c      = dot(AOxAB,AOxAB) - (r*r * ab2);
+    const vec3f upVector = v1 - v0;
+    const float upLength = length(upVector);
 
-    const float tA = dot(AB,A) * rcp(dot(V,AB));
-    const float tB = dot(AB,B) * rcp(dot(V,AB));
-    const float tAB0 = max(ray.t0,min(tA,tB));
-    const float tAB1 = min(ray.t, max(tA,tB));
+    // Compute the height of the full cone, in order to obtain its vertex
+    const float deltaRadius = radius0 - radius1;
+    const float tanA = deltaRadius / upLength;
+    const float coneHeight = radius0 / tanA;
+    const float squareTanA = tanA*tanA;
+    const float cosA = 1.f / sqrtf(1.f + squareTanA);
 
-    const float radical = b*b-4.f*a*c;
-    if (radical < 0.f) return;
+    const vec3f V = v0 + normalize(upVector) * coneHeight;
+    const vec3f v = normalize(v0 - V);
 
-    const float srad = sqrt(radical);
+    // Normal of the plane P determined by V and ray
+    vec3f n = normalize(cross(ray.dir, V - ray.org));
+    const float dotNV = dot(n, v);
+    if (dotNV > 0.f)
+        n = neg(n);
 
-    const float t_in = (- b - srad) *rcpf(2.f*a);
-    const float t_out= (- b + srad) *rcpf(2.f*a);
+    const float squareCosTheta = 1.f - dotNV*dotNV;
+    const float cosTheta = sqrtf(squareCosTheta);
+    if (cosTheta < cosA)
+        return; // no intersection
 
-    if (t_in >= tAB0 && t_in <= tAB1) {
-        ray.primID = primID;
-        ray.geomID = geometry->geometry.geomID;
-        ray.t = t_in;
-        const vec3f P = ray.org+ray.t*ray.dir - v0;
-        // const vec3f P = ray.t*ray.dir - A;
-        const vec3f V = cross(P,AB);
-        ray.Ng = cross(AB,V);
-        return;
-    } else if (t_out >= tAB0 && t_out <= tAB1) {
-        ray.primID = primID;
-        ray.geomID = geometry->geometry.geomID;
-        ray.t = t_out;
-        const vec3f P = ray.t*ray.dir - A;
-        const vec3f V = cross(P,AB);
-        ray.Ng = cross(AB,V);
-        return;
+    const float squareTanTheta = (1.f - squareCosTheta) / squareCosTheta;
+    const float tanTheta = sqrtf(squareTanTheta);
+
+    // Compute u-v-w coordinate system
+    const vec3f u = normalize(cross(v, n));
+    const vec3f w = normalize(cross(u, v));
+
+    // Circle intersection of cone with plane P
+    const vec3f uComponent = sqrtf(squareTanA - squareTanTheta)*u;
+    const vec3f vwComponent = v + tanTheta*w;
+    const vec3f delta1 = vwComponent + uComponent;
+    const vec3f delta2 = vwComponent - uComponent;
+    const vec3f rayApex = V-ray.org;
+
+    const vec3f normal1 = cross(ray.dir, delta1);
+    const float length1 = length(normal1);
+    const float r1 = dot(cross(rayApex, delta1), normal1) / (length1*length1);
+
+    const vec3f normal2 = cross(ray.dir, delta2);
+    const float length2 = length(normal2);
+    const float r2 = dot(cross(rayApex, delta2), normal2) / (length2*length2);
+
+    float t_in = r1;
+    float t_out = r2;
+    if (r2 > 0.f)
+    {
+        if (r1 > 0.f)
+        {
+            if (r1 > r2)
+            {
+                t_in = r2;
+                t_out = r1;
+            }
+        }
+        else
+            t_in = r2;
+    }
+
+    if (t_in > ray.t0 && t_in < ray.t)
+    {
+        const vec3f p1 = ray.org + t_in*ray.dir;
+        // consider only the parts within the extents of the truncated cone
+        if (dot(p1 - v1, v) > 0.f && dot(p1 - v0, v) < 0.f)
+        {
+            ray.primID = primID;
+            ray.geomID = geometry->geometry.geomID;
+            ray.t = t_in;
+            const vec3f surfaceVec = normalize(p1 - V);
+            ray.Ng = cross(cross(v, surfaceVec), surfaceVec);
+            return;
+        }
+    }
+    if (t_out > ray.t0 && t_out < ray.t)
+    {
+        const vec3f p2 = ray.org + t_out*ray.dir;
+        // consider only the parts within the extents of the truncated cone
+        if (dot(p2 - v1, v) > 0.f && dot(p2 - v0, v) < 0.f)
+        {
+            ray.primID = primID;
+            ray.geomID = geometry->geometry.geomID;
+            ray.t = t_out;
+            const vec3f surfaceVec = normalize(p2 - V);
+            ray.Ng = cross(cross(v, surfaceVec), surfaceVec);
+        }
     }
     return;
 }
-
 
 static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
                                         uniform Model *uniform model,
@@ -177,8 +238,8 @@ export void ExtendedConesGeometry_set(void *uniform _geom,
                                       int   uniform materialID,
                                       int   uniform offset_center,
                                       int   uniform offset_up,
-                                      int   uniform offset_radius,
-                                      int   uniform offset_length,
+                                      int   uniform offset_centerRadius,
+                                      int   uniform offset_upRadius,
                                       int   uniform offset_frame,
                                       int   uniform offset_materialID)
 {
@@ -197,12 +258,12 @@ export void ExtendedConesGeometry_set(void *uniform _geom,
     geom->materialID = materialID;
     geom->bytesPerCone = bytesPerCone;
 
-    geom->offset_center     = offset_center;
-    geom->offset_up         = offset_up;
-    geom->offset_radius     = offset_radius;
-    geom->offset_length     = offset_length;
-    geom->offset_frame      = offset_frame;
-    geom->offset_materialID = offset_materialID;
+    geom->offset_center       = offset_center;
+    geom->offset_up           = offset_up;
+    geom->offset_centerRadius = offset_centerRadius;
+    geom->offset_upRadius     = offset_upRadius;
+    geom->offset_frame        = offset_frame;
+    geom->offset_materialID   = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle,geomID,geom);
     rtcSetBoundsFunction(

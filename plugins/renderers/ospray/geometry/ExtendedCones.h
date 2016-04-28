@@ -25,8 +25,8 @@ struct ExtendedCones : public ospray::Geometry
     size_t bytesPerCone;
     int64 offset_center;
     int64 offset_up;
-    int64 offset_radius;
-    int64 offset_length;
+    int64 offset_centerRadius;
+    int64 offset_upRadius;
     int64 offset_frame;
     int64 offset_materialID;
 

@@ -169,22 +169,24 @@ bool MorphologyLoader::_importMorphology(
                     sample.w() * _geometryParameters.getRadius( ));
 
                 primitives[material].push_back( SpherePtr(
-                    new Sphere( material, position,
-                        std::max( radius, previousRadius ),
-                        distance, offset )));
+                    new Sphere( material, position, radius,
+                                distance, offset)));
                 bounds.merge( position );
 
                 if( position != target )
                 {
-                    primitives[material].push_back( CylinderPtr(
-                        new Cylinder( material, position, target,
-                            previousRadius, distance, offset )));
+                    if (radius == previousRadius)
+                        primitives[material].push_back( CylinderPtr(
+                            new Cylinder( material, position, target,
+                                          previousRadius, 0.f, 0 )));
+                    else
+                        primitives[material].push_back( ConePtr(
+                            new Cone( material, target, position,
+                                      previousRadius, radius, 0 )));
                     bounds.merge( target );
                 }
-
                 previousSample = sample;
             }
-
             ++sectionId;
         }
     }
@@ -193,7 +195,6 @@ bool MorphologyLoader::_importMorphology(
         BRAYNS_ERROR << e.what() << std::endl;
         return false;
     }
-
     return true;
 }
 

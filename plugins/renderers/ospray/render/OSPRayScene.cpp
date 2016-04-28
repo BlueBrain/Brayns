@@ -79,6 +79,14 @@ void OSPRayScene::_saveCacheFile()
         file.write( ( char* )&bufferSize, sizeof( size_t ));
         file.write( ( char* )_serializedCylindersData[materialId].data(),
             bufferSize );
+
+        bufferSize =
+            _serializedConesDataSize[materialId] *
+            Cone::getSerializationSize() *
+            sizeof( float );
+        file.write( ( char* )&bufferSize, sizeof( size_t ));
+        file.write( ( char* )_serializedConesData[materialId].data(),
+            bufferSize );
     }
 
     file.write( ( char* )&_bounds, sizeof( Boxf ));
@@ -133,6 +141,17 @@ void OSPRayScene::_loadCacheFile()
             {
                 _serializedCylindersData[materialId].reserve( bufferSize );
                 file.read( (char*)_serializedCylindersData[materialId].data(),
+                    bufferSize );
+            }
+
+            bufferSize = 0;
+            file.read( (char*)&bufferSize, sizeof( size_t ));
+            _serializedConesDataSize[materialId] = bufferSize /
+                ( Cone::getSerializationSize() * sizeof( float ));
+            if( bufferSize != 0 )
+            {
+                _serializedConesData[materialId].reserve( bufferSize );
+                file.read( (char*)_serializedConesData[materialId].data(),
                     bufferSize );
             }
 
@@ -358,16 +377,19 @@ void OSPRayScene::buildGeometry()
 
     size_t totalNbSpheres = 0;
     size_t totalNbCylinders = 0;
+    size_t totalNbCones = 0;
     for( size_t i = 0; i < _materials.size(); ++i )
     {
         totalNbSpheres += _serializedSpheresDataSize[i];
         totalNbCylinders += _serializedCylindersDataSize[i];
+        totalNbCones += _serializedConesDataSize[i];
     }
 
     BRAYNS_INFO << "--------------------" << std::endl;
     BRAYNS_INFO << "Geometry information" << std::endl;
     BRAYNS_INFO << "Spheres  : " << totalNbSpheres << std::endl;
     BRAYNS_INFO << "Cylinders: " << totalNbCylinders << std::endl;
+    BRAYNS_INFO << "Cones: " << totalNbCones << std::endl;
     BRAYNS_INFO << "--------------------" << std::endl;
 
     if(!_geometryParameters.getSaveCacheFile().empty())

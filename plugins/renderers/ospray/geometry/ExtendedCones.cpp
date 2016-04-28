@@ -21,17 +21,17 @@ ExtendedCones::ExtendedCones()
 
 void ExtendedCones::finalize(ospray::Model *model)
 {
-    radius            = getParam1f("radius",0.01f);
-    length            = getParam1f("length",0.01f);
-    materialID        = getParam1i("materialID",0);
-    bytesPerCone      = getParam1i("bytes_per_extended_cone",9*sizeof(float));
-    offset_center     = getParam1i("offset_center",0);
-    offset_up         = getParam1i("offset_up",3*sizeof(float));
-    offset_radius     = getParam1i("offset_radius",6*sizeof(float));
-    offset_length     = getParam1i("offset_length",7*sizeof(float));
-    offset_frame      = getParam1i("offset_frame",8*sizeof(float));
-    offset_materialID = getParam1i("offset_materialID",-1);
-    data              = getParamData("extendedcones",nullptr);
+    radius              = getParam1f("radius",0.01f);
+    length              = getParam1f("length",0.01f);
+    materialID          = getParam1i("materialID",0);
+    bytesPerCone        = getParam1i("bytes_per_extended_cone",9*sizeof(float));
+    offset_center       = getParam1i("offset_center",0);
+    offset_up           = getParam1i("offset_up",3*sizeof(float));
+    offset_centerRadius = getParam1i("offset_centerRadius",6*sizeof(float));
+    offset_upRadius     = getParam1i("offset_upRadius",7*sizeof(float));
+    offset_frame        = getParam1i("offset_frame",8*sizeof(float));
+    offset_materialID   = getParam1i("offset_materialID",-1);
+    data                = getParamData("extendedcones",nullptr);
 
     if (data.ptr == nullptr || bytesPerCone == 0)
         throw std::runtime_error( "#ospray:geometry/extendedcones: " \
@@ -48,8 +48,8 @@ void ExtendedCones::finalize(ospray::Model *model)
                 materialID,
                 offset_center,
                 offset_up,
-                offset_radius,
-                offset_length,
+                offset_centerRadius,
+                offset_upRadius,
                 offset_frame,
                 offset_materialID);
 }
