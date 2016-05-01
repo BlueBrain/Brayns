@@ -9,7 +9,7 @@
 #ifndef BRAYNSVIEWER_H
 #define BRAYNSVIEWER_H
 
-#include <brayns/common/ui/BaseWindow.h>
+#include <apps/ui/BaseWindow.h>
 
 namespace brayns
 {

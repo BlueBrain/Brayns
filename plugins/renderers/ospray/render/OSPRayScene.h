@@ -23,7 +23,6 @@ public:
     OSPRayScene( RendererMap renderer, GeometryParameters& geometryParameters );
 
     void commit() final;
-    void loadData() final;
     void buildGeometry() final;
 
     OSPModel impl() {return _scene;}

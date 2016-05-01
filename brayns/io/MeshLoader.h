@@ -11,8 +11,8 @@
 #include <brayns/common/types.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
-#include <brayns/common/parameters/GeometryParameters.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
+#include <brayns/parameters/GeometryParameters.h>
 
 #include <string>
 

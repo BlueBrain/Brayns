@@ -5,17 +5,15 @@
  * This file is part of BRayns
  */
 
-#include <time.h>
-
 #include "OSPRayScene.h"
 #include "OSPRayRenderer.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/parameters/GeometryParameters.h>
+#include <brayns/parameters/GeometryParameters.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/light/DirectionalLight.h>
-#include <plugins/loaders/TextureLoader.h>
+#include <brayns/io/TextureLoader.h>
 
 namespace brayns
 {
@@ -52,25 +50,6 @@ void OSPRayScene::commit()
     ospCommit(_scene);
 }
 
-void OSPRayScene::loadData()
-{
-    if(!_geometryParameters.getMorphologyFolder().empty())
-        loadMorphologyFolder();
-
-    if(!_geometryParameters.getPDBFolder().empty())
-        loadPDBFolder();
-
-    if(!_geometryParameters.getMeshFolder().empty())
-        loadMeshFolder();
-
-    if(!_geometryParameters.getCircuitConfiguration().empty() &&
-        _geometryParameters.getLoadCacheFile().empty())
-        loadCircuitConfiguration();
-
-    if(!_geometryParameters.getReport().empty())
-        loadCompartmentReport();
-}
-
 void OSPRayScene::_saveCacheFile()
 {
     const std::string& filename = _geometryParameters.getSaveCacheFile();
@@ -86,13 +65,17 @@ void OSPRayScene::_saveCacheFile()
     for( size_t materialId = 0; materialId < nbMaterials; ++materialId )
     {
         size_t bufferSize =
-            _serializedSpheresDataSize[materialId] * 5 * sizeof( float );
+            _serializedSpheresDataSize[materialId] *
+            Sphere::getSerializationSize() *
+            sizeof( float );
         file.write( ( char* )&bufferSize, sizeof( size_t ));
         file.write( ( char* )_serializedSpheresData[materialId].data(),
             bufferSize );
 
         bufferSize =
-            _serializedCylindersDataSize[materialId] * 9 * sizeof( float );
+            _serializedCylindersDataSize[materialId] *
+            Cylinder::getSerializationSize() *
+            sizeof( float );
         file.write( ( char* )&bufferSize, sizeof( size_t ));
         file.write( ( char* )_serializedCylindersData[materialId].data(),
             bufferSize );
@@ -118,9 +101,6 @@ void OSPRayScene::_saveCacheFile()
 void OSPRayScene::_loadCacheFile()
 {
     _commitMaterials();
-
-    timespec ts_beg, ts_end;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_beg);
 
     const std::string& filename = _geometryParameters.getLoadCacheFile();
     BRAYNS_INFO << "Loading scene from binary file: " << filename << std::endl;
@@ -193,6 +173,7 @@ void OSPRayScene::_loadCacheFile()
                 TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
             _commitMaterials();
         }
+        BRAYNS_INFO << _bounds << std::endl;
     }
     else
     {
@@ -200,11 +181,6 @@ void OSPRayScene::_loadCacheFile()
             " is currently supported" << std::endl;
     }
     file.close();
-
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_end);
-    BRAYNS_INFO << "Scene loaded in " <<
-        (ts_end.tv_sec - ts_beg.tv_sec) +
-        (ts_end.tv_nsec - ts_beg.tv_nsec) / 1e9 << " sec" << std::endl;
 }
 
 void OSPRayScene::_buildParametricOSPGeometry( const size_t materialId )

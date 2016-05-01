@@ -11,7 +11,7 @@
 #include <brayns/common/types.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/geometry/Primitive.h>
-#include <brayns/common/parameters/GeometryParameters.h>
+#include <brayns/parameters/GeometryParameters.h>
 #include <string>
 
 namespace brayns
@@ -33,8 +33,7 @@ public:
         int material,
         const Materials& materials,
         int positionsOnly,
-        PrimitivesMap& primitives,
-        Boxf& bounds );
+        Scene& scene);
 
     /** Imports atoms from a given PDB file
      *
@@ -49,9 +48,7 @@ public:
         const std::string &filename,
         const Vector3f& position,
         int material,
-        const Materials& materials,
-        PrimitivesMap& primitives,
-        Boxf& bounds );
+        Scene& scene);
 
     /** Returns the RGB composants for a given atom index, and according to the
      * JMol scheme

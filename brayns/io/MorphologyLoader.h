@@ -10,7 +10,7 @@
 
 #include <brayns/common/types.h>
 #include <brayns/common/geometry/Primitive.h>
-#include <brayns/common/parameters/GeometryParameters.h>
+#include <brayns/parameters/GeometryParameters.h>
 
 #include <servus/types.h>
 
@@ -50,8 +50,7 @@ public:
     bool importMorphology(
         const servus::URI& uri,
         int morphologyIndex,
-        PrimitivesMap& primitives,
-        Boxf& bounds);
+        Scene& scene);
 
     /** Imports morphology from a circuit for the given target name
      *
@@ -69,8 +68,7 @@ public:
         const servus::URI& circuitConfig,
         const std::string& target,
         const std::string& report,
-        PrimitivesMap& primitives,
-        Boxf& bounds);
+        Scene& scene);
 
     /** Imports morphology from a circuit for the given target name
      *
@@ -86,8 +84,7 @@ public:
     bool importCircuit(
         const servus::URI& circuitConfig,
         const std::string& target,
-        PrimitivesMap& primitives,
-        Boxf& bounds);
+        Scene& scene);
 
     /** Imports simulation data into a texture. Each frame of the simulation
      *  is a line of the texture, and simulation values are stored in columns.
@@ -107,7 +104,7 @@ public:
         const servus::URI& circuitConfig,
         const std::string& target,
         const std::string& report,
-        TexturesMap& textures );
+        Scene& scene );
 
 private:
     bool _importMorphology(

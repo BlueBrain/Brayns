@@ -9,7 +9,7 @@
 #define RENDERER_H
 
 #include <brayns/api.h>
-#include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {

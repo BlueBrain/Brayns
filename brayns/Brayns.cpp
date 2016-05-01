@@ -13,13 +13,19 @@
 #include <brayns/common/light/DirectionalLight.h>
 
 #include <plugins/extensions/ExtensionPluginFactory.h>
-#include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/parameters/ParametersManager.h>
+#include <brayns/io/MorphologyLoader.h>
+#include <brayns/io/ProteinLoader.h>
+#include <brayns/io/MeshLoader.h>
 
 // OSPray specific -> Must be changed to a dynamic plugin
 #include <plugins/renderers/ospray/render/OSPRayRenderer.h>
 #include <plugins/renderers/ospray/render/OSPRayScene.h>
 #include <plugins/renderers/ospray/render/OSPRayFrameBuffer.h>
 #include <plugins/renderers/ospray/render/OSPRayCamera.h>
+
+#include <boost/filesystem.hpp>
+#include <servus/uri.h>
 
 namespace brayns
 {
@@ -32,6 +38,7 @@ struct Brayns::Impl
     {
         ospInit( &argc, argv );
 
+        BRAYNS_INFO << "Parsing command line options" << std::endl;
         _parametersManager.reset( new ParametersManager( ));
         _parametersManager->parse( argc, argv );
         _parametersManager->print( );
@@ -39,6 +46,7 @@ struct Brayns::Impl
         _frameSize =
             _parametersManager->getApplicationParameters( ).getWindowSize( );
 
+        BRAYNS_INFO << "Initialize renderers" << std::endl;
         // Should be implemented with a plugin factory
         _activeRenderer =
             _parametersManager->getRenderingParameters().getRenderer();
@@ -50,6 +58,7 @@ struct Brayns::Impl
             _renderers[renderer].reset(
                 new OSPRayRenderer( renderer, *_parametersManager ));
 
+        BRAYNS_INFO << "Initialize scene" << std::endl;
         _scene.reset( new OSPRayScene( _renderers,
             _parametersManager->getGeometryParameters( )));
 
@@ -60,7 +69,8 @@ struct Brayns::Impl
             Vector3f( 1.f, -1.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
         _scene->addLight( sunLight );
 
-        _scene->loadData( );
+        BRAYNS_INFO << "Build model" << std::endl;
+        loadData( );
         _scene->buildEnvironment( );
         _scene->buildGeometry( );
         _scene->commit( );
@@ -82,6 +92,27 @@ struct Brayns::Impl
     {
     }
 
+    void loadData()
+    {
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        if(!geometryParameters.getMorphologyFolder().empty())
+            _loadMorphologyFolder();
+
+        if(!geometryParameters.getPDBFolder().empty())
+            _loadPDBFolder();
+
+        if(!geometryParameters.getMeshFolder().empty())
+            _loadMeshFolder();
+
+        if(!geometryParameters.getCircuitConfiguration().empty() &&
+            geometryParameters.getLoadCacheFile().empty())
+            _loadCircuitConfiguration();
+
+        if(!geometryParameters.getReport().empty())
+            _loadCompartmentReport();
+    }
+
     void render( const RenderInput& renderInput,
                  RenderOutput& renderOutput )
     {
@@ -91,9 +122,11 @@ struct Brayns::Impl
         _camera->set(
             renderInput.position, renderInput.target, renderInput.up );
 
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
         if( !_extensionPluginFactory )
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
+#endif
 
         _camera->commit();
         _render( );
@@ -114,16 +147,24 @@ struct Brayns::Impl
     {
         _frameBuffer->map( );
 
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
         if( !_extensionPluginFactory )
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
-
+#endif
         _camera->commit();
         _render( );
 
         _frameBuffer->unmap( );
+
+        const Vector2ui windowSize = _parametersManager
+            ->getApplicationParameters()
+            .getWindowSize();
+        if( windowSize != _frameBuffer->getSize( ))
+            reshape(windowSize);
     }
 
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
     void _intializeExtensionPluginFactory( )
     {
         _extensionParameters.parametersManager = _parametersManager;
@@ -136,6 +177,7 @@ struct Brayns::Impl
             _parametersManager->getApplicationParameters( ),
             _extensionParameters ));
     }
+#endif
 
     void reshape( const Vector2ui& frameSize )
     {
@@ -192,7 +234,9 @@ private:
         if( _activeRenderer != renderer )
         {
             _activeRenderer = renderer;
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
             _extensionParameters.renderer = _renderers[_activeRenderer];
+#endif
         }
         _renderers[_activeRenderer]->render( _frameBuffer );
     }
@@ -212,6 +256,165 @@ private:
             static_cast< float >( _frameSize.y()));
     }
 
+    /**
+        Loads data from SWC and H5 files located in the folder specified in the
+        geometry parameters (command line parameter --morphology-folder)
+    */
+    void _loadMorphologyFolder()
+    {
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const boost::filesystem::path& folder =
+            geometryParameters.getMorphologyFolder( );
+        BRAYNS_INFO << "Loading morphologies from " << folder << std::endl;
+        MorphologyLoader morphologyLoader( geometryParameters );
+
+        size_t fileIndex = 0;
+        boost::filesystem::directory_iterator endIter;
+        if( boost::filesystem::exists(folder) &&
+            boost::filesystem::is_directory(folder))
+        {
+            for( boost::filesystem::directory_iterator dirIter( folder );
+                 dirIter != endIter; ++dirIter )
+            {
+                if( boost::filesystem::is_regular_file(dirIter->status( )))
+                {
+                    boost::filesystem::path fileExtension =
+                        dirIter->path( ).extension( );
+                    if( fileExtension==".swc" || fileExtension==".h5" )
+                    {
+                        const std::string& filename = dirIter->path( ).string( );
+                        servus::URI uri( filename );
+                        if( !morphologyLoader.importMorphology(
+                            uri, fileIndex++, *_scene))
+                        {
+                            BRAYNS_ERROR << "Failed to import " <<
+                                filename << std::endl;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+        Loads data from PDB files located in the folder specified in the
+        geometry parameters (command line parameter --pdb-folder)
+    */
+    void _loadPDBFolder()
+    {
+        // Load PDB Folder
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const boost::filesystem::path& folder =
+            geometryParameters.getPDBFolder( );
+        BRAYNS_INFO << "Loading PDB files from " << folder << std::endl;
+        ProteinLoader proteinLoader( geometryParameters );
+        if( !proteinLoader.importPDBFolder(
+            0, _scene->getMaterials(), true, *_scene))
+        {
+            BRAYNS_ERROR << "Failed to import " << folder << std::endl;
+        }
+
+        for( size_t i = 0; i < _scene->getMaterials().size( ); ++i )
+        {
+            float r,g,b;
+            proteinLoader.getMaterialKd( i, r, g, b );
+            MaterialPtr material = _scene->getMaterials()[i];
+            material->setColor( Vector3f( r, g, b ));
+        }
+    }
+
+    /**
+        Loads data from mesh files located in the folder specified in the
+        geometry parameters (command line parameter --mesh-folder)
+    */
+    void _loadMeshFolder()
+    {
+#ifdef BRAYNS_USE_ASSIMP
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const boost::filesystem::path& folder =
+            geometryParameters.getMeshFolder( );
+        BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
+        MeshLoader meshLoader;
+        size_t meshIndex = 0;
+
+        boost::filesystem::directory_iterator endIter;
+        if( boost::filesystem::exists(folder) &&
+            boost::filesystem::is_directory(folder))
+        {
+            for( boost::filesystem::directory_iterator dirIter( folder );
+                 dirIter != endIter; ++dirIter )
+            {
+                if( boost::filesystem::is_regular_file(dirIter->status( )))
+                {
+                    const std::string& filename = dirIter->path( ).string( );
+                    BRAYNS_INFO << "- " << filename << std::endl;
+                    MeshContainer MeshContainer =
+                    {
+                        _scene->getTriangleMeshes(), _scene->getMaterials(),
+                        _scene->getWorldBounds()
+                    };
+                    if(!meshLoader.importMeshFromFile(
+                        filename, MeshContainer, MQ_QUALITY, NO_MATERIAL ))
+                    {
+                        BRAYNS_ERROR << "Failed to import " <<
+                        filename << std::endl;
+                    }
+                    ++meshIndex;
+                }
+            }
+        }
+#endif
+    }
+
+    /**
+        Loads morphologies from circuit configuration (command line parameter
+        --circuit-configuration)
+    */
+    void _loadCircuitConfiguration()
+    {
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const std::string& filename =
+            geometryParameters.getCircuitConfiguration( );
+        const std::string& target =
+            geometryParameters.getTarget( );
+        BRAYNS_INFO << "Loading circuit configuration from " <<
+            filename << std::endl;
+        const std::string& report =
+            geometryParameters.getReport( );
+        MorphologyLoader morphologyLoader( geometryParameters );
+        const servus::URI uri( filename );
+        if( report.empty() )
+            morphologyLoader.importCircuit( uri, target, *_scene );
+        else
+            morphologyLoader.importCircuit( uri, target, report, *_scene );
+    }
+
+    /**
+        Loads compartment report from circuit configuration (command line
+        parameter --report)
+    */
+    void _loadCompartmentReport()
+    {
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const std::string& filename =
+            geometryParameters.getCircuitConfiguration( );
+        const std::string& target =
+            geometryParameters.getTarget( );
+        const std::string& report =
+            geometryParameters.getReport( );
+        BRAYNS_INFO << "Loading compartment report from " <<
+            filename << std::endl;
+        MorphologyLoader morphologyLoader( geometryParameters );
+        const servus::URI uri( filename );
+        morphologyLoader.importSimulationIntoTexture(
+            uri, target, report, *_scene );
+    }
+
     ParametersManagerPtr _parametersManager;
 
     ScenePtr _scene;
@@ -226,8 +429,10 @@ private:
     bool _rendering;
     bool _sceneModified;
 
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
     ExtensionPluginFactoryPtr _extensionPluginFactory;
     ExtensionParameters _extensionParameters;
+#endif
 };
 
 // -------------------------------------------------------------------------------------------------

@@ -8,18 +8,12 @@
 #include "Scene.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/parameters/GeometryParameters.h>
+#include <brayns/parameters/GeometryParameters.h>
 #include <brayns/common/material/Material.h>
-#include <plugins/loaders/MorphologyLoader.h>
-#include <plugins/loaders/ProteinLoader.h>
 
 #include <servus/uri.h>
 
 #include <boost/filesystem.hpp>
-
-#ifdef BRAYNS_USE_ASSIMP
-#  include <plugins/loaders/MeshLoader.h>
-#endif
 
 namespace brayns
 {
@@ -132,135 +126,6 @@ void Scene::setMaterials(
 MaterialPtr Scene::getMaterial( size_t index )
 {
     return _materials[index];
-}
-
-void Scene::loadMorphologyFolder( )
-{
-    const boost::filesystem::path& folder =
-        _geometryParameters.getMorphologyFolder( );
-    BRAYNS_INFO << "Loading morphologies from " << folder << std::endl;
-    MorphologyLoader morphologyLoader( _geometryParameters );
-
-    size_t fileIndex = 0;
-    boost::filesystem::directory_iterator endIter;
-    if( boost::filesystem::exists(folder) &&
-        boost::filesystem::is_directory(folder))
-    {
-        for( boost::filesystem::directory_iterator dirIter( folder );
-             dirIter != endIter; ++dirIter )
-        {
-            if( boost::filesystem::is_regular_file(dirIter->status( )))
-            {
-                boost::filesystem::path fileExtension =
-                    dirIter->path( ).extension( );
-                if( fileExtension==".swc" || fileExtension==".h5" )
-                {
-                    const std::string& filename = dirIter->path( ).string( );
-                    servus::URI uri( filename );
-                    if( !morphologyLoader.importMorphology(
-                        uri, fileIndex++, _primitives, _bounds ))
-                    {
-                        BRAYNS_ERROR << "Failed to import " <<
-                            filename << std::endl;
-                    }
-                }
-            }
-        }
-    }
-}
-
-void Scene::loadPDBFolder( )
-{
-    // Load PDB Folder
-    const boost::filesystem::path& folder = _geometryParameters.getPDBFolder( );
-    BRAYNS_INFO << "Loading PDB files from " << folder << std::endl;
-    ProteinLoader proteinLoader(_geometryParameters);
-    if( !proteinLoader.importPDBFolder(
-        0, _materials, true, _primitives, _bounds ))
-    {
-        BRAYNS_ERROR << "Failed to import " << folder << std::endl;
-    }
-
-    for( size_t i = 0; i < _materials.size( ); ++i )
-    {
-        float r,g,b;
-        proteinLoader.getMaterialKd( i, r, g, b );
-        MaterialPtr material = getMaterial( i );
-        material->setColor( Vector3f( r, g, b ));
-    }
-}
-
-void Scene::loadMeshFolder( )
-{
-#ifdef BRAYNS_USE_ASSIMP
-    const boost::filesystem::path& folder =
-        _geometryParameters.getMeshFolder( );
-    BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
-    MeshLoader meshLoader;
-    size_t meshIndex = 0;
-
-    boost::filesystem::directory_iterator endIter;
-    if( boost::filesystem::exists(folder) &&
-        boost::filesystem::is_directory(folder))
-    {
-        for( boost::filesystem::directory_iterator dirIter( folder );
-             dirIter != endIter; ++dirIter )
-        {
-            if( boost::filesystem::is_regular_file(dirIter->status( )))
-            {
-                const std::string& filename = dirIter->path( ).string( );
-                BRAYNS_INFO << "- " << filename << std::endl;
-                MeshContainer MeshContainer =
-                {
-                    _trianglesMeshes, _materials, _bounds
-                };
-                if(!meshLoader.importMeshFromFile(
-                    filename, MeshContainer, MQ_QUALITY, NO_MATERIAL ))
-                {
-                    BRAYNS_ERROR << "Failed to import " <<
-                    filename << std::endl;
-                }
-                ++meshIndex;
-            }
-        }
-    }
-#endif
-}
-
-void Scene::loadCircuitConfiguration( )
-{
-    const std::string& filename =
-        _geometryParameters.getCircuitConfiguration( );
-    const std::string& target =
-        _geometryParameters.getTarget( );
-    BRAYNS_INFO << "Loading circuit configuration from " <<
-        filename << std::endl;
-    const std::string& report =
-        _geometryParameters.getReport( );
-    MorphologyLoader morphologyLoader( _geometryParameters );
-    const servus::URI uri( filename );
-    if( report.empty() )
-        morphologyLoader.importCircuit(
-            uri, target, _primitives, _bounds );
-    else
-        morphologyLoader.importCircuit(
-            uri, target, report, _primitives, _bounds );
-}
-
-void Scene::loadCompartmentReport( )
-{
-    const std::string& filename =
-        _geometryParameters.getCircuitConfiguration( );
-    const std::string& target =
-        _geometryParameters.getTarget( );
-    const std::string& report =
-        _geometryParameters.getReport( );
-    BRAYNS_INFO << "Loading compartment report from " <<
-        filename << std::endl;
-    MorphologyLoader morphologyLoader( _geometryParameters );
-    const servus::URI uri( filename );
-    morphologyLoader.importSimulationIntoTexture(
-        uri, target, report, _textures );
 }
 
 void Scene::buildEnvironment( )

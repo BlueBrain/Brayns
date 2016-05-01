@@ -304,7 +304,7 @@ inline vec3f ProximityRenderer_shadeRay(
             }
         }
 
-        if (self->detectionDistance>0.f)
+        if (self->detectionDistance>0.f && ray.t<self->detectionDistance*1000.f )
         {
             // Generate random ray and trace it
             vec3f biNormU, biNormV;

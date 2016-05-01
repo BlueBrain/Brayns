@@ -51,35 +51,36 @@ body {
 }
 
 .bottom-ui {
-    height: 100%;
+    height: 50%;
     z-index: 1;
     position: relative;
 }
 
 .bottom-panel {
-    background-color: rgba(245, 245, 245, 0.9);
-    border-radius: 0 !important;
+    background-color: rgba(245, 245, 245, 0.5);
+    border-radius: 5 !important;
     padding: 12px 12px 12px 12px;
     overflow: hidden;
     position: absolute;
-    display: inline-block;
     bottom: 0;
 }
 
 .panel {
-    background-color: rgba(245, 245, 245, 0.9);
-    border-radius: 0 !important;
+    font-size: 11px;
+    background-color: rgba(245, 245, 245, 0.5);
+    border-radius: 5 !important;
     padding: 0px 24px 32px 24px;
-    margin-top: 30px;
+    margin-top: 2px;
 }
 
 .left-panel {
-    width: 250px;
+    width: 200px;
     float: left;
 }
 
 .right-panel {
-    width: 250px;
+    align-content: center;
+    width: 180px;
     float: right;
 }
 
@@ -96,9 +97,18 @@ body {
 	background: #BABABA;
 }
 
-.category {
-    margin-top: 24px;
+.vis-description {
+    text-align: justify
+    font-size: 14px;
+    margin-top: 10px;
     margin-bottom: 0px;
+}
+.category {
+    font-weight: bold;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 5px;
 }
 
 .window-title {

@@ -13,7 +13,7 @@
 
 namespace
 {
-const std::string DEFAULT_RENDERER = "raycast_eyelight";
+const std::string DEFAULT_RENDERER = "exobj";
 
 const std::string PARAM_MODULE = "module";
 const std::string PARAM_RENDERERS = "renderers";
@@ -56,7 +56,7 @@ RenderingParameters::RenderingParameters( )
     , _softShadows( false )
     , _backgroundColor( Vector3f( 0.f, 0.f, 0.f ))
     , _detectionDistance( 1.f )
-    , _detectionOnDifferentMaterial( false )
+    , _detectionOnDifferentMaterial( true )
     , _detectionNearColor( 1.f, 0.f, 0.f )
     , _detectionFarColor( 0.f, 1.f, 0.f )
     , _epsilon( 1.e-4f )

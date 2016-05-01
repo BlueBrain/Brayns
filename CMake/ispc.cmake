@@ -1,5 +1,5 @@
 ## ======================================================================== ##
-## Copyright 2009-2015 Intel Corporation                                    ##
+## Copyright 2009-2016 Intel Corporation                                    ##
 ##                                                                          ##
 ## Licensed under the Apache License, Version 2.0 (the "License");          ##
 ## you may not use this file except in compliance with the License.         ##
@@ -13,140 +13,185 @@
 ## See the License for the specific language governing permissions and      ##
 ## limitations under the License.                                           ##
 ## ======================================================================== ##
-##
-## Adaptation:
-##    - Raphael Dumusc <raphael.dumusc@epfl.ch>, 2015 BlueBrain project
-##
-## Defines macro ispc_compile() for compiling sources with the ispc compiler
-##
-## Input (required):
-##   * ISPC_TARGET_LIST a list of target architectures (sse4 avx avx2)
-## Input (optional):
-##   * ISPC_BINARY path to an ispc executable (default: use ispc in system PATH)
-##   * ISPC_DEFINES Additional definitions for the compiler
-##   * ISPC_INCLUDE_DIR Include directory for the compiler
-##   * THIS_IS_MIC (remove?)
-##   * OSPRAY_BUILD_ISA (remove?)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+# ISPC versions to look for, in decending order (newest first)
+IF(WIN32)
+  SET(ISPC_VERSION_WORKING "1.9.0" "1.8.2")
+ELSE()
+  SET(ISPC_VERSION_WORKING "1.9.0" "1.8.2" "1.8.1")
+ENDIF()
+LIST(GET ISPC_VERSION_WORKING -1 ISPC_VERSION_REQUIRED)
+SET(ISPC_VERSION_RECOMMENDED_KNC "1.8.1")
 
-MACRO(ispc_compile)
-  IF(CMAKE_OSX_ARCHITECTURES STREQUAL "i386")
-    SET(ISPC_ARCHITECTURE "x86")
+IF (NOT ISPC_EXECUTABLE)
+  # try sibling folder as hint for path of ISPC
+  IF (APPLE)
+    SET(ISPC_DIR_SUFFIX "osx")
+  ELSEIF(WIN32)
+    SET(ISPC_DIR_SUFFIX "windows")
   ELSE()
-    SET(ISPC_ARCHITECTURE "x86-64")
+    SET(ISPC_DIR_SUFFIX "linux")
+  ENDIF()
+  FOREACH(ver ${ISPC_VERSION_WORKING})
+    LIST(APPEND ISPC_DIR_HINT ${PROJECT_SOURCE_DIR}/../ispc-v${ver}-${ISPC_DIR_SUFFIX})
+  ENDFOREACH()
+
+  FIND_PROGRAM(ISPC_EXECUTABLE ispc PATHS ${ISPC_DIR_HINT} DOC "Path to the ISPC executable.")
+  IF (NOT ISPC_EXECUTABLE)
+    MESSAGE("********************************************")
+    MESSAGE("Could not find ISPC (looked in PATH and ${ISPC_DIR_HINT})")
+    MESSAGE("")
+    MESSAGE("This version of OSPRay expects you to have a binary install of ISPC minimum version ${ISPC_VERSION_REQUIRED}, and expects it to be found in 'PATH' or in the sibling directory to where the OSPRay source are located. Please go to https://ispc.github.io/downloads.html, select the binary release for your particular platform, and unpack it to ${PROJECT_SOURCE_DIR}/../")
+    MESSAGE("")
+    MESSAGE("If you insist on using your own custom install of ISPC, please make sure that the 'ISPC_EXECUTABLE' variable is properly set in CMake.")
+    MESSAGE("********************************************")
+    MESSAGE(FATAL_ERROR "Could not find ISPC. Exiting.")
+  ELSE()
+    MESSAGE(STATUS "Found Intel SPMD Compiler (ISPC): ${ISPC_EXECUTABLE}")
+  ENDIF()
+ENDIF()
+
+IF(NOT ISPC_VERSION)
+  EXECUTE_PROCESS(COMMAND ${ISPC_EXECUTABLE} --version OUTPUT_VARIABLE ISPC_OUTPUT)
+  STRING(REGEX MATCH " ([0-9]+[.][0-9]+[.][0-9]+)(dev|knl)? " DUMMY "${ISPC_OUTPUT}")
+  SET(ISPC_VERSION ${CMAKE_MATCH_1})
+
+  IF (ISPC_VERSION VERSION_LESS ISPC_VERSION_REQUIRED)
+    MESSAGE(FATAL_ERROR "Need at least version ${ISPC_VERSION_REQUIRED} of Intel SPMD Compiler (ISPC).")
   ENDIF()
 
+  SET(ISPC_VERSION ${ISPC_VERSION} CACHE STRING "ISPC Version")
+  MARK_AS_ADVANCED(ISPC_VERSION)
+  MARK_AS_ADVANCED(ISPC_EXECUTABLE)
+ENDIF()
+
+# warn about recommended ISPC version on KNC
+IF (OSPRAY_MIC AND NOT ISPC_VERSION VERSION_EQUAL ISPC_VERSION_RECOMMENDED_KNC
+    AND NOT OSPRAY_WARNED_KNC_ISPC_VERSION)
+  MESSAGE("Warning: use of ISPC v${ISPC_VERSION_RECOMMENDED_KNC} is recommended on KNC.")
+  SET(OSPRAY_WARNED_KNC_ISPC_VERSION ON CACHE INTERNAL "Warned about recommended ISPC version with KNC.")
+ENDIF()
+
+GET_FILENAME_COMPONENT(ISPC_DIR ${ISPC_EXECUTABLE} PATH)
+
+
+
+# ##################################################################
+# add macro INCLUDE_DIRECTORIES_ISPC() that allows to specify search
+# paths for ISPC sources
+# ##################################################################
+SET(ISPC_INCLUDE_DIR "")
+MACRO (INCLUDE_DIRECTORIES_ISPC)
+  SET(ISPC_INCLUDE_DIR ${ISPC_INCLUDE_DIR} ${ARGN})
+ENDMACRO ()
+
+MACRO (OSPRAY_ISPC_COMPILE)
+  SET(ISPC_ADDITIONAL_ARGS "")
+  SET(ISPC_TARGETS ${OSPRAY_ISPC_TARGET_LIST})
+
+  IF (THIS_IS_MIC)
+    SET(ISPC_TARGET_EXT .cpp)
+    SET(ISPC_TARGET_ARGS generic-16)
+    SET(ISPC_ADDITIONAL_ARGS ${ISPC_ADDITIONAL_ARGS} --opt=force-aligned-memory --emit-c++ --c++-include-file=${PROJECT_SOURCE_DIR}/ospray/common/ISPC_KNC_Backend.h )
+  ELSE()
+    SET(ISPC_TARGET_EXT ${CMAKE_CXX_OUTPUT_EXTENSION})
+    STRING(REPLACE ";" "," ISPC_TARGET_ARGS "${ISPC_TARGETS}")
+  ENDIF()
+
+  IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(ISPC_ARCHITECTURE "x86-64")
+  ELSE()
+    SET(ISPC_ARCHITECTURE "x86")
+  ENDIF()
+
+  SET(ISPC_TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR})
+  INCLUDE_DIRECTORIES(${ISPC_TARGET_DIR})
+
   IF(ISPC_INCLUDE_DIR)
-    STRING(REGEX REPLACE ";" ";-I;" ISPC_INCLUDE_DIR_PARMS "${ISPC_INCLUDE_DIR}")
+    STRING(REPLACE ";" ";-I;" ISPC_INCLUDE_DIR_PARMS "${ISPC_INCLUDE_DIR}")
     SET(ISPC_INCLUDE_DIR_PARMS "-I" ${ISPC_INCLUDE_DIR_PARMS})
   ENDIF()
 
-  IF(THIS_IS_MIC)
-    SET(CMAKE_ISPC_FLAGS --opt=force-aligned-memory --target generic-16 --emit-c++ --c++-include-file=${PROJECT_SOURCE_DIR}/ospray/common/ISPC_KNC_Backend.h  --addressing=32)
+  IF (WIN32 OR "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    SET(ISPC_OPT_FLAGS -O3)
   ELSE()
-    SET(CMAKE_ISPC_TARGET "")
-    SET(COMMA "")
-    FOREACH(target ${ISPC_TARGET_LIST})
-      SET(CMAKE_ISPC_TARGET "${CMAKE_ISPC_TARGET}${COMMA}${target}")
-      SET(COMMA ",")
-    ENDFOREACH()
-    SET(CMAKE_ISPC_FLAGS --target=${CMAKE_ISPC_TARGET} --addressing=32)
+    SET(ISPC_OPT_FLAGS -O2 -g)
   ENDIF()
 
-  IF(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-    SET(CMAKE_ISPC_OPT_FLAGS -O3)
-  ELSE()
-    SET(CMAKE_ISPC_OPT_FLAGS -O2 -g)
+  IF (NOT WIN32)
+    SET(ISPC_ADDITIONAL_ARGS ${ISPC_ADDITIONAL_ARGS} --pic)
   ENDIF()
 
   SET(ISPC_OBJECTS "")
-  FOREACH(src ${ARGN})
-    SET(ISPC_TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
+  FOREACH(src ${ARGN})
     GET_FILENAME_COMPONENT(fname ${src} NAME_WE)
     GET_FILENAME_COMPONENT(dir ${src} PATH)
 
-    IF("${dir}" MATCHES "^/")
-      # ------------------------------------------------------------------
-      # global path name to input, like when we include the embree sources
-      # from a global external embree checkout
-      # ------------------------------------------------------------------
-      STRING(REGEX REPLACE "^/" "${CMAKE_CURRENT_BINARY_DIR}/rebased/" outdir "${dir}")
-      SET(indir "${dir}")
-      SET(input "${indir}/${fname}.ispc")
-    ELSE()
-      # ------------------------------------------------------------------
-      # local path name to input, like local ospray sources
-      # ------------------------------------------------------------------
-      SET(outdir "${CMAKE_CURRENT_BINARY_DIR}/local_${dir}")
-      SET(indir "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
-      SET(input "${indir}/${fname}.ispc")
+    SET(input ${src})
+    IF ("${dir}" MATCHES "^/") # absolute unix-style path to input
+      SET(outdir "${ISPC_TARGET_DIR}/rebased${dir}")
+    ELSEIF ("${dir}" MATCHES "^[A-Z]:") # absolute DOS-style path to input
+      STRING(REGEX REPLACE "^[A-Z]:" "${ISPC_TARGET_DIR}/rebased/" outdir "${dir}")
+    ELSE() # relative path to input
+      SET(outdir "${ISPC_TARGET_DIR}/local_${dir}")
+      SET(input ${CMAKE_CURRENT_SOURCE_DIR}/${src})
     ENDIF()
-    SET(outdirh ${ISPC_TARGET_DIR})
 
     SET(deps "")
-    IF(EXISTS ${outdir}/${fname}.dev.idep)
+    IF (EXISTS ${outdir}/${fname}.dev.idep)
       FILE(READ ${outdir}/${fname}.dev.idep contents)
-      STRING(REGEX REPLACE " " ";"     contents "${contents}")
-      STRING(REGEX REPLACE ";" "\\\\;" contents "${contents}")
-      STRING(REGEX REPLACE "\n" ";"    contents "${contents}")
+      STRING(REPLACE " " ";"     contents "${contents}")
+      STRING(REPLACE ";" "\\\\;" contents "${contents}")
+      STRING(REPLACE "\n" ";"    contents "${contents}")
       FOREACH(dep ${contents})
         IF (EXISTS ${dep})
           SET(deps ${deps} ${dep})
         ENDIF (EXISTS ${dep})
       ENDFOREACH(dep ${contents})
-    ENDIF()
+    ENDIF ()
 
-    LIST(LENGTH ISPC_TARGET_LIST numIspcTargets)
-    IF(THIS_IS_MIC)
-      SET(outputs ${outdir}/${fname}.dev.cpp ${outdirh}/${fname}_ispc.h)
-      SET(main_output ${outdir}/${fname}.dev.cpp)
-      SET(ISPC_OBJECTS ${ISPC_OBJECTS} ${outdir}/${fname}.dev.cpp)
-    ELSEIF("${OSPRAY_BUILD_ISA}" STREQUAL "AVX512")
-      SET(outputs ${outdir}/${fname}.dev.cpp ${outdirh}/${fname}_ispc.h)
-      SET(ISPC_OBJECTS ${ISPC_OBJECTS} ${outdir}/${fname}.dev.cpp)
-      SET(main_output ${outdir}/${fname}.dev.cpp)
-      SET(CMAKE_ISPC_FLAGS --target generic-16 --emit-c++ --c++-include-file=${PROJECT_SOURCE_DIR}/ospray/common/ISPC_KNL_Backend.h  --addressing=32)
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xMIC-AVX512")
-    ELSEIF(${numIspcTargets} EQUAL 1)
-      SET(outputs ${outdir}/${fname}.dev.o ${outdirh}/${fname}_ispc.h)
-      SET(ISPC_OBJECTS ${ISPC_OBJECTS} ${outdir}/${fname}.dev.o)
-      SET(main_output ${outdir}/${fname}.dev.o)
-    ELSE()
-      SET(outputs ${outdir}/${fname}.dev.o ${outdirh}/${fname}_ispc.h)
-      SET(ISPC_OBJECTS ${ISPC_OBJECTS} ${outdir}/${fname}.dev.o)
-      SET(main_output ${outdir}/${fname}.dev.o)
-      FOREACH(target ${ISPC_TARGET_LIST})
-        SET(outputs ${outputs} ${outdir}/${fname}.dev_${target}.o)
-        SET(ISPC_OBJECTS ${ISPC_OBJECTS} ${outdir}/${fname}.dev_${target}.o)
+    SET(results "${outdir}/${fname}.dev${ISPC_TARGET_EXT}")
+
+    # if we have multiple targets add additional object files
+    IF (NOT THIS_IS_MIC)
+      LIST(LENGTH ISPC_TARGETS NUM_TARGETS)
+      IF (NUM_TARGETS EQUAL 1)
+        # workaround link issues to Embree ISPC exports:
+        # we add a 2nd target to force ISPC to add the ISA suffix during name
+        # mangling
+        SET(ISPC_TARGET_ARGS "${ISPC_TARGETS},sse2")
+        LIST(APPEND ISPC_TARGETS sse2)
+      ENDIF()
+      FOREACH(target ${ISPC_TARGETS})
+        # in v1.9.0 ISPC changed the ISA suffix of avx512knl-i32x16 to just 'avx512knl'
+        IF (${target} STREQUAL "avx512knl-i32x16" AND NOT ISPC_VERSION VERSION_LESS "1.9.0")
+          SET(target "avx512knl")
+        ENDIF()
+        SET(results ${results} "${outdir}/${fname}.dev_${target}${ISPC_TARGET_EXT}")
       ENDFOREACH()
     ENDIF()
 
-    if(NOT ISPC_BINARY)
-      set(ISPC_BINARY ispc) # Use the ispc executable in path
-    endif()
-
     ADD_CUSTOM_COMMAND(
-      OUTPUT ${outputs}
-      COMMAND mkdir -p ${outdir} \; ${ISPC_BINARY}
+      OUTPUT ${results} ${ISPC_TARGET_DIR}/${fname}_ispc.h
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${outdir}
+      COMMAND ${ISPC_EXECUTABLE}
       -I ${CMAKE_CURRENT_SOURCE_DIR}
       ${ISPC_INCLUDE_DIR_PARMS}
-      ${ISPC_DEFINES}
       --arch=${ISPC_ARCHITECTURE}
-      --pic
-      ${CMAKE_ISPC_OPT_FLAGS}
+      --addressing=32
+      ${ISPC_OPT_FLAGS}
+      --target=${ISPC_TARGET_ARGS}
       --woff
-      ${CMAKE_ISPC_FLAGS}
       --opt=fast-math
-      -h ${outdirh}/${fname}_ispc.h
+      ${ISPC_ADDITIONAL_ARGS}
+      -h ${ISPC_TARGET_DIR}/${fname}_ispc.h
       -MMM  ${outdir}/${fname}.dev.idep
-      -o ${main_output}
+      -o ${outdir}/${fname}.dev${ISPC_TARGET_EXT}
       ${input}
-      \;
-      DEPENDS ${input}
-      ${deps})
-
+      DEPENDS ${input} ${deps}
+      COMMENT "Building ISPC object ${outdir}/${fname}.dev${ISPC_TARGET_EXT}"
+    )
+    SET(ISPC_OBJECTS ${ISPC_OBJECTS} ${results})
   ENDFOREACH()
-
 ENDMACRO()

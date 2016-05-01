@@ -79,7 +79,6 @@ private:
     float _theta;
     float _phi;
     Vector3f _previousTouchPosition;
-    bool _interaction;
     bool _compressImage;
     size_t _compressionQuality;
     std::string _hostname;

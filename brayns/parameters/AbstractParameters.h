@@ -36,7 +36,7 @@ public:
        @param argv actual command line parameters
        @return a map of the variables identified by the parsing
      */
-    virtual bool parse( int argc, const char **argv );
+    bool parse( int argc, const char **argv );
 
     /**
        Displays the usage of registered parameters

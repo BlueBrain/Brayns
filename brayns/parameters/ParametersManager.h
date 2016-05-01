@@ -11,10 +11,10 @@
 #include <brayns/api.h>
 #include <brayns/common/types.h>
 #include <boost/program_options.hpp>
-#include <brayns/common/parameters/ApplicationParameters.h>
-#include <brayns/common/parameters/RenderingParameters.h>
-#include <brayns/common/parameters/GeometryParameters.h>
-#include <brayns/common/parameters/SceneParameters.h>
+#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/parameters/RenderingParameters.h>
+#include <brayns/parameters/GeometryParameters.h>
+#include <brayns/parameters/SceneParameters.h>
 
 namespace brayns
 {

@@ -7,7 +7,7 @@
 
 #include "ApplicationParameters.h"
 #include <brayns/common/log.h>
-#include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #include <boost/lexical_cast.hpp>
 

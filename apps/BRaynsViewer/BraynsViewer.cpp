@@ -10,7 +10,7 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/log.h>
-#include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
 
 namespace brayns
@@ -55,13 +55,13 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
         break;
     case ']':
         sceneParams.setTimestamp(
-            sceneParams.getTimestamp( ) + _timestampIncrement);
+            sceneParams.getTimestamp( ) + 1);
         BRAYNS_INFO << "Timestamp: " <<
             sceneParams.getTimestamp( ) << std::endl;
         break;
     case '[':
         sceneParams.setTimestamp(
-            sceneParams.getTimestamp( ) - _timestampIncrement);
+            sceneParams.getTimestamp( ) - 1);
         BRAYNS_INFO << "Timestamp: " <<
             sceneParams.getTimestamp( ) << std::endl;
         break;

@@ -68,13 +68,18 @@ if(OSPRAY_CMAKE_DIR)
   include(${OSPRAY_CMAKE_DIR}/mpi.cmake)
 endif()
 
+if(APPLE)
+  set(LIB_EMBREE LIB_EMBREE-NOTFOUND)
+  find_library(LIB_EMBREE embree.2.7.1 ${OSPRAY_ROOT}/lib ${OSPRAY_ROOT}/lib/x86_64-linux-gnu)
+endif()
+
 set(LIB_OSPRAY LIB_OSPRAY-NOTFOUND)
-find_library(LIB_OSPRAY ospray ${OSPRAY_ROOT}/lib)
+find_library(LIB_OSPRAY ospray ${OSPRAY_ROOT}/lib ${OSPRAY_ROOT}/lib/x86_64-linux-gnu)
 if(OSPRAY_MIC)
   # Xeon Phi specific build ops here
 endif()
 
-set(OSPRAY_LIBRARIES ${LIB_OSPRAY})
+set(OSPRAY_LIBRARIES ${LIB_OSPRAY} ${LIB_EMBREE})
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OSPRay DEFAULT_MSG

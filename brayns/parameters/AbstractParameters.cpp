@@ -19,13 +19,24 @@ bool AbstractParameters::parse( int argc, const char **argv )
     for( int i = 1; i < argc; ++i )
         _arguments.push_back(argv[i]);
 
-    po::variables_map vm;
-    po::parsed_options parsedOptions =
-        po::command_line_parser( argc, argv ).options( _parameters ).
-        allow_unregistered( ).run( );
-    po::store( parsedOptions, vm );
-    po::notify(vm);
-    _parse( vm );
+    try
+    {
+        po::variables_map vm;
+        po::parsed_options parsedOptions =
+            po::command_line_parser( argc, argv )
+                .options( _parameters )
+                .allow_unregistered( )
+                .run( );
+        po::store( parsedOptions, vm );
+        po::notify(vm);
+        _parse( vm );
+    }
+    catch( po::error& e )
+    {
+        BRAYNS_ERROR << e.what() << std::endl;
+        return false;
+    }
+
     return true;
 }
 

@@ -34,11 +34,11 @@
 
     <div class="ui-container">
         <div class="left-panel panel">
-            <h4 class="window-title">Blue Brain Project</h4>
+            <h4 class="category">Blue Brain Project</h4>
             <p class="vis-description" align="justify">One of the keys towards understanding how the brain works as a whole is visualisation of how the individual cells function.
                 <br/> The Blue Brain Project has made major efforts to create morphologically accurate neurons to simulate sub-cellular and electrical activities, e.g. molecular simulations of neuron biochemistry or multi-scale simulations of neuronal function. In combination with ‘global illumination’, which uses light, shadow, and depth of field effects to simulate photo-realistic images, ray-tracing makes it easier to visualise how the neurons function.
                 <hr/>
-                <h4>Visualisation presets</h4>
+                <h4 class="category">Visualisation presets</h4>
                 <div class="btn-group-vertical" data-toggle="buttons" id="presets">
                     <label class="btn btn-default active">
                         <input type="radio" name="options" id="presetsgrow" checked> Default
@@ -56,52 +56,32 @@
 
             <h4 class="category">Global illumination</h4>
             <div class="row">
-                <div class="col-md-2 setting">
-                    <p>
+                <br/>
+                
                         <input type="checkbox" value="" name="ambientocclusion" id="ambientocclusion"> Ambient occlusion
-                    </p>
-                </div>
-                <div class="col-md-1 setting">
-                    <p>
+                <br/>
+                <br/>
                         <input type="checkbox" value="" name="shadows" id="shadows"> Shadows
-                    </p>
-                </div>
             </div>
-
             <hr/>
             <h4 class="category">Shading</h4>
             <div class="row">
-                <div class="col-md-1 setting">
-                    <p>
-                        <input type="checkbox" value="" name="electron-shading" id="electronshading"> Electron</p>
-                </div>
-                <div class="col-md-1 setting">
-                    <p>
-                        <input type="checkbox" value="" name="shading" id="shading" checked> Directional light
-                    </p>
-                </div>
+                <input type="checkbox" value="" name="electron-shading" id="electronshading"> Electron
+                <br/>
+                <br/>
+                <input type="checkbox" value="" name="shading" id="shading" checked> Directional light
             </div>
-
-            <hr/>
-            <h4 class="category">Proximity detection</h4>
-            <div class="row">
-                <div class="col-md-1 setting">
-                    <p>
-                        <input type="checkbox" value="" name="detectiononmaterials" id="detectiononmaterials"> Self detection
-                    </p>
-                </div>
-            </div>
-
         </div>
     </div>
 
     <div class="bottom-ui-container">
         <div class="bottom-ui">
-            <div class="col-xs-1 col-sm-4 bottom-panel">
+            <div class="col-xs-0 col-sm-12 bottom-panel">
                 <a class="btn btn-default" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Timeline</a>
                 <div class="collapse" id="collapseExample">
                     <div class="btn-group-horizontal" data-toggle="buttons" id="presets" align=center>
-                        <input id="timer" data-slider-id='timerSlider' type="text" data-slider-min="0" data-slider-max="10000" data-slider-step="1" data-slider-value="0"/>
+                        <input id="timer" data-slider-id='timerSlider' type="text" data-slider-min="0" data-slider-max="2000" data-slider-step="1" data-slider-value="0"/>
+                        <!--
                         <br/>
                         <label class="btn btn-default">
                             <input type="radio" name="options" id="play">play
@@ -109,6 +89,7 @@
                         <label class="btn btn-default active">
                             <input type="radio" name="options" id="pause" checked>pause
                         </label>
+                        -->
                     </div>
                 </div>
             </div>

@@ -10,6 +10,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 #include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/scene/Scene.h>
 
 #include <assert.h>
 #include <fstream>
@@ -299,8 +300,7 @@ bool ProteinLoader::importPDBFolder(
     const int material,
     const Materials& materials,
     const int positionsOnly,
-    PrimitivesMap& primitives,
-    Boxf& bounds)
+    Scene& scene)
 {
     BRAYNS_INFO << "Folder   : " << _geometryParameters.getPDBFolder() << std::endl;
     BRAYNS_INFO << "Cells    : " << _geometryParameters.getPDBCells() << std::endl;
@@ -383,15 +383,15 @@ bool ProteinLoader::importPDBFolder(
                     const size_t defaultMaterial = id%materials.size();
                     SpherePtr sphere(
                         new Sphere(defaultMaterial, cellPositions.position, 0.05f, 0.f, 0.f));
-                    primitives[defaultMaterial].push_back(sphere);
-                    bounds.merge(sphere->getCenter());
+                    scene.getPrimitives()[defaultMaterial].push_back(sphere);
+                    scene.getWorldBounds().merge(sphere->getCenter());
                 }
                 else
                 {
                     const std::string pdbFilename(
                         _geometryParameters.getPDBFolder() + '/' + proteins[id] + ".pdb");
                     if(!importPDBFile(pdbFilename, cellPositions.position,
-                        material, materials, primitives, bounds))
+                        material, scene))
                         BRAYNS_WARN << "Failed to import " << pdbFilename << std::endl;
 
                     const size_t step = totalNbProteins/10;
@@ -416,9 +416,7 @@ bool ProteinLoader::importPDBFile(
     const std::string &filename,
     const Vector3f& position,
     const int material,
-    const Materials& materials,
-    PrimitivesMap& primitives,
-    Boxf& bounds)
+    Scene& scene)
 {
     Vector3f inViewPos(0,0,0);
     float inViewRadius = 1.0;
@@ -515,11 +513,13 @@ bool ProteinLoader::importPDBFile(
                             {
                             case CS_PROTEIN_CHAINS:
                                 atom.materialId =
-                                        abs(atom.chainId) % materials.size();
+                                    abs(atom.chainId) %
+                                        scene.getMaterials().size();
                                 break;
                             case CS_PROTEIN_RESIDUES:
                                 atom.materialId =
-                                        abs(atom.residue) % materials.size();
+                                    abs(atom.residue) %
+                                        scene.getMaterials().size();
                                 break;
                             case CS_PROTEIN_BACKBONE:
                                 atom.materialId = 0;
@@ -561,12 +561,12 @@ bool ProteinLoader::importPDBFile(
                     if( dist > inViewRadius )
                     {
                         atom.materialId = ( dist < (inViewRadius+0.1) ) ? 1 : 0;
-                        primitives[atom.materialId].push_back(sphere);
+                        scene.getPrimitives()[atom.materialId].push_back(sphere);
                     }
                 }
                 else
-                    primitives[atom.materialId].push_back(sphere);
-                bounds.merge(sphere->getCenter());
+                    scene.getPrimitives()[atom.materialId].push_back(sphere);
+                scene.getWorldBounds().merge(sphere->getCenter());
             }
         }
         file.close();

@@ -67,11 +67,6 @@ public:
     BRAYNS_API MaterialPtr getMaterial( size_t index );
 
     /**
-        Loads data from data source specified in the geometry parameters
-    */
-    BRAYNS_API virtual void loadData() = 0;
-
-    /**
         Converts scene geometry into rendering engine specific data structures
     */
     BRAYNS_API virtual void buildGeometry() = 0;
@@ -79,37 +74,7 @@ public:
     /**
         Returns the bounding box for the whole scene
     */
-    BRAYNS_API const Boxf& getWorldBounds() const { return _bounds; }
-
-    /**
-        Loads data from SWC and H5 files located in the folder specified in the
-        geometry parameters (command line parameter --morphology-folder)
-    */
-    BRAYNS_API void loadMorphologyFolder();
-
-    /**
-        Loads data from PDB files located in the folder specified in the
-        geometry parameters (command line parameter --pdb-folder)
-    */
-    BRAYNS_API void loadPDBFolder();
-
-    /**
-        Loads data from mesh files located in the folder specified in the
-        geometry parameters (command line parameter --mesh-folder)
-    */
-    BRAYNS_API void loadMeshFolder();
-
-    /**
-        Loads morphologies from circuit configuration (command line parameter
-        --circuit-configuration)
-    */
-    BRAYNS_API void loadCircuitConfiguration();
-
-    /**
-        Loads compartment report from circuit configuration (command line
-        parameter --report)
-    */
-    BRAYNS_API void loadCompartmentReport();
+    BRAYNS_API Boxf& getWorldBounds() { return _bounds; }
 
     /**
         Build an environment in addition to the loaded data, and according to
@@ -136,6 +101,14 @@ public:
         Removes all light sources from the scene
     */
     BRAYNS_API void clearLights();
+
+
+    BRAYNS_API RendererMap& getRenderers() { return _renderers; }
+    BRAYNS_API GeometryParameters& getGeometryParameters() { return _geometryParameters; }
+    BRAYNS_API PrimitivesMap& getPrimitives() { return _primitives; }
+    BRAYNS_API Materials& getMaterials() { return _materials; }
+    BRAYNS_API TexturesMap& getTextures() { return _textures; }
+    BRAYNS_API TrianglesMeshMap& getTriangleMeshes() { return _trianglesMeshes; }
 
 protected:
     // Parameters

@@ -9,8 +9,8 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/log.h>
-#include <brayns/common/parameters/ParametersManager.h>
-#include <brayns/common/parameters/SceneParameters.h>
+#include <brayns/parameters/ParametersManager.h>
+#include <brayns/parameters/SceneParameters.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/renderer/FrameBuffer.h>
@@ -172,6 +172,7 @@ void BaseWindow::reshape(const Vector2i& newSize)
     _windowSize = newSize;
     _viewPort.setAspect(float(newSize.x( ))/float(newSize.y( )));
     _brayns->reshape(newSize);
+    _brayns->getParametersManager().getApplicationParameters().setWindowSize(newSize);
     forceRedraw( );
 }
 
@@ -235,6 +236,10 @@ void BaseWindow::display( )
     if( camera.getUpVector( ) != _viewPort.getUp( ))
         _viewPort.setUp( camera.getUpVector( ) );
 #endif
+
+    const Vector2ui windowSize = _brayns->getParametersManager().getApplicationParameters().getWindowSize();
+    if( windowSize != _windowSize )
+        glutReshapeWindow(windowSize.x(), windowSize.y());
     ++frameCounter_;
 }
 

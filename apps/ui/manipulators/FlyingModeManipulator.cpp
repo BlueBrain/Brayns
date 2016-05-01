@@ -5,7 +5,7 @@
  * This file is part of BRayns
  */
 
-#include <brayns/common/ui/BaseWindow.h>
+#include <apps/ui/BaseWindow.h>
 
 #include "FlyingModeManipulator.h"
 

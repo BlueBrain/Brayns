@@ -10,7 +10,7 @@
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/parameters/ParametersManager.h>
+#include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/camera.h>
 #include <zerobuf/render/frameBuffers.h>
 #include <zeroeq/hbp/vocabulary.h>
@@ -71,18 +71,19 @@ void ZeroBufPlugin::_setupHTTPServer()
 
     servus::Serializable& cam = *_extensionParameters.camera->getSerializable( );
     _httpServer->add( cam );
-    cam.registerDeserializedCallback( [this]{ _attributeUpdated(); });
+    cam.registerDeserializedCallback( std::bind( &ZeroBufPlugin::_cameraUpdated, this ));
 
     _httpServer->add( _remoteImageJPEG );
-    _remoteImageJPEG.registerSerializeCallback( [this]{ _requestImageJPEG(); });
+    _remoteImageJPEG.registerSerializeCallback(
+        std::bind( &ZeroBufPlugin::_requestImageJPEG, this ));
 
     _httpServer->add( _remoteFrameBuffers );
     _remoteFrameBuffers.registerSerializeCallback(
-        [this]{ _requestFrameBuffers(); });
+        std::bind( &ZeroBufPlugin::_requestFrameBuffers, this ));
 
     _httpServer->add( _remoteAttribute );
     _remoteAttribute.registerDeserializedCallback(
-        [this]{ _attributeUpdated(); });
+        std::bind( &ZeroBufPlugin::_attributeUpdated, this ));
 }
 
 void ZeroBufPlugin::_setupRequests()
@@ -115,16 +116,6 @@ void ZeroBufPlugin::_attributeUpdated( )
     _extensionParameters.parametersManager->set(
         _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
     _extensionParameters.renderer->commit();
-
-    const Vector2ui currentSize = _extensionParameters.frameBuffer->getSize();
-    const Vector2ui newSize = _extensionParameters.parametersManager->
-        getApplicationParameters().getWindowSize();
-    if( currentSize != newSize )
-    {
-        _extensionParameters.frameBuffer->resize( newSize );
-        _extensionParameters.camera->setAspectRatio(
-            float(newSize.x())/float(newSize.y( )));
-    }
     _extensionParameters.frameBuffer->clear();
 }
 

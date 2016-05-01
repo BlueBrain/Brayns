@@ -12,6 +12,7 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/material/Texture2D.h>
+#include <brayns/common/scene/Scene.h>
 
 #ifdef BRAYNS_USE_BRION
 #  include <brain/brain.h>
@@ -31,12 +32,12 @@ MorphologyLoader::MorphologyLoader(
 bool MorphologyLoader::importMorphology(
     const servus::URI& uri,
     const int morphologyIndex,
-    PrimitivesMap& primitives,
-    Boxf& bounds)
+    Scene& scene)
 {
     return _importMorphology(
         uri, morphologyIndex, Matrix4f(),
-        0, primitives, bounds );
+        0, scene.getPrimitives(),
+        scene.getWorldBounds() );
 }
 
 bool MorphologyLoader::_importMorphology(
@@ -199,8 +200,7 @@ bool MorphologyLoader::_importMorphology(
 bool MorphologyLoader::importCircuit(
     const servus::URI& circuitConfig,
     const std::string& target,
-    PrimitivesMap& primitives,
-    Boxf& bounds)
+    Scene& scene)
 {
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc( filename );
@@ -227,14 +227,14 @@ bool MorphologyLoader::importCircuit(
             const auto& uri = uris[i];
             _importMorphology(
                 uri, i, transforms[i], 0,
-                private_primitives, bounds );
+                private_primitives, scene.getWorldBounds());
         }
         #pragma omp critical
         for( const auto& p: private_primitives )
         {
             const size_t material = p.first;
-            primitives[material].insert(
-                primitives[material].end(),
+            scene.getPrimitives()[material].insert(
+                scene.getPrimitives()[material].end(),
                 private_primitives[material].begin(),
                 private_primitives[material].end());
         }
@@ -247,8 +247,7 @@ bool MorphologyLoader::importCircuit(
     const servus::URI& circuitConfig,
     const std::string& target,
     const std::string& report,
-    PrimitivesMap& primitives,
-    Boxf& bounds)
+    Scene& scene)
 {
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc( filename );
@@ -302,14 +301,14 @@ bool MorphologyLoader::importCircuit(
             _importMorphology(
                 uri, i, transforms[i],
                 &simulationData,
-                private_primitives, bounds );
+                private_primitives, scene.getWorldBounds() );
         }
         #pragma omp critical
         for( const auto& p: private_primitives )
         {
             const size_t material = p.first;
-            primitives[material].insert(
-                primitives[material].end(),
+            scene.getPrimitives()[material].insert(
+                scene.getPrimitives()[material].end(),
                 private_primitives[material].begin(),
                 private_primitives[material].end());
         }
@@ -317,46 +316,12 @@ bool MorphologyLoader::importCircuit(
 
     return true;
 }
-#else
-bool MorphologyLoader::importMorphology(
-    const servus::URI&, const int, PrimitivesMap& , Boxf& )
-{
-    BRAYNS_ERROR << "Brion is required to load morphologies" << std::endl;
-    return false;
-}
-
-bool MorphologyLoader::importCircuit(
-    const servus::URI&, const std::string&, PrimitivesMap&, Boxf& )
-{
-    BRAYNS_ERROR << "Brion is required to load morphologies" << std::endl;
-    return false;
-}
-#endif
-
-size_t MorphologyLoader::_material(
-    const size_t morphologyIndex,
-    const size_t sectionType )
-{
-    size_t material;
-    switch( _geometryParameters.getColorScheme() )
-    {
-    case CS_NEURON_BY_ID:
-        material = morphologyIndex % DEFAULT_NB_MATERIALS;
-        break;
-    case CS_NEURON_BY_SEGMENT_TYPE:
-        material = sectionType % DEFAULT_NB_MATERIALS;
-        break;
-    default:
-        material = 0;
-    }
-    return material;
-}
 
 bool MorphologyLoader::importSimulationIntoTexture(
     const servus::URI& circuitConfig,
     const std::string& target,
     const std::string& report,
-    TexturesMap& textures )
+    Scene& scene )
 {
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc( filename );
@@ -444,8 +409,60 @@ bool MorphologyLoader::importSimulationIntoTexture(
         }
     }
     texture->setRawData( data.data(), totalSize * nbChannels );
-    textures[TEXTURE_NAME_SIMULATION] = texture;
+    scene.getTextures()[TEXTURE_NAME_SIMULATION] = texture;
     return true;
 }
+#else
+bool MorphologyLoader::importMorphology(
+    const servus::URI&, const int, Scene& )
+{
+    BRAYNS_ERROR << "Brion is required to load morphologies" << std::endl;
+    return false;
+}
+
+bool MorphologyLoader::importCircuit(
+    const servus::URI&, const std::string&, Scene& )
+{
+    BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
+    return false;
+}
+
+bool MorphologyLoader::importCircuit(
+    const servus::URI&, const std::string&, const std::string&, Scene& )
+{
+    BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
+    return false;
+}
+
+bool MorphologyLoader::importSimulationIntoTexture(
+    const servus::URI&,
+    const std::string&,
+    const std::string&,
+    Scene& )
+{
+    BRAYNS_ERROR << "Brion is required to load simulations" << std::endl;
+    return false;
+}
+#endif
+
+size_t MorphologyLoader::_material(
+    const size_t morphologyIndex,
+    const size_t sectionType )
+{
+    size_t material;
+    switch( _geometryParameters.getColorScheme() )
+    {
+    case CS_NEURON_BY_ID:
+        material = morphologyIndex % DEFAULT_NB_MATERIALS;
+        break;
+    case CS_NEURON_BY_SEGMENT_TYPE:
+        material = sectionType % DEFAULT_NB_MATERIALS;
+        break;
+    default:
+        material = 0;
+    }
+    return material;
+}
+
 
 }

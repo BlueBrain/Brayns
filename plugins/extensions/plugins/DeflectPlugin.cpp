@@ -21,7 +21,6 @@ DeflectPlugin::DeflectPlugin(
     , _theta( 0.f )
     , _phi( 0.f )
     , _previousTouchPosition( 0.5f, 0.5f, -1.f )
-    , _interaction(false)
     , _compressImage( applicationParameters.getJpegCompression( ) != 100 )
     , _compressionQuality( applicationParameters.getJpegCompression( ))
     , _hostname( _applicationParameters.getDeflectHostname( ))

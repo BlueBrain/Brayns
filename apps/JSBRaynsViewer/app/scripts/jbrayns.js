@@ -20,8 +20,7 @@
 
 'use strict';
 
-//var braynsUrl = 'http://128.178.97.241:5000/';
-var braynsUrl = 'http://bbpviz003.cscs.ch:5000/';
+var braynsUrl = 'http://192.168.0.14:5000/';
 
 // constants
 var SESSION_STATUS_STOPPED = 0;
@@ -65,9 +64,9 @@ function init() {
         matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1, 1]
     };
     controls = new THREE.OrbitControls(camera);
-    controls.rotateSpeed = 1.0;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 0.8;
+    controls.rotateSpeed = 0.2;
+    controls.zoomSpeed = 0.2;
+    controls.panSpeed = 0.2;
     controls.noZoom = false;
     controls.noPan = false;
     controls.staticMoving = true;
@@ -177,7 +176,7 @@ var statusImage = setInterval(function getImage() {
             firstCameraRetrieved = true;
         });
     }
-    
+
     controls.update();
     if( firstCameraRetrieved ) {
         if ( currentCameraPos.x !== camera.position.x) {
@@ -196,7 +195,7 @@ var statusImage = setInterval(function getImage() {
             accumulation = 0;
         }
 
-        if( !rendering && accumulation < maxAccumulation ) 
+        if( !rendering && accumulation < maxAccumulation )
         {
             rendering = true;
             /*
@@ -204,7 +203,7 @@ var statusImage = setInterval(function getImage() {
             sendParameter('jpeg-compression', compression);
             console.log(compression);
             */
-            
+
             doRequest('GET', braynsUrl + 'zerobuf/render/imagejpeg', function (event) {
                 if (event.target.status === 200) {
                     var jsonObject = JSON.parse(event.target.responseText);
@@ -213,7 +212,7 @@ var statusImage = setInterval(function getImage() {
                     accumulation = accumulation + 1;
                 }
             });
-            
+
             rendering = false;
         }
     }

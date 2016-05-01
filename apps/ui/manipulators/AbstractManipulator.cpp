@@ -18,7 +18,7 @@
 #  include <GL/freeglut_ext.h>
 #endif
 
-#include <brayns/common/ui/BaseWindow.h>
+#include <apps/ui/BaseWindow.h>
 #include "AbstractManipulator.h"
 
 namespace brayns
@@ -29,7 +29,11 @@ void AbstractManipulator::keypress( const int32 key )
     switch( key )
     {
     case 'Q':
+#ifdef __APPLE__
+        exit(0);
+#else
         glutLeaveMainLoop();
+#endif
         break;
     }
 }

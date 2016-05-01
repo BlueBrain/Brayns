@@ -60,7 +60,7 @@ void StereoCamera::initRay(ospray::Ray &ray, const osp::vec2f &sample)
 {
     ray.org = pos;
     ray.dir = dir_00
-            + sample.x * dir_du / 2
+            + sample.x * 0.5f * dir_du
             + sample.y * dir_dv;
 
     ray.dir = normalize(ray.dir);

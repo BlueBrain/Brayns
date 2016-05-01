@@ -4,32 +4,20 @@
 #
 # This file is part of BRayns
 
-set(BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsCommon vmmlib)
+set(BRAYNSPLUGINS_LINK_LIBRARIES 
+  PUBLIC braynsCommon vmmlib)
 
 set(BRAYNSPLUGINS_SOURCES
-  loaders/MorphologyLoader.cpp
-  loaders/ProteinLoader.cpp
-  loaders/TextureLoader.cpp
-  extensions/ExtensionPluginFactory.cpp
   extensions/plugins/ExtensionPlugin.cpp
 )
 
 set(BRAYNSPLUGINS_PUBLIC_HEADERS
-  loaders/MorphologyLoader.h
-  loaders/ProteinLoader.h
-  loaders/TextureLoader.h
-  extensions/ExtensionPluginFactory.h
   extensions/plugins/ExtensionPlugin.h
 )
 
-if(TARGET Brion)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Brion Brain)
-endif()
-
-if(ASSIMP_FOUND)
-  list(APPEND BRAYNSPLUGINS_SOURCES loaders/MeshLoader.cpp)
-  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS loaders/MeshLoader.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES assimp)
+if(DEFLECT_FOUND OR (TARGET ZeroBuf AND TARGET ZeroEQ))
+  list(APPEND BRAYNSPLUGINS_SOURCES extensions/ExtensionPluginFactory.cpp)
+  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/ExtensionPluginFactory.h)
 endif()
 
 if(DEFLECT_FOUND)

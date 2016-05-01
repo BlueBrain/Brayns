@@ -87,8 +87,13 @@ set_property(CACHE BRAYNS_BUILD_ISA PROPERTY STRINGS ALL SSE AVX AVX2)
 # BRAYNS applications and libraries
 # ------------------------------------------------------------------------------
 
+if(APPLE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework OpenGL -Wno-narrowing -Wno-deprecated-declarations")
+endif()
+
 add_subdirectory(plugins)
 add_subdirectory(brayns)
+add_subdirectory(apps/ui)
 
 option(BRAYNS_VIEWER_ENABLED "BRayns Viewer" ON)
 if(BRAYNS_VIEWER_ENABLED)

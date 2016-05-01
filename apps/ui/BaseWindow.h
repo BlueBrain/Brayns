@@ -19,9 +19,9 @@
 #endif
 
 #include <brayns/common/types.h>
-#include <brayns/common/ui/Viewport.h>
-#include <brayns/common/ui/manipulators/InspectCenterManipulator.h>
-#include <brayns/common/ui/manipulators/FlyingModeManipulator.h>
+#include <apps/ui/Viewport.h>
+#include <apps/ui/manipulators/InspectCenterManipulator.h>
+#include <apps/ui/manipulators/FlyingModeManipulator.h>
 
 namespace brayns
 {

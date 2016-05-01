@@ -31,6 +31,7 @@ public:
 
     /** window size */
     const Vector2ui& getWindowSize() const { return _windowSize; }
+    void setWindowSize( const Vector2ui& size ) { _windowSize = size; }
 
     /** camera name (e.g. Perspective, Stereo, etc. ) */
     std::string getCamera() const { return _camera; }

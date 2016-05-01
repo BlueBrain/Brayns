@@ -11,10 +11,7 @@ set(BRAYNSVIEWER_HEADERS
 )
 
 set(BRAYNSVIEWER_LINK_LIBRARIES
-  brayns
-  braynsCommon
-  braynsPlugins
-  braynsOSPRayPlugin
+  PUBLIC brayns braynsCommon braynsIO braynsParameters braynsUI
 )
 
 common_application(braynsViewer)

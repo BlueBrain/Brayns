@@ -7,10 +7,7 @@
 set(BRAYNSSERVICE_SOURCES main.cpp)
 
 set(BRAYNSSERVICE_LINK_LIBRARIES
-  brayns
-  braynsCommon
-  braynsPlugins
-  braynsOSPRayPlugin
+  PUBLIC brayns braynsCommon braynsIO braynsParameters
 )
 
 common_application(braynsService)

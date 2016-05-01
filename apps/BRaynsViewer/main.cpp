@@ -7,7 +7,10 @@
  */
 
 #include <brayns/Brayns.h>
+#include <brayns/common/types.h>
 #include <brayns/common/log.h>
+#include <brayns/parameters/ParametersManager.h>
+#include <brayns/parameters/ParametersManager.h>
 #include "BraynsViewer.h"
 
 int main(int argc, const char **argv)
@@ -16,6 +19,9 @@ int main(int argc, const char **argv)
     brayns::initGLUT(&argc, argv);
     brayns::BraynsViewer braynsViewer(brayns, argc, argv);
     BRAYNS_INFO << "Initializing Application..." << std::endl;
-    braynsViewer.create( "BRayns Viewer", 512, 512, false);
+    const brayns::Vector2ui& size =
+        brayns->getParametersManager().getApplicationParameters().getWindowSize();
+
+    braynsViewer.create( "BRayns Viewer", size.x(), size.y(), false);
     brayns::runGLUT();
 }

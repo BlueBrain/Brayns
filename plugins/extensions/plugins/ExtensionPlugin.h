@@ -10,7 +10,7 @@
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <brayns/common/parameters/ApplicationParameters.h>
+#include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns
 {

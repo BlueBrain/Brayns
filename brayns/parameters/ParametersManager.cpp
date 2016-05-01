@@ -7,7 +7,7 @@
 
 #include "ParametersManager.h"
 
-#include <brayns/common/parameters/AbstractParameters.h>
+#include <brayns/parameters/AbstractParameters.h>
 
 namespace brayns
 {
