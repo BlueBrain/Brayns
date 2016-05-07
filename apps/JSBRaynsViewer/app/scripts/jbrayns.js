@@ -20,7 +20,7 @@
 
 'use strict';
 
-var braynsUrl = 'http://192.168.0.14:5000/';
+var braynsUrl = 'http://128.178.97.241:5000/';
 
 // constants
 var SESSION_STATUS_STOPPED = 0;
@@ -159,7 +159,7 @@ function doRequest(method, url, callback, body) {
 
 var statusImage = setInterval(function getImage() {
     if( !firstCameraRetrieved ) {
-        doRequest('GET', braynsUrl + 'zerobuf/render/camera', function (event) {
+        doRequest('GET', braynsUrl + 'zerobuf/render/fovcamera', function (event) {
             var res = JSON.parse(event.target.responseText);
             initialCameraPos.copy(res.origin);
             initialCameraTarget.copy(res.lookAt);
@@ -190,7 +190,9 @@ var statusImage = setInterval(function getImage() {
             jsonCamera['up']['x'] = 0;
             jsonCamera['up']['y'] = 1;
             jsonCamera['up']['z'] = 0;
-            doRequest('PUT', braynsUrl + 'zerobuf/render/camera', function () {}, jsonCamera);
+            jsonCamera['fovFocalLength'] = 100.0;
+            jsonCamera['fovAperture'] = 0.002;
+            doRequest('PUT', braynsUrl + 'zerobuf/render/fovcamera', function () {}, jsonCamera);
             currentCameraPos.copy( camera.position );
             accumulation = 0;
         }

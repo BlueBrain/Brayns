@@ -48,8 +48,6 @@ private:
 
     bool _requestFrameBuffers( );
 
-    bool _onRequest( const ::zeroeq::Event& event );
-
     uint8_t* _encodeJpeg(const uint32_t width,
                          const uint32_t height,
                          const uint8_t* rawData,

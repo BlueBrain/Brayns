@@ -60,13 +60,13 @@ void Scene::setMaterials(
                     material->setColor( Vector3f( 1.f, 1.f, 1.f ));
                     break;
                 case 2: // Axon
-                    material->setColor( Vector3f( 0.1f, 0.1f, 0.9f ));
+                    material->setColor( Vector3f( 0.2f, 0.2f, 0.8f ));
                     break;
                 case 3: // Dendrite
-                    material->setColor( Vector3f( 0.9f, 0.1f, 0.1f ));
+                    material->setColor( Vector3f( 0.8f, 0.2f, 0.2f ));
                     break;
                 case 4: // Apical dendrite
-                    material->setColor( Vector3f( 0.9f, 0.1f, 0.9f ));
+                    material->setColor( Vector3f( 0.2f, 0.2f, 0.8f ));
                     break;
                 default:
                     material->setColor( Vector3f(

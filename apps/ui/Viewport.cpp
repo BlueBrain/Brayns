@@ -12,10 +12,10 @@
 namespace brayns
 {
 
-const Vector3f INITIAL_UP = { 0, 1, 0 };
-const Vector3f INITIAL_POSITION = { 0, 0, -1 };
-const Vector3f INITIAL_DIRECTION = { 0, 0, 1 };
-const Vector3f ZERO = { 0, 0, 0 };
+const Vector3f INITIAL_UP = { 0.f, 1.f, 0.f };
+const Vector3f INITIAL_POSITION = { 0.f, 0.f, -1.f };
+const Vector3f INITIAL_DIRECTION = { 0.f, 0.f, 1.f };
+const Vector3f ZERO = { 0.f, 0.f, 0.f };
 
 Viewport::Viewport()
     : _modified( true )
@@ -45,9 +45,10 @@ void Viewport::_modify()
 
 void Viewport::translate( const Vector3f& vector, bool updateTarget )
 {
-     _position = vector + _position;
+    const Vector3f translation = _matrix * vector;
+     _position = translation + _position;
      if( updateTarget )
-        _target = vector + _target;
+        _target = translation + _target;
     _modify();
 }
 
@@ -55,23 +56,22 @@ void Viewport::rotate(
     const Vector3f& pivot, float du, float dv, bool updateTarget)
 {
     _matrix.rotate_x( dv );
-    _matrix.rotate_y( -du * std::copysign( 1.f, _up.y( )));
+    _matrix.rotate_y( -du );
 
     const Vector3f dir =  _target - _position ;
-    const float l = dir.length();
+    const float length = dir.length();
     if( updateTarget )
     {
-        const Vector3f target = _matrix * ( l * INITIAL_DIRECTION );
+        const Vector3f target = _matrix * ( length * INITIAL_DIRECTION );
         _target = _position + target;
     }
     else
     {
         _position = _position - pivot;
-        _position = _matrix * ( l * INITIAL_POSITION );
+        _position = _matrix * ( length * INITIAL_POSITION );
         _position = _position + pivot;
     }
     _up = _matrix * INITIAL_UP;
-
     _modify();
 }
 

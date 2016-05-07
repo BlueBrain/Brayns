@@ -29,6 +29,8 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
 {
     SceneParameters& sceneParams =
         _brayns->getParametersManager().getSceneParameters();
+    RenderingParameters& renderingParams =
+        _brayns->getParametersManager().getRenderingParameters();
 
     switch (key)
     {
@@ -53,6 +55,10 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
         BRAYNS_INFO << "Timestamp increment: " <<
             _timestampIncrement << std::endl;
         break;
+    case 'x':
+        sceneParams.setTimestamp( 1098.f );
+        BRAYNS_INFO << "Test Timestamp" << std::endl;
+        break;
     case ']':
         sceneParams.setTimestamp(
             sceneParams.getTimestamp( ) + 1);
@@ -67,6 +73,18 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
         break;
     case '*':
         _brayns->getParametersManager( ).printHelp( );
+        break;
+    case '0':
+        BRAYNS_INFO << "Default renderer activated" << std::endl;
+        renderingParams.setRenderer("exobj");
+        break;
+    case '8':
+        BRAYNS_INFO << "Touch detection renderer activated" << std::endl;
+        renderingParams.setRenderer("proximityrenderer");
+        break;
+    case '9':
+        BRAYNS_INFO << "Simulation renderer activated" << std::endl;
+        renderingParams.setRenderer("simulationrenderer");
         break;
     default:
         BaseWindow::keypress(key,where);

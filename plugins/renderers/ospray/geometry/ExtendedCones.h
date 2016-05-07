@@ -27,7 +27,8 @@ struct ExtendedCones : public ospray::Geometry
     int64 offset_up;
     int64 offset_centerRadius;
     int64 offset_upRadius;
-    int64 offset_frame;
+    int64 offset_timestamp;
+    int64 offset_value;
     int64 offset_materialID;
 
     ospray::Ref<ospray::Data> data;

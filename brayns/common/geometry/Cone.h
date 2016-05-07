@@ -26,7 +26,8 @@ public:
         const Vector3f& up,
         float centerRadius,
         float upRadius,
-        float timestamp = 0.f);
+        float timestamp,
+        float value);
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
     BRAYNS_API const Vector3f& getUp() const { return _up; }
@@ -42,6 +43,7 @@ private:
     float _centerRadius;
     float _upRadius;
     float _timestamp;
+    float _value;
 };
 
 }

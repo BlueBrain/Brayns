@@ -8,7 +8,7 @@
 #pragma once
 
 #include <ospray/math/vec.ih>
-#include <ospray/common/Material.ih>
+#include <ospray/render/scivis/SciVisMaterial.ih>
 #include <ospray/texture/Texture2D.ih>
 
 struct ExtendedOBJMaterial

@@ -20,6 +20,7 @@ namespace brayns
 
 const size_t CACHE_VERSION_1 = 1;
 const size_t CACHE_VERSION_2 = 2;
+const size_t CACHE_VERSION_3 = 3;
 
 struct TextureTypeMaterialAttribute
 {
@@ -56,7 +57,7 @@ void OSPRayScene::_saveCacheFile()
     BRAYNS_INFO << "Saving scene to binary file: " << filename << std::endl;
     std::ofstream file( filename, std::ios::out | std::ios::binary );
 
-    const size_t version = CACHE_VERSION_2;
+    const size_t version = CACHE_VERSION_3;
     file.write( ( char* )&version, sizeof( size_t ));
 
     const size_t nbMaterials = _materials.size();
@@ -116,7 +117,7 @@ void OSPRayScene::_loadCacheFile()
 
     size_t version;
     file.read( (char*)&version, sizeof( size_t ));
-    if( version == CACHE_VERSION_2 )
+    if( version == CACHE_VERSION_3 )
     {
         size_t nbMaterials;
         file.read( (char*)&nbMaterials, sizeof( size_t ));
@@ -196,7 +197,7 @@ void OSPRayScene::_loadCacheFile()
     }
     else
     {
-        BRAYNS_ERROR << "Only version " << CACHE_VERSION_2 <<
+        BRAYNS_ERROR << "Only version " << CACHE_VERSION_3 <<
             " is currently supported" << std::endl;
     }
     file.close();
@@ -274,7 +275,9 @@ void OSPRayScene::_buildParametricOSPGeometry( const size_t materialId )
     ospSet1i(extendedCylinders[materialId], "bytes_per_extended_cone",
         Cone::getSerializationSize() * sizeof(float));
     ospSet1i(extendedCones[materialId],
-        "offset_frame", 8 * sizeof(float));
+        "offset_timestamp", 8 * sizeof(float));
+    ospSet1i(extendedCones[materialId],
+        "offset_value", 9 * sizeof(float));
 
     if(_ospMaterials[materialId])
         ospSetMaterial(extendedCones[materialId], _ospMaterials[materialId]);
@@ -389,7 +392,7 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Geometry information" << std::endl;
     BRAYNS_INFO << "Spheres  : " << totalNbSpheres << std::endl;
     BRAYNS_INFO << "Cylinders: " << totalNbCylinders << std::endl;
-    BRAYNS_INFO << "Cones: " << totalNbCones << std::endl;
+    BRAYNS_INFO << "Cones    : " << totalNbCones << std::endl;
     BRAYNS_INFO << "--------------------" << std::endl;
 
     if(!_geometryParameters.getSaveCacheFile().empty())
@@ -540,25 +543,25 @@ OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)
         return nullptr;
     }
 
-    OSPDataType type = OSP_VOID_PTR;
+    OSPTextureFormat type = OSP_TEXTURE_R8; // smallest valid type as default
     if(texture->getDepth() == 1)
     {
-      if(texture->getNbChannels() == 3) type = OSP_UCHAR3;
-      if(texture->getNbChannels() == 4) type = OSP_UCHAR4;
+      if(texture->getNbChannels() == 3) type = OSP_TEXTURE_SRGB; // maybe OSP_TEXTURE_RGBA8
+      if(texture->getNbChannels() == 4) type = OSP_TEXTURE_SRGBA; // maybe OSP_TEXTURE_RGB8
     }
     else if(texture->getDepth() == 4)
     {
-      if(texture->getNbChannels() == 3) type = OSP_FLOAT3;
-      if(texture->getNbChannels() == 4) type = OSP_FLOAT3A;
+      if(texture->getNbChannels() == 3) type = OSP_TEXTURE_RGB32F;
+      if(texture->getNbChannels() == 4) type = OSP_TEXTURE_RGBA32F;
     }
 
     BRAYNS_DEBUG << "Creating OSPRay texture from " << textureName << " :" <<
         texture->getWidth() << "x" << texture->getHeight() << "x" <<
         (int)type << std::endl;
 
+    osp::vec2i texSize{texture->getWidth(), texture->getHeight()};
     OSPTexture2D ospTexture = ospNewTexture2D(
-        texture->getWidth(), texture->getHeight(),
-        type, texture->getRawData(), OSP_DATA_SHARED_BUFFER);
+        texSize, type, texture->getRawData(), 0);
 
     assert(ospTexture);
     ospCommit(ospTexture);

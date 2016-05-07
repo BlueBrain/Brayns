@@ -1,0 +1,26 @@
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of BRayns
+ */
+
+namespace zerobuf.render;
+
+table Vector3f
+{
+    x: float;
+    y: float;
+    z: float;
+}
+
+table FovCamera
+{
+  origin: Vector3f = 0, 0, 1;
+  lookAt: Vector3f;
+  up: Vector3f = 0, 1, 0;
+  fovAperture: float;
+  fovFocalLength: float;
+}
+
+root_type FovCamera;

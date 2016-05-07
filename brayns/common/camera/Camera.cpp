@@ -9,7 +9,7 @@
 #include "Camera.h"
 #include <brayns/common/log.h>
 #ifdef BRAYNS_USE_ZEROBUF
-#  include <zerobuf/render/camera.h>
+#  include <zerobuf/render/fovCamera.h>
 #endif
 
 namespace brayns
@@ -17,15 +17,15 @@ namespace brayns
 
 struct Camera::Impl
 #ifdef BRAYNS_USE_ZEROBUF
-    : public zerobuf::render::Camera
+    : public zerobuf::render::FovCamera
 #endif
 {
 public:
     Impl( const CameraType cameraType )
-        : _position( 0.f, 0.f, -1.f )
+        : _cameraType( cameraType )
+        , _position( 0.f, 0.f, -1.f )
         , _target( 0.f, 0.f, 0.f )
         , _up( 0.f, 1.f, 0.f )
-        , _cameraType( cameraType )
         , _aspectRatio( 1.f )
         , _aperture( 0.f )
         , _focalLength( 0.f )
@@ -42,10 +42,10 @@ public:
         setUpVector( upVector );
     }
 
-    const Vector3f& getPosition()
+    const Vector3f& getPosition() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        ::zerobuf::render::Vector3f& origin = getOrigin();
+        const ::zerobuf::render::Vector3f& origin = getOrigin();
         _position = Vector3f( origin.getX( ), origin.getY( ), origin.getZ( ));
     #endif
         return _position;
@@ -61,10 +61,10 @@ public:
         _position = position;
     }
 
-    const Vector3f& getTarget()
+    const Vector3f& getTarget() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        ::zerobuf::render::Vector3f& lookat = getLookAt();
+        const ::zerobuf::render::Vector3f& lookat = getLookAt();
         _target = Vector3f( lookat.getX( ), lookat.getY( ), lookat.getZ( ));
     #endif
         return _target;
@@ -80,10 +80,10 @@ public:
         _target = target;
     }
 
-    const Vector3f& getUpVector( )
+    const Vector3f& getUpVector( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        ::zerobuf::render::Vector3f& up = getUp( );
+        const ::zerobuf::render::Vector3f& up = getUp( );
         _up = Vector3f( up.getX( ), up.getY( ), up.getZ( ));
     #endif
         return _up;
@@ -116,32 +116,44 @@ public:
 
     void setAperture( const float aperture )
     {
+    #ifdef BRAYNS_USE_ZEROBUF
+        setFovAperture( aperture );
+    #endif
         _aperture = aperture;
     }
 
     float getAperture( ) const
     {
+    #ifdef BRAYNS_USE_ZEROBUF
+        _aperture = getFovAperture( );
+    #endif
         return _aperture;
     }
 
     void setFocalLength( const float focalLength )
     {
+    #ifdef BRAYNS_USE_ZEROBUF
+        setFovFocalLength( focalLength );
+    #endif
         _focalLength = focalLength;
     }
 
     float getFocalLength( ) const
     {
+    #ifdef BRAYNS_USE_ZEROBUF
+        _focalLength = getFovFocalLength();
+    #endif
         return _focalLength;
     }
 
 private:
-    Vector3f _position;
-    Vector3f _target;
-    Vector3f _up;
     CameraType _cameraType;
-    float _aspectRatio;
-    float _aperture;
-    float _focalLength;
+    mutable Vector3f _position;
+    mutable Vector3f _target;
+    mutable Vector3f _up;
+    mutable float _aspectRatio;
+    mutable float _aperture;
+    mutable float _focalLength;
 };
 
 Camera::Camera( const CameraType cameraType )

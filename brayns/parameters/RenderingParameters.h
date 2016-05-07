@@ -33,6 +33,7 @@ public:
 
     /** OSPRay renderer */
     const std::string& getRenderer( ) const { return _renderer; }
+    void setRenderer( const std::string& renderer ) { _renderer = renderer; }
 
     /** OSPRay supported renderers */
     const strings& getRenderers( ) const { return _renderers; }

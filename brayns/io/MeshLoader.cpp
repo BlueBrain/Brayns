@@ -289,7 +289,7 @@ void MeshLoader::_createMaterials(
         material->Get( AI_MATKEY_OPACITY, value1f );
         materials[m]->setOpacity( value1f );
 
-        value1f = 1.1f;
+        value1f = 1.3f;
         material->Get( AI_MATKEY_REFRACTI, value1f );
         materials[m]->setRefractionIndex( value1f );
     }

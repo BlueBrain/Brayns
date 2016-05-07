@@ -456,9 +456,9 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 const uniform Light* uniform l = self->lights[ i ];
 
                 const vec2f s = make_vec2f( 0.f );
-                const LightSample light = l->sample( l, dg, s );
-                vec3f radiance = light.radiance;
-                vec3f L = light.direction;
+                const Light_SampleRes light = l->sample( l, dg, s );
+                vec3f radiance = light.weight;
+                vec3f L = light.dir;
 
                 if( lightEmission != 0.f )
                     radiance = make_vec3f( lightEmission );
@@ -473,7 +473,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                         // Electron shading
                         vec3f me = normalize( ray.org - P );
                         float el = max( 0.f, dot( me, normal ));
-                        cosNL = 1.f - el * el;
+                        cosNL = 1.f - el;
                     }
                     else
                     {

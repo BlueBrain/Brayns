@@ -16,13 +16,15 @@ Cone::Cone(
     const Vector3f& up,
     const float centerRadius,
     const float upRadius,
-    const float timestamp)
+    const float timestamp,
+    const float value)
     : Primitive(materialId)
     , _center(center)
     , _up(up)
     , _centerRadius(centerRadius)
     , _upRadius(upRadius)
     , _timestamp(timestamp)
+    , _value(value)
 {
     _geometryType = GT_CONE;
 }
@@ -38,12 +40,13 @@ size_t Cone::serializeData(floats& serializedData)
     serializedData.push_back( _centerRadius );
     serializedData.push_back( _upRadius );
     serializedData.push_back( _timestamp );
+    serializedData.push_back( _value );
     return getSerializationSize();
 }
 
 size_t Cone::getSerializationSize()
 {
-    return 9;
+    return 10;
 }
 
 }

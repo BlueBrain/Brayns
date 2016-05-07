@@ -13,6 +13,7 @@
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/scene/Scene.h>
+#include <algorithm>
 
 #ifdef BRAYNS_USE_BRION
 #  include <brain/brain.h>
@@ -142,6 +143,31 @@ bool MorphologyLoader::_importMorphology(
                         float(samples.size());
             }
 
+            // begin smoothing
+            std::map< size_t, float > splines;
+            const int smoothStep = 0;
+            for( int i = 0; i < int(samples.size()); ++i )
+            {
+                size_t smoothCount = 0;
+                float avg = 0.f;
+                for( int j = -smoothStep; j < smoothStep; ++j )
+                {
+                    int index = i+j;
+                    if( index<0 ) index = 0;
+                    if( index>(int)samples.size()-1) index = (int)samples.size()-1;
+                    avg += samples[index].w();
+                    ++smoothCount;
+                }
+                splines[i] = (smoothCount == 0) ? samples[i].w() : avg / float(smoothCount);
+            }
+
+            if( section.hasParent() )
+            {
+                const Vector4fs& parentSamples = section.getParent().getSamples();
+                splines[0] = parentSamples[parentSamples.size()-1].w();
+            }
+            // end smoothing
+
             for( size_t i = step; i < samples.size(); i += step )
             {
                 if( simulationData )
@@ -152,10 +178,11 @@ bool MorphologyLoader::_importMorphology(
                 }
 
                 Vector4f sample =  samples[i];
+
                 const float previousRadius =
                     (_geometryParameters.getRadius() < 0.f ?
                     -_geometryParameters.getRadius() :
-                    previousSample.w() * _geometryParameters.getRadius( ));
+                    splines[ i - step ] * _geometryParameters.getRadius( ));
                 const float distance =
                     distanceToSoma + distancesToSoma[i];
 
@@ -166,23 +193,23 @@ bool MorphologyLoader::_importMorphology(
                 target += translation;
                 const float radius = (_geometryParameters.getRadius() < 0.f ?
                     -_geometryParameters.getRadius() :
-                    sample.w() * _geometryParameters.getRadius( ));
+                    splines[ i ] * _geometryParameters.getRadius( ));
 
                 primitives[material].push_back( SpherePtr(
-                    new Sphere( material, position, radius,
-                                distance, offset)));
+                    new Sphere( material, position,
+                        radius, distance, offset )));
                 bounds.merge( position );
-
                 if( position != target )
                 {
-                    if (radius == previousRadius)
+                    if( radius == previousRadius )
                         primitives[material].push_back( CylinderPtr(
                             new Cylinder( material, position, target,
-                                          previousRadius, 0.f, 0 )));
+                                radius, distance, offset )));
+
                     else
                         primitives[material].push_back( ConePtr(
-                            new Cone( material, target, position,
-                                      previousRadius, radius, 0 )));
+                            new Cone( material, position, target,
+                                radius, previousRadius, distance, offset )));
                     bounds.merge( target );
                 }
                 previousSample = sample;

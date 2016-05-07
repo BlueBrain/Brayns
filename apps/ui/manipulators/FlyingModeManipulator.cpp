@@ -15,8 +15,8 @@ namespace brayns
 void FlyingModeManipulator::keypress( int32 key )
 {
     Viewport& viewport = _window.getViewPort();
-    const Vector3f dir =
-        normalize( viewport.getTarget() - viewport.getPosition( ));
+    const Vector3f dir( 0.f, 0.f , 1.f );
+    const Vector3f strafe( 1.f, 0.f , 0.f );
     switch(key) {
         case 'w':
         {
@@ -33,15 +33,13 @@ void FlyingModeManipulator::keypress( int32 key )
         case 'd':
         {
             const float fwd = _window.getMotionSpeed();
-            viewport.translate(
-                vmml::cross( dir, viewport.getUp( ))*fwd, true );
+            viewport.translate(-strafe*fwd, true );
             break;
         }
         case 'a':
         {
             const float fwd = _window.getMotionSpeed();
-            viewport.translate(
-                -vmml::cross( dir, viewport.getUp( ))*fwd, true );
+            viewport.translate(strafe*fwd, true );
             break;
         }
     }
@@ -54,9 +52,8 @@ void FlyingModeManipulator::dragRight(
 {
     const float fwd = -( to.y() - from.y( )) * _window.getMotionSpeed();
     Viewport& viewport = _window.getViewPort();
-    const Vector3f dir =
-        normalize( viewport.getTarget() - viewport.getPosition( ));
-    viewport.translate( dir*fwd, true );
+    const Vector3f dir( 0.f, 0.f , 1.f );
+    viewport.translate( dir*fwd, false );
 }
 
 void FlyingModeManipulator::dragMiddle(
@@ -66,9 +63,7 @@ void FlyingModeManipulator::dragMiddle(
     Viewport& viewport = _window.getViewPort();
     const float x = ( to.x() - from.x( )) * _window.getMotionSpeed();
     const float y = ( to.y() - from.y( )) * _window.getMotionSpeed();
-    const Vector3f dir =
-        normalize( viewport.getTarget() - viewport.getPosition( ));
-    viewport.translate( Vector3f( -y, x, 0.f ).cross( dir ), true );
+    viewport.translate( Vector3f( x, y , 0.f ), true );
 }
 
 void FlyingModeManipulator::dragLeft(

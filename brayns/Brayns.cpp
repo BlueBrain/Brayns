@@ -66,7 +66,7 @@ struct Brayns::Impl
 
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
-            Vector3f( 1.f, -1.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
+            Vector3f( 0.f, 0.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
         _scene->addLight( sunLight );
 
         BRAYNS_INFO << "Build model" << std::endl;
@@ -357,7 +357,7 @@ private:
                         _scene->getWorldBounds()
                     };
                     if(!meshLoader.importMeshFromFile(
-                        filename, MeshContainer, MQ_QUALITY, NO_MATERIAL ))
+                        filename, MeshContainer, MQ_FAST, NO_MATERIAL ))
                     {
                         BRAYNS_ERROR << "Failed to import " <<
                         filename << std::endl;

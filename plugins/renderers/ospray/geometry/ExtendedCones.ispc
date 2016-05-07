@@ -32,7 +32,8 @@ struct ExtendedCones
     int   offset_up;
     int   offset_centerRadius;
     int   offset_upRadius;
-    int   offset_frame;
+    int   offset_timestamp;
+    int   offset_value;
     int   offset_materialID;
     int32 numExtendedCones;
     int32 bytesPerCone;
@@ -76,8 +77,8 @@ void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
     if (geometry->offset_upRadius >= 0)
         radius1 = *((uniform float *)(conePtr+geometry->offset_upRadius));
 
-    uniform float frame = *((uniform float *)(conePtr+geometry->offset_frame));
-    if( frame>ray.time ) return;
+    uniform float timestamp = *((uniform float *)(conePtr+geometry->offset_timestamp));
+    if( timestamp>ray.time ) return;
 
     uniform vec3f v0 = *((uniform vec3f*)(conePtr+geometry->offset_center));
     uniform vec3f v1 = *((uniform vec3f*)(conePtr+geometry->offset_up));
@@ -102,7 +103,10 @@ void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
     const float tanA = deltaRadius / upLength;
     const float coneHeight = radius0 / tanA;
     const float squareTanA = tanA*tanA;
-    const float cosA = 1.f / sqrtf(1.f + squareTanA);
+    const float div = sqrtf(1.f + squareTanA);
+    if( div == 0.f )
+        return;
+    const float cosA = 1.f / div;
 
     const vec3f V = v0 + normalize(upVector) * coneHeight;
     const vec3f v = normalize(v0 - V);
@@ -117,6 +121,9 @@ void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
     const float cosTheta = sqrtf(squareCosTheta);
     if (cosTheta < cosA)
         return; // no intersection
+
+    if( squareCosTheta == 0.f )
+        return;
 
     const float squareTanTheta = (1.f - squareCosTheta) / squareCosTheta;
     const float tanTheta = sqrtf(squareTanTheta);
@@ -134,10 +141,18 @@ void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
 
     const vec3f normal1 = cross(ray.dir, delta1);
     const float length1 = length(normal1);
+
+    if( length1 == 0.f )
+        return;
+
     const float r1 = dot(cross(rayApex, delta1), normal1) / (length1*length1);
 
     const vec3f normal2 = cross(ray.dir, delta2);
     const float length2 = length(normal2);
+
+    if( length2 == 0.f )
+        return;
+
     const float r2 = dot(cross(rayApex, delta2), normal2) / (length2*length2);
 
     float t_in = r1;
@@ -198,6 +213,16 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
     dg.material = geometry->material;
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
+    dg.st.x = 0.f;
+    dg.st.y = 0.f;
+
+    uniform uint8 *conePtr =
+            THIS->data + THIS->bytesPerCone*ray.primID;
+    // Store timestamp as texture coordinate
+    varying float value =
+            *((varying float *)(conePtr+THIS->offset_value));
+    dg.st.x = value;
+
 
     if (flags & DG_NORMALIZE)\
     {
@@ -211,7 +236,6 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
     }
     if ((flags & DG_MATERIALID) && (THIS->offset_materialID >= 0))
     {
-        uniform uint8 *conePtr = THIS->data + THIS->bytesPerCone*ray.primID;
         dg.materialID =
                 *((uniform uint32 *varying)(conePtr+THIS->offset_materialID));
     }
@@ -240,7 +264,8 @@ export void ExtendedConesGeometry_set(void *uniform _geom,
                                       int   uniform offset_up,
                                       int   uniform offset_centerRadius,
                                       int   uniform offset_upRadius,
-                                      int   uniform offset_frame,
+                                      int   uniform offset_timestamp,
+                                      int   uniform offset_value,
                                       int   uniform offset_materialID)
 {
     uniform ExtendedCones *uniform geom = (uniform ExtendedCones *uniform)_geom;
@@ -262,7 +287,8 @@ export void ExtendedConesGeometry_set(void *uniform _geom,
     geom->offset_up           = offset_up;
     geom->offset_centerRadius = offset_centerRadius;
     geom->offset_upRadius     = offset_upRadius;
-    geom->offset_frame        = offset_frame;
+    geom->offset_timestamp        = offset_timestamp;
+    geom->offset_value        = offset_value;
     geom->offset_materialID   = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle,geomID,geom);

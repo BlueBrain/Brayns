@@ -15,11 +15,12 @@
 #include <ospray/render/Renderer.ih>
 
 // obj renderer
-#include <ospray/render/obj/OBJMaterial.ih>
+#include <ospray/render/scivis/SciVisMaterial.ih>
 #include "ExtendedOBJMaterial.ih"
 
-#define ALPHA_THRESHOLD (.05f)
+#define ALPHA_THRESHOLD ( .05f )
 #define DEFAULT_LIGHT_EMISSION ( 5.f )
+#define DEFAULT_LIGHT_THRESHOLD ( 0.2f )
 
 uniform float simulation_SimpleGI__randomU[16][16] = {
     {0, 0.5, 0.25, 0.75, 0.125, 0.625, 0.375, 0.875, 0.0625, 0.5625, 0.3125,
@@ -463,7 +464,7 @@ inline vec3f SimulationRenderer_shadeRay(
         // Get simulation value from geometry timestamp and material 0
         vec3f simulationValue =
             SimulationRenderer_getSimulationValue( self, dg );
-        if( simulationValue.x > 0.5f )
+        if( simulationValue.x > DEFAULT_LIGHT_THRESHOLD )
             lightEmission = DEFAULT_LIGHT_EMISSION;
 
         max_depth -= 1;
@@ -483,9 +484,9 @@ inline vec3f SimulationRenderer_shadeRay(
                 const uniform Light* uniform l = self->lights[ i ];
 
                 const vec2f s = make_vec2f( 0.f );
-                const LightSample light = l->sample( l, dg, s );
-                vec3f radiance = light.radiance;
-                vec3f L = light.direction;
+                const Light_SampleRes light = l->sample( l, dg, s );
+                vec3f radiance = light.weight;
+                vec3f L = light.dir;
 
                 if( lightEmission != 0.f )
                     radiance = make_vec3f( lightEmission );
@@ -499,8 +500,7 @@ inline vec3f SimulationRenderer_shadeRay(
                     {
                         // Electron shading
                         vec3f me = normalize( ray.org - P );
-                        float el = max( 0.f, dot( me, normal ));
-                        cosNL = el * el;
+                        cosNL = max( 0.f, dot( me, normal ));
                     }
                     else
                     {
@@ -577,7 +577,7 @@ inline vec3f SimulationRenderer_shadeRay(
                     // Get simulation value from geometry
                     vec3f simulationValue =
                         SimulationRenderer_getSimulationValue( self, geometry );
-                    if( simulationValue.x > 0.5f )
+                    if( simulationValue.x > DEFAULT_LIGHT_THRESHOLD )
                         lightEmission = DEFAULT_LIGHT_EMISSION;
 
                     material = geometry.material;

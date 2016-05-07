@@ -13,7 +13,7 @@
 #include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/camera.h>
 #include <zerobuf/render/frameBuffers.h>
-#include <zeroeq/hbp/vocabulary.h>
+//#include <zeroeq/hbp/vocabulary.h>
 
 namespace brayns
 {
@@ -33,7 +33,6 @@ ZeroBufPlugin::~ZeroBufPlugin( )
 {
     if( _compressor )
         tjDestroy( _compressor );
-    _subscriber.deregisterHandler( ::zeroeq::vocabulary::EVENT_EXIT );
 
     if( _httpServer )
     {
@@ -44,8 +43,6 @@ ZeroBufPlugin::~ZeroBufPlugin( )
 
 void ZeroBufPlugin::run()
 {
-    _publisher.publish( zeroeq::Event( zeroeq::vocabulary::EVENT_HEARTBEAT ));
-
     while( _subscriber.receive( 0 )) {}
 }
 
@@ -173,15 +170,6 @@ bool ZeroBufPlugin::_requestFrameBuffers()
         _remoteFrameBuffers.setDiffuse( 0, 0 );
 
     return true;
-}
-
-bool ZeroBufPlugin::_onRequest( const ::zeroeq::Event& event )
-{
-    const auto& eventType = ::zeroeq::vocabulary::deserializeRequest( event );
-    const auto& i = _requests.find( eventType );
-    if( i == _requests.end( ))
-        return false;
-    return i->second();
 }
 
 uint8_t* ZeroBufPlugin::_encodeJpeg(const uint32_t width,

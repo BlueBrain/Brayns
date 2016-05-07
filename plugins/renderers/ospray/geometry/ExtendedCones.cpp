@@ -24,12 +24,13 @@ void ExtendedCones::finalize(ospray::Model *model)
     radius              = getParam1f("radius",0.01f);
     length              = getParam1f("length",0.01f);
     materialID          = getParam1i("materialID",0);
-    bytesPerCone        = getParam1i("bytes_per_extended_cone",9*sizeof(float));
+    bytesPerCone        = getParam1i("bytes_per_extended_cone",10*sizeof(float));
     offset_center       = getParam1i("offset_center",0);
     offset_up           = getParam1i("offset_up",3*sizeof(float));
     offset_centerRadius = getParam1i("offset_centerRadius",6*sizeof(float));
     offset_upRadius     = getParam1i("offset_upRadius",7*sizeof(float));
-    offset_frame        = getParam1i("offset_frame",8*sizeof(float));
+    offset_timestamp    = getParam1i("offset_timestamp",8*sizeof(float));
+    offset_value        = getParam1i("offset_value",9*sizeof(float));
     offset_materialID   = getParam1i("offset_materialID",-1);
     data                = getParamData("extendedcones",nullptr);
 
@@ -50,7 +51,8 @@ void ExtendedCones::finalize(ospray::Model *model)
                 offset_up,
                 offset_centerRadius,
                 offset_upRadius,
-                offset_frame,
+                offset_timestamp,
+                offset_value,
                 offset_materialID);
 }
 
