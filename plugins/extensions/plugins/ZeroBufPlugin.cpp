@@ -11,7 +11,7 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <zerobuf/render/camera.h>
+#include <zerobuf/render/fovCamera.h>
 #include <zerobuf/render/frameBuffers.h>
 //#include <zeroeq/hbp/vocabulary.h>
 
@@ -86,13 +86,13 @@ void ZeroBufPlugin::_setupHTTPServer()
 
 void ZeroBufPlugin::_setupRequests()
 {
-    ::zerobuf::render::Camera camera;
+    ::zerobuf::render::FovCamera camera;
     _requests[ camera.getTypeIdentifier() ] = [&]
         { return _publisher.publish(
             *_extensionParameters.camera->getSerializable( ));
         };
 
-    ::zerobuf::render::ImageJPEG imageJPEG;
+    ::lexis::render::ImageJPEG imageJPEG;
     _requests[ imageJPEG.getTypeIdentifier() ] =
         std::bind( &ZeroBufPlugin::_requestImageJPEG, this );
 

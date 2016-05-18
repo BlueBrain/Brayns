@@ -4,7 +4,7 @@
 #
 # This file is part of BRayns
 
-set(BRAYNSPLUGINS_LINK_LIBRARIES 
+set(BRAYNSPLUGINS_LINK_LIBRARIES
   PUBLIC braynsCommon vmmlib)
 
 set(BRAYNSPLUGINS_SOURCES
@@ -26,11 +26,11 @@ if(DEFLECT_FOUND)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
 endif()
 
-if(TARGET ZeroBuf AND TARGET ZeroEQ)
+if(TARGET Lexis AND TARGET ZeroEQ)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroBufPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/ZeroBufPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
-    PUBLIC ZeroEQ ZeroBuf ZeroBufRender BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
+    PUBLIC Lexis ZeroEQ BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
   add_subdirectory(extensions/vocabulary)
 endif()
 

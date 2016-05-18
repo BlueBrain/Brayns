@@ -12,6 +12,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake/common)
 include(GitExternal)
 
+set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 set(BRAYNS_DESCRIPTION "Ray-tracing engine")
 
 include(Common)
@@ -59,6 +60,7 @@ option(BRAYNS_REST_ENABLED "Activate REST" ON)
 if(BRAYNS_REST_ENABLED)
   common_find_package(Servus REQUIRED)
   common_find_package(ZeroBuf REQUIRED)
+  common_find_package(Lexis REQUIRED)
   common_find_package(LibJpegTurbo REQUIRED)
   common_find_package(ZeroEQ REQUIRED)
 endif()

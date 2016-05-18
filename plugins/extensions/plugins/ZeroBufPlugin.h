@@ -13,7 +13,7 @@
 #include <brayns/api.h>
 #include <zeroeq/zeroeq.h>
 #include <turbojpeg.h>
-#include <zerobuf/render/imageJPEG.h>
+#include <lexis/render/imageJPEG.h>
 #include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/attribute.h>
 
@@ -69,7 +69,7 @@ private:
     size_t _jpegCompression;
     bool _processingImageJpeg;
 
-    ::zerobuf::render::ImageJPEG _remoteImageJPEG;
+    ::lexis::render::ImageJPEG _remoteImageJPEG;
     ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
     ::zerobuf::render::Attribute _remoteAttribute;
 

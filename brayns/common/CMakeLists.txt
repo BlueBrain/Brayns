@@ -47,7 +47,7 @@ set(BRAYNSCOMMON_LINK_LIBRARIES
 )
 
 if(TARGET ZeroBuf)
-  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES ZeroBuf ZeroBufRender)
+  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES ZeroBuf)
 endif()
 
 common_library(braynsCommon)
