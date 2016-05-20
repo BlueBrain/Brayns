@@ -48,6 +48,12 @@ private:
 
     bool _requestFrameBuffers( );
 
+    void _resizeImage(
+        unsigned int* srcData,
+        const Vector2i& srcSize,
+        const Vector2i& dstSize,
+        uints& dstData);
+
     uint8_t* _encodeJpeg(const uint32_t width,
                          const uint32_t height,
                          const uint8_t* rawData,
@@ -61,6 +67,7 @@ private:
     typedef std::map< ::zeroeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
     size_t _jpegCompression;
+    bool _processingImageJpeg;
 
     ::zerobuf::render::ImageJPEG _remoteImageJPEG;
     ::zerobuf::render::FrameBuffers _remoteFrameBuffers;

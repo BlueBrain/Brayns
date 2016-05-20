@@ -24,6 +24,7 @@ ZeroBufPlugin::ZeroBufPlugin(
     : ExtensionPlugin( applicationParameters, extensionParameters )
     , _compressor( tjInitCompress( ))
     , _jpegCompression( applicationParameters.getJpegCompression( ))
+    , _processingImageJpeg( false )
 {
     _setupRequests( );
     _setupHTTPServer( );
@@ -116,23 +117,65 @@ void ZeroBufPlugin::_attributeUpdated( )
     _extensionParameters.frameBuffer->clear();
 }
 
+void ZeroBufPlugin::_resizeImage(
+    unsigned int* srcData,
+    const Vector2i& srcSize,
+    const Vector2i& dstSize,
+    uints& dstData)
+{
+    dstData.reserve(dstSize.x() * dstSize.y());
+    size_t x_ratio =
+        static_cast< size_t >(((srcSize.x() << 16) / dstSize.x()) + 1);
+    size_t y_ratio =
+        static_cast< size_t >(((srcSize.y() << 16) / dstSize.y()) + 1);
+
+    for( int y = 0; y < dstSize.y(); ++y )
+    {
+        for( int x=0; x < dstSize.x() ; ++x)
+        {
+            const size_t x2 = ((x*x_ratio) >> 16);
+            const size_t y2 = ((y*y_ratio) >> 16);
+            dstData[ ( y * dstSize.x() ) + x ] =
+                srcData[ ( y2 * srcSize.x() ) + x2 ] ;
+        }
+    }
+}
 
 bool ZeroBufPlugin::_requestImageJPEG()
 {
-    const Vector2i frameSize = _extensionParameters.frameBuffer->getSize( );
-    unsigned int* colorBuffer =
-        (unsigned int*)_extensionParameters.frameBuffer->getColorBuffer( );
-    if( colorBuffer )
+    if(!_processingImageJpeg)
     {
-        unsigned long jpegSize =
-            frameSize.x( ) * frameSize.y( ) * sizeof( unsigned long );
-        uint8_t* jpegData = _encodeJpeg(
-                ( uint32_t )frameSize.x( ),
-                ( uint32_t )frameSize.y( ),
-                ( uint8_t* )colorBuffer, jpegSize );
+        _processingImageJpeg = true;
+        const Vector2i& frameSize =
+            _extensionParameters.frameBuffer->getSize();
+        const Vector2i& newFrameSize =
+            _extensionParameters.parametersManager->getApplicationParameters()
+            .getJpegSize();
+        unsigned int* colorBuffer =
+            (unsigned int*)_extensionParameters.frameBuffer->getColorBuffer( );
+        if( colorBuffer )
+        {
+            unsigned int* resizedColorBuffer = colorBuffer;
 
-        _remoteImageJPEG.setData( jpegData, jpegSize  );
-        tjFree(jpegData);
+            uints resizedBuffer;
+            if( frameSize != newFrameSize )
+            {
+                _resizeImage( colorBuffer, frameSize,
+                              newFrameSize, resizedBuffer);
+                resizedColorBuffer = resizedBuffer.data();
+            }
+
+            unsigned long jpegSize =
+                newFrameSize.x( ) * newFrameSize.y( ) * sizeof( unsigned long );
+            uint8_t* jpegData = _encodeJpeg(
+                    ( uint32_t )newFrameSize.x( ),
+                    ( uint32_t )newFrameSize.y( ),
+                    ( uint8_t* )resizedColorBuffer, jpegSize );
+
+            _remoteImageJPEG.setData( jpegData, jpegSize  );
+            tjFree(jpegData);
+        }
+        _processingImageJpeg = false;
     }
     return true;
 }

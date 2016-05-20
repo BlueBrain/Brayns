@@ -44,8 +44,12 @@ public:
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
 
-    /** JPeg compression quality */
+    /** JPEG compression quality */
     size_t getJpegCompression() const { return _jpegCompression; }
+
+    /** JPEG size */
+    const Vector2ui& getJpegSize() const { return _jpegSize; }
+    void setJpegSize( const Vector2ui& size ) { _jpegSize = size; }
 
 protected:
     bool _parse( const po::variables_map& vm ) final;
@@ -56,6 +60,7 @@ protected:
     std::string _deflectStreamname;
     bool _benchmarking;
     size_t _jpegCompression;
+    Vector2ui _jpegSize;
 };
 
 }

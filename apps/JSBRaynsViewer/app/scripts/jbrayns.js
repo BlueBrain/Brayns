@@ -138,7 +138,7 @@ function onPresetsTouchSimulation() {
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    var jsonData = { 'key' : 'window-size', 'value': window.innerWidth + ' ' + window.innerHeight };
+    var jsonData = { 'key' : 'jpeg-size', 'value': window.innerWidth + ' ' + window.innerHeight };
     doRequest('PUT', braynsUrl + 'zerobuf/render/attribute', function () {}, jsonData);
     clearFrame();
 }
@@ -191,7 +191,7 @@ var statusImage = setInterval(function getImage() {
             jsonCamera['up']['y'] = 1;
             jsonCamera['up']['z'] = 0;
             jsonCamera['fovFocalLength'] = 100.0;
-            jsonCamera['fovAperture'] = 0.002;
+            jsonCamera['fovAperture'] = 0.0;
             doRequest('PUT', braynsUrl + 'zerobuf/render/fovcamera', function () {}, jsonCamera);
             currentCameraPos.copy( camera.position );
             accumulation = 0;
