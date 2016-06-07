@@ -14,19 +14,17 @@
 namespace brayns
 {
 
-DeflectPlugin::DeflectPlugin(
-    ApplicationParameters& applicationParameters,
-    ExtensionParameters& extensionParameters )
+DeflectPlugin::DeflectPlugin( ApplicationParameters& applicationParameters,
+                              ExtensionParameters& extensionParameters )
     : ExtensionPlugin( applicationParameters, extensionParameters )
     , _theta( 0.f )
     , _phi( 0.f )
     , _previousTouchPosition( 0.5f, 0.5f, -1.f )
-    , _compressImage( applicationParameters.getJpegCompression( ) != 100 )
+    , _compressImage( applicationParameters.getJpegCompression() != 100 )
     , _compressionQuality( applicationParameters.getJpegCompression( ))
-    , _hostname( _applicationParameters.getDeflectHostname( ))
-    , _streamName( _applicationParameters.getDeflectStreamname( ))
-    , _stream( nullptr )
-
+    , _stream( new deflect::Stream(
+                   applicationParameters.getDeflectStreamname(),
+                   applicationParameters.getDeflectHostname( )))
 {
     _initializeDeflect( );
 }
@@ -42,14 +40,14 @@ void DeflectPlugin::run()
 
 void DeflectPlugin::_initializeDeflect()
 {
-    BRAYNS_INFO << "Connecting to DisplayCluster on host " <<
-                   _hostname << std::endl;
+    if( _stream->isConnected( ))
+        BRAYNS_INFO << "Connected to Tide on host " << _stream->getHost()
+                    << std::endl;
+    else
+        BRAYNS_ERROR << "Could not connect to Tide on host "
+                     << _stream->getHost() << std::endl;
 
-    _stream.reset(new deflect::Stream(_streamName, _hostname));
-    if( !_stream->isConnected())
-        BRAYNS_ERROR << "Could not connect to " << _hostname << std::endl;
-
-    if( _stream && !_stream->registerForEvents( ))
+    if( !_stream->registerForEvents( ))
         BRAYNS_ERROR << "Could not register for events!" << std::endl;
 }
 

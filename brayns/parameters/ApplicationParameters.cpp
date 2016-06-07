@@ -27,7 +27,6 @@ const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_WIDTH = DEFAULT_WINDOW_WIDTH;
 const size_t DEFAULT_JPEG_HEIGHT = DEFAULT_WINDOW_HEIGHT;
-const std::string DEFAULT_DEFLECT_STREAM_NAME = "brayns";
 const size_t DEFAULT_JPEG_COMPRESSION = 100;
 const std::string DEFAULT_CAMERA = "perspective";
 
@@ -40,7 +39,6 @@ ApplicationParameters::ApplicationParameters( )
     : AbstractParameters( "Application" )
     , _camera( DEFAULT_CAMERA )
     , _windowSize( DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT )
-    , _deflectStreamname( DEFAULT_DEFLECT_STREAM_NAME )
     , _benchmarking( false )
     , _jpegCompression( DEFAULT_JPEG_COMPRESSION )
     , _jpegSize( DEFAULT_JPEG_WIDTH, DEFAULT_JPEG_HEIGHT )

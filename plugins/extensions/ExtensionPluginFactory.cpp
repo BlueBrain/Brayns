@@ -31,12 +31,14 @@ ExtensionPluginFactory::ExtensionPluginFactory(
 #endif
 
 #ifdef BRAYNS_USE_DEFLECT
-    if( !_applicationParameters.getDeflectHostname( ).empty() )
+    // Try to create Deflect plugin from env vars or application parameters,
+    // silently ignore failure
+    try
     {
-        DeflectPluginPtr deflectPlugin( new DeflectPlugin(
-            applicationParameters, _extensionParameters ));
-        add( deflectPlugin );
+        add( std::make_shared<DeflectPlugin>( applicationParameters,
+                                              _extensionParameters ));
     }
+    catch( ... ) {}
 #endif
 }
 

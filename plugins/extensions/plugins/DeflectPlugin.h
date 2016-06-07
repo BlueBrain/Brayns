@@ -81,8 +81,6 @@ private:
     Vector3f _previousTouchPosition;
     bool _compressImage;
     size_t _compressionQuality;
-    std::string _hostname;
-    std::string _streamName;
     std::unique_ptr<deflect::Stream> _stream;
 };
 
