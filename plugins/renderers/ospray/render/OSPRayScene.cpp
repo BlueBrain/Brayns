@@ -41,7 +41,7 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[6] =
 };
 
 OSPRayScene::OSPRayScene(
-    RendererMap renderers,
+    Renderers renderers,
     SceneParameters& sceneParameters,
     GeometryParameters& geometryParameters )
     : Scene( renderers, sceneParameters, geometryParameters )
@@ -60,16 +60,14 @@ OSPModel* OSPRayScene::modelImpl( const size_t timestamp )
 {
     if( _models.find( timestamp ) != _models.end())
         return &_models[timestamp];
-    else
-    {
-        size_t returnValue = 0;
-        for( const auto& model: _models )
-            if( model.first <= timestamp )
-                returnValue = model.first;
-        BRAYNS_DEBUG << "Request model for timestamp " << timestamp
-                     << ", returned " << returnValue << std::endl;
-        return &_models[returnValue];
-    }
+
+    int index = -1;
+    for( const auto& model: _models )
+        if( model.first <= timestamp )
+            index = model.first;
+    BRAYNS_DEBUG << "Request model for timestamp " << timestamp
+                 << ", returned " << index << std::endl;
+    return index == -1 ? nullptr : &_models[index];
 }
 
 
@@ -190,6 +188,11 @@ void OSPRayScene::_loadCacheFile()
     const std::string& filename = _geometryParameters.getLoadCacheFile();
     BRAYNS_INFO << "Loading scene from binary file: " << filename << std::endl;
     std::ifstream file( filename, std::ios::in | std::ios::binary );
+    if( !file.good( ))
+    {
+        BRAYNS_ERROR << "Could not open cache file " << filename << std::endl;
+        return;
+    }
 
     size_t version;
     file.read( (char*)&version, sizeof( size_t ));
@@ -597,7 +600,7 @@ void OSPRayScene::_commitLights()
     for( auto renderer: _renderers )
     {
         OSPRayRenderer* osprayRenderer =
-            dynamic_cast< OSPRayRenderer* >( renderer.second.get( ));
+            dynamic_cast< OSPRayRenderer* >( renderer.lock().get( ));
 
         std::vector< OSPLight > ospLights;
         for( auto light: _lights )
@@ -657,7 +660,7 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
     for( const auto& renderer: _renderers )
     {
         OSPRayRenderer* osprayRenderer =
-            dynamic_cast<OSPRayRenderer*>( renderer.second.get( ));
+            dynamic_cast<OSPRayRenderer*>( renderer.lock().get( ));
         for( size_t index=0; index < _materials.size(); ++index )
         {
             if( _ospMaterials.size() <= index )

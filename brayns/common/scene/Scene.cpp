@@ -20,7 +20,7 @@ namespace brayns
 {
 
 Scene::Scene(
-    RendererMap renderers,
+    Renderers renderers,
     SceneParameters& sceneParameters,
     GeometryParameters& geometryParameters )
     : _sceneParameters(sceneParameters)

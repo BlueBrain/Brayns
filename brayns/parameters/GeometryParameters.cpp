@@ -16,7 +16,7 @@ namespace
 {
 
 const std::string PARAM_MORPHOLOGY_FOLDER = "morphology-folder";
-const std::string PARAM_PDB_FOLDER = "pdb-folder";
+const std::string PARAM_PDB_FILE = "pdb-file";
 const std::string PARAM_MESH_FOLDER = "mesh-folder";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
@@ -56,8 +56,8 @@ GeometryParameters::GeometryParameters( )
             "Folder containing SWC and H5 files" )
         ( PARAM_MESH_FOLDER.c_str(), po::value< std::string >( ),
             "Folder containing mesh files" )
-        ( PARAM_PDB_FOLDER.c_str(), po::value< strings >( )->multitoken(),
-            "Folder containing PDB files" )
+        ( PARAM_PDB_FILE.c_str(), po::value< std::string >( ),
+            "PDB file to load" )
         ( PARAM_CIRCUIT_CONFIG.c_str(), po::value< std::string >( ),
             "Circuit configuration file" )
         ( PARAM_LOAD_CACHE_FILE.c_str(), po::value< std::string >( ),
@@ -99,16 +99,8 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_MORPHOLOGY_FOLDER ))
         _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as< std::string >( );
-    if( vm.count( PARAM_PDB_FOLDER ))
-    {
-        strings values = vm[PARAM_PDB_FOLDER].as< strings >( );
-        if( values.size( ) == 3 )
-        {
-            _pdbFolder = values[0];
-            _pdbCells = values[1];
-            _pdbPositions = values[2];
-        }
-    }
+    if( vm.count( PARAM_PDB_FILE ))
+        _pdbFile = vm[PARAM_PDB_FILE].as< std::string >( );
     if( vm.count( PARAM_MESH_FOLDER ))
         _meshFolder = vm[PARAM_MESH_FOLDER].as< std::string >( );
     if( vm.count( PARAM_CIRCUIT_CONFIG ))
@@ -167,10 +159,7 @@ void GeometryParameters::print( )
     AbstractParameters::print( );
     BRAYNS_INFO << "Morphology folder          : " <<
         _morphologyFolder << std::endl;
-    BRAYNS_INFO << "PDB datasource             : " << std::endl;
-    BRAYNS_INFO << "- Folder                   : " << _pdbFolder << std::endl;
-    BRAYNS_INFO << "- Cells                    : " << _pdbCells << std::endl;
-    BRAYNS_INFO << "- Positions                : " << _pdbPositions << std::endl;
+    BRAYNS_INFO << "PDB file                   : " << _pdbFile << std::endl;
     BRAYNS_INFO << "Mesh folder                : " << _meshFolder << std::endl;
     BRAYNS_INFO << "Cache file to load         : " << _loadCacheFile << std::endl;
     BRAYNS_INFO << "Cache file to save         : " << _saveCacheFile << std::endl;

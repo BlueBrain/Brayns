@@ -42,7 +42,9 @@ typedef std::shared_ptr< Camera > CameraPtr;
 
 class Renderer;
 typedef std::shared_ptr< Renderer > RendererPtr;
+typedef std::weak_ptr< Renderer > RendererWeakPtr;
 typedef std::map< std::string, RendererPtr > RendererMap;
+typedef std::vector< RendererWeakPtr > Renderers;
 
 class FrameBuffer;
 typedef std::shared_ptr< FrameBuffer > FrameBufferPtr;

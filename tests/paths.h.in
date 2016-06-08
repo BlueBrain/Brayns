@@ -1,0 +1,17 @@
+/* Copyright (c) 2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
+ *
+ * This file is part of BRayns
+ */
+
+#ifndef BRAYNS_TEST_PATHS
+#define BRAYNS_TEST_PATHS
+
+#ifdef BRAYNS_USE_BBPTESTDATA
+#  include <BBP/TestDatasets.h>
+#endif
+
+static char const *const BRAYNS_TESTDATA = "${CMAKE_CURRENT_SOURCE_DIR}/";
+
+#endif

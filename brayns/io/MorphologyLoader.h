@@ -43,8 +43,7 @@ public:
      * @param uri URI of the morphology
      * @param morphologyIndex specifies an index for the morphology. This is
      *        mainly used to give a specific color to every morphology.
-     * @param primitives Resulting primitives (spheres, cones, etc)
-     * @param bounds Bounding box of the morphology
+     * @param scene resulting scene
      * @return True if the morphology is successfully loaded, false otherwise
      */
     bool importMorphology(
@@ -54,13 +53,13 @@ public:
 
     /** Imports morphology from a circuit for the given target name
      *
-     * @param uri URI of the Circuit Config file
+     * @param circuitConfig URI of the Circuit Config file
      * @param target Target to be loaded. If empty, the target specified in the
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
      * @param report Compartment report to be loaded
-     * @param primitives Resulting primitives (spheres, cones, etc)
-     * @param bounds Bounding box of the whole circuit
+     * @param nbSimulationFramesLoaded number of simulation frames to load
+     * @param scene resulting scene
      * @return True if the circuit is successfully loaded, false if the circuit
      *         contains no cells.
      */
@@ -73,12 +72,11 @@ public:
 
     /** Imports morphology from a circuit for the given target name
      *
-     * @param uri URI of the Circuit Config file
+     * @param circuitConfig URI of the Circuit Config file
      * @param target Target to be loaded. If empty, the target specified in the
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
-     * @param primitives Resulting primitives (spheres, cones, etc)
-     * @param bounds Bounding box of the whole circuit
+     * @param scene resulting scene
      * @return True if the circuit is successfully loaded, false if the circuit
      *         contains no cells.
      */
@@ -93,11 +91,12 @@ public:
      *  normalized value of the data againt the whole simulation. In future
      *  work, R, G and B can be used to store different pieces of information
      *  that can then be interpreted by simulation renderer.
-     * @param uri URI of the Circuit Config file
+     * @param circuitConfig URI of the Circuit Config file
      * @param target Target to be loaded. If empty, the target specified in the
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
      * @param report report to be loaded.
+     * @param scene resulting scene
      * @return The number of loaded frames.
      */
     size_t importSimulationIntoTexture(

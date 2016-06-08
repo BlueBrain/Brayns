@@ -38,8 +38,6 @@ struct StereoCamera : public ospray::Camera
     ospray::vec3f dir_dv;
 
     ::ispc::StereoCamera_Data *ispcData;
-
-    virtual void initRay(ospray::Ray &ray, const osp::vec2f &sample);
 };
 
 } // ::brayns

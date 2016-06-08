@@ -52,14 +52,8 @@ public:
     /** folder containing SWC and H5 files */
     std::string getMorphologyFolder( ) const { return _morphologyFolder; }
 
-    /** folder containing PDB files */
-    std::string getPDBFolder( ) const { return _pdbFolder; }
-
-    /** folder containing PDB cells */
-    std::string getPDBCells( ) const { return _pdbCells; }
-
-    /** folder containing PDB positions */
-    std::string getPDBPositions( ) const { return _pdbPositions; }
+    /** PDB file */
+    std::string getPDBFile( ) const { return _pdbFile; }
 
     /** folder containing mesh files */
     std::string getMeshFolder( ) const { return _meshFolder; }
@@ -129,9 +123,7 @@ protected:
     bool _parse( const po::variables_map& vm ) final;
 
     std::string _morphologyFolder;
-    std::string _pdbFolder;
-    std::string _pdbCells;
-    std::string _pdbPositions;
+    std::string _pdbFile;
     std::string _h5Folder;
     std::string _meshFolder;
     std::string _circuitConfig;

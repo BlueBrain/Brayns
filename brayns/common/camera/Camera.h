@@ -40,7 +40,7 @@ public:
        @param position The x, y, z coordinates of the camera position
        @param target The x, y, z coordinates of the camera target: the point the
               camera is "looking at" or focused on
-       @param up the x, y, z coordinates of the up vector's end point
+       @param upVector the x, y, z coordinates of the up vector's end point
     */
     BRAYNS_API virtual void set(
         const Vector3f& position,
@@ -62,7 +62,7 @@ public:
        Sets camera position
        @param position The x, y, z coordinates of the camera position
     */
-    BRAYNS_API virtual void setPosition( const Vector3f& );
+    BRAYNS_API virtual void setPosition( const Vector3f& position );
 
     /**
        Gets camera position
@@ -75,7 +75,7 @@ public:
        @param target The x, y, z coordinates of the camera target: the point the
               camera is "looking at" or focused on
     */
-    BRAYNS_API virtual void setTarget( const Vector3f& );
+    BRAYNS_API virtual void setTarget( const Vector3f& target );
 
     /**
        Gets camera target
@@ -88,7 +88,7 @@ public:
        Sets camera up vector
        @param up the x, y, z coordinates of the up vector's end point
     */
-    BRAYNS_API virtual void setUpVector( const Vector3f& );
+    BRAYNS_API virtual void setUpVector( const Vector3f& up );
 
     /**
        Gets camera up vector
@@ -103,13 +103,19 @@ public:
     BRAYNS_API virtual void commit( ) =  0;
 
     /**
-       Set the aspec ratio of the camera
+       Set the aspect ratio of the camera
        @param aspectRatio The new aspect ratio
     */
     BRAYNS_API void setAspectRatio( float aspectRatio );
 
-    /** @copydoc Camera::setAspectRatio */
+    /** @return the aspect ration of the camera */
     BRAYNS_API float getAspectRatio( ) const;
+
+    /**
+       @copydoc Camera::getAperture
+       @param aperture The new aperture
+    */
+    BRAYNS_API void setAperture( float aperture );
 
     /**
        The aperture determines how collimated the admitted rays are, which is of
@@ -118,12 +124,14 @@ public:
        focus at the image plane. If an aperture is wide, then uncollimated rays
        are admitted, resulting in a sharp focus only for rays with a certain
        focal length.
-       @param aperture
     */
-    BRAYNS_API void setAperture( float aperture );
-
-    /** @copydoc Camera::setAperture */
     BRAYNS_API float getAperture( ) const;
+
+    /**
+       @copydoc Camera::getFocalLength
+       @param focalLength The new focal length
+    */
+    BRAYNS_API void setFocalLength( float focalLength );
 
     /**
       The focal length of an optical system is a measure of how strongly the
@@ -133,17 +141,13 @@ public:
       with a long focal length; that is, it bends the rays more sharply,
       bringing them to a focus in a shorter distance.
     */
-    BRAYNS_API void setFocalLength( float FocalLength );
-
-    /** @copydoc Camera::getFocalLength */
     BRAYNS_API float getFocalLength( ) const;
 
     /** Resets the camera to its initial values */
     BRAYNS_API void reset( );
 
     /**
-       Returns the serializable of the Camera
-       @param A serializable of the Camera
+       @return the serializable of the Camera
     */
     BRAYNS_API servus::Serializable* getSerializable( );
 

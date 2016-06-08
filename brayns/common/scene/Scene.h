@@ -34,7 +34,8 @@ public:
     /**
         Creates a scene object responsible for handling geometry, materials and
         light sources.
-        @param renderer Renderer to be used to render the scene
+        @param renderers Renderers to be used to render the scene
+        @param sceneParameters Parameters defining how the scene is constructed
         @param geometryParameters Parameters defining how the geometry is
                constructed
 
@@ -42,7 +43,7 @@ public:
               https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
     */
     BRAYNS_API Scene(
-        RendererMap renderers,
+        Renderers renderers,
         SceneParameters& sceneParameters,
         GeometryParameters& geometryParameters);
     BRAYNS_API virtual ~Scene();
@@ -83,7 +84,8 @@ public:
     /**
         Returns the bounding box for the whole scene
     */
-    BRAYNS_API Boxf& getWorldBounds() { return _bounds; }
+    Boxf& getWorldBounds() { return _bounds; }
+    const Boxf& getWorldBounds() const { return _bounds; }
 
     /**
         Build an environment in addition to the loaded data, and according to
@@ -93,9 +95,6 @@ public:
 
     /**
         Attaches a light source to the scene
-        @param index Index of the light source for further use. If a light
-                     source already exists for a given index, it is replaced
-                     by the one
         @param light Object representing the light source
     */
     BRAYNS_API void addLight( LightPtr light );
@@ -112,7 +111,6 @@ public:
     BRAYNS_API void clearLights();
 
 
-    BRAYNS_API RendererMap& getRenderers() { return _renderers; }
     BRAYNS_API GeometryParameters& getGeometryParameters() { return _geometryParameters; }
     BRAYNS_API SceneParameters& getSceneParameters() { return _sceneParameters; }
     BRAYNS_API PrimitivesMap& getPrimitives() { return _primitives; }
@@ -124,7 +122,7 @@ protected:
     // Parameters
     SceneParameters& _sceneParameters;
     GeometryParameters& _geometryParameters;
-    RendererMap _renderers;
+    Renderers _renderers;
 
     // Model
     PrimitivesMap _primitives;

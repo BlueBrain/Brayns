@@ -36,7 +36,10 @@ struct Brayns::Impl
          : _frameSize( 0, 0 )
          , _sceneModified( true )
     {
-        ospInit( &argc, argv );
+        // Ignore errors from multiple calls to init from same process,
+        // aka from unit tests. Remove this once ospShutdown is provided.
+        try { ospInit( &argc, argv ); }
+        catch( const std::runtime_error& ) {}
 
         BRAYNS_INFO << "Parsing command line options" << std::endl;
         _parametersManager.reset( new ParametersManager( ));
@@ -54,12 +57,16 @@ struct Brayns::Impl
         const strings& renderers =
             _parametersManager->getRenderingParameters().getRenderers();
 
+        Renderers renderersForScene;
         for( std::string renderer: renderers )
+        {
             _renderers[renderer].reset(
                 new OSPRayRenderer( renderer, *_parametersManager ));
+            renderersForScene.push_back( _renderers[renderer] );
+        }
 
         BRAYNS_INFO << "Initialize scene" << std::endl;
-        _scene.reset( new OSPRayScene( _renderers,
+        _scene.reset( new OSPRayScene( renderersForScene,
             _parametersManager->getSceneParameters(),
             _parametersManager->getGeometryParameters()));
 
@@ -106,8 +113,8 @@ struct Brayns::Impl
         if(!geometryParameters.getMorphologyFolder().empty())
             _loadMorphologyFolder();
 
-        if(!geometryParameters.getPDBFolder().empty())
-            _loadPDBFolder();
+        if(!geometryParameters.getPDBFile().empty())
+            _loadPDBFile();
 
         if(!geometryParameters.getMeshFolder().empty())
             _loadMeshFolder();
@@ -310,22 +317,21 @@ private:
     }
 
     /**
-        Loads data from PDB files located in the folder specified in the
-        geometry parameters (command line parameter --pdb-folder)
+        Loads data from a PDB file (command line parameter --pdb-file)
     */
-    void _loadPDBFolder()
+    void _loadPDBFile()
     {
-        // Load PDB Folder
+        // Load PDB File
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
-        const boost::filesystem::path& folder =
-            geometryParameters.getPDBFolder( );
-        BRAYNS_INFO << "Loading PDB files from " << folder << std::endl;
+        BRAYNS_INFO << "Loading PDB file " << geometryParameters.getPDBFile()
+                    << std::endl;
         ProteinLoader proteinLoader( geometryParameters );
-        if( !proteinLoader.importPDBFolder(
-            0, _scene->getMaterials(), true, *_scene))
+        if( !proteinLoader.importPDBFile( geometryParameters.getPDBFile(),
+                                          Vector3f( 0, 0, 0 ), 0, *_scene ))
         {
-            BRAYNS_ERROR << "Failed to import " << folder << std::endl;
+            BRAYNS_ERROR << "Failed to import "
+                         << geometryParameters.getPDBFile() << std::endl;
         }
 
         for( size_t i = 0; i < _scene->getMaterials().size( ); ++i )

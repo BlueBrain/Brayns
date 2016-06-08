@@ -30,7 +30,7 @@ if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
   endif()
 endif()
 
-common_find_package(Boost REQUIRED COMPONENTS program_options)
+common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework)
 common_find_package(OSPRay REQUIRED SYSTEM)
 common_find_package(GLUT REQUIRED SYSTEM)
 common_find_package(OpenGL REQUIRED)
@@ -48,6 +48,7 @@ endif()
 
 option(BRAYNS_BRION_ENABLED "Activate Brion" ON)
 if(BRAYNS_BRION_ENABLED)
+  common_find_package(BBPTestData)
   common_find_package(Brion)
 endif()
 
@@ -105,5 +106,7 @@ option(BRAYNS_SERVICE_ENABLED "BRayns Service" ON)
 if(BRAYNS_SERVICE_ENABLED)
   add_subdirectory(apps/BRaynsService)
 endif()
+
+add_subdirectory(tests)
 
 include(DoxygenRule)

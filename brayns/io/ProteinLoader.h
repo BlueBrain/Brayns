@@ -25,23 +25,8 @@ class ProteinLoader
 public:
     ProteinLoader( const GeometryParameters& geometryParameters );
 
-    /** Imports atoms from a given PDB folder
-     *
-     * @param geometries resulting geometries
-     */
-    bool importPDBFolder(
-        int material,
-        const Materials& materials,
-        int positionsOnly,
-        Scene& scene);
-
     /** Imports atoms from a given PDB file
      *
-     * @param filename filename of the PDB file
-     * @param position translates the protein to the given position
-     * @param materials materials to assign to atoms
-     * @param geometries resulting geometries
-     * @param bounds resulting bounding of the scene
      * @return bounding box of the protein
      */
     bool importPDBFile(

@@ -336,7 +336,7 @@ bool MorphologyLoader::importCircuit(
                     if( _importMorphology(
                         uri, i, transforms[i], 0,
                         private_primitives, scene.getWorldBounds(),
-                        simulationOffset, maxDistanceToSoma, replicaPosition))
+                        simulationOffset, maxDistanceToSoma, replicaPosition, 0))
                     {
                         morphologyOffsets[simulatedCells] = maxDistanceToSoma;
                         simulationOffset += maxDistanceToSoma;
@@ -347,7 +347,7 @@ bool MorphologyLoader::importCircuit(
                     _importMorphology(
                         uri, i, transforms[i], 0,
                         private_primitives, scene.getWorldBounds(),
-                        0, maxDistanceToSoma, replicaPosition);
+                        0, maxDistanceToSoma, replicaPosition, 0);
                 ++cellCount;
             }
             #pragma omp critical

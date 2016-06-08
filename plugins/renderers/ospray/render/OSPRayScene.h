@@ -21,7 +21,7 @@ class OSPRayScene: public brayns::Scene
 {
 public:
     OSPRayScene(
-        RendererMap renderer,
+        Renderers renderer,
         SceneParameters& sceneParameters,
         GeometryParameters& geometryParameters );
 
