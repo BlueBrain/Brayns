@@ -47,6 +47,11 @@ public:
         const Vector3f& target,
         const Vector3f& upVector );
 
+    BRAYNS_API virtual void setInitialState(
+        const Vector3f& position,
+        const Vector3f& target,
+        const Vector3f& upVector );
+
     /**
        Gets camera type
        @return The type of camera (Perpective, Stereo, etc)
@@ -132,6 +137,9 @@ public:
 
     /** @copydoc Camera::getFocalLength */
     BRAYNS_API float getFocalLength( ) const;
+
+    /** Resets the camera to its initial values */
+    BRAYNS_API void reset( );
 
     /**
        Returns the serializable of the Camera

@@ -41,7 +41,7 @@ void ExtendedOBJRenderer::commit( )
             lightArray.push_back(
                 ( ( ospray::Light** )lightData->data )[ i ]->getIE( ));
 
-    void **lightPtr = lightArray.empty() ? nullptr : &lightArray[0];
+    void **lightArrayPtr = lightArray.empty() ? nullptr : &lightArray[0];
 
     ospray::vec3f bgColor = getParam3f( "bgColor", ospray::vec3f( 1.f ));
 
@@ -55,26 +55,20 @@ void ExtendedOBJRenderer::commit( )
     timestamp = getParam1f( "timestamp", 0.f );
     spp = getParam1i("spp", 1);
     electronShadingEnabled = bool( getParam1i( "electronShading", 0 ));
-    gradientBackgroundEnabled =
-        bool( getParam1i( "gradientBackgroundEnabled", 0 ));
-    ospray::vec3f scale = getParam3f( "scale", ospray::vec3f( 1.f ));
-    float dof = getParam1f( "dof", 0.f );
 
     // Those materials are used for skybox mapping only
-    materialData = ( ospray::Data* )getParamData( "material" );
+    materialData = ( ospray::Data* )getParamData( "materials" );
     materialArray.clear( );
     if( materialData )
         for( size_t i = 0; i < materialData->size( ); ++i )
-        {
             materialArray.push_back(
-                ( ( ospray::Material** )materialData->data )[ i ]->getIE( ));
-        }
-    void **materialPtr = materialArray.empty( ) ? nullptr : &materialArray[ 0 ];
+                ( ( ospray::Material** )materialData->data )[i]->getIE( ));
+    void **materialArrayPtr =
+        materialArray.empty( ) ? nullptr : &materialArray[0];
 
     ispc::ExtendedOBJRenderer_set(
                 getIE( ),
                 ( ispc::vec3f& )bgColor,
-                ( ispc::vec3f& )scale,
                 shadowsEnabled,
                 softShadowsEnabled,
                 ambientOcclusionStrength,
@@ -84,10 +78,8 @@ void ExtendedOBJRenderer::commit( )
                 timestamp,
                 spp,
                 electronShadingEnabled,
-                gradientBackgroundEnabled,
-                dof,
-                lightPtr, lightArray.size( ),
-                materialPtr, materialArray.size( ));
+                lightArrayPtr, lightArray.size( ),
+                materialArrayPtr, materialArray.size( ));
 }
 
 ExtendedOBJRenderer::ExtendedOBJRenderer( )

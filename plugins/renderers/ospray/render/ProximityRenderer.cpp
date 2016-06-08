@@ -30,24 +30,26 @@ void ProximityRenderer::commit( )
 
     void **lightPtr = lightArray.empty( ) ? NULL : &lightArray[0];
 
-    vec3f bgColor =
-        getParam3f( "bgColor", vec3f( 0.f ));
-    vec3f nearColor =
-        getParam3f( "detectionNearColor", vec3f( 0.f, 1.f, 0.f ));
-    vec3f farColor =
-        getParam3f( "detectionFarColor", vec3f( 1.f, 0.f, 0.f ));
-    detectionDistance =
-        getParam1f( "detectionDistance", 1.f );
+    vec3f bgColor = getParam3f( "bgColor", vec3f( 0.f ));
+    vec3f nearColor = getParam3f( "detectionNearColor", vec3f( 0.f, 1.f, 0.f ));
+    vec3f farColor = getParam3f( "detectionFarColor", vec3f( 1.f, 0.f, 0.f ));
+    detectionDistance = getParam1f( "detectionDistance", 1.f );
     detectionOnDifferentMaterial =
         bool( getParam1i( "detectionOnDifferentMaterial", 0 ));
-    randomNumber =
-        getParam1i( "randomNumber", 0 );
-    timestamp =
-        getParam1f( "timestamp", 0.f );
-    spp =
-        getParam1i( "spp", 1 );
-    electronShadingEnabled =
-        bool( getParam1i( "electronShading", 1 ));
+    randomNumber = getParam1i( "randomNumber", 0 );
+    timestamp = getParam1f( "timestamp", 0.f );
+    spp = getParam1i( "spp", 1 );
+    electronShadingEnabled = bool( getParam1i( "electronShading", 1 ));
+
+    // Those materials are used for skybox mapping only
+    materialData = ( ospray::Data* )getParamData( "materials" );
+    materialArray.clear( );
+    if( materialData )
+        for( size_t i = 0; i < materialData->size( ); ++i )
+            materialArray.push_back(
+                ( ( ospray::Material** )materialData->data )[i]->getIE( ));
+    void **materialArrayPtr =
+        materialArray.empty( ) ? nullptr : &materialArray[0];
 
     ispc::ProximityRenderer_set(
                 getIE( ),
@@ -60,7 +62,8 @@ void ProximityRenderer::commit( )
                 timestamp,
                 spp,
                 electronShadingEnabled,
-                lightPtr, lightArray.size( ));
+                lightPtr, lightArray.size( ),
+                materialArrayPtr, materialArray.size( ));
 }
 
 ProximityRenderer::ProximityRenderer( )

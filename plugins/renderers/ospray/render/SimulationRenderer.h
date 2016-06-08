@@ -52,12 +52,10 @@ struct SimulationRenderer : public ospray::Renderer
     float ambientOcclusionStrength;
     bool shadingEnabled;
     bool electronShadingEnabled;
-    bool gradientBackgroundEnabled;
     int randomNumber;
     bool moving;
     float timestamp;
     int spp;
-    float dof;
     int simulationNbOffsets;
     int simulationNbFrames;
 };

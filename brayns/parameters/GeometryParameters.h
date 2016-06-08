@@ -23,7 +23,12 @@ namespace brayns
  */
 struct MorphologyLayout
 {
-    MorphologyLayout() : type( ML_NONE ) {}
+    MorphologyLayout()
+    : type( ML_NONE )
+    , nbColumns( 0 )
+    , verticalSpacing( 0 )
+    , horizontalSpacing( 0 )
+      {}
 
     MorphologyLayoutType type;
     size_t nbColumns;
@@ -106,6 +111,19 @@ public:
         return _morphologyLayout;
     }
 
+    /** Defines if cells with no simulation data should be loaded */
+    size_t getNonSimulatedCells() const { return _nonSimulatedCells; }
+
+    /** Defines the range of frames to be loaded for the simulation
+        This is related to the current size of the texture that is limited to
+        2 GB. This of course needs to be improved! */
+    size_t getLastSimulationFrame() const { return _lastSimulationFrame; }
+    size_t getFirstSimulationFrame() const { return _firstSimulationFrame; }
+
+    /** Defines if multiple models should be generated to increase the
+        rendering performance */
+    bool getGenerateMultipleModels() const { return _generateMultipleModels; }
+
 protected:
 
     bool _parse( const po::variables_map& vm ) final;
@@ -127,6 +145,10 @@ protected:
     GeometryQuality _geometryQuality;
     size_t _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
+    size_t _nonSimulatedCells;
+    size_t _firstSimulationFrame;
+    size_t _lastSimulationFrame;
+    bool _generateMultipleModels;
 };
 
 }

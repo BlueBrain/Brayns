@@ -43,6 +43,7 @@ public:
     */
     BRAYNS_API Scene(
         RendererMap renderers,
+        SceneParameters& sceneParameters,
         GeometryParameters& geometryParameters);
     BRAYNS_API virtual ~Scene();
 
@@ -105,6 +106,7 @@ public:
 
     BRAYNS_API RendererMap& getRenderers() { return _renderers; }
     BRAYNS_API GeometryParameters& getGeometryParameters() { return _geometryParameters; }
+    BRAYNS_API SceneParameters& getSceneParameters() { return _sceneParameters; }
     BRAYNS_API PrimitivesMap& getPrimitives() { return _primitives; }
     BRAYNS_API Materials& getMaterials() { return _materials; }
     BRAYNS_API TexturesMap& getTextures() { return _textures; }
@@ -112,6 +114,7 @@ public:
 
 protected:
     // Parameters
+    SceneParameters& _sceneParameters;
     GeometryParameters& _geometryParameters;
     RendererMap _renderers;
 

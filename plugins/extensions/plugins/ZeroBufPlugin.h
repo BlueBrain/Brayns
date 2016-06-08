@@ -16,6 +16,7 @@
 #include <lexis/render/imageJPEG.h>
 #include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/attribute.h>
+#include <zerobuf/render/reset.h>
 
 namespace brayns
 {
@@ -43,6 +44,8 @@ private:
     void _cameraUpdated( );
 
     void _attributeUpdated( );
+
+    void _resetUpdated( );
 
     bool _requestImageJPEG( );
 
@@ -72,6 +75,7 @@ private:
     ::lexis::render::ImageJPEG _remoteImageJPEG;
     ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
     ::zerobuf::render::Attribute _remoteAttribute;
+    ::zerobuf::render::Reset _remoteReset;
 
 };
 

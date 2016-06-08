@@ -78,7 +78,11 @@ void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
         radius1 = *((uniform float *)(conePtr+geometry->offset_upRadius));
 
     uniform float timestamp = *((uniform float *)(conePtr+geometry->offset_timestamp));
-    if( timestamp>ray.time ) return;
+
+#ifndef INTEL_DEMO
+    if( timestamp>ray.time )
+        return;
+#endif
 
     uniform vec3f v0 = *((uniform vec3f*)(conePtr+geometry->offset_center));
     uniform vec3f v1 = *((uniform vec3f*)(conePtr+geometry->offset_up));

@@ -42,7 +42,6 @@ private:
     Vector3f _up;
     float _centerRadius;
     float _upRadius;
-    float _timestamp;
     float _value;
 };
 

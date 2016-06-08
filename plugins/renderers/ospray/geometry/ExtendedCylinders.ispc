@@ -64,7 +64,10 @@ void ExtendedCylinders_intersect(uniform ExtendedCylinders *uniform geometry,
     uniform float timestamp =
             *((uniform float *)(cylinderPtr+geometry->offset_timestamp));
 
-    if( timestamp>ray.time ) return;
+#ifndef INTEL_DEMO
+    if( timestamp>ray.time )
+        return;
+#endif
 
     if (geometry->offset_radius >= 0)
         radius = *((uniform float *)(cylinderPtr+geometry->offset_radius));

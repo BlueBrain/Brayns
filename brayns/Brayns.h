@@ -110,7 +110,7 @@ public:
     */
     BRAYNS_API void setMaterials(
         MaterialType materialType,
-        size_t nbMaterials = DEFAULT_NB_MATERIALS);
+        size_t nbMaterials = NB_MAX_MATERIALS);
 
     /**
        Reshapes the current frame buffers

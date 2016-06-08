@@ -17,11 +17,10 @@ Cylinder::Cylinder(
     const float radius,
     const float timestamp,
     const float value)
-    : Primitive(materialId)
+    : Primitive(materialId, timestamp)
     , _center(center)
     , _up(up)
     , _radius(radius)
-    , _timestamp(timestamp)
     , _value(value)
 {
     _geometryType = GT_CYLINDER;

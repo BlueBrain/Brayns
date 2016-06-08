@@ -14,6 +14,9 @@
 
 #define ALPHA_THRESHOLD (.05f)
 
+#define MATERIAL_SIMULATION 0
+#define MATERIAL_SKYBOX 1
+
 uniform float Proximity_randomU[16][16] = {
     {0, 0.5, 0.25, 0.75, 0.125, 0.625, 0.375, 0.875, 0.0625, 0.5625, 0.3125,
      0.8125, 0.1875, 0.6875, 0.4375, 0.9375},
@@ -186,6 +189,8 @@ struct ProximityRenderer {
     Renderer super;
     const uniform Light *uniform *uniform lights;
     uint32 numLights;
+    const uniform ExtendedOBJMaterial *uniform *uniform materials;
+    uint32 numMaterials;
     vec3f bgColor;
     vec3f nearColor;
     vec3f farColor;
@@ -196,6 +201,68 @@ struct ProximityRenderer {
     float timestamp;
     int spp;
 };
+
+/*
+________________________________________________________________________________
+
+Skybox mapping
+________________________________________________________________________________
+*/
+vec4f skyboxMapping(
+    const uniform ProximityRenderer* uniform self,
+    Ray& ray )
+{
+    vec4f result = make_vec4f( self->bgColor );
+    if( self->numMaterials <= MATERIAL_SKYBOX )
+        return result;
+
+    const float radius = 10000.f;
+    const uniform ExtendedOBJMaterial *uniform mat =
+        self->materials[MATERIAL_SKYBOX];
+    if( !mat->map_Kd )
+        return result;
+
+    // solve the equation sphere-ray to find the intersections
+    vec3f dir = ray.dir;
+
+    float a = 2.f * dot( dir, dir );
+    float b = 2.f * dot( ray.org, dir );
+    float c = dot( ray.org, ray.org )- radius * radius;
+    float d = b * b - 2.f * a * c;
+
+    if(  d <= 0.f || a == 0.f)
+        return result;
+
+    float r = sqrt( d );
+    float t1 = ( -b - r ) / a;
+    float t2 = ( -b + r ) / a;
+
+    if( t1 <= self->super.epsilon && t2<=self->super.epsilon )
+        return result; // both intersections are behind the ray origin
+
+    float t = 0.f;
+    if( t1 <= self->super.epsilon )
+        t = t2;
+    else
+        if( t2 <= self->super.epsilon )
+            t = t1;
+        else
+            t = ( t1 < t2 ) ? t1 : t2;
+
+    if( t<self->super.epsilon)
+        return result; // Too close to intersection
+
+    vec3f intersection = normalize(ray.org+t*dir);
+
+    // Intersection found, now get skybox color
+    vec2f st =
+    {
+        (( atan2( intersection.x, intersection.z ) / PI ) + 1.f ) * .5f,
+        -( asin( intersection.y ) / PI ) + .5f
+    };
+
+    return get4f( mat->map_Kd, st );
+}
 
 inline vec3f ProximityRenderer_shadeRay(
         const uniform ProximityRenderer* uniform self,
@@ -211,7 +278,9 @@ inline vec3f ProximityRenderer_shadeRay(
 
     if( ray.geomID < 0 )
     {
-        // No more intersections
+        // No intersection. Return skybox color
+        color = color +
+            path_opacity * make_vec3f( skyboxMapping( self, ray ));
         sample.z = 1;
         sample.alpha = 0.f;
         return self->bgColor + color + colorKs;
@@ -390,7 +459,9 @@ export void ProximityRenderer_set(
         const uniform int& spp,
         const uniform bool& electronShadingEnabled,
         void** uniform lights,
-        uniform int32 numLights)
+        uniform int32 numLights,
+        void** uniform materials,
+        uniform int32 numMaterials )
 {
     uniform ProximityRenderer *uniform self =
             ( uniform ProximityRenderer* uniform )_self;
@@ -407,4 +478,8 @@ export void ProximityRenderer_set(
 
     self->lights = ( const uniform Light* uniform* uniform )lights;
     self->numLights = numLights;
+
+    self->materials =
+        ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
+    self->numMaterials = numMaterials;
 }

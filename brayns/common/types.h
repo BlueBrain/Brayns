@@ -137,7 +137,6 @@ class DeflectPlugin;
 typedef std::shared_ptr< DeflectPlugin > DeflectPluginPtr;
 
 /** Define the color scheme to be applied to the geometry */
-const size_t DEFAULT_NB_MATERIALS = 200;
 enum ColorScheme
 {
     CS_NONE,
@@ -200,7 +199,12 @@ struct ExtensionParameters
  *  such as simulations, or skyboxes.
  */
 const size_t NO_MATERIAL = -1;
-const size_t MATERIAL_SIMULATION = 199;
+const size_t NB_MAX_MATERIALS = 200;
+const size_t NB_SYSTEM_MATERIALS = 2;
+const size_t MATERIAL_SYSTEM = NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS;
+const size_t MATERIAL_SIMULATION = MATERIAL_SYSTEM + 0;
+const size_t MATERIAL_SKYBOX = MATERIAL_SYSTEM + 1;
+const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 
 /** Defines how materials should be created */
@@ -211,7 +215,10 @@ enum MaterialType
                        // and light emission
     MT_SHADES_OF_GREY, // 255 shades of grey
     MT_GRADIENT,       // Gradient from red to yellow
-    MT_PASTEL_COLORS   // Random pastel colors
+    MT_PASTEL_COLORS,  // Random pastel colors
+    MT_DIFFUSE,
+    MT_ELECTRON,
+    MT_NO_SHADING
 };
 
 enum MeshQuality

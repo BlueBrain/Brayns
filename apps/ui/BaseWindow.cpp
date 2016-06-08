@@ -195,6 +195,8 @@ void BaseWindow::display( )
         _viewPort.setModified(false);
     }
 
+    _fps.start();
+
     RenderInput renderInput;
     RenderOutput renderOutput;
 
@@ -223,6 +225,8 @@ void BaseWindow::display( )
         glClearColor(0.f,0.f,0.f,1.f);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     }
+
+    _fps.stop();
 
     glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
     glutSwapBuffers( );
@@ -323,6 +327,11 @@ void BaseWindow::keypress( char key, const Vector2f& )
 
     switch( key )
     {
+    case ' ':
+        BRAYNS_INFO << "Camera reset to initial state" << std::endl;
+        _brayns->getCamera().reset();
+        _brayns->getCamera().commit();
+        break;
     case '+':
         _motionSpeed *= DEFAULT_MOTION_ACCELERATION;
         BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
@@ -346,15 +355,9 @@ void BaseWindow::keypress( char key, const Vector2f& )
     case 'C':
         BRAYNS_INFO << _viewPort << std::endl;
         break;
-    case 'D':
-        renderParams.setDepthOfField( !renderParams.getDepthOfField( ));
-        BRAYNS_INFO << "Detph of field: " <<
-            renderParams.getDepthOfField( ) << std::endl;
-        break;
     case 'E':
-        renderParams.setElectronShading( !renderParams.getElectronShading( ));
-        BRAYNS_INFO << "Electron shading: " <<
-            (renderParams.getElectronShading( ) ? "On" : "Off") << std::endl;
+        renderParams.setMaterialType( MT_ELECTRON );
+        BRAYNS_INFO << "Electron shading activated" << std::endl;
         break;
     case 'F':
         // 'f'ly mode
@@ -363,12 +366,6 @@ void BaseWindow::keypress( char key, const Vector2f& )
             BRAYNS_INFO << "Switching to flying mode" << std::endl;
             _manipulator = _flyingModeManipulator.get();
         }
-        break;
-    case 'G':
-        renderParams.setGradientBackground(
-            !renderParams.getGradientBackground( ));
-        BRAYNS_INFO << "Gradient background: " <<
-            (renderParams.getGradientBackground( ) ? "On" : "Off") << std::endl;
         break;
     case 'H':
         renderParams.setSoftShadows( !renderParams.getSoftShadows( ));
@@ -413,10 +410,13 @@ void BaseWindow::keypress( char key, const Vector2f& )
             << aaStrength << std::endl;
         break;
     }
+    case 'p':
+        renderParams.setMaterialType( MT_DIFFUSE );
+        BRAYNS_INFO << "Diffuse shading activated" << std::endl;
+        break;
     case 'P':
-        renderParams.setLightShading( !renderParams.getLightShading( ));
-        BRAYNS_INFO << "Light shading: " <<
-            (renderParams.getLightShading( ) ? "On" : "Off") << std::endl;
+        renderParams.setMaterialType( MT_NO_SHADING );
+        BRAYNS_INFO << "No shading activated" << std::endl;
         break;
     case 'r':
         sceneParams.setTimestamp( 0.f );
@@ -424,7 +424,7 @@ void BaseWindow::keypress( char key, const Vector2f& )
             sceneParams.getTimestamp( ) << std::endl;
         break;
     case 'R':
-        sceneParams.setTimestamp( std::numeric_limits< float >::max( ));
+        sceneParams.setTimestamp( std::numeric_limits< size_t >::max( ));
         BRAYNS_INFO << "Timestamp: " <<
             sceneParams.getTimestamp( ) << std::endl;
         break;

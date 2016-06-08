@@ -8,6 +8,7 @@
 #include "Scene.h"
 
 #include <brayns/common/log.h>
+#include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/common/material/Material.h>
 
@@ -18,8 +19,12 @@
 namespace brayns
 {
 
-Scene::Scene( RendererMap renderers, GeometryParameters& geometryParameters )
-    : _geometryParameters( geometryParameters )
+Scene::Scene(
+    RendererMap renderers,
+    SceneParameters& sceneParameters,
+    GeometryParameters& geometryParameters )
+    : _sceneParameters(sceneParameters)
+    , _geometryParameters( geometryParameters )
     , _renderers( renderers )
 {
 }
@@ -43,8 +48,7 @@ void Scene::setMaterials(
         switch( i )
         {
             case MATERIAL_SIMULATION:
-                if( !_geometryParameters.getReport().empty( ))
-                    material->setTexture( TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
+                material->setTexture( TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
                 break;
             default:
                 break;
@@ -54,6 +58,9 @@ void Scene::setMaterials(
         switch( materialType )
         {
         case MT_DEFAULT:
+        case MT_DIFFUSE:
+        case MT_ELECTRON:
+        case MT_NO_SHADING:
             switch( i )
             {
                 case 1: // Soma

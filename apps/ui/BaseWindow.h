@@ -23,6 +23,12 @@
 #include <apps/ui/manipulators/InspectCenterManipulator.h>
 #include <apps/ui/manipulators/FlyingModeManipulator.h>
 
+#include <chrono>
+
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
+
 namespace brayns
 {
 
@@ -36,27 +42,25 @@ void runGLUT();
 /*! helper class that allows for easily computing (smoothed) frame rate */
 struct FPSCounter
 {
-    double smooth_nom;
-    double smooth_den;
-    double frameStartTime;
+    high_resolution_clock::time_point _startTime;
+    uint64_t _duration;
 
-    FPSCounter()
+    void start()
     {
-        smooth_nom = 0.;
-        smooth_den = 0.;
-        frameStartTime = 0.;
+        _startTime = high_resolution_clock::now( );
     }
 
-    void startRender() { frameStartTime = std::time(0); }
-
-    void doneRender()
+    void stop()
     {
-        const double seconds = std::time(0) - frameStartTime;
-        smooth_nom = smooth_nom * 0.8f + seconds;
-        smooth_den = smooth_den * 0.8f + 1.f;
+        _duration  = duration_cast< milliseconds >(
+            high_resolution_clock::now() - _startTime ).count();
     }
 
-    double getFPS() const { return smooth_den / smooth_nom; }
+    float getFPS()
+    {
+        return 1000.f/_duration;
+    }
+
 };
 
 class BaseWindow

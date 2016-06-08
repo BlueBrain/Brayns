@@ -7,10 +7,7 @@
 
 namespace zerobuf.render;
 
-table FrameBuffers
-{
-  width: int;
-  height: int;
-  diffuse:[ubyte];
-  depth:[ubyte];
+table Reset {
+    camera: bool;
+    timestamp: bool;
 }

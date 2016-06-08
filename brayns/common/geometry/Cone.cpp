@@ -18,12 +18,11 @@ Cone::Cone(
     const float upRadius,
     const float timestamp,
     const float value)
-    : Primitive(materialId)
+    : Primitive(materialId, timestamp)
     , _center(center)
     , _up(up)
     , _centerRadius(centerRadius)
     , _upRadius(upRadius)
-    , _timestamp(timestamp)
     , _value(value)
 {
     _geometryType = GT_CONE;

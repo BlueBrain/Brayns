@@ -56,11 +56,10 @@ public:
         _ambientOcclusionStrength = value;
     }
 
-    /** Geometry shaded by light sources. No shading coupled with ambient
-     * occlusion gives great results!
+    /** Material type applied to the geometry
      */
-    bool getLightShading( ) const { return _lightShading; }
-    void setLightShading( const bool value ) { _lightShading = value; }
+    MaterialType getMaterialType( ) const { return _materialType; }
+    void setMaterialType( const MaterialType value ) { _materialType = value; }
 
     /** Number of samples per pixel */
     size_t getSamplesPerPixel( ) const { return _spp; }
@@ -69,41 +68,12 @@ public:
         _spp = value;
     }
 
-    /** Electron shading defined by dot product between surface normal and
-     * camera position
-     */
-    bool getElectronShading( ) const { return _electronShading; }
-    void setElectronShading( const bool value)
-    {
-        _electronShading = value;
-    }
-
     /** Enables photon emission according to the radiance value of the
      * material */
     bool getLightEmittingMaterials( ) const { return _lightEmittingMaterials; }
     void setLightEmittingMaterials( const bool value )
     {
         _lightEmittingMaterials = value;
-    }
-
-    /** Enables depth of field by randomizing the camera position */
-    bool getDepthOfField( ) const { return _dof; }
-    void setDepthOfField( const bool value ) { _dof = value; }
-
-    /** Defines the strength of the camera position randomization */
-    float getDepthOfFieldStrength( ) const { return _dofStrength; }
-    void setDepthOfFieldStrength( const float value )
-    {
-        _dofStrength = value;
-    }
-
-    /** Enables a gradient background going from black to the "bgcolor"
-     * renderer attribute
-     */
-    bool getGradientBackground( ) const { return _gradientBackground; }
-    void setGradientBackground( const bool value )
-    {
-        _gradientBackground = value;
     }
 
     const Vector3f& getBackgroundColor( ) const { return _backgroundColor; }
@@ -180,9 +150,21 @@ public:
         return _cameraType;
     }
 
+    /**
+       Epsilon. All intersection distances less than the epsilon value are
+       ignored by the raytracer.
+    */
     void setEpsilon( const CameraType cameraType )
     {
         _cameraType = cameraType;
+    }
+
+    /**
+       file name of the HDRI image used for the skybox
+    */
+    const std::string& getHDRI() const
+    {
+        return _hdri;
     }
 
 protected:
@@ -193,11 +175,7 @@ protected:
     std::string _renderer;
     strings _renderers;
     float _ambientOcclusionStrength;
-    bool _dof;
-    float _dofStrength;
-    bool _electronShading;
-    bool _gradientBackground;
-    bool _lightShading;
+    MaterialType _materialType;
     bool _lightEmittingMaterials;
     size_t _spp;
     bool _shadows;
@@ -209,6 +187,7 @@ protected:
     Vector3f _detectionFarColor;
     float _epsilon;
     CameraType _cameraType;
+    std::string _hdri;
 };
 
 }

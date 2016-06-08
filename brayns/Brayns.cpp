@@ -60,9 +60,16 @@ struct Brayns::Impl
 
         BRAYNS_INFO << "Initialize scene" << std::endl;
         _scene.reset( new OSPRayScene( _renderers,
-            _parametersManager->getGeometryParameters( )));
+            _parametersManager->getSceneParameters(),
+            _parametersManager->getGeometryParameters()));
 
-        _scene->setMaterials( MT_DEFAULT, DEFAULT_NB_MATERIALS );
+        _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
+
+        // set HDRI skybox if applicable
+        const std::string& hdri =
+            _parametersManager->getRenderingParameters().getHDRI();
+        if( !hdri.empty() )
+            _scene->getMaterial(MATERIAL_SKYBOX)->setTexture(TT_DIFFUSE, hdri);
 
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
@@ -105,12 +112,14 @@ struct Brayns::Impl
         if(!geometryParameters.getMeshFolder().empty())
             _loadMeshFolder();
 
+        size_t nbLoadedFrames = 0;
+        if(!geometryParameters.getReport().empty())
+            nbLoadedFrames = _loadCompartmentReport();
+
         if(!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getLoadCacheFile().empty())
-            _loadCircuitConfiguration();
+            _loadCircuitConfiguration( nbLoadedFrames );
 
-        if(!geometryParameters.getReport().empty())
-            _loadCompartmentReport();
     }
 
     void render( const RenderInput& renderInput,
@@ -202,7 +211,10 @@ struct Brayns::Impl
     void commit( )
     {
         _frameBuffer->clear( );
-        _renderers[_activeRenderer]->commit( );
+        const strings& renderers =
+            _parametersManager->getRenderingParameters().getRenderers();
+        for( std::string renderer: renderers )
+            _renderers[renderer]->commit( );
         _camera->commit( );
     }
 
@@ -250,7 +262,7 @@ private:
         position.z( ) -= diag.z( );
 
         const Vector3f up  = Vector3f(0.f,1.f,0.f);
-        _camera->set(position, target, up);
+        _camera->setInitialState(position, target, up);
         _camera->setAspectRatio(
             static_cast< float >( _frameSize.x()) /
             static_cast< float >( _frameSize.y()));
@@ -373,7 +385,7 @@ private:
         Loads morphologies from circuit configuration (command line parameter
         --circuit-configuration)
     */
-    void _loadCircuitConfiguration()
+    void _loadCircuitConfiguration( const size_t nbSimulationFramesLoaded )
     {
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
@@ -390,14 +402,16 @@ private:
         if( report.empty() )
             morphologyLoader.importCircuit( uri, target, *_scene );
         else
-            morphologyLoader.importCircuit( uri, target, report, *_scene );
+            morphologyLoader.importCircuit(
+                uri, target, report, nbSimulationFramesLoaded, *_scene );
     }
 
     /**
         Loads compartment report from circuit configuration (command line
         parameter --report)
+        @return the number of simulation frames loaded
     */
-    void _loadCompartmentReport()
+    size_t _loadCompartmentReport()
     {
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
@@ -411,7 +425,7 @@ private:
             filename << std::endl;
         MorphologyLoader morphologyLoader( geometryParameters );
         const servus::URI uri( filename );
-        morphologyLoader.importSimulationIntoTexture(
+        return morphologyLoader.importSimulationIntoTexture(
             uri, target, report, *_scene );
     }
 

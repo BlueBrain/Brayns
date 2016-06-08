@@ -42,6 +42,22 @@ public:
         setUpVector( upVector );
     }
 
+    void setInitialState(
+        const Vector3f& position,
+        const Vector3f& target,
+        const Vector3f& upVector )
+    {
+        _initialPosition = position;
+        _initialTarget = target;
+        _initialUp = upVector;
+        set( position, target, upVector );
+    }
+
+    void reset()
+    {
+        set( _initialPosition, _initialTarget, _initialUp );
+    }
+
     const Vector3f& getPosition() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
@@ -151,6 +167,11 @@ private:
     mutable Vector3f _position;
     mutable Vector3f _target;
     mutable Vector3f _up;
+
+    Vector3f _initialPosition;
+    Vector3f _initialTarget;
+    Vector3f _initialUp;
+
     mutable float _aspectRatio;
     mutable float _aperture;
     mutable float _focalLength;
@@ -171,6 +192,19 @@ void Camera::set(
     const Vector3f& upVector )
 {
     _impl->set( position, target, upVector );
+}
+
+void Camera::setInitialState(
+    const Vector3f& position,
+    const Vector3f& target,
+    const Vector3f& upVector )
+{
+    _impl->setInitialState( position, target, upVector );
+}
+
+void Camera::reset( )
+{
+    return _impl->reset( );
 }
 
 const Vector3f& Camera::getPosition() const

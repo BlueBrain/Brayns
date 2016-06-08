@@ -56,20 +56,25 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
             _timestampIncrement << std::endl;
         break;
     case 'x':
-        sceneParams.setTimestamp( 1098.f );
+        sceneParams.setTimestamp( 107.f );
         BRAYNS_INFO << "Test Timestamp" << std::endl;
         break;
     case ']':
-        sceneParams.setTimestamp(
-            sceneParams.getTimestamp( ) + 1);
-        BRAYNS_INFO << "Timestamp: " <<
-            sceneParams.getTimestamp( ) << std::endl;
+        {
+            float ts = sceneParams.getTimestamp( );
+            sceneParams.setTimestamp( ts + 1 );
+            BRAYNS_INFO << "Timestamp: " <<
+                sceneParams.getTimestamp( ) << std::endl;
+        }
         break;
     case '[':
-        sceneParams.setTimestamp(
-            sceneParams.getTimestamp( ) - 1);
-        BRAYNS_INFO << "Timestamp: " <<
-            sceneParams.getTimestamp( ) << std::endl;
+        {
+            float ts = sceneParams.getTimestamp( );
+            if( ts > 0.f )
+                sceneParams.setTimestamp( ts - 1 );
+            BRAYNS_INFO << "Timestamp: " <<
+                sceneParams.getTimestamp( ) << std::endl;
+        }
         break;
     case '*':
         _brayns->getParametersManager( ).printHelp( );
@@ -110,7 +115,7 @@ void BraynsViewer::display( )
     if( _brayns->getParametersManager().getApplicationParameters( ).
         isBenchmarking( ))
     {
-        ss << "@ " << _fps.getFPS( );
+        ss << " @ " << _fps.getFPS( );
     }
     setTitle(ss.str( ));
     forceRedraw( );

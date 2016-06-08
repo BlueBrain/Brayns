@@ -81,18 +81,15 @@ std::ostream &operator << ( std::ostream &os, Viewport &viewport )
     const Vector3f& target = viewport.getTarget();
     const Vector3f& up = viewport.getUp();
     os <<
-        "{\"origin\": {" <<
-        "\"x\": " << position.x() << "," <<
-        "\"y\": " << position.y() << "," <<
-        "\"z\": " << position.z() << "}," <<
-        "\"lookAt\": {" <<
-        "\"x\": " << target.x() << "," <<
-        "\"y\": " << target.y() << "," <<
-        "\"z\": " << target.z() << "}," <<
-        "\"up\": {" <<
-        "\"x\": " << up.x() << "," <<
-        "\"y\": " << up.y() << "," <<
-        "\"z\": " << up.z() << "}}";
+        position.x() << "," <<
+        position.y() << "," <<
+        position.z() << "," <<
+        target.x() << "," <<
+        target.y() << "," <<
+        target.z() << "," <<
+        up.x() << "," <<
+        up.y() << "," <<
+        up.z();
     return os;
 }
 

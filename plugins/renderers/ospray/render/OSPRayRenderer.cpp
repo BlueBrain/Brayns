@@ -49,10 +49,11 @@ void OSPRayRenderer::render( FrameBufferPtr frameBuffer )
         OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM );
 }
 
-void OSPRayRenderer::commit( )
+void OSPRayRenderer::commit()
 {
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
     SceneParameters& sp = _parametersManager.getSceneParameters();
+    MaterialType mt = rp.getMaterialType();
 
     Vector3f color = rp.getBackgroundColor( );
     ospSet3f( _renderer, "bgColor", color.x( ), color.y( ), color.z( ));
@@ -61,15 +62,12 @@ void OSPRayRenderer::commit( )
         rp.getSoftShadows( ));
     ospSet1f( _renderer, "ambientOcclusionStrength",
         rp.getAmbientOcclusionStrength( ));
-    ospSet1i( _renderer, "shadingEnabled",
-        rp.getLightShading( ));
+
+    ospSet1i( _renderer, "shadingEnabled", ( mt == MT_DIFFUSE ));
     ospSet1f( _renderer, "timestamp", sp.getTimestamp( ));
     ospSet1i( _renderer, "randomNumber", rand() % 1000 );
     ospSet1i( _renderer, "spp", rp.getSamplesPerPixel( ));
-    ospSet1i( _renderer, "electronShading",
-        rp.getElectronShading( ));
-    ospSet1i( _renderer, "gradientBackgroundEnabled",
-        rp.getGradientBackground( ));
+    ospSet1i( _renderer, "electronShading", ( mt == MT_ELECTRON ));
     ospSet1f( _renderer, "epsilon", rp.getEpsilon( ));
     ospSet1i( _renderer, "moving", false );
     ospSet1f( _renderer, "detectionDistance",
@@ -85,9 +83,17 @@ void OSPRayRenderer::commit( )
 
     OSPRayScene* osprayScene = static_cast< OSPRayScene* >( _scene.get( ));
     assert( osprayScene );
-    ospSetObject( _renderer, "world", osprayScene->impl( ));
 
-    ospCommit( _renderer );
+    const size_t ts = _scene->getSceneParameters().getTimestamp();
+    OSPModel* model = osprayScene->modelImpl( ts );
+    if( model )
+    {
+        ospSetObject( _renderer, "world", *model );
+        ospCommit( _renderer );
+    }
+    else
+        BRAYNS_ERROR << "No model found for timestamp " << ts << std::endl;
+
 }
 
 void OSPRayRenderer::setCamera( CameraPtr camera )

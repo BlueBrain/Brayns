@@ -10,8 +10,9 @@
 namespace brayns
 {
 
-Primitive::Primitive(const size_t materialId)
+Primitive::Primitive( const size_t materialId, const float timestamp )
     : _materialId(materialId)
+    , _timestamp(timestamp)
 {
     _geometryType = GT_UNDEFINED;
 }

@@ -19,6 +19,7 @@ zerobuf_generate_cxx(
   fovCamera.fbs
   attribute.fbs
   frameBuffers.fbs
+  reset.fbs
 )
 
 common_library(BraynsZeroBufRender)

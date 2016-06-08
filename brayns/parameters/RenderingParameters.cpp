@@ -19,13 +19,10 @@ const std::string PARAM_MODULE = "module";
 const std::string PARAM_RENDERERS = "renderers";
 const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "spp";
-const std::string PARAM_DOF = "dof";
 const std::string PARAM_AMBIENT_OCCLUSION = "ambient-occlusion";
-const std::string PARAM_NO_LIGHT_SHADING = "no-light-shading";
 const std::string PARAM_SHADOWS = "shadows";
 const std::string PARAM_SOFT_SHADOWS = "soft-shadows";
-const std::string PARAM_ELECTRON_SHADING = "electron-shading";
-const std::string PARAM_GRADIENT_BACKGROUND = "gradient-background";
+const std::string PARAM_MATERIAL = "material";
 const std::string PARAM_RADIANCE = "radiance";
 const std::string PARAM_BACKGROUND_COLOR = "background-color";
 const std::string PARAM_DETECTION_DISTANCE = "detection-distance";
@@ -35,6 +32,7 @@ const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
 const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
 const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_CAMERA_TYPE = "camera-type";
+const std::string PARAM_HDRI = "hdri";
 
 }
 
@@ -45,11 +43,7 @@ RenderingParameters::RenderingParameters( )
     : AbstractParameters( "Rendering" )
     , _renderer( DEFAULT_RENDERER )
     , _ambientOcclusionStrength( 0.f )
-    , _dof( false )
-    , _dofStrength( 0.f )
-    , _electronShading( false )
-    , _gradientBackground( false )
-    , _lightShading( true )
+    , _materialType( MT_DIFFUSE )
     , _lightEmittingMaterials( false )
     , _spp( 1 )
     , _shadows( false )
@@ -71,20 +65,14 @@ RenderingParameters::RenderingParameters( )
             "Renderers")
         (PARAM_SPP.c_str(), po::value< size_t >( ),
             "Number of samples per pixel")
-        (PARAM_DOF.c_str(), po::value< float >( ),
-            "Depth of field strength")
         (PARAM_AMBIENT_OCCLUSION.c_str(), po::value< float >( ),
             "Ambient occlusion strength")
-        (PARAM_NO_LIGHT_SHADING.c_str(), po::value< bool >( ),
-            "Light shading enabled")
         (PARAM_SHADOWS.c_str(), po::value< bool >( ),
             "Shadows enabled")
         (PARAM_SOFT_SHADOWS.c_str(), po::value< bool >( ),
             "Soft shadows enabled")
-        (PARAM_ELECTRON_SHADING.c_str(), po::value< bool >( ),
-            "Electron shading enabled")
-        (PARAM_GRADIENT_BACKGROUND.c_str(), po::value< bool >( ),
-            "Gradient background enabled")
+        (PARAM_MATERIAL.c_str(), po::value< std::string >( ),
+            "Material type (diffuse, electron)")
         (PARAM_RADIANCE.c_str(), po::value< bool >( ),
             "Radiance enabled")
         (PARAM_BACKGROUND_COLOR.c_str(), po::value< floats >( )->multitoken(),
@@ -102,7 +90,9 @@ RenderingParameters::RenderingParameters( )
             "epsilon value are ignored by the raytracer")
         (PARAM_CAMERA_TYPE.c_str(),
             po::value< size_t >( ), "Camera type (0: perspective, "
-            "1: perspective stereo, 2: orthographic, 3: panoramic)");
+            "1: perspective stereo, 2: orthographic, 3: panoramic)")
+        (PARAM_HDRI.c_str(),
+            po::value< std::string >( ), "HDRI filename");
 
     // Add default renderers
     _renderers.push_back("exobj");
@@ -118,23 +108,24 @@ bool RenderingParameters::_parse( const po::variables_map& vm )
         _renderer = vm[PARAM_RENDERER].as< std::string >( );
     if( vm.count( PARAM_SPP ))
         _spp = vm[PARAM_SPP].as< size_t >( );
-    if( vm.count( PARAM_DOF ))
-    {
-        _dof = true;
-        _dofStrength = vm[PARAM_DOF].as< float >( );
-    }
     if( vm.count( PARAM_AMBIENT_OCCLUSION ))
         _ambientOcclusionStrength = vm[PARAM_AMBIENT_OCCLUSION].as< float >( );
-    if( vm.count( PARAM_NO_LIGHT_SHADING ))
-        _lightShading = !vm[PARAM_NO_LIGHT_SHADING].as< bool >( );
     if( vm.count( PARAM_SHADOWS ))
         _shadows = vm[PARAM_SHADOWS].as< bool >( );
     if( vm.count( PARAM_SOFT_SHADOWS ))
         _softShadows = vm[PARAM_SOFT_SHADOWS].as< bool >( );
-    if( vm.count( PARAM_ELECTRON_SHADING ))
-        _electronShading = vm[PARAM_ELECTRON_SHADING].as< bool >( );
-    if( vm.count( PARAM_GRADIENT_BACKGROUND ))
-        _gradientBackground = vm[PARAM_GRADIENT_BACKGROUND].as< bool >( );
+    if( vm.count( PARAM_MATERIAL ))
+    {
+        const std::string& materialType =
+            vm[PARAM_MATERIAL].as< std::string >( );
+        if( materialType == "diffuse" )
+            _materialType = MT_DIFFUSE;
+        else if ( materialType == "electron" )
+            _materialType = MT_ELECTRON;
+        else if ( materialType == "noshading" )
+            _materialType = MT_NO_SHADING;
+
+    }
     if( vm.count( PARAM_BACKGROUND_COLOR ))
     {
         floats values = vm[PARAM_BACKGROUND_COLOR].as< floats >( );
@@ -163,6 +154,8 @@ bool RenderingParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_CAMERA_TYPE ))
         _cameraType = static_cast< CameraType > (
             vm[PARAM_CAMERA_TYPE].as< size_t >( ));
+    if( vm.count( PARAM_HDRI ))
+        _hdri = vm[PARAM_HDRI].as< std::string >( );
     return true;
 }
 
@@ -178,18 +171,14 @@ void RenderingParameters::print( )
         _renderer << std::endl;
     BRAYNS_INFO << "Samples per pixel       :" <<
         _spp << std::endl;
-    BRAYNS_INFO << "Depth of field strength :" <<
-        _dofStrength << std::endl;
     BRAYNS_INFO << "AO strength             :" <<
         _ambientOcclusionStrength << std::endl;
     BRAYNS_INFO << "Shadows                 :" <<
         ( _shadows ? "on" : "off" ) << std::endl;
     BRAYNS_INFO << "Soft shadows            :" <<
         ( _softShadows ? "on" : "off" ) << std::endl;
-    BRAYNS_INFO << "Electron shading        :" <<
-        ( _electronShading ? "on" : "off" ) << std::endl;
-    BRAYNS_INFO << "Gradient background     :" <<
-        ( _gradientBackground ? "on" : "off" ) << std::endl;
+    BRAYNS_INFO << "Material                :" <<
+        static_cast< size_t > (_materialType) << std::endl;
     BRAYNS_INFO << "Background color        :" <<
         _backgroundColor << std::endl;
     BRAYNS_INFO << "Detection: " << std::endl;
@@ -205,6 +194,8 @@ void RenderingParameters::print( )
        _epsilon << std::endl;
     BRAYNS_INFO << "Camera type                       : " <<
        static_cast< size_t > (_cameraType) << std::endl;
+    BRAYNS_INFO << "HDRI                              : " <<
+       _hdri << std::endl;
 }
 
 }

@@ -25,14 +25,14 @@ public:
        Defines the current timestamp for the scene. The unit is not universally
        specified and is therefore specific to the scene.
     */
-    float getTimestamp( ) const { return _timestamp; }
-    void setTimestamp( const float value ) { _timestamp = value; }
+    size_t getTimestamp( ) const { return _timestamp; }
+    void setTimestamp( const size_t value ) { _timestamp = value; }
 
 protected:
 
     bool _parse( const po::variables_map& vm ) final;
 
-    float _timestamp;
+    size_t _timestamp;
 };
 
 }

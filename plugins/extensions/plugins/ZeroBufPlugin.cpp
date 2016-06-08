@@ -13,7 +13,7 @@
 #include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/fovCamera.h>
 #include <zerobuf/render/frameBuffers.h>
-//#include <zeroeq/hbp/vocabulary.h>
+
 
 namespace brayns
 {
@@ -82,6 +82,10 @@ void ZeroBufPlugin::_setupHTTPServer()
     _httpServer->add( _remoteAttribute );
     _remoteAttribute.registerDeserializedCallback(
         std::bind( &ZeroBufPlugin::_attributeUpdated, this ));
+
+    _httpServer->add( _remoteReset );
+    _remoteReset.registerDeserializedCallback(
+        std::bind( &ZeroBufPlugin::_resetUpdated, this ));
 }
 
 void ZeroBufPlugin::_setupRequests()
@@ -115,6 +119,16 @@ void ZeroBufPlugin::_attributeUpdated( )
         _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
     _extensionParameters.renderer->commit();
     _extensionParameters.frameBuffer->clear();
+}
+
+void ZeroBufPlugin::_resetUpdated( )
+{
+    if( _remoteReset.getCamera() )
+    {
+        BRAYNS_INFO << "Resetting camera" << std::endl;
+        _extensionParameters.camera->reset();
+        _extensionParameters.camera->commit();
+    }
 }
 
 void ZeroBufPlugin::_resizeImage(

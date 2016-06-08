@@ -19,8 +19,11 @@
 #include "ExtendedOBJMaterial.ih"
 
 #define ALPHA_THRESHOLD ( .05f )
-#define DEFAULT_LIGHT_EMISSION ( 5.f )
+#define DEFAULT_LIGHT_EMISSION ( 2.f )
 #define DEFAULT_LIGHT_THRESHOLD ( 0.2f )
+
+#define MATERIAL_SIMULATION 0
+#define MATERIAL_SKYBOX 1
 
 uniform float simulation_SimpleGI__randomU[16][16] = {
     {0, 0.5, 0.25, 0.75, 0.125, 0.625, 0.375, 0.875, 0.0625, 0.5625, 0.3125,
@@ -194,12 +197,10 @@ struct SimulationRenderer
     bool softShadowsEnabled;
     float ambientOcclusionStrength;
     bool electronShadingEnabled;
-    bool gradientBackgroundEnabled;
     int randomNumber;
     bool moving;
     float timestamp;
     int spp;
-    float dof;
     int simulationNbOffsets;
     int simulationNbFrames;
 };
@@ -215,16 +216,55 @@ vec4f skyboxMapping(
     Ray& ray )
 {
     vec4f result = make_vec4f( self->bgColor );
-    if( self->gradientBackgroundEnabled )
+    if( self->numMaterials <= MATERIAL_SKYBOX )
+        return result;
+
+    const float radius = 10000.f;
+    const uniform ExtendedOBJMaterial *uniform mat =
+        self->materials[MATERIAL_SKYBOX];
+    if( !mat->map_Kd )
+        return result;
+
+    // solve the equation sphere-ray to find the intersections
+    vec3f dir = ray.dir;
+
+    float a = 2.f * dot( dir, dir );
+    float b = 2.f * dot( ray.org, dir );
+    float c = dot( ray.org, ray.org )- radius * radius;
+    float d = b * b - 2.f * a * c;
+
+    if(  d <= 0.f || a == 0.f)
+        return result;
+
+    float r = sqrt( d );
+    float t1 = ( -b - r ) / a;
+    float t2 = ( -b + r ) / a;
+
+    if( t1 <= self->super.epsilon && t2<=self->super.epsilon )
+        return result; // both intersections are behind the ray origin
+
+    float t = 0.f;
+    if( t1 <= self->super.epsilon )
+        t = t2;
+    else
+        if( t2 <= self->super.epsilon )
+            t = t1;
+        else
+            t = ( t1 < t2 ) ? t1 : t2;
+
+    if( t<self->super.epsilon)
+        return result; // Too close to intersection
+
+    vec3f intersection = normalize(ray.org+t*dir);
+
+    // Intersection found, now get skybox color
+    vec2f st =
     {
-        // Background
-        vec3f normal = make_vec3f( 0.f, -1.f, 0.f );
-        vec3f dir = normalize( ray.dir );
-        float angle = 0.5f-dot( normal, dir );
-        angle = ( angle > 1.f ) ? 1.f: angle;
-        result = make_vec4f( 1.f - (0.5f * angle * self->bgColor) );
-    }
-    return result;
+        (( atan2( intersection.x, intersection.z ) / PI ) + 1.f ) * .5f,
+        -( asin( intersection.y ) / PI ) + .5f
+    };
+
+    return get4f( mat->map_Kd, st );
 }
 
 inline float lightAlpha(
@@ -343,8 +383,12 @@ inline vec3f SimulationRenderer_getSimulationValue(
     DifferentialGeometry& dg)
 {
     // Get simulation value from geometry timestamp and material 0
-    const uniform ExtendedOBJMaterial *uniform mat = self->materials[0];
     vec3f simulationValue = make_vec3f(0.f);
+    if( dg.st.x < 0.f )
+        return simulationValue;
+
+    const uniform ExtendedOBJMaterial *uniform mat =
+        self->materials[MATERIAL_SIMULATION];
     if( mat->map_Kd )
     {
         vec2f st;
@@ -366,16 +410,6 @@ inline vec3f SimulationRenderer_shadeRay(
     int max_depth = self->moving ? 2 : 10;
     uniform int depth = 0;
     vec3f colorKs = make_vec3f( 0.f );
-
-    if( self->dof > 0.f )
-    {
-        ray.org.x += self->dof * self->scale.x * (
-            simulation_SimpleGI__randomV[ self->randomNumber % 16 ]
-                             [ ( self->randomNumber + 1 ) % 16 ] - 0.5f );
-        ray.org.y += self->dof * self->scale.y * (
-            simulation_SimpleGI__randomV[ ( self->randomNumber + 2 ) % 16 ]
-                             [ ( self->randomNumber + 3 ) % 16 ] - 0.5f );
-    }
 
     while( true )
     {
@@ -687,8 +721,6 @@ export void SimulationRenderer_set(
         const uniform float& timestamp,
         const uniform int& spp,
         const uniform bool& electronShadingEnabled,
-        const uniform bool& gradientBackgroundEnabled,
-        const uniform float& dof,
         const uniform int& simulationNbOffsets,
         const uniform int& simulationNbFrames,
         void** uniform lights,
@@ -709,7 +741,6 @@ export void SimulationRenderer_set(
     self->timestamp = timestamp;
     self->spp = spp;
     self->electronShadingEnabled = electronShadingEnabled || moving;
-    self->gradientBackgroundEnabled = gradientBackgroundEnabled;
 
     self->lights =
         ( const uniform Light* uniform* uniform )lights;
@@ -720,7 +751,6 @@ export void SimulationRenderer_set(
     self->numMaterials = numMaterials;
 
     self->scale = scale;
-    self->dof = dof;
     self->simulationNbOffsets = simulationNbOffsets;
     self->simulationNbFrames = simulationNbFrames;
 }

@@ -9,6 +9,7 @@
 #include "OSPRayRenderer.h"
 
 #include <brayns/common/log.h>
+#include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/light/PointLight.h>
@@ -21,6 +22,7 @@ namespace brayns
 const size_t CACHE_VERSION_1 = 1;
 const size_t CACHE_VERSION_2 = 2;
 const size_t CACHE_VERSION_3 = 3;
+const size_t CACHE_VERSION_4 = 4;
 
 struct TextureTypeMaterialAttribute
 {
@@ -40,16 +42,36 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[6] =
 
 OSPRayScene::OSPRayScene(
     RendererMap renderers,
+    SceneParameters& sceneParameters,
     GeometryParameters& geometryParameters )
-    : Scene( renderers, geometryParameters ),
-    _scene( ospNewModel( ))
+    : Scene( renderers, sceneParameters, geometryParameters )
+    , _ospLightData( 0 )
+    , _ospMaterialData( 0 )
 {
 }
 
 void OSPRayScene::commit()
 {
-    ospCommit(_scene);
+    for( auto model: _models)
+        ospCommit( model.second );
 }
+
+OSPModel* OSPRayScene::modelImpl( const size_t timestamp )
+{
+    if( _models.find( timestamp ) != _models.end())
+        return &_models[timestamp];
+    else
+    {
+        size_t returnValue = 0;
+        for( const auto& model: _models )
+            if( model.first <= timestamp )
+                returnValue = model.first;
+        BRAYNS_DEBUG << "Request model for timestamp " << timestamp
+                     << ", returned " << returnValue << std::endl;
+        return &_models[returnValue];
+    }
+}
+
 
 void OSPRayScene::_saveCacheFile()
 {
@@ -57,21 +79,53 @@ void OSPRayScene::_saveCacheFile()
     BRAYNS_INFO << "Saving scene to binary file: " << filename << std::endl;
     std::ofstream file( filename, std::ios::out | std::ios::binary );
 
-    const size_t version = CACHE_VERSION_3;
+    const size_t version = CACHE_VERSION_4;
     file.write( ( char* )&version, sizeof( size_t ));
+    BRAYNS_INFO << "Version: " << version << std::endl;
+
+    const size_t nbModels = _models.size();
+    file.write( ( char* )&nbModels, sizeof( size_t ));
+    BRAYNS_INFO << nbModels << " models" << std::endl;
+    for( const auto& model: _models )
+        file.write( ( char* )&model.first, sizeof( size_t ));
 
     const size_t nbMaterials = _materials.size();
     file.write( ( char* )&nbMaterials, sizeof( size_t ));
+    BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
     for( size_t materialId = 0; materialId < nbMaterials; ++materialId )
     {
-        size_t bufferSize =
+        size_t bufferSize;
+
+        // Spheres
+        bufferSize = _timestampSpheresIndices[materialId].size();
+        file.write( ( char* )&bufferSize, sizeof( size_t ));
+        for( const auto& index: _timestampSpheresIndices[materialId] )
+        {
+            file.write( ( char* )&index.first, sizeof( size_t ));
+            file.write( ( char* )&index.second, sizeof( size_t ));
+        }
+
+        bufferSize =
             _serializedSpheresDataSize[materialId] *
             Sphere::getSerializationSize() *
             sizeof( float );
         file.write( ( char* )&bufferSize, sizeof( size_t ));
         file.write( ( char* )_serializedSpheresData[materialId].data(),
             bufferSize );
+        if( bufferSize != 0 )
+            BRAYNS_DEBUG << "[" << materialId << "] "
+                         << _serializedSpheresDataSize[materialId]
+                         << " Spheres" << std::endl;
+
+        // Cylinders
+        bufferSize = _timestampCylindersIndices[materialId].size();
+        file.write( ( char* )&bufferSize, sizeof( size_t ));
+        for( const auto& index: _timestampCylindersIndices[materialId] )
+        {
+            file.write( ( char* )&index.first, sizeof( size_t ));
+            file.write( ( char* )&index.second, sizeof( size_t ));
+        }
 
         bufferSize =
             _serializedCylindersDataSize[materialId] *
@@ -80,6 +134,19 @@ void OSPRayScene::_saveCacheFile()
         file.write( ( char* )&bufferSize, sizeof( size_t ));
         file.write( ( char* )_serializedCylindersData[materialId].data(),
             bufferSize );
+        if( bufferSize != 0 )
+            BRAYNS_DEBUG << "[" << materialId << "] "
+                         << _serializedCylindersDataSize[materialId]
+                         << " Cylinders" << std::endl;
+
+        // Cones
+        bufferSize = _timestampConesIndices[materialId].size();
+        file.write( ( char* )&bufferSize, sizeof( size_t ));
+        for( const auto& index: _timestampConesIndices[materialId] )
+        {
+            file.write( ( char* )&index.first, sizeof( size_t ));
+            file.write( ( char* )&index.second, sizeof( size_t ));
+        }
 
         bufferSize =
             _serializedConesDataSize[materialId] *
@@ -88,9 +155,14 @@ void OSPRayScene::_saveCacheFile()
         file.write( ( char* )&bufferSize, sizeof( size_t ));
         file.write( ( char* )_serializedConesData[materialId].data(),
             bufferSize );
+        if( bufferSize != 0 )
+            BRAYNS_DEBUG << "[" << materialId << "] "
+                         << _serializedConesDataSize[materialId]
+                         << " Cones" << std::endl;
     }
 
     file.write( ( char* )&_bounds, sizeof( Boxf ));
+    BRAYNS_INFO << _bounds << std::endl;
 
     Texture2DPtr simulationTexture = _textures[TEXTURE_NAME_SIMULATION];
     if( simulationTexture )
@@ -103,8 +175,12 @@ void OSPRayScene::_saveCacheFile()
         file.write( ( char* )&height, sizeof( size_t ));
         file.write( ( char* )&nbChannels, sizeof( size_t ));
         file.write( ( char* )simulationTexture->getRawData(), sizeof(char) * simulationTextureSize );
+        BRAYNS_INFO << "Simulation texture " << width << "x"
+                    << height << "x" << nbChannels
+                    << std::endl;
     }
     file.close();
+    BRAYNS_INFO << "Scene successfully saved"<< std::endl;
 }
 
 void OSPRayScene::_loadCacheFile()
@@ -117,177 +193,255 @@ void OSPRayScene::_loadCacheFile()
 
     size_t version;
     file.read( (char*)&version, sizeof( size_t ));
-    if( version == CACHE_VERSION_3 )
+    BRAYNS_INFO << "Version: " << version << std::endl;
+
+    if( version != CACHE_VERSION_4 )
     {
-        size_t nbMaterials;
-        file.read( (char*)&nbMaterials, sizeof( size_t ));
-        for( size_t materialId = 0; materialId < nbMaterials; ++materialId )
+        BRAYNS_ERROR << "Only version " << CACHE_VERSION_4
+                     << " is supported" << std::endl;
+        return;
+    }
+
+    _models.clear();
+    size_t nbModels;
+    file.read( (char*)&nbModels, sizeof( size_t ));
+    BRAYNS_INFO << nbModels << " models" << std::endl;
+    for( size_t model = 0; model < nbModels; ++model )
+    {
+        size_t ts;
+        file.read( (char*)&ts, sizeof( size_t ));
+        BRAYNS_INFO << "Model for ts " << ts << " created" << std::endl;
+        _models[ts] = ospNewModel();
+    }
+
+    size_t nbMaterials;
+    file.read( (char*)&nbMaterials, sizeof( size_t ));
+    BRAYNS_INFO << nbMaterials << " materials" << std::endl;
+    for( size_t materialId = 0; materialId < nbMaterials; ++materialId )
+    {
+        // Spheres
+        size_t bufferSize = 0;
+
+        file.read( ( char* )&bufferSize, sizeof( size_t ));
+        for( size_t i = 0; i<bufferSize; ++i)
         {
-            size_t bufferSize = 0;
-            file.read( ( char* )&bufferSize, sizeof( size_t ));
-            _serializedSpheresDataSize[materialId] = bufferSize /
-                ( Sphere::getSerializationSize() * sizeof( float ));
-            if( bufferSize != 0 )
-            {
-                _serializedSpheresData[materialId].resize( bufferSize );
-                file.read( (char*)_serializedSpheresData[materialId].data(),
-                    bufferSize );
-            }
-
-            bufferSize = 0;
-            file.read( (char*)&bufferSize, sizeof( size_t ));
-            _serializedCylindersDataSize[materialId] = bufferSize /
-                ( Cylinder::getSerializationSize() * sizeof( float ));
-            if( bufferSize != 0 )
-            {
-                _serializedCylindersData[materialId].reserve( bufferSize );
-                file.read( (char*)_serializedCylindersData[materialId].data(),
-                    bufferSize );
-            }
-
-            bufferSize = 0;
-            file.read( (char*)&bufferSize, sizeof( size_t ));
-            _serializedConesDataSize[materialId] = bufferSize /
-                ( Cone::getSerializationSize() * sizeof( float ));
-            if( bufferSize != 0 )
-            {
-                _serializedConesData[materialId].reserve( bufferSize );
-                file.read( (char*)_serializedConesData[materialId].data(),
-                    bufferSize );
-            }
-
-            _buildParametricOSPGeometry( materialId );
+            size_t ts;
+            file.read( ( char* )&ts, sizeof( size_t ));
+            size_t index;
+            file.read( ( char* )&index, sizeof( size_t ));
+            _timestampSpheresIndices[materialId][ts] = index;
         }
 
-        // Scene bounds
-        file.read( ( char* )&_bounds, sizeof( Boxf ));
-
-        // Read simulation texture
-        size_t width;
-        file.read( (char*)&width, sizeof( size_t ));
-        if( !file.eof() )
+        file.read( ( char* )&bufferSize, sizeof( size_t ));
+        _serializedSpheresDataSize[materialId] = bufferSize /
+            ( Sphere::getSerializationSize() * sizeof( float ));
+        if( bufferSize != 0 )
         {
-            size_t height;
-            file.read( (char*)&height, sizeof( size_t ));
-            size_t nbChannels;
-            file.read( (char*)&nbChannels, sizeof( size_t ));
-            size_t simulationTextureSize = width * height * nbChannels;
-
-            BRAYNS_INFO << "Loading simulation texture: " <<
-                width << "x" << height << "x" << nbChannels << std::endl;
-
-            uint8_ts bytes;
-            bytes.resize( simulationTextureSize );
-            file.read( (char*)bytes.data(), simulationTextureSize );
-
-            Texture2DPtr simulationTexture( new Texture2D );
-            simulationTexture->setWidth(width);
-            simulationTexture->setHeight(height);
-            simulationTexture->setNbChannels(nbChannels);
-            simulationTexture->setDepth(1);
-            simulationTexture->setRawData( bytes.data(), simulationTextureSize );
-
-            _textures[TEXTURE_NAME_SIMULATION] = simulationTexture;
-
-            _materials[MATERIAL_SIMULATION]->setTexture(
-                TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
-            _commitMaterials();
+            BRAYNS_DEBUG << "[" << materialId << "] "
+                         << _serializedSpheresDataSize[materialId]
+                         << " Spheres" << std::endl;
+            _serializedSpheresData[materialId].resize( bufferSize );
+            file.read( (char*)_serializedSpheresData[materialId].data(),
+                bufferSize );
         }
-        BRAYNS_INFO << _bounds << std::endl;
+
+        // Cylinders
+        bufferSize = 0;
+        file.read( ( char* )&bufferSize, sizeof( size_t ));
+        for( size_t i = 0; i<bufferSize; ++i)
+        {
+            size_t ts;
+            file.read( ( char* )&ts, sizeof( size_t ));
+            size_t index;
+            file.read( ( char* )&index, sizeof( size_t ));
+            _timestampCylindersIndices[materialId][ts] = index;
+        }
+
+        file.read( (char*)&bufferSize, sizeof( size_t ));
+        _serializedCylindersDataSize[materialId] = bufferSize /
+            ( Cylinder::getSerializationSize() * sizeof( float ));
+        if( bufferSize != 0 )
+        {
+            BRAYNS_DEBUG << "[" << materialId << "] "
+                         << _serializedCylindersDataSize[materialId]
+                         << " Cylinders" << std::endl;
+            _serializedCylindersData[materialId].reserve( bufferSize );
+            file.read( (char*)_serializedCylindersData[materialId].data(),
+                bufferSize );
+        }
+
+        // Cones
+        bufferSize = 0;
+        file.read( ( char* )&bufferSize, sizeof( size_t ));
+        for( size_t i = 0; i<bufferSize; ++i)
+        {
+            size_t ts;
+            file.read( ( char* )&ts, sizeof( size_t ));
+            size_t index;
+            file.read( ( char* )&index, sizeof( size_t ));
+            _timestampConesIndices[materialId][ts] = index;
+        }
+
+        file.read( (char*)&bufferSize, sizeof( size_t ));
+        _serializedConesDataSize[materialId] = bufferSize /
+            ( Cone::getSerializationSize() * sizeof( float ));
+        if( bufferSize != 0 )
+        {
+            BRAYNS_DEBUG << "[" << materialId << "] "
+                         << _serializedConesDataSize[materialId]
+                         << " Cones" << std::endl;
+            _serializedConesData[materialId].reserve( bufferSize );
+            file.read( (char*)_serializedConesData[materialId].data(),
+                bufferSize );
+        }
+
+        _buildParametricOSPGeometry( materialId );
     }
-    else
+
+    // Scene bounds
+    file.read( ( char* )&_bounds, sizeof( Boxf ));
+    // Read simulation texture
+    size_t width;
+    file.read( (char*)&width, sizeof( size_t ));
+    if( !file.eof() )
     {
-        BRAYNS_ERROR << "Only version " << CACHE_VERSION_3 <<
-            " is currently supported" << std::endl;
+        size_t height;
+        file.read( (char*)&height, sizeof( size_t ));
+        size_t nbChannels;
+        file.read( (char*)&nbChannels, sizeof( size_t ));
+        size_t simulationTextureSize = width * height * nbChannels;
+
+        BRAYNS_INFO << "Simulation texture: " <<
+            width << "x" << height << "x" << nbChannels << std::endl;
+
+        uint8_ts bytes;
+        bytes.resize( simulationTextureSize );
+        file.read( (char*)bytes.data(), simulationTextureSize );
+
+        Texture2DPtr simulationTexture( new Texture2D );
+        simulationTexture->setWidth(width);
+        simulationTexture->setHeight(height);
+        simulationTexture->setNbChannels(nbChannels);
+        simulationTexture->setDepth(1);
+        simulationTexture->setRawData( bytes.data(), simulationTextureSize );
+
+        _textures[TEXTURE_NAME_SIMULATION] = simulationTexture;
+
+        _materials[MATERIAL_SIMULATION]->setTexture(
+            TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
+        _commitMaterials();
     }
+    BRAYNS_INFO << _bounds << std::endl;
+    BRAYNS_INFO << "Scene successfully loaded"<< std::endl;
     file.close();
 }
 
 void OSPRayScene::_buildParametricOSPGeometry( const size_t materialId )
 {
-    OSPGeometry* extendedSpheres = new OSPGeometry[_materials.size()];
-    OSPGeometry* extendedCylinders = new OSPGeometry[_materials.size()];
-    OSPGeometry* extendedCones = new OSPGeometry[_materials.size()];
-
     // Extended spheres
-    const size_t spheresBufferSize =
-        _serializedSpheresDataSize[materialId] * Sphere::getSerializationSize();
-    extendedSpheres[materialId] = ospNewGeometry("extendedspheres");
-    OSPData data = ospNewData(
-        spheresBufferSize, OSP_FLOAT,
-        &_serializedSpheresData[materialId][0], OSP_DATA_SHARED_BUFFER );
+    for( const auto& timestampSpheresIndex: _timestampSpheresIndices[materialId] )
+    {
+        const size_t spheresBufferSize =
+            timestampSpheresIndex.second * Sphere::getSerializationSize();
 
-    ospSetObject(extendedSpheres[materialId],
-        "extendedspheres", data);
-    ospSet1i(extendedSpheres[materialId], "bytes_per_extended_sphere",
-        Sphere::getSerializationSize() * sizeof(float));
-    ospSet1i(extendedSpheres[materialId],
-        "offset_radius", 3 * sizeof(float));
-    ospSet1i(extendedSpheres[materialId],
-        "offset_timestamp", 4 * sizeof(float));
-    ospSet1i(extendedSpheres[materialId],
-        "offset_value", 5 * sizeof(float));
+        for( const auto& model: _models )
+        {
+            if( timestampSpheresIndex.first <= model.first )
+            {
+                OSPGeometry extendedSpheres =
+                    ospNewGeometry("extendedspheres");
+                OSPData data = ospNewData( spheresBufferSize, OSP_FLOAT,
+                    &_serializedSpheresData[materialId][0],
+                    OSP_DATA_SHARED_BUFFER );
 
-    if(_ospMaterials[materialId])
-        ospSetMaterial(extendedSpheres[materialId], _ospMaterials[materialId]);
+                ospSetObject(extendedSpheres,
+                    "extendedspheres", data );
+                ospSet1i(extendedSpheres, "bytes_per_extended_sphere",
+                    Sphere::getSerializationSize() * sizeof(float));
+                ospSet1i(extendedSpheres,
+                    "offset_radius", 3 * sizeof(float));
+                ospSet1i(extendedSpheres,
+                    "offset_timestamp", 4 * sizeof(float));
+                ospSet1i(extendedSpheres,
+                    "offset_value", 5 * sizeof(float));
 
-    ospCommit(extendedSpheres[materialId]);
-    ospAddGeometry(_scene, extendedSpheres[materialId]);
+                if(_ospMaterials[materialId])
+                    ospSetMaterial( extendedSpheres, _ospMaterials[materialId]);
+
+                ospCommit( extendedSpheres );
+                ospAddGeometry( model.second, extendedSpheres );
+            }
+        }
+    }
 
     // Extended cylinders
-    const size_t cylindersBufferSize =
-        _serializedCylindersDataSize[materialId] *
-        Cylinder::getSerializationSize();
-    extendedCylinders[materialId] = ospNewGeometry("extendedcylinders");
-    assert(extendedCylinders[materialId]);
+    for( const auto& timestampCylindersIndex: _timestampCylindersIndices[materialId] )
+    {
+        const size_t cylindersBufferSize =
+            timestampCylindersIndex.second * Cylinder::getSerializationSize();
 
-    data = ospNewData(
-        cylindersBufferSize, OSP_FLOAT,
-        &_serializedCylindersData[materialId][0], OSP_DATA_SHARED_BUFFER );
+        for( const auto& model: _models )
+        {
+            if( timestampCylindersIndex.first <= model.first )
+            {
+                OSPGeometry extendedCylinders =
+                    ospNewGeometry("extendedcylinders");
+                assert( extendedCylinders );
 
-    ospSetObject(extendedCylinders[materialId],
-        "extendedcylinders", data);
-    ospSet1i(extendedCylinders[materialId], "bytes_per_extended_cylinder",
-        Cylinder::getSerializationSize() * sizeof(float));
-    ospSet1i(extendedCylinders[materialId],
-        "offset_timestamp", 7 * sizeof(float));
-    ospSet1i(extendedCylinders[materialId],
-        "offset_value", 8 * sizeof(float));
+                OSPData data = ospNewData(
+                    cylindersBufferSize, OSP_FLOAT,
+                    &_serializedCylindersData[materialId][0],
+                    OSP_DATA_SHARED_BUFFER );
 
-    if(_ospMaterials[materialId])
-        ospSetMaterial(extendedCylinders[materialId], _ospMaterials[materialId]);
+                ospSetObject( extendedCylinders, "extendedcylinders", data);
+                ospSet1i(extendedCylinders, "bytes_per_extended_cylinder",
+                    Cylinder::getSerializationSize() * sizeof(float));
+                ospSet1i(extendedCylinders,
+                    "offset_timestamp", 7 * sizeof(float));
+                ospSet1i(extendedCylinders, "offset_value", 8 * sizeof(float));
 
-    ospCommit(extendedCylinders[materialId]);
-    ospAddGeometry(_scene, extendedCylinders[materialId]);
+                if( _ospMaterials[materialId] )
+                    ospSetMaterial( extendedCylinders,
+                                    _ospMaterials[materialId]);
+
+                ospCommit(extendedCylinders);
+                ospAddGeometry( model.second, extendedCylinders);
+            }
+        }
+    }
 
     // Extended cones
-    const size_t conesBufferSize =
-        _serializedConesDataSize[materialId] * Cone::getSerializationSize();
-    extendedCones[materialId] = ospNewGeometry("extendedcones");
-    assert(extendedCones[materialId]);
+    for( const auto& timestampConesIndex: _timestampConesIndices[materialId] )
+    {
+        const size_t conesBufferSize =
+            timestampConesIndex.second * Cone::getSerializationSize();
 
-    data = ospNewData(
-        conesBufferSize, OSP_FLOAT,
-        &_serializedConesData[materialId][0], OSP_DATA_SHARED_BUFFER );
+        for( const auto& model: _models )
+        {
+            if( timestampConesIndex.first <= model.first )
+            {
+                OSPGeometry extendedCones = ospNewGeometry("extendedcones");
+                assert(extendedCones);
 
-    ospSetObject(extendedCones[materialId],
-        "extendedcones", data);
-    ospSet1i(extendedCylinders[materialId], "bytes_per_extended_cone",
-        Cone::getSerializationSize() * sizeof(float));
-    ospSet1i(extendedCones[materialId],
-        "offset_timestamp", 8 * sizeof(float));
-    ospSet1i(extendedCones[materialId],
-        "offset_value", 9 * sizeof(float));
+                OSPData data = ospNewData(
+                    conesBufferSize, OSP_FLOAT,
+                    &_serializedConesData[materialId][0],
+                    OSP_DATA_SHARED_BUFFER );
 
-    if(_ospMaterials[materialId])
-        ospSetMaterial(extendedCones[materialId], _ospMaterials[materialId]);
+                ospSetObject(extendedCones, "extendedcones", data);
+                ospSet1i(extendedCones, "bytes_per_extended_cone",
+                    Cone::getSerializationSize() * sizeof(float));
+                ospSet1i(extendedCones, "offset_timestamp", 8 * sizeof(float));
+                ospSet1i(extendedCones, "offset_value", 9 * sizeof(float));
 
-    ospCommit(extendedCones[materialId]);
-    ospAddGeometry(_scene, extendedCones[materialId]);
+                if( _ospMaterials[materialId] )
+                    ospSetMaterial( extendedCones, _ospMaterials[materialId]);
 
-    delete extendedCones;
-    delete extendedSpheres;
-    delete extendedCylinders;
+                ospCommit( extendedCones );
+                ospAddGeometry( model.second, extendedCones );
+           }
+       }
+    }
 }
 
 void OSPRayScene::buildGeometry()
@@ -298,30 +452,66 @@ void OSPRayScene::buildGeometry()
 
     BRAYNS_INFO << "Building OSPRay geometry" << std::endl;
 
-    for( size_t materialId=0; materialId<_materials.size(); ++materialId )
+    if( _geometryParameters.getGenerateMultipleModels() )
+    {
+        // Initialize models according to timestamps
+        for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
+        {
+            for( const PrimitivePtr& primitive: _primitives[materialId] )
+            {
+                const size_t ts = primitive->getTimestamp();
+                if( _models.find(ts) == _models.end())
+                {
+                    _models[ts] = ospNewModel();
+                    BRAYNS_INFO << "Model created for timestamp " << ts
+                                << ": " << _models[ts] << std::endl;
+                }
+            }
+        }
+    }
+    if(_models.size() == 0 )
+        // If no timestamp is available, create a default model at timestamp 0
+        _models[0] = ospNewModel();
+
+    BRAYNS_INFO << "Models to process: " << _models.size() << std::endl;
+
+    // Process geometries
+    for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
     {
         _serializedSpheresDataSize[materialId] = 0;
         _serializedCylindersDataSize[materialId] = 0;
+        _serializedConesDataSize[materialId] = 0;
+
+        size_t sphereCount = 0;
+        size_t cylinderCount = 0;
+        size_t coneCount = 0;
         for( const PrimitivePtr& primitive: _primitives[materialId] )
         {
+            const float ts = primitive->getTimestamp();
             switch(primitive->getGeometryType())
             {
                 case GT_SPHERE:
                 {
                     primitive->serializeData(_serializedSpheresData[materialId]);
                     ++_serializedSpheresDataSize[materialId];
+                    ++sphereCount;
+                    _timestampSpheresIndices[materialId][ts] = sphereCount;
                 }
                 break;
                 case GT_CYLINDER:
                 {
                     primitive->serializeData(_serializedCylindersData[materialId]);
                     ++_serializedCylindersDataSize[materialId];
+                    ++cylinderCount;
+                    _timestampCylindersIndices[materialId][ts] = cylinderCount;
                 }
                 break;
                 case GT_CONE:
                 {
                     primitive->serializeData(_serializedConesData[materialId]);
                     ++_serializedConesDataSize[materialId];
+                    ++coneCount;
+                    _timestampConesIndices[materialId][ts] = coneCount;
                 }
                 default:
                     break;
@@ -370,7 +560,10 @@ void OSPRayScene::buildGeometry()
             ospSetMaterial(mesh, _ospMaterials[materialId]);
 
         ospCommit(mesh);
-        ospAddGeometry(_scene, mesh);
+
+        // Meshes are by default added to all timestamps
+        for( const auto& model: _models )
+            ospAddGeometry( model.second, mesh);
     }
 
     _commitLights();
@@ -389,7 +582,7 @@ void OSPRayScene::buildGeometry()
     }
 
     BRAYNS_INFO << "--------------------" << std::endl;
-    BRAYNS_INFO << "Geometry information" << std::endl;
+    BRAYNS_INFO << "Primitive information" << std::endl;
     BRAYNS_INFO << "Spheres  : " << totalNbSpheres << std::endl;
     BRAYNS_INFO << "Cylinders: " << totalNbCylinders << std::endl;
     BRAYNS_INFO << "Cones    : " << totalNbCones << std::endl;
@@ -449,25 +642,29 @@ void OSPRayScene::_commitLights()
                 }
             }
         }
-        _ospLightData = ospNewData( _lights.size(), OSP_OBJECT, &ospLights[0] );
-        ospCommit( _ospLightData );
+        if( _ospLightData == 0 )
+        {
+            _ospLightData = ospNewData(
+                _lights.size(), OSP_OBJECT, &ospLights[0]);
+            ospCommit( _ospLightData );
+        }
         ospSetData( osprayRenderer->impl(), "lights", _ospLightData );
     }
 }
 
 void OSPRayScene::_commitMaterials()
 {
-    for( auto renderer: _renderers )
+    for( const auto& renderer: _renderers )
     {
         OSPRayRenderer* osprayRenderer =
             dynamic_cast<OSPRayRenderer*>( renderer.second.get( ));
         for( size_t index=0; index < _materials.size(); ++index )
         {
-            if( !_ospMaterials[index] )
+            if( _ospMaterials.size() <= index )
             {
-                _ospMaterials[index] =
-                    ospNewMaterial(osprayRenderer->impl(),
-                        "ExtendedOBJMaterial");
+                _ospMaterials.push_back(
+                    ospNewMaterial( osprayRenderer->impl(),
+                        "ExtendedOBJMaterial" ));
             }
 
             MaterialPtr material = _materials[index];
@@ -498,34 +695,41 @@ void OSPRayScene::_commitMaterials()
                     textureTypeMaterialAttribute[texture.first].attribute.c_str(),
                     ospTexture);
 
-                BRAYNS_DEBUG << "OSPRay texture assigned to " <<
+                BRAYNS_INFO << "OSPRay texture assigned to " <<
                     textureTypeMaterialAttribute[texture.first].attribute <<
                     " of material " << index << std::endl;
             }
             ospCommit(ospMaterial);
+        }
 
-            if( index == MATERIAL_SIMULATION )
-            {
-                Texture2DPtr simulationTexture =
-                    _textures[TEXTURE_NAME_SIMULATION];
-                if( simulationTexture )
-                {
-                    _ospMaterialData =
-                        ospNewData( 1, OSP_OBJECT, &_ospMaterials[index] );
-                    ospCommit( _ospMaterialData );
-                    ospSetData( osprayRenderer->impl(),
-                        "material", _ospMaterialData );
+        if( _ospMaterialData == 0 )
+        {
+            _ospMaterialData = ospNewData(
+                NB_SYSTEM_MATERIALS,
+                OSP_OBJECT,
+                &_ospMaterials[MATERIAL_SYSTEM],
+                OSP_DATA_SHARED_BUFFER );
 
-                    ospSet1i( osprayRenderer->impl(), "simulationNbFrames",
-                        simulationTexture->getHeight());
-                    ospSet1i( osprayRenderer->impl(), "simulationNbOffsets",
-                        simulationTexture->getWidth());
-                    ospCommit(osprayRenderer->impl());
-                    BRAYNS_DEBUG << "Simulation material set: " <<
-                        simulationTexture->getWidth() << "x" <<
-                        simulationTexture->getHeight() << std::endl;
-                }
-            }
+            ospCommit( _ospMaterialData );
+        }
+
+        ospSetData( osprayRenderer->impl(), "materials", _ospMaterialData );
+        ospCommit( osprayRenderer->impl() );
+
+        // Simulation texture information needs to be transmitted to
+        // the renderer
+        Texture2DPtr simulationTexture =
+            _textures[TEXTURE_NAME_SIMULATION];
+        if( simulationTexture )
+        {
+            ospSet1i( osprayRenderer->impl(), "simulationNbFrames",
+                simulationTexture->getHeight());
+            ospSet1i( osprayRenderer->impl(), "simulationNbOffsets",
+                simulationTexture->getWidth());
+            BRAYNS_INFO << "Simulation set to material "
+                        << MATERIAL_SIMULATION << " :"
+                        << simulationTexture->getWidth() << "x"
+                        << simulationTexture->getHeight() << std::endl;
         }
     }
 }
@@ -546,8 +750,8 @@ OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)
     OSPTextureFormat type = OSP_TEXTURE_R8; // smallest valid type as default
     if(texture->getDepth() == 1)
     {
-      if(texture->getNbChannels() == 3) type = OSP_TEXTURE_SRGB; // maybe OSP_TEXTURE_RGBA8
-      if(texture->getNbChannels() == 4) type = OSP_TEXTURE_SRGBA; // maybe OSP_TEXTURE_RGB8
+      if(texture->getNbChannels() == 3) type = OSP_TEXTURE_SRGB;
+      if(texture->getNbChannels() == 4) type = OSP_TEXTURE_SRGBA;
     }
     else if(texture->getDepth() == 4)
     {

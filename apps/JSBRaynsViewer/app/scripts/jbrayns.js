@@ -51,8 +51,8 @@ var initialCameraPos = new THREE.Vector3(0,0,0);
 var initialCameraTarget = new THREE.Vector3(0,0,0);
 var scale = 1.0;
 var accumulation = 0;
-var maxAccumulation = 20;
-var fps = 10;
+var maxAccumulation = 10;
+var fps = 20;
 
 init();
 
@@ -64,9 +64,9 @@ function init() {
         matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1, 1]
     };
     controls = new THREE.OrbitControls(camera);
-    controls.rotateSpeed = 0.2;
-    controls.zoomSpeed = 0.2;
-    controls.panSpeed = 0.2;
+    controls.rotateSpeed = 1;
+    controls.zoomSpeed = 0.3;
+    controls.panSpeed = 1;
     controls.noZoom = false;
     controls.noPan = false;
     controls.staticMoving = true;
@@ -140,6 +140,8 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     var jsonData = { 'key' : 'jpeg-size', 'value': window.innerWidth + ' ' + window.innerHeight };
     doRequest('PUT', braynsUrl + 'zerobuf/render/attribute', function () {}, jsonData);
+    var jsonData = { 'key' : 'window-size', 'value': window.innerWidth + ' ' + window.innerHeight };
+    doRequest('PUT', braynsUrl + 'zerobuf/render/attribute', function () {}, jsonData);
     clearFrame();
 }
 
@@ -200,12 +202,10 @@ var statusImage = setInterval(function getImage() {
         if( !rendering && accumulation < maxAccumulation )
         {
             rendering = true;
-            /*
             var compression = Math.trunc(20+accumulation*(40/maxAccumulation));
             sendParameter('jpeg-compression', compression);
             console.log(compression);
-            */
-
+  
             doRequest('GET', braynsUrl + 'zerobuf/render/imagejpeg', function (event) {
                 if (event.target.status === 200) {
                     var jsonObject = JSON.parse(event.target.responseText);

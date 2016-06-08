@@ -22,5 +22,3 @@ table FovCamera
   fovAperture: float;
   fovFocalLength: float;
 }
-
-root_type FovCamera;

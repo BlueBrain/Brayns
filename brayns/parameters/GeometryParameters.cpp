@@ -27,8 +27,12 @@ const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_TARGET = "target";
 const std::string PARAM_REPORT = "report";
+const std::string PARAM_NON_SIMULATED_CELLS = "non-simulated-cells";
+const std::string PARAM_FIRST_SIMULATION_FRAME = "first-simulation-frame";
+const std::string PARAM_LAST_SIMULATION_FRAME = "last-simulation-frame";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
+const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
 
 }
 
@@ -42,6 +46,10 @@ GeometryParameters::GeometryParameters( )
     , _sceneEnvironment( SE_NONE )
     , _geometryQuality( GQ_MAX_QUALITY )
     , _morphologySectionTypes( MST_ALL )
+    , _nonSimulatedCells(0)
+    , _firstSimulationFrame(0)
+    , _lastSimulationFrame(0)
+    , _generateMultipleModels(false)
 {
     _parameters.add_options()
         ( PARAM_MORPHOLOGY_FOLDER.c_str(), po::value< std::string >( ),
@@ -75,7 +83,16 @@ GeometryParameters::GeometryParameters( )
             "one type of section" )
         ( PARAM_MORPHOLOGY_LAYOUT.c_str(), po::value< size_ts >()->multitoken(),
             "Morphology layout (number of lines, number of columns, "
-            "vertical spacing, horizontal spacing)" );
+            "vertical spacing, horizontal spacing)" )
+        ( PARAM_NON_SIMULATED_CELLS.c_str(), po::value< size_t >(),
+            "Defines the number of non-simulated cells should be loaded when a "
+            "report is specified" )
+        ( PARAM_FIRST_SIMULATION_FRAME.c_str(), po::value< size_t >(),
+            "First simulation frame to be loaded" )
+        ( PARAM_LAST_SIMULATION_FRAME.c_str(), po::value< size_t >(),
+            "Last simulation frame to be loaded" )
+        ( PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value< bool >(),
+            "Generated multiple models based on geometry timestamps" );
 }
 
 bool GeometryParameters::_parse( const po::variables_map& vm )
@@ -129,6 +146,18 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
             _morphologyLayout.horizontalSpacing = values[2];
         }
     }
+    if( vm.count( PARAM_NON_SIMULATED_CELLS))
+        _nonSimulatedCells =
+            vm[PARAM_NON_SIMULATED_CELLS].as< size_t >( );
+    if( vm.count( PARAM_FIRST_SIMULATION_FRAME ))
+        _firstSimulationFrame =
+            vm[PARAM_FIRST_SIMULATION_FRAME].as< size_t >( );
+    if( vm.count( PARAM_LAST_SIMULATION_FRAME ))
+        _lastSimulationFrame =
+            vm[PARAM_LAST_SIMULATION_FRAME].as< size_t >( );
+    if( vm.count( PARAM_GENERATE_MULTIPLE_MODELS ))
+        _generateMultipleModels =
+            vm[PARAM_GENERATE_MULTIPLE_MODELS].as< bool >( );
 
     return true;
 }
@@ -136,36 +165,44 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
 void GeometryParameters::print( )
 {
     AbstractParameters::print( );
-    BRAYNS_INFO << "Morphology folder       : " <<
+    BRAYNS_INFO << "Morphology folder          : " <<
         _morphologyFolder << std::endl;
-    BRAYNS_INFO << "PDB datasource          : " << std::endl;
-    BRAYNS_INFO << "- Folder                : " << _pdbFolder << std::endl;
-    BRAYNS_INFO << "- Cells                 : " << _pdbCells << std::endl;
-    BRAYNS_INFO << "- Positions             : " << _pdbPositions << std::endl;
-    BRAYNS_INFO << "Mesh folder             : " << _meshFolder << std::endl;
-    BRAYNS_INFO << "Cache file to load      : " << _loadCacheFile << std::endl;
-    BRAYNS_INFO << "Cache file to save      : " << _saveCacheFile << std::endl;
-    BRAYNS_INFO << "Circuit configuration   : " << _circuitConfig << std::endl;
-    BRAYNS_INFO << "Color scheme            : " <<
+    BRAYNS_INFO << "PDB datasource             : " << std::endl;
+    BRAYNS_INFO << "- Folder                   : " << _pdbFolder << std::endl;
+    BRAYNS_INFO << "- Cells                    : " << _pdbCells << std::endl;
+    BRAYNS_INFO << "- Positions                : " << _pdbPositions << std::endl;
+    BRAYNS_INFO << "Mesh folder                : " << _meshFolder << std::endl;
+    BRAYNS_INFO << "Cache file to load         : " << _loadCacheFile << std::endl;
+    BRAYNS_INFO << "Cache file to save         : " << _saveCacheFile << std::endl;
+    BRAYNS_INFO << "Circuit configuration      : " << _circuitConfig << std::endl;
+    BRAYNS_INFO << "Color scheme               : " <<
         static_cast<size_t>( _colorScheme ) << std::endl;
-    BRAYNS_INFO << "Radius                  : " << _radius << std::endl;
-    BRAYNS_INFO << "Scene environment       : " <<
+    BRAYNS_INFO << "Radius                     : " << _radius << std::endl;
+    BRAYNS_INFO << "Scene environment          : " <<
         static_cast<size_t>( _sceneEnvironment ) << std::endl;
-    BRAYNS_INFO << "Geometry quality        : " <<
+    BRAYNS_INFO << "Geometry quality           : " <<
         static_cast<size_t>( _geometryQuality ) << std::endl;
-    BRAYNS_INFO << "Target                  : " <<
+    BRAYNS_INFO << "Target                     : " <<
         _target << std::endl;
-    BRAYNS_INFO << "Report                  : " <<
+    BRAYNS_INFO << "Report                     : " <<
         _report << std::endl;
-    BRAYNS_INFO << "Morphology section types: " <<
+    BRAYNS_INFO << "- Non-simulated cells      : " <<
+        _nonSimulatedCells << std::endl;
+    BRAYNS_INFO << "- First frame              : " <<
+        _firstSimulationFrame << std::endl;
+    BRAYNS_INFO << "- Last frame               : " <<
+        _lastSimulationFrame << std::endl;
+    BRAYNS_INFO << "Morphology section types   : " <<
         _morphologySectionTypes << std::endl;
-    BRAYNS_INFO << "Morphology Layout       : " << std::endl;
-    BRAYNS_INFO << " - Columns              : " <<
+    BRAYNS_INFO << "Morphology Layout          : " << std::endl;
+    BRAYNS_INFO << " - Columns                 : " <<
         _morphologyLayout.nbColumns << std::endl;
-    BRAYNS_INFO << " - Vertical spacing     : " <<
+    BRAYNS_INFO << " - Vertical spacing        : " <<
         _morphologyLayout.verticalSpacing << std::endl;
-    BRAYNS_INFO << " - Horizontal spacing   : " <<
+    BRAYNS_INFO << " - Horizontal spacing      : " <<
         _morphologyLayout.horizontalSpacing << std::endl;
+    BRAYNS_INFO << "Generate multiple models   : " <<
+        (_generateMultipleModels ? "on" : "off") << std::endl;
 }
 
 }

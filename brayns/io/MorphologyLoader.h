@@ -68,6 +68,7 @@ public:
         const servus::URI& circuitConfig,
         const std::string& target,
         const std::string& report,
+        const size_t nbSimulationFramesLoaded,
         Scene& scene);
 
     /** Imports morphology from a circuit for the given target name
@@ -97,13 +98,16 @@ public:
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
      * @param report report to be loaded.
-     * @return True if the report is successfully loaded and texture is added
-     *         to cache.
+     * @return The number of loaded frames.
      */
-    bool importSimulationIntoTexture(
+    size_t importSimulationIntoTexture(
         const servus::URI& circuitConfig,
         const std::string& target,
         const std::string& report,
+        Scene& scene );
+
+    size_t createFakeSimulationTexture(
+        const std::map< size_t, float>& morphologyOffsets,
         Scene& scene );
 
 private:
@@ -113,7 +117,11 @@ private:
         const Matrix4f& transformation,
         const SimulationData* simulationData,
         PrimitivesMap& primitives,
-        Boxf& bounds);
+        Boxf& bounds,
+        const size_t simulationOffset,
+        float& maxDistanceToSoma,
+        const Vector3f& replicaPosition,
+        const int32_t forcedTimestamp = -1);
 
     size_t _material(
         size_t morphologyIndex,

@@ -18,16 +18,16 @@ namespace brayns
 
 SceneParameters::SceneParameters()
     : AbstractParameters( "Scene" )
-    , _timestamp( std::numeric_limits<float>::max( ))
+    , _timestamp( std::numeric_limits<size_t>::max( ))
 {
     _parameters.add_options()
-        (PARAM_TIMESTAMP.c_str(), po::value< float >( ), "Timestamp");
+        (PARAM_TIMESTAMP.c_str(), po::value< size_t >( ), "Timestamp");
 }
 
 bool SceneParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_TIMESTAMP ))
-        _timestamp = vm[PARAM_TIMESTAMP].as< float >( );
+        _timestamp = vm[PARAM_TIMESTAMP].as< size_t >( );
 
     return true;
 }

@@ -20,12 +20,15 @@ namespace brayns
 class OSPRayScene: public brayns::Scene
 {
 public:
-    OSPRayScene( RendererMap renderer, GeometryParameters& geometryParameters );
+    OSPRayScene(
+        RendererMap renderer,
+        SceneParameters& sceneParameters,
+        GeometryParameters& geometryParameters );
 
     void commit() final;
     void buildGeometry() final;
 
-    OSPModel impl() {return _scene;}
+    OSPModel* modelImpl( const size_t timestamp );
 
 private:
     void _commitLights();
@@ -37,11 +40,13 @@ private:
     void _loadCacheFile();
     void _saveCacheFile();
 
-    OSPModel _scene;
-    std::map<size_t, OSPMaterial> _ospMaterials;
+    std::map< size_t, OSPModel > _models;
+    std::vector<OSPMaterial> _ospMaterials;
     std::map<std::string, OSPTexture2D> _ospTextures;
     OSPData _ospLightData;
     OSPData _ospMaterialData;
+
+    std::map< float, size_t > _timestamps;
 
     std::map<size_t, floats> _serializedSpheresData;
     std::map<size_t, floats> _serializedCylindersData;
@@ -49,6 +54,10 @@ private:
     std::map<size_t, size_t> _serializedSpheresDataSize;
     std::map<size_t, size_t> _serializedCylindersDataSize;
     std::map<size_t, size_t> _serializedConesDataSize;
+
+    std::map< size_t, std::map< size_t, size_t > > _timestampSpheresIndices;
+    std::map< size_t, std::map< size_t, size_t > > _timestampCylindersIndices;
+    std::map< size_t, std::map< size_t, size_t > > _timestampConesIndices;
 };
 
 }

@@ -139,7 +139,10 @@ void ExtendedSpheres_intersect(uniform ExtendedSpheres *uniform geometry,
     uniform float timestamp =
             *((uniform float *)(spherePtr+geometry->offset_timestamp));
 
-    if( timestamp>ray.time ) return;
+#ifndef INTEL_DEMO
+    if( timestamp>ray.time )
+        return;
+#endif
 
     uniform float radius = geometry->radius;
     if (geometry->offset_radius >= 0)

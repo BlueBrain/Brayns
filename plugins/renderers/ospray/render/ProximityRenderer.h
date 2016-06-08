@@ -55,8 +55,10 @@ public:
 
 private:
     std::vector< void* > lightArray;
+    std::vector< void* > materialArray;
 
     ospray::Data* lightData;
+    ospray::Data* materialData;
 
     float detectionDistance;
     bool detectionOnDifferentMaterial;

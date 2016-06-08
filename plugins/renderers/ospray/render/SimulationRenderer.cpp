@@ -63,22 +63,17 @@ void SimulationRenderer::commit( )
     timestamp = getParam1f( "timestamp", 0.f );
     spp = getParam1i("spp", 1);
     electronShadingEnabled = bool( getParam1i( "electronShading", 0 ));
-    gradientBackgroundEnabled =
-        bool( getParam1i( "gradientBackgroundEnabled", 0 ));
     ospray::vec3f scale = getParam3f( "scale", ospray::vec3f( 1.f ));
-    dof = getParam1f( "dof", 0.f );
     simulationNbOffsets = getParam1i( "simulationNbOffsets", 0 );
     simulationNbFrames = getParam1i( "simulationNbFrames", 0 );
 
     // Those materials are used for simulation mapping only
-    materialData = ( ospray::Data* )getParamData( "material" );
+    materialData = ( ospray::Data* )getParamData( "materials" );
     materialArray.clear( );
     if( materialData )
         for( size_t i = 0; i < materialData->size( ); ++i )
-        {
             materialArray.push_back(
                 ( ( ospray::Material** )materialData->data )[i]->getIE( ));
-        }
     void **materialPtr = materialArray.empty( ) ? nullptr : &materialArray[0];
 
     ispc::SimulationRenderer_set(
@@ -94,8 +89,6 @@ void SimulationRenderer::commit( )
                 timestamp,
                 spp,
                 electronShadingEnabled,
-                gradientBackgroundEnabled,
-                dof,
                 simulationNbOffsets,
                 simulationNbFrames,
                 lightPtr, lightArray.size( ),

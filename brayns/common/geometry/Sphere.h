@@ -29,7 +29,6 @@ public:
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
     BRAYNS_API float getRadius() const { return _radius; }
-    BRAYNS_API float getTimestamp() const { return _timestamp; }
     BRAYNS_API float getValue() const { return _value; }
 
     BRAYNS_API virtual size_t serializeData(floats& serializedData);
@@ -38,7 +37,6 @@ public:
 private:
     Vector3f _center;
     float _radius;
-    float _timestamp;
     float _value;
 };
 

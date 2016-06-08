@@ -11,5 +11,3 @@ table Attribute {
   key: string;
   value: string;
 }
-
-root_type Attribute;
