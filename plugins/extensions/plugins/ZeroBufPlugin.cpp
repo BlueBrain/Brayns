@@ -8,11 +8,11 @@
 #include "ZeroBufPlugin.h"
 
 #include <brayns/common/camera/Camera.h>
+#include <brayns/common/scene/Scene.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/fovCamera.h>
-#include <zerobuf/render/frameBuffers.h>
 
 
 namespace brayns
@@ -86,6 +86,10 @@ void ZeroBufPlugin::_setupHTTPServer()
     _httpServer->add( _remoteReset );
     _remoteReset.registerDeserializedCallback(
         std::bind( &ZeroBufPlugin::_resetUpdated, this ));
+
+    _httpServer->add( _remoteMaterial );
+    _remoteMaterial.registerDeserializedCallback(
+        std::bind( &ZeroBufPlugin::_materialUpdated, this ));
 }
 
 void ZeroBufPlugin::_setupRequests()
@@ -129,6 +133,36 @@ void ZeroBufPlugin::_resetUpdated( )
         _extensionParameters.camera->reset();
         _extensionParameters.camera->commit();
     }
+}
+
+void ZeroBufPlugin::_materialUpdated( )
+{
+    size_t materialId = _remoteMaterial.getIndex();
+    MaterialPtr material =
+        _extensionParameters.scene->getMaterial( materialId );
+
+    if( material)
+    {
+        BRAYNS_INFO << "Setting material " << materialId << std::endl;
+        ::zerobuf::render::Color diffuse = _remoteMaterial.getDiffuseColor();
+        Vector3f kd = { diffuse.getR(), diffuse.getG(), diffuse.getB() };
+        material->setColor( kd );
+        BRAYNS_INFO << "- Diffuse color  : " << kd << std::endl;
+
+        ::zerobuf::render::Color specular = _remoteMaterial.getSpecularColor();
+        Vector3f ks = { specular.getR(), specular.getG(), specular.getB() };
+        material->setSpecularColor( ks );
+        BRAYNS_INFO << "- Specular color : " << ks << std::endl;
+
+        material->setSpecularExponent( _remoteMaterial.getSpecularExponent() );
+        material->setReflectionIndex( _remoteMaterial.getReflectionIndex() );
+        material->setOpacity( _remoteMaterial.getOpacity() );
+        material->setRefractionIndex( _remoteMaterial.getRefractionIndex() );
+        material->setEmission( _remoteMaterial.getLightEmission() );
+        _extensionParameters.scene->commitMaterials( true );
+        _extensionParameters.frameBuffer->clear();
+    }
+
 }
 
 void ZeroBufPlugin::_resizeImage(

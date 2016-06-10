@@ -185,7 +185,7 @@ void OSPRayScene::_saveCacheFile()
 
 void OSPRayScene::_loadCacheFile()
 {
-    _commitMaterials();
+    commitMaterials();
 
     const std::string& filename = _geometryParameters.getLoadCacheFile();
     BRAYNS_INFO << "Loading scene from binary file: " << filename << std::endl;
@@ -329,7 +329,7 @@ void OSPRayScene::_loadCacheFile()
 
         _materials[MATERIAL_SIMULATION]->setTexture(
             TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
-        _commitMaterials();
+        commitMaterials();
     }
     BRAYNS_INFO << _bounds << std::endl;
     BRAYNS_INFO << "Scene successfully loaded"<< std::endl;
@@ -448,7 +448,7 @@ void OSPRayScene::buildGeometry()
 {
     // Make sure lights and materials have been initialized before assigning
     // the geometry
-    _commitMaterials();
+    commitMaterials();
 
     BRAYNS_INFO << "Building OSPRay geometry" << std::endl;
 
@@ -652,7 +652,7 @@ void OSPRayScene::_commitLights()
     }
 }
 
-void OSPRayScene::_commitMaterials()
+void OSPRayScene::commitMaterials( const bool updateOnly )
 {
     for( const auto& renderer: _renderers )
     {
@@ -662,6 +662,7 @@ void OSPRayScene::_commitMaterials()
         {
             if( _ospMaterials.size() <= index )
             {
+                BRAYNS_INFO << "Creating material " << index << std::endl;
                 _ospMaterials.push_back(
                     ospNewMaterial( osprayRenderer->impl(),
                         "ExtendedOBJMaterial" ));
@@ -681,56 +682,63 @@ void OSPRayScene::_commitMaterials()
             ospSet1f(ospMaterial, "reflection", material->getReflectionIndex());
             ospSet1f(ospMaterial, "a", material->getEmission());
 
-            // Textures
-            for(auto texture: material->getTextures())
+            if( !updateOnly )
             {
-                TextureLoader textureLoader;
-                if( texture.second != TEXTURE_NAME_SIMULATION )
-                    textureLoader.loadTexture(
-                        _textures, texture.first, texture.second);
+                // Textures
+                for(auto texture: material->getTextures())
+                {
+                    TextureLoader textureLoader;
+                    if( texture.second != TEXTURE_NAME_SIMULATION )
+                        textureLoader.loadTexture(
+                            _textures, texture.first, texture.second);
 
-                OSPTexture2D ospTexture = _createTexture2D(texture.second);
-                ospSetObject(
-                    ospMaterial,
-                    textureTypeMaterialAttribute[texture.first].attribute.c_str(),
-                    ospTexture);
+                    OSPTexture2D ospTexture = _createTexture2D(texture.second);
+                    ospSetObject(
+                        ospMaterial,
+                        textureTypeMaterialAttribute[texture.first].attribute.c_str(),
+                        ospTexture);
 
-                BRAYNS_INFO << "OSPRay texture assigned to " <<
-                    textureTypeMaterialAttribute[texture.first].attribute <<
-                    " of material " << index << std::endl;
+                    BRAYNS_INFO << "OSPRay texture assigned to " <<
+                        textureTypeMaterialAttribute[texture.first].attribute <<
+                        " of material " << index << std::endl;
+                }
             }
             ospCommit(ospMaterial);
         }
 
-        if( _ospMaterialData == 0 )
+        if( !updateOnly )
         {
-            _ospMaterialData = ospNewData(
-                NB_SYSTEM_MATERIALS,
-                OSP_OBJECT,
-                &_ospMaterials[MATERIAL_SYSTEM],
-                OSP_DATA_SHARED_BUFFER );
+            if( _ospMaterialData == 0 )
+            {
+                _ospMaterialData = ospNewData(
+                    NB_SYSTEM_MATERIALS,
+                    OSP_OBJECT,
+                    &_ospMaterials[MATERIAL_SYSTEM],
+                    OSP_DATA_SHARED_BUFFER );
 
-            ospCommit( _ospMaterialData );
+                ospCommit( _ospMaterialData );
+            }
+
+            // Simulation texture information needs to be transmitted to
+            // the renderer
+            Texture2DPtr simulationTexture =
+                _textures[TEXTURE_NAME_SIMULATION];
+            if( simulationTexture )
+            {
+                ospSet1i( osprayRenderer->impl(), "simulationNbFrames",
+                    simulationTexture->getHeight());
+                ospSet1i( osprayRenderer->impl(), "simulationNbOffsets",
+                    simulationTexture->getWidth());
+                BRAYNS_INFO << "Simulation set to material "
+                            << MATERIAL_SIMULATION << " :"
+                            << simulationTexture->getWidth() << "x"
+                            << simulationTexture->getHeight() << std::endl;
+            }
+            ospSetData( osprayRenderer->impl(), "materials", _ospMaterialData );
         }
 
-        ospSetData( osprayRenderer->impl(), "materials", _ospMaterialData );
         ospCommit( osprayRenderer->impl() );
 
-        // Simulation texture information needs to be transmitted to
-        // the renderer
-        Texture2DPtr simulationTexture =
-            _textures[TEXTURE_NAME_SIMULATION];
-        if( simulationTexture )
-        {
-            ospSet1i( osprayRenderer->impl(), "simulationNbFrames",
-                simulationTexture->getHeight());
-            ospSet1i( osprayRenderer->impl(), "simulationNbOffsets",
-                simulationTexture->getWidth());
-            BRAYNS_INFO << "Simulation set to material "
-                        << MATERIAL_SIMULATION << " :"
-                        << simulationTexture->getWidth() << "x"
-                        << simulationTexture->getHeight() << std::endl;
-        }
     }
 }
 

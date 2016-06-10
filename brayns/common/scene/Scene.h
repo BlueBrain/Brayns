@@ -68,6 +68,14 @@ public:
     BRAYNS_API MaterialPtr getMaterial( size_t index );
 
     /**
+        Commit materials to renderers
+        @param updateOnly If true, materials are not recreated and textures are
+               not reassigned
+    */
+    BRAYNS_API virtual void commitMaterials(
+        const bool updateOnly = false  ) = 0;
+
+    /**
         Converts scene geometry into rendering engine specific data structures
     */
     BRAYNS_API virtual void buildGeometry() = 0;

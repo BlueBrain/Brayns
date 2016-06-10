@@ -27,12 +27,12 @@ public:
 
     void commit() final;
     void buildGeometry() final;
+    void commitMaterials( const bool updateOnly = false ) final;
 
     OSPModel* modelImpl( const size_t timestamp );
 
 private:
     void _commitLights();
-    void _commitMaterials();
 
     OSPTexture2D _createTexture2D(const std::string& textureName);
 

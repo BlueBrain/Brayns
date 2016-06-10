@@ -20,6 +20,7 @@ zerobuf_generate_cxx(
   attribute.fbs
   frameBuffers.fbs
   reset.fbs
+  material.fbs
 )
 
 common_library(BraynsZeroBufRender)

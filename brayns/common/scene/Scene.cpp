@@ -54,6 +54,9 @@ void Scene::setMaterials(
                 break;
         }
 
+        material->setSpecularColor( Vector3f( 1.f, 1.f, 1.f ));
+        material->setSpecularExponent( 10.f );
+
         // Other materials
         switch( materialType )
         {
@@ -82,7 +85,6 @@ void Scene::setMaterials(
                         float( std::rand( ) % 255 ) / 255.f ));
             }
             break;
-
         case MT_GRADIENT:
             material->setColor( Vector3f(
                 float( std::rand( ) % nbMaterials ) / float( nbMaterials ),

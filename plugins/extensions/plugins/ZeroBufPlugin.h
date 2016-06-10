@@ -17,6 +17,7 @@
 #include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/attribute.h>
 #include <zerobuf/render/reset.h>
+#include <zerobuf/render/material.h>
 
 namespace brayns
 {
@@ -47,6 +48,8 @@ private:
 
     void _resetUpdated( );
 
+    void _materialUpdated( );
+
     bool _requestImageJPEG( );
 
     bool _requestFrameBuffers( );
@@ -76,6 +79,7 @@ private:
     ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
     ::zerobuf::render::Attribute _remoteAttribute;
     ::zerobuf::render::Reset _remoteReset;
+    ::zerobuf::render::Material _remoteMaterial;
 
 };
 

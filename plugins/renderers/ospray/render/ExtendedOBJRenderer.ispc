@@ -565,7 +565,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                                 self->super.epsilon );
                         }
                     }
-                    local_shade_color = local_shade_color +
+                    local_shade_color = colorKs + local_shade_color +
                         unshaded_light_contrib;
                 }
             }
