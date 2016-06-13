@@ -33,6 +33,7 @@ const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
 const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_CAMERA_TYPE = "camera-type";
 const std::string PARAM_HDRI = "hdri";
+const std::string PARAM_SUN_ON_CAMERA = "sun-on-camera";
 
 }
 
@@ -55,6 +56,7 @@ RenderingParameters::RenderingParameters( )
     , _detectionFarColor( 0.f, 1.f, 0.f )
     , _epsilon( 1.e-3f )
     , _cameraType( CT_PERSPECTIVE )
+    , _sunOnCamera( false )
 {
     _parameters.add_options()
         (PARAM_MODULE.c_str(), po::value< std::string >( ),
@@ -92,7 +94,9 @@ RenderingParameters::RenderingParameters( )
             po::value< size_t >( ), "Camera type (0: perspective, "
             "1: perspective stereo, 2: orthographic, 3: panoramic)")
         (PARAM_HDRI.c_str(),
-            po::value< std::string >( ), "HDRI filename");
+            po::value< std::string >( ), "HDRI filename")
+        (PARAM_SUN_ON_CAMERA.c_str(),
+            po::value< bool >( ), "Sun will follow camera origin");
 
     // Add default renderers
     _renderers.push_back("exobj");
@@ -156,6 +160,8 @@ bool RenderingParameters::_parse( const po::variables_map& vm )
             vm[PARAM_CAMERA_TYPE].as< size_t >( ));
     if( vm.count( PARAM_HDRI ))
         _hdri = vm[PARAM_HDRI].as< std::string >( );
+    if( vm.count( PARAM_SUN_ON_CAMERA ))
+        _sunOnCamera = vm[PARAM_SUN_ON_CAMERA].as< bool >( );
     return true;
 }
 

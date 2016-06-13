@@ -137,6 +137,19 @@ struct Brayns::Impl
         _extensionPluginFactory->execute( );
 #endif
 
+        if( _parametersManager->getRenderingParameters().getSunOnCamera() )
+        {
+            LightPtr sunLight = _scene->getLight( 0 );
+            DirectionalLight* sun =
+                dynamic_cast< DirectionalLight* > ( sunLight.get() );
+            if( sun )
+            {
+                BRAYNS_INFO << "Committing light" << std::endl;
+                sun->setDirection( _camera->getTarget() - _camera->getPosition() );
+                _scene->commitLights();
+            }
+        }
+
         _camera->commit();
         _render( );
 
@@ -259,7 +272,7 @@ private:
         const Vector3f target = worldBounds.getCenter( );
         const Vector3f diag   = worldBounds.getSize( );
         Vector3f position = target;
-        position.z( ) -= diag.z( );
+        position.z( ) -= diag.z( ) / 2.f;
 
         const Vector3f up  = Vector3f(0.f,1.f,0.f);
         _camera->setInitialState(position, target, up);

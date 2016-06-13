@@ -566,7 +566,7 @@ void OSPRayScene::buildGeometry()
             ospAddGeometry( model.second, mesh);
     }
 
-    _commitLights();
+    commitLights();
 
     if(!_geometryParameters.getLoadCacheFile().empty())
         _loadCacheFile();
@@ -592,60 +592,65 @@ void OSPRayScene::buildGeometry()
         _saveCacheFile();
 }
 
-void OSPRayScene::_commitLights()
+void OSPRayScene::commitLights()
 {
+
     for( auto renderer: _renderers )
     {
         OSPRayRenderer* osprayRenderer =
             dynamic_cast< OSPRayRenderer* >( renderer.second.get( ));
 
-        std::vector< OSPLight > ospLights;
+        size_t lightCount = 0;
         for( auto light: _lights )
         {
-            OSPLight ospLight;
             DirectionalLight* directionalLight =
                 dynamic_cast< DirectionalLight* >( light.get( ));
             if( directionalLight != 0 )
             {
-                ospLight =
-                    ospNewLight( osprayRenderer->impl(), "DirectionalLight" );
+                if( _ospLights.size() <= lightCount )
+                    _ospLights.push_back( ospNewLight(
+                        osprayRenderer->impl(), "DirectionalLight" ));
+
                 const Vector3f color = directionalLight->getColor( );
-                ospSet3f( ospLight, "color",
+                ospSet3f( _ospLights[lightCount], "color",
                     color.x( ), color.y( ), color.z( ));
                 const Vector3f direction = directionalLight->getDirection( );
-                ospSet3f( ospLight, "direction",
+                ospSet3f( _ospLights[lightCount], "direction",
                     direction.x( ), direction.y( ), direction.z( ));
-                ospSet1f( ospLight, "intensity",
+                ospSet1f( _ospLights[lightCount], "intensity",
                     directionalLight->getIntensity( ));
-                ospCommit( ospLight );
-                ospLights.push_back( ospLight );
+                ospCommit( _ospLights[lightCount] );
             }
             else
             {
                 PointLight* pointLight = dynamic_cast< PointLight* >( light.get( ));
                 if( pointLight != 0 )
                 {
-                    ospLight =
-                        ospNewLight( osprayRenderer->impl(), "PointLight" );
+                    if( _ospLights.size() <= lightCount )
+                        _ospLights.push_back( ospNewLight(
+                            osprayRenderer->impl(), "PointLight" ));
+
                     const Vector3f position = pointLight->getPosition( );
-                    ospSet3f( ospLight, "position",
+                    ospSet3f( _ospLights[lightCount], "position",
                         position.x( ), position.y( ), position.z( ));
                     const Vector3f color = pointLight->getColor( );
-                    ospSet3f( ospLight, "color",
+                    ospSet3f( _ospLights[lightCount], "color",
                         color.x( ), color.y( ), color.z( ));
-                    ospSet1f( ospLight, "intensity",
+                    ospSet1f( _ospLights[lightCount], "intensity",
                         pointLight->getIntensity( ));
-                    ospSet1f( ospLight, "radius",
+                    ospSet1f( _ospLights[lightCount], "radius",
                         pointLight->getCutoffDistance( ));
-                    ospCommit( ospLight );
-                    ospLights.push_back( ospLight );
+                    ospCommit( _ospLights[lightCount] );
                 }
             }
+            ++lightCount;
         }
+
         if( _ospLightData == 0 )
         {
             _ospLightData = ospNewData(
-                _lights.size(), OSP_OBJECT, &ospLights[0]);
+                _lights.size(), OSP_OBJECT,
+                &_ospLights[0] );
             ospCommit( _ospLightData );
         }
         ospSetData( osprayRenderer->impl(), "lights", _ospLightData );
