@@ -398,8 +398,9 @@ bool MorphologyLoader::importCircuit(
     const brain::URIs& uris = circuit.getMorphologyURIs( gids );
 
     // Load simulation information from compartment reports
-    brion::CompartmentReport compartmentReport(
-        bc.getReportSource( report ).getPath(), gids );
+    const brion::CompartmentReport compartmentReport(
+        brion::URI( bc.getReportSource( report ).getPath( )), brion::MODE_READ,
+                    gids );
 
     const brion::CompartmentCounts& compartmentCounts =
         compartmentReport.getCompartmentCounts();
@@ -615,7 +616,8 @@ size_t MorphologyLoader::importSimulationIntoTexture(
 
     // Load simulation information from compartment reports
     brion::CompartmentReport compartmentReport(
-        bc.getReportSource( report ).getPath(), gids );
+        brion::URI( bc.getReportSource( report ).getPath( )), brion::MODE_READ,
+                gids );
 
     const float start = compartmentReport.getStartTime();
     const float end = compartmentReport.getEndTime();
