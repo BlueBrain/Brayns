@@ -39,7 +39,7 @@ ApplicationParameters::ApplicationParameters( )
     : AbstractParameters( "Application" )
     , _camera( DEFAULT_CAMERA )
     , _windowSize( DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT )
-    , _benchmarking( false )
+    , _benchmarking( true )
     , _jpegCompression( DEFAULT_JPEG_COMPRESSION )
     , _jpegSize( DEFAULT_JPEG_WIDTH, DEFAULT_JPEG_HEIGHT )
 {

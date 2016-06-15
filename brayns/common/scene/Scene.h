@@ -74,7 +74,12 @@ public:
                not reassigned
     */
     BRAYNS_API virtual void commitMaterials(
-        const bool updateOnly = false  ) = 0;
+        const bool updateOnly = false ) = 0;
+
+    /**
+        Commit lights to renderers
+    */
+    BRAYNS_API virtual void commitLights() = 0;
 
     /**
         Converts scene geometry into rendering engine specific data structures
@@ -98,6 +103,12 @@ public:
         @param light Object representing the light source
     */
     BRAYNS_API void addLight( LightPtr light );
+
+    /**
+        Gets a light source from the scene for a given index
+        @return Pointer to light source
+    */
+    BRAYNS_API LightPtr getLight( const size_t index );
 
     /**
         Removes a light source from the scene for a given index

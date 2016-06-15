@@ -54,9 +54,6 @@ void Scene::setMaterials(
                 break;
         }
 
-        material->setSpecularColor( Vector3f( 1.f, 1.f, 1.f ));
-        material->setSpecularExponent( 10.f );
-
         // Other materials
         switch( materialType )
         {
@@ -315,6 +312,13 @@ void Scene::removeLight( LightPtr light )
     Lights::iterator it = std::find( _lights.begin( ), _lights.end( ), light );
     if( it != _lights.end( ))
         _lights.erase( it );
+}
+
+LightPtr Scene::getLight( const size_t index )
+{
+    if( index < _lights.size() )
+        return _lights[index];
+    return 0;
 }
 
 void Scene::clearLights( )

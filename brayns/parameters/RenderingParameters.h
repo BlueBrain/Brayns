@@ -167,6 +167,14 @@ public:
         return _hdri;
     }
 
+    /**
+       Sun follows the camera direction
+    */
+    bool getSunOnCamera() const
+    {
+        return _sunOnCamera;
+    }
+
 protected:
 
     bool _parse( const po::variables_map& vm ) final;
@@ -188,6 +196,7 @@ protected:
     float _epsilon;
     CameraType _cameraType;
     std::string _hdri;
+    bool _sunOnCamera;
 };
 
 }
