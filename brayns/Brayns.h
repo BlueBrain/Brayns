@@ -1,9 +1,22 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
  *
- * This file is part of BRayns
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef BRAYNS_H
@@ -34,14 +47,14 @@ struct RenderOutput
 };
 
 /**
-    BRayns is a minimalistic library that allows optimized ray-tracing rendering
-    of meshes and parametric geometry. BRayns provides an abstraction of the
+    Brayns is a minimalistic library that allows optimized ray-tracing rendering
+    of meshes and parametric geometry. Brayns provides an abstraction of the
     underlying rendering engines, making it possible to use the best rendering
     engine depending on the case.
 
-    The scene is initialized according to parameters provided to the BRayns
+    The scene is initialized according to parameters provided to the Brayns
     constructor. Those parameters are related to the application itself, the
-    geometry and the renderer. During the initialization process, BRayns creates
+    geometry and the renderer. During the initialization process, Brayns creates
     the scene using loaders located in the braynsPlugins library.
 
     The underlying rendering engine (OSPRay, Optix, RayFire, etc) is specified
@@ -50,7 +63,7 @@ struct RenderOutput
 
     Underlying rendering engines support CPU, GPU and heterogenous architectures
 
-    This object exposes the basic API for BRayns
+    This object exposes the basic API for Brayns
 */
 class Brayns
 {

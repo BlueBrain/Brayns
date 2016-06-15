@@ -1,11 +1,24 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Author: Jafet Villafranca Díaz <jafet.villafrancadiaz@epfl.ch>
  *
  * Ray-cone intersection:
  * based on Ching-Kuang Shene (Graphics Gems 5, p. 227-230)
  *
- * This file is part of BRayns
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 // ospray
@@ -79,10 +92,8 @@ void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
 
     uniform float timestamp = *((uniform float *)(conePtr+geometry->offset_timestamp));
 
-#ifndef INTEL_DEMO
     if( timestamp>ray.time )
         return;
-#endif
 
     uniform vec3f v0 = *((uniform vec3f*)(conePtr+geometry->offset_center));
     uniform vec3f v1 = *((uniform vec3f*)(conePtr+geometry->offset_up));

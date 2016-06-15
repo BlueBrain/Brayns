@@ -1,8 +1,21 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
- * This file is part of BRayns
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "OSPRayScene.h"
@@ -472,7 +485,7 @@ void OSPRayScene::buildGeometry()
             }
         }
     }
-    if(_models.size() == 0 )
+    if( _models.size() == 0 )
         // If no timestamp is available, create a default model at timestamp 0
         _models[0] = ospNewModel();
 
@@ -490,7 +503,8 @@ void OSPRayScene::buildGeometry()
         size_t coneCount = 0;
         for( const PrimitivePtr& primitive: _primitives[materialId] )
         {
-            const float ts = primitive->getTimestamp();
+            const float ts =
+                ( _models.size() == 1 ) ? 0.f : primitive->getTimestamp();
             switch(primitive->getGeometryType())
             {
                 case GT_SPHERE:
@@ -664,12 +678,9 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
         for( size_t index=0; index < _materials.size(); ++index )
         {
             if( _ospMaterials.size() <= index )
-            {
-                BRAYNS_INFO << "Creating material " << index << std::endl;
                 _ospMaterials.push_back(
                     ospNewMaterial( osprayRenderer->impl(),
                         "ExtendedOBJMaterial" ));
-            }
 
             MaterialPtr material = _materials[index];
             assert(material);
@@ -701,7 +712,7 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
                         textureTypeMaterialAttribute[texture.first].attribute.c_str(),
                         ospTexture);
 
-                    BRAYNS_INFO << "OSPRay texture assigned to " <<
+                    BRAYNS_DEBUG << "OSPRay texture assigned to " <<
                         textureTypeMaterialAttribute[texture.first].attribute <<
                         " of material " << index << std::endl;
                 }
@@ -732,10 +743,10 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
                     simulationTexture->getHeight());
                 ospSet1i( osprayRenderer->impl(), "simulationNbOffsets",
                     simulationTexture->getWidth());
-                BRAYNS_INFO << "Simulation set to material "
-                            << MATERIAL_SIMULATION << " :"
-                            << simulationTexture->getWidth() << "x"
-                            << simulationTexture->getHeight() << std::endl;
+                BRAYNS_DEBUG << "Simulation set to material "
+                             << MATERIAL_SIMULATION << " :"
+                             << simulationTexture->getWidth() << "x"
+                             << simulationTexture->getHeight() << std::endl;
             }
             ospSetData( osprayRenderer->impl(), "materials", _ospMaterialData );
         }

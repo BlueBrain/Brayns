@@ -1,8 +1,8 @@
-# Copyright (c) 2011-2016, EPFL/Blue Brain Project
+# Copyright (c) 2015-2016, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
-# This file is part of BRayns
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSPARAMETERS_SOURCES
   ParametersManager.cpp

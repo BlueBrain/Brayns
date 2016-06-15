@@ -1,30 +1,30 @@
-# Copyright (c) 2011-2016, EPFL/Blue Brain Project
+# Copyright (c) 2015-2016, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
-# This file is part of BRayns
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-set(BRayns_VERSION_ABI 1)
-project(BRayns VERSION 0.1.0)
+set(Brayns_VERSION_ABI 1)
+project(Brayns VERSION 0.1.0)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake/common)
 include(GitExternal)
 
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
-set(BRAYNS_DESCRIPTION "Ray-tracing engine")
+set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
 
 include(Common)
 
-# Make BRayns optional when OSPRay is not available and:
+# Make Brayns optional when OSPRay is not available and:
 # - building as a subproject
 # - building on Ubuntu Jenkins VM
 if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
         (TRAVIS AND LSB_DISTRIBUTOR_ID MATCHES "Ubuntu"))
   common_find_package(OSPRay)
   if(NOT OSPRAY_FOUND)
-      message(WARNING "[BRayns] OSPRay not found, the project will not be built")
+      message(WARNING "[Brayns] OSPRay not found, the project will not be built")
     include(CommonPackageConfig)
     return()
   endif()
@@ -97,14 +97,14 @@ add_subdirectory(plugins)
 add_subdirectory(brayns)
 add_subdirectory(apps/ui)
 
-option(BRAYNS_VIEWER_ENABLED "BRayns Viewer" ON)
+option(BRAYNS_VIEWER_ENABLED "Brayns Viewer" ON)
 if(BRAYNS_VIEWER_ENABLED)
-  add_subdirectory(apps/BRaynsViewer)
+  add_subdirectory(apps/BraynsViewer)
 endif()
 
-option(BRAYNS_SERVICE_ENABLED "BRayns Service" ON)
+option(BRAYNS_SERVICE_ENABLED "Brayns Service" ON)
 if(BRAYNS_SERVICE_ENABLED)
-  add_subdirectory(apps/BRaynsService)
+  add_subdirectory(apps/BraynsService)
 endif()
 
 add_subdirectory(tests)
