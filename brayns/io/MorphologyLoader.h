@@ -1,8 +1,21 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
- * This file is part of BRayns
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef MORPHOLOGY_LOADER_H
@@ -58,7 +71,6 @@ public:
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
      * @param report Compartment report to be loaded
-     * @param nbSimulationFramesLoaded number of simulation frames to load
      * @param scene resulting scene
      * @return True if the circuit is successfully loaded, false if the circuit
      *         contains no cells.
@@ -67,7 +79,6 @@ public:
         const servus::URI& circuitConfig,
         const std::string& target,
         const std::string& report,
-        const size_t nbSimulationFramesLoaded,
         Scene& scene);
 
     /** Imports morphology from a circuit for the given target name
@@ -105,10 +116,6 @@ public:
         const std::string& report,
         Scene& scene );
 
-    size_t createFakeSimulationTexture(
-        const std::map< size_t, float>& morphologyOffsets,
-        Scene& scene );
-
 private:
     bool _importMorphology(
         const servus::URI& source,
@@ -118,9 +125,7 @@ private:
         PrimitivesMap& primitives,
         Boxf& bounds,
         const size_t simulationOffset,
-        float& maxDistanceToSoma,
-        const Vector3f& replicaPosition,
-        const int32_t forcedTimestamp = -1);
+        float& maxDistanceToSoma);
 
     size_t _material(
         size_t morphologyIndex,

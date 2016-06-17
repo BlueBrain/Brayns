@@ -1,9 +1,22 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
  *
- * This file is part of BRayns
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <brayns/Brayns.h>
@@ -83,7 +96,6 @@ struct Brayns::Impl
             Vector3f( 0.f, 0.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
         _scene->addLight( sunLight );
 
-        BRAYNS_INFO << "Build model" << std::endl;
         loadData( );
         _scene->buildEnvironment( );
         _scene->buildGeometry( );
@@ -119,13 +131,12 @@ struct Brayns::Impl
         if(!geometryParameters.getMeshFolder().empty())
             _loadMeshFolder();
 
-        size_t nbLoadedFrames = 0;
         if(!geometryParameters.getReport().empty())
-            nbLoadedFrames = _loadCompartmentReport();
+            _loadCompartmentReport();
 
         if(!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getLoadCacheFile().empty())
-            _loadCircuitConfiguration( nbLoadedFrames );
+            _loadCircuitConfiguration();
 
     }
 
@@ -404,7 +415,7 @@ private:
         Loads morphologies from circuit configuration (command line parameter
         --circuit-configuration)
     */
-    void _loadCircuitConfiguration( const size_t nbSimulationFramesLoaded )
+    void _loadCircuitConfiguration()
     {
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
@@ -422,7 +433,7 @@ private:
             morphologyLoader.importCircuit( uri, target, *_scene );
         else
             morphologyLoader.importCircuit(
-                uri, target, report, nbSimulationFramesLoaded, *_scene );
+                uri, target, report, *_scene );
     }
 
     /**
