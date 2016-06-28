@@ -68,6 +68,9 @@ void Scene::setMaterials(
         }
 
         // Other materials
+        material->setSpecularColor( Vector3f( 1.f, 1.f, 1.f ));
+        material->setSpecularExponent( 10.f );
+
         switch( materialType )
         {
         case MT_DEFAULT:
