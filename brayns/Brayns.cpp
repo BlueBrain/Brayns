@@ -290,7 +290,7 @@ private:
         const Vector3f target = worldBounds.getCenter( );
         const Vector3f diag   = worldBounds.getSize( );
         Vector3f position = target;
-        position.z( ) -= diag.z( ) / 2.f;
+        position.z( ) -= diag.z( );
 
         const Vector3f up  = Vector3f(0.f,1.f,0.f);
         _camera->setInitialState(position, target, up);
