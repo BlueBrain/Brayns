@@ -398,8 +398,9 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
     int max_depth = self->moving ? 2 : 10;
     uniform int depth = 0;
     vec3f colorKs = make_vec3f( 0.f );
+    sample.alpha = 1.f;
 
-    while( true )
+    while( depth < max_depth )
     {
         traceRay( self->super.model, ray );
 
@@ -409,11 +410,11 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
             color = color +
                 path_opacity * make_vec3f( skyboxMapping( self, ray ));
             sample.z = 1;
-            sample.alpha = 0.f;
+            if( depth == 0 )
+                sample.alpha = 0.f;
             return color + colorKs;
         }
 
-        sample.alpha = 1.f;
         if( depth == 0 )
             sample.z = log( ray.t ) / 10.f;
 
@@ -636,6 +637,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 ray.dir = refract;
                 ray.t0 = ray.t + self->super.epsilon;
                 path_opacity = path_opacity - opacity;
+                sample.alpha = path_opacity;
             }
             else if( reflection > 0.f )
             {
@@ -644,8 +646,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 ray.org = P;
                 path_opacity = path_opacity - abs( 1.f - reflection );
             }
-            else
-                path_opacity = 0.f;
         }
 
         if( path_opacity < 0.01f )
@@ -656,6 +656,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
+        ++depth;
     }
 
     return color;
