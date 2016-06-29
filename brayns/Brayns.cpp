@@ -162,7 +162,6 @@ struct Brayns::Impl
                 dynamic_cast< DirectionalLight* > ( sunLight.get() );
             if( sun )
             {
-                BRAYNS_INFO << "Committing light" << std::endl;
                 sun->setDirection( _camera->getTarget() - _camera->getPosition() );
                 _scene->commitLights();
             }
@@ -192,6 +191,18 @@ struct Brayns::Impl
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
 #endif
+        if( _parametersManager->getRenderingParameters().getSunOnCamera() )
+        {
+            LightPtr sunLight = _scene->getLight( 0 );
+            DirectionalLight* sun =
+                dynamic_cast< DirectionalLight* > ( sunLight.get() );
+            if( sun )
+            {
+                sun->setDirection( _camera->getTarget() - _camera->getPosition() );
+                _scene->commitLights();
+            }
+        }
+
         _camera->commit();
         _render( );
 

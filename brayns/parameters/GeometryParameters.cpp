@@ -82,7 +82,7 @@ GeometryParameters::GeometryParameters( )
         ( PARAM_COLOR_SCHEME.c_str( ), po::value< size_t >( ),
             "Color scheme to be applied to the geometry" )
         ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< size_t >( ),
-            "Scene environment (0: none, 1: ground, 2: wall, 3: box)" )
+            "Scene environment (0: none, 1: ground, 2: wall, 3: bounding box)" )
         ( PARAM_GEOMETRY_QUALITY.c_str(), po::value< size_t >( ),
             "Geometry rendering quality (0: Fast rendering, "
                 "1: Medium rendering, 2: Max quality)" )
