@@ -637,7 +637,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 ray.dir = refract;
                 ray.t0 = ray.t + self->super.epsilon;
                 path_opacity = path_opacity - opacity;
-                sample.alpha = path_opacity;
+                sample.alpha = max(0.f, 1.f - path_opacity);
             }
             else if( reflection > 0.f )
             {
