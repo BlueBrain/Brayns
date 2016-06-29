@@ -63,6 +63,10 @@ void Scene::setMaterials(
             case MATERIAL_SIMULATION:
                 material->setTexture( TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
                 break;
+            case MATERIAL_BOUNDING_BOX:
+                material->setColor( Vector3f( 1.f, 1.f, 1.f ));
+                material->setEmission( 1.f );
+                break;
             default:
                 break;
         }
@@ -309,9 +313,55 @@ void Scene::buildEnvironment( )
         _trianglesMeshes[material].getIndices( ).push_back( i );
         break;
     }
-    case SE_BOX:
+    case SE_BOUNDING_BOX:
     {
-        BRAYNS_ERROR << "Box environment is not implemented" << std::endl;
+        const size_t material = MATERIAL_BOUNDING_BOX;
+        const Vector3f s = _bounds.getSize()/2.f;
+        const Vector3f c = _bounds.getCenter();
+        const float radius = s.length()/500.f;
+        const Vector3f positions[8] =
+        {
+            { c.x() - s.x(), c.y() - s.y(), c.z() - s.z() },
+            { c.x() + s.x(), c.y() - s.y(), c.z() - s.z() }, //    6--------7
+            { c.x() - s.x(), c.y() + s.y(), c.z() - s.z() }, //   /|       /|
+            { c.x() + s.x(), c.y() + s.y(), c.z() - s.z() }, //  2--------3 |
+            { c.x() - s.x(), c.y() - s.y(), c.z() + s.z() }, //  | |      | |
+            { c.x() + s.x(), c.y() - s.y(), c.z() + s.z() }, //  | 4------|-5
+            { c.x() - s.x(), c.y() + s.y(), c.z() + s.z() }, //  |/       |/
+            { c.x() + s.x(), c.y() + s.y(), c.z() + s.z() }  //  0--------1
+        };
+
+        for( size_t i = 0; i < 8; ++i)
+            _primitives[material].push_back( SpherePtr(
+                new Sphere( material, positions[i], radius, 0, 0)));
+
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[0], positions[1], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[2], positions[3], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[4], positions[5], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[6], positions[7], radius, 0, 0)));
+
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[0], positions[2], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[1], positions[3], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[4], positions[6], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[5], positions[7], radius, 0, 0)));
+
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[0], positions[4], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[1], positions[5], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[2], positions[6], radius, 0, 0)));
+        _primitives[material].push_back( CylinderPtr(
+            new Cylinder( material, positions[3], positions[7], radius, 0, 0)));
+
         break;
     }
     }

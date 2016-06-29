@@ -171,7 +171,7 @@ enum SceneEnvironment
     SE_NONE = 0,
     SE_GROUND,
     SE_WALL,
-    SE_BOX
+    SE_BOUNDING_BOX
 };
 
 /** Define light types */
@@ -215,10 +215,11 @@ struct ExtensionParameters
  */
 const size_t NO_MATERIAL = -1;
 const size_t NB_MAX_MATERIALS = 200;
-const size_t NB_SYSTEM_MATERIALS = 2;
+const size_t NB_SYSTEM_MATERIALS = 3;
 const size_t MATERIAL_SYSTEM = NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS;
 const size_t MATERIAL_SIMULATION = MATERIAL_SYSTEM + 0;
 const size_t MATERIAL_SKYBOX = MATERIAL_SYSTEM + 1;
+const size_t MATERIAL_BOUNDING_BOX = MATERIAL_SYSTEM + 2;
 const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 
