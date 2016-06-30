@@ -34,7 +34,8 @@ const std::string PARAM_MESH_FOLDER = "mesh-folder";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
 const std::string PARAM_SAVE_CACHE_FILE = "save-cache-file";
-const std::string PARAM_RADIUS = "radius";
+const std::string PARAM_RADIUS_MULTIPLIER = "radius-multiplier";
+const std::string PARAM_RADIUS_CORRECTION = "radius-correction";
 const std::string PARAM_COLOR_SCHEME = "color-scheme";
 const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
@@ -54,7 +55,8 @@ namespace brayns
 
 GeometryParameters::GeometryParameters( )
     : AbstractParameters( "Geometry" )
-    , _radius(1)
+    , _radiusMultiplier(1.f)
+    , _radiusCorrection(0.f)
     , _colorScheme( CS_NONE )
     , _sceneEnvironment( SE_NONE )
     , _geometryQuality( GQ_MAX_QUALITY )
@@ -77,8 +79,10 @@ GeometryParameters::GeometryParameters( )
             "Load binary container of a scene" )
         ( PARAM_SAVE_CACHE_FILE.c_str(), po::value< std::string >( ),
             "Save binary container of a scene" )
-        ( PARAM_RADIUS.c_str(), po::value< float >( ),
+        ( PARAM_RADIUS_MULTIPLIER.c_str(), po::value< float >( ),
             "Radius multiplier for spheres, cones and cylinders" )
+        ( PARAM_RADIUS_CORRECTION.c_str(), po::value< float >( ),
+            "Forces radius of spheres and cylinders to the specified value" )
         ( PARAM_COLOR_SCHEME.c_str( ), po::value< size_t >( ),
             "Color scheme to be applied to the geometry" )
         ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< size_t >( ),
@@ -125,8 +129,10 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_COLOR_SCHEME ))
         _colorScheme = static_cast< ColorScheme >(
             vm[PARAM_COLOR_SCHEME].as< size_t >( ));
-    if( vm.count( PARAM_RADIUS))
-        _radius = vm[PARAM_RADIUS].as< float >( );
+    if( vm.count( PARAM_RADIUS_MULTIPLIER))
+        _radiusMultiplier = vm[PARAM_RADIUS_MULTIPLIER].as< float >( );
+    if( vm.count( PARAM_RADIUS_CORRECTION))
+        _radiusCorrection = vm[PARAM_RADIUS_CORRECTION].as< float >( );
     if( vm.count( PARAM_SCENE_ENVIRONMENT ))
         _sceneEnvironment = static_cast< SceneEnvironment >(
             vm[PARAM_SCENE_ENVIRONMENT].as< size_t >( ));
@@ -172,14 +178,22 @@ void GeometryParameters::print( )
     AbstractParameters::print( );
     BRAYNS_INFO << "Morphology folder          : " <<
         _morphologyFolder << std::endl;
-    BRAYNS_INFO << "PDB file                   : " << _pdbFile << std::endl;
-    BRAYNS_INFO << "Mesh folder                : " << _meshFolder << std::endl;
-    BRAYNS_INFO << "Cache file to load         : " << _loadCacheFile << std::endl;
-    BRAYNS_INFO << "Cache file to save         : " << _saveCacheFile << std::endl;
-    BRAYNS_INFO << "Circuit configuration      : " << _circuitConfig << std::endl;
+    BRAYNS_INFO << "PDB file                   : " <<
+        _pdbFile << std::endl;
+    BRAYNS_INFO << "Mesh folder                : " <<
+        _meshFolder << std::endl;
+    BRAYNS_INFO << "Cache file to load         : " <<
+        _loadCacheFile << std::endl;
+    BRAYNS_INFO << "Cache file to save         : " <<
+        _saveCacheFile << std::endl;
+    BRAYNS_INFO << "Circuit configuration      : " <<
+        _circuitConfig << std::endl;
     BRAYNS_INFO << "Color scheme               : " <<
         static_cast<size_t>( _colorScheme ) << std::endl;
-    BRAYNS_INFO << "Radius                     : " << _radius << std::endl;
+    BRAYNS_INFO << "Radius multiplier          : " <<
+        _radiusMultiplier << std::endl;
+    BRAYNS_INFO << "Radius correction          : " <<
+        _radiusCorrection << std::endl;
     BRAYNS_INFO << "Scene environment          : " <<
         static_cast<size_t>( _sceneEnvironment ) << std::endl;
     BRAYNS_INFO << "Geometry quality           : " <<

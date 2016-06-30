@@ -448,7 +448,8 @@ bool ProteinLoader::importPDBFile(
                         position[0] + 0.01f*atom.position[0],
                         position[1] + 0.01f*atom.position[1],
                         position[2] + 0.01f*atom.position[2]),
-                    0.0001f * atom.radius * _geometryParameters.getRadius(),
+                    0.0001f * atom.radius *
+                    _geometryParameters.getRadiusMultiplier(),
                     0.f, 0.f));
 
                 if( colorScheme == CS_PROTEIN_BACKBONE )

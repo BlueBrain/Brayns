@@ -128,9 +128,11 @@ bool MorphologyLoader::_importMorphology(
                 _material( morphologyIndex, brain::SECTION_SOMA );
             const Vector3f& center = soma.getCentroid() + translation;
 
-            const float radius = ( _geometryParameters.getRadius() < 0.f ?
-                - _geometryParameters.getRadius() :
-                soma.getMeanRadius() * _geometryParameters.getRadius() );
+            const float radius =
+                ( _geometryParameters.getRadiusCorrection() != 0.f ?
+                _geometryParameters.getRadiusCorrection() :
+                soma.getMeanRadius() *
+                    _geometryParameters.getRadiusMultiplier() );
             primitives[material].push_back( SpherePtr(
                 new Sphere( material, center, radius, 0.f, offset )));
             bounds.merge( center );
@@ -199,18 +201,21 @@ bool MorphologyLoader::_importMorphology(
 
                 Vector4f sample =  samples[i];
                 const float previousRadius =
-                    (_geometryParameters.getRadius() < 0.f ?
-                    -_geometryParameters.getRadius() :
-                    samples[ i - step ].w() * _geometryParameters.getRadius( ));
+                    (_geometryParameters.getRadiusCorrection() != 0.f ?
+                    _geometryParameters.getRadiusCorrection() :
+                    samples[ i - step ].w() * 0.5f *
+                        _geometryParameters.getRadiusMultiplier( ));
 
                 Vector3f position( sample.x(), sample.y(), sample.z());
                 position += translation;
                 Vector3f target(
                     previousSample.x(), previousSample.y(), previousSample.z());
                 target += translation;
-                const float radius = (_geometryParameters.getRadius() < 0.f ?
-                    -_geometryParameters.getRadius() :
-                    samples[ i ].w() * _geometryParameters.getRadius( ));
+                const float radius =
+                    (_geometryParameters.getRadiusCorrection() != 0.f ?
+                    _geometryParameters.getRadiusCorrection() :
+                    samples[ i ].w() * 0.5f *
+                         _geometryParameters.getRadiusMultiplier( ));
 
                 if( radius > 0.f )
                     primitives[material].push_back( SpherePtr(
