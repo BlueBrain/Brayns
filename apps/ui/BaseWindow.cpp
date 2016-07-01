@@ -31,10 +31,10 @@
 #include <assert.h>
 
 #ifdef __APPLE__
-#  include "GLUT/glut.h"
+//#  include "GLUT/glut.h"
 #  include <unistd.h>
-#else
-#  include "GL/glut.h"
+//#else
+//#  include "GL/glut.h"
 #endif
 
 namespace brayns
@@ -202,6 +202,7 @@ void BaseWindow::forceRedraw( )
 
 void BaseWindow::display( )
 {
+    std::cout<<" VERSION: " << glGetString(GL_VERSION) << std::endl;
     if(_viewPort.getModified( ))
     {
         _brayns->getFrameBuffer().clear();
