@@ -97,7 +97,8 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( geomParams.getSaveCacheFile(), "" );
     BOOST_CHECK_EQUAL( geomParams.getTarget(), "" );
     BOOST_CHECK_EQUAL( geomParams.getReport(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getRadius(), 1.f );
+    BOOST_CHECK_EQUAL( geomParams.getRadiusMultiplier(), 1.f );
+    BOOST_CHECK_EQUAL( geomParams.getRadiusCorrection(), 0.f );
     BOOST_CHECK_EQUAL( geomParams.getColorScheme(), brayns::CS_NONE );
     BOOST_CHECK_EQUAL( geomParams.getSceneEnvironment(), brayns::SE_NONE );
     BOOST_CHECK_EQUAL( geomParams.getGeometryQuality(), brayns::GQ_MAX_QUALITY );

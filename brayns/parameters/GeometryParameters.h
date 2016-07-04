@@ -87,12 +87,18 @@ public:
     std::string getReport( ) const { return _report; }
 
     /** Radius multiplier applied to spheres, cones and cylinders.
-     * @param value Radius multiplier. If a negative value is specified, the
-     *        radius contained in the data source is ignored and all geometries
-     *        will use the absolute value of the specified radius.
+     * @param value Radius multiplier. Multiplies the radius contained in the
+     *        data source by the specified value.
      */
-    void setRadius( const float value ) { _radius = value; }
-    float getRadius( ) const { return _radius; }
+    void setRadiusMultiplier( const float value ) { _radiusMultiplier = value; }
+    float getRadiusMultiplier( ) const { return _radiusMultiplier; }
+
+    /** Radius correction applied to spheres and cylinders.
+     * @param value Radius value. The radius contained in the data source is
+     *        ignored and all geometries use the specified value.
+     */
+    void setRadiusCorrection( const float value ) { _radiusCorrection = value; }
+    float getRadiusCorrection( ) const { return _radiusCorrection; }
 
     /** Enables a different color for every morphology/mesh when
     * loading them from a given folder
@@ -144,7 +150,8 @@ protected:
     std::string _saveCacheFile;
     std::string _target;
     std::string _report;
-    float  _radius;
+    float  _radiusMultiplier;
+    float  _radiusCorrection;
     ColorScheme _colorScheme;
     SceneEnvironment _sceneEnvironment;
     GeometryQuality _geometryQuality;
