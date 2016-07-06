@@ -1,0 +1,50 @@
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#pragma once
+
+#include "ospray/math/vec.ih"
+
+/**
+    Returns a random direction based on location in the frame buffer, the normal
+    to the surface and rotation parameters for the precomputed hard-coded random
+    distribution.
+    @param sample Frame buffer sample being rendered
+    @param normal Normal vector to the surface
+    @param randomNumber A random number that introduces noise in the
+           distribution
+    @return A random direction based on specified parameters
+*/
+vec3f getRandomVector(
+    varying ScreenSample& sample,
+    const vec3f& normal,
+    const int randomNumber );
+
+/**
+    Returns tangent vectors for a given normal.
+    @param normal Given normal vector
+    @param tangent The tangent vector is typically regarded as one vector that
+           exists within the surface's plane (for a flat surface) or which lies
+           tangent to a reference point on a curved surface
+    @param biTangent The BiTangent vector which is effectively the "other"
+           tangent vector for the surface, which is orthogonal to both the
+           Normal vector and the chosen tangent vector
+*/
+void getTangentVectors( const vec3f& normal, vec3f& tangent, vec3f& biTangent );

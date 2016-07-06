@@ -170,6 +170,7 @@ MACRO(CONFIGURE_ISPC)
 ENDMACRO()
 
 set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
+  render/utils/RandomGenerator.ispc
   geometry/ExtendedCylinders.ispc
   geometry/ExtendedCones.ispc
   geometry/ExtendedSpheres.ispc
