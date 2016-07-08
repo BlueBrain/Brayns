@@ -39,8 +39,9 @@
 #define DEFAULT_LIGHT_EMISSION ( 2.f )
 #define DEFAULT_LIGHT_THRESHOLD ( 0.2f )
 
-#define MATERIAL_SIMULATION 0
-#define MATERIAL_SKYBOX 1
+#define MATERIAL_SKYBOX 0
+#define MATERIAL_SIMULATION 1
+#define MATERIAL_SIMULATION_COLOR_MAP 2
 
 struct SimulationRenderer
 {
@@ -125,6 +126,28 @@ vec4f skyboxMapping(
     };
 
     return get4f( mat->map_Kd, st );
+}
+
+bool getColorFromMap(
+    const uniform SimulationRenderer* uniform self,
+    const varying float simulationValue,
+    varying vec3f& Kd,
+    varying float& opacity)
+{
+    if( self->numMaterials <= MATERIAL_SIMULATION_COLOR_MAP )
+        return false;
+
+    const uniform ExtendedOBJMaterial *uniform mat =
+        self->materials[MATERIAL_SIMULATION_COLOR_MAP];
+
+    if( !mat->map_Kd )
+        return false;
+
+    const varying vec2f st = { simulationValue, 0.f };
+    const varying vec4f Kd_from_map = get4f( mat->map_Kd, st );
+    Kd = make_vec3f(Kd_from_map);
+    opacity = Kd_from_map.w;
+    return true;
 }
 
 inline float lightAlpha(
@@ -223,12 +246,12 @@ inline bool launchRandomRay(
     return false;
 }
 
-inline vec3f SimulationRenderer_getSimulationValue(
+inline varying vec3f SimulationRenderer_getSimulationValue(
     const uniform SimulationRenderer* uniform self,
     DifferentialGeometry& dg)
 {
     // Get simulation value from geometry timestamp and material 0
-    vec3f simulationValue = make_vec3f(0.f);
+    varying vec3f simulationValue = make_vec3f(0.f);
     if( dg.st.x < 0.f )
         return simulationValue;
 
@@ -250,13 +273,13 @@ inline vec3f SimulationRenderer_shadeRay(
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
-    vec3f color = make_vec3f( 0.f );
-    float path_opacity = 1.f;
-    int max_depth = self->moving ? 2 : 10;
-    uniform int depth = 0;
-    vec3f colorKs = make_vec3f( 0.f );
+    varying vec3f color = make_vec3f( 0.f );
+    varying float path_opacity = 1.f;
+    uniform int max_depth = self->moving ? 2 : 10;
+    varying int depth = 0;
+    varying vec3f colorKs = make_vec3f( 0.f );
 
-    while( true )
+    while( depth < max_depth )
     {
         traceRay( self->super.model, ray );
 
@@ -288,14 +311,14 @@ inline vec3f SimulationRenderer_shadeRay(
         uniform ExtendedOBJMaterial* objMaterial =
                 ( uniform ExtendedOBJMaterial* ) material;
 
-        float lightEmission = 0.f;
-        float refraction = 1.f;
-        float reflection = 0.f;
-        float opacity = 1.f;
-        float Ns = 0.f;
-        vec3f Kd = make_vec3f( 0.f, 0.f, 0.f );
-        vec3f Ks = make_vec3f( 0.f );
-        vec3f normal = dg.Ns;
+        varying float lightEmission = 0.f;
+        varying float refraction = 1.f;
+        varying float reflection = 0.f;
+        varying float opacity = 1.f;
+        varying float Ns = 0.f;
+        varying vec3f Kd = make_vec3f( 0.f, 0.f, 0.f );
+        varying vec3f Ks = make_vec3f( 0.f );
+        varying vec3f normal = dg.Ns;
 
         if( !objMaterial )
         {
@@ -338,13 +361,18 @@ inline vec3f SimulationRenderer_shadeRay(
                 }
             }
         }
-        const float local_opacity = path_opacity * abs( opacity );
 
         // Get simulation value from geometry timestamp and material 0
-        vec3f simulationValue =
+        const varying vec3f simulationValue =
             SimulationRenderer_getSimulationValue( self, dg );
         if( simulationValue.x > DEFAULT_LIGHT_THRESHOLD )
             lightEmission = DEFAULT_LIGHT_EMISSION;
+
+        // Get color from ColorMap, if present
+        varying bool useColormap =
+            getColorFromMap( self, simulationValue.x, Kd, opacity );
+
+        const varying float local_opacity = path_opacity * opacity;
 
         max_depth -= 1;
         if( max_depth <= 0 )
@@ -392,8 +420,11 @@ inline vec3f SimulationRenderer_shadeRay(
                         }
                     }
 
-                    const vec3f unshaded_light_contrib = local_opacity *
-                        (0.5f * simulationValue + 0.5f * Kd) * cosNL * radiance;
+                    const vec3f unshaded_light_contrib =
+                        useColormap ?
+                        local_opacity * Kd * cosNL * radiance :
+                        local_opacity * (0.5f * simulationValue + 0.5f * Kd) *
+                            cosNL * radiance;
 
                     // Specular
                     if( self->shadingEnabled )
@@ -508,6 +539,7 @@ inline vec3f SimulationRenderer_shadeRay(
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
+        ++depth;
     }
 
     return color;

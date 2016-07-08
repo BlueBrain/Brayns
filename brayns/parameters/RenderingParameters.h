@@ -188,6 +188,16 @@ public:
         return _sunOnCamera;
     }
 
+    /**
+     * filename of the colormap used by the simulation renderer to map
+     * simulation values to colors. File contains a list of RGB integer value
+     * between 0 and 255 and separated by spaces.
+     */
+    const std::string& getSimulationColorMapFile() const
+    {
+        return _simulationColorMapFile;
+    }
+
 protected:
 
     bool _parse( const po::variables_map& vm ) final;
@@ -210,6 +220,7 @@ protected:
     CameraType _cameraType;
     std::string _hdri;
     bool _sunOnCamera;
+    std::string _simulationColorMapFile;
 };
 
 }

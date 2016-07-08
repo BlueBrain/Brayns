@@ -31,8 +31,7 @@
 
 #define ALPHA_THRESHOLD (.05f)
 
-#define MATERIAL_SIMULATION 0
-#define MATERIAL_SKYBOX 1
+#define MATERIAL_SKYBOX 0
 
 struct ProximityRenderer {
     Renderer super;
