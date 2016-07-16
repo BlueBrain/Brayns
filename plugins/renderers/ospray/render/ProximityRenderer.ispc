@@ -119,9 +119,9 @@ inline vec3f ProximityRenderer_shadeRay(
 {
     Ray ray = sample.ray;
 
-    vec3f color = make_vec3f( 0.f );
-    float path_opacity = 1.f;
-    vec3f colorKs = make_vec3f( 0.f );
+    varying vec3f color = make_vec3f( 0.f );
+    varying float path_opacity = 1.f;
+    varying vec3f colorKs = make_vec3f( 0.f );
 
     traceRay( self->super.model, ray );
 
@@ -150,13 +150,13 @@ inline vec3f ProximityRenderer_shadeRay(
     uniform ExtendedOBJMaterial *objMaterial =
             (uniform ExtendedOBJMaterial *)material;
 
-    float emission = 0.f;
-    float opacity = 1.f;
-    float Ns = 0.f;
-    vec3f Kd = make_vec3f( 0.0f, 0.0f, 0.0f );
-    vec3f Ks = make_vec3f( 0.f );
-    vec3f normal = dg.Ns;
-    const vec3f P = dg.P + self->super.epsilon * dg.Ng;
+    varying float emission = 0.f;
+    varying float opacity = 1.f;
+    varying float Ns = 0.f;
+    varying vec3f Kd = make_vec3f( 0.0f, 0.0f, 0.0f );
+    varying vec3f Ks = make_vec3f( 0.f );
+    varying vec3f normal = dg.Ns;
+    varying const vec3f P = dg.P + self->super.epsilon * dg.Ng;
 
     if( !objMaterial )
     {
@@ -173,22 +173,23 @@ inline vec3f ProximityRenderer_shadeRay(
         }
     }
 
-    const float local_opacity = path_opacity * abs( opacity );
+    const varying float local_opacity = path_opacity * abs( opacity );
 
     if( local_opacity > 0.01f )
     {
-        const vec3f R = ray.dir - ( 2.f * dot( ray.dir, normal )) * normal;
+        const varying vec3f R =
+            ray.dir - ( 2.f * dot( ray.dir, normal )) * normal;
 
         //calculate shading for all lights
         for( uniform int i = 0; self->lights && i < self->numLights; i++ )
         {
             const uniform Light* uniform l = self->lights[i];
 
-            const vec2f s = make_vec2f( 0.f );
-            const Light_SampleRes light = l->sample( l, dg, s );
-            float radiance = 1.f;
-            vec3f L = light.dir;
-            float dist;
+            const varying vec2f s = make_vec2f( 0.f );
+            const varying Light_SampleRes light = l->sample( l, dg, s );
+            float varying radiance = 1.f;
+            varying vec3f L = light.dir;
+            varying float dist;
 
             if(emission != 0 )
                 radiance = emission;
@@ -198,8 +199,8 @@ inline vec3f ProximityRenderer_shadeRay(
             if( radiance > 0.f )
             {
                 // Any potential contribution?
-                float cosNL = 0.0;
-                float cosLR = 0.0;
+                varying float cosNL = 0.0;
+                varying float cosLR = 0.0;
                 if( self->electronShadingEnabled )
                 {
                     // Electron shading
@@ -212,7 +213,7 @@ inline vec3f ProximityRenderer_shadeRay(
                     cosLR = max( 0, dot( L, R ));
                 }
 
-                const vec3f unshaded_light_contrib =
+                const varying vec3f unshaded_light_contrib =
                         local_opacity * Kd * cosNL * radiance;
                 // Specular
                 colorKs = max( colorKs, Ks * powf( cosLR, Ns ));
@@ -224,14 +225,14 @@ inline vec3f ProximityRenderer_shadeRay(
         if (self->detectionDistance>0.f && ray.t<self->detectionDistance*1000.f )
         {
             // Generate random ray and trace it
-            vec3f ao_dir = getRandomVector( sample, normal, self->randomNumber );
+            varying vec3f ao_dir = getRandomVector( sample, normal, self->randomNumber );
 
             if( dot( ao_dir, normal ) < 0.f )
                 ao_dir = ao_dir * -1.f;
-            Ray ao_ray = ray;
+            varying Ray ao_ray = ray;
             ao_ray.org = P;
             ao_ray.dir = ao_dir;
-            float t_max = self->detectionDistance;
+            varying float t_max = self->detectionDistance;
             ao_ray.t0 = self->detectionDistance * 0.1f;
             ao_ray.t = t_max;
 
@@ -241,7 +242,7 @@ inline vec3f ProximityRenderer_shadeRay(
                 // Intersection detected
                 postIntersect( self->super.model, dg, ao_ray, DG_MATERIALID );
 
-                bool test = true;
+                varying bool test = true;
                 if( self->detectionOnDifferentMaterial )
                     test =  material != dg.material;
 
