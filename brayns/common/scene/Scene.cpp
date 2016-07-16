@@ -67,6 +67,10 @@ void Scene::setMaterials(
                 material->setColor( Vector3f( 1.f, 1.f, 1.f ));
                 material->setEmission( 1.f );
                 break;
+            case MATERIAL_SIMULATION_COLORMAP:
+                material->setTexture(
+                    TT_DIFFUSE, TEXTURE_NAME_SIMULATION_COLOR_MAP );
+                break;
             default:
                 break;
         }

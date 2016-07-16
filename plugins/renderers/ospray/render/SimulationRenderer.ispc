@@ -255,7 +255,6 @@ inline vec3f SimulationRenderer_shadeRay(
     uniform int max_depth = self->moving ? 2 : 10;
     varying int depth = 0;
     varying vec3f colorKs = make_vec3f( 0.f );
-    sample.alpha = 1.f;
 
     while( depth < max_depth )
     {
@@ -271,10 +270,11 @@ inline vec3f SimulationRenderer_shadeRay(
             return color + colorKs;
         }
 
+        sample.alpha = 1.f;
         if( depth == 0 )
             sample.z = log( ray.t ) / 10.f;
 
-        varying vec3f local_shade_color = make_vec3f( 0.f );
+        vec3f local_shade_color = make_vec3f( 0.f );
 
         DifferentialGeometry dg;
         postIntersect(
@@ -288,14 +288,14 @@ inline vec3f SimulationRenderer_shadeRay(
         uniform ExtendedOBJMaterial* objMaterial =
                 ( uniform ExtendedOBJMaterial* ) material;
 
-        varying float lightEmission = 0.f;
-        varying float refraction = 1.f;
-        varying float reflection = 0.f;
-        varying float opacity = 1.f;
-        varying float Ns = 0.f;
-        varying vec3f Kd = make_vec3f( 0.f, 0.f, 0.f );
-        varying vec3f Ks = make_vec3f( 0.f );
-        varying vec3f normal = dg.Ns;
+        float lightEmission = 0.f;
+        float refraction = 1.f;
+        float reflection = 0.f;
+        float opacity = 1.f;
+        float Ns = 0.f;
+        vec3f Kd = make_vec3f( 0.f, 0.f, 0.f );
+        vec3f Ks = make_vec3f( 0.f );
+        vec3f normal = dg.Ns;
 
         if( !objMaterial )
         {
@@ -410,7 +410,7 @@ inline vec3f SimulationRenderer_shadeRay(
                             L = L + ss * 0.1f;
                         }
 
-                        const varying float max_contrib =
+                        const float max_contrib =
                                 reduce_max( unshaded_light_contrib );
                         if( max_contrib > 0.01f )
                         {

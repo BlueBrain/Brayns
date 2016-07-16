@@ -30,6 +30,7 @@
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/MeshLoader.h>
+#include <brayns/io/ColorMapLoader.h>
 
 // OSPray specific -> Must be changed to a dynamic plugin
 #include <plugins/renderers/ospray/render/OSPRayRenderer.h>
@@ -96,6 +97,18 @@ struct Brayns::Impl
             Vector3f( 0.f, 0.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
         _scene->addLight( sunLight );
 
+        // Simulation color map
+        const std::string& colorMapFile =
+            _parametersManager->getRenderingParameters()
+            .getSimulationColorMapFile();
+        if( colorMapFile != "" )
+        {
+            ColorMapLoader cml;
+            cml.loadFromFile( colorMapFile );
+            cml.assignColorMapToTexture( _scene );
+        }
+
+        // Geometry
         loadData( );
         _scene->buildEnvironment( );
         _scene->buildGeometry( );
