@@ -707,8 +707,7 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
                 for(auto texture: material->getTextures())
                 {
                     TextureLoader textureLoader;
-                    if( texture.second != TEXTURE_NAME_SIMULATION &&
-                        texture.second != TEXTURE_NAME_SIMULATION_COLOR_MAP )
+                    if( texture.second != TEXTURE_NAME_SIMULATION )
                         textureLoader.loadTexture(
                             _textures, texture.first, texture.second);
 
@@ -793,7 +792,7 @@ OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)
 
     osp::vec2i texSize{texture->getWidth(), texture->getHeight()};
     OSPTexture2D ospTexture = ospNewTexture2D(
-        texSize, type, texture->getRawData(), OSP_TEXTURE_FILTER_NEAREST);
+        texSize, type, texture->getRawData(), 0);
 
     assert(ospTexture);
     ospCommit(ospTexture);

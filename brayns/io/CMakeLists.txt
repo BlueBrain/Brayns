@@ -5,14 +5,12 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
-  ColorMapLoader.cpp
   MorphologyLoader.cpp
   ProteinLoader.cpp
   TextureLoader.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
-  ColorMapLoader.h
   MorphologyLoader.h
   ProteinLoader.h
   TextureLoader.h

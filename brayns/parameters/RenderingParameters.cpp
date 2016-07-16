@@ -47,7 +47,6 @@ const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_CAMERA_TYPE = "camera-type";
 const std::string PARAM_HDRI = "hdri";
 const std::string PARAM_SUN_ON_CAMERA = "sun-on-camera";
-const std::string PARAM_SIMULATION_COLOR_MAP_FILE = "simulation-color-map-file";
 
 }
 
@@ -110,9 +109,7 @@ RenderingParameters::RenderingParameters( )
         (PARAM_HDRI.c_str(),
             po::value< std::string >( ), "HDRI filename")
         (PARAM_SUN_ON_CAMERA.c_str(),
-            po::value< bool >( ), "Sun will follow camera origin")
-        (PARAM_SIMULATION_COLOR_MAP_FILE.c_str(),
-            po::value< std::string >( ), "Color map file for simulation");
+            po::value< bool >( ), "Sun will follow camera origin");
 
     // Add default renderers
     _renderers.push_back("exobj");
@@ -178,9 +175,6 @@ bool RenderingParameters::_parse( const po::variables_map& vm )
         _hdri = vm[PARAM_HDRI].as< std::string >( );
     if( vm.count( PARAM_SUN_ON_CAMERA ))
         _sunOnCamera = vm[PARAM_SUN_ON_CAMERA].as< bool >( );
-    if( vm.count( PARAM_SIMULATION_COLOR_MAP_FILE ))
-        _simulationColorMapFile =
-            vm[PARAM_SIMULATION_COLOR_MAP_FILE].as< std::string >( );
     return true;
 }
 
@@ -221,8 +215,6 @@ void RenderingParameters::print( )
        static_cast< size_t > (_cameraType) << std::endl;
     BRAYNS_INFO << "HDRI                              : " <<
        _hdri << std::endl;
-    BRAYNS_INFO << "Simulation Color Map File         : " <<
-       _simulationColorMapFile << std::endl;
 }
 
 }

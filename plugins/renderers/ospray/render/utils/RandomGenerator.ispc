@@ -248,28 +248,33 @@ inline float rotate( float x, const float dx )
 
 inline vec3f getRandomVector(
     varying ScreenSample& sample,
-    const vec3f& normal,
-    const int randomNumber )
+    const varying vec3f& normal,
+    const varying int randomNumber )
 {
     vec3f tangent,biTangent;
     getTangentVectors( normal, tangent, biTangent );
-    const int accumID = sample.sampleID.z;
-    const float rot_x = 1.f - precomputedHalton3( accumID );
-    const float rot_y = 1.f - precomputedHalton5( accumID );
+    const varying int accumID = sample.sampleID.z;
+    const varying float rot_x = 1.f - precomputedHalton3( accumID );
+    const varying float rot_y = 1.f - precomputedHalton5( accumID );
 
-    const int x = (randomNumber + sample.sampleID.x) % RANDOM_SET_SIZE;
-    const int y = (randomNumber + sample.sampleID.y) % RANDOM_SET_SIZE;
+    const varying int x = (randomNumber + sample.sampleID.x) % RANDOM_SET_SIZE;
+    const varying int y = (randomNumber + sample.sampleID.y) % RANDOM_SET_SIZE;
 
-    const float rx = rotate( randomDistribution[y][RANDOM_SET_SIZE-x], rot_x );
-    const float ry = rotate( randomDistribution[RANDOM_SET_SIZE-x][y], rot_y );
-    const float w = sqrt( 1.f - ry );
-    const float cx = cos(( 2.f * M_PI ) * rx) * w;
-    const float cy = sin(( 2.f * M_PI ) * rx) * w;
-    const float cz = sqrt( ry );
+    const varying float rx =
+        rotate( randomDistribution[y][RANDOM_SET_SIZE-x], rot_x );
+    const varying float ry =
+        rotate( randomDistribution[RANDOM_SET_SIZE-x][y], rot_y );
+    const varying float w = sqrt( 1.f - ry );
+    const varying float cx = cos(( 2.f * M_PI ) * rx) * w;
+    const varying float cy = sin(( 2.f * M_PI ) * rx) * w;
+    const varying float cz = sqrt( ry );
     return cx * tangent + cy * biTangent + cz * normal;
 }
 
-void getTangentVectors( const vec3f& normal, vec3f& tangent, vec3f& biTangent )
+void getTangentVectors(
+    const varying vec3f& normal,
+    varying vec3f& tangent,
+    varying vec3f& biTangent )
 {
     tangent = make_vec3f( 1.f, 0.f, 0.f );
     if( abs( dot( tangent, normal )) > 0.95f )
