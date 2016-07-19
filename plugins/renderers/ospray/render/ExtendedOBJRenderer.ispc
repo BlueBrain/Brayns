@@ -37,9 +37,7 @@
 
 #define ALPHA_THRESHOLD (.05f)
 
-#define MATERIAL_SIMULATION 0
-#define MATERIAL_SKYBOX 1
-
+#define MATERIAL_SKYBOX 0
 
 struct ExtendedOBJRenderer
 {
@@ -224,11 +222,11 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
-    vec3f color = make_vec3f( 0.f );
-    float path_opacity = 1.f;
-    int max_depth = self->moving ? 2 : 10;
+    varying vec3f color = make_vec3f( 0.f );
+    varying float path_opacity = 1.f;
+    uniform int max_depth = self->moving ? 2 : 10;
     uniform int depth = 0;
-    vec3f colorKs = make_vec3f( 0.f );
+    varying vec3f colorKs = make_vec3f( 0.f );
     sample.alpha = 1.f;
 
     while( depth < max_depth )
@@ -249,7 +247,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         if( depth == 0 )
             sample.z = log( ray.t ) / 10.f;
 
-        vec3f local_shade_color = make_vec3f( 0.f );
+        varying vec3f local_shade_color = make_vec3f( 0.f );
 
         DifferentialGeometry dg;
         postIntersect(
@@ -263,14 +261,14 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         uniform ExtendedOBJMaterial* objMaterial =
                 ( uniform ExtendedOBJMaterial* ) material;
 
-        float lightEmission = 0.f;
-        float refraction = 1.f;
-        float reflection = 0.f;
-        float opacity = 1.f;
-        float Ns = 0.f;
-        vec3f Kd = make_vec3f( 0.f, 0.f, 0.f );
-        vec3f Ks = make_vec3f( 0.f );
-        vec3f normal = dg.Ns;
+        varying float lightEmission = 0.f;
+        varying float refraction = 1.f;
+        varying float reflection = 0.f;
+        varying float opacity = 1.f;
+        varying float Ns = 0.f;
+        varying vec3f Kd = make_vec3f( 0.f, 0.f, 0.f );
+        varying vec3f Ks = make_vec3f( 0.f );
+        varying vec3f normal = dg.Ns;
 
         if( !objMaterial )
         {
@@ -313,14 +311,14 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 }
             }
         }
-        const float local_opacity = path_opacity * abs( opacity );
+        const varying float local_opacity = path_opacity * abs( opacity );
 
         max_depth -= 1;
         if( max_depth <= 0 )
             return color;
 
-        const vec3f P = dg.P + self->super.epsilon * dg.Ng;
-        float light_alpha = 1.f;
+        const varying vec3f P = dg.P + self->super.epsilon * dg.Ng;
+        varying float light_alpha = 1.f;
         if( local_opacity > 0.01f )
         {
             // Worth shading?
@@ -342,13 +340,13 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 if( reduce_max( radiance ) > 0.f )
                 {
                     // Any potential contribution?
-                    float cosNL = 0.f;
-                    float cosLR = 0.f;
+                    varying float cosNL = 0.f;
+                    varying float cosLR = 0.f;
                     if( self->electronShadingEnabled )
                     {
                         // Electron shading
-                        vec3f me = normalize( ray.org - P );
-                        float el = max( 0.f, dot( me, normal ));
+                        varying vec3f me = normalize( ray.org - P );
+                        varying float el = max( 0.f, dot( me, normal ));
                         cosNL = 1.f - el;
                     }
                     else
@@ -362,7 +360,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                         }
                     }
 
-                    const vec3f unshaded_light_contrib =
+                    const varying vec3f unshaded_light_contrib =
                             local_opacity * Kd * cosNL * radiance;
 
                     // Specular
@@ -374,12 +372,12 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                         if( self->softShadowsEnabled )
                         {
                             // Soft shadows
-                            const vec3f ss =
+                            const varying vec3f ss =
                                 getRandomVector( sample, normal, self->randomNumber );
                             L = L + ss * 0.1f;
                         }
 
-                        const float max_contrib =
+                        const varying float max_contrib =
                                 reduce_max( unshaded_light_contrib );
                         if( max_contrib > 0.01f )
                         {
@@ -434,16 +432,16 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 }
             }
 
-            float weight = path_opacity * light_alpha;
+            varying float weight = path_opacity * light_alpha;
             color = ( 1.f - weight ) * color +
                     weight * ( max( make_vec3f( 0.f ), local_shade_color ));
 
             if( opacity < 1.f )
             {
-                vec3f refract = ray.dir;
-                float eta = refraction;
-                float c1 = -dot( ray.dir, normal );
-                float cs2 = 1.f - eta * eta * ( 1.f - c1 * c1 );
+                varying vec3f refract = ray.dir;
+                varying float eta = refraction;
+                varying float c1 = -dot( ray.dir, normal );
+                varying float cs2 = 1.f - eta * eta * ( 1.f - c1 * c1 );
                 if( cs2 > 0.f )
                     refract = eta * ray.dir +
                         ( eta * c1 - sqrt( cs2 )) * normal;
