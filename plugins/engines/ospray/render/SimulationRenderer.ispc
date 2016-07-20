@@ -33,15 +33,16 @@
 #include "ExtendedOBJMaterial.ih"
 
 // Brayns
-#include <plugins/renderers/ospray/render/utils/RandomGenerator.ih>
+#include <plugins/engines/ospray/render/utils/RandomGenerator.ih>
 
-#define ALPHA_THRESHOLD (.05f)
+#define ALPHA_THRESHOLD ( .05f )
+#define DEFAULT_LIGHT_EMISSION ( 2.f )
+#define DEFAULT_LIGHT_THRESHOLD ( 0.2f )
 
 #define MATERIAL_SIMULATION 0
 #define MATERIAL_SKYBOX 1
 
-
-struct ExtendedOBJRenderer
+struct SimulationRenderer
 {
     Renderer super;
 
@@ -50,6 +51,7 @@ struct ExtendedOBJRenderer
     const uniform ExtendedOBJMaterial *uniform *uniform materials;
     uint32 numMaterials;
     vec3f bgColor;
+    vec3f scale;
     bool shadowsEnabled;
     bool shadingEnabled;
     bool softShadowsEnabled;
@@ -59,6 +61,8 @@ struct ExtendedOBJRenderer
     bool moving;
     float timestamp;
     int spp;
+    int simulationNbOffsets;
+    int simulationNbFrames;
 };
 
 /*
@@ -68,7 +72,7 @@ Skybox mapping
 ________________________________________________________________________________
 */
 vec4f skyboxMapping(
-    const uniform ExtendedOBJRenderer* uniform self,
+    const uniform SimulationRenderer* uniform self,
     Ray& ray )
 {
     vec4f result = make_vec4f( self->bgColor );
@@ -188,7 +192,7 @@ inline float lightAlpha(
 }
 
 inline bool launchRandomRay(
-    const uniform ExtendedOBJRenderer* uniform self,
+    const uniform SimulationRenderer* uniform self,
     Ray& ray,
     varying ScreenSample& sample,
     const vec3f& origin,
@@ -219,8 +223,30 @@ inline bool launchRandomRay(
     return false;
 }
 
-inline vec3f ExtendedOBJRenderer_shadeRay(
-    const uniform ExtendedOBJRenderer* uniform self,
+inline vec3f SimulationRenderer_getSimulationValue(
+    const uniform SimulationRenderer* uniform self,
+    DifferentialGeometry& dg)
+{
+    // Get simulation value from geometry timestamp and material 0
+    vec3f simulationValue = make_vec3f(0.f);
+    if( dg.st.x < 0.f )
+        return simulationValue;
+
+    const uniform ExtendedOBJMaterial *uniform mat =
+        self->materials[MATERIAL_SIMULATION];
+    if( mat->map_Kd )
+    {
+        vec2f st;
+        st.x = dg.st.x / (float)self->simulationNbOffsets;
+        st.y = ((int)self->timestamp % self->simulationNbFrames) /
+            (float)self->simulationNbFrames;
+        simulationValue = get3f(mat->map_Kd, st);
+    }
+    return simulationValue;
+}
+
+inline vec3f SimulationRenderer_shadeRay(
+    const uniform SimulationRenderer* uniform self,
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
@@ -229,9 +255,8 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
     int max_depth = self->moving ? 2 : 10;
     uniform int depth = 0;
     vec3f colorKs = make_vec3f( 0.f );
-    sample.alpha = 1.f;
 
-    while( depth < max_depth )
+    while( true )
     {
         traceRay( self->super.model, ray );
 
@@ -241,11 +266,11 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
             color = color +
                 path_opacity * make_vec3f( skyboxMapping( self, ray ));
             sample.z = 1;
-            if( depth == 0 )
-                sample.alpha = 0.f;
+            sample.alpha = 0.f;
             return color + colorKs;
         }
 
+        sample.alpha = 1.f;
         if( depth == 0 )
             sample.z = log( ray.t ) / 10.f;
 
@@ -315,6 +340,12 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         }
         const float local_opacity = path_opacity * abs( opacity );
 
+        // Get simulation value from geometry timestamp and material 0
+        vec3f simulationValue =
+            SimulationRenderer_getSimulationValue( self, dg );
+        if( simulationValue.x > DEFAULT_LIGHT_THRESHOLD )
+            lightEmission = DEFAULT_LIGHT_EMISSION;
+
         max_depth -= 1;
         if( max_depth <= 0 )
             return color;
@@ -348,8 +379,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                     {
                         // Electron shading
                         vec3f me = normalize( ray.org - P );
-                        float el = max( 0.f, dot( me, normal ));
-                        cosNL = 1.f - el;
+                        cosNL = max( 0.f, dot( me, normal ));
                     }
                     else
                     {
@@ -362,8 +392,8 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                         }
                     }
 
-                    const vec3f unshaded_light_contrib =
-                            local_opacity * Kd * cosNL * radiance;
+                    const vec3f unshaded_light_contrib = local_opacity *
+                        (0.5f * simulationValue + 0.5f * Kd) * cosNL * radiance;
 
                     // Specular
                     if( self->shadingEnabled )
@@ -374,8 +404,8 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                         if( self->softShadowsEnabled )
                         {
                             // Soft shadows
-                            const vec3f ss =
-                                getRandomVector( sample, normal, self->randomNumber );
+                            const vec3f ss = getRandomVector(
+                                sample, normal, self->randomNumber );
                             L = L + ss * 0.1f;
                         }
 
@@ -394,7 +424,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                                 self->super.epsilon );
                         }
                     }
-                    local_shade_color = colorKs + local_shade_color +
+                    local_shade_color = local_shade_color +
                         unshaded_light_contrib;
                 }
             }
@@ -405,17 +435,25 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 DifferentialGeometry geometry;
                 if( launchRandomRay( self, ray, sample, P, normal, geometry ))
                 {
+                    // Get simulation value from geometry
+                    vec3f simulationValue =
+                        SimulationRenderer_getSimulationValue( self, geometry );
+                    if( simulationValue.x > DEFAULT_LIGHT_THRESHOLD )
+                        lightEmission = DEFAULT_LIGHT_EMISSION;
+
                     material = geometry.material;
                     objMaterial = ( uniform ExtendedOBJMaterial* )material;
+
                     if( objMaterial )
                         foreach_unique( mat in objMaterial )
                         {
-                            if( mat->a != 0.f )
+                            const float a  = mat->a + lightEmission;
+                            if( a != 0.f )
                             {
                                 vec3f Kd = mat->Kd;
                                 if( mat->map_Kd )
                                     Kd = get3f( mat->map_Kd, dg.st );
-                                vec3f Ka = make_vec3f( mat->a );
+                                vec3f Ka = make_vec3f( a );
                                 if( mat->map_a )
                                     Ka = get3f( mat->map_a, dg.st );
                                 local_shade_color = local_shade_color +
@@ -450,7 +488,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 ray.dir = refract;
                 ray.t0 = ray.t + self->super.epsilon;
                 path_opacity = path_opacity - opacity;
-                sample.alpha = max(0.f, 1.f - path_opacity);
             }
             else if( reflection > 0.f )
             {
@@ -459,6 +496,8 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 ray.org = P;
                 path_opacity = path_opacity - abs( 1.f - reflection );
             }
+            else
+                path_opacity = 0.f;
         }
 
         if( path_opacity < 0.01f )
@@ -469,37 +508,37 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
-        ++depth;
     }
 
     return color;
 }
 
-void ExtendedOBJRenderer_renderSample(
+void SimulationRenderer_renderSample(
     uniform Renderer* uniform _self,
     void * uniform perFrameData,
     varying ScreenSample& sample)
 {
-    uniform ExtendedOBJRenderer* uniform self =
-            ( uniform ExtendedOBJRenderer* uniform )_self;
+    uniform SimulationRenderer* uniform self =
+            ( uniform SimulationRenderer* uniform )_self;
     sample.ray.time = self->timestamp;
-    sample.rgb = ExtendedOBJRenderer_shadeRay( self, sample );
+    sample.rgb = SimulationRenderer_shadeRay( self, sample );
 }
 
 // Exports (called from C++)
-export void* uniform ExtendedOBJRenderer_create( void* uniform cppE )
+export void* uniform SimulationRenderer_create( void* uniform cppE )
 {
-    uniform ExtendedOBJRenderer* uniform self =
-            uniform new uniform ExtendedOBJRenderer;
+    uniform SimulationRenderer* uniform self =
+            uniform new uniform SimulationRenderer;
 
     Renderer_Constructor( &self->super, cppE );
-    self->super.renderSample = ExtendedOBJRenderer_renderSample;
+    self->super.renderSample = SimulationRenderer_renderSample;
     return self;
 }
 
-export void ExtendedOBJRenderer_set(
+export void SimulationRenderer_set(
         void* uniform _self,
         const uniform vec3f& bgColor,
+        const uniform vec3f& scale,
         const uniform bool& shadowsEnabled,
         const uniform bool& softShadowsEnabled,
         const uniform float& ambientOcclusionStrength,
@@ -509,13 +548,15 @@ export void ExtendedOBJRenderer_set(
         const uniform float& timestamp,
         const uniform int& spp,
         const uniform bool& electronShadingEnabled,
+        const uniform int& simulationNbOffsets,
+        const uniform int& simulationNbFrames,
         void** uniform lights,
         uniform int32 numLights,
         void** uniform materials,
         uniform int32 numMaterials )
 {
-    uniform ExtendedOBJRenderer* uniform self =
-            ( uniform ExtendedOBJRenderer* uniform )_self;
+    uniform SimulationRenderer* uniform self =
+            ( uniform SimulationRenderer* uniform )_self;
 
     self->bgColor = bgColor;
     self->shadowsEnabled = shadowsEnabled && !moving;
@@ -535,4 +576,8 @@ export void ExtendedOBJRenderer_set(
     self->materials =
         ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
     self->numMaterials = numMaterials;
+
+    self->scale = scale;
+    self->simulationNbOffsets = simulationNbOffsets;
+    self->simulationNbFrames = simulationNbFrames;
 }

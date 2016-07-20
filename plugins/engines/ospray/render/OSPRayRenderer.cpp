@@ -30,8 +30,8 @@
 // make an explicit use of one of its classes. In the case of OSPRay
 // classes are loaded dynamicaly. The following line is only to make
 // sure that the hbpKernel library is loaded.
-#  include <plugins/renderers/ospray/render/ExtendedOBJRenderer.h>
-#  include <plugins/renderers/ospray/render/ProximityRenderer.h>
+#  include <plugins/engines/ospray/render/ExtendedOBJRenderer.h>
+#  include <plugins/engines/ospray/render/ProximityRenderer.h>
 brayns::ExtendedOBJRenderer extendedObjRenderer;
 brayns::ProximityRenderer proximityRenderer;
 #endif

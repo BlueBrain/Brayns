@@ -27,7 +27,7 @@
 #include <ospray/render/Renderer.ih>
 
 // Brayns
-#include <plugins/renderers/ospray/render/utils/RandomGenerator.ih>
+#include <plugins/engines/ospray/render/utils/RandomGenerator.ih>
 
 #define ALPHA_THRESHOLD (.05f)
 

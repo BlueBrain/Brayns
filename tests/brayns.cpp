@@ -67,6 +67,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( appParams.getJpegSize(), brayns::Vector2ui( 800, 600 ));
 
     const auto& renderParams = pm.getRenderingParameters();
+    BOOST_CHECK_EQUAL( renderParams.getEngine(), "ospray" );
     BOOST_CHECK_EQUAL( renderParams.getModule(), "" );
     BOOST_CHECK_EQUAL( renderParams.getRenderer(), "exobj" );
     BOOST_CHECK_EQUAL( renderParams.getRenderers().size(), 3 );

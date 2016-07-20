@@ -20,6 +20,7 @@
 
 #include "DeflectPlugin.h"
 
+#include <plugins/engines/Engine.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/camera/Camera.h>
@@ -66,9 +67,11 @@ void DeflectPlugin::_initializeDeflect()
 
 void DeflectPlugin::_sendDeflectFrame()
 {
-    const Vector2i frameSize = _extensionParameters.frameBuffer->getSize();
+    FrameBufferPtr frameBuffer =
+        _extensionParameters.engine->getFrameBuffer();
+    const Vector2i frameSize = frameBuffer->getSize();
     _send( frameSize, (unsigned long*)
-        _extensionParameters.frameBuffer->getColorBuffer(), true);
+        frameBuffer->getColorBuffer(), true);
 }
 
 void DeflectPlugin::_handleDeflectEvents()
@@ -93,10 +96,9 @@ void DeflectPlugin::_handleDeflectEvents()
                 handledEvents.wheelDelta.y() >
                 std::numeric_limits<float>::epsilon() )
             {
-                const Vector3f& center = _extensionParameters.scene->
-                    getWorldBounds().getCenter();
-                const Vector3f& size = _extensionParameters.scene->
-                    getWorldBounds().getSize();
+                ScenePtr scene = _extensionParameters.engine->getScene();
+                const Vector3f& center = scene->getWorldBounds().getCenter();
+                const Vector3f& size = scene->getWorldBounds().getSize();
 
                 const float du =
                     _previousTouchPosition.x() -
@@ -127,9 +129,13 @@ void DeflectPlugin::_handleDeflectEvents()
                         _previousTouchPosition.z( ) *
                             std::sin( _theta ));
 
-                   _extensionParameters.camera->setPosition( cameraPosition );
-                   _extensionParameters.camera->setTarget( center );
-                   _extensionParameters.frameBuffer->clear();
+                    CameraPtr camera =
+                        _extensionParameters.engine->getCamera();
+                    FrameBufferPtr frameBuffer =
+                        _extensionParameters.engine->getFrameBuffer();
+                    camera->setPosition( cameraPosition );
+                    camera->setTarget( center );
+                    frameBuffer->clear();
                 }
             }
         }
