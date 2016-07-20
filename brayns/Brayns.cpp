@@ -23,19 +23,17 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/camera/Camera.h>
 #include <brayns/common/light/DirectionalLight.h>
 
+#include <plugins/engines/EngineFactory.h>
+#include <plugins/engines/Engine.h>
 #include <plugins/extensions/ExtensionPluginFactory.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/MeshLoader.h>
-
-// OSPray specific -> Must be changed to a dynamic plugin
-#include <plugins/renderers/ospray/render/OSPRayRenderer.h>
-#include <plugins/renderers/ospray/render/OSPRayScene.h>
-#include <plugins/renderers/ospray/render/OSPRayFrameBuffer.h>
-#include <plugins/renderers/ospray/render/OSPRayCamera.h>
 
 #include <boost/filesystem.hpp>
 #include <servus/uri.h>
@@ -46,72 +44,43 @@ namespace brayns
 struct Brayns::Impl
 {
     Impl( int argc, const char **argv )
-         : _frameSize( 0, 0 )
-         , _sceneModified( true )
     {
-        // Ignore errors from multiple calls to init from same process,
-        // aka from unit tests. Remove this once ospShutdown is provided.
-        try { ospInit( &argc, argv ); }
-        catch( const std::runtime_error& ) {}
-
         BRAYNS_INFO << "Parsing command line options" << std::endl;
         _parametersManager.reset( new ParametersManager( ));
         _parametersManager->parse( argc, argv );
         _parametersManager->print( );
 
-        _frameSize =
-            _parametersManager->getApplicationParameters( ).getWindowSize( );
-
-        BRAYNS_INFO << "Initialize renderers" << std::endl;
-        // Should be implemented with a plugin factory
-        _activeRenderer =
-            _parametersManager->getRenderingParameters().getRenderer();
-
-        const strings& renderers =
-            _parametersManager->getRenderingParameters().getRenderers();
-
-        Renderers renderersForScene;
-        for( std::string renderer: renderers )
-        {
-            _renderers[renderer].reset(
-                new OSPRayRenderer( renderer, *_parametersManager ));
-            renderersForScene.push_back( _renderers[renderer] );
-        }
-
-        BRAYNS_INFO << "Initialize scene" << std::endl;
-        _scene.reset( new OSPRayScene( renderersForScene,
-            _parametersManager->getSceneParameters(),
-            _parametersManager->getGeometryParameters()));
-
-        _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
+        // Get rendering engine
+        EngineFactory engineFactory( argc, argv, _parametersManager );
+        std::string engineName =
+            _parametersManager->getRenderingParameters( ).getEngine();
+        _engine = engineFactory.get( engineName );
+        if( !_engine )
+            throw std::runtime_error( "Unsupported engine: " + engineName );
 
         // set HDRI skybox if applicable
         const std::string& hdri =
             _parametersManager->getRenderingParameters().getHDRI();
+        ScenePtr scene = _engine->getScene();
         if( !hdri.empty() )
-            _scene->getMaterial(MATERIAL_SKYBOX)->setTexture(TT_DIFFUSE, hdri);
+            scene->getMaterial(MATERIAL_SKYBOX)->setTexture(TT_DIFFUSE, hdri);
 
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
             Vector3f( 0.f, 0.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
-        _scene->addLight( sunLight );
+        scene->addLight( sunLight );
 
+        // Build geometry
         loadData( );
-        _scene->buildEnvironment( );
-        _scene->buildGeometry( );
-        _scene->commit( );
+        scene->buildEnvironment( );
+        scene->buildGeometry( );
+        scene->commit( );
 
-        _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8 ));
-        _camera.reset( new OSPRayCamera(
-            _parametersManager->getRenderingParameters().getCameraType( )));
+        // Set default camera according to scene bounding box
         _setDefaultCamera( );
 
-        for( std::string renderer: renderers )
-        {
-            _renderers[renderer]->setScene( _scene );
-            _renderers[renderer]->setCamera( _camera );
-            _renderers[renderer]->commit( );
-        }
+        // Commit changes to the rendering engine
+        _engine->commit();
     }
 
     ~Impl( )
@@ -137,7 +106,6 @@ struct Brayns::Impl
         if(!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getLoadCacheFile().empty())
             _loadCircuitConfiguration();
-
     }
 
     void render( const RenderInput& renderInput,
@@ -145,8 +113,9 @@ struct Brayns::Impl
     {
         reshape( renderInput.windowSize );
 
-        _frameBuffer->map( );
-        _camera->set(
+        _engine->preRender();
+
+        _engine->getCamera()->set(
             renderInput.position, renderInput.target, renderInput.up );
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
@@ -155,36 +124,46 @@ struct Brayns::Impl
         _extensionPluginFactory->execute( );
 #endif
 
+        ScenePtr scene = _engine->getScene();
+        CameraPtr camera = _engine->getCamera();
+        FrameBufferPtr frameBuffer = _engine->getFrameBuffer();
+        const Vector2i& frameSize = frameBuffer->getSize();
+
         if( _parametersManager->getRenderingParameters().getSunOnCamera() )
         {
-            LightPtr sunLight = _scene->getLight( 0 );
+            LightPtr sunLight = scene->getLight( 0 );
             DirectionalLight* sun =
                 dynamic_cast< DirectionalLight* > ( sunLight.get() );
             if( sun )
             {
-                sun->setDirection( _camera->getTarget() - _camera->getPosition() );
-                _scene->commitLights();
+                sun->setDirection( camera->getTarget() - camera->getPosition() );
+                scene->commitLights();
             }
         }
 
-        _camera->commit();
+        camera->commit();
         _render( );
 
-        uint8_t* colorBuffer = _frameBuffer->getColorBuffer( );
+        uint8_t* colorBuffer = frameBuffer->getColorBuffer( );
         size_t size =
-            _frameSize.x( ) * _frameSize.y( ) * _frameBuffer->getColorDepth( );
+            frameSize.x( ) * frameSize.y( ) * frameBuffer->getColorDepth( );
         renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
 
-        float* depthBuffer = _frameBuffer->getDepthBuffer( );
-        size = _frameSize.x( ) * _frameSize.y( );
+        float* depthBuffer = frameBuffer->getDepthBuffer( );
+        size = frameSize.x( ) * frameSize.y( );
         renderOutput.depthBuffer.assign( depthBuffer, depthBuffer + size );
 
-        _frameBuffer->unmap( );
+        _engine->postRender();
     }
 
     void render()
     {
-        _frameBuffer->map( );
+        ScenePtr scene = _engine->getScene();
+        CameraPtr camera = _engine->getCamera();
+        FrameBufferPtr frameBuffer = _engine->getFrameBuffer();
+        const Vector2i& frameSize = frameBuffer->getSize();
+
+        _engine->preRender();
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
         if( !_extensionPluginFactory )
@@ -193,25 +172,25 @@ struct Brayns::Impl
 #endif
         if( _parametersManager->getRenderingParameters().getSunOnCamera() )
         {
-            LightPtr sunLight = _scene->getLight( 0 );
+            LightPtr sunLight = scene->getLight( 0 );
             DirectionalLight* sun =
                 dynamic_cast< DirectionalLight* > ( sunLight.get() );
             if( sun )
             {
-                sun->setDirection( _camera->getTarget() - _camera->getPosition() );
-                _scene->commitLights();
+                sun->setDirection( camera->getTarget() - camera->getPosition() );
+                scene->commitLights();
             }
         }
 
-        _camera->commit();
+        camera->commit();
         _render( );
 
-        _frameBuffer->unmap( );
+        _engine->postRender();
 
         const Vector2ui windowSize = _parametersManager
             ->getApplicationParameters()
             .getWindowSize();
-        if( windowSize != _frameBuffer->getSize( ))
+        if( windowSize != frameSize )
             reshape(windowSize);
     }
 
@@ -219,10 +198,7 @@ struct Brayns::Impl
     void _intializeExtensionPluginFactory( )
     {
         _extensionParameters.parametersManager = _parametersManager;
-        _extensionParameters.scene = _scene;
-        _extensionParameters.renderer = _renderers[_activeRenderer];
-        _extensionParameters.camera = _camera;
-        _extensionParameters.frameBuffer = _frameBuffer;
+        _extensionParameters.engine = _engine;
 
         _extensionPluginFactory.reset( new ExtensionPluginFactory(
             _parametersManager->getApplicationParameters( ),
@@ -232,32 +208,31 @@ struct Brayns::Impl
 
     void reshape( const Vector2ui& frameSize )
     {
-        if( _frameBuffer->getSize() == frameSize )
+        CameraPtr camera = _engine->getCamera();
+        FrameBufferPtr frameBuffer = _engine->getFrameBuffer();
+
+        if( frameBuffer->getSize() == frameSize )
             return;
 
-        _frameSize = frameSize;
-        _frameBuffer->resize( _frameSize );
-        _camera->setAspectRatio(
-            static_cast< float >( _frameSize.x()) /
-            static_cast< float >( _frameSize.y()));
+        frameBuffer->resize( frameSize );
+        camera->setAspectRatio(
+            static_cast< float >( frameSize.x()) /
+            static_cast< float >( frameSize.y()));
     }
 
     void setMaterials(
         const MaterialType materialType,
         const size_t nbMaterials )
     {
-        _scene->setMaterials( materialType, nbMaterials );
-        _scene->commit( );
+        ScenePtr scene = _engine->getScene();
+        scene->setMaterials( materialType, nbMaterials );
+        scene->commit( );
     }
 
     void commit( )
     {
-        _frameBuffer->clear( );
-        const strings& renderers =
-            _parametersManager->getRenderingParameters().getRenderers();
-        for( std::string renderer: renderers )
-            _renderers[renderer]->commit( );
-        _camera->commit( );
+        _engine->getFrameBuffer()->clear();
+        _engine->commit();
     }
 
     ParametersManager& getParametersManager( )
@@ -267,47 +242,46 @@ struct Brayns::Impl
 
     Scene& getScene( )
     {
-        return *_scene;
+        return *_engine->getScene();
     }
 
     Camera& getCamera( )
     {
-        return *_camera;
+        return *_engine->getCamera();
     }
 
     FrameBuffer& getFrameBuffer( )
     {
-        return *_frameBuffer;
+        return *_engine->getFrameBuffer();
     }
 
 private:
     void _render( )
     {
-        const std::string& renderer =
-            _parametersManager->getRenderingParameters().getRenderer();
-        if( _activeRenderer != renderer )
-        {
-            _activeRenderer = renderer;
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
-            _extensionParameters.renderer = _renderers[_activeRenderer];
-#endif
-        }
-        _renderers[_activeRenderer]->render( _frameBuffer );
+
+        _engine->setActiveRenderer(
+            _parametersManager->getRenderingParameters().getRenderer());
+        _engine->render();
     }
 
     void _setDefaultCamera()
     {
-        const Boxf worldBounds = _scene->getWorldBounds( );
+        ScenePtr scene = _engine->getScene();
+        CameraPtr camera = _engine->getCamera();
+        FrameBufferPtr frameBuffer = _engine->getFrameBuffer();
+        const Vector2i& frameSize = frameBuffer->getSize();
+
+        const Boxf worldBounds = scene->getWorldBounds( );
         const Vector3f target = worldBounds.getCenter( );
         const Vector3f diag   = worldBounds.getSize( );
         Vector3f position = target;
         position.z( ) -= diag.z( );
 
         const Vector3f up  = Vector3f(0.f,1.f,0.f);
-        _camera->setInitialState(position, target, up);
-        _camera->setAspectRatio(
-            static_cast< float >( _frameSize.x()) /
-            static_cast< float >( _frameSize.y()));
+        camera->setInitialState(position, target, up);
+        camera->setAspectRatio(
+            static_cast< float >( frameSize.x()) /
+            static_cast< float >( frameSize.y()));
     }
 
     /**
@@ -340,7 +314,7 @@ private:
                         const std::string& filename = dirIter->path( ).string( );
                         servus::URI uri( filename );
                         if( !morphologyLoader.importMorphology(
-                            uri, fileIndex++, *_scene))
+                            uri, fileIndex++, *_engine->getScene()))
                         {
                             BRAYNS_ERROR << "Failed to import " <<
                                 filename << std::endl;
@@ -363,17 +337,19 @@ private:
                     << std::endl;
         ProteinLoader proteinLoader( geometryParameters );
         if( !proteinLoader.importPDBFile( geometryParameters.getPDBFile(),
-                                          Vector3f( 0, 0, 0 ), 0, *_scene ))
+                                          Vector3f( 0, 0, 0 ), 0,
+                                          *_engine->getScene()))
         {
             BRAYNS_ERROR << "Failed to import "
                          << geometryParameters.getPDBFile() << std::endl;
         }
 
-        for( size_t i = 0; i < _scene->getMaterials().size( ); ++i )
+        ScenePtr scene = _engine->getScene();
+        for( size_t i = 0; i < scene->getMaterials().size( ); ++i )
         {
             float r,g,b;
             proteinLoader.getMaterialKd( i, r, g, b );
-            MaterialPtr material = _scene->getMaterials()[i];
+            MaterialPtr material = scene->getMaterials()[i];
             material->setColor( Vector3f( r, g, b ));
         }
     }
@@ -404,10 +380,11 @@ private:
                 {
                     const std::string& filename = dirIter->path( ).string( );
                     BRAYNS_INFO << "- " << filename << std::endl;
+                    ScenePtr scene = _engine->getScene();
                     MeshContainer MeshContainer =
                     {
-                        _scene->getTriangleMeshes(), _scene->getMaterials(),
-                        _scene->getWorldBounds()
+                        scene->getTriangleMeshes(), scene->getMaterials(),
+                        scene->getWorldBounds()
                     };
                     if(!meshLoader.importMeshFromFile(
                         filename, MeshContainer, MQ_FAST, NO_MATERIAL ))
@@ -441,10 +418,10 @@ private:
         MorphologyLoader morphologyLoader( geometryParameters );
         const servus::URI uri( filename );
         if( report.empty() )
-            morphologyLoader.importCircuit( uri, target, *_scene );
+            morphologyLoader.importCircuit( uri, target, *_engine->getScene());
         else
             morphologyLoader.importCircuit(
-                uri, target, report, *_scene );
+                uri, target, report, *_engine->getScene());
     }
 
     /**
@@ -467,22 +444,11 @@ private:
         MorphologyLoader morphologyLoader( geometryParameters );
         const servus::URI uri( filename );
         return morphologyLoader.importSimulationIntoTexture(
-            uri, target, report, *_scene );
+            uri, target, report, *_engine->getScene());
     }
 
     ParametersManagerPtr _parametersManager;
-
-    ScenePtr _scene;
-    CameraPtr _camera;
-    std::string _activeRenderer;
-    RendererMap _renderers;
-    FrameBufferPtr _frameBuffer;
-
-    Vector2i _frameSize;
-    float _timestamp;
-
-    bool _rendering;
-    bool _sceneModified;
+    EnginePtr _engine;
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
     ExtensionPluginFactoryPtr _extensionPluginFactory;

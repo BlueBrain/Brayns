@@ -37,6 +37,8 @@ ExtensionPluginFactory::ExtensionPluginFactory(
     : _applicationParameters( applicationParameters )
     , _extensionParameters( extensionParameters )
 {
+    BRAYNS_DEBUG << &_applicationParameters << std::endl;
+    BRAYNS_DEBUG << &_extensionParameters << std::endl;
 #ifdef BRAYNS_USE_ZEROBUF
     ZeroBufPluginPtr zeroBufPlugin( new ZeroBufPlugin(
         applicationParameters, _extensionParameters ));

@@ -579,14 +579,14 @@ bool MorphologyLoader::importCircuit(
     return false;
 }
 
-bool MorphologyLoader::importSimulationIntoTexture(
+size_t MorphologyLoader::importSimulationIntoTexture(
     const servus::URI&,
     const std::string&,
     const std::string&,
     Scene& )
 {
     BRAYNS_ERROR << "Brion is required to load simulations" << std::endl;
-    return false;
+    return 0;
 }
 #endif
 

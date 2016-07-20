@@ -57,7 +57,7 @@ struct RenderOutput
     geometry and the renderer. During the initialization process, Brayns creates
     the scene using loaders located in the braynsPlugins library.
 
-    The underlying rendering engine (OSPRay, Optix, RayFire, etc) is specified
+    The underlying rendering engine (OSPRay, Optix, FireRays, etc) is specified
     in the rendering parameters and is invoked by the render method for
     generating the frames.
 

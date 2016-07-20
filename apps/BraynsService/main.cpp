@@ -24,11 +24,18 @@
 
 int main(int argc, const char **argv)
 {
-    BRAYNS_INFO << "Initializing Service..." << std::endl;
-    brayns::Brayns brayns(argc, argv);
+    try
+    {
+        BRAYNS_INFO << "Initializing Service..." << std::endl;
+        brayns::Brayns brayns(argc, argv);
 
-    while( true )
-        brayns.render( );
-
+        while( true )
+            brayns.render( );
+    }
+    catch( const std::runtime_error& e )
+    {
+        BRAYNS_ERROR << e.what() << std::endl;
+        return 1;
+    }
     return 0;
 }

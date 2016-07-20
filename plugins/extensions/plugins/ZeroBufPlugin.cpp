@@ -20,6 +20,7 @@
 
 #include "ZeroBufPlugin.h"
 
+#include <plugins/engines/Engine.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/renderer/Renderer.h>
@@ -50,7 +51,8 @@ ZeroBufPlugin::~ZeroBufPlugin( )
 
     if( _httpServer )
     {
-        _httpServer->remove( *_extensionParameters.camera->getSerializable( ));
+        _httpServer->remove(
+            *_extensionParameters.engine->getCamera()->getSerializable( ));
         _httpServer->remove( _remoteImageJPEG );
     }
 }
@@ -80,7 +82,8 @@ void ZeroBufPlugin::_setupHTTPServer()
     BRAYNS_INFO << "Registering handlers on " <<
         _httpServer->getURI() << std::endl;
 
-    servus::Serializable& cam = *_extensionParameters.camera->getSerializable( );
+    servus::Serializable& cam =
+        *_extensionParameters.engine->getCamera()->getSerializable();
     _httpServer->add( cam );
     cam.registerDeserializedCallback( std::bind( &ZeroBufPlugin::_cameraUpdated, this ));
 
@@ -110,7 +113,7 @@ void ZeroBufPlugin::_setupRequests()
     ::zerobuf::render::FovCamera camera;
     _requests[ camera.getTypeIdentifier() ] = [&]
         { return _publisher.publish(
-            *_extensionParameters.camera->getSerializable( ));
+            *_extensionParameters.engine->getCamera()->getSerializable( ));
         };
 
     ::lexis::render::ImageJPEG imageJPEG;
@@ -124,8 +127,8 @@ void ZeroBufPlugin::_setupRequests()
 
 void ZeroBufPlugin::_cameraUpdated()
 {
-    _extensionParameters.frameBuffer->clear();
-    _extensionParameters.camera->commit();
+    _extensionParameters.engine->getFrameBuffer()->clear();
+    _extensionParameters.engine->getCamera()->commit();
 }
 
 void ZeroBufPlugin::_attributeUpdated( )
@@ -134,8 +137,8 @@ void ZeroBufPlugin::_attributeUpdated( )
         _remoteAttribute.getValueString() << std::endl;
     _extensionParameters.parametersManager->set(
         _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
-    _extensionParameters.renderer->commit();
-    _extensionParameters.frameBuffer->clear();
+    _extensionParameters.engine->getRenderer()->commit();
+    _extensionParameters.engine->getFrameBuffer()->clear();
 }
 
 void ZeroBufPlugin::_resetUpdated( )
@@ -143,16 +146,17 @@ void ZeroBufPlugin::_resetUpdated( )
     if( _remoteReset.getCamera() )
     {
         BRAYNS_INFO << "Resetting camera" << std::endl;
-        _extensionParameters.camera->reset();
-        _extensionParameters.camera->commit();
+        CameraPtr camera = _extensionParameters.engine->getCamera();
+        camera->reset();
+        camera->commit();
     }
 }
 
 void ZeroBufPlugin::_materialUpdated( )
 {
     size_t materialId = _remoteMaterial.getIndex();
-    MaterialPtr material =
-        _extensionParameters.scene->getMaterial( materialId );
+    ScenePtr scene = _extensionParameters.engine->getScene();
+    MaterialPtr material = scene->getMaterial( materialId );
 
     if( material)
     {
@@ -172,8 +176,8 @@ void ZeroBufPlugin::_materialUpdated( )
         material->setOpacity( _remoteMaterial.getOpacity() );
         material->setRefractionIndex( _remoteMaterial.getRefractionIndex() );
         material->setEmission( _remoteMaterial.getLightEmission() );
-        _extensionParameters.scene->commitMaterials( true );
-        _extensionParameters.frameBuffer->clear();
+        scene->commitMaterials( true );
+        _extensionParameters.engine->getFrameBuffer()->clear();
     }
 
 }
@@ -207,13 +211,15 @@ bool ZeroBufPlugin::_requestImageJPEG()
     if(!_processingImageJpeg)
     {
         _processingImageJpeg = true;
+        FrameBufferPtr frameBuffer =
+            _extensionParameters.engine->getFrameBuffer();
         const Vector2i& frameSize =
-            _extensionParameters.frameBuffer->getSize();
+            frameBuffer->getSize();
         const Vector2i& newFrameSize =
             _extensionParameters.parametersManager->getApplicationParameters()
             .getJpegSize();
         unsigned int* colorBuffer =
-            (unsigned int*)_extensionParameters.frameBuffer->getColorBuffer( );
+            (unsigned int*)frameBuffer->getColorBuffer( );
         if( colorBuffer )
         {
             unsigned int* resizedColorBuffer = colorBuffer;
@@ -243,9 +249,10 @@ bool ZeroBufPlugin::_requestImageJPEG()
 
 bool ZeroBufPlugin::_requestFrameBuffers()
 {
-    const Vector2i frameSize = _extensionParameters.frameBuffer->getSize( );
-    const float* depthBuffer =
-        _extensionParameters.frameBuffer->getDepthBuffer( );
+    FrameBufferPtr frameBuffer =
+        _extensionParameters.engine->getFrameBuffer();
+    const Vector2i frameSize = frameBuffer->getSize( );
+    const float* depthBuffer = frameBuffer->getDepthBuffer( );
 
     _remoteFrameBuffers.setWidth( frameSize.x( ));
     _remoteFrameBuffers.setHeight( frameSize.y( ));
@@ -265,11 +272,11 @@ bool ZeroBufPlugin::_requestFrameBuffers()
         _remoteFrameBuffers.setDepth( 0, 0 );
 
     const uint8_t* colorBuffer =
-        _extensionParameters.frameBuffer->getColorBuffer( );
+        frameBuffer->getColorBuffer( );
     if( colorBuffer )
         _remoteFrameBuffers.setDiffuse(
             colorBuffer, frameSize.x( ) * frameSize.y( ) *
-              _extensionParameters.frameBuffer->getColorDepth( ));
+              frameBuffer->getColorDepth( ));
     else
         _remoteFrameBuffers.setDiffuse( 0, 0 );
 

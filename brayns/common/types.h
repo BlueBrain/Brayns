@@ -47,6 +47,10 @@ namespace brayns
 class Brayns;
 typedef std::shared_ptr< Brayns > BraynsPtr;
 
+class Engine;
+typedef std::shared_ptr< Engine > EnginePtr;
+typedef std::map< std::string, EnginePtr > EngineMap;
+
 class Scene;
 typedef std::shared_ptr< Scene > ScenePtr;
 
@@ -204,10 +208,7 @@ enum MorphologySectionType
 struct ExtensionParameters
 {
     ParametersManagerPtr parametersManager;
-    ScenePtr scene;
-    RendererPtr renderer;
-    CameraPtr camera;
-    FrameBufferPtr frameBuffer;
+    EnginePtr engine;
 };
 
 /** Some 'special' materials are used by Brayns to acomplish specific features

@@ -41,6 +41,9 @@ public:
     /** @copydoc AbstractParameters::print */
     void print( ) final;
 
+    /** Engine*/
+    const std::string& getEngine( ) const { return _engine; }
+
     /** OSPRay module */
     const std::string& getModule( ) const { return _module; }
 
@@ -192,6 +195,7 @@ protected:
 
     bool _parse( const po::variables_map& vm ) final;
 
+    std::string _engine;
     std::string _module;
     std::string _renderer;
     strings _renderers;

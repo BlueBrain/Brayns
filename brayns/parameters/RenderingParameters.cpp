@@ -26,8 +26,10 @@
 
 namespace
 {
+const std::string DEFAULT_ENGINE = "ospray";
 const std::string DEFAULT_RENDERER = "exobj";
 
+const std::string PARAM_ENGINE = "engine";
 const std::string PARAM_MODULE = "module";
 const std::string PARAM_RENDERERS = "renderers";
 const std::string PARAM_RENDERER = "renderer";
@@ -55,6 +57,7 @@ namespace brayns
 
 RenderingParameters::RenderingParameters( )
     : AbstractParameters( "Rendering" )
+    , _engine(DEFAULT_ENGINE)
     , _renderer( DEFAULT_RENDERER )
     , _ambientOcclusionStrength( 0.f )
     , _materialType( MT_DIFFUSE )
@@ -72,6 +75,8 @@ RenderingParameters::RenderingParameters( )
     , _sunOnCamera( false )
 {
     _parameters.add_options()
+        (PARAM_ENGINE.c_str(), po::value< std::string >( ),
+            "Engine name (ospray, optix, etc")
         (PARAM_MODULE.c_str(), po::value< std::string >( ),
             "OSPRay module name")
         (PARAM_RENDERER.c_str(), po::value< std::string >( ),
@@ -119,6 +124,8 @@ RenderingParameters::RenderingParameters( )
 
 bool RenderingParameters::_parse( const po::variables_map& vm )
 {
+    if( vm.count( PARAM_ENGINE ))
+        _engine = vm[PARAM_ENGINE].as< std::string >( );
     if( vm.count( PARAM_MODULE ))
         _module = vm[PARAM_MODULE].as< std::string >( );
     if( vm.count( PARAM_RENDERER ))
@@ -181,6 +188,8 @@ bool RenderingParameters::_parse( const po::variables_map& vm )
 void RenderingParameters::print( )
 {
     AbstractParameters::print( );
+    BRAYNS_INFO << "Engine                  :" <<
+        _engine << std::endl;
     BRAYNS_INFO << "Module                  :" <<
         _module << std::endl;
     BRAYNS_INFO << "Supported renderers     :" << std::endl;
