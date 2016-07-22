@@ -76,6 +76,10 @@ OSPRayEngine::OSPRayEngine(
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 
+OSPRayEngine::~OSPRayEngine()
+{
+}
+
 std::string OSPRayEngine::name() const
 {
     return "ospray";

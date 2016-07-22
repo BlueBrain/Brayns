@@ -271,14 +271,14 @@ private:
         FrameBufferPtr frameBuffer = _engine->getFrameBuffer();
         const Vector2i& frameSize = frameBuffer->getSize();
 
-        const Boxf worldBounds = scene->getWorldBounds( );
-        const Vector3f target = worldBounds.getCenter( );
-        const Vector3f diag   = worldBounds.getSize( );
+        const Boxf& worldBounds = scene->getWorldBounds();
+        const Vector3f& target = worldBounds.getCenter();
+        const Vector3f& diag = worldBounds.getSize();
         Vector3f position = target;
-        position.z( ) -= diag.z( );
+        position.z() -= diag.z();
 
-        const Vector3f up  = Vector3f(0.f,1.f,0.f);
-        camera->setInitialState(position, target, up);
+        const Vector3f up = Vector3f( 0.f, 1.f, 0.f );
+        camera->setInitialState( position, target, up );
         camera->setAspectRatio(
             static_cast< float >( frameSize.x()) /
             static_cast< float >( frameSize.y()));

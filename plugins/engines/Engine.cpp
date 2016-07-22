@@ -23,7 +23,7 @@
 namespace brayns
 {
 
-void Engine::setActiveRenderer( const std::string renderer )
+void Engine::setActiveRenderer( const std::string& renderer )
 {
     if( _activeRenderer != renderer )
         _activeRenderer = renderer;

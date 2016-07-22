@@ -39,6 +39,8 @@ public:
         const char **argv,
         ParametersManagerPtr parametersManager );
 
+    ~OSPRayEngine();
+
     /** @copydoc Engine::name */
     std::string name() const final;
 

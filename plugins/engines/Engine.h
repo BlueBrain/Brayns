@@ -56,10 +56,10 @@ public:
     virtual void render() = 0;
 
     /** Executes engine specific pre-render operations */
-    virtual void preRender() = 0;
+    virtual void preRender() {}
 
     /** Executes engine specific post-render operations */
-    virtual void postRender() = 0;
+    virtual void postRender() {}
 
     /** Gets the scene */
     ScenePtr getScene() { return _scene; }
@@ -74,7 +74,7 @@ public:
     RendererPtr getRenderer() { return _renderers[_activeRenderer]; }
 
     /** Sets the active renderer */
-    void setActiveRenderer( const std::string renderer );
+    void setActiveRenderer( const std::string& renderer );
 
 protected:
 

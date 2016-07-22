@@ -69,7 +69,7 @@ void DeflectPlugin::_sendDeflectFrame()
 {
     FrameBufferPtr frameBuffer =
         _extensionParameters.engine->getFrameBuffer();
-    const Vector2i frameSize = frameBuffer->getSize();
+    const Vector2i& frameSize = frameBuffer->getSize();
     _send( frameSize, (unsigned long*)
         frameBuffer->getColorBuffer(), true);
 }
