@@ -9,10 +9,14 @@ set(BRAYNSPLUGINS_LINK_LIBRARIES
 
 set(BRAYNSPLUGINS_SOURCES
   extensions/plugins/ExtensionPlugin.cpp
+  engines/EngineFactory.cpp
+  engines/Engine.cpp
 )
 
 set(BRAYNSPLUGINS_PUBLIC_HEADERS
   extensions/plugins/ExtensionPlugin.h
+  engines/EngineFactory.h
+  engines/Engine.h
 )
 
 if(DEFLECT_FOUND OR (TARGET ZeroBuf AND TARGET ZeroEQ))
@@ -38,6 +42,9 @@ if(MAGICK++_FOUND)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Magick++)
 endif()
 
-add_subdirectory(renderers/ospray)
+if(OSPRAY_FOUND)
+  add_subdirectory(engines/ospray)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOSPRayPlugin)
+endif()
 
 common_library(braynsPlugins)

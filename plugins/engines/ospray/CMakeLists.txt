@@ -182,6 +182,7 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
 )
 
 set(BRAYNSOSPRAYPLUGIN_SOURCES
+  OSPRayEngine.cpp
   camera/StereoCamera.cpp
   geometry/ExtendedCones.cpp
   geometry/ExtendedCylinders.cpp
@@ -197,6 +198,7 @@ set(BRAYNSOSPRAYPLUGIN_SOURCES
 )
 
 set(BRAYNSOSPRAYPLUGIN_PUBLIC_HEADERS
+  OSPRayEngine.h
   camera/StereoCamera.h
   geometry/ExtendedCones.h
   geometry/ExtendedCylinders.h

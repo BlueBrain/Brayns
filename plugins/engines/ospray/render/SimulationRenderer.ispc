@@ -33,7 +33,7 @@
 #include "ExtendedOBJMaterial.ih"
 
 // Brayns
-#include <plugins/renderers/ospray/render/utils/RandomGenerator.ih>
+#include <plugins/engines/ospray/render/utils/RandomGenerator.ih>
 
 #define ALPHA_THRESHOLD ( .05f )
 #define DEFAULT_LIGHT_EMISSION ( 2.f )

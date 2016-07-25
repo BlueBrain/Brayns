@@ -14,6 +14,6 @@ set(BRAYNS_SOURCES Brayns.cpp)
 
 set(BRAYNS_LINK_LIBRARIES
     PUBLIC Servus braynsParameters braynsCommon
-           braynsIO braynsPlugins braynsOSPRayPlugin ${OSPRAY_LIBRARIES})
+           braynsIO braynsPlugins ${OSPRAY_LIBRARIES})
 
 common_library(brayns)
