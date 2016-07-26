@@ -21,8 +21,8 @@
 #include "ExtensionPluginFactory.h"
 
 #include <plugins/extensions/plugins/ExtensionPlugin.h>
-#ifdef BRAYNS_USE_ZEROBUF
-#  include <plugins/extensions/plugins/ZeroBufPlugin.h>
+#ifdef BRAYNS_USE_ZEROEQ
+#  include <plugins/extensions/plugins/ZeroEQPlugin.h>
 #endif
 #ifdef BRAYNS_USE_DEFLECT
 #  include <plugins/extensions/plugins/DeflectPlugin.h>
@@ -39,10 +39,10 @@ ExtensionPluginFactory::ExtensionPluginFactory(
 {
     BRAYNS_DEBUG << &_applicationParameters << std::endl;
     BRAYNS_DEBUG << &_extensionParameters << std::endl;
-#ifdef BRAYNS_USE_ZEROBUF
-    ZeroBufPluginPtr zeroBufPlugin( new ZeroBufPlugin(
+#ifdef BRAYNS_USE_ZEROEQ
+    ZeroEQPluginPtr zeroEQPlugin( new ZeroEQPlugin(
         applicationParameters, _extensionParameters ));
-    add( zeroBufPlugin );
+    add( zeroEQPlugin );
 #endif
 
 #ifdef BRAYNS_USE_DEFLECT

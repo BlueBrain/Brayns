@@ -19,7 +19,7 @@ set(BRAYNSPLUGINS_PUBLIC_HEADERS
   engines/Engine.h
 )
 
-if(DEFLECT_FOUND OR (TARGET ZeroBuf AND TARGET ZeroEQ))
+if(DEFLECT_FOUND OR (TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ))
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/ExtensionPluginFactory.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/ExtensionPluginFactory.h)
 endif()
@@ -30,12 +30,11 @@ if(DEFLECT_FOUND)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
 endif()
 
-if(TARGET Lexis AND TARGET ZeroEQ)
-  list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroBufPlugin.cpp)
-  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/ZeroBufPlugin.h)
+if(TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ)
+  list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroEQPlugin.cpp)
+  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/ZeroEQPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
     PUBLIC Lexis ZeroEQ BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
-  add_subdirectory(extensions/vocabulary)
 endif()
 
 if(OSPRAY_FOUND)

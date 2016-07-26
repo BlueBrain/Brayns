@@ -149,8 +149,8 @@ typedef std::vector< ExtensionPluginPtr > ExtensionPlugins;
 class ExtensionPluginFactory;
 typedef std::unique_ptr< ExtensionPluginFactory > ExtensionPluginFactoryPtr;
 
-class ZeroBufPlugin;
-typedef std::shared_ptr< ZeroBufPlugin > ZeroBufPluginPtr;
+class ZeroEQPlugin;
+typedef std::shared_ptr< ZeroEQPlugin > ZeroEQPluginPtr;
 
 class DeflectPlugin;
 typedef std::shared_ptr< DeflectPlugin > DeflectPluginPtr;
