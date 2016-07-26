@@ -38,10 +38,6 @@ if(TARGET Lexis AND TARGET ZeroEQ)
   add_subdirectory(extensions/vocabulary)
 endif()
 
-if(MAGICK++_FOUND)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Magick++)
-endif()
-
 if(OSPRAY_FOUND)
   add_subdirectory(engines/ospray)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOSPRayPlugin)
