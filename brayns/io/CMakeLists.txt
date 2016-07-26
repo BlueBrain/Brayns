@@ -30,4 +30,8 @@ if(TARGET Brion)
   list(APPEND BRAYNSIO_LINK_LIBRARIES Brion Brain)
 endif()
 
+if(MAGICK++_FOUND)
+  list(APPEND BRAYNSIO_LINK_LIBRARIES ${Magick++_LIBRARIES})
+endif()
+
 common_library(braynsIO)

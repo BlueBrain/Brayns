@@ -38,7 +38,7 @@ common_find_package(vmmlib REQUIRED)
 
 option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)
 if(BRAYNS_IMAGEMAGICK_ENABLED)
-  common_find_package(Magick++)
+  common_find_package(Magick++ SYSTEM)
 endif()
 
 option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ON)
