@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ZeroBufPlugin_H
-#define ZeroBufPlugin_H
+#ifndef ZEROEQPLUGIN_H
+#define ZEROEQPLUGIN_H
 
 #include "ExtensionPlugin.h"
 
@@ -36,15 +36,15 @@ namespace brayns
 {
 
 /**
-   The ZeroBufPlugin is in charge of exposing a both a http/REST and a ZeroEQ
+   The ZeroEQPlugin is in charge of exposing a both a http/REST and a ZeroEQ
    interface to the outside world. The http server is configured according
    to the --http-server parameter provided by ApplicationParameters.
  */
-class ZeroBufPlugin : public ExtensionPlugin
+class ZeroEQPlugin : public ExtensionPlugin
 {
 public:
-    ZeroBufPlugin( ApplicationParameters&, ExtensionParameters& );
-    ~ZeroBufPlugin( );
+    ZeroEQPlugin( ApplicationParameters&, ExtensionParameters& );
+    ~ZeroEQPlugin( );
 
     /** @copydoc ExtensionPlugin::execute */
     BRAYNS_API void run( ) final;
@@ -97,4 +97,4 @@ private:
 };
 
 }
-#endif // ZeroBufPlugin_H
+#endif // ZEROEQPLUGIN_H

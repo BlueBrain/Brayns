@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ZeroBufPlugin.h"
+#include "ZeroEQPlugin.h"
 
 #include <plugins/engines/Engine.h>
 #include <brayns/common/camera/Camera.h>
@@ -32,7 +32,7 @@
 namespace brayns
 {
 
-ZeroBufPlugin::ZeroBufPlugin(
+ZeroEQPlugin::ZeroEQPlugin(
     ApplicationParameters& applicationParameters,
     ExtensionParameters& extensionParameters )
     : ExtensionPlugin( applicationParameters, extensionParameters )
@@ -44,7 +44,7 @@ ZeroBufPlugin::ZeroBufPlugin(
     _setupHTTPServer( );
 }
 
-ZeroBufPlugin::~ZeroBufPlugin( )
+ZeroEQPlugin::~ZeroEQPlugin( )
 {
     if( _compressor )
         tjDestroy( _compressor );
@@ -57,12 +57,12 @@ ZeroBufPlugin::~ZeroBufPlugin( )
     }
 }
 
-void ZeroBufPlugin::run()
+void ZeroEQPlugin::run()
 {
     while( _subscriber.receive( 0 )) {}
 }
 
-void ZeroBufPlugin::_setupHTTPServer()
+void ZeroEQPlugin::_setupHTTPServer()
 {
     const strings& arguments = _applicationParameters.arguments();
     char** argv = new char*[arguments.size()];
@@ -85,30 +85,30 @@ void ZeroBufPlugin::_setupHTTPServer()
     servus::Serializable& cam =
         *_extensionParameters.engine->getCamera()->getSerializable();
     _httpServer->add( cam );
-    cam.registerDeserializedCallback( std::bind( &ZeroBufPlugin::_cameraUpdated, this ));
+    cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
 
     _httpServer->add( _remoteImageJPEG );
     _remoteImageJPEG.registerSerializeCallback(
-        std::bind( &ZeroBufPlugin::_requestImageJPEG, this ));
+        std::bind( &ZeroEQPlugin::_requestImageJPEG, this ));
 
     _httpServer->add( _remoteFrameBuffers );
     _remoteFrameBuffers.registerSerializeCallback(
-        std::bind( &ZeroBufPlugin::_requestFrameBuffers, this ));
+        std::bind( &ZeroEQPlugin::_requestFrameBuffers, this ));
 
     _httpServer->add( _remoteAttribute );
     _remoteAttribute.registerDeserializedCallback(
-        std::bind( &ZeroBufPlugin::_attributeUpdated, this ));
+        std::bind( &ZeroEQPlugin::_attributeUpdated, this ));
 
     _httpServer->add( _remoteReset );
     _remoteReset.registerDeserializedCallback(
-        std::bind( &ZeroBufPlugin::_resetUpdated, this ));
+        std::bind( &ZeroEQPlugin::_resetUpdated, this ));
 
     _httpServer->add( _remoteMaterial );
     _remoteMaterial.registerDeserializedCallback(
-        std::bind( &ZeroBufPlugin::_materialUpdated, this ));
+        std::bind( &ZeroEQPlugin::_materialUpdated, this ));
 }
 
-void ZeroBufPlugin::_setupRequests()
+void ZeroEQPlugin::_setupRequests()
 {
     ::zerobuf::render::FovCamera camera;
     _requests[ camera.getTypeIdentifier() ] = [&]
@@ -118,20 +118,20 @@ void ZeroBufPlugin::_setupRequests()
 
     ::lexis::render::ImageJPEG imageJPEG;
     _requests[ imageJPEG.getTypeIdentifier() ] =
-        std::bind( &ZeroBufPlugin::_requestImageJPEG, this );
+        std::bind( &ZeroEQPlugin::_requestImageJPEG, this );
 
     ::zerobuf::render::FrameBuffers frameBuffers;
     _requests[ frameBuffers.getTypeIdentifier() ] =
-        std::bind( &ZeroBufPlugin::_requestFrameBuffers, this );
+        std::bind( &ZeroEQPlugin::_requestFrameBuffers, this );
 }
 
-void ZeroBufPlugin::_cameraUpdated()
+void ZeroEQPlugin::_cameraUpdated()
 {
     _extensionParameters.engine->getFrameBuffer()->clear();
     _extensionParameters.engine->getCamera()->commit();
 }
 
-void ZeroBufPlugin::_attributeUpdated( )
+void ZeroEQPlugin::_attributeUpdated( )
 {
     BRAYNS_INFO << _remoteAttribute.getKeyString() << " = " <<
         _remoteAttribute.getValueString() << std::endl;
@@ -141,7 +141,7 @@ void ZeroBufPlugin::_attributeUpdated( )
     _extensionParameters.engine->getFrameBuffer()->clear();
 }
 
-void ZeroBufPlugin::_resetUpdated( )
+void ZeroEQPlugin::_resetUpdated( )
 {
     if( _remoteReset.getCamera() )
     {
@@ -152,7 +152,7 @@ void ZeroBufPlugin::_resetUpdated( )
     }
 }
 
-void ZeroBufPlugin::_materialUpdated( )
+void ZeroEQPlugin::_materialUpdated( )
 {
     size_t materialId = _remoteMaterial.getIndex();
     ScenePtr scene = _extensionParameters.engine->getScene();
@@ -182,7 +182,7 @@ void ZeroBufPlugin::_materialUpdated( )
 
 }
 
-void ZeroBufPlugin::_resizeImage(
+void ZeroEQPlugin::_resizeImage(
     unsigned int* srcData,
     const Vector2i& srcSize,
     const Vector2i& dstSize,
@@ -206,7 +206,7 @@ void ZeroBufPlugin::_resizeImage(
     }
 }
 
-bool ZeroBufPlugin::_requestImageJPEG()
+bool ZeroEQPlugin::_requestImageJPEG()
 {
     if(!_processingImageJpeg)
     {
@@ -247,7 +247,7 @@ bool ZeroBufPlugin::_requestImageJPEG()
     return true;
 }
 
-bool ZeroBufPlugin::_requestFrameBuffers()
+bool ZeroEQPlugin::_requestFrameBuffers()
 {
     FrameBufferPtr frameBuffer =
         _extensionParameters.engine->getFrameBuffer();
@@ -283,7 +283,7 @@ bool ZeroBufPlugin::_requestFrameBuffers()
     return true;
 }
 
-uint8_t* ZeroBufPlugin::_encodeJpeg(const uint32_t width,
+uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width,
                      const uint32_t height,
                      const uint8_t* rawData,
                      unsigned long& dataSize)

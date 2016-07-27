@@ -46,8 +46,9 @@ set(BRAYNSCOMMON_LINK_LIBRARIES
     PUBLIC braynsParameters Servus boost_filesystem vmmlib boost_system
 )
 
-if(TARGET ZeroBuf)
-  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES ZeroBuf)
+if(TARGET Lexis AND TARGET ZeroBuf)
+  add_subdirectory(vocabulary)
+  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES Lexis ZeroBuf BraynsZeroBufRender)
 endif()
 
 common_library(braynsCommon)
