@@ -28,6 +28,12 @@
 #define BOOST_TEST_MODULE brayns
 #include <boost/test/unit_test.hpp>
 
+#include <chrono>
+
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
+
 BOOST_AUTO_TEST_CASE( simple_construction )
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
@@ -43,7 +49,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     const auto& camera = brayns.getCamera();
     BOOST_CHECK_EQUAL( camera.getType(), brayns::CT_PERSPECTIVE );
     BOOST_CHECK_EQUAL( camera.getPosition(),
-            brayns::Vector3f( 0, 0, std::numeric_limits< float >::infinity( )));
+            brayns::Vector3f( 0, 0, -2 ));
     BOOST_CHECK_EQUAL( camera.getTarget(), brayns::Vector3f( ));
     BOOST_CHECK_EQUAL( camera.getUpVector(), brayns::Vector3f( 0, 1, 0 ));
     BOOST_CHECK_EQUAL( camera.getAspectRatio(), 4.f/3.f );
@@ -115,7 +121,11 @@ BOOST_AUTO_TEST_CASE( defaults )
 
     auto& scene = brayns.getScene();
     BOOST_CHECK( scene.getMaterial( 0 ));
-    BOOST_CHECK_EQUAL( scene.getWorldBounds(), brayns::Boxf( ));
+
+    brayns::Boxf defaultBoundingBox;
+    defaultBoundingBox.merge( brayns::Vector3f(-1,-1,-1 ));
+    defaultBoundingBox.merge( brayns::Vector3f( 1, 1, 1 ));
+    BOOST_CHECK_EQUAL( scene.getWorldBounds(), defaultBoundingBox );
 }
 
 BOOST_AUTO_TEST_CASE( render_two_frames_and_compare_they_are_same )
@@ -134,6 +144,7 @@ BOOST_AUTO_TEST_CASE( render_two_frames_and_compare_they_are_same )
     memcpy( oldBuffer.data(), fb.getColorBuffer(), bytes );
     fb.unmap();
 
+    fb.clear();
     brayns.render();
 
     fb.map();
@@ -141,4 +152,78 @@ BOOST_AUTO_TEST_CASE( render_two_frames_and_compare_they_are_same )
                                    fb.getColorBuffer(),
                                    fb.getColorBuffer()+bytes );
     fb.unmap();
+}
+
+BOOST_AUTO_TEST_CASE( default_scene_benckmark )
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+    brayns::Brayns brayns( testSuite.argc,
+                           const_cast< const char** >( testSuite.argv ));
+
+    high_resolution_clock::time_point startTime;
+    uint64_t reference, shadows, softShadows, ambientOcclusion, AllOptions;
+
+    brayns::ParametersManager& params = brayns.getParametersManager();
+
+    // Set default rendering parameters
+    params.getRenderingParameters().setSamplesPerPixel(32);
+    brayns.commit();
+
+    // Start timer
+    startTime = high_resolution_clock::now();
+    brayns.render();
+    reference = duration_cast< milliseconds >(
+        high_resolution_clock::now() - startTime ).count();
+
+    // Shadows
+    params.getRenderingParameters().setShadows( true );
+    brayns.commit();
+
+    startTime = high_resolution_clock::now();
+    brayns.render();
+    shadows = duration_cast< milliseconds >(
+        high_resolution_clock::now() - startTime ).count();
+
+    // Shadows cost: +30%
+    BOOST_CHECK( float(shadows) / float(reference) < 1.3f );
+
+    // Soft shadows
+    params.getRenderingParameters().setSoftShadows( true );
+    brayns.commit();
+
+    startTime = high_resolution_clock::now();
+    brayns.render();
+    softShadows = duration_cast< milliseconds >(
+        high_resolution_clock::now() - startTime ).count();
+
+    // Soft shadows cost: +50%
+    BOOST_CHECK( float(softShadows) / float(reference) < 1.5f );
+
+    // Ambient occlustion
+    params.getRenderingParameters().setShadows( false );
+    params.getRenderingParameters().setSoftShadows( false );
+    params.getRenderingParameters().setAmbientOcclusionStrength( 1.f );
+    brayns.commit();
+
+    startTime = high_resolution_clock::now();
+    brayns.render();
+    ambientOcclusion = duration_cast< milliseconds >(
+        high_resolution_clock::now() - startTime ).count();
+
+    // Ambient occlusion cost: +160%
+    BOOST_CHECK( float(ambientOcclusion) / float(reference) < 2.6f );
+
+    // All options
+    params.getRenderingParameters().setShadows( true );
+    params.getRenderingParameters().setSoftShadows( true );
+    params.getRenderingParameters().setAmbientOcclusionStrength( 1.f );
+    brayns.commit();
+
+    startTime = high_resolution_clock::now();
+    brayns.render();
+    AllOptions = duration_cast< milliseconds >(
+        high_resolution_clock::now() - startTime ).count();
+
+    // All options: +300%
+    BOOST_CHECK( float(AllOptions) / float(reference) < 3.f );
 }

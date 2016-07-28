@@ -67,13 +67,17 @@ struct Brayns::Impl
 
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
-            Vector3f( 0.f, 0.f, 1.f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
+            Vector3f( 0.1f, -0.2f, 0.5f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
         scene->addLight( sunLight );
 
         // Build geometry
         loadData( );
         scene->buildEnvironment( );
         scene->buildGeometry( );
+
+        if( scene->isEmpty() )
+            _buildDefaultScene();
+
         scene->commit( );
 
         // Set default camera according to scene bounding box
@@ -445,6 +449,13 @@ private:
         const servus::URI uri( filename );
         return morphologyLoader.importSimulationIntoTexture(
             uri, target, report, *_engine->getScene());
+    }
+
+    void _buildDefaultScene()
+    {
+        ScenePtr scene = _engine->getScene();
+        scene->buildDefault();
+        scene->buildGeometry();
     }
 
     ParametersManagerPtr _parametersManager;

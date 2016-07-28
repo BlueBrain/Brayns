@@ -134,6 +134,16 @@ public:
     */
     BRAYNS_API void clearLights();
 
+    /**
+        Builds a default scene made of a Cornell box, a refelctive cube, and
+        a transparent sphere
+    */
+    BRAYNS_API void buildDefault();
+
+    /**
+        Return true if the scene does not contain any geometry. False otherwise
+    */
+    BRAYNS_API bool isEmpty() { return _isEmpty; }
 
     BRAYNS_API GeometryParameters& getGeometryParameters() { return _geometryParameters; }
     BRAYNS_API SceneParameters& getSceneParameters() { return _sceneParameters; }
@@ -156,6 +166,7 @@ protected:
     Lights _lights;
 
     Boxf _bounds;
+    bool _isEmpty;
 };
 
 }

@@ -491,6 +491,9 @@ void OSPRayScene::buildGeometry()
 
     BRAYNS_INFO << "Models to process: " << _models.size() << std::endl;
 
+    size_t totalNbVertices = 0;
+    size_t totalNbIndices = 0;
+
     // Process geometries
     for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
     {
@@ -501,86 +504,96 @@ void OSPRayScene::buildGeometry()
         size_t sphereCount = 0;
         size_t cylinderCount = 0;
         size_t coneCount = 0;
-        for( const PrimitivePtr& primitive: _primitives[materialId] )
+        if( _primitives.find(materialId) != _primitives.end() )
         {
-            const float ts =
-                ( _models.size() == 1 ) ? 0.f : primitive->getTimestamp();
-            switch(primitive->getGeometryType())
+            for( const PrimitivePtr& primitive: _primitives[materialId] )
             {
-                case GT_SPHERE:
+                const float ts =
+                    ( _models.size() == 1 ) ? 0.f : primitive->getTimestamp();
+                switch(primitive->getGeometryType())
                 {
-                    primitive->serializeData(_serializedSpheresData[materialId]);
-                    ++_serializedSpheresDataSize[materialId];
-                    ++sphereCount;
-                    _timestampSpheresIndices[materialId][ts] = sphereCount;
-                }
-                break;
-                case GT_CYLINDER:
-                {
-                    primitive->serializeData(_serializedCylindersData[materialId]);
-                    ++_serializedCylindersDataSize[materialId];
-                    ++cylinderCount;
-                    _timestampCylindersIndices[materialId][ts] = cylinderCount;
-                }
-                break;
-                case GT_CONE:
-                {
-                    primitive->serializeData(_serializedConesData[materialId]);
-                    ++_serializedConesDataSize[materialId];
-                    ++coneCount;
-                    _timestampConesIndices[materialId][ts] = coneCount;
-                }
-                default:
+                    case GT_SPHERE:
+                    {
+                        primitive->serializeData(_serializedSpheresData[materialId]);
+                        ++_serializedSpheresDataSize[materialId];
+                        ++sphereCount;
+                        _timestampSpheresIndices[materialId][ts] = sphereCount;
+                    }
                     break;
+                    case GT_CYLINDER:
+                    {
+                        primitive->serializeData(_serializedCylindersData[materialId]);
+                        ++_serializedCylindersDataSize[materialId];
+                        ++cylinderCount;
+                        _timestampCylindersIndices[materialId][ts] = cylinderCount;
+                    }
+                    break;
+                    case GT_CONE:
+                    {
+                        primitive->serializeData(_serializedConesData[materialId]);
+                        ++_serializedConesDataSize[materialId];
+                        ++coneCount;
+                        _timestampConesIndices[materialId][ts] = coneCount;
+                    }
+                    default:
+                        break;
+                }
             }
+
+            _buildParametricOSPGeometry( materialId );
         }
 
-        _buildParametricOSPGeometry( materialId );
-
         // Triangle mesh
-        OSPGeometry mesh = ospNewGeometry("trianglemesh");
-        assert(mesh);
-        OSPData vertices = ospNewData(
-            _trianglesMeshes[materialId].getVertices().size(),
-            OSP_FLOAT3A,
-            &_trianglesMeshes[materialId].getVertices()[0],
-            OSP_DATA_SHARED_BUFFER);
-        OSPData normals = ospNewData(
-            _trianglesMeshes[materialId].getNormals().size(),
-            OSP_FLOAT3A,
-            &_trianglesMeshes[materialId].getNormals()[0],
-            OSP_DATA_SHARED_BUFFER);
-        OSPData indices = ospNewData(
-            _trianglesMeshes[materialId].getIndices().size(),
-            OSP_INT3,
-            &_trianglesMeshes[materialId].getIndices()[0],
-            OSP_DATA_SHARED_BUFFER);
-        OSPData colors = ospNewData(
-            _trianglesMeshes[materialId].getColors().size(),
-            OSP_FLOAT3A,
-            &_trianglesMeshes[materialId].getColors()[0],
-            OSP_DATA_SHARED_BUFFER);
-        OSPData texcoord = ospNewData(
-            _trianglesMeshes[materialId].getTextureCoordinates().size(),
-            OSP_FLOAT2,
-            &_trianglesMeshes[materialId].getTextureCoordinates()[0],
-            OSP_DATA_SHARED_BUFFER);
-        ospSetObject(mesh,"position",vertices);
-        ospSetObject(mesh,"index",indices);
-        ospSetObject(mesh,"vertex.normal",normals);
-        ospSetObject(mesh,"vertex.color",colors);
-        ospSetObject(mesh,"vertex.texcoord",texcoord);
-        ospSet1i(mesh, "alpha_type", 0);
-        ospSet1i(mesh, "alpha_component", 4);
+        if( _trianglesMeshes.find(materialId) != _trianglesMeshes.end() )
+        {
+            OSPGeometry mesh = ospNewGeometry("trianglemesh");
+            assert(mesh);
+            OSPData vertices = ospNewData(
+                _trianglesMeshes[materialId].getVertices().size(),
+                OSP_FLOAT3A,
+                &_trianglesMeshes[materialId].getVertices()[0],
+                OSP_DATA_SHARED_BUFFER);
+            totalNbVertices += _trianglesMeshes[materialId].getVertices().size();
 
-        if (_ospMaterials[materialId])
-            ospSetMaterial(mesh, _ospMaterials[materialId]);
+            OSPData normals = ospNewData(
+                _trianglesMeshes[materialId].getNormals().size(),
+                OSP_FLOAT3A,
+                &_trianglesMeshes[materialId].getNormals()[0],
+                OSP_DATA_SHARED_BUFFER);
+            OSPData indices = ospNewData(
+                _trianglesMeshes[materialId].getIndices().size(),
+                OSP_INT3,
+                &_trianglesMeshes[materialId].getIndices()[0],
+                OSP_DATA_SHARED_BUFFER);
+            totalNbIndices += _trianglesMeshes[materialId].getIndices().size();
 
-        ospCommit(mesh);
+            OSPData colors = ospNewData(
+                _trianglesMeshes[materialId].getColors().size(),
+                OSP_FLOAT3A,
+                &_trianglesMeshes[materialId].getColors()[0],
+                OSP_DATA_SHARED_BUFFER);
+            OSPData texcoord = ospNewData(
+                _trianglesMeshes[materialId].getTextureCoordinates().size(),
+                OSP_FLOAT2,
+                &_trianglesMeshes[materialId].getTextureCoordinates()[0],
+                OSP_DATA_SHARED_BUFFER);
+            ospSetObject(mesh,"position",vertices);
+            ospSetObject(mesh,"index",indices);
+            ospSetObject(mesh,"vertex.normal",normals);
+            ospSetObject(mesh,"vertex.color",colors);
+            ospSetObject(mesh,"vertex.texcoord",texcoord);
+            ospSet1i(mesh, "alpha_type", 0);
+            ospSet1i(mesh, "alpha_component", 4);
 
-        // Meshes are by default added to all timestamps
-        for( const auto& model: _models )
-            ospAddGeometry( model.second, mesh);
+            if (_ospMaterials[materialId])
+                ospSetMaterial(mesh, _ospMaterials[materialId]);
+
+            ospCommit(mesh);
+
+            // Meshes are by default added to all timestamps
+            for( const auto& model: _models )
+                ospAddGeometry( model.second, mesh);
+        }
     }
 
     commitLights();
@@ -603,10 +616,15 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Spheres  : " << totalNbSpheres << std::endl;
     BRAYNS_INFO << "Cylinders: " << totalNbCylinders << std::endl;
     BRAYNS_INFO << "Cones    : " << totalNbCones << std::endl;
+    BRAYNS_INFO << "Vertices : " << totalNbVertices << std::endl;
+    BRAYNS_INFO << "Indices  : " << totalNbIndices << std::endl;
     BRAYNS_INFO << "--------------------" << std::endl;
 
     if(!_geometryParameters.getSaveCacheFile().empty())
         _saveCacheFile();
+
+    _isEmpty = ( totalNbSpheres + totalNbCylinders +
+                 totalNbCones + totalNbVertices ) == 0;
 }
 
 void OSPRayScene::commitLights()

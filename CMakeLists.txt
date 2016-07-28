@@ -107,6 +107,11 @@ if(BRAYNS_SERVICE_ENABLED)
   add_subdirectory(apps/BraynsService)
 endif()
 
+option(BRAYNS_BENCHMARK_ENABLED "Brayns Benchmark" OFF)
+if(BRAYNS_BENCHMARK_ENABLED)
+  add_subdirectory(apps/BraynsBenchmark)
+endif()
+
 add_subdirectory(tests)
 
 include(DoxygenRule)
