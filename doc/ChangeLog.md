@@ -3,6 +3,9 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#20](https://github.com/BlueBrain/Brayns/pull/20):
+  Added default Cornell Box scene when no datasource is provided. A new
+  benchmarking application was also added to allow performance measurements.
 * [#18](https://github.com/BlueBrain/Brayns/pull/18):
   ZeroEQ/Buf refactoring and cleanup to fix circular dependency and allow MacOSX
   support.

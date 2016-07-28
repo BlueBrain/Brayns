@@ -39,6 +39,7 @@ Scene::Scene(
     : _sceneParameters(sceneParameters)
     , _geometryParameters( geometryParameters )
     , _renderers( renderers )
+    , _isEmpty( true )
 {
 }
 
@@ -152,6 +153,112 @@ void Scene::setMaterials(
 MaterialPtr Scene::getMaterial( size_t index )
 {
     return _materials[index];
+}
+
+void Scene::buildDefault( )
+{
+    BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
+    const Vector3f positions[8] =
+    {
+        { -1.f,-1.f,-1.f },
+        {  1.f,-1.f,-1.f }, //    6--------7
+        { -1.f, 1.f,-1.f }, //   /|       /|
+        {  1.f, 1.f,-1.f }, //  2--------3 |
+        { -1.f,-1.f, 1.f }, //  | |      | |
+        {  1.f,-1.f, 1.f }, //  | 4------|-5
+        { -1.f, 1.f, 1.f }, //  |/       |/
+        {  1.f, 1.f, 1.f }  //  0--------1
+    };
+
+    const uint16_t indices[6][6] =
+    {
+        { 0, 1, 3, 3, 2, 0 }, // Front
+        { 1, 5, 7, 7, 3, 1 }, // Right
+        { 5, 4, 6, 6, 7, 5 }, // Back
+        { 4, 0, 2, 2, 6, 4 }, // Left
+        { 0, 1, 5, 5, 4, 0 }, // Bottom
+        { 2, 3, 7, 7, 6, 2 }  // Top
+    };
+
+    const Vector3f colors[6] =
+    {
+        { 0.8f, 0.8f, 0.8f },
+        { 1.f, 0.f, 0.f },
+        { 0.8f, 0.8f, 0.8f },
+        { 0.f, 1.f, 0.f },
+        { 0.8f, 0.8f, 0.8f },
+        { 0.8f, 0.8f, 0.8f }
+    };
+
+    const Vector3f WHITE = { 1.f, 1.f, 1.f };
+
+    // Cornell box
+    for( size_t material = 1; material < 6; ++material )
+    {
+        _materials[material]->setColor( colors[material] );
+        _materials[material]->setSpecularColor( WHITE );
+        _materials[material]->setSpecularExponent( 10.f );
+        for( size_t i = 0; i < 6; ++i )
+        {
+            const Vector3f& position = positions[ indices[material][i] ];
+            _trianglesMeshes[material].getVertices().push_back( position );
+            _bounds.merge( position );
+            _trianglesMeshes[material].getIndices().push_back(
+                Vector3i( 0, 1, 2 ));
+            _trianglesMeshes[material].getIndices().push_back(
+                Vector3i( 3, 4, 5 ));
+        }
+        _materials[material]->setSpecularColor( Vector3f( 0.1f, 0.1f, 0.1f ));
+        _materials[material]->setSpecularExponent( 10.f );
+    }
+
+    size_t material = 7;
+
+    // Sphere
+    _primitives[material].push_back( SpherePtr(
+        new Sphere( material, Vector3f( -0.5f, -0.5f, -0.5f ), 0.5f, 0, 0 )));
+    _materials[material]->setOpacity( 0.3f );
+    _materials[material]->setRefractionIndex( 1.3f );
+    _materials[material]->setSpecularColor( WHITE );
+    _materials[material]->setSpecularExponent( 100.f );
+
+    // Cylinder
+    ++material;
+    _primitives[material].push_back( CylinderPtr(
+        new Cylinder( material,
+            Vector3f( -0.5f, -0.75f, 0.5f ), Vector3f( 0.5f, -0.75f, 0.5f ),
+            0.25f, 0, 0 )));
+    _materials[material]->setColor( Vector3f( 0.1f, 0.1f, 0.8f ));
+    _materials[material]->setSpecularColor( WHITE );
+    _materials[material]->setSpecularExponent( 10.f );
+
+    // Cone
+    ++material;
+    _primitives[material].push_back( ConePtr(
+        new Cone( material,
+            Vector3f( 0.5f, -1.f, -0.5f ), Vector3f( 0.5f, 0.f, -0.5f ),
+            0.3f, 0.f, 0, 0 )));
+    _materials[material]->setReflectionIndex(0.8f);
+    _materials[material]->setSpecularColor( WHITE );
+    _materials[material]->setSpecularExponent( 10.f );
+
+    // Lamp
+    ++material;
+    const Vector3f lampPositions[4] =
+    {
+        { -0.3f, 0.98f, -0.3f },
+        {  0.3f, 0.98f, -0.3f },
+        {  0.3f, 0.98f,  0.3f },
+        { -0.3f, 0.98f,  0.3f }
+    };
+    for( size_t i = 0; i < 4; ++i )
+        _trianglesMeshes[material].getVertices().push_back( lampPositions[i] );
+    _trianglesMeshes[material].getIndices().push_back( Vector3i( 0, 1, 2 ));
+    _trianglesMeshes[material].getIndices().push_back( Vector3i( 2, 3, 0 ));
+    _materials[material]->setColor( WHITE );
+    _materials[material]->setEmission(10.f);
+
+    BRAYNS_INFO << "Bounding Box: " << _bounds << std::endl;
 }
 
 void Scene::buildEnvironment( )
