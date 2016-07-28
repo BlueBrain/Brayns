@@ -190,11 +190,13 @@ void Scene::buildDefault( )
         { 0.8f, 0.8f, 0.8f }
     };
 
+    const Vector3f WHITE = { 1.f, 1.f, 1.f };
+
     // Cornell box
     for( size_t material = 1; material < 6; ++material )
     {
         _materials[material]->setColor( colors[material] );
-        _materials[material]->setSpecularColor( Vector3f( 1.f, 1.f, 1.f ));
+        _materials[material]->setSpecularColor( WHITE );
         _materials[material]->setSpecularExponent( 10.f );
         for( size_t i = 0; i < 6; ++i )
         {
@@ -217,7 +219,7 @@ void Scene::buildDefault( )
         new Sphere( material, Vector3f( -0.5f, -0.5f, -0.5f ), 0.5f, 0, 0 )));
     _materials[material]->setOpacity( 0.3f );
     _materials[material]->setRefractionIndex( 1.3f );
-    _materials[material]->setSpecularColor( Vector3f( 1.f, 1.f, 1.f ));
+    _materials[material]->setSpecularColor( WHITE );
     _materials[material]->setSpecularExponent( 100.f );
 
     // Cylinder
@@ -227,7 +229,7 @@ void Scene::buildDefault( )
             Vector3f( -0.5f, -0.75f, 0.5f ), Vector3f( 0.5f, -0.75f, 0.5f ),
             0.25f, 0, 0 )));
     _materials[material]->setColor( Vector3f( 0.1f, 0.1f, 0.8f ));
-    _materials[material]->setSpecularColor( Vector3f( 1.f, 1.f, 1.f ));
+    _materials[material]->setSpecularColor( WHITE );
     _materials[material]->setSpecularExponent( 10.f );
 
     // Cone
@@ -237,7 +239,7 @@ void Scene::buildDefault( )
             Vector3f( 0.5f, -1.f, -0.5f ), Vector3f( 0.5f, 0.f, -0.5f ),
             0.3f, 0.f, 0, 0 )));
     _materials[material]->setReflectionIndex(0.8f);
-    _materials[material]->setSpecularColor( Vector3f( 1.f, 1.f, 1.f ));
+    _materials[material]->setSpecularColor( WHITE );
     _materials[material]->setSpecularExponent( 10.f );
 
     // Lamp
@@ -253,7 +255,7 @@ void Scene::buildDefault( )
         _trianglesMeshes[material].getVertices().push_back( lampPositions[i] );
     _trianglesMeshes[material].getIndices().push_back( Vector3i( 0, 1, 2 ));
     _trianglesMeshes[material].getIndices().push_back( Vector3i( 2, 3, 0 ));
-    _materials[material]->setColor( Vector3f( 1.f, 1.f, 1.f ));
+    _materials[material]->setColor( WHITE );
     _materials[material]->setEmission(10.f);
 
     BRAYNS_INFO << "Bounding Box: " << _bounds << std::endl;

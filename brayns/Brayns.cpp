@@ -67,7 +67,7 @@ struct Brayns::Impl
 
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
-            Vector3f( 0.1f, -0.2f, 0.5f ), Vector3f( 1.f, 1.f, 1.f ), 1.f ));
+            DEFAULT_SUN_DIRECTION, DEFAULT_SUN_COLOR, DEFAULT_SUN_INTENSITY ));
         scene->addLight( sunLight );
 
         // Build geometry

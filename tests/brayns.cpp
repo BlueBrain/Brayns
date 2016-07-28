@@ -210,8 +210,8 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
     ambientOcclusion = duration_cast< milliseconds >(
         high_resolution_clock::now() - startTime ).count();
 
-    // Ambient occlusion cost: +160%
-    BOOST_CHECK( float(ambientOcclusion) / float(reference) < 2.6f );
+    // Ambient occlusion cost: +170%
+    BOOST_CHECK( float(ambientOcclusion) / float(reference) < 2.7f );
 
     // All options
     params.getRenderingParameters().setShadows( true );
@@ -224,6 +224,6 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
     AllOptions = duration_cast< milliseconds >(
         high_resolution_clock::now() - startTime ).count();
 
-    // All options: +300%
-    BOOST_CHECK( float(AllOptions) / float(reference) < 3.f );
+    // All options: +320%
+    BOOST_CHECK( float(AllOptions) / float(reference) < 3.2f );
 }
