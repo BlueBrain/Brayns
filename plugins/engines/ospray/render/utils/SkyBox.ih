@@ -18,33 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FrameBuffer.h"
+#pragma once
 
-namespace brayns
-{
+#include <ospray/math/vec.ih>
 
-FrameBuffer::FrameBuffer(
-    const Vector2i& frameSize,
-    const FrameBufferFormat frameBufferFormat,
-    const bool accumulation )
-    : _frameSize(frameSize)
-    , _frameBufferFormat(frameBufferFormat)
-    , _accumulation( accumulation )
-{
-}
-
-size_t FrameBuffer::getColorDepth()
-{
-    switch(_frameBufferFormat)
-    {
-        case FBF_RGBA_I8:
-        case FBF_RGBA_F32:
-            return 4;
-        case FBF_RGB_I8:
-            return 3;
-        default:
-            return 0;
-    }
-}
-
-}
+/**
+    Returns the color of the skybox for a given ray. If no material is defined for the skybox, the
+    background color of the renderer is returned.
+    @param renderer Pointer to current renderer
+    @param ray Current ray
+    @param materials Pointer to the list of materials held by the renderer
+    @param nbMaterials Number of materials held by the renderer
+    @return The RGBA color of the skybox
+*/
+vec4f skyboxMapping(
+    const uniform Renderer* uniform renderer,
+    Ray& ray,
+    const uniform unsigned int32 nbMaterials,
+    const uniform ExtendedOBJMaterial* uniform* uniform materials );

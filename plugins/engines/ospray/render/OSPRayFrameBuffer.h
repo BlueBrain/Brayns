@@ -30,7 +30,10 @@ namespace brayns
 class OSPRayFrameBuffer : public brayns::FrameBuffer
 {
 public:
-    OSPRayFrameBuffer(const Vector2i& frameSize, FrameBufferFormat colorDepth);
+    OSPRayFrameBuffer(
+        const Vector2i& frameSize,
+        FrameBufferFormat colorDepth,
+        bool accumulation = true );
     ~OSPRayFrameBuffer();
 
     void clear() final;

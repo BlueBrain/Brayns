@@ -18,33 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FrameBuffer.h"
+#pragma once
 
-namespace brayns
-{
+#define ALPHA_THRESHOLD ( .05f )
+#define DEFAULT_LIGHT_EMISSION ( 2.f )
+#define DEFAULT_LIGHT_THRESHOLD ( 0.2f )
 
-FrameBuffer::FrameBuffer(
-    const Vector2i& frameSize,
-    const FrameBufferFormat frameBufferFormat,
-    const bool accumulation )
-    : _frameSize(frameSize)
-    , _frameBufferFormat(frameBufferFormat)
-    , _accumulation( accumulation )
-{
-}
+#define MATERIAL_SKYBOX 0
+#define MATERIAL_SIMULATION 1
 
-size_t FrameBuffer::getColorDepth()
-{
-    switch(_frameBufferFormat)
-    {
-        case FBF_RGBA_I8:
-        case FBF_RGBA_F32:
-            return 4;
-        case FBF_RGB_I8:
-            return 3;
-        default:
-            return 0;
-    }
-}
-
-}
+#define NB_MAX_REBOUNDS 10

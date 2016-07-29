@@ -78,7 +78,7 @@ void OSPRayRenderer::commit()
 
     ospSet1i( _renderer, "shadingEnabled", ( mt == MT_DIFFUSE ));
     ospSet1f( _renderer, "timestamp", sp.getTimestamp( ));
-    ospSet1i( _renderer, "randomNumber", rand() % 1000 );
+    ospSet1i( _renderer, "randomNumber", rand() % 10000 );
     ospSet1i( _renderer, "spp", rp.getSamplesPerPixel( ));
     ospSet1i( _renderer, "electronShading", ( mt == MT_ELECTRON ));
     ospSet1f( _renderer, "epsilon", rp.getEpsilon( ));

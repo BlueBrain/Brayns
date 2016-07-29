@@ -38,7 +38,10 @@ enum FrameBufferFormat
 class FrameBuffer
 {
 public:
-    BRAYNS_API FrameBuffer(const Vector2i& frameSize, FrameBufferFormat frameBufferFormat);
+    BRAYNS_API FrameBuffer(
+        const Vector2i& frameSize,
+        FrameBufferFormat frameBufferFormat,
+        bool accumulation = true );
     BRAYNS_API virtual ~FrameBuffer() {}
 
     BRAYNS_API virtual void clear() = 0;
@@ -53,9 +56,13 @@ public:
 
     BRAYNS_API Vector2i getSize() const { return _frameSize; }
 
+    BRAYNS_API void setAccumulation( const bool accumulation ) { _accumulation = accumulation; }
+    BRAYNS_API bool getAccumulation() const { return _accumulation; }
+
 protected:
     Vector2i _frameSize;
     FrameBufferFormat _frameBufferFormat;
+    bool _accumulation;
 };
 
 }

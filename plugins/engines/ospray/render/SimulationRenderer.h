@@ -22,45 +22,33 @@
 
 #pragma once
 
-// ospray
-#include <ospray/render/Renderer.h>
-#include <ospray/common/Material.h>
+#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
 
-// system
-#include <vector>
-
-namespace brayns {
-struct Camera;
-struct Model;
-
-struct SimulationRenderer : public ospray::Renderer
+namespace brayns
 {
-    SimulationRenderer( );
-    std::string toString( ) const final { return "ospray::OBJRenderer"; }
 
-    std::vector< void* > lightArray;
-    std::vector< void* > materialArray;
+class SimulationRenderer : public AbstractRenderer
+{
 
-    Model* world;
-    Camera* camera;
-    ospray::Data* materialData;
-    ospray::Data* lightData;
+public:
 
-    void commit( ) final;
+    SimulationRenderer();
 
-    virtual ospray::Material *createMaterial( const char *type );
+    /**
+       Returns the class name as a string
+       @return string containing the full name of the class
+    */
+    std::string toString() const final
+    {
+        return "brayns::SimulationRenderer";
+    }
 
-    bool shadowsEnabled;
-    bool softShadowsEnabled;
-    float ambientOcclusionStrength;
-    bool shadingEnabled;
-    bool electronShadingEnabled;
-    int randomNumber;
-    bool moving;
-    float timestamp;
-    int spp;
-    int simulationNbOffsets;
-    int simulationNbFrames;
+    void commit() final;
+
+private:
+
+    int _simulationNbOffsets;
+    int _simulationNbFrames;
 };
 
 } // ::brayns

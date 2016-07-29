@@ -23,7 +23,7 @@
 #ifndef PROXIMITYRENDERER_H
 #define PROXIMITYRENDERER_H
 
-#include <ospray/render/Renderer.h>
+#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
 
 namespace brayns
 {
@@ -48,7 +48,7 @@ namespace brayns
     electron shading algorithm.
     - spp: Unsigned integer defining the number of samples per pixel
 */
-struct ProximityRenderer : public ospray::Renderer
+class ProximityRenderer : public AbstractRenderer
 {
 public:
     ProximityRenderer( );
@@ -57,9 +57,9 @@ public:
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString( ) const final
+    std::string toString() const final
     {
-        return "ospray::ProximityRenderer";
+        return "brayns::ProximityRenderer";
     }
 
     /**
@@ -69,18 +69,12 @@ public:
     virtual void commit( );
 
 private:
-    std::vector< void* > lightArray;
-    std::vector< void* > materialArray;
 
-    ospray::Data* lightData;
-    ospray::Data* materialData;
+    ospray::vec3f _nearColor;
+    ospray::vec3f _farColor;
+    float _detectionDistance;
+    bool _detectionOnDifferentMaterial;
 
-    float detectionDistance;
-    bool detectionOnDifferentMaterial;
-    bool electronShadingEnabled;
-    int randomNumber;
-    float timestamp;
-    int spp;
 };
 
 }
