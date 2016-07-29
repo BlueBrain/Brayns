@@ -64,6 +64,8 @@ public:
     const Vector2ui& getJpegSize() const { return _jpegSize; }
     void setJpegSize( const Vector2ui& size ) { _jpegSize = size; }
 
+    const strings& getFilters() const { return _filters; }
+
 protected:
     bool _parse( const po::variables_map& vm ) final;
 
@@ -74,6 +76,7 @@ protected:
     bool _benchmarking;
     size_t _jpegCompression;
     Vector2ui _jpegSize;
+    strings _filters;
 };
 
 }

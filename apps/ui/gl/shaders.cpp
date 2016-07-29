@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include "shaders.h"
+#include <brayns/common/log.h>
 
 #undef glewGetContext
 #define glewGetContext() glewContext
@@ -37,8 +38,8 @@ bool compile( const unsigned shader, const char* source )
     {
         GLchar errorLog[1024] = {0};
         glGetShaderInfoLog( shader, 1024, 0, errorLog );
-        std::cout << "Failed to compile shader " << shader << ": " << errorLog
-                  << std::endl;
+        BRAYNS_ERROR << "Failed to compile shader " << shader << ": " << errorLog
+                     << std::endl;
         return false;
     }
     return true;
@@ -49,8 +50,8 @@ bool linkProgram( const unsigned program, const char* vertexShaderSource,
 {
     if( !program || !vertexShaderSource || !fragmentShaderSource )
     {
-        std::cout << "Failed to link shader program " << program << ": No valid "
-                     "shader program, vertex or fragment source." << std::endl;
+        BRAYNS_ERROR << "Failed to link shader program " << program << ": No valid "
+                        "shader program, vertex or fragment source." << std::endl;
         return false;
     }
 
@@ -80,8 +81,8 @@ bool linkProgram( const unsigned program, const char* vertexShaderSource,
     {
         GLchar errorLog[1024] = {0};
         glGetProgramInfoLog( program, 1024, 0, errorLog );
-        std::cout << "Failed to link shader program " << program << ": "
-                  << errorLog << std::endl;
+        BRAYNS_ERROR << "Failed to link shader program " << program << ": "
+                     << errorLog << std::endl;
         return false;
     }
     return true;

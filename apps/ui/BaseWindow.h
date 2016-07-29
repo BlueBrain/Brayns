@@ -249,7 +249,7 @@ protected:
 
     FPSCounter _fps;
 
-    ScreenSpaceProcessor screeSpaceProcessor_;
+    ScreenSpaceProcessor _screenSpaceProcessor;
 
 private:
     /*! set a default camera position that views given bounds from the

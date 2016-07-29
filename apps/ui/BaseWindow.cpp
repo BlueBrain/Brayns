@@ -31,10 +31,10 @@
 #include <assert.h>
 
 #ifdef __APPLE__
-//#  include "GLUT/glut.h"
+#  include "GLUT/glut.h"
 #  include <unistd.h>
-//#else
-//#  include "GL/glut.h"
+#else
+#  include "GL/glut.h"
 #endif
 
 namespace brayns
@@ -52,6 +52,7 @@ void runGLUT( )
 void initGLUT(int *ac, const char **av)
 {
     glutInit( ac, (char **) av);
+    glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
 }
 
 // ------------------------------------------------------------------
@@ -186,6 +187,10 @@ void BaseWindow::reshape(const Vector2i& newSize)
     _viewPort.setAspect(float(newSize.x( ))/float(newSize.y( )));
     _brayns->reshape(newSize);
     _brayns->getParametersManager().getApplicationParameters().setWindowSize(newSize);
+
+    if( !_brayns->getParametersManager().getApplicationParameters().getFilters().empty( ))
+        _screenSpaceProcessor.resize( newSize.x( ), newSize.y( ));
+
     forceRedraw( );
 }
 
@@ -202,7 +207,6 @@ void BaseWindow::forceRedraw( )
 
 void BaseWindow::display( )
 {
-    std::cout<<" VERSION: " << glGetString(GL_VERSION) << std::endl;
     if(_viewPort.getModified( ))
     {
         _brayns->getFrameBuffer().clear();
@@ -222,28 +226,52 @@ void BaseWindow::display( )
     _brayns->getCamera().commit();
     _brayns->render( renderInput, renderOutput );
 
-    GLenum format = GL_RGBA;
-    GLenum type   = GL_FLOAT;
-    GLvoid* buffer = 0;
-    switch(_frameBufferMode)
+    if( _brayns->getParametersManager().getApplicationParameters().getFilters().empty( ))
     {
-    case BaseWindow::FRAMEBUFFER_COLOR:
-        type = GL_UNSIGNED_BYTE;
-        buffer = renderOutput.colorBuffer.data( );
-        break;
-    case BaseWindow::FRAMEBUFFER_DEPTH:
-        format = GL_LUMINANCE;
-        buffer = renderOutput.depthBuffer.data( );
-        break;
-    default:
-        glClearColor(0.f,0.f,0.f,1.f);
-        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+        GLenum format = GL_RGBA;
+        GLenum type   = GL_FLOAT;
+        GLvoid* buffer = 0;
+        switch(_frameBufferMode)
+        {
+        case BaseWindow::FRAMEBUFFER_COLOR:
+            type = GL_UNSIGNED_BYTE;
+            buffer = renderOutput.colorBuffer.data( );
+            break;
+        case BaseWindow::FRAMEBUFFER_DEPTH:
+            format = GL_LUMINANCE;
+            buffer = renderOutput.depthBuffer.data( );
+            break;
+        default:
+            glClearColor(0.f,0.f,0.f,1.f);
+            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        }
+
+        glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
+    }
+    else
+    {
+        ScreenSpaceProcessorData ssProcData;
+
+        ssProcData.width = _windowSize.x( );
+        ssProcData.height = _windowSize.y( );
+
+        ssProcData.colorFormat = GL_RGBA;
+        ssProcData.colorBuffer = renderOutput.colorBuffer.data( );
+        ssProcData.colorType = GL_UNSIGNED_BYTE;
+
+        ssProcData.depthFormat = GL_LUMINANCE;
+        ssProcData.depthBuffer = renderOutput.depthBuffer.data( );
+        ssProcData.depthType = GL_FLOAT;
+
+        _screenSpaceProcessor.draw( ssProcData );
+
     }
 
     _fps.stop();
-
-    glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
     glutSwapBuffers( );
+
+    clearPixels( );
 
 #if(BRAYNS_USE_ZEROEQ || BRAYNS_USE_DEFLECT)
     Camera& camera = _brayns->getCamera( );
@@ -263,9 +291,7 @@ void BaseWindow::display( )
 
 void BaseWindow::clearPixels( )
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glutSwapBuffers( );
+    _screenSpaceProcessor.clear();
 }
 
 void BaseWindow::drawPixels(const int* framebuffer)
@@ -324,6 +350,8 @@ void BaseWindow::create(const char *title,
 
     if(fullScreen)
         glutFullScreen( );
+
+    _screenSpaceProcessor.init( width, height );
 }
 
 void BaseWindow::specialkey( int key, const Vector2f& )
