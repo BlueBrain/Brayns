@@ -233,11 +233,8 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
 
     uniform uint8 *conePtr =
             THIS->data + THIS->bytesPerCone*ray.primID;
-    // Store timestamp as texture coordinate
-    varying float value =
-            *((varying float *)(conePtr+THIS->offset_value));
-    dg.st.x = value;
-
+    // Store value as texture coordinate
+    dg.st.x = *((varying float *)(conePtr+THIS->offset_value));
 
     if (flags & DG_NORMALIZE)\
     {

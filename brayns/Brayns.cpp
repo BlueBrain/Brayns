@@ -449,7 +449,7 @@ private:
         parameter --report)
         @return the number of simulation frames loaded
     */
-    size_t _loadCompartmentReport()
+    void _loadCompartmentReport()
     {
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
@@ -463,8 +463,8 @@ private:
             filename << std::endl;
         MorphologyLoader morphologyLoader( geometryParameters );
         const servus::URI uri( filename );
-        return morphologyLoader.importSimulationIntoTexture(
-            uri, target, report, *_engine->getScene());
+        if( morphologyLoader.importSimulationData( uri, target, report, *_engine->getScene()))
+            _engine->getScene()->commitSimulationData();
     }
 
     void _buildDefaultScene()

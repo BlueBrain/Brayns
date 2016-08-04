@@ -36,6 +36,7 @@ const size_t CACHE_VERSION_1 = 1;
 const size_t CACHE_VERSION_2 = 2;
 const size_t CACHE_VERSION_3 = 3;
 const size_t CACHE_VERSION_4 = 4;
+const size_t CACHE_VERSION_5 = 5;
 
 struct TextureTypeMaterialAttribute
 {
@@ -60,6 +61,7 @@ OSPRayScene::OSPRayScene(
     : Scene( renderers, sceneParameters, geometryParameters )
     , _ospLightData( 0 )
     , _ospMaterialData( 0 )
+    , _ospSimulationData( 0 )
 {
 }
 
@@ -90,7 +92,7 @@ void OSPRayScene::_saveCacheFile()
     BRAYNS_INFO << "Saving scene to binary file: " << filename << std::endl;
     std::ofstream file( filename, std::ios::out | std::ios::binary );
 
-    const size_t version = CACHE_VERSION_4;
+    const size_t version = CACHE_VERSION_5;
     file.write( ( char* )&version, sizeof( size_t ));
     BRAYNS_INFO << "Version: " << version << std::endl;
 
@@ -175,21 +177,19 @@ void OSPRayScene::_saveCacheFile()
     file.write( ( char* )&_bounds, sizeof( Boxf ));
     BRAYNS_INFO << _bounds << std::endl;
 
-    Texture2DPtr simulationTexture = _textures[TEXTURE_NAME_SIMULATION];
-    if( simulationTexture )
+    uint64_t simulationSize = 0;
+    const uint64_t nbFrames = _simulationData.valuesPerFrame.size();
+    file.write( ( char* )&nbFrames, sizeof( uint64_t ));
+    for( uint64_t frame = 0; frame < nbFrames; ++frame )
     {
-        const size_t width = simulationTexture->getWidth();
-        const size_t height = simulationTexture->getHeight();
-        const size_t nbChannels = simulationTexture->getNbChannels();
-        size_t simulationTextureSize = width * height * nbChannels;
-        file.write( ( char* )&width, sizeof( size_t ));
-        file.write( ( char* )&height, sizeof( size_t ));
-        file.write( ( char* )&nbChannels, sizeof( size_t ));
-        file.write( ( char* )simulationTexture->getRawData(), sizeof(char) * simulationTextureSize );
-        BRAYNS_INFO << "Simulation texture " << width << "x"
-                    << height << "x" << nbChannels
-                    << std::endl;
+        const uint64_t simulationDataSize = _simulationData.valuesPerFrame[frame].size();
+        file.write( ( char* )&simulationDataSize, sizeof( uint64_t ));
+        if( simulationDataSize != 0 )
+            file.write( ( char* )_simulationData.valuesPerFrame[frame].data(),
+                sizeof(float) * simulationDataSize );
+        simulationSize += simulationDataSize * sizeof( float );
     }
+    BRAYNS_INFO << "Simulation size: " << simulationSize << " bytes" << std::endl;
     file.close();
     BRAYNS_INFO << "Scene successfully saved"<< std::endl;
 }
@@ -211,9 +211,9 @@ void OSPRayScene::_loadCacheFile()
     file.read( (char*)&version, sizeof( size_t ));
     BRAYNS_INFO << "Version: " << version << std::endl;
 
-    if( version != CACHE_VERSION_4 )
+    if( version != CACHE_VERSION_5 )
     {
-        BRAYNS_ERROR << "Only version " << CACHE_VERSION_4
+        BRAYNS_ERROR << "Only version " << CACHE_VERSION_5
                      << " is supported" << std::endl;
         return;
     }
@@ -316,37 +316,30 @@ void OSPRayScene::_loadCacheFile()
 
     // Scene bounds
     file.read( ( char* )&_bounds, sizeof( Boxf ));
-    // Read simulation texture
-    size_t width;
-    file.read( (char*)&width, sizeof( size_t ));
-    if( !file.eof() )
+
+    // Read simulation data
+    uint64_t simulationSize = 0;
+    uint64_t nbFrames;
+    file.read( (char*)&nbFrames, sizeof( uint64_t ));
+    for( uint64_t frame = 0; frame < nbFrames; ++frame )
     {
-        size_t height;
-        file.read( (char*)&height, sizeof( size_t ));
-        size_t nbChannels;
-        file.read( (char*)&nbChannels, sizeof( size_t ));
-        size_t simulationTextureSize = width * height * nbChannels;
+        size_t simulationDataSize;
+        file.read( (char*)&simulationDataSize, sizeof( uint64_t ));
+        if( simulationDataSize != 0 )
+        {
+            _simulationData.valuesPerFrame[frame].clear();
+            _simulationData.valuesPerFrame[frame].reserve( simulationDataSize );
+            file.read( ( char* )_simulationData.valuesPerFrame[frame].data(),
+                       sizeof(float) * simulationDataSize );
+            simulationSize += simulationDataSize * sizeof( float );
+        }
 
-        BRAYNS_INFO << "Simulation texture: " <<
-            width << "x" << height << "x" << nbChannels << std::endl;
-
-        uint8_ts bytes;
-        bytes.resize( simulationTextureSize );
-        file.read( (char*)bytes.data(), simulationTextureSize );
-
-        Texture2DPtr simulationTexture( new Texture2D );
-        simulationTexture->setWidth(width);
-        simulationTexture->setHeight(height);
-        simulationTexture->setNbChannels(nbChannels);
-        simulationTexture->setDepth(1);
-        simulationTexture->setRawData( bytes.data(), simulationTextureSize );
-
-        _textures[TEXTURE_NAME_SIMULATION] = simulationTexture;
-
-        _materials[MATERIAL_SIMULATION]->setTexture(
-            TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
-        commitMaterials();
     }
+    BRAYNS_INFO << "Simulation size: " << simulationSize  << "/"
+                << nbFrames << std::endl;
+    if( simulationSize != 0 )
+        commitSimulationData();
+
     BRAYNS_INFO << _bounds << std::endl;
     BRAYNS_INFO << "Scene successfully loaded"<< std::endl;
     file.close();
@@ -755,27 +748,27 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
 
                 ospCommit( _ospMaterialData );
             }
-
-            // Simulation texture information needs to be transmitted to
-            // the renderer
-            Texture2DPtr simulationTexture =
-                _textures[TEXTURE_NAME_SIMULATION];
-            if( simulationTexture )
-            {
-                ospSet1i( osprayRenderer->impl(), "simulationNbFrames",
-                    simulationTexture->getHeight());
-                ospSet1i( osprayRenderer->impl(), "simulationNbOffsets",
-                    simulationTexture->getWidth());
-                BRAYNS_DEBUG << "Simulation set to material "
-                             << MATERIAL_SIMULATION << " :"
-                             << simulationTexture->getWidth() << "x"
-                             << simulationTexture->getHeight() << std::endl;
-            }
-            ospSetData( osprayRenderer->impl(), "materials", _ospMaterialData );
         }
 
         ospCommit( osprayRenderer->impl() );
 
+    }
+}
+
+void OSPRayScene::commitSimulationData()
+{
+    if( _simulationData.valuesPerFrame.size() == 0 )
+        return;
+
+    for( const auto& renderer: _renderers )
+    {
+        size_t ts = _sceneParameters.getTimestamp() % _simulationData.valuesPerFrame.size();
+        OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.lock().get( ));
+        _ospSimulationData = ospNewData(
+            _simulationData.valuesPerFrame[ts].size(), OSP_FLOAT,
+            &_simulationData.valuesPerFrame[ts].data()[0], OSP_DATA_SHARED_BUFFER );
+        ospCommit( _ospSimulationData );
+        ospSetData( osprayRenderer->impl(), "simulationData", _ospSimulationData );
     }
 }
 

@@ -47,8 +47,10 @@ public:
 
 private:
 
-    int _simulationNbOffsets;
-    int _simulationNbFrames;
+    ospray::Ref< ospray::Data > _simulationData;
+
+    ospray::int64 _simulationFrameSize;
+    ospray::int64 _simulationNbFrames;
 };
 
 } // ::brayns
