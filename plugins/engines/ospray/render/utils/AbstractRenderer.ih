@@ -1,0 +1,143 @@
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Based on OSPRay implementation
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+// ospray
+#include <ospray/fb/FrameBuffer.ih>
+#include <ospray/camera/PerspectiveCamera.ih>
+#include <ospray/common/Model.ih>
+#include <ospray/texture/Texture2D.ih>
+#include <ospray/lights/Light.ih>
+#include <ospray/render/Renderer.ih>
+
+// obj renderer
+#include <ospray/render/scivis/SciVisMaterial.ih>
+#include <plugins/engines/ospray/render/ExtendedOBJMaterial.ih>
+
+// Brayns
+#include <plugins/engines/ospray/render/utils/Consts.ih>
+#include <plugins/engines/ospray/render/utils/RandomGenerator.ih>
+#include <plugins/engines/ospray/render/utils/SkyBox.ih>
+
+struct AbstractRenderer
+{
+    Renderer super;
+
+    const uniform Light *uniform *uniform lights;
+    uint32 numLights;
+    const uniform ExtendedOBJMaterial *uniform *uniform materials;
+    uint32 numMaterials;
+    vec3f bgColor;
+    bool shadowsEnabled;
+    bool shadingEnabled;
+    bool softShadowsEnabled;
+    float ambientOcclusionStrength;
+    bool electronShadingEnabled;
+    int randomNumber;
+    float timestamp;
+    int spp;
+};
+
+/**
+    Launches a random ray in the half-hemishere of the surface and returns information about the
+    intersected geometry, if any.
+    @param self Pointer to the current renderer
+    @param ray Current ray used to initialize the random ray
+    @param sample Screen sample
+    @param intersection First ray intersection with the surface
+    @param normal Normal to the surface
+    @param geometry Geometry intersected by the random ray
+    @param backgroundColor Background color in case the random ray does not hit any geometry
+    @param distanceToIntersection distanceToIntersection between surface intersection and the
+           geometry hit by the random ray
+    @param randomDirection Computed random direction
+    @return true if a geometry intersects the random ray, false otherwise
+*/
+bool launchRandomRay(
+    const uniform AbstractRenderer* uniform self,
+    const varying Ray& ray,
+    varying ScreenSample& sample,
+    const varying vec3f& intersection,
+    const varying vec3f& normal,
+    DifferentialGeometry& geometry,
+    varying vec3f& backgroundColor,
+    varying float& distanceToIntersection,
+    varying vec3f& randomDirection );
+
+/**
+    Returns the refracted vector according to the direction of the incident ray, he normal to the
+    surface, and localRefraction indices
+    @param direction Direction of the incident ray
+    @param normal Normal to the surface
+    @param n1 In localRefraction index
+    @param n2 Out localRefraction index
+    @return Refracted vector
+*/
+vec3f refractedVector(
+    const varying vec3f& direction,
+    const varying vec3f& normal,
+    const varying float n1,
+    const varying float n2);
+
+/**
+    Computes indirect shading for secondary rays. A random ray is launched in the half-hemisphere
+    defined by the normal to the surface hit by the first generation ray. If the random ray hits a
+    light emitting surface, the contribution of the light is returned, otherwise the ambient
+    occlusion algorithmn is applied. If no geometry is intersected by the random ray, the
+    contribution is the background or the skymap color if defined.
+    @param self Pointer to the current renderer
+    @param ray Current ray used to initialize the random ray
+    @param sample Screen sample
+    @param intersection First ray intersection with the surface
+    @param normal Normal to the surface
+    @param geometry Geometry intersected by the random ray
+    @param indirectShadingColor Resulting color from the random ray
+    @param indirectShadingPower Resulting intensity according to the distance to intersection
+           between the intersection and the geometry intersect by the random ray.
+*/
+bool indirectShading(
+    const uniform AbstractRenderer* uniform self,
+    Ray& ray,
+    varying ScreenSample& sample,
+    const varying vec3f& intersection,
+    const varying vec3f& normal,
+    DifferentialGeometry& geometry,
+    varying vec3f& indirectShadingColor,
+    varying float& indirectShadingPower );
+
+/**
+    Return the normalized light intensity decreased by the opacity of the intersected surfaces.
+    @param self Pointer to the current renderer
+    @param ray Current ray used to initialize the random ray
+    @param sample Screen sample
+    @param intersection First ray intersection with the surface
+    @param normal Normal to the surface
+    @param lightDirection Direction of light source
+    @return Intensity of shaded light
+*/
+float shadedLightIntensity(
+    const uniform AbstractRenderer* uniform self,
+    Ray& ray,
+    varying ScreenSample& sample,
+    const varying vec3f& intersection,
+    const varying vec3f& normal,
+    varying vec3f& lightDirection );
+

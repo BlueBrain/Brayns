@@ -83,6 +83,9 @@ struct Brayns::Impl
         // Set default camera according to scene bounding box
         _setDefaultCamera( );
 
+        // Set default epsilon according to scene bounding box
+        _setDefaultEpsilon( );
+
         // Commit changes to the rendering engine
         _engine->commit();
     }
@@ -288,6 +291,19 @@ private:
             static_cast< float >( frameSize.y()));
     }
 
+    void _setDefaultEpsilon()
+    {
+        float epsilon = _parametersManager->getRenderingParameters().getEpsilon();
+        if( epsilon == 0.f )
+        {
+            ScenePtr scene = _engine->getScene();
+            const Vector3f& worldBoundsSize = scene->getWorldBounds().getSize();
+            epsilon = worldBoundsSize.length() / 1e6f;
+            BRAYNS_INFO << "Default epsilon: " << epsilon << std::endl;
+            _parametersManager->getRenderingParameters().setEpsilon( epsilon );
+        }
+    }
+
     /**
         Loads data from SWC and H5 files located in the folder specified in the
         geometry parameters (command line parameter --morphology-folder)
@@ -391,7 +407,7 @@ private:
                         scene->getWorldBounds()
                     };
                     if(!meshLoader.importMeshFromFile(
-                        filename, MeshContainer, MQ_FAST, NO_MATERIAL ))
+                        filename, MeshContainer, MQ_MAX_QUALITY, NO_MATERIAL ))
                     {
                         BRAYNS_ERROR << "Failed to import " <<
                         filename << std::endl;

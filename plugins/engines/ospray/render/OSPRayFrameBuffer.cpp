@@ -28,8 +28,11 @@ namespace brayns
 
 const float DEFAULT_GAMMA = 2.2f;
 
-OSPRayFrameBuffer::OSPRayFrameBuffer(const Vector2i& frameSize, const FrameBufferFormat colorDepth)
-    : FrameBuffer(frameSize, colorDepth)
+OSPRayFrameBuffer::OSPRayFrameBuffer(
+    const Vector2i& frameSize,
+    const FrameBufferFormat colorDepth,
+    const bool accumulation )
+    : FrameBuffer( frameSize, colorDepth, accumulation )
     , _frameBuffer(0)
     , _colorBuffer(0)
     , _depthBuffer(0)
@@ -67,8 +70,13 @@ void OSPRayFrameBuffer::resize(const Vector2i& frameSize)
     }
 
     osp::vec2i size = { _frameSize.x(), _frameSize.y() };
-    _frameBuffer = ospNewFrameBuffer( size,
-        format, OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM );
+
+
+    size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
+    if( _accumulation )
+        attributes |= OSP_FB_ACCUM;
+
+    _frameBuffer = ospNewFrameBuffer( size, format, attributes );
     ospSet1f(_frameBuffer, "gamma", DEFAULT_GAMMA);
     ospCommit(_frameBuffer);
     clear();
@@ -76,7 +84,10 @@ void OSPRayFrameBuffer::resize(const Vector2i& frameSize)
 
 void OSPRayFrameBuffer::clear()
 {
-    ospFrameBufferClear(_frameBuffer, OSP_FB_ACCUM);
+    size_t attributes = 0;
+    if( _accumulation )
+        attributes |= OSP_FB_ACCUM;
+    ospFrameBufferClear( _frameBuffer, attributes );
 }
 
 void OSPRayFrameBuffer::map()

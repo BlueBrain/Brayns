@@ -20,97 +20,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExtendedOBJMaterial.ih"
+#include <plugins/engines/ospray/render/utils/AbstractRenderer.ih>
 
-#include <ospray/common/Model.ih>
-#include <ospray/lights/Light.ih>
-#include <ospray/render/Renderer.ih>
+struct ProximityRenderer
+{
+    AbstractRenderer abstract;
 
-// Brayns
-#include <plugins/engines/ospray/render/utils/RandomGenerator.ih>
-
-#define ALPHA_THRESHOLD (.05f)
-
-#define MATERIAL_SKYBOX 0
-
-struct ProximityRenderer {
-    Renderer super;
-    const uniform Light *uniform *uniform lights;
-    uint32 numLights;
-    const uniform ExtendedOBJMaterial *uniform *uniform materials;
-    uint32 numMaterials;
-    vec3f bgColor;
     vec3f nearColor;
     vec3f farColor;
     float detectionDistance;
     bool detectionOnDifferentMaterial;
     bool electronShadingEnabled;
-    int randomNumber;
-    float timestamp;
-    int spp;
 };
-
-/*
-________________________________________________________________________________
-
-Skybox mapping
-________________________________________________________________________________
-*/
-vec4f skyboxMapping(
-    const uniform ProximityRenderer* uniform self,
-    Ray& ray )
-{
-    vec4f result = make_vec4f( self->bgColor );
-    if( self->numMaterials <= MATERIAL_SKYBOX )
-        return result;
-
-    const float radius = 10000.f;
-    const uniform ExtendedOBJMaterial *uniform mat =
-        self->materials[MATERIAL_SKYBOX];
-    if( !mat->map_Kd )
-        return result;
-
-    // solve the equation sphere-ray to find the intersections
-    vec3f dir = ray.dir;
-
-    float a = 2.f * dot( dir, dir );
-    float b = 2.f * dot( ray.org, dir );
-    float c = dot( ray.org, ray.org )- radius * radius;
-    float d = b * b - 2.f * a * c;
-
-    if(  d <= 0.f || a == 0.f)
-        return result;
-
-    float r = sqrt( d );
-    float t1 = ( -b - r ) / a;
-    float t2 = ( -b + r ) / a;
-
-    if( t1 <= self->super.epsilon && t2<=self->super.epsilon )
-        return result; // both intersections are behind the ray origin
-
-    float t = 0.f;
-    if( t1 <= self->super.epsilon )
-        t = t2;
-    else
-        if( t2 <= self->super.epsilon )
-            t = t1;
-        else
-            t = ( t1 < t2 ) ? t1 : t2;
-
-    if( t<self->super.epsilon)
-        return result; // Too close to intersection
-
-    vec3f intersection = normalize(ray.org+t*dir);
-
-    // Intersection found, now get skybox color
-    vec2f st =
-    {
-        (( atan2( intersection.x, intersection.z ) / PI ) + 1.f ) * .5f,
-        -( asin( intersection.y ) / PI ) + .5f
-    };
-
-    return get4f( mat->map_Kd, st );
-}
 
 inline vec3f ProximityRenderer_shadeRay(
         const uniform ProximityRenderer* uniform self,
@@ -122,16 +43,19 @@ inline vec3f ProximityRenderer_shadeRay(
     varying float path_opacity = 1.f;
     varying vec3f colorKs = make_vec3f( 0.f );
 
-    traceRay( self->super.model, ray );
+    traceRay( self->abstract.super.model, ray );
 
     if( ray.geomID < 0 )
     {
         // No intersection. Return skybox color
+
         color = color +
-            path_opacity * make_vec3f( skyboxMapping( self, ray ));
-        sample.z = 1;
+            path_opacity * make_vec3f( skyboxMapping(
+                (Renderer *)self, ray, self->abstract.numMaterials, self->abstract.materials ));
+
+        sample.z = 1.f;
         sample.alpha = 0.f;
-        return self->bgColor + color + colorKs;
+        return self->abstract.bgColor + color + colorKs;
     }
 
     sample.alpha = 1.f;
@@ -139,7 +63,7 @@ inline vec3f ProximityRenderer_shadeRay(
 
     DifferentialGeometry dg;
     postIntersect(
-                self->super.model,
+                self->abstract.super.model,
                 dg,
                 ray,
                 DG_NG|DG_NS|DG_NORMALIZE|DG_FACEFORWARD|DG_MATERIALID|
@@ -155,7 +79,7 @@ inline vec3f ProximityRenderer_shadeRay(
     varying vec3f Kd = make_vec3f( 0.0f, 0.0f, 0.0f );
     varying vec3f Ks = make_vec3f( 0.f );
     varying vec3f normal = dg.Ns;
-    varying const vec3f P = dg.P + self->super.epsilon * dg.Ng;
+    varying const vec3f P = dg.P + self->abstract.super.epsilon * dg.Ng;
 
     if( !objMaterial )
     {
@@ -180,9 +104,9 @@ inline vec3f ProximityRenderer_shadeRay(
             ray.dir - ( 2.f * dot( ray.dir, normal )) * normal;
 
         //calculate shading for all lights
-        for( uniform int i = 0; self->lights && i < self->numLights; i++ )
+        for( uniform int i = 0; self->abstract.lights && i < self->abstract.numLights; i++ )
         {
-            const uniform Light* uniform l = self->lights[i];
+            const uniform Light* uniform l = self->abstract.lights[i];
 
             const varying vec2f s = make_vec2f( 0.f );
             const varying Light_SampleRes light = l->sample( l, dg, s );
@@ -224,7 +148,7 @@ inline vec3f ProximityRenderer_shadeRay(
         if (self->detectionDistance>0.f && ray.t<self->detectionDistance*1000.f )
         {
             // Generate random ray and trace it
-            varying vec3f ao_dir = getRandomVector( sample, normal, self->randomNumber );
+            varying vec3f ao_dir = getRandomVector( sample, normal, self->abstract.randomNumber );
 
             if( dot( ao_dir, normal ) < 0.f )
                 ao_dir = ao_dir * -1.f;
@@ -235,11 +159,11 @@ inline vec3f ProximityRenderer_shadeRay(
             ao_ray.t0 = self->detectionDistance * 0.1f;
             ao_ray.t = t_max;
 
-            traceRay( self->super.model, ao_ray );
+            traceRay( self->abstract.super.model, ao_ray );
             if( ao_ray.t != t_max )
             {
                 // Intersection detected
-                postIntersect( self->super.model, dg, ao_ray, DG_MATERIALID );
+                postIntersect( self->abstract.super.model, dg, ao_ray, DG_MATERIALID );
 
                 varying bool test = true;
                 if( self->detectionOnDifferentMaterial )
@@ -266,7 +190,7 @@ void ProximityRenderer_renderSample(
 {
     uniform ProximityRenderer* uniform self =
             ( uniform ProximityRenderer* uniform )_self;
-    sample.ray.time = self->timestamp;
+    sample.ray.time = self->abstract.timestamp;
     sample.rgb = ProximityRenderer_shadeRay( self, sample );
 }
 
@@ -277,8 +201,8 @@ export void *uniform ProximityRenderer_create( void* uniform cppE )
     uniform ProximityRenderer* uniform self =
             uniform new uniform ProximityRenderer;
 
-    Renderer_Constructor( &self->super, cppE );
-    self->super.renderSample = ProximityRenderer_renderSample;
+    Renderer_Constructor( &self->abstract.super, cppE );
+    self->abstract.super.renderSample = ProximityRenderer_renderSample;
     return self;
 }
 
@@ -298,23 +222,20 @@ export void ProximityRenderer_set(
         void** uniform materials,
         uniform int32 numMaterials )
 {
-    uniform ProximityRenderer *uniform self =
-            ( uniform ProximityRenderer* uniform )_self;
+    uniform ProximityRenderer *uniform self = ( uniform ProximityRenderer* uniform )_self;
 
-    self->bgColor = bgColor;
+    self->abstract.bgColor = bgColor;
+    self->abstract.randomNumber = randomNumber;
+    self->abstract.timestamp = timestamp;
+    self->abstract.spp = spp;
+    self->abstract.electronShadingEnabled = electronShadingEnabled;
+    self->abstract.lights = ( const uniform Light* uniform* uniform )lights;
+    self->abstract.numLights = numLights;
+    self->abstract.materials = ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
+    self->abstract.numMaterials = numMaterials;
+
     self->nearColor = nearColor;
     self->farColor = farColor;
     self->detectionDistance = detectionDistance;
     self->detectionOnDifferentMaterial = detectionOnDifferentMaterial;
-    self->randomNumber = randomNumber;
-    self->timestamp = timestamp;
-    self->spp = spp;
-    self->electronShadingEnabled = electronShadingEnabled;
-
-    self->lights = ( const uniform Light* uniform* uniform )lights;
-    self->numLights = numLights;
-
-    self->materials =
-        ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
-    self->numMaterials = numMaterials;
 }

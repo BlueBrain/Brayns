@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "ospray/math/vec.ih"
+#include <ospray/math/vec.ih>
 
 /**
     Returns a random direction based on location in the frame buffer, the normal
@@ -47,4 +47,7 @@ vec3f getRandomVector(
            tangent vector for the surface, which is orthogonal to both the
            Normal vector and the chosen tangent vector
 */
-void getTangentVectors( const vec3f& normal, vec3f& tangent, vec3f& biTangent );
+void getTangentVectors(
+    const vec3f& normal,
+    vec3f& tangent,
+    vec3f& biTangent );

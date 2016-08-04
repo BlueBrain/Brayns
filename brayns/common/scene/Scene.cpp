@@ -72,10 +72,6 @@ void Scene::setMaterials(
                 break;
         }
 
-        // Other materials
-        material->setSpecularColor( Vector3f( 1.f, 1.f, 1.f ));
-        material->setSpecularExponent( 10.f );
-
         switch( materialType )
         {
         case MT_DEFAULT:
@@ -244,19 +240,20 @@ void Scene::buildDefault( )
 
     // Lamp
     ++material;
+    const Vector3f lampInfo = { 0.3f, 0.99f, 0.3f };
     const Vector3f lampPositions[4] =
     {
-        { -0.3f, 0.98f, -0.3f },
-        {  0.3f, 0.98f, -0.3f },
-        {  0.3f, 0.98f,  0.3f },
-        { -0.3f, 0.98f,  0.3f }
+        { -lampInfo.x(), lampInfo.y(), -lampInfo.z() },
+        {  lampInfo.x(), lampInfo.y(), -lampInfo.z() },
+        {  lampInfo.x(), lampInfo.y(),  lampInfo.z() },
+        { -lampInfo.x(), lampInfo.y(),  lampInfo.z() }
     };
     for( size_t i = 0; i < 4; ++i )
         _trianglesMeshes[material].getVertices().push_back( lampPositions[i] );
-    _trianglesMeshes[material].getIndices().push_back( Vector3i( 0, 1, 2 ));
-    _trianglesMeshes[material].getIndices().push_back( Vector3i( 2, 3, 0 ));
+    _trianglesMeshes[material].getIndices().push_back( Vector3i( 2, 1, 0 ));
+    _trianglesMeshes[material].getIndices().push_back( Vector3i( 0, 3, 2 ));
     _materials[material]->setColor( WHITE );
-    _materials[material]->setEmission(10.f);
+    _materials[material]->setEmission( 5.f );
 
     BRAYNS_INFO << "Bounding Box: " << _bounds << std::endl;
 }

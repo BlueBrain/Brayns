@@ -26,6 +26,11 @@
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
 
+namespace
+{
+    const float DEFAULT_TEST_TIMESTAMP = 10000.f;
+}
+
 namespace brayns
 {
 
@@ -69,7 +74,7 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
             _timestampIncrement << std::endl;
         break;
     case 'x':
-        sceneParams.setTimestamp( 107.f );
+        sceneParams.setTimestamp( DEFAULT_TEST_TIMESTAMP );
         BRAYNS_INFO << "Test Timestamp" << std::endl;
         break;
     case ']':

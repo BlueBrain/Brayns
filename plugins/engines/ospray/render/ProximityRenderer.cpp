@@ -20,65 +20,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ProximityRenderer.h"
+#include <plugins/engines/ospray/render/ProximityRenderer.h>
+
+// ispc exports
 #include "ProximityRenderer_ispc.h"
 
-#include <ospray/common/Data.h>
-#include <ospray/camera/Camera.h>
-#include <ospray/lights/Light.h>
-
-using namespace ospray;
+#define OSP_REGISTER_EXRENDERER( InternalClassName, external_name )\
+extern "C" ospray::Renderer *ospray_create_renderer__##external_name( )\
+{\
+    return new InternalClassName;\
+}
 
 namespace brayns
 {
 
 void ProximityRenderer::commit( )
 {
-    Renderer::commit( );
+    AbstractRenderer::commit( );
 
-    lightData = ( ospray::Data* )getParamData( "lights" );
-    lightArray.clear( );
-
-    if( lightData )
-        for( size_t i = 0; i < lightData->size( ); ++i )
-            lightArray.push_back(((Light**)lightData->data)[i]->getIE());
-
-    void **lightPtr = lightArray.empty( ) ? NULL : &lightArray[0];
-
-    vec3f bgColor = getParam3f( "bgColor", vec3f( 0.f ));
-    vec3f nearColor = getParam3f( "detectionNearColor", vec3f( 0.f, 1.f, 0.f ));
-    vec3f farColor = getParam3f( "detectionFarColor", vec3f( 1.f, 0.f, 0.f ));
-    detectionDistance = getParam1f( "detectionDistance", 1.f );
-    detectionOnDifferentMaterial =
-        bool( getParam1i( "detectionOnDifferentMaterial", 0 ));
-    randomNumber = getParam1i( "randomNumber", 0 );
-    timestamp = getParam1f( "timestamp", 0.f );
-    spp = getParam1i( "spp", 1 );
-    electronShadingEnabled = bool( getParam1i( "electronShading", 1 ));
-
-    // Those materials are used for skybox mapping only
-    materialData = ( ospray::Data* )getParamData( "materials" );
-    materialArray.clear( );
-    if( materialData )
-        for( size_t i = 0; i < materialData->size( ); ++i )
-            materialArray.push_back(
-                ( ( ospray::Material** )materialData->data )[i]->getIE( ));
-    void **materialArrayPtr =
-        materialArray.empty( ) ? nullptr : &materialArray[0];
+    _nearColor = getParam3f( "detectionNearColor", ospray::vec3f( 0.f, 1.f, 0.f ));
+    _farColor = getParam3f( "detectionFarColor", ospray::vec3f( 1.f, 0.f, 0.f ));
+    _detectionDistance = getParam1f( "detectionDistance", 1.f );
+    _detectionOnDifferentMaterial = bool( getParam1i( "detectionOnDifferentMaterial", 0 ));
 
     ispc::ProximityRenderer_set(
                 getIE( ),
-                ( ispc::vec3f& )bgColor,
-                ( ispc::vec3f& )nearColor,
-                ( ispc::vec3f& )farColor,
-                detectionDistance,
-                detectionOnDifferentMaterial,
-                randomNumber,
-                timestamp,
-                spp,
-                electronShadingEnabled,
-                lightPtr, lightArray.size( ),
-                materialArrayPtr, materialArray.size( ));
+                ( ispc::vec3f& )_bgColor,
+                ( ispc::vec3f& )_nearColor,
+                ( ispc::vec3f& )_farColor,
+                _detectionDistance,
+                _detectionOnDifferentMaterial,
+                _randomNumber,
+                _timestamp,
+                _spp,
+                _electronShadingEnabled,
+                _lightPtr, _lightArray.size(),
+                _materialPtr, _materialArray.size());
 }
 
 ProximityRenderer::ProximityRenderer( )
@@ -86,6 +63,6 @@ ProximityRenderer::ProximityRenderer( )
     ispcEquivalent = ispc::ProximityRenderer_create( this );
 }
 
-OSP_REGISTER_RENDERER( ProximityRenderer, PROXIMITYRENDERER );
-OSP_REGISTER_RENDERER( ProximityRenderer, proximityrenderer );
+OSP_REGISTER_EXRENDERER( ProximityRenderer, PROXIMITYRENDERER );
+OSP_REGISTER_EXRENDERER( ProximityRenderer, proximityrenderer );
 }
