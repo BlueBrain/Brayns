@@ -23,38 +23,30 @@
 // Brayns
 #include <plugins/engines/ospray/render/utils/AbstractRenderer.ih>
 
-#define DEFAULT_LIGHT_EMISSION_MULTIPLIER 10.f
+#define DEFAULT_LIGHT_EMISSION_MULTIPLIER 1.f
 
 struct SimulationRenderer
 {
     AbstractRenderer abstract;
 
-    int simulationNbOffsets;
-    int simulationNbFrames;
+    uniform float* uniform simulationData;
+    uint64 simulationFrameSize;
+    uint64 simulationNbFrames;
 };
 
-inline varying vec3f getSimulationValue(
+inline varying float getSimulationValue(
     const uniform SimulationRenderer* uniform self,
     DifferentialGeometry& dg)
 {
-    // Get simulation value from geometry timestamp and material 0
-    varying vec3f simulationValue = make_vec3f(0.f);
-    if( dg.st.x < 0.f )
-        return simulationValue;
+    if( !self->simulationData )
+        return 0.f;
 
-    const uniform ExtendedOBJMaterial *uniform mat =
-        self->abstract.materials[MATERIAL_SIMULATION];
-    if( mat->map_Kd )
-    {
-        const varying vec2f st =
-        {
-            dg.st.x / (float)self->simulationNbOffsets,
-            ((int)self->abstract.timestamp % self->simulationNbFrames) /
-                (float)self->simulationNbFrames
-        };
-        simulationValue = get3f(mat->map_Kd, st);
-    }
-    return simulationValue;
+    const varying float value = self->simulationData[ dg.st.x ];
+    if( value < DEFAULT_LIGHT_THRESHOLD )
+        return 0.f;
+
+    return DEFAULT_LIGHT_EMISSION_MULTIPLIER * value;
+
 }
 
 inline vec3f SimulationRenderer_shadeRay(
@@ -114,8 +106,8 @@ inline vec3f SimulationRenderer_shadeRay(
             varying float localLightIntensity = 1.f;
 
             // Get simulation value from geometry ID
-            const varying vec3f simulationValue = getSimulationValue( self, dg );
-            localLightEmission = DEFAULT_LIGHT_EMISSION_MULTIPLIER * simulationValue.x;
+            const float simulationValue = getSimulationValue( self, dg );
+            localLightEmission = simulationValue;
 
             // Process material attributes
             const uniform Material* material = dg.material;
@@ -210,9 +202,8 @@ inline vec3f SimulationRenderer_shadeRay(
                         indirectShadingColor = indirectShadingColor * localOpacity;
 
                         // Get simulation value from geometry ID
-                        const varying vec3f simulationValue = getSimulationValue( self, geometry );
-                        indirectShadingIntensity +=
-                            DEFAULT_LIGHT_EMISSION_MULTIPLIER * simulationValue.x;
+                        const float simulationValue = getSimulationValue( self, geometry );
+                        indirectShadingIntensity += simulationValue;
                     }
                 }
 
@@ -227,10 +218,8 @@ inline vec3f SimulationRenderer_shadeRay(
                 {
                     // Electron Shading
                     localLightIntensity = 1.f;
-                    const varying vec3f viewer =
-                        normalize( ray.org - intersection );
-                    const varying float el =
-                        max( 0.f, dot( viewer, localNormal ));
+                    const varying vec3f viewer = normalize( ray.org - intersection );
+                    const varying float el = max( 0.f, dot( viewer, localNormal ));
                     varying float cosNL  = localLightEmission + ( 0.1f - 0.1f * el );
                     localShadedColor =
                         localOpacity * cosNL *
@@ -333,7 +322,7 @@ inline vec3f SimulationRenderer_shadeRay(
 
     // Back to front computation of final color according to colors and weights of each ray
     // generation
-    sample.alpha =  pathOpacity;
+    sample.alpha = pathOpacity;
     for( int i = depth - 2; i >= 0; --i )
         intersectionColors[i] =
             intersectionColors[i+1] * intersectionWeights[i] +
@@ -374,15 +363,13 @@ export void SimulationRenderer_set(
         const uniform float& timestamp,
         const uniform int& spp,
         const uniform bool& electronShadingEnabled,
-        const uniform int& simulationNbOffsets,
-        const uniform int& simulationNbFrames,
         void** uniform lights,
-        uniform int32 numLights,
+        const uniform int32 numLights,
         void** uniform materials,
-        uniform int32 numMaterials )
+        const uniform int32 numMaterials,
+        uniform float* uniform simulationData )
 {
-    uniform SimulationRenderer* uniform self =
-            ( uniform SimulationRenderer* uniform )_self;
+    uniform SimulationRenderer* uniform self = ( uniform SimulationRenderer* uniform )_self;
 
     self->abstract.bgColor = bgColor;
     self->abstract.shadowsEnabled = shadowsEnabled;
@@ -394,14 +381,12 @@ export void SimulationRenderer_set(
     self->abstract.spp = spp;
     self->abstract.electronShadingEnabled = electronShadingEnabled;
 
-    self->abstract.lights =
-        ( const uniform Light* uniform* uniform )lights;
+    self->abstract.lights = ( const uniform Light* uniform* uniform )lights;
     self->abstract.numLights = numLights;
 
-    self->abstract.materials =
-        ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
+    self->abstract.materials = ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
     self->abstract.numMaterials = numMaterials;
 
-    self->simulationNbOffsets = simulationNbOffsets;
-    self->simulationNbFrames = simulationNbFrames;
+    self->simulationData = (uniform float* uniform)simulationData;
+
 }

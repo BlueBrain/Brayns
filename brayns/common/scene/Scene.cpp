@@ -58,12 +58,9 @@ void Scene::setMaterials(
     {
         MaterialPtr material( new Material );
 
-        // Special materials (Simulation, skybox, etc)
+        // Special materials ( skybox, etc )
         switch( i )
         {
-            case MATERIAL_SIMULATION:
-                material->setTexture( TT_DIFFUSE, TEXTURE_NAME_SIMULATION );
-                break;
             case MATERIAL_BOUNDING_BOX:
                 material->setColor( Vector3f( 1.f, 1.f, 1.f ));
                 material->setEmission( 1.f );

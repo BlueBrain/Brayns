@@ -37,7 +37,7 @@ namespace brayns
  * comparmentCounts: Number of compartments per section
  * comparmentOffsets: Offset for every compartments
  */
-struct SimulationData
+struct SimulationInformation
 {
     const uint16_ts* compartmentCounts;
     const uint64_ts* compartmentOffsets;
@@ -96,21 +96,16 @@ public:
         const std::string& target,
         Scene& scene);
 
-    /** Imports simulation data into a texture. Each frame of the simulation
-     *  is a line of the texture, and simulation values are stored in columns.
-     *  In the current implementation, RGB values are all equal to the
-     *  normalized value of the data againt the whole simulation. In future
-     *  work, R, G and B can be used to store different pieces of information
-     *  that can then be interpreted by simulation renderer.
+    /** Imports simulation data into the scene
      * @param circuitConfig URI of the Circuit Config file
      * @param target Target to be loaded. If empty, the target specified in the
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
      * @param report report to be loaded.
      * @param scene resulting scene
-     * @return The number of loaded frames.
+     * @return True if simulation was successfully loaded, dalse otherwise
      */
-    size_t importSimulationIntoTexture(
+    bool importSimulationData(
         const servus::URI& circuitConfig,
         const std::string& target,
         const std::string& report,
@@ -121,7 +116,7 @@ private:
         const servus::URI& source,
         size_t morphologyIndex,
         const Matrix4f& transformation,
-        const SimulationData* simulationData,
+        const SimulationInformation* simulationInformation,
         PrimitivesMap& primitives,
         Boxf& bounds,
         const size_t simulationOffset,

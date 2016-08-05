@@ -69,9 +69,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
     // Store timestamp as texture coordinate
     uniform uint8 *spherePtr =
             THIS->data + THIS->bytesPerExtendedSphere*ray.primID;
-    varying float value =
-        *((varying float *)(spherePtr+THIS->offset_value));
-    dg.st.x = value;
+    dg.st.x = *((varying float *)(spherePtr+THIS->offset_value));
 
     if (flags & DG_NORMALIZE)
     {
@@ -105,10 +103,8 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
                 if (THIS->materialList)
                     dg.material = THIS->materialList[dg.materialID];
 
-                // Store timestamp as texture coordinate
-                varying float value =
-                    *((varying float *)(spherePtr+THIS->offset_value));
-                dg.st.x = value;
+                // Store value as texture coordinate
+                dg.st.x = *((varying float *)(spherePtr+THIS->offset_value));
             }
         }
         else

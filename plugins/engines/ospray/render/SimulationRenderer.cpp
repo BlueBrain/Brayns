@@ -22,6 +22,9 @@
 
 #include <plugins/engines/ospray/render/SimulationRenderer.h>
 
+// ospray
+#include <ospray/common/Data.h>
+
 // ispc exports
 #include "SimulationRenderer_ispc.h"
 
@@ -30,15 +33,14 @@ using namespace ospray;
 namespace brayns
 {
 
-void SimulationRenderer::commit( )
+void SimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
-    _simulationNbOffsets = getParam1i( "simulationNbOffsets", 0 );
-    _simulationNbFrames = getParam1i( "simulationNbFrames", 0 );
+    _simulationData = getParamData("simulationData" );
 
     ispc::SimulationRenderer_set(
-                getIE( ),
+                getIE(),
                 ( ispc::vec3f& )_bgColor,
                 _shadowsEnabled,
                 _softShadowsEnabled,
@@ -48,10 +50,9 @@ void SimulationRenderer::commit( )
                 _timestamp,
                 _spp,
                 _electronShadingEnabled,
-                _simulationNbOffsets,
-                _simulationNbFrames,
-                _lightPtr, _lightArray.size( ),
-                _materialPtr, _materialArray.size( ));
+                _lightPtr, _lightArray.size(),
+                _materialPtr, _materialArray.size(),
+                _simulationData?( float* )_simulationData->data:NULL );
 }
 
 SimulationRenderer::SimulationRenderer( )

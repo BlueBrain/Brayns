@@ -100,6 +100,11 @@ public:
     BRAYNS_API virtual void buildGeometry() = 0;
 
     /**
+        Attach simulation data to renderer
+    */
+    BRAYNS_API virtual void commitSimulationData() = 0;
+
+    /**
         Returns the bounding box for the whole scene
     */
     Boxf& getWorldBounds() { return _bounds; }
@@ -152,6 +157,8 @@ public:
     BRAYNS_API TexturesMap& getTextures() { return _textures; }
     BRAYNS_API TrianglesMeshMap& getTriangleMeshes() { return _trianglesMeshes; }
 
+    BRAYNS_API SimulationData& getSimulationData() { return _simulationData; }
+
 protected:
     // Parameters
     SceneParameters& _sceneParameters;
@@ -164,6 +171,9 @@ protected:
     Materials _materials;
     TexturesMap _textures;
     Lights _lights;
+
+    // Simulation
+    SimulationData _simulationData;
 
     Boxf _bounds;
     bool _isEmpty;

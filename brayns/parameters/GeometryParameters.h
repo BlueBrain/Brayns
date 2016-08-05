@@ -127,11 +127,11 @@ public:
     /** Defines if cells with no simulation data should be loaded */
     size_t getNonSimulatedCells() const { return _nonSimulatedCells; }
 
-    /** Defines the range of frames to be loaded for the simulation
-        This is related to the current size of the texture that is limited to
-        2 GB. This of course needs to be improved! */
-    size_t getLastSimulationFrame() const { return _lastSimulationFrame; }
-    size_t getFirstSimulationFrame() const { return _firstSimulationFrame; }
+    /** Defines the range of frames to be loaded for the simulation */
+    float getEndSimulationTime() const { return _endSimulationTime; }
+    float getStartSimulationTime() const { return _startSimulationTime; }
+
+    Vector2f getSimulationValuesRange() const { return _simulationValuesRange; }
 
     /** Defines if multiple models should be generated to increase the
         rendering performance */
@@ -158,8 +158,9 @@ protected:
     size_t _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
     size_t _nonSimulatedCells;
-    size_t _firstSimulationFrame;
-    size_t _lastSimulationFrame;
+    float _startSimulationTime;
+    float _endSimulationTime;
+    Vector2f _simulationValuesRange;
     bool _generateMultipleModels;
 };
 

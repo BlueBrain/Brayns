@@ -112,8 +112,10 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( geomParams.getMorphologySectionTypes(), brayns::MST_ALL );
     BOOST_CHECK_EQUAL( geomParams.getMorphologyLayout().type, brayns::ML_NONE );
     BOOST_CHECK_EQUAL( geomParams.getNonSimulatedCells(), 0 );
-    BOOST_CHECK_EQUAL( geomParams.getLastSimulationFrame(), 0 );
-    BOOST_CHECK_EQUAL( geomParams.getFirstSimulationFrame(), 0 );
+    BOOST_CHECK_EQUAL( geomParams.getStartSimulationTime(), 0.f );
+    BOOST_CHECK_EQUAL( geomParams.getEndSimulationTime(), std::numeric_limits< float >::max() );
+    BOOST_CHECK_EQUAL( geomParams.getSimulationValuesRange().x(), std::numeric_limits< float >::max() );
+    BOOST_CHECK_EQUAL( geomParams.getSimulationValuesRange().y(), std::numeric_limits< float >::min() );
 
     const auto& sceneParams = pm.getSceneParameters();
     BOOST_CHECK_EQUAL( sceneParams.getTimestamp(),

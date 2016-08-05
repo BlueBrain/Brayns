@@ -155,10 +155,8 @@ static void ExtendedCylinders_postIntersect(uniform Geometry *uniform geometry,
 
     uniform uint8 *cylinderPtr =
             THIS->data + THIS->bytesPerCylinder*ray.primID;
-    // Store timestamp as texture coordinate
-    varying float value =
-            *((varying float *)(cylinderPtr+THIS->offset_value));
-    dg.st.x = value;
+    // Store value as texture coordinate
+    dg.st.x = *((varying float *)(cylinderPtr+THIS->offset_value));
 
     if (flags & DG_NORMALIZE)
     {

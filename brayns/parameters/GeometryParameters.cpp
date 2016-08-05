@@ -42,8 +42,9 @@ const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_TARGET = "target";
 const std::string PARAM_REPORT = "report";
 const std::string PARAM_NON_SIMULATED_CELLS = "non-simulated-cells";
-const std::string PARAM_FIRST_SIMULATION_FRAME = "first-simulation-frame";
-const std::string PARAM_LAST_SIMULATION_FRAME = "last-simulation-frame";
+const std::string PARAM_START_SIMULATION_TIME = "start-simulation-time";
+const std::string PARAM_END_SIMULATION_TIME = "end-simulation-time";
+const std::string PARAM_SIMULATION_RANGE = "simulation-values-range";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
@@ -55,16 +56,18 @@ namespace brayns
 
 GeometryParameters::GeometryParameters( )
     : AbstractParameters( "Geometry" )
-    , _radiusMultiplier(1.f)
-    , _radiusCorrection(0.f)
+    , _radiusMultiplier( 1.f )
+    , _radiusCorrection( 0.f )
     , _colorScheme( CS_NONE )
     , _sceneEnvironment( SE_NONE )
     , _geometryQuality( GQ_MAX_QUALITY )
     , _morphologySectionTypes( MST_ALL )
-    , _nonSimulatedCells(0)
-    , _firstSimulationFrame(0)
-    , _lastSimulationFrame(0)
-    , _generateMultipleModels(false)
+    , _nonSimulatedCells( 0 )
+    , _startSimulationTime( 0.f )
+    , _endSimulationTime( std::numeric_limits<float>::max() )
+    , _simulationValuesRange( Vector2f(
+        std::numeric_limits<float>::max(), std::numeric_limits<float>::min() ))
+    , _generateMultipleModels( false )
 {
     _parameters.add_options()
         ( PARAM_MORPHOLOGY_FOLDER.c_str(), po::value< std::string >( ),
@@ -104,10 +107,12 @@ GeometryParameters::GeometryParameters( )
         ( PARAM_NON_SIMULATED_CELLS.c_str(), po::value< size_t >(),
             "Defines the number of non-simulated cells should be loaded when a "
             "report is specified" )
-        ( PARAM_FIRST_SIMULATION_FRAME.c_str(), po::value< size_t >(),
-            "First simulation frame to be loaded" )
-        ( PARAM_LAST_SIMULATION_FRAME.c_str(), po::value< size_t >(),
-            "Last simulation frame to be loaded" )
+        ( PARAM_START_SIMULATION_TIME.c_str(), po::value< float >(),
+            "Start simulation time" )
+        ( PARAM_END_SIMULATION_TIME.c_str(), po::value< float >(),
+            "End simulation time" )
+        ( PARAM_SIMULATION_RANGE.c_str(), po::value< floats >()->multitoken(),
+            "Minimum and maximum values for the simulation" )
         ( PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value< bool >(),
             "Generated multiple models based on geometry timestamps" );
 }
@@ -160,12 +165,18 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_NON_SIMULATED_CELLS))
         _nonSimulatedCells =
             vm[PARAM_NON_SIMULATED_CELLS].as< size_t >( );
-    if( vm.count( PARAM_FIRST_SIMULATION_FRAME ))
-        _firstSimulationFrame =
-            vm[PARAM_FIRST_SIMULATION_FRAME].as< size_t >( );
-    if( vm.count( PARAM_LAST_SIMULATION_FRAME ))
-        _lastSimulationFrame =
-            vm[PARAM_LAST_SIMULATION_FRAME].as< size_t >( );
+    if( vm.count( PARAM_START_SIMULATION_TIME ))
+        _startSimulationTime =
+            vm[PARAM_START_SIMULATION_TIME].as< float >( );
+    if( vm.count( PARAM_END_SIMULATION_TIME ))
+        _endSimulationTime =
+            vm[PARAM_END_SIMULATION_TIME].as< float >( );
+    if( vm.count( PARAM_SIMULATION_RANGE ))
+    {
+        floats values = vm[PARAM_SIMULATION_RANGE].as< floats >( );
+        if( values.size( ) == 2 )
+            _simulationValuesRange = Vector2f( values[0], values[1] );
+    }
     if( vm.count( PARAM_GENERATE_MULTIPLE_MODELS ))
         _generateMultipleModels =
             vm[PARAM_GENERATE_MULTIPLE_MODELS].as< bool >( );
@@ -204,10 +215,12 @@ void GeometryParameters::print( )
         _report << std::endl;
     BRAYNS_INFO << "- Non-simulated cells      : " <<
         _nonSimulatedCells << std::endl;
-    BRAYNS_INFO << "- First frame              : " <<
-        _firstSimulationFrame << std::endl;
-    BRAYNS_INFO << "- Last frame               : " <<
-        _lastSimulationFrame << std::endl;
+    BRAYNS_INFO << "- Start simulation time    : " <<
+        _startSimulationTime << std::endl;
+    BRAYNS_INFO << "- End simulation time      : " <<
+        _endSimulationTime << std::endl;
+    BRAYNS_INFO << "- Simulation values range  : " <<
+        _simulationValuesRange << std::endl;
     BRAYNS_INFO << "Morphology section types   : " <<
         _morphologySectionTypes << std::endl;
     BRAYNS_INFO << "Morphology Layout          : " << std::endl;

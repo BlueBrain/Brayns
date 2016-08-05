@@ -24,7 +24,6 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Cone.h>
-#include <brayns/common/material/Texture2D.h>
 #include <brayns/common/scene/Scene.h>
 #include <algorithm>
 
@@ -59,7 +58,7 @@ bool MorphologyLoader::_importMorphology(
     const servus::URI& source,
     const size_t morphologyIndex,
     const Matrix4f& transformation,
-    const SimulationData* simulationData,
+    const SimulationInformation* simulationInformation,
     PrimitivesMap& primitives,
     Boxf& bounds,
     const size_t simulationOffset,
@@ -113,9 +112,9 @@ bool MorphologyLoader::_importMorphology(
 
         size_t sectionId = 0;
 
-        float offset = -1.f;
-        if( simulationData )
-            offset = (*simulationData->compartmentOffsets)[sectionId];
+        float offset = 0.f;
+        if( simulationInformation )
+            offset = (*simulationInformation->compartmentOffsets)[sectionId];
         else
             if( simulationOffset != 0 )
                 offset = simulationOffset;
@@ -166,12 +165,12 @@ bool MorphologyLoader::_importMorphology(
             const floats& distancesToSoma = section.getSampleDistancesToSoma();
 
             float segmentStep = 0.f;
-            if( simulationData )
+            if( simulationInformation )
             {
                 // Number of compartments usually differs from number of samples
-                if( samples.size() != 0 && (*simulationData->compartmentCounts)[sectionId] > 1 )
+                if( samples.size() != 0 && (*simulationInformation->compartmentCounts)[sectionId] > 1 )
                     segmentStep =
-                        float((*simulationData->compartmentCounts)[sectionId]) /
+                        float((*simulationInformation->compartmentCounts)[sectionId]) /
                         float(samples.size());
             }
 
@@ -189,12 +188,8 @@ bool MorphologyLoader::_importMorphology(
 
                 maxDistanceToSoma = std::max(maxDistanceToSoma, distance);
 
-                if( simulationData )
-                {
-                    offset = (*simulationData->compartmentOffsets)[sectionId] + float(i)*segmentStep;
-                    if( offset>1e4f ) // TODO: Why am I getting weird values??
-                        offset = -1.f;
-                }
+                if( simulationInformation )
+                    offset = (*simulationInformation->compartmentOffsets)[sectionId] + float(i)*segmentStep;
                 else
                     if( simulationOffset != 0 )
                         offset = simulationOffset + distance;
@@ -273,15 +268,14 @@ bool MorphologyLoader::importCircuit(
 
     size_t simulationOffset = 1;
     size_t simulatedCells = 0;
+    size_t progress = 0;
     #pragma omp parallel
     {
         PrimitivesMap private_primitives;
         #pragma omp for nowait
-        for( size_t i = 0; i <uris.size(); ++i )
+        for( size_t i = 0; i < uris.size(); ++i )
         {
             const auto& uri = uris[i];
-            BRAYNS_INFO << "[" << i << "/" << uris.size() << "] "
-                        << uri << std::endl;
             float maxDistanceToSoma = 0.f;
             if( _importMorphology(
                 uri, i, transforms[i], 0,
@@ -291,6 +285,10 @@ bool MorphologyLoader::importCircuit(
                 morphologyOffsets[simulatedCells] = maxDistanceToSoma;
                 simulationOffset += maxDistanceToSoma;
             }
+
+            BRAYNS_PROGRESS( progress, uris.size() );
+            #pragma omp atomic
+            ++progress;
         }
         #pragma omp critical
         for( const auto& p: private_primitives )
@@ -349,6 +347,7 @@ bool MorphologyLoader::importCircuit(
         cr_uris.push_back( uris[ index ] );
     }
 
+    size_t progress = 0;
     #pragma omp parallel
     {
         PrimitivesMap private_primitives;
@@ -356,18 +355,21 @@ bool MorphologyLoader::importCircuit(
         for( size_t i = 0; i < cr_uris.size(); ++i )
         {
             const auto& uri = cr_uris[i];
-            BRAYNS_DEBUG << "[" << i << "/" << uris.size() << "] "
-                         << uri << std::endl;
-            const SimulationData simulationData = {
+            const SimulationInformation simulationInformation =
+            {
                 &compartmentCounts[i],
                 &compartmentOffsets[i]
             };
 
             float maxDistanceToSoma;
             _importMorphology(
-                uri, i, transforms[i], &simulationData,
+                uri, i, transforms[i], &simulationInformation,
                 private_primitives, scene.getWorldBounds(),
                 0, maxDistanceToSoma);
+
+            BRAYNS_PROGRESS( progress, cr_uris.size() );
+            #pragma omp atomic
+            ++progress;
         }
         #pragma omp critical
         for( const auto& p: private_primitives )
@@ -405,7 +407,8 @@ bool MorphologyLoader::importCircuit(
         BRAYNS_INFO << "Loading " << nonSimulatedCells
                     << " non-simulated cells" << std::endl;
 
-#pragma omp parallel
+        progress = 0;
+        #pragma omp parallel
         {
             PrimitivesMap private_primitives;
             #pragma omp for nowait
@@ -413,14 +416,15 @@ bool MorphologyLoader::importCircuit(
             {
                 float maxDistanceToSoma;
                 const auto& uri = allUris[i];
-                BRAYNS_INFO << "[" << i << "/" << nonSimulatedCells << "] "
-                            << uri << std::endl;
-
 
                 _importMorphology(
                     uri, i, allTransforms[i], 0,
                     private_primitives, scene.getWorldBounds(),
                     0, maxDistanceToSoma);
+
+                BRAYNS_PROGRESS( progress, allUris.size() );
+                #pragma omp atomic
+                ++progress;
             }
             #pragma omp critical
             for( const auto& p: private_primitives )
@@ -436,12 +440,14 @@ bool MorphologyLoader::importCircuit(
     return true;
 }
 
-size_t MorphologyLoader::importSimulationIntoTexture(
+bool MorphologyLoader::importSimulationData(
     const servus::URI& circuitConfig,
     const std::string& target,
     const std::string& report,
     Scene& scene )
 {
+    SimulationData& simulationData = scene.getSimulationData();
+
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc( filename );
     const brain::Circuit circuit( bc );
@@ -450,110 +456,107 @@ size_t MorphologyLoader::importSimulationIntoTexture(
     if( gids.empty( ))
     {
         BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
-        return 0;
+        return false;
     }
 
     // Load simulation information from compartment reports
     brion::CompartmentReport compartmentReport(
-        brion::URI( bc.getReportSource( report ).getPath( )), brion::MODE_READ,
-                gids );
+        brion::URI( bc.getReportSource( report ).getPath( )), brion::MODE_READ, gids );
 
     const float start = compartmentReport.getStartTime();
     const float end = compartmentReport.getEndTime();
     const float step = compartmentReport.getTimestep();
-    const uint64_t nbChannels = 3;
 
-    const uint64_t totalNbFrames = (end-start) / step;
+    const float firstFrame = std::max( start, _geometryParameters.getStartSimulationTime() );
+    const float lastFrame = std::min( end, _geometryParameters.getEndSimulationTime() );
+    const float frameSize = compartmentReport.getFrameSize();
 
-    uint64_t nbFrames = totalNbFrames;
+    const uint64_t nbFrames = ( lastFrame - firstFrame ) / step;
+    const uint64_t totalSize = nbFrames * frameSize;
 
-    const uint64_t firstFrame =
-        _geometryParameters.getFirstSimulationFrame();
-
-    uint64_t lastFrame =
-        _geometryParameters.getLastSimulationFrame();
-
-    if( lastFrame == 0 )
-        lastFrame = totalNbFrames;
-
-    if( lastFrame > totalNbFrames )
-        lastFrame = totalNbFrames;
-
-    const uint64_t frameSize =
-        compartmentReport.getFrameSize();
-
-    nbFrames = lastFrame - firstFrame;
-
-    Texture2DPtr texture( new Texture2D );
-    texture->setType( TT_DIFFUSE );
-    texture->setNbChannels( nbChannels );
-    texture->setDepth( 1 );
-    texture->setWidth( frameSize );
-
-    const uint64_t maxTextureSize = 2147483648; // 2GB
-
-    if( nbFrames * frameSize * nbChannels >= maxTextureSize )
+    BRAYNS_INFO << "Loading values from compartment report" << std::endl;
+    for( uint64_t frame = 0; frame < nbFrames; ++frame )
     {
-        // OSPRay is currently limited to 2GB textures, we therefore limit the
-        // number of frames accordingly.
-        // TODO: Create one texture per frame? Discuss with Intel first!
-        nbFrames = maxTextureSize / (frameSize * nbChannels);
-
-        BRAYNS_WARN << "Simulation is too big to fit in one texture (" <<
-            nbFrames * frameSize << " bytes). " <<
-            nbFrames << " out of " << totalNbFrames <<
-            " frames will be loaded" << std::endl;
-    }
-
-    texture->setHeight( nbFrames );
-
-    size_t totalSize = 0;
-    float min = std::numeric_limits<float>::max();
-    float max = std::numeric_limits<float>::min();
-    for( size_t frame = firstFrame; frame < firstFrame + nbFrames; ++frame )
-    {
-        const brion::floatsPtr& valuesPtr =
-            compartmentReport.loadFrame( start + step * frame );
+        BRAYNS_PROGRESS( frame, nbFrames );
+        const float frameTime = firstFrame + step * frame;
+        const brion::floatsPtr& valuesPtr = compartmentReport.loadFrame( frameTime );
         const floats& values = *valuesPtr;
 
-        for(size_t i = 0; i < values.size(); ++i )
+        simulationData.valuesPerFrame[frame].reserve( values.size() );
+
+        simulationData.valuesPerFrame[frame].insert(
+            simulationData.valuesPerFrame[frame].end(),
+            values.begin(), values.end());
+    }
+
+    Vector2f simulationRange = _geometryParameters.getSimulationValuesRange();
+    if( simulationRange.x() == std::numeric_limits<float>::max() &&
+        simulationRange.y() == std::numeric_limits<float>::min())
+    {
+        BRAYNS_INFO << "Identifying min and max simulation values in range ["
+                    << firstFrame << " - " << lastFrame << "]"
+                    << std::endl;
+        uint64_t progress = 0;
+        #pragma omp parallel
         {
-            min = std::min( min, values[i] );
-            max = std::max( max, values[i] );
+            std::map< uint64_t, Vector2f > privateRanges;
+            uint64_t frame;
+            #pragma omp for nowait
+            for( frame = 0; frame < simulationData.valuesPerFrame.size(); ++frame )
+            {
+                const auto& valuesPerFrame = simulationData.valuesPerFrame[frame];
+                privateRanges[frame] = Vector2f(
+                    std::numeric_limits<float>::max(),
+                    std::numeric_limits<float>::min());
+
+                for( uint64_t i = 0; i < valuesPerFrame.size(); ++i )
+                {
+                    const float& value = valuesPerFrame[i];
+                    Vector2f& range = privateRanges[i];
+                    range.x() = std::min( range.x(), value );
+                    range.y() = std::max( range.y(), value );
+                }
+                BRAYNS_PROGRESS( progress, nbFrames );
+
+                #pragma omp atomic
+                ++progress;
+
+            }
+            #pragma omp critical
+            for( const auto& p: privateRanges )
+            {
+                simulationRange.x() = std::min( simulationRange.x(), p.second.x() );
+                simulationRange.y() = std::max( simulationRange.y(), p.second.y() );
+            }
         }
-        totalSize += values.size();
+    }
+
+    BRAYNS_INFO << "Normalizing simulation values" << std::endl;
+    const float colorStep = float( simulationRange.y()- simulationRange.x() );
+
+    uint64_t frame;
+    uint64_t progress = 0;
+    #pragma omp parallel for
+    for( frame = 0; frame < simulationData.valuesPerFrame.size(); ++frame )
+    {
+        auto& valuesPerFrame = simulationData.valuesPerFrame[frame];
+        for( uint64_t i = 0; i < valuesPerFrame.size(); ++i )
+            valuesPerFrame[i] =
+                ( valuesPerFrame[i] - simulationRange.x() ) / colorStep;
+
+        BRAYNS_PROGRESS( progress, nbFrames );
+        #pragma omp atomic
+        ++progress;
     }
 
     BRAYNS_INFO << "----------------------------------------" << std::endl;
-    BRAYNS_INFO << "Frames loaded   : [" << firstFrame << " - "
-                << lastFrame << "] " << nbFrames << "/"
-                << totalNbFrames << std::endl;
-    BRAYNS_INFO << "Simulation range: [" <<
-        min << " : " << max << "]" << std::endl;
-    BRAYNS_INFO << "Texture size    : " <<
-        texture->getWidth() << "x" << texture->getHeight() << std::endl;
+    BRAYNS_INFO << "Number of frames: " << nbFrames << std::endl;
+    BRAYNS_INFO << "Frame size      : " << frameSize << std::endl;
+    BRAYNS_INFO << "Simulation range: " << simulationRange << std::endl;
+    BRAYNS_INFO << "Number of values: " << totalSize << std::endl;
     BRAYNS_INFO << "----------------------------------------" << std::endl;
 
-    const float colorStep = 255.f / float( max - min );
-    std::vector< unsigned char > data;
-    data.reserve( totalSize * nbChannels );
-    for( size_t frame = firstFrame; frame < firstFrame + nbFrames; ++frame )
-    {
-        const brion::floatsPtr& valuesPtr =
-            compartmentReport.loadFrame( start + step * frame );
-        const floats& values = *valuesPtr;
-
-        for( size_t i = 0; i < values.size(); ++i )
-        {
-            const size_t value = float( values[i] - min ) * colorStep;
-            data.push_back( value );
-            data.push_back( value );
-            data.push_back( value );
-        }
-    }
-    texture->setRawData( data.data(), totalSize * nbChannels );
-    scene.getTextures()[TEXTURE_NAME_SIMULATION] = texture;
-    return nbFrames;
+    return true;
 }
 
 #else
@@ -608,6 +611,5 @@ size_t MorphologyLoader::_material(
     }
     return material;
 }
-
 
 }

@@ -42,6 +42,7 @@ public:
     void buildGeometry() final;
     void commitLights() final;
     void commitMaterials( const bool updateOnly = false ) final;
+    void commitSimulationData() final;
 
     OSPModel* modelImpl( const size_t timestamp );
 
@@ -60,6 +61,7 @@ private:
     std::vector< OSPLight > _ospLights;
     OSPData _ospLightData;
     OSPData _ospMaterialData;
+    OSPData _ospSimulationData;
 
     std::map< float, size_t > _timestamps;
 
