@@ -29,6 +29,7 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
+#include <brayns/common/transferFunction/TransferFunction.h>
 
 namespace brayns
 {
@@ -159,6 +160,11 @@ public:
 
     BRAYNS_API SimulationData& getSimulationData() { return _simulationData; }
 
+    /**
+        Build a color map from a file, according to the colormap-file scene parameters
+    */
+    BRAYNS_API TransferFunction& getTransferFunction() { return _transferFunction; }
+
 protected:
     // Parameters
     SceneParameters& _sceneParameters;
@@ -174,6 +180,7 @@ protected:
 
     // Simulation
     SimulationData _simulationData;
+    TransferFunction _transferFunction;
 
     Boxf _bounds;
     bool _isEmpty;

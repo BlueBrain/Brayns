@@ -65,14 +65,14 @@ struct AtomicRadius
 
 /** Structure defining the color of atoms according to the JMol Scheme
  */
-struct ColorMap
+struct ProteinColorMap
 {
     std::string symbol;
     short R,G,B;
 };
 
 const size_t colorMapSize = 119;
-static ColorMap colorMap[colorMapSize] = {
+static ProteinColorMap colorMap[colorMapSize] = {
     { "H", 0xDF,0xDF,0xDF} ,
     { "He",0xD9,0xFF,0xFF} ,
     { "Li",0xCC,0x80,0xFF} ,

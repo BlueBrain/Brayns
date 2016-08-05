@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Author: Jafet Villafranca Díaz <jafet.villafrancadiaz@epfl.ch>
+ * Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
  * Ray-cone intersection:
  * based on Ching-Kuang Shene (Graphics Gems 5, p. 227-230)
@@ -222,7 +222,7 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
                                         const varying Ray &ray,
                                         uniform int64 flags)
 {
-    uniform ExtendedCones *uniform THIS =
+    uniform ExtendedCones *uniform this =
             (uniform ExtendedCones *uniform)geometry;
     dg.geometry = geometry;
     dg.material = geometry->material;
@@ -232,9 +232,9 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
     dg.st.y = 0.f;
 
     uniform uint8 *conePtr =
-            THIS->data + THIS->bytesPerCone*ray.primID;
+            this->data + this->bytesPerCone*ray.primID;
     // Store value as texture coordinate
-    dg.st.x = *((varying float *)(conePtr+THIS->offset_value));
+    dg.st.x = *((varying float *)(conePtr+this->offset_value));
 
     if (flags & DG_NORMALIZE)\
     {
@@ -246,10 +246,10 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
         if (dot(ray.dir,Ng) >= 0.f) Ng = neg(Ng);
         if (dot(ray.dir,Ns) >= 0.f) Ns = neg(Ns);
     }
-    if ((flags & DG_MATERIALID) && (THIS->offset_materialID >= 0))
+    if ((flags & DG_MATERIALID) && (this->offset_materialID >= 0))
     {
         dg.materialID =
-                *((uniform uint32 *varying)(conePtr+THIS->offset_materialID));
+                *((uniform uint32 *varying)(conePtr+this->offset_materialID));
     }
     dg.Ng = Ng;
     dg.Ns = Ns;
@@ -315,3 +315,4 @@ export void ExtendedConesGeometry_set(void *uniform _geom,
                 (uniform RTCOccludedFuncVarying)&ExtendedCones_intersect);
     rtcEnable(model->embreeSceneHandle,geomID);
 }
+

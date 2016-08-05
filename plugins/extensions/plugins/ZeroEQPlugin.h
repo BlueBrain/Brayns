@@ -31,6 +31,7 @@
 #include <zerobuf/render/attribute.h>
 #include <zerobuf/render/reset.h>
 #include <zerobuf/render/material.h>
+#include <zerobuf/render/transferFunction1D.h>
 
 namespace brayns
 {
@@ -51,28 +52,81 @@ public:
 
 private:
 
-    void _setupHTTPServer( );
+    /**
+     * @brief Initializes HTTP server
+     */
+    void _setupHTTPServer();
 
-    void _setupRequests( );
+    /**
+     * @brief Sets up ZeroEQ requests
+     */
+    void _setupRequests();
 
-    void _cameraUpdated( );
+    /**
+     * @brief This method is called when the camera is updated by a ZeroEQ event
+     */
+    void _cameraUpdated();
 
-    void _attributeUpdated( );
+    /**
+     * @brief This method is called when an application attribute is updated by a ZeroEQ event
+     */
+    void _attributeUpdated();
 
-    void _resetUpdated( );
+    /**
+     * @brief This method is called when camera reset is invoked by a ZeroEQ event
+     */
+    void _resetUpdated();
 
-    void _materialUpdated( );
+    /**
+     * @brief This method is called when a material is updated by a ZeroEQ event
+     */
+    void _materialUpdated();
 
-    bool _requestImageJPEG( );
+    /**
+     * @brief This method is called when the transfer function is requested by a ZeroEQ event
+     * @return True if the method was successfull, false otherwise
+     * @todo Specify the attribute that should be returned when the feature is available in ZeroEQ
+     */
+    bool _requestTransferFunction1D();
 
-    bool _requestFrameBuffers( );
+    /**
+     * @brief This method is called when the transfer function is updated by a ZeroEQ event
+     */
+    void _transferFunction1DUpdated();
 
+    /**
+     * @brief This method is called when an Image JPEG is requested by a ZeroEQ event
+     * @return True if the method was successfull, false otherwise
+     */
+    bool _requestImageJPEG();
+
+    /**
+     * @brief This method is called when frame buffers is requested by a ZeroEQ event
+     * @return True if the method was successfull, false otherwise
+     */
+    bool _requestFrameBuffers();
+
+    /**
+     * @brief Resizes an given image according to the new size
+     * @param srcData Source buffer
+     * @param srcSize Source size
+     * @param dstSize Returned destination size
+     * @param dstData Returned destination buffer
+     */
     void _resizeImage(
         unsigned int* srcData,
         const Vector2i& srcSize,
         const Vector2i& dstSize,
         uints& dstData);
 
+    /**
+     * @brief Encodes an RAW image buffer into JPEG
+     * @param width Image width
+     * @param height Image height
+     * @param rawData Source buffer
+     * @param dataSize Returned buffer size
+     * @return Destination buffer
+     */
     uint8_t* _encodeJpeg(const uint32_t width,
                          const uint32_t height,
                          const uint8_t* rawData,
@@ -93,6 +147,7 @@ private:
     ::zerobuf::render::Attribute _remoteAttribute;
     ::zerobuf::render::Reset _remoteReset;
     ::zerobuf::render::Material _remoteMaterial;
+    ::zerobuf::render::TransferFunction1D _remoteTransferFunction1D;
 
 };
 

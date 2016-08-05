@@ -144,7 +144,7 @@ static void ExtendedCylinders_postIntersect(uniform Geometry *uniform geometry,
                                             const varying Ray &ray,
                                             uniform int64 flags)
 {
-    uniform ExtendedCylinders *uniform THIS =
+    uniform ExtendedCylinders *uniform this =
             (uniform ExtendedCylinders *uniform)geometry;
     dg.geometry = geometry;
     dg.material = geometry->material;
@@ -154,9 +154,9 @@ static void ExtendedCylinders_postIntersect(uniform Geometry *uniform geometry,
     dg.st.y = 0.f;
 
     uniform uint8 *cylinderPtr =
-            THIS->data + THIS->bytesPerCylinder*ray.primID;
+            this->data + this->bytesPerCylinder*ray.primID;
     // Store value as texture coordinate
-    dg.st.x = *((varying float *)(cylinderPtr+THIS->offset_value));
+    dg.st.x = *((varying float *)(cylinderPtr+this->offset_value));
 
     if (flags & DG_NORMALIZE)
     {
@@ -168,11 +168,11 @@ static void ExtendedCylinders_postIntersect(uniform Geometry *uniform geometry,
         if (dot(ray.dir,Ng) >= 0.f) Ng = neg(Ng);
         if (dot(ray.dir,Ns) >= 0.f) Ns = neg(Ns);
     }
-    if ((flags & DG_MATERIALID) && (THIS->offset_materialID >= 0))
+    if ((flags & DG_MATERIALID) && (this->offset_materialID >= 0))
     {
 
         dg.materialID = *((uniform uint32 *varying)
-                          (cylinderPtr+THIS->offset_materialID));
+                          (cylinderPtr+this->offset_materialID));
     }
     dg.Ng = Ng;
     dg.Ns = Ns;
@@ -237,3 +237,4 @@ export void ExtendedCylindersGeometry_set(void *uniform _geom,
                 (uniform RTCOccludedFuncVarying)&ExtendedCylinders_intersect);
     rtcEnable(model->embreeSceneHandle,geomID);
 }
+

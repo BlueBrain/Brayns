@@ -57,6 +57,9 @@ typedef std::shared_ptr< Scene > ScenePtr;
 class Camera;
 typedef std::shared_ptr< Camera > CameraPtr;
 
+class TransferFunction;
+typedef std::shared_ptr< TransferFunction > TransferFunctionPtr;
+
 class Renderer;
 typedef std::shared_ptr< Renderer > RendererPtr;
 typedef std::weak_ptr< Renderer > RendererWeakPtr;
@@ -202,6 +205,17 @@ enum MorphologySectionType
     MST_DENDRITE = 0x04,
     MST_APICAL_DENDRITE = 0x08,
     MST_ALL = 0xff
+};
+
+/** Transfer function attributes */
+enum TransferFunctionAttribute
+{
+    TF_UNDEFINED,
+    TF_RED,
+    TF_GREEN,
+    TF_BLUE,
+    TF_ALPHA,
+    TF_EMISSION
 };
 
 /** Extension parameters */

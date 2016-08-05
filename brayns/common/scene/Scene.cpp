@@ -24,6 +24,7 @@
 #include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/common/material/Material.h>
+#include <brayns/io/TransferFunctionLoader.h>
 
 #include <servus/uri.h>
 

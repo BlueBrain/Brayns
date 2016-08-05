@@ -32,11 +32,7 @@
 namespace brayns
 {
 
-const size_t CACHE_VERSION_1 = 1;
-const size_t CACHE_VERSION_2 = 2;
-const size_t CACHE_VERSION_3 = 3;
-const size_t CACHE_VERSION_4 = 4;
-const size_t CACHE_VERSION_5 = 5;
+const size_t CACHE_VERSION = 5;
 
 struct TextureTypeMaterialAttribute
 {
@@ -62,6 +58,8 @@ OSPRayScene::OSPRayScene(
     , _ospLightData( 0 )
     , _ospMaterialData( 0 )
     , _ospSimulationData( 0 )
+    , _ospTransferFunctionDiffuseData( 0 )
+    , _ospTransferFunctionEmissionData( 0 )
 {
 }
 
@@ -92,7 +90,7 @@ void OSPRayScene::_saveCacheFile()
     BRAYNS_INFO << "Saving scene to binary file: " << filename << std::endl;
     std::ofstream file( filename, std::ios::out | std::ios::binary );
 
-    const size_t version = CACHE_VERSION_5;
+    const size_t version = CACHE_VERSION;
     file.write( ( char* )&version, sizeof( size_t ));
     BRAYNS_INFO << "Version: " << version << std::endl;
 
@@ -211,9 +209,9 @@ void OSPRayScene::_loadCacheFile()
     file.read( (char*)&version, sizeof( size_t ));
     BRAYNS_INFO << "Version: " << version << std::endl;
 
-    if( version != CACHE_VERSION_5 )
+    if( version != CACHE_VERSION )
     {
-        BRAYNS_ERROR << "Only version " << CACHE_VERSION_5
+        BRAYNS_ERROR << "Only version " << CACHE_VERSION
                      << " is supported" << std::endl;
         return;
     }
@@ -762,13 +760,35 @@ void OSPRayScene::commitSimulationData()
 
     for( const auto& renderer: _renderers )
     {
-        size_t ts = _sceneParameters.getTimestamp() % _simulationData.valuesPerFrame.size();
         OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.lock().get( ));
+
+        // Simulation data
+        size_t ts = _sceneParameters.getTimestamp() % _simulationData.valuesPerFrame.size();
         _ospSimulationData = ospNewData(
             _simulationData.valuesPerFrame[ts].size(), OSP_FLOAT,
             &_simulationData.valuesPerFrame[ts].data()[0], OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospSimulationData );
         ospSetData( osprayRenderer->impl(), "simulationData", _ospSimulationData );
+
+        // Transfer function Diffuse colors
+        _ospTransferFunctionDiffuseData = ospNewData(
+            _transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
+            &_transferFunction.getDiffuseColors()[0], OSP_DATA_SHARED_BUFFER );
+        ospCommit( _ospTransferFunctionDiffuseData );
+        ospSetData( osprayRenderer->impl(),
+            "transferFunctionDiffuseData", _ospTransferFunctionDiffuseData );
+
+        // Transfer function emission data
+        _ospTransferFunctionEmissionData = ospNewData(
+            _transferFunction.getEmissionIntensities().size(), OSP_FLOAT,
+            &_transferFunction.getEmissionIntensities()[0], OSP_DATA_SHARED_BUFFER );
+        ospCommit( _ospTransferFunctionEmissionData );
+        ospSetData( osprayRenderer->impl(),
+            "transferFunctionEmissionData", _ospTransferFunctionEmissionData );
+
+        // Transfer function size
+        ospSet1i( osprayRenderer->impl(),
+            "transferFunctionSize", _transferFunction.getDiffuseColors().size() );
     }
 }
 

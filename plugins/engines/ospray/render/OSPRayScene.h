@@ -62,6 +62,8 @@ private:
     OSPData _ospLightData;
     OSPData _ospMaterialData;
     OSPData _ospSimulationData;
+    OSPData _ospTransferFunctionDiffuseData;
+    OSPData _ospTransferFunctionEmissionData;
 
     std::map< float, size_t > _timestamps;
 

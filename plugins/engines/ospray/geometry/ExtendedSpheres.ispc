@@ -57,7 +57,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
                                           const varying Ray &ray,
                                           uniform int64 flags)
 {
-    uniform ExtendedSpheres *uniform THIS =
+    uniform ExtendedSpheres *uniform this =
             (uniform ExtendedSpheres *uniform)geometry;
     dg.geometry = geometry;
     dg.material = geometry->material;
@@ -68,8 +68,8 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
 
     // Store timestamp as texture coordinate
     uniform uint8 *spherePtr =
-            THIS->data + THIS->bytesPerExtendedSphere*ray.primID;
-    dg.st.x = *((varying float *)(spherePtr+THIS->offset_value));
+            this->data + this->bytesPerExtendedSphere*ray.primID;
+    dg.st.x = *((varying float *)(spherePtr+this->offset_value));
 
     if (flags & DG_NORMALIZE)
     {
@@ -81,7 +81,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
         if (dot(ray.dir,Ng) >= 0.f) Ng = neg(Ng);
         if (dot(ray.dir,Ns) >= 0.f) Ns = neg(Ns);
     }
-    if ((flags & DG_MATERIALID) && (THIS->offset_materialID >= 0))
+    if ((flags & DG_MATERIALID) && (this->offset_materialID >= 0))
     {
         const uniform int32 primsPerPage = (1024*1024*128);
         if (any(ray.primID >= primsPerPage ))
@@ -90,32 +90,32 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
             const int localPrimID = ray.primID % primsPerPage;
             foreach_unique(primPage in primPageID)
             {
-                uniform uint8 *uniform pagePtr = THIS->data +
+                uniform uint8 *uniform pagePtr = this->data +
                         (((int64)primPage) * primsPerPage *
-                         THIS->bytesPerExtendedSphere);
+                         this->bytesPerExtendedSphere);
 
                 uniform uint8 *spherePtr =
-                        pagePtr + THIS->bytesPerExtendedSphere*localPrimID;
+                        pagePtr + this->bytesPerExtendedSphere*localPrimID;
 
                 dg.materialID = *((uniform uint32 *varying)
-                                  (spherePtr+THIS->offset_materialID));
+                                  (spherePtr+this->offset_materialID));
 
-                if (THIS->materialList)
-                    dg.material = THIS->materialList[dg.materialID];
+                if (this->materialList)
+                    dg.material = this->materialList[dg.materialID];
 
                 // Store value as texture coordinate
-                dg.st.x = *((varying float *)(spherePtr+THIS->offset_value));
+                dg.st.x = *((varying float *)(spherePtr+this->offset_value));
             }
         }
         else
         {
             uniform uint8 *spherePtr =
-                    THIS->data + THIS->bytesPerExtendedSphere*ray.primID;
+                    this->data + this->bytesPerExtendedSphere*ray.primID;
             dg.materialID = *((uniform uint32 *varying)
-                              (spherePtr+THIS->offset_materialID));
+                              (spherePtr+this->offset_materialID));
 
-            if (THIS->materialList)
-                dg.material = THIS->materialList[dg.materialID];
+            if (this->materialList)
+                dg.material = this->materialList[dg.materialID];
         }
     }
     dg.Ng = Ng;
@@ -250,3 +250,4 @@ export void ExtendedSpheresGeometry_set(void  *uniform _geom,
                 (uniform RTCOccludedFuncVarying)&ExtendedSpheres_intersect);
     rtcEnable(model->embreeSceneHandle,geomID);
 }
+

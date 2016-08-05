@@ -37,7 +37,11 @@ void SimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
-    _simulationData = getParamData("simulationData" );
+    _simulationData = getParamData( "simulationData" );
+    _transferFunctionDiffuseData = getParamData( "transferFunctionDiffuseData" );
+    _transferFunctionEmissionData = getParamData( "transferFunctionEmissionData" );
+    _transferFunctionSize = getParam1i( "transferFunctionSize", 0 );
+    _threshold = getParam1f( "threshold", 0.f );
 
     ispc::SimulationRenderer_set(
                 getIE(),
@@ -52,7 +56,12 @@ void SimulationRenderer::commit()
                 _electronShadingEnabled,
                 _lightPtr, _lightArray.size(),
                 _materialPtr, _materialArray.size(),
-                _simulationData?( float* )_simulationData->data:NULL );
+                _simulationData ? ( float* )_simulationData->data : NULL,
+                _transferFunctionDiffuseData ?
+                    ( ispc::vec4f* )_transferFunctionDiffuseData->data : NULL,
+                _transferFunctionEmissionData ?
+                    ( float* )_transferFunctionEmissionData->data : NULL,
+                _transferFunctionSize, _threshold );
 }
 
 SimulationRenderer::SimulationRenderer( )
