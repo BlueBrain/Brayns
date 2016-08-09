@@ -1,10 +1,10 @@
 /* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Juan Hernando <juan.hernando@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
- *
- * Based on OSPRay implementation
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,40 +20,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+namespace zerobuf.render;
 
-#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
-
-namespace brayns
+// Control point
+table Point2D
 {
+    x: float;
+    y: float;
+}
 
-class SimulationRenderer : public AbstractRenderer
+// Transfer function
+table TransferFunction1D
 {
+    attribute: string;
+    points: [Point2D];
+}
 
-public:
-
-    SimulationRenderer();
-
-    /**
-       Returns the class name as a string
-       @return string containing the full name of the class
-    */
-    std::string toString() const final
-    {
-        return "brayns::SimulationRenderer";
-    }
-
-    void commit() final;
-
-private:
-
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
-    ospray::int32 _transferFunctionSize;
-
-    float _threshold;
-};
-
-} // ::brayns
-
+// Range of values for which the transfer function applies
+table Threshold
+{
+    min: float;
+    max: float;
+}

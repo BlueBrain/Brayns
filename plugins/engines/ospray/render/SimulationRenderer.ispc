@@ -23,30 +23,40 @@
 // Brayns
 #include <plugins/engines/ospray/render/utils/AbstractRenderer.ih>
 
-#define DEFAULT_LIGHT_EMISSION_MULTIPLIER 1.f
-
 struct SimulationRenderer
 {
     AbstractRenderer abstract;
 
     uniform float* uniform simulationData;
+    uniform vec4f* uniform colorMap;
+    uniform float* uniform colorMapEmissionData;
+    uint32 colorMapSize;
+    float threshold;
     uint64 simulationFrameSize;
     uint64 simulationNbFrames;
 };
 
-inline varying float getSimulationValue(
+inline varying vec4f getSimulationValue(
     const uniform SimulationRenderer* uniform self,
-    DifferentialGeometry& dg)
+    DifferentialGeometry& dg,
+    varying float& lightEmission )
 {
+    lightEmission = 0.f;
+    varying vec4f color = make_vec4f( 0.f );
     if( !self->simulationData )
-        return 0.f;
+        return color;
 
     const varying float value = self->simulationData[ dg.st.x ];
-    if( value < DEFAULT_LIGHT_THRESHOLD )
-        return 0.f;
+    if( value < self->threshold )
+        return color;
 
-    return DEFAULT_LIGHT_EMISSION_MULTIPLIER * value;
+    if( self->colorMap )
+        color = self->colorMap[ value * self->colorMapSize ];
 
+    if( self->colorMapEmissionData )
+        lightEmission = self->colorMapEmissionData[ value * self->colorMapSize ];
+
+    return color;
 }
 
 inline vec3f SimulationRenderer_shadeRay(
@@ -99,6 +109,8 @@ inline vec3f SimulationRenderer_shadeRay(
             varying float localRefraction = 1.f;
             varying float localReflection = 0.f;
             varying float localOpacity = 1.f;
+            varying vec3f localSimulationColor = make_vec3f( 0.f );
+            varying float localSimulationIntensity = 0.f;
             varying vec3f localDiffuseColor = make_vec3f( 0.f );
             varying vec3f localSpecularColor = make_vec3f( 0.f );
             varying float localSpecularExponent = 0.f;
@@ -106,8 +118,11 @@ inline vec3f SimulationRenderer_shadeRay(
             varying float localLightIntensity = 1.f;
 
             // Get simulation value from geometry ID
-            const float simulationValue = getSimulationValue( self, dg );
-            localLightEmission = simulationValue;
+            varying float lightEmission;
+            const vec4f simulationValue = getSimulationValue( self, dg, lightEmission );
+            localSimulationColor = make_vec3f( simulationValue );
+            localSimulationIntensity = simulationValue.w;
+            localLightEmission = lightEmission;
 
             // Process material attributes
             const uniform Material* material = dg.material;
@@ -202,8 +217,11 @@ inline vec3f SimulationRenderer_shadeRay(
                         indirectShadingColor = indirectShadingColor * localOpacity;
 
                         // Get simulation value from geometry ID
-                        const float simulationValue = getSimulationValue( self, geometry );
-                        indirectShadingIntensity += simulationValue;
+                        varying float lightEmission;
+                        const vec4f simulationValue =
+                            getSimulationValue( self, geometry, lightEmission );
+                        indirectShadingColor = indirectShadingColor + make_vec3f( simulationValue );
+                        indirectShadingIntensity += lightEmission;
                     }
                 }
 
@@ -220,10 +238,15 @@ inline vec3f SimulationRenderer_shadeRay(
                     localLightIntensity = 1.f;
                     const varying vec3f viewer = normalize( ray.org - intersection );
                     const varying float el = max( 0.f, dot( viewer, localNormal ));
-                    varying float cosNL  = localLightEmission + ( 0.1f - 0.1f * el );
+                    varying float cosNL  = localLightEmission + ( 1.f - el );
                     localShadedColor =
                         localOpacity * cosNL *
-                        (localDiffuseColor + indirectShadingColor * indirectShadingIntensity);
+                        (
+                            // Affect shading with color determined by simulation value
+                            (localSimulationColor * localSimulationIntensity) +
+                            ( 1.f - localSimulationIntensity ) * localDiffuseColor +
+                            indirectShadingColor * indirectShadingIntensity
+                        );
                 }
                 else
                 {
@@ -238,27 +261,30 @@ inline vec3f SimulationRenderer_shadeRay(
 
                         if( reduce_max( radiance ) > 0.f )
                         {
-                            varying float cosNL = 0.f;
-                            varying float cosLR = 0.f;
+                            varying float cosNL = 1.f;
+                            varying float cosLR = 1.f;
                             // Phong + Blinn shading
                             if( self->abstract.shadingEnabled )
                             {
                                 cosNL = min( 1.f,
                                     max( 0.f, indirectShadingIntensity ) +
-                                    max( 0.f, 0.1f * dot( lightDirection, localNormal )));
+                                    max( 0.f, dot( lightDirection, localNormal )));
                                 cosLR = min( 1.f,
                                     max( 0.f, indirectShadingIntensity ) +
                                     max( 0.f, dot( lightDirection, reflectedDirection )));
                             }
 
-                            // Affect shading with light emission determined by simulation value
                             cosNL += localLightEmission;
                             cosLR += localLightEmission;
 
                             // Diffuse color
                             const varying vec3f localUnshadedColor =
-                                localOpacity * cosNL *
-                                (localDiffuseColor + indirectShadingColor * indirectShadingIntensity);
+                                localOpacity * cosNL * (
+                                (
+                                    // Affect shading with color determined by simulation value
+                                    (localSimulationColor * localSimulationIntensity) +
+                                    ( 1.f - localSimulationIntensity ) * localDiffuseColor
+                                ) + indirectShadingColor * indirectShadingIntensity);
 
                             // Specular color
                             if( self->abstract.shadingEnabled )
@@ -367,7 +393,11 @@ export void SimulationRenderer_set(
         const uniform int32 numLights,
         void** uniform materials,
         const uniform int32 numMaterials,
-        uniform float* uniform simulationData )
+        uniform float* uniform simulationData,
+        uniform vec4f* uniform colormap,
+        uniform float* uniform colormapEmissionData,
+        const uniform int32 colorMapSize,
+        const uniform float& threshold )
 {
     uniform SimulationRenderer* uniform self = ( uniform SimulationRenderer* uniform )_self;
 
@@ -388,5 +418,8 @@ export void SimulationRenderer_set(
     self->abstract.numMaterials = numMaterials;
 
     self->simulationData = (uniform float* uniform)simulationData;
-
+    self->colorMap = (uniform vec4f* uniform)colormap;
+    self->colorMapEmissionData = (uniform float* uniform)colormapEmissionData;
+    self->colorMapSize = colorMapSize;
+    self->threshold = threshold;
 }

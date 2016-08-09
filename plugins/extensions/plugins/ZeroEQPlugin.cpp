@@ -106,6 +106,12 @@ void ZeroEQPlugin::_setupHTTPServer()
     _httpServer->add( _remoteMaterial );
     _remoteMaterial.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_materialUpdated, this ));
+
+    _httpServer->add( _remoteTransferFunction1D );
+    _remoteTransferFunction1D.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_transferFunction1DUpdated, this ));
+    _remoteTransferFunction1D.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestTransferFunction1D, this ));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -123,6 +129,10 @@ void ZeroEQPlugin::_setupRequests()
     ::zerobuf::render::FrameBuffers frameBuffers;
     _requests[ frameBuffers.getTypeIdentifier() ] =
         std::bind( &ZeroEQPlugin::_requestFrameBuffers, this );
+
+    ::zerobuf::render::TransferFunction1D transferFunction1D;
+    _requests[ transferFunction1D.getTypeIdentifier() ] =
+        std::bind( &ZeroEQPlugin::_requestTransferFunction1D, this );
 }
 
 void ZeroEQPlugin::_cameraUpdated()
@@ -179,7 +189,47 @@ void ZeroEQPlugin::_materialUpdated( )
         scene->commitMaterials( true );
         _extensionParameters.engine->getFrameBuffer()->clear();
     }
+}
 
+bool ZeroEQPlugin::_requestTransferFunction1D()
+{
+    ScenePtr scene = _extensionParameters.engine->getScene();
+    TransferFunction& transferFunction = scene->getTransferFunction();
+    std::vector< ::zerobuf::render::Point2D > items;
+
+    for( const auto& controlPoint: transferFunction.getControlPoints( TF_RED ) )
+        items.push_back( ::zerobuf::render::Point2D(
+            controlPoint.x(), controlPoint.y() ));
+    _remoteTransferFunction1D.setAttribute( transferFunction.getAttributeAsString( TF_RED ) );
+    _remoteTransferFunction1D.setPoints( items );
+    return true;
+}
+
+void ZeroEQPlugin::_transferFunction1DUpdated( )
+{
+    ScenePtr scene = _extensionParameters.engine->getScene();
+    TransferFunction& transferFunction = scene->getTransferFunction();
+    std::vector< ::zerobuf::render::Point2D > points = _remoteTransferFunction1D.getPointsVector();
+
+    const std::string& attributeName = _remoteTransferFunction1D.getAttributeString();
+    BRAYNS_INFO << "Setting "
+                << points.size() << " control points for transfer function attribute <"
+                << attributeName <<  ">" << std::endl;
+
+    const TransferFunctionAttribute attribute =
+        transferFunction.getAttributeFromString( attributeName );
+
+    if( attribute == TF_UNDEFINED )
+        return;
+
+    auto& controlPoints = transferFunction.getControlPoints( attribute );
+    controlPoints.clear();
+    for( const auto& point: points )
+        controlPoints.push_back( Vector2f(point.getX(), point.getY()));
+    transferFunction.resample();
+
+    scene->commitSimulationData();
+    _extensionParameters.engine->getFrameBuffer()->clear();
 }
 
 void ZeroEQPlugin::_resizeImage(

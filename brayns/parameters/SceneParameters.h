@@ -41,11 +41,14 @@ public:
     size_t getTimestamp( ) const { return _timestamp; }
     void setTimestamp( const size_t value ) { _timestamp = value; }
 
+    const std::string& getTransferFunctionFilename() const { return _transferFunctionFilename; }
+
 protected:
 
     bool _parse( const po::variables_map& vm ) final;
 
     size_t _timestamp;
+    std::string _transferFunctionFilename;
 };
 
 }

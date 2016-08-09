@@ -20,10 +20,10 @@
 
 #include "SceneParameters.h"
 
-
 namespace
 {
 const std::string PARAM_TIMESTAMP = "timestamp";
+const std::string PARAM_TRANSFER_FUNCTION_FILE = "transfer-function-file";
 }
 
 namespace brayns
@@ -31,25 +31,29 @@ namespace brayns
 
 SceneParameters::SceneParameters()
     : AbstractParameters( "Scene" )
-    , _timestamp( std::numeric_limits<size_t>::max( ))
+    , _timestamp( std::numeric_limits<size_t>::max())
 {
     _parameters.add_options()
-        (PARAM_TIMESTAMP.c_str(), po::value< size_t >( ), "Timestamp");
+        (PARAM_TIMESTAMP.c_str(), po::value< size_t >(),
+        "Timestamp")
+        (PARAM_TRANSFER_FUNCTION_FILE.c_str(), po::value< std::string >(),
+        "Color map filename" );
 }
 
 bool SceneParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_TIMESTAMP ))
-        _timestamp = vm[PARAM_TIMESTAMP].as< size_t >( );
-
+        _timestamp = vm[PARAM_TIMESTAMP].as< size_t >();
+    if( vm.count( PARAM_TRANSFER_FUNCTION_FILE ))
+        _transferFunctionFilename = vm[PARAM_TRANSFER_FUNCTION_FILE].as< std::string > ();
     return true;
 }
 
 void SceneParameters::print( )
 {
     AbstractParameters::print( );
-    BRAYNS_INFO << "Timestamp :" <<
-        _timestamp << std::endl;
+    BRAYNS_INFO << "Timestamp     :" << _timestamp << std::endl;
+    BRAYNS_INFO << "Transfer function file :" << _transferFunctionFilename << std::endl;
 }
 
 }

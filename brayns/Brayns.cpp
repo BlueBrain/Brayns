@@ -34,6 +34,7 @@
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/MeshLoader.h>
+#include <brayns/io/TransferFunctionLoader.h>
 
 #include <boost/filesystem.hpp>
 #include <servus/uri.h>
@@ -431,6 +432,7 @@ private:
             geometryParameters.getCircuitConfiguration( );
         const std::string& target =
             geometryParameters.getTarget( );
+
         BRAYNS_INFO << "Loading circuit configuration from " <<
             filename << std::endl;
         const std::string& report =
@@ -459,12 +461,23 @@ private:
             geometryParameters.getTarget( );
         const std::string& report =
             geometryParameters.getReport( );
-        BRAYNS_INFO << "Loading compartment report from " <<
-            filename << std::endl;
+        BRAYNS_INFO << "Loading compartment report from " << filename << std::endl;
         MorphologyLoader morphologyLoader( geometryParameters );
         const servus::URI uri( filename );
         if( morphologyLoader.importSimulationData( uri, target, report, *_engine->getScene()))
+        {
+            SceneParameters& sceneParameters =
+                _parametersManager->getSceneParameters();
+            const std::string& transferFunctionFilename =
+                sceneParameters.getTransferFunctionFilename();
+            if( !transferFunctionFilename.empty() )
+            {
+                TransferFunctionLoader transferFunctionLoader;
+                transferFunctionLoader.loadFromFile(
+                    transferFunctionFilename, *_engine->getScene() );
+            }
             _engine->getScene()->commitSimulationData();
+        }
     }
 
     void _buildDefaultScene()
