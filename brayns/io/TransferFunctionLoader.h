@@ -39,14 +39,16 @@ namespace brayns
  */
 class TransferFunctionLoader
 {
+
 public:
+
     TransferFunctionLoader();
 
     /**
      * @brief Loads values from a transfer function file
      * @param filename Full file name of the transfer function file
-     * @param scene
-     * @return true if the colormap file was successfully loaded, false
+     * @param scene Scene holding the transfer function
+     * @return True if the colormap file was successfully loaded, false
      *         otherwise
      */
     bool loadFromFile(

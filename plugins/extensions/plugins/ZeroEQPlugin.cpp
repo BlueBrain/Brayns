@@ -229,6 +229,7 @@ void ZeroEQPlugin::_transferFunction1DUpdated( )
     transferFunction.resample();
 
     scene->commitSimulationData();
+    _extensionParameters.engine->getRenderer()->commit();
     _extensionParameters.engine->getFrameBuffer()->clear();
 }
 

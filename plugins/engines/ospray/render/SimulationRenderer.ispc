@@ -31,6 +31,8 @@ struct SimulationRenderer
     uniform vec4f* uniform colorMap;
     uniform float* uniform colorMapEmissionData;
     uint32 colorMapSize;
+    float colorMapMinValue;
+    float colorMapRange;
     float threshold;
     uint64 simulationFrameSize;
     uint64 simulationNbFrames;
@@ -47,14 +49,17 @@ inline varying vec4f getSimulationValue(
         return color;
 
     const varying float value = self->simulationData[ dg.st.x ];
+
     if( value < self->threshold )
         return color;
 
+    const varying float normalizedValue =
+        self->colorMapSize * ( value - self->colorMapMinValue ) / self->colorMapRange;
     if( self->colorMap )
-        color = self->colorMap[ value * self->colorMapSize ];
+        color = self->colorMap[normalizedValue];
 
     if( self->colorMapEmissionData )
-        lightEmission = self->colorMapEmissionData[ value * self->colorMapSize ];
+        lightEmission = self->colorMapEmissionData[normalizedValue];
 
     return color;
 }
@@ -397,6 +402,8 @@ export void SimulationRenderer_set(
         uniform vec4f* uniform colormap,
         uniform float* uniform colormapEmissionData,
         const uniform int32 colorMapSize,
+        const uniform float colorMapMinValue,
+        const uniform float colorMapRange,
         const uniform float& threshold )
 {
     uniform SimulationRenderer* uniform self = ( uniform SimulationRenderer* uniform )_self;
@@ -421,5 +428,7 @@ export void SimulationRenderer_set(
     self->colorMap = (uniform vec4f* uniform)colormap;
     self->colorMapEmissionData = (uniform float* uniform)colormapEmissionData;
     self->colorMapSize = colorMapSize;
+    self->colorMapMinValue = colorMapMinValue;
+    self->colorMapRange = colorMapRange;
     self->threshold = threshold;
 }

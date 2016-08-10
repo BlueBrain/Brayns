@@ -127,6 +127,9 @@ typedef std::shared_ptr< DirectionalLight > DirectionalLightPtr;
 class PointLight;
 typedef std::shared_ptr< PointLight > PointLightPtr;
 
+class SimulationDescriptor;
+typedef std::shared_ptr< SimulationDescriptor > SimulationDescriptorPtr;
+
 typedef std::vector< std::string > strings;
 typedef std::vector< float > floats;
 typedef std::vector< int > ints;
@@ -223,12 +226,6 @@ struct ExtensionParameters
 {
     ParametersManagerPtr parametersManager;
     EnginePtr engine;
-};
-
-/** Extension parameters */
-struct SimulationData
-{
-    std::map< uint64_t, floats > valuesPerFrame;
 };
 
 /** Some 'special' materials are used by Brayns to acomplish specific features

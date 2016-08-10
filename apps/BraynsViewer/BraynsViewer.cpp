@@ -129,7 +129,10 @@ void BraynsViewer::display( )
     BaseWindow::display( );
 
     std::stringstream ss;
-    ss << "BRayns Viewer - Interactive Ray-Tracing";
+    ss << "Brayns Viewer - Interactive Ray-Tracing";
+    size_t ts = _brayns->getParametersManager().getSceneParameters().getTimestamp();
+    if( ts != std::numeric_limits<size_t>::max() )
+        ss << " (frame " << ts << ")";
     if( _brayns->getParametersManager().getApplicationParameters( ).
         isBenchmarking( ))
     {

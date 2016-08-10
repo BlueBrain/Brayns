@@ -5,6 +5,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSCOMMON_SOURCES
+  simulation/SimulationDescriptor.cpp
   transferFunction/TransferFunction.cpp
   camera/Camera.cpp
   scene/Scene.cpp
@@ -26,6 +27,7 @@ set(BRAYNSCOMMON_SOURCES
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   exceptions.h
   log.h
+  simulation/SimulationDescriptor.h
   transferFunction/TransferFunction.h
   camera/Camera.h
   scene/Scene.h

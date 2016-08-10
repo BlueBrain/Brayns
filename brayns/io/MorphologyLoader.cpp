@@ -25,7 +25,10 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/simulation/SimulationDescriptor.h>
+
 #include <algorithm>
+#include <fstream>
 
 #ifdef BRAYNS_USE_BRION
 #  include <brain/brain.h>
@@ -443,11 +446,8 @@ bool MorphologyLoader::importCircuit(
 bool MorphologyLoader::importSimulationData(
     const servus::URI& circuitConfig,
     const std::string& target,
-    const std::string& report,
-    Scene& scene )
+    const std::string& report )
 {
-    SimulationData& simulationData = scene.getSimulationData();
-
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc( filename );
     const brain::Circuit circuit( bc );
@@ -463,99 +463,54 @@ bool MorphologyLoader::importSimulationData(
     brion::CompartmentReport compartmentReport(
         brion::URI( bc.getReportSource( report ).getPath( )), brion::MODE_READ, gids );
 
+
+    SimulationDescriptor simulationDescriptor;
+    const std::string& cacheFile = _geometryParameters.getSimulationCacheFile();
+    if( simulationDescriptor.attachSimulationToCacheFile( cacheFile ) )
+        // Cache already exists, no need to create it.
+        return true;
+
+    BRAYNS_INFO << "Cache file does not exist, creating it" << std::endl;
+    std::ofstream file( cacheFile, std::ios::out | std::ios::binary );
+
+    if( !file.is_open() )
+    {
+        BRAYNS_ERROR << "Failed to create cache file" << std::endl;
+        return false;
+    }
+
+    // Load simulation information from compartment reports
     const float start = compartmentReport.getStartTime();
     const float end = compartmentReport.getEndTime();
     const float step = compartmentReport.getTimestep();
 
     const float firstFrame = std::max( start, _geometryParameters.getStartSimulationTime() );
     const float lastFrame = std::min( end, _geometryParameters.getEndSimulationTime() );
-    const float frameSize = compartmentReport.getFrameSize();
+    const uint64_t frameSize = compartmentReport.getFrameSize();
 
     const uint64_t nbFrames = ( lastFrame - firstFrame ) / step;
-    const uint64_t totalSize = nbFrames * frameSize;
 
-    BRAYNS_INFO << "Loading values from compartment report" << std::endl;
+    BRAYNS_INFO << "Loading values from compartment report and saving them to cache" << std::endl;
+
+    // Write header
+    simulationDescriptor.writeHeader( file, nbFrames, frameSize );
+
+    // Write body
     for( uint64_t frame = 0; frame < nbFrames; ++frame )
     {
         BRAYNS_PROGRESS( frame, nbFrames );
         const float frameTime = firstFrame + step * frame;
         const brion::floatsPtr& valuesPtr = compartmentReport.loadFrame( frameTime );
         const floats& values = *valuesPtr;
-
-        simulationData.valuesPerFrame[frame].reserve( values.size() );
-
-        simulationData.valuesPerFrame[frame].insert(
-            simulationData.valuesPerFrame[frame].end(),
-            values.begin(), values.end());
+        simulationDescriptor.writeFrame( file, values );
     }
-
-    Vector2f simulationRange = _geometryParameters.getSimulationValuesRange();
-    if( simulationRange.x() == std::numeric_limits<float>::max() &&
-        simulationRange.y() == std::numeric_limits<float>::min())
-    {
-        BRAYNS_INFO << "Identifying min and max simulation values in range ["
-                    << firstFrame << " - " << lastFrame << "]"
-                    << std::endl;
-        uint64_t progress = 0;
-        #pragma omp parallel
-        {
-            std::map< uint64_t, Vector2f > privateRanges;
-            uint64_t frame;
-            #pragma omp for nowait
-            for( frame = 0; frame < simulationData.valuesPerFrame.size(); ++frame )
-            {
-                const auto& valuesPerFrame = simulationData.valuesPerFrame[frame];
-                privateRanges[frame] = Vector2f(
-                    std::numeric_limits<float>::max(),
-                    std::numeric_limits<float>::min());
-
-                for( uint64_t i = 0; i < valuesPerFrame.size(); ++i )
-                {
-                    const float& value = valuesPerFrame[i];
-                    Vector2f& range = privateRanges[i];
-                    range.x() = std::min( range.x(), value );
-                    range.y() = std::max( range.y(), value );
-                }
-                BRAYNS_PROGRESS( progress, nbFrames );
-
-                #pragma omp atomic
-                ++progress;
-
-            }
-            #pragma omp critical
-            for( const auto& p: privateRanges )
-            {
-                simulationRange.x() = std::min( simulationRange.x(), p.second.x() );
-                simulationRange.y() = std::max( simulationRange.y(), p.second.y() );
-            }
-        }
-    }
-
-    BRAYNS_INFO << "Normalizing simulation values" << std::endl;
-    const float colorStep = float( simulationRange.y()- simulationRange.x() );
-
-    uint64_t frame;
-    uint64_t progress = 0;
-    #pragma omp parallel for
-    for( frame = 0; frame < simulationData.valuesPerFrame.size(); ++frame )
-    {
-        auto& valuesPerFrame = simulationData.valuesPerFrame[frame];
-        for( uint64_t i = 0; i < valuesPerFrame.size(); ++i )
-            valuesPerFrame[i] =
-                ( valuesPerFrame[i] - simulationRange.x() ) / colorStep;
-
-        BRAYNS_PROGRESS( progress, nbFrames );
-        #pragma omp atomic
-        ++progress;
-    }
+    file.close();
 
     BRAYNS_INFO << "----------------------------------------" << std::endl;
+    BRAYNS_INFO << "Cache file successfully created" << std::endl;
     BRAYNS_INFO << "Number of frames: " << nbFrames << std::endl;
     BRAYNS_INFO << "Frame size      : " << frameSize << std::endl;
-    BRAYNS_INFO << "Simulation range: " << simulationRange << std::endl;
-    BRAYNS_INFO << "Number of values: " << totalSize << std::endl;
     BRAYNS_INFO << "----------------------------------------" << std::endl;
-
     return true;
 }
 
@@ -582,15 +537,14 @@ bool MorphologyLoader::importCircuit(
     return false;
 }
 
-size_t MorphologyLoader::importSimulationIntoTexture(
-    const servus::URI&,
-    const std::string&,
-    const std::string&,
-    Scene& )
+bool MorphologyLoader::_createSimulationDataCache(
+    const brion::CompartmentReport& report,
+    const std::string& cacheFile )
 {
-    BRAYNS_ERROR << "Brion is required to load simulations" << std::endl;
+    BRAYNS_ERROR << "Brion is required to load simulation data" << std::endl;
     return 0;
 }
+
 #endif
 
 size_t MorphologyLoader::_material(

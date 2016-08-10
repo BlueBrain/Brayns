@@ -25,6 +25,7 @@
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/io/TransferFunctionLoader.h>
+#include <brayns/common/simulation/SimulationDescriptor.h>
 
 #include <servus/uri.h>
 
@@ -492,6 +493,20 @@ LightPtr Scene::getLight( const size_t index )
 void Scene::clearLights( )
 {
     _lights.clear();
+}
+
+SimulationDescriptorPtr Scene::getSimulationDescriptor()
+{
+    const std::string& cacheFile = _geometryParameters.getSimulationCacheFile();
+    if( !_simulationDescriptor && !cacheFile.empty() )
+    {
+        if( cacheFile.empty() )
+            return 0;
+
+        _simulationDescriptor.reset( new SimulationDescriptor() );
+        _simulationDescriptor->attachSimulationToCacheFile( cacheFile );
+    }
+    return _simulationDescriptor;
 }
 
 }
