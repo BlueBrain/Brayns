@@ -238,8 +238,8 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
 
     // All options
     t = float(allOptions) / float(reference);
-    BOOST_TEST_MESSAGE( "All options cost. expected: 320%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 3.2f );
+    BOOST_TEST_MESSAGE( "All options cost. expected: 330%, realized: " << t * 100.f );
+    BOOST_CHECK( t < 3.3f );
 }
 
 BOOST_AUTO_TEST_CASE( test_transfer_function )
