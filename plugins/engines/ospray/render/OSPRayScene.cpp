@@ -27,6 +27,7 @@
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/light/DirectionalLight.h>
+#include <brayns/common/simulation/SimulationDescriptor.h>
 #include <brayns/io/TextureLoader.h>
 
 namespace brayns
@@ -174,20 +175,6 @@ void OSPRayScene::_saveCacheFile()
 
     file.write( ( char* )&_bounds, sizeof( Boxf ));
     BRAYNS_INFO << _bounds << std::endl;
-
-    uint64_t simulationSize = 0;
-    const uint64_t nbFrames = _simulationData.valuesPerFrame.size();
-    file.write( ( char* )&nbFrames, sizeof( uint64_t ));
-    for( uint64_t frame = 0; frame < nbFrames; ++frame )
-    {
-        const uint64_t simulationDataSize = _simulationData.valuesPerFrame[frame].size();
-        file.write( ( char* )&simulationDataSize, sizeof( uint64_t ));
-        if( simulationDataSize != 0 )
-            file.write( ( char* )_simulationData.valuesPerFrame[frame].data(),
-                sizeof(float) * simulationDataSize );
-        simulationSize += simulationDataSize * sizeof( float );
-    }
-    BRAYNS_INFO << "Simulation size: " << simulationSize << " bytes" << std::endl;
     file.close();
     BRAYNS_INFO << "Scene successfully saved"<< std::endl;
 }
@@ -314,29 +301,6 @@ void OSPRayScene::_loadCacheFile()
 
     // Scene bounds
     file.read( ( char* )&_bounds, sizeof( Boxf ));
-
-    // Read simulation data
-    uint64_t simulationSize = 0;
-    uint64_t nbFrames;
-    file.read( (char*)&nbFrames, sizeof( uint64_t ));
-    for( uint64_t frame = 0; frame < nbFrames; ++frame )
-    {
-        size_t simulationDataSize;
-        file.read( (char*)&simulationDataSize, sizeof( uint64_t ));
-        if( simulationDataSize != 0 )
-        {
-            _simulationData.valuesPerFrame[frame].clear();
-            _simulationData.valuesPerFrame[frame].reserve( simulationDataSize );
-            file.read( ( char* )_simulationData.valuesPerFrame[frame].data(),
-                       sizeof(float) * simulationDataSize );
-            simulationSize += simulationDataSize * sizeof( float );
-        }
-
-    }
-    BRAYNS_INFO << "Simulation size: " << simulationSize  << "/"
-                << nbFrames << std::endl;
-    if( simulationSize != 0 )
-        commitSimulationData();
 
     BRAYNS_INFO << _bounds << std::endl;
     BRAYNS_INFO << "Scene successfully loaded"<< std::endl;
@@ -755,7 +719,8 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
 
 void OSPRayScene::commitSimulationData()
 {
-    if( _simulationData.valuesPerFrame.size() == 0 )
+    SimulationDescriptorPtr simulationDescriptor = getSimulationDescriptor();
+    if( !simulationDescriptor )
         return;
 
     for( const auto& renderer: _renderers )
@@ -763,10 +728,11 @@ void OSPRayScene::commitSimulationData()
         OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.lock().get( ));
 
         // Simulation data
-        size_t ts = _sceneParameters.getTimestamp() % _simulationData.valuesPerFrame.size();
+        const uint64_t frame = _sceneParameters.getTimestamp();
+
         _ospSimulationData = ospNewData(
-            _simulationData.valuesPerFrame[ts].size(), OSP_FLOAT,
-            &_simulationData.valuesPerFrame[ts].data()[0], OSP_DATA_SHARED_BUFFER );
+            simulationDescriptor->getFrameSize( frame ), OSP_FLOAT,
+            simulationDescriptor->getFramePointer( frame ), OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospSimulationData );
         ospSetData( osprayRenderer->impl(), "simulationData", _ospSimulationData );
 
@@ -789,6 +755,12 @@ void OSPRayScene::commitSimulationData()
         // Transfer function size
         ospSet1i( osprayRenderer->impl(),
             "transferFunctionSize", _transferFunction.getDiffuseColors().size() );
+
+        // Transfer function range
+        ospSet1f( osprayRenderer->impl(),
+            "transferFunctionMinValue", _transferFunction.getValuesRange().x() );
+        ospSet1f( osprayRenderer->impl(),  "transferFunctionRange",
+            _transferFunction.getValuesRange().y() - _transferFunction.getValuesRange().x() );
     }
 }
 

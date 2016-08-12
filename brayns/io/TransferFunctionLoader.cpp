@@ -30,6 +30,7 @@ namespace
 {
 const float DEFAULT_ALPHA = 1.f;
 const float DEFAULT_EMISSION = 0.f;
+const brayns::Vector2f DEFAULT_RANGE = { -92.0915, 49.5497 };
 }
 
 namespace brayns
@@ -43,7 +44,7 @@ bool TransferFunctionLoader::loadFromFile(
     const std::string& filename,
     Scene& scene )
 {
-    BRAYNS_INFO << "Loading color map from " << filename << std::endl;
+    BRAYNS_INFO << "Loading transfer function color map from " << filename << std::endl;
     std::ifstream file( filename, std::ios::in );
     if( !file.good( ))
     {
@@ -55,6 +56,7 @@ bool TransferFunctionLoader::loadFromFile(
     std::string line;
 
     TransferFunction& transferFunction = scene.getTransferFunction();
+    transferFunction.setValuesRange( DEFAULT_RANGE );
     transferFunction.clear();
 
     while( validParsing && std::getline( file, line ))

@@ -158,7 +158,10 @@ public:
     BRAYNS_API TexturesMap& getTextures() { return _textures; }
     BRAYNS_API TrianglesMeshMap& getTriangleMeshes() { return _trianglesMeshes; }
 
-    BRAYNS_API SimulationData& getSimulationData() { return _simulationData; }
+    /**
+        Returns simulation data
+    */
+    BRAYNS_API SimulationDescriptorPtr getSimulationDescriptor();
 
     /**
         Build a color map from a file, according to the colormap-file scene parameters
@@ -179,11 +182,17 @@ protected:
     Lights _lights;
 
     // Simulation
-    SimulationData _simulationData;
+    SimulationDescriptorPtr _simulationDescriptor;
     TransferFunction _transferFunction;
 
+    // Scene
     Boxf _bounds;
     bool _isEmpty;
+
+private:
+
+    bool _attachSimulationCacheFile();
+
 };
 
 }

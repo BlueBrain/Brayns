@@ -130,8 +130,10 @@ public:
     /** Defines the range of frames to be loaded for the simulation */
     float getEndSimulationTime() const { return _endSimulationTime; }
     float getStartSimulationTime() const { return _startSimulationTime; }
-
     Vector2f getSimulationValuesRange() const { return _simulationValuesRange; }
+
+    /** File containing simulation data */
+    const std::string& getSimulationCacheFile() const { return _simulationCacheFile; }
 
     /** Defines if multiple models should be generated to increase the
         rendering performance */
@@ -161,6 +163,7 @@ protected:
     float _startSimulationTime;
     float _endSimulationTime;
     Vector2f _simulationValuesRange;
+    std::string _simulationCacheFile;
     bool _generateMultipleModels;
 };
 

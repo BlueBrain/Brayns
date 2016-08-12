@@ -45,6 +45,7 @@ const std::string PARAM_NON_SIMULATED_CELLS = "non-simulated-cells";
 const std::string PARAM_START_SIMULATION_TIME = "start-simulation-time";
 const std::string PARAM_END_SIMULATION_TIME = "end-simulation-time";
 const std::string PARAM_SIMULATION_RANGE = "simulation-values-range";
+const std::string PARAM_SIMULATION_CACHE_FILENAME = "simulation-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
@@ -113,6 +114,8 @@ GeometryParameters::GeometryParameters( )
             "End simulation time" )
         ( PARAM_SIMULATION_RANGE.c_str(), po::value< floats >()->multitoken(),
             "Minimum and maximum values for the simulation" )
+        ( PARAM_SIMULATION_CACHE_FILENAME.c_str(), po::value< std::string >(),
+            "Cache file containing simulation data" )
         ( PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value< bool >(),
             "Generated multiple models based on geometry timestamps" );
 }
@@ -177,6 +180,9 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
         if( values.size( ) == 2 )
             _simulationValuesRange = Vector2f( values[0], values[1] );
     }
+    if( vm.count( PARAM_SIMULATION_CACHE_FILENAME ))
+        _simulationCacheFile =
+            vm[PARAM_SIMULATION_CACHE_FILENAME].as< std::string >( );
     if( vm.count( PARAM_GENERATE_MULTIPLE_MODELS ))
         _generateMultipleModels =
             vm[PARAM_GENERATE_MULTIPLE_MODELS].as< bool >( );
@@ -221,6 +227,8 @@ void GeometryParameters::print( )
         _endSimulationTime << std::endl;
     BRAYNS_INFO << "- Simulation values range  : " <<
         _simulationValuesRange << std::endl;
+    BRAYNS_INFO << "- Simulation cache file    : " <<
+        _simulationCacheFile << std::endl;
     BRAYNS_INFO << "Morphology section types   : " <<
         _morphologySectionTypes << std::endl;
     BRAYNS_INFO << "Morphology Layout          : " << std::endl;

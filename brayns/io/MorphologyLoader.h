@@ -29,6 +29,11 @@
 
 #include <vector>
 
+namespace brion
+{
+    class CompartmentReport;
+}
+
 namespace brayns
 {
 
@@ -102,14 +107,13 @@ public:
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
      * @param report report to be loaded.
-     * @param scene resulting scene
-     * @return True if simulation was successfully loaded, dalse otherwise
+     * @return True if simulation cache file successfully opened or created, false otherwise
      */
     bool importSimulationData(
         const servus::URI& circuitConfig,
         const std::string& target,
-        const std::string& report,
-        Scene& scene );
+        const std::string& report );
+
 
 private:
     bool _importMorphology(

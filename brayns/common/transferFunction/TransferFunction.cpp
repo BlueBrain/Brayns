@@ -15,6 +15,7 @@ namespace brayns
 {
 
 TransferFunction::TransferFunction()
+    : _valuesRange( 0.f, 0.f )
 {
 }
 
@@ -32,23 +33,23 @@ Vector2fs& TransferFunction::getControlPoints( const TransferFunctionAttribute a
 
 void TransferFunction::resample( const size_t sampleSize )
 {
-    Vector2f range(
+    _valuesRange = Vector2f(
         std::numeric_limits<size_t>::max(),
         std::numeric_limits<size_t>::min());
     for( const auto& controlPoints: _controlPoints )
         for( const auto& point: controlPoints.second )
         {
-            range.x() = std::min( range.x(), point.x() );
-            range.y() = std::max( range.y(), point.x() );
+            _valuesRange.x() = std::min( _valuesRange.x(), point.x() );
+            _valuesRange.y() = std::max( _valuesRange.y(), point.x() );
         }
-    if( range.x() == range.y() )
+    if( _valuesRange.x() == _valuesRange.y() )
         return;
 
     _diffuseColors.clear();
     _emissionIntensities.clear();
 
     BRAYNS_DEBUG << "Computing linear deltas between each control points" << std::endl;
-    const float step = ( range.y() - range.x() ) / ( sampleSize - 1 );
+    const float step = ( _valuesRange.y() - _valuesRange.x() ) / ( sampleSize - 1 );
     std::map< TransferFunctionAttribute, Vector4fs > deltas;
     for( const auto& controlPoints: _controlPoints )
         for( size_t i = 1; i < controlPoints.second.size(); ++i )
@@ -75,7 +76,7 @@ void TransferFunction::resample( const size_t sampleSize )
     float emission =
         _controlPoints[TF_EMISSION].size() == 0 ? 0.f : _controlPoints[TF_EMISSION][0].y();
 
-    for( float x = range.x(); x <= range.y(); x += step )
+    for( float x = _valuesRange.x(); x <= _valuesRange.y(); x += step )
     {
         if( xr < deltas[TF_RED].size() )
         {

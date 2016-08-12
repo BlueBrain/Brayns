@@ -51,7 +51,8 @@ private:
     ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
     ospray::Ref< ospray::Data > _transferFunctionEmissionData;
     ospray::int32 _transferFunctionSize;
-
+    float _transferFunctionMinValue;
+    float _transferFunctionRange;
     float _threshold;
 };
 

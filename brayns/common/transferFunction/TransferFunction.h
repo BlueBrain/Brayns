@@ -86,12 +86,20 @@ public:
      */
     floats& getEmissionIntensities() { return _emissionIntensities; }
 
+    /**
+     * @brief Get transfer function range of values
+     * @return A tuple of 2 floats with min and max value
+     */
+    const Vector2f& getValuesRange() const { return _valuesRange; }
+    void setValuesRange( const Vector2f& valuesRange ) { _valuesRange = valuesRange; }
+
 private:
 
     std::map< TransferFunctionAttribute, Vector2fs > _controlPoints;
 
     Vector4fs _diffuseColors;
     floats _emissionIntensities;
+    Vector2f _valuesRange;
 };
 
 }

@@ -464,7 +464,7 @@ private:
         BRAYNS_INFO << "Loading compartment report from " << filename << std::endl;
         MorphologyLoader morphologyLoader( geometryParameters );
         const servus::URI uri( filename );
-        if( morphologyLoader.importSimulationData( uri, target, report, *_engine->getScene()))
+        if( morphologyLoader.importSimulationData( uri, target, report ))
         {
             SceneParameters& sceneParameters =
                 _parametersManager->getSceneParameters();
