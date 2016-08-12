@@ -70,7 +70,10 @@ OSPRayEngine::OSPRayEngine(
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize =
         parametersManager->getApplicationParameters( ).getWindowSize( );
-    _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8 ));
+
+    const bool accumulation = parametersManager->getApplicationParameters().getFilters().empty( );
+
+    _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8, accumulation ));
     _camera.reset( new OSPRayCamera(
         parametersManager->getRenderingParameters().getCameraType( )));
     BRAYNS_INFO << "Engine initialization complete" << std::endl;

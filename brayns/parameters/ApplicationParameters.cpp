@@ -35,6 +35,7 @@ const std::string PARAM_DEFLECT_HOST_NAME = "deflect-hostname";
 const std::string PARAM_DEFLECT_STREAM_NAME = "deflect-streamname";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
+const std::string PARAM_FILTERS = "filters";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -71,7 +72,9 @@ ApplicationParameters::ApplicationParameters( )
         ( PARAM_JPEG_COMPRESSION.c_str( ), po::value< size_t >( ),
             "JPEG compression rate (100 = full quality)" )
         ( PARAM_JPEG_SIZE.c_str( ), po::value< uints >( )->multitoken( ),
-            "JPEG size" );
+            "JPEG size" )
+        ( PARAM_FILTERS.c_str( ), po::value< strings >( )->multitoken( ),
+            "Screen space filters" );
 }
 
 bool ApplicationParameters::_parse( const po::variables_map& vm )
@@ -105,6 +108,10 @@ bool ApplicationParameters::_parse( const po::variables_map& vm )
             _jpegSize.x( ) = values[0];
             _jpegSize.y( ) = values[1];
         }
+    }
+    if( vm.count( PARAM_FILTERS ))
+    {
+        _filters = vm[PARAM_FILTERS].as< strings >( );
     }
 
     return true;

@@ -21,22 +21,23 @@
 #ifndef BASEWINDOW_H
 #define BASEWINDOW_H
 
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
 #ifdef __linux__
 #include <unistd.h>
 #endif
 
 #include <brayns/common/types.h>
 #include <apps/ui/Viewport.h>
+#include <apps/ui/gl/ScreenSpaceProcessor.h>
 #include <apps/ui/manipulators/InspectCenterManipulator.h>
 #include <apps/ui/manipulators/FlyingModeManipulator.h>
 
 #include <chrono>
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
 
 using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
@@ -247,6 +248,8 @@ protected:
     int frameCounter_;
 
     FPSCounter _fps;
+
+    ScreenSpaceProcessor _screenSpaceProcessor;
 
 private:
     /*! set a default camera position that views given bounds from the
