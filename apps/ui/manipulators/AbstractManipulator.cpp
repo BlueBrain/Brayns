@@ -23,6 +23,9 @@
 #  include <unistd.h>
 #endif
 
+#include <apps/ui/BaseWindow.h>
+#include "AbstractManipulator.h"
+
 #ifdef __APPLE__
 #  include "GLUT/glut.h"
 #  include <unistd.h>
@@ -30,9 +33,6 @@
 #  include <GL/glut.h>
 #  include <GL/freeglut_ext.h>
 #endif
-
-#include <apps/ui/BaseWindow.h>
-#include "AbstractManipulator.h"
 
 namespace brayns
 {

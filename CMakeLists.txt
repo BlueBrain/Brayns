@@ -33,6 +33,7 @@ endif()
 common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework)
 common_find_package(OSPRay REQUIRED SYSTEM)
 common_find_package(GLUT REQUIRED SYSTEM)
+common_find_package(GLEW REQUIRED SYSTEM)
 common_find_package(OpenGL REQUIRED)
 common_find_package(vmmlib REQUIRED)
 
