@@ -127,6 +127,9 @@ typedef std::shared_ptr< DirectionalLight > DirectionalLightPtr;
 class PointLight;
 typedef std::shared_ptr< PointLight > PointLightPtr;
 
+class SimulationHandler;
+typedef std::shared_ptr< SimulationHandler > SimulationHandlerPtr;
+
 class SimulationDescriptor;
 typedef std::shared_ptr< SimulationDescriptor > SimulationDescriptorPtr;
 

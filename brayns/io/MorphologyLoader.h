@@ -107,12 +107,14 @@ public:
      *        circuit configuration file is used. If such an entry does not
      *        exist, all neurons are loaded.
      * @param report report to be loaded.
+     * @param scene to load the simulation data in.
      * @return True if simulation cache file successfully opened or created, false otherwise
      */
     bool importSimulationData(
         const servus::URI& circuitConfig,
         const std::string& target,
-        const std::string& report );
+        const std::string& report,
+        Scene& scene );
 
 
 private:
