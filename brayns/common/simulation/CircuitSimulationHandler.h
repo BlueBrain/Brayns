@@ -18,38 +18,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SCENEPARAMETERS_H
-#define SCENEPARAMETERS_H
+#ifndef CIRCUITSIMULATIONHANDLER_H
+#define CIRCUITSIMULATIONHANDLER_H
 
-#include "AbstractParameters.h"
+#include <brayns/api.h>
+#include <brayns/common/types.h>
+#include <brayns/common/scene/Scene.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
 
 namespace brayns
 {
 
-class SceneParameters final : public AbstractParameters
+class CircuitSimulationHandler: public AbstractSimulationHandler
 {
-public:
-    SceneParameters();
 
-    /** @copydoc AbstractParameters::print */
-    void print( ) final;
+public:
 
     /**
-       Defines the current timestamp for the scene. The unit is not universally
-       specified and is therefore specific to the scene.
-    */
-    float getTimestamp( ) const { return _timestamp; }
-    void setTimestamp( const float value ) { _timestamp = value; }
+     * @brief Returns the size of a frame
+     * @return Size of given frame
+     */
+    uint64_t getFrameSize() const final { return _frameSize; }
 
-    const std::string& getTransferFunctionFilename() const { return _transferFunctionFilename; }
+    /**
+     * @brief Returns a pointer to a given frame in the memory mapped file.
+     * @param timestamp Timestamp of the frame
+     * @return Pointer to given frame
+     */
+    void* getFrameData( const float timestamp ) final;
 
-protected:
-
-    bool _parse( const po::variables_map& vm ) final;
-
-    float _timestamp;
-    std::string _transferFunctionFilename;
 };
 
 }
-#endif // SCENEPARAMETERS_H
+
+#endif // CIRCUITSIMULATIONHANDLER

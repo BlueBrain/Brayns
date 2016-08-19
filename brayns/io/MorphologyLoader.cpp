@@ -25,7 +25,7 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/common/simulation/SimulationDescriptor.h>
+#include <brayns/common/simulation/CircuitSimulationHandler.h>
 
 #include <algorithm>
 #include <fstream>
@@ -127,7 +127,8 @@ bool MorphologyLoader::_importMorphology(
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material =
-                _material( morphologyIndex, brain::SECTION_SOMA );
+                _material( morphologyIndex,
+                           static_cast< size_t >( brain::SECTION_SOMA ));
             const Vector3f& center = soma.getCentroid() + translation;
 
             const float radius =
@@ -144,7 +145,8 @@ bool MorphologyLoader::_importMorphology(
         for( const auto& section: sections )
         {
             const size_t material =
-                _material( morphologyIndex, section.getType( ));
+                _material( morphologyIndex,
+                    static_cast< size_t >(section.getType()));
             const Vector4fs& samples = section.getSamples();
             if( samples.size() == 0 )
                 continue;
@@ -446,7 +448,8 @@ bool MorphologyLoader::importCircuit(
 bool MorphologyLoader::importSimulationData(
     const servus::URI& circuitConfig,
     const std::string& target,
-    const std::string& report )
+    const std::string& report,
+    Scene& scene )
 {
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc( filename );
@@ -463,10 +466,9 @@ bool MorphologyLoader::importSimulationData(
     brion::CompartmentReport compartmentReport(
         brion::URI( bc.getReportSource( report ).getPath( )), brion::MODE_READ, gids );
 
-
-    SimulationDescriptor simulationDescriptor;
+    CircuitSimulationHandlerPtr simulationHandler( new CircuitSimulationHandler( ));
     const std::string& cacheFile = _geometryParameters.getSimulationCacheFile();
-    if( simulationDescriptor.attachSimulationToCacheFile( cacheFile ) )
+    if( simulationHandler->attachSimulationToCacheFile( cacheFile ))
         // Cache already exists, no need to create it.
         return true;
 
@@ -493,7 +495,9 @@ bool MorphologyLoader::importSimulationData(
     BRAYNS_INFO << "Loading values from compartment report and saving them to cache" << std::endl;
 
     // Write header
-    simulationDescriptor.writeHeader( file, nbFrames, frameSize );
+    simulationHandler->setNbFrames( nbFrames );
+    simulationHandler->setFrameSize( frameSize );
+    simulationHandler->writeHeader( file );
 
     // Write body
     for( uint64_t frame = 0; frame < nbFrames; ++frame )
@@ -502,9 +506,11 @@ bool MorphologyLoader::importSimulationData(
         const float frameTime = firstFrame + step * frame;
         const brion::floatsPtr& valuesPtr = compartmentReport.loadFrame( frameTime );
         const floats& values = *valuesPtr;
-        simulationDescriptor.writeFrame( file, values );
+        simulationHandler->writeFrame( file, values );
     }
     file.close();
+
+    scene.setSimulationHandler( simulationHandler );
 
     BRAYNS_INFO << "----------------------------------------" << std::endl;
     BRAYNS_INFO << "Cache file successfully created" << std::endl;

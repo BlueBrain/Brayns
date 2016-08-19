@@ -28,7 +28,7 @@
 
 namespace
 {
-    const float DEFAULT_TEST_TIMESTAMP = 10000.f;
+    const float DEFAULT_TEST_TIMESTAMP = 300.f;
 }
 
 namespace brayns
@@ -64,10 +64,6 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
         BRAYNS_INFO << "Setting random materials" << std::endl;
         _brayns->setMaterials(MT_RANDOM);
         break;
-    case '7':
-        BRAYNS_INFO << "Setting shades of grey materials" << std::endl;
-        _brayns->setMaterials(MT_SHADES_OF_GREY);
-        break;
     case 'g':
         _timestampIncrement = ( _timestampIncrement == 0.f ) ? 1.f : 0.f;
         BRAYNS_INFO << "Timestamp increment: " <<
@@ -101,6 +97,10 @@ void BraynsViewer::keypress(char key, const Vector2f& where)
         BRAYNS_INFO << "Default renderer activated" << std::endl;
         renderingParams.setRenderer("exobj");
         break;
+    case '7':
+        BRAYNS_INFO << "Particle renderer activated" << std::endl;
+        renderingParams.setRenderer("particlerenderer");
+        break;
     case '8':
         BRAYNS_INFO << "Touch detection renderer activated" << std::endl;
         renderingParams.setRenderer("proximityrenderer");
@@ -130,9 +130,11 @@ void BraynsViewer::display( )
 
     std::stringstream ss;
     ss << "Brayns Viewer - Interactive Ray-Tracing";
-    size_t ts = _brayns->getParametersManager().getSceneParameters().getTimestamp();
-    if( ts != std::numeric_limits<size_t>::max() )
-        ss << " (frame " << ts << ")";
+    float ts = _brayns->getParametersManager().getSceneParameters().getTimestamp();
+    if( ts != std::numeric_limits< float >::max() )
+        ss << " (timestamp " << ts << ")";
+    ss << ", (" << _mouse.x() << ", " << _mouse.y() << ")";
+    ss << ", GID = " << _gid;
     if( _brayns->getParametersManager().getApplicationParameters( ).
         isBenchmarking( ))
     {

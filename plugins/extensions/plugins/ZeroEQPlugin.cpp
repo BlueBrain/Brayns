@@ -27,6 +27,8 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/fovCamera.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/common/simulation/SpikeSimulationHandler.h>
 
 
 namespace brayns
@@ -112,6 +114,12 @@ void ZeroEQPlugin::_setupHTTPServer()
         std::bind( &ZeroEQPlugin::_transferFunction1DUpdated, this ));
     _remoteTransferFunction1D.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestTransferFunction1D, this ));
+
+    _httpServer->add( _remoteSpikes );
+    _remoteSpikes.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_spikesUpdated, this ));
+    _remoteSpikes.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestSpikes, this ));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -133,6 +141,10 @@ void ZeroEQPlugin::_setupRequests()
     ::zerobuf::render::TransferFunction1D transferFunction1D;
     _requests[ transferFunction1D.getTypeIdentifier() ] =
         std::bind( &ZeroEQPlugin::_requestTransferFunction1D, this );
+
+    ::zerobuf::data::Spikes spikes;
+    _requests[ spikes.getTypeIdentifier() ] =
+        std::bind( &ZeroEQPlugin::_requestSpikes, this );
 }
 
 void ZeroEQPlugin::_cameraUpdated()
@@ -190,6 +202,27 @@ void ZeroEQPlugin::_materialUpdated( )
         _extensionParameters.engine->getFrameBuffer()->clear();
     }
 }
+
+void ZeroEQPlugin::_spikesUpdated( )
+{
+    AbstractSimulationHandlerPtr simulationHandler =
+        _extensionParameters.engine->getScene()->getSimulationHandler();
+
+    SpikeSimulationHandler* spikeSimulationHandler =
+        dynamic_cast< SpikeSimulationHandler * >(simulationHandler.get());
+
+    if( spikeSimulationHandler )
+    {
+        uint64_t ts = _remoteSpikes.getTimestamp();
+        float* data = (float*)spikeSimulationHandler->getFrameData( ts );
+        for( const auto& gid: _remoteSpikes.getGidsVector() )
+            data[gid] = ts;
+
+        _extensionParameters.engine->getFrameBuffer()->clear();
+        _extensionParameters.engine->getScene()->commitSimulationData();
+    }
+}
+
 
 bool ZeroEQPlugin::_requestTransferFunction1D()
 {
@@ -331,6 +364,30 @@ bool ZeroEQPlugin::_requestFrameBuffers()
     else
         _remoteFrameBuffers.setDiffuse( 0, 0 );
 
+    return true;
+}
+
+bool ZeroEQPlugin::_requestSpikes()
+{
+    BRAYNS_INFO << "Spikes requested" << std::endl;
+    AbstractSimulationHandlerPtr simulationHandler =
+        _extensionParameters.engine->getScene()->getSimulationHandler();
+
+    SpikeSimulationHandler* spikeSimulationHandler =
+        dynamic_cast< SpikeSimulationHandler * >(simulationHandler.get());
+
+    std::vector< uint64_t > spikeGids;
+    uint64_t ts = 0.f;
+
+    _remoteSpikes.setTimestamp( ts );
+    if( spikeSimulationHandler )
+    {
+        uint64_t frameSize = spikeSimulationHandler->getFrameSize();
+        uint64_t* gids = (uint64_t*)spikeSimulationHandler->getFrameData( ts );
+        spikeGids.reserve( frameSize );
+        spikeGids.assign( gids, gids + frameSize );
+    }
+    _remoteSpikes.setGids( spikeGids );
     return true;
 }
 

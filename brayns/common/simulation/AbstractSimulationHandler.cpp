@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimulationDescriptor.h"
+#include "AbstractSimulationHandler.h"
 
 #include <brayns/common/log.h>
 
@@ -30,16 +30,18 @@
 namespace brayns
 {
 
-SimulationDescriptor::SimulationDescriptor()
-    : _headerSize( 0 )
+AbstractSimulationHandler::AbstractSimulationHandler()
+    : _currentFrame( 0 )
     , _nbFrames( 0 )
     , _frameSize( 0 )
+    , _headerSize( 0 )
     , _memoryMapPtr( 0 )
     , _cacheFileDescriptor( -1 )
 {
+
 }
 
-SimulationDescriptor::~SimulationDescriptor()
+AbstractSimulationHandler::~AbstractSimulationHandler()
 {
     if( _memoryMapPtr )
     {
@@ -52,20 +54,21 @@ SimulationDescriptor::~SimulationDescriptor()
         ::close( _cacheFileDescriptor );
 }
 
-bool SimulationDescriptor::attachSimulationToCacheFile( const std::string& cacheFile )
+bool AbstractSimulationHandler::attachSimulationToCacheFile(
+    const std::string& cacheFile )
 {
     BRAYNS_INFO << "Attaching " << cacheFile << " to current scene" << std::endl;
     _cacheFileDescriptor = open( cacheFile.c_str(), O_RDONLY );
     if( _cacheFileDescriptor == -1 )
     {
-        BRAYNS_ERROR << "Failed to attach " << cacheFile << std::endl;
+        BRAYNS_ERROR << "Failed to open " << cacheFile << std::endl;
         return false;
     }
 
     struct stat sb;
     if( ::fstat( _cacheFileDescriptor, &sb ) == -1 )
     {
-        BRAYNS_ERROR << "Failed to attach " << cacheFile << std::endl;
+        BRAYNS_ERROR << "Failed to get stats from " << cacheFile << std::endl;
         return false;
     }
 
@@ -91,30 +94,17 @@ bool SimulationDescriptor::attachSimulationToCacheFile( const std::string& cache
     return true;
 }
 
-void SimulationDescriptor::writeHeader(
-    std::ofstream& stream,
-    uint64_t nbFrames,
-    uint64_t frameSize )
+void AbstractSimulationHandler::writeHeader( std::ofstream& stream )
 {
-    stream.write( ( char* )&nbFrames, sizeof( uint64_t ));
-    stream.write( ( char* )&frameSize, sizeof( uint64_t ));
+    stream.write( ( char* )&_nbFrames, sizeof( uint64_t ));
+    stream.write( ( char* )&_frameSize, sizeof( uint64_t ));
 }
 
-void SimulationDescriptor::writeFrame(
+void AbstractSimulationHandler::writeFrame(
     std::ofstream& stream,
     const floats& values )
 {
     stream.write( ( char* )values.data(), values.size() * sizeof(float) );
-}
-
-void* SimulationDescriptor::getFramePointer( const uint64_t frame )
-{
-    if( _nbFrames ==  0 )
-        return 0;
-
-    uint64_t moduloFrame = frame % _nbFrames;
-    uint64_t index = std::min( _frameSize, std::max( uint64_t(0), moduloFrame ));
-    return (unsigned char*)_memoryMapPtr + _headerSize + index * _frameSize * sizeof(float);
 }
 
 }

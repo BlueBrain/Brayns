@@ -136,8 +136,9 @@ public:
             bool released,
             const Vector2i& pos);
 
-    virtual void motion(
-            const Vector2i& pos);
+    virtual void motion( const Vector2i& pos );
+
+    virtual void passiveMotion( const Vector2i& pos );
 
     virtual void reshape( const Vector2i& newSize );
 
@@ -225,6 +226,7 @@ protected:
     Vector2i _lastMousePos; /*! last mouse screen position of mouse before
                                     current motion */
     Vector2i _currMousePos; /*! current screen position of mouse */
+    Vector2i _mouse;
     u_int64_t _lastButtonState;
     u_int64_t _currButtonState;
     u_int64_t _currModifiers;
@@ -250,6 +252,10 @@ protected:
     FPSCounter _fps;
 
     ScreenSpaceProcessor _screenSpaceProcessor;
+
+protected:
+
+    uint64_t _gid;
 
 private:
     /*! set a default camera position that views given bounds from the

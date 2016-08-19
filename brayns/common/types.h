@@ -127,8 +127,14 @@ typedef std::shared_ptr< DirectionalLight > DirectionalLightPtr;
 class PointLight;
 typedef std::shared_ptr< PointLight > PointLightPtr;
 
-class SimulationDescriptor;
-typedef std::shared_ptr< SimulationDescriptor > SimulationDescriptorPtr;
+class AbstractSimulationHandler;
+typedef std::shared_ptr< AbstractSimulationHandler > AbstractSimulationHandlerPtr;
+
+class CircuitSimulationHandler;
+typedef std::shared_ptr< CircuitSimulationHandler > CircuitSimulationHandlerPtr;
+
+class SpikeSimulationHandler;
+typedef std::shared_ptr< SpikeSimulationHandler > SpikeSimulationHandlerPtr;
 
 typedef std::vector< std::string > strings;
 typedef std::vector< float > floats;
@@ -136,6 +142,7 @@ typedef std::vector< int > ints;
 typedef std::vector< unsigned int > uints;
 typedef std::vector< uint8_t > uint8_ts;
 typedef std::vector< uint16_t > uint16_ts;
+typedef std::vector< uint32_t > uint32_ts;
 typedef std::vector< uint64_t > uint64_ts;
 typedef std::vector< size_t > size_ts;
 
@@ -237,6 +244,7 @@ const size_t NB_SYSTEM_MATERIALS = 3;
 const size_t MATERIAL_SYSTEM = NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS;
 const size_t MATERIAL_SKYBOX = MATERIAL_SYSTEM + 0;
 const size_t MATERIAL_BOUNDING_BOX = MATERIAL_SYSTEM + 1;
+const size_t MATERIAL_SIMULATION = MATERIAL_SYSTEM + 2;
 const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 

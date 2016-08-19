@@ -4,6 +4,8 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
+ * Based on OSPRay implementation
+ *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -18,38 +20,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SCENEPARAMETERS_H
-#define SCENEPARAMETERS_H
+#pragma once
 
-#include "AbstractParameters.h"
+#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
 
 namespace brayns
 {
 
-class SceneParameters final : public AbstractParameters
+class ParticleRenderer : public AbstractRenderer
 {
-public:
-    SceneParameters();
 
-    /** @copydoc AbstractParameters::print */
-    void print( ) final;
+public:
+
+    ParticleRenderer();
 
     /**
-       Defines the current timestamp for the scene. The unit is not universally
-       specified and is therefore specific to the scene.
+       Returns the class name as a string
+       @return string containing the full name of the class
     */
-    float getTimestamp( ) const { return _timestamp; }
-    void setTimestamp( const float value ) { _timestamp = value; }
+    std::string toString() const final
+    {
+        return "brayns::ParticleRenderer";
+    }
 
-    const std::string& getTransferFunctionFilename() const { return _transferFunctionFilename; }
+    void commit() final;
 
-protected:
+private:
 
-    bool _parse( const po::variables_map& vm ) final;
+    ospray::Ref< ospray::Data > _simulationData;
+    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
+    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
+    ospray::uint32 _transferFunctionSize;
 
-    float _timestamp;
-    std::string _transferFunctionFilename;
 };
 
-}
-#endif // SCENEPARAMETERS_H
+} // ::brayns
+

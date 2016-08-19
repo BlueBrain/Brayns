@@ -139,6 +139,7 @@ void TransferFunction::resample( const size_t sampleSize )
         _diffuseColors.push_back( color );
         _emissionIntensities.push_back( emission );
     }
+    BRAYNS_INFO << "Range: " << _valuesRange << "/" << sampleSize << std::endl;
 }
 
 std::string TransferFunction::getAttributeAsString( const TransferFunctionAttribute attribute )

@@ -402,8 +402,8 @@ export void SimulationRenderer_set(
         uniform vec4f* uniform colormap,
         uniform float* uniform colormapEmissionData,
         const uniform int32 colorMapSize,
-        const uniform float colorMapMinValue,
-        const uniform float colorMapRange,
+        const uniform float& colorMapMinValue,
+        const uniform float& colorMapRange,
         const uniform float& threshold )
 {
     uniform SimulationRenderer* uniform self = ( uniform SimulationRenderer* uniform )_self;

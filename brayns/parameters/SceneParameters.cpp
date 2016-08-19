@@ -31,10 +31,10 @@ namespace brayns
 
 SceneParameters::SceneParameters()
     : AbstractParameters( "Scene" )
-    , _timestamp( std::numeric_limits<size_t>::max())
+    , _timestamp( std::numeric_limits< float >::max())
 {
     _parameters.add_options()
-        (PARAM_TIMESTAMP.c_str(), po::value< size_t >(),
+        (PARAM_TIMESTAMP.c_str(), po::value< float >(),
         "Timestamp")
         (PARAM_TRANSFER_FUNCTION_FILE.c_str(), po::value< std::string >(),
         "Color map filename" );
@@ -43,7 +43,7 @@ SceneParameters::SceneParameters()
 bool SceneParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_TIMESTAMP ))
-        _timestamp = vm[PARAM_TIMESTAMP].as< size_t >();
+        _timestamp = vm[PARAM_TIMESTAMP].as< float >();
     if( vm.count( PARAM_TRANSFER_FUNCTION_FILE ))
         _transferFunctionFilename = vm[PARAM_TRANSFER_FUNCTION_FILE].as< std::string > ();
     return true;

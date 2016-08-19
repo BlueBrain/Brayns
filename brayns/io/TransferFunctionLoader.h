@@ -42,7 +42,7 @@ class TransferFunctionLoader
 
 public:
 
-    TransferFunctionLoader();
+    TransferFunctionLoader( const Vector2f& range );
 
     /**
      * @brief Loads values from a transfer function file
@@ -54,6 +54,10 @@ public:
     bool loadFromFile(
         const std::string& filename,
         Scene& scene );
+
+private:
+
+    Vector2f _range;
 
 };
 

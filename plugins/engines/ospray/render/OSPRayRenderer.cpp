@@ -93,11 +93,13 @@ void OSPRayRenderer::commit()
     color = rp.getDetectionFarColor( );
     ospSet3f( _renderer, "detectionFarColor",
         color.x( ), color.y( ), color.z( ));
+    ospSet1i( _renderer, "materialForSimulation",
+        MATERIAL_SIMULATION );
 
     OSPRayScene* osprayScene = static_cast< OSPRayScene* >( _scene.get( ));
     assert( osprayScene );
 
-    const size_t ts = _scene->getSceneParameters().getTimestamp();
+    const float ts = _scene->getSceneParameters().getTimestamp();
     OSPModel* model = osprayScene->modelImpl( ts );
     if( model )
     {

@@ -26,12 +26,15 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/light/DirectionalLight.h>
+#include <brayns/common/simulation/CircuitSimulationHandler.h>
+#include <brayns/common/simulation/SpikeSimulationHandler.h>
 
 #include <plugins/engines/EngineFactory.h>
 #include <plugins/engines/Engine.h>
 #include <plugins/extensions/ExtensionPluginFactory.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/io/MorphologyLoader.h>
+#include <brayns/io/NESTLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
@@ -99,8 +102,14 @@ struct Brayns::Impl
     {
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
+        if(!geometryParameters.getSimulationCacheFile().empty())
+            _loadSimulationCacheFile();
+
         if(!geometryParameters.getMorphologyFolder().empty())
             _loadMorphologyFolder();
+
+        if(!geometryParameters.getNESTCircuit().empty())
+            _loadNESTCircuit();
 
         if(!geometryParameters.getPDBFile().empty())
             _loadPDBFile();
@@ -264,6 +273,7 @@ struct Brayns::Impl
     }
 
 private:
+
     void _render( )
     {
 
@@ -303,6 +313,17 @@ private:
             BRAYNS_INFO << "Default epsilon: " << epsilon << std::endl;
             _parametersManager->getRenderingParameters().setEpsilon( epsilon );
         }
+    }
+
+    void _loadSimulationCacheFile()
+    {
+        const GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const std::string& cacheFile(
+            geometryParameters.getSimulationCacheFile( ));
+        CircuitSimulationHandlerPtr simulationHandler( new CircuitSimulationHandler( ));
+        simulationHandler->attachSimulationToCacheFile( cacheFile );
+        _engine->getScene()->setSimulationHandler( simulationHandler );
     }
 
     /**
@@ -347,6 +368,46 @@ private:
     }
 
     /**
+     * Loads data from a NEST circuit file (command line parameter --nest-circuit)
+     */
+    void _loadNESTCircuit()
+    {
+        const GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const std::string& circuit( geometryParameters.getNESTCircuit( ));
+        if( !circuit.empty( ))
+        {
+            size_t nbMaterials;
+            NESTLoader loader( geometryParameters );
+            loader.importCircuit( circuit, *_engine->getScene(), nbMaterials );
+
+            loader.importSpikeReport(
+                geometryParameters.getNESTReport(), *_engine->getScene( ));
+
+            const std::string& cacheFile( geometryParameters.getNESTCacheFile( ));
+            if( !cacheFile.empty( ))
+            {
+                SpikeSimulationHandlerPtr simulationHandler( new SpikeSimulationHandler( ));
+                simulationHandler->attachSimulationToCacheFile( cacheFile );
+                _engine->getScene()->setSimulationHandler( simulationHandler );
+            }
+
+            SceneParameters& sceneParameters =
+                            _parametersManager->getSceneParameters();
+            const std::string& transferFunctionFilename =
+                sceneParameters.getTransferFunctionFilename();
+            if( !transferFunctionFilename.empty() )
+            {
+                TransferFunctionLoader transferFunctionLoader( brayns::Vector2f( 0, nbMaterials ));
+                transferFunctionLoader.loadFromFile(
+                    transferFunctionFilename, *_engine->getScene( ));
+                _engine->getScene()->commitSimulationData();
+            }
+
+        }
+    }
+
+    /**
         Loads data from a PDB file (command line parameter --pdb-file)
     */
     void _loadPDBFile()
@@ -365,12 +426,12 @@ private:
                          << geometryParameters.getPDBFile() << std::endl;
         }
 
-        ScenePtr scene = _engine->getScene();
-        for( size_t i = 0; i < scene->getMaterials().size( ); ++i )
+        ScenePtr scene = _engine->getScene( );
+        for( size_t i = 0; i < scene->getMaterials().size(); ++i )
         {
             float r,g,b;
             proteinLoader.getMaterialKd( i, r, g, b );
-            MaterialPtr material = scene->getMaterials()[i];
+            MaterialPtr material = scene->getMaterials()[ i ];
             material->setColor( Vector3f( r, g, b ));
         }
     }
@@ -449,7 +510,6 @@ private:
     /**
         Loads compartment report from circuit configuration (command line
         parameter --report)
-        @return the number of simulation frames loaded
     */
     void _loadCompartmentReport()
     {
@@ -464,7 +524,8 @@ private:
         BRAYNS_INFO << "Loading compartment report from " << filename << std::endl;
         MorphologyLoader morphologyLoader( geometryParameters );
         const servus::URI uri( filename );
-        if( morphologyLoader.importSimulationData( uri, target, report ))
+        if( morphologyLoader.importSimulationData( uri, target, report,
+                                                   *_engine->getScene( )))
         {
             SceneParameters& sceneParameters =
                 _parametersManager->getSceneParameters();
@@ -472,7 +533,7 @@ private:
                 sceneParameters.getTransferFunctionFilename();
             if( !transferFunctionFilename.empty() )
             {
-                TransferFunctionLoader transferFunctionLoader;
+                TransferFunctionLoader transferFunctionLoader( DEFAULT_TRANSFER_FUNCTION_RANGE );
                 transferFunctionLoader.loadFromFile(
                     transferFunctionFilename, *_engine->getScene() );
             }
