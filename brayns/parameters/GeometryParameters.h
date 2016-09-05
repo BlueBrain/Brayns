@@ -76,6 +76,9 @@ public:
     /** PDB file */
     std::string getPDBFile( ) const { return _pdbFile; }
 
+    /** XYZR file */
+    std::string getXYZBFile( ) const { return _xyzbFile; }
+
     /** folder containing mesh files */
     std::string getMeshFolder( ) const { return _meshFolder; }
 
@@ -156,6 +159,7 @@ protected:
     std::string _NESTReport;
     std::string _NESTCacheFile;
     std::string _pdbFile;
+    std::string _xyzbFile;
     std::string _h5Folder;
     std::string _meshFolder;
     std::string _circuitConfig;

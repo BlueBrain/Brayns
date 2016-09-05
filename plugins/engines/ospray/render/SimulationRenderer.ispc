@@ -34,8 +34,6 @@ struct SimulationRenderer
     float colorMapMinValue;
     float colorMapRange;
     float threshold;
-    uint64 simulationFrameSize;
-    uint64 simulationNbFrames;
 };
 
 inline varying vec4f getSimulationValue(

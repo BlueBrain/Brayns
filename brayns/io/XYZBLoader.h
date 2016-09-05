@@ -4,8 +4,6 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * Based on OSPRay implementation
- *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -20,41 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef XYZBLOADER_H
+#define XYZBLOADER_H
 
-#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
+#include <brayns/common/types.h>
+#include <brayns/parameters/GeometryParameters.h>
 
 namespace brayns
 {
 
-class ParticleRenderer : public AbstractRenderer
+class XYZBLoader
 {
 
 public:
 
-    ParticleRenderer();
+    XYZBLoader( const GeometryParameters& geometryParameters );
 
-    /**
-       Returns the class name as a string
-       @return string containing the full name of the class
-    */
-    std::string toString() const final
-    {
-        return "brayns::ParticleRenderer";
-    }
+    bool importFromFile(
+        const std::string& filename,
+        Scene& scene );
 
-    void commit() final;
+    bool importFromBinaryFile(
+        const std::string& filename,
+        Scene& scene );
 
 private:
 
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
-    ospray::int32 _transferFunctionSize;
-    float _transferFunctionMinValue;
-    float _transferFunctionRange;
-    float _threshold;
+    GeometryParameters _geometryParameters;
+
 };
 
-} // ::brayns
+}
 
+#endif // XYZBLOADER_H

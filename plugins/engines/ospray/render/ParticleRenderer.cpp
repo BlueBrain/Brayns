@@ -41,6 +41,9 @@ void ParticleRenderer::commit()
     _transferFunctionDiffuseData = getParamData( "transferFunctionDiffuseData" );
     _transferFunctionEmissionData = getParamData( "transferFunctionEmissionData" );
     _transferFunctionSize = getParam1i( "transferFunctionSize", 0 );
+    _transferFunctionMinValue = getParam1f( "transferFunctionMinValue", 0.f );
+    _transferFunctionRange = getParam1f( "transferFunctionRange", 0.f );
+    _threshold = getParam1f( "threshold", _transferFunctionMinValue );
 
     ispc::ParticleRenderer_set(
                 getIE(),
@@ -54,7 +57,10 @@ void ParticleRenderer::commit()
                     ( ispc::vec4f* )_transferFunctionDiffuseData->data : NULL,
                 _transferFunctionEmissionData ?
                     ( float* )_transferFunctionEmissionData->data : NULL,
-                _transferFunctionSize );
+                _transferFunctionSize,
+                _transferFunctionMinValue,
+                _transferFunctionRange,
+                _threshold );
 }
 
 ParticleRenderer::ParticleRenderer( )

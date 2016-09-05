@@ -38,6 +38,7 @@
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
+#include <brayns/io/XYZBLoader.h>
 
 #include <boost/filesystem.hpp>
 #include <servus/uri.h>
@@ -123,6 +124,9 @@ struct Brayns::Impl
         if(!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getLoadCacheFile().empty())
             _loadCircuitConfiguration();
+
+        if(!geometryParameters.getXYZBFile().empty())
+            _loadXYZBFile();
     }
 
     void render( const RenderInput& renderInput,
@@ -434,6 +438,22 @@ private:
             MaterialPtr material = scene->getMaterials()[ i ];
             material->setColor( Vector3f( r, g, b ));
         }
+    }
+
+    /**
+        Loads data from a XYZR file (command line parameter --xyzr-file)
+    */
+    void _loadXYZBFile()
+    {
+        // Load XYZB File
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        BRAYNS_INFO << "Loading XYZB file " << geometryParameters.getXYZBFile()
+                    << std::endl;
+        XYZBLoader xyzbLoader( geometryParameters );
+        if( !xyzbLoader.importFromBinaryFile(
+            geometryParameters.getXYZBFile(), *_engine->getScene()))
+            BRAYNS_ERROR << "Failed to import " << geometryParameters.getXYZBFile() << std::endl;
     }
 
     /**

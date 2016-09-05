@@ -31,9 +31,12 @@ struct ParticleRenderer
     AbstractRenderer abstract;
 
     uniform float* uniform simulationData;
-    uniform vec4f* uniform transferFunction;
-    uniform float* uniform transferFunctionEmissionData;
-    uint32 transferFunctionSize;
+    uniform vec4f* uniform colorMap;
+    uniform float* uniform colorMapEmissionData;
+    uint32 colorMapSize;
+    float colorMapMinValue;
+    float colorMapRange;
+    float threshold;
 };
 
 inline varying vec4f getSimulationValue(
@@ -63,25 +66,30 @@ inline vec3f ParticleRenderer_shadeRay(
 {
     Ray ray = sample.ray;
 
-    varying vec3f intersectionColor = make_vec3f( skyboxMapping(
-        (Renderer *)self, ray, self->abstract.numMaterials, self->abstract.materials ));
-    sample.z = -1.f;
-    sample.alpha = 0.f;
+    varying vec3f intersectionColors = make_vec3f( 0.f );
+    sample.z = 1.f;
     varying int depth = 0;
     varying float path_opacity = 0.f;
     varying float opacity = 0.f;
 
-    while( path_opacity < 1.f && depth < NB_MAX_REBOUNDS )
+    varying bool moreRebounds = true;
+    while( moreRebounds /*&& depth < NB_MAX_REBOUNDS*/ )
     {
         traceRay( self->abstract.super.model, ray );
 
         if( ray.geomID < 0 )
-            break;
+        {
+            // No intersection. Return skybox color
+            intersectionColors = intersectionColors * 0.5f + 0.5f *
+                make_vec3f( skyboxMapping(
+                    (Renderer *)self, ray, self->abstract.numMaterials, self->abstract.materials ));
+            moreRebounds = false;
+        }
         else
         {
             // Intersection found
             if( depth == 0 )
-                sample.alpha = 1.f;
+                sample.z = log( ray.t ) / 10.f;
 
             // Retreive information about the geometry, typically geometry ID,
             // normal to the surface, material ID, texture coordinates, etc.
@@ -91,54 +99,27 @@ inline vec3f ParticleRenderer_shadeRay(
                 DG_NG|DG_NS|DG_NORMALIZE|DG_FACEFORWARD|DG_MATERIALID|
                 DG_COLOR|DG_TEXCOORD);
 
-            if( ray.geomID == 1 )
-            {
-                // Non simulated geometry
-                const uniform Material* material = dg.material;
-                const uniform ExtendedOBJMaterial* objMaterial =
-                        ( const uniform ExtendedOBJMaterial* ) material;
-                varying vec3f Kd;
-                if( !objMaterial )
-                {
-                    Kd = make_vec3f( dg.color );
-                    opacity = dg.color.w;
-                }
-                else
-                    foreach_unique( mat in objMaterial )
-                    {
-                        Kd = mat->Kd;
-                        opacity = mat->d;
-                    }
+            // Get simulation value from geometry ID
+            varying float lightEmission;
+            const vec4f simulationValue = getSimulationValue( self, dg, lightEmission );
+            intersectionColors = intersectionColors * 0.5f + 0.5f * make_vec3f( simulationValue );
 
-                const varying vec3f intersection = dg.P + self->abstract.super.epsilon * dg.Ng;
-                const varying vec3f viewer = normalize( ray.org - intersection );
-                const varying float el = max( 0.f, dot( viewer, dg.Ng ));
-                varying float cosNL  = 1.f - el;
-                intersectionColor =
-                    intersectionColor * (1.f - opacity) + opacity * Kd * cosNL ;
-            }
+#if 0
+            // Process material attributes
+            const uniform Material* material = dg.material;
+            const uniform ExtendedOBJMaterial* objMaterial =
+                    ( const uniform ExtendedOBJMaterial* ) material;
+            if( !objMaterial )
+                // Diffuse color
+                intersectionColors = intersectionColors * 0.5f + 0.5f * make_vec3f( dg.color );
             else
-            {
-                if( depth == 0 )
-                    sample.z = ray.primID;
+                foreach_unique( mat in objMaterial )
+                    // Diffuse color
+                    intersectionColors =
+                        intersectionColors * 0.5f + 0.5f * mat->Kd;
+#endif // 0
 
-                // Get simulation value from geometry
-                const vec4f simulationValue =
-                    getSimulationValue( self, dg, ray.primID );
-
-                // Spike value is different from zero, meaning that the neuron is activated and
-                // neuron color should be considered. If the spike value is zero, the
-                // intersection is ignored
-                opacity = simulationValue.w;
-                if( opacity > 0.f )
-                {
-                    intersectionColor = intersectionColor +
-                        make_vec3f( simulationValue ) * opacity * (1.f - path_opacity );
-                    path_opacity = path_opacity + opacity * ( 1.f - path_opacity );
-                }
-            }
-
-            ray.t0 = ray.t + self->abstract.super.epsilon * 5.f;
+            ray.t0 = ray.t + self->abstract.super.epsilon;
             ray.t = infinity;
             ray.primID = -1;
             ray.geomID = -1;
@@ -147,7 +128,7 @@ inline vec3f ParticleRenderer_shadeRay(
         ++depth;
     }
 
-    return intersectionColor;
+    return intersectionColors;
 }
 
 void ParticleRenderer_renderSample(
@@ -180,9 +161,12 @@ export void ParticleRenderer_set(
         void** uniform materials,
         const uniform int32 numMaterials,
         uniform float* uniform simulationData,
-        uniform vec4f* uniform transferFunction,
-        uniform float* uniform transferFunctionEmissionData,
-        const uniform uint32 transferFunctionSize )
+        uniform vec4f* uniform colormap,
+        uniform float* uniform colormapEmissionData,
+        const uniform int32 colorMapSize,
+        const uniform float colorMapMinValue,
+        const uniform float colorMapRange,
+        const uniform float& threshold )
 {
     uniform ParticleRenderer* uniform self = ( uniform ParticleRenderer* uniform )_self;
 
@@ -190,6 +174,10 @@ export void ParticleRenderer_set(
     self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
     self->abstract.spp = spp;
+    self->abstract.electronShadingEnabled = electronShadingEnabled;
+
+    self->abstract.lights = ( const uniform Light* uniform* uniform )lights;
+    self->abstract.numLights = numLights;
 
     self->abstract.materials = ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
     self->abstract.numMaterials = numMaterials;

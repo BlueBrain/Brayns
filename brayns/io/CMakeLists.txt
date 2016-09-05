@@ -5,6 +5,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
+  XYZBLoader.cpp
   TransferFunctionLoader.cpp
   MorphologyLoader.cpp
   ProteinLoader.cpp
@@ -13,6 +14,7 @@ set(BRAYNSIO_SOURCES
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
+  XYZBLoader.h
   TransferFunctionLoader.h
   MorphologyLoader.h
   ProteinLoader.h

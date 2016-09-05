@@ -32,6 +32,7 @@ const std::string PARAM_MORPHOLOGY_FOLDER = "morphology-folder";
 const std::string PARAM_NEST_CIRCUIT = "nest-circuit";
 const std::string PARAM_NEST_REPORT = "nest-report";
 const std::string PARAM_PDB_FILE = "pdb-file";
+const std::string PARAM_XYZB_FILE = "xyzb-file";
 const std::string PARAM_MESH_FOLDER = "mesh-folder";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
@@ -84,6 +85,8 @@ GeometryParameters::GeometryParameters( )
             "Folder containing mesh files" )
         ( PARAM_PDB_FILE.c_str(), po::value< std::string >( ),
             "PDB file to load" )
+        ( PARAM_XYZB_FILE.c_str(), po::value< std::string >( ),
+            "XYZB file to load" )
         ( PARAM_CIRCUIT_CONFIG.c_str(), po::value< std::string >( ),
             "Circuit configuration file" )
         ( PARAM_LOAD_CACHE_FILE.c_str(), po::value< std::string >( ),
@@ -139,6 +142,8 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
         _NESTReport = vm[PARAM_NEST_REPORT].as< std::string >( );
     if( vm.count( PARAM_PDB_FILE ))
         _pdbFile = vm[PARAM_PDB_FILE].as< std::string >( );
+    if( vm.count( PARAM_XYZB_FILE ))
+        _xyzbFile = vm[PARAM_XYZB_FILE].as< std::string >( );
     if( vm.count( PARAM_MESH_FOLDER ))
         _meshFolder = vm[PARAM_MESH_FOLDER].as< std::string >( );
     if( vm.count( PARAM_CIRCUIT_CONFIG ))
@@ -219,6 +224,8 @@ void GeometryParameters::print( )
         _NESTCacheFile << std::endl;
     BRAYNS_INFO << "PDB file                   : " <<
         _pdbFile << std::endl;
+    BRAYNS_INFO << "XYZB file                   : " <<
+        _xyzbFile << std::endl;
     BRAYNS_INFO << "Mesh folder                : " <<
         _meshFolder << std::endl;
     BRAYNS_INFO << "Cache file to load         : " <<
