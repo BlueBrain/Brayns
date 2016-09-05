@@ -27,7 +27,8 @@
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/light/DirectionalLight.h>
-#include <brayns/common/simulation/SimulationDescriptor.h>
+#include <brayns/io/simulation/SimulationDescriptor.h>
+#include <brayns/io/simulation/SimulationHandler.h>
 #include <brayns/io/TextureLoader.h>
 
 namespace brayns
@@ -719,8 +720,8 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
 
 void OSPRayScene::commitSimulationData()
 {
-    SimulationDescriptorPtr simulationDescriptor = getSimulationDescriptor();
-    if( !simulationDescriptor )
+    SimulationHandlerPtr simulationHandler = getSimulationHandler();
+    if( !simulationHandler )
         return;
 
     for( const auto& renderer: _renderers )
@@ -731,10 +732,11 @@ void OSPRayScene::commitSimulationData()
         const uint64_t frame = _sceneParameters.getTimestamp();
 
         _ospSimulationData = ospNewData(
-            simulationDescriptor->getFrameSize( frame ), OSP_FLOAT,
-            simulationDescriptor->getFramePointer( frame ), OSP_DATA_SHARED_BUFFER );
+            simulationHandler->getFrameSize(), OSP_FLOAT,
+            simulationHandler->getFrameData( frame ), OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospSimulationData );
         ospSetData( osprayRenderer->impl(), "simulationData", _ospSimulationData );
+        ospCommit( osprayRenderer->impl( ));
 
         // Transfer function Diffuse colors
         _ospTransferFunctionDiffuseData = ospNewData(

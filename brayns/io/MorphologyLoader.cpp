@@ -25,7 +25,7 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/common/simulation/SimulationDescriptor.h>
+#include <brayns/io/simulation/SimulationDescriptor.h>
 
 #include <algorithm>
 #include <fstream>
@@ -445,7 +445,8 @@ bool MorphologyLoader::importCircuit(
 bool MorphologyLoader::importSimulationData(
     const servus::URI& circuitConfig,
     const std::string& target,
-    const std::string& report )
+    const std::string& report,
+    Scene& scene )
 {
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc( filename );
@@ -465,7 +466,7 @@ bool MorphologyLoader::importSimulationData(
 
     SimulationDescriptor simulationDescriptor;
     const std::string& cacheFile = _geometryParameters.getSimulationCacheFile();
-    if( simulationDescriptor.attachSimulationToCacheFile( cacheFile ) )
+    if( simulationDescriptor.attachSimulationToCacheFile( cacheFile, scene ))
         // Cache already exists, no need to create it.
         return true;
 

@@ -8,6 +8,8 @@ set(BRAYNSIO_SOURCES
   TransferFunctionLoader.cpp
   MorphologyLoader.cpp
   ProteinLoader.cpp
+  simulation/NESTLoader.cpp
+  simulation/SimulationDescriptor.cpp
   TextureLoader.cpp
 )
 
@@ -15,11 +17,14 @@ set(BRAYNSIO_PUBLIC_HEADERS
   TransferFunctionLoader.h
   MorphologyLoader.h
   ProteinLoader.h
+  simulation/NESTLoader.h
+  simulation/SimulationDescriptor.h
+  simulation/SimulationHandler.h
   TextureLoader.h
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
-    PUBLIC braynsParameters braynsCommon Servus vmmlib boost_system boost_filesystem
+    PUBLIC braynsParameters braynsCommon Servus vmmlib boost_system boost_filesystem Brion
 )
 
 if(ASSIMP_FOUND)

@@ -29,6 +29,8 @@ namespace
 {
 
 const std::string PARAM_MORPHOLOGY_FOLDER = "morphology-folder";
+const std::string PARAM_NEST_CIRCUIT = "nest-circuit";
+const std::string PARAM_NEST_REPORT = "nest-report";
 const std::string PARAM_PDB_FILE = "pdb-file";
 const std::string PARAM_MESH_FOLDER = "mesh-folder";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
@@ -73,6 +75,10 @@ GeometryParameters::GeometryParameters( )
     _parameters.add_options()
         ( PARAM_MORPHOLOGY_FOLDER.c_str(), po::value< std::string >( ),
             "Folder containing SWC and H5 files" )
+        ( PARAM_NEST_CIRCUIT.c_str(), po::value< std::string >( ),
+            "H5 file containing the NEST circuit" )
+        ( PARAM_NEST_REPORT.c_str(), po::value< std::string >( ),
+            "NEST simulation report file" )
         ( PARAM_MESH_FOLDER.c_str(), po::value< std::string >( ),
             "Folder containing mesh files" )
         ( PARAM_PDB_FILE.c_str(), po::value< std::string >( ),
@@ -124,6 +130,10 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_MORPHOLOGY_FOLDER ))
         _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as< std::string >( );
+    if( vm.count( PARAM_NEST_CIRCUIT ))
+        _NESTCircuit = vm[PARAM_NEST_CIRCUIT].as< std::string >( );
+    if( vm.count( PARAM_NEST_REPORT ))
+        _NESTReport = vm[PARAM_NEST_REPORT].as< std::string >( );
     if( vm.count( PARAM_PDB_FILE ))
         _pdbFile = vm[PARAM_PDB_FILE].as< std::string >( );
     if( vm.count( PARAM_MESH_FOLDER ))
@@ -195,6 +205,10 @@ void GeometryParameters::print( )
     AbstractParameters::print( );
     BRAYNS_INFO << "Morphology folder          : " <<
         _morphologyFolder << std::endl;
+    BRAYNS_INFO << "NEST circuit file          : " <<
+        _NESTCircuit << std::endl;
+    BRAYNS_INFO << "NEST simulation report file: " <<
+        _NESTReport << std::endl;
     BRAYNS_INFO << "PDB file                   : " <<
         _pdbFile << std::endl;
     BRAYNS_INFO << "Mesh folder                : " <<

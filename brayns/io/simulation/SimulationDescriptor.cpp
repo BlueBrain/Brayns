@@ -33,7 +33,6 @@ namespace brayns
 SimulationDescriptor::SimulationDescriptor()
     : _headerSize( 0 )
     , _nbFrames( 0 )
-    , _frameSize( 0 )
     , _memoryMapPtr( 0 )
     , _cacheFileDescriptor( -1 )
 {
@@ -52,20 +51,22 @@ SimulationDescriptor::~SimulationDescriptor()
         ::close( _cacheFileDescriptor );
 }
 
-bool SimulationDescriptor::attachSimulationToCacheFile( const std::string& cacheFile )
+bool SimulationDescriptor::attachSimulationToCacheFile(
+    const std::string& cacheFile,
+    Scene& scene )
 {
     BRAYNS_INFO << "Attaching " << cacheFile << " to current scene" << std::endl;
     _cacheFileDescriptor = open( cacheFile.c_str(), O_RDONLY );
     if( _cacheFileDescriptor == -1 )
     {
-        BRAYNS_ERROR << "Failed to attach " << cacheFile << std::endl;
+        BRAYNS_ERROR << "Failed to open " << cacheFile << std::endl;
         return false;
     }
 
     struct stat sb;
     if( ::fstat( _cacheFileDescriptor, &sb ) == -1 )
     {
-        BRAYNS_ERROR << "Failed to attach " << cacheFile << std::endl;
+        BRAYNS_ERROR << "Failed to get stats from " << cacheFile << std::endl;
         return false;
     }
 
@@ -87,6 +88,7 @@ bool SimulationDescriptor::attachSimulationToCacheFile( const std::string& cache
     BRAYNS_INFO << "Nb Frames: " << _nbFrames << std::endl;
     BRAYNS_INFO << "Frame size: " << _frameSize << std::endl;
 
+    scene.setSimulationHandler( this );
     BRAYNS_INFO << "Successfully attached to " << cacheFile << std::endl;
     return true;
 }
@@ -107,7 +109,7 @@ void SimulationDescriptor::writeFrame(
     stream.write( ( char* )values.data(), values.size() * sizeof(float) );
 }
 
-void* SimulationDescriptor::getFramePointer( const uint64_t frame )
+void* SimulationDescriptor::getFrameData( const uint64_t frame )
 {
     if( _nbFrames ==  0 )
         return 0;

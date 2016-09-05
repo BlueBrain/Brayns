@@ -32,8 +32,10 @@
 #include <plugins/extensions/ExtensionPluginFactory.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/io/MorphologyLoader.h>
+#include <brayns/io/simulation/NESTLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/MeshLoader.h>
+#include <brayns/io/simulation/SimulationDescriptor.h>
 #include <brayns/io/TransferFunctionLoader.h>
 
 #include <boost/filesystem.hpp>
@@ -99,8 +101,14 @@ struct Brayns::Impl
     {
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
+        if(!geometryParameters.getSimulationCacheFile().empty())
+            _loadSimulationCacheFile();
+
         if(!geometryParameters.getMorphologyFolder().empty())
             _loadMorphologyFolder();
+
+        if(!geometryParameters.getNESTCircuit().empty())
+            _loadNESTCircuit();
 
         if(!geometryParameters.getPDBFile().empty())
             _loadPDBFile();
@@ -305,6 +313,20 @@ private:
         }
     }
 
+    void _loadSimulationCacheFile()
+    {
+        const GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const std::string& cacheFile(
+            geometryParameters.getSimulationCacheFile( ));
+        if( !cacheFile.empty( ))
+        {
+            SimulationDescriptor* simulationDescriptor( new SimulationDescriptor( ));
+            simulationDescriptor->attachSimulationToCacheFile(
+                cacheFile, *_engine->getScene( ));
+        }
+    }
+
     /**
         Loads data from SWC and H5 files located in the folder specified in the
         geometry parameters (command line parameter --morphology-folder)
@@ -343,6 +365,26 @@ private:
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Loads data from a NEST circuit file (command line parameter
+     * --nest-circuit)
+     */
+    void _loadNESTCircuit()
+    {
+        const GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        const std::string& circuit( geometryParameters.getNESTCircuit( ));
+        if( !circuit.empty( ))
+        {
+            NESTLoader* loader( new NESTLoader( geometryParameters ));
+            loader->importCircuit( circuit, *_engine->getScene( ));
+
+            const std::string& report = geometryParameters.getNESTReport();
+            if( !report.empty( ))
+                loader->loadSpikeReport( report, *_engine->getScene( ));
         }
     }
 
@@ -449,7 +491,6 @@ private:
     /**
         Loads compartment report from circuit configuration (command line
         parameter --report)
-        @return the number of simulation frames loaded
     */
     void _loadCompartmentReport()
     {
@@ -464,7 +505,8 @@ private:
         BRAYNS_INFO << "Loading compartment report from " << filename << std::endl;
         MorphologyLoader morphologyLoader( geometryParameters );
         const servus::URI uri( filename );
-        if( morphologyLoader.importSimulationData( uri, target, report ))
+        if( morphologyLoader.importSimulationData( uri, target, report,
+                                                   *_engine->getScene( )))
         {
             SceneParameters& sceneParameters =
                 _parametersManager->getSceneParameters();

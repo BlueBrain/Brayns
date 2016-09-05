@@ -65,6 +65,13 @@ public:
     /** folder containing SWC and H5 files */
     std::string getMorphologyFolder( ) const { return _morphologyFolder; }
 
+    /**
+     * @brief getNESTCircuit
+     * @return
+     */
+    std::string getNESTCircuit( ) const { return _NESTCircuit; }
+    std::string getNESTReport( ) const { return _NESTReport; }
+
     /** PDB file */
     std::string getPDBFile( ) const { return _pdbFile; }
 
@@ -144,6 +151,8 @@ protected:
     bool _parse( const po::variables_map& vm ) final;
 
     std::string _morphologyFolder;
+    std::string _NESTCircuit;
+    std::string _NESTReport;
     std::string _pdbFile;
     std::string _h5Folder;
     std::string _meshFolder;

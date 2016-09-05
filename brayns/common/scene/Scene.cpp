@@ -25,7 +25,9 @@
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/io/TransferFunctionLoader.h>
-#include <brayns/common/simulation/SimulationDescriptor.h>
+#include <brayns/io/simulation/NESTLoader.h>
+#include <brayns/io/simulation/SimulationDescriptor.h>
+#include <brayns/io/simulation/SimulationHandler.h>
 
 #include <servus/uri.h>
 
@@ -495,18 +497,13 @@ void Scene::clearLights( )
     _lights.clear();
 }
 
-SimulationDescriptorPtr Scene::getSimulationDescriptor()
+void Scene::setSimulationHandler( SimulationHandler* handler )
 {
-    const std::string& cacheFile = _geometryParameters.getSimulationCacheFile();
-    if( !_simulationDescriptor && !cacheFile.empty() )
-    {
-        if( cacheFile.empty() )
-            return 0;
-
-        _simulationDescriptor.reset( new SimulationDescriptor() );
-        _simulationDescriptor->attachSimulationToCacheFile( cacheFile );
-    }
-    return _simulationDescriptor;
+    _simulationHandler.reset( handler);
 }
 
+SimulationHandlerPtr Scene::getSimulationHandler() const
+{
+    return _simulationHandler;
+}
 }

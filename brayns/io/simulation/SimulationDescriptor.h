@@ -23,15 +23,17 @@
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
+#include <brayns/common/scene/Scene.h>
+
+#include <brayns/io/simulation/SimulationHandler.h>
 
 namespace brayns
 {
 
-class SimulationDescriptor
+class SimulationDescriptor : SimulationHandler
 {
 
 public:
-
     SimulationDescriptor();
     ~SimulationDescriptor();
 
@@ -40,9 +42,12 @@ public:
     *        as if it was in memory. The OS is in charge of dealing with the map file in system
     *        memory.
     * @param cacheFile File containing the simulation values
+    * @param scene The scene corresponding to the simulation
     * @return True if the file was successfully attached, false otherwise
     */
-    BRAYNS_API bool attachSimulationToCacheFile( const std::string& cacheFile );
+    BRAYNS_API bool attachSimulationToCacheFile(
+        const std::string& cacheFile,
+        Scene &scene );
 
     /**
     * @brief Writes the header to a stream. The header contains the number of frames and the frame
@@ -66,24 +71,21 @@ public:
         const floats& values );
 
     /**
-     * @brief Returns the size of a given frame
-     * @param frame Frame number
+     * @brief Returns the size of a frame
      * @return Size of given frame
      */
-    uint64_t getFrameSize( const uint64_t ) { return _frameSize; }
+    uint64_t getFrameSize() const final { return _frameSize; }
 
     /**
      * @brief Returns a pointer to a given frame in the memory mapped file.
      * @param frame Frame number
      * @return Pointer to given frame
      */
-    void* getFramePointer( const uint64_t frame );
+    void* getFrameData( const uint64_t frame ) final;
 
 private:
-
     uint64_t _headerSize;
     uint64_t _nbFrames;
-    uint64_t _frameSize;
     void* _memoryMapPtr;
     int _cacheFileDescriptor;
 
