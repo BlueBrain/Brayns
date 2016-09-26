@@ -23,6 +23,14 @@
 namespace brayns
 {
 
+Engine::Engine()
+    : _scene( 0 )
+    , _camera( 0 )
+    , _frameBuffer( 0 )
+{
+
+}
+
 void Engine::setActiveRenderer( const std::string& renderer )
 {
     if( _activeRenderer != renderer )

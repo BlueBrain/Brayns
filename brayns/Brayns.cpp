@@ -26,6 +26,7 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/light/DirectionalLight.h>
+#include <brayns/common/light/PointLight.h>
 #include <brayns/common/simulation/CircuitSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
 
@@ -115,6 +116,9 @@ struct Brayns::Impl
         if(!geometryParameters.getPDBFile().empty())
             _loadPDBFile();
 
+        if(!geometryParameters.getPDBFolder().empty())
+            _loadPDBFolder();
+
         if(!geometryParameters.getMeshFolder().empty())
             _loadMeshFolder();
 
@@ -166,13 +170,18 @@ struct Brayns::Impl
         _render( );
 
         uint8_t* colorBuffer = frameBuffer->getColorBuffer( );
-        size_t size =
-            frameSize.x( ) * frameSize.y( ) * frameBuffer->getColorDepth( );
-        renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
+        if( colorBuffer )
+        {
+            const size_t size = frameSize.x( ) * frameSize.y( ) * frameBuffer->getColorDepth( );
+            renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
+        }
 
         float* depthBuffer = frameBuffer->getDepthBuffer( );
-        size = frameSize.x( ) * frameSize.y( );
-        renderOutput.depthBuffer.assign( depthBuffer, depthBuffer + size );
+        if( depthBuffer )
+        {
+            const size_t size = frameSize.x( ) * frameSize.y( );
+            renderOutput.depthBuffer.assign( depthBuffer, depthBuffer + size );
+        }
 
         _engine->postRender();
     }
@@ -414,28 +423,62 @@ private:
     /**
         Loads data from a PDB file (command line parameter --pdb-file)
     */
-    void _loadPDBFile()
+    void _loadPDBFolder()
     {
         // Load PDB File
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
-        BRAYNS_INFO << "Loading PDB file " << geometryParameters.getPDBFile()
-                    << std::endl;
+        const std::string& folder = geometryParameters.getPDBFolder();
+        BRAYNS_INFO << "Loading PDB folder " << folder << std::endl;
+        boost::filesystem::directory_iterator endIter;
+        if( boost::filesystem::exists( folder ) &&
+            boost::filesystem::is_directory( folder ))
+        {
+            for( boost::filesystem::directory_iterator dirIter( folder );
+                 dirIter != endIter; ++dirIter )
+            {
+                if( boost::filesystem::is_regular_file(dirIter->status( )))
+                {
+                    boost::filesystem::path fileExtension =
+                        dirIter->path( ).extension( );
+                    if( fileExtension==".pdb" || fileExtension==".pdb1" )
+                    {
+                        const std::string& filename = dirIter->path().string();
+                        BRAYNS_INFO << "- " << filename << std::endl;
+                        _loadPDBFile( filename );
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+        Loads data from a PDB file (command line parameter --pdb-file)
+    */
+    void _loadPDBFile( const std::string& filename = "" )
+    {
+        // Load PDB File
+        GeometryParameters& geometryParameters = _parametersManager->getGeometryParameters();
+        std::string pdbFile = filename;
+        if( pdbFile == "" )
+        {
+            pdbFile = geometryParameters.getPDBFile();
+            BRAYNS_INFO << "Loading PDB file " << pdbFile << std::endl;
+        }
         ProteinLoader proteinLoader( geometryParameters );
-        if( !proteinLoader.importPDBFile( geometryParameters.getPDBFile(),
+        if( !proteinLoader.importPDBFile( pdbFile,
                                           Vector3f( 0, 0, 0 ), 0,
                                           *_engine->getScene()))
         {
-            BRAYNS_ERROR << "Failed to import "
-                         << geometryParameters.getPDBFile() << std::endl;
+            BRAYNS_ERROR << "Failed to import " << pdbFile << std::endl;
         }
 
-        ScenePtr scene = _engine->getScene( );
-        for( size_t i = 0; i < scene->getMaterials().size(); ++i )
+        ScenePtr scene = _engine->getScene();
+        for( size_t i = 0; i < scene->getMaterials().size( ); ++i )
         {
             float r,g,b;
             proteinLoader.getMaterialKd( i, r, g, b );
-            MaterialPtr material = scene->getMaterials()[ i ];
+            MaterialPtr material = scene->getMaterials()[i];
             material->setColor( Vector3f( r, g, b ));
         }
     }
@@ -530,6 +573,7 @@ private:
     /**
         Loads compartment report from circuit configuration (command line
         parameter --report)
+        @return the number of simulation frames loaded
     */
     void _loadCompartmentReport()
     {

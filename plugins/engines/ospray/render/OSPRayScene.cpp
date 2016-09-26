@@ -505,14 +505,14 @@ void OSPRayScene::buildGeometry()
             assert(mesh);
             OSPData vertices = ospNewData(
                 _trianglesMeshes[materialId].getVertices().size(),
-                OSP_FLOAT3A,
+                OSP_FLOAT3,
                 &_trianglesMeshes[materialId].getVertices()[0],
                 OSP_DATA_SHARED_BUFFER);
             totalNbVertices += _trianglesMeshes[materialId].getVertices().size();
 
             OSPData normals = ospNewData(
                 _trianglesMeshes[materialId].getNormals().size(),
-                OSP_FLOAT3A,
+                OSP_FLOAT3,
                 &_trianglesMeshes[materialId].getNormals()[0],
                 OSP_DATA_SHARED_BUFFER);
             OSPData indices = ospNewData(

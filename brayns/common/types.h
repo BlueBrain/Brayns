@@ -168,6 +168,15 @@ typedef std::shared_ptr< ZeroEQPlugin > ZeroEQPluginPtr;
 class DeflectPlugin;
 typedef std::shared_ptr< DeflectPlugin > DeflectPluginPtr;
 
+/** Define the frame buffer format */
+enum FrameBufferFormat
+{
+  FBF_RGBA_NONE,
+  FBF_RGBA_I8,
+  FBF_RGB_I8,
+  FBF_RGBA_F32,
+};
+
 /** Define the color scheme to be applied to the geometry */
 enum ColorScheme
 {

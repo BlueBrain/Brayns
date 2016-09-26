@@ -42,4 +42,10 @@ if(OSPRAY_FOUND)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOSPRayPlugin)
 endif()
 
+if(OPTIX_FOUND AND CUDA_FOUND)
+  add_subdirectory(engines/optix)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOptiXPlugin)
+endif()
+
 common_library(braynsPlugins)
+

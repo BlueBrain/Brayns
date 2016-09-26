@@ -31,11 +31,18 @@ if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
 endif()
 
 common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework)
-common_find_package(OSPRay REQUIRED SYSTEM)
-common_find_package(GLUT REQUIRED SYSTEM)
-common_find_package(GLEW REQUIRED SYSTEM)
-common_find_package(OpenGL REQUIRED)
 common_find_package(vmmlib REQUIRED)
+
+option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay engine" ON)
+if(BRAYNS_OSPRAY_ENABLED)
+  common_find_package(OSPRay REQUIRED SYSTEM)
+endif()
+
+option(BRAYNS_OPTIX_ENABLED "Activate OptiX engine" OFF)
+if(BRAYNS_OPTIX_ENABLED)
+  common_find_package(OptiX REQUIRED SYSTEM)
+  common_find_package(CUDA REQUIRED SYSTEM)
+endif()
 
 option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)
 if(BRAYNS_IMAGEMAGICK_ENABLED)
@@ -96,10 +103,13 @@ endif()
 
 add_subdirectory(plugins)
 add_subdirectory(brayns)
-add_subdirectory(apps/ui)
 
 option(BRAYNS_VIEWER_ENABLED "Brayns Viewer" ON)
 if(BRAYNS_VIEWER_ENABLED)
+  common_find_package(GLUT REQUIRED SYSTEM)
+  common_find_package(GLEW REQUIRED SYSTEM)
+  common_find_package(OpenGL REQUIRED)
+  add_subdirectory(apps/ui)
   add_subdirectory(apps/BraynsViewer)
 endif()
 

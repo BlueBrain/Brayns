@@ -36,15 +36,15 @@ BRAYNS_API class TrianglesMesh : Geometry
 public:
     BRAYNS_API TrianglesMesh();
 
-    BRAYNS_API Vector4fs& getVertices() { return _vertices; }
-    BRAYNS_API Vector4fs& getNormals() { return _normals; }
+    BRAYNS_API Vector3fs& getVertices() { return _vertices; }
+    BRAYNS_API Vector3fs& getNormals() { return _normals; }
     BRAYNS_API Vector4fs& getColors() { return _colors; }
     BRAYNS_API Vector3is& getIndices() { return _indices; }
     BRAYNS_API Vector2fs& getTextureCoordinates() { return _textureCoordinates; }
 
 private:
-    Vector4fs _vertices;
-    Vector4fs _normals;
+    Vector3fs _vertices;
+    Vector3fs _normals;
     Vector4fs _colors;
     Vector3is _indices;
     Vector2fs _textureCoordinates;

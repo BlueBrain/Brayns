@@ -540,14 +540,6 @@ bool MorphologyLoader::importCircuit(
     return false;
 }
 
-bool MorphologyLoader::_createSimulationDataCache(
-    const brion::CompartmentReport& report,
-    const std::string& cacheFile )
-{
-    BRAYNS_ERROR << "Brion is required to load simulation data" << std::endl;
-    return 0;
-}
-
 #endif
 
 size_t MorphologyLoader::_material(

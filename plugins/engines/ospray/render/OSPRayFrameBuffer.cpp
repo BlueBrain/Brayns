@@ -29,7 +29,7 @@ namespace brayns
 const float DEFAULT_GAMMA = 2.2f;
 
 OSPRayFrameBuffer::OSPRayFrameBuffer(
-    const Vector2i& frameSize,
+    const Vector2ui& frameSize,
     const FrameBufferFormat colorDepth,
     const bool accumulation )
     : FrameBuffer( frameSize, colorDepth, accumulation )
@@ -46,7 +46,8 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
     ospFreeFrameBuffer(_frameBuffer);
 }
 
-void OSPRayFrameBuffer::resize(const Vector2i& frameSize)
+void OSPRayFrameBuffer::resize(
+    const Vector2ui& frameSize )
 {
     _frameSize = frameSize;
 

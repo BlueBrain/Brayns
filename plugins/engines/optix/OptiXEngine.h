@@ -18,40 +18,54 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYCAMERA_H
-#define OSPRAYCAMERA_H
+#ifndef OPTIXENGINE_H
+#define OPTIXENGINE_H
 
-#include <brayns/common/camera/Camera.h>
-#include <ospray.h>
+#include <plugins/engines/Engine.h>
+
+// OptiX
+#include <optixu/optixpp_namespace.h>
+#include <optixu/optixu_math_stream_namespace.h>
 
 namespace brayns
 {
 
 /**
-   OPSRAY specific camera
-
-   This object is the OSPRay specific implementation of a Camera
-*/
-class OSPRayCamera : public brayns::Camera
+ * OSPRay implementation of the ray-tracing engine.
+ */
+class OptiXEngine : public Engine
 {
-public:
-    OSPRayCamera( const CameraType cameraType );
 
-    /**
-       Commits the changes held by the camera object so that
-       attributes become available to the OSPRay rendering engine
-    */
+public:
+
+    OptiXEngine(
+        int argc,
+        const char **argv,
+        ParametersManagerPtr parametersManager );
+
+    ~OptiXEngine();
+
+    /** @copydoc Engine::name */
+    std::string name() const final;
+
+    /** @copydoc Engine::commit */
     void commit() final;
 
-    /**
-       Gets the OSPRay implementation of the camera object
-       @return OSPRay implementation of the camera object
-    */
-    OSPCamera impl() { return _camera; }
+    /** @copydoc Engine::render */
+    void render() final;
+
+    /** @copydoc Engine::preRender */
+    void preRender() final;
+
+    /** @copydoc Engine::postRender */
+    void postRender() final;
 
 private:
-    OSPCamera _camera;
+
+    optix::Context _context;
+
 };
 
 }
-#endif // OSPRAYCAMERA_H
+
+#endif // OPTIXENGINE_H

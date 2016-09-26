@@ -18,34 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OSPRayEngine.h"
+#include "OptiXEngine.h"
 
-#include <plugins/engines/ospray/render/OSPRayRenderer.h>
-#include <plugins/engines/ospray/render/OSPRayScene.h>
-#include <plugins/engines/ospray/render/OSPRayFrameBuffer.h>
-#include <plugins/engines/ospray/render/OSPRayCamera.h>
+#include <brayns/common/log.h>
+
+#include <plugins/engines/optix/OptiXRenderer.h>
+#include <plugins/engines/optix/OptiXScene.h>
+#include <plugins/engines/optix/OptiXFrameBuffer.h>
+#include <plugins/engines/optix/OptiXCamera.h>
 
 namespace brayns
 {
 
-OSPRayEngine::OSPRayEngine(
-    int argc,
-    const char **argv,
+OptiXEngine::OptiXEngine(
+    int /*argc*/,
+    const char ** /*argv*/,
     ParametersManagerPtr parametersManager )
     : Engine()
+    , _context( 0 )
 {
-    BRAYNS_INFO << "Initializing OSPRay" << std::endl;
-    try
-    {
-        ospInit( &argc, argv );
-    }
-    catch( std::runtime_error& )
-    {
-        // Note: This is necessary because OSPRay does not yet implement a
-        // ospDestroy API.
-        BRAYNS_WARN << "OSPRay is already initialized. Did you call it twice? "
-                    << std::endl;
-    }
+    BRAYNS_INFO << "Initializing OptiX" << std::endl;
+    // Set up context
+    _context = optix::Context::create();
+    if( !_context )
+        BRAYNS_THROW( std::runtime_error( "Failed to initialize OptiX" ));
+
+    _context->setRayTypeCount( 2 );
+    _context->setEntryPointCount( 1 );
+    _context->setStackSize( 2800 );
+
+    BRAYNS_INFO << "Context " << &_context << std::endl;
 
     BRAYNS_INFO << "Initializing renderers" << std::endl;
     _activeRenderer =
@@ -57,14 +59,16 @@ OSPRayEngine::OSPRayEngine(
     for( std::string renderer: _rendererNames )
     {
         _renderers[renderer].reset(
-            new OSPRayRenderer( renderer, *parametersManager ));
+            new OptiXRenderer( renderer, *parametersManager, _context ));
         renderersForScene.push_back( _renderers[renderer] );
     }
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset( new OSPRayScene( renderersForScene,
+    _scene.reset( new OptiXScene(
+        renderersForScene,
         parametersManager->getSceneParameters(),
-        parametersManager->getGeometryParameters()));
+        parametersManager->getGeometryParameters(),
+        _context));
 
     _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
 
@@ -74,22 +78,29 @@ OSPRayEngine::OSPRayEngine(
 
     const bool accumulation = parametersManager->getApplicationParameters().getFilters().empty( );
 
-    _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8, accumulation ));
-    _camera.reset( new OSPRayCamera(
-        parametersManager->getRenderingParameters().getCameraType( )));
+    _frameBuffer.reset( new OptiXFrameBuffer(
+        _frameSize, FBF_RGBA_I8, accumulation, _context ));
+    _camera.reset( new OptiXCamera(
+        parametersManager->getRenderingParameters().getCameraType(),
+        _context));
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 
-OSPRayEngine::~OSPRayEngine()
+OptiXEngine::~OptiXEngine()
 {
+    if( _context )
+    {
+        _context->destroy();
+        _context = 0;
+    }
 }
 
-std::string OSPRayEngine::name() const
+std::string OptiXEngine::name() const
 {
-    return "ospray";
+    return "OptiX";
 }
 
-void OSPRayEngine::commit()
+void OptiXEngine::commit()
 {
     for( std::string renderer: _rendererNames )
     {
@@ -100,20 +111,20 @@ void OSPRayEngine::commit()
     _camera->commit( );
 }
 
-void OSPRayEngine::render()
-{
-    _scene->commitSimulationData();
-    _renderers[_activeRenderer]->render( _frameBuffer );
-}
-
-void OSPRayEngine::preRender()
+void OptiXEngine::render()
 {
     _frameBuffer->map();
+    _scene->commitSimulationData();
+    _renderers[_activeRenderer]->render( _frameBuffer );
+    _frameBuffer->unmap();
 }
 
-void OSPRayEngine::postRender()
+void OptiXEngine::preRender()
 {
-    _frameBuffer->unmap();
+}
+
+void OptiXEngine::postRender()
+{
 }
 
 }

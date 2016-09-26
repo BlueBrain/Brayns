@@ -23,6 +23,9 @@
 #ifdef BRAYNS_USE_OSPRAY
 #  include <plugins/engines/ospray/OSPRayEngine.h>
 #endif
+#ifdef BRAYNS_USE_OPTIX
+#  include <plugins/engines/optix/OptiXEngine.h>
+#endif
 
 namespace brayns
 {
@@ -49,6 +52,18 @@ EnginePtr EngineFactory::get( const std::string& name )
             argv[i] = _arguments[i].c_str();
         _engines[name] = EnginePtr(
             new OSPRayEngine( _arguments.size(), argv, _parametersManager ));
+        delete [] argv;
+        return _engines[name];
+    }
+#endif
+#ifdef BRAYNS_USE_OPTIX
+    if( name == "optix" )
+    {
+        const char** argv = new const char*[_arguments.size()];
+        for( size_t i = 0; i < _arguments.size(); ++i )
+            argv[i] = _arguments[i].c_str();
+        _engines[name] = EnginePtr(
+            new OptiXEngine( _arguments.size(), argv, _parametersManager ));
         delete [] argv;
         return _engines[name];
     }

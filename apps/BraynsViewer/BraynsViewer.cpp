@@ -28,7 +28,7 @@
 
 namespace
 {
-    const float DEFAULT_TEST_TIMESTAMP = 300.f;
+    const float DEFAULT_TEST_TIMESTAMP = 10000.f;
 }
 
 namespace brayns
@@ -129,12 +129,12 @@ void BraynsViewer::display( )
     BaseWindow::display( );
 
     std::stringstream ss;
-    ss << "Brayns Viewer - Interactive Ray-Tracing";
-    float ts = _brayns->getParametersManager().getSceneParameters().getTimestamp();
-    if( ts != std::numeric_limits< float >::max() )
-        ss << " (timestamp " << ts << ")";
-    ss << ", (" << _mouse.x() << ", " << _mouse.y() << ")";
-    ss << ", GID = " << _gid;
+    ss << "Brayns Viewer [" <<
+          _brayns->getParametersManager().getRenderingParameters().getEngine() <<
+          "] ";
+    size_t ts = _brayns->getParametersManager().getSceneParameters().getTimestamp();
+    if( ts != std::numeric_limits<size_t>::max() )
+        ss << " (frame " << ts << ")";
     if( _brayns->getParametersManager().getApplicationParameters( ).
         isBenchmarking( ))
     {
