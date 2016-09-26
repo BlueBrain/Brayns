@@ -31,7 +31,7 @@
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
 
 #include <plugins/engines/EngineFactory.h>
-#include <plugins/engines/Engine.h>
+#include <plugins/engines/common/Engine.h>
 #include <plugins/extensions/ExtensionPluginFactory.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/io/MorphologyLoader.h>

@@ -4,8 +4,6 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * Based on OSPRay implementation
- *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -20,38 +18,52 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef OPTIXCAMERA_H
+#define OPTIXCAMERA_H
 
-#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
+#include <brayns/common/camera/Camera.h>
+#include <optixu/optixpp_namespace.h>
 
 namespace brayns
 {
 
-class ParticleRenderer : public AbstractRenderer
+/**
+   OptiX specific camera
+
+   This object is the OptiX specific implementation of a Camera
+*/
+class OptiXCamera : public brayns::Camera
 {
 
 public:
 
-    ParticleRenderer();
+    OptiXCamera(
+        const CameraType cameraType,
+        optix::Context& context );
 
     /**
-       Returns the class name as a string
-       @return string containing the full name of the class
+       Commits the changes held by the camera object so that
+       attributes become available to the OptiX rendering engine
     */
-    std::string toString() const final
-    {
-        return "brayns::ParticleRenderer";
-    }
-
     void commit() final;
+
+    /**
+       Gets the OptiX implementation of the camera object
+       @return OptiX implementation of the camera object
+    */
+    optix::Program& impl() { return _camera; }
 
 private:
 
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
-    ospray::uint32 _transferFunctionSize;
+    void _calculateCameraVariables(
+        const Vector3f& eye, const Vector3f& lookat, const Vector3f& up,
+        Vector3f& U, Vector3f& V, Vector3f& W );
+
+    optix::Program _camera;
+    optix::Program _exceptionProgram;
+    optix::Context& _context;
 
 };
 
-} // ::brayns
+}
+#endif // OptiXCAMERA_H

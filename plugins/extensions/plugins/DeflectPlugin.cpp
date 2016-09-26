@@ -20,7 +20,7 @@
 
 #include "DeflectPlugin.h"
 
-#include <plugins/engines/Engine.h>
+#include <plugins/engines/common/Engine.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/camera/Camera.h>

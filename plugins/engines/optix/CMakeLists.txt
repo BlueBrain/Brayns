@@ -9,7 +9,7 @@
 # mic-executables with ".mic". *libraries* cannot use the
 # ".mic"-suffix trick, so we'll put libraries into separate
 # directories (names 'intel64' and 'mic', respectively)
-set(BRAYNSOPTIXPLUGIN_SOURCES
+set(BRAYNSOPTIXENGINEPLUGIN_SOURCES
   OptiXFrameBuffer.cpp
   OptiXScene.cpp
   OptiXUtils.cpp
@@ -18,7 +18,7 @@ set(BRAYNSOPTIXPLUGIN_SOURCES
   OptiXEngine.cpp
 )
 
-set(BRAYNSOPTIXPLUGIN_PUBLIC_HEADERS
+set(BRAYNSOPTIXENGINEPLUGIN_PUBLIC_HEADERS
   OptiXFrameBuffer.h
   OptiXScene.h
   OptiXUtils.h
@@ -27,13 +27,13 @@ set(BRAYNSOPTIXPLUGIN_PUBLIC_HEADERS
   OptiXEngine.h
 )
 
-set(BRAYNSOPTIXPLUGIN_LINK_LIBRARIES
+set(BRAYNSOPTIXENGINEPLUGIN_LINK_LIBRARIES
     PUBLIC vmmlib braynsCommon braynsIO
-    PRIVATE ${OptiX_LIBRARIES}
+    PRIVATE braynsCommonEnginePlugin ${OptiX_LIBRARIES}
 )
 
 add_subdirectory(cuda)
 
-common_library(braynsOptiXPlugin)
+common_library(braynsOptiXEnginePlugin)
 
 

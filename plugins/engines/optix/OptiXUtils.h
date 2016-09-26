@@ -4,8 +4,6 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * Based on OSPRay implementation
- *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -20,38 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef OPTIXUTILS_H
+#define OPTIXUTILS_H
 
-#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
+#include <brayns/common/types.h>
+
+// Error check/report helper for users of the C API
+#define RT_CHECK_ERROR( func ) \
+  do \
+  { \
+    RTresult code = func; \
+    if( code != RT_SUCCESS ) \
+      throw std::runtime_error( "OptiX exception" ); \
+  } \
+  while( 0 )
 
 namespace brayns
 {
 
-class ParticleRenderer : public AbstractRenderer
-{
+const std::string getPTXPath( const std::string& filename );
 
-public:
+}
 
-    ParticleRenderer();
-
-    /**
-       Returns the class name as a string
-       @return string containing the full name of the class
-    */
-    std::string toString() const final
-    {
-        return "brayns::ParticleRenderer";
-    }
-
-    void commit() final;
-
-private:
-
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
-    ospray::uint32 _transferFunctionSize;
-
-};
-
-} // ::brayns
+#endif // OPTIXUTILS_H

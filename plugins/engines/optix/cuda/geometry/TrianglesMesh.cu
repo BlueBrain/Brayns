@@ -26,6 +26,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Adaptations to Brayns
+ */
+
 #include <optix.h>
 #include <optixu/optixu_math_namespace.h>
 #include <optixu/optixu_matrix_namespace.h>
@@ -106,19 +111,19 @@ void meshIntersect( int primIdx )
 }
 
 
-RT_PROGRAM void mesh_intersect( int primIdx )
+RT_PROGRAM void intersect( int primIdx )
 {
     meshIntersect<false>( primIdx );
 }
 
 
-RT_PROGRAM void mesh_intersect_refine( int primIdx )
+RT_PROGRAM void intersect_refine( int primIdx )
 {
     meshIntersect<true>( primIdx );
 }
 
 
-RT_PROGRAM void mesh_bounds (int primIdx, float result[6])
+RT_PROGRAM void bounds (int primIdx, float result[6])
 {
   const int3 v_idx = index_buffer[primIdx];
 

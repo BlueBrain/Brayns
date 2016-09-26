@@ -21,7 +21,7 @@
 #ifndef OPTIXENGINE_H
 #define OPTIXENGINE_H
 
-#include <plugins/engines/Engine.h>
+#include <plugins/engines/common/Engine.h>
 
 // OptiX
 #include <optixu/optixpp_namespace.h>
@@ -60,9 +60,14 @@ public:
     /** @copydoc Engine::postRender */
     void postRender() final;
 
+    uint64_t getTotalMemory() { return _totalMemory; }
+
 private:
 
+    void _initializeContext();
+
     optix::Context _context;
+    uint64_t _totalMemory;
 
 };
 

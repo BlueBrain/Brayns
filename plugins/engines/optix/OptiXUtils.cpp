@@ -4,8 +4,6 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * Based on OSPRay implementation
- *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -20,38 +18,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "OptiXUtils.h"
 
-#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
+#include <brayns/common/log.h>
 
 namespace brayns
 {
 
-class ParticleRenderer : public AbstractRenderer
+const std::string getPTXPath( const std::string& filename )
 {
+    const std::string basePath = "./ptx/";
+    const std::string fullPath =
+        basePath + "braynsOptiXCudaPlugin_generated_" + filename + ".ptx";
+    BRAYNS_DEBUG << "[PTX] " << fullPath << std::endl;
+    return fullPath;
+}
 
-public:
-
-    ParticleRenderer();
-
-    /**
-       Returns the class name as a string
-       @return string containing the full name of the class
-    */
-    std::string toString() const final
-    {
-        return "brayns::ParticleRenderer";
-    }
-
-    void commit() final;
-
-private:
-
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
-    ospray::uint32 _transferFunctionSize;
-
-};
-
-} // ::brayns
+}

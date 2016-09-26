@@ -26,7 +26,7 @@
 namespace brayns
 {
 
-const Vector3f DEFAULT_SUN_POSITION = { -10.f, 10.f, -10.f };
+const Vector3f DEFAULT_SUN_POSITION = { -100.f, 100.f, -100.f };
 
 /**
     Point light object

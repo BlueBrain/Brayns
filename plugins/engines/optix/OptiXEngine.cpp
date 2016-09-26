@@ -26,6 +26,7 @@
 #include <plugins/engines/optix/OptiXScene.h>
 #include <plugins/engines/optix/OptiXFrameBuffer.h>
 #include <plugins/engines/optix/OptiXCamera.h>
+#include <plugins/engines/optix/OptiXUtils.h>
 
 namespace brayns
 {
@@ -38,16 +39,7 @@ OptiXEngine::OptiXEngine(
     , _context( 0 )
 {
     BRAYNS_INFO << "Initializing OptiX" << std::endl;
-    // Set up context
-    _context = optix::Context::create();
-    if( !_context )
-        BRAYNS_THROW( std::runtime_error( "Failed to initialize OptiX" ));
-
-    _context->setRayTypeCount( 2 );
-    _context->setEntryPointCount( 1 );
-    _context->setStackSize( 2800 );
-
-    BRAYNS_INFO << "Context " << &_context << std::endl;
+    _initializeContext();
 
     BRAYNS_INFO << "Initializing renderers" << std::endl;
     _activeRenderer =
@@ -92,6 +84,54 @@ OptiXEngine::~OptiXEngine()
     {
         _context->destroy();
         _context = 0;
+    }
+}
+
+void OptiXEngine::_initializeContext()
+{
+    // Set up context
+    _context = optix::Context::create();
+    if( !_context )
+        BRAYNS_THROW( std::runtime_error( "Failed to initialize OptiX" ));
+
+    _context->setRayTypeCount( 2 );
+    _context->setEntryPointCount( 1 );
+    _context->setStackSize( 16384 );
+
+    unsigned int num_devices;
+    unsigned int version;
+    unsigned int i;
+
+    rtDeviceGetDeviceCount(&num_devices);
+    rtGetVersion(&version);
+
+    BRAYNS_INFO << "Number of CUDA Devices: " + std::to_string( num_devices ) << std::endl;
+
+    for( i = 0; i < num_devices; ++i )
+    {
+        char deviceName[256];
+        int computeCaps[2];
+        int clock_rate;
+
+        RT_CHECK_ERROR( rtDeviceGetAttribute(
+            i, RT_DEVICE_ATTRIBUTE_NAME, sizeof( deviceName ), deviceName ));
+        BRAYNS_INFO << "Device " + std::to_string( i ) + ": " +
+            std::string( deviceName ) << std::endl;
+
+        RT_CHECK_ERROR( rtDeviceGetAttribute(
+            i, RT_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY, sizeof( computeCaps ), &computeCaps ));
+        BRAYNS_INFO << "- Compute Support: " + std::to_string( computeCaps[0] ) +
+            std::to_string( computeCaps[1] ) << std::endl;
+
+        RT_CHECK_ERROR( rtDeviceGetAttribute(
+            i, RT_DEVICE_ATTRIBUTE_TOTAL_MEMORY, sizeof( _totalMemory ), &_totalMemory ));
+        BRAYNS_INFO << "- Total Memory: " + std::to_string( _totalMemory ) + " bytes ["
+                    + std::to_string( _totalMemory / 1024 / 1024 ) + " MB]"
+                    << std::endl;
+
+        RT_CHECK_ERROR( rtDeviceGetAttribute(
+            i, RT_DEVICE_ATTRIBUTE_CLOCK_RATE, sizeof( clock_rate ), &clock_rate ));
+        BRAYNS_INFO << "- Clock Rate: " + std::to_string( clock_rate / 1000 ) + " MHz" << std::endl;
     }
 }
 

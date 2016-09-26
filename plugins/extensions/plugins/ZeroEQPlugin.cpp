@@ -20,7 +20,7 @@
 
 #include "ZeroEQPlugin.h"
 
-#include <plugins/engines/Engine.h>
+#include <plugins/engines/common/Engine.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/renderer/Renderer.h>

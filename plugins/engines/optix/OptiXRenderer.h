@@ -4,8 +4,6 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * Based on OSPRay implementation
- *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -20,38 +18,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef OPTIXRENDERER_H
+#define OPTIXXRENDERER_H
 
-#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
+#include "OptiXCamera.h"
+
+#include <brayns/common/types.h>
+#include <brayns/common/renderer/Renderer.h>
+
 
 namespace brayns
 {
 
-class ParticleRenderer : public AbstractRenderer
+/**
+   OptiX specific renderer
+
+   This object is the OptiX specific implementation of a renderer
+*/
+class OptiXRenderer : public brayns::Renderer
 {
 
 public:
 
-    ParticleRenderer();
+    OptiXRenderer(
+        const std::string& name,
+        ParametersManager& parametersMamager,
+        optix::Context& context );
 
-    /**
-       Returns the class name as a string
-       @return string containing the full name of the class
-    */
-    std::string toString() const final
-    {
-        return "brayns::ParticleRenderer";
-    }
+    /** @copydoc Renderer::render */
+    void render( FrameBufferPtr frameBuffer ) final;
 
+    /** @copydoc Renderer::commit */
     void commit() final;
+
+    /** @copydoc Renderer::setCamera */
+    void setCamera( CameraPtr camera ) final;
 
 private:
 
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
-    ospray::uint32 _transferFunctionSize;
+    optix::Context& _context;
+    uint64_t _frame;
 
 };
 
-} // ::brayns
+}
+
+#endif // OPTIXRENDERER_H

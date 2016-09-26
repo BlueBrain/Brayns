@@ -32,16 +32,13 @@ endif()
 
 common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework)
 common_find_package(vmmlib REQUIRED)
+common_find_package(OptiX SYSTEM)
+common_find_package(CUDA SYSTEM)
+common_find_package(OSPRay SYSTEM)
 
-option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay engine" ON)
-if(BRAYNS_OSPRAY_ENABLED)
-  common_find_package(OSPRay REQUIRED SYSTEM)
-endif()
-
-option(BRAYNS_OPTIX_ENABLED "Activate OptiX engine" OFF)
-if(BRAYNS_OPTIX_ENABLED)
-  common_find_package(OptiX REQUIRED SYSTEM)
-  common_find_package(CUDA REQUIRED SYSTEM)
+if( NOT( OPTIX_FOUND AND CUDA_FOUND ) AND NOT OSPRAY_FOUND )
+    message( FATAL_ERROR
+        "Neither OptiX+CUDA or OSPRay were found. Brayns cannot work without an engine" )
 endif()
 
 option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)
@@ -58,6 +55,7 @@ option(BRAYNS_BRION_ENABLED "Activate Brion" ON)
 if(BRAYNS_BRION_ENABLED)
   common_find_package(BBPTestData)
   common_find_package(Brion)
+  common_find_package(HDF5 SYSTEM REQUIRED COMPONENTS C CXX)
 endif()
 
 option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
