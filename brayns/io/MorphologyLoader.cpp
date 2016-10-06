@@ -73,7 +73,7 @@ bool MorphologyLoader::_importMorphology(
         Vector3f translation = { 0.f, 0.f, 0.f };
 
         brain::neuron::Morphology morphology( source, transformation );
-        brain::SectionTypes sectionTypes;
+        brain::neuron::SectionTypes sectionTypes;
 
         const MorphologyLayout& layout =
             _geometryParameters.getMorphologyLayout();
@@ -102,13 +102,13 @@ bool MorphologyLoader::_importMorphology(
         const size_t morphologySectionTypes =
             _geometryParameters.getMorphologySectionTypes();
         if( morphologySectionTypes & MST_SOMA )
-            sectionTypes.push_back( brain::SECTION_SOMA );
+            sectionTypes.push_back( brain::neuron::SectionType::soma );
         if( morphologySectionTypes & MST_AXON )
-            sectionTypes.push_back( brain::SECTION_AXON );
+            sectionTypes.push_back( brain::neuron::SectionType::axon );
         if( morphologySectionTypes & MST_DENDRITE )
-            sectionTypes.push_back( brain::SECTION_DENDRITE );
+            sectionTypes.push_back( brain::neuron::SectionType::dendrite );
         if( morphologySectionTypes & MST_APICAL_DENDRITE )
-            sectionTypes.push_back( brain::SECTION_APICAL_DENDRITE );
+            sectionTypes.push_back( brain::neuron::SectionType::apicalDendrite );
 
         const brain::neuron::Sections& sections =
             morphology.getSections( sectionTypes );
@@ -128,7 +128,7 @@ bool MorphologyLoader::_importMorphology(
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material =
                 _material( morphologyIndex,
-                           static_cast< size_t >( brain::SECTION_SOMA ));
+                           size_t( brain::neuron::SectionType::soma ));
             const Vector3f& center = soma.getCentroid() + translation;
 
             const float radius =
@@ -145,15 +145,14 @@ bool MorphologyLoader::_importMorphology(
         for( const auto& section: sections )
         {
             const size_t material =
-                _material( morphologyIndex,
-                    static_cast< size_t >(section.getType()));
+                _material( morphologyIndex, size_t( section.getType( )));
             const Vector4fs& samples = section.getSamples();
             if( samples.size() == 0 )
                 continue;
 
             Vector4f previousSample = samples[0];
             size_t step = 1;
-            switch( _geometryParameters.getGeometryQuality() )
+            switch( _geometryParameters.getGeometryQuality( ))
             {
                 case GQ_FAST:
                     step = samples.size()-1;
@@ -172,24 +171,22 @@ bool MorphologyLoader::_importMorphology(
             float segmentStep = 0.f;
             if( simulationInformation )
             {
+                const auto& counts = *simulationInformation->compartmentCounts;
                 // Number of compartments usually differs from number of samples
-                if( samples.size() != 0 && (*simulationInformation->compartmentCounts)[sectionId] > 1 )
-                    segmentStep =
-                        float((*simulationInformation->compartmentCounts)[sectionId]) /
-                        float(samples.size());
+                if( samples.size() != 0 && counts[sectionId] > 1 )
+                    segmentStep = counts[sectionId] / float(samples.size());
             }
 
             bool done = false;
             for( size_t i = step; !done && i < samples.size() + step; i += step )
             {
-                if( i>=samples.size() )
+                if( i >= samples.size( ))
                 {
-                    i = samples.size()-1;
+                    i = samples.size() - 1;
                     done = true;
                 }
 
-                const float distance =
-                    distanceToSoma + distancesToSoma[i];
+                const float distance = distanceToSoma + distancesToSoma[i];
 
                 maxDistanceToSoma = std::max(maxDistanceToSoma, distance);
 
