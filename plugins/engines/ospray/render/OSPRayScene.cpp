@@ -27,7 +27,7 @@
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/light/DirectionalLight.h>
-#include <brayns/common/simulation/SimulationDescriptor.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/io/TextureLoader.h>
 
 namespace brayns
@@ -719,8 +719,7 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
 
 void OSPRayScene::commitSimulationData()
 {
-    SimulationDescriptorPtr simulationDescriptor = getSimulationDescriptor();
-    if( !simulationDescriptor )
+    if( !_simulationHandler )
         return;
 
     for( const auto& renderer: _renderers )
@@ -728,38 +727,41 @@ void OSPRayScene::commitSimulationData()
         OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.lock().get( ));
 
         // Simulation data
-        const uint64_t frame = _sceneParameters.getTimestamp();
+        const float timestamp = _sceneParameters.getTimestamp();
 
         _ospSimulationData = ospNewData(
-            simulationDescriptor->getFrameSize( frame ), OSP_FLOAT,
-            simulationDescriptor->getFramePointer( frame ), OSP_DATA_SHARED_BUFFER );
+            _simulationHandler->getFrameSize(), OSP_FLOAT,
+            _simulationHandler->getFrameData( timestamp ), OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospSimulationData );
         ospSetData( osprayRenderer->impl(), "simulationData", _ospSimulationData );
+        ospCommit( osprayRenderer->impl( ));
 
         // Transfer function Diffuse colors
         _ospTransferFunctionDiffuseData = ospNewData(
             _transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
             &_transferFunction.getDiffuseColors()[0], OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospTransferFunctionDiffuseData );
-        ospSetData( osprayRenderer->impl(),
-            "transferFunctionDiffuseData", _ospTransferFunctionDiffuseData );
+        ospSetData( osprayRenderer->impl(), "transferFunctionDiffuseData",
+            _ospTransferFunctionDiffuseData );
 
         // Transfer function emission data
         _ospTransferFunctionEmissionData = ospNewData(
             _transferFunction.getEmissionIntensities().size(), OSP_FLOAT,
             &_transferFunction.getEmissionIntensities()[0], OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospTransferFunctionEmissionData );
-        ospSetData( osprayRenderer->impl(),
-            "transferFunctionEmissionData", _ospTransferFunctionEmissionData );
+        ospSetData( osprayRenderer->impl(), "transferFunctionEmissionData",
+            _ospTransferFunctionEmissionData );
 
         // Transfer function size
-        ospSet1i( osprayRenderer->impl(),
-            "transferFunctionSize", _transferFunction.getDiffuseColors().size() );
+        ospSet1i( osprayRenderer->impl(), "transferFunctionSize",
+            _transferFunction.getDiffuseColors().size() );
+
+        // Transfer function min value
+        ospSet1f( osprayRenderer->impl(), "transferFunctionMinValue",
+            _transferFunction.getValuesRange().x() );
 
         // Transfer function range
-        ospSet1f( osprayRenderer->impl(),
-            "transferFunctionMinValue", _transferFunction.getValuesRange().x() );
-        ospSet1f( osprayRenderer->impl(),  "transferFunctionRange",
+        ospSet1f( osprayRenderer->impl(), "transferFunctionRange",
             _transferFunction.getValuesRange().y() - _transferFunction.getValuesRange().x() );
     }
 }

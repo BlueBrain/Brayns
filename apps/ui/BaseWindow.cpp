@@ -99,6 +99,12 @@ void glut3dMouseFunc(int whichButton, int released, int x, int y)
                    whichButton, released, Vector2i(x,y));
 }
 
+void glut3dPassiveMouseFunc(int x, int y)
+{
+    if(BaseWindow::_activeWindow)
+       BaseWindow::_activeWindow->passiveMotion( Vector2i(x,y) );
+}
+
 // ------------------------------------------------------------------
 // Base window
 // ------------------------------------------------------------------
@@ -174,6 +180,11 @@ void BaseWindow::motion(const Vector2i& pos)
 
     _manipulator->motion( );
     _lastMousePos = _currMousePos;
+}
+
+void BaseWindow::passiveMotion(const Vector2i& pos)
+{
+    _mouse = pos;
 }
 
 void BaseWindow::idle( )
@@ -268,6 +279,13 @@ void BaseWindow::display( )
 
     }
 
+    float* buffer = renderOutput.depthBuffer.data();
+    if( buffer )
+    {
+        size_t index = (_windowSize.y() - _mouse.y()) * _windowSize.x() + _mouse.x();
+        _gid = buffer[index];
+    }
+
     _fps.stop();
     glutSwapBuffers( );
 
@@ -346,6 +364,7 @@ void BaseWindow::create(const char *title,
     glutSpecialFunc(glut3dSpecial);
     glutMotionFunc(glut3dMotionFunc);
     glutMouseFunc(glut3dMouseFunc);
+    glutPassiveMotionFunc(glut3dPassiveMouseFunc);
     glutIdleFunc(glut3dIdle);
 
     if(fullScreen)

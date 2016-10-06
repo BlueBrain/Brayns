@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( renderParams.getEngine(), "ospray" );
     BOOST_CHECK_EQUAL( renderParams.getModule(), "" );
     BOOST_CHECK_EQUAL( renderParams.getRenderer(), "exobj" );
-    BOOST_CHECK_EQUAL( renderParams.getRenderers().size(), 3 );
+    BOOST_CHECK_EQUAL( renderParams.getRenderers().size(), 4 );
     BOOST_CHECK( !renderParams.getShadows( ));
     BOOST_CHECK( !renderParams.getSoftShadows( ));
     BOOST_CHECK_EQUAL( renderParams.getAmbientOcclusionStrength(), 0.f );
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE( defaults )
 
     const auto& sceneParams = pm.getSceneParameters();
     BOOST_CHECK_EQUAL( sceneParams.getTimestamp(),
-                       std::numeric_limits< size_t >::max( ));
+                       std::numeric_limits< float >::max( ));
 
     auto& scene = brayns.getScene();
     BOOST_CHECK( scene.getMaterial( 0 ));
@@ -238,8 +238,8 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
 
     // All options
     t = float(allOptions) / float(reference);
-    BOOST_TEST_MESSAGE( "All options cost. expected: 330%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 3.3f );
+    BOOST_TEST_MESSAGE( "All options cost. expected: 350%, realized: " << t * 100.f );
+    BOOST_CHECK( t < 3.5f );
 }
 
 BOOST_AUTO_TEST_CASE( test_transfer_function )

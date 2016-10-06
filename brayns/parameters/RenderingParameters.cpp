@@ -120,6 +120,7 @@ RenderingParameters::RenderingParameters( )
     _renderers.push_back("exobj");
     _renderers.push_back("proximityrenderer");
     _renderers.push_back("simulationrenderer");
+    _renderers.push_back("particlerenderer");
 }
 
 bool RenderingParameters::_parse( const po::variables_map& vm )

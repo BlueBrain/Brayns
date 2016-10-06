@@ -30,6 +30,7 @@
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
 
 namespace brayns
 {
@@ -158,10 +159,8 @@ public:
     BRAYNS_API TexturesMap& getTextures() { return _textures; }
     BRAYNS_API TrianglesMeshMap& getTriangleMeshes() { return _trianglesMeshes; }
 
-    /**
-        Returns simulation data
-    */
-    BRAYNS_API SimulationDescriptorPtr getSimulationDescriptor();
+    BRAYNS_API AbstractSimulationHandlerPtr getSimulationHandler() const;
+    BRAYNS_API void setSimulationHandler( AbstractSimulationHandlerPtr handler );
 
     /**
         Build a color map from a file, according to the colormap-file scene parameters
@@ -182,17 +181,12 @@ protected:
     Lights _lights;
 
     // Simulation
-    SimulationDescriptorPtr _simulationDescriptor;
+    AbstractSimulationHandlerPtr _simulationHandler;
     TransferFunction _transferFunction;
 
     // Scene
     Boxf _bounds;
     bool _isEmpty;
-
-private:
-
-    bool _attachSimulationCacheFile();
-
 };
 
 }

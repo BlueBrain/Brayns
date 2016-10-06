@@ -181,6 +181,7 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   render/ExtendedOBJRenderer.ispc
   render/ProximityRenderer.ispc
   render/SimulationRenderer.ispc
+  render/ParticleRenderer.ispc
 )
 
 set(BRAYNSOSPRAYPLUGIN_SOURCES
@@ -194,6 +195,7 @@ set(BRAYNSOSPRAYPLUGIN_SOURCES
   render/ExtendedOBJRenderer.cpp
   render/ProximityRenderer.cpp
   render/SimulationRenderer.cpp
+  render/ParticleRenderer.cpp
   render/OSPRayScene.cpp
   render/OSPRayRenderer.cpp
   render/OSPRayFrameBuffer.cpp
@@ -211,6 +213,7 @@ set(BRAYNSOSPRAYPLUGIN_PUBLIC_HEADERS
   render/ExtendedOBJRenderer.h
   render/ProximityRenderer.h
   render/SimulationRenderer.h
+  render/ParticleRenderer.h
   render/OSPRayScene.h
   render/OSPRayRenderer.h
   render/OSPRayFrameBuffer.h

@@ -109,26 +109,26 @@ inline vec3f ProximityRenderer_shadeRay(
             const uniform Light* uniform l = self->abstract.lights[i];
 
             const varying vec2f s = make_vec2f( 0.f );
-            const varying Light_SampleRes light = l->sample( l, dg, s );
+            const varying Light_SampleRes lightSample = l->sample( l, dg, s );
             float varying radiance = 1.f;
-            varying vec3f L = light.dir;
+            varying vec3f L = lightSample.dir;
             varying float dist;
 
-            if(emission != 0 )
+            if( emission != 0.f )
                 radiance = emission;
             else
-                radiance = reduce_max( light.weight );
+                radiance = reduce_max( lightSample.weight );
 
-            if( radiance > 0.f )
+            if( reduce_max( radiance ) > 0.f )
             {
                 // Any potential contribution?
                 varying float cosNL = 0.0;
                 varying float cosLR = 0.0;
-                if( self->electronShadingEnabled )
+                if( self->abstract.electronShadingEnabled )
                 {
                     // Electron shading
                     vec3f me = normalize( ray.org - P );
-                    cosNL = 0.2f - 0.2f * max( 0.f, dot( me, normal ));
+                    cosNL = max( 0.f, dot( me, normal ));
                 }
                 else
                 {

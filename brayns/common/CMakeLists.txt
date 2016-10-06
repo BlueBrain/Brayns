@@ -5,8 +5,10 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSCOMMON_SOURCES
-  simulation/SimulationDescriptor.cpp
   transferFunction/TransferFunction.cpp
+  simulation/AbstractSimulationHandler.cpp
+  simulation/CircuitSimulationHandler.cpp
+  simulation/SpikeSimulationHandler.cpp
   camera/Camera.cpp
   scene/Scene.cpp
   geometry/Primitive.cpp
@@ -27,7 +29,9 @@ set(BRAYNSCOMMON_SOURCES
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   exceptions.h
   log.h
-  simulation/SimulationDescriptor.h
+  simulation/AbstractSimulationHandler.h
+  simulation/CircuitSimulationHandler.h
+  simulation/SpikeSimulationHandler.h
   transferFunction/TransferFunction.h
   camera/Camera.h
   scene/Scene.h

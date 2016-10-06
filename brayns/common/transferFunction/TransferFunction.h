@@ -25,7 +25,8 @@
 
 namespace
 {
-    const size_t DEFAULT_SAMPLE_SIZE = 2048;
+    const size_t DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE = 2048;
+    const brayns::Vector2f DEFAULT_TRANSFER_FUNCTION_RANGE = { -92.0915, 49.5497 };
 }
 
 namespace brayns
@@ -50,7 +51,7 @@ public:
      * @param size Sample size defining the number of values that will be generated for each
      *        attribute.
     */
-    void resample( size_t sampleSize = DEFAULT_SAMPLE_SIZE );
+    void resample( size_t sampleSize = DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE );
 
     /**
      * @brief Gets control points for a given attribute

@@ -28,15 +28,15 @@
 
 namespace
 {
-const float DEFAULT_ALPHA = 1.f;
-const float DEFAULT_EMISSION = 0.f;
-const brayns::Vector2f DEFAULT_RANGE = { -92.0915, 49.5497 };
+    const float DEFAULT_ALPHA = 0.1f;
+    const float DEFAULT_EMISSION = 0.f;
 }
 
 namespace brayns
 {
 
-TransferFunctionLoader::TransferFunctionLoader()
+TransferFunctionLoader::TransferFunctionLoader( const Vector2f& range )
+    : _range( range )
 {
 }
 
@@ -56,8 +56,9 @@ bool TransferFunctionLoader::loadFromFile(
     std::string line;
 
     TransferFunction& transferFunction = scene.getTransferFunction();
-    transferFunction.setValuesRange( DEFAULT_RANGE );
     transferFunction.clear();
+
+    size_t nbEntries = 0;
 
     while( validParsing && std::getline( file, line ))
     {
@@ -108,8 +109,12 @@ bool TransferFunctionLoader::loadFromFile(
             validParsing = false;
             break;
         }
+        ++nbEntries;
     }
 
+    _range = Vector2f( 0.f, nbEntries );
+    transferFunction.setValuesRange( _range );
+    BRAYNS_INFO << "Transfer function values range: " << _range << std::endl;
     file.close();
     return validParsing;
 }

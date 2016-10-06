@@ -29,6 +29,8 @@ namespace
 {
 
 const std::string PARAM_MORPHOLOGY_FOLDER = "morphology-folder";
+const std::string PARAM_NEST_CIRCUIT = "nest-circuit";
+const std::string PARAM_NEST_REPORT = "nest-report";
 const std::string PARAM_PDB_FILE = "pdb-file";
 const std::string PARAM_MESH_FOLDER = "mesh-folder";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
@@ -46,6 +48,7 @@ const std::string PARAM_START_SIMULATION_TIME = "start-simulation-time";
 const std::string PARAM_END_SIMULATION_TIME = "end-simulation-time";
 const std::string PARAM_SIMULATION_RANGE = "simulation-values-range";
 const std::string PARAM_SIMULATION_CACHE_FILENAME = "simulation-cache-file";
+const std::string PARAM_NEST_CACHE_FILENAME = "nest-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
@@ -73,6 +76,10 @@ GeometryParameters::GeometryParameters( )
     _parameters.add_options()
         ( PARAM_MORPHOLOGY_FOLDER.c_str(), po::value< std::string >( ),
             "Folder containing SWC and H5 files" )
+        ( PARAM_NEST_CIRCUIT.c_str(), po::value< std::string >( ),
+            "H5 file containing the NEST circuit" )
+        ( PARAM_NEST_REPORT.c_str(), po::value< std::string >( ),
+            "NEST simulation report file" )
         ( PARAM_MESH_FOLDER.c_str(), po::value< std::string >( ),
             "Folder containing mesh files" )
         ( PARAM_PDB_FILE.c_str(), po::value< std::string >( ),
@@ -116,6 +123,8 @@ GeometryParameters::GeometryParameters( )
             "Minimum and maximum values for the simulation" )
         ( PARAM_SIMULATION_CACHE_FILENAME.c_str(), po::value< std::string >(),
             "Cache file containing simulation data" )
+        ( PARAM_NEST_CACHE_FILENAME.c_str(), po::value< std::string >(),
+            "Cache file containing nest data" )
         ( PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value< bool >(),
             "Generated multiple models based on geometry timestamps" );
 }
@@ -124,6 +133,10 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_MORPHOLOGY_FOLDER ))
         _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as< std::string >( );
+    if( vm.count( PARAM_NEST_CIRCUIT ))
+        _NESTCircuit = vm[PARAM_NEST_CIRCUIT].as< std::string >( );
+    if( vm.count( PARAM_NEST_REPORT ))
+        _NESTReport = vm[PARAM_NEST_REPORT].as< std::string >( );
     if( vm.count( PARAM_PDB_FILE ))
         _pdbFile = vm[PARAM_PDB_FILE].as< std::string >( );
     if( vm.count( PARAM_MESH_FOLDER ))
@@ -183,6 +196,9 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_SIMULATION_CACHE_FILENAME ))
         _simulationCacheFile =
             vm[PARAM_SIMULATION_CACHE_FILENAME].as< std::string >( );
+    if( vm.count( PARAM_NEST_CACHE_FILENAME ))
+        _NESTCacheFile =
+            vm[PARAM_NEST_CACHE_FILENAME].as< std::string >( );
     if( vm.count( PARAM_GENERATE_MULTIPLE_MODELS ))
         _generateMultipleModels =
             vm[PARAM_GENERATE_MULTIPLE_MODELS].as< bool >( );
@@ -195,6 +211,12 @@ void GeometryParameters::print( )
     AbstractParameters::print( );
     BRAYNS_INFO << "Morphology folder          : " <<
         _morphologyFolder << std::endl;
+    BRAYNS_INFO << "NEST circuit file          : " <<
+        _NESTCircuit << std::endl;
+    BRAYNS_INFO << "NEST simulation report file: " <<
+        _NESTReport << std::endl;
+    BRAYNS_INFO << "NEST cache file            : " <<
+        _NESTCacheFile << std::endl;
     BRAYNS_INFO << "PDB file                   : " <<
         _pdbFile << std::endl;
     BRAYNS_INFO << "Mesh folder                : " <<

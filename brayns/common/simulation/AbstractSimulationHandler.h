@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SIMULATIONDESCRIPTOR_H
-#define SIMULATIONDESCRIPTOR_H
+#ifndef ABSTRACTSIMULATIONHANDLER_H
+#define ABSTRACTSIMULATIONHANDLER_H
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
@@ -27,13 +27,13 @@
 namespace brayns
 {
 
-class SimulationDescriptor
+class AbstractSimulationHandler
 {
 
 public:
 
-    SimulationDescriptor();
-    ~SimulationDescriptor();
+    AbstractSimulationHandler();
+    virtual ~AbstractSimulationHandler();
 
     /**
     * @brief Attaches a memory mapped file to the scene so that renderers can access the data
@@ -48,47 +48,37 @@ public:
     * @brief Writes the header to a stream. The header contains the number of frames and the frame
     *        size.
     * @param stream Stream where the header should be written
-    * @param nbFrames Number of frames
-    * @param frameSize Frame size
     */
-    BRAYNS_API static void writeHeader(
-        std::ofstream& stream,
-        uint64_t nbFrames,
-        uint64_t frameSize );
+    BRAYNS_API void writeHeader( std::ofstream& stream );
 
     /**
     * @brief Writes a frame to a stream. A frame is a set of float values.
     * @param stream Stream where the header should be written
     * @param value Frame values
     */
-    BRAYNS_API static void writeFrame(
-        std::ofstream& stream,
-        const floats& values );
+    BRAYNS_API void writeFrame( std::ofstream& stream, const floats& values );
 
-    /**
-     * @brief Returns the size of a given frame
-     * @param frame Frame number
-     * @return Size of given frame
-     */
-    uint64_t getFrameSize( const uint64_t ) { return _frameSize; }
+    virtual void* getFrameData( const float timestamp ) = 0;
 
-    /**
-     * @brief Returns a pointer to a given frame in the memory mapped file.
-     * @param frame Frame number
-     * @return Pointer to given frame
-     */
-    void* getFramePointer( const uint64_t frame );
+    virtual uint64_t getFrameSize() const { return _frameSize; }
 
-private:
+    void setFrameSize( const uint64_t frameSize ) { _frameSize = frameSize; }
+    void setNbFrames( const uint64_t nbFrames ) { _nbFrames = nbFrames; }
 
-    uint64_t _headerSize;
+    uint64_t getCurrentFrame() const { return _currentFrame; }
+    void setCurrentFrame( const uint64_t currentFrame ) { _currentFrame = currentFrame; }
+
+protected:
+
+    uint64_t _currentFrame;
     uint64_t _nbFrames;
     uint64_t _frameSize;
+
+    uint64_t _headerSize;
     void* _memoryMapPtr;
     int _cacheFileDescriptor;
 
 };
 
 }
-
-#endif // SIMULATIONDESCRIPTOR_H
+#endif // ABSTRACTSIMULATIONHANDLER_H

@@ -32,6 +32,7 @@
 #include <zerobuf/render/reset.h>
 #include <zerobuf/render/material.h>
 #include <zerobuf/render/transferFunction1D.h>
+#include <zerobuf/render/spikes.h>
 
 namespace brayns
 {
@@ -83,6 +84,11 @@ private:
     void _materialUpdated();
 
     /**
+     * @brief This method is called when spikes are updated by a ZeroEQ event
+     */
+    void _spikesUpdated();
+
+    /**
      * @brief This method is called when the transfer function is requested by a ZeroEQ event
      * @return True if the method was successfull, false otherwise
      * @todo Specify the attribute that should be returned when the feature is available in ZeroEQ
@@ -105,6 +111,12 @@ private:
      * @return True if the method was successfull, false otherwise
      */
     bool _requestFrameBuffers();
+
+    /**
+     * @brief This method is called when spikes are requested by a ZeroEQ event
+     * @return True if the method was successfull, false otherwise
+     */
+    bool _requestSpikes();
 
     /**
      * @brief Resizes an given image according to the new size
@@ -148,6 +160,7 @@ private:
     ::zerobuf::render::Reset _remoteReset;
     ::zerobuf::render::Material _remoteMaterial;
     ::zerobuf::render::TransferFunction1D _remoteTransferFunction1D;
+    ::zerobuf::data::Spikes _remoteSpikes;
 
 };
 

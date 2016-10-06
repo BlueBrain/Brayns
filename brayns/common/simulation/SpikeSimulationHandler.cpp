@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,38 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SCENEPARAMETERS_H
-#define SCENEPARAMETERS_H
+#include "SpikeSimulationHandler.h"
 
-#include "AbstractParameters.h"
+#include <brayns/common/log.h>
 
 namespace brayns
 {
 
-class SceneParameters final : public AbstractParameters
+void* SpikeSimulationHandler::getFrameData( const float timestamp )
 {
-public:
-    SceneParameters();
+    if( _nbFrames == 0 || _memoryMapPtr == 0 )
+        return 0;
 
-    /** @copydoc AbstractParameters::print */
-    void print( ) final;
+    const uint64_t frame = timestamp;
+    const uint64_t moduloFrame = frame % _nbFrames;
+    const uint64_t index = std::min( _frameSize, std::max( uint64_t(0), moduloFrame ));
 
-    /**
-       Defines the current timestamp for the scene. The unit is not universally
-       specified and is therefore specific to the scene.
-    */
-    float getTimestamp( ) const { return _timestamp; }
-    void setTimestamp( const float value ) { _timestamp = value; }
+    return (unsigned char*)_memoryMapPtr + _headerSize + index * _frameSize * sizeof(float);
+}
 
-    const std::string& getTransferFunctionFilename() const { return _transferFunctionFilename; }
-
-protected:
-
-    bool _parse( const po::variables_map& vm ) final;
-
-    float _timestamp;
-    std::string _transferFunctionFilename;
-};
 
 }
-#endif // SCENEPARAMETERS_H
