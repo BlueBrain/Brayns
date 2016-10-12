@@ -47,20 +47,17 @@ class Scene
 {
 public:
     /**
-        Creates a scene object responsible for handling geometry, materials and
+        Creates a scene object responsible for handling geometry, volumes, materials and
         light sources.
         @param renderers Renderers to be used to render the scene
-        @param sceneParameters Parameters defining how the scene is constructed
-        @param geometryParameters Parameters defining how the geometry is
-               constructed
-
+        @param parametersManagers Parameters for the scene (Geometry, volume, rendering, etc)
         @todo The scene must not know about the renderer
               https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
     */
     BRAYNS_API Scene(
         Renderers renderers,
-        SceneParameters& sceneParameters,
-        GeometryParameters& geometryParameters);
+        ParametersManager& parametersManager );
+
     BRAYNS_API virtual ~Scene();
 
     BRAYNS_API virtual void commit() = 0;
@@ -107,6 +104,16 @@ public:
     BRAYNS_API virtual void commitSimulationData() = 0;
 
     /**
+        Attach volume data to renderer
+    */
+    BRAYNS_API virtual void commitVolumeData() = 0;
+
+    /**
+        Commit transfer function data to renderer
+    */
+    BRAYNS_API virtual void commitTransferFunctionData() = 0;
+
+    /**
         Returns the bounding box for the whole scene
     */
     Boxf& getWorldBounds() { return _bounds; }
@@ -150,17 +157,47 @@ public:
     /**
         Return true if the scene does not contain any geometry. False otherwise
     */
-    BRAYNS_API bool isEmpty() { return _isEmpty; }
+    BRAYNS_API bool isEmpty() const
+    {
+        return _primitives.size() == 0 && _trianglesMeshes.size() == 0;
+    }
 
-    BRAYNS_API GeometryParameters& getGeometryParameters() { return _geometryParameters; }
-    BRAYNS_API SceneParameters& getSceneParameters() { return _sceneParameters; }
+    BRAYNS_API ParametersManager& getParametersManager() { return _parametersManager; }
+
+    /**
+        Returns geometric primitives handled by the scene
+    */
     BRAYNS_API PrimitivesMap& getPrimitives() { return _primitives; }
+
+    /**
+        Returns materials handled by the scene
+    */
     BRAYNS_API Materials& getMaterials() { return _materials; }
+
+    /**
+        Returns textures handled by the scene
+    */
     BRAYNS_API TexturesMap& getTextures() { return _textures; }
+
+    /**
+        Returns triangle meshes handled by the scene
+    */
     BRAYNS_API TrianglesMeshMap& getTriangleMeshes() { return _trianglesMeshes; }
 
+    /**
+        Returns the simulutation handler
+    */
     BRAYNS_API AbstractSimulationHandlerPtr getSimulationHandler() const;
+
+    /**
+        Sets the simulation handler
+    */
     BRAYNS_API void setSimulationHandler( AbstractSimulationHandlerPtr handler );
+
+    /**
+        Returns volume data
+    */
+    BRAYNS_API VolumeHandlerPtr getVolumeHandler();
 
     /**
         Build a color map from a file, according to the colormap-file scene parameters
@@ -168,9 +205,9 @@ public:
     BRAYNS_API TransferFunction& getTransferFunction() { return _transferFunction; }
 
 protected:
+
     // Parameters
-    SceneParameters& _sceneParameters;
-    GeometryParameters& _geometryParameters;
+    ParametersManager& _parametersManager;
     Renderers _renderers;
 
     // Model
@@ -180,13 +217,16 @@ protected:
     TexturesMap _textures;
     Lights _lights;
 
+    // Volume
+    VolumeHandlerPtr _volumeHandler;
+
     // Simulation
     AbstractSimulationHandlerPtr _simulationHandler;
     TransferFunction _transferFunction;
 
     // Scene
     Boxf _bounds;
-    bool _isEmpty;
+
 };
 
 }

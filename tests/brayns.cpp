@@ -49,9 +49,8 @@ BOOST_AUTO_TEST_CASE( defaults )
 
     const auto& camera = brayns.getCamera();
     BOOST_CHECK_EQUAL( camera.getType(), brayns::CT_PERSPECTIVE );
-    BOOST_CHECK_EQUAL( camera.getPosition(),
-            brayns::Vector3f( 0, 0, -2 ));
-    BOOST_CHECK_EQUAL( camera.getTarget(), brayns::Vector3f( ));
+    BOOST_CHECK_EQUAL( camera.getPosition(), brayns::Vector3f( 0.5f, 0.5f, -0.5f ));
+    BOOST_CHECK_EQUAL( camera.getTarget(), brayns::Vector3f( 0.5f, 0.5f, 0.5f ));
     BOOST_CHECK_EQUAL( camera.getUpVector(), brayns::Vector3f( 0, 1, 0 ));
     BOOST_CHECK_EQUAL( camera.getAspectRatio(), 4.f/3.f );
     BOOST_CHECK_EQUAL( camera.getAperture(), 0.f );
@@ -114,18 +113,25 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( geomParams.getNonSimulatedCells(), 0 );
     BOOST_CHECK_EQUAL( geomParams.getStartSimulationTime(), 0.f );
     BOOST_CHECK_EQUAL( geomParams.getEndSimulationTime(), std::numeric_limits< float >::max() );
-    BOOST_CHECK_EQUAL( geomParams.getSimulationValuesRange().x(), std::numeric_limits< float >::max() );
-    BOOST_CHECK_EQUAL( geomParams.getSimulationValuesRange().y(), std::numeric_limits< float >::min() );
+    BOOST_CHECK_EQUAL( geomParams.getSimulationValuesRange().x(),
+                       std::numeric_limits< float >::max() );
+    BOOST_CHECK_EQUAL( geomParams.getSimulationValuesRange().y(),
+                       std::numeric_limits< float >::min() );
 
     const auto& sceneParams = pm.getSceneParameters();
-    BOOST_CHECK_EQUAL( sceneParams.getTimestamp(),
-                       std::numeric_limits< float >::max( ));
+    BOOST_CHECK_EQUAL( sceneParams.getTimestamp(), std::numeric_limits< float >::max( ));
+
+    const auto& volumeParams = pm.getVolumeParameters();
+    BOOST_CHECK_EQUAL( volumeParams.getDimensions(), brayns::Vector3ui( 0, 0, 0 ));
+    BOOST_CHECK_EQUAL( volumeParams.getScale(), brayns::Vector3f( 1.f, 1.f, 1.f ));
+    BOOST_CHECK_EQUAL( volumeParams.getPosition(), brayns::Vector3f( 0.f, 0.f, 0.f ));
+    BOOST_CHECK_EQUAL( volumeParams.getSamplesPerRay(), 128 );
 
     auto& scene = brayns.getScene();
     BOOST_CHECK( scene.getMaterial( 0 ));
 
     brayns::Boxf defaultBoundingBox;
-    defaultBoundingBox.merge( brayns::Vector3f(-1,-1,-1 ));
+    defaultBoundingBox.merge( brayns::Vector3f( 0, 0, 0 ));
     defaultBoundingBox.merge( brayns::Vector3f( 1, 1, 1 ));
     BOOST_CHECK_EQUAL( scene.getWorldBounds(), defaultBoundingBox );
 }

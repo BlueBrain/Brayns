@@ -24,6 +24,8 @@
 #include <brayns/common/log.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/light/PointLight.h>
+#include <brayns/parameters/ParametersManager.h>
+#include <brayns/common/volume/VolumeHandler.h>
 
 namespace
 {
@@ -42,13 +44,14 @@ namespace brayns
 
 OptiXScene::OptiXScene(
     Renderers renderer,
-    SceneParameters& sceneParameters,
-    GeometryParameters& geometryParameters,
+    ParametersManager& parametersManager,
     optix::Context& context )
-    : Scene( renderer, sceneParameters, geometryParameters)
+    : Scene( renderer, parametersManager )
     , _context( context )
     , _lightBuffer( 0 )
     , _accelerationStructure( DEFAULT_ACCELERATION_STRUCTURE )
+    , _volumeBuffer( 0 )
+    , _colorMapBuffer( 0 )
     , _mesh( 0 )
     , _verticesBuffer( 0 )
     , _indicesBuffer( 0 )
@@ -103,9 +106,8 @@ void OptiXScene::buildGeometry()
 
     _context["top_object"]->set( _geometryGroup );
     _context["top_shadower"]->set( _geometryGroup );
-    _context->validate();
 
-    _isEmpty = ( totalGPUMemory == 0 );
+    _context->validate();
 }
 
 void OptiXScene::commitLights()
@@ -392,7 +394,6 @@ uint64_t OptiXScene::_processMeshes()
         memcpy( _verticesBuffer->map(), &vertices.data()[0], size );
         _verticesBuffer->unmap();
     }
-    vertices.clear();
 
     _indicesBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_INT3, indices.size() );
     size = indices.size() * 3 * sizeof(int);
@@ -401,7 +402,6 @@ uint64_t OptiXScene::_processMeshes()
         memcpy( _indicesBuffer->map(), &indices.data()[0], size );
         _indicesBuffer->unmap();
     }
-    indices.clear();
 
     _normalsBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, normals.size() );
     size = normals.size() * 3 * sizeof(float);
@@ -410,7 +410,6 @@ uint64_t OptiXScene::_processMeshes()
         memcpy( _normalsBuffer->map(), &normals.data()[0], size );
         _normalsBuffer->unmap();
     }
-    normals.clear();
 
     _textureCoordsBuffer =
         _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT2, texCoords.size() );
@@ -420,7 +419,6 @@ uint64_t OptiXScene::_processMeshes()
         memcpy( _textureCoordsBuffer->map(), &texCoords.data()[0], size );
         _textureCoordsBuffer->unmap();
     }
-    texCoords.clear();
 
     size = materials.size() * sizeof(int);
     _materialsBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_INT, materials.size() );
@@ -430,7 +428,6 @@ uint64_t OptiXScene::_processMeshes()
         _materialsBuffer->unmap();
     }
     nbTotalMaterials = materials.size();
-    materials.clear();
 
     // Attach all of the buffers at the Context level since they are shared
     _context[ "vertex_buffer"   ]->setBuffer( _verticesBuffer );
@@ -513,6 +510,8 @@ void OptiXScene::commitMaterials( const bool updateOnly )
         optixMaterial["phong_exp"]->setFloat( material->getSpecularExponent( ));
         const float reflectionIndex = material->getReflectionIndex();
         optixMaterial["Kr"]->setFloat( reflectionIndex,  reflectionIndex,  reflectionIndex);
+        const float opacity = material->getOpacity();
+        optixMaterial["Ko"]->setFloat( opacity, opacity, opacity );
 
         if( !updateOnly )
             _optixMaterials[ materialId ] = optixMaterial;
@@ -522,6 +521,128 @@ void OptiXScene::commitMaterials( const bool updateOnly )
 void OptiXScene::commitSimulationData()
 {
     BRAYNS_DEBUG << "OptiXScene::commitSimulationData not implemented" << std::endl;
+}
+
+void OptiXScene::commitVolumeData()
+{
+    VolumeHandlerPtr volumeHandler = getVolumeHandler();
+    if( !volumeHandler )
+    {
+        _volumeBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE, 0 );
+        _context[ "volumeData" ]->setBuffer( _volumeBuffer );
+        _context[ "volumeDimensions" ]->setUint( 0, 0, 0 );
+        _context[ "volumeScale" ]->setFloat( 0.f, 0.f, 0.f );
+        _context[ "volumePosition" ]->setFloat( 0.f, 0.f, 0.f );
+        _context[ "volumeEpsilon" ]->setFloat( 0.f );
+        _context[ "volumeDiag" ]->setFloat( 0.f );
+        return;
+    }
+
+    if( _volumeBuffer == 0 )
+    {
+        _volumeBuffer = _context->createBuffer(
+            RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE, volumeHandler->getSize() );
+        uint64_t size = volumeHandler->getSize() * sizeof( unsigned char );
+        if( size != 0 )
+        {
+            memcpy( _volumeBuffer->map(), volumeHandler->getData(), size );
+            _volumeBuffer->unmap();
+        }
+        _context[ "volumeData"   ]->setBuffer( _volumeBuffer );
+
+        // Optix needs a bounding box around the volume so that if can find intersections
+        // before initiating the traversing of the volume
+        _buildVolumeAABBGeometry();
+    }
+
+    const Vector3ui& dimensions = volumeHandler->getDimensions();
+    _context[ "volumeDimensions" ]->setUint( dimensions.x(), dimensions.y(), dimensions.z());
+
+    VolumeParameters& volumeParameters = _parametersManager.getVolumeParameters();
+    const Vector3f& scale = volumeParameters.getScale();
+    _context[ "volumeScale" ]->setFloat( scale.x(), scale.y(), scale.z());
+
+    const Vector3f& position = volumeParameters.getPosition();
+    _context[ "volumePosition" ]->setFloat( position.x(), position.y(), position.z());
+
+    _context[ "volumeEpsilon" ]->setFloat(
+        volumeHandler->getEpsilon( scale, volumeParameters.getSamplesPerRay()));
+
+    Vector3f diag = Vector3f( dimensions ) * scale;
+    const float volumeDiag = std::max( diag.x(), std::max( diag.y(), diag.z()));
+    _context[ "volumeDiag" ]->setFloat( volumeDiag );
+}
+
+void OptiXScene::commitTransferFunctionData()
+{
+    if( _colorMapBuffer == 0 )
+        _colorMapBuffer = _context->createBuffer(
+            RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, _transferFunction.getDiffuseColors().size() );
+
+    uint64_t size = _transferFunction.getDiffuseColors().size() * 4 * sizeof( float );
+    if( size != 0 )
+    {
+        memcpy( _colorMapBuffer->map(), &_transferFunction.getDiffuseColors()[0], size );
+        _colorMapBuffer->unmap();
+    }
+
+    _context[ "colorMap" ]->setBuffer( _colorMapBuffer );
+    _context[ "colorMapMinValue" ]->setFloat( _transferFunction.getValuesRange().x() );
+    _context[ "colorMapRange" ]->setFloat(
+        _transferFunction.getValuesRange().y() - _transferFunction.getValuesRange().x() );
+
+}
+
+void OptiXScene::_buildVolumeAABBGeometry()
+{
+    const Vector3f positions[8] =
+    {
+        {  0.f, 0.f, 0.f },
+        {  1.f, 0.f, 0.f }, //    6--------7
+        {  0.f, 1.f, 0.f }, //   /|       /|
+        {  1.f, 1.f, 0.f }, //  2--------3 |
+        {  0.f, 0.f, 1.f }, //  | |      | |
+        {  1.f, 0.f, 1.f }, //  | 4------|-5
+        {  0.f, 1.f, 1.f }, //  |/       |/
+        {  1.f, 1.f, 1.f }  //  0--------1
+    };
+
+    const uint16_t indices[6][6] =
+    {
+        { 0, 1, 3, 3, 2, 0 }, // Front
+        { 1, 5, 7, 7, 3, 1 }, // Right
+        { 5, 4, 6, 6, 7, 5 }, // Back
+        { 4, 0, 2, 2, 6, 4 }, // Left
+        { 0, 1, 5, 5, 4, 0 }, // Bottom
+        { 2, 3, 7, 7, 6, 2 }  // Top
+    };
+
+    VolumeParameters& volumeParameters = _parametersManager.getVolumeParameters();
+    const Vector3f& volumeScale = volumeParameters.getScale();
+    const Vector3f& volumePosition = volumeParameters.getPosition();
+    const Vector3f& volumeDimensions = volumeParameters.getDimensions();
+
+    uint64_t offset  =_trianglesMeshes[MATERIAL_INVISIBLE].getVertices().size();
+    for( size_t face = 0; face < 6; ++face )
+    {
+        for( size_t index = 0; index < 6; ++index )
+        {
+            const Vector3f& position =
+                positions[ indices[face][index] ] * volumeScale * volumeDimensions +
+                volumePosition;
+
+            _trianglesMeshes[MATERIAL_INVISIBLE].getVertices().push_back( position );
+            _bounds.merge( position );
+
+            _trianglesMeshes[MATERIAL_INVISIBLE].getIndices().push_back(
+                Vector3i( offset + 0, offset + 1, offset + 2 ));
+            _trianglesMeshes[MATERIAL_INVISIBLE].getIndices().push_back(
+                Vector3i( offset + 3, offset + 4, offset + 5 ));
+
+        }
+        offset += 6;
+    }
+
 }
 
 }

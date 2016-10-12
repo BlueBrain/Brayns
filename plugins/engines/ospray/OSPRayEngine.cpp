@@ -62,9 +62,7 @@ OSPRayEngine::OSPRayEngine(
     }
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset( new OSPRayScene( renderersForScene,
-        parametersManager->getSceneParameters(),
-        parametersManager->getGeometryParameters()));
+    _scene.reset( new OSPRayScene( renderersForScene, *parametersManager ));
 
     _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
 

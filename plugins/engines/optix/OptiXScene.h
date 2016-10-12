@@ -38,9 +38,11 @@ struct BasicLight
 };
 
 /**
+
    OptiX specific scene
 
    This object is the OptiX specific implementation of a scene
+
 */
 class OptiXScene : public brayns::Scene
 {
@@ -49,8 +51,7 @@ public:
 
     OptiXScene(
         Renderers renderer,
-        SceneParameters& sceneParameters,
-        GeometryParameters& geometryParameters,
+        ParametersManager& parametersManager,
         optix::Context& context );
 
     /** @copydoc Scene::commit */
@@ -68,7 +69,15 @@ public:
     /** @copydoc Scene::commitSimulationData */
     void commitSimulationData() final;
 
+    /** @copydoc Scene::commitVolumeData */
+    void commitVolumeData() final;
+
+    /** @copydoc Scene::commitTransferFunctionData */
+    void commitTransferFunctionData() final;
+
 private:
+
+    void _buildVolumeAABBGeometry();
 
     uint64_t _processParametricGeometries();
     uint64_t _processMeshes();
@@ -80,6 +89,8 @@ private:
     optix::Buffer _lightBuffer;
     std::vector< BasicLight > _optixLights;
     std::string _accelerationStructure;
+    optix::Buffer _volumeBuffer;
+    optix::Buffer _colorMapBuffer;
 
     // Spheres
     std::map< size_t, floats > _serializedSpheresData;

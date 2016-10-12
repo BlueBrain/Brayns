@@ -62,9 +62,8 @@ typedef std::shared_ptr< TransferFunction > TransferFunctionPtr;
 
 class Renderer;
 typedef std::shared_ptr< Renderer > RendererPtr;
-typedef std::weak_ptr< Renderer > RendererWeakPtr;
 typedef std::map< std::string, RendererPtr > RendererMap;
-typedef std::vector< RendererWeakPtr > Renderers;
+typedef std::vector< RendererPtr > Renderers;
 
 class FrameBuffer;
 typedef std::shared_ptr< FrameBuffer > FrameBufferPtr;
@@ -77,6 +76,9 @@ typedef std::shared_ptr< GeometryParameters > GeometryParametersPtr;
 
 class RenderingParameters;
 typedef std::shared_ptr< RenderingParameters > RenderingParametersPtr;
+
+class VolumeParameters;
+typedef std::shared_ptr< VolumeParameters > VolumeParametersPtr;
 
 class ExtensionController;
 typedef std::shared_ptr<ExtensionController> ExtensionControllerPtr;
@@ -135,6 +137,9 @@ typedef std::shared_ptr< CircuitSimulationHandler > CircuitSimulationHandlerPtr;
 
 class SpikeSimulationHandler;
 typedef std::shared_ptr< SpikeSimulationHandler > SpikeSimulationHandlerPtr;
+
+class VolumeHandler;
+typedef std::shared_ptr< VolumeHandler > VolumeHandlerPtr;
 
 typedef std::vector< std::string > strings;
 typedef std::vector< float > floats;
@@ -249,11 +254,12 @@ struct ExtensionParameters
  */
 const size_t NO_MATERIAL = -1;
 const size_t NB_MAX_MATERIALS = 200;
-const size_t NB_SYSTEM_MATERIALS = 3;
+const size_t NB_SYSTEM_MATERIALS = 4;
 const size_t MATERIAL_SYSTEM = NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS;
 const size_t MATERIAL_SKYBOX = MATERIAL_SYSTEM + 0;
 const size_t MATERIAL_BOUNDING_BOX = MATERIAL_SYSTEM + 1;
 const size_t MATERIAL_SIMULATION = MATERIAL_SYSTEM + 2;
+const size_t MATERIAL_INVISIBLE = MATERIAL_SYSTEM + 3;
 const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 

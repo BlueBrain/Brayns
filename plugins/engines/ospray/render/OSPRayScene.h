@@ -30,19 +30,42 @@
 namespace brayns
 {
 
+/**
+
+   OSPRray specific scene
+
+   This object is the OSPRay specific implementation of a scene
+
+*/
 class OSPRayScene: public brayns::Scene
 {
+
 public:
+
     OSPRayScene(
         Renderers renderer,
-        SceneParameters& sceneParameters,
-        GeometryParameters& geometryParameters );
+        ParametersManager& parametersManager );
 
+    /** @copydoc Scene::commit */
     void commit() final;
+
+    /** @copydoc Scene::buildGeometry */
     void buildGeometry() final;
+
+    /** @copydoc Scene::commitLights */
     void commitLights() final;
+
+    /** @copydoc Scene::commitMaterials */
     void commitMaterials( const bool updateOnly = false ) final;
+
+    /** @copydoc Scene::commitSimulationData */
     void commitSimulationData() final;
+
+    /** @copydoc Scene::commitVolumeData */
+    void commitVolumeData() final;
+
+    /** @copydoc Scene::commitTransferFunctionData */
+    void commitTransferFunctionData() final;
 
     OSPModel* modelImpl( const size_t timestamp );
 
@@ -61,6 +84,7 @@ private:
     std::vector< OSPLight > _ospLights;
     OSPData _ospLightData;
     OSPData _ospMaterialData;
+    OSPData _ospVolumeData;
     OSPData _ospSimulationData;
     OSPData _ospTransferFunctionDiffuseData;
     OSPData _ospTransferFunctionEmissionData;

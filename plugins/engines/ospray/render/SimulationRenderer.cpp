@@ -37,6 +37,11 @@ void SimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
+    _volumeData = getParamData( "volumeData" );
+    _volumeDimensions = getParam3i( "volumeDimensions", ospray::vec3i( 0 ));
+    _volumeScale = getParam3f( "volumeScale", ospray::vec3f( 1.f ));
+    _volumePosition = getParam3f( "volumePosition", ospray::vec3f( 0.f ));
+    _volumeEpsilon = getParam1f( "volumeEpsilon", 1.f );
     _simulationData = getParamData( "simulationData" );
     _transferFunctionDiffuseData = getParamData( "transferFunctionDiffuseData" );
     _transferFunctionEmissionData = getParamData( "transferFunctionEmissionData" );
@@ -58,6 +63,11 @@ void SimulationRenderer::commit()
                 _electronShadingEnabled,
                 _lightPtr, _lightArray.size(),
                 _materialPtr, _materialArray.size(),
+                _volumeData ? ( uint8* )_volumeData->data : NULL,
+                ( ispc::vec3i& )_volumeDimensions,
+                ( ispc::vec3f& )_volumeScale,
+                ( ispc::vec3f& )_volumePosition,
+                _volumeEpsilon,
                 _simulationData ? ( float* )_simulationData->data : NULL,
                 _transferFunctionDiffuseData ?
                     ( ispc::vec4f* )_transferFunctionDiffuseData->data : NULL,

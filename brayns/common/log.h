@@ -46,7 +46,7 @@
     __cmd; \
     __duration  = duration_cast< milliseconds >( \
             high_resolution_clock::now() - __startTime ).count(); \
-    std::cout << "[TIMER ] " << __duration << " ms" << std::endl; \
+    std::cout << "[TIMER] " << __duration << " ms" << std::endl; \
 }
 
 static std::mutex __logging_mtx;

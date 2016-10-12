@@ -38,6 +38,7 @@ bool AbstractParameters::parse( int argc, const char **argv )
         po::parsed_options parsedOptions =
             po::command_line_parser( argc, argv )
                 .options( _parameters )
+                .style( po::command_line_style::unix_style ^ po::command_line_style::allow_short )
                 .allow_unregistered( )
                 .run( );
         po::store( parsedOptions, vm );
@@ -84,8 +85,11 @@ void AbstractParameters::set( const std::string& key, const std::string& value )
 
     po::variables_map vm;
     po::parsed_options parsedOptions =
-        po::command_line_parser( argc, argv ).options( _parameters ).
-        allow_unregistered( ).run( );
+        po::command_line_parser( argc, argv )
+        .options( _parameters )
+        .style( po::command_line_style::unix_style ^ po::command_line_style::allow_short )
+        .allow_unregistered( )
+        .run( );
     po::store( parsedOptions, vm );
     po::notify(vm);
     delete [] argv;

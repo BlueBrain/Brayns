@@ -173,11 +173,20 @@ inline float shadedLightIntensity(
     setRay( shadowRay, intersection, lightDirection );
     shadowRay.t0 = self->super.epsilon;
     shadowRay.time = sample.ray.time;
+    shadowRay.t = ray.t;
 
     varying float intensity = 1.f;
     const varying float maxt = ray.t;
     varying int depth = 0;
     varying bool moreRebounds = true;
+
+    // Light attenuation altered by volume
+    if( self->volumeData )
+    {
+        const vec4f volumetricValue = getVolumeContribution( self, shadowRay );
+        intensity -= volumetricValue.w;
+        moreRebounds = ( volumetricValue.w < 1.f );
+    }
 
     while( moreRebounds && depth < NB_MAX_REBOUNDS )
     {
@@ -228,4 +237,91 @@ inline float shadedLightIntensity(
             moreRebounds = false;
     }
     return intensity;
+}
+
+// AABB-Ray intersection ( http://prideout.net/blog/?p=64 ).
+inline bool intersectBox(
+    const uniform AbstractRenderer* uniform self,
+    Ray& ray,
+    float &tnear, float& tfar )
+{
+    //We need to avoid division by zero in "vec3 invR = 1.0 / ray.dir;"
+    if( ray.dir.x == 0.f )
+        ray.dir.x = self->super.epsilon;
+
+    if( ray.dir.y == 0.f )
+        ray.dir.y = self->super.epsilon;
+
+    if( ray.dir.z == 0.f )
+        ray.dir.z = self->super.epsilon;
+
+    const vec3f aabbMin = self->volumePosition;
+    const vec3f aabbMax = self->volumePosition + self->volumeDimensions.x * self->volumeScale;
+
+    const vec3f invR = 1.f / ray.dir;
+    const vec3f tbot = invR * ( aabbMin - ray.org );
+    const vec3f ttop = invR * ( aabbMax - ray.org );
+    const vec3f tmin = min( ttop, tbot );
+    const vec3f tmax = max( ttop, tbot );
+
+    vec2f t = max( make_vec2f( tmin.x, tmin.x), make_vec2f( tmin.y, tmin.z) );
+    tnear = max( t.x, t.y );
+
+    t = min( make_vec2f( tmax.x, tmax.x ), make_vec2f( tmax.y, tmax.z) );
+    tfar = min( t.x, t.y );
+
+    return tnear <= tfar;
+}
+
+inline varying vec4f getVolumeContribution(
+    const uniform AbstractRenderer* uniform self,
+    Ray& ray )
+{
+    vec3f pathColor = make_vec3f( 0.f );
+    const vec3i dimensions = self->volumeDimensions;
+
+    float t = ray.t0 + self->volumeEpsilon;
+    const float tMax = ray.t - self->volumeEpsilon;
+
+    float pathAlpha = 0.f;
+    while( t < tMax && pathAlpha < 1.f )
+    {
+        vec3f point = ( ray.org + ray.dir * t ) / self->volumeScale - self->volumePosition;
+
+        if( point.x > 0.f && point.x < dimensions.x &&
+            point.y > 0.f && point.y < dimensions.y &&
+            point.z > 0.f && point.z < dimensions.z )
+        {
+            uint64 index = (uint64)(
+                (uint64)floor( point.x ) +
+                (uint64)floor( point.y ) * dimensions.x +
+                (uint64)floor( point.z ) * dimensions.x * dimensions.y );
+
+            const uint8 voxelValue = self->volumeData[ index ];
+            if( self->colorMap )
+            {
+                const float normalizedValue =
+                    self->colorMapSize * ( voxelValue - self->colorMapMinValue ) /
+                    self->colorMapRange;
+                const vec4f colorMapColor = self->colorMap[ normalizedValue ];
+                const vec3f voxelColor =
+                    make_vec3f( colorMapColor.x, colorMapColor.y, colorMapColor.z );
+                const float alphaMagic = self->volumeEpsilon / self->volumeDiag;
+                const float alpha = 1.f - pow(
+                    1.f - min( colorMapColor.w, 1.f - 1.f / (float)self->colorMapSize), alphaMagic );
+                pathColor = pathColor + ( voxelColor * alpha * ( 1.f - pathAlpha ));
+                pathAlpha = pathAlpha + ( alpha * ( 1.f - pathAlpha ));
+            }
+            else
+            {
+                float alpha = 1.f;
+                vec3f voxelColor = { point.x, point.y, point.z };
+
+                pathColor = pathColor + ( voxelColor * alpha * ( 1.f - pathAlpha ));
+                pathAlpha = pathAlpha + ( alpha * ( 1.f - pathAlpha ));
+            }
+        }
+        t += self->volumeEpsilon;
+    }
+    return make_vec4f( pathColor.x, pathColor.y, pathColor.z, pathAlpha );
 }

@@ -41,6 +41,7 @@ struct AbstractRenderer
 {
     Renderer super;
 
+    // Rendering attributes
     const uniform Light *uniform *uniform lights;
     uint32 numLights;
     const uniform ExtendedOBJMaterial *uniform *uniform materials;
@@ -54,6 +55,21 @@ struct AbstractRenderer
     int randomNumber;
     float timestamp;
     int spp;
+
+    // Volume attributes
+    uniform uint8* uniform volumeData;
+    vec3i volumeDimensions;
+    vec3f volumeScale;
+    vec3f volumePosition;
+    float volumeEpsilon;
+    float volumeDiag;
+
+    // Transfer function / Color map attributes
+    uniform vec4f* uniform colorMap;
+    uniform float* uniform colorMapEmissionData;
+    uint32 colorMapSize;
+    float colorMapMinValue;
+    float colorMapRange;
 };
 
 /**
@@ -124,7 +140,7 @@ bool indirectShading(
     varying float& indirectShadingPower );
 
 /**
-    Return the normalized light intensity decreased by the opacity of the intersected surfaces.
+    Returns the normalized light intensity decreased by the opacity of the intersected surfaces.
     @param self Pointer to the current renderer
     @param ray Current ray used to initialize the random ray
     @param sample Screen sample
@@ -140,4 +156,16 @@ float shadedLightIntensity(
     const varying vec3f& intersection,
     const varying vec3f& normal,
     varying vec3f& lightDirection );
+
+
+/**
+    Returns the contribution (color and alpha) of a ray going through the volume attached to the
+    scene
+    @param self Pointer to the current renderer
+    @param ray Current ray used to traverse the volume
+    @return Resulting color and alpha value
+*/
+vec4f getVolumeContribution(
+    const uniform AbstractRenderer* uniform self,
+    Ray& ray );
 

@@ -30,8 +30,6 @@
 namespace brayns
 {
 
-typedef std::vector< std::string > Arguments;
-
 /** Manages application parameters
  */
 class ApplicationParameters : public AbstractParameters

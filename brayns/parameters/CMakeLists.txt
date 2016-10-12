@@ -11,6 +11,7 @@ set(BRAYNSPARAMETERS_SOURCES
   GeometryParameters.cpp
   ApplicationParameters.cpp
   SceneParameters.cpp
+  VolumeParameters.cpp
 )
 
 set(BRAYNSPARAMETERS_PUBLIC_HEADERS
@@ -20,6 +21,7 @@ set(BRAYNSPARAMETERS_PUBLIC_HEADERS
   GeometryParameters.h
   ApplicationParameters.h
   SceneParameters.h
+  VolumeParameters.h
 )
 
 set(BRAYNSPARAMETERS_LINK_LIBRARIES

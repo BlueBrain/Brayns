@@ -1,3 +1,23 @@
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #include "TransferFunction.h"
 
 #include <brayns/common/log.h>
@@ -15,8 +35,18 @@ namespace brayns
 {
 
 TransferFunction::TransferFunction()
-    : _valuesRange( 0.f, 0.f )
+    : _valuesRange( 0.f, DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE )
 {
+    // Initialize default values
+    for( size_t i = 0; i < DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE; ++i )
+    {
+        _diffuseColors.push_back( Vector4f(
+                (float)i / (float)DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE,
+                0.8f * (float)i / (float)DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE,
+                0.5f - 0.5f * (float)i / (float)DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE,
+                ( i < DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE / 10 ? 0.f : 1.f )));
+        _emissionIntensities.push_back( 0.f );
+    }
 }
 
 void TransferFunction::clear()

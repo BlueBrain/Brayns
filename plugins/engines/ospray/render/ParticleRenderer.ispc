@@ -194,6 +194,8 @@ export void ParticleRenderer_set(
     self->abstract.materials = ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
     self->abstract.numMaterials = numMaterials;
 
+    self->abstract.volumeData = 0;
+
     self->simulationData = (uniform float* uniform)simulationData;
     self->transferFunction = (uniform vec4f* uniform)transferFunction;
     self->transferFunctionEmissionData = (uniform float* uniform)transferFunctionEmissionData;
