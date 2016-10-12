@@ -24,7 +24,7 @@ namespace brayns
 {
 
 FrameBuffer::FrameBuffer(
-    const Vector2i& frameSize,
+    const Vector2ui& frameSize,
     const FrameBufferFormat frameBufferFormat,
     const bool accumulation )
     : _frameSize(frameSize)

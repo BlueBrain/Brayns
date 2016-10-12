@@ -67,7 +67,7 @@ ApplicationParameters::ApplicationParameters( )
             "Host running Deflect server" )
         ( PARAM_DEFLECT_STREAM_NAME.c_str( ), po::value< std::string >( ),
             "Name of Deflect stream" )
-        ( PARAM_BENCHMARKING.c_str( ), po::value< std::string >( ),
+        ( PARAM_BENCHMARKING.c_str( ), po::value< bool >( ),
             "Activates application benchmarking" )
         ( PARAM_JPEG_COMPRESSION.c_str( ), po::value< size_t >( ),
             "JPEG compression rate (100 = full quality)" )

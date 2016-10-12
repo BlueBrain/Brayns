@@ -58,13 +58,13 @@ private:
    void createColorTexture_( uint32_t width, uint32_t height );
    void createDepthTexture_( uint32_t width, uint32_t height );
 
-   ScreenSpaceProcessorData buffersData_;
+   //ScreenSpaceProcessorData buffersData_;
 
    //textures
    GLuint colorTexture_;
    GLuint depthTexture_;
-   GLuint normalTexture_;
-   GLuint lightTexture_;
+   //GLuint normalTexture_;
+   //GLuint lightTexture_;
 
    //Quad
    GLfloat quadVertices_[ 12 ];

@@ -38,6 +38,17 @@
         throw exc;\
     }
 
+#define BRAYNS_TIMER(__cmd) \
+{ \
+    high_resolution_clock::time_point __startTime; \
+    uint64_t __duration; \
+    __startTime = high_resolution_clock::now( ); \
+    __cmd; \
+    __duration  = duration_cast< milliseconds >( \
+            high_resolution_clock::now() - __startTime ).count(); \
+    std::cout << "[TIMER ] " << __duration << " ms" << std::endl; \
+}
+
 static std::mutex __logging_mtx;
 #define BRAYNS_PROGRESS( __value, __maxValue ) \
 {\

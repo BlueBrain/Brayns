@@ -5,6 +5,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
+  XYZBLoader.cpp
   TransferFunctionLoader.cpp
   MorphologyLoader.cpp
   ProteinLoader.cpp
@@ -13,6 +14,7 @@ set(BRAYNSIO_SOURCES
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
+  XYZBLoader.h
   TransferFunctionLoader.h
   MorphologyLoader.h
   ProteinLoader.h
@@ -21,7 +23,8 @@ set(BRAYNSIO_PUBLIC_HEADERS
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
-    PUBLIC braynsParameters braynsCommon Servus vmmlib boost_system boost_filesystem Brion
+  PUBLIC braynsParameters braynsCommon Servus vmmlib boost_system boost_filesystem Brion
+  PRIVATE ${HDF5_LIBRARIES}
 )
 
 if(ASSIMP_FOUND)

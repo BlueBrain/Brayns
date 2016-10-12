@@ -116,6 +116,20 @@ public:
     BRAYNS_API virtual void commit( ) =  0;
 
     /**
+       The field of view is the extent of the observable world that is seen at any given moment.
+       In case of optical instruments or sensors it is a solid angle through which a detector is
+       sensitive to electromagnetic radiation.
+    */
+    /** @return the field of view of the camera */
+    BRAYNS_API float getFieldOfView( ) const;
+
+    /**
+       Set the field of view of the camera
+       @param fov The field of view
+    */
+    BRAYNS_API void setFieldOfView( const float fov );
+
+    /**
        Set the aspect ratio of the camera
        @param aspectRatio The new aspect ratio
     */

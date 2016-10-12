@@ -31,13 +31,13 @@ class OSPRayFrameBuffer : public brayns::FrameBuffer
 {
 public:
     OSPRayFrameBuffer(
-        const Vector2i& frameSize,
+        const Vector2ui& frameSize,
         FrameBufferFormat colorDepth,
         bool accumulation = true );
     ~OSPRayFrameBuffer();
 
     void clear() final;
-    void resize(const Vector2i& frameSize) final;
+    void resize(const Vector2ui& frameSize) final;
     void map() final;
     void unmap() final;
 

@@ -47,7 +47,7 @@ public:
        Gets the OSPRay implementation of the camera object
        @return OSPRay implementation of the camera object
     */
-    OSPCamera ospImpl() { return _camera; }
+    OSPCamera impl() { return _camera; }
 
 private:
     OSPCamera _camera;

@@ -27,19 +27,11 @@
 namespace brayns
 {
 
-enum FrameBufferFormat
-{
-  FBF_RGBA_NONE,
-  FBF_RGBA_I8,
-  FBF_RGB_I8,
-  FBF_RGBA_F32,
-};
-
 class FrameBuffer
 {
 public:
     BRAYNS_API FrameBuffer(
-        const Vector2i& frameSize,
+        const Vector2ui& frameSize,
         FrameBufferFormat frameBufferFormat,
         bool accumulation = true );
     BRAYNS_API virtual ~FrameBuffer() {}
@@ -52,15 +44,15 @@ public:
     BRAYNS_API virtual size_t getColorDepth();
     BRAYNS_API virtual float* getDepthBuffer() = 0;
 
-    BRAYNS_API virtual void resize(const Vector2i& frameSize) = 0;
+    BRAYNS_API virtual void resize(const Vector2ui& frameSize) = 0;
 
-    BRAYNS_API Vector2i getSize() const { return _frameSize; }
+    BRAYNS_API Vector2ui getSize() const { return _frameSize; }
 
     BRAYNS_API void setAccumulation( const bool accumulation ) { _accumulation = accumulation; }
     BRAYNS_API bool getAccumulation() const { return _accumulation; }
 
 protected:
-    Vector2i _frameSize;
+    Vector2ui _frameSize;
     FrameBufferFormat _frameBufferFormat;
     bool _accumulation;
 };

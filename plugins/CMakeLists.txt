@@ -10,14 +10,14 @@ set(BRAYNSPLUGINS_LINK_LIBRARIES
 set(BRAYNSPLUGINS_SOURCES
   extensions/plugins/ExtensionPlugin.cpp
   engines/EngineFactory.cpp
-  engines/Engine.cpp
 )
 
 set(BRAYNSPLUGINS_PUBLIC_HEADERS
   extensions/plugins/ExtensionPlugin.h
   engines/EngineFactory.h
-  engines/Engine.h
 )
+
+add_subdirectory(engines/common)
 
 if(DEFLECT_FOUND OR (TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ))
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/ExtensionPluginFactory.cpp)
@@ -39,7 +39,15 @@ endif()
 
 if(OSPRAY_FOUND)
   add_subdirectory(engines/ospray)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOSPRayPlugin)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOSPRayEnginePlugin)
 endif()
 
+if(OPTIX_FOUND AND CUDA_FOUND)
+  add_subdirectory(engines/optix)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOptiXEnginePlugin)
+endif()
+
+list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsCommonEnginePlugin)
+
 common_library(braynsPlugins)
+

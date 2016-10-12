@@ -18,15 +18,59 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Engine.h"
+#ifndef OPTIXENGINE_H
+#define OPTIXENGINE_H
+
+#include <plugins/engines/common/Engine.h>
+
+// OptiX
+#include <optixu/optixpp_namespace.h>
+#include <optixu/optixu_math_stream_namespace.h>
 
 namespace brayns
 {
 
-void Engine::setActiveRenderer( const std::string& renderer )
+/**
+ * OSPRay implementation of the ray-tracing engine.
+ */
+class OptiXEngine : public Engine
 {
-    if( _activeRenderer != renderer )
-        _activeRenderer = renderer;
-}
+
+public:
+
+    OptiXEngine(
+        int argc,
+        const char **argv,
+        ParametersManagerPtr parametersManager );
+
+    ~OptiXEngine();
+
+    /** @copydoc Engine::name */
+    std::string name() const final;
+
+    /** @copydoc Engine::commit */
+    void commit() final;
+
+    /** @copydoc Engine::render */
+    void render() final;
+
+    /** @copydoc Engine::preRender */
+    void preRender() final;
+
+    /** @copydoc Engine::postRender */
+    void postRender() final;
+
+    uint64_t getTotalMemory() { return _totalMemory; }
+
+private:
+
+    void _initializeContext();
+
+    optix::Context _context;
+    uint64_t _totalMemory;
+
+};
 
 }
+
+#endif // OPTIXENGINE_H

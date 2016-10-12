@@ -32,6 +32,7 @@ OSPRayEngine::OSPRayEngine(
     int argc,
     const char **argv,
     ParametersManagerPtr parametersManager )
+    : Engine()
 {
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     try

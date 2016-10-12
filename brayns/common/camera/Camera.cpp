@@ -42,6 +42,7 @@ public:
         , _aspectRatio( 1.f )
         , _aperture( 0.f )
         , _focalLength( 0.f )
+        , _fieldOfView( 60.f )
     {
     }
 
@@ -133,6 +134,16 @@ public:
         return _cameraType;
     }
 
+    void setFieldOfView( const float fov )
+    {
+        _fieldOfView = fov;
+    }
+
+    float getFieldOfView( ) const
+    {
+        return _fieldOfView;
+    }
+
     void setAspectRatio( const float aspectRatio )
     {
         _aspectRatio = aspectRatio;
@@ -188,6 +199,7 @@ private:
     mutable float _aspectRatio;
     mutable float _aperture;
     mutable float _focalLength;
+    mutable float _fieldOfView;
 };
 
 Camera::Camera( const CameraType cameraType )
@@ -253,6 +265,16 @@ void Camera::setUpVector( const Vector3f& upVector )
 CameraType Camera::getType( ) const
 {
     return _impl->getType( );
+}
+
+void Camera::setFieldOfView( const float fov )
+{
+    _impl->setFieldOfView( fov );
+}
+
+float Camera::getFieldOfView( ) const
+{
+    return _impl->getFieldOfView();
 }
 
 void Camera::setAspectRatio( const float aspectRatio )

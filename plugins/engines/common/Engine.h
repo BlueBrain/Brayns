@@ -36,8 +36,10 @@ namespace brayns
  */
 class Engine
 {
+
 public:
 
+    Engine();
     virtual ~Engine() {}
 
     /**
