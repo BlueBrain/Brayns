@@ -54,6 +54,8 @@ public:
         ParametersManager& parametersManager,
         optix::Context& context );
 
+    ~OptiXScene();
+
     /** @copydoc Scene::commit */
     void commit() final;
 
@@ -78,6 +80,8 @@ public:
 private:
 
     void _buildVolumeAABBGeometry();
+
+    uint64_t _getBvhSize( const uint64_t nbElements ) const;
 
     uint64_t _processParametricGeometries();
     uint64_t _processMeshes();
