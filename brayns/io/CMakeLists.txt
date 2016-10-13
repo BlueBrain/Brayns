@@ -23,22 +23,21 @@ set(BRAYNSIO_PUBLIC_HEADERS
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
-  PUBLIC braynsParameters braynsCommon Servus vmmlib boost_system boost_filesystem Brion
-  PRIVATE ${HDF5_LIBRARIES}
+  PRIVATE braynsParameters braynsCommon Servus vmmlib boost_system boost_filesystem
 )
 
 if(ASSIMP_FOUND)
   list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp)
   list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES assimp)
+  list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE assimp)
 endif()
 
 if(TARGET Brion)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES Brion Brain)
+  list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE Brion Brain ${HDF5_LIBRARIES})
 endif()
 
 if(MAGICK++_FOUND)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES ${Magick++_LIBRARIES})
+  list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE ${Magick++_LIBRARIES})
 endif()
 
 common_library(braynsIO)

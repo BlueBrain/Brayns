@@ -1,3 +1,4 @@
+./
 CMake/common/
 Deflect/
 FlatBuffers/
@@ -6,6 +7,13 @@ Servus/
 ZeroBuf/
 build/
 ZeroEQ/
+Brion/
+Lexis/
+Lunchbox/
+MVDTool/
+httpxx/
+vmmlib/
+CMakeFiles
 .DS_Store
 *~
 *#
@@ -13,3 +21,6 @@ ZeroEQ/
 *.files
 *.config
 *.includes
+*.creator*
+*.user
+
