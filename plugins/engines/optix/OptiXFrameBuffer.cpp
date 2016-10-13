@@ -47,6 +47,8 @@ OptiXFrameBuffer::OptiXFrameBuffer(
 OptiXFrameBuffer::~OptiXFrameBuffer()
 {
     unmap();
+    if( _frameBuffer ) _frameBuffer->destroy();
+    if( _accumBuffer ) _accumBuffer->destroy();
 }
 
 void OptiXFrameBuffer::resize(

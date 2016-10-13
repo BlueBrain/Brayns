@@ -32,9 +32,7 @@ namespace brayns
 {
 
 OptiXEngine::OptiXEngine(
-    int /*argc*/,
-    const char ** /*argv*/,
-    ParametersManagerPtr parametersManager )
+    int, const char **, ParametersManagerPtr parametersManager )
     : Engine()
     , _context( 0 )
 {
@@ -92,7 +90,7 @@ void OptiXEngine::_initializeContext()
 
     _context->setRayTypeCount( 2 );
     _context->setEntryPointCount( 1 );
-    _context->setStackSize( 16384 );
+    _context->setStackSize( 4096 );
 
     unsigned int num_devices;
     unsigned int version;

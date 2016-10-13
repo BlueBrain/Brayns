@@ -61,6 +61,23 @@ OptiXScene::OptiXScene(
 {
 }
 
+OptiXScene::~OptiXScene()
+{
+    if( _volumeBuffer ) _volumeBuffer->destroy();
+    if( _colorMapBuffer ) _colorMapBuffer->destroy();
+    for( auto buffer: _spheresBuffers )
+        buffer.second->destroy();
+    for( auto buffer: _cylindersBuffers )
+        buffer.second->destroy();
+    for( auto buffer: _conesBuffers )
+        buffer.second->destroy();
+    if( _verticesBuffer ) _verticesBuffer->destroy();
+    if( _indicesBuffer ) _indicesBuffer->destroy();
+    if( _normalsBuffer ) _normalsBuffer->destroy();
+    if( _textureCoordsBuffer ) _textureCoordsBuffer->destroy();
+    if( _materialsBuffer ) _materialsBuffer->destroy();
+}
+
 void OptiXScene::commit()
 {
     BRAYNS_ERROR << "OptiXScene::commitSimulationData not implemented" << std::endl;
@@ -81,12 +98,12 @@ void OptiXScene::buildGeometry()
     BRAYNS_INFO << "----------------------------------------" << std::endl;
     BRAYNS_INFO << "Data information:" << std::endl;
 
-    uint64_t paramGeomMemSize =  _processParametricGeometries();
+    uint64_t paramGeomMemSize = _processParametricGeometries();
     uint64_t meshMemSize = _processMeshes();
     uint64_t totalGPUMemory = paramGeomMemSize + meshMemSize;
 
     BRAYNS_INFO << "Total GPU : " << totalGPUMemory << " bytes ("
-                << totalGPUMemory / 1024 / 1024 << " MB)"
+                << totalGPUMemory / 1048576 << " MB)"
                 << std::endl;
     BRAYNS_INFO << "----------------------------------------" << std::endl;
 
@@ -309,9 +326,13 @@ uint64_t OptiXScene::_processParametricGeometries()
          }
     }
 
-    uint64_t spheresMemSize = totalNbSpheres * Sphere::getSerializationSize() * sizeof(float);
-    uint64_t cylindersMemSize = totalNbCylinders * Cylinder::getSerializationSize() * sizeof(float);
-    uint64_t conesMemSize = totalNbCones * Cone::getSerializationSize() * sizeof(float);
+    const uint64_t spheresMemSize =
+        totalNbSpheres * Sphere::getSerializationSize() * sizeof(float);
+    const uint64_t cylindersMemSize =
+        totalNbCylinders * Cylinder::getSerializationSize() * sizeof(float);
+    const uint64_t conesMemSize =
+        totalNbCones * Cone::getSerializationSize() * sizeof(float);
+    const uint64_t bvhSize = _getBvhSize( totalNbSpheres + totalNbCylinders + totalNbCones );
 
     BRAYNS_INFO << "- Spheres   : " << totalNbSpheres
                 << " [" << spheresMemSize << " bytes]"
@@ -322,7 +343,7 @@ uint64_t OptiXScene::_processParametricGeometries()
     BRAYNS_INFO << "- Cones     : " << totalNbCones
                 << " [" << conesMemSize << " bytes]"
                 << std::endl;
-    return spheresMemSize + cylindersMemSize + conesMemSize;
+    return bvhSize + spheresMemSize + cylindersMemSize + conesMemSize;
 }
 
 uint64_t OptiXScene::_processMeshes()
@@ -453,11 +474,11 @@ uint64_t OptiXScene::_processMeshes()
             &_optixMaterials[ 0 ],
             &_optixMaterials[ 0 ] + _optixMaterials.size() ) );
 
-    uint64_t verticesMemSize = nbTotalVertices * 3 * sizeof(float);
-    uint64_t indicesMemSize = nbTotalIndices * 3 * sizeof(int);
-    uint64_t normalsMemSize = nbTotalNormals * 3 * sizeof(float);
-    uint64_t texCoordsMemSize = nbTotalTexCoords * 2 * sizeof(float);
-    uint64_t materialsMemSize = nbTotalMaterials * sizeof(int);
+    const uint64_t verticesMemSize = nbTotalVertices * 3 * sizeof(float);
+    const uint64_t indicesMemSize = nbTotalIndices * 3 * sizeof(int);
+    const uint64_t normalsMemSize = nbTotalNormals * 3 * sizeof(float);
+    const uint64_t texCoordsMemSize = nbTotalTexCoords * 2 * sizeof(float);
+    const uint64_t materialsMemSize = nbTotalMaterials * sizeof(int);
 
     BRAYNS_INFO << "- Vertices  : " << vertices.size()
                 << " [" << verticesMemSize << " bytes]"
@@ -474,7 +495,11 @@ uint64_t OptiXScene::_processMeshes()
     BRAYNS_INFO << "- Materials : " << materials.size()
                 << " [" << materialsMemSize << " bytes]"
                 << std::endl;
-    return verticesMemSize + indicesMemSize + normalsMemSize + texCoordsMemSize + materialsMemSize;
+
+    const uint64_t bvhSize = _getBvhSize( indicesMemSize / 3 );
+
+    return bvhSize + verticesMemSize + indicesMemSize +
+           normalsMemSize + texCoordsMemSize + materialsMemSize;
 }
 
 void OptiXScene::commitMaterials( const bool updateOnly )
@@ -643,6 +668,12 @@ void OptiXScene::_buildVolumeAABBGeometry()
         offset += 6;
     }
 
+}
+
+uint64_t OptiXScene::_getBvhSize( const uint64_t nbElements ) const
+{
+    // An estimate of the BVH size
+    return 64 * 1.3f * nbElements;
 }
 
 }
