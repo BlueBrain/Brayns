@@ -50,4 +50,3 @@ endif()
 list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsCommonEnginePlugin)
 
 common_library(braynsPlugins)
-

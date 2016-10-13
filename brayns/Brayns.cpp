@@ -26,9 +26,9 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/light/DirectionalLight.h>
-#include <brayns/common/light/PointLight.h>
 #include <brayns/common/simulation/CircuitSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
+#include <brayns/common/volume/VolumeHandler.h>
 
 #include <plugins/engines/EngineFactory.h>
 #include <plugins/engines/common/Engine.h>
@@ -77,12 +77,9 @@ struct Brayns::Impl
         scene->addLight( sunLight );
 
         // Build geometry
-        loadData( );
+        loadData();
         scene->buildEnvironment( );
         scene->buildGeometry( );
-
-        if( scene->isEmpty() )
-            _buildDefaultScene();
 
         scene->commit( );
 
@@ -102,10 +99,19 @@ struct Brayns::Impl
 
     void loadData()
     {
-        GeometryParameters& geometryParameters =
-            _parametersManager->getGeometryParameters();
-        if(!geometryParameters.getSimulationCacheFile().empty())
-            _loadSimulationCacheFile();
+        ScenePtr scene = _engine->getScene();
+        GeometryParameters& geometryParameters = _parametersManager->getGeometryParameters();
+        VolumeParameters& volumeParameters = _parametersManager->getVolumeParameters();
+        SceneParameters& sceneParameters = _parametersManager->getSceneParameters();
+
+        const std::string& transferFunctionFilename = sceneParameters.getTransferFunctionFilename();
+        if( !transferFunctionFilename.empty() )
+        {
+            TransferFunctionLoader transferFunctionLoader( DEFAULT_TRANSFER_FUNCTION_RANGE );
+            transferFunctionLoader.loadFromFile(
+                transferFunctionFilename, *scene );
+        }
+        scene->commitTransferFunctionData();
 
         if(!geometryParameters.getMorphologyFolder().empty())
             _loadMorphologyFolder();
@@ -131,6 +137,19 @@ struct Brayns::Impl
 
         if(!geometryParameters.getXYZBFile().empty())
             _loadXYZBFile();
+
+        if(!volumeParameters.getFilename().empty())
+        {
+            const Vector3ui& volumeDimensions = scene->getVolumeHandler()->getDimensions();
+            const Vector3f& volumeScale = volumeParameters.getScale();
+            Boxf& worldBounds = scene->getWorldBounds();
+            worldBounds.merge( Vector3f( 0.f, 0.f, 0.f ));
+            worldBounds.merge( Vector3f( volumeDimensions ) * volumeScale );
+        }
+        scene->commitVolumeData();
+
+        if( scene->isEmpty() && !scene->getVolumeHandler() )
+            scene->buildDefault();
     }
 
     void render( const RenderInput& renderInput,
@@ -313,6 +332,9 @@ private:
         camera->setAspectRatio(
             static_cast< float >( frameSize.x()) /
             static_cast< float >( frameSize.y()));
+
+        BRAYNS_INFO << "World bounding box: " << worldBounds << std::endl;
+        BRAYNS_INFO << "World center      : " << worldBounds.getCenter() << std::endl;
     }
 
     void _setDefaultEpsilon()
@@ -326,17 +348,6 @@ private:
             BRAYNS_INFO << "Default epsilon: " << epsilon << std::endl;
             _parametersManager->getRenderingParameters().setEpsilon( epsilon );
         }
-    }
-
-    void _loadSimulationCacheFile()
-    {
-        const GeometryParameters& geometryParameters =
-            _parametersManager->getGeometryParameters();
-        const std::string& cacheFile(
-            geometryParameters.getSimulationCacheFile( ));
-        CircuitSimulationHandlerPtr simulationHandler( new CircuitSimulationHandler( ));
-        simulationHandler->attachSimulationToCacheFile( cacheFile );
-        _engine->getScene()->setSimulationHandler( simulationHandler );
     }
 
     /**
@@ -354,8 +365,7 @@ private:
 
         size_t fileIndex = 0;
         boost::filesystem::directory_iterator endIter;
-        if( boost::filesystem::exists(folder) &&
-            boost::filesystem::is_directory(folder))
+        if( boost::filesystem::is_directory(folder))
         {
             for( boost::filesystem::directory_iterator dirIter( folder );
                  dirIter != endIter; ++dirIter )
@@ -431,8 +441,7 @@ private:
         const std::string& folder = geometryParameters.getPDBFolder();
         BRAYNS_INFO << "Loading PDB folder " << folder << std::endl;
         boost::filesystem::directory_iterator endIter;
-        if( boost::filesystem::exists( folder ) &&
-            boost::filesystem::is_directory( folder ))
+        if( boost::filesystem::is_directory( folder ))
         {
             for( boost::filesystem::directory_iterator dirIter( folder );
                  dirIter != endIter; ++dirIter )
@@ -515,8 +524,7 @@ private:
         size_t meshIndex = 0;
 
         boost::filesystem::directory_iterator endIter;
-        if( boost::filesystem::exists(folder) &&
-            boost::filesystem::is_directory(folder))
+        if( boost::filesystem::is_directory(folder))
         {
             for( boost::filesystem::directory_iterator dirIter( folder );
                  dirIter != endIter; ++dirIter )
@@ -531,8 +539,22 @@ private:
                         scene->getTriangleMeshes(), scene->getMaterials(),
                         scene->getWorldBounds()
                     };
+
+                    size_t material =
+                        geometryParameters.getColorScheme() == CS_NEURON_BY_ID ?
+                        meshIndex % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
+                        NO_MATERIAL;
+
+                    MeshQuality quality;
+                    switch( geometryParameters.getGeometryQuality() )
+                    {
+                    case GQ_QUALITY: quality = MQ_QUALITY; break;
+                    case GQ_MAX_QUALITY: quality = MQ_MAX_QUALITY; break;
+                    default: quality = MQ_FAST ; break;
+                    }
+
                     if(!meshLoader.importMeshFromFile(
-                        filename, MeshContainer, MQ_MAX_QUALITY, NO_MATERIAL ))
+                        filename, MeshContainer, quality, material ))
                     {
                         BRAYNS_ERROR << "Failed to import " <<
                         filename << std::endl;

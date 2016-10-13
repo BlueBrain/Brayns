@@ -153,6 +153,7 @@ public:
         rendering performance */
     bool getGenerateMultipleModels() const { return _generateMultipleModels; }
 
+
 protected:
 
     bool _parse( const po::variables_map& vm ) final;

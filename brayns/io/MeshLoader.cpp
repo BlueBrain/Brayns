@@ -120,6 +120,7 @@ bool MeshLoader::importMeshFromFile(
                     getTextureCoordinates().push_back( texCoord );
             }
         }
+        bool nonTriangulatedFaces = false;
         nbFaces += mesh->mNumFaces;
         for( size_t f = 0; f < mesh->mNumFaces; ++f )
         {
@@ -132,11 +133,11 @@ bool MeshLoader::importMeshFromFile(
                 meshContainer.triangles[ materialIndex ].
                     getIndices().push_back( ind );
             }
-            else {
-                BRAYNS_ERROR << "Face " << f
-                    << " is not triangulated" << std::endl;
-            }
+            else
+                nonTriangulatedFaces = true;
         }
+        if( nonTriangulatedFaces )
+            BRAYNS_WARN << "Some faces are not triangulated and have been removed" << std::endl;
 
         if(_meshIndex.find( materialIndex ) == _meshIndex.end())
            _meshIndex[ materialIndex ] = 0;

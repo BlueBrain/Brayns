@@ -28,6 +28,7 @@
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
+#include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/io/TextureLoader.h>
 
 namespace brayns
@@ -53,11 +54,11 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[6] =
 
 OSPRayScene::OSPRayScene(
     Renderers renderers,
-    SceneParameters& sceneParameters,
-    GeometryParameters& geometryParameters )
-    : Scene( renderers, sceneParameters, geometryParameters )
+    ParametersManager& parametersManager )
+    : Scene( renderers, parametersManager )
     , _ospLightData( 0 )
     , _ospMaterialData( 0 )
+    , _ospVolumeData( 0 )
     , _ospSimulationData( 0 )
     , _ospTransferFunctionDiffuseData( 0 )
     , _ospTransferFunctionEmissionData( 0 )
@@ -87,7 +88,7 @@ OSPModel* OSPRayScene::modelImpl( const size_t timestamp )
 
 void OSPRayScene::_saveCacheFile()
 {
-    const std::string& filename = _geometryParameters.getSaveCacheFile();
+    const std::string& filename = _parametersManager.getGeometryParameters().getSaveCacheFile();
     BRAYNS_INFO << "Saving scene to binary file: " << filename << std::endl;
     std::ofstream file( filename, std::ios::out | std::ios::binary );
 
@@ -183,7 +184,7 @@ void OSPRayScene::_loadCacheFile()
 {
     commitMaterials();
 
-    const std::string& filename = _geometryParameters.getLoadCacheFile();
+    const std::string& filename = _parametersManager.getGeometryParameters().getLoadCacheFile();
     BRAYNS_INFO << "Loading scene from binary file: " << filename << std::endl;
     std::ifstream file( filename, std::ios::in | std::ios::binary );
     if( !file.good( ))
@@ -423,7 +424,7 @@ void OSPRayScene::buildGeometry()
 
     BRAYNS_INFO << "Building OSPRay geometry" << std::endl;
 
-    if( _geometryParameters.getGenerateMultipleModels() )
+    if( _parametersManager.getGeometryParameters().getGenerateMultipleModels() )
     {
         // Initialize models according to timestamps
         for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
@@ -553,7 +554,7 @@ void OSPRayScene::buildGeometry()
 
     commitLights();
 
-    if(!_geometryParameters.getLoadCacheFile().empty())
+    if(!_parametersManager.getGeometryParameters().getLoadCacheFile().empty())
         _loadCacheFile();
 
     size_t totalNbSpheres = 0;
@@ -575,11 +576,8 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Indices  : " << totalNbIndices << std::endl;
     BRAYNS_INFO << "--------------------" << std::endl;
 
-    if(!_geometryParameters.getSaveCacheFile().empty())
+    if(!_parametersManager.getGeometryParameters().getSaveCacheFile().empty())
         _saveCacheFile();
-
-    _isEmpty = ( totalNbSpheres + totalNbCylinders +
-                 totalNbCones + totalNbVertices ) == 0;
 }
 
 void OSPRayScene::commitLights()
@@ -588,7 +586,7 @@ void OSPRayScene::commitLights()
     for( auto renderer: _renderers )
     {
         OSPRayRenderer* osprayRenderer =
-            dynamic_cast< OSPRayRenderer* >( renderer.lock().get( ));
+            dynamic_cast< OSPRayRenderer* >( renderer.get( ));
 
         size_t lightCount = 0;
         for( auto light: _lights )
@@ -652,7 +650,7 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
     for( const auto& renderer: _renderers )
     {
         OSPRayRenderer* osprayRenderer =
-            dynamic_cast<OSPRayRenderer*>( renderer.lock().get( ));
+            dynamic_cast<OSPRayRenderer*>( renderer.get( ));
         for( size_t index=0; index < _materials.size(); ++index )
         {
             if( _ospMaterials.size() <= index )
@@ -717,6 +715,76 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
     }
 }
 
+void OSPRayScene::commitTransferFunctionData()
+{
+    for( const auto& renderer: _renderers )
+    {
+        OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
+
+        // Transfer function Diffuse colors
+        if( !_ospTransferFunctionDiffuseData )
+            _ospTransferFunctionDiffuseData = ospNewData(
+                _transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
+                &_transferFunction.getDiffuseColors()[0], OSP_DATA_SHARED_BUFFER );
+        ospCommit( _ospTransferFunctionDiffuseData );
+        ospSetData( osprayRenderer->impl(),
+            "transferFunctionDiffuseData", _ospTransferFunctionDiffuseData );
+
+        // Transfer function emission data
+        _ospTransferFunctionEmissionData = ospNewData(
+            _transferFunction.getEmissionIntensities().size(), OSP_FLOAT,
+            &_transferFunction.getEmissionIntensities()[0], OSP_DATA_SHARED_BUFFER );
+        ospCommit( _ospTransferFunctionEmissionData );
+        ospSetData( osprayRenderer->impl(),
+            "transferFunctionEmissionData", _ospTransferFunctionEmissionData );
+
+        // Transfer function size
+        ospSet1i( osprayRenderer->impl(),
+            "transferFunctionSize", _transferFunction.getDiffuseColors().size() );
+
+        // Transfer function range
+        ospSet1f( osprayRenderer->impl(),
+            "transferFunctionMinValue", _transferFunction.getValuesRange().x() );
+        ospSet1f( osprayRenderer->impl(),  "transferFunctionRange",
+            _transferFunction.getValuesRange().y() - _transferFunction.getValuesRange().x() );
+    }
+}
+
+void OSPRayScene::commitVolumeData()
+{
+    VolumeHandlerPtr volumeHandler = getVolumeHandler();
+    if( !volumeHandler )
+        return;
+
+    for( const auto& renderer: _renderers )
+    {
+        OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
+
+        if( !_ospVolumeData )
+            _ospVolumeData = ospNewData(
+                volumeHandler->getSize(), OSP_UCHAR,
+                volumeHandler->getData(), OSP_DATA_SHARED_BUFFER );
+        ospCommit( _ospVolumeData );
+        ospSetData( osprayRenderer->impl(), "volumeData", _ospVolumeData );
+
+        const Vector3ui& dimensions = volumeHandler->getDimensions();
+        ospSet3i( osprayRenderer->impl(),
+            "volumeDimensions", dimensions.x(), dimensions.y(), dimensions.z() );
+
+        const Vector3f& scale = _parametersManager.getVolumeParameters().getScale();
+        ospSet3f( osprayRenderer->impl(),
+            "volumeScale", scale.x(), scale.y(), scale.z() );
+
+        const Vector3f& position = _parametersManager.getVolumeParameters().getPosition();
+        ospSet3f( osprayRenderer->impl(),
+            "volumePosition", position.x(), position.y(), position.z() );
+
+        ospSet1f( osprayRenderer->impl(),
+            "volumeEpsilon", volumeHandler->getEpsilon(
+                scale, _parametersManager.getVolumeParameters().getSamplesPerRay()));
+    }
+}
+
 void OSPRayScene::commitSimulationData()
 {
     if( !_simulationHandler )
@@ -724,45 +792,17 @@ void OSPRayScene::commitSimulationData()
 
     for( const auto& renderer: _renderers )
     {
-        OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.lock().get( ));
+        OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
 
         // Simulation data
-        const float timestamp = _sceneParameters.getTimestamp();
+        const uint64_t frame = _parametersManager.getSceneParameters().getTimestamp();
 
-        _ospSimulationData = ospNewData(
-            _simulationHandler->getFrameSize(), OSP_FLOAT,
-            _simulationHandler->getFrameData( timestamp ), OSP_DATA_SHARED_BUFFER );
+        if( !_ospSimulationData )
+            _ospSimulationData = ospNewData(
+                _simulationHandler->getFrameSize(), OSP_FLOAT,
+                _simulationHandler->getFrameData( frame ), OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospSimulationData );
         ospSetData( osprayRenderer->impl(), "simulationData", _ospSimulationData );
-        ospCommit( osprayRenderer->impl( ));
-
-        // Transfer function Diffuse colors
-        _ospTransferFunctionDiffuseData = ospNewData(
-            _transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
-            &_transferFunction.getDiffuseColors()[0], OSP_DATA_SHARED_BUFFER );
-        ospCommit( _ospTransferFunctionDiffuseData );
-        ospSetData( osprayRenderer->impl(), "transferFunctionDiffuseData",
-            _ospTransferFunctionDiffuseData );
-
-        // Transfer function emission data
-        _ospTransferFunctionEmissionData = ospNewData(
-            _transferFunction.getEmissionIntensities().size(), OSP_FLOAT,
-            &_transferFunction.getEmissionIntensities()[0], OSP_DATA_SHARED_BUFFER );
-        ospCommit( _ospTransferFunctionEmissionData );
-        ospSetData( osprayRenderer->impl(), "transferFunctionEmissionData",
-            _ospTransferFunctionEmissionData );
-
-        // Transfer function size
-        ospSet1i( osprayRenderer->impl(), "transferFunctionSize",
-            _transferFunction.getDiffuseColors().size() );
-
-        // Transfer function min value
-        ospSet1f( osprayRenderer->impl(), "transferFunctionMinValue",
-            _transferFunction.getValuesRange().x() );
-
-        // Transfer function range
-        ospSet1f( osprayRenderer->impl(), "transferFunctionRange",
-            _transferFunction.getValuesRange().y() - _transferFunction.getValuesRange().x() );
     }
 }
 

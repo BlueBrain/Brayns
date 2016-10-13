@@ -99,7 +99,7 @@ void OSPRayRenderer::commit()
     OSPRayScene* osprayScene = static_cast< OSPRayScene* >( _scene.get( ));
     assert( osprayScene );
 
-    const float ts = _scene->getSceneParameters().getTimestamp();
+    const float ts = _scene->getParametersManager().getSceneParameters().getTimestamp();
     OSPModel* model = osprayScene->modelImpl( ts );
     if( model )
     {

@@ -31,6 +31,7 @@ ParametersManager::ParametersManager()
     registerParameters( &_applicationParameters );
     registerParameters( &_geometryParameters );
     registerParameters( &_renderingParameters );
+    registerParameters( &_volumeParameters );
 }
 
 void ParametersManager::registerParameters( AbstractParameters* parameters )
@@ -74,6 +75,11 @@ GeometryParameters& ParametersManager::getGeometryParameters()
 SceneParameters& ParametersManager::getSceneParameters()
 {
     return _sceneParameters;
+}
+
+VolumeParameters& ParametersManager::getVolumeParameters()
+{
+    return _volumeParameters;
 }
 
 void ParametersManager::set( const std::string& key, const std::string& value )

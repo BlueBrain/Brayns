@@ -42,8 +42,9 @@ ZeroEQPlugin::ZeroEQPlugin(
     , _jpegCompression( applicationParameters.getJpegCompression( ))
     , _processingImageJpeg( false )
 {
-    _setupRequests( );
     _setupHTTPServer( );
+    _setupRequests( );
+    _setupSubscriber( );
 }
 
 ZeroEQPlugin::~ZeroEQPlugin( )
@@ -120,6 +121,11 @@ void ZeroEQPlugin::_setupHTTPServer()
         std::bind( &ZeroEQPlugin::_spikesUpdated, this ));
     _remoteSpikes.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestSpikes, this ));
+
+    _remoteLookupTable1D.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_LookupTable1DUpdated, this ));
+    _remoteLookupTable1D.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestLookupTable1D, this ));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -147,6 +153,11 @@ void ZeroEQPlugin::_setupRequests()
         std::bind( &ZeroEQPlugin::_requestSpikes, this );
 }
 
+void ZeroEQPlugin::_setupSubscriber()
+{
+    _subscriber.subscribe( _remoteLookupTable1D );
+}
+
 void ZeroEQPlugin::_cameraUpdated()
 {
     _extensionParameters.engine->getFrameBuffer()->clear();
@@ -160,6 +171,7 @@ void ZeroEQPlugin::_attributeUpdated( )
     _extensionParameters.parametersManager->set(
         _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
     _extensionParameters.engine->getRenderer()->commit();
+    _extensionParameters.engine->getScene()->commitVolumeData();
     _extensionParameters.engine->getFrameBuffer()->clear();
 }
 
@@ -262,8 +274,56 @@ void ZeroEQPlugin::_transferFunction1DUpdated( )
     transferFunction.resample();
 
     scene->commitSimulationData();
+    scene->commitTransferFunctionData();
     _extensionParameters.engine->getRenderer()->commit();
     _extensionParameters.engine->getFrameBuffer()->clear();
+}
+
+void ZeroEQPlugin::_LookupTable1DUpdated( )
+{
+    ScenePtr scene = _extensionParameters.engine->getScene();
+    TransferFunction& transferFunction = scene->getTransferFunction();
+
+    transferFunction.clear();
+    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
+    floats& emissionIntensities = transferFunction.getEmissionIntensities();
+
+    const uint8_ts& lut = _remoteLookupTable1D.getLutVector();
+    for( size_t i = 0; i < lut.size(); i += 4 )
+    {
+        Vector4f color = {
+            lut[ i ] / 255.f,
+            lut[ i + 1 ] / 255.f,
+            lut[ i + 2 ] / 255.f,
+            lut[ i + 3 ] / 255.f
+        };
+        diffuseColors.push_back( color );
+        emissionIntensities.push_back( 0.f );
+    }
+
+    transferFunction.setValuesRange( Vector2f( 0.f, lut.size() / 4 ));
+    scene->commitTransferFunctionData();
+    _extensionParameters.engine->getFrameBuffer()->clear();
+}
+
+bool ZeroEQPlugin::_requestLookupTable1D( )
+{
+    ScenePtr scene = _extensionParameters.engine->getScene();
+    TransferFunction& transferFunction = scene->getTransferFunction();
+
+    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
+
+    uint8_ts lut;
+    lut.clear();
+    for( const auto& color: diffuseColors )
+    {
+        lut.push_back( color.x() * 255.f );
+        lut.push_back( color.y() * 255.f );
+        lut.push_back( color.z() * 255.f );
+        lut.push_back( color.w() * 255.f );
+    }
+    _remoteLookupTable1D.setLut( lut );
+    return true;
 }
 
 void ZeroEQPlugin::_resizeImage(

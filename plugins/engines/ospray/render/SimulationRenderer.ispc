@@ -28,11 +28,6 @@ struct SimulationRenderer
     AbstractRenderer abstract;
 
     uniform float* uniform simulationData;
-    uniform vec4f* uniform colorMap;
-    uniform float* uniform colorMapEmissionData;
-    uint32 colorMapSize;
-    float colorMapMinValue;
-    float colorMapRange;
     float threshold;
 };
 
@@ -43,21 +38,20 @@ inline varying vec4f getSimulationValue(
 {
     lightEmission = 0.f;
     varying vec4f color = make_vec4f( 0.f );
-    if( !self->simulationData )
-        return color;
 
     const varying float value = self->simulationData[ dg.st.x ];
 
     if( value < self->threshold )
         return color;
 
-    const varying float normalizedValue =
-        self->colorMapSize * ( value - self->colorMapMinValue ) / self->colorMapRange;
-    if( self->colorMap )
-        color = self->colorMap[normalizedValue];
+    const varying float normalizedValue = self->abstract.colorMapSize *
+        ( value - self->abstract.colorMapMinValue ) / self->abstract.colorMapRange;
 
-    if( self->colorMapEmissionData )
-        lightEmission = self->colorMapEmissionData[normalizedValue];
+    if( self->abstract.colorMap )
+        color = self->abstract.colorMap[normalizedValue];
+
+    if( self->abstract.colorMapEmissionData )
+        lightEmission = self->abstract.colorMapEmissionData[normalizedValue];
 
     return color;
 }
@@ -86,7 +80,14 @@ inline vec3f SimulationRenderer_shadeRay(
         if( ray.geomID < 0 )
         {
             // No intersection. Return skybox color
+
+            ray.t = self->abstract.volumeDiag * 2.f;
+            vec3f volumetricValue = make_vec3f( 0.f );
+            if( self->abstract.volumeData )
+                volumetricValue = make_vec3f( getVolumeContribution( &(self->abstract), ray ) );
+
             intersectionColors[depth] =
+                volumetricValue +
                 make_vec3f( skyboxMapping(
                     (Renderer *)self, ray, self->abstract.numMaterials, self->abstract.materials ));
             if( depth == 0 )
@@ -121,11 +122,29 @@ inline vec3f SimulationRenderer_shadeRay(
             varying float localLightIntensity = 1.f;
 
             // Get simulation value from geometry ID
-            varying float lightEmission;
-            const vec4f simulationValue = getSimulationValue( self, dg, lightEmission );
+            varying float lightEmission = 0.f;
+            vec4f simulationValue = make_vec4f( 0.f );
+            if( self->simulationData )
+                simulationValue = getSimulationValue( self, dg, lightEmission );
+
             localSimulationColor = make_vec3f( simulationValue );
             localSimulationIntensity = simulationValue.w;
             localLightEmission = lightEmission;
+
+            // localShadedColor defines the color for the current intersected
+            // surface, and for the current ray generation only. This value is
+            // reset and updated for every rebound
+            varying vec3f localShadedColor = make_vec3f(0.f);
+
+            // Get volumetric information
+            if( self->abstract.volumeData )
+            {
+                vec4f volumetricValue = getVolumeContribution( &(self->abstract), ray );
+                localOpacity = volumetricValue.w;
+                intersectionColors[depth] = localShadedColor = make_vec3f( volumetricValue );
+                if( localOpacity >= 1.f )
+                    break;
+            }
 
             // Process material attributes
             const uniform Material* material = dg.material;
@@ -190,17 +209,12 @@ inline vec3f SimulationRenderer_shadeRay(
                 }
             }
 
-            // localShadedColor defines the color for the current intersected
-            // surface, and for the current ray generation only. This value is
-            // reset and updated for every rebound
-            varying vec3f localShadedColor = make_vec3f(0.f);
-
-            // Intersection point with geometry, slightly above the surface,
-            // along the normal
-            const varying vec3f intersection = dg.P + self->abstract.super.epsilon * dg.Ng;
-
             if( localOpacity > 0.01f )
             {
+                // Intersection point with geometry, slightly above the surface,
+                // along the normal
+                const varying vec3f intersection = dg.P + self->abstract.super.epsilon * dg.Ng;
+
                 varying vec3f indirectShadingColor = make_vec3f( 0.f );
                 varying float indirectShadingIntensity = 0.f;
                 const varying vec3f reflectedDirection =
@@ -214,15 +228,17 @@ inline vec3f SimulationRenderer_shadeRay(
                         &(self->abstract), ray, sample, intersection, localNormal,
                         geometry, indirectShadingColor, indirectShadingIntensity ))
                     {
-                        indirectShadingColor = indirectShadingColor * self->abstract.ambientOcclusionStrength;
+                        indirectShadingColor =
+                            indirectShadingColor * self->abstract.ambientOcclusionStrength;
                         indirectShadingIntensity *= self->abstract.ambientOcclusionStrength;
 
                         indirectShadingColor = indirectShadingColor * localOpacity;
 
                         // Get simulation value from geometry ID
-                        varying float lightEmission;
-                        const vec4f simulationValue =
-                            getSimulationValue( self, geometry, lightEmission );
+                        varying float lightEmission = 0.f;
+                        vec4f simulationValue = make_vec4f( 0.f );
+                        if( self->simulationData )
+                            simulationValue = getSimulationValue( self, geometry, lightEmission );
                         indirectShadingColor = indirectShadingColor + make_vec3f( simulationValue );
                         indirectShadingIntensity += lightEmission;
                     }
@@ -309,7 +325,8 @@ inline vec3f SimulationRenderer_shadeRay(
                 }
 
                 // Store final color for current iteration
-                intersectionColors[depth] = localShadedColor * localLightIntensity + specularColor;
+                intersectionColors[depth] = intersectionColors[depth] +
+                    localShadedColor * localLightIntensity + specularColor;
 
                 // Update cumulated path opacity
                 pathOpacity += localOpacity;
@@ -396,6 +413,11 @@ export void SimulationRenderer_set(
         const uniform int32 numLights,
         void** uniform materials,
         const uniform int32 numMaterials,
+        uniform uint8* uniform volumeData,
+        const uniform vec3i& volumeDimensions,
+        const uniform vec3f& volumeScale,
+        const uniform vec3f& volumePosition,
+        const uniform float& volumeEpsilon,
         uniform float* uniform simulationData,
         uniform vec4f* uniform colormap,
         uniform float* uniform colormapEmissionData,
@@ -422,11 +444,21 @@ export void SimulationRenderer_set(
     self->abstract.materials = ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
     self->abstract.numMaterials = numMaterials;
 
+    self->abstract.volumeData = (uniform uint8* uniform)volumeData;
+    self->abstract.volumeDimensions = volumeDimensions;
+    self->abstract.volumeScale = volumeScale;
+    self->abstract.volumePosition = volumePosition;
+    self->abstract.volumeEpsilon = volumeEpsilon;
+
+    const uniform vec3f diag = make_vec3f( volumeDimensions ) * volumeScale;
+    self->abstract.volumeDiag = max( diag.x, max( diag.y, diag.z ));
+
+    self->abstract.colorMap = (uniform vec4f* uniform)colormap;
+    self->abstract.colorMapEmissionData = (uniform float* uniform)colormapEmissionData;
+    self->abstract.colorMapSize = colorMapSize;
+    self->abstract.colorMapMinValue = colorMapMinValue;
+    self->abstract.colorMapRange = colorMapRange;
+
     self->simulationData = (uniform float* uniform)simulationData;
-    self->colorMap = (uniform vec4f* uniform)colormap;
-    self->colorMapEmissionData = (uniform float* uniform)colormapEmissionData;
-    self->colorMapSize = colorMapSize;
-    self->colorMapMinValue = colorMapMinValue;
-    self->colorMapRange = colorMapRange;
     self->threshold = threshold;
 }

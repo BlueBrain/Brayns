@@ -27,6 +27,7 @@
 #include <zeroeq/zeroeq.h>
 #include <turbojpeg.h>
 #include <lexis/render/imageJPEG.h>
+#include <lexis/render/lookupTable1D.h>
 #include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/attribute.h>
 #include <zerobuf/render/reset.h>
@@ -62,6 +63,9 @@ private:
      * @brief Sets up ZeroEQ requests
      */
     void _setupRequests();
+
+    void _setupSubscriber();
+
 
     /**
      * @brief This method is called when the camera is updated by a ZeroEQ event
@@ -99,6 +103,17 @@ private:
      * @brief This method is called when the transfer function is updated by a ZeroEQ event
      */
     void _transferFunction1DUpdated();
+
+    /**
+     * @brief This method is called when the lookup table is updated by a ZeroEQ event
+     */
+    void _LookupTable1DUpdated();
+
+    /**
+     * @brief This method is called when a lookup table 1D is requested by a ZeroEQ event
+     * @return True if the method was successfull, false otherwise
+     */
+    bool _requestLookupTable1D();
 
     /**
      * @brief This method is called when an Image JPEG is requested by a ZeroEQ event
@@ -160,6 +175,7 @@ private:
     ::zerobuf::render::Reset _remoteReset;
     ::zerobuf::render::Material _remoteMaterial;
     ::zerobuf::render::TransferFunction1D _remoteTransferFunction1D;
+    ::lexis::render::LookupTable1D _remoteLookupTable1D;
     ::zerobuf::data::Spikes _remoteSpikes;
 
 };

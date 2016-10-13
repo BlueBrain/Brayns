@@ -25,7 +25,7 @@
 
 namespace
 {
-    const size_t DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE = 2048;
+    const size_t DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE = 512;
     const brayns::Vector2f DEFAULT_TRANSFER_FUNCTION_RANGE = { -92.0915, 49.5497 };
 }
 

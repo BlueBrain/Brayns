@@ -359,6 +359,8 @@ export void ExtendedOBJRenderer_set(
     self->abstract.lights = ( const uniform Light* uniform* uniform )lights;
     self->abstract.numLights = numLights;
 
+    self->abstract.volumeData = 0;
+
     self->abstract.materials = ( const uniform ExtendedOBJMaterial* uniform* uniform )materials;
     self->abstract.numMaterials = numMaterials;
 }

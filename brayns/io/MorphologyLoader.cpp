@@ -152,7 +152,7 @@ bool MorphologyLoader::_importMorphology(
 
             Vector4f previousSample = samples[0];
             size_t step = 1;
-            switch( _geometryParameters.getGeometryQuality( ))
+            switch( _geometryParameters.getGeometryQuality() )
             {
                 case GQ_FAST:
                     step = samples.size()-1;

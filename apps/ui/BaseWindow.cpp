@@ -258,7 +258,8 @@ void BaseWindow::display( )
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         }
 
-        glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
+        if( buffer )
+            glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
     }
     else
     {
@@ -385,6 +386,8 @@ void BaseWindow::keypress( char key, const Vector2f& )
         _brayns->getParametersManager( ).getRenderingParameters( );
     SceneParameters& sceneParams =
         _brayns->getParametersManager().getSceneParameters();
+    VolumeParameters& volumeParams =
+        _brayns->getParametersManager().getVolumeParameters();
 
     switch( key )
     {
@@ -494,6 +497,16 @@ void BaseWindow::keypress( char key, const Vector2f& )
             !renderParams.getShadows( ));
         BRAYNS_INFO << "Shadows: " <<
             (renderParams.getShadows( ) ? "On" : "Off") << std::endl;
+        break;
+    case 'T':
+        volumeParams.setSamplesPerRay( volumeParams.getSamplesPerRay() / 2 );
+        BRAYNS_INFO << "Volume samples per ray: " << volumeParams.getSamplesPerRay() << std::endl;
+        _brayns->getScene().commitVolumeData();
+        break;
+    case 't':
+        volumeParams.setSamplesPerRay( volumeParams.getSamplesPerRay() * 2 );
+        BRAYNS_INFO << "Volume samples per ray: " << volumeParams.getSamplesPerRay() << std::endl;
+        _brayns->getScene().commitVolumeData();
         break;
     case 'V':
         renderParams.

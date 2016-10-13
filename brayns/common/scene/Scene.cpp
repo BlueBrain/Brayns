@@ -21,11 +21,11 @@
 #include "Scene.h"
 
 #include <brayns/common/log.h>
-#include <brayns/parameters/SceneParameters.h>
-#include <brayns/parameters/GeometryParameters.h>
+#include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/NESTLoader.h>
+#include <brayns/common/volume/VolumeHandler.h>
 
 #include <servus/uri.h>
 
@@ -36,13 +36,11 @@ namespace brayns
 
 Scene::Scene(
     Renderers renderers,
-    SceneParameters& sceneParameters,
-    GeometryParameters& geometryParameters )
-    : _sceneParameters(sceneParameters)
-    , _geometryParameters( geometryParameters )
+    ParametersManager& parametersManager )
+    : _parametersManager( parametersManager )
     , _renderers( renderers )
+    , _volumeHandler( 0 )
     , _simulationHandler( 0 )
-    , _isEmpty( true )
 {
 }
 
@@ -67,6 +65,12 @@ void Scene::setMaterials(
             case MATERIAL_BOUNDING_BOX:
                 material->setColor( Vector3f( 1.f, 1.f, 1.f ));
                 material->setEmission( 1.f );
+                break;
+            case MATERIAL_INVISIBLE:
+                material->setOpacity( 0.f );
+                material->setRefractionIndex( 1.f );
+                material->setColor( Vector3f( 0.f, 0.f, 0.f ));
+                material->setSpecularColor( Vector3f( 0.f, 0.f, 0.f ));
                 break;
             default:
                 break;
@@ -154,15 +158,16 @@ MaterialPtr Scene::getMaterial( size_t index )
 void Scene::buildDefault( )
 {
     BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
+
     const Vector3f positions[8] =
     {
-        { -1.f,-1.f,-1.f },
-        {  1.f,-1.f,-1.f }, //    6--------7
-        { -1.f, 1.f,-1.f }, //   /|       /|
-        {  1.f, 1.f,-1.f }, //  2--------3 |
-        { -1.f,-1.f, 1.f }, //  | |      | |
-        {  1.f,-1.f, 1.f }, //  | 4------|-5
-        { -1.f, 1.f, 1.f }, //  |/       |/
+        {  0.f, 0.f, 0.f },
+        {  1.f, 0.f, 0.f }, //    6--------7
+        {  0.f, 1.f, 0.f }, //   /|       /|
+        {  1.f, 1.f, 0.f }, //  2--------3 |
+        {  0.f, 0.f, 1.f }, //  | |      | |
+        {  1.f, 0.f, 1.f }, //  | 4------|-5
+        {  0.f, 1.f, 1.f }, //  |/       |/
         {  1.f, 1.f, 1.f }  //  0--------1
     };
 
@@ -194,6 +199,8 @@ void Scene::buildDefault( )
         _materials[material]->setColor( colors[material] );
         _materials[material]->setSpecularColor( WHITE );
         _materials[material]->setSpecularExponent( 10.f );
+        _materials[material]->setReflectionIndex( material == 4 ? 0.8f : 0.f );
+        _materials[material]->setOpacity( 1.f );
         for( size_t i = 0; i < 6; ++i )
         {
             const Vector3f& position = positions[ indices[material][i] ];
@@ -204,17 +211,15 @@ void Scene::buildDefault( )
             _trianglesMeshes[material].getIndices().push_back(
                 Vector3i( 3, 4, 5 ));
         }
-        _materials[material]->setSpecularColor( Vector3f( 0.1f, 0.1f, 0.1f ));
-        _materials[material]->setSpecularExponent( 10.f );
     }
 
     size_t material = 7;
 
     // Sphere
     _primitives[material].push_back( SpherePtr(
-        new Sphere( material, Vector3f( -0.5f, -0.5f, -0.5f ), 0.5f, 0, 0 )));
+        new Sphere( material, Vector3f( 0.25f, 0.26f, 0.30f ), 0.25f, 0, 0 )));
     _materials[material]->setOpacity( 0.3f );
-    _materials[material]->setRefractionIndex( 1.3f );
+    _materials[material]->setRefractionIndex( 1.1f );
     _materials[material]->setSpecularColor( WHITE );
     _materials[material]->setSpecularExponent( 100.f );
 
@@ -222,8 +227,8 @@ void Scene::buildDefault( )
     ++material;
     _primitives[material].push_back( CylinderPtr(
         new Cylinder( material,
-            Vector3f( -0.5f, -0.75f, 0.5f ), Vector3f( 0.5f, -0.75f, 0.5f ),
-            0.25f, 0, 0 )));
+            Vector3f( 0.25f, 0.126f, 0.75f ), Vector3f( 0.75f, 0.126f, 0.75f ),
+            0.125f, 0, 0 )));
     _materials[material]->setColor( Vector3f( 0.1f, 0.1f, 0.8f ));
     _materials[material]->setSpecularColor( WHITE );
     _materials[material]->setSpecularExponent( 10.f );
@@ -232,21 +237,21 @@ void Scene::buildDefault( )
     ++material;
     _primitives[material].push_back( ConePtr(
         new Cone( material,
-            Vector3f( 0.5f, -1.f, -0.5f ), Vector3f( 0.5f, 0.f, -0.5f ),
-            0.3f, 0.f, 0, 0 )));
+            Vector3f( 0.75f, 0.01f, 0.25f ), Vector3f( 0.75f, 0.5f, 0.25f ),
+            0.15f, 0.f, 0, 0 )));
     _materials[material]->setReflectionIndex(0.8f);
     _materials[material]->setSpecularColor( WHITE );
     _materials[material]->setSpecularExponent( 10.f );
 
     // Lamp
     ++material;
-    const Vector3f lampInfo = { 0.3f, 0.99f, 0.3f };
+    const Vector3f lampInfo = { 0.15f, 0.99f, 0.15f };
     const Vector3f lampPositions[4] =
     {
-        { -lampInfo.x(), lampInfo.y(), -lampInfo.z() },
-        {  lampInfo.x(), lampInfo.y(), -lampInfo.z() },
-        {  lampInfo.x(), lampInfo.y(),  lampInfo.z() },
-        { -lampInfo.x(), lampInfo.y(),  lampInfo.z() }
+        { 0.5f - lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z() },
+        { 0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z() },
+        { 0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z() },
+        { 0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z() }
     };
     for( size_t i = 0; i < 4; ++i )
         _trianglesMeshes[material].getVertices().push_back( lampPositions[i] );
@@ -260,7 +265,7 @@ void Scene::buildDefault( )
 
 void Scene::buildEnvironment( )
 {
-    switch( _geometryParameters.getSceneEnvironment( ) )
+    switch( _parametersManager.getGeometryParameters().getSceneEnvironment( ) )
     {
     case SE_NONE:
         break;
@@ -504,6 +509,24 @@ void Scene::setSimulationHandler( AbstractSimulationHandlerPtr handler )
 AbstractSimulationHandlerPtr Scene::getSimulationHandler() const
 {
     return _simulationHandler;
+}
+
+VolumeHandlerPtr Scene::getVolumeHandler()
+{
+    try
+    {
+        const std::string& volumeFile =
+            _parametersManager.getVolumeParameters().getFilename();
+        if( !_volumeHandler && !volumeFile.empty() )
+            _volumeHandler.reset( new VolumeHandler(
+                _parametersManager.getVolumeParameters(),  volumeFile ));
+    }
+    catch( const std::runtime_error& e )
+    {
+        BRAYNS_ERROR << e.what() << std::endl;
+    }
+
+    return _volumeHandler;
 }
 
 }

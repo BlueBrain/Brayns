@@ -47,6 +47,7 @@ public:
 
 private:
 
+    ospray::Ref< ospray::Data > _volumeData;
     ospray::Ref< ospray::Data > _simulationData;
     ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
     ospray::Ref< ospray::Data > _transferFunctionEmissionData;
@@ -54,6 +55,10 @@ private:
     float _transferFunctionMinValue;
     float _transferFunctionRange;
     float _threshold;
+    ospray::vec3i _volumeDimensions;
+    ospray::vec3f _volumeScale;
+    ospray::vec3f _volumePosition;
+    float _volumeEpsilon;
 };
 
 } // ::brayns

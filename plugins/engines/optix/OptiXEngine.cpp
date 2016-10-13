@@ -56,11 +56,7 @@ OptiXEngine::OptiXEngine(
     }
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset( new OptiXScene(
-        renderersForScene,
-        parametersManager->getSceneParameters(),
-        parametersManager->getGeometryParameters(),
-        _context));
+    _scene.reset( new OptiXScene( renderersForScene, *parametersManager, _context));
 
     _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
 

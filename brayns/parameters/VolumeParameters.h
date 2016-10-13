@@ -4,8 +4,6 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * Based on OSPRay implementation
- *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -20,38 +18,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef VOLUMEPARAMETERS_H
+#define VOLUMEPARAMETERS_H
 
-#include <plugins/engines/ospray/render/utils/AbstractRenderer.h>
+#include "AbstractParameters.h"
 
 namespace brayns
 {
 
-class ParticleRenderer : public AbstractRenderer
+class VolumeParameters final : public AbstractParameters
 {
-
 public:
+    VolumeParameters();
 
-    ParticleRenderer();
+    /** @copydoc AbstractParameters::print */
+    void print( ) final;
 
-    /**
-       Returns the class name as a string
-       @return string containing the full name of the class
-    */
-    std::string toString() const final
-    {
-        return "brayns::ParticleRenderer";
-    }
+    /** File containing volume data */
+    const std::string& getFilename() const { return _filename; }
 
-    void commit() final;
+    /** Volume dimension  */
+    const Vector3ui& getDimensions() const { return _dimensions; }
 
-private:
+    /** Volume scale  */
+    const Vector3f& getScale() const { return _scale; }
 
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
-    ospray::uint32 _transferFunctionSize;
+    /** Volume position */
+    const Vector3f& getPosition() const { return _position; }
+
+    /** Volume epsilon */
+    void setSamplesPerRay( const size_t spr ) { _spr = spr; }
+    const float& getSamplesPerRay() const { return _spr; }
+
+protected:
+
+    bool _parse( const po::variables_map& vm ) final;
+
+    std::string _filename;
+    Vector3ui _dimensions;
+    Vector3f _scale;
+    Vector3f _position;
+    float _spr;
+
 };
 
-} // ::brayns
-
+}
+#endif // VOLUMEPARAMETERS_H
