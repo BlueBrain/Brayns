@@ -32,27 +32,39 @@ namespace brayns
 {
 
 VolumeHandler::VolumeHandler(
-    const VolumeParameters& volumeParameters,
-    const std::string& volumeFile )
-    : _memoryMapPtr( 0 )
-    , _cacheFileDescriptor( -1 )
-    , _dimensions( volumeParameters.getDimensions() )
+    const VolumeParameters& volumeParameters )
+    : _dimensions( volumeParameters.getDimensions() )
 {
-    BRAYNS_INFO << "Attaching " << volumeFile << " to current scene" << std::endl;
-    _cacheFileDescriptor = open( volumeFile.c_str(), O_RDONLY );
-    if( _cacheFileDescriptor == -1 )
+}
+
+VolumeHandler::~VolumeHandler()
+{
+    for( auto memoryMapPtr: _memoryMapPtrs )
+        if( memoryMapPtr.second )
+            ::munmap( (void *)memoryMapPtr.second, _size );
+
+    for( auto cacheFileDescriptor: _cacheFileDescriptors )
+        if( cacheFileDescriptor.second != -1 )
+            ::close( cacheFileDescriptor.second );
+}
+
+void VolumeHandler::attachVolumeToFile( const float timestamp, const std::string& volumeFile )
+{
+    BRAYNS_INFO << "Attaching " << volumeFile << " to timestamp " << timestamp << std::endl;
+    _cacheFileDescriptors[ timestamp ] = open( volumeFile.c_str(), O_RDONLY );
+    if( _cacheFileDescriptors[ timestamp ] == -1 )
         BRAYNS_THROW( std::runtime_error( "Failed to attach " + volumeFile ));
 
     struct stat sb;
-    if( ::fstat( _cacheFileDescriptor, &sb ) == -1 )
+    if( ::fstat( _cacheFileDescriptors[ timestamp ], &sb ) == -1 )
         BRAYNS_THROW( std::runtime_error( "Failed to attach " + volumeFile ));
 
-    _memoryMapPtr = ::mmap(
-        0, sb.st_size, PROT_READ, MAP_PRIVATE, _cacheFileDescriptor, 0 );
-    if( _memoryMapPtr == MAP_FAILED )
+    _memoryMapPtrs[ timestamp ] = ::mmap(
+        0, sb.st_size, PROT_READ, MAP_PRIVATE, _cacheFileDescriptors[ timestamp ], 0 );
+    if( _memoryMapPtrs[ timestamp ] == MAP_FAILED )
     {
-        _memoryMapPtr = 0;
-        ::close( _cacheFileDescriptor );
+        _memoryMapPtrs[ timestamp ] = 0;
+        ::close( _cacheFileDescriptors[ timestamp ] );
         BRAYNS_THROW( std::runtime_error( "Failed to attach " + volumeFile ));
     }
 
@@ -64,18 +76,12 @@ VolumeHandler::VolumeHandler(
     BRAYNS_INFO << "Successfully attached to " << volumeFile << std::endl;
 }
 
-VolumeHandler::~VolumeHandler()
+void* VolumeHandler::getData( const float timestamp )
 {
-    if( _memoryMapPtr )
-        ::munmap( (void *)_memoryMapPtr, _size );
-
-    if( _cacheFileDescriptor != -1 )
-        ::close( _cacheFileDescriptor );
-}
-
-void* VolumeHandler::getData()
-{
-    return _memoryMapPtr;
+    size_t ts = timestamp;
+    ts = ts % _memoryMapPtrs.size();
+    BRAYNS_INFO << "Assigning volume for timestamp " << ts << std::endl;
+    return _memoryMapPtrs[ ts ];
 }
 
 float VolumeHandler::getEpsilon( const Vector3f& scale, const uint16_t samplesPerRay )

@@ -88,6 +88,7 @@ private:
 
     optix::Context& _context;
     optix::GeometryGroup _geometryGroup;
+    optix::GeometryGroup _meshGroup;
     std::vector< optix::GeometryInstance > _geometryInstances;
     std::vector< optix::Material > _optixMaterials;
     optix::Buffer _lightBuffer;
@@ -101,18 +102,21 @@ private:
     std::map< size_t, size_t > _serializedSpheresDataSize;
     std::map< size_t, size_t > _timestampSpheresIndices;
     std::map< size_t, optix::Buffer > _spheresBuffers;
+    std::map< size_t, optix::Geometry > _optixSpheres;
 
     // Cylinders
     std::map< size_t, floats > _serializedCylindersData;
     std::map< size_t, size_t > _serializedCylindersDataSize;
     std::map< size_t, size_t > _timestampCylindersIndices;
     std::map< size_t, optix::Buffer > _cylindersBuffers;
+    std::map< size_t, optix::Geometry > _optixCylinders;
 
     // Cones
     std::map< size_t, floats > _serializedConesData;
     std::map< size_t, size_t > _serializedConesDataSize;
     std::map< size_t, size_t > _timestampConesIndices;
     std::map< size_t, optix::Buffer > _conesBuffers;
+    std::map< size_t, optix::Geometry > _optixCones;
 
     // Triangle meshes
     optix::Geometry _mesh;

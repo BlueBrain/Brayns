@@ -62,6 +62,7 @@ OSPRayScene::OSPRayScene(
     , _ospSimulationData( 0 )
     , _ospTransferFunctionDiffuseData( 0 )
     , _ospTransferFunctionEmissionData( 0 )
+    , _currentTimestamp( 0.f )
 {
 }
 
@@ -760,10 +761,14 @@ void OSPRayScene::commitVolumeData()
     {
         OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
 
-        if( !_ospVolumeData )
+        const float timestamp = _parametersManager.getSceneParameters().getTimestamp();
+        if( timestamp != _currentTimestamp )
+        {
             _ospVolumeData = ospNewData(
                 volumeHandler->getSize(), OSP_UCHAR,
-                volumeHandler->getData(), OSP_DATA_SHARED_BUFFER );
+                volumeHandler->getData( timestamp ), OSP_DATA_SHARED_BUFFER );
+            _currentTimestamp = timestamp;
+        }
         ospCommit( _ospVolumeData );
         ospSetData( osprayRenderer->impl(), "volumeData", _ospVolumeData );
 
@@ -793,16 +798,17 @@ void OSPRayScene::commitSimulationData()
     for( const auto& renderer: _renderers )
     {
         OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
+        if( osprayRenderer->getName() != "simulationrenderer" ) continue;
 
         // Simulation data
         const uint64_t frame = _parametersManager.getSceneParameters().getTimestamp();
 
-        if( !_ospSimulationData )
-            _ospSimulationData = ospNewData(
-                _simulationHandler->getFrameSize(), OSP_FLOAT,
-                _simulationHandler->getFrameData( frame ), OSP_DATA_SHARED_BUFFER );
+        _ospSimulationData = ospNewData(
+            _simulationHandler->getFrameSize(), OSP_FLOAT,
+            _simulationHandler->getFrameData( frame ), OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospSimulationData );
         ospSetData( osprayRenderer->impl(), "simulationData", _ospSimulationData );
+        ospCommit(osprayRenderer->impl());
     }
 }
 

@@ -43,6 +43,7 @@ OSPRayRenderer::OSPRayRenderer(
     const std::string& name,
     ParametersManager& parametersManager )
     : Renderer( parametersManager )
+    , _name( name )
     , _camera( 0 )
 {
     RenderingParameters& rp = _parametersManager.getRenderingParameters();

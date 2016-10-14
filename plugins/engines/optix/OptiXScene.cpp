@@ -244,6 +244,7 @@ uint64_t OptiXScene::_processParametricGeometries()
                         break;
                 }
             }
+
             totalNbSpheres += _timestampSpheresIndices[ materialId ];
             totalNbCylinders += _timestampCylindersIndices[ materialId ];
             totalNbCones += _timestampConesIndices[ materialId ];
@@ -253,10 +254,10 @@ uint64_t OptiXScene::_processParametricGeometries()
         // Create spheres geometry
         if( _timestampSpheresIndices[ materialId ] != 0 )
         {
-            optix::Geometry optixSpheres = _context->createGeometry();
-            optixSpheres->setPrimitiveCount( _timestampSpheresIndices[ materialId ] );
-            optixSpheres->setBoundingBoxProgram( spheresBoundsProgram );
-            optixSpheres->setIntersectionProgram( spheresIntersectProgram );
+            _optixSpheres[ materialId ] = _context->createGeometry();
+            _optixSpheres[ materialId ]->setPrimitiveCount( _timestampSpheresIndices[ materialId ] );
+            _optixSpheres[ materialId ]->setBoundingBoxProgram( spheresBoundsProgram );
+            _optixSpheres[ materialId ]->setIntersectionProgram( spheresIntersectProgram );
             uint64_t size = _timestampSpheresIndices[ materialId ] *
                 Sphere::getSerializationSize();
             _spheresBuffers[ materialId ] =
@@ -266,10 +267,11 @@ uint64_t OptiXScene::_processParametricGeometries()
                 &_serializedSpheresData[ materialId ][ 0 ],
                 size * sizeof(float));
             _spheresBuffers[ materialId ]->unmap();
-            optixSpheres["spheres"]->setBuffer( _spheresBuffers[ materialId ] );
+            _optixSpheres[ materialId ][ "spheres" ]->setBuffer(
+                _spheresBuffers[ materialId ] );
             _geometryInstances.push_back(
                 _context->createGeometryInstance(
-                    optixSpheres,
+                    _optixSpheres[ materialId ],
                     &_optixMaterials[ materialId ],
                     &_optixMaterials[ materialId ]+1 ) );
             _serializedSpheresData[ materialId ].clear();
@@ -278,10 +280,10 @@ uint64_t OptiXScene::_processParametricGeometries()
         // Create cylinders geometry
         if( _timestampCylindersIndices[ materialId ] != 0 )
         {
-            optix::Geometry optixCylinders = _context->createGeometry();
-            optixCylinders->setPrimitiveCount( _timestampCylindersIndices[ materialId ] );
-            optixCylinders->setBoundingBoxProgram( cylindersBoundsProgram );
-            optixCylinders->setIntersectionProgram( cylindersIntersectProgram );
+            _optixCylinders[ materialId ] = _context->createGeometry();
+            _optixCylinders[ materialId ]->setPrimitiveCount( _timestampCylindersIndices[ materialId ] );
+            _optixCylinders[ materialId ]->setBoundingBoxProgram( cylindersBoundsProgram );
+            _optixCylinders[ materialId ]->setIntersectionProgram( cylindersIntersectProgram );
             uint64_t size = _timestampCylindersIndices[ materialId ] *
                 Cylinder::getSerializationSize();
             _cylindersBuffers[ materialId ] =
@@ -291,10 +293,11 @@ uint64_t OptiXScene::_processParametricGeometries()
                 &_serializedCylindersData[ materialId ][ 0 ],
                 size * sizeof(float));
             _cylindersBuffers[ materialId ]->unmap();
-            optixCylinders["cylinders"]->setBuffer( _cylindersBuffers[ materialId ] );
+            _optixCylinders[ materialId ][ "cylinders" ]->setBuffer(
+                _cylindersBuffers[ materialId ] );
             _geometryInstances.push_back(
                 _context->createGeometryInstance(
-                    optixCylinders,
+                    _optixCylinders[ materialId ],
                     &_optixMaterials[ materialId ],
                     &_optixMaterials[ materialId ]+1 ) );
             _serializedCylindersData[ materialId ].clear();
@@ -303,10 +306,10 @@ uint64_t OptiXScene::_processParametricGeometries()
         // Create cones geometry
         if( _timestampConesIndices[ materialId ] != 0 )
         {
-            optix::Geometry optixCones = _context->createGeometry();
-            optixCones->setPrimitiveCount( _timestampConesIndices[ materialId ] );
-            optixCones->setBoundingBoxProgram( conesBoundsProgram );
-            optixCones->setIntersectionProgram( conesIntersectProgram );
+            _optixCones[ materialId ] = _context->createGeometry();
+            _optixCones[ materialId ]->setPrimitiveCount( _timestampConesIndices[ materialId ] );
+            _optixCones[ materialId ]->setBoundingBoxProgram( conesBoundsProgram );
+            _optixCones[ materialId ]->setIntersectionProgram( conesIntersectProgram );
             uint64_t size = _timestampConesIndices[ materialId ] *
                 Cone::getSerializationSize();
             _conesBuffers[ materialId ] =
@@ -316,10 +319,11 @@ uint64_t OptiXScene::_processParametricGeometries()
                 &_serializedConesData[ materialId ][ 0 ],
                 size * sizeof(float) );
             _conesBuffers[ materialId ]->unmap();
-            optixCones["cones"]->setBuffer( _conesBuffers[ materialId ] );
+            _optixCones[ materialId ][ "cones" ]->setBuffer(
+                _conesBuffers[ materialId ] );
             _geometryInstances.push_back(
                 _context->createGeometryInstance(
-                    optixCones,
+                    _optixCones[ materialId ],
                     &_optixMaterials[ materialId ],
                     &_optixMaterials[ materialId ]+1 ) );
             _serializedConesData[ materialId ].clear();
@@ -570,7 +574,7 @@ void OptiXScene::commitVolumeData()
         uint64_t size = volumeHandler->getSize() * sizeof( unsigned char );
         if( size != 0 )
         {
-            memcpy( _volumeBuffer->map(), volumeHandler->getData(), size );
+            memcpy( _volumeBuffer->map(), volumeHandler->getData( 0.f ), size );
             _volumeBuffer->unmap();
         }
         _context[ "volumeData" ]->setBuffer( _volumeBuffer );
@@ -621,7 +625,7 @@ void OptiXScene::commitTransferFunctionData()
 
 void OptiXScene::_buildVolumeAABBGeometry()
 {
-    const Vector3f positions[8] =
+    const Vector3f positions[ 8 ] =
     {
         {  0.f, 0.f, 0.f },
         {  1.f, 0.f, 0.f }, //    6--------7
@@ -633,7 +637,7 @@ void OptiXScene::_buildVolumeAABBGeometry()
         {  1.f, 1.f, 1.f }  //  0--------1
     };
 
-    const uint16_t indices[6][6] =
+    const uint16_t indices[ 6 ][ 6 ] =
     {
         { 0, 1, 3, 3, 2, 0 }, // Front
         { 1, 5, 7, 7, 3, 1 }, // Right
@@ -648,24 +652,22 @@ void OptiXScene::_buildVolumeAABBGeometry()
     const Vector3f& volumePosition = volumeParameters.getPosition();
     const Vector3f& volumeDimensions = volumeParameters.getDimensions();
 
-    uint64_t offset  =_trianglesMeshes[MATERIAL_INVISIBLE].getVertices().size();
+    uint64_t offset =_trianglesMeshes[ MATERIAL_INVISIBLE ].getVertices().size();
     for( size_t face = 0; face < 6; ++face )
     {
         for( size_t index = 0; index < 6; ++index )
         {
-            const Vector3f& position =
+            const Vector3f position =
                 positions[ indices[face][index] ] * volumeScale * volumeDimensions +
                 volumePosition;
 
-            _trianglesMeshes[MATERIAL_INVISIBLE].getVertices().push_back( position );
+            _trianglesMeshes[ MATERIAL_INVISIBLE ].getVertices().push_back( position );
             _bounds.merge( position );
-
-            _trianglesMeshes[MATERIAL_INVISIBLE].getIndices().push_back(
-                Vector3i( offset + 0, offset + 1, offset + 2 ));
-            _trianglesMeshes[MATERIAL_INVISIBLE].getIndices().push_back(
-                Vector3i( offset + 3, offset + 4, offset + 5 ));
-
         }
+        _trianglesMeshes[ MATERIAL_INVISIBLE ].getIndices().push_back(
+            Vector3ui( offset + 0, offset + 1, offset + 2 ));
+        _trianglesMeshes[ MATERIAL_INVISIBLE ].getIndices().push_back(
+            Vector3ui( offset + 3, offset + 4, offset + 5 ));
         offset += 6;
     }
 

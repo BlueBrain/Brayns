@@ -138,7 +138,7 @@ struct Brayns::Impl
         if(!geometryParameters.getXYZBFile().empty())
             _loadXYZBFile();
 
-        if(!volumeParameters.getFilename().empty())
+        if(!volumeParameters.getFilename().empty() || !volumeParameters.getFolder().empty())
         {
             const Vector3ui& volumeDimensions = scene->getVolumeHandler()->getDimensions();
             const Vector3f& volumeScale = volumeParameters.getScale();
@@ -424,7 +424,7 @@ private:
                 TransferFunctionLoader transferFunctionLoader( brayns::Vector2f( 0, nbMaterials ));
                 transferFunctionLoader.loadFromFile(
                     transferFunctionFilename, *_engine->getScene( ));
-                _engine->getScene()->commitSimulationData();
+                _engine->getScene()->commitTransferFunctionData();
             }
 
         }
@@ -622,8 +622,8 @@ private:
                 TransferFunctionLoader transferFunctionLoader( DEFAULT_TRANSFER_FUNCTION_RANGE );
                 transferFunctionLoader.loadFromFile(
                     transferFunctionFilename, *_engine->getScene() );
+                _engine->getScene()->commitTransferFunctionData();
             }
-            _engine->getScene()->commitSimulationData();
         }
     }
 

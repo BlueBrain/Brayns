@@ -28,7 +28,7 @@
 
 namespace
 {
-    const float DEFAULT_ALPHA = 0.1f;
+    const float DEFAULT_ALPHA = 1.f;
     const float DEFAULT_EMISSION = 0.f;
 }
 

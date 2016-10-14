@@ -30,6 +30,7 @@
 #include <servus/uri.h>
 
 #include <boost/filesystem.hpp>
+#include <algorithm>
 
 namespace brayns
 {
@@ -517,9 +518,45 @@ VolumeHandlerPtr Scene::getVolumeHandler()
     {
         const std::string& volumeFile =
             _parametersManager.getVolumeParameters().getFilename();
-        if( !_volumeHandler && !volumeFile.empty() )
-            _volumeHandler.reset( new VolumeHandler(
-                _parametersManager.getVolumeParameters(),  volumeFile ));
+        const std::string& volumeFolder =
+            _parametersManager.getVolumeParameters().getFolder();
+
+        if( !_volumeHandler && ( !volumeFile.empty() || !volumeFolder.empty() ))
+        {
+            _volumeHandler.reset( new VolumeHandler( _parametersManager.getVolumeParameters() ));
+            if( !volumeFile.empty() )
+                _volumeHandler->attachVolumeToFile( 0.f, volumeFile );
+            else
+            {
+                float timestamp = 0.f;
+                strings filenames;
+
+                boost::filesystem::directory_iterator endIter;
+                if( boost::filesystem::is_directory(volumeFolder))
+                {
+                    for( boost::filesystem::directory_iterator dirIter( volumeFolder );
+                         dirIter != endIter; ++dirIter )
+                    {
+                        if( boost::filesystem::is_regular_file(dirIter->status( )))
+                        {
+                            boost::filesystem::path fileExtension =
+                                dirIter->path( ).extension( );
+                            if( fileExtension==".raw" )
+                            {
+                                const std::string& filename = dirIter->path( ).string( );
+                                filenames.push_back( filename );
+                            }
+                        }
+                    }
+                }
+                std::sort(filenames.begin(), filenames.end());
+                for( const auto& filename: filenames )
+                {
+                    _volumeHandler->attachVolumeToFile( timestamp, filename );
+                    timestamp += 1.f;
+                }
+            }
+        }
     }
     catch( const std::runtime_error& e )
     {

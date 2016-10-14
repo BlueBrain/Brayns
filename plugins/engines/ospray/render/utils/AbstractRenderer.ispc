@@ -286,7 +286,7 @@ inline varying vec4f getVolumeContribution(
     float pathAlpha = 0.f;
     while( t < tMax && pathAlpha < 1.f )
     {
-        vec3f point = ( ray.org + ray.dir * t ) / self->volumeScale - self->volumePosition;
+        vec3f point = (( ray.org + ray.dir * t ) - self->volumePosition) / self->volumeScale;
 
         if( point.x > 0.f && point.x < dimensions.x &&
             point.y > 0.f && point.y < dimensions.y &&
