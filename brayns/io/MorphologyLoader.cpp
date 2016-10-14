@@ -540,6 +540,14 @@ bool MorphologyLoader::importCircuit(
     return false;
 }
 
+bool MorphologyLoader::importSimulationData(
+    const servus::URI&, const std::string&, const std::string&, Scene& )
+{
+    BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
+    return false;
+}
+
+
 #endif
 
 size_t MorphologyLoader::_material(

@@ -48,6 +48,7 @@ NESTLoader::NESTLoader( const GeometryParameters& geometryParameters )
 {
 }
 
+#ifdef BRAYNS_USE_BRION
 void NESTLoader::importCircuit( const std::string& filepath, Scene& scene, size_t& nbMaterials )
 {
     BRAYNS_INFO << "Loading NEST cells from circuit " << filepath << std::endl;
@@ -252,5 +253,30 @@ bool NESTLoader::_load( const float timestamp )
 
     return true;
 }
+#else
+void NESTLoader::importCircuit( const std::string&, Scene&, size_t& )
+{
+    BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
+}
+
+bool NESTLoader::importSpikeReport( const std::string&, Scene&)
+{
+    BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
+    return false;
+}
+
+bool NESTLoader::_loadBinarySpikes( const std::string& )
+{
+    BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
+    return false;
+}
+
+bool NESTLoader::_load( const float )
+{
+    BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
+    return false;
+}
+
+#endif
 
 }
