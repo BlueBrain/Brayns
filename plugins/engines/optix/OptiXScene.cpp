@@ -573,7 +573,7 @@ void OptiXScene::commitVolumeData()
             memcpy( _volumeBuffer->map(), volumeHandler->getData(), size );
             _volumeBuffer->unmap();
         }
-        _context[ "volumeData"   ]->setBuffer( _volumeBuffer );
+        _context[ "volumeData" ]->setBuffer( _volumeBuffer );
 
         // Optix needs a bounding box around the volume so that if can find intersections
         // before initiating the traversing of the volume
@@ -615,6 +615,7 @@ void OptiXScene::commitTransferFunctionData()
     _context[ "colorMapMinValue" ]->setFloat( _transferFunction.getValuesRange().x() );
     _context[ "colorMapRange" ]->setFloat(
         _transferFunction.getValuesRange().y() - _transferFunction.getValuesRange().x() );
+    _context[ "colorMapSize" ]->setUint( _transferFunction.getDiffuseColors().size() );
 
 }
 
