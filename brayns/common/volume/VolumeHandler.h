@@ -39,16 +39,7 @@ class VolumeHandler
 
 public:
 
-    /**
-    * @brief Attaches a memory mapped file to the scene so that renderers can access the data
-    *        as if it was in memory. The OS is in charge of dealing with the map file in system
-    *        memory.
-    * @param volumeFile File containing the 8bit volume
-    * @return True if the file was successfully attached, false otherwise
-    */
-    VolumeHandler(
-        const VolumeParameters& volumeParameters,
-        const std::string& volumeFile );
+    VolumeHandler( const VolumeParameters& volumeParameters );
     ~VolumeHandler();
 
     /**
@@ -65,9 +56,10 @@ public:
 
     /**
      * @brief Returns a pointer to a given frame in the memory mapped file.
+     * @param timestamp Timestamp for the volume
      * @return Pointer to volume
      */
-    void* getData();
+    void* getData( const float timestamp );
 
     /**
      * @brief Returns the epsilon that defines the step used to walk along the ray when traversing
@@ -77,10 +69,20 @@ public:
      */
     float getEpsilon ( const Vector3f& scale, const uint16_t samplesPerRay );
 
+    /**
+    * @brief Attaches a memory mapped file to the scene so that renderers can access the data
+    *        as if it was in memory. The OS is in charge of dealing with the map file in system
+    *        memory.
+    * @param timestamp Timestamp for the volume
+    * @param volumeFile File containing the 8bit volume
+    * @return True if the file was successfully attached, false otherwise
+    */
+    void attachVolumeToFile( const float timestamp, const std::string& volumeFile );
+
 private:
 
-    void* _memoryMapPtr;
-    int _cacheFileDescriptor;
+    std::map< float, void* > _memoryMapPtrs;
+    std::map< float, int > _cacheFileDescriptors;
     uint64_t _size;
     Vector3ui _dimensions;
 

@@ -464,6 +464,7 @@ bool MorphologyLoader::importSimulationData(
         brion::URI( bc.getReportSource( report ).getPath( )), brion::MODE_READ, gids );
 
     CircuitSimulationHandlerPtr simulationHandler( new CircuitSimulationHandler( ));
+    scene.setSimulationHandler( simulationHandler );
     const std::string& cacheFile = _geometryParameters.getSimulationCacheFile();
     if( simulationHandler->attachSimulationToCacheFile( cacheFile ))
         // Cache already exists, no need to create it.
@@ -506,8 +507,6 @@ bool MorphologyLoader::importSimulationData(
         simulationHandler->writeFrame( file, values );
     }
     file.close();
-
-    scene.setSimulationHandler( simulationHandler );
 
     BRAYNS_INFO << "----------------------------------------" << std::endl;
     BRAYNS_INFO << "Cache file successfully created" << std::endl;

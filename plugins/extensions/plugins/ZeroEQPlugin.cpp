@@ -62,7 +62,7 @@ ZeroEQPlugin::~ZeroEQPlugin( )
 
 void ZeroEQPlugin::run()
 {
-    while( _subscriber.receive( 0 )) {}
+    while( _subscriber.receive( 10 )) {}
 }
 
 void ZeroEQPlugin::_setupHTTPServer()
@@ -170,8 +170,8 @@ void ZeroEQPlugin::_attributeUpdated( )
         _remoteAttribute.getValueString() << std::endl;
     _extensionParameters.parametersManager->set(
         _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
-    _extensionParameters.engine->getRenderer()->commit();
     _extensionParameters.engine->getScene()->commitVolumeData();
+    _extensionParameters.engine->getRenderer()->commit();
     _extensionParameters.engine->getFrameBuffer()->clear();
 }
 

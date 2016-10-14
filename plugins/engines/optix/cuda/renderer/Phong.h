@@ -83,6 +83,7 @@ rtDeclareVariable(float, volumeDiag, , );
 rtBuffer<float4> colorMap;
 rtDeclareVariable(float, colorMapMinValue, , );
 rtDeclareVariable(float, colorMapRange, , );
+rtDeclareVariable(uint, colorMapSize, , );
 
 rtBuffer<uchar4, 2> output_buffer;
 
@@ -109,7 +110,6 @@ static __device__ float4 getVolumeContribution()
 
             const unsigned char voxelValue = volumeData[ index ];
 
-            const size_t colorMapSize = colorMap.size();
             if( colorMapSize != 0 )
             {
                 const float normalizedValue =

@@ -22,6 +22,7 @@
 
 namespace
 {
+const std::string PARAM_VOLUME_FOLDER = "volume-folder";
 const std::string PARAM_VOLUME_FILENAME = "volume-file";
 const std::string PARAM_VOLUME_DIMENSIONS = "volume-dimensions";
 const std::string PARAM_VOLUME_SCALE = "volume-scale";
@@ -41,6 +42,8 @@ VolumeParameters::VolumeParameters()
     , _spr( DEFAULT_SAMPLES_PER_RAY )
 {
     _parameters.add_options()
+        ( PARAM_VOLUME_FOLDER.c_str(), po::value< std::string >(),
+            "Folder containing volume files" )
         ( PARAM_VOLUME_FILENAME.c_str(), po::value< std::string >(),
             "Cache file volume data" )
         ( PARAM_VOLUME_DIMENSIONS.c_str(), po::value< size_ts >()->multitoken(),
@@ -55,6 +58,9 @@ VolumeParameters::VolumeParameters()
 
 bool VolumeParameters::_parse( const po::variables_map& vm )
 {
+    if( vm.count( PARAM_VOLUME_FOLDER ))
+        _folder = vm[PARAM_VOLUME_FOLDER].as< std::string >( );
+
     if( vm.count( PARAM_VOLUME_FILENAME ))
         _filename = vm[PARAM_VOLUME_FILENAME].as< std::string >( );
 
@@ -84,6 +90,7 @@ bool VolumeParameters::_parse( const po::variables_map& vm )
 void VolumeParameters::print( )
 {
     AbstractParameters::print( );
+    BRAYNS_INFO << "Folder          : " << _folder << std::endl;
     BRAYNS_INFO << "Filename        : " << _filename << std::endl;
     BRAYNS_INFO << "Dimensions      : " << _dimensions << std::endl;
     BRAYNS_INFO << "Scale           : " << _scale << std::endl;

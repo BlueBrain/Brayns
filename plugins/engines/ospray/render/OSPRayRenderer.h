@@ -42,9 +42,13 @@ public:
 
     void setCamera( CameraPtr camera ) final;
 
+    const std::string& getName() { return _name; }
+
     OSPRenderer impl() { return _renderer; }
 
 private:
+
+    std::string _name;
     OSPRayCamera* _camera;
     OSPRenderer _renderer;
 };

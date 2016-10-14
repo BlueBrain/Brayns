@@ -100,6 +100,7 @@ void OSPRayEngine::commit()
 
 void OSPRayEngine::render()
 {
+    _scene->commitVolumeData();
     _scene->commitSimulationData();
     _renderers[_activeRenderer]->render( _frameBuffer );
 }
