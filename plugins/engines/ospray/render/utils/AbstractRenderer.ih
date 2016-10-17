@@ -59,8 +59,8 @@ struct AbstractRenderer
     // Volume attributes
     uniform uint8* uniform volumeData;
     vec3i volumeDimensions;
-    vec3f volumeScale;
-    vec3f volumePosition;
+    vec3f volumeElementSpacing;
+    vec3f volumeOffset;
     float volumeEpsilon;
     float volumeDiag;
 

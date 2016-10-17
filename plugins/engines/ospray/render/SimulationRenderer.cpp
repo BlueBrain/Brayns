@@ -39,8 +39,8 @@ void SimulationRenderer::commit()
 
     _volumeData = getParamData( "volumeData" );
     _volumeDimensions = getParam3i( "volumeDimensions", ospray::vec3i( 0 ));
-    _volumeScale = getParam3f( "volumeScale", ospray::vec3f( 1.f ));
-    _volumePosition = getParam3f( "volumePosition", ospray::vec3f( 0.f ));
+    _volumeElementSpacing = getParam3f( "volumeElementSpacing", ospray::vec3f( 1.f ));
+    _volumeOffset = getParam3f( "volumeOffset", ospray::vec3f( 0.f ));
     _volumeEpsilon = getParam1f( "volumeEpsilon", 1.f );
     _simulationData = getParamData( "simulationData" );
     _transferFunctionDiffuseData = getParamData( "transferFunctionDiffuseData" );
@@ -65,8 +65,8 @@ void SimulationRenderer::commit()
                 _materialPtr, _materialArray.size(),
                 _volumeData ? ( uint8* )_volumeData->data : NULL,
                 ( ispc::vec3i& )_volumeDimensions,
-                ( ispc::vec3f& )_volumeScale,
-                ( ispc::vec3f& )_volumePosition,
+                ( ispc::vec3f& )_volumeElementSpacing,
+                ( ispc::vec3f& )_volumeOffset,
                 _volumeEpsilon,
                 _simulationData ? ( float* )_simulationData->data : NULL,
                 _transferFunctionDiffuseData ?

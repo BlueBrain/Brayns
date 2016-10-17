@@ -4,7 +4,7 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} brayns)
+set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} brayns Lunchbox)
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 if(TARGET BBPTestData)

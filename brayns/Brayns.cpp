@@ -78,6 +78,7 @@ struct Brayns::Impl
 
         // Build geometry
         loadData();
+        scene->commitVolumeData();
         scene->buildEnvironment( );
         scene->buildGeometry( );
 
@@ -140,13 +141,12 @@ struct Brayns::Impl
 
         if(!volumeParameters.getFilename().empty() || !volumeParameters.getFolder().empty())
         {
-            const Vector3ui& volumeDimensions = scene->getVolumeHandler()->getDimensions();
-            const Vector3f& volumeScale = volumeParameters.getScale();
+            const Vector3ui& volumeDimensions = scene->getVolumeHandler()->getDimensions( 0.f );
+            const Vector3f& volumeElementSpacing = volumeParameters.getElementSpacing();
             Boxf& worldBounds = scene->getWorldBounds();
             worldBounds.merge( Vector3f( 0.f, 0.f, 0.f ));
-            worldBounds.merge( Vector3f( volumeDimensions ) * volumeScale );
+            worldBounds.merge( Vector3f( volumeDimensions ) * volumeElementSpacing );
         }
-        scene->commitVolumeData();
 
         if( scene->isEmpty() && !scene->getVolumeHandler() )
             scene->buildDefault();

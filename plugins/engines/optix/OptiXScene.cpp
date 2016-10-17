@@ -50,7 +50,6 @@ OptiXScene::OptiXScene(
     , _context( context )
     , _lightBuffer( 0 )
     , _accelerationStructure( DEFAULT_ACCELERATION_STRUCTURE )
-    , _volumeBuffer( 0 )
     , _colorMapBuffer( 0 )
     , _mesh( 0 )
     , _verticesBuffer( 0 )
@@ -58,6 +57,7 @@ OptiXScene::OptiXScene(
     , _normalsBuffer( 0 )
     , _textureCoordsBuffer( 0 )
     , _materialsBuffer( 0 )
+    , _volumeBuffer( 0 )
 {
 }
 
@@ -80,7 +80,6 @@ OptiXScene::~OptiXScene()
 
 void OptiXScene::commit()
 {
-    BRAYNS_ERROR << "OptiXScene::commitSimulationData not implemented" << std::endl;
 }
 
 void OptiXScene::buildGeometry()
@@ -352,6 +351,13 @@ uint64_t OptiXScene::_processParametricGeometries()
 
 uint64_t OptiXScene::_processMeshes()
 {
+    if( getVolumeHandler() )
+    {
+        // Optix needs a bounding box around the volume so that if can find intersections
+        // before initiating the traversal
+        _processVolumeAABBGeometry();
+    }
+
     // These buffers will be shared across all Geometries
     uint64_t size = 0;
 
@@ -376,7 +382,10 @@ uint64_t OptiXScene::_processMeshes()
     ints materials;
 
     if( nbTotalIndices == 0 )
+    {
+        BRAYNS_INFO << "- No meshes" << std::endl;
         return 0;
+    }
 
     uint64_t offset = 0;
     for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
@@ -455,9 +464,9 @@ uint64_t OptiXScene::_processMeshes()
     nbTotalMaterials = materials.size();
 
     // Attach all of the buffers at the Context level since they are shared
-    _context[ "vertex_buffer"   ]->setBuffer( _verticesBuffer );
-    _context[ "index_buffer"    ]->setBuffer( _indicesBuffer );
-    _context[ "normal_buffer"   ]->setBuffer( _normalsBuffer );
+    _context[ "vertices_buffer" ]->setBuffer( _verticesBuffer );
+    _context[ "indices_buffer" ]->setBuffer( _indicesBuffer );
+    _context[ "normal_buffer" ]->setBuffer( _normalsBuffer );
     _context[ "texcoord_buffer" ]->setBuffer( _textureCoordsBuffer );
     _context[ "material_buffer" ]->setBuffer( _materialsBuffer );
 
@@ -541,6 +550,7 @@ void OptiXScene::commitMaterials( const bool updateOnly )
         optixMaterial["Kr"]->setFloat( reflectionIndex,  reflectionIndex,  reflectionIndex);
         const float opacity = material->getOpacity();
         optixMaterial["Ko"]->setFloat( opacity, opacity, opacity );
+        optixMaterial["refraction_index"]->setFloat( material->getRefractionIndex( ));
 
         if( !updateOnly )
             _optixMaterials[ materialId ] = optixMaterial;
@@ -549,11 +559,12 @@ void OptiXScene::commitMaterials( const bool updateOnly )
 
 void OptiXScene::commitSimulationData()
 {
-    BRAYNS_DEBUG << "OptiXScene::commitSimulationData not implemented" << std::endl;
+    BRAYNS_ERROR << "OptiXScene::commitSimulationData not implemented" << std::endl;
 }
 
 void OptiXScene::commitVolumeData()
 {
+    const float timestamp = _parametersManager.getSceneParameters().getTimestamp();
     VolumeHandlerPtr volumeHandler = getVolumeHandler();
     if( !volumeHandler )
     {
@@ -567,38 +578,40 @@ void OptiXScene::commitVolumeData()
         return;
     }
 
-    if( _volumeBuffer == 0 )
+    void* data = volumeHandler->getData( timestamp );
+    if( data )
     {
+        if( _volumeBuffer ) _volumeBuffer->destroy();
+
         _volumeBuffer = _context->createBuffer(
-            RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE, volumeHandler->getSize() );
-        uint64_t size = volumeHandler->getSize() * sizeof( unsigned char );
+            RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE,
+            volumeHandler->getSize( timestamp ));
+        uint64_t size = volumeHandler->getSize( timestamp ) * sizeof( unsigned char );
         if( size != 0 )
         {
-            memcpy( _volumeBuffer->map(), volumeHandler->getData( 0.f ), size );
+            memcpy( _volumeBuffer->map(), data, size );
             _volumeBuffer->unmap();
         }
         _context[ "volumeData" ]->setBuffer( _volumeBuffer );
-
-        // Optix needs a bounding box around the volume so that if can find intersections
-        // before initiating the traversing of the volume
-        _buildVolumeAABBGeometry();
     }
 
-    const Vector3ui& dimensions = volumeHandler->getDimensions();
+    const Vector3ui& dimensions = volumeHandler->getDimensions( timestamp );
     _context[ "volumeDimensions" ]->setUint( dimensions.x(), dimensions.y(), dimensions.z());
 
-    VolumeParameters& volumeParameters = _parametersManager.getVolumeParameters();
-    const Vector3f& scale = volumeParameters.getScale();
-    _context[ "volumeScale" ]->setFloat( scale.x(), scale.y(), scale.z());
+    const Vector3f& elementSpacing = volumeHandler->getElementSpacing( timestamp );
+    _context[ "volumeElementSpacing" ]->setFloat(
+        elementSpacing.x(), elementSpacing.y(), elementSpacing.z());
 
-    const Vector3f& position = volumeParameters.getPosition();
-    _context[ "volumePosition" ]->setFloat( position.x(), position.y(), position.z());
+    const Vector3f& position = volumeHandler->getOffset( timestamp );
+    _context[ "volumeOffset" ]->setFloat( position.x(), position.y(), position.z());
 
     _context[ "volumeEpsilon" ]->setFloat(
-        volumeHandler->getEpsilon( scale, volumeParameters.getSamplesPerRay()));
+        volumeHandler->getEpsilon(
+            timestamp, elementSpacing,
+            _parametersManager.getVolumeParameters().getSamplesPerRay()));
 
-    Vector3f diag = Vector3f( dimensions ) * scale;
-    const float volumeDiag = std::max( diag.x(), std::max( diag.y(), diag.z()));
+    const Vector3f diag = Vector3f( dimensions ) * elementSpacing;
+    const float volumeDiag = diag.find_max();
     _context[ "volumeDiag" ]->setFloat( volumeDiag );
 }
 
@@ -623,8 +636,12 @@ void OptiXScene::commitTransferFunctionData()
 
 }
 
-void OptiXScene::_buildVolumeAABBGeometry()
+void OptiXScene::_processVolumeAABBGeometry()
 {
+    VolumeHandlerPtr volumeHandler = getVolumeHandler();
+    if( !volumeHandler )
+        return;
+
     const Vector3f positions[ 8 ] =
     {
         {  0.f, 0.f, 0.f },
@@ -647,30 +664,30 @@ void OptiXScene::_buildVolumeAABBGeometry()
         { 2, 3, 7, 7, 6, 2 }  // Top
     };
 
-    VolumeParameters& volumeParameters = _parametersManager.getVolumeParameters();
-    const Vector3f& volumeScale = volumeParameters.getScale();
-    const Vector3f& volumePosition = volumeParameters.getPosition();
-    const Vector3f& volumeDimensions = volumeParameters.getDimensions();
+    const float timestamp = _parametersManager.getSceneParameters().getTimestamp();
+    const Vector3f& volumeElementSpacing = volumeHandler->getElementSpacing( timestamp );
+    const Vector3f& volumeOffset = volumeHandler->getOffset( timestamp );
+    const Vector3ui& volumeDimensions = volumeHandler->getDimensions( timestamp );
 
-    uint64_t offset =_trianglesMeshes[ MATERIAL_INVISIBLE ].getVertices().size();
+    uint64_t offset = _trianglesMeshes[ MATERIAL_INVISIBLE ].getVertices().size();
     for( size_t face = 0; face < 6; ++face )
     {
         for( size_t index = 0; index < 6; ++index )
         {
             const Vector3f position =
-                positions[ indices[face][index] ] * volumeScale * volumeDimensions +
-                volumePosition;
+                positions[ indices[face][index] ]  * volumeElementSpacing * volumeDimensions +
+                volumeOffset;
 
             _trianglesMeshes[ MATERIAL_INVISIBLE ].getVertices().push_back( position );
+
             _bounds.merge( position );
         }
+        const size_t index = offset + face * 6;
         _trianglesMeshes[ MATERIAL_INVISIBLE ].getIndices().push_back(
-            Vector3ui( offset + 0, offset + 1, offset + 2 ));
+            Vector3ui( index + 0, index + 1, index + 2 ));
         _trianglesMeshes[ MATERIAL_INVISIBLE ].getIndices().push_back(
-            Vector3ui( offset + 3, offset + 4, offset + 5 ));
-        offset += 6;
+            Vector3ui( index + 3, index + 4, index + 5 ));
     }
-
 }
 
 uint64_t OptiXScene::_getBvhSize( const uint64_t nbElements ) const

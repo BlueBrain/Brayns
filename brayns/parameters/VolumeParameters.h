@@ -32,7 +32,7 @@ public:
     VolumeParameters();
 
     /** @copydoc AbstractParameters::print */
-    void print( ) final;
+    void print() final;
 
     /** Folder containing volume files */
     const std::string& getFolder() const { return _folder; }
@@ -44,10 +44,10 @@ public:
     const Vector3ui& getDimensions() const { return _dimensions; }
 
     /** Volume scale  */
-    const Vector3f& getScale() const { return _scale; }
+    const Vector3f& getElementSpacing() const { return _elementSpacing; }
 
-    /** Volume position */
-    const Vector3f& getPosition() const { return _position; }
+    /** Volume offset */
+    const Vector3f& getOffset() const { return _offset; }
 
     /** Volume epsilon */
     void setSamplesPerRay( const size_t spr ) { _spr = spr; }
@@ -60,8 +60,8 @@ protected:
     std::string _folder;
     std::string _filename;
     Vector3ui _dimensions;
-    Vector3f _scale;
-    Vector3f _position;
+    Vector3f _elementSpacing;
+    Vector3f _offset;
     float _spr;
 
 };

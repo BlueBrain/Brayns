@@ -25,8 +25,8 @@ namespace
 const std::string PARAM_VOLUME_FOLDER = "volume-folder";
 const std::string PARAM_VOLUME_FILENAME = "volume-file";
 const std::string PARAM_VOLUME_DIMENSIONS = "volume-dimensions";
-const std::string PARAM_VOLUME_SCALE = "volume-scale";
-const std::string PARAM_VOLUME_POSITION = "volume-position";
+const std::string PARAM_VOLUME_ELEMENT_SPACING = "volume-element-spacing";
+const std::string PARAM_VOLUME_OFFSET = "volume-offset";
 const std::string PARAM_VOLUME_SPR = "volume-samples-per-ray";
 const size_t DEFAULT_SAMPLES_PER_RAY = 128;
 }
@@ -37,8 +37,8 @@ namespace brayns
 VolumeParameters::VolumeParameters()
     : AbstractParameters( "Volume" )
     , _dimensions( 0, 0, 0 )
-    , _scale( 1.f, 1.f, 1.f )
-    , _position( 0.f, 0.f, 0.f )
+    , _elementSpacing( 1.f, 1.f, 1.f )
+    , _offset( 0.f, 0.f, 0.f )
     , _spr( DEFAULT_SAMPLES_PER_RAY )
 {
     _parameters.add_options()
@@ -48,10 +48,10 @@ VolumeParameters::VolumeParameters()
             "Cache file volume data" )
         ( PARAM_VOLUME_DIMENSIONS.c_str(), po::value< size_ts >()->multitoken(),
             "Volume dimensions" )
-        ( PARAM_VOLUME_SCALE.c_str(), po::value< floats >()->multitoken(),
-            "Volume scale" )
-        ( PARAM_VOLUME_POSITION.c_str(), po::value< floats >()->multitoken(),
-            "Volume position" )
+        ( PARAM_VOLUME_ELEMENT_SPACING.c_str(), po::value< floats >()->multitoken(),
+            "Element spacing in the volume" )
+        ( PARAM_VOLUME_OFFSET.c_str(), po::value< floats >()->multitoken(),
+            "Volume offset" )
         ( PARAM_VOLUME_SPR.c_str(), po::value< size_t >(),
             "Volume samples per ray" );
 }
@@ -70,17 +70,17 @@ bool VolumeParameters::_parse( const po::variables_map& vm )
         if( values.size( ) == 3 )
             _dimensions = Vector3ui( values[0], values[1], values[2] );
     }
-    if( vm.count( PARAM_VOLUME_SCALE ))
+    if( vm.count( PARAM_VOLUME_ELEMENT_SPACING ))
     {
-        floats values = vm[PARAM_VOLUME_SCALE].as< floats >( );
+        floats values = vm[PARAM_VOLUME_ELEMENT_SPACING].as< floats >( );
         if( values.size( ) == 3 )
-            _scale = Vector3f( values[0], values[1], values[2] );
+            _elementSpacing = Vector3f( values[0], values[1], values[2] );
     }
-    if( vm.count( PARAM_VOLUME_POSITION ))
+    if( vm.count( PARAM_VOLUME_OFFSET ))
     {
-        floats values = vm[PARAM_VOLUME_POSITION].as< floats >( );
+        floats values = vm[PARAM_VOLUME_OFFSET].as< floats >( );
         if( values.size() == 3 )
-            _position = Vector3f( values[0], values[1], values[2] );
+            _offset = Vector3f( values[0], values[1], values[2] );
     }
     if( vm.count( PARAM_VOLUME_SPR ))
         _spr = vm[PARAM_VOLUME_SPR].as< size_t >();
@@ -93,8 +93,8 @@ void VolumeParameters::print( )
     BRAYNS_INFO << "Folder          : " << _folder << std::endl;
     BRAYNS_INFO << "Filename        : " << _filename << std::endl;
     BRAYNS_INFO << "Dimensions      : " << _dimensions << std::endl;
-    BRAYNS_INFO << "Scale           : " << _scale << std::endl;
-    BRAYNS_INFO << "Position        : " << _position << std::endl;
+    BRAYNS_INFO << "Element spacing : " << _elementSpacing << std::endl;
+    BRAYNS_INFO << "Offset          : " << _offset << std::endl;
     BRAYNS_INFO << "Samples per ray : " << _spr << std::endl;
 }
 

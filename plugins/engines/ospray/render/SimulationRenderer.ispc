@@ -82,16 +82,16 @@ inline vec3f SimulationRenderer_shadeRay(
             // No intersection. Return skybox color
 
             ray.t = self->abstract.volumeDiag * 2.f;
-            vec3f volumetricValue = make_vec3f( 0.f );
+            vec4f volumetricValue = make_vec4f( 0.f );
             if( self->abstract.volumeData )
-                volumetricValue = make_vec3f( getVolumeContribution( &(self->abstract), ray ) );
+                volumetricValue = getVolumeContribution( &(self->abstract), ray );
 
             intersectionColors[depth] =
-                volumetricValue +
+                make_vec3f( volumetricValue ) +
                 make_vec3f( skyboxMapping(
                     (Renderer *)self, ray, self->abstract.numMaterials, self->abstract.materials ));
             if( depth == 0 )
-                pathOpacity = 0.f;
+                pathOpacity = 1.f - volumetricValue.w;
             moreRebounds = false;
         }
         else
@@ -143,7 +143,10 @@ inline vec3f SimulationRenderer_shadeRay(
                 localOpacity = volumetricValue.w;
                 intersectionColors[depth] = localShadedColor = make_vec3f( volumetricValue );
                 if( localOpacity >= 1.f )
+                {
+                    pathOpacity = 1.f;
                     break;
+                }
             }
 
             // Process material attributes
@@ -169,7 +172,7 @@ inline vec3f SimulationRenderer_shadeRay(
                     localRefraction = mat->refraction;
 
                     // localOpacity
-                    localOpacity = mat->d * get1f( mat->map_d, dg.st, 1.f );
+                    localOpacity += mat->d * get1f( mat->map_d, dg.st, 1.f );
 
                     // Diffuse color
                     localDiffuseColor = mat->Kd * make_vec3f( dg.color );
@@ -415,8 +418,8 @@ export void SimulationRenderer_set(
         const uniform int32 numMaterials,
         uniform uint8* uniform volumeData,
         const uniform vec3i& volumeDimensions,
-        const uniform vec3f& volumeScale,
-        const uniform vec3f& volumePosition,
+        const uniform vec3f& volumeElementSpacing,
+        const uniform vec3f& volumeOffset,
         const uniform float& volumeEpsilon,
         uniform float* uniform simulationData,
         uniform vec4f* uniform colormap,
@@ -446,11 +449,11 @@ export void SimulationRenderer_set(
 
     self->abstract.volumeData = (uniform uint8* uniform)volumeData;
     self->abstract.volumeDimensions = volumeDimensions;
-    self->abstract.volumeScale = volumeScale;
-    self->abstract.volumePosition = volumePosition;
+    self->abstract.volumeElementSpacing = volumeElementSpacing;
+    self->abstract.volumeOffset = volumeOffset;
     self->abstract.volumeEpsilon = volumeEpsilon;
 
-    const uniform vec3f diag = make_vec3f( volumeDimensions ) * volumeScale;
+    const uniform vec3f diag = make_vec3f( volumeDimensions ) * volumeElementSpacing;
     self->abstract.volumeDiag = max( diag.x, max( diag.y, diag.z ));
 
     self->abstract.colorMap = (uniform vec4f* uniform)colormap;

@@ -66,7 +66,7 @@ void OptiXRenderer::commit()
 
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
 
-    _context["max_depth"]->setInt( 10 );
+    _context["max_depth"]->setUint( 10 );
     _context["radiance_ray_type"]->setUint( 0 );
     _context["shadow_ray_type"]->setUint( 1 );
     _context["scene_epsilon"]->setFloat( rp.getEpsilon( ));

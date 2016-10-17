@@ -299,6 +299,13 @@ enum CameraType
     CT_PANORAMIC
 };
 
+enum TimestampMode
+{
+    TM_DEFAULT,
+    TM_MODULO,
+    TM_BOUNDED
+};
+
 }
 
 #endif // TYPES_H

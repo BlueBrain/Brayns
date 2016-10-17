@@ -79,7 +79,7 @@ public:
 
 private:
 
-    void _buildVolumeAABBGeometry();
+    void _processVolumeAABBGeometry();
 
     uint64_t _getBvhSize( const uint64_t nbElements ) const;
 
@@ -94,7 +94,6 @@ private:
     optix::Buffer _lightBuffer;
     std::vector< BasicLight > _optixLights;
     std::string _accelerationStructure;
-    optix::Buffer _volumeBuffer;
     optix::Buffer _colorMapBuffer;
 
     // Spheres
@@ -125,6 +124,10 @@ private:
     optix::Buffer _normalsBuffer;
     optix::Buffer _textureCoordsBuffer;
     optix::Buffer _materialsBuffer;
+
+    // Volume
+    optix::Buffer _volumeBuffer;
+
 };
 
 }

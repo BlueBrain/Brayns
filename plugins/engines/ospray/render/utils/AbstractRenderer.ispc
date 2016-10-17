@@ -255,8 +255,9 @@ inline bool intersectBox(
     if( ray.dir.z == 0.f )
         ray.dir.z = self->super.epsilon;
 
-    const vec3f aabbMin = self->volumePosition;
-    const vec3f aabbMax = self->volumePosition + self->volumeDimensions.x * self->volumeScale;
+    const vec3f aabbMin = self->volumeOffset;
+    const vec3f aabbMax =
+        self->volumeOffset + self->volumeDimensions.x * self->volumeElementSpacing;
 
     const vec3f invR = 1.f / ray.dir;
     const vec3f tbot = invR * ( aabbMin - ray.org );
@@ -286,7 +287,7 @@ inline varying vec4f getVolumeContribution(
     float pathAlpha = 0.f;
     while( t < tMax && pathAlpha < 1.f )
     {
-        vec3f point = (( ray.org + ray.dir * t ) - self->volumePosition) / self->volumeScale;
+        vec3f point = (( ray.org + ray.dir * t ) - self->volumeOffset) / self->volumeElementSpacing;
 
         if( point.x > 0.f && point.x < dimensions.x &&
             point.y > 0.f && point.y < dimensions.y &&
