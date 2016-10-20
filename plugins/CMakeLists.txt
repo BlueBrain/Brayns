@@ -30,11 +30,11 @@ if(DEFLECT_FOUND)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
 endif()
 
-if(TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ)
+if(TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ AND TARGET ZeroEQHTTP)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroEQPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/ZeroEQPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
-    PUBLIC Lexis ZeroEQ BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
+    PUBLIC Lexis ZeroEQ ZeroEQHTTP BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
 endif()
 
 if(OSPRAY_FOUND)
