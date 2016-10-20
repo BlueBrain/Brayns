@@ -87,36 +87,36 @@ void ZeroEQPlugin::_setupHTTPServer()
 
     servus::Serializable& cam =
         *_extensionParameters.engine->getCamera()->getSerializable();
-    _httpServer->add( cam );
+    _httpServer->handle( cam );
     cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
 
-    _httpServer->add( _remoteImageJPEG );
+    _httpServer->handleGET( _remoteImageJPEG );
     _remoteImageJPEG.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestImageJPEG, this ));
 
-    _httpServer->add( _remoteFrameBuffers );
+    _httpServer->handle( _remoteFrameBuffers );
     _remoteFrameBuffers.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestFrameBuffers, this ));
 
-    _httpServer->add( _remoteAttribute );
+    _httpServer->handle( _remoteAttribute );
     _remoteAttribute.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_attributeUpdated, this ));
 
-    _httpServer->add( _remoteReset );
+    _httpServer->handle( _remoteReset );
     _remoteReset.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_resetUpdated, this ));
 
-    _httpServer->add( _remoteMaterial );
+    _httpServer->handle( _remoteMaterial );
     _remoteMaterial.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_materialUpdated, this ));
 
-    _httpServer->add( _remoteTransferFunction1D );
+    _httpServer->handle( _remoteTransferFunction1D );
     _remoteTransferFunction1D.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_transferFunction1DUpdated, this ));
     _remoteTransferFunction1D.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestTransferFunction1D, this ));
 
-    _httpServer->add( _remoteSpikes );
+    _httpServer->handle( _remoteSpikes );
     _remoteSpikes.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_spikesUpdated, this ));
     _remoteSpikes.registerSerializeCallback(

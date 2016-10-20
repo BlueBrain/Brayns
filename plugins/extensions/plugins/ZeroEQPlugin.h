@@ -25,6 +25,7 @@
 
 #include <brayns/api.h>
 #include <zeroeq/zeroeq.h>
+#include <zeroeq/http/server.h>
 #include <turbojpeg.h>
 #include <lexis/render/imageJPEG.h>
 #include <lexis/render/lookupTable1D.h>
