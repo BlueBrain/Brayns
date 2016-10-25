@@ -134,6 +134,7 @@ BaseWindow::BaseWindow( BraynsPtr brayns, const FrameBufferMode frameBufferMode)
     BRAYNS_INFO << "Motion speed :" << motionSpeed << std::endl;
 }
 
+
 BaseWindow::~BaseWindow( )
 {
 }
@@ -297,6 +298,7 @@ void BaseWindow::display( )
         ssProcData.depthType = GL_FLOAT;
 
         _screenSpaceProcessor.draw( ssProcData );
+
     }
 
     float* buffer = renderOutput.depthBuffer.data();
