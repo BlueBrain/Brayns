@@ -299,11 +299,11 @@ enum CameraType
     CT_PANORAMIC
 };
 
-enum TimestampMode
+enum class TimestampMode
 {
-    TM_DEFAULT,
-    TM_MODULO,
-    TM_BOUNDED
+    unchanged,
+    modulo,
+    bounded
 };
 
 }

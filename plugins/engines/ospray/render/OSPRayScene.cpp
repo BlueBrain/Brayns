@@ -758,33 +758,35 @@ void OSPRayScene::commitVolumeData()
         return;
 
     const float timestamp = _parametersManager.getSceneParameters().getTimestamp();
-    void* data = volumeHandler->getData( timestamp );
+    volumeHandler->setTimestamp( timestamp );
+    void* data = volumeHandler->getData();
     if( data )
     {
         for( const auto& renderer: _renderers )
         {
             OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
 
-            const size_t size = volumeHandler->getSize( timestamp );
+            const size_t size = volumeHandler->getSize();
 
             _ospVolumeData = ospNewData( size, OSP_UCHAR, data, OSP_DATA_SHARED_BUFFER );
             ospCommit( _ospVolumeData );
             ospSetData( osprayRenderer->impl(), "volumeData", _ospVolumeData );
 
-            const Vector3ui& dimensions = volumeHandler->getDimensions( timestamp );
+            const Vector3ui& dimensions = volumeHandler->getDimensions();
             ospSet3i( osprayRenderer->impl(),
                 "volumeDimensions", dimensions.x(), dimensions.y(), dimensions.z() );
 
-            const Vector3f& elementSpacing = _parametersManager.getVolumeParameters().getElementSpacing();
+            const Vector3f& elementSpacing =
+                _parametersManager.getVolumeParameters().getElementSpacing();
             ospSet3f( osprayRenderer->impl(),
-                "volumeElementSpacing", elementSpacing.x(), elementSpacing.y(), elementSpacing.z() );
+                "volumeElementSpacing", elementSpacing.x(), elementSpacing.y(), elementSpacing.z());
 
             const Vector3f& offset = _parametersManager.getVolumeParameters().getOffset();
             ospSet3f( osprayRenderer->impl(),
                 "volumeOffset", offset.x(), offset.y(), offset.z() );
 
             const float epsilon = volumeHandler->getEpsilon(
-                timestamp, elementSpacing, _parametersManager.getVolumeParameters().getSamplesPerRay());
+                elementSpacing, _parametersManager.getVolumeParameters().getSamplesPerRay());
             ospSet1f( osprayRenderer->impl(), "volumeEpsilon", epsilon );
         }
     }

@@ -40,7 +40,7 @@ VolumeHandler::VolumeHandler(
     VolumeParameters& volumeParameters,
     const TimestampMode timestampMode )
     : _volumeParameters( &volumeParameters )
-    , _currentTimestamp( std::numeric_limits<float>::max( ))
+    , _timestamp( std::numeric_limits<float>::max( ))
     , _timestampRange( std::numeric_limits<float>::max(), std::numeric_limits<float>::min( ))
     , _timestampMode( timestampMode )
 {
@@ -53,11 +53,14 @@ VolumeHandler::~VolumeHandler()
 
 void VolumeHandler::attachVolumeToFile( const float timestamp, const std::string& volumeFile )
 {
+    // Add volume descriptor for specified timestamp
     _volumeDescriptors[ timestamp ].reset( new VolumeDescriptor(
         volumeFile,
         _volumeParameters->getDimensions(),
         _volumeParameters->getElementSpacing(),
         _volumeParameters->getOffset()));
+
+    // Update timestamp range
     for( const auto& volumeDescriptor: _volumeDescriptors )
     {
         _timestampRange.x() = std::min( _timestampRange.x(), volumeDescriptor.first );
@@ -67,81 +70,50 @@ void VolumeHandler::attachVolumeToFile( const float timestamp, const std::string
                 << timestamp << " " << _timestampRange << std::endl;
 }
 
-void* VolumeHandler::getData( const float timestamp )
+void VolumeHandler::setTimestamp( const float timestamp )
 {
     const float ts = _getBoundedTimestamp( timestamp );
-    if( ts != _currentTimestamp &&
+    if( ts != _timestamp &&
         _volumeDescriptors.find( ts ) != _volumeDescriptors.end( ))
     {
-        if( _volumeDescriptors.find( _currentTimestamp ) != _volumeDescriptors.end( ))
-            _volumeDescriptors[ _currentTimestamp ]->unmap();
-        _currentTimestamp = ts;
-        _volumeDescriptors[ _currentTimestamp ]->map();
-        return _volumeDescriptors[ _currentTimestamp ]->getMemoryMapPtr();
+        if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
+            _volumeDescriptors[ _timestamp ]->unmap();
+        _timestamp = ts;
+        _volumeDescriptors[ _timestamp ]->map();
     }
-    return 0;
+}
+
+void* VolumeHandler::getData() const
+{
+    return _volumeDescriptors.at( _timestamp )->getMemoryMapPtr();
 }
 
 float VolumeHandler::getEpsilon(
-    const float timestamp ,
     const Vector3f& elementSpacing,
     const uint16_t samplesPerRay )
 {
-    const float ts = _getBoundedTimestamp( timestamp );
-    if( _volumeDescriptors.find( ts ) != _volumeDescriptors.end( ))
-    {
-        const Vector3f diag =
-            Vector3f( _volumeDescriptors[ ts ]->getDimensions( )) * elementSpacing;
-        return diag.find_max() / float( samplesPerRay );
-    }
-
-    BRAYNS_ERROR << "No volume is attached to the specified timestamp: "
-                 << timestamp << std::endl;
-    return 0;
+    const Vector3f diag = _volumeDescriptors.at( _timestamp )->getDimensions( ) * elementSpacing;
+    return diag.find_max() / float( samplesPerRay );
 }
 
-const Vector3ui VolumeHandler::getDimensions( const float timestamp )
+const Vector3ui VolumeHandler::getDimensions() const
 {
-    float ts = _getBoundedTimestamp( timestamp );
-    if( _volumeDescriptors.find( ts ) != _volumeDescriptors.end( ))
-        return _volumeDescriptors[ ts ]->getDimensions();
-
-    BRAYNS_ERROR << "No volume is attached to the specified timestamp: "
-                 << timestamp << std::endl;
-    return Vector3ui();
+    return _volumeDescriptors.at( _timestamp )->getDimensions();
 }
 
-const Vector3f VolumeHandler::getElementSpacing( const float timestamp )
+const Vector3f VolumeHandler::getElementSpacing() const
 {
-    float ts = _getBoundedTimestamp( timestamp );
-    if( _volumeDescriptors.find( ts ) != _volumeDescriptors.end( ))
-        return _volumeDescriptors[ ts ]->getElementSpacing();
-
-    BRAYNS_ERROR << "No volume is attached to the specified timestamp: "
-                 << timestamp << std::endl;
-    return Vector3f();
+    return _volumeDescriptors.at( _timestamp )->getElementSpacing();
 }
 
-const Vector3f VolumeHandler::getOffset( const float timestamp )
+const Vector3f VolumeHandler::getOffset() const
 {
-    float ts = _getBoundedTimestamp( timestamp );
-    if( _volumeDescriptors.find( ts ) != _volumeDescriptors.end( ))
-        return _volumeDescriptors[ ts ]->getOffset();
-
-    BRAYNS_ERROR << "No volume is attached to the specified timestamp: "
-                 << timestamp << std::endl;
-    return Vector3f();
+    return _volumeDescriptors.at( _timestamp )->getOffset();
 }
 
-uint64_t VolumeHandler::getSize( const float timestamp )
+uint64_t VolumeHandler::getSize() const
 {
-    const float ts = _getBoundedTimestamp( timestamp );
-    if( _volumeDescriptors.find( ts ) != _volumeDescriptors.end( ))
-        return _volumeDescriptors[ ts ]->getSize();
-
-    BRAYNS_ERROR << "No volume is attached to the specified timestamp: "
-                 << timestamp << std::endl;
-    return 0;
+    return _volumeDescriptors.at( _timestamp )->getSize();
 }
 
 float VolumeHandler::_getBoundedTimestamp( const float timestamp ) const
@@ -149,12 +121,12 @@ float VolumeHandler::_getBoundedTimestamp( const float timestamp ) const
     float result;
     switch( _timestampMode )
     {
-    case TM_MODULO:
+    case TimestampMode::modulo:
         result = size_t( timestamp + _timestampRange.x( )) % _volumeDescriptors.size();
         break;
-    case TM_BOUNDED:
+    case TimestampMode::bounded:
         result = std::max( std::min( timestamp, _timestampRange.y( )), _timestampRange.x( ));
-    case TM_DEFAULT:
+    case TimestampMode::unchanged:
     default:
         result = timestamp;
     }

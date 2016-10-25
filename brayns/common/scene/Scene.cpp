@@ -223,7 +223,7 @@ void Scene::buildDefault( )
     _materials[material]->setSpecularColor( WHITE );
     _materials[material]->setSpecularExponent( 100.f );
 
-    // CyliindexOffsetnder
+    // Cylinder
     ++material;
     _primitives[material].push_back( CylinderPtr(
         new Cylinder( material,
@@ -524,8 +524,8 @@ VolumeHandlerPtr Scene::getVolumeHandler()
     {
         if( !_volumeHandler )
         {
-            _volumeHandler.reset(
-                new VolumeHandler( _parametersManager.getVolumeParameters(), TM_MODULO ));
+            _volumeHandler.reset( new VolumeHandler(
+                _parametersManager.getVolumeParameters(), TimestampMode::modulo ));
             if( !volumeFile.empty() )
                 _volumeHandler->attachVolumeToFile( 0.f, volumeFile );
             else

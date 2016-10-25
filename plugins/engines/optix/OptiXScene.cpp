@@ -578,15 +578,16 @@ void OptiXScene::commitVolumeData()
         return;
     }
 
-    void* data = volumeHandler->getData( timestamp );
+    volumeHandler->setTimestamp( timestamp );
+    void* data = volumeHandler->getData();
     if( data )
     {
         if( _volumeBuffer ) _volumeBuffer->destroy();
 
         _volumeBuffer = _context->createBuffer(
             RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE,
-            volumeHandler->getSize( timestamp ));
-        uint64_t size = volumeHandler->getSize( timestamp ) * sizeof( unsigned char );
+            volumeHandler->getSize());
+        uint64_t size = volumeHandler->getSize() * sizeof( unsigned char );
         if( size != 0 )
         {
             memcpy( _volumeBuffer->map(), data, size );
@@ -595,20 +596,19 @@ void OptiXScene::commitVolumeData()
         _context[ "volumeData" ]->setBuffer( _volumeBuffer );
     }
 
-    const Vector3ui& dimensions = volumeHandler->getDimensions( timestamp );
+    const Vector3ui& dimensions = volumeHandler->getDimensions();
     _context[ "volumeDimensions" ]->setUint( dimensions.x(), dimensions.y(), dimensions.z());
 
-    const Vector3f& elementSpacing = volumeHandler->getElementSpacing( timestamp );
+    const Vector3f& elementSpacing = volumeHandler->getElementSpacing();
     _context[ "volumeElementSpacing" ]->setFloat(
         elementSpacing.x(), elementSpacing.y(), elementSpacing.z());
 
-    const Vector3f& position = volumeHandler->getOffset( timestamp );
+    const Vector3f& position = volumeHandler->getOffset();
     _context[ "volumeOffset" ]->setFloat( position.x(), position.y(), position.z());
 
     _context[ "volumeEpsilon" ]->setFloat(
         volumeHandler->getEpsilon(
-            timestamp, elementSpacing,
-            _parametersManager.getVolumeParameters().getSamplesPerRay()));
+            elementSpacing, _parametersManager.getVolumeParameters().getSamplesPerRay()));
 
     const Vector3f diag = Vector3f( dimensions ) * elementSpacing;
     const float volumeDiag = diag.find_max();
@@ -665,9 +665,10 @@ void OptiXScene::_processVolumeAABBGeometry()
     };
 
     const float timestamp = _parametersManager.getSceneParameters().getTimestamp();
-    const Vector3f& volumeElementSpacing = volumeHandler->getElementSpacing( timestamp );
-    const Vector3f& volumeOffset = volumeHandler->getOffset( timestamp );
-    const Vector3ui& volumeDimensions = volumeHandler->getDimensions( timestamp );
+    volumeHandler->setTimestamp( timestamp );
+    const Vector3f& volumeElementSpacing = volumeHandler->getElementSpacing();
+    const Vector3f& volumeOffset = volumeHandler->getOffset();
+    const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
 
     uint64_t offset = _trianglesMeshes[ MATERIAL_INVISIBLE ].getVertices().size();
     for( size_t face = 0; face < 6; ++face )

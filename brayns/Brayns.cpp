@@ -141,7 +141,8 @@ struct Brayns::Impl
 
         if(!volumeParameters.getFilename().empty() || !volumeParameters.getFolder().empty())
         {
-            const Vector3ui& volumeDimensions = scene->getVolumeHandler()->getDimensions( 0.f );
+            scene->getVolumeHandler()->setTimestamp( 0.f );
+            const Vector3ui& volumeDimensions = scene->getVolumeHandler()->getDimensions();
             const Vector3f& volumeElementSpacing = volumeParameters.getElementSpacing();
             Boxf& worldBounds = scene->getWorldBounds();
             worldBounds.merge( Vector3f( 0.f, 0.f, 0.f ));

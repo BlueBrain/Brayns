@@ -56,51 +56,44 @@ public:
 
     /**
      * @brief Returns the dimension of the 8bit volume
-     * @param timestamp Timestamp for the volume
      * @return Dimensions of the volume for the specified timestamp
      */
-    const Vector3ui getDimensions( const float timestamp );
+    const Vector3ui getDimensions() const;
 
     /**
      * @brief Returns the voxel size of the 8bit volume
-     * @param timestamp Timestamp for the volume
      * @return Voxel size of the volume for the specified timestamp
      */
-    const Vector3f getElementSpacing( const float timestamp );
+    const Vector3f getElementSpacing() const;
 
     /**
      * @brief Returns the position offset of the 8bit volume in world coordinates
-     * @param timestamp Timestamp for the volume
      * @return Volume offset position for the specified timestamp
      */
-    const Vector3f getOffset( const float timestamp );
+    const Vector3f getOffset() const;
 
     /**
      * @brief Returns the size of the 8bit volume in bytes
-     * @param timestamp Timestamp for the volume
      * @return Size of the volume for the specified timestamp
      */
-    uint64_t getSize( const float timestamp );
+    uint64_t getSize() const;
 
     /**
      * @brief Returns a pointer to a given frame in the memory mapped file.
-     * @param timestamp Timestamp for the volume
      * @return Pointer to volume
      */
-    void* getData( const float timestamp );
+    void* getData() const;
 
     /**
      * @brief Returns the epsilon that defines the step used to walk along the ray when traversing
      *        the volume. The value is defined according to the dimensions and scaling of the
      *        volume, and the number of samples per ray
-     * @param timestamp Timestamp for the volume
      * @param elementSpacing Scaling between elements of the volume. This attribute represents the
      *        voxel size
      * @param samplesPerRay Number of samples per ray
      * @return The epsilon
      */
     float getEpsilon (
-        const float timestamp ,
         const Vector3f& elementSpacing,
         const uint16_t samplesPerRay );
 
@@ -125,6 +118,14 @@ public:
      * @brief Gets the timestamp mode
      */
     TimestampMode getTimestampMode() const { return _timestampMode; }
+
+    /**
+     * @brief Sets the timestamp for the volume handler. If the specified timestamp is different
+     *        from the current one, the current volume is unmapped and the new one is mapped
+     *        instead
+     * @param timestamp Timestamp for the volume
+     */
+    void setTimestamp( const float timestamp );
 
     /**
      * @brief The VolumeDescriptor class handles the attribute of a single volume. The class
@@ -213,7 +214,7 @@ private:
 
     VolumeParametersPtr _volumeParameters;
     std::map< float, VolumeDescriptorPtr > _volumeDescriptors;
-    float _currentTimestamp;
+    float _timestamp;
     Vector2f _timestampRange;
     TimestampMode _timestampMode;
 
