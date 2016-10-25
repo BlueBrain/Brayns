@@ -56,8 +56,8 @@ private:
     float _transferFunctionRange;
     float _threshold;
     ospray::vec3i _volumeDimensions;
-    ospray::vec3f _volumeScale;
-    ospray::vec3f _volumePosition;
+    ospray::vec3f _volumeElementSpacing;
+    ospray::vec3f _volumeOffset;
     float _volumeEpsilon;
 };
 

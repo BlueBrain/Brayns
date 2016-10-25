@@ -43,10 +43,10 @@ using namespace optix;
 // a triangle mesh with a vertex buffer of triangle soup (triangle list)
 // with an interleaved position, normal, texturecoordinate layout.
 
-rtBuffer<float3> vertex_buffer;
+rtBuffer<float3> vertices_buffer;
 rtBuffer<float3> normal_buffer;
 rtBuffer<float2> texcoord_buffer;
-rtBuffer<int3>   index_buffer;
+rtBuffer<int3>   indices_buffer;
 rtBuffer<int>    material_buffer;
 
 rtDeclareVariable(float3, texcoord,         attribute texcoord, );
@@ -63,11 +63,11 @@ template<bool DO_REFINE>
 static __device__
 void meshIntersect( int primIdx )
 {
-  const int3 v_idx = index_buffer[primIdx];
+  const int3 v_idx = indices_buffer[primIdx];
 
-  const float3 p0 = vertex_buffer[ v_idx.x ];
-  const float3 p1 = vertex_buffer[ v_idx.y ];
-  const float3 p2 = vertex_buffer[ v_idx.z ];
+  const float3 p0 = vertices_buffer[ v_idx.x ];
+  const float3 p1 = vertices_buffer[ v_idx.y ];
+  const float3 p2 = vertices_buffer[ v_idx.z ];
 
   // Intersect ray with triangle
   float3 n;
@@ -125,11 +125,11 @@ RT_PROGRAM void intersect_refine( int primIdx )
 
 RT_PROGRAM void bounds (int primIdx, float result[6])
 {
-  const int3 v_idx = index_buffer[primIdx];
+  const int3 v_idx = indices_buffer[primIdx];
 
-  const float3 v0   = vertex_buffer[ v_idx.x ];
-  const float3 v1   = vertex_buffer[ v_idx.y ];
-  const float3 v2   = vertex_buffer[ v_idx.z ];
+  const float3 v0   = vertices_buffer[ v_idx.x ];
+  const float3 v1   = vertices_buffer[ v_idx.y ];
+  const float3 v2   = vertices_buffer[ v_idx.z ];
   const float  area = length(cross(v1-v0, v2-v0));
 
   optix::Aabb* aabb = (optix::Aabb*)result;

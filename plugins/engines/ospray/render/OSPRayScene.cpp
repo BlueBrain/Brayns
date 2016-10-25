@@ -62,7 +62,6 @@ OSPRayScene::OSPRayScene(
     , _ospSimulationData( 0 )
     , _ospTransferFunctionDiffuseData( 0 )
     , _ospTransferFunctionEmissionData( 0 )
-    , _currentTimestamp( 0.f )
 {
 }
 
@@ -709,6 +708,7 @@ void OSPRayScene::commitMaterials( const bool updateOnly )
 
                 ospCommit( _ospMaterialData );
             }
+            ospSetData( osprayRenderer->impl(),"materials", _ospMaterialData);
         }
 
         ospCommit( osprayRenderer->impl() );
@@ -757,36 +757,38 @@ void OSPRayScene::commitVolumeData()
     if( !volumeHandler )
         return;
 
-    for( const auto& renderer: _renderers )
+    const float timestamp = _parametersManager.getSceneParameters().getTimestamp();
+    volumeHandler->setTimestamp( timestamp );
+    void* data = volumeHandler->getData();
+    if( data )
     {
-        OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
-
-        const float timestamp = _parametersManager.getSceneParameters().getTimestamp();
-        if( timestamp != _currentTimestamp )
+        for( const auto& renderer: _renderers )
         {
-            _ospVolumeData = ospNewData(
-                volumeHandler->getSize(), OSP_UCHAR,
-                volumeHandler->getData( timestamp ), OSP_DATA_SHARED_BUFFER );
-            _currentTimestamp = timestamp;
+            OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
+
+            const size_t size = volumeHandler->getSize();
+
+            _ospVolumeData = ospNewData( size, OSP_UCHAR, data, OSP_DATA_SHARED_BUFFER );
+            ospCommit( _ospVolumeData );
+            ospSetData( osprayRenderer->impl(), "volumeData", _ospVolumeData );
+
+            const Vector3ui& dimensions = volumeHandler->getDimensions();
+            ospSet3i( osprayRenderer->impl(),
+                "volumeDimensions", dimensions.x(), dimensions.y(), dimensions.z() );
+
+            const Vector3f& elementSpacing =
+                _parametersManager.getVolumeParameters().getElementSpacing();
+            ospSet3f( osprayRenderer->impl(),
+                "volumeElementSpacing", elementSpacing.x(), elementSpacing.y(), elementSpacing.z());
+
+            const Vector3f& offset = _parametersManager.getVolumeParameters().getOffset();
+            ospSet3f( osprayRenderer->impl(),
+                "volumeOffset", offset.x(), offset.y(), offset.z() );
+
+            const float epsilon = volumeHandler->getEpsilon(
+                elementSpacing, _parametersManager.getVolumeParameters().getSamplesPerRay());
+            ospSet1f( osprayRenderer->impl(), "volumeEpsilon", epsilon );
         }
-        ospCommit( _ospVolumeData );
-        ospSetData( osprayRenderer->impl(), "volumeData", _ospVolumeData );
-
-        const Vector3ui& dimensions = volumeHandler->getDimensions();
-        ospSet3i( osprayRenderer->impl(),
-            "volumeDimensions", dimensions.x(), dimensions.y(), dimensions.z() );
-
-        const Vector3f& scale = _parametersManager.getVolumeParameters().getScale();
-        ospSet3f( osprayRenderer->impl(),
-            "volumeScale", scale.x(), scale.y(), scale.z() );
-
-        const Vector3f& position = _parametersManager.getVolumeParameters().getPosition();
-        ospSet3f( osprayRenderer->impl(),
-            "volumePosition", position.x(), position.y(), position.z() );
-
-        ospSet1f( osprayRenderer->impl(),
-            "volumeEpsilon", volumeHandler->getEpsilon(
-                scale, _parametersManager.getVolumeParameters().getSamplesPerRay()));
     }
 }
 

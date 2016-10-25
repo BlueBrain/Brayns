@@ -30,7 +30,6 @@
 #include <servus/uri.h>
 
 #include <boost/filesystem.hpp>
-#include <algorithm>
 
 namespace brayns
 {
@@ -160,6 +159,8 @@ void Scene::buildDefault( )
 {
     BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
 
+    const Vector3f WHITE = { 1.f, 1.f, 1.f };
+
     const Vector3f positions[8] =
     {
         {  0.f, 0.f, 0.f },
@@ -192,26 +193,24 @@ void Scene::buildDefault( )
         { 0.8f, 0.8f, 0.8f }
     };
 
-    const Vector3f WHITE = { 1.f, 1.f, 1.f };
-
     // Cornell box
     for( size_t material = 1; material < 6; ++material )
     {
-        _materials[material]->setColor( colors[material] );
+        _materials[material]->setColor( colors[ material ] );
         _materials[material]->setSpecularColor( WHITE );
         _materials[material]->setSpecularExponent( 10.f );
         _materials[material]->setReflectionIndex( material == 4 ? 0.8f : 0.f );
         _materials[material]->setOpacity( 1.f );
         for( size_t i = 0; i < 6; ++i )
         {
-            const Vector3f& position = positions[ indices[material][i] ];
+            const Vector3f& position = positions[ indices[ material ][ i ] ];
             _trianglesMeshes[material].getVertices().push_back( position );
             _bounds.merge( position );
-            _trianglesMeshes[material].getIndices().push_back(
-                Vector3i( 0, 1, 2 ));
-            _trianglesMeshes[material].getIndices().push_back(
-                Vector3i( 3, 4, 5 ));
         }
+        _trianglesMeshes[material].getIndices().push_back(
+            Vector3ui( 0, 1, 2 ));
+        _trianglesMeshes[material].getIndices().push_back(
+            Vector3ui( 3, 4, 5 ));
     }
 
     size_t material = 7;
@@ -514,21 +513,23 @@ AbstractSimulationHandlerPtr Scene::getSimulationHandler() const
 
 VolumeHandlerPtr Scene::getVolumeHandler()
 {
+    const std::string& volumeFile =
+        _parametersManager.getVolumeParameters().getFilename();
+    const std::string& volumeFolder =
+        _parametersManager.getVolumeParameters().getFolder();
+    if( volumeFile.empty() && volumeFolder.empty() )
+        return 0;
+
     try
     {
-        const std::string& volumeFile =
-            _parametersManager.getVolumeParameters().getFilename();
-        const std::string& volumeFolder =
-            _parametersManager.getVolumeParameters().getFolder();
-
-        if( !_volumeHandler && ( !volumeFile.empty() || !volumeFolder.empty() ))
+        if( !_volumeHandler )
         {
-            _volumeHandler.reset( new VolumeHandler( _parametersManager.getVolumeParameters() ));
+            _volumeHandler.reset( new VolumeHandler(
+                _parametersManager.getVolumeParameters(), TimestampMode::modulo ));
             if( !volumeFile.empty() )
                 _volumeHandler->attachVolumeToFile( 0.f, volumeFile );
             else
             {
-                float timestamp = 0.f;
                 strings filenames;
 
                 boost::filesystem::directory_iterator endIter;
@@ -550,6 +551,7 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                     }
                 }
                 std::sort(filenames.begin(), filenames.end());
+                float timestamp = 0.f;
                 for( const auto& filename: filenames )
                 {
                     _volumeHandler->attachVolumeToFile( timestamp, filename );

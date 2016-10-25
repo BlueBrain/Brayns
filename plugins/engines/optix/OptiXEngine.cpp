@@ -148,8 +148,15 @@ void OptiXEngine::commit()
 void OptiXEngine::render()
 {
     _frameBuffer->map();
-    _scene->commitSimulationData();
+
+    if( _scene->getSimulationHandler() )
+        _scene->commitSimulationData();
+
+    if( _scene->getVolumeHandler() )
+        _scene->commitVolumeData();
+
     _renderers[_activeRenderer]->render( _frameBuffer );
+
     _frameBuffer->unmap();
 }
 

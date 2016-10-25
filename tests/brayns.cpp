@@ -123,8 +123,8 @@ BOOST_AUTO_TEST_CASE( defaults )
 
     const auto& volumeParams = pm.getVolumeParameters();
     BOOST_CHECK_EQUAL( volumeParams.getDimensions(), brayns::Vector3ui( 0, 0, 0 ));
-    BOOST_CHECK_EQUAL( volumeParams.getScale(), brayns::Vector3f( 1.f, 1.f, 1.f ));
-    BOOST_CHECK_EQUAL( volumeParams.getPosition(), brayns::Vector3f( 0.f, 0.f, 0.f ));
+    BOOST_CHECK_EQUAL( volumeParams.getElementSpacing(), brayns::Vector3f( 1.f, 1.f, 1.f ));
+    BOOST_CHECK_EQUAL( volumeParams.getOffset(), brayns::Vector3f( 0.f, 0.f, 0.f ));
     BOOST_CHECK_EQUAL( volumeParams.getSamplesPerRay(), 128 );
 
     auto& scene = brayns.getScene();

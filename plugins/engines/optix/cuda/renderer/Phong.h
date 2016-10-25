@@ -56,7 +56,7 @@ rtDeclareVariable(PerRayData_radiance, prd, rtPayload, );
 rtDeclareVariable(PerRayData_shadow,   prd_shadow, rtPayload, );
 rtDeclareVariable(unsigned int,  frame, , );
 rtDeclareVariable(uint2,         launch_index, rtLaunchIndex, );
-rtDeclareVariable(int,               max_depth, , );
+rtDeclareVariable(unsigned int,      max_depth, , );
 rtBuffer<BasicLight>                 lights;
 rtDeclareVariable(float3,            ambient_light_color, , );
 rtDeclareVariable(unsigned int,      radiance_ray_type, , );
@@ -69,13 +69,14 @@ rtDeclareVariable(uint,              shading_enabled, , );
 rtDeclareVariable(uint,              shadows_enabled, , );
 rtDeclareVariable(uint,              soft_shadows_enabled, , );
 rtDeclareVariable(float,             ambient_occlusion_strength, , );
+rtDeclareVariable(uint,              electron_shading_enabled, , );
 rtDeclareVariable(float4,            jitter4, , );
 
 // Volume
 rtBuffer<unsigned char> volumeData;
 rtDeclareVariable(uint3, volumeDimensions, , );
-rtDeclareVariable(float3, volumePosition, , );
-rtDeclareVariable(float3, volumeScale, , );
+rtDeclareVariable(float3, volumeOffset, , );
+rtDeclareVariable(float3, volumeElementSpacing, , );
 rtDeclareVariable(float, volumeEpsilon, , );
 rtDeclareVariable(float, volumeDiag, , );
 
@@ -87,6 +88,22 @@ rtDeclareVariable(uint, colorMapSize, , );
 
 rtBuffer<uchar4, 2> output_buffer;
 
+static __device__ float3 refractedVector(
+    const float3 direction,
+    const float3 normal,
+    const float n1,
+    const float n2)
+{
+    if( n2 < 0.01f )
+        return direction;
+    const float eta = n1 / n2;
+    const float cos1 = -optix::dot( direction, normal );
+    const float cos2 = 1.f - eta * eta * ( 1.f - cos1 * cos1 );
+    if( cos2 > 0.f )
+        return eta * direction + ( eta * cos1 - sqrt( cos2 )) * normal;
+    return direction;
+}
+
 static __device__ float4 getVolumeContribution()
 {
     float3 pathColor = { 0.f, 0.f, 0.f };
@@ -97,7 +114,7 @@ static __device__ float4 getVolumeContribution()
     float pathAlpha = 0.f;
     while( t < tMax && pathAlpha < 1.f )
     {
-        float3 point = ( ray.origin + ray.direction * t ) / volumeScale - volumePosition;
+        float3 point = (( ray.origin + ray.direction * t ) - volumeOffset ) / volumeElementSpacing;
 
         if( point.x > 0.f && point.x < volumeDimensions.x &&
             point.y > 0.f && point.y < volumeDimensions.y &&
@@ -148,32 +165,18 @@ static __device__ void phongShadowed()
     rtTerminateRay();
 }
 
-static __device__ void electronShade(
-    float3 Kd,
-    float3 Ka,
-    float3 normal )
-{
-    float3 hit_point = ray.origin + t_hit * ray.direction;
-
-    // ambient contribution
-    float3 result = Ka * ambient_light_color;
-    result += Kd * (1.f - abs(optix::dot( optix::normalize(hit_point-eye), normal)));
-
-    // pass the color back up the tree
-    prd.result = result;
-}
-
 static __device__ void phongShade(
     float3 p_Kd,
     float3 p_Ka,
     float3 p_Ks,
     float3 p_Kr,
     float3 p_Ko,
+    float  p_refractionIndex,
     float  p_phong_exp,
     float3 p_normal )
 {
-    // ambient contribution
-    float3 result = p_Ka * ambient_light_color;
+    // Ambient contribution
+    float3 result = { 0.f, 0.f, 0.f };
 
     // Volume
     float4 volumeValue = { 0.f, 0.f, 0.f, 0.f };
@@ -185,7 +188,7 @@ static __device__ void phongShade(
         result.z += volumeValue.z;
     }
 
-    if( fmaxf( p_Ko ) == 0.f )
+    if( fmaxf( p_Ko ) < 0.01f )
     {
         prd.result = result;
         return;
@@ -194,9 +197,11 @@ static __device__ void phongShade(
     // Surface
     float3 hit_point = ray.origin + t_hit * ray.direction;
     optix::size_t2 screen = output_buffer.size();
-    unsigned int seed = tea<16>( screen.x*launch_index.y + launch_index.x, frame );
+    unsigned int seed = tea< 16 >( screen.x * launch_index.y + launch_index.x, frame );
 
-    if( shading_enabled == 0 )
+    if ( electron_shading_enabled == 1 )
+        result += p_Kd * ( 1.f - abs( optix::dot( optix::normalize( hit_point - eye ), p_normal )));
+    else if( shading_enabled == 0 )
         result += p_Kd;
     else
     {
@@ -265,38 +270,38 @@ static __device__ void phongShade(
         }
     }
 
+    // Reflection
     if( fmaxf( p_Kr ) > 0 )
     {
-        // ray tree attenuation
         PerRayData_radiance new_prd;
-
-        // reflection ray
         new_prd.importance = prd.importance * optix::luminance( p_Kr );
         new_prd.depth = prd.depth + 1;
 
-        if( new_prd.importance >= 0.01f && new_prd.depth <= max_depth)
+        if( new_prd.importance >= 0.01f && new_prd.depth <= max_depth )
         {
             float3 R = optix::reflect( ray.direction, p_normal );
-            optix::Ray refl_ray = optix::make_Ray( hit_point, R, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX );
-            rtTrace(top_object, refl_ray, new_prd);
+            optix::Ray refl_ray = optix::make_Ray(
+                hit_point, R, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX );
+            rtTrace( top_object, refl_ray, new_prd );
             result += p_Kr * new_prd.result;
         }
     }
 
+    // Refraction
     if( fmaxf( p_Ko ) < 1.f )
     {
-        // ray tree attenuation
         PerRayData_radiance new_prd;
-
-        // refraction ray
-        new_prd.importance = prd.importance * optix::luminance( p_Ko );
+        new_prd.importance = prd.importance * optix::luminance( 1.f - p_Ko );
         new_prd.depth = prd.depth + 1;
-        if( new_prd.importance >= 0.01f && new_prd.depth <= max_depth)
+
+        if( new_prd.importance >= 0.01f && new_prd.depth <= max_depth )
         {
-            optix::Ray refl_ray = optix::make_Ray(
-                hit_point, ray.direction, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX );
-            rtTrace( top_object, refl_ray, new_prd );
-            result += ( 1.f - p_Ko) * new_prd.result;
+            float3 R = refractedVector(
+                ray.direction, p_normal, p_refractionIndex, 1.f );
+            optix::Ray refr_ray = optix::make_Ray(
+                hit_point, R, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX );
+            rtTrace( top_object, refr_ray, new_prd );
+            result += ( 1.f - p_Ko ) * new_prd.result;
         }
     }
 
@@ -306,14 +311,15 @@ static __device__ void phongShade(
         PerRayData_shadow aa_prd;
         aa_prd.attenuation = make_float3(1.f);
 
-        float3 aa_normal = optix::normalize( make_float3(rnd( seed ) - 0.5f, rnd( seed ) - 0.5f, rnd( seed ) - 0.5f ));
+        float3 aa_normal = optix::normalize(
+            make_float3(rnd( seed ) - 0.5f, rnd( seed ) - 0.5f, rnd( seed ) - 0.5f ));
         if( optix::dot(aa_normal, p_normal) < 0.f )
             aa_normal = -aa_normal;
-        optix::Ray aa_ray = optix::make_Ray( hit_point, aa_normal, shadow_ray_type, scene_epsilon, RT_DEFAULT_MAX );
+        optix::Ray aa_ray = optix::make_Ray(
+            hit_point, aa_normal, shadow_ray_type, scene_epsilon, RT_DEFAULT_MAX );
         rtTrace(top_shadower, aa_ray, aa_prd);
-        result *= 1.f - ambient_occlusion_strength * (1.f - aa_prd.attenuation);
+        result *= 1.f - ambient_occlusion_strength * ( 1.f - aa_prd.attenuation );
     }
 
-    // pass the color back up the tree
     prd.result = result;
 }
