@@ -18,23 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Engine.h"
+#ifndef KEYBOARDHANDLER_H
+#define KEYBOARDHANDLER_H
+
+#include <brayns/common/types.h>
 
 namespace brayns
 {
 
-Engine::Engine()
-    : _scene( 0 )
-    , _camera( 0 )
-    , _frameBuffer( 0 )
-    , _keyboardHandler( 0 )
+class KeyboardHandler
 {
+
+public:
+
+    KeyboardHandler( ScenePtr scene, ParametersManagerPtr parametersManager );
+
+    void processKey( const unsigned char key );
+
+    std::string help();
+
+    void registerKey( const unsigned char key, const std::string& description );
+    void logDescription( const unsigned char key );
+
+private:
+
+    ParametersManagerPtr _parametersManager;
+    ScenePtr _scene;
+    std::map< unsigned char, std::string > _registeredKeys;
+
+};
+
 }
 
-void Engine::setActiveRenderer( const std::string& renderer )
-{
-    if( _activeRenderer != renderer )
-        _activeRenderer = renderer;
-}
-
-}
+#endif // KEYBOARDHANDLER_H

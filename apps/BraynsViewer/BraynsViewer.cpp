@@ -25,6 +25,7 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 namespace
 {
@@ -41,77 +42,44 @@ BraynsViewer::BraynsViewer(BraynsPtr brayns, int argc, const char **argv)
                  INSPECT_CENTER_MODE|MOVE_MODE)
     , _timestampIncrement( 0.f )
 {
+    KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
+    keyHandler.registerKey( '4', "Set gradient materials" );
+    keyHandler.registerKey( '5', "Set pastel materials" );
+    keyHandler.registerKey( '6', "Set random materials" );
+    keyHandler.registerKey( 'g', "Enable/Disable timestamp auto-increment" );
+    keyHandler.registerKey( 'h', "Display shortcuts help" );
+    keyHandler.registerKey( 'x', "Set timestamp to " + std::to_string( DEFAULT_TEST_TIMESTAMP ));
 }
 
 void BraynsViewer::keypress(char key, const Vector2f& where)
 {
     SceneParameters& sceneParams =
         _brayns->getParametersManager().getSceneParameters();
-    RenderingParameters& renderingParams =
-        _brayns->getParametersManager().getRenderingParameters();
 
     switch (key)
     {
     case '4':
-        BRAYNS_INFO << "Setting gradient materials" << std::endl;
         _brayns->setMaterials(MT_GRADIENT);
         break;
     case '5':
-        BRAYNS_INFO << "Setting pastel materials" << std::endl;
         _brayns->setMaterials(MT_PASTEL_COLORS);
         break;
     case '6':
-        BRAYNS_INFO << "Setting random materials" << std::endl;
         _brayns->setMaterials(MT_RANDOM);
         break;
     case 'g':
         _timestampIncrement = ( _timestampIncrement == 0.f ) ? 1.f : 0.f;
-        BRAYNS_INFO << "Timestamp increment: " <<
-            _timestampIncrement << std::endl;
+        break;
+    case 'h':
+        BRAYNS_INFO << _brayns->getKeyboardHandler().help() << std::endl;
         break;
     case 'x':
         sceneParams.setTimestamp( DEFAULT_TEST_TIMESTAMP );
-        BRAYNS_INFO << "Test Timestamp" << std::endl;
-        break;
-    case ']':
-        {
-            float ts = sceneParams.getTimestamp( );
-            sceneParams.setTimestamp( ts + 1 );
-            BRAYNS_INFO << "Timestamp: " <<
-                sceneParams.getTimestamp( ) << std::endl;
-        }
-        break;
-    case '[':
-        {
-            float ts = sceneParams.getTimestamp( );
-            if( ts > 0.f )
-                sceneParams.setTimestamp( ts - 1 );
-            BRAYNS_INFO << "Timestamp: " <<
-                sceneParams.getTimestamp( ) << std::endl;
-        }
-        break;
-    case '*':
-        _brayns->getParametersManager( ).printHelp( );
-        break;
-    case '0':
-        BRAYNS_INFO << "Default renderer activated" << std::endl;
-        renderingParams.setRenderer("exobj");
-        break;
-    case '7':
-        BRAYNS_INFO << "Particle renderer activated" << std::endl;
-        renderingParams.setRenderer("particlerenderer");
-        break;
-    case '8':
-        BRAYNS_INFO << "Touch detection renderer activated" << std::endl;
-        renderingParams.setRenderer("proximityrenderer");
-        break;
-    case '9':
-        BRAYNS_INFO << "Simulation renderer activated" << std::endl;
-        renderingParams.setRenderer("simulationrenderer");
         break;
     default:
         BaseWindow::keypress(key,where);
     }
+    _brayns->getKeyboardHandler().logDescription( key );
     _brayns->commit( );
 }
 

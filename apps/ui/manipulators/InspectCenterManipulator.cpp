@@ -18,16 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <apps/ui/BaseWindow.h>
 #include "InspectCenterManipulator.h"
+
+#include <apps/ui/BaseWindow.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 namespace brayns
 {
 
-InspectCenterManipulator::InspectCenterManipulator(BaseWindow& window)
-    : AbstractManipulator(window)
-    , _pivot(_window.getWorldBounds().getCenter())
+InspectCenterManipulator::InspectCenterManipulator(
+    BaseWindow& window,
+    KeyboardHandler& keyboardHandler )
+    : AbstractManipulator( window, keyboardHandler )
+    , _pivot( _window.getWorldBounds().getCenter() )
 {
+    _keyboardHandler.registerKey( 'a', "Rotate left" );
+    _keyboardHandler.registerKey( 'd', "Rotate right" );
+    _keyboardHandler.registerKey( 'w', "Rotate up" );
+    _keyboardHandler.registerKey( 's', "Rotate down" );
 }
 
 void InspectCenterManipulator::keypress( int32 key )

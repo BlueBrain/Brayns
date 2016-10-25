@@ -173,6 +173,9 @@ typedef std::shared_ptr< ZeroEQPlugin > ZeroEQPluginPtr;
 class DeflectPlugin;
 typedef std::shared_ptr< DeflectPlugin > DeflectPluginPtr;
 
+class KeyboardHandler;
+typedef std::shared_ptr< KeyboardHandler > KeyboardHandlerPtr;
+
 /** Define the frame buffer format */
 enum FrameBufferFormat
 {

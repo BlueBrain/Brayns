@@ -155,6 +155,12 @@ public:
     */
     BRAYNS_API FrameBuffer& getFrameBuffer();
 
+    /**
+       Gets the keyboard handler
+       @return The keyboard handler object
+    */
+    BRAYNS_API KeyboardHandler& getKeyboardHandler();
+
 private:
 
     struct Impl;

@@ -27,6 +27,7 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 #include <assert.h>
 
@@ -35,6 +36,7 @@
 #  include <unistd.h>
 #else
 #  include "GL/glut.h"
+#  include <GL/freeglut_ext.h>
 #endif
 
 namespace brayns
@@ -128,10 +130,12 @@ BaseWindow::BaseWindow(
 
     // Initialize manipulators
     if(allowedManipulators & INSPECT_CENTER_MODE)
-        _inspectCenterManipulator.reset(new InspectCenterManipulator(*this));
+        _inspectCenterManipulator.reset(
+            new InspectCenterManipulator( *this, _brayns->getKeyboardHandler() ));
 
     if(allowedManipulators & MOVE_MODE)
-        _flyingModeManipulator.reset(new FlyingModeManipulator(*this));
+        _flyingModeManipulator.reset(
+            new FlyingModeManipulator( *this, _brayns->getKeyboardHandler() ));
 
     switch(initialManipulator)
     {
@@ -143,6 +147,16 @@ BaseWindow::BaseWindow(
         break;
     }
     assert(_manipulator);
+
+    KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
+    keyHandler.registerKey( ' ', "Camera reset to initial state" );
+    keyHandler.registerKey( '+', "Increase motion speed" );
+    keyHandler.registerKey( '-', "Decrease motion speed" );
+    keyHandler.registerKey( 'c', "Display current viewport information" );
+    keyHandler.registerKey( 'f', "Enable fly mode" );
+    keyHandler.registerKey( 'i', "Enable inspect mode" );
+    keyHandler.registerKey( 'Q', "Quit application" );
+    keyHandler.registerKey( 'z', "Switch between depth and color buffers" );
 }
 
 
@@ -382,12 +396,7 @@ void BaseWindow::specialkey( int key, const Vector2f& )
 
 void BaseWindow::keypress( char key, const Vector2f& )
 {
-    RenderingParameters& renderParams =
-        _brayns->getParametersManager( ).getRenderingParameters( );
-    SceneParameters& sceneParams =
-        _brayns->getParametersManager().getSceneParameters();
-    VolumeParameters& volumeParams =
-        _brayns->getParametersManager().getVolumeParameters();
+    _brayns->getKeyboardHandler().processKey( key );
 
     switch( key )
     {
@@ -404,26 +413,10 @@ void BaseWindow::keypress( char key, const Vector2f& )
         _motionSpeed /= DEFAULT_MOTION_ACCELERATION;
         BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
         break;
-    case '1':
-        renderParams.setBackgroundColor(Vector3f(.5f,.5f,.5f));
-        BRAYNS_INFO << "Setting grey background" << std::endl;
-        break;
-    case '2':
-        renderParams.setBackgroundColor(Vector3f(1.f,1.f,1.f));
-        BRAYNS_INFO << "Setting white background" << std::endl;
-        break;
-    case '3':
-        renderParams.setBackgroundColor(Vector3f(0.f,0.f,0.f));
-        BRAYNS_INFO << "Setting black background" << std::endl;
-        break;
-    case 'C':
+    case 'c':
         BRAYNS_INFO << _viewPort << std::endl;
         break;
-    case 'E':
-        renderParams.setMaterialType( MT_ELECTRON );
-        BRAYNS_INFO << "Electron shading activated" << std::endl;
-        break;
-    case 'F':
+    case 'f':
         // 'f'ly mode
         if( _flyingModeManipulator )
         {
@@ -431,12 +424,7 @@ void BaseWindow::keypress( char key, const Vector2f& )
             _manipulator = _flyingModeManipulator.get();
         }
         break;
-    case 'H':
-        renderParams.setSoftShadows( !renderParams.getSoftShadows( ));
-        BRAYNS_INFO << "Soft shadows " <<
-            (renderParams.getSoftShadows( ) ? "On" : "Off") << std::endl;
-        break;
-    case 'I':
+    case 'i':
         // 'i'nspect mode
         if( _inspectCenterManipulator)
         {
@@ -444,80 +432,14 @@ void BaseWindow::keypress( char key, const Vector2f& )
             _manipulator = _inspectCenterManipulator.get();
         }
         break;
-    case 'L':
-    {
-        fullScreen_ = !fullScreen_;
-        if(fullScreen_)
-            glutFullScreen( );
-        else
-            glutPositionWindow(0,10);
+    case 'Q':
+#ifdef __APPLE__
+        exit(0);
+#else
+        glutLeaveMainLoop();
+#endif
         break;
-    }
-    case 'o':
-    {
-        float aaStrength = _brayns->getParametersManager( ).
-            getRenderingParameters( ).getAmbientOcclusionStrength( );
-        aaStrength += 0.1f;
-        if( aaStrength>1.f ) aaStrength=1.f;
-        renderParams.setAmbientOcclusionStrength( aaStrength );
-        BRAYNS_INFO << "Ambient occlusion strength: " <<
-            aaStrength << std::endl;
-        break;
-    }
-    case 'O':
-    {
-        float aaStrength = renderParams.getAmbientOcclusionStrength( );
-        aaStrength -= 0.1f;
-        if( aaStrength<0.f ) aaStrength=0.f;
-        renderParams.setAmbientOcclusionStrength( aaStrength );
-        BRAYNS_INFO << "Ambient occlusion strength: "
-            << aaStrength << std::endl;
-        break;
-    }
-    case 'p':
-        renderParams.setMaterialType( MT_DIFFUSE );
-        BRAYNS_INFO << "Diffuse shading activated" << std::endl;
-        break;
-    case 'P':
-        renderParams.setMaterialType( MT_NO_SHADING );
-        BRAYNS_INFO << "No shading activated" << std::endl;
-        break;
-    case 'r':
-        sceneParams.setTimestamp( 0.f );
-        BRAYNS_INFO << "Timestamp: " <<
-            sceneParams.getTimestamp( ) << std::endl;
-        break;
-    case 'R':
-        sceneParams.setTimestamp( std::numeric_limits< size_t >::max( ));
-        BRAYNS_INFO << "Timestamp: " <<
-            sceneParams.getTimestamp( ) << std::endl;
-        break;
-    case 'S':
-        renderParams.setShadows(
-            !renderParams.getShadows( ));
-        BRAYNS_INFO << "Shadows: " <<
-            (renderParams.getShadows( ) ? "On" : "Off") << std::endl;
-        break;
-    case 'T':
-        volumeParams.setSamplesPerRay( volumeParams.getSamplesPerRay() / 2 );
-        BRAYNS_INFO << "Volume samples per ray: " << volumeParams.getSamplesPerRay() << std::endl;
-        _brayns->getScene().commitVolumeData();
-        break;
-    case 't':
-        volumeParams.setSamplesPerRay( volumeParams.getSamplesPerRay() * 2 );
-        BRAYNS_INFO << "Volume samples per ray: " << volumeParams.getSamplesPerRay() << std::endl;
-        _brayns->getScene().commitVolumeData();
-        break;
-    case 'V':
-        renderParams.
-            setBackgroundColor( Vector3f( rand( ) % 200 / 100.f - 1.f,
-            rand( ) % 200 / 100.f - 1.f, rand( ) % 200 / 100.f - 1.f ));
-        break;
-    case 'Y':
-        renderParams.setLightEmittingMaterials(
-            !renderParams.getLightEmittingMaterials( ));
-        break;
-    case 'Z':
+    case 'z':
         if( _frameBufferMode==FRAMEBUFFER_DEPTH )
             _frameBufferMode = FRAMEBUFFER_COLOR;
         else

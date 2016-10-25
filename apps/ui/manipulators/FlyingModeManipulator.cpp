@@ -18,12 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <apps/ui/BaseWindow.h>
-
 #include "FlyingModeManipulator.h"
+
+#include <apps/ui/BaseWindow.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 namespace brayns
 {
+
+FlyingModeManipulator::FlyingModeManipulator(
+    BaseWindow& window,
+    KeyboardHandler& keyboardHandler )
+    : AbstractManipulator( window, keyboardHandler )
+{
+    _keyboardHandler.registerKey( 'a', "Strafe left" );
+    _keyboardHandler.registerKey( 'd', "Strafe right" );
+    _keyboardHandler.registerKey( 'w', "Fly forward" );
+    _keyboardHandler.registerKey( 's', "Fly backwards" );
+}
 
 void FlyingModeManipulator::keypress( int32 key )
 {

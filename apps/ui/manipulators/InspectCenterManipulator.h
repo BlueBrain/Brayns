@@ -31,7 +31,9 @@ namespace brayns
 class InspectCenterManipulator : public AbstractManipulator
 {
 public:
-    InspectCenterManipulator( BaseWindow& window );
+    InspectCenterManipulator(
+        BaseWindow& window,
+        KeyboardHandler& keyboardHandler );
 
     void dragLeft( const Vector2i &to, const Vector2i &from ) final;
     void dragRight( const Vector2i &to, const Vector2i &from ) final;

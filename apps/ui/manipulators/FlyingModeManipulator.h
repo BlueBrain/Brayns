@@ -32,8 +32,7 @@ class FlyingModeManipulator : public AbstractManipulator
 {
 public:
 
-    FlyingModeManipulator( BaseWindow& window ) :
-        AbstractManipulator( window ) {}
+    FlyingModeManipulator( BaseWindow& window, KeyboardHandler& keyboardHandler );
 
 protected:
 

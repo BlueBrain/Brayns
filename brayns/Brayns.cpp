@@ -64,6 +64,10 @@ struct Brayns::Impl
         if( !_engine )
             throw std::runtime_error( "Unsupported engine: " + engineName );
 
+        // Keyboard handler
+        KeyboardHandlerPtr keyboardHandler =
+            _engine->getKeyboardHandler();
+
         // set HDRI skybox if applicable
         const std::string& hdri =
             _parametersManager->getRenderingParameters().getHDRI();
@@ -303,6 +307,11 @@ struct Brayns::Impl
     FrameBuffer& getFrameBuffer( )
     {
         return *_engine->getFrameBuffer();
+    }
+
+    KeyboardHandler& getKeyboardHandler()
+    {
+        return *_engine->getKeyboardHandler();
     }
 
 private:
@@ -699,6 +708,11 @@ Camera& Brayns::getCamera( )
 FrameBuffer& Brayns::getFrameBuffer( )
 {
     return _impl->getFrameBuffer( );
+}
+
+KeyboardHandler& Brayns::getKeyboardHandler()
+{
+    return _impl->getKeyboardHandler( );
 }
 
 }

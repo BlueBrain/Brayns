@@ -20,6 +20,8 @@
 
 #include "OSPRayEngine.h"
 
+#include <brayns/common/input/KeyboardHandler.h>
+
 #include <plugins/engines/ospray/render/OSPRayRenderer.h>
 #include <plugins/engines/ospray/render/OSPRayScene.h>
 #include <plugins/engines/ospray/render/OSPRayFrameBuffer.h>
@@ -75,6 +77,8 @@ OSPRayEngine::OSPRayEngine(
     _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8, accumulation ));
     _camera.reset( new OSPRayCamera(
         parametersManager->getRenderingParameters().getCameraType( )));
+
+    _keyboardHandler.reset( new KeyboardHandler( _scene, parametersManager ));
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 
