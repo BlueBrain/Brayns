@@ -134,8 +134,8 @@ bool MorphologyLoader::_importMorphology(
             const float radius =
                 ( _geometryParameters.getRadiusCorrection() != 0.f ?
                 _geometryParameters.getRadiusCorrection() :
-                soma.getMeanRadius() *
-                    _geometryParameters.getRadiusMultiplier() );
+                soma.getMeanRadius() /* *
+                    _geometryParameters.getRadiusMultiplier()*/ );
             primitives[material].push_back( SpherePtr(
                 new Sphere( material, center, radius, 0.f, offset )));
             bounds.merge( center );
