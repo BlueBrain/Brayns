@@ -69,7 +69,7 @@ void Scene::setMaterials(
             case MATERIAL_INVISIBLE:
                 material->setOpacity( 0.f );
                 material->setRefractionIndex( 1.f );
-                material->setColor( Vector3f( 0.f, 0.f, 0.f ));
+                material->setColor( Vector3f( 1.f, 1.f, 1.f ));
                 material->setSpecularColor( Vector3f( 0.f, 0.f, 0.f ));
                 break;
             default:
@@ -85,7 +85,7 @@ void Scene::setMaterials(
             switch( i )
             {
                 case 1: // Soma
-                    material->setColor( Vector3f( 1.f, 1.f, 1.f ));
+                    material->setColor( Vector3f( 0.9f, 0.9f, 0.9f ));
                     break;
                 case 2: // Axon
                     material->setColor( Vector3f( 0.2f, 0.2f, 0.8f ));
@@ -94,7 +94,7 @@ void Scene::setMaterials(
                     material->setColor( Vector3f( 0.8f, 0.2f, 0.2f ));
                     break;
                 case 4: // Apical dendrite
-                    material->setColor( Vector3f( 0.2f, 0.2f, 0.8f ));
+                    material->setColor( Vector3f( 0.8f, 0.2f, 0.8f ));
                     break;
                 default:
                     material->setColor( Vector3f(
@@ -542,7 +542,7 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                         {
                             boost::filesystem::path fileExtension =
                                 dirIter->path( ).extension( );
-                            if( fileExtension==".raw" )
+                            //if( fileExtension==".raw" )
                             {
                                 const std::string& filename = dirIter->path( ).string( );
                                 filenames.push_back( filename );

@@ -23,11 +23,8 @@
 namespace brayns
 {
 
-ExtensionPlugin::ExtensionPlugin(
-    ApplicationParameters& applicationParameters,
-    ExtensionParameters& extensionParameters )
-    : _applicationParameters( applicationParameters )
-    , _extensionParameters( extensionParameters )
+ExtensionPlugin::ExtensionPlugin( Brayns& brayns )
+    : _brayns( brayns )
 {
 }
 

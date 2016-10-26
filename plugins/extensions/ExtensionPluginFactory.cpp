@@ -31,17 +31,11 @@
 namespace brayns
 {
 
-ExtensionPluginFactory::ExtensionPluginFactory(
-    ApplicationParameters& applicationParameters,
-    ExtensionParameters& extensionParameters )
-    : _applicationParameters( applicationParameters )
-    , _extensionParameters( extensionParameters )
+ExtensionPluginFactory::ExtensionPluginFactory( Brayns& brayns )
+    : _brayns( brayns )
 {
-    BRAYNS_DEBUG << &_applicationParameters << std::endl;
-    BRAYNS_DEBUG << &_extensionParameters << std::endl;
 #ifdef BRAYNS_USE_ZEROEQ
-    ZeroEQPluginPtr zeroEQPlugin( new ZeroEQPlugin(
-        applicationParameters, _extensionParameters ));
+    ZeroEQPluginPtr zeroEQPlugin( new ZeroEQPlugin( brayns ));
     add( zeroEQPlugin );
 #endif
 
@@ -50,8 +44,7 @@ ExtensionPluginFactory::ExtensionPluginFactory(
     // silently ignore failure
     try
     {
-        add( std::make_shared<DeflectPlugin>( applicationParameters,
-                                              _extensionParameters ));
+        add( std::make_shared<DeflectPlugin>( brayns ));
     }
     catch( ... ) {}
 #endif

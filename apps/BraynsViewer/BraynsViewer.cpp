@@ -42,45 +42,54 @@ BraynsViewer::BraynsViewer(BraynsPtr brayns, int argc, const char **argv)
                  INSPECT_CENTER_MODE|MOVE_MODE)
     , _timestampIncrement( 0.f )
 {
-    KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
-    keyHandler.registerKey( '4', "Set gradient materials" );
-    keyHandler.registerKey( '5', "Set pastel materials" );
-    keyHandler.registerKey( '6', "Set random materials" );
-    keyHandler.registerKey( 'g', "Enable/Disable timestamp auto-increment" );
-    keyHandler.registerKey( 'h', "Display shortcuts help" );
-    keyHandler.registerKey( 'x', "Set timestamp to " + std::to_string( DEFAULT_TEST_TIMESTAMP ));
+    _registerKeyboardShortcuts();
 }
 
-void BraynsViewer::keypress(char key, const Vector2f& where)
+void BraynsViewer::_registerKeyboardShortcuts()
 {
-    SceneParameters& sceneParams =
-        _brayns->getParametersManager().getSceneParameters();
+    BaseWindow::_registerKeyboardShortcuts();
+    KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
+    keyHandler.registerKeyboardShortcut(
+        '3', "Set gradient materials",
+        std::bind( &BraynsViewer::_gradientMaterials, this ));
+    keyHandler.registerKeyboardShortcut(
+        '4', "Set pastel materials",
+        std::bind( &BraynsViewer::_pastelMaterials, this ));
+    keyHandler.registerKeyboardShortcut(
+        '5', "Set random materials",
+        std::bind( &BraynsViewer::_randomMaterials, this ));
+    keyHandler.registerKeyboardShortcut(
+        'g', "Enable/Disable timestamp auto-increment",
+         std::bind( &BraynsViewer::_toggleIncrementalTimestamp, this ));
+    keyHandler.registerKeyboardShortcut(
+        'x', "Set timestamp to " + std::to_string( DEFAULT_TEST_TIMESTAMP ),
+        std::bind( &BraynsViewer::_defaultTimestamp, this ));
+}
 
-    switch (key)
-    {
-    case '4':
-        _brayns->setMaterials(MT_GRADIENT);
-        break;
-    case '5':
-        _brayns->setMaterials(MT_PASTEL_COLORS);
-        break;
-    case '6':
-        _brayns->setMaterials(MT_RANDOM);
-        break;
-    case 'g':
-        _timestampIncrement = ( _timestampIncrement == 0.f ) ? 1.f : 0.f;
-        break;
-    case 'h':
-        BRAYNS_INFO << _brayns->getKeyboardHandler().help() << std::endl;
-        break;
-    case 'x':
-        sceneParams.setTimestamp( DEFAULT_TEST_TIMESTAMP );
-        break;
-    default:
-        BaseWindow::keypress(key,where);
-    }
-    _brayns->getKeyboardHandler().logDescription( key );
-    _brayns->commit( );
+void BraynsViewer::_gradientMaterials()
+{
+    _brayns->setMaterials( MT_GRADIENT );
+}
+
+void BraynsViewer::_pastelMaterials()
+{
+    _brayns->setMaterials( MT_PASTEL_COLORS );
+}
+
+void BraynsViewer::_randomMaterials()
+{
+    _brayns->setMaterials( MT_RANDOM );
+}
+
+void BraynsViewer::_toggleIncrementalTimestamp()
+{
+    _timestampIncrement = ( _timestampIncrement == 0.f ) ? 1.f : 0.f;
+}
+
+void BraynsViewer::_defaultTimestamp()
+{
+    SceneParameters& sceneParams = _brayns->getParametersManager().getSceneParameters();
+    sceneParams.setTimestamp( DEFAULT_TEST_TIMESTAMP );
 }
 
 void BraynsViewer::display( )
@@ -94,7 +103,7 @@ void BraynsViewer::display( )
         _brayns->commit( );
     }
 
-    BaseWindow::display( );
+    BaseWindow::display();
 
     std::stringstream ss;
     ss << "Brayns Viewer [" <<

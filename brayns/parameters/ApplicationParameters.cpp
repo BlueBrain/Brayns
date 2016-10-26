@@ -33,6 +33,7 @@ const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
 const std::string PARAM_DEFLECT_HOST_NAME = "deflect-hostname";
 const std::string PARAM_DEFLECT_STREAM_NAME = "deflect-streamname";
+const std::string PARAM_DEFLECT_ENABLED = "deflect-enabled";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_FILTERS = "filters";
@@ -53,6 +54,7 @@ ApplicationParameters::ApplicationParameters( )
     : AbstractParameters( "Application" )
     , _camera( DEFAULT_CAMERA )
     , _windowSize( DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT )
+    , _deflectEnabled( true )
     , _benchmarking( false )
     , _jpegCompression( DEFAULT_JPEG_COMPRESSION )
     , _jpegSize( DEFAULT_JPEG_WIDTH, DEFAULT_JPEG_HEIGHT )
@@ -67,6 +69,8 @@ ApplicationParameters::ApplicationParameters( )
             "Host running Deflect server" )
         ( PARAM_DEFLECT_STREAM_NAME.c_str( ), po::value< std::string >( ),
             "Name of Deflect stream" )
+        ( PARAM_DEFLECT_ENABLED.c_str( ), po::value< bool >( ),
+            "Enables/Disables Deflect stream" )
         ( PARAM_BENCHMARKING.c_str( ), po::value< bool >( ),
             "Activates application benchmarking" )
         ( PARAM_JPEG_COMPRESSION.c_str( ), po::value< size_t >( ),
@@ -93,9 +97,11 @@ bool ApplicationParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_CAMERA ))
         _camera = vm[PARAM_CAMERA].as< std::string >( );
     if( vm.count( PARAM_DEFLECT_HOST_NAME ))
-        _deflectHostname = vm[PARAM_DEFLECT_HOST_NAME].as< std::string >( );
+        _deflectHostName = vm[PARAM_DEFLECT_HOST_NAME].as< std::string >( );
     if( vm.count( PARAM_DEFLECT_STREAM_NAME ))
-        _deflectStreamname = vm[PARAM_DEFLECT_STREAM_NAME].as< std::string >( );
+        _deflectStreamName = vm[PARAM_DEFLECT_STREAM_NAME].as< std::string >( );
+    if( vm.count( PARAM_DEFLECT_ENABLED ))
+        _deflectEnabled = vm[PARAM_DEFLECT_ENABLED].as< bool >( );
     if( vm.count( PARAM_BENCHMARKING ))
         _benchmarking = vm[PARAM_BENCHMARKING].as< bool >( );
     if( vm.count( PARAM_JPEG_COMPRESSION ))
@@ -122,14 +128,11 @@ void ApplicationParameters::print( )
     AbstractParameters::print( );
     BRAYNS_INFO << "Window size             : " << _windowSize << std::endl;
     BRAYNS_INFO << "Camera                  : " << _camera << std::endl;
-    BRAYNS_INFO << "Deflect host name       : " <<
-        _deflectHostname << std::endl;
-    BRAYNS_INFO << "Deflect stream name     : " <<
-        _deflectStreamname << std::endl;
-    BRAYNS_INFO << "Benchmarking            : " <<
-        ( _benchmarking ? "on" : "off" ) << std::endl;
-    BRAYNS_INFO << "JPEG Compression        : " <<
-        _jpegCompression << std::endl;
+    BRAYNS_INFO << "Deflect host name       : " << _deflectHostName << std::endl;
+    BRAYNS_INFO << "Deflect stream name     : " << _deflectStreamName << std::endl;
+    BRAYNS_INFO << "Deflect enabled         : " << ( _deflectEnabled ? "on" : "off" ) << std::endl;
+    BRAYNS_INFO << "Benchmarking            : " << ( _benchmarking ? "on" : "off" ) << std::endl;
+    BRAYNS_INFO << "JPEG Compression        : " << _jpegCompression << std::endl;
     BRAYNS_INFO << "JPEG size               : " << _jpegSize << std::endl;
 }
 

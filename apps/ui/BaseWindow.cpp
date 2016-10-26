@@ -124,7 +124,7 @@ BaseWindow::BaseWindow(
     _motionSpeed(DEFAULT_MOUSE_SPEED), _rotateSpeed(DEFAULT_MOUSE_SPEED),
     _frameBufferMode(frameBufferMode),
     _windowID(-1), _windowSize(-1,-1), fullScreen_(false),
-    frameCounter_(0)
+    frameCounter_(0), _displayHelp( false )
 {
     _setViewPort( );
 
@@ -147,18 +147,7 @@ BaseWindow::BaseWindow(
         break;
     }
     assert(_manipulator);
-
-    KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
-    keyHandler.registerKey( ' ', "Camera reset to initial state" );
-    keyHandler.registerKey( '+', "Increase motion speed" );
-    keyHandler.registerKey( '-', "Decrease motion speed" );
-    keyHandler.registerKey( 'c', "Display current viewport information" );
-    keyHandler.registerKey( 'f', "Enable fly mode" );
-    keyHandler.registerKey( 'i', "Enable inspect mode" );
-    keyHandler.registerKey( 'Q', "Quit application" );
-    keyHandler.registerKey( 'z', "Switch between depth and color buffers" );
 }
-
 
 BaseWindow::~BaseWindow( )
 {
@@ -268,12 +257,19 @@ void BaseWindow::display( )
             buffer = renderOutput.depthBuffer.data( );
             break;
         default:
-            glClearColor(0.f,0.f,0.f,1.f);
+            glClearColor( 0.f, 0.f, 0.f, 1.f );
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         }
 
         if( buffer )
+        {
             glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
+            if( _displayHelp )
+            {
+                KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
+                _renderBitmapString( -0.98f, 0.95f, keyHandler.help() );
+            }
+        }
     }
     else
     {
@@ -291,7 +287,6 @@ void BaseWindow::display( )
         ssProcData.depthType = GL_FLOAT;
 
         _screenSpaceProcessor.draw( ssProcData );
-
     }
 
     float* buffer = renderOutput.depthBuffer.data();
@@ -302,6 +297,7 @@ void BaseWindow::display( )
     }
 
     _fps.stop();
+
     glutSwapBuffers( );
 
     clearPixels( );
@@ -320,6 +316,7 @@ void BaseWindow::display( )
     if( windowSize != _windowSize )
         glutReshapeWindow(windowSize.x(), windowSize.y());
     ++frameCounter_;
+
 }
 
 void BaseWindow::clearPixels( )
@@ -388,6 +385,37 @@ void BaseWindow::create(const char *title,
     _screenSpaceProcessor.init( width, height );
 }
 
+void BaseWindow::_registerKeyboardShortcuts()
+{
+    _manipulator->registerKeyboardShortcuts();
+
+    KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
+    keyHandler.registerKeyboardShortcut(
+        ' ', "Camera reset to initial state",
+        std::bind( &BaseWindow::_resetCamera, this ));
+    keyHandler.registerKeyboardShortcut(
+        '+', "Increase motion speed",
+        std::bind( &BaseWindow::_increaseMotionSpeed, this ));
+    keyHandler.registerKeyboardShortcut(
+        '-', "Decrease motion speed",
+        std::bind( &BaseWindow::_decreaseMotionSpeed, this ));
+    keyHandler.registerKeyboardShortcut(
+        'c', "Display current viewport information",
+        std::bind( &BaseWindow::_displayViewportInformation, this ));
+    keyHandler.registerKeyboardShortcut(
+        'f', "Enable fly mode",
+        std::bind( &BaseWindow::_enableFlyMode, this ));
+    keyHandler.registerKeyboardShortcut(
+        'i', "Enable inspect mode",
+        std::bind( &BaseWindow::_enableInspectMode, this ));
+    keyHandler.registerKeyboardShortcut(
+        'Q', "Quit application",
+        std::bind( &BaseWindow::_exitApplication, this ));
+    keyHandler.registerKeyboardShortcut(
+        'z', "Switch between depth and color buffers",
+        std::bind( &BaseWindow::_toggleFrameBuffer, this ));
+}
+
 void BaseWindow::specialkey( int key, const Vector2f& )
 {
     if(_manipulator)
@@ -396,58 +424,85 @@ void BaseWindow::specialkey( int key, const Vector2f& )
 
 void BaseWindow::keypress( char key, const Vector2f& )
 {
-    _brayns->getKeyboardHandler().processKey( key );
-
-    switch( key )
+    switch (key)
     {
-    case ' ':
-        BRAYNS_INFO << "Camera reset to initial state" << std::endl;
-        _brayns->getCamera().reset();
-        _brayns->getCamera().commit();
+    case 'h':
+        _displayHelp = !_displayHelp;
         break;
-    case '+':
-        _motionSpeed *= DEFAULT_MOTION_ACCELERATION;
-        BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
-        break;
-    case '-':
-        _motionSpeed /= DEFAULT_MOTION_ACCELERATION;
-        BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
-        break;
-    case 'c':
-        BRAYNS_INFO << _viewPort << std::endl;
-        break;
-    case 'f':
-        // 'f'ly mode
-        if( _flyingModeManipulator )
-        {
-            BRAYNS_INFO << "Switching to flying mode" << std::endl;
-            _manipulator = _flyingModeManipulator.get();
-        }
-        break;
-    case 'i':
-        // 'i'nspect mode
-        if( _inspectCenterManipulator)
-        {
-            BRAYNS_INFO << "Switching to inspect mode" << std::endl;
-            _manipulator = _inspectCenterManipulator.get();
-        }
-        break;
-    case 'Q':
-#ifdef __APPLE__
-        exit(0);
-#else
-        glutLeaveMainLoop();
-#endif
-        break;
-    case 'z':
-        if( _frameBufferMode==FRAMEBUFFER_DEPTH )
-            _frameBufferMode = FRAMEBUFFER_COLOR;
-        else
-            _frameBufferMode = FRAMEBUFFER_DEPTH;
-        break;
+    default:
+        _brayns->getKeyboardHandler().handleKeyboardShortcut( key );
     }
+
     if(_manipulator)
         _manipulator->keypress( key );
+
+    _brayns->commit( );
+}
+
+void BaseWindow::_resetCamera()
+{
+    _brayns->getCamera().reset();
+    _brayns->getCamera().commit();
+}
+
+void BaseWindow::_increaseMotionSpeed()
+{
+    _motionSpeed *= DEFAULT_MOTION_ACCELERATION;
+}
+
+void BaseWindow::_decreaseMotionSpeed()
+{
+    _motionSpeed /= DEFAULT_MOTION_ACCELERATION;
+}
+
+void BaseWindow::_displayViewportInformation()
+{
+    BRAYNS_INFO << _viewPort << std::endl;
+}
+
+void BaseWindow::_enableFlyMode()
+{
+    // 'f'ly mode
+    if( _flyingModeManipulator )
+    {
+        _manipulator->unregisterKeyboardShortcuts();
+        _manipulator = _flyingModeManipulator.get();
+        _manipulator->registerKeyboardShortcuts();
+    }
+}
+
+void BaseWindow::_enableInspectMode()
+{
+    if( _inspectCenterManipulator)
+    {
+        _manipulator->unregisterKeyboardShortcuts();
+        _manipulator = _inspectCenterManipulator.get();
+        _manipulator->registerKeyboardShortcuts();
+    }
+}
+
+void BaseWindow::_exitApplication()
+{
+#ifdef __APPLE__
+    exit(0);
+#else
+    glutLeaveMainLoop();
+#endif
+}
+
+void BaseWindow::_toggleFrameBuffer()
+{
+    if( _frameBufferMode==FRAMEBUFFER_DEPTH )
+        _frameBufferMode = FRAMEBUFFER_COLOR;
+    else
+        _frameBufferMode = FRAMEBUFFER_DEPTH;
+}
+
+void BaseWindow::_renderBitmapString( const float x, const float y, const std::string& text )
+{
+    glRasterPos3f( x, y, 0.f );
+    glutBitmapString( GLUT_BITMAP_8_BY_13, reinterpret_cast< const unsigned char* >( text.c_str()));
+    glRasterPos3f( -1.f, -1.f, 0.f );
 }
 
 }

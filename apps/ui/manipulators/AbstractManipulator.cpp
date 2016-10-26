@@ -26,6 +26,7 @@
 #include "AbstractManipulator.h"
 
 #include <apps/ui/BaseWindow.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 namespace brayns
 {

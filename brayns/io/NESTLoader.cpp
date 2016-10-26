@@ -113,6 +113,7 @@ void NESTLoader::importCircuit( const std::string& filepath, Scene& scene, size_
         const size_t index =
             int(xColor[gid]) + int(yColor[gid] * 256) + int(zColor[gid] * 65536);
         const Vector3f center( xPos[gid], yPos[gid], zPos[gid] );
+        _positions.push_back( center );
         primitives[ 0 ].push_back( SpherePtr(
             new Sphere( 0, center, radius, 0.f, materials[index].w() )));
         bounds.merge( center );
@@ -228,6 +229,10 @@ bool NESTLoader::_load( const float timestamp )
     BRAYNS_DEBUG << "Loading spikes at timestamp: " << timestamp
                  << " (" << start << " ms)" << std::endl;
 
+
+    char filename[1024];
+    sprintf( filename, "/home/favreau/medias/volumes/spikes/10pct/events/spikes_%05d.events", int(timestamp*10) );
+    std::ofstream myFile (filename, std::ios::out | std::ios::binary);
     size_t nbSpikes = 0;
     for( size_t i = 0; i < _nbElements; ++i )
     {
@@ -245,8 +250,22 @@ bool NESTLoader::_load( const float timestamp )
         // We store the frame on which the spike happens, as the renderer keeps
         // track of the current timestamp
         _spikingTimes[ gid ] = time;
+
+        const Vector3f& position = _positions[gid];
+        float value;
+        value = position.x();
+        myFile.write( (char *) &value, sizeof(float ));
+        value = position.y();
+        myFile.write( (char *) &value, sizeof(float ));
+        value = position.z();
+        myFile.write( (char *) &value, sizeof(float ));
+        value = 1.f;
+        myFile.write( (char *) &value, sizeof(float ));
+        myFile.write( (char *) &value, sizeof(float ));
+
         ++nbSpikes;
     }
+    myFile.close();
     BRAYNS_INFO << "Nb Spikes for timestamp " << timestamp << " ["
                 << start << "-" << end << "]: " << nbSpikes
                 << std::endl;

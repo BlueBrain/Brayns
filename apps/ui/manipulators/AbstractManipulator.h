@@ -52,6 +52,10 @@ public:
 
     virtual void specialkey( int32 ) {}
 
+    virtual void registerKeyboardShortcuts() {}
+
+    virtual void unregisterKeyboardShortcuts() {}
+
 protected:
 
     /** helper functions called from the default 'motion' function */

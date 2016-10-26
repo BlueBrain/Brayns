@@ -39,8 +39,17 @@ protected:
     void dragLeft( const Vector2i&, const Vector2i& ) final;
     void dragRight( const Vector2i&, const Vector2i& ) final;
     void dragMiddle( const Vector2i&,const Vector2i& ) final;
-    void keypress( int32 key ) final;
     void button( const Vector2i& ) final {}
+
+    void registerKeyboardShortcuts() final;
+
+    void unregisterKeyboardShortcuts() final;
+
+    void StrafeLeft();
+    void StrafeRight();
+    void FlyForward();
+    void FlyBackwards();
+
 };
 
 }

@@ -23,7 +23,6 @@
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns
 {
@@ -46,10 +45,9 @@ public:
     BRAYNS_API virtual void run( ) = 0;
 
 protected:
-    ExtensionPlugin( ApplicationParameters&, ExtensionParameters& );
+    ExtensionPlugin( Brayns& brayns );
 
-    ApplicationParameters& _applicationParameters;
-    ExtensionParameters& _extensionParameters;
+    Brayns& _brayns;
 };
 
 }

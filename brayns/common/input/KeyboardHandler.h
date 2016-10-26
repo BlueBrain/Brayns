@@ -26,6 +26,12 @@
 namespace brayns
 {
 
+struct ShortcutInformation
+{
+    std::string description;
+    std::function< void() > functor;
+};
+
 class KeyboardHandler
 {
 
@@ -33,18 +39,22 @@ public:
 
     KeyboardHandler( ScenePtr scene, ParametersManagerPtr parametersManager );
 
-    void processKey( const unsigned char key );
-
     std::string help();
 
-    void registerKey( const unsigned char key, const std::string& description );
-    void logDescription( const unsigned char key );
+    void registerKeyboardShortcut(
+        const unsigned char key,
+        const std::string& description,
+        std::function< void() > functor );
+
+    void unregisterKeyboardShortcut( const unsigned char key );
+
+    void handleKeyboardShortcut( const unsigned char key );
 
 private:
 
     ParametersManagerPtr _parametersManager;
     ScenePtr _scene;
-    std::map< unsigned char, std::string > _registeredKeys;
+    std::map< unsigned char, ShortcutInformation > _registeredShortcuts;
 
 };
 

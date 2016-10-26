@@ -20,6 +20,7 @@
 
 #include "ZeroEQPlugin.h"
 
+#include <brayns/Brayns.h>
 #include <plugins/engines/common/Engine.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/scene/Scene.h>
@@ -34,12 +35,9 @@
 namespace brayns
 {
 
-ZeroEQPlugin::ZeroEQPlugin(
-    ApplicationParameters& applicationParameters,
-    ExtensionParameters& extensionParameters )
-    : ExtensionPlugin( applicationParameters, extensionParameters )
-    , _compressor( tjInitCompress( ))
-    , _jpegCompression( applicationParameters.getJpegCompression( ))
+ZeroEQPlugin::ZeroEQPlugin( Brayns& brayns )
+    : ExtensionPlugin( brayns )
+    , _compressor( tjInitCompress() )
     , _processingImageJpeg( false )
 {
     _setupHTTPServer( );
@@ -54,8 +52,7 @@ ZeroEQPlugin::~ZeroEQPlugin( )
 
     if( _httpServer )
     {
-        _httpServer->remove(
-            *_extensionParameters.engine->getCamera()->getSerializable( ));
+        _httpServer->remove( *_brayns.getCamera().getSerializable() );
         _httpServer->remove( _remoteImageJPEG );
     }
 }
@@ -67,7 +64,8 @@ void ZeroEQPlugin::run()
 
 void ZeroEQPlugin::_setupHTTPServer()
 {
-    const strings& arguments = _applicationParameters.arguments();
+    const strings& arguments =
+        _brayns.getParametersManager().getApplicationParameters().arguments();
     char** argv = new char*[arguments.size()];
     for( size_t i = 0; i < arguments.size( ); ++i )
         argv[ i ] = const_cast< char* >( arguments[ i ].c_str( ));
@@ -85,8 +83,7 @@ void ZeroEQPlugin::_setupHTTPServer()
     BRAYNS_INFO << "Registering handlers on " <<
         _httpServer->getURI() << std::endl;
 
-    servus::Serializable& cam =
-        *_extensionParameters.engine->getCamera()->getSerializable();
+    servus::Serializable& cam = *_brayns.getCamera().getSerializable();
     _httpServer->handle( cam );
     cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
 
@@ -131,10 +128,8 @@ void ZeroEQPlugin::_setupHTTPServer()
 void ZeroEQPlugin::_setupRequests()
 {
     ::zerobuf::render::FovCamera camera;
-    _requests[ camera.getTypeIdentifier() ] = [&]
-        { return _publisher.publish(
-            *_extensionParameters.engine->getCamera()->getSerializable( ));
-        };
+    _requests[ camera.getTypeIdentifier() ] =
+        [&]{ return _publisher.publish( *_brayns.getCamera().getSerializable() ); };
 
     ::lexis::render::ImageJPEG imageJPEG;
     _requests[ imageJPEG.getTypeIdentifier() ] =
@@ -160,19 +155,19 @@ void ZeroEQPlugin::_setupSubscriber()
 
 void ZeroEQPlugin::_cameraUpdated()
 {
-    _extensionParameters.engine->getFrameBuffer()->clear();
-    _extensionParameters.engine->getCamera()->commit();
+    _brayns.getFrameBuffer().clear();
+    _brayns.getCamera().commit();
 }
 
 void ZeroEQPlugin::_attributeUpdated( )
 {
     BRAYNS_INFO << _remoteAttribute.getKeyString() << " = " <<
         _remoteAttribute.getValueString() << std::endl;
-    _extensionParameters.parametersManager->set(
+    _brayns.getParametersManager().set(
         _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
-    _extensionParameters.engine->getScene()->commitVolumeData();
-    _extensionParameters.engine->getRenderer()->commit();
-    _extensionParameters.engine->getFrameBuffer()->clear();
+    _brayns.getScene().commitVolumeData();
+    _brayns.getRenderer().commit();
+    _brayns.getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_resetUpdated( )
@@ -180,17 +175,16 @@ void ZeroEQPlugin::_resetUpdated( )
     if( _remoteReset.getCamera() )
     {
         BRAYNS_INFO << "Resetting camera" << std::endl;
-        CameraPtr camera = _extensionParameters.engine->getCamera();
-        camera->reset();
-        camera->commit();
+        _brayns.getCamera().reset();
+        _brayns.getCamera().commit();
     }
 }
 
 void ZeroEQPlugin::_materialUpdated( )
 {
     size_t materialId = _remoteMaterial.getIndex();
-    ScenePtr scene = _extensionParameters.engine->getScene();
-    MaterialPtr material = scene->getMaterial( materialId );
+    Scene& scene = _brayns.getScene();
+    MaterialPtr material = scene.getMaterial( materialId );
 
     if( material)
     {
@@ -210,15 +204,15 @@ void ZeroEQPlugin::_materialUpdated( )
         material->setOpacity( _remoteMaterial.getOpacity() );
         material->setRefractionIndex( _remoteMaterial.getRefractionIndex() );
         material->setEmission( _remoteMaterial.getLightEmission() );
-        scene->commitMaterials( true );
-        _extensionParameters.engine->getFrameBuffer()->clear();
+        scene.commitMaterials( true );
+        _brayns.getFrameBuffer().clear();
     }
 }
 
 void ZeroEQPlugin::_spikesUpdated( )
 {
     AbstractSimulationHandlerPtr simulationHandler =
-        _extensionParameters.engine->getScene()->getSimulationHandler();
+        _brayns.getScene().getSimulationHandler();
 
     SpikeSimulationHandler* spikeSimulationHandler =
         dynamic_cast< SpikeSimulationHandler * >(simulationHandler.get());
@@ -230,16 +224,16 @@ void ZeroEQPlugin::_spikesUpdated( )
         for( const auto& gid: _remoteSpikes.getGidsVector() )
             data[gid] = ts;
 
-        _extensionParameters.engine->getFrameBuffer()->clear();
-        _extensionParameters.engine->getScene()->commitSimulationData();
+        _brayns.getFrameBuffer().clear();
+        _brayns.getScene().commitSimulationData();
     }
 }
 
 
 bool ZeroEQPlugin::_requestTransferFunction1D()
 {
-    ScenePtr scene = _extensionParameters.engine->getScene();
-    TransferFunction& transferFunction = scene->getTransferFunction();
+    Scene& scene = _brayns.getScene();
+    TransferFunction& transferFunction = scene.getTransferFunction();
     std::vector< ::zerobuf::render::Point2D > items;
 
     for( const auto& controlPoint: transferFunction.getControlPoints( TF_RED ) )
@@ -252,8 +246,8 @@ bool ZeroEQPlugin::_requestTransferFunction1D()
 
 void ZeroEQPlugin::_transferFunction1DUpdated( )
 {
-    ScenePtr scene = _extensionParameters.engine->getScene();
-    TransferFunction& transferFunction = scene->getTransferFunction();
+    Scene& scene = _brayns.getScene();
+    TransferFunction& transferFunction = scene.getTransferFunction();
     std::vector< ::zerobuf::render::Point2D > points = _remoteTransferFunction1D.getPointsVector();
 
     const std::string& attributeName = _remoteTransferFunction1D.getAttributeString();
@@ -273,16 +267,16 @@ void ZeroEQPlugin::_transferFunction1DUpdated( )
         controlPoints.push_back( Vector2f(point.getX(), point.getY()));
     transferFunction.resample();
 
-    scene->commitSimulationData();
-    scene->commitTransferFunctionData();
-    _extensionParameters.engine->getRenderer()->commit();
-    _extensionParameters.engine->getFrameBuffer()->clear();
+    scene.commitSimulationData();
+    scene.commitTransferFunctionData();
+    _brayns.getRenderer().commit();
+    _brayns.getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_LookupTable1DUpdated( )
 {
-    ScenePtr scene = _extensionParameters.engine->getScene();
-    TransferFunction& transferFunction = scene->getTransferFunction();
+    Scene& scene = _brayns.getScene();
+    TransferFunction& transferFunction = scene.getTransferFunction();
 
     transferFunction.clear();
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
@@ -302,14 +296,14 @@ void ZeroEQPlugin::_LookupTable1DUpdated( )
     }
 
     transferFunction.setValuesRange( Vector2f( 0.f, lut.size() / 4 ));
-    scene->commitTransferFunctionData();
-    _extensionParameters.engine->getFrameBuffer()->clear();
+    scene.commitTransferFunctionData();
+    _brayns.getFrameBuffer().clear();
 }
 
 bool ZeroEQPlugin::_requestLookupTable1D( )
 {
-    ScenePtr scene = _extensionParameters.engine->getScene();
-    TransferFunction& transferFunction = scene->getTransferFunction();
+    Scene& scene = _brayns.getScene();
+    TransferFunction& transferFunction = scene.getTransferFunction();
 
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
 
@@ -355,15 +349,12 @@ bool ZeroEQPlugin::_requestImageJPEG()
     if(!_processingImageJpeg)
     {
         _processingImageJpeg = true;
-        FrameBufferPtr frameBuffer =
-            _extensionParameters.engine->getFrameBuffer();
-        const Vector2i& frameSize =
-            frameBuffer->getSize();
+        FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
+        const Vector2i& frameSize = frameBuffer.getSize();
         const Vector2i& newFrameSize =
-            _extensionParameters.parametersManager->getApplicationParameters()
-            .getJpegSize();
+            _brayns.getParametersManager().getApplicationParameters().getJpegSize();
         unsigned int* colorBuffer =
-            (unsigned int*)frameBuffer->getColorBuffer( );
+            (unsigned int*)frameBuffer.getColorBuffer( );
         if( colorBuffer )
         {
             unsigned int* resizedColorBuffer = colorBuffer;
@@ -393,10 +384,9 @@ bool ZeroEQPlugin::_requestImageJPEG()
 
 bool ZeroEQPlugin::_requestFrameBuffers()
 {
-    FrameBufferPtr frameBuffer =
-        _extensionParameters.engine->getFrameBuffer();
-    const Vector2i frameSize = frameBuffer->getSize( );
-    const float* depthBuffer = frameBuffer->getDepthBuffer( );
+    FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
+    const Vector2i frameSize = frameBuffer.getSize( );
+    const float* depthBuffer = frameBuffer.getDepthBuffer( );
 
     _remoteFrameBuffers.setWidth( frameSize.x( ));
     _remoteFrameBuffers.setHeight( frameSize.y( ));
@@ -416,11 +406,10 @@ bool ZeroEQPlugin::_requestFrameBuffers()
         _remoteFrameBuffers.setDepth( 0, 0 );
 
     const uint8_t* colorBuffer =
-        frameBuffer->getColorBuffer( );
+        frameBuffer.getColorBuffer();
     if( colorBuffer )
         _remoteFrameBuffers.setDiffuse(
-            colorBuffer, frameSize.x( ) * frameSize.y( ) *
-              frameBuffer->getColorDepth( ));
+            colorBuffer, frameSize.x() * frameSize.y() * frameBuffer.getColorDepth() );
     else
         _remoteFrameBuffers.setDiffuse( 0, 0 );
 
@@ -430,11 +419,10 @@ bool ZeroEQPlugin::_requestFrameBuffers()
 bool ZeroEQPlugin::_requestSpikes()
 {
     BRAYNS_INFO << "Spikes requested" << std::endl;
-    AbstractSimulationHandlerPtr simulationHandler =
-        _extensionParameters.engine->getScene()->getSimulationHandler();
+    AbstractSimulationHandlerPtr simulationHandler = _brayns.getScene().getSimulationHandler();
 
     SpikeSimulationHandler* spikeSimulationHandler =
-        dynamic_cast< SpikeSimulationHandler * >(simulationHandler.get());
+        dynamic_cast< SpikeSimulationHandler * >( simulationHandler.get() );
 
     std::vector< uint64_t > spikeGids;
     uint64_t ts = 0.f;
@@ -466,10 +454,11 @@ uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width,
     const int32_t tjJpegSubsamp = TJSAMP_444;
     const int32_t tjFlags = TJXOP_ROT180;
 
-    const int32_t success =
-            tjCompress2( _compressor, tjSrcBuffer, width, tjPitch, height,
-                        tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
-                        _applicationParameters.getJpegCompression( ), tjFlags);
+    const int32_t success = tjCompress2(
+        _compressor, tjSrcBuffer, width, tjPitch, height,
+        tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
+        _brayns.getParametersManager().getApplicationParameters().getJpegCompression(),
+        tjFlags);
 
     if(success != 0)
     {

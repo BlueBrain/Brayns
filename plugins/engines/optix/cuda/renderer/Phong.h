@@ -94,7 +94,7 @@ static __device__ float3 refractedVector(
     const float n1,
     const float n2)
 {
-    if( n2 < 0.01f )
+    if( n2 < 0.01f || n1 == n2 )
         return direction;
     const float eta = n1 / n2;
     const float cos1 = -optix::dot( direction, normal );
@@ -158,10 +158,10 @@ static __device__ float4 getVolumeContribution()
     return result;
 }
 
-static __device__ void phongShadowed()
+static __device__ void phongShadowed( float3 p_Ko )
 {
     // this material is opaque, so it fully attenuates all shadow rays
-    prd_shadow.attenuation = optix::make_float3(0.0f);
+    prd_shadow.attenuation = 1.f - p_Ko;
     rtTerminateRay();
 }
 
@@ -188,18 +188,16 @@ static __device__ void phongShade(
         result.z += volumeValue.z;
     }
 
-    if( fmaxf( p_Ko ) < 0.01f )
-    {
-        prd.result = result;
-        return;
-    }
-
     // Surface
     float3 hit_point = ray.origin + t_hit * ray.direction;
     optix::size_t2 screen = output_buffer.size();
     unsigned int seed = tea< 16 >( screen.x * launch_index.y + launch_index.x, frame );
 
-    if ( electron_shading_enabled == 1 )
+    float3 light_attenuation = make_float3( 1.f - volumeValue.w );
+
+    if( fmaxf( p_Ko ) < 0.01f )
+        result += p_Ko * p_Kd;
+    else if ( electron_shading_enabled == 1 )
         result += p_Kd * ( 1.f - abs( optix::dot( optix::normalize( hit_point - eye ), p_normal )));
     else if( shading_enabled == 0 )
         result += p_Kd;
@@ -237,7 +235,6 @@ static __device__ void phongShade(
             float nDl = optix::dot( p_normal, L );
 
             // Shadows
-            float3 light_attenuation = make_float3( 1.f - volumeValue.w );
             if( shadows_enabled )
             {
                 light_attenuation = make_float3(static_cast<float>( nDl > 0.0f ));
@@ -283,7 +280,7 @@ static __device__ void phongShade(
             optix::Ray refl_ray = optix::make_Ray(
                 hit_point, R, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX );
             rtTrace( top_object, refl_ray, new_prd );
-            result += p_Kr * new_prd.result;
+            result += light_attenuation * p_Kr * new_prd.result;
         }
     }
 
@@ -301,7 +298,7 @@ static __device__ void phongShade(
             optix::Ray refr_ray = optix::make_Ray(
                 hit_point, R, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX );
             rtTrace( top_object, refr_ray, new_prd );
-            result += ( 1.f - p_Ko ) * new_prd.result;
+            result += light_attenuation * ( 1.f - p_Ko ) * new_prd.result;
         }
     }
 

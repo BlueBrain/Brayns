@@ -84,6 +84,8 @@ private:
     floats _spikingTimes;
     float _spikesStart;
     float _spikesEnd;
+
+    Vector3fs _positions;
 };
 
 }
