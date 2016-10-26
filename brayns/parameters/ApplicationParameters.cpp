@@ -112,8 +112,6 @@ void ApplicationParameters::print( )
     AbstractParameters::print( );
     BRAYNS_INFO << "Window size             : " << _windowSize << std::endl;
     BRAYNS_INFO << "Camera                  : " << _camera << std::endl;
-    BRAYNS_INFO << "Benchmarking            : " << ( _benchmarking ? "on" : "off" ) << std::endl;
-    BRAYNS_INFO << "JPEG Compression        : " << _jpegCompression << std::endl;
     BRAYNS_INFO << "JPEG size               : " << _jpegSize << std::endl;
 }
 
