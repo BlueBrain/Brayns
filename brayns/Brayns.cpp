@@ -394,9 +394,6 @@ struct Brayns::Impl
         keyboardHandler.registerKeyboardShortcut(
             'y', "Enable/Disable light emitting materials",
             std::bind( &Brayns::Impl::_toggleLightEmittingMaterials, this ));
-        keyboardHandler.registerKeyboardShortcut(
-            '*', "Enable/Disable Deflect streaming",
-            std::bind( &Brayns::Impl::_toggleDeflectStreaming, this ));
     }
 
     void _blackBackground()
@@ -537,12 +534,6 @@ struct Brayns::Impl
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
         renderParams.setLightEmittingMaterials( !renderParams.getLightEmittingMaterials() );
-    }
-
-    void _toggleDeflectStreaming()
-    {
-        ApplicationParameters& appParams = _parametersManager->getApplicationParameters();
-        appParams.setDeflectEnabled( !appParams.getDeflectEnabled() );
     }
 
 private:

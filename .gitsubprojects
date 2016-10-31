@@ -3,9 +3,9 @@ git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 10d93e6)
 git_subproject(Servus https://github.com/HBPVIS/Servus.git 001588d)
 
 # ZeroEQ and HTTP messaging
-git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git e095397)
+git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git b040418)
 git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 1019277)
-git_subproject(Lexis https://github.com/HBPVis/Lexis.git a853636)
+git_subproject(Lexis https://github.com/HBPVis/Lexis.git a9afc31)
 
 # Streaming to display walls
 git_subproject(Deflect https://github.com/BlueBrain/Deflect.git fd77ea4)

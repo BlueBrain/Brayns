@@ -19,15 +19,15 @@ set(BRAYNSPLUGINS_PUBLIC_HEADERS
 
 add_subdirectory(engines/common)
 
-if(DEFLECT_FOUND OR (TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ))
+if(TARGET Deflect OR (TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ))
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/ExtensionPluginFactory.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/ExtensionPluginFactory.h)
 endif()
 
-if(DEFLECT_FOUND)
+if(TARGET Deflect AND TARGET Lexis)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/DeflectPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/DeflectPlugin.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect Lexis)
 endif()
 
 if(TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ AND TARGET ZeroEQHTTP)

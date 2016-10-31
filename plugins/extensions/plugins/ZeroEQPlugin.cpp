@@ -62,6 +62,14 @@ void ZeroEQPlugin::run()
     while( _subscriber.receive( 10 )) {}
 }
 
+bool ZeroEQPlugin::handleObject( servus::Serializable& object )
+{
+    if( !_httpServer )
+        return false;
+
+    return _httpServer->handle( object );
+}
+
 void ZeroEQPlugin::_setupHTTPServer()
 {
     const strings& arguments =

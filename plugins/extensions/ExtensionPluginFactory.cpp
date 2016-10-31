@@ -35,18 +35,15 @@ ExtensionPluginFactory::ExtensionPluginFactory( Brayns& brayns )
     : _brayns( brayns )
 {
 #ifdef BRAYNS_USE_ZEROEQ
-    ZeroEQPluginPtr zeroEQPlugin( new ZeroEQPlugin( brayns ));
-    add( zeroEQPlugin );
+    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( brayns );
+    add( zeroeqPlugin );
 #endif
-
 #ifdef BRAYNS_USE_DEFLECT
-    // Try to create Deflect plugin from env vars or application parameters,
-    // silently ignore failure
-    try
-    {
-        add( std::make_shared<DeflectPlugin>( brayns ));
-    }
-    catch( ... ) {}
+# ifdef BRAYNS_USE_ZEROEQ
+    add( std::make_shared<DeflectPlugin>( brayns, *zeroeqPlugin ));
+# else
+    add( std::make_shared<DeflectPlugin>( brayns ));
+# endif
 #endif
 }
 
