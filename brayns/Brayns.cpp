@@ -877,7 +877,7 @@ private:
 
     ParametersManagerPtr _parametersManager;
     EnginePtr _engine;
-    BraynsPtr _brayns;
+    Brayns* _brayns;
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
     ExtensionPluginFactoryPtr _extensionPluginFactory;
