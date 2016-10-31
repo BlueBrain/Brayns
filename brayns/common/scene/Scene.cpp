@@ -540,13 +540,8 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                     {
                         if( boost::filesystem::is_regular_file(dirIter->status( )))
                         {
-                            boost::filesystem::path fileExtension =
-                                dirIter->path( ).extension( );
-                            //if( fileExtension==".raw" )
-                            {
-                                const std::string& filename = dirIter->path( ).string( );
-                                filenames.push_back( filename );
-                            }
+                            const std::string& filename = dirIter->path( ).string( );
+                            filenames.push_back( filename );
                         }
                     }
                 }

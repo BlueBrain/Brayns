@@ -41,7 +41,8 @@ public:
 
 private:
 
-    virtual void _registerKeyboardShortcuts() final;
+    void _registerKeyboardShortcuts() final;
+
     void _gradientMaterials();
     void _pastelMaterials();
     void _randomMaterials();

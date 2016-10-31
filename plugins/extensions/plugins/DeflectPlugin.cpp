@@ -52,9 +52,7 @@ void DeflectPlugin::run()
     if( _stream && _stream->isConnected() && !deflectEnabled )
     {
         BRAYNS_INFO << "Closing Deflect stream" << std::endl;
-        delete _stream.get();
-        _stream.release();
-        _stream = nullptr;
+        _stream.reset();
     }
 
     if( deflectEnabled && !_stream )
@@ -196,14 +194,11 @@ void DeflectPlugin::_send(
     deflectImage.compressionPolicy =
         ( deflectImage.compressionQuality != 100 ) ?
         deflect::COMPRESSION_ON : deflect::COMPRESSION_OFF;
-
     if( swapXAxis )
         deflect::ImageWrapper::swapYAxis( (void*)imageData, windowSize.x(), windowSize.y(), 4);
 
     // TODO: Big Memory Leak on every send. FIX NEEDED!!!!!
-    const bool success = _stream->send( deflectImage );
-    _stream->finishFrame();
-
+    const bool success = _stream->send( deflectImage ) && _stream->finishFrame();
     if(!success)
     {
         if( !_stream->isConnected() )
