@@ -27,6 +27,7 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 #include <assert.h>
 
@@ -35,6 +36,7 @@
 #  include <unistd.h>
 #else
 #  include "GL/glut.h"
+#  include <GL/freeglut_ext.h>
 #endif
 
 namespace brayns
@@ -122,16 +124,18 @@ BaseWindow::BaseWindow(
     _motionSpeed(DEFAULT_MOUSE_SPEED), _rotateSpeed(DEFAULT_MOUSE_SPEED),
     _frameBufferMode(frameBufferMode),
     _windowID(-1), _windowSize(-1,-1), fullScreen_(false),
-    frameCounter_(0)
+    frameCounter_(0), _displayHelp( false )
 {
     _setViewPort( );
 
     // Initialize manipulators
     if(allowedManipulators & INSPECT_CENTER_MODE)
-        _inspectCenterManipulator.reset(new InspectCenterManipulator(*this));
+        _inspectCenterManipulator.reset(
+            new InspectCenterManipulator( *this, _brayns->getKeyboardHandler() ));
 
     if(allowedManipulators & MOVE_MODE)
-        _flyingModeManipulator.reset(new FlyingModeManipulator(*this));
+        _flyingModeManipulator.reset(
+            new FlyingModeManipulator( *this, _brayns->getKeyboardHandler() ));
 
     switch(initialManipulator)
     {
@@ -144,7 +148,6 @@ BaseWindow::BaseWindow(
     }
     assert(_manipulator);
 }
-
 
 BaseWindow::~BaseWindow( )
 {
@@ -254,12 +257,19 @@ void BaseWindow::display( )
             buffer = renderOutput.depthBuffer.data( );
             break;
         default:
-            glClearColor(0.f,0.f,0.f,1.f);
+            glClearColor( 0.f, 0.f, 0.f, 1.f );
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         }
 
         if( buffer )
+        {
             glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
+            if( _displayHelp )
+            {
+                KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
+                _renderBitmapString( -0.98f, 0.95f, keyHandler.help() );
+            }
+        }
     }
     else
     {
@@ -277,7 +287,6 @@ void BaseWindow::display( )
         ssProcData.depthType = GL_FLOAT;
 
         _screenSpaceProcessor.draw( ssProcData );
-
     }
 
     float* buffer = renderOutput.depthBuffer.data();
@@ -288,6 +297,7 @@ void BaseWindow::display( )
     }
 
     _fps.stop();
+
     glutSwapBuffers( );
 
     clearPixels( );
@@ -306,6 +316,7 @@ void BaseWindow::display( )
     if( windowSize != _windowSize )
         glutReshapeWindow(windowSize.x(), windowSize.y());
     ++frameCounter_;
+
 }
 
 void BaseWindow::clearPixels( )
@@ -374,6 +385,37 @@ void BaseWindow::create(const char *title,
     _screenSpaceProcessor.init( width, height );
 }
 
+void BaseWindow::_registerKeyboardShortcuts()
+{
+    _manipulator->registerKeyboardShortcuts();
+
+    KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
+    keyHandler.registerKeyboardShortcut(
+        ' ', "Camera reset to initial state",
+        std::bind( &BaseWindow::_resetCamera, this ));
+    keyHandler.registerKeyboardShortcut(
+        '+', "Increase motion speed",
+        std::bind( &BaseWindow::_increaseMotionSpeed, this ));
+    keyHandler.registerKeyboardShortcut(
+        '-', "Decrease motion speed",
+        std::bind( &BaseWindow::_decreaseMotionSpeed, this ));
+    keyHandler.registerKeyboardShortcut(
+        'c', "Display current viewport information",
+        std::bind( &BaseWindow::_displayViewportInformation, this ));
+    keyHandler.registerKeyboardShortcut(
+        'f', "Enable fly mode",
+        std::bind( &BaseWindow::_enableFlyMode, this ));
+    keyHandler.registerKeyboardShortcut(
+        'i', "Enable inspect mode",
+        std::bind( &BaseWindow::_enableInspectMode, this ));
+    keyHandler.registerKeyboardShortcut(
+        'Q', "Quit application",
+        std::bind( &BaseWindow::_exitApplication, this ));
+    keyHandler.registerKeyboardShortcut(
+        'z', "Switch between depth and color buffers",
+        std::bind( &BaseWindow::_toggleFrameBuffer, this ));
+}
+
 void BaseWindow::specialkey( int key, const Vector2f& )
 {
     if(_manipulator)
@@ -382,150 +424,85 @@ void BaseWindow::specialkey( int key, const Vector2f& )
 
 void BaseWindow::keypress( char key, const Vector2f& )
 {
-    RenderingParameters& renderParams =
-        _brayns->getParametersManager( ).getRenderingParameters( );
-    SceneParameters& sceneParams =
-        _brayns->getParametersManager().getSceneParameters();
-    VolumeParameters& volumeParams =
-        _brayns->getParametersManager().getVolumeParameters();
+    switch (key)
+    {
+    case 'h':
+        _displayHelp = !_displayHelp;
+        break;
+    default:
+        _brayns->getKeyboardHandler().handleKeyboardShortcut( key );
+    }
 
-    switch( key )
-    {
-    case ' ':
-        BRAYNS_INFO << "Camera reset to initial state" << std::endl;
-        _brayns->getCamera().reset();
-        _brayns->getCamera().commit();
-        break;
-    case '+':
-        _motionSpeed *= DEFAULT_MOTION_ACCELERATION;
-        BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
-        break;
-    case '-':
-        _motionSpeed /= DEFAULT_MOTION_ACCELERATION;
-        BRAYNS_INFO << "Motion speed: " << _motionSpeed << std::endl;
-        break;
-    case '1':
-        renderParams.setBackgroundColor(Vector3f(.5f,.5f,.5f));
-        BRAYNS_INFO << "Setting grey background" << std::endl;
-        break;
-    case '2':
-        renderParams.setBackgroundColor(Vector3f(1.f,1.f,1.f));
-        BRAYNS_INFO << "Setting white background" << std::endl;
-        break;
-    case '3':
-        renderParams.setBackgroundColor(Vector3f(0.f,0.f,0.f));
-        BRAYNS_INFO << "Setting black background" << std::endl;
-        break;
-    case 'C':
-        BRAYNS_INFO << _viewPort << std::endl;
-        break;
-    case 'E':
-        renderParams.setMaterialType( MT_ELECTRON );
-        BRAYNS_INFO << "Electron shading activated" << std::endl;
-        break;
-    case 'F':
-        // 'f'ly mode
-        if( _flyingModeManipulator )
-        {
-            BRAYNS_INFO << "Switching to flying mode" << std::endl;
-            _manipulator = _flyingModeManipulator.get();
-        }
-        break;
-    case 'H':
-        renderParams.setSoftShadows( !renderParams.getSoftShadows( ));
-        BRAYNS_INFO << "Soft shadows " <<
-            (renderParams.getSoftShadows( ) ? "On" : "Off") << std::endl;
-        break;
-    case 'I':
-        // 'i'nspect mode
-        if( _inspectCenterManipulator)
-        {
-            BRAYNS_INFO << "Switching to inspect mode" << std::endl;
-            _manipulator = _inspectCenterManipulator.get();
-        }
-        break;
-    case 'L':
-    {
-        fullScreen_ = !fullScreen_;
-        if(fullScreen_)
-            glutFullScreen( );
-        else
-            glutPositionWindow(0,10);
-        break;
-    }
-    case 'o':
-    {
-        float aaStrength = _brayns->getParametersManager( ).
-            getRenderingParameters( ).getAmbientOcclusionStrength( );
-        aaStrength += 0.1f;
-        if( aaStrength>1.f ) aaStrength=1.f;
-        renderParams.setAmbientOcclusionStrength( aaStrength );
-        BRAYNS_INFO << "Ambient occlusion strength: " <<
-            aaStrength << std::endl;
-        break;
-    }
-    case 'O':
-    {
-        float aaStrength = renderParams.getAmbientOcclusionStrength( );
-        aaStrength -= 0.1f;
-        if( aaStrength<0.f ) aaStrength=0.f;
-        renderParams.setAmbientOcclusionStrength( aaStrength );
-        BRAYNS_INFO << "Ambient occlusion strength: "
-            << aaStrength << std::endl;
-        break;
-    }
-    case 'p':
-        renderParams.setMaterialType( MT_DIFFUSE );
-        BRAYNS_INFO << "Diffuse shading activated" << std::endl;
-        break;
-    case 'P':
-        renderParams.setMaterialType( MT_NO_SHADING );
-        BRAYNS_INFO << "No shading activated" << std::endl;
-        break;
-    case 'r':
-        sceneParams.setTimestamp( 0.f );
-        BRAYNS_INFO << "Timestamp: " <<
-            sceneParams.getTimestamp( ) << std::endl;
-        break;
-    case 'R':
-        sceneParams.setTimestamp( std::numeric_limits< size_t >::max( ));
-        BRAYNS_INFO << "Timestamp: " <<
-            sceneParams.getTimestamp( ) << std::endl;
-        break;
-    case 'S':
-        renderParams.setShadows(
-            !renderParams.getShadows( ));
-        BRAYNS_INFO << "Shadows: " <<
-            (renderParams.getShadows( ) ? "On" : "Off") << std::endl;
-        break;
-    case 'T':
-        volumeParams.setSamplesPerRay( volumeParams.getSamplesPerRay() / 2 );
-        BRAYNS_INFO << "Volume samples per ray: " << volumeParams.getSamplesPerRay() << std::endl;
-        _brayns->getScene().commitVolumeData();
-        break;
-    case 't':
-        volumeParams.setSamplesPerRay( volumeParams.getSamplesPerRay() * 2 );
-        BRAYNS_INFO << "Volume samples per ray: " << volumeParams.getSamplesPerRay() << std::endl;
-        _brayns->getScene().commitVolumeData();
-        break;
-    case 'V':
-        renderParams.
-            setBackgroundColor( Vector3f( rand( ) % 200 / 100.f - 1.f,
-            rand( ) % 200 / 100.f - 1.f, rand( ) % 200 / 100.f - 1.f ));
-        break;
-    case 'Y':
-        renderParams.setLightEmittingMaterials(
-            !renderParams.getLightEmittingMaterials( ));
-        break;
-    case 'Z':
-        if( _frameBufferMode==FRAMEBUFFER_DEPTH )
-            _frameBufferMode = FRAMEBUFFER_COLOR;
-        else
-            _frameBufferMode = FRAMEBUFFER_DEPTH;
-        break;
-    }
     if(_manipulator)
         _manipulator->keypress( key );
+
+    _brayns->commit( );
+}
+
+void BaseWindow::_resetCamera()
+{
+    _brayns->getCamera().reset();
+    _brayns->getCamera().commit();
+}
+
+void BaseWindow::_increaseMotionSpeed()
+{
+    _motionSpeed *= DEFAULT_MOTION_ACCELERATION;
+}
+
+void BaseWindow::_decreaseMotionSpeed()
+{
+    _motionSpeed /= DEFAULT_MOTION_ACCELERATION;
+}
+
+void BaseWindow::_displayViewportInformation()
+{
+    BRAYNS_INFO << _viewPort << std::endl;
+}
+
+void BaseWindow::_enableFlyMode()
+{
+    // 'f'ly mode
+    if( _flyingModeManipulator )
+    {
+        _manipulator->unregisterKeyboardShortcuts();
+        _manipulator = _flyingModeManipulator.get();
+        _manipulator->registerKeyboardShortcuts();
+    }
+}
+
+void BaseWindow::_enableInspectMode()
+{
+    if( _inspectCenterManipulator)
+    {
+        _manipulator->unregisterKeyboardShortcuts();
+        _manipulator = _inspectCenterManipulator.get();
+        _manipulator->registerKeyboardShortcuts();
+    }
+}
+
+void BaseWindow::_exitApplication()
+{
+#ifdef __APPLE__
+    exit(0);
+#else
+    glutLeaveMainLoop();
+#endif
+}
+
+void BaseWindow::_toggleFrameBuffer()
+{
+    if( _frameBufferMode==FRAMEBUFFER_DEPTH )
+        _frameBufferMode = FRAMEBUFFER_COLOR;
+    else
+        _frameBufferMode = FRAMEBUFFER_DEPTH;
+}
+
+void BaseWindow::_renderBitmapString( const float x, const float y, const std::string& text )
+{
+    glRasterPos3f( x, y, 0.f );
+    glutBitmapString( GLUT_BITMAP_8_BY_13, reinterpret_cast< const unsigned char* >( text.c_str()));
+    glRasterPos3f( -1.f, -1.f, 0.f );
 }
 
 }

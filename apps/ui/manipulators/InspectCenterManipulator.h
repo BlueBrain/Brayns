@@ -31,14 +31,23 @@ namespace brayns
 class InspectCenterManipulator : public AbstractManipulator
 {
 public:
-    InspectCenterManipulator( BaseWindow& window );
+    InspectCenterManipulator(
+        BaseWindow& window,
+        KeyboardHandler& keyboardHandler );
 
     void dragLeft( const Vector2i &to, const Vector2i &from ) final;
     void dragRight( const Vector2i &to, const Vector2i &from ) final;
     void dragMiddle( const Vector2i &to, const Vector2i &from ) final;
     void specialkey( int32 key ) final;
-    void keypress( int32 key ) final;
-    void button( const Vector2i &pos ) final;
+
+    void registerKeyboardShortcuts() final;
+
+    void unregisterKeyboardShortcuts() final;
+
+    void rotateLeft();
+    void rotateRight();
+    void rotateUp();
+    void rotateDown();
 
 protected:
     Vector3f _pivot;

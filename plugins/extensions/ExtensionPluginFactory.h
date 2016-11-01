@@ -34,13 +34,9 @@ public:
     /**
         Constructs the object and initializes default plugins according to
         application parameters.
-        @param applicationParameters Application parameters
-        @param extensionParameters Struture of pointers to objects that are
-               potentially updated by registered plugins
+        @param Brayns instance of brayns
     */
-    ExtensionPluginFactory(
-        ApplicationParameters& applicationParameters,
-        ExtensionParameters& extensionParameters );
+    ExtensionPluginFactory( Brayns& brayns );
 
     ~ExtensionPluginFactory();
 
@@ -67,9 +63,10 @@ public:
     void execute( );
 
 private:
+
+    Brayns& _brayns;
     ExtensionPlugins _plugins;
-    ApplicationParameters& _applicationParameters;
-    ExtensionParameters& _extensionParameters;
+
 };
 
 }

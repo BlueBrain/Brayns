@@ -221,6 +221,9 @@ public:
 
 protected:
 
+    virtual void _registerKeyboardShortcuts();
+    void _renderBitmapString( const float x, const float y, const std::string& text );
+
     BraynsPtr _brayns;
 
     Vector2i _lastMousePos; /*! last mouse screen position of mouse before
@@ -253,14 +256,21 @@ protected:
 
     ScreenSpaceProcessor _screenSpaceProcessor;
 
-protected:
-
     uint64_t _gid;
 
+    bool _displayHelp;
+
 private:
-    /*! set a default camera position that views given bounds from the
-        top left front */
+
     void _setViewPort();
+    void _resetCamera();
+    void _increaseMotionSpeed();
+    void _decreaseMotionSpeed();
+    void _displayViewportInformation();
+    void _enableFlyMode();
+    void _enableInspectMode();
+    void _exitApplication();
+    void _toggleFrameBuffer();
 
 };
 

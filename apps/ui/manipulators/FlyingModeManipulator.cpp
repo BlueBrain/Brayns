@@ -18,45 +18,71 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <apps/ui/BaseWindow.h>
-
 #include "FlyingModeManipulator.h"
+
+#include <apps/ui/BaseWindow.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 namespace brayns
 {
 
-void FlyingModeManipulator::keypress( int32 key )
+FlyingModeManipulator::FlyingModeManipulator(
+    BaseWindow& window,
+    KeyboardHandler& keyboardHandler )
+    : AbstractManipulator( window, keyboardHandler )
+{
+}
+
+void FlyingModeManipulator::StrafeLeft()
+{
+    const Vector3f strafe( 1.f, 0.f, 0.f );
+    Viewport& viewport = _window.getViewPort();
+    const float fwd = _window.getMotionSpeed();
+    viewport.translate(strafe*fwd, true );
+}
+
+void FlyingModeManipulator::StrafeRight()
+{
+    const Vector3f strafe( 1.f, 0.f, 0.f );
+    Viewport& viewport = _window.getViewPort();
+    const float fwd = _window.getMotionSpeed();
+    viewport.translate(-strafe*fwd, true );
+}
+
+void FlyingModeManipulator::FlyForward()
 {
     Viewport& viewport = _window.getViewPort();
     const Vector3f dir( 0.f, 0.f , 1.f );
-    const Vector3f strafe( 1.f, 0.f , 0.f );
-    switch(key) {
-        case 'w':
-        {
-            const float fwd = _window.getMotionSpeed();
-            viewport.translate( dir*fwd, true );
-            break;
-        }
-        case 's':
-        {
-            const float fwd = _window.getMotionSpeed();
-            viewport.translate( -dir*fwd, true );
-            break;
-        }
-        case 'd':
-        {
-            const float fwd = _window.getMotionSpeed();
-            viewport.translate(-strafe*fwd, true );
-            break;
-        }
-        case 'a':
-        {
-            const float fwd = _window.getMotionSpeed();
-            viewport.translate(strafe*fwd, true );
-            break;
-        }
-    }
-    AbstractManipulator::keypress( key );
+    const float fwd = _window.getMotionSpeed();
+    viewport.translate( dir*fwd, true );
+}
+
+void FlyingModeManipulator::FlyBackwards()
+{
+    Viewport& viewport = _window.getViewPort();
+    const Vector3f dir( 0.f, 0.f , 1.f );
+    const float fwd = _window.getMotionSpeed();
+    viewport.translate( -dir*fwd, true );
+}
+
+void FlyingModeManipulator::registerKeyboardShortcuts()
+{
+    _keyboardHandler.registerKeyboardShortcut(
+        'a', "Strafe left", std::bind( &FlyingModeManipulator::StrafeLeft, this ));
+    _keyboardHandler.registerKeyboardShortcut(
+        'd', "Strafe right", std::bind( &FlyingModeManipulator::StrafeRight, this ));
+    _keyboardHandler.registerKeyboardShortcut(
+        'w', "Fly forward", std::bind( &FlyingModeManipulator::FlyForward, this ));
+    _keyboardHandler.registerKeyboardShortcut(
+        's', "Fly backwards", std::bind( &FlyingModeManipulator::FlyBackwards, this ));
+}
+
+void FlyingModeManipulator::unregisterKeyboardShortcuts()
+{
+    _keyboardHandler.unregisterKeyboardShortcut( 'a' );
+    _keyboardHandler.unregisterKeyboardShortcut( 'd' );
+    _keyboardHandler.unregisterKeyboardShortcut( 'w' );
+    _keyboardHandler.unregisterKeyboardShortcut( 's' );
 }
 
 void FlyingModeManipulator::dragRight(

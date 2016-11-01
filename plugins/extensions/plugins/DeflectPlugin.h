@@ -39,9 +39,7 @@ public:
         @param extensionParameters Struture of pointers to objects that are
                potentially updated by registered plugins
     */
-    DeflectPlugin(
-        ApplicationParameters& applicationParameters,
-        ExtensionParameters& extensionParameters );
+    DeflectPlugin( Brayns& brayns );
 
     /** @copydoc ExtensionPlugin::execute */
     BRAYNS_API void run( ) final;
@@ -82,19 +80,13 @@ private:
         unsigned long* imageData,
         bool swapXAxis);
 
-    /** Handles touch events provided by DisplayCluster
-     *
-     * @param handledEvents Events populated by deflect
-     * @return True if Deflect is available, false otherwise.
-     */
-    bool _handleTouchEvents( HandledEvents& handledEvents );
-
     float _theta;
     float _phi;
     Vector3f _previousTouchPosition;
-    bool _compressImage;
-    size_t _compressionQuality;
-    std::unique_ptr<deflect::Stream> _stream;
+    std::unique_ptr< deflect::Stream > _stream;
+    bool _pressed;
+    bool _streamingEnabled;
+
 };
 
 }

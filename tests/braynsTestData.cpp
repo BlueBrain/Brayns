@@ -44,9 +44,10 @@ void writeTestData( const std::string& filename, brayns::FrameBuffer& fb )
 
 void compareTestData( const std::string& filename, brayns::FrameBuffer& fb )
 {
-    const lunchbox::MemoryMap file( BRAYNS_TESTDATA + filename );
-    fb.map();
+
+    const lunchbox::MemoryMap file( BRAYNS_TESTDATA + filename);
     const auto& size = fb.getSize();
+    fb.map();
     BOOST_CHECK_EQUAL( memcmp( file.getAddress(), fb.getColorBuffer(),
                                size[0] * size[1] * fb.getColorDepth( )), 0 );
     fb.unmap();
@@ -102,6 +103,7 @@ BOOST_AUTO_TEST_CASE( render_protein_and_compare )
     compareTestData( "testdataProtein.bin", brayns.getFrameBuffer( ));
 }
 
+#ifdef NDEBUG
 BOOST_AUTO_TEST_CASE( render_protein_in_stereo_and_compare )
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
@@ -120,3 +122,4 @@ BOOST_AUTO_TEST_CASE( render_protein_in_stereo_and_compare )
     compareTestData( "testdataProteinStereo.bin", brayns.getFrameBuffer( ));
     checkFiles( "testdataProtein.bin", "testdataProteinStereo.bin", false );
 }
+#endif

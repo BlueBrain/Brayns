@@ -47,8 +47,8 @@ namespace brayns
 class ZeroEQPlugin : public ExtensionPlugin
 {
 public:
-    ZeroEQPlugin( ApplicationParameters&, ExtensionParameters& );
-    ~ZeroEQPlugin( );
+    ZeroEQPlugin( Brayns& brayns );
+    ~ZeroEQPlugin();
 
     /** @copydoc ExtensionPlugin::execute */
     BRAYNS_API void run( ) final;
@@ -167,7 +167,6 @@ private:
     typedef std::function< bool() > RequestFunc;
     typedef std::map< ::zeroeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
-    size_t _jpegCompression;
     bool _processingImageJpeg;
 
     ::lexis::render::ImageJPEG _remoteImageJPEG;

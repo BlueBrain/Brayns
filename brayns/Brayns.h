@@ -134,12 +134,24 @@ public:
     BRAYNS_API void reshape( const Vector2ui& frameSize );
 
     /**
+       Gets the current engine
+       @return The engine object
+    */
+    BRAYNS_API Engine& getEngine();
+
+    /**
        Gets the current scene
        @return The scene object
 
        @todo Must be removed (VIZTM-572)
     */
     BRAYNS_API Scene& getScene();
+
+    /**
+       Gets the current renderer
+       @return The renderer object
+    */
+    BRAYNS_API Renderer& getRenderer();
 
     /**
        Gets the current camera
@@ -154,6 +166,12 @@ public:
        @return The frame buffer object
     */
     BRAYNS_API FrameBuffer& getFrameBuffer();
+
+    /**
+       Gets the keyboard handler
+       @return The keyboard handler object
+    */
+    BRAYNS_API KeyboardHandler& getKeyboardHandler();
 
 private:
 

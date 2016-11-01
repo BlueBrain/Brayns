@@ -23,35 +23,19 @@
 #  include <unistd.h>
 #endif
 
-#include <apps/ui/BaseWindow.h>
 #include "AbstractManipulator.h"
 
-#ifdef __APPLE__
-#  include "GLUT/glut.h"
-#  include <unistd.h>
-#else
-#  include <GL/glut.h>
-#  include <GL/freeglut_ext.h>
-#endif
+#include <apps/ui/BaseWindow.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 namespace brayns
 {
 
-void AbstractManipulator::keypress( const int32 key )
-{
-    switch( key )
-    {
-    case 'Q':
-#ifdef __APPLE__
-        exit(0);
-#else
-        glutLeaveMainLoop();
-#endif
-        break;
-    }
-}
-
-void AbstractManipulator::specialkey( const int32 )
+AbstractManipulator::AbstractManipulator(
+    BaseWindow& window,
+    KeyboardHandler& keyboardHandler )
+    : _window( window )
+    , _keyboardHandler( keyboardHandler )
 {
 }
 

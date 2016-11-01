@@ -24,11 +24,13 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/simulation/CircuitSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 #include <plugins/engines/EngineFactory.h>
 #include <plugins/engines/common/Engine.h>
@@ -49,7 +51,8 @@ namespace brayns
 
 struct Brayns::Impl
 {
-    Impl( int argc, const char **argv )
+    Impl( int argc, const char **argv, Brayns* brayns )
+    : _brayns( brayns )
     {
         BRAYNS_INFO << "Parsing command line options" << std::endl;
         _parametersManager.reset( new ParametersManager( ));
@@ -63,6 +66,10 @@ struct Brayns::Impl
         _engine = engineFactory.get( engineName );
         if( !_engine )
             throw std::runtime_error( "Unsupported engine: " + engineName );
+
+        // Keyboard handler
+        KeyboardHandlerPtr keyboardHandler =
+            _engine->getKeyboardHandler();
 
         // set HDRI skybox if applicable
         const std::string& hdri =
@@ -92,6 +99,9 @@ struct Brayns::Impl
 
         // Commit changes to the rendering engine
         _engine->commit();
+
+        // Register keyboard shortcuts
+        _registerKeyboardShortcuts();
     }
 
     ~Impl( )
@@ -143,10 +153,11 @@ struct Brayns::Impl
         {
             scene->getVolumeHandler()->setTimestamp( 0.f );
             const Vector3ui& volumeDimensions = scene->getVolumeHandler()->getDimensions();
+            const Vector3f& volumeOffset = scene->getVolumeHandler()->getOffset();
             const Vector3f& volumeElementSpacing = volumeParameters.getElementSpacing();
             Boxf& worldBounds = scene->getWorldBounds();
             worldBounds.merge( Vector3f( 0.f, 0.f, 0.f ));
-            worldBounds.merge( Vector3f( volumeDimensions ) * volumeElementSpacing );
+            worldBounds.merge( volumeOffset + Vector3f( volumeDimensions ) * volumeElementSpacing );
         }
 
         if( scene->isEmpty() && !scene->getVolumeHandler() )
@@ -160,8 +171,9 @@ struct Brayns::Impl
 
         _engine->preRender();
 
-        _engine->getCamera()->set(
-            renderInput.position, renderInput.target, renderInput.up );
+        CameraPtr camera = _engine->getCamera();
+        camera->set( renderInput.position, renderInput.target, renderInput.up );
+        camera->commit();
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
         if( !_extensionPluginFactory )
@@ -170,7 +182,6 @@ struct Brayns::Impl
 #endif
 
         ScenePtr scene = _engine->getScene();
-        CameraPtr camera = _engine->getCamera();
         FrameBufferPtr frameBuffer = _engine->getFrameBuffer();
         const Vector2i& frameSize = frameBuffer->getSize();
 
@@ -186,7 +197,6 @@ struct Brayns::Impl
             }
         }
 
-        camera->commit();
         _render( );
 
         uint8_t* colorBuffer = frameBuffer->getColorBuffer( );
@@ -250,9 +260,7 @@ struct Brayns::Impl
         _extensionParameters.parametersManager = _parametersManager;
         _extensionParameters.engine = _engine;
 
-        _extensionPluginFactory.reset( new ExtensionPluginFactory(
-            _parametersManager->getApplicationParameters( ),
-            _extensionParameters ));
+        _extensionPluginFactory.reset( new ExtensionPluginFactory( *_brayns ));
     }
 #endif
 
@@ -295,14 +303,246 @@ struct Brayns::Impl
         return *_engine->getScene();
     }
 
+    Engine& getEngine( )
+    {
+        return *_engine;
+    }
+
     Camera& getCamera( )
     {
         return *_engine->getCamera();
     }
 
+    Renderer& getRenderer( )
+    {
+        return *_engine->getRenderer();
+    }
+
     FrameBuffer& getFrameBuffer( )
     {
         return *_engine->getFrameBuffer();
+    }
+
+    KeyboardHandler& getKeyboardHandler()
+    {
+        return *_engine->getKeyboardHandler();
+    }
+
+    void _registerKeyboardShortcuts()
+    {
+        KeyboardHandler& keyboardHandler =  *_engine->getKeyboardHandler();
+        keyboardHandler.registerKeyboardShortcut(
+            '0', "Black background",
+             std::bind( &Brayns::Impl::_blackBackground, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            '1', "Gray background",
+            std::bind( &Brayns::Impl::_grayBackground, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            '2', "White background",
+            std::bind( &Brayns::Impl::_whiteBackground, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            '6', "Default renderer",
+            std::bind( &Brayns::Impl::_defaultRenderer, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            '7', "Particle renderer",
+            std::bind( &Brayns::Impl::_particleRenderer, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            '8', "Proximity renderer",
+            std::bind( &Brayns::Impl::_proximityRenderer, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            '9', "Simulation renderer",
+            std::bind( &Brayns::Impl::_simulationRenderer, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            '[', "Decrease timestamp by 1",
+            std::bind( &Brayns::Impl::_decreaseTimestamp, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            ']', "Increase timestamp by 1",
+            std::bind( &Brayns::Impl::_increaseTimestamp, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'e', "Enable eletron shading",
+            std::bind( &Brayns::Impl::_electronShading, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'o', "Decrease ambient occlusion strength",
+            std::bind( &Brayns::Impl::_decreaseAmbientOcclusionStrength, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'O', "Increase ambient occlusion strength",
+            std::bind( &Brayns::Impl::_increaseAmbientOcclusionStrength, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'p', "Enable diffuse shading",
+            std::bind( &Brayns::Impl::_diffuseShading, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'P', "Disable shading",
+            std::bind( &Brayns::Impl::_disableShading, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'r', "Set timestamp to 0",
+            std::bind( &Brayns::Impl::_resetTimestamp, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'R', "Set timestamp to infinity",
+            std::bind( &Brayns::Impl::_infiniteTimestamp, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'u', "Enable/Disable shadows",
+            std::bind( &Brayns::Impl::_toggleShadows, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'U', "Enable/Disable soft shadows",
+            std::bind( &Brayns::Impl::_toggleSoftShadows, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            't', "Multiply samples per ray by 2",
+            std::bind( &Brayns::Impl::_increaseSamplesPerRay, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'T', "Divide samples per ray by 2",
+            std::bind( &Brayns::Impl::_decreaseSamplesPerRay, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'y', "Enable/Disable light emitting materials",
+            std::bind( &Brayns::Impl::_toggleLightEmittingMaterials, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            '*', "Enable/Disable Deflect streaming",
+            std::bind( &Brayns::Impl::_toggleDeflectStreaming, this ));
+    }
+
+    void _blackBackground()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setBackgroundColor( Vector3f( 0.f, 0.f, 0.f ));
+    }
+
+    void _grayBackground()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setBackgroundColor( Vector3f( 0.5f, 0.5f, 0.5f ));
+    }
+
+    void _whiteBackground()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setBackgroundColor( Vector3f( 1.f, 1.f, 1.f ));
+    }
+
+    void _defaultRenderer()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setRenderer( "exobj" );
+    }
+
+    void _particleRenderer()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setRenderer( "particlerenderer" );
+    }
+
+    void _proximityRenderer()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setRenderer( "proximityrenderer" );
+    }
+
+    void _simulationRenderer()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setRenderer( "simulationrenderer" );
+    }
+
+    void _increaseTimestamp()
+    {
+        SceneParameters& sceneParams = _parametersManager->getSceneParameters();
+        float ts = sceneParams.getTimestamp();
+        sceneParams.setTimestamp( ts + 1.f );
+    }
+
+    void _decreaseTimestamp()
+    {
+        SceneParameters& sceneParams = _parametersManager->getSceneParameters();
+        float ts = sceneParams.getTimestamp();
+        if( ts > 0.f )
+            sceneParams.setTimestamp( ts - 1.f );
+    }
+
+    void _diffuseShading()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setMaterialType( MT_DIFFUSE );
+    }
+
+    void _electronShading()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setMaterialType( MT_ELECTRON );
+    }
+
+    void _disableShading()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setMaterialType( MT_NO_SHADING );
+    }
+
+    void _increaseAmbientOcclusionStrength()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        float aaStrength = renderParams.getAmbientOcclusionStrength();
+        aaStrength += 0.1f;
+        if( aaStrength>1.f )
+            aaStrength = 1.f;
+        renderParams.setAmbientOcclusionStrength( aaStrength );
+    }
+
+    void _decreaseAmbientOcclusionStrength()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        float aaStrength = renderParams.getAmbientOcclusionStrength( );
+        aaStrength -= 0.1f;
+        if( aaStrength < 0.f )
+            aaStrength = 0.f;
+        renderParams.setAmbientOcclusionStrength( aaStrength );
+    }
+
+    void _resetTimestamp()
+    {
+        SceneParameters& sceneParams = _parametersManager->getSceneParameters();
+        sceneParams.setTimestamp( 0.f );
+    }
+
+    void _infiniteTimestamp()
+    {
+        SceneParameters& sceneParams = _parametersManager->getSceneParameters();
+        sceneParams.setTimestamp( std::numeric_limits< size_t >::max() );
+    }
+
+    void _toggleShadows()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setShadows( !renderParams.getShadows() );
+    }
+
+    void _toggleSoftShadows()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setSoftShadows( !renderParams.getSoftShadows() );
+    }
+
+    void _increaseSamplesPerRay()
+    {
+        VolumeParameters& volumeParams = _parametersManager->getVolumeParameters();
+        volumeParams.setSamplesPerRay( volumeParams.getSamplesPerRay() * 2 );
+        _engine->getScene()->commitVolumeData();
+    }
+
+    void _decreaseSamplesPerRay()
+    {
+        VolumeParameters& volumeParams = _parametersManager->getVolumeParameters();
+        if( volumeParams.getSamplesPerRay() >= 4 )
+            volumeParams.setSamplesPerRay( volumeParams.getSamplesPerRay() / 2 );
+        _engine->getScene()->commitVolumeData();
+    }
+
+    void _toggleLightEmittingMaterials()
+    {
+        RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
+        renderParams.setLightEmittingMaterials( !renderParams.getLightEmittingMaterials() );
+    }
+
+    void _toggleDeflectStreaming()
+    {
+        ApplicationParameters& appParams = _parametersManager->getApplicationParameters();
+        appParams.setDeflectEnabled( !appParams.getDeflectEnabled() );
     }
 
 private:
@@ -637,6 +877,7 @@ private:
 
     ParametersManagerPtr _parametersManager;
     EnginePtr _engine;
+    Brayns* _brayns;
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
     ExtensionPluginFactoryPtr _extensionPluginFactory;
@@ -647,7 +888,7 @@ private:
 // -------------------------------------------------------------------------------------------------
 
 Brayns::Brayns( int argc, const char **argv )
-    : _impl( new Impl( argc, argv ))
+    : _impl( new Impl( argc, argv, this ))
 {}
 
 Brayns::~Brayns( )
@@ -686,9 +927,19 @@ void Brayns::setMaterials(
     _impl->setMaterials( materialType, nbMaterials );
 }
 
+Engine& Brayns::getEngine( )
+{
+    return _impl->getEngine( );
+}
+
 Scene& Brayns::getScene( )
 {
     return _impl->getScene( );
+}
+
+Renderer& Brayns::getRenderer( )
+{
+    return _impl->getRenderer( );
 }
 
 Camera& Brayns::getCamera( )
@@ -699,6 +950,11 @@ Camera& Brayns::getCamera( )
 FrameBuffer& Brayns::getFrameBuffer( )
 {
     return _impl->getFrameBuffer( );
+}
+
+KeyboardHandler& Brayns::getKeyboardHandler()
+{
+    return _impl->getKeyboardHandler( );
 }
 
 }

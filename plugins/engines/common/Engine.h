@@ -75,6 +75,9 @@ public:
     /** Gets the renderer */
     RendererPtr getRenderer() { return _renderers[_activeRenderer]; }
 
+    /** Gets the keyboard handler */
+    KeyboardHandlerPtr getKeyboardHandler() { return _keyboardHandler; }
+
     /** Sets the active renderer */
     void setActiveRenderer( const std::string& renderer );
 
@@ -87,6 +90,7 @@ protected:
     RendererMap _renderers;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
+    KeyboardHandlerPtr _keyboardHandler;
 
 };
 

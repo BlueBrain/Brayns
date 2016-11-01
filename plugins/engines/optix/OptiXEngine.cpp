@@ -20,7 +20,7 @@
 
 #include "OptiXEngine.h"
 
-#include <brayns/common/log.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 #include <plugins/engines/optix/OptiXRenderer.h>
 #include <plugins/engines/optix/OptiXScene.h>
@@ -69,6 +69,9 @@ OptiXEngine::OptiXEngine(
     _camera.reset( new OptiXCamera(
         parametersManager->getRenderingParameters().getCameraType(),
         _context));
+
+    _keyboardHandler.reset( new KeyboardHandler( _scene, parametersManager ));
+
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 

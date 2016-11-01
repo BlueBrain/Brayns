@@ -18,37 +18,46 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef EXTENSIONPLUGIN_H
-#define EXTENSIONPLUGIN_H
+#ifndef KEYBOARDHANDLER_H
+#define KEYBOARDHANDLER_H
 
-#include <brayns/api.h>
 #include <brayns/common/types.h>
 
 namespace brayns
 {
 
-/**
-   Defines the abstract representation of a extension plug-in. What we mean by
-   extension is a set a functionalities that are not provided by the core of
-   the application. For example, exposing a REST interface via HTTP, or
-   streaming images to an distant display.
- */
-class ExtensionPlugin
+struct ShortcutInformation
 {
+    std::string description;
+    std::function< void() > functor;
+};
+
+class KeyboardHandler
+{
+
 public:
-    virtual ~ExtensionPlugin() {}
 
-    /**
-        Executes the core functionnalities of the plugin and modifies the
-        ExtensionParameters accordingly
-    */
-    BRAYNS_API virtual void run( ) = 0;
+    KeyboardHandler( ScenePtr scene, ParametersManagerPtr parametersManager );
 
-protected:
-    ExtensionPlugin( Brayns& brayns );
+    std::string help();
 
-    Brayns& _brayns;
+    void registerKeyboardShortcut(
+        const unsigned char key,
+        const std::string& description,
+        std::function< void() > functor );
+
+    void unregisterKeyboardShortcut( const unsigned char key );
+
+    void handleKeyboardShortcut( const unsigned char key );
+
+private:
+
+    ParametersManagerPtr _parametersManager;
+    ScenePtr _scene;
+    std::map< unsigned char, ShortcutInformation > _registeredShortcuts;
+
 };
 
 }
-#endif // EXTENSIONPLUGIN_H
+
+#endif // KEYBOARDHANDLER_H

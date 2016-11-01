@@ -18,46 +18,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <apps/ui/BaseWindow.h>
 #include "InspectCenterManipulator.h"
+
+#include <apps/ui/BaseWindow.h>
+#include <brayns/common/input/KeyboardHandler.h>
 
 namespace brayns
 {
 
-InspectCenterManipulator::InspectCenterManipulator(BaseWindow& window)
-    : AbstractManipulator(window)
-    , _pivot(_window.getWorldBounds().getCenter())
+InspectCenterManipulator::InspectCenterManipulator(
+    BaseWindow& window,
+    KeyboardHandler& keyboardHandler )
+    : AbstractManipulator( window, keyboardHandler )
+    , _pivot( _window.getWorldBounds().getCenter() )
 {
 }
 
-void InspectCenterManipulator::keypress( int32 key )
+void InspectCenterManipulator::registerKeyboardShortcuts()
+{
+    _keyboardHandler.registerKeyboardShortcut(
+        'a', "Rotate left", std::bind( &InspectCenterManipulator::rotateLeft, this ) );
+    _keyboardHandler.registerKeyboardShortcut(
+        'd', "Rotate right", std::bind( &InspectCenterManipulator::rotateRight, this ) );
+    _keyboardHandler.registerKeyboardShortcut(
+        'w', "Rotate up", std::bind( &InspectCenterManipulator::rotateUp, this ) );
+    _keyboardHandler.registerKeyboardShortcut(
+        's', "Rotate down", std::bind( &InspectCenterManipulator::rotateDown, this ) );
+}
+
+void InspectCenterManipulator::unregisterKeyboardShortcuts()
+{
+    _keyboardHandler.unregisterKeyboardShortcut( 'a' );
+    _keyboardHandler.unregisterKeyboardShortcut( 'd' );
+    _keyboardHandler.unregisterKeyboardShortcut( 'w' );
+    _keyboardHandler.unregisterKeyboardShortcut( 's' );
+}
+
+void InspectCenterManipulator::rotateLeft()
 {
     Viewport& viewport = _window.getViewPort();
-    switch(key)
-    {
-        case 'a':
-            viewport.rotate(
-                viewport.getTarget(), _window.getRotateSpeed(), 0, false );
-            break;
-        case 'd':
-            viewport.rotate(
-                viewport.getTarget(), -_window.getRotateSpeed(), 0, false );
-            break;
-        case 'w':
-            viewport.rotate(
-                viewport.getTarget(), 0, _window.getRotateSpeed(), false );
-            break;
-        case 's':
-            viewport.rotate(
-                viewport.getTarget(), 0, -_window.getRotateSpeed(), false );
-            break;
-    }
-
-    AbstractManipulator::keypress(key);
+    viewport.rotate( viewport.getTarget(), _window.getRotateSpeed(), 0, false );
 }
 
-void InspectCenterManipulator::button( const Vector2i& )
+void InspectCenterManipulator::rotateRight()
 {
+    Viewport& viewport = _window.getViewPort();
+    viewport.rotate( viewport.getTarget(), -_window.getRotateSpeed(), 0, false );
+}
+
+void InspectCenterManipulator::rotateUp()
+{
+    Viewport& viewport = _window.getViewPort();
+    viewport.rotate( viewport.getTarget(), 0, _window.getRotateSpeed(), false );
+}
+
+void InspectCenterManipulator::rotateDown()
+{
+    Viewport& viewport = _window.getViewPort();
+    viewport.rotate( viewport.getTarget(), 0, -_window.getRotateSpeed(), false );
 }
 
 void InspectCenterManipulator::specialkey( int32 key )

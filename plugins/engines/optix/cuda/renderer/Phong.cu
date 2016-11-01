@@ -50,7 +50,7 @@ rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 
 RT_PROGRAM void any_hit_shadow()
 {
-    phongShadowed();
+    phongShadowed( Ko );
 }
 
 

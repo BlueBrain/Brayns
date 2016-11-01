@@ -281,13 +281,10 @@ if(EXISTS ${GIT_EXTERNALS} AND NOT GIT_EXTERNAL_SCRIPT_MODE)
           if(NOT TARGET update)
             add_custom_target(update)
           endif()
-          if(NOT TARGET update-gitexternal)
-            add_custom_target(update-gitexternal)
-            add_custom_target(flatten-gitexternal)
-            add_dependencies(update update-gitexternal)
-          endif()
-          if(NOT TARGET ${PROJECT_NAME}-flatten-gitexternal)
+          if(NOT TARGET ${PROJECT_NAME}-update-gitexternal)
+            add_custom_target(${PROJECT_NAME}-update-gitexternal)
             add_custom_target(${PROJECT_NAME}-flatten-gitexternal)
+            add_dependencies(update ${PROJECT_NAME}-update-gitexternal)
           endif()
 
           # Create a unique, flat name
@@ -328,7 +325,7 @@ endif()")
             COMMENT "Update ${REPO} in ${GIT_EXTERNALS_BASE}"
             DEPENDS ${GIT_EXTERNAL_TARGET}
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-          add_dependencies(update-gitexternal
+          add_dependencies(${PROJECT_NAME}-update-gitexternal
             update-gitexternal-${GIT_EXTERNAL_NAME})
 
           # Flattens a git external repository into its parent repo:
@@ -346,12 +343,10 @@ endif()")
             COMMENT "Flatten ${REPO} into ${DIR}"
             DEPENDS ${PROJECT_NAME}-make-branch
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${DIR}")
-          add_dependencies(flatten-gitexternal
-            flatten-gitexternal-${GIT_EXTERNAL_NAME})
           add_dependencies(${PROJECT_NAME}-flatten-gitexternal
             flatten-gitexternal-${GIT_EXTERNAL_NAME})
 
-          foreach(_target flatten-gitexternal-${GIT_EXTERNAL_NAME} ${PROJECT_NAME}-flatten-gitexternal flatten-gitexternal update-gitexternal-${GIT_EXTERNAL_NAME} ${GIT_EXTERNAL_TARGET} update-gitexternal update)
+          foreach(_target flatten-gitexternal-${GIT_EXTERNAL_NAME} ${PROJECT_NAME}-flatten-gitexternal update-gitexternal-${GIT_EXTERNAL_NAME} ${GIT_EXTERNAL_TARGET} ${PROJECT_NAME}-update-gitexternal update)
             set_target_properties(${_target} PROPERTIES
               EXCLUDE_FROM_DEFAULT_BUILD ON FOLDER git)
           endforeach()

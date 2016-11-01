@@ -21,7 +21,7 @@
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
 
-#include <ospray/common/OSPCommon.h>
+#include <brayns/common/types.h>
 
 namespace brayns
 {
@@ -32,8 +32,10 @@ class BaseWindow;
  */
 class AbstractManipulator
 {
+
 public:
-    AbstractManipulator( BaseWindow& window ) : _window( window ) {}
+
+    AbstractManipulator( BaseWindow& window, KeyboardHandler& keyboardHandler );
     virtual ~AbstractManipulator() {}
 
     /** This is the fct that gets called when the mouse moved in the
@@ -46,11 +48,16 @@ public:
      */
     virtual void button(const Vector2i &) {}
 
-    virtual void keypress( int32 key );
+    virtual void keypress( int32 ) {}
 
-    virtual void specialkey( int32 key );
+    virtual void specialkey( int32 ) {}
+
+    virtual void registerKeyboardShortcuts() {}
+
+    virtual void unregisterKeyboardShortcuts() {}
 
 protected:
+
     /** helper functions called from the default 'motion' function */
     virtual void dragLeft(
             const Vector2i&,
@@ -65,6 +72,8 @@ protected:
             const Vector2i&) = 0;
 
     BaseWindow& _window;
+    KeyboardHandler& _keyboardHandler;
+
 };
 
 }
