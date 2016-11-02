@@ -26,6 +26,8 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/camera/Camera.h>
+#include <brayns/common/camera/FlyingModeManipulator.h>
+#include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/simulation/CircuitSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
@@ -93,6 +95,7 @@ struct Brayns::Impl
 
         // Set default camera according to scene bounding box
         _setDefaultCamera( );
+        setupCameraManipulator( CameraMode::INSPECT_CENTER );
 
         // Set default epsilon according to scene bounding box
         _setDefaultEpsilon( );
@@ -102,10 +105,6 @@ struct Brayns::Impl
 
         // Register keyboard shortcuts
         _registerKeyboardShortcuts();
-    }
-
-    ~Impl( )
-    {
     }
 
     void loadData()
@@ -313,6 +312,11 @@ struct Brayns::Impl
         return *_engine->getCamera();
     }
 
+    AbstractManipulator& getCameraManipulator()
+    {
+        return *_cameraManipulator;
+    }
+
     Renderer& getRenderer( )
     {
         return *_engine->getRenderer();
@@ -361,6 +365,12 @@ struct Brayns::Impl
         keyboardHandler.registerKeyboardShortcut(
             'e', "Enable eletron shading",
             std::bind( &Brayns::Impl::_electronShading, this ));
+        keyboardHandler.registerKeyboardShortcut(
+            'f', "Enable fly mode",
+            [this](){ setupCameraManipulator( CameraMode::FLYING ); });
+        keyboardHandler.registerKeyboardShortcut(
+            'i', "Enable inspect mode",
+            [this](){ setupCameraManipulator( CameraMode::INSPECT_CENTER ); });
         keyboardHandler.registerKeyboardShortcut(
             'o', "Decrease ambient occlusion strength",
             std::bind( &Brayns::Impl::_decreaseAmbientOcclusionStrength, this ));
@@ -534,6 +544,26 @@ struct Brayns::Impl
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
         renderParams.setLightEmittingMaterials( !renderParams.getLightEmittingMaterials() );
+    }
+
+    void setupCameraManipulator( const CameraMode mode )
+    {
+        _cameraManipulator.reset(); // deregister previous keyboard handlers
+
+        auto& camera = getCamera();
+        auto& handler = getKeyboardHandler();
+
+        switch( mode )
+        {
+        case CameraMode::FLYING:
+            _cameraManipulator.reset( new FlyingModeManipulator( camera,
+                                                                 handler ));
+            break;
+        case CameraMode::INSPECT_CENTER:
+            _cameraManipulator.reset( new InspectCenterManipulator( camera,
+                                                                    handler ));
+            break;
+        };
     }
 
 private:
@@ -874,6 +904,8 @@ private:
     ExtensionPluginFactoryPtr _extensionPluginFactory;
     ExtensionParameters _extensionParameters;
 #endif
+
+    std::unique_ptr<AbstractManipulator> _cameraManipulator;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -936,6 +968,11 @@ Renderer& Brayns::getRenderer( )
 Camera& Brayns::getCamera( )
 {
     return _impl->getCamera( );
+}
+
+AbstractManipulator& Brayns::getCameraManipulator()
+{
+    return _impl->getCameraManipulator();
 }
 
 FrameBuffer& Brayns::getFrameBuffer( )

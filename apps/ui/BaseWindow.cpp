@@ -25,6 +25,7 @@
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/parameters/SceneParameters.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/camera/AbstractManipulator.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/input/KeyboardHandler.h>
@@ -39,12 +40,15 @@
 #  include <GL/freeglut_ext.h>
 #endif
 
+namespace
+{
+const float DEFAULT_MOTION_ACCELERATION = 1.5f;
+const int GLUT_WHEEL_SCROLL_UP = 3;
+const int GLUT_WHEEL_SCROLL_DOWN = 4;
+}
+
 namespace brayns
 {
-
-const float DEFAULT_EPSILON = 1e-4f;
-const float DEFAULT_MOTION_ACCELERATION = 1.5f;
-const float DEFAULT_MOUSE_SPEED = 0.005f;
 
 void runGLUT( )
 {
@@ -111,42 +115,23 @@ void glut3dPassiveMouseFunc(int x, int y)
 // Base window
 // ------------------------------------------------------------------
 /*! currently active window */
-BaseWindow *BaseWindow::_activeWindow = nullptr;
+BaseWindow* BaseWindow::_activeWindow = nullptr;
 
-BaseWindow::BaseWindow(
-        BraynsPtr brayns, const int , const char **,
-        const FrameBufferMode frameBufferMode,
-        const ManipulatorMode initialManipulator,
-        const int allowedManipulators)
-  : _brayns(brayns), _lastMousePos(-1,-1), _currMousePos(-1,-1),
-    _lastButtonState(0), _currButtonState(0),
-    _currModifiers(0), _upVectorFromCmdLine(0,1,0),
-    _motionSpeed(DEFAULT_MOUSE_SPEED), _rotateSpeed(DEFAULT_MOUSE_SPEED),
-    _frameBufferMode(frameBufferMode),
-    _windowID(-1), _windowSize(-1,-1), fullScreen_(false),
-    frameCounter_(0), _displayHelp( false )
+BaseWindow::BaseWindow( BraynsPtr brayns, const FrameBufferMode frameBufferMode)
+  : _brayns(brayns)
+  , _lastMousePos(-1,-1)
+  , _currMousePos(-1,-1)
+  , _lastButtonState(0)
+  , _currButtonState(0)
+  , _currModifiers(0)
+  , _frameBufferMode(frameBufferMode)
+  , _windowID(-1)
+  , _windowSize(-1,-1)
+  , _displayHelp( false )
 {
-    _setViewPort( );
-
-    // Initialize manipulators
-    if(allowedManipulators & INSPECT_CENTER_MODE)
-        _inspectCenterManipulator.reset(
-            new InspectCenterManipulator( *this, _brayns->getKeyboardHandler() ));
-
-    if(allowedManipulators & MOVE_MODE)
-        _flyingModeManipulator.reset(
-            new FlyingModeManipulator( *this, _brayns->getKeyboardHandler() ));
-
-    switch(initialManipulator)
-    {
-    case MOVE_MODE:
-        _manipulator = _flyingModeManipulator.get( );
-        break;
-    case INSPECT_CENTER_MODE:
-        _manipulator = _inspectCenterManipulator.get( );
-        break;
-    }
-    assert(_manipulator);
+    const auto motionSpeed = _brayns->getCameraManipulator().getMotionSpeed();
+    BRAYNS_INFO << "Camera       :" << _brayns->getCamera() << std::endl;
+    BRAYNS_INFO << "Motion speed :" << motionSpeed << std::endl;
 }
 
 BaseWindow::~BaseWindow( )
@@ -154,8 +139,8 @@ BaseWindow::~BaseWindow( )
 }
 
 void BaseWindow::mouseButton(
-        int whichButton,
-        bool released,
+        const int button,
+        const bool released,
         const Vector2i& pos)
 {
     if(pos != _currMousePos)
@@ -163,25 +148,50 @@ void BaseWindow::mouseButton(
     _lastButtonState = _currButtonState;
 
     if(released)
-        _currButtonState = _currButtonState & ~(1<<whichButton);
+        _currButtonState = _currButtonState & ~(1<<button);
     else
-        _currButtonState = _currButtonState |  (1<<whichButton);
+        _currButtonState = _currButtonState |  (1<<button);
     _currModifiers = glutGetModifiers( );
 
-    _manipulator->button( pos );
+    if( button == GLUT_WHEEL_SCROLL_UP || button == GLUT_WHEEL_SCROLL_DOWN )
+    {
+        // Wheel events are reported twice like a button click (press + release)
+        if( released )
+            return;
+        const auto delta = (button == GLUT_WHEEL_SCROLL_UP) ? 1 : -1;
+        _brayns->getCameraManipulator().wheel( pos, delta );
+    }
 }
 
 void BaseWindow::motion(const Vector2i& pos)
 {
     _currMousePos = pos;
-    if(_currButtonState != _lastButtonState)
+    if( _currButtonState != _lastButtonState )
     {
         // some button got pressed; reset 'old' pos to new pos.
         _lastMousePos = _currMousePos;
         _lastButtonState = _currButtonState;
     }
 
-    _manipulator->motion( );
+    auto& manipulator = _brayns->getCameraManipulator();
+
+    if(( _currButtonState == (1 << GLUT_RIGHT_BUTTON )) ||
+      (( _currButtonState == ( 1 << GLUT_LEFT_BUTTON )) &&
+      ( _currModifiers & GLUT_ACTIVE_ALT )))
+    {
+        manipulator.dragRight( _currMousePos, _lastMousePos );
+    }
+    else if(( _currButtonState == ( 1 << GLUT_MIDDLE_BUTTON )) ||
+           (( _currButtonState == ( 1 << GLUT_LEFT_BUTTON )) &&
+           ( _currModifiers & GLUT_ACTIVE_CTRL )))
+    {
+        manipulator.dragMiddle( _currMousePos, _lastMousePos );
+    }
+    else if( _currButtonState == ( 1 << GLUT_LEFT_BUTTON ))
+    {
+        manipulator.dragLeft( _currMousePos, _lastMousePos );
+    }
+
     _lastMousePos = _currMousePos;
 }
 
@@ -198,7 +208,7 @@ void BaseWindow::idle( )
 void BaseWindow::reshape(const Vector2i& newSize)
 {
     _windowSize = newSize;
-    _viewPort.setAspect(float(newSize.x( ))/float(newSize.y( )));
+    _brayns->getCamera().setAspectRatio(float(newSize.x( ))/float(newSize.y( )));
     _brayns->reshape(newSize);
     _brayns->getParametersManager().getApplicationParameters().setWindowSize(newSize);
 
@@ -221,10 +231,11 @@ void BaseWindow::forceRedraw( )
 
 void BaseWindow::display( )
 {
-    if(_viewPort.getModified( ))
+    const auto& camera = _brayns->getCamera();
+    if( camera.getModified( ))
     {
         _brayns->getFrameBuffer().clear();
-        _viewPort.setModified(false);
+        _brayns->getCamera().resetModified();
     }
 
     _fps.start();
@@ -233,26 +244,25 @@ void BaseWindow::display( )
     RenderOutput renderOutput;
 
     renderInput.windowSize = _windowSize;
-    renderInput.position = _viewPort.getPosition( );
-    renderInput.target = _viewPort.getTarget( );
-    renderInput.up = _viewPort.getUp( );
+    renderInput.position = camera.getPosition( );
+    renderInput.target = camera.getTarget( );
+    renderInput.up = camera.getUpVector( );
 
     _brayns->getCamera().commit();
     _brayns->render( renderInput, renderOutput );
 
     if( _brayns->getParametersManager().getApplicationParameters().getFilters().empty( ))
     {
-
         GLenum format = GL_RGBA;
         GLenum type   = GL_FLOAT;
         GLvoid* buffer = 0;
         switch(_frameBufferMode)
         {
-        case BaseWindow::FRAMEBUFFER_COLOR:
+        case FrameBufferMode::COLOR:
             type = GL_UNSIGNED_BYTE;
             buffer = renderOutput.colorBuffer.data( );
             break;
-        case BaseWindow::FRAMEBUFFER_DEPTH:
+        case FrameBufferMode::DEPTH:
             format = GL_LUMINANCE;
             buffer = renderOutput.depthBuffer.data( );
             break;
@@ -302,21 +312,9 @@ void BaseWindow::display( )
 
     clearPixels( );
 
-#if(BRAYNS_USE_ZEROEQ || BRAYNS_USE_DEFLECT)
-    Camera& camera = _brayns->getCamera( );
-    if( camera.getPosition( ) != _viewPort.getPosition( ))
-        _viewPort.setPosition( camera.getPosition( ) );
-    if( camera.getTarget( ) != _viewPort.getTarget( ))
-        _viewPort.setTarget( camera.getTarget( ) );
-    if( camera.getUpVector( ) != _viewPort.getUp( ))
-        _viewPort.setUp( camera.getUpVector( ) );
-#endif
-
     const Vector2ui windowSize = _brayns->getParametersManager().getApplicationParameters().getWindowSize();
     if( windowSize != _windowSize )
         glutReshapeWindow(windowSize.x(), windowSize.y());
-    ++frameCounter_;
-
 }
 
 void BaseWindow::clearPixels( )
@@ -336,24 +334,6 @@ void BaseWindow::drawPixels(const Vector3f* framebuffer)
     glDrawPixels(_windowSize.x( ), _windowSize.y( ),
                  GL_RGBA, GL_FLOAT, framebuffer);
     glutSwapBuffers( );
-}
-
-Boxf BaseWindow::getWorldBounds( )
-{
-    return _brayns->getScene( ).getWorldBounds( );
-}
-
-void BaseWindow::_setViewPort( )
-{
-    Camera& camera = _brayns->getCamera();
-    const Vector3f& position = camera.getPosition();
-    const Vector3f& target = camera.getTarget();
-    _viewPort.initialize( position, target, camera.getUpVector());
-
-    _motionSpeed = Vector3f(target-position).length( ) * 0.001f;
-    BRAYNS_INFO << "Viewport     :" << _viewPort << std::endl;
-    BRAYNS_INFO << "Motion speed :" << _motionSpeed << std::endl;
-    camera.commit();
 }
 
 void BaseWindow::setTitle(const char *title)
@@ -385,10 +365,41 @@ void BaseWindow::create(const char *title,
     _screenSpaceProcessor.init( width, height );
 }
 
+void BaseWindow::keypress( const char key, const Vector2f& )
+{
+    switch( key )
+    {
+    case 'h':
+        _displayHelp = !_displayHelp;
+        break;
+    default:
+        _brayns->getKeyboardHandler().handleKeyboardShortcut( key );
+    }
+
+    _brayns->commit( );
+}
+
+void BaseWindow::specialkey( const int key, const Vector2f& )
+{
+    switch( key )
+    {
+    case GLUT_KEY_LEFT:
+        _brayns->getKeyboardHandler().handle( SpecialKey::LEFT );
+        break;
+    case GLUT_KEY_RIGHT:
+        _brayns->getKeyboardHandler().handle( SpecialKey::RIGHT );
+        break;
+    case GLUT_KEY_UP:
+        _brayns->getKeyboardHandler().handle( SpecialKey::UP );
+        break;
+    case GLUT_KEY_DOWN:
+        _brayns->getKeyboardHandler().handle( SpecialKey::DOWN );
+        break;
+    }
+}
+
 void BaseWindow::_registerKeyboardShortcuts()
 {
-    _manipulator->registerKeyboardShortcuts();
-
     KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
     keyHandler.registerKeyboardShortcut(
         ' ', "Camera reset to initial state",
@@ -400,14 +411,8 @@ void BaseWindow::_registerKeyboardShortcuts()
         '-', "Decrease motion speed",
         std::bind( &BaseWindow::_decreaseMotionSpeed, this ));
     keyHandler.registerKeyboardShortcut(
-        'c', "Display current viewport information",
-        std::bind( &BaseWindow::_displayViewportInformation, this ));
-    keyHandler.registerKeyboardShortcut(
-        'f', "Enable fly mode",
-        std::bind( &BaseWindow::_enableFlyMode, this ));
-    keyHandler.registerKeyboardShortcut(
-        'i', "Enable inspect mode",
-        std::bind( &BaseWindow::_enableInspectMode, this ));
+        'c', "Display current camera information",
+        std::bind( &BaseWindow::_displayCameraInformation, this ));
     keyHandler.registerKeyboardShortcut(
         'Q', "Quit application",
         std::bind( &BaseWindow::_exitApplication, this ));
@@ -416,27 +421,13 @@ void BaseWindow::_registerKeyboardShortcuts()
         std::bind( &BaseWindow::_toggleFrameBuffer, this ));
 }
 
-void BaseWindow::specialkey( int key, const Vector2f& )
+void BaseWindow::_renderBitmapString( const float x, const float y,
+                                      const std::string& text )
 {
-    if(_manipulator)
-        _manipulator->specialkey( key );
-}
-
-void BaseWindow::keypress( char key, const Vector2f& )
-{
-    switch (key)
-    {
-    case 'h':
-        _displayHelp = !_displayHelp;
-        break;
-    default:
-        _brayns->getKeyboardHandler().handleKeyboardShortcut( key );
-    }
-
-    if(_manipulator)
-        _manipulator->keypress( key );
-
-    _brayns->commit( );
+    glRasterPos3f( x, y, 0.f );
+    glutBitmapString( GLUT_BITMAP_8_BY_13,
+                      reinterpret_cast< const unsigned char* >( text.c_str( )));
+    glRasterPos3f( -1.f, -1.f, 0.f );
 }
 
 void BaseWindow::_resetCamera()
@@ -447,38 +438,19 @@ void BaseWindow::_resetCamera()
 
 void BaseWindow::_increaseMotionSpeed()
 {
-    _motionSpeed *= DEFAULT_MOTION_ACCELERATION;
+    const auto speed = _brayns->getCameraManipulator().getMotionSpeed();
+    _brayns->getCameraManipulator().setMotionSpeed( speed * DEFAULT_MOTION_ACCELERATION );
 }
 
 void BaseWindow::_decreaseMotionSpeed()
 {
-    _motionSpeed /= DEFAULT_MOTION_ACCELERATION;
+    const auto speed = _brayns->getCameraManipulator().getMotionSpeed();
+    _brayns->getCameraManipulator().setMotionSpeed( speed / DEFAULT_MOTION_ACCELERATION );
 }
 
-void BaseWindow::_displayViewportInformation()
+void BaseWindow::_displayCameraInformation()
 {
-    BRAYNS_INFO << _viewPort << std::endl;
-}
-
-void BaseWindow::_enableFlyMode()
-{
-    // 'f'ly mode
-    if( _flyingModeManipulator )
-    {
-        _manipulator->unregisterKeyboardShortcuts();
-        _manipulator = _flyingModeManipulator.get();
-        _manipulator->registerKeyboardShortcuts();
-    }
-}
-
-void BaseWindow::_enableInspectMode()
-{
-    if( _inspectCenterManipulator)
-    {
-        _manipulator->unregisterKeyboardShortcuts();
-        _manipulator = _inspectCenterManipulator.get();
-        _manipulator->registerKeyboardShortcuts();
-    }
+    BRAYNS_INFO << _brayns->getCamera() << std::endl;
 }
 
 void BaseWindow::_exitApplication()
@@ -492,17 +464,10 @@ void BaseWindow::_exitApplication()
 
 void BaseWindow::_toggleFrameBuffer()
 {
-    if( _frameBufferMode==FRAMEBUFFER_DEPTH )
-        _frameBufferMode = FRAMEBUFFER_COLOR;
+    if( _frameBufferMode == FrameBufferMode::DEPTH )
+        _frameBufferMode = FrameBufferMode::COLOR;
     else
-        _frameBufferMode = FRAMEBUFFER_DEPTH;
-}
-
-void BaseWindow::_renderBitmapString( const float x, const float y, const std::string& text )
-{
-    glRasterPos3f( x, y, 0.f );
-    glutBitmapString( GLUT_BITMAP_8_BY_13, reinterpret_cast< const unsigned char* >( text.c_str()));
-    glRasterPos3f( -1.f, -1.f, 0.f );
+        _frameBufferMode = FrameBufferMode::DEPTH;
 }
 
 }

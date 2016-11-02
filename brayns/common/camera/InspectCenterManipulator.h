@@ -26,32 +26,32 @@
 namespace brayns
 {
 
-/** Defines an inspect center camera manipulators
-*/
+/**
+ * Camera manipulator to rotate and zoom around a central point.
+ */
 class InspectCenterManipulator : public AbstractManipulator
 {
 public:
-    InspectCenterManipulator(
-        BaseWindow& window,
-        KeyboardHandler& keyboardHandler );
+    InspectCenterManipulator( Camera& camera, KeyboardHandler& handler );
+    ~InspectCenterManipulator();
 
+private:
     void dragLeft( const Vector2i &to, const Vector2i &from ) final;
     void dragRight( const Vector2i &to, const Vector2i &from ) final;
     void dragMiddle( const Vector2i &to, const Vector2i &from ) final;
-    void specialkey( int32 key ) final;
+    void wheel( const Vector2i& position, float delta ) final;
 
-    void registerKeyboardShortcuts() final;
+    void _rotateLeft();
+    void _rotateRight();
+    void _rotateUp();
+    void _rotateDown();
 
-    void unregisterKeyboardShortcuts() final;
-
-    void rotateLeft();
-    void rotateRight();
-    void rotateUp();
-    void rotateDown();
-
-protected:
-    Vector3f _pivot;
+    void _turnLeft();
+    void _turnRight();
+    void _turnUp();
+    void _turnDown();
 };
 
 }
-#endif // INSPECTCENTERMANIPULATOR_H
+
+#endif

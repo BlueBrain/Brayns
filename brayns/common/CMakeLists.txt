@@ -11,7 +11,10 @@ set(BRAYNSCOMMON_SOURCES
   simulation/AbstractSimulationHandler.cpp
   simulation/CircuitSimulationHandler.cpp
   simulation/SpikeSimulationHandler.cpp
+  camera/AbstractManipulator.cpp
   camera/Camera.cpp
+  camera/FlyingModeManipulator.cpp
+  camera/InspectCenterManipulator.cpp
   scene/Scene.cpp
   geometry/Primitive.cpp
   geometry/Geometry.cpp
@@ -37,7 +40,10 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   simulation/CircuitSimulationHandler.h
   simulation/SpikeSimulationHandler.h
   transferFunction/TransferFunction.h
+  camera/AbstractManipulator.h
   camera/Camera.h
+  camera/FlyingModeManipulator.h
+  camera/InspectCenterManipulator.h
   scene/Scene.h
   geometry/Primitive.h
   geometry/Geometry.h

@@ -21,6 +21,7 @@
 #include <brayns/Brayns.h>
 
 #include <brayns/common/camera/Camera.h>
+#include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
@@ -55,6 +56,9 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( camera.getAspectRatio(), 4.f/3.f );
     BOOST_CHECK_EQUAL( camera.getAperture(), 0.f );
     BOOST_CHECK_EQUAL( camera.getFocalLength(), 0.f );
+
+    auto& manipulator = brayns.getCameraManipulator();
+    BOOST_CHECK( dynamic_cast<brayns::InspectCenterManipulator*>( &manipulator ));
 
     auto& fb = brayns.getFrameBuffer();
     BOOST_CHECK( !fb.getColorBuffer( ));
