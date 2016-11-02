@@ -66,9 +66,6 @@ BOOST_AUTO_TEST_CASE( defaults )
     const auto& appParams = pm.getApplicationParameters();
     BOOST_CHECK_EQUAL( appParams.getWindowSize(), brayns::Vector2ui( 800, 600 ));
     BOOST_CHECK_EQUAL( appParams.getCamera(), "perspective" );
-    BOOST_CHECK_EQUAL( appParams.getDeflectHostName(), "" );
-    BOOST_CHECK_EQUAL( appParams.getDeflectStreamName(), "" );
-    BOOST_CHECK_EQUAL( appParams.getDeflectEnabled(), true );
     BOOST_CHECK( !appParams.isBenchmarking( ));
     BOOST_CHECK_EQUAL( appParams.getJpegCompression(), 100 );
     BOOST_CHECK_EQUAL( appParams.getJpegSize(), brayns::Vector2ui( 800, 600 ));

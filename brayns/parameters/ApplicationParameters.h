@@ -47,16 +47,6 @@ public:
     /** camera name (e.g. Perspective, Stereo, etc. ) */
     std::string getCamera() const { return _camera; }
 
-    /** DisplayCluster server host */
-    std::string getDeflectHostName() const { return _deflectHostName; }
-
-    /** Application stream name for DisplayCluster */
-    std::string getDeflectStreamName() const { return _deflectStreamName; }
-
-    /** Application stream enabled */
-    bool getDeflectEnabled() const { return _deflectEnabled; }
-    void setDeflectEnabled( const bool value ) { _deflectEnabled = value; }
-
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
 
@@ -74,9 +64,6 @@ protected:
 
     std::string _camera;
     Vector2ui _windowSize;
-    std::string _deflectHostName;
-    std::string _deflectStreamName;
-    bool _deflectEnabled;
     bool _benchmarking;
     size_t _jpegCompression;
     Vector2ui _jpegSize;

@@ -29,26 +29,45 @@
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/parameters/ApplicationParameters.h>
 
+#ifdef BRAYNS_USE_ZEROEQ
+#  include "ZeroEQPlugin.h"
+#endif
+
 namespace brayns
 {
 
-DeflectPlugin::DeflectPlugin( Brayns& brayns )
+#ifdef BRAYNS_USE_ZEROEQ
+    DeflectPlugin::DeflectPlugin( Brayns& brayns, ZeroEQPlugin& zeroeq )
+#else
+    DeflectPlugin::DeflectPlugin( Brayns& brayns )
+#endif
     : ExtensionPlugin( brayns )
     , _theta( 0.f )
     , _phi( 0.f )
     , _previousTouchPosition( 0.5f, 0.5f, -1.f )
     , _stream( nullptr )
     , _pressed( false )
-    , _streamingEnabled( false )
 {
+    brayns.getKeyboardHandler().registerKeyboardShortcut(
+        '*', "Enable/Disable Deflect streaming",
+                [&] { _params.setEnabled( !_params.getEnabled( )); });
+
+#ifdef BRAYNS_USE_ZEROEQ
+    zeroeq.handleObject( _params );
+#endif
 }
 
 void DeflectPlugin::run()
 {
-    ApplicationParameters& applicationParameters =
-        _brayns.getParametersManager().getApplicationParameters();
-    const bool deflectEnabled = applicationParameters.getDeflectEnabled();
+    if( _stream )
+    {
+        const bool changed = _stream->getId() != _params.getIdString() ||
+                             _stream->getHost() != _params.getHostString();
+        if( changed )
+            _stream.reset();
+    }
 
+    const bool deflectEnabled = _params.getEnabled();
     if( _stream && _stream->isConnected() && !deflectEnabled )
     {
         BRAYNS_INFO << "Closing Deflect stream" << std::endl;
@@ -67,14 +86,11 @@ void DeflectPlugin::run()
 
 void DeflectPlugin::_initializeDeflect()
 {
-    ApplicationParameters& applicationParameters =
-        _brayns.getParametersManager().getApplicationParameters();
-
     try
     {
-        _stream.reset( new deflect::Stream(
-           applicationParameters.getDeflectStreamName(),
-           applicationParameters.getDeflectHostName()));
+        _stream.reset( new deflect::Stream( _params.getIdString(),
+                                            _params.getHostString(),
+                                            _params.getPort( )));
 
         if( _stream->isConnected( ))
             BRAYNS_INFO << "Deflect successfully connected to Tide on host "
@@ -85,11 +101,14 @@ void DeflectPlugin::_initializeDeflect()
 
         if( !_stream->registerForEvents( ))
             BRAYNS_ERROR << "Deflect failed to register for events!" << std::endl;
+
+        _params.setId( _stream->getId( ));
+        _params.setHost( _stream->getHost( ));
     }
     catch( std::runtime_error& ex )
     {
         BRAYNS_ERROR << "Deflect failed to initialize. " << ex.what() << std::endl;
-        applicationParameters.setDeflectEnabled( false );
+        _params.setEnabled( false );
         return;
     }
 }
@@ -187,12 +206,9 @@ void DeflectPlugin::_send(
 {
     deflect::ImageWrapper deflectImage( imageData, windowSize.x(), windowSize.y(), deflect::RGBA );
 
-    ApplicationParameters& applicationParameters =
-        _brayns.getParametersManager().getApplicationParameters();
-
-    deflectImage.compressionQuality = applicationParameters.getJpegCompression();
+    deflectImage.compressionQuality = _params.getQuality();
     deflectImage.compressionPolicy =
-        ( deflectImage.compressionQuality != 100 ) ?
+        _params.getCompression() ?
         deflect::COMPRESSION_ON : deflect::COMPRESSION_OFF;
     if( swapXAxis )
         deflect::ImageWrapper::swapYAxis( (void*)imageData, windowSize.x(), windowSize.y(), 4);

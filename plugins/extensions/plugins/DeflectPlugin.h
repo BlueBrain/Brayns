@@ -25,9 +25,14 @@
 
 #include <brayns/api.h>
 #include <deflect/Stream.h>
+#include <lexis/render/stream.h>
 
 namespace brayns
 {
+
+#ifdef BRAYNS_USE_ZEROEQ
+class ZeroEQPlugin;
+#endif
 
 class DeflectPlugin : public ExtensionPlugin
 {
@@ -39,7 +44,11 @@ public:
         @param extensionParameters Struture of pointers to objects that are
                potentially updated by registered plugins
     */
+#ifdef BRAYNS_USE_ZEROEQ
+    DeflectPlugin( Brayns& brayns, ZeroEQPlugin& zeroeq );
+#else
     DeflectPlugin( Brayns& brayns );
+#endif
 
     /** @copydoc ExtensionPlugin::execute */
     BRAYNS_API void run( ) final;
@@ -85,8 +94,7 @@ private:
     Vector3f _previousTouchPosition;
     std::unique_ptr< deflect::Stream > _stream;
     bool _pressed;
-    bool _streamingEnabled;
-
+    ::lexis::render::Stream _params;
 };
 
 }

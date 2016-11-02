@@ -53,6 +53,8 @@ public:
     /** @copydoc ExtensionPlugin::execute */
     BRAYNS_API void run( ) final;
 
+    bool handleObject( servus::Serializable& object );
+
 private:
 
     /**
