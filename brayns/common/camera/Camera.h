@@ -39,7 +39,6 @@ namespace brayns
 class Camera
 {
 public:
-
     /**
        Default constructor
        @param cameraType Type of camera (Perpective, Stereo, etc)
@@ -110,6 +109,12 @@ public:
     BRAYNS_API virtual const Vector3f& getUpVector( ) const;
 
     /**
+       Gets the camera rotation matrix
+       @return the rotation matrix from the original *target* and *up* vectors
+    */
+    BRAYNS_API virtual Matrix4f& getRotationMatrix( );
+
+    /**
        Commits the changes held by the camera object so that
        attributes become available to the underlying rendering engine
     */
@@ -178,12 +183,21 @@ public:
     */
     BRAYNS_API servus::Serializable* getSerializable( );
 
+    /**
+       @return true if any modification happend after the last resetModified()
+    */
+    BRAYNS_API bool getModified() const;
+
+    /** Reset the modified flag */
+    BRAYNS_API void resetModified();
+
 private:
     struct Impl;
-
     std::unique_ptr< Impl > _impl;
 };
 
+std::ostream& operator << ( std::ostream& os, Camera& camera );
+
 }
 
-#endif // CAMERA_H
+#endif

@@ -26,31 +26,27 @@
 namespace brayns
 {
 
-/** Defines a flying mode camera manipulator, like in a flight simulator!
-*/
+/**
+ * Defines a flying mode camera manipulator, like in a flight simulator.
+ */
 class FlyingModeManipulator : public AbstractManipulator
 {
 public:
+    FlyingModeManipulator( Camera& camera, KeyboardHandler& keyboardHandler );
+    ~FlyingModeManipulator();
 
-    FlyingModeManipulator( BaseWindow& window, KeyboardHandler& keyboardHandler );
-
-protected:
-
+private:
     void dragLeft( const Vector2i&, const Vector2i& ) final;
     void dragRight( const Vector2i&, const Vector2i& ) final;
     void dragMiddle( const Vector2i&,const Vector2i& ) final;
-    void button( const Vector2i& ) final {}
+    void wheel( const Vector2i& position, float delta ) final;
 
-    void registerKeyboardShortcuts() final;
-
-    void unregisterKeyboardShortcuts() final;
-
-    void StrafeLeft();
-    void StrafeRight();
-    void FlyForward();
-    void FlyBackwards();
-
+    void _strafeLeft();
+    void _strafeRight();
+    void _flyForward();
+    void _flyBackwards();
 };
 
 }
-#endif // FLYINGMODEMAINPULATOR_H
+
+#endif

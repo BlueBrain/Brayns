@@ -31,13 +31,13 @@ int main(int argc, const char **argv)
     try
     {
         brayns::BraynsPtr brayns( new brayns::Brayns( argc, argv ));
-        brayns::initGLUT(&argc, argv);
-        brayns::BraynsViewer braynsViewer(brayns, argc, argv);
+        brayns::initGLUT( &argc, argv );
+        brayns::BraynsViewer braynsViewer( brayns );
         BRAYNS_INFO << "Initializing Application..." << std::endl;
         const brayns::Vector2ui& size =
             brayns->getParametersManager().getApplicationParameters().getWindowSize();
 
-        braynsViewer.create( "Brayns Viewer", size.x(), size.y(), false);
+        braynsViewer.create( "Brayns Viewer", size.x(), size.y(), false );
         brayns::runGLUT();
     }
     catch( const std::runtime_error& e )

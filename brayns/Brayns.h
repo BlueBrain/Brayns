@@ -162,6 +162,12 @@ public:
     BRAYNS_API Camera& getCamera();
 
     /**
+       Gets the camera manipulator
+       @return The camera manipulator that is currently active
+    */
+    BRAYNS_API AbstractManipulator& getCameraManipulator();
+
+    /**
        Gets the current frame buffer
        @return The frame buffer object
     */

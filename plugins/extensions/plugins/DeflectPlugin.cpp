@@ -22,16 +22,21 @@
 
 #include <brayns/Brayns.h>
 #include <plugins/engines/common/Engine.h>
-#include <brayns/common/scene/Scene.h>
+#include <brayns/common/camera/AbstractManipulator.h>
+#include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
-#include <brayns/common/camera/Camera.h>
-#include <brayns/common/input/KeyboardHandler.h>
+#include <brayns/common/scene/Scene.h>
 #include <brayns/parameters/ApplicationParameters.h>
 
 #ifdef BRAYNS_USE_ZEROEQ
 #  include "ZeroEQPlugin.h"
 #endif
+
+namespace
+{
+const float wheelFactor = 1.f / 40.f;
+}
 
 namespace brayns
 {
@@ -42,11 +47,6 @@ namespace brayns
     DeflectPlugin::DeflectPlugin( Brayns& brayns )
 #endif
     : ExtensionPlugin( brayns )
-    , _theta( 0.f )
-    , _phi( 0.f )
-    , _previousTouchPosition( 0.5f, 0.5f, -1.f )
-    , _stream( nullptr )
-    , _pressed( false )
 {
     brayns.getKeyboardHandler().registerKeyboardShortcut(
         '*', "Enable/Disable Deflect streaming",
@@ -126,7 +126,6 @@ void DeflectPlugin::_handleDeflectEvents()
 {
     bool hasEvents = false;
 
-    FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
     while( _stream->hasEvent() )
     {
         hasEvents = true;
@@ -135,59 +134,45 @@ void DeflectPlugin::_handleDeflectEvents()
         switch( event.type )
         {
         case deflect::Event::EVT_PRESS:
-        {
-            _previousTouchPosition.x() = event.mouseX;
-            _previousTouchPosition.y() = event.mouseY;
-            _pressed = true;
+            _previousPos = _getWindowPos( event );
+            _panOrPinch = false;
             break;
-        }
+        case deflect::Event::EVT_MOVE:
         case deflect::Event::EVT_RELEASE:
         {
-            _pressed = false;
+            const auto pos = _getWindowPos( event );
+            if( !_panOrPinch )
+                _brayns.getCameraManipulator().dragLeft( _previousPos, pos );
+            _previousPos = pos;
+            _panOrPinch = false;
             break;
         }
-        case deflect::Event::EVT_MOVE:
-        case deflect::Event::EVT_WHEEL:
+        case deflect::Event::EVT_PAN:
         {
-            if( _pressed )
-            {
-                const float du = _previousTouchPosition.x() - event.mouseX;
-                const float dv = _previousTouchPosition.y() - event.mouseY;
-
-                _theta -= frameBuffer.getSize().x() / 100.f * std::asin( du );
-                _phi += frameBuffer.getSize().y() / 100.f * std::asin( dv );
-
-                _previousTouchPosition.x() = event.mouseX;
-                _previousTouchPosition.y() = event.mouseY;
-                _previousTouchPosition.z() = std::min(0.f, _previousTouchPosition.z());
-            }
-            else
-                _previousTouchPosition.z() += event.dy;
-
-            Scene& scene = _brayns.getScene();
-            const Vector3f& center = scene.getWorldBounds().getCenter();
-            const Vector3f& size = scene.getWorldBounds().getSize();
-            const Vector3f cameraPosition = center + size * Vector3f(
-                _previousTouchPosition.z( ) * std::cos( _phi ) * std::cos( _theta ),
-                _previousTouchPosition.z( ) * std::sin( _phi ) * std::cos( _theta ),
-                _previousTouchPosition.z( ) * std::sin( _theta ));
-
-            _brayns.getCamera().setPosition( cameraPosition );
-            _brayns.getCamera().setTarget( center );
+            const auto pos = _getWindowPos( event );
+            _brayns.getCameraManipulator().dragMiddle( _previousPos, pos );
+            _previousPos = pos;
+            _panOrPinch = true;
+            break;
+        }
+        case deflect::Event::EVT_PINCH:
+        {
+            const auto pos = _getWindowPos( event );
+            const auto delta = _getZoomDelta( event );
+            _brayns.getCameraManipulator().wheel( pos, delta * wheelFactor );
+            _panOrPinch = true;
             break;
         }
         case deflect::Event::EVT_KEY_PRESS:
         {
-            _brayns.getEngine().getKeyboardHandler()->handleKeyboardShortcut( event.text[0] );
+            _brayns.getKeyboardHandler().handleKeyboardShortcut( event.text[0] );
             break;
         }
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
         {
-            _brayns.reshape( Vector2ui( event.dx, event.dy ) );
+            _brayns.reshape( Vector2ui( event.dx, event.dy ));
             break;
         }
-        case deflect::Event::EVT_NONE:
-        case deflect::Event::EVT_CLICK:
         default:
             break;
         }
@@ -202,26 +187,41 @@ void DeflectPlugin::_handleDeflectEvents()
 void DeflectPlugin::_send(
     const Vector2i& windowSize,
     unsigned long* imageData,
-    const bool swapXAxis )
+    const bool swapYAxis )
 {
-    deflect::ImageWrapper deflectImage( imageData, windowSize.x(), windowSize.y(), deflect::RGBA );
+    deflect::ImageWrapper deflectImage( imageData, windowSize.x(),
+                                        windowSize.y(), deflect::RGBA );
 
     deflectImage.compressionQuality = _params.getQuality();
     deflectImage.compressionPolicy =
         _params.getCompression() ?
         deflect::COMPRESSION_ON : deflect::COMPRESSION_OFF;
-    if( swapXAxis )
-        deflect::ImageWrapper::swapYAxis( (void*)imageData, windowSize.x(), windowSize.y(), 4);
+    if( swapYAxis )
+        deflect::ImageWrapper::swapYAxis( (void*)imageData, windowSize.x(),
+                                          windowSize.y(), 4 );
 
-    // TODO: Big Memory Leak on every send. FIX NEEDED!!!!!
     const bool success = _stream->send( deflectImage ) && _stream->finishFrame();
-    if(!success)
+    if( !success )
     {
         if( !_stream->isConnected() )
             BRAYNS_ERROR << "Stream closed, exiting." << std::endl;
         else
             BRAYNS_ERROR << "failure in deflectStreamSend()" << std::endl;
     }
+}
+
+Vector2d DeflectPlugin::_getWindowPos( const deflect::Event& event ) const
+{
+    const auto windowSize = _brayns.getFrameBuffer().getSize();
+    return { event.mouseX * windowSize.x(), event.mouseY * windowSize.y() };
+}
+
+double DeflectPlugin::_getZoomDelta( const deflect::Event& pinchEvent ) const
+{
+    const auto windowSize = _brayns.getFrameBuffer().getSize();
+    const auto dx = pinchEvent.dx * windowSize.x();
+    const auto dy = pinchEvent.dy * windowSize.y();
+    return std::copysign( std::sqrt( dx * dx + dy * dy ), dx + dy );
 }
 
 }

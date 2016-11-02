@@ -25,19 +25,10 @@
 #include <unistd.h>
 #endif
 
-#include <brayns/common/types.h>
-#include <apps/ui/Viewport.h>
 #include <apps/ui/gl/ScreenSpaceProcessor.h>
-#include <apps/ui/manipulators/InspectCenterManipulator.h>
-#include <apps/ui/manipulators/FlyingModeManipulator.h>
+#include <brayns/common/types.h>
 
 #include <chrono>
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 
 using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
@@ -77,43 +68,25 @@ struct FPSCounter
 
 };
 
+/**
+ * The different types of frame buffer targets for rendering.
+ */
+enum class FrameBufferMode
+{
+    COLOR,
+    DEPTH
+};
+
 class BaseWindow
 {
 public:
 
-    static BaseWindow *_activeWindow;
-
-    typedef enum
-    {
-        FRAMEBUFFER_COLOR,
-        FRAMEBUFFER_DEPTH,
-        FRAMEBUFFER_NONE
-    } FrameBufferMode;
-
-    typedef enum
-    {
-        MOVE_MODE           =(1<<0),
-        INSPECT_CENTER_MODE =(1<<1)
-    } ManipulatorMode;
-
-    BaseWindow(BraynsPtr brayns, int argc, const char **argv,
-               const FrameBufferMode frameBufferMode,
-               const ManipulatorMode initialManipulator=INSPECT_CENTER_MODE,
-               int allowedManipulators=INSPECT_CENTER_MODE|MOVE_MODE);
+    BaseWindow( BraynsPtr brayns,
+                FrameBufferMode frameBufferMode = FrameBufferMode::COLOR );
     virtual ~BaseWindow();
-
-    std::unique_ptr<InspectCenterManipulator> _inspectCenterManipulator;
-    std::unique_ptr<FlyingModeManipulator> _flyingModeManipulator;
-
-    /*! current manipulator */
-    AbstractManipulator* _manipulator;
 
     /*! size we'll create a window at */
     static Vector2i _defaultInitSize;
-
-    /*! set a default camera position that views given bounds from the
-        top left front */
-    void setViewPort();
 
     /*! tell GLUT that this window is 'dirty' and needs redrawing */
     virtual void forceRedraw();
@@ -124,15 +97,12 @@ public:
     /*! set window title */
     void setTitle(const std::string &title) { setTitle(title.c_str()); }
 
-    /*! set viewport to given values */
-    Viewport& getViewPort() { return _viewPort; }
-
     // ------------------------------------------------------------------
     // event handling - override this to change this widgets behavior
     // to input events
     // ------------------------------------------------------------------
     virtual void mouseButton(
-            int which,
+            int button,
             bool released,
             const Vector2i& pos);
 
@@ -171,21 +141,6 @@ public:
      * dimensions are equal) */
     void drawPixels(const Vector3f *framebuffer);
 
-    // ------------------------------------------------------------------
-    // camera helper code
-    // ------------------------------------------------------------------
-    void snapUp();
-    /*! set 'up' vector. if this vector is '0,0,0' the viewer will
-       *not* apply the up-vector after camera manipulation */
-
-    friend void glut3dReshape(int x, int y);
-    friend void glut3dDisplay(void);
-    friend void glut3dKeyboard(char key, int x, int y);
-    friend void glut3dIdle(void);
-    friend void glut3dMotionFunc(int x, int y);
-    friend void glut3dMouseFunc(int whichButton, int released,
-                                int x, int y);
-
     virtual void keypress(char key, const Vector2f& where);
     virtual void specialkey(int key, const Vector2f& where);
 
@@ -201,28 +156,10 @@ public:
     void saveSceneToBinaryFile( const std::string& fn );
     void loadSceneFromBinaryFile( const std::string& fn );
 
-    /*! last mouse screen position of mouse before current motion */
-    Vector2i getLastMousePos() { return _lastMousePos; }
-
-    /*! current screen position of mouse */
-    Vector2i getCurrentMousePos() { return _currMousePos; }
-    int64_t getLastButtonState() { return _lastButtonState; }
-    int64_t getCurrentButtonState() { return _currButtonState; }
-    int64_t getCurrentModifiers() { return _currModifiers; }
-    Vector3f getUpVectorFromCmdLine() { return _upVectorFromCmdLine; }
-
-    /*!< world bounds, to automatically set viewPort lookat, mouse speed, etc */
-    Boxf getWorldBounds();
-
-    float getRotateSpeed() { return _rotateSpeed; }
-    float getMotionSpeed() { return _motionSpeed; }
-
-    Vector2i getWindowSize() { return _windowSize; }
-
 protected:
 
     virtual void _registerKeyboardShortcuts();
-    void _renderBitmapString( const float x, const float y, const std::string& text );
+    void _renderBitmapString( float x, float y, const std::string& text );
 
     BraynsPtr _brayns;
 
@@ -233,24 +170,11 @@ protected:
     u_int64_t _lastButtonState;
     u_int64_t _currButtonState;
     u_int64_t _currModifiers;
-    Vector3f _upVectorFromCmdLine;
-
-    /*! camera speed modifier - affects how many units the camera _moves_ with
-     * each unit on the screen */
-    float _motionSpeed;
-    /*! camera rotation speed modifier - affects how many units the camera
-     * _rotates_ with each unit on the screen */
-    float _rotateSpeed;
 
     FrameBufferMode _frameBufferMode;
 
-    Viewport _viewPort;
     int _windowID;
     Vector2i _windowSize;
-
-    bool fullScreen_;
-    int resampleSize_;
-    int frameCounter_;
 
     FPSCounter _fps;
 
@@ -262,16 +186,25 @@ protected:
 
 private:
 
-    void _setViewPort();
     void _resetCamera();
     void _increaseMotionSpeed();
     void _decreaseMotionSpeed();
-    void _displayViewportInformation();
-    void _enableFlyMode();
-    void _enableInspectMode();
+    void _displayCameraInformation();
     void _exitApplication();
     void _toggleFrameBuffer();
 
+    // ------------------------------------------------------------------
+    // GLUT camera helper code
+    // ------------------------------------------------------------------
+    static BaseWindow* _activeWindow;
+    friend void glut3dReshape(int x, int y);
+    friend void glut3dDisplay(void);
+    friend void glut3dKeyboard(unsigned char key, int x, int y);
+    friend void glut3dSpecial(int key, int x, int y);
+    friend void glut3dIdle(void);
+    friend void glut3dMotionFunc(int x, int y);
+    friend void glut3dMouseFunc(int whichButton, int released, int x, int y);
+    friend void glut3dPassiveMouseFunc(int x, int y);
 };
 
 }

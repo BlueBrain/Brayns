@@ -35,11 +35,8 @@ namespace
 namespace brayns
 {
 
-BraynsViewer::BraynsViewer(BraynsPtr brayns, int argc, const char **argv)
-    : BaseWindow(brayns, argc, argv,
-                 FRAMEBUFFER_COLOR,
-                 INSPECT_CENTER_MODE,
-                 INSPECT_CENTER_MODE|MOVE_MODE)
+BraynsViewer::BraynsViewer( BraynsPtr brayns )
+    : BaseWindow( brayns )
     , _timestampIncrement( 0.f )
 {
     _registerKeyboardShortcuts();

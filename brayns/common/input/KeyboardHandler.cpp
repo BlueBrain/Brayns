@@ -74,12 +74,50 @@ void KeyboardHandler::handleKeyboardShortcut( const unsigned char key )
     }
 }
 
+void KeyboardHandler::registerSpecialKey(
+    const SpecialKey key,
+    const std::string& description,
+    std::function< void() > functor )
+{
+    if( _registeredSpecialKeys.find( key ) != _registeredSpecialKeys.end() )
+    {
+        std::stringstream message;
+        message << int(key) << " is already registered";
+        BRAYNS_ERROR << message.str() << std::endl;
+    }
+    else
+    {
+        ShortcutInformation shortcutInformation = { description, functor };
+        _registeredSpecialKeys[ key ] = shortcutInformation;
+    }
+}
+
+void KeyboardHandler::unregisterSpecialKey( const SpecialKey key )
+{
+    auto it = _registeredSpecialKeys.find( key );
+    if( it != _registeredSpecialKeys.end() )
+        _registeredSpecialKeys.erase( it );
+}
+
+void KeyboardHandler::handle( const SpecialKey key )
+{
+    auto it = _registeredSpecialKeys.find( key );
+    if( it != _registeredSpecialKeys.end() )
+    {
+        BRAYNS_INFO << "Processing " << (*it).second.description << std::endl;
+        (*it).second.functor();
+    }
+}
+
 std::string KeyboardHandler::help()
 {
     std::stringstream result;
     result << "Keyboard shortcuts:" << std::endl;
     for( const auto& registeredShortcut: _registeredShortcuts )
         result << "'" << registeredShortcut.first
+               << "' " + registeredShortcut.second.description << "\n";
+    for( const auto& registeredShortcut: _registeredSpecialKeys )
+        result << "'" << (int)registeredShortcut.first
                << "' " + registeredShortcut.second.description << "\n";
     return result.str();
 }

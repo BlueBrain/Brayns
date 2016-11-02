@@ -32,14 +32,20 @@ struct ShortcutInformation
     std::function< void() > functor;
 };
 
+enum class SpecialKey
+{
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN
+};
+
 class KeyboardHandler
 {
 
 public:
 
     KeyboardHandler( ScenePtr scene, ParametersManagerPtr parametersManager );
-
-    std::string help();
 
     void registerKeyboardShortcut(
         const unsigned char key,
@@ -50,11 +56,23 @@ public:
 
     void handleKeyboardShortcut( const unsigned char key );
 
+    void registerSpecialKey(
+        const SpecialKey key,
+        const std::string& description,
+        std::function< void() > functor );
+
+    void unregisterSpecialKey( const SpecialKey key );
+
+    void handle( const SpecialKey key );
+
+    std::string help();
+
 private:
 
     ParametersManagerPtr _parametersManager;
     ScenePtr _scene;
     std::map< unsigned char, ShortcutInformation > _registeredShortcuts;
+    std::map< SpecialKey, ShortcutInformation > _registeredSpecialKeys;
 
 };
 

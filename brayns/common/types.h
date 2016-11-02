@@ -54,6 +54,7 @@ typedef std::map< std::string, EnginePtr > EngineMap;
 class Scene;
 typedef std::shared_ptr< Scene > ScenePtr;
 
+class AbstractManipulator;
 class Camera;
 typedef std::shared_ptr< Camera > CameraPtr;
 

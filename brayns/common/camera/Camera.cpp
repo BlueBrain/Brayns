@@ -54,6 +54,7 @@ public:
         setPosition( position );
         setTarget( target );
         setUpVector( upVector );
+        modified = true;
     }
 
     void setInitialState(
@@ -70,6 +71,7 @@ public:
     void reset()
     {
         set( _initialPosition, _initialTarget, _initialUp );
+        _matrix = Matrix4f();
     }
 
     const Vector3f& getPosition() const
@@ -89,6 +91,7 @@ public:
         setOrigin( origin );
     #endif
         _position = position;
+        modified = true;
     }
 
     const Vector3f& getTarget() const
@@ -108,6 +111,7 @@ public:
         setLookAt( lookat );
     #endif
         _target = target;
+        modified = true;
     }
 
     const Vector3f& getUpVector( ) const
@@ -127,6 +131,7 @@ public:
         setUp( up );
     #endif
         _up = upVector;
+        modified = true;
     }
 
     CameraType getType( ) const
@@ -137,6 +142,7 @@ public:
     void setFieldOfView( const float fov )
     {
         _fieldOfView = fov;
+        modified = true;
     }
 
     float getFieldOfView( ) const
@@ -147,6 +153,7 @@ public:
     void setAspectRatio( const float aspectRatio )
     {
         _aspectRatio = aspectRatio;
+        modified = true;
     }
 
     float getAspectRatio( ) const
@@ -160,6 +167,7 @@ public:
         setFovAperture( aperture );
     #endif
         _aperture = aperture;
+        modified = true;
     }
 
     float getAperture( ) const
@@ -176,6 +184,7 @@ public:
         setFovFocalLength( focalLength );
     #endif
         _focalLength = focalLength;
+        modified = true;
     }
 
     float getFocalLength( ) const
@@ -185,6 +194,11 @@ public:
     #endif
         return _focalLength;
     }
+
+    bool modified = false;
+
+    /*! rotation matrice along x and y axis */
+    Matrix4f _matrix;
 
 private:
     CameraType _cameraType;
@@ -257,6 +271,11 @@ const Vector3f& Camera::getUpVector( ) const
     return _impl->getUpVector();
 }
 
+vmml::Matrix4f& Camera::getRotationMatrix()
+{
+    return _impl->_matrix;
+}
+
 void Camera::setUpVector( const Vector3f& upVector )
 {
     _impl->setUpVector( upVector );
@@ -314,6 +333,34 @@ servus::Serializable* Camera::getSerializable( )
 #else
     return 0;
 #endif
+}
+
+bool Camera::getModified() const
+{
+    return _impl->modified;
+}
+
+void Camera::resetModified()
+{
+    _impl->modified = false;
+}
+
+std::ostream& operator << ( std::ostream& os, Camera& camera )
+{
+    const auto& position = camera.getPosition();
+    const auto& target = camera.getTarget();
+    const auto& up = camera.getUpVector();
+    os <<
+        position.x() << "," <<
+        position.y() << "," <<
+        position.z() << "," <<
+        target.x() << "," <<
+        target.y() << "," <<
+        target.z() << "," <<
+        up.x() << "," <<
+        up.y() << "," <<
+        up.z();
+    return os;
 }
 
 }

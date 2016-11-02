@@ -82,18 +82,19 @@ private:
      *
      * @param imageSize size of the image
      * @param buffer containing the image
-     * @param swapXAxis enables a horizontal flip operation on the image
+     * @param swapYAxis enables a vertical flip operation on the image
      */
     void _send(
         const Vector2i& imageSize,
         unsigned long* imageData,
-        bool swapXAxis);
+        bool swapYAxis);
 
-    float _theta;
-    float _phi;
-    Vector3f _previousTouchPosition;
+    Vector2d _getWindowPos( const deflect::Event& event ) const;
+    double _getZoomDelta( const deflect::Event& pinchEvent ) const;
+
+    Vector2d _previousPos;
+    bool _panOrPinch = false;
     std::unique_ptr< deflect::Stream > _stream;
-    bool _pressed;
     ::lexis::render::Stream _params;
 };
 
