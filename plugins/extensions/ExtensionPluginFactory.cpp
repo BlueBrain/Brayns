@@ -34,13 +34,10 @@ namespace brayns
 ExtensionPluginFactory::ExtensionPluginFactory( Brayns& brayns )
     : _brayns( brayns )
 {
-    BRAYNS_DEBUG << &_applicationParameters << std::endl;
-    BRAYNS_DEBUG << &_extensionParameters << std::endl;
 #ifdef BRAYNS_USE_ZEROEQ
     auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( brayns );
     add( zeroeqPlugin );
 #endif
-
 #ifdef BRAYNS_USE_DEFLECT
 # ifdef BRAYNS_USE_ZEROEQ
     add( std::make_shared<DeflectPlugin>( brayns, *zeroeqPlugin ));
