@@ -34,6 +34,7 @@ common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framewor
 common_find_package(vmmlib REQUIRED)
 common_find_package(OptiX SYSTEM)
 common_find_package(CUDA SYSTEM)
+common_find_package(Lunchbox)
 common_find_package(OSPRay SYSTEM)
 
 if( NOT( OPTIX_FOUND AND CUDA_FOUND ) AND NOT OSPRAY_FOUND )
