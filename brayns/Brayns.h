@@ -179,6 +179,11 @@ public:
     */
     BRAYNS_API KeyboardHandler& getKeyboardHandler();
 
+    /**
+       Builds scene according to scene and geometry parameters
+    */
+    BRAYNS_API void buildScene();
+
 private:
 
     struct Impl;

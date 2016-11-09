@@ -51,10 +51,13 @@ public:
         const Vector3f& target,
         const Vector3f& upVector )
     {
+        const Vector3f& p = getPosition();
+        const Vector3f& t = getTarget();
+        const Vector3f& u = getUpVector();
         setPosition( position );
         setTarget( target );
         setUpVector( upVector );
-        modified = true;
+        modified = ( p != position || t != target || u != upVector );
     }
 
     void setInitialState(

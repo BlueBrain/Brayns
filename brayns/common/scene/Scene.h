@@ -204,6 +204,11 @@ public:
     */
     BRAYNS_API TransferFunction& getTransferFunction() { return _transferFunction; }
 
+    /**
+        Resets the current scene (Geometry, lights, materials, etc).
+    */
+    BRAYNS_API virtual void reset();
+
 protected:
 
     // Parameters

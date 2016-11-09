@@ -65,6 +65,28 @@ OSPRayScene::OSPRayScene(
 {
 }
 
+void OSPRayScene::reset()
+{
+    Scene::reset();
+
+    _models.clear();
+
+    _ospMaterials.clear();
+    _ospTextures.clear();
+    _ospLights.clear();
+
+    _serializedSpheresData.clear();
+    _serializedCylindersData.clear();
+    _serializedConesData.clear();
+    _serializedSpheresDataSize.clear();
+    _serializedCylindersDataSize.clear();
+    _serializedConesDataSize.clear();
+
+    _timestampSpheresIndices.clear();
+    _timestampCylindersIndices.clear();
+    _timestampConesIndices.clear();
+}
+
 void OSPRayScene::commit()
 {
     for( auto model: _models)

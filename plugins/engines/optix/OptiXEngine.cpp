@@ -34,7 +34,7 @@ namespace brayns
 OptiXEngine::OptiXEngine(
     int, const char **, ParametersManagerPtr parametersManager )
     : Engine()
-    , _context( 0 )
+    , _context( nullptr )
 {
     BRAYNS_INFO << "Initializing OptiX" << std::endl;
     _initializeContext();
@@ -80,7 +80,7 @@ OptiXEngine::~OptiXEngine()
     if( _context )
     {
         _context->destroy();
-        _context = 0;
+        _context = nullptr;
     }
 }
 
