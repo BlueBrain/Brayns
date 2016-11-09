@@ -32,8 +32,14 @@
 set(OptiX_FOUND FALSE)
 set(OptiX_PATH)
 
-# Our initial guess will be within the SDK.
-set(OptiX_INSTALL_DIR "${CMAKE_SOURCE_DIR}/../OptiX" CACHE PATH "Path to OptiX installed location.")
+# Use OPTIX_ROOT from the environment (set by the optix module)
+set(OPTIX_ROOT $ENV{OPTIX_ROOT})
+if(NOT OPTIX_ROOT)
+  # If no OPTIX_ROOT set, fallback to initial guess within the SDK.
+  set(OPTIX_ROOT "${CMAKE_SOURCE_DIR}/../OptiX")
+endif()
+
+set(OptiX_INSTALL_DIR "${OPTIX_ROOT}" CACHE PATH "Path to OptiX installed location.")
 
 # The distribution contains both 32 and 64 bit libraries.  Adjust the library
 # search path based on the bit-ness of the build.  (i.e. 64: bin64, lib64; 32:
