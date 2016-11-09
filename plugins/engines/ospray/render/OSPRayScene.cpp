@@ -800,7 +800,6 @@ void OSPRayScene::commitSimulationData()
     for( const auto& renderer: _renderers )
     {
         OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
-        if( osprayRenderer->getName() != "simulationrenderer" ) continue;
 
         // Simulation data
         const uint64_t frame = _parametersManager.getSceneParameters().getTimestamp();
