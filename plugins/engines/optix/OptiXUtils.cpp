@@ -22,12 +22,21 @@
 
 #include <brayns/common/log.h>
 
+#if BRAYNS_USE_LUNCHBOX
+#  include <lunchbox/file.h>
+#endif
+
 namespace brayns
 {
 
 const std::string getPTXPath( const std::string& filename )
 {
-    const std::string basePath = "./ptx/";
+#if BRAYNS_USE_LUNCHBOX
+    const std::string basePath = lunchbox::getExecutablePath() +
+                                 "/../share/Brayns/ptx/";
+#else
+    const std::string basePath = "../share/Brayns/ptx/";
+#endif
     const std::string fullPath =
         basePath + "braynsOptiXCudaPlugin_generated_" + filename + ".ptx";
     BRAYNS_DEBUG << "[PTX] " << fullPath << std::endl;

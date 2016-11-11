@@ -28,8 +28,8 @@ set(BRAYNSOPTIXENGINEPLUGIN_PUBLIC_HEADERS
 )
 
 set(BRAYNSOPTIXENGINEPLUGIN_LINK_LIBRARIES
-    PUBLIC vmmlib braynsCommon braynsIO
-    PRIVATE braynsCommonEnginePlugin ${OptiX_LIBRARIES}
+  PUBLIC vmmlib braynsCommon braynsIO
+  PRIVATE braynsCommonEnginePlugin Lunchbox ${OptiX_LIBRARIES}
 )
 
 add_subdirectory(cuda)

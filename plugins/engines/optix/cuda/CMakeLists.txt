@@ -28,18 +28,20 @@ set(BRAYNSOPTIXCUDAPLUGIN_PUBLIC_HEADERS
   Random.h
 )
 
-set(CUDA_PTX_DIR ${CMAKE_BINARY_DIR}/plugins/engines/optix/cuda)
+# Ensure ptx are in the same relative path for build and install directories
+set(_ptx_rel_dir share/${PROJECT_NAME}/ptx)
+set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_BINARY_DIR}/${_ptx_rel_dir})
 install(
   FILES
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Camera.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Cones.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Spheres.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Cylinders.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_TrianglesMesh.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Constantbg.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Phong.cu.ptx
+    ${CUDA_GENERATED_OUTPUT_DIR}/braynsOptiXCudaPlugin_generated_Camera.cu.ptx
+    ${CUDA_GENERATED_OUTPUT_DIR}/braynsOptiXCudaPlugin_generated_Cones.cu.ptx
+    ${CUDA_GENERATED_OUTPUT_DIR}/braynsOptiXCudaPlugin_generated_Spheres.cu.ptx
+    ${CUDA_GENERATED_OUTPUT_DIR}/braynsOptiXCudaPlugin_generated_Cylinders.cu.ptx
+    ${CUDA_GENERATED_OUTPUT_DIR}/braynsOptiXCudaPlugin_generated_TrianglesMesh.cu.ptx
+    ${CUDA_GENERATED_OUTPUT_DIR}/braynsOptiXCudaPlugin_generated_Constantbg.cu.ptx
+    ${CUDA_GENERATED_OUTPUT_DIR}/braynsOptiXCudaPlugin_generated_Phong.cu.ptx
   DESTINATION
-    ${CMAKE_INSTALL_PREFIX}/bin/ptx
+    ${_ptx_rel_dir}
 )
 
 # These calls will group PTX and CUDA files into their own directories in the Visual
@@ -63,6 +65,6 @@ CUDA_WRAP_SRCS(
 )
 
 set(BRAYNSOPTIXCUDAPLUGIN_LINK_LIBRARIES
-    PRIVATE ${OptiX_LIBRARIES}
+  PRIVATE ${OptiX_LIBRARIES}
 )
 common_library(braynsOptiXCudaPlugin)
