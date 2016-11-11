@@ -77,6 +77,9 @@ public:
     /** @copydoc Scene::commitTransferFunctionData */
     void commitTransferFunctionData() final;
 
+    /** @copydoc Scene::reset */
+    void reset() final;
+
 private:
 
     void _processVolumeAABBGeometry();
@@ -88,7 +91,6 @@ private:
 
     optix::Context& _context;
     optix::GeometryGroup _geometryGroup;
-    optix::GeometryGroup _meshGroup;
     std::vector< optix::GeometryInstance > _geometryInstances;
     std::vector< optix::Material > _optixMaterials;
     optix::Buffer _lightBuffer;

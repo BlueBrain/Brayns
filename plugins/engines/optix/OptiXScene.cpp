@@ -37,6 +37,7 @@ namespace
     const std::string CUDA_FUNCTION_BOUNDS = "bounds";
     const std::string CUDA_FUNCTION_INTERSECTION = "intersect";
     const std::string CUDA_FUNCTION_ROBUST_INTERSECTION = "robust_intersect";
+    const std::string CUDA_PHONG = "Phong.cu";
 }
 
 namespace brayns
@@ -48,34 +49,116 @@ OptiXScene::OptiXScene(
     optix::Context& context )
     : Scene( renderer, parametersManager )
     , _context( context )
-    , _lightBuffer( 0 )
+    , _lightBuffer( nullptr )
     , _accelerationStructure( DEFAULT_ACCELERATION_STRUCTURE )
-    , _colorMapBuffer( 0 )
-    , _mesh( 0 )
-    , _verticesBuffer( 0 )
-    , _indicesBuffer( 0 )
-    , _normalsBuffer( 0 )
-    , _textureCoordsBuffer( 0 )
-    , _materialsBuffer( 0 )
-    , _volumeBuffer( 0 )
+    , _colorMapBuffer( nullptr )
+    , _mesh( nullptr )
+    , _verticesBuffer( nullptr )
+    , _indicesBuffer( nullptr )
+    , _normalsBuffer( nullptr )
+    , _textureCoordsBuffer( nullptr )
+    , _materialsBuffer( nullptr )
+    , _volumeBuffer( nullptr )
 {
 }
 
 OptiXScene::~OptiXScene()
 {
-    if( _volumeBuffer ) _volumeBuffer->destroy();
-    if( _colorMapBuffer ) _colorMapBuffer->destroy();
+    reset();
+}
+
+void OptiXScene::reset()
+{
+    Scene::reset();
+
+    // Geometry
+    for( auto geometryInstance: _geometryInstances)
+        geometryInstance->destroy();
+    _geometryInstances.clear();
+
+    if( _geometryGroup )
+        _geometryGroup->destroy();
+    _geometryGroup = nullptr;
+
+    // Volume
+    if( _volumeBuffer )
+        _volumeBuffer->destroy();
+    _volumeBuffer = nullptr;
+
+    // Color map
+    if( _colorMapBuffer )
+        _colorMapBuffer->destroy();
+    _colorMapBuffer = nullptr;
+
+    // Spheres
     for( auto buffer: _spheresBuffers )
         buffer.second->destroy();
+    _spheresBuffers.clear();
+
+    for( auto optixSphere: _optixSpheres )
+        optixSphere.second->destroy();
+    _optixSpheres.clear();
+
+    _serializedSpheresData.clear();
+    _serializedSpheresDataSize.clear();
+    _timestampSpheresIndices.clear();
+
+    // Cylinders
     for( auto buffer: _cylindersBuffers )
         buffer.second->destroy();
+    _cylindersBuffers.clear();
+
+    for( auto optixCylinder: _optixCylinders )
+        optixCylinder.second->destroy();
+    _optixCylinders.clear();
+
+    _serializedCylindersData.clear();
+    _timestampCylindersIndices.clear();
+    _serializedCylindersDataSize.clear();
+
+    // Cones
     for( auto buffer: _conesBuffers )
         buffer.second->destroy();
-    if( _verticesBuffer ) _verticesBuffer->destroy();
-    if( _indicesBuffer ) _indicesBuffer->destroy();
-    if( _normalsBuffer ) _normalsBuffer->destroy();
-    if( _textureCoordsBuffer ) _textureCoordsBuffer->destroy();
-    if( _materialsBuffer ) _materialsBuffer->destroy();
+    _conesBuffers.clear();
+
+    for( auto optixCone: _optixCones )
+        optixCone.second->destroy();
+    _optixCones.clear();
+
+    _serializedConesData.clear();
+    _serializedConesDataSize.clear();
+    _timestampConesIndices.clear();
+
+    // Meshes
+    if( _mesh )
+        _mesh->destroy();
+    _mesh = nullptr;
+
+    if( _verticesBuffer )
+        _verticesBuffer->destroy();
+    _verticesBuffer = nullptr;
+
+    if( _indicesBuffer )
+        _indicesBuffer->destroy();
+    _indicesBuffer = nullptr;
+
+    if( _normalsBuffer )
+        _normalsBuffer->destroy();
+    _normalsBuffer = nullptr;
+
+    if( _textureCoordsBuffer )
+        _textureCoordsBuffer->destroy();
+    _textureCoordsBuffer = nullptr;
+
+    if( _materialsBuffer )
+        _materialsBuffer->destroy();
+    _materialsBuffer = nullptr;
+
+    // Lights
+    if( _lightBuffer )
+        _lightBuffer->destroy();
+    _lightBuffer = nullptr;
+
 }
 
 void OptiXScene::commit()
@@ -384,6 +467,16 @@ uint64_t OptiXScene::_processMeshes()
     if( nbTotalIndices == 0 )
     {
         BRAYNS_INFO << "- No meshes" << std::endl;
+        _verticesBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, 0 );
+        _context[ "vertices_buffer" ]->setBuffer( _verticesBuffer );
+        _indicesBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_INT3, 0 );
+        _context[ "indices_buffer" ]->setBuffer( _indicesBuffer );
+        _normalsBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, 0 );
+        _context[ "normal_buffer" ]->setBuffer( _normalsBuffer );
+        _textureCoordsBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT2, 0 );
+        _context[ "texcoord_buffer" ]->setBuffer( _textureCoordsBuffer );
+        _materialsBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_INT, 0 );
+        _context[ "material_buffer" ]->setBuffer( _materialsBuffer );
         return 0;
     }
 
@@ -470,7 +563,7 @@ uint64_t OptiXScene::_processMeshes()
     _context[ "texcoord_buffer" ]->setBuffer( _textureCoordsBuffer );
     _context[ "material_buffer" ]->setBuffer( _materialsBuffer );
 
-    std::string trianglesPtx = getPTXPath( "TrianglesMesh.cu" );
+    std::string trianglesPtx = getPTXPath( CUDA_TRIANGLES_MESH );
     optix::Program meshBoundsProgram =
         _context->createProgramFromPTXFile( trianglesPtx, CUDA_FUNCTION_BOUNDS );
     optix::Program meshIntersectProgram =
@@ -519,7 +612,7 @@ void OptiXScene::commitMaterials( const bool updateOnly )
 {
     BRAYNS_INFO << "Commit OptiX materials" << std::endl;
 
-    const std::string phongPtx = getPTXPath( "Phong.cu" );
+    const std::string phongPtx = getPTXPath( CUDA_PHONG );
     optix::Program phong_ch =
         _context->createProgramFromPTXFile( phongPtx, "closest_hit_radiance" );
     optix::Program phong_ah =

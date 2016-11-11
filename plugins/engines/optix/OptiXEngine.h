@@ -68,6 +68,7 @@ private:
 
     optix::Context _context;
     uint64_t _totalMemory;
+    std::string _workingDirectory;
 
 };
 

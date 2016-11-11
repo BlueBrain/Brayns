@@ -67,6 +67,9 @@ public:
     /** @copydoc Scene::commitTransferFunctionData */
     void commitTransferFunctionData() final;
 
+    /** @copydoc Scene::reset */
+    void reset() final;
+
     OSPModel* modelImpl( const size_t timestamp );
 
 private:

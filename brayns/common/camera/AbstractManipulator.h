@@ -44,9 +44,9 @@ public:
     AbstractManipulator( Camera& camera, KeyboardHandler& keyboardHandler );
     virtual ~AbstractManipulator();
 
-    virtual void dragLeft( const Vector2i& from, const Vector2i& to ) = 0;
-    virtual void dragRight( const Vector2i& from, const Vector2i& to ) = 0;
-    virtual void dragMiddle( const Vector2i& from, const Vector2i& to ) = 0;
+    virtual void dragLeft( const Vector2i& to, const Vector2i& from ) = 0;
+    virtual void dragRight( const Vector2i& to, const Vector2i& from ) = 0;
+    virtual void dragMiddle( const Vector2i& to, const Vector2i& from ) = 0;
     virtual void wheel( const Vector2i& position, float delta ) = 0;
 
     float getMotionSpeed() const;

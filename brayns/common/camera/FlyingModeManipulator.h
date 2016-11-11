@@ -36,9 +36,9 @@ public:
     ~FlyingModeManipulator();
 
 private:
-    void dragLeft( const Vector2i&, const Vector2i& ) final;
-    void dragRight( const Vector2i&, const Vector2i& ) final;
-    void dragMiddle( const Vector2i&,const Vector2i& ) final;
+    void dragLeft( const Vector2i& to, const Vector2i& from ) final;
+    void dragRight( const Vector2i& to, const Vector2i& from ) final;
+    void dragMiddle( const Vector2i& to, const Vector2i& from ) final;
     void wheel( const Vector2i& position, float delta ) final;
 
     void _strafeLeft();

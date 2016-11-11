@@ -22,5 +22,5 @@ namespace zerobuf.render;
 
 table Reset {
     camera: bool;
-    timestamp: bool;
+    scene: bool;
 }

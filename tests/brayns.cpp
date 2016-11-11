@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( defaults )
 
     const auto& camera = brayns.getCamera();
     BOOST_CHECK_EQUAL( camera.getType(), brayns::CT_PERSPECTIVE );
-    BOOST_CHECK_EQUAL( camera.getPosition(), brayns::Vector3f( 0.5f, 0.5f, -0.5f ));
+    BOOST_CHECK_EQUAL( camera.getPosition(), brayns::Vector3f( 0.5f, 0.5f, -1.f ));
     BOOST_CHECK_EQUAL( camera.getTarget(), brayns::Vector3f( 0.5f, 0.5f, 0.5f ));
     BOOST_CHECK_EQUAL( camera.getUpVector(), brayns::Vector3f( 0, 1, 0 ));
     BOOST_CHECK_EQUAL( camera.getAspectRatio(), 4.f/3.f );

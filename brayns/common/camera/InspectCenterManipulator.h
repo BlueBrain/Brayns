@@ -36,9 +36,9 @@ public:
     ~InspectCenterManipulator();
 
 private:
-    void dragLeft( const Vector2i &to, const Vector2i &from ) final;
-    void dragRight( const Vector2i &to, const Vector2i &from ) final;
-    void dragMiddle( const Vector2i &to, const Vector2i &from ) final;
+    void dragLeft( const Vector2i& to, const Vector2i& from ) final;
+    void dragRight( const Vector2i& to, const Vector2i& from ) final;
+    void dragMiddle( const Vector2i& to, const Vector2i& from ) final;
     void wheel( const Vector2i& position, float delta ) final;
 
     void _rotateLeft();

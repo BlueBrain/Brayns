@@ -46,8 +46,13 @@ Scene::Scene(
 
 Scene::~Scene( )
 {
+}
+
+void Scene::reset( )
+{
     _primitives.clear( );
     _trianglesMeshes.clear( );
+    _bounds.reset();
 }
 
 void Scene::setMaterials(

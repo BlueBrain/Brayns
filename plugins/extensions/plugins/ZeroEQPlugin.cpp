@@ -178,13 +178,19 @@ void ZeroEQPlugin::_attributeUpdated( )
     _brayns.getFrameBuffer().clear();
 }
 
-void ZeroEQPlugin::_resetUpdated( )
+void ZeroEQPlugin::_resetUpdated()
 {
-    if( _remoteReset.getCamera() )
+    if( _remoteReset.getCamera( ))
     {
         BRAYNS_INFO << "Resetting camera" << std::endl;
         _brayns.getCamera().reset();
         _brayns.getCamera().commit();
+    }
+    if( _remoteReset.getScene( ))
+    {
+        BRAYNS_INFO << "Resetting scene" << std::endl;
+        _brayns.getScene().reset();
+        _brayns.buildScene();
     }
 }
 

@@ -34,7 +34,7 @@ namespace brayns
 OptiXEngine::OptiXEngine(
     int, const char **, ParametersManagerPtr parametersManager )
     : Engine()
-    , _context( 0 )
+    , _context( nullptr )
 {
     BRAYNS_INFO << "Initializing OptiX" << std::endl;
     _initializeContext();
@@ -80,7 +80,7 @@ OptiXEngine::~OptiXEngine()
     if( _context )
     {
         _context->destroy();
-        _context = 0;
+        _context = nullptr;
     }
 }
 
@@ -150,8 +150,6 @@ void OptiXEngine::commit()
 
 void OptiXEngine::render()
 {
-    _frameBuffer->map();
-
     if( _scene->getSimulationHandler() )
         _scene->commitSimulationData();
 
@@ -159,16 +157,16 @@ void OptiXEngine::render()
         _scene->commitVolumeData();
 
     _renderers[_activeRenderer]->render( _frameBuffer );
-
-    _frameBuffer->unmap();
 }
 
 void OptiXEngine::preRender()
 {
+    _frameBuffer->map();
 }
 
 void OptiXEngine::postRender()
 {
+    _frameBuffer->unmap();
 }
 
 }

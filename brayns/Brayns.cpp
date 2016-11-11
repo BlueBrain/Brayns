@@ -85,12 +85,20 @@ struct Brayns::Impl
             DEFAULT_SUN_DIRECTION, DEFAULT_SUN_COLOR, DEFAULT_SUN_INTENSITY ));
         scene->addLight( sunLight );
 
-        // Build geometry
+        // Load data and build geometry
+        buildScene();
+
+        // Register keyboard shortcuts
+        _registerKeyboardShortcuts();
+    }
+
+    void buildScene()
+    {
         loadData();
+        ScenePtr scene = _engine->getScene();
         scene->commitVolumeData();
         scene->buildEnvironment( );
         scene->buildGeometry( );
-
         scene->commit( );
 
         // Set default camera according to scene bounding box
@@ -102,9 +110,6 @@ struct Brayns::Impl
 
         // Commit changes to the rendering engine
         _engine->commit();
-
-        // Register keyboard shortcuts
-        _registerKeyboardShortcuts();
     }
 
     void loadData()
@@ -587,7 +592,7 @@ private:
         const Vector3f& target = worldBounds.getCenter();
         const Vector3f& diag = worldBounds.getSize();
         Vector3f position = target;
-        position.z() -= diag.z();
+        position.z() -= 1.5f * diag.find_max();
 
         const Vector3f up = Vector3f( 0.f, 1.f, 0.f );
         camera->setInitialState( position, target, up );
@@ -983,6 +988,11 @@ FrameBuffer& Brayns::getFrameBuffer( )
 KeyboardHandler& Brayns::getKeyboardHandler()
 {
     return _impl->getKeyboardHandler( );
+}
+
+void Brayns::buildScene()
+{
+    _impl->buildScene();
 }
 
 }
