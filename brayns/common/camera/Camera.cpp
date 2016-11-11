@@ -51,13 +51,10 @@ public:
         const Vector3f& target,
         const Vector3f& upVector )
     {
-        const Vector3f& p = getPosition();
-        const Vector3f& t = getTarget();
-        const Vector3f& u = getUpVector();
         setPosition( position );
         setTarget( target );
         setUpVector( upVector );
-        modified = ( p != position || t != target || u != upVector );
+        modified = true;
     }
 
     void setInitialState(
@@ -88,6 +85,8 @@ public:
 
     void setPosition( const Vector3f& position )
     {
+        if( _position.equals( position ))
+            return;
     #ifdef BRAYNS_USE_ZEROBUF
         ::zerobuf::render::Vector3f origin(
             position.x( ), position.y( ), position.z( ));
@@ -108,6 +107,8 @@ public:
 
     void setTarget( const Vector3f& target )
     {
+        if( _target.equals( target ))
+            return;
     #ifdef BRAYNS_USE_ZEROBUF
         ::zerobuf::render::Vector3f lookat(
             target.x( ), target.y( ), target.z( ));
@@ -128,6 +129,8 @@ public:
 
     void setUpVector( const Vector3f& upVector )
     {
+        if( _up.equals( upVector ))
+            return;
     #ifdef BRAYNS_USE_ZEROBUF
         ::zerobuf::render::Vector3f up(
             upVector.x( ), upVector.y( ), upVector.z( ));
@@ -142,9 +145,11 @@ public:
         return _cameraType;
     }
 
-    void setFieldOfView( const float fov )
+    void setFieldOfView( const float fieldOfView )
     {
-        _fieldOfView = fov;
+        if( _fieldOfView == fieldOfView )
+            return;
+        _fieldOfView = fieldOfView;
         modified = true;
     }
 
@@ -155,6 +160,8 @@ public:
 
     void setAspectRatio( const float aspectRatio )
     {
+        if( _aspectRatio == aspectRatio )
+            return;
         _aspectRatio = aspectRatio;
         modified = true;
     }
@@ -166,6 +173,8 @@ public:
 
     void setAperture( const float aperture )
     {
+        if( _aperture == aperture )
+            return;
     #ifdef BRAYNS_USE_ZEROBUF
         setFovAperture( aperture );
     #endif
@@ -183,6 +192,8 @@ public:
 
     void setFocalLength( const float focalLength )
     {
+        if( _focalLength == focalLength )
+            return;
     #ifdef BRAYNS_USE_ZEROBUF
         setFovFocalLength( focalLength );
     #endif

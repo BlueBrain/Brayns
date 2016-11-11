@@ -46,7 +46,6 @@ Scene::Scene(
 
 Scene::~Scene( )
 {
-    reset();
 }
 
 void Scene::reset( )

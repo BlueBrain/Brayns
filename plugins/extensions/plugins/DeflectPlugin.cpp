@@ -142,7 +142,7 @@ void DeflectPlugin::_handleDeflectEvents()
         {
             const auto pos = _getWindowPos( event );
             if( !_panOrPinch )
-                _brayns.getCameraManipulator().dragLeft( _previousPos, pos );
+                _brayns.getCameraManipulator().dragLeft( pos, _previousPos );
             _previousPos = pos;
             _panOrPinch = false;
             break;
@@ -150,7 +150,7 @@ void DeflectPlugin::_handleDeflectEvents()
         case deflect::Event::EVT_PAN:
         {
             const auto pos = _getWindowPos( event );
-            _brayns.getCameraManipulator().dragMiddle( _previousPos, pos );
+            _brayns.getCameraManipulator().dragMiddle( pos, _previousPos );
             _previousPos = pos;
             _panOrPinch = true;
             break;
