@@ -12,7 +12,6 @@
 set(BRAYNSOPTIXENGINEPLUGIN_SOURCES
   OptiXFrameBuffer.cpp
   OptiXScene.cpp
-  OptiXUtils.cpp
   OptiXCamera.cpp
   OptiXRenderer.cpp
   OptiXEngine.cpp
@@ -29,7 +28,7 @@ set(BRAYNSOPTIXENGINEPLUGIN_PUBLIC_HEADERS
 
 set(BRAYNSOPTIXENGINEPLUGIN_LINK_LIBRARIES
     PUBLIC vmmlib braynsCommon braynsIO
-    PRIVATE braynsCommonEnginePlugin ${OptiX_LIBRARIES}
+    PRIVATE braynsOptiXCudaPlugin braynsCommonEnginePlugin ${OptiX_LIBRARIES}
 )
 
 add_subdirectory(cuda)

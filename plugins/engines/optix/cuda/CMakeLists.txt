@@ -10,6 +10,8 @@
 # ".mic"-suffix trick, so we'll put libraries into separate
 # directories (names 'intel64' and 'mic', respectively)
 
+include(StringifyPtx)
+
 set(BRAYNSOPTIXCUDAPLUGIN_SOURCES
   geometry/Cylinders.cu
   geometry/Cones.cu
@@ -20,26 +22,22 @@ set(BRAYNSOPTIXCUDAPLUGIN_SOURCES
   Constantbg.cu
 )
 
+set(BRAYNSOPTIXCUDAPLUGIN_PTX
+  braynsOptiXCudaPlugin_generated_Camera.cu.ptx
+  braynsOptiXCudaPlugin_generated_Cones.cu.ptx
+  braynsOptiXCudaPlugin_generated_Spheres.cu.ptx
+  braynsOptiXCudaPlugin_generated_Cylinders.cu.ptx
+  braynsOptiXCudaPlugin_generated_TrianglesMesh.cu.ptx
+  braynsOptiXCudaPlugin_generated_Constantbg.cu.ptx
+  braynsOptiXCudaPlugin_generated_Phong.cu.ptx
+)
+
 set(BRAYNSOPTIXCUDAPLUGIN_PUBLIC_HEADERS
   geometry/IntersectionRefinement.h
   renderer/Phong.h
   CommonStructs.h
   Helpers.h
   Random.h
-)
-
-set(CUDA_PTX_DIR ${CMAKE_BINARY_DIR}/plugins/engines/optix/cuda)
-install(
-  FILES
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Camera.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Cones.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Spheres.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Cylinders.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_TrianglesMesh.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Constantbg.cu.ptx
-    ${CUDA_PTX_DIR}/braynsOptiXCudaPlugin_generated_Phong.cu.ptx
-  DESTINATION
-    ${CMAKE_INSTALL_PREFIX}/bin/ptx
 )
 
 # These calls will group PTX and CUDA files into their own directories in the Visual
@@ -62,7 +60,14 @@ CUDA_WRAP_SRCS(
   OPTIONS ${options}
 )
 
+# Stringify PTX files and add generated files to source and header files
+if(BRAYNSOPTIXCUDAPLUGIN_PTX)
+  stringify_ptx(${BRAYNSOPTIXCUDAPLUGIN_PTX})
+  list(APPEND BRAYNSOPTIXCUDAPLUGIN_SOURCES ${PTX_SOURCES})
+  list(APPEND BRAYNSOPTIXCUDAPLUGIN_PUBLIC_HEADERS ${PTX_HEADERS})
+endif()
+
 set(BRAYNSOPTIXCUDAPLUGIN_LINK_LIBRARIES
-    PRIVATE ${OptiX_LIBRARIES}
+  PRIVATE ${OptiX_LIBRARIES}
 )
 common_library(braynsOptiXCudaPlugin)

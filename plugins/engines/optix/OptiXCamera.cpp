@@ -24,22 +24,24 @@
 #include <brayns/common/log.h>
 #include <plugins/engines/optix/OptiXUtils.h>
 #include <optixu/optixpp_namespace.h>
+#include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Camera.cu.ptx.h>
+#include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Constantbg.cu.ptx.h>
 
 namespace
 {
-    const std::string CUDA_PERSPECTIVE_CAMERA = "Camera.cu";
-    const std::string CUDA_MISS = "Constantbg.cu";
-    const std::string CUDA_FUNCTION_CAMERA = "camera";
-    const std::string CUDA_FUNCTION_EXCEPTION = "exception";
-    const std::string CUDA_FUNCTION_MISS = "miss";
+char const* const CUDA_PERSPECTIVE_CAMERA = braynsOptiXCudaPlugin_generated_Camera_cu_ptx;
+char const* const CUDA_MISS = braynsOptiXCudaPlugin_generated_Constantbg_cu_ptx;
+const std::string CUDA_FUNCTION_CAMERA = "camera";
+const std::string CUDA_FUNCTION_EXCEPTION = "exception";
+const std::string CUDA_FUNCTION_MISS = "miss";
 
-    const std::string CUDA_ATTRIBUTE_BAD_COLOR = "bad_color";
-    const std::string CUDA_ATTRIBUTE_CAMERA_EYE = "eye";
-    const std::string CUDA_ATTRIBUTE_CAMERA_U = "U";
-    const std::string CUDA_ATTRIBUTE_CAMERA_V = "V";
-    const std::string CUDA_ATTRIBUTE_CAMERA_W = "W";
-    const std::string CUDA_ATTRIBUTE_CAMERA_APERTURE_RADIUS = "aperture_radius";
-    const std::string CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE = "focal_scale";
+const std::string CUDA_ATTRIBUTE_BAD_COLOR = "bad_color";
+const std::string CUDA_ATTRIBUTE_CAMERA_EYE = "eye";
+const std::string CUDA_ATTRIBUTE_CAMERA_U = "U";
+const std::string CUDA_ATTRIBUTE_CAMERA_V = "V";
+const std::string CUDA_ATTRIBUTE_CAMERA_W = "W";
+const std::string CUDA_ATTRIBUTE_CAMERA_APERTURE_RADIUS = "aperture_radius";
+const std::string CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE = "focal_scale";
 }
 
 namespace brayns
@@ -59,7 +61,7 @@ OptiXCamera::OptiXCamera(
     {
     case CT_PERSPECTIVE:
         cameraName = CUDA_FUNCTION_CAMERA;
-        cameraPtx = getPTXPath( CUDA_PERSPECTIVE_CAMERA );
+        cameraPtx = CUDA_PERSPECTIVE_CAMERA;
         break;
     default:
         BRAYNS_THROW( std::runtime_error("Unsupported camera") );
@@ -67,17 +69,16 @@ OptiXCamera::OptiXCamera(
     }
 
     // Exception program
-    _exceptionProgram = _context->createProgramFromPTXFile( cameraPtx, CUDA_FUNCTION_EXCEPTION );
+    _exceptionProgram = _context->createProgramFromPTXString( cameraPtx, CUDA_FUNCTION_EXCEPTION );
     _context->setExceptionProgram( 0, _exceptionProgram );
     _context[ CUDA_ATTRIBUTE_BAD_COLOR ]->setFloat( 1.f, 0.f, 1.f );
 
     // Miss program
-    const std::string ptxPath = getPTXPath( CUDA_MISS );
     _context->setMissProgram( 0,
-        _context->createProgramFromPTXFile( ptxPath, CUDA_FUNCTION_MISS ) );
+        _context->createProgramFromPTXString( CUDA_MISS, CUDA_FUNCTION_MISS ) );
 
     // Ray generation program
-    _camera = _context->createProgramFromPTXFile( cameraPtx, cameraName );
+    _camera = _context->createProgramFromPTXString( cameraPtx, cameraName );
 }
 
 void OptiXCamera::commit()
