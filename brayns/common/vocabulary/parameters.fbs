@@ -1,0 +1,91 @@
+/* Copyright (c) 2015_2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110_1301 USA.
+ */
+
+namespace brayns;
+
+table DataSource {
+    transferFunctionFile: string;
+    morphologyFolder: string;
+    nestCircuit: string;
+    nestReport: string;
+    pdbFile: string;
+    pdbFolder: string;
+    xyzbFile: string;
+    meshFolder: string;
+    circuitConfig: string;
+    loadCacheFile: string;
+    saveCacheFile: string;
+    radiusMultiplier: float;
+    radiusCorrection: float;
+    colorScheme: uint;
+    sceneEnvironment: uint;
+    geometryQuality: uint;
+    target: string;
+    report: string;
+    nonSimulatedCells: uint;
+    startSimulationTime: float;
+    endSimulationTime: float;
+    simulationValuesRange: [float:2];
+    simulationCacheFile: string;
+    nestCacheFile: string;
+    morphologySection_types: uint;
+    morphologyLayout: uint;
+    generateMultipleModels: bool;
+    volumeFolder: string;
+    volumeFile: string;
+    volumeDimensions: [uint:3];
+    volumeElement_spacing: [float:3];
+    volumeOffset: [float:3];
+}
+
+enum Renderer: uint {
+    basic,
+    proximity,
+    particle,
+    simulation
+}
+
+// Zerobuf currently does not yet support several enums in the same file. Daniel is working on it.
+/*
+enum Material: uint {
+    diffuse,
+    electron,
+    noshading
+}
+*/
+
+table Settings {
+    timestamp: float;
+    volumeSamplesPerRay: uint;
+    renderer: Renderer;
+    samplesPerPixel: uint;
+    ambientOcclusion: bool;
+    shadows: bool;
+    softShadows: bool;
+    //material: Material;
+    radiance: bool;
+    backgroundColor: [float:3];
+    detectionDistance: float;
+    detectionOnDifferentMaterial: bool;
+    detectionNearColor: [float:3];
+    detectionFarColor: [float:3];
+    epsilon: float;
+    headLight: bool;
+}
