@@ -33,11 +33,4 @@
   } \
   while( 0 )
 
-namespace brayns
-{
-
-const std::string getPTXPath( const std::string& filename );
-
-}
-
 #endif // OPTIXUTILS_H

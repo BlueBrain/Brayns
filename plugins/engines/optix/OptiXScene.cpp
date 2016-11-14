@@ -26,18 +26,23 @@
 #include <brayns/common/light/PointLight.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/volume/VolumeHandler.h>
+#include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Spheres.cu.ptx.h>
+#include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Cylinders.cu.ptx.h>
+#include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Cones.cu.ptx.h>
+#include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_TrianglesMesh.cu.ptx.h>
+#include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Phong.cu.ptx.h>
 
 namespace
 {
-    const std::string DEFAULT_ACCELERATION_STRUCTURE = "Trbvh";
-    const std::string CUDA_SPHERES = "Spheres.cu";
-    const std::string CUDA_CYLINDERS = "Cylinders.cu";
-    const std::string CUDA_CONES = "Cones.cu";
-    const std::string CUDA_TRIANGLES_MESH = "TrianglesMesh.cu";
-    const std::string CUDA_FUNCTION_BOUNDS = "bounds";
-    const std::string CUDA_FUNCTION_INTERSECTION = "intersect";
-    const std::string CUDA_FUNCTION_ROBUST_INTERSECTION = "robust_intersect";
-    const std::string CUDA_PHONG = "Phong.cu";
+const std::string DEFAULT_ACCELERATION_STRUCTURE = "Trbvh";
+char const* const CUDA_SPHERES = braynsOptiXCudaPlugin_generated_Spheres_cu_ptx;
+char const* const CUDA_CYLINDERS = braynsOptiXCudaPlugin_generated_Cylinders_cu_ptx;
+char const* const CUDA_CONES = braynsOptiXCudaPlugin_generated_Cones_cu_ptx;
+char const* const CUDA_TRIANGLES_MESH = braynsOptiXCudaPlugin_generated_TrianglesMesh_cu_ptx;
+const std::string CUDA_FUNCTION_BOUNDS = "bounds";
+const std::string CUDA_FUNCTION_INTERSECTION = "intersect";
+const std::string CUDA_FUNCTION_ROBUST_INTERSECTION = "robust_intersect";
+char const* const CUDA_PHONG = braynsOptiXCudaPlugin_generated_Phong_cu_ptx;
 }
 
 namespace brayns
@@ -269,23 +274,20 @@ void OptiXScene::commitLights()
 uint64_t OptiXScene::_processParametricGeometries()
 {
     // Compile Kernels
-    const std::string spherePtx = getPTXPath( CUDA_SPHERES );
     optix::Program spheresBoundsProgram =
-        _context->createProgramFromPTXFile( spherePtx, CUDA_FUNCTION_BOUNDS );
+        _context->createProgramFromPTXString( CUDA_SPHERES, CUDA_FUNCTION_BOUNDS );
     optix::Program spheresIntersectProgram =
-        _context->createProgramFromPTXFile( spherePtx, CUDA_FUNCTION_INTERSECTION );
+        _context->createProgramFromPTXString( CUDA_SPHERES, CUDA_FUNCTION_INTERSECTION );
 
-    const std::string cylinderPtx = getPTXPath( CUDA_CYLINDERS );
     optix::Program cylindersBoundsProgram =
-        _context->createProgramFromPTXFile( cylinderPtx, CUDA_FUNCTION_BOUNDS );
+        _context->createProgramFromPTXString( CUDA_CYLINDERS, CUDA_FUNCTION_BOUNDS );
     optix::Program cylindersIntersectProgram =
-        _context->createProgramFromPTXFile( cylinderPtx, CUDA_FUNCTION_INTERSECTION );
+        _context->createProgramFromPTXString( CUDA_CYLINDERS, CUDA_FUNCTION_INTERSECTION );
 
-    const std::string conesPtx = getPTXPath( CUDA_CONES );
     optix::Program conesBoundsProgram =
-        _context->createProgramFromPTXFile( conesPtx, CUDA_FUNCTION_BOUNDS );
+        _context->createProgramFromPTXString( CUDA_CONES, CUDA_FUNCTION_BOUNDS );
     optix::Program conesIntersectProgram =
-        _context->createProgramFromPTXFile( conesPtx, CUDA_FUNCTION_INTERSECTION );
+        _context->createProgramFromPTXString( CUDA_CONES, CUDA_FUNCTION_INTERSECTION );
 
     // Load geometry to GPU
     size_t totalNbSpheres = 0;
@@ -563,11 +565,10 @@ uint64_t OptiXScene::_processMeshes()
     _context[ "texcoord_buffer" ]->setBuffer( _textureCoordsBuffer );
     _context[ "material_buffer" ]->setBuffer( _materialsBuffer );
 
-    std::string trianglesPtx = getPTXPath( CUDA_TRIANGLES_MESH );
     optix::Program meshBoundsProgram =
-        _context->createProgramFromPTXFile( trianglesPtx, CUDA_FUNCTION_BOUNDS );
+        _context->createProgramFromPTXString( CUDA_TRIANGLES_MESH, CUDA_FUNCTION_BOUNDS );
     optix::Program meshIntersectProgram =
-        _context->createProgramFromPTXFile( trianglesPtx, CUDA_FUNCTION_INTERSECTION );
+        _context->createProgramFromPTXString( CUDA_TRIANGLES_MESH, CUDA_FUNCTION_INTERSECTION );
 
     _mesh = _context->createGeometry();
     _mesh->setIntersectionProgram( meshIntersectProgram );
@@ -612,11 +613,10 @@ void OptiXScene::commitMaterials( const bool updateOnly )
 {
     BRAYNS_INFO << "Commit OptiX materials" << std::endl;
 
-    const std::string phongPtx = getPTXPath( CUDA_PHONG );
     optix::Program phong_ch =
-        _context->createProgramFromPTXFile( phongPtx, "closest_hit_radiance" );
+        _context->createProgramFromPTXString( CUDA_PHONG, "closest_hit_radiance" );
     optix::Program phong_ah =
-        _context->createProgramFromPTXFile( phongPtx, "any_hit_shadow" );
+        _context->createProgramFromPTXString( CUDA_PHONG, "any_hit_shadow" );
 
     _optixMaterials.clear();
     _optixMaterials.resize( _materials.size( ));
