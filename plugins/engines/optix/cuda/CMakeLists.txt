@@ -12,7 +12,6 @@
 
 include(StringifyPtx)
 
-set(CUDA_PTX_DIR ${CMAKE_BINARY_DIR}/plugins/engines/optix/cuda)
 set(BRAYNSOPTIXCUDAPLUGIN_SOURCES
   geometry/Cylinders.cu
   geometry/Cones.cu
@@ -24,13 +23,13 @@ set(BRAYNSOPTIXCUDAPLUGIN_SOURCES
 )
 
 set(BRAYNSOPTIXCUDAPLUGIN_PTX
-    braynsOptiXCudaPlugin_generated_Camera.cu.ptx
-    braynsOptiXCudaPlugin_generated_Cones.cu.ptx
-    braynsOptiXCudaPlugin_generated_Spheres.cu.ptx
-    braynsOptiXCudaPlugin_generated_Cylinders.cu.ptx
-    braynsOptiXCudaPlugin_generated_TrianglesMesh.cu.ptx
-    braynsOptiXCudaPlugin_generated_Constantbg.cu.ptx
-    braynsOptiXCudaPlugin_generated_Phong.cu.ptx
+  braynsOptiXCudaPlugin_generated_Camera.cu.ptx
+  braynsOptiXCudaPlugin_generated_Cones.cu.ptx
+  braynsOptiXCudaPlugin_generated_Spheres.cu.ptx
+  braynsOptiXCudaPlugin_generated_Cylinders.cu.ptx
+  braynsOptiXCudaPlugin_generated_TrianglesMesh.cu.ptx
+  braynsOptiXCudaPlugin_generated_Constantbg.cu.ptx
+  braynsOptiXCudaPlugin_generated_Phong.cu.ptx
 )
 
 set(BRAYNSOPTIXCUDAPLUGIN_PUBLIC_HEADERS
@@ -63,12 +62,12 @@ CUDA_WRAP_SRCS(
 
 # Stringify PTX files and add generated files to source and header files
 if(BRAYNSOPTIXCUDAPLUGIN_PTX)
-    stringify_ptx(${BRAYNSOPTIXCUDAPLUGIN_PTX})
-    list(APPEND BRAYNSOPTIXCUDAPLUGIN_SOURCES ${PTX_SOURCES})
-    list(APPEND BRAYNSOPTIXCUDAPLUGIN_PUBLIC_HEADERS ${PTX_HEADERS})
+  stringify_ptx(${BRAYNSOPTIXCUDAPLUGIN_PTX})
+  list(APPEND BRAYNSOPTIXCUDAPLUGIN_SOURCES ${PTX_SOURCES})
+  list(APPEND BRAYNSOPTIXCUDAPLUGIN_PUBLIC_HEADERS ${PTX_HEADERS})
 endif()
 
 set(BRAYNSOPTIXCUDAPLUGIN_LINK_LIBRARIES
-    PRIVATE ${OptiX_LIBRARIES}
+  PRIVATE ${OptiX_LIBRARIES}
 )
 common_library(braynsOptiXCudaPlugin)
