@@ -59,15 +59,15 @@ ZeroEQPlugin::~ZeroEQPlugin( )
 
 void ZeroEQPlugin::run()
 {
-    while( _subscriber.receive( 10 )) {}
+    while( _subscriber.receive( 1 )) {}
 }
 
-bool ZeroEQPlugin::handleObject( servus::Serializable& object )
+bool ZeroEQPlugin::handlePUT( servus::Serializable& object )
 {
     if( !_httpServer )
         return false;
 
-    return _httpServer->handle( object );
+    return _httpServer->handlePUT( object );
 }
 
 void ZeroEQPlugin::_setupHTTPServer()
@@ -99,15 +99,15 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteImageJPEG.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestImageJPEG, this ));
 
-    _httpServer->handle( _remoteFrameBuffers );
+    _httpServer->handleGET( _remoteFrameBuffers );
     _remoteFrameBuffers.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestFrameBuffers, this ));
 
-    _httpServer->handle( _remoteAttribute );
+    _httpServer->handlePUT( _remoteAttribute );
     _remoteAttribute.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_attributeUpdated, this ));
 
-    _httpServer->handle( _remoteReset );
+    _httpServer->handlePUT( _remoteReset );
     _remoteReset.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_resetUpdated, this ));
 
