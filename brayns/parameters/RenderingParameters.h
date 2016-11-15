@@ -72,10 +72,10 @@ public:
         _ambientOcclusionStrength = value;
     }
 
-    /** Material type applied to the geometry
+    /** Shading applied to the geometry
      */
-    MaterialType getMaterialType( ) const { return _materialType; }
-    void setMaterialType( const MaterialType value ) { _materialType = value; }
+    ShadingType getShading( ) const { return _shading; }
+    void setShading( const ShadingType value ) { _shading = value; }
 
     /** Number of samples per pixel */
     size_t getSamplesPerPixel( ) const { return _spp; }
@@ -184,11 +184,11 @@ public:
     }
 
     /**
-       Sun follows the camera direction
+       Light source follow camera origin
     */
-    bool getSunOnCamera() const
+    bool getHeadLight() const
     {
-        return _sunOnCamera;
+        return _headLight;
     }
 
 protected:
@@ -200,7 +200,7 @@ protected:
     std::string _renderer;
     strings _renderers;
     float _ambientOcclusionStrength;
-    MaterialType _materialType;
+    ShadingType _shading;
     bool _lightEmittingMaterials;
     size_t _spp;
     bool _shadows;
@@ -213,7 +213,7 @@ protected:
     float _epsilon;
     CameraType _cameraType;
     std::string _hdri;
-    bool _sunOnCamera;
+    bool _headLight;
 };
 
 }

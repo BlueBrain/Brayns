@@ -276,9 +276,13 @@ enum MaterialType
     MT_SHADES_OF_GREY, // 255 shades of grey
     MT_GRADIENT,       // Gradient from red to yellow
     MT_PASTEL_COLORS,  // Random pastel colors
-    MT_DIFFUSE,
-    MT_ELECTRON,
-    MT_NO_SHADING
+};
+
+enum class ShadingType
+{
+    none,
+    diffuse,
+    electron,
 };
 
 enum MeshQuality

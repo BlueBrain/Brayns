@@ -189,7 +189,7 @@ struct Brayns::Impl
         FrameBufferPtr frameBuffer = _engine->getFrameBuffer();
         const Vector2i& frameSize = frameBuffer->getSize();
 
-        if( _parametersManager->getRenderingParameters().getSunOnCamera() )
+        if( _parametersManager->getRenderingParameters().getHeadLight() )
         {
             LightPtr sunLight = scene->getLight( 0 );
             DirectionalLight* sun =
@@ -234,7 +234,7 @@ struct Brayns::Impl
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
 #endif
-        if( _parametersManager->getRenderingParameters().getSunOnCamera() )
+        if( _parametersManager->getRenderingParameters().getHeadLight() )
         {
             LightPtr sunLight = scene->getLight( 0 );
             DirectionalLight* sun =
@@ -471,19 +471,19 @@ struct Brayns::Impl
     void _diffuseShading()
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
-        renderParams.setMaterialType( MT_DIFFUSE );
+        renderParams.setShading( ShadingType::diffuse );
     }
 
     void _electronShading()
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
-        renderParams.setMaterialType( MT_ELECTRON );
+        renderParams.setShading( ShadingType::electron );
     }
 
     void _disableShading()
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
-        renderParams.setMaterialType( MT_NO_SHADING );
+        renderParams.setShading( ShadingType::none );
     }
 
     void _increaseAmbientOcclusionStrength()

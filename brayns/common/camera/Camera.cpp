@@ -54,7 +54,6 @@ public:
         setPosition( position );
         setTarget( target );
         setUpVector( upVector );
-        modified = true;
     }
 
     void setInitialState(

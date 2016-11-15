@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK( !renderParams.getShadows( ));
     BOOST_CHECK( !renderParams.getSoftShadows( ));
     BOOST_CHECK_EQUAL( renderParams.getAmbientOcclusionStrength(), 0.f );
-    BOOST_CHECK_EQUAL( renderParams.getMaterialType(), brayns::MT_DIFFUSE );
+    BOOST_CHECK( renderParams.getShading() == brayns::ShadingType::diffuse );
     BOOST_CHECK_EQUAL( renderParams.getSamplesPerPixel(), 1 );
     BOOST_CHECK( !renderParams.getLightEmittingMaterials( ));
     BOOST_CHECK_EQUAL( renderParams.getBackgroundColor(),

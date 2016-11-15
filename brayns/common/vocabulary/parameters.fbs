@@ -21,71 +21,68 @@
 namespace brayns;
 
 table DataSource {
-    transferFunctionFile: string;
-    morphologyFolder: string;
-    nestCircuit: string;
-    nestReport: string;
-    pdbFile: string;
-    pdbFolder: string;
-    xyzbFile: string;
-    meshFolder: string;
-    circuitConfig: string;
-    loadCacheFile: string;
-    saveCacheFile: string;
-    radiusMultiplier: float;
-    radiusCorrection: float;
-    colorScheme: uint;
-    sceneEnvironment: uint;
-    geometryQuality: uint;
+    transfer_function_file: string;
+    morphology_folder: string;
+    nest_circuit: string;
+    nest_report: string;
+    pdb_file: string;
+    pdb_folder: string;
+    xyzb_file: string;
+    mesh_folder: string;
+    circuit_config: string;
+    load_cache_file: string;
+    save_cache_file: string;
+    radius_multiplier: float;
+    radius_correction: float;
+    color_scheme: uint;
+    scene_environment: uint;
+    geometry_quality: uint;
     target: string;
     report: string;
-    nonSimulatedCells: uint;
-    startSimulationTime: float;
-    endSimulationTime: float;
-    simulationValuesRange: [float:2];
-    simulationCacheFile: string;
-    nestCacheFile: string;
-    morphologySection_types: uint;
-    morphologyLayout: uint;
-    generateMultipleModels: bool;
-    volumeFolder: string;
-    volumeFile: string;
-    volumeDimensions: [uint:3];
-    volumeElement_spacing: [float:3];
-    volumeOffset: [float:3];
+    non_simulated_cells: uint;
+    start_simulation_time: float;
+    end_simulation_time: float;
+    simulation_values_range: [float:2];
+    simulation_cache_file: string;
+    nest_cache_file: string;
+    morphology_section_types: uint;
+    morphology_layout: uint;
+    generate_multiple_models: bool;
+    volume_folder: string;
+    volume_file: string;
+    volume_dimensions: [uint:3];
+    volume_element_spacing: [float:3];
+    volume_offset: [float:3];
 }
 
-enum Renderer: uint {
+enum Shader: uint {
     basic,
     proximity,
     particle,
     simulation
 }
 
-// Zerobuf currently does not yet support several enums in the same file. Daniel is working on it.
-/*
-enum Material: uint {
+enum Shading: uint {
+    none,
     diffuse,
     electron,
-    noshading
 }
-*/
 
 table Settings {
     timestamp: float;
-    volumeSamplesPerRay: uint;
-    renderer: Renderer;
-    samplesPerPixel: uint;
-    ambientOcclusion: bool;
+    volume_samples_per_ray: uint;
+    shader: Shader;
+    samples_per_pixel: uint;
+    ambient_occlusion: bool;
     shadows: bool;
-    softShadows: bool;
-    //material: Material;
+    soft_shadows: bool;
+    shading: Shading;
     radiance: bool;
-    backgroundColor: [float:3];
-    detectionDistance: float;
-    detectionOnDifferentMaterial: bool;
-    detectionNearColor: [float:3];
-    detectionFarColor: [float:3];
+    background_color: [float:3];
+    detection_distance: float;
+    detection_on_different_material: bool;
+    detection_near_color: [float:3];
+    detection_far_color: [float:3];
     epsilon: float;
-    headLight: bool;
+    head_light: bool;
 }
