@@ -53,7 +53,7 @@ namespace brayns
                 [&] { _params.setEnabled( !_params.getEnabled( )); });
 
 #ifdef BRAYNS_USE_ZEROEQ
-    zeroeq.handleObject( _params );
+    zeroeq.handlePUT( _params );
 #endif
 }
 
