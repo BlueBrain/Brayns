@@ -107,11 +107,11 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteAttribute.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_attributeUpdated, this ));
 
-    _httpServer->handlePut( _remoteResetCamera );
+    _httpServer->handlePUT( _remoteResetCamera );
     _remoteResetCamera.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_resetCameraUpdated, this ));
 
-    _httpServer->handlePut( _remoteResetScene );
+    _httpServer->handlePUT( _remoteResetScene );
     _remoteResetScene.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_resetSceneUpdated, this ));
 
