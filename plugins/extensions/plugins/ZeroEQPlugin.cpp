@@ -99,11 +99,11 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteImageJPEG.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestImageJPEG, this ));
 
-    _httpServer->handleGET( _remoteFrameBuffers );
+    _httpServer->handle( _remoteFrameBuffers );
     _remoteFrameBuffers.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestFrameBuffers, this ));
 
-    _httpServer->handlePUT( _remoteAttribute );
+    _httpServer->handle( _remoteAttribute );
     _remoteAttribute.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_attributeUpdated, this ));
 
