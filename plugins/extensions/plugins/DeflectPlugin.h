@@ -96,6 +96,7 @@ private:
     bool _panOrPinch = false;
     std::unique_ptr< deflect::Stream > _stream;
     ::lexis::render::Stream _params;
+    std::string _previousHost;
 };
 
 }

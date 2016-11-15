@@ -67,6 +67,12 @@ void DeflectPlugin::run()
             _stream.reset();
     }
 
+    if( _previousHost != _params.getHostString( ))
+    {
+        _params.setEnabled( true );
+        _previousHost = _params.getHostString();
+    }
+
     const bool deflectEnabled = _params.getEnabled();
     if( _stream && _stream->isConnected() && !deflectEnabled )
     {
