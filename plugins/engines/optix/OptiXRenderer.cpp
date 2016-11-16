@@ -71,9 +71,9 @@ void OptiXRenderer::commit()
     _context["shadow_ray_type"]->setUint( 1 );
     _context["scene_epsilon"]->setFloat( rp.getEpsilon( ));
 
-    MaterialType mt = rp.getMaterialType();
-    _context["shading_enabled"]->setUint( mt == MT_DIFFUSE );
-    _context["electron_shading_enabled"]->setUint( mt == MT_ELECTRON );
+    ShadingType mt = rp.getShading();
+    _context["shading_enabled"]->setUint( mt == ShadingType::diffuse );
+    _context["electron_shading_enabled"]->setUint( mt == ShadingType::electron );
     _context["shadows_enabled"]->setUint( rp.getShadows( ));
     _context["soft_shadows_enabled"]->setUint( rp.getSoftShadows( ));
     _context["ambient_occlusion_strength"]->setFloat( rp.getAmbientOcclusionStrength( ));

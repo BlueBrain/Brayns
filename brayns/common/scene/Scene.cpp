@@ -84,9 +84,6 @@ void Scene::setMaterials(
         switch( materialType )
         {
         case MT_DEFAULT:
-        case MT_DIFFUSE:
-        case MT_ELECTRON:
-        case MT_NO_SHADING:
             switch( i )
             {
                 case 1: // Soma

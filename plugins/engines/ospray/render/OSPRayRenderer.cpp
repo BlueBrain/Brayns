@@ -67,7 +67,7 @@ void OSPRayRenderer::commit()
 {
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
     SceneParameters& sp = _parametersManager.getSceneParameters();
-    MaterialType mt = rp.getMaterialType();
+    ShadingType mt = rp.getShading();
 
     Vector3f color = rp.getBackgroundColor( );
     ospSet3f( _renderer, "bgColor", color.x( ), color.y( ), color.z( ));
@@ -77,11 +77,11 @@ void OSPRayRenderer::commit()
     ospSet1f( _renderer, "ambientOcclusionStrength",
         rp.getAmbientOcclusionStrength( ));
 
-    ospSet1i( _renderer, "shadingEnabled", ( mt == MT_DIFFUSE ));
+    ospSet1i( _renderer, "shadingEnabled", ( mt == ShadingType::diffuse ));
     ospSet1f( _renderer, "timestamp", sp.getTimestamp( ));
     ospSet1i( _renderer, "randomNumber", rand() % 10000 );
     ospSet1i( _renderer, "spp", rp.getSamplesPerPixel( ));
-    ospSet1i( _renderer, "electronShading", ( mt == MT_ELECTRON ));
+    ospSet1i( _renderer, "electronShading", ( mt == ShadingType::electron ));
     ospSet1f( _renderer, "epsilon", rp.getEpsilon( ));
     ospSet1i( _renderer, "moving", false );
     ospSet1f( _renderer, "detectionDistance",

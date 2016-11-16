@@ -1,0 +1,88 @@
+/* Copyright (c) 2015_2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110_1301 USA.
+ */
+
+namespace brayns;
+
+table DataSource {
+    transfer_function_file: string;
+    morphology_folder: string;
+    nest_circuit: string;
+    nest_report: string;
+    pdb_file: string;
+    pdb_folder: string;
+    xyzb_file: string;
+    mesh_folder: string;
+    circuit_config: string;
+    load_cache_file: string;
+    save_cache_file: string;
+    radius_multiplier: float;
+    radius_correction: float;
+    color_scheme: uint;
+    scene_environment: uint;
+    geometry_quality: uint;
+    target: string;
+    report: string;
+    non_simulated_cells: uint;
+    start_simulation_time: float;
+    end_simulation_time: float;
+    simulation_values_range: [float:2];
+    simulation_cache_file: string;
+    nest_cache_file: string;
+    morphology_section_types: uint;
+    morphology_layout: uint;
+    generate_multiple_models: bool;
+    volume_folder: string;
+    volume_file: string;
+    volume_dimensions: [uint:3];
+    volume_element_spacing: [float:3];
+    volume_offset: [float:3];
+}
+
+enum Shader: uint {
+    basic,
+    proximity,
+    particle,
+    simulation
+}
+
+enum Shading: uint {
+    none,
+    diffuse,
+    electron,
+}
+
+table Settings {
+    timestamp: float;
+    volume_samples_per_ray: uint;
+    shader: Shader;
+    samples_per_pixel: uint;
+    ambient_occlusion: bool;
+    shadows: bool;
+    soft_shadows: bool;
+    shading: Shading;
+    radiance: bool;
+    background_color: [float:3];
+    detection_distance: float;
+    detection_on_different_material: bool;
+    detection_near_color: [float:3];
+    detection_far_color: [float:3];
+    epsilon: float;
+    head_light: bool;
+}

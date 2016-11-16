@@ -37,7 +37,7 @@ const std::string PARAM_SPP = "spp";
 const std::string PARAM_AMBIENT_OCCLUSION = "ambient-occlusion";
 const std::string PARAM_SHADOWS = "shadows";
 const std::string PARAM_SOFT_SHADOWS = "soft-shadows";
-const std::string PARAM_MATERIAL = "material";
+const std::string PARAM_SHADING = "shading";
 const std::string PARAM_RADIANCE = "radiance";
 const std::string PARAM_BACKGROUND_COLOR = "background-color";
 const std::string PARAM_DETECTION_DISTANCE = "detection-distance";
@@ -48,7 +48,7 @@ const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
 const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_CAMERA_TYPE = "camera-type";
 const std::string PARAM_HDRI = "hdri";
-const std::string PARAM_SUN_ON_CAMERA = "sun-on-camera";
+const std::string PARAM_HEAD_LIGHT = "head-light";
 
 }
 
@@ -60,7 +60,7 @@ RenderingParameters::RenderingParameters( )
     , _engine(DEFAULT_ENGINE)
     , _renderer( DEFAULT_RENDERER )
     , _ambientOcclusionStrength( 0.f )
-    , _materialType( MT_DIFFUSE )
+    , _shading( ShadingType::diffuse )
     , _lightEmittingMaterials( false )
     , _spp( 1 )
     , _shadows( false )
@@ -72,7 +72,7 @@ RenderingParameters::RenderingParameters( )
     , _detectionFarColor( 0.f, 1.f, 0.f )
     , _epsilon( 0.f )
     , _cameraType( CT_PERSPECTIVE )
-    , _sunOnCamera( false )
+    , _headLight( false )
 {
     _parameters.add_options()
         (PARAM_ENGINE.c_str(), po::value< std::string >( ),
@@ -91,8 +91,8 @@ RenderingParameters::RenderingParameters( )
             "Shadows enabled")
         (PARAM_SOFT_SHADOWS.c_str(), po::value< bool >( ),
             "Soft shadows enabled")
-        (PARAM_MATERIAL.c_str(), po::value< std::string >( ),
-            "Material type (diffuse, electron)")
+        (PARAM_SHADING.c_str(), po::value< std::string >( ),
+            "Shading type (none, diffuse, electron)")
         (PARAM_RADIANCE.c_str(), po::value< bool >( ),
             "Radiance enabled")
         (PARAM_BACKGROUND_COLOR.c_str(), po::value< floats >( )->multitoken(),
@@ -113,7 +113,7 @@ RenderingParameters::RenderingParameters( )
             "1: perspective stereo, 2: orthographic, 3: panoramic)")
         (PARAM_HDRI.c_str(),
             po::value< std::string >( ), "HDRI filename")
-        (PARAM_SUN_ON_CAMERA.c_str(),
+        (PARAM_HEAD_LIGHT.c_str(),
             po::value< bool >( ), "Sun will follow camera origin");
 
     // Add default renderers
@@ -139,16 +139,15 @@ bool RenderingParameters::_parse( const po::variables_map& vm )
         _shadows = vm[PARAM_SHADOWS].as< bool >( );
     if( vm.count( PARAM_SOFT_SHADOWS ))
         _softShadows = vm[PARAM_SOFT_SHADOWS].as< bool >( );
-    if( vm.count( PARAM_MATERIAL ))
+    if( vm.count( PARAM_SHADING ))
     {
-        const std::string& materialType =
-            vm[PARAM_MATERIAL].as< std::string >( );
-        if( materialType == "diffuse" )
-            _materialType = MT_DIFFUSE;
-        else if ( materialType == "electron" )
-            _materialType = MT_ELECTRON;
-        else if ( materialType == "noshading" )
-            _materialType = MT_NO_SHADING;
+        const std::string& shading = vm[PARAM_SHADING].as< std::string >( );
+        if( shading == "diffuse" )
+            _shading = ShadingType::diffuse;
+        else if ( shading == "electron" )
+            _shading = ShadingType::electron;
+        else if ( shading == "none" )
+            _shading = ShadingType::none;
 
     }
     if( vm.count( PARAM_BACKGROUND_COLOR ))
@@ -181,8 +180,8 @@ bool RenderingParameters::_parse( const po::variables_map& vm )
             vm[PARAM_CAMERA_TYPE].as< size_t >( ));
     if( vm.count( PARAM_HDRI ))
         _hdri = vm[PARAM_HDRI].as< std::string >( );
-    if( vm.count( PARAM_SUN_ON_CAMERA ))
-        _sunOnCamera = vm[PARAM_SUN_ON_CAMERA].as< bool >( );
+    if( vm.count( PARAM_HEAD_LIGHT ))
+        _headLight = vm[PARAM_HEAD_LIGHT].as< bool >( );
     return true;
 }
 
@@ -206,8 +205,8 @@ void RenderingParameters::print( )
         ( _shadows ? "on" : "off" ) << std::endl;
     BRAYNS_INFO << "Soft shadows            :" <<
         ( _softShadows ? "on" : "off" ) << std::endl;
-    BRAYNS_INFO << "Material                :" <<
-        static_cast< size_t > (_materialType) << std::endl;
+    BRAYNS_INFO << "Shading                 :" <<
+        static_cast< size_t > (_shading) << std::endl;
     BRAYNS_INFO << "Background color        :" <<
         _backgroundColor << std::endl;
     BRAYNS_INFO << "Detection: " << std::endl;

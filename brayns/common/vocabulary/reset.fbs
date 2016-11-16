@@ -20,7 +20,6 @@
 
 namespace zerobuf.render;
 
-table Reset {
-    camera: bool;
-    scene: bool;
-}
+table ResetCamera {}
+
+table ResetScene {}

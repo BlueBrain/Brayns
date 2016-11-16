@@ -35,6 +35,7 @@
 #include <zerobuf/render/material.h>
 #include <zerobuf/render/transferFunction1D.h>
 #include <zerobuf/render/spikes.h>
+#include <zerobuf/render/parameters.h>
 
 namespace brayns
 {
@@ -83,7 +84,12 @@ private:
     /**
      * @brief This method is called when camera reset is invoked by a ZeroEQ event
      */
-    void _resetUpdated();
+    void _resetCameraUpdated();
+
+    /**
+     * @brief This method is called when scene reset is invoked by a ZeroEQ event
+     */
+    void _resetSceneUpdated();
 
     /**
      * @brief This method is called when a material is updated by a ZeroEQ event
@@ -137,6 +143,16 @@ private:
     bool _requestSpikes();
 
     /**
+     * @brief This method is called when data sources are updated by a ZeroEQ event
+     */
+    void _dataSourceUpdated();
+
+    /**
+     * @brief This method is called when settings are updated by a ZeroEQ event
+     */
+    void _settingsUpdated();
+
+    /**
      * @brief Resizes an given image according to the new size
      * @param srcData Source buffer
      * @param srcSize Source size
@@ -174,11 +190,14 @@ private:
     ::lexis::render::ImageJPEG _remoteImageJPEG;
     ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
     ::zerobuf::render::Attribute _remoteAttribute;
-    ::zerobuf::render::Reset _remoteReset;
+    ::zerobuf::render::ResetCamera _remoteResetCamera;
+    ::zerobuf::render::ResetScene _remoteResetScene;
     ::zerobuf::render::Material _remoteMaterial;
     ::zerobuf::render::TransferFunction1D _remoteTransferFunction1D;
     ::lexis::render::LookupTable1D _remoteLookupTable1D;
     ::zerobuf::data::Spikes _remoteSpikes;
+    ::brayns::DataSource _remoteDataSource;
+    ::brayns::Settings _remoteSettings;
 
 };
 
