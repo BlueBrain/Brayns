@@ -27,11 +27,12 @@ table Vector3f
     z: float;
 }
 
-table FovCamera
+table Camera
 {
   origin: Vector3f = 0, 0, 1;
-  lookAt: Vector3f;
+  look_at: Vector3f;
   up: Vector3f = 0, 1, 0;
-  fovAperture: float;
-  fovFocalLength: float;
+  field_of_view: float;
+  aperture: float;
+  focal_length: float;
 }

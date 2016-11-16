@@ -27,7 +27,7 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <zerobuf/render/fovCamera.h>
+#include <zerobuf/render/camera.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
 
@@ -147,7 +147,7 @@ void ZeroEQPlugin::_setupHTTPServer()
 
 void ZeroEQPlugin::_setupRequests()
 {
-    ::zerobuf::render::FovCamera camera;
+    ::zerobuf::render::Camera camera;
     _requests[ camera.getTypeIdentifier() ] =
         [&]{ return _publisher.publish( *_brayns.getCamera().getSerializable() ); };
 
@@ -213,21 +213,21 @@ void ZeroEQPlugin::_materialUpdated( )
     if( material)
     {
         BRAYNS_INFO << "Setting material " << materialId << std::endl;
-        ::zerobuf::render::Color diffuse = _remoteMaterial.getDiffuseColor();
+        ::zerobuf::render::Color diffuse = _remoteMaterial.getDiffuse_color();
         Vector3f kd = { diffuse.getR(), diffuse.getG(), diffuse.getB() };
         material->setColor( kd );
         BRAYNS_INFO << "- Diffuse color  : " << kd << std::endl;
 
-        ::zerobuf::render::Color specular = _remoteMaterial.getSpecularColor();
+        ::zerobuf::render::Color specular = _remoteMaterial.getSpecular_color();
         Vector3f ks = { specular.getR(), specular.getG(), specular.getB() };
         material->setSpecularColor( ks );
         BRAYNS_INFO << "- Specular color : " << ks << std::endl;
 
-        material->setSpecularExponent( _remoteMaterial.getSpecularExponent() );
-        material->setReflectionIndex( _remoteMaterial.getReflectionIndex() );
+        material->setSpecularExponent( _remoteMaterial.getSpecular_exponent() );
+        material->setReflectionIndex( _remoteMaterial.getReflection_index() );
         material->setOpacity( _remoteMaterial.getOpacity() );
-        material->setRefractionIndex( _remoteMaterial.getRefractionIndex() );
-        material->setEmission( _remoteMaterial.getLightEmission() );
+        material->setRefractionIndex( _remoteMaterial.getRefraction_index() );
+        material->setEmission( _remoteMaterial.getLight_emission() );
         scene.commitMaterials( true );
         _brayns.getFrameBuffer().clear();
     }
