@@ -29,11 +29,11 @@ table Color
 
 table Material {
     index: int;
-    diffuseColor : Color;
-    specularColor: Color;
-    specularExponent: float;
-    reflectionIndex : float;
+    diffuse_color : Color;
+    specular_color: Color;
+    specular_exponent: float;
+    reflection_index : float;
     opacity: float;
-    refractionIndex: float;
-    lightEmission: float;
+    refraction_index: float;
+    light_emission: float;
 }

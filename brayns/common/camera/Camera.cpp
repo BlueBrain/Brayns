@@ -22,7 +22,7 @@
 #include "Camera.h"
 #include <brayns/common/log.h>
 #ifdef BRAYNS_USE_ZEROBUF
-#  include <zerobuf/render/fovCamera.h>
+#  include <zerobuf/render/camera.h>
 #endif
 
 namespace brayns
@@ -30,7 +30,7 @@ namespace brayns
 
 struct Camera::Impl
 #ifdef BRAYNS_USE_ZEROBUF
-    : public zerobuf::render::FovCamera
+    : public zerobuf::render::Camera
 #endif
 {
 public:
@@ -98,7 +98,7 @@ public:
     const Vector3f& getTarget() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        const ::zerobuf::render::Vector3f& lookat = getLookAt();
+        const ::zerobuf::render::Vector3f& lookat = getLook_at();
         _target = Vector3f( lookat.getX( ), lookat.getY( ), lookat.getZ( ));
     #endif
         return _target;
@@ -111,7 +111,7 @@ public:
     #ifdef BRAYNS_USE_ZEROBUF
         ::zerobuf::render::Vector3f lookat(
             target.x( ), target.y( ), target.z( ));
-        setLookAt( lookat );
+        setLook_at( lookat );
     #endif
         _target = target;
         modified = true;
@@ -175,7 +175,7 @@ public:
         if( _aperture == aperture )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        setFovAperture( aperture );
+        zerobuf::render::Camera::setAperture( aperture );
     #endif
         _aperture = aperture;
         modified = true;
@@ -184,7 +184,7 @@ public:
     float getAperture( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _aperture = getFovAperture( );
+        _aperture = zerobuf::render::Camera::getAperture( );
     #endif
         return _aperture;
     }
@@ -194,7 +194,7 @@ public:
         if( _focalLength == focalLength )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        setFovFocalLength( focalLength );
+        setFocal_length( focalLength );
     #endif
         _focalLength = focalLength;
         modified = true;
@@ -203,7 +203,7 @@ public:
     float getFocalLength( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _focalLength = getFovFocalLength();
+        _focalLength = getFocal_length();
     #endif
         return _focalLength;
     }
