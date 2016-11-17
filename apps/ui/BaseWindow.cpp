@@ -244,9 +244,9 @@ void BaseWindow::display( )
     RenderOutput renderOutput;
 
     renderInput.windowSize = _windowSize;
-    renderInput.position = camera.getPosition( );
-    renderInput.target = camera.getTarget( );
-    renderInput.up = camera.getUpVector( );
+    renderInput.position = camera.getPosition();
+    renderInput.target = camera.getTarget();
+    renderInput.up = camera.getUp();
 
     _brayns->getCamera().commit();
     _brayns->render( renderInput, renderOutput );

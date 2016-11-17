@@ -298,13 +298,13 @@ enum MorphologyLayoutType
     ML_GRID,
 };
 
-enum CameraType
+enum class CameraType
 {
-    CT_UNDEFINED = 0,
-    CT_PERSPECTIVE,
-    CT_STEREO,
-    CT_ORTHOGRAPHIC,
-    CT_PANORAMIC
+    undefined,
+    perspective,
+    stereo,
+    orthographic,
+    panoramic
 };
 
 enum class TimestampMode

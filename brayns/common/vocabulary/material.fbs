@@ -20,17 +20,10 @@
 
 namespace zerobuf.render;
 
-table Color
-{
-    r: float;
-    g: float;
-    b: float;
-}
-
 table Material {
     index: int;
-    diffuse_color : Color;
-    specular_color: Color;
+    diffuse_color : [float:3];
+    specular_color: [float:3];
     specular_exponent: float;
     reflection_index : float;
     opacity: float;

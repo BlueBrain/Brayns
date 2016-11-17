@@ -52,17 +52,17 @@ public:
        @param position The x, y, z coordinates of the camera position
        @param target The x, y, z coordinates of the camera target: the point the
               camera is "looking at" or focused on
-       @param upVector the x, y, z coordinates of the up vector's end point
+       @param up the x, y, z coordinates of the up vector's end point
     */
     BRAYNS_API virtual void set(
         const Vector3f& position,
         const Vector3f& target,
-        const Vector3f& upVector );
+        const Vector3f& up );
 
     BRAYNS_API virtual void setInitialState(
         const Vector3f& position,
         const Vector3f& target,
-        const Vector3f& upVector );
+        const Vector3f& up );
 
     /**
        Gets camera type
@@ -100,13 +100,13 @@ public:
        Sets camera up vector
        @param up the x, y, z coordinates of the up vector's end point
     */
-    BRAYNS_API virtual void setUpVector( const Vector3f& up );
+    BRAYNS_API virtual void setUp( const Vector3f& up );
 
     /**
        Gets camera up vector
        @return the x, y, z coordinates of the up vector's end point
     */
-    BRAYNS_API virtual const Vector3f& getUpVector( ) const;
+    BRAYNS_API virtual const Vector3f& getUp( ) const;
 
     /**
        Gets the camera rotation matrix

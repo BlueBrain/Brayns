@@ -91,7 +91,7 @@ void AbstractManipulator::rotate( const Vector3f& pivot, const float du,
     else
         _camera.setPosition( pivot + newPivotToCam );
 
-    _camera.setUpVector( matrix * UNIT_Y );
+    _camera.setUp( matrix * UNIT_Y );
 }
 
 }

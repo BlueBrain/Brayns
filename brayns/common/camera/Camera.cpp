@@ -36,9 +36,9 @@ struct Camera::Impl
 public:
     Impl( const CameraType cameraType )
         : _cameraType( cameraType )
-        , _position( 0.f, 0.f, -1.f )
+        , _position( 0.f, 0.f, 0.f )
         , _target( 0.f, 0.f, 0.f )
-        , _up( 0.f, 1.f, 0.f )
+        , _up( 0.f, 0.f, 0.f )
         , _aspectRatio( 1.f )
         , _aperture( 0.f )
         , _focalLength( 0.f )
@@ -49,22 +49,22 @@ public:
     void set(
         const Vector3f& position,
         const Vector3f& target,
-        const Vector3f& upVector )
+        const Vector3f& up )
     {
         setPosition( position );
         setTarget( target );
-        setUpVector( upVector );
+        setUp( up );
     }
 
     void setInitialState(
         const Vector3f& position,
         const Vector3f& target,
-        const Vector3f& upVector )
+        const Vector3f& up )
     {
         _initialPosition = position;
         _initialTarget = target;
-        _initialUp = upVector;
-        set( position, target, upVector );
+        _initialUp = up;
+        set( position, target, up );
     }
 
     void reset()
@@ -76,8 +76,8 @@ public:
     const Vector3f& getPosition() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        const ::zerobuf::render::Vector3f& origin = getOrigin();
-        _position = Vector3f( origin.getX( ), origin.getY( ), origin.getZ( ));
+        const floats& origin = getOriginVector();
+        _position = Vector3f( origin[0], origin[1], origin[2] );
     #endif
         return _position;
     }
@@ -87,9 +87,8 @@ public:
         if( _position.equals( position ))
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        ::zerobuf::render::Vector3f origin(
-            position.x( ), position.y( ), position.z( ));
-        setOrigin( origin );
+        const floats& origin = { position.x(), position.y(), position.z() };
+        zerobuf::render::Camera::setOrigin( origin );
     #endif
         _position = position;
         modified = true;
@@ -98,8 +97,8 @@ public:
     const Vector3f& getTarget() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        const ::zerobuf::render::Vector3f& lookat = getLook_at();
-        _target = Vector3f( lookat.getX( ), lookat.getY( ), lookat.getZ( ));
+        const floats& lookat = getLook_atVector();
+        _target = Vector3f( lookat[0], lookat[1], lookat[2] );
     #endif
         return _target;
     }
@@ -109,31 +108,29 @@ public:
         if( _target.equals( target ))
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        ::zerobuf::render::Vector3f lookat(
-            target.x( ), target.y( ), target.z( ));
-        setLook_at( lookat );
+        const floats& lookat = { target.x(), target.y(), target.z() };
+        zerobuf::render::Camera::setLook_at( lookat );
     #endif
         _target = target;
         modified = true;
     }
 
-    const Vector3f& getUpVector( ) const
+    const Vector3f& getUp( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        const ::zerobuf::render::Vector3f& up = getUp( );
-        _up = Vector3f( up.getX( ), up.getY( ), up.getZ( ));
+        const floats& up = getUpVector();
+        _up = Vector3f( up[0], up[1], up[2] );
     #endif
         return _up;
     }
 
-    void setUpVector( const Vector3f& upVector )
+    void setUp( const Vector3f& upVector )
     {
         if( _up.equals( upVector ))
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        ::zerobuf::render::Vector3f up(
-            upVector.x( ), upVector.y( ), upVector.z( ));
-        setUp( up );
+        const floats& up = { upVector.x(), upVector.y(), upVector.z() };
+        zerobuf::render::Camera::setUp( up );
     #endif
         _up = upVector;
         modified = true;
@@ -194,7 +191,7 @@ public:
         if( _focalLength == focalLength )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        setFocal_length( focalLength );
+        zerobuf::render::Camera::setFocal_length( focalLength );
     #endif
         _focalLength = focalLength;
         modified = true;
@@ -203,7 +200,7 @@ public:
     float getFocalLength( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _focalLength = getFocal_length();
+        _focalLength = zerobuf::render::Camera::getFocal_length();
     #endif
         return _focalLength;
     }
@@ -279,9 +276,9 @@ void Camera::setTarget( const Vector3f& target )
     _impl->setTarget( target );
 }
 
-const Vector3f& Camera::getUpVector( ) const
+const Vector3f& Camera::getUp( ) const
 {
-    return _impl->getUpVector();
+    return _impl->getUp();
 }
 
 vmml::Matrix4f& Camera::getRotationMatrix()
@@ -289,9 +286,9 @@ vmml::Matrix4f& Camera::getRotationMatrix()
     return _impl->_matrix;
 }
 
-void Camera::setUpVector( const Vector3f& upVector )
+void Camera::setUp( const Vector3f& upVector )
 {
-    _impl->setUpVector( upVector );
+    _impl->setUp( upVector );
 }
 
 CameraType Camera::getType( ) const
@@ -362,7 +359,7 @@ std::ostream& operator << ( std::ostream& os, Camera& camera )
 {
     const auto& position = camera.getPosition();
     const auto& target = camera.getTarget();
-    const auto& up = camera.getUpVector();
+    const auto& up = camera.getUp();
     os <<
         position.x() << "," <<
         position.y() << "," <<

@@ -20,18 +20,11 @@
 
 namespace zerobuf.render;
 
-table Vector3f
-{
-    x: float;
-    y: float;
-    z: float;
-}
-
 table Camera
 {
-  origin: Vector3f = 0, 0, 1;
-  look_at: Vector3f;
-  up: Vector3f = 0, 1, 0;
+  origin: [float:3];
+  look_at: [float:3];
+  up: [float:3];
   field_of_view: float;
   aperture: float;
   focal_length: float;

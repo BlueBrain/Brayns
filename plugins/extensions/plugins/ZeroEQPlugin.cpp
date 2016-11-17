@@ -213,13 +213,13 @@ void ZeroEQPlugin::_materialUpdated( )
     if( material)
     {
         BRAYNS_INFO << "Setting material " << materialId << std::endl;
-        ::zerobuf::render::Color diffuse = _remoteMaterial.getDiffuse_color();
-        Vector3f kd = { diffuse.getR(), diffuse.getG(), diffuse.getB() };
+        const floats& diffuse = _remoteMaterial.getDiffuse_colorVector();
+        Vector3f kd = { diffuse[0], diffuse[1], diffuse[2] };
         material->setColor( kd );
         BRAYNS_INFO << "- Diffuse color  : " << kd << std::endl;
 
-        ::zerobuf::render::Color specular = _remoteMaterial.getSpecular_color();
-        Vector3f ks = { specular.getR(), specular.getG(), specular.getB() };
+        const floats& specular = _remoteMaterial.getSpecular_colorVector();
+        Vector3f ks = { specular[0], specular[1], specular[2] };
         material->setSpecularColor( ks );
         BRAYNS_INFO << "- Specular color : " << ks << std::endl;
 
@@ -546,6 +546,7 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _brayns.getScene().commitVolumeData();
     _brayns.getRenderer().commit();
     _brayns.getFrameBuffer().clear();
+    _brayns.getParametersManager().print();
 }
 
 void ZeroEQPlugin::_settingsUpdated()
@@ -577,7 +578,7 @@ void ZeroEQPlugin::_settingsUpdated()
             _brayns.getParametersManager().set( "shading", "none"); break;
     }
     _brayns.getParametersManager().set(
-        "samples-per-pixel", std::to_string(_remoteSettings.getSamples_per_pixel( )));
+        "spp", std::to_string(_remoteSettings.getSamples_per_pixel( )));
     _brayns.getParametersManager().set(
         "ambient-occlusion", (_remoteSettings.getAmbient_occlusion() ? "1" : "0"));
     _brayns.getParametersManager().set(

@@ -49,10 +49,10 @@ BOOST_AUTO_TEST_CASE( defaults )
                            const_cast< const char** >( testSuite.argv ));
 
     const auto& camera = brayns.getCamera();
-    BOOST_CHECK_EQUAL( camera.getType(), brayns::CT_PERSPECTIVE );
+    BOOST_CHECK( camera.getType() == brayns::CameraType::perspective );
     BOOST_CHECK_EQUAL( camera.getPosition(), brayns::Vector3f( 0.5f, 0.5f, -1.f ));
     BOOST_CHECK_EQUAL( camera.getTarget(), brayns::Vector3f( 0.5f, 0.5f, 0.5f ));
-    BOOST_CHECK_EQUAL( camera.getUpVector(), brayns::Vector3f( 0, 1, 0 ));
+    BOOST_CHECK_EQUAL( camera.getUp(), brayns::Vector3f( 0, 1, 0 ));
     BOOST_CHECK_EQUAL( camera.getAspectRatio(), 4.f/3.f );
     BOOST_CHECK_EQUAL( camera.getAperture(), 0.f );
     BOOST_CHECK_EQUAL( camera.getFocalLength(), 0.f );
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE( defaults )
                        brayns::Vector3f( 1, 0, 0 ));
     BOOST_CHECK_EQUAL( renderParams.getDetectionFarColor(),
                        brayns::Vector3f( 0, 1, 0 ));
-    BOOST_CHECK_EQUAL( renderParams.getCameraType(), brayns::CT_PERSPECTIVE );
+    BOOST_CHECK( renderParams.getCameraType() == brayns::CameraType::perspective );
     BOOST_CHECK_EQUAL( renderParams.getHDRI(), "" );
 
     const auto& geomParams = pm.getGeometryParameters();
