@@ -21,7 +21,6 @@
 namespace zerobuf.render;
 
 table Material {
-    index: int;
     diffuse_color : [float:3];
     specular_color: [float:3];
     specular_exponent: float;
@@ -30,3 +29,9 @@ table Material {
     refraction_index: float;
     light_emission: float;
 }
+
+table Scene {
+    materials: [Material];
+}
+
+table ResetScene {}

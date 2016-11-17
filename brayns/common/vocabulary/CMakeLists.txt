@@ -16,14 +16,14 @@ include(zerobufGenerateCxx)
 zerobuf_generate_cxx(
   BRAYNSZEROBUFRENDER
   ${PROJECT_BINARY_DIR}/include/${BRAYNSZEROBUFRENDER_INCLUDE_NAME}
-  camera.fbs
   attribute.fbs
+  camera.fbs
   frameBuffers.fbs
-  reset.fbs
-  material.fbs
-  transferFunction1D.fbs
-  spikes.fbs
   parameters.fbs
+  reset.fbs
+  scene.fbs
+  spikes.fbs
+  transferFunction1D.fbs
 )
 
 common_library(BraynsZeroBufRender)

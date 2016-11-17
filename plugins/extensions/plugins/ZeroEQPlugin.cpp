@@ -117,9 +117,11 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteResetScene.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_resetSceneUpdated, this ));
 
-    _httpServer->handle( _remoteMaterial );
-    _remoteMaterial.registerDeserializedCallback(
-        std::bind( &ZeroEQPlugin::_materialUpdated, this ));
+    _httpServer->handle( _remoteScene );
+    _remoteScene.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_sceneUpdated, this ));
+    _remoteScene.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestScene, this ));
 
     _httpServer->handle( _remoteTransferFunction1D );
     _remoteTransferFunction1D.registerDeserializedCallback(
@@ -206,33 +208,60 @@ void ZeroEQPlugin::_resetSceneUpdated()
     _brayns.buildScene();
 }
 
-void ZeroEQPlugin::_materialUpdated( )
+bool ZeroEQPlugin::_requestScene()
 {
-    size_t materialId = _remoteMaterial.getIndex();
+    BRAYNS_INFO << "Getting materials " << std::endl;
+
+    auto& ms = _remoteScene.getMaterials();
+    ms.clear();
     Scene& scene = _brayns.getScene();
-    MaterialPtr material = scene.getMaterial( materialId );
+    const auto& materials = scene.getMaterials();
 
-    if( material)
+    for( const auto& material: materials )
     {
-        BRAYNS_INFO << "Setting material " << materialId << std::endl;
-        const floats& diffuse = _remoteMaterial.getDiffuse_colorVector();
-        Vector3f kd = { diffuse[0], diffuse[1], diffuse[2] };
-        material->setColor( kd );
-        BRAYNS_INFO << "- Diffuse color  : " << kd << std::endl;
-
-        const floats& specular = _remoteMaterial.getSpecular_colorVector();
-        Vector3f ks = { specular[0], specular[1], specular[2] };
-        material->setSpecularColor( ks );
-        BRAYNS_INFO << "- Specular color : " << ks << std::endl;
-
-        material->setSpecularExponent( _remoteMaterial.getSpecular_exponent() );
-        material->setReflectionIndex( _remoteMaterial.getReflection_index() );
-        material->setOpacity( _remoteMaterial.getOpacity() );
-        material->setRefractionIndex( _remoteMaterial.getRefraction_index() );
-        material->setEmission( _remoteMaterial.getLight_emission() );
-        scene.commitMaterials( true );
-        _brayns.getFrameBuffer().clear();
+        ::zerobuf::render::Material m;
+        m.setDiffuse_color( material->getColor( ));
+        m.setSpecular_color( material->getSpecularColor( ));
+        m.setSpecular_exponent( material->getSpecularExponent( ));
+        m.setReflection_index( material->getReflectionIndex( ));
+        m.setOpacity( material->getOpacity( ));
+        m.setRefraction_index( material->getRefractionIndex( ));
+        m.setLight_emission( material->getEmission( ));
+        ms.push_back(m);
     }
+    return true;
+}
+
+void ZeroEQPlugin::_sceneUpdated( )
+{
+    BRAYNS_INFO << "Setting materials " << std::endl;
+    auto& materials = _remoteScene.getMaterials();
+    Scene& scene = _brayns.getScene();
+
+    for( size_t materialId = 0; materialId < materials.size(); ++materialId )
+    {
+        MaterialPtr material = scene.getMaterial( materialId );
+
+        if( material)
+        {
+            ::zerobuf::render::Material& m = materials[ materialId ];
+            const floats& diffuse = m.getDiffuse_colorVector();
+            Vector3f kd = { diffuse[0], diffuse[1], diffuse[2] };
+            material->setColor( kd );
+
+            const floats& specular = m.getSpecular_colorVector();
+            Vector3f ks = { specular[0], specular[1], specular[2] };
+            material->setSpecularColor( ks );
+
+            material->setSpecularExponent( m.getSpecular_exponent() );
+            material->setReflectionIndex( m.getReflection_index() );
+            material->setOpacity( m.getOpacity() );
+            material->setRefractionIndex( m.getRefraction_index() );
+            material->setEmission( m.getLight_emission() );
+        }
+    }
+    scene.commitMaterials( true );
+    _brayns.getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_spikesUpdated( )
