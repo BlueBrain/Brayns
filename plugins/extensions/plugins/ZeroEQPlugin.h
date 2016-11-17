@@ -142,10 +142,21 @@ private:
      */
     bool _requestSpikes();
 
+
+    /**
+     * @brief This method initializes data sources according to default application parameters
+     */
+    void _initializeDataSource();
+
     /**
      * @brief This method is called when data sources are updated by a ZeroEQ event
      */
     void _dataSourceUpdated();
+
+    /**
+     * @brief This method initializes data sources according to default application parameters
+     */
+    void _initializeSettings();
 
     /**
      * @brief This method is called when settings are updated by a ZeroEQ event

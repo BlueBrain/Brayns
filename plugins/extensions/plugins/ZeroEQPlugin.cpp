@@ -40,9 +40,11 @@ ZeroEQPlugin::ZeroEQPlugin( Brayns& brayns )
     , _compressor( tjInitCompress() )
     , _processingImageJpeg( false )
 {
-    _setupHTTPServer( );
-    _setupRequests( );
-    _setupSubscriber( );
+    _setupHTTPServer();
+    _setupRequests();
+    _setupSubscriber();
+    _initializeDataSource();
+    _initializeSettings();
 }
 
 ZeroEQPlugin::~ZeroEQPlugin( )
@@ -463,6 +465,49 @@ bool ZeroEQPlugin::_requestSpikes()
     return true;
 }
 
+void ZeroEQPlugin::_initializeDataSource()
+{
+    SceneParameters& sceneParameters =
+        _brayns.getParametersManager().getSceneParameters();
+    GeometryParameters& geometryParameters =
+        _brayns.getParametersManager().getGeometryParameters();
+    VolumeParameters& volumeParameters =
+        _brayns.getParametersManager().getVolumeParameters();
+
+    _remoteDataSource.setTransfer_function_file( sceneParameters.getTransferFunctionFilename( ));
+    _remoteDataSource.setMorphology_folder( geometryParameters.getMorphologyFolder( ));
+    _remoteDataSource.setNest_circuit( geometryParameters.getNESTCircuit( ));
+    _remoteDataSource.setNest_report( geometryParameters.getNESTReport( ));
+    _remoteDataSource.setPdb_file( geometryParameters.getPDBFile( ));
+    _remoteDataSource.setPdb_folder( geometryParameters.getPDBFolder( ));
+    _remoteDataSource.setXyzb_file( geometryParameters.getXYZBFile( ));
+    _remoteDataSource.setMesh_folder( geometryParameters.getMeshFolder( ));
+    _remoteDataSource.setCircuit_config( geometryParameters.getCircuitConfiguration( ));
+    _remoteDataSource.setLoad_cache_file( geometryParameters.getLoadCacheFile( ));
+    _remoteDataSource.setSave_cache_file( geometryParameters.getSaveCacheFile( ));
+    _remoteDataSource.setRadius_multiplier( geometryParameters.getRadiusMultiplier( ));
+    _remoteDataSource.setRadius_correction( geometryParameters.getRadiusCorrection( ));
+    _remoteDataSource.setColor_scheme( geometryParameters.getColorScheme( ));
+    _remoteDataSource.setScene_environment( geometryParameters.getSceneEnvironment( ));
+    _remoteDataSource.setGeometry_quality( geometryParameters.getGeometryQuality( ));
+    _remoteDataSource.setTarget( geometryParameters.getTarget( ));
+    _remoteDataSource.setReport( geometryParameters.getReport( ));
+    _remoteDataSource.setNon_simulated_cells( geometryParameters.getNonSimulatedCells( ));
+    _remoteDataSource.setStart_simulation_time( geometryParameters.getStartSimulationTime( ));
+    _remoteDataSource.setEnd_simulation_time( geometryParameters.getEndSimulationTime( ));
+    _remoteDataSource.setSimulation_values_range( geometryParameters.getSimulationValuesRange( ));
+    _remoteDataSource.setSimulation_cache_file( geometryParameters.getSimulationCacheFile( ));
+    _remoteDataSource.setNest_cache_file( geometryParameters.getNESTCacheFile( ));
+    _remoteDataSource.setMorphology_section_types( geometryParameters.getMorphologySectionTypes( ));
+    _remoteDataSource.setMorphology_layout( geometryParameters.getMorphologyLayout().type );
+    _remoteDataSource.setGenerate_multiple_models( geometryParameters.getGenerateMultipleModels( ));
+    _remoteDataSource.setVolume_folder( volumeParameters.getFolder( ));
+    _remoteDataSource.setVolume_file( volumeParameters.getFilename( ));
+    _remoteDataSource.setVolume_dimensions( Vector3ui(volumeParameters.getDimensions( )));
+    _remoteDataSource.setVolume_element_spacing( Vector3f( volumeParameters.getElementSpacing( )));
+    _remoteDataSource.setVolume_offset( Vector3f(volumeParameters.getOffset( )));
+}
+
 void ZeroEQPlugin::_dataSourceUpdated()
 {
     BRAYNS_INFO << "Data source updated" << std::endl;
@@ -547,6 +592,48 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _brayns.getRenderer().commit();
     _brayns.getFrameBuffer().clear();
     _brayns.getParametersManager().print();
+}
+
+void ZeroEQPlugin::_initializeSettings()
+{
+    SceneParameters& sceneParameters =
+        _brayns.getParametersManager().getSceneParameters();
+    RenderingParameters& renderingParameters =
+        _brayns.getParametersManager().getRenderingParameters();
+    VolumeParameters& volumeParameters =
+        _brayns.getParametersManager().getVolumeParameters();
+
+    _remoteSettings.setTimestamp( sceneParameters.getTimestamp( ));
+    _remoteSettings.setVolume_samples_per_ray( volumeParameters.getSamplesPerRay( ));
+    if( renderingParameters.getRenderer( ) == "exobj" )
+        _remoteSettings.setShader( Shader::basic );
+     else if( renderingParameters.getRenderer( ) == "proximityrenderer" )
+        _remoteSettings.setShader( Shader::proximity );
+     else if( renderingParameters.getRenderer( ) == "particlerenderer" )
+        _remoteSettings.setShader( Shader::particle );
+     else if( renderingParameters.getRenderer( ) == "simulationrenderer" )
+        _remoteSettings.setShader( Shader::simulation );
+
+    switch( renderingParameters.getShading( ) )
+    {
+        case ShadingType::diffuse: _remoteSettings.setShading( Shading::diffuse ); break;
+        case ShadingType::electron: _remoteSettings.setShading( Shading::electron ); break;
+        default: _remoteSettings.setShading( Shading::none ); break;
+    }
+    _remoteSettings.setSamples_per_pixel( renderingParameters.getSamplesPerPixel( ));
+    _remoteSettings.setAmbient_occlusion( renderingParameters.getAmbientOcclusionStrength( ));
+    _remoteSettings.setShadows( renderingParameters.getShadows( ));
+    _remoteSettings.setSoft_shadows( renderingParameters.getSoftShadows( ));
+    _remoteSettings.setRadiance( renderingParameters.getLightEmittingMaterials( ));
+    Vector3f value = renderingParameters.getBackgroundColor();
+    _remoteSettings.setBackground_color( value );
+    _remoteSettings.setDetection_distance( renderingParameters.getDetectionDistance( ));
+    value = renderingParameters.getDetectionNearColor();
+    _remoteSettings.setDetection_near_color( value );
+    value = renderingParameters.getDetectionFarColor();
+    _remoteSettings.setDetection_far_color( value );
+    _remoteSettings.setEpsilon( renderingParameters.getEpsilon( ));
+    _remoteSettings.setHead_light( renderingParameters.getHeadLight( ));
 }
 
 void ZeroEQPlugin::_settingsUpdated()

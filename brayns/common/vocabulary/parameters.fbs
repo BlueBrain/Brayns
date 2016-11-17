@@ -73,7 +73,7 @@ table Settings {
     volume_samples_per_ray: uint;
     shader: Shader;
     samples_per_pixel: uint;
-    ambient_occlusion: bool;
+    ambient_occlusion: float;
     shadows: bool;
     soft_shadows: bool;
     shading: Shading;
