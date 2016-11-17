@@ -27,15 +27,17 @@
 #include <zeroeq/zeroeq.h>
 #include <zeroeq/http/server.h>
 #include <turbojpeg.h>
+
+#include <lexis/render/frame.h>
 #include <lexis/render/imageJPEG.h>
 #include <lexis/render/lookupTable1D.h>
-#include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/attribute.h>
+#include <zerobuf/render/frameBuffers.h>
+#include <zerobuf/render/parameters.h>
 #include <zerobuf/render/reset.h>
 #include <zerobuf/render/scene.h>
-#include <zerobuf/render/transferFunction1D.h>
 #include <zerobuf/render/spikes.h>
-#include <zerobuf/render/parameters.h>
+#include <zerobuf/render/transferFunction1D.h>
 
 namespace brayns
 {
@@ -93,7 +95,7 @@ private:
 
     /**
      * @brief This method is called when the scene is requested by a ZeroEQ event
-     * @return True if the method was successfull, false otherwise
+     * @return True if the method was successful, false otherwise
      */
     bool _requestScene();
 
@@ -109,7 +111,7 @@ private:
 
     /**
      * @brief This method is called when the transfer function is requested by a ZeroEQ event
-     * @return True if the method was successfull, false otherwise
+     * @return True if the method was successful, false otherwise
      * @todo Specify the attribute that should be returned when the feature is available in ZeroEQ
      */
     bool _requestTransferFunction1D();
@@ -126,25 +128,25 @@ private:
 
     /**
      * @brief This method is called when a lookup table 1D is requested by a ZeroEQ event
-     * @return True if the method was successfull, false otherwise
+     * @return True if the method was successful, false otherwise
      */
     bool _requestLookupTable1D();
 
     /**
      * @brief This method is called when an Image JPEG is requested by a ZeroEQ event
-     * @return True if the method was successfull, false otherwise
+     * @return True if the method was successful, false otherwise
      */
     bool _requestImageJPEG();
 
     /**
      * @brief This method is called when frame buffers is requested by a ZeroEQ event
-     * @return True if the method was successfull, false otherwise
+     * @return True if the method was successful, false otherwise
      */
     bool _requestFrameBuffers();
 
     /**
      * @brief This method is called when spikes are requested by a ZeroEQ event
-     * @return True if the method was successfull, false otherwise
+     * @return True if the method was successful, false otherwise
      */
     bool _requestSpikes();
 
@@ -168,6 +170,17 @@ private:
      * @brief This method is called when settings are updated by a ZeroEQ event
      */
     void _settingsUpdated();
+
+    /**
+     * @brief This method is called when simulation frame (timestamp) are requested by a ZeroEQ event
+     * @return True if the method was successful, false otherwise
+     */
+    bool _requestFrame();
+
+    /**
+     * @brief This method is called when simulation frame (timestamp) are updated by a ZeroEQ event
+     */
+    void _frameUpdated();
 
     /**
      * @brief Resizes an given image according to the new size
@@ -204,18 +217,19 @@ private:
     RequestFuncs _requests;
     bool _processingImageJpeg;
 
+    ::brayns::DataSource _remoteDataSource;
+    ::brayns::Settings _remoteSettings;
+    ::lexis::render::Frame _remoteFrame;
     ::lexis::render::ImageJPEG _remoteImageJPEG;
-    ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
+    ::lexis::render::LookupTable1D _remoteLookupTable1D;
+    ::zerobuf::data::Spikes _remoteSpikes;
     ::zerobuf::render::Attribute _remoteAttribute;
+    ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
+    ::zerobuf::render::Material _remoteMaterial;
     ::zerobuf::render::ResetCamera _remoteResetCamera;
     ::zerobuf::render::ResetScene _remoteResetScene;
     ::zerobuf::render::Scene _remoteScene;
     ::zerobuf::render::TransferFunction1D _remoteTransferFunction1D;
-    ::lexis::render::LookupTable1D _remoteLookupTable1D;
-    ::zerobuf::data::Spikes _remoteSpikes;
-    ::brayns::DataSource _remoteDataSource;
-    ::brayns::Settings _remoteSettings;
-
 };
 
 }

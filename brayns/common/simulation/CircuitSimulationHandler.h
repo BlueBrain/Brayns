@@ -35,12 +35,6 @@ class CircuitSimulationHandler: public AbstractSimulationHandler
 public:
 
     /**
-     * @brief Returns the size of a frame
-     * @return Size of given frame
-     */
-    uint64_t getFrameSize() const final { return _frameSize; }
-
-    /**
      * @brief Returns a pointer to a given frame in the memory mapped file.
      * @param timestamp Timestamp of the frame
      * @return Pointer to given frame

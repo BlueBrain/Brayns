@@ -135,6 +135,7 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteSpikes.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestSpikes, this ));
 
+    _httpServer->handle( _remoteLookupTable1D );
     _remoteLookupTable1D.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_LookupTable1DUpdated, this ));
     _remoteLookupTable1D.registerSerializeCallback(
@@ -147,6 +148,12 @@ void ZeroEQPlugin::_setupHTTPServer()
     _httpServer->handle( _remoteSettings );
     _remoteSettings.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_settingsUpdated, this ));
+
+    _httpServer->handle( _remoteFrame );
+    _remoteFrame.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestFrame, this ));
+    _remoteFrame.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_frameUpdated, this ));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -730,6 +737,26 @@ void ZeroEQPlugin::_settingsUpdated()
 
     _brayns.getRenderer().commit();
     _brayns.getFrameBuffer().clear();
+}
+
+bool ZeroEQPlugin::_requestFrame()
+{
+    auto simHandler = _brayns.getScene().getSimulationHandler();
+    if( !simHandler )
+        return false;
+
+    const auto ts = uint64_t(_brayns.getParametersManager().getSceneParameters().getTimestamp());
+    _remoteFrame.setCurrent( ts % simHandler->getNbFrames( ));
+    _remoteFrame.setDelta( 1 );
+    _remoteFrame.setEnd( simHandler->getNbFrames( ));
+    _remoteFrame.setStart( 0 );
+    return true;
+}
+
+void ZeroEQPlugin::_frameUpdated()
+{
+    _brayns.getParametersManager().getSceneParameters().setTimestamp( _remoteFrame.getCurrent( ));
+    _brayns.commit();
 }
 
 uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width,
