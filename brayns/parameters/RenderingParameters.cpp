@@ -71,7 +71,7 @@ RenderingParameters::RenderingParameters( )
     , _detectionNearColor( 1.f, 0.f, 0.f )
     , _detectionFarColor( 0.f, 1.f, 0.f )
     , _epsilon( 0.f )
-    , _cameraType( CT_PERSPECTIVE )
+    , _cameraType( CameraType::perspective )
     , _headLight( false )
 {
     _parameters.add_options()

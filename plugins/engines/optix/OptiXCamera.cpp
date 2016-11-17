@@ -59,7 +59,7 @@ OptiXCamera::OptiXCamera(
     std::string cameraPtx;
     switch (cameraType)
     {
-    case CT_PERSPECTIVE:
+    case CameraType::perspective:
         cameraName = CUDA_FUNCTION_CAMERA;
         cameraPtx = CUDA_PERSPECTIVE_CAMERA;
         break;
@@ -87,7 +87,7 @@ void OptiXCamera::commit()
 
     const Vector3f& pos = getPosition();
 
-    _calculateCameraVariables( pos, getTarget(), getUpVector(), u, v, w );
+    _calculateCameraVariables( pos, getTarget(), getUp(), u, v, w );
 
     _context[ CUDA_ATTRIBUTE_CAMERA_EYE ]->setFloat( pos.x(), pos.y(), pos.z() );
     _context[ CUDA_ATTRIBUTE_CAMERA_U ]->setFloat( u.x(), u.y(), u.z() );
