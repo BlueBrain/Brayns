@@ -135,11 +135,16 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteSpikes.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestSpikes, this ));
 
-    _httpServer->handle( _remoteLookupTable1D );
     _remoteLookupTable1D.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_LookupTable1DUpdated, this ));
     _remoteLookupTable1D.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestLookupTable1D, this ));
+
+    _httpServer->handle( _remoteColormap );
+    _remoteColormap.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_colormapUpdated, this ));
+    _remoteColormap.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestColormap, this ));
 
     _httpServer->handle( _remoteDataSource );
     _remoteDataSource.registerDeserializedCallback(
@@ -379,6 +384,56 @@ bool ZeroEQPlugin::_requestLookupTable1D( )
         lut.push_back( color.w() * 255.f );
     }
     _remoteLookupTable1D.setLut( lut );
+    return true;
+}
+
+void ZeroEQPlugin::_colormapUpdated()
+{
+    Scene& scene = _brayns.getScene();
+    TransferFunction& transferFunction = scene.getTransferFunction();
+
+    transferFunction.clear();
+    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
+    floats& emissionIntensities = transferFunction.getEmissionIntensities();
+
+    const uint8_ts& rgba = _remoteColormap.getRgbaVector();
+    for( size_t i = 0; i < rgba.size(); i += 4 )
+    {
+        Vector4f color = {
+            rgba[ i ] / 255.f,
+            rgba[ i + 1 ] / 255.f,
+            rgba[ i + 2 ] / 255.f,
+            rgba[ i + 3 ] / 255.f
+        };
+        diffuseColors.push_back( color );
+        emissionIntensities.push_back( 0.f );
+    }
+
+    const auto& range = _remoteColormap.getRange( );
+    transferFunction.setValuesRange( Vector2f(range[0], range[1] ));
+    scene.commitTransferFunctionData();
+    _brayns.getFrameBuffer().clear();
+}
+
+bool ZeroEQPlugin::_requestColormap( )
+{
+    Scene& scene = _brayns.getScene();
+    TransferFunction& transferFunction = scene.getTransferFunction();
+
+    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
+
+    uint8_ts rgba;
+    rgba.clear();
+    for( const auto& color: diffuseColors )
+    {
+        rgba.push_back( color.x() * 255.f );
+        rgba.push_back( color.y() * 255.f );
+        rgba.push_back( color.z() * 255.f );
+        rgba.push_back( color.w() * 255.f );
+    }
+    _remoteColormap.setRgba( rgba );
+    const auto& range = transferFunction.getValuesRange( );
+    _remoteColormap.setRange( { range[0], range[1] } );
     return true;
 }
 

@@ -1,0 +1,20 @@
+// Copyright (c) 2016, Human Brain Project
+//                     Stefan.Eilemann@epfl.ch
+//                     Ahmet.Bilgili@epfl.ch
+
+// This event is used to communicate look up tables.
+// Data is organized as quartets of 8 bit each, R,G,B,A data.
+// There are 256 possible RGBA quartets ( i.e. value for
+// each 8 bit data in volume rendering ) and this is
+// 256 * 4 = 1024 bytes in total.
+//
+// When rendering for different kinds of data ( i.e. float, short )
+// this event needs further improvements.
+
+namespace zerobuf.render;
+
+table Colormap
+{
+  range: [float:2]; // Range of value to which the color map should apply
+  rgba: [byte:1024]; // Lookup table
+}
