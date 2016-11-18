@@ -81,7 +81,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
             varying float localLightEmission = 0.f;
             varying float localRefraction = 1.f;
             varying float localReflection = 0.f;
-            varying float localOpacity = 1.f;
+            varying float localOpacity = 0.f;
             varying vec3f localDiffuseColor = make_vec3f( 0.f );
             varying vec3f localSpecularColor = make_vec3f( 0.f );
             varying float localSpecularExponent = 0.f;

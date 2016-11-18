@@ -112,7 +112,7 @@ inline vec3f SimulationRenderer_shadeRay(
             varying float localLightEmission = 0.f;
             varying float localRefraction = 1.f;
             varying float localReflection = 0.f;
-            varying float localOpacity = 1.f;
+            varying float localOpacity = 0.f;
             varying vec3f localSimulationColor = make_vec3f( 0.f );
             varying float localSimulationIntensity = 0.f;
             varying vec3f localDiffuseColor = make_vec3f( 0.f );
@@ -387,7 +387,7 @@ void SimulationRenderer_renderSample(
 {
     uniform SimulationRenderer* uniform self =
             ( uniform SimulationRenderer* uniform )_self;
-    sample.ray.time = self->abstract.timestamp;
+    sample.ray.time = infinity;
     sample.rgb = SimulationRenderer_shadeRay( self, sample );
 }
 
