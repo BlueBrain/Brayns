@@ -32,6 +32,7 @@
 #include <lexis/render/imageJPEG.h>
 #include <lexis/render/lookupTable1D.h>
 #include <zerobuf/render/attribute.h>
+#include <zerobuf/render/colormap.h>
 #include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/parameters.h>
 #include <zerobuf/render/reset.h>
@@ -133,6 +134,17 @@ private:
     bool _requestLookupTable1D();
 
     /**
+     * @brief This method is called when the colomap is updated by a ZeroEQ event
+     */
+    void _colormapUpdated();
+
+    /**
+     * @brief This method is called when the colormap is requested by a ZeroEQ event
+     * @return True if the method was successful, false otherwise
+     */
+    bool _requestColormap();
+
+    /**
      * @brief This method is called when an Image JPEG is requested by a ZeroEQ event
      * @return True if the method was successful, false otherwise
      */
@@ -224,6 +236,7 @@ private:
     ::lexis::render::LookupTable1D _remoteLookupTable1D;
     ::zerobuf::data::Spikes _remoteSpikes;
     ::zerobuf::render::Attribute _remoteAttribute;
+    ::zerobuf::render::Colormap _remoteColormap;
     ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
     ::zerobuf::render::Material _remoteMaterial;
     ::zerobuf::render::ResetCamera _remoteResetCamera;
