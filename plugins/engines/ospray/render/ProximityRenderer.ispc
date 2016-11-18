@@ -74,7 +74,7 @@ inline vec3f ProximityRenderer_shadeRay(
             (uniform ExtendedOBJMaterial *)material;
 
     varying float emission = 0.f;
-    varying float opacity = 1.f;
+    varying float opacity = 0.f;
     varying float Ns = 0.f;
     varying vec3f Kd = make_vec3f( 0.0f, 0.0f, 0.0f );
     varying vec3f Ks = make_vec3f( 0.f );

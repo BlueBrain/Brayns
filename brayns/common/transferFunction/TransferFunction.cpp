@@ -44,7 +44,7 @@ TransferFunction::TransferFunction()
                 (float)i / (float)DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE,
                 0.8f * (float)i / (float)DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE,
                 0.5f - 0.5f * (float)i / (float)DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE,
-                ( i < DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE / 10 ? 0.f : 1.f )));
+                1.f));
         _emissionIntensities.push_back( 0.f );
     }
 }
