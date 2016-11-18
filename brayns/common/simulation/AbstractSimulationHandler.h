@@ -60,9 +60,10 @@ public:
 
     virtual void* getFrameData( const float timestamp ) = 0;
 
-    virtual uint64_t getFrameSize() const { return _frameSize; }
-
+    uint64_t getFrameSize() const { return _frameSize; }
     void setFrameSize( const uint64_t frameSize ) { _frameSize = frameSize; }
+
+    uint64_t getNbFrames() const { return _nbFrames; }
     void setNbFrames( const uint64_t nbFrames ) { _nbFrames = nbFrames; }
 
     uint64_t getCurrentFrame() const { return _currentFrame; }
