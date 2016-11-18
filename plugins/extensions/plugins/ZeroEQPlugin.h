@@ -57,7 +57,8 @@ public:
     /** @copydoc ExtensionPlugin::execute */
     BRAYNS_API void run( ) final;
 
-    BRAYNS_API bool handlePUT( servus::Serializable& object );
+    BRAYNS_API bool operator ! () const;
+    BRAYNS_API ::zeroeq::http::Server* operator->();
 
 private:
 

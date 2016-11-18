@@ -53,7 +53,18 @@ namespace brayns
                 [&] { _params.setEnabled( !_params.getEnabled( )); });
 
 #ifdef BRAYNS_USE_ZEROEQ
-    zeroeq.handlePUT( _params );
+    if( !zeroeq )
+        return;
+
+    zeroeq->handle( _params );
+
+    // TODO needs proper exposure from ZeroEQ/ZeroBuf
+    std::string schema = _params.getSchema();
+    const std::string name = "Stream";
+    schema.replace( schema.find( name ), name.length(), "StreamTo" );
+    zeroeq->handlePUT( "lexis::render::StreamTo", schema,
+                       std::bind( &::lexis::render::Stream::fromJSON,
+                                    std::ref(_params), std::placeholders::_1 ));
 #endif
 }
 
@@ -86,7 +97,11 @@ void DeflectPlugin::run()
     if( deflectEnabled && _stream && _stream->isConnected() )
     {
         _sendDeflectFrame();
-        _handleDeflectEvents();
+        if( _handleDeflectEvents( ))
+        {
+            _brayns.getFrameBuffer().clear();
+            _brayns.getRenderer().commit();
+        }
     }
 }
 
@@ -128,15 +143,14 @@ void DeflectPlugin::_sendDeflectFrame()
         _send( frameSize, (unsigned long*)data, true);
 }
 
-void DeflectPlugin::_handleDeflectEvents()
+bool DeflectPlugin::_handleDeflectEvents()
 {
-    bool hasEvents = false;
+    if( !_stream->hasEvent( ))
+        return false;
 
     while( _stream->hasEvent() )
     {
-        hasEvents = true;
         const deflect::Event& event = _stream->getEvent();
-
         switch( event.type )
         {
         case deflect::Event::EVT_PRESS:
@@ -179,15 +193,18 @@ void DeflectPlugin::_handleDeflectEvents()
             _brayns.reshape( Vector2ui( event.dx, event.dy ));
             break;
         }
+        case deflect::Event::EVT_CLOSE:
+            _params.setEnabled( false );
+            _params.setHost( "" );
+            _previousHost.clear();
+            _stream.reset();
+            return true;
         default:
             break;
         }
     }
-    if( hasEvents )
-    {
-        _brayns.getFrameBuffer().clear();
-        _brayns.getRenderer().commit();
-    }
+
+    return true;
 }
 
 void DeflectPlugin::_send(
@@ -210,7 +227,7 @@ void DeflectPlugin::_send(
     if( !success )
     {
         if( !_stream->isConnected() )
-            BRAYNS_ERROR << "Stream closed, exiting." << std::endl;
+            BRAYNS_INFO << "Stream closed, exiting." << std::endl;
         else
             BRAYNS_ERROR << "failure in deflectStreamSend()" << std::endl;
     }

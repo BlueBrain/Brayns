@@ -76,7 +76,7 @@ private:
 
     void _initializeDeflect();
     void _sendDeflectFrame();
-    void _handleDeflectEvents();
+    bool _handleDeflectEvents();
 
     /** Send an image to DisplayCluster
      *

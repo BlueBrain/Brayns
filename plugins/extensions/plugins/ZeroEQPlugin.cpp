@@ -64,12 +64,14 @@ void ZeroEQPlugin::run()
     while( _subscriber.receive( 1 )) {}
 }
 
-bool ZeroEQPlugin::handlePUT( servus::Serializable& object )
+bool ZeroEQPlugin::operator ! () const
 {
-    if( !_httpServer )
-        return false;
+    return !_httpServer;
+}
 
-    return _httpServer->handlePUT( object );
+::zeroeq::http::Server* ZeroEQPlugin::operator->()
+{
+    return _httpServer.get();
 }
 
 void ZeroEQPlugin::_setupHTTPServer()
