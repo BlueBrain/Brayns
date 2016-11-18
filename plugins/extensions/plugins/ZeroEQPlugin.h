@@ -32,7 +32,7 @@
 #include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/attribute.h>
 #include <zerobuf/render/reset.h>
-#include <zerobuf/render/material.h>
+#include <zerobuf/render/scene.h>
 #include <zerobuf/render/transferFunction1D.h>
 #include <zerobuf/render/spikes.h>
 #include <zerobuf/render/parameters.h>
@@ -92,9 +92,15 @@ private:
     void _resetSceneUpdated();
 
     /**
-     * @brief This method is called when a material is updated by a ZeroEQ event
+     * @brief This method is called when the scene is requested by a ZeroEQ event
+     * @return True if the method was successfull, false otherwise
      */
-    void _materialUpdated();
+    bool _requestScene();
+
+    /**
+     * @brief This method is called when the scene is updated by a ZeroEQ event
+     */
+    void _sceneUpdated();
 
     /**
      * @brief This method is called when spikes are updated by a ZeroEQ event
@@ -203,7 +209,7 @@ private:
     ::zerobuf::render::Attribute _remoteAttribute;
     ::zerobuf::render::ResetCamera _remoteResetCamera;
     ::zerobuf::render::ResetScene _remoteResetScene;
-    ::zerobuf::render::Material _remoteMaterial;
+    ::zerobuf::render::Scene _remoteScene;
     ::zerobuf::render::TransferFunction1D _remoteTransferFunction1D;
     ::lexis::render::LookupTable1D _remoteLookupTable1D;
     ::zerobuf::data::Spikes _remoteSpikes;
