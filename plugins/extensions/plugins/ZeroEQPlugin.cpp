@@ -161,6 +161,12 @@ void ZeroEQPlugin::_setupHTTPServer()
         std::bind( &ZeroEQPlugin::_requestFrame, this ));
     _remoteFrame.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_frameUpdated, this ));
+
+    _httpServer->handle( _remoteViewport );
+    _remoteViewport.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestViewport, this ));
+    _remoteViewport.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_viewportUpdated, this ));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -468,10 +474,18 @@ bool ZeroEQPlugin::_requestImageJPEG()
     if(!_processingImageJpeg)
     {
         _processingImageJpeg = true;
-        FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
-        const Vector2i& frameSize = frameBuffer.getSize();
-        const Vector2i& newFrameSize =
+        const auto& newFrameSize =
             _brayns.getParametersManager().getApplicationParameters().getJpegSize();
+        if( newFrameSize.x() == 0 || newFrameSize.y() == 0 )
+        {
+            BRAYNS_ERROR << "Encountered invalid size of image JPEG: "
+                         << newFrameSize << std::endl;
+            _processingImageJpeg = false;
+            return false;
+        }
+
+        FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
+        const auto& frameSize = frameBuffer.getSize();
         unsigned int* colorBuffer =
             (unsigned int*)frameBuffer.getColorBuffer( );
         if( colorBuffer )
@@ -695,6 +709,8 @@ void ZeroEQPlugin::_initializeSettings()
         _brayns.getParametersManager().getRenderingParameters();
     VolumeParameters& volumeParameters =
         _brayns.getParametersManager().getVolumeParameters();
+    auto& applicationParameters =
+        _brayns.getParametersManager().getApplicationParameters();
 
     _remoteSettings.setTimestamp( sceneParameters.getTimestamp( ));
     _remoteSettings.setVolume_samples_per_ray( volumeParameters.getSamplesPerRay( ));
@@ -727,6 +743,8 @@ void ZeroEQPlugin::_initializeSettings()
     _remoteSettings.setDetection_far_color( value );
     _remoteSettings.setEpsilon( renderingParameters.getEpsilon( ));
     _remoteSettings.setHead_light( renderingParameters.getHeadLight( ));
+    _remoteSettings.setJpeg_compression( applicationParameters.getJpegCompression( ));
+    _remoteSettings.setJpeg_size( { *applicationParameters.getJpegSize() } );
 }
 
 void ZeroEQPlugin::_settingsUpdated()
@@ -792,6 +810,10 @@ void ZeroEQPlugin::_settingsUpdated()
     _brayns.getParametersManager().set(
         "head-light", (_remoteSettings.getHead_light( ) ? "1" : "0"));
 
+    auto& app = _brayns.getParametersManager().getApplicationParameters();
+    app.setJpegSize( Vector2ui{ _remoteSettings.getJpeg_size()  } );
+    app.setJpegCompression( std::min( _remoteSettings.getJpeg_compression(), 100u ));
+
     _brayns.getRenderer().commit();
     _brayns.getFrameBuffer().clear();
 }
@@ -799,13 +821,12 @@ void ZeroEQPlugin::_settingsUpdated()
 bool ZeroEQPlugin::_requestFrame()
 {
     auto simHandler = _brayns.getScene().getSimulationHandler();
-    if( !simHandler )
-        return false;
+    const uint64_t nbFrames = simHandler ? simHandler->getNbFrames() : 0;
 
     const auto ts = uint64_t(_brayns.getParametersManager().getSceneParameters().getTimestamp());
-    _remoteFrame.setCurrent( ts % simHandler->getNbFrames( ));
+    _remoteFrame.setCurrent( nbFrames == 0 ? 0 : (ts % nbFrames) );
     _remoteFrame.setDelta( 1 );
-    _remoteFrame.setEnd( simHandler->getNbFrames( ));
+    _remoteFrame.setEnd( nbFrames );
     _remoteFrame.setStart( 0 );
     return true;
 }
@@ -813,6 +834,18 @@ bool ZeroEQPlugin::_requestFrame()
 void ZeroEQPlugin::_frameUpdated()
 {
     _brayns.getParametersManager().getSceneParameters().setTimestamp( _remoteFrame.getCurrent( ));
+    _brayns.commit();
+}
+
+bool ZeroEQPlugin::_requestViewport()
+{
+    _remoteViewport.setSize( { *_brayns.getParametersManager().getApplicationParameters().getWindowSize() } );
+    return true;
+}
+
+void ZeroEQPlugin::_viewportUpdated()
+{
+    _brayns.getParametersManager().getApplicationParameters().setWindowSize( Vector2ui{ _remoteViewport.getSize() } );
     _brayns.commit();
 }
 

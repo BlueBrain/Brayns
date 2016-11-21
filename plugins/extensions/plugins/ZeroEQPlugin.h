@@ -31,6 +31,7 @@
 #include <lexis/render/frame.h>
 #include <lexis/render/imageJPEG.h>
 #include <lexis/render/lookupTable1D.h>
+#include <lexis/render/viewport.h>
 #include <zerobuf/render/attribute.h>
 #include <zerobuf/render/colormap.h>
 #include <zerobuf/render/frameBuffers.h>
@@ -196,6 +197,17 @@ private:
     void _frameUpdated();
 
     /**
+     * @brief This method is called when viewport requested by a ZeroEQ event
+     * @return True if the method was successful, false otherwise
+     */
+    bool _requestViewport();
+
+    /**
+     * @brief This method is called when viewport is updated by a ZeroEQ event
+     */
+    void _viewportUpdated();
+
+    /**
      * @brief Resizes an given image according to the new size
      * @param srcData Source buffer
      * @param srcSize Source size
@@ -235,6 +247,7 @@ private:
     ::lexis::render::Frame _remoteFrame;
     ::lexis::render::ImageJPEG _remoteImageJPEG;
     ::lexis::render::LookupTable1D _remoteLookupTable1D;
+    ::lexis::render::Viewport _remoteViewport;
     ::zerobuf::data::Spikes _remoteSpikes;
     ::zerobuf::render::Attribute _remoteAttribute;
     ::zerobuf::render::Colormap _remoteColormap;

@@ -85,4 +85,6 @@ table Settings {
     detection_far_color: [float:3];
     epsilon: float;
     head_light: bool;
+    jpeg_size: [uint:2];
+    jpeg_compression: uint;
 }
