@@ -745,7 +745,8 @@ void ZeroEQPlugin::_initializeSettings()
     _remoteSettings.setEpsilon( renderingParameters.getEpsilon( ));
     _remoteSettings.setHead_light( renderingParameters.getHeadLight( ));
     _remoteSettings.setJpeg_compression( applicationParameters.getJpegCompression( ));
-    _remoteSettings.setJpeg_size( { *applicationParameters.getJpegSize() } );
+    const auto& jpegSize = applicationParameters.getJpegSize();
+    _remoteSettings.setJpeg_size( { jpegSize[0], jpegSize[1] } );
 }
 
 void ZeroEQPlugin::_settingsUpdated()
@@ -840,7 +841,8 @@ void ZeroEQPlugin::_frameUpdated()
 
 bool ZeroEQPlugin::_requestViewport()
 {
-    _remoteViewport.setSize( { *_brayns.getParametersManager().getApplicationParameters().getWindowSize() } );
+    const auto& windowSize = _brayns.getParametersManager().getApplicationParameters().getWindowSize();
+    _remoteViewport.setSize( { windowSize[0], windowSize[1] } );
     return true;
 }
 
