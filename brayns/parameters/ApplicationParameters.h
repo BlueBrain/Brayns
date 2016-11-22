@@ -51,6 +51,8 @@ public:
     bool isBenchmarking() const { return _benchmarking; }
 
     /** JPEG compression quality */
+    void setJpegCompression( const size_t compression )
+        { _jpegCompression = compression; }
     size_t getJpegCompression() const { return _jpegCompression; }
 
     /** JPEG size */
