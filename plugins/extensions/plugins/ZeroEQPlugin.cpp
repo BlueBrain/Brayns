@@ -219,6 +219,7 @@ void ZeroEQPlugin::_resetCameraUpdated()
     BRAYNS_INFO << "Resetting camera" << std::endl;
     _brayns.getCamera().reset();
     _brayns.getCamera().commit();
+    _brayns.getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_resetSceneUpdated()
