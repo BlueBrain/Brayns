@@ -52,6 +52,9 @@ namespace brayns
         '*', "Enable/Disable Deflect streaming",
                 [&] { _params.setEnabled( !_params.getEnabled( )); });
 
+    // ensure streaming is off initially, otherwise our logic in run() won't work
+    _params.setEnabled( false );
+
 #ifdef BRAYNS_USE_ZEROEQ
     if( !zeroeq )
         return;
