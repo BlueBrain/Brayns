@@ -282,6 +282,7 @@ void ZeroEQPlugin::_sceneUpdated( )
         }
     }
     scene.commitMaterials( true );
+    _brayns.getRenderer().commit();
     _brayns.getFrameBuffer().clear();
 }
 
@@ -780,7 +781,7 @@ void ZeroEQPlugin::_settingsUpdated()
     _brayns.getParametersManager().set(
         "spp", std::to_string(_remoteSettings.getSamples_per_pixel( )));
     _brayns.getParametersManager().set(
-        "ambient-occlusion", (_remoteSettings.getAmbient_occlusion() ? "1" : "0"));
+        "ambient-occlusion", std::to_string(_remoteSettings.getAmbient_occlusion()));
     _brayns.getParametersManager().set(
         "shadows", (_remoteSettings.getShadows( ) ? "1" : "0"));
     _brayns.getParametersManager().set(
