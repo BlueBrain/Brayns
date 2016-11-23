@@ -53,6 +53,7 @@ public:
     void updateMotionSpeed( float speed );
 
     float getRotationSpeed() const;
+    float getWheelSpeed() const;
 
 protected:
     /*! target camera */
