@@ -92,8 +92,9 @@ void InspectCenterManipulator::dragMiddle( const Vector2i& to,
 }
 
 void InspectCenterManipulator::wheel( const Vector2i& /*position*/,
-                                      const float delta )
+                                      float delta )
 {
+    delta *= getMotionSpeed();
     if( delta < ( _camera.getTarget() - _camera.getPosition( )).length( ))
         translate( forwardDirection * delta, false );
 }
