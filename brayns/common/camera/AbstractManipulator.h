@@ -50,7 +50,7 @@ public:
     virtual void wheel( const Vector2i& position, float delta ) = 0;
 
     float getMotionSpeed() const;
-    void setMotionSpeed( float speed );
+    void updateMotionSpeed( float speed );
 
     float getRotationSpeed() const;
 

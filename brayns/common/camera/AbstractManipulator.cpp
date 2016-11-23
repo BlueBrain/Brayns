@@ -30,21 +30,16 @@ namespace
 {
 const Vector3f UNIT_Y = { 0.f, 1.f, 0.f };
 const Vector3f UNIT_Z = { 0.f, 0.f, 1.f };
+const float DEFAULT_MOTION_SPEED = 0.01f;
 const float DEFAULT_ROTATION_SPEED = 0.005f;
 
-float _getDefaultMotionSpeed( const Camera& camera )
-{
-    const auto& position = camera.getPosition();
-    const auto& target = camera.getTarget();
-    return Vector3f{ target - position }.length() * 0.001f;
-}
 }
 
 AbstractManipulator::AbstractManipulator( Camera& camera,
                                           KeyboardHandler& keyboardHandler )
     : _camera( camera )
     , _keyboardHandler( keyboardHandler )
-    , _motionSpeed{ _getDefaultMotionSpeed( camera ) }
+    , _motionSpeed{ DEFAULT_MOTION_SPEED }
     , _rotationSpeed{ DEFAULT_ROTATION_SPEED }
 {}
 
@@ -57,12 +52,14 @@ float AbstractManipulator::getRotationSpeed() const
 
 float AbstractManipulator::getMotionSpeed() const
 {
-    return _motionSpeed;
+    const auto& position = _camera.getPosition();
+    const auto& target = _camera.getTarget();
+    return Vector3f{ target - position }.length() * _motionSpeed;
 }
 
-void AbstractManipulator::setMotionSpeed( const float speed )
+void AbstractManipulator::updateMotionSpeed( const float speed )
 {
-    _motionSpeed = speed;
+    _motionSpeed *= speed;
 }
 
 void AbstractManipulator::translate( const Vector3f& vector,

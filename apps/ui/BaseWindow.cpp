@@ -438,14 +438,12 @@ void BaseWindow::_resetCamera()
 
 void BaseWindow::_increaseMotionSpeed()
 {
-    const auto speed = _brayns->getCameraManipulator().getMotionSpeed();
-    _brayns->getCameraManipulator().setMotionSpeed( speed * DEFAULT_MOTION_ACCELERATION );
+    _brayns->getCameraManipulator().updateMotionSpeed( DEFAULT_MOTION_ACCELERATION );
 }
 
 void BaseWindow::_decreaseMotionSpeed()
 {
-    const auto speed = _brayns->getCameraManipulator().getMotionSpeed();
-    _brayns->getCameraManipulator().setMotionSpeed( speed / DEFAULT_MOTION_ACCELERATION );
+    _brayns->getCameraManipulator().updateMotionSpeed( 1.f / DEFAULT_MOTION_ACCELERATION );
 }
 
 void BaseWindow::_displayCameraInformation()
