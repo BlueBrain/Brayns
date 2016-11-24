@@ -36,6 +36,15 @@
 namespace
 {
 const float wheelFactor = 1.f / 40.f;
+
+template<typename T>
+std::future<T> make_ready_future( const T value )
+{
+    std::promise<T> promise;
+    promise.set_value( value );
+    return promise.get_future();
+}
+
 }
 
 namespace brayns
@@ -47,6 +56,7 @@ namespace brayns
     DeflectPlugin::DeflectPlugin( Brayns& brayns )
 #endif
     : ExtensionPlugin( brayns )
+    , _sendFuture(make_ready_future( true ))
 {
     brayns.getKeyboardHandler().registerKeyboardShortcut(
         '*', "Enable/Disable Deflect streaming",
@@ -139,11 +149,28 @@ void DeflectPlugin::_initializeDeflect()
 
 void DeflectPlugin::_sendDeflectFrame()
 {
+    if( !_sendFuture.get( ))
+    {
+        if( !_stream->isConnected() )
+            BRAYNS_INFO << "Stream closed, exiting." << std::endl;
+        else
+            BRAYNS_ERROR << "failure in deflectStreamSend()" << std::endl;
+        return;
+    }
+
     FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
     const Vector2i& frameSize = frameBuffer.getSize();
     void* data = frameBuffer.getColorBuffer();
+
     if( data )
-        _send( frameSize, (unsigned long*)data, true);
+    {
+        const size_t bufferSize = frameSize.x()*frameSize.y()*frameBuffer.getColorDepth();
+        _lastImage.data.resize( bufferSize );
+        memcpy( _lastImage.data.data(), data, bufferSize );
+        _lastImage.size = frameSize;
+
+        _send( true );
+    }
 }
 
 bool DeflectPlugin::_handleDeflectEvents()
@@ -214,30 +241,20 @@ bool DeflectPlugin::_handleDeflectEvents()
     return true;
 }
 
-void DeflectPlugin::_send(
-    const Vector2i& windowSize,
-    unsigned long* imageData,
-    const bool swapYAxis )
+void DeflectPlugin::_send( const bool swapYAxis )
 {
-    deflect::ImageWrapper deflectImage( imageData, windowSize.x(),
-                                        windowSize.y(), deflect::RGBA );
+    deflect::ImageWrapper deflectImage( _lastImage.data.data(), _lastImage.size.x(),
+                                        _lastImage.size.y(), deflect::RGBA );
 
     deflectImage.compressionQuality = _params.getQuality();
     deflectImage.compressionPolicy =
         _params.getCompression() ?
         deflect::COMPRESSION_ON : deflect::COMPRESSION_OFF;
     if( swapYAxis )
-        deflect::ImageWrapper::swapYAxis( (void*)imageData, windowSize.x(),
-                                          windowSize.y(), 4 );
+        deflect::ImageWrapper::swapYAxis( (void*)_lastImage.data.data(), _lastImage.size.x(),
+                                          _lastImage.size.y(), 4 );
 
-    const bool success = _stream->send( deflectImage ) && _stream->finishFrame();
-    if( !success )
-    {
-        if( !_stream->isConnected() )
-            BRAYNS_INFO << "Stream closed, exiting." << std::endl;
-        else
-            BRAYNS_ERROR << "failure in deflectStreamSend()" << std::endl;
-    }
+    _sendFuture = _stream->asyncSend( deflectImage );
 }
 
 Vector2d DeflectPlugin::_getWindowPos( const deflect::Event& event ) const
