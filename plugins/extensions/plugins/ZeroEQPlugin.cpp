@@ -288,6 +288,7 @@ void ZeroEQPlugin::_sceneUpdated( )
 
 void ZeroEQPlugin::_spikesUpdated( )
 {
+#if 0
     AbstractSimulationHandlerPtr simulationHandler =
         _brayns.getScene().getSimulationHandler();
 
@@ -304,6 +305,7 @@ void ZeroEQPlugin::_spikesUpdated( )
         _brayns.getFrameBuffer().clear();
         _brayns.getScene().commitSimulationData();
     }
+#endif
 }
 
 
@@ -553,7 +555,7 @@ bool ZeroEQPlugin::_requestFrameBuffers()
 
 bool ZeroEQPlugin::_requestSpikes()
 {
-    BRAYNS_INFO << "Spikes requested" << std::endl;
+#if 0
     AbstractSimulationHandlerPtr simulationHandler = _brayns.getScene().getSimulationHandler();
 
     SpikeSimulationHandler* spikeSimulationHandler =
@@ -571,6 +573,7 @@ bool ZeroEQPlugin::_requestSpikes()
         spikeGids.assign( gids, gids + frameSize );
     }
     _remoteSpikes.setGids( spikeGids );
+#endif
     return true;
 }
 
