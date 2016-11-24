@@ -34,6 +34,12 @@ namespace brayns
 class ZeroEQPlugin;
 #endif
 
+struct Image
+{
+    std::vector<char> data;
+    Vector2ui size;
+};
+
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
@@ -80,14 +86,9 @@ private:
 
     /** Send an image to DisplayCluster
      *
-     * @param imageSize size of the image
-     * @param buffer containing the image
      * @param swapYAxis enables a vertical flip operation on the image
      */
-    void _send(
-        const Vector2i& imageSize,
-        unsigned long* imageData,
-        bool swapYAxis);
+    void _send( bool swapYAxis );
 
     Vector2d _getWindowPos( const deflect::Event& event ) const;
     double _getZoomDelta( const deflect::Event& pinchEvent ) const;
@@ -98,6 +99,8 @@ private:
     std::unique_ptr< deflect::Stream > _stream;
     ::lexis::render::Stream _params;
     std::string _previousHost;
+    Image _lastImage;
+    deflect::Stream::Future _sendFuture;
 };
 
 }

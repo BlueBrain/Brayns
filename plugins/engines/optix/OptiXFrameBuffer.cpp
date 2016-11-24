@@ -98,15 +98,8 @@ void OptiXFrameBuffer::map()
         return;
 
     rtBufferMap( _frameBuffer->get(), &_imageData );
+
     _context["frame"]->setUint( _accumulationFrame++ );
-}
-
-void OptiXFrameBuffer::unmap()
-{
-    // Now unmap the buffer
-    if( !_frameBuffer )
-        return;
-
     switch( _frameBufferFormat )
     {
         case FBF_RGBA_I8:
@@ -118,8 +111,17 @@ void OptiXFrameBuffer::unmap()
         default:
             BRAYNS_ERROR << "Unsupported format" << std::endl;
     }
+}
+
+void OptiXFrameBuffer::unmap()
+{
+    // Now unmap the buffer
+    if( !_frameBuffer )
+        return;
 
     rtBufferUnmap( _frameBuffer->get( ) );
+    _colorBuffer = nullptr;
+    _depthBuffer = nullptr;
 }
 
 }
