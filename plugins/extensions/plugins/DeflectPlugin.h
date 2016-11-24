@@ -93,7 +93,8 @@ private:
     double _getZoomDelta( const deflect::Event& pinchEvent ) const;
 
     Vector2d _previousPos;
-    bool _panOrPinch = false;
+    bool _pan = false;
+    bool _pinch = false;
     std::unique_ptr< deflect::Stream > _stream;
     ::lexis::render::Stream _params;
     std::string _previousHost;

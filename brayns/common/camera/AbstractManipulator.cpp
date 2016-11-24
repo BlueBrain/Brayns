@@ -30,7 +30,7 @@ namespace
 {
 const Vector3f UNIT_Y = { 0.f, 1.f, 0.f };
 const Vector3f UNIT_Z = { 0.f, 0.f, 1.f };
-const float DEFAULT_MOTION_SPEED = 0.01f;
+const float DEFAULT_MOTION_SPEED = 0.001f;
 const float DEFAULT_ROTATION_SPEED = 0.005f;
 
 }
@@ -48,6 +48,11 @@ AbstractManipulator::~AbstractManipulator() {}
 float AbstractManipulator::getRotationSpeed() const
 {
     return _rotationSpeed;
+}
+
+float AbstractManipulator::getWheelSpeed() const
+{
+    return getMotionSpeed() * 100.f;
 }
 
 float AbstractManipulator::getMotionSpeed() const

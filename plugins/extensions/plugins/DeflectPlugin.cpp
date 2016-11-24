@@ -158,32 +158,36 @@ bool DeflectPlugin::_handleDeflectEvents()
         {
         case deflect::Event::EVT_PRESS:
             _previousPos = _getWindowPos( event );
-            _panOrPinch = false;
+            _pan = _pinch = false;
             break;
         case deflect::Event::EVT_MOVE:
         case deflect::Event::EVT_RELEASE:
         {
             const auto pos = _getWindowPos( event );
-            if( !_panOrPinch )
+            if( !_pan && !_pinch )
                 _brayns.getCameraManipulator().dragLeft( pos, _previousPos );
             _previousPos = pos;
-            _panOrPinch = false;
+            _pan = _pinch = false;
             break;
         }
         case deflect::Event::EVT_PAN:
         {
+            if( _pinch )
+                break;
             const auto pos = _getWindowPos( event );
             _brayns.getCameraManipulator().dragMiddle( pos, _previousPos );
             _previousPos = pos;
-            _panOrPinch = true;
+            _pan = true;
             break;
         }
         case deflect::Event::EVT_PINCH:
         {
+            if( _pan )
+                break;
             const auto pos = _getWindowPos( event );
             const auto delta = _getZoomDelta( event );
             _brayns.getCameraManipulator().wheel( pos, delta * wheelFactor );
-            _panOrPinch = true;
+            _pinch = true;
             break;
         }
         case deflect::Event::EVT_KEY_PRESS:

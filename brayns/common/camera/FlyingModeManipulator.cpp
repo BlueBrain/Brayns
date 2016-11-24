@@ -80,7 +80,7 @@ void FlyingModeManipulator::dragMiddle( const Vector2i& to,
 void FlyingModeManipulator::wheel( const Vector2i& /*position*/,
                                    const float delta )
 {
-    translate( forwardDirection * delta * getMotionSpeed(), false );
+    translate( forwardDirection * delta * getWheelSpeed(), false );
 }
 
 void FlyingModeManipulator::_strafeLeft()
@@ -95,12 +95,12 @@ void FlyingModeManipulator::_strafeRight()
 
 void FlyingModeManipulator::_flyForward()
 {
-    translate( forwardDirection * getMotionSpeed(), true );
+    translate( forwardDirection * getWheelSpeed(), true );
 }
 
 void FlyingModeManipulator::_flyBackwards()
 {
-    translate( forwardDirection * -getMotionSpeed(), true );
+    translate( forwardDirection * -getWheelSpeed(), true );
 }
 
 }
