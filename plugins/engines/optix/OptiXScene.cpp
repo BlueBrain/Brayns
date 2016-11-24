@@ -618,21 +618,26 @@ void OptiXScene::commitMaterials( const bool updateOnly )
     optix::Program phong_ah =
         _context->createProgramFromPTXString( CUDA_PHONG, "any_hit_shadow" );
 
-    _optixMaterials.clear();
-    _optixMaterials.resize( _materials.size( ));
+    if( !updateOnly )
+    {
+        _optixMaterials.clear();
+        _optixMaterials.resize( _materials.size( ));
+    }
     for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
     {
         // Material
         MaterialPtr material = _materials[ materialId ];
         assert(material);
 
-        optix::Material optixMaterial = 0;
+        optix::Material optixMaterial = nullptr;
         if( updateOnly )
             optixMaterial = _optixMaterials[ materialId ];
         else
+        {
             optixMaterial = _context->createMaterial();
-        optixMaterial->setClosestHitProgram( 0, phong_ch );
-        optixMaterial->setAnyHitProgram( 1, phong_ah );
+            optixMaterial->setClosestHitProgram( 0, phong_ch );
+            optixMaterial->setAnyHitProgram( 1, phong_ah );
+        }
 
         const Vector3f& color = material->getColor();
         optixMaterial["Kd"]->setFloat( color.z(), color.y(), color.x() );
