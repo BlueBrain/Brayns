@@ -72,30 +72,31 @@ void meshIntersect( int primIdx )
   // Intersect ray with triangle
   float3 n;
   float  t, beta, gamma;
-  if( intersect_triangle( ray, p0, p1, p2, n, t, beta, gamma ) ) {
-
-    if(  rtPotentialIntersection( t ) ) {
-
+  if( intersect_triangle( ray, p0, p1, p2, n, t, beta, gamma ) )
+  {
+    if(  rtPotentialIntersection( t ) )
+    {
       geometric_normal = normalize( n );
-      if( normal_buffer.size() == 0 ) {
+      if( normal_buffer.size() == 0 )
         shading_normal = geometric_normal;
-      } else {
+      else
+      {
         float3 n0 = normal_buffer[ v_idx.x ];
         float3 n1 = normal_buffer[ v_idx.y ];
         float3 n2 = normal_buffer[ v_idx.z ];
-        shading_normal = normalize( n1*beta + n2*gamma + n0*(1.0f-beta-gamma) );
+        shading_normal = normalize( n1 * beta + n2 * gamma + n0 * ( 1.f - beta-gamma ));
       }
 
-      if( texcoord_buffer.size() == 0 ) {
-        texcoord = make_float3( 0.0f, 0.0f, 0.0f );
-      } else {
+      if( texcoord_buffer.size() == 0 )
+        texcoord = make_float3( 0.f, 0.f, 0.f );
+      else {
         float2 t0 = texcoord_buffer[ v_idx.x ];
         float2 t1 = texcoord_buffer[ v_idx.y ];
         float2 t2 = texcoord_buffer[ v_idx.z ];
-        texcoord = make_float3( t1*beta + t2*gamma + t0*(1.0f-beta-gamma) );
+        texcoord = make_float3( t1 * beta + t2 * gamma + t0 * ( 1.f - beta-gamma ));
       }
 
-      if( DO_REFINE ) {
+      if( DO_REFINE )
           refine_and_offset_hitpoint(
                   ray.origin + t*ray.direction,
                   ray.direction,
@@ -103,7 +104,6 @@ void meshIntersect( int primIdx )
                   p0,
                   back_hit_point,
                   front_hit_point );
-      }
 
       rtReportIntersection(material_buffer[primIdx]);
     }

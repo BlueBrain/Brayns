@@ -98,8 +98,8 @@ bool MeshLoader::importMeshFromFile(
         nbVertices += mesh->mNumVertices;
         for(size_t i=0; i < mesh->mNumVertices; ++i )
         {
-            aiVector3D v = mesh->mVertices[i];
-            Vector3f vertex = { v.x, v.y, v.z };
+            aiVector3D v = mesh->mVertices[ i ];
+            const Vector3f vertex = { -v.x, v.y, -v.z };
             meshContainer.triangles[ materialIndex ].
                 getVertices().push_back( vertex );
             meshContainer.bounds.merge(vertex);
@@ -107,15 +107,15 @@ bool MeshLoader::importMeshFromFile(
             if( mesh->HasNormals( ))
             {
                 v = mesh->mNormals[ i ];
-                Vector3f normal = { v.x, v.y, v.z };
+                const Vector3f normal = { -v.x, v.y, -v.z };
                 meshContainer.triangles[ materialIndex ].
                     getNormals().push_back( normal );
             }
 
             if( mesh->HasTextureCoords( 0 ))
             {
-                v = mesh->mTextureCoords[0][i];
-                Vector2f texCoord( v.x, -v.y );
+                v = mesh->mTextureCoords[ 0 ][ i ];
+                const Vector2f texCoord( v.x, -v.y );
                 meshContainer.triangles[ materialIndex ].
                     getTextureCoordinates().push_back( texCoord );
             }
@@ -126,7 +126,7 @@ bool MeshLoader::importMeshFromFile(
         {
             if( mesh->mFaces[f].mNumIndices == 3 )
             {
-                Vector3i ind = Vector3i(
+                const Vector3ui ind = Vector3ui(
                     _meshIndex[materialIndex]+mesh->mFaces[f].mIndices[0],
                     _meshIndex[materialIndex]+mesh->mFaces[f].mIndices[1],
                     _meshIndex[materialIndex]+mesh->mFaces[f].mIndices[2]);
@@ -279,8 +279,11 @@ void MeshLoader::_createMaterials(
         aiColor3D value3f( 0.f, 0.f, 0.f );
         float value1f;
         material->Get( AI_MATKEY_COLOR_DIFFUSE, value3f );
-        materials[m]->setColor(
-            Vector3f( value3f.r, value3f.g, value3f.b ));
+        materials[m]->setColor( Vector3f( value3f.r, value3f.g, value3f.b ));
+
+        value1f = 0.f;
+        material->Get( AI_MATKEY_REFLECTIVITY, value1f );
+        materials[m]->setReflectionIndex( value1f );
 
         value3f = aiColor3D( 0.f, 0.f, 0.f);
         material->Get( AI_MATKEY_COLOR_SPECULAR, value3f );
@@ -289,23 +292,19 @@ void MeshLoader::_createMaterials(
 
         value1f = 0.f;
         material->Get( AI_MATKEY_SHININESS, value1f );
-        materials[m]->setSpecularExponent( value1f );
+        materials[m]->setSpecularExponent( fabs(value1f) < 0.01f ? 100.f : value1f );
 
         value3f = aiColor3D( 0.f, 0.f, 0.f );
         material->Get( AI_MATKEY_COLOR_EMISSIVE, value3f );
         materials[m]->setEmission( value3f.r );
 
         value1f = 0.f;
-        material->Get( AI_MATKEY_REFLECTIVITY, value1f );
-        materials[m]->setReflectionIndex( value1f );
-
-        value1f = 1.f;
         material->Get( AI_MATKEY_OPACITY, value1f );
-        materials[m]->setOpacity( value1f );
+        materials[m]->setOpacity( fabs(value1f) < 0.01f ? 1.f : value1f );
 
-        value1f = 1.3f;
+        value1f = 0.f;
         material->Get( AI_MATKEY_REFRACTI, value1f );
-        materials[m]->setRefractionIndex( value1f );
+        materials[m]->setRefractionIndex( fabs(value1f - 1.f) < 0.01f ? 1.1f : value1f );
     }
 }
 

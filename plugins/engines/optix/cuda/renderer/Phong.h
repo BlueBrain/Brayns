@@ -268,7 +268,7 @@ static __device__ void phongShade(
     }
 
     // Reflection
-    if( fmaxf( p_Kr ) > 0 )
+    if( fmaxf(p_Kr ) > 0 )
     {
         PerRayData_radiance new_prd;
         new_prd.importance = prd.importance * optix::luminance( p_Kr );
@@ -302,20 +302,42 @@ static __device__ void phongShade(
         }
     }
 
-    // Ambient occlusion
-    if( ambient_occlusion_strength > 0.f )
+    if( fmaxf( p_Ko ) > 0.99f )
     {
-        PerRayData_shadow aa_prd;
-        aa_prd.attenuation = make_float3(1.f);
+        // Ambient occlusion
+        if( ambient_occlusion_strength > 0.f )
+        {
+            PerRayData_shadow aa_prd;
+            aa_prd.attenuation = make_float3(1.f);
 
-        float3 aa_normal = optix::normalize(
-            make_float3(rnd( seed ) - 0.5f, rnd( seed ) - 0.5f, rnd( seed ) - 0.5f ));
-        if( optix::dot(aa_normal, p_normal) < 0.f )
-            aa_normal = -aa_normal;
-        optix::Ray aa_ray = optix::make_Ray(
-            hit_point, aa_normal, shadow_ray_type, scene_epsilon, RT_DEFAULT_MAX );
-        rtTrace(top_shadower, aa_ray, aa_prd);
-        result *= 1.f - ambient_occlusion_strength * ( 1.f - aa_prd.attenuation );
+            float3 aa_normal = optix::normalize(
+                make_float3(rnd( seed ) - 0.5f, rnd( seed ) - 0.5f, rnd( seed ) - 0.5f ));
+            if( optix::dot(aa_normal, p_normal) < 0.f )
+                aa_normal = -aa_normal;
+            optix::Ray aa_ray = optix::make_Ray(
+                hit_point, aa_normal, shadow_ray_type, scene_epsilon, RT_DEFAULT_MAX );
+            rtTrace(top_shadower, aa_ray, aa_prd);
+            result *= 1.f - ambient_occlusion_strength * ( 1.f - aa_prd.attenuation );
+        }
+
+        // Radiosity
+        if( ambient_occlusion_strength > 0.f && prd.depth == 0 )
+        {
+            PerRayData_radiance new_prd;
+            new_prd.importance = prd.importance;
+            new_prd.depth = prd.depth + 1;
+            if( new_prd.importance >= 0.01f && new_prd.depth <= max_depth )
+            {
+                float3 ra_normal = optix::normalize(
+                    make_float3(rnd( seed ) - 0.5f, rnd( seed ) - 0.5f, rnd( seed ) - 0.5f ));
+                if( optix::dot(ra_normal, p_normal) < 0.f )
+                    ra_normal = -ra_normal;
+                optix::Ray ra_ray = optix::make_Ray(
+                    hit_point, ra_normal, radiance_ray_type, scene_epsilon, RT_DEFAULT_MAX );
+                rtTrace(top_shadower, ra_ray, new_prd);
+                result += light_attenuation * ambient_occlusion_strength * new_prd.result;
+            }
+        }
     }
 
     prd.result = result;

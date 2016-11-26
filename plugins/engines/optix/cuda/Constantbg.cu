@@ -28,18 +28,34 @@
 
 #include <optix_world.h>
 
-rtDeclareVariable(float3, bg_color, , );
-
 struct PerRayData_radiance
 {
-  float3 result;
-  float importance;
-  int depth;
+    float3 result;
+    float importance;
+    int depth;
 };
 
+rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
+rtDeclareVariable(float3, bg_color, , );
+rtTextureSampler<float4, 2> envmap;
 rtDeclareVariable(PerRayData_radiance, prd_radiance, rtPayload, );
 
+//
+// Constant background
+//
 RT_PROGRAM void miss()
 {
-  prd_radiance.result = bg_color;
+    prd_radiance.result = bg_color;
+}
+
+//
+// Environment map background
+//
+RT_PROGRAM void envmap_miss()
+{
+    float theta = atan2f( ray.direction.x, ray.direction.z );
+    float phi   = M_PIf * 0.5f -  acosf( ray.direction.y );
+    float u     = (theta + M_PIf) * (0.5f * M_1_PIf);
+    float v     = -0.5f * ( 1.0f + sin(phi) );
+    prd_radiance.result = make_float3( tex2D(envmap, u, v) );
 }

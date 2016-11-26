@@ -26,6 +26,8 @@
 #include <brayns/common/light/PointLight.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/volume/VolumeHandler.h>
+#include <brayns/io/TextureLoader.h>
+
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Spheres.cu.ptx.h>
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Cylinders.cu.ptx.h>
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Cones.cu.ptx.h>
@@ -164,6 +166,14 @@ void OptiXScene::reset()
         _lightBuffer->destroy();
     _lightBuffer = nullptr;
 
+    // Textures
+    for( auto optixTextures: _optixTextures )
+        optixTextures.second->destroy();
+    _optixTextures.clear();
+
+    for( auto optixTextureSamplers: _optixTextureSamplers )
+        optixTextureSamplers.second->destroy();
+    _optixTextureSamplers.clear();
 }
 
 void OptiXScene::commit()
@@ -615,29 +625,66 @@ void OptiXScene::commitMaterials( const bool updateOnly )
 
     optix::Program phong_ch =
         _context->createProgramFromPTXString( CUDA_PHONG, "closest_hit_radiance" );
+    optix::Program phong_ch_textured =
+        _context->createProgramFromPTXString( CUDA_PHONG, "closest_hit_radiance_textured" );
     optix::Program phong_ah =
         _context->createProgramFromPTXString( CUDA_PHONG, "any_hit_shadow" );
 
+    // Create materials
+    for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
+        if( materialId >= _optixMaterials.size( ))
+        {
+            optix::Material optixMaterial = _context->createMaterial();
+            optixMaterial->setAnyHitProgram( 1, phong_ah );
+            _optixMaterials.push_back( optixMaterial );
+        }
+
+    // Load textures once and for all (textures are ignored by the material update process
     if( !updateOnly )
     {
-        _optixMaterials.clear();
-        _optixMaterials.resize( _materials.size( ));
+        // Load textures from disk
+        for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
+        {
+            bool textured = false;
+            optix::Material optixMaterial = _optixMaterials[ materialId ];
+            MaterialPtr material = _materials[ materialId ];
+            for(const auto texture: material->getTextures())
+            {
+                TextureLoader textureLoader;
+                if( texture.second != TEXTURE_NAME_SIMULATION )
+                    if( textureLoader.loadTexture( _textures, texture.first, texture.second ))
+                    {
+                        optixMaterial->setClosestHitProgram( 0, phong_ch_textured );
+                        textured = true;
+                    }
+
+                if( _createTexture2D( texture.second ))
+                {
+                    if( materialId == MATERIAL_SKYBOX )
+                      _context["envmap"]->setTextureSampler(
+                        _optixTextureSamplers[ texture.second ] );
+
+                    optixMaterial["diffuse_map"]->setTextureSampler(
+                        _optixTextureSamplers[ texture.second ]);
+
+                    BRAYNS_INFO << "Texture " << texture.second
+                                << " assigned to material " << materialId
+                                << std::endl;
+                }
+            }
+            if( !textured )
+                optixMaterial->setClosestHitProgram( 0, phong_ch );
+        }
     }
+
+    // Populate material attributes
     for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
     {
         // Material
         MaterialPtr material = _materials[ materialId ];
         assert(material);
 
-        optix::Material optixMaterial = nullptr;
-        if( updateOnly )
-            optixMaterial = _optixMaterials[ materialId ];
-        else
-        {
-            optixMaterial = _context->createMaterial();
-            optixMaterial->setClosestHitProgram( 0, phong_ch );
-            optixMaterial->setAnyHitProgram( 1, phong_ah );
-        }
+        optix::Material optixMaterial = _optixMaterials[ materialId ];
 
         const Vector3f& color = material->getColor();
         optixMaterial["Kd"]->setFloat( color.z(), color.y(), color.x() );
@@ -649,10 +696,58 @@ void OptiXScene::commitMaterials( const bool updateOnly )
         const float opacity = material->getOpacity();
         optixMaterial["Ko"]->setFloat( opacity, opacity, opacity );
         optixMaterial["refraction_index"]->setFloat( material->getRefractionIndex( ));
-
-        if( !updateOnly )
-            _optixMaterials[ materialId ] = optixMaterial;
     }
+}
+
+bool OptiXScene::_createTexture2D( const std::string& textureName )
+{
+    if(_optixTextures.find( textureName ) != _optixTextures.end( ))
+        return false;
+    Texture2DPtr tex = _textures[ textureName ];
+
+    const uint16_t nx = tex->getWidth();
+    const uint16_t ny = tex->getHeight();
+    const uint16_t channels = tex->getNbChannels();
+    const uint16_t optixChannels = 4;
+
+    // Create texture sampler
+    optix::TextureSampler sampler = _context->createTextureSampler();
+    sampler->setWrapMode( 0, RT_WRAP_REPEAT );
+    sampler->setWrapMode( 1, RT_WRAP_REPEAT );
+    sampler->setWrapMode( 2, RT_WRAP_REPEAT );
+    sampler->setIndexingMode( RT_TEXTURE_INDEX_NORMALIZED_COORDINATES );
+    sampler->setReadMode( RT_TEXTURE_READ_NORMALIZED_FLOAT );
+    sampler->setMaxAnisotropy( 1.0f );
+    sampler->setMipLevelCount( 1u );
+    sampler->setArraySize( 1u );
+
+    // Create buffer and populate with texture data
+    optix::Buffer buffer =_context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, nx, ny );
+    float* buffer_data = static_cast<float*>( buffer->map() );
+
+    size_t idx_src = 0;
+    size_t idx_dst = 0;
+    for( uint16_t y = 0; y < ny; ++y )
+    {
+        for( uint16_t x = 0; x < nx; ++x )
+        {
+            buffer_data[ idx_dst + 0 ] = float(tex->getRawData()[ idx_src + 2 ])/255.f;
+            buffer_data[ idx_dst + 1 ] = float(tex->getRawData()[ idx_src + 1 ])/255.f;
+            buffer_data[ idx_dst + 2 ] = float(tex->getRawData()[ idx_src + 0 ])/255.f;
+            buffer_data[ idx_dst + 3 ] = ( channels == optixChannels ) ?
+                float(tex->getRawData()[ idx_src + 4 ])/255.f : 1.f;
+            idx_dst += 4;
+            idx_src += ( channels == optixChannels ) ? 4 : 3;
+        }
+    }
+    buffer->unmap();
+    _optixTextures[ textureName ] = buffer;
+
+    // Assign buffer to sampler
+    sampler->setBuffer( buffer );
+    sampler->setFilteringModes( RT_FILTER_LINEAR, RT_FILTER_LINEAR, RT_FILTER_NONE );
+    _optixTextureSamplers[textureName] = sampler;
+    return true;
 }
 
 void OptiXScene::commitSimulationData()
