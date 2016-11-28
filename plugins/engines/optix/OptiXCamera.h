@@ -39,7 +39,8 @@ public:
 
     OptiXCamera(
         const CameraType cameraType,
-        optix::Context& context );
+        optix::Context& context,
+        const bool environmentMap );
 
     /**
        Commits the changes held by the camera object so that
@@ -55,9 +56,7 @@ public:
 
 private:
 
-    void _calculateCameraVariables(
-        const Vector3f& eye, const Vector3f& lookat, const Vector3f& up,
-        Vector3f& U, Vector3f& V, Vector3f& W );
+    void _calculateCameraVariables( Vector3f& U, Vector3f& V, Vector3f& W );
 
     optix::Program _camera;
     optix::Program _exceptionProgram;

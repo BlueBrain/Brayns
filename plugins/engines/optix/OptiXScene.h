@@ -83,6 +83,7 @@ public:
 private:
 
     void _processVolumeAABBGeometry();
+    bool _createTexture2D( const std::string& textureName );
 
     uint64_t _getBvhSize( const uint64_t nbElements ) const;
 
@@ -129,6 +130,10 @@ private:
 
     // Volume
     optix::Buffer _volumeBuffer;
+
+    // Textures
+    std::map<std::string, optix::Buffer> _optixTextures;
+    std::map<std::string, optix::TextureSampler> _optixTextureSamplers;
 
 };
 

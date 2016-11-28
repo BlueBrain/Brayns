@@ -33,6 +33,7 @@ char const* const CUDA_PERSPECTIVE_CAMERA = braynsOptiXCudaPlugin_generated_Came
 char const* const CUDA_MISS = braynsOptiXCudaPlugin_generated_Constantbg_cu_ptx;
 const std::string CUDA_FUNCTION_CAMERA = "camera";
 const std::string CUDA_FUNCTION_EXCEPTION = "exception";
+const std::string CUDA_FUNCTION_ENVMAP_MISS = "envmap_miss";
 const std::string CUDA_FUNCTION_MISS = "miss";
 
 const std::string CUDA_ATTRIBUTE_BAD_COLOR = "bad_color";
@@ -49,7 +50,8 @@ namespace brayns
 
 OptiXCamera::OptiXCamera(
     const CameraType cameraType,
-    optix::Context& context )
+    optix::Context& context,
+    const bool environmentMap )
     : Camera( cameraType )
     , _camera( 0 )
     , _exceptionProgram( 0 )
@@ -74,8 +76,8 @@ OptiXCamera::OptiXCamera(
     _context[ CUDA_ATTRIBUTE_BAD_COLOR ]->setFloat( 1.f, 0.f, 1.f );
 
     // Miss program
-    _context->setMissProgram( 0,
-        _context->createProgramFromPTXString( CUDA_MISS, CUDA_FUNCTION_MISS ) );
+    _context->setMissProgram( 0, _context->createProgramFromPTXString(
+        CUDA_MISS, environmentMap ? CUDA_FUNCTION_ENVMAP_MISS : CUDA_FUNCTION_MISS ));
 
     // Ray generation program
     _camera = _context->createProgramFromPTXString( cameraPtx, cameraName );
@@ -87,7 +89,7 @@ void OptiXCamera::commit()
 
     const Vector3f& pos = getPosition();
 
-    _calculateCameraVariables( pos, getTarget(), getUp(), u, v, w );
+     _calculateCameraVariables( u, v, w );
 
     _context[ CUDA_ATTRIBUTE_CAMERA_EYE ]->setFloat( pos.x(), pos.y(), pos.z() );
     _context[ CUDA_ATTRIBUTE_CAMERA_U ]->setFloat( u.x(), u.y(), u.z() );
@@ -97,15 +99,13 @@ void OptiXCamera::commit()
     _context[ CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE ]->setFloat( getFocalLength( ));
 }
 
-void OptiXCamera::_calculateCameraVariables(
-    const Vector3f& eye, const Vector3f& lookat, const Vector3f& up,
-    Vector3f& U, Vector3f& V, Vector3f& W )
+void OptiXCamera::_calculateCameraVariables( Vector3f& U, Vector3f& V, Vector3f& W )
 {
     float ulen, vlen, wlen;
-    W = lookat - eye;
+    W = getTarget() - getPosition();
 
     wlen = W.length();
-    U = normalize( cross( W, up ) );
+    U = normalize( cross( W, getUp( )));
     V = normalize( cross( U, W  ) );
 
     vlen = wlen * tanf( 0.5f * getFieldOfView() * M_PI / 180.f );

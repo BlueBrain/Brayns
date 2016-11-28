@@ -145,12 +145,18 @@ public:
     {
         if( _fieldOfView == fieldOfView )
             return;
+    #ifdef BRAYNS_USE_ZEROBUF
+        zerobuf::render::Camera::setField_of_view( fieldOfView );
+    #endif
         _fieldOfView = fieldOfView;
         modified = true;
     }
 
     float getFieldOfView( ) const
     {
+    #ifdef BRAYNS_USE_ZEROBUF
+        _fieldOfView = zerobuf::render::Camera::getField_of_view();
+    #endif
         return _fieldOfView;
     }
 

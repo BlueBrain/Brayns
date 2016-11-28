@@ -62,13 +62,14 @@ OptiXEngine::OptiXEngine(
     _frameSize =
         parametersManager->getApplicationParameters( ).getWindowSize( );
 
-    const bool accumulation = parametersManager->getApplicationParameters().getFilters().empty( );
+    const bool accumulation = parametersManager->getApplicationParameters().getFilters().empty();
+    const bool environmentMap = !parametersManager->getRenderingParameters().getHDRI().empty();
 
     _frameBuffer.reset( new OptiXFrameBuffer(
         _frameSize, FBF_RGBA_I8, accumulation, _context ));
     _camera.reset( new OptiXCamera(
         parametersManager->getRenderingParameters().getCameraType(),
-        _context));
+        _context, environmentMap));
 
     _keyboardHandler.reset( new KeyboardHandler( _scene, parametersManager ));
 
