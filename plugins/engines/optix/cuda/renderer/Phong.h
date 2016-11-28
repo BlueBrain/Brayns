@@ -302,7 +302,7 @@ static __device__ void phongShade(
         }
     }
 
-    if( fmaxf( p_Ko ) > 0.99f )
+    if( fmaxf( p_Ko ) == 1.f ) // Only opaque surfaces are affected by Global Illumination
     {
         // Ambient occlusion
         if( ambient_occlusion_strength > 0.f )
