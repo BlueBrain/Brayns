@@ -76,8 +76,7 @@ OptiXCamera::OptiXCamera(
     _context[ CUDA_ATTRIBUTE_BAD_COLOR ]->setFloat( 1.f, 0.f, 1.f );
 
     // Miss program
-    _context->setMissProgram( 0, _context->createProgramFromPTXString(
-        CUDA_MISS, environmentMap ? CUDA_FUNCTION_ENVMAP_MISS : CUDA_FUNCTION_MISS ));
+    setEnvironmentMap( environmentMap );
 
     // Ray generation program
     _camera = _context->createProgramFromPTXString( cameraPtx, cameraName );
@@ -113,5 +112,12 @@ void OptiXCamera::_calculateCameraVariables( Vector3f& U, Vector3f& V, Vector3f&
     ulen = vlen * getAspectRatio();
     U *= ulen;
 }
+
+void OptiXCamera::setEnvironmentMap( const bool environmentMap )
+{
+    _context->setMissProgram( 0, _context->createProgramFromPTXString(
+        CUDA_MISS, environmentMap ? CUDA_FUNCTION_ENVMAP_MISS : CUDA_FUNCTION_MISS ));
+}
+
 
 }

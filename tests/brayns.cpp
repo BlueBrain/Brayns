@@ -94,7 +94,6 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( renderParams.getDetectionFarColor(),
                        brayns::Vector3f( 0, 1, 0 ));
     BOOST_CHECK( renderParams.getCameraType() == brayns::CameraType::perspective );
-    BOOST_CHECK_EQUAL( renderParams.getHDRI(), "" );
 
     const auto& geomParams = pm.getGeometryParameters();
     BOOST_CHECK_EQUAL( geomParams.getMorphologyFolder(), "" );
@@ -131,6 +130,7 @@ BOOST_AUTO_TEST_CASE( defaults )
 
     auto& scene = brayns.getScene();
     BOOST_CHECK( scene.getMaterial( 0 ));
+    BOOST_CHECK_EQUAL( sceneParams.getEnvironmentMap(), "" );
 
     brayns::Boxf defaultBoundingBox;
     defaultBoundingBox.merge( brayns::Vector3f( 0, 0, 0 ));

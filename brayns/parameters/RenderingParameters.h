@@ -176,14 +176,6 @@ public:
     }
 
     /**
-       file name of the HDRI image used for the skybox
-    */
-    const std::string& getHDRI() const
-    {
-        return _hdri;
-    }
-
-    /**
        Light source follow camera origin
     */
     bool getHeadLight() const
@@ -212,7 +204,6 @@ protected:
     Vector3f _detectionFarColor;
     float _epsilon;
     CameraType _cameraType;
-    std::string _hdri;
     bool _headLight;
 };
 

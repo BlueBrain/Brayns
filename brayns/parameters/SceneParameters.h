@@ -43,12 +43,22 @@ public:
 
     const std::string& getTransferFunctionFilename() const { return _transferFunctionFilename; }
 
+    /**
+       file name of the environment map
+    */
+    const std::string& getEnvironmentMap() const
+    {
+        return _environmentMap;
+    }
+
 protected:
 
     bool _parse( const po::variables_map& vm ) final;
 
     float _timestamp;
     std::string _transferFunctionFilename;
+    std::string _environmentMap;
+
 };
 
 }

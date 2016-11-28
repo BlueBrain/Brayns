@@ -73,16 +73,10 @@ struct Brayns::Impl
         KeyboardHandlerPtr keyboardHandler =
             _engine->getKeyboardHandler();
 
-        // set HDRI skybox if applicable
-        const std::string& hdri =
-            _parametersManager->getRenderingParameters().getHDRI();
-        ScenePtr scene = _engine->getScene();
-        if( !hdri.empty() )
-            scene->getMaterial(MATERIAL_SKYBOX)->setTexture(TT_DIFFUSE, hdri);
-
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
             DEFAULT_SUN_DIRECTION, DEFAULT_SUN_COLOR, DEFAULT_SUN_INTENSITY ));
+        ScenePtr scene = _engine->getScene();
         scene->addLight( sunLight );
 
         // Load data and build geometry
@@ -119,6 +113,15 @@ struct Brayns::Impl
         VolumeParameters& volumeParameters = _parametersManager->getVolumeParameters();
         SceneParameters& sceneParameters = _parametersManager->getSceneParameters();
 
+        // set environment map if applicable
+        const std::string& environmentMap =
+            _parametersManager->getSceneParameters().getEnvironmentMap();
+        if( !environmentMap.empty() )
+            scene->getMaterial(MATERIAL_SKYBOX)->setTexture(TT_DIFFUSE, environmentMap);
+
+        if(!geometryParameters.getSplashSceneFolder().empty())
+            _loadMeshFolder( geometryParameters.getSplashSceneFolder( ));
+
         const std::string& transferFunctionFilename = sceneParameters.getTransferFunctionFilename();
         if( !transferFunctionFilename.empty() )
         {
@@ -141,7 +144,7 @@ struct Brayns::Impl
             _loadPDBFolder();
 
         if(!geometryParameters.getMeshFolder().empty())
-            _loadMeshFolder();
+            _loadMeshFolder( geometryParameters.getMeshFolder( ));
 
         if(!geometryParameters.getReport().empty())
             _loadCompartmentReport();
@@ -779,16 +782,15 @@ private:
         Loads data from mesh files located in the folder specified in the
         geometry parameters (command line parameter --mesh-folder)
     */
-    void _loadMeshFolder()
+    void _loadMeshFolder( const std::string& folder )
     {
 #ifdef BRAYNS_USE_ASSIMP
-        GeometryParameters& geometryParameters =
-            _parametersManager->getGeometryParameters();
-        const boost::filesystem::path& folder =
-            geometryParameters.getMeshFolder( );
         BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
         MeshLoader meshLoader;
         size_t meshIndex = 0;
+
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
 
         boost::filesystem::directory_iterator endIter;
         if( boost::filesystem::is_directory(folder))
@@ -830,8 +832,11 @@ private:
                 }
             }
         }
+#else
+        BRAYNS_ERROR << "Assimp library is required to load meshes from " << folder << std::endl;
 #endif
     }
+
 
     /**
         Loads morphologies from circuit configuration (command line parameter

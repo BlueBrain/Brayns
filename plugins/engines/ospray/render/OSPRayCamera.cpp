@@ -64,4 +64,8 @@ void OSPRayCamera::commit()
     ospCommit( _camera );
 }
 
+void OSPRayCamera::setEnvironmentMap( const bool )
+{
+}
+
 }

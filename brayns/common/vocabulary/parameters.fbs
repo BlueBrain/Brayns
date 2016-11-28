@@ -53,6 +53,7 @@ table DataSource {
     volume_dimensions: [uint:3];
     volume_element_spacing: [float:3];
     volume_offset: [float:3];
+    environment_map: string;
 }
 
 enum Shader: uint {

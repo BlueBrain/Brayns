@@ -217,6 +217,9 @@ void ZeroEQPlugin::_attributeUpdated( )
 void ZeroEQPlugin::_resetCameraUpdated()
 {
     BRAYNS_INFO << "Resetting camera" << std::endl;
+    SceneParameters& sceneParameters =
+        _brayns.getParametersManager().getSceneParameters();
+    _brayns.getCamera().setEnvironmentMap( !sceneParameters.getEnvironmentMap().empty( ));
     _brayns.getCamera().reset();
     _brayns.getCamera().commit();
     _brayns.getFrameBuffer().clear();
@@ -618,11 +621,15 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setVolume_dimensions( Vector3ui(volumeParameters.getDimensions( )));
     _remoteDataSource.setVolume_element_spacing( Vector3f( volumeParameters.getElementSpacing( )));
     _remoteDataSource.setVolume_offset( Vector3f(volumeParameters.getOffset( )));
+    _remoteDataSource.setEnvironment_map( sceneParameters.getEnvironmentMap( ));
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
 {
     BRAYNS_INFO << "Data source updated" << std::endl;
+
+    _brayns.getParametersManager().set(
+        "splash-scene-folder", ""); // Make sure the splash scene is removed
     _brayns.getParametersManager().set(
         "transfer-function-file", _remoteDataSource.getTransfer_function_fileString( ));
     _brayns.getParametersManager().set(
@@ -699,11 +706,16 @@ void ZeroEQPlugin::_dataSourceUpdated()
         std::to_string(_remoteDataSource.getVolume_offset()[0]) + " " +
         std::to_string(_remoteDataSource.getVolume_offset()[1]) + " " +
         std::to_string(_remoteDataSource.getVolume_offset()[2]) );
+    _brayns.getParametersManager().set(
+        "environment-map", _remoteDataSource.getEnvironment_mapString( ));
 
     _brayns.getScene().commitVolumeData();
     _brayns.getRenderer().commit();
     _brayns.getFrameBuffer().clear();
     _brayns.getParametersManager().print();
+
+    _resetSceneUpdated();
+    _resetCameraUpdated();
 }
 
 void ZeroEQPlugin::_initializeSettings()

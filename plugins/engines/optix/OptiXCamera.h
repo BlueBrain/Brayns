@@ -54,6 +54,9 @@ public:
     */
     optix::Program& impl() { return _camera; }
 
+    /** @copydoc Camera::setEnvironmentMap */
+    void setEnvironmentMap( const bool environmentMap );
+
 private:
 
     void _calculateCameraVariables( Vector3f& U, Vector3f& V, Vector3f& W );

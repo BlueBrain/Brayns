@@ -63,7 +63,8 @@ OptiXEngine::OptiXEngine(
         parametersManager->getApplicationParameters( ).getWindowSize( );
 
     const bool accumulation = parametersManager->getApplicationParameters().getFilters().empty();
-    const bool environmentMap = !parametersManager->getRenderingParameters().getHDRI().empty();
+    const bool environmentMap =
+        !parametersManager->getSceneParameters().getEnvironmentMap().empty();
 
     _frameBuffer.reset( new OptiXFrameBuffer(
         _frameSize, FBF_RGBA_I8, accumulation, _context ));

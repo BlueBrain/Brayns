@@ -54,6 +54,7 @@ const std::string PARAM_NEST_CACHE_FILENAME = "nest-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
+const std::string PARAM_SPLASH_SCENE_FOLDER = "splash-scene-folder";
 
 }
 
@@ -132,7 +133,9 @@ GeometryParameters::GeometryParameters( )
         ( PARAM_NEST_CACHE_FILENAME.c_str(), po::value< std::string >(),
             "Cache file containing nest data" )
         ( PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value< bool >(),
-            "Generated multiple models based on geometry timestamps" );
+            "Generated multiple models based on geometry timestamps" )
+        ( PARAM_SPLASH_SCENE_FOLDER.c_str(), po::value< std::string >( ),
+            "Folder containing splash scene folder" );
 }
 
 bool GeometryParameters::_parse( const po::variables_map& vm )
@@ -212,6 +215,8 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_GENERATE_MULTIPLE_MODELS ))
         _generateMultipleModels =
             vm[PARAM_GENERATE_MULTIPLE_MODELS].as< bool >( );
+    if( vm.count( PARAM_SPLASH_SCENE_FOLDER ))
+        _splashSceneFolder = vm[PARAM_SPLASH_SCENE_FOLDER].as< std::string >( );
 
     return true;
 }
@@ -231,7 +236,7 @@ void GeometryParameters::print( )
         _pdbFile << std::endl;
     BRAYNS_INFO << "PDB folder                 : " <<
         _pdbFolder << std::endl;
-    BRAYNS_INFO << "XYZB file                   : " <<
+    BRAYNS_INFO << "XYZB file                  : " <<
         _xyzbFile << std::endl;
     BRAYNS_INFO << "Mesh folder                : " <<
         _meshFolder << std::endl;
@@ -276,6 +281,8 @@ void GeometryParameters::print( )
         _morphologyLayout.horizontalSpacing << std::endl;
     BRAYNS_INFO << "Generate multiple models   : " <<
         (_generateMultipleModels ? "on" : "off") << std::endl;
+    BRAYNS_INFO << "Splash scene folder        : " <<
+        _splashSceneFolder << std::endl;
 }
 
 }
