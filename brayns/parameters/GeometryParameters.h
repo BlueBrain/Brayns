@@ -153,6 +153,10 @@ public:
         rendering performance */
     bool getGenerateMultipleModels() const { return _generateMultipleModels; }
 
+    /** Splash scene folder */
+    void setSplashSceneFolder( const std::string& value ) { _splashSceneFolder = value; }
+    std::string getSplashSceneFolder() const { return _splashSceneFolder; }
+
 
 protected:
 
@@ -185,6 +189,8 @@ protected:
     Vector2f _simulationValuesRange;
     std::string _simulationCacheFile;
     bool _generateMultipleModels;
+    std::string _splashSceneFolder;
+
 };
 
 }

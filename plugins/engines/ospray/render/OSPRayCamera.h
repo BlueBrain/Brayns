@@ -49,6 +49,9 @@ public:
     */
     OSPCamera impl() { return _camera; }
 
+    /** @copydoc Camera::setEnvironmentMap */
+    void setEnvironmentMap( const bool environmentMap ) final;
+
 private:
     OSPCamera _camera;
 };

@@ -191,6 +191,9 @@ public:
     /** Reset the modified flag */
     BRAYNS_API void resetModified();
 
+    /** Enable/disables environment mapping */
+    BRAYNS_API virtual void setEnvironmentMap( const bool environmentMap ) = 0;
+
 private:
     struct Impl;
     std::unique_ptr< Impl > _impl;

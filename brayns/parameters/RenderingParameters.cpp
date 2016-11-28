@@ -47,7 +47,6 @@ const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
 const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
 const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_CAMERA_TYPE = "camera-type";
-const std::string PARAM_HDRI = "hdri";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 
 }
@@ -111,8 +110,6 @@ RenderingParameters::RenderingParameters( )
         (PARAM_CAMERA_TYPE.c_str(),
             po::value< size_t >( ), "Camera type (0: perspective, "
             "1: perspective stereo, 2: orthographic, 3: panoramic)")
-        (PARAM_HDRI.c_str(),
-            po::value< std::string >( ), "HDRI filename")
         (PARAM_HEAD_LIGHT.c_str(),
             po::value< bool >( ), "Sun will follow camera origin");
 
@@ -178,8 +175,6 @@ bool RenderingParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_CAMERA_TYPE ))
         _cameraType = static_cast< CameraType > (
             vm[PARAM_CAMERA_TYPE].as< size_t >( ));
-    if( vm.count( PARAM_HDRI ))
-        _hdri = vm[PARAM_HDRI].as< std::string >( );
     if( vm.count( PARAM_HEAD_LIGHT ))
         _headLight = vm[PARAM_HEAD_LIGHT].as< bool >( );
     return true;
@@ -222,8 +217,6 @@ void RenderingParameters::print( )
        _epsilon << std::endl;
     BRAYNS_INFO << "Camera type                       : " <<
        static_cast< size_t > (_cameraType) << std::endl;
-    BRAYNS_INFO << "HDRI                              : " <<
-       _hdri << std::endl;
 }
 
 }

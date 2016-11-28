@@ -650,6 +650,7 @@ void OptiXScene::commitMaterials( const bool updateOnly )
             MaterialPtr material = _materials[ materialId ];
             for(const auto texture: material->getTextures())
             {
+                BRAYNS_ERROR << "Texture nane: " << texture.second << std::endl;
                 TextureLoader textureLoader;
                 if( texture.second != TEXTURE_NAME_SIMULATION )
                     if( textureLoader.loadTexture( _textures, texture.first, texture.second ))
