@@ -31,6 +31,8 @@
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
 
+#include <brayns/version.h>
+
 
 namespace brayns
 {
@@ -95,6 +97,8 @@ void ZeroEQPlugin::_setupHTTPServer()
     BRAYNS_INFO << "Registering handlers on " <<
         _httpServer->getURI() << std::endl;
 
+    _httpServer->handleGET( "brayns/version", brayns::Version::getSchema(),
+                            &brayns::Version::toJSON );
     servus::Serializable& cam = *_brayns.getCamera().getSerializable();
     _httpServer->handle( cam );
     cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
