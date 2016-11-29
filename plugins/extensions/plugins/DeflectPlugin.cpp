@@ -232,6 +232,7 @@ bool DeflectPlugin::_handleDeflectEvents()
             _params.setHost( "" );
             _previousHost.clear();
             _stream.reset();
+            _sendFuture = make_ready_future( true );
             return true;
         default:
             break;
