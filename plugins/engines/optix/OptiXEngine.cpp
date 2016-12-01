@@ -32,8 +32,8 @@ namespace brayns
 {
 
 OptiXEngine::OptiXEngine(
-    int, const char **, ParametersManagerPtr parametersManager )
-    : Engine()
+    int, const char **, ParametersManager& parametersManager )
+    : Engine( parametersManager )
     , _context( nullptr )
 {
     BRAYNS_INFO << "Initializing OptiX" << std::endl;
@@ -41,38 +41,38 @@ OptiXEngine::OptiXEngine(
 
     BRAYNS_INFO << "Initializing renderers" << std::endl;
     _activeRenderer =
-        parametersManager->getRenderingParameters().getRenderer();
+        parametersManager.getRenderingParameters().getRenderer();
 
-    _rendererNames = parametersManager->getRenderingParameters().getRenderers();
+    _rendererNames = _parametersManager.getRenderingParameters().getRenderers();
 
     Renderers renderersForScene;
     for( std::string renderer: _rendererNames )
     {
         _renderers[renderer].reset(
-            new OptiXRenderer( renderer, *parametersManager, _context ));
+            new OptiXRenderer( renderer, _parametersManager, _context ));
         renderersForScene.push_back( _renderers[renderer] );
     }
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset( new OptiXScene( renderersForScene, *parametersManager, _context));
+    _scene.reset( new OptiXScene( renderersForScene, _parametersManager, _context));
 
     _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize =
-        parametersManager->getApplicationParameters( ).getWindowSize( );
+        _parametersManager.getApplicationParameters( ).getWindowSize( );
 
-    const bool accumulation = parametersManager->getApplicationParameters().getFilters().empty();
+    const bool accumulation = _parametersManager.getApplicationParameters().getFilters().empty();
     const bool environmentMap =
-        !parametersManager->getSceneParameters().getEnvironmentMap().empty();
+        !parametersManager.getSceneParameters().getEnvironmentMap().empty();
 
     _frameBuffer.reset( new OptiXFrameBuffer(
         _frameSize, FBF_RGBA_I8, accumulation, _context ));
     _camera.reset( new OptiXCamera(
-        parametersManager->getRenderingParameters().getCameraType(),
+        _parametersManager.getRenderingParameters().getCameraType(),
         _context, environmentMap));
 
-    _keyboardHandler.reset( new KeyboardHandler( _scene, parametersManager ));
+    _keyboardHandler.reset( new KeyboardHandler( _scene ));
 
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
@@ -141,6 +141,7 @@ std::string OptiXEngine::name() const
 
 void OptiXEngine::commit()
 {
+    Engine::commit();
     for( std::string renderer: _rendererNames )
     {
         _renderers[renderer]->setScene( _scene );

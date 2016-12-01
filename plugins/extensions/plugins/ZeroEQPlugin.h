@@ -52,7 +52,7 @@ namespace brayns
 class ZeroEQPlugin : public ExtensionPlugin
 {
 public:
-    ZeroEQPlugin( Brayns& brayns );
+    ZeroEQPlugin( EnginePtr engine );
     ~ZeroEQPlugin();
 
     /** @copydoc ExtensionPlugin::execute */

@@ -25,6 +25,7 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/input/KeyboardHandler.h>
 
 namespace
@@ -45,7 +46,7 @@ BraynsViewer::BraynsViewer( BraynsPtr brayns )
 void BraynsViewer::_registerKeyboardShortcuts()
 {
     BaseWindow::_registerKeyboardShortcuts();
-    KeyboardHandler& keyHandler = _brayns->getKeyboardHandler();
+    auto& keyHandler = _brayns->getEngine().getKeyboardHandler();
     keyHandler.registerKeyboardShortcut(
         '3', "Set gradient materials",
         std::bind( &BraynsViewer::_gradientMaterials, this ));
@@ -85,7 +86,7 @@ void BraynsViewer::_toggleIncrementalTimestamp()
 
 void BraynsViewer::_defaultTimestamp()
 {
-    SceneParameters& sceneParams = _brayns->getParametersManager().getSceneParameters();
+    SceneParameters& sceneParams = _brayns->getEngine().getParametersManager().getSceneParameters();
     sceneParams.setTimestamp( DEFAULT_TEST_TIMESTAMP );
 }
 
@@ -94,23 +95,22 @@ void BraynsViewer::display( )
     if( _timestampIncrement != 0.f )
     {
         SceneParameters& sceneParams =
-            _brayns->getParametersManager().getSceneParameters();
+            _brayns->getEngine().getParametersManager().getSceneParameters();
         sceneParams.setTimestamp(
             sceneParams.getTimestamp( ) + _timestampIncrement );
-        _brayns->commit( );
+        _brayns->getEngine().commit();
     }
 
     BaseWindow::display();
 
     std::stringstream ss;
     ss << "Brayns Viewer [" <<
-          _brayns->getParametersManager().getRenderingParameters().getEngine() <<
+          _brayns->getEngine().getParametersManager().getRenderingParameters().getEngine() <<
           "] ";
-    size_t ts = _brayns->getParametersManager().getSceneParameters().getTimestamp();
+    size_t ts = _brayns->getEngine().getParametersManager().getSceneParameters().getTimestamp();
     if( ts != std::numeric_limits<size_t>::max() )
         ss << " (frame " << ts << ")";
-    if( _brayns->getParametersManager().getApplicationParameters( ).
-        isBenchmarking( ))
+    if( _brayns->getEngine().getParametersManager().getApplicationParameters().isBenchmarking( ))
     {
         ss << " @ " << _fps.getFPS( );
     }

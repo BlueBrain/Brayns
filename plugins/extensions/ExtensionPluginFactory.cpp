@@ -31,18 +31,22 @@
 namespace brayns
 {
 
-ExtensionPluginFactory::ExtensionPluginFactory( Brayns& brayns )
-    : _brayns( brayns )
+ExtensionPluginFactory::ExtensionPluginFactory(
+#if BRAYNS_USE_ZEROEQ || BRAYNS_USE_DEFLECT
+    EnginePtr engine )
+#else
+    EnginePtr )
+#endif
 {
 #ifdef BRAYNS_USE_ZEROEQ
-    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( brayns );
+    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( engine );
     add( zeroeqPlugin );
 #endif
 #ifdef BRAYNS_USE_DEFLECT
 # ifdef BRAYNS_USE_ZEROEQ
-    add( std::make_shared<DeflectPlugin>( brayns, *zeroeqPlugin ));
+    add( std::make_shared<DeflectPlugin>( engine, *zeroeqPlugin ));
 # else
-    add( std::make_shared<DeflectPlugin>( brayns ));
+    add( std::make_shared<DeflectPlugin>( engine ));
 # endif
 #endif
 }

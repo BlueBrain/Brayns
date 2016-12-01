@@ -21,7 +21,7 @@
 #ifndef OPTIXENGINE_H
 #define OPTIXENGINE_H
 
-#include <plugins/engines/common/Engine.h>
+#include <brayns/common/engine/Engine.h>
 
 // OptiX
 #include <optixu/optixpp_namespace.h>
@@ -41,7 +41,7 @@ public:
     OptiXEngine(
         int argc,
         const char **argv,
-        ParametersManagerPtr parametersManager );
+        ParametersManager& parametersManager );
 
     ~OptiXEngine();
 

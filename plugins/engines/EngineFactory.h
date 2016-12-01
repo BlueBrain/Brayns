@@ -45,7 +45,7 @@ public:
     EngineFactory(
         int argc,
         const char **argv,
-        ParametersManagerPtr parametersManager );
+        ParametersManager& parametersManager );
     ~EngineFactory() {}
 
     /**
@@ -61,7 +61,7 @@ public:
 private:
 
     strings _arguments;
-    ParametersManagerPtr _parametersManager;
+    ParametersManager& _parametersManager;
     EngineMap _engines;
 };
 

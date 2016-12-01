@@ -33,7 +33,7 @@ namespace brayns
 EngineFactory::EngineFactory(
     int argc,
     const char **argv,
-    ParametersManagerPtr parametersManager )
+    ParametersManager& parametersManager )
     : _parametersManager( parametersManager )
 {
     for( int i = 0; i < argc; ++i )
