@@ -45,9 +45,9 @@ public:
     BRAYNS_API virtual void run( ) = 0;
 
 protected:
-    ExtensionPlugin( Brayns& brayns );
+    ExtensionPlugin( Engine& engine );
 
-    Brayns& _brayns;
+    Engine& _engine;
 };
 
 }

@@ -51,9 +51,9 @@ public:
                potentially updated by registered plugins
     */
 #ifdef BRAYNS_USE_ZEROEQ
-    DeflectPlugin( Brayns& brayns, ZeroEQPlugin& zeroeq );
+    DeflectPlugin( Engine& engine, ZeroEQPlugin& zeroeq );
 #else
-    DeflectPlugin( Brayns& brayns );
+    DeflectPlugin( Engine& engine );
 #endif
 
     /** @copydoc ExtensionPlugin::execute */
