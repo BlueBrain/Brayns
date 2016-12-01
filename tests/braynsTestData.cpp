@@ -21,6 +21,7 @@
 #include <tests/paths.h>
 #include <brayns/Brayns.h>
 
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 
 #define BOOST_TEST_MODULE braynsTestData
@@ -80,9 +81,9 @@ BOOST_AUTO_TEST_CASE( render_circuit_and_compare )
     brayns::Brayns brayns( argc, argv );
     brayns.render();
 #ifdef GENERATE_TESTDATA
-    writeTestData( "testdataLayer1.bin", brayns.getFrameBuffer( ));
+    writeTestData( "testdataLayer1.bin", brayns.getEngine().getFrameBuffer( ));
 #endif
-    compareTestData( "testdataLayer1.bin", brayns.getFrameBuffer( ));
+    compareTestData( "testdataLayer1.bin", brayns.getEngine().getFrameBuffer( ));
 }
 #endif
 
@@ -98,9 +99,9 @@ BOOST_AUTO_TEST_CASE( render_protein_and_compare )
     brayns::Brayns brayns( argc, argv );
     brayns.render();
 #ifdef GENERATE_TESTDATA
-    writeTestData( "testdataProtein.bin", brayns.getFrameBuffer( ));
+    writeTestData( "testdataProtein.bin", brayns.getEngine().getFrameBuffer( ));
 #endif
-    compareTestData( "testdataProtein.bin", brayns.getFrameBuffer( ));
+    compareTestData( "testdataProtein.bin", brayns.getEngine().getFrameBuffer( ));
 }
 
 #ifdef NDEBUG
@@ -117,9 +118,9 @@ BOOST_AUTO_TEST_CASE( render_protein_in_stereo_and_compare )
     brayns::Brayns brayns( argc, argv );
     brayns.render();
 #ifdef GENERATE_TESTDATA
-    writeTestData( "testdataProteinStereo.bin", brayns.getFrameBuffer( ));
+    writeTestData( "testdataProteinStereo.bin", brayns.getEngine().getFrameBuffer( ));
 #endif
-    compareTestData( "testdataProteinStereo.bin", brayns.getFrameBuffer( ));
+    compareTestData( "testdataProteinStereo.bin", brayns.getEngine().getFrameBuffer( ));
     checkFiles( "testdataProtein.bin", "testdataProteinStereo.bin", false );
 }
 #endif

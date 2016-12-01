@@ -55,6 +55,8 @@ class Scene;
 typedef std::shared_ptr< Scene > ScenePtr;
 
 class AbstractManipulator;
+typedef std::shared_ptr< AbstractManipulator > AbstractManipulatorPtr;
+
 class Camera;
 typedef std::shared_ptr< Camera > CameraPtr;
 
@@ -312,6 +314,32 @@ enum class TimestampMode
     unchanged,
     modulo,
     bounded
+};
+
+/**
+ * The different modes for moving the camera.
+ */
+enum class CameraMode
+{
+    flying,
+    inspect
+};
+
+struct RenderInput
+{
+    Vector2i windowSize;
+    Matrix4f modelview;
+    Matrix4f projection;
+
+    Vector3f position;
+    Vector3f target;
+    Vector3f up;
+};
+
+struct RenderOutput
+{
+    uint8_ts colorBuffer;
+    floats depthBuffer;
 };
 
 }

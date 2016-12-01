@@ -1,0 +1,186 @@
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#ifndef ENGINE_H
+#define ENGINE_H
+
+#include <brayns/common/types.h>
+
+namespace brayns
+{
+
+/**
+ * Abstract implementation of the ray-tracing engine. What we call the
+ * ray-tracing engine is a 3rd party acceleration library, typically OSPRay,
+ * Optix or FireRays, that provides hardware acceleration.
+ * An engine holds a native implementation of a scene, a camera, a frame buffer
+ * and of one or serveral renderers according to the capatilities of the
+ * acceleration library.
+ */
+class Engine
+{
+
+public:
+
+    Engine( ParametersManager& parametersManager );
+    virtual ~Engine() {}
+
+    /**
+       Returns the name of the engine
+       @return the name of the engine
+    */
+    virtual std::string name() const = 0;
+
+    /**
+       Commits changes to the engine. This include scene and camera
+       modifications
+    */
+    virtual void commit();
+
+    /** Renders the current scene and populates the frame buffer accordingly */
+    virtual void render() = 0;
+
+    /** Executes engine specific pre-render operations */
+    virtual void preRender() {}
+
+    /** Executes engine specific post-render operations */
+    virtual void postRender() {}
+
+    /** Gets the scene */
+    Scene& getScene() { return *_scene; }
+
+    /** Gets the frame buffer */
+    FrameBuffer& getFrameBuffer() { return *_frameBuffer; }
+
+    /** Gets the camera */
+    Camera& getCamera() { return *_camera; }
+
+    /** Gets the renderer */
+    Renderer& getRenderer() { return *_renderers[_activeRenderer]; }
+
+    /** Gets the keyboard handler */
+    KeyboardHandler& getKeyboardHandler() { return *_keyboardHandler; }
+
+    /** Sets the active renderer */
+    void setActiveRenderer( const std::string& renderer );
+
+    /** Gets the parameter manager */
+    ParametersManager& getParametersManager() { return _parametersManager; }
+
+    /** Gets the camera manipulator */
+    AbstractManipulator& getCameraManipulator() { return *_cameraManipulator; }
+
+    /**
+       Reshapes the current frame buffers
+       @param frameSize New size for the buffers
+
+       @todo Must be removed and held by the render method above
+    */
+    void reshape( const Vector2ui& frameSize );
+
+    /**
+       Register keyboard shorcuts
+    */
+    void registerKeyboardShortcuts();
+
+    /**
+       Sets up camera manipulator
+    */
+    void setupCameraManipulator( const CameraMode mode );
+
+    /**
+       Sets default camera according to scene bounding box
+    */
+    void setDefaultCamera();
+
+    /**
+       Sets default epsilon to scene bounding box
+    */
+    void setDefaultEpsilon();
+
+    /**
+       @brief Makes the engine. This means that all attributes, including geometry, material,
+       camera, framebuffer, etc, have to be reset according to the engine parameters stored in the
+       _parametersManager class member.
+    */
+    void makeDirty() { _dirty = true; }
+
+    /**
+     * @brief isDirty returns the engine state
+     * @return True if the engine is dirty and needs to be updated. False otherwise.
+     */
+    bool isDirty() { return _dirty; }
+
+protected:
+
+    void _render( const RenderInput& renderInput, RenderOutput& renderOutput );
+    void _render();
+
+    void _loadData();
+
+    void _loadMorphologyFolder();
+    void _loadNESTCircuit();
+    void _loadPDBFolder();
+    void _loadPDBFile( const std::string& filename = "" );
+    void _loadXYZBFile();
+    void _loadMeshFolder( const std::string& folder );
+    void _loadCircuitConfiguration();
+    void _loadCompartmentReport();
+    void _buildDefaultScene();
+
+    void _blackBackground();
+    void _grayBackground();
+    void _whiteBackground();
+    void _defaultRenderer();
+    void _particleRenderer();
+    void _proximityRenderer();
+    void _simulationRenderer();
+    void _increaseTimestamp();
+    void _decreaseTimestamp();
+    void _diffuseShading();
+    void _electronShading();
+    void _disableShading();
+    void _increaseAmbientOcclusionStrength();
+    void _decreaseAmbientOcclusionStrength();
+    void _resetTimestamp();
+    void _infiniteTimestamp();
+    void _toggleShadows();
+    void _toggleSoftShadows();
+    void _increaseSamplesPerRay();
+    void _decreaseSamplesPerRay();
+    void _toggleLightEmittingMaterials();
+
+    ParametersManager& _parametersManager;
+    ScenePtr _scene;
+    CameraPtr _camera;
+    std::string _activeRenderer;
+    strings _rendererNames;
+    RendererMap _renderers;
+    Vector2i _frameSize;
+    FrameBufferPtr _frameBuffer;
+    KeyboardHandlerPtr _keyboardHandler;
+    AbstractManipulatorPtr _cameraManipulator;
+    bool _dirty;
+
+};
+
+}
+
+#endif // ENGINE_H

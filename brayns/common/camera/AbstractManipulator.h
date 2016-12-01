@@ -27,15 +27,6 @@ namespace brayns
 {
 
 /**
- * The different modes for moving the camera.
- */
-enum class CameraMode
-{
-    FLYING,
-    INSPECT_CENTER
-};
-
-/**
  * Base class for camera manipulators.
  */
 class AbstractManipulator

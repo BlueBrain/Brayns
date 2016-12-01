@@ -32,10 +32,8 @@ namespace brayns
 {
 
 KeyboardHandler::KeyboardHandler(
-    ScenePtr scene,
-    ParametersManagerPtr parametersManager )
-    : _parametersManager( parametersManager )
-    , _scene( scene )
+    ScenePtr scene )
+    : _scene( scene )
 {
 }
 

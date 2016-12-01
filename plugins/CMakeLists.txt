@@ -17,8 +17,6 @@ set(BRAYNSPLUGINS_PUBLIC_HEADERS
   engines/EngineFactory.h
 )
 
-add_subdirectory(engines/common)
-
 if(TARGET Deflect OR (TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ))
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/ExtensionPluginFactory.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/ExtensionPluginFactory.h)
@@ -46,7 +44,5 @@ if(OPTIX_FOUND AND CUDA_FOUND)
   add_subdirectory(engines/optix)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOptiXEnginePlugin)
 endif()
-
-list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsCommonEnginePlugin)
 
 common_library(braynsPlugins)
