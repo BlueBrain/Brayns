@@ -51,14 +51,14 @@ namespace brayns
 {
 
 #ifdef BRAYNS_USE_ZEROEQ
-    DeflectPlugin::DeflectPlugin( Brayns& brayns, ZeroEQPlugin& zeroeq )
+    DeflectPlugin::DeflectPlugin( Engine& engine, ZeroEQPlugin& zeroeq )
 #else
-    DeflectPlugin::DeflectPlugin( Brayns& brayns )
+    DeflectPlugin::DeflectPlugin( Engine& engine )
 #endif
-    : ExtensionPlugin( brayns )
+    : ExtensionPlugin( engine )
     , _sendFuture(make_ready_future( true ))
 {
-    brayns.getKeyboardHandler().registerKeyboardShortcut(
+    engine.getKeyboardHandler()->registerKeyboardShortcut(
         '*', "Enable/Disable Deflect streaming",
                 [&] { _params.setEnabled( !_params.getEnabled( )); });
 
@@ -112,8 +112,8 @@ void DeflectPlugin::run()
         _sendDeflectFrame();
         if( _handleDeflectEvents( ))
         {
-            _brayns.getFrameBuffer().clear();
-            _brayns.getRenderer().commit();
+            _engine.getFrameBuffer()->clear();
+            _engine.getRenderer()->commit();
         }
     }
 }
@@ -158,7 +158,7 @@ void DeflectPlugin::_sendDeflectFrame()
         return;
     }
 
-    FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
+    FrameBuffer& frameBuffer = _engine.getFrameBuffer();
     const Vector2i& frameSize = frameBuffer.getSize();
     void* data = frameBuffer.getColorBuffer();
 
@@ -192,7 +192,7 @@ bool DeflectPlugin::_handleDeflectEvents()
         {
             const auto pos = _getWindowPos( event );
             if( !_pan && !_pinch )
-                _brayns.getCameraManipulator().dragLeft( pos, _previousPos );
+                _engine.getCameraManipulator()->dragLeft( pos, _previousPos );
             _previousPos = pos;
             _pan = _pinch = false;
             break;
@@ -202,7 +202,7 @@ bool DeflectPlugin::_handleDeflectEvents()
             if( _pinch )
                 break;
             const auto pos = _getWindowPos( event );
-            _brayns.getCameraManipulator().dragMiddle( pos, _previousPos );
+            _engine.getCameraManipulator()->dragMiddle( pos, _previousPos );
             _previousPos = pos;
             _pan = true;
             break;
@@ -213,18 +213,18 @@ bool DeflectPlugin::_handleDeflectEvents()
                 break;
             const auto pos = _getWindowPos( event );
             const auto delta = _getZoomDelta( event );
-            _brayns.getCameraManipulator().wheel( pos, delta * wheelFactor );
+            _engine.getCameraManipulator().wheel( pos, delta * wheelFactor );
             _pinch = true;
             break;
         }
         case deflect::Event::EVT_KEY_PRESS:
         {
-            _brayns.getKeyboardHandler().handleKeyboardShortcut( event.text[0] );
+            _engine.getKeyboardHandler()->handleKeyboardShortcut( event.text[0] );
             break;
         }
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
         {
-            _brayns.reshape( Vector2ui( event.dx, event.dy ));
+            _engine.reshape( Vector2ui( event.dx, event.dy ));
             break;
         }
         case deflect::Event::EVT_CLOSE:
