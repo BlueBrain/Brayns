@@ -122,40 +122,6 @@ protected:
     void _render( const RenderInput& renderInput, RenderOutput& renderOutput );
     void _render();
 
-    void _loadData();
-
-    void _loadMorphologyFolder();
-    void _loadNESTCircuit();
-    void _loadPDBFolder();
-    void _loadPDBFile( const std::string& filename = "" );
-    void _loadXYZBFile();
-    void _loadMeshFolder( const std::string& folder );
-    void _loadCircuitConfiguration();
-    void _loadCompartmentReport();
-    void _buildDefaultScene();
-
-    void _blackBackground();
-    void _grayBackground();
-    void _whiteBackground();
-    void _defaultRenderer();
-    void _particleRenderer();
-    void _proximityRenderer();
-    void _simulationRenderer();
-    void _increaseTimestamp();
-    void _decreaseTimestamp();
-    void _diffuseShading();
-    void _electronShading();
-    void _disableShading();
-    void _increaseAmbientOcclusionStrength();
-    void _decreaseAmbientOcclusionStrength();
-    void _resetTimestamp();
-    void _infiniteTimestamp();
-    void _toggleShadows();
-    void _toggleSoftShadows();
-    void _increaseSamplesPerRay();
-    void _decreaseSamplesPerRay();
-    void _toggleLightEmittingMaterials();
-
     ParametersManager& _parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;

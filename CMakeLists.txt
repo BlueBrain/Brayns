@@ -36,6 +36,7 @@ common_find_package(OptiX SYSTEM)
 common_find_package(CUDA SYSTEM)
 common_find_package(OSPRay SYSTEM)
 common_find_package(OpenMP)
+common_find_package(Lunchbox)
 
 if( NOT( OPTIX_FOUND AND CUDA_FOUND ) AND NOT OSPRAY_FOUND )
     message( FATAL_ERROR

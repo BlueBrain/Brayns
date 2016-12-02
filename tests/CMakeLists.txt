@@ -4,8 +4,6 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-common_find_package(Lunchbox)
-
 set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} brayns)
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
