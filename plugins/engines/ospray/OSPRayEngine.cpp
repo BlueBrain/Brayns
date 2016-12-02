@@ -77,7 +77,6 @@ OSPRayEngine::OSPRayEngine(
     _camera.reset( new OSPRayCamera(
         _parametersManager.getRenderingParameters().getCameraType( )));
 
-    _keyboardHandler.reset( new KeyboardHandler( _scene ));
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 

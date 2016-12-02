@@ -118,7 +118,7 @@ void glut3dPassiveMouseFunc(int x, int y)
 /*! currently active window */
 BaseWindow* BaseWindow::_activeWindow = nullptr;
 
-BaseWindow::BaseWindow( BraynsPtr brayns, const FrameBufferMode frameBufferMode)
+BaseWindow::BaseWindow( Brayns& brayns, const FrameBufferMode frameBufferMode)
   : _brayns(brayns)
   , _lastMousePos(-1,-1)
   , _currMousePos(-1,-1)
@@ -130,8 +130,8 @@ BaseWindow::BaseWindow( BraynsPtr brayns, const FrameBufferMode frameBufferMode)
   , _windowSize(-1,-1)
   , _displayHelp( false )
 {
-    const auto motionSpeed = _brayns->getEngine().getCameraManipulator().getMotionSpeed();
-    BRAYNS_INFO << "Camera       :" << _brayns->getEngine().getCamera() << std::endl;
+    const auto motionSpeed = _brayns.getCameraManipulator().getMotionSpeed();
+    BRAYNS_INFO << "Camera       :" << _brayns.getEngine().getCamera() << std::endl;
     BRAYNS_INFO << "Motion speed :" << motionSpeed << std::endl;
 }
 
@@ -160,7 +160,7 @@ void BaseWindow::mouseButton(
         if( released )
             return;
         const auto delta = (button == GLUT_WHEEL_SCROLL_UP) ? 1 : -1;
-        _brayns->getEngine().getCameraManipulator().wheel( pos, delta );
+        _brayns.getCameraManipulator().wheel( pos, delta );
     }
 }
 
@@ -174,7 +174,7 @@ void BaseWindow::motion(const Vector2i& pos)
         _lastButtonState = _currButtonState;
     }
 
-    auto& manipulator = _brayns->getEngine().getCameraManipulator();
+    auto& manipulator = _brayns.getCameraManipulator();
 
     if(( _currButtonState == (1 << GLUT_RIGHT_BUTTON )) ||
       (( _currButtonState == ( 1 << GLUT_LEFT_BUTTON )) &&
@@ -209,12 +209,14 @@ void BaseWindow::idle( )
 void BaseWindow::reshape(const Vector2i& newSize)
 {
     _windowSize = newSize;
-    Engine& engine = _brayns->getEngine();
+    Engine& engine = _brayns.getEngine();
     engine.getCamera().setAspectRatio(float(newSize.x( ))/float(newSize.y( )));
     engine.reshape(newSize);
-    engine.getParametersManager().getApplicationParameters().setWindowSize(newSize);
 
-    if( !_brayns->getEngine().getParametersManager().getApplicationParameters().getFilters().empty( ))
+    auto& applicationParameters = _brayns.getParametersManager();
+    applicationParameters.getApplicationParameters().setWindowSize(newSize);
+
+    if( !applicationParameters.getApplicationParameters().getFilters().empty( ))
         _screenSpaceProcessor.resize( newSize.x( ), newSize.y( ));
 
     forceRedraw( );
@@ -233,11 +235,12 @@ void BaseWindow::forceRedraw( )
 
 void BaseWindow::display( )
 {
-    auto& camera = _brayns->getEngine().getCamera();
+    auto& engine = _brayns.getEngine();
+    auto& camera = engine.getCamera();
     if( camera.getModified( ))
     {
-        _brayns->getEngine().getFrameBuffer().clear();
-        _brayns->getEngine().getCamera().resetModified();
+        engine.getFrameBuffer().clear();
+        engine.getCamera().resetModified();
     }
 
     _fps.start();
@@ -250,10 +253,10 @@ void BaseWindow::display( )
     renderInput.target = camera.getTarget();
     renderInput.up = camera.getUp();
 
-    _brayns->getEngine().getCamera().commit();
-    _brayns->render( renderInput, renderOutput );
+    engine.getCamera().commit();
+    _brayns.render( renderInput, renderOutput );
 
-    if( _brayns->getEngine().getParametersManager().getApplicationParameters().getFilters().empty( ))
+    if( _brayns.getParametersManager().getApplicationParameters().getFilters().empty( ))
     {
         GLenum format = GL_RGBA;
         GLenum type   = GL_FLOAT;
@@ -278,7 +281,7 @@ void BaseWindow::display( )
             glDrawPixels( _windowSize.x( ), _windowSize.y( ), format, type, buffer );
             if( _displayHelp )
             {
-                KeyboardHandler& keyHandler = _brayns->getEngine().getKeyboardHandler();
+                auto& keyHandler = _brayns.getKeyboardHandler();
                 _renderBitmapString( -0.98f, 0.95f, keyHandler.help() );
             }
         }
@@ -315,7 +318,7 @@ void BaseWindow::display( )
     clearPixels( );
 
     const Vector2ui windowSize =
-        _brayns->getEngine().getParametersManager().getApplicationParameters().getWindowSize();
+        _brayns.getParametersManager().getApplicationParameters().getWindowSize();
     if( windowSize != _windowSize )
         glutReshapeWindow(windowSize.x(), windowSize.y());
 }
@@ -376,10 +379,10 @@ void BaseWindow::keypress( const char key, const Vector2f& )
         _displayHelp = !_displayHelp;
         break;
     default:
-        _brayns->getEngine().getKeyboardHandler().handleKeyboardShortcut( key );
+        _brayns.getKeyboardHandler().handleKeyboardShortcut( key );
     }
 
-    _brayns->getEngine().commit( );
+    _brayns.getEngine().commit();
 }
 
 void BaseWindow::specialkey( const int key, const Vector2f& )
@@ -387,23 +390,23 @@ void BaseWindow::specialkey( const int key, const Vector2f& )
     switch( key )
     {
     case GLUT_KEY_LEFT:
-        _brayns->getEngine().getKeyboardHandler().handle( SpecialKey::LEFT );
+        _brayns.getKeyboardHandler().handle( SpecialKey::LEFT );
         break;
     case GLUT_KEY_RIGHT:
-        _brayns->getEngine().getKeyboardHandler().handle( SpecialKey::RIGHT );
+        _brayns.getKeyboardHandler().handle( SpecialKey::RIGHT );
         break;
     case GLUT_KEY_UP:
-        _brayns->getEngine().getKeyboardHandler().handle( SpecialKey::UP );
+        _brayns.getKeyboardHandler().handle( SpecialKey::UP );
         break;
     case GLUT_KEY_DOWN:
-        _brayns->getEngine().getKeyboardHandler().handle( SpecialKey::DOWN );
+        _brayns.getKeyboardHandler().handle( SpecialKey::DOWN );
         break;
     }
 }
 
 void BaseWindow::_registerKeyboardShortcuts()
 {
-    auto& keyHandler = _brayns->getEngine().getKeyboardHandler();
+    auto& keyHandler = _brayns.getKeyboardHandler();
     keyHandler.registerKeyboardShortcut(
         ' ', "Camera reset to initial state",
         std::bind( &BaseWindow::_resetCamera, this ));
@@ -441,24 +444,24 @@ void BaseWindow::_renderBitmapString( const float x, const float y,
 
 void BaseWindow::_resetCamera()
 {
-    auto& camera = _brayns->getEngine().getCamera();
+    auto& camera = _brayns.getEngine().getCamera();
     camera.reset();
     camera.commit();
 }
 
 void BaseWindow::_increaseMotionSpeed()
 {
-    _brayns->getEngine().getCameraManipulator().updateMotionSpeed( DEFAULT_MOTION_ACCELERATION );
+    _brayns.getCameraManipulator().updateMotionSpeed( DEFAULT_MOTION_ACCELERATION );
 }
 
 void BaseWindow::_decreaseMotionSpeed()
 {
-    _brayns->getEngine().getCameraManipulator().updateMotionSpeed( 1.f / DEFAULT_MOTION_ACCELERATION );
+    _brayns.getCameraManipulator().updateMotionSpeed( 1.f / DEFAULT_MOTION_ACCELERATION );
 }
 
 void BaseWindow::_displayCameraInformation()
 {
-    BRAYNS_INFO << _brayns->getEngine().getCamera() << std::endl;
+    BRAYNS_INFO << _brayns.getEngine().getCamera() << std::endl;
 }
 
 void BaseWindow::_exitApplication()

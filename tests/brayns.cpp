@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( camera.getAperture(), 0.f );
     BOOST_CHECK_EQUAL( camera.getFocalLength(), 0.f );
 
-    auto& manipulator = brayns.getEngine().getCameraManipulator();
+    auto& manipulator = brayns.getCameraManipulator();
     BOOST_CHECK( dynamic_cast<brayns::InspectCenterManipulator*>( &manipulator ));
 
     auto& fb = brayns.getEngine().getFrameBuffer();
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK( !fb.getDepthBuffer( ));
     BOOST_CHECK_EQUAL( fb.getSize(), brayns::Vector2i( 800, 600 ));
 
-    auto& pm = brayns.getEngine().getParametersManager();
+    auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();
     BOOST_CHECK_EQUAL( appParams.getWindowSize(), brayns::Vector2ui( 800, 600 ));
     BOOST_CHECK_EQUAL( appParams.getCamera(), "perspective" );
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
     uint64_t reference, shadows, softShadows, ambientOcclusion, allOptions;
 
     // Set default rendering parameters
-    brayns::ParametersManager& params = brayns.getEngine().getParametersManager();
+    brayns::ParametersManager& params = brayns.getParametersManager();
     params.getRenderingParameters().setSamplesPerPixel(32);
     brayns.getEngine().commit();
 

@@ -36,7 +36,11 @@ public:
         application parameters.
         @param Brayns instance of brayns
     */
-    ExtensionPluginFactory( EnginePtr engine );
+    ExtensionPluginFactory(
+        Engine& engine,
+        ParametersManager& parametersManager,
+        KeyboardHandler& keyboardHandler,
+        AbstractManipulator& cameraManipulator );
 
     ~ExtensionPluginFactory();
 

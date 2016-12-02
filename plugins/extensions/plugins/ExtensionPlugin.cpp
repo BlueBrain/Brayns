@@ -23,7 +23,7 @@
 namespace brayns
 {
 
-ExtensionPlugin::ExtensionPlugin( EnginePtr engine )
+ExtensionPlugin::ExtensionPlugin( Engine& engine )
     : _engine( engine )
 {
 }

@@ -45,7 +45,7 @@ class KeyboardHandler
 
 public:
 
-    KeyboardHandler( ScenePtr scene );
+    KeyboardHandler();
 
     void registerKeyboardShortcut(
         const unsigned char key,
@@ -69,7 +69,6 @@ public:
 
 private:
 
-    ScenePtr _scene;
     std::map< unsigned char, ShortcutInformation > _registeredShortcuts;
     std::map< SpecialKey, ShortcutInformation > _registeredSpecialKeys;
 

@@ -95,15 +95,30 @@ public:
         size_t nbMaterials = NB_MAX_MATERIALS);
 
     /**
-       Gets the current engine
-       @return The engine object
+       @return the current engine
     */
     BRAYNS_API Engine& getEngine();
 
     /**
-       Builds scene according to scene and geometry parameters
-    */
+     * @return The parameter manager
+     */
+    BRAYNS_API ParametersManager& getParametersManager();
+
+    /**
+     * Gets the keyboard handler
+     */
+    BRAYNS_API KeyboardHandler& getKeyboardHandler();
+
+    /**
+     * Gets the camera manipulator
+     */
+    BRAYNS_API AbstractManipulator& getCameraManipulator();
+
+    /**
+     * Builds scene according to scene and geometry parameters
+     */
     BRAYNS_API void buildScene();
+
 
 private:
 

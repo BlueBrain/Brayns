@@ -33,20 +33,25 @@ namespace brayns
 
 ExtensionPluginFactory::ExtensionPluginFactory(
 #if BRAYNS_USE_ZEROEQ || BRAYNS_USE_DEFLECT
-    EnginePtr engine )
+    Engine& engine,
+    ParametersManager& parametersManager,
+    KeyboardHandler& keyboardHandler,
+    AbstractManipulator& cameraManipulator )
 #else
-    EnginePtr )
+    Engine&, ParametersManager& , KeyboardHandler&, AbstractManipulator& )
 #endif
 {
 #ifdef BRAYNS_USE_ZEROEQ
-    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( engine );
+    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( engine, parametersManager );
     add( zeroeqPlugin );
 #endif
 #ifdef BRAYNS_USE_DEFLECT
 # ifdef BRAYNS_USE_ZEROEQ
-    add( std::make_shared<DeflectPlugin>( engine, *zeroeqPlugin ));
+    add( std::make_shared<DeflectPlugin>(
+        engine, keyboardHandler, cameraManipulator, *zeroeqPlugin ));
 # else
-    add( std::make_shared<DeflectPlugin>( engine ));
+    add( std::make_shared<DeflectPlugin>(
+        engine, keyboardHandler, cameraManipulator ));
 # endif
 #endif
 }

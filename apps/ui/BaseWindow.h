@@ -81,7 +81,7 @@ class BaseWindow
 {
 public:
 
-    BaseWindow( BraynsPtr brayns,
+    BaseWindow( Brayns& brayns,
                 FrameBufferMode frameBufferMode = FrameBufferMode::COLOR );
     virtual ~BaseWindow();
 
@@ -161,7 +161,7 @@ protected:
     virtual void _registerKeyboardShortcuts();
     void _renderBitmapString( float x, float y, const std::string& text );
 
-    BraynsPtr _brayns;
+    Brayns& _brayns;
 
     Vector2i _lastMousePos; /*! last mouse screen position of mouse before
                                     current motion */

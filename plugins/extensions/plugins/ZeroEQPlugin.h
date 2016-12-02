@@ -52,7 +52,7 @@ namespace brayns
 class ZeroEQPlugin : public ExtensionPlugin
 {
 public:
-    ZeroEQPlugin( EnginePtr engine );
+    ZeroEQPlugin( Engine& engine, ParametersManager& parametersManager );
     ~ZeroEQPlugin();
 
     /** @copydoc ExtensionPlugin::execute */
@@ -233,6 +233,7 @@ private:
                          const uint8_t* rawData,
                          unsigned long& dataSize);
 
+    ParametersManager& _parametersManager;
     tjhandle _compressor;
     ::zeroeq::Subscriber _subscriber;
     ::zeroeq::Publisher _publisher;

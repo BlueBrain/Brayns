@@ -39,11 +39,14 @@ class Engine
 
 public:
 
-    Engine( ParametersManager& parametersManager );
+    /**
+     * @brief Engine contructor
+     * @param parametersManager holds all engine parameters (geometry, rendering, etc)
+     */
+    explicit Engine( ParametersManager& parametersManager );
     virtual ~Engine() {}
 
     /**
-       Returns the name of the engine
        @return the name of the engine
     */
     virtual std::string name() const = 0;
@@ -75,17 +78,8 @@ public:
     /** Gets the renderer */
     Renderer& getRenderer() { return *_renderers[_activeRenderer]; }
 
-    /** Gets the keyboard handler */
-    KeyboardHandler& getKeyboardHandler() { return *_keyboardHandler; }
-
     /** Sets the active renderer */
     void setActiveRenderer( const std::string& renderer );
-
-    /** Gets the parameter manager */
-    ParametersManager& getParametersManager() { return _parametersManager; }
-
-    /** Gets the camera manipulator */
-    AbstractManipulator& getCameraManipulator() { return *_cameraManipulator; }
 
     /**
        Reshapes the current frame buffers
@@ -94,11 +88,6 @@ public:
        @todo Must be removed and held by the render method above
     */
     void reshape( const Vector2ui& frameSize );
-
-    /**
-       Register keyboard shorcuts
-    */
-    void registerKeyboardShortcuts();
 
     /**
        Sets up camera manipulator
@@ -175,8 +164,6 @@ protected:
     RendererMap _renderers;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
-    KeyboardHandlerPtr _keyboardHandler;
-    AbstractManipulatorPtr _cameraManipulator;
     bool _dirty;
 
 };

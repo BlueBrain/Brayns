@@ -24,16 +24,13 @@
 #include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
-#include <brayns/common/scene/Scene.h>
 
 #include <sstream>
 
 namespace brayns
 {
 
-KeyboardHandler::KeyboardHandler(
-    ScenePtr scene )
-    : _scene( scene )
+KeyboardHandler::KeyboardHandler()
 {
 }
 

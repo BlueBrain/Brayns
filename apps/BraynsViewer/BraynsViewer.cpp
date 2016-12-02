@@ -36,7 +36,7 @@ namespace
 namespace brayns
 {
 
-BraynsViewer::BraynsViewer( BraynsPtr brayns )
+BraynsViewer::BraynsViewer( Brayns& brayns )
     : BaseWindow( brayns )
     , _timestampIncrement( 0.f )
 {
@@ -46,7 +46,7 @@ BraynsViewer::BraynsViewer( BraynsPtr brayns )
 void BraynsViewer::_registerKeyboardShortcuts()
 {
     BaseWindow::_registerKeyboardShortcuts();
-    auto& keyHandler = _brayns->getEngine().getKeyboardHandler();
+    auto& keyHandler = _brayns.getKeyboardHandler();
     keyHandler.registerKeyboardShortcut(
         '3', "Set gradient materials",
         std::bind( &BraynsViewer::_gradientMaterials, this ));
@@ -66,17 +66,17 @@ void BraynsViewer::_registerKeyboardShortcuts()
 
 void BraynsViewer::_gradientMaterials()
 {
-    _brayns->setMaterials( MT_GRADIENT );
+    _brayns.setMaterials( MT_GRADIENT );
 }
 
 void BraynsViewer::_pastelMaterials()
 {
-    _brayns->setMaterials( MT_PASTEL_COLORS );
+    _brayns.setMaterials( MT_PASTEL_COLORS );
 }
 
 void BraynsViewer::_randomMaterials()
 {
-    _brayns->setMaterials( MT_RANDOM );
+    _brayns.setMaterials( MT_RANDOM );
 }
 
 void BraynsViewer::_toggleIncrementalTimestamp()
@@ -86,7 +86,7 @@ void BraynsViewer::_toggleIncrementalTimestamp()
 
 void BraynsViewer::_defaultTimestamp()
 {
-    SceneParameters& sceneParams = _brayns->getEngine().getParametersManager().getSceneParameters();
+    auto& sceneParams = _brayns.getParametersManager().getSceneParameters();
     sceneParams.setTimestamp( DEFAULT_TEST_TIMESTAMP );
 }
 
@@ -94,23 +94,21 @@ void BraynsViewer::display( )
 {
     if( _timestampIncrement != 0.f )
     {
-        SceneParameters& sceneParams =
-            _brayns->getEngine().getParametersManager().getSceneParameters();
-        sceneParams.setTimestamp(
-            sceneParams.getTimestamp( ) + _timestampIncrement );
-        _brayns->getEngine().commit();
+        auto& sceneParams = _brayns.getParametersManager().getSceneParameters();
+        sceneParams.setTimestamp( sceneParams.getTimestamp( ) + _timestampIncrement );
+        _brayns.getEngine().commit();
     }
 
     BaseWindow::display();
 
     std::stringstream ss;
     ss << "Brayns Viewer [" <<
-          _brayns->getEngine().getParametersManager().getRenderingParameters().getEngine() <<
+          _brayns.getParametersManager().getRenderingParameters().getEngine() <<
           "] ";
-    size_t ts = _brayns->getEngine().getParametersManager().getSceneParameters().getTimestamp();
+    size_t ts = _brayns.getParametersManager().getSceneParameters().getTimestamp();
     if( ts != std::numeric_limits<size_t>::max() )
         ss << " (frame " << ts << ")";
-    if( _brayns->getEngine().getParametersManager().getApplicationParameters().isBenchmarking( ))
+    if( _brayns.getParametersManager().getApplicationParameters().isBenchmarking( ))
     {
         ss << " @ " << _fps.getFPS( );
     }

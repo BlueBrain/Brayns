@@ -33,7 +33,7 @@ class BraynsViewer : public BaseWindow
 {
 public:
 
-    BraynsViewer( BraynsPtr brayns );
+    BraynsViewer( Brayns& brayns );
 
     /** Sets the rendering parameters and renders the current frame
      */
