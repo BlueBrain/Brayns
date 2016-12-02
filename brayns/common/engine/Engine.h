@@ -39,11 +39,14 @@ class Engine
 
 public:
 
-    Engine();
+    /**
+     * @brief Engine contructor
+     * @param parametersManager holds all engine parameters (geometry, rendering, etc)
+     */
+    explicit Engine( ParametersManager& parametersManager );
     virtual ~Engine() {}
 
     /**
-       Returns the name of the engine
        @return the name of the engine
     */
     virtual std::string name() const = 0;
@@ -52,7 +55,7 @@ public:
        Commits changes to the engine. This include scene and camera
        modifications
     */
-    virtual void commit() = 0;
+    virtual void commit();
 
     /** Renders the current scene and populates the frame buffer accordingly */
     virtual void render() = 0;
@@ -64,25 +67,62 @@ public:
     virtual void postRender() {}
 
     /** Gets the scene */
-    ScenePtr getScene() { return _scene; }
+    Scene& getScene() { return *_scene; }
 
     /** Gets the frame buffer */
-    FrameBufferPtr getFrameBuffer() { return _frameBuffer; }
+    FrameBuffer& getFrameBuffer() { return *_frameBuffer; }
 
     /** Gets the camera */
-    CameraPtr getCamera() { return _camera; }
+    Camera& getCamera() { return *_camera; }
 
     /** Gets the renderer */
-    RendererPtr getRenderer() { return _renderers[_activeRenderer]; }
-
-    /** Gets the keyboard handler */
-    KeyboardHandlerPtr getKeyboardHandler() { return _keyboardHandler; }
+    Renderer& getRenderer() { return *_renderers[_activeRenderer]; }
 
     /** Sets the active renderer */
     void setActiveRenderer( const std::string& renderer );
 
+    /**
+       Reshapes the current frame buffers
+       @param frameSize New size for the buffers
+
+       @todo Must be removed and held by the render method above
+    */
+    void reshape( const Vector2ui& frameSize );
+
+    /**
+       Sets up camera manipulator
+    */
+    void setupCameraManipulator( const CameraMode mode );
+
+    /**
+       Sets default camera according to scene bounding box
+    */
+    void setDefaultCamera();
+
+    /**
+       Sets default epsilon to scene bounding box
+    */
+    void setDefaultEpsilon();
+
+    /**
+       @brief Makes the engine. This means that all attributes, including geometry, material,
+       camera, framebuffer, etc, have to be reset according to the engine parameters stored in the
+       _parametersManager class member.
+    */
+    void makeDirty() { _dirty = true; }
+
+    /**
+     * @brief isDirty returns the engine state
+     * @return True if the engine is dirty and needs to be updated. False otherwise.
+     */
+    bool isDirty() { return _dirty; }
+
 protected:
 
+    void _render( const RenderInput& renderInput, RenderOutput& renderOutput );
+    void _render();
+
+    ParametersManager& _parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;
     std::string _activeRenderer;
@@ -90,7 +130,7 @@ protected:
     RendererMap _renderers;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
-    KeyboardHandlerPtr _keyboardHandler;
+    bool _dirty;
 
 };
 

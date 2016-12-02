@@ -23,8 +23,8 @@
 namespace brayns
 {
 
-ExtensionPlugin::ExtensionPlugin( Brayns& brayns )
-    : _brayns( brayns )
+ExtensionPlugin::ExtensionPlugin( Engine& engine )
+    : _engine( engine )
 {
 }
 

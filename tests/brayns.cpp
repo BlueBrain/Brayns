@@ -20,6 +20,7 @@
 
 #include <brayns/Brayns.h>
 
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/renderer/FrameBuffer.h>
@@ -48,7 +49,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     brayns::Brayns brayns( testSuite.argc,
                            const_cast< const char** >( testSuite.argv ));
 
-    const auto& camera = brayns.getCamera();
+    auto& camera = brayns.getEngine().getCamera();
     BOOST_CHECK( camera.getType() == brayns::CameraType::perspective );
     BOOST_CHECK_EQUAL( camera.getPosition(), brayns::Vector3f( 0.5f, 0.5f, -1.f ));
     BOOST_CHECK_EQUAL( camera.getTarget(), brayns::Vector3f( 0.5f, 0.5f, 0.5f ));
@@ -60,7 +61,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     auto& manipulator = brayns.getCameraManipulator();
     BOOST_CHECK( dynamic_cast<brayns::InspectCenterManipulator*>( &manipulator ));
 
-    auto& fb = brayns.getFrameBuffer();
+    auto& fb = brayns.getEngine().getFrameBuffer();
     BOOST_CHECK( !fb.getColorBuffer( ));
     BOOST_CHECK_EQUAL( fb.getColorDepth(), 4 );
     BOOST_CHECK( !fb.getDepthBuffer( ));
@@ -128,7 +129,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( volumeParams.getOffset(), brayns::Vector3f( 0.f, 0.f, 0.f ));
     BOOST_CHECK_EQUAL( volumeParams.getSamplesPerRay(), 128 );
 
-    auto& scene = brayns.getScene();
+    auto& scene = brayns.getEngine().getScene();
     BOOST_CHECK( scene.getMaterial( 0 ));
     BOOST_CHECK_EQUAL( sceneParams.getEnvironmentMap(), "" );
 
@@ -144,7 +145,7 @@ BOOST_AUTO_TEST_CASE( render_two_frames_and_compare_they_are_same )
     brayns::Brayns brayns( testSuite.argc,
                            const_cast< const char** >( testSuite.argv ));
 
-    auto& fb = brayns.getFrameBuffer();
+    auto& fb = brayns.getEngine().getFrameBuffer();
     const auto& size = fb.getSize();
     fb.setAccumulation( false );
     fb.resize( size );
@@ -183,7 +184,7 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
     // Set default rendering parameters
     brayns::ParametersManager& params = brayns.getParametersManager();
     params.getRenderingParameters().setSamplesPerPixel(32);
-    brayns.commit();
+    brayns.getEngine().commit();
 
     // Start timer
     startTime = high_resolution_clock::now();
@@ -193,7 +194,7 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
 
     // Shadows
     params.getRenderingParameters().setShadows( true );
-    brayns.commit();
+    brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
     brayns.render();
@@ -206,7 +207,7 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
     BOOST_CHECK( t < 1.65f );
 
     params.getRenderingParameters().setSoftShadows( true );
-    brayns.commit();
+    brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
     brayns.render();
@@ -222,7 +223,7 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
     params.getRenderingParameters().setShadows( false );
     params.getRenderingParameters().setSoftShadows( false );
     params.getRenderingParameters().setAmbientOcclusionStrength( 1.f );
-    brayns.commit();
+    brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
     brayns.render();
@@ -238,7 +239,7 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
     params.getRenderingParameters().setShadows( true );
     params.getRenderingParameters().setSoftShadows( true );
     params.getRenderingParameters().setAmbientOcclusionStrength( 1.f );
-    brayns.commit();
+    brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
     brayns.render();
@@ -258,7 +259,7 @@ BOOST_AUTO_TEST_CASE( test_transfer_function )
     brayns::Brayns brayns( testSuite.argc,
                            const_cast< const char** >( testSuite.argv ));
 
-    brayns::Scene& scene = brayns.getScene();
+    auto& scene = brayns.getEngine().getScene();
     brayns::TransferFunction& transferFunction = scene.getTransferFunction();
 
     // Red attribute

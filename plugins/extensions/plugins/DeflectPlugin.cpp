@@ -21,7 +21,7 @@
 #include "DeflectPlugin.h"
 
 #include <brayns/Brayns.h>
-#include <plugins/engines/common/Engine.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/camera/AbstractManipulator.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/renderer/FrameBuffer.h>
@@ -51,14 +51,23 @@ namespace brayns
 {
 
 #ifdef BRAYNS_USE_ZEROEQ
-    DeflectPlugin::DeflectPlugin( Brayns& brayns, ZeroEQPlugin& zeroeq )
+    DeflectPlugin::DeflectPlugin(
+        Engine& engine,
+        KeyboardHandler& keyboardHandler,
+        AbstractManipulator& cameraManipulator,
+        ZeroEQPlugin& zeroeq )
 #else
-    DeflectPlugin::DeflectPlugin( Brayns& brayns )
+    DeflectPlugin::DeflectPlugin(
+        Engine& engine,
+        KeyboardHandler& keyboardHandler,
+        AbstractManipulator& cameraManipulator )
 #endif
-    : ExtensionPlugin( brayns )
-    , _sendFuture(make_ready_future( true ))
+    : ExtensionPlugin( engine )
+    , _keyboardHandler( keyboardHandler )
+    , _cameraManipulator( cameraManipulator )
+    , _sendFuture( make_ready_future( true ))
 {
-    brayns.getKeyboardHandler().registerKeyboardShortcut(
+    _keyboardHandler.registerKeyboardShortcut(
         '*', "Enable/Disable Deflect streaming",
                 [&] { _params.setEnabled( !_params.getEnabled( )); });
 
@@ -112,8 +121,8 @@ void DeflectPlugin::run()
         _sendDeflectFrame();
         if( _handleDeflectEvents( ))
         {
-            _brayns.getFrameBuffer().clear();
-            _brayns.getRenderer().commit();
+            _engine.getFrameBuffer().clear();
+            _engine.getRenderer().commit();
         }
     }
 }
@@ -158,7 +167,7 @@ void DeflectPlugin::_sendDeflectFrame()
         return;
     }
 
-    FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
+    auto& frameBuffer = _engine.getFrameBuffer();
     const Vector2i& frameSize = frameBuffer.getSize();
     void* data = frameBuffer.getColorBuffer();
 
@@ -192,7 +201,7 @@ bool DeflectPlugin::_handleDeflectEvents()
         {
             const auto pos = _getWindowPos( event );
             if( !_pan && !_pinch )
-                _brayns.getCameraManipulator().dragLeft( pos, _previousPos );
+                _cameraManipulator.dragLeft( pos, _previousPos );
             _previousPos = pos;
             _pan = _pinch = false;
             break;
@@ -202,7 +211,7 @@ bool DeflectPlugin::_handleDeflectEvents()
             if( _pinch )
                 break;
             const auto pos = _getWindowPos( event );
-            _brayns.getCameraManipulator().dragMiddle( pos, _previousPos );
+            _cameraManipulator.dragMiddle( pos, _previousPos );
             _previousPos = pos;
             _pan = true;
             break;
@@ -213,18 +222,18 @@ bool DeflectPlugin::_handleDeflectEvents()
                 break;
             const auto pos = _getWindowPos( event );
             const auto delta = _getZoomDelta( event );
-            _brayns.getCameraManipulator().wheel( pos, delta * wheelFactor );
+            _cameraManipulator.wheel( pos, delta * wheelFactor );
             _pinch = true;
             break;
         }
         case deflect::Event::EVT_KEY_PRESS:
         {
-            _brayns.getKeyboardHandler().handleKeyboardShortcut( event.text[0] );
+            _keyboardHandler.handleKeyboardShortcut( event.text[0] );
             break;
         }
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
         {
-            _brayns.reshape( Vector2ui( event.dx, event.dy ));
+            _engine.reshape( Vector2ui( event.dx, event.dy ));
             break;
         }
         case deflect::Event::EVT_CLOSE:
@@ -260,13 +269,13 @@ void DeflectPlugin::_send( const bool swapYAxis )
 
 Vector2d DeflectPlugin::_getWindowPos( const deflect::Event& event ) const
 {
-    const auto windowSize = _brayns.getFrameBuffer().getSize();
+    const auto windowSize = _engine.getFrameBuffer().getSize();
     return { event.mouseX * windowSize.x(), event.mouseY * windowSize.y() };
 }
 
 double DeflectPlugin::_getZoomDelta( const deflect::Event& pinchEvent ) const
 {
-    const auto windowSize = _brayns.getFrameBuffer().getSize();
+    const auto windowSize = _engine.getFrameBuffer().getSize();
     const auto dx = pinchEvent.dx * windowSize.x();
     const auto dy = pinchEvent.dy * windowSize.y();
     return std::copysign( std::sqrt( dx * dx + dy * dy ), dx + dy );

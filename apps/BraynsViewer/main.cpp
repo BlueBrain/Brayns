@@ -22,7 +22,7 @@
 #include <brayns/Brayns.h>
 #include <brayns/common/types.h>
 #include <brayns/common/log.h>
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/parameters/ParametersManager.h>
 #include "BraynsViewer.h"
 
@@ -30,12 +30,12 @@ int main(int argc, const char **argv)
 {
     try
     {
-        brayns::BraynsPtr brayns( new brayns::Brayns( argc, argv ));
+        brayns::Brayns brayns( argc, argv );
         brayns::initGLUT( &argc, argv );
         brayns::BraynsViewer braynsViewer( brayns );
         BRAYNS_INFO << "Initializing Application..." << std::endl;
         const brayns::Vector2ui& size =
-            brayns->getParametersManager().getApplicationParameters().getWindowSize();
+            brayns.getParametersManager().getApplicationParameters().getWindowSize();
 
         braynsViewer.create( "Brayns Viewer", size.x(), size.y(), false );
         brayns::runGLUT();

@@ -33,8 +33,8 @@ namespace brayns
 OSPRayEngine::OSPRayEngine(
     int argc,
     const char **argv,
-    ParametersManagerPtr parametersManager )
-    : Engine()
+    ParametersManager& parametersManager )
+    : Engine( parametersManager )
 {
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     try
@@ -51,34 +51,32 @@ OSPRayEngine::OSPRayEngine(
 
     BRAYNS_INFO << "Initializing renderers" << std::endl;
     _activeRenderer =
-        parametersManager->getRenderingParameters().getRenderer();
+        _parametersManager.getRenderingParameters().getRenderer();
 
-    _rendererNames = parametersManager->getRenderingParameters().getRenderers();
+    _rendererNames = _parametersManager.getRenderingParameters().getRenderers();
 
     Renderers renderersForScene;
     for( std::string renderer: _rendererNames )
     {
         _renderers[renderer].reset(
-            new OSPRayRenderer( renderer, *parametersManager ));
+            new OSPRayRenderer( renderer, _parametersManager ));
         renderersForScene.push_back( _renderers[renderer] );
     }
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset( new OSPRayScene( renderersForScene, *parametersManager ));
+    _scene.reset( new OSPRayScene( renderersForScene, _parametersManager ));
 
     _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
-    _frameSize =
-        parametersManager->getApplicationParameters( ).getWindowSize( );
+    _frameSize = _parametersManager.getApplicationParameters( ).getWindowSize( );
 
-    const bool accumulation = parametersManager->getApplicationParameters().getFilters().empty( );
+    const bool accumulation = _parametersManager.getApplicationParameters().getFilters().empty( );
 
     _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8, accumulation ));
     _camera.reset( new OSPRayCamera(
-        parametersManager->getRenderingParameters().getCameraType( )));
+        _parametersManager.getRenderingParameters().getCameraType( )));
 
-    _keyboardHandler.reset( new KeyboardHandler( _scene, parametersManager ));
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 
@@ -93,6 +91,7 @@ std::string OSPRayEngine::name() const
 
 void OSPRayEngine::commit()
 {
+    Engine::commit();
     for( std::string renderer: _rendererNames )
     {
         _renderers[renderer]->setScene( _scene );

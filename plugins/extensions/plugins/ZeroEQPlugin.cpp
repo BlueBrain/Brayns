@@ -21,7 +21,7 @@
 #include "ZeroEQPlugin.h"
 
 #include <brayns/Brayns.h>
-#include <plugins/engines/common/Engine.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/renderer/Renderer.h>
@@ -37,8 +37,11 @@
 namespace brayns
 {
 
-ZeroEQPlugin::ZeroEQPlugin( Brayns& brayns )
-    : ExtensionPlugin( brayns )
+ZeroEQPlugin::ZeroEQPlugin(
+    Engine& engine,
+    ParametersManager& parametersManager )
+    : ExtensionPlugin( engine )
+    , _parametersManager( parametersManager )
     , _compressor( tjInitCompress() )
     , _processingImageJpeg( false )
 {
@@ -56,7 +59,7 @@ ZeroEQPlugin::~ZeroEQPlugin( )
 
     if( _httpServer )
     {
-        _httpServer->remove( *_brayns.getCamera().getSerializable() );
+        _httpServer->remove( *_engine.getCamera().getSerializable() );
         _httpServer->remove( _remoteImageJPEG );
     }
 }
@@ -78,8 +81,7 @@ bool ZeroEQPlugin::operator ! () const
 
 void ZeroEQPlugin::_setupHTTPServer()
 {
-    const strings& arguments =
-        _brayns.getParametersManager().getApplicationParameters().arguments();
+    const strings& arguments = _parametersManager.getApplicationParameters().arguments();
     char** argv = new char*[arguments.size()];
     for( size_t i = 0; i < arguments.size( ); ++i )
         argv[ i ] = const_cast< char* >( arguments[ i ].c_str( ));
@@ -97,9 +99,7 @@ void ZeroEQPlugin::_setupHTTPServer()
     BRAYNS_INFO << "Registering handlers on " <<
         _httpServer->getURI() << std::endl;
 
-    _httpServer->handleGET( "brayns/version", brayns::Version::getSchema(),
-                            &brayns::Version::toJSON );
-    servus::Serializable& cam = *_brayns.getCamera().getSerializable();
+    servus::Serializable& cam = *_engine.getCamera().getSerializable();
     _httpServer->handle( cam );
     cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
 
@@ -177,7 +177,7 @@ void ZeroEQPlugin::_setupRequests()
 {
     ::zerobuf::render::Camera camera;
     _requests[ camera.getTypeIdentifier() ] =
-        [&]{ return _publisher.publish( *_brayns.getCamera().getSerializable() ); };
+        [&]{ return _publisher.publish( *_engine.getCamera().getSerializable( )); };
 
     ::lexis::render::ImageJPEG imageJPEG;
     _requests[ imageJPEG.getTypeIdentifier() ] =
@@ -203,37 +203,34 @@ void ZeroEQPlugin::_setupSubscriber()
 
 void ZeroEQPlugin::_cameraUpdated()
 {
-    _brayns.getFrameBuffer().clear();
-    _brayns.getCamera().commit();
+    _engine.getFrameBuffer().clear();
+    _engine.getCamera().commit();
 }
 
 void ZeroEQPlugin::_attributeUpdated( )
 {
     BRAYNS_INFO << _remoteAttribute.getKeyString() << " = " <<
         _remoteAttribute.getValueString() << std::endl;
-    _brayns.getParametersManager().set(
-        _remoteAttribute.getKeyString(), _remoteAttribute.getValueString());
-    _brayns.getScene().commitVolumeData();
-    _brayns.getRenderer().commit();
-    _brayns.getFrameBuffer().clear();
+    _parametersManager.set( _remoteAttribute.getKeyString(), _remoteAttribute.getValueString( ));
+    _engine.getScene().commitVolumeData();
+    _engine.getRenderer().commit();
+    _engine.getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_resetCameraUpdated()
 {
     BRAYNS_INFO << "Resetting camera" << std::endl;
-    SceneParameters& sceneParameters =
-        _brayns.getParametersManager().getSceneParameters();
-    _brayns.getCamera().setEnvironmentMap( !sceneParameters.getEnvironmentMap().empty( ));
-    _brayns.getCamera().reset();
-    _brayns.getCamera().commit();
-    _brayns.getFrameBuffer().clear();
+    auto& sceneParameters = _parametersManager.getSceneParameters();
+    _engine.getCamera().setEnvironmentMap( !sceneParameters.getEnvironmentMap().empty( ));
+    _engine.getCamera().reset();
+    _engine.getCamera().commit();
+    _engine.getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_resetSceneUpdated()
 {
     BRAYNS_INFO << "Resetting scene" << std::endl;
-    _brayns.getScene().reset();
-    _brayns.buildScene();
+    _engine.makeDirty();
 }
 
 bool ZeroEQPlugin::_requestScene()
@@ -242,7 +239,7 @@ bool ZeroEQPlugin::_requestScene()
 
     auto& ms = _remoteScene.getMaterials();
     ms.clear();
-    Scene& scene = _brayns.getScene();
+    auto& scene = _engine.getScene();
     const auto& materials = scene.getMaterials();
 
     for( const auto& material: materials )
@@ -264,7 +261,7 @@ void ZeroEQPlugin::_sceneUpdated( )
 {
     BRAYNS_INFO << "Setting materials " << std::endl;
     auto& materials = _remoteScene.getMaterials();
-    Scene& scene = _brayns.getScene();
+    auto& scene = _engine.getScene();
 
     for( size_t materialId = 0; materialId < materials.size(); ++materialId )
     {
@@ -289,15 +286,15 @@ void ZeroEQPlugin::_sceneUpdated( )
         }
     }
     scene.commitMaterials( true );
-    _brayns.getRenderer().commit();
-    _brayns.getFrameBuffer().clear();
+    _engine.getRenderer().commit();
+    _engine.getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_spikesUpdated( )
 {
 #if 0
     AbstractSimulationHandlerPtr simulationHandler =
-        _brayns.getScene().getSimulationHandler();
+        _engine.getScene().getSimulationHandler();
 
     SpikeSimulationHandler* spikeSimulationHandler =
         dynamic_cast< SpikeSimulationHandler * >(simulationHandler.get());
@@ -309,8 +306,8 @@ void ZeroEQPlugin::_spikesUpdated( )
         for( const auto& gid: _remoteSpikes.getGidsVector() )
             data[gid] = ts;
 
-        _brayns.getFrameBuffer().clear();
-        _brayns.getScene().commitSimulationData();
+        _engine.getFrameBuffer().clear();
+        _engine.getScene().commitSimulationData();
     }
 #endif
 }
@@ -318,7 +315,7 @@ void ZeroEQPlugin::_spikesUpdated( )
 
 bool ZeroEQPlugin::_requestTransferFunction1D()
 {
-    Scene& scene = _brayns.getScene();
+    auto& scene = _engine.getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
     std::vector< ::zerobuf::render::Point2D > items;
 
@@ -332,7 +329,7 @@ bool ZeroEQPlugin::_requestTransferFunction1D()
 
 void ZeroEQPlugin::_transferFunction1DUpdated( )
 {
-    Scene& scene = _brayns.getScene();
+    auto& scene = _engine.getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
     std::vector< ::zerobuf::render::Point2D > points = _remoteTransferFunction1D.getPointsVector();
 
@@ -355,13 +352,13 @@ void ZeroEQPlugin::_transferFunction1DUpdated( )
 
     scene.commitSimulationData();
     scene.commitTransferFunctionData();
-    _brayns.getRenderer().commit();
-    _brayns.getFrameBuffer().clear();
+    _engine.getRenderer().commit();
+    _engine.getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_LookupTable1DUpdated( )
 {
-    Scene& scene = _brayns.getScene();
+    auto& scene = _engine.getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
     transferFunction.clear();
@@ -383,12 +380,12 @@ void ZeroEQPlugin::_LookupTable1DUpdated( )
 
     transferFunction.setValuesRange( Vector2f( 0.f, lut.size() / 4 ));
     scene.commitTransferFunctionData();
-    _brayns.getFrameBuffer().clear();
+    _engine.getFrameBuffer().clear();
 }
 
 bool ZeroEQPlugin::_requestLookupTable1D( )
 {
-    Scene& scene = _brayns.getScene();
+    auto& scene = _engine.getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
@@ -408,7 +405,7 @@ bool ZeroEQPlugin::_requestLookupTable1D( )
 
 void ZeroEQPlugin::_colormapUpdated()
 {
-    Scene& scene = _brayns.getScene();
+    auto& scene = _engine.getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
     transferFunction.clear();
@@ -431,12 +428,12 @@ void ZeroEQPlugin::_colormapUpdated()
     const auto& range = _remoteColormap.getRange( );
     transferFunction.setValuesRange( Vector2f(range[0], range[1] ));
     scene.commitTransferFunctionData();
-    _brayns.getFrameBuffer().clear();
+    _engine.getFrameBuffer().clear();
 }
 
 bool ZeroEQPlugin::_requestColormap( )
 {
-    Scene& scene = _brayns.getScene();
+    auto& scene = _engine.getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
@@ -486,7 +483,7 @@ bool ZeroEQPlugin::_requestImageJPEG()
     {
         _processingImageJpeg = true;
         const auto& newFrameSize =
-            _brayns.getParametersManager().getApplicationParameters().getJpegSize();
+            _parametersManager.getApplicationParameters().getJpegSize();
         if( newFrameSize.x() == 0 || newFrameSize.y() == 0 )
         {
             BRAYNS_ERROR << "Encountered invalid size of image JPEG: "
@@ -495,7 +492,7 @@ bool ZeroEQPlugin::_requestImageJPEG()
             return false;
         }
 
-        FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
+        FrameBuffer& frameBuffer = _engine.getFrameBuffer();
         const auto& frameSize = frameBuffer.getSize();
         unsigned int* colorBuffer =
             (unsigned int*)frameBuffer.getColorBuffer( );
@@ -528,7 +525,7 @@ bool ZeroEQPlugin::_requestImageJPEG()
 
 bool ZeroEQPlugin::_requestFrameBuffers()
 {
-    FrameBuffer& frameBuffer = _brayns.getFrameBuffer();
+    auto& frameBuffer = _engine.getFrameBuffer();
     const Vector2i frameSize = frameBuffer.getSize( );
     const float* depthBuffer = frameBuffer.getDepthBuffer( );
 
@@ -563,7 +560,7 @@ bool ZeroEQPlugin::_requestFrameBuffers()
 bool ZeroEQPlugin::_requestSpikes()
 {
 #if 0
-    AbstractSimulationHandlerPtr simulationHandler = _brayns.getScene().getSimulationHandler();
+    AbstractSimulationHandlerPtr simulationHandler = _engine.getScene().getSimulationHandler();
 
     SpikeSimulationHandler* spikeSimulationHandler =
         dynamic_cast< SpikeSimulationHandler * >( simulationHandler.get() );
@@ -586,12 +583,9 @@ bool ZeroEQPlugin::_requestSpikes()
 
 void ZeroEQPlugin::_initializeDataSource()
 {
-    SceneParameters& sceneParameters =
-        _brayns.getParametersManager().getSceneParameters();
-    GeometryParameters& geometryParameters =
-        _brayns.getParametersManager().getGeometryParameters();
-    VolumeParameters& volumeParameters =
-        _brayns.getParametersManager().getVolumeParameters();
+    auto& sceneParameters = _parametersManager.getSceneParameters();
+    auto& geometryParameters = _parametersManager.getGeometryParameters();
+    auto& volumeParameters = _parametersManager.getVolumeParameters();
 
     _remoteDataSource.setTransfer_function_file( sceneParameters.getTransferFunctionFilename( ));
     _remoteDataSource.setMorphology_folder( geometryParameters.getMorphologyFolder( ));
@@ -632,91 +626,91 @@ void ZeroEQPlugin::_dataSourceUpdated()
 {
     BRAYNS_INFO << "Data source updated" << std::endl;
 
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "splash-scene-folder", ""); // Make sure the splash scene is removed
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "transfer-function-file", _remoteDataSource.getTransfer_function_fileString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "morphology-folder", _remoteDataSource.getMorphology_folderString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "nest-circuit", _remoteDataSource.getNest_circuitString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "nest-report", _remoteDataSource.getNest_reportString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "pdb-file", _remoteDataSource.getPdb_fileString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "pdb-folder", _remoteDataSource.getPdb_folderString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "xyzb-file", _remoteDataSource.getXyzb_fileString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "mesh-folder", _remoteDataSource.getMesh_folderString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "circuit-config", _remoteDataSource.getCircuit_configString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "load-cache-file", _remoteDataSource.getLoad_cache_fileString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "save-cache-file", _remoteDataSource.getSave_cache_fileString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "radius-multiplier", std::to_string(_remoteDataSource.getRadius_multiplier( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "radius-correction", std::to_string(_remoteDataSource.getRadius_correction( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "color-scheme", std::to_string(_remoteDataSource.getColor_scheme( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "scene-environment", std::to_string(_remoteDataSource.getScene_environment( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "geometry-quality", std::to_string(_remoteDataSource.getGeometry_quality( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "target", _remoteDataSource.getTargetString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "report", _remoteDataSource.getReportString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "non-simulated-cells", std::to_string(_remoteDataSource.getNon_simulated_cells( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "start-simulation-time", std::to_string(_remoteDataSource.getStart_simulation_time( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "end-simulation-time", std::to_string(_remoteDataSource.getEnd_simulation_time( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "simulation-values-range",
         std::to_string(_remoteDataSource.getSimulation_values_range()[0]) + " " +
         std::to_string(_remoteDataSource.getSimulation_values_range()[1]) );
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "simulation-cache-file", _remoteDataSource.getSimulation_cache_fileString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "nest-cache-file", _remoteDataSource.getNest_cache_fileString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "morphology-section-types",
         std::to_string(_remoteDataSource.getMorphology_section_types( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "morphology-layout", std::to_string(_remoteDataSource.getMorphology_layout( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "generate-multiple-models", (_remoteDataSource.getGenerate_multiple_models( ) ? "1" : "0"));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "volume-folder", _remoteDataSource.getVolume_folderString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "volume-file", _remoteDataSource.getVolume_fileString( ));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "volume-dimensions",
         std::to_string(_remoteDataSource.getVolume_dimensions()[0]) + " " +
         std::to_string(_remoteDataSource.getVolume_dimensions()[1]) + " " +
         std::to_string(_remoteDataSource.getVolume_dimensions()[2]) );
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "volume-element-spacing",
         std::to_string(_remoteDataSource.getVolume_element_spacing()[0]) + " " +
         std::to_string(_remoteDataSource.getVolume_element_spacing()[1]) + " " +
         std::to_string(_remoteDataSource.getVolume_element_spacing()[2]) );
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "volume-offset",
         std::to_string(_remoteDataSource.getVolume_offset()[0]) + " " +
         std::to_string(_remoteDataSource.getVolume_offset()[1]) + " " +
         std::to_string(_remoteDataSource.getVolume_offset()[2]) );
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "environment-map", _remoteDataSource.getEnvironment_mapString( ));
 
-    _brayns.getScene().commitVolumeData();
-    _brayns.getRenderer().commit();
-    _brayns.getFrameBuffer().clear();
-    _brayns.getParametersManager().print();
+    _engine.getScene().commitVolumeData();
+    _engine.getRenderer().commit();
+    _engine.getFrameBuffer().clear();
+    _parametersManager.print();
 
     _resetSceneUpdated();
     _resetCameraUpdated();
@@ -724,14 +718,10 @@ void ZeroEQPlugin::_dataSourceUpdated()
 
 void ZeroEQPlugin::_initializeSettings()
 {
-    SceneParameters& sceneParameters =
-        _brayns.getParametersManager().getSceneParameters();
-    RenderingParameters& renderingParameters =
-        _brayns.getParametersManager().getRenderingParameters();
-    VolumeParameters& volumeParameters =
-        _brayns.getParametersManager().getVolumeParameters();
-    auto& applicationParameters =
-        _brayns.getParametersManager().getApplicationParameters();
+    auto& sceneParameters = _parametersManager.getSceneParameters();
+    auto& renderingParameters = _parametersManager.getRenderingParameters();
+    auto& volumeParameters = _parametersManager.getVolumeParameters();
+    auto& applicationParameters = _parametersManager.getApplicationParameters();
 
     _remoteSettings.setTimestamp( sceneParameters.getTimestamp( ));
     _remoteSettings.setVolume_samples_per_ray( volumeParameters.getSamplesPerRay( ));
@@ -773,79 +763,79 @@ void ZeroEQPlugin::_settingsUpdated()
 {
     BRAYNS_INFO << "Settings updated" << std::endl;
 
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "timestamp", std::to_string(_remoteSettings.getTimestamp( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "volume-samples-per-ray", std::to_string(_remoteSettings.getVolume_samples_per_ray( )));
     switch( _remoteSettings.getShader( ))
     {
         case brayns::Shader::proximity:
-            _brayns.getParametersManager().set( "renderer", "proximityrenderer"); break;
+            _parametersManager.set( "renderer", "proximityrenderer"); break;
         case brayns::Shader::particle:
-            _brayns.getParametersManager().set( "renderer", "particlerenderer"); break;
+            _parametersManager.set( "renderer", "particlerenderer"); break;
         case brayns::Shader::simulation:
-            _brayns.getParametersManager().set( "renderer", "simulationrenderer"); break;
+            _parametersManager.set( "renderer", "simulationrenderer"); break;
         default:
-            _brayns.getParametersManager().set( "renderer", "exobj"); break;
+            _parametersManager.set( "renderer", "exobj"); break;
     }
     switch( _remoteSettings.getShading( ))
     {
         case brayns::Shading::diffuse:
-            _brayns.getParametersManager().set( "shading", "diffuse"); break;
+            _parametersManager.set( "shading", "diffuse"); break;
         case brayns::Shading::electron:
-            _brayns.getParametersManager().set( "shading", "electron"); break;
+            _parametersManager.set( "shading", "electron"); break;
         default:
-            _brayns.getParametersManager().set( "shading", "none"); break;
+            _parametersManager.set( "shading", "none"); break;
     }
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "spp", std::to_string(_remoteSettings.getSamples_per_pixel( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "ambient-occlusion", std::to_string(_remoteSettings.getAmbient_occlusion()));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "shadows", (_remoteSettings.getShadows( ) ? "1" : "0"));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "soft-shadows", (_remoteSettings.getSoft_shadows( ) ? "1" : "0"));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "radiance", (_remoteSettings.getRadiance( ) ? "1" : "0"));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "background-color",
         std::to_string(_remoteSettings.getBackground_color()[0]) + " " +
         std::to_string(_remoteSettings.getBackground_color()[1]) + " " +
         std::to_string(_remoteSettings.getBackground_color()[2]) );
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "detection-distance", std::to_string(_remoteSettings.getDetection_distance( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "detection-on-different-material",
         (_remoteSettings.getDetection_on_different_material() ? "1" : "0"));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "detection-near-color",
         std::to_string(_remoteSettings.getDetection_near_color()[0]) + " " +
         std::to_string(_remoteSettings.getDetection_near_color()[1]) + " " +
         std::to_string(_remoteSettings.getDetection_near_color()[2]) );
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "detection-far-color",
         std::to_string(_remoteSettings.getDetection_far_color()[0]) + " " +
         std::to_string(_remoteSettings.getDetection_far_color()[1]) + " " +
         std::to_string(_remoteSettings.getDetection_far_color()[2]) );
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "epsilon", std::to_string(_remoteSettings.getEpsilon( )));
-    _brayns.getParametersManager().set(
+    _parametersManager.set(
         "head-light", (_remoteSettings.getHead_light( ) ? "1" : "0"));
 
-    auto& app = _brayns.getParametersManager().getApplicationParameters();
+    auto& app = _parametersManager.getApplicationParameters();
     app.setJpegSize( Vector2ui{ _remoteSettings.getJpeg_size()  } );
     app.setJpegCompression( std::min( _remoteSettings.getJpeg_compression(), 100u ));
 
-    _brayns.getRenderer().commit();
-    _brayns.getFrameBuffer().clear();
+    _engine.getRenderer().commit();
+    _engine.getFrameBuffer().clear();
 }
 
 bool ZeroEQPlugin::_requestFrame()
 {
-    auto simHandler = _brayns.getScene().getSimulationHandler();
+    auto simHandler = _engine.getScene().getSimulationHandler();
     const uint64_t nbFrames = simHandler ? simHandler->getNbFrames() : 0;
 
-    const auto ts = uint64_t(_brayns.getParametersManager().getSceneParameters().getTimestamp());
+    const auto ts = uint64_t(_parametersManager.getSceneParameters().getTimestamp());
     _remoteFrame.setCurrent( nbFrames == 0 ? 0 : (ts % nbFrames) );
     _remoteFrame.setDelta( 1 );
     _remoteFrame.setEnd( nbFrames );
@@ -855,21 +845,22 @@ bool ZeroEQPlugin::_requestFrame()
 
 void ZeroEQPlugin::_frameUpdated()
 {
-    _brayns.getParametersManager().getSceneParameters().setTimestamp( _remoteFrame.getCurrent( ));
-    _brayns.commit();
+    _parametersManager.getSceneParameters().setTimestamp( _remoteFrame.getCurrent( ));
+    _engine.commit();
 }
 
 bool ZeroEQPlugin::_requestViewport()
 {
-    const auto& windowSize = _brayns.getParametersManager().getApplicationParameters().getWindowSize();
+    const auto& windowSize =
+        _parametersManager.getApplicationParameters().getWindowSize();
     _remoteViewport.setSize( { windowSize[0], windowSize[1] } );
     return true;
 }
 
 void ZeroEQPlugin::_viewportUpdated()
 {
-    _brayns.getParametersManager().getApplicationParameters().setWindowSize( Vector2ui{ _remoteViewport.getSize() } );
-    _brayns.commit();
+    _parametersManager.getApplicationParameters().setWindowSize( Vector2ui{ _remoteViewport.getSize() } );
+    _engine.commit();
 }
 
 uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width,
@@ -890,7 +881,7 @@ uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width,
     const int32_t success = tjCompress2(
         _compressor, tjSrcBuffer, width, tjPitch, height,
         tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
-        _brayns.getParametersManager().getApplicationParameters().getJpegCompression(),
+        _parametersManager.getApplicationParameters().getJpegCompression(),
         tjFlags);
 
     if(success != 0)

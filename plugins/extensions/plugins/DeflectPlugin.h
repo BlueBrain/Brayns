@@ -51,9 +51,16 @@ public:
                potentially updated by registered plugins
     */
 #ifdef BRAYNS_USE_ZEROEQ
-    DeflectPlugin( Brayns& brayns, ZeroEQPlugin& zeroeq );
+    DeflectPlugin(
+        Engine& engine,
+        KeyboardHandler& keyboardHandler,
+        AbstractManipulator& cameraManipulator,
+        ZeroEQPlugin& zeroeq );
 #else
-    DeflectPlugin( Brayns& brayns );
+    DeflectPlugin(
+        Engine& engine,
+        KeyboardHandler& keyboardHandler,
+        AbstractManipulator& cameraManipulator );
 #endif
 
     /** @copydoc ExtensionPlugin::execute */
@@ -92,6 +99,9 @@ private:
 
     Vector2d _getWindowPos( const deflect::Event& event ) const;
     double _getZoomDelta( const deflect::Event& pinchEvent ) const;
+
+    KeyboardHandler& _keyboardHandler;
+    AbstractManipulator& _cameraManipulator;
 
     Vector2d _previousPos;
     bool _pan = false;

@@ -35,7 +35,9 @@ namespace brayns
  */
 class ExtensionPlugin
 {
+
 public:
+
     virtual ~ExtensionPlugin() {}
 
     /**
@@ -45,9 +47,11 @@ public:
     BRAYNS_API virtual void run( ) = 0;
 
 protected:
-    ExtensionPlugin( Brayns& brayns );
 
-    Brayns& _brayns;
+    ExtensionPlugin( Engine& engine );
+
+    Engine& _engine;
+
 };
 
 }

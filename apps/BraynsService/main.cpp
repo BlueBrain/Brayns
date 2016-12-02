@@ -22,12 +22,12 @@
 #include <brayns/common/log.h>
 #include <brayns/Brayns.h>
 
-int main(int argc, const char **argv)
+int main( int argc, const char **argv )
 {
     try
     {
         BRAYNS_INFO << "Initializing Service..." << std::endl;
-        brayns::Brayns brayns(argc, argv);
+        brayns::Brayns brayns( argc, argv );
 
         while( true )
             brayns.render( );

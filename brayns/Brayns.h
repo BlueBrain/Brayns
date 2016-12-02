@@ -29,23 +29,6 @@
 namespace brayns
 {
 
-struct RenderInput
-{
-    Vector2i windowSize;
-    Matrix4f modelview;
-    Matrix4f projection;
-
-    Vector3f position;
-    Vector3f target;
-    Vector3f up;
-};
-
-struct RenderOutput
-{
-    uint8_ts colorBuffer;
-    floats depthBuffer;
-};
-
 /**
     Brayns is a minimalistic library that allows optimized ray-tracing rendering
     of meshes and parametric geometry. Brayns provides an abstraction of the
@@ -95,20 +78,6 @@ public:
     BRAYNS_API void render();
 
     /**
-       Commits the changes held by scene and camera objects so that
-       attributes become available to the underlying rendering engine
-
-       @todo Must be removed (VIZTM-572)
-    */
-    BRAYNS_API void commit();
-
-    /**
-       Gets parameters manager
-       @return Parameters manager for the current scene
-    */
-    BRAYNS_API ParametersManager& getParametersManager();
-
-    /**
        Sets materials for the current scene
        @param materialType Predefined sets of colors
              MT_DEFAULT: Random colors
@@ -126,63 +95,30 @@ public:
         size_t nbMaterials = NB_MAX_MATERIALS);
 
     /**
-       Reshapes the current frame buffers
-       @param frameSize New size for the buffers
-
-       @todo Must be removed and held by the render method above
-    */
-    BRAYNS_API void reshape( const Vector2ui& frameSize );
-
-    /**
-       Gets the current engine
-       @return The engine object
+       @return the current engine
     */
     BRAYNS_API Engine& getEngine();
 
     /**
-       Gets the current scene
-       @return The scene object
-
-       @todo Must be removed (VIZTM-572)
-    */
-    BRAYNS_API Scene& getScene();
+     * @return The parameter manager
+     */
+    BRAYNS_API ParametersManager& getParametersManager();
 
     /**
-       Gets the current renderer
-       @return The renderer object
-    */
-    BRAYNS_API Renderer& getRenderer();
-
-    /**
-       Gets the current camera
-       @return The camera object
-
-       @todo Must be removed (VIZTM-572)
-    */
-    BRAYNS_API Camera& getCamera();
-
-    /**
-       Gets the camera manipulator
-       @return The camera manipulator that is currently active
-    */
-    BRAYNS_API AbstractManipulator& getCameraManipulator();
-
-    /**
-       Gets the current frame buffer
-       @return The frame buffer object
-    */
-    BRAYNS_API FrameBuffer& getFrameBuffer();
-
-    /**
-       Gets the keyboard handler
-       @return The keyboard handler object
-    */
+     * Gets the keyboard handler
+     */
     BRAYNS_API KeyboardHandler& getKeyboardHandler();
 
     /**
-       Builds scene according to scene and geometry parameters
-    */
+     * Gets the camera manipulator
+     */
+    BRAYNS_API AbstractManipulator& getCameraManipulator();
+
+    /**
+     * Builds scene according to scene and geometry parameters
+     */
     BRAYNS_API void buildScene();
+
 
 private:
 

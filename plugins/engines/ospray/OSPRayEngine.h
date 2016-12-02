@@ -21,7 +21,7 @@
 #ifndef OSPRAYENGINE_H
 #define OSPRAYENGINE_H
 
-#include <plugins/engines/common/Engine.h>
+#include <brayns/common/engine/Engine.h>
 
 namespace brayns
 {
@@ -37,7 +37,7 @@ public:
     OSPRayEngine(
         int argc,
         const char **argv,
-        ParametersManagerPtr parametersManager );
+        ParametersManager& parametersManager );
 
     ~OSPRayEngine();
 
