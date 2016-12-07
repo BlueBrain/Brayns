@@ -180,6 +180,8 @@ void DeflectPlugin::_sendDeflectFrame()
 
         _send( true );
     }
+    else
+        _sendFuture = make_ready_future( true );
 }
 
 bool DeflectPlugin::_handleDeflectEvents()
