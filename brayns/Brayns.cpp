@@ -108,6 +108,9 @@ struct Brayns::Impl
         Camera& camera = _engine->getCamera();
         camera.set( renderInput.position, renderInput.target, renderInput.up );
 
+        _engine->reshape( renderInput.windowSize );
+        _engine->preRender();
+
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
         if( !_extensionPluginFactory )
             _intializeExtensionPluginFactory( );
@@ -119,9 +122,6 @@ struct Brayns::Impl
             buildScene();
         }
 #endif
-
-        _engine->reshape( renderInput.windowSize );
-        _engine->preRender();
 
         camera.commit();
 
@@ -161,6 +161,13 @@ struct Brayns::Impl
 
     void render()
     {
+        Scene& scene = _engine->getScene();
+        Camera& camera = _engine->getCamera();
+        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
+        const Vector2i& frameSize = frameBuffer.getSize();
+
+        _engine->preRender();
+
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
         if( !_extensionPluginFactory )
             _intializeExtensionPluginFactory( );
@@ -172,13 +179,6 @@ struct Brayns::Impl
             buildScene();
         }
 #endif
-
-        Scene& scene = _engine->getScene();
-        Camera& camera = _engine->getCamera();
-        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-        const Vector2i& frameSize = frameBuffer.getSize();
-
-        _engine->preRender();
 
         if( _parametersManager->getRenderingParameters().getHeadLight() )
         {
