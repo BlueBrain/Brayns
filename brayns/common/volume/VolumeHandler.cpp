@@ -85,44 +85,57 @@ void VolumeHandler::setTimestamp( const float timestamp )
 
 void* VolumeHandler::getData() const
 {
-    return _volumeDescriptors.at( _timestamp )->getMemoryMapPtr();
+    if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
+        return _volumeDescriptors.at( _timestamp )->getMemoryMapPtr();
+    return nullptr;
 }
 
 float VolumeHandler::getEpsilon(
     const Vector3f& elementSpacing,
     const uint16_t samplesPerRay )
 {
+    if( _volumeDescriptors.find( _timestamp ) == _volumeDescriptors.end( ))
+        return 0.f;
     const Vector3f diag = _volumeDescriptors.at( _timestamp )->getDimensions( ) * elementSpacing;
     return diag.find_max() / float( samplesPerRay );
 }
 
 const Vector3ui VolumeHandler::getDimensions() const
 {
-    return _volumeDescriptors.at( _timestamp )->getDimensions();
+    if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
+        return _volumeDescriptors.at( _timestamp )->getDimensions();
+    return Vector3ui();
 }
 
 const Vector3f VolumeHandler::getElementSpacing() const
 {
-    return _volumeDescriptors.at( _timestamp )->getElementSpacing();
+    if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
+        return _volumeDescriptors.at( _timestamp )->getElementSpacing();
+    return Vector3f();
 }
 
 const Vector3f VolumeHandler::getOffset() const
 {
-    return _volumeDescriptors.at( _timestamp )->getOffset();
+    if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
+        return _volumeDescriptors.at( _timestamp )->getOffset();
+    return Vector3f();
 }
 
 uint64_t VolumeHandler::getSize() const
 {
-    return _volumeDescriptors.at( _timestamp )->getSize();
+    if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
+        return _volumeDescriptors.at( _timestamp )->getSize();
+    return 0;
 }
 
 float VolumeHandler::_getBoundedTimestamp( const float timestamp ) const
 {
-    float result;
+    float result = 0.f;
     switch( _timestampMode )
     {
     case TimestampMode::modulo:
-        result = size_t( timestamp + _timestampRange.x( )) % _volumeDescriptors.size();
+        if( _volumeDescriptors.size() != 0 )
+            result = size_t( timestamp + _timestampRange.x( )) % _volumeDescriptors.size();
         break;
     case TimestampMode::bounded:
         result = std::max( std::min( timestamp, _timestampRange.y( )), _timestampRange.x( ));

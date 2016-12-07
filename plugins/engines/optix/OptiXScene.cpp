@@ -760,7 +760,7 @@ void OptiXScene::commitVolumeData()
 {
     const float timestamp = _parametersManager.getSceneParameters().getTimestamp();
     VolumeHandlerPtr volumeHandler = getVolumeHandler();
-    if( !volumeHandler )
+    if( !volumeHandler || !volumeHandler->getData( ))
     {
         _volumeBuffer = _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE, 0 );
         _context[ "volumeData" ]->setBuffer( _volumeBuffer );
