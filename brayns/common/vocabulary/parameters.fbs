@@ -18,7 +18,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110_1301 USA.
  */
 
-namespace brayns;
+namespace brayns.v1;
+
+enum GeometryQuality: uint {
+    low = 0,
+    medium = 1,
+    high = 2
+}
+
+enum SectionType: uint {
+    soma = 1,
+    axon = 2,
+    dendrite = 4,
+    apical_dendrite = 8
+}
+
+enum ColorScheme: uint {
+    none = 0,
+    protein_atoms = 1,
+    protein_chain = 2,
+    protein_residue = 3,
+    protein_backbone = 4,
+    neuron_default = 5,
+    neuron_by_id = 6,
+    neuron_by_type = 7
+    neuron_by_segment_type = 8
+}
+
+enum SceneEnvironment: uint {
+    none = 0,
+    ground = 1,
+    wall = 2,
+    bounding_box = 3
+}
 
 table DataSource {
     transfer_function_file: string;
@@ -34,9 +66,9 @@ table DataSource {
     save_cache_file: string;
     radius_multiplier: float;
     radius_correction: float;
-    color_scheme: uint;
-    scene_environment: uint;
-    geometry_quality: uint;
+    color_scheme: ColorScheme;
+    scene_environment: SceneEnvironment;
+    geometry_quality: GeometryQuality;
     target: string;
     report: string;
     non_simulated_cells: uint;
@@ -45,7 +77,7 @@ table DataSource {
     simulation_values_range: [float:2];
     simulation_cache_file: string;
     nest_cache_file: string;
-    morphology_section_types: uint;
+    morphology_section_types: [SectionType];
     morphology_layout: uint;
     generate_multiple_models: bool;
     volume_folder: string;

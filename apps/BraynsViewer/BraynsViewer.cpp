@@ -66,17 +66,17 @@ void BraynsViewer::_registerKeyboardShortcuts()
 
 void BraynsViewer::_gradientMaterials()
 {
-    _brayns.setMaterials( MT_GRADIENT );
+    _brayns.getEngine().initializeMaterials( MT_GRADIENT );
 }
 
 void BraynsViewer::_pastelMaterials()
 {
-    _brayns.setMaterials( MT_PASTEL_COLORS );
+    _brayns.getEngine().initializeMaterials( MT_PASTEL_COLORS );
 }
 
 void BraynsViewer::_randomMaterials()
 {
-    _brayns.setMaterials( MT_RANDOM );
+    _brayns.getEngine().initializeMaterials( MT_RANDOM );
 }
 
 void BraynsViewer::_toggleIncrementalTimestamp()

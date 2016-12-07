@@ -63,6 +63,7 @@ void Scene::setMaterials(
     for( size_t i = 0; i < nbMaterials; ++i )
     {
         MaterialPtr material( new Material );
+        material->setSpecularColor( Vector3f( 0.f, 0.f, 0.f ));
 
         // Special materials ( skybox, etc )
         switch( i )

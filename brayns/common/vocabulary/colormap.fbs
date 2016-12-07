@@ -11,7 +11,7 @@
 // When rendering for different kinds of data ( i.e. float, short )
 // this event needs further improvements.
 
-namespace zerobuf.render;
+namespace brayns.v1;
 
 table Colormap
 {

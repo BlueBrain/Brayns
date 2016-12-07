@@ -243,21 +243,22 @@ private:
     RequestFuncs _requests;
     bool _processingImageJpeg;
 
-    ::brayns::DataSource _remoteDataSource;
-    ::brayns::Settings _remoteSettings;
     ::lexis::render::Frame _remoteFrame;
     ::lexis::render::ImageJPEG _remoteImageJPEG;
     ::lexis::render::LookupTable1D _remoteLookupTable1D;
     ::lexis::render::Viewport _remoteViewport;
-    ::zerobuf::data::Spikes _remoteSpikes;
-    ::zerobuf::render::Attribute _remoteAttribute;
-    ::zerobuf::render::Colormap _remoteColormap;
-    ::zerobuf::render::FrameBuffers _remoteFrameBuffers;
-    ::zerobuf::render::Material _remoteMaterial;
-    ::zerobuf::render::ResetCamera _remoteResetCamera;
-    ::zerobuf::render::ResetScene _remoteResetScene;
-    ::zerobuf::render::Scene _remoteScene;
-    ::zerobuf::render::TransferFunction1D _remoteTransferFunction1D;
+
+    ::brayns::v1::DataSource _remoteDataSource;
+    ::brayns::v1::Settings _remoteSettings;
+    ::brayns::v1::Spikes _remoteSpikes;
+    ::brayns::v1::Attribute _remoteAttribute;
+    ::brayns::v1::Colormap _remoteColormap;
+    ::brayns::v1::FrameBuffers _remoteFrameBuffers;
+    ::brayns::v1::Material _remoteMaterial;
+    ::brayns::v1::ResetCamera _remoteResetCamera;
+    ::brayns::v1::ResetScene _remoteResetScene;
+    ::brayns::v1::Scene _remoteScene;
+    ::brayns::v1::TransferFunction1D _remoteTransferFunction1D;
 };
 
 }

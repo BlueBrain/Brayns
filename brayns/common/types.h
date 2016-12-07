@@ -189,17 +189,17 @@ enum FrameBufferFormat
 };
 
 /** Define the color scheme to be applied to the geometry */
-enum ColorScheme
+enum class ColorScheme
 {
-    CS_NONE,
-    CS_PROTEIN_ATOMS,
-    CS_PROTEIN_CHAINS,
-    CS_PROTEIN_RESIDUES,
-    CS_PROTEIN_BACKBONE,
-    CS_NEURON_DEFAULT,
-    CS_NEURON_BY_ID,
-    CS_NEURON_BY_TYPE,
-    CS_NEURON_BY_SEGMENT_TYPE,
+    none,
+    protein_atoms,
+    protein_chains,
+    protein_residues,
+    protein_backbones,
+    neuron_default,
+    neuron_by_id,
+    neuron_by_type,
+    neuron_by_segment_type,
 };
 
 /** Define the environment that is added to the default scene */
@@ -219,11 +219,11 @@ enum LightType
 };
 
 /** Geometry quality */
-enum GeometryQuality
+enum class GeometryQuality
 {
-    GQ_FAST,
-    GQ_QUALITY,
-    GQ_MAX_QUALITY
+    low,
+    medium,
+    high
 };
 
 /** Morphology element types */

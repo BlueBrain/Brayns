@@ -117,6 +117,21 @@ public:
      */
     bool isDirty() { return _dirty; }
 
+    /**
+       Initializes materials for the current scene
+       @param materialType Predefined sets of colors
+             MT_DEFAULT: Random colors
+             MT_RANDOM: Random materials including transparency, reflection and
+                        light emission
+             MT_SHADES_OF_GREY: 255 shades of grey
+             MT_GRADIENT: Gradient from red to yellow
+             MT_PASTEL_COLORS: Random pastel colors
+       @param nbMaterials Number of materials to be defined
+    */
+    void initializeMaterials(
+        MaterialType materialType = MT_DEFAULT,
+        size_t nbMaterials = NB_MAX_MATERIALS );
+
 protected:
 
     void _render( const RenderInput& renderInput, RenderOutput& renderOutput );

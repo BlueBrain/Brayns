@@ -175,7 +175,7 @@ void ZeroEQPlugin::_setupHTTPServer()
 
 void ZeroEQPlugin::_setupRequests()
 {
-    ::zerobuf::render::Camera camera;
+    ::brayns::v1::Camera camera;
     _requests[ camera.getTypeIdentifier() ] =
         [&]{ return _publisher.publish( *_engine.getCamera().getSerializable( )); };
 
@@ -183,15 +183,15 @@ void ZeroEQPlugin::_setupRequests()
     _requests[ imageJPEG.getTypeIdentifier() ] =
         std::bind( &ZeroEQPlugin::_requestImageJPEG, this );
 
-    ::zerobuf::render::FrameBuffers frameBuffers;
+    ::brayns::v1::FrameBuffers frameBuffers;
     _requests[ frameBuffers.getTypeIdentifier() ] =
         std::bind( &ZeroEQPlugin::_requestFrameBuffers, this );
 
-    ::zerobuf::render::TransferFunction1D transferFunction1D;
+    ::brayns::v1::TransferFunction1D transferFunction1D;
     _requests[ transferFunction1D.getTypeIdentifier() ] =
         std::bind( &ZeroEQPlugin::_requestTransferFunction1D, this );
 
-    ::zerobuf::data::Spikes spikes;
+    ::brayns::v1::Spikes spikes;
     _requests[ spikes.getTypeIdentifier() ] =
         std::bind( &ZeroEQPlugin::_requestSpikes, this );
 }
@@ -219,7 +219,6 @@ void ZeroEQPlugin::_attributeUpdated( )
 
 void ZeroEQPlugin::_resetCameraUpdated()
 {
-    BRAYNS_INFO << "Resetting camera" << std::endl;
     auto& sceneParameters = _parametersManager.getSceneParameters();
     _engine.getCamera().setEnvironmentMap( !sceneParameters.getEnvironmentMap().empty( ));
     _engine.getCamera().reset();
@@ -229,14 +228,11 @@ void ZeroEQPlugin::_resetCameraUpdated()
 
 void ZeroEQPlugin::_resetSceneUpdated()
 {
-    BRAYNS_INFO << "Resetting scene" << std::endl;
     _engine.makeDirty();
 }
 
 bool ZeroEQPlugin::_requestScene()
 {
-    BRAYNS_INFO << "Getting materials " << std::endl;
-
     auto& ms = _remoteScene.getMaterials();
     ms.clear();
     auto& scene = _engine.getScene();
@@ -244,7 +240,7 @@ bool ZeroEQPlugin::_requestScene()
 
     for( const auto& material: materials )
     {
-        ::zerobuf::render::Material m;
+        ::brayns::v1::Material m;
         m.setDiffuse_color( material->getColor( ));
         m.setSpecular_color( material->getSpecularColor( ));
         m.setSpecular_exponent( material->getSpecularExponent( ));
@@ -259,7 +255,6 @@ bool ZeroEQPlugin::_requestScene()
 
 void ZeroEQPlugin::_sceneUpdated( )
 {
-    BRAYNS_INFO << "Setting materials " << std::endl;
     auto& materials = _remoteScene.getMaterials();
     auto& scene = _engine.getScene();
 
@@ -269,7 +264,7 @@ void ZeroEQPlugin::_sceneUpdated( )
 
         if( material)
         {
-            ::zerobuf::render::Material& m = materials[ materialId ];
+            ::brayns::v1::Material& m = materials[ materialId ];
             const floats& diffuse = m.getDiffuse_colorVector();
             Vector3f kd = { diffuse[0], diffuse[1], diffuse[2] };
             material->setColor( kd );
@@ -317,10 +312,10 @@ bool ZeroEQPlugin::_requestTransferFunction1D()
 {
     auto& scene = _engine.getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
-    std::vector< ::zerobuf::render::Point2D > items;
+    std::vector< ::brayns::v1::Point2D > items;
 
     for( const auto& controlPoint: transferFunction.getControlPoints( TF_RED ) )
-        items.push_back( ::zerobuf::render::Point2D(
+        items.push_back( ::brayns::v1::Point2D(
             controlPoint.x(), controlPoint.y() ));
     _remoteTransferFunction1D.setAttribute( transferFunction.getAttributeAsString( TF_RED ) );
     _remoteTransferFunction1D.setPoints( items );
@@ -331,7 +326,7 @@ void ZeroEQPlugin::_transferFunction1DUpdated( )
 {
     auto& scene = _engine.getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
-    std::vector< ::zerobuf::render::Point2D > points = _remoteTransferFunction1D.getPointsVector();
+    std::vector< ::brayns::v1::Point2D > points = _remoteTransferFunction1D.getPointsVector();
 
     const std::string& attributeName = _remoteTransferFunction1D.getAttributeString();
     BRAYNS_INFO << "Setting "
@@ -600,9 +595,12 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setSave_cache_file( geometryParameters.getSaveCacheFile( ));
     _remoteDataSource.setRadius_multiplier( geometryParameters.getRadiusMultiplier( ));
     _remoteDataSource.setRadius_correction( geometryParameters.getRadiusCorrection( ));
-    _remoteDataSource.setColor_scheme( geometryParameters.getColorScheme( ));
-    _remoteDataSource.setScene_environment( geometryParameters.getSceneEnvironment( ));
-    _remoteDataSource.setGeometry_quality( geometryParameters.getGeometryQuality( ));
+    _remoteDataSource.setColor_scheme(
+        ::brayns::v1::ColorScheme(geometryParameters.getColorScheme()));
+    _remoteDataSource.setScene_environment(
+        ::brayns::v1::SceneEnvironment( geometryParameters.getSceneEnvironment( )));
+    _remoteDataSource.setGeometry_quality(
+        ::brayns::v1::GeometryQuality( geometryParameters.getGeometryQuality( )));
     _remoteDataSource.setTarget( geometryParameters.getTarget( ));
     _remoteDataSource.setReport( geometryParameters.getReport( ));
     _remoteDataSource.setNon_simulated_cells( geometryParameters.getNonSimulatedCells( ));
@@ -611,7 +609,19 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setSimulation_values_range( geometryParameters.getSimulationValuesRange( ));
     _remoteDataSource.setSimulation_cache_file( geometryParameters.getSimulationCacheFile( ));
     _remoteDataSource.setNest_cache_file( geometryParameters.getNESTCacheFile( ));
-    _remoteDataSource.setMorphology_section_types( geometryParameters.getMorphologySectionTypes( ));
+
+    const auto mst = geometryParameters.getMorphologySectionTypes();
+    std::vector< ::brayns::v1::SectionType > sectionTypes;
+    if( mst & (size_t)::brayns::v1::SectionType::soma )
+        sectionTypes.push_back( ::brayns::v1::SectionType::soma );
+    if( mst & (size_t)::brayns::v1::SectionType::axon )
+        sectionTypes.push_back( ::brayns::v1::SectionType::axon );
+    if( mst & (size_t)::brayns::v1::SectionType::dendrite )
+        sectionTypes.push_back( ::brayns::v1::SectionType::dendrite );
+    if( mst & (size_t)::brayns::v1::SectionType::apical_dendrite )
+        sectionTypes.push_back( ::brayns::v1::SectionType::apical_dendrite );
+    _remoteDataSource.setMorphology_section_types( sectionTypes );
+
     _remoteDataSource.setMorphology_layout( geometryParameters.getMorphologyLayout().type );
     _remoteDataSource.setGenerate_multiple_models( geometryParameters.getGenerateMultipleModels( ));
     _remoteDataSource.setVolume_folder( volumeParameters.getFolder( ));
@@ -624,8 +634,6 @@ void ZeroEQPlugin::_initializeDataSource()
 
 void ZeroEQPlugin::_dataSourceUpdated()
 {
-    BRAYNS_INFO << "Data source updated" << std::endl;
-
     _parametersManager.set(
         "splash-scene-folder", ""); // Make sure the splash scene is removed
     _parametersManager.set(
@@ -655,11 +663,13 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _parametersManager.set(
         "radius-correction", std::to_string(_remoteDataSource.getRadius_correction( )));
     _parametersManager.set(
-        "color-scheme", std::to_string(_remoteDataSource.getColor_scheme( )));
+        "color-scheme", std::to_string( static_cast<uint>( _remoteDataSource.getColor_scheme( ))));
     _parametersManager.set(
-        "scene-environment", std::to_string(_remoteDataSource.getScene_environment( )));
+        "scene-environment",
+        std::to_string( static_cast<uint>( _remoteDataSource.getScene_environment( ))));
     _parametersManager.set(
-        "geometry-quality", std::to_string(_remoteDataSource.getGeometry_quality( )));
+        "geometry-quality",
+        std::to_string( static_cast<uint>( _remoteDataSource.getGeometry_quality( ))));
     _parametersManager.set(
         "target", _remoteDataSource.getTargetString( ));
     _parametersManager.set(
@@ -678,9 +688,25 @@ void ZeroEQPlugin::_dataSourceUpdated()
         "simulation-cache-file", _remoteDataSource.getSimulation_cache_fileString( ));
     _parametersManager.set(
         "nest-cache-file", _remoteDataSource.getNest_cache_fileString( ));
-    _parametersManager.set(
-        "morphology-section-types",
-        std::to_string(_remoteDataSource.getMorphology_section_types( )));
+
+    uint morphologySectionTypes = MST_UNDEFINED;
+    const auto sectionTypes = _remoteDataSource.getMorphology_section_typesVector();
+    for( const auto& sectionType: sectionTypes )
+    {
+        switch( sectionType )
+        {
+        case ::brayns::v1::SectionType::soma:
+            morphologySectionTypes |= MST_SOMA; break;
+        case ::brayns::v1::SectionType::axon:
+            morphologySectionTypes |= MST_AXON; break;
+        case ::brayns::v1::SectionType::dendrite:
+            morphologySectionTypes |= MST_DENDRITE; break;
+        case ::brayns::v1::SectionType::apical_dendrite:
+            morphologySectionTypes |= MST_APICAL_DENDRITE; break;
+        }
+    }
+    _parametersManager.set( "morphology-section-types", std::to_string( morphologySectionTypes ));
+
     _parametersManager.set(
         "morphology-layout", std::to_string(_remoteDataSource.getMorphology_layout( )));
     _parametersManager.set(
@@ -726,19 +752,22 @@ void ZeroEQPlugin::_initializeSettings()
     _remoteSettings.setTimestamp( sceneParameters.getTimestamp( ));
     _remoteSettings.setVolume_samples_per_ray( volumeParameters.getSamplesPerRay( ));
     if( renderingParameters.getRenderer( ) == "exobj" )
-        _remoteSettings.setShader( Shader::basic );
+        _remoteSettings.setShader( ::brayns::v1::Shader::basic );
      else if( renderingParameters.getRenderer( ) == "proximityrenderer" )
-        _remoteSettings.setShader( Shader::proximity );
+        _remoteSettings.setShader( ::brayns::v1::Shader::proximity );
      else if( renderingParameters.getRenderer( ) == "particlerenderer" )
-        _remoteSettings.setShader( Shader::particle );
+        _remoteSettings.setShader( ::brayns::v1::Shader::particle );
      else if( renderingParameters.getRenderer( ) == "simulationrenderer" )
-        _remoteSettings.setShader( Shader::simulation );
+        _remoteSettings.setShader( ::brayns::v1::Shader::simulation );
 
     switch( renderingParameters.getShading( ) )
     {
-        case ShadingType::diffuse: _remoteSettings.setShading( Shading::diffuse ); break;
-        case ShadingType::electron: _remoteSettings.setShading( Shading::electron ); break;
-        default: _remoteSettings.setShading( Shading::none ); break;
+        case ShadingType::diffuse:
+            _remoteSettings.setShading( ::brayns::v1::Shading::diffuse ); break;
+        case ShadingType::electron:
+            _remoteSettings.setShading( ::brayns::v1::Shading::electron ); break;
+        default:
+            _remoteSettings.setShading( ::brayns::v1::Shading::none ); break;
     }
     _remoteSettings.setSamples_per_pixel( renderingParameters.getSamplesPerPixel( ));
     _remoteSettings.setAmbient_occlusion( renderingParameters.getAmbientOcclusionStrength( ));
@@ -761,28 +790,26 @@ void ZeroEQPlugin::_initializeSettings()
 
 void ZeroEQPlugin::_settingsUpdated()
 {
-    BRAYNS_INFO << "Settings updated" << std::endl;
-
     _parametersManager.set(
         "timestamp", std::to_string(_remoteSettings.getTimestamp( )));
     _parametersManager.set(
         "volume-samples-per-ray", std::to_string(_remoteSettings.getVolume_samples_per_ray( )));
     switch( _remoteSettings.getShader( ))
     {
-        case brayns::Shader::proximity:
+        case ::brayns::v1::Shader::proximity:
             _parametersManager.set( "renderer", "proximityrenderer"); break;
-        case brayns::Shader::particle:
+        case ::brayns::v1::Shader::particle:
             _parametersManager.set( "renderer", "particlerenderer"); break;
-        case brayns::Shader::simulation:
+        case ::brayns::v1::Shader::simulation:
             _parametersManager.set( "renderer", "simulationrenderer"); break;
         default:
             _parametersManager.set( "renderer", "exobj"); break;
     }
     switch( _remoteSettings.getShading( ))
     {
-        case brayns::Shading::diffuse:
+        case ::brayns::v1::Shading::diffuse:
             _parametersManager.set( "shading", "diffuse"); break;
-        case brayns::Shading::electron:
+        case ::brayns::v1::Shading::electron:
             _parametersManager.set( "shading", "electron"); break;
         default:
             _parametersManager.set( "shading", "none"); break;

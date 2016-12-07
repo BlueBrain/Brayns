@@ -80,7 +80,6 @@ struct Brayns::Impl
 
         // Load data and build geometry
         buildScene();
-
     }
 
     void buildScene()
@@ -116,6 +115,7 @@ struct Brayns::Impl
         if( _engine->isDirty( ))
         {
             _engine->getScene().reset();
+            _engine->initializeMaterials();
             buildScene();
         }
 #endif
@@ -161,6 +161,18 @@ struct Brayns::Impl
 
     void render()
     {
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+        if( !_extensionPluginFactory )
+            _intializeExtensionPluginFactory( );
+        _extensionPluginFactory->execute( );
+        if( _engine->isDirty( ))
+        {
+            _engine->getScene().reset();
+            _engine->initializeMaterials();
+            buildScene();
+        }
+#endif
+
         Scene& scene = _engine->getScene();
         Camera& camera = _engine->getCamera();
         FrameBuffer& frameBuffer = _engine->getFrameBuffer();
@@ -168,11 +180,6 @@ struct Brayns::Impl
 
         _engine->preRender();
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
-        if( !_extensionPluginFactory )
-            _intializeExtensionPluginFactory( );
-        _extensionPluginFactory->execute( );
-#endif
         if( _parametersManager->getRenderingParameters().getHeadLight() )
         {
             LightPtr sunLight = scene.getLight( 0 );
@@ -195,15 +202,6 @@ struct Brayns::Impl
             .getWindowSize();
         if( windowSize != frameSize )
             _engine->reshape(windowSize);
-    }
-
-    void setMaterials(
-        const MaterialType materialType,
-        const size_t nbMaterials )
-    {
-        Scene& scene = _engine->getScene();
-        scene.setMaterials( materialType, nbMaterials );
-        scene.commit( );
     }
 
     Engine& getEngine( )
@@ -488,15 +486,15 @@ private:
                     };
 
                     size_t material =
-                        geometryParameters.getColorScheme() == CS_NEURON_BY_ID ?
+                        geometryParameters.getColorScheme() == ColorScheme::neuron_by_id ?
                         meshIndex % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
                         NO_MATERIAL;
 
                     MeshQuality quality;
                     switch( geometryParameters.getGeometryQuality() )
                     {
-                    case GQ_QUALITY: quality = MQ_QUALITY; break;
-                    case GQ_MAX_QUALITY: quality = MQ_MAX_QUALITY; break;
+                    case GeometryQuality::medium : quality = MQ_QUALITY; break;
+                    case GeometryQuality::high : quality = MQ_MAX_QUALITY; break;
                     default: quality = MQ_FAST ; break;
                     }
 
@@ -831,13 +829,6 @@ void Brayns::render( const RenderInput& renderInput,
 void Brayns::render()
 {
     _impl->render();
-}
-
-void Brayns::setMaterials(
-    const MaterialType materialType,
-    const size_t nbMaterials )
-{
-    _impl->setMaterials( materialType, nbMaterials );
 }
 
 Engine& Brayns::getEngine()
