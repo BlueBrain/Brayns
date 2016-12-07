@@ -154,10 +154,10 @@ bool MorphologyLoader::_importMorphology(
             size_t step = 1;
             switch( _geometryParameters.getGeometryQuality() )
             {
-                case GQ_FAST:
+                case GeometryQuality::low:
                     step = samples.size()-1;
                     break;
-                case GQ_QUALITY:
+                case GeometryQuality::medium:
                     step = samples.size()/2;
                     step = ( step == 0 ) ? 1 : step;
                     break;
@@ -556,10 +556,10 @@ size_t MorphologyLoader::_material(
     size_t material;
     switch( _geometryParameters.getColorScheme() )
     {
-    case CS_NEURON_BY_ID:
+    case ColorScheme::neuron_by_id:
         material = morphologyIndex % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
         break;
-    case CS_NEURON_BY_SEGMENT_TYPE:
+    case ColorScheme::neuron_by_segment_type:
         material = sectionType % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
         break;
     default:

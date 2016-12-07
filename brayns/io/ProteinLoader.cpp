@@ -397,7 +397,7 @@ bool ProteinLoader::importPDBFile(
                 bool found(false);
                 const ColorScheme colorScheme =
                     _geometryParameters.getColorScheme( );
-                if( colorScheme == CS_PROTEIN_BACKBONE )
+                if( colorScheme == ColorScheme::protein_backbones )
                     atom.materialId = material;
                 else
                 {
@@ -408,17 +408,17 @@ bool ProteinLoader::importPDBFile(
                             found = true;
                             switch( colorScheme )
                             {
-                            case CS_PROTEIN_CHAINS:
+                            case ColorScheme::protein_chains:
                                 atom.materialId =
                                     abs(atom.chainId) %
                                         scene.getMaterials().size();
                                 break;
-                            case CS_PROTEIN_RESIDUES:
+                            case ColorScheme::protein_residues:
                                 atom.materialId =
                                     abs(atom.residue) %
                                         scene.getMaterials().size();
                                 break;
-                            case CS_PROTEIN_BACKBONE:
+                            case ColorScheme::protein_backbones:
                                 atom.materialId = 0;
                                 break;
                             default:
@@ -452,7 +452,7 @@ bool ProteinLoader::importPDBFile(
                     _geometryParameters.getRadiusMultiplier(),
                     0.f, 0.f));
 
-                if( colorScheme == CS_PROTEIN_BACKBONE )
+                if( colorScheme == ColorScheme::protein_backbones )
                 {
                     Vector3f inView( sphere->getCenter() - inViewPos );
                     float dist = inView.length();

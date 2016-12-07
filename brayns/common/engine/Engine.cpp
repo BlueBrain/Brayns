@@ -164,4 +164,12 @@ void Engine::setDefaultEpsilon()
     }
 }
 
+void Engine::initializeMaterials(
+    const MaterialType materialType,
+    const size_t nbMaterials )
+{
+    _scene->setMaterials( materialType, nbMaterials );
+    _scene->commit( );
+}
+
 }

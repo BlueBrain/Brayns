@@ -1,14 +1,14 @@
 # -*- mode: cmake -*-
-git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 10d93e6)
-git_subproject(Servus https://github.com/HBPVIS/Servus.git 001588d)
+git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 6b7d203)
+git_subproject(Servus https://github.com/HBPVIS/Servus.git 2da95ea)
 
 # ZeroEQ and HTTP messaging
-git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 4882a0f)
-git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 7eb2a34)
-git_subproject(Lexis https://github.com/HBPVis/Lexis.git e8c6c79)
+git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 9e51c26)
+git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 1420ab9)
+git_subproject(Lexis https://github.com/HBPVis/Lexis.git 9110580)
 
 # Streaming to display walls
-git_subproject(Deflect https://github.com/BlueBrain/Deflect.git fd77ea4)
+git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 1717912)
 
 # Data access
-git_subproject(Brion https://github.com/BlueBrain/Brion.git 98191be)
+git_subproject(Brion https://github.com/BlueBrain/Brion.git 4c2114c)

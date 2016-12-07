@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace zerobuf.data;
+namespace brayns.v1;
 
 // Spikes activated for a given timestamp
 table Spikes

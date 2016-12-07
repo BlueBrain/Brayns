@@ -30,7 +30,7 @@ namespace brayns
 
 struct Camera::Impl
 #ifdef BRAYNS_USE_ZEROBUF
-    : public zerobuf::render::Camera
+    : public brayns::v1::Camera
 #endif
 {
 public:
@@ -88,7 +88,7 @@ public:
             return;
     #ifdef BRAYNS_USE_ZEROBUF
         const floats& origin = { position.x(), position.y(), position.z() };
-        zerobuf::render::Camera::setOrigin( origin );
+        brayns::v1::Camera::setOrigin( origin );
     #endif
         _position = position;
         modified = true;
@@ -109,7 +109,7 @@ public:
             return;
     #ifdef BRAYNS_USE_ZEROBUF
         const floats& lookat = { target.x(), target.y(), target.z() };
-        zerobuf::render::Camera::setLook_at( lookat );
+        brayns::v1::Camera::setLook_at( lookat );
     #endif
         _target = target;
         modified = true;
@@ -130,7 +130,7 @@ public:
             return;
     #ifdef BRAYNS_USE_ZEROBUF
         const floats& up = { upVector.x(), upVector.y(), upVector.z() };
-        zerobuf::render::Camera::setUp( up );
+        brayns::v1::Camera::setUp( up );
     #endif
         _up = upVector;
         modified = true;
@@ -146,7 +146,7 @@ public:
         if( _fieldOfView == fieldOfView )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        zerobuf::render::Camera::setField_of_view( fieldOfView );
+        brayns::v1::Camera::setField_of_view( fieldOfView );
     #endif
         _fieldOfView = fieldOfView;
         modified = true;
@@ -155,7 +155,7 @@ public:
     float getFieldOfView( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _fieldOfView = zerobuf::render::Camera::getField_of_view();
+        _fieldOfView = brayns::v1::Camera::getField_of_view();
     #endif
         return _fieldOfView;
     }
@@ -178,7 +178,7 @@ public:
         if( _aperture == aperture )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        zerobuf::render::Camera::setAperture( aperture );
+        brayns::v1::Camera::setAperture( aperture );
     #endif
         _aperture = aperture;
         modified = true;
@@ -187,7 +187,7 @@ public:
     float getAperture( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _aperture = zerobuf::render::Camera::getAperture( );
+        _aperture = brayns::v1::Camera::getAperture( );
     #endif
         return _aperture;
     }
@@ -197,7 +197,7 @@ public:
         if( _focalLength == focalLength )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        zerobuf::render::Camera::setFocal_length( focalLength );
+        brayns::v1::Camera::setFocal_length( focalLength );
     #endif
         _focalLength = focalLength;
         modified = true;
@@ -206,7 +206,7 @@ public:
     float getFocalLength( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _focalLength = zerobuf::render::Camera::getFocal_length();
+        _focalLength = brayns::v1::Camera::getFocal_length();
     #endif
         return _focalLength;
     }

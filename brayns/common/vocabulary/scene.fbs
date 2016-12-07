@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace zerobuf.render;
+namespace brayns.v1;
 
 table Material {
     diffuse_color : [float:3];

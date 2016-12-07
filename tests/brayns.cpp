@@ -107,9 +107,9 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( geomParams.getReport(), "" );
     BOOST_CHECK_EQUAL( geomParams.getRadiusMultiplier(), 1.f );
     BOOST_CHECK_EQUAL( geomParams.getRadiusCorrection(), 0.f );
-    BOOST_CHECK_EQUAL( geomParams.getColorScheme(), brayns::CS_NONE );
+    BOOST_CHECK( geomParams.getColorScheme() == brayns::ColorScheme::none );
     BOOST_CHECK_EQUAL( geomParams.getSceneEnvironment(), brayns::SE_NONE );
-    BOOST_CHECK_EQUAL( geomParams.getGeometryQuality(), brayns::GQ_MAX_QUALITY );
+    BOOST_CHECK( geomParams.getGeometryQuality() == brayns::GeometryQuality::high );
     BOOST_CHECK_EQUAL( geomParams.getMorphologySectionTypes(), brayns::MST_ALL );
     BOOST_CHECK_EQUAL( geomParams.getMorphologyLayout().type, brayns::ML_NONE );
     BOOST_CHECK_EQUAL( geomParams.getNonSimulatedCells(), 0 );

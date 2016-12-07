@@ -78,23 +78,6 @@ public:
     BRAYNS_API void render();
 
     /**
-       Sets materials for the current scene
-       @param materialType Predefined sets of colors
-             MT_DEFAULT: Random colors
-             MT_RANDOM: Random materials including transparency, reflection and
-                        light emission
-             MT_SHADES_OF_GREY: 255 shades of grey
-             MT_GRADIENT: Gradient from red to yellow
-             MT_PASTEL_COLORS: Random pastel colors
-       @param nbMaterials Number of materials to be defined
-
-       @todo Must be moved to scene object (VIZTM-572)
-    */
-    BRAYNS_API void setMaterials(
-        MaterialType materialType,
-        size_t nbMaterials = NB_MAX_MATERIALS);
-
-    /**
        @return the current engine
     */
     BRAYNS_API Engine& getEngine();
