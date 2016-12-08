@@ -33,7 +33,7 @@ Contact: bbp-open-source@googlegroups.com
 
 The following platforms and build environments are tested:
 
-* Linux: Ubuntu 14.04, RHEL 6.5 (Makefile, x64)
+* Linux: Ubuntu 16.04, RHEL 6.8 (Makefile, x64)
 
 The [API documentation](http://bluebrain.github.io/Brayns-0.1/index.html)
 can be found on [bluebrain.github.io](http://bluebrain.github.io/).
@@ -86,15 +86,12 @@ features:
 cmake .. -DBRAYNS_ASSIMP_ENABLED=ON:OFF
 ```
 
-#### Enable/Disable [Brion](https://github.com/BlueBrain/Brion) supported
-morphology file loader (.h5, .swc, BlueConfig, CircuitConfig)
+#### Enable/Disable [Brion](https://github.com/BlueBrain/Brion) supported morphology file loader (.h5, .swc, BlueConfig, CircuitConfig)
 ```
 cmake .. -DBRAYNS_BRION_ENABLED=ON:OFF
 ```
 
-#### Enable/Disable [Deflect](https://github.com/BlueBrain/Deflect) for
-streaming to [Tide](https://github.com/BlueBrain/Tide), the Tiled Interactive
-DisplayWall environment.
+#### Enable/Disable [Deflect](https://github.com/BlueBrain/Deflect) for streaming to [Tide](https://github.com/BlueBrain/Tide), the Tiled Interactive DisplayWall environment.
 ```
 cmake .. -DBRAYNS_DEFLECT_ENABLED=ON:OFF
 ```
@@ -138,4 +135,3 @@ find new issues which have not already been reported in
 [Bug Report](https://github.com/BlueBrain/Brayns/issues) page. If you find an
 already reported problem, please update the corresponding issue with your inputs
 and outputs.
-
