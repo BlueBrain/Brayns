@@ -30,7 +30,8 @@ enum SectionType: uint {
     soma = 1,
     axon = 2,
     dendrite = 4,
-    apical_dendrite = 8
+    apical_dendrite = 8,
+    all = 255
 }
 
 enum ColorScheme: uint {

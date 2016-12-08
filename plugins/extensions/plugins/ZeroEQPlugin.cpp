@@ -614,13 +614,14 @@ void ZeroEQPlugin::_initializeDataSource()
 
     const auto mst = geometryParameters.getMorphologySectionTypes();
     std::vector< ::brayns::v1::SectionType > sectionTypes;
-    if( mst & (size_t)::brayns::v1::SectionType::soma )
+    const auto all = mst & (size_t)::brayns::v1::SectionType::all;
+    if( all || mst & (size_t)::brayns::v1::SectionType::soma )
         sectionTypes.push_back( ::brayns::v1::SectionType::soma );
-    if( mst & (size_t)::brayns::v1::SectionType::axon )
+    if( all || mst & (size_t)::brayns::v1::SectionType::axon )
         sectionTypes.push_back( ::brayns::v1::SectionType::axon );
-    if( mst & (size_t)::brayns::v1::SectionType::dendrite )
+    if( all || mst & (size_t)::brayns::v1::SectionType::dendrite )
         sectionTypes.push_back( ::brayns::v1::SectionType::dendrite );
-    if( mst & (size_t)::brayns::v1::SectionType::apical_dendrite )
+    if( all || mst & (size_t)::brayns::v1::SectionType::apical_dendrite )
         sectionTypes.push_back( ::brayns::v1::SectionType::apical_dendrite );
     _remoteDataSource.setMorphology_section_types( sectionTypes );
 
@@ -705,6 +706,8 @@ void ZeroEQPlugin::_dataSourceUpdated()
             morphologySectionTypes |= MST_DENDRITE; break;
         case ::brayns::v1::SectionType::apical_dendrite:
             morphologySectionTypes |= MST_APICAL_DENDRITE; break;
+        case ::brayns::v1::SectionType::all:
+            morphologySectionTypes |= MST_ALL;
         }
     }
     _parametersManager.set( "morphology-section-types", std::to_string( morphologySectionTypes ));
