@@ -1,8 +1,51 @@
 Changelog {#Changelog}
 =========
 
-# master {#master}
+# master
 
+# Release 0.2 (09-12-2016)
+
+* [#80](https://github.com/BlueBrain/Brayns/pull/80):
+  Added FullScreen and Escape keyboard shortcuts
+* [#72](https://github.com/BlueBrain/Brayns/pull/72):
+  Added environment map and splash scene option
+* [#70](https://github.com/BlueBrain/Brayns/pull/70):
+  Added support for textures in OptiX engine
+* [#65](https://github.com/BlueBrain/Brayns/pull/65):
+  Use adaptive motion speed for zooming depending on camera distance
+* [#61](https://github.com/BlueBrain/Brayns/pull/61):
+  Expose image jpeg size and quality in settings, add lexis/render/viewport
+* [#59](https://github.com/BlueBrain/Brayns/pull/59):
+  Added colormap event
+* [#57](https://github.com/BlueBrain/Brayns/pull/57):
+  Expose lexis/render/frame event in HTTP server for simulation slider
+* [#54](https://github.com/BlueBrain/Brayns/pull/54):
+  Added Datasource and settings initialization to ZeroEQ plugin
+* [#47](https://github.com/BlueBrain/Brayns/pull/47):
+  Stringification of PTX to avoid file deployment
+* [#46](https://github.com/BlueBrain/Brayns/pull/46):
+  Allow scenes to be reloaded dynamically through reset event
+* [#39](https://github.com/BlueBrain/Brayns/pull/39):
+  Added keyboard shortcuts management
+* [#36](https://github.com/BlueBrain/Brayns/pull/36):
+  Added support for sequences of volumes
+* [#33](https://github.com/BlueBrain/Brayns/pull/33):
+  Added volume rendering feature
+* [#32](https://github.com/BlueBrain/Brayns/pull/32):
+  Added OptiX as a rendering library. Engine can be activate using --engine optix
+  command line option.
+* [#31](https://github.com/BlueBrain/Brayns/pull/31):
+  Add support for NEST circuits (and spikes visualization)
+* [#27](https://github.com/BlueBrain/Brayns/pull/27):
+  First commit for GPU screen space post processing
+* [#26](https://github.com/BlueBrain/Brayns/pull/26):
+  Added python lib wrapping the HTTP REST interface
+* [#25](https://github.com/BlueBrain/Brayns/pull/25):
+  Use memory map file to store simulation data
+* [#24](https://github.com/BlueBrain/Brayns/pull/24):
+  Updated Web UI example application
+* [#23](https://github.com/BlueBrain/Brayns/pull/23):
+  Added colormap management for simulation renderer
 * [#20](https://github.com/BlueBrain/Brayns/pull/20):
   Added default Cornell Box scene when no datasource is provided. A new
   benchmarking application was also added to allow performance measurements.
@@ -33,7 +76,7 @@ Changelog {#Changelog}
 * [#1](https://github.com/BlueBrain/Brayns/pull/1)
   Fixed alpha in OBJExtendedRenderer
 
-# Release 0.1 (2016-06-16) {#Release010}
+# Release 0.1 (06-16-2016)
 
 * Initial commit
 
