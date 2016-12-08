@@ -99,6 +99,8 @@ void ZeroEQPlugin::_setupHTTPServer()
     BRAYNS_INFO << "Registering handlers on " <<
         _httpServer->getURI() << std::endl;
 
+    _httpServer->handleGET( "brayns/version", brayns::Version::getSchema(),
+                            &brayns::Version::toJSON );
     servus::Serializable& cam = *_engine.getCamera().getSerializable();
     _httpServer->handle( cam );
     cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
