@@ -127,8 +127,7 @@ public:
     virtual void activate();
 
     void create(const char *title,
-                size_t width, size_t height,
-                bool fullScreen = false);
+                size_t width, size_t height);
 
     /*! clear the frame buffer color and depth bits */
     void clearPixels();
@@ -174,7 +173,7 @@ protected:
     FrameBufferMode _frameBufferMode;
 
     int _windowID;
-    Vector2i _windowSize;
+    Vector2ui _windowSize;
 
     FPSCounter _fps;
 
@@ -183,6 +182,8 @@ protected:
     uint64_t _gid;
 
     bool _displayHelp;
+    bool _fullScreen;
+    Vector2ui _windowPosition;
 
 private:
 

@@ -129,6 +129,7 @@ BaseWindow::BaseWindow( Brayns& brayns, const FrameBufferMode frameBufferMode)
   , _windowID(-1)
   , _windowSize(-1,-1)
   , _displayHelp( false )
+  , _fullScreen( false )
 {
     const auto motionSpeed = _brayns.getCameraManipulator().getMotionSpeed();
     BRAYNS_INFO << "Camera       :" << _brayns.getEngine().getCamera() << std::endl;
@@ -350,8 +351,7 @@ void BaseWindow::setTitle(const char *title)
 }
 
 void BaseWindow::create(const char *title,
-                        const size_t width, const size_t height,
-                        bool fullScreen)
+                        const size_t width, const size_t height)
 {
     glutInitWindowSize(width, height);
     _windowID = glutCreateWindow(title);
@@ -365,9 +365,6 @@ void BaseWindow::create(const char *title,
     glutPassiveMotionFunc(glut3dPassiveMouseFunc);
     glutIdleFunc(glut3dIdle);
 
-    if(fullScreen)
-        glutFullScreen( );
-
     _screenSpaceProcessor.init( width, height );
 }
 
@@ -377,6 +374,14 @@ void BaseWindow::keypress( const char key, const Vector2f& )
     {
     case 'h':
         _displayHelp = !_displayHelp;
+        break;
+    case 27:
+    case 'Q':
+#ifdef __APPLE__
+        exit(0);
+#else
+        glutLeaveMainLoop();
+#endif
         break;
     default:
         _brayns.getKeyboardHandler().handleKeyboardShortcut( key );
@@ -401,6 +406,17 @@ void BaseWindow::specialkey( const int key, const Vector2f& )
     case GLUT_KEY_DOWN:
         _brayns.getKeyboardHandler().handle( SpecialKey::DOWN );
         break;
+    case GLUT_KEY_F11:
+        if( _fullScreen )
+            glutPositionWindow( _windowPosition.x(), _windowPosition.y( ));
+        else
+        {
+            _windowPosition.x() =  glutGet((GLenum)GLUT_WINDOW_X);
+            _windowPosition.y() =  glutGet((GLenum)GLUT_WINDOW_Y);
+            glutFullScreen();
+        }
+        _fullScreen = !_fullScreen;
+        break;
     }
 }
 
@@ -419,9 +435,6 @@ void BaseWindow::_registerKeyboardShortcuts()
     keyHandler.registerKeyboardShortcut(
         'c', "Display current camera information",
         std::bind( &BaseWindow::_displayCameraInformation, this ));
-    keyHandler.registerKeyboardShortcut(
-        'Q', "Quit application",
-        std::bind( &BaseWindow::_exitApplication, this ));
     keyHandler.registerKeyboardShortcut(
         'z', "Switch between depth and color buffers",
         std::bind( &BaseWindow::_toggleFrameBuffer, this ));
@@ -462,15 +475,6 @@ void BaseWindow::_decreaseMotionSpeed()
 void BaseWindow::_displayCameraInformation()
 {
     BRAYNS_INFO << _brayns.getEngine().getCamera() << std::endl;
-}
-
-void BaseWindow::_exitApplication()
-{
-#ifdef __APPLE__
-    exit(0);
-#else
-    glutLeaveMainLoop();
-#endif
 }
 
 void BaseWindow::_toggleFrameBuffer()
