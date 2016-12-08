@@ -660,7 +660,7 @@ void OSPRayScene::commitLights()
         {
             _ospLightData = ospNewData(
                 _lights.size(), OSP_OBJECT,
-                &_ospLights[0] );
+                &_ospLights[0], OSP_DATA_SHARED_BUFFER );
             ospCommit( _ospLightData );
         }
         ospSetData( osprayRenderer->impl(), "lights", _ospLightData );
