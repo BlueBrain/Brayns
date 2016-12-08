@@ -733,13 +733,13 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _parametersManager.set(
         "environment-map", _remoteDataSource.getEnvironment_mapString( ));
 
-    _engine.getScene().commitVolumeData();
-    _engine.getRenderer().commit();
-    _engine.getFrameBuffer().clear();
-    _parametersManager.print();
-
     _resetSceneUpdated();
     _resetCameraUpdated();
+
+    _engine.getFrameBuffer().clear();
+    _engine.getScene().commitVolumeData();
+    _engine.getRenderer().commit();
+    _parametersManager.print();
 }
 
 void ZeroEQPlugin::_initializeSettings()
