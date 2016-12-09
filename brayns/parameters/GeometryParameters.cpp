@@ -50,6 +50,7 @@ const std::string PARAM_START_SIMULATION_TIME = "start-simulation-time";
 const std::string PARAM_END_SIMULATION_TIME = "end-simulation-time";
 const std::string PARAM_SIMULATION_RANGE = "simulation-values-range";
 const std::string PARAM_SIMULATION_CACHE_FILENAME = "simulation-cache-file";
+const std::string PARAM_SIMULATION_HISTOGRAM_SIZE = "simulation-histogram-size";
 const std::string PARAM_NEST_CACHE_FILENAME = "nest-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
@@ -74,6 +75,7 @@ GeometryParameters::GeometryParameters( )
     , _endSimulationTime( std::numeric_limits<float>::max() )
     , _simulationValuesRange( Vector2f(
         std::numeric_limits<float>::max(), std::numeric_limits<float>::min() ))
+    , _simulationHistogramSize( 128 )
     , _generateMultipleModels( false )
 {
     _parameters.add_options()
@@ -130,6 +132,8 @@ GeometryParameters::GeometryParameters( )
             "Minimum and maximum values for the simulation" )
         ( PARAM_SIMULATION_CACHE_FILENAME.c_str(), po::value< std::string >(),
             "Cache file containing simulation data" )
+        (PARAM_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value< size_t >(),
+            "Number of values defining the simulation histogram")
         ( PARAM_NEST_CACHE_FILENAME.c_str(), po::value< std::string >(),
             "Cache file containing nest data" )
         ( PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value< bool >(),
@@ -209,6 +213,8 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_SIMULATION_CACHE_FILENAME ))
         _simulationCacheFile =
             vm[PARAM_SIMULATION_CACHE_FILENAME].as< std::string >( );
+    if( vm.count( PARAM_SIMULATION_HISTOGRAM_SIZE ))
+        _simulationHistogramSize = vm[PARAM_SIMULATION_HISTOGRAM_SIZE].as< size_t >( );
     if( vm.count( PARAM_NEST_CACHE_FILENAME ))
         _NESTCacheFile =
             vm[PARAM_NEST_CACHE_FILENAME].as< std::string >( );
@@ -270,6 +276,8 @@ void GeometryParameters::print( )
         _simulationValuesRange << std::endl;
     BRAYNS_INFO << "- Simulation cache file    : " <<
         _simulationCacheFile << std::endl;
+    BRAYNS_INFO << "- Simulation histogram size: " <<
+        _simulationHistogramSize << std::endl;
     BRAYNS_INFO << "Morphology section types   : " <<
         _morphologySectionTypes << std::endl;
     BRAYNS_INFO << "Morphology Layout          : " << std::endl;

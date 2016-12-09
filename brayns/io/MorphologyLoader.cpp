@@ -463,7 +463,8 @@ bool MorphologyLoader::importSimulationData(
     brion::CompartmentReport compartmentReport(
         brion::URI( bc.getReportSource( report ).getPath( )), brion::MODE_READ, gids );
 
-    CircuitSimulationHandlerPtr simulationHandler( new CircuitSimulationHandler( ));
+    CircuitSimulationHandlerPtr simulationHandler(
+        new CircuitSimulationHandler( _geometryParameters ));
     scene.setSimulationHandler( simulationHandler );
     const std::string& cacheFile = _geometryParameters.getSimulationCacheFile();
     if( simulationHandler->attachSimulationToCacheFile( cacheFile ))

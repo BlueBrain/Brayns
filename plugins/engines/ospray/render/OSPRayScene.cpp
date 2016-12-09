@@ -826,9 +826,10 @@ void OSPRayScene::commitSimulationData()
         // Simulation data
         const uint64_t frame = _parametersManager.getSceneParameters().getTimestamp();
 
+        _simulationHandler->setTimestamp( frame );
         _ospSimulationData = ospNewData(
             _simulationHandler->getFrameSize(), OSP_FLOAT,
-            _simulationHandler->getFrameData( frame ), OSP_DATA_SHARED_BUFFER );
+            _simulationHandler->getFrameData(), OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospSimulationData );
         ospSetData( osprayRenderer->impl(), "simulationData", _ospSimulationData );
         ospCommit(osprayRenderer->impl());

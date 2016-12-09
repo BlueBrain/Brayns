@@ -29,12 +29,28 @@
 namespace brayns
 {
 
+/**
+ * @brief The SpikeSimulationHandler class handles simulation frames for the current circuit.
+ *        Frames are stored in a memory mapped file that is accessed according to a specified
+ *        timestamp. The SpikeSimulationHandler class is in charge of keeping the handle to the
+ *        memory mapped file.
+ */
 class SpikeSimulationHandler : public AbstractSimulationHandler
 {
 
 public:
 
-    void* getFrameData( const float frame ) final;
+    /**
+     * @brief Default contructor
+     * @param geometryParameters Geometry parameters
+     */
+    SpikeSimulationHandler( const GeometryParameters& geometryParameters );
+
+    /**
+     * @brief Returns a pointer to the current frame in the memory mapped file.
+     * @return Pointer to given frame
+     */
+    void* getFrameData() final;
 
 };
 

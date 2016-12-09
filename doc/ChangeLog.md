@@ -3,6 +3,9 @@ Changelog {#Changelog}
 
 # master
 
+* [#86](https://github.com/BlueBrain/Brayns/pull/86):
+  Added simulation histogram event
+
 # Release 0.2 (09-12-2016)
 
 * [#80](https://github.com/BlueBrain/Brayns/pull/80):

@@ -149,6 +149,9 @@ public:
     /** File containing simulation data */
     const std::string& getSimulationCacheFile() const { return _simulationCacheFile; }
 
+    /** Size of the simulation histogram */
+    size_t getSimulationHistogramSize() const { return _simulationHistogramSize; }
+
     /** Defines if multiple models should be generated to increase the
         rendering performance */
     bool getGenerateMultipleModels() const { return _generateMultipleModels; }
@@ -188,6 +191,7 @@ protected:
     float _endSimulationTime;
     Vector2f _simulationValuesRange;
     std::string _simulationCacheFile;
+    size_t _simulationHistogramSize;
     bool _generateMultipleModels;
     std::string _splashSceneFolder;
 

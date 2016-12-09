@@ -25,12 +25,17 @@
 namespace brayns
 {
 
-void* SpikeSimulationHandler::getFrameData( const float timestamp )
+SpikeSimulationHandler::SpikeSimulationHandler( const GeometryParameters& geometryParameters )
+    : AbstractSimulationHandler( geometryParameters )
+{
+}
+
+void* SpikeSimulationHandler::getFrameData()
 {
     if( _nbFrames == 0 || _memoryMapPtr == 0 )
         return 0;
 
-    const uint64_t frame = timestamp;
+    const uint64_t frame = _timestamp;
     const uint64_t moduloFrame = frame % _nbFrames;
     const uint64_t index = std::min( _frameSize, std::max( uint64_t(0), moduloFrame ));
 

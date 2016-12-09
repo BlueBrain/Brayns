@@ -28,12 +28,17 @@
 namespace brayns
 {
 
-void* CircuitSimulationHandler::getFrameData( const float timestamp )
+CircuitSimulationHandler::CircuitSimulationHandler( const GeometryParameters& geometryParameters )
+    : AbstractSimulationHandler( geometryParameters )
+{
+}
+
+void* CircuitSimulationHandler::getFrameData()
 {
     if( _nbFrames ==  0 )
         return 0;
 
-    const uint64_t frame = timestamp;
+    const uint64_t frame = _timestamp;
     const uint64_t moduloFrame = frame % _nbFrames;
     const uint64_t index = std::min( _frameSize, std::max( uint64_t(0), moduloFrame ));
     return (unsigned char*)_memoryMapPtr + _headerSize + index * _frameSize * sizeof(float);
