@@ -78,15 +78,8 @@ namespace brayns
     if( !zeroeq )
         return;
 
-    zeroeq->handle( _params );
-
-    // TODO needs proper exposure from ZeroEQ/ZeroBuf
-    std::string schema = _params.getSchema();
-    const std::string name = "Stream";
-    schema.replace( schema.find( name ), name.length(), "StreamTo" );
-    zeroeq->handlePUT( "lexis::render::StreamTo", schema,
-                       std::bind( &::lexis::render::Stream::fromJSON,
-                                    std::ref(_params), std::placeholders::_1 ));
+    zeroeq->handleGET( _params );
+    zeroeq->handlePUT( "lexis/render/stream-to", _params );
 #endif
 }
 
