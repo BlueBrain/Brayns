@@ -37,13 +37,11 @@ namespace brayns
 struct MorphologyLayout
 {
     MorphologyLayout()
-    : type( ML_NONE )
-    , nbColumns( 0 )
+    : nbColumns( 0 )
     , verticalSpacing( 0 )
     , horizontalSpacing( 0 )
       {}
 
-    MorphologyLayoutType type;
     size_t nbColumns;
     size_t verticalSpacing;
     size_t horizontalSpacing;

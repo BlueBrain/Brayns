@@ -189,7 +189,6 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
         size_ts values = vm[PARAM_MORPHOLOGY_LAYOUT].as< size_ts >( );
         if( values.size( ) == 3 )
         {
-            _morphologyLayout.type = ML_GRID;
             _morphologyLayout.nbColumns = values[0];
             _morphologyLayout.verticalSpacing = values[1];
             _morphologyLayout.horizontalSpacing = values[2];

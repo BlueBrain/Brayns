@@ -124,7 +124,7 @@ public:
     /**
      * @brief getHistogram returns the Histogram of the values in the current simulation frame. The
      *        size of the histogram is defined by the --simulation-histogram-size command line
-     *        parameter (128 by default). To build the histogram, occurences of the same value are
+     *        parameter (128 by default). To build the histogram, occurrences of the same value are
      *        counted and spread along the histogram according to the calculated range. The
      *        range is defined by the minimum and maximum value of the current frame. The Histogram
      *        is specific to the current frame, not to the whole simulation.
