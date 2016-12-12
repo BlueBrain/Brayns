@@ -4,7 +4,7 @@ git_subproject(Servus https://github.com/HBPVIS/Servus.git 2da95ea)
 
 # ZeroEQ and HTTP messaging
 git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 9e51c26)
-git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 1420ab9)
+git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 2e457a8)
 git_subproject(Lexis https://github.com/HBPVis/Lexis.git 9110580)
 
 # Streaming to display walls
