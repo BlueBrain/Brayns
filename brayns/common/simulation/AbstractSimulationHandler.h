@@ -27,12 +27,34 @@
 namespace brayns
 {
 
+/**
+ * @brief The Histogram struct contains the range as well as the values of the simulation histogram
+ *        for a given simulation frame, determined by the timestamp
+ */
+struct Histogram
+{
+    uint64_ts values;
+    Vector2f range;
+    float timestamp;
+};
+
+/**
+ * @brief The AbstractSimulationHandler class handles simulation frames for the current circuit
+ */
 class AbstractSimulationHandler
 {
 
 public:
 
-    AbstractSimulationHandler();
+    /**
+     * @brief Default contructor
+     * @param geometryParameters Geometry parameters
+     */
+    AbstractSimulationHandler( const GeometryParameters& geometryParameters );
+
+    /**
+     * @brief Default desctuctor
+     */
     virtual ~AbstractSimulationHandler();
 
     /**
@@ -58,19 +80,61 @@ public:
     */
     BRAYNS_API void writeFrame( std::ofstream& stream, const floats& values );
 
-    virtual void* getFrameData( const float timestamp ) = 0;
+    /**
+     * @brief setTimestamp sets the current timestamp for the simulation
+     * @param timestamp Timestamp to set
+     */
+    void setTimestamp( const float timestamp );
 
+    /**
+     * @brief getFrameData returns a void pointer to the simulation data for the current timestamp
+     */
+    virtual void* getFrameData() = 0;
+
+    /**
+     * @brief getFrameSize return the size of the current simulation frame
+     */
     uint64_t getFrameSize() const { return _frameSize; }
+
+    /**
+     * @brief setFrameSize Sets the size of the current simulation frame
+     */
     void setFrameSize( const uint64_t frameSize ) { _frameSize = frameSize; }
 
+    /**
+     * @brief getNbFrames returns the number of frame for the current simulation
+     */
     uint64_t getNbFrames() const { return _nbFrames; }
+
+    /**
+     * @brief setNbFrames sets the number of frame for the current simulation
+     */
     void setNbFrames( const uint64_t nbFrames ) { _nbFrames = nbFrames; }
 
+    /**
+     * @brief getCurrentFrame returns the current frame number
+     */
     uint64_t getCurrentFrame() const { return _currentFrame; }
+
+    /**
+     * @brief setCurrentFrame sets the current frame number
+     */
     void setCurrentFrame( const uint64_t currentFrame ) { _currentFrame = currentFrame; }
+
+    /**
+     * @brief getHistogram returns the Histogram of the values in the current simulation frame. The
+     *        size of the histogram is defined by the --simulation-histogram-size command line
+     *        parameter (128 by default). To build the histogram, occurences of the same value are
+     *        counted and spread along the histogram according to the calculated range. The
+     *        range is defined by the minimum and maximum value of the current frame. The Histogram
+     *        is specific to the current frame, not to the whole simulation.
+     */
+    const Histogram& getHistogram();
 
 protected:
 
+    const GeometryParameters& _geometryParameters;
+    float _timestamp;
     uint64_t _currentFrame;
     uint64_t _nbFrames;
     uint64_t _frameSize;
@@ -78,6 +142,7 @@ protected:
     uint64_t _headerSize;
     void* _memoryMapPtr;
     int _cacheFileDescriptor;
+    Histogram _histogram;
 
 };
 

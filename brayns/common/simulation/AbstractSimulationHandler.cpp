@@ -21,6 +21,7 @@
 #include "AbstractSimulationHandler.h"
 
 #include <brayns/common/log.h>
+#include <brayns/parameters/GeometryParameters.h>
 
 #include <fstream>
 #include <sys/mman.h>
@@ -30,15 +31,18 @@
 namespace brayns
 {
 
-AbstractSimulationHandler::AbstractSimulationHandler()
-    : _currentFrame( 0 )
+AbstractSimulationHandler::AbstractSimulationHandler(
+    const GeometryParameters& geometryParameters)
+    : _geometryParameters( geometryParameters )
+    , _timestamp( -std::numeric_limits<float>::max( ))
+    , _currentFrame( 0 )
     , _nbFrames( 0 )
     , _frameSize( 0 )
     , _headerSize( 0 )
     , _memoryMapPtr( 0 )
     , _cacheFileDescriptor( -1 )
 {
-
+    _histogram.timestamp = _timestamp;
 }
 
 AbstractSimulationHandler::~AbstractSimulationHandler()
@@ -52,6 +56,11 @@ AbstractSimulationHandler::~AbstractSimulationHandler()
     }
     if( _cacheFileDescriptor != -1 )
         ::close( _cacheFileDescriptor );
+}
+
+void AbstractSimulationHandler::setTimestamp( const float timestamp )
+{
+    _timestamp = size_t( timestamp ) % _nbFrames;
 }
 
 bool AbstractSimulationHandler::attachSimulationToCacheFile(
@@ -105,6 +114,41 @@ void AbstractSimulationHandler::writeFrame(
     const floats& values )
 {
     stream.write( ( char* )values.data(), values.size() * sizeof(float) );
+}
+
+const Histogram& AbstractSimulationHandler::getHistogram()
+{
+    if( _timestamp == _histogram.timestamp )
+        return _histogram;
+
+    float* data = (float*)getFrameData();
+
+    // Determine range
+    Vector2f range( std::numeric_limits< float >::max(), -std::numeric_limits< float >::max( ));
+    for( size_t i = 0; i < _frameSize; ++i )
+    {
+        const uint64_t index = i * sizeof(float);
+        float value = data[index];
+        if( value < range.x() ) range.x() = value;
+        if( value > range.y() ) range.y() = value;
+    }
+
+    // Normalize values
+    const auto histogramSize = _geometryParameters.getSimulationHistogramSize();
+    _histogram.values.clear();
+    const float normalizationValue = ( range.y() - range.x() ) / float( histogramSize );
+    for( size_t i = 0; i < _frameSize; ++i )
+    {
+        const uint64_t index = i * sizeof(float);
+        _histogram.values.resize( histogramSize, 0 );
+        const size_t idx = ( data[index] - range.x( )) * normalizationValue;
+        ++_histogram.values[ idx ];
+    }
+
+    // Build histogram
+    _histogram.range = range;
+    _histogram.timestamp = _timestamp;
+    return _histogram;
 }
 
 }

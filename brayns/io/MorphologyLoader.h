@@ -132,7 +132,7 @@ private:
         size_t morphologyIndex,
         size_t sectionType );
 
-    GeometryParameters _geometryParameters;
+    const GeometryParameters& _geometryParameters;
 };
 
 }

@@ -124,7 +124,9 @@ void NESTLoader::importCircuit( const std::string& filepath, Scene& scene, size_
 
 bool NESTLoader::importSpikeReport( const std::string& filename, Scene& scene )
 {
-    SpikeSimulationHandlerPtr simulationHandler( new SpikeSimulationHandler( ));
+    SpikeSimulationHandlerPtr simulationHandler(
+        new SpikeSimulationHandler( _geometryParameters ));
+
     const std::string& cacheFile = _geometryParameters.getNESTCacheFile();
     if( simulationHandler->attachSimulationToCacheFile( cacheFile ))
         // Cache already exists, no need to create it.

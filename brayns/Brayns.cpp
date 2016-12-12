@@ -366,7 +366,8 @@ private:
             const std::string& cacheFile( geometryParameters.getNESTCacheFile( ));
             if( !cacheFile.empty( ))
             {
-                SpikeSimulationHandlerPtr simulationHandler( new SpikeSimulationHandler( ));
+                SpikeSimulationHandlerPtr simulationHandler(
+                    new SpikeSimulationHandler( _parametersManager->getGeometryParameters( )));
                 simulationHandler->attachSimulationToCacheFile( cacheFile );
                 scene.setSimulationHandler( simulationHandler );
             }

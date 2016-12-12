@@ -173,6 +173,10 @@ void ZeroEQPlugin::_setupHTTPServer()
         std::bind( &ZeroEQPlugin::_requestViewport, this ));
     _remoteViewport.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_viewportUpdated, this ));
+
+    _httpServer->handleGET( _remoteHistogram );
+    _remoteHistogram.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestHistogram, this ));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -742,6 +746,7 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _resetCameraUpdated();
 
     _engine.getFrameBuffer().clear();
+    _engine.getScene().commitSimulationData();
     _engine.getScene().commitVolumeData();
     _engine.getRenderer().commit();
     _parametersManager.print();
@@ -893,6 +898,19 @@ void ZeroEQPlugin::_viewportUpdated()
 {
     _parametersManager.getApplicationParameters().setWindowSize( Vector2ui{ _remoteViewport.getSize() } );
     _engine.commit();
+}
+
+bool ZeroEQPlugin::_requestHistogram()
+{
+    auto simulationHandler = _engine.getScene().getSimulationHandler();
+    if( simulationHandler )
+    {
+        const auto& histogram = simulationHandler->getHistogram();
+        _remoteHistogram.setMin( histogram.range.x( ));
+        _remoteHistogram.setMax( histogram.range.y( ));
+        _remoteHistogram.setBins( histogram.values );
+    }
+    return true;
 }
 
 uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width,

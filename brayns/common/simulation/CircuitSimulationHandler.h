@@ -29,17 +29,28 @@
 namespace brayns
 {
 
+/**
+ * @brief The CircuitSimulationHandler class handles simulation frames for the current circuit.
+ *        Frames are stored in a memory mapped file that is accessed according to a specified
+ *        timestamp. The CircuitSimulationHandler class is in charge of keeping the handle to the
+ *        memory mapped file.
+ */
 class CircuitSimulationHandler: public AbstractSimulationHandler
 {
 
 public:
 
     /**
-     * @brief Returns a pointer to a given frame in the memory mapped file.
-     * @param timestamp Timestamp of the frame
+     * @brief Default contructor
+     * @param geometryParameters Geometry parameters
+     */
+    CircuitSimulationHandler( const GeometryParameters& geometryParameters );
+
+    /**
+     * @brief Returns a pointer to the current frame in the memory mapped file.
      * @return Pointer to given frame
      */
-    void* getFrameData( const float timestamp ) final;
+    void* getFrameData() final;
 
 };
 
