@@ -78,7 +78,7 @@ bool MorphologyLoader::_importMorphology(
         const MorphologyLayout& layout =
             _geometryParameters.getMorphologyLayout();
 
-        if( layout.type != ML_NONE )
+        if( layout.nbColumns != 0 )
         {
             Boxf morphologyAABB;
             const brain::Vector4fs& points = morphology.getPoints();

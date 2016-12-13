@@ -629,7 +629,13 @@ void ZeroEQPlugin::_initializeDataSource()
         sectionTypes.push_back( ::brayns::v1::SectionType::apical_dendrite );
     _remoteDataSource.setMorphology_section_types( sectionTypes );
 
-    _remoteDataSource.setMorphology_layout( geometryParameters.getMorphologyLayout().type );
+    const auto& morphologyLayout = geometryParameters.getMorphologyLayout();
+    brayns::v1::MorphologyLayout remoteMorphologyLayout(
+        morphologyLayout.nbColumns,
+        morphologyLayout.verticalSpacing,
+        morphologyLayout.horizontalSpacing );
+    _remoteDataSource.setMorphology_layout( remoteMorphologyLayout );
+
     _remoteDataSource.setGenerate_multiple_models( geometryParameters.getGenerateMultipleModels( ));
     _remoteDataSource.setVolume_folder( volumeParameters.getFolder( ));
     _remoteDataSource.setVolume_file( volumeParameters.getFilename( ));
@@ -716,8 +722,14 @@ void ZeroEQPlugin::_dataSourceUpdated()
     }
     _parametersManager.set( "morphology-section-types", std::to_string( morphologySectionTypes ));
 
-    _parametersManager.set(
-        "morphology-layout", std::to_string(_remoteDataSource.getMorphology_layout( )));
+    const auto remoteMorphologyLayout = _remoteDataSource.getMorphology_layout();
+    std::string layoutAsString;
+    layoutAsString += std::to_string( remoteMorphologyLayout.getNb_columns( ));
+    layoutAsString += " " + std::to_string( remoteMorphologyLayout.getVertical_spacing( ));
+    layoutAsString += " " + std::to_string( remoteMorphologyLayout.getHorizontal_spacing( ));
+    BRAYNS_ERROR << "morphology-layout: " << layoutAsString << std::endl;
+    _parametersManager.set( "morphology-layout", layoutAsString );
+
     _parametersManager.set(
         "generate-multiple-models", (_remoteDataSource.getGenerate_multiple_models( ) ? "1" : "0"));
     _parametersManager.set(

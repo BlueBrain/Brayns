@@ -53,6 +53,12 @@ enum SceneEnvironment: uint {
     bounding_box = 3
 }
 
+table MorphologyLayout {
+    nb_columns: uint;
+    vertical_spacing: uint;
+    horizontal_spacing: uint;
+}
+
 table DataSource {
     transfer_function_file: string;
     morphology_folder: string;
@@ -79,7 +85,7 @@ table DataSource {
     simulation_cache_file: string;
     nest_cache_file: string;
     morphology_section_types: [SectionType];
-    morphology_layout: uint;
+    morphology_layout: MorphologyLayout;
     generate_multiple_models: bool;
     volume_folder: string;
     volume_file: string;

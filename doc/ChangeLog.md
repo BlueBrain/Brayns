@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master
 
+* [#87](https://github.com/BlueBrain/Brayns/pull/87):
+  Added morphology layout feature to Parameters event
 * [#86](https://github.com/BlueBrain/Brayns/pull/86):
   Added simulation histogram event
 

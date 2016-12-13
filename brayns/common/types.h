@@ -294,12 +294,6 @@ enum MeshQuality
     MQ_MAX_QUALITY
 };
 
-enum MorphologyLayoutType
-{
-    ML_NONE = 0,
-    ML_GRID,
-};
-
 enum class CameraType
 {
     undefined,
