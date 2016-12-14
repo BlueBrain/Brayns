@@ -63,9 +63,18 @@ typedef std::shared_ptr< Camera > CameraPtr;
 class TransferFunction;
 typedef std::shared_ptr< TransferFunction > TransferFunctionPtr;
 
+enum class RendererType
+{
+    basic,
+    proximity,
+    simulation,
+    particle
+};
+typedef std::vector< RendererType > RendererTypes;
+
 class Renderer;
 typedef std::shared_ptr< Renderer > RendererPtr;
-typedef std::map< std::string, RendererPtr > RendererMap;
+typedef std::map< RendererType, RendererPtr > RendererMap;
 typedef std::vector< RendererPtr > Renderers;
 
 class FrameBuffer;
@@ -138,6 +147,7 @@ typedef std::shared_ptr< AbstractSimulationHandler > AbstractSimulationHandlerPt
 class CircuitSimulationHandler;
 typedef std::shared_ptr< CircuitSimulationHandler > CircuitSimulationHandlerPtr;
 
+class Brayns;
 class SpikeSimulationHandler;
 typedef std::shared_ptr< SpikeSimulationHandler > SpikeSimulationHandlerPtr;
 
@@ -191,24 +201,23 @@ enum FrameBufferFormat
 /** Define the color scheme to be applied to the geometry */
 enum class ColorScheme
 {
-    none,
-    protein_atoms,
-    protein_chains,
-    protein_residues,
-    protein_backbones,
-    neuron_default,
-    neuron_by_id,
-    neuron_by_type,
-    neuron_by_segment_type,
+    none = 0,
+    neuron_by_id = 1,
+    neuron_by_type = 2,
+    neuron_by_segment_type = 3,
+    protein_atoms = 4,
+    protein_chains = 5,
+    protein_residues = 6,
+    protein_backbones = 7
 };
 
 /** Define the environment that is added to the default scene */
-enum SceneEnvironment
+enum class SceneEnvironment
 {
-    SE_NONE = 0,
-    SE_GROUND,
-    SE_WALL,
-    SE_BOUNDING_BOX
+    none,
+    ground,
+    wall,
+    bounding_box
 };
 
 /** Define light types */
@@ -296,7 +305,6 @@ enum MeshQuality
 
 enum class CameraType
 {
-    undefined,
     perspective,
     stereo,
     orthographic,

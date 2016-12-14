@@ -40,16 +40,15 @@ OptiXEngine::OptiXEngine(
     _initializeContext();
 
     BRAYNS_INFO << "Initializing renderers" << std::endl;
-    _activeRenderer =
-        parametersManager.getRenderingParameters().getRenderer();
-
-    _rendererNames = _parametersManager.getRenderingParameters().getRenderers();
+    _activeRenderer = parametersManager.getRenderingParameters().getRenderer();
 
     Renderers renderersForScene;
-    for( std::string renderer: _rendererNames )
+    for( const auto renderer: parametersManager.getRenderingParameters().getRenderers() )
     {
-        _renderers[renderer].reset(
-            new OptiXRenderer( renderer, _parametersManager, _context ));
+        const auto& rendererName =
+            parametersManager.getRenderingParameters().getRendererAsString( renderer );
+        _renderers[ renderer ].reset(
+            new OptiXRenderer( rendererName, _parametersManager, _context ));
         renderersForScene.push_back( _renderers[renderer] );
     }
 
@@ -140,24 +139,24 @@ std::string OptiXEngine::name() const
 void OptiXEngine::commit()
 {
     Engine::commit();
-    for( std::string renderer: _rendererNames )
+    for( const auto& renderer: _renderers )
     {
-        _renderers[renderer]->setScene( _scene );
-        _renderers[renderer]->setCamera( _camera );
-        _renderers[renderer]->commit( );
+        _renderers[ renderer.first ]->setScene( _scene );
+        _renderers[ renderer.first ]->setCamera( _camera );
+        _renderers[ renderer.first ]->commit( );
     }
-    _camera->commit( );
+    _camera->commit();
 }
 
 void OptiXEngine::render()
 {
-    if( _scene->getSimulationHandler() )
+    if( _scene->getSimulationHandler( ))
         _scene->commitSimulationData();
 
     if( _scene->getVolumeHandler() )
         _scene->commitVolumeData();
 
-    _renderers[_activeRenderer]->render( _frameBuffer );
+    _renderers[ _activeRenderer ]->render( _frameBuffer );
 }
 
 void OptiXEngine::preRender()

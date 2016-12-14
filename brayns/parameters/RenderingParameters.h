@@ -48,11 +48,12 @@ public:
     const std::string& getModule( ) const { return _module; }
 
     /** OSPRay renderer */
-    const std::string& getRenderer( ) const { return _renderer; }
-    void setRenderer( const std::string& renderer ) { _renderer = renderer; }
+    RendererType getRenderer() const { return _renderer; }
+    const std::string& getRendererAsString( const RendererType value ) const;
+    void setRenderer( const RendererType renderer  ) { _renderer = renderer; }
 
     /** OSPRay supported renderers */
-    const strings& getRenderers( ) const { return _renderers; }
+    const RendererTypes& getRenderers( ) const { return _renderers; }
 
     /** Shadows */
     bool getShadows( ) const { return _shadows; }
@@ -75,6 +76,7 @@ public:
     /** Shading applied to the geometry
      */
     ShadingType getShading( ) const { return _shading; }
+    const std::string& getShadingAsString( const ShadingType value ) const;
     void setShading( const ShadingType value ) { _shading = value; }
 
     /** Number of samples per pixel */
@@ -161,10 +163,8 @@ public:
     /**
        Camera type
     */
-    CameraType getCameraType() const
-    {
-        return _cameraType;
-    }
+    CameraType getCameraType() const { return _cameraType; }
+    const std::string& getCameraTypeAsString( const CameraType value ) const;
 
     /**
        Epsilon. All intersection distances less than the epsilon value are
@@ -189,8 +189,8 @@ protected:
 
     std::string _engine;
     std::string _module;
-    std::string _renderer;
-    strings _renderers;
+    RendererType _renderer;
+    RendererTypes _renderers;
     float _ambientOcclusionStrength;
     ShadingType _shading;
     bool _lightEmittingMaterials;

@@ -37,7 +37,7 @@ Engine::Engine( ParametersManager& parametersManager )
 {
 }
 
-void Engine::setActiveRenderer( const std::string& renderer )
+void Engine::setActiveRenderer( const RendererType renderer )
 {
     if( _activeRenderer != renderer )
         _activeRenderer = renderer;
@@ -73,30 +73,30 @@ void Engine::_render(
 
     const Vector2i& frameSize = _frameBuffer->getSize();
 
-    if( _parametersManager.getRenderingParameters().getHeadLight() )
+    if( _parametersManager.getRenderingParameters().getHeadLight( ))
     {
         LightPtr sunLight = _scene->getLight( 0 );
-        DirectionalLight* sun = dynamic_cast< DirectionalLight* > ( sunLight.get() );
+        DirectionalLight* sun = dynamic_cast< DirectionalLight* > ( sunLight.get( ));
         if( sun )
         {
-            sun->setDirection( _camera->getTarget() - _camera->getPosition() );
+            sun->setDirection( _camera->getTarget() - _camera->getPosition( ));
             _scene->commitLights();
         }
     }
 
     _render( );
 
-    uint8_t* colorBuffer = _frameBuffer->getColorBuffer( );
+    uint8_t* colorBuffer = _frameBuffer->getColorBuffer();
     if( colorBuffer )
     {
-        const size_t size = frameSize.x( ) * frameSize.y( ) * _frameBuffer->getColorDepth( );
+        const size_t size = frameSize.x() * frameSize.y() * _frameBuffer->getColorDepth();
         renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
     }
 
     float* depthBuffer = _frameBuffer->getDepthBuffer( );
     if( depthBuffer )
     {
-        const size_t size = frameSize.x( ) * frameSize.y( );
+        const size_t size = frameSize.x() * frameSize.y();
         renderOutput.depthBuffer.assign( depthBuffer, depthBuffer + size );
     }
 
@@ -109,14 +109,14 @@ void Engine::_render()
 
     preRender();
 
-    if( _parametersManager.getRenderingParameters().getHeadLight() )
+    if( _parametersManager.getRenderingParameters().getHeadLight( ))
     {
         LightPtr sunLight = _scene->getLight( 0 );
         DirectionalLight* sun =
-            dynamic_cast< DirectionalLight* > ( sunLight.get() );
+            dynamic_cast< DirectionalLight* > ( sunLight.get( ));
         if( sun )
         {
-            sun->setDirection( _camera->getTarget() - _camera->getPosition() );
+            sun->setDirection( _camera->getTarget() - _camera->getPosition( ));
             _scene->commitLights();
         }
     }
@@ -169,7 +169,13 @@ void Engine::initializeMaterials(
     const size_t nbMaterials )
 {
     _scene->setMaterials( materialType, nbMaterials );
-    _scene->commit( );
+    _scene->commit();
 }
+
+Renderer& Engine::getRenderer()
+{
+    return *_renderers[ _activeRenderer ];
+}
+
 
 }

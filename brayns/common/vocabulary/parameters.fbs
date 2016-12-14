@@ -36,14 +36,13 @@ enum SectionType: uint {
 
 enum ColorScheme: uint {
     none = 0,
-    protein_atoms = 1,
-    protein_chain = 2,
-    protein_residue = 3,
-    protein_backbone = 4,
-    neuron_default = 5,
-    neuron_by_id = 6,
-    neuron_by_type = 7
-    neuron_by_segment_type = 8
+    neuron_by_id = 1,
+    neuron_by_type = 2
+    neuron_by_segment_type = 3
+    protein_atoms = 4,
+    protein_chain = 5,
+    protein_residue = 6,
+    protein_backbone = 7
 }
 
 enum SceneEnvironment: uint {

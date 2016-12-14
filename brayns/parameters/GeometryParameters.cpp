@@ -57,137 +57,162 @@ const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
 const std::string PARAM_SPLASH_SCENE_FOLDER = "splash-scene-folder";
 
+const std::string COLOR_SCHEMES[8] = {
+    "none", "neuron-by-id", "neuron-by-type", "neuron-by-segment-type",
+    "protein-atoms", "protein-chains", "protein-residues", "protein-backbones"
+};
+
+const std::string SCENE_ENVIRONMENTS[4] = { "none", "ground", "wall", "bounding-box" };
+
+const std::string GEOMETRY_QUALITIES[3] = { "low", "medium", "high" };
+
 }
 
 namespace brayns
 {
 
-GeometryParameters::GeometryParameters( )
+GeometryParameters::GeometryParameters()
     : AbstractParameters( "Geometry" )
     , _radiusMultiplier( 1.f )
     , _radiusCorrection( 0.f )
     , _colorScheme( ColorScheme::none )
-    , _sceneEnvironment( SE_NONE )
+    , _sceneEnvironment( SceneEnvironment::none )
     , _geometryQuality( GeometryQuality::high )
     , _morphologySectionTypes( MST_ALL )
     , _nonSimulatedCells( 0 )
     , _startSimulationTime( 0.f )
-    , _endSimulationTime( std::numeric_limits<float>::max() )
+    , _endSimulationTime( std::numeric_limits<float>::max( ))
     , _simulationValuesRange( Vector2f(
-        std::numeric_limits<float>::max(), std::numeric_limits<float>::min() ))
+        std::numeric_limits<float>::max(), std::numeric_limits<float>::min( )))
     , _simulationHistogramSize( 128 )
     , _generateMultipleModels( false )
 {
     _parameters.add_options()
-        ( PARAM_MORPHOLOGY_FOLDER.c_str(), po::value< std::string >( ),
-            "Folder containing SWC and H5 files" )
-        ( PARAM_NEST_CIRCUIT.c_str(), po::value< std::string >( ),
-            "H5 file containing the NEST circuit" )
-        ( PARAM_NEST_REPORT.c_str(), po::value< std::string >( ),
-            "NEST simulation report file" )
-        ( PARAM_MESH_FOLDER.c_str(), po::value< std::string >( ),
-            "Folder containing mesh files" )
-        ( PARAM_PDB_FILE.c_str(), po::value< std::string >( ),
-            "PDB file to load" )
-        ( PARAM_PDB_FOLDER.c_str(), po::value< std::string >( ),
-            "Folder containing PDB files" )
-        ( PARAM_XYZB_FILE.c_str(), po::value< std::string >( ),
-            "XYZB file to load" )
-        ( PARAM_CIRCUIT_CONFIG.c_str(), po::value< std::string >( ),
-            "Circuit configuration file" )
-        ( PARAM_LOAD_CACHE_FILE.c_str(), po::value< std::string >( ),
-            "Load binary container of a scene" )
-        ( PARAM_SAVE_CACHE_FILE.c_str(), po::value< std::string >( ),
-            "Save binary container of a scene" )
-        ( PARAM_RADIUS_MULTIPLIER.c_str(), po::value< float >( ),
-            "Radius multiplier for spheres, cones and cylinders" )
-        ( PARAM_RADIUS_CORRECTION.c_str(), po::value< float >( ),
-            "Forces radius of spheres and cylinders to the specified value" )
-        ( PARAM_COLOR_SCHEME.c_str( ), po::value< size_t >( ),
-            "Color scheme to be applied to the geometry" )
-        ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< size_t >( ),
-            "Scene environment (0: none, 1: ground, 2: wall, 3: bounding box)" )
-        ( PARAM_GEOMETRY_QUALITY.c_str(), po::value< size_t >( ),
-            "Geometry rendering quality (0: Fast rendering, "
-                "1: Medium rendering, 2: Max quality)" )
-        ( PARAM_TARGET.c_str(), po::value< std::string >( ),
-            "Circuit target to load" )
-        ( PARAM_REPORT.c_str(), po::value< std::string >( ),
-            "Circuit report to load" )
-        ( PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value< size_t > ( ),
+        ( PARAM_MORPHOLOGY_FOLDER.c_str(), po::value< std::string >(),
+            "Folder containing SWC and H5 files [string]" )
+        ( PARAM_NEST_CIRCUIT.c_str(), po::value< std::string >(),
+            "H5 file containing the NEST circuit [string]" )
+        ( PARAM_NEST_REPORT.c_str(), po::value< std::string >(),
+            "NEST simulation report file [string]" )
+        ( PARAM_MESH_FOLDER.c_str(), po::value< std::string >(),
+            "Folder containing mesh files [string]" )
+        ( PARAM_PDB_FILE.c_str(), po::value< std::string >(),
+            "PDB filename [string]" )
+        ( PARAM_PDB_FOLDER.c_str(), po::value< std::string >(),
+            "Folder containing PDB files [string]" )
+        ( PARAM_XYZB_FILE.c_str(), po::value< std::string >(),
+            "XYZB filename [string]" )
+        ( PARAM_CIRCUIT_CONFIG.c_str(), po::value< std::string >(),
+            "Circuit configuration filename [string]" )
+        ( PARAM_LOAD_CACHE_FILE.c_str(), po::value< std::string >(),
+            "Load binary container of a scene [string]" )
+        ( PARAM_SAVE_CACHE_FILE.c_str(), po::value< std::string >(),
+            "Save binary container of a scene [string]" )
+        ( PARAM_RADIUS_MULTIPLIER.c_str(), po::value< float >(),
+            "Radius multiplier for spheres, cones and cylinders [float]" )
+        ( PARAM_RADIUS_CORRECTION.c_str(), po::value< float >(),
+            "Forces radius of spheres and cylinders to the specified value [float]" )
+        ( PARAM_COLOR_SCHEME.c_str(), po::value< std::string >(),
+            "Color scheme to be applied to the geometry [none|"
+            "neuron_by_id|neuron_by_type|neuron_by_segment_type|"
+            "protein_atoms|protein_chains|protein_residues|protein_backbones]")
+        ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< std::string >(),
+            "Scene environment [none|ground|wall|bounding-box]" )
+        ( PARAM_GEOMETRY_QUALITY.c_str(), po::value< std::string >(),
+            "Geometry rendering quality [low|medium|high]" )
+        ( PARAM_TARGET.c_str(), po::value< std::string >(),
+            "Circuit target [string]" )
+        ( PARAM_REPORT.c_str(), po::value< std::string >(),
+            "Circuit report [string]" )
+        ( PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value< size_t >(),
             "Morphology section types (1: soma, 2: axon, 4: dendrite, "
             "8: apical dendrite). Values can be added to select more than "
             "one type of section" )
         ( PARAM_MORPHOLOGY_LAYOUT.c_str(), po::value< size_ts >()->multitoken(),
-            "Morphology layout (number of lines, number of columns, "
-            "vertical spacing, horizontal spacing)" )
+            "Morphology layout defined by number of columns, vertical spacing, horizontal spacing "
+            "[int int int]" )
         ( PARAM_NON_SIMULATED_CELLS.c_str(), po::value< size_t >(),
-            "Defines the number of non-simulated cells should be loaded when a "
-            "report is specified" )
+            "Defines the number of non-simulated cells that should be loaded when a "
+            "report is specified [int]" )
         ( PARAM_START_SIMULATION_TIME.c_str(), po::value< float >(),
-            "Start simulation time" )
+            "Start simulation timestamp [float]" )
         ( PARAM_END_SIMULATION_TIME.c_str(), po::value< float >(),
-            "End simulation time" )
+            "End simulation timestamp [float]" )
         ( PARAM_SIMULATION_RANGE.c_str(), po::value< floats >()->multitoken(),
-            "Minimum and maximum values for the simulation" )
+            "Minimum and maximum values for the simulation [float float]" )
         ( PARAM_SIMULATION_CACHE_FILENAME.c_str(), po::value< std::string >(),
-            "Cache file containing simulation data" )
+            "Cache file containing simulation data [string]" )
         (PARAM_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value< size_t >(),
-            "Number of values defining the simulation histogram")
+            "Number of values defining the simulation histogram [int]")
         ( PARAM_NEST_CACHE_FILENAME.c_str(), po::value< std::string >(),
-            "Cache file containing nest data" )
+            "Cache file containing nest data [string]" )
         ( PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value< bool >(),
-            "Generated multiple models based on geometry timestamps" )
-        ( PARAM_SPLASH_SCENE_FOLDER.c_str(), po::value< std::string >( ),
-            "Folder containing splash scene folder" );
+            "Enable/Disable generation of multiple models based on geometry timestamps [bool]" )
+        ( PARAM_SPLASH_SCENE_FOLDER.c_str(), po::value< std::string >(),
+            "Folder containing splash scene folder [string]" );
 }
 
 bool GeometryParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_MORPHOLOGY_FOLDER ))
-        _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as< std::string >( );
+        _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as< std::string >();
     if( vm.count( PARAM_NEST_CIRCUIT ))
-        _NESTCircuit = vm[PARAM_NEST_CIRCUIT].as< std::string >( );
+        _NESTCircuit = vm[PARAM_NEST_CIRCUIT].as< std::string >();
     if( vm.count( PARAM_NEST_REPORT ))
-        _NESTReport = vm[PARAM_NEST_REPORT].as< std::string >( );
+        _NESTReport = vm[PARAM_NEST_REPORT].as< std::string >();
     if( vm.count( PARAM_PDB_FILE ))
-        _pdbFile = vm[PARAM_PDB_FILE].as< std::string >( );
+        _pdbFile = vm[PARAM_PDB_FILE].as< std::string >();
     if( vm.count( PARAM_PDB_FOLDER ))
-        _pdbFolder = vm[PARAM_PDB_FOLDER].as< std::string >( );
+        _pdbFolder = vm[PARAM_PDB_FOLDER].as< std::string >();
     if( vm.count( PARAM_XYZB_FILE ))
-        _xyzbFile = vm[PARAM_XYZB_FILE].as< std::string >( );
+        _xyzbFile = vm[PARAM_XYZB_FILE].as< std::string >();
     if( vm.count( PARAM_MESH_FOLDER ))
-        _meshFolder = vm[PARAM_MESH_FOLDER].as< std::string >( );
+        _meshFolder = vm[PARAM_MESH_FOLDER].as< std::string >();
     if( vm.count( PARAM_CIRCUIT_CONFIG ))
-        _circuitConfig = vm[PARAM_CIRCUIT_CONFIG].as< std::string >( );
+        _circuitConfig = vm[PARAM_CIRCUIT_CONFIG].as< std::string >();
     if( vm.count( PARAM_LOAD_CACHE_FILE ))
-        _loadCacheFile = vm[PARAM_LOAD_CACHE_FILE].as< std::string >( );
+        _loadCacheFile = vm[PARAM_LOAD_CACHE_FILE].as< std::string >();
     if( vm.count( PARAM_SAVE_CACHE_FILE ))
-        _saveCacheFile = vm[PARAM_SAVE_CACHE_FILE].as< std::string >( );
+        _saveCacheFile = vm[PARAM_SAVE_CACHE_FILE].as< std::string >();
     if( vm.count( PARAM_COLOR_SCHEME ))
-        _colorScheme = static_cast< ColorScheme >(
-            vm[PARAM_COLOR_SCHEME].as< size_t >( ));
+    {
+        _colorScheme = ColorScheme::none;
+        const auto& colorScheme = vm[PARAM_COLOR_SCHEME].as< std::string >();
+        for( size_t i = 0; i < sizeof( COLOR_SCHEMES ) / sizeof( COLOR_SCHEMES[0] ); ++i )
+            if( colorScheme == COLOR_SCHEMES[i])
+                _colorScheme = static_cast< ColorScheme >( i );
+    }
     if( vm.count( PARAM_RADIUS_MULTIPLIER))
-        _radiusMultiplier = vm[PARAM_RADIUS_MULTIPLIER].as< float >( );
+        _radiusMultiplier = vm[PARAM_RADIUS_MULTIPLIER].as< float >();
     if( vm.count( PARAM_RADIUS_CORRECTION))
-        _radiusCorrection = vm[PARAM_RADIUS_CORRECTION].as< float >( );
+        _radiusCorrection = vm[PARAM_RADIUS_CORRECTION].as< float >();
     if( vm.count( PARAM_SCENE_ENVIRONMENT ))
-        _sceneEnvironment = static_cast< SceneEnvironment >(
-            vm[PARAM_SCENE_ENVIRONMENT].as< size_t >( ));
+    {
+        _sceneEnvironment = SceneEnvironment::none;
+        const auto& sceneEnvironment = vm[PARAM_SCENE_ENVIRONMENT].as< std::string >();
+        for( size_t i = 0; i < sizeof( SCENE_ENVIRONMENTS ) / sizeof( SCENE_ENVIRONMENTS[0] ); ++i )
+            if( sceneEnvironment == SCENE_ENVIRONMENTS[i])
+                _sceneEnvironment = static_cast< SceneEnvironment >( i );
+    }
     if( vm.count( PARAM_GEOMETRY_QUALITY ))
-        _geometryQuality = static_cast< GeometryQuality >(
-            vm[PARAM_GEOMETRY_QUALITY].as< size_t >( ));
+    {
+        _geometryQuality = GeometryQuality::low;
+        const auto& geometryQuality = vm[PARAM_GEOMETRY_QUALITY].as< std::string >();
+        for( size_t i = 0; i < sizeof( GEOMETRY_QUALITIES ) / sizeof( GEOMETRY_QUALITIES[0] ); ++i )
+            if( geometryQuality == GEOMETRY_QUALITIES[i])
+                _geometryQuality = static_cast< GeometryQuality >( i );
+    }
     if( vm.count( PARAM_TARGET ))
-        _target = vm[PARAM_TARGET].as< std::string >( );
+        _target = vm[PARAM_TARGET].as< std::string >();
     if( vm.count( PARAM_REPORT ))
-        _report = vm[PARAM_REPORT].as< std::string >( );
+        _report = vm[PARAM_REPORT].as< std::string >();
     if( vm.count( PARAM_MORPHOLOGY_SECTION_TYPES ))
         _morphologySectionTypes =
-            vm[PARAM_MORPHOLOGY_SECTION_TYPES].as< size_t >( );
+            vm[PARAM_MORPHOLOGY_SECTION_TYPES].as< size_t >();
     if( vm.count( PARAM_MORPHOLOGY_LAYOUT ))
     {
-        size_ts values = vm[PARAM_MORPHOLOGY_LAYOUT].as< size_ts >( );
-        if( values.size( ) == 3 )
+        size_ts values = vm[PARAM_MORPHOLOGY_LAYOUT].as< size_ts >();
+        if( values.size() == 3 )
         {
             _morphologyLayout.nbColumns = values[0];
             _morphologyLayout.verticalSpacing = values[1];
@@ -196,39 +221,39 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
     }
     if( vm.count( PARAM_NON_SIMULATED_CELLS))
         _nonSimulatedCells =
-            vm[PARAM_NON_SIMULATED_CELLS].as< size_t >( );
+            vm[PARAM_NON_SIMULATED_CELLS].as< size_t >();
     if( vm.count( PARAM_START_SIMULATION_TIME ))
         _startSimulationTime =
-            vm[PARAM_START_SIMULATION_TIME].as< float >( );
+            vm[PARAM_START_SIMULATION_TIME].as< float >();
     if( vm.count( PARAM_END_SIMULATION_TIME ))
         _endSimulationTime =
-            vm[PARAM_END_SIMULATION_TIME].as< float >( );
+            vm[PARAM_END_SIMULATION_TIME].as< float >();
     if( vm.count( PARAM_SIMULATION_RANGE ))
     {
-        floats values = vm[PARAM_SIMULATION_RANGE].as< floats >( );
-        if( values.size( ) == 2 )
+        floats values = vm[PARAM_SIMULATION_RANGE].as< floats >();
+        if( values.size() == 2 )
             _simulationValuesRange = Vector2f( values[0], values[1] );
     }
     if( vm.count( PARAM_SIMULATION_CACHE_FILENAME ))
         _simulationCacheFile =
-            vm[PARAM_SIMULATION_CACHE_FILENAME].as< std::string >( );
+            vm[PARAM_SIMULATION_CACHE_FILENAME].as< std::string >();
     if( vm.count( PARAM_SIMULATION_HISTOGRAM_SIZE ))
-        _simulationHistogramSize = vm[PARAM_SIMULATION_HISTOGRAM_SIZE].as< size_t >( );
+        _simulationHistogramSize = vm[PARAM_SIMULATION_HISTOGRAM_SIZE].as< size_t >();
     if( vm.count( PARAM_NEST_CACHE_FILENAME ))
         _NESTCacheFile =
-            vm[PARAM_NEST_CACHE_FILENAME].as< std::string >( );
+            vm[PARAM_NEST_CACHE_FILENAME].as< std::string >();
     if( vm.count( PARAM_GENERATE_MULTIPLE_MODELS ))
         _generateMultipleModels =
-            vm[PARAM_GENERATE_MULTIPLE_MODELS].as< bool >( );
+            vm[PARAM_GENERATE_MULTIPLE_MODELS].as< bool >();
     if( vm.count( PARAM_SPLASH_SCENE_FOLDER ))
-        _splashSceneFolder = vm[PARAM_SPLASH_SCENE_FOLDER].as< std::string >( );
+        _splashSceneFolder = vm[PARAM_SPLASH_SCENE_FOLDER].as< std::string >();
 
     return true;
 }
 
-void GeometryParameters::print( )
+void GeometryParameters::print()
 {
-    AbstractParameters::print( );
+    AbstractParameters::print();
     BRAYNS_INFO << "Morphology folder          : " <<
         _morphologyFolder << std::endl;
     BRAYNS_INFO << "NEST circuit file          : " <<
@@ -252,15 +277,15 @@ void GeometryParameters::print( )
     BRAYNS_INFO << "Circuit configuration      : " <<
         _circuitConfig << std::endl;
     BRAYNS_INFO << "Color scheme               : " <<
-        static_cast<size_t>( _colorScheme ) << std::endl;
+        getColorSchemeAsString( _colorScheme ) << std::endl;
     BRAYNS_INFO << "Radius multiplier          : " <<
         _radiusMultiplier << std::endl;
     BRAYNS_INFO << "Radius correction          : " <<
         _radiusCorrection << std::endl;
     BRAYNS_INFO << "Scene environment          : " <<
-        static_cast<size_t>( _sceneEnvironment ) << std::endl;
+        getSceneEnvironmentAsString( _sceneEnvironment ) << std::endl;
     BRAYNS_INFO << "Geometry quality           : " <<
-        static_cast<size_t>( _geometryQuality ) << std::endl;
+        getGeometryQualityAsString( _geometryQuality ) << std::endl;
     BRAYNS_INFO << "Target                     : " <<
         _target << std::endl;
     BRAYNS_INFO << "Report                     : " <<
@@ -290,6 +315,24 @@ void GeometryParameters::print( )
         (_generateMultipleModels ? "on" : "off") << std::endl;
     BRAYNS_INFO << "Splash scene folder        : " <<
         _splashSceneFolder << std::endl;
+}
+
+const std::string& GeometryParameters::getColorSchemeAsString(
+    const ColorScheme value ) const
+{
+    return COLOR_SCHEMES[ static_cast< size_t >( value )];
+}
+
+const std::string& GeometryParameters::getSceneEnvironmentAsString(
+    const SceneEnvironment value ) const
+{
+    return SCENE_ENVIRONMENTS[ static_cast< size_t >( value )];
+}
+
+const std::string& GeometryParameters::getGeometryQualityAsString(
+    const GeometryQuality value ) const
+{
+    return GEOMETRY_QUALITIES[ static_cast< size_t >( value )];
 }
 
 }

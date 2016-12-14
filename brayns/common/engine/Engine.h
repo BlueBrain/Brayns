@@ -76,10 +76,10 @@ public:
     Camera& getCamera() { return *_camera; }
 
     /** Gets the renderer */
-    Renderer& getRenderer() { return *_renderers[_activeRenderer]; }
+    Renderer& getRenderer();
 
     /** Sets the active renderer */
-    void setActiveRenderer( const std::string& renderer );
+    void setActiveRenderer( const RendererType renderer );
 
     /**
        Reshapes the current frame buffers
@@ -140,8 +140,7 @@ protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;
-    std::string _activeRenderer;
-    strings _rendererNames;
+    RendererType _activeRenderer;
     RendererMap _renderers;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;

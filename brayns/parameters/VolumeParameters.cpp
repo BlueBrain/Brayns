@@ -43,42 +43,42 @@ VolumeParameters::VolumeParameters()
 {
     _parameters.add_options()
         ( PARAM_VOLUME_FOLDER.c_str(), po::value< std::string >(),
-            "Folder containing volume files" )
+            "Folder containing RAW 8bit volume files [string]" )
         ( PARAM_VOLUME_FILENAME.c_str(), po::value< std::string >(),
-            "Cache file volume data" )
+            "File containing RAW 8bit volume data [string]" )
         ( PARAM_VOLUME_DIMENSIONS.c_str(), po::value< size_ts >()->multitoken(),
-            "Volume dimensions" )
+            "Volume dimensions [int int int]" )
         ( PARAM_VOLUME_ELEMENT_SPACING.c_str(), po::value< floats >()->multitoken(),
-            "Element spacing in the volume" )
+            "Element spacing in the volume [int int int]" )
         ( PARAM_VOLUME_OFFSET.c_str(), po::value< floats >()->multitoken(),
-            "Volume offset" )
+            "Volume offset [int int int]" )
         ( PARAM_VOLUME_SPR.c_str(), po::value< size_t >(),
-            "Volume samples per ray" );
+            "Volume samples per ray [int]" );
 }
 
 bool VolumeParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_VOLUME_FOLDER ))
-        _folder = vm[PARAM_VOLUME_FOLDER].as< std::string >( );
+        _folder = vm[PARAM_VOLUME_FOLDER].as< std::string >();
 
     if( vm.count( PARAM_VOLUME_FILENAME ))
-        _filename = vm[PARAM_VOLUME_FILENAME].as< std::string >( );
+        _filename = vm[PARAM_VOLUME_FILENAME].as< std::string >();
 
     if( vm.count( PARAM_VOLUME_DIMENSIONS ))
     {
-        size_ts values = vm[PARAM_VOLUME_DIMENSIONS].as< size_ts >( );
-        if( values.size( ) == 3 )
+        size_ts values = vm[PARAM_VOLUME_DIMENSIONS].as< size_ts >();
+        if( values.size() == 3 )
             _dimensions = Vector3ui( values[0], values[1], values[2] );
     }
     if( vm.count( PARAM_VOLUME_ELEMENT_SPACING ))
     {
-        floats values = vm[PARAM_VOLUME_ELEMENT_SPACING].as< floats >( );
-        if( values.size( ) == 3 )
+        floats values = vm[PARAM_VOLUME_ELEMENT_SPACING].as< floats >();
+        if( values.size() == 3 )
             _elementSpacing = Vector3f( values[0], values[1], values[2] );
     }
     if( vm.count( PARAM_VOLUME_OFFSET ))
     {
-        floats values = vm[PARAM_VOLUME_OFFSET].as< floats >( );
+        floats values = vm[PARAM_VOLUME_OFFSET].as< floats >();
         if( values.size() == 3 )
             _offset = Vector3f( values[0], values[1], values[2] );
     }
@@ -87,9 +87,9 @@ bool VolumeParameters::_parse( const po::variables_map& vm )
     return true;
 }
 
-void VolumeParameters::print( )
+void VolumeParameters::print()
 {
-    AbstractParameters::print( );
+    AbstractParameters::print();
     BRAYNS_INFO << "Folder          : " << _folder << std::endl;
     BRAYNS_INFO << "Filename        : " << _filename << std::endl;
     BRAYNS_INFO << "Dimensions      : " << _dimensions << std::endl;

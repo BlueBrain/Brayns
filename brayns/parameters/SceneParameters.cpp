@@ -24,7 +24,7 @@ namespace
 {
 
 const std::string PARAM_TIMESTAMP = "timestamp";
-const std::string PARAM_TRANSFER_FUNCTION_FILE = "transfer-function-file";
+const std::string PARAM_COLOR_MAP_FILE = "color-map-file";
 const std::string PARAM_ENVIRONMENT_MAP = "environment-map";
 
 }
@@ -38,30 +38,30 @@ SceneParameters::SceneParameters()
 {
     _parameters.add_options()
         (PARAM_TIMESTAMP.c_str(), po::value< float >(),
-        "Timestamp")
-        (PARAM_TRANSFER_FUNCTION_FILE.c_str(), po::value< std::string >(),
-        "Color map filename" )
+        "Scene timestamp [float]")
+        (PARAM_COLOR_MAP_FILE.c_str(), po::value< std::string >(),
+        "Color map filename [string]" )
         (PARAM_ENVIRONMENT_MAP.c_str(),
-            po::value< std::string >( ), "Environment map filename");
+            po::value< std::string >(), "Environment map filename [string]");
 }
 
 bool SceneParameters::_parse( const po::variables_map& vm )
 {
     if( vm.count( PARAM_TIMESTAMP ))
         _timestamp = vm[PARAM_TIMESTAMP].as< float >();
-    if( vm.count( PARAM_TRANSFER_FUNCTION_FILE ))
-        _transferFunctionFilename = vm[PARAM_TRANSFER_FUNCTION_FILE].as< std::string > ();
+    if( vm.count( PARAM_COLOR_MAP_FILE ))
+        _colorMapFilename = vm[PARAM_COLOR_MAP_FILE].as< std::string >();
     if( vm.count( PARAM_ENVIRONMENT_MAP ))
-        _environmentMap = vm[PARAM_ENVIRONMENT_MAP].as< std::string >( );
+        _environmentMap = vm[PARAM_ENVIRONMENT_MAP].as< std::string >();
     return true;
 }
 
-void SceneParameters::print( )
+void SceneParameters::print()
 {
-    AbstractParameters::print( );
-    BRAYNS_INFO << "Timestamp              :" << _timestamp << std::endl;
-    BRAYNS_INFO << "Transfer function file :" << _transferFunctionFilename << std::endl;
-    BRAYNS_INFO << "Environment map        : " << _environmentMap << std::endl;
+    AbstractParameters::print();
+    BRAYNS_INFO << "Timestamp                :" << _timestamp << std::endl;
+    BRAYNS_INFO << "Color Map filename       :" << _colorMapFilename << std::endl;
+    BRAYNS_INFO << "Environment map filename : " << _environmentMap << std::endl;
 }
 
 }

@@ -112,17 +112,20 @@ public:
     void setRadiusCorrection( const float value ) { _radiusCorrection = value; }
     float getRadiusCorrection( ) const { return _radiusCorrection; }
 
-    /** Enables a different color for every morphology/mesh when
+    /** Enables a different color for every molecule/morphology/mesh when
     * loading them from a given folder
     */
     ColorScheme getColorScheme( ) const { return _colorScheme; }
+    const std::string& getColorSchemeAsString( const ColorScheme value ) const;
     void setColorScheme( const ColorScheme value ) { _colorScheme = value; }
 
-    /** Scene environment (0: none, 1: ground, 2: box ) */
-    SceneEnvironment getSceneEnvironment( ) const { return _sceneEnvironment; }
+    /** Scene environment (none, ground, wall, bounding_box ) */
+    SceneEnvironment getSceneEnvironment() const { return _sceneEnvironment; }
+    const std::string& getSceneEnvironmentAsString( const SceneEnvironment value ) const;
 
     /** Morphology quality */
     GeometryQuality getGeometryQuality( ) const { return _geometryQuality; }
+    const std::string& getGeometryQualityAsString( const GeometryQuality value ) const;
 
     /** Morphology section types*/
     size_t getMorphologySectionTypes( ) const

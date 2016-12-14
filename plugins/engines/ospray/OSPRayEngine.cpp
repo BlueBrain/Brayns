@@ -50,16 +50,15 @@ OSPRayEngine::OSPRayEngine(
     }
 
     BRAYNS_INFO << "Initializing renderers" << std::endl;
-    _activeRenderer =
-        _parametersManager.getRenderingParameters().getRenderer();
-
-    _rendererNames = _parametersManager.getRenderingParameters().getRenderers();
+    _activeRenderer = _parametersManager.getRenderingParameters().getRenderer();
 
     Renderers renderersForScene;
-    for( std::string renderer: _rendererNames )
+    for( const auto renderer: parametersManager.getRenderingParameters().getRenderers() )
     {
+        const auto& rendererName =
+            parametersManager.getRenderingParameters().getRendererAsString( renderer );
         _renderers[renderer].reset(
-            new OSPRayRenderer( renderer, _parametersManager ));
+            new OSPRayRenderer( rendererName, _parametersManager ));
         renderersForScene.push_back( _renderers[renderer] );
     }
 
@@ -92,11 +91,11 @@ std::string OSPRayEngine::name() const
 void OSPRayEngine::commit()
 {
     Engine::commit();
-    for( std::string renderer: _rendererNames )
+    for( const auto& renderer: _renderers )
     {
-        _renderers[renderer]->setScene( _scene );
-        _renderers[renderer]->setCamera( _camera );
-        _renderers[renderer]->commit( );
+        _renderers[ renderer.first ]->setScene( _scene );
+        _renderers[ renderer.first ]->setCamera( _camera );
+        _renderers[ renderer.first ]->commit( );
     }
     _camera->commit( );
 }
@@ -105,8 +104,8 @@ void OSPRayEngine::render()
 {
     _scene->commitVolumeData();
     _scene->commitSimulationData();
-    _renderers[_activeRenderer]->commit();
-    _renderers[_activeRenderer]->render( _frameBuffer );
+    _renderers[ _activeRenderer ]->commit();
+    _renderers[ _activeRenderer ]->render( _frameBuffer );
 }
 
 void OSPRayEngine::preRender()

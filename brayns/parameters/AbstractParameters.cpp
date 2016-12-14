@@ -56,7 +56,7 @@ bool AbstractParameters::parse( int argc, const char **argv )
 
 void AbstractParameters::usage( )
 {
-    BRAYNS_INFO << _name << " parameters:" <<
+    std::cout << _name << " parameters:" << std::endl <<
         std::endl << _parameters << std::endl;
 }
 
