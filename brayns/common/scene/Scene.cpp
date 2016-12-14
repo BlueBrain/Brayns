@@ -270,9 +270,9 @@ void Scene::buildEnvironment( )
 {
     switch( _parametersManager.getGeometryParameters().getSceneEnvironment( ) )
     {
-    case SE_NONE:
+    case SceneEnvironment::none:
         break;
-    case SE_GROUND:
+    case SceneEnvironment::ground:
     {
         // Ground
         const Vector3f scale( 4.f, 0.5f, 4.f );
@@ -350,7 +350,7 @@ void Scene::buildEnvironment( )
         _trianglesMeshes[material].getIndices( ).push_back( i );
         break;
     }
-    case SE_WALL:
+    case SceneEnvironment::wall:
     {
         // Wall
         const Vector3f scale( 1.f, 1.f, 1.f );
@@ -425,7 +425,7 @@ void Scene::buildEnvironment( )
         _trianglesMeshes[material].getIndices( ).push_back( i );
         break;
     }
-    case SE_BOUNDING_BOX:
+    case SceneEnvironment::bounding_box:
     {
         const size_t material = MATERIAL_BOUNDING_BOX;
         const Vector3f s = _bounds.getSize()/2.f;

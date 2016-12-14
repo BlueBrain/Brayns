@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( render_protein_in_stereo_and_compare )
     const char* app = testSuite.argv[0];
     const std::string pdbFile( BRAYNS_TESTDATA + std::string( "1bna.pdb" ));
     const char* argv[] = { app, "--pdb-file", pdbFile.c_str(),
-                           "--camera-type", "2" };
+                           "--camera-type", "stereo" };
     const int argc = sizeof(argv)/sizeof(char*);
 
     brayns::Brayns brayns( argc, argv );

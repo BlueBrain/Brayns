@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     const auto& renderParams = pm.getRenderingParameters();
     BOOST_CHECK_EQUAL( renderParams.getEngine(), "ospray" );
     BOOST_CHECK_EQUAL( renderParams.getModule(), "" );
-    BOOST_CHECK_EQUAL( renderParams.getRenderer(), "exobj" );
+    BOOST_CHECK( renderParams.getRenderer() == brayns::RendererType::basic );
     BOOST_CHECK_EQUAL( renderParams.getRenderers().size(), 4 );
     BOOST_CHECK( !renderParams.getShadows( ));
     BOOST_CHECK( !renderParams.getSoftShadows( ));
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( defaults )
     BOOST_CHECK_EQUAL( geomParams.getRadiusMultiplier(), 1.f );
     BOOST_CHECK_EQUAL( geomParams.getRadiusCorrection(), 0.f );
     BOOST_CHECK( geomParams.getColorScheme() == brayns::ColorScheme::none );
-    BOOST_CHECK_EQUAL( geomParams.getSceneEnvironment(), brayns::SE_NONE );
+    BOOST_CHECK( geomParams.getSceneEnvironment() == brayns::SceneEnvironment::none );
     BOOST_CHECK( geomParams.getGeometryQuality() == brayns::GeometryQuality::high );
     BOOST_CHECK_EQUAL( geomParams.getMorphologySectionTypes(), brayns::MST_ALL );
     BOOST_CHECK_EQUAL( geomParams.getMorphologyLayout().nbColumns, 0 );

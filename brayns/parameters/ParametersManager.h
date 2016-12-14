@@ -52,14 +52,14 @@ public:
     BRAYNS_API void registerParameters( AbstractParameters* parameters );
 
     /**
-       Displays help screen for registered parameters
+       Displays usage of registered parameters
      */
-    BRAYNS_API void printHelp( );
+    BRAYNS_API void usage();
 
     /**
        Displays values registered parameters
      */
-    BRAYNS_API void print( );
+    BRAYNS_API void print();
 
     /**
        Parses registered parameters

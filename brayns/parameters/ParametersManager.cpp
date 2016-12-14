@@ -41,20 +41,31 @@ void ParametersManager::registerParameters( AbstractParameters* parameters )
 
 void ParametersManager::parse( int argc, const char **argv )
 {
-    for( AbstractParameters* parameters: _parameterSets )
-        parameters->parse( argc, argv );
+    bool help = false;
+    for( int i = 0; i < argc && !help; ++i )
+        if ( std::string( argv[i] ) == "--help" )
+            help = true;
+
+    if( help )
+    {
+        usage();
+        exit(0);
+    }
+    else
+        for( AbstractParameters* parameters: _parameterSets )
+            parameters->parse( argc, argv );
 }
 
-void ParametersManager::printHelp( )
+void ParametersManager::usage()
 {
     for( AbstractParameters* parameters: _parameterSets )
-        parameters->usage( );
+        parameters->usage();
 }
 
-void ParametersManager::print( )
+void ParametersManager::print()
 {
     for( AbstractParameters* parameters: _parameterSets )
-        parameters->print( );
+        parameters->print();
 }
 
 ApplicationParameters& ParametersManager::getApplicationParameters()

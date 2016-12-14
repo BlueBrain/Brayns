@@ -41,7 +41,7 @@ public:
     float getTimestamp( ) const { return _timestamp; }
     void setTimestamp( const float value ) { _timestamp = value; }
 
-    const std::string& getTransferFunctionFilename() const { return _transferFunctionFilename; }
+    const std::string& getColorMapFilename() const { return _colorMapFilename; }
 
     /**
        file name of the environment map
@@ -56,7 +56,7 @@ protected:
     bool _parse( const po::variables_map& vm ) final;
 
     float _timestamp;
-    std::string _transferFunctionFilename;
+    std::string _colorMapFilename;
     std::string _environmentMap;
 
 };

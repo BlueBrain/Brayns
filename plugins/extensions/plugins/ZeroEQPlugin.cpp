@@ -588,7 +588,7 @@ void ZeroEQPlugin::_initializeDataSource()
     auto& geometryParameters = _parametersManager.getGeometryParameters();
     auto& volumeParameters = _parametersManager.getVolumeParameters();
 
-    _remoteDataSource.setTransfer_function_file( sceneParameters.getTransferFunctionFilename( ));
+    _remoteDataSource.setTransfer_function_file( sceneParameters.getColorMapFilename( ));
     _remoteDataSource.setMorphology_folder( geometryParameters.getMorphologyFolder( ));
     _remoteDataSource.setNest_circuit( geometryParameters.getNESTCircuit( ));
     _remoteDataSource.setNest_report( geometryParameters.getNESTReport( ));
@@ -647,6 +647,8 @@ void ZeroEQPlugin::_initializeDataSource()
 
 void ZeroEQPlugin::_dataSourceUpdated()
 {
+    auto& geometryParameters = _parametersManager.getGeometryParameters();
+
     _parametersManager.set(
         "splash-scene-folder", ""); // Make sure the splash scene is removed
     _parametersManager.set(
@@ -676,13 +678,14 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _parametersManager.set(
         "radius-correction", std::to_string(_remoteDataSource.getRadius_correction( )));
     _parametersManager.set(
-        "color-scheme", std::to_string( static_cast<uint>( _remoteDataSource.getColor_scheme( ))));
+        "color-scheme", geometryParameters.getColorSchemeAsString(
+        static_cast< ColorScheme >( _remoteDataSource.getColor_scheme( ))));
     _parametersManager.set(
-        "scene-environment",
-        std::to_string( static_cast<uint>( _remoteDataSource.getScene_environment( ))));
+        "scene-environment", geometryParameters.getSceneEnvironmentAsString(
+        static_cast< SceneEnvironment >( _remoteDataSource.getScene_environment( ))));
     _parametersManager.set(
-        "geometry-quality",
-        std::to_string( static_cast<uint>( _remoteDataSource.getGeometry_quality( ))));
+        "geometry-quality", geometryParameters.getGeometryQualityAsString(
+        static_cast< GeometryQuality >( _remoteDataSource.getGeometry_quality( ))));
     _parametersManager.set(
         "target", _remoteDataSource.getTargetString( ));
     _parametersManager.set(
@@ -773,14 +776,18 @@ void ZeroEQPlugin::_initializeSettings()
 
     _remoteSettings.setTimestamp( sceneParameters.getTimestamp( ));
     _remoteSettings.setVolume_samples_per_ray( volumeParameters.getSamplesPerRay( ));
-    if( renderingParameters.getRenderer( ) == "exobj" )
-        _remoteSettings.setShader( ::brayns::v1::Shader::basic );
-     else if( renderingParameters.getRenderer( ) == "proximityrenderer" )
-        _remoteSettings.setShader( ::brayns::v1::Shader::proximity );
-     else if( renderingParameters.getRenderer( ) == "particlerenderer" )
-        _remoteSettings.setShader( ::brayns::v1::Shader::particle );
-     else if( renderingParameters.getRenderer( ) == "simulationrenderer" )
-        _remoteSettings.setShader( ::brayns::v1::Shader::simulation );
+
+    switch( renderingParameters.getRenderer( ))
+    {
+    case RendererType::proximity:
+        _remoteSettings.setShader( ::brayns::v1::Shader::proximity ); break;
+    case RendererType::particle:
+        _remoteSettings.setShader( ::brayns::v1::Shader::particle ); break;
+    case RendererType::simulation:
+        _remoteSettings.setShader( ::brayns::v1::Shader::simulation ); break;
+    default:
+        _remoteSettings.setShader( ::brayns::v1::Shader::basic ); break;
+    }
 
     switch( renderingParameters.getShading( ) )
     {
@@ -812,21 +819,14 @@ void ZeroEQPlugin::_initializeSettings()
 
 void ZeroEQPlugin::_settingsUpdated()
 {
+    const auto& renderingParameters = _parametersManager.getRenderingParameters();
+
     _parametersManager.set(
         "timestamp", std::to_string(_remoteSettings.getTimestamp( )));
     _parametersManager.set(
         "volume-samples-per-ray", std::to_string(_remoteSettings.getVolume_samples_per_ray( )));
-    switch( _remoteSettings.getShader( ))
-    {
-        case ::brayns::v1::Shader::proximity:
-            _parametersManager.set( "renderer", "proximityrenderer"); break;
-        case ::brayns::v1::Shader::particle:
-            _parametersManager.set( "renderer", "particlerenderer"); break;
-        case ::brayns::v1::Shader::simulation:
-            _parametersManager.set( "renderer", "simulationrenderer"); break;
-        default:
-            _parametersManager.set( "renderer", "exobj"); break;
-    }
+    _parametersManager.set( "renderer", renderingParameters.getRendererAsString(
+        static_cast< RendererType >( _remoteSettings.getShader( ))));
     switch( _remoteSettings.getShading( ))
     {
         case ::brayns::v1::Shading::diffuse:

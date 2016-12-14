@@ -63,9 +63,18 @@ typedef std::shared_ptr< Camera > CameraPtr;
 class TransferFunction;
 typedef std::shared_ptr< TransferFunction > TransferFunctionPtr;
 
+enum class RendererType
+{
+    basic,
+    proximity,
+    simulation,
+    particle
+};
+typedef std::vector< RendererType > RendererTypes;
+
 class Renderer;
 typedef std::shared_ptr< Renderer > RendererPtr;
-typedef std::map< std::string, RendererPtr > RendererMap;
+typedef std::map< RendererType, RendererPtr > RendererMap;
 typedef std::vector< RendererPtr > Renderers;
 
 class FrameBuffer;
@@ -138,6 +147,7 @@ typedef std::shared_ptr< AbstractSimulationHandler > AbstractSimulationHandlerPt
 class CircuitSimulationHandler;
 typedef std::shared_ptr< CircuitSimulationHandler > CircuitSimulationHandlerPtr;
 
+class Brayns;
 class SpikeSimulationHandler;
 typedef std::shared_ptr< SpikeSimulationHandler > SpikeSimulationHandlerPtr;
 
@@ -203,12 +213,12 @@ enum class ColorScheme
 };
 
 /** Define the environment that is added to the default scene */
-enum SceneEnvironment
+enum class SceneEnvironment
 {
-    SE_NONE = 0,
-    SE_GROUND,
-    SE_WALL,
-    SE_BOUNDING_BOX
+    none,
+    ground,
+    wall,
+    bounding_box
 };
 
 /** Define light types */
@@ -296,7 +306,6 @@ enum MeshQuality
 
 enum class CameraType
 {
-    undefined,
     perspective,
     stereo,
     orthographic,

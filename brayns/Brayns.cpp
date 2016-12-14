@@ -259,12 +259,11 @@ private:
         if(!geometryParameters.getSplashSceneFolder().empty())
             _loadMeshFolder( geometryParameters.getSplashSceneFolder( ));
 
-        const std::string& transferFunctionFilename = sceneParameters.getTransferFunctionFilename();
-        if( !transferFunctionFilename.empty() )
+        const std::string& colorMapFilename = sceneParameters.getColorMapFilename();
+        if( !colorMapFilename.empty() )
         {
             TransferFunctionLoader transferFunctionLoader( DEFAULT_TRANSFER_FUNCTION_RANGE );
-            transferFunctionLoader.loadFromFile(
-                transferFunctionFilename, scene );
+            transferFunctionLoader.loadFromFile( colorMapFilename, scene );
         }
         scene.commitTransferFunctionData();
 
@@ -373,12 +372,12 @@ private:
             }
 
             auto& sceneParameters = _parametersManager->getSceneParameters();
-            const std::string& transferFunctionFilename =
-                sceneParameters.getTransferFunctionFilename();
-            if( !transferFunctionFilename.empty() )
+            const std::string& colorMapFilename =
+                sceneParameters.getColorMapFilename();
+            if( !colorMapFilename.empty() )
             {
                 TransferFunctionLoader transferFunctionLoader( brayns::Vector2f( 0, nbMaterials ));
-                transferFunctionLoader.loadFromFile( transferFunctionFilename, scene );
+                transferFunctionLoader.loadFromFile( colorMapFilename, scene );
                 scene.commitTransferFunctionData();
             }
 
@@ -553,12 +552,12 @@ private:
         if( morphologyLoader.importSimulationData( uri, target, report, scene ))
         {
             auto& sceneParameters = _parametersManager->getSceneParameters();
-            const std::string& transferFunctionFilename =
-                sceneParameters.getTransferFunctionFilename();
-            if( !transferFunctionFilename.empty() )
+            const std::string& colorMapFilename =
+                sceneParameters.getColorMapFilename();
+            if( !colorMapFilename.empty() )
             {
                 TransferFunctionLoader transferFunctionLoader( DEFAULT_TRANSFER_FUNCTION_RANGE );
-                transferFunctionLoader.loadFromFile( transferFunctionFilename, scene );
+                transferFunctionLoader.loadFromFile( colorMapFilename, scene );
                 scene.commitTransferFunctionData();
             }
         }
@@ -682,25 +681,25 @@ private:
     void _defaultRenderer()
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
-        renderParams.setRenderer( "exobj" );
+        renderParams.setRenderer( RendererType::basic );
     }
 
     void _particleRenderer()
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
-        renderParams.setRenderer( "particlerenderer" );
+        renderParams.setRenderer( RendererType::particle );
     }
 
     void _proximityRenderer()
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
-        renderParams.setRenderer( "proximityrenderer" );
+        renderParams.setRenderer( RendererType::proximity );
     }
 
     void _simulationRenderer()
     {
         RenderingParameters& renderParams = _parametersManager->getRenderingParameters();
-        renderParams.setRenderer( "simulationrenderer" );
+        renderParams.setRenderer( RendererType::simulation );
     }
 
     void _increaseTimestamp()
