@@ -657,6 +657,7 @@ void OSPRayScene::buildGeometry()
                         break;
                 }
             }
+
             _buildParametricOSPGeometry( materialId );
         }
 
