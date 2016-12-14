@@ -201,15 +201,14 @@ enum FrameBufferFormat
 /** Define the color scheme to be applied to the geometry */
 enum class ColorScheme
 {
-    none,
-    protein_atoms,
-    protein_chains,
-    protein_residues,
-    protein_backbones,
-    neuron_default,
-    neuron_by_id,
-    neuron_by_type,
-    neuron_by_segment_type,
+    none = 0,
+    neuron_by_id = 1,
+    neuron_by_type = 2,
+    neuron_by_segment_type = 3,
+    protein_atoms = 4,
+    protein_chains = 5,
+    protein_residues = 6,
+    protein_backbones = 7
 };
 
 /** Define the environment that is added to the default scene */

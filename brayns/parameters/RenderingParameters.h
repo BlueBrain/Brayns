@@ -49,7 +49,7 @@ public:
 
     /** OSPRay renderer */
     RendererType getRenderer() const { return _renderer; }
-    const std::string getRendererAsString( const RendererType value ) const;
+    const std::string& getRendererAsString( const RendererType value ) const;
     void setRenderer( const RendererType renderer  ) { _renderer = renderer; }
 
     /** OSPRay supported renderers */
@@ -76,7 +76,7 @@ public:
     /** Shading applied to the geometry
      */
     ShadingType getShading( ) const { return _shading; }
-    const std::string getShadingAsString( const ShadingType value ) const;
+    const std::string& getShadingAsString( const ShadingType value ) const;
     void setShading( const ShadingType value ) { _shading = value; }
 
     /** Number of samples per pixel */
@@ -164,7 +164,7 @@ public:
        Camera type
     */
     CameraType getCameraType() const { return _cameraType; }
-    const std::string getCameraTypeAsString( const CameraType value ) const;
+    const std::string& getCameraTypeAsString( const CameraType value ) const;
 
     /**
        Epsilon. All intersection distances less than the epsilon value are

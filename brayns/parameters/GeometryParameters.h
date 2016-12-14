@@ -116,16 +116,16 @@ public:
     * loading them from a given folder
     */
     ColorScheme getColorScheme( ) const { return _colorScheme; }
-    const std::string getColorSchemeAsString( const ColorScheme value ) const;
+    const std::string& getColorSchemeAsString( const ColorScheme value ) const;
     void setColorScheme( const ColorScheme value ) { _colorScheme = value; }
 
     /** Scene environment (none, ground, wall, bounding_box ) */
     SceneEnvironment getSceneEnvironment() const { return _sceneEnvironment; }
-    const std::string getSceneEnvironmentAsString( const SceneEnvironment value ) const;
+    const std::string& getSceneEnvironmentAsString( const SceneEnvironment value ) const;
 
     /** Morphology quality */
     GeometryQuality getGeometryQuality( ) const { return _geometryQuality; }
-    const std::string getGeometryQualityAsString( const GeometryQuality value ) const;
+    const std::string& getGeometryQualityAsString( const GeometryQuality value ) const;
 
     /** Morphology section types*/
     size_t getMorphologySectionTypes( ) const

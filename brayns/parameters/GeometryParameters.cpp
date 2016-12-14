@@ -58,8 +58,8 @@ const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
 const std::string PARAM_SPLASH_SCENE_FOLDER = "splash-scene-folder";
 
 const std::string COLOR_SCHEMES[8] = {
-    "protein-atoms", "protein-chains", "protein-residues", "protein-backbones", "neuron-default",
-    "neuron-by-id", "neuron-by-type", "neuron-by-segment-type"
+    "none", "neuron-by-id", "neuron-by-type", "neuron-by-segment-type",
+    "protein-atoms", "protein-chains", "protein-residues", "protein-backbones"
 };
 
 const std::string SCENE_ENVIRONMENTS[4] = { "none", "ground", "wall", "bounding-box" };
@@ -113,9 +113,9 @@ GeometryParameters::GeometryParameters()
         ( PARAM_RADIUS_CORRECTION.c_str(), po::value< float >(),
             "Forces radius of spheres and cylinders to the specified value [float]" )
         ( PARAM_COLOR_SCHEME.c_str(), po::value< std::string >(),
-            "Color scheme to be applied to the geometry [protein_atoms|protein_chains|"
-            "protein_residues|protein_backbones|neuron_default|neuron_by_id|neuron_by_type|"
-            "neuron_by_segment_type]" )
+            "Color scheme to be applied to the geometry [none|"
+            "neuron_by_id|neuron_by_type|neuron_by_segment_type|"
+            "protein_atoms|protein_chains|protein_residues|protein_backbones]")
         ( PARAM_SCENE_ENVIRONMENT.c_str(), po::value< std::string >(),
             "Scene environment [none|ground|wall|bounding-box]" )
         ( PARAM_GEOMETRY_QUALITY.c_str(), po::value< std::string >(),
@@ -317,19 +317,19 @@ void GeometryParameters::print()
         _splashSceneFolder << std::endl;
 }
 
-const std::string GeometryParameters::getColorSchemeAsString(
+const std::string& GeometryParameters::getColorSchemeAsString(
     const ColorScheme value ) const
 {
     return COLOR_SCHEMES[ static_cast< size_t >( value )];
 }
 
-const std::string GeometryParameters::getSceneEnvironmentAsString(
+const std::string& GeometryParameters::getSceneEnvironmentAsString(
     const SceneEnvironment value ) const
 {
     return SCENE_ENVIRONMENTS[ static_cast< size_t >( value )];
 }
 
-const std::string GeometryParameters::getGeometryQualityAsString(
+const std::string& GeometryParameters::getGeometryQualityAsString(
     const GeometryQuality value ) const
 {
     return GEOMETRY_QUALITIES[ static_cast< size_t >( value )];

@@ -237,19 +237,19 @@ void RenderingParameters::print()
        getCameraTypeAsString( _cameraType ) << std::endl;
 }
 
-const std::string RenderingParameters::getRendererAsString(
+const std::string& RenderingParameters::getRendererAsString(
      const RendererType value ) const
 {
     return RENDERERS[ static_cast< size_t >( value )];
 }
 
-const std::string RenderingParameters::getCameraTypeAsString(
+const std::string& RenderingParameters::getCameraTypeAsString(
     const CameraType value ) const
 {
     return CAMERA_TYPES[ static_cast< size_t >( value )];
 }
 
-const std::string RenderingParameters::getShadingAsString(
+const std::string& RenderingParameters::getShadingAsString(
     const ShadingType value ) const
 {
     return SHADING_TYPES[ static_cast< size_t >( value )];
