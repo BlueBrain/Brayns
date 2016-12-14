@@ -70,6 +70,9 @@ public:
     /** @copydoc Scene::reset */
     void reset() final;
 
+    /** @copydoc Scene::saveSceneToCacheFile */
+    void saveSceneToCacheFile() final;
+
     OSPModel* modelImpl( const size_t timestamp );
 
 private:
@@ -77,6 +80,7 @@ private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
 
     void _buildParametricOSPGeometry( const size_t materialId );
+    void _buildMeshOSPGeometry( const size_t materialId );
     void _loadCacheFile();
     void _saveCacheFile();
 

@@ -157,10 +157,7 @@ public:
     /**
         Return true if the scene does not contain any geometry. False otherwise
     */
-    BRAYNS_API bool isEmpty() const
-    {
-        return _primitives.size() == 0 && _trianglesMeshes.size() == 0;
-    }
+    BRAYNS_API bool isEmpty() const;
 
     BRAYNS_API ParametersManager& getParametersManager() { return _parametersManager; }
 
@@ -208,6 +205,11 @@ public:
         Resets the current scene (Geometry, lights, materials, etc).
     */
     BRAYNS_API virtual void reset();
+
+    /**
+        Saves geometry a binary cache file defined by the --save-cache-file command line parameter
+    */
+    BRAYNS_API virtual void saveSceneToCacheFile() = 0;
 
 protected:
 

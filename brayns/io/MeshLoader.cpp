@@ -99,7 +99,7 @@ bool MeshLoader::importMeshFromFile(
         for(size_t i=0; i < mesh->mNumVertices; ++i )
         {
             aiVector3D v = mesh->mVertices[ i ];
-            const Vector3f vertex = { -v.x, v.y, -v.z };
+            const Vector3f vertex = { v.x, v.y, v.z };
             meshContainer.triangles[ materialIndex ].
                 getVertices().push_back( vertex );
             meshContainer.bounds.merge(vertex);
@@ -107,7 +107,7 @@ bool MeshLoader::importMeshFromFile(
             if( mesh->HasNormals( ))
             {
                 v = mesh->mNormals[ i ];
-                const Vector3f normal = { -v.x, v.y, -v.z };
+                const Vector3f normal = { v.x, v.y, v.z };
                 meshContainer.triangles[ materialIndex ].
                     getNormals().push_back( normal );
             }
@@ -304,7 +304,7 @@ void MeshLoader::_createMaterials(
 
         value1f = 0.f;
         material->Get( AI_MATKEY_REFRACTI, value1f );
-        materials[m]->setRefractionIndex( fabs(value1f - 1.f) < 0.01f ? 1.1f : value1f );
+        materials[m]->setRefractionIndex( fabs(value1f - 1.f) < 0.01f ? 1.0f : value1f );
     }
 }
 

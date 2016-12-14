@@ -43,12 +43,13 @@ inline bool launchRandomRay(
     setRay( randomRay, intersection, randomDirection );
     randomRay.t0 = self->super.epsilon;
     randomRay.time = ray.time;
-
-    const varying float maxt = self->super.epsilon * 1e6f;
-    randomRay.t = maxt;
+    randomRay.t = infinity;
+    randomRay.primID = -1;
+    randomRay.geomID = -1;
+    randomRay.instID = -1;
 
     traceRay( self->super.model, randomRay );
-    if( randomRay.t == maxt )
+    if( randomRay.geomID < 0 )
     {
         // No intersection
         backgroundColor =
@@ -149,7 +150,10 @@ inline bool indirectShading(
         return true;
     }
     else
+    {
+        indirectShadingPower = DEFAULT_SKYBOX_INTENSITY;
         indirectShadingColor = backgroundColor;
+    }
     return false;
 }
 

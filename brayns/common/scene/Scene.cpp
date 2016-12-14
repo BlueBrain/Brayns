@@ -516,12 +516,10 @@ AbstractSimulationHandlerPtr Scene::getSimulationHandler() const
 
 VolumeHandlerPtr Scene::getVolumeHandler()
 {
-    const std::string& volumeFile =
-        _parametersManager.getVolumeParameters().getFilename();
-    const std::string& volumeFolder =
-        _parametersManager.getVolumeParameters().getFolder();
+    const auto& volumeFile = _parametersManager.getVolumeParameters().getFilename();
+    const auto& volumeFolder = _parametersManager.getVolumeParameters().getFolder();
     if( volumeFile.empty() && volumeFolder.empty() )
-        return 0;
+        return nullptr;
 
     try
     {
@@ -564,6 +562,12 @@ VolumeHandlerPtr Scene::getVolumeHandler()
     }
 
     return _volumeHandler;
+}
+
+
+bool Scene::isEmpty() const
+{
+    return ( _primitives.size() == 0 && _trianglesMeshes.size() == 0 );
 }
 
 }

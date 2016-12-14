@@ -48,6 +48,7 @@ private:
     void _randomMaterials();
     void _toggleIncrementalTimestamp();
     void _defaultTimestamp();
+    void _saveSceneToCacheFile();
 
     float _timestampIncrement;
 };
