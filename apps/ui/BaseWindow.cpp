@@ -219,8 +219,6 @@ void BaseWindow::reshape(const Vector2i& newSize)
 
     if( !applicationParameters.getApplicationParameters().getFilters().empty( ))
         _screenSpaceProcessor.resize( newSize.x( ), newSize.y( ));
-
-    forceRedraw( );
 }
 
 void BaseWindow::activate( )
@@ -243,6 +241,11 @@ void BaseWindow::display( )
         engine.getFrameBuffer().clear();
         engine.getCamera().resetModified();
     }
+
+    const Vector2ui windowSize =
+        _brayns.getParametersManager().getApplicationParameters().getWindowSize();
+    if( windowSize != _windowSize )
+        glutReshapeWindow(windowSize.x(), windowSize.y());
 
     _fps.start();
 
@@ -306,10 +309,12 @@ void BaseWindow::display( )
     }
 
     float* buffer = renderOutput.depthBuffer.data();
-    if( buffer )
+    _gid = -1;
+    if( buffer && engine.getActiveRenderer() == RendererType::particle )
     {
         size_t index = (_windowSize.y() - _mouse.y()) * _windowSize.x() + _mouse.x();
-        _gid = buffer[index];
+        if( index < _windowSize.x() * _windowSize.y( ))
+            _gid = buffer[index];
     }
 
     _fps.stop();
@@ -318,10 +323,7 @@ void BaseWindow::display( )
 
     clearPixels( );
 
-    const Vector2ui windowSize =
-        _brayns.getParametersManager().getApplicationParameters().getWindowSize();
-    if( windowSize != _windowSize )
-        glutReshapeWindow(windowSize.x(), windowSize.y());
+    forceRedraw( );
 }
 
 void BaseWindow::clearPixels( )

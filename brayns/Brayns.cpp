@@ -89,6 +89,14 @@ struct Brayns::Impl
         scene.commitVolumeData();
         scene.buildEnvironment();
         scene.buildGeometry();
+
+        if( scene.empty() && !scene.getVolumeHandler( ))
+        {
+            BRAYNS_INFO << "Building default scene" << std::endl;
+            scene.buildDefault();
+            scene.buildGeometry();
+        }
+
         scene.commit();
 
         // Set default camera according to scene bounding box
@@ -163,8 +171,8 @@ struct Brayns::Impl
     {
         Scene& scene = _engine->getScene();
         Camera& camera = _engine->getCamera();
-        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-        const Vector2i& frameSize = frameBuffer.getSize();
+        const Vector2ui windowSize = _parametersManager->getApplicationParameters().getWindowSize();
+        _engine->reshape( windowSize );
 
         _engine->preRender();
 
@@ -196,12 +204,6 @@ struct Brayns::Impl
         _render( );
 
         _engine->postRender();
-
-        const Vector2ui windowSize = _parametersManager
-            ->getApplicationParameters()
-            .getWindowSize();
-        if( windowSize != frameSize )
-            _engine->reshape(windowSize);
     }
 
     Engine& getEngine( )
@@ -302,9 +304,6 @@ private:
             worldBounds.merge( Vector3f( 0.f, 0.f, 0.f ));
             worldBounds.merge( volumeOffset + Vector3f( volumeDimensions ) * volumeElementSpacing );
         }
-
-        if( scene.isEmpty() && !scene.getVolumeHandler() )
-            scene.buildDefault();
     }
 
     /**

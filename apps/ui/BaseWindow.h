@@ -206,6 +206,7 @@ private:
     friend void glut3dMotionFunc(int x, int y);
     friend void glut3dMouseFunc(int whichButton, int released, int x, int y);
     friend void glut3dPassiveMouseFunc(int x, int y);
+
 };
 
 }

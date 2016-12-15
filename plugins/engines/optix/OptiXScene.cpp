@@ -891,4 +891,9 @@ uint64_t OptiXScene::_getBvhSize( const uint64_t nbElements ) const
     return 64 * 1.3f * nbElements;
 }
 
+void OptiXScene::saveSceneToCacheFile()
+{
+    BRAYNS_ERROR << "OptiXScene::saveSceneToCacheFile not implemented" << std::endl;
+}
+
 }

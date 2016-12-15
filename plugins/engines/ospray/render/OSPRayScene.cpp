@@ -34,7 +34,7 @@
 namespace brayns
 {
 
-const size_t CACHE_VERSION = 5;
+const size_t CACHE_VERSION = 6;
 
 struct TextureTypeMaterialAttribute
 {
@@ -128,6 +128,28 @@ void OSPRayScene::_saveCacheFile()
     file.write( ( char* )&nbMaterials, sizeof( size_t ));
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
+    // Save materials
+    for( const auto& material: _materials )
+    {
+        Vector3f value3f;
+        value3f = material->getColor();
+        file.write( ( char* )&value3f, sizeof( Vector3f ));
+        value3f = material->getSpecularColor();
+        file.write( ( char* )&value3f, sizeof( Vector3f ));
+        float value = material->getSpecularExponent();
+        file.write( ( char* )&value, sizeof( float ));
+        value = material->getReflectionIndex();
+        file.write( ( char* )&value, sizeof( float ));
+        value = material->getOpacity();
+        file.write( ( char* )&value, sizeof( float ));
+        value = material->getRefractionIndex();
+        file.write( ( char* )&value, sizeof( float ));
+        value = material->getEmission();
+        file.write( ( char* )&value, sizeof( float ));
+        // TODO: Textures
+    }
+
+    // Save geometry
     for( size_t materialId = 0; materialId < nbMaterials; ++materialId )
     {
         size_t bufferSize;
@@ -194,6 +216,53 @@ void OSPRayScene::_saveCacheFile()
             BRAYNS_DEBUG << "[" << materialId << "] "
                          << _serializedConesDataSize[materialId]
                          << " Cones" << std::endl;
+
+        if( _trianglesMeshes.find( materialId ) != _trianglesMeshes.end( ))
+        {
+            // Vertices
+            bufferSize = _trianglesMeshes[materialId].getVertices().size() * sizeof(Vector3f);
+            file.write( ( char* )&bufferSize, sizeof( size_t ));
+            file.write( ( char* )_trianglesMeshes[materialId].getVertices().data(), bufferSize );
+            if( bufferSize != 0 )
+                BRAYNS_DEBUG << "[" << materialId << "] "
+                             << _trianglesMeshes[materialId].getVertices().size()
+                             << " Vertices" << std::endl;
+
+            // Indices
+            bufferSize = _trianglesMeshes[materialId].getIndices().size() * sizeof(Vector3ui);
+            file.write( ( char* )&bufferSize, sizeof( size_t ));
+            file.write( ( char* )_trianglesMeshes[materialId].getIndices().data(), bufferSize );
+            if( bufferSize != 0 )
+                BRAYNS_DEBUG << "[" << materialId << "] "
+                             << _trianglesMeshes[materialId].getIndices().size()
+                             << " Indices" << std::endl;
+
+            // Normals
+            bufferSize = _trianglesMeshes[materialId].getNormals().size() * sizeof(Vector3f);
+            file.write( ( char* )&bufferSize, sizeof( size_t ));
+            file.write( ( char* )_trianglesMeshes[materialId].getNormals().data(), bufferSize );
+            if( bufferSize != 0 )
+                BRAYNS_DEBUG << "[" << materialId << "] "
+                             << _trianglesMeshes[materialId].getNormals().size()
+                             << " Vertices" << std::endl;
+
+            // Texture coordinates
+            bufferSize = _trianglesMeshes[materialId].getTextureCoordinates().size() * sizeof(Vector2f);
+            file.write( ( char* )&bufferSize, sizeof( size_t ));
+            file.write( ( char* )_trianglesMeshes[materialId].getTextureCoordinates().data(), bufferSize );
+            if( bufferSize != 0 )
+                BRAYNS_DEBUG << "[" << materialId << "] "
+                             << _trianglesMeshes[materialId].getTextureCoordinates().size()
+                             << " Texture coordinates" << std::endl;
+        }
+        else
+        {
+            bufferSize = 0;
+            file.write( ( char* )&bufferSize, sizeof( size_t )); // No vertices
+            file.write( ( char* )&bufferSize, sizeof( size_t )); // No indices
+            file.write( ( char* )&bufferSize, sizeof( size_t )); // No normals
+            file.write( ( char* )&bufferSize, sizeof( size_t )); // No Texture coordinates
+        }
     }
 
     file.write( ( char* )&_bounds, sizeof( Boxf ));
@@ -241,6 +310,31 @@ void OSPRayScene::_loadCacheFile()
     size_t nbMaterials;
     file.read( (char*)&nbMaterials, sizeof( size_t ));
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
+
+    // Read materials
+    for( const auto& material: _materials )
+    {
+        Vector3f value3f;
+        file.read( ( char* )&value3f, sizeof( Vector3f ));
+        material->setColor( value3f );
+        file.read( ( char* )&value3f, sizeof( Vector3f ));
+        material->setSpecularColor( value3f );
+        float value;
+        file.read( ( char* )&value, sizeof( float ));
+        material->setSpecularExponent( value );
+        file.read( ( char* )&value, sizeof( float ));
+        material->setReflectionIndex( value );
+        file.read( ( char* )&value, sizeof( float ));
+        material->setOpacity( value );
+        file.read( ( char* )&value, sizeof( float ));
+        material->setRefractionIndex( value );
+        file.read( ( char* )&value, sizeof( float ));
+        material->setEmission( value );
+        // TODO: Textures
+    }
+    commitMaterials( true );
+
+    // Read geometry
     for( size_t materialId = 0; materialId < nbMaterials; ++materialId )
     {
         // Spheres
@@ -320,6 +414,52 @@ void OSPRayScene::_loadCacheFile()
         }
 
         _buildParametricOSPGeometry( materialId );
+
+        // Vertices
+        _trianglesMeshes[materialId].getVertices().clear();
+        bufferSize = 0;
+        file.read( ( char* )&bufferSize, sizeof( size_t ));
+        for( size_t i = 0; i < bufferSize / sizeof( Vector3f ); ++i)
+        {
+            Vector3f vertex;
+            file.read( ( char* )&vertex, sizeof( Vector3f ));
+            _trianglesMeshes[materialId].getVertices().push_back( vertex );
+        }
+
+        // Indices
+        _trianglesMeshes[materialId].getIndices().clear();
+        bufferSize = 0;
+        file.read( ( char* )&bufferSize, sizeof( size_t ));
+        for( size_t i = 0; i < bufferSize / sizeof( Vector3ui ) ; ++i)
+        {
+            Vector3ui index;
+            file.read( ( char* )&index, sizeof( Vector3ui ));
+            _trianglesMeshes[materialId].getIndices().push_back( index );
+        }
+
+        // Normals
+        _trianglesMeshes[materialId].getNormals().clear();
+        bufferSize = 0;
+        file.read( ( char* )&bufferSize, sizeof( size_t ));
+        for( size_t i = 0; i < bufferSize / sizeof( Vector3f ); ++i)
+        {
+            Vector3f normal;
+            file.read( ( char* )&normal, sizeof( Vector3f ));
+            _trianglesMeshes[materialId].getVertices().push_back( normal );
+        }
+
+        // Texture coordinates
+        _trianglesMeshes[materialId].getTextureCoordinates().clear();
+        bufferSize = 0;
+        file.read( ( char* )&bufferSize, sizeof( size_t ));
+        for( size_t i = 0; i < bufferSize / sizeof( Vector2f ); ++i)
+        {
+            Vector2f texCoord;
+            file.read( ( char* )&texCoord, sizeof( Vector2f ));
+            _trianglesMeshes[materialId].getTextureCoordinates().push_back( texCoord );
+        }
+
+        _buildMeshOSPGeometry( materialId );
     }
 
     // Scene bounds
@@ -475,14 +615,14 @@ void OSPRayScene::buildGeometry()
     // Process geometries
     for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
     {
-        _serializedSpheresDataSize[materialId] = 0;
-        _serializedCylindersDataSize[materialId] = 0;
-        _serializedConesDataSize[materialId] = 0;
+        _serializedSpheresDataSize[ materialId ] = 0;
+        _serializedCylindersDataSize[ materialId ] = 0;
+        _serializedConesDataSize[ materialId ] = 0;
 
         size_t sphereCount = 0;
         size_t cylinderCount = 0;
         size_t coneCount = 0;
-        if( _primitives.find(materialId) != _primitives.end() )
+        if( _primitives.find( materialId ) != _primitives.end( ))
         {
             for( const PrimitivePtr& primitive: _primitives[materialId] )
             {
@@ -517,60 +657,15 @@ void OSPRayScene::buildGeometry()
                         break;
                 }
             }
-
             _buildParametricOSPGeometry( materialId );
         }
 
-        // Triangle mesh
-        if( _trianglesMeshes.find(materialId) != _trianglesMeshes.end() )
+        // Triangle meshes
+        if( _trianglesMeshes.find( materialId ) != _trianglesMeshes.end( ))
         {
-            OSPGeometry mesh = ospNewGeometry("trianglemesh");
-            assert(mesh);
-            OSPData vertices = ospNewData(
-                _trianglesMeshes[materialId].getVertices().size(),
-                OSP_FLOAT3,
-                &_trianglesMeshes[materialId].getVertices()[0],
-                OSP_DATA_SHARED_BUFFER);
+            _buildMeshOSPGeometry( materialId );
             totalNbVertices += _trianglesMeshes[materialId].getVertices().size();
-
-            OSPData normals = ospNewData(
-                _trianglesMeshes[materialId].getNormals().size(),
-                OSP_FLOAT3,
-                &_trianglesMeshes[materialId].getNormals()[0],
-                OSP_DATA_SHARED_BUFFER);
-            OSPData indices = ospNewData(
-                _trianglesMeshes[materialId].getIndices().size(),
-                OSP_INT3,
-                &_trianglesMeshes[materialId].getIndices()[0],
-                OSP_DATA_SHARED_BUFFER);
             totalNbIndices += _trianglesMeshes[materialId].getIndices().size();
-
-            OSPData colors = ospNewData(
-                _trianglesMeshes[materialId].getColors().size(),
-                OSP_FLOAT3A,
-                &_trianglesMeshes[materialId].getColors()[0],
-                OSP_DATA_SHARED_BUFFER);
-            OSPData texcoord = ospNewData(
-                _trianglesMeshes[materialId].getTextureCoordinates().size(),
-                OSP_FLOAT2,
-                &_trianglesMeshes[materialId].getTextureCoordinates()[0],
-                OSP_DATA_SHARED_BUFFER);
-            ospSetObject(mesh,"position",vertices);
-            ospSetObject(mesh,"index",indices);
-            ospSetObject(mesh,"vertex.normal",normals);
-            ospSetObject(mesh,"vertex.color",colors);
-            ospSetObject(mesh,"vertex.texcoord",texcoord);
-            ospSet1i(mesh, "alpha_type", 0);
-            ospSet1i(mesh, "alpha_component", 4);
-
-            if (_ospMaterials[materialId])
-                ospSetMaterial(mesh, _ospMaterials[materialId]);
-
-            ospCommit(mesh);
-
-            // Meshes are by default added to all timestamps
-            for( const auto& model: _models )
-                ospAddGeometry( model.second, mesh);
         }
     }
 
@@ -600,6 +695,60 @@ void OSPRayScene::buildGeometry()
 
     if(!_parametersManager.getGeometryParameters().getSaveCacheFile().empty())
         _saveCacheFile();
+}
+
+void OSPRayScene::_buildMeshOSPGeometry( const size_t materialId )
+{
+    // Triangle mesh
+    if( _trianglesMeshes.find(materialId) != _trianglesMeshes.end() )
+    {
+        OSPGeometry mesh = ospNewGeometry("trianglemesh");
+        assert(mesh);
+        OSPData vertices = ospNewData(
+            _trianglesMeshes[materialId].getVertices().size(),
+            OSP_FLOAT3,
+            &_trianglesMeshes[materialId].getVertices()[0],
+            OSP_DATA_SHARED_BUFFER);
+
+        OSPData normals = ospNewData(
+            _trianglesMeshes[materialId].getNormals().size(),
+            OSP_FLOAT3,
+            &_trianglesMeshes[materialId].getNormals()[0],
+            OSP_DATA_SHARED_BUFFER);
+        OSPData indices = ospNewData(
+            _trianglesMeshes[materialId].getIndices().size(),
+            OSP_INT3,
+            &_trianglesMeshes[materialId].getIndices()[0],
+            OSP_DATA_SHARED_BUFFER);
+
+        OSPData colors = ospNewData(
+            _trianglesMeshes[materialId].getColors().size(),
+            OSP_FLOAT3A,
+            &_trianglesMeshes[materialId].getColors()[0],
+            OSP_DATA_SHARED_BUFFER);
+        OSPData texcoord = ospNewData(
+            _trianglesMeshes[materialId].getTextureCoordinates().size(),
+            OSP_FLOAT2,
+            &_trianglesMeshes[materialId].getTextureCoordinates()[0],
+            OSP_DATA_SHARED_BUFFER);
+        ospSetObject(mesh,"position",vertices);
+        ospSetObject(mesh,"index",indices);
+        ospSetObject(mesh,"vertex.normal",normals);
+        ospSetObject(mesh,"vertex.color",colors);
+        ospSetObject(mesh,"vertex.texcoord",texcoord);
+        ospSet1i(mesh, "alpha_type", 0);
+        ospSet1i(mesh, "alpha_component", 4);
+
+        if (_ospMaterials[materialId])
+            ospSetMaterial(mesh, _ospMaterials[materialId]);
+
+        ospCommit(mesh);
+
+        // Meshes are by default added to all timestamps
+        for( const auto& model: _models )
+            ospAddGeometry( model.second, mesh);
+    }
+
 }
 
 void OSPRayScene::commitLights()
@@ -875,6 +1024,11 @@ OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)
     _ospTextures[textureName] = ospTexture;
 
     return ospTexture;
+}
+
+void OSPRayScene::saveSceneToCacheFile()
+{
+    _saveCacheFile();
 }
 
 }

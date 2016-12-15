@@ -34,7 +34,7 @@ vec4f skyboxMapping(
     if( nbMaterials <= MATERIAL_SKYBOX )
         return result;
 
-    const varying float radius = renderer->epsilon * 1e6f;
+    const varying float radius = 1e6;
     const uniform ExtendedOBJMaterial* uniform mat =
         (const uniform ExtendedOBJMaterial* uniform)materials[MATERIAL_SKYBOX];
     if( !mat->map_Kd )

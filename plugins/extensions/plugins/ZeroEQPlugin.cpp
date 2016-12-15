@@ -908,7 +908,8 @@ bool ZeroEQPlugin::_requestViewport()
 
 void ZeroEQPlugin::_viewportUpdated()
 {
-    _parametersManager.getApplicationParameters().setWindowSize( Vector2ui{ _remoteViewport.getSize() } );
+    _parametersManager.getApplicationParameters().setWindowSize(
+        Vector2ui{ _remoteViewport.getSize() } );
     _engine.commit();
 }
 

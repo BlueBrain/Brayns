@@ -80,6 +80,9 @@ public:
     /** @copydoc Scene::reset */
     void reset() final;
 
+    /** @copydoc Scene::saveSceneToCacheFile */
+    void saveSceneToCacheFile() final;
+
 private:
 
     void _processVolumeAABBGeometry();

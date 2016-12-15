@@ -62,6 +62,9 @@ void BraynsViewer::_registerKeyboardShortcuts()
     keyHandler.registerKeyboardShortcut(
         'x', "Set timestamp to " + std::to_string( DEFAULT_TEST_TIMESTAMP ),
         std::bind( &BraynsViewer::_defaultTimestamp, this ));
+    keyHandler.registerKeyboardShortcut(
+        '|', "Create cache file ",
+        std::bind( &BraynsViewer::_saveSceneToCacheFile, this ));
 }
 
 void BraynsViewer::_gradientMaterials()
@@ -90,6 +93,12 @@ void BraynsViewer::_defaultTimestamp()
     sceneParams.setTimestamp( DEFAULT_TEST_TIMESTAMP );
 }
 
+void BraynsViewer::_saveSceneToCacheFile()
+{
+    auto& scene = _brayns.getEngine().getScene();
+    scene.saveSceneToCacheFile();
+}
+
 void BraynsViewer::display( )
 {
     if( _timestampIncrement != 0.f )
@@ -98,8 +107,6 @@ void BraynsViewer::display( )
         sceneParams.setTimestamp( sceneParams.getTimestamp( ) + _timestampIncrement );
         _brayns.getEngine().commit();
     }
-
-    BaseWindow::display();
 
     std::stringstream ss;
     ss << "Brayns Viewer [" <<
@@ -113,7 +120,8 @@ void BraynsViewer::display( )
         ss << " @ " << _fps.getFPS( );
     }
     setTitle(ss.str( ));
-    forceRedraw( );
+
+    BaseWindow::display();
 }
 
 }

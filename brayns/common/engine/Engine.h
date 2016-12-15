@@ -78,8 +78,9 @@ public:
     /** Gets the renderer */
     Renderer& getRenderer();
 
-    /** Sets the active renderer */
+    /** Active renderer */
     void setActiveRenderer( const RendererType renderer );
+    RendererType getActiveRenderer() { return _activeRenderer; }
 
     /**
        Reshapes the current frame buffers

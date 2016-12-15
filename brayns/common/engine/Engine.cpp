@@ -140,7 +140,7 @@ void Engine::setDefaultCamera()
     const Vector3f& target = worldBounds.getCenter();
     const Vector3f& diag = worldBounds.getSize();
     Vector3f position = target;
-    position.z() -= 1.5f * diag.find_max();
+    position.z() -= diag.find_max();
 
     const Vector3f up = Vector3f( 0.f, 1.f, 0.f );
     _camera->setInitialState( position, target, up );
