@@ -205,10 +205,10 @@ enum class ColorScheme
     neuron_by_id = 1,
     neuron_by_type = 2,
     neuron_by_segment_type = 3,
-    protein_atoms = 4,
-    protein_chains = 5,
-    protein_residues = 6,
-    protein_backbones = 7
+    protein_by_id = 4,
+    protein_atoms = 5,
+    protein_chains = 6,
+    protein_residues = 7
 };
 
 /** Define the environment that is added to the default scene */

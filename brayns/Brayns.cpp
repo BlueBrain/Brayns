@@ -42,6 +42,7 @@
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
+#include <brayns/io/MolecularSystemReader.h>
 
 #include <plugins/engines/EngineFactory.h>
 #include <plugins/extensions/ExtensionPluginFactory.h>
@@ -294,6 +295,9 @@ private:
         if(!geometryParameters.getXYZBFile().empty())
             _loadXYZBFile();
 
+        if(!geometryParameters.getMolecularSystemConfig().empty( ))
+            _loadMolecularSystem();
+
         if(!volumeParameters.getFilename().empty() || !volumeParameters.getFolder().empty())
         {
             scene.getVolumeHandler()->setTimestamp( 0.f );
@@ -306,6 +310,34 @@ private:
         }
     }
 
+    strings _parseFolder( const std::string& folder, const strings& filters )
+    {
+        strings files;
+        boost::filesystem::directory_iterator endIter;
+        if( boost::filesystem::is_directory( folder ))
+        {
+            for( boost::filesystem::directory_iterator dirIter( folder );
+                 dirIter != endIter; ++dirIter )
+            {
+                if( boost::filesystem::is_regular_file(dirIter->status( )))
+                {
+                    boost::filesystem::path fileExtension = dirIter->path().extension();
+                    const auto filename = dirIter->path().c_str();
+                    if( filters.empty( ))
+                        files.push_back( filename );
+                    else
+                    {
+                        const auto found =
+                            std::find( filters.begin(), filters.end(), fileExtension );
+                        if( found != filters.end( ))
+                            files.push_back( filename );
+                    }
+                }
+            }
+        }
+        return files;
+    }
+
     /**
         Loads data from SWC and H5 files located in the folder specified in the
         geometry parameters (command line parameter --morphology-folder)
@@ -314,34 +346,20 @@ private:
     {
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
-        const boost::filesystem::path& folder = geometryParameters.getMorphologyFolder( );
+        const auto& folder = geometryParameters.getMorphologyFolder( );
         BRAYNS_INFO << "Loading morphologies from " << folder << std::endl;
         MorphologyLoader morphologyLoader( geometryParameters );
 
-        size_t fileIndex = 0;
-        boost::filesystem::directory_iterator endIter;
-        if( boost::filesystem::is_directory(folder))
+        strings filters = { ".swc", ".h5" };
+        strings files = _parseFolder( folder, filters );
+        size_t progress = 0;
+        for( const auto& file: files )
         {
-            for( boost::filesystem::directory_iterator dirIter( folder );
-                 dirIter != endIter; ++dirIter )
-            {
-                if( boost::filesystem::is_regular_file(dirIter->status( )))
-                {
-                    boost::filesystem::path fileExtension =
-                        dirIter->path( ).extension( );
-                    if( fileExtension==".swc" || fileExtension==".h5" )
-                    {
-                        const std::string& filename = dirIter->path( ).string( );
-                        servus::URI uri( filename );
-                        if( !morphologyLoader.importMorphology(
-                            uri, fileIndex++, scene ))
-                        {
-                            BRAYNS_ERROR << "Failed to import " <<
-                                filename << std::endl;
-                        }
-                    }
-                }
-            }
+            BRAYNS_PROGRESS( progress, files.size( ));
+            servus::URI uri( file );
+            if( !morphologyLoader.importMorphology( uri, progress, scene ))
+                BRAYNS_ERROR << "Failed to import " << file << std::endl;
+            ++progress;
         }
     }
 
@@ -392,24 +410,14 @@ private:
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         const std::string& folder = geometryParameters.getPDBFolder();
         BRAYNS_INFO << "Loading PDB folder " << folder << std::endl;
-        boost::filesystem::directory_iterator endIter;
-        if( boost::filesystem::is_directory( folder ))
+        strings filters = { ".pdb", ".pdb1" };
+        strings files = _parseFolder( folder, filters );
+        size_t progress = 0;
+        for( const auto& file: files )
         {
-            for( boost::filesystem::directory_iterator dirIter( folder );
-                 dirIter != endIter; ++dirIter )
-            {
-                if( boost::filesystem::is_regular_file(dirIter->status( )))
-                {
-                    boost::filesystem::path fileExtension =
-                        dirIter->path( ).extension( );
-                    if( fileExtension==".pdb" || fileExtension==".pdb1" )
-                    {
-                        const std::string& filename = dirIter->path().string();
-                        BRAYNS_INFO << "- " << filename << std::endl;
-                        _loadPDBFile( filename );
-                    }
-                }
-            }
+            BRAYNS_PROGRESS( progress, files.size( ));
+            _loadPDBFile( file );
+            ++progress;
         }
     }
 
@@ -433,10 +441,8 @@ private:
 
         for( size_t i = 0; i < scene.getMaterials().size( ); ++i )
         {
-            float r,g,b;
-            proteinLoader.getMaterialKd( i, r, g, b );
-            MaterialPtr material = scene.getMaterials()[i];
-            material->setColor( Vector3f( r, g, b ));
+            MaterialPtr material = scene.getMaterials()[ i ];
+            material->setColor( proteinLoader.getMaterialKd( i ));
         }
     }
 
@@ -462,50 +468,47 @@ private:
     {
     #ifdef BRAYNS_USE_ASSIMP
         BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
-        MeshLoader meshLoader;
-        size_t meshIndex = 0;
-
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
 
-        boost::filesystem::directory_iterator endIter;
-        if( boost::filesystem::is_directory(folder))
+        strings filters = {
+            ".obj", ".dae", ".fbx", ".ply", ".lwo", ".stl", ".3ds", ".ase", ".ifc" };
+        strings files = _parseFolder( folder, filters );
+        size_t progress = 0;
+        MeshLoader meshLoader;
+        for( const auto& file: files )
         {
-            for( boost::filesystem::directory_iterator dirIter( folder );
-                 dirIter != endIter; ++dirIter )
+            BRAYNS_PROGRESS( progress, files.size( ));
+            MeshContainer MeshContainer =
             {
-                if( boost::filesystem::is_regular_file(dirIter->status( )))
-                {
-                    const std::string& filename = dirIter->path( ).string( );
-                    BRAYNS_INFO << "- " << filename << std::endl;
-                    MeshContainer MeshContainer =
-                    {
-                        scene.getTriangleMeshes(), scene.getMaterials(),
-                        scene.getWorldBounds()
-                    };
+                scene.getTriangleMeshes(),
+                scene.getMaterials(),
+                scene.getWorldBounds()
+            };
 
-                    size_t material =
-                        geometryParameters.getColorScheme() == ColorScheme::neuron_by_id ?
-                        meshIndex % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
-                        NO_MATERIAL;
+            size_t material =
+                geometryParameters.getColorScheme() == ColorScheme::neuron_by_id ?
+                progress % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
+                NO_MATERIAL;
 
-                    MeshQuality quality;
-                    switch( geometryParameters.getGeometryQuality() )
-                    {
-                    case GeometryQuality::medium : quality = MQ_QUALITY; break;
-                    case GeometryQuality::high : quality = MQ_MAX_QUALITY; break;
-                    default: quality = MQ_FAST ; break;
-                    }
-
-                    if(!meshLoader.importMeshFromFile(
-                        filename, MeshContainer, quality, material ))
-                    {
-                        BRAYNS_ERROR << "Failed to import " <<
-                        filename << std::endl;
-                    }
-                    ++meshIndex;
-                }
+            MeshQuality quality;
+            switch( geometryParameters.getGeometryQuality( ))
+            {
+            case GeometryQuality::medium:
+                quality = MQ_QUALITY;
+                break;
+            case GeometryQuality::high:
+                quality = MQ_MAX_QUALITY;
+                break;
+            default:
+                quality = MQ_FAST ;
+                break;
             }
+
+            if( !meshLoader.importMeshFromFile(
+                file, MeshContainer, quality, Vector3f(), Vector3f(1,1,1), material ))
+                BRAYNS_ERROR << "Failed to import " << file << std::endl;
+            ++progress;
         }
     #else
         BRAYNS_ERROR << "Assimp library is required to load meshes from " << folder << std::endl;
@@ -536,7 +539,6 @@ private:
     /**
         Loads compartment report from circuit configuration (command line
         parameter --report)
-        @return the number of simulation frames loaded
     */
     void _loadCompartmentReport()
     {
@@ -560,6 +562,18 @@ private:
                 scene.commitTransferFunctionData();
             }
         }
+    }
+
+    /**
+        Loads molecular system from configuration (command line parameter
+        --molecular-system-config )
+    */
+    void _loadMolecularSystem()
+    {
+        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& scene = _engine->getScene();
+        MolecularSystemReader molecularSystemReader( geometryParameters );
+        molecularSystemReader.import( scene );
     }
 
     void _buildDefaultScene()

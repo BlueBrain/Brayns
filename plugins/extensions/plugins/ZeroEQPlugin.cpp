@@ -643,6 +643,7 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setVolume_element_spacing( Vector3f( volumeParameters.getElementSpacing( )));
     _remoteDataSource.setVolume_offset( Vector3f(volumeParameters.getOffset( )));
     _remoteDataSource.setEnvironment_map( sceneParameters.getEnvironmentMap( ));
+    _remoteDataSource.setMolecular_system_config( geometryParameters.getMolecularSystemConfig( ));
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -756,6 +757,9 @@ void ZeroEQPlugin::_dataSourceUpdated()
         std::to_string(_remoteDataSource.getVolume_offset()[2]) );
     _parametersManager.set(
         "environment-map", _remoteDataSource.getEnvironment_mapString( ));
+
+    _parametersManager.set(
+        "molecular-system-config", _remoteDataSource.getMolecular_system_configString( ));
 
     _resetSceneUpdated();
     _resetCameraUpdated();

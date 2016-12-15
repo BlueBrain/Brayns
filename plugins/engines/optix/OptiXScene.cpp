@@ -463,12 +463,13 @@ uint64_t OptiXScene::_processMeshes()
     uint64_t nbTotalMaterials = 0;
 
     for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
-    {
-        nbTotalVertices += _trianglesMeshes[ materialId ].getVertices().size();
-        nbTotalIndices += _trianglesMeshes[ materialId ].getIndices().size();
-        nbTotalNormals += _trianglesMeshes[ materialId ].getNormals().size();
-        nbTotalTexCoords += _trianglesMeshes[ materialId ].getTextureCoordinates().size();
-    }
+        if( _trianglesMeshes.find( materialId ) != _trianglesMeshes.end( ))
+        {
+            nbTotalVertices += _trianglesMeshes[ materialId ].getVertices().size();
+            nbTotalIndices += _trianglesMeshes[ materialId ].getIndices().size();
+            nbTotalNormals += _trianglesMeshes[ materialId ].getNormals().size();
+            nbTotalTexCoords += _trianglesMeshes[ materialId ].getTextureCoordinates().size();
+        }
 
     Vector3fs vertices;
     Vector3uis indices;

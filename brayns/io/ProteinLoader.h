@@ -40,27 +40,23 @@ public:
 
     /** Imports atoms from a given PDB file
      *
-     * @return bounding box of the protein
+     * @param PDB file to import
+     * @param Position of protein in space
+     * @param Index of the protein when more than one is loaded
+     * @return true if PDB file was successufully loaded, false otherwize
      */
     bool importPDBFile(
         const std::string &filename,
         const Vector3f& position,
-        int material,
+        const size_t proteinIndex,
         Scene& scene);
 
     /** Returns the RGB composants for a given atom index, and according to the
      * JMol scheme
      *
      * @param index index of the material
-     * @param r red composant
-     * @param g green composant
-     * @param b blue composant
      */
-    void getMaterialKd(
-        size_t index,
-        float& r,
-        float& g,
-        float& b );
+    Vector3f getMaterialKd( size_t index );
 
 private:
 

@@ -27,6 +27,7 @@
 
 #include <brayns/common/log.h>
 #include <boost/filesystem.hpp>
+#include <fstream>
 
 namespace brayns
 {
@@ -39,6 +40,8 @@ bool MeshLoader::importMeshFromFile(
         const std::string& filename,
         MeshContainer& meshContainer,
         MeshQuality meshQuality,
+        const Vector3f& position,
+        const Vector3f& scale,
         const size_t defaultMaterial )
 {
     const boost::filesystem::path file = filename;
@@ -63,6 +66,14 @@ bool MeshLoader::importMeshFromFile(
             quality = aiProcessPreset_TargetRealtime_Fast;
             break;
     }
+
+    std::ifstream meshFile( filename, std::ios::in );
+    if( !meshFile.good( ))
+    {
+        BRAYNS_ERROR << "Could not open file " << filename << std::endl;
+        return false;
+    }
+    meshFile.close();
 
     const aiScene *scene = nullptr;
     scene = importer.ReadFile( filename.c_str() , quality);
@@ -91,33 +102,30 @@ bool MeshLoader::importMeshFromFile(
     size_t nbFaces = 0;
     for( size_t m = 0; m < scene->mNumMeshes; ++m )
     {
-        aiMesh* mesh = scene->mMeshes[m];
-        size_t materialIndex = (defaultMaterial == NO_MATERIAL) ?
-                    mesh->mMaterialIndex : defaultMaterial;
+        aiMesh* mesh = scene->mMeshes[ m ];
+        size_t materialId =
+            ( defaultMaterial == NO_MATERIAL ) ? mesh->mMaterialIndex : defaultMaterial;
 
         nbVertices += mesh->mNumVertices;
         for(size_t i=0; i < mesh->mNumVertices; ++i )
         {
             aiVector3D v = mesh->mVertices[ i ];
-            const Vector3f vertex = { v.x, v.y, v.z };
-            meshContainer.triangles[ materialIndex ].
-                getVertices().push_back( vertex );
+            const Vector3f vertex = position + scale * Vector3f( v.x, v.y, v.z );
+            meshContainer.triangles[ materialId ].getVertices().push_back( vertex );
             meshContainer.bounds.merge(vertex);
 
             if( mesh->HasNormals( ))
             {
                 v = mesh->mNormals[ i ];
                 const Vector3f normal = { v.x, v.y, v.z };
-                meshContainer.triangles[ materialIndex ].
-                    getNormals().push_back( normal );
+                meshContainer.triangles[ materialId ].getNormals().push_back( normal );
             }
 
             if( mesh->HasTextureCoords( 0 ))
             {
                 v = mesh->mTextureCoords[ 0 ][ i ];
                 const Vector2f texCoord( v.x, -v.y );
-                meshContainer.triangles[ materialIndex ].
-                    getTextureCoordinates().push_back( texCoord );
+                meshContainer.triangles[ materialId ].getTextureCoordinates().push_back( texCoord );
             }
         }
         bool nonTriangulatedFaces = false;
@@ -127,11 +135,10 @@ bool MeshLoader::importMeshFromFile(
             if( mesh->mFaces[f].mNumIndices == 3 )
             {
                 const Vector3ui ind = Vector3ui(
-                    _meshIndex[materialIndex]+mesh->mFaces[f].mIndices[0],
-                    _meshIndex[materialIndex]+mesh->mFaces[f].mIndices[1],
-                    _meshIndex[materialIndex]+mesh->mFaces[f].mIndices[2]);
-                meshContainer.triangles[ materialIndex ].
-                    getIndices().push_back( ind );
+                    _meshIndex[ materialId ] + mesh->mFaces[ f ].mIndices[ 0 ],
+                    _meshIndex[ materialId ] + mesh->mFaces[ f ].mIndices[ 1 ],
+                    _meshIndex[ materialId ] + mesh->mFaces[ f ].mIndices[ 2 ]);
+                meshContainer.triangles[ materialId ].getIndices().push_back( ind );
             }
             else
                 nonTriangulatedFaces = true;
@@ -139,14 +146,14 @@ bool MeshLoader::importMeshFromFile(
         if( nonTriangulatedFaces )
             BRAYNS_WARN << "Some faces are not triangulated and have been removed" << std::endl;
 
-        if(_meshIndex.find( materialIndex ) == _meshIndex.end())
-           _meshIndex[ materialIndex ] = 0;
+        if(_meshIndex.find( materialId ) == _meshIndex.end())
+           _meshIndex[ materialId ] = 0;
 
-        _meshIndex[ materialIndex ] += mesh->mNumVertices;
+        _meshIndex[ materialId ] += mesh->mNumVertices;
     }
 
-    BRAYNS_INFO << "Loaded " << nbVertices << " vertices and "
-                << nbFaces << " faces" << std::endl;
+    BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and "
+                 << nbFaces << " faces" << std::endl;
 
     return true;
 }
@@ -158,25 +165,25 @@ bool MeshLoader::exportMeshToFile(
     // Save to OBJ
     size_t nbMaterials = meshContainer.materials.size();
     aiScene scene;
-    scene.mMaterials = new aiMaterial*[nbMaterials];
+    scene.mMaterials = new aiMaterial*[ nbMaterials ];
     scene.mNumMaterials = nbMaterials;
 
     aiNode* rootNode = new aiNode();
     rootNode->mName = "brayns";
     scene.mRootNode = rootNode;
     rootNode->mNumMeshes = nbMaterials;
-    rootNode->mMeshes = new unsigned int[rootNode->mNumMeshes];
+    rootNode->mMeshes = new unsigned int[ rootNode->mNumMeshes ];
 
     for( size_t i = 0; i < rootNode->mNumMeshes; ++i )
     {
-        rootNode->mMeshes[i] = i;
+        rootNode->mMeshes[ i ] = i;
 
         // Materials
         aiMaterial* material = new aiMaterial();
-        const aiVector3D c(rand()%255/255,rand()%255/255,rand()%255/255);
-        material->AddProperty(&c, 1, AI_MATKEY_COLOR_DIFFUSE);
-        material->AddProperty(&c, 1, AI_MATKEY_COLOR_SPECULAR );
-        scene.mMaterials[i] = material;
+        const aiVector3D c( rand() % 255 / 255, rand() % 255 / 255, rand() % 255 / 255);
+        material->AddProperty( &c, 1, AI_MATKEY_COLOR_DIFFUSE );
+        material->AddProperty( &c, 1, AI_MATKEY_COLOR_SPECULAR );
+        scene.mMaterials[ i ] = material;
     }
 
     scene.mNumMeshes = nbMaterials;
@@ -186,14 +193,12 @@ bool MeshLoader::exportMeshToFile(
     for( size_t meshIndex = 0; meshIndex < scene.mNumMeshes; ++meshIndex )
     {
         aiMesh mesh;
-        mesh.mNumVertices =
-            meshContainer.triangles[meshIndex].getVertices().size();
-        mesh.mNumFaces =
-            meshContainer.triangles[meshIndex].getIndices().size();
+        mesh.mNumVertices = meshContainer.triangles[ meshIndex ].getVertices().size();
+        mesh.mNumFaces = meshContainer.triangles[ meshIndex ].getIndices().size();
         mesh.mMaterialIndex = meshIndex;
-        mesh.mVertices = new aiVector3D[mesh.mNumVertices];
-        mesh.mFaces = new aiFace[mesh.mNumFaces];
-        mesh.mNormals = new aiVector3D[mesh.mNumVertices];
+        mesh.mVertices = new aiVector3D[ mesh.mNumVertices ];
+        mesh.mFaces = new aiFace[ mesh.mNumFaces ];
+        mesh.mNormals = new aiVector3D[ mesh.mNumVertices ];
 
         for( size_t t = 0; t < meshContainer.triangles[meshIndex].
             getIndices().size(); ++t )
@@ -201,12 +206,9 @@ bool MeshLoader::exportMeshToFile(
             aiFace face;
             face.mNumIndices = 3;
             face.mIndices = new unsigned int[face.mNumIndices];
-            face.mIndices[0] =
-                meshContainer.triangles[meshIndex].getIndices()[t].x();
-            face.mIndices[1] =
-                meshContainer.triangles[meshIndex].getIndices()[t].y();
-            face.mIndices[2] =
-                meshContainer.triangles[meshIndex].getIndices()[t].z();
+            face.mIndices[ 0 ] = meshContainer.triangles[meshIndex].getIndices()[t].x();
+            face.mIndices[ 1 ] = meshContainer.triangles[meshIndex].getIndices()[t].y();
+            face.mIndices[ 2 ] = meshContainer.triangles[meshIndex].getIndices()[t].z();
             mesh.mFaces[t] = face;
             ++numFace;
         }
@@ -214,11 +216,9 @@ bool MeshLoader::exportMeshToFile(
         for( size_t t = 0; t < meshContainer.triangles[meshIndex].
             getVertices().size(); ++t )
         {
-            const Vector3f& vertex =
-                meshContainer.triangles[meshIndex].getVertices()[t];
+            const Vector3f& vertex = meshContainer.triangles[meshIndex].getVertices()[t];
             mesh.mVertices[t] = aiVector3D(vertex.x(), vertex.y(), vertex.z());
-            const Vector3f& normal =
-                meshContainer.triangles[meshIndex].getNormals()[t];
+            const Vector3f& normal = meshContainer.triangles[meshIndex].getNormals()[t];
             mesh.mNormals[t] = aiVector3D(normal.x(), normal.y(), normal.z());
             ++numVertex;
         }
@@ -236,7 +236,7 @@ void MeshLoader::_createMaterials(
         const std::string& folder,
         Materials& materials )
 {
-    BRAYNS_INFO << "Loading " << scene->mNumMaterials
+    BRAYNS_DEBUG << "Loading " << scene->mNumMaterials
         << " materials" << std::endl;
     for( size_t m = 0; m < scene->mNumMaterials; ++m )
     {

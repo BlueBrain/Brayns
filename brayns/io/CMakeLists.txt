@@ -8,6 +8,7 @@ set(BRAYNSIO_SOURCES
   XYZBLoader.cpp
   TransferFunctionLoader.cpp
   MorphologyLoader.cpp
+  MolecularSystemReader.cpp
   ProteinLoader.cpp
   NESTLoader.cpp
   TextureLoader.cpp
@@ -17,6 +18,7 @@ set(BRAYNSIO_PUBLIC_HEADERS
   XYZBLoader.h
   TransferFunctionLoader.h
   MorphologyLoader.h
+  MolecularSystemReader.h
   ProteinLoader.h
   NESTLoader.h
   TextureLoader.h

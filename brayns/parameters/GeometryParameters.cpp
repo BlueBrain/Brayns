@@ -56,10 +56,11 @@ const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
 const std::string PARAM_SPLASH_SCENE_FOLDER = "splash-scene-folder";
+const std::string PARAM_MOLECULAR_SYSTEM_CONFIG = "molecular-system-config";
 
 const std::string COLOR_SCHEMES[8] = {
     "none", "neuron-by-id", "neuron-by-type", "neuron-by-segment-type",
-    "protein-atoms", "protein-chains", "protein-residues", "protein-backbones"
+    "protein-by-id", "protein-atoms", "protein-chains", "protein-residues"
 };
 
 const std::string SCENE_ENVIRONMENTS[4] = { "none", "ground", "wall", "bounding-box" };
@@ -149,7 +150,9 @@ GeometryParameters::GeometryParameters()
         ( PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value< bool >(),
             "Enable/Disable generation of multiple models based on geometry timestamps [bool]" )
         ( PARAM_SPLASH_SCENE_FOLDER.c_str(), po::value< std::string >(),
-            "Folder containing splash scene folder [string]" );
+            "Folder containing splash scene folder [string]" )
+        ( PARAM_MOLECULAR_SYSTEM_CONFIG.c_str(), po::value< std::string >(),
+            "Molecular system configuration [string]" );
 }
 
 bool GeometryParameters::_parse( const po::variables_map& vm )
@@ -247,6 +250,8 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
             vm[PARAM_GENERATE_MULTIPLE_MODELS].as< bool >();
     if( vm.count( PARAM_SPLASH_SCENE_FOLDER ))
         _splashSceneFolder = vm[PARAM_SPLASH_SCENE_FOLDER].as< std::string >();
+    if( vm.count( PARAM_MOLECULAR_SYSTEM_CONFIG ))
+        _molecularSystemConfig = vm[ PARAM_MOLECULAR_SYSTEM_CONFIG ].as< std::string >();
 
     return true;
 }
@@ -315,6 +320,8 @@ void GeometryParameters::print()
         (_generateMultipleModels ? "on" : "off") << std::endl;
     BRAYNS_INFO << "Splash scene folder        : " <<
         _splashSceneFolder << std::endl;
+    BRAYNS_INFO << "Molecular system config    : " <<
+        _molecularSystemConfig << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(

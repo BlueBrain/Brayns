@@ -37,12 +37,12 @@ enum SectionType: uint {
 enum ColorScheme: uint {
     none = 0,
     neuron_by_id = 1,
-    neuron_by_type = 2
-    neuron_by_segment_type = 3
-    protein_atoms = 4,
-    protein_chain = 5,
-    protein_residue = 6,
-    protein_backbone = 7
+    neuron_by_type = 2,
+    neuron_by_segment_type = 3,
+    protein_by_id = 4,
+    protein_atoms = 5,
+    protein_chain = 6,
+    protein_residue = 7
 }
 
 enum SceneEnvironment: uint {
@@ -92,6 +92,7 @@ table DataSource {
     volume_element_spacing: [float:3];
     volume_offset: [float:3];
     environment_map: string;
+    molecular_system_config: string;
 }
 
 enum Shader: uint {
