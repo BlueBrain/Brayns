@@ -129,9 +129,8 @@ void OSPRayScene::_saveCacheFile()
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
     // Save materials
-    for( size_t materialId = 0; materialId < nbMaterials; ++materialId )
+    for( const auto& material: _materials )
     {
-        auto material = _materials[ materialId ];
         Vector3f value3f;
         value3f = material->getColor();
         file.write( ( char* )&value3f, sizeof( Vector3f ));
@@ -313,9 +312,8 @@ void OSPRayScene::_loadCacheFile()
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
     // Read materials
-    for( size_t materialId = 0; materialId < nbMaterials; ++materialId )
+    for( const auto& material: _materials )
     {
-        auto material = _materials[ materialId ];
         Vector3f value3f;
         file.read( ( char* )&value3f, sizeof( Vector3f ));
         material->setColor( value3f );

@@ -157,7 +157,7 @@ public:
     /**
         Return true if the scene does not contain any geometry. False otherwise
     */
-    BRAYNS_API bool isEmpty() const;
+    BRAYNS_API bool empty() const;
 
     BRAYNS_API ParametersManager& getParametersManager() { return _parametersManager; }
 

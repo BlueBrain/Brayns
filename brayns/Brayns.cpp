@@ -90,7 +90,7 @@ struct Brayns::Impl
         scene.buildEnvironment();
         scene.buildGeometry();
 
-        if( scene.isEmpty() && !scene.getVolumeHandler( ))
+        if( scene.empty() && !scene.getVolumeHandler( ))
         {
             BRAYNS_INFO << "Building default scene" << std::endl;
             scene.buildDefault();

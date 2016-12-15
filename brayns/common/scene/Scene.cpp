@@ -564,10 +564,9 @@ VolumeHandlerPtr Scene::getVolumeHandler()
     return _volumeHandler;
 }
 
-
-bool Scene::isEmpty() const
+bool Scene::empty() const
 {
-    return ( _primitives.size() == 0 && _trianglesMeshes.size() == 0 );
+    return _primitives.empty() && _trianglesMeshes.empty();
 }
 
 }
