@@ -35,6 +35,7 @@
 
 namespace
 {
+
 const float wheelFactor = 1.f / 40.f;
 
 template<typename T>
@@ -71,8 +72,9 @@ namespace brayns
         '*', "Enable/Disable Deflect streaming",
                 [&] { _params.setEnabled( !_params.getEnabled( )); });
 
-    // ensure streaming is off initially, otherwise our logic in run() won't work
-    _params.setEnabled( false );
+    _params.setEnabled( true ); // Streaming will only be activated if
+                                // the DEFLECT_HOST environment variable
+                                // is defined
 
 #ifdef BRAYNS_USE_ZEROEQ
     if( !zeroeq )
@@ -109,7 +111,7 @@ void DeflectPlugin::run()
     if( deflectEnabled && !_stream )
         _initializeDeflect();
 
-    if( deflectEnabled && _stream && _stream->isConnected() )
+    if( deflectEnabled && _stream && _stream->isConnected( ))
     {
         _sendDeflectFrame();
         if( _handleDeflectEvents( ))
