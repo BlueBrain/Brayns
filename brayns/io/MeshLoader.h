@@ -70,7 +70,9 @@ public:
             const std::string& filename,
             MeshContainer& meshContainer,
             MeshQuality meshQuality,
-            size_t material);
+            const Vector3f& position,
+            const Vector3f& scale,
+            const size_t defaultMaterial);
 
     /** Exports meshes to a given file
      *

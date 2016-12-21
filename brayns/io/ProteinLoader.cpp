@@ -62,6 +62,7 @@ struct AtomicRadius
     float radius;
     int index;
 };
+const float DEFAULT_RADIUS = 25.f;
 
 /** Structure defining the color of atoms according to the JMol Scheme
  */
@@ -312,12 +313,9 @@ ProteinLoader::ProteinLoader(
 bool ProteinLoader::importPDBFile(
     const std::string &filename,
     const Vector3f& position,
-    const int material,
+    const size_t proteinIndex,
     Scene& scene)
 {
-    Vector3f inViewPos(0,0,0);
-    float inViewRadius = 1.0;
-
     int index(0);
     std::ifstream file(filename.c_str());
     if(!file.is_open())
@@ -332,7 +330,7 @@ bool ProteinLoader::importPDBFile(
             std::string line;
             std::string value;
             std::getline( file, line );
-            if( line.find("ATOM") == 0 )
+            if( line.find( "ATOM" ) == 0 )
             {
                 // Atom
                 Atom atom;
@@ -372,16 +370,13 @@ bool ProteinLoader::importPDBFile(
                         atom.residue = static_cast<int>(atoi(value.c_str()));
                         break;
                     case 37:
-                        atom.position[0] =
-                                static_cast<float>(atof(value.c_str()));
+                        atom.position[0] = static_cast<float>(atof(value.c_str()));
                         break;
                     case 45:
-                        atom.position[1] =
-                                static_cast<float>(atof(value.c_str()));
+                        atom.position[1] = static_cast<float>(atof(value.c_str()));
                         break;
                     case 53:
-                        atom.position[2] =
-                                static_cast<float>(atof(value.c_str()));
+                        atom.position[2] = static_cast<float>(atof(value.c_str()));
                         break;
                     default:
                         if( line.at(i) != ' ' )
@@ -393,77 +388,62 @@ bool ProteinLoader::importPDBFile(
 
                 // Material
                 atom.materialId = 0;
-                i=0;
-                bool found(false);
-                const ColorScheme colorScheme =
-                    _geometryParameters.getColorScheme( );
-                if( colorScheme == ColorScheme::protein_backbones )
-                    atom.materialId = material;
-                else
+                i = 0;
+                bool found = false;
+                const auto colorScheme = _geometryParameters.getColorScheme();
+                while(!found && i<colorMapSize)
                 {
-                    while(!found && i<colorMapSize)
+                    if( atomName == colorMap[i].symbol )
                     {
-                        if( atomName == colorMap[i].symbol )
+                        found = true;
+                        switch( colorScheme )
                         {
-                            found = true;
-                            switch( colorScheme )
-                            {
-                            case ColorScheme::protein_chains:
-                                atom.materialId =
-                                    abs(atom.chainId) %
-                                        scene.getMaterials().size();
-                                break;
-                            case ColorScheme::protein_residues:
-                                atom.materialId =
-                                    abs(atom.residue) %
-                                        scene.getMaterials().size();
-                                break;
-                            case ColorScheme::protein_backbones:
-                                atom.materialId = 0;
-                                break;
-                            default:
-                                atom.materialId = static_cast<int>(i);
-                                break;
-                            }
+                        case ColorScheme::protein_chains:
+                            atom.materialId = abs( atom.chainId ) % scene.getMaterials().size();
+                            break;
+                        case ColorScheme::protein_residues:
+                            atom.materialId = abs( atom.residue ) % scene.getMaterials().size();
+                            break;
+                        default:
+                            atom.materialId = static_cast< int >( i );
+                            break;
                         }
-                        ++i;
                     }
+                    ++i;
                 }
+
                 // Radius
-                atom.radius = 25.f;
-                i=0;
+                atom.radius = DEFAULT_RADIUS;
+                i = 0;
                 found = false;
                 while( !found && i<colorMapSize )
                 {
-                    if( atomName == atomic_radii[i].Symbol )
+                    if( atomName == atomic_radii[ i ].Symbol )
                     {
-                        atom.radius = atomic_radii[i].radius;
+                        atom.radius = atomic_radii[ i ].radius;
                         found = true;
                     }
                     ++i;
                 }
 
                 SpherePtr sphere(new Sphere(
-                    0, Vector3f(
-                        position[0] + 0.01f*atom.position[0],
-                        position[1] + 0.01f*atom.position[1],
-                        position[2] + 0.01f*atom.position[2]),
-                    0.0001f * atom.radius *
-                    _geometryParameters.getRadiusMultiplier(),
+                    0, Vector3f( position + 0.01f * atom.position ), // convert from nanometers
+                    0.0001f * atom.radius *                          // convert from angstrom
+                        _geometryParameters.getRadiusMultiplier(),
                     0.f, 0.f));
 
-                if( colorScheme == ColorScheme::protein_backbones )
+                switch( colorScheme )
                 {
-                    Vector3f inView( sphere->getCenter() - inViewPos );
-                    float dist = inView.length();
-                    if( dist > inViewRadius )
+                case ColorScheme::protein_by_id:
                     {
-                        atom.materialId = ( dist < (inViewRadius+0.1) ) ? 1 : 0;
-                        scene.getPrimitives()[atom.materialId].push_back(sphere);
+                        const auto material = proteinIndex % scene.getMaterials().size();
+                        scene.getPrimitives()[ material ].push_back( sphere );
                     }
+                    break;
+                default:
+                    scene.getPrimitives()[ atom.materialId ].push_back( sphere );
                 }
-                else
-                    scene.getPrimitives()[atom.materialId].push_back(sphere);
+
                 scene.getWorldBounds().merge(sphere->getCenter());
             }
         }
@@ -473,15 +453,10 @@ bool ProteinLoader::importPDBFile(
     return true;
 }
 
-void ProteinLoader::getMaterialKd(
-        const size_t index,
-        float& r,
-        float& g,
-        float& b)
+Vector3f ProteinLoader::getMaterialKd( const size_t index )
 {
-    r = colorMap[index].R/255.f;
-    g = colorMap[index].G/255.f;
-    b = colorMap[index].B/255.f;
+    return Vector3f(
+        colorMap[ index ].R / 255.f, colorMap[ index ].G / 255.f, colorMap[ index ].B / 255.f );
 }
 
 }

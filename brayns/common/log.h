@@ -52,21 +52,16 @@
 static std::mutex __logging_mtx;
 #define BRAYNS_PROGRESS( __value, __maxValue ) \
 {\
-    uint64_t __step = ( __maxValue + 1 ) / 100; \
-    __step = ( __step == 0 ) ? 1 : __step; \
-    if( __value % __step == 0 ) \
-    { \
-        __logging_mtx.lock();\
-        std::cout << "[";\
-        uint64_t __percent = 100 * ( __value + 1 ) / __maxValue;\
-        for( uint64_t __progress = 0; __progress < 100; ++__progress )\
-            std::cout << ( __progress <= __percent ? "=" : " " );\
-        std::cout << "] " << int( __percent ) << " %\r";\
-        std::cout.flush();\
-        if( __value >= __maxValue - 1 )\
-            std::cout << std::endl;\
-        __logging_mtx.unlock();\
-    } \
+    std::lock_guard<std::mutex> lock(__logging_mtx);\
+    std::cout << "[INFO ] [";\
+    uint64_t __percent = 100 * ( __value + 1 ) / __maxValue;\
+    for( uint64_t __progress = 0; __progress < 100; __progress += 2 )\
+        std::cout << ( __progress <= __percent ? "=" : " " );\
+    std::cout << "] " << int( __percent ) << " % [" << __value + 1 <<\
+        "/" << __maxValue << "]\r";\
+    std::cout.flush();\
+    if( __value >= __maxValue - 1 )\
+        std::cout << std::endl;\
 }
 
 #endif

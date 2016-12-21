@@ -161,6 +161,8 @@ public:
     void setSplashSceneFolder( const std::string& value ) { _splashSceneFolder = value; }
     std::string getSplashSceneFolder() const { return _splashSceneFolder; }
 
+    /** Biological assembly */
+    const std::string& getMolecularSystemConfig() const { return _molecularSystemConfig; }
 
 protected:
 
@@ -195,6 +197,7 @@ protected:
     size_t _simulationHistogramSize;
     bool _generateMultipleModels;
     std::string _splashSceneFolder;
+    std::string _molecularSystemConfig;
 
 };
 
