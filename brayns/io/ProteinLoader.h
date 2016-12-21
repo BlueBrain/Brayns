@@ -40,9 +40,10 @@ public:
 
     /** Imports atoms from a given PDB file
      *
-     * @param PDB file to import
-     * @param Position of protein in space
-     * @param Index of the protein when more than one is loaded
+     * @param filename PDB file to import
+     * @param position Position of protein in space
+     * @param proteinIndex Index of the protein when more than one is loaded
+     * @param scene Resulting scene
      * @return true if PDB file was successufully loaded, false otherwize
      */
     bool importPDBFile(
@@ -54,7 +55,7 @@ public:
     /** Returns the RGB composants for a given atom index, and according to the
      * JMol scheme
      *
-     * @param index index of the material
+     * @param index Index of the material
      */
     Vector3f getMaterialKd( size_t index );
 

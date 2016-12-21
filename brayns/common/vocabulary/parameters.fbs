@@ -98,8 +98,8 @@ table DataSource {
 enum Shader: uint {
     basic,
     proximity,
-    particle,
-    simulation
+    simulation,
+    particle
 }
 
 enum Shading: uint {

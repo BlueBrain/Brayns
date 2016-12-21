@@ -32,6 +32,7 @@ namespace brayns
  * @brief The ProteinPosition struct contains the ID of each protein as well as its positions
  *        in the system
  */
+typedef std::map< size_t, std::string > Proteins;
 typedef std::map< size_t, Vector3fs > ProteinPositions;
 
 /**
@@ -49,7 +50,7 @@ class MolecularSystemReader
 public:
 
     /**
-     * @brief Default constructor
+     * @brief Constructor
      * @param geometryParameters Geometry parameters
      */
     MolecularSystemReader( const GeometryParameters& geometryParameters );
@@ -64,7 +65,19 @@ public:
 
 private:
 
+    bool _createScene( Scene& scene );
+    bool _loadConfiguration();
+    bool _loadProteins();
+    bool _loadPositions();
+
     const GeometryParameters& _geometryParameters;
+    std::string _proteinFolder;
+    std::string _meshFolder;
+    std::string _descriptorFilename;
+    std::string _positionsFilename;
+    uint64_t _nbProteins;
+    Proteins _proteins;
+    ProteinPositions _proteinPositions;
 
 };
 

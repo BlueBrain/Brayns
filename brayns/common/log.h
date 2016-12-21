@@ -52,7 +52,7 @@
 static std::mutex __logging_mtx;
 #define BRAYNS_PROGRESS( __value, __maxValue ) \
 {\
-    __logging_mtx.lock();\
+    std::lock_guard<std::mutex> lock(__logging_mtx);\
     std::cout << "[INFO ] [";\
     uint64_t __percent = 100 * ( __value + 1 ) / __maxValue;\
     for( uint64_t __progress = 0; __progress < 100; __progress += 2 )\
@@ -62,7 +62,6 @@ static std::mutex __logging_mtx;
     std::cout.flush();\
     if( __value >= __maxValue - 1 )\
         std::cout << std::endl;\
-    __logging_mtx.unlock();\
 }
 
 #endif

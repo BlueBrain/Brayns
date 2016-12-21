@@ -321,12 +321,12 @@ private:
             {
                 if( boost::filesystem::is_regular_file(dirIter->status( )))
                 {
-                    boost::filesystem::path fileExtension = dirIter->path().extension();
                     const auto filename = dirIter->path().c_str();
                     if( filters.empty( ))
                         files.push_back( filename );
                     else
                     {
+                        const auto& fileExtension = dirIter->path().extension();
                         const auto found =
                             std::find( filters.begin(), filters.end(), fileExtension );
                         if( found != filters.end( ))
@@ -350,8 +350,8 @@ private:
         BRAYNS_INFO << "Loading morphologies from " << folder << std::endl;
         MorphologyLoader morphologyLoader( geometryParameters );
 
-        strings filters = { ".swc", ".h5" };
-        strings files = _parseFolder( folder, filters );
+        const strings filters = { ".swc", ".h5" };
+        const strings files = _parseFolder( folder, filters );
         size_t progress = 0;
         for( const auto& file: files )
         {
@@ -410,8 +410,8 @@ private:
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         const std::string& folder = geometryParameters.getPDBFolder();
         BRAYNS_INFO << "Loading PDB folder " << folder << std::endl;
-        strings filters = { ".pdb", ".pdb1" };
-        strings files = _parseFolder( folder, filters );
+        const strings filters = { ".pdb", ".pdb1" };
+        const strings files = _parseFolder( folder, filters );
         size_t progress = 0;
         for( const auto& file: files )
         {

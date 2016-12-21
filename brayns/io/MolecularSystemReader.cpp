@@ -37,8 +37,100 @@ MolecularSystemReader::MolecularSystemReader(
 
 bool MolecularSystemReader::import( Scene& scene )
 {
-    const auto& configuration = _geometryParameters.getMolecularSystemConfig();
+    _nbProteins = 0;
+    if( !_loadConfiguration( ))
+        return false;
+    if( !_loadProteins( ))
+        return false;
+    if( !_loadPositions( ))
+        return false;
+
+    BRAYNS_INFO << "Total number of different proteins: " << _proteins.size() << std::endl;
+    BRAYNS_INFO << "Total number of proteins          : " << _nbProteins << std::endl;
+
+    return _createScene( scene );
+}
+
+bool MolecularSystemReader::_createScene( Scene& scene )
+{
+    MeshQuality quality;
+    switch( _geometryParameters.getGeometryQuality( ))
+    {
+    case GeometryQuality::medium:
+        quality = MQ_QUALITY;
+        break;
+    case GeometryQuality::high:
+        quality = MQ_MAX_QUALITY;
+        break;
+    default:
+        quality = MQ_FAST ;
+        break;
+    }
+
+    MeshLoader meshLoader;
+    uint64_t proteinCount = 0;
+    for( const auto& proteinPosition: _proteinPositions )
+    {
+        BRAYNS_PROGRESS( proteinCount, _nbProteins );
+
+        const auto& protein = _proteins.find( proteinPosition.first );
+        if( !_proteinFolder.empty( ))
+            // Load PDB files
+            for( const auto& position: proteinPosition.second )
+            {
+                const auto pdbFilename = _proteinFolder + '/' + protein->second + ".pdb";
+                ProteinLoader loader( _geometryParameters );
+                loader.importPDBFile( pdbFilename, position, proteinCount, scene );
+                ++proteinCount;
+            }
+
+        if( !_meshFolder.empty( ))
+            // Load meshes
+            for( const auto& position: proteinPosition.second )
+            {
+                const auto objFilename = _meshFolder + '/' + protein->second + ".obj";
+                MeshContainer MeshContainer =
+                {
+                    scene.getTriangleMeshes(),
+                    scene.getMaterials(),
+                    scene.getWorldBounds()
+                };
+
+                const size_t material =
+                    _geometryParameters.getColorScheme() == ColorScheme::protein_by_id ?
+                    proteinCount % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
+                    NO_MATERIAL;
+
+                // Scale mesh to match PDB units. PDB are in angstrom, and positions are
+                // in micrometers
+                const float scale = 0.0001f;
+                meshLoader.importMeshFromFile(
+                    objFilename, MeshContainer, quality,
+                    position, Vector3f( scale, scale, scale ), material );
+
+                if( _proteinFolder.empty( ))
+                    ++proteinCount;
+            }
+    }
+
+    // Update materials
+    if( _geometryParameters.getColorScheme() != ColorScheme::protein_by_id )
+    {
+        size_t index = 0;
+        for( const auto& material: scene.getMaterials( ))
+        {
+            ProteinLoader loader( _geometryParameters );
+            material->setColor( loader.getMaterialKd( index ));
+            ++index;
+        }
+    }
+    return true;
+}
+
+bool MolecularSystemReader::_loadConfiguration()
+{
     // Load molecular system configuration
+    const auto& configuration = _geometryParameters.getMolecularSystemConfig();
     std::ifstream configurationFile( configuration, std::ios::in );
     if( !configurationFile.good( ))
     {
@@ -57,43 +149,46 @@ bool MolecularSystemReader::import( Scene& scene )
     }
     configurationFile.close();
 
-    const auto& proteinFolder = parameters["ProteinFolder"];
-    const auto& meshFolder = parameters["MeshFolder"];
-    const auto& descriptor = parameters["SystemDescriptor"];
-    const auto& positions = parameters["ProteinPositions"];
+    _proteinFolder = parameters["ProteinFolder"];
+    _meshFolder = parameters["MeshFolder"];
+    _descriptorFilename = parameters["SystemDescriptor"];
+    _positionsFilename = parameters["ProteinPositions"];
 
     BRAYNS_INFO << "Loading biological assembly" << std::endl;
-    BRAYNS_INFO << "Protein folder    : " << proteinFolder << std::endl;
-    BRAYNS_INFO << "Mesh folder       : " << meshFolder << std::endl;
-    BRAYNS_INFO << "System descriptor : " << descriptor << std::endl;
-    BRAYNS_INFO << "Protein positions : " << positions << std::endl;
+    BRAYNS_INFO << "Protein folder    : " << _proteinFolder << std::endl;
+    BRAYNS_INFO << "Mesh folder       : " << _meshFolder << std::endl;
+    BRAYNS_INFO << "System descriptor : " << _descriptorFilename << std::endl;
+    BRAYNS_INFO << "Protein positions : " << _positionsFilename << std::endl;
+    return true;
+}
 
-    std::ifstream descriptorFile( descriptor, std::ios::in );
+bool MolecularSystemReader::_loadProteins( )
+{
+    std::ifstream descriptorFile( _descriptorFilename, std::ios::in );
     if( !descriptorFile.good( ))
     {
-        BRAYNS_ERROR << "Could not open file " << descriptor << std::endl;
+        BRAYNS_ERROR << "Could not open file " << _descriptorFilename << std::endl;
         return false;
     }
 
     // Load list of proteins
-    std::map< size_t, std::string > proteins;
+    std::string line;
     while( std::getline( descriptorFile, line ))
     {
         std::stringstream lineStream( line );
-
         std::string protein;
         size_t id;
         size_t instances;
         lineStream >> protein >> id >> instances;
-        if( protein == "" )
+        if( protein.empty( ))
             continue;
 
-        proteins[id] = protein;
+        _proteins[id] = protein;
 
-        if( proteinFolder == "" )
+        if( _proteinFolder.empty( ))
             continue;
 
-        const std::string pdbFilename( proteinFolder + '/' + protein + ".pdb" );
+        const auto pdbFilename( _proteinFolder + '/' + protein + ".pdb" );
         std::ifstream pdbFile( pdbFilename, std::ios::in );
         if( pdbFile.good( ))
             pdbFile.close();
@@ -105,115 +200,43 @@ bool MolecularSystemReader::import( Scene& scene )
             command += protein;
             command += ".pdb";
             command += " -P ";
-            command += proteinFolder;
+            command += _proteinFolder;
             int status = system( command.c_str( ));
             BRAYNS_INFO << command << ": " << status << std::endl;
         }
     }
     descriptorFile.close();
+    return true;
+}
 
+bool MolecularSystemReader::_loadPositions()
+{
     // Load proteins according to specified positions
-    std::ifstream filePositions( positions, std::ios::in );
+    std::ifstream filePositions( _positionsFilename, std::ios::in );
     if( !filePositions.good( ))
     {
-        BRAYNS_ERROR << "Could not open file " << positions << std::endl;
+        BRAYNS_ERROR << "Could not open file " << _positionsFilename << std::endl;
         return false;
     }
 
-    MeshQuality quality;
-    switch( _geometryParameters.getGeometryQuality( ))
-    {
-    case GeometryQuality::medium:
-        quality = MQ_QUALITY;
-        break;
-    case GeometryQuality::high:
-        quality = MQ_MAX_QUALITY;
-        break;
-    default:
-        quality = MQ_FAST ;
-        break;
-    }
-
     // Load positions
-    size_t nbProteins = 0;
-    ProteinPositions proteinPositions;
+    _nbProteins = 0;
+    std::string line;
     while( std::getline( filePositions, line ))
     {
         std::stringstream lineStream( line );
-
         size_t id;
         Vector3f position;
         lineStream >> id >> position.x() >> position.y() >> position.z();
 
-        if( proteins.find(id) != proteins.end( ))
+        if( _proteins.find(id) != _proteins.end( ))
         {
-            // Scale to correct units
-            position *= 10.f;
-            auto& proteinPosition = proteinPositions[ id ];
+            auto& proteinPosition = _proteinPositions[ id ];
             proteinPosition.push_back( position );
-            ++nbProteins;
+            ++_nbProteins;
         }
     }
     filePositions.close();
-
-    BRAYNS_INFO << "Total number of different proteins: " << proteins.size() << std::endl;
-    BRAYNS_INFO << "Total number of proteins          : " << nbProteins << std::endl;
-
-    MeshLoader meshLoader;
-    size_t proteinCount = 0;
-    for( const auto& proteinPosition: proteinPositions )
-    {
-        BRAYNS_PROGRESS( proteinCount, nbProteins );
-
-        const auto& protein = proteins.find( proteinPosition.first );
-        if( !proteinFolder.empty( ))
-            for( const auto& position: proteinPosition.second )
-            {
-                const auto pdbFilename = proteinFolder + '/' + protein->second + ".pdb";
-                ProteinLoader loader( _geometryParameters );
-                loader.importPDBFile( pdbFilename, position, proteinCount, scene );
-                ++proteinCount;
-            }
-
-        if( !meshFolder.empty( ))
-        {
-            for( const auto& position: proteinPosition.second )
-            {
-                const auto objFilename = meshFolder + '/' + protein->second + ".obj";
-                MeshContainer MeshContainer =
-                {
-                    scene.getTriangleMeshes(),
-                    scene.getMaterials(),
-                    scene.getWorldBounds()
-                };
-
-                const size_t material =
-                    _geometryParameters.getColorScheme() == ColorScheme::protein_by_id ?
-                    proteinCount % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
-                    NO_MATERIAL;
-
-                const float scale = 0.01f; // Scale mesh to match pdb units
-                meshLoader.importMeshFromFile(
-                    objFilename, MeshContainer, quality,
-                    position, Vector3f( scale, scale, scale ), material );
-                if( proteinFolder.empty( ))
-                    ++proteinCount;
-            }
-        }
-    }
-
-    // Update materials
-    if( _geometryParameters.getColorScheme() != ColorScheme::protein_by_id )
-    {
-        size_t index = 0;
-        for( const auto& material: scene.getMaterials( ))
-        {
-            ProteinLoader loader( _geometryParameters );
-            material->setColor( loader.getMaterialKd( index ));
-            ++index;
-        }
-    }
-
     return true;
 }
 
