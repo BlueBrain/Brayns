@@ -128,7 +128,7 @@ inline vec3f ProximityRenderer_shadeRay(
                 {
                     // Electron shading
                     vec3f me = normalize( ray.org - P );
-                    cosNL = max( 0.f, dot( me, normal ));
+                    cosNL = 1.f - max( 0.f, dot( me, normal ));
                 }
                 else
                 {

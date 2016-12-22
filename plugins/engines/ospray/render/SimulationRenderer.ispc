@@ -252,7 +252,7 @@ inline vec3f SimulationRenderer_shadeRay(
                     // No lights defined
                     localLightIntensity = localLightEmission;
                     localLightIntensity = max( localLightIntensity, indirectShadingIntensity );
-                    localShadedColor = localOpacity * ( localDiffuseColor + indirectShadingColor );
+                    localShadedColor = localShadedColor + localOpacity * ( localDiffuseColor + indirectShadingColor );
                 }
                 else if( self->abstract.electronShadingEnabled )
                 {
@@ -261,7 +261,7 @@ inline vec3f SimulationRenderer_shadeRay(
                     const varying vec3f viewer = normalize( ray.org - intersection );
                     const varying float el = max( 0.f, dot( viewer, localNormal ));
                     varying float cosNL  = localLightEmission + ( 1.f - el );
-                    localShadedColor =
+                    localShadedColor = localShadedColor +
                         localOpacity * cosNL *
                         (
                             // Affect shading with color determined by simulation value

@@ -59,7 +59,7 @@ inline bool launchRandomRay(
     }
 
     // Random ray hits a primitive
-    distanceToIntersection = randomRay.t * randomRay.t;
+    distanceToIntersection = self->super.epsilon; //randomRay.t * randomRay.t;
     postIntersect(
         self->super.model, geometry,
         randomRay,
