@@ -9,6 +9,8 @@ set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} brayns)
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 if(TARGET BBPTestData)
   list(APPEND TEST_LIBRARIES BBPTestData Lunchbox)
+else()
+  list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp)
 endif()
 
 include(CommonCTest)
