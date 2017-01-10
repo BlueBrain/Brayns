@@ -25,32 +25,33 @@
 # OSPRAY_LIBRARIES
 
 set(OSPRAY_ROOT $ENV{OSPRAY_ROOT})
+set(EMBREE_ROOT $ENV{EMBREE_ROOT})
 
-# guess that OSPRay is installed in a peer directory (if in dev) or in a peer to the ParaView source
+# Guess that OSPRay is installed in a peer directory (if in dev)
 find_path(OSPRAY_ROOT ospray
   HINTS ${PROJECT_SOURCE_DIR}/../OSPRay  ${PROJECT_SOURCE_DIR}/../../../OSPRay
   DOC "OSPRay base directory"
   )
 
 if(NOT OSPRAY_ROOT AND NOT OSPRay_FIND_QUIETLY)
-  message("Could not find OSPRay base directory. Please set OSPRAY_ROOT to the root of your local OSPRay git repository.")
+  message("Could not find OSPRay base directory. Please set OSPRAY_ROOT to the root of your local OSPRay installation folder.")
 endif()
 
-find_path(OSPRAY_ROOT/bin ospModelViewer
-  HINTS ${OSPRAY_ROOT}/build ${PROJECT_SOURCE_DIR}/../OSPRay/build ${PROJECT_SOURCE_DIR}/../OSPRay ${PROJECT_SOURCE_DIR}/../../../OSPRay/build ${PROJECT_SOURCE_DIR}/../../../OSPRay
-  DOC "OSPRay build directory"
+# Guess that embree is installed in a peer directory (if in dev)
+find_path(EMBREE_ROOT embree
+  HINTS ${PROJECT_SOURCE_DIR}/../embree  ${PROJECT_SOURCE_DIR}/../../../embree
+  DOC "Embree base directory"
   )
-if(NOT OSPRAY_ROOT AND NOT OSPRay_FIND_QUIETLY)
-  message("Could not find OSPRay build directory. Please set OSPRAY_ROOT to the directory where OSPRay was built.")
+
+if(NOT EMBREE_ROOT AND NOT Embree_FIND_QUIETLY)
+  message("Could not find Embree base directory. Please set EMBREE_ROOT to the root of your local embree installation folder.")
 endif()
 
 set(OSPRAY_INCLUDE_DIRS
   ${OSPRAY_ROOT}/include
   ${OSPRAY_ROOT}/include/ospray
-  ${OSPRAY_ROOT}/include/ospray/embree/common
-  ${OSPRAY_ROOT}/include/ospray/embree
-  ${OSPRAY_ROOT}/include/ospray/embree/include
-  ${OSPRAY_ROOT}/include/ospray/include
+  ${OSPRAY_ROOT}/include/ospray/SDK
+  ${EMBREE_ROOT}/include
   )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OSPRAY_CMAKE_DIR} ${OSPRAY_DIR})
@@ -68,16 +69,11 @@ if(OSPRAY_CMAKE_DIR)
   include(${OSPRAY_CMAKE_DIR}/mpi.cmake)
 endif()
 
-if(APPLE)
-  set(LIB_EMBREE LIB_EMBREE-NOTFOUND)
-  find_library(LIB_EMBREE embree.2.7.1 ${OSPRAY_ROOT}/lib ${OSPRAY_ROOT}/lib/x86_64-linux-gnu)
-endif()
+set(LIB_EMBREE LIB_EMBREE-NOTFOUND)
+find_library(LIB_EMBREE embree ${EMBREE_ROOT}/lib ${EMBREE_ROOT}/lib/x86_64-linux-gnu)
 
 set(LIB_OSPRAY LIB_OSPRAY-NOTFOUND)
 find_library(LIB_OSPRAY ospray ${OSPRAY_ROOT}/lib ${OSPRAY_ROOT}/lib/x86_64-linux-gnu)
-if(OSPRAY_MIC)
-  # Xeon Phi specific build ops here
-endif()
 
 set(OSPRAY_LIBRARIES ${LIB_OSPRAY} ${LIB_EMBREE})
 

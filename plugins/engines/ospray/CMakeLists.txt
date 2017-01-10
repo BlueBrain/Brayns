@@ -10,6 +10,7 @@
 # ".mic"-suffix trick, so we'll put libraries into separate
 # directories (names 'intel64' and 'mic', respectively)
 MACRO(CONFIGURE_ISPC)
+
   # Embree common include directories; others may be added depending on build target.
   # this section could be sooo much cleaner if embree only used
   # fully-qualified include names...
@@ -170,54 +171,54 @@ MACRO(CONFIGURE_ISPC)
 ENDMACRO()
 
 set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
-  render/utils/AbstractRenderer.ispc
-  render/utils/RandomGenerator.ispc
-  render/utils/SkyBox.ispc
-  geometry/ExtendedCylinders.ispc
-  geometry/ExtendedCones.ispc
-  geometry/ExtendedSpheres.ispc
-  camera/StereoCamera.ispc
-  render/ExtendedOBJMaterial.ispc
-  render/ExtendedOBJRenderer.ispc
-  render/ProximityRenderer.ispc
-  render/SimulationRenderer.ispc
-  render/ParticleRenderer.ispc
+  ispc/render/utils/AbstractRenderer.ispc
+  ispc/render/utils/RandomGenerator.ispc
+  ispc/render/utils/SkyBox.ispc
+  ispc/geometry/ExtendedCylinders.ispc
+  ispc/geometry/ExtendedCones.ispc
+  ispc/geometry/ExtendedSpheres.ispc
+  ispc/camera/StereoCamera.ispc
+  ispc/render/ExtendedOBJMaterial.ispc
+  ispc/render/ExtendedOBJRenderer.ispc
+  ispc/render/ProximityRenderer.ispc
+  ispc/render/SimulationRenderer.ispc
+  ispc/render/ParticleRenderer.ispc
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
-  render/utils/AbstractRenderer.cpp
+  ispc/render/utils/AbstractRenderer.cpp
+  ispc/camera/StereoCamera.cpp
+  ispc/geometry/ExtendedCones.cpp
+  ispc/geometry/ExtendedCylinders.cpp
+  ispc/geometry/ExtendedSpheres.cpp
+  ispc/render/ExtendedOBJMaterial.cpp
+  ispc/render/ExtendedOBJRenderer.cpp
+  ispc/render/ProximityRenderer.cpp
+  ispc/render/SimulationRenderer.cpp
+  ispc/render/ParticleRenderer.cpp
   OSPRayEngine.cpp
-  camera/StereoCamera.cpp
-  geometry/ExtendedCones.cpp
-  geometry/ExtendedCylinders.cpp
-  geometry/ExtendedSpheres.cpp
-  render/ExtendedOBJMaterial.cpp
-  render/ExtendedOBJRenderer.cpp
-  render/ProximityRenderer.cpp
-  render/SimulationRenderer.cpp
-  render/ParticleRenderer.cpp
-  render/OSPRayScene.cpp
-  render/OSPRayRenderer.cpp
-  render/OSPRayFrameBuffer.cpp
-  render/OSPRayCamera.cpp
+  OSPRayScene.cpp
+  OSPRayRenderer.cpp
+  OSPRayFrameBuffer.cpp
+  OSPRayCamera.cpp
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
-  render/utils/AbstractRenderer.h
+  ispc/render/utils/AbstractRenderer.h
+  ispc/camera/StereoCamera.h
+  ispc/geometry/ExtendedCones.h
+  ispc/geometry/ExtendedCylinders.h
+  ispc/geometry/ExtendedSpheres.h
+  ispc/render/ExtendedOBJMaterial.h
+  ispc/render/ExtendedOBJRenderer.h
+  ispc/render/ProximityRenderer.h
+  ispc/render/SimulationRenderer.h
+  ispc/render/ParticleRenderer.h
   OSPRayEngine.h
-  camera/StereoCamera.h
-  geometry/ExtendedCones.h
-  geometry/ExtendedCylinders.h
-  geometry/ExtendedSpheres.h
-  render/ExtendedOBJMaterial.h
-  render/ExtendedOBJRenderer.h
-  render/ProximityRenderer.h
-  render/SimulationRenderer.h
-  render/ParticleRenderer.h
-  render/OSPRayScene.h
-  render/OSPRayRenderer.h
-  render/OSPRayFrameBuffer.h
-  render/OSPRayCamera.h
+  OSPRayScene.h
+  OSPRayRenderer.h
+  OSPRayFrameBuffer.h
+  OSPRayCamera.h
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_LINK_LIBRARIES

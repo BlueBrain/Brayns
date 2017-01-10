@@ -25,7 +25,9 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
 
-#include <H5Cpp.h>
+#ifdef BRAYNS_USE_BRION
+#  include <H5Cpp.h>
+#endif
 #include <algorithm>
 #include <fstream>
 

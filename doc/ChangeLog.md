@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master
 
+* [#95](https://github.com/BlueBrain/Brayns/pull/95):
+  Upgraded to OSPRay 1.1.2
 * [#87](https://github.com/BlueBrain/Brayns/pull/87):
   Added morphology layout feature to Parameters event
 * [#86](https://github.com/BlueBrain/Brayns/pull/86):
