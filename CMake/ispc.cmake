@@ -15,13 +15,9 @@
 ## ======================================================================== ##
 
 # ISPC versions to look for, in decending order (newest first)
-IF(WIN32)
-  SET(ISPC_VERSION_WORKING "1.9.0" "1.8.2")
-ELSE()
-  SET(ISPC_VERSION_WORKING "1.9.0" "1.8.2" "1.8.1")
-ENDIF()
+SET(ISPC_VERSION_WORKING "1.9.1" "1.9.0")
 LIST(GET ISPC_VERSION_WORKING -1 ISPC_VERSION_REQUIRED)
-SET(ISPC_VERSION_RECOMMENDED_KNC "1.8.1")
+SET(ISPC_VERSION_RECOMMENDED_KNC "1.9.0")
 
 IF (NOT ISPC_EXECUTABLE)
   # try sibling folder as hint for path of ISPC
@@ -29,11 +25,18 @@ IF (NOT ISPC_EXECUTABLE)
     SET(ISPC_DIR_SUFFIX "osx")
   ELSEIF(WIN32)
     SET(ISPC_DIR_SUFFIX "windows")
+    IF (MSVC14)
+      LIST(APPEND ISPC_DIR_SUFFIX "windows-vs2015")
+    ELSE()
+      LIST(APPEND ISPC_DIR_SUFFIX "windows-vs2013")
+    ENDIF()
   ELSE()
     SET(ISPC_DIR_SUFFIX "linux")
   ENDIF()
   FOREACH(ver ${ISPC_VERSION_WORKING})
-    LIST(APPEND ISPC_DIR_HINT ${PROJECT_SOURCE_DIR}/../ispc-v${ver}-${ISPC_DIR_SUFFIX})
+    FOREACH(suffix ${ISPC_DIR_SUFFIX})
+      LIST(APPEND ISPC_DIR_HINT ${PROJECT_SOURCE_DIR}/../ispc-v${ver}-${suffix})
+    ENDFOREACH()
   ENDFOREACH()
 
   FIND_PROGRAM(ISPC_EXECUTABLE ispc PATHS ${ISPC_DIR_HINT} DOC "Path to the ISPC executable.")
@@ -66,10 +69,9 @@ IF(NOT ISPC_VERSION)
 ENDIF()
 
 # warn about recommended ISPC version on KNC
-IF (OSPRAY_MIC AND NOT ISPC_VERSION VERSION_EQUAL ISPC_VERSION_RECOMMENDED_KNC
-    AND NOT OSPRAY_WARNED_KNC_ISPC_VERSION)
-  MESSAGE("Warning: use of ISPC v${ISPC_VERSION_RECOMMENDED_KNC} is recommended on KNC.")
-  SET(OSPRAY_WARNED_KNC_ISPC_VERSION ON CACHE INTERNAL "Warned about recommended ISPC version with KNC.")
+IF (OSPRAY_MIC AND NOT ISPC_VERSION VERSION_EQUAL ISPC_VERSION_RECOMMENDED_KNC)
+  OSPRAY_WARN_ONCE(KNC_ISPC_VERSION
+    "Use of ISPC v${ISPC_VERSION_RECOMMENDED_KNC} is recommended on KNC.")
 ENDIF()
 
 GET_FILENAME_COMPONENT(ISPC_DIR ${ISPC_EXECUTABLE} PATH)
@@ -92,7 +94,13 @@ MACRO (OSPRAY_ISPC_COMPILE)
   IF (THIS_IS_MIC)
     SET(ISPC_TARGET_EXT .cpp)
     SET(ISPC_TARGET_ARGS generic-16)
-    SET(ISPC_ADDITIONAL_ARGS ${ISPC_ADDITIONAL_ARGS} --opt=force-aligned-memory --emit-c++ --c++-include-file=${PROJECT_SOURCE_DIR}/ospray/common/ISPC_KNC_Backend.h )
+    SET(ISPC_ADDITIONAL_ARGS
+      ${ISPC_ADDITIONAL_ARGS}
+      -DOSPRAY_TARGET_MIC
+      --opt=force-aligned-memory
+      --emit-c++
+      --c++-include-file=${PROJECT_SOURCE_DIR}/ospray/common/ISPC_KNC_Backend.h
+    )
   ELSE()
     SET(ISPC_TARGET_EXT ${CMAKE_CXX_OUTPUT_EXTENSION})
     STRING(REPLACE ";" "," ISPC_TARGET_ARGS "${ISPC_TARGETS}")
@@ -103,7 +111,7 @@ MACRO (OSPRAY_ISPC_COMPILE)
   ELSE()
     SET(ISPC_ARCHITECTURE "x86")
   ENDIF()
-
+  
   SET(ISPC_TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR})
   INCLUDE_DIRECTORIES(${ISPC_TARGET_DIR})
 
@@ -120,6 +128,10 @@ MACRO (OSPRAY_ISPC_COMPILE)
 
   IF (NOT WIN32)
     SET(ISPC_ADDITIONAL_ARGS ${ISPC_ADDITIONAL_ARGS} --pic)
+  ENDIF()
+
+  IF (NOT OSPRAY_DEBUG_BUILD)
+    SET(ISPC_ADDITIONAL_ARGS ${ISPC_ADDITIONAL_ARGS} --opt=disable-assertions)
   ENDIF()
 
   SET(ISPC_OBJECTS "")
@@ -160,7 +172,7 @@ MACRO (OSPRAY_ISPC_COMPILE)
         # workaround link issues to Embree ISPC exports:
         # we add a 2nd target to force ISPC to add the ISA suffix during name
         # mangling
-        SET(ISPC_TARGET_ARGS "${ISPC_TARGETS},sse2")
+        SET(ISPC_TARGET_ARGS "${ISPC_TARGETS},sse2") 
         LIST(APPEND ISPC_TARGETS sse2)
       ENDIF()
       FOREACH(target ${ISPC_TARGETS})
@@ -176,7 +188,7 @@ MACRO (OSPRAY_ISPC_COMPILE)
       OUTPUT ${results} ${ISPC_TARGET_DIR}/${fname}_ispc.h
       COMMAND ${CMAKE_COMMAND} -E make_directory ${outdir}
       COMMAND ${ISPC_EXECUTABLE}
-      -I ${CMAKE_CURRENT_SOURCE_DIR}
+      -I ${CMAKE_CURRENT_SOURCE_DIR} 
       ${ISPC_INCLUDE_DIR_PARMS}
       --arch=${ISPC_ARCHITECTURE}
       --addressing=32
@@ -186,12 +198,13 @@ MACRO (OSPRAY_ISPC_COMPILE)
       --opt=fast-math
       ${ISPC_ADDITIONAL_ARGS}
       -h ${ISPC_TARGET_DIR}/${fname}_ispc.h
-      -MMM  ${outdir}/${fname}.dev.idep
+      -MMM  ${outdir}/${fname}.dev.idep 
       -o ${outdir}/${fname}.dev${ISPC_TARGET_EXT}
       ${input}
       DEPENDS ${input} ${deps}
       COMMENT "Building ISPC object ${outdir}/${fname}.dev${ISPC_TARGET_EXT}"
     )
+
     SET(ISPC_OBJECTS ${ISPC_OBJECTS} ${results})
   ENDFOREACH()
 ENDMACRO()

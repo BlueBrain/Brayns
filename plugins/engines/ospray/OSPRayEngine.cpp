@@ -22,10 +22,10 @@
 
 #include <brayns/common/input/KeyboardHandler.h>
 
-#include <plugins/engines/ospray/render/OSPRayRenderer.h>
-#include <plugins/engines/ospray/render/OSPRayScene.h>
-#include <plugins/engines/ospray/render/OSPRayFrameBuffer.h>
-#include <plugins/engines/ospray/render/OSPRayCamera.h>
+#include <plugins/engines/ospray/OSPRayRenderer.h>
+#include <plugins/engines/ospray/OSPRayScene.h>
+#include <plugins/engines/ospray/OSPRayFrameBuffer.h>
+#include <plugins/engines/ospray/OSPRayCamera.h>
 
 namespace brayns
 {
