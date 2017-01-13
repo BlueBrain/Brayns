@@ -50,17 +50,19 @@ OSPRayCamera::OSPRayCamera( const CameraType cameraType )
 
 void OSPRayCamera::commit()
 {
-    const Vector3f& position = getPosition();
-    const Vector3f& target = getTarget();
-    const Vector3f dir = normalize( target - position );
-    const Vector3f& up = getUp();
+    const auto& position = getPosition();
+    const auto& target = getTarget();
+    const auto dir = normalize( target - position );
+    const auto& up = getUp();
 
     ospSet3f( _camera,"pos", position.x(), position.y(), position.z( ));
     ospSet3f( _camera,"dir", dir.x(), dir.y(), dir.z( ));
     ospSet3f( _camera,"up", up.x(), up.y(), up.z( ));
-    ospSetf( _camera, "aspect", getAspectRatio( ));
-    ospSetf( _camera, "apertureRadius", getAperture( ));
-    ospSetf( _camera, "focusDistance", getFocalLength( ));
+    ospSet1f( _camera, "aspect", getAspectRatio( ));
+    ospSet1f( _camera, "apertureRadius", getAperture( ));
+    ospSet1f( _camera, "focusDistance", getFocalLength( ));
+    ospSet1i( _camera, "stereoMode", static_cast< uint >( getStereoMode( )));
+    ospSet1f( _camera, "interpupillaryDistance", getEyeSeparation( ));
     ospCommit( _camera );
 }
 

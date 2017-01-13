@@ -20,6 +20,13 @@
 
 namespace brayns.v1;
 
+enum CameraStereoMode: uint {
+    none = 0,
+    left = 1,
+    right = 2,
+    side_by_side= 3
+}
+
 table Camera
 {
   origin: [float:3];
@@ -28,4 +35,6 @@ table Camera
   field_of_view: float = 60;
   aperture: float = 0;
   focal_length: float = 0;
+  stereo_mode: CameraStereoMode;
+  eye_separation: float = 0.0635;
 }

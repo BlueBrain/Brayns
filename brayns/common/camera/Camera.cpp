@@ -35,7 +35,7 @@ struct Camera::Impl
 {
 public:
     Impl( const CameraType cameraType )
-        : _cameraType( cameraType )
+        : _type( cameraType )
         , _position( 0.f, 0.f, 0.f )
         , _target( 0.f, 0.f, 0.f )
         , _up( 0.f, 0.f, 0.f )
@@ -43,7 +43,11 @@ public:
         , _aperture( 0.f )
         , _focalLength( 0.f )
         , _fieldOfView( 60.f )
+        , _stereoMode( CameraStereoMode::none )
+        , _eyeSeparation( 0.0635f )
     {
+        if( _type == CameraType::stereo )
+            setStereoMode( CameraStereoMode::side_by_side );
     }
 
     void set(
@@ -138,7 +142,7 @@ public:
 
     CameraType getType( ) const
     {
-        return _cameraType;
+        return _type;
     }
 
     void setFieldOfView( const float fieldOfView )
@@ -211,13 +215,71 @@ public:
         return _focalLength;
     }
 
+    void setStereoMode( const CameraStereoMode stereoMode )
+    {
+        if( _stereoMode == stereoMode )
+            return;
+    #ifdef BRAYNS_USE_ZEROBUF
+        switch( stereoMode )
+        {
+        case CameraStereoMode::left:
+            brayns::v1::Camera::setStereo_mode( brayns::v1::CameraStereoMode::left ); break;
+        case CameraStereoMode::right:
+            brayns::v1::Camera::setStereo_mode( brayns::v1::CameraStereoMode::right ); break;
+        case CameraStereoMode::side_by_side:
+            brayns::v1::Camera::setStereo_mode( brayns::v1::CameraStereoMode::side_by_side ); break;
+        default:
+            brayns::v1::Camera::setStereo_mode( brayns::v1::CameraStereoMode::none ); break;
+        }
+    #endif
+        _stereoMode = stereoMode;
+        modified = true;
+    }
+
+    CameraStereoMode getStereoMode( ) const
+    {
+    #ifdef BRAYNS_USE_ZEROBUF
+        switch( brayns::v1::Camera::getStereo_mode() )
+        {
+        case brayns::v1::CameraStereoMode::left:
+            _stereoMode = CameraStereoMode::left; break;
+        case brayns::v1::CameraStereoMode::right:
+            _stereoMode = CameraStereoMode::right; break;
+        case brayns::v1::CameraStereoMode::side_by_side:
+            _stereoMode = CameraStereoMode::side_by_side; break;
+        default:
+            _stereoMode = CameraStereoMode::none; break;
+        }
+    #endif
+        return _stereoMode;
+    }
+
+    void setEyeSeparation( const float eyeSeparation )
+    {
+        if( _eyeSeparation == eyeSeparation )
+            return;
+    #ifdef BRAYNS_USE_ZEROBUF
+        brayns::v1::Camera::setEye_separation( eyeSeparation );
+    #endif
+        _eyeSeparation = eyeSeparation;
+        modified = true;
+    }
+
+    float getEyeSeparation( ) const
+    {
+    #ifdef BRAYNS_USE_ZEROBUF
+        _eyeSeparation = brayns::v1::Camera::getEye_separation();
+    #endif
+        return _eyeSeparation;
+    }
+
     bool modified = false;
 
     /*! rotation matrice along x and y axis */
     Matrix4f _matrix;
 
 private:
-    CameraType _cameraType;
+    CameraType _type;
     mutable Vector3f _position;
     mutable Vector3f _target;
     mutable Vector3f _up;
@@ -230,6 +292,9 @@ private:
     mutable float _aperture;
     mutable float _focalLength;
     mutable float _fieldOfView;
+
+    mutable CameraStereoMode _stereoMode;
+    mutable float _eyeSeparation;
 };
 
 Camera::Camera( const CameraType cameraType )
@@ -340,6 +405,26 @@ void Camera::setFocalLength( const float focalLength )
 float Camera::getFocalLength( ) const
 {
     return _impl->getFocalLength( );
+}
+
+void Camera::setStereoMode( const CameraStereoMode stereoMode )
+{
+    _impl->setStereoMode( stereoMode );
+}
+
+CameraStereoMode Camera::getStereoMode( ) const
+{
+    return _impl->getStereoMode( );
+}
+
+void Camera::setEyeSeparation( const float eyeSeparation )
+{
+    _impl->setEyeSeparation( eyeSeparation );
+}
+
+float Camera::getEyeSeparation( ) const
+{
+    return _impl->getEyeSeparation( );
 }
 
 servus::Serializable* Camera::getSerializable( )
