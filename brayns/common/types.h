@@ -311,6 +311,14 @@ enum class CameraType
     panoramic
 };
 
+enum class CameraStereoMode
+{
+    none = 0,
+    left,
+    right,
+    side_by_side
+};
+
 enum class TimestampMode
 {
     unchanged,

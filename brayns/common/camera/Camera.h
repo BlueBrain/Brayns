@@ -175,6 +175,28 @@ public:
     */
     BRAYNS_API float getFocalLength( ) const;
 
+    /**
+       @brief Sets the stereo mode of the camera (Left eye, Right eye or Side by Side)
+       @param stereoMode The new stereo mode
+    */
+    BRAYNS_API void setStereoMode( CameraStereoMode stereoMode );
+
+    /**
+      @return the stereo mode of the Camera
+    */
+    BRAYNS_API CameraStereoMode getStereoMode( ) const;
+
+    /**
+       @brief Sets the eye separation of the stereo camera
+       @param eyeSeparation The new distance bewteen eyes
+    */
+    BRAYNS_API void setEyeSeparation( float eyeSeparation );
+
+    /**
+      @return the eye separation of the stereo Camera
+    */
+    BRAYNS_API float getEyeSeparation( ) const;
+
     /** Resets the camera to its initial values */
     BRAYNS_API void reset( );
 

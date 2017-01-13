@@ -177,7 +177,6 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   ispc/geometry/ExtendedCylinders.ispc
   ispc/geometry/ExtendedCones.ispc
   ispc/geometry/ExtendedSpheres.ispc
-  ispc/camera/StereoCamera.ispc
   ispc/render/ExtendedOBJMaterial.ispc
   ispc/render/ExtendedOBJRenderer.ispc
   ispc/render/ProximityRenderer.ispc
@@ -187,7 +186,6 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
 
 set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/render/utils/AbstractRenderer.cpp
-  ispc/camera/StereoCamera.cpp
   ispc/geometry/ExtendedCones.cpp
   ispc/geometry/ExtendedCylinders.cpp
   ispc/geometry/ExtendedSpheres.cpp
@@ -205,7 +203,6 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
 
 set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   ispc/render/utils/AbstractRenderer.h
-  ispc/camera/StereoCamera.h
   ispc/geometry/ExtendedCones.h
   ispc/geometry/ExtendedCylinders.h
   ispc/geometry/ExtendedSpheres.h
