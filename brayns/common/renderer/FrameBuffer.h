@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -34,22 +34,24 @@ public:
         const Vector2ui& frameSize,
         FrameBufferFormat frameBufferFormat,
         bool accumulation = true );
-    BRAYNS_API virtual ~FrameBuffer() {}
+    virtual ~FrameBuffer() {}
 
-    BRAYNS_API virtual void clear() = 0;
-    BRAYNS_API virtual void map() = 0;
-    BRAYNS_API virtual void unmap() = 0;
+    virtual void clear() = 0;
+    virtual void map() = 0;
+    virtual void unmap() = 0;
 
-    BRAYNS_API virtual uint8_t* getColorBuffer() = 0;
-    BRAYNS_API virtual size_t getColorDepth();
-    BRAYNS_API virtual float* getDepthBuffer() = 0;
+    virtual uint8_t* getColorBuffer() = 0;
+    virtual size_t getColorDepth();
+    virtual float* getDepthBuffer() = 0;
 
-    BRAYNS_API virtual void resize(const Vector2ui& frameSize) = 0;
+    virtual void resize(const Vector2ui& frameSize) = 0;
 
-    BRAYNS_API Vector2ui getSize() const { return _frameSize; }
+    Vector2ui getSize() const { return _frameSize; }
 
-    BRAYNS_API void setAccumulation( const bool accumulation ) { _accumulation = accumulation; }
-    BRAYNS_API bool getAccumulation() const { return _accumulation; }
+    void setAccumulation( const bool accumulation ) { _accumulation = accumulation; }
+    bool getAccumulation() const { return _accumulation; }
+
+    FrameBufferFormat getFrameBufferFormat() const { return _frameBufferFormat; }
 
 protected:
     Vector2ui _frameSize;

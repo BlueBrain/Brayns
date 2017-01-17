@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -38,6 +38,7 @@ struct Image
 {
     std::vector<char> data;
     Vector2ui size;
+    FrameBufferFormat format;
 };
 
 class DeflectPlugin : public ExtensionPlugin

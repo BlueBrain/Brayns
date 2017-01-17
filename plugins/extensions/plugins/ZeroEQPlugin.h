@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -61,6 +61,9 @@ public:
 
     BRAYNS_API bool operator ! () const;
     BRAYNS_API ::zeroeq::http::Server* operator->();
+
+    /** Handle the given objects in subscriber, publisher (via request) and HTTP server. */
+    BRAYNS_API void handle( servus::Serializable& object );
 
 private:
 
@@ -213,7 +216,14 @@ private:
      *        by a ZeroEQ event
      * @return True if the method was successful, false otherwise
      */
-    bool _requestHistogram();
+    bool _requestSimulationHistogram();
+
+    /**
+     * @brief This method is called when the histogram for the current volume is requested
+     *        by a ZeroEQ event
+     * @return True if the method was successful, false otherwise
+     */
+    bool _requestVolumeHistogram();
 
     /**
      * @brief Resizes an given image according to the new size
@@ -233,12 +243,14 @@ private:
      * @param width Image width
      * @param height Image height
      * @param rawData Source buffer
+     * @param pixelFormat pixel format of rawData
      * @param dataSize Returned buffer size
      * @return Destination buffer
      */
     uint8_t* _encodeJpeg(const uint32_t width,
                          const uint32_t height,
                          const uint8_t* rawData,
+                         const int32_t pixelFormat,
                          unsigned long& dataSize);
 
     ParametersManager& _parametersManager;
@@ -255,7 +267,8 @@ private:
     ::lexis::render::ImageJPEG _remoteImageJPEG;
     ::lexis::render::LookupTable1D _remoteLookupTable1D;
     ::lexis::render::Viewport _remoteViewport;
-    ::lexis::render::Histogram _remoteHistogram;
+    ::lexis::render::Histogram _remoteSimulationHistogram;
+    ::lexis::render::Histogram _remoteVolumeHistogram;
 
     ::brayns::v1::DataSource _remoteDataSource;
     ::brayns::v1::Settings _remoteSettings;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -194,6 +194,7 @@ enum FrameBufferFormat
 {
   FBF_RGBA_NONE,
   FBF_RGBA_I8,
+  FBF_BGRA_I8,
   FBF_RGB_I8,
   FBF_RGBA_F32,
 };
@@ -262,6 +263,18 @@ struct ExtensionParameters
 {
     ParametersManagerPtr parametersManager;
     EnginePtr engine;
+};
+
+/**
+ * @brief The Histogram struct contains the range as well as the values of the simulation histogram
+ *        for a given simulation frame, determined by the timestamp
+ */
+struct Histogram
+{
+    uint64_ts values;
+    Vector2f range;
+    float timestamp;
+    bool empty() const { return values.empty(); }
 };
 
 /** Some 'special' materials are used by Brayns to acomplish specific features
@@ -350,6 +363,7 @@ struct RenderOutput
 {
     uint8_ts colorBuffer;
     floats depthBuffer;
+    FrameBufferFormat colorBufferFormat;
 };
 
 }

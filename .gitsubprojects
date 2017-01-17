@@ -1,5 +1,5 @@
 # -*- mode: cmake -*-
-git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 6b7d203)
+git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 8a4497c)
 git_subproject(Servus https://github.com/HBPVIS/Servus.git 2da95ea)
 
 # ZeroEQ and HTTP messaging
@@ -11,4 +11,9 @@ git_subproject(Lexis https://github.com/HBPVis/Lexis.git 9110580)
 git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 1717912)
 
 # Data access
-git_subproject(Brion https://github.com/BlueBrain/Brion.git 4c2114c)
+git_subproject(Brion https://github.com/BlueBrain/Brion.git a29ca96)
+
+if(BRAYNS_LIVRE_ENABLED)
+  git_subproject(Livre https://github.com/BlueBrain/Livre.git 3f96377)
+  common_find_package(Livre)
+endif()

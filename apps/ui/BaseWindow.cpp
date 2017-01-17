@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -260,9 +260,21 @@ void BaseWindow::display( )
     engine.getCamera().commit();
     _brayns.render( renderInput, renderOutput );
 
+    GLenum format = GL_RGBA;
+    switch( renderOutput.colorBufferFormat )
+    {
+    case FrameBufferFormat::FBF_BGRA_I8:
+        format = GL_BGRA;
+        break;
+    case FrameBufferFormat::FBF_RGB_I8:
+        format = GL_RGB;
+        break;
+    default:
+        format = GL_RGBA;
+    }
+
     if( _brayns.getParametersManager().getApplicationParameters().getFilters().empty( ))
     {
-        GLenum format = GL_RGBA;
         GLenum type   = GL_FLOAT;
         GLvoid* buffer = 0;
         switch(_frameBufferMode)
@@ -286,7 +298,10 @@ void BaseWindow::display( )
             if( _displayHelp )
             {
                 auto& keyHandler = _brayns.getKeyboardHandler();
+                glLogicOp( GL_XOR );
+                glEnable( GL_COLOR_LOGIC_OP );
                 _renderBitmapString( -0.98f, 0.95f, keyHandler.help() );
+                glDisable( GL_COLOR_LOGIC_OP );
             }
         }
     }
@@ -297,7 +312,7 @@ void BaseWindow::display( )
         ssProcData.width = _windowSize.x( );
         ssProcData.height = _windowSize.y( );
 
-        ssProcData.colorFormat = GL_RGBA;
+        ssProcData.colorFormat = format;
         ssProcData.colorBuffer = renderOutput.colorBuffer.data( );
         ssProcData.colorType = GL_UNSIGNED_BYTE;
 

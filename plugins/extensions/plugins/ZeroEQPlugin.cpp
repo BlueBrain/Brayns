@@ -21,15 +21,16 @@
 #include "ZeroEQPlugin.h"
 
 #include <brayns/Brayns.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/camera/Camera.h>
-#include <brayns/common/scene/Scene.h>
-#include <brayns/common/renderer/Renderer.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/parameters/ParametersManager.h>
-#include <zerobuf/render/camera.h>
+#include <brayns/common/renderer/Renderer.h>
+#include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
+#include <brayns/common/volume/VolumeHandler.h>
+#include <brayns/parameters/ParametersManager.h>
+#include <zerobuf/render/camera.h>
 
 #include <brayns/version.h>
 
@@ -50,6 +51,8 @@ ZeroEQPlugin::ZeroEQPlugin(
     _setupSubscriber();
     _initializeDataSource();
     _initializeSettings();
+
+    engine.extensionInit( *this );
 }
 
 ZeroEQPlugin::~ZeroEQPlugin( )
@@ -66,6 +69,12 @@ ZeroEQPlugin::~ZeroEQPlugin( )
 
 void ZeroEQPlugin::run()
 {
+    if( _requestVolumeHistogram( ))
+        _publisher.publish( _remoteVolumeHistogram );
+
+    if( _requestFrame( ))
+        _publisher.publish( _remoteFrame );
+
     while( _subscriber.receive( 1 )) {}
 }
 
@@ -77,6 +86,18 @@ bool ZeroEQPlugin::operator ! () const
 ::zeroeq::http::Server* ZeroEQPlugin::operator->()
 {
     return _httpServer.get();
+}
+
+void ZeroEQPlugin::handle( servus::Serializable& object )
+{
+    if( _httpServer )
+        _httpServer->handle( object );
+    _subscriber.subscribe( object );
+    _requests[ object.getTypeIdentifier() ] =
+        [&]{ return _publisher.publish( object ); };
+
+    // publish updates from HTTP to subscribers, e.g. livreGUI
+    object.registerDeserializedCallback( [&] { _publisher.publish( object ); });
 }
 
 void ZeroEQPlugin::_setupHTTPServer()
@@ -143,11 +164,6 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteSpikes.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestSpikes, this ));
 
-    _remoteLookupTable1D.registerDeserializedCallback(
-        std::bind( &ZeroEQPlugin::_LookupTable1DUpdated, this ));
-    _remoteLookupTable1D.registerSerializeCallback(
-        std::bind( &ZeroEQPlugin::_requestLookupTable1D, this ));
-
     _httpServer->handle( _remoteColormap );
     _remoteColormap.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_colormapUpdated, this ));
@@ -174,37 +190,45 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteViewport.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_viewportUpdated, this ));
 
-    _httpServer->handleGET( _remoteHistogram );
-    _remoteHistogram.registerSerializeCallback(
-        std::bind( &ZeroEQPlugin::_requestHistogram, this ));
+    _httpServer->handleGET( "brayns/v1/simulation-histogram", _remoteSimulationHistogram );
+    _remoteSimulationHistogram.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestSimulationHistogram, this ));
+
+    _httpServer->handleGET( "brayns/v1/volume-histogram", _remoteVolumeHistogram );
+    _remoteVolumeHistogram.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestVolumeHistogram, this ));
 }
 
 void ZeroEQPlugin::_setupRequests()
 {
-    ::brayns::v1::Camera camera;
-    _requests[ camera.getTypeIdentifier() ] =
+    _requests[ ::lexis::render::ImageJPEG::ZEROBUF_TYPE_IDENTIFIER() ] =
+        [&]{ _requestImageJPEG(); return _publisher.publish( _remoteImageJPEG ); };
+
+    _requests[ ::lexis::render::Frame::ZEROBUF_TYPE_IDENTIFIER() ] =
+        [&]{ _requestFrame(); return _publisher.publish( _remoteFrame ); };
+
+    _requests[ ::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER() ] =
         [&]{ return _publisher.publish( *_engine.getCamera().getSerializable( )); };
 
-    ::lexis::render::ImageJPEG imageJPEG;
-    _requests[ imageJPEG.getTypeIdentifier() ] =
-        std::bind( &ZeroEQPlugin::_requestImageJPEG, this );
+    _requests[ v1::FrameBuffers::ZEROBUF_TYPE_IDENTIFIER() ] =
+        [&]{ _requestFrameBuffers(); return _publisher.publish( _remoteFrameBuffers ); };
 
-    ::brayns::v1::FrameBuffers frameBuffers;
-    _requests[ frameBuffers.getTypeIdentifier() ] =
-        std::bind( &ZeroEQPlugin::_requestFrameBuffers, this );
+    _requests[ v1::TransferFunction1D::ZEROBUF_TYPE_IDENTIFIER() ] =
+        [&]{ _requestTransferFunction1D(); return _publisher.publish( _remoteTransferFunction1D ); };
 
-    ::brayns::v1::TransferFunction1D transferFunction1D;
-    _requests[ transferFunction1D.getTypeIdentifier() ] =
-        std::bind( &ZeroEQPlugin::_requestTransferFunction1D, this );
-
-    ::brayns::v1::Spikes spikes;
-    _requests[ spikes.getTypeIdentifier() ] =
-        std::bind( &ZeroEQPlugin::_requestSpikes, this );
+    _requests[ v1::Spikes::ZEROBUF_TYPE_IDENTIFIER() ] =
+        [&]{ _requestSpikes(); return _publisher.publish( _remoteSpikes ); };
 }
 
 void ZeroEQPlugin::_setupSubscriber()
 {
     _subscriber.subscribe( _remoteLookupTable1D );
+    _subscriber.subscribe( _remoteFrame );
+
+    _remoteLookupTable1D.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_LookupTable1DUpdated, this ));
+    _remoteLookupTable1D.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestLookupTable1D, this ));
 }
 
 void ZeroEQPlugin::_cameraUpdated()
@@ -509,12 +533,25 @@ bool ZeroEQPlugin::_requestImageJPEG()
                 resizedColorBuffer = resizedBuffer.data();
             }
 
+            int32_t pixelFormat = TJPF_RGBA;
+            switch( frameBuffer.getFrameBufferFormat( ))
+            {
+            case FrameBufferFormat::FBF_BGRA_I8:
+                pixelFormat = TJPF_BGRA;
+                break;
+            case FrameBufferFormat::FBF_RGB_I8:
+                pixelFormat = TJPF_RGB;
+                break;
+            default:
+                pixelFormat = TJPF_RGBA;
+            }
+
             unsigned long jpegSize =
                 newFrameSize.x( ) * newFrameSize.y( ) * sizeof( unsigned long );
             uint8_t* jpegData = _encodeJpeg(
                     ( uint32_t )newFrameSize.x( ),
                     ( uint32_t )newFrameSize.y( ),
-                    ( uint8_t* )resizedColorBuffer, jpegSize );
+                    ( uint8_t* )resizedColorBuffer, pixelFormat, jpegSize );
 
             _remoteImageJPEG.setData( jpegData, jpegSize  );
             tjFree(jpegData);
@@ -886,11 +923,24 @@ void ZeroEQPlugin::_settingsUpdated()
 bool ZeroEQPlugin::_requestFrame()
 {
     auto simHandler = _engine.getScene().getSimulationHandler();
-    const uint64_t nbFrames = simHandler ? simHandler->getNbFrames() : 0;
+    auto volHandler = _engine.getScene().getVolumeHandler();
+    const uint64_t nbFrames = simHandler ? simHandler->getNbFrames() :
+                                 ( volHandler ? volHandler->getNbFrames() : 0 );
 
-    const auto ts = uint64_t(_parametersManager.getSceneParameters().getTimestamp());
-    _remoteFrame.setCurrent( nbFrames == 0 ? 0 : (ts % nbFrames) );
-    _remoteFrame.setDelta( 1 );
+    const auto& sceneParams = _parametersManager.getSceneParameters();
+    const auto ts = uint64_t(sceneParams.getTimestamp());
+    const auto current = nbFrames == 0 ? 0 : (ts % nbFrames);
+    const auto animationDelta = sceneParams.getAnimationDelta();
+
+    if( current == _remoteFrame.getCurrent() &&
+        nbFrames == _remoteFrame.getEnd() &&
+        animationDelta == _remoteFrame.getDelta( ))
+    {
+        return false;
+    }
+
+    _remoteFrame.setCurrent( current );
+    _remoteFrame.setDelta( animationDelta );
     _remoteFrame.setEnd( nbFrames );
     _remoteFrame.setStart( 0 );
     return true;
@@ -898,7 +948,9 @@ bool ZeroEQPlugin::_requestFrame()
 
 void ZeroEQPlugin::_frameUpdated()
 {
-    _parametersManager.getSceneParameters().setTimestamp( _remoteFrame.getCurrent( ));
+    auto& sceneParams = _parametersManager.getSceneParameters();
+    sceneParams.setTimestamp( _remoteFrame.getCurrent( ));
+    sceneParams.setAnimationDelta( _remoteFrame.getDelta( ));
     _engine.commit();
 }
 
@@ -917,15 +969,28 @@ void ZeroEQPlugin::_viewportUpdated()
     _engine.commit();
 }
 
-bool ZeroEQPlugin::_requestHistogram()
+bool ZeroEQPlugin::_requestSimulationHistogram()
 {
     auto simulationHandler = _engine.getScene().getSimulationHandler();
     if( simulationHandler )
     {
         const auto& histogram = simulationHandler->getHistogram();
-        _remoteHistogram.setMin( histogram.range.x( ));
-        _remoteHistogram.setMax( histogram.range.y( ));
-        _remoteHistogram.setBins( histogram.values );
+        _remoteSimulationHistogram.setMin( histogram.range.x( ));
+        _remoteSimulationHistogram.setMax( histogram.range.y( ));
+        _remoteSimulationHistogram.setBins( histogram.values );
+    }
+    return true;
+}
+
+bool ZeroEQPlugin::_requestVolumeHistogram()
+{
+    auto volumeHandler = _engine.getScene().getVolumeHandler();
+    if( volumeHandler )
+    {
+        const auto& histogram = volumeHandler->getHistogram();
+        _remoteVolumeHistogram.setMin( histogram.range.x( ));
+        _remoteVolumeHistogram.setMax( histogram.range.y( ));
+        _remoteVolumeHistogram.setBins( histogram.values );
     }
     return true;
 }
@@ -933,10 +998,10 @@ bool ZeroEQPlugin::_requestHistogram()
 uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width,
                      const uint32_t height,
                      const uint8_t* rawData,
+                     const int32_t pixelFormat,
                      unsigned long& dataSize)
 {
     uint8_t* tjSrcBuffer = const_cast< uint8_t* >( rawData );
-    const int32_t pixelFormat = TJPF_RGBA;
     const int32_t color_components = 4; // Color Depth
     const int32_t tjPitch = width * color_components;
     const int32_t tjPixelFormat = pixelFormat;

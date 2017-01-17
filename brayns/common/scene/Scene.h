@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -70,7 +70,7 @@ public:
                random colors, transparency, reflection, and light emission
         @param nbMaterials The number of materials to create
     */
-    BRAYNS_API virtual void setMaterials(
+    BRAYNS_API void setMaterials(
         MaterialType materialType,
         size_t nbMaterials);
 

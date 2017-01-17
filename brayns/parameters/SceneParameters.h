@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -41,6 +41,10 @@ public:
     float getTimestamp( ) const { return _timestamp; }
     void setTimestamp( const float value ) { _timestamp = value; }
 
+    /** The (frame) delta to apply for animations to select the next frame. */
+    void setAnimationDelta( const int32_t animation ) { _animation = animation; }
+    int32_t getAnimationDelta() const { return _animation; }
+
     const std::string& getColorMapFilename() const { return _colorMapFilename; }
 
     /**
@@ -56,6 +60,7 @@ protected:
     bool _parse( const po::variables_map& vm ) final;
 
     float _timestamp;
+    int32_t _animation = 0;
     std::string _colorMapFilename;
     std::string _environmentMap;
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -86,7 +86,7 @@ RenderingParameters::RenderingParameters()
 {
     _parameters.add_options()
         (PARAM_ENGINE.c_str(), po::value< std::string >(),
-            "Engine name [ospray|optix]")
+            "Engine name [ospray|optix|livre]")
         (PARAM_MODULE.c_str(), po::value< std::string >(),
             "OSPRay module name [string]")
         (PARAM_RENDERER.c_str(), po::value< std::string >(),

@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016, EPFL/Blue Brain Project
+# Copyright (c) 2015-2017, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
@@ -43,6 +43,11 @@ endif()
 if(OPTIX_FOUND AND CUDA_FOUND)
   add_subdirectory(engines/optix)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOptiXEnginePlugin)
+endif()
+
+if(TARGET LivreLib)
+  add_subdirectory(engines/livre)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsLivreEnginePlugin)
 endif()
 
 common_library(braynsPlugins)

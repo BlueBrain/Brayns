@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016, EPFL/Blue Brain Project
+# Copyright (c) 2015-2017, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
@@ -14,6 +14,8 @@ include(GitExternal)
 
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
+
+option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ON)
 
 include(Common)
 
@@ -38,9 +40,9 @@ common_find_package(OSPRay SYSTEM)
 common_find_package(OpenMP)
 common_find_package(Lunchbox)
 
-if( NOT( OPTIX_FOUND AND CUDA_FOUND ) AND NOT OSPRAY_FOUND )
+if( NOT( OPTIX_FOUND AND CUDA_FOUND ) AND NOT OSPRAY_FOUND AND NOT TARGET LivreLib )
     message( FATAL_ERROR
-        "Neither OptiX+CUDA or OSPRay were found. Brayns cannot work without an engine" )
+        "Neither OptiX+CUDA, OSPRay nor Livre were found. Brayns cannot work without an engine" )
 endif()
 
 option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)

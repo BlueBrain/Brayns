@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -88,6 +88,7 @@ struct Brayns::Impl
         _loadData();
         Scene& scene = _engine->getScene();
         scene.commitVolumeData();
+        scene.commitSimulationData();
         scene.buildEnvironment();
         scene.buildGeometry();
 
@@ -132,6 +133,10 @@ struct Brayns::Impl
         }
 #endif
 
+        auto& sceneParams = _parametersManager->getSceneParameters();
+        if( sceneParams.getAnimationDelta() != 0 )
+            _engine->commit();
+
         camera.commit();
 
         Scene& scene = _engine->getScene();
@@ -156,6 +161,7 @@ struct Brayns::Impl
         {
             const size_t size = frameSize.x( ) * frameSize.y( ) * frameBuffer.getColorDepth( );
             renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
+            renderOutput.colorBufferFormat = frameBuffer.getFrameBufferFormat();
         }
 
         float* depthBuffer = frameBuffer.getDepthBuffer( );
@@ -188,6 +194,10 @@ struct Brayns::Impl
             buildScene();
         }
 #endif
+
+        auto& sceneParams = _parametersManager->getSceneParameters();
+        if( sceneParams.getAnimationDelta() != 0 )
+            _engine->commit();
 
         if( _parametersManager->getRenderingParameters().getHeadLight() )
         {
