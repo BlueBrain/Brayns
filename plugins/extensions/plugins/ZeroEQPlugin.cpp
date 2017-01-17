@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -247,13 +247,13 @@ bool ZeroEQPlugin::_requestScene()
     for( const auto& material: materials )
     {
         ::brayns::v1::Material m;
-        m.setDiffuse_color( material->getColor( ));
-        m.setSpecular_color( material->getSpecularColor( ));
-        m.setSpecular_exponent( material->getSpecularExponent( ));
-        m.setReflection_index( material->getReflectionIndex( ));
+        m.setDiffuseColor( material->getColor( ));
+        m.setSpecularColor( material->getSpecularColor( ));
+        m.setSpecularExponent( material->getSpecularExponent( ));
+        m.setReflectionIndex( material->getReflectionIndex( ));
         m.setOpacity( material->getOpacity( ));
-        m.setRefraction_index( material->getRefractionIndex( ));
-        m.setLight_emission( material->getEmission( ));
+        m.setRefractionIndex( material->getRefractionIndex( ));
+        m.setLightEmission( material->getEmission( ));
         ms.push_back(m);
     }
     return true;
@@ -271,19 +271,19 @@ void ZeroEQPlugin::_sceneUpdated( )
         if( material)
         {
             ::brayns::v1::Material& m = materials[ materialId ];
-            const floats& diffuse = m.getDiffuse_colorVector();
+            const floats& diffuse = m.getDiffuseColorVector();
             Vector3f kd = { diffuse[0], diffuse[1], diffuse[2] };
             material->setColor( kd );
 
-            const floats& specular = m.getSpecular_colorVector();
+            const floats& specular = m.getSpecularColorVector();
             Vector3f ks = { specular[0], specular[1], specular[2] };
             material->setSpecularColor( ks );
 
-            material->setSpecularExponent( m.getSpecular_exponent() );
-            material->setReflectionIndex( m.getReflection_index() );
+            material->setSpecularExponent( m.getSpecularExponent() );
+            material->setReflectionIndex( m.getReflectionIndex() );
             material->setOpacity( m.getOpacity() );
-            material->setRefractionIndex( m.getRefraction_index() );
-            material->setEmission( m.getLight_emission() );
+            material->setRefractionIndex( m.getRefractionIndex() );
+            material->setEmission( m.getLightEmission() );
         }
     }
     scene.commitMaterials( true );
@@ -588,33 +588,33 @@ void ZeroEQPlugin::_initializeDataSource()
     auto& geometryParameters = _parametersManager.getGeometryParameters();
     auto& volumeParameters = _parametersManager.getVolumeParameters();
 
-    _remoteDataSource.setTransfer_function_file( sceneParameters.getColorMapFilename( ));
-    _remoteDataSource.setMorphology_folder( geometryParameters.getMorphologyFolder( ));
-    _remoteDataSource.setNest_circuit( geometryParameters.getNESTCircuit( ));
-    _remoteDataSource.setNest_report( geometryParameters.getNESTReport( ));
-    _remoteDataSource.setPdb_file( geometryParameters.getPDBFile( ));
-    _remoteDataSource.setPdb_folder( geometryParameters.getPDBFolder( ));
-    _remoteDataSource.setXyzb_file( geometryParameters.getXYZBFile( ));
-    _remoteDataSource.setMesh_folder( geometryParameters.getMeshFolder( ));
-    _remoteDataSource.setCircuit_config( geometryParameters.getCircuitConfiguration( ));
-    _remoteDataSource.setLoad_cache_file( geometryParameters.getLoadCacheFile( ));
-    _remoteDataSource.setSave_cache_file( geometryParameters.getSaveCacheFile( ));
-    _remoteDataSource.setRadius_multiplier( geometryParameters.getRadiusMultiplier( ));
-    _remoteDataSource.setRadius_correction( geometryParameters.getRadiusCorrection( ));
-    _remoteDataSource.setColor_scheme(
+    _remoteDataSource.setTransferFunctionFile( sceneParameters.getColorMapFilename( ));
+    _remoteDataSource.setMorphologyFolder( geometryParameters.getMorphologyFolder( ));
+    _remoteDataSource.setNestCircuit( geometryParameters.getNESTCircuit( ));
+    _remoteDataSource.setNestReport( geometryParameters.getNESTReport( ));
+    _remoteDataSource.setPdbFile( geometryParameters.getPDBFile( ));
+    _remoteDataSource.setPdbFolder( geometryParameters.getPDBFolder( ));
+    _remoteDataSource.setXyzbFile( geometryParameters.getXYZBFile( ));
+    _remoteDataSource.setMeshFolder( geometryParameters.getMeshFolder( ));
+    _remoteDataSource.setCircuitConfig( geometryParameters.getCircuitConfiguration( ));
+    _remoteDataSource.setLoadCacheFile( geometryParameters.getLoadCacheFile( ));
+    _remoteDataSource.setSaveCacheFile( geometryParameters.getSaveCacheFile( ));
+    _remoteDataSource.setRadiusMultiplier( geometryParameters.getRadiusMultiplier( ));
+    _remoteDataSource.setRadiusCorrection( geometryParameters.getRadiusCorrection( ));
+    _remoteDataSource.setColorScheme(
         ::brayns::v1::ColorScheme(geometryParameters.getColorScheme()));
-    _remoteDataSource.setScene_environment(
+    _remoteDataSource.setSceneEnvironment(
         ::brayns::v1::SceneEnvironment( geometryParameters.getSceneEnvironment( )));
-    _remoteDataSource.setGeometry_quality(
+    _remoteDataSource.setGeometryQuality(
         ::brayns::v1::GeometryQuality( geometryParameters.getGeometryQuality( )));
     _remoteDataSource.setTarget( geometryParameters.getTarget( ));
     _remoteDataSource.setReport( geometryParameters.getReport( ));
-    _remoteDataSource.setNon_simulated_cells( geometryParameters.getNonSimulatedCells( ));
-    _remoteDataSource.setStart_simulation_time( geometryParameters.getStartSimulationTime( ));
-    _remoteDataSource.setEnd_simulation_time( geometryParameters.getEndSimulationTime( ));
-    _remoteDataSource.setSimulation_values_range( geometryParameters.getSimulationValuesRange( ));
-    _remoteDataSource.setSimulation_cache_file( geometryParameters.getSimulationCacheFile( ));
-    _remoteDataSource.setNest_cache_file( geometryParameters.getNESTCacheFile( ));
+    _remoteDataSource.setNonSimulatedCells( geometryParameters.getNonSimulatedCells( ));
+    _remoteDataSource.setStartSimulationTime( geometryParameters.getStartSimulationTime( ));
+    _remoteDataSource.setEndSimulationTime( geometryParameters.getEndSimulationTime( ));
+    _remoteDataSource.setSimulationValuesRange( geometryParameters.getSimulationValuesRange( ));
+    _remoteDataSource.setSimulationCacheFile( geometryParameters.getSimulationCacheFile( ));
+    _remoteDataSource.setNestCacheFile( geometryParameters.getNESTCacheFile( ));
 
     const auto mst = geometryParameters.getMorphologySectionTypes();
     std::vector< ::brayns::v1::SectionType > sectionTypes;
@@ -627,23 +627,23 @@ void ZeroEQPlugin::_initializeDataSource()
         sectionTypes.push_back( ::brayns::v1::SectionType::dendrite );
     if( all || mst & (size_t)::brayns::v1::SectionType::apical_dendrite )
         sectionTypes.push_back( ::brayns::v1::SectionType::apical_dendrite );
-    _remoteDataSource.setMorphology_section_types( sectionTypes );
+    _remoteDataSource.setMorphologySectionTypes( sectionTypes );
 
     const auto& morphologyLayout = geometryParameters.getMorphologyLayout();
     brayns::v1::MorphologyLayout remoteMorphologyLayout(
         morphologyLayout.nbColumns,
         morphologyLayout.verticalSpacing,
         morphologyLayout.horizontalSpacing );
-    _remoteDataSource.setMorphology_layout( remoteMorphologyLayout );
+    _remoteDataSource.setMorphologyLayout( remoteMorphologyLayout );
 
-    _remoteDataSource.setGenerate_multiple_models( geometryParameters.getGenerateMultipleModels( ));
-    _remoteDataSource.setVolume_folder( volumeParameters.getFolder( ));
-    _remoteDataSource.setVolume_file( volumeParameters.getFilename( ));
-    _remoteDataSource.setVolume_dimensions( Vector3ui(volumeParameters.getDimensions( )));
-    _remoteDataSource.setVolume_element_spacing( Vector3f( volumeParameters.getElementSpacing( )));
-    _remoteDataSource.setVolume_offset( Vector3f(volumeParameters.getOffset( )));
-    _remoteDataSource.setEnvironment_map( sceneParameters.getEnvironmentMap( ));
-    _remoteDataSource.setMolecular_system_config( geometryParameters.getMolecularSystemConfig( ));
+    _remoteDataSource.setGenerateMultipleModels( geometryParameters.getGenerateMultipleModels( ));
+    _remoteDataSource.setVolumeFolder( volumeParameters.getFolder( ));
+    _remoteDataSource.setVolumeFile( volumeParameters.getFilename( ));
+    _remoteDataSource.setVolumeDimensions( Vector3ui(volumeParameters.getDimensions( )));
+    _remoteDataSource.setVolumeElementSpacing( Vector3f( volumeParameters.getElementSpacing( )));
+    _remoteDataSource.setVolumeOffset( Vector3f(volumeParameters.getOffset( )));
+    _remoteDataSource.setEnvironmentMap( sceneParameters.getEnvironmentMap( ));
+    _remoteDataSource.setMolecularSystemConfig( geometryParameters.getMolecularSystemConfig( ));
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -653,61 +653,61 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _parametersManager.set(
         "splash-scene-folder", ""); // Make sure the splash scene is removed
     _parametersManager.set(
-        "transfer-function-file", _remoteDataSource.getTransfer_function_fileString( ));
+        "transfer-function-file", _remoteDataSource.getTransferFunctionFileString( ));
     _parametersManager.set(
-        "morphology-folder", _remoteDataSource.getMorphology_folderString( ));
+        "morphology-folder", _remoteDataSource.getMorphologyFolderString( ));
     _parametersManager.set(
-        "nest-circuit", _remoteDataSource.getNest_circuitString( ));
+        "nest-circuit", _remoteDataSource.getNestCircuitString( ));
     _parametersManager.set(
-        "nest-report", _remoteDataSource.getNest_reportString( ));
+        "nest-report", _remoteDataSource.getNestReportString( ));
     _parametersManager.set(
-        "pdb-file", _remoteDataSource.getPdb_fileString( ));
+        "pdb-file", _remoteDataSource.getPdbFileString( ));
     _parametersManager.set(
-        "pdb-folder", _remoteDataSource.getPdb_folderString( ));
+        "pdb-folder", _remoteDataSource.getPdbFolderString( ));
     _parametersManager.set(
-        "xyzb-file", _remoteDataSource.getXyzb_fileString( ));
+        "xyzb-file", _remoteDataSource.getXyzbFileString( ));
     _parametersManager.set(
-        "mesh-folder", _remoteDataSource.getMesh_folderString( ));
+        "mesh-folder", _remoteDataSource.getMeshFolderString( ));
     _parametersManager.set(
-        "circuit-config", _remoteDataSource.getCircuit_configString( ));
+        "circuit-config", _remoteDataSource.getCircuitConfigString( ));
     _parametersManager.set(
-        "load-cache-file", _remoteDataSource.getLoad_cache_fileString( ));
+        "load-cache-file", _remoteDataSource.getLoadCacheFileString( ));
     _parametersManager.set(
-        "save-cache-file", _remoteDataSource.getSave_cache_fileString( ));
+        "save-cache-file", _remoteDataSource.getSaveCacheFileString( ));
     _parametersManager.set(
-        "radius-multiplier", std::to_string(_remoteDataSource.getRadius_multiplier( )));
+        "radius-multiplier", std::to_string(_remoteDataSource.getRadiusMultiplier( )));
     _parametersManager.set(
-        "radius-correction", std::to_string(_remoteDataSource.getRadius_correction( )));
+        "radius-correction", std::to_string(_remoteDataSource.getRadiusCorrection( )));
     _parametersManager.set(
         "color-scheme", geometryParameters.getColorSchemeAsString(
-        static_cast< ColorScheme >( _remoteDataSource.getColor_scheme( ))));
+        static_cast< ColorScheme >( _remoteDataSource.getColorScheme( ))));
     _parametersManager.set(
         "scene-environment", geometryParameters.getSceneEnvironmentAsString(
-        static_cast< SceneEnvironment >( _remoteDataSource.getScene_environment( ))));
+        static_cast< SceneEnvironment >( _remoteDataSource.getSceneEnvironment( ))));
     _parametersManager.set(
         "geometry-quality", geometryParameters.getGeometryQualityAsString(
-        static_cast< GeometryQuality >( _remoteDataSource.getGeometry_quality( ))));
+        static_cast< GeometryQuality >( _remoteDataSource.getGeometryQuality( ))));
     _parametersManager.set(
         "target", _remoteDataSource.getTargetString( ));
     _parametersManager.set(
         "report", _remoteDataSource.getReportString( ));
     _parametersManager.set(
-        "non-simulated-cells", std::to_string(_remoteDataSource.getNon_simulated_cells( )));
+        "non-simulated-cells", std::to_string(_remoteDataSource.getNonSimulatedCells( )));
     _parametersManager.set(
-        "start-simulation-time", std::to_string(_remoteDataSource.getStart_simulation_time( )));
+        "start-simulation-time", std::to_string(_remoteDataSource.getStartSimulationTime( )));
     _parametersManager.set(
-        "end-simulation-time", std::to_string(_remoteDataSource.getEnd_simulation_time( )));
+        "end-simulation-time", std::to_string(_remoteDataSource.getEndSimulationTime( )));
     _parametersManager.set(
         "simulation-values-range",
-        std::to_string(_remoteDataSource.getSimulation_values_range()[0]) + " " +
-        std::to_string(_remoteDataSource.getSimulation_values_range()[1]) );
+        std::to_string(_remoteDataSource.getSimulationValuesRange()[0]) + " " +
+        std::to_string(_remoteDataSource.getSimulationValuesRange()[1]) );
     _parametersManager.set(
-        "simulation-cache-file", _remoteDataSource.getSimulation_cache_fileString( ));
+        "simulation-cache-file", _remoteDataSource.getSimulationCacheFileString( ));
     _parametersManager.set(
-        "nest-cache-file", _remoteDataSource.getNest_cache_fileString( ));
+        "nest-cache-file", _remoteDataSource.getNestCacheFileString( ));
 
     uint morphologySectionTypes = MST_UNDEFINED;
-    const auto sectionTypes = _remoteDataSource.getMorphology_section_typesVector();
+    const auto sectionTypes = _remoteDataSource.getMorphologySectionTypesVector();
     for( const auto& sectionType: sectionTypes )
     {
         switch( sectionType )
@@ -726,40 +726,40 @@ void ZeroEQPlugin::_dataSourceUpdated()
     }
     _parametersManager.set( "morphology-section-types", std::to_string( morphologySectionTypes ));
 
-    const auto remoteMorphologyLayout = _remoteDataSource.getMorphology_layout();
+    const auto remoteMorphologyLayout = _remoteDataSource.getMorphologyLayout();
     std::string layoutAsString;
-    layoutAsString += std::to_string( remoteMorphologyLayout.getNb_columns( ));
-    layoutAsString += " " + std::to_string( remoteMorphologyLayout.getVertical_spacing( ));
-    layoutAsString += " " + std::to_string( remoteMorphologyLayout.getHorizontal_spacing( ));
+    layoutAsString += std::to_string( remoteMorphologyLayout.getNbColumns( ));
+    layoutAsString += " " + std::to_string( remoteMorphologyLayout.getVerticalSpacing( ));
+    layoutAsString += " " + std::to_string( remoteMorphologyLayout.getHorizontalSpacing( ));
     BRAYNS_ERROR << "morphology-layout: " << layoutAsString << std::endl;
     _parametersManager.set( "morphology-layout", layoutAsString );
 
     _parametersManager.set(
-        "generate-multiple-models", (_remoteDataSource.getGenerate_multiple_models( ) ? "1" : "0"));
+        "generate-multiple-models", (_remoteDataSource.getGenerateMultipleModels( ) ? "1" : "0"));
     _parametersManager.set(
-        "volume-folder", _remoteDataSource.getVolume_folderString( ));
+        "volume-folder", _remoteDataSource.getVolumeFolderString( ));
     _parametersManager.set(
-        "volume-file", _remoteDataSource.getVolume_fileString( ));
+        "volume-file", _remoteDataSource.getVolumeFileString( ));
     _parametersManager.set(
         "volume-dimensions",
-        std::to_string(_remoteDataSource.getVolume_dimensions()[0]) + " " +
-        std::to_string(_remoteDataSource.getVolume_dimensions()[1]) + " " +
-        std::to_string(_remoteDataSource.getVolume_dimensions()[2]) );
+        std::to_string(_remoteDataSource.getVolumeDimensions()[0]) + " " +
+        std::to_string(_remoteDataSource.getVolumeDimensions()[1]) + " " +
+        std::to_string(_remoteDataSource.getVolumeDimensions()[2]) );
     _parametersManager.set(
         "volume-element-spacing",
-        std::to_string(_remoteDataSource.getVolume_element_spacing()[0]) + " " +
-        std::to_string(_remoteDataSource.getVolume_element_spacing()[1]) + " " +
-        std::to_string(_remoteDataSource.getVolume_element_spacing()[2]) );
+        std::to_string(_remoteDataSource.getVolumeElementSpacing()[0]) + " " +
+        std::to_string(_remoteDataSource.getVolumeElementSpacing()[1]) + " " +
+        std::to_string(_remoteDataSource.getVolumeElementSpacing()[2]) );
     _parametersManager.set(
         "volume-offset",
-        std::to_string(_remoteDataSource.getVolume_offset()[0]) + " " +
-        std::to_string(_remoteDataSource.getVolume_offset()[1]) + " " +
-        std::to_string(_remoteDataSource.getVolume_offset()[2]) );
+        std::to_string(_remoteDataSource.getVolumeOffset()[0]) + " " +
+        std::to_string(_remoteDataSource.getVolumeOffset()[1]) + " " +
+        std::to_string(_remoteDataSource.getVolumeOffset()[2]) );
     _parametersManager.set(
-        "environment-map", _remoteDataSource.getEnvironment_mapString( ));
+        "environment-map", _remoteDataSource.getEnvironmentMapString( ));
 
     _parametersManager.set(
-        "molecular-system-config", _remoteDataSource.getMolecular_system_configString( ));
+        "molecular-system-config", _remoteDataSource.getMolecularSystemConfigString( ));
 
     _resetSceneUpdated();
     _resetCameraUpdated();
@@ -779,7 +779,7 @@ void ZeroEQPlugin::_initializeSettings()
     auto& applicationParameters = _parametersManager.getApplicationParameters();
 
     _remoteSettings.setTimestamp( sceneParameters.getTimestamp( ));
-    _remoteSettings.setVolume_samples_per_ray( volumeParameters.getSamplesPerRay( ));
+    _remoteSettings.setVolumeSamplesPerRay( volumeParameters.getSamplesPerRay( ));
 
     switch( renderingParameters.getRenderer( ))
     {
@@ -802,23 +802,23 @@ void ZeroEQPlugin::_initializeSettings()
         default:
             _remoteSettings.setShading( ::brayns::v1::Shading::none ); break;
     }
-    _remoteSettings.setSamples_per_pixel( renderingParameters.getSamplesPerPixel( ));
-    _remoteSettings.setAmbient_occlusion( renderingParameters.getAmbientOcclusionStrength( ));
+    _remoteSettings.setSamplesPerPixel( renderingParameters.getSamplesPerPixel( ));
+    _remoteSettings.setAmbientOcclusion( renderingParameters.getAmbientOcclusionStrength( ));
     _remoteSettings.setShadows( renderingParameters.getShadows( ));
-    _remoteSettings.setSoft_shadows( renderingParameters.getSoftShadows( ));
+    _remoteSettings.setSoftShadows( renderingParameters.getSoftShadows( ));
     _remoteSettings.setRadiance( renderingParameters.getLightEmittingMaterials( ));
     Vector3f value = renderingParameters.getBackgroundColor();
-    _remoteSettings.setBackground_color( value );
-    _remoteSettings.setDetection_distance( renderingParameters.getDetectionDistance( ));
+    _remoteSettings.setBackgroundColor( value );
+    _remoteSettings.setDetectionDistance( renderingParameters.getDetectionDistance( ));
     value = renderingParameters.getDetectionNearColor();
-    _remoteSettings.setDetection_near_color( value );
+    _remoteSettings.setDetectionNearColor( value );
     value = renderingParameters.getDetectionFarColor();
-    _remoteSettings.setDetection_far_color( value );
+    _remoteSettings.setDetectionFarColor( value );
     _remoteSettings.setEpsilon( renderingParameters.getEpsilon( ));
-    _remoteSettings.setHead_light( renderingParameters.getHeadLight( ));
-    _remoteSettings.setJpeg_compression( applicationParameters.getJpegCompression( ));
+    _remoteSettings.setHeadLight( renderingParameters.getHeadLight( ));
+    _remoteSettings.setJpegCompression( applicationParameters.getJpegCompression( ));
     const auto& jpegSize = applicationParameters.getJpegSize();
-    _remoteSettings.setJpeg_size( { jpegSize[0], jpegSize[1] } );
+    _remoteSettings.setJpegSize( { jpegSize[0], jpegSize[1] } );
 }
 
 void ZeroEQPlugin::_settingsUpdated()
@@ -828,7 +828,7 @@ void ZeroEQPlugin::_settingsUpdated()
     _parametersManager.set(
         "timestamp", std::to_string(_remoteSettings.getTimestamp( )));
     _parametersManager.set(
-        "volume-samples-per-ray", std::to_string(_remoteSettings.getVolume_samples_per_ray( )));
+        "volume-samples-per-ray", std::to_string(_remoteSettings.getVolumeSamplesPerRay( )));
     _parametersManager.set( "renderer", renderingParameters.getRendererAsString(
         static_cast< RendererType >( _remoteSettings.getShader( ))));
     switch( _remoteSettings.getShading( ))
@@ -841,43 +841,43 @@ void ZeroEQPlugin::_settingsUpdated()
             _parametersManager.set( "shading", "none"); break;
     }
     _parametersManager.set(
-        "spp", std::to_string(_remoteSettings.getSamples_per_pixel( )));
+        "spp", std::to_string(_remoteSettings.getSamplesPerPixel( )));
     _parametersManager.set(
-        "ambient-occlusion", std::to_string(_remoteSettings.getAmbient_occlusion()));
+        "ambient-occlusion", std::to_string(_remoteSettings.getAmbientOcclusion()));
     _parametersManager.set(
         "shadows", (_remoteSettings.getShadows( ) ? "1" : "0"));
     _parametersManager.set(
-        "soft-shadows", (_remoteSettings.getSoft_shadows( ) ? "1" : "0"));
+        "soft-shadows", (_remoteSettings.getSoftShadows( ) ? "1" : "0"));
     _parametersManager.set(
         "radiance", (_remoteSettings.getRadiance( ) ? "1" : "0"));
     _parametersManager.set(
         "background-color",
-        std::to_string(_remoteSettings.getBackground_color()[0]) + " " +
-        std::to_string(_remoteSettings.getBackground_color()[1]) + " " +
-        std::to_string(_remoteSettings.getBackground_color()[2]) );
+        std::to_string(_remoteSettings.getBackgroundColor()[0]) + " " +
+        std::to_string(_remoteSettings.getBackgroundColor()[1]) + " " +
+        std::to_string(_remoteSettings.getBackgroundColor()[2]) );
     _parametersManager.set(
-        "detection-distance", std::to_string(_remoteSettings.getDetection_distance( )));
+        "detection-distance", std::to_string(_remoteSettings.getDetectionDistance( )));
     _parametersManager.set(
         "detection-on-different-material",
-        (_remoteSettings.getDetection_on_different_material() ? "1" : "0"));
+        (_remoteSettings.getDetectionOnDifferentMaterial() ? "1" : "0"));
     _parametersManager.set(
         "detection-near-color",
-        std::to_string(_remoteSettings.getDetection_near_color()[0]) + " " +
-        std::to_string(_remoteSettings.getDetection_near_color()[1]) + " " +
-        std::to_string(_remoteSettings.getDetection_near_color()[2]) );
+        std::to_string(_remoteSettings.getDetectionNearColor()[0]) + " " +
+        std::to_string(_remoteSettings.getDetectionNearColor()[1]) + " " +
+        std::to_string(_remoteSettings.getDetectionNearColor()[2]) );
     _parametersManager.set(
         "detection-far-color",
-        std::to_string(_remoteSettings.getDetection_far_color()[0]) + " " +
-        std::to_string(_remoteSettings.getDetection_far_color()[1]) + " " +
-        std::to_string(_remoteSettings.getDetection_far_color()[2]) );
+        std::to_string(_remoteSettings.getDetectionFarColor()[0]) + " " +
+        std::to_string(_remoteSettings.getDetectionFarColor()[1]) + " " +
+        std::to_string(_remoteSettings.getDetectionFarColor()[2]) );
     _parametersManager.set(
         "epsilon", std::to_string(_remoteSettings.getEpsilon( )));
     _parametersManager.set(
-        "head-light", (_remoteSettings.getHead_light( ) ? "1" : "0"));
+        "head-light", (_remoteSettings.getHeadLight( ) ? "1" : "0"));
 
     auto& app = _parametersManager.getApplicationParameters();
-    app.setJpegSize( Vector2ui{ _remoteSettings.getJpeg_size()  } );
-    app.setJpegCompression( std::min( _remoteSettings.getJpeg_compression(), 100u ));
+    app.setJpegSize( Vector2ui{ _remoteSettings.getJpegSize()  } );
+    app.setJpegCompression( std::min( _remoteSettings.getJpegCompression(), 100u ));
 
     _engine.getRenderer().commit();
     _engine.getFrameBuffer().clear();

@@ -101,7 +101,7 @@ public:
     const Vector3f& getTarget() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        const floats& lookat = getLook_atVector();
+        const floats& lookat = getLookAtVector();
         _target = Vector3f( lookat[0], lookat[1], lookat[2] );
     #endif
         return _target;
@@ -113,7 +113,7 @@ public:
             return;
     #ifdef BRAYNS_USE_ZEROBUF
         const floats& lookat = { target.x(), target.y(), target.z() };
-        brayns::v1::Camera::setLook_at( lookat );
+        brayns::v1::Camera::setLookAt( lookat );
     #endif
         _target = target;
         modified = true;
@@ -150,7 +150,7 @@ public:
         if( _fieldOfView == fieldOfView )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        brayns::v1::Camera::setField_of_view( fieldOfView );
+        brayns::v1::Camera::setFieldOfView( fieldOfView );
     #endif
         _fieldOfView = fieldOfView;
         modified = true;
@@ -159,7 +159,7 @@ public:
     float getFieldOfView( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _fieldOfView = brayns::v1::Camera::getField_of_view();
+        _fieldOfView = brayns::v1::Camera::getFieldOfView();
     #endif
         return _fieldOfView;
     }
@@ -201,7 +201,7 @@ public:
         if( _focalLength == focalLength )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        brayns::v1::Camera::setFocal_length( focalLength );
+        brayns::v1::Camera::setFocalLength( focalLength );
     #endif
         _focalLength = focalLength;
         modified = true;
@@ -210,7 +210,7 @@ public:
     float getFocalLength( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _focalLength = brayns::v1::Camera::getFocal_length();
+        _focalLength = brayns::v1::Camera::getFocalLength();
     #endif
         return _focalLength;
     }
@@ -223,13 +223,13 @@ public:
         switch( stereoMode )
         {
         case CameraStereoMode::left:
-            brayns::v1::Camera::setStereo_mode( brayns::v1::CameraStereoMode::left ); break;
+            brayns::v1::Camera::setStereoMode( brayns::v1::CameraStereoMode::left ); break;
         case CameraStereoMode::right:
-            brayns::v1::Camera::setStereo_mode( brayns::v1::CameraStereoMode::right ); break;
+            brayns::v1::Camera::setStereoMode( brayns::v1::CameraStereoMode::right ); break;
         case CameraStereoMode::side_by_side:
-            brayns::v1::Camera::setStereo_mode( brayns::v1::CameraStereoMode::side_by_side ); break;
+            brayns::v1::Camera::setStereoMode( brayns::v1::CameraStereoMode::side_by_side ); break;
         default:
-            brayns::v1::Camera::setStereo_mode( brayns::v1::CameraStereoMode::none ); break;
+            brayns::v1::Camera::setStereoMode( brayns::v1::CameraStereoMode::none ); break;
         }
     #endif
         _stereoMode = stereoMode;
@@ -239,7 +239,7 @@ public:
     CameraStereoMode getStereoMode( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        switch( brayns::v1::Camera::getStereo_mode() )
+        switch( brayns::v1::Camera::getStereoMode() )
         {
         case brayns::v1::CameraStereoMode::left:
             _stereoMode = CameraStereoMode::left; break;
@@ -259,7 +259,7 @@ public:
         if( _eyeSeparation == eyeSeparation )
             return;
     #ifdef BRAYNS_USE_ZEROBUF
-        brayns::v1::Camera::setEye_separation( eyeSeparation );
+        brayns::v1::Camera::setEyeSeparation( eyeSeparation );
     #endif
         _eyeSeparation = eyeSeparation;
         modified = true;
@@ -268,7 +268,7 @@ public:
     float getEyeSeparation( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        _eyeSeparation = brayns::v1::Camera::getEye_separation();
+        _eyeSeparation = brayns::v1::Camera::getEyeSeparation();
     #endif
         return _eyeSeparation;
     }
