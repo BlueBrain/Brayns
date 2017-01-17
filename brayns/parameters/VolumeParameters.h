@@ -51,7 +51,7 @@ public:
 
     /** Volume epsilon */
     void setSamplesPerRay( const size_t spr ) { _spr = spr; }
-    const float& getSamplesPerRay() const { return _spr; }
+    size_t getSamplesPerRay() const { return _spr; }
 
 protected:
 
@@ -62,7 +62,7 @@ protected:
     Vector3ui _dimensions;
     Vector3f _elementSpacing;
     Vector3f _offset;
-    float _spr;
+    size_t _spr;
 
 };
 
