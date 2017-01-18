@@ -144,7 +144,7 @@ public:
     virtual void specialkey(int key, const Vector2f& where);
 
     /** Saves current frame to disk. The filename is defined by a prefix and a
-     * frame index (<prefix>_<frame>_%08d.ppm). The file uses the ppm encoding
+     * frame index (\<prefix\>_\<frame\>_%08d.ppm). The file uses the ppm encoding
      * and is written to the working folder of the application.
      *
      * @param frameIndex index of the current frame

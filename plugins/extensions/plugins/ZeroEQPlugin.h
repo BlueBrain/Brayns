@@ -56,7 +56,7 @@ public:
     ZeroEQPlugin( Engine& engine, ParametersManager& parametersManager );
     ~ZeroEQPlugin();
 
-    /** @copydoc ExtensionPlugin::execute */
+    /** @copydoc ExtensionPlugin::run */
     BRAYNS_API void run( ) final;
 
     BRAYNS_API bool operator ! () const;

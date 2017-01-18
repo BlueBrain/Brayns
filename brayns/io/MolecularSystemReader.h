@@ -58,7 +58,7 @@ public:
     /**
      * @brief Imports proteins and shapes from the Molecular System Configutation file, defined
      *        by the --molecular-system-config command line parameter
-     * @param Scene Resulting scene
+     * @param scene Resulting scene
      * @return True if the system is successfully loaded, false otherwise
      */
     bool import( Scene& scene );

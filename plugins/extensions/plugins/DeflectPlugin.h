@@ -44,13 +44,6 @@ struct Image
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
-    /**
-        Constructs the object and initializes default plugins according to
-        application parameters.
-        @param applicationParameters Application parameters
-        @param extensionParameters Struture of pointers to objects that are
-               potentially updated by registered plugins
-    */
 #ifdef BRAYNS_USE_ZEROEQ
     DeflectPlugin(
         Engine& engine,
@@ -64,7 +57,7 @@ public:
         AbstractManipulator& cameraManipulator );
 #endif
 
-    /** @copydoc ExtensionPlugin::execute */
+    /** @copydoc ExtensionPlugin::run */
     BRAYNS_API void run( ) final;
 
 private:

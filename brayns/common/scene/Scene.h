@@ -50,7 +50,7 @@ public:
         Creates a scene object responsible for handling geometry, volumes, materials and
         light sources.
         @param renderers Renderers to be used to render the scene
-        @param parametersManagers Parameters for the scene (Geometry, volume, rendering, etc)
+        @param parametersManager Parameters for the scene (Geometry, volume, rendering, etc)
         @todo The scene must not know about the renderer
               https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
     */
@@ -60,6 +60,10 @@ public:
 
     BRAYNS_API virtual ~Scene();
 
+    /**
+     * Called after scene-related changes have been made before rendering the
+     * scene.
+     */
     BRAYNS_API virtual void commit() = 0;
 
     /**

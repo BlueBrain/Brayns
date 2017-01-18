@@ -65,7 +65,7 @@ public:
     /**
     * @brief Writes a frame to a stream. A frame is a set of float values.
     * @param stream Stream where the header should be written
-    * @param value Frame values
+    * @param values Frame values
     */
     BRAYNS_API void writeFrame( std::ofstream& stream, const floats& values );
 

@@ -34,14 +34,19 @@ public:
 
     ~LivreEngine();
 
+    /** @copydoc Engine::name */
     std::string name() const final;
 
+    /** @copydoc Engine::commit */
     void commit() final;
 
+    /** @copydoc Engine::render */
     void render() final;
 
+    /** @copydoc Engine::postRender */
     void postRender() final;
 
+    /** @copydoc Engine::extensionInit */
     void extensionInit( ExtensionPlugin& ) final;
 
 private:

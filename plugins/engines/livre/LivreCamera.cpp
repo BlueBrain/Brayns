@@ -25,6 +25,8 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/CameraSettings.h>
 
+#include <brayns/common/log.h>
+
 namespace brayns
 {
 
@@ -55,6 +57,12 @@ void LivreCamera::commit()
     livreModelView.setColumn( 3, translation );
 
     _livre.getFrameData().getCameraSettings().setModelViewMatrix( livreModelView );
+}
+
+void LivreCamera::setEnvironmentMap( const bool )
+{
+    BRAYNS_WARN << "Environment map is not supported by Livre engine"
+                << std::endl;
 }
 
 }

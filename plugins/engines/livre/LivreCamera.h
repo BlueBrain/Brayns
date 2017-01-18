@@ -34,7 +34,7 @@ public:
 
     void commit() final;
 
-    void setEnvironmentMap( const bool ) final {}
+    void setEnvironmentMap( bool ) final;
 
 private:
     livre::Engine& _livre;

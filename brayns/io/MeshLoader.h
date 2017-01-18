@@ -61,7 +61,9 @@ public:
      * @param meshQuality can be MQ_FAST, MQ_QUALITY or MQ_MAX_QUALITY. Appart
      *        from MQ_FAST, normals are automatically generated is not in the
      *        file.
-     * @param material Default material for the whole mesh. If set to
+     * @param position where to position the imported mesh
+     * @param scale how to scale the imported mesh
+     * @param defaultMaterial Default material for the whole mesh. If set to
      *        NO_MATERIAL, materials from the mesh file are used. Otherwise,
      *        all meshes are forced to that specific material.
      * @return true if the file was successfully imported. False otherwise.

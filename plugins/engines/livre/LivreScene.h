@@ -33,22 +33,31 @@ public:
     LivreScene( const Renderers& renderer, ParametersManager& parametersManager,
                 livre::Engine& livre );
 
+    /** @copydoc Scene::commit */
     void commit() final;
 
+    /** @copydoc Scene::buildGeometry */
     void buildGeometry() final;
 
+    /** @copydoc Scene::commitLights */
     void commitLights() final;
 
+    /** @copydoc Scene::commitMaterials */
     void commitMaterials( const bool updateOnly = false ) final;
 
+    /** @copydoc Scene::commitSimulationData */
     void commitSimulationData() final;
 
+    /** @copydoc Scene::commitVolumeData */
     void commitVolumeData() final;
 
+    /** @copydoc Scene::commitTransferFunctionData */
     void commitTransferFunctionData() final;
 
+    /** @copydoc Scene::reset */
     void reset() final;
 
+    /** @copydoc Scene::saveSceneToCacheFile */
     void saveSceneToCacheFile() final;
 
 private:
