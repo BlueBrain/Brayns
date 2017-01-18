@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -56,6 +56,9 @@ void Engine::reshape( const Vector2ui& frameSize )
 
 void Engine::commit()
 {
+    auto& sceneParams = _parametersManager.getSceneParameters();
+    sceneParams.setTimestamp( sceneParams.getTimestamp() + sceneParams.getAnimationDelta( ));
+
     _frameBuffer->clear();
     _dirty = false;
 }
@@ -91,6 +94,7 @@ void Engine::_render(
     {
         const size_t size = frameSize.x() * frameSize.y() * _frameBuffer->getColorDepth();
         renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
+        renderOutput.colorBufferFormat = _frameBuffer->getFrameBufferFormat();
     }
 
     float* depthBuffer = _frameBuffer->getDepthBuffer( );

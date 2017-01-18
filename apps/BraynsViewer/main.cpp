@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -26,18 +26,26 @@
 #include <brayns/parameters/ParametersManager.h>
 #include "BraynsViewer.h"
 
+brayns::Brayns* braynsInstance;
+
+void cleanup()
+{
+    delete braynsInstance;
+}
+
 int main(int argc, const char **argv)
 {
     try
     {
-        brayns::Brayns brayns( argc, argv );
+        braynsInstance = new brayns::Brayns( argc, argv );
         brayns::initGLUT( &argc, argv );
-        brayns::BraynsViewer braynsViewer( brayns );
+        brayns::BraynsViewer braynsViewer( *braynsInstance );
         BRAYNS_INFO << "Initializing Application..." << std::endl;
         const brayns::Vector2ui& size =
-            brayns.getParametersManager().getApplicationParameters().getWindowSize();
+            braynsInstance->getParametersManager().getApplicationParameters().getWindowSize();
 
         braynsViewer.create( "Brayns Viewer", size.x(), size.y( ));
+        atexit( cleanup );
         brayns::runGLUT();
     }
     catch( const std::runtime_error& e )

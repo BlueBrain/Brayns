@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -172,6 +172,7 @@ void DeflectPlugin::_sendDeflectFrame()
         _lastImage.data.resize( bufferSize );
         memcpy( _lastImage.data.data(), data, bufferSize );
         _lastImage.size = frameSize;
+        _lastImage.format = frameBuffer.getFrameBufferFormat();
 
         _send( true );
     }
@@ -250,8 +251,21 @@ bool DeflectPlugin::_handleDeflectEvents()
 
 void DeflectPlugin::_send( const bool swapYAxis )
 {
+    deflect::PixelFormat format = deflect::RGBA;
+    switch( _lastImage.format )
+    {
+    case FrameBufferFormat::FBF_BGRA_I8:
+        format = deflect::BGRA;
+        break;
+    case FrameBufferFormat::FBF_RGB_I8:
+        format = deflect::RGB;
+        break;
+    default:
+        format = deflect::RGBA;
+    }
+
     deflect::ImageWrapper deflectImage( _lastImage.data.data(), _lastImage.size.x(),
-                                        _lastImage.size.y(), deflect::RGBA );
+                                        _lastImage.size.y(), format );
 
     deflectImage.compressionQuality = _params.getQuality();
     deflectImage.compressionPolicy =

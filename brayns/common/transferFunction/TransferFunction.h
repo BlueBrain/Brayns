@@ -48,7 +48,7 @@ public:
      * @brief Generates arrays of linear interpolated values according to control points, for each
      *        attribute of the transfer function. The red, green, blue and alpha attributes are
      *        stored in the form of an RGBA tupple of floats.
-     * @param size Sample size defining the number of values that will be generated for each
+     * @param sampleSize Sample size defining the number of values that will be generated for each
      *        attribute.
     */
     void resample( size_t sampleSize = DEFAULT_TRANSFER_FUNCTION_SAMPLE_SIZE );

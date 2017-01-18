@@ -34,7 +34,6 @@ public:
     /**
         Constructs the object and initializes default plugins according to
         application parameters.
-        @param Brayns instance of brayns
     */
     ExtensionPluginFactory(
         Engine& engine,

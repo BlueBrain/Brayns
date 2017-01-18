@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -25,6 +25,9 @@
 #endif
 #ifdef BRAYNS_USE_OPTIX
 #  include <plugins/engines/optix/OptiXEngine.h>
+#endif
+#ifdef BRAYNS_USE_LIVRE
+#  include <plugins/engines/livre/LivreEngine.h>
 #endif
 
 namespace brayns
@@ -64,6 +67,18 @@ EnginePtr EngineFactory::get( const std::string& name )
             argv[i] = _arguments[i].c_str();
         _engines[name] = EnginePtr(
             new OptiXEngine( _arguments.size(), argv, _parametersManager ));
+        delete [] argv;
+        return _engines[name];
+    }
+#endif
+#ifdef BRAYNS_USE_LIVRE
+    if( name == "livre" )
+    {
+        char** argv = new char*[_arguments.size()];
+        for( size_t i = 0; i < _arguments.size(); ++i )
+            argv[i] = const_cast< char* >( _arguments[i].c_str( ));
+        _engines[name] = EnginePtr(
+            new LivreEngine( _arguments.size(), argv, _parametersManager ));
         delete [] argv;
         return _engines[name];
     }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
@@ -26,17 +26,6 @@
 
 namespace brayns
 {
-
-/**
- * @brief The Histogram struct contains the range as well as the values of the simulation histogram
- *        for a given simulation frame, determined by the timestamp
- */
-struct Histogram
-{
-    uint64_ts values;
-    Vector2f range;
-    float timestamp;
-};
 
 /**
  * @brief The AbstractSimulationHandler class handles simulation frames for the current circuit
@@ -76,7 +65,7 @@ public:
     /**
     * @brief Writes a frame to a stream. A frame is a set of float values.
     * @param stream Stream where the header should be written
-    * @param value Frame values
+    * @param values Frame values
     */
     BRAYNS_API void writeFrame( std::ofstream& stream, const floats& values );
 

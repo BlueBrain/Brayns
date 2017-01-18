@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -50,7 +50,7 @@ public:
         Creates a scene object responsible for handling geometry, volumes, materials and
         light sources.
         @param renderers Renderers to be used to render the scene
-        @param parametersManagers Parameters for the scene (Geometry, volume, rendering, etc)
+        @param parametersManager Parameters for the scene (Geometry, volume, rendering, etc)
         @todo The scene must not know about the renderer
               https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
     */
@@ -60,6 +60,10 @@ public:
 
     BRAYNS_API virtual ~Scene();
 
+    /**
+     * Called after scene-related changes have been made before rendering the
+     * scene.
+     */
     BRAYNS_API virtual void commit() = 0;
 
     /**
@@ -70,7 +74,7 @@ public:
                random colors, transparency, reflection, and light emission
         @param nbMaterials The number of materials to create
     */
-    BRAYNS_API virtual void setMaterials(
+    BRAYNS_API void setMaterials(
         MaterialType materialType,
         size_t nbMaterials);
 
