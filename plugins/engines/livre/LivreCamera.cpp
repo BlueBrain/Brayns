@@ -59,7 +59,7 @@ void LivreCamera::commit()
     _livre.getFrameData().getCameraSettings().setModelViewMatrix( livreModelView );
 }
 
-void LivreCamera::setEnvironmentMap( const bool )
+void LivreCamera::setEnvironmentMap( const bool /*environmentMap*/ )
 {
     BRAYNS_WARN << "Environment map is not supported by Livre engine"
                 << std::endl;

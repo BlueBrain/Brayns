@@ -27,37 +27,34 @@
 namespace brayns
 {
 
-class LivreScene : public brayns::Scene
+class LivreScene : public Scene
 {
 public:
     LivreScene( const Renderers& renderer, ParametersManager& parametersManager,
                 livre::Engine& livre );
 
-    /** @copydoc Scene::commit */
-    void commit() final;
-
-    /** @copydoc Scene::buildGeometry */
-    void buildGeometry() final;
-
-    /** @copydoc Scene::commitLights */
-    void commitLights() final;
-
-    /** @copydoc Scene::commitMaterials */
-    void commitMaterials( const bool updateOnly = false ) final;
-
-    /** @copydoc Scene::commitSimulationData */
-    void commitSimulationData() final;
-
-    /** @copydoc Scene::commitVolumeData */
-    void commitVolumeData() final;
-
-    /** @copydoc Scene::commitTransferFunctionData */
+    /** Update transfer function Livre RenderSettings. */
     void commitTransferFunctionData() final;
 
-    /** @copydoc Scene::reset */
-    void reset() final;
+    /** Update Livre's VolumeRendererParameters, e.g. samples per ray. */
+    void commitVolumeData() final;
 
-    /** @copydoc Scene::saveSceneToCacheFile */
+    /** Unsupported by Livre. */
+    void commit() final;
+
+    /** Unsupported by Livre. */
+    void buildGeometry() final;
+
+    /** Unsupported by Livre. */
+    void commitLights() final;
+
+    /** Unsupported by Livre. */
+    void commitMaterials( const bool updateOnly = false ) final;
+
+    /** Unsupported by Livre. */
+    void commitSimulationData() final;
+
+    /** Unsupported by Livre. */
     void saveSceneToCacheFile() final;
 
 private:

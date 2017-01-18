@@ -34,7 +34,7 @@ public:
 
     ~LivreEngine();
 
-    /** @copydoc Engine::name */
+    /** @return "livre" */
     std::string name() const final;
 
     /** @copydoc Engine::commit */
@@ -43,10 +43,16 @@ public:
     /** @copydoc Engine::render */
     void render() final;
 
-    /** @copydoc Engine::postRender */
+    /**
+     * Update the histogram in VolumeHandler after Livre has updated it during
+     * the rendering.
+     */
     void postRender() final;
 
-    /** @copydoc Engine::extensionInit */
+    /**
+     * Register Livre-specific serializables, i.e. VolumeRendererParameters, in
+     * ZeroEQPlugin.
+     */
     void extensionInit( ExtensionPlugin& ) final;
 
 private:

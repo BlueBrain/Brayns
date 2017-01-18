@@ -41,27 +41,6 @@ LivreScene::LivreScene( const Renderers& renderers,
     braynsParams.setSamplesPerRay( livreParams.getSamplesPerRay( ));
 }
 
-void LivreScene::reset()
-{
-    Scene::reset();
-}
-
-void LivreScene::commit()
-{
-}
-
-void LivreScene::buildGeometry()
-{
-}
-
-void LivreScene::commitLights()
-{
-}
-
-void LivreScene::commitMaterials( const bool /*updateOnly*/ )
-{
-}
-
 void LivreScene::commitTransferFunctionData()
 {
     TransferFunction& transferFunction = getTransferFunction();
@@ -85,6 +64,22 @@ void LivreScene::commitVolumeData()
     livreParams.setSamplesPerRay( braynsParams.getSamplesPerRay( ));
 }
 
+void LivreScene::commit()
+{
+}
+
+void LivreScene::buildGeometry()
+{
+}
+
+void LivreScene::commitLights()
+{
+}
+
+void LivreScene::commitMaterials( const bool /*updateOnly*/ )
+{
+}
+
 void LivreScene::commitSimulationData()
 {
 }
@@ -92,5 +87,6 @@ void LivreScene::commitSimulationData()
 void LivreScene::saveSceneToCacheFile()
 {
 }
+
 
 }
