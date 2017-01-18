@@ -24,7 +24,7 @@ include(Common)
 # - building on Ubuntu Jenkins VM
 if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
         (TRAVIS AND LSB_DISTRIBUTOR_ID MATCHES "Ubuntu"))
-  common_find_package(OSPRay)
+  common_find_package(ospray)
   if(NOT OSPRAY_FOUND)
       message(WARNING "[Brayns] OSPRay not found, the project will not be built")
     include(CommonPackageConfig)
@@ -36,7 +36,7 @@ common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framewor
 common_find_package(vmmlib REQUIRED)
 common_find_package(OptiX SYSTEM)
 common_find_package(CUDA SYSTEM)
-common_find_package(OSPRay SYSTEM)
+common_find_package(ospray SYSTEM)
 common_find_package(OpenMP)
 common_find_package(Lunchbox)
 
