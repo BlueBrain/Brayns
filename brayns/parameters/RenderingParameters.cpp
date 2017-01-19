@@ -52,8 +52,8 @@ const std::string RENDERERS[4] = {
     "exobj", "proximityrenderer", "simulationrenderer", "particlerenderer"
 };
 
-const std::string CAMERA_TYPES[4] = {
-    "perspective", "stereo", "orthographic", "panoramic"
+const std::string CAMERA_TYPES[5] = {
+    "perspective", "stereo", "orthographic", "panoramic", "clipped"
 };
 
 const std::string SHADING_TYPES[3] = {

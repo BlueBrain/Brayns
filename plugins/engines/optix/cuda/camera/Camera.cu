@@ -57,6 +57,35 @@ rtDeclareVariable(float, aperture_radius, , );
 rtDeclareVariable(float, focal_scale, , );
 rtDeclareVariable(float4, jitter4, , );
 
+#define NB_CLIP_PLANES 6
+rtDeclareVariable(float4, clip_plane1, , );
+rtDeclareVariable(float4, clip_plane2, , );
+rtDeclareVariable(float4, clip_plane3, , );
+rtDeclareVariable(float4, clip_plane4, , );
+rtDeclareVariable(float4, clip_plane5, , );
+rtDeclareVariable(float4, clip_plane6, , );
+
+__device__ void getClippingValues(
+        const float3& ray_origin, const float3& ray_direction,
+        float& near, float& far )
+{
+    float4 clip_planes[ NB_CLIP_PLANES ] = {
+        clip_plane1, clip_plane2, clip_plane3, clip_plane4, clip_plane5, clip_plane6
+    };
+    for( int i = 0; i < NB_CLIP_PLANES; ++i )
+    {
+        const float3 planeNormal = { clip_planes[i].x, clip_planes[i].y, clip_planes[i].z };
+        float rn = dot( ray_direction, planeNormal );
+        if( rn == 0.f )
+            rn = scene_epsilon;
+        float d = clip_planes[i].w;
+        float t = -( dot( planeNormal, ray_origin ) + d ) / rn;
+        if( rn > 0.f ) // opposite direction plane
+            near = max( near, t );
+        else
+            far = min( far, t );
+    }
+}
 
 RT_PROGRAM void camera()
 {
@@ -89,7 +118,10 @@ RT_PROGRAM void camera()
 
     ray_direction = normalize( ray_target - ray_origin );
 
-    optix::Ray ray( ray_origin, ray_direction, radiance_ray_type, scene_epsilon );
+    float near = scene_epsilon;
+    float far = INFINITY;
+    getClippingValues( ray_origin, ray_direction, near, far );
+    optix::Ray ray( ray_origin, ray_direction, radiance_ray_type, near, far );
 
     PerRayData_radiance prd;
     prd.importance = 1.f;

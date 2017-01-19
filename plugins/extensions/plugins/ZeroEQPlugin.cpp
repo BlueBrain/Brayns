@@ -177,6 +177,13 @@ void ZeroEQPlugin::_setupHTTPServer()
     _httpServer->handleGET( _remoteHistogram );
     _remoteHistogram.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestHistogram, this ));
+
+    _httpServer->handle( _clipPlanes );
+    _clipPlanes.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_clipPlanesUpdated, this ));
+    _clipPlanes.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestClipPlanes, this ));
+
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -200,11 +207,16 @@ void ZeroEQPlugin::_setupRequests()
     ::brayns::v1::Spikes spikes;
     _requests[ spikes.getTypeIdentifier() ] =
         std::bind( &ZeroEQPlugin::_requestSpikes, this );
+
+    ::lexis::render::ClipPlanes clipPlanes;
+    _requests[ clipPlanes.getTypeIdentifier() ] =
+        std::bind( &ZeroEQPlugin::_requestClipPlanes, this );
 }
 
 void ZeroEQPlugin::_setupSubscriber()
 {
     _subscriber.subscribe( _remoteLookupTable1D );
+    _subscriber.subscribe( _clipPlanes );
 }
 
 void ZeroEQPlugin::_cameraUpdated()
@@ -244,7 +256,7 @@ bool ZeroEQPlugin::_requestScene()
     auto& scene = _engine.getScene();
     const auto& materials = scene.getMaterials();
 
-    for( const auto& material: materials )
+    for( auto& material: materials )
     {
         ::brayns::v1::Material m;
         m.setDiffuseColor( material->getColor( ));
@@ -927,6 +939,45 @@ bool ZeroEQPlugin::_requestHistogram()
         _remoteHistogram.setMax( histogram.range.y( ));
         _remoteHistogram.setBins( histogram.values );
     }
+    return true;
+}
+
+void ZeroEQPlugin::_clipPlanesUpdated()
+{
+    const auto& bounds = _engine.getScene().getWorldBounds();
+    const auto& size = bounds.getSize();
+    ClipPlanes clipPlanes;
+
+    for( const auto& plane: _clipPlanes.getPlanesVector( ))
+    {
+        const auto& normal = plane.getNormal();
+        const auto distance = plane.getD() * size.find_max();
+        clipPlanes.push_back( Vector4f( normal[0], normal[1], normal[2], distance));
+    }
+    if( clipPlanes.size() == 6 )
+    {
+        _engine.getCamera().setClipPlanes( clipPlanes );
+        _engine.getCamera().commit();
+        _engine.getFrameBuffer().clear();
+    }
+    else
+        BRAYNS_ERROR << "Invalid number of clip planes. Expected 6, received "
+                     << clipPlanes.size() << std::endl;
+}
+
+bool ZeroEQPlugin::_requestClipPlanes()
+{
+    std::vector< ::lexis::render::Plane > planes;
+    const auto& clipPlanes = _engine.getCamera().getClipPlanes();
+    for( const auto& clipPlane: clipPlanes )
+    {
+        ::lexis::render::Plane plane;
+        float normal[3] = { clipPlane.x(), clipPlane.y(), clipPlane.z() };
+        plane.setNormal( normal );
+        plane.setD( clipPlane.w( ));
+        planes.push_back( plane );
+    }
+    _clipPlanes.setPlanes( planes );
     return true;
 }
 

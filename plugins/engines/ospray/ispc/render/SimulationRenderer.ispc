@@ -69,6 +69,7 @@ inline vec3f SimulationRenderer_shadeRay(
     varying vec3f intersectionColors[NB_MAX_REBOUNDS];
     varying vec3f specularColor = make_vec3f( 0.f );
     sample.z = 1.f;
+    varying float tend = ray.t;
 
     varying bool moreRebounds = true;
     while( moreRebounds && depth < NB_MAX_REBOUNDS )
@@ -361,7 +362,9 @@ inline vec3f SimulationRenderer_shadeRay(
                 else
                     moreRebounds = false;
             }
-            ray.t = infinity;
+            tend -= ray.t;
+            if( tend < 0.f ) break;
+            ray.t = tend;
             ray.primID = -1;
             ray.geomID = -1;
             ray.instID = -1;

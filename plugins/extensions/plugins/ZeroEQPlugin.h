@@ -33,6 +33,8 @@
 #include <lexis/render/lookupTable1D.h>
 #include <lexis/render/viewport.h>
 #include <lexis/render/histogram.h>
+#include <lexis/render/clipPlanes.h>
+
 #include <zerobuf/render/attribute.h>
 #include <zerobuf/render/colormap.h>
 #include <zerobuf/render/frameBuffers.h>
@@ -165,7 +167,6 @@ private:
      */
     bool _requestSpikes();
 
-
     /**
      * @brief This method initializes data sources according to default application parameters
      */
@@ -216,6 +217,17 @@ private:
     bool _requestHistogram();
 
     /**
+     * @brief This method is called when the clip planes are updated by a ZeroEQ event
+     */
+    void _clipPlanesUpdated();
+
+    /**
+     * @brief This method is called when the clip planes are requested by a ZeroEQ event
+     * @return True if the method was successful, false otherwise
+     */
+    bool _requestClipPlanes();
+
+    /**
      * @brief Resizes an given image according to the new size
      * @param srcData Source buffer
      * @param srcSize Source size
@@ -256,6 +268,7 @@ private:
     ::lexis::render::LookupTable1D _remoteLookupTable1D;
     ::lexis::render::Viewport _remoteViewport;
     ::lexis::render::Histogram _remoteHistogram;
+    ::lexis::render::ClipPlanes _clipPlanes;
 
     ::brayns::v1::DataSource _remoteDataSource;
     ::brayns::v1::Settings _remoteSettings;
