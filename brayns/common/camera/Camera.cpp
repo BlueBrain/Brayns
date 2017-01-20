@@ -42,7 +42,7 @@ public:
         , _aspectRatio( 1.f )
         , _aperture( 0.f )
         , _focalLength( 0.f )
-        , _fieldOfView( 60.f )
+        , _fieldOfView( 45.f )
         , _stereoMode( CameraStereoMode::none )
         , _eyeSeparation( 0.0635f )
     {

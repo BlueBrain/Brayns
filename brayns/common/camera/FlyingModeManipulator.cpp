@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -25,12 +25,6 @@
 
 namespace brayns
 {
-
-namespace
-{
-const Vector3f forwardDirection{ 0.f, 0.f , 1.f };
-const Vector3f leftDirection{ 1.f, 0.f, 0.f };
-}
 
 FlyingModeManipulator::FlyingModeManipulator( Camera& camera,
                                               KeyboardHandler& keyboardHandler )
@@ -66,7 +60,7 @@ void FlyingModeManipulator::dragRight( const Vector2i& to,
                                        const Vector2i& from )
 {
     const float distance = -( to.y() - from.y( )) * getMotionSpeed();
-    translate( forwardDirection * distance, false );
+    translate( Vector3f::forward() * distance, false );
 }
 
 void FlyingModeManipulator::dragMiddle( const Vector2i& to,
@@ -80,27 +74,27 @@ void FlyingModeManipulator::dragMiddle( const Vector2i& to,
 void FlyingModeManipulator::wheel( const Vector2i& /*position*/,
                                    const float delta )
 {
-    translate( forwardDirection * delta * getWheelSpeed(), false );
+    translate( Vector3f::forward() * delta * getWheelSpeed(), false );
 }
 
 void FlyingModeManipulator::_strafeLeft()
 {
-    translate( leftDirection * getMotionSpeed(), true );
+    translate( Vector3f::left() * getMotionSpeed(), true );
 }
 
 void FlyingModeManipulator::_strafeRight()
 {
-    translate( leftDirection * -getMotionSpeed(), true );
+    translate( Vector3f::left() * -getMotionSpeed(), true );
 }
 
 void FlyingModeManipulator::_flyForward()
 {
-    translate( forwardDirection * getWheelSpeed(), true );
+    translate( Vector3f::forward() * getWheelSpeed(), true );
 }
 
 void FlyingModeManipulator::_flyBackwards()
 {
-    translate( forwardDirection * -getWheelSpeed(), true );
+    translate( Vector3f::forward() * -getWheelSpeed(), true );
 }
 
 }
