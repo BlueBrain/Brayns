@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -38,7 +38,6 @@ namespace brayns
 
 BraynsViewer::BraynsViewer( Brayns& brayns )
     : BaseWindow( brayns )
-    , _timestampIncrement( 0.f )
 {
     _registerKeyboardShortcuts();
 }
@@ -84,7 +83,8 @@ void BraynsViewer::_randomMaterials()
 
 void BraynsViewer::_toggleIncrementalTimestamp()
 {
-    _timestampIncrement = ( _timestampIncrement == 0.f ) ? 1.f : 0.f;
+    auto& sceneParams = _brayns.getParametersManager().getSceneParameters();
+    sceneParams.setAnimationDelta( sceneParams.getAnimationDelta() == 0 ? 1 : 0 );
 }
 
 void BraynsViewer::_defaultTimestamp()
@@ -101,13 +101,6 @@ void BraynsViewer::_saveSceneToCacheFile()
 
 void BraynsViewer::display( )
 {
-    if( _timestampIncrement != 0.f )
-    {
-        auto& sceneParams = _brayns.getParametersManager().getSceneParameters();
-        sceneParams.setTimestamp( sceneParams.getTimestamp( ) + _timestampIncrement );
-        _brayns.getEngine().commit();
-    }
-
     std::stringstream ss;
     ss << "Brayns Viewer [" <<
           _brayns.getParametersManager().getRenderingParameters().getEngine() <<

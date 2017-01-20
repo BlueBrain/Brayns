@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -17,35 +17,37 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#pragma once
 
-#include "FrameBuffer.h"
+#include <brayns/common/renderer/Renderer.h>
+
+#include <livre/eq/types.h>
 
 namespace brayns
 {
 
-FrameBuffer::FrameBuffer(
-    const Vector2ui& frameSize,
-    const FrameBufferFormat frameBufferFormat,
-    const bool accumulation )
-    : _frameSize(frameSize)
-    , _frameBufferFormat(frameBufferFormat)
-    , _accumulation( accumulation )
+class LivreRenderer : public Renderer
 {
-}
+public:
+    LivreRenderer( ParametersManager& parametersMamager, livre::Engine& livre );
 
-size_t FrameBuffer::getColorDepth()
-{
-    switch(_frameBufferFormat)
-    {
-        case FBF_RGBA_I8:
-        case FBF_BGRA_I8:
-        case FBF_RGBA_F32:
-            return 4;
-        case FBF_RGB_I8:
-            return 3;
-        default:
-            return 0;
-    }
-}
+    /**
+     * Renders one frame with the current committed settings, scene, etc. and
+     * updates the color buffer of the given frameBuffer.
+     */
+    void render( FrameBufferPtr frameBuffer ) final;
+
+    /**
+     * Updates NbFrames in VolumeHandler and sets the current requested
+     * timestamp to render in Livre.
+     */
+    void commit() final;
+
+    /** Unsupported by Livre. */
+    void setCamera( CameraPtr camera ) final;
+
+private:
+    livre::Engine& _livre;
+};
 
 }

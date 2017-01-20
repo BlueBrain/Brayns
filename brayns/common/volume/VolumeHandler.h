@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -127,6 +127,18 @@ public:
      */
     void setTimestamp( const float timestamp );
 
+    /** Set the histogram of the currently loaded volume. */
+    void setHistogram( const Histogram& histogram ) { _histogram = histogram; }
+
+    /** @return the histogram of the currently loaded volume. */
+    const Histogram& getHistogram() const { return _histogram; }
+
+    /** @return the number of frames of the current volume. */
+    uint64_t getNbFrames() const { return _nbFrames; }
+
+    /** Sets the number of frames for the current volume. */
+    void setNbFrames( const uint64_t nbFrames ) { _nbFrames = nbFrames; }
+
     /**
      * @brief The VolumeDescriptor class handles the attribute of a single volume. The class
      *        is in charge of the mapping to the volume file
@@ -217,7 +229,8 @@ private:
     float _timestamp;
     Vector2f _timestampRange;
     TimestampMode _timestampMode;
-
+    Histogram _histogram;
+    uint64_t _nbFrames = 0;
 };
 
 }

@@ -6,6 +6,8 @@ Changelog {#Changelog}
 * [#103](https://github.com/BlueBrain/Brayns/pull/103:
   Added clipping planes (OSPRay engine only). --camera-type command line argument must
   be set to activate the feature
+* [#99](https://github.com/BlueBrain/Brayns/pull/99):
+  Add livre as a new rendering engine
 * [#95](https://github.com/BlueBrain/Brayns/pull/95):
   Upgraded to OSPRay 1.1.2
 * [#87](https://github.com/BlueBrain/Brayns/pull/87):

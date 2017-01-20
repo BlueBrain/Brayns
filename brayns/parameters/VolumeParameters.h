@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -39,6 +39,7 @@ public:
 
     /** File containing volume data */
     const std::string& getFilename() const { return _filename; }
+    void setFilename( const std::string& filename ) { _filename = filename; }
 
     /** Volume dimension  */
     const Vector3ui& getDimensions() const { return _dimensions; }

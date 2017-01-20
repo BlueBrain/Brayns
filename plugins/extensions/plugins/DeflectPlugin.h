@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -38,18 +38,12 @@ struct Image
 {
     std::vector<char> data;
     Vector2ui size;
+    FrameBufferFormat format;
 };
 
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
-    /**
-        Constructs the object and initializes default plugins according to
-        application parameters.
-        @param applicationParameters Application parameters
-        @param extensionParameters Struture of pointers to objects that are
-               potentially updated by registered plugins
-    */
 #ifdef BRAYNS_USE_ZEROEQ
     DeflectPlugin(
         Engine& engine,
@@ -63,7 +57,7 @@ public:
         AbstractManipulator& cameraManipulator );
 #endif
 
-    /** @copydoc ExtensionPlugin::execute */
+    /** @copydoc ExtensionPlugin::run */
     BRAYNS_API void run( ) final;
 
 private:

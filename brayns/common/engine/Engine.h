@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -56,6 +56,12 @@ public:
        modifications
     */
     virtual void commit();
+
+    /**
+     * Called after the given extension plugin was created to perform
+     * engine-specific initialization on a given extension.
+     */
+    virtual void extensionInit( ExtensionPlugin& ) {};
 
     /** Renders the current scene and populates the frame buffer accordingly */
     virtual void render() = 0;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -49,8 +49,6 @@ private:
     void _toggleIncrementalTimestamp();
     void _defaultTimestamp();
     void _saveSceneToCacheFile();
-
-    float _timestampIncrement;
 };
 
 }

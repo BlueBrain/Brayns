@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,34 +18,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FrameBuffer.h"
+#pragma once
+
+#include <brayns/common/camera/Camera.h>
+
+#include <livre/eq/types.h>
 
 namespace brayns
 {
 
-FrameBuffer::FrameBuffer(
-    const Vector2ui& frameSize,
-    const FrameBufferFormat frameBufferFormat,
-    const bool accumulation )
-    : _frameSize(frameSize)
-    , _frameBufferFormat(frameBufferFormat)
-    , _accumulation( accumulation )
+class LivreCamera : public Camera
 {
-}
+public:
+    LivreCamera( const CameraType cameraType, livre::Engine& livre );
 
-size_t FrameBuffer::getColorDepth()
-{
-    switch(_frameBufferFormat)
-    {
-        case FBF_RGBA_I8:
-        case FBF_BGRA_I8:
-        case FBF_RGBA_F32:
-            return 4;
-        case FBF_RGB_I8:
-            return 3;
-        default:
-            return 0;
-    }
-}
+    /**
+     * Transform modelview from Brayns to Livre space and apply in
+     * CameraSettings.
+     */
+    void commit() final;
+
+    /** Unsupported in Livre. */
+    void setEnvironmentMap( bool environmentMap ) final;
+
+private:
+    livre::Engine& _livre;
+};
 
 }
