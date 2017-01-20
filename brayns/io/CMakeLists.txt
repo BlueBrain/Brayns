@@ -8,7 +8,6 @@ set(BRAYNSIO_SOURCES
   XYZBLoader.cpp
   TransferFunctionLoader.cpp
   MorphologyLoader.cpp
-  MolecularSystemReader.cpp
   ProteinLoader.cpp
   NESTLoader.cpp
   TextureLoader.cpp
@@ -18,7 +17,6 @@ set(BRAYNSIO_PUBLIC_HEADERS
   XYZBLoader.h
   TransferFunctionLoader.h
   MorphologyLoader.h
-  MolecularSystemReader.h
   ProteinLoader.h
   NESTLoader.h
   TextureLoader.h
@@ -29,8 +27,8 @@ set(BRAYNSIO_LINK_LIBRARIES
 )
 
 if(ASSIMP_FOUND)
-  list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp)
-  list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h)
+  list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp MolecularSystemReader.cpp)
+  list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h MolecularSystemReader.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE assimp)
 endif()
 

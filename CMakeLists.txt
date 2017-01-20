@@ -19,19 +19,6 @@ option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ON)
 
 include(Common)
 
-# Make Brayns optional when OSPRay is not available and:
-# - building as a subproject
-# - building on Ubuntu Jenkins VM
-if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} OR
-        (TRAVIS AND LSB_DISTRIBUTOR_ID MATCHES "Ubuntu"))
-  common_find_package(OSPRay)
-  if(NOT OSPRAY_FOUND)
-      message(WARNING "[Brayns] OSPRay not found, the project will not be built")
-    include(CommonPackageConfig)
-    return()
-  endif()
-endif()
-
 common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework)
 common_find_package(vmmlib REQUIRED)
 common_find_package(OptiX SYSTEM)
