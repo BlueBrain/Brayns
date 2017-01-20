@@ -42,7 +42,9 @@
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
-#include <brayns/io/MolecularSystemReader.h>
+#ifdef BRAYNS_USE_ASSIMP
+#  include <brayns/io/MolecularSystemReader.h>
+#endif
 
 #include <plugins/engines/EngineFactory.h>
 #include <plugins/extensions/ExtensionPluginFactory.h>
@@ -580,10 +582,15 @@ private:
     */
     void _loadMolecularSystem()
     {
+#ifdef BRAYNS_USE_ASSIMP
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader( geometryParameters );
         molecularSystemReader.import( scene );
+#else
+        BRAYNS_ERROR << "Assimp library missing for molecular meshes"
+                     << std::endl;
+#endif
     }
 
     void _buildDefaultScene()

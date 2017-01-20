@@ -12,5 +12,7 @@ if(TARGET BBPTestData)
 else()
   list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp)
 endif()
-
+if(NOT OSPRAY_FOUND)
+  list(APPEND EXCLUDE_FROM_TESTS brayns.cpp braynsTestData.cpp)
+endif()
 include(CommonCTest)
