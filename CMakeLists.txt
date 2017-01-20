@@ -23,7 +23,7 @@ common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framewor
 common_find_package(vmmlib REQUIRED)
 common_find_package(OptiX SYSTEM)
 common_find_package(CUDA SYSTEM)
-common_find_package(OSPRay SYSTEM)
+#common_find_package(OSPRay SYSTEM) disabled until module on RHEL is fixed
 common_find_package(OpenMP)
 common_find_package(Lunchbox)
 

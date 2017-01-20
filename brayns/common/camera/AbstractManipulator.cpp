@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -28,11 +28,8 @@ namespace brayns
 
 namespace
 {
-const Vector3f UNIT_Y = { 0.f, 1.f, 0.f };
-const Vector3f UNIT_Z = { 0.f, 0.f, 1.f };
 const float DEFAULT_MOTION_SPEED = 0.001f;
 const float DEFAULT_ROTATION_SPEED = 0.005f;
-
 }
 
 AbstractManipulator::AbstractManipulator( Camera& camera,
@@ -82,18 +79,18 @@ void AbstractManipulator::rotate( const Vector3f& pivot, const float du,
                                   const float dv, const bool updateTarget )
 {
     auto& matrix = _camera.getRotationMatrix();
-    matrix.rotate_x( dv );
+    matrix.rotate_x( -dv );
     matrix.rotate_y( -du );
 
     const auto dir = _camera.getTarget() - _camera.getPosition();
-    const auto newPivotToCam = Vector3f{ matrix * -UNIT_Z } * dir.length();
+    const auto newPivotToCam = Vector3f{ matrix * Vector3f::unitZ() } * dir.length();
 
     if( updateTarget )
         _camera.setTarget( _camera.getPosition() - newPivotToCam );
     else
         _camera.setPosition( pivot + newPivotToCam );
 
-    _camera.setUp( matrix * UNIT_Y );
+    _camera.setUp( matrix * Vector3f::unitY() );
 }
 
 }

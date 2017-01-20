@@ -32,7 +32,7 @@ table Camera
   origin: [float:3];
   look_at: [float:3];
   up: [float:3];
-  field_of_view: float = 60;
+  field_of_view: float = 45;
   aperture: float = 0;
   focal_length: float = 0;
   stereo_mode: CameraStereoMode;
