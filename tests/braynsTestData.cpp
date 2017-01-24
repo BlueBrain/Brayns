@@ -1,3 +1,4 @@
+
 /* Copyright (c) 2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel.Nachbaur@epfl.ch
