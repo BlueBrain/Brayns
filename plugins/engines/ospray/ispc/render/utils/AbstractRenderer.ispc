@@ -43,7 +43,7 @@ inline bool launchRandomRay(
     setRay( randomRay, intersection, randomDirection );
     randomRay.t0 = self->super.epsilon;
     randomRay.time = ray.time;
-    randomRay.t = infinity;
+    randomRay.t = ray.t;
     randomRay.primID = -1;
     randomRay.geomID = -1;
     randomRay.instID = -1;

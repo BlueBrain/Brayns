@@ -43,6 +43,9 @@ const std::string CUDA_ATTRIBUTE_CAMERA_V = "V";
 const std::string CUDA_ATTRIBUTE_CAMERA_W = "W";
 const std::string CUDA_ATTRIBUTE_CAMERA_APERTURE_RADIUS = "aperture_radius";
 const std::string CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE = "focal_scale";
+
+const std::string CUDA_CLIP_PLANES[6] =
+    { "clip_plane1", "clip_plane2", "clip_plane3", "clip_plane4", "clip_plane5", "clip_plane6" };
 }
 
 namespace brayns
@@ -62,6 +65,7 @@ OptiXCamera::OptiXCamera(
     switch (cameraType)
     {
     case CameraType::perspective:
+    case CameraType::clipped:
         cameraName = CUDA_FUNCTION_CAMERA;
         cameraPtx = CUDA_PERSPECTIVE_CAMERA;
         break;
@@ -96,6 +100,14 @@ void OptiXCamera::commit()
     _context[ CUDA_ATTRIBUTE_CAMERA_W ]->setFloat( w.x(), w.y(), w.z() );
     _context[ CUDA_ATTRIBUTE_CAMERA_APERTURE_RADIUS ]->setFloat( getAperture( ));
     _context[ CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE ]->setFloat( getFocalLength( ));
+
+    const auto& clipPlanes = getClipPlanes();
+    for( size_t i=0; i < clipPlanes.size(); ++i )
+    {
+        const auto& clipPlane = clipPlanes[i];
+        _context[ CUDA_CLIP_PLANES[i] ]->setFloat(
+            clipPlane.x(), clipPlane.y(), clipPlane.z(), clipPlane.w( ));
+    }
 }
 
 void OptiXCamera::_calculateCameraVariables( Vector3f& U, Vector3f& V, Vector3f& W )
@@ -118,6 +130,5 @@ void OptiXCamera::setEnvironmentMap( const bool environmentMap )
     _context->setMissProgram( 0, _context->createProgramFromPTXString(
         CUDA_MISS, environmentMap ? CUDA_FUNCTION_ENVMAP_MISS : CUDA_FUNCTION_MISS ));
 }
-
 
 }

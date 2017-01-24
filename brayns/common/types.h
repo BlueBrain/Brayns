@@ -158,9 +158,13 @@ typedef std::vector< std::string > strings;
 typedef std::vector< float > floats;
 typedef std::vector< int > ints;
 typedef std::vector< unsigned int > uints;
+typedef std::vector< int8_t > int8_ts;
 typedef std::vector< uint8_t > uint8_ts;
+typedef std::vector< int16_t > int16_ts;
 typedef std::vector< uint16_t > uint16_ts;
+typedef std::vector< int32_t > int32_ts;
 typedef std::vector< uint32_t > uint32_ts;
+typedef std::vector< int64_t > int64_ts;
 typedef std::vector< uint64_t > uint64_ts;
 typedef std::vector< size_t > size_ts;
 
@@ -321,7 +325,8 @@ enum class CameraType
     perspective,
     stereo,
     orthographic,
-    panoramic
+    panoramic,
+    clipped
 };
 
 enum class CameraStereoMode
@@ -347,6 +352,12 @@ enum class CameraMode
     flying,
     inspect
 };
+
+/** A clip plane is defined by a normal and a distance expressed
+ * in absolute value of the coordinate system. Values are stored
+ * in a Vector4, with the following order: nx, ny, nz and d
+ */
+typedef std::vector< Vector4f > ClipPlanes;
 
 struct RenderInput
 {

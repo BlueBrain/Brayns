@@ -171,6 +171,7 @@ MACRO(CONFIGURE_ISPC)
 ENDMACRO()
 
 set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
+  ispc/camera/ClippedPerspectiveCamera.ispc
   ispc/render/utils/AbstractRenderer.ispc
   ispc/render/utils/RandomGenerator.ispc
   ispc/render/utils/SkyBox.ispc
@@ -185,6 +186,7 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
+  ispc/camera/ClippedPerspectiveCamera.cpp
   ispc/render/utils/AbstractRenderer.cpp
   ispc/geometry/ExtendedCones.cpp
   ispc/geometry/ExtendedCylinders.cpp
@@ -202,6 +204,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
+  ispc/camera/ClippedPerspectiveCamera.h
   ispc/render/utils/AbstractRenderer.h
   ispc/geometry/ExtendedCones.h
   ispc/geometry/ExtendedCylinders.h

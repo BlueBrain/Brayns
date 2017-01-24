@@ -492,6 +492,7 @@ void OSPRayScene::_buildParametricOSPGeometry( const size_t materialId )
                     "extendedspheres", data );
                 ospSet1i(extendedSpheres, "bytes_per_extended_sphere",
                     Sphere::getSerializationSize() * sizeof(float));
+                ospSet1i(extendedSpheres, "materialID", materialId );
                 ospSet1i(extendedSpheres,
                     "offset_radius", 3 * sizeof(float));
                 ospSet1i(extendedSpheres,
@@ -527,6 +528,7 @@ void OSPRayScene::_buildParametricOSPGeometry( const size_t materialId )
                     &_serializedCylindersData[materialId][0],
                     OSP_DATA_SHARED_BUFFER );
 
+                ospSet1i( extendedCylinders, "materialID", materialId );
                 ospSetObject( extendedCylinders, "extendedcylinders", data);
                 ospSet1i(extendedCylinders, "bytes_per_extended_cylinder",
                     Cylinder::getSerializationSize() * sizeof(float));
@@ -562,6 +564,7 @@ void OSPRayScene::_buildParametricOSPGeometry( const size_t materialId )
                     &_serializedConesData[materialId][0],
                     OSP_DATA_SHARED_BUFFER );
 
+                ospSet1i( extendedCones, "materialID", materialId );
                 ospSetObject(extendedCones, "extendedcones", data);
                 ospSet1i(extendedCones, "bytes_per_extended_cone",
                     Cone::getSerializationSize() * sizeof(float));
