@@ -219,12 +219,12 @@ public:
     /**
       Sets the camera clip planes
     */
-    BRAYNS_API virtual void setClipPlanes( const ClipPlanes clipPlanes );
+    BRAYNS_API void setClipPlanes( const ClipPlanes clipPlanes );
 
     /**
       @return the camera clip planes
     */
-    BRAYNS_API virtual ClipPlanes& getClipPlanes();
+    BRAYNS_API ClipPlanes& getClipPlanes();
 
 private:
     struct Impl;
