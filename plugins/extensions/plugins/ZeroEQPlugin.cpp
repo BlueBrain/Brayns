@@ -1023,6 +1023,8 @@ void ZeroEQPlugin::_clipPlanesUpdated()
         _engine.getCamera().setClipPlanes( clipPlanes );
         _engine.getCamera().commit();
         _engine.getFrameBuffer().clear();
+
+        _publisher.publish( _clipPlanes );
     }
     else
         BRAYNS_ERROR << "Invalid number of clip planes. Expected 6, received "

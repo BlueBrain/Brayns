@@ -24,6 +24,7 @@
 #include <livre/eq/Engine.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/CameraSettings.h>
+#include <livre/eq/settings/RenderSettings.h>
 
 #include <brayns/common/log.h>
 
@@ -57,6 +58,19 @@ void LivreCamera::commit()
     livreModelView.setColumn( 3, translation );
 
     _livre.getFrameData().getCameraSettings().setModelViewMatrix( livreModelView );
+
+    std::vector< ::lexis::render::Plane > planes;
+    for( const auto& clipPlane: getClipPlanes( ))
+    {
+        ::lexis::render::Plane plane;
+        float normal[3] = { clipPlane.x(), clipPlane.y(), clipPlane.z() };
+        plane.setNormal( normal );
+        plane.setD( clipPlane.w( ));
+        planes.push_back( plane );
+    }
+    ::livre::ClipPlanes clipPlanes;
+    clipPlanes.setPlanes( planes );
+    _livre.getFrameData().getRenderSettings().setClipPlanes( clipPlanes );
 }
 
 void LivreCamera::setEnvironmentMap( const bool /*environmentMap*/ )
