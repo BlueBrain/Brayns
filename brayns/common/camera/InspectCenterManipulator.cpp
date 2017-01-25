@@ -83,7 +83,7 @@ void InspectCenterManipulator::dragMiddle( const Vector2i& to,
 {
     const float x = ( to.x() - from.x() ) * getMotionSpeed();
     const float y = ( to.y() - from.y() ) * getMotionSpeed();
-    translate( { x, y, 0.f }, true );
+    translate( { -x, y, 0.f }, true );
 }
 
 void InspectCenterManipulator::wheel( const Vector2i& /*position*/,
@@ -96,22 +96,22 @@ void InspectCenterManipulator::wheel( const Vector2i& /*position*/,
 
 void InspectCenterManipulator::_rotateLeft()
 {
-    rotate( _camera.getTarget(), getRotationSpeed(), 0, false );
+    rotate( _camera.getTarget(), -getRotationSpeed(), 0, false );
 }
 
 void InspectCenterManipulator::_rotateRight()
 {
-    rotate( _camera.getTarget(), -getRotationSpeed(), 0, false );
+    rotate( _camera.getTarget(), getRotationSpeed(), 0, false );
 }
 
 void InspectCenterManipulator::_rotateUp()
 {
-    rotate( _camera.getTarget(), 0, getRotationSpeed(), false );
+    rotate( _camera.getTarget(), 0, -getRotationSpeed(), false );
 }
 
 void InspectCenterManipulator::_rotateDown()
 {
-    rotate( _camera.getTarget(), 0, -getRotationSpeed(), false );
+    rotate( _camera.getTarget(), 0, getRotationSpeed(), false );
 }
 
 void InspectCenterManipulator::_turnLeft()

@@ -45,22 +45,16 @@ public:
 
     ~OptiXFrameBuffer();
 
-    /** @copydoc FrameBuffer::clear */
     void clear() final;
 
-    /** @copydoc FrameBuffer::resize */
     void resize( const Vector2ui& frameSize ) final;
 
-    /** @copydoc FrameBuffer::map */
     void map() final;
 
-    /** @copydoc FrameBuffer::unmap */
     void unmap() final;
 
-    /** @copydoc FrameBuffer::getColorBuffer */
     uint8_t* getColorBuffer() final { return _colorBuffer; }
 
-    /** @copydoc FrameBuffer::getDepthBuffer */
     float* getDepthBuffer() final { return 0; }
 
 private:

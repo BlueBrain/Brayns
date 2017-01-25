@@ -22,6 +22,7 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
+#include <livre/core/data/DataSource.h>
 #include <livre/eq/Engine.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/RenderSettings.h>
@@ -88,5 +89,9 @@ void LivreScene::saveSceneToCacheFile()
 {
 }
 
+bool LivreScene::isVolumeSupported( const std::string& volumeFile ) const
+{
+    return livre::DataSource::handles( servus::URI( volumeFile ));
+}
 
 }

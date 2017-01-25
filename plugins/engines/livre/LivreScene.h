@@ -57,6 +57,9 @@ public:
     /** Unsupported by Livre. */
     void saveSceneToCacheFile() final;
 
+    /** @copydoc Scene::isVolumeSupported */
+    bool isVolumeSupported( const std::string& volumeFile ) const final;
+
 private:
     livre::Engine& _livre;
 };

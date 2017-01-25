@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -33,6 +33,8 @@
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Cones.cu.ptx.h>
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_TrianglesMesh.cu.ptx.h>
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Phong.cu.ptx.h>
+
+#include <boost/algorithm/string/predicate.hpp> // ends_with
 
 namespace
 {
@@ -895,6 +897,11 @@ uint64_t OptiXScene::_getBvhSize( const uint64_t nbElements ) const
 void OptiXScene::saveSceneToCacheFile()
 {
     BRAYNS_ERROR << "OptiXScene::saveSceneToCacheFile not implemented" << std::endl;
+}
+
+bool OptiXScene::isVolumeSupported( const std::string& volumeFile ) const
+{
+    return boost::algorithm::ends_with( volumeFile, ".raw" );
 }
 
 }

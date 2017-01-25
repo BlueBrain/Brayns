@@ -215,6 +215,12 @@ public:
     */
     BRAYNS_API virtual void saveSceneToCacheFile() = 0;
 
+    /**
+     * @return true if the given volume file is supported by the engines' scene.
+     *         If false, a default scene will be constructed.
+     */
+    BRAYNS_API virtual bool isVolumeSupported( const std::string& volumeFile ) const = 0;
+
 protected:
 
     // Parameters

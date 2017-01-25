@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -41,17 +41,15 @@ public:
     virtual ~ExtensionPlugin() {}
 
     /**
-        Executes the core functionnalities of the plugin and modifies the
-        ExtensionParameters accordingly
-    */
-    BRAYNS_API virtual void run( ) = 0;
+     * Executes the core functionnalities of the plugin
+     * @return true if other plugins are allowed to continue execution or false
+     *         if control shall be returned to Brayns main loop for e.g.
+     *         rendering a new frame.
+     */
+    BRAYNS_API virtual bool run( Engine& _engine ) = 0;
 
 protected:
-
-    ExtensionPlugin( Engine& engine );
-
-    Engine& _engine;
-
+    ExtensionPlugin();
 };
 
 }

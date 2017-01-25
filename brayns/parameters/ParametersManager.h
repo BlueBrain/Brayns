@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -103,6 +103,8 @@ public:
        parameter is not registered, the setting is ignored.
      */
     void set( const std::string& key, const std::string& value );
+
+    std::function< void() > recreateEngine;
 
 private:
     std::vector< AbstractParameters* > _parameterSets;

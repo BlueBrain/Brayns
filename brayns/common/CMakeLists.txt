@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016, EPFL/Blue Brain Project
+# Copyright (c) 2015-2017, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
@@ -33,33 +33,34 @@ set(BRAYNSCOMMON_SOURCES
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
-  exceptions.h
-  log.h
-  engine/Engine.h
-  input/KeyboardHandler.h
-  volume/VolumeHandler.h
-  simulation/AbstractSimulationHandler.h
-  simulation/CircuitSimulationHandler.h
-  simulation/SpikeSimulationHandler.h
-  transferFunction/TransferFunction.h
   camera/AbstractManipulator.h
   camera/Camera.h
   camera/FlyingModeManipulator.h
   camera/InspectCenterManipulator.h
-  scene/Scene.h
-  geometry/Primitive.h
-  geometry/Geometry.h
-  geometry/Sphere.h
-  geometry/Cylinder.h
+  engine/Engine.h
+  exceptions.h
   geometry/Cone.h
+  geometry/Cylinder.h
+  geometry/Geometry.h
+  geometry/Primitive.h
+  geometry/Sphere.h
   geometry/TrianglesMesh.h
-  material/Material.h
-  material/Texture2D.h
-  renderer/Renderer.h
-  renderer/FrameBuffer.h
+  input/KeyboardHandler.h
+  light/DirectionalLight.h
   light/Light.h
   light/PointLight.h
-  light/DirectionalLight.h
+  log.h
+  material/Material.h
+  material/Texture2D.h
+  renderer/FrameBuffer.h
+  renderer/Renderer.h
+  scene/Scene.h
+  simulation/AbstractSimulationHandler.h
+  simulation/CircuitSimulationHandler.h
+  simulation/SpikeSimulationHandler.h
+  transferFunction/TransferFunction.h
+  types.h
+  volume/VolumeHandler.h
 )
 
 set(BRAYNSCOMMON_LINK_LIBRARIES

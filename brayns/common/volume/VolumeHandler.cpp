@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,7 +21,6 @@
 #include "VolumeHandler.h"
 
 #include <brayns/common/log.h>
-#include <brayns/parameters/VolumeParameters.h>
 
 #include <fstream>
 #include <sys/mman.h>
@@ -37,9 +36,9 @@ namespace brayns
 {
 
 VolumeHandler::VolumeHandler(
-    VolumeParameters& volumeParameters,
+    const VolumeParameters& volumeParameters,
     const TimestampMode timestampMode )
-    : _volumeParameters( &volumeParameters )
+    : _volumeParameters( volumeParameters )
     , _timestamp( std::numeric_limits<float>::max( ))
     , _timestampRange( std::numeric_limits<float>::max(), std::numeric_limits<float>::min( ))
     , _timestampMode( timestampMode )
@@ -56,9 +55,9 @@ void VolumeHandler::attachVolumeToFile( const float timestamp, const std::string
     // Add volume descriptor for specified timestamp
     _volumeDescriptors[ timestamp ].reset( new VolumeDescriptor(
         volumeFile,
-        _volumeParameters->getDimensions(),
-        _volumeParameters->getElementSpacing(),
-        _volumeParameters->getOffset()));
+        _volumeParameters.getDimensions(),
+        _volumeParameters.getElementSpacing(),
+        _volumeParameters.getOffset()));
 
     // Update timestamp range
     for( const auto& volumeDescriptor: _volumeDescriptors )
@@ -100,21 +99,21 @@ float VolumeHandler::getEpsilon(
     return diag.find_max() / float( samplesPerRay );
 }
 
-const Vector3ui VolumeHandler::getDimensions() const
+Vector3ui VolumeHandler::getDimensions() const
 {
     if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
         return _volumeDescriptors.at( _timestamp )->getDimensions();
     return Vector3ui();
 }
 
-const Vector3f VolumeHandler::getElementSpacing() const
+Vector3f VolumeHandler::getElementSpacing() const
 {
     if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
         return _volumeDescriptors.at( _timestamp )->getElementSpacing();
     return Vector3f();
 }
 
-const Vector3f VolumeHandler::getOffset() const
+Vector3f VolumeHandler::getOffset() const
 {
     if( _volumeDescriptors.find( _timestamp ) != _volumeDescriptors.end( ))
         return _volumeDescriptors.at( _timestamp )->getOffset();

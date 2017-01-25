@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -36,7 +36,6 @@ public:
         application parameters.
     */
     ExtensionPluginFactory(
-        Engine& engine,
         ParametersManager& parametersManager,
         KeyboardHandler& keyboardHandler,
         AbstractManipulator& cameraManipulator );
@@ -63,7 +62,7 @@ public:
     /**
        Executes code specific to every registered plugin
      */
-    void execute( );
+    void execute( Engine& engine );
 
 private:
 

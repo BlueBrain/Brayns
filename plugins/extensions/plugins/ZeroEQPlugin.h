@@ -55,11 +55,11 @@ namespace brayns
 class ZeroEQPlugin : public ExtensionPlugin
 {
 public:
-    ZeroEQPlugin( Engine& engine, ParametersManager& parametersManager );
+    ZeroEQPlugin( ParametersManager& parametersManager );
     ~ZeroEQPlugin();
 
     /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API void run( ) final;
+    BRAYNS_API bool run( Engine& engine ) final;
 
     BRAYNS_API bool operator ! () const;
     BRAYNS_API ::zeroeq::http::Server* operator->();
@@ -96,11 +96,6 @@ private:
      * @brief This method is called when camera reset is invoked by a ZeroEQ event
      */
     void _resetCameraUpdated();
-
-    /**
-     * @brief This method is called when scene reset is invoked by a ZeroEQ event
-     */
-    void _resetSceneUpdated();
 
     /**
      * @brief This method is called when the scene is requested by a ZeroEQ event
@@ -265,6 +260,10 @@ private:
                          const int32_t pixelFormat,
                          unsigned long& dataSize);
 
+    void _engineInit();
+    void _engineFinish();
+
+    Engine* _engine;
     ParametersManager& _parametersManager;
     tjhandle _compressor;
     ::zeroeq::Subscriber _subscriber;
@@ -291,9 +290,10 @@ private:
     ::brayns::v1::FrameBuffers _remoteFrameBuffers;
     ::brayns::v1::Material _remoteMaterial;
     ::brayns::v1::ResetCamera _remoteResetCamera;
-    ::brayns::v1::ResetScene _remoteResetScene;
     ::brayns::v1::Scene _remoteScene;
     ::brayns::v1::TransferFunction1D _remoteTransferFunction1D;
+
+    bool _forceRendering = false;
 };
 
 }

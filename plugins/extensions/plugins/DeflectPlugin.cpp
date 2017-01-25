@@ -53,17 +53,15 @@ namespace brayns
 
 #if BRAYNS_USE_NETWORKING
     DeflectPlugin::DeflectPlugin(
-        Engine& engine,
         KeyboardHandler& keyboardHandler,
         AbstractManipulator& cameraManipulator,
         ZeroEQPlugin& zeroeq )
 #else
     DeflectPlugin::DeflectPlugin(
-        Engine& engine,
         KeyboardHandler& keyboardHandler,
         AbstractManipulator& cameraManipulator )
 #endif
-    : ExtensionPlugin( engine )
+    : ExtensionPlugin()
     , _keyboardHandler( keyboardHandler )
     , _cameraManipulator( cameraManipulator )
     , _sendFuture( make_ready_future( true ))
@@ -85,7 +83,7 @@ namespace brayns
 #endif
 }
 
-void DeflectPlugin::run()
+bool DeflectPlugin::run( Engine& engine )
 {
     if( _stream )
     {
@@ -113,13 +111,15 @@ void DeflectPlugin::run()
 
     if( deflectEnabled && _stream && _stream->isConnected( ))
     {
-        _sendDeflectFrame();
-        if( _handleDeflectEvents( ))
+        _sendDeflectFrame( engine );
+        if( _handleDeflectEvents( engine ))
         {
-            _engine.getFrameBuffer().clear();
-            _engine.getRenderer().commit();
+            engine.getFrameBuffer().clear();
+            engine.getRenderer().commit();
         }
     }
+
+    return true;
 }
 
 void DeflectPlugin::_initializeDeflect()
@@ -151,7 +151,7 @@ void DeflectPlugin::_initializeDeflect()
     }
 }
 
-void DeflectPlugin::_sendDeflectFrame()
+void DeflectPlugin::_sendDeflectFrame( Engine& engine )
 {
     if( !_sendFuture.get( ))
     {
@@ -162,7 +162,7 @@ void DeflectPlugin::_sendDeflectFrame()
         return;
     }
 
-    auto& frameBuffer = _engine.getFrameBuffer();
+    auto& frameBuffer = engine.getFrameBuffer();
     const Vector2i& frameSize = frameBuffer.getSize();
     void* data = frameBuffer.getColorBuffer();
 
@@ -180,7 +180,7 @@ void DeflectPlugin::_sendDeflectFrame()
         _sendFuture = make_ready_future( true );
 }
 
-bool DeflectPlugin::_handleDeflectEvents()
+bool DeflectPlugin::_handleDeflectEvents( Engine& engine )
 {
     if( !_stream->hasEvent( ))
         return false;
@@ -191,13 +191,15 @@ bool DeflectPlugin::_handleDeflectEvents()
         switch( event.type )
         {
         case deflect::Event::EVT_PRESS:
-            _previousPos = _getWindowPos( event );
+            _previousPos = _getWindowPos( event,
+                                          engine.getFrameBuffer().getSize( ));
             _pan = _pinch = false;
             break;
         case deflect::Event::EVT_MOVE:
         case deflect::Event::EVT_RELEASE:
         {
-            const auto pos = _getWindowPos( event );
+            const auto pos = _getWindowPos( event,
+                                            engine.getFrameBuffer().getSize( ));
             if( !_pan && !_pinch )
                 _cameraManipulator.dragLeft( pos, _previousPos );
             _previousPos = pos;
@@ -208,7 +210,8 @@ bool DeflectPlugin::_handleDeflectEvents()
         {
             if( _pinch )
                 break;
-            const auto pos = _getWindowPos( event );
+            const auto pos = _getWindowPos( event,
+                                            engine.getFrameBuffer().getSize( ));
             _cameraManipulator.dragMiddle( pos, _previousPos );
             _previousPos = pos;
             _pan = true;
@@ -218,8 +221,10 @@ bool DeflectPlugin::_handleDeflectEvents()
         {
             if( _pan )
                 break;
-            const auto pos = _getWindowPos( event );
-            const auto delta = _getZoomDelta( event );
+            const auto pos = _getWindowPos( event,
+                                            engine.getFrameBuffer().getSize( ));
+            const auto delta = _getZoomDelta( event,
+                                              engine.getFrameBuffer().getSize( ));
             _cameraManipulator.wheel( pos, delta * wheelFactor );
             _pinch = true;
             break;
@@ -231,7 +236,7 @@ bool DeflectPlugin::_handleDeflectEvents()
         }
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
         {
-            _engine.reshape( Vector2ui( event.dx, event.dy ));
+            engine.reshape( Vector2ui( event.dx, event.dy ));
             break;
         }
         case deflect::Event::EVT_CLOSE:
@@ -278,15 +283,15 @@ void DeflectPlugin::_send( const bool swapYAxis )
     _sendFuture = _stream->asyncSend( deflectImage );
 }
 
-Vector2d DeflectPlugin::_getWindowPos( const deflect::Event& event ) const
+Vector2d DeflectPlugin::_getWindowPos( const deflect::Event& event,
+                                       const Vector2ui& windowSize ) const
 {
-    const auto windowSize = _engine.getFrameBuffer().getSize();
     return { event.mouseX * windowSize.x(), event.mouseY * windowSize.y() };
 }
 
-double DeflectPlugin::_getZoomDelta( const deflect::Event& pinchEvent ) const
+double DeflectPlugin::_getZoomDelta( const deflect::Event& pinchEvent,
+                                     const Vector2ui& windowSize ) const
 {
-    const auto windowSize = _engine.getFrameBuffer().getSize();
     const auto dx = pinchEvent.dx * windowSize.x();
     const auto dy = pinchEvent.dy * windowSize.y();
     return std::copysign( std::sqrt( dx * dx + dy * dy ), dx + dy );

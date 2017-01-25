@@ -26,10 +26,8 @@ namespace ospray
     \brief Implements a straightforward perspective (or "pinhole"
     camera) for perspective rendering, without support for Depth of Field or Motion Blur
 
-    \ingroup ospray_supported_cameras
-
     A simple perspective camera. This camera type is loaded by passing
-    the type string "perspective" to \ref ospNewCamera
+    the type string "perspective" to ospNewCamera
 
     The perspective camera supports the following parameters
     <pre>
@@ -41,10 +39,10 @@ namespace ospray
     </pre>
 
     The functionality for a perspective camera is implemented via the
-    \ref ospray::ClippedPerspectiveCamera class.
+    ospray::ClippedPerspectiveCamera class.
   */
 
-//! Implements a simple perspective camera (see \subpage perspective_camera)
+//! Implements a clipped perspective camera
 struct OSPRAY_SDK_INTERFACE ClippedPerspectiveCamera : public Camera
 {
 

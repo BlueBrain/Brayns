@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -57,6 +57,12 @@ public:
      *         instanciated
      */
     EnginePtr get( const std::string& name );
+
+    /**
+     * Remove the given engine from the factory. Note that the engine might not
+     * be destroyed, depending on other shared_ptrs holding it.
+     */
+    void remove( EnginePtr engine );
 
 private:
 

@@ -20,6 +20,8 @@
 
 #include "EngineFactory.h"
 
+#include <brayns/common/log.h>
+
 #ifdef BRAYNS_USE_OSPRAY
 #  include <plugins/engines/ospray/OSPRayEngine.h>
 #endif
@@ -47,6 +49,8 @@ EnginePtr EngineFactory::get( const std::string& name )
 {
     if( _engines.find( name ) != _engines.end() )
         return _engines[name];
+    try
+    {
 #ifdef BRAYNS_USE_OSPRAY
     if( name == "ospray" )
     {
@@ -83,7 +87,19 @@ EnginePtr EngineFactory::get( const std::string& name )
         return _engines[name];
     }
 #endif
-    return 0;
+    }
+    catch( const std::runtime_error& e )
+    {
+        BRAYNS_ERROR << "Engine creation failed: " << e.what() << std::endl;
+    }
+
+    return EnginePtr();
+}
+
+void EngineFactory::remove( EnginePtr engine )
+{
+    if( engine )
+        _engines.erase( engine->name() );
 }
 
 }

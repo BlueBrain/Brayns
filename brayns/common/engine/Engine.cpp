@@ -33,7 +33,6 @@ namespace brayns
 
 Engine::Engine( ParametersManager& parametersManager )
     : _parametersManager( parametersManager )
-    , _dirty( true )
 {
 }
 

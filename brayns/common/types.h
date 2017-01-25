@@ -264,13 +264,6 @@ enum TransferFunctionAttribute
     TF_EMISSION
 };
 
-/** Extension parameters */
-struct ExtensionParameters
-{
-    ParametersManagerPtr parametersManager;
-    EnginePtr engine;
-};
-
 /**
  * @brief The Histogram struct contains the range as well as the values of the simulation histogram
  *        for a given simulation frame, determined by the timestamp

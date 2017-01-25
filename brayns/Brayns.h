@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -97,18 +97,9 @@ public:
      */
     BRAYNS_API AbstractManipulator& getCameraManipulator();
 
-    /**
-     * Builds scene according to scene and geometry parameters
-     */
-    BRAYNS_API void buildScene();
-
-
 private:
-
     struct Impl;
-
     std::unique_ptr< Impl > _impl;
-
 };
 
 }

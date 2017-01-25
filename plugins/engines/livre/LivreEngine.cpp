@@ -28,6 +28,7 @@
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/Histogram.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/eq/Engine.h>
@@ -49,11 +50,34 @@ LivreEngine::LivreEngine( int argc, char **argv,
     // force offscreen rendering
     ::setenv( "EQ_WINDOW_IATTR_HINT_DRAWABLE", "-12" /*FBO*/, 1 /*overwrite*/ );
 
+    // deflect streaming is handled by Brayns, disable Equalizer-integrated stream
+    auto deflectHost = ::getenv( "DEFLECT_HOST" );
+    ::unsetenv( "DEFLECT_HOST" );
+
     // disable all logging
     lunchbox::Log::level = 0;
     lunchbox::Log::topics = 0;
 
-    _livre.reset( new livre::Engine( argc, argv ));
+    strings arguments;
+    for( int i = 0; i < argc; ++i )
+        arguments.push_back( argv[i] );
+    const auto& volumeFile = _parametersManager.getVolumeParameters().getFilename();
+    if( !volumeFile.empty( ))
+    {
+        if( livre::DataSource::handles( servus::URI( volumeFile )))
+        {
+            arguments.push_back( "--volume" );
+            arguments.push_back( volumeFile );
+        }
+    }
+
+    char** newArgv = new char*[arguments.size()];
+    for( size_t i = 0; i < arguments.size(); ++i )
+        newArgv[i] = const_cast< char* >( arguments[i].c_str());
+
+    _livre.reset( new livre::Engine( arguments.size(), newArgv ));
+
+    ::setenv( "DEFLECT_HOST", deflectHost, 1 );
 
     auto& volParams = parametersManager.getVolumeParameters();
     auto& rendererParams = _parametersManager.getRenderingParameters();
@@ -129,6 +153,9 @@ void LivreEngine::render()
 
 void LivreEngine::postRender()
 {
+    if( !_scene->getVolumeHandler( ))
+        return;
+
     const auto& livreHistogram = _livre->getHistogram();
     Histogram braynsHistogram;
     braynsHistogram.range.x() = livreHistogram.getMin();

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -529,7 +529,14 @@ VolumeHandlerPtr Scene::getVolumeHandler()
             _volumeHandler.reset( new VolumeHandler(
                 _parametersManager.getVolumeParameters(), TimestampMode::modulo ));
             if( !volumeFile.empty() )
+            {
+                if( !isVolumeSupported( volumeFile ))
+                {
+                    _volumeHandler.reset();
+                    return nullptr;
+                }
                 _volumeHandler->attachVolumeToFile( 0.f, volumeFile );
+            }
             else
             {
                 strings filenames;
@@ -543,10 +550,18 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                         if( boost::filesystem::is_regular_file(dirIter->status( )))
                         {
                             const std::string& filename = dirIter->path( ).string( );
-                            filenames.push_back( filename );
+                            if( isVolumeSupported( filename ))
+                                filenames.push_back( filename );
                         }
                     }
                 }
+
+                if( filenames.empty( ))
+                {
+                    _volumeHandler.reset();
+                    return nullptr;
+                }
+
                 std::sort(filenames.begin(), filenames.end());
                 float timestamp = 0.f;
                 for( const auto& filename: filenames )

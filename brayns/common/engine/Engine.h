@@ -112,7 +112,7 @@ public:
     void setDefaultEpsilon();
 
     /**
-       @brief Makes the engine. This means that all attributes, including geometry, material,
+       @brief Makes the engine dirty. This means that all attributes, including geometry, material,
        camera, framebuffer, etc, have to be reset according to the engine parameters stored in the
        _parametersManager class member.
     */
@@ -122,7 +122,7 @@ public:
      * @brief isDirty returns the engine state
      * @return True if the engine is dirty and needs to be updated. False otherwise.
      */
-    bool isDirty() { return _dirty; }
+    bool isDirty() const { return _dirty; }
 
     /**
        Initializes materials for the current scene
@@ -151,8 +151,7 @@ protected:
     RendererMap _renderers;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
-    bool _dirty;
-
+    bool _dirty = false;
 };
 
 }
