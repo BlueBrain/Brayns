@@ -40,6 +40,8 @@ typedef ::int8_t int8;
 typedef ::uint8_t uint8;
 typedef ::int64_t index_t;
 
+#define BRAYNS_USE_NETWORKING (BRAYNS_USE_LIBJPEGTURBO && BRAYNS_USE_ZEROEQ)
+
 namespace brayns
 {
 

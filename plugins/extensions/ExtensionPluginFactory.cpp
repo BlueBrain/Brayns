@@ -21,7 +21,7 @@
 #include "ExtensionPluginFactory.h"
 
 #include <plugins/extensions/plugins/ExtensionPlugin.h>
-#ifdef BRAYNS_USE_ZEROEQ
+#if BRAYNS_USE_NETWORKING
 #  include <plugins/extensions/plugins/ZeroEQPlugin.h>
 #endif
 #ifdef BRAYNS_USE_DEFLECT
@@ -32,27 +32,33 @@ namespace brayns
 {
 
 ExtensionPluginFactory::ExtensionPluginFactory(
-#if BRAYNS_USE_ZEROEQ || BRAYNS_USE_DEFLECT
+#if BRAYNS_USE_NETWORKING || BRAYNS_USE_DEFLECT
     Engine& engine,
     ParametersManager& parametersManager,
+#  ifdef BRAYNS_USE_DEFLECT
     KeyboardHandler& keyboardHandler,
     AbstractManipulator& cameraManipulator )
+#  else
+    KeyboardHandler&,
+    AbstractManipulator& )
+#  endif
 #else
     Engine&, ParametersManager& , KeyboardHandler&, AbstractManipulator& )
 #endif
 {
-#ifdef BRAYNS_USE_ZEROEQ
+#if BRAYNS_USE_NETWORKING
     auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( engine, parametersManager );
     add( zeroeqPlugin );
 #endif
+
 #ifdef BRAYNS_USE_DEFLECT
-# ifdef BRAYNS_USE_ZEROEQ
+#  if BRAYNS_USE_NETWORKING
     add( std::make_shared<DeflectPlugin>(
-        engine, keyboardHandler, cameraManipulator, *zeroeqPlugin ));
-# else
+         engine, keyboardHandler, cameraManipulator, *zeroeqPlugin ));
+#  else
     add( std::make_shared<DeflectPlugin>(
-        engine, keyboardHandler, cameraManipulator ));
-# endif
+         engine, keyboardHandler, cameraManipulator ));
+#  endif
 #endif
 }
 

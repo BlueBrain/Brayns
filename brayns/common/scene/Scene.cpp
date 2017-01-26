@@ -87,6 +87,7 @@ void Scene::setMaterials(
         case MT_DEFAULT:
             switch( i )
             {
+                case 0: // Default
                 case 1: // Soma
                     material->setColor( Vector3f( 0.9f, 0.9f, 0.9f ));
                     break;

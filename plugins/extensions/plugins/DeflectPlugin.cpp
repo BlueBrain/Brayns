@@ -29,7 +29,7 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/parameters/ApplicationParameters.h>
 
-#ifdef BRAYNS_USE_ZEROEQ
+#if BRAYNS_USE_NETWORKING
 #  include "ZeroEQPlugin.h"
 #endif
 
@@ -51,7 +51,7 @@ std::future<T> make_ready_future( const T value )
 namespace brayns
 {
 
-#ifdef BRAYNS_USE_ZEROEQ
+#if BRAYNS_USE_NETWORKING
     DeflectPlugin::DeflectPlugin(
         Engine& engine,
         KeyboardHandler& keyboardHandler,
@@ -76,7 +76,7 @@ namespace brayns
                                 // the DEFLECT_HOST environment variable
                                 // is defined
 
-#ifdef BRAYNS_USE_ZEROEQ
+#if BRAYNS_USE_NETWORKING
     if( !zeroeq )
         return;
 
