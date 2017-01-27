@@ -51,8 +51,9 @@ LivreEngine::LivreEngine( int argc, char **argv,
     ::setenv( "EQ_WINDOW_IATTR_HINT_DRAWABLE", "-12" /*FBO*/, 1 /*overwrite*/ );
 
     // deflect streaming is handled by Brayns, disable Equalizer-integrated stream
-    auto deflectHost = ::getenv( "DEFLECT_HOST" );
-    ::unsetenv( "DEFLECT_HOST" );
+    const char* deflectHostEnv = "DEFLECT_HOST";
+    auto deflectHost = ::getenv( deflectHostEnv );
+    ::unsetenv( deflectHostEnv );
 
     // disable all logging
     lunchbox::Log::level = 0;
@@ -77,7 +78,8 @@ LivreEngine::LivreEngine( int argc, char **argv,
 
     _livre.reset( new livre::Engine( arguments.size(), newArgv ));
 
-    ::setenv( "DEFLECT_HOST", deflectHost, 1 );
+    if( deflectHost )
+        ::setenv( deflectHostEnv, deflectHost, 1 );
 
     auto& volParams = parametersManager.getVolumeParameters();
     auto& rendererParams = _parametersManager.getRenderingParameters();

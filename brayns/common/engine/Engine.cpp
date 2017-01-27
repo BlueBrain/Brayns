@@ -59,7 +59,6 @@ void Engine::commit()
     sceneParams.setTimestamp( sceneParams.getTimestamp() + sceneParams.getAnimationDelta( ));
 
     _frameBuffer->clear();
-    _dirty = false;
 }
 
 void Engine::_render(

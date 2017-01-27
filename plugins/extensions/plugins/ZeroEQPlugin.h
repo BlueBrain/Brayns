@@ -260,8 +260,8 @@ private:
                          const int32_t pixelFormat,
                          unsigned long& dataSize);
 
-    void _engineInit();
-    void _engineFinish();
+    void _onNewEngine();
+    void _onChangeEngine();
 
     Engine* _engine;
     ParametersManager& _parametersManager;

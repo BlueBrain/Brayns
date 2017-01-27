@@ -58,7 +58,7 @@ ZeroEQPlugin::~ZeroEQPlugin( )
         tjDestroy( _compressor );
 }
 
-void ZeroEQPlugin::_engineInit()
+void ZeroEQPlugin::_onNewEngine()
 {
     servus::Serializable& cam = *_engine->getCamera().getSerializable();
     cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
@@ -72,7 +72,7 @@ void ZeroEQPlugin::_engineInit()
     _engine->extensionInit( *this );
 }
 
-void ZeroEQPlugin::_engineFinish()
+void ZeroEQPlugin::_onChangeEngine()
 {
     servus::Serializable& cam = *_engine->getCamera().getSerializable();
     cam.registerDeserializedCallback( servus::Serializable::DeserializedCallback( ));
@@ -81,6 +81,9 @@ void ZeroEQPlugin::_engineFinish()
         _httpServer->remove( cam );
 
     _requests.erase( ::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER());
+
+    _engine->recreate();
+    _forceRendering = true;
 }
 
 bool ZeroEQPlugin::run( Engine& engine )
@@ -88,7 +91,7 @@ bool ZeroEQPlugin::run( Engine& engine )
     if( _engine != &engine )
     {
         _engine = &engine;
-        _engineInit();
+        _onNewEngine();
     }
 
     if( _requestVolumeHistogram( ))
@@ -824,9 +827,7 @@ void ZeroEQPlugin::_dataSourceUpdated()
 
     _parametersManager.print();
 
-    _engineFinish();
-    _parametersManager.recreateEngine();
-    _forceRendering = true;
+    _onChangeEngine();
 }
 
 void ZeroEQPlugin::_initializeSettings()
@@ -954,11 +955,7 @@ void ZeroEQPlugin::_settingsUpdated()
     app.setJpegCompression( std::min( _remoteSettings.getJpegCompression(), 100u ));
 
     if( _engine->name() != _parametersManager.getRenderingParameters().getEngine( ))
-    {
-        _engineFinish();
-        _parametersManager.recreateEngine();
-        _forceRendering = true;
-    }
+        _onChangeEngine();
     else
     {
         _engine->getRenderer().commit();

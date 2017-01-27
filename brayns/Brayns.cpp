@@ -64,7 +64,6 @@ struct Brayns::Impl
         _parametersManager.reset( new ParametersManager( ));
         _parametersManager->parse( argc, argv );
         _parametersManager->print( );
-        _parametersManager->recreateEngine = std::bind( &Impl::createEngine, this );
 
         // Initialize keyboard handler
         _keyboardHandler.reset( new KeyboardHandler( ));
@@ -99,6 +98,8 @@ struct Brayns::Impl
 
         // Load data and build geometry
         buildScene();
+
+        _engine->recreate = std::bind( &Impl::createEngine, this );
     }
 
     void buildScene()
@@ -133,17 +134,19 @@ struct Brayns::Impl
     void render( const RenderInput& renderInput,
                  RenderOutput& renderOutput )
     {
-        if( _engine->isDirty( ))
-            createEngine();
-
         _engine->getCamera().set( renderInput.position, renderInput.target, renderInput.up );
         _engine->reshape( renderInput.windowSize );
         _engine->preRender();
 
+        auto oldEngine = _engine.get();
         _extensionPluginFactory->execute( *_engine );
 
-        _engine->reshape( renderInput.windowSize );
-        _engine->preRender();
+        // the ZeroEQ plugin can create a new engine
+        if( _engine.get() != oldEngine )
+        {
+            _engine->reshape( renderInput.windowSize );
+            _engine->preRender();
+        }
 
         auto& sceneParams = _parametersManager->getSceneParameters();
         if( sceneParams.getAnimationDelta() != 0 )
@@ -189,18 +192,20 @@ struct Brayns::Impl
 
     void render()
     {
-        if( _engine->isDirty( ))
-            createEngine();
-
         const Vector2ui windowSize = _parametersManager->getApplicationParameters().getWindowSize();
 
         _engine->reshape( windowSize );
         _engine->preRender();
 
+        auto oldEngine = _engine.get();
         _extensionPluginFactory->execute( *_engine );
 
-        _engine->reshape( windowSize );
-        _engine->preRender();
+        // the ZeroEQ plugin can create a new engine
+        if( _engine.get() != oldEngine )
+        {
+            _engine->reshape( windowSize );
+            _engine->preRender();
+        }
 
         Scene& scene = _engine->getScene();
         Camera& camera = _engine->getCamera();

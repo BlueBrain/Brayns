@@ -112,19 +112,6 @@ public:
     void setDefaultEpsilon();
 
     /**
-       @brief Makes the engine dirty. This means that all attributes, including geometry, material,
-       camera, framebuffer, etc, have to be reset according to the engine parameters stored in the
-       _parametersManager class member.
-    */
-    void makeDirty() { _dirty = true; }
-
-    /**
-     * @brief isDirty returns the engine state
-     * @return True if the engine is dirty and needs to be updated. False otherwise.
-     */
-    bool isDirty() const { return _dirty; }
-
-    /**
        Initializes materials for the current scene
        @param materialType Predefined sets of colors
              MT_DEFAULT: Random colors
@@ -139,6 +126,13 @@ public:
         MaterialType materialType = MT_DEFAULT,
         size_t nbMaterials = NB_MAX_MATERIALS );
 
+    /**
+     * Recreates the engine according to new parameters, e.g. datasource has
+     * changed or engine type/name. The recreation is delegated to the Brayns
+     * instance.
+     */
+    std::function< void() > recreate;
+
 protected:
 
     void _render( const RenderInput& renderInput, RenderOutput& renderOutput );
@@ -151,7 +145,6 @@ protected:
     RendererMap _renderers;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
-    bool _dirty = false;
 };
 
 }
