@@ -134,7 +134,7 @@ void OptiXEngine::_initializeContext()
 
 std::string OptiXEngine::name() const
 {
-    return "OptiX";
+    return "optix";
 }
 
 void OptiXEngine::commit()
