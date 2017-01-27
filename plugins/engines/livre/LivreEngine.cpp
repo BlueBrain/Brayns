@@ -67,8 +67,17 @@ LivreEngine::LivreEngine( int argc, char **argv,
     {
         if( livre::DataSource::handles( servus::URI( volumeFile )))
         {
-            arguments.push_back( "--volume" );
-            arguments.push_back( volumeFile );
+            auto i = std::find( arguments.begin(), arguments.end(),  "--volume" );
+            if( i == arguments.end( ))
+            {
+                arguments.push_back( "--volume" );
+                arguments.push_back( volumeFile );
+            }
+            else
+            {
+                ++i;
+                *i = volumeFile;
+            }
         }
     }
 
@@ -77,6 +86,7 @@ LivreEngine::LivreEngine( int argc, char **argv,
         newArgv[i] = const_cast< char* >( arguments[i].c_str());
 
     _livre.reset( new livre::Engine( arguments.size(), newArgv ));
+    delete [] newArgv;
 
     if( deflectHost )
         ::setenv( deflectHostEnv, deflectHost, 1 );
@@ -104,22 +114,6 @@ LivreEngine::LivreEngine( int argc, char **argv,
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
     _frameBuffer.reset( new LivreFrameBuffer( _frameSize, FBF_BGRA_I8, *_livre ));
     _camera.reset( new LivreCamera( rendererParams.getCameraType(), *_livre ));
-
-    const auto& volInfo = _livre->getVolumeInformation();
-    Vector4f halfWorldSize = volInfo.worldSize/2.f;
-    halfWorldSize[3] = 1.f;
-    auto bboxMin = volInfo.dataToLivreTransform.inverse() * halfWorldSize;
-    bboxMin[3] = 1;
-    auto bboxMax = volInfo.dataToLivreTransform.inverse() * -halfWorldSize;
-
-    // not fully understanding the math behind here, but this solves the camera
-    // positioning for now
-    if( volInfo.dataToLivreTransform.getTranslation() == Vector3f( ))
-        bboxMax[3] = 1;
-
-    Boxf& worldBounds = _scene->getWorldBounds();
-    worldBounds.merge( Vector3f(bboxMin) / volInfo.meterToDataUnitRatio );
-    worldBounds.merge( Vector3f(bboxMax) / volInfo.meterToDataUnitRatio );
 }
 
 LivreEngine::~LivreEngine()

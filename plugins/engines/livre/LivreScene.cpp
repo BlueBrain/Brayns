@@ -71,6 +71,18 @@ void LivreScene::commit()
 
 void LivreScene::buildGeometry()
 {
+    const auto& volInfo = _livre.getVolumeInformation();
+    Vector4f halfWorldSize = volInfo.worldSize/2.f;
+    halfWorldSize[3] = 1.f;
+    auto bboxMin = volInfo.dataToLivreTransform.inverse() * halfWorldSize;
+    bboxMin[3] = 1;
+    auto bboxMax = volInfo.dataToLivreTransform.inverse() * -halfWorldSize;
+    bboxMax[3] = 1;
+
+    Boxf& worldBounds = getWorldBounds();
+    worldBounds.reset();
+    worldBounds.merge( Vector3f(bboxMin) / volInfo.meterToDataUnitRatio );
+    worldBounds.merge( Vector3f(bboxMax) / volInfo.meterToDataUnitRatio );
 }
 
 void LivreScene::commitLights()
