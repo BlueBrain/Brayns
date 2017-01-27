@@ -23,7 +23,7 @@ set(BRAYNSIO_PUBLIC_HEADERS
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
-  PRIVATE braynsParameters braynsCommon Servus vmmlib boost_system boost_filesystem
+  PRIVATE braynsParameters braynsCommon vmmlib boost_system boost_filesystem
 )
 
 if(ASSIMP_FOUND)

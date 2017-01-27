@@ -123,7 +123,7 @@ struct Brayns::Impl
         _engine->reshape( renderInput.windowSize );
         _engine->preRender();
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         if( !_extensionPluginFactory )
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
@@ -185,7 +185,7 @@ struct Brayns::Impl
 
         _engine->preRender();
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         if( !_extensionPluginFactory )
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
@@ -241,7 +241,7 @@ struct Brayns::Impl
 
 private:
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     void _intializeExtensionPluginFactory( )
     {
         _extensionParameters.parametersManager = _parametersManager;
@@ -835,7 +835,7 @@ private:
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;
     ExtensionParameters _extensionParameters;
 #endif
