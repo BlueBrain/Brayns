@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -76,6 +76,9 @@ public:
 
     /** @copydoc Scene::saveSceneToCacheFile */
     void saveSceneToCacheFile() final;
+
+    /** @copydoc Scene::isVolumeSupported */
+    bool isVolumeSupported( const std::string& volumeFile ) const final;
 
     OSPModel* modelImpl( const size_t timestamp );
 

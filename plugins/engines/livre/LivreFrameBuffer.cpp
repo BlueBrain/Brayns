@@ -52,7 +52,6 @@ void LivreFrameBuffer::resize( const Vector2ui& frameSize )
 
 void LivreFrameBuffer::clear()
 {
-    _colorBuffer = nullptr;
 }
 
 void LivreFrameBuffer::map()

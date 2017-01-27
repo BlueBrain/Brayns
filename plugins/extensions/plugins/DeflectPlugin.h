@@ -46,19 +46,17 @@ class DeflectPlugin : public ExtensionPlugin
 public:
 #if BRAYNS_USE_NETWORKING
     DeflectPlugin(
-        Engine& engine,
         KeyboardHandler& keyboardHandler,
         AbstractManipulator& cameraManipulator,
         ZeroEQPlugin& zeroeq );
 #else
     DeflectPlugin(
-        Engine& engine,
         KeyboardHandler& keyboardHandler,
         AbstractManipulator& cameraManipulator );
 #endif
 
     /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API void run( ) final;
+    BRAYNS_API bool run( Engine& engine ) final;
 
 private:
     struct HandledEvents
@@ -82,8 +80,8 @@ private:
     };
 
     void _initializeDeflect();
-    void _sendDeflectFrame();
-    bool _handleDeflectEvents();
+    void _sendDeflectFrame( Engine& engine );
+    bool _handleDeflectEvents( Engine& engine );
 
     /** Send an image to DisplayCluster
      *
@@ -91,8 +89,10 @@ private:
      */
     void _send( bool swapYAxis );
 
-    Vector2d _getWindowPos( const deflect::Event& event ) const;
-    double _getZoomDelta( const deflect::Event& pinchEvent ) const;
+    Vector2d _getWindowPos( const deflect::Event& event,
+                            const Vector2ui& windowSize ) const;
+    double _getZoomDelta( const deflect::Event& pinchEvent,
+                          const Vector2ui& windowSize ) const;
 
     KeyboardHandler& _keyboardHandler;
     AbstractManipulator& _cameraManipulator;

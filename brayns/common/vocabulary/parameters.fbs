@@ -1,4 +1,4 @@
-/* Copyright (c) 2015_2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015_2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -108,7 +108,14 @@ enum Shading: uint {
     electron,
 }
 
+enum Engine: string {
+    ospray,
+    optix,
+    livre
+}
+
 table Settings {
+    engine: Engine;
     timestamp: float;
     volume_samples_per_ray: uint;
     shader: Shader;

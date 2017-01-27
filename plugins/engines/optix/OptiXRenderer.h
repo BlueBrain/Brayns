@@ -45,13 +45,10 @@ public:
         ParametersManager& parametersMamager,
         optix::Context& context );
 
-    /** @copydoc Renderer::render */
     void render( FrameBufferPtr frameBuffer ) final;
 
-    /** @copydoc Renderer::commit */
     void commit() final;
 
-    /** @copydoc Renderer::setCamera */
     void setCamera( CameraPtr camera ) final;
 
 private:

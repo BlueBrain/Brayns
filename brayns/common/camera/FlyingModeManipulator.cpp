@@ -68,7 +68,7 @@ void FlyingModeManipulator::dragMiddle( const Vector2i& to,
 {
     const float x = ( to.x() - from.x( )) * getMotionSpeed();
     const float y = ( to.y() - from.y( )) * getMotionSpeed();
-    translate( { x, y, 0.f }, true );
+    translate( { -x, y, 0.f }, true );
 }
 
 void FlyingModeManipulator::wheel( const Vector2i& /*position*/,
@@ -79,12 +79,12 @@ void FlyingModeManipulator::wheel( const Vector2i& /*position*/,
 
 void FlyingModeManipulator::_strafeLeft()
 {
-    translate( Vector3f::left() * getMotionSpeed(), true );
+    translate( Vector3f::right() * getMotionSpeed(), true );
 }
 
 void FlyingModeManipulator::_strafeRight()
 {
-    translate( Vector3f::left() * -getMotionSpeed(), true );
+    translate( Vector3f::left() * getMotionSpeed(), true );
 }
 
 void FlyingModeManipulator::_flyForward()
@@ -94,7 +94,7 @@ void FlyingModeManipulator::_flyForward()
 
 void FlyingModeManipulator::_flyBackwards()
 {
-    translate( Vector3f::forward() * -getWheelSpeed(), true );
+    translate( Vector3f::backward() * getWheelSpeed(), true );
 }
 
 }

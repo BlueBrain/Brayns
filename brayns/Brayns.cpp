@@ -65,16 +65,31 @@ struct Brayns::Impl
         _parametersManager->parse( argc, argv );
         _parametersManager->print( );
 
-        // Get rendering engine
-        EngineFactory engineFactory( argc, argv, *_parametersManager );
-        std::string engineName = _parametersManager->getRenderingParameters().getEngine();
-        _engine = engineFactory.get( engineName );
-        if( !_engine )
-            throw std::runtime_error( "Unsupported engine: " + engineName );
-
         // Initialize keyboard handler
         _keyboardHandler.reset( new KeyboardHandler( ));
         _registerKeyboardShortcuts();
+
+        // Get rendering engine
+        _engineFactory.reset( new EngineFactory( argc, argv,
+                                                 *_parametersManager ));
+        createEngine();
+
+        _extensionPluginFactory.reset( new ExtensionPluginFactory(
+                    *_parametersManager, *_keyboardHandler, *_cameraManipulator ));
+    }
+
+    void createEngine()
+    {
+        if( _engine )
+        {
+            _engineFactory->remove( _engine );
+            _engine.reset();
+        }
+
+        const auto& engineName = _parametersManager->getRenderingParameters().getEngine();
+        _engine = _engineFactory->get( engineName );
+        if( !_engine )
+            throw std::runtime_error( "Unsupported engine: " + engineName );
 
         // Default sun light
         DirectionalLightPtr sunLight( new DirectionalLight(
@@ -83,6 +98,8 @@ struct Brayns::Impl
 
         // Load data and build geometry
         buildScene();
+
+        _engine->recreate = std::bind( &Impl::createEngine, this );
     }
 
     void buildScene()
@@ -108,7 +125,7 @@ struct Brayns::Impl
         _engine->setDefaultCamera();
 
         // Set default epsilon according to scene bounding box
-        _engine->setDefaultEpsilon( );
+        _engine->setDefaultEpsilon();
 
         // Commit changes to the rendering engine
         _engine->commit();
@@ -117,28 +134,25 @@ struct Brayns::Impl
     void render( const RenderInput& renderInput,
                  RenderOutput& renderOutput )
     {
-        Camera& camera = _engine->getCamera();
-        camera.set( renderInput.position, renderInput.target, renderInput.up );
-
+        _engine->getCamera().set( renderInput.position, renderInput.target, renderInput.up );
         _engine->reshape( renderInput.windowSize );
         _engine->preRender();
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        if( !_extensionPluginFactory )
-            _intializeExtensionPluginFactory( );
-        _extensionPluginFactory->execute( );
-        if( _engine->isDirty( ))
+        auto oldEngine = _engine.get();
+        _extensionPluginFactory->execute( *_engine );
+
+        // the ZeroEQ plugin can create a new engine
+        if( _engine.get() != oldEngine )
         {
-            _engine->getScene().reset();
-            _engine->initializeMaterials();
-            buildScene();
+            _engine->reshape( renderInput.windowSize );
+            _engine->preRender();
         }
-#endif
 
         auto& sceneParams = _parametersManager->getSceneParameters();
         if( sceneParams.getAnimationDelta() != 0 )
             _engine->commit();
 
+        Camera& camera = _engine->getCamera();
         camera.commit();
 
         Scene& scene = _engine->getScene();
@@ -178,24 +192,23 @@ struct Brayns::Impl
 
     void render()
     {
-        Scene& scene = _engine->getScene();
-        Camera& camera = _engine->getCamera();
         const Vector2ui windowSize = _parametersManager->getApplicationParameters().getWindowSize();
-        _engine->reshape( windowSize );
 
+        _engine->reshape( windowSize );
         _engine->preRender();
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        if( !_extensionPluginFactory )
-            _intializeExtensionPluginFactory( );
-        _extensionPluginFactory->execute( );
-        if( _engine->isDirty( ))
+        auto oldEngine = _engine.get();
+        _extensionPluginFactory->execute( *_engine );
+
+        // the ZeroEQ plugin can create a new engine
+        if( _engine.get() != oldEngine )
         {
-            _engine->getScene().reset();
-            _engine->initializeMaterials();
-            buildScene();
+            _engine->reshape( windowSize );
+            _engine->preRender();
         }
-#endif
+
+        Scene& scene = _engine->getScene();
+        Camera& camera = _engine->getCamera();
 
         auto& sceneParams = _parametersManager->getSceneParameters();
         if( sceneParams.getAnimationDelta() != 0 )
@@ -240,18 +253,6 @@ struct Brayns::Impl
     }
 
 private:
-
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-    void _intializeExtensionPluginFactory( )
-    {
-        _extensionParameters.parametersManager = _parametersManager;
-        _extensionParameters.engine = _engine;
-
-        _extensionPluginFactory.reset( new ExtensionPluginFactory(
-            *_engine, *_parametersManager, *_keyboardHandler, *_cameraManipulator ));
-    }
-#endif
-
     void _render( )
     {
         _engine->setActiveRenderer( _parametersManager->getRenderingParameters().getRenderer( ));
@@ -310,7 +311,7 @@ private:
         if(!geometryParameters.getMolecularSystemConfig().empty( ))
             _loadMolecularSystem();
 
-        if(!volumeParameters.getFilename().empty() || !volumeParameters.getFolder().empty())
+        if( scene.getVolumeHandler( ))
         {
             scene.getVolumeHandler()->setTimestamp( 0.f );
             const Vector3ui& volumeDimensions = scene.getVolumeHandler()->getDimensions();
@@ -593,16 +594,9 @@ private:
 #endif
     }
 
-    void _buildDefaultScene()
-    {
-        auto& scene = _engine->getScene();
-        scene.buildDefault();
-        scene.buildGeometry();
-    }
-
     void _setupCameraManipulator( const CameraMode mode )
     {
-        _cameraManipulator.reset(); // deregister previous keyboard handlers
+        _cameraManipulator.reset();
 
         switch( mode )
         {
@@ -830,6 +824,7 @@ private:
         renderParams.setLightEmittingMaterials( !renderParams.getLightEmittingMaterials() );
     }
 
+    std::unique_ptr< EngineFactory > _engineFactory;
     ParametersManagerPtr _parametersManager;
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
@@ -837,7 +832,6 @@ private:
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;
-    ExtensionParameters _extensionParameters;
 #endif
 };
 
@@ -864,11 +858,6 @@ void Brayns::render()
 Engine& Brayns::getEngine()
 {
     return _impl->getEngine();
-}
-
-void Brayns::buildScene()
-{
-    return _impl->buildScene();
 }
 
 ParametersManager& Brayns::getParametersManager()

@@ -28,6 +28,7 @@
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/Histogram.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/eq/Engine.h>
@@ -49,11 +50,46 @@ LivreEngine::LivreEngine( int argc, char **argv,
     // force offscreen rendering
     ::setenv( "EQ_WINDOW_IATTR_HINT_DRAWABLE", "-12" /*FBO*/, 1 /*overwrite*/ );
 
+    // deflect streaming is handled by Brayns, disable Equalizer-integrated stream
+    const char* deflectHostEnv = "DEFLECT_HOST";
+    auto deflectHost = ::getenv( deflectHostEnv );
+    ::unsetenv( deflectHostEnv );
+
     // disable all logging
     lunchbox::Log::level = 0;
     lunchbox::Log::topics = 0;
 
-    _livre.reset( new livre::Engine( argc, argv ));
+    strings arguments;
+    for( int i = 0; i < argc; ++i )
+        arguments.push_back( argv[i] );
+    const auto& volumeFile = _parametersManager.getVolumeParameters().getFilename();
+    if( !volumeFile.empty( ))
+    {
+        if( livre::DataSource::handles( servus::URI( volumeFile )))
+        {
+            auto i = std::find( arguments.begin(), arguments.end(),  "--volume" );
+            if( i == arguments.end( ))
+            {
+                arguments.push_back( "--volume" );
+                arguments.push_back( volumeFile );
+            }
+            else
+            {
+                ++i;
+                *i = volumeFile;
+            }
+        }
+    }
+
+    char** newArgv = new char*[arguments.size()];
+    for( size_t i = 0; i < arguments.size(); ++i )
+        newArgv[i] = const_cast< char* >( arguments[i].c_str());
+
+    _livre.reset( new livre::Engine( arguments.size(), newArgv ));
+    delete [] newArgv;
+
+    if( deflectHost )
+        ::setenv( deflectHostEnv, deflectHost, 1 );
 
     auto& volParams = parametersManager.getVolumeParameters();
     auto& rendererParams = _parametersManager.getRenderingParameters();
@@ -78,22 +114,6 @@ LivreEngine::LivreEngine( int argc, char **argv,
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
     _frameBuffer.reset( new LivreFrameBuffer( _frameSize, FBF_BGRA_I8, *_livre ));
     _camera.reset( new LivreCamera( rendererParams.getCameraType(), *_livre ));
-
-    const auto& volInfo = _livre->getVolumeInformation();
-    Vector4f halfWorldSize = volInfo.worldSize/2.f;
-    halfWorldSize[3] = 1.f;
-    auto bboxMin = volInfo.dataToLivreTransform.inverse() * halfWorldSize;
-    bboxMin[3] = 1;
-    auto bboxMax = volInfo.dataToLivreTransform.inverse() * -halfWorldSize;
-
-    // not fully understanding the math behind here, but this solves the camera
-    // positioning for now
-    if( volInfo.dataToLivreTransform.getTranslation() == Vector3f( ))
-        bboxMax[3] = 1;
-
-    Boxf& worldBounds = _scene->getWorldBounds();
-    worldBounds.merge( Vector3f(bboxMin) / volInfo.meterToDataUnitRatio );
-    worldBounds.merge( Vector3f(bboxMax) / volInfo.meterToDataUnitRatio );
 }
 
 LivreEngine::~LivreEngine()
@@ -129,6 +149,9 @@ void LivreEngine::render()
 
 void LivreEngine::postRender()
 {
+    if( !_scene->getVolumeHandler( ))
+        return;
+
     const auto& livreHistogram = _livre->getHistogram();
     Histogram braynsHistogram;
     braynsHistogram.range.x() = livreHistogram.getMin();

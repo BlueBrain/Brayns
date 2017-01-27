@@ -33,7 +33,6 @@ namespace brayns
 
 Engine::Engine( ParametersManager& parametersManager )
     : _parametersManager( parametersManager )
-    , _dirty( true )
 {
 }
 
@@ -60,7 +59,6 @@ void Engine::commit()
     sceneParams.setTimestamp( sceneParams.getTimestamp() + sceneParams.getAnimationDelta( ));
 
     _frameBuffer->clear();
-    _dirty = false;
 }
 
 void Engine::_render(

@@ -59,7 +59,8 @@ void LivreRenderer::commit()
 
     livreSettings.setFrameNumber( nbFrames == 0 ? 0 : (ts % nbFrames) );
 
-    _scene->getVolumeHandler()->setNbFrames( nbFrames );
+    if( _scene->getVolumeHandler( ))
+        _scene->getVolumeHandler()->setNbFrames( nbFrames );
 }
 
 void LivreRenderer::setCamera( CameraPtr /*camera*/ )

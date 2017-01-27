@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -33,7 +33,6 @@ namespace brayns
 
 ExtensionPluginFactory::ExtensionPluginFactory(
 #if BRAYNS_USE_NETWORKING || BRAYNS_USE_DEFLECT
-    Engine& engine,
     ParametersManager& parametersManager,
 #  ifdef BRAYNS_USE_DEFLECT
     KeyboardHandler& keyboardHandler,
@@ -43,22 +42,22 @@ ExtensionPluginFactory::ExtensionPluginFactory(
     AbstractManipulator& )
 #  endif
 #else
-    Engine&, ParametersManager& , KeyboardHandler&, AbstractManipulator& )
+    ParametersManager& , KeyboardHandler&, AbstractManipulator& )
 #endif
 {
 #if BRAYNS_USE_NETWORKING
-    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( engine, parametersManager );
+    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( parametersManager );
     add( zeroeqPlugin );
 #endif
 
 #ifdef BRAYNS_USE_DEFLECT
 #  if BRAYNS_USE_NETWORKING
     add( std::make_shared<DeflectPlugin>(
-         engine, keyboardHandler, cameraManipulator, *zeroeqPlugin ));
-#  else
+        keyboardHandler, cameraManipulator, *zeroeqPlugin ));
+# else
     add( std::make_shared<DeflectPlugin>(
-         engine, keyboardHandler, cameraManipulator ));
-#  endif
+        keyboardHandler, cameraManipulator ));
+# endif
 #endif
 }
 
@@ -86,10 +85,11 @@ void ExtensionPluginFactory::clear( )
     _plugins.clear();
 }
 
-void ExtensionPluginFactory::execute( )
+void ExtensionPluginFactory::execute( Engine& engine )
 {
     for( ExtensionPluginPtr plugin: _plugins )
-        plugin->run( );
+        if( !plugin->run( engine ))
+            break;
 }
 
 }

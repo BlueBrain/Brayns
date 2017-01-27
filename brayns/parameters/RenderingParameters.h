@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -43,6 +43,7 @@ public:
 
     /** Engine*/
     const std::string& getEngine( ) const { return _engine; }
+    void setEngine( const std::string& name ) { _engine = name; }
 
     /** OSPRay module */
     const std::string& getModule( ) const { return _module; }

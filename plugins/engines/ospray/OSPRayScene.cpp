@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -30,6 +30,8 @@
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/io/TextureLoader.h>
+
+#include <boost/algorithm/string/predicate.hpp> // ends_with
 
 namespace brayns
 {
@@ -1032,6 +1034,11 @@ OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)
 void OSPRayScene::saveSceneToCacheFile()
 {
     _saveCacheFile();
+}
+
+bool OSPRayScene::isVolumeSupported( const std::string& volumeFile ) const
+{
+    return boost::algorithm::ends_with( volumeFile, ".raw" );
 }
 
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -76,6 +76,7 @@ OptiXEngine::OptiXEngine(
 
 OptiXEngine::~OptiXEngine()
 {
+    _frameBuffer.reset();
     if( _context )
     {
         _context->destroy();

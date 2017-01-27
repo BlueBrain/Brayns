@@ -39,9 +39,8 @@ namespace brayns
 {
 
 ZeroEQPlugin::ZeroEQPlugin(
-    Engine& engine,
     ParametersManager& parametersManager )
-    : ExtensionPlugin( engine )
+    : ExtensionPlugin()
     , _parametersManager( parametersManager )
     , _compressor( tjInitCompress() )
     , _processingImageJpeg( false )
@@ -51,31 +50,63 @@ ZeroEQPlugin::ZeroEQPlugin(
     _setupSubscriber();
     _initializeDataSource();
     _initializeSettings();
-
-    engine.extensionInit( *this );
 }
 
 ZeroEQPlugin::~ZeroEQPlugin( )
 {
     if( _compressor )
         tjDestroy( _compressor );
-
-    if( _httpServer )
-    {
-        _httpServer->remove( *_engine.getCamera().getSerializable() );
-        _httpServer->remove( _remoteImageJPEG );
-    }
 }
 
-void ZeroEQPlugin::run()
+void ZeroEQPlugin::_onNewEngine()
 {
+    servus::Serializable& cam = *_engine->getCamera().getSerializable();
+    cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
+
+    if( _httpServer )
+        _httpServer->handle( cam );
+
+    _requests[ ::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER() ] =
+        [&]{ return _publisher.publish( *_engine->getCamera().getSerializable( )); };
+
+    _engine->extensionInit( *this );
+}
+
+void ZeroEQPlugin::_onChangeEngine()
+{
+    servus::Serializable& cam = *_engine->getCamera().getSerializable();
+    cam.registerDeserializedCallback( servus::Serializable::DeserializedCallback( ));
+
+    if( _httpServer )
+        _httpServer->remove( cam );
+
+    _requests.erase( ::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER());
+
+    _engine->recreate();
+    _forceRendering = true;
+}
+
+bool ZeroEQPlugin::run( Engine& engine )
+{
+    if( _engine != &engine )
+    {
+        _engine = &engine;
+        _onNewEngine();
+    }
+
     if( _requestVolumeHistogram( ))
         _publisher.publish( _remoteVolumeHistogram );
 
     if( _requestFrame( ))
         _publisher.publish( _remoteFrame );
 
-    while( _subscriber.receive( 1 )) {}
+    _forceRendering = false;
+    while( _subscriber.receive( 1 ))
+    {
+        if( _forceRendering )
+            break;
+    }
+    return !_forceRendering;
 }
 
 bool ZeroEQPlugin::operator ! () const
@@ -122,9 +153,6 @@ void ZeroEQPlugin::_setupHTTPServer()
 
     _httpServer->handleGET( "brayns/version", brayns::Version::getSchema(),
                             &brayns::Version::toJSON );
-    servus::Serializable& cam = *_engine.getCamera().getSerializable();
-    _httpServer->handle( cam );
-    cam.registerDeserializedCallback( std::bind( &ZeroEQPlugin::_cameraUpdated, this ));
 
     _httpServer->handleGET( _remoteImageJPEG );
     _remoteImageJPEG.registerSerializeCallback(
@@ -141,10 +169,6 @@ void ZeroEQPlugin::_setupHTTPServer()
     _httpServer->handlePUT( _remoteResetCamera );
     _remoteResetCamera.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_resetCameraUpdated, this ));
-
-    _httpServer->handlePUT( _remoteResetScene );
-    _remoteResetScene.registerDeserializedCallback(
-        std::bind( &ZeroEQPlugin::_resetSceneUpdated, this ));
 
     _httpServer->handle( _remoteScene );
     _remoteScene.registerDeserializedCallback(
@@ -213,9 +237,6 @@ void ZeroEQPlugin::_setupRequests()
     _requests[ ::lexis::render::Frame::ZEROBUF_TYPE_IDENTIFIER() ] =
         [&]{ _requestFrame(); return _publisher.publish( _remoteFrame ); };
 
-    _requests[ ::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER() ] =
-        [&]{ return _publisher.publish( *_engine.getCamera().getSerializable( )); };
-
     _requests[ v1::FrameBuffers::ZEROBUF_TYPE_IDENTIFIER() ] =
         [&]{ _requestFrameBuffers(); return _publisher.publish( _remoteFrameBuffers ); };
 
@@ -244,8 +265,8 @@ void ZeroEQPlugin::_setupSubscriber()
 
 void ZeroEQPlugin::_cameraUpdated()
 {
-    _engine.getFrameBuffer().clear();
-    _engine.getCamera().commit();
+    _engine->getFrameBuffer().clear();
+    _engine->getCamera().commit();
 }
 
 void ZeroEQPlugin::_attributeUpdated( )
@@ -253,30 +274,25 @@ void ZeroEQPlugin::_attributeUpdated( )
     BRAYNS_INFO << _remoteAttribute.getKeyString() << " = " <<
         _remoteAttribute.getValueString() << std::endl;
     _parametersManager.set( _remoteAttribute.getKeyString(), _remoteAttribute.getValueString( ));
-    _engine.getScene().commitVolumeData();
-    _engine.getRenderer().commit();
-    _engine.getFrameBuffer().clear();
+    _engine->getScene().commitVolumeData();
+    _engine->getRenderer().commit();
+    _engine->getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_resetCameraUpdated()
 {
     auto& sceneParameters = _parametersManager.getSceneParameters();
-    _engine.getCamera().setEnvironmentMap( !sceneParameters.getEnvironmentMap().empty( ));
-    _engine.getCamera().reset();
-    _engine.getCamera().commit();
-    _engine.getFrameBuffer().clear();
-}
-
-void ZeroEQPlugin::_resetSceneUpdated()
-{
-    _engine.makeDirty();
+    _engine->getCamera().setEnvironmentMap( !sceneParameters.getEnvironmentMap().empty( ));
+    _engine->getCamera().reset();
+    _engine->getCamera().commit();
+    _engine->getFrameBuffer().clear();
 }
 
 bool ZeroEQPlugin::_requestScene()
 {
     auto& ms = _remoteScene.getMaterials();
     ms.clear();
-    auto& scene = _engine.getScene();
+    auto& scene = _engine->getScene();
     const auto& materials = scene.getMaterials();
 
     for( auto& material: materials )
@@ -297,7 +313,7 @@ bool ZeroEQPlugin::_requestScene()
 void ZeroEQPlugin::_sceneUpdated( )
 {
     auto& materials = _remoteScene.getMaterials();
-    auto& scene = _engine.getScene();
+    auto& scene = _engine->getScene();
 
     for( size_t materialId = 0; materialId < materials.size(); ++materialId )
     {
@@ -322,15 +338,15 @@ void ZeroEQPlugin::_sceneUpdated( )
         }
     }
     scene.commitMaterials( true );
-    _engine.getRenderer().commit();
-    _engine.getFrameBuffer().clear();
+    _engine->getRenderer().commit();
+    _engine->getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_spikesUpdated( )
 {
 #if 0
     AbstractSimulationHandlerPtr simulationHandler =
-        _engine.getScene().getSimulationHandler();
+        _engine->getScene().getSimulationHandler();
 
     SpikeSimulationHandler* spikeSimulationHandler =
         dynamic_cast< SpikeSimulationHandler * >(simulationHandler.get());
@@ -342,8 +358,8 @@ void ZeroEQPlugin::_spikesUpdated( )
         for( const auto& gid: _remoteSpikes.getGidsVector() )
             data[gid] = ts;
 
-        _engine.getFrameBuffer().clear();
-        _engine.getScene().commitSimulationData();
+        _engine->getFrameBuffer().clear();
+        _engine->getScene().commitSimulationData();
     }
 #endif
 }
@@ -351,7 +367,7 @@ void ZeroEQPlugin::_spikesUpdated( )
 
 bool ZeroEQPlugin::_requestTransferFunction1D()
 {
-    auto& scene = _engine.getScene();
+    auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
     std::vector< ::brayns::v1::Point2D > items;
 
@@ -365,7 +381,7 @@ bool ZeroEQPlugin::_requestTransferFunction1D()
 
 void ZeroEQPlugin::_transferFunction1DUpdated( )
 {
-    auto& scene = _engine.getScene();
+    auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
     std::vector< ::brayns::v1::Point2D > points = _remoteTransferFunction1D.getPointsVector();
 
@@ -388,13 +404,13 @@ void ZeroEQPlugin::_transferFunction1DUpdated( )
 
     scene.commitSimulationData();
     scene.commitTransferFunctionData();
-    _engine.getRenderer().commit();
-    _engine.getFrameBuffer().clear();
+    _engine->getRenderer().commit();
+    _engine->getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_LookupTable1DUpdated( )
 {
-    auto& scene = _engine.getScene();
+    auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
     transferFunction.clear();
@@ -416,12 +432,12 @@ void ZeroEQPlugin::_LookupTable1DUpdated( )
 
     transferFunction.setValuesRange( Vector2f( 0.f, lut.size() / 4 ));
     scene.commitTransferFunctionData();
-    _engine.getFrameBuffer().clear();
+    _engine->getFrameBuffer().clear();
 }
 
 bool ZeroEQPlugin::_requestLookupTable1D( )
 {
-    auto& scene = _engine.getScene();
+    auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
@@ -441,7 +457,7 @@ bool ZeroEQPlugin::_requestLookupTable1D( )
 
 void ZeroEQPlugin::_colormapUpdated()
 {
-    auto& scene = _engine.getScene();
+    auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
     transferFunction.clear();
@@ -464,12 +480,12 @@ void ZeroEQPlugin::_colormapUpdated()
     const auto& range = _remoteColormap.getRange( );
     transferFunction.setValuesRange( Vector2f(range[0], range[1] ));
     scene.commitTransferFunctionData();
-    _engine.getFrameBuffer().clear();
+    _engine->getFrameBuffer().clear();
 }
 
 bool ZeroEQPlugin::_requestColormap( )
 {
-    auto& scene = _engine.getScene();
+    auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
@@ -528,7 +544,7 @@ bool ZeroEQPlugin::_requestImageJPEG()
             return false;
         }
 
-        FrameBuffer& frameBuffer = _engine.getFrameBuffer();
+        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
         const auto& frameSize = frameBuffer.getSize();
         unsigned int* colorBuffer =
             (unsigned int*)frameBuffer.getColorBuffer( );
@@ -574,7 +590,7 @@ bool ZeroEQPlugin::_requestImageJPEG()
 
 bool ZeroEQPlugin::_requestFrameBuffers()
 {
-    auto& frameBuffer = _engine.getFrameBuffer();
+    auto& frameBuffer = _engine->getFrameBuffer();
     const Vector2i frameSize = frameBuffer.getSize( );
     const float* depthBuffer = frameBuffer.getDepthBuffer( );
 
@@ -609,7 +625,7 @@ bool ZeroEQPlugin::_requestFrameBuffers()
 bool ZeroEQPlugin::_requestSpikes()
 {
 #if 0
-    AbstractSimulationHandlerPtr simulationHandler = _engine.getScene().getSimulationHandler();
+    AbstractSimulationHandlerPtr simulationHandler = _engine->getScene().getSimulationHandler();
 
     SpikeSimulationHandler* spikeSimulationHandler =
         dynamic_cast< SpikeSimulationHandler * >( simulationHandler.get() );
@@ -809,14 +825,9 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _parametersManager.set(
         "molecular-system-config", _remoteDataSource.getMolecularSystemConfigString( ));
 
-    _resetSceneUpdated();
-    _resetCameraUpdated();
-
-    _engine.getFrameBuffer().clear();
-    _engine.getScene().commitSimulationData();
-    _engine.getScene().commitVolumeData();
-    _engine.getRenderer().commit();
     _parametersManager.print();
+
+    _onChangeEngine();
 }
 
 void ZeroEQPlugin::_initializeSettings()
@@ -826,6 +837,12 @@ void ZeroEQPlugin::_initializeSettings()
     auto& volumeParameters = _parametersManager.getVolumeParameters();
     auto& applicationParameters = _parametersManager.getApplicationParameters();
 
+    if( renderingParameters.getEngine() == "ospray" )
+        _remoteSettings.setEngine( ::brayns::v1::Engine::ospray );
+    else if( renderingParameters.getEngine() == "optix" )
+        _remoteSettings.setEngine( ::brayns::v1::Engine::optix );
+    else if( renderingParameters.getEngine() == "livre" )
+        _remoteSettings.setEngine( ::brayns::v1::Engine::livre );
     _remoteSettings.setTimestamp( sceneParameters.getTimestamp( ));
     _remoteSettings.setVolumeSamplesPerRay( volumeParameters.getSamplesPerRay( ));
 
@@ -872,6 +889,16 @@ void ZeroEQPlugin::_initializeSettings()
 void ZeroEQPlugin::_settingsUpdated()
 {
     const auto& renderingParameters = _parametersManager.getRenderingParameters();
+
+    switch( _remoteSettings.getEngine( ))
+    {
+    case ::brayns::v1::Engine::ospray:
+        _parametersManager.getRenderingParameters().setEngine( "ospray" ); break;
+    case ::brayns::v1::Engine::optix:
+        _parametersManager.getRenderingParameters().setEngine( "optix" ); break;
+    case ::brayns::v1::Engine::livre:
+        _parametersManager.getRenderingParameters().setEngine( "livre" ); break;
+    }
 
     _parametersManager.set(
         "timestamp", std::to_string(_remoteSettings.getTimestamp( )));
@@ -927,14 +954,19 @@ void ZeroEQPlugin::_settingsUpdated()
     app.setJpegSize( Vector2ui{ _remoteSettings.getJpegSize()  } );
     app.setJpegCompression( std::min( _remoteSettings.getJpegCompression(), 100u ));
 
-    _engine.getRenderer().commit();
-    _engine.getFrameBuffer().clear();
+    if( _engine->name() != _parametersManager.getRenderingParameters().getEngine( ))
+        _onChangeEngine();
+    else
+    {
+        _engine->getRenderer().commit();
+        _engine->getFrameBuffer().clear();
+    }
 }
 
 bool ZeroEQPlugin::_requestFrame()
 {
-    auto simHandler = _engine.getScene().getSimulationHandler();
-    auto volHandler = _engine.getScene().getVolumeHandler();
+    auto simHandler = _engine->getScene().getSimulationHandler();
+    auto volHandler = _engine->getScene().getVolumeHandler();
     const uint64_t nbFrames = simHandler ? simHandler->getNbFrames() :
                                  ( volHandler ? volHandler->getNbFrames() : 0 );
 
@@ -962,7 +994,7 @@ void ZeroEQPlugin::_frameUpdated()
     auto& sceneParams = _parametersManager.getSceneParameters();
     sceneParams.setTimestamp( _remoteFrame.getCurrent( ));
     sceneParams.setAnimationDelta( _remoteFrame.getDelta( ));
-    _engine.commit();
+    _engine->commit();
 }
 
 bool ZeroEQPlugin::_requestViewport()
@@ -977,12 +1009,12 @@ void ZeroEQPlugin::_viewportUpdated()
 {
     _parametersManager.getApplicationParameters().setWindowSize(
         Vector2ui{ _remoteViewport.getSize() } );
-    _engine.commit();
+    _engine->commit();
 }
 
 bool ZeroEQPlugin::_requestSimulationHistogram()
 {
-    auto simulationHandler = _engine.getScene().getSimulationHandler();
+    auto simulationHandler = _engine->getScene().getSimulationHandler();
     if( simulationHandler )
     {
         const auto& histogram = simulationHandler->getHistogram();
@@ -995,7 +1027,7 @@ bool ZeroEQPlugin::_requestSimulationHistogram()
 
 bool ZeroEQPlugin::_requestVolumeHistogram()
 {
-    auto volumeHandler = _engine.getScene().getVolumeHandler();
+    auto volumeHandler = _engine->getScene().getVolumeHandler();
     if( volumeHandler )
     {
         const auto& histogram = volumeHandler->getHistogram();
@@ -1008,7 +1040,7 @@ bool ZeroEQPlugin::_requestVolumeHistogram()
 
 void ZeroEQPlugin::_clipPlanesUpdated()
 {
-    const auto& bounds = _engine.getScene().getWorldBounds();
+    const auto& bounds = _engine->getScene().getWorldBounds();
     const auto& size = bounds.getSize();
     ClipPlanes clipPlanes;
 
@@ -1020,9 +1052,9 @@ void ZeroEQPlugin::_clipPlanesUpdated()
     }
     if( clipPlanes.size() == 6 )
     {
-        _engine.getCamera().setClipPlanes( clipPlanes );
-        _engine.getCamera().commit();
-        _engine.getFrameBuffer().clear();
+        _engine->getCamera().setClipPlanes( clipPlanes );
+        _engine->getCamera().commit();
+        _engine->getFrameBuffer().clear();
 
         _publisher.publish( _clipPlanes );
     }
@@ -1034,7 +1066,7 @@ void ZeroEQPlugin::_clipPlanesUpdated()
 bool ZeroEQPlugin::_requestClipPlanes()
 {
     std::vector< ::lexis::render::Plane > planes;
-    const auto& clipPlanes = _engine.getCamera().getClipPlanes();
+    const auto& clipPlanes = _engine->getCamera().getClipPlanes();
     for( const auto& clipPlane: clipPlanes )
     {
         ::lexis::render::Plane plane;

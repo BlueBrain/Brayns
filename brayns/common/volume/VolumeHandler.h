@@ -22,6 +22,7 @@
 #define VOLUMEHANDLER_H
 
 #include <brayns/common/types.h>
+#include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
@@ -49,8 +50,8 @@ public:
      *        - BOUNDED: The timestamp is bounded by the timestamp range for the attached volumes
      */
     VolumeHandler(
-        VolumeParameters& volumeParameters,
-        const TimestampMode timestampMode );
+        const VolumeParameters& volumeParameters,
+        TimestampMode timestampMode );
 
     ~VolumeHandler();
 
@@ -58,19 +59,19 @@ public:
      * @brief Returns the dimension of the 8bit volume
      * @return Dimensions of the volume for the specified timestamp
      */
-    const Vector3ui getDimensions() const;
+    Vector3ui getDimensions() const;
 
     /**
      * @brief Returns the voxel size of the 8bit volume
      * @return Voxel size of the volume for the specified timestamp
      */
-    const Vector3f getElementSpacing() const;
+    Vector3f getElementSpacing() const;
 
     /**
      * @brief Returns the position offset of the 8bit volume in world coordinates
      * @return Volume offset position for the specified timestamp
      */
-    const Vector3f getOffset() const;
+    Vector3f getOffset() const;
 
     /**
      * @brief Returns the size of the 8bit volume in bytes
@@ -224,7 +225,7 @@ private:
 
     float _getBoundedTimestamp( const float timestamp ) const;
 
-    VolumeParametersPtr _volumeParameters;
+    const VolumeParameters _volumeParameters;
     std::map< float, VolumeDescriptorPtr > _volumeDescriptors;
     float _timestamp;
     Vector2f _timestampRange;
