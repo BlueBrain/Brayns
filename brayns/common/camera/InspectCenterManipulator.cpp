@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -25,11 +25,6 @@
 
 namespace brayns
 {
-
-namespace
-{
-const Vector3f forwardDirection{ 0.f, 0.f , 1.f };
-}
 
 InspectCenterManipulator::InspectCenterManipulator( Camera& camera,
                                                     KeyboardHandler& handler )
@@ -80,7 +75,7 @@ void InspectCenterManipulator::dragRight( const Vector2i& to,
 {
     const float distance = -( to.y() - from.y() ) * getMotionSpeed();
     if( distance < ( _camera.getTarget() - _camera.getPosition( )).length( ))
-        translate( forwardDirection * distance, false );
+        translate( Vector3f::forward() * distance, false );
 }
 
 void InspectCenterManipulator::dragMiddle( const Vector2i& to,
@@ -96,7 +91,7 @@ void InspectCenterManipulator::wheel( const Vector2i& /*position*/,
 {
     delta *= getWheelSpeed();
     if( delta < ( _camera.getTarget() - _camera.getPosition( )).length( ))
-        translate( forwardDirection * delta, false );
+        translate( Vector3f::forward() * delta, false );
 }
 
 void InspectCenterManipulator::_rotateLeft()

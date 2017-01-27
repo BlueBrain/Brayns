@@ -79,10 +79,21 @@ LivreEngine::LivreEngine( int argc, char **argv,
     _frameBuffer.reset( new LivreFrameBuffer( _frameSize, FBF_BGRA_I8, *_livre ));
     _camera.reset( new LivreCamera( rendererParams.getCameraType(), *_livre ));
 
-    Boxf& worldBounds = _scene->getWorldBounds();
     const auto& volInfo = _livre->getVolumeInformation();
-    worldBounds.merge( -volInfo.worldSize/2.f );
-    worldBounds.merge( volInfo.worldSize/2.f );
+    Vector4f halfWorldSize = volInfo.worldSize/2.f;
+    halfWorldSize[3] = 1.f;
+    auto bboxMin = volInfo.dataToLivreTransform.inverse() * halfWorldSize;
+    bboxMin[3] = 1;
+    auto bboxMax = volInfo.dataToLivreTransform.inverse() * -halfWorldSize;
+
+    // not fully understanding the math behind here, but this solves the camera
+    // positioning for now
+    if( volInfo.dataToLivreTransform.getTranslation() == Vector3f( ))
+        bboxMax[3] = 1;
+
+    Boxf& worldBounds = _scene->getWorldBounds();
+    worldBounds.merge( Vector3f(bboxMin) / volInfo.meterToDataUnitRatio );
+    worldBounds.merge( Vector3f(bboxMax) / volInfo.meterToDataUnitRatio );
 }
 
 LivreEngine::~LivreEngine()

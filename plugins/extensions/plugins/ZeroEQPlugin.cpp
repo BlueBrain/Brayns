@@ -190,6 +190,12 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteViewport.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_viewportUpdated, this ));
 
+    _httpServer->handle( _clipPlanes );
+    _clipPlanes.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_clipPlanesUpdated, this ));
+    _clipPlanes.registerSerializeCallback(
+        std::bind( &ZeroEQPlugin::_requestClipPlanes, this ));
+
     _httpServer->handleGET( "brayns/v1/simulation-histogram", _remoteSimulationHistogram );
     _remoteSimulationHistogram.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestSimulationHistogram, this ));
@@ -216,13 +222,18 @@ void ZeroEQPlugin::_setupRequests()
     _requests[ v1::TransferFunction1D::ZEROBUF_TYPE_IDENTIFIER() ] =
         [&]{ _requestTransferFunction1D(); return _publisher.publish( _remoteTransferFunction1D ); };
 
-    _requests[ v1::Spikes::ZEROBUF_TYPE_IDENTIFIER() ] =
+    ::lexis::render::ClipPlanes clipPlanes;
+    _requests[ clipPlanes.getTypeIdentifier() ] =
+        std::bind( &ZeroEQPlugin::_requestClipPlanes, this );
+
+   _requests[ v1::Spikes::ZEROBUF_TYPE_IDENTIFIER() ] =
         [&]{ _requestSpikes(); return _publisher.publish( _remoteSpikes ); };
 }
 
 void ZeroEQPlugin::_setupSubscriber()
 {
     _subscriber.subscribe( _remoteLookupTable1D );
+    _subscriber.subscribe( _clipPlanes );
     _subscriber.subscribe( _remoteFrame );
 
     _remoteLookupTable1D.registerDeserializedCallback(
@@ -268,7 +279,7 @@ bool ZeroEQPlugin::_requestScene()
     auto& scene = _engine.getScene();
     const auto& materials = scene.getMaterials();
 
-    for( const auto& material: materials )
+    for( auto& material: materials )
     {
         ::brayns::v1::Material m;
         m.setDiffuseColor( material->getColor( ));
@@ -992,6 +1003,47 @@ bool ZeroEQPlugin::_requestVolumeHistogram()
         _remoteVolumeHistogram.setMax( histogram.range.y( ));
         _remoteVolumeHistogram.setBins( histogram.values );
     }
+    return true;
+}
+
+void ZeroEQPlugin::_clipPlanesUpdated()
+{
+    const auto& bounds = _engine.getScene().getWorldBounds();
+    const auto& size = bounds.getSize();
+    ClipPlanes clipPlanes;
+
+    for( const auto& plane: _clipPlanes.getPlanesVector( ))
+    {
+        const auto& normal = plane.getNormal();
+        const auto distance = plane.getD() * size.find_max();
+        clipPlanes.push_back( Vector4f( normal[0], normal[1], normal[2], distance));
+    }
+    if( clipPlanes.size() == 6 )
+    {
+        _engine.getCamera().setClipPlanes( clipPlanes );
+        _engine.getCamera().commit();
+        _engine.getFrameBuffer().clear();
+
+        _publisher.publish( _clipPlanes );
+    }
+    else
+        BRAYNS_ERROR << "Invalid number of clip planes. Expected 6, received "
+                     << clipPlanes.size() << std::endl;
+}
+
+bool ZeroEQPlugin::_requestClipPlanes()
+{
+    std::vector< ::lexis::render::Plane > planes;
+    const auto& clipPlanes = _engine.getCamera().getClipPlanes();
+    for( const auto& clipPlane: clipPlanes )
+    {
+        ::lexis::render::Plane plane;
+        float normal[3] = { clipPlane.x(), clipPlane.y(), clipPlane.z() };
+        plane.setNormal( normal );
+        plane.setD( clipPlane.w( ));
+        planes.push_back( plane );
+    }
+    _clipPlanes.setPlanes( planes );
     return true;
 }
 

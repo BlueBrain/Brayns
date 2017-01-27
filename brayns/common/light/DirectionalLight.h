@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -26,7 +26,7 @@
 namespace brayns
 {
 
-const Vector3f DEFAULT_SUN_DIRECTION = { 0.1f, -0.2f, 0.5f };
+const Vector3f DEFAULT_SUN_DIRECTION = { 0.1f, -0.2f, -0.5f };
 const Vector3f DEFAULT_SUN_COLOR = { 1.f, 1.f, 1.f };
 const float DEFAULT_SUN_INTENSITY = 0.5f;
 const float DEFAULT_SUN_CUTOFF = 1000.f;

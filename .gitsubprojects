@@ -1,19 +1,61 @@
 # -*- mode: cmake -*-
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 8a4497c)
-git_subproject(Servus https://github.com/HBPVIS/Servus.git 2da95ea)
+git_subproject(Servus https://github.com/HBPVIS/Servus.git 18abce4)
+common_find_package(Servus REQUIRED)
+
+if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
+  git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git f40a6e4)
+  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 505caf8)
+  git_subproject(Lexis https://github.com/HBPVis/Lexis.git 1d70690)
+  common_find_package(ZeroEQ REQUIRED)
+  common_find_package(ZeroBuf REQUIRED)
+  common_find_package(Lexis REQUIRED)
+endif()
 
 # ZeroEQ and HTTP messaging
-git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git f40a6e4)
-git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 2e457a8)
-git_subproject(Lexis https://github.com/HBPVis/Lexis.git 9110580)
+if(BRAYNS_NETWORKING_ENABLED)
+  common_find_package(LibJpegTurbo REQUIRED)
+endif()
 
 # Streaming to display walls
-git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 1717912)
+if(BRAYNS_DEFLECT_ENABLED)
+  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 7ebb0a5)
+  common_find_package(Deflect)
+endif()
 
 # Data access
-git_subproject(Brion https://github.com/BlueBrain/Brion.git a29ca96)
+if(BRAYNS_BRION_ENABLED)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git e062e50)
+  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 76c941a)
+  common_find_package(Lunchbox)
+  common_find_package(BBPTestData)
+  common_find_package(Brion REQUIRED)
+  common_find_package(HDF5 SYSTEM REQUIRED COMPONENTS C CXX)
+endif()
 
+# OSPRay rendering engine
+if(BRAYNS_OSPRAY_ENABLED)
+    common_find_package(ospray SYSTEM)
+endif()
+
+# OptiX rendering engine
+if(BRAYNS_OPTIX_ENABLED)
+    common_find_package(OptiX SYSTEM)
+    common_find_package(CUDA SYSTEM)
+endif()
+
+# Livre rendering engine
 if(BRAYNS_LIVRE_ENABLED)
-  git_subproject(Livre https://github.com/BlueBrain/Livre.git 3f96377)
+  git_subproject(Livre https://github.com/BlueBrain/Livre.git 353c499)
   common_find_package(Livre)
+endif()
+
+# Image processing
+if(BRAYNS_IMAGEMAGICK_ENABLED)
+  common_find_package(Magick++ SYSTEM)
+endif()
+
+# Mesh loading
+if(BRAYNS_ASSIMP_ENABLED)
+  common_find_package(assimp)
 endif()

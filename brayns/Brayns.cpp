@@ -42,7 +42,9 @@
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
-#include <brayns/io/MolecularSystemReader.h>
+#ifdef BRAYNS_USE_ASSIMP
+#  include <brayns/io/MolecularSystemReader.h>
+#endif
 
 #include <plugins/engines/EngineFactory.h>
 #include <plugins/extensions/ExtensionPluginFactory.h>
@@ -121,7 +123,7 @@ struct Brayns::Impl
         _engine->reshape( renderInput.windowSize );
         _engine->preRender();
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         if( !_extensionPluginFactory )
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
@@ -183,7 +185,7 @@ struct Brayns::Impl
 
         _engine->preRender();
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         if( !_extensionPluginFactory )
             _intializeExtensionPluginFactory( );
         _extensionPluginFactory->execute( );
@@ -239,7 +241,7 @@ struct Brayns::Impl
 
 private:
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     void _intializeExtensionPluginFactory( )
     {
         _extensionParameters.parametersManager = _parametersManager;
@@ -580,10 +582,15 @@ private:
     */
     void _loadMolecularSystem()
     {
+#ifdef BRAYNS_USE_ASSIMP
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader( geometryParameters );
         molecularSystemReader.import( scene );
+#else
+        BRAYNS_ERROR << "Assimp library missing for molecular meshes"
+                     << std::endl;
+#endif
     }
 
     void _buildDefaultScene()
@@ -828,7 +835,7 @@ private:
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
 
-#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_REST)
+#if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;
     ExtensionParameters _extensionParameters;
 #endif

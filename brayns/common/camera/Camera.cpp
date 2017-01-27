@@ -42,12 +42,21 @@ public:
         , _aspectRatio( 1.f )
         , _aperture( 0.f )
         , _focalLength( 0.f )
-        , _fieldOfView( 60.f )
+        , _fieldOfView( 45.f )
         , _stereoMode( CameraStereoMode::none )
         , _eyeSeparation( 0.0635f )
     {
         if( _type == CameraType::stereo )
             setStereoMode( CameraStereoMode::side_by_side );
+
+        // Initial clip planes
+        const float inf = std::numeric_limits< float >::max();
+        _clipPlanes.push_back( Vector4f(-1.f, 0.f, 0.f, inf ));
+        _clipPlanes.push_back( Vector4f( 1.f, 0.f, 0.f, inf ));
+        _clipPlanes.push_back( Vector4f( 0.f,-1.f, 0.f, inf ));
+        _clipPlanes.push_back( Vector4f( 0.f, 1.f, 0.f, inf ));
+        _clipPlanes.push_back( Vector4f( 0.f, 0.f,-1.f, inf ));
+        _clipPlanes.push_back( Vector4f( 0.f, 0.f, 1.f, inf ));
     }
 
     void set(
@@ -273,6 +282,16 @@ public:
         return _eyeSeparation;
     }
 
+    void setClipPlanes( const ClipPlanes clipPlanes )
+    {
+        _clipPlanes = clipPlanes;
+    }
+
+    ClipPlanes& getClipPlanes()
+    {
+        return _clipPlanes;
+    }
+
     bool modified = false;
 
     /*! rotation matrice along x and y axis */
@@ -295,6 +314,8 @@ private:
 
     mutable CameraStereoMode _stereoMode;
     mutable float _eyeSeparation;
+
+    ClipPlanes _clipPlanes;
 };
 
 Camera::Camera( const CameraType cameraType )
@@ -444,6 +465,16 @@ bool Camera::getModified() const
 void Camera::resetModified()
 {
     _impl->modified = false;
+}
+
+void Camera::setClipPlanes( const ClipPlanes clipPlanes )
+{
+    _impl->setClipPlanes( clipPlanes );
+}
+
+ClipPlanes& Camera::getClipPlanes()
+{
+    return _impl->getClipPlanes();
 }
 
 std::ostream& operator << ( std::ostream& os, Camera& camera )

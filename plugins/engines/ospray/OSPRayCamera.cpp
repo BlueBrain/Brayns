@@ -41,6 +41,9 @@ OSPRayCamera::OSPRayCamera( const CameraType cameraType )
     case CameraType::panoramic:
         cameraAsString = "panoramic";
         break;
+    case CameraType::clipped:
+        cameraAsString = "clippedperspective";
+        break;
     default:
         cameraAsString = "perspective";
         break;
@@ -63,6 +66,20 @@ void OSPRayCamera::commit()
     ospSet1f( _camera, "focusDistance", getFocalLength( ));
     ospSet1i( _camera, "stereoMode", static_cast< uint >( getStereoMode( )));
     ospSet1f( _camera, "interpupillaryDistance", getEyeSeparation( ));
+
+    // Clip planes
+    const auto& clipPlanes = getClipPlanes();
+    if( clipPlanes.size() == 6 )
+    {
+        const std::string clipPlaneNames[6]  =
+            { "clipPlane1", "clipPlane2", "clipPlane3", "clipPlane4", "clipPlane5", "clipPlane6" };
+        for( size_t i = 0; i < clipPlanes.size(); ++i )
+        {
+            const auto& clipPlane = clipPlanes[i];
+            ospSet4f( _camera, clipPlaneNames[i].c_str(),
+                      clipPlane.x(), clipPlane.y(), clipPlane.z(), clipPlane.w() );
+        }
+    }
     ospCommit( _camera );
 }
 

@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( defaults )
 
     auto& camera = brayns.getEngine().getCamera();
     BOOST_CHECK( camera.getType() == brayns::CameraType::perspective );
-    BOOST_CHECK_EQUAL( camera.getPosition(), brayns::Vector3f( 0.5f, 0.5f, -0.5f ));
+    BOOST_CHECK_EQUAL( camera.getPosition(), brayns::Vector3f( 0.5f, 0.5f, 1.5f ));
     BOOST_CHECK_EQUAL( camera.getTarget(), brayns::Vector3f( 0.5f, 0.5f, 0.5f ));
     BOOST_CHECK_EQUAL( camera.getUp(), brayns::Vector3f( 0, 1, 0 ));
     BOOST_CHECK_EQUAL( camera.getAspectRatio(), 4.f/3.f );

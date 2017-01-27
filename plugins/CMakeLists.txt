@@ -17,22 +17,23 @@ set(BRAYNSPLUGINS_PUBLIC_HEADERS
   engines/EngineFactory.h
 )
 
-if(TARGET Deflect OR (TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ))
+if(BRAYNS_DEFLECT_ENABLED OR BRAYNS_NETWORKING_ENABLED)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/ExtensionPluginFactory.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/ExtensionPluginFactory.h)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Lexis ZeroEQ)
 endif()
 
-if(TARGET Deflect AND TARGET Lexis)
+if(BRAYNS_DEFLECT_ENABLED)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/DeflectPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/DeflectPlugin.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect Lexis)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
 endif()
 
-if(TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ AND TARGET ZeroEQHTTP)
+if(BRAYNS_NETWORKING_ENABLED)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroEQPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/ZeroEQPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
-    PUBLIC Lexis ZeroEQ ZeroEQHTTP BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
+    PUBLIC ZeroEQHTTP BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
 endif()
 
 if(OSPRAY_FOUND)

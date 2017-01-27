@@ -216,6 +216,16 @@ public:
     /** Enable/disables environment mapping */
     BRAYNS_API virtual void setEnvironmentMap( const bool environmentMap ) = 0;
 
+    /**
+      Sets the camera clip planes
+    */
+    BRAYNS_API void setClipPlanes( const ClipPlanes clipPlanes );
+
+    /**
+      @return the camera clip planes
+    */
+    BRAYNS_API ClipPlanes& getClipPlanes();
+
 private:
     struct Impl;
     std::unique_ptr< Impl > _impl;
