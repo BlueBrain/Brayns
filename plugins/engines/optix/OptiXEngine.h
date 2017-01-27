@@ -31,7 +31,7 @@ namespace brayns
 {
 
 /**
- * OSPRay implementation of the ray-tracing engine.
+ * OptiX implementation of the ray-tracing engine.
  */
 class OptiXEngine : public Engine
 {
