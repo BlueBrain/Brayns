@@ -581,8 +581,8 @@ inline vec3f getRandomVector(
     const int x = sample.sampleID.x % RANDOM_SET_SIZE;
     const int y = sample.sampleID.y % RANDOM_SET_SIZE;
 
-    const float rx = rotate( randomDistribution[y][RANDOM_SET_SIZE-x], rot_x );
-    const float ry = rotate( randomDistribution[RANDOM_SET_SIZE-x][y], rot_y );
+    const float rx = rotate( randomDistribution[y][RANDOM_SET_SIZE-1-x], rot_x );
+    const float ry = rotate( randomDistribution[RANDOM_SET_SIZE-1-x][y], rot_y );
     const float w = sqrt( 1.f - ry );
     const float cx = cos(( 2.f * M_PI ) * rx) * w;
     const float cy = sin(( 2.f * M_PI ) * rx) * w;
