@@ -25,7 +25,7 @@ set(BRAYNSPARAMETERS_PUBLIC_HEADERS
 )
 
 set(BRAYNSPARAMETERS_LINK_LIBRARIES
-    PUBLIC vmmlib boost_program_options
+    PUBLIC vmmlib ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
 common_library(braynsParameters)
