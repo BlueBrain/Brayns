@@ -125,8 +125,7 @@ typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 
 class Material;
 typedef std::shared_ptr<Material> MaterialPtr;
-typedef std::vector<MaterialPtr> Materials;
-typedef std::map<size_t, Materials> MaterialsMap;
+typedef std::map<size_t, MaterialPtr> MaterialsMap;
 
 class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;

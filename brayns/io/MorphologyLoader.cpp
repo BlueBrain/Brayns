@@ -26,6 +26,7 @@
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/CircuitSimulationHandler.h>
+#include <brayns/io/algorithms/MetaballsGenerator.h>
 
 #include <algorithm>
 #include <fstream>
@@ -34,6 +35,8 @@
 #  include <brain/brain.h>
 #  include <brion/brion.h>
 #endif
+
+//#define BRAYNS_USE_BRION //// TO REMOVE ////
 
 namespace brayns
 {
@@ -45,16 +48,134 @@ MorphologyLoader::MorphologyLoader(
 }
 
 #ifdef BRAYNS_USE_BRION
+bool MorphologyLoader::_importMorphologyAsMesh(
+    const servus::URI& source,
+    const size_t morphologyIndex,
+    const MaterialsMap& materials,
+    const Matrix4f& transformation,
+    TrianglesMeshMap& meshes,
+    Boxf& bounds)
+{
+    try
+    {
+        brain::neuron::Morphology morphology( source, transformation );
+        brain::neuron::SectionTypes sectionTypes;
+
+        const size_t morphologySectionTypes =
+            _geometryParameters.getMorphologySectionTypes();
+        if( morphologySectionTypes & MST_SOMA )
+            sectionTypes.push_back( brain::neuron::SectionType::soma );
+        if( morphologySectionTypes & MST_AXON )
+            sectionTypes.push_back( brain::neuron::SectionType::axon );
+        if( morphologySectionTypes & MST_DENDRITE )
+            sectionTypes.push_back( brain::neuron::SectionType::dendrite );
+        if( morphologySectionTypes & MST_APICAL_DENDRITE )
+            sectionTypes.push_back( brain::neuron::SectionType::apicalDendrite );
+
+        const brain::neuron::Sections& sections =
+            morphology.getSections( sectionTypes );
+
+        Spheres metaballs;
+
+        if( morphologySectionTypes & MST_SOMA )
+        {
+            // Soma
+            const brain::neuron::Soma& soma = morphology.getSoma();
+            const size_t material =
+                _material( morphologyIndex,
+                           size_t( brain::neuron::SectionType::soma ));
+            const Vector3f center = soma.getCentroid();
+
+            const float radius =
+                ( _geometryParameters.getRadiusCorrection() != 0.f ?
+                _geometryParameters.getRadiusCorrection() :
+                soma.getMeanRadius() *
+                    _geometryParameters.getRadiusMultiplier() );
+
+            metaballs.push_back(
+                SpherePtr( new Sphere( material, center, radius, 0.f, 0.f )));
+            bounds.merge( center );
+        }
+
+        // Dendrites and axon
+        for( size_t s = 0; s < sections.size(); ++s )
+        {
+            const auto& section = sections[s];
+            const bool hasParent = section.hasParent();
+            if( hasParent )
+            {
+                const auto parentSectionType = section.getParent().getType();
+                if( parentSectionType != brain::neuron::SectionType::soma )
+                    continue;
+            }
+
+            const auto material =
+                _material( morphologyIndex, size_t( section.getType( )));
+            const auto& samples = section.getSamples();
+            if( samples.size() == 0 )
+                continue;
+
+            const size_t samplesFromSoma =
+                _geometryParameters.getMetaballsSamplesFromSoma();
+            const size_t samplesToProcess =
+                std::min( samplesFromSoma, samples.size( ));
+            for( size_t i = 0; i < samplesToProcess; ++i )
+            {
+                const auto& sample = samples[i];
+                Vector3f position( sample.x(), sample.y(), sample.z());
+                const auto radius =
+                    (_geometryParameters.getRadiusCorrection() != 0.f ?
+                    _geometryParameters.getRadiusCorrection() :
+                    sample.w() * 0.5f * _geometryParameters.getRadiusMultiplier( ));
+
+                if( radius > 0.f )
+                    metaballs.push_back( SpherePtr(
+                        new Sphere( material, position, radius, 0.f, 0.f )));
+
+                bounds.merge( position );
+            }
+        }
+
+        // Generate mesh
+        const size_t gridSize =
+            _geometryParameters.getMetaballsGridSize();
+        const float threshold =
+            _geometryParameters.getMetaballsThreshold();
+        MetaballsGenerator metaballsGenerator;
+        const size_t material = _material(
+            morphologyIndex, size_t( brain::neuron::SectionType::soma ));
+        metaballsGenerator.generateMesh(
+            metaballs, gridSize, threshold, materials, material, meshes );
+    }
+    catch( const std::runtime_error& e )
+    {
+        BRAYNS_ERROR << e.what() << std::endl;
+        return false;
+    }
+    return true;
+}
+
 bool MorphologyLoader::importMorphology(
     const servus::URI& uri,
     const int morphologyIndex,
     Scene& scene)
 {
+    bool returnValue = true;
+    if( _geometryParameters.getMetaballsGridSize() != 0 )
+    {
+        returnValue = _importMorphologyAsMesh(
+            uri, morphologyIndex,
+            scene.getMaterials(),
+            Matrix4f(),
+            scene.getTriangleMeshes(),
+            scene.getWorldBounds( ));
+    }
     float maxDistanceToSoma;
-    return _importMorphology(
+    returnValue = returnValue && _importMorphology(
         uri, morphologyIndex, Matrix4f(),
         0, scene.getPrimitives(),
-        scene.getWorldBounds(), 0, maxDistanceToSoma);
+        scene.getWorldBounds(), 0, maxDistanceToSoma );
+    return returnValue;
 }
 
 bool MorphologyLoader::_importMorphology(
@@ -67,6 +188,7 @@ bool MorphologyLoader::_importMorphology(
     const size_t simulationOffset,
     float& maxDistanceToSoma)
 {
+    const bool useMetaballs = _geometryParameters.getMetaballsGridSize() != 0;
     maxDistanceToSoma = 0.f;
     try
     {
@@ -122,7 +244,7 @@ bool MorphologyLoader::_importMorphology(
             if( simulationOffset != 0 )
                 offset = simulationOffset;
 
-        if( morphologySectionTypes & MST_SOMA )
+        if( !useMetaballs && morphologySectionTypes & MST_SOMA )
         {
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();
@@ -279,6 +401,17 @@ bool MorphologyLoader::importCircuit(
         {
             const auto& uri = uris[i];
             float maxDistanceToSoma = 0.f;
+
+            if( _geometryParameters.getMetaballsGridSize() != 0 )
+            {
+                _importMorphologyAsMesh(
+                    uri, i,
+                    scene.getMaterials(),
+                    transforms[i],
+                    scene.getTriangleMeshes(),
+                    scene.getWorldBounds( ));
+            }
+
             if( _importMorphology(
                 uri, i, transforms[i], 0,
                 private_primitives, scene.getWorldBounds(),
@@ -362,6 +495,16 @@ bool MorphologyLoader::importCircuit(
                 &compartmentCounts[i],
                 &compartmentOffsets[i]
             };
+
+            if( _geometryParameters.getMetaballsGridSize() != 0 )
+            {
+                _importMorphologyAsMesh(
+                    uri, i,
+                    scene.getMaterials(),
+                    transforms[i],
+                    scene.getTriangleMeshes(),
+                    scene.getWorldBounds( ));
+            }
 
             float maxDistanceToSoma;
             _importMorphology(

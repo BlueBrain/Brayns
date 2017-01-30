@@ -116,8 +116,8 @@ public:
         const std::string& report,
         Scene& scene );
 
-
 private:
+
     bool _importMorphology(
         const servus::URI& source,
         size_t morphologyIndex,
@@ -127,6 +127,14 @@ private:
         Boxf& bounds,
         const size_t simulationOffset,
         float& maxDistanceToSoma);
+
+    bool _importMorphologyAsMesh(
+        const servus::URI& source,
+        const size_t morphologyIndex,
+        const MaterialsMap& materials,
+        const Matrix4f& transformation,
+        TrianglesMeshMap& meshes,
+        Boxf& bounds);
 
     size_t _material(
         size_t morphologyIndex,

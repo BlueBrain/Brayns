@@ -287,13 +287,13 @@ bool ZeroEQPlugin::_requestScene()
     for( auto& material: materials )
     {
         ::brayns::v1::Material m;
-        m.setDiffuseColor( material->getColor( ));
-        m.setSpecularColor( material->getSpecularColor( ));
-        m.setSpecularExponent( material->getSpecularExponent( ));
-        m.setReflectionIndex( material->getReflectionIndex( ));
-        m.setOpacity( material->getOpacity( ));
-        m.setRefractionIndex( material->getRefractionIndex( ));
-        m.setLightEmission( material->getEmission( ));
+        m.setDiffuseColor( material.second->getColor( ));
+        m.setSpecularColor( material.second->getSpecularColor( ));
+        m.setSpecularExponent( material.second->getSpecularExponent( ));
+        m.setReflectionIndex( material.second->getReflectionIndex( ));
+        m.setOpacity( material.second->getOpacity( ));
+        m.setRefractionIndex( material.second->getRefractionIndex( ));
+        m.setLightEmission( material.second->getEmission( ));
         ms.push_back(m);
     }
     return true;
@@ -360,6 +360,7 @@ void ZeroEQPlugin::_LookupTable1DUpdated( )
 
     transferFunction.clear();
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
+    floats& emissionIntensities = transferFunction.getEmissionIntensities();
 
     const uint8_ts& lut = _remoteLookupTable1D.getLutVector();
     for( size_t i = 0; i < lut.size(); i += 4 )
@@ -371,6 +372,7 @@ void ZeroEQPlugin::_LookupTable1DUpdated( )
             lut[ i + 3 ] / 255.f
         };
         diffuseColors.push_back( color );
+        emissionIntensities.push_back( 0.f );
     }
 
     transferFunction.setValuesRange( Vector2f( 0.f, lut.size() / 4 ));
@@ -402,8 +404,8 @@ void ZeroEQPlugin::_materialLUTUpdated()
 {
     auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
-    transferFunction.clear();
 
+    transferFunction.clear();
     auto& diffuseColors = transferFunction.getDiffuseColors();
 
     const auto size = _remoteMaterialLUT.getDiffuseVector().size();
@@ -645,6 +647,9 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setVolumeOffset( Vector3f(volumeParameters.getOffset( )));
     _remoteDataSource.setEnvironmentMap( sceneParameters.getEnvironmentMap( ));
     _remoteDataSource.setMolecularSystemConfig( geometryParameters.getMolecularSystemConfig( ));
+    _remoteDataSource.setMetaballsGridSize( geometryParameters.getMetaballsGridSize( ));
+    _remoteDataSource.setMetaballsThreshold( geometryParameters.getMetaballsThreshold( ));
+    _remoteDataSource.setMetaballsSamplesFromSoma( geometryParameters.getMetaballsSamplesFromSoma( ));
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -732,7 +737,6 @@ void ZeroEQPlugin::_dataSourceUpdated()
     layoutAsString += std::to_string( remoteMorphologyLayout.getNbColumns( ));
     layoutAsString += " " + std::to_string( remoteMorphologyLayout.getVerticalSpacing( ));
     layoutAsString += " " + std::to_string( remoteMorphologyLayout.getHorizontalSpacing( ));
-    BRAYNS_ERROR << "morphology-layout: " << layoutAsString << std::endl;
     _parametersManager.set( "morphology-layout", layoutAsString );
 
     _parametersManager.set(
@@ -761,6 +765,13 @@ void ZeroEQPlugin::_dataSourceUpdated()
 
     _parametersManager.set(
         "molecular-system-config", _remoteDataSource.getMolecularSystemConfigString( ));
+
+    _parametersManager.set(
+        "metaballs-grid-size", std::to_string( _remoteDataSource.getMetaballsGridSize( )));
+    _parametersManager.set(
+        "metaballs-threshold", std::to_string( _remoteDataSource.getMetaballsThreshold( )));
+    _parametersManager.set(
+        "metaballs-samples-from-soma", std::to_string( _remoteDataSource.getMetaballsSamplesFromSoma( )));
 
     _parametersManager.print();
 

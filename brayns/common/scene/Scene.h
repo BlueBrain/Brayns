@@ -173,7 +173,7 @@ public:
     /**
         Returns materials handled by the scene
     */
-    BRAYNS_API Materials& getMaterials() { return _materials; }
+    BRAYNS_API MaterialsMap& getMaterials() { return _materials; }
 
     /**
         Returns textures handled by the scene
@@ -230,7 +230,7 @@ protected:
     // Model
     PrimitivesMap _primitives;
     TrianglesMeshMap _trianglesMeshes;
-    Materials _materials;
+    MaterialsMap _materials;
     TexturesMap _textures;
     Lights _lights;
 
