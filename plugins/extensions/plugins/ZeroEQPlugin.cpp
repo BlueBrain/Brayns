@@ -916,7 +916,7 @@ void ZeroEQPlugin::_settingsUpdated()
             _parametersManager.set( "shading", "none"); break;
     }
     _parametersManager.set(
-        "spp", std::to_string(_remoteSettings.getSamplesPerPixel( )));
+        "samples-per-pixel", std::to_string(_remoteSettings.getSamplesPerPixel( )));
     _parametersManager.set(
         "ambient-occlusion", std::to_string(_remoteSettings.getAmbientOcclusion()));
     _parametersManager.set(
