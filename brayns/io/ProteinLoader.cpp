@@ -72,7 +72,7 @@ struct ProteinColorMap
     short R,G,B;
 };
 
-const size_t colorMapSize = 119;
+const size_t colorMapSize = 113;
 static ProteinColorMap colorMap[colorMapSize] = {
     { "H", 0xDF,0xDF,0xDF} ,
     { "He",0xD9,0xFF,0xFF} ,
@@ -182,7 +182,13 @@ static ProteinColorMap colorMap[colorMapSize] = {
     { "Sg",0xD9,0x00,0x45} ,
     { "Bh",0xE0,0x00,0x38} ,
     { "Hs",0xE6,0x00,0x2E} ,
-    { "Mt",0xEB,0x00,0x26}
+    { "Mt",0xEB,0x00,0x26},
+
+    // TODO
+    { "",0xFF,0xFF,0xFF},
+    { "",0xFF,0xFF,0xFF},
+    { "",0xFF,0xFF,0xFF},
+    { "",0xFF,0xFF,0xFF}
 };
 
 static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
@@ -330,12 +336,13 @@ bool ProteinLoader::importPDBFile(
             std::string line;
             std::string value;
             std::getline( file, line );
-            if( line.find( "ATOM" ) == 0 )
+            if( line.find( "ATOM" ) == 0 || line.find( "HETATM" ) == 0)
             {
                 // Atom
                 Atom atom;
                 atom.chainId = 0;
                 atom.residue = 0;
+                atom.processed = false;
                 atom.index = index;
                 index++;
                 std::string atomName;
