@@ -35,8 +35,7 @@ namespace
 namespace brayns
 {
 
-TransferFunctionLoader::TransferFunctionLoader( const Vector2f& range )
-    : _range( range )
+TransferFunctionLoader::TransferFunctionLoader()
 {
 }
 
@@ -79,7 +78,6 @@ bool TransferFunctionLoader::loadFromFile(
                 lineData[2] / 255.f,
                 DEFAULT_ALPHA );
             transferFunction.getDiffuseColors().push_back( diffuse );
-            transferFunction.getEmissionIntensities().push_back( DEFAULT_EMISSION );
             break;
         }
         case 4:
@@ -90,18 +88,6 @@ bool TransferFunctionLoader::loadFromFile(
                 lineData[2] / 255.f,
                 lineData[3] / 255.f );
             transferFunction.getDiffuseColors().push_back( diffuse );
-            transferFunction.getEmissionIntensities().push_back( DEFAULT_EMISSION );
-            break;
-        }
-        case 5:
-        {
-            Vector4f diffuse(
-                lineData[0] / 255.f,
-                lineData[1] / 255.f,
-                lineData[2] / 255.f,
-                lineData[3] / 255.f );
-            transferFunction.getDiffuseColors().push_back( diffuse );
-            transferFunction.getEmissionIntensities().push_back( lineData[3] / 255.f );
             break;
         }
         default:

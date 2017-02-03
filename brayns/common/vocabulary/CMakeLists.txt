@@ -18,7 +18,6 @@ zerobuf_generate_cxx(
   ${PROJECT_BINARY_DIR}/include/${BRAYNSZEROBUFRENDER_INCLUDE_NAME}
   attribute.fbs
   camera.fbs
-  colormap.fbs
   frameBuffers.fbs
   parameters.fbs
   reset.fbs

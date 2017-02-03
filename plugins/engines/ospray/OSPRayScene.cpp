@@ -896,13 +896,15 @@ void OSPRayScene::commitTransferFunctionData()
 {
     for( const auto& renderer: _renderers )
     {
-        OSPRayRenderer* osprayRenderer = dynamic_cast<OSPRayRenderer*>( renderer.get( ));
+        OSPRayRenderer* osprayRenderer =
+            dynamic_cast<OSPRayRenderer*>( renderer.get( ));
 
         // Transfer function Diffuse colors
         if( !_ospTransferFunctionDiffuseData )
             _ospTransferFunctionDiffuseData = ospNewData(
                 _transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
-                &_transferFunction.getDiffuseColors()[0], OSP_DATA_SHARED_BUFFER );
+                &_transferFunction.getDiffuseColors()[0],
+                OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospTransferFunctionDiffuseData );
         ospSetData( osprayRenderer->impl(),
             "transferFunctionDiffuseData", _ospTransferFunctionDiffuseData );
@@ -910,20 +912,24 @@ void OSPRayScene::commitTransferFunctionData()
         // Transfer function emission data
         _ospTransferFunctionEmissionData = ospNewData(
             _transferFunction.getEmissionIntensities().size(), OSP_FLOAT,
-            &_transferFunction.getEmissionIntensities()[0], OSP_DATA_SHARED_BUFFER );
+            &_transferFunction.getEmissionIntensities()[0],
+            OSP_DATA_SHARED_BUFFER );
         ospCommit( _ospTransferFunctionEmissionData );
         ospSetData( osprayRenderer->impl(),
             "transferFunctionEmissionData", _ospTransferFunctionEmissionData );
 
         // Transfer function size
         ospSet1i( osprayRenderer->impl(),
-            "transferFunctionSize", _transferFunction.getDiffuseColors().size() );
+            "transferFunctionSize",
+            _transferFunction.getDiffuseColors().size( ));
 
         // Transfer function range
         ospSet1f( osprayRenderer->impl(),
-            "transferFunctionMinValue", _transferFunction.getValuesRange().x() );
+            "transferFunctionMinValue",
+            _transferFunction.getValuesRange().x( ));
         ospSet1f( osprayRenderer->impl(),  "transferFunctionRange",
-            _transferFunction.getValuesRange().y() - _transferFunction.getValuesRange().x() );
+            _transferFunction.getValuesRange().y() -
+            _transferFunction.getValuesRange().x( ));
     }
 }
 

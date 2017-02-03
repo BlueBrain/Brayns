@@ -323,7 +323,7 @@ inline vec3f SimulationRenderer_shadeRay(
                                             intersection, localNormal, lightDirection ));
 
                             // Add contribution of current light
-                            localShadedColor = localShadedColor + localUnshadedColor;
+                            localShadedColor = localShadedColor + localOpacity * localUnshadedColor;
                         }
                     }
                 }

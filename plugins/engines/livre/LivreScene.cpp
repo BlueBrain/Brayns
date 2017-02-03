@@ -46,6 +46,12 @@ void LivreScene::commitTransferFunctionData()
 {
     TransferFunction& transferFunction = getTransferFunction();
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
+    if( diffuseColors.size() != 256 )
+    {
+        BRAYNS_ERROR << "Livre only supports color maps with 256 values"
+                     << std::endl;
+        return;
+    }
     uint8_ts lut;
     lut.reserve( 1024 );
     for( const auto& color: diffuseColors )
