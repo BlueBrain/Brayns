@@ -176,23 +176,15 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteScene.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestScene, this ));
 
-    _httpServer->handle( _remoteTransferFunction1D );
-    _remoteTransferFunction1D.registerDeserializedCallback(
-        std::bind( &ZeroEQPlugin::_transferFunction1DUpdated, this ));
-    _remoteTransferFunction1D.registerSerializeCallback(
-        std::bind( &ZeroEQPlugin::_requestTransferFunction1D, this ));
-
     _httpServer->handle( _remoteSpikes );
     _remoteSpikes.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_spikesUpdated, this ));
     _remoteSpikes.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestSpikes, this ));
 
-    _httpServer->handle( _remoteColormap );
-    _remoteColormap.registerDeserializedCallback(
-        std::bind( &ZeroEQPlugin::_colormapUpdated, this ));
-    _remoteColormap.registerSerializeCallback(
-        std::bind( &ZeroEQPlugin::_requestColormap, this ));
+    _httpServer->handlePUT( _remoteMaterialLUT );
+    _remoteMaterialLUT.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_materialLUTUpdated, this ));
 
     _httpServer->handle( _remoteDataSource );
     _remoteDataSource.registerDeserializedCallback(
@@ -239,9 +231,6 @@ void ZeroEQPlugin::_setupRequests()
 
     _requests[ v1::FrameBuffers::ZEROBUF_TYPE_IDENTIFIER() ] =
         [&]{ _requestFrameBuffers(); return _publisher.publish( _remoteFrameBuffers ); };
-
-    _requests[ v1::TransferFunction1D::ZEROBUF_TYPE_IDENTIFIER() ] =
-        [&]{ _requestTransferFunction1D(); return _publisher.publish( _remoteTransferFunction1D ); };
 
     ::lexis::render::ClipPlanes clipPlanes;
     _requests[ clipPlanes.getTypeIdentifier() ] =
@@ -364,50 +353,6 @@ void ZeroEQPlugin::_spikesUpdated( )
 #endif
 }
 
-
-bool ZeroEQPlugin::_requestTransferFunction1D()
-{
-    auto& scene = _engine->getScene();
-    TransferFunction& transferFunction = scene.getTransferFunction();
-    std::vector< ::brayns::v1::Point2D > items;
-
-    for( const auto& controlPoint: transferFunction.getControlPoints( TF_RED ) )
-        items.push_back( ::brayns::v1::Point2D(
-            controlPoint.x(), controlPoint.y() ));
-    _remoteTransferFunction1D.setAttribute( transferFunction.getAttributeAsString( TF_RED ) );
-    _remoteTransferFunction1D.setPoints( items );
-    return true;
-}
-
-void ZeroEQPlugin::_transferFunction1DUpdated( )
-{
-    auto& scene = _engine->getScene();
-    TransferFunction& transferFunction = scene.getTransferFunction();
-    std::vector< ::brayns::v1::Point2D > points = _remoteTransferFunction1D.getPointsVector();
-
-    const std::string& attributeName = _remoteTransferFunction1D.getAttributeString();
-    BRAYNS_INFO << "Setting "
-                << points.size() << " control points for transfer function attribute <"
-                << attributeName <<  ">" << std::endl;
-
-    const TransferFunctionAttribute attribute =
-        transferFunction.getAttributeFromString( attributeName );
-
-    if( attribute == TF_UNDEFINED )
-        return;
-
-    auto& controlPoints = transferFunction.getControlPoints( attribute );
-    controlPoints.clear();
-    for( const auto& point: points )
-        controlPoints.push_back( Vector2f(point.getX(), point.getY()));
-    transferFunction.resample();
-
-    scene.commitSimulationData();
-    scene.commitTransferFunctionData();
-    _engine->getRenderer().commit();
-    _engine->getFrameBuffer().clear();
-}
-
 void ZeroEQPlugin::_LookupTable1DUpdated( )
 {
     auto& scene = _engine->getScene();
@@ -415,7 +360,6 @@ void ZeroEQPlugin::_LookupTable1DUpdated( )
 
     transferFunction.clear();
     Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
-    floats& emissionIntensities = transferFunction.getEmissionIntensities();
 
     const uint8_ts& lut = _remoteLookupTable1D.getLutVector();
     for( size_t i = 0; i < lut.size(); i += 4 )
@@ -427,7 +371,6 @@ void ZeroEQPlugin::_LookupTable1DUpdated( )
             lut[ i + 3 ] / 255.f
         };
         diffuseColors.push_back( color );
-        emissionIntensities.push_back( 0.f );
     }
 
     transferFunction.setValuesRange( Vector2f( 0.f, lut.size() / 4 ));
@@ -455,54 +398,48 @@ bool ZeroEQPlugin::_requestLookupTable1D( )
     return true;
 }
 
-void ZeroEQPlugin::_colormapUpdated()
+void ZeroEQPlugin::_materialLUTUpdated()
 {
     auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
-
     transferFunction.clear();
-    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
-    floats& emissionIntensities = transferFunction.getEmissionIntensities();
 
-    const uint8_ts& rgba = _remoteColormap.getRgbaVector();
-    for( size_t i = 0; i < rgba.size(); i += 4 )
+    auto& diffuseColors = transferFunction.getDiffuseColors();
+
+    const auto size = _remoteMaterialLUT.getDiffuseVector().size();
+    if( _remoteMaterialLUT.getAlphaVector().size() != size )
     {
-        Vector4f color = {
-            rgba[ i ] / 255.f,
-            rgba[ i + 1 ] / 255.f,
-            rgba[ i + 2 ] / 255.f,
-            rgba[ i + 3 ] / 255.f
-        };
-        diffuseColors.push_back( color );
-        emissionIntensities.push_back( 0.f );
+        BRAYNS_ERROR << "All lookup tables must have the same size. "
+                     << "Event will be ignored" << std::endl;
+        return;
     }
 
-    const auto& range = _remoteColormap.getRange( );
-    transferFunction.setValuesRange( Vector2f(range[0], range[1] ));
+    for( size_t i = 0; i < size; ++i )
+    {
+        const auto& diffuse = _remoteMaterialLUT.getDiffuseVector()[i];
+        const auto alpha = _remoteMaterialLUT.getAlphaVector()[i];
+        Vector4f color = {
+            diffuse.getRed(), diffuse.getGreen(), diffuse.getBlue(), alpha };
+        diffuseColors.push_back( color );
+    }
+
+    auto& emissionIntensities = transferFunction.getEmissionIntensities();
+    for( const auto& emission: _remoteMaterialLUT.getEmissionVector( ))
+    {
+        const float intensity =
+            ( emission.getRed() + emission.getGreen() + emission.getBlue( ))
+            / 3.f;
+        emissionIntensities.push_back( intensity );
+    }
+
+    auto& contributions = transferFunction.getContributions();
+    for( const auto& contribution: _remoteMaterialLUT.getContributionVector( ))
+        contributions.push_back( contribution );
+
+    const auto& range = _remoteMaterialLUT.getRange();
+    transferFunction.setValuesRange( Vector2f( range[0], range[1] ));
     scene.commitTransferFunctionData();
     _engine->getFrameBuffer().clear();
-}
-
-bool ZeroEQPlugin::_requestColormap( )
-{
-    auto& scene = _engine->getScene();
-    TransferFunction& transferFunction = scene.getTransferFunction();
-
-    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
-
-    uint8_ts rgba;
-    rgba.clear();
-    for( const auto& color: diffuseColors )
-    {
-        rgba.push_back( color.x() * 255.f );
-        rgba.push_back( color.y() * 255.f );
-        rgba.push_back( color.z() * 255.f );
-        rgba.push_back( color.w() * 255.f );
-    }
-    _remoteColormap.setRgba( rgba );
-    const auto& range = transferFunction.getValuesRange( );
-    _remoteColormap.setRange( { range[0], range[1] } );
-    return true;
 }
 
 void ZeroEQPlugin::_resizeImage(

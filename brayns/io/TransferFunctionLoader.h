@@ -42,7 +42,7 @@ class TransferFunctionLoader
 
 public:
 
-    TransferFunctionLoader( const Vector2f& range );
+    TransferFunctionLoader();
 
     /**
      * @brief Loads values from a transfer function file

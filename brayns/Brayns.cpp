@@ -278,7 +278,7 @@ private:
         const std::string& colorMapFilename = sceneParameters.getColorMapFilename();
         if( !colorMapFilename.empty() )
         {
-            TransferFunctionLoader transferFunctionLoader( DEFAULT_TRANSFER_FUNCTION_RANGE );
+            TransferFunctionLoader transferFunctionLoader;
             transferFunctionLoader.loadFromFile( colorMapFilename, scene );
         }
         scene.commitTransferFunctionData();
@@ -406,7 +406,7 @@ private:
                 sceneParameters.getColorMapFilename();
             if( !colorMapFilename.empty() )
             {
-                TransferFunctionLoader transferFunctionLoader( brayns::Vector2f( 0, nbMaterials ));
+                TransferFunctionLoader transferFunctionLoader;
                 transferFunctionLoader.loadFromFile( colorMapFilename, scene );
                 scene.commitTransferFunctionData();
             }
@@ -570,7 +570,7 @@ private:
                 sceneParameters.getColorMapFilename();
             if( !colorMapFilename.empty() )
             {
-                TransferFunctionLoader transferFunctionLoader( DEFAULT_TRANSFER_FUNCTION_RANGE );
+                TransferFunctionLoader transferFunctionLoader;
                 transferFunctionLoader.loadFromFile( colorMapFilename, scene );
                 scene.commitTransferFunctionData();
             }

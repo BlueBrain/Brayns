@@ -34,9 +34,9 @@
 #include <lexis/render/viewport.h>
 #include <lexis/render/histogram.h>
 #include <lexis/render/clipPlanes.h>
+#include <lexis/render/materialLUT.h>
 
 #include <zerobuf/render/attribute.h>
-#include <zerobuf/render/colormap.h>
 #include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/parameters.h>
 #include <zerobuf/render/reset.h>
@@ -114,18 +114,6 @@ private:
     void _spikesUpdated();
 
     /**
-     * @brief This method is called when the transfer function is requested by a ZeroEQ event
-     * @return True if the method was successful, false otherwise
-     * @todo Specify the attribute that should be returned when the feature is available in ZeroEQ
-     */
-    bool _requestTransferFunction1D();
-
-    /**
-     * @brief This method is called when the transfer function is updated by a ZeroEQ event
-     */
-    void _transferFunction1DUpdated();
-
-    /**
      * @brief This method is called when the lookup table is updated by a ZeroEQ event
      */
     void _LookupTable1DUpdated();
@@ -137,15 +125,10 @@ private:
     bool _requestLookupTable1D();
 
     /**
-     * @brief This method is called when the colomap is updated by a ZeroEQ event
+     * @brief This method is called when the material lookup table is updated by
+     *        a ZeroEQ event
      */
-    void _colormapUpdated();
-
-    /**
-     * @brief This method is called when the colormap is requested by a ZeroEQ event
-     * @return True if the method was successful, false otherwise
-     */
-    bool _requestColormap();
+    void _materialLUTUpdated();
 
     /**
      * @brief This method is called when an Image JPEG is requested by a ZeroEQ event
@@ -281,17 +264,16 @@ private:
     ::lexis::render::ClipPlanes _clipPlanes;
     ::lexis::render::Histogram _remoteSimulationHistogram;
     ::lexis::render::Histogram _remoteVolumeHistogram;
+    ::lexis::render::MaterialLUT _remoteMaterialLUT;
 
     ::brayns::v1::DataSource _remoteDataSource;
     ::brayns::v1::Settings _remoteSettings;
     ::brayns::v1::Spikes _remoteSpikes;
     ::brayns::v1::Attribute _remoteAttribute;
-    ::brayns::v1::Colormap _remoteColormap;
     ::brayns::v1::FrameBuffers _remoteFrameBuffers;
     ::brayns::v1::Material _remoteMaterial;
     ::brayns::v1::ResetCamera _remoteResetCamera;
     ::brayns::v1::Scene _remoteScene;
-    ::brayns::v1::TransferFunction1D _remoteTransferFunction1D;
 
     bool _forceRendering = false;
 };
