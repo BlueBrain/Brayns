@@ -44,6 +44,7 @@ ZeroEQPlugin::ZeroEQPlugin(
     , _parametersManager( parametersManager )
     , _compressor( tjInitCompress() )
     , _processingImageJpeg( false )
+    , _dirtyEngine( false )
 {
     _setupHTTPServer();
     _setupRequests();
@@ -70,6 +71,7 @@ void ZeroEQPlugin::_onNewEngine()
         [&]{ return _publisher.publish( *_engine->getCamera().getSerializable( )); };
 
     _engine->extensionInit( *this );
+    _dirtyEngine = false;
 }
 
 void ZeroEQPlugin::_onChangeEngine()
@@ -88,7 +90,7 @@ void ZeroEQPlugin::_onChangeEngine()
 
 bool ZeroEQPlugin::run( Engine& engine )
 {
-    if( _engine != &engine )
+    if( _engine != &engine || _dirtyEngine )
     {
         _engine = &engine;
         _onNewEngine();
@@ -775,6 +777,7 @@ void ZeroEQPlugin::_dataSourceUpdated()
 
     _parametersManager.print();
 
+    _dirtyEngine = true;
     _onChangeEngine();
 }
 

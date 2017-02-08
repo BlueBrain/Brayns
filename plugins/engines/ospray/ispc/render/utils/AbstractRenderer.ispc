@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -34,10 +34,10 @@ inline bool launchRandomRay(
     randomDirection = getRandomVector( sample, normal, self->randomNumber );
     backgroundColor = self->bgColor;
 
-    if( dot( randomDirection, normal ) < 0.01f )
+    if( dot( randomDirection, normal ) < 0.f )
         // Invert direction of random ray direction is opposite to surface
         // normal
-        randomDirection = randomDirection * -1.f;
+        randomDirection = neg( randomDirection );
 
     varying Ray randomRay;
     setRay( randomRay, intersection, randomDirection );
@@ -52,14 +52,13 @@ inline bool launchRandomRay(
     if( randomRay.geomID < 0 )
     {
         // No intersection
-        backgroundColor =
-            make_vec3f(
-                skyboxMapping( (Renderer *)self, randomRay, self->numMaterials, self->materials ));
+        backgroundColor = make_vec3f( skyboxMapping(
+            (Renderer *)self, randomRay, self->numMaterials, self->materials ));
         return false;
     }
 
     // Random ray hits a primitive
-    distanceToIntersection = self->super.epsilon; //randomRay.t * randomRay.t;
+    distanceToIntersection = randomRay.t * randomRay.t;
     postIntersect(
         self->super.model, geometry,
         randomRay,
@@ -119,34 +118,39 @@ inline bool indirectShading(
                     vec3f localDiffuseColor = mat->Kd;
                     if( mat->map_Kd )
                         localDiffuseColor = get3f( mat->map_Kd, geometry.st );
+
+                    // intensity
                     vec3f Ka = make_vec3f( mat->a );
                     indirectShadingPower = mat->a;
-
                     if( mat->map_a )
                     {
                         Ka = get3f( mat->map_a, geometry.st );
                         indirectShadingPower = reduce_max( Ka );
                     }
-                    // Returned color is the one of the emitting material
-                    // with weigth according to distance to intersection
+
+                    // Returned color is the one material with weigth according
+                    // intensity and distance to intersection
                     indirectShadingColor = localDiffuseColor * Ka;
                     indirectShadingPower /= distanceToIntersection;
                 }
                 else
                 {
                     // Material does not emit light, occlusion is considered
-                    // according to surface localOpacity and distance to intersection
+                    // according to surface localOpacity
                     indirectShadingColor = make_vec3f( mat->d );
-                    indirectShadingPower = -mat->d / distanceToIntersection;
+                    indirectShadingPower = -mat->d;
                 }
             }
         else
         {
             // Material does not emit light, occlusion is considered
-            // according to surface localOpacity and distance to intersection
+            // according to surface localOpacity
             indirectShadingColor = make_vec3f( geometry.color.w );
-            indirectShadingPower = -geometry.color.w / distanceToIntersection;
+            indirectShadingPower = -geometry.color.w;
         }
+
+        const varying float angle = abs(dot( normal, randomDirection ));
+        indirectShadingPower *= angle;
         return true;
     }
     else

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -115,6 +115,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
 
                     // Diffuse color
                     localDiffuseColor = mat->Kd * make_vec3f( dg.color );
+
                     if( mat->map_Kd )
                     {
                         vec4f localDiffuseColorFromMap = get4f( mat->map_Kd, dg.st );
@@ -223,30 +224,27 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                             if( localLightEmission == 0.f && self->abstract.shadingEnabled )
                             {
                                 cosNL = min( 1.f,
-                                    max( 0.f, indirectShadingIntensity ) +
                                     max( 0.f, dot( lightDirection, localNormal )));
                                 cosLR = min( 1.f,
-                                    max( 0.f, indirectShadingIntensity ) +
                                     max( 0.f, dot( lightDirection, reflectedDirection )));
                             }
 
+                            // Process shadows
+                            if( self->abstract.shadowsEnabled && localLightEmission == 0.f )
+                                localLightIntensity = shadedLightIntensity(
+                                    &(self->abstract), ray, sample,
+                                    intersection, localNormal, lightDirection );
+
                             // Diffuse color
                             const varying vec3f localUnshadedColor =
-                                localOpacity * cosNL *
-                                (localDiffuseColor + indirectShadingColor * indirectShadingIntensity);
+                                localOpacity * cosNL * localDiffuseColor * localLightIntensity +
+                                indirectShadingColor * indirectShadingIntensity;
 
                             // Specular color
                             if( self->abstract.shadingEnabled )
                                 specularColor = max(
                                     specularColor,
                                     localSpecularColor * powf( cosLR, localSpecularExponent ));
-
-                            // Process shadows
-                            if( self->abstract.shadowsEnabled && localLightEmission == 0.f )
-                                localLightIntensity = max( 0.f,
-                                        indirectShadingIntensity + shadedLightIntensity(
-                                            &(self->abstract), ray, sample,
-                                            intersection, localNormal, lightDirection ));
 
                             // Add contribution of current light
                             localShadedColor = localShadedColor + localUnshadedColor;
@@ -255,7 +253,10 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 }
 
                 // Store final color for current iteration
-                intersectionColors[depth] = localShadedColor * localLightIntensity + specularColor;
+                intersectionColors[depth] =
+                    intersectionColors[depth] + min(
+                        make_vec3f(1.f),
+                        localShadedColor + specularColor );
 
                 // Update cumulated path opacity
                 pathOpacity += localOpacity;
