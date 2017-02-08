@@ -28,4 +28,13 @@ TrianglesMesh::TrianglesMesh()
     _geometryType = GT_TRIANGLES_MESH;
 }
 
+TrianglesMesh::~TrianglesMesh()
+{
+    _vertices.clear();
+    _normals.clear();
+    _colors.clear();
+    _indices.clear();
+    _textureCoordinates.clear();
+}
+
 }

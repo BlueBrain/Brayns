@@ -523,14 +523,15 @@ void MetaballsGenerator::_buildTriangles(
             cube.vertices[ 7 ]->value < threshold )
             cubeIndex |= 128;
 
-        size_t usedEdges = METABALLS_EDGES[cubeIndex];
+        int usedEdges = METABALLS_EDGES[ cubeIndex ];
 
         if( usedEdges == 0 || usedEdges == 255 )
             continue;
 
         for( size_t currentEdge = 0; currentEdge < NB_EDGES; ++currentEdge )
         {
-            if( usedEdges & 1<<currentEdge )
+            // Check usedEdges against 1,2,4,8,16,...,2048
+            if( usedEdges & ( 1 << currentEdge ))
             {
                 CubeGridVertex* v1=
                         cube.vertices[
@@ -539,11 +540,13 @@ void MetaballsGenerator::_buildTriangles(
                         cube.vertices[
                         METABALLS_VERTICES[ currentEdge * 2 +  1 ]];
 
-                auto delta =
-                    ( threshold - v1->value ) /
-                    ( v2->value - v1->value );
+                const float denom = ( v2->value - v1->value );
+                if( fabs( denom ) < 0.00001f )
+                    continue;
 
-                auto& position = _edgeVertices[ currentEdge ].position;
+                auto delta = ( threshold - v1->value ) / denom;
+
+                Vector3f position;
                 position.x() =
                     v1->position.x() + delta * (
                     v2->position.x() - v1->position.x( ));
@@ -554,7 +557,7 @@ void MetaballsGenerator::_buildTriangles(
                     v1->position.z() + delta * (
                     v2->position.z() - v1->position.z( ));
 
-                auto& normal = _edgeVertices[ currentEdge ].normal;
+                Vector3f normal;
                 normal.x() = v1->normal.x() +
                     delta * (v2->normal.x() - v1->normal.x( ));
                 normal.y() = v1->normal.y() +
@@ -562,6 +565,8 @@ void MetaballsGenerator::_buildTriangles(
                 normal.z() = v1->normal.z() +
                     delta * (v2->normal.z() - v1->normal.z( ));
 
+                _edgeVertices[ currentEdge ].position = position;
+                _edgeVertices[ currentEdge ].normal = normal;
                 _edgeVertices[ currentEdge ].materialId = v1->materialId;
             }
         }
@@ -596,7 +601,7 @@ void MetaballsGenerator::_buildTriangles(
             }
 
             indices.push_back( Vector3ui(
-                verticesIndex, verticesIndex + 1, verticesIndex + 2 ));
+                verticesIndex, verticesIndex + 2, verticesIndex + 1 ));
         }
     }
 }

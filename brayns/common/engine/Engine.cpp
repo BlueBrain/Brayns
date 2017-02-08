@@ -36,6 +36,14 @@ Engine::Engine( ParametersManager& parametersManager )
 {
 }
 
+Engine::~Engine()
+{
+    _scene.reset();
+    _camera.reset();
+    _renderers.clear();
+    _frameBuffer.reset();
+}
+
 void Engine::setActiveRenderer( const RendererType renderer )
 {
     if( _activeRenderer != renderer )
