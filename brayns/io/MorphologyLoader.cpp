@@ -36,8 +36,6 @@
 #  include <brion/brion.h>
 #endif
 
-//#define BRAYNS_USE_BRION //// TO REMOVE ////
-
 namespace brayns
 {
 
@@ -48,6 +46,21 @@ MorphologyLoader::MorphologyLoader(
 }
 
 #ifdef BRAYNS_USE_BRION
+brain::neuron::SectionTypes _getSectionTypes(
+    const size_t morphologySectionTypes )
+{
+    brain::neuron::SectionTypes sectionTypes;
+    if( morphologySectionTypes & MST_SOMA )
+        sectionTypes.push_back( brain::neuron::SectionType::soma );
+    if( morphologySectionTypes & MST_AXON )
+        sectionTypes.push_back( brain::neuron::SectionType::axon );
+    if( morphologySectionTypes & MST_DENDRITE )
+        sectionTypes.push_back( brain::neuron::SectionType::dendrite );
+    if( morphologySectionTypes & MST_APICAL_DENDRITE )
+        sectionTypes.push_back( brain::neuron::SectionType::apicalDendrite );
+    return sectionTypes;
+}
+
 bool MorphologyLoader::_importMorphologyAsMesh(
     const servus::URI& source,
     const size_t morphologyIndex,
@@ -58,19 +71,12 @@ bool MorphologyLoader::_importMorphologyAsMesh(
 {
     try
     {
-        brain::neuron::Morphology morphology( source, transformation );
-        brain::neuron::SectionTypes sectionTypes;
-
         const size_t morphologySectionTypes =
             _geometryParameters.getMorphologySectionTypes();
-        if( morphologySectionTypes & MST_SOMA )
-            sectionTypes.push_back( brain::neuron::SectionType::soma );
-        if( morphologySectionTypes & MST_AXON )
-            sectionTypes.push_back( brain::neuron::SectionType::axon );
-        if( morphologySectionTypes & MST_DENDRITE )
-            sectionTypes.push_back( brain::neuron::SectionType::dendrite );
-        if( morphologySectionTypes & MST_APICAL_DENDRITE )
-            sectionTypes.push_back( brain::neuron::SectionType::apicalDendrite );
+
+        brain::neuron::Morphology morphology( source, transformation );
+        brain::neuron::SectionTypes sectionTypes =
+            _getSectionTypes( morphologySectionTypes );
 
         const brain::neuron::Sections& sections =
             morphology.getSections( sectionTypes );
@@ -82,7 +88,7 @@ bool MorphologyLoader::_importMorphologyAsMesh(
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material =
-                _material( morphologyIndex,
+                _getMaterialFromSectionType( morphologyIndex,
                            size_t( brain::neuron::SectionType::soma ));
             const Vector3f center = soma.getCentroid();
 
@@ -109,10 +115,10 @@ bool MorphologyLoader::_importMorphologyAsMesh(
                     continue;
             }
 
-            const auto material =
-                _material( morphologyIndex, size_t( section.getType( )));
+            const auto material = _getMaterialFromSectionType(
+                morphologyIndex, size_t( section.getType( )));
             const auto& samples = section.getSamples();
-            if( samples.size() == 0 )
+            if( samples.empty( ))
                 continue;
 
             const size_t samplesFromSoma =
@@ -122,7 +128,7 @@ bool MorphologyLoader::_importMorphologyAsMesh(
             for( size_t i = 0; i < samplesToProcess; ++i )
             {
                 const auto& sample = samples[i];
-                Vector3f position( sample.x(), sample.y(), sample.z());
+                const Vector3f position( sample.x(), sample.y(), sample.z());
                 const auto radius =
                     (_geometryParameters.getRadiusCorrection() != 0.f ?
                     _geometryParameters.getRadiusCorrection() :
@@ -142,7 +148,7 @@ bool MorphologyLoader::_importMorphologyAsMesh(
         const float threshold =
             _geometryParameters.getMetaballsThreshold();
         MetaballsGenerator metaballsGenerator;
-        const size_t material = _material(
+        const size_t material = _getMaterialFromSectionType(
             morphologyIndex, size_t( brain::neuron::SectionType::soma ));
         metaballsGenerator.generateMesh(
             metaballs, gridSize, threshold, materials, material, meshes );
@@ -161,7 +167,7 @@ bool MorphologyLoader::importMorphology(
     Scene& scene)
 {
     bool returnValue = true;
-    if( _geometryParameters.getMetaballsGridSize() != 0 )
+    if( _geometryParameters.useMetaballs( ))
     {
         returnValue = _importMorphologyAsMesh(
             uri, morphologyIndex,
@@ -188,7 +194,6 @@ bool MorphologyLoader::_importMorphology(
     const size_t simulationOffset,
     float& maxDistanceToSoma)
 {
-    const bool useMetaballs = _geometryParameters.getMetaballsGridSize() != 0;
     maxDistanceToSoma = 0.f;
     try
     {
@@ -223,14 +228,8 @@ bool MorphologyLoader::_importMorphology(
 
         const size_t morphologySectionTypes =
             _geometryParameters.getMorphologySectionTypes();
-        if( morphologySectionTypes & MST_SOMA )
-            sectionTypes.push_back( brain::neuron::SectionType::soma );
-        if( morphologySectionTypes & MST_AXON )
-            sectionTypes.push_back( brain::neuron::SectionType::axon );
-        if( morphologySectionTypes & MST_DENDRITE )
-            sectionTypes.push_back( brain::neuron::SectionType::dendrite );
-        if( morphologySectionTypes & MST_APICAL_DENDRITE )
-            sectionTypes.push_back( brain::neuron::SectionType::apicalDendrite );
+
+        sectionTypes = _getSectionTypes( morphologySectionTypes );
 
         const brain::neuron::Sections& sections =
             morphology.getSections( sectionTypes );
@@ -244,13 +243,13 @@ bool MorphologyLoader::_importMorphology(
             if( simulationOffset != 0 )
                 offset = simulationOffset;
 
-        if( !useMetaballs && morphologySectionTypes & MST_SOMA )
+        if( !_geometryParameters.useMetaballs() &&
+            morphologySectionTypes & MST_SOMA )
         {
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();
-            const size_t material =
-                _material( morphologyIndex,
-                           size_t( brain::neuron::SectionType::soma ));
+            const size_t material = _getMaterialFromSectionType(
+                morphologyIndex, size_t( brain::neuron::SectionType::soma ));
             const Vector3f& center = soma.getCentroid() + translation;
 
             const float radius =
@@ -266,10 +265,10 @@ bool MorphologyLoader::_importMorphology(
         // Dendrites and axon
         for( const auto& section: sections )
         {
-            const size_t material =
-                _material( morphologyIndex, size_t( section.getType( )));
+            const size_t material = _getMaterialFromSectionType(
+                morphologyIndex, size_t( section.getType( )));
             const Vector4fs& samples = section.getSamples();
-            if( samples.size() == 0 )
+            if( samples.empty( ))
                 continue;
 
             Vector4f previousSample = samples[0];
@@ -295,7 +294,7 @@ bool MorphologyLoader::_importMorphology(
             {
                 const auto& counts = *simulationInformation->compartmentCounts;
                 // Number of compartments usually differs from number of samples
-                if( samples.size() != 0 && counts[sectionId] > 1 )
+                if( samples.empty() && counts[sectionId] > 1 )
                     segmentStep = counts[sectionId] / float(samples.size());
             }
 
@@ -693,7 +692,7 @@ bool MorphologyLoader::importSimulationData(
 
 #endif
 
-size_t MorphologyLoader::_material(
+size_t MorphologyLoader::_getMaterialFromSectionType(
     const size_t morphologyIndex,
     const size_t sectionType )
 {

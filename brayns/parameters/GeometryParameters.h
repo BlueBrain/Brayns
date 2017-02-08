@@ -170,8 +170,11 @@ public:
     /** Metaballs threshold */
     float getMetaballsThreshold() const { return _metaballsThreshold; }
 
-    /** Metaballs threshold */
+    /** Metaballs samples from soma */
     size_t getMetaballsSamplesFromSoma() const { return _metaballsSamplesFromSoma; }
+
+    /** Metaballs enabled? */
+    bool useMetaballs() const { return _metaballsGridSize != 0; }
 
 protected:
 

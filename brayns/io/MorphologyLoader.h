@@ -136,7 +136,7 @@ private:
         TrianglesMeshMap& meshes,
         Boxf& bounds);
 
-    size_t _material(
+    size_t _getMaterialFromSectionType(
         size_t morphologyIndex,
         size_t sectionType );
 
