@@ -29,7 +29,6 @@
 namespace
 {
     const float DEFAULT_ALPHA = 1.f;
-    const float DEFAULT_EMISSION = 0.f;
 }
 
 namespace brayns

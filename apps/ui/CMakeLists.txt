@@ -1,5 +1,4 @@
-# Copyright (c) 2015-2016, EPFL/Blue Brain Project
-# All rights reserved. Do not distribute without permission.
+# Copyright (c) 2015-2017, EPFL/Blue Brain Project
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -24,7 +23,8 @@ stringify_shaders(${SSP_SHADERS})
 list(APPEND BRAYNSUI_SOURCES ${SHADER_SOURCES})
 
 set(BRAYNSUI_LINK_LIBRARIES
-    PUBLIC Servus brayns braynsParameters boost_filesystem vmmlib boost_system
+    PUBLIC Servus brayns braynsParameters vmmlib
+      ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     PRIVATE ${GLUT_LIBRARIES} ${GLEW_LIBRARIES}
 )
 
