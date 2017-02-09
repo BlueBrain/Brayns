@@ -401,7 +401,7 @@ bool MorphologyLoader::importCircuit(
             const auto& uri = uris[i];
             float maxDistanceToSoma = 0.f;
 
-            if( _geometryParameters.getMetaballsGridSize() != 0 )
+            if( _geometryParameters.useMetaballs( ))
             {
                 _importMorphologyAsMesh(
                     uri, i,
@@ -495,7 +495,7 @@ bool MorphologyLoader::importCircuit(
                 &compartmentOffsets[i]
             };
 
-            if( _geometryParameters.getMetaballsGridSize() != 0 )
+            if( _geometryParameters.useMetaballs( ))
             {
                 _importMorphologyAsMesh(
                     uri, i,
