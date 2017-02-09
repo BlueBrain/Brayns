@@ -149,7 +149,7 @@ void Scene::setMaterials(
             material->setColor( Vector3f( value, value, value ));
             break;
         }
-        _materials.push_back(material);
+        _materials[i] = material;
     }
     BRAYNS_INFO << nbMaterials << " materials set" << std::endl;
 }

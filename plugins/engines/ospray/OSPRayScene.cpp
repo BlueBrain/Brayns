@@ -134,19 +134,19 @@ void OSPRayScene::_saveCacheFile()
     for( const auto& material: _materials )
     {
         Vector3f value3f;
-        value3f = material->getColor();
+        value3f = material.second->getColor();
         file.write( ( char* )&value3f, sizeof( Vector3f ));
-        value3f = material->getSpecularColor();
+        value3f = material.second->getSpecularColor();
         file.write( ( char* )&value3f, sizeof( Vector3f ));
-        float value = material->getSpecularExponent();
+        float value = material.second->getSpecularExponent();
         file.write( ( char* )&value, sizeof( float ));
-        value = material->getReflectionIndex();
+        value = material.second->getReflectionIndex();
         file.write( ( char* )&value, sizeof( float ));
-        value = material->getOpacity();
+        value = material.second->getOpacity();
         file.write( ( char* )&value, sizeof( float ));
-        value = material->getRefractionIndex();
+        value = material.second->getRefractionIndex();
         file.write( ( char* )&value, sizeof( float ));
-        value = material->getEmission();
+        value = material.second->getEmission();
         file.write( ( char* )&value, sizeof( float ));
         // TODO: Textures
     }
@@ -318,20 +318,20 @@ void OSPRayScene::_loadCacheFile()
     {
         Vector3f value3f;
         file.read( ( char* )&value3f, sizeof( Vector3f ));
-        material->setColor( value3f );
+        material.second->setColor( value3f );
         file.read( ( char* )&value3f, sizeof( Vector3f ));
-        material->setSpecularColor( value3f );
+        material.second->setSpecularColor( value3f );
         float value;
         file.read( ( char* )&value, sizeof( float ));
-        material->setSpecularExponent( value );
+        material.second->setSpecularExponent( value );
         file.read( ( char* )&value, sizeof( float ));
-        material->setReflectionIndex( value );
+        material.second->setReflectionIndex( value );
         file.read( ( char* )&value, sizeof( float ));
-        material->setOpacity( value );
+        material.second->setOpacity( value );
         file.read( ( char* )&value, sizeof( float ));
-        material->setRefractionIndex( value );
+        material.second->setRefractionIndex( value );
         file.read( ( char* )&value, sizeof( float ));
-        material->setEmission( value );
+        material.second->setEmission( value );
         // TODO: Textures
     }
     commitMaterials( true );

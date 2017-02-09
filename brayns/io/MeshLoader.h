@@ -40,7 +40,7 @@ namespace brayns
 struct MeshContainer
 {
     TrianglesMeshMap& triangles;
-    Materials& materials;
+    MaterialsMap& materials;
     Boxf& bounds;
 };
 
@@ -91,7 +91,7 @@ private:
     void _createMaterials(
         const aiScene *scene,
         const std::string& folder,
-        Materials& materials );
+        MaterialsMap& materials );
 
     std::map<size_t, size_t> _meshIndex;
 };

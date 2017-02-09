@@ -120,7 +120,7 @@ bool MolecularSystemReader::_createScene( Scene& scene )
         for( const auto& material: scene.getMaterials( ))
         {
             ProteinLoader loader( _geometryParameters );
-            material->setColor( loader.getMaterialKd( index ));
+            material.second->setColor( loader.getMaterialKd( index ));
             ++index;
         }
     }

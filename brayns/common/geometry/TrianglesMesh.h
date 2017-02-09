@@ -35,6 +35,7 @@ BRAYNS_API class TrianglesMesh : Geometry
 {
 public:
     BRAYNS_API TrianglesMesh();
+    BRAYNS_API ~TrianglesMesh();
 
     BRAYNS_API Vector3fs& getVertices() { return _vertices; }
     BRAYNS_API Vector3fs& getNormals() { return _normals; }

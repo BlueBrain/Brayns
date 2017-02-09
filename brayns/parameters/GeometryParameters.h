@@ -164,6 +164,18 @@ public:
     /** Biological assembly */
     const std::string& getMolecularSystemConfig() const { return _molecularSystemConfig; }
 
+    /** Metaballs grid size */
+    size_t getMetaballsGridSize() const { return _metaballsGridSize; }
+
+    /** Metaballs threshold */
+    float getMetaballsThreshold() const { return _metaballsThreshold; }
+
+    /** Metaballs samples from soma */
+    size_t getMetaballsSamplesFromSoma() const { return _metaballsSamplesFromSoma; }
+
+    /** Metaballs enabled? */
+    bool useMetaballs() const { return _metaballsGridSize != 0; }
+
 protected:
 
     bool _parse( const po::variables_map& vm ) final;
@@ -198,6 +210,9 @@ protected:
     bool _generateMultipleModels;
     std::string _splashSceneFolder;
     std::string _molecularSystemConfig;
+    size_t _metaballsGridSize;
+    float _metaballsThreshold;
+    size_t _metaballsSamplesFromSoma;
 
 };
 

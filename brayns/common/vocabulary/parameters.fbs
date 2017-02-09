@@ -93,6 +93,9 @@ table DataSource {
     volume_offset: [float:3];
     environment_map: string;
     molecular_system_config: string;
+    metaballs_grid_size: uint;
+    metaballs_threshold: float;
+    metaballs_samples_from_soma: uint;
 }
 
 enum Shader: uint {

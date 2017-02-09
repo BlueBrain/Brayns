@@ -36,6 +36,10 @@ Engine::Engine( ParametersManager& parametersManager )
 {
 }
 
+Engine::~Engine()
+{
+}
+
 void Engine::setActiveRenderer( const RendererType renderer )
 {
     if( _activeRenderer != renderer )

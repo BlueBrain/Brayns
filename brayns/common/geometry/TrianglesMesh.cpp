@@ -28,4 +28,8 @@ TrianglesMesh::TrianglesMesh()
     _geometryType = GT_TRIANGLES_MESH;
 }
 
+TrianglesMesh::~TrianglesMesh()
+{
+}
+
 }

@@ -5,6 +5,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
+  algorithms/MetaballsGenerator.cpp
   XYZBLoader.cpp
   TransferFunctionLoader.cpp
   MorphologyLoader.cpp
@@ -14,6 +15,7 @@ set(BRAYNSIO_SOURCES
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
+  algorithms/MetaballsGenerator.h
   XYZBLoader.h
   TransferFunctionLoader.h
   MorphologyLoader.h

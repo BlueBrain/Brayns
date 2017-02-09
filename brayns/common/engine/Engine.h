@@ -44,7 +44,7 @@ public:
      * @param parametersManager holds all engine parameters (geometry, rendering, etc)
      */
     explicit Engine( ParametersManager& parametersManager );
-    virtual ~Engine() {}
+    virtual ~Engine();
 
     /**
        @return the name of the engine

@@ -57,6 +57,9 @@ const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
 const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
 const std::string PARAM_SPLASH_SCENE_FOLDER = "splash-scene-folder";
 const std::string PARAM_MOLECULAR_SYSTEM_CONFIG = "molecular-system-config";
+const std::string PARAM_METABALLS_GRIDSIZE = "metaballs-grid-size";
+const std::string PARAM_METABALLS_THRESHOLD = "metaballs-threshold";
+const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA = "metaballs-samples-from-soma";
 
 const std::string COLOR_SCHEMES[8] = {
     "none", "neuron-by-id", "neuron-by-type", "neuron-by-segment-type",
@@ -87,6 +90,9 @@ GeometryParameters::GeometryParameters()
         std::numeric_limits<float>::max(), std::numeric_limits<float>::min( )))
     , _simulationHistogramSize( 128 )
     , _generateMultipleModels( false )
+    , _metaballsGridSize( 0 )
+    , _metaballsThreshold( 1.f )
+    , _metaballsSamplesFromSoma( 3 )
 {
     _parameters.add_options()
         ( PARAM_MORPHOLOGY_FOLDER.c_str(), po::value< std::string >(),
@@ -152,7 +158,15 @@ GeometryParameters::GeometryParameters()
         ( PARAM_SPLASH_SCENE_FOLDER.c_str(), po::value< std::string >(),
             "Folder containing splash scene folder [string]" )
         ( PARAM_MOLECULAR_SYSTEM_CONFIG.c_str(), po::value< std::string >(),
-            "Molecular system configuration [string]" );
+            "Molecular system configuration [string]" )
+        ( PARAM_METABALLS_GRIDSIZE.c_str(), po::value< size_t >(),
+            "Metaballs grid size [int]. Activates automated meshing of somas "
+            "if different from 0")
+        ( PARAM_METABALLS_THRESHOLD.c_str(), po::value< float >(),
+            "Metaballs threshold [float]" )
+        ( PARAM_METABALLS_SAMPLES_FROM_SOMA.c_str(), po::value< size_t >(),
+            "Number of morphology samples (or segments) from soma used by "
+            "automated meshing [int]" );
 }
 
 bool GeometryParameters::_parse( const po::variables_map& vm )
@@ -253,6 +267,13 @@ bool GeometryParameters::_parse( const po::variables_map& vm )
     if( vm.count( PARAM_MOLECULAR_SYSTEM_CONFIG ))
         _molecularSystemConfig = vm[ PARAM_MOLECULAR_SYSTEM_CONFIG ].as< std::string >();
 
+    if( vm.count( PARAM_METABALLS_GRIDSIZE ))
+        _metaballsGridSize = vm[ PARAM_METABALLS_GRIDSIZE ].as< size_t >();
+    if( vm.count( PARAM_METABALLS_THRESHOLD ))
+        _metaballsThreshold = vm[ PARAM_METABALLS_THRESHOLD ].as< float >();
+    if( vm.count( PARAM_METABALLS_SAMPLES_FROM_SOMA ))
+        _metaballsSamplesFromSoma = vm[ PARAM_METABALLS_SAMPLES_FROM_SOMA ].as< size_t >();
+
     return true;
 }
 
@@ -322,6 +343,13 @@ void GeometryParameters::print()
         _splashSceneFolder << std::endl;
     BRAYNS_INFO << "Molecular system config    : " <<
         _molecularSystemConfig << std::endl;
+    BRAYNS_INFO << "Metaballs                  : " << std::endl;
+    BRAYNS_INFO << " - Grid size               : " <<
+        _metaballsGridSize << std::endl;
+    BRAYNS_INFO << " - Threshold               : " <<
+        _metaballsThreshold << std::endl;
+    BRAYNS_INFO << " - Samples from soma       : " <<
+        _metaballsSamplesFromSoma << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(

@@ -234,7 +234,7 @@ bool MeshLoader::exportMeshToFile(
 void MeshLoader::_createMaterials(
         const aiScene *scene,
         const std::string& folder,
-        Materials& materials )
+        MaterialsMap& materials )
 {
     BRAYNS_DEBUG << "Loading " << scene->mNumMaterials
         << " materials" << std::endl;
