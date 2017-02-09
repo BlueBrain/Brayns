@@ -45,7 +45,8 @@ if(BRAYNS_OSPRAY_ENABLED)
     set_property(CACHE BRAYNS_BUILD_ISA PROPERTY STRINGS ALL SSE AVX AVX2)
 endif()
 
-common_find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework)
+common_find_package(Boost REQUIRED COMPONENTS
+  filesystem system program_options unit_test_framework)
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 

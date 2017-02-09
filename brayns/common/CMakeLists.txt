@@ -1,5 +1,4 @@
 # Copyright (c) 2015-2017, EPFL/Blue Brain Project
-# All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -64,7 +63,8 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
 )
 
 set(BRAYNSCOMMON_LINK_LIBRARIES
-    PUBLIC braynsParameters Servus boost_filesystem vmmlib boost_system
+    PUBLIC braynsParameters Servus vmmlib
+      ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 
 if(TARGET Lexis AND TARGET ZeroBuf)
