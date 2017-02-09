@@ -160,11 +160,13 @@ GeometryParameters::GeometryParameters()
         ( PARAM_MOLECULAR_SYSTEM_CONFIG.c_str(), po::value< std::string >(),
             "Molecular system configuration [string]" )
         ( PARAM_METABALLS_GRIDSIZE.c_str(), po::value< size_t >(),
-            "Metaballs grid size [int]" )
+            "Metaballs grid size [int]. Activates automated meshing of somas "
+            "if different from 0")
         ( PARAM_METABALLS_THRESHOLD.c_str(), po::value< float >(),
             "Metaballs threshold [float]" )
         ( PARAM_METABALLS_SAMPLES_FROM_SOMA.c_str(), po::value< size_t >(),
-            "Metaballs samples from soma [int]" );
+            "Number of morphology samples (or segments) from soma used by "
+            "automated meshing [int]" );
 }
 
 bool GeometryParameters::_parse( const po::variables_map& vm )

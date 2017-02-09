@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master
 
+* [#116](https://github.com/BlueBrain/Brayns/pull/116):
+  Added automated meshing of somas using metaballs algorithm
 * [#103](https://github.com/BlueBrain/Brayns/pull/103:
   Added clipping planes (OSPRay engine only). --camera-type command line argument must
   be set to activate the feature
