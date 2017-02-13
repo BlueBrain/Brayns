@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -217,33 +217,43 @@ inline vec3f SimulationRenderer_shadeRay(
             {
                 // Intersection point with geometry, slightly above the surface,
                 // along the normal
-                const varying vec3f intersection = dg.P + self->abstract.super.epsilon * dg.Ng;
+                const varying vec3f intersection =
+                    dg.P + self->abstract.super.epsilon * dg.Ng;
 
                 varying vec3f indirectShadingColor = make_vec3f( 0.f );
                 varying float indirectShadingIntensity = 0.f;
                 const varying vec3f reflectedDirection =
                     ray.dir - 2.f * dot( ray.dir, localNormal ) * localNormal;
 
-                if( self->abstract.ambientOcclusionStrength != 0.f )
+                if( self->abstract.ambientOcclusionStrength != 0.f &&
+                    localLightEmission == 0.f )
                 {
                     // Indirect illumination
                     DifferentialGeometry geometry;
                     if( indirectShading(
-                        &(self->abstract), ray, sample, intersection, localNormal,
-                        geometry, indirectShadingColor, indirectShadingIntensity ))
+                        &(self->abstract), ray, sample, intersection,
+                        localNormal, geometry, indirectShadingColor,
+                        indirectShadingIntensity ))
                     {
                         indirectShadingColor =
-                            indirectShadingColor * self->abstract.ambientOcclusionStrength;
-                        indirectShadingIntensity *= self->abstract.ambientOcclusionStrength;
+                            indirectShadingColor *
+                            self->abstract.ambientOcclusionStrength;
 
-                        indirectShadingColor = indirectShadingColor * localOpacity;
+                        indirectShadingIntensity *=
+                            self->abstract.ambientOcclusionStrength;
 
                         // Get simulation value from geometry ID
                         varying float lightEmission = 0.f;
                         vec4f simulationValue = make_vec4f( 0.f );
+
                         if( self->simulationData )
-                            simulationValue = getSimulationValue( self, geometry, lightEmission );
-                        indirectShadingColor = indirectShadingColor + make_vec3f( simulationValue );
+                            simulationValue = getSimulationValue(
+                                self, geometry, lightEmission );
+
+                        indirectShadingColor =
+                            indirectShadingColor +
+                            make_vec3f( simulationValue );
+
                         indirectShadingIntensity += lightEmission;
                     }
                 }
@@ -252,34 +262,44 @@ inline vec3f SimulationRenderer_shadeRay(
                 {
                     // No lights defined
                     localLightIntensity = localLightEmission;
-                    localLightIntensity = max( localLightIntensity, indirectShadingIntensity );
-                    localShadedColor = localShadedColor + localOpacity * ( localDiffuseColor + indirectShadingColor );
+                    localLightIntensity =
+                        max( localLightIntensity, indirectShadingIntensity );
+                    localShadedColor =
+                        localShadedColor + localOpacity *
+                        ( localDiffuseColor + indirectShadingColor );
                 }
                 else if( self->abstract.electronShadingEnabled )
                 {
                     // Electron Shading
                     localLightIntensity = 1.f;
-                    const varying vec3f viewer = normalize( ray.org - intersection );
-                    const varying float el = max( 0.f, dot( viewer, localNormal ));
+                    const varying vec3f viewer =
+                        normalize( ray.org - intersection );
+                    const varying float el =
+                        max( 0.f, dot( viewer, localNormal ));
                     varying float cosNL  = localLightEmission + ( 1.f - el );
-                    localShadedColor = localShadedColor +
+                    localShadedColor =
+                        localShadedColor +
                         localOpacity * cosNL *
                         (
-                            // Affect shading with color determined by simulation value
+                            // Affect shading with color determined by
+                            // simulation value
                             (localSimulationColor * localSimulationIntensity) +
-                            ( 1.f - localSimulationIntensity ) * localDiffuseColor +
-                            indirectShadingColor * indirectShadingIntensity
-                        );
+                            ( 1.f - localSimulationIntensity ) * localDiffuseColor
+                        ) +
+                        indirectShadingColor * indirectShadingIntensity;
                 }
                 else
                 {
                     // Shading for all lights defined in the scene
                     for( uniform int i = 0; self->abstract.lights && i < self->abstract.numLights; ++i )
                     {
-                        const uniform Light* uniform light = self->abstract.lights[ i ];
+                        const uniform Light* uniform light =
+                            self->abstract.lights[ i ];
                         const varying vec2f s = make_vec2f( 0.5f );
-                        const varying Light_SampleRes lightSample = light->sample( light, dg, s );
-                        varying vec3f radiance = lightSample.weight + indirectShadingIntensity;
+                        const varying Light_SampleRes lightSample =
+                            light->sample( light, dg, s );
+                        varying vec3f radiance =
+                            lightSample.weight + indirectShadingIntensity;
                         varying vec3f lightDirection = lightSample.dir;
 
                         if( reduce_max( radiance ) > 0.f )
@@ -290,47 +310,47 @@ inline vec3f SimulationRenderer_shadeRay(
                             if( self->abstract.shadingEnabled )
                             {
                                 cosNL = min( 1.f,
-                                    max( 0.f, indirectShadingIntensity ) +
                                     max( 0.f, dot( lightDirection, localNormal )));
                                 cosLR = min( 1.f,
-                                    max( 0.f, indirectShadingIntensity ) +
                                     max( 0.f, dot( lightDirection, reflectedDirection )));
+
+                                // Specular color
+                                specularColor = max( specularColor,
+                                    localSpecularColor ) *
+                                    powf( cosLR, localSpecularExponent );
                             }
 
                             cosNL += localLightEmission;
                             cosLR += localLightEmission;
 
-                            // Diffuse color
-                            const varying vec3f localUnshadedColor =
-                                localOpacity * cosNL * (
-                                (
-                                    // Affect shading with color determined by simulation value
-                                    (localSimulationColor * localSimulationIntensity) +
-                                    ( 1.f - localSimulationIntensity ) * localDiffuseColor
-                                ) + indirectShadingColor * indirectShadingIntensity);
-
-                            // Specular color
-                            if( self->abstract.shadingEnabled )
-                                specularColor = max(
-                                    specularColor,
-                                    localSpecularColor * powf( cosLR, localSpecularExponent ));
-
                             // Process shadows
                             if( self->abstract.shadowsEnabled && localLightEmission == 0.f )
-                                localLightIntensity = max( 0.f,
-                                        indirectShadingIntensity + shadedLightIntensity(
-                                            &(self->abstract), ray, sample,
-                                            intersection, localNormal, lightDirection ));
+                                localLightIntensity = shadedLightIntensity(
+                                    &(self->abstract), ray, sample,
+                                    intersection, localNormal, lightDirection );
+
+                            // Diffuse color
+                            const varying vec3f localUnshadedColor =
+                                localOpacity * cosNL * localLightIntensity *
+                                (
+                                    // Affect shading with color determined by
+                                    // simulation value
+                                    (localSimulationColor * localSimulationIntensity) +
+                                    ( 1.f - localSimulationIntensity ) * localDiffuseColor
+                                ) +
+                                indirectShadingColor * indirectShadingIntensity;
 
                             // Add contribution of current light
-                            localShadedColor = localShadedColor + localOpacity * localUnshadedColor;
+                            localShadedColor = localShadedColor + localUnshadedColor;
                         }
                     }
                 }
 
                 // Store final color for current iteration
-                intersectionColors[depth] = intersectionColors[depth] +
-                    localShadedColor * localLightIntensity + specularColor;
+                intersectionColors[depth] =
+                    intersectionColors[depth] + min(
+                        make_vec3f(1.f),
+                        localShadedColor + specularColor );
 
                 // Update cumulated path opacity
                 pathOpacity += localOpacity;

@@ -276,6 +276,8 @@ private:
     ::brayns::v1::Scene _remoteScene;
 
     bool _forceRendering = false;
+    bool _dirtyEngine;
+
 };
 
 }

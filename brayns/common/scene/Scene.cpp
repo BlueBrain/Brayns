@@ -180,11 +180,11 @@ void Scene::buildDefault( )
     const uint16_t indices[6][6] =
     {
         { 5, 4, 6, 6, 7, 5 }, // Front
-        { 1, 5, 7, 7, 3, 1 }, // Right
-        { 0, 1, 3, 3, 2, 0 }, // Back
-        { 4, 0, 2, 2, 6, 4 }, // Left
+        { 7, 5, 1, 1, 3, 7 }, // Right
+        { 3, 1, 0, 0, 2, 3 }, // Back
+        { 2, 0, 4, 4, 6, 2 }, // Left
         { 0, 1, 5, 5, 4, 0 }, // Bottom
-        { 2, 3, 7, 7, 6, 2 }  // Top
+        { 7, 3, 2, 2, 6, 7 }  // Top
     };
 
     const Vector3f colors[6] =
