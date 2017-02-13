@@ -1,5 +1,4 @@
-# Copyright (c) 2015-2016, EPFL/Blue Brain Project
-# All rights reserved. Do not distribute without permission.
+# Copyright (c) 2015-2017, EPFL/Blue Brain Project
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -25,7 +24,8 @@ set(BRAYNSIO_PUBLIC_HEADERS
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
-  PRIVATE braynsParameters braynsCommon vmmlib boost_system boost_filesystem
+  PRIVATE braynsParameters braynsCommon vmmlib
+    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 
 if(ASSIMP_FOUND)
