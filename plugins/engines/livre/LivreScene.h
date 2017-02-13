@@ -46,6 +46,9 @@ public:
     void buildGeometry() final;
 
     /** Unsupported by Livre. */
+    uint64_t serializeGeometry() final;
+
+    /** Unsupported by Livre. */
     void commitLights() final;
 
     /** Unsupported by Livre. */

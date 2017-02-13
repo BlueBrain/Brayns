@@ -103,6 +103,12 @@ public:
     BRAYNS_API virtual void buildGeometry() = 0;
 
     /**
+        Serializes scene geometry into rendering engine specific data structures
+        @return The total size of the serialized data
+    */
+    BRAYNS_API virtual uint64_t serializeGeometry() = 0;
+
+    /**
         Attach simulation data to renderer
     */
     BRAYNS_API virtual void commitSimulationData() = 0;
@@ -166,9 +172,19 @@ public:
     BRAYNS_API ParametersManager& getParametersManager() { return _parametersManager; }
 
     /**
-        Returns geometric primitives handled by the scene
+        Returns spheres handled by the scene
     */
-    BRAYNS_API PrimitivesMap& getPrimitives() { return _primitives; }
+    BRAYNS_API SpheresMap& getSpheres() { return _spheres; }
+
+    /**
+        Returns cylinders handled by the scene
+    */
+    BRAYNS_API CylindersMap& getCylinders() { return _cylinders; }
+
+    /**
+        Returns cones handled by the scene
+    */
+    BRAYNS_API ConesMap& getCones() { return _cones; }
 
     /**
         Returns materials handled by the scene
@@ -221,6 +237,41 @@ public:
      */
     BRAYNS_API virtual bool isVolumeSupported( const std::string& volumeFile ) const = 0;
 
+    /**
+     * @return Active renderers
+     */
+    BRAYNS_API Renderers& getRenderers() { return _renderers; }
+
+    /**
+     * @brief Sets spheres as dirty, meaning that they need to be serialized
+     *        and sent to the rendering engine
+     */
+    BRAYNS_API void setSpheresDirty( const bool value ) { _spheresDirty = value; }
+
+    /**
+     * @brief Sets cylinders as dirty, meaning that they need to be serialized
+     *        and sent to the rendering engine
+     */
+    BRAYNS_API void setCylindersDirty( const bool value ) { _cylindersDirty = value; }
+
+    /**
+     * @brief Sets cones as dirty, meaning that they need to be serialized
+     *        and sent to the rendering engine
+     */
+    BRAYNS_API void setConesDirty( const bool value ) { _conesDirty = value; }
+
+    /**
+     * @brief Sets meshes as dirty, meaning that they need to be serialized
+     *        and sent to the rendering engine
+     */
+    BRAYNS_API void setTrianglesMeshesDirty( const bool value ) { _trianglesMeshesDirty = value; }
+
+    /**
+     * @brief Sets all geometries as dirty, meaning that they need to be
+     *        serialized and sent to the rendering engine
+     */
+    BRAYNS_API void setDirty();
+
 protected:
 
     // Parameters
@@ -228,8 +279,14 @@ protected:
     Renderers _renderers;
 
     // Model
-    PrimitivesMap _primitives;
+    SpheresMap _spheres;
+    bool _spheresDirty;
+    CylindersMap _cylinders;
+    bool _cylindersDirty;
+    ConesMap _cones;
+    bool _conesDirty;
     TrianglesMeshMap _trianglesMeshes;
+    bool _trianglesMeshesDirty;
     MaterialsMap _materials;
     TexturesMap _textures;
     Lights _lights;

@@ -103,7 +103,7 @@ void NESTLoader::importCircuit( const std::string& filepath, Scene& scene, size_
     }
     BRAYNS_INFO << "Number of materials: " << nbMaterials << std::endl;
 
-    PrimitivesMap& primitives = scene.getPrimitives();
+    SpheresMap& spheres = scene.getSpheres();
     Boxf& bounds = scene.getWorldBounds();
     const float radius = _geometryParameters.getRadiusMultiplier();
 
@@ -116,7 +116,7 @@ void NESTLoader::importCircuit( const std::string& filepath, Scene& scene, size_
             int(xColor[gid]) + int(yColor[gid] * 256) + int(zColor[gid] * 65536);
         const Vector3f center( xPos[gid], yPos[gid], zPos[gid] );
         _positions.push_back( center );
-        primitives[ 0 ].push_back( SpherePtr(
+        spheres[ 0 ].push_back( SpherePtr(
             new Sphere( 0, center, radius, 0.f, materials[index].w() )));
         bounds.merge( center );
     }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -27,6 +27,12 @@ namespace brayns
 
 TransferFunction::TransferFunction()
 {
+    for( size_t i=0; i<256; ++i )
+    {
+        _diffuseColors.push_back( Vector3f( 0, i/255.f, 0 ));
+        _contributions.push_back( 1.f );
+    }
+    _valuesRange = Vector2f( 0, 255 );
 }
 
 void TransferFunction::clear()

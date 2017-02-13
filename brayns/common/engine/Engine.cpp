@@ -38,6 +38,7 @@ Engine::Engine( ParametersManager& parametersManager )
 
 Engine::~Engine()
 {
+    _scene->reset();
 }
 
 void Engine::setActiveRenderer( const RendererType renderer )

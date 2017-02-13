@@ -20,6 +20,33 @@
 
 namespace brayns.v1;
 
+table Sphere
+{
+    index: uint64_t;
+    material_id: int;
+    center: [float:3];
+    radius: float;
+}
+
+table Cylinder
+{
+    index: uint64_t;
+    material_id: int;
+    center: [float:3];
+    up: [float:3];
+    radius: float;
+}
+
+table Cone
+{
+    index: uint64_t;
+    material_id: int;
+    center: [float:3];
+    up: [float:3];
+    center_radius: float;
+    up_radius: float;
+}
+
 table Material {
     diffuse_color : [float:3];
     specular_color: [float:3];
@@ -32,4 +59,7 @@ table Material {
 
 table Scene {
     materials: [Material];
+    spheres: [Sphere];
+    cylinders: [Cylinder];
+    cones: [Cone];
 }

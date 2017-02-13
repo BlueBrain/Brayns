@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -29,6 +29,8 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 
+#include <brayns/common/scene/Scene.h>
+
 namespace brayns
 {
 
@@ -36,9 +38,14 @@ MeshLoader::MeshLoader()
 {
 }
 
+void MeshLoader::clear()
+{
+    _meshIndex.clear();
+}
+
 bool MeshLoader::importMeshFromFile(
         const std::string& filename,
-        MeshContainer& meshContainer,
+        Scene& scene,
         MeshQuality meshQuality,
         const Vector3f& position,
         const Vector3f& scale,
@@ -56,10 +63,10 @@ bool MeshLoader::importMeshFromFile(
     size_t quality;
     switch( meshQuality )
     {
-        case MQ_QUALITY:
+        case MeshQuality::medium:
             quality = aiProcessPreset_TargetRealtime_Quality;
             break;
-        case MQ_MAX_QUALITY:
+        case MeshQuality::high:
             quality = aiProcessPreset_TargetRealtime_MaxQuality;
             break;
         default:
@@ -75,17 +82,17 @@ bool MeshLoader::importMeshFromFile(
     }
     meshFile.close();
 
-    const aiScene *scene = nullptr;
-    scene = importer.ReadFile( filename.c_str() , quality);
+    const aiScene *aiScene = nullptr;
+    aiScene = importer.ReadFile( filename.c_str() , quality);
 
-    if (!scene)
+    if (!aiScene)
     {
         BRAYNS_ERROR << "Error parsing " << filename.c_str() << ": " <<
                         importer.GetErrorString() << std::endl;
         return false;
     }
 
-    if (!scene->HasMeshes())
+    if (!aiScene->HasMeshes())
     {
         BRAYNS_ERROR << "Error Finding Model In file. " <<
                         "Did you export an empty scene?" << std::endl;
@@ -94,15 +101,14 @@ bool MeshLoader::importMeshFromFile(
 
     boost::filesystem::path filepath = filename;
     if( defaultMaterial == NO_MATERIAL )
-        _createMaterials(
-            scene, filepath.parent_path().string(),
-            meshContainer.materials );
+        _createMaterials( scene, aiScene, filepath.parent_path().string() );
 
     size_t nbVertices = 0;
     size_t nbFaces = 0;
-    for( size_t m = 0; m < scene->mNumMeshes; ++m )
+    auto& triangleMeshes = scene.getTriangleMeshes();
+    for( size_t m = 0; m < aiScene->mNumMeshes; ++m )
     {
-        aiMesh* mesh = scene->mMeshes[ m ];
+        aiMesh* mesh = aiScene->mMeshes[ m ];
         size_t materialId =
             ( defaultMaterial == NO_MATERIAL ) ? mesh->mMaterialIndex : defaultMaterial;
 
@@ -111,21 +117,21 @@ bool MeshLoader::importMeshFromFile(
         {
             aiVector3D v = mesh->mVertices[ i ];
             const Vector3f vertex = position + scale * Vector3f( v.x, v.y, v.z );
-            meshContainer.triangles[ materialId ].getVertices().push_back( vertex );
-            meshContainer.bounds.merge(vertex);
+            triangleMeshes[ materialId ].getVertices().push_back( vertex );
+            scene.getWorldBounds().merge(vertex);
 
             if( mesh->HasNormals( ))
             {
                 v = mesh->mNormals[ i ];
                 const Vector3f normal = { v.x, v.y, v.z };
-                meshContainer.triangles[ materialId ].getNormals().push_back( normal );
+                triangleMeshes[ materialId ].getNormals().push_back( normal );
             }
 
             if( mesh->HasTextureCoords( 0 ))
             {
                 v = mesh->mTextureCoords[ 0 ][ i ];
                 const Vector2f texCoord( v.x, -v.y );
-                meshContainer.triangles[ materialId ].getTextureCoordinates().push_back( texCoord );
+                triangleMeshes[ materialId ].getTextureCoordinates().push_back( texCoord );
             }
         }
         bool nonTriangulatedFaces = false;
@@ -138,7 +144,7 @@ bool MeshLoader::importMeshFromFile(
                     _meshIndex[ materialId ] + mesh->mFaces[ f ].mIndices[ 0 ],
                     _meshIndex[ materialId ] + mesh->mFaces[ f ].mIndices[ 1 ],
                     _meshIndex[ materialId ] + mesh->mFaces[ f ].mIndices[ 2 ]);
-                meshContainer.triangles[ materialId ].getIndices().push_back( ind );
+                triangleMeshes[ materialId ].getIndices().push_back( ind );
             }
             else
                 nonTriangulatedFaces = true;
@@ -160,17 +166,17 @@ bool MeshLoader::importMeshFromFile(
 
 bool MeshLoader::exportMeshToFile(
     const std::string& filename,
-    MeshContainer& meshContainer ) const
+    Scene& scene ) const
 {
     // Save to OBJ
-    size_t nbMaterials = meshContainer.materials.size();
-    aiScene scene;
-    scene.mMaterials = new aiMaterial*[ nbMaterials ];
-    scene.mNumMaterials = nbMaterials;
+    size_t nbMaterials = scene.getMaterials().size();
+    aiScene aiScene;
+    aiScene.mMaterials = new aiMaterial*[ nbMaterials ];
+    aiScene.mNumMaterials = nbMaterials;
 
     aiNode* rootNode = new aiNode();
     rootNode->mName = "brayns";
-    scene.mRootNode = rootNode;
+    aiScene.mRootNode = rootNode;
     rootNode->mNumMeshes = nbMaterials;
     rootNode->mMeshes = new unsigned int[ rootNode->mNumMeshes ];
 
@@ -183,64 +189,65 @@ bool MeshLoader::exportMeshToFile(
         const aiVector3D c( rand() % 255 / 255, rand() % 255 / 255, rand() % 255 / 255);
         material->AddProperty( &c, 1, AI_MATKEY_COLOR_DIFFUSE );
         material->AddProperty( &c, 1, AI_MATKEY_COLOR_SPECULAR );
-        scene.mMaterials[ i ] = material;
+        aiScene.mMaterials[ i ] = material;
     }
 
-    scene.mNumMeshes = nbMaterials;
-    scene.mMeshes = new aiMesh*[ meshContainer.materials.size( )];
+    aiScene.mNumMeshes = nbMaterials;
+    aiScene.mMeshes = new aiMesh*[ scene.getMaterials().size( )];
     size_t numVertex = 0;
     size_t numFace = 0;
-    for( size_t meshIndex = 0; meshIndex < scene.mNumMeshes; ++meshIndex )
+    auto& triangleMeshes = scene.getTriangleMeshes();
+    for( size_t meshIndex = 0; meshIndex < aiScene.mNumMeshes; ++meshIndex )
     {
         aiMesh mesh;
-        mesh.mNumVertices = meshContainer.triangles[ meshIndex ].getVertices().size();
-        mesh.mNumFaces = meshContainer.triangles[ meshIndex ].getIndices().size();
+        mesh.mNumVertices = triangleMeshes[ meshIndex ].getVertices().size();
+        mesh.mNumFaces = triangleMeshes[ meshIndex ].getIndices().size();
         mesh.mMaterialIndex = meshIndex;
         mesh.mVertices = new aiVector3D[ mesh.mNumVertices ];
         mesh.mFaces = new aiFace[ mesh.mNumFaces ];
         mesh.mNormals = new aiVector3D[ mesh.mNumVertices ];
 
-        for( size_t t = 0; t < meshContainer.triangles[meshIndex].
+        for( size_t t = 0; t < triangleMeshes[meshIndex].
             getIndices().size(); ++t )
         {
             aiFace face;
             face.mNumIndices = 3;
             face.mIndices = new unsigned int[face.mNumIndices];
-            face.mIndices[ 0 ] = meshContainer.triangles[meshIndex].getIndices()[t].x();
-            face.mIndices[ 1 ] = meshContainer.triangles[meshIndex].getIndices()[t].y();
-            face.mIndices[ 2 ] = meshContainer.triangles[meshIndex].getIndices()[t].z();
+            face.mIndices[ 0 ] = triangleMeshes[meshIndex].getIndices()[t].x();
+            face.mIndices[ 1 ] = triangleMeshes[meshIndex].getIndices()[t].y();
+            face.mIndices[ 2 ] = triangleMeshes[meshIndex].getIndices()[t].z();
             mesh.mFaces[t] = face;
             ++numFace;
         }
 
-        for( size_t t = 0; t < meshContainer.triangles[meshIndex].
+        for( size_t t = 0; t < triangleMeshes[meshIndex].
             getVertices().size(); ++t )
         {
-            const Vector3f& vertex = meshContainer.triangles[meshIndex].getVertices()[t];
+            const Vector3f& vertex = triangleMeshes[meshIndex].getVertices()[t];
             mesh.mVertices[t] = aiVector3D(vertex.x(), vertex.y(), vertex.z());
-            const Vector3f& normal = meshContainer.triangles[meshIndex].getNormals()[t];
+            const Vector3f& normal = triangleMeshes[meshIndex].getNormals()[t];
             mesh.mNormals[t] = aiVector3D(normal.x(), normal.y(), normal.z());
             ++numVertex;
         }
-        scene.mMeshes[meshIndex] = &mesh;
+        aiScene.mMeshes[meshIndex] = &mesh;
     }
     Assimp::Exporter exporter;
-    exporter.Export( &scene, "obj", filename, aiProcess_MakeLeftHanded );
+    exporter.Export( &aiScene, "obj", filename, aiProcess_MakeLeftHanded );
 
     BRAYNS_INFO << "Exported OBJ model to " << filename << std::endl;
     return true;
 }
 
 void MeshLoader::_createMaterials(
-        const aiScene *scene,
-        const std::string& folder,
-        MaterialsMap& materials )
+    Scene& scene,
+    const aiScene *aiScene,
+    const std::string& folder )
 {
-    BRAYNS_DEBUG << "Loading " << scene->mNumMaterials
+    BRAYNS_DEBUG << "Loading " << aiScene->mNumMaterials
         << " materials" << std::endl;
-    for( size_t m = 0; m < scene->mNumMaterials; ++m )
+    for( size_t m = 0; m < aiScene->mNumMaterials; ++m )
     {
-        aiMaterial* material = scene->mMaterials[m];
+        aiMaterial* material = aiScene->mMaterials[m];
 
         struct TextureTypeMapping
         {
@@ -270,7 +277,7 @@ void MeshLoader::_createMaterials(
                     textureTypeMapping[textureType].aiType, 0, &path, nullptr,
                     nullptr, nullptr, nullptr, nullptr ) == AI_SUCCESS )
                 {
-                    materials[m]->getTextures()[textureTypeMapping[textureType].
+                    scene.getMaterials()[m]->getTextures()[textureTypeMapping[textureType].
                         type] = folder + "/" + path.data;
                 }
             }
@@ -279,32 +286,36 @@ void MeshLoader::_createMaterials(
         aiColor3D value3f( 0.f, 0.f, 0.f );
         float value1f;
         material->Get( AI_MATKEY_COLOR_DIFFUSE, value3f );
-        materials[m]->setColor( Vector3f( value3f.r, value3f.g, value3f.b ));
+        scene.getMaterials()[m]->setColor(
+            Vector3f( value3f.r, value3f.g, value3f.b ));
 
         value1f = 0.f;
         material->Get( AI_MATKEY_REFLECTIVITY, value1f );
-        materials[m]->setReflectionIndex( value1f );
+        scene.getMaterials()[m]->setReflectionIndex( value1f );
 
         value3f = aiColor3D( 0.f, 0.f, 0.f);
         material->Get( AI_MATKEY_COLOR_SPECULAR, value3f );
-        materials[m]->setSpecularColor(
+        scene.getMaterials()[m]->setSpecularColor(
             Vector3f( value3f.r, value3f.g, value3f.b ));
 
         value1f = 0.f;
         material->Get( AI_MATKEY_SHININESS, value1f );
-        materials[m]->setSpecularExponent( fabs(value1f) < 0.01f ? 100.f : value1f );
+        scene.getMaterials()[m]->setSpecularExponent(
+            fabs(value1f) < 0.01f ? 100.f : value1f );
 
         value3f = aiColor3D( 0.f, 0.f, 0.f );
         material->Get( AI_MATKEY_COLOR_EMISSIVE, value3f );
-        materials[m]->setEmission( value3f.r );
+        scene.getMaterials()[m]->setEmission( value3f.r );
 
         value1f = 0.f;
         material->Get( AI_MATKEY_OPACITY, value1f );
-        materials[m]->setOpacity( fabs(value1f) < 0.01f ? 1.f : value1f );
+        scene.getMaterials()[m]->setOpacity(
+            fabs(value1f) < 0.01f ? 1.f : value1f );
 
         value1f = 0.f;
         material->Get( AI_MATKEY_REFRACTI, value1f );
-        materials[m]->setRefractionIndex( fabs(value1f - 1.f) < 0.01f ? 1.0f : value1f );
+        scene.getMaterials()[m]->setRefractionIndex(
+            fabs(value1f - 1.f) < 0.01f ? 1.0f : value1f );
     }
 }
 

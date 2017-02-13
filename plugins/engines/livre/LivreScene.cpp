@@ -91,6 +91,11 @@ void LivreScene::buildGeometry()
     worldBounds.merge( Vector3f(bboxMax) / volInfo.meterToDataUnitRatio );
 }
 
+uint64_t LivreScene::serializeGeometry()
+{
+    return 0;
+}
+
 void LivreScene::commitLights()
 {
 }

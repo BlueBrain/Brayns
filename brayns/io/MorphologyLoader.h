@@ -123,7 +123,9 @@ private:
         size_t morphologyIndex,
         const Matrix4f& transformation,
         const SimulationInformation* simulationInformation,
-        PrimitivesMap& primitives,
+        SpheresMap& spheres,
+        CylindersMap& cylinders,
+        ConesMap& cones,
         Boxf& bounds,
         const size_t simulationOffset,
         float& maxDistanceToSoma);

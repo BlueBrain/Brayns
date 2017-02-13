@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -178,8 +178,8 @@ bool MorphologyLoader::importMorphology(
     }
     float maxDistanceToSoma;
     returnValue = returnValue && _importMorphology(
-        uri, morphologyIndex, Matrix4f(),
-        0, scene.getPrimitives(),
+        uri, morphologyIndex, Matrix4f(), nullptr,
+        scene.getSpheres(), scene.getCylinders(), scene.getCones(),
         scene.getWorldBounds(), 0, maxDistanceToSoma );
     return returnValue;
 }
@@ -189,7 +189,9 @@ bool MorphologyLoader::_importMorphology(
     const size_t morphologyIndex,
     const Matrix4f& transformation,
     const SimulationInformation* simulationInformation,
-    PrimitivesMap& primitives,
+    SpheresMap& spheres,
+    CylindersMap& cylinders,
+    ConesMap& cones,
     Boxf& bounds,
     const size_t simulationOffset,
     float& maxDistanceToSoma)
@@ -257,7 +259,7 @@ bool MorphologyLoader::_importMorphology(
                 _geometryParameters.getRadiusCorrection() :
                 soma.getMeanRadius() *
                     _geometryParameters.getRadiusMultiplier() );
-            primitives[material].push_back( SpherePtr(
+            spheres[material].push_back( SpherePtr(
                 new Sphere( material, center, radius, 0.f, offset )));
             bounds.merge( center );
         }
@@ -336,7 +338,7 @@ bool MorphologyLoader::_importMorphology(
                          _geometryParameters.getRadiusMultiplier( ));
 
                 if( radius > 0.f )
-                    primitives[material].push_back( SpherePtr(
+                    spheres[material].push_back( SpherePtr(
                         new Sphere( material, position,
                             radius, distance, offset )));
 
@@ -344,11 +346,11 @@ bool MorphologyLoader::_importMorphology(
                 if( position != target && radius > 0.f && previousRadius > 0.f )
                 {
                     if( radius == previousRadius )
-                        primitives[material].push_back( CylinderPtr(
+                        cylinders[material].push_back( CylinderPtr(
                             new Cylinder( material, position, target,
                                 radius, distance, offset )));
                     else
-                        primitives[material].push_back( ConePtr(
+                        cones[material].push_back( ConePtr(
                             new Cone( material, position, target,
                                 radius, previousRadius, distance, offset )));
                     bounds.merge( target );
@@ -394,7 +396,10 @@ bool MorphologyLoader::importCircuit(
     size_t progress = 0;
     #pragma omp parallel
     {
-        PrimitivesMap private_primitives;
+        SpheresMap private_spheres;
+        CylindersMap private_cylinders;
+        ConesMap private_cones;
+        Boxf private_bounds;
         #pragma omp for nowait
         for( size_t i = 0; i < uris.size(); ++i )
         {
@@ -413,8 +418,8 @@ bool MorphologyLoader::importCircuit(
 
             if( _importMorphology(
                 uri, i, transforms[i], 0,
-                private_primitives, scene.getWorldBounds(),
-                simulationOffset, maxDistanceToSoma))
+                private_spheres, private_cylinders, private_cones,
+                private_bounds, simulationOffset, maxDistanceToSoma))
             {
                 morphologyOffsets[simulatedCells] = maxDistanceToSoma;
                 simulationOffset += maxDistanceToSoma;
@@ -425,14 +430,35 @@ bool MorphologyLoader::importCircuit(
             ++progress;
         }
         #pragma omp critical
-        for( const auto& p: private_primitives )
+
+        for( const auto& p: private_spheres )
         {
             const size_t material = p.first;
-            scene.getPrimitives()[material].insert(
-                scene.getPrimitives()[material].end(),
-                private_primitives[material].begin(),
-                private_primitives[material].end());
+            scene.getSpheres()[ material ].insert(
+                scene.getSpheres()[ material ].end(),
+                private_spheres[ material ].begin(),
+                private_spheres[ material ].end());
         }
+
+        for( const auto& p: private_cylinders )
+        {
+            const size_t material = p.first;
+            scene.getCylinders()[ material ].insert(
+                scene.getCylinders()[ material ].end(),
+                private_cylinders[ material ].begin(),
+                private_cylinders[ material ].end());
+        }
+
+        for( const auto& p: private_cones )
+        {
+            const size_t material = p.first;
+            scene.getCones()[ material ].insert(
+                scene.getCones()[ material ].end(),
+                private_cones[ material ].begin(),
+                private_cones[ material ].end());
+        }
+
+        scene.getWorldBounds().merge( private_bounds );
     }
 
     return true;
@@ -484,7 +510,10 @@ bool MorphologyLoader::importCircuit(
     size_t progress = 0;
     #pragma omp parallel
     {
-        PrimitivesMap private_primitives;
+        SpheresMap private_spheres;
+        CylindersMap private_cylinders;
+        ConesMap private_cones;
+        Boxf private_bounds;
         #pragma omp for nowait
         for( size_t i = 0; i < cr_uris.size(); ++i )
         {
@@ -508,22 +537,42 @@ bool MorphologyLoader::importCircuit(
             float maxDistanceToSoma;
             _importMorphology(
                 uri, i, transforms[i], &simulationInformation,
-                private_primitives, scene.getWorldBounds(),
-                0, maxDistanceToSoma);
+                private_spheres, private_cylinders, private_cones,
+                private_bounds, 0, maxDistanceToSoma);
 
             BRAYNS_PROGRESS( progress, cr_uris.size() );
             #pragma omp atomic
             ++progress;
         }
         #pragma omp critical
-        for( const auto& p: private_primitives )
+        for( const auto& p: private_spheres )
         {
             const size_t material = p.first;
-            scene.getPrimitives()[material].insert(
-                scene.getPrimitives()[material].end(),
-                private_primitives[material].begin(),
-                private_primitives[material].end());
+            scene.getSpheres()[ material ].insert(
+                scene.getSpheres()[ material ].end(),
+                private_spheres[ material ].begin(),
+                private_spheres[ material ].end());
         }
+
+        for( const auto& p: private_cylinders )
+        {
+            const size_t material = p.first;
+            scene.getCylinders()[ material ].insert(
+                scene.getCylinders()[ material ].end(),
+                private_cylinders[ material ].begin(),
+                private_cylinders[ material ].end());
+        }
+
+        for( const auto& p: private_cones )
+        {
+            const size_t material = p.first;
+            scene.getCones()[ material ].insert(
+                scene.getCones()[ material ].end(),
+                private_cones[ material ].begin(),
+                private_cones[ material ].end());
+        }
+
+        scene.getWorldBounds().merge( private_bounds );
     }
 
     size_t nonSimulatedCells =
@@ -554,7 +603,10 @@ bool MorphologyLoader::importCircuit(
         progress = 0;
         #pragma omp parallel
         {
-            PrimitivesMap private_primitives;
+            SpheresMap private_spheres;
+            CylindersMap private_cylinders;
+            ConesMap private_cones;
+            Boxf private_bounds;
             #pragma omp for nowait
             for( size_t i = 0; i < nonSimulatedCells; ++i )
             {
@@ -563,22 +615,44 @@ bool MorphologyLoader::importCircuit(
 
                 _importMorphology(
                     uri, i, allTransforms[i], 0,
-                    private_primitives, scene.getWorldBounds(),
-                    0, maxDistanceToSoma);
+                    private_spheres, private_cylinders, private_cones,
+                    private_bounds, 0, maxDistanceToSoma);
 
                 BRAYNS_PROGRESS( progress, allUris.size() );
                 #pragma omp atomic
                 ++progress;
             }
+
             #pragma omp critical
-            for( const auto& p: private_primitives )
+
+            for( const auto& p: private_spheres )
             {
                 const size_t material = p.first;
-                scene.getPrimitives()[material].insert(
-                    scene.getPrimitives()[material].end(),
-                    private_primitives[material].begin(),
-                    private_primitives[material].end());
+                scene.getSpheres()[ material ].insert(
+                    scene.getSpheres()[ material ].end(),
+                    private_spheres[ material ].begin(),
+                    private_spheres[ material ].end());
             }
+
+            for( const auto& p: private_cylinders )
+            {
+                const size_t material = p.first;
+                scene.getCylinders()[ material ].insert(
+                    scene.getCylinders()[ material ].end(),
+                    private_cylinders[ material ].begin(),
+                    private_cylinders[ material ].end());
+            }
+
+            for( const auto& p: private_cones )
+            {
+                const size_t material = p.first;
+                scene.getCones()[ material ].insert(
+                    scene.getCones()[ material ].end(),
+                    private_cones[ material ].begin(),
+                    private_cones[ material ].end());
+            }
+
+            scene.getWorldBounds().merge( private_bounds );
         }
     }
     return true;
@@ -688,7 +762,6 @@ bool MorphologyLoader::importSimulationData(
     BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
     return false;
 }
-
 
 #endif
 

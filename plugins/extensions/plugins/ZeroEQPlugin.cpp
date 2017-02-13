@@ -298,6 +298,24 @@ bool ZeroEQPlugin::_requestScene()
         m.setLightEmission( material.second->getEmission( ));
         ms.push_back(m);
     }
+
+    auto& remoteSpheres = _remoteScene.getSpheres();
+    remoteSpheres.clear();
+    for( size_t materialId = 0; materialId < materials.size(); ++materialId )
+    {
+        const auto& spheres = scene.getSpheres()[ materialId ];
+        for( const auto& sphere: spheres )
+        {
+            ::brayns::v1::Sphere remoteSphere;
+            const auto& center = sphere->getCenter();
+            float remoteCenter[3] = { center.x(), center.y(), center.z( ) };
+            remoteSphere.setIndex( remoteSpheres.size( ));
+            remoteSphere.setMaterialId( materialId );
+            remoteSphere.setCenter( remoteCenter );
+            remoteSphere.setRadius( sphere->getRadius( ));
+            remoteSpheres.push_back( remoteSphere );
+        }
+    }
     return true;
 }
 
@@ -308,8 +326,8 @@ void ZeroEQPlugin::_sceneUpdated( )
 
     for( size_t materialId = 0; materialId < materials.size(); ++materialId )
     {
+        // Materials
         MaterialPtr material = scene.getMaterial( materialId );
-
         if( material)
         {
             ::brayns::v1::Material& m = materials[ materialId ];
@@ -328,6 +346,54 @@ void ZeroEQPlugin::_sceneUpdated( )
             material->setEmission( m.getLightEmission() );
         }
     }
+
+    // Spheres
+    const auto& remoteSpheres = _remoteScene.getSpheresVector();
+    auto& spheres = scene.getSpheres();
+    scene.setSpheresDirty( remoteSpheres.size() != 0 );
+    for( const auto& remoteSphere: remoteSpheres )
+    {
+        const auto index = remoteSphere.getIndex();
+        const auto& center = remoteSphere.getCenter();
+        const auto radius = remoteSphere.getRadius( );
+        auto& sphere = spheres[ remoteSphere.getMaterialId() ][ index ];
+        sphere->setCenter( Vector3f( center[0], center[1], center[2] ));
+        sphere->setRadius( radius );
+    }
+
+    // Cylinders
+    const auto& remoteCylinders = _remoteScene.getCylindersVector();
+    auto& cylinders = scene.getCylinders();
+    scene.setCylindersDirty( remoteCylinders.size() != 0 );
+    for( const auto& remoteCylinder: remoteCylinders )
+    {
+        const auto index = remoteCylinder.getIndex();
+        const auto& center = remoteCylinder.getCenter();
+        const auto& up = remoteCylinder.getUp();
+        auto& cylinder = cylinders[ remoteCylinder.getMaterialId() ][ index ];
+        cylinder->setCenter( Vector3f( center[0], center[1], center[2] ));
+        cylinder->setUp( Vector3f( up[0], up[1], up[2] ));
+        cylinder->setRadius( remoteCylinder.getRadius());
+    }
+
+    // Cones
+    const auto& remoteCones = _remoteScene.getConesVector();
+    auto& cones = scene.getCones();
+    scene.setConesDirty( remoteCones.size() != 0 );
+    for( const auto& remoteCone: remoteCones )
+    {
+        const auto index = remoteCone.getIndex();
+        const auto& center = remoteCone.getCenter();
+        const auto& up = remoteCone.getUp();
+        auto& cone = cones[ remoteCone.getMaterialId() ][ index ];
+        cone->setCenter( Vector3f( center[0], center[1], center[2] ));
+        cone->setUp( Vector3f( up[0], up[1], up[2] ));
+        cone->setCenterRadius( remoteCone.getCenterRadius());
+        cone->setUpRadius( remoteCone.getUpRadius());
+    }
+
+    scene.serializeGeometry();
+    scene.commit();
     scene.commitMaterials( true );
     _engine->getRenderer().commit();
     _engine->getFrameBuffer().clear();
