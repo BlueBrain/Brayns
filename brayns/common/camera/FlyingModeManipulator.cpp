@@ -21,6 +21,8 @@
 #include "FlyingModeManipulator.h"
 
 #include "Camera.h"
+
+#include <brayns/common/log.h>
 #include <brayns/common/input/KeyboardHandler.h>
 
 namespace brayns
@@ -79,17 +81,18 @@ void FlyingModeManipulator::wheel( const Vector2i& /*position*/,
 
 void FlyingModeManipulator::_strafeLeft()
 {
-    translate( Vector3f::right() * getMotionSpeed(), true );
+    translate( Vector3f::left() * getMotionSpeed(), true );
 }
 
 void FlyingModeManipulator::_strafeRight()
 {
-    translate( Vector3f::left() * getMotionSpeed(), true );
+    translate( Vector3f::right() * getMotionSpeed(), true );
 }
 
 void FlyingModeManipulator::_flyForward()
 {
     translate( Vector3f::forward() * getWheelSpeed(), true );
+    BRAYNS_INFO << _camera << std::endl;
 }
 
 void FlyingModeManipulator::_flyBackwards()

@@ -39,6 +39,10 @@ Scene::Scene(
     ParametersManager& parametersManager )
     : _parametersManager( parametersManager )
     , _renderers( renderers )
+    , _spheresDirty( true )
+    , _cylindersDirty( true )
+    , _conesDirty( true )
+    , _trianglesMeshesDirty( true )
     , _volumeHandler( 0 )
     , _simulationHandler( 0 )
 {
@@ -50,10 +54,22 @@ Scene::~Scene( )
 
 void Scene::reset( )
 {
-    _primitives.clear( );
+    setDirty();
+    _spheres.clear( );
+    _cylinders.clear( );
+    _cones.clear( );
     _trianglesMeshes.clear( );
     _bounds.reset();
 }
+
+void Scene::setDirty()
+{
+    _spheresDirty = true;
+    _cylindersDirty =  true;
+    _conesDirty = true;
+    _trianglesMeshesDirty = true;
+}
+
 
 void Scene::setMaterials(
     const MaterialType materialType,
@@ -163,6 +179,8 @@ void Scene::buildDefault( )
 {
     BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
 
+    setDirty();
+
     const Vector3f WHITE = { 1.f, 1.f, 1.f };
 
     const Vector3f positions[8] =
@@ -220,7 +238,7 @@ void Scene::buildDefault( )
     size_t material = 7;
 
     // Sphere
-    _primitives[material].push_back( SpherePtr(
+    _spheres[material].push_back( SpherePtr(
         new Sphere( material, Vector3f( 0.25f, 0.26f, 0.30f ), 0.25f, 0, 0 )));
     _materials[material]->setOpacity( 0.3f );
     _materials[material]->setRefractionIndex( 1.1f );
@@ -229,7 +247,7 @@ void Scene::buildDefault( )
 
     // Cylinder
     ++material;
-    _primitives[material].push_back( CylinderPtr(
+    _cylinders[material].push_back( CylinderPtr(
         new Cylinder( material,
             Vector3f( 0.25f, 0.126f, 0.75f ), Vector3f( 0.75f, 0.126f, 0.75f ),
             0.125f, 0, 0 )));
@@ -239,7 +257,7 @@ void Scene::buildDefault( )
 
     // Cone
     ++material;
-    _primitives[material].push_back( ConePtr(
+    _cones[material].push_back( ConePtr(
         new Cone( material,
             Vector3f( 0.75f, 0.01f, 0.25f ), Vector3f( 0.75f, 0.5f, 0.25f ),
             0.15f, 0.f, 0, 0 )));
@@ -445,34 +463,34 @@ void Scene::buildEnvironment( )
         };
 
         for( size_t i = 0; i < 8; ++i)
-            _primitives[material].push_back( SpherePtr(
+            _spheres[material].push_back( SpherePtr(
                 new Sphere( material, positions[i], radius, 0, 0)));
 
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[0], positions[1], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[2], positions[3], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[4], positions[5], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[6], positions[7], radius, 0, 0)));
 
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[0], positions[2], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[1], positions[3], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[4], positions[6], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[5], positions[7], radius, 0, 0)));
 
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[0], positions[4], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[1], positions[5], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[2], positions[6], radius, 0, 0)));
-        _primitives[material].push_back( CylinderPtr(
+        _cylinders[material].push_back( CylinderPtr(
             new Cylinder( material, positions[3], positions[7], radius, 0, 0)));
 
         break;
@@ -582,7 +600,8 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 
 bool Scene::empty() const
 {
-    return _primitives.empty() && _trianglesMeshes.empty();
+    return _spheres.empty() && _cylinders.empty()
+        && _cones.empty() && _trianglesMeshes.empty();
 }
 
 }

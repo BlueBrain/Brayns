@@ -22,6 +22,7 @@
 #define MOLECULARSYSTEMREADER_H
 
 #include <brayns/common/types.h>
+#include <brayns/io/MeshLoader.h>
 
 #include <string>
 
@@ -43,6 +44,7 @@ typedef std::map< size_t, Vector3fs > ProteinPositions;
  *        - MeshFolder: Folder containing obj files
  *        - SystemDescriptor: File containing the IDs of the proteins
  *        - ProteinPositions: File containing the position of each protein
+ *        - CalciumPositions: File containing the position of each CA atom
  */
 class MolecularSystemReader
 {
@@ -56,28 +58,34 @@ public:
     MolecularSystemReader( const GeometryParameters& geometryParameters );
 
     /**
-     * @brief Imports proteins and shapes from the Molecular System Configutation file, defined
-     *        by the --molecular-system-config command line parameter
+     * @brief Imports proteins and shapes from the Molecular System
+     *        Configutation file, defined by the --molecular-system-config
+     *        command line argument
      * @param scene Resulting scene
+     * @param meshLoader Mesh loader used to load the meshes
      * @return True if the system is successfully loaded, false otherwise
      */
-    bool import( Scene& scene );
+    bool import( Scene& scene, MeshLoader& meshLoader );
 
 private:
 
-    bool _createScene( Scene& scene );
+    bool _createScene( Scene& scene, MeshLoader& meshLoader );
     bool _loadConfiguration();
     bool _loadProteins();
     bool _loadPositions();
+    bool _loadCalciumPositions();
+    void _writePositionstoFile( const std::string& filename );
 
     const GeometryParameters& _geometryParameters;
     std::string _proteinFolder;
     std::string _meshFolder;
     std::string _descriptorFilename;
     std::string _positionsFilename;
+    std::string _calciumFilename;
     uint64_t _nbProteins;
     Proteins _proteins;
     ProteinPositions _proteinPositions;
+    Vector3fs _calciumPositions;
 
 };
 

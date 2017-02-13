@@ -104,6 +104,7 @@ struct Brayns::Impl
 
     void buildScene()
     {
+        _meshLoader.clear();
         _loadData();
         Scene& scene = _engine->getScene();
         scene.commitVolumeData();
@@ -488,17 +489,9 @@ private:
             ".obj", ".dae", ".fbx", ".ply", ".lwo", ".stl", ".3ds", ".ase", ".ifc" };
         strings files = _parseFolder( folder, filters );
         size_t progress = 0;
-        MeshLoader meshLoader;
         for( const auto& file: files )
         {
             BRAYNS_PROGRESS( progress, files.size( ));
-            MeshContainer MeshContainer =
-            {
-                scene.getTriangleMeshes(),
-                scene.getMaterials(),
-                scene.getWorldBounds()
-            };
-
             size_t material =
                 geometryParameters.getColorScheme() == ColorScheme::neuron_by_id ?
                 progress % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
@@ -508,18 +501,18 @@ private:
             switch( geometryParameters.getGeometryQuality( ))
             {
             case GeometryQuality::medium:
-                quality = MQ_QUALITY;
+                quality = MeshQuality::medium;
                 break;
             case GeometryQuality::high:
-                quality = MQ_MAX_QUALITY;
+                quality = MeshQuality::high;
                 break;
             default:
-                quality = MQ_FAST ;
+                quality = MeshQuality::low;
                 break;
             }
 
-            if( !meshLoader.importMeshFromFile(
-                file, MeshContainer, quality, Vector3f(), Vector3f(1,1,1), material ))
+            if( !_meshLoader.importMeshFromFile(
+                file, scene, quality, Vector3f(), Vector3f(1,1,1), material ))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++progress;
         }
@@ -587,7 +580,7 @@ private:
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader( geometryParameters );
-        molecularSystemReader.import( scene );
+        molecularSystemReader.import( scene, _meshLoader );
 #else
         BRAYNS_ERROR << "Assimp library missing for molecular meshes"
                      << std::endl;
@@ -829,6 +822,7 @@ private:
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
+    MeshLoader _meshLoader;
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;

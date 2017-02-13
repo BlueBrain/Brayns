@@ -44,7 +44,7 @@ bool XYZBLoader::importFromFile(
         return false;
     }
 
-    PrimitivesMap& primitives = scene.getPrimitives();
+    SpheresMap& spheres = scene.getSpheres();
     bool validParsing = true;
     std::string line;
 
@@ -63,7 +63,7 @@ bool XYZBLoader::importFromFile(
         {
             const Vector3f position( lineData[0], lineData[1], lineData[2] );
             BRAYNS_INFO << position << std::endl;
-            primitives[0].push_back( SpherePtr(
+            spheres[0].push_back( SpherePtr(
                 new Sphere( 0, position, _geometryParameters.getRadiusMultiplier(), 0.f, 0.f)));
             scene.getWorldBounds().merge( position );
             break;
@@ -96,7 +96,7 @@ bool XYZBLoader::importFromBinaryFile(
     uint64_t nbPoints = file.tellg() / ( 3 * sizeof(double) );
     file.seekg(0);
 
-    PrimitivesMap& primitives = scene.getPrimitives();
+    SpheresMap& spheres = scene.getSpheres();
     while( !file.eof() )
     {
         if( progress % ( nbPoints / 100 ) == 0 )
@@ -110,7 +110,7 @@ bool XYZBLoader::importFromBinaryFile(
         BRAYNS_DEBUG << x << "," << y << "," << z << std::endl;
 
         const Vector3f position( x, y, z );
-        primitives[0].push_back( SpherePtr( new Sphere(
+        spheres[0].push_back( SpherePtr( new Sphere(
             0, position, _geometryParameters.getRadiusMultiplier(), 0.f, 0.f )));
         scene.getWorldBounds().merge( position );
 

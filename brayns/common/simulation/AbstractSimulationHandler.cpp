@@ -136,12 +136,12 @@ const Histogram& AbstractSimulationHandler::getHistogram()
     // Normalize values
     const auto histogramSize = _geometryParameters.getSimulationHistogramSize();
     _histogram.values.clear();
-    const float normalizationValue = ( range.y() - range.x() ) / float( histogramSize );
+    _histogram.values.resize( histogramSize, 0 );
+    const float normalizationValue = ( range.y() - range.x() ) / float(( histogramSize  + 1 ));
     for( size_t i = 0; i < _frameSize; ++i )
     {
         const uint64_t index = i * sizeof(float);
-        _histogram.values.resize( histogramSize, 0 );
-        const size_t idx = ( data[index] - range.x( )) * normalizationValue;
+        const size_t idx = ( data[index] - range.x( )) / normalizationValue;
         ++_histogram.values[ idx ];
     }
 
