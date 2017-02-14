@@ -59,10 +59,10 @@ void LivreCamera::commit()
 
     _livre.getFrameData().getCameraSettings().setModelViewMatrix( livreModelView );
 
-    std::vector< ::lexis::render::Plane > planes;
+    std::vector< ::lexis::render::detail::Plane > planes;
     for( const auto& clipPlane: getClipPlanes( ))
     {
-        ::lexis::render::Plane plane;
+        ::lexis::render::detail::Plane plane;
         float normal[3] = { clipPlane.x(), clipPlane.y(), clipPlane.z() };
         plane.setNormal( normal );
         plane.setD( clipPlane.w( ));

@@ -32,8 +32,8 @@
 #include <lexis/render/imageJPEG.h>
 #include <lexis/render/lookupTable1D.h>
 #include <lexis/render/viewport.h>
-#include <lexis/render/histogram.h>
-#include <lexis/render/clipPlanes.h>
+#include <lexis/render/Histogram.h>
+#include <lexis/render/ClipPlanes.h>
 #include <lexis/render/materialLUT.h>
 
 #include <zerobuf/render/attribute.h>

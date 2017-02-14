@@ -29,7 +29,7 @@
 #include <brayns/parameters/ParametersManager.h>
 
 #include <livre/core/data/DataSource.h>
-#include <livre/core/data/Histogram.h>
+#include <lexis/render/Histogram.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/eq/Engine.h>
 #include <livre/eq/FrameData.h>

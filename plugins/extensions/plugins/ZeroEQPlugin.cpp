@@ -1016,11 +1016,11 @@ void ZeroEQPlugin::_clipPlanesUpdated()
 
 bool ZeroEQPlugin::_requestClipPlanes()
 {
-    std::vector< ::lexis::render::Plane > planes;
+    std::vector< ::lexis::render::detail::Plane > planes;
     const auto& clipPlanes = _engine->getCamera().getClipPlanes();
     for( const auto& clipPlane: clipPlanes )
     {
-        ::lexis::render::Plane plane;
+        ::lexis::render::detail::Plane plane;
         float normal[3] = { clipPlane.x(), clipPlane.y(), clipPlane.z() };
         plane.setNormal( normal );
         plane.setD( clipPlane.w( ));
