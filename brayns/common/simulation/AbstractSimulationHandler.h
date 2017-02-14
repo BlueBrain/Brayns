@@ -120,6 +120,9 @@ public:
      */
     const Histogram& getHistogram();
 
+    /** @return true if the histogram has changed since the last update. */
+    bool histogramChanged() const;
+
 protected:
 
     const GeometryParameters& _geometryParameters;
