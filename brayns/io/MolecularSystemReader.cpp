@@ -191,7 +191,7 @@ bool MolecularSystemReader::_loadCalciumPositions()
     }
 
     std::string line;
-    while( std::getline( filePositions, line ))
+    while( filePositions.good() && std::getline( filePositions, line ))
     {
         std::stringstream lineStream( line );
         size_t id;
@@ -215,7 +215,7 @@ bool MolecularSystemReader::_loadProteins( )
 
     // Load list of proteins
     std::string line;
-    while( std::getline( descriptorFile, line ))
+    while( descriptorFile.good() && std::getline( descriptorFile, line ))
     {
         std::stringstream lineStream( line );
         std::string protein;
@@ -264,7 +264,7 @@ bool MolecularSystemReader::_loadPositions()
     // Load protein positions
     _nbProteins = 0;
     std::string line;
-    while( std::getline( filePositions, line ))
+    while( filePositions.good() && std::getline( filePositions, line ))
     {
         std::stringstream lineStream( line );
         size_t id;
