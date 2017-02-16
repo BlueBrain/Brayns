@@ -1,12 +1,12 @@
 # -*- mode: cmake -*-
-git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 8a4497c)
-git_subproject(Servus https://github.com/HBPVIS/Servus.git 18abce4)
+git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git cfa6243)
+git_subproject(Servus https://github.com/HBPVIS/Servus.git 36180b5)
 common_find_package(Servus REQUIRED)
 
 if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
-  git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git f40a6e4)
-  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 505caf8)
-  git_subproject(Lexis https://github.com/HBPVis/Lexis.git 6540ce3)
+  git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git cea0338)
+  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 847025a)
+  git_subproject(Lexis https://github.com/HBPVis/Lexis.git 2678219)
   common_find_package(ZeroEQ REQUIRED)
   common_find_package(ZeroBuf REQUIRED)
   common_find_package(Lexis REQUIRED)
@@ -19,14 +19,14 @@ endif()
 
 # Streaming to display walls
 if(BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 7ebb0a5)
+  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 24e97d7)
   common_find_package(Deflect)
 endif()
 
 # Data access
 if(BRAYNS_BRION_ENABLED)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git e062e50)
-  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 76c941a)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git 8b0c1f1)
+  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 19d3790)
   common_find_package(Lunchbox)
   common_find_package(BBPTestData)
   common_find_package(Brion REQUIRED)
@@ -46,7 +46,7 @@ endif()
 
 # Livre rendering engine
 if(BRAYNS_LIVRE_ENABLED)
-  git_subproject(Livre https://github.com/BlueBrain/Livre.git b6f87f2)
+  git_subproject(Livre https://github.com/BlueBrain/Livre.git c8bbc0d)
   common_find_package(Livre)
 endif()
 
