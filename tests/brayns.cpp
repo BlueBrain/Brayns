@@ -30,12 +30,6 @@
 #define BOOST_TEST_MODULE brayns
 #include <boost/test/unit_test.hpp>
 
-#include <chrono>
-
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::chrono::milliseconds;
-
 BOOST_AUTO_TEST_CASE( simple_construction )
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
@@ -170,85 +164,3 @@ BOOST_AUTO_TEST_CASE( render_two_frames_and_compare_they_are_same )
                                    fb.getColorBuffer() + bytes );
     fb.unmap();
 }
-
-#ifdef NDEBUG
-BOOST_AUTO_TEST_CASE( default_scene_benckmark )
-{
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-    brayns::Brayns brayns( testSuite.argc,
-                           const_cast< const char** >( testSuite.argv ));
-
-    high_resolution_clock::time_point startTime;
-    uint64_t reference, shadows, softShadows, ambientOcclusion, allOptions;
-
-    // Set default rendering parameters
-    brayns::ParametersManager& params = brayns.getParametersManager();
-    params.getRenderingParameters().setSamplesPerPixel(32);
-    brayns.getEngine().commit();
-
-    // Start timer
-    startTime = high_resolution_clock::now();
-    brayns.render();
-    reference = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
-
-    // Shadows
-    params.getRenderingParameters().setShadows( true );
-    brayns.getEngine().commit();
-
-    startTime = high_resolution_clock::now();
-    brayns.render();
-    shadows = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
-
-    // Shadows
-    float t = float(shadows) / float(reference);
-    BOOST_TEST_MESSAGE( "Shadows cost. expected: 165%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 1.65f );
-
-    params.getRenderingParameters().setSoftShadows( true );
-    brayns.getEngine().commit();
-
-    startTime = high_resolution_clock::now();
-    brayns.render();
-    softShadows = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
-
-    // Soft shadows
-    t = float(softShadows) / float(reference);
-    BOOST_TEST_MESSAGE( "Soft shadows cost. expected: 185%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 1.85f );
-
-    // Ambient occlustion
-    params.getRenderingParameters().setShadows( false );
-    params.getRenderingParameters().setSoftShadows( false );
-    params.getRenderingParameters().setAmbientOcclusionStrength( 1.f );
-    brayns.getEngine().commit();
-
-    startTime = high_resolution_clock::now();
-    brayns.render();
-    ambientOcclusion = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
-
-    // Ambient occlusion
-    t = float(ambientOcclusion) / float(reference);
-    BOOST_TEST_MESSAGE( "Ambient occlusion cost. expected: 250%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 2.5f );
-
-    // All options
-    params.getRenderingParameters().setShadows( true );
-    params.getRenderingParameters().setSoftShadows( true );
-    params.getRenderingParameters().setAmbientOcclusionStrength( 1.f );
-    brayns.getEngine().commit();
-
-    startTime = high_resolution_clock::now();
-    brayns.render();
-    allOptions = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
-
-    // All options
-    t = float(allOptions) / float(reference);
-    BOOST_TEST_MESSAGE( "All options cost. expected: 350%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 3.5f );
-}
-#endif
