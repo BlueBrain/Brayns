@@ -429,8 +429,8 @@ bool MorphologyLoader::importCircuit(
             #pragma omp atomic
             ++progress;
         }
-        #pragma omp critical
 
+        #pragma omp critical
         for( const auto& p: private_spheres )
         {
             const size_t material = p.first;
@@ -440,6 +440,7 @@ bool MorphologyLoader::importCircuit(
                 private_spheres[ material ].end());
         }
 
+        #pragma omp critical
         for( const auto& p: private_cylinders )
         {
             const size_t material = p.first;
@@ -449,6 +450,7 @@ bool MorphologyLoader::importCircuit(
                 private_cylinders[ material ].end());
         }
 
+        #pragma omp critical
         for( const auto& p: private_cones )
         {
             const size_t material = p.first;
@@ -544,6 +546,7 @@ bool MorphologyLoader::importCircuit(
             #pragma omp atomic
             ++progress;
         }
+
         #pragma omp critical
         for( const auto& p: private_spheres )
         {
@@ -554,6 +557,7 @@ bool MorphologyLoader::importCircuit(
                 private_spheres[ material ].end());
         }
 
+        #pragma omp critical
         for( const auto& p: private_cylinders )
         {
             const size_t material = p.first;
@@ -563,6 +567,7 @@ bool MorphologyLoader::importCircuit(
                 private_cylinders[ material ].end());
         }
 
+        #pragma omp critical
         for( const auto& p: private_cones )
         {
             const size_t material = p.first;
@@ -618,38 +623,39 @@ bool MorphologyLoader::importCircuit(
                     private_spheres, private_cylinders, private_cones,
                     private_bounds, 0, maxDistanceToSoma);
 
-                BRAYNS_PROGRESS( progress, allUris.size() );
+                BRAYNS_PROGRESS( progress, allUris.size( ));
                 #pragma omp atomic
                 ++progress;
             }
 
             #pragma omp critical
-
             for( const auto& p: private_spheres )
             {
                 const size_t material = p.first;
                 scene.getSpheres()[ material ].insert(
                     scene.getSpheres()[ material ].end(),
                     private_spheres[ material ].begin(),
-                    private_spheres[ material ].end());
+                    private_spheres[ material ].end( ));
             }
 
+            #pragma omp critical
             for( const auto& p: private_cylinders )
             {
                 const size_t material = p.first;
                 scene.getCylinders()[ material ].insert(
                     scene.getCylinders()[ material ].end(),
                     private_cylinders[ material ].begin(),
-                    private_cylinders[ material ].end());
+                    private_cylinders[ material ].end( ));
             }
 
+            #pragma omp critical
             for( const auto& p: private_cones )
             {
                 const size_t material = p.first;
                 scene.getCones()[ material ].insert(
                     scene.getCones()[ material ].end(),
                     private_cones[ material ].begin(),
-                    private_cones[ material ].end());
+                    private_cones[ material ].end( ));
             }
 
             scene.getWorldBounds().merge( private_bounds );

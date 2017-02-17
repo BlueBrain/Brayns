@@ -301,20 +301,54 @@ bool ZeroEQPlugin::_requestScene()
 
     auto& remoteSpheres = _remoteScene.getSpheres();
     remoteSpheres.clear();
-    for( size_t materialId = 0; materialId < materials.size(); ++materialId )
+    const auto& spheres = scene.getSpheres()[ MATERIAL_SELECTION ];
+    for( const auto& sphere: spheres )
     {
-        const auto& spheres = scene.getSpheres()[ materialId ];
-        for( const auto& sphere: spheres )
-        {
-            ::brayns::v1::Sphere remoteSphere;
-            const auto& center = sphere->getCenter();
-            float remoteCenter[3] = { center.x(), center.y(), center.z( ) };
-            remoteSphere.setIndex( remoteSpheres.size( ));
-            remoteSphere.setMaterialId( materialId );
-            remoteSphere.setCenter( remoteCenter );
-            remoteSphere.setRadius( sphere->getRadius( ));
-            remoteSpheres.push_back( remoteSphere );
-        }
+        ::brayns::v1::Sphere remoteSphere;
+        const auto& center = sphere->getCenter();
+        float remoteCenter[3] = { center.x(), center.y(), center.z( ) };
+        remoteSphere.setIndex( remoteSpheres.size( ));
+        remoteSphere.setMaterialId( MATERIAL_SELECTION );
+        remoteSphere.setCenter( remoteCenter );
+        remoteSphere.setRadius( sphere->getRadius( ));
+        remoteSpheres.push_back( remoteSphere );
+    }
+
+    auto& remoteCylinders = _remoteScene.getCylinders();
+    remoteCylinders.clear();
+    const auto& cylinders = scene.getCylinders()[ MATERIAL_SELECTION ];
+    for( const auto& cylinder: cylinders )
+    {
+        ::brayns::v1::Cylinder remoteCylinder;
+        const auto& center = cylinder->getCenter();
+        float remoteCenter[3] = { center.x(), center.y(), center.z() };
+        const auto& up = cylinder->getUp();
+        float remoteUp[3] = { up.x(), up.y(), up.z() };
+        remoteCylinder.setIndex( remoteSpheres.size( ));
+        remoteCylinder.setMaterialId( MATERIAL_SELECTION );
+        remoteCylinder.setCenter( remoteCenter );
+        remoteCylinder.setUp( remoteUp );
+        remoteCylinder.setRadius( cylinder->getRadius( ));
+        remoteCylinders.push_back( remoteCylinder );
+    }
+
+    auto& remoteCones = _remoteScene.getCones();
+    remoteCones.clear();
+    const auto& cones = scene.getCones()[ MATERIAL_SELECTION ];
+    for( const auto& cone: cones )
+    {
+        ::brayns::v1::Cone remoteCone;
+        const auto& center = cone->getCenter();
+        float remoteCenter[3] = { center.x(), center.y(), center.z() };
+        const auto& up = cone->getUp();
+        float remoteUp[3] = { up.x(), up.y(), up.z() };
+        remoteCone.setIndex( remoteCones.size( ));
+        remoteCone.setMaterialId( MATERIAL_SELECTION );
+        remoteCone.setCenter( remoteCenter );
+        remoteCone.setUp( remoteUp );
+        remoteCone.setCenterRadius( cone->getCenterRadius( ));
+        remoteCone.setUpRadius( cone->getUpRadius( ));
+        remoteCones.push_back( remoteCone );
     }
     return true;
 }
