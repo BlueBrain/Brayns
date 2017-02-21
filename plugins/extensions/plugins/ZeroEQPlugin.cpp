@@ -28,6 +28,7 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
+#include <brayns/common/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/camera.h>
@@ -298,58 +299,6 @@ bool ZeroEQPlugin::_requestScene()
         m.setLightEmission( material.second->getEmission( ));
         ms.push_back(m);
     }
-
-    auto& remoteSpheres = _remoteScene.getSpheres();
-    remoteSpheres.clear();
-    const auto& spheres = scene.getSpheres()[ MATERIAL_SELECTION ];
-    for( const auto& sphere: spheres )
-    {
-        ::brayns::v1::Sphere remoteSphere;
-        const auto& center = sphere->getCenter();
-        float remoteCenter[3] = { center.x(), center.y(), center.z( ) };
-        remoteSphere.setIndex( remoteSpheres.size( ));
-        remoteSphere.setMaterialId( MATERIAL_SELECTION );
-        remoteSphere.setCenter( remoteCenter );
-        remoteSphere.setRadius( sphere->getRadius( ));
-        remoteSpheres.push_back( remoteSphere );
-    }
-
-    auto& remoteCylinders = _remoteScene.getCylinders();
-    remoteCylinders.clear();
-    const auto& cylinders = scene.getCylinders()[ MATERIAL_SELECTION ];
-    for( const auto& cylinder: cylinders )
-    {
-        ::brayns::v1::Cylinder remoteCylinder;
-        const auto& center = cylinder->getCenter();
-        float remoteCenter[3] = { center.x(), center.y(), center.z() };
-        const auto& up = cylinder->getUp();
-        float remoteUp[3] = { up.x(), up.y(), up.z() };
-        remoteCylinder.setIndex( remoteSpheres.size( ));
-        remoteCylinder.setMaterialId( MATERIAL_SELECTION );
-        remoteCylinder.setCenter( remoteCenter );
-        remoteCylinder.setUp( remoteUp );
-        remoteCylinder.setRadius( cylinder->getRadius( ));
-        remoteCylinders.push_back( remoteCylinder );
-    }
-
-    auto& remoteCones = _remoteScene.getCones();
-    remoteCones.clear();
-    const auto& cones = scene.getCones()[ MATERIAL_SELECTION ];
-    for( const auto& cone: cones )
-    {
-        ::brayns::v1::Cone remoteCone;
-        const auto& center = cone->getCenter();
-        float remoteCenter[3] = { center.x(), center.y(), center.z() };
-        const auto& up = cone->getUp();
-        float remoteUp[3] = { up.x(), up.y(), up.z() };
-        remoteCone.setIndex( remoteCones.size( ));
-        remoteCone.setMaterialId( MATERIAL_SELECTION );
-        remoteCone.setCenter( remoteCenter );
-        remoteCone.setUp( remoteUp );
-        remoteCone.setCenterRadius( cone->getCenterRadius( ));
-        remoteCone.setUpRadius( cone->getUpRadius( ));
-        remoteCones.push_back( remoteCone );
-    }
     return true;
 }
 
@@ -381,53 +330,6 @@ void ZeroEQPlugin::_sceneUpdated( )
         }
     }
 
-    // Spheres
-    const auto& remoteSpheres = _remoteScene.getSpheresVector();
-    auto& spheres = scene.getSpheres();
-    scene.setSpheresDirty( remoteSpheres.size() != 0 );
-    for( const auto& remoteSphere: remoteSpheres )
-    {
-        const auto index = remoteSphere.getIndex();
-        const auto& center = remoteSphere.getCenter();
-        const auto radius = remoteSphere.getRadius( );
-        auto& sphere = spheres[ remoteSphere.getMaterialId() ][ index ];
-        sphere->setCenter( Vector3f( center[0], center[1], center[2] ));
-        sphere->setRadius( radius );
-    }
-
-    // Cylinders
-    const auto& remoteCylinders = _remoteScene.getCylindersVector();
-    auto& cylinders = scene.getCylinders();
-    scene.setCylindersDirty( remoteCylinders.size() != 0 );
-    for( const auto& remoteCylinder: remoteCylinders )
-    {
-        const auto index = remoteCylinder.getIndex();
-        const auto& center = remoteCylinder.getCenter();
-        const auto& up = remoteCylinder.getUp();
-        auto& cylinder = cylinders[ remoteCylinder.getMaterialId() ][ index ];
-        cylinder->setCenter( Vector3f( center[0], center[1], center[2] ));
-        cylinder->setUp( Vector3f( up[0], up[1], up[2] ));
-        cylinder->setRadius( remoteCylinder.getRadius());
-    }
-
-    // Cones
-    const auto& remoteCones = _remoteScene.getConesVector();
-    auto& cones = scene.getCones();
-    scene.setConesDirty( remoteCones.size() != 0 );
-    for( const auto& remoteCone: remoteCones )
-    {
-        const auto index = remoteCone.getIndex();
-        const auto& center = remoteCone.getCenter();
-        const auto& up = remoteCone.getUp();
-        auto& cone = cones[ remoteCone.getMaterialId() ][ index ];
-        cone->setCenter( Vector3f( center[0], center[1], center[2] ));
-        cone->setUp( Vector3f( up[0], up[1], up[2] ));
-        cone->setCenterRadius( remoteCone.getCenterRadius());
-        cone->setUpRadius( remoteCone.getUpRadius());
-    }
-
-    scene.serializeGeometry();
-    scene.commit();
     scene.commitMaterials( true );
     _engine->getRenderer().commit();
     _engine->getFrameBuffer().clear();
@@ -1016,10 +918,13 @@ void ZeroEQPlugin::_settingsUpdated()
 
 bool ZeroEQPlugin::_requestFrame()
 {
+    auto caSimHandler = _engine->getScene().getCADiffusionSimulationHandler();
     auto simHandler = _engine->getScene().getSimulationHandler();
     auto volHandler = _engine->getScene().getVolumeHandler();
-    const uint64_t nbFrames = simHandler ? simHandler->getNbFrames() :
+    uint64_t nbFrames = simHandler ? simHandler->getNbFrames() :
                                  ( volHandler ? volHandler->getNbFrames() : 0 );
+    nbFrames = std::max( nbFrames,
+                         caSimHandler ? caSimHandler->getNbFrames() : 0 );
 
     const auto& sceneParams = _parametersManager.getSceneParameters();
     const auto ts = uint64_t(sceneParams.getTimestamp());
@@ -1045,6 +950,18 @@ void ZeroEQPlugin::_frameUpdated()
     auto& sceneParams = _parametersManager.getSceneParameters();
     sceneParams.setTimestamp( _remoteFrame.getCurrent( ));
     sceneParams.setAnimationDelta( _remoteFrame.getDelta( ));
+
+    CADiffusionSimulationHandlerPtr handler =
+        _engine->getScene().getCADiffusionSimulationHandler();
+    if( handler )
+    {
+        auto& scene = _engine->getScene();
+        handler->setFrame( scene, _remoteFrame.getCurrent( ) );
+        scene.setSpheresDirty( true );
+        scene.serializeGeometry();
+        scene.commit();
+    }
+
     _engine->commit();
 }
 

@@ -43,8 +43,9 @@ Scene::Scene(
     , _cylindersDirty( true )
     , _conesDirty( true )
     , _trianglesMeshesDirty( true )
-    , _volumeHandler( 0 )
-    , _simulationHandler( 0 )
+    , _volumeHandler( nullptr )
+    , _simulationHandler( nullptr )
+    , _caDiffusionSimulationHandler( nullptr )
 {
 }
 
@@ -60,6 +61,7 @@ void Scene::reset( )
     _cones.clear( );
     _trianglesMeshes.clear( );
     _bounds.reset();
+    _caDiffusionSimulationHandler.reset();
 }
 
 void Scene::setDirty()
@@ -531,6 +533,16 @@ void Scene::setSimulationHandler( AbstractSimulationHandlerPtr handler )
 AbstractSimulationHandlerPtr Scene::getSimulationHandler() const
 {
     return _simulationHandler;
+}
+
+void Scene::setCADiffusionSimulationHandler( CADiffusionSimulationHandlerPtr handler )
+{
+    _caDiffusionSimulationHandler = handler;
+}
+
+CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
+{
+    return _caDiffusionSimulationHandler;
 }
 
 VolumeHandlerPtr Scene::getVolumeHandler()

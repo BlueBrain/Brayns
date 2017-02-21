@@ -73,7 +73,6 @@ private:
     bool _loadConfiguration();
     bool _loadProteins();
     bool _loadPositions();
-    bool _loadCalciumPositions();
     void _writePositionstoFile( const std::string& filename );
 
     const GeometryParameters& _geometryParameters;
@@ -81,11 +80,10 @@ private:
     std::string _meshFolder;
     std::string _descriptorFilename;
     std::string _positionsFilename;
-    std::string _calciumFilename;
+    std::string _calciumSimulationFolder;
     uint64_t _nbProteins;
     Proteins _proteins;
     ProteinPositions _proteinPositions;
-    Vector3fs _calciumPositions;
 
 };
 

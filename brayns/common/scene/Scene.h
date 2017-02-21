@@ -217,6 +217,16 @@ public:
     BRAYNS_API VolumeHandlerPtr getVolumeHandler();
 
     /**
+        Sets the Calcium diffusion simulation handler
+    */
+    void setCADiffusionSimulationHandler( CADiffusionSimulationHandlerPtr handler );
+
+    /**
+        Gets the Calcium diffusion simulation handler
+    */
+    CADiffusionSimulationHandlerPtr getCADiffusionSimulationHandler() const;
+
+    /**
         Build a color map from a file, according to the colormap-file scene parameters
     */
     BRAYNS_API TransferFunction& getTransferFunction() { return _transferFunction; }
@@ -297,6 +307,7 @@ protected:
     // Simulation
     AbstractSimulationHandlerPtr _simulationHandler;
     TransferFunction _transferFunction;
+    CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler;
 
     // Scene
     Boxf _bounds;

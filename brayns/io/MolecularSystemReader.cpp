@@ -23,12 +23,8 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/io/ProteinLoader.h>
+#include <brayns/common/simulation/CADiffusionSimulationHandler.h>
 #include <fstream>
-
-namespace
-{
-    const float CALCIUM_RADIUS = 0.00194f;
-}
 
 namespace brayns
 {
@@ -50,15 +46,23 @@ bool MolecularSystemReader::import(
         return false;
     if( !_loadPositions( ))
         return false;
-    if( !_loadCalciumPositions( ))
+
+    if( !_createScene( scene, meshLoader ))
         return false;
 
+    if( !_calciumSimulationFolder.empty( ))
+    {
+        CADiffusionSimulationHandlerPtr handler(
+            new CADiffusionSimulationHandler( _calciumSimulationFolder ));
+        handler->setFrame( scene, 0 );
+        scene.setCADiffusionSimulationHandler( handler );
+    }
     BRAYNS_INFO << "Total number of different proteins: "
                 << _proteins.size() << std::endl;
     BRAYNS_INFO << "Total number of proteins          : "
                 << _nbProteins << std::endl;
 
-    return _createScene( scene, meshLoader );
+    return true;
 }
 
 bool MolecularSystemReader::_createScene(
@@ -117,18 +121,6 @@ bool MolecularSystemReader::_createScene(
             }
     }
 
-    if( !_calciumFilename.empty( ))
-    {
-        // Load Calcium positions
-        for( const auto position: _calciumPositions )
-        {
-            SpherePtr sphere( new Sphere(
-                MATERIAL_SELECTION, position, CALCIUM_RADIUS, 0.f, 0.f));
-            scene.getSpheres()[ MATERIAL_SELECTION ].push_back( sphere );
-            scene.getWorldBounds().merge( position );
-        }
-    }
-
     // Update materials
     if( _geometryParameters.getColorScheme() != ColorScheme::protein_by_id )
     {
@@ -169,38 +161,14 @@ bool MolecularSystemReader::_loadConfiguration()
     _meshFolder = parameters["MeshFolder"];
     _descriptorFilename = parameters["SystemDescriptor"];
     _positionsFilename = parameters["ProteinPositions"];
-    _calciumFilename = parameters["CalciumPositions"];
+    _calciumSimulationFolder = parameters["CalciumPositions"];
 
     BRAYNS_INFO << "Loading molecular system" << std::endl;
     BRAYNS_INFO << "Protein folder    : " << _proteinFolder << std::endl;
     BRAYNS_INFO << "Mesh folder       : " << _meshFolder << std::endl;
     BRAYNS_INFO << "System descriptor : " << _descriptorFilename << std::endl;
     BRAYNS_INFO << "Protein positions : " << _positionsFilename << std::endl;
-    BRAYNS_INFO << "Calcium positions : " << _calciumFilename << std::endl;
-    return true;
-}
-
-bool MolecularSystemReader::_loadCalciumPositions()
-{
-    // Load Calcium positions
-    std::ifstream filePositions( _calciumFilename, std::ios::in );
-    if( !filePositions.good( ))
-    {
-        BRAYNS_ERROR << "Could not open file " << _calciumFilename << std::endl;
-        return false;
-    }
-
-    std::string line;
-    while( filePositions.good() && std::getline( filePositions, line ))
-    {
-        std::stringstream lineStream( line );
-        size_t id;
-        Vector3f position;
-        lineStream >> id >> position.x() >> position.y() >> position.z();
-
-        _calciumPositions.push_back( position );
-    }
-    filePositions.close();
+    BRAYNS_INFO << "Calcium positions : " << _calciumSimulationFolder << std::endl;
     return true;
 }
 
@@ -279,7 +247,6 @@ bool MolecularSystemReader::_loadPositions()
         }
     }
     filePositions.close();
-
     return true;
 }
 

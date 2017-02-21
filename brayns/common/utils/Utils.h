@@ -18,18 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace brayns.v1;
+#ifndef UTILS_H
+#define UTILS_H
 
-table Material {
-    diffuse_color : [float:3];
-    specular_color: [float:3];
-    specular_exponent: float;
-    reflection_index : float;
-    opacity: float;
-    refraction_index: float;
-    light_emission: float;
+#include <brayns/common/types.h>
+
+namespace brayns
+{
+
+strings parseFolder( const std::string& folder, const strings& filters );
+
 }
 
-table Scene {
-    materials: [Material];
-}
+#endif // UTILS_H

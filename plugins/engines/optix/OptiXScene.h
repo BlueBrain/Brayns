@@ -146,6 +146,23 @@ private:
     std::map<std::string, optix::Buffer> _optixTextures;
     std::map<std::string, optix::TextureSampler> _optixTextureSamplers;
 
+    // Programs
+    optix::Program _phong_ch;
+    optix::Program _phong_ch_textured;
+    optix::Program _phong_ah;
+
+    optix::Program _spheresBoundsProgram;
+    optix::Program _spheresIntersectProgram;
+
+    optix::Program _cylindersBoundsProgram;
+    optix::Program _cylindersIntersectProgram;
+
+    optix::Program _conesBoundsProgram;
+    optix::Program _conesIntersectProgram;
+
+    optix::Program _meshBoundsProgram;
+    optix::Program _meshIntersectProgram;
+
 };
 
 }
