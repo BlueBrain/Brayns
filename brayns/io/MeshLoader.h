@@ -34,16 +34,6 @@ class aiScene;
 namespace brayns
 {
 
-/** structure containing references to triangles, materials and bounding for
-    for all meshes
-*/
-struct MeshContainer
-{
-    TrianglesMeshMap& triangles;
-    MaterialsMap& materials;
-    Boxf& bounds;
-};
-
 /** Loads meshes from files using the assimp library
  * http://assimp.sourceforge.net
  */
@@ -55,9 +45,7 @@ public:
     /** Imports meshes from a given file
      *
      * @param filename name of the file containing the meshes
-     * @param meshContainer structure containing references to triangles and
-     *        materials imported from the file, as well as the bounding box of
-     *        all meshes.
+     * @param Scene holding the meshes
      * @param meshQuality can be MQ_FAST, MQ_QUALITY or MQ_MAX_QUALITY. Appart
      *        from MQ_FAST, normals are automatically generated is not in the
      *        file.
@@ -70,7 +58,7 @@ public:
      */
     bool importMeshFromFile(
             const std::string& filename,
-            MeshContainer& meshContainer,
+            Scene& scene,
             MeshQuality meshQuality,
             const Vector3f& position,
             const Vector3f& scale,
@@ -79,19 +67,23 @@ public:
     /** Exports meshes to a given file
      *
      * @param filename destination file name
-     * @param meshContainer structure containing references to triangles and
-     *        materials imported from the file, as well as the bounding box of
-     *        all meshes.
+     * @param Scene holding the meshes
      */
     bool exportMeshToFile(
             const std::string& filename,
-            MeshContainer& meshContainer ) const;
+            Scene& scene ) const;
+
+    /**
+     * @brief Clear all internal buffers
+     */
+    void clear();
 
 private:
+
     void _createMaterials(
-        const aiScene *scene,
-        const std::string& folder,
-        MaterialsMap& materials );
+        Scene& scene,
+        const aiScene *aiScene,
+        const std::string& folder );
 
     std::map<size_t, size_t> _meshIndex;
 };

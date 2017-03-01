@@ -8,6 +8,7 @@ set(BRAYNSCOMMON_SOURCES
   input/KeyboardHandler.cpp
   volume/VolumeHandler.cpp
   transferFunction/TransferFunction.cpp
+  simulation/CADiffusionSimulationHandler.cpp
   simulation/AbstractSimulationHandler.cpp
   simulation/CircuitSimulationHandler.cpp
   simulation/SpikeSimulationHandler.cpp
@@ -29,6 +30,7 @@ set(BRAYNSCOMMON_SOURCES
   light/Light.cpp
   light/PointLight.cpp
   light/DirectionalLight.cpp
+  utils/Utils.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
@@ -54,12 +56,14 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   renderer/FrameBuffer.h
   renderer/Renderer.h
   scene/Scene.h
+  simulation/CADiffusionSimulationHandler.h
   simulation/AbstractSimulationHandler.h
   simulation/CircuitSimulationHandler.h
   simulation/SpikeSimulationHandler.h
   transferFunction/TransferFunction.h
   types.h
   volume/VolumeHandler.h
+  utils/Utils.h
 )
 
 set(BRAYNSCOMMON_LINK_LIBRARIES

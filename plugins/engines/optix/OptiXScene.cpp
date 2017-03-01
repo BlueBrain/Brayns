@@ -69,6 +69,33 @@ OptiXScene::OptiXScene(
     , _materialsBuffer( nullptr )
     , _volumeBuffer( nullptr )
 {
+    // Compile Kernels
+    _phong_ch = _context->createProgramFromPTXString(
+        CUDA_PHONG, "closest_hit_radiance" );
+    _phong_ch_textured = _context->createProgramFromPTXString(
+        CUDA_PHONG, "closest_hit_radiance_textured" );
+    _phong_ah = _context->createProgramFromPTXString(
+        CUDA_PHONG, "any_hit_shadow" );
+
+    _spheresBoundsProgram = _context->createProgramFromPTXString(
+        CUDA_SPHERES, CUDA_FUNCTION_BOUNDS );
+    _spheresIntersectProgram = _context->createProgramFromPTXString(
+        CUDA_SPHERES, CUDA_FUNCTION_INTERSECTION );
+
+    _cylindersBoundsProgram = _context->createProgramFromPTXString(
+        CUDA_CYLINDERS, CUDA_FUNCTION_BOUNDS );
+    _cylindersIntersectProgram = _context->createProgramFromPTXString(
+        CUDA_CYLINDERS, CUDA_FUNCTION_INTERSECTION );
+
+    _conesBoundsProgram = _context->createProgramFromPTXString(
+        CUDA_CONES, CUDA_FUNCTION_BOUNDS );
+    _conesIntersectProgram = _context->createProgramFromPTXString(
+        CUDA_CONES, CUDA_FUNCTION_INTERSECTION );
+
+    _meshBoundsProgram = _context->createProgramFromPTXString(
+        CUDA_TRIANGLES_MESH, CUDA_FUNCTION_BOUNDS );
+    _meshIntersectProgram = _context->createProgramFromPTXString(
+        CUDA_TRIANGLES_MESH, CUDA_FUNCTION_INTERSECTION );
 }
 
 OptiXScene::~OptiXScene()
@@ -81,132 +108,56 @@ void OptiXScene::reset()
     Scene::reset();
 
     // Geometry
-    for( auto geometryInstance: _geometryInstances)
-        geometryInstance->destroy();
     _geometryInstances.clear();
-
-    if( _geometryGroup )
-        _geometryGroup->destroy();
     _geometryGroup = nullptr;
 
     // Volume
-    if( _volumeBuffer )
-        _volumeBuffer->destroy();
     _volumeBuffer = nullptr;
 
     // Color map
-    if( _colorMapBuffer )
-        _colorMapBuffer->destroy();
     _colorMapBuffer = nullptr;
 
     // Spheres
-    for( auto buffer: _spheresBuffers )
-        buffer.second->destroy();
     _spheresBuffers.clear();
-
-    for( auto optixSphere: _optixSpheres )
-        optixSphere.second->destroy();
     _optixSpheres.clear();
-
     _serializedSpheresData.clear();
     _serializedSpheresDataSize.clear();
     _timestampSpheresIndices.clear();
 
     // Cylinders
-    for( auto buffer: _cylindersBuffers )
-        buffer.second->destroy();
     _cylindersBuffers.clear();
-
-    for( auto optixCylinder: _optixCylinders )
-        optixCylinder.second->destroy();
     _optixCylinders.clear();
-
     _serializedCylindersData.clear();
     _timestampCylindersIndices.clear();
     _serializedCylindersDataSize.clear();
 
     // Cones
-    for( auto buffer: _conesBuffers )
-        buffer.second->destroy();
     _conesBuffers.clear();
-
-    for( auto optixCone: _optixCones )
-        optixCone.second->destroy();
     _optixCones.clear();
-
     _serializedConesData.clear();
     _serializedConesDataSize.clear();
     _timestampConesIndices.clear();
 
     // Meshes
-    if( _mesh )
-        _mesh->destroy();
     _mesh = nullptr;
-
-    if( _verticesBuffer )
-        _verticesBuffer->destroy();
     _verticesBuffer = nullptr;
-
-    if( _indicesBuffer )
-        _indicesBuffer->destroy();
     _indicesBuffer = nullptr;
-
-    if( _normalsBuffer )
-        _normalsBuffer->destroy();
     _normalsBuffer = nullptr;
-
-    if( _textureCoordsBuffer )
-        _textureCoordsBuffer->destroy();
     _textureCoordsBuffer = nullptr;
-
-    if( _materialsBuffer )
-        _materialsBuffer->destroy();
     _materialsBuffer = nullptr;
 
     // Lights
-    if( _lightBuffer )
-        _lightBuffer->destroy();
     _lightBuffer = nullptr;
 
     // Textures
-    for( auto optixTextures: _optixTextures )
-        optixTextures.second->destroy();
     _optixTextures.clear();
-
-    for( auto optixTextureSamplers: _optixTextureSamplers )
-        optixTextureSamplers.second->destroy();
     _optixTextureSamplers.clear();
 }
 
 void OptiXScene::commit()
 {
-}
-
-void OptiXScene::buildGeometry()
-{
-
-    BRAYNS_INFO << "Building OptiX geometry" << std::endl;
-
-    // Make sure lights and materials have been initialized before assigning
-    // the geometry
-    commitMaterials();
-    commitLights();
-
-    _geometryInstances.clear();
-
-    BRAYNS_INFO << "----------------------------------------" << std::endl;
-    BRAYNS_INFO << "Data information:" << std::endl;
-
-    uint64_t paramGeomMemSize = _processParametricGeometries();
-    uint64_t meshMemSize = _processMeshes();
-    uint64_t totalGPUMemory = paramGeomMemSize + meshMemSize;
-
-    BRAYNS_INFO << "Total GPU : " << totalGPUMemory << " bytes ("
-                << totalGPUMemory / 1048576 << " MB)"
-                << std::endl;
-    BRAYNS_INFO << "----------------------------------------" << std::endl;
-
-    // Geometry hierarchy
+    if( _geometryGroup )
+        _geometryGroup->destroy();
     _geometryGroup = _context->createGeometryGroup();
     _geometryGroup->setAcceleration(
         _context->createAcceleration( _accelerationStructure, _accelerationStructure ));
@@ -224,6 +175,34 @@ void OptiXScene::buildGeometry()
     _context["top_shadower"]->set( _geometryGroup );
 
     _context->validate();
+}
+
+void OptiXScene::buildGeometry()
+{
+
+    BRAYNS_INFO << "Building OptiX geometry" << std::endl;
+
+    // Make sure lights and materials have been initialized before assigning
+    // the geometry
+    commitMaterials();
+    commitLights();
+
+    _geometryInstances.clear();
+
+    BRAYNS_INFO << "----------------------------------------" << std::endl;
+    BRAYNS_INFO << "Data information:" << std::endl;
+
+    uint64_t paramGeomMemSize = serializeGeometry();
+    uint64_t meshMemSize = _processMeshes();
+    uint64_t totalGPUMemory = paramGeomMemSize + meshMemSize;
+
+    BRAYNS_INFO << "Total GPU : " << totalGPUMemory << " bytes ("
+                << totalGPUMemory / 1048576 << " MB)"
+                << std::endl;
+    BRAYNS_INFO << "----------------------------------------" << std::endl;
+
+    // Geometry hierarchy
+    commit();
 }
 
 void OptiXScene::commitLights()
@@ -283,68 +262,22 @@ void OptiXScene::commitLights()
     _lightBuffer->unmap();
 }
 
-uint64_t OptiXScene::_processParametricGeometries()
+uint64_t OptiXScene::_serializeSpheres()
 {
-    // Compile Kernels
-    optix::Program spheresBoundsProgram =
-        _context->createProgramFromPTXString( CUDA_SPHERES, CUDA_FUNCTION_BOUNDS );
-    optix::Program spheresIntersectProgram =
-        _context->createProgramFromPTXString( CUDA_SPHERES, CUDA_FUNCTION_INTERSECTION );
-
-    optix::Program cylindersBoundsProgram =
-        _context->createProgramFromPTXString( CUDA_CYLINDERS, CUDA_FUNCTION_BOUNDS );
-    optix::Program cylindersIntersectProgram =
-        _context->createProgramFromPTXString( CUDA_CYLINDERS, CUDA_FUNCTION_INTERSECTION );
-
-    optix::Program conesBoundsProgram =
-        _context->createProgramFromPTXString( CUDA_CONES, CUDA_FUNCTION_BOUNDS );
-    optix::Program conesIntersectProgram =
-        _context->createProgramFromPTXString( CUDA_CONES, CUDA_FUNCTION_INTERSECTION );
-
     // Load geometry to GPU
     size_t totalNbSpheres = 0;
-    size_t totalNbCylinders = 0;
-    size_t totalNbCones = 0;
     for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
     {
         _timestampSpheresIndices[ materialId ] = 0;
-        _timestampCylindersIndices[ materialId ] = 0;
-        _timestampConesIndices[ materialId ] = 0;
-        if( _primitives.find( materialId ) != _primitives.end( ))
+        if( _spheres.find( materialId ) != _spheres.end( ))
         {
-            for( const auto& primitive: _primitives[materialId] )
+            for( const auto& sphere: _spheres[materialId] )
             {
-                switch( primitive->getGeometryType() )
-                {
-                    case GT_SPHERE:
-                    {
-                        primitive->serializeData( _serializedSpheresData[ materialId ] );
-                        ++_serializedSpheresDataSize[ materialId ];
-                        ++_timestampSpheresIndices[ materialId ];
-                    }
-                    break;
-                    case GT_CYLINDER:
-                    {
-                        primitive->serializeData( _serializedCylindersData[ materialId ] );
-                        ++_serializedCylindersDataSize[ materialId ];
-                        ++_timestampCylindersIndices[ materialId ];
-                    }
-                    break;
-                    case GT_CONE:
-                    {
-                        primitive->serializeData( _serializedConesData[ materialId ] );
-                        ++_serializedConesDataSize[ materialId ];
-                        ++_timestampConesIndices[ materialId ];
-                    }
-                    default:
-                        break;
-                }
+                sphere->serializeData( _serializedSpheresData[ materialId ] );
+                ++_serializedSpheresDataSize[ materialId ];
+                ++_timestampSpheresIndices[ materialId ];
             }
-
             totalNbSpheres += _timestampSpheresIndices[ materialId ];
-            totalNbCylinders += _timestampCylindersIndices[ materialId ];
-            totalNbCones += _timestampConesIndices[ materialId ];
-            _primitives[materialId].clear();
         }
 
         // Create spheres geometry
@@ -352,12 +285,13 @@ uint64_t OptiXScene::_processParametricGeometries()
         {
             _optixSpheres[ materialId ] = _context->createGeometry();
             _optixSpheres[ materialId ]->setPrimitiveCount( _timestampSpheresIndices[ materialId ] );
-            _optixSpheres[ materialId ]->setBoundingBoxProgram( spheresBoundsProgram );
-            _optixSpheres[ materialId ]->setIntersectionProgram( spheresIntersectProgram );
+            _optixSpheres[ materialId ]->setBoundingBoxProgram( _spheresBoundsProgram );
+            _optixSpheres[ materialId ]->setIntersectionProgram( _spheresIntersectProgram );
             uint64_t size = _timestampSpheresIndices[ materialId ] *
                 Sphere::getSerializationSize();
-            _spheresBuffers[ materialId ] =
-                _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT, size );
+            if( !_spheresBuffers[ materialId ] )
+                _spheresBuffers[ materialId ] = _context->createBuffer(
+                    RT_BUFFER_INPUT, RT_FORMAT_FLOAT, size );
             memcpy(
                 _spheresBuffers[ materialId ]->map(),
                 &_serializedSpheresData[ materialId ][ 0 ],
@@ -372,18 +306,46 @@ uint64_t OptiXScene::_processParametricGeometries()
                     &_optixMaterials[ materialId ]+1 ) );
             _serializedSpheresData[ materialId ].clear();
         }
+    }
+
+    const uint64_t memSize = _getBvhSize(
+        totalNbSpheres * Sphere::getSerializationSize() * sizeof( float ));
+    BRAYNS_DEBUG << "- Spheres   : " << totalNbSpheres
+                 << " [" << memSize << " bytes]"
+                 << std::endl;
+    return memSize;
+}
+
+uint64_t OptiXScene::_serializeCylinders()
+{
+    size_t totalNbCylinders = 0;
+    for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
+    {
+        _timestampCylindersIndices[ materialId ] = 0;
+
+        if( _cylinders.find( materialId ) != _cylinders.end( ))
+        {
+            for( const auto& cylinder: _cylinders[materialId] )
+            {
+                cylinder->serializeData( _serializedCylindersData[ materialId ] );
+                ++_serializedCylindersDataSize[ materialId ];
+                ++_timestampCylindersIndices[ materialId ];
+            }
+            totalNbCylinders += _timestampCylindersIndices[ materialId ];
+        }
 
         // Create cylinders geometry
         if( _timestampCylindersIndices[ materialId ] != 0 )
         {
             _optixCylinders[ materialId ] = _context->createGeometry();
             _optixCylinders[ materialId ]->setPrimitiveCount( _timestampCylindersIndices[ materialId ] );
-            _optixCylinders[ materialId ]->setBoundingBoxProgram( cylindersBoundsProgram );
-            _optixCylinders[ materialId ]->setIntersectionProgram( cylindersIntersectProgram );
+            _optixCylinders[ materialId ]->setBoundingBoxProgram( _cylindersBoundsProgram );
+            _optixCylinders[ materialId ]->setIntersectionProgram( _cylindersIntersectProgram );
             uint64_t size = _timestampCylindersIndices[ materialId ] *
                 Cylinder::getSerializationSize();
-            _cylindersBuffers[ materialId ] =
-                _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT, size );
+            if( !_cylindersBuffers[ materialId ] )
+                _cylindersBuffers[ materialId ] =_context->createBuffer(
+                    RT_BUFFER_INPUT, RT_FORMAT_FLOAT, size );
             memcpy(
                 _cylindersBuffers[ materialId ]->map(),
                 &_serializedCylindersData[ materialId ][ 0 ],
@@ -398,18 +360,47 @@ uint64_t OptiXScene::_processParametricGeometries()
                     &_optixMaterials[ materialId ]+1 ) );
             _serializedCylindersData[ materialId ].clear();
         }
+    }
+
+    const uint64_t memSize = _getBvhSize(
+        totalNbCylinders * Cylinder::getSerializationSize() * sizeof( float ));
+    BRAYNS_DEBUG << "- Cylinders : " << totalNbCylinders
+                 << " [" << memSize << " bytes]"
+                 << std::endl;
+    return memSize;
+}
+
+uint64_t OptiXScene::_serializeCones()
+{
+    // Load geometry to GPU
+    size_t totalNbCones = 0;
+    for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
+    {
+        _timestampConesIndices[ materialId ] = 0;
+
+        if( _cones.find( materialId ) != _cones.end( ))
+        {
+            for( const auto& cone: _cones[materialId] )
+            {
+                cone->serializeData( _serializedConesData[ materialId ] );
+                ++_serializedConesDataSize[ materialId ];
+                ++_timestampConesIndices[ materialId ];
+            }
+            totalNbCones += _timestampConesIndices[ materialId ];
+        }
 
         // Create cones geometry
         if( _timestampConesIndices[ materialId ] != 0 )
         {
             _optixCones[ materialId ] = _context->createGeometry();
             _optixCones[ materialId ]->setPrimitiveCount( _timestampConesIndices[ materialId ] );
-            _optixCones[ materialId ]->setBoundingBoxProgram( conesBoundsProgram );
-            _optixCones[ materialId ]->setIntersectionProgram( conesIntersectProgram );
+            _optixCones[ materialId ]->setBoundingBoxProgram( _conesBoundsProgram );
+            _optixCones[ materialId ]->setIntersectionProgram( _conesIntersectProgram );
             uint64_t size = _timestampConesIndices[ materialId ] *
                 Cone::getSerializationSize();
-            _conesBuffers[ materialId ] =
-                _context->createBuffer( RT_BUFFER_INPUT, RT_FORMAT_FLOAT, size );
+            if( !_conesBuffers[ materialId ] )
+                _conesBuffers[ materialId ] = _context->createBuffer(
+                    RT_BUFFER_INPUT, RT_FORMAT_FLOAT, size );
             memcpy(
                 _conesBuffers[ materialId ]->map(),
                 &_serializedConesData[ materialId ][ 0 ],
@@ -426,24 +417,27 @@ uint64_t OptiXScene::_processParametricGeometries()
          }
     }
 
-    const uint64_t spheresMemSize =
-        totalNbSpheres * Sphere::getSerializationSize() * sizeof(float);
-    const uint64_t cylindersMemSize =
-        totalNbCylinders * Cylinder::getSerializationSize() * sizeof(float);
-    const uint64_t conesMemSize =
-        totalNbCones * Cone::getSerializationSize() * sizeof(float);
-    const uint64_t bvhSize = _getBvhSize( totalNbSpheres + totalNbCylinders + totalNbCones );
+    const uint64_t memSize = _getBvhSize(
+        totalNbCones * Cone::getSerializationSize() * sizeof(float));
+    BRAYNS_DEBUG << "- Cones     : " << totalNbCones
+                 << " [" << memSize << " bytes]"
+                 << std::endl;
+    return memSize;
+}
 
-    BRAYNS_INFO << "- Spheres   : " << totalNbSpheres
-                << " [" << spheresMemSize << " bytes]"
-                << std::endl;
-    BRAYNS_INFO << "- Cylinders : " << totalNbCylinders
-                << " [" << cylindersMemSize << " bytes]"
-                << std::endl;
-    BRAYNS_INFO << "- Cones     : " << totalNbCones
-                << " [" << conesMemSize << " bytes]"
-                << std::endl;
-    return bvhSize + spheresMemSize + cylindersMemSize + conesMemSize;
+uint64_t OptiXScene::serializeGeometry()
+{
+    const uint64_t spheresMemSize =
+        _spheresDirty ? _serializeSpheres() : 0;
+    const uint64_t cylindersMemSize =
+        _cylindersDirty ? _serializeCylinders() : 0;
+    const uint64_t conesMemSize =
+        _conesDirty ? _serializeCones() : 0;
+
+    _spheresDirty = false;
+    _cylindersDirty = false;
+    _conesDirty = false;
+    return spheresMemSize + cylindersMemSize + conesMemSize;
 }
 
 uint64_t OptiXScene::_processMeshes()
@@ -578,14 +572,9 @@ uint64_t OptiXScene::_processMeshes()
     _context[ "texcoord_buffer" ]->setBuffer( _textureCoordsBuffer );
     _context[ "material_buffer" ]->setBuffer( _materialsBuffer );
 
-    optix::Program meshBoundsProgram =
-        _context->createProgramFromPTXString( CUDA_TRIANGLES_MESH, CUDA_FUNCTION_BOUNDS );
-    optix::Program meshIntersectProgram =
-        _context->createProgramFromPTXString( CUDA_TRIANGLES_MESH, CUDA_FUNCTION_INTERSECTION );
-
     _mesh = _context->createGeometry();
-    _mesh->setIntersectionProgram( meshIntersectProgram );
-    _mesh->setBoundingBoxProgram( meshBoundsProgram );
+    _mesh->setIntersectionProgram( _meshIntersectProgram );
+    _mesh->setBoundingBoxProgram( _meshBoundsProgram );
     _mesh->setPrimitiveCount( nbTotalIndices );
 
     _geometryInstances.push_back(
@@ -626,19 +615,12 @@ void OptiXScene::commitMaterials( const bool updateOnly )
 {
     BRAYNS_INFO << "Commit OptiX materials" << std::endl;
 
-    optix::Program phong_ch =
-        _context->createProgramFromPTXString( CUDA_PHONG, "closest_hit_radiance" );
-    optix::Program phong_ch_textured =
-        _context->createProgramFromPTXString( CUDA_PHONG, "closest_hit_radiance_textured" );
-    optix::Program phong_ah =
-        _context->createProgramFromPTXString( CUDA_PHONG, "any_hit_shadow" );
-
     // Create materials
     for( size_t materialId = 0; materialId < _materials.size(); ++materialId )
         if( materialId >= _optixMaterials.size( ))
         {
             optix::Material optixMaterial = _context->createMaterial();
-            optixMaterial->setAnyHitProgram( 1, phong_ah );
+            optixMaterial->setAnyHitProgram( 1, _phong_ah );
             _optixMaterials.push_back( optixMaterial );
         }
 
@@ -658,7 +640,7 @@ void OptiXScene::commitMaterials( const bool updateOnly )
                 if( texture.second != TEXTURE_NAME_SIMULATION )
                     if( textureLoader.loadTexture( _textures, texture.first, texture.second ))
                     {
-                        optixMaterial->setClosestHitProgram( 0, phong_ch_textured );
+                        optixMaterial->setClosestHitProgram( 0, _phong_ch_textured );
                         textured = true;
                     }
 
@@ -677,7 +659,7 @@ void OptiXScene::commitMaterials( const bool updateOnly )
                 }
             }
             if( !textured )
-                optixMaterial->setClosestHitProgram( 0, phong_ch );
+                optixMaterial->setClosestHitProgram( 0, _phong_ch );
         }
     }
 
@@ -814,7 +796,7 @@ void OptiXScene::commitVolumeData()
 
 void OptiXScene::commitTransferFunctionData()
 {
-    if( _colorMapBuffer == 0 )
+    if( !_colorMapBuffer )
         _colorMapBuffer = _context->createBuffer(
             RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, _transferFunction.getDiffuseColors().size() );
 

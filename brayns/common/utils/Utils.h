@@ -18,23 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TransferFunction.h"
+#ifndef UTILS_H
+#define UTILS_H
 
-#include <brayns/common/log.h>
+#include <brayns/common/types.h>
 
 namespace brayns
 {
 
-TransferFunction::TransferFunction()
-{
-}
-
-void TransferFunction::clear()
-{
-    _diffuseColors.clear();
-    _emissionIntensities.clear();
-    _contributions.clear();
-    _valuesRange = Vector2f();
-}
+strings parseFolder( const std::string& folder, const strings& filters );
 
 }
+
+#endif // UTILS_H

@@ -28,6 +28,7 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
+#include <brayns/common/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/camera.h>
@@ -308,8 +309,8 @@ void ZeroEQPlugin::_sceneUpdated( )
 
     for( size_t materialId = 0; materialId < materials.size(); ++materialId )
     {
+        // Materials
         MaterialPtr material = scene.getMaterial( materialId );
-
         if( material)
         {
             ::brayns::v1::Material& m = materials[ materialId ];
@@ -328,6 +329,7 @@ void ZeroEQPlugin::_sceneUpdated( )
             material->setEmission( m.getLightEmission() );
         }
     }
+
     scene.commitMaterials( true );
     _engine->getRenderer().commit();
     _engine->getFrameBuffer().clear();
@@ -916,10 +918,13 @@ void ZeroEQPlugin::_settingsUpdated()
 
 bool ZeroEQPlugin::_requestFrame()
 {
+    auto caSimHandler = _engine->getScene().getCADiffusionSimulationHandler();
     auto simHandler = _engine->getScene().getSimulationHandler();
     auto volHandler = _engine->getScene().getVolumeHandler();
-    const uint64_t nbFrames = simHandler ? simHandler->getNbFrames() :
+    uint64_t nbFrames = simHandler ? simHandler->getNbFrames() :
                                  ( volHandler ? volHandler->getNbFrames() : 0 );
+    nbFrames = std::max( nbFrames,
+                         caSimHandler ? caSimHandler->getNbFrames() : 0 );
 
     const auto& sceneParams = _parametersManager.getSceneParameters();
     const auto ts = uint64_t(sceneParams.getTimestamp());
@@ -945,6 +950,18 @@ void ZeroEQPlugin::_frameUpdated()
     auto& sceneParams = _parametersManager.getSceneParameters();
     sceneParams.setTimestamp( _remoteFrame.getCurrent( ));
     sceneParams.setAnimationDelta( _remoteFrame.getDelta( ));
+
+    CADiffusionSimulationHandlerPtr handler =
+        _engine->getScene().getCADiffusionSimulationHandler();
+    if( handler )
+    {
+        auto& scene = _engine->getScene();
+        handler->setFrame( scene, _remoteFrame.getCurrent( ) );
+        scene.setSpheresDirty( true );
+        scene.serializeGeometry();
+        scene.commit();
+    }
+
     _engine->commit();
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -23,7 +23,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/io/ProteinLoader.h>
-#include <brayns/io/MeshLoader.h>
+#include <brayns/common/simulation/CADiffusionSimulationHandler.h>
 #include <fstream>
 
 namespace brayns
@@ -35,7 +35,9 @@ MolecularSystemReader::MolecularSystemReader(
 {
 }
 
-bool MolecularSystemReader::import( Scene& scene )
+bool MolecularSystemReader::import(
+    Scene& scene,
+    MeshLoader& meshLoader )
 {
     _nbProteins = 0;
     if( !_loadConfiguration( ))
@@ -45,29 +47,42 @@ bool MolecularSystemReader::import( Scene& scene )
     if( !_loadPositions( ))
         return false;
 
-    BRAYNS_INFO << "Total number of different proteins: " << _proteins.size() << std::endl;
-    BRAYNS_INFO << "Total number of proteins          : " << _nbProteins << std::endl;
+    if( !_createScene( scene, meshLoader ))
+        return false;
 
-    return _createScene( scene );
+    if( !_calciumSimulationFolder.empty( ))
+    {
+        CADiffusionSimulationHandlerPtr handler(
+            new CADiffusionSimulationHandler( _calciumSimulationFolder ));
+        handler->setFrame( scene, 0 );
+        scene.setCADiffusionSimulationHandler( handler );
+    }
+    BRAYNS_INFO << "Total number of different proteins: "
+                << _proteins.size() << std::endl;
+    BRAYNS_INFO << "Total number of proteins          : "
+                << _nbProteins << std::endl;
+
+    return true;
 }
 
-bool MolecularSystemReader::_createScene( Scene& scene )
+bool MolecularSystemReader::_createScene(
+    Scene& scene,
+    MeshLoader& meshLoader )
 {
     MeshQuality quality;
     switch( _geometryParameters.getGeometryQuality( ))
     {
     case GeometryQuality::medium:
-        quality = MQ_QUALITY;
+        quality = MeshQuality::medium;
         break;
     case GeometryQuality::high:
-        quality = MQ_MAX_QUALITY;
+        quality = MeshQuality::high;
         break;
     default:
-        quality = MQ_FAST ;
+        quality = MeshQuality::low;
         break;
     }
 
-    MeshLoader meshLoader;
     uint64_t proteinCount = 0;
     for( const auto& proteinPosition: _proteinPositions )
     {
@@ -89,13 +104,6 @@ bool MolecularSystemReader::_createScene( Scene& scene )
             for( const auto& position: proteinPosition.second )
             {
                 const auto objFilename = _meshFolder + '/' + protein->second + ".obj";
-                MeshContainer MeshContainer =
-                {
-                    scene.getTriangleMeshes(),
-                    scene.getMaterials(),
-                    scene.getWorldBounds()
-                };
-
                 const size_t material =
                     _geometryParameters.getColorScheme() == ColorScheme::protein_by_id ?
                     proteinCount % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
@@ -105,7 +113,7 @@ bool MolecularSystemReader::_createScene( Scene& scene )
                 // in micrometers
                 const float scale = 0.0001f;
                 meshLoader.importMeshFromFile(
-                    objFilename, MeshContainer, quality,
+                    objFilename, scene, quality,
                     position, Vector3f( scale, scale, scale ), material );
 
                 if( _proteinFolder.empty( ))
@@ -153,12 +161,14 @@ bool MolecularSystemReader::_loadConfiguration()
     _meshFolder = parameters["MeshFolder"];
     _descriptorFilename = parameters["SystemDescriptor"];
     _positionsFilename = parameters["ProteinPositions"];
+    _calciumSimulationFolder = parameters["CalciumPositions"];
 
-    BRAYNS_INFO << "Loading biological assembly" << std::endl;
+    BRAYNS_INFO << "Loading molecular system" << std::endl;
     BRAYNS_INFO << "Protein folder    : " << _proteinFolder << std::endl;
     BRAYNS_INFO << "Mesh folder       : " << _meshFolder << std::endl;
     BRAYNS_INFO << "System descriptor : " << _descriptorFilename << std::endl;
     BRAYNS_INFO << "Protein positions : " << _positionsFilename << std::endl;
+    BRAYNS_INFO << "Calcium positions : " << _calciumSimulationFolder << std::endl;
     return true;
 }
 
@@ -173,7 +183,7 @@ bool MolecularSystemReader::_loadProteins( )
 
     // Load list of proteins
     std::string line;
-    while( std::getline( descriptorFile, line ))
+    while( descriptorFile.good() && std::getline( descriptorFile, line ))
     {
         std::stringstream lineStream( line );
         std::string protein;
@@ -219,10 +229,10 @@ bool MolecularSystemReader::_loadPositions()
         return false;
     }
 
-    // Load positions
+    // Load protein positions
     _nbProteins = 0;
     std::string line;
-    while( std::getline( filePositions, line ))
+    while( filePositions.good() && std::getline( filePositions, line ))
     {
         std::stringstream lineStream( line );
         size_t id;
@@ -238,6 +248,25 @@ bool MolecularSystemReader::_loadPositions()
     }
     filePositions.close();
     return true;
+}
+
+void MolecularSystemReader::_writePositionstoFile( const std::string& filename )
+{
+    std::ofstream outfile( filename, std::ios::binary );
+    for( const auto& position: _proteinPositions )
+    {
+        for( const auto& element: position.second )
+        {
+            const float radius = 1.f;
+            const float value = 1.f;
+            outfile.write((char *)&element.x(), sizeof( float ));
+            outfile.write((char *)&element.y(), sizeof( float ));
+            outfile.write((char *)&element.z(), sizeof( float ));
+            outfile.write((char *)&radius, sizeof( float ));
+            outfile.write((char *)&value, sizeof( float ));
+        }
+    }
+    outfile.close();
 }
 
 }

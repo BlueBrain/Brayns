@@ -62,6 +62,9 @@ public:
     /** @copydoc Scene::buildGeometry */
     void buildGeometry() final;
 
+    /** @copydoc Scene::serializeGeometry */
+    uint64_t serializeGeometry() final;
+
     /** @copydoc Scene::commitLights */
     void commitLights() final;
 
@@ -93,7 +96,9 @@ private:
 
     uint64_t _getBvhSize( const uint64_t nbElements ) const;
 
-    uint64_t _processParametricGeometries();
+    uint64_t _serializeSpheres();
+    uint64_t _serializeCylinders();
+    uint64_t _serializeCones();
     uint64_t _processMeshes();
 
     optix::Context& _context;
@@ -140,6 +145,23 @@ private:
     // Textures
     std::map<std::string, optix::Buffer> _optixTextures;
     std::map<std::string, optix::TextureSampler> _optixTextureSamplers;
+
+    // Programs
+    optix::Program _phong_ch;
+    optix::Program _phong_ch_textured;
+    optix::Program _phong_ah;
+
+    optix::Program _spheresBoundsProgram;
+    optix::Program _spheresIntersectProgram;
+
+    optix::Program _cylindersBoundsProgram;
+    optix::Program _cylindersIntersectProgram;
+
+    optix::Program _conesBoundsProgram;
+    optix::Program _conesIntersectProgram;
+
+    optix::Program _meshBoundsProgram;
+    optix::Program _meshIntersectProgram;
 
 };
 

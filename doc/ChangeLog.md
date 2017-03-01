@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master
 
+* [#120](https://github.com/BlueBrain/Brayns/pull/120):
+  Improved visualization of molecular systems
 * [#116](https://github.com/BlueBrain/Brayns/pull/116):
   Added automated meshing of somas using metaballs algorithm
 * [#103](https://github.com/BlueBrain/Brayns/pull/103:

@@ -64,7 +64,7 @@ void KeyboardHandler::handleKeyboardShortcut( const unsigned char key )
     auto it = _registeredShortcuts.find( key );
     if( it != _registeredShortcuts.end() )
     {
-        BRAYNS_INFO << "Processing " << (*it).second.description << std::endl;
+        BRAYNS_DEBUG << "Processing " << (*it).second.description << std::endl;
         (*it).second.functor();
     }
 }

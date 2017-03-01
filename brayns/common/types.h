@@ -152,6 +152,9 @@ class Brayns;
 class SpikeSimulationHandler;
 typedef std::shared_ptr< SpikeSimulationHandler > SpikeSimulationHandlerPtr;
 
+class CADiffusionSimulationHandler;
+typedef std::shared_ptr< CADiffusionSimulationHandler > CADiffusionSimulationHandlerPtr;
+
 class VolumeHandler;
 typedef std::shared_ptr< VolumeHandler > VolumeHandlerPtr;
 
@@ -280,12 +283,13 @@ struct Histogram
  */
 const size_t NO_MATERIAL = -1;
 const size_t NB_MAX_MATERIALS = 200;
-const size_t NB_SYSTEM_MATERIALS = 4;
+const size_t NB_SYSTEM_MATERIALS = 5;
 const size_t MATERIAL_SYSTEM = NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS - 1;
 const size_t MATERIAL_SKYBOX = MATERIAL_SYSTEM + 0;
 const size_t MATERIAL_BOUNDING_BOX = MATERIAL_SYSTEM + 1;
 const size_t MATERIAL_SIMULATION = MATERIAL_SYSTEM + 2;
 const size_t MATERIAL_INVISIBLE = MATERIAL_SYSTEM + 3;
+const size_t MATERIAL_CA_SIMULATION = MATERIAL_SYSTEM + 4;
 const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 
@@ -307,11 +311,11 @@ enum class ShadingType
     electron,
 };
 
-enum MeshQuality
+enum class MeshQuality
 {
-    MQ_FAST = 0,
-    MQ_QUALITY,
-    MQ_MAX_QUALITY
+    low = 0,
+    medium,
+    high
 };
 
 enum class CameraType

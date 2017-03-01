@@ -33,6 +33,7 @@
 #include <brayns/common/simulation/CircuitSimulationHandler.h>
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
 #include <brayns/common/input/KeyboardHandler.h>
+#include <brayns/common/utils/Utils.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -49,7 +50,6 @@
 #include <plugins/engines/EngineFactory.h>
 #include <plugins/extensions/ExtensionPluginFactory.h>
 
-#include <boost/filesystem.hpp>
 #include <servus/uri.h>
 
 namespace brayns
@@ -104,6 +104,7 @@ struct Brayns::Impl
 
     void buildScene()
     {
+        _meshLoader.clear();
         _loadData();
         Scene& scene = _engine->getScene();
         scene.commitVolumeData();
@@ -323,34 +324,6 @@ private:
         }
     }
 
-    strings _parseFolder( const std::string& folder, const strings& filters )
-    {
-        strings files;
-        boost::filesystem::directory_iterator endIter;
-        if( boost::filesystem::is_directory( folder ))
-        {
-            for( boost::filesystem::directory_iterator dirIter( folder );
-                 dirIter != endIter; ++dirIter )
-            {
-                if( boost::filesystem::is_regular_file(dirIter->status( )))
-                {
-                    const auto filename = dirIter->path().c_str();
-                    if( filters.empty( ))
-                        files.push_back( filename );
-                    else
-                    {
-                        const auto& fileExtension = dirIter->path().extension();
-                        const auto found =
-                            std::find( filters.begin(), filters.end(), fileExtension );
-                        if( found != filters.end( ))
-                            files.push_back( filename );
-                    }
-                }
-            }
-        }
-        return files;
-    }
-
     /**
         Loads data from SWC and H5 files located in the folder specified in the
         geometry parameters (command line parameter --morphology-folder)
@@ -364,7 +337,7 @@ private:
         MorphologyLoader morphologyLoader( geometryParameters );
 
         const strings filters = { ".swc", ".h5" };
-        const strings files = _parseFolder( folder, filters );
+        const strings files = parseFolder( folder, filters );
         size_t progress = 0;
         for( const auto& file: files )
         {
@@ -424,7 +397,7 @@ private:
         const std::string& folder = geometryParameters.getPDBFolder();
         BRAYNS_INFO << "Loading PDB folder " << folder << std::endl;
         const strings filters = { ".pdb", ".pdb1" };
-        const strings files = _parseFolder( folder, filters );
+        const strings files = parseFolder( folder, filters );
         size_t progress = 0;
         for( const auto& file: files )
         {
@@ -486,19 +459,11 @@ private:
 
         strings filters = {
             ".obj", ".dae", ".fbx", ".ply", ".lwo", ".stl", ".3ds", ".ase", ".ifc" };
-        strings files = _parseFolder( folder, filters );
+        strings files = parseFolder( folder, filters );
         size_t progress = 0;
-        MeshLoader meshLoader;
         for( const auto& file: files )
         {
             BRAYNS_PROGRESS( progress, files.size( ));
-            MeshContainer MeshContainer =
-            {
-                scene.getTriangleMeshes(),
-                scene.getMaterials(),
-                scene.getWorldBounds()
-            };
-
             size_t material =
                 geometryParameters.getColorScheme() == ColorScheme::neuron_by_id ?
                 progress % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
@@ -508,18 +473,18 @@ private:
             switch( geometryParameters.getGeometryQuality( ))
             {
             case GeometryQuality::medium:
-                quality = MQ_QUALITY;
+                quality = MeshQuality::medium;
                 break;
             case GeometryQuality::high:
-                quality = MQ_MAX_QUALITY;
+                quality = MeshQuality::high;
                 break;
             default:
-                quality = MQ_FAST ;
+                quality = MeshQuality::low;
                 break;
             }
 
-            if( !meshLoader.importMeshFromFile(
-                file, MeshContainer, quality, Vector3f(), Vector3f(1,1,1), material ))
+            if( !_meshLoader.importMeshFromFile(
+                file, scene, quality, Vector3f(), Vector3f(1,1,1), material ))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++progress;
         }
@@ -587,7 +552,7 @@ private:
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader( geometryParameters );
-        molecularSystemReader.import( scene );
+        molecularSystemReader.import( scene, _meshLoader );
 #else
         BRAYNS_ERROR << "Assimp library missing for molecular meshes"
                      << std::endl;
@@ -829,6 +794,7 @@ private:
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
+    MeshLoader _meshLoader;
 
 #if(BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;

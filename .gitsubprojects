@@ -26,7 +26,7 @@ endif()
 # Data access
 if(BRAYNS_BRION_ENABLED)
   git_subproject(Brion https://github.com/BlueBrain/Brion.git 8b0c1f1)
-  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 19d3790)
+  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git f05b9c6)
   common_find_package(Lunchbox)
   common_find_package(BBPTestData)
   common_find_package(Brion REQUIRED)

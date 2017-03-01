@@ -56,6 +56,9 @@ public:
     /** @copydoc Scene::buildGeometry */
     void buildGeometry() final;
 
+    /** @copydoc Scene::serializeGeometry */
+    uint64_t serializeGeometry() final;
+
     /** @copydoc Scene::commitLights */
     void commitLights() final;
 
@@ -85,9 +88,13 @@ public:
 private:
 
     OSPTexture2D _createTexture2D(const std::string& textureName);
+    void _createModel( const size_t timestamp );
 
-    void _buildParametricOSPGeometry( const size_t materialId );
-    void _buildMeshOSPGeometry( const size_t materialId );
+    uint64_t _serializeSpheres( const size_t materialId );
+    uint64_t _serializeCylinders( const size_t materialId );
+    uint64_t _serializeCones( const size_t materialId );
+    uint64_t _buildMeshOSPGeometry( const size_t materialId );
+
     void _loadCacheFile();
     void _saveCacheFile();
 
@@ -102,6 +109,14 @@ private:
     OSPData _ospSimulationData;
     OSPData _ospTransferFunctionDiffuseData;
     OSPData _ospTransferFunctionEmissionData;
+
+    std::map< size_t, OSPGeometry > _ospExtendedSpheres;
+    std::map< size_t, OSPData > _ospExtendedSpheresData;
+    std::map< size_t, OSPGeometry > _ospExtendedCylinders;
+    std::map< size_t, OSPData > _ospExtendedCylindersData;
+    std::map< size_t, OSPGeometry > _ospExtendedCones;
+    std::map< size_t, OSPData > _ospExtendedConesData;
+    std::map< size_t, OSPGeometry > _ospMeshes;
 
     std::map< float, size_t > _timestamps;
 
