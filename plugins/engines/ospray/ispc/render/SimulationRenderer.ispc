@@ -37,8 +37,7 @@ inline varying vec4f getSimulationValue(
     varying float& lightEmission )
 {
     lightEmission = 0.f;
-    //varying vec4f color = make_vec4f( 0.f );
-    varying vec4f color = make_vec4f( 1,0,0,1 );
+    varying vec4f color = make_vec4f( 0.f );
 
     const varying float value = self->simulationData[ dg.st.x ];
 
