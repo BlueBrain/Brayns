@@ -573,14 +573,23 @@ void MetaballsGenerator::_buildTriangles(
 
         auto& vertices = triangles[ defaultMaterialId ].getVertices();
         auto& normals = triangles[ defaultMaterialId ].getNormals();
-        auto& indices = triangles[ defaultMaterialId ].getIndices();
         auto& colors = triangles[ defaultMaterialId ].getColors();
+        auto& indices = triangles[ defaultMaterialId ].getIndices();
 
         for( auto k = 0; METABALLS_TRIANGLES[ cubeIndex ][ k ] != -1; k += 3 )
         {
             const auto verticesIndex = vertices.size();
 
             // Create triangulated face
+            bool processFace = true;
+            for( auto f = 0; f < 3 && processFace; ++f )
+            {
+                const auto index = METABALLS_TRIANGLES[ cubeIndex ][ k + f ];
+                if( size_t(index )>= _edgeVertices.size())
+                    processFace = false;
+            }
+            if( !processFace ) continue;
+
             for( auto f = 0; f < 3; ++f )
             {
                 const auto index = METABALLS_TRIANGLES[ cubeIndex ][ k + f ];
@@ -601,7 +610,7 @@ void MetaballsGenerator::_buildTriangles(
             }
 
             indices.push_back( Vector3ui(
-                verticesIndex, verticesIndex + 2, verticesIndex + 1 ));
+                verticesIndex, verticesIndex + 1, verticesIndex + 2 ));
         }
     }
 }
