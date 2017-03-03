@@ -36,7 +36,6 @@
 #include <lexis/render/ClipPlanes.h>
 #include <lexis/render/materialLUT.h>
 
-#include <zerobuf/render/attribute.h>
 #include <zerobuf/render/frameBuffers.h>
 #include <zerobuf/render/parameters.h>
 #include <zerobuf/render/reset.h>
@@ -85,11 +84,6 @@ private:
      * @brief This method is called when the camera is updated by a ZeroEQ event
      */
     void _cameraUpdated();
-
-    /**
-     * @brief This method is called when an application attribute is updated by a ZeroEQ event
-     */
-    void _attributeUpdated();
 
     /**
      * @brief This method is called when camera reset is invoked by a ZeroEQ event
@@ -267,7 +261,6 @@ private:
     ::brayns::v1::DataSource _remoteDataSource;
     ::brayns::v1::Settings _remoteSettings;
     ::brayns::v1::Spikes _remoteSpikes;
-    ::brayns::v1::Attribute _remoteAttribute;
     ::brayns::v1::FrameBuffers _remoteFrameBuffers;
     ::brayns::v1::Material _remoteMaterial;
     ::brayns::v1::ResetCamera _remoteResetCamera;

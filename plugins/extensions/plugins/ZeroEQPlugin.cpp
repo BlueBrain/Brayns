@@ -168,10 +168,6 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteFrameBuffers.registerSerializeCallback(
         std::bind( &ZeroEQPlugin::_requestFrameBuffers, this ));
 
-    _httpServer->handlePUT( _remoteAttribute );
-    _remoteAttribute.registerDeserializedCallback(
-        std::bind( &ZeroEQPlugin::_attributeUpdated, this ));
-
     _httpServer->handlePUT( _remoteResetCamera );
     _remoteResetCamera.registerDeserializedCallback(
         std::bind( &ZeroEQPlugin::_resetCameraUpdated, this ));
@@ -258,16 +254,6 @@ void ZeroEQPlugin::_cameraUpdated()
 {
     _engine->getFrameBuffer().clear();
     _engine->getCamera().commit();
-}
-
-void ZeroEQPlugin::_attributeUpdated( )
-{
-    BRAYNS_INFO << _remoteAttribute.getKeyString() << " = " <<
-        _remoteAttribute.getValueString() << std::endl;
-    _parametersManager.set( _remoteAttribute.getKeyString(), _remoteAttribute.getValueString( ));
-    _engine->getScene().commitVolumeData();
-    _engine->getRenderer().commit();
-    _engine->getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_resetCameraUpdated()
