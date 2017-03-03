@@ -43,24 +43,20 @@ LivreScene::LivreScene(const Renderers& renderers,
 
 void LivreScene::commitTransferFunctionData()
 {
-    TransferFunction& transferFunction = getTransferFunction();
-    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
-    if (diffuseColors.size() != 256)
+    auto& livreTF =
+        _livre.getFrameData().getRenderSettings().getTransferFunction();
+    const auto& diffuseColors = getTransferFunction().getDiffuseColors();
+
+    livreTF.getDiffuse().resize(diffuseColors.size());
+    livreTF.getAlpha().resize(diffuseColors.size());
+    for (size_t i = 0; i < diffuseColors.size(); ++i)
     {
-        BRAYNS_ERROR << "Livre only supports color maps with 256 values"
-                     << std::endl;
-        return;
+        const auto& color = diffuseColors[i];
+        livreTF.getDiffuse()[i] = {color[0], color[1], color[2]};
+        livreTF.getAlpha()[i] = color[3];
     }
-    uint8_ts lut;
-    lut.reserve(1024);
-    for (const auto& color : diffuseColors)
-    {
-        lut.push_back(color.x() * 255.f);
-        lut.push_back(color.y() * 255.f);
-        lut.push_back(color.z() * 255.f);
-        lut.push_back(color.w() * 255.f);
-    }
-    _livre.getFrameData().getRenderSettings().getTransferFunction().setLut(lut);
+    const auto& range = getTransferFunction().getValuesRange();
+    livreTF.setRange({range[0], range[1]});
 }
 
 void LivreScene::commitVolumeData()
