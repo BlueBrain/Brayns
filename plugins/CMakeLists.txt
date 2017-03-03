@@ -37,6 +37,7 @@ if(BRAYNS_NETWORKING_ENABLED)
 endif()
 
 if(OSPRAY_FOUND)
+  add_definitions( -DBRAYNS_USE_OSPRAY=1 )
   add_subdirectory(engines/ospray)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOSPRayEnginePlugin)
 endif()
