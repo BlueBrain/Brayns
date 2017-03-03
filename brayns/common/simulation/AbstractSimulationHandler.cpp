@@ -118,7 +118,7 @@ void AbstractSimulationHandler::writeFrame(
 
 const Histogram& AbstractSimulationHandler::getHistogram()
 {
-    if( _timestamp == _histogram.timestamp )
+    if( !histogramChanged( ))
         return _histogram;
 
     float* data = (float*)getFrameData();
@@ -129,8 +129,8 @@ const Histogram& AbstractSimulationHandler::getHistogram()
     {
         const uint64_t index = i * sizeof(float);
         float value = data[index];
-        if( value < range.x() ) range.x() = value;
-        if( value > range.y() ) range.y() = value;
+        range.x() = std::min( range.x(), value );
+        range.y() = std::max( range.y(), value );
     }
 
     // Normalize values
@@ -149,6 +149,11 @@ const Histogram& AbstractSimulationHandler::getHistogram()
     _histogram.range = range;
     _histogram.timestamp = _timestamp;
     return _histogram;
+}
+
+bool AbstractSimulationHandler::histogramChanged() const
+{
+    return _timestamp != _histogram.timestamp;
 }
 
 }

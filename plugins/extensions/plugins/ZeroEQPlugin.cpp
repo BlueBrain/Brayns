@@ -100,6 +100,9 @@ bool ZeroEQPlugin::run( Engine& engine )
     if( _requestVolumeHistogram( ))
         _publisher.publish( _remoteVolumeHistogram );
 
+    if( _requestSimulationHistogram( ))
+        _publisher.publish( _remoteSimulationHistogram );
+
     if( _requestFrame( ))
         _publisher.publish( _remoteFrame );
 
@@ -186,8 +189,6 @@ void ZeroEQPlugin::_setupHTTPServer()
         std::bind( &ZeroEQPlugin::_requestSpikes, this ));
 
     _httpServer->handlePUT( _remoteMaterialLUT );
-    _remoteMaterialLUT.registerDeserializedCallback(
-        std::bind( &ZeroEQPlugin::_materialLUTUpdated, this ));
 
     _httpServer->handle( _remoteDataSource );
     _remoteDataSource.registerDeserializedCallback(
@@ -245,14 +246,12 @@ void ZeroEQPlugin::_setupRequests()
 
 void ZeroEQPlugin::_setupSubscriber()
 {
-    _subscriber.subscribe( _remoteLookupTable1D );
+    _subscriber.subscribe( _remoteMaterialLUT );
     _subscriber.subscribe( _clipPlanes );
     _subscriber.subscribe( _remoteFrame );
 
-    _remoteLookupTable1D.registerDeserializedCallback(
-        std::bind( &ZeroEQPlugin::_LookupTable1DUpdated, this ));
-    _remoteLookupTable1D.registerSerializeCallback(
-        std::bind( &ZeroEQPlugin::_requestLookupTable1D, this ));
+    _remoteMaterialLUT.registerDeserializedCallback(
+        std::bind( &ZeroEQPlugin::_materialLUTUpdated, this ));
 }
 
 void ZeroEQPlugin::_cameraUpdated()
@@ -314,11 +313,11 @@ void ZeroEQPlugin::_sceneUpdated( )
         if( material)
         {
             ::brayns::v1::Material& m = materials[ materialId ];
-            const floats& diffuse = m.getDiffuseColorVector();
+            const auto& diffuse = m.getDiffuseColor();
             Vector3f kd = { diffuse[0], diffuse[1], diffuse[2] };
             material->setColor( kd );
 
-            const floats& specular = m.getSpecularColorVector();
+            const auto& specular = m.getSpecularColor();
             Vector3f ks = { specular[0], specular[1], specular[2] };
             material->setSpecularColor( ks );
 
@@ -357,53 +356,6 @@ void ZeroEQPlugin::_spikesUpdated( )
 #endif
 }
 
-void ZeroEQPlugin::_LookupTable1DUpdated( )
-{
-    auto& scene = _engine->getScene();
-    TransferFunction& transferFunction = scene.getTransferFunction();
-
-    transferFunction.clear();
-    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
-    floats& emissionIntensities = transferFunction.getEmissionIntensities();
-
-    const uint8_ts& lut = _remoteLookupTable1D.getLutVector();
-    for( size_t i = 0; i < lut.size(); i += 4 )
-    {
-        Vector4f color = {
-            lut[ i ] / 255.f,
-            lut[ i + 1 ] / 255.f,
-            lut[ i + 2 ] / 255.f,
-            lut[ i + 3 ] / 255.f
-        };
-        diffuseColors.push_back( color );
-        emissionIntensities.push_back( 0.f );
-    }
-
-    transferFunction.setValuesRange( Vector2f( 0.f, lut.size() / 4 ));
-    scene.commitTransferFunctionData();
-    _engine->getFrameBuffer().clear();
-}
-
-bool ZeroEQPlugin::_requestLookupTable1D( )
-{
-    auto& scene = _engine->getScene();
-    TransferFunction& transferFunction = scene.getTransferFunction();
-
-    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
-
-    uint8_ts lut;
-    lut.clear();
-    for( const auto& color: diffuseColors )
-    {
-        lut.push_back( color.x() * 255.f );
-        lut.push_back( color.y() * 255.f );
-        lut.push_back( color.z() * 255.f );
-        lut.push_back( color.w() * 255.f );
-    }
-    _remoteLookupTable1D.setLut( lut );
-    return true;
-}
-
 void ZeroEQPlugin::_materialLUTUpdated()
 {
     auto& scene = _engine->getScene();
@@ -412,8 +364,8 @@ void ZeroEQPlugin::_materialLUTUpdated()
     transferFunction.clear();
     auto& diffuseColors = transferFunction.getDiffuseColors();
 
-    const auto size = _remoteMaterialLUT.getDiffuseVector().size();
-    if( _remoteMaterialLUT.getAlphaVector().size() != size )
+    const auto size = _remoteMaterialLUT.getDiffuse().size();
+    if( _remoteMaterialLUT.getAlpha().size() != size )
     {
         BRAYNS_ERROR << "All lookup tables must have the same size. "
                      << "Event will be ignored" << std::endl;
@@ -422,15 +374,15 @@ void ZeroEQPlugin::_materialLUTUpdated()
 
     for( size_t i = 0; i < size; ++i )
     {
-        const auto& diffuse = _remoteMaterialLUT.getDiffuseVector()[i];
-        const auto alpha = _remoteMaterialLUT.getAlphaVector()[i];
+        const auto& diffuse = _remoteMaterialLUT.getDiffuse()[i];
+        const auto alpha = _remoteMaterialLUT.getAlpha()[i];
         Vector4f color = {
             diffuse.getRed(), diffuse.getGreen(), diffuse.getBlue(), alpha };
         diffuseColors.push_back( color );
     }
 
     auto& emissionIntensities = transferFunction.getEmissionIntensities();
-    for( const auto& emission: _remoteMaterialLUT.getEmissionVector( ))
+    for( const auto& emission: _remoteMaterialLUT.getEmission( ))
     {
         const float intensity =
             ( emission.getRed() + emission.getGreen() + emission.getBlue( ))
@@ -439,7 +391,7 @@ void ZeroEQPlugin::_materialLUTUpdated()
     }
 
     auto& contributions = transferFunction.getContributions();
-    for( const auto& contribution: _remoteMaterialLUT.getContributionVector( ))
+    for( const auto& contribution: _remoteMaterialLUT.getContribution( ))
         contributions.push_back( contribution );
 
     const auto& range = _remoteMaterialLUT.getRange();
@@ -717,7 +669,7 @@ void ZeroEQPlugin::_dataSourceUpdated()
         "nest-cache-file", _remoteDataSource.getNestCacheFileString( ));
 
     uint morphologySectionTypes = MST_UNDEFINED;
-    const auto sectionTypes = _remoteDataSource.getMorphologySectionTypesVector();
+    const auto& sectionTypes = _remoteDataSource.getMorphologySectionTypes();
     for( const auto& sectionType: sectionTypes )
     {
         switch( sectionType )
@@ -983,26 +935,26 @@ void ZeroEQPlugin::_viewportUpdated()
 bool ZeroEQPlugin::_requestSimulationHistogram()
 {
     auto simulationHandler = _engine->getScene().getSimulationHandler();
-    if( simulationHandler )
-    {
-        const auto& histogram = simulationHandler->getHistogram();
-        _remoteSimulationHistogram.setMin( histogram.range.x( ));
-        _remoteSimulationHistogram.setMax( histogram.range.y( ));
-        _remoteSimulationHistogram.setBins( histogram.values );
-    }
+    if( !simulationHandler || !simulationHandler->histogramChanged( ))
+        return false;
+
+    const auto& histogram = simulationHandler->getHistogram();
+    _remoteSimulationHistogram.setMin( histogram.range.x( ));
+    _remoteSimulationHistogram.setMax( histogram.range.y( ));
+    _remoteSimulationHistogram.setBins( histogram.values );
     return true;
 }
 
 bool ZeroEQPlugin::_requestVolumeHistogram()
 {
     auto volumeHandler = _engine->getScene().getVolumeHandler();
-    if( volumeHandler )
-    {
-        const auto& histogram = volumeHandler->getHistogram();
-        _remoteVolumeHistogram.setMin( histogram.range.x( ));
-        _remoteVolumeHistogram.setMax( histogram.range.y( ));
-        _remoteVolumeHistogram.setBins( histogram.values );
-    }
+    if( !volumeHandler )
+        return false;
+
+    const auto& histogram = volumeHandler->getHistogram();
+    _remoteVolumeHistogram.setMin( histogram.range.x( ));
+    _remoteVolumeHistogram.setMax( histogram.range.y( ));
+    _remoteVolumeHistogram.setBins( histogram.values );
     return true;
 }
 
@@ -1012,7 +964,7 @@ void ZeroEQPlugin::_clipPlanesUpdated()
     const auto& size = bounds.getSize();
     ClipPlanes clipPlanes;
 
-    for( const auto& plane: _clipPlanes.getPlanesVector( ))
+    for( const auto& plane: _clipPlanes.getPlanes( ))
     {
         const auto& normal = plane.getNormal();
         const auto distance = plane.getD() * size.find_max();

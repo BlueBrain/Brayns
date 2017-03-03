@@ -89,7 +89,7 @@ public:
     const Vector3f& getPosition() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        const floats& origin = getOriginVector();
+        const auto& origin = brayns::v1::Camera::getOrigin();
         _position = Vector3f( origin[0], origin[1], origin[2] );
     #endif
         return _position;
@@ -110,7 +110,7 @@ public:
     const Vector3f& getTarget() const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        const floats& lookat = getLookAtVector();
+        const auto& lookat = brayns::v1::Camera::getLookAt();
         _target = Vector3f( lookat[0], lookat[1], lookat[2] );
     #endif
         return _target;
@@ -131,7 +131,7 @@ public:
     const Vector3f& getUp( ) const
     {
     #ifdef BRAYNS_USE_ZEROBUF
-        const floats& up = getUpVector();
+        const auto& up = brayns::v1::Camera::getUp();
         _up = Vector3f( up[0], up[1], up[2] );
     #endif
         return _up;

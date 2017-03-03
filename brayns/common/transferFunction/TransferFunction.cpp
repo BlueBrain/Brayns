@@ -27,6 +27,10 @@ namespace brayns
 
 TransferFunction::TransferFunction()
 {
+    _diffuseColors.resize( 256, { 1, 0, 0, 0.5 } );
+    _emissionIntensities.resize( 256, 1 );
+    _contributions.resize( 256, 1 );
+    _valuesRange = { 0, 255.f };
 }
 
 void TransferFunction::clear()

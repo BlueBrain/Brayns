@@ -42,7 +42,6 @@
 #include <zerobuf/render/reset.h>
 #include <zerobuf/render/scene.h>
 #include <zerobuf/render/spikes.h>
-#include <zerobuf/render/transferFunction1D.h>
 
 namespace brayns
 {
@@ -246,7 +245,7 @@ private:
     void _onNewEngine();
     void _onChangeEngine();
 
-    Engine* _engine;
+    Engine* _engine = nullptr;
     ParametersManager& _parametersManager;
     tjhandle _compressor;
     ::zeroeq::Subscriber _subscriber;
@@ -259,7 +258,6 @@ private:
 
     ::lexis::render::Frame _remoteFrame;
     ::lexis::render::ImageJPEG _remoteImageJPEG;
-    ::lexis::render::LookupTable1D _remoteLookupTable1D;
     ::lexis::render::Viewport _remoteViewport;
     ::lexis::render::ClipPlanes _clipPlanes;
     ::lexis::render::Histogram _remoteSimulationHistogram;

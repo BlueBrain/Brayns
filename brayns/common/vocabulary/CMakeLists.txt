@@ -23,7 +23,6 @@ zerobuf_generate_cxx(
   reset.fbs
   scene.fbs
   spikes.fbs
-  transferFunction1D.fbs
 )
 
 common_library(BraynsZeroBufRender)
