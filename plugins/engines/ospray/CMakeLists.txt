@@ -22,6 +22,13 @@ MACRO(CONFIGURE_ISPC)
     ${OSPRAY_EMBREE_SOURCE_DIR}/kernels
     )
 
+  # Add respective ROOT directories
+  LIST(APPEND EMBREE_INCLUDE_DIRECTORIES
+		${EMBREE_ROOT}/include 
+		${OSPRAY_ROOT}/include
+		${OSPRAY_ROOT}/include/ospray
+		${OSPRAY_ROOT}/include/ospray/SDK)
+
   IF (OSPRAY_TARGET STREQUAL "mic")
     SET(OSPRAY_EXE_SUFFIX ".mic")
     SET(OSPRAY_LIB_SUFFIX "_mic")
