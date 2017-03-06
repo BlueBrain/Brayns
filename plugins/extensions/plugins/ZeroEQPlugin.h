@@ -32,7 +32,6 @@
 #include <lexis/render/Histogram.h>
 #include <lexis/render/frame.h>
 #include <lexis/render/imageJPEG.h>
-#include <lexis/render/lookupTable1D.h>
 #include <lexis/render/materialLUT.h>
 #include <lexis/render/viewport.h>
 
@@ -105,19 +104,6 @@ private:
      * @brief This method is called when spikes are updated by a ZeroEQ event
      */
     void _spikesUpdated();
-
-    /**
-     * @brief This method is called when the lookup table is updated by a ZeroEQ
-     * event
-     */
-    void _LookupTable1DUpdated();
-
-    /**
-     * @brief This method is called when a lookup table 1D is requested by a
-     * ZeroEQ event
-     * @return True if the method was successful, false otherwise
-     */
-    bool _requestLookupTable1D();
 
     /**
      * @brief This method is called when the material lookup table is updated by
