@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,12 +32,11 @@
 
 struct BasicLight
 {
-    union
-    {
+    union {
         float3 pos;
         float3 dir;
     };
     float3 color;
-    int    casts_shadow;
-    int    type; // Point or Directional
+    int casts_shadow;
+    int type; // Point or Directional
 };

@@ -32,36 +32,34 @@ using namespace ospray;
 
 namespace brayns
 {
-
 void ParticleRenderer::commit()
 {
     AbstractRenderer::commit();
 
-    _simulationData = getParamData( "simulationData" );
-    _transferFunctionDiffuseData = getParamData( "transferFunctionDiffuseData" );
-    _transferFunctionEmissionData = getParamData( "transferFunctionEmissionData" );
-    _transferFunctionSize = getParam1i( "transferFunctionSize", 0 );
+    _simulationData = getParamData("simulationData");
+    _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
+    _transferFunctionEmissionData =
+        getParamData("transferFunctionEmissionData");
+    _transferFunctionSize = getParam1i("transferFunctionSize", 0);
 
     ispc::ParticleRenderer_set(
-                getIE(),
-                ( ispc::vec3f& )_bgColor,
-                _randomNumber,
-                _timestamp,
-                _spp,
-                _materialPtr, _materialArray.size(),
-                _simulationData ? ( float* )_simulationData->data : NULL,
-                _transferFunctionDiffuseData ?
-                    ( ispc::vec4f* )_transferFunctionDiffuseData->data : NULL,
-                _transferFunctionEmissionData ?
-                    ( float* )_transferFunctionEmissionData->data : NULL,
-                _transferFunctionSize );
+        getIE(), (ispc::vec3f&)_bgColor, _randomNumber, _timestamp, _spp,
+        _materialPtr, _materialArray.size(),
+        _simulationData ? (float*)_simulationData->data : NULL,
+        _transferFunctionDiffuseData
+            ? (ispc::vec4f*)_transferFunctionDiffuseData->data
+            : NULL,
+        _transferFunctionEmissionData
+            ? (float*)_transferFunctionEmissionData->data
+            : NULL,
+        _transferFunctionSize);
 }
 
-ParticleRenderer::ParticleRenderer( )
+ParticleRenderer::ParticleRenderer()
 {
-    ispcEquivalent = ispc::ParticleRenderer_create( this );
+    ispcEquivalent = ispc::ParticleRenderer_create(this);
 }
 
-OSP_REGISTER_RENDERER( ParticleRenderer, PARTICLERENDERER );
-OSP_REGISTER_RENDERER( ParticleRenderer, particlerenderer );
+OSP_REGISTER_RENDERER(ParticleRenderer, PARTICLERENDERER);
+OSP_REGISTER_RENDERER(ParticleRenderer, particlerenderer);
 } // ::brayns

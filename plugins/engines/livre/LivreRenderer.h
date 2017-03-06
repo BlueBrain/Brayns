@@ -25,17 +25,16 @@
 
 namespace brayns
 {
-
 class LivreRenderer : public Renderer
 {
 public:
-    LivreRenderer( ParametersManager& parametersMamager, livre::Engine& livre );
+    LivreRenderer(ParametersManager& parametersMamager, livre::Engine& livre);
 
     /**
      * Renders one frame with the current committed settings, scene, etc. and
      * updates the color buffer of the given frameBuffer.
      */
-    void render( FrameBufferPtr frameBuffer ) final;
+    void render(FrameBufferPtr frameBuffer) final;
 
     /**
      * Updates NbFrames in VolumeHandler and sets the current requested
@@ -44,10 +43,9 @@ public:
     void commit() final;
 
     /** Unsupported by Livre. */
-    void setCamera( CameraPtr camera ) final;
+    void setCamera(CameraPtr camera) final;
 
 private:
     livre::Engine& _livre;
 };
-
 }

@@ -31,21 +31,19 @@
 
 namespace brayns
 {
-
-LivreRenderer::LivreRenderer( ParametersManager& parametersManager,
-                              livre::Engine& livre )
-    : Renderer( parametersManager )
-    , _livre( livre )
+LivreRenderer::LivreRenderer(ParametersManager& parametersManager,
+                             livre::Engine& livre)
+    : Renderer(parametersManager)
+    , _livre(livre)
 {
 }
 
-void LivreRenderer::render( FrameBufferPtr frameBuffer )
+void LivreRenderer::render(FrameBufferPtr frameBuffer)
 {
-    _livre.render( [=]( const uint32_t /*frameNumber*/, const eq::Image& image )
-    {
-        auto buffer = std::dynamic_pointer_cast< LivreFrameBuffer >( frameBuffer );
-        if( buffer )
-            buffer->assign( image );
+    _livre.render([=](const uint32_t /*frameNumber*/, const eq::Image& image) {
+        auto buffer = std::dynamic_pointer_cast<LivreFrameBuffer>(frameBuffer);
+        if (buffer)
+            buffer->assign(image);
     });
 }
 
@@ -57,14 +55,13 @@ void LivreRenderer::commit()
     const uint64_t nbFrames = livreParams.frames[1] - livreParams.frames[0];
     const uint64_t ts = _parametersManager.getSceneParameters().getTimestamp();
 
-    livreSettings.setFrameNumber( nbFrames == 0 ? 0 : (ts % nbFrames) );
+    livreSettings.setFrameNumber(nbFrames == 0 ? 0 : (ts % nbFrames));
 
-    if( _scene->getVolumeHandler( ))
-        _scene->getVolumeHandler()->setNbFrames( nbFrames );
+    if (_scene->getVolumeHandler())
+        _scene->getVolumeHandler()->setNbFrames(nbFrames);
 }
 
-void LivreRenderer::setCamera( CameraPtr /*camera*/ )
+void LivreRenderer::setCamera(CameraPtr /*camera*/)
 {
 }
-
 }

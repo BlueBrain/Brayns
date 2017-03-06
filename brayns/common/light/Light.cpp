@@ -22,15 +22,13 @@
 
 namespace brayns
 {
-
 Light::~Light()
 {
 }
 
-Light::Light( const Vector3f& color, const float intensity )
-    : _color( color )
-    , _intensity( intensity )
+Light::Light(const Vector3f& color, const float intensity)
+    : _color(color)
+    , _intensity(intensity)
 {
 }
-
 }

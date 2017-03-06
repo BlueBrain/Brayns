@@ -29,7 +29,6 @@
 
 namespace brayns
 {
-
 /**
    Camera object
 
@@ -43,7 +42,7 @@ public:
        Default constructor
        @param cameraType Type of camera (Perpective, Stereo, etc)
     */
-    BRAYNS_API Camera( CameraType cameraType );
+    BRAYNS_API Camera(CameraType cameraType);
 
     BRAYNS_API virtual ~Camera();
 
@@ -54,100 +53,99 @@ public:
               camera is "looking at" or focused on
        @param up the x, y, z coordinates of the up vector's end point
     */
-    BRAYNS_API virtual void set(
-        const Vector3f& position,
-        const Vector3f& target,
-        const Vector3f& up );
+    BRAYNS_API virtual void set(const Vector3f& position,
+                                const Vector3f& target, const Vector3f& up);
 
-    BRAYNS_API virtual void setInitialState(
-        const Vector3f& position,
-        const Vector3f& target,
-        const Vector3f& up );
+    BRAYNS_API virtual void setInitialState(const Vector3f& position,
+                                            const Vector3f& target,
+                                            const Vector3f& up);
 
     /**
        Gets camera type
        @return The type of camera (Perpective, Stereo, etc)
     */
-    BRAYNS_API CameraType getType( ) const;
+    BRAYNS_API CameraType getType() const;
 
     /**
        Sets camera position
        @param position The x, y, z coordinates of the camera position
     */
-    BRAYNS_API virtual void setPosition( const Vector3f& position );
+    BRAYNS_API virtual void setPosition(const Vector3f& position);
 
     /**
        Gets camera position
        @return The x, y, z coordinates of the camera position
     */
-    BRAYNS_API virtual const Vector3f& getPosition( ) const;
+    BRAYNS_API virtual const Vector3f& getPosition() const;
 
     /**
        Sets camera target
        @param target The x, y, z coordinates of the camera target: the point the
               camera is "looking at" or focused on
     */
-    BRAYNS_API virtual void setTarget( const Vector3f& target );
+    BRAYNS_API virtual void setTarget(const Vector3f& target);
 
     /**
        Gets camera target
        @return The x, y, z coordinates of the camera target: the point the
                camera is "looking at" or focused on
     */
-    BRAYNS_API virtual const Vector3f& getTarget( ) const;
+    BRAYNS_API virtual const Vector3f& getTarget() const;
 
     /**
        Sets camera up vector
        @param up the x, y, z coordinates of the up vector's end point
     */
-    BRAYNS_API virtual void setUp( const Vector3f& up );
+    BRAYNS_API virtual void setUp(const Vector3f& up);
 
     /**
        Gets camera up vector
        @return the x, y, z coordinates of the up vector's end point
     */
-    BRAYNS_API virtual const Vector3f& getUp( ) const;
+    BRAYNS_API virtual const Vector3f& getUp() const;
 
     /**
        Gets the camera rotation matrix
        @return the rotation matrix from the original *target* and *up* vectors
     */
-    BRAYNS_API virtual Matrix4f& getRotationMatrix( );
+    BRAYNS_API virtual Matrix4f& getRotationMatrix();
 
     /**
        Commits the changes held by the camera object so that
        attributes become available to the underlying rendering engine
     */
-    BRAYNS_API virtual void commit( ) =  0;
+    BRAYNS_API virtual void commit() = 0;
 
     /**
-       The field of view is the extent of the observable world that is seen at any given moment.
-       In case of optical instruments or sensors it is a solid angle through which a detector is
+       The field of view is the extent of the observable world that is seen at
+       any given moment.
+       In case of optical instruments or sensors it is a solid angle through
+       which a detector is
        sensitive to electromagnetic radiation.
     */
     /** @return the field of view of the camera */
-    BRAYNS_API float getFieldOfView( ) const;
+    BRAYNS_API float getFieldOfView() const;
 
     /**
        Set the field of view of the camera
        @param fov The field of view
     */
-    BRAYNS_API void setFieldOfView( const float fov );
+    BRAYNS_API void setFieldOfView(const float fov);
 
     /**
        Set the aspect ratio of the camera
        @param aspectRatio The new aspect ratio
     */
-    BRAYNS_API void setAspectRatio( float aspectRatio );
+    BRAYNS_API void setAspectRatio(float aspectRatio);
 
     /** @return the aspect ration of the camera */
-    BRAYNS_API float getAspectRatio( ) const;
+    BRAYNS_API float getAspectRatio() const;
 
     /**
        @copydoc Camera::getAperture
        @param aperture The new aperture
     */
-    BRAYNS_API void setAperture( float aperture );
+    BRAYNS_API void setAperture(float aperture);
 
     /**
        The aperture determines how collimated the admitted rays are, which is of
@@ -157,13 +155,13 @@ public:
        are admitted, resulting in a sharp focus only for rays with a certain
        focal length.
     */
-    BRAYNS_API float getAperture( ) const;
+    BRAYNS_API float getAperture() const;
 
     /**
        @copydoc Camera::getFocalLength
        @param focalLength The new focal length
     */
-    BRAYNS_API void setFocalLength( float focalLength );
+    BRAYNS_API void setFocalLength(float focalLength);
 
     /**
       The focal length of an optical system is a measure of how strongly the
@@ -173,37 +171,38 @@ public:
       with a long focal length; that is, it bends the rays more sharply,
       bringing them to a focus in a shorter distance.
     */
-    BRAYNS_API float getFocalLength( ) const;
+    BRAYNS_API float getFocalLength() const;
 
     /**
-       @brief Sets the stereo mode of the camera (Left eye, Right eye or Side by Side)
+       @brief Sets the stereo mode of the camera (Left eye, Right eye or Side by
+       Side)
        @param stereoMode The new stereo mode
     */
-    BRAYNS_API void setStereoMode( CameraStereoMode stereoMode );
+    BRAYNS_API void setStereoMode(CameraStereoMode stereoMode);
 
     /**
       @return the stereo mode of the Camera
     */
-    BRAYNS_API CameraStereoMode getStereoMode( ) const;
+    BRAYNS_API CameraStereoMode getStereoMode() const;
 
     /**
        @brief Sets the eye separation of the stereo camera
        @param eyeSeparation The new distance bewteen eyes
     */
-    BRAYNS_API void setEyeSeparation( float eyeSeparation );
+    BRAYNS_API void setEyeSeparation(float eyeSeparation);
 
     /**
       @return the eye separation of the stereo Camera
     */
-    BRAYNS_API float getEyeSeparation( ) const;
+    BRAYNS_API float getEyeSeparation() const;
 
     /** Resets the camera to its initial values */
-    BRAYNS_API void reset( );
+    BRAYNS_API void reset();
 
     /**
        @return the serializable of the Camera
     */
-    BRAYNS_API servus::Serializable* getSerializable( );
+    BRAYNS_API servus::Serializable* getSerializable();
 
     /**
        @return true if any modification happend after the last resetModified()
@@ -214,12 +213,12 @@ public:
     BRAYNS_API void resetModified();
 
     /** Enable/disables environment mapping */
-    BRAYNS_API virtual void setEnvironmentMap( const bool environmentMap ) = 0;
+    BRAYNS_API virtual void setEnvironmentMap(const bool environmentMap) = 0;
 
     /**
       Sets the camera clip planes
     */
-    BRAYNS_API void setClipPlanes( const ClipPlanes clipPlanes );
+    BRAYNS_API void setClipPlanes(const ClipPlanes clipPlanes);
 
     /**
       @return the camera clip planes
@@ -228,11 +227,10 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
 
-std::ostream& operator << ( std::ostream& os, Camera& camera );
-
+std::ostream& operator<<(std::ostream& os, Camera& camera);
 }
 
 #endif

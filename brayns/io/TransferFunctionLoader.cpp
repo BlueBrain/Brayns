@@ -28,23 +28,22 @@
 
 namespace
 {
-    const float DEFAULT_ALPHA = 1.f;
+const float DEFAULT_ALPHA = 1.f;
 }
 
 namespace brayns
 {
-
 TransferFunctionLoader::TransferFunctionLoader()
 {
 }
 
-bool TransferFunctionLoader::loadFromFile(
-    const std::string& filename,
-    Scene& scene )
+bool TransferFunctionLoader::loadFromFile(const std::string& filename,
+                                          Scene& scene)
 {
-    BRAYNS_INFO << "Loading transfer function color map from " << filename << std::endl;
-    std::ifstream file( filename, std::ios::in );
-    if( !file.good( ))
+    BRAYNS_INFO << "Loading transfer function color map from " << filename
+                << std::endl;
+    std::ifstream file(filename, std::ios::in);
+    if (!file.good())
     {
         BRAYNS_ERROR << "Could not open file " << filename << std::endl;
         return false;
@@ -58,35 +57,29 @@ bool TransferFunctionLoader::loadFromFile(
 
     size_t nbEntries = 0;
 
-    while( validParsing && std::getline( file, line ))
+    while (validParsing && std::getline(file, line))
     {
-        std::vector< uint > lineData;
+        std::vector<uint> lineData;
         std::stringstream lineStream(line);
 
         size_t value;
-        while( lineStream >> value )
+        while (lineStream >> value)
             lineData.push_back(value);
 
-        switch( lineData.size() )
+        switch (lineData.size())
         {
         case 3:
         {
-            Vector4f diffuse(
-                lineData[0] / 255.f,
-                lineData[1] / 255.f,
-                lineData[2] / 255.f,
-                DEFAULT_ALPHA );
-            transferFunction.getDiffuseColors().push_back( diffuse );
+            Vector4f diffuse(lineData[0] / 255.f, lineData[1] / 255.f,
+                             lineData[2] / 255.f, DEFAULT_ALPHA);
+            transferFunction.getDiffuseColors().push_back(diffuse);
             break;
         }
         case 4:
         {
-            Vector4f diffuse(
-                lineData[0] / 255.f,
-                lineData[1] / 255.f,
-                lineData[2] / 255.f,
-                lineData[3] / 255.f );
-            transferFunction.getDiffuseColors().push_back( diffuse );
+            Vector4f diffuse(lineData[0] / 255.f, lineData[1] / 255.f,
+                             lineData[2] / 255.f, lineData[3] / 255.f);
+            transferFunction.getDiffuseColors().push_back(diffuse);
             break;
         }
         default:
@@ -97,11 +90,10 @@ bool TransferFunctionLoader::loadFromFile(
         ++nbEntries;
     }
 
-    _range = Vector2f( 0.f, nbEntries );
-    transferFunction.setValuesRange( _range );
+    _range = Vector2f(0.f, nbEntries);
+    transferFunction.setValuesRange(_range);
     BRAYNS_INFO << "Transfer function values range: " << _range << std::endl;
     file.close();
     return validParsing;
 }
-
 }

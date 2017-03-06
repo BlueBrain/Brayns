@@ -29,19 +29,14 @@
 
 namespace brayns
 {
-
 /**
  * OptiX implementation of the ray-tracing engine.
  */
 class OptiXEngine : public Engine
 {
-
 public:
-
-    OptiXEngine(
-        int argc,
-        const char **argv,
-        ParametersManager& parametersManager );
+    OptiXEngine(int argc, const char** argv,
+                ParametersManager& parametersManager);
 
     ~OptiXEngine();
 
@@ -61,17 +56,13 @@ public:
     void postRender() final;
 
     uint64_t getTotalMemory() { return _totalMemory; }
-
 private:
-
     void _initializeContext();
 
     optix::Context _context;
     uint64_t _totalMemory;
     std::string _workingDirectory;
-
 };
-
 }
 
 #endif // OPTIXENGINE_H

@@ -30,53 +30,53 @@
 
 namespace brayns
 {
-
-LivreCamera::LivreCamera( const CameraType cameraType, livre::Engine& livre )
-   : Camera( cameraType )
-   , _livre( livre )
+LivreCamera::LivreCamera(const CameraType cameraType, livre::Engine& livre)
+    : Camera(cameraType)
+    , _livre(livre)
 {
 }
 
 void LivreCamera::commit()
 {
-    const Matrix4f braynsModelView( getPosition(), getTarget(), getUp( ));
+    const Matrix4f braynsModelView(getPosition(), getTarget(), getUp());
 
-    Vector4f translation = braynsModelView.getColumn( 3 );
+    Vector4f translation = braynsModelView.getColumn(3);
     Matrix4f rotation;
-    rotation.setSubMatrix< 3, 3 >( braynsModelView.getSubMatrix< 3, 3 >( 0, 0 ), 0, 0 );
+    rotation.setSubMatrix<3, 3>(braynsModelView.getSubMatrix<3, 3>(0, 0), 0, 0);
 
     const auto& volumeInformation = _livre.getVolumeInformation();
     translation = -rotation.inverse() * translation;
     translation *= volumeInformation.meterToDataUnitRatio;
     translation[3] = 1.0f;
 
-    translation = -rotation * volumeInformation.dataToLivreTransform * translation;
+    translation =
+        -rotation * volumeInformation.dataToLivreTransform * translation;
     translation[3] = 1.0f;
 
     Matrix4f livreModelView;
-    livreModelView.setSubMatrix< 3, 3 >( rotation.getSubMatrix< 3, 3 >( 0, 0 ), 0, 0 );
-    livreModelView.setColumn( 3, translation );
+    livreModelView.setSubMatrix<3, 3>(rotation.getSubMatrix<3, 3>(0, 0), 0, 0);
+    livreModelView.setColumn(3, translation);
 
-    _livre.getFrameData().getCameraSettings().setModelViewMatrix( livreModelView );
+    _livre.getFrameData().getCameraSettings().setModelViewMatrix(
+        livreModelView);
 
-    std::vector< ::lexis::render::detail::Plane > planes;
-    for( const auto& clipPlane: getClipPlanes( ))
+    std::vector<::lexis::render::detail::Plane> planes;
+    for (const auto& clipPlane : getClipPlanes())
     {
         ::lexis::render::detail::Plane plane;
-        float normal[3] = { clipPlane.x(), clipPlane.y(), clipPlane.z() };
-        plane.setNormal( normal );
-        plane.setD( clipPlane.w( ));
-        planes.push_back( plane );
+        float normal[3] = {clipPlane.x(), clipPlane.y(), clipPlane.z()};
+        plane.setNormal(normal);
+        plane.setD(clipPlane.w());
+        planes.push_back(plane);
     }
     ::livre::ClipPlanes clipPlanes;
-    clipPlanes.setPlanes( planes );
-    _livre.getFrameData().getRenderSettings().setClipPlanes( clipPlanes );
+    clipPlanes.setPlanes(planes);
+    _livre.getFrameData().getRenderSettings().setClipPlanes(clipPlanes);
 }
 
-void LivreCamera::setEnvironmentMap( const bool /*environmentMap*/ )
+void LivreCamera::setEnvironmentMap(const bool /*environmentMap*/)
 {
     BRAYNS_WARN << "Environment map is not supported by Livre engine"
                 << std::endl;
 }
-
 }

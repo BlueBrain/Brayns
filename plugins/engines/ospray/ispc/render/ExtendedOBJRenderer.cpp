@@ -25,38 +25,31 @@
 // ispc exports
 #include "ExtendedOBJRenderer_ispc.h"
 
-#define OSP_REGISTER_EXRENDERER( InternalClassName, external_name )\
-extern "C" ospray::Renderer *ospray_create_renderer__##external_name( )\
-{\
-    return new InternalClassName;\
-}
+#define OSP_REGISTER_EXRENDERER(InternalClassName, external_name)          \
+    extern "C" ospray::Renderer* ospray_create_renderer__##external_name() \
+    {                                                                      \
+        return new InternalClassName;                                      \
+    }
 
 namespace brayns
 {
-
 void ExtendedOBJRenderer::commit()
 {
     AbstractRenderer::commit();
-    ispc::ExtendedOBJRenderer_set(
-                getIE( ),
-                ( ispc::vec3f& )_bgColor,
-                _shadowsEnabled,
-                _softShadowsEnabled,
-                _ambientOcclusionStrength,
-                _shadingEnabled,
-                _randomNumber,
-                _timestamp,
-                _spp,
-                _electronShadingEnabled,
-                _lightPtr, _lightArray.size(),
-                _materialPtr, _materialArray.size( ));
+    ispc::ExtendedOBJRenderer_set(getIE(), (ispc::vec3f&)_bgColor,
+                                  _shadowsEnabled, _softShadowsEnabled,
+                                  _ambientOcclusionStrength, _shadingEnabled,
+                                  _randomNumber, _timestamp, _spp,
+                                  _electronShadingEnabled, _lightPtr,
+                                  _lightArray.size(), _materialPtr,
+                                  _materialArray.size());
 }
 
-ExtendedOBJRenderer::ExtendedOBJRenderer( )
+ExtendedOBJRenderer::ExtendedOBJRenderer()
 {
-    ispcEquivalent = ispc::ExtendedOBJRenderer_create( this );
+    ispcEquivalent = ispc::ExtendedOBJRenderer_create(this);
 }
 
-OSP_REGISTER_EXRENDERER( ExtendedOBJRenderer, EXOBJ );
-OSP_REGISTER_EXRENDERER( ExtendedOBJRenderer, exobj );
+OSP_REGISTER_EXRENDERER(ExtendedOBJRenderer, EXOBJ);
+OSP_REGISTER_EXRENDERER(ExtendedOBJRenderer, exobj);
 } // ::brayns

@@ -26,7 +26,6 @@
 
 namespace brayns
 {
-
 /**
    Defines the abstract representation of a extension plug-in. What we mean by
    extension is a set a functionalities that are not provided by the core of
@@ -35,22 +34,18 @@ namespace brayns
  */
 class ExtensionPlugin
 {
-
 public:
-
     virtual ~ExtensionPlugin() {}
-
     /**
      * Executes the core functionnalities of the plugin
      * @return true if other plugins are allowed to continue execution or false
      *         if control shall be returned to Brayns main loop for e.g.
      *         rendering a new frame.
      */
-    BRAYNS_API virtual bool run( Engine& _engine ) = 0;
+    BRAYNS_API virtual bool run(Engine& _engine) = 0;
 
 protected:
     ExtensionPlugin();
 };
-
 }
 #endif // EXTENSIONPLUGIN_H

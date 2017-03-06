@@ -26,7 +26,6 @@
 
 namespace brayns
 {
-
 /**
  * @brief The CADiffusionSimulationHandler class handles simulation frames for
  *        Calcium diffusion. Frames are stored in ASCII files containing
@@ -36,15 +35,13 @@ namespace brayns
  */
 class CADiffusionSimulationHandler
 {
-
 public:
-
     /**
      * @brief Default contructor
      * @param simulationFolder Folder containing files with the CA atom
      *        positions. Files must have a .dat extension.
      */
-    CADiffusionSimulationHandler( const std::string& simulationFolder );
+    CADiffusionSimulationHandler(const std::string& simulationFolder);
 
     /**
      * @brief setFrame Sets the frame to load
@@ -53,23 +50,19 @@ public:
      *              positions are updated with the new values
      * @param frame Frame to load
      */
-    void setFrame( Scene& scene, const size_t frame );
+    void setFrame(Scene& scene, const size_t frame);
 
     /**
      * @return Returns the number of frames for the current simulation
      */
     uint64_t getNbFrames() const { return _simulationFiles.size(); }
-
 private:
+    bool _loadCalciumPositions(const size_t frame);
 
-    bool _loadCalciumPositions( const size_t frame );
-
-    std::map< size_t, std::string> _simulationFiles;
+    std::map<size_t, std::string> _simulationFiles;
     Vector3fs _calciumPositions;
     size_t _currentFrame;
     bool _spheresCreated;
-
 };
-
 }
 #endif // CADIFFUSIONSIMULATIONHANDLER_H

@@ -25,9 +25,8 @@
 
 namespace brayns
 {
-
-const Vector3f DEFAULT_SUN_DIRECTION = { 0.1f, -0.2f, -0.5f };
-const Vector3f DEFAULT_SUN_COLOR = { 1.f, 1.f, 1.f };
+const Vector3f DEFAULT_SUN_DIRECTION = {0.1f, -0.2f, -0.5f};
+const Vector3f DEFAULT_SUN_COLOR = {1.f, 1.f, 1.f};
 const float DEFAULT_SUN_INTENSITY = 0.5f;
 const float DEFAULT_SUN_CUTOFF = 1000.f;
 
@@ -47,23 +46,18 @@ public:
         @param color Light source RGB color
         @param intensity Amount of light emitted
      */
-    BRAYNS_API DirectionalLight(
-        const Vector3f& direction,
-        const Vector3f& color,
-        float intensity );
+    BRAYNS_API DirectionalLight(const Vector3f& direction,
+                                const Vector3f& color, float intensity);
 
     BRAYNS_API ~DirectionalLight() {}
-
     /** Light source direction */
-    BRAYNS_API void setDirection( const Vector3f direction )
+    BRAYNS_API void setDirection(const Vector3f direction)
     {
         _direction = direction;
     }
-    BRAYNS_API const Vector3f& getDirection( ) const { return _direction; }
-
+    BRAYNS_API const Vector3f& getDirection() const { return _direction; }
 private:
     Vector3f _direction;
 };
-
 }
 #endif // DIRECTIONALLIGHT_H

@@ -28,7 +28,6 @@ namespace po = boost::program_options;
 
 namespace brayns
 {
-
 /**
    Base class defining command line parameters
  */
@@ -39,27 +38,27 @@ public:
        Constructor
        @param name Display name for the set of parameters
      */
-    AbstractParameters( const std::string& name ) : _name(name) {};
+    AbstractParameters(const std::string& name)
+        : _name(name){};
 
-    virtual ~AbstractParameters( ) {}
-
+    virtual ~AbstractParameters() {}
     /**
        Parses parameters managed by the class
        @param argc number of command line parameters
        @param argv actual command line parameters
        @return a map of the variables identified by the parsing
      */
-    bool parse( int argc, const char **argv );
+    bool parse(int argc, const char** argv);
 
     /**
        Displays the usage of registered parameters
      */
-    void usage( );
+    void usage();
 
     /**
        Displays values of registered parameters
      */
-    virtual void print( );
+    virtual void print();
 
     /**
        Sets a parameter. If the parameter is not registered, Action is ignored
@@ -67,18 +66,16 @@ public:
        @param key Name of the parameter
        @param value Value of the parameter
      */
-    void set( const std::string& key, const std::string& value );
+    void set(const std::string& key, const std::string& value);
 
     const strings& arguments() const;
 
 protected:
-
-    virtual bool _parse( const po::variables_map& ) = 0;
+    virtual bool _parse(const po::variables_map&) = 0;
 
     std::string _name;
     po::options_description _parameters;
     strings _arguments;
 };
-
 }
 #endif // ABSTRACTPARAMETERS_H

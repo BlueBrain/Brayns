@@ -29,40 +29,35 @@
 
 namespace brayns
 {
-
 /** Manages application parameters
  */
 class ApplicationParameters : public AbstractParameters
 {
 public:
-    ApplicationParameters( );
+    ApplicationParameters();
 
     /** @copydoc AbstractParameters::print */
-    void print( ) final;
+    void print() final;
 
     /** window size */
     const Vector2ui& getWindowSize() const { return _windowSize; }
-    void setWindowSize( const Vector2ui& size ) { _windowSize = size; }
-
+    void setWindowSize(const Vector2ui& size) { _windowSize = size; }
     /** camera name (e.g. Perspective, Stereo, etc. ) */
     std::string getCamera() const { return _camera; }
-
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
-
     /** JPEG compression quality */
-    void setJpegCompression( const size_t compression )
-        { _jpegCompression = compression; }
+    void setJpegCompression(const size_t compression)
+    {
+        _jpegCompression = compression;
+    }
     size_t getJpegCompression() const { return _jpegCompression; }
-
     /** JPEG size */
     const Vector2ui& getJpegSize() const { return _jpegSize; }
-    void setJpegSize( const Vector2ui& size ) { _jpegSize = size; }
-
+    void setJpegSize(const Vector2ui& size) { _jpegSize = size; }
     const strings& getFilters() const { return _filters; }
-
 protected:
-    bool _parse( const po::variables_map& vm ) final;
+    bool _parse(const po::variables_map& vm) final;
 
     std::string _camera;
     Vector2ui _windowSize;
@@ -71,7 +66,6 @@ protected:
     Vector2ui _jpegSize;
     strings _filters;
 };
-
 }
 
 #endif // APPLICATIONPARAMETERS_H

@@ -22,276 +22,271 @@
 #include "Camera.h"
 #include <brayns/common/log.h>
 #ifdef BRAYNS_USE_ZEROBUF
-#  include <zerobuf/render/camera.h>
+#include <zerobuf/render/camera.h>
 #endif
 
 namespace brayns
 {
-
 struct Camera::Impl
 #ifdef BRAYNS_USE_ZEROBUF
     : public brayns::v1::Camera
 #endif
 {
 public:
-    Impl( const CameraType cameraType )
-        : _type( cameraType )
-        , _position( 0.f, 0.f, 0.f )
-        , _target( 0.f, 0.f, 0.f )
-        , _up( 0.f, 0.f, 0.f )
-        , _aspectRatio( 1.f )
-        , _aperture( 0.f )
-        , _focalLength( 0.f )
-        , _fieldOfView( 45.f )
-        , _stereoMode( CameraStereoMode::none )
-        , _eyeSeparation( 0.0635f )
+    Impl(const CameraType cameraType)
+        : _type(cameraType)
+        , _position(0.f, 0.f, 0.f)
+        , _target(0.f, 0.f, 0.f)
+        , _up(0.f, 0.f, 0.f)
+        , _aspectRatio(1.f)
+        , _aperture(0.f)
+        , _focalLength(0.f)
+        , _fieldOfView(45.f)
+        , _stereoMode(CameraStereoMode::none)
+        , _eyeSeparation(0.0635f)
     {
-        if( _type == CameraType::stereo )
-            setStereoMode( CameraStereoMode::side_by_side );
+        if (_type == CameraType::stereo)
+            setStereoMode(CameraStereoMode::side_by_side);
 
         // Initial clip planes
-        const float inf = std::numeric_limits< float >::max();
-        _clipPlanes.push_back( Vector4f(-1.f, 0.f, 0.f, inf ));
-        _clipPlanes.push_back( Vector4f( 1.f, 0.f, 0.f, inf ));
-        _clipPlanes.push_back( Vector4f( 0.f,-1.f, 0.f, inf ));
-        _clipPlanes.push_back( Vector4f( 0.f, 1.f, 0.f, inf ));
-        _clipPlanes.push_back( Vector4f( 0.f, 0.f,-1.f, inf ));
-        _clipPlanes.push_back( Vector4f( 0.f, 0.f, 1.f, inf ));
+        const float inf = std::numeric_limits<float>::max();
+        _clipPlanes.push_back(Vector4f(-1.f, 0.f, 0.f, inf));
+        _clipPlanes.push_back(Vector4f(1.f, 0.f, 0.f, inf));
+        _clipPlanes.push_back(Vector4f(0.f, -1.f, 0.f, inf));
+        _clipPlanes.push_back(Vector4f(0.f, 1.f, 0.f, inf));
+        _clipPlanes.push_back(Vector4f(0.f, 0.f, -1.f, inf));
+        _clipPlanes.push_back(Vector4f(0.f, 0.f, 1.f, inf));
     }
 
-    void set(
-        const Vector3f& position,
-        const Vector3f& target,
-        const Vector3f& up )
+    void set(const Vector3f& position, const Vector3f& target,
+             const Vector3f& up)
     {
-        setPosition( position );
-        setTarget( target );
-        setUp( up );
+        setPosition(position);
+        setTarget(target);
+        setUp(up);
     }
 
-    void setInitialState(
-        const Vector3f& position,
-        const Vector3f& target,
-        const Vector3f& up )
+    void setInitialState(const Vector3f& position, const Vector3f& target,
+                         const Vector3f& up)
     {
         _initialPosition = position;
         _initialTarget = target;
         _initialUp = up;
-        set( position, target, up );
+        set(position, target, up);
     }
 
     void reset()
     {
-        set( _initialPosition, _initialTarget, _initialUp );
+        set(_initialPosition, _initialTarget, _initialUp);
         _matrix = Matrix4f();
     }
 
     const Vector3f& getPosition() const
     {
-    #ifdef BRAYNS_USE_ZEROBUF
+#ifdef BRAYNS_USE_ZEROBUF
         const auto& origin = brayns::v1::Camera::getOrigin();
-        _position = Vector3f( origin[0], origin[1], origin[2] );
-    #endif
+        _position = Vector3f(origin[0], origin[1], origin[2]);
+#endif
         return _position;
     }
 
-    void setPosition( const Vector3f& position )
+    void setPosition(const Vector3f& position)
     {
-        if( _position.equals( position ))
+        if (_position.equals(position))
             return;
-    #ifdef BRAYNS_USE_ZEROBUF
-        const floats& origin = { position.x(), position.y(), position.z() };
-        brayns::v1::Camera::setOrigin( origin );
-    #endif
+#ifdef BRAYNS_USE_ZEROBUF
+        const floats& origin = {position.x(), position.y(), position.z()};
+        brayns::v1::Camera::setOrigin(origin);
+#endif
         _position = position;
         modified = true;
     }
 
     const Vector3f& getTarget() const
     {
-    #ifdef BRAYNS_USE_ZEROBUF
+#ifdef BRAYNS_USE_ZEROBUF
         const auto& lookat = brayns::v1::Camera::getLookAt();
-        _target = Vector3f( lookat[0], lookat[1], lookat[2] );
-    #endif
+        _target = Vector3f(lookat[0], lookat[1], lookat[2]);
+#endif
         return _target;
     }
 
-    void setTarget( const Vector3f& target )
+    void setTarget(const Vector3f& target)
     {
-        if( _target.equals( target ))
+        if (_target.equals(target))
             return;
-    #ifdef BRAYNS_USE_ZEROBUF
-        const floats& lookat = { target.x(), target.y(), target.z() };
-        brayns::v1::Camera::setLookAt( lookat );
-    #endif
+#ifdef BRAYNS_USE_ZEROBUF
+        const floats& lookat = {target.x(), target.y(), target.z()};
+        brayns::v1::Camera::setLookAt(lookat);
+#endif
         _target = target;
         modified = true;
     }
 
-    const Vector3f& getUp( ) const
+    const Vector3f& getUp() const
     {
-    #ifdef BRAYNS_USE_ZEROBUF
+#ifdef BRAYNS_USE_ZEROBUF
         const auto& up = brayns::v1::Camera::getUp();
-        _up = Vector3f( up[0], up[1], up[2] );
-    #endif
+        _up = Vector3f(up[0], up[1], up[2]);
+#endif
         return _up;
     }
 
-    void setUp( const Vector3f& upVector )
+    void setUp(const Vector3f& upVector)
     {
-        if( _up.equals( upVector ))
+        if (_up.equals(upVector))
             return;
-    #ifdef BRAYNS_USE_ZEROBUF
-        const floats& up = { upVector.x(), upVector.y(), upVector.z() };
-        brayns::v1::Camera::setUp( up );
-    #endif
+#ifdef BRAYNS_USE_ZEROBUF
+        const floats& up = {upVector.x(), upVector.y(), upVector.z()};
+        brayns::v1::Camera::setUp(up);
+#endif
         _up = upVector;
         modified = true;
     }
 
-    CameraType getType( ) const
+    CameraType getType() const { return _type; }
+    void setFieldOfView(const float fieldOfView)
     {
-        return _type;
-    }
-
-    void setFieldOfView( const float fieldOfView )
-    {
-        if( _fieldOfView == fieldOfView )
+        if (_fieldOfView == fieldOfView)
             return;
-    #ifdef BRAYNS_USE_ZEROBUF
-        brayns::v1::Camera::setFieldOfView( fieldOfView );
-    #endif
+#ifdef BRAYNS_USE_ZEROBUF
+        brayns::v1::Camera::setFieldOfView(fieldOfView);
+#endif
         _fieldOfView = fieldOfView;
         modified = true;
     }
 
-    float getFieldOfView( ) const
+    float getFieldOfView() const
     {
-    #ifdef BRAYNS_USE_ZEROBUF
+#ifdef BRAYNS_USE_ZEROBUF
         _fieldOfView = brayns::v1::Camera::getFieldOfView();
-    #endif
+#endif
         return _fieldOfView;
     }
 
-    void setAspectRatio( const float aspectRatio )
+    void setAspectRatio(const float aspectRatio)
     {
-        if( _aspectRatio == aspectRatio )
+        if (_aspectRatio == aspectRatio)
             return;
         _aspectRatio = aspectRatio;
         modified = true;
     }
 
-    float getAspectRatio( ) const
+    float getAspectRatio() const { return _aspectRatio; }
+    void setAperture(const float aperture)
     {
-        return _aspectRatio;
-    }
-
-    void setAperture( const float aperture )
-    {
-        if( _aperture == aperture )
+        if (_aperture == aperture)
             return;
-    #ifdef BRAYNS_USE_ZEROBUF
-        brayns::v1::Camera::setAperture( aperture );
-    #endif
+#ifdef BRAYNS_USE_ZEROBUF
+        brayns::v1::Camera::setAperture(aperture);
+#endif
         _aperture = aperture;
         modified = true;
     }
 
-    float getAperture( ) const
+    float getAperture() const
     {
-    #ifdef BRAYNS_USE_ZEROBUF
-        _aperture = brayns::v1::Camera::getAperture( );
-    #endif
+#ifdef BRAYNS_USE_ZEROBUF
+        _aperture = brayns::v1::Camera::getAperture();
+#endif
         return _aperture;
     }
 
-    void setFocalLength( const float focalLength )
+    void setFocalLength(const float focalLength)
     {
-        if( _focalLength == focalLength )
+        if (_focalLength == focalLength)
             return;
-    #ifdef BRAYNS_USE_ZEROBUF
-        brayns::v1::Camera::setFocalLength( focalLength );
-    #endif
+#ifdef BRAYNS_USE_ZEROBUF
+        brayns::v1::Camera::setFocalLength(focalLength);
+#endif
         _focalLength = focalLength;
         modified = true;
     }
 
-    float getFocalLength( ) const
+    float getFocalLength() const
     {
-    #ifdef BRAYNS_USE_ZEROBUF
+#ifdef BRAYNS_USE_ZEROBUF
         _focalLength = brayns::v1::Camera::getFocalLength();
-    #endif
+#endif
         return _focalLength;
     }
 
-    void setStereoMode( const CameraStereoMode stereoMode )
+    void setStereoMode(const CameraStereoMode stereoMode)
     {
-        if( _stereoMode == stereoMode )
+        if (_stereoMode == stereoMode)
             return;
-    #ifdef BRAYNS_USE_ZEROBUF
-        switch( stereoMode )
+#ifdef BRAYNS_USE_ZEROBUF
+        switch (stereoMode)
         {
         case CameraStereoMode::left:
-            brayns::v1::Camera::setStereoMode( brayns::v1::CameraStereoMode::left ); break;
+            brayns::v1::Camera::setStereoMode(
+                brayns::v1::CameraStereoMode::left);
+            break;
         case CameraStereoMode::right:
-            brayns::v1::Camera::setStereoMode( brayns::v1::CameraStereoMode::right ); break;
+            brayns::v1::Camera::setStereoMode(
+                brayns::v1::CameraStereoMode::right);
+            break;
         case CameraStereoMode::side_by_side:
-            brayns::v1::Camera::setStereoMode( brayns::v1::CameraStereoMode::side_by_side ); break;
+            brayns::v1::Camera::setStereoMode(
+                brayns::v1::CameraStereoMode::side_by_side);
+            break;
         default:
-            brayns::v1::Camera::setStereoMode( brayns::v1::CameraStereoMode::none ); break;
+            brayns::v1::Camera::setStereoMode(
+                brayns::v1::CameraStereoMode::none);
+            break;
         }
-    #endif
+#endif
         _stereoMode = stereoMode;
         modified = true;
     }
 
-    CameraStereoMode getStereoMode( ) const
+    CameraStereoMode getStereoMode() const
     {
-    #ifdef BRAYNS_USE_ZEROBUF
-        switch( brayns::v1::Camera::getStereoMode() )
+#ifdef BRAYNS_USE_ZEROBUF
+        switch (brayns::v1::Camera::getStereoMode())
         {
         case brayns::v1::CameraStereoMode::left:
-            _stereoMode = CameraStereoMode::left; break;
+            _stereoMode = CameraStereoMode::left;
+            break;
         case brayns::v1::CameraStereoMode::right:
-            _stereoMode = CameraStereoMode::right; break;
+            _stereoMode = CameraStereoMode::right;
+            break;
         case brayns::v1::CameraStereoMode::side_by_side:
-            _stereoMode = CameraStereoMode::side_by_side; break;
+            _stereoMode = CameraStereoMode::side_by_side;
+            break;
         default:
-            _stereoMode = CameraStereoMode::none; break;
+            _stereoMode = CameraStereoMode::none;
+            break;
         }
-    #endif
+#endif
         return _stereoMode;
     }
 
-    void setEyeSeparation( const float eyeSeparation )
+    void setEyeSeparation(const float eyeSeparation)
     {
-        if( _eyeSeparation == eyeSeparation )
+        if (_eyeSeparation == eyeSeparation)
             return;
-    #ifdef BRAYNS_USE_ZEROBUF
-        brayns::v1::Camera::setEyeSeparation( eyeSeparation );
-    #endif
+#ifdef BRAYNS_USE_ZEROBUF
+        brayns::v1::Camera::setEyeSeparation(eyeSeparation);
+#endif
         _eyeSeparation = eyeSeparation;
         modified = true;
     }
 
-    float getEyeSeparation( ) const
+    float getEyeSeparation() const
     {
-    #ifdef BRAYNS_USE_ZEROBUF
+#ifdef BRAYNS_USE_ZEROBUF
         _eyeSeparation = brayns::v1::Camera::getEyeSeparation();
-    #endif
+#endif
         return _eyeSeparation;
     }
 
-    void setClipPlanes( const ClipPlanes clipPlanes )
+    void setClipPlanes(const ClipPlanes clipPlanes)
     {
         _clipPlanes = clipPlanes;
     }
 
-    ClipPlanes& getClipPlanes()
-    {
-        return _clipPlanes;
-    }
-
+    ClipPlanes& getClipPlanes() { return _clipPlanes; }
     bool modified = false;
 
     /*! rotation matrice along x and y axis */
@@ -318,8 +313,8 @@ private:
     ClipPlanes _clipPlanes;
 };
 
-Camera::Camera( const CameraType cameraType )
-    : _impl( new Camera::Impl( cameraType ))
+Camera::Camera(const CameraType cameraType)
+    : _impl(new Camera::Impl(cameraType))
 {
 }
 
@@ -327,35 +322,31 @@ Camera::~Camera()
 {
 }
 
-void Camera::set(
-    const Vector3f& position,
-    const Vector3f& target,
-    const Vector3f& upVector )
+void Camera::set(const Vector3f& position, const Vector3f& target,
+                 const Vector3f& upVector)
 {
-    _impl->set( position, target, upVector );
+    _impl->set(position, target, upVector);
 }
 
-void Camera::setInitialState(
-    const Vector3f& position,
-    const Vector3f& target,
-    const Vector3f& upVector )
+void Camera::setInitialState(const Vector3f& position, const Vector3f& target,
+                             const Vector3f& upVector)
 {
-    _impl->setInitialState( position, target, upVector );
+    _impl->setInitialState(position, target, upVector);
 }
 
-void Camera::reset( )
+void Camera::reset()
 {
-    return _impl->reset( );
+    return _impl->reset();
 }
 
 const Vector3f& Camera::getPosition() const
 {
-    return _impl->getPosition( );
+    return _impl->getPosition();
 }
 
-void Camera::setPosition( const Vector3f& position )
+void Camera::setPosition(const Vector3f& position)
 {
-    _impl->setPosition( position );
+    _impl->setPosition(position);
 }
 
 const Vector3f& Camera::getTarget() const
@@ -363,12 +354,12 @@ const Vector3f& Camera::getTarget() const
     return _impl->getTarget();
 }
 
-void Camera::setTarget( const Vector3f& target )
+void Camera::setTarget(const Vector3f& target)
 {
-    _impl->setTarget( target );
+    _impl->setTarget(target);
 }
 
-const Vector3f& Camera::getUp( ) const
+const Vector3f& Camera::getUp() const
 {
     return _impl->getUp();
 }
@@ -378,77 +369,77 @@ vmml::Matrix4f& Camera::getRotationMatrix()
     return _impl->_matrix;
 }
 
-void Camera::setUp( const Vector3f& upVector )
+void Camera::setUp(const Vector3f& upVector)
 {
-    _impl->setUp( upVector );
+    _impl->setUp(upVector);
 }
 
-CameraType Camera::getType( ) const
+CameraType Camera::getType() const
 {
-    return _impl->getType( );
+    return _impl->getType();
 }
 
-void Camera::setFieldOfView( const float fov )
+void Camera::setFieldOfView(const float fov)
 {
-    _impl->setFieldOfView( fov );
+    _impl->setFieldOfView(fov);
 }
 
-float Camera::getFieldOfView( ) const
+float Camera::getFieldOfView() const
 {
     return _impl->getFieldOfView();
 }
 
-void Camera::setAspectRatio( const float aspectRatio )
+void Camera::setAspectRatio(const float aspectRatio)
 {
-    _impl->setAspectRatio( aspectRatio );
+    _impl->setAspectRatio(aspectRatio);
 }
 
-float Camera::getAspectRatio( ) const
+float Camera::getAspectRatio() const
 {
-    return _impl->getAspectRatio( );
+    return _impl->getAspectRatio();
 }
 
-void Camera::setAperture( const float aperture )
+void Camera::setAperture(const float aperture)
 {
-    _impl->setAperture( aperture );
+    _impl->setAperture(aperture);
 }
 
-float Camera::getAperture( ) const
+float Camera::getAperture() const
 {
-    return _impl->getAperture( );
+    return _impl->getAperture();
 }
 
-void Camera::setFocalLength( const float focalLength )
+void Camera::setFocalLength(const float focalLength)
 {
-    _impl->setFocalLength( focalLength );
+    _impl->setFocalLength(focalLength);
 }
 
-float Camera::getFocalLength( ) const
+float Camera::getFocalLength() const
 {
-    return _impl->getFocalLength( );
+    return _impl->getFocalLength();
 }
 
-void Camera::setStereoMode( const CameraStereoMode stereoMode )
+void Camera::setStereoMode(const CameraStereoMode stereoMode)
 {
-    _impl->setStereoMode( stereoMode );
+    _impl->setStereoMode(stereoMode);
 }
 
-CameraStereoMode Camera::getStereoMode( ) const
+CameraStereoMode Camera::getStereoMode() const
 {
-    return _impl->getStereoMode( );
+    return _impl->getStereoMode();
 }
 
-void Camera::setEyeSeparation( const float eyeSeparation )
+void Camera::setEyeSeparation(const float eyeSeparation)
 {
-    _impl->setEyeSeparation( eyeSeparation );
+    _impl->setEyeSeparation(eyeSeparation);
 }
 
-float Camera::getEyeSeparation( ) const
+float Camera::getEyeSeparation() const
 {
-    return _impl->getEyeSeparation( );
+    return _impl->getEyeSeparation();
 }
 
-servus::Serializable* Camera::getSerializable( )
+servus::Serializable* Camera::getSerializable()
 {
 #ifdef BRAYNS_USE_ZEROBUF
     return _impl.get();
@@ -467,9 +458,9 @@ void Camera::resetModified()
     _impl->modified = false;
 }
 
-void Camera::setClipPlanes( const ClipPlanes clipPlanes )
+void Camera::setClipPlanes(const ClipPlanes clipPlanes)
 {
-    _impl->setClipPlanes( clipPlanes );
+    _impl->setClipPlanes(clipPlanes);
 }
 
 ClipPlanes& Camera::getClipPlanes()
@@ -477,22 +468,14 @@ ClipPlanes& Camera::getClipPlanes()
     return _impl->getClipPlanes();
 }
 
-std::ostream& operator << ( std::ostream& os, Camera& camera )
+std::ostream& operator<<(std::ostream& os, Camera& camera)
 {
     const auto& position = camera.getPosition();
     const auto& target = camera.getTarget();
     const auto& up = camera.getUp();
-    os <<
-        position.x() << "," <<
-        position.y() << "," <<
-        position.z() << "," <<
-        target.x() << "," <<
-        target.y() << "," <<
-        target.z() << "," <<
-        up.x() << "," <<
-        up.y() << "," <<
-        up.z();
+    os << position.x() << "," << position.y() << "," << position.z() << ","
+       << target.x() << "," << target.y() << "," << target.z() << "," << up.x()
+       << "," << up.y() << "," << up.z();
     return os;
 }
-
 }

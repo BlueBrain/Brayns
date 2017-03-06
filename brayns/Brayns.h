@@ -23,12 +23,11 @@
 #define BRAYNS_H
 
 #include <brayns/api.h>
-#include <brayns/common/types.h>
 #include <brayns/common/material/Material.h>
+#include <brayns/common/types.h>
 
 namespace brayns
 {
-
 /**
     Brayns is a minimalistic library that allows optimized ray-tracing rendering
     of meshes and parametric geometry. Brayns provides an abstraction of the
@@ -51,8 +50,7 @@ namespace brayns
 class Brayns
 {
 public:
-
-    BRAYNS_API Brayns(int argc, const char **argv);
+    BRAYNS_API Brayns(int argc, const char** argv);
     BRAYNS_API ~Brayns();
 
     /**
@@ -62,9 +60,8 @@ public:
               camera and according model and projection matrices
        @param renderOutput Color and depth buffers
     */
-    BRAYNS_API void render(
-        const RenderInput& renderInput,
-        RenderOutput& renderOutput);
+    BRAYNS_API void render(const RenderInput& renderInput,
+                           RenderOutput& renderOutput);
 
     /**
        Renders color and depth buffers of the current scene, according to
@@ -99,8 +96,7 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 #endif // BRAYNS

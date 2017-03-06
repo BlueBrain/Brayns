@@ -22,74 +22,69 @@
 
 #include <plugins/extensions/plugins/ExtensionPlugin.h>
 #if BRAYNS_USE_NETWORKING
-#  include <plugins/extensions/plugins/ZeroEQPlugin.h>
+#include <plugins/extensions/plugins/ZeroEQPlugin.h>
 #endif
 #ifdef BRAYNS_USE_DEFLECT
-#  include <plugins/extensions/plugins/DeflectPlugin.h>
+#include <plugins/extensions/plugins/DeflectPlugin.h>
 #endif
 
 namespace brayns
 {
-
 ExtensionPluginFactory::ExtensionPluginFactory(
 #if BRAYNS_USE_NETWORKING || BRAYNS_USE_DEFLECT
     ParametersManager& parametersManager,
-#  ifdef BRAYNS_USE_DEFLECT
-    KeyboardHandler& keyboardHandler,
-    AbstractManipulator& cameraManipulator )
-#  else
-    KeyboardHandler&,
-    AbstractManipulator& )
-#  endif
+#ifdef BRAYNS_USE_DEFLECT
+    KeyboardHandler& keyboardHandler, AbstractManipulator& cameraManipulator)
 #else
-    ParametersManager& , KeyboardHandler&, AbstractManipulator& )
+    KeyboardHandler&, AbstractManipulator&)
+#endif
+#else
+    ParametersManager&, KeyboardHandler&, AbstractManipulator&)
 #endif
 {
 #if BRAYNS_USE_NETWORKING
-    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>( parametersManager );
-    add( zeroeqPlugin );
+    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>(parametersManager);
+    add(zeroeqPlugin);
 #endif
 
 #ifdef BRAYNS_USE_DEFLECT
-#  if BRAYNS_USE_NETWORKING
-    add( std::make_shared<DeflectPlugin>(
-        keyboardHandler, cameraManipulator, *zeroeqPlugin ));
-# else
-    add( std::make_shared<DeflectPlugin>(
-        keyboardHandler, cameraManipulator ));
-# endif
+#if BRAYNS_USE_NETWORKING
+    add(std::make_shared<DeflectPlugin>(keyboardHandler, cameraManipulator,
+                                        *zeroeqPlugin));
+#else
+    add(std::make_shared<DeflectPlugin>(keyboardHandler, cameraManipulator));
+#endif
 #endif
 }
 
 ExtensionPluginFactory::~ExtensionPluginFactory()
 {
-    clear( );
+    clear();
 }
 
-void ExtensionPluginFactory::remove( ExtensionPluginPtr plugin )
+void ExtensionPluginFactory::remove(ExtensionPluginPtr plugin)
 {
     ExtensionPlugins::iterator it =
-        std::find( _plugins.begin( ), _plugins.end( ), plugin );
-    if( it != _plugins.end( ))
-        _plugins.erase( it );
+        std::find(_plugins.begin(), _plugins.end(), plugin);
+    if (it != _plugins.end())
+        _plugins.erase(it);
 }
 
-void ExtensionPluginFactory::add( ExtensionPluginPtr plugin )
+void ExtensionPluginFactory::add(ExtensionPluginPtr plugin)
 {
-    remove( plugin );
-    _plugins.push_back( plugin );
+    remove(plugin);
+    _plugins.push_back(plugin);
 }
 
-void ExtensionPluginFactory::clear( )
+void ExtensionPluginFactory::clear()
 {
     _plugins.clear();
 }
 
-void ExtensionPluginFactory::execute( Engine& engine )
+void ExtensionPluginFactory::execute(Engine& engine)
 {
-    for( ExtensionPluginPtr plugin: _plugins )
-        if( !plugin->run( engine ))
+    for (ExtensionPluginPtr plugin : _plugins)
+        if (!plugin->run(engine))
             break;
 }
-
 }

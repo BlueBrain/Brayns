@@ -28,17 +28,19 @@
 
 namespace brayns
 {
-
 /**
- * @brief The ProteinPosition struct contains the ID of each protein as well as its positions
+ * @brief The ProteinPosition struct contains the ID of each protein as well as
+ * its positions
  *        in the system
  */
-typedef std::map< size_t, std::string > Proteins;
-typedef std::map< size_t, Vector3fs > ProteinPositions;
+typedef std::map<size_t, std::string> Proteins;
+typedef std::map<size_t, Vector3fs> ProteinPositions;
 
 /**
- * @brief The MolecularSystemReader class loads proteins and meshes according to parameters
- *        defined in a Molecular System Configuration file. This configuration is defined by
+ * @brief The MolecularSystemReader class loads proteins and meshes according to
+ * parameters
+ *        defined in a Molecular System Configuration file. This configuration
+ * is defined by
  *        the following entries:
  *        - ProteinFolder: Folder containing pdb files
  *        - MeshFolder: Folder containing obj files
@@ -48,14 +50,12 @@ typedef std::map< size_t, Vector3fs > ProteinPositions;
  */
 class MolecularSystemReader
 {
-
 public:
-
     /**
      * @brief Constructor
      * @param geometryParameters Geometry parameters
      */
-    MolecularSystemReader( const GeometryParameters& geometryParameters );
+    MolecularSystemReader(const GeometryParameters& geometryParameters);
 
     /**
      * @brief Imports proteins and shapes from the Molecular System
@@ -65,15 +65,14 @@ public:
      * @param meshLoader Mesh loader used to load the meshes
      * @return True if the system is successfully loaded, false otherwise
      */
-    bool import( Scene& scene, MeshLoader& meshLoader );
+    bool import(Scene& scene, MeshLoader& meshLoader);
 
 private:
-
-    bool _createScene( Scene& scene, MeshLoader& meshLoader );
+    bool _createScene(Scene& scene, MeshLoader& meshLoader);
     bool _loadConfiguration();
     bool _loadProteins();
     bool _loadPositions();
-    void _writePositionstoFile( const std::string& filename );
+    void _writePositionstoFile(const std::string& filename);
 
     const GeometryParameters& _geometryParameters;
     std::string _proteinFolder;
@@ -84,9 +83,7 @@ private:
     uint64_t _nbProteins;
     Proteins _proteins;
     ProteinPositions _proteinPositions;
-
 };
-
 }
 
 #endif // MOLECULARSYSTEMREADER_H

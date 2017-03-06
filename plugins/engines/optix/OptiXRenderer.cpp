@@ -28,32 +28,27 @@ using std::chrono::milliseconds;
 
 namespace brayns
 {
-
-OptiXRenderer::OptiXRenderer(
-    const std::string& /*name*/,
-    ParametersManager& parametersMamager,
-    optix::Context& context )
-    : Renderer( parametersMamager )
-    , _context( context )
-    , _frame( 0 )
+OptiXRenderer::OptiXRenderer(const std::string& /*name*/,
+                             ParametersManager& parametersMamager,
+                             optix::Context& context)
+    : Renderer(parametersMamager)
+    , _context(context)
+    , _frame(0)
 {
 }
 
-void OptiXRenderer::render( FrameBufferPtr frameBuffer )
+void OptiXRenderer::render(FrameBufferPtr frameBuffer)
 {
     // Provide a random seed to the renderer
-    optix::float4 jitter =
-    {
-        (float)rand() / (float)RAND_MAX,
-        (float)rand() / (float)RAND_MAX,
-        (float)rand() / (float)RAND_MAX,
-        (float)rand() / (float)RAND_MAX
-    };
-    _context["jitter4"]->setFloat( jitter );
+    optix::float4 jitter = {(float)rand() / (float)RAND_MAX,
+                            (float)rand() / (float)RAND_MAX,
+                            (float)rand() / (float)RAND_MAX,
+                            (float)rand() / (float)RAND_MAX};
+    _context["jitter4"]->setFloat(jitter);
 
     // Render
     const Vector2ui& size = frameBuffer->getSize();
-    _context->launch( 0, size.x(), size.y() );
+    _context->launch(0, size.x(), size.y());
 
     ++_frame;
 }
@@ -62,32 +57,33 @@ void OptiXRenderer::commit()
 {
     SceneParameters& sp = _parametersManager.getSceneParameters();
 
-    _context["timestamp"]->setFloat( sp.getTimestamp( ));
+    _context["timestamp"]->setFloat(sp.getTimestamp());
 
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
 
-    _context["max_depth"]->setUint( 10 );
-    _context["radiance_ray_type"]->setUint( 0 );
-    _context["shadow_ray_type"]->setUint( 1 );
-    _context["scene_epsilon"]->setFloat( rp.getEpsilon( ));
+    _context["max_depth"]->setUint(10);
+    _context["radiance_ray_type"]->setUint(0);
+    _context["shadow_ray_type"]->setUint(1);
+    _context["scene_epsilon"]->setFloat(rp.getEpsilon());
 
     ShadingType mt = rp.getShading();
-    _context["shading_enabled"]->setUint( mt == ShadingType::diffuse );
-    _context["electron_shading_enabled"]->setUint( mt == ShadingType::electron );
-    _context["shadows_enabled"]->setUint( rp.getShadows( ));
-    _context["soft_shadows_enabled"]->setUint( rp.getSoftShadows( ));
-    _context["ambient_occlusion_strength"]->setFloat( rp.getAmbientOcclusionStrength( ));
+    _context["shading_enabled"]->setUint(mt == ShadingType::diffuse);
+    _context["electron_shading_enabled"]->setUint(mt == ShadingType::electron);
+    _context["shadows_enabled"]->setUint(rp.getShadows());
+    _context["soft_shadows_enabled"]->setUint(rp.getSoftShadows());
+    _context["ambient_occlusion_strength"]->setFloat(
+        rp.getAmbientOcclusionStrength());
 
     Vector3f color = rp.getBackgroundColor();
-    _context["ambient_light_color"]->setFloat( color.x(), color.y(), color.z( ));
-    _context["bg_color"]->setFloat( color.x(), color.y(), color.z( ));
+    _context["ambient_light_color"]->setFloat(color.x(), color.y(), color.z());
+    _context["bg_color"]->setFloat(color.x(), color.y(), color.z());
     _frame = 0;
 }
 
-void OptiXRenderer::setCamera( CameraPtr camera )
+void OptiXRenderer::setCamera(CameraPtr camera)
 {
-    OptiXCamera* optixCamera = dynamic_cast< OptiXCamera* >( camera.get( ));
-    assert( optixCamera );
-    _context->setRayGenerationProgram( 0, optixCamera->impl( ));
+    OptiXCamera* optixCamera = dynamic_cast<OptiXCamera*>(camera.get());
+    assert(optixCamera);
+    _context->setRayGenerationProgram(0, optixCamera->impl());
 }
 }

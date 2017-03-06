@@ -26,16 +26,13 @@
 
 namespace brayns
 {
-
 class FrameBuffer
 {
 public:
-    BRAYNS_API FrameBuffer(
-        const Vector2ui& frameSize,
-        FrameBufferFormat frameBufferFormat,
-        bool accumulation = true );
+    BRAYNS_API FrameBuffer(const Vector2ui& frameSize,
+                           FrameBufferFormat frameBufferFormat,
+                           bool accumulation = true);
     virtual ~FrameBuffer() {}
-
     virtual void clear() = 0;
     virtual void map() = 0;
     virtual void unmap() = 0;
@@ -47,17 +44,20 @@ public:
     virtual void resize(const Vector2ui& frameSize) = 0;
 
     Vector2ui getSize() const { return _frameSize; }
-
-    void setAccumulation( const bool accumulation ) { _accumulation = accumulation; }
+    void setAccumulation(const bool accumulation)
+    {
+        _accumulation = accumulation;
+    }
     bool getAccumulation() const { return _accumulation; }
-
-    FrameBufferFormat getFrameBufferFormat() const { return _frameBufferFormat; }
+    FrameBufferFormat getFrameBufferFormat() const
+    {
+        return _frameBufferFormat;
+    }
 
 protected:
     Vector2ui _frameSize;
     FrameBufferFormat _frameBufferFormat;
     bool _accumulation;
 };
-
 }
 #endif // FRAMEBUFFER_H

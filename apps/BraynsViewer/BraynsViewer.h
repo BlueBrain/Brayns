@@ -26,21 +26,18 @@
 
 namespace brayns
 {
-
 class DeflectManager;
 
 class BraynsViewer : public BaseWindow
 {
 public:
-
-    BraynsViewer( Brayns& brayns );
+    BraynsViewer(Brayns& brayns);
 
     /** Sets the rendering parameters and renders the current frame
      */
     void display();
 
 private:
-
     void _registerKeyboardShortcuts() final;
 
     void _gradientMaterials();
@@ -50,6 +47,5 @@ private:
     void _defaultTimestamp();
     void _saveSceneToCacheFile();
 };
-
 }
 #endif // BRAYNSVIEWER_H

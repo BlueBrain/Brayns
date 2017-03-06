@@ -20,11 +20,12 @@
 
 namespace ospray
 {
-
-/*! \defgroup clipped_perspective_camera The Perspective Camera ("clipped_perspective")
+/*! \defgroup clipped_perspective_camera The Perspective Camera
+   ("clipped_perspective")
 
     \brief Implements a straightforward perspective (or "pinhole"
-    camera) for perspective rendering, without support for Depth of Field or Motion Blur
+    camera) for perspective rendering, without support for Depth of Field or
+   Motion Blur
 
     A simple perspective camera. This camera type is loaded by passing
     the type string "perspective" to ospNewCamera
@@ -34,7 +35,8 @@ namespace ospray
     vec3f(a) pos;    // camera position
     vec3f(a) dir;    // camera direction
     vec3f(a) up;     // up vector
-    float    fovy;   // field of view (camera opening angle) in frame's y dimension
+    float    fovy;   // field of view (camera opening angle) in frame's y
+   dimension
     float    aspect; // aspect ratio (x/y)
     </pre>
 
@@ -45,17 +47,19 @@ namespace ospray
 //! Implements a clipped perspective camera
 struct OSPRAY_SDK_INTERFACE ClippedPerspectiveCamera : public Camera
 {
-
-    /*! \brief constructor \internal also creates the ispc-side data structure */
+    /*! \brief constructor \internal also creates the ispc-side data structure
+     */
     ClippedPerspectiveCamera();
 
     //! \brief common function to help printf-debugging
     /*! Every derived class should overrride this! */
-    virtual std::string toString() const { return "ospray::ClippedPerspectiveCamera"; }
+    virtual std::string toString() const
+    {
+        return "ospray::ClippedPerspectiveCamera";
+    }
     virtual void commit();
 
 public:
-
     // ------------------------------------------------------------------
     // the parameters we 'parsed' from our parameters
     // ------------------------------------------------------------------
@@ -63,9 +67,9 @@ public:
     float aspect;
     float apertureRadius;
     float focusDistance;
-    bool architectural; // orient image plane to be parallel to 'up' and shift the lens
-    typedef enum
-    {
+    bool architectural; // orient image plane to be parallel to 'up' and shift
+                        // the lens
+    typedef enum {
         OSP_STEREO_NONE,
         OSP_STEREO_LEFT,
         OSP_STEREO_RIGHT,

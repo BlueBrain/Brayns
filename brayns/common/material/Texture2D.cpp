@@ -22,7 +22,6 @@
 
 namespace brayns
 {
-
 Texture2D::Texture2D()
     : _nbChannels(0)
     , _depth(0)
@@ -34,7 +33,6 @@ Texture2D::Texture2D()
 void Texture2D::setRawData(unsigned char* data, size_t size)
 {
     _rawData.clear();
-    _rawData.assign(data, data+size);
+    _rawData.assign(data, data + size);
 }
-
 }

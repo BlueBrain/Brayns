@@ -27,7 +27,6 @@
 
 namespace brayns
 {
-
 struct ScreenSpaceProcessorData
 {
     uint32_t width;
@@ -46,36 +45,34 @@ class ScreenSpaceProcessor
 public:
     ScreenSpaceProcessor();
 
-    void init( uint32_t width, uint32_t height );
+    void init(uint32_t width, uint32_t height);
 
     void clear();
-    void resize( uint32_t width, uint32_t height );
-    void draw( const ScreenSpaceProcessorData& buffersData );
+    void resize(uint32_t width, uint32_t height);
+    void draw(const ScreenSpaceProcessorData& buffersData);
 
 private:
+    void renderTexturedQuad_();
+    void createColorTexture_(uint32_t width, uint32_t height);
+    void createDepthTexture_(uint32_t width, uint32_t height);
 
-   void renderTexturedQuad_();
-   void createColorTexture_( uint32_t width, uint32_t height );
-   void createDepthTexture_( uint32_t width, uint32_t height );
+    // ScreenSpaceProcessorData buffersData_;
 
-   //ScreenSpaceProcessorData buffersData_;
+    // textures
+    GLuint colorTexture_;
+    GLuint depthTexture_;
+    // GLuint normalTexture_;
+    // GLuint lightTexture_;
 
-   //textures
-   GLuint colorTexture_;
-   GLuint depthTexture_;
-   //GLuint normalTexture_;
-   //GLuint lightTexture_;
+    // Quad
+    GLfloat quadVertices_[12];
+    GLint quadIndices_[6];
+    GLuint quadVertexeId_;
+    GLuint quadIndexId_;
 
-   //Quad
-   GLfloat quadVertices_[ 12 ];
-   GLint quadIndices_[ 6 ];
-   GLuint quadVertexeId_;
-   GLuint quadIndexId_;
-
-   //Shaders
-   GLuint quadShader_;
+    // Shaders
+    GLuint quadShader_;
 };
-
 }
 
-#endif //SCREENSPACEPROCESSOR_H
+#endif // SCREENSPACEPROCESSOR_H

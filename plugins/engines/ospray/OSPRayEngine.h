@@ -25,19 +25,14 @@
 
 namespace brayns
 {
-
 /**
  * OSPRay implementation of the ray-tracing engine.
  */
 class OSPRayEngine : public Engine
 {
-
 public:
-
-    OSPRayEngine(
-        int argc,
-        const char **argv,
-        ParametersManager& parametersManager );
+    OSPRayEngine(int argc, const char** argv,
+                 ParametersManager& parametersManager);
 
     ~OSPRayEngine();
 
@@ -55,9 +50,7 @@ public:
 
     /** @copydoc Engine::postRender */
     void postRender() final;
-
 };
-
 }
 
 #endif // OSPRAYENGINE_H

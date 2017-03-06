@@ -21,8 +21,8 @@
 #include "DeflectPlugin.h"
 
 #include <brayns/Brayns.h>
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/camera/AbstractManipulator.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
@@ -30,89 +30,84 @@
 #include <brayns/parameters/ApplicationParameters.h>
 
 #if BRAYNS_USE_NETWORKING
-#  include "ZeroEQPlugin.h"
+#include "ZeroEQPlugin.h"
 #endif
 
 namespace
 {
-
 const float wheelFactor = 1.f / 40.f;
 
-template<typename T>
-std::future<T> make_ready_future( const T value )
+template <typename T>
+std::future<T> make_ready_future(const T value)
 {
     std::promise<T> promise;
-    promise.set_value( value );
+    promise.set_value(value);
     return promise.get_future();
 }
-
 }
 
 namespace brayns
 {
-
 #if BRAYNS_USE_NETWORKING
-    DeflectPlugin::DeflectPlugin(
-        KeyboardHandler& keyboardHandler,
-        AbstractManipulator& cameraManipulator,
-        ZeroEQPlugin& zeroeq )
+DeflectPlugin::DeflectPlugin(KeyboardHandler& keyboardHandler,
+                             AbstractManipulator& cameraManipulator,
+                             ZeroEQPlugin& zeroeq)
 #else
-    DeflectPlugin::DeflectPlugin(
-        KeyboardHandler& keyboardHandler,
-        AbstractManipulator& cameraManipulator )
+DeflectPlugin::DeflectPlugin(KeyboardHandler& keyboardHandler,
+                             AbstractManipulator& cameraManipulator)
 #endif
     : ExtensionPlugin()
-    , _keyboardHandler( keyboardHandler )
-    , _cameraManipulator( cameraManipulator )
-    , _sendFuture( make_ready_future( true ))
+    , _keyboardHandler(keyboardHandler)
+    , _cameraManipulator(cameraManipulator)
+    , _sendFuture(make_ready_future(true))
 {
     _keyboardHandler.registerKeyboardShortcut(
         '*', "Enable/Disable Deflect streaming",
-                [&] { _params.setEnabled( !_params.getEnabled( )); });
+        [&] { _params.setEnabled(!_params.getEnabled()); });
 
-    _params.setEnabled( true ); // Streaming will only be activated if
-                                // the DEFLECT_HOST environment variable
-                                // is defined
+    _params.setEnabled(true); // Streaming will only be activated if
+                              // the DEFLECT_HOST environment variable
+                              // is defined
 
 #if BRAYNS_USE_NETWORKING
-    if( !zeroeq )
+    if (!zeroeq)
         return;
 
-    zeroeq->handleGET( _params );
-    zeroeq->handlePUT( "lexis/render/stream-to", _params );
+    zeroeq->handleGET(_params);
+    zeroeq->handlePUT("lexis/render/stream-to", _params);
 #endif
 }
 
-bool DeflectPlugin::run( Engine& engine )
+bool DeflectPlugin::run(Engine& engine)
 {
-    if( _stream )
+    if (_stream)
     {
         const bool changed = _stream->getId() != _params.getIdString() ||
                              _stream->getHost() != _params.getHostString();
-        if( changed )
+        if (changed)
             _stream.reset();
     }
 
-    if( _previousHost != _params.getHostString( ))
+    if (_previousHost != _params.getHostString())
     {
-        _params.setEnabled( true );
+        _params.setEnabled(true);
         _previousHost = _params.getHostString();
     }
 
     const bool deflectEnabled = _params.getEnabled();
-    if( _stream && _stream->isConnected() && !deflectEnabled )
+    if (_stream && _stream->isConnected() && !deflectEnabled)
     {
         BRAYNS_INFO << "Closing Deflect stream" << std::endl;
         _stream.reset();
     }
 
-    if( deflectEnabled && !_stream )
+    if (deflectEnabled && !_stream)
         _initializeDeflect();
 
-    if( deflectEnabled && _stream && _stream->isConnected( ))
+    if (deflectEnabled && _stream && _stream->isConnected())
     {
-        _sendDeflectFrame( engine );
-        if( _handleDeflectEvents( engine ))
+        _sendDeflectFrame(engine);
+        if (_handleDeflectEvents(engine))
         {
             engine.getFrameBuffer().clear();
             engine.getRenderer().commit();
@@ -126,36 +121,38 @@ void DeflectPlugin::_initializeDeflect()
 {
     try
     {
-        _stream.reset( new deflect::Stream( _params.getIdString(),
-                                            _params.getHostString(),
-                                            _params.getPort( )));
+        _stream.reset(new deflect::Stream(_params.getIdString(),
+                                          _params.getHostString(),
+                                          _params.getPort()));
 
-        if( _stream->isConnected( ))
+        if (_stream->isConnected())
             BRAYNS_INFO << "Deflect successfully connected to Tide on host "
                         << _stream->getHost() << std::endl;
         else
             BRAYNS_ERROR << "Deflect failed to connect to Tide on host "
                          << _stream->getHost() << std::endl;
 
-        if( !_stream->registerForEvents( ))
-            BRAYNS_ERROR << "Deflect failed to register for events!" << std::endl;
+        if (!_stream->registerForEvents())
+            BRAYNS_ERROR << "Deflect failed to register for events!"
+                         << std::endl;
 
-        _params.setId( _stream->getId( ));
-        _params.setHost( _stream->getHost( ));
+        _params.setId(_stream->getId());
+        _params.setHost(_stream->getHost());
     }
-    catch( std::runtime_error& ex )
+    catch (std::runtime_error& ex)
     {
-        BRAYNS_ERROR << "Deflect failed to initialize. " << ex.what() << std::endl;
-        _params.setEnabled( false );
+        BRAYNS_ERROR << "Deflect failed to initialize. " << ex.what()
+                     << std::endl;
+        _params.setEnabled(false);
         return;
     }
 }
 
-void DeflectPlugin::_sendDeflectFrame( Engine& engine )
+void DeflectPlugin::_sendDeflectFrame(Engine& engine)
 {
-    if( !_sendFuture.get( ))
+    if (!_sendFuture.get())
     {
-        if( !_stream->isConnected() )
+        if (!_stream->isConnected())
             BRAYNS_INFO << "Stream closed, exiting." << std::endl;
         else
             BRAYNS_ERROR << "failure in deflectStreamSend()" << std::endl;
@@ -166,85 +163,86 @@ void DeflectPlugin::_sendDeflectFrame( Engine& engine )
     const Vector2i& frameSize = frameBuffer.getSize();
     void* data = frameBuffer.getColorBuffer();
 
-    if( data )
+    if (data)
     {
-        const size_t bufferSize = frameSize.x()*frameSize.y()*frameBuffer.getColorDepth();
-        _lastImage.data.resize( bufferSize );
-        memcpy( _lastImage.data.data(), data, bufferSize );
+        const size_t bufferSize =
+            frameSize.x() * frameSize.y() * frameBuffer.getColorDepth();
+        _lastImage.data.resize(bufferSize);
+        memcpy(_lastImage.data.data(), data, bufferSize);
         _lastImage.size = frameSize;
         _lastImage.format = frameBuffer.getFrameBufferFormat();
 
-        _send( true );
+        _send(true);
     }
     else
-        _sendFuture = make_ready_future( true );
+        _sendFuture = make_ready_future(true);
 }
 
-bool DeflectPlugin::_handleDeflectEvents( Engine& engine )
+bool DeflectPlugin::_handleDeflectEvents(Engine& engine)
 {
-    if( !_stream->hasEvent( ))
+    if (!_stream->hasEvent())
         return false;
 
-    while( _stream->hasEvent() )
+    while (_stream->hasEvent())
     {
         const deflect::Event& event = _stream->getEvent();
-        switch( event.type )
+        switch (event.type)
         {
         case deflect::Event::EVT_PRESS:
-            _previousPos = _getWindowPos( event,
-                                          engine.getFrameBuffer().getSize( ));
+            _previousPos =
+                _getWindowPos(event, engine.getFrameBuffer().getSize());
             _pan = _pinch = false;
             break;
         case deflect::Event::EVT_MOVE:
         case deflect::Event::EVT_RELEASE:
         {
-            const auto pos = _getWindowPos( event,
-                                            engine.getFrameBuffer().getSize( ));
-            if( !_pan && !_pinch )
-                _cameraManipulator.dragLeft( pos, _previousPos );
+            const auto pos =
+                _getWindowPos(event, engine.getFrameBuffer().getSize());
+            if (!_pan && !_pinch)
+                _cameraManipulator.dragLeft(pos, _previousPos);
             _previousPos = pos;
             _pan = _pinch = false;
             break;
         }
         case deflect::Event::EVT_PAN:
         {
-            if( _pinch )
+            if (_pinch)
                 break;
-            const auto pos = _getWindowPos( event,
-                                            engine.getFrameBuffer().getSize( ));
-            _cameraManipulator.dragMiddle( pos, _previousPos );
+            const auto pos =
+                _getWindowPos(event, engine.getFrameBuffer().getSize());
+            _cameraManipulator.dragMiddle(pos, _previousPos);
             _previousPos = pos;
             _pan = true;
             break;
         }
         case deflect::Event::EVT_PINCH:
         {
-            if( _pan )
+            if (_pan)
                 break;
-            const auto pos = _getWindowPos( event,
-                                            engine.getFrameBuffer().getSize( ));
-            const auto delta = _getZoomDelta( event,
-                                              engine.getFrameBuffer().getSize( ));
-            _cameraManipulator.wheel( pos, delta * wheelFactor );
+            const auto pos =
+                _getWindowPos(event, engine.getFrameBuffer().getSize());
+            const auto delta =
+                _getZoomDelta(event, engine.getFrameBuffer().getSize());
+            _cameraManipulator.wheel(pos, delta * wheelFactor);
             _pinch = true;
             break;
         }
         case deflect::Event::EVT_KEY_PRESS:
         {
-            _keyboardHandler.handleKeyboardShortcut( event.text[0] );
+            _keyboardHandler.handleKeyboardShortcut(event.text[0]);
             break;
         }
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
         {
-            engine.reshape( Vector2ui( event.dx, event.dy ));
+            engine.reshape(Vector2ui(event.dx, event.dy));
             break;
         }
         case deflect::Event::EVT_CLOSE:
-            _params.setEnabled( false );
-            _params.setHost( "" );
+            _params.setEnabled(false);
+            _params.setHost("");
             _previousHost.clear();
             _stream.reset();
-            _sendFuture = make_ready_future( true );
+            _sendFuture = make_ready_future(true);
             return true;
         default:
             break;
@@ -254,10 +252,10 @@ bool DeflectPlugin::_handleDeflectEvents( Engine& engine )
     return true;
 }
 
-void DeflectPlugin::_send( const bool swapYAxis )
+void DeflectPlugin::_send(const bool swapYAxis)
 {
     deflect::PixelFormat format = deflect::RGBA;
-    switch( _lastImage.format )
+    switch (_lastImage.format)
     {
     case FrameBufferFormat::FBF_BGRA_I8:
         format = deflect::BGRA;
@@ -269,32 +267,33 @@ void DeflectPlugin::_send( const bool swapYAxis )
         format = deflect::RGBA;
     }
 
-    deflect::ImageWrapper deflectImage( _lastImage.data.data(), _lastImage.size.x(),
-                                        _lastImage.size.y(), format );
+    deflect::ImageWrapper deflectImage(_lastImage.data.data(),
+                                       _lastImage.size.x(), _lastImage.size.y(),
+                                       format);
 
     deflectImage.compressionQuality = _params.getQuality();
-    deflectImage.compressionPolicy =
-        _params.getCompression() ?
-        deflect::COMPRESSION_ON : deflect::COMPRESSION_OFF;
-    if( swapYAxis )
-        deflect::ImageWrapper::swapYAxis( (void*)_lastImage.data.data(), _lastImage.size.x(),
-                                          _lastImage.size.y(), 4 );
+    deflectImage.compressionPolicy = _params.getCompression()
+                                         ? deflect::COMPRESSION_ON
+                                         : deflect::COMPRESSION_OFF;
+    if (swapYAxis)
+        deflect::ImageWrapper::swapYAxis((void*)_lastImage.data.data(),
+                                         _lastImage.size.x(),
+                                         _lastImage.size.y(), 4);
 
-    _sendFuture = _stream->asyncSend( deflectImage );
+    _sendFuture = _stream->asyncSend(deflectImage);
 }
 
-Vector2d DeflectPlugin::_getWindowPos( const deflect::Event& event,
-                                       const Vector2ui& windowSize ) const
+Vector2d DeflectPlugin::_getWindowPos(const deflect::Event& event,
+                                      const Vector2ui& windowSize) const
 {
-    return { event.mouseX * windowSize.x(), event.mouseY * windowSize.y() };
+    return {event.mouseX * windowSize.x(), event.mouseY * windowSize.y()};
 }
 
-double DeflectPlugin::_getZoomDelta( const deflect::Event& pinchEvent,
-                                     const Vector2ui& windowSize ) const
+double DeflectPlugin::_getZoomDelta(const deflect::Event& pinchEvent,
+                                    const Vector2ui& windowSize) const
 {
     const auto dx = pinchEvent.dx * windowSize.x();
     const auto dy = pinchEvent.dy * windowSize.y();
-    return std::copysign( std::sqrt( dx * dx + dy * dy ), dx + dy );
+    return std::copysign(std::sqrt(dx * dx + dy * dy), dx + dy);
 }
-
 }

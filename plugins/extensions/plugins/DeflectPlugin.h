@@ -29,7 +29,6 @@
 
 namespace brayns
 {
-
 #if BRAYNS_USE_NETWORKING
 class ZeroEQPlugin;
 #endif
@@ -45,31 +44,25 @@ class DeflectPlugin : public ExtensionPlugin
 {
 public:
 #if BRAYNS_USE_NETWORKING
-    DeflectPlugin(
-        KeyboardHandler& keyboardHandler,
-        AbstractManipulator& cameraManipulator,
-        ZeroEQPlugin& zeroeq );
+    DeflectPlugin(KeyboardHandler& keyboardHandler,
+                  AbstractManipulator& cameraManipulator, ZeroEQPlugin& zeroeq);
 #else
-    DeflectPlugin(
-        KeyboardHandler& keyboardHandler,
-        AbstractManipulator& cameraManipulator );
+    DeflectPlugin(KeyboardHandler& keyboardHandler,
+                  AbstractManipulator& cameraManipulator);
 #endif
 
     /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API bool run( Engine& engine ) final;
+    BRAYNS_API bool run(Engine& engine) final;
 
 private:
     struct HandledEvents
     {
-        HandledEvents(
-            const Vector2f& touchPosition,
-            const Vector2f& wDelta,
-            const bool pressedState,
-            const bool exit )
-            : position( touchPosition )
-            , wheelDelta( wDelta )
-            , pressed( pressedState )
-            , closeApplication( exit )
+        HandledEvents(const Vector2f& touchPosition, const Vector2f& wDelta,
+                      const bool pressedState, const bool exit)
+            : position(touchPosition)
+            , wheelDelta(wDelta)
+            , pressed(pressedState)
+            , closeApplication(exit)
         {
         }
 
@@ -80,19 +73,19 @@ private:
     };
 
     void _initializeDeflect();
-    void _sendDeflectFrame( Engine& engine );
-    bool _handleDeflectEvents( Engine& engine );
+    void _sendDeflectFrame(Engine& engine);
+    bool _handleDeflectEvents(Engine& engine);
 
     /** Send an image to DisplayCluster
      *
      * @param swapYAxis enables a vertical flip operation on the image
      */
-    void _send( bool swapYAxis );
+    void _send(bool swapYAxis);
 
-    Vector2d _getWindowPos( const deflect::Event& event,
-                            const Vector2ui& windowSize ) const;
-    double _getZoomDelta( const deflect::Event& pinchEvent,
-                          const Vector2ui& windowSize ) const;
+    Vector2d _getWindowPos(const deflect::Event& event,
+                           const Vector2ui& windowSize) const;
+    double _getZoomDelta(const deflect::Event& pinchEvent,
+                         const Vector2ui& windowSize) const;
 
     KeyboardHandler& _keyboardHandler;
     AbstractManipulator& _cameraManipulator;
@@ -100,12 +93,11 @@ private:
     Vector2d _previousPos;
     bool _pan = false;
     bool _pinch = false;
-    std::unique_ptr< deflect::Stream > _stream;
+    std::unique_ptr<deflect::Stream> _stream;
     ::lexis::render::Stream _params;
     std::string _previousHost;
     Image _lastImage;
     deflect::Stream::Future _sendFuture;
 };
-
 }
 #endif // DEFLECTPLUGIN_H

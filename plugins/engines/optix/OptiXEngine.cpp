@@ -22,19 +22,18 @@
 
 #include <brayns/common/input/KeyboardHandler.h>
 
+#include <plugins/engines/optix/OptiXCamera.h>
+#include <plugins/engines/optix/OptiXFrameBuffer.h>
 #include <plugins/engines/optix/OptiXRenderer.h>
 #include <plugins/engines/optix/OptiXScene.h>
-#include <plugins/engines/optix/OptiXFrameBuffer.h>
-#include <plugins/engines/optix/OptiXCamera.h>
 #include <plugins/engines/optix/OptiXUtils.h>
 
 namespace brayns
 {
-
-OptiXEngine::OptiXEngine(
-    int, const char **, ParametersManager& parametersManager )
-    : Engine( parametersManager )
-    , _context( nullptr )
+OptiXEngine::OptiXEngine(int, const char**,
+                         ParametersManager& parametersManager)
+    : Engine(parametersManager)
+    , _context(nullptr)
 {
     BRAYNS_INFO << "Initializing OptiX" << std::endl;
     _initializeContext();
@@ -43,33 +42,36 @@ OptiXEngine::OptiXEngine(
     _activeRenderer = parametersManager.getRenderingParameters().getRenderer();
 
     Renderers renderersForScene;
-    for( const auto renderer: parametersManager.getRenderingParameters().getRenderers() )
+    for (const auto renderer :
+         parametersManager.getRenderingParameters().getRenderers())
     {
         const auto& rendererName =
-            parametersManager.getRenderingParameters().getRendererAsString( renderer );
-        _renderers[ renderer ].reset(
-            new OptiXRenderer( rendererName, _parametersManager, _context ));
-        renderersForScene.push_back( _renderers[renderer] );
+            parametersManager.getRenderingParameters().getRendererAsString(
+                renderer);
+        _renderers[renderer].reset(
+            new OptiXRenderer(rendererName, _parametersManager, _context));
+        renderersForScene.push_back(_renderers[renderer]);
     }
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset( new OptiXScene( renderersForScene, _parametersManager, _context));
+    _scene.reset(
+        new OptiXScene(renderersForScene, _parametersManager, _context));
 
-    _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
+    _scene->setMaterials(MT_DEFAULT, NB_MAX_MATERIALS);
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
-    _frameSize =
-        _parametersManager.getApplicationParameters( ).getWindowSize( );
+    _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
 
-    const bool accumulation = _parametersManager.getApplicationParameters().getFilters().empty();
+    const bool accumulation =
+        _parametersManager.getApplicationParameters().getFilters().empty();
     const bool environmentMap =
         !parametersManager.getSceneParameters().getEnvironmentMap().empty();
 
-    _frameBuffer.reset( new OptiXFrameBuffer(
-        _frameSize, FBF_RGBA_I8, accumulation, _context ));
-    _camera.reset( new OptiXCamera(
-        _parametersManager.getRenderingParameters().getCameraType(),
-        _context, environmentMap));
+    _frameBuffer.reset(
+        new OptiXFrameBuffer(_frameSize, FBF_RGBA_I8, accumulation, _context));
+    _camera.reset(new OptiXCamera(
+        _parametersManager.getRenderingParameters().getCameraType(), _context,
+        environmentMap));
 
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
@@ -77,7 +79,7 @@ OptiXEngine::OptiXEngine(
 OptiXEngine::~OptiXEngine()
 {
     _frameBuffer.reset();
-    if( _context )
+    if (_context)
     {
         _context->destroy();
         _context = nullptr;
@@ -88,12 +90,12 @@ void OptiXEngine::_initializeContext()
 {
     // Set up context
     _context = optix::Context::create();
-    if( !_context )
-        BRAYNS_THROW( std::runtime_error( "Failed to initialize OptiX" ));
+    if (!_context)
+        BRAYNS_THROW(std::runtime_error("Failed to initialize OptiX"));
 
-    _context->setRayTypeCount( 2 );
-    _context->setEntryPointCount( 1 );
-    _context->setStackSize( 4096 );
+    _context->setRayTypeCount(2);
+    _context->setEntryPointCount(1);
+    _context->setStackSize(4096);
 
     unsigned int num_devices;
     unsigned int version;
@@ -102,33 +104,41 @@ void OptiXEngine::_initializeContext()
     rtDeviceGetDeviceCount(&num_devices);
     rtGetVersion(&version);
 
-    BRAYNS_INFO << "Number of CUDA Devices: " + std::to_string( num_devices ) << std::endl;
+    BRAYNS_INFO << "Number of CUDA Devices: " + std::to_string(num_devices)
+                << std::endl;
 
-    for( i = 0; i < num_devices; ++i )
+    for (i = 0; i < num_devices; ++i)
     {
         char deviceName[256];
         int computeCaps[2];
         int clock_rate;
 
-        RT_CHECK_ERROR( rtDeviceGetAttribute(
-            i, RT_DEVICE_ATTRIBUTE_NAME, sizeof( deviceName ), deviceName ));
-        BRAYNS_INFO << "Device " + std::to_string( i ) + ": " +
-            std::string( deviceName ) << std::endl;
-
-        RT_CHECK_ERROR( rtDeviceGetAttribute(
-            i, RT_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY, sizeof( computeCaps ), &computeCaps ));
-        BRAYNS_INFO << "- Compute Support: " + std::to_string( computeCaps[0] ) +
-            std::to_string( computeCaps[1] ) << std::endl;
-
-        RT_CHECK_ERROR( rtDeviceGetAttribute(
-            i, RT_DEVICE_ATTRIBUTE_TOTAL_MEMORY, sizeof( _totalMemory ), &_totalMemory ));
-        BRAYNS_INFO << "- Total Memory: " + std::to_string( _totalMemory ) + " bytes ["
-                    + std::to_string( _totalMemory / 1024 / 1024 ) + " MB]"
+        RT_CHECK_ERROR(rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_NAME,
+                                            sizeof(deviceName), deviceName));
+        BRAYNS_INFO << "Device " + std::to_string(i) + ": " +
+                           std::string(deviceName)
                     << std::endl;
 
-        RT_CHECK_ERROR( rtDeviceGetAttribute(
-            i, RT_DEVICE_ATTRIBUTE_CLOCK_RATE, sizeof( clock_rate ), &clock_rate ));
-        BRAYNS_INFO << "- Clock Rate: " + std::to_string( clock_rate / 1000 ) + " MHz" << std::endl;
+        RT_CHECK_ERROR(
+            rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY,
+                                 sizeof(computeCaps), &computeCaps));
+        BRAYNS_INFO << "- Compute Support: " + std::to_string(computeCaps[0]) +
+                           std::to_string(computeCaps[1])
+                    << std::endl;
+
+        RT_CHECK_ERROR(rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_TOTAL_MEMORY,
+                                            sizeof(_totalMemory),
+                                            &_totalMemory));
+        BRAYNS_INFO << "- Total Memory: " + std::to_string(_totalMemory) +
+                           " bytes [" +
+                           std::to_string(_totalMemory / 1024 / 1024) + " MB]"
+                    << std::endl;
+
+        RT_CHECK_ERROR(rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_CLOCK_RATE,
+                                            sizeof(clock_rate), &clock_rate));
+        BRAYNS_INFO << "- Clock Rate: " + std::to_string(clock_rate / 1000) +
+                           " MHz"
+                    << std::endl;
     }
 }
 
@@ -140,24 +150,24 @@ std::string OptiXEngine::name() const
 void OptiXEngine::commit()
 {
     Engine::commit();
-    for( const auto& renderer: _renderers )
+    for (const auto& renderer : _renderers)
     {
-        _renderers[ renderer.first ]->setScene( _scene );
-        _renderers[ renderer.first ]->setCamera( _camera );
-        _renderers[ renderer.first ]->commit( );
+        _renderers[renderer.first]->setScene(_scene);
+        _renderers[renderer.first]->setCamera(_camera);
+        _renderers[renderer.first]->commit();
     }
     _camera->commit();
 }
 
 void OptiXEngine::render()
 {
-    if( _scene->getSimulationHandler( ))
+    if (_scene->getSimulationHandler())
         _scene->commitSimulationData();
 
-    if( _scene->getVolumeHandler() )
+    if (_scene->getVolumeHandler())
         _scene->commitVolumeData();
 
-    _renderers[ _activeRenderer ]->render( _frameBuffer );
+    _renderers[_activeRenderer]->render(_frameBuffer);
 }
 
 void OptiXEngine::preRender()
@@ -169,5 +179,4 @@ void OptiXEngine::postRender()
 {
     _frameBuffer->unmap();
 }
-
 }

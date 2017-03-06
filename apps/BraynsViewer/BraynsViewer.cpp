@@ -22,22 +22,21 @@
 #include "BraynsViewer.h"
 
 #include <brayns/Brayns.h>
-#include <brayns/common/log.h>
-#include <brayns/parameters/ParametersManager.h>
-#include <brayns/common/scene/Scene.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/input/KeyboardHandler.h>
+#include <brayns/common/log.h>
+#include <brayns/common/scene/Scene.h>
+#include <brayns/parameters/ParametersManager.h>
 
 namespace
 {
-    const float DEFAULT_TEST_TIMESTAMP = 10000.f;
+const float DEFAULT_TEST_TIMESTAMP = 10000.f;
 }
 
 namespace brayns
 {
-
-BraynsViewer::BraynsViewer( Brayns& brayns )
-    : BaseWindow( brayns )
+BraynsViewer::BraynsViewer(Brayns& brayns)
+    : BaseWindow(brayns)
 {
     _registerKeyboardShortcuts();
 }
@@ -48,49 +47,49 @@ void BraynsViewer::_registerKeyboardShortcuts()
     auto& keyHandler = _brayns.getKeyboardHandler();
     keyHandler.registerKeyboardShortcut(
         '3', "Set gradient materials",
-        std::bind( &BraynsViewer::_gradientMaterials, this ));
+        std::bind(&BraynsViewer::_gradientMaterials, this));
     keyHandler.registerKeyboardShortcut(
         '4', "Set pastel materials",
-        std::bind( &BraynsViewer::_pastelMaterials, this ));
+        std::bind(&BraynsViewer::_pastelMaterials, this));
     keyHandler.registerKeyboardShortcut(
         '5', "Set random materials",
-        std::bind( &BraynsViewer::_randomMaterials, this ));
+        std::bind(&BraynsViewer::_randomMaterials, this));
     keyHandler.registerKeyboardShortcut(
         'g', "Enable/Disable timestamp auto-increment",
-         std::bind( &BraynsViewer::_toggleIncrementalTimestamp, this ));
+        std::bind(&BraynsViewer::_toggleIncrementalTimestamp, this));
     keyHandler.registerKeyboardShortcut(
-        'x', "Set timestamp to " + std::to_string( DEFAULT_TEST_TIMESTAMP ),
-        std::bind( &BraynsViewer::_defaultTimestamp, this ));
+        'x', "Set timestamp to " + std::to_string(DEFAULT_TEST_TIMESTAMP),
+        std::bind(&BraynsViewer::_defaultTimestamp, this));
     keyHandler.registerKeyboardShortcut(
         '|', "Create cache file ",
-        std::bind( &BraynsViewer::_saveSceneToCacheFile, this ));
+        std::bind(&BraynsViewer::_saveSceneToCacheFile, this));
 }
 
 void BraynsViewer::_gradientMaterials()
 {
-    _brayns.getEngine().initializeMaterials( MT_GRADIENT );
+    _brayns.getEngine().initializeMaterials(MT_GRADIENT);
 }
 
 void BraynsViewer::_pastelMaterials()
 {
-    _brayns.getEngine().initializeMaterials( MT_PASTEL_COLORS );
+    _brayns.getEngine().initializeMaterials(MT_PASTEL_COLORS);
 }
 
 void BraynsViewer::_randomMaterials()
 {
-    _brayns.getEngine().initializeMaterials( MT_RANDOM );
+    _brayns.getEngine().initializeMaterials(MT_RANDOM);
 }
 
 void BraynsViewer::_toggleIncrementalTimestamp()
 {
     auto& sceneParams = _brayns.getParametersManager().getSceneParameters();
-    sceneParams.setAnimationDelta( sceneParams.getAnimationDelta() == 0 ? 1 : 0 );
+    sceneParams.setAnimationDelta(sceneParams.getAnimationDelta() == 0 ? 1 : 0);
 }
 
 void BraynsViewer::_defaultTimestamp()
 {
     auto& sceneParams = _brayns.getParametersManager().getSceneParameters();
-    sceneParams.setTimestamp( DEFAULT_TEST_TIMESTAMP );
+    sceneParams.setTimestamp(DEFAULT_TEST_TIMESTAMP);
 }
 
 void BraynsViewer::_saveSceneToCacheFile()
@@ -99,22 +98,24 @@ void BraynsViewer::_saveSceneToCacheFile()
     scene.saveSceneToCacheFile();
 }
 
-void BraynsViewer::display( )
+void BraynsViewer::display()
 {
     std::stringstream ss;
-    ss << "Brayns Viewer [" <<
-          _brayns.getParametersManager().getRenderingParameters().getEngine() <<
-          "] ";
-    size_t ts = _brayns.getParametersManager().getSceneParameters().getTimestamp();
-    if( ts != std::numeric_limits<size_t>::max() )
+    ss << "Brayns Viewer ["
+       << _brayns.getParametersManager().getRenderingParameters().getEngine()
+       << "] ";
+    size_t ts =
+        _brayns.getParametersManager().getSceneParameters().getTimestamp();
+    if (ts != std::numeric_limits<size_t>::max())
         ss << " (frame " << ts << ")";
-    if( _brayns.getParametersManager().getApplicationParameters().isBenchmarking( ))
+    if (_brayns.getParametersManager()
+            .getApplicationParameters()
+            .isBenchmarking())
     {
-        ss << " @ " << _fps.getFPS( );
+        ss << " @ " << _fps.getFPS();
     }
-    setTitle(ss.str( ));
+    setTitle(ss.str());
 
     BaseWindow::display();
 }
-
 }

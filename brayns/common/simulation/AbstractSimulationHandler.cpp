@@ -23,78 +23,78 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/GeometryParameters.h>
 
+#include <fcntl.h>
 #include <fstream>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 
 namespace brayns
 {
-
 AbstractSimulationHandler::AbstractSimulationHandler(
     const GeometryParameters& geometryParameters)
-    : _geometryParameters( geometryParameters )
-    , _timestamp( -std::numeric_limits<float>::max( ))
-    , _currentFrame( 0 )
-    , _nbFrames( 0 )
-    , _frameSize( 0 )
-    , _headerSize( 0 )
-    , _memoryMapPtr( 0 )
-    , _cacheFileDescriptor( -1 )
+    : _geometryParameters(geometryParameters)
+    , _timestamp(-std::numeric_limits<float>::max())
+    , _currentFrame(0)
+    , _nbFrames(0)
+    , _frameSize(0)
+    , _headerSize(0)
+    , _memoryMapPtr(0)
+    , _cacheFileDescriptor(-1)
 {
     _histogram.timestamp = _timestamp;
 }
 
 AbstractSimulationHandler::~AbstractSimulationHandler()
 {
-    if( _memoryMapPtr )
+    if (_memoryMapPtr)
     {
         const uint64_t size =
-            _headerSize +
-            _frameSize * _nbFrames * sizeof(float);
-        ::munmap( (void *)_memoryMapPtr, size );
+            _headerSize + _frameSize * _nbFrames * sizeof(float);
+        ::munmap((void*)_memoryMapPtr, size);
     }
-    if( _cacheFileDescriptor != -1 )
-        ::close( _cacheFileDescriptor );
+    if (_cacheFileDescriptor != -1)
+        ::close(_cacheFileDescriptor);
 }
 
-void AbstractSimulationHandler::setTimestamp( const float timestamp )
+void AbstractSimulationHandler::setTimestamp(const float timestamp)
 {
-    _timestamp = size_t( timestamp ) % _nbFrames;
+    _timestamp = size_t(timestamp) % _nbFrames;
 }
 
 bool AbstractSimulationHandler::attachSimulationToCacheFile(
-    const std::string& cacheFile )
+    const std::string& cacheFile)
 {
-    BRAYNS_INFO << "Attaching " << cacheFile << " to current scene" << std::endl;
-    _cacheFileDescriptor = open( cacheFile.c_str(), O_RDONLY );
-    if( _cacheFileDescriptor == -1 )
+    BRAYNS_INFO << "Attaching " << cacheFile << " to current scene"
+                << std::endl;
+    _cacheFileDescriptor = open(cacheFile.c_str(), O_RDONLY);
+    if (_cacheFileDescriptor == -1)
     {
         BRAYNS_ERROR << "Failed to open " << cacheFile << std::endl;
         return false;
     }
 
     struct stat sb;
-    if( ::fstat( _cacheFileDescriptor, &sb ) == -1 )
+    if (::fstat(_cacheFileDescriptor, &sb) == -1)
     {
         BRAYNS_ERROR << "Failed to get stats from " << cacheFile << std::endl;
         return false;
     }
 
-    _memoryMapPtr = ::mmap(
-        0, sb.st_size, PROT_READ, MAP_PRIVATE, _cacheFileDescriptor, 0 );
-    if( _memoryMapPtr == MAP_FAILED )
+    _memoryMapPtr =
+        ::mmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, _cacheFileDescriptor, 0);
+    if (_memoryMapPtr == MAP_FAILED)
     {
         _memoryMapPtr = 0;
         BRAYNS_ERROR << "Failed to attach " << cacheFile << std::endl;
-        ::close( _cacheFileDescriptor );
+        ::close(_cacheFileDescriptor);
         return false;
     }
 
-    _headerSize = 2 * sizeof( uint64_t );
+    _headerSize = 2 * sizeof(uint64_t);
 
-    strncpy((char *)&_nbFrames, (char *)_memoryMapPtr, sizeof( uint64_t ));
-    strncpy((char *)&_frameSize, ((char *)_memoryMapPtr + sizeof( uint64_t )), sizeof( uint64_t ));
+    strncpy((char*)&_nbFrames, (char*)_memoryMapPtr, sizeof(uint64_t));
+    strncpy((char*)&_frameSize, ((char*)_memoryMapPtr + sizeof(uint64_t)),
+            sizeof(uint64_t));
 
     BRAYNS_INFO << "Nb Frames: " << _nbFrames << std::endl;
     BRAYNS_INFO << "Frame size: " << _frameSize << std::endl;
@@ -103,46 +103,47 @@ bool AbstractSimulationHandler::attachSimulationToCacheFile(
     return true;
 }
 
-void AbstractSimulationHandler::writeHeader( std::ofstream& stream )
+void AbstractSimulationHandler::writeHeader(std::ofstream& stream)
 {
-    stream.write( ( char* )&_nbFrames, sizeof( uint64_t ));
-    stream.write( ( char* )&_frameSize, sizeof( uint64_t ));
+    stream.write((char*)&_nbFrames, sizeof(uint64_t));
+    stream.write((char*)&_frameSize, sizeof(uint64_t));
 }
 
-void AbstractSimulationHandler::writeFrame(
-    std::ofstream& stream,
-    const floats& values )
+void AbstractSimulationHandler::writeFrame(std::ofstream& stream,
+                                           const floats& values)
 {
-    stream.write( ( char* )values.data(), values.size() * sizeof(float) );
+    stream.write((char*)values.data(), values.size() * sizeof(float));
 }
 
 const Histogram& AbstractSimulationHandler::getHistogram()
 {
-    if( !histogramChanged( ))
+    if (!histogramChanged())
         return _histogram;
 
     float* data = (float*)getFrameData();
 
     // Determine range
-    Vector2f range( std::numeric_limits< float >::max(), -std::numeric_limits< float >::max( ));
-    for( size_t i = 0; i < _frameSize; ++i )
+    Vector2f range(std::numeric_limits<float>::max(),
+                   -std::numeric_limits<float>::max());
+    for (size_t i = 0; i < _frameSize; ++i)
     {
         const uint64_t index = i * sizeof(float);
         float value = data[index];
-        range.x() = std::min( range.x(), value );
-        range.y() = std::max( range.y(), value );
+        range.x() = std::min(range.x(), value);
+        range.y() = std::max(range.y(), value);
     }
 
     // Normalize values
     const auto histogramSize = _geometryParameters.getSimulationHistogramSize();
     _histogram.values.clear();
-    _histogram.values.resize( histogramSize, 0 );
-    const float normalizationValue = ( range.y() - range.x() ) / float(( histogramSize  + 1 ));
-    for( size_t i = 0; i < _frameSize; ++i )
+    _histogram.values.resize(histogramSize, 0);
+    const float normalizationValue =
+        (range.y() - range.x()) / float((histogramSize + 1));
+    for (size_t i = 0; i < _frameSize; ++i)
     {
         const uint64_t index = i * sizeof(float);
-        const size_t idx = ( data[index] - range.x( )) / normalizationValue;
-        ++_histogram.values[ idx ];
+        const size_t idx = (data[index] - range.x()) / normalizationValue;
+        ++_histogram.values[idx];
     }
 
     // Build histogram
@@ -155,5 +156,4 @@ bool AbstractSimulationHandler::histogramChanged() const
 {
     return _timestamp != _histogram.timestamp;
 }
-
 }

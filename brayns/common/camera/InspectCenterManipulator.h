@@ -25,21 +25,20 @@
 
 namespace brayns
 {
-
 /**
  * Camera manipulator to rotate and zoom around a central point.
  */
 class InspectCenterManipulator : public AbstractManipulator
 {
 public:
-    InspectCenterManipulator( Camera& camera, KeyboardHandler& handler );
+    InspectCenterManipulator(Camera& camera, KeyboardHandler& handler);
     ~InspectCenterManipulator();
 
 private:
-    void dragLeft( const Vector2i& to, const Vector2i& from ) final;
-    void dragRight( const Vector2i& to, const Vector2i& from ) final;
-    void dragMiddle( const Vector2i& to, const Vector2i& from ) final;
-    void wheel( const Vector2i& position, float delta ) final;
+    void dragLeft(const Vector2i& to, const Vector2i& from) final;
+    void dragRight(const Vector2i& to, const Vector2i& from) final;
+    void dragMiddle(const Vector2i& to, const Vector2i& from) final;
+    void wheel(const Vector2i& position, float delta) final;
 
     void _rotateLeft();
     void _rotateRight();
@@ -51,7 +50,6 @@ private:
     void _turnUp();
     void _turnDown();
 };
-
 }
 
 #endif

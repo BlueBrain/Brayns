@@ -18,18 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OptiXUtils.h"
 #include "OptiXCamera.h"
+#include "OptiXUtils.h"
 
 #include <brayns/common/log.h>
-#include <plugins/engines/optix/OptiXUtils.h>
 #include <optixu/optixpp_namespace.h>
+#include <plugins/engines/optix/OptiXUtils.h>
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Camera.cu.ptx.h>
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Constantbg.cu.ptx.h>
 
 namespace
 {
-char const* const CUDA_PERSPECTIVE_CAMERA = braynsOptiXCudaPlugin_generated_Camera_cu_ptx;
+char const* const CUDA_PERSPECTIVE_CAMERA =
+    braynsOptiXCudaPlugin_generated_Camera_cu_ptx;
 char const* const CUDA_MISS = braynsOptiXCudaPlugin_generated_Constantbg_cu_ptx;
 const std::string CUDA_FUNCTION_CAMERA = "camera";
 const std::string CUDA_FUNCTION_EXCEPTION = "exception";
@@ -44,21 +45,19 @@ const std::string CUDA_ATTRIBUTE_CAMERA_W = "W";
 const std::string CUDA_ATTRIBUTE_CAMERA_APERTURE_RADIUS = "aperture_radius";
 const std::string CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE = "focal_scale";
 
-const std::string CUDA_CLIP_PLANES[6] =
-    { "clip_plane1", "clip_plane2", "clip_plane3", "clip_plane4", "clip_plane5", "clip_plane6" };
+const std::string CUDA_CLIP_PLANES[6] = {"clip_plane1", "clip_plane2",
+                                         "clip_plane3", "clip_plane4",
+                                         "clip_plane5", "clip_plane6"};
 }
 
 namespace brayns
 {
-
-OptiXCamera::OptiXCamera(
-    const CameraType cameraType,
-    optix::Context& context,
-    const bool environmentMap )
-    : Camera( cameraType )
-    , _camera( 0 )
-    , _exceptionProgram( 0 )
-    , _context( context )
+OptiXCamera::OptiXCamera(const CameraType cameraType, optix::Context& context,
+                         const bool environmentMap)
+    : Camera(cameraType)
+    , _camera(0)
+    , _exceptionProgram(0)
+    , _context(context)
 {
     std::string cameraName;
     std::string cameraPtx;
@@ -70,20 +69,22 @@ OptiXCamera::OptiXCamera(
         cameraPtx = CUDA_PERSPECTIVE_CAMERA;
         break;
     default:
-        BRAYNS_THROW( std::runtime_error("Unsupported camera") );
+        BRAYNS_THROW(std::runtime_error("Unsupported camera"));
         break;
     }
 
     // Exception program
-    _exceptionProgram = _context->createProgramFromPTXString( cameraPtx, CUDA_FUNCTION_EXCEPTION );
-    _context->setExceptionProgram( 0, _exceptionProgram );
-    _context[ CUDA_ATTRIBUTE_BAD_COLOR ]->setFloat( 1.f, 0.f, 1.f );
+    _exceptionProgram =
+        _context->createProgramFromPTXString(cameraPtx,
+                                             CUDA_FUNCTION_EXCEPTION);
+    _context->setExceptionProgram(0, _exceptionProgram);
+    _context[CUDA_ATTRIBUTE_BAD_COLOR]->setFloat(1.f, 0.f, 1.f);
 
     // Miss program
-    setEnvironmentMap( environmentMap );
+    setEnvironmentMap(environmentMap);
 
     // Ray generation program
-    _camera = _context->createProgramFromPTXString( cameraPtx, cameraName );
+    _camera = _context->createProgramFromPTXString(cameraPtx, cameraName);
 }
 
 void OptiXCamera::commit()
@@ -92,43 +93,45 @@ void OptiXCamera::commit()
 
     const Vector3f& pos = getPosition();
 
-     _calculateCameraVariables( u, v, w );
+    _calculateCameraVariables(u, v, w);
 
-    _context[ CUDA_ATTRIBUTE_CAMERA_EYE ]->setFloat( pos.x(), pos.y(), pos.z() );
-    _context[ CUDA_ATTRIBUTE_CAMERA_U ]->setFloat( u.x(), u.y(), u.z() );
-    _context[ CUDA_ATTRIBUTE_CAMERA_V ]->setFloat( v.x(), v.y(), v.z() );
-    _context[ CUDA_ATTRIBUTE_CAMERA_W ]->setFloat( w.x(), w.y(), w.z() );
-    _context[ CUDA_ATTRIBUTE_CAMERA_APERTURE_RADIUS ]->setFloat( getAperture( ));
-    _context[ CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE ]->setFloat( getFocalLength( ));
+    _context[CUDA_ATTRIBUTE_CAMERA_EYE]->setFloat(pos.x(), pos.y(), pos.z());
+    _context[CUDA_ATTRIBUTE_CAMERA_U]->setFloat(u.x(), u.y(), u.z());
+    _context[CUDA_ATTRIBUTE_CAMERA_V]->setFloat(v.x(), v.y(), v.z());
+    _context[CUDA_ATTRIBUTE_CAMERA_W]->setFloat(w.x(), w.y(), w.z());
+    _context[CUDA_ATTRIBUTE_CAMERA_APERTURE_RADIUS]->setFloat(getAperture());
+    _context[CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE]->setFloat(getFocalLength());
 
     const auto& clipPlanes = getClipPlanes();
-    for( size_t i=0; i < clipPlanes.size(); ++i )
+    for (size_t i = 0; i < clipPlanes.size(); ++i)
     {
         const auto& clipPlane = clipPlanes[i];
-        _context[ CUDA_CLIP_PLANES[i] ]->setFloat(
-            clipPlane.x(), clipPlane.y(), clipPlane.z(), clipPlane.w( ));
+        _context[CUDA_CLIP_PLANES[i]]->setFloat(clipPlane.x(), clipPlane.y(),
+                                                clipPlane.z(), clipPlane.w());
     }
 }
 
-void OptiXCamera::_calculateCameraVariables( Vector3f& U, Vector3f& V, Vector3f& W )
+void OptiXCamera::_calculateCameraVariables(Vector3f& U, Vector3f& V,
+                                            Vector3f& W)
 {
     float ulen, vlen, wlen;
     W = getTarget() - getPosition();
 
     wlen = W.length();
-    U = normalize( cross( W, getUp( )));
-    V = normalize( cross( U, W  ) );
+    U = normalize(cross(W, getUp()));
+    V = normalize(cross(U, W));
 
-    vlen = wlen * tanf( 0.5f * getFieldOfView() * M_PI / 180.f );
+    vlen = wlen * tanf(0.5f * getFieldOfView() * M_PI / 180.f);
     V *= vlen;
     ulen = vlen * getAspectRatio();
     U *= ulen;
 }
 
-void OptiXCamera::setEnvironmentMap( const bool environmentMap )
+void OptiXCamera::setEnvironmentMap(const bool environmentMap)
 {
-    _context->setMissProgram( 0, _context->createProgramFromPTXString(
-        CUDA_MISS, environmentMap ? CUDA_FUNCTION_ENVMAP_MISS : CUDA_FUNCTION_MISS ));
+    _context->setMissProgram(0, _context->createProgramFromPTXString(
+                                    CUDA_MISS, environmentMap
+                                                   ? CUDA_FUNCTION_ENVMAP_MISS
+                                                   : CUDA_FUNCTION_MISS));
 }
-
 }

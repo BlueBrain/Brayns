@@ -26,11 +26,10 @@
 
 namespace brayns
 {
-
 class LivreCamera : public Camera
 {
 public:
-    LivreCamera( const CameraType cameraType, livre::Engine& livre );
+    LivreCamera(const CameraType cameraType, livre::Engine& livre);
 
     /**
      * Transform modelview from Brayns to Livre space and apply in
@@ -39,10 +38,9 @@ public:
     void commit() final;
 
     /** Unsupported in Livre. */
-    void setEnvironmentMap( bool environmentMap ) final;
+    void setEnvironmentMap(bool environmentMap) final;
 
 private:
     livre::Engine& _livre;
 };
-
 }

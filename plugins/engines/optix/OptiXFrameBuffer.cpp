@@ -26,20 +26,17 @@
 
 namespace brayns
 {
-
-OptiXFrameBuffer::OptiXFrameBuffer(
-    const Vector2ui& frameSize,
-    FrameBufferFormat colorDepth,
-    bool accumulation,
-    optix::Context& context )
-    : FrameBuffer( frameSize, colorDepth, accumulation )
-    , _frameBuffer( 0 )
-    , _accumBuffer( 0 )
-    , _context( context )
-    , _colorBuffer( 0 )
-    , _depthBuffer( 0 )
-    , _accumulationFrame( 0 )
-    , _imageData( 0 )
+OptiXFrameBuffer::OptiXFrameBuffer(const Vector2ui& frameSize,
+                                   FrameBufferFormat colorDepth,
+                                   bool accumulation, optix::Context& context)
+    : FrameBuffer(frameSize, colorDepth, accumulation)
+    , _frameBuffer(0)
+    , _accumBuffer(0)
+    , _context(context)
+    , _colorBuffer(0)
+    , _depthBuffer(0)
+    , _accumulationFrame(0)
+    , _imageData(0)
 {
     resize(frameSize);
 }
@@ -47,41 +44,40 @@ OptiXFrameBuffer::OptiXFrameBuffer(
 OptiXFrameBuffer::~OptiXFrameBuffer()
 {
     unmap();
-    if( _frameBuffer ) _frameBuffer->destroy();
-    if( _accumBuffer ) _accumBuffer->destroy();
+    if (_frameBuffer)
+        _frameBuffer->destroy();
+    if (_accumBuffer)
+        _accumBuffer->destroy();
 }
 
-void OptiXFrameBuffer::resize(
-    const Vector2ui& frameSize )
+void OptiXFrameBuffer::resize(const Vector2ui& frameSize)
 {
     _frameSize = frameSize;
 
     unmap();
 
     RTformat format;
-    switch( _frameBufferFormat )
+    switch (_frameBufferFormat)
     {
-        case FBF_RGBA_I8:
-            format = RT_FORMAT_UNSIGNED_BYTE4;
-            break;
-        case FBF_RGBA_F32:
-            format = RT_FORMAT_FLOAT4;
-            break;
-        default:
-            format = RT_FORMAT_UNKNOWN;
+    case FBF_RGBA_I8:
+        format = RT_FORMAT_UNSIGNED_BYTE4;
+        break;
+    case FBF_RGBA_F32:
+        format = RT_FORMAT_FLOAT4;
+        break;
+    default:
+        format = RT_FORMAT_UNKNOWN;
     }
 
-    _frameBuffer = _context->createBuffer(
-        RT_BUFFER_OUTPUT,
-        format,
-        _frameSize.x(), _frameSize.y( ));
-    _context["output_buffer"]->set( _frameBuffer );
+    _frameBuffer = _context->createBuffer(RT_BUFFER_OUTPUT, format,
+                                          _frameSize.x(), _frameSize.y());
+    _context["output_buffer"]->set(_frameBuffer);
 
-    _accumBuffer = _context->createBuffer(
-        RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
-        RT_FORMAT_FLOAT4,
-        _frameSize.x(), _frameSize.y() );
-    _context["accum_buffer"]->set( _accumBuffer );
+    _accumBuffer =
+        _context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
+                               RT_FORMAT_FLOAT4, _frameSize.x(),
+                               _frameSize.y());
+    _context["accum_buffer"]->set(_accumBuffer);
 
     clear();
 }
@@ -94,34 +90,33 @@ void OptiXFrameBuffer::clear()
 void OptiXFrameBuffer::map()
 {
     // Now unmap the buffer
-    if( !_frameBuffer )
+    if (!_frameBuffer)
         return;
 
-    rtBufferMap( _frameBuffer->get(), &_imageData );
+    rtBufferMap(_frameBuffer->get(), &_imageData);
 
-    _context["frame"]->setUint( _accumulationFrame++ );
-    switch( _frameBufferFormat )
+    _context["frame"]->setUint(_accumulationFrame++);
+    switch (_frameBufferFormat)
     {
-        case FBF_RGBA_I8:
-            _colorBuffer = (uint8_t*)(_imageData);
-            break;
-        case FBF_RGBA_F32:
-            _depthBuffer = (float*)_imageData;
-            break;
-        default:
-            BRAYNS_ERROR << "Unsupported format" << std::endl;
+    case FBF_RGBA_I8:
+        _colorBuffer = (uint8_t*)(_imageData);
+        break;
+    case FBF_RGBA_F32:
+        _depthBuffer = (float*)_imageData;
+        break;
+    default:
+        BRAYNS_ERROR << "Unsupported format" << std::endl;
     }
 }
 
 void OptiXFrameBuffer::unmap()
 {
     // Now unmap the buffer
-    if( !_frameBuffer )
+    if (!_frameBuffer)
         return;
 
-    rtBufferUnmap( _frameBuffer->get( ) );
+    rtBufferUnmap(_frameBuffer->get());
     _colorBuffer = nullptr;
     _depthBuffer = nullptr;
 }
-
 }

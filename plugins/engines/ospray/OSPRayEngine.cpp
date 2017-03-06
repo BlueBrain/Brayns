@@ -22,26 +22,23 @@
 
 #include <brayns/common/input/KeyboardHandler.h>
 
+#include <plugins/engines/ospray/OSPRayCamera.h>
+#include <plugins/engines/ospray/OSPRayFrameBuffer.h>
 #include <plugins/engines/ospray/OSPRayRenderer.h>
 #include <plugins/engines/ospray/OSPRayScene.h>
-#include <plugins/engines/ospray/OSPRayFrameBuffer.h>
-#include <plugins/engines/ospray/OSPRayCamera.h>
 
 namespace brayns
 {
-
-OSPRayEngine::OSPRayEngine(
-    int argc,
-    const char **argv,
-    ParametersManager& parametersManager )
-    : Engine( parametersManager )
+OSPRayEngine::OSPRayEngine(int argc, const char** argv,
+                           ParametersManager& parametersManager)
+    : Engine(parametersManager)
 {
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     try
     {
-        ospInit( &argc, argv );
+        ospInit(&argc, argv);
     }
-    catch( std::runtime_error& )
+    catch (std::runtime_error&)
     {
         // Note: This is necessary because OSPRay does not yet implement a
         // ospDestroy API.
@@ -53,28 +50,32 @@ OSPRayEngine::OSPRayEngine(
     _activeRenderer = _parametersManager.getRenderingParameters().getRenderer();
 
     Renderers renderersForScene;
-    for( const auto renderer: parametersManager.getRenderingParameters().getRenderers() )
+    for (const auto renderer :
+         parametersManager.getRenderingParameters().getRenderers())
     {
         const auto& rendererName =
-            parametersManager.getRenderingParameters().getRendererAsString( renderer );
+            parametersManager.getRenderingParameters().getRendererAsString(
+                renderer);
         _renderers[renderer].reset(
-            new OSPRayRenderer( rendererName, _parametersManager ));
-        renderersForScene.push_back( _renderers[renderer] );
+            new OSPRayRenderer(rendererName, _parametersManager));
+        renderersForScene.push_back(_renderers[renderer]);
     }
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset( new OSPRayScene( renderersForScene, _parametersManager ));
+    _scene.reset(new OSPRayScene(renderersForScene, _parametersManager));
 
-    _scene->setMaterials( MT_DEFAULT, NB_MAX_MATERIALS );
+    _scene->setMaterials(MT_DEFAULT, NB_MAX_MATERIALS);
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
-    _frameSize = _parametersManager.getApplicationParameters( ).getWindowSize( );
+    _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
 
-    const bool accumulation = _parametersManager.getApplicationParameters().getFilters().empty( );
+    const bool accumulation =
+        _parametersManager.getApplicationParameters().getFilters().empty();
 
-    _frameBuffer.reset( new OSPRayFrameBuffer( _frameSize, FBF_RGBA_I8, accumulation ));
-    _camera.reset( new OSPRayCamera(
-        _parametersManager.getRenderingParameters().getCameraType( )));
+    _frameBuffer.reset(
+        new OSPRayFrameBuffer(_frameSize, FBF_RGBA_I8, accumulation));
+    _camera.reset(new OSPRayCamera(
+        _parametersManager.getRenderingParameters().getCameraType()));
 
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
@@ -91,21 +92,21 @@ std::string OSPRayEngine::name() const
 void OSPRayEngine::commit()
 {
     Engine::commit();
-    for( const auto& renderer: _renderers )
+    for (const auto& renderer : _renderers)
     {
-        _renderers[ renderer.first ]->setScene( _scene );
-        _renderers[ renderer.first ]->setCamera( _camera );
-        _renderers[ renderer.first ]->commit( );
+        _renderers[renderer.first]->setScene(_scene);
+        _renderers[renderer.first]->setCamera(_camera);
+        _renderers[renderer.first]->commit();
     }
-    _camera->commit( );
+    _camera->commit();
 }
 
 void OSPRayEngine::render()
 {
     _scene->commitVolumeData();
     _scene->commitSimulationData();
-    _renderers[ _activeRenderer ]->commit();
-    _renderers[ _activeRenderer ]->render( _frameBuffer );
+    _renderers[_activeRenderer]->commit();
+    _renderers[_activeRenderer]->render(_frameBuffer);
 }
 
 void OSPRayEngine::preRender()
@@ -117,5 +118,4 @@ void OSPRayEngine::postRender()
 {
     _frameBuffer->unmap();
 }
-
 }

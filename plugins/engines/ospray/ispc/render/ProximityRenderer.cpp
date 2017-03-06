@@ -25,44 +25,38 @@
 // ispc exports
 #include "ProximityRenderer_ispc.h"
 
-#define OSP_REGISTER_EXRENDERER( InternalClassName, external_name )\
-extern "C" ospray::Renderer *ospray_create_renderer__##external_name( )\
-{\
-    return new InternalClassName;\
-}
+#define OSP_REGISTER_EXRENDERER(InternalClassName, external_name)          \
+    extern "C" ospray::Renderer* ospray_create_renderer__##external_name() \
+    {                                                                      \
+        return new InternalClassName;                                      \
+    }
 
 namespace brayns
 {
-
-void ProximityRenderer::commit( )
+void ProximityRenderer::commit()
 {
-    AbstractRenderer::commit( );
+    AbstractRenderer::commit();
 
-    _nearColor = getParam3f( "detectionNearColor", ospray::vec3f( 0.f, 1.f, 0.f ));
-    _farColor = getParam3f( "detectionFarColor", ospray::vec3f( 1.f, 0.f, 0.f ));
-    _detectionDistance = getParam1f( "detectionDistance", 1.f );
-    _detectionOnDifferentMaterial = bool( getParam1i( "detectionOnDifferentMaterial", 0 ));
+    _nearColor = getParam3f("detectionNearColor", ospray::vec3f(0.f, 1.f, 0.f));
+    _farColor = getParam3f("detectionFarColor", ospray::vec3f(1.f, 0.f, 0.f));
+    _detectionDistance = getParam1f("detectionDistance", 1.f);
+    _detectionOnDifferentMaterial =
+        bool(getParam1i("detectionOnDifferentMaterial", 0));
 
-    ispc::ProximityRenderer_set(
-                getIE( ),
-                ( ispc::vec3f& )_bgColor,
-                ( ispc::vec3f& )_nearColor,
-                ( ispc::vec3f& )_farColor,
-                _detectionDistance,
-                _detectionOnDifferentMaterial,
-                _randomNumber,
-                _timestamp,
-                _spp,
-                _electronShadingEnabled,
-                _lightPtr, _lightArray.size(),
-                _materialPtr, _materialArray.size());
+    ispc::ProximityRenderer_set(getIE(), (ispc::vec3f&)_bgColor,
+                                (ispc::vec3f&)_nearColor,
+                                (ispc::vec3f&)_farColor, _detectionDistance,
+                                _detectionOnDifferentMaterial, _randomNumber,
+                                _timestamp, _spp, _electronShadingEnabled,
+                                _lightPtr, _lightArray.size(), _materialPtr,
+                                _materialArray.size());
 }
 
-ProximityRenderer::ProximityRenderer( )
+ProximityRenderer::ProximityRenderer()
 {
-    ispcEquivalent = ispc::ProximityRenderer_create( this );
+    ispcEquivalent = ispc::ProximityRenderer_create(this);
 }
 
-OSP_REGISTER_EXRENDERER( ProximityRenderer, PROXIMITYRENDERER );
-OSP_REGISTER_EXRENDERER( ProximityRenderer, proximityrenderer );
+OSP_REGISTER_EXRENDERER(ProximityRenderer, PROXIMITYRENDERER);
+OSP_REGISTER_EXRENDERER(ProximityRenderer, proximityrenderer);
 }

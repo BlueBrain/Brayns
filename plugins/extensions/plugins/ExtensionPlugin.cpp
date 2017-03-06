@@ -22,9 +22,7 @@
 
 namespace brayns
 {
-
 ExtensionPlugin::ExtensionPlugin()
 {
 }
-
 }

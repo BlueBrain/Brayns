@@ -25,14 +25,12 @@
 
 namespace brayns
 {
-
 const float DEFAULT_GAMMA = 2.2f;
 
-OSPRayFrameBuffer::OSPRayFrameBuffer(
-    const Vector2ui& frameSize,
-    const FrameBufferFormat colorDepth,
-    const bool accumulation )
-    : FrameBuffer( frameSize, colorDepth, accumulation )
+OSPRayFrameBuffer::OSPRayFrameBuffer(const Vector2ui& frameSize,
+                                     const FrameBufferFormat colorDepth,
+                                     const bool accumulation)
+    : FrameBuffer(frameSize, colorDepth, accumulation)
     , _frameBuffer(0)
     , _colorBuffer(0)
     , _depthBuffer(0)
@@ -46,38 +44,36 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
     ospFreeFrameBuffer(_frameBuffer);
 }
 
-void OSPRayFrameBuffer::resize(
-    const Vector2ui& frameSize )
+void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
 {
     _frameSize = frameSize;
 
-    if( _frameBuffer )
+    if (_frameBuffer)
     {
         unmap();
         ospFreeFrameBuffer(_frameBuffer);
     }
 
     OSPFrameBufferFormat format;
-    switch(_frameBufferFormat)
+    switch (_frameBufferFormat)
     {
-        case FBF_RGBA_I8:
-            format = OSP_FB_SRGBA; // maybe OSP_FB_RGBA8;
-            break;
-        case FBF_RGBA_F32:
-            format = OSP_FB_RGBA32F;
-            break;
-        default:
-            format = OSP_FB_NONE;
+    case FBF_RGBA_I8:
+        format = OSP_FB_SRGBA; // maybe OSP_FB_RGBA8;
+        break;
+    case FBF_RGBA_F32:
+        format = OSP_FB_RGBA32F;
+        break;
+    default:
+        format = OSP_FB_NONE;
     }
 
-    osp::vec2i size = { _frameSize.x(), _frameSize.y() };
-
+    osp::vec2i size = {_frameSize.x(), _frameSize.y()};
 
     size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
-    if( _accumulation )
+    if (_accumulation)
         attributes |= OSP_FB_ACCUM;
 
-    _frameBuffer = ospNewFrameBuffer( size, format, attributes );
+    _frameBuffer = ospNewFrameBuffer(size, format, attributes);
     ospSet1f(_frameBuffer, "gamma", DEFAULT_GAMMA);
     ospCommit(_frameBuffer);
     clear();
@@ -86,30 +82,29 @@ void OSPRayFrameBuffer::resize(
 void OSPRayFrameBuffer::clear()
 {
     size_t attributes = 0;
-    if( _accumulation )
+    if (_accumulation)
         attributes |= OSP_FB_ACCUM;
-    ospFrameBufferClear( _frameBuffer, attributes );
+    ospFrameBufferClear(_frameBuffer, attributes);
 }
 
 void OSPRayFrameBuffer::map()
 {
-    _colorBuffer = (uint8_t *)ospMapFrameBuffer( _frameBuffer, OSP_FB_COLOR );
-    _depthBuffer = (float *)ospMapFrameBuffer( _frameBuffer, OSP_FB_DEPTH );
+    _colorBuffer = (uint8_t*)ospMapFrameBuffer(_frameBuffer, OSP_FB_COLOR);
+    _depthBuffer = (float*)ospMapFrameBuffer(_frameBuffer, OSP_FB_DEPTH);
 }
 
 void OSPRayFrameBuffer::unmap()
 {
-    if( _colorBuffer )
+    if (_colorBuffer)
     {
-        ospUnmapFrameBuffer( _colorBuffer, _frameBuffer );
+        ospUnmapFrameBuffer(_colorBuffer, _frameBuffer);
         _colorBuffer = 0;
     }
 
-    if( _depthBuffer )
+    if (_depthBuffer)
     {
-        ospUnmapFrameBuffer( _depthBuffer, _frameBuffer );
+        ospUnmapFrameBuffer(_depthBuffer, _frameBuffer);
         _depthBuffer = 0;
     }
 }
-
 }

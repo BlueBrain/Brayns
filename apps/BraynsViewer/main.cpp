@@ -19,12 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <brayns/Brayns.h>
-#include <brayns/common/types.h>
-#include <brayns/common/log.h>
-#include <brayns/common/engine/Engine.h>
-#include <brayns/parameters/ParametersManager.h>
 #include "BraynsViewer.h"
+#include <brayns/Brayns.h>
+#include <brayns/common/engine/Engine.h>
+#include <brayns/common/log.h>
+#include <brayns/common/types.h>
+#include <brayns/parameters/ParametersManager.h>
 
 brayns::Brayns* braynsInstance;
 
@@ -33,22 +33,23 @@ void cleanup()
     delete braynsInstance;
 }
 
-int main(int argc, const char **argv)
+int main(int argc, const char** argv)
 {
     try
     {
-        braynsInstance = new brayns::Brayns( argc, argv );
-        brayns::initGLUT( &argc, argv );
-        brayns::BraynsViewer braynsViewer( *braynsInstance );
+        braynsInstance = new brayns::Brayns(argc, argv);
+        brayns::initGLUT(&argc, argv);
+        brayns::BraynsViewer braynsViewer(*braynsInstance);
         BRAYNS_INFO << "Initializing Application..." << std::endl;
-        const brayns::Vector2ui& size =
-            braynsInstance->getParametersManager().getApplicationParameters().getWindowSize();
+        const brayns::Vector2ui& size = braynsInstance->getParametersManager()
+                                            .getApplicationParameters()
+                                            .getWindowSize();
 
-        braynsViewer.create( "Brayns Viewer", size.x(), size.y( ));
-        atexit( cleanup );
+        braynsViewer.create("Brayns Viewer", size.x(), size.y());
+        atexit(cleanup);
         brayns::runGLUT();
     }
-    catch( const std::runtime_error& e )
+    catch (const std::runtime_error& e)
     {
         BRAYNS_ERROR << e.what() << std::endl;
         return 1;

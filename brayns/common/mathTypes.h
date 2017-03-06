@@ -25,7 +25,6 @@
 
 namespace brayns
 {
-
 /**
  * AABB definitions
  */
@@ -43,7 +42,7 @@ using vmml::Matrix3d;
 using vmml::Matrix4d;
 
 using vmml::Matrix4f;
-typedef std::vector< Matrix4f > Matrix4fs;
+typedef std::vector<Matrix4f> Matrix4fs;
 
 /**
  * Vector definitions
@@ -79,9 +78,8 @@ typedef std::vector<Vector4d> Vector4ds;
 /**
  * Quaternion definitions
  */
-typedef vmml::Quaternion<float> Quaternionf; //!< Float quaternion.
+typedef vmml::Quaternion<float> Quaternionf;  //!< Float quaternion.
 typedef vmml::Quaternion<double> Quaterniond; //!< Double quaternion.
-
 }
 
 #endif // _mathTypes_h_

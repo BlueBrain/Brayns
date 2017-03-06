@@ -24,13 +24,12 @@
 #include <brayns/common/types.h>
 
 // Error check/report helper for users of the C API
-#define RT_CHECK_ERROR( func ) \
-  do \
-  { \
-    RTresult code = func; \
-    if( code != RT_SUCCESS ) \
-      throw std::runtime_error( "OptiX exception" ); \
-  } \
-  while( 0 )
+#define RT_CHECK_ERROR(func)                             \
+    do                                                   \
+    {                                                    \
+        RTresult code = func;                            \
+        if (code != RT_SUCCESS)                          \
+            throw std::runtime_error("OptiX exception"); \
+    } while (0)
 
 #endif // OPTIXUTILS_H
