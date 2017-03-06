@@ -21,18 +21,17 @@
 #ifndef PARAMETERSMANAGER_H
 #define PARAMETERSMANAGER_H
 
+#include <boost/program_options.hpp>
 #include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <boost/program_options.hpp>
 #include <brayns/parameters/ApplicationParameters.h>
-#include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
+#include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
 {
-
 /**
    Class managing all parameters registered by the application. By default
    this class create an instance of Application, Rendering, and Geometry
@@ -49,7 +48,7 @@ public:
        Registers specific parameters to the manager
        @param parameters to be registered
      */
-    BRAYNS_API void registerParameters( AbstractParameters* parameters );
+    BRAYNS_API void registerParameters(AbstractParameters* parameters);
 
     /**
        Displays usage of registered parameters
@@ -66,7 +65,7 @@ public:
        @param argc number of command line parameters
        @param argv actual command line parameters
      */
-    BRAYNS_API void parse( int argc, const char **argv );
+    BRAYNS_API void parse(int argc, const char** argv);
 
     /**
        Gets rendering parameters
@@ -102,10 +101,10 @@ public:
        Sets a parameter (application, geometry, rendering, etc). If the
        parameter is not registered, the setting is ignored.
      */
-    void set( const std::string& key, const std::string& value );
+    void set(const std::string& key, const std::string& value);
 
 private:
-    std::vector< AbstractParameters* > _parameterSets;
+    std::vector<AbstractParameters*> _parameterSets;
     po::options_description _parameters;
     ApplicationParameters _applicationParameters;
     RenderingParameters _renderingParameters;
@@ -113,6 +112,5 @@ private:
     SceneParameters _sceneParameters;
     VolumeParameters _volumeParameters;
 };
-
 }
 #endif // PARAMETERSMANAGER_H

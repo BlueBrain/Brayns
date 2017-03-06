@@ -27,24 +27,26 @@
 
 namespace brayns
 {
-
-class Exception: public std::exception
+class Exception : public std::exception
 {
 public:
-    Exception(const std::string& message) : _message(message) {}
+    Exception(const std::string& message)
+        : _message(message)
+    {
+    }
 
 protected:
     std::string _message;
 };
 
-class BadParameter: public Exception
+class BadParameter : public Exception
 {
 public:
-    BadParameter(const std::string& message) : Exception(message)
+    BadParameter(const std::string& message)
+        : Exception(message)
     {
         BRAYNS_ERROR << "<" << _message << "> is a bad parameter" << std::endl;
     }
 };
-
 }
 #endif // EXCEPTIONS_H

@@ -25,46 +25,35 @@
 
 namespace brayns
 {
-
 class SceneParameters final : public AbstractParameters
 {
 public:
     SceneParameters();
 
     /** @copydoc AbstractParameters::print */
-    void print( ) final;
+    void print() final;
 
     /**
        Defines the current timestamp for the scene. The unit is not universally
        specified and is therefore specific to the scene.
     */
-    float getTimestamp( ) const { return _timestamp; }
-    void setTimestamp( const float value ) { _timestamp = value; }
-
+    float getTimestamp() const { return _timestamp; }
+    void setTimestamp(const float value) { _timestamp = value; }
     /** The (frame) delta to apply for animations to select the next frame. */
-    void setAnimationDelta( const int32_t animation ) { _animation = animation; }
+    void setAnimationDelta(const int32_t animation) { _animation = animation; }
     int32_t getAnimationDelta() const { return _animation; }
-
     const std::string& getColorMapFilename() const { return _colorMapFilename; }
-
     /**
        file name of the environment map
     */
-    const std::string& getEnvironmentMap() const
-    {
-        return _environmentMap;
-    }
-
+    const std::string& getEnvironmentMap() const { return _environmentMap; }
 protected:
-
-    bool _parse( const po::variables_map& vm ) final;
+    bool _parse(const po::variables_map& vm) final;
 
     float _timestamp;
     int32_t _animation = 0;
     std::string _colorMapFilename;
     std::string _environmentMap;
-
 };
-
 }
 #endif // SCENEPARAMETERS_H

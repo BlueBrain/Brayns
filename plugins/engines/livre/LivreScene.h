@@ -26,12 +26,11 @@
 
 namespace brayns
 {
-
 class LivreScene : public Scene
 {
 public:
-    LivreScene( const Renderers& renderer, ParametersManager& parametersManager,
-                livre::Engine& livre );
+    LivreScene(const Renderers& renderer, ParametersManager& parametersManager,
+               livre::Engine& livre);
 
     /** Update transfer function Livre RenderSettings. */
     void commitTransferFunctionData() final;
@@ -52,7 +51,7 @@ public:
     void commitLights() final;
 
     /** Unsupported by Livre. */
-    void commitMaterials( const bool updateOnly = false ) final;
+    void commitMaterials(const bool updateOnly = false) final;
 
     /** Unsupported by Livre. */
     void commitSimulationData() final;
@@ -61,10 +60,9 @@ public:
     void saveSceneToCacheFile() final;
 
     /** @copydoc Scene::isVolumeSupported */
-    bool isVolumeSupported( const std::string& volumeFile ) const final;
+    bool isVolumeSupported(const std::string& volumeFile) const final;
 
 private:
     livre::Engine& _livre;
 };
-
 }

@@ -21,8 +21,8 @@
 #ifndef MORPHOLOGY_LOADER_H
 #define MORPHOLOGY_LOADER_H
 
-#include <brayns/common/types.h>
 #include <brayns/common/geometry/Primitive.h>
+#include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <servus/types.h>
@@ -31,12 +31,11 @@
 
 namespace brion
 {
-    class CompartmentReport;
+class CompartmentReport;
 }
 
 namespace brayns
 {
-
 /** Simulation data hold the pointers to data contained by one single frame
  * of the simulation.
  * comparmentCounts: Number of compartments per section
@@ -53,8 +52,7 @@ struct SimulationInformation
 class MorphologyLoader
 {
 public:
-    MorphologyLoader(
-            const GeometryParameters& geometryParameters);
+    MorphologyLoader(const GeometryParameters& geometryParameters);
 
     /** Imports morphology from a given SWC or H5 file
      *
@@ -64,10 +62,8 @@ public:
      * @param scene resulting scene
      * @return True if the morphology is successfully loaded, false otherwise
      */
-    bool importMorphology(
-        const servus::URI& uri,
-        int morphologyIndex,
-        Scene& scene);
+    bool importMorphology(const servus::URI& uri, int morphologyIndex,
+                          Scene& scene);
 
     /** Imports morphology from a circuit for the given target name
      *
@@ -80,11 +76,9 @@ public:
      * @return True if the circuit is successfully loaded, false if the circuit
      *         contains no cells.
      */
-    bool importCircuit(
-        const servus::URI& circuitConfig,
-        const std::string& target,
-        const std::string& report,
-        Scene& scene);
+    bool importCircuit(const servus::URI& circuitConfig,
+                       const std::string& target, const std::string& report,
+                       Scene& scene);
 
     /** Imports morphology from a circuit for the given target name
      *
@@ -96,10 +90,8 @@ public:
      * @return True if the circuit is successfully loaded, false if the circuit
      *         contains no cells.
      */
-    bool importCircuit(
-        const servus::URI& circuitConfig,
-        const std::string& target,
-        Scene& scene);
+    bool importCircuit(const servus::URI& circuitConfig,
+                       const std::string& target, Scene& scene);
 
     /** Imports simulation data into the scene
      * @param circuitConfig URI of the Circuit Config file
@@ -108,43 +100,33 @@ public:
      *        exist, all neurons are loaded.
      * @param report report to be loaded.
      * @param scene to load the simulation data in.
-     * @return True if simulation cache file successfully opened or created, false otherwise
+     * @return True if simulation cache file successfully opened or created,
+     * false otherwise
      */
-    bool importSimulationData(
-        const servus::URI& circuitConfig,
-        const std::string& target,
-        const std::string& report,
-        Scene& scene );
+    bool importSimulationData(const servus::URI& circuitConfig,
+                              const std::string& target,
+                              const std::string& report, Scene& scene);
 
 private:
+    bool _importMorphology(const servus::URI& source, size_t morphologyIndex,
+                           const Matrix4f& transformation,
+                           const SimulationInformation* simulationInformation,
+                           SpheresMap& spheres, CylindersMap& cylinders,
+                           ConesMap& cones, Boxf& bounds,
+                           const size_t simulationOffset,
+                           float& maxDistanceToSoma);
 
-    bool _importMorphology(
-        const servus::URI& source,
-        size_t morphologyIndex,
-        const Matrix4f& transformation,
-        const SimulationInformation* simulationInformation,
-        SpheresMap& spheres,
-        CylindersMap& cylinders,
-        ConesMap& cones,
-        Boxf& bounds,
-        const size_t simulationOffset,
-        float& maxDistanceToSoma);
+    bool _importMorphologyAsMesh(const servus::URI& source,
+                                 const size_t morphologyIndex,
+                                 const MaterialsMap& materials,
+                                 const Matrix4f& transformation,
+                                 TrianglesMeshMap& meshes, Boxf& bounds);
 
-    bool _importMorphologyAsMesh(
-        const servus::URI& source,
-        const size_t morphologyIndex,
-        const MaterialsMap& materials,
-        const Matrix4f& transformation,
-        TrianglesMeshMap& meshes,
-        Boxf& bounds);
-
-    size_t _getMaterialFromSectionType(
-        size_t morphologyIndex,
-        size_t sectionType );
+    size_t _getMaterialFromSectionType(size_t morphologyIndex,
+                                       size_t sectionType);
 
     const GeometryParameters& _geometryParameters;
 };
-
 }
 
 #endif // MORPHOLOGY_LOADER_H

@@ -21,8 +21,8 @@
 #ifndef OSPRAYRENDERER_H
 #define OSPRAYRENDERER_H
 
-#include <brayns/common/types.h>
 #include <brayns/common/renderer/Renderer.h>
+#include <brayns/common/types.h>
 
 #include <ospray.h>
 
@@ -30,29 +30,24 @@
 
 namespace brayns
 {
-
 class OSPRayRenderer : public brayns::Renderer
 {
 public:
-    OSPRayRenderer(
-        const std::string& name, ParametersManager& parametersMamager );
+    OSPRayRenderer(const std::string& name,
+                   ParametersManager& parametersMamager);
 
-    void render( FrameBufferPtr frameBuffer ) final;
+    void render(FrameBufferPtr frameBuffer) final;
     void commit() final;
 
-    void setCamera( CameraPtr camera ) final;
+    void setCamera(CameraPtr camera) final;
 
     const std::string& getName() const { return _name; }
-
     OSPRenderer impl() const { return _renderer; }
-
 private:
-
     std::string _name;
     OSPRayCamera* _camera;
     OSPRenderer _renderer;
 };
-
 }
 
 #endif // OSPRAYRENDERER_H

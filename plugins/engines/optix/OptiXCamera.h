@@ -26,7 +26,6 @@
 
 namespace brayns
 {
-
 /**
    OptiX specific camera
 
@@ -34,13 +33,9 @@ namespace brayns
 */
 class OptiXCamera : public brayns::Camera
 {
-
 public:
-
-    OptiXCamera(
-        const CameraType cameraType,
-        optix::Context& context,
-        const bool environmentMap );
+    OptiXCamera(const CameraType cameraType, optix::Context& context,
+                const bool environmentMap);
 
     /**
        Commits the changes held by the camera object so that
@@ -53,19 +48,15 @@ public:
        @return OptiX implementation of the camera object
     */
     optix::Program& impl() { return _camera; }
-
     /** @copydoc Camera::setEnvironmentMap */
-    void setEnvironmentMap( const bool environmentMap );
+    void setEnvironmentMap(const bool environmentMap);
 
 private:
-
-    void _calculateCameraVariables( Vector3f& U, Vector3f& V, Vector3f& W );
+    void _calculateCameraVariables(Vector3f& U, Vector3f& V, Vector3f& W);
 
     optix::Program _camera;
     optix::Program _exceptionProgram;
     optix::Context& _context;
-
 };
-
 }
 #endif // OptiXCAMERA_H

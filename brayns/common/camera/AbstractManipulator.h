@@ -25,23 +25,22 @@
 
 namespace brayns
 {
-
 /**
  * Base class for camera manipulators.
  */
 class AbstractManipulator
 {
 public:
-    AbstractManipulator( Camera& camera, KeyboardHandler& keyboardHandler );
+    AbstractManipulator(Camera& camera, KeyboardHandler& keyboardHandler);
     virtual ~AbstractManipulator();
 
-    virtual void dragLeft( const Vector2i& to, const Vector2i& from ) = 0;
-    virtual void dragRight( const Vector2i& to, const Vector2i& from ) = 0;
-    virtual void dragMiddle( const Vector2i& to, const Vector2i& from ) = 0;
-    virtual void wheel( const Vector2i& position, float delta ) = 0;
+    virtual void dragLeft(const Vector2i& to, const Vector2i& from) = 0;
+    virtual void dragRight(const Vector2i& to, const Vector2i& from) = 0;
+    virtual void dragMiddle(const Vector2i& to, const Vector2i& from) = 0;
+    virtual void wheel(const Vector2i& position, float delta) = 0;
 
     float getMotionSpeed() const;
-    void updateMotionSpeed( float speed );
+    void updateMotionSpeed(float speed);
 
     float getRotationSpeed() const;
     float getWheelSpeed() const;
@@ -61,10 +60,9 @@ protected:
      * _rotates_ with each unit on the screen */
     float _rotationSpeed;
 
-    void translate( const Vector3f& v, bool updateTarget );
-    void rotate( const Vector3f& pivot, float du, float dv, bool updateTarget );
+    void translate(const Vector3f& v, bool updateTarget);
+    void rotate(const Vector3f& pivot, float du, float dv, bool updateTarget);
 };
-
 }
 
 #endif

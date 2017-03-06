@@ -22,30 +22,27 @@
 
 namespace brayns
 {
-
-FrameBuffer::FrameBuffer(
-    const Vector2ui& frameSize,
-    const FrameBufferFormat frameBufferFormat,
-    const bool accumulation )
+FrameBuffer::FrameBuffer(const Vector2ui& frameSize,
+                         const FrameBufferFormat frameBufferFormat,
+                         const bool accumulation)
     : _frameSize(frameSize)
     , _frameBufferFormat(frameBufferFormat)
-    , _accumulation( accumulation )
+    , _accumulation(accumulation)
 {
 }
 
 size_t FrameBuffer::getColorDepth()
 {
-    switch(_frameBufferFormat)
+    switch (_frameBufferFormat)
     {
-        case FBF_RGBA_I8:
-        case FBF_BGRA_I8:
-        case FBF_RGBA_F32:
-            return 4;
-        case FBF_RGB_I8:
-            return 3;
-        default:
-            return 0;
+    case FBF_RGBA_I8:
+    case FBF_BGRA_I8:
+    case FBF_RGBA_F32:
+        return 4;
+    case FBF_RGB_I8:
+        return 3;
+    default:
+        return 0;
     }
 }
-
 }

@@ -21,19 +21,18 @@
 #ifndef OSPRAYSCENE_H
 #define OSPRAYSCENE_H
 
-#include <brayns/common/types.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/types.h>
 
-#include <ospray_cpp/Model.h>
-#include <ospray_cpp/Texture2D.h>
 #include <ospray_cpp/Data.h>
 #include <ospray_cpp/Light.h>
+#include <ospray_cpp/Model.h>
+#include <ospray_cpp/Texture2D.h>
 
 #include <fstream>
 
 namespace brayns
 {
-
 /**
 
    OSPRray specific scene
@@ -41,14 +40,10 @@ namespace brayns
    This object is the OSPRay specific implementation of a scene
 
 */
-class OSPRayScene: public brayns::Scene
+class OSPRayScene : public brayns::Scene
 {
-
 public:
-
-    OSPRayScene(
-        Renderers renderer,
-        ParametersManager& parametersManager );
+    OSPRayScene(Renderers renderer, ParametersManager& parametersManager);
 
     /** @copydoc Scene::commit */
     void commit() final;
@@ -63,7 +58,7 @@ public:
     void commitLights() final;
 
     /** @copydoc Scene::commitMaterials */
-    void commitMaterials( const bool updateOnly = false ) final;
+    void commitMaterials(const bool updateOnly = false) final;
 
     /** @copydoc Scene::commitSimulationData */
     void commitSimulationData() final;
@@ -81,28 +76,27 @@ public:
     void saveSceneToCacheFile() final;
 
     /** @copydoc Scene::isVolumeSupported */
-    bool isVolumeSupported( const std::string& volumeFile ) const final;
+    bool isVolumeSupported(const std::string& volumeFile) const final;
 
-    OSPModel* modelImpl( const size_t timestamp );
+    OSPModel* modelImpl(const size_t timestamp);
 
 private:
-
     OSPTexture2D _createTexture2D(const std::string& textureName);
-    void _createModel( const size_t timestamp );
+    void _createModel(const size_t timestamp);
 
-    uint64_t _serializeSpheres( const size_t materialId );
-    uint64_t _serializeCylinders( const size_t materialId );
-    uint64_t _serializeCones( const size_t materialId );
-    uint64_t _buildMeshOSPGeometry( const size_t materialId );
+    uint64_t _serializeSpheres(const size_t materialId);
+    uint64_t _serializeCylinders(const size_t materialId);
+    uint64_t _serializeCones(const size_t materialId);
+    uint64_t _buildMeshOSPGeometry(const size_t materialId);
 
     void _loadCacheFile();
     void _saveCacheFile();
 
-    std::map< size_t, OSPModel > _models;
-    std::vector< OSPMaterial > _ospMaterials;
-    std::map< std::string, OSPTexture2D > _ospTextures;
+    std::map<size_t, OSPModel> _models;
+    std::vector<OSPMaterial> _ospMaterials;
+    std::map<std::string, OSPTexture2D> _ospTextures;
 
-    std::vector< OSPLight > _ospLights;
+    std::vector<OSPLight> _ospLights;
     OSPData _ospLightData;
     OSPData _ospMaterialData;
     OSPData _ospVolumeData;
@@ -110,29 +104,28 @@ private:
     OSPData _ospTransferFunctionDiffuseData;
     OSPData _ospTransferFunctionEmissionData;
 
-    std::map< size_t, OSPGeometry > _ospExtendedSpheres;
-    std::map< size_t, OSPData > _ospExtendedSpheresData;
-    std::map< size_t, OSPGeometry > _ospExtendedCylinders;
-    std::map< size_t, OSPData > _ospExtendedCylindersData;
-    std::map< size_t, OSPGeometry > _ospExtendedCones;
-    std::map< size_t, OSPData > _ospExtendedConesData;
-    std::map< size_t, OSPGeometry > _ospMeshes;
+    std::map<size_t, OSPGeometry> _ospExtendedSpheres;
+    std::map<size_t, OSPData> _ospExtendedSpheresData;
+    std::map<size_t, OSPGeometry> _ospExtendedCylinders;
+    std::map<size_t, OSPData> _ospExtendedCylindersData;
+    std::map<size_t, OSPGeometry> _ospExtendedCones;
+    std::map<size_t, OSPData> _ospExtendedConesData;
+    std::map<size_t, OSPGeometry> _ospMeshes;
 
-    std::map< float, size_t > _timestamps;
+    std::map<float, size_t> _timestamps;
 
-    std::map< size_t, floats > _serializedSpheresData;
-    std::map< size_t, floats > _serializedCylindersData;
-    std::map< size_t, floats > _serializedConesData;
-    std::map< size_t, size_t > _serializedSpheresDataSize;
-    std::map< size_t, size_t > _serializedCylindersDataSize;
-    std::map< size_t, size_t > _serializedConesDataSize;
+    std::map<size_t, floats> _serializedSpheresData;
+    std::map<size_t, floats> _serializedCylindersData;
+    std::map<size_t, floats> _serializedConesData;
+    std::map<size_t, size_t> _serializedSpheresDataSize;
+    std::map<size_t, size_t> _serializedCylindersDataSize;
+    std::map<size_t, size_t> _serializedConesDataSize;
 
-    std::map< size_t, std::map< size_t, size_t > > _timestampSpheresIndices;
-    std::map< size_t, std::map< size_t, size_t > > _timestampCylindersIndices;
-    std::map< size_t, std::map< size_t, size_t > > _timestampConesIndices;
+    std::map<size_t, std::map<size_t, size_t>> _timestampSpheresIndices;
+    std::map<size_t, std::map<size_t, size_t>> _timestampCylindersIndices;
+    std::map<size_t, std::map<size_t, size_t>> _timestampConesIndices;
 
     float _currentTimestamp;
 };
-
 }
 #endif // OSPRAYSCENE_H

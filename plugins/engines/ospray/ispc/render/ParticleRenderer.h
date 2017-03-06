@@ -26,32 +26,23 @@
 
 namespace brayns
 {
-
 class ParticleRenderer : public AbstractRenderer
 {
-
 public:
-
     ParticleRenderer();
 
     /**
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final
-    {
-        return "brayns::ParticleRenderer";
-    }
-
+    std::string toString() const final { return "brayns::ParticleRenderer"; }
     void commit() final;
 
 private:
-
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
+    ospray::Ref<ospray::Data> _simulationData;
+    ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
+    ospray::Ref<ospray::Data> _transferFunctionEmissionData;
     ospray::uint32 _transferFunctionSize;
 };
 
 } // ::brayns
-

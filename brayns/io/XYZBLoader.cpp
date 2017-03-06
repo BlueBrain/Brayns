@@ -26,19 +26,16 @@
 
 namespace brayns
 {
-
-XYZBLoader::XYZBLoader( const GeometryParameters& geometryParameters )
-    : _geometryParameters( geometryParameters )
+XYZBLoader::XYZBLoader(const GeometryParameters& geometryParameters)
+    : _geometryParameters(geometryParameters)
 {
 }
 
-bool XYZBLoader::importFromFile(
-    const std::string& filename,
-    Scene& scene )
+bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
 {
     BRAYNS_INFO << "Loading xyz file from " << filename << std::endl;
-    std::ifstream file( filename, std::ios::in );
-    if( !file.good( ))
+    std::ifstream file(filename, std::ios::in);
+    if (!file.good())
     {
         BRAYNS_ERROR << "Could not open file " << filename << std::endl;
         return false;
@@ -48,24 +45,26 @@ bool XYZBLoader::importFromFile(
     bool validParsing = true;
     std::string line;
 
-    while( validParsing && std::getline( file, line ))
+    while (validParsing && std::getline(file, line))
     {
-        std::vector< float > lineData;
+        std::vector<float> lineData;
         std::stringstream lineStream(line);
 
         float value;
-        while( lineStream >> value )
+        while (lineStream >> value)
             lineData.push_back(value);
 
-        switch( lineData.size() )
+        switch (lineData.size())
         {
         case 3:
         {
-            const Vector3f position( lineData[0], lineData[1], lineData[2] );
+            const Vector3f position(lineData[0], lineData[1], lineData[2]);
             BRAYNS_INFO << position << std::endl;
-            spheres[0].push_back( SpherePtr(
-                new Sphere( 0, position, _geometryParameters.getRadiusMultiplier(), 0.f, 0.f)));
-            scene.getWorldBounds().merge( position );
+            spheres[0].push_back(
+                SpherePtr(new Sphere(0, position,
+                                     _geometryParameters.getRadiusMultiplier(),
+                                     0.f, 0.f)));
+            scene.getWorldBounds().merge(position);
             break;
         }
         default:
@@ -79,13 +78,11 @@ bool XYZBLoader::importFromFile(
     return validParsing;
 }
 
-bool XYZBLoader::importFromBinaryFile(
-    const std::string& filename,
-    Scene& scene )
+bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
 {
     BRAYNS_INFO << "Loading xyzb file from " << filename << std::endl;
-    std::ifstream file( filename, std::ios::in|std::fstream::binary );
-    if( !file.good( ))
+    std::ifstream file(filename, std::ios::in | std::fstream::binary);
+    if (!file.good())
     {
         BRAYNS_ERROR << "Could not open file " << filename << std::endl;
         return false;
@@ -93,26 +90,27 @@ bool XYZBLoader::importFromBinaryFile(
 
     uint64_t progress = 0;
     file.seekg(0, std::ios_base::end);
-    uint64_t nbPoints = file.tellg() / ( 3 * sizeof(double) );
+    uint64_t nbPoints = file.tellg() / (3 * sizeof(double));
     file.seekg(0);
 
     SpheresMap& spheres = scene.getSpheres();
-    while( !file.eof() )
+    while (!file.eof())
     {
-        if( progress % ( nbPoints / 100 ) == 0 )
-            BRAYNS_PROGRESS( progress, nbPoints );
+        if (progress % (nbPoints / 100) == 0)
+            BRAYNS_PROGRESS(progress, nbPoints);
 
-        double x,y,z;
-        file.read((char *)&x, sizeof(double));
-        file.read((char *)&y, sizeof(double));
-        file.read((char *)&z, sizeof(double));
+        double x, y, z;
+        file.read((char*)&x, sizeof(double));
+        file.read((char*)&y, sizeof(double));
+        file.read((char*)&z, sizeof(double));
 
         BRAYNS_DEBUG << x << "," << y << "," << z << std::endl;
 
-        const Vector3f position( x, y, z );
-        spheres[0].push_back( SpherePtr( new Sphere(
-            0, position, _geometryParameters.getRadiusMultiplier(), 0.f, 0.f )));
-        scene.getWorldBounds().merge( position );
+        const Vector3f position(x, y, z);
+        spheres[0].push_back(SpherePtr(
+            new Sphere(0, position, _geometryParameters.getRadiusMultiplier(),
+                       0.f, 0.f)));
+        scene.getWorldBounds().merge(position);
 
         ++progress;
     }
@@ -120,5 +118,4 @@ bool XYZBLoader::importFromBinaryFile(
     file.close();
     return true;
 }
-
 }

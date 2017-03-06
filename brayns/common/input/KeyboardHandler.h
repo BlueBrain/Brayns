@@ -25,11 +25,10 @@
 
 namespace brayns
 {
-
 struct ShortcutInformation
 {
     std::string description;
-    std::function< void() > functor;
+    std::function<void()> functor;
 };
 
 enum class SpecialKey
@@ -42,38 +41,31 @@ enum class SpecialKey
 
 class KeyboardHandler
 {
-
 public:
-
     KeyboardHandler();
 
-    void registerKeyboardShortcut(
-        const unsigned char key,
-        const std::string& description,
-        std::function< void() > functor );
+    void registerKeyboardShortcut(const unsigned char key,
+                                  const std::string& description,
+                                  std::function<void()> functor);
 
-    void unregisterKeyboardShortcut( const unsigned char key );
+    void unregisterKeyboardShortcut(const unsigned char key);
 
-    void handleKeyboardShortcut( const unsigned char key );
+    void handleKeyboardShortcut(const unsigned char key);
 
-    void registerSpecialKey(
-        const SpecialKey key,
-        const std::string& description,
-        std::function< void() > functor );
+    void registerSpecialKey(const SpecialKey key,
+                            const std::string& description,
+                            std::function<void()> functor);
 
-    void unregisterSpecialKey( const SpecialKey key );
+    void unregisterSpecialKey(const SpecialKey key);
 
-    void handle( const SpecialKey key );
+    void handle(const SpecialKey key);
 
     std::string help();
 
 private:
-
-    std::map< unsigned char, ShortcutInformation > _registeredShortcuts;
-    std::map< SpecialKey, ShortcutInformation > _registeredSpecialKeys;
-
+    std::map<unsigned char, ShortcutInformation> _registeredShortcuts;
+    std::map<SpecialKey, ShortcutInformation> _registeredSpecialKeys;
 };
-
 }
 
 #endif // KEYBOARDHANDLER_H

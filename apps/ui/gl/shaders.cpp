@@ -27,65 +27,65 @@
 
 namespace brayns
 {
-
-bool compile( const unsigned shader, const char* source )
+bool compile(const unsigned shader, const char* source)
 {
-    glShaderSource( shader, 1, &source, 0 );
-    glCompileShader( shader );
+    glShaderSource(shader, 1, &source, 0);
+    glCompileShader(shader);
     GLint status;
-    glGetShaderiv( shader, GL_COMPILE_STATUS, &status );
-    if( !status )
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+    if (!status)
     {
         GLchar errorLog[1024] = {0};
-        glGetShaderInfoLog( shader, 1024, 0, errorLog );
-        BRAYNS_ERROR << "Failed to compile shader " << shader << ": " << errorLog
-                     << std::endl;
-        return false;
-    }
-    return true;
-}
-
-bool linkProgram( const unsigned program, const char* vertexShaderSource,
-                  const char* fragmentShaderSource )
-{
-    if( !program || !vertexShaderSource || !fragmentShaderSource )
-    {
-        BRAYNS_ERROR << "Failed to link shader program " << program << ": No valid "
-                        "shader program, vertex or fragment source." << std::endl;
-        return false;
-    }
-
-    const GLuint vertexShader = glCreateShader( GL_VERTEX_SHADER );
-    if( !compile( vertexShader, vertexShaderSource ))
-    {
-        glDeleteShader( vertexShader );
-        return false;
-    }
-
-    const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
-    if( !compile( fragmentShader, fragmentShaderSource ))
-    {
-        glDeleteShader( fragmentShader );
-        return false;
-    }
-
-    glAttachShader( program, vertexShader );
-    glAttachShader( program, fragmentShader );
-    glDeleteShader( vertexShader );
-    glDeleteShader( fragmentShader );
-
-    glLinkProgram( program );
-    GLint status;
-    glGetProgramiv( program, GL_LINK_STATUS, &status );
-    if( !status )
-    {
-        GLchar errorLog[1024] = {0};
-        glGetProgramInfoLog( program, 1024, 0, errorLog );
-        BRAYNS_ERROR << "Failed to link shader program " << program << ": "
+        glGetShaderInfoLog(shader, 1024, 0, errorLog);
+        BRAYNS_ERROR << "Failed to compile shader " << shader << ": "
                      << errorLog << std::endl;
         return false;
     }
     return true;
 }
 
+bool linkProgram(const unsigned program, const char* vertexShaderSource,
+                 const char* fragmentShaderSource)
+{
+    if (!program || !vertexShaderSource || !fragmentShaderSource)
+    {
+        BRAYNS_ERROR << "Failed to link shader program " << program
+                     << ": No valid "
+                        "shader program, vertex or fragment source."
+                     << std::endl;
+        return false;
+    }
+
+    const GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    if (!compile(vertexShader, vertexShaderSource))
+    {
+        glDeleteShader(vertexShader);
+        return false;
+    }
+
+    const GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    if (!compile(fragmentShader, fragmentShaderSource))
+    {
+        glDeleteShader(fragmentShader);
+        return false;
+    }
+
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    glLinkProgram(program);
+    GLint status;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    if (!status)
+    {
+        GLchar errorLog[1024] = {0};
+        glGetProgramInfoLog(program, 1024, 0, errorLog);
+        BRAYNS_ERROR << "Failed to link shader program " << program << ": "
+                     << errorLog << std::endl;
+        return false;
+    }
+    return true;
+}
 }

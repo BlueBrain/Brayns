@@ -26,7 +26,6 @@
 
 namespace brayns
 {
-
 /**
    OPSRAY specific camera
 
@@ -35,7 +34,7 @@ namespace brayns
 class OSPRayCamera : public brayns::Camera
 {
 public:
-    OSPRayCamera( const CameraType cameraType );
+    OSPRayCamera(const CameraType cameraType);
 
     /**
        Commits the changes held by the camera object so that
@@ -48,13 +47,11 @@ public:
        @return OSPRay implementation of the camera object
     */
     OSPCamera impl() { return _camera; }
-
     /** @copydoc Camera::setEnvironmentMap */
-    void setEnvironmentMap( const bool environmentMap ) final;
+    void setEnvironmentMap(const bool environmentMap) final;
 
 private:
     OSPCamera _camera;
 };
-
 }
 #endif // OSPRAYCAMERA_H

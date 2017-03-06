@@ -22,10 +22,9 @@
 
 namespace brayns
 {
-
 Material::Material()
-    : _color(0.f,0.f,0.f)
-    , _specularColor(0.f,0.f,0.f)
+    : _color(0.f, 0.f, 0.f)
+    , _specularColor(0.f, 0.f, 0.f)
     , _specularExponent(0.f)
     , _reflectionIndex(0.f)
     , _opacity(1.f)
@@ -34,10 +33,8 @@ Material::Material()
 {
 }
 
-void Material::setTexture( const TextureType& type,
-                           const std::string& filename )
+void Material::setTexture(const TextureType& type, const std::string& filename)
 {
     _textures[type] = filename;
 }
-
 }

@@ -33,57 +33,56 @@ const size_t DEFAULT_SAMPLES_PER_RAY = 128;
 
 namespace brayns
 {
-
 VolumeParameters::VolumeParameters()
-    : AbstractParameters( "Volume" )
-    , _dimensions( 0, 0, 0 )
-    , _elementSpacing( 1.f, 1.f, 1.f )
-    , _offset( 0.f, 0.f, 0.f )
-    , _spr( DEFAULT_SAMPLES_PER_RAY )
+    : AbstractParameters("Volume")
+    , _dimensions(0, 0, 0)
+    , _elementSpacing(1.f, 1.f, 1.f)
+    , _offset(0.f, 0.f, 0.f)
+    , _spr(DEFAULT_SAMPLES_PER_RAY)
 {
-    _parameters.add_options()
-        ( PARAM_VOLUME_FOLDER.c_str(), po::value< std::string >(),
-            "Folder containing RAW 8bit volume files [string]" )
-        ( PARAM_VOLUME_FILENAME.c_str(), po::value< std::string >(),
-            "File containing RAW 8bit volume data [string]" )
-        ( PARAM_VOLUME_DIMENSIONS.c_str(), po::value< size_ts >()->multitoken(),
-            "Volume dimensions [int int int]" )
-        ( PARAM_VOLUME_ELEMENT_SPACING.c_str(), po::value< floats >()->multitoken(),
-            "Element spacing in the volume [int int int]" )
-        ( PARAM_VOLUME_OFFSET.c_str(), po::value< floats >()->multitoken(),
-            "Volume offset [int int int]" )
-        ( PARAM_VOLUME_SPR.c_str(), po::value< size_t >(),
-            "Volume samples per ray [int]" );
+    _parameters.add_options()(
+        PARAM_VOLUME_FOLDER.c_str(), po::value<std::string>(),
+        "Folder containing RAW 8bit volume files [string]")(
+        PARAM_VOLUME_FILENAME.c_str(), po::value<std::string>(),
+        "File containing RAW 8bit volume data [string]")(
+        PARAM_VOLUME_DIMENSIONS.c_str(), po::value<size_ts>()->multitoken(),
+        "Volume dimensions [int int int]")(
+        PARAM_VOLUME_ELEMENT_SPACING.c_str(), po::value<floats>()->multitoken(),
+        "Element spacing in the volume [int int int]")(
+        PARAM_VOLUME_OFFSET.c_str(), po::value<floats>()->multitoken(),
+        "Volume offset [int int int]")(PARAM_VOLUME_SPR.c_str(),
+                                       po::value<size_t>(),
+                                       "Volume samples per ray [int]");
 }
 
-bool VolumeParameters::_parse( const po::variables_map& vm )
+bool VolumeParameters::_parse(const po::variables_map& vm)
 {
-    if( vm.count( PARAM_VOLUME_FOLDER ))
-        _folder = vm[PARAM_VOLUME_FOLDER].as< std::string >();
+    if (vm.count(PARAM_VOLUME_FOLDER))
+        _folder = vm[PARAM_VOLUME_FOLDER].as<std::string>();
 
-    if( vm.count( PARAM_VOLUME_FILENAME ))
-        _filename = vm[PARAM_VOLUME_FILENAME].as< std::string >();
+    if (vm.count(PARAM_VOLUME_FILENAME))
+        _filename = vm[PARAM_VOLUME_FILENAME].as<std::string>();
 
-    if( vm.count( PARAM_VOLUME_DIMENSIONS ))
+    if (vm.count(PARAM_VOLUME_DIMENSIONS))
     {
-        size_ts values = vm[PARAM_VOLUME_DIMENSIONS].as< size_ts >();
-        if( values.size() == 3 )
-            _dimensions = Vector3ui( values[0], values[1], values[2] );
+        size_ts values = vm[PARAM_VOLUME_DIMENSIONS].as<size_ts>();
+        if (values.size() == 3)
+            _dimensions = Vector3ui(values[0], values[1], values[2]);
     }
-    if( vm.count( PARAM_VOLUME_ELEMENT_SPACING ))
+    if (vm.count(PARAM_VOLUME_ELEMENT_SPACING))
     {
-        floats values = vm[PARAM_VOLUME_ELEMENT_SPACING].as< floats >();
-        if( values.size() == 3 )
-            _elementSpacing = Vector3f( values[0], values[1], values[2] );
+        floats values = vm[PARAM_VOLUME_ELEMENT_SPACING].as<floats>();
+        if (values.size() == 3)
+            _elementSpacing = Vector3f(values[0], values[1], values[2]);
     }
-    if( vm.count( PARAM_VOLUME_OFFSET ))
+    if (vm.count(PARAM_VOLUME_OFFSET))
     {
-        floats values = vm[PARAM_VOLUME_OFFSET].as< floats >();
-        if( values.size() == 3 )
-            _offset = Vector3f( values[0], values[1], values[2] );
+        floats values = vm[PARAM_VOLUME_OFFSET].as<floats>();
+        if (values.size() == 3)
+            _offset = Vector3f(values[0], values[1], values[2]);
     }
-    if( vm.count( PARAM_VOLUME_SPR ))
-        _spr = vm[PARAM_VOLUME_SPR].as< size_t >();
+    if (vm.count(PARAM_VOLUME_SPR))
+        _spr = vm[PARAM_VOLUME_SPR].as<size_t>();
     return true;
 }
 
@@ -97,5 +96,4 @@ void VolumeParameters::print()
     BRAYNS_INFO << "Offset          : " << _offset << std::endl;
     BRAYNS_INFO << "Samples per ray : " << _spr << std::endl;
 }
-
 }

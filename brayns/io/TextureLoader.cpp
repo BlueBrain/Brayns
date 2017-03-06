@@ -23,23 +23,21 @@
 #include <brayns/common/log.h>
 
 #ifdef BRAYNS_USE_MAGICKPP
-#  define MAGICKCORE_HDRI_ENABLE true
-#  define MAGICKCORE_QUANTUM_DEPTH 32
-#  include <Magick++.h>
+#define MAGICKCORE_HDRI_ENABLE true
+#define MAGICKCORE_QUANTUM_DEPTH 32
+#include <Magick++.h>
 #endif
 
 namespace brayns
 {
-
 TextureLoader::TextureLoader()
 {
 }
 
 #ifdef BRAYNS_USE_MAGICKPP
-bool TextureLoader::loadTexture(
-    TexturesMap& textures,
-    const TextureType textureType,
-    const std::string& filename)
+bool TextureLoader::loadTexture(TexturesMap& textures,
+                                const TextureType textureType,
+                                const std::string& filename)
 {
     if (textures.find(filename) != textures.end())
         return true;
@@ -60,19 +58,19 @@ bool TextureLoader::loadTexture(
         texture->setDepth(1);
         texture->setRawData((unsigned char*)blob.data(), totalSize);
 
-        BRAYNS_INFO << filename << ": " <<
-            texture->getWidth() << "x" << texture->getHeight() << "x" <<
-            texture->getNbChannels() << "x" << texture->getDepth() <<
-            " added to the texture cache" << std::endl;
+        BRAYNS_INFO << filename << ": " << texture->getWidth() << "x"
+                    << texture->getHeight() << "x" << texture->getNbChannels()
+                    << "x" << texture->getDepth()
+                    << " added to the texture cache" << std::endl;
         textures[filename] = texture;
     }
-    catch( Magick::Warning &warning )
+    catch (Magick::Warning& warning)
     {
         // Handle any other Magick++ warning.
         BRAYNS_WARN << warning.what() << std::endl;
         return false;
     }
-    catch( Magick::ErrorFileOpen &error )
+    catch (Magick::ErrorFileOpen& error)
     {
         // Process Magick++ file open error
         BRAYNS_ERROR << error.what() << std::endl;
@@ -81,12 +79,11 @@ bool TextureLoader::loadTexture(
     return true;
 }
 #else
-bool TextureLoader::loadTexture(
-    TexturesMap&, const TextureType, const std::string& filename )
+bool TextureLoader::loadTexture(TexturesMap&, const TextureType,
+                                const std::string& filename)
 {
     BRAYNS_ERROR << "ImageMagick is required to load " << filename << std::endl;
     return false;
 }
 #endif
-
 }

@@ -25,23 +25,24 @@
 
 namespace brayns
 {
-
-/** Loads transfer function from text file where every line contains a space separated
+/** Loads transfer function from text file where every line contains a space
+ * separated
  *  list of integers for the following attributes:
  *  red: 0..1 value for the RGBA red component
  *  green: 0..1 value for the RGBA green component
  *  blue: 0..1 value for the RGBA blue component
  *  alpha: 0..1 value for the RGBA alpha component defining the opacity of the
- *     surface. This component is optional and is set to DEFAULT_ALPHA if not present
- *  emission: 0..1 value for the light emission component defining the intensity of light
- *     emitted by the surface. This component is optional and is set to DEFAULT_EMISSION if
+ *     surface. This component is optional and is set to DEFAULT_ALPHA if not
+ * present
+ *  emission: 0..1 value for the light emission component defining the intensity
+ * of light
+ *     emitted by the surface. This component is optional and is set to
+ * DEFAULT_EMISSION if
  *     not present
  */
 class TransferFunctionLoader
 {
-
 public:
-
     TransferFunctionLoader();
 
     /**
@@ -51,16 +52,11 @@ public:
      * @return True if the colormap file was successfully loaded, false
      *         otherwise
      */
-    bool loadFromFile(
-        const std::string& filename,
-        Scene& scene );
+    bool loadFromFile(const std::string& filename, Scene& scene);
 
 private:
-
     Vector2f _range;
-
 };
-
 }
 
 #endif // TRANSFERFUNCTIONLOADER_H

@@ -22,14 +22,10 @@
 
 namespace brayns
 {
-
-DirectionalLight::DirectionalLight(
-    const Vector3f& direction,
-    const Vector3f& color,
-    const float intensity )
-    : Light( color, intensity )
-    , _direction( direction )
+DirectionalLight::DirectionalLight(const Vector3f& direction,
+                                   const Vector3f& color, const float intensity)
+    : Light(color, intensity)
+    , _direction(direction)
 {
 }
-
 }

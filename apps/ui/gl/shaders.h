@@ -21,7 +21,6 @@
 
 namespace brayns
 {
-
 /**
  * Compile a shader object from a GLSL source and print errors if any.
  *
@@ -30,7 +29,7 @@ namespace brayns
  * @param source GLSL formatted shader source
  * @return true on successful compilation, false otherwise
  */
-bool compile( const unsigned shader, const char* source );
+bool compile(const unsigned shader, const char* source);
 
 /**
  * Link a shader program from a given vertex and fragment GLSL source and print
@@ -41,8 +40,8 @@ bool compile( const unsigned shader, const char* source );
  * @param fragmentShaderSource GLSL formatted vertex shader source
  * @return true on successful linking, false otherwise
  */
-bool linkProgram( const unsigned program, const char* vertexShaderSource,
-                  const char* fragmentShaderSource );
+bool linkProgram(const unsigned program, const char* vertexShaderSource,
+                 const char* fragmentShaderSource);
 }
 
 #endif // SHADER_H

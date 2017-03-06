@@ -21,60 +21,72 @@
 #ifndef NEST_LOADER_H
 #define NEST_LOADER_H
 
-
-#include <brayns/common/types.h>
 #include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 
 namespace brayns
 {
-
-/** Loads a NEST circuit from file and stores it into a cache file containing the activation
- * timestamp for every GUID of every frame. The cache file full path is specified by the
- * --nest-cache-file command line parameter. If the cache file does not exist, it is created and
- * populated by the import process. The format of the cache file is a array of float values
- * representing the activation timestamp by GUID. GUID are ordered in the same way as they are
- * read from the original NEST circuit. All frames of the simulation are stored one after the other.
- * The cache file contains a header of two uint64_t. The first one is the number of frame, and the
- * second one is the frame size (the number of floats per frame). The cache file is handled bu the
+/** Loads a NEST circuit from file and stores it into a cache file containing
+ * the activation
+ * timestamp for every GUID of every frame. The cache file full path is
+ * specified by the
+ * --nest-cache-file command line parameter. If the cache file does not exist,
+ * it is created and
+ * populated by the import process. The format of the cache file is a array of
+ * float values
+ * representing the activation timestamp by GUID. GUID are ordered in the same
+ * way as they are
+ * read from the original NEST circuit. All frames of the simulation are stored
+ * one after the other.
+ * The cache file contains a header of two uint64_t. The first one is the number
+ * of frame, and the
+ * second one is the frame size (the number of floats per frame). The cache file
+ * is handled bu the
  * SpikeSimulationHandler class.
- * Note that in the current implementation, the simulation can only be played forward.
+ * Note that in the current implementation, the simulation can only be played
+ * forward.
  * @todo Move this loaded to Brion
  */
 class NESTLoader
 {
 public:
-
-    NESTLoader( const GeometryParameters& geometryParameters );
+    NESTLoader(const GeometryParameters& geometryParameters);
 
     /**
-     * Imports a circuit into a scene. Every neuron is represented as a sphere, with a given
-     * color, and a radius of 1. The radius can be altered by the --radius-multiplier command line
+     * Imports a circuit into a scene. Every neuron is represented as a sphere,
+     * with a given
+     * color, and a radius of 1. The radius can be altered by the
+     * --radius-multiplier command line
      * argument.
      * @param filename File containing the circuit
      * @param scene Scene in which spheres should be added
-     * @param nbMaterials The number of different materials identified in the circuit
+     * @param nbMaterials The number of different materials identified in the
+     * circuit
      */
-    void importCircuit( const std::string& filename, Scene& scene, size_t& nbMaterials );
+    void importCircuit(const std::string& filename, Scene& scene,
+                       size_t& nbMaterials);
 
     /**
-     * Imports a spike report into the memory mapped cache file that will be attached to the
-     * specified scene at the end of the loading. If the cache file does not exists, it is created.
-     * The cache file contains the timestamp for the spike activation, for every neuron, and for
+     * Imports a spike report into the memory mapped cache file that will be
+     * attached to the
+     * specified scene at the end of the loading. If the cache file does not
+     * exists, it is created.
+     * The cache file contains the timestamp for the spike activation, for every
+     * neuron, and for
      * every frame.
      * @param filename File containing the report
      * @param scene Scene to which the simulation should be attached
      * @return True if report was successfully imported, false otherwise
      */
-    bool importSpikeReport( const std::string& filename, Scene& scene );
+    bool importSpikeReport(const std::string& filename, Scene& scene);
 
 private:
-
-    bool _loadBinarySpikes( const std::string& spikesFilename );
-    bool _load( const float timestamp );
+    bool _loadBinarySpikes(const std::string& spikesFilename);
+    bool _load(const float timestamp);
 
     const GeometryParameters& _geometryParameters;
     floats _values;
@@ -87,7 +99,6 @@ private:
 
     Vector3fs _positions;
 };
-
 }
 
 #endif // NEST_LOADER_H

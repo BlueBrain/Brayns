@@ -26,23 +26,16 @@
 
 namespace brayns
 {
-
 class ExtendedOBJRenderer : public AbstractRenderer
 {
-
 public:
-
     ExtendedOBJRenderer();
 
     /**
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final
-    {
-        return "brayns::ExtendedOBJRenderer";
-    }
-
+    std::string toString() const final { return "brayns::ExtendedOBJRenderer"; }
     void commit() final;
 };
 

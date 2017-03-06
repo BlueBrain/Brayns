@@ -32,10 +32,8 @@
            distribution
     @return A random direction based on specified parameters
 */
-vec3f getRandomVector(
-    varying ScreenSample& sample,
-    const vec3f& normal,
-    const int randomNumber );
+vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
+                      const int randomNumber);
 
 /**
     Returns tangent vectors for a given normal.
@@ -47,7 +45,4 @@ vec3f getRandomVector(
            tangent vector for the surface, which is orthogonal to both the
            Normal vector and the chosen tangent vector
 */
-void getTangentVectors(
-    const vec3f& normal,
-    vec3f& tangent,
-    vec3f& biTangent );
+void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent);

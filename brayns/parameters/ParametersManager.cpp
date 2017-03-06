@@ -24,47 +24,46 @@
 
 namespace brayns
 {
-
 ParametersManager::ParametersManager()
 {
-    registerParameters( &_sceneParameters );
-    registerParameters( &_applicationParameters );
-    registerParameters( &_geometryParameters );
-    registerParameters( &_renderingParameters );
-    registerParameters( &_volumeParameters );
+    registerParameters(&_sceneParameters);
+    registerParameters(&_applicationParameters);
+    registerParameters(&_geometryParameters);
+    registerParameters(&_renderingParameters);
+    registerParameters(&_volumeParameters);
 }
 
-void ParametersManager::registerParameters( AbstractParameters* parameters )
+void ParametersManager::registerParameters(AbstractParameters* parameters)
 {
-    _parameterSets.push_back( parameters );
+    _parameterSets.push_back(parameters);
 }
 
-void ParametersManager::parse( int argc, const char **argv )
+void ParametersManager::parse(int argc, const char** argv)
 {
     bool help = false;
-    for( int i = 0; i < argc && !help; ++i )
-        if ( std::string( argv[i] ) == "--help" )
+    for (int i = 0; i < argc && !help; ++i)
+        if (std::string(argv[i]) == "--help")
             help = true;
 
-    if( help )
+    if (help)
     {
         usage();
         exit(0);
     }
     else
-        for( AbstractParameters* parameters: _parameterSets )
-            parameters->parse( argc, argv );
+        for (AbstractParameters* parameters : _parameterSets)
+            parameters->parse(argc, argv);
 }
 
 void ParametersManager::usage()
 {
-    for( AbstractParameters* parameters: _parameterSets )
+    for (AbstractParameters* parameters : _parameterSets)
         parameters->usage();
 }
 
 void ParametersManager::print()
 {
-    for( AbstractParameters* parameters: _parameterSets )
+    for (AbstractParameters* parameters : _parameterSets)
         parameters->print();
 }
 
@@ -93,10 +92,9 @@ VolumeParameters& ParametersManager::getVolumeParameters()
     return _volumeParameters;
 }
 
-void ParametersManager::set( const std::string& key, const std::string& value )
+void ParametersManager::set(const std::string& key, const std::string& value)
 {
-    for( AbstractParameters* parameters: _parameterSets )
-        parameters->set( key, value );
+    for (AbstractParameters* parameters : _parameterSets)
+        parameters->set(key, value);
 }
-
 }

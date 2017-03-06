@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include <ospray/SDK/math/vec.ih>
 #include <ospray/SDK/common/Material.ih>
+#include <ospray/SDK/math/vec.ih>
 #include <ospray/SDK/texture/Texture2D.ih>
 
 struct ExtendedOBJMaterial

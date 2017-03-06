@@ -22,37 +22,33 @@
 
 namespace
 {
-
 const std::string PARAM_TIMESTAMP = "timestamp";
 const std::string PARAM_COLOR_MAP_FILE = "color-map-file";
 const std::string PARAM_ENVIRONMENT_MAP = "environment-map";
-
 }
 
 namespace brayns
 {
-
 SceneParameters::SceneParameters()
-    : AbstractParameters( "Scene" )
-    , _timestamp( std::numeric_limits< float >::max())
+    : AbstractParameters("Scene")
+    , _timestamp(std::numeric_limits<float>::max())
 {
-    _parameters.add_options()
-        (PARAM_TIMESTAMP.c_str(), po::value< float >(),
-        "Scene timestamp [float]")
-        (PARAM_COLOR_MAP_FILE.c_str(), po::value< std::string >(),
-        "Color map filename [string]" )
-        (PARAM_ENVIRONMENT_MAP.c_str(),
-            po::value< std::string >(), "Environment map filename [string]");
+    _parameters.add_options()(PARAM_TIMESTAMP.c_str(), po::value<float>(),
+                              "Scene timestamp [float]")(
+        PARAM_COLOR_MAP_FILE.c_str(), po::value<std::string>(),
+        "Color map filename [string]")(PARAM_ENVIRONMENT_MAP.c_str(),
+                                       po::value<std::string>(),
+                                       "Environment map filename [string]");
 }
 
-bool SceneParameters::_parse( const po::variables_map& vm )
+bool SceneParameters::_parse(const po::variables_map& vm)
 {
-    if( vm.count( PARAM_TIMESTAMP ))
-        _timestamp = vm[PARAM_TIMESTAMP].as< float >();
-    if( vm.count( PARAM_COLOR_MAP_FILE ))
-        _colorMapFilename = vm[PARAM_COLOR_MAP_FILE].as< std::string >();
-    if( vm.count( PARAM_ENVIRONMENT_MAP ))
-        _environmentMap = vm[PARAM_ENVIRONMENT_MAP].as< std::string >();
+    if (vm.count(PARAM_TIMESTAMP))
+        _timestamp = vm[PARAM_TIMESTAMP].as<float>();
+    if (vm.count(PARAM_COLOR_MAP_FILE))
+        _colorMapFilename = vm[PARAM_COLOR_MAP_FILE].as<std::string>();
+    if (vm.count(PARAM_ENVIRONMENT_MAP))
+        _environmentMap = vm[PARAM_ENVIRONMENT_MAP].as<std::string>();
     return true;
 }
 
@@ -60,8 +56,9 @@ void SceneParameters::print()
 {
     AbstractParameters::print();
     BRAYNS_INFO << "Timestamp                :" << _timestamp << std::endl;
-    BRAYNS_INFO << "Color Map filename       :" << _colorMapFilename << std::endl;
-    BRAYNS_INFO << "Environment map filename : " << _environmentMap << std::endl;
+    BRAYNS_INFO << "Color Map filename       :" << _colorMapFilename
+                << std::endl;
+    BRAYNS_INFO << "Environment map filename : " << _environmentMap
+                << std::endl;
 }
-
 }

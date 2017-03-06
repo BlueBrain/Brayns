@@ -27,7 +27,6 @@
 
 namespace brayns
 {
-
 /**
     The ProximityRenderer uses an algorithm similar to ambient occlusion to
     identify touches between geometries. A color gradient, defined by nearColor
@@ -51,32 +50,25 @@ namespace brayns
 class ProximityRenderer : public AbstractRenderer
 {
 public:
-    ProximityRenderer( );
+    ProximityRenderer();
 
     /**
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final
-    {
-        return "brayns::ProximityRenderer";
-    }
-
+    std::string toString() const final { return "brayns::ProximityRenderer"; }
     /**
        Commits the changes held by the object so that
        attributes become available to the OSPRay rendering engine
     */
-    virtual void commit( );
+    virtual void commit();
 
 private:
-
     ospray::vec3f _nearColor;
     ospray::vec3f _farColor;
     float _detectionDistance;
     bool _detectionOnDifferentMaterial;
-
 };
-
 }
 
 #endif

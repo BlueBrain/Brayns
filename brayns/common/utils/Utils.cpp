@@ -26,34 +26,32 @@
 
 namespace brayns
 {
-
-strings parseFolder( const std::string& folder, const strings& filters )
+strings parseFolder(const std::string& folder, const strings& filters)
 {
     strings files;
     boost::filesystem::directory_iterator endIter;
-    if( boost::filesystem::is_directory( folder ))
+    if (boost::filesystem::is_directory(folder))
     {
-        for( boost::filesystem::directory_iterator dirIter( folder );
-             dirIter != endIter; ++dirIter )
+        for (boost::filesystem::directory_iterator dirIter(folder);
+             dirIter != endIter; ++dirIter)
         {
-            if( boost::filesystem::is_regular_file(dirIter->status( )))
+            if (boost::filesystem::is_regular_file(dirIter->status()))
             {
                 const auto filename = dirIter->path().c_str();
-                if( filters.empty( ))
-                    files.push_back( filename );
+                if (filters.empty())
+                    files.push_back(filename);
                 else
                 {
                     const auto& fileExtension = dirIter->path().extension();
-                    const auto found =
-                        std::find( filters.begin(), filters.end(), fileExtension );
-                    if( found != filters.end( ))
-                        files.push_back( filename );
+                    const auto found = std::find(filters.begin(), filters.end(),
+                                                 fileExtension);
+                    if (found != filters.end())
+                        files.push_back(filename);
                 }
             }
         }
     }
-    std::sort(files.begin(), files.end( ));
+    std::sort(files.begin(), files.end());
     return files;
 }
-
 }

@@ -21,10 +21,10 @@
 #ifndef MESHLOADER_H
 #define MESHLOADER_H
 
-#include <brayns/common/types.h>
+#include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
-#include <brayns/common/geometry/TrianglesMesh.h>
+#include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <string>
@@ -33,7 +33,6 @@ class aiScene;
 
 namespace brayns
 {
-
 /** Loads meshes from files using the assimp library
  * http://assimp.sourceforge.net
  */
@@ -56,22 +55,17 @@ public:
      *        all meshes are forced to that specific material.
      * @return true if the file was successfully imported. False otherwise.
      */
-    bool importMeshFromFile(
-            const std::string& filename,
-            Scene& scene,
-            MeshQuality meshQuality,
-            const Vector3f& position,
-            const Vector3f& scale,
-            const size_t defaultMaterial);
+    bool importMeshFromFile(const std::string& filename, Scene& scene,
+                            MeshQuality meshQuality, const Vector3f& position,
+                            const Vector3f& scale,
+                            const size_t defaultMaterial);
 
     /** Exports meshes to a given file
      *
      * @param filename destination file name
      * @param Scene holding the meshes
      */
-    bool exportMeshToFile(
-            const std::string& filename,
-            Scene& scene ) const;
+    bool exportMeshToFile(const std::string& filename, Scene& scene) const;
 
     /**
      * @brief Clear all internal buffers
@@ -79,15 +73,11 @@ public:
     void clear();
 
 private:
-
-    void _createMaterials(
-        Scene& scene,
-        const aiScene *aiScene,
-        const std::string& folder );
+    void _createMaterials(Scene& scene, const aiScene* aiScene,
+                          const std::string& folder);
 
     std::map<size_t, size_t> _meshIndex;
 };
-
 }
 
 #endif // MESHLOADER_H
