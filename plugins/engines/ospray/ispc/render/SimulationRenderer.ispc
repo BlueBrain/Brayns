@@ -81,18 +81,18 @@ inline vec3f SimulationRenderer_shadeRay(
 
         if (ray.geomID < 0)
         {
-            // No intersection. Return skybox color
-
+            // No intersection. Return volume contribution + skybox color
             ray.t = self->abstract.volumeDiag * 2.f;
             vec4f volumetricValue = make_vec4f(0.f);
             if (self->abstract.volumeData)
                 volumetricValue = getVolumeContribution(&(self->abstract), ray);
 
             intersectionColors[depth] =
-                make_vec3f(volumetricValue) +
-                make_vec3f(skyboxMapping((Renderer*)self, ray,
-                                         self->abstract.numMaterials,
-                                         self->abstract.materials));
+                volumetricValue.w * make_vec3f(volumetricValue) +
+                (1.f - volumetricValue.w) *
+                    make_vec3f(skyboxMapping((Renderer*)self, ray,
+                                             self->abstract.numMaterials,
+                                             self->abstract.materials));
             if (depth == 0)
                 pathOpacity = 1.f - volumetricValue.w;
             moreRebounds = false;

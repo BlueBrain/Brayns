@@ -168,4 +168,5 @@ float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
     @return Resulting color and alpha value
 */
 vec4f getVolumeContribution(const uniform AbstractRenderer* uniform self,
-                            Ray& ray);
+                            Ray& ray,
+                            const int iteration = VOLUME_NB_MAX_REBOUNDS);

@@ -395,7 +395,10 @@ void ZeroEQPlugin::_materialLUTUpdated()
         contributions.push_back(contribution);
 
     const auto& range = _remoteMaterialLUT.getRange();
-    transferFunction.setValuesRange(Vector2f(range[0], range[1]));
+    if (range[0] == range[1])
+        transferFunction.setValuesRange(Vector2f(0.f, 255.f));
+    else
+        transferFunction.setValuesRange(Vector2f(range[0], range[1]));
     scene.commitTransferFunctionData();
     _engine->getFrameBuffer().clear();
 }
