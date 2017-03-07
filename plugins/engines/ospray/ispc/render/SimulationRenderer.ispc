@@ -69,6 +69,7 @@ inline vec3f SimulationRenderer_shadeRay(
     varying float intersectionWeights[NB_MAX_REBOUNDS];
     varying vec3f intersectionColors[NB_MAX_REBOUNDS];
     varying vec3f specularColor = make_vec3f(0.f);
+    varying float zDepth = 0.f;
     sample.z = 1.f;
     varying float tend = ray.t;
 
@@ -81,27 +82,29 @@ inline vec3f SimulationRenderer_shadeRay(
 
         if (ray.geomID < 0)
         {
-            // No intersection. Return skybox color
-
+            // No intersection. Return volume contribution + skybox color
             ray.t = self->abstract.volumeDiag * 2.f;
             vec4f volumetricValue = make_vec4f(0.f);
+            vec4f backgroundColor =
+                skyboxMapping((Renderer*)self, ray, self->abstract.numMaterials,
+                              self->abstract.materials);
+
             if (self->abstract.volumeData)
-                volumetricValue = getVolumeContribution(&(self->abstract), ray);
+                volumetricValue =
+                    getVolumeContribution(&(self->abstract), ray, sample);
 
             intersectionColors[depth] =
-                make_vec3f(volumetricValue) +
-                make_vec3f(skyboxMapping((Renderer*)self, ray,
-                                         self->abstract.numMaterials,
-                                         self->abstract.materials));
+                volumetricValue.w * make_vec3f(volumetricValue) +
+                (1.f - volumetricValue.w) * make_vec3f(backgroundColor);
             if (depth == 0)
                 pathOpacity = 1.f - volumetricValue.w;
+
+            sample.z = 1.f - log(zDepth) / 10.f;
             moreRebounds = false;
         }
         else
         {
             // Intersection found
-            if (depth == 0)
-                sample.z = log(ray.t) / 10.f;
 
             // Retreive information about the geometry, typically geometry ID,
             // normal to the surface, material ID, texture coordinates, etc.
@@ -142,7 +145,7 @@ inline vec3f SimulationRenderer_shadeRay(
             if (self->abstract.volumeData)
             {
                 vec4f volumetricValue =
-                    getVolumeContribution(&(self->abstract), ray);
+                    getVolumeContribution(&(self->abstract), ray, sample);
                 localOpacity = volumetricValue.w;
                 intersectionColors[depth] = localShadedColor =
                     make_vec3f(volumetricValue);
@@ -400,6 +403,11 @@ inline vec3f SimulationRenderer_shadeRay(
                 else
                     moreRebounds = false;
             }
+            // Z-Depth
+            zDepth += localOpacity * ray.t;
+            sample.z = log(zDepth) / 10.f;
+
+            // Next ray
             tend -= ray.t;
             if (tend < 0.f)
                 break;
@@ -410,6 +418,9 @@ inline vec3f SimulationRenderer_shadeRay(
         }
         ++depth;
     }
+    // Z-Depth
+    if (depth >= NB_MAX_REBOUNDS)
+        sample.z = 1.f - log(zDepth) / 10.f;
 
     // Back to front computation of final color according to colors and weights
     // of each ray

@@ -64,21 +64,26 @@ inline vec3f ParticleRenderer_shadeRay(
 {
     Ray ray = sample.ray;
 
-    varying vec3f intersectionColor = make_vec3f(
-        skyboxMapping((Renderer*)self, ray, self->abstract.numMaterials,
-                      self->abstract.materials));
-    sample.z = -1.f;
+    varying float zDepth = 0.f;
+    sample.z = 1.f;
     sample.alpha = 0.f;
     varying int depth = 0;
     varying float path_opacity = 0.f;
     varying float opacity = 0.f;
+
+    varying vec3f intersectionColor = make_vec3f(
+        skyboxMapping((Renderer*)self, ray, self->abstract.numMaterials,
+                      self->abstract.materials));
 
     while (path_opacity < 1.f && depth < NB_MAX_REBOUNDS)
     {
         traceRay(self->abstract.super.model, ray);
 
         if (ray.geomID < 0)
+        {
+            sample.z = 1.f - log(zDepth) / 10.f;
             break;
+        }
         else
         {
             // Intersection found
@@ -144,6 +149,11 @@ inline vec3f ParticleRenderer_shadeRay(
                 }
             }
 
+            // Z-Depth
+            zDepth += opacity * ray.t;
+            sample.z = log(zDepth) / 10.f;
+
+            // Next ray
             ray.t0 = ray.t + self->abstract.super.epsilon * 5.f;
             ray.t = infinity;
             ray.primID = -1;
@@ -152,6 +162,10 @@ inline vec3f ParticleRenderer_shadeRay(
         }
         ++depth;
     }
+
+    // Z-Depth
+    if (depth >= NB_MAX_REBOUNDS)
+        sample.z = 1.f - log(zDepth) / 10.f;
 
     return intersectionColor;
 }
