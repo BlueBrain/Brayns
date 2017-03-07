@@ -47,10 +47,12 @@ void LivreFrameBuffer::resize(const Vector2ui& frameSize)
 
     clear();
     _livre.resize(frameSize);
+    _frameSize = frameSize;
 }
 
 void LivreFrameBuffer::clear()
 {
+    _colorBuffer.clear();
 }
 
 void LivreFrameBuffer::map()
@@ -68,10 +70,11 @@ void LivreFrameBuffer::assign(const eq::Image& image)
 
     if (image.hasPixelData(eq::Frame::Buffer::color) &&
         newFrameSize == _frameSize)
-        _colorBuffer =
-            (uint8_t*)image.getPixelPointer(eq::Frame::Buffer::color);
+    {
+        auto data = (uint8_t*)image.getPixelPointer(eq::Frame::Buffer::color);
+        _colorBuffer.assign(data, data + pvp.w * pvp.h * getColorDepth());
+    }
     else
-        _colorBuffer = nullptr;
-    _frameSize = newFrameSize;
+        _colorBuffer.clear();
 }
 }
