@@ -6,7 +6,7 @@ common_find_package(Servus REQUIRED)
 if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
   git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git cea0338)
   git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 847025a)
-  git_subproject(Lexis https://github.com/HBPVis/Lexis.git 2678219)
+  git_subproject(Lexis https://github.com/HBPVis/Lexis.git 2f50220)
   common_find_package(ZeroEQ REQUIRED)
   common_find_package(ZeroBuf REQUIRED)
   common_find_package(Lexis REQUIRED)
@@ -46,7 +46,7 @@ endif()
 
 # Livre rendering engine
 if(BRAYNS_LIVRE_ENABLED)
-  git_subproject(Livre https://github.com/BlueBrain/Livre.git c8bbc0d)
+  git_subproject(Livre https://github.com/BlueBrain/Livre.git b706e65)
   common_find_package(Livre)
 endif()
 

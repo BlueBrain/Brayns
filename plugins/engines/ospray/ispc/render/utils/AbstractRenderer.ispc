@@ -180,7 +180,8 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
     // Light attenuation altered by volume
     if (self->volumeData)
     {
-        const vec4f volumetricValue = getVolumeContribution(self, shadowRay);
+        const vec4f volumetricValue =
+            getVolumeContribution(self, shadowRay, sample);
         intensity -= volumetricValue.w;
         moreRebounds = (volumetricValue.w < 1.f);
     }
@@ -273,13 +274,15 @@ inline bool intersectBox(const uniform AbstractRenderer* uniform self, Ray& ray,
 }
 
 inline varying vec4f getVolumeContribution(
-    const uniform AbstractRenderer* uniform self, Ray& ray, const int iteration)
+    const uniform AbstractRenderer* uniform self, Ray& ray,
+    varying ScreenSample& sample, const int iteration)
 {
     float pathAlpha = 0.f;
     vec3f pathColor = make_vec3f(0.f);
 
     vec3f lightContribution = make_vec3f(1.f);
     const vec3i dimensions = self->volumeDimensions;
+    const float alphaMagic = 2.f * self->volumeEpsilon / self->volumeDiag;
 
     float t = ray.t0 + self->volumeEpsilon;
     const float tMax = ray.t - self->volumeEpsilon;
@@ -307,7 +310,8 @@ inline varying vec4f getVolumeContribution(
                      ++i)
                 {
                     const uniform Light* uniform light = self->lights[i];
-                    const varying vec2f s = make_vec2f(0.5f);
+                    const varying vec2f s =
+                        make_vec2f(1.f / self->randomNumber);
                     DifferentialGeometry dg;
                     dg.P = point;
                     const varying Light_SampleRes lightSample =
@@ -315,15 +319,19 @@ inline varying vec4f getVolumeContribution(
 
                     Ray lightRay = ray;
                     lightRay.org = point;
-                    lightRay.dir = lightSample.dir;
+                    if (self->softShadowsEnabled)
+                        lightRay.dir = getRandomVector(sample, lightSample.dir,
+                                                       self->randomNumber);
+                    else
+                        lightRay.dir = lightSample.dir;
                     vec4f voxelColor =
-                        getVolumeContribution(self, lightRay, iteration - 1);
-                    lightContribution = lightContribution +
-                                        VOLUME_SHADOW_RAY_SAMPLES_PER_RAY *
-                                            make_vec3f(voxelColor);
+                        getVolumeContribution(self, lightRay, sample,
+                                              iteration - 1);
+                    lightContribution =
+                        VOLUME_SHADOW_RAY_SAMPLES_PER_RAY *
+                        (lightContribution + make_vec3f(voxelColor));
                     pathAlpha += voxelColor.w;
                 }
-                lightContribution = min(make_vec3f(1.f), lightContribution);
             }
 
             if (self->colorMap)
@@ -336,7 +344,6 @@ inline varying vec4f getVolumeContribution(
                     lightContribution * make_vec3f(colorMapColor.x,
                                                    colorMapColor.y,
                                                    colorMapColor.z);
-                const float alphaMagic = self->volumeEpsilon / self->volumeDiag;
                 alpha =
                     1.f - pow(1.f - min(colorMapColor.w,
                                         1.f - 1.f / (float)self->colorMapSize),
@@ -354,12 +361,13 @@ inline varying vec4f getVolumeContribution(
                 pathAlpha = pathAlpha + (alpha * (1.f - pathAlpha));
             }
         }
-        t += (iteration > 0) ? self->volumeEpsilon
-                             : VOLUME_SHADOW_RAY_SAMPLES_PER_RAY;
+        t += (iteration > 0)
+                 ? self->volumeEpsilon
+                 : self->volumeEpsilon * VOLUME_SHADOW_RAY_SAMPLES_PER_RAY;
     }
     vec4f finalColor =
         make_vec4f(pathColor.x, pathColor.y, pathColor.z, pathAlpha);
     if (self->shadowsEnabled)
-        finalColor = finalColor * VOLUME_DEFAULT_ALPHA;
+        finalColor = min(make_vec4f(1.f), finalColor * VOLUME_DEFAULT_ALPHA);
     return finalColor;
 }

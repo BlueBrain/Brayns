@@ -43,24 +43,21 @@ inline vec3f ProximityRenderer_shadeRay(
     varying vec3f colorKs = make_vec3f(0.f);
 
     traceRay(self->abstract.super.model, ray);
+    varying float zDepth = 0.f;
+    sample.z = 1.f;
+    sample.alpha = 1.f;
 
     if (ray.geomID < 0)
     {
         // No intersection. Return skybox color
-
         color =
             color +
             path_opacity * make_vec3f(skyboxMapping((Renderer*)self, ray,
                                                     self->abstract.numMaterials,
                                                     self->abstract.materials));
-
-        sample.z = 1.f;
         sample.alpha = 0.f;
         return self->abstract.bgColor + color + colorKs;
     }
-
-    sample.alpha = 1.f;
-    sample.z = log(ray.t) / 10.f;
 
     DifferentialGeometry dg;
     postIntersect(self->abstract.super.model, dg, ray,
@@ -180,6 +177,9 @@ inline vec3f ProximityRenderer_shadeRay(
             }
         }
     }
+
+    // Z-Depth
+    sample.z = log(opacity * ray.t) / 10.f;
 
     return color;
 }
