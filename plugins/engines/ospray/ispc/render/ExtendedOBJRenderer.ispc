@@ -46,6 +46,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
     varying float intersectionWeights[NB_MAX_REBOUNDS];
     varying vec3f intersectionColors[NB_MAX_REBOUNDS];
     varying vec3f specularColor = make_vec3f(0.f);
+    varying float zDepth = 0.f;
     sample.z = 1.f;
 
     varying bool moreRebounds = true;
@@ -61,13 +62,12 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
             intersectionColors[depth] = make_vec3f(
                 skyboxMapping((Renderer*)self, ray, self->abstract.numMaterials,
                               self->abstract.materials));
+            sample.z = 1.f - log(zDepth) / 10.f;
             moreRebounds = false;
         }
         else
         {
             // Intersection found
-            if (depth == 0)
-                sample.z = log(ray.t) / 10.f;
 
             // Retreive information about the geometry, typically geometry ID,
             // normal to the surface, material ID, texture coordinates, etc.
@@ -314,6 +314,10 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                 else
                     moreRebounds = false;
             }
+            // Z-Depth
+            zDepth += localOpacity * ray.t;
+            sample.z = log(zDepth) / 10.f;
+
             ray.t = infinity;
             ray.primID = -1;
             ray.geomID = -1;
@@ -321,6 +325,10 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         }
         ++depth;
     }
+
+    // Z-Depth
+    if (depth >= NB_MAX_REBOUNDS)
+        sample.z = 1.f - log(zDepth) / 10.f;
 
     // Back to front computation of final color according to colors and weights
     // of each ray
@@ -331,7 +339,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
         intersectionColors[i] =
             intersectionColors[i + 1] * intersectionWeights[i] +
             intersectionColors[i] * (1.f - intersectionWeights[i]);
-
     return intersectionColors[0];
 }
 

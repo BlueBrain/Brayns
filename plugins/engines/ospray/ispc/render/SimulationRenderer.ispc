@@ -69,6 +69,7 @@ inline vec3f SimulationRenderer_shadeRay(
     varying float intersectionWeights[NB_MAX_REBOUNDS];
     varying vec3f intersectionColors[NB_MAX_REBOUNDS];
     varying vec3f specularColor = make_vec3f(0.f);
+    varying float zDepth = 0.f;
     sample.z = 1.f;
     varying float tend = ray.t;
 
@@ -95,13 +96,13 @@ inline vec3f SimulationRenderer_shadeRay(
                                          self->abstract.materials));
             if (depth == 0)
                 pathOpacity = 1.f - volumetricValue.w;
+
+            sample.z = 1.f - log(zDepth) / 10.f;
             moreRebounds = false;
         }
         else
         {
             // Intersection found
-            if (depth == 0)
-                sample.z = log(ray.t) / 10.f;
 
             // Retreive information about the geometry, typically geometry ID,
             // normal to the surface, material ID, texture coordinates, etc.
@@ -400,6 +401,11 @@ inline vec3f SimulationRenderer_shadeRay(
                 else
                     moreRebounds = false;
             }
+            // Z-Depth
+            zDepth += localOpacity * ray.t;
+            sample.z = log(zDepth) / 10.f;
+
+            // Next ray
             tend -= ray.t;
             if (tend < 0.f)
                 break;
@@ -410,6 +416,9 @@ inline vec3f SimulationRenderer_shadeRay(
         }
         ++depth;
     }
+    // Z-Depth
+    if (depth >= NB_MAX_REBOUNDS)
+        sample.z = 1.f - log(zDepth) / 10.f;
 
     // Back to front computation of final color according to colors and weights
     // of each ray
