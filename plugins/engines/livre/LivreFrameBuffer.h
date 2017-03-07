@@ -49,7 +49,10 @@ public:
     void unmap() final;
 
     /** @return the color buffer of the last rendering. */
-    uint8_t* getColorBuffer() final { return _colorBuffer; }
+    uint8_t* getColorBuffer() final
+    {
+        return _colorBuffer.empty() ? nullptr : _colorBuffer.data();
+    }
     /** Unsupported by Livre. */
     float* getDepthBuffer() final { return nullptr; }
     /**
@@ -60,6 +63,6 @@ public:
 
 private:
     livre::Engine& _livre;
-    uint8_t* _colorBuffer = nullptr;
+    uint8_ts _colorBuffer;
 };
 }
