@@ -26,7 +26,6 @@
 
 namespace ospray
 {
-
 ExtendedCylinders::ExtendedCylinders()
 {
     this->ispcEquivalent = ispc::ExtendedCylinders_create(this);
@@ -34,37 +33,30 @@ ExtendedCylinders::ExtendedCylinders()
 
 void ExtendedCylinders::finalize(ospray::Model *model)
 {
-    radius            = getParam1f("radius",0.01f);
-    materialID        = getParam1i("materialID",0);
-    bytesPerCylinder  = getParam1i("bytes_per_cylinder",9*sizeof(float));
-    offset_v0         = getParam1i("offset_v0",0);
-    offset_v1         = getParam1i("offset_v1",3*sizeof(float));
-    offset_radius     = getParam1i("offset_radius",6*sizeof(float));
-    offset_timestamp  = getParam1i("offset_timestamp",7*sizeof(float));
-    offset_value      = getParam1i("offset_value",8*sizeof(float));
-    offset_materialID = getParam1i("offset_materialID",-1);
-    data              = getParamData("extendedcylinders",nullptr);
+    radius = getParam1f("radius", 0.01f);
+    materialID = getParam1i("materialID", 0);
+    bytesPerCylinder = getParam1i("bytes_per_cylinder", 9 * sizeof(float));
+    offset_v0 = getParam1i("offset_v0", 0);
+    offset_v1 = getParam1i("offset_v1", 3 * sizeof(float));
+    offset_radius = getParam1i("offset_radius", 6 * sizeof(float));
+    offset_timestamp = getParam1i("offset_timestamp", 7 * sizeof(float));
+    offset_value = getParam1i("offset_value", 8 * sizeof(float));
+    offset_materialID = getParam1i("offset_materialID", -1);
+    data = getParamData("extendedcylinders", nullptr);
 
     if (data.ptr == nullptr || bytesPerCylinder == 0)
-        throw std::runtime_error("#ospray:geometry/extendedcylinders: " \
-                                 "no 'extendedcylinders' data specified");
+        throw std::runtime_error(
+            "#ospray:geometry/extendedcylinders: "
+            "no 'extendedcylinders' data specified");
     numExtendedCylinders = data->numBytes / bytesPerCylinder;
-    ispc::ExtendedCylindersGeometry_set(
-                getIE(),
-                model->getIE(),
-                data->data,
-                numExtendedCylinders,
-                bytesPerCylinder,
-                radius,
-                materialID,
-                offset_v0,
-                offset_v1,
-                offset_radius,
-                offset_timestamp,
-                offset_value,
-                offset_materialID);
+    ispc::ExtendedCylindersGeometry_set(getIE(), model->getIE(), data->data,
+                                        numExtendedCylinders, bytesPerCylinder,
+                                        radius, materialID, offset_v0,
+                                        offset_v1, offset_radius,
+                                        offset_timestamp, offset_value,
+                                        offset_materialID);
 }
 
-OSP_REGISTER_GEOMETRY( ExtendedCylinders, extendedcylinders );
+OSP_REGISTER_GEOMETRY(ExtendedCylinders, extendedcylinders);
 
 } // ::brayns

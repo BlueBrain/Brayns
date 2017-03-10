@@ -26,31 +26,23 @@
 
 namespace brayns
 {
-
 class SimulationRenderer : public AbstractRenderer
 {
-
 public:
-
     SimulationRenderer();
 
     /**
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final
-    {
-        return "brayns::SimulationRenderer";
-    }
-
+    std::string toString() const final { return "brayns::SimulationRenderer"; }
     void commit() final;
 
 private:
-
-    ospray::Ref< ospray::Data > _volumeData;
-    ospray::Ref< ospray::Data > _simulationData;
-    ospray::Ref< ospray::Data > _transferFunctionDiffuseData;
-    ospray::Ref< ospray::Data > _transferFunctionEmissionData;
+    ospray::Ref<ospray::Data> _volumeData;
+    ospray::Ref<ospray::Data> _simulationData;
+    ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
+    ospray::Ref<ospray::Data> _transferFunctionEmissionData;
     ospray::int32 _transferFunctionSize;
     float _transferFunctionMinValue;
     float _transferFunctionRange;
@@ -62,4 +54,3 @@ private:
 };
 
 } // ::brayns
-

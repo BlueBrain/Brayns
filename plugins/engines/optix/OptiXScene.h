@@ -21,20 +21,20 @@
 #ifndef OPTIXSCENE_H
 #define OPTIXSCENE_H
 
-#include <brayns/common/types.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/types.h>
 
 #include <optixu/optixpp_namespace.h>
 
 namespace brayns
 {
-
 struct BasicLight
 {
-  optix::float3 pos;
-  optix::float3 color;
-  int casts_shadow;
-  int padding;      // make this structure 32 bytes -- powers of two are your friend!
+    optix::float3 pos;
+    optix::float3 color;
+    int casts_shadow;
+    int padding; // make this structure 32 bytes -- powers of two are your
+                 // friend!
 };
 
 /**
@@ -46,13 +46,9 @@ struct BasicLight
 */
 class OptiXScene : public brayns::Scene
 {
-
 public:
-
-    OptiXScene(
-        Renderers renderer,
-        ParametersManager& parametersManager,
-        optix::Context& context );
+    OptiXScene(Renderers renderer, ParametersManager& parametersManager,
+               optix::Context& context);
 
     ~OptiXScene();
 
@@ -69,7 +65,7 @@ public:
     void commitLights() final;
 
     /** @copydoc Scene::commitMaterials */
-    void commitMaterials( const bool updateOnly = false ) final;
+    void commitMaterials(const bool updateOnly = false) final;
 
     /** @copydoc Scene::commitSimulationData */
     void commitSimulationData() final;
@@ -87,14 +83,13 @@ public:
     void saveSceneToCacheFile() final;
 
     /** @copydoc Scene::isVolumeSupported */
-    bool isVolumeSupported( const std::string& volumeFile ) const final;
+    bool isVolumeSupported(const std::string& volumeFile) const final;
 
 private:
-
     void _processVolumeAABBGeometry();
-    bool _createTexture2D( const std::string& textureName );
+    bool _createTexture2D(const std::string& textureName);
 
-    uint64_t _getBvhSize( const uint64_t nbElements ) const;
+    uint64_t _getBvhSize(const uint64_t nbElements) const;
 
     uint64_t _serializeSpheres();
     uint64_t _serializeCylinders();
@@ -103,33 +98,33 @@ private:
 
     optix::Context& _context;
     optix::GeometryGroup _geometryGroup;
-    std::vector< optix::GeometryInstance > _geometryInstances;
-    std::vector< optix::Material > _optixMaterials;
+    std::vector<optix::GeometryInstance> _geometryInstances;
+    std::vector<optix::Material> _optixMaterials;
     optix::Buffer _lightBuffer;
-    std::vector< BasicLight > _optixLights;
+    std::vector<BasicLight> _optixLights;
     std::string _accelerationStructure;
     optix::Buffer _colorMapBuffer;
 
     // Spheres
-    std::map< size_t, floats > _serializedSpheresData;
-    std::map< size_t, size_t > _serializedSpheresDataSize;
-    std::map< size_t, size_t > _timestampSpheresIndices;
-    std::map< size_t, optix::Buffer > _spheresBuffers;
-    std::map< size_t, optix::Geometry > _optixSpheres;
+    std::map<size_t, floats> _serializedSpheresData;
+    std::map<size_t, size_t> _serializedSpheresDataSize;
+    std::map<size_t, size_t> _timestampSpheresIndices;
+    std::map<size_t, optix::Buffer> _spheresBuffers;
+    std::map<size_t, optix::Geometry> _optixSpheres;
 
     // Cylinders
-    std::map< size_t, floats > _serializedCylindersData;
-    std::map< size_t, size_t > _serializedCylindersDataSize;
-    std::map< size_t, size_t > _timestampCylindersIndices;
-    std::map< size_t, optix::Buffer > _cylindersBuffers;
-    std::map< size_t, optix::Geometry > _optixCylinders;
+    std::map<size_t, floats> _serializedCylindersData;
+    std::map<size_t, size_t> _serializedCylindersDataSize;
+    std::map<size_t, size_t> _timestampCylindersIndices;
+    std::map<size_t, optix::Buffer> _cylindersBuffers;
+    std::map<size_t, optix::Geometry> _optixCylinders;
 
     // Cones
-    std::map< size_t, floats > _serializedConesData;
-    std::map< size_t, size_t > _serializedConesDataSize;
-    std::map< size_t, size_t > _timestampConesIndices;
-    std::map< size_t, optix::Buffer > _conesBuffers;
-    std::map< size_t, optix::Geometry > _optixCones;
+    std::map<size_t, floats> _serializedConesData;
+    std::map<size_t, size_t> _serializedConesDataSize;
+    std::map<size_t, size_t> _timestampConesIndices;
+    std::map<size_t, optix::Buffer> _conesBuffers;
+    std::map<size_t, optix::Geometry> _optixCones;
 
     // Triangle meshes
     optix::Geometry _mesh;
@@ -162,8 +157,6 @@ private:
 
     optix::Program _meshBoundsProgram;
     optix::Program _meshIntersectProgram;
-
 };
-
 }
 #endif // OPTIXSCENE_H

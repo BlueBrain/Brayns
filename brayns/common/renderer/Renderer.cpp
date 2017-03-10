@@ -24,10 +24,8 @@
 
 namespace brayns
 {
-
-Renderer::Renderer( ParametersManager& parametersManager )
-    : _parametersManager( parametersManager )
+Renderer::Renderer(ParametersManager& parametersManager)
+    : _parametersManager(parametersManager)
 {
 }
-
 }

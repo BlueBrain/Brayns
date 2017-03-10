@@ -26,14 +26,11 @@
 
 namespace brayns
 {
-
 class OSPRayFrameBuffer : public brayns::FrameBuffer
 {
 public:
-    OSPRayFrameBuffer(
-        const Vector2ui& frameSize,
-        FrameBufferFormat colorDepth,
-        bool accumulation = true );
+    OSPRayFrameBuffer(const Vector2ui& frameSize, FrameBufferFormat colorDepth,
+                      bool accumulation = true);
     ~OSPRayFrameBuffer();
 
     void clear() final;
@@ -43,14 +40,11 @@ public:
 
     uint8_t* getColorBuffer() final { return _colorBuffer; }
     float* getDepthBuffer() final { return _depthBuffer; }
-
     OSPFrameBuffer impl() { return _frameBuffer; }
-
 private:
     OSPFrameBuffer _frameBuffer;
     uint8_t* _colorBuffer;
     float* _depthBuffer;
 };
-
 }
 #endif // OSPRAYFRAMEBUFFER_H

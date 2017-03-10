@@ -21,22 +21,21 @@
 #ifndef PROTEINLOADER_H
 #define PROTEINLOADER_H
 
-#include <brayns/common/types.h>
-#include <brayns/common/material/Material.h>
 #include <brayns/common/geometry/Primitive.h>
+#include <brayns/common/material/Material.h>
+#include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <string>
 
 namespace brayns
 {
-
 /** Loads protein from PDB files
  * http://www.rcsb.org
  */
 class ProteinLoader
 {
 public:
-    ProteinLoader( const GeometryParameters& geometryParameters );
+    ProteinLoader(const GeometryParameters& geometryParameters);
 
     /** Imports atoms from a given PDB file
      *
@@ -46,25 +45,19 @@ public:
      * @param scene Resulting scene
      * @return true if PDB file was successufully loaded, false otherwize
      */
-    bool importPDBFile(
-        const std::string &filename,
-        const Vector3f& position,
-        const size_t proteinIndex,
-        Scene& scene);
+    bool importPDBFile(const std::string& filename, const Vector3f& position,
+                       const size_t proteinIndex, Scene& scene);
 
     /** Returns the RGB composants for a given atom index, and according to the
      * JMol scheme
      *
      * @param index Index of the material
      */
-    Vector3f getMaterialKd( size_t index );
+    Vector3f getMaterialKd(size_t index);
 
 private:
-
     GeometryParameters _geometryParameters;
-
 };
-
 }
 
 #endif // PROTEINLOADER_H

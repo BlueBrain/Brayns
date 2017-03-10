@@ -22,14 +22,9 @@
 
 namespace brayns
 {
-
-Cylinder::Cylinder(
-    const size_t materialId,
-    const Vector3f& center,
-    const Vector3f& up,
-    const float radius,
-    const float timestamp,
-    const float value)
+Cylinder::Cylinder(const size_t materialId, const Vector3f& center,
+                   const Vector3f& up, const float radius,
+                   const float timestamp, const float value)
     : Primitive(materialId, timestamp)
     , _center(center)
     , _up(up)
@@ -44,11 +39,11 @@ size_t Cylinder::serializeData(floats& serializedData)
     serializedData.push_back(_center.x());
     serializedData.push_back(_center.y());
     serializedData.push_back(_center.z());
-    serializedData.push_back(_up.x() );
-    serializedData.push_back(_up.y() );
-    serializedData.push_back(_up.z() );
-    serializedData.push_back(_radius );
-    serializedData.push_back(_timestamp );
+    serializedData.push_back(_up.x());
+    serializedData.push_back(_up.y());
+    serializedData.push_back(_up.z());
+    serializedData.push_back(_radius);
+    serializedData.push_back(_timestamp);
     serializedData.push_back(_value);
     return getSerializationSize();
 }
@@ -57,5 +52,4 @@ size_t Cylinder::getSerializationSize()
 {
     return 9;
 }
-
 }

@@ -27,41 +27,44 @@
 #define BRAYNS_WARN std::cerr << "[WARN ] "
 #define BRAYNS_INFO std::cout << "[INFO ] "
 #ifdef NDEBUG
-#  define BRAYNS_DEBUG if( false ) std::cout
+#define BRAYNS_DEBUG \
+    if (false)       \
+    std::cout
 #else
-#  define BRAYNS_DEBUG std::cout << "[DEBUG] "
+#define BRAYNS_DEBUG std::cout << "[DEBUG] "
 #endif
 
-#define BRAYNS_THROW(exc) \
-    {\
-        BRAYNS_ERROR << exc.what() << std::endl;\
-        throw exc;\
+#define BRAYNS_THROW(exc)                        \
+    {                                            \
+        BRAYNS_ERROR << exc.what() << std::endl; \
+        throw exc;                               \
     }
 
-#define BRAYNS_TIMER(__cmd) \
-{ \
-    high_resolution_clock::time_point __startTime; \
-    uint64_t __duration; \
-    __startTime = high_resolution_clock::now( ); \
-    __cmd; \
-    __duration  = duration_cast< milliseconds >( \
-            high_resolution_clock::now() - __startTime ).count(); \
-    std::cout << "[TIMER] " << __duration << " ms" << std::endl; \
-}
+#define BRAYNS_TIMER(__cmd)                                          \
+    {                                                                \
+        high_resolution_clock::time_point __startTime;               \
+        uint64_t __duration;                                         \
+        __startTime = high_resolution_clock::now();                  \
+        __cmd;                                                       \
+        __duration = duration_cast<milliseconds>(                    \
+                         high_resolution_clock::now() - __startTime) \
+                         .count();                                   \
+        std::cout << "[TIMER] " << __duration << " ms" << std::endl; \
+    }
 
 static std::mutex __logging_mtx;
-#define BRAYNS_PROGRESS( __value, __maxValue ) \
-{\
-    std::lock_guard<std::mutex> lock(__logging_mtx);\
-    std::cout << "[INFO ] [";\
-    uint64_t __percent = 100 * ( __value + 1 ) / __maxValue;\
-    for( uint64_t __progress = 0; __progress < 100; __progress += 2 )\
-        std::cout << ( __progress <= __percent ? "=" : " " );\
-    std::cout << "] " << int( __percent ) << " % [" << __value + 1 <<\
-        "/" << __maxValue << "]\r";\
-    std::cout.flush();\
-    if( __value >= __maxValue - 1 )\
-        std::cout << std::endl;\
-}
+#define BRAYNS_PROGRESS(__value, __maxValue)                                \
+    {                                                                       \
+        std::lock_guard<std::mutex> lock(__logging_mtx);                    \
+        std::cout << "[INFO ] [";                                           \
+        uint64_t __percent = 100 * (__value + 1) / __maxValue;              \
+        for (uint64_t __progress = 0; __progress < 100; __progress += 2)    \
+            std::cout << (__progress <= __percent ? "=" : " ");             \
+        std::cout << "] " << int(__percent) << " % [" << __value + 1 << "/" \
+                  << __maxValue << "]\r";                                   \
+        std::cout.flush();                                                  \
+        if (__value >= __maxValue - 1)                                      \
+            std::cout << std::endl;                                         \
+    }
 
 #endif

@@ -21,12 +21,11 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include "ospray/SDK/geometry/Geometry.h"
+#include <brayns/common/types.h>
 
 namespace ospray
 {
-
 struct ExtendedCones : public ospray::Geometry
 {
     std::string toString() const final { return "ospray::Cones"; }
@@ -46,7 +45,7 @@ struct ExtendedCones : public ospray::Geometry
     int64 offset_value;
     int64 offset_materialID;
 
-    ospray::Ref< ospray::Data > data;
+    ospray::Ref<ospray::Data> data;
 
     ExtendedCones();
 };

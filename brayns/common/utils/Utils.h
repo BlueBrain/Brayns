@@ -25,9 +25,7 @@
 
 namespace brayns
 {
-
-strings parseFolder( const std::string& folder, const strings& filters );
-
+strings parseFolder(const std::string& folder, const strings& filters);
 }
 
 #endif // UTILS_H

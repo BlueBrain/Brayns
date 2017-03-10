@@ -25,12 +25,11 @@
 
 #include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace brayns
 {
-
 BRAYNS_API class TrianglesMesh : Geometry
 {
 public:
@@ -41,7 +40,10 @@ public:
     BRAYNS_API Vector3fs& getNormals() { return _normals; }
     BRAYNS_API Vector4fs& getColors() { return _colors; }
     BRAYNS_API Vector3uis& getIndices() { return _indices; }
-    BRAYNS_API Vector2fs& getTextureCoordinates() { return _textureCoordinates; }
+    BRAYNS_API Vector2fs& getTextureCoordinates()
+    {
+        return _textureCoordinates;
+    }
 
 private:
     Vector3fs _vertices;
@@ -50,7 +52,6 @@ private:
     Vector3uis _indices;
     Vector2fs _textureCoordinates;
 };
-
 }
 
 #endif // TRIANGLESMESH_H

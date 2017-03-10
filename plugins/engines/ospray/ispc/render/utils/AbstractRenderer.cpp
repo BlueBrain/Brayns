@@ -28,12 +28,11 @@
 // ospray
 #include <ospray/SDK/common/Data.h>
 #include <ospray/SDK/lights/Light.h>
-//sys
+// sys
 #include <vector>
 
 namespace brayns
 {
-
 AbstractRenderer::AbstractRenderer()
 {
 }
@@ -42,41 +41,40 @@ void AbstractRenderer::commit()
 {
     Renderer::commit();
 
-    _lightData = ( ospray::Data* )getParamData( "lights" );
-    _lightArray.clear( );
+    _lightData = (ospray::Data*)getParamData("lights");
+    _lightArray.clear();
 
-    if( _lightData )
-        for( size_t i = 0; i < _lightData->size(); ++i )
+    if (_lightData)
+        for (size_t i = 0; i < _lightData->size(); ++i)
             _lightArray.push_back(
-                ( ( ospray::Light** )_lightData->data )[ i ]->getIE( ));
+                ((ospray::Light**)_lightData->data)[i]->getIE());
 
     _lightPtr = _lightArray.empty() ? nullptr : &_lightArray[0];
 
-    _bgColor = getParam3f( "bgColor", ospray::vec3f( 1.f ));
-    _shadowsEnabled = bool( getParam1i( "shadowsEnabled", 1 ));
-    _softShadowsEnabled = bool(getParam1i( "softShadowsEnabled", 1 ));
-    _ambientOcclusionStrength = getParam1f( "ambientOcclusionStrength", 0.f );
-    _shadingEnabled = bool( getParam1i( "shadingEnabled", 1 ));
-    _randomNumber = getParam1i( "randomNumber", 0 );
-    _timestamp = getParam1f( "timestamp", 0.f );
+    _bgColor = getParam3f("bgColor", ospray::vec3f(1.f));
+    _shadowsEnabled = bool(getParam1i("shadowsEnabled", 1));
+    _softShadowsEnabled = bool(getParam1i("softShadowsEnabled", 1));
+    _ambientOcclusionStrength = getParam1f("ambientOcclusionStrength", 0.f);
+    _shadingEnabled = bool(getParam1i("shadingEnabled", 1));
+    _randomNumber = getParam1i("randomNumber", 0);
+    _timestamp = getParam1f("timestamp", 0.f);
     _spp = getParam1i("spp", 1);
-    _electronShadingEnabled = bool( getParam1i( "electronShading", 0 ));
+    _electronShadingEnabled = bool(getParam1i("electronShading", 0));
 
     // Those materials are used for simulation mapping only
-    _materialData = ( ospray::Data* )getParamData( "materials" );
-    _materialArray.clear( );
-    if( _materialData )
-        for( size_t i = 0; i < _materialData->size(); ++i )
+    _materialData = (ospray::Data*)getParamData("materials");
+    _materialArray.clear();
+    if (_materialData)
+        for (size_t i = 0; i < _materialData->size(); ++i)
             _materialArray.push_back(
-                ( ( ospray::Material** )_materialData->data )[i]->getIE( ));
-    _materialPtr = _materialArray.empty( ) ? nullptr : &_materialArray[0];
+                ((ospray::Material**)_materialData->data)[i]->getIE());
+    _materialPtr = _materialArray.empty() ? nullptr : &_materialArray[0];
 }
 
 /*! \brief create a material of given type */
-ospray::Material *AbstractRenderer::createMaterial( const char * )
+ospray::Material* AbstractRenderer::createMaterial(const char*)
 {
-    ospray::Material *mat = new brayns::obj::ExtendedOBJMaterial;
+    ospray::Material* mat = new brayns::obj::ExtendedOBJMaterial;
     return mat;
 }
-
 }

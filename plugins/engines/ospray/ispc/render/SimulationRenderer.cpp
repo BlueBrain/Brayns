@@ -32,58 +32,49 @@ using namespace ospray;
 
 namespace brayns
 {
-
 void SimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
-    _volumeData = getParamData( "volumeData" );
-    _volumeDimensions = getParam3i( "volumeDimensions", ospray::vec3i( 0 ));
-    _volumeElementSpacing = getParam3f( "volumeElementSpacing", ospray::vec3f( 1.f ));
-    _volumeOffset = getParam3f( "volumeOffset", ospray::vec3f( 0.f ));
-    _volumeEpsilon = getParam1f( "volumeEpsilon", 1.f );
-    _simulationData = getParamData( "simulationData" );
-    _transferFunctionDiffuseData = getParamData( "transferFunctionDiffuseData" );
-    _transferFunctionEmissionData = getParamData( "transferFunctionEmissionData" );
-    _transferFunctionSize = getParam1i( "transferFunctionSize", 0 );
-    _transferFunctionMinValue = getParam1f( "transferFunctionMinValue", 0.f );
-    _transferFunctionRange = getParam1f( "transferFunctionRange", 0.f );
-    _threshold = getParam1f( "threshold", _transferFunctionMinValue );
+    _volumeData = getParamData("volumeData");
+    _volumeDimensions = getParam3i("volumeDimensions", ospray::vec3i(0));
+    _volumeElementSpacing =
+        getParam3f("volumeElementSpacing", ospray::vec3f(1.f));
+    _volumeOffset = getParam3f("volumeOffset", ospray::vec3f(0.f));
+    _volumeEpsilon = getParam1f("volumeEpsilon", 1.f);
+    _simulationData = getParamData("simulationData");
+    _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
+    _transferFunctionEmissionData =
+        getParamData("transferFunctionEmissionData");
+    _transferFunctionSize = getParam1i("transferFunctionSize", 0);
+    _transferFunctionMinValue = getParam1f("transferFunctionMinValue", 0.f);
+    _transferFunctionRange = getParam1f("transferFunctionRange", 0.f);
+    _threshold = getParam1f("threshold", _transferFunctionMinValue);
 
     ispc::SimulationRenderer_set(
-                getIE(),
-                ( ispc::vec3f& )_bgColor,
-                _shadowsEnabled,
-                _softShadowsEnabled,
-                _ambientOcclusionStrength,
-                _shadingEnabled,
-                _randomNumber,
-                _timestamp,
-                _spp,
-                _electronShadingEnabled,
-                _lightPtr, _lightArray.size(),
-                _materialPtr, _materialArray.size(),
-                _volumeData ? ( uint8* )_volumeData->data : NULL,
-                ( ispc::vec3i& )_volumeDimensions,
-                ( ispc::vec3f& )_volumeElementSpacing,
-                ( ispc::vec3f& )_volumeOffset,
-                _volumeEpsilon,
-                _simulationData ? ( float* )_simulationData->data : NULL,
-                _transferFunctionDiffuseData ?
-                    ( ispc::vec4f* )_transferFunctionDiffuseData->data : NULL,
-                _transferFunctionEmissionData ?
-                    ( float* )_transferFunctionEmissionData->data : NULL,
-                _transferFunctionSize,
-                _transferFunctionMinValue,
-                _transferFunctionRange,
-                _threshold );
+        getIE(), (ispc::vec3f&)_bgColor, _shadowsEnabled, _softShadowsEnabled,
+        _ambientOcclusionStrength, _shadingEnabled, _randomNumber, _timestamp,
+        _spp, _electronShadingEnabled, _lightPtr, _lightArray.size(),
+        _materialPtr, _materialArray.size(),
+        _volumeData ? (uint8*)_volumeData->data : NULL,
+        (ispc::vec3i&)_volumeDimensions, (ispc::vec3f&)_volumeElementSpacing,
+        (ispc::vec3f&)_volumeOffset, _volumeEpsilon,
+        _simulationData ? (float*)_simulationData->data : NULL,
+        _transferFunctionDiffuseData
+            ? (ispc::vec4f*)_transferFunctionDiffuseData->data
+            : NULL,
+        _transferFunctionEmissionData
+            ? (float*)_transferFunctionEmissionData->data
+            : NULL,
+        _transferFunctionSize, _transferFunctionMinValue,
+        _transferFunctionRange, _threshold);
 }
 
-SimulationRenderer::SimulationRenderer( )
+SimulationRenderer::SimulationRenderer()
 {
-    ispcEquivalent = ispc::SimulationRenderer_create( this );
+    ispcEquivalent = ispc::SimulationRenderer_create(this);
 }
 
-OSP_REGISTER_RENDERER( SimulationRenderer, SIMULATIONRENDERER );
-OSP_REGISTER_RENDERER( SimulationRenderer, simulationrenderer );
+OSP_REGISTER_RENDERER(SimulationRenderer, SIMULATIONRENDERER);
+OSP_REGISTER_RENDERER(SimulationRenderer, simulationrenderer);
 } // ::brayns

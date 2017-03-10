@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include <brayns/common/types.h>
 #include "ospray/SDK/geometry/Geometry.h"
+#include <brayns/common/types.h>
 
 namespace ospray
 {
@@ -49,8 +49,6 @@ struct ExtendedSpheres : public ospray::Geometry
 
 private:
     std::vector<void *> ispcMaterials_;
-
 };
 
 } // ::brayns
-

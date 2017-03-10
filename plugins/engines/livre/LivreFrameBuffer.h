@@ -26,12 +26,11 @@
 
 namespace brayns
 {
-
 class LivreFrameBuffer : public FrameBuffer
 {
 public:
-    LivreFrameBuffer( const Vector2ui& frameSize, FrameBufferFormat colorDepth,
-                      livre::Engine& livre );
+    LivreFrameBuffer(const Vector2ui& frameSize, FrameBufferFormat colorDepth,
+                     livre::Engine& livre);
     ~LivreFrameBuffer();
 
     /** Invalidates the color buffer content. */
@@ -41,7 +40,7 @@ public:
      * Resizes the underlying Livre buffer(s) to allow rendering of the
      * requested size.
      */
-    void resize( const Vector2ui& frameSize ) final;
+    void resize(const Vector2ui& frameSize) final;
 
     /** Unsupported by Livre. */
     void map() final;
@@ -50,20 +49,20 @@ public:
     void unmap() final;
 
     /** @return the color buffer of the last rendering. */
-    uint8_t* getColorBuffer() final { return _colorBuffer; }
-
+    uint8_t* getColorBuffer() final
+    {
+        return _colorBuffer.empty() ? nullptr : _colorBuffer.data();
+    }
     /** Unsupported by Livre. */
     float* getDepthBuffer() final { return nullptr; }
-
     /**
      * @internal
      * Assigns the colorBuffer from the given image from the last rendering.
      */
-    void assign( const eq::Image& image );
+    void assign(const eq::Image& image);
 
 private:
     livre::Engine& _livre;
-    uint8_t* _colorBuffer = nullptr;
+    uint8_ts _colorBuffer;
 };
-
 }

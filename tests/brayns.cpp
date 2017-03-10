@@ -20,147 +20,155 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #define BOOST_TEST_MODULE brayns
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE( simple_construction )
+BOOST_AUTO_TEST_CASE(simple_construction)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
-    BOOST_CHECK_NO_THROW( brayns::Brayns( testSuite.argc,
-                                 const_cast< const char** >( testSuite.argv )));
+    BOOST_CHECK_NO_THROW(
+        brayns::Brayns(testSuite.argc,
+                       const_cast<const char**>(testSuite.argv)));
 }
 
-BOOST_AUTO_TEST_CASE( defaults )
+BOOST_AUTO_TEST_CASE(defaults)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
-    brayns::Brayns brayns( testSuite.argc,
-                           const_cast< const char** >( testSuite.argv ));
+    brayns::Brayns brayns(testSuite.argc,
+                          const_cast<const char**>(testSuite.argv));
 
     auto& camera = brayns.getEngine().getCamera();
-    BOOST_CHECK( camera.getType() == brayns::CameraType::perspective );
-    BOOST_CHECK_EQUAL( camera.getPosition(), brayns::Vector3f( 0.5f, 0.5f, 1.5f ));
-    BOOST_CHECK_EQUAL( camera.getTarget(), brayns::Vector3f( 0.5f, 0.5f, 0.5f ));
-    BOOST_CHECK_EQUAL( camera.getUp(), brayns::Vector3f( 0, 1, 0 ));
-    BOOST_CHECK_EQUAL( camera.getAspectRatio(), 4.f/3.f );
-    BOOST_CHECK_EQUAL( camera.getAperture(), 0.f );
-    BOOST_CHECK_EQUAL( camera.getFocalLength(), 0.f );
+    BOOST_CHECK(camera.getType() == brayns::CameraType::perspective);
+    BOOST_CHECK_EQUAL(camera.getPosition(), brayns::Vector3f(0.5f, 0.5f, 1.5f));
+    BOOST_CHECK_EQUAL(camera.getTarget(), brayns::Vector3f(0.5f, 0.5f, 0.5f));
+    BOOST_CHECK_EQUAL(camera.getUp(), brayns::Vector3f(0, 1, 0));
+    BOOST_CHECK_EQUAL(camera.getAspectRatio(), 4.f / 3.f);
+    BOOST_CHECK_EQUAL(camera.getAperture(), 0.f);
+    BOOST_CHECK_EQUAL(camera.getFocalLength(), 0.f);
 
     auto& manipulator = brayns.getCameraManipulator();
-    BOOST_CHECK( dynamic_cast<brayns::InspectCenterManipulator*>( &manipulator ));
+    BOOST_CHECK(dynamic_cast<brayns::InspectCenterManipulator*>(&manipulator));
 
     auto& fb = brayns.getEngine().getFrameBuffer();
-    BOOST_CHECK( !fb.getColorBuffer( ));
-    BOOST_CHECK_EQUAL( fb.getColorDepth(), 4 );
-    BOOST_CHECK( !fb.getDepthBuffer( ));
-    BOOST_CHECK_EQUAL( fb.getSize(), brayns::Vector2i( 800, 600 ));
+    BOOST_CHECK(!fb.getColorBuffer());
+    BOOST_CHECK_EQUAL(fb.getColorDepth(), 4);
+    BOOST_CHECK(!fb.getDepthBuffer());
+    BOOST_CHECK_EQUAL(fb.getSize(), brayns::Vector2i(800, 600));
 
     auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();
-    BOOST_CHECK_EQUAL( appParams.getWindowSize(), brayns::Vector2ui( 800, 600 ));
-    BOOST_CHECK_EQUAL( appParams.getCamera(), "perspective" );
-    BOOST_CHECK( !appParams.isBenchmarking( ));
-    BOOST_CHECK_EQUAL( appParams.getJpegCompression(), 100 );
-    BOOST_CHECK_EQUAL( appParams.getJpegSize(), brayns::Vector2ui( 800, 600 ));
+    BOOST_CHECK_EQUAL(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
+    BOOST_CHECK_EQUAL(appParams.getCamera(), "perspective");
+    BOOST_CHECK(!appParams.isBenchmarking());
+    BOOST_CHECK_EQUAL(appParams.getJpegCompression(), 100);
+    BOOST_CHECK_EQUAL(appParams.getJpegSize(), brayns::Vector2ui(800, 600));
 
     const auto& renderParams = pm.getRenderingParameters();
-    BOOST_CHECK_EQUAL( renderParams.getEngine(), "ospray" );
-    BOOST_CHECK_EQUAL( renderParams.getModule(), "" );
-    BOOST_CHECK( renderParams.getRenderer() == brayns::RendererType::basic );
-    BOOST_CHECK_EQUAL( renderParams.getRenderers().size(), 4 );
-    BOOST_CHECK( !renderParams.getShadows( ));
-    BOOST_CHECK( !renderParams.getSoftShadows( ));
-    BOOST_CHECK_EQUAL( renderParams.getAmbientOcclusionStrength(), 0.f );
-    BOOST_CHECK( renderParams.getShading() == brayns::ShadingType::diffuse );
-    BOOST_CHECK_EQUAL( renderParams.getSamplesPerPixel(), 1 );
-    BOOST_CHECK( !renderParams.getLightEmittingMaterials( ));
-    BOOST_CHECK_EQUAL( renderParams.getBackgroundColor(),
-                       brayns::Vector3f( 0, 0, 0 ));
-    BOOST_CHECK_EQUAL( renderParams.getDetectionDistance(), 1.f );
-    BOOST_CHECK( renderParams.getDetectionOnDifferentMaterial( ));
-    BOOST_CHECK_EQUAL( renderParams.getDetectionNearColor(),
-                       brayns::Vector3f( 1, 0, 0 ));
-    BOOST_CHECK_EQUAL( renderParams.getDetectionFarColor(),
-                       brayns::Vector3f( 0, 1, 0 ));
-    BOOST_CHECK( renderParams.getCameraType() == brayns::CameraType::perspective );
+    BOOST_CHECK_EQUAL(renderParams.getEngine(), "ospray");
+    BOOST_CHECK_EQUAL(renderParams.getModule(), "");
+    BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::basic);
+    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 4);
+    BOOST_CHECK(!renderParams.getShadows());
+    BOOST_CHECK(!renderParams.getSoftShadows());
+    BOOST_CHECK_EQUAL(renderParams.getAmbientOcclusionStrength(), 0.f);
+    BOOST_CHECK(renderParams.getShading() == brayns::ShadingType::diffuse);
+    BOOST_CHECK_EQUAL(renderParams.getSamplesPerPixel(), 1);
+    BOOST_CHECK(!renderParams.getLightEmittingMaterials());
+    BOOST_CHECK_EQUAL(renderParams.getBackgroundColor(),
+                      brayns::Vector3f(0, 0, 0));
+    BOOST_CHECK_EQUAL(renderParams.getDetectionDistance(), 1.f);
+    BOOST_CHECK(renderParams.getDetectionOnDifferentMaterial());
+    BOOST_CHECK_EQUAL(renderParams.getDetectionNearColor(),
+                      brayns::Vector3f(1, 0, 0));
+    BOOST_CHECK_EQUAL(renderParams.getDetectionFarColor(),
+                      brayns::Vector3f(0, 1, 0));
+    BOOST_CHECK(renderParams.getCameraType() ==
+                brayns::CameraType::perspective);
 
     const auto& geomParams = pm.getGeometryParameters();
-    BOOST_CHECK_EQUAL( geomParams.getMorphologyFolder(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getPDBFile(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getMeshFolder(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getCircuitConfiguration(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getLoadCacheFile(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getSaveCacheFile(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getTarget(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getReport(), "" );
-    BOOST_CHECK_EQUAL( geomParams.getRadiusMultiplier(), 1.f );
-    BOOST_CHECK_EQUAL( geomParams.getRadiusCorrection(), 0.f );
-    BOOST_CHECK( geomParams.getColorScheme() == brayns::ColorScheme::none );
-    BOOST_CHECK( geomParams.getSceneEnvironment() == brayns::SceneEnvironment::none );
-    BOOST_CHECK( geomParams.getGeometryQuality() == brayns::GeometryQuality::high );
-    BOOST_CHECK_EQUAL( geomParams.getMorphologySectionTypes(), brayns::MST_ALL );
-    BOOST_CHECK_EQUAL( geomParams.getMorphologyLayout().nbColumns, 0 );
-    BOOST_CHECK_EQUAL( geomParams.getNonSimulatedCells(), 0 );
-    BOOST_CHECK_EQUAL( geomParams.getStartSimulationTime(), 0.f );
-    BOOST_CHECK_EQUAL( geomParams.getEndSimulationTime(), std::numeric_limits< float >::max() );
-    BOOST_CHECK_EQUAL( geomParams.getSimulationValuesRange().x(),
-                       std::numeric_limits< float >::max() );
-    BOOST_CHECK_EQUAL( geomParams.getSimulationValuesRange().y(),
-                       std::numeric_limits< float >::min() );
+    BOOST_CHECK_EQUAL(geomParams.getMorphologyFolder(), "");
+    BOOST_CHECK_EQUAL(geomParams.getPDBFile(), "");
+    BOOST_CHECK_EQUAL(geomParams.getMeshFolder(), "");
+    BOOST_CHECK_EQUAL(geomParams.getCircuitConfiguration(), "");
+    BOOST_CHECK_EQUAL(geomParams.getLoadCacheFile(), "");
+    BOOST_CHECK_EQUAL(geomParams.getSaveCacheFile(), "");
+    BOOST_CHECK_EQUAL(geomParams.getTarget(), "");
+    BOOST_CHECK_EQUAL(geomParams.getReport(), "");
+    BOOST_CHECK_EQUAL(geomParams.getRadiusMultiplier(), 1.f);
+    BOOST_CHECK_EQUAL(geomParams.getRadiusCorrection(), 0.f);
+    BOOST_CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
+    BOOST_CHECK(geomParams.getSceneEnvironment() ==
+                brayns::SceneEnvironment::none);
+    BOOST_CHECK(geomParams.getGeometryQuality() ==
+                brayns::GeometryQuality::high);
+    BOOST_CHECK_EQUAL(geomParams.getMorphologySectionTypes(), brayns::MST_ALL);
+    BOOST_CHECK_EQUAL(geomParams.getMorphologyLayout().nbColumns, 0);
+    BOOST_CHECK_EQUAL(geomParams.getNonSimulatedCells(), 0);
+    BOOST_CHECK_EQUAL(geomParams.getStartSimulationTime(), 0.f);
+    BOOST_CHECK_EQUAL(geomParams.getEndSimulationTime(),
+                      std::numeric_limits<float>::max());
+    BOOST_CHECK_EQUAL(geomParams.getSimulationValuesRange().x(),
+                      std::numeric_limits<float>::max());
+    BOOST_CHECK_EQUAL(geomParams.getSimulationValuesRange().y(),
+                      std::numeric_limits<float>::min());
 
     const auto& sceneParams = pm.getSceneParameters();
-    BOOST_CHECK_EQUAL( sceneParams.getTimestamp(), std::numeric_limits< float >::max( ));
+    BOOST_CHECK_EQUAL(sceneParams.getTimestamp(),
+                      std::numeric_limits<float>::max());
 
     const auto& volumeParams = pm.getVolumeParameters();
-    BOOST_CHECK_EQUAL( volumeParams.getDimensions(), brayns::Vector3ui( 0, 0, 0 ));
-    BOOST_CHECK_EQUAL( volumeParams.getElementSpacing(), brayns::Vector3f( 1.f, 1.f, 1.f ));
-    BOOST_CHECK_EQUAL( volumeParams.getOffset(), brayns::Vector3f( 0.f, 0.f, 0.f ));
-    BOOST_CHECK_EQUAL( volumeParams.getSamplesPerRay(), 128 );
+    BOOST_CHECK_EQUAL(volumeParams.getDimensions(), brayns::Vector3ui(0, 0, 0));
+    BOOST_CHECK_EQUAL(volumeParams.getElementSpacing(),
+                      brayns::Vector3f(1.f, 1.f, 1.f));
+    BOOST_CHECK_EQUAL(volumeParams.getOffset(),
+                      brayns::Vector3f(0.f, 0.f, 0.f));
+    BOOST_CHECK_EQUAL(volumeParams.getSamplesPerRay(), 128);
 
     auto& scene = brayns.getEngine().getScene();
-    BOOST_CHECK( scene.getMaterial( 0 ));
-    BOOST_CHECK_EQUAL( sceneParams.getEnvironmentMap(), "" );
+    BOOST_CHECK(scene.getMaterial(0));
+    BOOST_CHECK_EQUAL(sceneParams.getEnvironmentMap(), "");
 
     brayns::Boxf defaultBoundingBox;
-    defaultBoundingBox.merge( brayns::Vector3f( 0, 0, 0 ));
-    defaultBoundingBox.merge( brayns::Vector3f( 1, 1, 1 ));
-    BOOST_CHECK_EQUAL( scene.getWorldBounds(), defaultBoundingBox );
+    defaultBoundingBox.merge(brayns::Vector3f(0, 0, 0));
+    defaultBoundingBox.merge(brayns::Vector3f(1, 1, 1));
+    BOOST_CHECK_EQUAL(scene.getWorldBounds(), defaultBoundingBox);
 }
 
-BOOST_AUTO_TEST_CASE( render_two_frames_and_compare_they_are_same )
+BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
-    brayns::Brayns brayns( testSuite.argc,
-                           const_cast< const char** >( testSuite.argv ));
+    brayns::Brayns brayns(testSuite.argc,
+                          const_cast<const char**>(testSuite.argv));
 
     auto& fb = brayns.getEngine().getFrameBuffer();
     const auto& size = fb.getSize();
-    fb.setAccumulation( false );
-    fb.resize( size );
+    fb.setAccumulation(false);
+    fb.resize(size);
 
     uint16_t depth = fb.getColorDepth();
     const size_t bytes = size[0] * size[1] * depth;
-    std::vector< uint8_t > oldBuffer( bytes );
+    std::vector<uint8_t> oldBuffer(bytes);
 
     fb.clear();
     brayns.render();
 
     fb.map();
-    memcpy( oldBuffer.data(), fb.getColorBuffer(), bytes );
+    memcpy(oldBuffer.data(), fb.getColorBuffer(), bytes);
     fb.unmap();
 
     fb.clear();
     brayns.render();
 
     fb.map();
-    BOOST_CHECK_EQUAL_COLLECTIONS( oldBuffer.begin(), oldBuffer.end(),
-                                   fb.getColorBuffer(),
-                                   fb.getColorBuffer() + bytes );
+    BOOST_CHECK_EQUAL_COLLECTIONS(oldBuffer.begin(), oldBuffer.end(),
+                                  fb.getColorBuffer(),
+                                  fb.getColorBuffer() + bytes);
     fb.unmap();
 }

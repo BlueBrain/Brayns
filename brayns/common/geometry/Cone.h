@@ -29,31 +29,25 @@
 
 namespace brayns
 {
-
 class Cone : public Primitive
 {
 public:
-    BRAYNS_API Cone(
-        size_t materialId,
-        const Vector3f& center,
-        const Vector3f& up,
-        float centerRadius,
-        float upRadius,
-        float timestamp,
-        float value);
+    BRAYNS_API Cone(size_t materialId, const Vector3f& center,
+                    const Vector3f& up, float centerRadius, float upRadius,
+                    float timestamp, float value);
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
-    BRAYNS_API void setCenter( const Vector3f center ) { _center = center; }
-
+    BRAYNS_API void setCenter(const Vector3f center) { _center = center; }
     BRAYNS_API const Vector3f& getUp() const { return _up; }
-    BRAYNS_API void setUp( const Vector3f up ) { _up = up; }
-
+    BRAYNS_API void setUp(const Vector3f up) { _up = up; }
     BRAYNS_API float getCenterRadius() const { return _centerRadius; }
-    BRAYNS_API void setCenterRadius( const float radius ) { _centerRadius = radius; }
+    BRAYNS_API void setCenterRadius(const float radius)
+    {
+        _centerRadius = radius;
+    }
 
     BRAYNS_API float getUpRadius() const { return _upRadius; }
-    BRAYNS_API void setUpRadius( const float radius ) { _upRadius = radius; }
-
+    BRAYNS_API void setUpRadius(const float radius) { _upRadius = radius; }
     BRAYNS_API virtual size_t serializeData(floats& serializedData);
     BRAYNS_API static size_t getSerializationSize();
 
@@ -64,7 +58,6 @@ private:
     float _upRadius;
     float _value;
 };
-
 }
 
 #endif // CONE_H

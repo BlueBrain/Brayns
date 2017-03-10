@@ -21,23 +21,19 @@
 #ifndef TEXTURELOADER_H
 #define TEXTURELOADER_H
 
-#include <brayns/common/types.h>
 #include <brayns/common/material/Texture2D.h>
+#include <brayns/common/types.h>
 
 namespace brayns
 {
-
 class TextureLoader
 {
 public:
     TextureLoader();
 
-    bool loadTexture(
-        TexturesMap& textures,
-        TextureType textureType,
-        const std::string& filename);
+    bool loadTexture(TexturesMap& textures, TextureType textureType,
+                     const std::string& filename);
 };
-
 }
 
 #endif // TEXTURELOADER_H

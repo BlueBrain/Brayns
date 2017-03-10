@@ -25,12 +25,9 @@
 
 namespace brayns
 {
-
 class TransferFunction
 {
-
 public:
-
     TransferFunction();
 
     /**
@@ -43,42 +40,32 @@ public:
      * @return A vector of RGB floats
      */
     Vector4fs& getDiffuseColors() { return _diffuseColors; }
-
     /**
      * @brief Get emission color intensities
      * @return A vector of floats
      */
     floats& getEmissionIntensities() { return _emissionIntensities; }
-
     /**
      * @brief Get contributions
      * @return A vector of floats
      */
     floats& getContributions() { return _contributions; }
-
     /**
      * @brief Get transfer function range of values
      * @return A tuple of 2 floats with min and max value
      */
-    const Vector2f& getValuesRange() const
-    {
-        return _valuesRange;
-    }
-
-    void setValuesRange( const Vector2f& valuesRange )
+    const Vector2f& getValuesRange() const { return _valuesRange; }
+    void setValuesRange(const Vector2f& valuesRange)
     {
         _valuesRange = valuesRange;
     }
 
 private:
-
     Vector4fs _diffuseColors;
     floats _emissionIntensities;
     floats _contributions;
     Vector2f _valuesRange;
-
 };
-
 }
 
 #endif // TRANSFERFUNCTION_H

@@ -26,11 +26,10 @@
 
 namespace brayns
 {
-
 class LivreEngine : public Engine
 {
 public:
-    LivreEngine( int argc, char **argv, ParametersManager& parametersManager );
+    LivreEngine(int argc, char** argv, ParametersManager& parametersManager);
 
     ~LivreEngine();
 
@@ -53,10 +52,9 @@ public:
      * Register Livre-specific serializables, i.e. VolumeRendererParameters, in
      * ZeroEQPlugin.
      */
-    void extensionInit( ExtensionPlugin& ) final;
+    void extensionInit(ExtensionPlugin&) final;
 
 private:
-    std::unique_ptr< livre::Engine > _livre;
+    std::unique_ptr<livre::Engine> _livre;
 };
-
 }

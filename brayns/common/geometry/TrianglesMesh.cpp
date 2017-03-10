@@ -22,7 +22,6 @@
 
 namespace brayns
 {
-
 TrianglesMesh::TrianglesMesh()
 {
     _geometryType = GT_TRIANGLES_MESH;
@@ -31,5 +30,4 @@ TrianglesMesh::TrianglesMesh()
 TrianglesMesh::~TrianglesMesh()
 {
 }
-
 }

@@ -20,19 +20,18 @@
 
 #include "Engine.h"
 
-#include <brayns/common/scene/Scene.h>
-#include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/light/DirectionalLight.h>
+#include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/renderer/Renderer.h>
+#include <brayns/common/scene/Scene.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {
-
-Engine::Engine( ParametersManager& parametersManager )
-    : _parametersManager( parametersManager )
+Engine::Engine(ParametersManager& parametersManager)
+    : _parametersManager(parametersManager)
 {
 }
 
@@ -41,70 +40,69 @@ Engine::~Engine()
     _scene->reset();
 }
 
-void Engine::setActiveRenderer( const RendererType renderer )
+void Engine::setActiveRenderer(const RendererType renderer)
 {
-    if( _activeRenderer != renderer )
+    if (_activeRenderer != renderer)
         _activeRenderer = renderer;
 }
 
-void Engine::reshape( const Vector2ui& frameSize )
+void Engine::reshape(const Vector2ui& frameSize)
 {
-    if( _frameBuffer->getSize() == frameSize )
+    if (_frameBuffer->getSize() == frameSize)
         return;
 
-    _frameBuffer->resize( frameSize );
-    _camera->setAspectRatio(
-        static_cast< float >( frameSize.x()) /
-        static_cast< float >( frameSize.y()));
+    _frameBuffer->resize(frameSize);
+    _camera->setAspectRatio(static_cast<float>(frameSize.x()) /
+                            static_cast<float>(frameSize.y()));
 }
 
 void Engine::commit()
 {
     auto& sceneParams = _parametersManager.getSceneParameters();
-    sceneParams.setTimestamp( sceneParams.getTimestamp() + sceneParams.getAnimationDelta( ));
+    sceneParams.setTimestamp(sceneParams.getTimestamp() +
+                             sceneParams.getAnimationDelta());
 
     _frameBuffer->clear();
 }
 
-void Engine::_render(
-    const RenderInput& renderInput,
-    RenderOutput& renderOutput )
+void Engine::_render(const RenderInput& renderInput, RenderOutput& renderOutput)
 {
-    reshape( renderInput.windowSize );
+    reshape(renderInput.windowSize);
 
     preRender();
 
-    _camera->set( renderInput.position, renderInput.target, renderInput.up );
+    _camera->set(renderInput.position, renderInput.target, renderInput.up);
     _camera->commit();
 
     const Vector2i& frameSize = _frameBuffer->getSize();
 
-    if( _parametersManager.getRenderingParameters().getHeadLight( ))
+    if (_parametersManager.getRenderingParameters().getHeadLight())
     {
-        LightPtr sunLight = _scene->getLight( 0 );
-        DirectionalLight* sun = dynamic_cast< DirectionalLight* > ( sunLight.get( ));
-        if( sun )
+        LightPtr sunLight = _scene->getLight(0);
+        DirectionalLight* sun = dynamic_cast<DirectionalLight*>(sunLight.get());
+        if (sun)
         {
-            sun->setDirection( _camera->getTarget() - _camera->getPosition( ));
+            sun->setDirection(_camera->getTarget() - _camera->getPosition());
             _scene->commitLights();
         }
     }
 
-    _render( );
+    _render();
 
     uint8_t* colorBuffer = _frameBuffer->getColorBuffer();
-    if( colorBuffer )
+    if (colorBuffer)
     {
-        const size_t size = frameSize.x() * frameSize.y() * _frameBuffer->getColorDepth();
-        renderOutput.colorBuffer.assign( colorBuffer, colorBuffer + size );
+        const size_t size =
+            frameSize.x() * frameSize.y() * _frameBuffer->getColorDepth();
+        renderOutput.colorBuffer.assign(colorBuffer, colorBuffer + size);
         renderOutput.colorBufferFormat = _frameBuffer->getFrameBufferFormat();
     }
 
-    float* depthBuffer = _frameBuffer->getDepthBuffer( );
-    if( depthBuffer )
+    float* depthBuffer = _frameBuffer->getDepthBuffer();
+    if (depthBuffer)
     {
         const size_t size = frameSize.x() * frameSize.y();
-        renderOutput.depthBuffer.assign( depthBuffer, depthBuffer + size );
+        renderOutput.depthBuffer.assign(depthBuffer, depthBuffer + size);
     }
 
     postRender();
@@ -116,26 +114,27 @@ void Engine::_render()
 
     preRender();
 
-    if( _parametersManager.getRenderingParameters().getHeadLight( ))
+    if (_parametersManager.getRenderingParameters().getHeadLight())
     {
-        LightPtr sunLight = _scene->getLight( 0 );
-        DirectionalLight* sun =
-            dynamic_cast< DirectionalLight* > ( sunLight.get( ));
-        if( sun )
+        LightPtr sunLight = _scene->getLight(0);
+        DirectionalLight* sun = dynamic_cast<DirectionalLight*>(sunLight.get());
+        if (sun)
         {
-            sun->setDirection( _camera->getTarget() - _camera->getPosition( ));
+            sun->setDirection(_camera->getTarget() - _camera->getPosition());
             _scene->commitLights();
         }
     }
 
     _camera->commit();
-    setActiveRenderer( _parametersManager.getRenderingParameters().getRenderer( ));
+    setActiveRenderer(
+        _parametersManager.getRenderingParameters().getRenderer());
     render();
 
     postRender();
 
-    const Vector2ui windowSize = _parametersManager.getApplicationParameters().getWindowSize();
-    if( windowSize != frameSize )
+    const Vector2ui windowSize =
+        _parametersManager.getApplicationParameters().getWindowSize();
+    if (windowSize != frameSize)
         reshape(windowSize);
 }
 
@@ -149,40 +148,37 @@ void Engine::setDefaultCamera()
     Vector3f position = target;
     position.z() += diag.find_max();
 
-    const Vector3f up = Vector3f( 0.f, 1.f, 0.f );
-    _camera->setInitialState( position, target, up );
-    _camera->setAspectRatio(
-        static_cast< float >( frameSize.x()) /
-        static_cast< float >( frameSize.y()));
+    const Vector3f up = Vector3f(0.f, 1.f, 0.f);
+    _camera->setInitialState(position, target, up);
+    _camera->setAspectRatio(static_cast<float>(frameSize.x()) /
+                            static_cast<float>(frameSize.y()));
 
     BRAYNS_INFO << "World bounding box: " << worldBounds << std::endl;
-    BRAYNS_INFO << "World center      : " << worldBounds.getCenter() << std::endl;
+    BRAYNS_INFO << "World center      : " << worldBounds.getCenter()
+                << std::endl;
 }
 
 void Engine::setDefaultEpsilon()
 {
     float epsilon = _parametersManager.getRenderingParameters().getEpsilon();
-    if( epsilon == 0.f )
+    if (epsilon == 0.f)
     {
         const Vector3f& worldBoundsSize = _scene->getWorldBounds().getSize();
         epsilon = worldBoundsSize.length() / 1e6f;
         BRAYNS_INFO << "Default epsilon: " << epsilon << std::endl;
-        _parametersManager.getRenderingParameters().setEpsilon( epsilon );
+        _parametersManager.getRenderingParameters().setEpsilon(epsilon);
     }
 }
 
-void Engine::initializeMaterials(
-    const MaterialType materialType,
-    const size_t nbMaterials )
+void Engine::initializeMaterials(const MaterialType materialType,
+                                 const size_t nbMaterials)
 {
-    _scene->setMaterials( materialType, nbMaterials );
+    _scene->setMaterials(materialType, nbMaterials);
     _scene->commit();
 }
 
 Renderer& Engine::getRenderer()
 {
-    return *_renderers[ _activeRenderer ];
+    return *_renderers[_activeRenderer];
 }
-
-
 }

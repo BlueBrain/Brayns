@@ -24,35 +24,34 @@
 #define ABSTRACTRENDERER_H
 
 // ospray
-#include <ospray/SDK/render/Renderer.h>
 #include <ospray/SDK/common/Material.h>
+#include <ospray/SDK/render/Renderer.h>
 
 // system
 #include <vector>
 
-namespace brayns {
+namespace brayns
+{
 struct Camera;
 struct Model;
 
 /**
- * The AbstractRenderer class implements a base renderer for all Brayns custom implementations
+ * The AbstractRenderer class implements a base renderer for all Brayns custom
+ * implementations
  */
 class AbstractRenderer : public ospray::Renderer
 {
-
 public:
-
     AbstractRenderer();
 
     virtual void commit();
 
-    ospray::Material *createMaterial( const char *type ) final;
+    ospray::Material* createMaterial(const char* type) final;
 
 protected:
-
-    std::vector< void* > _lightArray;
+    std::vector<void*> _lightArray;
     void** _lightPtr;
-    std::vector< void* > _materialArray;
+    std::vector<void*> _materialArray;
     void** _materialPtr;
 
     Model* _world;
@@ -71,7 +70,6 @@ protected:
     float _timestamp;
     int _spp;
 };
-
 }
 
 #endif // ABSTRACTRENDERER_H

@@ -22,16 +22,11 @@
 
 namespace brayns
 {
-
-PointLight::PointLight(
-    const Vector3f& position,
-    const Vector3f& color,
-    const float intensity,
-    const float cutoffDistance )
-    : Light( color, intensity )
-    , _position( position )
-    , _cutoffDistance( cutoffDistance )
+PointLight::PointLight(const Vector3f& position, const Vector3f& color,
+                       const float intensity, const float cutoffDistance)
+    : Light(color, intensity)
+    , _position(position)
+    , _cutoffDistance(cutoffDistance)
 {
 }
-
 }

@@ -30,45 +30,40 @@
 
 namespace brayns
 {
-
-LivreScene::LivreScene( const Renderers& renderers,
-                        ParametersManager& parametersManager,
-                        livre::Engine& livre )
-    : Scene( renderers, parametersManager )
-    , _livre( livre )
+LivreScene::LivreScene(const Renderers& renderers,
+                       ParametersManager& parametersManager,
+                       livre::Engine& livre)
+    : Scene(renderers, parametersManager)
+    , _livre(livre)
 {
     auto& braynsParams = _parametersManager.getVolumeParameters();
     const auto& livreParams = _livre.getFrameData().getVRParameters();
-    braynsParams.setSamplesPerRay( livreParams.getSamplesPerRay( ));
+    braynsParams.setSamplesPerRay(livreParams.getSamplesPerRay());
 }
 
 void LivreScene::commitTransferFunctionData()
 {
-    TransferFunction& transferFunction = getTransferFunction();
-    Vector4fs& diffuseColors = transferFunction.getDiffuseColors();
-    if( diffuseColors.size() != 256 )
+    auto& livreTF =
+        _livre.getFrameData().getRenderSettings().getTransferFunction();
+    const auto& diffuseColors = getTransferFunction().getDiffuseColors();
+
+    livreTF.getDiffuse().resize(diffuseColors.size());
+    livreTF.getAlpha().resize(diffuseColors.size());
+    for (size_t i = 0; i < diffuseColors.size(); ++i)
     {
-        BRAYNS_ERROR << "Livre only supports color maps with 256 values"
-                     << std::endl;
-        return;
+        const auto& color = diffuseColors[i];
+        livreTF.getDiffuse()[i] = {color[0], color[1], color[2]};
+        livreTF.getAlpha()[i] = color[3];
     }
-    uint8_ts lut;
-    lut.reserve( 1024 );
-    for( const auto& color: diffuseColors )
-    {
-        lut.push_back( color.x() * 255.f );
-        lut.push_back( color.y() * 255.f );
-        lut.push_back( color.z() * 255.f );
-        lut.push_back( color.w() * 255.f );
-    }
-    _livre.getFrameData().getRenderSettings().getTransferFunction().setLut( lut );
+    const auto& range = getTransferFunction().getValuesRange();
+    livreTF.setRange({range[0], range[1]});
 }
 
 void LivreScene::commitVolumeData()
 {
     const auto& braynsParams = _parametersManager.getVolumeParameters();
     auto& livreParams = _livre.getFrameData().getVRParameters();
-    livreParams.setSamplesPerRay( braynsParams.getSamplesPerRay( ));
+    livreParams.setSamplesPerRay(braynsParams.getSamplesPerRay());
 }
 
 void LivreScene::commit()
@@ -78,7 +73,7 @@ void LivreScene::commit()
 void LivreScene::buildGeometry()
 {
     const auto& volInfo = _livre.getVolumeInformation();
-    Vector4f halfWorldSize = volInfo.worldSize/2.f;
+    Vector4f halfWorldSize = volInfo.worldSize / 2.f;
     halfWorldSize[3] = 1.f;
     auto bboxMin = volInfo.dataToLivreTransform.inverse() * halfWorldSize;
     bboxMin[3] = 1;
@@ -87,8 +82,8 @@ void LivreScene::buildGeometry()
 
     Boxf& worldBounds = getWorldBounds();
     worldBounds.reset();
-    worldBounds.merge( Vector3f(bboxMin) / volInfo.meterToDataUnitRatio );
-    worldBounds.merge( Vector3f(bboxMax) / volInfo.meterToDataUnitRatio );
+    worldBounds.merge(Vector3f(bboxMin) / volInfo.meterToDataUnitRatio);
+    worldBounds.merge(Vector3f(bboxMax) / volInfo.meterToDataUnitRatio);
 }
 
 uint64_t LivreScene::serializeGeometry()
@@ -100,7 +95,7 @@ void LivreScene::commitLights()
 {
 }
 
-void LivreScene::commitMaterials( const bool /*updateOnly*/ )
+void LivreScene::commitMaterials(const bool /*updateOnly*/)
 {
 }
 
@@ -112,9 +107,8 @@ void LivreScene::saveSceneToCacheFile()
 {
 }
 
-bool LivreScene::isVolumeSupported( const std::string& volumeFile ) const
+bool LivreScene::isVolumeSupported(const std::string& volumeFile) const
 {
-    return livre::DataSource::handles( servus::URI( volumeFile ));
+    return livre::DataSource::handles(servus::URI(volumeFile));
 }
-
 }

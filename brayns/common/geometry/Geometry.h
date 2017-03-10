@@ -28,7 +28,6 @@
 
 namespace brayns
 {
-
 enum GeometryType
 {
     GT_UNDEFINED = 0,
@@ -43,12 +42,9 @@ class Geometry
 public:
     BRAYNS_API Geometry();
     BRAYNS_API virtual ~Geometry() {}
-
     BRAYNS_API GeometryType getGeometryType() const { return _geometryType; }
-
 protected:
     GeometryType _geometryType;
 };
-
 }
 #endif // GEOMETRY_H

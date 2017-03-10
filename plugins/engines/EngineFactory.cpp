@@ -23,72 +23,69 @@
 #include <brayns/common/log.h>
 
 #ifdef BRAYNS_USE_OSPRAY
-#  include <plugins/engines/ospray/OSPRayEngine.h>
+#include <plugins/engines/ospray/OSPRayEngine.h>
 #endif
 #ifdef BRAYNS_USE_OPTIX
-#  include <plugins/engines/optix/OptiXEngine.h>
+#include <plugins/engines/optix/OptiXEngine.h>
 #endif
 #ifdef BRAYNS_USE_LIVRE
-#  include <plugins/engines/livre/LivreEngine.h>
+#include <plugins/engines/livre/LivreEngine.h>
 #endif
 
 namespace brayns
 {
-
-EngineFactory::EngineFactory(
-    int argc,
-    const char **argv,
-    ParametersManager& parametersManager )
-    : _parametersManager( parametersManager )
+EngineFactory::EngineFactory(int argc, const char** argv,
+                             ParametersManager& parametersManager)
+    : _parametersManager(parametersManager)
 {
-    for( int i = 0; i < argc; ++i )
-        _arguments.push_back( argv[i] );
+    for (int i = 0; i < argc; ++i)
+        _arguments.push_back(argv[i]);
 }
 
-EnginePtr EngineFactory::get( const std::string& name )
+EnginePtr EngineFactory::get(const std::string& name)
 {
-    if( _engines.find( name ) != _engines.end() )
+    if (_engines.find(name) != _engines.end())
         return _engines[name];
     try
     {
 #ifdef BRAYNS_USE_OSPRAY
-    if( name == "ospray" )
-    {
-        const char** argv = new const char*[_arguments.size()];
-        for( size_t i = 0; i < _arguments.size(); ++i )
-            argv[i] = _arguments[i].c_str();
-        _engines[name] = EnginePtr(
-            new OSPRayEngine( _arguments.size(), argv, _parametersManager ));
-        delete [] argv;
-        return _engines[name];
-    }
+        if (name == "ospray")
+        {
+            const char** argv = new const char*[_arguments.size()];
+            for (size_t i = 0; i < _arguments.size(); ++i)
+                argv[i] = _arguments[i].c_str();
+            _engines[name] = EnginePtr(
+                new OSPRayEngine(_arguments.size(), argv, _parametersManager));
+            delete[] argv;
+            return _engines[name];
+        }
 #endif
 #ifdef BRAYNS_USE_OPTIX
-    if( name == "optix" )
-    {
-        const char** argv = new const char*[_arguments.size()];
-        for( size_t i = 0; i < _arguments.size(); ++i )
-            argv[i] = _arguments[i].c_str();
-        _engines[name] = EnginePtr(
-            new OptiXEngine( _arguments.size(), argv, _parametersManager ));
-        delete [] argv;
-        return _engines[name];
-    }
+        if (name == "optix")
+        {
+            const char** argv = new const char*[_arguments.size()];
+            for (size_t i = 0; i < _arguments.size(); ++i)
+                argv[i] = _arguments[i].c_str();
+            _engines[name] = EnginePtr(
+                new OptiXEngine(_arguments.size(), argv, _parametersManager));
+            delete[] argv;
+            return _engines[name];
+        }
 #endif
 #ifdef BRAYNS_USE_LIVRE
-    if( name == "livre" )
-    {
-        char** argv = new char*[_arguments.size()];
-        for( size_t i = 0; i < _arguments.size(); ++i )
-            argv[i] = const_cast< char* >( _arguments[i].c_str( ));
-        _engines[name] = EnginePtr(
-            new LivreEngine( _arguments.size(), argv, _parametersManager ));
-        delete [] argv;
-        return _engines[name];
-    }
+        if (name == "livre")
+        {
+            char** argv = new char*[_arguments.size()];
+            for (size_t i = 0; i < _arguments.size(); ++i)
+                argv[i] = const_cast<char*>(_arguments[i].c_str());
+            _engines[name] = EnginePtr(
+                new LivreEngine(_arguments.size(), argv, _parametersManager));
+            delete[] argv;
+            return _engines[name];
+        }
 #endif
     }
-    catch( const std::runtime_error& e )
+    catch (const std::runtime_error& e)
     {
         BRAYNS_ERROR << "Engine creation failed: " << e.what() << std::endl;
     }
@@ -96,10 +93,9 @@ EnginePtr EngineFactory::get( const std::string& name )
     return EnginePtr();
 }
 
-void EngineFactory::remove( EnginePtr engine )
+void EngineFactory::remove(EnginePtr engine)
 {
-    if( engine )
-        _engines.erase( engine->name() );
+    if (engine)
+        _engines.erase(engine->name());
 }
-
 }

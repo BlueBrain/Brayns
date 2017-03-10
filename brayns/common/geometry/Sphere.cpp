@@ -22,13 +22,8 @@
 
 namespace brayns
 {
-
-Sphere::Sphere(
-    const size_t materialId,
-    const Vector3f& center,
-    const float radius,
-    const float timestamp,
-    const float value)
+Sphere::Sphere(const size_t materialId, const Vector3f& center,
+               const float radius, const float timestamp, const float value)
     : Primitive(materialId, timestamp)
     , _center(center)
     , _radius(radius)
@@ -52,5 +47,4 @@ size_t Sphere::getSerializationSize()
 {
     return 6;
 }
-
 }

@@ -29,7 +29,6 @@ namespace brayns
 {
 namespace obj
 {
-
 typedef ospray::vec3f Color;
 
 struct ExtendedOBJMaterial : public ospray::Material
@@ -68,8 +67,10 @@ struct ExtendedOBJMaterial : public ospray::Material
     /*! bump map */
     ospray::Texture2D *map_Bump;
 
-    std::string toString() const final {
-        return "brayns::extendedobjrenderer::ExtendedOBJMaterial"; }
+    std::string toString() const final
+    {
+        return "brayns::extendedobjrenderer::ExtendedOBJMaterial";
+    }
 
     void commit() final;
 };

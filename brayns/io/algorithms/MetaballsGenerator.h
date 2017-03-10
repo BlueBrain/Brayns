@@ -27,15 +27,12 @@
 
 namespace brayns
 {
-
 /**
  * Generated a mesh according to given set of metaballs.
  */
 class MetaballsGenerator
 {
-
 public:
-
     MetaballsGenerator() {}
     ~MetaballsGenerator();
 
@@ -50,21 +47,18 @@ public:
      * @param defaultMaterialId Default material to apply to the generated mesh
      * @param triangles Generated triangles
      */
-    void generateMesh(
-            const Spheres& metaballs,
-            const size_t gridSize,
-            const float threshold,
-            const MaterialsMap& materials,
-            const size_t defaultMaterialId,
-            TrianglesMeshMap& triangles );
+    void generateMesh(const Spheres& metaballs, const size_t gridSize,
+                      const float threshold, const MaterialsMap& materials,
+                      const size_t defaultMaterialId,
+                      TrianglesMeshMap& triangles);
 
 private:
-
     struct SurfaceVertex
     {
         SurfaceVertex()
-            : materialId( 0 )
-        {}
+            : materialId(0)
+        {
+        }
 
         Vector3f position;
         Vector3f normal;
@@ -72,12 +66,13 @@ private:
         size_t materialId;
     };
 
-    struct CubeGridVertex: public SurfaceVertex
+    struct CubeGridVertex : public SurfaceVertex
     {
         CubeGridVertex()
             : SurfaceVertex()
             , value(0)
-        {}
+        {
+        }
 
         float value; // Value of the scalar field
     };
@@ -87,30 +82,24 @@ private:
         CubeGridVertex* vertices[8];
     };
 
-    typedef std::vector< CubeGridVertex > Vertices;
-    typedef std::vector< CubeGridCube > Cubes;
-    typedef std::vector< SurfaceVertex > SurfaceVertices;
+    typedef std::vector<CubeGridVertex> Vertices;
+    typedef std::vector<CubeGridCube> Cubes;
+    typedef std::vector<SurfaceVertex> SurfaceVertices;
 
     void _clear();
 
-    void _buildVerticesAndCubes(
-        const Spheres& metaballs,
-        const size_t gridSize,
-        const size_t defaultMaterialId,
-        const float scale = 5.f );
+    void _buildVerticesAndCubes(const Spheres& metaballs, const size_t gridSize,
+                                const size_t defaultMaterialId,
+                                const float scale = 5.f);
 
-    void _buildTriangles(
-        const Spheres& metaballs,
-        const float threshold,
-        const MaterialsMap& materials,
-        const size_t defaultMaterialId,
-        TrianglesMeshMap& triangles );
+    void _buildTriangles(const Spheres& metaballs, const float threshold,
+                         const MaterialsMap& materials,
+                         const size_t defaultMaterialId,
+                         TrianglesMeshMap& triangles);
 
     SurfaceVertices _edgeVertices;
     Vertices _vertices;
     Cubes _cubes;
-
 };
-
 }
 #endif // METABALLSGENERATOR_H

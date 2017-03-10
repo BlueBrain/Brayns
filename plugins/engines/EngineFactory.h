@@ -25,7 +25,6 @@
 
 namespace brayns
 {
-
 /**
  * The engine factory is in charge of instanciating engines according to their
  * name (ospray, optix or firerays). If Brayns does not find the 3rd party
@@ -42,12 +41,9 @@ public:
      * @param parametersManager Container for all parameters (application,
      *        rendering, geometry, scene)
      */
-    EngineFactory(
-        int argc,
-        const char **argv,
-        ParametersManager& parametersManager );
+    EngineFactory(int argc, const char** argv,
+                  ParametersManager& parametersManager);
     ~EngineFactory() {}
-
     /**
      * @brief Gets the instance of the engine corresponding the given name. If
      *        the instance does not exist, it is created. If the name is
@@ -56,21 +52,19 @@ public:
      * @return A pointer to the engine, null if the engine could not be
      *         instanciated
      */
-    EnginePtr get( const std::string& name );
+    EnginePtr get(const std::string& name);
 
     /**
      * Remove the given engine from the factory. Note that the engine might not
      * be destroyed, depending on other shared_ptrs holding it.
      */
-    void remove( EnginePtr engine );
+    void remove(EnginePtr engine);
 
 private:
-
     strings _arguments;
     ParametersManager& _parametersManager;
     EngineMap _engines;
 };
-
 }
 
 #endif // ENGINEFACTORY_H

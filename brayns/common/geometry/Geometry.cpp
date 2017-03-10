@@ -22,9 +22,7 @@
 
 namespace brayns
 {
-
 Geometry::Geometry()
 {
 }
-
 }

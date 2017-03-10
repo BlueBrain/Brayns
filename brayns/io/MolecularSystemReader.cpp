@@ -22,55 +22,50 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/io/ProteinLoader.h>
 #include <brayns/common/simulation/CADiffusionSimulationHandler.h>
+#include <brayns/io/ProteinLoader.h>
 #include <fstream>
 
 namespace brayns
 {
-
 MolecularSystemReader::MolecularSystemReader(
-    const GeometryParameters& geometryParameters )
-    : _geometryParameters( geometryParameters )
+    const GeometryParameters& geometryParameters)
+    : _geometryParameters(geometryParameters)
 {
 }
 
-bool MolecularSystemReader::import(
-    Scene& scene,
-    MeshLoader& meshLoader )
+bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 {
     _nbProteins = 0;
-    if( !_loadConfiguration( ))
+    if (!_loadConfiguration())
         return false;
-    if( !_loadProteins( ))
+    if (!_loadProteins())
         return false;
-    if( !_loadPositions( ))
-        return false;
-
-    if( !_createScene( scene, meshLoader ))
+    if (!_loadPositions())
         return false;
 
-    if( !_calciumSimulationFolder.empty( ))
+    if (!_createScene(scene, meshLoader))
+        return false;
+
+    if (!_calciumSimulationFolder.empty())
     {
         CADiffusionSimulationHandlerPtr handler(
-            new CADiffusionSimulationHandler( _calciumSimulationFolder ));
-        handler->setFrame( scene, 0 );
-        scene.setCADiffusionSimulationHandler( handler );
+            new CADiffusionSimulationHandler(_calciumSimulationFolder));
+        handler->setFrame(scene, 0);
+        scene.setCADiffusionSimulationHandler(handler);
     }
-    BRAYNS_INFO << "Total number of different proteins: "
-                << _proteins.size() << std::endl;
-    BRAYNS_INFO << "Total number of proteins          : "
-                << _nbProteins << std::endl;
+    BRAYNS_INFO << "Total number of different proteins: " << _proteins.size()
+                << std::endl;
+    BRAYNS_INFO << "Total number of proteins          : " << _nbProteins
+                << std::endl;
 
     return true;
 }
 
-bool MolecularSystemReader::_createScene(
-    Scene& scene,
-    MeshLoader& meshLoader )
+bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
 {
     MeshQuality quality;
-    switch( _geometryParameters.getGeometryQuality( ))
+    switch (_geometryParameters.getGeometryQuality())
     {
     case GeometryQuality::medium:
         quality = MeshQuality::medium;
@@ -84,51 +79,58 @@ bool MolecularSystemReader::_createScene(
     }
 
     uint64_t proteinCount = 0;
-    for( const auto& proteinPosition: _proteinPositions )
+    for (const auto& proteinPosition : _proteinPositions)
     {
-        BRAYNS_PROGRESS( proteinCount, _nbProteins );
+        BRAYNS_PROGRESS(proteinCount, _nbProteins);
 
-        const auto& protein = _proteins.find( proteinPosition.first );
-        if( !_proteinFolder.empty( ))
+        const auto& protein = _proteins.find(proteinPosition.first);
+        if (!_proteinFolder.empty())
             // Load PDB files
-            for( const auto& position: proteinPosition.second )
+            for (const auto& position : proteinPosition.second)
             {
-                const auto pdbFilename = _proteinFolder + '/' + protein->second + ".pdb";
-                ProteinLoader loader( _geometryParameters );
-                loader.importPDBFile( pdbFilename, position, proteinCount, scene );
+                const auto pdbFilename =
+                    _proteinFolder + '/' + protein->second + ".pdb";
+                ProteinLoader loader(_geometryParameters);
+                loader.importPDBFile(pdbFilename, position, proteinCount,
+                                     scene);
                 ++proteinCount;
             }
 
-        if( !_meshFolder.empty( ))
+        if (!_meshFolder.empty())
             // Load meshes
-            for( const auto& position: proteinPosition.second )
+            for (const auto& position : proteinPosition.second)
             {
-                const auto objFilename = _meshFolder + '/' + protein->second + ".obj";
+                const auto objFilename =
+                    _meshFolder + '/' + protein->second + ".obj";
                 const size_t material =
-                    _geometryParameters.getColorScheme() == ColorScheme::protein_by_id ?
-                    proteinCount % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS) :
-                    NO_MATERIAL;
+                    _geometryParameters.getColorScheme() ==
+                            ColorScheme::protein_by_id
+                        ? proteinCount %
+                              (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS)
+                        : NO_MATERIAL;
 
-                // Scale mesh to match PDB units. PDB are in angstrom, and positions are
+                // Scale mesh to match PDB units. PDB are in angstrom, and
+                // positions are
                 // in micrometers
                 const float scale = 0.0001f;
-                meshLoader.importMeshFromFile(
-                    objFilename, scene, quality,
-                    position, Vector3f( scale, scale, scale ), material );
+                meshLoader.importMeshFromFile(objFilename, scene, quality,
+                                              position,
+                                              Vector3f(scale, scale, scale),
+                                              material);
 
-                if( _proteinFolder.empty( ))
+                if (_proteinFolder.empty())
                     ++proteinCount;
             }
     }
 
     // Update materials
-    if( _geometryParameters.getColorScheme() != ColorScheme::protein_by_id )
+    if (_geometryParameters.getColorScheme() != ColorScheme::protein_by_id)
     {
         size_t index = 0;
-        for( const auto& material: scene.getMaterials( ))
+        for (const auto& material : scene.getMaterials())
         {
-            ProteinLoader loader( _geometryParameters );
-            material.second->setColor( loader.getMaterialKd( index ));
+            ProteinLoader loader(_geometryParameters);
+            material.second->setColor(loader.getMaterialKd(index));
             ++index;
         }
     }
@@ -139,21 +141,21 @@ bool MolecularSystemReader::_loadConfiguration()
 {
     // Load molecular system configuration
     const auto& configuration = _geometryParameters.getMolecularSystemConfig();
-    std::ifstream configurationFile( configuration, std::ios::in );
-    if( !configurationFile.good( ))
+    std::ifstream configurationFile(configuration, std::ios::in);
+    if (!configurationFile.good())
     {
         BRAYNS_ERROR << "Could not open file " << configuration << std::endl;
         return false;
     }
 
-    std::map< std::string, std::string > parameters;
+    std::map<std::string, std::string> parameters;
     std::string line;
-    while( std::getline( configurationFile, line ))
+    while (std::getline(configurationFile, line))
     {
-        std::stringstream lineStream( line );
+        std::stringstream lineStream(line);
         std::string key, value;
         lineStream >> key >> value;
-        parameters[ key ] = value;
+        parameters[key] = value;
     }
     configurationFile.close();
 
@@ -168,39 +170,41 @@ bool MolecularSystemReader::_loadConfiguration()
     BRAYNS_INFO << "Mesh folder       : " << _meshFolder << std::endl;
     BRAYNS_INFO << "System descriptor : " << _descriptorFilename << std::endl;
     BRAYNS_INFO << "Protein positions : " << _positionsFilename << std::endl;
-    BRAYNS_INFO << "Calcium positions : " << _calciumSimulationFolder << std::endl;
+    BRAYNS_INFO << "Calcium positions : " << _calciumSimulationFolder
+                << std::endl;
     return true;
 }
 
-bool MolecularSystemReader::_loadProteins( )
+bool MolecularSystemReader::_loadProteins()
 {
-    std::ifstream descriptorFile( _descriptorFilename, std::ios::in );
-    if( !descriptorFile.good( ))
+    std::ifstream descriptorFile(_descriptorFilename, std::ios::in);
+    if (!descriptorFile.good())
     {
-        BRAYNS_ERROR << "Could not open file " << _descriptorFilename << std::endl;
+        BRAYNS_ERROR << "Could not open file " << _descriptorFilename
+                     << std::endl;
         return false;
     }
 
     // Load list of proteins
     std::string line;
-    while( descriptorFile.good() && std::getline( descriptorFile, line ))
+    while (descriptorFile.good() && std::getline(descriptorFile, line))
     {
-        std::stringstream lineStream( line );
+        std::stringstream lineStream(line);
         std::string protein;
         size_t id;
         size_t instances;
         lineStream >> protein >> id >> instances;
-        if( protein.empty( ))
+        if (protein.empty())
             continue;
 
         _proteins[id] = protein;
 
-        if( _proteinFolder.empty( ))
+        if (_proteinFolder.empty())
             continue;
 
-        const auto pdbFilename( _proteinFolder + '/' + protein + ".pdb" );
-        std::ifstream pdbFile( pdbFilename, std::ios::in );
-        if( pdbFile.good( ))
+        const auto pdbFilename(_proteinFolder + '/' + protein + ".pdb");
+        std::ifstream pdbFile(pdbFilename, std::ios::in);
+        if (pdbFile.good())
             pdbFile.close();
         else
         {
@@ -211,7 +215,7 @@ bool MolecularSystemReader::_loadProteins( )
             command += ".pdb";
             command += " -P ";
             command += _proteinFolder;
-            int status = system( command.c_str( ));
+            int status = system(command.c_str());
             BRAYNS_INFO << command << ": " << status << std::endl;
         }
     }
@@ -222,27 +226,28 @@ bool MolecularSystemReader::_loadProteins( )
 bool MolecularSystemReader::_loadPositions()
 {
     // Load proteins according to specified positions
-    std::ifstream filePositions( _positionsFilename, std::ios::in );
-    if( !filePositions.good( ))
+    std::ifstream filePositions(_positionsFilename, std::ios::in);
+    if (!filePositions.good())
     {
-        BRAYNS_ERROR << "Could not open file " << _positionsFilename << std::endl;
+        BRAYNS_ERROR << "Could not open file " << _positionsFilename
+                     << std::endl;
         return false;
     }
 
     // Load protein positions
     _nbProteins = 0;
     std::string line;
-    while( filePositions.good() && std::getline( filePositions, line ))
+    while (filePositions.good() && std::getline(filePositions, line))
     {
-        std::stringstream lineStream( line );
+        std::stringstream lineStream(line);
         size_t id;
         Vector3f position;
         lineStream >> id >> position.x() >> position.y() >> position.z();
 
-        if( _proteins.find(id) != _proteins.end( ))
+        if (_proteins.find(id) != _proteins.end())
         {
-            auto& proteinPosition = _proteinPositions[ id ];
-            proteinPosition.push_back( position );
+            auto& proteinPosition = _proteinPositions[id];
+            proteinPosition.push_back(position);
             ++_nbProteins;
         }
     }
@@ -250,23 +255,22 @@ bool MolecularSystemReader::_loadPositions()
     return true;
 }
 
-void MolecularSystemReader::_writePositionstoFile( const std::string& filename )
+void MolecularSystemReader::_writePositionstoFile(const std::string& filename)
 {
-    std::ofstream outfile( filename, std::ios::binary );
-    for( const auto& position: _proteinPositions )
+    std::ofstream outfile(filename, std::ios::binary);
+    for (const auto& position : _proteinPositions)
     {
-        for( const auto& element: position.second )
+        for (const auto& element : position.second)
         {
             const float radius = 1.f;
             const float value = 1.f;
-            outfile.write((char *)&element.x(), sizeof( float ));
-            outfile.write((char *)&element.y(), sizeof( float ));
-            outfile.write((char *)&element.z(), sizeof( float ));
-            outfile.write((char *)&radius, sizeof( float ));
-            outfile.write((char *)&value, sizeof( float ));
+            outfile.write((char*)&element.x(), sizeof(float));
+            outfile.write((char*)&element.y(), sizeof(float));
+            outfile.write((char*)&element.z(), sizeof(float));
+            outfile.write((char*)&radius, sizeof(float));
+            outfile.write((char*)&value, sizeof(float));
         }
     }
     outfile.close();
 }
-
 }

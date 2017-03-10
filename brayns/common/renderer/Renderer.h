@@ -26,23 +26,20 @@
 
 namespace brayns
 {
-
 class Renderer
 {
 public:
-    BRAYNS_API Renderer( ParametersManager& parametersManager );
-    BRAYNS_API virtual ~Renderer( ) {}
+    BRAYNS_API Renderer(ParametersManager& parametersManager);
+    BRAYNS_API virtual ~Renderer() {}
+    BRAYNS_API virtual void render(FrameBufferPtr frameBuffer) = 0;
 
-    BRAYNS_API virtual void render( FrameBufferPtr frameBuffer ) = 0;
-
-    BRAYNS_API virtual void commit( ) =  0;
-    BRAYNS_API void setScene( ScenePtr scene ) { _scene = scene; };
-    BRAYNS_API virtual void setCamera( CameraPtr camera ) =  0;
+    BRAYNS_API virtual void commit() = 0;
+    BRAYNS_API void setScene(ScenePtr scene) { _scene = scene; };
+    BRAYNS_API virtual void setCamera(CameraPtr camera) = 0;
 
 protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;
 };
-
 }
 #endif // RENDERER_H

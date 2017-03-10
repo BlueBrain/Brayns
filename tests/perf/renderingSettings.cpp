@@ -20,12 +20,12 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/parameters/ParametersManager.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #define BOOST_TEST_MODULE brayns
 #include <boost/test/unit_test.hpp>
@@ -36,11 +36,11 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-BOOST_AUTO_TEST_CASE( default_scene_benckmark )
+BOOST_AUTO_TEST_CASE(default_scene_benckmark)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
-    brayns::Brayns brayns( testSuite.argc,
-                           const_cast< const char** >( testSuite.argv ));
+    brayns::Brayns brayns(testSuite.argc,
+                          const_cast<const char**>(testSuite.argv));
 
     high_resolution_clock::time_point startTime;
     uint64_t reference, shadows, softShadows, ambientOcclusion, allOptions;
@@ -53,65 +53,73 @@ BOOST_AUTO_TEST_CASE( default_scene_benckmark )
     // Start timer
     startTime = high_resolution_clock::now();
     brayns.render();
-    reference = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
+    reference =
+        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
+            .count();
 
     // Shadows
-    params.getRenderingParameters().setShadows( true );
+    params.getRenderingParameters().setShadows(true);
     brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
     brayns.render();
-    shadows = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
+    shadows =
+        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
+            .count();
 
     // Shadows
     float t = float(shadows) / float(reference);
-    BOOST_TEST_MESSAGE( "Shadows cost. expected: 165%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 1.65f );
+    BOOST_TEST_MESSAGE("Shadows cost. expected: 165%, realized: " << t * 100.f);
+    BOOST_CHECK(t < 1.65f);
 
-    params.getRenderingParameters().setSoftShadows( true );
+    params.getRenderingParameters().setSoftShadows(true);
     brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
     brayns.render();
-    softShadows = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
+    softShadows =
+        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
+            .count();
 
     // Soft shadows
     t = float(softShadows) / float(reference);
-    BOOST_TEST_MESSAGE( "Soft shadows cost. expected: 185%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 1.85f );
+    BOOST_TEST_MESSAGE(
+        "Soft shadows cost. expected: 185%, realized: " << t * 100.f);
+    BOOST_CHECK(t < 1.85f);
 
     // Ambient occlustion
-    params.getRenderingParameters().setShadows( false );
-    params.getRenderingParameters().setSoftShadows( false );
-    params.getRenderingParameters().setAmbientOcclusionStrength( 1.f );
+    params.getRenderingParameters().setShadows(false);
+    params.getRenderingParameters().setSoftShadows(false);
+    params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
     brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
     brayns.render();
-    ambientOcclusion = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
+    ambientOcclusion =
+        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
+            .count();
 
     // Ambient occlusion
     t = float(ambientOcclusion) / float(reference);
-    BOOST_TEST_MESSAGE( "Ambient occlusion cost. expected: 250%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 2.5f );
+    BOOST_TEST_MESSAGE(
+        "Ambient occlusion cost. expected: 250%, realized: " << t * 100.f);
+    BOOST_CHECK(t < 2.5f);
 
     // All options
-    params.getRenderingParameters().setShadows( true );
-    params.getRenderingParameters().setSoftShadows( true );
-    params.getRenderingParameters().setAmbientOcclusionStrength( 1.f );
+    params.getRenderingParameters().setShadows(true);
+    params.getRenderingParameters().setSoftShadows(true);
+    params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
     brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
     brayns.render();
-    allOptions = duration_cast< milliseconds >(
-        high_resolution_clock::now() - startTime ).count();
+    allOptions =
+        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
+            .count();
 
     // All options
     t = float(allOptions) / float(reference);
-    BOOST_TEST_MESSAGE( "All options cost. expected: 350%, realized: " << t * 100.f );
-    BOOST_CHECK( t < 3.5f );
+    BOOST_TEST_MESSAGE(
+        "All options cost. expected: 350%, realized: " << t * 100.f);
+    BOOST_CHECK(t < 3.5f);
 }

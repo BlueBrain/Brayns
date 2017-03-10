@@ -20,38 +20,39 @@
 
 #include "LivreFrameBuffer.h"
 
-#include <eq/image.h>
 #include <eq/fabric/pixelViewport.h>
+#include <eq/image.h>
 
 #include <livre/eq/Engine.h>
 
 namespace brayns
 {
-
-LivreFrameBuffer::LivreFrameBuffer( const Vector2ui& frameSize,
-                                    const FrameBufferFormat colorDepth,
-                                    livre::Engine& livre )
-    : FrameBuffer( frameSize, colorDepth, false )
-    , _livre( livre )
+LivreFrameBuffer::LivreFrameBuffer(const Vector2ui& frameSize,
+                                   const FrameBufferFormat colorDepth,
+                                   livre::Engine& livre)
+    : FrameBuffer(frameSize, colorDepth, false)
+    , _livre(livre)
 {
-    _livre.resize( frameSize );
+    _livre.resize(frameSize);
 }
 
 LivreFrameBuffer::~LivreFrameBuffer()
 {
 }
 
-void LivreFrameBuffer::resize( const Vector2ui& frameSize )
+void LivreFrameBuffer::resize(const Vector2ui& frameSize)
 {
-    if( _frameSize == frameSize )
+    if (_frameSize == frameSize)
         return;
 
     clear();
-    _livre.resize( frameSize );
+    _livre.resize(frameSize);
+    _frameSize = frameSize;
 }
 
 void LivreFrameBuffer::clear()
 {
+    _colorBuffer.clear();
 }
 
 void LivreFrameBuffer::map()
@@ -62,17 +63,18 @@ void LivreFrameBuffer::unmap()
 {
 }
 
-void LivreFrameBuffer::assign( const eq::Image& image )
+void LivreFrameBuffer::assign(const eq::Image& image)
 {
     const auto& pvp = image.getPixelViewport();
-    const Vector2ui newFrameSize = { uint32_t(pvp.w), uint32_t(pvp.h) };
+    const Vector2ui newFrameSize = {uint32_t(pvp.w), uint32_t(pvp.h)};
 
-    if( image.hasPixelData( eq::Frame::Buffer::color ) &&
-        newFrameSize == _frameSize )
-        _colorBuffer = (uint8_t*)image.getPixelPointer( eq::Frame::Buffer::color );
+    if (image.hasPixelData(eq::Frame::Buffer::color) &&
+        newFrameSize == _frameSize)
+    {
+        auto data = (uint8_t*)image.getPixelPointer(eq::Frame::Buffer::color);
+        _colorBuffer.assign(data, data + pvp.w * pvp.h * getColorDepth());
+    }
     else
-        _colorBuffer = nullptr;
-    _frameSize = newFrameSize;
+        _colorBuffer.clear();
 }
-
 }

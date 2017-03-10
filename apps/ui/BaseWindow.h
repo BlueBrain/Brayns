@@ -36,10 +36,9 @@ using std::chrono::milliseconds;
 
 namespace brayns
 {
-
 //! dedicated namespace for 3D glut viewer widget
 /*! initialize everything GLUT-related */
-void initGLUT(int *ac, const char **av);
+void initGLUT(int* ac, const char** av);
 
 /*! switch over to GLUT for control flow. This functoin will not return */
 void runGLUT();
@@ -50,22 +49,15 @@ struct FPSCounter
     high_resolution_clock::time_point _startTime;
     uint64_t _duration;
 
-    void start()
-    {
-        _startTime = high_resolution_clock::now( );
-    }
-
+    void start() { _startTime = high_resolution_clock::now(); }
     void stop()
     {
-        _duration  = duration_cast< milliseconds >(
-            high_resolution_clock::now() - _startTime ).count();
+        _duration = duration_cast<milliseconds>(high_resolution_clock::now() -
+                                                _startTime)
+                        .count();
     }
 
-    float getFPS()
-    {
-        return 1000.f/_duration;
-    }
-
+    float getFPS() { return 1000.f / _duration; }
 };
 
 /**
@@ -80,9 +72,8 @@ enum class FrameBufferMode
 class BaseWindow
 {
 public:
-
-    BaseWindow( Brayns& brayns,
-                FrameBufferMode frameBufferMode = FrameBufferMode::COLOR );
+    BaseWindow(Brayns& brayns,
+               FrameBufferMode frameBufferMode = FrameBufferMode::COLOR);
     virtual ~BaseWindow();
 
     /*! size we'll create a window at */
@@ -92,25 +83,21 @@ public:
     virtual void forceRedraw();
 
     /*! set window title */
-    void setTitle(const char *title);
+    void setTitle(const char* title);
 
     /*! set window title */
-    void setTitle(const std::string &title) { setTitle(title.c_str()); }
-
+    void setTitle(const std::string& title) { setTitle(title.c_str()); }
     // ------------------------------------------------------------------
     // event handling - override this to change this widgets behavior
     // to input events
     // ------------------------------------------------------------------
-    virtual void mouseButton(
-            int button,
-            bool released,
-            const Vector2i& pos);
+    virtual void mouseButton(int button, bool released, const Vector2i& pos);
 
-    virtual void motion( const Vector2i& pos );
+    virtual void motion(const Vector2i& pos);
 
-    virtual void passiveMotion( const Vector2i& pos );
+    virtual void passiveMotion(const Vector2i& pos);
 
-    virtual void reshape( const Vector2i& newSize );
+    virtual void reshape(const Vector2i& newSize);
 
     virtual void idle();
 
@@ -126,39 +113,38 @@ public:
         events get routed to this window instance */
     virtual void activate();
 
-    void create(const char *title,
-                size_t width, size_t height);
+    void create(const char* title, size_t width, size_t height);
 
     /*! clear the frame buffer color and depth bits */
     void clearPixels();
 
     /*! draw uint pixels into the GLUT window (assumes window and buffer
      * dimensions are equal) */
-    void drawPixels(const int *framebuffer);
+    void drawPixels(const int* framebuffer);
 
     /*! draw float4 pixels into the GLUT window (assumes window and buffer
      * dimensions are equal) */
-    void drawPixels(const Vector3f *framebuffer);
+    void drawPixels(const Vector3f* framebuffer);
 
     virtual void keypress(char key, const Vector2f& where);
     virtual void specialkey(int key, const Vector2f& where);
 
     /** Saves current frame to disk. The filename is defined by a prefix and a
-     * frame index (\<prefix\>_\<frame\>_%08d.ppm). The file uses the ppm encoding
+     * frame index (\<prefix\>_\<frame\>_%08d.ppm). The file uses the ppm
+     * encoding
      * and is written to the working folder of the application.
      *
      * @param frameIndex index of the current frame
      * @param prefix prefix used for the filename
      */
-    void saveFrameToDisk( size_t frameIndex, const std::string& prefix );
+    void saveFrameToDisk(size_t frameIndex, const std::string& prefix);
 
-    void saveSceneToBinaryFile( const std::string& fn );
-    void loadSceneFromBinaryFile( const std::string& fn );
+    void saveSceneToBinaryFile(const std::string& fn);
+    void loadSceneFromBinaryFile(const std::string& fn);
 
 protected:
-
     virtual void _registerKeyboardShortcuts();
-    void _renderBitmapString( float x, float y, const std::string& text );
+    void _renderBitmapString(float x, float y, const std::string& text);
 
     Brayns& _brayns;
 
@@ -186,7 +172,6 @@ protected:
     Vector2ui _windowPosition;
 
 private:
-
     void _resetCamera();
     void _increaseMotionSpeed();
     void _decreaseMotionSpeed();
@@ -206,9 +191,7 @@ private:
     friend void glut3dMotionFunc(int x, int y);
     friend void glut3dMouseFunc(int whichButton, int released, int x, int y);
     friend void glut3dPassiveMouseFunc(int x, int y);
-
 };
-
 }
 
 #endif

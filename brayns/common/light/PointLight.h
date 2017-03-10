@@ -25,8 +25,7 @@
 
 namespace brayns
 {
-
-const Vector3f DEFAULT_SUN_POSITION = { -10.f, 10.f, -10.f };
+const Vector3f DEFAULT_SUN_POSITION = {-10.f, 10.f, -10.f};
 
 /**
     Point light object
@@ -44,38 +43,25 @@ public:
         @param intensity Amount of light emitted
         @param cutoffDistance Cutoff distance
      */
-    BRAYNS_API PointLight(
-        const Vector3f& position,
-        const Vector3f& color,
-        float intensity,
-        float cutoffDistance );
+    BRAYNS_API PointLight(const Vector3f& position, const Vector3f& color,
+                          float intensity, float cutoffDistance);
 
     BRAYNS_API ~PointLight() {}
-
     /** Light source position */
-    BRAYNS_API void setPosition( const Vector3f& position )
+    BRAYNS_API void setPosition(const Vector3f& position)
     {
         _position = position;
     }
-    BRAYNS_API const Vector3f& getPosition( ) const
-    {
-        return _position;
-    }
-
+    BRAYNS_API const Vector3f& getPosition() const { return _position; }
     /** Light source cutoff distance */
-    BRAYNS_API void setCutoffDistance( float cutoffDistance )
+    BRAYNS_API void setCutoffDistance(float cutoffDistance)
     {
         _cutoffDistance = cutoffDistance;
     }
-    BRAYNS_API float getCutoffDistance( ) const
-    {
-        return _cutoffDistance;
-    }
-
+    BRAYNS_API float getCutoffDistance() const { return _cutoffDistance; }
 private:
     Vector3f _position;
     float _cutoffDistance;
 };
-
 }
 #endif // POINTLIGHT_H

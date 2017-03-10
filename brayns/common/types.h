@@ -25,10 +25,10 @@
 
 #include <boost/program_options.hpp>
 
-#include <memory>
-#include <map>
-#include <vector>
 #include <cstdint>
+#include <map>
+#include <memory>
+#include <vector>
 
 typedef ::int64_t int64;
 typedef ::uint64_t uint64;
@@ -44,26 +44,25 @@ typedef ::int64_t index_t;
 
 namespace brayns
 {
-
 // Forward declarations
 class Brayns;
-typedef std::shared_ptr< Brayns > BraynsPtr;
+typedef std::shared_ptr<Brayns> BraynsPtr;
 
 class Engine;
-typedef std::shared_ptr< Engine > EnginePtr;
-typedef std::map< std::string, EnginePtr > EngineMap;
+typedef std::shared_ptr<Engine> EnginePtr;
+typedef std::map<std::string, EnginePtr> EngineMap;
 
 class Scene;
-typedef std::shared_ptr< Scene > ScenePtr;
+typedef std::shared_ptr<Scene> ScenePtr;
 
 class AbstractManipulator;
-typedef std::shared_ptr< AbstractManipulator > AbstractManipulatorPtr;
+typedef std::shared_ptr<AbstractManipulator> AbstractManipulatorPtr;
 
 class Camera;
-typedef std::shared_ptr< Camera > CameraPtr;
+typedef std::shared_ptr<Camera> CameraPtr;
 
 class TransferFunction;
-typedef std::shared_ptr< TransferFunction > TransferFunctionPtr;
+typedef std::shared_ptr<TransferFunction> TransferFunctionPtr;
 
 enum class RendererType
 {
@@ -72,33 +71,33 @@ enum class RendererType
     simulation,
     particle
 };
-typedef std::vector< RendererType > RendererTypes;
+typedef std::vector<RendererType> RendererTypes;
 
 class Renderer;
-typedef std::shared_ptr< Renderer > RendererPtr;
-typedef std::map< RendererType, RendererPtr > RendererMap;
-typedef std::vector< RendererPtr > Renderers;
+typedef std::shared_ptr<Renderer> RendererPtr;
+typedef std::map<RendererType, RendererPtr> RendererMap;
+typedef std::vector<RendererPtr> Renderers;
 
 class FrameBuffer;
-typedef std::shared_ptr< FrameBuffer > FrameBufferPtr;
+typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
 
 class ApplicationParameters;
-typedef std::shared_ptr< ApplicationParameters > ApplicationParametersPtr;
+typedef std::shared_ptr<ApplicationParameters> ApplicationParametersPtr;
 
 class GeometryParameters;
-typedef std::shared_ptr< GeometryParameters > GeometryParametersPtr;
+typedef std::shared_ptr<GeometryParameters> GeometryParametersPtr;
 
 class RenderingParameters;
-typedef std::shared_ptr< RenderingParameters > RenderingParametersPtr;
+typedef std::shared_ptr<RenderingParameters> RenderingParametersPtr;
 
 class VolumeParameters;
-typedef std::shared_ptr< VolumeParameters > VolumeParametersPtr;
+typedef std::shared_ptr<VolumeParameters> VolumeParametersPtr;
 
 class ExtensionController;
 typedef std::shared_ptr<ExtensionController> ExtensionControllerPtr;
 
 class Geometry;
-typedef std::vector< Geometry* > Geometries;
+typedef std::vector<Geometry*> Geometries;
 
 class Primitive;
 typedef std::shared_ptr<Primitive> PrimitivePtr;
@@ -132,45 +131,46 @@ typedef std::shared_ptr<Texture2D> Texture2DPtr;
 typedef std::map<std::string, Texture2DPtr> TexturesMap;
 
 class Light;
-typedef std::shared_ptr< Light > LightPtr;
-typedef std::vector< LightPtr > Lights;
-typedef std::map< size_t, LightPtr > LightsMap;
+typedef std::shared_ptr<Light> LightPtr;
+typedef std::vector<LightPtr> Lights;
+typedef std::map<size_t, LightPtr> LightsMap;
 
 class DirectionalLight;
-typedef std::shared_ptr< DirectionalLight > DirectionalLightPtr;
+typedef std::shared_ptr<DirectionalLight> DirectionalLightPtr;
 
 class PointLight;
-typedef std::shared_ptr< PointLight > PointLightPtr;
+typedef std::shared_ptr<PointLight> PointLightPtr;
 
 class AbstractSimulationHandler;
-typedef std::shared_ptr< AbstractSimulationHandler > AbstractSimulationHandlerPtr;
+typedef std::shared_ptr<AbstractSimulationHandler> AbstractSimulationHandlerPtr;
 
 class CircuitSimulationHandler;
-typedef std::shared_ptr< CircuitSimulationHandler > CircuitSimulationHandlerPtr;
+typedef std::shared_ptr<CircuitSimulationHandler> CircuitSimulationHandlerPtr;
 
 class Brayns;
 class SpikeSimulationHandler;
-typedef std::shared_ptr< SpikeSimulationHandler > SpikeSimulationHandlerPtr;
+typedef std::shared_ptr<SpikeSimulationHandler> SpikeSimulationHandlerPtr;
 
 class CADiffusionSimulationHandler;
-typedef std::shared_ptr< CADiffusionSimulationHandler > CADiffusionSimulationHandlerPtr;
+typedef std::shared_ptr<CADiffusionSimulationHandler>
+    CADiffusionSimulationHandlerPtr;
 
 class VolumeHandler;
-typedef std::shared_ptr< VolumeHandler > VolumeHandlerPtr;
+typedef std::shared_ptr<VolumeHandler> VolumeHandlerPtr;
 
-typedef std::vector< std::string > strings;
-typedef std::vector< float > floats;
-typedef std::vector< int > ints;
-typedef std::vector< unsigned int > uints;
-typedef std::vector< int8_t > int8_ts;
-typedef std::vector< uint8_t > uint8_ts;
-typedef std::vector< int16_t > int16_ts;
-typedef std::vector< uint16_t > uint16_ts;
-typedef std::vector< int32_t > int32_ts;
-typedef std::vector< uint32_t > uint32_ts;
-typedef std::vector< int64_t > int64_ts;
-typedef std::vector< uint64_t > uint64_ts;
-typedef std::vector< size_t > size_ts;
+typedef std::vector<std::string> strings;
+typedef std::vector<float> floats;
+typedef std::vector<int> ints;
+typedef std::vector<unsigned int> uints;
+typedef std::vector<int8_t> int8_ts;
+typedef std::vector<uint8_t> uint8_ts;
+typedef std::vector<int16_t> int16_ts;
+typedef std::vector<uint16_t> uint16_ts;
+typedef std::vector<int32_t> int32_ts;
+typedef std::vector<uint32_t> uint32_ts;
+typedef std::vector<int64_t> int64_ts;
+typedef std::vector<uint64_t> uint64_ts;
+typedef std::vector<size_t> size_ts;
 
 class AbstractParameters;
 class ApplicationParameters;
@@ -179,32 +179,32 @@ class RenderingParameters;
 class SceneParameters;
 
 class ParametersManager;
-typedef std::shared_ptr< ParametersManager > ParametersManagerPtr;
+typedef std::shared_ptr<ParametersManager> ParametersManagerPtr;
 
 class ExtensionPlugin;
-typedef std::shared_ptr< ExtensionPlugin > ExtensionPluginPtr;
-typedef std::vector< ExtensionPluginPtr > ExtensionPlugins;
+typedef std::shared_ptr<ExtensionPlugin> ExtensionPluginPtr;
+typedef std::vector<ExtensionPluginPtr> ExtensionPlugins;
 
 class ExtensionPluginFactory;
-typedef std::unique_ptr< ExtensionPluginFactory > ExtensionPluginFactoryPtr;
+typedef std::unique_ptr<ExtensionPluginFactory> ExtensionPluginFactoryPtr;
 
 class ZeroEQPlugin;
-typedef std::shared_ptr< ZeroEQPlugin > ZeroEQPluginPtr;
+typedef std::shared_ptr<ZeroEQPlugin> ZeroEQPluginPtr;
 
 class DeflectPlugin;
-typedef std::shared_ptr< DeflectPlugin > DeflectPluginPtr;
+typedef std::shared_ptr<DeflectPlugin> DeflectPluginPtr;
 
 class KeyboardHandler;
-typedef std::shared_ptr< KeyboardHandler > KeyboardHandlerPtr;
+typedef std::shared_ptr<KeyboardHandler> KeyboardHandlerPtr;
 
 /** Define the frame buffer format */
 enum FrameBufferFormat
 {
-  FBF_RGBA_NONE,
-  FBF_RGBA_I8,
-  FBF_BGRA_I8,
-  FBF_RGB_I8,
-  FBF_RGBA_F32,
+    FBF_RGBA_NONE,
+    FBF_RGBA_I8,
+    FBF_BGRA_I8,
+    FBF_RGB_I8,
+    FBF_RGBA_F32,
 };
 
 /** Define the color scheme to be applied to the geometry */
@@ -267,7 +267,8 @@ enum TransferFunctionAttribute
 };
 
 /**
- * @brief The Histogram struct contains the range as well as the values of the simulation histogram
+ * @brief The Histogram struct contains the range as well as the values of the
+ * simulation histogram
  *        for a given simulation frame, determined by the timestamp
  */
 struct Histogram
@@ -355,7 +356,7 @@ enum class CameraMode
  * in absolute value of the coordinate system. Values are stored
  * in a Vector4, with the following order: nx, ny, nz and d
  */
-typedef std::vector< Vector4f > ClipPlanes;
+typedef std::vector<Vector4f> ClipPlanes;
 
 struct RenderInput
 {
@@ -374,7 +375,6 @@ struct RenderOutput
     floats depthBuffer;
     FrameBufferFormat colorBufferFormat;
 };
-
 }
 
 #endif // TYPES_H

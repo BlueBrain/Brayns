@@ -26,28 +26,18 @@
 
 namespace brayns
 {
-
 class XYZBLoader
 {
-
 public:
+    XYZBLoader(const GeometryParameters& geometryParameters);
 
-    XYZBLoader( const GeometryParameters& geometryParameters );
+    bool importFromFile(const std::string& filename, Scene& scene);
 
-    bool importFromFile(
-        const std::string& filename,
-        Scene& scene );
-
-    bool importFromBinaryFile(
-        const std::string& filename,
-        Scene& scene );
+    bool importFromBinaryFile(const std::string& filename, Scene& scene);
 
 private:
-
     GeometryParameters _geometryParameters;
-
 };
-
 }
 
 #endif // XYZBLOADER_H

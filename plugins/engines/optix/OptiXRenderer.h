@@ -23,13 +23,11 @@
 
 #include "OptiXCamera.h"
 
-#include <brayns/common/types.h>
 #include <brayns/common/renderer/Renderer.h>
-
+#include <brayns/common/types.h>
 
 namespace brayns
 {
-
 /**
    OptiX specific renderer
 
@@ -37,27 +35,20 @@ namespace brayns
 */
 class OptiXRenderer : public brayns::Renderer
 {
-
 public:
+    OptiXRenderer(const std::string& name, ParametersManager& parametersMamager,
+                  optix::Context& context);
 
-    OptiXRenderer(
-        const std::string& name,
-        ParametersManager& parametersMamager,
-        optix::Context& context );
-
-    void render( FrameBufferPtr frameBuffer ) final;
+    void render(FrameBufferPtr frameBuffer) final;
 
     void commit() final;
 
-    void setCamera( CameraPtr camera ) final;
+    void setCamera(CameraPtr camera) final;
 
 private:
-
     optix::Context& _context;
     uint64_t _frame;
-
 };
-
 }
 
 #endif // OPTIXRENDERER_H

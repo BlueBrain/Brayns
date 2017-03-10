@@ -27,7 +27,6 @@
 
 namespace brayns
 {
-
 /**
  * Defines how morphologies should be organized in space when the layout mode is
  * selected. The idea is to present the morphology in a grid with a given number
@@ -37,10 +36,11 @@ namespace brayns
 struct MorphologyLayout
 {
     MorphologyLayout()
-    : nbColumns( 0 )
-    , verticalSpacing( 0 )
-    , horizontalSpacing( 0 )
-      {}
+        : nbColumns(0)
+        , verticalSpacing(0)
+        , horizontalSpacing(0)
+    {
+    }
 
     size_t nbColumns;
     size_t verticalSpacing;
@@ -55,84 +55,68 @@ public:
     /**
        Parse the command line parameters and populates according class members
      */
-    GeometryParameters( );
+    GeometryParameters();
 
     /** @copydoc AbstractParameters::print */
-    void print( ) final;
+    void print() final;
 
     /** folder containing SWC and H5 files */
-    std::string getMorphologyFolder( ) const { return _morphologyFolder; }
-
+    std::string getMorphologyFolder() const { return _morphologyFolder; }
     /**
      * @brief getNESTCircuit
      * @return
      */
-    std::string getNESTCircuit( ) const { return _NESTCircuit; }
-    std::string getNESTReport( ) const { return _NESTReport; }
-    std::string getNESTCacheFile( ) const { return _NESTCacheFile; }
-
+    std::string getNESTCircuit() const { return _NESTCircuit; }
+    std::string getNESTReport() const { return _NESTReport; }
+    std::string getNESTCacheFile() const { return _NESTCacheFile; }
     /** PDB file */
-    std::string getPDBFile( ) const { return _pdbFile; }
-
+    std::string getPDBFile() const { return _pdbFile; }
     /** PDB folder */
-    std::string getPDBFolder( ) const { return _pdbFolder; }
-
+    std::string getPDBFolder() const { return _pdbFolder; }
     /** XYZR file */
-    std::string getXYZBFile( ) const { return _xyzbFile; }
-
+    std::string getXYZBFile() const { return _xyzbFile; }
     /** folder containing mesh files */
-    std::string getMeshFolder( ) const { return _meshFolder; }
-
+    std::string getMeshFolder() const { return _meshFolder; }
     /** file containing circuit configuration */
-    std::string getCircuitConfiguration( ) const { return _circuitConfig; }
-
+    std::string getCircuitConfiguration() const { return _circuitConfig; }
     /** Binary representation of a scene to load */
-    std::string getLoadCacheFile( ) const { return _loadCacheFile; }
-
+    std::string getLoadCacheFile() const { return _loadCacheFile; }
     /** Binary representation of a scene to save */
-    std::string getSaveCacheFile( ) const { return _saveCacheFile; }
-
+    std::string getSaveCacheFile() const { return _saveCacheFile; }
     /** Circuit target */
-    std::string getTarget( ) const { return _target; }
-
+    std::string getTarget() const { return _target; }
     /** Circuit compartment report */
-    std::string getReport( ) const { return _report; }
-
+    std::string getReport() const { return _report; }
     /** Radius multiplier applied to spheres, cones and cylinders.
      * @param value Radius multiplier. Multiplies the radius contained in the
      *        data source by the specified value.
      */
-    void setRadiusMultiplier( const float value ) { _radiusMultiplier = value; }
-    float getRadiusMultiplier( ) const { return _radiusMultiplier; }
-
+    void setRadiusMultiplier(const float value) { _radiusMultiplier = value; }
+    float getRadiusMultiplier() const { return _radiusMultiplier; }
     /** Radius correction applied to spheres and cylinders.
      * @param value Radius value. The radius contained in the data source is
      *        ignored and all geometries use the specified value.
      */
-    void setRadiusCorrection( const float value ) { _radiusCorrection = value; }
-    float getRadiusCorrection( ) const { return _radiusCorrection; }
-
+    void setRadiusCorrection(const float value) { _radiusCorrection = value; }
+    float getRadiusCorrection() const { return _radiusCorrection; }
     /** Enables a different color for every molecule/morphology/mesh when
     * loading them from a given folder
     */
-    ColorScheme getColorScheme( ) const { return _colorScheme; }
-    const std::string& getColorSchemeAsString( const ColorScheme value ) const;
-    void setColorScheme( const ColorScheme value ) { _colorScheme = value; }
-
+    ColorScheme getColorScheme() const { return _colorScheme; }
+    const std::string& getColorSchemeAsString(const ColorScheme value) const;
+    void setColorScheme(const ColorScheme value) { _colorScheme = value; }
     /** Scene environment (none, ground, wall, bounding_box ) */
     SceneEnvironment getSceneEnvironment() const { return _sceneEnvironment; }
-    const std::string& getSceneEnvironmentAsString( const SceneEnvironment value ) const;
+    const std::string& getSceneEnvironmentAsString(
+        const SceneEnvironment value) const;
 
     /** Morphology quality */
-    GeometryQuality getGeometryQuality( ) const { return _geometryQuality; }
-    const std::string& getGeometryQualityAsString( const GeometryQuality value ) const;
+    GeometryQuality getGeometryQuality() const { return _geometryQuality; }
+    const std::string& getGeometryQualityAsString(
+        const GeometryQuality value) const;
 
     /** Morphology section types*/
-    size_t getMorphologySectionTypes( ) const
-    {
-        return _morphologySectionTypes;
-    }
-
+    size_t getMorphologySectionTypes() const { return _morphologySectionTypes; }
     /** Morphology layout */
     const MorphologyLayout& getMorphologyLayout() const
     {
@@ -141,44 +125,51 @@ public:
 
     /** Defines if cells with no simulation data should be loaded */
     size_t getNonSimulatedCells() const { return _nonSimulatedCells; }
-
     /** Defines the range of frames to be loaded for the simulation */
     float getEndSimulationTime() const { return _endSimulationTime; }
     float getStartSimulationTime() const { return _startSimulationTime; }
     Vector2f getSimulationValuesRange() const { return _simulationValuesRange; }
-
     /** File containing simulation data */
-    const std::string& getSimulationCacheFile() const { return _simulationCacheFile; }
+    const std::string& getSimulationCacheFile() const
+    {
+        return _simulationCacheFile;
+    }
 
     /** Size of the simulation histogram */
-    size_t getSimulationHistogramSize() const { return _simulationHistogramSize; }
+    size_t getSimulationHistogramSize() const
+    {
+        return _simulationHistogramSize;
+    }
 
     /** Defines if multiple models should be generated to increase the
         rendering performance */
     bool getGenerateMultipleModels() const { return _generateMultipleModels; }
-
     /** Splash scene folder */
-    void setSplashSceneFolder( const std::string& value ) { _splashSceneFolder = value; }
+    void setSplashSceneFolder(const std::string& value)
+    {
+        _splashSceneFolder = value;
+    }
     std::string getSplashSceneFolder() const { return _splashSceneFolder; }
-
     /** Biological assembly */
-    const std::string& getMolecularSystemConfig() const { return _molecularSystemConfig; }
+    const std::string& getMolecularSystemConfig() const
+    {
+        return _molecularSystemConfig;
+    }
 
     /** Metaballs grid size */
     size_t getMetaballsGridSize() const { return _metaballsGridSize; }
-
     /** Metaballs threshold */
     float getMetaballsThreshold() const { return _metaballsThreshold; }
-
     /** Metaballs samples from soma */
-    size_t getMetaballsSamplesFromSoma() const { return _metaballsSamplesFromSoma; }
+    size_t getMetaballsSamplesFromSoma() const
+    {
+        return _metaballsSamplesFromSoma;
+    }
 
     /** Metaballs enabled? */
     bool useMetaballs() const { return _metaballsGridSize != 0; }
-
 protected:
-
-    bool _parse( const po::variables_map& vm ) final;
+    bool _parse(const po::variables_map& vm) final;
 
     std::string _morphologyFolder;
     std::string _NESTCircuit;
@@ -194,8 +185,8 @@ protected:
     std::string _saveCacheFile;
     std::string _target;
     std::string _report;
-    float  _radiusMultiplier;
-    float  _radiusCorrection;
+    float _radiusMultiplier;
+    float _radiusCorrection;
     ColorScheme _colorScheme;
     SceneEnvironment _sceneEnvironment;
     GeometryQuality _geometryQuality;
@@ -213,8 +204,6 @@ protected:
     size_t _metaballsGridSize;
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
-
 };
-
 }
 #endif // GEOMETRYPARAMETERS_H

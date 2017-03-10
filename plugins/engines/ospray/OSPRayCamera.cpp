@@ -25,12 +25,11 @@
 
 namespace brayns
 {
-
-OSPRayCamera::OSPRayCamera( const CameraType cameraType )
-   : Camera( cameraType )
+OSPRayCamera::OSPRayCamera(const CameraType cameraType)
+    : Camera(cameraType)
 {
     std::string cameraAsString;
-    switch( getType( ))
+    switch (getType())
     {
     case CameraType::stereo:
         cameraAsString = "stereo";
@@ -48,43 +47,43 @@ OSPRayCamera::OSPRayCamera( const CameraType cameraType )
         cameraAsString = "perspective";
         break;
     }
-    _camera = ospNewCamera( cameraAsString.c_str( ));
+    _camera = ospNewCamera(cameraAsString.c_str());
 }
 
 void OSPRayCamera::commit()
 {
     const auto& position = getPosition();
     const auto& target = getTarget();
-    const auto dir = normalize( target - position );
+    const auto dir = normalize(target - position);
     const auto& up = getUp();
 
-    ospSet3f( _camera,"pos", position.x(), position.y(), position.z( ));
-    ospSet3f( _camera,"dir", dir.x(), dir.y(), dir.z( ));
-    ospSet3f( _camera,"up", up.x(), up.y(), up.z( ));
-    ospSet1f( _camera, "aspect", getAspectRatio( ));
-    ospSet1f( _camera, "apertureRadius", getAperture( ));
-    ospSet1f( _camera, "focusDistance", getFocalLength( ));
-    ospSet1i( _camera, "stereoMode", static_cast< uint >( getStereoMode( )));
-    ospSet1f( _camera, "interpupillaryDistance", getEyeSeparation( ));
+    ospSet3f(_camera, "pos", position.x(), position.y(), position.z());
+    ospSet3f(_camera, "dir", dir.x(), dir.y(), dir.z());
+    ospSet3f(_camera, "up", up.x(), up.y(), up.z());
+    ospSet1f(_camera, "aspect", getAspectRatio());
+    ospSet1f(_camera, "apertureRadius", getAperture());
+    ospSet1f(_camera, "focusDistance", getFocalLength());
+    ospSet1i(_camera, "stereoMode", static_cast<uint>(getStereoMode()));
+    ospSet1f(_camera, "interpupillaryDistance", getEyeSeparation());
 
     // Clip planes
     const auto& clipPlanes = getClipPlanes();
-    if( clipPlanes.size() == 6 )
+    if (clipPlanes.size() == 6)
     {
-        const std::string clipPlaneNames[6]  =
-            { "clipPlane1", "clipPlane2", "clipPlane3", "clipPlane4", "clipPlane5", "clipPlane6" };
-        for( size_t i = 0; i < clipPlanes.size(); ++i )
+        const std::string clipPlaneNames[6] = {"clipPlane1", "clipPlane2",
+                                               "clipPlane3", "clipPlane4",
+                                               "clipPlane5", "clipPlane6"};
+        for (size_t i = 0; i < clipPlanes.size(); ++i)
         {
             const auto& clipPlane = clipPlanes[i];
-            ospSet4f( _camera, clipPlaneNames[i].c_str(),
-                      clipPlane.x(), clipPlane.y(), clipPlane.z(), clipPlane.w() );
+            ospSet4f(_camera, clipPlaneNames[i].c_str(), clipPlane.x(),
+                     clipPlane.y(), clipPlane.z(), clipPlane.w());
         }
     }
-    ospCommit( _camera );
+    ospCommit(_camera);
 }
 
-void OSPRayCamera::setEnvironmentMap( const bool )
+void OSPRayCamera::setEnvironmentMap(const bool)
 {
 }
-
 }

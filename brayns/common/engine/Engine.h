@@ -25,7 +25,6 @@
 
 namespace brayns
 {
-
 /**
  * Abstract implementation of the ray-tracing engine. What we call the
  * ray-tracing engine is a 3rd party acceleration library, typically OSPRay,
@@ -36,14 +35,13 @@ namespace brayns
  */
 class Engine
 {
-
 public:
-
     /**
      * @brief Engine contructor
-     * @param parametersManager holds all engine parameters (geometry, rendering, etc)
+     * @param parametersManager holds all engine parameters (geometry,
+     * rendering, etc)
      */
-    explicit Engine( ParametersManager& parametersManager );
+    explicit Engine(ParametersManager& parametersManager);
     virtual ~Engine();
 
     /**
@@ -61,45 +59,39 @@ public:
      * Called after the given extension plugin was created to perform
      * engine-specific initialization on a given extension.
      */
-    virtual void extensionInit( ExtensionPlugin& ) {};
+    virtual void extensionInit(ExtensionPlugin&){};
 
     /** Renders the current scene and populates the frame buffer accordingly */
     virtual void render() = 0;
 
     /** Executes engine specific pre-render operations */
     virtual void preRender() {}
-
     /** Executes engine specific post-render operations */
     virtual void postRender() {}
-
     /** Gets the scene */
     Scene& getScene() { return *_scene; }
-
     /** Gets the frame buffer */
     FrameBuffer& getFrameBuffer() { return *_frameBuffer; }
-
     /** Gets the camera */
     Camera& getCamera() { return *_camera; }
-
     /** Gets the renderer */
     Renderer& getRenderer();
 
     /** Active renderer */
-    void setActiveRenderer( const RendererType renderer );
+    void setActiveRenderer(const RendererType renderer);
     RendererType getActiveRenderer() { return _activeRenderer; }
-
     /**
        Reshapes the current frame buffers
        @param frameSize New size for the buffers
 
        @todo Must be removed and held by the render method above
     */
-    void reshape( const Vector2ui& frameSize );
+    void reshape(const Vector2ui& frameSize);
 
     /**
        Sets up camera manipulator
     */
-    void setupCameraManipulator( const CameraMode mode );
+    void setupCameraManipulator(const CameraMode mode);
 
     /**
        Sets default camera according to scene bounding box
@@ -122,20 +114,18 @@ public:
              MT_PASTEL_COLORS: Random pastel colors
        @param nbMaterials Number of materials to be defined
     */
-    void initializeMaterials(
-        MaterialType materialType = MT_DEFAULT,
-        size_t nbMaterials = NB_MAX_MATERIALS );
+    void initializeMaterials(MaterialType materialType = MT_DEFAULT,
+                             size_t nbMaterials = NB_MAX_MATERIALS);
 
     /**
      * Recreates the engine according to new parameters, e.g. datasource has
      * changed or engine type/name. The recreation is delegated to the Brayns
      * instance.
      */
-    std::function< void() > recreate;
+    std::function<void()> recreate;
 
 protected:
-
-    void _render( const RenderInput& renderInput, RenderOutput& renderOutput );
+    void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
 
     ParametersManager& _parametersManager;
@@ -146,7 +136,6 @@ protected:
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
 };
-
 }
 
 #endif // ENGINE_H

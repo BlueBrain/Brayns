@@ -26,7 +26,6 @@
 
 namespace brayns
 {
-
 /**
     Light object
 
@@ -40,25 +39,19 @@ public:
     BRAYNS_API virtual ~Light() = 0;
 
     /** Light source RGB color */
-    BRAYNS_API void setColor( const Vector3f& color )
-    {
-        _color = color;
-    }
-    BRAYNS_API const Vector3f getColor( ) const { return _color; }
-
+    BRAYNS_API void setColor(const Vector3f& color) { _color = color; }
+    BRAYNS_API const Vector3f getColor() const { return _color; }
     /** Light source intensity */
-    BRAYNS_API void setIntensity( const float intensity )
+    BRAYNS_API void setIntensity(const float intensity)
     {
         _intensity = intensity;
     }
-    BRAYNS_API float getIntensity( ) const { return _intensity; }
-
+    BRAYNS_API float getIntensity() const { return _intensity; }
 protected:
-    BRAYNS_API Light( const Vector3f& color, float intensity );
+    BRAYNS_API Light(const Vector3f& color, float intensity);
 
     Vector3f _color;
     float _intensity;
 };
-
 }
 #endif // LIGHT_H
