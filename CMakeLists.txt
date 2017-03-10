@@ -26,6 +26,8 @@ option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ON)
 
 include(Common)
 
+include(BraynsDepResolver)
+
 if(BRAYNS_OSPRAY_ENABLED)
     # ------------------------------------------------------------------------------
     # OSPRAY specific settings
