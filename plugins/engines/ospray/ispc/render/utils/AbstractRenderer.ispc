@@ -282,7 +282,6 @@ inline varying vec4f getVolumeContribution(
 
     vec3f lightContribution = make_vec3f(1.f);
     const vec3i dimensions = self->volumeDimensions;
-    const float alphaMagic = 2.f * self->volumeEpsilon / self->volumeDiag;
 
     float t = ray.t0 + self->volumeEpsilon;
     const float tMax = ray.t - self->volumeEpsilon;
@@ -328,7 +327,7 @@ inline varying vec4f getVolumeContribution(
                         getVolumeContribution(self, lightRay, sample,
                                               iteration - 1);
                     lightContribution =
-                        VOLUME_SHADOW_RAY_SAMPLES_PER_RAY *
+                        self->volumeEpsilon * VOLUME_SHADOW_SAMPLES_FACTOR *
                         (lightContribution + make_vec3f(voxelColor));
                     pathAlpha += voxelColor.w;
                 }
@@ -344,6 +343,8 @@ inline varying vec4f getVolumeContribution(
                     lightContribution * make_vec3f(colorMapColor.x,
                                                    colorMapColor.y,
                                                    colorMapColor.z);
+                const float alphaMagic =
+                    2.f * self->volumeEpsilon / self->volumeDiag;
                 alpha =
                     1.f - pow(1.f - min(colorMapColor.w,
                                         1.f - 1.f / (float)self->colorMapSize),
@@ -363,7 +364,7 @@ inline varying vec4f getVolumeContribution(
         }
         t += (iteration > 0)
                  ? self->volumeEpsilon
-                 : self->volumeEpsilon * VOLUME_SHADOW_RAY_SAMPLES_PER_RAY;
+                 : self->volumeEpsilon * VOLUME_SHADOW_SAMPLES_FACTOR;
     }
     vec4f finalColor =
         make_vec4f(pathColor.x, pathColor.y, pathColor.z, pathAlpha);
