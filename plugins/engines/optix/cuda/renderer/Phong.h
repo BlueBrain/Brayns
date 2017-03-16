@@ -88,6 +88,9 @@ rtDeclareVariable(uint, colorMapSize, , );
 
 rtBuffer<uchar4, 2> output_buffer;
 
+#define VOLUME_SHADOW_SAMPLES_FACTOR 32
+#define VOLUME_DEFAULT_ALPHA 2.f
+
 static __device__ float3 refractedVector(const float3 direction,
                                          const float3 normal, const float n1,
                                          const float n2)
@@ -102,9 +105,11 @@ static __device__ float3 refractedVector(const float3 direction,
     return direction;
 }
 
-static __device__ float4 getVolumeContribution()
+static __device__ float4 getVolumeContribution(optix::Ray volumeRay,
+                                               int iteration)
 {
-    float3 pathColor = {0.f, 0.f, 0.f};
+    float3 pathColor = make_float3(0.f);
+    float3 lightContribution = make_float3(1.f);
 
     float t = volumeEpsilon;
     const float tMax = t_hit - volumeEpsilon + volumeDiag;
@@ -112,8 +117,9 @@ static __device__ float4 getVolumeContribution()
     float pathAlpha = 0.f;
     while (t < tMax && pathAlpha < 1.f)
     {
-        float3 point = ((ray.origin + ray.direction * t) - volumeOffset) /
-                       volumeElementSpacing;
+        float3 point =
+            ((volumeRay.origin + volumeRay.direction * t) - volumeOffset) /
+            volumeElementSpacing;
 
         if (point.x > 0.f && point.x < volumeDimensions.x && point.y > 0.f &&
             point.y < volumeDimensions.y && point.z > 0.f &&
@@ -125,6 +131,54 @@ static __device__ float4 getVolumeContribution()
                                       volumeDimensions.y);
 
             const unsigned char voxelValue = volumeData[index];
+            float alpha = 1.f;
+
+            // Determine light contribution
+            if (shadows_enabled == 1 && iteration > 0)
+            {
+                lightContribution = make_float3(0.f);
+                unsigned int num_lights = lights.size();
+                for (int i = 0; i < num_lights; ++i)
+                {
+                    optix::size_t2 screen = output_buffer.size();
+                    unsigned int seed =
+                        tea<16>(screen.x * launch_index.y + launch_index.x,
+                                frame);
+
+                    optix::Ray lightRay = volumeRay;
+                    lightRay.origin = point;
+
+                    BasicLight light = lights[i];
+                    if (light.type == 0)
+                    {
+                        // Point light
+                        float3 pos = light.pos;
+                        if (soft_shadows_enabled == 1)
+                            // Soft shadows
+                            pos += 5.f * make_float3(rnd(seed) - 0.5f,
+                                                     rnd(seed) - 0.5f,
+                                                     rnd(seed) - 0.5f);
+                        lightRay.direction = optix::normalize(pos - point);
+                    }
+                    else
+                    {
+                        // Directional light
+                        float3 L = -light.dir;
+                        if (soft_shadows_enabled == 1)
+                            // Soft shadows
+                            L += 0.1f * make_float3(rnd(seed) - 0.5f,
+                                                    rnd(seed) - 0.5f,
+                                                    rnd(seed) - 0.5f);
+                        lightRay.direction = optix::normalize(L);
+                    }
+                    float4 voxelColor =
+                        getVolumeContribution(lightRay, iteration - 1);
+                    lightContribution =
+                        volumeEpsilon * VOLUME_SHADOW_SAMPLES_FACTOR *
+                        (lightContribution + make_float3(voxelColor));
+                    pathAlpha += voxelColor.w;
+                }
+            }
 
             if (colorMapSize != 0)
             {
@@ -133,14 +187,14 @@ static __device__ float4 getVolumeContribution()
                                               colorMapRange;
                 const float4 colorMapColor = colorMap[normalizedValue];
                 const float3 voxelColor =
-                    make_float3(colorMapColor.z, colorMapColor.y,
-                                colorMapColor.x);
+                    lightContribution * make_float3(colorMapColor.z,
+                                                    colorMapColor.y,
+                                                    colorMapColor.x);
 
                 const float alphaMagic = 2.f * volumeEpsilon / volumeDiag;
-                const float alpha =
-                    1.f - pow(1.f - min(colorMapColor.w,
-                                        1.f - 1.f / (float)colorMapSize),
-                              alphaMagic);
+                alpha = 1.f - pow(1.f - min(colorMapColor.w,
+                                            1.f - 1.f / (float)colorMapSize),
+                                  alphaMagic);
                 pathColor =
                     pathColor + (voxelColor * alpha * (1.f - pathAlpha));
                 pathAlpha = pathAlpha + (alpha * (1.f - pathAlpha));
@@ -148,20 +202,27 @@ static __device__ float4 getVolumeContribution()
             else
             {
                 const float alphaMagic = volumeEpsilon / volumeDiag;
-                const float alpha =
-                    1.f -
-                    powf(1.f - min(0.01f, 1.f - 1.f / (float)colorMapSize),
-                         alphaMagic);
+                alpha = 1.f -
+                        powf(1.f - min(0.01f, 1.f - 1.f / (float)colorMapSize),
+                             alphaMagic);
                 const float3 voxelColor = {point.x, point.y, point.z};
                 pathColor =
                     pathColor + (voxelColor * alpha * (1.f - pathAlpha));
                 pathAlpha = pathAlpha + (alpha * (1.f - pathAlpha));
             }
         }
-        t += volumeEpsilon;
+        t += (iteration > 0) ? volumeEpsilon
+                             : volumeEpsilon * VOLUME_SHADOW_SAMPLES_FACTOR;
     }
-    const float4 result = {pathColor.x, pathColor.y, pathColor.z, pathAlpha};
-    return result;
+    float4 finalColor = {min(1.f, pathColor.x), min(1.f, pathColor.y),
+                         min(1.f, pathColor.z), min(1.f, pathAlpha)};
+    if (shadows_enabled == 1)
+    {
+        finalColor.x = min(1.f, finalColor.x * VOLUME_DEFAULT_ALPHA);
+        finalColor.y = min(1.f, finalColor.y * VOLUME_DEFAULT_ALPHA);
+        finalColor.z = min(1.f, finalColor.z * VOLUME_DEFAULT_ALPHA);
+    }
+    return finalColor;
 }
 
 static __device__ void phongShadowed(float3 p_Ko)
@@ -183,7 +244,8 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
     float4 volumeValue = {0.f, 0.f, 0.f, 0.f};
     if (volumeDiag != 0.f)
     {
-        volumeValue = getVolumeContribution();
+        optix::Ray volumeRay = ray;
+        volumeValue = getVolumeContribution(volumeRay, 1);
         result.x += volumeValue.x;
         result.y += volumeValue.y;
         result.z += volumeValue.z;
