@@ -51,8 +51,9 @@ inline varying vec4f
     if (self->abstract.colorMap)
         color = self->abstract.colorMap[normalizedValue];
 
-    if (self->abstract.colorMapEmissionData)
-        lightEmission = self->abstract.colorMapEmissionData[normalizedValue];
+    if (self->abstract.emissionIntensitiesMap)
+        lightEmission =
+            reduce_max(self->abstract.emissionIntensitiesMap[normalizedValue]);
 
     return color;
 }
@@ -98,7 +99,6 @@ inline vec3f SimulationRenderer_shadeRay(
                 (1.f - volumetricValue.w) * make_vec3f(backgroundColor);
             if (depth == 0)
                 pathOpacity = 1.f - volumetricValue.w;
-
             sample.z = 1.f - log(zDepth) / 10.f;
             moreRebounds = false;
         }
@@ -423,14 +423,12 @@ inline vec3f SimulationRenderer_shadeRay(
         sample.z = 1.f - log(zDepth) / 10.f;
 
     // Back to front computation of final color according to colors and weights
-    // of each ray
-    // generation
+    // of each ray generation
     sample.alpha = pathOpacity;
     for (int i = depth - 2; i >= 0; --i)
         intersectionColors[i] =
             intersectionColors[i + 1] * intersectionWeights[i] +
             intersectionColors[i] * (1.f - intersectionWeights[i]);
-
     return intersectionColors[0];
 }
 
@@ -467,7 +465,7 @@ export void SimulationRenderer_set(
     const uniform vec3f& volumeElementSpacing,
     const uniform vec3f& volumeOffset, const uniform float& volumeEpsilon,
     uniform float* uniform simulationData, uniform vec4f* uniform colormap,
-    uniform float* uniform colormapEmissionData,
+    uniform vec3f* uniform emissionIntensitiesMap,
     const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
     const uniform float& colorMapRange, const uniform float& threshold)
 {
@@ -502,8 +500,8 @@ export void SimulationRenderer_set(
     self->abstract.volumeDiag = max(diag.x, max(diag.y, diag.z));
 
     self->abstract.colorMap = (uniform vec4f * uniform)colormap;
-    self->abstract.colorMapEmissionData =
-        (uniform float* uniform)colormapEmissionData;
+    self->abstract.emissionIntensitiesMap =
+        (uniform vec3f * uniform)emissionIntensitiesMap;
     self->abstract.colorMapSize = colorMapSize;
     self->abstract.colorMapMinValue = colorMapMinValue;
     self->abstract.colorMapRange = colorMapRange;

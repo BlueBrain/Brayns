@@ -44,7 +44,7 @@ public:
      * @brief Get emission color intensities
      * @return A vector of floats
      */
-    floats& getEmissionIntensities() { return _emissionIntensities; }
+    Vector3fs& getEmissionIntensities() { return _emissionIntensities; }
     /**
      * @brief Get contributions
      * @return A vector of floats
@@ -62,7 +62,7 @@ public:
 
 private:
     Vector4fs _diffuseColors;
-    floats _emissionIntensities;
+    Vector3fs _emissionIntensities;
     floats _contributions;
     Vector2f _valuesRange;
 };

@@ -22,9 +22,13 @@
 
 #include <ospray/SDK/math/vec.ih>
 
+float getRandomValue(varying ScreenSample& sample, const int randomNumber);
+
 /**
-    Returns a random direction based on location in the frame buffer, the normal
-    to the surface and rotation parameters for the precomputed hard-coded random
+    Returns a random direction based on location in the frame buffer, the
+   normal
+    to the surface and rotation parameters for the precomputed hard-coded
+   random
     distribution.
     @param sample Frame buffer sample being rendered
     @param normal Normal vector to the surface

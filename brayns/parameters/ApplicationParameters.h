@@ -56,6 +56,13 @@ public:
     const Vector2ui& getJpegSize() const { return _jpegSize; }
     void setJpegSize(const Vector2ui& size) { _jpegSize = size; }
     const strings& getFilters() const { return _filters; }
+    /**
+     * @brief Auto publication of ZeroEQ events is used when several
+     * applications supporting the ZeroEQ protocol are started and need to
+     * be remain synchronized.
+     * @return True if auto publication is enabled, false otherwize
+     */
+    bool getAutoPublishZeroEQEvents() const { return _autoPublishZeroEQEvents; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -65,6 +72,7 @@ protected:
     size_t _jpegCompression;
     Vector2ui _jpegSize;
     strings _filters;
+    bool _autoPublishZeroEQEvents;
 };
 }
 
