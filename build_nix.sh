@@ -10,8 +10,11 @@
 #  clean the environment
 module purge
 
-# load basic dev env
+# load basic dev gcc env
 module load nix/dev-env-gcc
+
+# for compilation with ICC, replace the previous line with
+# module load nix/dev-env-icc/09.2016
 
 # load openGL env
 module load nix/gl-dev
