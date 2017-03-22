@@ -97,14 +97,18 @@ bool ZeroEQPlugin::run(Engine& engine)
         _onNewEngine();
     }
 
-    if (_requestVolumeHistogram())
-        _publisher.publish(_remoteVolumeHistogram);
+    const auto& ap = _parametersManager.getApplicationParameters();
+    if (ap.getAutoPublishZeroEQEvents())
+    {
+        if (_requestVolumeHistogram())
+            _publisher.publish(_remoteVolumeHistogram);
 
-    if (_requestSimulationHistogram())
-        _publisher.publish(_remoteSimulationHistogram);
+        if (_requestSimulationHistogram())
+            _publisher.publish(_remoteSimulationHistogram);
 
-    if (_requestFrame())
-        _publisher.publish(_remoteFrame);
+        if (_requestFrame())
+            _publisher.publish(_remoteFrame);
+    }
 
     _forceRendering = false;
     while (_subscriber.receive(1))
@@ -187,7 +191,11 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteSpikes.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestSpikes, this));
 
-    _httpServer->handlePUT(_remoteMaterialLUT);
+    _httpServer->handle(_remoteMaterialLUT);
+    _remoteMaterialLUT.registerDeserializedCallback(
+        std::bind(&ZeroEQPlugin::_materialLUTUpdated, this));
+    _remoteMaterialLUT.registerSerializeCallback(
+        std::bind(&ZeroEQPlugin::_requestMaterialLUT, this));
 
     _httpServer->handle(_remoteDataSource);
     _remoteDataSource.registerDeserializedCallback(
@@ -258,9 +266,6 @@ void ZeroEQPlugin::_setupSubscriber()
     _subscriber.subscribe(_remoteMaterialLUT);
     _subscriber.subscribe(_clipPlanes);
     _subscriber.subscribe(_remoteFrame);
-
-    _remoteMaterialLUT.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_materialLUTUpdated, this));
 }
 
 void ZeroEQPlugin::_cameraUpdated()
@@ -384,9 +389,8 @@ void ZeroEQPlugin::_materialLUTUpdated()
     auto& emissionIntensities = transferFunction.getEmissionIntensities();
     for (const auto& emission : _remoteMaterialLUT.getEmission())
     {
-        const float intensity =
-            (emission.getRed() + emission.getGreen() + emission.getBlue()) /
-            3.f;
+        const Vector3f intensity = {emission.getRed(), emission.getGreen(),
+                                    emission.getBlue()};
         emissionIntensities.push_back(intensity);
     }
 
@@ -401,6 +405,34 @@ void ZeroEQPlugin::_materialLUTUpdated()
         transferFunction.setValuesRange(Vector2f(range[0], range[1]));
     scene.commitTransferFunctionData();
     _engine->getFrameBuffer().clear();
+}
+
+void ZeroEQPlugin::_requestMaterialLUT()
+{
+    auto& scene = _engine->getScene();
+    TransferFunction& transferFunction = scene.getTransferFunction();
+
+    _remoteMaterialLUT.getEmission().clear();
+    _remoteMaterialLUT.getDiffuse().clear();
+    _remoteMaterialLUT.getAlpha().clear();
+
+    for (const auto& diffuseColor : transferFunction.getDiffuseColors())
+    {
+        ::lexis::render::Color color(diffuseColor.x(), diffuseColor.y(),
+                                     diffuseColor.z());
+        _remoteMaterialLUT.getDiffuse().push_back(color);
+        _remoteMaterialLUT.getAlpha().push_back(diffuseColor.w());
+    }
+
+    for (const auto& emission : transferFunction.getEmissionIntensities())
+    {
+        ::lexis::render::Color color(emission.x(), emission.y(), emission.z());
+        _remoteMaterialLUT.getEmission().push_back(color);
+    }
+
+    const auto& range = transferFunction.getValuesRange();
+    std::vector<double> rangeVector = {range.x(), range.y()};
+    _remoteMaterialLUT.setRange(rangeVector);
 }
 
 void ZeroEQPlugin::_resizeImage(unsigned int* srcData, const Vector2i& srcSize,

@@ -60,6 +60,7 @@ OptiXScene::OptiXScene(Renderers renderer, ParametersManager& parametersManager,
     , _lightBuffer(nullptr)
     , _accelerationStructure(DEFAULT_ACCELERATION_STRUCTURE)
     , _colorMapBuffer(nullptr)
+    , _emissionIntensityMapBuffer(nullptr)
     , _mesh(nullptr)
     , _verticesBuffer(nullptr)
     , _indicesBuffer(nullptr)
@@ -123,6 +124,7 @@ void OptiXScene::reset()
 
     // Color map
     _colorMapBuffer = nullptr;
+    _emissionIntensityMapBuffer = nullptr;
 
     // Spheres
     _spheresBuffers.clear();
@@ -159,6 +161,19 @@ void OptiXScene::reset()
     // Textures
     _optixTextures.clear();
     _optixTextureSamplers.clear();
+
+    // Programs
+    _phong_ch = nullptr;
+    _phong_ch_textured = nullptr;
+    _phong_ah = nullptr;
+    _spheresBoundsProgram = nullptr;
+    _spheresIntersectProgram = nullptr;
+    _cylindersBoundsProgram = nullptr;
+    _cylindersIntersectProgram = nullptr;
+    _conesBoundsProgram = nullptr;
+    _conesIntersectProgram = nullptr;
+    _meshBoundsProgram = nullptr;
+    _meshIntersectProgram = nullptr;
 }
 
 void OptiXScene::commit()
@@ -835,12 +850,26 @@ void OptiXScene::commitTransferFunctionData()
         _transferFunction.getDiffuseColors().size() * 4 * sizeof(float);
     if (size != 0)
     {
-        memcpy(_colorMapBuffer->map(), &_transferFunction.getDiffuseColors()[0],
-               size);
+        memcpy(_colorMapBuffer->map(),
+               _transferFunction.getDiffuseColors().data(), size);
         _colorMapBuffer->unmap();
     }
 
+    size = _transferFunction.getEmissionIntensities().size() * sizeof(float);
+    if (!_emissionIntensityMapBuffer)
+        _emissionIntensityMapBuffer = _context->createBuffer(
+            RT_BUFFER_INPUT, RT_FORMAT_FLOAT3,
+            _transferFunction.getEmissionIntensities().size());
+
+    if (size != 0)
+    {
+        memcpy(_emissionIntensityMapBuffer->map(),
+               _transferFunction.getEmissionIntensities().data(), size);
+        _emissionIntensityMapBuffer->unmap();
+    }
+
     _context["colorMap"]->setBuffer(_colorMapBuffer);
+    _context["emissionIntensityMap"]->setBuffer(_emissionIntensityMapBuffer);
     _context["colorMapMinValue"]->setFloat(
         _transferFunction.getValuesRange().x());
     _context["colorMapRange"]->setFloat(_transferFunction.getValuesRange().y() -

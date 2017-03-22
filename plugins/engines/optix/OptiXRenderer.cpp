@@ -49,24 +49,23 @@ void OptiXRenderer::render(FrameBufferPtr frameBuffer)
     // Render
     const Vector2ui& size = frameBuffer->getSize();
     _context->launch(0, size.x(), size.y());
-
     ++_frame;
 }
 
 void OptiXRenderer::commit()
 {
-    SceneParameters& sp = _parametersManager.getSceneParameters();
+    const auto& sp = _parametersManager.getSceneParameters();
 
     _context["timestamp"]->setFloat(sp.getTimestamp());
 
-    RenderingParameters& rp = _parametersManager.getRenderingParameters();
+    const auto& rp = _parametersManager.getRenderingParameters();
 
     _context["max_depth"]->setUint(10);
     _context["radiance_ray_type"]->setUint(0);
     _context["shadow_ray_type"]->setUint(1);
     _context["scene_epsilon"]->setFloat(rp.getEpsilon());
 
-    ShadingType mt = rp.getShading();
+    auto mt = rp.getShading();
     _context["shading_enabled"]->setUint(mt == ShadingType::diffuse);
     _context["electron_shading_enabled"]->setUint(mt == ShadingType::electron);
     _context["shadows_enabled"]->setUint(rp.getShadows());
@@ -74,7 +73,7 @@ void OptiXRenderer::commit()
     _context["ambient_occlusion_strength"]->setFloat(
         rp.getAmbientOcclusionStrength());
 
-    Vector3f color = rp.getBackgroundColor();
+    auto color = rp.getBackgroundColor();
     _context["ambient_light_color"]->setFloat(color.x(), color.y(), color.z());
     _context["bg_color"]->setFloat(color.x(), color.y(), color.z());
     _frame = 0;
