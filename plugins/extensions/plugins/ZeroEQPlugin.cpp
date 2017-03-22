@@ -415,6 +415,7 @@ void ZeroEQPlugin::_requestMaterialLUT()
     _remoteMaterialLUT.getEmission().clear();
     _remoteMaterialLUT.getDiffuse().clear();
     _remoteMaterialLUT.getAlpha().clear();
+    _remoteMaterialLUT.getContribution().clear();
 
     for (const auto& diffuseColor : transferFunction.getDiffuseColors())
     {
@@ -424,11 +425,23 @@ void ZeroEQPlugin::_requestMaterialLUT()
         _remoteMaterialLUT.getAlpha().push_back(diffuseColor.w());
     }
 
-    for (const auto& emission : transferFunction.getEmissionIntensities())
-    {
-        ::lexis::render::Color color(emission.x(), emission.y(), emission.z());
-        _remoteMaterialLUT.getEmission().push_back(color);
-    }
+    if (transferFunction.getEmissionIntensities().empty())
+        for (size_t i = 0; i < transferFunction.getDiffuseColors().size(); ++i)
+            _remoteMaterialLUT.getEmission().push_back({0, 0, 0});
+    else
+        for (const auto& emission : transferFunction.getEmissionIntensities())
+        {
+            ::lexis::render::Color color(emission.x(), emission.y(),
+                                         emission.z());
+            _remoteMaterialLUT.getEmission().push_back(color);
+        }
+
+    if (transferFunction.getContributions().empty())
+        for (size_t i = 0; i < transferFunction.getDiffuseColors().size(); ++i)
+            _remoteMaterialLUT.getContribution().push_back(0.f);
+    else
+        for (const auto& contribution : transferFunction.getContributions())
+            _remoteMaterialLUT.getContribution().push_back(contribution);
 
     const auto& range = transferFunction.getValuesRange();
     std::vector<double> rangeVector = {range.x(), range.y()};

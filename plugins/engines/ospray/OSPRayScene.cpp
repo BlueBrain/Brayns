@@ -1035,7 +1035,7 @@ void OSPRayScene::commitTransferFunctionData()
         // Transfer function emission data
         _ospTransferFunctionEmissionData =
             ospNewData(_transferFunction.getEmissionIntensities().size(),
-                       OSP_FLOAT,
+                       OSP_FLOAT3,
                        &_transferFunction.getEmissionIntensities()[0],
                        OSP_DATA_SHARED_BUFFER);
         ospCommit(_ospTransferFunctionEmissionData);
