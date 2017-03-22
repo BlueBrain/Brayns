@@ -65,7 +65,7 @@ struct AbstractRenderer
 
     // Transfer function / Color map attributes
     uniform vec4f* uniform colorMap;
-    uniform float* uniform colorMapEmissionData;
+    uniform vec3f* uniform emissionIntensitiesMap;
     uint32 colorMapSize;
     float colorMapMinValue;
     float colorMapRange;

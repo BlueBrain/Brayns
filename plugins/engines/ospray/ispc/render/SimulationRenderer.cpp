@@ -64,7 +64,7 @@ void SimulationRenderer::commit()
             ? (ispc::vec4f*)_transferFunctionDiffuseData->data
             : NULL,
         _transferFunctionEmissionData
-            ? (float*)_transferFunctionEmissionData->data
+            ? (ispc::vec3f*)_transferFunctionEmissionData->data
             : NULL,
         _transferFunctionSize, _transferFunctionMinValue,
         _transferFunctionRange, _threshold);

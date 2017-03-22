@@ -1079,6 +1079,14 @@ inline float rotate(float x, const float dx)
     return x;
 }
 
+inline float getRandomValue(varying ScreenSample& sample,
+                            const int randomNumber)
+{
+    const int x = sample.sampleID.x % RANDOM_SET_SIZE;
+    const int y = sample.sampleID.y % RANDOM_SET_SIZE;
+    return rotate(randomDistribution[x][y], sample.sampleID.z % 8);
+}
+
 inline vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
                              const int randomNumber)
 {
@@ -1099,7 +1107,7 @@ inline vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
     const float cx = cos((2.f * M_PI) * rx) * w;
     const float cy = sin((2.f * M_PI) * rx) * w;
     const float cz = sqrt(ry);
-    return cx * tangent + cy * biTangent + cz * normal;
+    return normalize(cx * tangent + cy * biTangent + cz * normal);
 }
 
 void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent)

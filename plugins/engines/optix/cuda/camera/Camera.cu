@@ -136,7 +136,7 @@ RT_PROGRAM void camera()
             acc_val,
             make_float4( prd.result, 0.f), 1.0f / static_cast<float>( frame+1 ));
     else
-        acc_val = make_float4( prd.result, 0.f );
+        acc_val = make_float4( prd.result, 1.f );
 
     output_buffer[ launch_index ] = make_color( make_float3( acc_val ) );
     accum_buffer[ launch_index ] = acc_val;

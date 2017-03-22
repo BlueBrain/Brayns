@@ -133,9 +133,12 @@ public:
     void setTimestamp(const float timestamp);
 
     /** Set the histogram of the currently loaded volume. */
-    void setHistogram(const Histogram& histogram) { _histogram = histogram; }
+    void setHistogram(const Histogram& histogram)
+    {
+        _histograms[_timestamp] = histogram;
+    }
     /** @return the histogram of the currently loaded volume. */
-    const Histogram& getHistogram() const { return _histogram; }
+    const Histogram& getHistogram();
     /** @return the number of frames of the current volume. */
     uint64_t getNbFrames() const { return _nbFrames; }
     /** Sets the number of frames for the current volume. */
@@ -218,7 +221,7 @@ private:
     float _timestamp;
     Vector2f _timestampRange;
     TimestampMode _timestampMode;
-    Histogram _histogram;
+    std::map<float, Histogram> _histograms;
     uint64_t _nbFrames = 0;
 };
 }

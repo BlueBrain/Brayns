@@ -103,7 +103,10 @@ private:
     optix::Buffer _lightBuffer;
     std::vector<BasicLight> _optixLights;
     std::string _accelerationStructure;
+
+    // Material Lookup tables
     optix::Buffer _colorMapBuffer;
+    optix::Buffer _emissionIntensityMapBuffer;
 
     // Spheres
     std::map<size_t, floats> _serializedSpheresData;

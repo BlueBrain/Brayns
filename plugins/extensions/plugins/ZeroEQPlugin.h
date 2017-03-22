@@ -112,6 +112,13 @@ private:
     void _materialLUTUpdated();
 
     /**
+     * @brief This method is called when a material lookup table is requested by
+     * a ZeroEQ event
+     * @return True if the method was successful, false otherwise
+     */
+    void _requestMaterialLUT();
+
+    /**
      * @brief This method is called when an Image JPEG is requested by a ZeroEQ
      * event
      * @return True if the method was successful, false otherwise
