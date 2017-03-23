@@ -33,9 +33,9 @@ struct SimulationRenderer
 
 inline varying vec4f
     getSimulationValue(const uniform SimulationRenderer* uniform self,
-                       DifferentialGeometry& dg, varying float& lightEmission)
+                       DifferentialGeometry& dg, varying vec3f& lightEmission)
 {
-    lightEmission = 0.f;
+    lightEmission = make_vec3f(0.f);
     varying vec4f color = make_vec4f(0.f);
 
     const varying float value = self->simulationData[dg.st.x];
@@ -52,8 +52,7 @@ inline varying vec4f
         color = self->abstract.colorMap[normalizedValue];
 
     if (self->abstract.emissionIntensitiesMap)
-        lightEmission =
-            reduce_max(self->abstract.emissionIntensitiesMap[normalizedValue]);
+        lightEmission = self->abstract.emissionIntensitiesMap[normalizedValue];
 
     return color;
 }
@@ -127,14 +126,14 @@ inline vec3f SimulationRenderer_shadeRay(
             varying float localLightIntensity = 1.f;
 
             // Get simulation value from geometry ID
-            varying float lightEmission = 0.f;
+            varying vec3f lightEmission = make_vec3f(0.f);
             vec4f simulationValue = make_vec4f(0.f);
             if (self->simulationData)
                 simulationValue = getSimulationValue(self, dg, lightEmission);
 
-            localSimulationColor = make_vec3f(simulationValue);
+            localSimulationColor = lightEmission + make_vec3f(simulationValue);
             localSimulationIntensity = simulationValue.w;
-            localLightEmission = lightEmission;
+            localLightEmission = reduce_max(lightEmission);
 
             // localShadedColor defines the color for the current intersected
             // surface, and for the current ray generation only. This value is
@@ -255,17 +254,18 @@ inline vec3f SimulationRenderer_shadeRay(
                             self->abstract.ambientOcclusionStrength;
 
                         // Get simulation value from geometry ID
-                        varying float lightEmission = 0.f;
+                        varying vec3f lightEmission = make_vec3f(0.f);
                         vec4f simulationValue = make_vec4f(0.f);
 
                         if (self->simulationData)
                             simulationValue = getSimulationValue(self, geometry,
                                                                  lightEmission);
 
-                        indirectShadingColor =
-                            indirectShadingColor + make_vec3f(simulationValue);
+                        indirectShadingColor = indirectShadingColor +
+                                               lightEmission +
+                                               make_vec3f(simulationValue);
 
-                        indirectShadingIntensity += lightEmission;
+                        indirectShadingIntensity += reduce_max(lightEmission);
                     }
                 }
 
