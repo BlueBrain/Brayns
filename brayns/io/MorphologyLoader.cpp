@@ -200,15 +200,12 @@ bool MorphologyLoader::_importMorphology(
             Boxf morphologyAABB;
             const brain::Vector4fs& points = morphology.getPoints();
             for (Vector4f point : points)
-            {
-                const Vector3f p = {point.x(), point.y(), point.z()};
-                morphologyAABB.merge(p);
-            }
+                morphologyAABB.merge({point.x(), point.y(), point.z()});
 
             const Vector3f positionInGrid = {
-                -layout.horizontalSpacing *
+                -1.f * layout.horizontalSpacing *
                     static_cast<float>(morphologyIndex % layout.nbColumns),
-                -layout.verticalSpacing *
+                -1.f * layout.verticalSpacing *
                     static_cast<float>(morphologyIndex / layout.nbColumns),
                 0.f};
             translation = positionInGrid - morphologyAABB.getCenter();
