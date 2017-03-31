@@ -348,7 +348,7 @@ inline vec3f SimulationRenderer_shadeRay(
 
                             // Diffuse color
                             const varying vec3f localUnshadedColor =
-                                localOpacity * cosNL * localLightIntensity *
+                                cosNL * localLightIntensity *
                                     (
                                         // Affect shading with color determined
                                         // by
@@ -361,7 +361,8 @@ inline vec3f SimulationRenderer_shadeRay(
 
                             // Add contribution of current light
                             localShadedColor =
-                                localShadedColor + localUnshadedColor;
+                                localShadedColor * (1.f - localOpacity) +
+                                localUnshadedColor * localOpacity;
                         }
                     }
                 }

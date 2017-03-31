@@ -284,7 +284,7 @@ inline varying vec4f getVolumeContribution(
     const vec3i dimensions = self->volumeDimensions;
 
     const float delta =
-        (float)((self->randomNumber) % (int)self->volumeEpsilon);
+        (float)((self->randomNumber) % (int)(self->volumeEpsilon + 1));
     float t = ray.t0 + self->volumeEpsilon - delta;
     const float tMax = ray.t - self->volumeEpsilon;
 

@@ -198,8 +198,8 @@ bool MorphologyLoader::_importMorphology(
         if (layout.nbColumns != 0)
         {
             Boxf morphologyAABB;
-            const brain::Vector4fs& points = morphology.getPoints();
-            for (Vector4f point : points)
+            const auto& points = morphology.getPoints();
+            for (const auto& point : points)
                 morphologyAABB.merge({point.x(), point.y(), point.z()});
 
             const Vector3f positionInGrid = {
