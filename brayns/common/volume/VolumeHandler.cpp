@@ -97,8 +97,10 @@ float VolumeHandler::getEpsilon(const Vector3f& elementSpacing,
     if (_volumeDescriptors.find(_timestamp) == _volumeDescriptors.end())
         return 0.f;
     const Vector3f diag =
-        _volumeDescriptors.at(_timestamp)->getDimensions() * elementSpacing;
-    return diag.find_max() / float(samplesPerRay);
+        elementSpacing * _volumeDescriptors.at(_timestamp)->getDimensions();
+    const float diagMax = diag.find_max();
+    const float epsilon = diagMax / float(samplesPerRay);
+    return epsilon;
 }
 
 Vector3ui VolumeHandler::getDimensions() const

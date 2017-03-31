@@ -118,7 +118,7 @@ static __device__ float4 getVolumeContribution(optix::Ray volumeRay,
     optix::size_t2 screen = output_buffer.size();
     unsigned int seed =
         tea<16>(screen.x * launch_index.y + launch_index.x, frame);
-    const float delta = (float)(seed % (int)volumeEpsilon);
+    const float delta = (float)(seed % (int)(volumeEpsilon + 1));
 
     float t = volumeEpsilon - delta;
     const float tMax = t_hit - volumeEpsilon + volumeDiag;

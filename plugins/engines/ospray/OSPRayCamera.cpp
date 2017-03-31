@@ -65,6 +65,8 @@ void OSPRayCamera::commit()
     ospSet1f(_camera, "focusDistance", getFocalLength());
     ospSet1i(_camera, "stereoMode", static_cast<uint>(getStereoMode()));
     ospSet1f(_camera, "interpupillaryDistance", getEyeSeparation());
+    ospSet1f(_camera, "fovy", getFieldOfView());
+    ospSet1f(_camera, "architectural", true);
 
     // Clip planes
     const auto& clipPlanes = getClipPlanes();
