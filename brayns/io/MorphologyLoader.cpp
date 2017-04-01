@@ -34,7 +34,6 @@
 #ifdef BRAYNS_USE_BRION
 #include <brain/brain.h>
 #include <brion/brion.h>
-typedef std::shared_ptr<brion::Circuit> BrionCircuitPtr;
 #endif
 
 namespace brayns
@@ -240,7 +239,7 @@ bool MorphologyLoader::_importMorphology(
                 size_t(brain::neuron::SectionType::soma));
             const Vector3f somaPosition = soma.getCentroid() + translation;
 
-            float radius =
+            const float radius =
                 (_geometryParameters.getRadiusCorrection() != 0.f
                      ? _geometryParameters.getRadiusCorrection()
                      : soma.getMeanRadius() *
@@ -436,6 +435,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         return false;
     }
     const Matrix4fs& transforms = circuit.getTransforms(gids);
+
     const brain::URIs& uris = circuit.getMorphologyURIs(gids);
 
     BRAYNS_INFO << "Loading " << uris.size() << " cells" << std::endl;
@@ -447,6 +447,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         neuronMatrix);
 
     std::map<size_t, float> morphologyOffsets;
+
     size_t simulationOffset = 1;
     size_t simulatedCells = 0;
     size_t progress = 0;
