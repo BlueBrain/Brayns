@@ -144,8 +144,7 @@ inline vec3f ProximityRenderer_shadeRay(
             ray.t < self->detectionDistance * 1000.f)
         {
             // Generate random ray and trace it
-            varying vec3f ao_dir =
-                getRandomVector(sample, normal, self->abstract.randomNumber);
+            varying vec3f ao_dir = getRandomVector(normal);
 
             if (dot(ao_dir, normal) < 0.f)
                 ao_dir = ao_dir * -1.f;

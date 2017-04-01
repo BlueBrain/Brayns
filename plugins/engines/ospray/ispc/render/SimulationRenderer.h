@@ -39,6 +39,8 @@ public:
     void commit() final;
 
 private:
+    ospray::Model *_simulationModel;
+
     ospray::Ref<ospray::Data> _volumeData;
     ospray::Ref<ospray::Data> _simulationData;
     ospray::Ref<ospray::Data> _transferFunctionDiffuseData;

@@ -96,12 +96,14 @@ void OSPRayRenderer::commit()
         _scene->getParametersManager().getSceneParameters().getTimestamp();
     const auto model = osprayScene->modelImpl(ts);
     if (model)
-    {
         ospSetObject(_renderer, "world", *model);
-        ospCommit(_renderer);
-    }
     else
         BRAYNS_ERROR << "No model found for timestamp " << ts << std::endl;
+
+    const auto simulationModel = osprayScene->simulationModelImpl();
+    if (simulationModel)
+        ospSetObject(_renderer, "simulationModel", *simulationModel);
+    ospCommit(_renderer);
 }
 
 void OSPRayRenderer::setCamera(CameraPtr camera)

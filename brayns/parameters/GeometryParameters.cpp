@@ -60,6 +60,7 @@ const std::string PARAM_METABALLS_GRIDSIZE = "metaballs-grid-size";
 const std::string PARAM_METABALLS_THRESHOLD = "metaballs-threshold";
 const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
+const std::string PARAM_USE_SIMULATION_MODEL = "use-simulation-model";
 
 const std::string COLOR_SCHEMES[8] = {
     "none",           "neuron-by-id",
@@ -93,6 +94,7 @@ GeometryParameters::GeometryParameters()
     , _metaballsGridSize(0)
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
+    , _useSimulationModel(false)
 {
     _parameters.add_options()(PARAM_MORPHOLOGY_FOLDER.c_str(),
                               po::value<std::string>(),
@@ -170,7 +172,10 @@ GeometryParameters::GeometryParameters()
                                "Metaballs threshold [float]")(
         PARAM_METABALLS_SAMPLES_FROM_SOMA.c_str(), po::value<size_t>(),
         "Number of morphology samples (or segments) from soma used by "
-        "automated meshing [int]");
+        "automated meshing [int]")(PARAM_USE_SIMULATION_MODEL.c_str(),
+                                   po::value<bool>(),
+                                   "Defines if a different model is used to "
+                                   "handle the simulation geometry [bool]");
 }
 
 bool GeometryParameters::_parse(const po::variables_map& vm)
@@ -282,6 +287,8 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_METABALLS_SAMPLES_FROM_SOMA))
         _metaballsSamplesFromSoma =
             vm[PARAM_METABALLS_SAMPLES_FROM_SOMA].as<size_t>();
+    if (vm.count(PARAM_USE_SIMULATION_MODEL))
+        _useSimulationModel = vm[PARAM_USE_SIMULATION_MODEL].as<bool>();
 
     return true;
 }
@@ -351,6 +358,8 @@ void GeometryParameters::print()
                 << std::endl;
     BRAYNS_INFO << " - Samples from soma       : " << _metaballsSamplesFromSoma
                 << std::endl;
+    BRAYNS_INFO << "Use simulation model       : "
+                << (_useSimulationModel ? "Yes" : "No") << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(

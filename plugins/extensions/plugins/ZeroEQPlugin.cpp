@@ -665,6 +665,8 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getMetaballsThreshold());
     _remoteDataSource.setMetaballsSamplesFromSoma(
         geometryParameters.getMetaballsSamplesFromSoma());
+    _remoteDataSource.setUseSimulationModel(
+        geometryParameters.getUseSimulationModel());
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -730,6 +732,9 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            _remoteDataSource.getSimulationCacheFileString());
     _parametersManager.set("nest-cache-file",
                            _remoteDataSource.getNestCacheFileString());
+    _parametersManager.set("use-simulation-model",
+                           _remoteDataSource.getUseSimulationModel() ? "1"
+                                                                     : "0");
 
     uint morphologySectionTypes = MST_UNDEFINED;
     const auto& sectionTypes = _remoteDataSource.getMorphologySectionTypes();

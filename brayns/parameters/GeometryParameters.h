@@ -168,6 +168,18 @@ public:
 
     /** Metaballs enabled? */
     bool useMetaballs() const { return _metaballsGridSize != 0; }
+    /**
+     * Defines if a different model is used to handle the simulation geometry.
+     * If set to True, the shading of the main geometry model will be done
+     * using information stored in a secondary model that contains the
+     * simulation information. See OSPRay simulation renderer for more details.
+     */
+    bool getUseSimulationModel() const { return _useSimulationModel; }
+    void setUseSimulationModel(const bool value)
+    {
+        _useSimulationModel = value;
+    }
+
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -204,6 +216,7 @@ protected:
     size_t _metaballsGridSize;
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
+    bool _useSimulationModel;
 };
 }
 #endif // GEOMETRYPARAMETERS_H

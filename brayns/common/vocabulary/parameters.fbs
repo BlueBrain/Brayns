@@ -82,6 +82,7 @@ table DataSource {
     end_simulation_time: float;
     simulation_values_range: [float:2];
     simulation_cache_file: string;
+    use_simulation_model: bool;
     nest_cache_file: string;
     morphology_section_types: [SectionType];
     morphology_layout: MorphologyLayout;

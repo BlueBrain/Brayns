@@ -51,6 +51,7 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[6] = {
 OSPRayScene::OSPRayScene(Renderers renderers,
                          ParametersManager& parametersManager)
     : Scene(renderers, parametersManager)
+    , _simulationModel(0)
     , _ospLightData(0)
     , _ospMaterialData(0)
     , _ospVolumeData(0)
@@ -77,6 +78,21 @@ void OSPRayScene::reset()
         ospCommit(model.second);
     }
 
+    if (_simulationModel)
+    {
+        for (size_t materialId = 0; materialId < _materials.size();
+             ++materialId)
+        {
+            ospRemoveGeometry(_simulationModel,
+                              _ospExtendedSpheres[materialId]);
+            ospRemoveGeometry(_simulationModel,
+                              _ospExtendedCylinders[materialId]);
+            ospRemoveGeometry(_simulationModel, _ospExtendedCones[materialId]);
+        }
+        ospCommit(_simulationModel);
+    }
+    _simulationModel = 0;
+
     _models.clear();
 
     _ospMaterials.clear();
@@ -99,6 +115,11 @@ void OSPRayScene::commit()
 {
     for (auto model : _models)
         ospCommit(model.second);
+    if (_simulationModel)
+    {
+        BRAYNS_INFO << "Committing simulation model" << std::endl;
+        ospCommit(_simulationModel);
+    }
 }
 
 OSPModel* OSPRayScene::modelImpl(const size_t timestamp)
@@ -501,6 +522,7 @@ void OSPRayScene::_createModel(const size_t timestamp)
 
 uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
 {
+    const auto& geometryParameters = _parametersManager.getGeometryParameters();
     uint64_t size = 0;
 
     size_t count = 0;
@@ -558,7 +580,12 @@ uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
 
                 ospCommit(_ospExtendedSpheres[materialId]);
 
-                ospAddGeometry(model.second, _ospExtendedSpheres[materialId]);
+                if (geometryParameters.getUseSimulationModel())
+                    ospAddGeometry(_simulationModel,
+                                   _ospExtendedSpheres[materialId]);
+                else
+                    ospAddGeometry(model.second,
+                                   _ospExtendedSpheres[materialId]);
             }
         }
     }
@@ -567,6 +594,7 @@ uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
 
 uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
 {
+    const auto& geometryParameters = _parametersManager.getGeometryParameters();
     uint64_t size = 0;
 
     size_t count = 0;
@@ -624,7 +652,12 @@ uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
                                    _ospMaterials[materialId]);
 
                 ospCommit(_ospExtendedCylinders[materialId]);
-                ospAddGeometry(model.second, _ospExtendedCylinders[materialId]);
+                if (geometryParameters.getUseSimulationModel())
+                    ospAddGeometry(_simulationModel,
+                                   _ospExtendedCylinders[materialId]);
+                else
+                    ospAddGeometry(model.second,
+                                   _ospExtendedCylinders[materialId]);
             }
         }
     }
@@ -633,6 +666,7 @@ uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
 
 uint64_t OSPRayScene::_serializeCones(const size_t materialId)
 {
+    const auto& geometryParameters = _parametersManager.getGeometryParameters();
     uint64_t size = 0;
 
     size_t count = 0;
@@ -685,8 +719,11 @@ uint64_t OSPRayScene::_serializeCones(const size_t materialId)
                                    _ospMaterials[materialId]);
 
                 ospCommit(_ospExtendedCones[materialId]);
-                ospRemoveGeometry(model.second, _ospExtendedCones[materialId]);
-                ospAddGeometry(model.second, _ospExtendedCones[materialId]);
+                if (geometryParameters.getUseSimulationModel())
+                    ospAddGeometry(_simulationModel,
+                                   _ospExtendedCones[materialId]);
+                else
+                    ospAddGeometry(model.second, _ospExtendedCones[materialId]);
             }
         }
     }
@@ -775,6 +812,9 @@ void OSPRayScene::buildGeometry()
     if (_models.size() == 0)
         // If no timestamp is available, create a default model at timestamp 0
         _models[0] = ospNewModel();
+
+    if (_parametersManager.getGeometryParameters().getUseSimulationModel())
+        _simulationModel = ospNewModel();
 
     BRAYNS_INFO << "Models to process: " << _models.size() << std::endl;
 

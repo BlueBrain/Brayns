@@ -234,16 +234,38 @@ bool MorphologyLoader::_importMorphology(
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material = _getMaterialFromSectionType(
                 morphologyIndex, size_t(brain::neuron::SectionType::soma));
-            const Vector3f& center = soma.getCentroid() + translation;
+            const Vector3f somaPosition = soma.getCentroid() + translation;
 
-            const float radius =
+            float radius =
                 (_geometryParameters.getRadiusCorrection() != 0.f
                      ? _geometryParameters.getRadiusCorrection()
                      : soma.getMeanRadius() *
                            _geometryParameters.getRadiusMultiplier());
-            spheres[material].push_back(
-                SpherePtr(new Sphere(material, center, radius, 0.f, offset)));
-            bounds.merge(center);
+
+            spheres[material].push_back(SpherePtr(
+                new Sphere(material, somaPosition, radius, 0.f, offset)));
+            bounds.merge(somaPosition);
+
+            if (_geometryParameters.getUseSimulationModel())
+            {
+                // When using a simulation model, parametric geometries must
+                // occupy as much space as possible in the mesh. This code
+                // inserts a Cone between the soma and the beginning of each
+                // branch.
+                const auto& children = soma.getChildren();
+                for (const auto& child : children)
+                {
+                    const auto& samples = child.getSamples();
+                    const Vector3f sample = {samples[0].x(), samples[0].y(),
+                                             samples[0].z()};
+                    cones[material].push_back(ConePtr(
+                        new Cone(material, somaPosition, sample, radius,
+                                 samples[0].w() * 0.5f *
+                                     _geometryParameters.getRadiusMultiplier(),
+                                 0.f, offset)));
+                    bounds.merge(sample);
+                }
+            }
         }
 
         // Dendrites and axon
