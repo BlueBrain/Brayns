@@ -459,7 +459,7 @@ private:
         auto& scene = _engine->getScene();
 
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
-                           ".stl", ".3ds", ".ase", ".ifc"};
+                           ".stl", ".3ds", ".ase", ".ifc", ".off"};
         strings files = parseFolder(folder, filters);
         size_t progress = 0;
         for (const auto& file : files)

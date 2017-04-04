@@ -28,6 +28,7 @@
 // ospray
 #include <ospray/SDK/common/Data.h>
 #include <ospray/SDK/lights/Light.h>
+
 // sys
 #include <vector>
 
