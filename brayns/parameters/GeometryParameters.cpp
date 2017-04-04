@@ -62,11 +62,17 @@ const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
 const std::string PARAM_USE_SIMULATION_MODEL = "use-simulation-model";
 
-const std::string COLOR_SCHEMES[8] = {
-    "none",           "neuron-by-id",
-    "neuron-by-type", "neuron-by-segment-type",
-    "protein-by-id",  "protein-atoms",
-    "protein-chains", "protein-residues"};
+const std::string COLOR_SCHEMES[11] = {"none",
+                                       "neuron-by-id",
+                                       "neuron-by-type",
+                                       "neuron-by-segment-type",
+                                       "neuron-by-layer",
+                                       "neuron-by-mtype",
+                                       "neuron-by-etype",
+                                       "protein-by-id",
+                                       "protein-atoms",
+                                       "protein-chains",
+                                       "protein-residues"};
 
 const std::string SCENE_ENVIRONMENTS[4] = {"none", "ground", "wall",
                                            "bounding-box"};
