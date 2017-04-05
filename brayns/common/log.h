@@ -21,6 +21,7 @@
 #ifndef BRAYNS_LOG_H
 #define BRAYNS_LOG_H
 
+#include <chrono>
 #include <iostream>
 #include <mutex>
 #define BRAYNS_ERROR std::cerr << "[ERROR] "
@@ -40,16 +41,17 @@
         throw exc;                               \
     }
 
-#define BRAYNS_TIMER(__cmd)                                          \
-    {                                                                \
-        high_resolution_clock::time_point __startTime;               \
-        uint64_t __duration;                                         \
-        __startTime = high_resolution_clock::now();                  \
-        __cmd;                                                       \
-        __duration = duration_cast<milliseconds>(                    \
-                         high_resolution_clock::now() - __startTime) \
-                         .count();                                   \
-        std::cout << "[TIMER] " << __duration << " ms" << std::endl; \
+#define BRAYNS_TIMER(__cmd)                                              \
+    {                                                                    \
+        std::chrono::high_resolution_clock::time_point __startTime;      \
+        uint64_t __duration;                                             \
+        __startTime = std::chrono::high_resolution_clock::now();         \
+        __cmd;                                                           \
+        __duration =                                                     \
+            std::chrono::duration_cast<std::chrono::milliseconds>(       \
+                std::chrono::high_resolution_clock::now() - __startTime) \
+                .count();                                                \
+        std::cout << "[TIMER] " << __duration << " ms" << std::endl;     \
     }
 
 static std::mutex __logging_mtx;

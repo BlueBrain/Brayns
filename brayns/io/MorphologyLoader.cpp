@@ -435,7 +435,6 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         return false;
     }
     const Matrix4fs& transforms = circuit.getTransforms(gids);
-
     const brain::URIs& uris = circuit.getMorphologyURIs(gids);
 
     BRAYNS_INFO << "Loading " << uris.size() << " cells" << std::endl;
@@ -447,7 +446,6 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         neuronMatrix);
 
     std::map<size_t, float> morphologyOffsets;
-
     size_t simulationOffset = 1;
     size_t simulatedCells = 0;
     size_t progress = 0;
