@@ -32,6 +32,7 @@ const std::string PARAM_BENCHMARKING = "enable-benchmark";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_FILTERS = "filters";
+const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
 #if BRAYNS_USE_NETWORKING
 const std::string PARAM_ZEROEQ_AUTO_PUBLISH = "zeroeq-auto-publish";
 #endif
@@ -70,7 +71,9 @@ ApplicationParameters::ApplicationParameters()
          "Enable|Disable automatic publishing of zeroeq network events [bool]")
 #endif
             (PARAM_FILTERS.c_str(), po::value<strings>()->multitoken(),
-             "Screen space filters [string]");
+             "Screen space filters [string]")(
+                PARAM_FRAME_EXPORT_FOLDER.c_str(), po::value<std::string>(),
+                "Folder where frames are exported as PNG images [string]");
 }
 
 bool ApplicationParameters::_parse(const po::variables_map& vm)
@@ -100,9 +103,9 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
         }
     }
     if (vm.count(PARAM_FILTERS))
-    {
         _filters = vm[PARAM_FILTERS].as<strings>();
-    }
+    if (vm.count(PARAM_FRAME_EXPORT_FOLDER))
+        _frameExportFolder = vm[PARAM_FRAME_EXPORT_FOLDER].as<std::string>();
 #if BRAYNS_USE_NETWORKING
     if (vm.count(PARAM_ZEROEQ_AUTO_PUBLISH))
         _autoPublishZeroEQEvents = vm[PARAM_ZEROEQ_AUTO_PUBLISH].as<bool>();

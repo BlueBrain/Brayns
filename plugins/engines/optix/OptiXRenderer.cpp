@@ -33,7 +33,6 @@ OptiXRenderer::OptiXRenderer(const std::string& /*name*/,
                              optix::Context& context)
     : Renderer(parametersMamager)
     , _context(context)
-    , _frame(0)
 {
 }
 
@@ -49,7 +48,6 @@ void OptiXRenderer::render(FrameBufferPtr frameBuffer)
     // Render
     const Vector2ui& size = frameBuffer->getSize();
     _context->launch(0, size.x(), size.y());
-    ++_frame;
 }
 
 void OptiXRenderer::commit()
@@ -76,7 +74,6 @@ void OptiXRenderer::commit()
     auto color = rp.getBackgroundColor();
     _context["ambient_light_color"]->setFloat(color.x(), color.y(), color.z());
     _context["bg_color"]->setFloat(color.x(), color.y(), color.z());
-    _frame = 0;
 }
 
 void OptiXRenderer::setCamera(CameraPtr camera)

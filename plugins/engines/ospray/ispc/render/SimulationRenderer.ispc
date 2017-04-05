@@ -154,14 +154,16 @@ inline vec3f SimulationRenderer_shadeRay(
                               self->abstract.materials);
 
             if (self->abstract.volumeData)
+            {
                 volumetricValue =
                     getVolumeContribution(&(self->abstract), ray, sample);
+                if (depth == 0)
+                    pathOpacity = 1.f - volumetricValue.w;
+            }
 
             intersectionColors[depth] =
                 volumetricValue.w * make_vec3f(volumetricValue) +
                 (1.f - volumetricValue.w) * make_vec3f(backgroundColor);
-            if (depth == 0)
-                pathOpacity = 1.f - volumetricValue.w;
             sample.z = 1.f - log(zDepth) / 10.f;
             moreRebounds = false;
         }

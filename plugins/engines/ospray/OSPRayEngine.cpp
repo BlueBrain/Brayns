@@ -103,6 +103,7 @@ void OSPRayEngine::commit()
 
 void OSPRayEngine::render()
 {
+    Engine::render();
     _scene->commitVolumeData();
     _scene->commitSimulationData();
     _renderers[_activeRenderer]->commit();

@@ -63,6 +63,11 @@ public:
      * @return True if auto publication is enabled, false otherwize
      */
     bool getAutoPublishZeroEQEvents() const { return _autoPublishZeroEQEvents; }
+    void setFrameExportFolder(const std::string& folder)
+    {
+        _frameExportFolder = folder;
+    }
+    std::string getFrameExportFolder() const { return _frameExportFolder; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -73,6 +78,7 @@ protected:
     Vector2ui _jpegSize;
     strings _filters;
     bool _autoPublishZeroEQEvents;
+    std::string _frameExportFolder;
 };
 }
 
