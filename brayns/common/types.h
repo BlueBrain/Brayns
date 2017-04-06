@@ -282,7 +282,7 @@ struct Histogram
 /** Some 'special' materials are used by Brayns to acomplish specific features
  *  such as skyboxes.
  */
-const size_t NO_MATERIAL = -1;
+const size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
 const size_t NB_MAX_MATERIALS = 200;
 const size_t NB_SYSTEM_MATERIALS = 5;
 const size_t MATERIAL_SYSTEM = NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS - 1;
