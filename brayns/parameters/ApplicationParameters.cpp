@@ -32,6 +32,10 @@ const std::string PARAM_BENCHMARKING = "enable-benchmark";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_FILTERS = "filters";
+const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
+#if BRAYNS_USE_NETWORKING
+const std::string PARAM_ZEROEQ_AUTO_PUBLISH = "zeroeq-auto-publish";
+#endif
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -50,6 +54,7 @@ ApplicationParameters::ApplicationParameters()
     , _benchmarking(false)
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
     , _jpegSize(DEFAULT_JPEG_WIDTH, DEFAULT_JPEG_HEIGHT)
+    , _autoPublishZeroEQEvents(false)
 {
     _parameters.add_options()(PARAM_WINDOW_SIZE.c_str(),
                               po::value<uints>()->multitoken(),
@@ -60,9 +65,15 @@ ApplicationParameters::ApplicationParameters()
         PARAM_JPEG_COMPRESSION.c_str(), po::value<size_t>(),
         "JPEG compression rate (100 is full quality) [float]")(
         PARAM_JPEG_SIZE.c_str(), po::value<uints>()->multitoken(),
-        "JPEG size [int int]")(PARAM_FILTERS.c_str(),
-                               po::value<strings>()->multitoken(),
-                               "Screen space filters [string]");
+        "JPEG size [int int]")
+#if BRAYNS_USE_NETWORKING
+        (PARAM_ZEROEQ_AUTO_PUBLISH.c_str(), po::value<bool>(),
+         "Enable|Disable automatic publishing of zeroeq network events [bool]")
+#endif
+            (PARAM_FILTERS.c_str(), po::value<strings>()->multitoken(),
+             "Screen space filters [string]")(
+                PARAM_FRAME_EXPORT_FOLDER.c_str(), po::value<std::string>(),
+                "Folder where frames are exported as PNG images [string]");
 }
 
 bool ApplicationParameters::_parse(const po::variables_map& vm)
@@ -92,9 +103,13 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
         }
     }
     if (vm.count(PARAM_FILTERS))
-    {
         _filters = vm[PARAM_FILTERS].as<strings>();
-    }
+    if (vm.count(PARAM_FRAME_EXPORT_FOLDER))
+        _frameExportFolder = vm[PARAM_FRAME_EXPORT_FOLDER].as<std::string>();
+#if BRAYNS_USE_NETWORKING
+    if (vm.count(PARAM_ZEROEQ_AUTO_PUBLISH))
+        _autoPublishZeroEQEvents = vm[PARAM_ZEROEQ_AUTO_PUBLISH].as<bool>();
+#endif
 
     return true;
 }
@@ -102,12 +117,16 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
 void ApplicationParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Window size             : " << _windowSize << std::endl;
-    BRAYNS_INFO << "Camera                  : " << _camera << std::endl;
-    BRAYNS_INFO << "Benchmarking            : "
+    BRAYNS_INFO << "Window size                 : " << _windowSize << std::endl;
+    BRAYNS_INFO << "Camera                      : " << _camera << std::endl;
+    BRAYNS_INFO << "Benchmarking                : "
                 << (_benchmarking ? "on" : "off") << std::endl;
-    BRAYNS_INFO << "JPEG Compression        : " << _jpegCompression
+    BRAYNS_INFO << "JPEG Compression            : " << _jpegCompression
                 << std::endl;
-    BRAYNS_INFO << "JPEG size               : " << _jpegSize << std::endl;
+    BRAYNS_INFO << "JPEG size                   : " << _jpegSize << std::endl;
+#if BRAYNS_USE_NETWORKING
+    BRAYNS_INFO << "Auto-publish ZeroeEQ events : "
+                << (_autoPublishZeroEQEvents ? "on" : "off") << std::endl;
+#endif
 }
 }

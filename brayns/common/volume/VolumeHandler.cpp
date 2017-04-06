@@ -24,6 +24,7 @@
 
 #include <fcntl.h>
 #include <fstream>
+#include <future>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
@@ -96,8 +97,10 @@ float VolumeHandler::getEpsilon(const Vector3f& elementSpacing,
     if (_volumeDescriptors.find(_timestamp) == _volumeDescriptors.end())
         return 0.f;
     const Vector3f diag =
-        _volumeDescriptors.at(_timestamp)->getDimensions() * elementSpacing;
-    return diag.find_max() / float(samplesPerRay);
+        elementSpacing * _volumeDescriptors.at(_timestamp)->getDimensions();
+    const float diagMax = diag.find_max();
+    const float epsilon = diagMax / float(samplesPerRay);
+    return epsilon;
 }
 
 Vector3ui VolumeHandler::getDimensions() const
@@ -206,5 +209,47 @@ void VolumeHandler::VolumeDescriptor::unmap()
         ::close(_cacheFileDescriptor);
         _cacheFileDescriptor = NO_DESCRIPTOR;
     }
+}
+
+const Histogram& VolumeHandler::getHistogram()
+{
+    if (_histograms.find(_timestamp) != _histograms.end())
+        return _histograms[_timestamp];
+
+    std::future<bool> computeHistogram =
+        std::async(std::launch::async, [this]() {
+            uint8_t* data = static_cast<uint8_t*>(getData());
+            if (data)
+            {
+                BRAYNS_INFO << "Computing volume histogram" << std::endl;
+                uint8_t minValue = std::numeric_limits<uint8_t>::max();
+                uint8_t maxValue = 0;
+                std::map<uint8_t, uint64_t> values;
+                for (uint64_t i = 0; i < getSize(); ++i)
+                {
+                    const uint8_t value = data[i];
+                    minValue = std::min(minValue, value);
+                    maxValue = std::max(maxValue, value);
+                    if (values.find(value) == values.end())
+                        values[value] = 1;
+                    else
+                        ++values[value];
+                }
+
+                _histograms[_timestamp].values.clear();
+                for (const auto& value : values)
+                    _histograms[_timestamp].values.push_back(value.second);
+                _histograms[_timestamp].range = Vector2f(minValue, maxValue);
+                BRAYNS_INFO
+                    << "Histogram range: " << _histograms[_timestamp].range
+                    << std::endl;
+            }
+            return true;
+        });
+
+    computeHistogram.wait();
+    computeHistogram.get();
+
+    return _histograms[_timestamp];
 }
 }

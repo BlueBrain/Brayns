@@ -112,6 +112,13 @@ private:
     void _materialLUTUpdated();
 
     /**
+     * @brief This method is called when a material lookup table is requested by
+     * a ZeroEQ event
+     * @return True if the method was successful, false otherwise
+     */
+    void _requestMaterialLUT();
+
+    /**
      * @brief This method is called when an Image JPEG is requested by a ZeroEQ
      * event
      * @return True if the method was successful, false otherwise
@@ -208,6 +215,11 @@ private:
     bool _requestClipPlanes();
 
     /**
+     * @brief This method is called when rendering is forced by a ZeroEQ event
+     */
+    void _forceRenderingUpdated();
+
+    /**
      * @brief Resizes an given image according to the new size
      * @param srcData Source buffer
      * @param srcSize Source size
@@ -259,6 +271,7 @@ private:
     ::brayns::v1::Material _remoteMaterial;
     ::brayns::v1::ResetCamera _remoteResetCamera;
     ::brayns::v1::Scene _remoteScene;
+    ::brayns::v1::ForceRendering _remoteForceRendering;
 
     bool _forceRendering = false;
     bool _dirtyEngine;

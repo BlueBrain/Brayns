@@ -79,7 +79,7 @@ public:
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
     OSPModel* modelImpl(const size_t timestamp);
-
+    OSPModel* simulationModelImpl() { return &_simulationModel; };
 private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
     void _createModel(const size_t timestamp);
@@ -93,6 +93,7 @@ private:
     void _saveCacheFile();
 
     std::map<size_t, OSPModel> _models;
+    OSPModel _simulationModel;
     std::vector<OSPMaterial> _ospMaterials;
     std::map<std::string, OSPTexture2D> _ospTextures;
 

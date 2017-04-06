@@ -22,6 +22,7 @@
 #include "BraynsViewer.h"
 
 #include <brayns/Brayns.h>
+#include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/log.h>
@@ -37,6 +38,8 @@ namespace brayns
 {
 BraynsViewer::BraynsViewer(Brayns& brayns)
     : BaseWindow(brayns)
+    , _fieldOfView(45.f)
+    , _eyeSeparation(0.0635f)
 {
     _registerKeyboardShortcuts();
 }
@@ -63,6 +66,50 @@ void BraynsViewer::_registerKeyboardShortcuts()
     keyHandler.registerKeyboardShortcut(
         '|', "Create cache file ",
         std::bind(&BraynsViewer::_saveSceneToCacheFile, this));
+    keyHandler.registerKeyboardShortcut(
+        '{', "Decrease eye separation",
+        std::bind(&BraynsViewer::_decreaseEyeSeparation, this));
+    keyHandler.registerKeyboardShortcut(
+        '}', "Increase eye separation",
+        std::bind(&BraynsViewer::_increaseEyeSeparation, this));
+    keyHandler.registerKeyboardShortcut(
+        '<', "Decrease field of view",
+        std::bind(&BraynsViewer::_decreaseFieldOfView, this));
+    keyHandler.registerKeyboardShortcut(
+        '>', "Increase field of view",
+        std::bind(&BraynsViewer::_increaseFieldOfView, this));
+}
+
+void BraynsViewer::_decreaseFieldOfView()
+{
+    _fieldOfView -= 1.f;
+    //_fieldOfView = std::max(1.f, _fieldOfView);
+    _brayns.getEngine().getCamera().setFieldOfView(_fieldOfView);
+    BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
+}
+
+void BraynsViewer::_increaseFieldOfView()
+{
+    _fieldOfView += 1.f;
+    //    _fieldOfView = std::min(179.f, _fieldOfView);
+    _brayns.getEngine().getCamera().setFieldOfView(_fieldOfView);
+    BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
+}
+
+void BraynsViewer::_decreaseEyeSeparation()
+{
+    _eyeSeparation -= 0.01f;
+    //_eyeSeparation = std::max(0.1f, _eyeSeparation);
+    _brayns.getEngine().getCamera().setEyeSeparation(_eyeSeparation);
+    BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
+}
+
+void BraynsViewer::_increaseEyeSeparation()
+{
+    _eyeSeparation += 0.01f;
+    //_eyeSeparation = std::min(1.0f, _eyeSeparation);
+    _brayns.getEngine().getCamera().setEyeSeparation(_eyeSeparation);
+    BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
 }
 
 void BraynsViewer::_gradientMaterials()

@@ -33,6 +33,7 @@ namespace brayns
 Engine::Engine(ParametersManager& parametersManager)
     : _parametersManager(parametersManager)
 {
+    resetFrameNumber();
 }
 
 Engine::~Engine()
@@ -63,79 +64,6 @@ void Engine::commit()
                              sceneParams.getAnimationDelta());
 
     _frameBuffer->clear();
-}
-
-void Engine::_render(const RenderInput& renderInput, RenderOutput& renderOutput)
-{
-    reshape(renderInput.windowSize);
-
-    preRender();
-
-    _camera->set(renderInput.position, renderInput.target, renderInput.up);
-    _camera->commit();
-
-    const Vector2i& frameSize = _frameBuffer->getSize();
-
-    if (_parametersManager.getRenderingParameters().getHeadLight())
-    {
-        LightPtr sunLight = _scene->getLight(0);
-        DirectionalLight* sun = dynamic_cast<DirectionalLight*>(sunLight.get());
-        if (sun)
-        {
-            sun->setDirection(_camera->getTarget() - _camera->getPosition());
-            _scene->commitLights();
-        }
-    }
-
-    _render();
-
-    uint8_t* colorBuffer = _frameBuffer->getColorBuffer();
-    if (colorBuffer)
-    {
-        const size_t size =
-            frameSize.x() * frameSize.y() * _frameBuffer->getColorDepth();
-        renderOutput.colorBuffer.assign(colorBuffer, colorBuffer + size);
-        renderOutput.colorBufferFormat = _frameBuffer->getFrameBufferFormat();
-    }
-
-    float* depthBuffer = _frameBuffer->getDepthBuffer();
-    if (depthBuffer)
-    {
-        const size_t size = frameSize.x() * frameSize.y();
-        renderOutput.depthBuffer.assign(depthBuffer, depthBuffer + size);
-    }
-
-    postRender();
-}
-
-void Engine::_render()
-{
-    const Vector2i& frameSize = _frameBuffer->getSize();
-
-    preRender();
-
-    if (_parametersManager.getRenderingParameters().getHeadLight())
-    {
-        LightPtr sunLight = _scene->getLight(0);
-        DirectionalLight* sun = dynamic_cast<DirectionalLight*>(sunLight.get());
-        if (sun)
-        {
-            sun->setDirection(_camera->getTarget() - _camera->getPosition());
-            _scene->commitLights();
-        }
-    }
-
-    _camera->commit();
-    setActiveRenderer(
-        _parametersManager.getRenderingParameters().getRenderer());
-    render();
-
-    postRender();
-
-    const Vector2ui windowSize =
-        _parametersManager.getApplicationParameters().getWindowSize();
-    if (windowSize != frameSize)
-        reshape(windowSize);
 }
 
 void Engine::setDefaultCamera()
@@ -177,8 +105,18 @@ void Engine::initializeMaterials(const MaterialType materialType,
     _scene->commit();
 }
 
+void Engine::render()
+{
+    ++_frameNumber;
+}
+
 Renderer& Engine::getRenderer()
 {
     return *_renderers[_activeRenderer];
+}
+
+void Engine::resetFrameNumber()
+{
+    _frameNumber = -1;
 }
 }

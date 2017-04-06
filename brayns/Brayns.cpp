@@ -47,6 +47,10 @@
 #include <brayns/io/MolecularSystemReader.h>
 #endif
 
+#ifdef BRAYNS_USE_MAGICKPP
+#include <Magick++.h>
+#endif
+
 #include <plugins/engines/EngineFactory.h>
 #include <plugins/extensions/ExtensionPluginFactory.h>
 
@@ -134,6 +138,76 @@ struct Brayns::Impl
         _engine->commit();
     }
 
+#ifdef BRAYNS_USE_MAGICKPP
+    void _writeFrameToFolder()
+    {
+        const auto& frameExportFolder =
+            _parametersManager->getApplicationParameters()
+                .getFrameExportFolder();
+        if (frameExportFolder.empty())
+            return;
+        try
+        {
+            char str[7];
+            snprintf(str, 7, "%06d", int(_engine->getFrameNumber()));
+
+            const std::string filename = frameExportFolder + "/" + str + ".png";
+            FrameBuffer& frameBuffer = _engine->getFrameBuffer();
+            std::string format;
+            switch (frameBuffer.getFrameBufferFormat())
+            {
+            case FBF_RGBA_I8:
+                format = "RGBA";
+                break;
+            case FBF_RGB_I8:
+                format = "RGB";
+                break;
+            default:
+                BRAYNS_ERROR
+                    << "Unsupported frame buffer format. Cannot export "
+                       "frame to file as PNG image"
+                    << std::endl;
+                return;
+            }
+            uint8_t* colorBuffer = frameBuffer.getColorBuffer();
+            const auto& size = frameBuffer.getSize();
+            Magick::Image image(size.x(), size.y(), format, Magick::CharPixel,
+                                colorBuffer);
+            image.flip();
+            image.write(filename);
+        }
+        catch (Magick::Warning& warning)
+        {
+            BRAYNS_WARN << warning.what() << std::endl;
+            return;
+        }
+        catch (Magick::Error& error)
+        {
+            BRAYNS_ERROR << error.what() << std::endl;
+            return;
+        }
+    }
+#else
+    void _writeFrameToFolder()
+    {
+        BRAYNS_ERROR << "ImageMagick is required to export frames as PNG files"
+                     << std::endl;
+    }
+#endif
+
+    void _executePlugins(const Vector2ui& size)
+    {
+        auto oldEngine = _engine.get();
+        _extensionPluginFactory->execute(*_engine);
+
+        // the ZeroEQ plugin can create a new engine
+        if (_engine.get() != oldEngine)
+        {
+            _engine->reshape(size);
+            _engine->preRender();
+        }
+    }
+
     void render(const RenderInput& renderInput, RenderOutput& renderOutput)
     {
         _engine->getCamera().set(renderInput.position, renderInput.target,
@@ -141,15 +215,7 @@ struct Brayns::Impl
         _engine->reshape(renderInput.windowSize);
         _engine->preRender();
 
-        auto oldEngine = _engine.get();
-        _extensionPluginFactory->execute(*_engine);
-
-        // the ZeroEQ plugin can create a new engine
-        if (_engine.get() != oldEngine)
-        {
-            _engine->reshape(renderInput.windowSize);
-            _engine->preRender();
-        }
+        _executePlugins(renderInput.windowSize);
 
         auto& sceneParams = _parametersManager->getSceneParameters();
         if (sceneParams.getAnimationDelta() != 0)
@@ -203,15 +269,7 @@ struct Brayns::Impl
         _engine->reshape(windowSize);
         _engine->preRender();
 
-        auto oldEngine = _engine.get();
-        _extensionPluginFactory->execute(*_engine);
-
-        // the ZeroEQ plugin can create a new engine
-        if (_engine.get() != oldEngine)
-        {
-            _engine->reshape(windowSize);
-            _engine->preRender();
-        }
+        _executePlugins(windowSize);
 
         Scene& scene = _engine->getScene();
         Camera& camera = _engine->getCamera();
@@ -248,6 +306,7 @@ private:
         _engine->setActiveRenderer(
             _parametersManager->getRenderingParameters().getRenderer());
         _engine->render();
+        _writeFrameToFolder();
     }
 
     void _loadData()
@@ -322,7 +381,8 @@ private:
     }
 
     /**
-        Loads data from SWC and H5 files located in the folder specified in the
+        Loads data from SWC and H5 files located in the folder specified
+       in the
         geometry parameters (command line parameter --morphology-folder)
     */
     void _loadMorphologyFolder()
@@ -448,7 +508,8 @@ private:
     }
 
     /**
-        Loads data from mesh files located in the folder specified in the
+        Loads data from mesh files located in the folder specified in
+       the
         geometry parameters (command line parameter --mesh-folder)
     */
     void _loadMeshFolder(const std::string& folder)
@@ -459,7 +520,7 @@ private:
         auto& scene = _engine->getScene();
 
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
-                           ".stl", ".3ds", ".ase", ".ifc"};
+                           ".stl", ".3ds", ".ase", ".ifc", ".off"};
         strings files = parseFolder(folder, filters);
         size_t progress = 0;
         for (const auto& file : files)
@@ -497,7 +558,8 @@ private:
     }
 
     /**
-        Loads morphologies from circuit configuration (command line parameter
+        Loads morphologies from circuit configuration (command line
+       parameter
         --circuit-configuration)
     */
     void _loadCircuitConfiguration()
@@ -520,7 +582,8 @@ private:
     }
 
     /**
-        Loads compartment report from circuit configuration (command line
+        Loads compartment report from circuit configuration (command
+       line
         parameter --report)
     */
     void _loadCompartmentReport()
@@ -550,7 +613,8 @@ private:
     }
 
     /**
-        Loads molecular system from configuration (command line parameter
+        Loads molecular system from configuration (command line
+       parameter
         --molecular-system-config )
     */
     void _loadMolecularSystem()
@@ -840,7 +904,6 @@ Brayns::Brayns(int argc, const char** argv)
 Brayns::~Brayns()
 {
 }
-
 void Brayns::render(const RenderInput& renderInput, RenderOutput& renderOutput)
 {
     _impl->render(renderInput, renderOutput);
@@ -850,12 +913,10 @@ void Brayns::render()
 {
     _impl->render();
 }
-
 Engine& Brayns::getEngine()
 {
     return _impl->getEngine();
 }
-
 ParametersManager& Brayns::getParametersManager()
 {
     return _impl->getParametersManager();

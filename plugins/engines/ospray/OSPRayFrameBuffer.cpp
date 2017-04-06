@@ -25,8 +25,6 @@
 
 namespace brayns
 {
-const float DEFAULT_GAMMA = 2.2f;
-
 OSPRayFrameBuffer::OSPRayFrameBuffer(const Vector2ui& frameSize,
                                      const FrameBufferFormat colorDepth,
                                      const bool accumulation)
@@ -58,7 +56,7 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     switch (_frameBufferFormat)
     {
     case FBF_RGBA_I8:
-        format = OSP_FB_SRGBA; // maybe OSP_FB_RGBA8;
+        format = OSP_FB_RGBA8;
         break;
     case FBF_RGBA_F32:
         format = OSP_FB_RGBA32F;
@@ -74,7 +72,6 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
         attributes |= OSP_FB_ACCUM;
 
     _frameBuffer = ospNewFrameBuffer(size, format, attributes);
-    ospSet1f(_frameBuffer, "gamma", DEFAULT_GAMMA);
     ospCommit(_frameBuffer);
     clear();
 }

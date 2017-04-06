@@ -161,6 +161,7 @@ void OptiXEngine::commit()
 
 void OptiXEngine::render()
 {
+    Engine::render();
     if (_scene->getSimulationHandler())
         _scene->commitSimulationData();
 

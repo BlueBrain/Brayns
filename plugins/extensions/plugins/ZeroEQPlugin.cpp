@@ -97,17 +97,21 @@ bool ZeroEQPlugin::run(Engine& engine)
         _onNewEngine();
     }
 
-    if (_requestVolumeHistogram())
-        _publisher.publish(_remoteVolumeHistogram);
+    const auto& ap = _parametersManager.getApplicationParameters();
+    if (ap.getAutoPublishZeroEQEvents())
+    {
+        if (_requestVolumeHistogram())
+            _publisher.publish(_remoteVolumeHistogram);
 
-    if (_requestSimulationHistogram())
-        _publisher.publish(_remoteSimulationHistogram);
+        if (_requestSimulationHistogram())
+            _publisher.publish(_remoteSimulationHistogram);
 
-    if (_requestFrame())
-        _publisher.publish(_remoteFrame);
+        if (_requestFrame())
+            _publisher.publish(_remoteFrame);
+    }
 
     _forceRendering = false;
-    while (_subscriber.receive(1))
+    while (_subscriber.receive(10))
     {
         if (_forceRendering)
             break;
@@ -187,7 +191,11 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteSpikes.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestSpikes, this));
 
-    _httpServer->handlePUT(_remoteMaterialLUT);
+    _httpServer->handle(_remoteMaterialLUT);
+    _remoteMaterialLUT.registerDeserializedCallback(
+        std::bind(&ZeroEQPlugin::_materialLUTUpdated, this));
+    _remoteMaterialLUT.registerSerializeCallback(
+        std::bind(&ZeroEQPlugin::_requestMaterialLUT, this));
 
     _httpServer->handle(_remoteDataSource);
     _remoteDataSource.registerDeserializedCallback(
@@ -224,6 +232,10 @@ void ZeroEQPlugin::_setupHTTPServer()
                            _remoteVolumeHistogram);
     _remoteVolumeHistogram.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestVolumeHistogram, this));
+
+    _httpServer->handle(_remoteForceRendering);
+    _remoteForceRendering.registerDeserializedCallback(
+        std::bind(&ZeroEQPlugin::_forceRenderingUpdated, this));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -258,9 +270,6 @@ void ZeroEQPlugin::_setupSubscriber()
     _subscriber.subscribe(_remoteMaterialLUT);
     _subscriber.subscribe(_clipPlanes);
     _subscriber.subscribe(_remoteFrame);
-
-    _remoteMaterialLUT.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_materialLUTUpdated, this));
 }
 
 void ZeroEQPlugin::_cameraUpdated()
@@ -384,9 +393,8 @@ void ZeroEQPlugin::_materialLUTUpdated()
     auto& emissionIntensities = transferFunction.getEmissionIntensities();
     for (const auto& emission : _remoteMaterialLUT.getEmission())
     {
-        const float intensity =
-            (emission.getRed() + emission.getGreen() + emission.getBlue()) /
-            3.f;
+        const Vector3f intensity = {emission.getRed(), emission.getGreen(),
+                                    emission.getBlue()};
         emissionIntensities.push_back(intensity);
     }
 
@@ -401,6 +409,47 @@ void ZeroEQPlugin::_materialLUTUpdated()
         transferFunction.setValuesRange(Vector2f(range[0], range[1]));
     scene.commitTransferFunctionData();
     _engine->getFrameBuffer().clear();
+}
+
+void ZeroEQPlugin::_requestMaterialLUT()
+{
+    auto& scene = _engine->getScene();
+    TransferFunction& transferFunction = scene.getTransferFunction();
+
+    _remoteMaterialLUT.getEmission().clear();
+    _remoteMaterialLUT.getDiffuse().clear();
+    _remoteMaterialLUT.getAlpha().clear();
+    _remoteMaterialLUT.getContribution().clear();
+
+    for (const auto& diffuseColor : transferFunction.getDiffuseColors())
+    {
+        ::lexis::render::Color color(diffuseColor.x(), diffuseColor.y(),
+                                     diffuseColor.z());
+        _remoteMaterialLUT.getDiffuse().push_back(color);
+        _remoteMaterialLUT.getAlpha().push_back(diffuseColor.w());
+    }
+
+    if (transferFunction.getEmissionIntensities().empty())
+        for (size_t i = 0; i < transferFunction.getDiffuseColors().size(); ++i)
+            _remoteMaterialLUT.getEmission().push_back({0, 0, 0});
+    else
+        for (const auto& emission : transferFunction.getEmissionIntensities())
+        {
+            ::lexis::render::Color color(emission.x(), emission.y(),
+                                         emission.z());
+            _remoteMaterialLUT.getEmission().push_back(color);
+        }
+
+    if (transferFunction.getContributions().empty())
+        for (size_t i = 0; i < transferFunction.getDiffuseColors().size(); ++i)
+            _remoteMaterialLUT.getContribution().push_back(0.f);
+    else
+        for (const auto& contribution : transferFunction.getContributions())
+            _remoteMaterialLUT.getContribution().push_back(contribution);
+
+    const auto& range = transferFunction.getValuesRange();
+    std::vector<double> rangeVector = {range.x(), range.y()};
+    _remoteMaterialLUT.setRange(rangeVector);
 }
 
 void ZeroEQPlugin::_resizeImage(unsigned int* srcData, const Vector2i& srcSize,
@@ -620,6 +669,8 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getMetaballsThreshold());
     _remoteDataSource.setMetaballsSamplesFromSoma(
         geometryParameters.getMetaballsSamplesFromSoma());
+    _remoteDataSource.setUseSimulationModel(
+        geometryParameters.getUseSimulationModel());
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -685,6 +736,9 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            _remoteDataSource.getSimulationCacheFileString());
     _parametersManager.set("nest-cache-file",
                            _remoteDataSource.getNestCacheFileString());
+    _parametersManager.set("use-simulation-model",
+                           _remoteDataSource.getUseSimulationModel() ? "1"
+                                                                     : "0");
 
     uint morphologySectionTypes = MST_UNDEFINED;
     const auto& sectionTypes = _remoteDataSource.getMorphologySectionTypes();
@@ -832,6 +886,8 @@ void ZeroEQPlugin::_initializeSettings()
         applicationParameters.getJpegCompression());
     const auto& jpegSize = applicationParameters.getJpegSize();
     _remoteSettings.setJpegSize({jpegSize[0], jpegSize[1]});
+    _remoteSettings.setFrameExportFolder(
+        applicationParameters.getFrameExportFolder());
 }
 
 void ZeroEQPlugin::_settingsUpdated()
@@ -924,6 +980,11 @@ void ZeroEQPlugin::_settingsUpdated()
         _engine->getRenderer().commit();
         _engine->getFrameBuffer().clear();
     }
+
+    _parametersManager.set("frame-export-folder",
+                           _remoteSettings.getFrameExportFolderString());
+    if (_remoteSettings.getFrameExportFolderString().empty())
+        _engine->resetFrameNumber();
 }
 
 bool ZeroEQPlugin::_requestFrame()
@@ -1057,6 +1118,11 @@ bool ZeroEQPlugin::_requestClipPlanes()
     }
     _clipPlanes.setPlanes(planes);
     return true;
+}
+
+void ZeroEQPlugin::_forceRenderingUpdated()
+{
+    _forceRendering = true;
 }
 
 uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width, const uint32_t height,

@@ -114,16 +114,19 @@ private:
                            SpheresMap& spheres, CylindersMap& cylinders,
                            ConesMap& cones, Boxf& bounds,
                            const size_t simulationOffset,
-                           float& maxDistanceToSoma);
+                           float& maxDistanceToSoma,
+                           const size_t forcedMaterial = NO_MATERIAL);
 
     bool _importMorphologyAsMesh(const servus::URI& source,
                                  const size_t morphologyIndex,
                                  const MaterialsMap& materials,
                                  const Matrix4f& transformation,
-                                 TrianglesMeshMap& meshes, Boxf& bounds);
+                                 TrianglesMeshMap& meshes, Boxf& bounds,
+                                 const size_t forcedMaterial = NO_MATERIAL);
 
-    size_t _getMaterialFromSectionType(size_t morphologyIndex,
-                                       size_t sectionType);
+    size_t _getMaterialFromSectionType(const size_t morphologyIndex,
+                                       const size_t forcedMaterial,
+                                       const size_t sectionType);
 
     const GeometryParameters& _geometryParameters;
 };

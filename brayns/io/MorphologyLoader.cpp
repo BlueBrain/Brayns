@@ -59,12 +59,10 @@ brain::neuron::SectionTypes _getSectionTypes(
     return sectionTypes;
 }
 
-bool MorphologyLoader::_importMorphologyAsMesh(const servus::URI& source,
-                                               const size_t morphologyIndex,
-                                               const MaterialsMap& materials,
-                                               const Matrix4f& transformation,
-                                               TrianglesMeshMap& meshes,
-                                               Boxf& bounds)
+bool MorphologyLoader::_importMorphologyAsMesh(
+    const servus::URI& source, const size_t morphologyIndex,
+    const MaterialsMap& materials, const Matrix4f& transformation,
+    TrianglesMeshMap& meshes, Boxf& bounds, const size_t forcedMaterial)
 {
     try
     {
@@ -85,7 +83,8 @@ bool MorphologyLoader::_importMorphologyAsMesh(const servus::URI& source,
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material = _getMaterialFromSectionType(
-                morphologyIndex, size_t(brain::neuron::SectionType::soma));
+                morphologyIndex, forcedMaterial,
+                size_t(brain::neuron::SectionType::soma));
             const Vector3f center = soma.getCentroid();
 
             const float radius =
@@ -112,7 +111,7 @@ bool MorphologyLoader::_importMorphologyAsMesh(const servus::URI& source,
             }
 
             const auto material =
-                _getMaterialFromSectionType(morphologyIndex,
+                _getMaterialFromSectionType(morphologyIndex, forcedMaterial,
                                             size_t(section.getType()));
             const auto& samples = section.getSamples();
             if (samples.empty())
@@ -144,8 +143,10 @@ bool MorphologyLoader::_importMorphologyAsMesh(const servus::URI& source,
         const size_t gridSize = _geometryParameters.getMetaballsGridSize();
         const float threshold = _geometryParameters.getMetaballsThreshold();
         MetaballsGenerator metaballsGenerator;
-        const size_t material = _getMaterialFromSectionType(
-            morphologyIndex, size_t(brain::neuron::SectionType::soma));
+        const size_t material =
+            _getMaterialFromSectionType(morphologyIndex, forcedMaterial,
+                                        size_t(
+                                            brain::neuron::SectionType::soma));
         metaballsGenerator.generateMesh(metaballs, gridSize, threshold,
                                         materials, material, meshes);
     }
@@ -182,7 +183,8 @@ bool MorphologyLoader::_importMorphology(
     const Matrix4f& transformation,
     const SimulationInformation* simulationInformation, SpheresMap& spheres,
     CylindersMap& cylinders, ConesMap& cones, Boxf& bounds,
-    const size_t simulationOffset, float& maxDistanceToSoma)
+    const size_t simulationOffset, float& maxDistanceToSoma,
+    const size_t forcedMaterial)
 {
     maxDistanceToSoma = 0.f;
     try
@@ -198,17 +200,14 @@ bool MorphologyLoader::_importMorphology(
         if (layout.nbColumns != 0)
         {
             Boxf morphologyAABB;
-            const brain::Vector4fs& points = morphology.getPoints();
-            for (Vector4f point : points)
-            {
-                const Vector3f p = {point.x(), point.y(), point.z()};
-                morphologyAABB.merge(p);
-            }
+            const auto& points = morphology.getPoints();
+            for (const auto& point : points)
+                morphologyAABB.merge({point.x(), point.y(), point.z()});
 
             const Vector3f positionInGrid = {
-                -layout.horizontalSpacing *
+                -1.f * layout.horizontalSpacing *
                     static_cast<float>(morphologyIndex % layout.nbColumns),
-                -layout.verticalSpacing *
+                -1.f * layout.verticalSpacing *
                     static_cast<float>(morphologyIndex / layout.nbColumns),
                 0.f};
             translation = positionInGrid - morphologyAABB.getCenter();
@@ -236,24 +235,47 @@ bool MorphologyLoader::_importMorphology(
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material = _getMaterialFromSectionType(
-                morphologyIndex, size_t(brain::neuron::SectionType::soma));
-            const Vector3f& center = soma.getCentroid() + translation;
+                morphologyIndex, forcedMaterial,
+                size_t(brain::neuron::SectionType::soma));
+            const Vector3f somaPosition = soma.getCentroid() + translation;
 
             const float radius =
                 (_geometryParameters.getRadiusCorrection() != 0.f
                      ? _geometryParameters.getRadiusCorrection()
                      : soma.getMeanRadius() *
                            _geometryParameters.getRadiusMultiplier());
-            spheres[material].push_back(
-                SpherePtr(new Sphere(material, center, radius, 0.f, offset)));
-            bounds.merge(center);
+
+            spheres[material].push_back(SpherePtr(
+                new Sphere(material, somaPosition, radius, 0.f, offset)));
+            bounds.merge(somaPosition);
+
+            if (_geometryParameters.getUseSimulationModel())
+            {
+                // When using a simulation model, parametric geometries must
+                // occupy as much space as possible in the mesh. This code
+                // inserts a Cone between the soma and the beginning of each
+                // branch.
+                const auto& children = soma.getChildren();
+                for (const auto& child : children)
+                {
+                    const auto& samples = child.getSamples();
+                    const Vector3f sample = {samples[0].x(), samples[0].y(),
+                                             samples[0].z()};
+                    cones[material].push_back(ConePtr(
+                        new Cone(material, somaPosition, sample, radius,
+                                 samples[0].w() * 0.5f *
+                                     _geometryParameters.getRadiusMultiplier(),
+                                 0.f, offset)));
+                    bounds.merge(sample);
+                }
+            }
         }
 
         // Dendrites and axon
         for (const auto& section : sections)
         {
             const size_t material =
-                _getMaterialFromSectionType(morphologyIndex,
+                _getMaterialFromSectionType(morphologyIndex, forcedMaterial,
                                             size_t(section.getType()));
             const Vector4fs& samples = section.getSamples();
             if (samples.empty())
@@ -355,6 +377,50 @@ bool MorphologyLoader::_importMorphology(
     return true;
 }
 
+brion::NeuronAttributes getNeuronAttributes(const ColorScheme& colorScheme)
+{
+    brion::NeuronAttributes neuronAttributes;
+    switch (colorScheme)
+    {
+    case ColorScheme::neuron_by_layer:
+        neuronAttributes = brion::NEURON_LAYER;
+        break;
+    case ColorScheme::neuron_by_mtype:
+        neuronAttributes = brion::NEURON_MTYPE;
+        break;
+    case ColorScheme::neuron_by_etype:
+        neuronAttributes = brion::NEURON_ETYPE;
+        break;
+    default:
+        neuronAttributes = brion::NEURON_ALL;
+        break;
+    }
+    return neuronAttributes;
+}
+
+bool getNeuronMatrix(const brion::BlueConfig& bc, const brain::GIDSet& gids,
+                     const ColorScheme colorScheme, strings& neuronMatrix)
+{
+    brion::NeuronAttributes neuronAttributes = getNeuronAttributes(colorScheme);
+    if (neuronAttributes == brion::NEURON_ALL)
+        return false;
+    try
+    {
+        brion::Circuit brionCircuit(bc.getCircuitSource());
+        for (const auto& a : brionCircuit.get(gids, neuronAttributes))
+            neuronMatrix.push_back(a[0]);
+        return true;
+    }
+    catch (...)
+    {
+        BRAYNS_WARN << "Only MVD2 format is currently supported by Brion "
+                       "circuits. Color scheme by layer, e-type or m-type is "
+                       "not available for this circuit"
+                    << std::endl;
+    }
+    return false;
+}
+
 bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                                      const std::string& target, Scene& scene)
 {
@@ -369,13 +435,17 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         return false;
     }
     const Matrix4fs& transforms = circuit.getTransforms(gids);
-
     const brain::URIs& uris = circuit.getMorphologyURIs(gids);
 
     BRAYNS_INFO << "Loading " << uris.size() << " cells" << std::endl;
 
-    std::map<size_t, float> morphologyOffsets;
+    // Read Brion circuit
+    strings neuronMatrix;
+    bool mvd3Support =
+        getNeuronMatrix(bc, gids, _geometryParameters.getColorScheme(),
+                        neuronMatrix);
 
+    std::map<size_t, float> morphologyOffsets;
     size_t simulationOffset = 1;
     size_t simulatedCells = 0;
     size_t progress = 0;
@@ -390,19 +460,22 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         {
             const auto& uri = uris[i];
             float maxDistanceToSoma = 0.f;
+            const size_t material =
+                mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
+                            : NO_MATERIAL;
 
             if (_geometryParameters.useMetaballs())
             {
                 _importMorphologyAsMesh(uri, i, scene.getMaterials(),
                                         transforms[i],
                                         scene.getTriangleMeshes(),
-                                        scene.getWorldBounds());
+                                        scene.getWorldBounds(), material);
             }
 
             if (_importMorphology(uri, i, transforms[i], 0, private_spheres,
                                   private_cylinders, private_cones,
                                   private_bounds, simulationOffset,
-                                  maxDistanceToSoma))
+                                  maxDistanceToSoma, material))
             {
                 morphologyOffsets[simulatedCells] = maxDistanceToSoma;
                 simulationOffset += maxDistanceToSoma;
@@ -480,6 +553,12 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     brain::URIs cr_uris;
     const brain::GIDSet& cr_gids = compartmentReport.getGIDs();
 
+    // Read Brion circuit
+    strings neuronMatrix;
+    bool mvd3Support =
+        getNeuronMatrix(bc, gids, _geometryParameters.getColorScheme(),
+                        neuronMatrix);
+
     BRAYNS_INFO << "Loading " << cr_gids.size() << " simulated cells"
                 << std::endl;
     for (const auto cr_gid : cr_gids)
@@ -502,19 +581,22 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             const auto& uri = cr_uris[i];
             const SimulationInformation simulationInformation = {
                 &compartmentCounts[i], &compartmentOffsets[i]};
+            const size_t material =
+                mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
+                            : NO_MATERIAL;
 
             if (_geometryParameters.useMetaballs())
             {
                 _importMorphologyAsMesh(uri, i, scene.getMaterials(),
                                         transforms[i],
                                         scene.getTriangleMeshes(),
-                                        scene.getWorldBounds());
+                                        scene.getWorldBounds(), material);
             }
 
             float maxDistanceToSoma;
             _importMorphology(uri, i, transforms[i], &simulationInformation,
                               private_spheres, private_cylinders, private_cones,
-                              private_bounds, 0, maxDistanceToSoma);
+                              private_bounds, 0, maxDistanceToSoma, material);
 
             BRAYNS_PROGRESS(progress, cr_uris.size());
 #pragma omp atomic
@@ -589,10 +671,15 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             {
                 float maxDistanceToSoma;
                 const auto& uri = allUris[i];
+                const size_t material =
+                    mvd3Support
+                        ? boost::lexical_cast<size_t>(neuronMatrix[i][0])
+                        : NO_MATERIAL;
 
                 _importMorphology(uri, i, allTransforms[i], 0, private_spheres,
                                   private_cylinders, private_cones,
-                                  private_bounds, 0, maxDistanceToSoma);
+                                  private_bounds, 0, maxDistanceToSoma,
+                                  material);
 
                 BRAYNS_PROGRESS(progress, allUris.size());
 #pragma omp atomic
@@ -748,8 +835,11 @@ bool MorphologyLoader::importSimulationData(const servus::URI&,
 #endif
 
 size_t MorphologyLoader::_getMaterialFromSectionType(
-    const size_t morphologyIndex, const size_t sectionType)
+    const size_t morphologyIndex, const size_t forcedMaterial,
+    const size_t sectionType)
 {
+    if (forcedMaterial != NO_MATERIAL)
+        return forcedMaterial;
     size_t material;
     switch (_geometryParameters.getColorScheme())
     {

@@ -24,6 +24,7 @@
 
 // ospray
 #include <ospray/SDK/common/Data.h>
+#include <ospray/SDK/common/Model.h>
 
 // ispc exports
 #include "SimulationRenderer_ispc.h"
@@ -36,6 +37,7 @@ void SimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
+    _simulationModel = (ospray::Model*)getParamObject("simulationModel", 0);
     _volumeData = getParamData("volumeData");
     _volumeDimensions = getParam3i("volumeDimensions", ospray::vec3i(0));
     _volumeElementSpacing =
@@ -52,7 +54,8 @@ void SimulationRenderer::commit()
     _threshold = getParam1f("threshold", _transferFunctionMinValue);
 
     ispc::SimulationRenderer_set(
-        getIE(), (ispc::vec3f&)_bgColor, _shadowsEnabled, _softShadowsEnabled,
+        getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
+        (ispc::vec3f&)_bgColor, _shadowsEnabled, _softShadowsEnabled,
         _ambientOcclusionStrength, _shadingEnabled, _randomNumber, _timestamp,
         _spp, _electronShadingEnabled, _lightPtr, _lightArray.size(),
         _materialPtr, _materialArray.size(),
@@ -64,7 +67,7 @@ void SimulationRenderer::commit()
             ? (ispc::vec4f*)_transferFunctionDiffuseData->data
             : NULL,
         _transferFunctionEmissionData
-            ? (float*)_transferFunctionEmissionData->data
+            ? (ispc::vec3f*)_transferFunctionEmissionData->data
             : NULL,
         _transferFunctionSize, _transferFunctionMinValue,
         _transferFunctionRange, _threshold);
