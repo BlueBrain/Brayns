@@ -22,14 +22,22 @@
 
 #include <ospray/SDK/math/vec.ih>
 
-float getRandomValue();
+float getRandomValue(varying ScreenSample& sample, const int randomNumber);
 
 /**
-    Returns a random direction based on normal to the surface
+    Returns a random direction based on location in the frame buffer, the
+   normal
+    to the surface and rotation parameters for the precomputed hard-coded
+   random
+    distribution.
+    @param sample Frame buffer sample being rendered
     @param normal Normal vector to the surface
-    @return A random direction
+    @param randomNumber A random number that introduces noise in the
+           distribution
+    @return A random direction based on specified parameters
 */
-vec3f getRandomVector(const vec3f& normal);
+vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
+                      const int randomNumber);
 
 /**
     Returns tangent vectors for a given normal.

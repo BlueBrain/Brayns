@@ -190,7 +190,7 @@ struct Brayns::Impl
 #else
     void _writeFrameToFolder()
     {
-        BRAYNS_ERROR << "ImageMagick is required to export frames as PNG files"
+        BRAYNS_DEBUG << "ImageMagick is required to export frames as PNG files"
                      << std::endl;
     }
 #endif

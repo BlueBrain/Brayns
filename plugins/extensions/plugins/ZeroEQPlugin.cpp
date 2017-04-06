@@ -622,6 +622,8 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setReport(geometryParameters.getReport());
     _remoteDataSource.setNonSimulatedCells(
         geometryParameters.getNonSimulatedCells());
+    _remoteDataSource.setCircuitConcentration(
+        geometryParameters.getCircuitConcentration());
     _remoteDataSource.setStartSimulationTime(
         geometryParameters.getStartSimulationTime());
     _remoteDataSource.setEndSimulationTime(
@@ -719,6 +721,9 @@ void ZeroEQPlugin::_dataSourceUpdated()
                                    _remoteDataSource.getGeometryQuality())));
     _parametersManager.set("target", _remoteDataSource.getTargetString());
     _parametersManager.set("report", _remoteDataSource.getReportString());
+    _parametersManager.set("circuit-concentration",
+                           std::to_string(
+                               _remoteDataSource.getCircuitConcentration()));
     _parametersManager.set("non-simulated-cells",
                            std::to_string(
                                _remoteDataSource.getNonSimulatedCells()));

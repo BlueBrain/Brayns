@@ -87,6 +87,10 @@ public:
     std::string getTarget() const { return _target; }
     /** Circuit compartment report */
     std::string getReport() const { return _report; }
+    /** Percentage of concentration of cells in the circuit (Mainly for testing
+     * purposes) */
+    size_t getCircuitConcentration() const;
+
     /** Radius multiplier applied to spheres, cones and cylinders.
      * @param value Radius multiplier. Multiplies the radius contained in the
      *        data source by the specified value.
@@ -197,6 +201,7 @@ protected:
     std::string _saveCacheFile;
     std::string _target;
     std::string _report;
+    size_t _circuitConcentration;
     float _radiusMultiplier;
     float _radiusCorrection;
     ColorScheme _colorScheme;
