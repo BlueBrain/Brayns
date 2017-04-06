@@ -424,18 +424,17 @@ bool getNeuronMatrix(const brion::BlueConfig& bc, const brain::GIDSet& gids,
 bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                                      const std::string& target, Scene& scene)
 {
-    const std::string& filename = circuitConfig.getPath();
-    const brion::BlueConfig bc(filename);
+    const brion::BlueConfig bc(circuitConfig.getPath());
     const brain::Circuit circuit(bc);
-    const brain::GIDSet& gids =
+    const auto& gids =
         (target.empty() ? circuit.getGIDs() : circuit.getGIDs(target));
     if (gids.empty())
     {
         BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
         return false;
     }
-    const Matrix4fs& transforms = circuit.getTransforms(gids);
-    const brain::URIs& uris = circuit.getMorphologyURIs(gids);
+    const auto& transforms = circuit.getTransforms(gids);
+    const auto& uris = circuit.getMorphologyURIs(gids);
 
     BRAYNS_INFO << "Loading " << uris.size() << " cells" << std::endl;
 
@@ -449,6 +448,11 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     size_t simulationOffset = 1;
     size_t simulatedCells = 0;
     size_t progress = 0;
+    const auto circuitConcentration =
+        _geometryParameters.getCircuitConcentration();
+    const size_t nbSkippedCells =
+        uris.size() / (uris.size() * circuitConcentration / 100);
+
 #pragma omp parallel
     {
         SpheresMap private_spheres;
@@ -458,6 +462,13 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 #pragma omp for nowait
         for (size_t i = 0; i < uris.size(); ++i)
         {
+            if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
+            {
+                BRAYNS_PROGRESS(progress, uris.size());
+                ++progress;
+                continue;
+            }
+
             const auto& uri = uris[i];
             float maxDistanceToSoma = 0.f;
             const size_t material =
@@ -569,6 +580,11 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     }
 
     size_t progress = 0;
+    const auto circuitConcentration =
+        _geometryParameters.getCircuitConcentration();
+    const size_t nbSkippedCells =
+        uris.size() / (uris.size() * circuitConcentration / 100);
+
 #pragma omp parallel
     {
         SpheresMap private_spheres;
@@ -578,6 +594,13 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 #pragma omp for nowait
         for (size_t i = 0; i < cr_uris.size(); ++i)
         {
+            if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
+            {
+                BRAYNS_PROGRESS(progress, uris.size());
+                ++progress;
+                continue;
+            }
+
             const auto& uri = cr_uris[i];
             const SimulationInformation simulationInformation = {
                 &compartmentCounts[i], &compartmentOffsets[i]};
@@ -669,6 +692,13 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 #pragma omp for nowait
             for (size_t i = 0; i < nonSimulatedCells; ++i)
             {
+                if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
+                {
+                    BRAYNS_PROGRESS(progress, uris.size());
+                    ++progress;
+                    continue;
+                }
+
                 float maxDistanceToSoma;
                 const auto& uri = allUris[i];
                 const size_t material =

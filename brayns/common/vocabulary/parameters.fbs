@@ -80,6 +80,7 @@ table DataSource {
     geometry_quality: GeometryQuality;
     target: string;
     report: string;
+    circuit_concentration: uint;
     non_simulated_cells: uint;
     start_simulation_time: float;
     end_simulation_time: float;

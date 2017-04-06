@@ -44,6 +44,7 @@ const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_TARGET = "target";
 const std::string PARAM_REPORT = "report";
+const std::string PARAM_CIRCUIT_CONCENTRATION = "circuit-concentration";
 const std::string PARAM_NON_SIMULATED_CELLS = "non-simulated-cells";
 const std::string PARAM_START_SIMULATION_TIME = "start-simulation-time";
 const std::string PARAM_END_SIMULATION_TIME = "end-simulation-time";
@@ -84,6 +85,7 @@ namespace brayns
 {
 GeometryParameters::GeometryParameters()
     : AbstractParameters("Geometry")
+    , _circuitConcentration(100)
     , _radiusMultiplier(1.f)
     , _radiusCorrection(0.f)
     , _colorScheme(ColorScheme::none)
@@ -137,9 +139,11 @@ GeometryParameters::GeometryParameters()
         PARAM_GEOMETRY_QUALITY.c_str(), po::value<std::string>(),
         "Geometry rendering quality [low|medium|high]")(
         PARAM_TARGET.c_str(), po::value<std::string>(),
-        "Circuit target [string]")(PARAM_REPORT.c_str(),
-                                   po::value<std::string>(),
-                                   "Circuit report [string]")(
+        "Circuit target [string]")(
+        PARAM_CIRCUIT_CONCENTRATION.c_str(), po::value<size_t>(),
+        "Percentage of concentration of cells in the circuit [int]")(
+        PARAM_REPORT.c_str(), po::value<std::string>(),
+        "Circuit report [string]")(
         PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value<size_t>(),
         "Morphology section types (1: soma, 2: axon, 4: dendrite, "
         "8: apical dendrite). Values can be added to select more than "
@@ -245,6 +249,8 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
         _target = vm[PARAM_TARGET].as<std::string>();
     if (vm.count(PARAM_REPORT))
         _report = vm[PARAM_REPORT].as<std::string>();
+    if (vm.count(PARAM_CIRCUIT_CONCENTRATION))
+        _circuitConcentration = vm[PARAM_CIRCUIT_CONCENTRATION].as<size_t>();
     if (vm.count(PARAM_MORPHOLOGY_SECTION_TYPES))
         _morphologySectionTypes =
             vm[PARAM_MORPHOLOGY_SECTION_TYPES].as<size_t>();
@@ -330,6 +336,8 @@ void GeometryParameters::print()
                 << getGeometryQualityAsString(_geometryQuality) << std::endl;
     BRAYNS_INFO << "Target                     : " << _target << std::endl;
     BRAYNS_INFO << "Report                     : " << _report << std::endl;
+    BRAYNS_INFO << "- Circuit concentration    : " << _circuitConcentration
+                << std::endl;
     BRAYNS_INFO << "- Non-simulated cells      : " << _nonSimulatedCells
                 << std::endl;
     BRAYNS_INFO << "- Start simulation time    : " << _startSimulationTime
@@ -384,5 +392,10 @@ const std::string& GeometryParameters::getGeometryQualityAsString(
     const GeometryQuality value) const
 {
     return GEOMETRY_QUALITIES[static_cast<size_t>(value)];
+}
+
+size_t GeometryParameters::getCircuitConcentration() const
+{
+    return std::max(size_t(1), std::min(size_t(100), _circuitConcentration));
 }
 }
