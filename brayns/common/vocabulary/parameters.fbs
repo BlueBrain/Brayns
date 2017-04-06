@@ -141,4 +141,10 @@ table Settings {
     head_light: bool;
     jpeg_size: [uint:2];
     jpeg_compression: uint;
+    frame_export_folder: string;
+}
+
+table ForceRendering
+{
+    frame_number: uint;
 }

@@ -111,7 +111,7 @@ bool ZeroEQPlugin::run(Engine& engine)
     }
 
     _forceRendering = false;
-    while (_subscriber.receive(1))
+    while (_subscriber.receive(10))
     {
         if (_forceRendering)
             break;
@@ -232,6 +232,10 @@ void ZeroEQPlugin::_setupHTTPServer()
                            _remoteVolumeHistogram);
     _remoteVolumeHistogram.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestVolumeHistogram, this));
+
+    _httpServer->handle(_remoteForceRendering);
+    _remoteForceRendering.registerDeserializedCallback(
+        std::bind(&ZeroEQPlugin::_forceRenderingUpdated, this));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -882,6 +886,8 @@ void ZeroEQPlugin::_initializeSettings()
         applicationParameters.getJpegCompression());
     const auto& jpegSize = applicationParameters.getJpegSize();
     _remoteSettings.setJpegSize({jpegSize[0], jpegSize[1]});
+    _remoteSettings.setFrameExportFolder(
+        applicationParameters.getFrameExportFolder());
 }
 
 void ZeroEQPlugin::_settingsUpdated()
@@ -974,6 +980,11 @@ void ZeroEQPlugin::_settingsUpdated()
         _engine->getRenderer().commit();
         _engine->getFrameBuffer().clear();
     }
+
+    _parametersManager.set("frame-export-folder",
+                           _remoteSettings.getFrameExportFolderString());
+    if (_remoteSettings.getFrameExportFolderString().empty())
+        _engine->resetFrameNumber();
 }
 
 bool ZeroEQPlugin::_requestFrame()
@@ -1107,6 +1118,11 @@ bool ZeroEQPlugin::_requestClipPlanes()
     }
     _clipPlanes.setPlanes(planes);
     return true;
+}
+
+void ZeroEQPlugin::_forceRenderingUpdated()
+{
+    _forceRendering = true;
 }
 
 uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width, const uint32_t height,

@@ -23,8 +23,6 @@
 #include <brayns/common/log.h>
 
 #ifdef BRAYNS_USE_MAGICKPP
-#define MAGICKCORE_HDRI_ENABLE true
-#define MAGICKCORE_QUANTUM_DEPTH 32
 #include <Magick++.h>
 #endif
 

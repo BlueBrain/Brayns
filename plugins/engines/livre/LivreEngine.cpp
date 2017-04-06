@@ -146,6 +146,7 @@ void LivreEngine::commit()
 
 void LivreEngine::render()
 {
+    Engine::render();
     _renderers[_activeRenderer]->render(_frameBuffer);
 }
 

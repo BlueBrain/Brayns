@@ -62,7 +62,7 @@ public:
     virtual void extensionInit(ExtensionPlugin&){};
 
     /** Renders the current scene and populates the frame buffer accordingly */
-    virtual void render() = 0;
+    virtual void render();
 
     /** Executes engine specific pre-render operations */
     virtual void preRender() {}
@@ -124,6 +124,15 @@ public:
      */
     std::function<void()> recreate;
 
+    /**
+     * @brief resets frame number
+     */
+    void resetFrameNumber();
+
+    /**
+     * @returns the current frame number
+     */
+    size_t getFrameNumber() const { return _frameNumber; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
@@ -135,6 +144,8 @@ protected:
     RendererMap _renderers;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
+
+    size_t _frameNumber;
 };
 }
 
