@@ -197,6 +197,7 @@ MACRO (OSPRAY_ISPC_COMPILE)
       --woff
       --opt=fast-math
       ${ISPC_ADDITIONAL_ARGS}
+      ${ISPC_EXTRA_ARGS}
       -h ${ISPC_TARGET_DIR}/${fname}_ispc.h
       -MMM  ${outdir}/${fname}.dev.idep 
       -o ${outdir}/${fname}.dev${ISPC_TARGET_EXT}

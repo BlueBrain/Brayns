@@ -27,7 +27,7 @@ inline bool launchRandomRay(
     varying vec3f& backgroundColor, varying float& distanceToIntersection,
     varying vec3f& randomDirection)
 {
-    randomDirection = getRandomVector(normal);
+    randomDirection = getRandomVector(sample, normal, self->randomNumber);
     backgroundColor = self->bgColor;
 
     if (dot(randomDirection, normal) < 0.f)
@@ -161,7 +161,8 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
     if (self->softShadowsEnabled)
     {
         // Slightly alter light direction for Soft shadows
-        const varying vec3f ss = getRandomVector(normal);
+        const varying vec3f ss =
+            getRandomVector(sample, normal, self->randomNumber);
         lightDirection = lightDirection + ss * 0.1f;
     }
 
@@ -289,7 +290,8 @@ inline varying vec4f getVolumeContribution(
 
     while (t < tMax && pathAlpha < 1.f)
     {
-        const float x = getRandomValue() * self->volumeEpsilon;
+        const float x =
+            getRandomValue(sample, self->randomNumber) * self->volumeEpsilon;
         vec3f point = ((ray.org + ray.dir * (t + x)) - self->volumeOffset) /
                       self->volumeElementSpacing;
 
@@ -319,7 +321,8 @@ inline varying vec4f getVolumeContribution(
                     Ray lightRay = ray;
                     lightRay.org = point;
                     if (self->softShadowsEnabled)
-                        lightRay.dir = getRandomVector(lightSample.dir);
+                        lightRay.dir = getRandomVector(sample, lightSample.dir,
+                                                       self->randomNumber);
                     else
                         lightRay.dir = lightSample.dir;
                     const vec4f voxelColor =

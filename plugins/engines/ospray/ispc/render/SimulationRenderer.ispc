@@ -86,7 +86,8 @@ inline void getValueFromSimulationModel(
     // Get simulation color from simulation model
     varying Ray colorRay;
     colorRay.org = intersection;
-    colorRay.dir = getRandomVector(neg(normal));
+    colorRay.dir =
+        getRandomVector(sample, neg(normal), self->abstract.randomNumber);
     colorRay.t0 = 0.f;
     colorRay.time = infinity;
     colorRay.t = infinity;
