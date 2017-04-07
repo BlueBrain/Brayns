@@ -1012,6 +1012,7 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
             ospSet1f(ospMaterial, "refraction", material->getRefractionIndex());
             ospSet1f(ospMaterial, "reflection", material->getReflectionIndex());
             ospSet1f(ospMaterial, "a", material->getEmission());
+            ospSet1f(ospMaterial, "g", material->getGlossiness());
 
             if (!updateOnly)
             {

@@ -38,6 +38,7 @@ struct ExtendedOBJMaterial
     float reflection;
     const uniform Texture2D *map_a;
     float a;
+    float g;
     const uniform Texture2D *map_Kd;
     vec3f Kd;
     const uniform Texture2D *map_Ks;

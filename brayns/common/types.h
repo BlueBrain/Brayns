@@ -320,13 +320,6 @@ enum class ShadingType
     electron,
 };
 
-enum class MeshQuality
-{
-    low = 0,
-    medium,
-    high
-};
-
 enum class CameraType
 {
     perspective,

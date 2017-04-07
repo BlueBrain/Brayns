@@ -85,8 +85,18 @@ inline vec3f ProximityRenderer_shadeRay(
     {
         foreach_unique(mat in objMaterial)
         {
+            // Light emission strength
             emission = mat->a;
+
+            // glossiness
+            normal = normalize(
+                normal +
+                mat->g * getRandomVector(sample, normal,
+                                         self->abstract.randomNumber));
+            // Opacity
             opacity = mat->d * get1f(mat->map_d, dg.st, 1.f);
+
+            // Diffuse color
             Kd = mat->Kd * make_vec3f(dg.color);
         }
     }

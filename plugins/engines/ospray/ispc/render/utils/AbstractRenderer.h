@@ -60,8 +60,8 @@ protected:
     ospray::Data* _lightData;
 
     ospray::vec3f _bgColor;
-    bool _shadowsEnabled;
-    bool _softShadowsEnabled;
+    float _shadows;
+    float _softShadows;
     float _ambientOcclusionStrength;
     bool _shadingEnabled;
     bool _electronShadingEnabled;

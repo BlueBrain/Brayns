@@ -713,6 +713,7 @@ void OptiXScene::commitMaterials(const bool updateOnly)
         optixMaterial["Ko"]->setFloat(opacity, opacity, opacity);
         optixMaterial["refraction_index"]->setFloat(
             material->getRefractionIndex());
+        optixMaterial["glossiness"]->setFloat(material->getGlossiness());
     }
 }
 

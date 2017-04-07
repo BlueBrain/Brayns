@@ -23,6 +23,7 @@
 
 #include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/types.h>
+#include <brayns/io/MeshLoader.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <servus/types.h>
@@ -78,7 +79,7 @@ public:
      */
     bool importCircuit(const servus::URI& circuitConfig,
                        const std::string& target, const std::string& report,
-                       Scene& scene);
+                       Scene& scene, MeshLoader& meshLoader);
 
     /** Imports morphology from a circuit for the given target name
      *
@@ -91,7 +92,8 @@ public:
      *         contains no cells.
      */
     bool importCircuit(const servus::URI& circuitConfig,
-                       const std::string& target, Scene& scene);
+                       const std::string& target, Scene& scene,
+                       MeshLoader& meshLoader);
 
     /** Imports simulation data into the scene
      * @param circuitConfig URI of the Circuit Config file
@@ -123,10 +125,6 @@ private:
                                  const Matrix4f& transformation,
                                  TrianglesMeshMap& meshes, Boxf& bounds,
                                  const size_t forcedMaterial = NO_MATERIAL);
-
-    size_t _getMaterialFromSectionType(const size_t morphologyIndex,
-                                       const size_t forcedMaterial,
-                                       const size_t sectionType);
 
     const GeometryParameters& _geometryParameters;
 };

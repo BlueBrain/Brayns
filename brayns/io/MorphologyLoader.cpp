@@ -31,6 +31,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include <boost/filesystem.hpp>
+
 #ifdef BRAYNS_USE_BRION
 #include <brain/brain.h>
 #include <brion/brion.h>
@@ -44,6 +46,47 @@ MorphologyLoader::MorphologyLoader(const GeometryParameters& geometryParameters)
 }
 
 #ifdef BRAYNS_USE_BRION
+size_t _getMaterialFromSectionType(const size_t morphologyIndex,
+                                   const size_t forcedMaterial,
+                                   const brain::neuron::SectionType sectionType,
+                                   const ColorScheme colorScheme)
+{
+    if (forcedMaterial != NO_MATERIAL)
+        return forcedMaterial;
+    size_t material;
+    switch (colorScheme)
+    {
+    case ColorScheme::neuron_by_id:
+        material = morphologyIndex % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
+        break;
+    case ColorScheme::neuron_by_segment_type:
+        size_t s;
+        switch (sectionType)
+        {
+        case brain::neuron::SectionType::soma:
+            s = 1;
+            break;
+        case brain::neuron::SectionType::axon:
+            s = 2;
+            break;
+        case brain::neuron::SectionType::dendrite:
+            s = 3;
+            break;
+        case brain::neuron::SectionType::apicalDendrite:
+            s = 4;
+            break;
+        default:
+            s = 0;
+            break;
+        }
+        material = s % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
+        break;
+    default:
+        material = 0;
+    }
+    return material;
+}
+
 brain::neuron::SectionTypes _getSectionTypes(
     const size_t morphologySectionTypes)
 {
@@ -84,7 +127,8 @@ bool MorphologyLoader::_importMorphologyAsMesh(
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material = _getMaterialFromSectionType(
                 morphologyIndex, forcedMaterial,
-                size_t(brain::neuron::SectionType::soma));
+                brain::neuron::SectionType::soma,
+                _geometryParameters.getColorScheme());
             const Vector3f center = soma.getCentroid();
 
             const float radius =
@@ -110,9 +154,9 @@ bool MorphologyLoader::_importMorphologyAsMesh(
                     continue;
             }
 
-            const auto material =
-                _getMaterialFromSectionType(morphologyIndex, forcedMaterial,
-                                            size_t(section.getType()));
+            const auto material = _getMaterialFromSectionType(
+                morphologyIndex, forcedMaterial, section.getType(),
+                _geometryParameters.getColorScheme());
             const auto& samples = section.getSamples();
             if (samples.empty())
                 continue;
@@ -145,8 +189,8 @@ bool MorphologyLoader::_importMorphologyAsMesh(
         MetaballsGenerator metaballsGenerator;
         const size_t material =
             _getMaterialFromSectionType(morphologyIndex, forcedMaterial,
-                                        size_t(
-                                            brain::neuron::SectionType::soma));
+                                        brain::neuron::SectionType::soma,
+                                        _geometryParameters.getColorScheme());
         metaballsGenerator.generateMesh(metaballs, gridSize, threshold,
                                         materials, material, meshes);
     }
@@ -236,7 +280,8 @@ bool MorphologyLoader::_importMorphology(
             const brain::neuron::Soma& soma = morphology.getSoma();
             const size_t material = _getMaterialFromSectionType(
                 morphologyIndex, forcedMaterial,
-                size_t(brain::neuron::SectionType::soma));
+                brain::neuron::SectionType::soma,
+                _geometryParameters.getColorScheme());
             const Vector3f somaPosition = soma.getCentroid() + translation;
 
             const float radius =
@@ -274,9 +319,9 @@ bool MorphologyLoader::_importMorphology(
         // Dendrites and axon
         for (const auto& section : sections)
         {
-            const size_t material =
-                _getMaterialFromSectionType(morphologyIndex, forcedMaterial,
-                                            size_t(section.getType()));
+            const size_t material = _getMaterialFromSectionType(
+                morphologyIndex, forcedMaterial, section.getType(),
+                _geometryParameters.getColorScheme());
             const Vector4fs& samples = section.getSamples();
             if (samples.empty())
                 continue;
@@ -422,7 +467,8 @@ bool getNeuronMatrix(const brion::BlueConfig& bc, const brain::GIDSet& gids,
 }
 
 bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
-                                     const std::string& target, Scene& scene)
+                                     const std::string& target, Scene& scene,
+                                     MeshLoader& meshLoader)
 {
     const brion::BlueConfig bc(circuitConfig.getPath());
     const brain::Circuit circuit(bc);
@@ -448,18 +494,17 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     size_t simulationOffset = 1;
     size_t simulatedCells = 0;
     size_t progress = 0;
-    const auto circuitConcentration =
-        _geometryParameters.getCircuitConcentration();
+    const auto circuitDensity = _geometryParameters.getCircuitDensity();
     const size_t nbSkippedCells =
-        uris.size() / (uris.size() * circuitConcentration / 100);
+        uris.size() / (uris.size() * circuitDensity / 100);
 
-#pragma omp parallel
+    const auto meshedMorphologiesFolder =
+        _geometryParameters.getMeshedMorphologiesFolder();
+
+    bool loadParametricGeometry = true;
+    if (!meshedMorphologiesFolder.empty())
     {
-        SpheresMap private_spheres;
-        CylindersMap private_cylinders;
-        ConesMap private_cones;
-        Boxf private_bounds;
-#pragma omp for nowait
+        // Loading meshes is currently sequential. TODO: Make it parallel!!!
         for (size_t i = 0; i < uris.size(); ++i)
         {
             if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
@@ -469,72 +514,115 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 continue;
             }
 
-            const auto& uri = uris[i];
-            float maxDistanceToSoma = 0.f;
             const size_t material =
-                mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
-                            : NO_MATERIAL;
+                mvd3Support
+                    ? boost::lexical_cast<size_t>(neuronMatrix[i])
+                    : _getMaterialFromSectionType(
+                          i, NO_MATERIAL, brain::neuron::SectionType::undefined,
+                          _geometryParameters.getColorScheme());
 
-            if (_geometryParameters.useMetaballs())
-            {
-                _importMorphologyAsMesh(uri, i, scene.getMaterials(),
-                                        transforms[i],
-                                        scene.getTriangleMeshes(),
-                                        scene.getWorldBounds(), material);
-            }
-
-            if (_importMorphology(uri, i, transforms[i], 0, private_spheres,
-                                  private_cylinders, private_cones,
-                                  private_bounds, simulationOffset,
-                                  maxDistanceToSoma, material))
-            {
-                morphologyOffsets[simulatedCells] = maxDistanceToSoma;
-                simulationOffset += maxDistanceToSoma;
-            }
-
+            const auto& uri = uris[i];
+            const auto filenameNoExt =
+                boost::filesystem::path(uri.getPath()).stem().string();
+            std::string meshFilename = meshedMorphologiesFolder + "/" +
+                                       filenameNoExt.c_str() +
+                                       ".h5.bin_decimated.off";
+            meshLoader.importMeshFromFile(
+                meshFilename, scene, _geometryParameters.getGeometryQuality(),
+                transforms[i], material);
             BRAYNS_PROGRESS(progress, uris.size());
-#pragma omp atomic
             ++progress;
         }
-
-#pragma omp critical
-        for (const auto& p : private_spheres)
-        {
-            const size_t material = p.first;
-            scene.getSpheres()[material].insert(
-                scene.getSpheres()[material].end(),
-                private_spheres[material].begin(),
-                private_spheres[material].end());
-        }
-
-#pragma omp critical
-        for (const auto& p : private_cylinders)
-        {
-            const size_t material = p.first;
-            scene.getCylinders()[material].insert(
-                scene.getCylinders()[material].end(),
-                private_cylinders[material].begin(),
-                private_cylinders[material].end());
-        }
-
-#pragma omp critical
-        for (const auto& p : private_cones)
-        {
-            const size_t material = p.first;
-            scene.getCones()[material].insert(scene.getCones()[material].end(),
-                                              private_cones[material].begin(),
-                                              private_cones[material].end());
-        }
-
-        scene.getWorldBounds().merge(private_bounds);
+        loadParametricGeometry = _geometryParameters.getUseSimulationModel();
     }
 
+    if (loadParametricGeometry)
+    {
+        progress = 0;
+#pragma omp parallel
+        {
+            SpheresMap private_spheres;
+            CylindersMap private_cylinders;
+            ConesMap private_cones;
+            Boxf private_bounds;
+#pragma omp for nowait
+            for (size_t i = 0; i < uris.size(); ++i)
+            {
+                if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
+                {
+                    BRAYNS_PROGRESS(progress, uris.size());
+                    ++progress;
+                    continue;
+                }
+
+                const auto& uri = uris[i];
+                float maxDistanceToSoma = 0.f;
+                const size_t material =
+                    mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
+                                : NO_MATERIAL;
+
+                if (_geometryParameters.useMetaballs())
+                {
+                    _importMorphologyAsMesh(uri, i, scene.getMaterials(),
+                                            transforms[i],
+                                            scene.getTriangleMeshes(),
+                                            scene.getWorldBounds(), material);
+                }
+
+                if (_importMorphology(uri, i, transforms[i], 0, private_spheres,
+                                      private_cylinders, private_cones,
+                                      private_bounds, simulationOffset,
+                                      maxDistanceToSoma, material))
+                {
+                    morphologyOffsets[simulatedCells] = maxDistanceToSoma;
+                    simulationOffset += maxDistanceToSoma;
+                }
+
+                BRAYNS_PROGRESS(progress, uris.size());
+#pragma omp atomic
+                ++progress;
+            }
+
+#pragma omp critical
+            for (const auto& p : private_spheres)
+            {
+                const size_t material = p.first;
+                scene.getSpheres()[material].insert(
+                    scene.getSpheres()[material].end(),
+                    private_spheres[material].begin(),
+                    private_spheres[material].end());
+            }
+
+#pragma omp critical
+            for (const auto& p : private_cylinders)
+            {
+                const size_t material = p.first;
+                scene.getCylinders()[material].insert(
+                    scene.getCylinders()[material].end(),
+                    private_cylinders[material].begin(),
+                    private_cylinders[material].end());
+            }
+
+#pragma omp critical
+            for (const auto& p : private_cones)
+            {
+                const size_t material = p.first;
+                scene.getCones()[material].insert(
+                    scene.getCones()[material].end(),
+                    private_cones[material].begin(),
+                    private_cones[material].end());
+            }
+
+            scene.getWorldBounds().merge(private_bounds);
+        }
+    }
     return true;
 }
 
 bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                                      const std::string& target,
-                                     const std::string& report, Scene& scene)
+                                     const std::string& report, Scene& scene,
+                                     MeshLoader& meshLoader)
 {
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc(filename);
@@ -580,19 +668,18 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     }
 
     size_t progress = 0;
-    const auto circuitConcentration =
-        _geometryParameters.getCircuitConcentration();
+    const auto circuitDensity = _geometryParameters.getCircuitDensity();
     const size_t nbSkippedCells =
-        uris.size() / (uris.size() * circuitConcentration / 100);
+        uris.size() / (uris.size() * circuitDensity / 100);
 
-#pragma omp parallel
+    const auto meshedMorphologiesFolder =
+        _geometryParameters.getMeshedMorphologiesFolder();
+
+    bool loadParametricGeometry = true;
+    if (!meshedMorphologiesFolder.empty())
     {
-        SpheresMap private_spheres;
-        CylindersMap private_cylinders;
-        ConesMap private_cones;
-        Boxf private_bounds;
-#pragma omp for nowait
-        for (size_t i = 0; i < cr_uris.size(); ++i)
+        // Loading meshes is currently sequential. TODO: Make it parallel!!!
+        for (size_t i = 0; i < uris.size(); ++i)
         {
             if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
             {
@@ -601,61 +688,104 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 continue;
             }
 
-            const auto& uri = cr_uris[i];
-            const SimulationInformation simulationInformation = {
-                &compartmentCounts[i], &compartmentOffsets[i]};
             const size_t material =
-                mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
-                            : NO_MATERIAL;
+                mvd3Support
+                    ? boost::lexical_cast<size_t>(neuronMatrix[i])
+                    : _getMaterialFromSectionType(
+                          i, NO_MATERIAL, brain::neuron::SectionType::undefined,
+                          _geometryParameters.getColorScheme());
 
-            if (_geometryParameters.useMetaballs())
-            {
-                _importMorphologyAsMesh(uri, i, scene.getMaterials(),
-                                        transforms[i],
-                                        scene.getTriangleMeshes(),
-                                        scene.getWorldBounds(), material);
-            }
-
-            float maxDistanceToSoma;
-            _importMorphology(uri, i, transforms[i], &simulationInformation,
-                              private_spheres, private_cylinders, private_cones,
-                              private_bounds, 0, maxDistanceToSoma, material);
-
-            BRAYNS_PROGRESS(progress, cr_uris.size());
-#pragma omp atomic
+            const auto& uri = uris[i];
+            const auto filenameNoExt =
+                boost::filesystem::path(uri.getPath()).stem().string();
+            std::string meshFilename = meshedMorphologiesFolder + "/" +
+                                       filenameNoExt.c_str() +
+                                       ".h5.bin_decimated.off";
+            meshLoader.importMeshFromFile(
+                meshFilename, scene, _geometryParameters.getGeometryQuality(),
+                transforms[i], material);
+            BRAYNS_PROGRESS(progress, uris.size());
             ++progress;
         }
+        loadParametricGeometry = _geometryParameters.getUseSimulationModel();
+    }
+
+    if (loadParametricGeometry)
+    {
+        progress = 0;
+#pragma omp parallel
+        {
+            SpheresMap private_spheres;
+            CylindersMap private_cylinders;
+            ConesMap private_cones;
+            Boxf private_bounds;
+#pragma omp for nowait
+            for (size_t i = 0; i < cr_uris.size(); ++i)
+            {
+                if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
+                {
+                    BRAYNS_PROGRESS(progress, uris.size());
+                    ++progress;
+                    continue;
+                }
+
+                const auto& uri = cr_uris[i];
+                const SimulationInformation simulationInformation = {
+                    &compartmentCounts[i], &compartmentOffsets[i]};
+                const size_t material =
+                    mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
+                                : NO_MATERIAL;
+
+                if (_geometryParameters.useMetaballs())
+                {
+                    _importMorphologyAsMesh(uri, i, scene.getMaterials(),
+                                            transforms[i],
+                                            scene.getTriangleMeshes(),
+                                            scene.getWorldBounds(), material);
+                }
+
+                float maxDistanceToSoma;
+                _importMorphology(uri, i, transforms[i], &simulationInformation,
+                                  private_spheres, private_cylinders,
+                                  private_cones, private_bounds, 0,
+                                  maxDistanceToSoma, material);
+                BRAYNS_PROGRESS(progress, cr_uris.size());
+#pragma omp atomic
+                ++progress;
+            }
 
 #pragma omp critical
-        for (const auto& p : private_spheres)
-        {
-            const size_t material = p.first;
-            scene.getSpheres()[material].insert(
-                scene.getSpheres()[material].end(),
-                private_spheres[material].begin(),
-                private_spheres[material].end());
-        }
+            for (const auto& p : private_spheres)
+            {
+                const size_t material = p.first;
+                scene.getSpheres()[material].insert(
+                    scene.getSpheres()[material].end(),
+                    private_spheres[material].begin(),
+                    private_spheres[material].end());
+            }
 
 #pragma omp critical
-        for (const auto& p : private_cylinders)
-        {
-            const size_t material = p.first;
-            scene.getCylinders()[material].insert(
-                scene.getCylinders()[material].end(),
-                private_cylinders[material].begin(),
-                private_cylinders[material].end());
-        }
+            for (const auto& p : private_cylinders)
+            {
+                const size_t material = p.first;
+                scene.getCylinders()[material].insert(
+                    scene.getCylinders()[material].end(),
+                    private_cylinders[material].begin(),
+                    private_cylinders[material].end());
+            }
 
 #pragma omp critical
-        for (const auto& p : private_cones)
-        {
-            const size_t material = p.first;
-            scene.getCones()[material].insert(scene.getCones()[material].end(),
-                                              private_cones[material].begin(),
-                                              private_cones[material].end());
-        }
+            for (const auto& p : private_cones)
+            {
+                const size_t material = p.first;
+                scene.getCones()[material].insert(
+                    scene.getCones()[material].end(),
+                    private_cones[material].begin(),
+                    private_cones[material].end());
+            }
 
-        scene.getWorldBounds().merge(private_bounds);
+            scene.getWorldBounds().merge(private_bounds);
+        }
     }
 
     size_t nonSimulatedCells = _geometryParameters.getNonSimulatedCells();
@@ -706,10 +836,23 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         ? boost::lexical_cast<size_t>(neuronMatrix[i][0])
                         : NO_MATERIAL;
 
-                _importMorphology(uri, i, allTransforms[i], 0, private_spheres,
-                                  private_cylinders, private_cones,
-                                  private_bounds, 0, maxDistanceToSoma,
-                                  material);
+                if (!meshedMorphologiesFolder.empty())
+                {
+                    const auto filenameNoExt =
+                        boost::filesystem::path(uri.getPath()).stem().string();
+                    const std::string meshFilename = meshedMorphologiesFolder +
+                                                     filenameNoExt.c_str() +
+                                                     ".off";
+                    meshLoader.importMeshFromFile(
+                        meshFilename, scene,
+                        _geometryParameters.getGeometryQuality(), transforms[i],
+                        material);
+                }
+                else
+                    _importMorphology(uri, i, allTransforms[i], 0,
+                                      private_spheres, private_cylinders,
+                                      private_cones, private_bounds, 0,
+                                      maxDistanceToSoma, material);
 
                 BRAYNS_PROGRESS(progress, allUris.size());
 #pragma omp atomic
@@ -863,25 +1006,4 @@ bool MorphologyLoader::importSimulationData(const servus::URI&,
 }
 
 #endif
-
-size_t MorphologyLoader::_getMaterialFromSectionType(
-    const size_t morphologyIndex, const size_t forcedMaterial,
-    const size_t sectionType)
-{
-    if (forcedMaterial != NO_MATERIAL)
-        return forcedMaterial;
-    size_t material;
-    switch (_geometryParameters.getColorScheme())
-    {
-    case ColorScheme::neuron_by_id:
-        material = morphologyIndex % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
-        break;
-    case ColorScheme::neuron_by_segment_type:
-        material = sectionType % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
-        break;
-    default:
-        material = 0;
-    }
-    return material;
-}
 }

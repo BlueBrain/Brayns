@@ -30,6 +30,7 @@ Material::Material()
     , _opacity(1.f)
     , _refractionIndex(1.f)
     , _emission(0.f)
+    , _glossiness(0.f)
 {
 }
 

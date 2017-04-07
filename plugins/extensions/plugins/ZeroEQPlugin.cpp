@@ -305,6 +305,7 @@ bool ZeroEQPlugin::_requestScene()
         m.setOpacity(material.second->getOpacity());
         m.setRefractionIndex(material.second->getRefractionIndex());
         m.setLightEmission(material.second->getEmission());
+        m.setGlossiness(material.second->getGlossiness());
         ms.push_back(m);
     }
     return true;
@@ -335,6 +336,7 @@ void ZeroEQPlugin::_sceneUpdated()
             material->setOpacity(m.getOpacity());
             material->setRefractionIndex(m.getRefractionIndex());
             material->setEmission(m.getLightEmission());
+            material->setGlossiness(m.getGlossiness());
         }
     }
 
@@ -620,10 +622,11 @@ void ZeroEQPlugin::_initializeDataSource()
         ::brayns::v1::GeometryQuality(geometryParameters.getGeometryQuality()));
     _remoteDataSource.setTarget(geometryParameters.getTarget());
     _remoteDataSource.setReport(geometryParameters.getReport());
+    _remoteDataSource.setMeshedMorphologiesFolder(
+        geometryParameters.getMeshedMorphologiesFolder());
     _remoteDataSource.setNonSimulatedCells(
         geometryParameters.getNonSimulatedCells());
-    _remoteDataSource.setCircuitConcentration(
-        geometryParameters.getCircuitConcentration());
+    _remoteDataSource.setCircuitDensity(geometryParameters.getCircuitDensity());
     _remoteDataSource.setStartSimulationTime(
         geometryParameters.getStartSimulationTime());
     _remoteDataSource.setEndSimulationTime(
@@ -721,9 +724,12 @@ void ZeroEQPlugin::_dataSourceUpdated()
                                    _remoteDataSource.getGeometryQuality())));
     _parametersManager.set("target", _remoteDataSource.getTargetString());
     _parametersManager.set("report", _remoteDataSource.getReportString());
-    _parametersManager.set("circuit-concentration",
+    _parametersManager.set("circuit-density",
                            std::to_string(
-                               _remoteDataSource.getCircuitConcentration()));
+                               _remoteDataSource.getCircuitDensity()));
+    _parametersManager.set(
+        "meshed-morphologies-folder",
+        _remoteDataSource.getMeshedMorphologiesFolderString());
     _parametersManager.set("non-simulated-cells",
                            std::to_string(
                                _remoteDataSource.getNonSimulatedCells()));
@@ -940,9 +946,9 @@ void ZeroEQPlugin::_settingsUpdated()
                            std::to_string(
                                _remoteSettings.getAmbientOcclusion()));
     _parametersManager.set("shadows",
-                           (_remoteSettings.getShadows() ? "1" : "0"));
+                           std::to_string(_remoteSettings.getShadows()));
     _parametersManager.set("soft-shadows",
-                           (_remoteSettings.getSoftShadows() ? "1" : "0"));
+                           std::to_string(_remoteSettings.getSoftShadows()));
     _parametersManager.set("radiance",
                            (_remoteSettings.getRadiance() ? "1" : "0"));
     _parametersManager.set(

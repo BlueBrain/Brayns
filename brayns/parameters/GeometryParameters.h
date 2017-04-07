@@ -87,9 +87,17 @@ public:
     std::string getTarget() const { return _target; }
     /** Circuit compartment report */
     std::string getReport() const { return _report; }
-    /** Percentage of concentration of cells in the circuit (Mainly for testing
+    /** Defines the folder where morphologies meshes are stored. Meshes must
+     * have the same name as the h5/SWC morphology file, suffixed with an
+     * extension supported by the assimp library
+     */
+    std::string getMeshedMorphologiesFolder() const
+    {
+        return _meshedMorphologiesFolder;
+    }
+    /** ensity of cells in the circuit in percent (Mainly for testing
      * purposes) */
-    size_t getCircuitConcentration() const;
+    size_t getCircuitDensity() const;
 
     /** Radius multiplier applied to spheres, cones and cylinders.
      * @param value Radius multiplier. Multiplies the radius contained in the
@@ -201,7 +209,8 @@ protected:
     std::string _saveCacheFile;
     std::string _target;
     std::string _report;
-    size_t _circuitConcentration;
+    size_t _circuitDensity;
+    std::string _meshedMorphologiesFolder;
     float _radiusMultiplier;
     float _radiusCorrection;
     ColorScheme _colorScheme;

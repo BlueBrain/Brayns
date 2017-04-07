@@ -66,8 +66,8 @@ void OptiXRenderer::commit()
     auto mt = rp.getShading();
     _context["shading_enabled"]->setUint(mt == ShadingType::diffuse);
     _context["electron_shading_enabled"]->setUint(mt == ShadingType::electron);
-    _context["shadows_enabled"]->setUint(rp.getShadows());
-    _context["soft_shadows_enabled"]->setUint(rp.getSoftShadows());
+    _context["shadows"]->setFloat(rp.getShadows());
+    _context["soft_shadows"]->setFloat(rp.getSoftShadows());
     _context["ambient_occlusion_strength"]->setFloat(
         rp.getAmbientOcclusionStrength());
 

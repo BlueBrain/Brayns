@@ -64,19 +64,7 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 
 bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
 {
-    MeshQuality quality;
-    switch (_geometryParameters.getGeometryQuality())
-    {
-    case GeometryQuality::medium:
-        quality = MeshQuality::medium;
-        break;
-    case GeometryQuality::high:
-        quality = MeshQuality::high;
-        break;
-    default:
-        quality = MeshQuality::low;
-        break;
-    }
+    const auto quality = _geometryParameters.getGeometryQuality();
 
     uint64_t proteinCount = 0;
     for (const auto& proteinPosition : _proteinPositions)
@@ -100,6 +88,8 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
             // Load meshes
             for (const auto& position : proteinPosition.second)
             {
+                const Vector3f scale = {1.f, 1.f, 1.f};
+                const Matrix4f transformation(position, scale);
                 const auto objFilename =
                     _meshFolder + '/' + protein->second + ".obj";
                 const size_t material =
@@ -112,11 +102,8 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
                 // Scale mesh to match PDB units. PDB are in angstrom, and
                 // positions are
                 // in micrometers
-                const float scale = 0.0001f;
                 meshLoader.importMeshFromFile(objFilename, scene, quality,
-                                              position,
-                                              Vector3f(scale, scale, scale),
-                                              material);
+                                              transformation, material);
 
                 if (_proteinFolder.empty())
                     ++proteinCount;

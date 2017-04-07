@@ -44,7 +44,9 @@ const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_TARGET = "target";
 const std::string PARAM_REPORT = "report";
-const std::string PARAM_CIRCUIT_CONCENTRATION = "circuit-concentration";
+const std::string PARAM_CIRCUIT_DENSITY = "circuit-density";
+const std::string PARAM_MESHED_MORPHOLOGIES_FOLDER =
+    "meshed-morphologies-folder";
 const std::string PARAM_NON_SIMULATED_CELLS = "non-simulated-cells";
 const std::string PARAM_START_SIMULATION_TIME = "start-simulation-time";
 const std::string PARAM_END_SIMULATION_TIME = "end-simulation-time";
@@ -85,7 +87,7 @@ namespace brayns
 {
 GeometryParameters::GeometryParameters()
     : AbstractParameters("Geometry")
-    , _circuitConcentration(100)
+    , _circuitDensity(100)
     , _radiusMultiplier(1.f)
     , _radiusCorrection(0.f)
     , _colorScheme(ColorScheme::none)
@@ -140,8 +142,10 @@ GeometryParameters::GeometryParameters()
         "Geometry rendering quality [low|medium|high]")(
         PARAM_TARGET.c_str(), po::value<std::string>(),
         "Circuit target [string]")(
-        PARAM_CIRCUIT_CONCENTRATION.c_str(), po::value<size_t>(),
-        "Percentage of concentration of cells in the circuit [int]")(
+        PARAM_CIRCUIT_DENSITY.c_str(), po::value<size_t>(),
+        "Density of cells in the circuit in percent [int]")(
+        PARAM_MESHED_MORPHOLOGIES_FOLDER.c_str(), po::value<std::string>(),
+        "Folder containing meshed morphologies [string]")(
         PARAM_REPORT.c_str(), po::value<std::string>(),
         "Circuit report [string]")(
         PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value<size_t>(),
@@ -249,8 +253,11 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
         _target = vm[PARAM_TARGET].as<std::string>();
     if (vm.count(PARAM_REPORT))
         _report = vm[PARAM_REPORT].as<std::string>();
-    if (vm.count(PARAM_CIRCUIT_CONCENTRATION))
-        _circuitConcentration = vm[PARAM_CIRCUIT_CONCENTRATION].as<size_t>();
+    if (vm.count(PARAM_CIRCUIT_DENSITY))
+        _circuitDensity = vm[PARAM_CIRCUIT_DENSITY].as<size_t>();
+    if (vm.count(PARAM_MESHED_MORPHOLOGIES_FOLDER))
+        _meshedMorphologiesFolder =
+            vm[PARAM_MESHED_MORPHOLOGIES_FOLDER].as<std::string>();
     if (vm.count(PARAM_MORPHOLOGY_SECTION_TYPES))
         _morphologySectionTypes =
             vm[PARAM_MORPHOLOGY_SECTION_TYPES].as<size_t>();
@@ -336,7 +343,9 @@ void GeometryParameters::print()
                 << getGeometryQualityAsString(_geometryQuality) << std::endl;
     BRAYNS_INFO << "Target                     : " << _target << std::endl;
     BRAYNS_INFO << "Report                     : " << _report << std::endl;
-    BRAYNS_INFO << "- Circuit concentration    : " << _circuitConcentration
+    BRAYNS_INFO << "- Meshes folder            : " << _meshedMorphologiesFolder
+                << std::endl;
+    BRAYNS_INFO << "- Circuit density          : " << _circuitDensity
                 << std::endl;
     BRAYNS_INFO << "- Non-simulated cells      : " << _nonSimulatedCells
                 << std::endl;
@@ -373,7 +382,7 @@ void GeometryParameters::print()
     BRAYNS_INFO << " - Samples from soma       : " << _metaballsSamplesFromSoma
                 << std::endl;
     BRAYNS_INFO << "Use simulation model       : "
-                << (_useSimulationModel ? "Yes" : "No") << std::endl;
+                << (_useSimulationModel ? "yes" : "no") << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(
@@ -394,8 +403,8 @@ const std::string& GeometryParameters::getGeometryQualityAsString(
     return GEOMETRY_QUALITIES[static_cast<size_t>(value)];
 }
 
-size_t GeometryParameters::getCircuitConcentration() const
+size_t GeometryParameters::getCircuitDensity() const
 {
-    return std::max(size_t(1), std::min(size_t(100), _circuitConcentration));
+    return std::max(size_t(1), std::min(size_t(100), _circuitDensity));
 }
 }

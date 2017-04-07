@@ -28,6 +28,7 @@ table Material {
     opacity: float;
     refraction_index: float;
     light_emission: float;
+    glossiness: float;
 }
 
 table Scene {
