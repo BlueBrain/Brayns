@@ -1165,6 +1165,8 @@ void OSPRayScene::commitSimulationData()
         ospCommit(_ospSimulationData);
         ospSetData(osprayRenderer->impl(), "simulationData",
                    _ospSimulationData);
+        ospSet1i(osprayRenderer->impl(), "simulationDataSize",
+                 _simulationHandler->getFrameSize());
         ospCommit(osprayRenderer->impl());
     }
 }

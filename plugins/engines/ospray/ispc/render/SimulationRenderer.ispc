@@ -29,6 +29,7 @@ struct SimulationRenderer
 
     Model* simulationModel;
     uniform float* uniform simulationData;
+    int64 simulationDataSize;
     float threshold;
 };
 
@@ -45,7 +46,12 @@ inline varying vec4f
     lightEmission = make_vec3f(0.f);
     varying vec4f color = make_vec4f(0.f);
 
-    const varying float value = self->simulationData[dg.st.x];
+    varying float value = 0.f;
+    if (dg.st.x >= 0 && dg.st.x < self->simulationDataSize)
+        value = self->simulationData[dg.st.x];
+    else
+        // Value offset is out of range, return error color
+        return make_vec4f(1.f, 0.f, 0.f, 1.f);
 
     if (value < self->threshold)
         return color;
@@ -546,7 +552,8 @@ export void SimulationRenderer_set(
     const uniform vec3i& volumeDimensions,
     const uniform vec3f& volumeElementSpacing,
     const uniform vec3f& volumeOffset, const uniform float& volumeEpsilon,
-    uniform float* uniform simulationData, uniform vec4f* uniform colormap,
+    uniform float* uniform simulationData,
+    const uniform int64& simulationDataSize, uniform vec4f* uniform colormap,
     uniform vec3f* uniform emissionIntensitiesMap,
     const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
     const uniform float& colorMapRange, const uniform float& threshold)
@@ -590,5 +597,6 @@ export void SimulationRenderer_set(
 
     self->simulationModel = (uniform Model * uniform)simulationModel;
     self->simulationData = (uniform float* uniform)simulationData;
+    self->simulationDataSize = simulationDataSize;
     self->threshold = threshold;
 }

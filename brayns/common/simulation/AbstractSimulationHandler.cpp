@@ -40,6 +40,7 @@ AbstractSimulationHandler::AbstractSimulationHandler(
     , _headerSize(0)
     , _memoryMapPtr(0)
     , _cacheFileDescriptor(-1)
+    , _frameData(nullptr)
 {
     _histogram.timestamp = _timestamp;
 }
@@ -54,6 +55,7 @@ AbstractSimulationHandler::~AbstractSimulationHandler()
     }
     if (_cacheFileDescriptor != -1)
         ::close(_cacheFileDescriptor);
+    delete _frameData;
 }
 
 void AbstractSimulationHandler::setTimestamp(const float timestamp)

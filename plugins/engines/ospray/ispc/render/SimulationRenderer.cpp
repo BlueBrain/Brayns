@@ -45,6 +45,7 @@ void SimulationRenderer::commit()
     _volumeOffset = getParam3f("volumeOffset", ospray::vec3f(0.f));
     _volumeEpsilon = getParam1f("volumeEpsilon", 1.f);
     _simulationData = getParamData("simulationData");
+    _simulationDataSize = getParam1i("simulationDataSize", 0);
     _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
     _transferFunctionEmissionData =
         getParamData("transferFunctionEmissionData");
@@ -63,6 +64,7 @@ void SimulationRenderer::commit()
         (ispc::vec3i&)_volumeDimensions, (ispc::vec3f&)_volumeElementSpacing,
         (ispc::vec3f&)_volumeOffset, _volumeEpsilon,
         _simulationData ? (float*)_simulationData->data : NULL,
+        _simulationDataSize,
         _transferFunctionDiffuseData
             ? (ispc::vec4f*)_transferFunctionDiffuseData->data
             : NULL,
