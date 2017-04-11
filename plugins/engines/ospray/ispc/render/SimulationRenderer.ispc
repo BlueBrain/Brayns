@@ -147,8 +147,6 @@ inline vec3f SimulationRenderer_shadeRay(
     varying bool moreRebounds = true;
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
     {
-        intersectionWeights[depth] = 1.f;
-        intersectionColors[depth] = make_vec3f(0.f);
         traceRay(self->abstract.super.model, ray);
 
         if (ray.geomID < 0)
@@ -303,6 +301,9 @@ inline vec3f SimulationRenderer_shadeRay(
 
             if (localOpacity > 0.01f)
             {
+                intersectionWeights[depth] = 1.f;
+                intersectionColors[depth] = make_vec3f(0.f);
+
                 if (self->simulationModel)
                     // Get color from simulation model
                     getValueFromSimulationModel(self, sample, dg.P, neg(dg.Ng),
@@ -479,6 +480,7 @@ inline vec3f SimulationRenderer_shadeRay(
 
                     intersectionWeights[depth] = 1.f - localOpacity;
                     oldlocalRefraction = localRefraction;
+                    ++depth;
                 }
                 else if (localReflection > 0.f)
                 {
@@ -486,10 +488,15 @@ inline vec3f SimulationRenderer_shadeRay(
                     ray.t0 = self->abstract.super.epsilon;
                     ray.org = intersection;
                     intersectionWeights[depth] = localReflection;
+                    ++depth;
                 }
                 else
                     moreRebounds = false;
             }
+            else
+                // Fully transparent object. Ignore intersection
+                ray.t0 = ray.t + 1.f;
+
             // Z-Depth
             zDepth += localOpacity * ray.t;
             sample.z = log(zDepth) / 10.f;
@@ -503,8 +510,8 @@ inline vec3f SimulationRenderer_shadeRay(
             ray.geomID = -1;
             ray.instID = -1;
         }
-        ++depth;
     }
+
     // Z-Depth
     if (depth >= NB_MAX_REBOUNDS)
         sample.z = 1.f - log(zDepth) / 10.f;
