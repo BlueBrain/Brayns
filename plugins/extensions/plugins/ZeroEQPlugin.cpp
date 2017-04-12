@@ -676,6 +676,15 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getMetaballsSamplesFromSoma());
     _remoteDataSource.setUseSimulationModel(
         geometryParameters.getUseSimulationModel());
+
+    const Boxf& aabb = geometryParameters.getCircuitBoundingBox();
+    if (aabb.getSize() != 0)
+    {
+        const floats values = {aabb.getMin().x(), aabb.getMin().y(),
+                               aabb.getMin().z(), aabb.getMax().x(),
+                               aabb.getMin().y(), aabb.getMin().z()};
+        _remoteDataSource.setCircuitBoundingBox(values);
+    }
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -727,6 +736,13 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _parametersManager.set("circuit-density",
                            std::to_string(
                                _remoteDataSource.getCircuitDensity()));
+    floats aabb(_remoteDataSource.getCircuitBoundingBoxVector());
+    if (aabb.size() == 6)
+        _parametersManager.set(
+            "circuit-bounding-box",
+            std::to_string(aabb[0]) + " " + std::to_string(aabb[1]) + " " +
+                std::to_string(aabb[2]) + " " + std::to_string(aabb[3]) + " " +
+                std::to_string(aabb[4]) + " " + std::to_string(aabb[5]));
     _parametersManager.set(
         "meshed-morphologies-folder",
         _remoteDataSource.getMeshedMorphologiesFolderString());

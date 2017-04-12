@@ -514,6 +514,10 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 continue;
             }
 
+            const auto& position = transforms[i].getTranslation();
+            if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+                continue;
+
             const size_t material =
                 mvd3Support
                     ? boost::lexical_cast<size_t>(neuronMatrix[i])
@@ -554,6 +558,10 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                     ++progress;
                     continue;
                 }
+
+                const auto& position = transforms[i].getTranslation();
+                if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+                    continue;
 
                 const auto& uri = uris[i];
                 float maxDistanceToSoma = 0.f;
@@ -688,6 +696,10 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 continue;
             }
 
+            const auto& position = transforms[i].getTranslation();
+            if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+                continue;
+
             const size_t material =
                 mvd3Support
                     ? boost::lexical_cast<size_t>(neuronMatrix[i])
@@ -728,6 +740,10 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                     ++progress;
                     continue;
                 }
+
+                const auto& position = transforms[i].getTranslation();
+                if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+                    continue;
 
                 const auto& uri = cr_uris[i];
                 const SimulationInformation simulationInformation = {
@@ -828,6 +844,10 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                     ++progress;
                     continue;
                 }
+
+                const auto& position = transforms[i].getTranslation();
+                if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+                    continue;
 
                 float maxDistanceToSoma;
                 const auto& uri = allUris[i];

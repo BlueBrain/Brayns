@@ -192,6 +192,16 @@ public:
         _useSimulationModel = value;
     }
 
+    /**
+     * Defines a bounding box outside of which geometry of a circuit will not be
+     * loaded
+     */
+    const Boxf& getCircuitBoundingBox() const { return _circuitBoundingBox; }
+    void setCircuitBoundingBox(const Boxf& value)
+    {
+        _circuitBoundingBox = value;
+    }
+
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -231,6 +241,7 @@ protected:
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
     bool _useSimulationModel;
+    Boxf _circuitBoundingBox;
 };
 }
 #endif // GEOMETRYPARAMETERS_H

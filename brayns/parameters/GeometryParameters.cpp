@@ -64,6 +64,7 @@ const std::string PARAM_METABALLS_THRESHOLD = "metaballs-threshold";
 const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
 const std::string PARAM_USE_SIMULATION_MODEL = "use-simulation-model";
+const std::string PARAM_CIRCUIT_BOUNDING_BOX = "circuit-bounding-box";
 
 const std::string COLOR_SCHEMES[11] = {"none",
                                        "neuron-by-id",
@@ -106,6 +107,8 @@ GeometryParameters::GeometryParameters()
     , _metaballsSamplesFromSoma(3)
     , _useSimulationModel(false)
 {
+    _circuitBoundingBox.merge(Vector3f(-std::numeric_limits<double>::max()));
+    _circuitBoundingBox.merge(Vector3f(std::numeric_limits<double>::max()));
     _parameters.add_options()(PARAM_MORPHOLOGY_FOLDER.c_str(),
                               po::value<std::string>(),
                               "Folder containing SWC and H5 files [string]")(
@@ -189,7 +192,10 @@ GeometryParameters::GeometryParameters()
         "automated meshing [int]")(PARAM_USE_SIMULATION_MODEL.c_str(),
                                    po::value<bool>(),
                                    "Defines if a different model is used to "
-                                   "handle the simulation geometry [bool]");
+                                   "handle the simulation geometry [bool]")(
+        PARAM_CIRCUIT_BOUNDING_BOX.c_str(), po::value<floats>()->multitoken(),
+        "Does not load circuit geometry outside of the specified bounding box"
+        "[float float float float float float]");
 }
 
 bool GeometryParameters::_parse(const po::variables_map& vm)
@@ -308,6 +314,22 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             vm[PARAM_METABALLS_SAMPLES_FROM_SOMA].as<size_t>();
     if (vm.count(PARAM_USE_SIMULATION_MODEL))
         _useSimulationModel = vm[PARAM_USE_SIMULATION_MODEL].as<bool>();
+    if (vm.count(PARAM_CIRCUIT_BOUNDING_BOX))
+    {
+        const floats values = vm[PARAM_CIRCUIT_BOUNDING_BOX].as<floats>();
+        if (values.size() == 6)
+        {
+            _circuitBoundingBox.reset();
+            _circuitBoundingBox.merge(
+                Vector3f(values[0], values[1], values[2]));
+            _circuitBoundingBox.merge(
+                Vector3f(values[3], values[4], values[5]));
+            BRAYNS_ERROR << _circuitBoundingBox << std::endl;
+        }
+        else
+            BRAYNS_ERROR << "Invalid number of values for "
+                         << PARAM_CIRCUIT_BOUNDING_BOX << std::endl;
+    }
 
     return true;
 }
@@ -358,6 +380,8 @@ void GeometryParameters::print()
     BRAYNS_INFO << "- Simulation cache file    : " << _simulationCacheFile
                 << std::endl;
     BRAYNS_INFO << "- Simulation histogram size: " << _simulationHistogramSize
+                << std::endl;
+    BRAYNS_INFO << "- Bounding box             : " << _circuitBoundingBox
                 << std::endl;
     BRAYNS_INFO << "Morphology section types   : " << _morphologySectionTypes
                 << std::endl;
