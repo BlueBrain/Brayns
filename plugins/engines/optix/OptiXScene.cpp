@@ -246,7 +246,7 @@ void OptiXScene::commitLights()
             BasicLight optixLight = {{position.x(), position.y(), position.z()},
                                      {color.x(), color.y(), color.z()},
                                      1, // Casts shadows
-                                     LT_POINT};
+                                     size_t(LightType::point)};
             _optixLights.push_back(optixLight);
         }
         else
@@ -261,7 +261,7 @@ void OptiXScene::commitLights()
                                           direction.z()},
                                          {color.x(), color.y(), color.z()},
                                          1, // Casts shadows
-                                         LT_DIRECTIONAL};
+                                         size_t(LightType::directional)};
                 _optixLights.push_back(optixLight);
             }
         }

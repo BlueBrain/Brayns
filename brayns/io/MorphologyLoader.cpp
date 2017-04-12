@@ -91,13 +91,13 @@ brain::neuron::SectionTypes _getSectionTypes(
     const size_t morphologySectionTypes)
 {
     brain::neuron::SectionTypes sectionTypes;
-    if (morphologySectionTypes & MST_SOMA)
+    if (morphologySectionTypes & size_t(MorphologySectionType::soma))
         sectionTypes.push_back(brain::neuron::SectionType::soma);
-    if (morphologySectionTypes & MST_AXON)
+    if (morphologySectionTypes & size_t(MorphologySectionType::axon))
         sectionTypes.push_back(brain::neuron::SectionType::axon);
-    if (morphologySectionTypes & MST_DENDRITE)
+    if (morphologySectionTypes & size_t(MorphologySectionType::dendrite))
         sectionTypes.push_back(brain::neuron::SectionType::dendrite);
-    if (morphologySectionTypes & MST_APICAL_DENDRITE)
+    if (morphologySectionTypes & size_t(MorphologySectionType::apical_dendrite))
         sectionTypes.push_back(brain::neuron::SectionType::apicalDendrite);
     return sectionTypes;
 }
@@ -121,7 +121,7 @@ bool MorphologyLoader::_importMorphologyAsMesh(
 
         Spheres metaballs;
 
-        if (morphologySectionTypes & MST_SOMA)
+        if (morphologySectionTypes & size_t(MorphologySectionType::soma))
         {
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();
@@ -274,7 +274,7 @@ bool MorphologyLoader::_importMorphology(
             offset = simulationOffset;
 
         if (!_geometryParameters.useMetaballs() &&
-            morphologySectionTypes & MST_SOMA)
+            morphologySectionTypes & size_t(MorphologySectionType::soma))
         {
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();

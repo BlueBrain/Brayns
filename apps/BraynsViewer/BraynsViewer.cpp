@@ -114,17 +114,17 @@ void BraynsViewer::_increaseEyeSeparation()
 
 void BraynsViewer::_gradientMaterials()
 {
-    _brayns.getEngine().initializeMaterials(MT_GRADIENT);
+    _brayns.getEngine().initializeMaterials(MaterialType::gradient);
 }
 
 void BraynsViewer::_pastelMaterials()
 {
-    _brayns.getEngine().initializeMaterials(MT_PASTEL_COLORS);
+    _brayns.getEngine().initializeMaterials(MaterialType::pastel);
 }
 
 void BraynsViewer::_randomMaterials()
 {
-    _brayns.getEngine().initializeMaterials(MT_RANDOM);
+    _brayns.getEngine().initializeMaterials(MaterialType::random);
 }
 
 void BraynsViewer::_toggleIncrementalTimestamp()

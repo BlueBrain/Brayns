@@ -64,7 +64,7 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     BRAYNS_INFO << "Initializing scene" << std::endl;
     _scene.reset(new OSPRayScene(renderersForScene, _parametersManager));
 
-    _scene->setMaterials(MT_DEFAULT, NB_MAX_MATERIALS);
+    _scene->setMaterials(MaterialType::none, NB_MAX_MATERIALS);
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
@@ -72,8 +72,9 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     const bool accumulation =
         _parametersManager.getApplicationParameters().getFilters().empty();
 
-    _frameBuffer.reset(
-        new OSPRayFrameBuffer(_frameSize, FBF_RGBA_I8, accumulation));
+    _frameBuffer.reset(new OSPRayFrameBuffer(_frameSize,
+                                             FrameBufferFormat::rgba_i8,
+                                             accumulation));
     _camera.reset(new OSPRayCamera(
         _parametersManager.getRenderingParameters().getCameraType()));
 

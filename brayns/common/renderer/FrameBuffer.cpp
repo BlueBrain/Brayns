@@ -35,11 +35,11 @@ size_t FrameBuffer::getColorDepth()
 {
     switch (_frameBufferFormat)
     {
-    case FBF_RGBA_I8:
-    case FBF_BGRA_I8:
-    case FBF_RGBA_F32:
+    case FrameBufferFormat::rgba_i8:
+    case FrameBufferFormat::bgra_i8:
+    case FrameBufferFormat::rgb_f32:
         return 4;
-    case FBF_RGB_I8:
+    case FrameBufferFormat::rgb_i8:
         return 3;
     default:
         return 0;

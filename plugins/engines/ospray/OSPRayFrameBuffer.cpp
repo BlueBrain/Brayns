@@ -55,10 +55,10 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     OSPFrameBufferFormat format;
     switch (_frameBufferFormat)
     {
-    case FBF_RGBA_I8:
+    case FrameBufferFormat::rgba_i8:
         format = OSP_FB_RGBA8;
         break;
-    case FBF_RGBA_F32:
+    case FrameBufferFormat::rgb_f32:
         format = OSP_FB_RGBA32F;
         break;
     default:
