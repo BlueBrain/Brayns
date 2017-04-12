@@ -81,6 +81,7 @@ table DataSource {
     target: string;
     report: string;
     circuit_density: uint;
+    circuit_bounding_box: [float:6];
     meshed_morphologies_folder: string;
     non_simulated_cells: uint;
     start_simulation_time: float;
