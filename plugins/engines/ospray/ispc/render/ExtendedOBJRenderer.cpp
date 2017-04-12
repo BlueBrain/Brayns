@@ -36,11 +36,10 @@ namespace brayns
 void ExtendedOBJRenderer::commit()
 {
     AbstractRenderer::commit();
-    ispc::ExtendedOBJRenderer_set(getIE(), (ispc::vec3f&)_bgColor,
-                                  _shadowsEnabled, _softShadowsEnabled,
-                                  _ambientOcclusionStrength, _shadingEnabled,
-                                  _randomNumber, _timestamp, _spp,
-                                  _electronShadingEnabled, _lightPtr,
+    ispc::ExtendedOBJRenderer_set(getIE(), (ispc::vec3f&)_bgColor, _shadows,
+                                  _softShadows, _ambientOcclusionStrength,
+                                  _shadingEnabled, _randomNumber, _timestamp,
+                                  _spp, _electronShadingEnabled, _lightPtr,
                                   _lightArray.size(), _materialPtr,
                                   _materialArray.size());
 }

@@ -53,8 +53,8 @@ void AbstractRenderer::commit()
     _lightPtr = _lightArray.empty() ? nullptr : &_lightArray[0];
 
     _bgColor = getParam3f("bgColor", ospray::vec3f(1.f));
-    _shadowsEnabled = bool(getParam1i("shadowsEnabled", 1));
-    _softShadowsEnabled = bool(getParam1i("softShadowsEnabled", 1));
+    _shadows = getParam1f("shadows", 0.f);
+    _softShadows = getParam1f("softShadows", 0.f);
     _ambientOcclusionStrength = getParam1f("ambientOcclusionStrength", 0.f);
     _shadingEnabled = bool(getParam1i("shadingEnabled", 1));
     _randomNumber = getParam1i("randomNumber", 0);

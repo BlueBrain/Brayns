@@ -35,14 +35,20 @@ CircuitSimulationHandler::CircuitSimulationHandler(
 
 void* CircuitSimulationHandler::getFrameData()
 {
-    if (_nbFrames == 0)
+    if (_nbFrames == 0 || _memoryMapPtr == 0)
         return 0;
+
+    if (!_frameData)
+        _frameData = new float[_frameSize];
 
     const uint64_t frame = _timestamp;
     const uint64_t moduloFrame = frame % _nbFrames;
     const uint64_t index =
         std::min(_frameSize, std::max(uint64_t(0), moduloFrame));
-    return (unsigned char*)_memoryMapPtr + _headerSize +
-           index * _frameSize * sizeof(float);
+    const uint64_t frameSize = _frameSize * sizeof(float);
+    memcpy(_frameData,
+           (unsigned char*)_memoryMapPtr + _headerSize + index * frameSize,
+           frameSize);
+    return _frameData;
 }
 }

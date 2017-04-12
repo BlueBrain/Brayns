@@ -61,6 +61,9 @@ struct ExtendedOBJMaterial : public ospray::Material
     ospray::Texture2D *map_Ns;
     float Ns;
 
+    /*! Glossiness: 0 (none), 1 (full) */
+    float g;
+
     /*! normal map */
     ospray::Texture2D *map_Normal;
 

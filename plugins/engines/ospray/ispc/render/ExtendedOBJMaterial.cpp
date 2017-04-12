@@ -64,6 +64,7 @@ void ExtendedOBJMaterial::commit()
     refraction = getParam1f("refraction", 0.f);
     reflection = getParam1f("reflection", 0.f);
     a = getParam1f("a", 0.f);
+    g = getParam1f("g", 0.f);
     Kd = getParam3f("kd", getParam3f("Kd", ospray::vec3f(.8f)));
     Ks = getParam3f("ks", getParam3f("Ks", ospray::vec3f(0.f)));
     Ns = getParam1f("ns", getParam1f("Ns", 10.f));
@@ -72,9 +73,10 @@ void ExtendedOBJMaterial::commit()
         getIE(), map_d ? map_d->getIE() : nullptr, d,
         map_refraction ? map_refraction->getIE() : nullptr, refraction,
         map_reflection ? map_reflection->getIE() : nullptr, reflection,
-        map_a ? map_a->getIE() : nullptr, a, map_Kd ? map_Kd->getIE() : nullptr,
-        (ispc::vec3f &)Kd, map_Ks ? map_Ks->getIE() : nullptr,
-        (ispc::vec3f &)Ks, map_Ns ? map_Ns->getIE() : nullptr, Ns,
+        map_a ? map_a->getIE() : nullptr, a, g,
+        map_Kd ? map_Kd->getIE() : nullptr, (ispc::vec3f &)Kd,
+        map_Ks ? map_Ks->getIE() : nullptr, (ispc::vec3f &)Ks,
+        map_Ns ? map_Ns->getIE() : nullptr, Ns,
         map_Bump != nullptr ? map_Bump->getIE() : nullptr,
         map_Normal != nullptr ? map_Normal->getIE() : nullptr);
 }

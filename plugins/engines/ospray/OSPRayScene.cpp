@@ -1012,6 +1012,7 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
             ospSet1f(ospMaterial, "refraction", material->getRefractionIndex());
             ospSet1f(ospMaterial, "reflection", material->getReflectionIndex());
             ospSet1f(ospMaterial, "a", material->getEmission());
+            ospSet1f(ospMaterial, "g", material->getGlossiness());
 
             if (!updateOnly)
             {
@@ -1164,6 +1165,8 @@ void OSPRayScene::commitSimulationData()
         ospCommit(_ospSimulationData);
         ospSetData(osprayRenderer->impl(), "simulationData",
                    _ospSimulationData);
+        ospSet1i(osprayRenderer->impl(), "simulationDataSize",
+                 _simulationHandler->getFrameSize());
         ospCommit(osprayRenderer->impl());
     }
 }

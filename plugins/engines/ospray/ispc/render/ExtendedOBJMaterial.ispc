@@ -34,7 +34,7 @@ export void ExtendedOBJMaterial_set(
     void *uniform _mat, const void *uniform map_d, const uniform float &d,
     const void *uniform map_refraction, const uniform float &refraction,
     const void *uniform map_reflection, const uniform float &reflection,
-    const void *uniform map_a, const uniform float &a,
+    const void *uniform map_a, const uniform float &a, const uniform float &g,
     const void *uniform map_Kd, const uniform vec3f &Kd,
     const void *uniform map_Ks, const uniform vec3f &Ks,
     const void *uniform map_Ns, const uniform float &Ns,
@@ -51,6 +51,7 @@ export void ExtendedOBJMaterial_set(
     self->reflection = reflection;
     self->map_a = (uniform Texture2D * uniform)map_a;
     self->a = a;
+    self->g = g;
     self->map_Kd = (uniform Texture2D * uniform)map_Kd;
     self->Kd = Kd;
     self->map_Ks = (uniform Texture2D * uniform)map_Ks;

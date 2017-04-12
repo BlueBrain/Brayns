@@ -68,8 +68,8 @@ void OSPRayRenderer::commit()
 
     Vector3f color = rp.getBackgroundColor();
     ospSet3f(_renderer, "bgColor", color.x(), color.y(), color.z());
-    ospSet1i(_renderer, "shadowsEnabled", rp.getShadows());
-    ospSet1i(_renderer, "softShadowsEnabled", rp.getSoftShadows());
+    ospSet1f(_renderer, "shadows", rp.getShadows());
+    ospSet1f(_renderer, "softShadows", rp.getSoftShadows());
     ospSet1f(_renderer, "ambientOcclusionStrength",
              rp.getAmbientOcclusionStrength());
 

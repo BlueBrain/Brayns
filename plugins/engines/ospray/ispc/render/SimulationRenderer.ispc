@@ -29,6 +29,7 @@ struct SimulationRenderer
 
     Model* simulationModel;
     uniform float* uniform simulationData;
+    int64 simulationDataSize;
     float threshold;
 };
 
@@ -45,7 +46,12 @@ inline varying vec4f
     lightEmission = make_vec3f(0.f);
     varying vec4f color = make_vec4f(0.f);
 
-    const varying float value = self->simulationData[dg.st.x];
+    varying float value = 0.f;
+    if (dg.st.x >= 0 && dg.st.x < self->simulationDataSize)
+        value = self->simulationData[dg.st.x];
+    else
+        // Value offset is out of range, return error color
+        return make_vec4f(1.f, 0.f, 0.f, 1.f);
 
     if (value < self->threshold)
         return color;
@@ -86,8 +92,7 @@ inline void getValueFromSimulationModel(
     // Get simulation color from simulation model
     varying Ray colorRay;
     colorRay.org = intersection;
-    colorRay.dir =
-        getRandomVector(sample, neg(normal), self->abstract.randomNumber);
+    colorRay.dir = getRandomVector(sample, normal, self->abstract.randomNumber);
     colorRay.t0 = 0.f;
     colorRay.time = infinity;
     colorRay.t = infinity;
@@ -98,9 +103,6 @@ inline void getValueFromSimulationModel(
     // Trace ray to hit the simulation model
     traceRay(self->simulationModel, colorRay);
 
-    // Default color is initialized with the first value of the colormap
-    simulationColor = simulationColor * (1.f - self->abstract.colorMap[0].w);
-
     if (colorRay.geomID >= 0)
     {
         // Intersection found. Simulation ray hit a primitive
@@ -110,9 +112,9 @@ inline void getValueFromSimulationModel(
         if (materialID == colorDg.materialID && self->simulationData)
         {
             // The mesh and it's corresponding representation in the
-            // simulation model must use the same material ID. This is to make
-            // sure that one neuron is not shaded with the simulation value
-            // of another neuron.
+            // simulation model must use the same material ID. This is to
+            // make sure that one neuron is not shaded with the simulation
+            // value of another neuron.
             vec3f emission = make_vec3f(0.f);
             const vec4f color = getSimulationValue(self, colorDg, emission);
             simulationColor =
@@ -120,6 +122,10 @@ inline void getValueFromSimulationModel(
             lightEmission = reduce_max(emission);
         }
     }
+    else
+        // No intersection, color is initialized with the first value of the
+        // colormap
+        simulationColor = make_vec3f(self->abstract.colorMap[0]);
 }
 
 inline vec3f SimulationRenderer_shadeRay(
@@ -141,8 +147,6 @@ inline vec3f SimulationRenderer_shadeRay(
     varying bool moreRebounds = true;
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
     {
-        intersectionWeights[depth] = 1.f;
-        intersectionColors[depth] = make_vec3f(0.f);
         traceRay(self->abstract.super.model, ray);
 
         if (ray.geomID < 0)
@@ -241,10 +245,15 @@ inline vec3f SimulationRenderer_shadeRay(
                     // Light emission strength
                     localLightEmission += mat->a;
 
+                    // Glossiness
+                    localNormal = normalize(
+                        localNormal +
+                        mat->g * getRandomVector(sample, localNormal,
+                                                 self->abstract.randomNumber));
                     // Refraction index
                     localRefraction = mat->refraction;
 
-                    // localOpacity
+                    // Opacity
                     localOpacity += mat->d * get1f(mat->map_d, dg.st, 1.f);
 
                     // Diffuse color
@@ -292,9 +301,12 @@ inline vec3f SimulationRenderer_shadeRay(
 
             if (localOpacity > 0.01f)
             {
+                intersectionWeights[depth] = 1.f;
+                intersectionColors[depth] = make_vec3f(0.f);
+
                 if (self->simulationModel)
                     // Get color from simulation model
-                    getValueFromSimulationModel(self, sample, dg.P, dg.Ng,
+                    getValueFromSimulationModel(self, sample, dg.P, neg(dg.Ng),
                                                 dg.materialID,
                                                 localDiffuseColor,
                                                 localLightEmission);
@@ -404,15 +416,16 @@ inline vec3f SimulationRenderer_shadeRay(
 
                                 // Specular color
                                 specularColor =
-                                    max(specularColor, localSpecularColor) *
-                                    powf(cosLR, localSpecularExponent);
+                                    specularColor +
+                                    localSpecularColor *
+                                        powf(cosLR, localSpecularExponent);
                             }
 
                             cosNL += localLightEmission;
                             cosLR += localLightEmission;
 
                             // Process shadows
-                            if (self->abstract.shadowsEnabled &&
+                            if (self->abstract.shadows != 0.f &&
                                 localLightEmission == 0.f)
                                 localLightIntensity =
                                     shadedLightIntensity(&(self->abstract), ray,
@@ -467,6 +480,7 @@ inline vec3f SimulationRenderer_shadeRay(
 
                     intersectionWeights[depth] = 1.f - localOpacity;
                     oldlocalRefraction = localRefraction;
+                    ++depth;
                 }
                 else if (localReflection > 0.f)
                 {
@@ -474,10 +488,15 @@ inline vec3f SimulationRenderer_shadeRay(
                     ray.t0 = self->abstract.super.epsilon;
                     ray.org = intersection;
                     intersectionWeights[depth] = localReflection;
+                    ++depth;
                 }
                 else
                     moreRebounds = false;
             }
+            else
+                // Fully transparent object. Ignore intersection
+                ray.t0 = ray.t + 1.f;
+
             // Z-Depth
             zDepth += localOpacity * ray.t;
             sample.z = log(zDepth) / 10.f;
@@ -491,8 +510,8 @@ inline vec3f SimulationRenderer_shadeRay(
             ray.geomID = -1;
             ray.instID = -1;
         }
-        ++depth;
     }
+
     // Z-Depth
     if (depth >= NB_MAX_REBOUNDS)
         sample.z = 1.f - log(zDepth) / 10.f;
@@ -529,8 +548,8 @@ export void* uniform SimulationRenderer_create(void* uniform cppE)
 
 export void SimulationRenderer_set(
     void* uniform _self, void* uniform simulationModel,
-    const uniform vec3f& bgColor, const uniform bool& shadowsEnabled,
-    const uniform bool& softShadowsEnabled,
+    const uniform vec3f& bgColor, const uniform float& shadows,
+    const uniform float& softShadows,
     const uniform float& ambientOcclusionStrength,
     const uniform bool& shadingEnabled, const uniform int& randomNumber,
     const uniform float& timestamp, const uniform int& spp,
@@ -540,7 +559,8 @@ export void SimulationRenderer_set(
     const uniform vec3i& volumeDimensions,
     const uniform vec3f& volumeElementSpacing,
     const uniform vec3f& volumeOffset, const uniform float& volumeEpsilon,
-    uniform float* uniform simulationData, uniform vec4f* uniform colormap,
+    uniform float* uniform simulationData,
+    const uniform int64& simulationDataSize, uniform vec4f* uniform colormap,
     uniform vec3f* uniform emissionIntensitiesMap,
     const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
     const uniform float& colorMapRange, const uniform float& threshold)
@@ -549,8 +569,8 @@ export void SimulationRenderer_set(
         (uniform SimulationRenderer * uniform)_self;
 
     self->abstract.bgColor = bgColor;
-    self->abstract.shadowsEnabled = shadowsEnabled;
-    self->abstract.softShadowsEnabled = softShadowsEnabled;
+    self->abstract.shadows = shadows;
+    self->abstract.softShadows = softShadows;
     self->abstract.ambientOcclusionStrength = ambientOcclusionStrength;
     self->abstract.shadingEnabled = shadingEnabled;
     self->abstract.randomNumber = randomNumber;
@@ -584,5 +604,6 @@ export void SimulationRenderer_set(
 
     self->simulationModel = (uniform Model * uniform)simulationModel;
     self->simulationData = (uniform float* uniform)simulationData;
+    self->simulationDataSize = simulationDataSize;
     self->threshold = threshold;
 }

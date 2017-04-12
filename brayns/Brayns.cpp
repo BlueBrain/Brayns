@@ -531,23 +531,9 @@ private:
                     ? progress % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS)
                     : NO_MATERIAL;
 
-            MeshQuality quality;
-            switch (geometryParameters.getGeometryQuality())
-            {
-            case GeometryQuality::medium:
-                quality = MeshQuality::medium;
-                break;
-            case GeometryQuality::high:
-                quality = MeshQuality::high;
-                break;
-            default:
-                quality = MeshQuality::low;
-                break;
-            }
-
-            if (!_meshLoader.importMeshFromFile(file, scene, quality,
-                                                Vector3f(), Vector3f(1, 1, 1),
-                                                material))
+            if (!_meshLoader.importMeshFromFile(
+                    file, scene, geometryParameters.getGeometryQuality(),
+                    Matrix4f(), material))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++progress;
         }
@@ -576,9 +562,10 @@ private:
         MorphologyLoader morphologyLoader(geometryParameters);
         const servus::URI uri(filename);
         if (report.empty())
-            morphologyLoader.importCircuit(uri, target, scene);
+            morphologyLoader.importCircuit(uri, target, scene, _meshLoader);
         else
-            morphologyLoader.importCircuit(uri, target, report, scene);
+            morphologyLoader.importCircuit(uri, target, report, scene,
+                                           _meshLoader);
     }
 
     /**
@@ -847,14 +834,15 @@ private:
     {
         RenderingParameters& renderParams =
             _parametersManager->getRenderingParameters();
-        renderParams.setShadows(!renderParams.getShadows());
+        renderParams.setShadows(renderParams.getShadows() == 0.f ? 1.f : 0.f);
     }
 
     void _toggleSoftShadows()
     {
         RenderingParameters& renderParams =
             _parametersManager->getRenderingParameters();
-        renderParams.setSoftShadows(!renderParams.getSoftShadows());
+        renderParams.setSoftShadows(renderParams.getSoftShadows() == 0.f ? 0.1f
+                                                                         : 0.f);
     }
 
     void _increaseSamplesPerRay()

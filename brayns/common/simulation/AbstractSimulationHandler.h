@@ -139,6 +139,7 @@ protected:
     void* _memoryMapPtr;
     int _cacheFileDescriptor;
     Histogram _histogram;
+    float* _frameData;
 };
 }
 #endif // ABSTRACTSIMULATIONHANDLER_H

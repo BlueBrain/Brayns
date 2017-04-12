@@ -67,8 +67,8 @@ RenderingParameters::RenderingParameters()
     , _shading(ShadingType::diffuse)
     , _lightEmittingMaterials(false)
     , _spp(1)
-    , _shadows(false)
-    , _softShadows(false)
+    , _shadows(0.f)
+    , _softShadows(0.f)
     , _backgroundColor(Vector3f(0.f, 0.f, 0.f))
     , _detectionDistance(1.f)
     , _detectionOnDifferentMaterial(true)
@@ -88,10 +88,10 @@ RenderingParameters::RenderingParameters()
         "Number of samples per pixel [int]")(
         PARAM_AMBIENT_OCCLUSION.c_str(), po::value<float>(),
         "Ambient occlusion strength [float]")(PARAM_SHADOWS.c_str(),
-                                              po::value<bool>(),
-                                              "Enable/Disable shadows [bool]")(
-        PARAM_SOFT_SHADOWS.c_str(), po::value<bool>(),
-        "Enable/Disable soft shadows [bool]")(
+                                              po::value<float>(),
+                                              "Shadows intensity [float]")(
+        PARAM_SOFT_SHADOWS.c_str(), po::value<float>(),
+        "Soft shadows strength [float]")(
         PARAM_SHADING.c_str(), po::value<std::string>(),
         "Shading type [none|diffuse|electron]")(
         PARAM_RADIANCE.c_str(), po::value<bool>(),
@@ -140,9 +140,9 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_AMBIENT_OCCLUSION))
         _ambientOcclusionStrength = vm[PARAM_AMBIENT_OCCLUSION].as<float>();
     if (vm.count(PARAM_SHADOWS))
-        _shadows = vm[PARAM_SHADOWS].as<bool>();
+        _shadows = vm[PARAM_SHADOWS].as<float>();
     if (vm.count(PARAM_SOFT_SHADOWS))
-        _softShadows = vm[PARAM_SOFT_SHADOWS].as<bool>();
+        _softShadows = vm[PARAM_SOFT_SHADOWS].as<float>();
     if (vm.count(PARAM_SHADING))
     {
         _shading = ShadingType::diffuse;
@@ -206,10 +206,10 @@ void RenderingParameters::print()
     BRAYNS_INFO << "Samples per pixel                 :" << _spp << std::endl;
     BRAYNS_INFO << "Ambient occlusion strength        :"
                 << _ambientOcclusionStrength << std::endl;
-    BRAYNS_INFO << "Shadows                           :"
-                << (_shadows ? "on" : "off") << std::endl;
-    BRAYNS_INFO << "Soft shadows                      :"
-                << (_softShadows ? "on" : "off") << std::endl;
+    BRAYNS_INFO << "Shadows                           :" << _shadows
+                << std::endl;
+    BRAYNS_INFO << "Soft shadows                      :" << _softShadows
+                << std::endl;
     BRAYNS_INFO << "Shading                           :"
                 << getShadingAsString(_shading) << std::endl;
     BRAYNS_INFO << "Background color                  :" << _backgroundColor

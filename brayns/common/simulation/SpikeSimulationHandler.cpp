@@ -39,8 +39,10 @@ void* SpikeSimulationHandler::getFrameData()
     const uint64_t moduloFrame = frame % _nbFrames;
     const uint64_t index =
         std::min(_frameSize, std::max(uint64_t(0), moduloFrame));
-
-    return (unsigned char*)_memoryMapPtr + _headerSize +
-           index * _frameSize * sizeof(float);
+    const uint64_t frameSize = _frameSize * sizeof(float);
+    memcpy(_frameData,
+           (unsigned char*)_memoryMapPtr + _headerSize + index * frameSize,
+           frameSize);
+    return _frameData;
 }
 }

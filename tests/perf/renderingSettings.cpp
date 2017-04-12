@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     BOOST_TEST_MESSAGE("Shadows cost. expected: 165%, realized: " << t * 100.f);
     BOOST_CHECK(t < 1.65f);
 
-    params.getRenderingParameters().setSoftShadows(true);
+    params.getRenderingParameters().setSoftShadows(1.f);
     brayns.getEngine().commit();
 
     startTime = high_resolution_clock::now();
@@ -88,8 +88,8 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     BOOST_CHECK(t < 1.85f);
 
     // Ambient occlustion
-    params.getRenderingParameters().setShadows(false);
-    params.getRenderingParameters().setSoftShadows(false);
+    params.getRenderingParameters().setShadows(0.f);
+    params.getRenderingParameters().setSoftShadows(0.f);
     params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
     brayns.getEngine().commit();
 

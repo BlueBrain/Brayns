@@ -43,9 +43,8 @@ void MeshLoader::clear()
 }
 
 bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
-                                    MeshQuality meshQuality,
-                                    const Vector3f& position,
-                                    const Vector3f& scale,
+                                    GeometryQuality geometryQuality,
+                                    const Matrix4f& transformation,
                                     const size_t defaultMaterial)
 {
     const boost::filesystem::path file = filename;
@@ -58,12 +57,12 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     }
 
     size_t quality;
-    switch (meshQuality)
+    switch (geometryQuality)
     {
-    case MeshQuality::medium:
+    case GeometryQuality::medium:
         quality = aiProcessPreset_TargetRealtime_Quality;
         break;
-    case MeshQuality::high:
+    case GeometryQuality::high:
         quality = aiProcessPreset_TargetRealtime_MaxQuality;
         break;
     default:
@@ -114,15 +113,23 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
         for (size_t i = 0; i < mesh->mNumVertices; ++i)
         {
             aiVector3D v = mesh->mVertices[i];
-            const Vector3f vertex = position + scale * Vector3f(v.x, v.y, v.z);
-            triangleMeshes[materialId].getVertices().push_back(vertex);
-            scene.getWorldBounds().merge(vertex);
+            const Vector4f vertex =
+                transformation * Vector4f(v.x, v.y, v.z, 1.f);
+            const Vector3f transformedVertex = {vertex.x(), vertex.y(),
+                                                vertex.z()};
+            triangleMeshes[materialId].getVertices().push_back(
+                transformedVertex);
+            scene.getWorldBounds().merge(transformedVertex);
 
             if (mesh->HasNormals())
             {
                 v = mesh->mNormals[i];
-                const Vector3f normal = {v.x, v.y, v.z};
-                triangleMeshes[materialId].getNormals().push_back(normal);
+                const Vector4f normal =
+                    transformation * Vector4f(v.x, v.y, v.z, 0.f);
+                const Vector3f transformedNormal = {normal.x(), normal.y(),
+                                                    normal.z()};
+                triangleMeshes[materialId].getNormals().push_back(
+                    transformedNormal);
             }
 
             if (mesh->HasTextureCoords(0))

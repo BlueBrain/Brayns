@@ -45,19 +45,18 @@ public:
      *
      * @param filename name of the file containing the meshes
      * @param Scene holding the meshes
-     * @param meshQuality can be MQ_FAST, MQ_QUALITY or MQ_MAX_QUALITY. Appart
-     *        from MQ_FAST, normals are automatically generated is not in the
-     *        file.
-     * @param position where to position the imported mesh
-     * @param scale how to scale the imported mesh
+     * @param geometryQuality can be low, medium or high. Appart from low,
+     * normals are automatically generated is not in the file.
+     * @param transformation Position, orientation and scale to apply to the
+     * mesh
      * @param defaultMaterial Default material for the whole mesh. If set to
      *        NO_MATERIAL, materials from the mesh file are used. Otherwise,
      *        all meshes are forced to that specific material.
      * @return true if the file was successfully imported. False otherwise.
      */
     bool importMeshFromFile(const std::string& filename, Scene& scene,
-                            MeshQuality meshQuality, const Vector3f& position,
-                            const Vector3f& scale,
+                            GeometryQuality geometryQuality,
+                            const Matrix4f& transformation,
                             const size_t defaultMaterial);
 
     /** Exports meshes to a given file

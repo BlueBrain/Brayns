@@ -80,7 +80,8 @@ table DataSource {
     geometry_quality: GeometryQuality;
     target: string;
     report: string;
-    circuit_concentration: uint;
+    circuit_density: uint;
+    meshed_morphologies_folder: string;
     non_simulated_cells: uint;
     start_simulation_time: float;
     end_simulation_time: float;
@@ -129,8 +130,8 @@ table Settings {
     shader: Shader;
     samples_per_pixel: uint;
     ambient_occlusion: float;
-    shadows: bool;
-    soft_shadows: bool;
+    shadows: float;
+    soft_shadows: float;
     shading: Shading;
     radiance: bool;
     background_color: [float:3];

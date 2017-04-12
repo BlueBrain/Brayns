@@ -46,9 +46,9 @@ struct AbstractRenderer
     const uniform ExtendedOBJMaterial* uniform* uniform materials;
     uint32 numMaterials;
     vec3f bgColor;
-    bool shadowsEnabled;
+    float shadows;
     bool shadingEnabled;
-    bool softShadowsEnabled;
+    float softShadows;
     float ambientOcclusionStrength;
     bool electronShadingEnabled;
     int randomNumber;

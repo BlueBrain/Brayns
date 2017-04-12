@@ -52,8 +52,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
     varying bool moreRebounds = true;
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
     {
-        intersectionWeights[depth] = 1.f;
-        intersectionColors[depth] = make_vec3f(0.f);
         traceRay(self->abstract.super.model, ray);
 
         if (ray.geomID < 0)
@@ -107,10 +105,16 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                     // Light emission strength
                     localLightEmission = mat->a;
 
+                    // Glossiness
+                    localNormal = normalize(
+                        localNormal +
+                        mat->g * getRandomVector(sample, localNormal,
+                                                 self->abstract.randomNumber));
+
                     // Refraction index
                     localRefraction = mat->refraction;
 
-                    // localOpacity
+                    // Opacity
                     localOpacity = mat->d * get1f(mat->map_d, dg.st, 1.f);
 
                     // Diffuse color
@@ -169,6 +173,9 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
 
             if (localOpacity > 0.01f)
             {
+                intersectionWeights[depth] = 1.f;
+                intersectionColors[depth] = make_vec3f(0.f);
+
                 varying vec3f indirectShadingColor = make_vec3f(0.f);
                 varying float indirectShadingIntensity = 0.f;
                 const varying vec3f reflectedDirection =
@@ -249,7 +256,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                             }
 
                             // Process shadows
-                            if (self->abstract.shadowsEnabled &&
+                            if (self->abstract.shadows != 0.f &&
                                 localLightEmission == 0.f)
                                 localLightIntensity =
                                     shadedLightIntensity(&(self->abstract), ray,
@@ -303,6 +310,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
 
                     intersectionWeights[depth] = 1.f - localOpacity;
                     oldlocalRefraction = localRefraction;
+                    ++depth;
                 }
                 else if (localReflection > 0.f)
                 {
@@ -310,10 +318,15 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
                     ray.t0 = self->abstract.super.epsilon;
                     ray.org = intersection;
                     intersectionWeights[depth] = localReflection;
+                    ++depth;
                 }
                 else
                     moreRebounds = false;
             }
+            else
+                // Fully transparent object. Ignore intersection
+                ray.t0 = ray.t + 1.f;
+
             // Z-Depth
             zDepth += localOpacity * ray.t;
             sample.z = log(zDepth) / 10.f;
@@ -323,7 +336,6 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
             ray.geomID = -1;
             ray.instID = -1;
         }
-        ++depth;
     }
 
     // Z-Depth
@@ -364,7 +376,7 @@ export void* uniform ExtendedOBJRenderer_create(void* uniform cppE)
 
 export void ExtendedOBJRenderer_set(
     void* uniform _self, const uniform vec3f& bgColor,
-    const uniform bool& shadowsEnabled, const uniform bool& softShadowsEnabled,
+    const uniform float& shadows, const uniform float& softShadows,
     const uniform float& ambientOcclusionStrength,
     const uniform bool& shadingEnabled, const uniform int& randomNumber,
     const uniform float& timestamp, const uniform int& spp,
@@ -376,8 +388,8 @@ export void ExtendedOBJRenderer_set(
         (uniform ExtendedOBJRenderer * uniform)_self;
 
     self->abstract.bgColor = bgColor;
-    self->abstract.shadowsEnabled = shadowsEnabled;
-    self->abstract.softShadowsEnabled = softShadowsEnabled;
+    self->abstract.shadows = shadows;
+    self->abstract.softShadows = softShadows;
     self->abstract.ambientOcclusionStrength = ambientOcclusionStrength;
     self->abstract.shadingEnabled = shadingEnabled;
     self->abstract.randomNumber = randomNumber;

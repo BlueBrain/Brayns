@@ -158,22 +158,21 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
                                   const varying vec3f& normal,
                                   varying vec3f& lightDirection)
 {
-    if (self->softShadowsEnabled)
-    {
+    if (self->softShadows != 0.f)
         // Slightly alter light direction for Soft shadows
-        const varying vec3f ss =
-            getRandomVector(sample, normal, self->randomNumber);
-        lightDirection = lightDirection + ss * 0.1f;
-    }
+        lightDirection =
+            normalize(lightDirection +
+                      self->softShadows *
+                          getRandomVector(sample, normal, self->randomNumber));
 
     Ray shadowRay;
     setRay(shadowRay, intersection, lightDirection);
     shadowRay.t0 = self->super.epsilon;
     shadowRay.time = sample.ray.time;
-    shadowRay.t = ray.t;
+    shadowRay.t = infinity;
 
+    varying float opacity = 0.f;
     varying float intensity = 1.f;
-    const varying float maxt = ray.t;
     varying int depth = 0;
     varying bool moreRebounds = true;
 
@@ -222,13 +221,14 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
                 }
             }
 
-            intensity -= materialOpacity;
+            opacity += materialOpacity;
+            intensity -= materialOpacity * self->shadows;
 
-            if (intensity < ALPHA_THRESHOLD)
+            if (intensity < ALPHA_THRESHOLD || opacity >= 1.f)
                 moreRebounds = false;
 
             shadowRay.t0 = shadowRay.t + self->super.epsilon;
-            shadowRay.t = maxt;
+            shadowRay.t = infinity;
             shadowRay.primID = -1;
             shadowRay.geomID = -1;
             shadowRay.instID = -1;
@@ -304,7 +304,7 @@ inline varying vec4f getVolumeContribution(
 
             const uint8 voxelValue = self->volumeData[index];
 
-            if (self->shadowsEnabled && iteration > 0)
+            if (self->shadows != 0.f && iteration > 0)
             {
                 // Determine light contribution
                 for (uniform int i = 0; self->lights && i < self->numLights;
@@ -320,9 +320,12 @@ inline varying vec4f getVolumeContribution(
 
                     Ray lightRay = ray;
                     lightRay.org = point;
-                    if (self->softShadowsEnabled)
-                        lightRay.dir = getRandomVector(sample, lightSample.dir,
-                                                       self->randomNumber);
+                    if (self->softShadows != 0.f)
+                        lightRay.dir = normalize(
+                            lightSample.dir +
+                            self->softShadows *
+                                getRandomVector(sample, lightSample.dir,
+                                                self->randomNumber));
                     else
                         lightRay.dir = lightSample.dir;
                     const vec4f voxelColor =
@@ -372,7 +375,7 @@ inline varying vec4f getVolumeContribution(
         }
         t += self->volumeEpsilon;
     }
-    if (self->shadowsEnabled && iteration > 0)
+    if (self->shadows != 0.f && iteration > 0)
         pathColor = pathColor * VOLUME_DEFAULT_ALPHA;
     return make_vec4f(min(1.f, pathColor.x), min(1.f, pathColor.y),
                       min(1.f, pathColor.z), min(1.f, pathAlpha));
