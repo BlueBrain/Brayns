@@ -206,7 +206,6 @@ typedef std::map<RendererType, RendererPtr> RendererMap;
 /** Define the frame buffer format */
 enum class FrameBufferFormat
 {
-    rgba_none,
     rgba_i8,
     bgra_i8,
     rgb_i8,
@@ -300,7 +299,7 @@ enum class MaterialType
                     // and light emission
     shades_of_grey, // 255 shades of grey
     gradient,       // Gradient from red to yellow
-    pastel,         // Random pastel colors
+    pastel          // Random pastel colors
 };
 
 enum class ShadingType
