@@ -743,6 +743,9 @@ void ZeroEQPlugin::_dataSourceUpdated()
             std::to_string(aabb[0]) + " " + std::to_string(aabb[1]) + " " +
                 std::to_string(aabb[2]) + " " + std::to_string(aabb[3]) + " " +
                 std::to_string(aabb[4]) + " " + std::to_string(aabb[5]));
+    else
+        _parametersManager.set("circuit-bounding-box", "0 0 0 0 0 0");
+
     _parametersManager.set(
         "meshed-morphologies-folder",
         _remoteDataSource.getMeshedMorphologiesFolderString());

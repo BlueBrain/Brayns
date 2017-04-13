@@ -106,9 +106,8 @@ GeometryParameters::GeometryParameters()
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
     , _useSimulationModel(false)
+    , _circuitBoundingBox(Vector3f(0.f), Vector3f(0.f))
 {
-    _circuitBoundingBox.merge(Vector3f(-std::numeric_limits<double>::max()));
-    _circuitBoundingBox.merge(Vector3f(std::numeric_limits<double>::max()));
     _parameters.add_options()(PARAM_MORPHOLOGY_FOLDER.c_str(),
                               po::value<std::string>(),
                               "Folder containing SWC and H5 files [string]")(
