@@ -262,10 +262,10 @@ void BaseWindow::display()
     GLenum format = GL_RGBA;
     switch (renderOutput.colorBufferFormat)
     {
-    case FrameBufferFormat::FBF_BGRA_I8:
+    case FrameBufferFormat::bgra_i8:
         format = GL_BGRA;
         break;
-    case FrameBufferFormat::FBF_RGB_I8:
+    case FrameBufferFormat::rgb_i8:
         format = GL_RGB;
         break;
     default:

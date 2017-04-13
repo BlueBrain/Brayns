@@ -114,7 +114,7 @@ public:
              MT_PASTEL_COLORS: Random pastel colors
        @param nbMaterials Number of materials to be defined
     */
-    void initializeMaterials(MaterialType materialType = MT_DEFAULT,
+    void initializeMaterials(MaterialType materialType = MaterialType::none,
                              size_t nbMaterials = NB_MAX_MATERIALS);
 
     /**

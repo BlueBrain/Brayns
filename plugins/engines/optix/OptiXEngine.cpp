@@ -57,7 +57,7 @@ OptiXEngine::OptiXEngine(int, const char**,
     _scene.reset(
         new OptiXScene(renderersForScene, _parametersManager, _context));
 
-    _scene->setMaterials(MT_DEFAULT, NB_MAX_MATERIALS);
+    _scene->setMaterials(MaterialType::none, NB_MAX_MATERIALS);
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
@@ -67,8 +67,9 @@ OptiXEngine::OptiXEngine(int, const char**,
     const bool environmentMap =
         !parametersManager.getSceneParameters().getEnvironmentMap().empty();
 
-    _frameBuffer.reset(
-        new OptiXFrameBuffer(_frameSize, FBF_RGBA_I8, accumulation, _context));
+    _frameBuffer.reset(new OptiXFrameBuffer(_frameSize,
+                                            FrameBufferFormat::rgba_i8,
+                                            accumulation, _context));
     _camera.reset(new OptiXCamera(
         _parametersManager.getRenderingParameters().getCameraType(), _context,
         environmentMap));

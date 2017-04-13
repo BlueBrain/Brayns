@@ -97,7 +97,7 @@ void Scene::setMaterials(const MaterialType materialType,
 
         switch (materialType)
         {
-        case MT_DEFAULT:
+        case MaterialType::none:
             switch (i)
             {
             case 0: // Default
@@ -119,18 +119,18 @@ void Scene::setMaterials(const MaterialType materialType,
                                             float(std::rand() % 255) / 255.f));
             }
             break;
-        case MT_GRADIENT:
+        case MaterialType::gradient:
             material->setColor(
                 Vector3f(float(std::rand() % nbMaterials) / float(nbMaterials),
                          1.f, 0.f));
             break;
-        case MT_PASTEL_COLORS:
+        case MaterialType::pastel:
             material->setColor(
                 Vector3f(0.5f + float(std::rand() % 127) / 255.f,
                          0.5f + float(std::rand() % 127) / 255.f,
                          0.5f + float(std::rand() % 127) / 255.f));
             break;
-        case MT_RANDOM:
+        case MaterialType::random:
             material->setColor(Vector3f(float(rand() % 255) / 255.f,
                                         float(rand() % 255) / 255.f,
                                         float(rand() % 255) / 255.f));
@@ -152,7 +152,7 @@ void Scene::setMaterials(const MaterialType materialType,
                 material->setSpecularExponent(10.f);
             }
             break;
-        case MT_SHADES_OF_GREY:
+        case MaterialType::shades_of_grey:
             float value = float(std::rand() % 255) / 255.f;
             material->setColor(Vector3f(value, value, value));
             break;

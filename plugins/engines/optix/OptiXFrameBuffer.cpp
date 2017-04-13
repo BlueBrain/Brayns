@@ -59,10 +59,10 @@ void OptiXFrameBuffer::resize(const Vector2ui& frameSize)
     RTformat format;
     switch (_frameBufferFormat)
     {
-    case FBF_RGBA_I8:
+    case FrameBufferFormat::rgba_i8:
         format = RT_FORMAT_UNSIGNED_BYTE4;
         break;
-    case FBF_RGBA_F32:
+    case FrameBufferFormat::rgb_f32:
         format = RT_FORMAT_FLOAT4;
         break;
     default:
@@ -98,10 +98,10 @@ void OptiXFrameBuffer::map()
     _context["frame"]->setUint(_accumulationFrame++);
     switch (_frameBufferFormat)
     {
-    case FBF_RGBA_I8:
+    case FrameBufferFormat::rgba_i8:
         _colorBuffer = (uint8_t*)(_imageData);
         break;
-    case FBF_RGBA_F32:
+    case FrameBufferFormat::rgb_f32:
         _depthBuffer = (float*)_imageData;
         break;
     default:

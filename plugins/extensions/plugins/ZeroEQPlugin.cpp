@@ -507,10 +507,10 @@ bool ZeroEQPlugin::_requestImageJPEG()
             int32_t pixelFormat = TJPF_RGBA;
             switch (frameBuffer.getFrameBufferFormat())
             {
-            case FrameBufferFormat::FBF_BGRA_I8:
+            case FrameBufferFormat::bgra_i8:
                 pixelFormat = TJPF_BGRA;
                 break;
-            case FrameBufferFormat::FBF_RGB_I8:
+            case FrameBufferFormat::rgba_i8:
                 pixelFormat = TJPF_RGB;
                 break;
             default:
@@ -767,26 +767,27 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            _remoteDataSource.getUseSimulationModel() ? "1"
                                                                      : "0");
 
-    uint morphologySectionTypes = MST_UNDEFINED;
+    uint morphologySectionTypes = size_t(MorphologySectionType::undefined);
     const auto& sectionTypes = _remoteDataSource.getMorphologySectionTypes();
     for (const auto& sectionType : sectionTypes)
     {
         switch (sectionType)
         {
         case ::brayns::v1::SectionType::soma:
-            morphologySectionTypes |= MST_SOMA;
+            morphologySectionTypes |= size_t(MorphologySectionType::soma);
             break;
         case ::brayns::v1::SectionType::axon:
-            morphologySectionTypes |= MST_AXON;
+            morphologySectionTypes |= size_t(MorphologySectionType::axon);
             break;
         case ::brayns::v1::SectionType::dendrite:
-            morphologySectionTypes |= MST_DENDRITE;
+            morphologySectionTypes |= size_t(MorphologySectionType::dendrite);
             break;
         case ::brayns::v1::SectionType::apical_dendrite:
-            morphologySectionTypes |= MST_APICAL_DENDRITE;
+            morphologySectionTypes |=
+                size_t(MorphologySectionType::apical_dendrite);
             break;
         case ::brayns::v1::SectionType::all:
-            morphologySectionTypes |= MST_ALL;
+            morphologySectionTypes |= size_t(MorphologySectionType::all);
         }
     }
     _parametersManager.set("morphology-section-types",

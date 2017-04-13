@@ -114,7 +114,8 @@ LivreEngine::LivreEngine(int argc, char** argv,
     renderer->setScene(_scene);
 
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
-    _frameBuffer.reset(new LivreFrameBuffer(_frameSize, FBF_BGRA_I8, *_livre));
+    _frameBuffer.reset(
+        new LivreFrameBuffer(_frameSize, FrameBufferFormat::bgra_i8, *_livre));
     _camera.reset(new LivreCamera(rendererParams.getCameraType(), *_livre));
 }
 

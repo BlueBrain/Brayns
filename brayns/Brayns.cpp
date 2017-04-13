@@ -156,10 +156,10 @@ struct Brayns::Impl
             std::string format;
             switch (frameBuffer.getFrameBufferFormat())
             {
-            case FBF_RGBA_I8:
+            case FrameBufferFormat::rgba_i8:
                 format = "RGBA";
                 break;
-            case FBF_RGB_I8:
+            case FrameBufferFormat::rgb_i8:
                 format = "RGB";
                 break;
             default:

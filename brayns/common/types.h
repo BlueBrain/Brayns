@@ -69,18 +69,8 @@ typedef std::shared_ptr<Camera> CameraPtr;
 class TransferFunction;
 typedef std::shared_ptr<TransferFunction> TransferFunctionPtr;
 
-enum class RendererType
-{
-    basic,
-    proximity,
-    simulation,
-    particle
-};
-typedef std::vector<RendererType> RendererTypes;
-
 class Renderer;
 typedef std::shared_ptr<Renderer> RendererPtr;
-typedef std::map<RendererType, RendererPtr> RendererMap;
 typedef std::vector<RendererPtr> Renderers;
 
 class FrameBuffer;
@@ -202,14 +192,24 @@ typedef std::shared_ptr<DeflectPlugin> DeflectPluginPtr;
 class KeyboardHandler;
 typedef std::shared_ptr<KeyboardHandler> KeyboardHandlerPtr;
 
-/** Define the frame buffer format */
-enum FrameBufferFormat
+/** Types of renderers */
+enum class RendererType
 {
-    FBF_RGBA_NONE,
-    FBF_RGBA_I8,
-    FBF_BGRA_I8,
-    FBF_RGB_I8,
-    FBF_RGBA_F32,
+    basic,
+    proximity,
+    simulation,
+    particle
+};
+typedef std::vector<RendererType> RendererTypes;
+typedef std::map<RendererType, RendererPtr> RendererMap;
+
+/** Define the frame buffer format */
+enum class FrameBufferFormat
+{
+    rgba_i8,
+    bgra_i8,
+    rgb_i8,
+    rgb_f32,
 };
 
 /** Define the color scheme to be applied to the geometry */
@@ -238,10 +238,10 @@ enum class SceneEnvironment
 };
 
 /** Define light types */
-enum LightType
+enum class LightType
 {
-    LT_POINT = 0,
-    LT_DIRECTIONAL,
+    point = 0,
+    directional,
 };
 
 /** Geometry quality */
@@ -253,25 +253,14 @@ enum class GeometryQuality
 };
 
 /** Morphology element types */
-enum MorphologySectionType
+enum class MorphologySectionType
 {
-    MST_UNDEFINED = 0x00,
-    MST_SOMA = 0x01,
-    MST_AXON = 0x02,
-    MST_DENDRITE = 0x04,
-    MST_APICAL_DENDRITE = 0x08,
-    MST_ALL = 0xff
-};
-
-/** Transfer function attributes */
-enum TransferFunctionAttribute
-{
-    TF_UNDEFINED,
-    TF_RED,
-    TF_GREEN,
-    TF_BLUE,
-    TF_ALPHA,
-    TF_EMISSION
+    undefined = 0x00,
+    soma = 0x01,
+    axon = 0x02,
+    dendrite = 0x04,
+    apical_dendrite = 0x08,
+    all = 0xff
 };
 
 /**
@@ -303,14 +292,14 @@ const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 
 /** Defines how materials should be created */
-enum MaterialType
+enum class MaterialType
 {
-    MT_DEFAULT,        // Random colors
-    MT_RANDOM,         // Random materials including transparency, reflection,
-                       // and light emission
-    MT_SHADES_OF_GREY, // 255 shades of grey
-    MT_GRADIENT,       // Gradient from red to yellow
-    MT_PASTEL_COLORS,  // Random pastel colors
+    none,           // Random colors
+    random,         // Random materials including transparency, reflection,
+                    // and light emission
+    shades_of_grey, // 255 shades of grey
+    gradient,       // Gradient from red to yellow
+    pastel          // Random pastel colors
 };
 
 enum class ShadingType

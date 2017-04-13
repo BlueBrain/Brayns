@@ -257,10 +257,10 @@ void DeflectPlugin::_send(const bool swapYAxis)
     deflect::PixelFormat format = deflect::RGBA;
     switch (_lastImage.format)
     {
-    case FrameBufferFormat::FBF_BGRA_I8:
+    case FrameBufferFormat::bgra_i8:
         format = deflect::BGRA;
         break;
-    case FrameBufferFormat::FBF_RGB_I8:
+    case FrameBufferFormat::rgb_i8:
         format = deflect::RGB;
         break;
     default:
