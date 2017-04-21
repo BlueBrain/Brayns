@@ -1030,7 +1030,8 @@ bool MorphologyLoader::importSimulationData(const servus::URI& circuitConfig,
     return true;
 }
 
-bool MorphologyLoader::_positionInCircuitBoundingBox(const Vector3f& position)
+bool MorphologyLoader::_positionInCircuitBoundingBox(
+    const Vector3f& position) const
 {
     const auto& aabb = _geometryParameters.getCircuitBoundingBox();
     return aabb.getSize() == Vector3f(0.f) ? true : aabb.isIn(position);

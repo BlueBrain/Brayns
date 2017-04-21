@@ -126,7 +126,7 @@ private:
                                  TrianglesMeshMap& meshes, Boxf& bounds,
                                  const size_t forcedMaterial = NO_MATERIAL);
 
-    bool _positionInCircuitBoundingBox(const Vector3f& position);
+    bool _positionInCircuitBoundingBox(const Vector3f& position) const;
 
     const GeometryParameters& _geometryParameters;
 };
