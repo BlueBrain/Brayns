@@ -95,9 +95,7 @@ LivreEngine::LivreEngine(int argc, char** argv,
     auto& volParams = parametersManager.getVolumeParameters();
     auto& rendererParams = _parametersManager.getRenderingParameters();
 
-    const auto& vrParams = _livre->getFrameData().getVRParameters();
     volParams.setFilename(_livre->getApplicationParameters().dataFileName);
-    rendererParams.setSamplesPerPixel(vrParams.getSamplesPerPixel());
 
     _activeRenderer = parametersManager.getRenderingParameters().getRenderer();
 
