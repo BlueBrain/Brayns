@@ -494,6 +494,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     size_t simulationOffset = 1;
     size_t simulatedCells = 0;
     size_t progress = 0;
+    size_t morphologyCount = 0;
     const auto circuitDensity = _geometryParameters.getCircuitDensity();
     const size_t nbSkippedCells =
         uris.size() / (uris.size() * circuitDensity / 100);
@@ -514,16 +515,18 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 continue;
             }
 
-            const auto& position = transforms[i].getTranslation();
-            if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+            if (!_positionInCircuitBoundingBox(transforms[i].getTranslation()))
+            {
+                ++progress;
                 continue;
+            }
 
             const size_t material =
-                mvd3Support
-                    ? boost::lexical_cast<size_t>(neuronMatrix[i])
-                    : _getMaterialFromSectionType(
-                          i, NO_MATERIAL, brain::neuron::SectionType::undefined,
-                          _geometryParameters.getColorScheme());
+                mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
+                            : _getMaterialFromSectionType(
+                                  morphologyCount, NO_MATERIAL,
+                                  brain::neuron::SectionType::undefined,
+                                  _geometryParameters.getColorScheme());
 
             const auto& uri = uris[i];
             const auto filenameNoExt =
@@ -536,6 +539,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 transforms[i], material);
             BRAYNS_PROGRESS(progress, uris.size());
             ++progress;
+            ++morphologyCount;
         }
         loadParametricGeometry = _geometryParameters.getUseSimulationModel();
     }
@@ -543,6 +547,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     if (loadParametricGeometry)
     {
         progress = 0;
+        morphologyCount = 0;
 #pragma omp parallel
         {
             SpheresMap private_spheres;
@@ -555,13 +560,18 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
                 {
                     BRAYNS_PROGRESS(progress, uris.size());
+#pragma omp atomic
                     ++progress;
                     continue;
                 }
 
-                const auto& position = transforms[i].getTranslation();
-                if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+                if (!_positionInCircuitBoundingBox(
+                        transforms[i].getTranslation()))
+                {
+#pragma omp atomic
+                    ++progress;
                     continue;
+                }
 
                 const auto& uri = uris[i];
                 float maxDistanceToSoma = 0.f;
@@ -571,13 +581,14 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 
                 if (_geometryParameters.useMetaballs())
                 {
-                    _importMorphologyAsMesh(uri, i, scene.getMaterials(),
-                                            transforms[i],
+                    _importMorphologyAsMesh(uri, morphologyCount,
+                                            scene.getMaterials(), transforms[i],
                                             scene.getTriangleMeshes(),
                                             scene.getWorldBounds(), material);
                 }
 
-                if (_importMorphology(uri, i, transforms[i], 0, private_spheres,
+                if (_importMorphology(uri, morphologyCount, transforms[i],
+                                      nullptr, private_spheres,
                                       private_cylinders, private_cones,
                                       private_bounds, simulationOffset,
                                       maxDistanceToSoma, material))
@@ -589,6 +600,8 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 BRAYNS_PROGRESS(progress, uris.size());
 #pragma omp atomic
                 ++progress;
+#pragma omp atomic
+                ++morphologyCount;
             }
 
 #pragma omp critical
@@ -676,6 +689,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     }
 
     size_t progress = 0;
+    size_t morphologyCount = 0;
     const auto circuitDensity = _geometryParameters.getCircuitDensity();
     const size_t nbSkippedCells =
         uris.size() / (uris.size() * circuitDensity / 100);
@@ -696,16 +710,18 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 continue;
             }
 
-            const auto& position = transforms[i].getTranslation();
-            if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+            if (!_positionInCircuitBoundingBox(transforms[i].getTranslation()))
+            {
+                ++progress;
                 continue;
+            }
 
             const size_t material =
-                mvd3Support
-                    ? boost::lexical_cast<size_t>(neuronMatrix[i])
-                    : _getMaterialFromSectionType(
-                          i, NO_MATERIAL, brain::neuron::SectionType::undefined,
-                          _geometryParameters.getColorScheme());
+                mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
+                            : _getMaterialFromSectionType(
+                                  morphologyCount, NO_MATERIAL,
+                                  brain::neuron::SectionType::undefined,
+                                  _geometryParameters.getColorScheme());
 
             const auto& uri = uris[i];
             const auto filenameNoExt =
@@ -718,6 +734,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 transforms[i], material);
             BRAYNS_PROGRESS(progress, uris.size());
             ++progress;
+            ++morphologyCount;
         }
         loadParametricGeometry = _geometryParameters.getUseSimulationModel();
     }
@@ -725,6 +742,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     if (loadParametricGeometry)
     {
         progress = 0;
+        morphologyCount = 0;
 #pragma omp parallel
         {
             SpheresMap private_spheres;
@@ -737,13 +755,18 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
                 {
                     BRAYNS_PROGRESS(progress, uris.size());
+#pragma omp atomic
                     ++progress;
                     continue;
                 }
 
-                const auto& position = transforms[i].getTranslation();
-                if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+                if (!_positionInCircuitBoundingBox(
+                        transforms[i].getTranslation()))
+                {
+#pragma omp atomic
+                    ++progress;
                     continue;
+                }
 
                 const auto& uri = cr_uris[i];
                 const SimulationInformation simulationInformation = {
@@ -754,20 +777,23 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 
                 if (_geometryParameters.useMetaballs())
                 {
-                    _importMorphologyAsMesh(uri, i, scene.getMaterials(),
-                                            transforms[i],
+                    _importMorphologyAsMesh(uri, morphologyCount,
+                                            scene.getMaterials(), transforms[i],
                                             scene.getTriangleMeshes(),
                                             scene.getWorldBounds(), material);
                 }
 
                 float maxDistanceToSoma;
-                _importMorphology(uri, i, transforms[i], &simulationInformation,
-                                  private_spheres, private_cylinders,
-                                  private_cones, private_bounds, 0,
-                                  maxDistanceToSoma, material);
+                _importMorphology(uri, morphologyCount, transforms[i],
+                                  &simulationInformation, private_spheres,
+                                  private_cylinders, private_cones,
+                                  private_bounds, 0, maxDistanceToSoma,
+                                  material);
                 BRAYNS_PROGRESS(progress, cr_uris.size());
 #pragma omp atomic
                 ++progress;
+#pragma omp atomic
+                ++morphologyCount;
             }
 
 #pragma omp critical
@@ -829,6 +855,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                     << std::endl;
 
         progress = 0;
+        morphologyCount = 0;
 #pragma omp parallel
         {
             SpheresMap private_spheres;
@@ -841,13 +868,18 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
                 {
                     BRAYNS_PROGRESS(progress, uris.size());
+#pragma omp atomic
                     ++progress;
                     continue;
                 }
 
-                const auto& position = transforms[i].getTranslation();
-                if (!_geometryParameters.getCircuitBoundingBox().isIn(position))
+                if (!_positionInCircuitBoundingBox(
+                        transforms[i].getTranslation()))
+                {
+#pragma omp atomic
+                    ++progress;
                     continue;
+                }
 
                 float maxDistanceToSoma;
                 const auto& uri = allUris[i];
@@ -869,14 +901,17 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         material);
                 }
                 else
-                    _importMorphology(uri, i, allTransforms[i], 0,
-                                      private_spheres, private_cylinders,
-                                      private_cones, private_bounds, 0,
-                                      maxDistanceToSoma, material);
+                    _importMorphology(uri, morphologyCount, allTransforms[i],
+                                      nullptr, private_spheres,
+                                      private_cylinders, private_cones,
+                                      private_bounds, 0, maxDistanceToSoma,
+                                      material);
 
                 BRAYNS_PROGRESS(progress, allUris.size());
 #pragma omp atomic
                 ++progress;
+#pragma omp atomic
+                ++morphologyCount;
             }
 
 #pragma omp critical
@@ -993,6 +1028,13 @@ bool MorphologyLoader::importSimulationData(const servus::URI& circuitConfig,
     BRAYNS_INFO << "Frame size      : " << frameSize << std::endl;
     BRAYNS_INFO << "----------------------------------------" << std::endl;
     return true;
+}
+
+bool MorphologyLoader::_positionInCircuitBoundingBox(
+    const Vector3f& position) const
+{
+    const auto& aabb = _geometryParameters.getCircuitBoundingBox();
+    return aabb.getSize() == Vector3f(0.f) ? true : aabb.isIn(position);
 }
 
 #else
