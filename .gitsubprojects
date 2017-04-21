@@ -22,5 +22,5 @@ endif()
 
 # Livre rendering engine
 if(BRAYNS_LIVRE_ENABLED)
-  git_subproject(Livre https://github.com/BlueBrain/Livre.git b706e65)
+  git_subproject(Livre https://github.com/BlueBrain/Livre.git 66362a3)
 endif()
