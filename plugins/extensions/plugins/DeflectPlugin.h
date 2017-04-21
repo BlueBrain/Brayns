@@ -80,7 +80,7 @@ private:
      *
      * @param swapYAxis enables a vertical flip operation on the image
      */
-    void _send(bool swapYAxis);
+    void _send(const Engine& engine, bool swapYAxis);
 
     Vector2d _getWindowPos(const deflect::Event& event,
                            const Vector2ui& windowSize) const;
