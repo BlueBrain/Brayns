@@ -62,7 +62,7 @@ table MorphologyLayout {
 }
 
 table DataSource {
-    transfer_function_file: string;
+    color_map_file: string;
     morphology_folder: string;
     nest_circuit: string;
     nest_report: string;
