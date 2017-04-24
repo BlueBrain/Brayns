@@ -127,10 +127,9 @@ const Histogram& AbstractSimulationHandler::getHistogram()
     // Determine range
     Vector2f range(std::numeric_limits<float>::max(),
                    -std::numeric_limits<float>::max());
-    for (size_t i = 0; i < _frameSize; ++i)
+    for (uint64_t i = 0; i < _frameSize; ++i)
     {
-        const uint64_t index = i * sizeof(float);
-        float value = data[index];
+        float value = data[i];
         range.x() = std::min(range.x(), value);
         range.y() = std::max(range.y(), value);
     }
@@ -141,10 +140,9 @@ const Histogram& AbstractSimulationHandler::getHistogram()
     _histogram.values.resize(histogramSize, 0);
     const float normalizationValue =
         (range.y() - range.x()) / float((histogramSize + 1));
-    for (size_t i = 0; i < _frameSize; ++i)
+    for (uint64_t i = 0; i < _frameSize; ++i)
     {
-        const uint64_t index = i * sizeof(float);
-        const size_t idx = (data[index] - range.x()) / normalizationValue;
+        const size_t idx = (data[i] - range.x()) / normalizationValue;
         ++_histogram.values[idx];
     }
 
