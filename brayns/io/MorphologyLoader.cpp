@@ -532,16 +532,19 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             const auto filenameNoExt =
                 boost::filesystem::path(uri.getPath()).stem().string();
             std::string meshFilename = meshedMorphologiesFolder + "/" +
-                                       filenameNoExt.c_str() +
-                                       ".h5.bin_decimated.off";
-            meshLoader.importMeshFromFile(
-                meshFilename, scene, _geometryParameters.getGeometryQuality(),
-                transforms[i], material);
+                                       filenameNoExt.c_str() + "_decimated.off";
+            if (meshLoader.importMeshFromFile(
+                    meshFilename, scene,
+                    _geometryParameters.getGeometryQuality(), transforms[i],
+                    material))
+                ++morphologyCount;
+
             BRAYNS_PROGRESS(progress, uris.size());
             ++progress;
-            ++morphologyCount;
         }
         loadParametricGeometry = _geometryParameters.getUseSimulationModel();
+        BRAYNS_INFO << "Loaded " << morphologyCount << "/" << uris.size()
+                    << " meshes" << std::endl;
     }
 
     if (loadParametricGeometry)
@@ -595,13 +598,13 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 {
                     morphologyOffsets[simulatedCells] = maxDistanceToSoma;
                     simulationOffset += maxDistanceToSoma;
+#pragma omp atomic
+                    ++morphologyCount;
                 }
 
                 BRAYNS_PROGRESS(progress, uris.size());
 #pragma omp atomic
                 ++progress;
-#pragma omp atomic
-                ++morphologyCount;
             }
 
 #pragma omp critical
@@ -634,6 +637,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                     private_cones[material].end());
             }
 
+#pragma omp critical
             scene.getWorldBounds().merge(private_bounds);
         }
     }
@@ -727,8 +731,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             const auto filenameNoExt =
                 boost::filesystem::path(uri.getPath()).stem().string();
             std::string meshFilename = meshedMorphologiesFolder + "/" +
-                                       filenameNoExt.c_str() +
-                                       ".h5.bin_decimated.off";
+                                       filenameNoExt.c_str() + "decimated.off";
             meshLoader.importMeshFromFile(
                 meshFilename, scene, _geometryParameters.getGeometryQuality(),
                 transforms[i], material);
@@ -784,16 +787,17 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 }
 
                 float maxDistanceToSoma;
-                _importMorphology(uri, morphologyCount, transforms[i],
-                                  &simulationInformation, private_spheres,
-                                  private_cylinders, private_cones,
-                                  private_bounds, 0, maxDistanceToSoma,
-                                  material);
+                if (_importMorphology(uri, morphologyCount, transforms[i],
+                                      &simulationInformation, private_spheres,
+                                      private_cylinders, private_cones,
+                                      private_bounds, 0, maxDistanceToSoma,
+                                      material))
+#pragma omp atomic
+                    ++morphologyCount;
+
                 BRAYNS_PROGRESS(progress, cr_uris.size());
 #pragma omp atomic
                 ++progress;
-#pragma omp atomic
-                ++morphologyCount;
             }
 
 #pragma omp critical
@@ -826,6 +830,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                     private_cones[material].end());
             }
 
+#pragma omp critical
             scene.getWorldBounds().merge(private_bounds);
         }
     }
@@ -900,18 +905,17 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         _geometryParameters.getGeometryQuality(), transforms[i],
                         material);
                 }
-                else
-                    _importMorphology(uri, morphologyCount, allTransforms[i],
-                                      nullptr, private_spheres,
-                                      private_cylinders, private_cones,
-                                      private_bounds, 0, maxDistanceToSoma,
-                                      material);
+                else if (_importMorphology(uri, morphologyCount,
+                                           allTransforms[i], nullptr,
+                                           private_spheres, private_cylinders,
+                                           private_cones, private_bounds, 0,
+                                           maxDistanceToSoma, material))
+#pragma omp atomic
+                    ++morphologyCount;
 
                 BRAYNS_PROGRESS(progress, allUris.size());
 #pragma omp atomic
                 ++progress;
-#pragma omp atomic
-                ++morphologyCount;
             }
 
 #pragma omp critical
@@ -944,6 +948,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                     private_cones[material].end());
             }
 
+#pragma omp critical
             scene.getWorldBounds().merge(private_bounds);
         }
     }
