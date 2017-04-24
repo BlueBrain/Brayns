@@ -207,16 +207,18 @@ void BaseWindow::idle()
 
 void BaseWindow::reshape(const Vector2i& newSize)
 {
-    _windowSize = newSize;
     Engine& engine = _brayns.getEngine();
-    engine.getCamera().setAspectRatio(float(newSize.x()) / float(newSize.y()));
-    engine.reshape(newSize);
+    _windowSize = engine.getSupportedFrameSize(newSize);
+
+    engine.getCamera().setAspectRatio(float(_windowSize.x()) /
+                                      float(_windowSize.y()));
+    engine.reshape(_windowSize);
 
     auto& applicationParameters = _brayns.getParametersManager();
-    applicationParameters.getApplicationParameters().setWindowSize(newSize);
+    applicationParameters.getApplicationParameters().setWindowSize(_windowSize);
 
     if (!applicationParameters.getApplicationParameters().getFilters().empty())
-        _screenSpaceProcessor.resize(newSize.x(), newSize.y());
+        _screenSpaceProcessor.resize(_windowSize.x(), _windowSize.y());
 }
 
 void BaseWindow::activate()

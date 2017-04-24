@@ -73,6 +73,7 @@ public:
     /** Gets the frame buffer */
     FrameBuffer& getFrameBuffer() { return *_frameBuffer; }
     /** Gets the camera */
+    const Camera& getCamera() const { return *_camera; }
     Camera& getCamera() { return *_camera; }
     /** Gets the renderer */
     Renderer& getRenderer();
@@ -133,6 +134,15 @@ public:
      * @returns the current frame number
      */
     size_t getFrameNumber() const { return _frameNumber; }
+    /**
+     * @brief Adapts the size of the frame buffer according to camera
+     * requirements. Typically, in case of 3D stereo vision, the frame buffer
+     * width has to be an even number.
+     * @param size New size of the frame buffer
+     * @return Size that matches the camera requirements
+     */
+    Vector2ui getSupportedFrameSize(const Vector2ui& size);
+
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();

@@ -22,6 +22,7 @@
 
 #include <brayns/Brayns.h>
 #include <brayns/common/camera/AbstractManipulator.h>
+#include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/renderer/FrameBuffer.h>
@@ -172,7 +173,7 @@ void DeflectPlugin::_sendDeflectFrame(Engine& engine)
         _lastImage.size = frameSize;
         _lastImage.format = frameBuffer.getFrameBufferFormat();
 
-        _send(true);
+        _send(engine, true);
     }
     else
         _sendFuture = make_ready_future(true);
@@ -252,7 +253,7 @@ bool DeflectPlugin::_handleDeflectEvents(Engine& engine)
     return true;
 }
 
-void DeflectPlugin::_send(const bool swapYAxis)
+void DeflectPlugin::_send(const Engine& engine, const bool swapYAxis)
 {
     deflect::PixelFormat format = deflect::RGBA;
     switch (_lastImage.format)
@@ -270,6 +271,8 @@ void DeflectPlugin::_send(const bool swapYAxis)
     deflect::ImageWrapper deflectImage(_lastImage.data.data(),
                                        _lastImage.size.x(), _lastImage.size.y(),
                                        format);
+    if (engine.getCamera().getType() == CameraType::stereo)
+        deflectImage.view = deflect::View::side_by_side;
 
     deflectImage.compressionQuality = _params.getQuality();
     deflectImage.compressionPolicy = _params.getCompression()

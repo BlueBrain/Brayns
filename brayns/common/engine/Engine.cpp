@@ -52,9 +52,10 @@ void Engine::reshape(const Vector2ui& frameSize)
     if (_frameBuffer->getSize() == frameSize)
         return;
 
-    _frameBuffer->resize(frameSize);
-    _camera->setAspectRatio(static_cast<float>(frameSize.x()) /
-                            static_cast<float>(frameSize.y()));
+    const auto size = getSupportedFrameSize(frameSize);
+    _frameBuffer->resize(size);
+    _camera->setAspectRatio(static_cast<float>(size.x()) /
+                            static_cast<float>(size.y()));
 }
 
 void Engine::commit()
@@ -118,5 +119,14 @@ Renderer& Engine::getRenderer()
 void Engine::resetFrameNumber()
 {
     _frameNumber = -1;
+}
+
+Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
+{
+    Vector2f result = size;
+    if (getCamera().getType() == CameraType::stereo && size.x() % 2 != 0)
+        // In case of 3D stereo vision, make sure the width is even
+        result.x() = size.x() - 1;
+    return result;
 }
 }
