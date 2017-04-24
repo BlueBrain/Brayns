@@ -596,8 +596,7 @@ void ZeroEQPlugin::_initializeDataSource()
     auto& geometryParameters = _parametersManager.getGeometryParameters();
     auto& volumeParameters = _parametersManager.getVolumeParameters();
 
-    _remoteDataSource.setTransferFunctionFile(
-        sceneParameters.getColorMapFilename());
+    _remoteDataSource.setColorMapFile(sceneParameters.getColorMapFilename());
     _remoteDataSource.setMorphologyFolder(
         geometryParameters.getMorphologyFolder());
     _remoteDataSource.setNestCircuit(geometryParameters.getNESTCircuit());
@@ -693,8 +692,8 @@ void ZeroEQPlugin::_dataSourceUpdated()
 
     _parametersManager.set("splash-scene-folder",
                            ""); // Make sure the splash scene is removed
-    _parametersManager.set("transfer-function-file",
-                           _remoteDataSource.getTransferFunctionFileString());
+    _parametersManager.set("color-map-file",
+                           _remoteDataSource.getColorMapFileString());
     _parametersManager.set("morphology-folder",
                            _remoteDataSource.getMorphologyFolderString());
     _parametersManager.set("nest-circuit",
