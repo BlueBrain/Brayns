@@ -473,10 +473,11 @@ inline vec3f SimulationRenderer_shadeRay(
                             // volume
                             localRefraction = 1.f;
 
-                    ray.t0 = ray.t + self->abstract.super.epsilon;
+                    ray.t0 = self->abstract.super.epsilon;
                     ray.dir =
                         refractedVector(ray.dir, localNormal,
                                         oldlocalRefraction, localRefraction);
+                    ray.org = dg.P + self->abstract.super.epsilon * ray.dir;
 
                     intersectionWeights[depth] = 1.f - localOpacity;
                     oldlocalRefraction = localRefraction;
@@ -519,7 +520,7 @@ inline vec3f SimulationRenderer_shadeRay(
     // Back to front computation of final color according to colors and weights
     // of each ray generation
     sample.alpha = pathOpacity;
-    for (int i = depth - 2; i >= 0; --i)
+    for (int i = depth - 1; i >= 0; --i)
         intersectionColors[i] =
             intersectionColors[i + 1] * intersectionWeights[i] +
             intersectionColors[i] * (1.f - intersectionWeights[i]);
