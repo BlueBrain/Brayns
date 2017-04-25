@@ -561,11 +561,7 @@ private:
         const std::string& report = geometryParameters.getReport();
         MorphologyLoader morphologyLoader(geometryParameters);
         const servus::URI uri(filename);
-        if (report.empty())
-            morphologyLoader.importCircuit(uri, target, scene, _meshLoader);
-        else
-            morphologyLoader.importCircuit(uri, target, report, scene,
-                                           _meshLoader);
+        morphologyLoader.importCircuit(uri, target, report, scene, _meshLoader);
     }
 
     /**

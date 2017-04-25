@@ -38,6 +38,11 @@
 #include <brion/brion.h>
 #endif
 
+namespace
+{
+const std::string MESH_EXTENSION = "_decimated.off";
+}
+
 namespace brayns
 {
 MorphologyLoader::MorphologyLoader(const GeometryParameters& geometryParameters)
@@ -225,7 +230,7 @@ bool MorphologyLoader::importMorphology(const servus::URI& uri,
 bool MorphologyLoader::_importMorphology(
     const servus::URI& source, const size_t morphologyIndex,
     const Matrix4f& transformation,
-    const SimulationInformation* simulationInformation, SpheresMap& spheres,
+    SimulationInformation* simulationInformation, SpheresMap& spheres,
     CylindersMap& cylinders, ConesMap& cones, Boxf& bounds,
     const size_t simulationOffset, float& maxDistanceToSoma,
     const size_t forcedMaterial)
@@ -269,7 +274,7 @@ bool MorphologyLoader::_importMorphology(
 
         float offset = 0.f;
         if (simulationInformation)
-            offset = (*simulationInformation->compartmentOffsets)[sectionId];
+            offset = simulationInformation->getCompartmentOffsets(sectionId);
         else if (simulationOffset != 0)
             offset = simulationOffset;
 
@@ -347,7 +352,8 @@ bool MorphologyLoader::_importMorphology(
             float segmentStep = 0.f;
             if (simulationInformation)
             {
-                const auto& counts = *simulationInformation->compartmentCounts;
+                const auto& counts =
+                    simulationInformation->getCompartmentCounts();
                 // Number of compartments usually differs from number of samples
                 if (samples.empty() && counts[sectionId] > 1)
                     segmentStep = counts[sectionId] / float(samples.size());
@@ -367,8 +373,8 @@ bool MorphologyLoader::_importMorphology(
                 maxDistanceToSoma = std::max(maxDistanceToSoma, distance);
 
                 if (simulationInformation)
-                    offset = (*simulationInformation
-                                   ->compartmentOffsets)[sectionId] +
+                    offset = simulationInformation->getCompartmentOffsets(
+                                 sectionId) +
                              float(i) * segmentStep;
                 else if (simulationOffset != 0)
                     offset = simulationOffset + distance;
@@ -467,184 +473,6 @@ bool getNeuronMatrix(const brion::BlueConfig& bc, const brain::GIDSet& gids,
 }
 
 bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
-                                     const std::string& target, Scene& scene,
-                                     MeshLoader& meshLoader)
-{
-    const brion::BlueConfig bc(circuitConfig.getPath());
-    const brain::Circuit circuit(bc);
-    const auto& gids =
-        (target.empty() ? circuit.getGIDs() : circuit.getGIDs(target));
-    if (gids.empty())
-    {
-        BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
-        return false;
-    }
-    const auto& transforms = circuit.getTransforms(gids);
-    const auto& uris = circuit.getMorphologyURIs(gids);
-
-    BRAYNS_INFO << "Loading " << uris.size() << " cells" << std::endl;
-
-    // Read Brion circuit
-    strings neuronMatrix;
-    bool mvd3Support =
-        getNeuronMatrix(bc, gids, _geometryParameters.getColorScheme(),
-                        neuronMatrix);
-
-    std::map<size_t, float> morphologyOffsets;
-    size_t simulationOffset = 1;
-    size_t simulatedCells = 0;
-    size_t progress = 0;
-    size_t morphologyCount = 0;
-    const auto circuitDensity = _geometryParameters.getCircuitDensity();
-    const size_t nbSkippedCells =
-        uris.size() / (uris.size() * circuitDensity / 100);
-
-    const auto meshedMorphologiesFolder =
-        _geometryParameters.getMeshedMorphologiesFolder();
-
-    bool loadParametricGeometry = true;
-    if (!meshedMorphologiesFolder.empty())
-    {
-        // Loading meshes is currently sequential. TODO: Make it parallel!!!
-        for (size_t i = 0; i < uris.size(); ++i)
-        {
-            if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
-            {
-                BRAYNS_PROGRESS(progress, uris.size());
-                ++progress;
-                continue;
-            }
-
-            if (!_positionInCircuitBoundingBox(transforms[i].getTranslation()))
-            {
-                ++progress;
-                continue;
-            }
-
-            const size_t material =
-                mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
-                            : _getMaterialFromSectionType(
-                                  morphologyCount, NO_MATERIAL,
-                                  brain::neuron::SectionType::undefined,
-                                  _geometryParameters.getColorScheme());
-
-            const auto& uri = uris[i];
-            const auto filenameNoExt =
-                boost::filesystem::path(uri.getPath()).stem().string();
-            std::string meshFilename = meshedMorphologiesFolder + "/" +
-                                       filenameNoExt.c_str() + "_decimated.off";
-            if (meshLoader.importMeshFromFile(
-                    meshFilename, scene,
-                    _geometryParameters.getGeometryQuality(), transforms[i],
-                    material))
-                ++morphologyCount;
-
-            BRAYNS_PROGRESS(progress, uris.size());
-            ++progress;
-        }
-        loadParametricGeometry = _geometryParameters.getUseSimulationModel();
-        BRAYNS_INFO << "Loaded " << morphologyCount << "/" << uris.size()
-                    << " meshes" << std::endl;
-    }
-
-    if (loadParametricGeometry)
-    {
-        progress = 0;
-        morphologyCount = 0;
-#pragma omp parallel
-        {
-            SpheresMap private_spheres;
-            CylindersMap private_cylinders;
-            ConesMap private_cones;
-            Boxf private_bounds;
-#pragma omp for nowait
-            for (size_t i = 0; i < uris.size(); ++i)
-            {
-                if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
-                {
-                    BRAYNS_PROGRESS(progress, uris.size());
-#pragma omp atomic
-                    ++progress;
-                    continue;
-                }
-
-                if (!_positionInCircuitBoundingBox(
-                        transforms[i].getTranslation()))
-                {
-#pragma omp atomic
-                    ++progress;
-                    continue;
-                }
-
-                const auto& uri = uris[i];
-                float maxDistanceToSoma = 0.f;
-                const size_t material =
-                    mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
-                                : NO_MATERIAL;
-
-                if (_geometryParameters.useMetaballs())
-                {
-                    _importMorphologyAsMesh(uri, morphologyCount,
-                                            scene.getMaterials(), transforms[i],
-                                            scene.getTriangleMeshes(),
-                                            scene.getWorldBounds(), material);
-                }
-
-                if (_importMorphology(uri, morphologyCount, transforms[i],
-                                      nullptr, private_spheres,
-                                      private_cylinders, private_cones,
-                                      private_bounds, simulationOffset,
-                                      maxDistanceToSoma, material))
-                {
-                    morphologyOffsets[simulatedCells] = maxDistanceToSoma;
-                    simulationOffset += maxDistanceToSoma;
-#pragma omp atomic
-                    ++morphologyCount;
-                }
-
-                BRAYNS_PROGRESS(progress, uris.size());
-#pragma omp atomic
-                ++progress;
-            }
-
-#pragma omp critical
-            for (const auto& p : private_spheres)
-            {
-                const size_t material = p.first;
-                scene.getSpheres()[material].insert(
-                    scene.getSpheres()[material].end(),
-                    private_spheres[material].begin(),
-                    private_spheres[material].end());
-            }
-
-#pragma omp critical
-            for (const auto& p : private_cylinders)
-            {
-                const size_t material = p.first;
-                scene.getCylinders()[material].insert(
-                    scene.getCylinders()[material].end(),
-                    private_cylinders[material].begin(),
-                    private_cylinders[material].end());
-            }
-
-#pragma omp critical
-            for (const auto& p : private_cones)
-            {
-                const size_t material = p.first;
-                scene.getCones()[material].insert(
-                    scene.getCones()[material].end(),
-                    private_cones[material].begin(),
-                    private_cones[material].end());
-            }
-
-#pragma omp critical
-            scene.getWorldBounds().merge(private_bounds);
-        }
-    }
-    return true;
-}
-
-bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                                      const std::string& target,
                                      const std::string& report, Scene& scene,
                                      MeshLoader& meshLoader)
@@ -654,6 +482,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     const brain::Circuit circuit(bc);
     const brain::GIDSet& gids =
         (target.empty() ? circuit.getGIDs() : circuit.getGIDs(target));
+
     if (gids.empty())
     {
         BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
@@ -663,19 +492,35 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 
     const brain::URIs& uris = circuit.getMorphologyURIs(gids);
 
+    brain::GIDSet cr_gids;
+
     // Load simulation information from compartment reports
-    const brion::CompartmentReport compartmentReport(
-        brion::URI(bc.getReportSource(report).getPath()), brion::MODE_READ,
-        gids);
+    std::unique_ptr<brion::CompartmentReport> compartmentReport = nullptr;
+    if (!report.empty())
+        compartmentReport.reset(new brion::CompartmentReport(
+            brion::URI(bc.getReportSource(report).getPath()), brion::MODE_READ,
+            gids));
 
     const brion::CompartmentCounts& compartmentCounts =
-        compartmentReport.getCompartmentCounts();
-
+        compartmentReport ? compartmentReport->getCompartmentCounts()
+                          : brion::CompartmentCounts();
     const brion::SectionOffsets& compartmentOffsets =
-        compartmentReport.getOffsets();
+        compartmentReport ? compartmentReport->getOffsets()
+                          : brion::SectionOffsets();
+    cr_gids = compartmentReport ? compartmentReport->getGIDs() : gids;
 
+    BRAYNS_INFO << "Loading " << cr_gids.size() << " simulated cells"
+                << std::endl;
     brain::URIs cr_uris;
-    const brain::GIDSet& cr_gids = compartmentReport.getGIDs();
+    if (compartmentReport)
+        for (const auto cr_gid : cr_gids)
+        {
+            const auto it = std::find(gids.begin(), gids.end(), cr_gid);
+            const auto index = std::distance(gids.begin(), it);
+            cr_uris.push_back(uris[index]);
+        }
+    else
+        cr_uris = uris;
 
     // Read Brion circuit
     strings neuronMatrix;
@@ -683,17 +528,6 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         getNeuronMatrix(bc, gids, _geometryParameters.getColorScheme(),
                         neuronMatrix);
 
-    BRAYNS_INFO << "Loading " << cr_gids.size() << " simulated cells"
-                << std::endl;
-    for (const auto cr_gid : cr_gids)
-    {
-        auto it = std::find(gids.begin(), gids.end(), cr_gid);
-        auto index = std::distance(gids.begin(), it);
-        cr_uris.push_back(uris[index]);
-    }
-
-    size_t progress = 0;
-    size_t morphologyCount = 0;
     const auto circuitDensity = _geometryParameters.getCircuitDensity();
     const size_t nbSkippedCells =
         uris.size() / (uris.size() * circuitDensity / 100);
@@ -701,6 +535,8 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     const auto meshedMorphologiesFolder =
         _geometryParameters.getMeshedMorphologiesFolder();
 
+    size_t progress = 0;
+    size_t morphologyCount = 0;
     bool loadParametricGeometry = true;
     if (!meshedMorphologiesFolder.empty())
     {
@@ -731,7 +567,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             const auto filenameNoExt =
                 boost::filesystem::path(uri.getPath()).stem().string();
             std::string meshFilename = meshedMorphologiesFolder + "/" +
-                                       filenameNoExt.c_str() + "decimated.off";
+                                       filenameNoExt.c_str() + MESH_EXTENSION;
             meshLoader.importMeshFromFile(
                 meshFilename, scene, _geometryParameters.getGeometryQuality(),
                 transforms[i], material);
@@ -772,8 +608,13 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 }
 
                 const auto& uri = cr_uris[i];
-                const SimulationInformation simulationInformation = {
-                    &compartmentCounts[i], &compartmentOffsets[i]};
+
+                std::unique_ptr<SimulationInformation> simulationInformation =
+                    nullptr;
+                if (compartmentReport)
+                    simulationInformation.reset(new SimulationInformation(
+                        (uint16_ts&)compartmentCounts[i],
+                        (uint64_ts&)compartmentOffsets[i]));
                 const size_t material =
                     mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
                                 : NO_MATERIAL;
@@ -788,10 +629,10 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 
                 float maxDistanceToSoma;
                 if (_importMorphology(uri, morphologyCount, transforms[i],
-                                      &simulationInformation, private_spheres,
-                                      private_cylinders, private_cones,
-                                      private_bounds, 0, maxDistanceToSoma,
-                                      material))
+                                      simulationInformation.get(),
+                                      private_spheres, private_cylinders,
+                                      private_cones, private_bounds, 0,
+                                      maxDistanceToSoma, material))
 #pragma omp atomic
                     ++morphologyCount;
 
