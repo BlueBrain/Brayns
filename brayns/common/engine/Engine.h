@@ -143,6 +143,14 @@ public:
      */
     Vector2ui getSupportedFrameSize(const Vector2ui& size);
 
+    /**
+     * @return the last operation processed by the engine
+     */
+    const std::string getLastOperation() const { return _lastOperation; }
+    /**
+     * @return the last normalized progress value (0..1) emitted by the engine
+     */
+    float getLastProgress() const { return _lastProgress; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
@@ -156,6 +164,8 @@ protected:
     FrameBufferPtr _frameBuffer;
 
     size_t _frameNumber;
+    float _lastProgress;
+    std::string _lastOperation;
 };
 }
 
