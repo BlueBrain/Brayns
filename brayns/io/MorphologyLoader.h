@@ -37,21 +37,45 @@ class CompartmentReport;
 
 namespace brayns
 {
-/** Simulation data hold the pointers to data contained by one single frame
- * of the simulation.
- * comparmentCounts: Number of compartments per section
- * comparmentOffsets: Offset for every compartments
- */
-struct SimulationInformation
-{
-    const uint16_ts* compartmentCounts;
-    const uint64_ts* compartmentOffsets;
-};
-
-/** Loads morphologies from SWC and H5 files
+/** Loads morphologies from SWC and H5, and Circuit Config files
  */
 class MorphologyLoader
 {
+    /** Simulation information hold the pointers to data contained by one single
+     * frame of the simulation.
+     * compartmentCounts: Number of compartments per section
+     * compartmentOffsets: Offset for every compartments
+     */
+    class SimulationInformation
+    {
+    public:
+        SimulationInformation(uint16_ts& compartmentCounts,
+                              uint64_ts& compartmentOffsets)
+            : _compartmentCounts(compartmentCounts)
+            , _compartmentOffsets(compartmentOffsets)
+        {
+        }
+
+        const uint16_ts& getCompartmentCounts() const
+        {
+            return _compartmentCounts;
+        }
+
+        const uint16_t& getCompartmentCounts(const size_t sectionId) const
+        {
+            return _compartmentCounts[sectionId];
+        }
+
+        const uint64_t& getCompartmentOffsets(const size_t sectionId) const
+        {
+            return _compartmentOffsets[sectionId];
+        }
+
+    private:
+        const uint16_ts& _compartmentCounts;
+        const uint64_ts& _compartmentOffsets;
+    };
+
 public:
     MorphologyLoader(const GeometryParameters& geometryParameters);
 
@@ -81,20 +105,6 @@ public:
                        const std::string& target, const std::string& report,
                        Scene& scene, MeshLoader& meshLoader);
 
-    /** Imports morphology from a circuit for the given target name
-     *
-     * @param circuitConfig URI of the Circuit Config file
-     * @param target Target to be loaded. If empty, the target specified in the
-     *        circuit configuration file is used. If such an entry does not
-     *        exist, all neurons are loaded.
-     * @param scene resulting scene
-     * @return True if the circuit is successfully loaded, false if the circuit
-     *         contains no cells.
-     */
-    bool importCircuit(const servus::URI& circuitConfig,
-                       const std::string& target, Scene& scene,
-                       MeshLoader& meshLoader);
-
     /** Imports simulation data into the scene
      * @param circuitConfig URI of the Circuit Config file
      * @param target Target to be loaded. If empty, the target specified in the
@@ -112,7 +122,7 @@ public:
 private:
     bool _importMorphology(const servus::URI& source, size_t morphologyIndex,
                            const Matrix4f& transformation,
-                           const SimulationInformation* simulationInformation,
+                           SimulationInformation* simulationInformation,
                            SpheresMap& spheres, CylindersMap& cylinders,
                            ConesMap& cones, Boxf& bounds,
                            const size_t simulationOffset,

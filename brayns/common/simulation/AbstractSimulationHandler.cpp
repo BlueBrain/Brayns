@@ -60,7 +60,8 @@ AbstractSimulationHandler::~AbstractSimulationHandler()
 
 void AbstractSimulationHandler::setTimestamp(const float timestamp)
 {
-    _timestamp = size_t(timestamp) % _nbFrames;
+    _timestamp =
+        _nbFrames == 0 ? size_t(timestamp) : size_t(timestamp) % _nbFrames;
 }
 
 bool AbstractSimulationHandler::attachSimulationToCacheFile(
