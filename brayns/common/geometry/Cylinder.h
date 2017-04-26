@@ -32,9 +32,8 @@ namespace brayns
 class Cylinder : public Primitive
 {
 public:
-    BRAYNS_API Cylinder(size_t materialId, const Vector3f& center,
-                        const Vector3f& up, float radius, float timestamp,
-                        float value);
+    BRAYNS_API Cylinder(const Vector3f& center, const Vector3f& up,
+                        float radius, float timestamp, float value);
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
     BRAYNS_API void setCenter(const Vector3f center) { _center = center; }

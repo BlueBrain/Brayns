@@ -32,8 +32,8 @@ namespace brayns
 class Sphere : public Primitive
 {
 public:
-    BRAYNS_API Sphere(size_t materialId, const Vector3f& center, float radius,
-                      float timestamp, float value);
+    BRAYNS_API Sphere(const Vector3f& center, float radius, float timestamp,
+                      float value);
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
     BRAYNS_API void setCenter(const Vector3f center) { _center = center; }

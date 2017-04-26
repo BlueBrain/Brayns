@@ -219,8 +219,8 @@ void Scene::buildDefault()
     size_t material = 7;
 
     // Sphere
-    _spheres[material].push_back(SpherePtr(
-        new Sphere(material, Vector3f(0.25f, 0.26f, 0.30f), 0.25f, 0, 0)));
+    _spheres[material].push_back(
+        SpherePtr(new Sphere(Vector3f(0.25f, 0.26f, 0.30f), 0.25f, 0, 0)));
     _materials[material]->setOpacity(0.3f);
     _materials[material]->setRefractionIndex(1.1f);
     _materials[material]->setSpecularColor(WHITE);
@@ -229,7 +229,7 @@ void Scene::buildDefault()
     // Cylinder
     ++material;
     _cylinders[material].push_back(CylinderPtr(
-        new Cylinder(material, Vector3f(0.25f, 0.126f, 0.75f),
+        new Cylinder(Vector3f(0.25f, 0.126f, 0.75f),
                      Vector3f(0.75f, 0.126f, 0.75f), 0.125f, 0, 0)));
     _materials[material]->setColor(Vector3f(0.1f, 0.1f, 0.8f));
     _materials[material]->setSpecularColor(WHITE);
@@ -238,7 +238,7 @@ void Scene::buildDefault()
     // Cone
     ++material;
     _cones[material].push_back(
-        ConePtr(new Cone(material, Vector3f(0.75f, 0.01f, 0.25f),
+        ConePtr(new Cone(Vector3f(0.75f, 0.01f, 0.25f),
                          Vector3f(0.75f, 0.5f, 0.25f), 0.15f, 0.f, 0, 0)));
     _materials[material]->setReflectionIndex(0.8f);
     _materials[material]->setSpecularColor(WHITE);
@@ -410,34 +410,34 @@ void Scene::buildEnvironment()
 
         for (size_t i = 0; i < 8; ++i)
             _spheres[material].push_back(
-                SpherePtr(new Sphere(material, positions[i], radius, 0, 0)));
+                SpherePtr(new Sphere(positions[i], radius, 0, 0)));
 
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[0], positions[1], radius, 0, 0)));
+            new Cylinder(positions[0], positions[1], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[2], positions[3], radius, 0, 0)));
+            new Cylinder(positions[2], positions[3], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[4], positions[5], radius, 0, 0)));
+            new Cylinder(positions[4], positions[5], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[6], positions[7], radius, 0, 0)));
+            new Cylinder(positions[6], positions[7], radius, 0, 0)));
 
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[0], positions[2], radius, 0, 0)));
+            new Cylinder(positions[0], positions[2], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[1], positions[3], radius, 0, 0)));
+            new Cylinder(positions[1], positions[3], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[4], positions[6], radius, 0, 0)));
+            new Cylinder(positions[4], positions[6], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[5], positions[7], radius, 0, 0)));
+            new Cylinder(positions[5], positions[7], radius, 0, 0)));
 
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[0], positions[4], radius, 0, 0)));
+            new Cylinder(positions[0], positions[4], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[1], positions[5], radius, 0, 0)));
+            new Cylinder(positions[1], positions[5], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[2], positions[6], radius, 0, 0)));
+            new Cylinder(positions[2], positions[6], radius, 0, 0)));
         _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(material, positions[3], positions[7], radius, 0, 0)));
+            new Cylinder(positions[3], positions[7], radius, 0, 0)));
 
         break;
     }

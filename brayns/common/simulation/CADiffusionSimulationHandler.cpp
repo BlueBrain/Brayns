@@ -103,8 +103,7 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
                     << std::endl;
         for (const auto position : _calciumPositions)
         {
-            SpherePtr sphere(new Sphere(MATERIAL_CA_SIMULATION, position,
-                                        CALCIUM_RADIUS, 0.f, 0.f));
+            SpherePtr sphere(new Sphere(position, CALCIUM_RADIUS, 0.f, 0.f));
             scene.getSpheres()[MATERIAL_CA_SIMULATION].push_back(sphere);
             scene.getWorldBounds().merge(position);
         }
