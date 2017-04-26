@@ -25,8 +25,11 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 
+#include "ittnotify.h"
+
 int main(int argc, const char** argv)
 {
+    __itt_pause();
     try
     {
         const size_t nbFrames = 100;
@@ -48,6 +51,7 @@ int main(int argc, const char** argv)
         auto& bounds = scene.getWorldBounds();
         const float radius = bounds.getSize().find_max();
         startTime = std::chrono::high_resolution_clock::now();
+        __itt_resume(); 
         for (size_t frame = 0; frame < nbFrames; ++frame)
         {
             const brayns::Vector3f target = bounds.getCenter();
@@ -60,6 +64,7 @@ int main(int argc, const char** argv)
 
             brayns.render();
         }
+        __itt_pause();
         duration = std::chrono::duration_cast<std::chrono::milliseconds>(
                        std::chrono::high_resolution_clock::now() - startTime)
                        .count();

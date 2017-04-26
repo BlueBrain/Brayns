@@ -7,7 +7,7 @@
 set(BRAYNSBENCHMARK_SOURCES main.cpp)
 
 set(BRAYNSBENCHMARK_LINK_LIBRARIES
-  PUBLIC brayns braynsCommon braynsIO braynsParameters
+  PUBLIC brayns braynsCommon braynsIO braynsParameters /gpfs/bbp.cscs.ch/apps/viz/intel/vtune_amplifier_xe_2016.4.0.470476/lib64/libittnotify.a
 )
 
 common_application(braynsBenchmark)
