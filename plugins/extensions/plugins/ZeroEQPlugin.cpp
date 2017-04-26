@@ -42,6 +42,7 @@ ZeroEQPlugin::ZeroEQPlugin(ParametersManager& parametersManager)
     , _parametersManager(parametersManager)
     , _compressor(tjInitCompress())
     , _processingImageJpeg(false)
+    , _remoteProgress(0)
     , _dirtyEngine(false)
 {
     _setupHTTPServer();
@@ -236,6 +237,10 @@ void ZeroEQPlugin::_setupHTTPServer()
     _httpServer->handle(_remoteForceRendering);
     _remoteForceRendering.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_forceRenderingUpdated, this));
+
+    _httpServer->handleGET(_remoteProgress);
+    _remoteProgress.registerSerializeCallback(
+        std::bind(&ZeroEQPlugin::_requestProgress, this));
 }
 
 void ZeroEQPlugin::_setupRequests()
@@ -1153,6 +1158,13 @@ bool ZeroEQPlugin::_requestClipPlanes()
 void ZeroEQPlugin::_forceRenderingUpdated()
 {
     _forceRendering = true;
+}
+
+bool ZeroEQPlugin::_requestProgress()
+{
+    _remoteProgress.setAmount(_engine->getLastProgress());
+    _remoteProgress.setOperation(_engine->getLastOperation());
+    return true;
 }
 
 uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width, const uint32_t height,

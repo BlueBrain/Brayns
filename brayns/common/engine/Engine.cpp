@@ -32,6 +32,7 @@ namespace brayns
 {
 Engine::Engine(ParametersManager& parametersManager)
     : _parametersManager(parametersManager)
+    , _lastProgress(0)
 {
     resetFrameNumber();
 }
