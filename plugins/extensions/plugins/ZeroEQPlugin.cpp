@@ -680,6 +680,10 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getMetaballsSamplesFromSoma());
     _remoteDataSource.setUseSimulationModel(
         geometryParameters.getUseSimulationModel());
+    _remoteDataSource.setMemoryMode(geometryParameters.getMemoryMode() ==
+                                            MemoryMode::shared
+                                        ? brayns::v1::MemoryMode::shared
+                                        : brayns::v1::MemoryMode::replicated);
 
     const Boxf& aabb = geometryParameters.getCircuitBoundingBox();
     if (aabb.getSize() != 0)
@@ -848,6 +852,11 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _parametersManager.set(
         "metaballs-samples-from-soma",
         std::to_string(_remoteDataSource.getMetaballsSamplesFromSoma()));
+
+    _parametersManager.set("memory-mode", _remoteDataSource.getMemoryMode() ==
+                                                  brayns::v1::MemoryMode::shared
+                                              ? "shared"
+                                              : "replicated");
 
     _parametersManager.print();
 

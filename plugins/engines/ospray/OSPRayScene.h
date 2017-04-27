@@ -83,6 +83,7 @@ public:
 private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
     void _createModel(const size_t timestamp);
+    uint32_t _getOSPDataFlags();
 
     uint64_t _serializeSpheres(const size_t materialId);
     uint64_t _serializeCylinders(const size_t materialId);
