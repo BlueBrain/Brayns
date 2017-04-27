@@ -15,7 +15,7 @@ endif()
 
 # Data access
 if(BRAYNS_BRION_ENABLED)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git 8b0c1f1)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git 15b6434)
   git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git f05b9c6)
 endif()
 
