@@ -438,7 +438,6 @@ void MetaballsGenerator::_buildTriangles(const Spheres& metaballs,
         const auto radius = metaball->getRadius();
         const auto squaredRadius = radius * radius;
         const auto& ballPosition = metaball->getCenter();
-        const auto materialId = metaball->getMaterialId();
 
 #pragma omp parallel
         for (auto& vertex : _vertices)
@@ -456,7 +455,7 @@ void MetaballsGenerator::_buildTriangles(const Spheres& metaballs,
             vertex.value += normalScale;
 
             if (distance < threshold)
-                vertex.materialId = materialId;
+                vertex.materialId = defaultMaterialId;
 
             vertex.normal += ballToPoint * normalScale;
         }

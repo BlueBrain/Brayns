@@ -22,9 +22,9 @@
 
 namespace brayns
 {
-Sphere::Sphere(const size_t materialId, const Vector3f& center,
-               const float radius, const float timestamp, const float value)
-    : Primitive(materialId, timestamp)
+Sphere::Sphere(const Vector3f& center, const float radius,
+               const float timestamp, const float value)
+    : Primitive(timestamp)
     , _center(center)
     , _radius(radius)
     , _value(value)

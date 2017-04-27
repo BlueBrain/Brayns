@@ -433,7 +433,6 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                 }
 
                 SpherePtr sphere(new Sphere(
-                    0,
                     Vector3f(position +
                              0.01f * atom.position), // convert from nanometers
                     0.0001f * atom.radius *          // convert from angstrom

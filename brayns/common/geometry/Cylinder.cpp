@@ -22,10 +22,9 @@
 
 namespace brayns
 {
-Cylinder::Cylinder(const size_t materialId, const Vector3f& center,
-                   const Vector3f& up, const float radius,
-                   const float timestamp, const float value)
-    : Primitive(materialId, timestamp)
+Cylinder::Cylinder(const Vector3f& center, const Vector3f& up,
+                   const float radius, const float timestamp, const float value)
+    : Primitive(timestamp)
     , _center(center)
     , _up(up)
     , _radius(radius)

@@ -130,10 +130,6 @@ bool MorphologyLoader::_importMorphologyAsMesh(
         {
             // Soma
             const brain::neuron::Soma& soma = morphology.getSoma();
-            const size_t material = _getMaterialFromSectionType(
-                morphologyIndex, forcedMaterial,
-                brain::neuron::SectionType::soma,
-                _geometryParameters.getColorScheme());
             const Vector3f center = soma.getCentroid();
 
             const float radius =
@@ -143,7 +139,7 @@ bool MorphologyLoader::_importMorphologyAsMesh(
                            _geometryParameters.getRadiusMultiplier());
 
             metaballs.push_back(
-                SpherePtr(new Sphere(material, center, radius, 0.f, 0.f)));
+                SpherePtr(new Sphere(center, radius, 0.f, 0.f)));
             bounds.merge(center);
         }
 
@@ -159,9 +155,6 @@ bool MorphologyLoader::_importMorphologyAsMesh(
                     continue;
             }
 
-            const auto material = _getMaterialFromSectionType(
-                morphologyIndex, forcedMaterial, section.getType(),
-                _geometryParameters.getColorScheme());
             const auto& samples = section.getSamples();
             if (samples.empty())
                 continue;
@@ -181,8 +174,8 @@ bool MorphologyLoader::_importMorphologyAsMesh(
                                _geometryParameters.getRadiusMultiplier());
 
                 if (radius > 0.f)
-                    metaballs.push_back(SpherePtr(
-                        new Sphere(material, position, radius, 0.f, 0.f)));
+                    metaballs.push_back(
+                        SpherePtr(new Sphere(position, radius, 0.f, 0.f)));
 
                 bounds.merge(position);
             }
@@ -295,8 +288,8 @@ bool MorphologyLoader::_importMorphology(
                      : soma.getMeanRadius() *
                            _geometryParameters.getRadiusMultiplier());
 
-            spheres[material].push_back(SpherePtr(
-                new Sphere(material, somaPosition, radius, 0.f, offset)));
+            spheres[material].push_back(
+                SpherePtr(new Sphere(somaPosition, radius, 0.f, offset)));
             bounds.merge(somaPosition);
 
             if (_geometryParameters.getUseSimulationModel())
@@ -312,7 +305,7 @@ bool MorphologyLoader::_importMorphology(
                     const Vector3f sample = {samples[0].x(), samples[0].y(),
                                              samples[0].z()};
                     cones[material].push_back(ConePtr(
-                        new Cone(material, somaPosition, sample, radius,
+                        new Cone(somaPosition, sample, radius,
                                  samples[0].w() * 0.5f *
                                      _geometryParameters.getRadiusMultiplier(),
                                  0.f, offset)));
@@ -398,21 +391,20 @@ bool MorphologyLoader::_importMorphology(
                                _geometryParameters.getRadiusMultiplier());
 
                 if (radius > 0.f)
-                    spheres[material].push_back(
-                        SpherePtr(new Sphere(material, position, radius,
-                                             distance, offset)));
+                    spheres[material].push_back(SpherePtr(
+                        new Sphere(position, radius, distance, offset)));
 
                 bounds.merge(position);
                 if (position != target && radius > 0.f && previousRadius > 0.f)
                 {
                     if (radius == previousRadius)
-                        cylinders[material].push_back(CylinderPtr(
-                            new Cylinder(material, position, target, radius,
-                                         distance, offset)));
+                        cylinders[material].push_back(
+                            CylinderPtr(new Cylinder(position, target, radius,
+                                                     distance, offset)));
                     else
                         cones[material].push_back(ConePtr(
-                            new Cone(material, position, target, radius,
-                                     previousRadius, distance, offset)));
+                            new Cone(position, target, radius, previousRadius,
+                                     distance, offset)));
                     bounds.merge(target);
                 }
                 previousSample = sample;
