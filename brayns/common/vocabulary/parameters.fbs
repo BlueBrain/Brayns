@@ -55,6 +55,11 @@ enum SceneEnvironment: uint {
     bounding_box = 3
 }
 
+enum MemoryMode: uint {
+    shared = 0,
+    replicated = 1
+}
+
 table MorphologyLayout {
     nb_columns: uint;
     vertical_spacing: uint;
@@ -103,6 +108,7 @@ table DataSource {
     metaballs_grid_size: uint;
     metaballs_threshold: float;
     metaballs_samples_from_soma: uint;
+    memory_mode: MemoryMode;
 }
 
 enum Shader: uint {

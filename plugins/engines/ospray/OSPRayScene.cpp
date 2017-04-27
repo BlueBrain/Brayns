@@ -558,7 +558,7 @@ uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
                 _ospExtendedSpheresData[materialId] =
                     ospNewData(spheresBufferSize, OSP_FLOAT,
                                &_serializedSpheresData[materialId][0],
-                               OSP_DATA_SHARED_BUFFER);
+                               _getOSPDataFlags());
 
                 ospSetObject(_ospExtendedSpheres[materialId], "extendedspheres",
                              _ospExtendedSpheresData[materialId]);
@@ -632,7 +632,7 @@ uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
                 _ospExtendedCylindersData[materialId] =
                     ospNewData(cylindersBufferSize, OSP_FLOAT,
                                &_serializedCylindersData[materialId][0],
-                               OSP_DATA_SHARED_BUFFER);
+                               _getOSPDataFlags());
 
                 ospSet1i(_ospExtendedCylinders[materialId], "materialID",
                          materialId);
@@ -700,7 +700,7 @@ uint64_t OSPRayScene::_serializeCones(const size_t materialId)
                 _ospExtendedConesData[materialId] =
                     ospNewData(conesBufferSize, OSP_FLOAT,
                                &_serializedConesData[materialId][0],
-                               OSP_DATA_SHARED_BUFFER);
+                               _getOSPDataFlags());
 
                 ospSet1i(_ospExtendedCones[materialId], "materialID",
                          materialId);
@@ -871,7 +871,7 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
             ospNewData(_trianglesMeshes[materialId].getVertices().size(),
                        OSP_FLOAT3,
                        &_trianglesMeshes[materialId].getVertices()[0],
-                       OSP_DATA_SHARED_BUFFER);
+                       _getOSPDataFlags());
 
         size += _trianglesMeshes[materialId].getNormals().size() * 3 *
                 sizeof(float);
@@ -879,14 +879,14 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
             ospNewData(_trianglesMeshes[materialId].getNormals().size(),
                        OSP_FLOAT3,
                        &_trianglesMeshes[materialId].getNormals()[0],
-                       OSP_DATA_SHARED_BUFFER);
+                       _getOSPDataFlags());
 
         size +=
             _trianglesMeshes[materialId].getIndices().size() * 3 * sizeof(int);
         OSPData indices =
             ospNewData(_trianglesMeshes[materialId].getIndices().size(),
                        OSP_INT3, &_trianglesMeshes[materialId].getIndices()[0],
-                       OSP_DATA_SHARED_BUFFER);
+                       _getOSPDataFlags());
 
         size +=
             _trianglesMeshes[materialId].getColors().size() * 4 * sizeof(float);
@@ -894,7 +894,7 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
             ospNewData(_trianglesMeshes[materialId].getColors().size(),
                        OSP_FLOAT3A,
                        &_trianglesMeshes[materialId].getColors()[0],
-                       OSP_DATA_SHARED_BUFFER);
+                       _getOSPDataFlags());
 
         size += _trianglesMeshes[materialId].getTextureCoordinates().size() *
                 2 * sizeof(float);
@@ -902,7 +902,7 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
             _trianglesMeshes[materialId].getTextureCoordinates().size(),
             OSP_FLOAT2,
             &_trianglesMeshes[materialId].getTextureCoordinates()[0],
-            OSP_DATA_SHARED_BUFFER);
+            _getOSPDataFlags());
 
         ospSetObject(_ospMeshes[materialId], "position", vertices);
         ospSetObject(_ospMeshes[materialId], "index", indices);
@@ -980,7 +980,7 @@ void OSPRayScene::commitLights()
         if (_ospLightData == 0)
         {
             _ospLightData = ospNewData(_lights.size(), OSP_OBJECT,
-                                       &_ospLights[0], OSP_DATA_SHARED_BUFFER);
+                                       &_ospLights[0], _getOSPDataFlags());
             ospCommit(_ospLightData);
         }
         ospSetData(osprayRenderer->impl(), "lights", _ospLightData);
@@ -1045,7 +1045,7 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
             {
                 _ospMaterialData = ospNewData(NB_SYSTEM_MATERIALS, OSP_OBJECT,
                                               &_ospMaterials[MATERIAL_SYSTEM],
-                                              OSP_DATA_SHARED_BUFFER);
+                                              _getOSPDataFlags());
 
                 ospCommit(_ospMaterialData);
             }
@@ -1068,7 +1068,7 @@ void OSPRayScene::commitTransferFunctionData()
             _ospTransferFunctionDiffuseData =
                 ospNewData(_transferFunction.getDiffuseColors().size(),
                            OSP_FLOAT4, &_transferFunction.getDiffuseColors()[0],
-                           OSP_DATA_SHARED_BUFFER);
+                           _getOSPDataFlags());
         ospCommit(_ospTransferFunctionDiffuseData);
         ospSetData(osprayRenderer->impl(), "transferFunctionDiffuseData",
                    _ospTransferFunctionDiffuseData);
@@ -1078,7 +1078,7 @@ void OSPRayScene::commitTransferFunctionData()
             ospNewData(_transferFunction.getEmissionIntensities().size(),
                        OSP_FLOAT3,
                        &_transferFunction.getEmissionIntensities()[0],
-                       OSP_DATA_SHARED_BUFFER);
+                       _getOSPDataFlags());
         ospCommit(_ospTransferFunctionEmissionData);
         ospSetData(osprayRenderer->impl(), "transferFunctionEmissionData",
                    _ospTransferFunctionEmissionData);
@@ -1116,7 +1116,7 @@ void OSPRayScene::commitVolumeData()
             const size_t size = volumeHandler->getSize();
 
             _ospVolumeData =
-                ospNewData(size, OSP_UCHAR, data, OSP_DATA_SHARED_BUFFER);
+                ospNewData(size, OSP_UCHAR, data, _getOSPDataFlags());
             ospCommit(_ospVolumeData);
             ospSetData(osprayRenderer->impl(), "volumeData", _ospVolumeData);
 
@@ -1160,8 +1160,7 @@ void OSPRayScene::commitSimulationData()
         _simulationHandler->setTimestamp(frame);
         _ospSimulationData =
             ospNewData(_simulationHandler->getFrameSize(), OSP_FLOAT,
-                       _simulationHandler->getFrameData(),
-                       OSP_DATA_SHARED_BUFFER);
+                       _simulationHandler->getFrameData(), _getOSPDataFlags());
         ospCommit(_ospSimulationData);
         ospSetData(osprayRenderer->impl(), "simulationData",
                    _ospSimulationData);
@@ -1224,5 +1223,13 @@ void OSPRayScene::saveSceneToCacheFile()
 bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
 {
     return boost::algorithm::ends_with(volumeFile, ".raw");
+}
+
+uint32_t OSPRayScene::_getOSPDataFlags()
+{
+    return _parametersManager.getGeometryParameters().getMemoryMode() ==
+                   MemoryMode::shared
+               ? OSP_DATA_SHARED_BUFFER
+               : 0;
 }
 }

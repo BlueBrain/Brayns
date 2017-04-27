@@ -202,6 +202,11 @@ public:
         _circuitBoundingBox = value;
     }
 
+    /**
+     * Defines what memory mode should be used between Brayns and the
+     * underlying renderer
+     */
+    MemoryMode getMemoryMode() const { return _memoryMode; };
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -242,6 +247,7 @@ protected:
     size_t _metaballsSamplesFromSoma;
     bool _useSimulationModel;
     Boxf _circuitBoundingBox;
+    MemoryMode _memoryMode;
 };
 }
 #endif // GEOMETRYPARAMETERS_H
