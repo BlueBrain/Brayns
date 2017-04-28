@@ -576,13 +576,14 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         morphologyCount = 0;
 #pragma omp parallel
         {
-            SpheresMap private_spheres;
-            CylindersMap private_cylinders;
-            ConesMap private_cones;
-            Boxf private_bounds;
 #pragma omp for nowait
             for (size_t i = 0; i < cr_uris.size(); ++i)
             {
+                SpheresMap private_spheres;
+                CylindersMap private_cylinders;
+                ConesMap private_cones;
+                Boxf private_bounds;
+
                 if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
                 {
                     BRAYNS_PROGRESS(progress, uris.size());
@@ -628,43 +629,41 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 #pragma omp atomic
                     ++morphologyCount;
 
+#pragma omp critical
+                for (const auto& p : private_spheres)
+                {
+                    const auto m = p.first;
+                    scene.getSpheres()[m].insert(scene.getSpheres()[m].end(),
+                                                 private_spheres[m].begin(),
+                                                 private_spheres[m].end());
+                }
+
+#pragma omp critical
+                for (const auto& p : private_cylinders)
+                {
+                    const auto m = p.first;
+                    scene.getCylinders()[m].insert(
+                        scene.getCylinders()[m].end(),
+                        private_cylinders[m].begin(),
+                        private_cylinders[m].end());
+                }
+
+#pragma omp critical
+                for (const auto& p : private_cones)
+                {
+                    const auto m = p.first;
+                    scene.getCones()[m].insert(scene.getCones()[m].end(),
+                                               private_cones[m].begin(),
+                                               private_cones[m].end());
+                }
+
+#pragma omp critical
+                scene.getWorldBounds().merge(private_bounds);
+
                 BRAYNS_PROGRESS(progress, cr_uris.size());
 #pragma omp atomic
                 ++progress;
             }
-
-#pragma omp critical
-            for (const auto& p : private_spheres)
-            {
-                const size_t material = p.first;
-                scene.getSpheres()[material].insert(
-                    scene.getSpheres()[material].end(),
-                    private_spheres[material].begin(),
-                    private_spheres[material].end());
-            }
-
-#pragma omp critical
-            for (const auto& p : private_cylinders)
-            {
-                const size_t material = p.first;
-                scene.getCylinders()[material].insert(
-                    scene.getCylinders()[material].end(),
-                    private_cylinders[material].begin(),
-                    private_cylinders[material].end());
-            }
-
-#pragma omp critical
-            for (const auto& p : private_cones)
-            {
-                const size_t material = p.first;
-                scene.getCones()[material].insert(
-                    scene.getCones()[material].end(),
-                    private_cones[material].begin(),
-                    private_cones[material].end());
-            }
-
-#pragma omp critical
-            scene.getWorldBounds().merge(private_bounds);
         }
     }
 
@@ -696,13 +695,14 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         morphologyCount = 0;
 #pragma omp parallel
         {
-            SpheresMap private_spheres;
-            CylindersMap private_cylinders;
-            ConesMap private_cones;
-            Boxf private_bounds;
 #pragma omp for nowait
             for (size_t i = 0; i < nonSimulatedCells; ++i)
             {
+                SpheresMap private_spheres;
+                CylindersMap private_cylinders;
+                ConesMap private_cones;
+                Boxf private_bounds;
+
                 if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
                 {
                     BRAYNS_PROGRESS(progress, uris.size());
@@ -746,43 +746,41 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 #pragma omp atomic
                     ++morphologyCount;
 
+#pragma omp critical
+                for (const auto& p : private_spheres)
+                {
+                    const size_t m = p.first;
+                    scene.getSpheres()[m].insert(scene.getSpheres()[m].end(),
+                                                 private_spheres[m].begin(),
+                                                 private_spheres[m].end());
+                }
+
+#pragma omp critical
+                for (const auto& p : private_cylinders)
+                {
+                    const size_t m = p.first;
+                    scene.getCylinders()[m].insert(
+                        scene.getCylinders()[m].end(),
+                        private_cylinders[m].begin(),
+                        private_cylinders[m].end());
+                }
+
+#pragma omp critical
+                for (const auto& p : private_cones)
+                {
+                    const size_t m = p.first;
+                    scene.getCones()[m].insert(scene.getCones()[m].end(),
+                                               private_cones[m].begin(),
+                                               private_cones[m].end());
+                }
+
+#pragma omp critical
+                scene.getWorldBounds().merge(private_bounds);
+
                 BRAYNS_PROGRESS(progress, allUris.size());
 #pragma omp atomic
                 ++progress;
             }
-
-#pragma omp critical
-            for (const auto& p : private_spheres)
-            {
-                const size_t material = p.first;
-                scene.getSpheres()[material].insert(
-                    scene.getSpheres()[material].end(),
-                    private_spheres[material].begin(),
-                    private_spheres[material].end());
-            }
-
-#pragma omp critical
-            for (const auto& p : private_cylinders)
-            {
-                const size_t material = p.first;
-                scene.getCylinders()[material].insert(
-                    scene.getCylinders()[material].end(),
-                    private_cylinders[material].begin(),
-                    private_cylinders[material].end());
-            }
-
-#pragma omp critical
-            for (const auto& p : private_cones)
-            {
-                const size_t material = p.first;
-                scene.getCones()[material].insert(
-                    scene.getCones()[material].end(),
-                    private_cones[material].begin(),
-                    private_cones[material].end());
-            }
-
-#pragma omp critical
-            scene.getWorldBounds().merge(private_bounds);
         }
     }
     return true;
