@@ -32,6 +32,29 @@ voltages --simulation-cache-file ~/circuits/cache
 
 ![Layer1](images/Layer1.png)
 
+#### Bounding box
+
+Defining a bounding box will prevent any geometry located outside of the box
+from being loaded. The --circuit-bounding-box command line argument takes six
+float values. The first three values being the lower bound of the box, and the
+next three values defining the upper bound.
+
+Example of how to define a circuit bounding box:
+```
+braynsViewer --circuit-config ~/circuits/BlueConfig --circuit-bounding-box -100 -100 -100 100 100 100
+```
+
+#### Density
+
+The --circuit-density command line argument defines how many of the circuit
+cells should be loaded. For example, if a density of 5 is specified, one cell
+in 20 will be loaded. Brayns reads the cells in GID order.
+
+Example of how to load 10% of the circuit:
+```
+braynsViewer --circuit-config ~/circuits/BlueConfig --circuit-density 10
+```
+
 ### Loading a NEST circuit
 
 The --nest-config command line argument define the NEST circuit to be loaded by
@@ -137,7 +160,11 @@ The --color-scheme command line argument specifies how materials are applied to
 the morphology. Available values are:
 - neuron-by-id: Each neuron has a different color
 - neuron-by-segment id: Somas are white, axons are blue, dendrites are red, and
-apical dendrites are purple.
+apical dendrites are purple
+- neuron-by-layer: A different color is assigned for every layer. All neurons
+belonging to a specific layer as the same color
+- neuron-by-mtype: Each morphological type has a different color
+- neuron-by-etype: Each electro-physiologic type has a different color
 - protein-by-id: Each protein has a different color
 - protein-atoms: Atoms have standard colors
 - protein-chains: Each chain has a different color
@@ -310,10 +337,11 @@ braynsViewer --epsilon 0.001
 
 The --camera-type command line argument defines the type of camera to be used
 by the renderer. Four cameras are currently supported.
-- perspective
-- stereo
-- orthographic
-- panoramic
+- perspective: Perspective camera
+- stereo: Side-by-side camera
+- orthographic: Orthographic camera
+- panoramic: 360 degrees camera
+- clipped: Perspective camera allowing clipping planes
 
 ```
 braynsViewer --camera-type orthographic
@@ -330,19 +358,19 @@ braynsViewer --head-light 1
 
 ## Shadows
 
-The --shadows command line argument determines if the rendering of the shadows
-is activated. A value of 1 activate the feature, 0 deactivates it.
-By default, shadows are hard. The --soft-Shadows command line argument activates
-the soft shadows.
+The --shadows command line argument determines if the intensity of the shadows.
+A value of 1 activates full shadows, 0 deactivates it. By default, shadows are
+hard. The --soft-Shadows command line argument defines the softness of the
+shadows.
 
 ```
-braynsViewer --shadows 1
+braynsViewer --shadows 0.3
 ```
 
 ![Shadows](images/Shadows.png)
 
 ```
-braynsViewer --shadows 1 --soft-shadows 1
+braynsViewer --shadows 0.6 --soft-shadows 0.1
 ```
 
 ![SoftShadows](images/SoftShadows.png)
