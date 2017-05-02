@@ -3,11 +3,39 @@ Changelog {#Changelog}
 
 # master
 
+* [#158](https://github.com/BlueBrain/Brayns/pull/158):
+  Added memory-mode command line argument to define how memory is shared between Brayns and underlying engine
+* [#156](https://github.com/BlueBrain/Brayns/pull/156):
+  Added progress message to ZeroEQ Plugin
+* [#151](https://github.com/BlueBrain/Brayns/pull/151):
+  Added support for 3D Stereo in Deflect plugin
+* [#147](https://github.com/BlueBrain/Brayns/pull/147):
+  Added bounding box command line argument to circuit loading
+* [#144](https://github.com/BlueBrain/Brayns/pull/144):
+  Added an option to export frames to PNG files
+* [#143](https://github.com/BlueBrain/Brayns/pull/143):
+  Added benchmarking application
+* [#142](https://github.com/BlueBrain/Brayns/pull/142):
+  Added simulation model allowing interactive mapping of simulation values to morphology meshes
+* [#137](https://github.com/BlueBrain/Brayns/pull/137):
+  Added a simple build script to build Brayns in the NIX environment
+* [#136](https://github.com/BlueBrain/Brayns/pull/136):
+  Volumetric global illumination improved in performance and quality
+* [#135](https://github.com/BlueBrain/Brayns/pull/135):
+  Added global illumination to OptiX-based volume rendering
+* [#133](https://github.com/BlueBrain/Brayns/pull/133):
+  Added user guide to documentation
+* [#132](https://github.com/BlueBrain/Brayns/pull/132):
+  Decoupled Brayns dependencies from git_subprojects
+* [#128](https://github.com/BlueBrain/Brayns/pull/128):
+  Added support of MaterialLUT ZeroEQ event to Livre engine
+* [#126](https://github.com/BlueBrain/Brayns/pull/126):
+  Improved build system by allowing to specify EMBREE and OSPRAY DIRECTORY directly with OSPRAY_ROOT and EMBREE_ROOT
 * [#120](https://github.com/BlueBrain/Brayns/pull/120):
   Improved visualization of molecular systems
 * [#116](https://github.com/BlueBrain/Brayns/pull/116):
   Added automated meshing of somas using metaballs algorithm
-* [#103](https://github.com/BlueBrain/Brayns/pull/103:
+* [#103](https://github.com/BlueBrain/Brayns/pull/103):
   Added clipping planes (OSPRay engine only). --camera-type command line argument must
   be set to activate the feature
 * [#99](https://github.com/BlueBrain/Brayns/pull/99):
