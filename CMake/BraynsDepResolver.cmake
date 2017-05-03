@@ -30,7 +30,7 @@ endif()
 
 # OSPRay rendering engine
 if(BRAYNS_OSPRAY_ENABLED)
-    common_find_package(ospray SYSTEM)
+    common_find_package(ospray QUIET)
 endif()
 
 # OptiX rendering engine

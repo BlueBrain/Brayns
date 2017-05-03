@@ -24,6 +24,8 @@ option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
 option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" ON)
 option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ON)
 
+set(EMBREE_MAX_ISA "AVX512KNL" CACHE STRING "MAX ISA SSE,AVX,AVX2,AVX512KNL")
+
 include(Common)
 
 include(BraynsDepResolver)
@@ -32,7 +34,6 @@ if(BRAYNS_OSPRAY_ENABLED)
     # ------------------------------------------------------------------------------
     # OSPRAY specific settings
     # ------------------------------------------------------------------------------
-
     # compiler selection for the non-MIC part
     if(APPLE)
       set(OSPRAY_COMPILER "CLANG" CACHE STRING "compiler to use (ICC,GCC, or CLANG)")
