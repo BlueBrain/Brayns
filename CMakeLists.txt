@@ -45,7 +45,6 @@ if(BRAYNS_OSPRAY_ENABLED)
 
     # the arch we're targeting for the non-MIC/non-xeon phi part of ospray
     set(BRAYNS_BUILD_ISA "ALL" CACHE STRING "Target ISA (SSE,AVX,AVX2,or ALL)")
-#useless line
     set_property(CACHE BRAYNS_BUILD_ISA PROPERTY STRINGS ALL SSE AVX AVX2)
 endif()
 
