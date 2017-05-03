@@ -103,7 +103,12 @@ public:
      */
     bool importCircuit(const servus::URI& circuitConfig,
                        const std::string& target, const std::string& report,
-                       Scene& scene, MeshLoader& meshLoader);
+                       Scene& scene
+#if BRAYNS_USE_ASSIMP
+                       ,
+                       MeshLoader& meshLoader
+#endif
+                       );
 
     /** Imports simulation data into the scene
      * @param circuitConfig URI of the Circuit Config file
