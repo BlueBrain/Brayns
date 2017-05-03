@@ -32,7 +32,6 @@ int main(int argc, const char** argv)
         brayns::Brayns brayns(argc, argv);
 
       auto start = std::chrono::system_clock::now();
-   // for (size_t i = 0; i < 100; ++i)
       while (true)
          brayns.render();
       auto end = std::chrono::system_clock::now();
