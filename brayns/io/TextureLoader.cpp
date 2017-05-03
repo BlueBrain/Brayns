@@ -22,7 +22,7 @@
 
 #include <brayns/common/log.h>
 
-#ifdef BRAYNS_USE_MAGICKPP
+#if (BRAYNS_USE_MAGICKPP)
 #include <Magick++.h>
 #endif
 
@@ -32,7 +32,8 @@ TextureLoader::TextureLoader()
 {
 }
 
-#ifdef BRAYNS_USE_MAGICKPP
+#if (BRAYNS_USE_MAGICKPP)
+
 bool TextureLoader::loadTexture(TexturesMap& textures,
                                 const TextureType textureType,
                                 const std::string& filename)
@@ -76,12 +77,12 @@ bool TextureLoader::loadTexture(TexturesMap& textures,
     }
     return true;
 }
-#else
+#else  // BRAYNS_USE_MAGICKPP
 bool TextureLoader::loadTexture(TexturesMap&, const TextureType,
                                 const std::string& filename)
 {
     BRAYNS_ERROR << "ImageMagick is required to load " << filename << std::endl;
     return false;
 }
-#endif
+#endif // BRAYNS_USE_MAGICKPP
 }

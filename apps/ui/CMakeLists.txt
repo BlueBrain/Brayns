@@ -23,7 +23,7 @@ stringify_shaders(${SSP_SHADERS})
 list(APPEND BRAYNSUI_SOURCES ${SHADER_SOURCES})
 
 set(BRAYNSUI_LINK_LIBRARIES
-    PUBLIC Servus brayns braynsParameters vmmlib
+    PUBLIC brayns braynsParameters vmmlib
       ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     PRIVATE ${GLUT_LIBRARIES} ${GLEW_LIBRARIES}
 )

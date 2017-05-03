@@ -13,6 +13,6 @@ set(BRAYNS_PUBLIC_HEADERS Brayns.h)
 set(BRAYNS_SOURCES Brayns.cpp)
 
 set(BRAYNS_LINK_LIBRARIES
-    PUBLIC Servus braynsParameters braynsCommon braynsIO braynsPlugins)
+    PUBLIC braynsParameters braynsCommon braynsIO braynsPlugins)
 
 common_library(brayns)

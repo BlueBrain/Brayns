@@ -1203,7 +1203,7 @@ OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)
                  << texture->getWidth() << "x" << texture->getHeight() << "x"
                  << (int)type << std::endl;
 
-    osp::vec2i texSize{texture->getWidth(), texture->getHeight()};
+    osp::vec2i texSize{int(texture->getWidth()), int(texture->getHeight())};
     OSPTexture2D ospTexture =
         ospNewTexture2D(texSize, type, texture->getRawData(), 0);
 

@@ -25,7 +25,9 @@
 #include <brayns/api.h>
 #include <brayns/common/types.h>
 
+#if BRAYNS_USE_SERVUS
 #include <servus/serializable.h>
+#endif
 
 namespace brayns
 {
@@ -199,10 +201,12 @@ public:
     /** Resets the camera to its initial values */
     BRAYNS_API void reset();
 
+#if (BRAYNS_USE_SERVUS)
     /**
        @return the serializable of the Camera
     */
     BRAYNS_API servus::Serializable* getSerializable();
+#endif
 
     /**
        @return true if any modification happend after the last resetModified()

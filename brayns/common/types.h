@@ -41,8 +41,7 @@ typedef ::int8_t int8;
 typedef ::uint8_t uint8;
 typedef ::int64_t index_t;
 
-#define BRAYNS_USE_NETWORKING (BRAYNS_USE_LIBJPEGTURBO && BRAYNS_USE_ZEROEQ)
-#ifdef BRAYNS_USE_MAGICKPP
+#if BRAYNS_USE_MAGICKPP
 #define MAGICKCORE_HDRI_ENABLE true
 #define MAGICKCORE_QUANTUM_DEPTH 32
 #endif

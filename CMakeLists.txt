@@ -53,6 +53,10 @@ common_find_package(Boost REQUIRED COMPONENTS
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 
+if(BRAYNS_IMAGEMAGICK_ENABLED==ON)
+common_find_package(Magick++ SYSTEM)
+endif()
+
 if( NOT( OPTIX_FOUND AND CUDA_FOUND ) AND NOT OSPRAY_FOUND AND NOT TARGET LivreLib )
     message( FATAL_ERROR
         "Neither OptiX+CUDA, OSPRay nor Livre were found. Brayns cannot work without an engine" )

@@ -29,7 +29,7 @@
 
 namespace brayns
 {
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
 class ZeroEQPlugin;
 #endif
 
@@ -43,7 +43,7 @@ struct Image
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
     DeflectPlugin(KeyboardHandler& keyboardHandler,
                   AbstractManipulator& cameraManipulator, ZeroEQPlugin& zeroeq);
 #else

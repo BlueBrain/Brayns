@@ -1,6 +1,5 @@
 # -*- mode: cmake -*-
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git cfa6243)
-git_subproject(Servus https://github.com/HBPVIS/Servus.git 36180b5)
 
 if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
   git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git cea0338)
@@ -15,10 +14,10 @@ endif()
 
 # Data access
 if(BRAYNS_BRION_ENABLED)
+  git_subproject(Servus https://github.com/HBPVIS/Servus.git 36180b5)
   git_subproject(Brion https://github.com/BlueBrain/Brion.git 15b6434)
   git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git f05b9c6)
 endif()
-
 
 # Livre rendering engine
 if(BRAYNS_LIVRE_ENABLED)

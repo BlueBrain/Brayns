@@ -21,14 +21,15 @@
 
 #include "Camera.h"
 #include <brayns/common/log.h>
-#ifdef BRAYNS_USE_ZEROBUF
+
+#if BRAYNS_USE_SERVUS
 #include <zerobuf/render/camera.h>
 #endif
 
 namespace brayns
 {
 struct Camera::Impl
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
     : public brayns::v1::Camera
 #endif
 {
@@ -83,7 +84,7 @@ public:
 
     const Vector3f& getPosition() const
     {
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         const auto& origin = brayns::v1::Camera::getOrigin();
         _position = Vector3f(origin[0], origin[1], origin[2]);
 #endif
@@ -94,7 +95,7 @@ public:
     {
         if (_position.equals(position))
             return;
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         const floats& origin = {position.x(), position.y(), position.z()};
         brayns::v1::Camera::setOrigin(origin);
 #endif
@@ -104,7 +105,7 @@ public:
 
     const Vector3f& getTarget() const
     {
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         const auto& lookat = brayns::v1::Camera::getLookAt();
         _target = Vector3f(lookat[0], lookat[1], lookat[2]);
 #endif
@@ -115,7 +116,7 @@ public:
     {
         if (_target.equals(target))
             return;
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         const floats& lookat = {target.x(), target.y(), target.z()};
         brayns::v1::Camera::setLookAt(lookat);
 #endif
@@ -125,7 +126,7 @@ public:
 
     const Vector3f& getUp() const
     {
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         const auto& up = brayns::v1::Camera::getUp();
         _up = Vector3f(up[0], up[1], up[2]);
 #endif
@@ -136,7 +137,7 @@ public:
     {
         if (_up.equals(upVector))
             return;
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         const floats& up = {upVector.x(), upVector.y(), upVector.z()};
         brayns::v1::Camera::setUp(up);
 #endif
@@ -149,7 +150,7 @@ public:
     {
         if (_fieldOfView == fieldOfView)
             return;
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         brayns::v1::Camera::setFieldOfView(fieldOfView);
 #endif
         _fieldOfView = fieldOfView;
@@ -158,7 +159,7 @@ public:
 
     float getFieldOfView() const
     {
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         _fieldOfView = brayns::v1::Camera::getFieldOfView();
 #endif
         return _fieldOfView;
@@ -177,7 +178,7 @@ public:
     {
         if (_aperture == aperture)
             return;
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         brayns::v1::Camera::setAperture(aperture);
 #endif
         _aperture = aperture;
@@ -186,7 +187,7 @@ public:
 
     float getAperture() const
     {
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         _aperture = brayns::v1::Camera::getAperture();
 #endif
         return _aperture;
@@ -196,7 +197,7 @@ public:
     {
         if (_focalLength == focalLength)
             return;
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         brayns::v1::Camera::setFocalLength(focalLength);
 #endif
         _focalLength = focalLength;
@@ -205,7 +206,7 @@ public:
 
     float getFocalLength() const
     {
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         _focalLength = brayns::v1::Camera::getFocalLength();
 #endif
         return _focalLength;
@@ -215,7 +216,7 @@ public:
     {
         if (_stereoMode == stereoMode)
             return;
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         switch (stereoMode)
         {
         case CameraStereoMode::left:
@@ -242,7 +243,7 @@ public:
 
     CameraStereoMode getStereoMode() const
     {
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         switch (brayns::v1::Camera::getStereoMode())
         {
         case brayns::v1::CameraStereoMode::left:
@@ -266,7 +267,7 @@ public:
     {
         if (_eyeSeparation == eyeSeparation)
             return;
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         brayns::v1::Camera::setEyeSeparation(eyeSeparation);
 #endif
         _eyeSeparation = eyeSeparation;
@@ -275,7 +276,7 @@ public:
 
     float getEyeSeparation() const
     {
-#ifdef BRAYNS_USE_ZEROBUF
+#if (BRAYNS_USE_SERVUS)
         _eyeSeparation = brayns::v1::Camera::getEyeSeparation();
 #endif
         return _eyeSeparation;
@@ -439,14 +440,12 @@ float Camera::getEyeSeparation() const
     return _impl->getEyeSeparation();
 }
 
+#if (BRAYNS_USE_SERVUS)
 servus::Serializable* Camera::getSerializable()
 {
-#ifdef BRAYNS_USE_ZEROBUF
     return _impl.get();
-#else
-    return 0;
-#endif
 }
+#endif
 
 bool Camera::getModified() const
 {

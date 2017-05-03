@@ -104,7 +104,7 @@ public:
     bool importCircuit(const servus::URI& circuitConfig,
                        const std::string& target, const std::string& report,
                        Scene& scene
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
                        ,
                        MeshLoader& meshLoader
 #endif

@@ -65,7 +65,7 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
         format = OSP_FB_NONE;
     }
 
-    osp::vec2i size = {_frameSize.x(), _frameSize.y()};
+    osp::vec2i size = {int(_frameSize.x()), int(_frameSize.y())};
 
     size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
     if (_accumulation)

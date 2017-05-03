@@ -37,24 +37,28 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/io/MorphologyLoader.h>
-#include <brayns/io/NESTLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #endif
 
-#if BRAYNS_USE_MAGICKPP
+#if (BRAYNS_USE_MAGICKPP)
 #include <Magick++.h>
 #endif
 
 #include <plugins/engines/EngineFactory.h>
+#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
 #include <plugins/extensions/ExtensionPluginFactory.h>
+#endif
 
+#if (BRAYNS_USE_BRION)
+#include <brayns/io/MorphologyLoader.h>
+#include <brayns/io/NESTLoader.h>
 #include <servus/uri.h>
+#endif
 
 namespace brayns
 {
@@ -77,7 +81,7 @@ struct Brayns::Impl
             new EngineFactory(argc, argv, *_parametersManager));
         createEngine();
 
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
         _extensionPluginFactory.reset(
             new ExtensionPluginFactory(*_parametersManager, *_keyboardHandler,
                                        *_cameraManipulator));
@@ -112,7 +116,7 @@ struct Brayns::Impl
 
     void buildScene()
     {
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
         _meshLoader.clear();
 #endif
         _loadData();
@@ -142,7 +146,7 @@ struct Brayns::Impl
         _engine->commit();
     }
 
-#if BRAYNS_USE_MAGICKPP
+#if (BRAYNS_USE_MAGICKPP)
     void _writeFrameToFolder()
     {
         const auto& frameExportFolder =
@@ -199,7 +203,7 @@ struct Brayns::Impl
     }
 #endif
 
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
     void _executePlugins(const Vector2ui& size)
     {
         auto oldEngine = _engine.get();
@@ -223,7 +227,7 @@ struct Brayns::Impl
         _engine->reshape(renderInput.windowSize);
         _engine->preRender();
 
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
         _executePlugins(renderInput.windowSize);
 #endif
         auto& sceneParams = _parametersManager->getSceneParameters();
@@ -278,7 +282,7 @@ struct Brayns::Impl
         _engine->reshape(windowSize);
         _engine->preRender();
 
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
         _executePlugins(windowSize);
 #endif
         Scene& scene = _engine->getScene();
@@ -345,12 +349,6 @@ private:
         }
         scene.commitTransferFunctionData();
 
-        if (!geometryParameters.getMorphologyFolder().empty())
-            _loadMorphologyFolder();
-
-        if (!geometryParameters.getNESTCircuit().empty())
-            _loadNESTCircuit();
-
         if (!geometryParameters.getPDBFile().empty())
             _loadPDBFile(geometryParameters.getPDBFile());
 
@@ -360,12 +358,20 @@ private:
         if (!geometryParameters.getMeshFolder().empty())
             _loadMeshFolder(geometryParameters.getMeshFolder());
 
+#if (BRAYNS_USE_BRION)
+        if (!geometryParameters.getNESTCircuit().empty())
+            _loadNESTCircuit();
+
+        if (!geometryParameters.getMorphologyFolder().empty())
+            _loadMorphologyFolder();
+
         if (!geometryParameters.getReport().empty())
             _loadCompartmentReport();
 
         if (!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getLoadCacheFile().empty())
             _loadCircuitConfiguration();
+#endif
 
         if (!geometryParameters.getXYZBFile().empty())
             _loadXYZBFile();
@@ -387,71 +393,6 @@ private:
             worldBounds.merge(volumeOffset +
                               Vector3f(volumeDimensions) *
                                   volumeElementSpacing);
-        }
-    }
-
-    /**
-        Loads data from SWC and H5 files located in the folder specified
-       in the
-        geometry parameters (command line parameter --morphology-folder)
-    */
-    void _loadMorphologyFolder()
-    {
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
-        auto& scene = _engine->getScene();
-        const auto& folder = geometryParameters.getMorphologyFolder();
-        BRAYNS_INFO << "Loading morphologies from " << folder << std::endl;
-        MorphologyLoader morphologyLoader(geometryParameters);
-
-        const strings filters = {".swc", ".h5"};
-        const strings files = parseFolder(folder, filters);
-        size_t progress = 0;
-        for (const auto& file : files)
-        {
-            BRAYNS_PROGRESS(progress, files.size());
-            servus::URI uri(file);
-            if (!morphologyLoader.importMorphology(uri, progress, scene))
-                BRAYNS_ERROR << "Failed to import " << file << std::endl;
-            ++progress;
-        }
-    }
-
-    /**
-     * Loads data from a NEST circuit file (command line parameter
-     * --nest-circuit)
-     */
-    void _loadNESTCircuit()
-    {
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
-        auto& scene = _engine->getScene();
-
-        const std::string& circuit(geometryParameters.getNESTCircuit());
-        if (!circuit.empty())
-        {
-            size_t nbMaterials;
-            NESTLoader loader(geometryParameters);
-            loader.importCircuit(circuit, scene, nbMaterials);
-            loader.importSpikeReport(geometryParameters.getNESTReport(), scene);
-
-            const std::string& cacheFile(geometryParameters.getNESTCacheFile());
-            if (!cacheFile.empty())
-            {
-                SpikeSimulationHandlerPtr simulationHandler(
-                    new SpikeSimulationHandler(
-                        _parametersManager->getGeometryParameters()));
-                simulationHandler->attachSimulationToCacheFile(cacheFile);
-                scene.setSimulationHandler(simulationHandler);
-            }
-
-            auto& sceneParameters = _parametersManager->getSceneParameters();
-            const std::string& colorMapFilename =
-                sceneParameters.getColorMapFilename();
-            if (!colorMapFilename.empty())
-            {
-                TransferFunctionLoader transferFunctionLoader;
-                transferFunctionLoader.loadFromFile(colorMapFilename, scene);
-                scene.commitTransferFunctionData();
-            }
         }
     }
 
@@ -524,7 +465,7 @@ private:
     */
     void _loadMeshFolder(const std::string& folder)
     {
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
         BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
@@ -553,6 +494,72 @@ private:
 #endif
     }
 
+#if (BRAYNS_USE_BRION)
+    /**
+     * Loads data from a NEST circuit file (command line parameter
+     * --nest-circuit)
+     */
+    void _loadNESTCircuit()
+    {
+        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& scene = _engine->getScene();
+
+        const std::string& circuit(geometryParameters.getNESTCircuit());
+        if (!circuit.empty())
+        {
+            size_t nbMaterials;
+            NESTLoader loader(geometryParameters);
+            loader.importCircuit(circuit, scene, nbMaterials);
+            loader.importSpikeReport(geometryParameters.getNESTReport(), scene);
+
+            const std::string& cacheFile(geometryParameters.getNESTCacheFile());
+            if (!cacheFile.empty())
+            {
+                SpikeSimulationHandlerPtr simulationHandler(
+                    new SpikeSimulationHandler(
+                        _parametersManager->getGeometryParameters()));
+                simulationHandler->attachSimulationToCacheFile(cacheFile);
+                scene.setSimulationHandler(simulationHandler);
+            }
+
+            auto& sceneParameters = _parametersManager->getSceneParameters();
+            const std::string& colorMapFilename =
+                sceneParameters.getColorMapFilename();
+            if (!colorMapFilename.empty())
+            {
+                TransferFunctionLoader transferFunctionLoader;
+                transferFunctionLoader.loadFromFile(colorMapFilename, scene);
+                scene.commitTransferFunctionData();
+            }
+        }
+    }
+
+    /**
+        Loads data from SWC and H5 files located in the folder specified
+       in the
+        geometry parameters (command line parameter --morphology-folder)
+    */
+    void _loadMorphologyFolder()
+    {
+        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& scene = _engine->getScene();
+        const auto& folder = geometryParameters.getMorphologyFolder();
+        BRAYNS_INFO << "Loading morphologies from " << folder << std::endl;
+        MorphologyLoader morphologyLoader(geometryParameters);
+
+        const strings filters = {".swc", ".h5"};
+        const strings files = parseFolder(folder, filters);
+        size_t progress = 0;
+        for (const auto& file : files)
+        {
+            BRAYNS_PROGRESS(progress, files.size());
+            servus::URI uri(file);
+            if (!morphologyLoader.importMorphology(uri, progress, scene))
+                BRAYNS_ERROR << "Failed to import " << file << std::endl;
+            ++progress;
+        }
+    }
+
     /**
         Loads morphologies from circuit configuration (command line
        parameter
@@ -571,11 +578,11 @@ private:
         const std::string& report = geometryParameters.getReport();
         MorphologyLoader morphologyLoader(geometryParameters);
         const servus::URI uri(filename);
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
         morphologyLoader.importCircuit(uri, target, report, scene, _meshLoader);
 #else
         morphologyLoader.importCircuit(uri, target, report, scene);
-#endif
+#endif // BRAYNS_USE_ASSIMP
     }
 
     /**
@@ -608,6 +615,7 @@ private:
             }
         }
     }
+#endif // BRAYNS_USE_BRION
 
     /**
         Loads molecular system from configuration (command line
@@ -616,7 +624,7 @@ private:
     */
     void _loadMolecularSystem()
     {
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
@@ -885,7 +893,7 @@ private:
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
     MeshLoader _meshLoader;
 #endif
 
