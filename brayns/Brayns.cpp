@@ -37,17 +37,17 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/io/MeshLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
-#ifdef BRAYNS_USE_ASSIMP
+#if BRAYNS_USE_ASSIMP
+#include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #endif
 
-#ifdef BRAYNS_USE_MAGICKPP
+#if BRAYNS_USE_MAGICKPP
 #include <Magick++.h>
 #endif
 
@@ -77,9 +77,11 @@ struct Brayns::Impl
             new EngineFactory(argc, argv, *_parametersManager));
         createEngine();
 
+#if BRAYNS_USE_NETWORKING
         _extensionPluginFactory.reset(
             new ExtensionPluginFactory(*_parametersManager, *_keyboardHandler,
                                        *_cameraManipulator));
+#endif
     }
 
     void createEngine()
@@ -110,7 +112,9 @@ struct Brayns::Impl
 
     void buildScene()
     {
+#if BRAYNS_USE_ASSIMP
         _meshLoader.clear();
+#endif
         _loadData();
         Scene& scene = _engine->getScene();
         scene.commitVolumeData();
@@ -138,7 +142,7 @@ struct Brayns::Impl
         _engine->commit();
     }
 
-#ifdef BRAYNS_USE_MAGICKPP
+#if BRAYNS_USE_MAGICKPP
     void _writeFrameToFolder()
     {
         const auto& frameExportFolder =
@@ -195,6 +199,7 @@ struct Brayns::Impl
     }
 #endif
 
+#if BRAYNS_USE_NETWORKING
     void _executePlugins(const Vector2ui& size)
     {
         auto oldEngine = _engine.get();
@@ -207,6 +212,9 @@ struct Brayns::Impl
             _engine->preRender();
         }
     }
+#else
+    void _executePlugins(const Vector2ui&) {}
+#endif
 
     void render(const RenderInput& renderInput, RenderOutput& renderOutput)
     {
@@ -215,8 +223,9 @@ struct Brayns::Impl
         _engine->reshape(renderInput.windowSize);
         _engine->preRender();
 
+#if BRAYNS_USE_NETWORKING
         _executePlugins(renderInput.windowSize);
-
+#endif
         auto& sceneParams = _parametersManager->getSceneParameters();
         if (sceneParams.getAnimationDelta() != 0)
             _engine->commit();
@@ -269,8 +278,9 @@ struct Brayns::Impl
         _engine->reshape(windowSize);
         _engine->preRender();
 
+#if BRAYNS_USE_NETWORKING
         _executePlugins(windowSize);
-
+#endif
         Scene& scene = _engine->getScene();
         Camera& camera = _engine->getCamera();
 
@@ -514,7 +524,7 @@ private:
     */
     void _loadMeshFolder(const std::string& folder)
     {
-#ifdef BRAYNS_USE_ASSIMP
+#if BRAYNS_USE_ASSIMP
         BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
@@ -561,7 +571,11 @@ private:
         const std::string& report = geometryParameters.getReport();
         MorphologyLoader morphologyLoader(geometryParameters);
         const servus::URI uri(filename);
+#if BRAYNS_USE_ASSIMP
         morphologyLoader.importCircuit(uri, target, report, scene, _meshLoader);
+#else
+        morphologyLoader.importCircuit(uri, target, report, scene);
+#endif
     }
 
     /**
@@ -602,7 +616,7 @@ private:
     */
     void _loadMolecularSystem()
     {
-#ifdef BRAYNS_USE_ASSIMP
+#if BRAYNS_USE_ASSIMP
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
@@ -871,7 +885,9 @@ private:
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
+#if BRAYNS_USE_ASSIMP
     MeshLoader _meshLoader;
+#endif
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;

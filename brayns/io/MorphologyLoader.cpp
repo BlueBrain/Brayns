@@ -466,8 +466,12 @@ bool getNeuronMatrix(const brion::BlueConfig& bc, const brain::GIDSet& gids,
 
 bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                                      const std::string& target,
-                                     const std::string& report, Scene& scene,
-                                     MeshLoader& meshLoader)
+                                     const std::string& report, Scene& scene
+#if BRAYNS_USE_ASSIMP
+                                     ,
+                                     MeshLoader& meshLoader
+#endif
+                                     )
 {
     const std::string& filename = circuitConfig.getPath();
     const brion::BlueConfig bc(filename);
@@ -530,6 +534,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     size_t progress = 0;
     size_t morphologyCount = 0;
     bool loadParametricGeometry = true;
+#if BRAYNS_USE_ASSIMP
     if (!meshedMorphologiesFolder.empty())
     {
         // Loading meshes is currently sequential. TODO: Make it parallel!!!
@@ -569,6 +574,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         }
         loadParametricGeometry = _geometryParameters.getUseSimulationModel();
     }
+#endif
 
     if (loadParametricGeometry)
     {
@@ -726,6 +732,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         ? boost::lexical_cast<size_t>(neuronMatrix[i][0])
                         : NO_MATERIAL;
 
+#if BRAYNS_USE_ASSIMP
                 if (!meshedMorphologiesFolder.empty())
                 {
                     const auto filenameNoExt =
@@ -738,11 +745,13 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         _geometryParameters.getGeometryQuality(), transforms[i],
                         material);
                 }
-                else if (_importMorphology(uri, morphologyCount,
-                                           allTransforms[i], nullptr,
-                                           private_spheres, private_cylinders,
-                                           private_cones, private_bounds, 0,
-                                           maxDistanceToSoma, material))
+                else
+#endif
+                    if (_importMorphology(uri, morphologyCount,
+                                          allTransforms[i], nullptr,
+                                          private_spheres, private_cylinders,
+                                          private_cones, private_bounds, 0,
+                                          maxDistanceToSoma, material))
 #pragma omp atomic
                     ++morphologyCount;
 
@@ -882,14 +891,12 @@ bool MorphologyLoader::importMorphology(const servus::URI&, const int, Scene&)
 }
 
 bool MorphologyLoader::importCircuit(const servus::URI&, const std::string&,
-                                     Scene&)
-{
-    BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
-    return false;
-}
-
-bool MorphologyLoader::importCircuit(const servus::URI&, const std::string&,
-                                     const std::string&, Scene&)
+                                     const std::string&, Scene&
+#if BRAYNS_USE_ASSIMP
+                                     ,
+                                     MeshLoader&
+#endif
+                                     )
 {
     BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
     return false;
