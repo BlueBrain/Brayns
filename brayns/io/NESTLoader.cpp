@@ -103,12 +103,15 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
     BRAYNS_INFO << "Number of materials: " << nbMaterials << std::endl;
 
     SpheresMap& spheres = scene.getSpheres();
+    spheres[0].reserve(_frameSize);
+    _positions.reserve(_frameSize);
     Boxf& bounds = scene.getWorldBounds();
     const float radius = _geometryParameters.getRadiusMultiplier();
 
+    Progress progress("Loading neurons...", _frameSize);
     for (uint64_t gid = 0; gid < _frameSize; ++gid)
     {
-        BRAYNS_PROGRESS(gid, _frameSize);
+        ++progress;
         // Create a unique index for the combination of R,G and B values. This
         // index will then
         // be used to identify the color that should be applied to the sphere by
@@ -125,16 +128,8 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
     BRAYNS_INFO << "Finished loading " << _frameSize << " neurons" << std::endl;
 }
 
-bool NESTLoader::importSpikeReport(const std::string& filename, Scene& scene)
+bool NESTLoader::importSpikeReport(const std::string& filename)
 {
-    SpikeSimulationHandlerPtr simulationHandler(
-        new SpikeSimulationHandler(_geometryParameters));
-
-    const std::string& cacheFile = _geometryParameters.getNESTCacheFile();
-    if (simulationHandler->attachSimulationToCacheFile(cacheFile))
-        // Cache already exists, no need to create it.
-        return true;
-
     if (!_loadBinarySpikes(filename))
     {
         BRAYNS_ERROR << "No valid binary .spikes file found" << std::endl;
@@ -145,7 +140,8 @@ bool NESTLoader::importSpikeReport(const std::string& filename, Scene& scene)
     _spikingTimes.resize(_frameSize, -1.f);
 
     BRAYNS_INFO << "Cache file does not exist, creating it" << std::endl;
-    std::ofstream file(cacheFile, std::ios::out | std::ios::binary);
+    const std::string& cacheFile = _geometryParameters.getNESTCacheFile();
+    std::ofstream file(cacheFile, std::ios::binary);
 
     if (!file.is_open())
     {
@@ -153,10 +149,11 @@ bool NESTLoader::importSpikeReport(const std::string& filename, Scene& scene)
         return false;
     }
 
+    SpikeSimulationHandler simulationHandler(_geometryParameters);
     // Write header
-    simulationHandler->setNbFrames(nbFrames);
-    simulationHandler->setFrameSize(_frameSize);
-    simulationHandler->writeHeader(file);
+    simulationHandler.setNbFrames(nbFrames);
+    simulationHandler.setFrameSize(_frameSize);
+    simulationHandler.writeHeader(file);
 
     BRAYNS_INFO << "Spike report contains " << nbFrames << " frames of "
                 << _frameSize << " values each" << std::endl;
@@ -166,11 +163,12 @@ bool NESTLoader::importSpikeReport(const std::string& filename, Scene& scene)
          timestamp += NEST_TIMESTEP)
     {
         _load(timestamp);
-        simulationHandler->writeFrame(file, _spikingTimes);
+        simulationHandler.writeFrame(file, _spikingTimes);
+        if (file.bad())
+            throw std::runtime_error(
+                "Could not write cache file (disk full?), aborting");
     }
     file.close();
-
-    scene.setSimulationHandler(simulationHandler);
 
     BRAYNS_INFO << "----------------------------------------" << std::endl;
     BRAYNS_INFO << "Number of frames: " << nbFrames << std::endl;
@@ -181,7 +179,7 @@ bool NESTLoader::importSpikeReport(const std::string& filename, Scene& scene)
 
 bool NESTLoader::_loadBinarySpikes(const std::string& spikesFilename)
 {
-    std::ifstream file(spikesFilename, std::ios::out | std::ios::binary);
+    std::ifstream file(spikesFilename, std::ios::binary);
     file.seekg(0, std::ios::end);
     const size_t fileSize = file.tellg();
     file.seekg(0);
@@ -209,14 +207,15 @@ bool NESTLoader::_loadBinarySpikes(const std::string& spikesFilename)
     _values.reserve(_nbElements);
     _gids.reserve(_nbElements);
     size_t i = 0;
+    Progress progress("Loading spikes...", _nbElements);
     while (!file.eof())
     {
-        BRAYNS_PROGRESS(i, _nbElements);
         file.read((char*)&value, sizeof(float));
         _values.push_back(value);
         file.read((char*)&gid, sizeof(uint32_t));
         _gids.push_back(gid);
         ++i;
+        ++progress;
     }
 
     _spikesStart = _values[0];             // First spike timestamp after header
@@ -239,12 +238,6 @@ bool NESTLoader::_load(const float timestamp)
     BRAYNS_DEBUG << "Loading spikes at timestamp: " << timestamp << " ("
                  << start << " ms)" << std::endl;
 
-    char filename[1024];
-    sprintf(
-        filename,
-        "/home/favreau/medias/volumes/spikes/10pct/events/spikes_%05d.events",
-        int(timestamp * 10));
-    std::ofstream myFile(filename, std::ios::out | std::ios::binary);
     size_t nbSpikes = 0;
     for (size_t i = 0; i < _nbElements; ++i)
     {
@@ -262,23 +255,11 @@ bool NESTLoader::_load(const float timestamp)
 
         // We store the frame on which the spike happens, as the renderer keeps
         // track of the current timestamp
+        assert(gid < _spikingTimes.size());
         _spikingTimes[gid] = time;
-
-        const Vector3f& position = _positions[gid];
-        float value;
-        value = position.x();
-        myFile.write((char*)&value, sizeof(float));
-        value = position.y();
-        myFile.write((char*)&value, sizeof(float));
-        value = position.z();
-        myFile.write((char*)&value, sizeof(float));
-        value = 1.f;
-        myFile.write((char*)&value, sizeof(float));
-        myFile.write((char*)&value, sizeof(float));
 
         ++nbSpikes;
     }
-    myFile.close();
     BRAYNS_INFO << "Nb Spikes for timestamp " << timestamp << " [" << start
                 << "-" << end << "]: " << nbSpikes << std::endl;
 
@@ -290,7 +271,7 @@ void NESTLoader::importCircuit(const std::string&, Scene&, size_t&)
     BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
 }
 
-bool NESTLoader::importSpikeReport(const std::string&, Scene&)
+bool NESTLoader::importSpikeReport(const std::string&)
 {
     BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
     return false;

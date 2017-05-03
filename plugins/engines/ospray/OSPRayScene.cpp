@@ -1148,19 +1148,26 @@ void OSPRayScene::commitSimulationData()
     if (!_simulationHandler)
         return;
 
+    const float timestamp =
+        _parametersManager.getSceneParameters().getTimestamp();
+
+    if (_simulationHandler->getTimestamp() == timestamp)
+        return;
+
+    _simulationHandler->setTimestamp(timestamp);
+    auto frameData = _simulationHandler->getFrameData();
+
+    if (!frameData)
+        return;
+
     for (const auto& renderer : _renderers)
     {
         OSPRayRenderer* osprayRenderer =
             dynamic_cast<OSPRayRenderer*>(renderer.get());
 
-        // Simulation data
-        const uint64_t frame =
-            _parametersManager.getSceneParameters().getTimestamp();
-
-        _simulationHandler->setTimestamp(frame);
         _ospSimulationData =
-            ospNewData(_simulationHandler->getFrameSize(), OSP_FLOAT,
-                       _simulationHandler->getFrameData(), _getOSPDataFlags());
+            ospNewData(_simulationHandler->getFrameSize(), OSP_FLOAT, frameData,
+                       _getOSPDataFlags());
         ospCommit(_ospSimulationData);
         ospSetData(osprayRenderer->impl(), "simulationData",
                    _ospSimulationData);

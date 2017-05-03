@@ -47,7 +47,7 @@ if(OPTIX_FOUND AND CUDA_FOUND)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOptiXEnginePlugin)
 endif()
 
-if(TARGET LivreLib)
+if(BRAYNS_LIVRE_ENABLED)
   add_subdirectory(engines/livre)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsLivreEnginePlugin)
 endif()

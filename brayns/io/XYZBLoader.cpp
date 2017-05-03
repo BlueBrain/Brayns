@@ -87,16 +87,15 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
         return false;
     }
 
-    uint64_t progress = 0;
     file.seekg(0, std::ios_base::end);
     uint64_t nbPoints = file.tellg() / (3 * sizeof(double));
     file.seekg(0);
 
     SpheresMap& spheres = scene.getSpheres();
+    Progress progress("Loading spheres...", nbPoints);
     while (!file.eof())
     {
-        if (progress % (nbPoints / 100) == 0)
-            BRAYNS_PROGRESS(progress, nbPoints);
+        ++progress;
 
         double x, y, z;
         file.read((char*)&x, sizeof(double));
@@ -110,8 +109,6 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
             new Sphere(position, _geometryParameters.getRadiusMultiplier(), 0.f,
                        0.f)));
         scene.getWorldBounds().merge(position);
-
-        ++progress;
     }
 
     file.close();

@@ -531,27 +531,21 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     const auto meshedMorphologiesFolder =
         _geometryParameters.getMeshedMorphologiesFolder();
 
-    size_t progress = 0;
     size_t morphologyCount = 0;
     bool loadParametricGeometry = true;
 #if (BRAYNS_USE_ASSIMP)
     if (!meshedMorphologiesFolder.empty())
     {
         // Loading meshes is currently sequential. TODO: Make it parallel!!!
+        Progress progress("Loading meshes...", uris.size());
         for (size_t i = 0; i < uris.size(); ++i)
         {
+            ++progress;
             if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
-            {
-                BRAYNS_PROGRESS(progress, uris.size());
-                ++progress;
                 continue;
-            }
 
             if (!_positionInCircuitBoundingBox(transforms[i].getTranslation()))
-            {
-                ++progress;
                 continue;
-            }
 
             const size_t material =
                 mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
@@ -568,8 +562,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             meshLoader.importMeshFromFile(
                 meshFilename, scene, _geometryParameters.getGeometryQuality(),
                 transforms[i], material);
-            BRAYNS_PROGRESS(progress, uris.size());
-            ++progress;
+
             ++morphologyCount;
         }
         loadParametricGeometry = _geometryParameters.getUseSimulationModel();
@@ -578,31 +571,27 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 
     if (loadParametricGeometry)
     {
-        progress = 0;
+        Progress progress("Loading geometries...", cr_uris.size());
         morphologyCount = 0;
 #pragma omp parallel
         {
 #pragma omp for nowait
             for (size_t i = 0; i < cr_uris.size(); ++i)
             {
+#pragma omp critical
+                ++progress;
+
                 SpheresMap private_spheres;
                 CylindersMap private_cylinders;
                 ConesMap private_cones;
                 Boxf private_bounds;
 
                 if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
-                {
-                    BRAYNS_PROGRESS(progress, uris.size());
-#pragma omp atomic
-                    ++progress;
                     continue;
-                }
 
                 if (!_positionInCircuitBoundingBox(
                         transforms[i].getTranslation()))
                 {
-#pragma omp atomic
-                    ++progress;
                     continue;
                 }
 
@@ -665,10 +654,6 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 
 #pragma omp critical
                 scene.getWorldBounds().merge(private_bounds);
-
-                BRAYNS_PROGRESS(progress, cr_uris.size());
-#pragma omp atomic
-                ++progress;
             }
         }
     }
@@ -694,34 +679,30 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         if (cr_uris.size() < nonSimulatedCells)
             nonSimulatedCells = cr_uris.size();
 
-        BRAYNS_INFO << "Loading " << nonSimulatedCells << " non-simulated cells"
-                    << std::endl;
+        std::stringstream msg;
+        msg << "Loading " << nonSimulatedCells << " non-simulated cells";
 
-        progress = 0;
+        Progress progress(msg.str(), allUris.size());
         morphologyCount = 0;
 #pragma omp parallel
         {
 #pragma omp for nowait
             for (size_t i = 0; i < nonSimulatedCells; ++i)
             {
+#pragma omp critical
+                ++progress;
+
                 SpheresMap private_spheres;
                 CylindersMap private_cylinders;
                 ConesMap private_cones;
                 Boxf private_bounds;
 
                 if (nbSkippedCells != 0 && i % nbSkippedCells != 0)
-                {
-                    BRAYNS_PROGRESS(progress, uris.size());
-#pragma omp atomic
-                    ++progress;
                     continue;
-                }
 
                 if (!_positionInCircuitBoundingBox(
                         transforms[i].getTranslation()))
                 {
-#pragma omp atomic
-                    ++progress;
                     continue;
                 }
 
@@ -785,10 +766,6 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 
 #pragma omp critical
                 scene.getWorldBounds().merge(private_bounds);
-
-                BRAYNS_PROGRESS(progress, allUris.size());
-#pragma omp atomic
-                ++progress;
             }
         }
     }
@@ -846,19 +823,18 @@ bool MorphologyLoader::importSimulationData(const servus::URI& circuitConfig,
 
     const uint64_t nbFrames = (lastFrame - firstFrame) / step;
 
-    BRAYNS_INFO
-        << "Loading values from compartment report and saving them to cache"
-        << std::endl;
-
     // Write header
     simulationHandler->setNbFrames(nbFrames);
     simulationHandler->setFrameSize(frameSize);
     simulationHandler->writeHeader(file);
 
     // Write body
+    Progress progress(
+        "Loading values from compartment report and saving them to cache",
+        nbFrames);
     for (uint64_t frame = 0; frame < nbFrames; ++frame)
     {
-        BRAYNS_PROGRESS(frame, nbFrames);
+        ++progress;
         const float frameTime = firstFrame + step * frame;
         const brion::floatsPtr& valuesPtr =
             compartmentReport.loadFrame(frameTime);

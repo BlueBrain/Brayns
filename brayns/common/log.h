@@ -21,9 +21,9 @@
 #ifndef BRAYNS_LOG_H
 #define BRAYNS_LOG_H
 
+#include <boost/progress.hpp>
 #include <chrono>
 #include <iostream>
-#include <mutex>
 #define BRAYNS_ERROR std::cerr << "[ERROR] "
 #define BRAYNS_WARN std::cerr << "[WARN ] "
 #define BRAYNS_INFO std::cout << "[INFO ] "
@@ -54,19 +54,15 @@
         std::cout << "[TIMER] " << __duration << " ms" << std::endl;     \
     }
 
-static std::mutex __logging_mtx;
-#define BRAYNS_PROGRESS(__value, __maxValue)                                \
-    {                                                                       \
-        std::lock_guard<std::mutex> lock(__logging_mtx);                    \
-        std::cout << "[INFO ] [";                                           \
-        uint64_t __percent = 100 * (__value + 1) / __maxValue;              \
-        for (uint64_t __progress = 0; __progress < 100; __progress += 2)    \
-            std::cout << (__progress <= __percent ? "=" : " ");             \
-        std::cout << "] " << int(__percent) << " % [" << __value + 1 << "/" \
-                  << __maxValue << "]\r";                                   \
-        std::cout.flush();                                                  \
-        if (__value >= __maxValue - 1)                                      \
-            std::cout << std::endl;                                         \
+class Progress : public boost::progress_display
+{
+public:
+    Progress(const std::string& message, const unsigned long expected_count)
+        : boost::progress_display(expected_count, std::cout,
+                                  "[INFO ] " + message + "\n[INFO ] ",
+                                  "[INFO ] ", "[INFO ] ")
+    {
     }
+};
 
 #endif

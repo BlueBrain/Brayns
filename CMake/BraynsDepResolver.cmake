@@ -6,6 +6,7 @@ if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
   common_find_package(ZeroEQ REQUIRED)
   common_find_package(ZeroBuf REQUIRED)
   common_find_package(Lexis REQUIRED)
+  list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)
 endif()
 
 # ZeroEQ and HTTP messaging

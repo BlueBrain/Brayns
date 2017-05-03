@@ -46,6 +46,12 @@ typedef ::int64_t index_t;
 #define MAGICKCORE_QUANTUM_DEPTH 32
 #endif
 
+#ifdef __GNUC__
+#define BRAYNS_UNUSED __attribute__((unused))
+#else
+#define BRAYNS_UNUSED
+#endif
+
 namespace brayns
 {
 // Forward declarations
