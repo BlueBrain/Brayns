@@ -65,6 +65,7 @@ const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
 const std::string PARAM_USE_SIMULATION_MODEL = "use-simulation-model";
 const std::string PARAM_CIRCUIT_BOUNDING_BOX = "circuit-bounding-box";
+const std::string PARAM_MEMORY_MODE = "memory-mode";
 
 const std::string COLOR_SCHEMES[11] = {"none",
                                        "neuron-by-id",
@@ -82,6 +83,7 @@ const std::string SCENE_ENVIRONMENTS[4] = {"none", "ground", "wall",
                                            "bounding-box"};
 
 const std::string GEOMETRY_QUALITIES[3] = {"low", "medium", "high"};
+const std::string GEOMETRY_MEMORY_MODES[2] = {"shared", "replicated"};
 }
 
 namespace brayns
@@ -107,6 +109,7 @@ GeometryParameters::GeometryParameters()
     , _metaballsSamplesFromSoma(3)
     , _useSimulationModel(false)
     , _circuitBoundingBox(Vector3f(0.f), Vector3f(0.f))
+    , _memoryMode(MemoryMode::shared)
 {
     _parameters.add_options()(PARAM_MORPHOLOGY_FOLDER.c_str(),
                               po::value<std::string>(),
@@ -194,7 +197,10 @@ GeometryParameters::GeometryParameters()
                                    "handle the simulation geometry [bool]")(
         PARAM_CIRCUIT_BOUNDING_BOX.c_str(), po::value<floats>()->multitoken(),
         "Does not load circuit geometry outside of the specified bounding box"
-        "[float float float float float float]");
+        "[float float float float float float]")(
+        PARAM_MEMORY_MODE.c_str(), po::value<std::string>(),
+        "Defines what memory mode should be used between Brayns and the "
+        "underlying renderer [shared|replicated]");
 }
 
 bool GeometryParameters::_parse(const po::variables_map& vm)
@@ -329,6 +335,15 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             BRAYNS_ERROR << "Invalid number of values for "
                          << PARAM_CIRCUIT_BOUNDING_BOX << std::endl;
     }
+    if (vm.count(PARAM_MEMORY_MODE))
+    {
+        const auto& memoryMode = vm[PARAM_MEMORY_MODE].as<std::string>();
+        for (size_t i = 0; i < sizeof(GEOMETRY_MEMORY_MODES) /
+                                   sizeof(GEOMETRY_MEMORY_MODES[0]);
+             ++i)
+            if (memoryMode == GEOMETRY_MEMORY_MODES[i])
+                _memoryMode = static_cast<MemoryMode>(i);
+    }
 
     return true;
 }
@@ -406,6 +421,9 @@ void GeometryParameters::print()
                 << std::endl;
     BRAYNS_INFO << "Use simulation model       : "
                 << (_useSimulationModel ? "yes" : "no") << std::endl;
+    BRAYNS_INFO << "Memory mode                : "
+                << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
+                << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(

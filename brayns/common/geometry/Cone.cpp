@@ -22,10 +22,9 @@
 
 namespace brayns
 {
-Cone::Cone(const size_t materialId, const Vector3f& center, const Vector3f& up,
-           const float centerRadius, const float upRadius,
-           const float timestamp, const float value)
-    : Primitive(materialId, timestamp)
+Cone::Cone(const Vector3f& center, const Vector3f& up, const float centerRadius,
+           const float upRadius, const float timestamp, const float value)
+    : Primitive(timestamp)
     , _center(center)
     , _up(up)
     , _centerRadius(centerRadius)

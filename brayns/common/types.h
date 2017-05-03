@@ -291,6 +291,12 @@ const size_t MATERIAL_CA_SIMULATION = MATERIAL_SYSTEM + 4;
 const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 
+enum class MemoryMode
+{
+    shared,
+    replicated
+};
+
 /** Defines how materials should be created */
 enum class MaterialType
 {

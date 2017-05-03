@@ -117,8 +117,8 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
                              int(zColor[gid] * 65536);
         const Vector3f center(xPos[gid], yPos[gid], zPos[gid]);
         _positions.push_back(center);
-        spheres[0].push_back(SpherePtr(
-            new Sphere(0, center, radius, 0.f, materials[index].w())));
+        spheres[0].push_back(
+            SpherePtr(new Sphere(center, radius, 0.f, materials[index].w())));
         bounds.merge(center);
     }
 

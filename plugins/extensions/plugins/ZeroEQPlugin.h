@@ -28,6 +28,7 @@
 #include <zeroeq/http/server.h>
 #include <zeroeq/zeroeq.h>
 
+#include <lexis/data/Progress.h>
 #include <lexis/render/ClipPlanes.h>
 #include <lexis/render/Histogram.h>
 #include <lexis/render/frame.h>
@@ -220,6 +221,13 @@ private:
     void _forceRenderingUpdated();
 
     /**
+     * @brief This method is called when the progress of the application is
+     * requested by a ZeroEQ event
+     * @return True if the method was successful, false otherwise
+     */
+    bool _requestProgress();
+
+    /**
      * @brief Resizes an given image according to the new size
      * @param srcData Source buffer
      * @param srcSize Source size
@@ -263,6 +271,7 @@ private:
     ::lexis::render::Histogram _remoteSimulationHistogram;
     ::lexis::render::Histogram _remoteVolumeHistogram;
     ::lexis::render::MaterialLUT _remoteMaterialLUT;
+    ::lexis::data::Progress _remoteProgress;
 
     ::brayns::v1::DataSource _remoteDataSource;
     ::brayns::v1::Settings _remoteSettings;
