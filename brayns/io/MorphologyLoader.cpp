@@ -33,7 +33,7 @@
 
 #include <boost/filesystem.hpp>
 
-#ifdef BRAYNS_USE_BRION
+#if (BRAYNS_USE_BRION)
 #include <brain/brain.h>
 #include <brion/brion.h>
 #endif
@@ -50,7 +50,7 @@ MorphologyLoader::MorphologyLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-#ifdef BRAYNS_USE_BRION
+#if (BRAYNS_USE_BRION)
 size_t _getMaterialFromSectionType(const size_t morphologyIndex,
                                    const size_t forcedMaterial,
                                    const brain::neuron::SectionType sectionType,
@@ -467,7 +467,7 @@ bool getNeuronMatrix(const brion::BlueConfig& bc, const brain::GIDSet& gids,
 bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                                      const std::string& target,
                                      const std::string& report, Scene& scene
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
                                      ,
                                      MeshLoader& meshLoader
 #endif
@@ -534,7 +534,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     size_t progress = 0;
     size_t morphologyCount = 0;
     bool loadParametricGeometry = true;
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
     if (!meshedMorphologiesFolder.empty())
     {
         // Loading meshes is currently sequential. TODO: Make it parallel!!!
@@ -732,7 +732,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         ? boost::lexical_cast<size_t>(neuronMatrix[i][0])
                         : NO_MATERIAL;
 
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
                 if (!meshedMorphologiesFolder.empty())
                 {
                     const auto filenameNoExt =
@@ -892,7 +892,7 @@ bool MorphologyLoader::importMorphology(const servus::URI&, const int, Scene&)
 
 bool MorphologyLoader::importCircuit(const servus::URI&, const std::string&,
                                      const std::string&, Scene&
-#if BRAYNS_USE_ASSIMP
+#if (BRAYNS_USE_ASSIMP)
                                      ,
                                      MeshLoader&
 #endif

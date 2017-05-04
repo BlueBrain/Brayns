@@ -27,8 +27,6 @@
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <servus/uri.h>
-
 #include <boost/filesystem.hpp>
 
 namespace brayns

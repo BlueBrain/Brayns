@@ -20,15 +20,16 @@
 
 #include "EngineFactory.h"
 
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/log.h>
 
-#ifdef BRAYNS_USE_OSPRAY
+#if (BRAYNS_USE_OSPRAY)
 #include <plugins/engines/ospray/OSPRayEngine.h>
 #endif
-#ifdef BRAYNS_USE_OPTIX
+#if (BRAYNS_USE_OPTIX)
 #include <plugins/engines/optix/OptiXEngine.h>
 #endif
-#ifdef BRAYNS_USE_LIVRE
+#if (BRAYNS_USE_LIVRE)
 #include <plugins/engines/livre/LivreEngine.h>
 #endif
 
@@ -48,7 +49,7 @@ EnginePtr EngineFactory::get(const std::string& name)
         return _engines[name];
     try
     {
-#ifdef BRAYNS_USE_OSPRAY
+#if (BRAYNS_USE_OSPRAY)
         if (name == "ospray")
         {
             const char** argv = new const char*[_arguments.size()];
@@ -60,7 +61,7 @@ EnginePtr EngineFactory::get(const std::string& name)
             return _engines[name];
         }
 #endif
-#ifdef BRAYNS_USE_OPTIX
+#if (BRAYNS_USE_OPTIX)
         if (name == "optix")
         {
             const char** argv = new const char*[_arguments.size()];
@@ -72,7 +73,7 @@ EnginePtr EngineFactory::get(const std::string& name)
             return _engines[name];
         }
 #endif
-#ifdef BRAYNS_USE_LIVRE
+#if (BRAYNS_USE_LIVRE)
         if (name == "livre")
         {
             char** argv = new char*[_arguments.size()];

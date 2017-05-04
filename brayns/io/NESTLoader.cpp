@@ -25,7 +25,7 @@
 #include <brayns/common/simulation/SpikeSimulationHandler.h>
 #include <brayns/common/types.h>
 
-#ifdef BRAYNS_USE_BRION
+#if (BRAYNS_USE_BRION)
 #include <H5Cpp.h>
 #endif
 #include <algorithm>
@@ -49,7 +49,7 @@ NESTLoader::NESTLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-#ifdef BRAYNS_USE_BRION
+#if (BRAYNS_USE_BRION)
 void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
                                size_t& nbMaterials)
 {

@@ -7,9 +7,7 @@ set(BRAYNSIO_SOURCES
   algorithms/MetaballsGenerator.cpp
   XYZBLoader.cpp
   TransferFunctionLoader.cpp
-  MorphologyLoader.cpp
   ProteinLoader.cpp
-  NESTLoader.cpp
   TextureLoader.cpp
 )
 
@@ -17,9 +15,7 @@ set(BRAYNSIO_PUBLIC_HEADERS
   algorithms/MetaballsGenerator.h
   XYZBLoader.h
   TransferFunctionLoader.h
-  MorphologyLoader.h
   ProteinLoader.h
-  NESTLoader.h
   TextureLoader.h
 )
 
@@ -34,7 +30,9 @@ if(ASSIMP_FOUND)
   list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE assimp)
 endif()
 
-if(TARGET Brion)
+if(Brion_FOUND)
+  list(APPEND BRAYNSIO_SOURCES MorphologyLoader.cpp NESTLoader.cpp)
+  list(APPEND BRAYNSIO_PUBLIC_HEADERS MorphologyLoader.h NESTLoader.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE Brion Brain ${HDF5_LIBRARIES})
 endif()
 

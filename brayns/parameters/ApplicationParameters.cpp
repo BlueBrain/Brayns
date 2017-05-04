@@ -33,7 +33,7 @@ const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_FILTERS = "filters";
 const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
 const std::string PARAM_ZEROEQ_AUTO_PUBLISH = "zeroeq-auto-publish";
 #endif
 
@@ -66,7 +66,7 @@ ApplicationParameters::ApplicationParameters()
         "JPEG compression rate (100 is full quality) [float]")(
         PARAM_JPEG_SIZE.c_str(), po::value<uints>()->multitoken(),
         "JPEG size [int int]")
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
         (PARAM_ZEROEQ_AUTO_PUBLISH.c_str(), po::value<bool>(),
          "Enable|Disable automatic publishing of zeroeq network events [bool]")
 #endif
@@ -106,7 +106,7 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
         _filters = vm[PARAM_FILTERS].as<strings>();
     if (vm.count(PARAM_FRAME_EXPORT_FOLDER))
         _frameExportFolder = vm[PARAM_FRAME_EXPORT_FOLDER].as<std::string>();
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
     if (vm.count(PARAM_ZEROEQ_AUTO_PUBLISH))
         _autoPublishZeroEQEvents = vm[PARAM_ZEROEQ_AUTO_PUBLISH].as<bool>();
 #endif
@@ -124,7 +124,7 @@ void ApplicationParameters::print()
     BRAYNS_INFO << "JPEG Compression            : " << _jpegCompression
                 << std::endl;
     BRAYNS_INFO << "JPEG size                   : " << _jpegSize << std::endl;
-#if BRAYNS_USE_NETWORKING
+#if (BRAYNS_USE_NETWORKING)
     BRAYNS_INFO << "Auto-publish ZeroeEQ events : "
                 << (_autoPublishZeroEQEvents ? "on" : "off") << std::endl;
 #endif

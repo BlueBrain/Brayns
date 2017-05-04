@@ -67,13 +67,17 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
 )
 
 set(BRAYNSCOMMON_LINK_LIBRARIES
-    PUBLIC braynsParameters Servus vmmlib
+    PUBLIC braynsParameters vmmlib
       ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 
-if(TARGET Lexis AND TARGET ZeroBuf)
+if(Lexis_FOUND)
+  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES Lexis)
+endif()
+
+if(BRAYNS_NETWORKING_ENABLED)
   add_subdirectory(vocabulary)
-  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES Lexis ZeroBuf BraynsZeroBufRender)
+  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES ZeroBuf BraynsZeroBufRender)
 endif()
 
 common_library(braynsCommon)

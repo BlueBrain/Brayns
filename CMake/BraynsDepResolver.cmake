@@ -2,8 +2,6 @@
 # common_package dependencies of Brayns
 
 
-common_find_package(Servus REQUIRED)
-
 if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
   common_find_package(ZeroEQ REQUIRED)
   common_find_package(ZeroBuf REQUIRED)
@@ -22,6 +20,7 @@ endif()
 
 # Data access
 if(BRAYNS_BRION_ENABLED)
+  common_find_package(Servus REQUIRED)
   common_find_package(Lunchbox)
   common_find_package(BBPTestData)
   common_find_package(Brion REQUIRED)
@@ -30,7 +29,7 @@ endif()
 
 # OSPRay rendering engine
 if(BRAYNS_OSPRAY_ENABLED)
-    common_find_package(ospray QUIET)
+    common_find_package(ospray SYSTEM)
 endif()
 
 # OptiX rendering engine
