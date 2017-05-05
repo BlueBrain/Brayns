@@ -31,17 +31,9 @@
 namespace brayns
 {
 ExtensionPluginFactory::ExtensionPluginFactory(
-#if (BRAYNS_USE_NETWORKING) || BRAYNS_USE_DEFLECT
-#ifdef BRAYNS_USE_DEFLECT
-    ParametersManager&, KeyboardHandler& keyboardHandler,
-    AbstractManipulator& cameraManipulator)
-#else
-    ParametersManager& parametersManager, KeyboardHandler&,
-    AbstractManipulator&)
-#endif
-#else
-    ParametersManager&, KeyboardHandler&, AbstractManipulator&)
-#endif
+    ParametersManager& parametersManager BRAYNS_UNUSED,
+    KeyboardHandler& keyboardHandler BRAYNS_UNUSED,
+    AbstractManipulator& cameraManipulator BRAYNS_UNUSED)
 {
 #if (BRAYNS_USE_NETWORKING)
     auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>(parametersManager);

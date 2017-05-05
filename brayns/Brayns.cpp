@@ -404,13 +404,11 @@ private:
         // Load PDB File
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         const std::string& folder = geometryParameters.getPDBFolder();
-        BRAYNS_INFO << "Loading PDB folder " << folder << std::endl;
         const strings filters = {".pdb", ".pdb1"};
         const strings files = parseFolder(folder, filters);
-        size_t progress = 0;
+        Progress progress("Loading PDB folder " + folder, files.size());
         for (const auto& file : files)
         {
-            BRAYNS_PROGRESS(progress, files.size());
             _loadPDBFile(file);
             ++progress;
         }
@@ -466,26 +464,26 @@ private:
     void _loadMeshFolder(const std::string& folder)
     {
 #if (BRAYNS_USE_ASSIMP)
-        BRAYNS_INFO << "Loading meshes from " << folder << std::endl;
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
 
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
                            ".stl", ".3ds", ".ase", ".ifc", ".off"};
         strings files = parseFolder(folder, filters);
-        size_t progress = 0;
+        size_t i = 0;
+        Progress progress("Loading meshes from " + folder, files.size());
         for (const auto& file : files)
         {
-            BRAYNS_PROGRESS(progress, files.size());
             size_t material =
                 geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-                    ? progress % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS)
+                    ? i % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS)
                     : NO_MATERIAL;
 
             if (!_meshLoader.importMeshFromFile(
                     file, scene, geometryParameters.getGeometryQuality(),
                     Matrix4f(), material))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
+            ++i;
             ++progress;
         }
 #else
@@ -509,16 +507,39 @@ private:
         {
             size_t nbMaterials;
             NESTLoader loader(geometryParameters);
+
+            // need to import circuit first to determine _frameSize for report
+            // loading
             loader.importCircuit(circuit, scene, nbMaterials);
-            loader.importSpikeReport(geometryParameters.getNESTReport(), scene);
 
             const std::string& cacheFile(geometryParameters.getNESTCacheFile());
+            if (!geometryParameters.getNESTReport().empty() &&
+                cacheFile.empty())
+                throw std::runtime_error(
+                    "Need cache file to visualize simulation data");
+
             if (!cacheFile.empty())
             {
                 SpikeSimulationHandlerPtr simulationHandler(
                     new SpikeSimulationHandler(
                         _parametersManager->getGeometryParameters()));
-                simulationHandler->attachSimulationToCacheFile(cacheFile);
+                if (!simulationHandler->attachSimulationToCacheFile(cacheFile))
+                {
+                    if (!loader.importSpikeReport(
+                            geometryParameters.getNESTReport()))
+                    {
+                        throw std::runtime_error(
+                            "Could not load spike report, aborting");
+                    }
+
+                    if (!simulationHandler->attachSimulationToCacheFile(
+                            cacheFile))
+                    {
+                        throw std::runtime_error(
+                            "Could load cache file, aborting");
+                    }
+                }
+
                 scene.setSimulationHandler(simulationHandler);
             }
 
@@ -544,19 +565,19 @@ private:
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
-        BRAYNS_INFO << "Loading morphologies from " << folder << std::endl;
         MorphologyLoader morphologyLoader(geometryParameters);
 
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
-        size_t progress = 0;
+        size_t i = 0;
+        Progress progress("Loading morphologies from " + folder, files.size());
         for (const auto& file : files)
         {
-            BRAYNS_PROGRESS(progress, files.size());
-            servus::URI uri(file);
-            if (!morphologyLoader.importMorphology(uri, progress, scene))
-                BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++progress;
+            servus::URI uri(file);
+            if (!morphologyLoader.importMorphology(uri, i, scene))
+                BRAYNS_ERROR << "Failed to import " << file << std::endl;
+            ++i;
         }
     }
 

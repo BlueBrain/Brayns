@@ -509,21 +509,18 @@ bool ZeroEQPlugin::_requestImageJPEG()
                 resizedColorBuffer = resizedBuffer.data();
             }
 
-            int32_t pixelFormat = TJPF_RGBA;
+            int32_t pixelFormat = TJPF_RGBX;
             switch (frameBuffer.getFrameBufferFormat())
             {
             case FrameBufferFormat::bgra_i8:
-                pixelFormat = TJPF_BGRA;
+                pixelFormat = TJPF_BGRX;
                 break;
             case FrameBufferFormat::rgba_i8:
-                pixelFormat = TJPF_RGB;
-                break;
             default:
-                pixelFormat = TJPF_RGBA;
+                pixelFormat = TJPF_RGBX;
             }
 
-            unsigned long jpegSize =
-                newFrameSize.x() * newFrameSize.y() * sizeof(unsigned long);
+            unsigned long jpegSize = 0;
             uint8_t* jpegData = _encodeJpeg((uint32_t)newFrameSize.x(),
                                             (uint32_t)newFrameSize.y(),
                                             (uint8_t*)resizedColorBuffer,

@@ -76,6 +76,8 @@ public:
      */
     void setTimestamp(const float timestamp);
 
+    /** @return the current timestamp for the simulation. */
+    float getTimestamp() const { return _timestamp; }
     /**
      * @brief getFrameData returns a void pointer to the simulation data for the
      * current timestamp

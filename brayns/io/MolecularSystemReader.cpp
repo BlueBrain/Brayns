@@ -67,9 +67,10 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
     const auto quality = _geometryParameters.getGeometryQuality();
 
     uint64_t proteinCount = 0;
+    Progress progress("Loading proteins...", _nbProteins);
     for (const auto& proteinPosition : _proteinPositions)
     {
-        BRAYNS_PROGRESS(proteinCount, _nbProteins);
+        ++progress;
 
         const auto& protein = _proteins.find(proteinPosition.first);
         if (!_proteinFolder.empty())

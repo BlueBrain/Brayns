@@ -79,10 +79,9 @@ public:
      * neuron, and for
      * every frame.
      * @param filename File containing the report
-     * @param scene Scene to which the simulation should be attached
      * @return True if report was successfully imported, false otherwise
      */
-    bool importSpikeReport(const std::string& filename, Scene& scene);
+    bool importSpikeReport(const std::string& filename);
 
 private:
     bool _loadBinarySpikes(const std::string& spikesFilename);

@@ -55,7 +55,7 @@ AbstractSimulationHandler::~AbstractSimulationHandler()
     }
     if (_cacheFileDescriptor != -1)
         ::close(_cacheFileDescriptor);
-    delete _frameData;
+    delete[] _frameData;
 }
 
 void AbstractSimulationHandler::setTimestamp(const float timestamp)
@@ -67,6 +67,13 @@ void AbstractSimulationHandler::setTimestamp(const float timestamp)
 bool AbstractSimulationHandler::attachSimulationToCacheFile(
     const std::string& cacheFile)
 {
+    if (_cacheFileDescriptor > -1)
+    {
+        BRAYNS_ERROR << "Cache already opened, not attaching " << cacheFile
+                     << std::endl;
+        return false;
+    }
+
     BRAYNS_INFO << "Attaching " << cacheFile << " to current scene"
                 << std::endl;
     _cacheFileDescriptor = open(cacheFile.c_str(), O_RDONLY);
@@ -140,10 +147,11 @@ const Histogram& AbstractSimulationHandler::getHistogram()
     _histogram.values.clear();
     _histogram.values.resize(histogramSize, 0);
     const float normalizationValue =
-        (range.y() - range.x()) / float((histogramSize + 1));
+        (range.y() - range.x()) / float(histogramSize - 1);
     for (uint64_t i = 0; i < _frameSize; ++i)
     {
         const size_t idx = (data[i] - range.x()) / normalizationValue;
+        assert(idx < histogramSize);
         ++_histogram.values[idx];
     }
 
