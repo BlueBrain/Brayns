@@ -113,10 +113,8 @@ public:
              MT_SHADES_OF_GREY: 255 shades of grey
              MT_GRADIENT: Gradient from red to yellow
              MT_PASTEL_COLORS: Random pastel colors
-       @param nbMaterials Number of materials to be defined
     */
-    void initializeMaterials(MaterialType materialType = MaterialType::none,
-                             size_t nbMaterials = NB_MAX_MATERIALS);
+    void initializeMaterials(MaterialType materialType = MaterialType::none);
 
     /**
      * Recreates the engine according to new parameters, e.g. datasource has

@@ -285,8 +285,9 @@ uint64_t OptiXScene::_serializeSpheres()
 {
     // Load geometry to GPU
     size_t totalNbSpheres = 0;
-    for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
+    for (auto& material : _materials)
     {
+        const auto materialId = material.first;
         _timestampSpheresIndices[materialId] = 0;
         if (_spheres.find(materialId) != _spheres.end())
         {
@@ -338,8 +339,9 @@ uint64_t OptiXScene::_serializeSpheres()
 uint64_t OptiXScene::_serializeCylinders()
 {
     size_t totalNbCylinders = 0;
-    for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
+    for (auto& material : _materials)
     {
+        const auto materialId = material.first;
         _timestampCylindersIndices[materialId] = 0;
 
         if (_cylinders.find(materialId) != _cylinders.end())
@@ -393,8 +395,9 @@ uint64_t OptiXScene::_serializeCones()
 {
     // Load geometry to GPU
     size_t totalNbCones = 0;
-    for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
+    for (auto& material : _materials)
     {
+        const auto materialId = material.first;
         _timestampConesIndices[materialId] = 0;
 
         if (_cones.find(materialId) != _cones.end())
@@ -474,7 +477,9 @@ uint64_t OptiXScene::_processMeshes()
     uint64_t nbTotalTexCoords = 0;
     uint64_t nbTotalMaterials = 0;
 
-    for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
+    for (auto& material : _materials)
+    {
+        const auto materialId = material.first;
         if (_trianglesMeshes.find(materialId) != _trianglesMeshes.end())
         {
             nbTotalVertices +=
@@ -484,6 +489,7 @@ uint64_t OptiXScene::_processMeshes()
             nbTotalTexCoords +=
                 _trianglesMeshes[materialId].getTextureCoordinates().size();
         }
+    }
 
     Vector3fs vertices;
     Vector3uis indices;
@@ -637,33 +643,44 @@ uint64_t OptiXScene::_processMeshes()
 
 void OptiXScene::commitMaterials(const bool updateOnly)
 {
-    BRAYNS_INFO << "Commit OptiX materials" << std::endl;
+    // Determine how many materials need to be created
+    size_t maxId = -std::numeric_limits<size_t>::max();
+    for (auto& material : _materials)
+        maxId = std::max(maxId, material.first);
+
+    for (size_t i = 0; i < maxId; ++i)
+        if (_materials.find(i) == _materials.end())
+            _materials[i] = Material();
 
     // Create materials
-    for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
-        if (materialId >= _optixMaterials.size())
+    if (_optixMaterials.size() < maxId)
+    {
+        for (size_t i = _optixMaterials.size(); i <= maxId; ++i)
         {
-            optix::Material optixMaterial = _context->createMaterial();
+            auto optixMaterial = _context->createMaterial();
             optixMaterial->setAnyHitProgram(1, _phong_ah);
             _optixMaterials.push_back(optixMaterial);
         }
+    }
+
+    BRAYNS_INFO << "Committing " << maxId + 1 << " OptiX materials"
+                << std::endl;
 
     // Load textures once and for all (textures are ignored by the material
     // update process
     if (!updateOnly)
     {
         // Load textures from disk
-        for (size_t materialId = 0; materialId < _materials.size();
-             ++materialId)
+        for (auto& material : _materials)
         {
             bool textured = false;
-            optix::Material optixMaterial = _optixMaterials[materialId];
-            MaterialPtr material = _materials[materialId];
-            for (const auto texture : material->getTextures())
+            auto& optixMaterial = _optixMaterials[material.first];
+            assert(optixMaterial);
+            for (const auto texture : material.second.getTextures())
             {
-                BRAYNS_ERROR << "Texture nane: " << texture.second << std::endl;
                 TextureLoader textureLoader;
                 if (texture.second != TEXTURE_NAME_SIMULATION)
+                {
                     if (textureLoader.loadTexture(_textures, texture.first,
                                                   texture.second))
                     {
@@ -671,19 +688,24 @@ void OptiXScene::commitMaterials(const bool updateOnly)
                                                             _phong_ch_textured);
                         textured = true;
                     }
+                    else
+                        BRAYNS_ERROR
+                            << "Failed to load texture: " << texture.second
+                            << std::endl;
+                }
 
                 if (_createTexture2D(texture.second))
                 {
-                    if (materialId == MATERIAL_SKYBOX)
+                    if (material.first == MATERIAL_SKYBOX)
                         _context["envmap"]->setTextureSampler(
                             _optixTextureSamplers[texture.second]);
 
                     optixMaterial["diffuse_map"]->setTextureSampler(
                         _optixTextureSamplers[texture.second]);
 
-                    BRAYNS_INFO << "Texture " << texture.second
-                                << " assigned to material " << materialId
-                                << std::endl;
+                    BRAYNS_DEBUG << "Texture " << texture.second
+                                 << " assigned to material " << material.first
+                                 << std::endl;
                 }
             }
             if (!textured)
@@ -692,28 +714,26 @@ void OptiXScene::commitMaterials(const bool updateOnly)
     }
 
     // Populate material attributes
-    for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
+    for (auto& material : _materials)
     {
         // Material
-        MaterialPtr material = _materials[materialId];
-        assert(material);
+        auto& optixMaterial = _optixMaterials[material.first];
 
-        optix::Material optixMaterial = _optixMaterials[materialId];
-
-        const Vector3f& color = material->getColor();
+        const auto& color = material.second.getColor();
         optixMaterial["Kd"]->setFloat(color.z(), color.y(), color.x());
-        const Vector3f& specularColor = material->getSpecularColor();
+        const auto& specularColor = material.second.getSpecularColor();
         optixMaterial["Ks"]->setFloat(specularColor.z(), specularColor.y(),
                                       specularColor.x());
-        optixMaterial["phong_exp"]->setFloat(material->getSpecularExponent());
-        const float reflectionIndex = material->getReflectionIndex();
+        optixMaterial["phong_exp"]->setFloat(
+            material.second.getSpecularExponent());
+        const auto reflectionIndex = material.second.getReflectionIndex();
         optixMaterial["Kr"]->setFloat(reflectionIndex, reflectionIndex,
                                       reflectionIndex);
-        const float opacity = material->getOpacity();
+        const auto opacity = material.second.getOpacity();
         optixMaterial["Ko"]->setFloat(opacity, opacity, opacity);
         optixMaterial["refraction_index"]->setFloat(
-            material->getRefractionIndex());
-        optixMaterial["glossiness"]->setFloat(material->getGlossiness());
+            material.second.getRefractionIndex());
+        optixMaterial["glossiness"]->setFloat(material.second.getGlossiness());
     }
 }
 

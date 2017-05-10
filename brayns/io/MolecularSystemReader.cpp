@@ -96,8 +96,9 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
                 const size_t material =
                     _geometryParameters.getColorScheme() ==
                             ColorScheme::protein_by_id
-                        ? proteinCount %
-                              (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS)
+                        ? NB_SYSTEM_MATERIALS +
+                              proteinCount % (scene.getMaterials().size() -
+                                              NB_SYSTEM_MATERIALS)
                         : NO_MATERIAL;
 
                 // Scale mesh to match PDB units. PDB are in angstrom, and
@@ -115,10 +116,10 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
     if (_geometryParameters.getColorScheme() != ColorScheme::protein_by_id)
     {
         size_t index = 0;
-        for (const auto& material : scene.getMaterials())
+        for (auto& material : scene.getMaterials())
         {
             ProteinLoader loader(_geometryParameters);
-            material.second->setColor(loader.getMaterialKd(index));
+            material.second.setColor(loader.getMaterialKd(index));
             ++index;
         }
     }

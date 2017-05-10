@@ -57,7 +57,7 @@ OptiXEngine::OptiXEngine(int, const char**,
     _scene.reset(
         new OptiXScene(renderersForScene, _parametersManager, _context));
 
-    _scene->setMaterials(MaterialType::none, NB_MAX_MATERIALS);
+    _scene->buildMaterials();
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();

@@ -136,7 +136,7 @@ private:
 
     bool _importMorphologyAsMesh(const servus::URI& source,
                                  const size_t morphologyIndex,
-                                 const MaterialsMap& materials,
+                                 MaterialsMap& materials,
                                  const Matrix4f& transformation,
                                  TrianglesMeshMap& meshes, Boxf& bounds,
                                  const size_t forcedMaterial = NO_MATERIAL);

@@ -112,6 +112,8 @@ struct Brayns::Impl
         buildScene();
 
         _engine->recreate = std::bind(&Impl::createEngine, this);
+
+        BRAYNS_INFO << "Now rendering..." << std::endl;
     }
 
     void buildScene()
@@ -119,20 +121,20 @@ struct Brayns::Impl
 #if (BRAYNS_USE_ASSIMP)
         _meshLoader.clear();
 #endif
-        _loadData();
         Scene& scene = _engine->getScene();
-        scene.commitVolumeData();
-        scene.commitSimulationData();
-        scene.buildEnvironment();
-        scene.buildGeometry();
+        _loadData();
 
         if (scene.empty() && !scene.getVolumeHandler())
         {
             BRAYNS_INFO << "Building default scene" << std::endl;
             scene.buildDefault();
-            scene.buildGeometry();
         }
 
+        scene.buildMaterials();
+        scene.commitVolumeData();
+        scene.commitSimulationData();
+        scene.buildEnvironment();
+        scene.buildGeometry();
         scene.commit();
 
         // Set default camera according to scene bounding box
@@ -334,8 +336,10 @@ private:
         const std::string& environmentMap =
             _parametersManager->getSceneParameters().getEnvironmentMap();
         if (!environmentMap.empty())
-            scene.getMaterial(MATERIAL_SKYBOX)
-                ->setTexture(TT_DIFFUSE, environmentMap);
+        {
+            auto& material = scene.getMaterials()[MATERIAL_SKYBOX];
+            material.setTexture(TT_DIFFUSE, environmentMap);
+        }
 
         if (!geometryParameters.getSplashSceneFolder().empty())
             _loadMeshFolder(geometryParameters.getSplashSceneFolder());
@@ -434,8 +438,8 @@ private:
 
         for (size_t i = 0; i < scene.getMaterials().size(); ++i)
         {
-            MaterialPtr material = scene.getMaterials()[i];
-            material->setColor(proteinLoader.getMaterialKd(i));
+            auto& material = scene.getMaterials()[i];
+            material.setColor(proteinLoader.getMaterialKd(i));
         }
     }
 
@@ -476,7 +480,7 @@ private:
         {
             size_t material =
                 geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-                    ? i % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS)
+                    ? NB_SYSTEM_MATERIALS + i
                     : NO_MATERIAL;
 
             if (!_meshLoader.importMeshFromFile(
@@ -933,6 +937,7 @@ Brayns::Brayns(int argc, const char** argv)
 Brayns::~Brayns()
 {
 }
+
 void Brayns::render(const RenderInput& renderInput, RenderOutput& renderOutput)
 {
     _impl->render(renderInput, renderOutput);

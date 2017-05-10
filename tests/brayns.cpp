@@ -133,7 +133,6 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(volumeParams.getSamplesPerRay(), 128);
 
     auto& scene = brayns.getEngine().getScene();
-    BOOST_CHECK(scene.getMaterial(0));
     BOOST_CHECK_EQUAL(sceneParams.getEnvironmentMap(), "");
 
     brayns::Boxf defaultBoundingBox;

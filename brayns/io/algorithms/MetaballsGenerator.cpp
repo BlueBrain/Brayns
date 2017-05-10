@@ -428,7 +428,7 @@ void MetaballsGenerator::_buildVerticesAndCubes(const Spheres& metaballs,
 
 void MetaballsGenerator::_buildTriangles(const Spheres& metaballs,
                                          const float threshold,
-                                         const MaterialsMap& materials,
+                                         MaterialsMap& materials,
                                          const size_t defaultMaterialId,
                                          TrianglesMeshMap& triangles)
 {
@@ -565,9 +565,8 @@ void MetaballsGenerator::_buildTriangles(const Spheres& metaballs,
 
                 if (defaultMaterialId == NO_MATERIAL)
                 {
-                    const auto materialId = _edgeVertices[index].materialId;
-                    if (materials.find(materialId) != materials.end())
-                        colors.push_back(materials.at(materialId)->getColor());
+                    auto& material = materials[_edgeVertices[index].materialId];
+                    colors.push_back(material.getColor());
                 }
             }
 
@@ -587,7 +586,7 @@ void MetaballsGenerator::_clear()
 void MetaballsGenerator::generateMesh(const Spheres& metaballs,
                                       const size_t gridSize,
                                       const float threshold,
-                                      const MaterialsMap& materials,
+                                      MaterialsMap& materials,
                                       const size_t defaultMaterialId,
                                       TrianglesMeshMap& triangles)
 {

@@ -401,14 +401,16 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                         switch (colorScheme)
                         {
                         case ColorScheme::protein_chains:
-                            atom.materialId =
-                                abs(atom.chainId) %
-                                (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
+                            atom.materialId = NB_SYSTEM_MATERIALS +
+                                              abs(atom.chainId) %
+                                                  (scene.getMaterials().size() -
+                                                   NB_SYSTEM_MATERIALS);
                             break;
                         case ColorScheme::protein_residues:
-                            atom.materialId =
-                                abs(atom.residue) %
-                                (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
+                            atom.materialId = NB_SYSTEM_MATERIALS +
+                                              abs(atom.residue) %
+                                                  (scene.getMaterials().size() -
+                                                   NB_SYSTEM_MATERIALS);
                             break;
                         default:
                             atom.materialId = static_cast<int>(i);
