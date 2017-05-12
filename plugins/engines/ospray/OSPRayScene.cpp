@@ -997,7 +997,7 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
     _ospMaterialData = 0;
 
     // Determine how many materials need to be created
-    size_t maxId = -std::numeric_limits<size_t>::max();
+    size_t maxId = 0;
     for (auto& material : _materials)
         maxId = std::max(maxId, material.first);
 
