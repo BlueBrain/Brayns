@@ -81,7 +81,7 @@ struct Brayns::Impl
             new EngineFactory(argc, argv, *_parametersManager));
         createEngine();
 
-#if (BRAYNS_USE_NETWORKING)
+#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         _extensionPluginFactory.reset(
             new ExtensionPluginFactory(*_parametersManager, *_keyboardHandler,
                                        *_cameraManipulator));
@@ -205,7 +205,7 @@ struct Brayns::Impl
     }
 #endif
 
-#if (BRAYNS_USE_NETWORKING)
+#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     void _executePlugins(const Vector2ui& size)
     {
         auto oldEngine = _engine.get();
@@ -229,7 +229,7 @@ struct Brayns::Impl
         _engine->reshape(renderInput.windowSize);
         _engine->preRender();
 
-#if (BRAYNS_USE_NETWORKING)
+#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         _executePlugins(renderInput.windowSize);
 #endif
         auto& sceneParams = _parametersManager->getSceneParameters();
