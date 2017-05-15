@@ -64,8 +64,6 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     BRAYNS_INFO << "Initializing scene" << std::endl;
     _scene.reset(new OSPRayScene(renderersForScene, _parametersManager));
 
-    _scene->setMaterials(MaterialType::none, NB_MAX_MATERIALS);
-
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
 

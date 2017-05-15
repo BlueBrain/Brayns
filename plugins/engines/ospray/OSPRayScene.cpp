@@ -35,7 +35,7 @@
 
 namespace brayns
 {
-const size_t CACHE_VERSION = 6;
+const size_t CACHE_VERSION = 7;
 
 struct TextureTypeMaterialAttribute
 {
@@ -158,29 +158,32 @@ void OSPRayScene::_saveCacheFile()
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
     // Save materials
-    for (const auto& material : _materials)
+    for (auto& material : _materials)
     {
+        size_t id = material.first;
+        file.write((char*)&id, sizeof(size_t));
         Vector3f value3f;
-        value3f = material.second->getColor();
+        value3f = material.second.getColor();
         file.write((char*)&value3f, sizeof(Vector3f));
-        value3f = material.second->getSpecularColor();
+        value3f = material.second.getSpecularColor();
         file.write((char*)&value3f, sizeof(Vector3f));
-        float value = material.second->getSpecularExponent();
+        float value = material.second.getSpecularExponent();
         file.write((char*)&value, sizeof(float));
-        value = material.second->getReflectionIndex();
+        value = material.second.getReflectionIndex();
         file.write((char*)&value, sizeof(float));
-        value = material.second->getOpacity();
+        value = material.second.getOpacity();
         file.write((char*)&value, sizeof(float));
-        value = material.second->getRefractionIndex();
+        value = material.second.getRefractionIndex();
         file.write((char*)&value, sizeof(float));
-        value = material.second->getEmission();
+        value = material.second.getEmission();
         file.write((char*)&value, sizeof(float));
         // TODO: Textures
     }
 
     // Save geometry
-    for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
+    for (auto& material : _materials)
     {
+        const auto materialId = material.first;
         size_t bufferSize;
 
         // Spheres
@@ -310,8 +313,6 @@ void OSPRayScene::_saveCacheFile()
 
 void OSPRayScene::_loadCacheFile()
 {
-    commitMaterials();
-
     const std::string& filename =
         _parametersManager.getGeometryParameters().getLoadCacheFile();
     BRAYNS_INFO << "Loading scene from binary file: " << filename << std::endl;
@@ -350,27 +351,32 @@ void OSPRayScene::_loadCacheFile()
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
     // Read materials
-    for (const auto& material : _materials)
+    _materials.clear();
+    buildMaterials();
+    for (size_t i = 0; i < nbMaterials; ++i)
     {
+        size_t id;
+        file.read((char*)&id, sizeof(size_t));
+        auto& material = _materials[id];
         Vector3f value3f;
         file.read((char*)&value3f, sizeof(Vector3f));
-        material.second->setColor(value3f);
+        material.setColor(value3f);
         file.read((char*)&value3f, sizeof(Vector3f));
-        material.second->setSpecularColor(value3f);
+        material.setSpecularColor(value3f);
         float value;
         file.read((char*)&value, sizeof(float));
-        material.second->setSpecularExponent(value);
+        material.setSpecularExponent(value);
         file.read((char*)&value, sizeof(float));
-        material.second->setReflectionIndex(value);
+        material.setReflectionIndex(value);
         file.read((char*)&value, sizeof(float));
-        material.second->setOpacity(value);
+        material.setOpacity(value);
         file.read((char*)&value, sizeof(float));
-        material.second->setRefractionIndex(value);
+        material.setRefractionIndex(value);
         file.read((char*)&value, sizeof(float));
-        material.second->setEmission(value);
+        material.setEmission(value);
         // TODO: Textures
     }
-    commitMaterials(true);
+    commitMaterials();
 
     // Read geometry
     for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
@@ -739,10 +745,9 @@ uint64_t OSPRayScene::serializeGeometry()
         _serializedSpheresDataSize.clear();
         _timestampSpheresIndices.clear();
         _serializedSpheresData.clear();
-        for (size_t materialId = 0; materialId < _materials.size();
-             ++materialId)
+        for (auto& material : _materials)
         {
-            _serializedSpheresDataSize[materialId] = 0;
+            const auto materialId = material.first;
             _serializedSpheresDataSize[materialId] = 0;
             size += _serializeSpheres(materialId);
         }
@@ -754,9 +759,9 @@ uint64_t OSPRayScene::serializeGeometry()
         _serializedCylindersData.clear();
         _serializedCylindersDataSize.clear();
         _timestampCylindersIndices.clear();
-        for (size_t materialId = 0; materialId < _materials.size();
-             ++materialId)
+        for (auto& material : _materials)
         {
+            const auto materialId = material.first;
             _serializedCylindersDataSize[materialId] = 0;
             size += _serializeCylinders(materialId);
         }
@@ -768,9 +773,9 @@ uint64_t OSPRayScene::serializeGeometry()
         _serializedConesData.clear();
         _serializedConesDataSize.clear();
         _timestampConesIndices.clear();
-        for (size_t materialId = 0; materialId < _materials.size();
-             ++materialId)
+        for (auto& material : _materials)
         {
+            const auto materialId = material.first;
             _serializedConesDataSize[materialId] = 0;
             size += _serializeCones(materialId);
         }
@@ -780,9 +785,8 @@ uint64_t OSPRayScene::serializeGeometry()
     // Triangle meshes
     if (_trianglesMeshesDirty)
     {
-        for (size_t materialId = 0; materialId < _materials.size();
-             ++materialId)
-            size += _buildMeshOSPGeometry(materialId);
+        for (auto& material : _materials)
+            size += _buildMeshOSPGeometry(material.first);
         _trianglesMeshesDirty = false;
     }
     return size;
@@ -790,22 +794,19 @@ uint64_t OSPRayScene::serializeGeometry()
 
 void OSPRayScene::buildGeometry()
 {
-    // Make sure lights and materials have been initialized before assigning
-    // the geometry
-    commitMaterials();
-
     BRAYNS_INFO << "Building OSPRay geometry" << std::endl;
+
+    commitMaterials();
 
     if (_parametersManager.getGeometryParameters().getGenerateMultipleModels())
         // Initialize models according to timestamps
-        for (size_t materialId = 0; materialId < _materials.size();
-             ++materialId)
+        for (auto& material : _materials)
         {
-            for (const auto& sphere : _spheres[materialId])
+            for (const auto& sphere : _spheres[material.first])
                 _createModel(sphere->getTimestamp());
-            for (const auto& cylinder : _cylinders[materialId])
+            for (const auto& cylinder : _cylinders[material.first])
                 _createModel(cylinder->getTimestamp());
-            for (const auto& cone : _cones[materialId])
+            for (const auto& cone : _cones[material.first])
                 _createModel(cone->getTimestamp());
         }
 
@@ -829,8 +830,9 @@ void OSPRayScene::buildGeometry()
     size_t totalNbCones = 0;
     size_t totalNbVertices = 0;
     size_t totalNbIndices = 0;
-    for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
+    for (auto& material : _materials)
     {
+        const auto materialId = material.first;
         totalNbSpheres += _serializedSpheresDataSize[materialId];
         totalNbCylinders += _serializedCylindersDataSize[materialId];
         totalNbCones += _serializedConesDataSize[materialId];
@@ -842,15 +844,18 @@ void OSPRayScene::buildGeometry()
         }
     }
 
-    BRAYNS_INFO << "--------------------" << std::endl;
-    BRAYNS_INFO << "Primitive information" << std::endl;
+    BRAYNS_INFO << "---------------------------------------------------"
+                << std::endl;
+    BRAYNS_INFO << "Geometry information" << std::endl;
     BRAYNS_INFO << "Spheres  : " << totalNbSpheres << std::endl;
     BRAYNS_INFO << "Cylinders: " << totalNbCylinders << std::endl;
     BRAYNS_INFO << "Cones    : " << totalNbCones << std::endl;
     BRAYNS_INFO << "Vertices : " << totalNbVertices << std::endl;
     BRAYNS_INFO << "Indices  : " << totalNbIndices << std::endl;
+    BRAYNS_INFO << "Materials: " << _materials.size() << std::endl;
     BRAYNS_INFO << "Total    : " << size << " bytes" << std::endl;
-    BRAYNS_INFO << "--------------------" << std::endl;
+    BRAYNS_INFO << "---------------------------------------------------"
+                << std::endl;
 
     if (!_parametersManager.getGeometryParameters().getSaveCacheFile().empty())
         _saveCacheFile();
@@ -989,69 +994,84 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials(const bool updateOnly)
 {
+    _ospMaterialData = 0;
+
+    // Determine how many materials need to be created
+    size_t maxId = 0;
+    for (auto& material : _materials)
+        maxId = std::max(maxId, material.first);
+
+    for (size_t i = 0; i < maxId; ++i)
+        if (_materials.find(i) == _materials.end())
+            _materials[i] = Material();
+
+    BRAYNS_INFO << "Committing " << maxId + 1 << " OSPRay materials"
+                << std::endl;
+
+    for (auto& material : _materials)
+    {
+        if (_ospMaterials.size() <= material.first)
+            for (const auto& renderer : _renderers)
+            {
+                OSPRayRenderer* osprayRenderer =
+                    dynamic_cast<OSPRayRenderer*>(renderer.get());
+                _ospMaterials.push_back(ospNewMaterial(osprayRenderer->impl(),
+                                                       "ExtendedOBJMaterial"));
+            }
+
+        auto& ospMaterial = _ospMaterials[material.first];
+
+        Vector3f value3f = material.second.getColor();
+        ospSet3f(ospMaterial, "kd", value3f.x(), value3f.y(), value3f.z());
+        value3f = material.second.getSpecularColor();
+        ospSet3f(ospMaterial, "ks", value3f.x(), value3f.y(), value3f.z());
+        ospSet1f(ospMaterial, "ns", material.second.getSpecularExponent());
+        ospSet1f(ospMaterial, "d", material.second.getOpacity());
+        ospSet1f(ospMaterial, "refraction",
+                 material.second.getRefractionIndex());
+        ospSet1f(ospMaterial, "reflection",
+                 material.second.getReflectionIndex());
+        ospSet1f(ospMaterial, "a", material.second.getEmission());
+        ospSet1f(ospMaterial, "g", material.second.getGlossiness());
+
+        if (!updateOnly)
+        {
+            // Textures
+            for (auto texture : material.second.getTextures())
+            {
+                TextureLoader textureLoader;
+                if (texture.second != TEXTURE_NAME_SIMULATION)
+                    textureLoader.loadTexture(_textures, texture.first,
+                                              texture.second);
+                else
+                    BRAYNS_ERROR << "Failed to load texture: " << texture.second
+                                 << std::endl;
+
+                OSPTexture2D ospTexture = _createTexture2D(texture.second);
+                ospSetObject(ospMaterial,
+                             textureTypeMaterialAttribute[texture.first]
+                                 .attribute.c_str(),
+                             ospTexture);
+
+                BRAYNS_DEBUG
+                    << "Texture assigned to "
+                    << textureTypeMaterialAttribute[texture.first].attribute
+                    << " of material " << material.first << ": "
+                    << texture.second << std::endl;
+            }
+        }
+        ospCommit(ospMaterial);
+    }
+
+    _ospMaterialData = ospNewData(_materials.size(), OSP_OBJECT,
+                                  &_ospMaterials[0], _getOSPDataFlags());
+    ospCommit(_ospMaterialData);
+
     for (const auto& renderer : _renderers)
     {
         OSPRayRenderer* osprayRenderer =
             dynamic_cast<OSPRayRenderer*>(renderer.get());
-        for (size_t index = 0; index < _materials.size(); ++index)
-        {
-            if (_ospMaterials.size() <= index)
-                _ospMaterials.push_back(ospNewMaterial(osprayRenderer->impl(),
-                                                       "ExtendedOBJMaterial"));
-
-            MaterialPtr material = _materials[index];
-            assert(material);
-
-            OSPMaterial& ospMaterial = _ospMaterials[index];
-            Vector3f value3f = material->getColor();
-            ospSet3f(ospMaterial, "kd", value3f.x(), value3f.y(), value3f.z());
-            value3f = material->getSpecularColor();
-            ospSet3f(ospMaterial, "ks", value3f.x(), value3f.y(), value3f.z());
-            ospSet1f(ospMaterial, "ns", material->getSpecularExponent());
-            ospSet1f(ospMaterial, "d", material->getOpacity());
-            ospSet1f(ospMaterial, "refraction", material->getRefractionIndex());
-            ospSet1f(ospMaterial, "reflection", material->getReflectionIndex());
-            ospSet1f(ospMaterial, "a", material->getEmission());
-            ospSet1f(ospMaterial, "g", material->getGlossiness());
-
-            if (!updateOnly)
-            {
-                // Textures
-                for (auto texture : material->getTextures())
-                {
-                    TextureLoader textureLoader;
-                    if (texture.second != TEXTURE_NAME_SIMULATION)
-                        textureLoader.loadTexture(_textures, texture.first,
-                                                  texture.second);
-
-                    OSPTexture2D ospTexture = _createTexture2D(texture.second);
-                    ospSetObject(ospMaterial,
-                                 textureTypeMaterialAttribute[texture.first]
-                                     .attribute.c_str(),
-                                 ospTexture);
-
-                    BRAYNS_DEBUG
-                        << "OSPRay texture assigned to "
-                        << textureTypeMaterialAttribute[texture.first].attribute
-                        << " of material " << index << std::endl;
-                }
-            }
-            ospCommit(ospMaterial);
-        }
-
-        if (!updateOnly)
-        {
-            if (_ospMaterialData == 0)
-            {
-                _ospMaterialData = ospNewData(NB_SYSTEM_MATERIALS, OSP_OBJECT,
-                                              &_ospMaterials[MATERIAL_SYSTEM],
-                                              _getOSPDataFlags());
-
-                ospCommit(_ospMaterialData);
-            }
-            ospSetData(osprayRenderer->impl(), "materials", _ospMaterialData);
-        }
-
+        ospSetData(osprayRenderer->impl(), "materials", _ospMaterialData);
         ospCommit(osprayRenderer->impl());
     }
 }

@@ -57,10 +57,10 @@ bool TextureLoader::loadTexture(TexturesMap& textures,
         texture->setDepth(1);
         texture->setRawData((unsigned char*)blob.data(), totalSize);
 
-        BRAYNS_INFO << filename << ": " << texture->getWidth() << "x"
-                    << texture->getHeight() << "x" << texture->getNbChannels()
-                    << "x" << texture->getDepth()
-                    << " added to the texture cache" << std::endl;
+        BRAYNS_DEBUG << filename << ": " << texture->getWidth() << "x"
+                     << texture->getHeight() << "x" << texture->getNbChannels()
+                     << "x" << texture->getDepth()
+                     << " added to the texture cache" << std::endl;
         textures[filename] = texture;
     }
     catch (Magick::Warning& warning)

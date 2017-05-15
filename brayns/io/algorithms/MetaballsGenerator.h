@@ -48,7 +48,7 @@ public:
      * @param triangles Generated triangles
      */
     void generateMesh(const Spheres& metaballs, const size_t gridSize,
-                      const float threshold, const MaterialsMap& materials,
+                      const float threshold, MaterialsMap& materials,
                       const size_t defaultMaterialId,
                       TrianglesMeshMap& triangles);
 
@@ -93,7 +93,7 @@ private:
                                 const float scale = 5.f);
 
     void _buildTriangles(const Spheres& metaballs, const float threshold,
-                         const MaterialsMap& materials,
+                         MaterialsMap& materials,
                          const size_t defaultMaterialId,
                          TrianglesMeshMap& triangles);
 

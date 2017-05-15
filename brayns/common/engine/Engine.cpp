@@ -100,10 +100,9 @@ void Engine::setDefaultEpsilon()
     }
 }
 
-void Engine::initializeMaterials(const MaterialType materialType,
-                                 const size_t nbMaterials)
+void Engine::initializeMaterials(const MaterialType materialType)
 {
-    _scene->setMaterials(materialType, nbMaterials);
+    _scene->setMaterials(materialType);
     _scene->commit();
 }
 

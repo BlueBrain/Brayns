@@ -123,8 +123,7 @@ class TrianglesMesh;
 typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 
 class Material;
-typedef std::shared_ptr<Material> MaterialPtr;
-typedef std::map<size_t, MaterialPtr> MaterialsMap;
+typedef std::map<size_t, Material> MaterialsMap;
 
 class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;
@@ -285,14 +284,13 @@ struct Histogram
  *  such as skyboxes.
  */
 const size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
-const size_t NB_MAX_MATERIALS = 1000;
-const size_t NB_SYSTEM_MATERIALS = 5;
-const size_t MATERIAL_SYSTEM = NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS - 1;
-const size_t MATERIAL_SKYBOX = MATERIAL_SYSTEM + 0;
-const size_t MATERIAL_BOUNDING_BOX = MATERIAL_SYSTEM + 1;
-const size_t MATERIAL_SIMULATION = MATERIAL_SYSTEM + 2;
-const size_t MATERIAL_INVISIBLE = MATERIAL_SYSTEM + 3;
-const size_t MATERIAL_CA_SIMULATION = MATERIAL_SYSTEM + 4;
+const size_t NB_SYSTEM_MATERIALS = 6;
+const size_t MATERIAL_SYSTEM = 0;
+const size_t MATERIAL_SKYBOX = 1;
+const size_t MATERIAL_BOUNDING_BOX = 2;
+const size_t MATERIAL_SIMULATION = 3;
+const size_t MATERIAL_INVISIBLE = 4;
+const size_t MATERIAL_CA_SIMULATION = 5;
 const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 

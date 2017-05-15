@@ -105,10 +105,9 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
     {
         aiMesh* mesh = aiScene->mMeshes[m];
-        size_t materialId = (defaultMaterial == NO_MATERIAL)
-                                ? mesh->mMaterialIndex
-                                : defaultMaterial;
-
+        size_t materialId = (defaultMaterial == NO_MATERIAL
+                                 ? NB_SYSTEM_MATERIALS + mesh->mMaterialIndex
+                                 : defaultMaterial);
         nbVertices += mesh->mNumVertices;
         for (size_t i = 0; i < mesh->mNumVertices; ++i)
         {
@@ -253,7 +252,10 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
                  << std::endl;
     for (size_t m = 0; m < aiScene->mNumMaterials; ++m)
     {
+        const size_t materialId = NB_SYSTEM_MATERIALS + m;
         aiMaterial* material = aiScene->mMaterials[m];
+        auto& materials = scene.getMaterials();
+        auto& mat = materials[materialId];
 
         struct TextureTypeMapping
         {
@@ -281,9 +283,11 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
                                          0, &path, nullptr, nullptr, nullptr,
                                          nullptr, nullptr) == AI_SUCCESS)
                 {
-                    scene.getMaterials()[m]
-                        ->getTextures()[textureTypeMapping[textureType].type] =
-                        folder + "/" + path.data;
+                    const std::string filename = folder + "/" + path.data;
+                    BRAYNS_DEBUG << "Loading texture [" << materialId
+                                 << "] :" << filename << std::endl;
+                    mat.getTextures()[textureTypeMapping[textureType].type] =
+                        filename;
                 }
             }
         }
@@ -291,36 +295,31 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
         aiColor3D value3f(0.f, 0.f, 0.f);
         float value1f;
         material->Get(AI_MATKEY_COLOR_DIFFUSE, value3f);
-        scene.getMaterials()[m]->setColor(
-            Vector3f(value3f.r, value3f.g, value3f.b));
+        mat.setColor(Vector3f(value3f.r, value3f.g, value3f.b));
 
         value1f = 0.f;
         material->Get(AI_MATKEY_REFLECTIVITY, value1f);
-        scene.getMaterials()[m]->setReflectionIndex(value1f);
+        mat.setReflectionIndex(value1f);
 
         value3f = aiColor3D(0.f, 0.f, 0.f);
         material->Get(AI_MATKEY_COLOR_SPECULAR, value3f);
-        scene.getMaterials()[m]->setSpecularColor(
-            Vector3f(value3f.r, value3f.g, value3f.b));
+        mat.setSpecularColor(Vector3f(value3f.r, value3f.g, value3f.b));
 
         value1f = 0.f;
         material->Get(AI_MATKEY_SHININESS, value1f);
-        scene.getMaterials()[m]->setSpecularExponent(
-            fabs(value1f) < 0.01f ? 100.f : value1f);
+        mat.setSpecularExponent(fabs(value1f) < 0.01f ? 100.f : value1f);
 
         value3f = aiColor3D(0.f, 0.f, 0.f);
         material->Get(AI_MATKEY_COLOR_EMISSIVE, value3f);
-        scene.getMaterials()[m]->setEmission(value3f.r);
+        mat.setEmission(value3f.r);
 
         value1f = 0.f;
         material->Get(AI_MATKEY_OPACITY, value1f);
-        scene.getMaterials()[m]->setOpacity(fabs(value1f) < 0.01f ? 1.f
-                                                                  : value1f);
+        mat.setOpacity(fabs(value1f) < 0.01f ? 1.f : value1f);
 
         value1f = 0.f;
         material->Get(AI_MATKEY_REFRACTI, value1f);
-        scene.getMaterials()[m]->setRefractionIndex(
-            fabs(value1f - 1.f) < 0.01f ? 1.0f : value1f);
+        mat.setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f : value1f);
     }
 }
 }

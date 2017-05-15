@@ -65,21 +65,29 @@ public:
      */
     BRAYNS_API virtual void commit() = 0;
 
+    BRAYNS_API void clearMaterials();
+
     /**
         Creates the materials handled by the scene, and available to the
+        scene geometry
+    */
+    BRAYNS_API void buildMaterials();
+
+    /**
+        Sets the materials handled by the scene, and available to the
         scene geometry
         @param materialType Specifies the algorithm that is used to create
                the materials. For instance MT_RANDOM creates materials with
                random colors, transparency, reflection, and light emission
-        @param nbMaterials The number of materials to create
     */
-    BRAYNS_API void setMaterials(MaterialType materialType, size_t nbMaterials);
+    BRAYNS_API void setMaterials(
+        MaterialType materialType = MaterialType::none);
 
     /**
         Returns the material object for a given index
         @return Material object
     */
-    BRAYNS_API MaterialPtr getMaterial(size_t index);
+    BRAYNS_API Material& getMaterial(size_t index);
 
     /**
         Commit materials to renderers

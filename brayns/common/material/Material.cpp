@@ -23,9 +23,9 @@
 namespace brayns
 {
 Material::Material()
-    : _color(0.f, 0.f, 0.f)
-    , _specularColor(0.f, 0.f, 0.f)
-    , _specularExponent(0.f)
+    : _color(1.f, 1.f, 1.f)
+    , _specularColor(1.f, 1.f, 1.f)
+    , _specularExponent(10.f)
     , _reflectionIndex(0.f)
     , _opacity(1.f)
     , _refractionIndex(1.f)

@@ -298,19 +298,22 @@ bool ZeroEQPlugin::_requestScene()
     auto& ms = _remoteScene.getMaterials();
     ms.clear();
     auto& scene = _engine->getScene();
-    const auto& materials = scene.getMaterials();
+    auto& materials = scene.getMaterials();
 
-    for (auto& material : materials)
+    for (size_t materialId = NB_SYSTEM_MATERIALS; materialId < materials.size();
+         ++materialId)
     {
+        // Materials
+        auto& material = scene.getMaterial(materialId);
         ::brayns::v1::Material m;
-        m.setDiffuseColor(material.second->getColor());
-        m.setSpecularColor(material.second->getSpecularColor());
-        m.setSpecularExponent(material.second->getSpecularExponent());
-        m.setReflectionIndex(material.second->getReflectionIndex());
-        m.setOpacity(material.second->getOpacity());
-        m.setRefractionIndex(material.second->getRefractionIndex());
-        m.setLightEmission(material.second->getEmission());
-        m.setGlossiness(material.second->getGlossiness());
+        m.setDiffuseColor(material.getColor());
+        m.setSpecularColor(material.getSpecularColor());
+        m.setSpecularExponent(material.getSpecularExponent());
+        m.setReflectionIndex(material.getReflectionIndex());
+        m.setOpacity(material.getOpacity());
+        m.setRefractionIndex(material.getRefractionIndex());
+        m.setLightEmission(material.getEmission());
+        m.setGlossiness(material.getGlossiness());
         ms.push_back(m);
     }
     return true;
@@ -324,25 +327,22 @@ void ZeroEQPlugin::_sceneUpdated()
     for (size_t materialId = 0; materialId < materials.size(); ++materialId)
     {
         // Materials
-        MaterialPtr material = scene.getMaterial(materialId);
-        if (material)
-        {
-            ::brayns::v1::Material& m = materials[materialId];
-            const auto& diffuse = m.getDiffuseColor();
-            Vector3f kd = {diffuse[0], diffuse[1], diffuse[2]};
-            material->setColor(kd);
+        auto& material = scene.getMaterial(materialId + NB_SYSTEM_MATERIALS);
+        ::brayns::v1::Material& m = materials[materialId];
+        const auto& diffuse = m.getDiffuseColor();
+        Vector3f kd = {diffuse[0], diffuse[1], diffuse[2]};
+        material.setColor(kd);
 
-            const auto& specular = m.getSpecularColor();
-            Vector3f ks = {specular[0], specular[1], specular[2]};
-            material->setSpecularColor(ks);
+        const auto& specular = m.getSpecularColor();
+        Vector3f ks = {specular[0], specular[1], specular[2]};
+        material.setSpecularColor(ks);
 
-            material->setSpecularExponent(m.getSpecularExponent());
-            material->setReflectionIndex(m.getReflectionIndex());
-            material->setOpacity(m.getOpacity());
-            material->setRefractionIndex(m.getRefractionIndex());
-            material->setEmission(m.getLightEmission());
-            material->setGlossiness(m.getGlossiness());
-        }
+        material.setSpecularExponent(m.getSpecularExponent());
+        material.setReflectionIndex(m.getReflectionIndex());
+        material.setOpacity(m.getOpacity());
+        material.setRefractionIndex(m.getRefractionIndex());
+        material.setEmission(m.getLightEmission());
+        material.setGlossiness(m.getGlossiness());
     }
 
     scene.commitMaterials(true);

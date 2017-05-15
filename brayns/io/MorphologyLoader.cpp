@@ -62,7 +62,7 @@ size_t _getMaterialFromSectionType(const size_t morphologyIndex,
     switch (colorScheme)
     {
     case ColorScheme::neuron_by_id:
-        material = morphologyIndex % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
+        material = morphologyIndex;
         break;
     case ColorScheme::neuron_by_segment_type:
         size_t s;
@@ -84,12 +84,12 @@ size_t _getMaterialFromSectionType(const size_t morphologyIndex,
             s = 0;
             break;
         }
-        material = s % (NB_MAX_MATERIALS - NB_SYSTEM_MATERIALS);
+        material = s;
         break;
     default:
         material = 0;
     }
-    return material;
+    return NB_SYSTEM_MATERIALS + material;
 }
 
 brain::neuron::SectionTypes _getSectionTypes(
@@ -109,7 +109,7 @@ brain::neuron::SectionTypes _getSectionTypes(
 
 bool MorphologyLoader::_importMorphologyAsMesh(
     const servus::URI& source, const size_t morphologyIndex,
-    const MaterialsMap& materials, const Matrix4f& transformation,
+    MaterialsMap& materials, const Matrix4f& transformation,
     TrianglesMeshMap& meshes, Boxf& bounds, const size_t forcedMaterial)
 {
     try
@@ -604,8 +604,10 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         (uint16_ts&)compartmentCounts[i],
                         (uint64_ts&)compartmentOffsets[i]));
                 const size_t material =
-                    mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
-                                : NO_MATERIAL;
+                    mvd3Support
+                        ? NB_SYSTEM_MATERIALS +
+                              boost::lexical_cast<size_t>(neuronMatrix[i])
+                        : NO_MATERIAL;
 
                 if (_geometryParameters.useMetaballs())
                 {
@@ -710,7 +712,8 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 const auto& uri = allUris[i];
                 const size_t material =
                     mvd3Support
-                        ? boost::lexical_cast<size_t>(neuronMatrix[i][0])
+                        ? NB_SYSTEM_MATERIALS +
+                              boost::lexical_cast<size_t>(neuronMatrix[i][0])
                         : NO_MATERIAL;
 
 #if (BRAYNS_USE_ASSIMP)
