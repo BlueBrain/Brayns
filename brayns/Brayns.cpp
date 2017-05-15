@@ -284,7 +284,7 @@ struct Brayns::Impl
         _engine->reshape(windowSize);
         _engine->preRender();
 
-#if (BRAYNS_USE_NETWORKING)
+#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         _executePlugins(windowSize);
 #endif
         Scene& scene = _engine->getScene();
