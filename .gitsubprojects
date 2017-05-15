@@ -2,9 +2,12 @@
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git cfa6243)
 
 if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
+  git_subproject(Lexis https://github.com/HBPVis/Lexis.git 2f50220)
+endif()
+
+if(BRAYNS_NETWORKING_ENABLED)
   git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git cea0338)
   git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 847025a)
-  git_subproject(Lexis https://github.com/HBPVis/Lexis.git 2f50220)
 endif()
 
 # Streaming to display walls

@@ -71,13 +71,9 @@ set(BRAYNSCOMMON_LINK_LIBRARIES
       ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 
-if(Lexis_FOUND)
-  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES Lexis)
-endif()
-
 if(BRAYNS_NETWORKING_ENABLED)
   add_subdirectory(vocabulary)
-  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES ZeroBuf BraynsZeroBufRender)
+  list(APPEND BRAYNSCOMMON_LINK_LIBRARIES Lexis ZeroBuf BraynsZeroBufRender)
 endif()
 
 common_library(braynsCommon)

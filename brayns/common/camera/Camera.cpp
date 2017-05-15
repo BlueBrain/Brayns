@@ -22,14 +22,14 @@
 #include "Camera.h"
 #include <brayns/common/log.h>
 
-#if BRAYNS_USE_SERVUS
+#if BRAYNS_USE_NETWORKING
 #include <zerobuf/render/camera.h>
 #endif
 
 namespace brayns
 {
 struct Camera::Impl
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
     : public brayns::v1::Camera
 #endif
 {
@@ -84,7 +84,7 @@ public:
 
     const Vector3f& getPosition() const
     {
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         const auto& origin = brayns::v1::Camera::getOrigin();
         _position = Vector3f(origin[0], origin[1], origin[2]);
 #endif
@@ -95,7 +95,7 @@ public:
     {
         if (_position.equals(position))
             return;
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         const floats& origin = {position.x(), position.y(), position.z()};
         brayns::v1::Camera::setOrigin(origin);
 #endif
@@ -105,7 +105,7 @@ public:
 
     const Vector3f& getTarget() const
     {
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         const auto& lookat = brayns::v1::Camera::getLookAt();
         _target = Vector3f(lookat[0], lookat[1], lookat[2]);
 #endif
@@ -116,7 +116,7 @@ public:
     {
         if (_target.equals(target))
             return;
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         const floats& lookat = {target.x(), target.y(), target.z()};
         brayns::v1::Camera::setLookAt(lookat);
 #endif
@@ -126,7 +126,7 @@ public:
 
     const Vector3f& getUp() const
     {
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         const auto& up = brayns::v1::Camera::getUp();
         _up = Vector3f(up[0], up[1], up[2]);
 #endif
@@ -137,7 +137,7 @@ public:
     {
         if (_up.equals(upVector))
             return;
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         const floats& up = {upVector.x(), upVector.y(), upVector.z()};
         brayns::v1::Camera::setUp(up);
 #endif
@@ -150,7 +150,7 @@ public:
     {
         if (_fieldOfView == fieldOfView)
             return;
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         brayns::v1::Camera::setFieldOfView(fieldOfView);
 #endif
         _fieldOfView = fieldOfView;
@@ -159,7 +159,7 @@ public:
 
     float getFieldOfView() const
     {
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         _fieldOfView = brayns::v1::Camera::getFieldOfView();
 #endif
         return _fieldOfView;
@@ -178,7 +178,7 @@ public:
     {
         if (_aperture == aperture)
             return;
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         brayns::v1::Camera::setAperture(aperture);
 #endif
         _aperture = aperture;
@@ -187,7 +187,7 @@ public:
 
     float getAperture() const
     {
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         _aperture = brayns::v1::Camera::getAperture();
 #endif
         return _aperture;
@@ -197,7 +197,7 @@ public:
     {
         if (_focalLength == focalLength)
             return;
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         brayns::v1::Camera::setFocalLength(focalLength);
 #endif
         _focalLength = focalLength;
@@ -206,7 +206,7 @@ public:
 
     float getFocalLength() const
     {
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         _focalLength = brayns::v1::Camera::getFocalLength();
 #endif
         return _focalLength;
@@ -216,7 +216,7 @@ public:
     {
         if (_stereoMode == stereoMode)
             return;
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         switch (stereoMode)
         {
         case CameraStereoMode::left:
@@ -243,7 +243,7 @@ public:
 
     CameraStereoMode getStereoMode() const
     {
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         switch (brayns::v1::Camera::getStereoMode())
         {
         case brayns::v1::CameraStereoMode::left:
@@ -267,7 +267,7 @@ public:
     {
         if (_eyeSeparation == eyeSeparation)
             return;
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         brayns::v1::Camera::setEyeSeparation(eyeSeparation);
 #endif
         _eyeSeparation = eyeSeparation;
@@ -276,7 +276,7 @@ public:
 
     float getEyeSeparation() const
     {
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
         _eyeSeparation = brayns::v1::Camera::getEyeSeparation();
 #endif
         return _eyeSeparation;
@@ -440,7 +440,7 @@ float Camera::getEyeSeparation() const
     return _impl->getEyeSeparation();
 }
 
-#if (BRAYNS_USE_SERVUS)
+#if (BRAYNS_USE_NETWORKING)
 servus::Serializable* Camera::getSerializable()
 {
     return _impl.get();
