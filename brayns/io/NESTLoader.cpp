@@ -69,9 +69,9 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
     floats xPos(_frameSize);
     floats yPos(_frameSize);
     floats zPos(_frameSize);
-    floats xColor(_frameSize);
-    floats yColor(_frameSize);
-    floats zColor(_frameSize);
+    uint16_ts xColor(_frameSize);
+    uint16_ts yColor(_frameSize);
+    uint16_ts zColor(_frameSize);
 
     posDataset.read(xPos.data(), H5::PredType::NATIVE_FLOAT);
     posDataset = neurons.openDataSet("/y");
@@ -79,24 +79,28 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
     posDataset = neurons.openDataSet("/z");
     posDataset.read(zPos.data(), H5::PredType::NATIVE_FLOAT);
     posDataset = neurons.openDataSet("/colorx");
-    posDataset.read(xColor.data(), H5::PredType::NATIVE_FLOAT);
+    posDataset.read(xColor.data(), H5::PredType::NATIVE_UINT16);
     posDataset = neurons.openDataSet("/colory");
-    posDataset.read(yColor.data(), H5::PredType::NATIVE_FLOAT);
+    posDataset.read(yColor.data(), H5::PredType::NATIVE_UINT16);
     posDataset = neurons.openDataSet("/colorz");
-    posDataset.read(zColor.data(), H5::PredType::NATIVE_FLOAT);
+    posDataset.read(zColor.data(), H5::PredType::NATIVE_UINT16);
 
     std::map<size_t, Vector4f> materials;
     for (size_t gid = 0; gid < _frameSize; ++gid)
     {
         const size_t index = int(xColor[gid]) + int(yColor[gid] * 256) +
                              int(zColor[gid] * 65536);
-        materials[index] = Vector4f(xColor[gid], yColor[gid], zColor[gid], 0.f);
+        materials[index] = Vector4f(xColor[gid], yColor[gid], zColor[gid], 1.f);
     }
     nbMaterials = materials.size();
+
+    auto transferFunction = scene.getTransferFunction();
+    transferFunction.clear();
 
     size_t i = 0;
     for (auto& material : materials)
     {
+        transferFunction.getDiffuseColors().push_back(material.second);
         material.second.w() = i;
         ++i;
     }
