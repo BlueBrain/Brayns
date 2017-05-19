@@ -211,6 +211,9 @@ struct Brayns::Impl
         auto oldEngine = _engine.get();
         _extensionPluginFactory->execute(*_engine);
 
+        if (!_engine)
+            throw std::runtime_error("No valid engine found, aborting");
+
         // the ZeroEQ plugin can create a new engine
         if (_engine.get() != oldEngine)
         {

@@ -22,7 +22,7 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <livre/core/data/DataSource.h>
+#include <livre/data/DataSource.h>
 #include <livre/eq/Engine.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/RenderSettings.h>

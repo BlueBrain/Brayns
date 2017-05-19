@@ -20,7 +20,7 @@
 
 #include "LivreCamera.h"
 
-#include <livre/core/data/VolumeInformation.h>
+#include <livre/data/VolumeInformation.h>
 #include <livre/eq/Engine.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/CameraSettings.h>
@@ -69,7 +69,7 @@ void LivreCamera::commit()
         plane.setD(clipPlane.w());
         planes.push_back(plane);
     }
-    ::livre::ClipPlanes clipPlanes;
+    ::livre::ClipPlanesDist clipPlanes;
     clipPlanes.setPlanes(planes);
     _livre.getFrameData().getRenderSettings().setClipPlanes(clipPlanes);
 }

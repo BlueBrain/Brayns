@@ -22,7 +22,7 @@ set(BRAYNSLIVREENGINEPLUGIN_PUBLIC_HEADERS
 
 set(BRAYNSLIVREENGINEPLUGIN_LINK_LIBRARIES
     PUBLIC vmmlib braynsCommon braynsIO
-           LivreLib LivreEq LivreUVF
+           LivreLib LivreData LivreEq
 )
 
 common_library(braynsLivreEnginePlugin)
