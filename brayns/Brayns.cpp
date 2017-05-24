@@ -509,12 +509,11 @@ private:
         const std::string& circuit(geometryParameters.getNESTCircuit());
         if (!circuit.empty())
         {
-            size_t nbMaterials;
             NESTLoader loader(geometryParameters);
 
             // need to import circuit first to determine _frameSize for report
             // loading
-            loader.importCircuit(circuit, scene, nbMaterials);
+            loader.importCircuit(circuit, scene);
 
             const std::string& cacheFile(geometryParameters.getNESTCacheFile());
             if (!geometryParameters.getNESTReport().empty() &&
@@ -545,15 +544,6 @@ private:
                 }
 
                 scene.setSimulationHandler(simulationHandler);
-            }
-
-            auto& sceneParameters = _parametersManager->getSceneParameters();
-            const std::string& colorMapFilename =
-                sceneParameters.getColorMapFilename();
-            if (!colorMapFilename.empty())
-            {
-                TransferFunctionLoader transferFunctionLoader;
-                transferFunctionLoader.loadFromFile(colorMapFilename, scene);
                 scene.commitTransferFunctionData();
             }
         }

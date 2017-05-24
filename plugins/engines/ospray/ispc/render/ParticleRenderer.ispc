@@ -47,9 +47,9 @@ inline varying vec4f
     const varying float spikeValue =
         (timestamp < 0.f)
             ? 0.f
-            : min(1.f, max(0.f, 1.f -
-                                    NEST_TIMESTEP * (self->abstract.timestamp -
-                                                     timestamp)));
+            : min(1.f,
+                  max(0.f, 1.f - (NEST_TIMESTEP * self->abstract.timestamp -
+                                  timestamp)));
 
     if (dg.st.x > self->transferFunctionSize)
         return color;

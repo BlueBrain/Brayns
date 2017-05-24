@@ -38,6 +38,7 @@ const uint32_t NEST_VERSION = 1;
 const uint32_t NEST_HEADER_SIZE = 2 * sizeof(uint32_t);
 const float NEST_TIMESTEP = 0.1f;
 const uint32_t NEST_OFFSET = 2;
+const float DEFAULT_ALPHA = 1.f;
 }
 
 namespace brayns
@@ -50,8 +51,7 @@ NESTLoader::NESTLoader(const GeometryParameters& geometryParameters)
 }
 
 #if (BRAYNS_USE_BRION)
-void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
-                               size_t& nbMaterials)
+void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
 {
     BRAYNS_INFO << "Loading NEST cells from circuit " << filepath << std::endl;
 
@@ -69,9 +69,9 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
     floats xPos(_frameSize);
     floats yPos(_frameSize);
     floats zPos(_frameSize);
-    uint16_ts xColor(_frameSize);
-    uint16_ts yColor(_frameSize);
-    uint16_ts zColor(_frameSize);
+    int16_ts xColor(_frameSize);
+    int16_ts yColor(_frameSize);
+    int16_ts zColor(_frameSize);
 
     posDataset.read(xPos.data(), H5::PredType::NATIVE_FLOAT);
     posDataset = neurons.openDataSet("/y");
@@ -79,32 +79,42 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
     posDataset = neurons.openDataSet("/z");
     posDataset.read(zPos.data(), H5::PredType::NATIVE_FLOAT);
     posDataset = neurons.openDataSet("/colorx");
-    posDataset.read(xColor.data(), H5::PredType::NATIVE_UINT16);
+    posDataset.read(xColor.data(), H5::PredType::NATIVE_INT16);
     posDataset = neurons.openDataSet("/colory");
-    posDataset.read(yColor.data(), H5::PredType::NATIVE_UINT16);
+    posDataset.read(yColor.data(), H5::PredType::NATIVE_INT16);
     posDataset = neurons.openDataSet("/colorz");
-    posDataset.read(zColor.data(), H5::PredType::NATIVE_UINT16);
+    posDataset.read(zColor.data(), H5::PredType::NATIVE_INT16);
 
     std::map<size_t, Vector4f> materials;
-    for (size_t gid = 0; gid < _frameSize; ++gid)
+    for (uint64_t gid = 0; gid < _frameSize; ++gid)
     {
-        const size_t index = int(xColor[gid]) + int(yColor[gid] * 256) +
-                             int(zColor[gid] * 65536);
-        materials[index] = Vector4f(xColor[gid], yColor[gid], zColor[gid], 1.f);
+        // Create a unique index for the combination of R,G and B values. This
+        // index will then be used to identify the color that should be applied
+        // to the sphere by the renderer
+        const size_t index =
+            xColor[gid] * 65536 + yColor[gid] * 256 + zColor[gid];
+        materials[index] =
+            Vector4f(float(xColor[gid]) / 256.f, float(yColor[gid]) / 256.f,
+                     float(zColor[gid]) / 256.f, DEFAULT_ALPHA);
     }
-    nbMaterials = materials.size();
 
-    auto transferFunction = scene.getTransferFunction();
+    auto& transferFunction = scene.getTransferFunction();
     transferFunction.clear();
 
+    // Realign materials
+    std::map<size_t, float> materialMapping;
     size_t i = 0;
-    for (auto& material : materials)
+    transferFunction.getDiffuseColors().resize(materials.size(), Vector4f());
+    for (const auto& material : materials)
     {
-        transferFunction.getDiffuseColors().push_back(material.second);
-        material.second.w() = i;
+        transferFunction.getDiffuseColors()[i] = material.second;
+        materialMapping[material.first] = i;
         ++i;
     }
-    BRAYNS_INFO << "Number of materials: " << nbMaterials << std::endl;
+    transferFunction.setValuesRange(Vector2f(0.f, materialMapping.size()));
+
+    BRAYNS_INFO << "Number of materials: " << materialMapping.size()
+                << std::endl;
 
     SpheresMap& spheres = scene.getSpheres();
     spheres[0].reserve(_frameSize);
@@ -117,15 +127,14 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene,
     {
         ++progress;
         // Create a unique index for the combination of R,G and B values. This
-        // index will then
-        // be used to identify the color that should be applied to the sphere by
-        // the renderer
-        const size_t index = int(xColor[gid]) + int(yColor[gid] * 256) +
-                             int(zColor[gid] * 65536);
+        // index will then be used to identify the color that should be applied
+        // to the sphere by the renderer
+        const size_t index =
+            xColor[gid] * 65536 + yColor[gid] * 256 + zColor[gid];
         const Vector3f center(xPos[gid], yPos[gid], zPos[gid]);
         _positions.push_back(center);
         spheres[0].push_back(
-            SpherePtr(new Sphere(center, radius, 0.f, materials[index].w())));
+            SpherePtr(new Sphere(center, radius, 0.f, materialMapping[index])));
         bounds.merge(center);
     }
 
