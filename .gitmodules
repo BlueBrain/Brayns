@@ -1,0 +1,5 @@
+[submodule "CMake/common"]
+	path = CMake/common
+	url = https://github.com/Eyescale/CMake
+        branch = master
+        shallow = true

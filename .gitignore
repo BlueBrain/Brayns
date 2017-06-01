@@ -1,5 +1,4 @@
 ./
-CMake/common/
 Deflect/
 FlatBuffers/
 RESTBridge/
@@ -24,4 +23,3 @@ CMakeFiles
 *.includes
 *.creator*
 *.user
-

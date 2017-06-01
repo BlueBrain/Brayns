@@ -64,26 +64,26 @@ Download and extract [ISPC compiler 1.9.1 archive](https://ispc.github.io/downlo
 
 #### Embree
 
-Clone embree 2.14.0 in the same folder level as ISPC compiler
+Clone embree 2.16.1 in the same folder level as ISPC compiler
 
 ```
   git clone https://github.com/embree/embree.git
   mkdir embree/Build
   cd embree/Build
-  git checkout c24bc55
+  git checkout 788d912
   cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
 ```
 
 #### OSPRay
 
-Clone OSPRay 1.2.0 in the same folder level as ISPC compiler
+Clone OSPRay 1.2.1 in the same folder level as ISPC compiler
 
 ```
   git clone https://github.com/ospray/OSPRay.git
   mkdir OSPRay/Build
   cd OSPRay/Build
-  git checkout a6798ef
+  git checkout be966e3
   export embree_DIR=<Brayns_installation_folder>
   cmake .. -DOSPRAY_USE_EXTERNAL_EMBREE=ON -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
@@ -95,7 +95,7 @@ Clone OSPRay 1.2.0 in the same folder level as ISPC compiler
   git clone https://github.com/BlueBrain/Brayns.git
   mkdir Brayns/Build
   cd Brayns/Build
-  CMAKE_PREFIX_PATH=<Brayns_installation_folder>/lib/cmake/embree-2.14.0:<Brayns_installation_folder>/lib/cmake/ospray-1.2.0 cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
+  CMAKE_PREFIX_PATH=<Brayns_installation_folder>/lib/cmake/embree-2.14.0:<Brayns_installation_folder>/lib/cmake/ospray-1.2.0 cmake .. -DCLONE_SUBPROJECTS=ON -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
 ```
 

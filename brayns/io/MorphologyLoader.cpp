@@ -840,7 +840,7 @@ bool MorphologyLoader::importSimulationData(const servus::URI& circuitConfig,
         ++progress;
         const float frameTime = firstFrame + step * frame;
         const brion::floatsPtr& valuesPtr =
-            compartmentReport.loadFrame(frameTime);
+            compartmentReport.loadFrame(frameTime).get();
         const floats& values = *valuesPtr;
         simulationHandler->writeFrame(file, values);
     }
