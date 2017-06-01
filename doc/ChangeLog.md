@@ -1,7 +1,7 @@
 Changelog {#Changelog}
 =========
 
-# master
+# Release 0.3 (01-06-2017)
 
 * [#158](https://github.com/BlueBrain/Brayns/pull/158):
   Added memory-mode command line argument to define how memory is shared between Brayns and underlying engine
