@@ -92,7 +92,7 @@ Clone OSPRay 1.2.1 in the same folder level as ISPC compiler
 ### Brayns
 
 ```
-  git clone https://github.com/BlueBrain/Brayns.git
+  git clone --recursive https://github.com/BlueBrain/Brayns.git
   mkdir Brayns/Build
   cd Brayns/Build
   CMAKE_PREFIX_PATH=<Brayns_installation_folder>/lib/cmake/embree-2.14.0:<Brayns_installation_folder>/lib/cmake/ospray-1.2.0 cmake .. -DCLONE_SUBPROJECTS=ON -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>

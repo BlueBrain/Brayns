@@ -14,8 +14,6 @@ if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake)
   message(FATAL_ERROR "CMake/common missing, run: git submodule update --init")
 endif()
 
-include(GitExternal)
-
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
 
