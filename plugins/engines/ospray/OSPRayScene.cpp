@@ -1084,11 +1084,10 @@ void OSPRayScene::commitTransferFunctionData()
             dynamic_cast<OSPRayRenderer*>(renderer.get());
 
         // Transfer function Diffuse colors
-        if (!_ospTransferFunctionDiffuseData)
-            _ospTransferFunctionDiffuseData =
-                ospNewData(_transferFunction.getDiffuseColors().size(),
-                           OSP_FLOAT4, &_transferFunction.getDiffuseColors()[0],
-                           _getOSPDataFlags());
+        _ospTransferFunctionDiffuseData =
+            ospNewData(_transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
+                       _transferFunction.getDiffuseColors().data(),
+                       _getOSPDataFlags());
         ospCommit(_ospTransferFunctionDiffuseData);
         ospSetData(osprayRenderer->impl(), "transferFunctionDiffuseData",
                    _ospTransferFunctionDiffuseData);
@@ -1097,7 +1096,7 @@ void OSPRayScene::commitTransferFunctionData()
         _ospTransferFunctionEmissionData =
             ospNewData(_transferFunction.getEmissionIntensities().size(),
                        OSP_FLOAT3,
-                       &_transferFunction.getEmissionIntensities()[0],
+                       _transferFunction.getEmissionIntensities().data(),
                        _getOSPDataFlags());
         ospCommit(_ospTransferFunctionEmissionData);
         ospSetData(osprayRenderer->impl(), "transferFunctionEmissionData",

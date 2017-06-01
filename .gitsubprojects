@@ -7,7 +7,7 @@ endif()
 
 if(BRAYNS_NETWORKING_ENABLED)
   git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git cea0338)
-  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 847025a)
+  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 9ecd76b)
 endif()
 
 # Streaming to display walls

@@ -112,7 +112,7 @@ bool ZeroEQPlugin::run(Engine& engine)
     }
 
     _forceRendering = false;
-    while (_subscriber.receive(10))
+    while (_subscriber.receive(1))
     {
         if (_forceRendering)
             break;

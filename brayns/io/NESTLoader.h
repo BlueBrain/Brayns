@@ -64,11 +64,8 @@ public:
      * argument.
      * @param filename File containing the circuit
      * @param scene Scene in which spheres should be added
-     * @param nbMaterials The number of different materials identified in the
-     * circuit
      */
-    void importCircuit(const std::string& filename, Scene& scene,
-                       size_t& nbMaterials);
+    void importCircuit(const std::string& filename, Scene& scene);
 
     /**
      * Imports a spike report into the memory mapped cache file that will be
