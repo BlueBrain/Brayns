@@ -34,6 +34,7 @@ const std::string PARAM_PDB_FILE = "pdb-file";
 const std::string PARAM_PDB_FOLDER = "pdb-folder";
 const std::string PARAM_XYZB_FILE = "xyzb-file";
 const std::string PARAM_MESH_FOLDER = "mesh-folder";
+const std::string PARAM_MESH_FILE = "mesh-file";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
 const std::string PARAM_SAVE_CACHE_FILE = "save-cache-file";
@@ -119,15 +120,17 @@ GeometryParameters::GeometryParameters()
         PARAM_NEST_REPORT.c_str(), po::value<std::string>(),
         "NEST simulation report file [string]")(
         PARAM_MESH_FOLDER.c_str(), po::value<std::string>(),
-        "Folder containing mesh files [string]")(PARAM_PDB_FILE.c_str(),
+        "Folder containing mesh files [string]")(PARAM_MESH_FILE.c_str(),
                                                  po::value<std::string>(),
-                                                 "PDB filename [string]")(
-        PARAM_PDB_FOLDER.c_str(), po::value<std::string>(),
-        "Folder containing PDB files [string]")(PARAM_XYZB_FILE.c_str(),
-                                                po::value<std::string>(),
-                                                "XYZB filename [string]")(
-        PARAM_CIRCUIT_CONFIG.c_str(), po::value<std::string>(),
-        "Circuit configuration filename [string]")(
+                                                 "Mesh file [string]")(
+        PARAM_PDB_FILE.c_str(), po::value<std::string>(),
+        "PDB filename [string]")(PARAM_PDB_FOLDER.c_str(),
+                                 po::value<std::string>(),
+                                 "Folder containing PDB files [string]")(
+        PARAM_XYZB_FILE.c_str(), po::value<std::string>(),
+        "XYZB filename [string]")(PARAM_CIRCUIT_CONFIG.c_str(),
+                                  po::value<std::string>(),
+                                  "Circuit configuration filename [string]")(
         PARAM_LOAD_CACHE_FILE.c_str(), po::value<std::string>(),
         "Load binary container of a scene [string]")(
         PARAM_SAVE_CACHE_FILE.c_str(), po::value<std::string>(),
@@ -219,6 +222,8 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
         _xyzbFile = vm[PARAM_XYZB_FILE].as<std::string>();
     if (vm.count(PARAM_MESH_FOLDER))
         _meshFolder = vm[PARAM_MESH_FOLDER].as<std::string>();
+    if (vm.count(PARAM_MESH_FILE))
+        _meshFile = vm[PARAM_MESH_FILE].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_CONFIG))
         _circuitConfig = vm[PARAM_CIRCUIT_CONFIG].as<std::string>();
     if (vm.count(PARAM_LOAD_CACHE_FILE))
@@ -361,6 +366,7 @@ void GeometryParameters::print()
     BRAYNS_INFO << "PDB folder                 : " << _pdbFolder << std::endl;
     BRAYNS_INFO << "XYZB file                  : " << _xyzbFile << std::endl;
     BRAYNS_INFO << "Mesh folder                : " << _meshFolder << std::endl;
+    BRAYNS_INFO << "Mesh file                  : " << _meshFile << std::endl;
     BRAYNS_INFO << "Cache file to load         : " << _loadCacheFile
                 << std::endl;
     BRAYNS_INFO << "Cache file to save         : " << _saveCacheFile

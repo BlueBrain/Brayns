@@ -77,6 +77,8 @@ public:
     std::string getXYZBFile() const { return _xyzbFile; }
     /** folder containing mesh files */
     std::string getMeshFolder() const { return _meshFolder; }
+    /** Fesh containting mesh*/
+    std::string getMeshFile() const { return _meshFile; }
     /** file containing circuit configuration */
     std::string getCircuitConfiguration() const { return _circuitConfig; }
     /** Binary representation of a scene to load */
@@ -219,6 +221,7 @@ protected:
     std::string _xyzbFile;
     std::string _h5Folder;
     std::string _meshFolder;
+    std::string _meshFile;
     std::string _circuitConfig;
     std::string _loadCacheFile;
     std::string _saveCacheFile;

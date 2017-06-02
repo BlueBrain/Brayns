@@ -607,6 +607,7 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setPdbFolder(geometryParameters.getPDBFolder());
     _remoteDataSource.setXyzbFile(geometryParameters.getXYZBFile());
     _remoteDataSource.setMeshFolder(geometryParameters.getMeshFolder());
+    _remoteDataSource.setMeshFile(geometryParameters.getMeshFile());
     _remoteDataSource.setCircuitConfig(
         geometryParameters.getCircuitConfiguration());
     _remoteDataSource.setLoadCacheFile(geometryParameters.getLoadCacheFile());
@@ -712,6 +713,7 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _parametersManager.set("xyzb-file", _remoteDataSource.getXyzbFileString());
     _parametersManager.set("mesh-folder",
                            _remoteDataSource.getMeshFolderString());
+    _parametersManager.set("mesh-file", _remoteDataSource.getMeshFileString());
     _parametersManager.set("circuit-config",
                            _remoteDataSource.getCircuitConfigString());
     _parametersManager.set("load-cache-file",

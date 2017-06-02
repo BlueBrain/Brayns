@@ -362,6 +362,9 @@ private:
         if (!geometryParameters.getMeshFolder().empty())
             _loadMeshFolder(geometryParameters.getMeshFolder());
 
+        if (!geometryParameters.getMeshFile().empty())
+            _loadMeshFile(geometryParameters.getMeshFile());
+
 #if (BRAYNS_USE_BRION)
         if (!geometryParameters.getNESTCircuit().empty())
             _loadNESTCircuit();
@@ -462,8 +465,7 @@ private:
 
     /**
         Loads data from mesh files located in the folder specified in
-       the
-        geometry parameters (command line parameter --mesh-folder)
+       the geometry parameters (command line parameter --mesh-folder)
     */
     void _loadMeshFolder(const std::string& folder)
     {
@@ -493,6 +495,32 @@ private:
 #else
         BRAYNS_ERROR << "Assimp library is required to load meshes from "
                      << folder << std::endl;
+#endif
+    }
+
+    /**
+        Loads data from mesh file (command line parameter --mesh-file)
+    */
+    void _loadMeshFile(const std::string& filename)
+    {
+#if (BRAYNS_USE_ASSIMP)
+        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& scene = _engine->getScene();
+
+        strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
+                           ".stl", ".3ds", ".ase", ".ifc", ".off"};
+        size_t material =
+            geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
+                ? NB_SYSTEM_MATERIALS
+                : NO_MATERIAL;
+
+        if (!_meshLoader.importMeshFromFile(
+                filename, scene, geometryParameters.getGeometryQuality(),
+                Matrix4f(), material))
+            BRAYNS_ERROR << "Failed to import " << filename << std::endl;
+#else
+        BRAYNS_ERROR << "Assimp library is required to load meshes from "
+                     << filename << std::endl;
 #endif
     }
 
