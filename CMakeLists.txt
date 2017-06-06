@@ -17,18 +17,25 @@ endif()
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
 
-option(BRAYNS_BRION_ENABLED "Activate Brion" OFF)
-option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" OFF)
-option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" OFF)
-option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" OFF)
-option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" OFF)
+include(Common)
+
+# By default, optional dependencies are disabled
+set(BRAYNS_DEPENDENCY_ENABLED OFF)
+if(TRAVIS)
+    # All optional dependencies are enabled for Continuous integration
+  set(BRAYNS_DEPENDENCY_ENABLED ON)
+endif()
+
+option(BRAYNS_BRION_ENABLED "Activate Brion" ${BRAYNS_DEPENDENCY_ENABLED})
+option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ${BRAYNS_DEPENDENCY_ENABLED})
+option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ${BRAYNS_DEPENDENCY_ENABLED})
+option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ${BRAYNS_DEPENDENCY_ENABLED})
+option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ${BRAYNS_DEPENDENCY_ENABLED})
 option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
-option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" OFF)
-option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" OFF)
+option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" ${BRAYNS_DEPENDENCY_ENABLED})
+option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ${BRAYNS_DEPENDENCY_ENABLED})
 
 set(EMBREE_MAX_ISA "AVX512KNL" CACHE STRING "MAX ISA SSE,AVX,AVX2,AVX512KNL")
-
-include(Common)
 
 include(BraynsDepResolver)
 
@@ -64,8 +71,6 @@ if( NOT( OPTIX_FOUND AND CUDA_FOUND ) AND NOT OSPRAY_FOUND AND NOT TARGET LivreL
       "Neither OptiX+CUDA, OSPRay nor Livre were found. Brayns cannot work without an engine" )
 endif()
 
-common_find_package_post()
-
 # ------------------------------------------------------------------------------
 # BRAYNS applications and libraries
 # ------------------------------------------------------------------------------
@@ -95,6 +100,8 @@ option(BRAYNS_BENCHMARK_ENABLED "Brayns Benchmark" ON)
 if(BRAYNS_BENCHMARK_ENABLED)
   add_subdirectory(apps/BraynsBenchmark)
 endif()
+
+common_find_package_post()
 
 add_subdirectory(tests)
 
