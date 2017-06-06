@@ -75,6 +75,7 @@ table DataSource {
     pdb_folder: string;
     xyzb_file: string;
     mesh_folder: string;
+    mesh_file: string;
     circuit_config: string;
     load_cache_file: string;
     save_cache_file: string;
