@@ -78,6 +78,8 @@ if(APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework OpenGL -Wno-narrowing -Wno-deprecated-declarations")
 endif()
 
+common_find_package_post()
+
 add_subdirectory(plugins)
 add_subdirectory(brayns)
 
@@ -99,8 +101,6 @@ option(BRAYNS_BENCHMARK_ENABLED "Brayns Benchmark" ON)
 if(BRAYNS_BENCHMARK_ENABLED)
   add_subdirectory(apps/BraynsBenchmark)
 endif()
-
-common_find_package_post()
 
 add_subdirectory(tests)
 
