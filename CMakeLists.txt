@@ -17,26 +17,25 @@ endif()
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
 
-include(Common)
-
 # By default, optional dependencies are disabled
-set(BRAYNS_DEPENDENCY_ENABLED OFF)
-if(TRAVIS)
+set(BRAYNS_USE_OPTIONAL_DEPENDENCY)
+if($ENV{TRAVIS})
     # All optional dependencies are enabled for Continuous integration
-  set(BRAYNS_DEPENDENCY_ENABLED ON)
+  set(BRAYNS_USE_OPTIONAL_DEPENDENCY ON)
 endif()
 
-option(BRAYNS_BRION_ENABLED "Activate Brion" ${BRAYNS_DEPENDENCY_ENABLED})
-option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ${BRAYNS_DEPENDENCY_ENABLED})
-option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ${BRAYNS_DEPENDENCY_ENABLED})
-option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ${BRAYNS_DEPENDENCY_ENABLED})
-option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ${BRAYNS_DEPENDENCY_ENABLED})
+option(BRAYNS_BRION_ENABLED "Activate Brion" ${BRAYNS_USE_OPTIONAL_DEPENDENCY})
+option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ${BRAYNS_USE_OPTIONAL_DEPENDENCY})
+option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ${BRAYNS_USE_OPTIONAL_DEPENDENCY})
+option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ON)
+option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)
 option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
-option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" ${BRAYNS_DEPENDENCY_ENABLED})
+option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" ON)
 option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ${BRAYNS_DEPENDENCY_ENABLED})
 
 set(EMBREE_MAX_ISA "AVX512KNL" CACHE STRING "MAX ISA SSE,AVX,AVX2,AVX512KNL")
 
+include(Common)
 include(BraynsDepResolver)
 
 if(BRAYNS_OSPRAY_ENABLED)
