@@ -86,7 +86,14 @@ void ZeroEQPlugin::_onChangeEngine()
 
     _requests.erase(::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER());
 
-    _engine->recreate();
+    try
+    {
+        _engine->recreate();
+    }
+    catch (const std::runtime_error&)
+    {
+    }
+
     _forceRendering = true;
 }
 

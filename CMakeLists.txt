@@ -31,7 +31,7 @@ option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file forma
 option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)
 option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
 option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" ON)
-option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ${BRAYNS_DEPENDENCY_ENABLED})
+option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ${BRAYNS_USE_OPTIONAL_DEPENDENCY})
 
 set(EMBREE_MAX_ISA "AVX512KNL" CACHE STRING "MAX ISA SSE,AVX,AVX2,AVX512KNL")
 

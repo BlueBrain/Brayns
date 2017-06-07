@@ -29,8 +29,8 @@
 #include <brayns/parameters/ParametersManager.h>
 
 #include <lexis/render/Histogram.h>
-#include <livre/core/data/DataSource.h>
-#include <livre/core/data/VolumeInformation.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/VolumeInformation.h>
 #include <livre/eq/Engine.h>
 #include <livre/eq/FrameData.h>
 #include <livre/lib/configuration/ApplicationParameters.h>
