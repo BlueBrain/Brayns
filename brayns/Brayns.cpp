@@ -43,6 +43,7 @@
 #if (BRAYNS_USE_ASSIMP)
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
+#include <brayns/io/SceneLoader.h>
 #endif
 
 #if (BRAYNS_USE_MAGICKPP)
@@ -368,6 +369,9 @@ private:
         if (!geometryParameters.getMeshFile().empty())
             _loadMeshFile(geometryParameters.getMeshFile());
 
+        if (!geometryParameters.getSceneFile().empty())
+            _loadSceneFile(geometryParameters.getSceneFile());
+
 #if (BRAYNS_USE_BRION)
         if (!geometryParameters.getNESTCircuit().empty())
             _loadNESTCircuit();
@@ -521,6 +525,19 @@ private:
                 filename, scene, geometryParameters.getGeometryQuality(),
                 Matrix4f(), material))
             BRAYNS_ERROR << "Failed to import " << filename << std::endl;
+#else
+        BRAYNS_ERROR << "Assimp library is required to load meshes from "
+                     << filename << std::endl;
+#endif
+    }
+
+    void _loadSceneFile(const std::string& filename)
+    {
+#if (BRAYNS_USE_ASSIMP)
+        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& scene = _engine->getScene();
+        SceneLoader sceneLoader(geometryParameters);
+        sceneLoader.importFromFile(filename, scene, _meshLoader);
 #else
         BRAYNS_ERROR << "Assimp library is required to load meshes from "
                      << filename << std::endl;
