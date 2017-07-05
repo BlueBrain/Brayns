@@ -67,6 +67,7 @@ const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
 const std::string PARAM_USE_SIMULATION_MODEL = "use-simulation-model";
 const std::string PARAM_CIRCUIT_BOUNDING_BOX = "circuit-bounding-box";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
+const std::string PARAM_SCENE_FILE = "scene-file";
 
 const std::string COLOR_SCHEMES[11] = {"none",
                                        "neuron-by-id",
@@ -203,7 +204,9 @@ GeometryParameters::GeometryParameters()
         "[float float float float float float]")(
         PARAM_MEMORY_MODE.c_str(), po::value<std::string>(),
         "Defines what memory mode should be used between Brayns and the "
-        "underlying renderer [shared|replicated]");
+        "underlying renderer [shared|replicated]")(
+        PARAM_SCENE_FILE.c_str(), po::value<std::string>(),
+        "Full path of a file containing a scene description [string]");
 }
 
 bool GeometryParameters::_parse(const po::variables_map& vm)
@@ -349,6 +352,8 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             if (memoryMode == GEOMETRY_MEMORY_MODES[i])
                 _memoryMode = static_cast<MemoryMode>(i);
     }
+    if (vm.count(PARAM_SCENE_FILE))
+        _sceneFile = vm[PARAM_SCENE_FILE].as<std::string>();
 
     return true;
 }
@@ -430,6 +435,7 @@ void GeometryParameters::print()
     BRAYNS_INFO << "Memory mode                : "
                 << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
                 << std::endl;
+    BRAYNS_INFO << "Scene file                 : " << _sceneFile << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(

@@ -209,6 +209,10 @@ public:
      * underlying renderer
      */
     MemoryMode getMemoryMode() const { return _memoryMode; };
+    /**
+     * Return the full path of the file containing a scene description
+     */
+    std::string getSceneFile() const { return _sceneFile; };
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -251,6 +255,7 @@ protected:
     bool _useSimulationModel;
     Boxf _circuitBoundingBox;
     MemoryMode _memoryMode;
+    std::string _sceneFile;
 };
 }
 #endif // GEOMETRYPARAMETERS_H

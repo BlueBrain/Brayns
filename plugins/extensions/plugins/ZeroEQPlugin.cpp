@@ -698,6 +698,7 @@ void ZeroEQPlugin::_initializeDataSource()
                                aabb.getMin().y(), aabb.getMin().z()};
         _remoteDataSource.setCircuitBoundingBox(values);
     }
+    _remoteDataSource.setSceneFile(geometryParameters.getSceneFile());
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -863,6 +864,8 @@ void ZeroEQPlugin::_dataSourceUpdated()
                                                   brayns::v1::MemoryMode::shared
                                               ? "shared"
                                               : "replicated");
+    _parametersManager.set("scene-file",
+                           _remoteDataSource.getSceneFileString());
 
     _parametersManager.print();
 

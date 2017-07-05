@@ -110,6 +110,7 @@ table DataSource {
     metaballs_threshold: float;
     metaballs_samples_from_soma: uint;
     memory_mode: MemoryMode;
+    scene_file: string;
 }
 
 enum Shader: uint {
