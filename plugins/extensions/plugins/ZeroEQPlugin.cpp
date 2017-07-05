@@ -35,6 +35,34 @@
 
 #include <brayns/version.h>
 
+namespace
+{
+const std::string ENDPOINT_API_VERSION = "v1/";
+const std::string ENDPOINT_CAMERA = ENDPOINT_API_VERSION + "camera";
+const std::string ENDPOINT_DATA_SOURCE = ENDPOINT_API_VERSION + "data-source";
+const std::string ENDPOINT_FORCE_RENDERING =
+    ENDPOINT_API_VERSION + "force-rendering";
+const std::string ENDPOINT_FRAME_BUFFERS =
+    ENDPOINT_API_VERSION + "frame-buffers";
+const std::string ENDPOINT_RESET_CAMERA = ENDPOINT_API_VERSION + "reset-camera";
+const std::string ENDPOINT_SCENE = ENDPOINT_API_VERSION + "scene";
+const std::string ENDPOINT_SETTINGS = ENDPOINT_API_VERSION + "settings";
+const std::string ENDPOINT_SIMULATION_HISTOGRAM =
+    ENDPOINT_API_VERSION + "simulation-histogram";
+const std::string ENDPOINT_SPIKES = ENDPOINT_API_VERSION + "spikes";
+const std::string ENDPOINT_VOLUME_HISTOGRAM =
+    ENDPOINT_API_VERSION + "volume-histogram";
+const std::string ENDPOINT_VERSION = ENDPOINT_API_VERSION + "version";
+const std::string ENDPOINT_PROGRESS = ENDPOINT_API_VERSION + "progress";
+const std::string ENDPOINT_CLIP_PLANES = ENDPOINT_API_VERSION + "clip-planes";
+const std::string ENDPOINT_FRAME = ENDPOINT_API_VERSION + "frame";
+const std::string ENDPOINT_IMAGE_JPEG = ENDPOINT_API_VERSION + "image-jpeg";
+const std::string ENDPOINT_MATERIAL_LUT = ENDPOINT_API_VERSION + "material-lut";
+const std::string ENDPOINT_STREAM = ENDPOINT_API_VERSION + "stream";
+const std::string ENDPOINT_STREAM_TO = ENDPOINT_API_VERSION + "stream-to";
+const std::string ENDPOINT_VIEWPORT = ENDPOINT_API_VERSION + "viewport";
+}
+
 namespace brayns
 {
 ZeroEQPlugin::ZeroEQPlugin(ParametersManager& parametersManager)
@@ -65,7 +93,7 @@ void ZeroEQPlugin::_onNewEngine()
         std::bind(&ZeroEQPlugin::_cameraUpdated, this));
 
     if (_httpServer)
-        _httpServer->handle(cam);
+        _httpServer->handle(ENDPOINT_CAMERA, cam);
 
     _requests[ ::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER()] = [&] {
         return _publisher.publish(*_engine->getCamera().getSerializable());
@@ -172,80 +200,79 @@ void ZeroEQPlugin::_setupHTTPServer()
     BRAYNS_INFO << "Registering handlers on " << _httpServer->getURI()
                 << std::endl;
 
-    _httpServer->handleGET("brayns/version", brayns::Version::getSchema(),
+    _httpServer->handleGET(ENDPOINT_VERSION, brayns::Version::getSchema(),
                            &brayns::Version::toJSON);
 
-    _httpServer->handleGET(_remoteImageJPEG);
+    _httpServer->handleGET(ENDPOINT_IMAGE_JPEG, _remoteImageJPEG);
     _remoteImageJPEG.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestImageJPEG, this));
 
-    _httpServer->handleGET(_remoteFrameBuffers);
+    _httpServer->handleGET(ENDPOINT_FRAME_BUFFERS, _remoteFrameBuffers);
     _remoteFrameBuffers.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestFrameBuffers, this));
 
-    _httpServer->handlePUT(_remoteResetCamera);
+    _httpServer->handlePUT(ENDPOINT_RESET_CAMERA, _remoteResetCamera);
     _remoteResetCamera.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_resetCameraUpdated, this));
 
-    _httpServer->handle(_remoteScene);
+    _httpServer->handle(ENDPOINT_SCENE, _remoteScene);
     _remoteScene.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_sceneUpdated, this));
     _remoteScene.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestScene, this));
 
-    _httpServer->handle(_remoteSpikes);
+    _httpServer->handle(ENDPOINT_SPIKES, _remoteSpikes);
     _remoteSpikes.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_spikesUpdated, this));
     _remoteSpikes.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestSpikes, this));
 
-    _httpServer->handle(_remoteMaterialLUT);
+    _httpServer->handle(ENDPOINT_MATERIAL_LUT, _remoteMaterialLUT);
     _remoteMaterialLUT.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_materialLUTUpdated, this));
     _remoteMaterialLUT.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestMaterialLUT, this));
 
-    _httpServer->handle(_remoteDataSource);
+    _httpServer->handle(ENDPOINT_DATA_SOURCE, _remoteDataSource);
     _remoteDataSource.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_dataSourceUpdated, this));
 
-    _httpServer->handle(_remoteSettings);
+    _httpServer->handle(ENDPOINT_SETTINGS, _remoteSettings);
     _remoteSettings.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_settingsUpdated, this));
 
-    _httpServer->handle(_remoteFrame);
+    _httpServer->handle(ENDPOINT_FRAME, _remoteFrame);
     _remoteFrame.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestFrame, this));
     _remoteFrame.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_frameUpdated, this));
 
-    _httpServer->handle(_remoteViewport);
+    _httpServer->handle(ENDPOINT_VIEWPORT, _remoteViewport);
     _remoteViewport.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestViewport, this));
     _remoteViewport.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_viewportUpdated, this));
 
-    _httpServer->handle(_clipPlanes);
+    _httpServer->handle(ENDPOINT_CLIP_PLANES, _clipPlanes);
     _clipPlanes.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_clipPlanesUpdated, this));
     _clipPlanes.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestClipPlanes, this));
 
-    _httpServer->handleGET("brayns/v1/simulation-histogram",
+    _httpServer->handleGET(ENDPOINT_SIMULATION_HISTOGRAM,
                            _remoteSimulationHistogram);
     _remoteSimulationHistogram.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestSimulationHistogram, this));
 
-    _httpServer->handleGET("brayns/v1/volume-histogram",
-                           _remoteVolumeHistogram);
+    _httpServer->handleGET(ENDPOINT_VOLUME_HISTOGRAM, _remoteVolumeHistogram);
     _remoteVolumeHistogram.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestVolumeHistogram, this));
 
-    _httpServer->handle(_remoteForceRendering);
+    _httpServer->handle(ENDPOINT_FORCE_RENDERING, _remoteForceRendering);
     _remoteForceRendering.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_forceRenderingUpdated, this));
 
-    _httpServer->handleGET(_remoteProgress);
+    _httpServer->handleGET(ENDPOINT_PROGRESS, _remoteProgress);
     _remoteProgress.registerSerializeCallback(
         std::bind(&ZeroEQPlugin::_requestProgress, this));
 }
