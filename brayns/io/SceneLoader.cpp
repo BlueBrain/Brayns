@@ -33,9 +33,9 @@ SceneLoader::SceneLoader(const GeometryParameters& geometryParameters)
 
 bool SceneLoader::_parsePositions(const std::string& filename)
 {
-    _positions.clear();
+    _nodes.clear();
 
-    BRAYNS_INFO << "Loading xyz positions from " << filename << std::endl;
+    BRAYNS_INFO << "Loading nodes from " << filename << std::endl;
     std::ifstream file(filename, std::ios::in);
     if (!file.good())
     {
@@ -55,13 +55,15 @@ bool SceneLoader::_parsePositions(const std::string& filename)
 
         switch (lineData.size())
         {
-        case 4:
+        case 5:
         {
-            _positions.push_back(
-                Vector3f(boost::lexical_cast<float>(lineData[0]),
-                         boost::lexical_cast<float>(lineData[1]),
-                         boost::lexical_cast<float>(lineData[2])));
-            _meshFiles.push_back(lineData[3]);
+            Node node;
+            node.position = Vector3f(boost::lexical_cast<float>(lineData[0]),
+                                     boost::lexical_cast<float>(lineData[1]),
+                                     boost::lexical_cast<float>(lineData[2]));
+            node.materialId = boost::lexical_cast<uint16_t>(lineData[3]);
+            node.filename = lineData[4];
+            _nodes.push_back(node);
             break;
         }
         default:
@@ -71,7 +73,7 @@ bool SceneLoader::_parsePositions(const std::string& filename)
         }
     }
     file.close();
-    BRAYNS_INFO << _positions.size() << " positions loaded" << std::endl;
+    BRAYNS_INFO << _nodes.size() << " nodes loaded" << std::endl;
     return true;
 }
 
@@ -79,22 +81,20 @@ void SceneLoader::_importMeshes(Scene& scene, MeshLoader& meshLoader)
 {
     // Load mesh at specified positions
     uint32_t count = 0;
-    Progress progress("Loading meshes...", _positions.size());
-    for (const auto& position : _positions)
+    Progress progress("Loading scene...", _nodes.size());
+    for (const auto& node : _nodes)
     {
         ++progress;
         Matrix4f matrix;
-        matrix.setTranslation(position);
+        matrix.setTranslation(node.position);
         if (!meshLoader.importMeshFromFile(
-                _meshFiles[count], scene,
-                _geometryParameters.getGeometryQuality(), matrix,
-                NB_SYSTEM_MATERIALS + count))
+                node.filename, scene, _geometryParameters.getGeometryQuality(),
+                matrix, NB_SYSTEM_MATERIALS + node.materialId))
         {
-            BRAYNS_DEBUG << "Failed to load " << _meshFiles[count] << std::endl;
+            BRAYNS_DEBUG << "Failed to load " << node.filename << std::endl;
         }
         ++count;
     }
-    BRAYNS_INFO << "Loaded " << count << " meshes" << std::endl;
 }
 
 bool SceneLoader::importFromFile(const std::string& filename, Scene& scene,

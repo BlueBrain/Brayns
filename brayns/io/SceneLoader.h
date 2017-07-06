@@ -50,13 +50,20 @@ public:
                         MeshLoader& meshLoader);
 
 private:
+    struct Node
+    {
+        Vector3f position;
+        uint16_t materialId;
+        std::string filename;
+    };
+    typedef std::vector<Node> Nodes;
+
     bool _parsePositions(const std::string& filename);
     void _importMeshes(Scene& scene, MeshLoader& meshLoader);
 
     const GeometryParameters& _geometryParameters;
 
-    Vector3fs _positions;
-    strings _meshFiles;
+    Nodes _nodes;
 };
 }
 
