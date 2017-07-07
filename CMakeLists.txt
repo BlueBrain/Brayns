@@ -50,10 +50,6 @@ if(BRAYNS_OSPRAY_ENABLED)
     set(OSPRAY_COMPILER "GCC" CACHE STRING "compiler to use (ICC or GCC)")
     set_property(CACHE OSPRAY_COMPILER PROPERTY STRINGS ICC GCC)
   endif()
-
-  # the arch we're targeting for the non-MIC/non-xeon phi part of ospray
-  set(BRAYNS_BUILD_ISA "ALL" CACHE STRING "Target ISA (SSE,AVX,AVX2,or ALL)")
-  set_property(CACHE BRAYNS_BUILD_ISA PROPERTY STRINGS ALL SSE AVX AVX2)
 endif()
 
 common_find_package(Boost REQUIRED COMPONENTS
