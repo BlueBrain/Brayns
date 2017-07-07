@@ -110,7 +110,7 @@ void ZeroEQPlugin::_onChangeEngine()
         servus::Serializable::DeserializedCallback());
 
     if (_httpServer)
-        _httpServer->remove(cam);
+        _httpServer->remove(ENDPOINT_CAMERA);
 
     _requests.erase(::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER());
 
