@@ -51,7 +51,7 @@ inline varying vec4f
         value = self->simulationData[dg.st.x];
     else
         // Value offset is out of range, return error color
-        return make_vec4f(1.f, 0.f, 0.f, 1.f);
+        return make_vec4f(0.f, 0.f, 0.f, 0.f);
 
     if (value < self->threshold)
         return color;

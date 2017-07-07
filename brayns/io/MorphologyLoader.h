@@ -130,7 +130,7 @@ private:
                            SimulationInformation* simulationInformation,
                            SpheresMap& spheres, CylindersMap& cylinders,
                            ConesMap& cones, Boxf& bounds,
-                           const size_t simulationOffset,
+                           const float simulationOffset,
                            float& maxDistanceToSoma,
                            const size_t forcedMaterial = NO_MATERIAL);
 
