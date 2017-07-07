@@ -40,8 +40,6 @@
 
 namespace
 {
-const std::string MESH_DECIMATED_EXTENSION = "_decimated.off";
-const std::string MESH_EXTENSION = ".off";
 const float NO_OFFSET = -1.f;
 }
 
@@ -564,17 +562,22 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                                   brain::neuron::SectionType::undefined,
                                   _geometryParameters.getColorScheme());
 
-            std::stringstream meshFilename;
-            meshFilename << meshedMorphologiesFolder;
-            meshFilename << "/meshes_" << (*gid);
-            meshFilename << (_geometryParameters.getGeometryQuality() ==
-                                     GeometryQuality::high
-                                 ? MESH_EXTENSION
-                                 : MESH_DECIMATED_EXTENSION);
+            auto meshFilenamePattern =
+                _geometryParameters.getMeshFilenamePattern();
+            std::stringstream gidAsString;
+            gidAsString << (*gid);
+            const std::string GID = "{gid}";
+            if (!meshFilenamePattern.empty())
+                meshFilenamePattern.replace(meshFilenamePattern.find(GID),
+                                            GID.length(), gidAsString.str());
+            else
+                meshFilenamePattern = gidAsString.str();
+
+            auto meshFilename =
+                meshedMorphologiesFolder + "/" + meshFilenamePattern;
             meshLoader.importMeshFromFile(
-                meshFilename.str(), scene,
-                _geometryParameters.getGeometryQuality(), transforms[i],
-                material);
+                meshFilename, scene, _geometryParameters.getGeometryQuality(),
+                transforms[i], material);
 
             ++gid;
             ++morphologyCount;

@@ -213,6 +213,10 @@ public:
      * Return the full path of the file containing a scene description
      */
     std::string getSceneFile() const { return _sceneFile; };
+    /**
+     * Return the filename pattern use to load meshes
+     */
+    std::string getMeshFilenamePattern() const { return _meshFilenamePattern; };
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -256,6 +260,7 @@ protected:
     Boxf _circuitBoundingBox;
     MemoryMode _memoryMode;
     std::string _sceneFile;
+    std::string _meshFilenamePattern;
 };
 }
 #endif // GEOMETRYPARAMETERS_H

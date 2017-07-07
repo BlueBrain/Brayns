@@ -726,6 +726,8 @@ void ZeroEQPlugin::_initializeDataSource()
         _remoteDataSource.setCircuitBoundingBox(values);
     }
     _remoteDataSource.setSceneFile(geometryParameters.getSceneFile());
+    _remoteDataSource.setMeshFilenamePattern(
+        geometryParameters.getMeshFilenamePattern());
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -893,6 +895,8 @@ void ZeroEQPlugin::_dataSourceUpdated()
                                               : "replicated");
     _parametersManager.set("scene-file",
                            _remoteDataSource.getSceneFileString());
+    _parametersManager.set("mesh-filename-pattern",
+                           _remoteDataSource.getMeshFilenamePatternString());
 
     _parametersManager.print();
 
