@@ -42,6 +42,7 @@ namespace
 {
 const std::string MESH_DECIMATED_EXTENSION = "_decimated.off";
 const std::string MESH_EXTENSION = ".off";
+const float NO_OFFSET = -1.f;
 }
 
 namespace brayns
@@ -216,8 +217,8 @@ bool MorphologyLoader::importMorphology(const servus::URI& uri,
     returnValue = returnValue &&
                   _importMorphology(uri, morphologyIndex, Matrix4f(), nullptr,
                                     scene.getSpheres(), scene.getCylinders(),
-                                    scene.getCones(), scene.getWorldBounds(), 0,
-                                    maxDistanceToSoma);
+                                    scene.getCones(), scene.getWorldBounds(),
+                                    NO_OFFSET, maxDistanceToSoma);
     return returnValue;
 }
 
@@ -226,7 +227,7 @@ bool MorphologyLoader::_importMorphology(
     const Matrix4f& transformation,
     SimulationInformation* simulationInformation, SpheresMap& spheres,
     CylindersMap& cylinders, ConesMap& cones, Boxf& bounds,
-    const size_t simulationOffset, float& maxDistanceToSoma,
+    const float simulationOffset, float& maxDistanceToSoma,
     const size_t forcedMaterial)
 {
     maxDistanceToSoma = 0.f;
@@ -266,10 +267,10 @@ bool MorphologyLoader::_importMorphology(
 
         size_t sectionId = 0;
 
-        float offset = 0.f;
+        float offset = NO_OFFSET;
         if (simulationInformation)
             offset = simulationInformation->getCompartmentOffsets(sectionId);
-        else if (simulationOffset != 0)
+        else if (simulationOffset != NO_OFFSET)
             offset = simulationOffset;
 
         if (!_geometryParameters.useMetaballs() &&
@@ -370,7 +371,7 @@ bool MorphologyLoader::_importMorphology(
                     offset = simulationInformation->getCompartmentOffsets(
                                  sectionId) +
                              float(i) * segmentStep;
-                else if (simulationOffset != 0)
+                else if (simulationOffset != NO_OFFSET)
                     offset = simulationOffset + distance;
 
                 Vector4f sample = samples[i];
@@ -634,7 +635,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 if (_importMorphology(uri, morphologyCount, transforms[i],
                                       simulationInformation.get(),
                                       private_spheres, private_cylinders,
-                                      private_cones, private_bounds, 0,
+                                      private_cones, private_bounds, -1.f,
                                       maxDistanceToSoma, material))
 #pragma omp atomic
                     ++morphologyCount;
