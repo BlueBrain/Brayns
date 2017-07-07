@@ -68,6 +68,7 @@ const std::string PARAM_USE_SIMULATION_MODEL = "use-simulation-model";
 const std::string PARAM_CIRCUIT_BOUNDING_BOX = "circuit-bounding-box";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_SCENE_FILE = "scene-file";
+const std::string PARAM_MESH_FILENAME_PATTERN = "mesh-filename-pattern";
 
 const std::string COLOR_SCHEMES[11] = {"none",
                                        "neuron-by-id",
@@ -206,7 +207,10 @@ GeometryParameters::GeometryParameters()
         "Defines what memory mode should be used between Brayns and the "
         "underlying renderer [shared|replicated]")(
         PARAM_SCENE_FILE.c_str(), po::value<std::string>(),
-        "Full path of a file containing a scene description [string]");
+        "Full path of a file containing a scene description [string]")(
+        PARAM_MESH_FILENAME_PATTERN.c_str(), po::value<std::string>(),
+        "Pattern used to determine the name of the file containing a meshed "
+        "morphology [string]");
 }
 
 bool GeometryParameters::_parse(const po::variables_map& vm)
@@ -354,6 +358,9 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     }
     if (vm.count(PARAM_SCENE_FILE))
         _sceneFile = vm[PARAM_SCENE_FILE].as<std::string>();
+    if (vm.count(PARAM_MESH_FILENAME_PATTERN))
+        _meshFilenamePattern =
+            vm[PARAM_MESH_FILENAME_PATTERN].as<std::string>();
 
     return true;
 }
@@ -436,6 +443,8 @@ void GeometryParameters::print()
                 << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
                 << std::endl;
     BRAYNS_INFO << "Scene file                 : " << _sceneFile << std::endl;
+    BRAYNS_INFO << "Mesh filename pattern      : " << _meshFilenamePattern
+                << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(

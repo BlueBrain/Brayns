@@ -111,6 +111,7 @@ table DataSource {
     metaballs_samples_from_soma: uint;
     memory_mode: MemoryMode;
     scene_file: string;
+    mesh_filename_pattern: string;
 }
 
 enum Shader: uint {
