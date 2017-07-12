@@ -537,21 +537,19 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     if (!meshedMorphologiesFolder.empty())
     {
         // Loading meshes is currently sequential. TODO: Make it parallel!!!
-        Progress progress("Loading meshes...", uris.size());
+        Progress progress("Loading meshes...",
+                          static_cast<size_t>(uris.size() / nbSkippedCells));
         brion::GIDSet::const_iterator gid = cr_gids.begin();
         for (size_t i = 0; i < cr_gids.size(); ++i)
         {
             ++progress;
 
-            if ((nbSkippedCells != 0 && morphologyCount % nbSkippedCells != 0))
+            if ((nbSkippedCells != 0 &&
+                 morphologyCount % nbSkippedCells != 0) ||
+                !_positionInCircuitBoundingBox(transforms[i].getTranslation()))
             {
                 ++gid;
-                continue;
-            }
-
-            if (!_positionInCircuitBoundingBox(transforms[i].getTranslation()))
-            {
-                ++gid;
+                ++morphologyCount;
                 continue;
             }
 
@@ -578,7 +576,6 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             meshLoader.importMeshFromFile(
                 meshFilename, scene, _geometryParameters.getGeometryQuality(),
                 transforms[i], material);
-
             ++gid;
             ++morphologyCount;
         }
@@ -588,7 +585,8 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
 
     if (loadParametricGeometry)
     {
-        Progress progress("Loading geometries...", cr_uris.size());
+        Progress progress("Loading geometries...",
+                          static_cast<size_t>(cr_uris.size() / nbSkippedCells));
         morphologyCount = 0;
 #pragma omp parallel
         {
@@ -699,7 +697,9 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             nonSimulatedCells = cr_uris.size();
 
         std::stringstream msg;
-        msg << "Loading " << nonSimulatedCells << " non-simulated cells";
+        msg << "Loading "
+            << static_cast<size_t>(nonSimulatedCells / nbSkippedCells)
+            << " non-simulated cells";
 
         neuronMatrix.clear();
         if (mvd3Support)
