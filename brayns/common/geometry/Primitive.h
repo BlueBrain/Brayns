@@ -33,7 +33,8 @@ namespace brayns
 class Primitive : public Geometry
 {
 public:
-    BRAYNS_API Primitive(const float timestamp = 0.f);
+    BRAYNS_API Primitive(const float timestamp = 0.f,
+                         const Vector2f& values = Vector2f(0.f, 0.f));
     BRAYNS_API virtual ~Primitive() {}
     BRAYNS_API float getTimestamp() const { return _timestamp; }
     BRAYNS_API virtual size_t serializeData(floats& serializedData) = 0;
@@ -41,10 +42,12 @@ public:
     {
         return _serializationSize;
     }
-
+    BRAYNS_API const Vector2f& getValues() const { return _values; }
+    BRAYNS_API void setValues(const Vector2f& values) { _values = values; }
 protected:
     static size_t _serializationSize;
     float _timestamp;
+    Vector2f _values;
 };
 }
 

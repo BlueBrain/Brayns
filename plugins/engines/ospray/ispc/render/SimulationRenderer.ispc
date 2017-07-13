@@ -45,10 +45,10 @@ inline varying vec4f
 {
     lightEmission = make_vec3f(0.f);
     varying vec4f color = make_vec4f(0.f);
-
     varying float value = 0.f;
-    if (dg.st.x >= 0 && dg.st.x < self->simulationDataSize)
-        value = self->simulationData[dg.st.x];
+    varying int64 index = dg.st.y * 1e6 + dg.st.x;
+    if (index >= 0 && index < self->simulationDataSize)
+        value = self->simulationData[index];
     else
         // Value offset is out of range, return error color
         return make_vec4f(0.f, 0.f, 0.f, 0.f);

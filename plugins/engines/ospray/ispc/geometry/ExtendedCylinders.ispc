@@ -40,7 +40,8 @@ struct ExtendedCylinders
     int offset_v1;
     int offset_radius;
     int offset_timestamp;
-    int offset_value;
+    int offset_value_x;
+    int offset_value_y;
     int offset_materialID;
     int32 numExtendedCylinders;
     int32 bytesPerCylinder;
@@ -148,13 +149,12 @@ static void ExtendedCylinders_postIntersect(uniform Geometry *uniform geometry,
     dg.material = geometry->material;
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
-    dg.st.x = 0.f;
-    dg.st.y = 0.f;
 
     uniform uint8 *cylinderPtr =
         this->data + this->bytesPerCylinder * ray.primID;
     // Store value as texture coordinate
-    dg.st.x = *((varying float *)(cylinderPtr + this->offset_value));
+    dg.st.x = *((varying float *)(cylinderPtr + this->offset_value_x));
+    dg.st.y = *((varying float *)(cylinderPtr + this->offset_value_y));
 
     if (flags & DG_NORMALIZE)
     {
@@ -192,8 +192,8 @@ export void ExtendedCylindersGeometry_set(
     int uniform numExtendedCylinders, int uniform bytesPerCylinder,
     float uniform radius, int uniform materialID, int uniform offset_v0,
     int uniform offset_v1, int uniform offset_radius,
-    int uniform offset_timestamp, int uniform offset_value,
-    int uniform offset_materialID)
+    int uniform offset_timestamp, int uniform offset_value_x,
+    int uniform offset_value_y, int uniform offset_materialID)
 {
     uniform ExtendedCylinders *uniform geom =
         (uniform ExtendedCylinders * uniform)_geom;
@@ -214,7 +214,8 @@ export void ExtendedCylindersGeometry_set(
     geom->offset_v1 = offset_v1;
     geom->offset_radius = offset_radius;
     geom->offset_timestamp = offset_timestamp;
-    geom->offset_value = offset_value;
+    geom->offset_value_x = offset_value_x;
+    geom->offset_value_y = offset_value_y;
     geom->offset_materialID = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);

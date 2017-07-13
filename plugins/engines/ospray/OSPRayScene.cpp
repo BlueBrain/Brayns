@@ -577,8 +577,10 @@ uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
                          3 * sizeof(float));
                 ospSet1i(_ospExtendedSpheres[materialId], "offset_timestamp",
                          4 * sizeof(float));
-                ospSet1i(_ospExtendedSpheres[materialId], "offset_value",
+                ospSet1i(_ospExtendedSpheres[materialId], "offset_value_x",
                          5 * sizeof(float));
+                ospSet1i(_ospExtendedSpheres[materialId], "offset_value_y",
+                         6 * sizeof(float));
 
                 if (_ospMaterials[materialId])
                     ospSetMaterial(_ospExtendedSpheres[materialId],
@@ -650,8 +652,10 @@ uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
                          Cylinder::getSerializationSize() * sizeof(float));
                 ospSet1i(_ospExtendedCylinders[materialId], "offset_timestamp",
                          7 * sizeof(float));
-                ospSet1i(_ospExtendedCylinders[materialId], "offset_value",
+                ospSet1i(_ospExtendedCylinders[materialId], "offset_value_x",
                          8 * sizeof(float));
+                ospSet1i(_ospExtendedCylinders[materialId], "offset_value_y",
+                         9 * sizeof(float));
 
                 if (_ospMaterials[materialId])
                     ospSetMaterial(_ospExtendedCylinders[materialId],
@@ -717,8 +721,10 @@ uint64_t OSPRayScene::_serializeCones(const size_t materialId)
                          Cone::getSerializationSize() * sizeof(float));
                 ospSet1i(_ospExtendedCones[materialId], "offset_timestamp",
                          8 * sizeof(float));
-                ospSet1i(_ospExtendedCones[materialId], "offset_value",
+                ospSet1i(_ospExtendedCones[materialId], "offset_value_x",
                          9 * sizeof(float));
+                ospSet1i(_ospExtendedCones[materialId], "offset_value_y",
+                         10 * sizeof(float));
 
                 if (_ospMaterials[materialId])
                     ospSetMaterial(_ospExtendedCones[materialId],

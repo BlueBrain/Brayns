@@ -23,13 +23,12 @@
 namespace brayns
 {
 Cone::Cone(const Vector3f& center, const Vector3f& up, const float centerRadius,
-           const float upRadius, const float timestamp, const float value)
-    : Primitive(timestamp)
+           const float upRadius, const float timestamp, const Vector2f& values)
+    : Primitive(timestamp, values)
     , _center(center)
     , _up(up)
     , _centerRadius(centerRadius)
     , _upRadius(upRadius)
-    , _value(value)
 {
     _geometryType = GT_CONE;
 }
@@ -45,12 +44,13 @@ size_t Cone::serializeData(floats& serializedData)
     serializedData.push_back(_centerRadius);
     serializedData.push_back(_upRadius);
     serializedData.push_back(_timestamp);
-    serializedData.push_back(_value);
+    serializedData.push_back(_values.x());
+    serializedData.push_back(_values.y());
     return getSerializationSize();
 }
 
 size_t Cone::getSerializationSize()
 {
-    return 10;
+    return 11;
 }
 }

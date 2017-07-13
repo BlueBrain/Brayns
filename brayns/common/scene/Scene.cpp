@@ -251,7 +251,7 @@ void Scene::buildDefault()
     // Sphere
     {
         _spheres[material].push_back(
-            SpherePtr(new Sphere(Vector3f(0.25f, 0.26f, 0.30f), 0.25f, 0, 0)));
+            SpherePtr(new Sphere(Vector3f(0.25f, 0.26f, 0.30f), 0.25f)));
         auto& m = _materials[material];
         m.setOpacity(0.3f);
         m.setRefractionIndex(1.1f);
@@ -262,9 +262,9 @@ void Scene::buildDefault()
 
     // Cylinder
     ++material;
-    _cylinders[material].push_back(CylinderPtr(
-        new Cylinder(Vector3f(0.25f, 0.126f, 0.75f),
-                     Vector3f(0.75f, 0.126f, 0.75f), 0.125f, 0, 0)));
+    _cylinders[material].push_back(
+        CylinderPtr(new Cylinder(Vector3f(0.25f, 0.126f, 0.75f),
+                                 Vector3f(0.75f, 0.126f, 0.75f), 0.125f)));
     {
         auto& m = _materials[material];
         m.setColor(Vector3f(0.1f, 0.1f, 0.8f));
@@ -276,7 +276,7 @@ void Scene::buildDefault()
     ++material;
     _cones[material].push_back(
         ConePtr(new Cone(Vector3f(0.75f, 0.01f, 0.25f),
-                         Vector3f(0.75f, 0.5f, 0.25f), 0.15f, 0.f, 0, 0)));
+                         Vector3f(0.75f, 0.5f, 0.25f), 0.15f, 0.f)));
     {
         auto& m = _materials[material];
         m.setReflectionIndex(0.8f);
@@ -453,34 +453,34 @@ void Scene::buildEnvironment()
 
         for (size_t i = 0; i < 8; ++i)
             _spheres[material].push_back(
-                SpherePtr(new Sphere(positions[i], radius, 0, 0)));
+                SpherePtr(new Sphere(positions[i], radius)));
 
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[0], positions[1], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[2], positions[3], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[4], positions[5], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[6], positions[7], radius, 0, 0)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[0], positions[1], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[2], positions[3], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[4], positions[5], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[6], positions[7], radius)));
 
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[0], positions[2], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[1], positions[3], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[4], positions[6], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[5], positions[7], radius, 0, 0)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[0], positions[2], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[1], positions[3], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[4], positions[6], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[5], positions[7], radius)));
 
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[0], positions[4], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[1], positions[5], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[2], positions[6], radius, 0, 0)));
-        _cylinders[material].push_back(CylinderPtr(
-            new Cylinder(positions[3], positions[7], radius, 0, 0)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[0], positions[4], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[1], positions[5], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[2], positions[6], radius)));
+        _cylinders[material].push_back(
+            CylinderPtr(new Cylinder(positions[3], positions[7], radius)));
 
         break;
     }

@@ -44,7 +44,8 @@ struct ExtendedSpheres
     int offset_center;
     int offset_radius;
     int offset_timestamp;
-    int offset_value;
+    int offset_value_x;
+    int offset_value_y;
     int offset_materialID;
     int32 numExtendedSpheres;
     int32 bytesPerExtendedSphere;
@@ -64,13 +65,12 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
     dg.material = geometry->material;
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
-    dg.st.x = 0.f;
-    dg.st.y = 0.f;
 
     // Store timestamp as texture coordinate
     uniform uint8 *spherePtr =
         this->data + this->bytesPerExtendedSphere * ray.primID;
-    dg.st.x = *((varying float *)(spherePtr + this->offset_value));
+    dg.st.x = *((varying float *)(spherePtr + this->offset_value_x));
+    dg.st.y = *((varying float *)(spherePtr + this->offset_value_y));
 
     if (flags & DG_NORMALIZE)
     {
@@ -107,7 +107,10 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
                     dg.material = this->materialList[dg.materialID];
 
                 // Store value as texture coordinate
-                dg.st.x = *((varying float *)(spherePtr + this->offset_value));
+                dg.st.x =
+                    *((varying float *)(spherePtr + this->offset_value_x));
+                dg.st.x =
+                    *((varying float *)(spherePtr + this->offset_value_y));
             }
         }
         else
@@ -209,7 +212,8 @@ export void ExtendedSpheresGeometry_set(
     int uniform bytesPerExtendedSphere, float uniform radius,
     int uniform materialID, int uniform offset_center,
     int uniform offset_radius, int uniform offset_timestamp,
-    int uniform offset_value, int uniform offset_materialID)
+    int uniform offset_value_x, int uniform offset_value_y,
+    int uniform offset_materialID)
 {
     uniform ExtendedSpheres *uniform geom =
         (uniform ExtendedSpheres * uniform)_geom;
@@ -230,7 +234,8 @@ export void ExtendedSpheresGeometry_set(
     geom->offset_center = offset_center;
     geom->offset_radius = offset_radius;
     geom->offset_timestamp = offset_timestamp;
-    geom->offset_value = offset_value;
+    geom->offset_value_x = offset_value_x;
+    geom->offset_value_y = offset_value_y;
     geom->offset_materialID = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
