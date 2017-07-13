@@ -642,8 +642,40 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setXyzbFile(geometryParameters.getXYZBFile());
     _remoteDataSource.setMeshFolder(geometryParameters.getMeshFolder());
     _remoteDataSource.setMeshFile(geometryParameters.getMeshFile());
-    _remoteDataSource.setCircuitConfig(
-        geometryParameters.getCircuitConfiguration());
+
+    // Circuit
+    ::brayns::v1::CircuitConfiguration circuit;
+    circuit.setCircuitConfigFile(geometryParameters.getCircuitConfiguration());
+    circuit.setDensity(geometryParameters.getCircuitDensity());
+    const Boxf& aabb = geometryParameters.getCircuitBoundingBox();
+    if (aabb.getSize() != 0)
+    {
+        const floats values = {aabb.getMin().x(), aabb.getMin().y(),
+                               aabb.getMin().z(), aabb.getMax().x(),
+                               aabb.getMin().y(), aabb.getMin().z()};
+        circuit.setBoundingBox(values);
+    }
+    circuit.setMeshFilenamePattern(
+        geometryParameters.getCircuitMeshFilenamePattern());
+    circuit.setMeshFolder(geometryParameters.getCircuitMeshFolder());
+    circuit.setUseSimulationModel(
+        geometryParameters.getCircuitUseSimulationModel());
+    circuit.setTarget(geometryParameters.getCircuitTarget());
+    circuit.setReport(geometryParameters.getCircuitReport());
+    circuit.setNonSimulatedCells(
+        geometryParameters.getCircuitNonSimulatedCells());
+    circuit.setStartSimulationTime(
+        geometryParameters.getCircuitStartSimulationTime());
+    circuit.setEndSimulationTime(
+        geometryParameters.getCircuitEndSimulationTime());
+    circuit.setSimulationValuesRange(
+        geometryParameters.getCircuitSimulationValuesRange());
+    circuit.setSimulationCacheFile(
+        geometryParameters.getCircuitSimulationCacheFile());
+    circuit.setMeshTransformation(
+        geometryParameters.getCircuitMeshTransformation());
+    _remoteDataSource.setCircuitConfiguration(circuit);
+
     _remoteDataSource.setLoadCacheFile(geometryParameters.getLoadCacheFile());
     _remoteDataSource.setSaveCacheFile(geometryParameters.getSaveCacheFile());
     _remoteDataSource.setRadiusMultiplier(
@@ -656,21 +688,6 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getSceneEnvironment()));
     _remoteDataSource.setGeometryQuality(
         ::brayns::v1::GeometryQuality(geometryParameters.getGeometryQuality()));
-    _remoteDataSource.setTarget(geometryParameters.getTarget());
-    _remoteDataSource.setReport(geometryParameters.getReport());
-    _remoteDataSource.setMeshedMorphologiesFolder(
-        geometryParameters.getMeshedMorphologiesFolder());
-    _remoteDataSource.setNonSimulatedCells(
-        geometryParameters.getNonSimulatedCells());
-    _remoteDataSource.setCircuitDensity(geometryParameters.getCircuitDensity());
-    _remoteDataSource.setStartSimulationTime(
-        geometryParameters.getStartSimulationTime());
-    _remoteDataSource.setEndSimulationTime(
-        geometryParameters.getEndSimulationTime());
-    _remoteDataSource.setSimulationValuesRange(
-        geometryParameters.getSimulationValuesRange());
-    _remoteDataSource.setSimulationCacheFile(
-        geometryParameters.getSimulationCacheFile());
     _remoteDataSource.setNestCacheFile(geometryParameters.getNESTCacheFile());
 
     const auto mst = geometryParameters.getMorphologySectionTypes();
@@ -710,24 +727,12 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getMetaballsThreshold());
     _remoteDataSource.setMetaballsSamplesFromSoma(
         geometryParameters.getMetaballsSamplesFromSoma());
-    _remoteDataSource.setUseSimulationModel(
-        geometryParameters.getUseSimulationModel());
     _remoteDataSource.setMemoryMode(geometryParameters.getMemoryMode() ==
                                             MemoryMode::shared
                                         ? brayns::v1::MemoryMode::shared
                                         : brayns::v1::MemoryMode::replicated);
 
-    const Boxf& aabb = geometryParameters.getCircuitBoundingBox();
-    if (aabb.getSize() != 0)
-    {
-        const floats values = {aabb.getMin().x(), aabb.getMin().y(),
-                               aabb.getMin().z(), aabb.getMax().x(),
-                               aabb.getMin().y(), aabb.getMin().z()};
-        _remoteDataSource.setCircuitBoundingBox(values);
-    }
     _remoteDataSource.setSceneFile(geometryParameters.getSceneFile());
-    _remoteDataSource.setMeshFilenamePattern(
-        geometryParameters.getMeshFilenamePattern());
 }
 
 void ZeroEQPlugin::_dataSourceUpdated()
@@ -752,7 +757,8 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            _remoteDataSource.getMeshFolderString());
     _parametersManager.set("mesh-file", _remoteDataSource.getMeshFileString());
     _parametersManager.set("circuit-config",
-                           _remoteDataSource.getCircuitConfigString());
+                           _remoteDataSource.getCircuitConfiguration()
+                               .getCircuitConfigFileString());
     _parametersManager.set("load-cache-file",
                            _remoteDataSource.getLoadCacheFileString());
     _parametersManager.set("save-cache-file",
@@ -775,12 +781,18 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            geometryParameters.getGeometryQualityAsString(
                                static_cast<GeometryQuality>(
                                    _remoteDataSource.getGeometryQuality())));
-    _parametersManager.set("target", _remoteDataSource.getTargetString());
-    _parametersManager.set("report", _remoteDataSource.getReportString());
-    _parametersManager.set("circuit-density",
-                           std::to_string(
-                               _remoteDataSource.getCircuitDensity()));
-    floats aabb(_remoteDataSource.getCircuitBoundingBoxVector());
+    _parametersManager.set(
+        "circuit-target",
+        _remoteDataSource.getCircuitConfiguration().getTargetString());
+    _parametersManager.set(
+        "circuit-report",
+        _remoteDataSource.getCircuitConfiguration().getReportString());
+    _parametersManager.set(
+        "circuit-density",
+        std::to_string(
+            _remoteDataSource.getCircuitConfiguration().getDensity()));
+    floats aabb(
+        _remoteDataSource.getCircuitConfiguration().getBoundingBoxVector());
     if (aabb.size() == 6)
         _parametersManager.set(
             "circuit-bounding-box",
@@ -791,28 +803,41 @@ void ZeroEQPlugin::_dataSourceUpdated()
         _parametersManager.set("circuit-bounding-box", "0 0 0 0 0 0");
 
     _parametersManager.set(
-        "meshed-morphologies-folder",
-        _remoteDataSource.getMeshedMorphologiesFolderString());
-    _parametersManager.set("non-simulated-cells",
-                           std::to_string(
-                               _remoteDataSource.getNonSimulatedCells()));
-    _parametersManager.set("start-simulation-time",
-                           std::to_string(
-                               _remoteDataSource.getStartSimulationTime()));
-    _parametersManager.set("end-simulation-time",
-                           std::to_string(
-                               _remoteDataSource.getEndSimulationTime()));
+        "circuit-mesh-folder",
+        _remoteDataSource.getCircuitConfiguration().getMeshFolderString());
     _parametersManager.set(
-        "simulation-values-range",
-        std::to_string(_remoteDataSource.getSimulationValuesRange()[0]) + " " +
-            std::to_string(_remoteDataSource.getSimulationValuesRange()[1]));
-    _parametersManager.set("simulation-cache-file",
-                           _remoteDataSource.getSimulationCacheFileString());
+        "circuit-mesh-transformation",
+        (_remoteDataSource.getCircuitConfiguration().getMeshTransformation())
+            ? "1"
+            : "0");
+    _parametersManager.set("circuit-non-simulated-cells",
+                           std::to_string(
+                               _remoteDataSource.getCircuitConfiguration()
+                                   .getNonSimulatedCells()));
+    _parametersManager.set("circuit-start-simulation-time",
+                           std::to_string(
+                               _remoteDataSource.getCircuitConfiguration()
+                                   .getStartSimulationTime()));
+    _parametersManager.set("circuit-end-simulation-time",
+                           std::to_string(
+                               _remoteDataSource.getCircuitConfiguration()
+                                   .getEndSimulationTime()));
+    _parametersManager.set(
+        "circuit-simulation-values-range",
+        std::to_string(_remoteDataSource.getCircuitConfiguration()
+                           .getSimulationValuesRange()[0]) +
+            " " + std::to_string(_remoteDataSource.getCircuitConfiguration()
+                                     .getSimulationValuesRange()[1]));
+    _parametersManager.set("circuit-simulation-cache-file",
+                           _remoteDataSource.getCircuitConfiguration()
+                               .getSimulationCacheFileString());
     _parametersManager.set("nest-cache-file",
                            _remoteDataSource.getNestCacheFileString());
-    _parametersManager.set("use-simulation-model",
-                           _remoteDataSource.getUseSimulationModel() ? "1"
-                                                                     : "0");
+    _parametersManager.set(
+        "circuit-uses-simulation-model",
+        _remoteDataSource.getCircuitConfiguration().getUseSimulationModel()
+            ? "1"
+            : "0");
 
     uint morphologySectionTypes = size_t(MorphologySectionType::undefined);
     const auto& sectionTypes = _remoteDataSource.getMorphologySectionTypes();
@@ -895,8 +920,9 @@ void ZeroEQPlugin::_dataSourceUpdated()
                                               : "replicated");
     _parametersManager.set("scene-file",
                            _remoteDataSource.getSceneFileString());
-    _parametersManager.set("mesh-filename-pattern",
-                           _remoteDataSource.getMeshFilenamePatternString());
+    _parametersManager.set("circuit-mesh-filename-pattern",
+                           _remoteDataSource.getCircuitConfiguration()
+                               .getMeshFilenamePatternString());
 
     _parametersManager.print();
 

@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
     const char* app = testSuite.argv[0];
     const char* argv[] = {
         app,        "--circuit-config", BBP_TEST_BLUECONFIG3,
-        "--target", "Layer1",           "--last-simulation-frame",
+        "--target", "Layer1",           "--circuit-last-simulation-frame",
         "1"};
     const int argc = sizeof(argv) / sizeof(char*);
 

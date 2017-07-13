@@ -143,7 +143,8 @@ const Histogram& AbstractSimulationHandler::getHistogram()
     }
 
     // Normalize values
-    const auto histogramSize = _geometryParameters.getSimulationHistogramSize();
+    const auto histogramSize =
+        _geometryParameters.getCircuitSimulationHistogramSize();
     _histogram.values.clear();
     _histogram.values.resize(histogramSize, 0);
     const float normalizationValue =

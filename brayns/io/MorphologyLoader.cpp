@@ -292,7 +292,7 @@ bool MorphologyLoader::_importMorphology(
                 SpherePtr(new Sphere(somaPosition, radius, 0.f, offsets)));
             bounds.merge(somaPosition);
 
-            if (_geometryParameters.getUseSimulationModel())
+            if (_geometryParameters.getCircuitUseSimulationModel())
             {
                 // When using a simulation model, parametric geometries must
                 // occupy as much space as possible in the mesh. This code
@@ -506,8 +506,10 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                           : brion::SectionOffsets();
     cr_gids = compartmentReport ? compartmentReport->getGIDs() : gids;
 
-    BRAYNS_INFO << "Loading " << cr_gids.size() << " simulated cells"
-                << std::endl;
+    const auto circuitDensity = _geometryParameters.getCircuitDensity();
+    BRAYNS_INFO << "Loading "
+                << static_cast<size_t>(cr_gids.size() * circuitDensity / 100)
+                << " simulated cells" << std::endl;
     brain::URIs cr_uris;
     if (compartmentReport)
         for (const auto cr_gid : cr_gids)
@@ -525,44 +527,40 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         getNeuronMatrix(bc, gids, _geometryParameters.getColorScheme(),
                         neuronMatrix);
 
-    const auto circuitDensity = _geometryParameters.getCircuitDensity();
     const size_t nbSkippedCells =
         uris.size() / (uris.size() * circuitDensity / 100);
 
     const auto meshedMorphologiesFolder =
-        _geometryParameters.getMeshedMorphologiesFolder();
+        _geometryParameters.getCircuitMeshFolder();
 
-    size_t morphologyCount = 0;
+    size_t meshCount = 0;
     bool loadParametricGeometry = true;
 #if (BRAYNS_USE_ASSIMP)
     if (!meshedMorphologiesFolder.empty())
     {
         // Loading meshes is currently sequential. TODO: Make it parallel!!!
-        Progress progress("Loading meshes...",
-                          static_cast<size_t>(uris.size() / nbSkippedCells));
+        Progress progress("Loading meshes...", uris.size());
         brion::GIDSet::const_iterator gid = cr_gids.begin();
         for (size_t i = 0; i < cr_gids.size(); ++i)
         {
             ++progress;
 
-            if ((nbSkippedCells != 0 &&
-                 morphologyCount % nbSkippedCells != 0) ||
+            if ((nbSkippedCells != 0 && i % nbSkippedCells != 0) ||
                 !_positionInCircuitBoundingBox(transforms[i].getTranslation()))
             {
                 ++gid;
-                ++morphologyCount;
                 continue;
             }
 
             const size_t material =
                 mvd3Support ? boost::lexical_cast<size_t>(neuronMatrix[i])
                             : _getMaterialFromSectionType(
-                                  morphologyCount, NO_MATERIAL,
+                                  meshCount, NO_MATERIAL,
                                   brain::neuron::SectionType::undefined,
                                   _geometryParameters.getColorScheme());
 
             auto meshFilenamePattern =
-                _geometryParameters.getMeshFilenamePattern();
+                _geometryParameters.getCircuitMeshFilenamePattern();
             std::stringstream gidAsString;
             gidAsString << (*gid);
             const std::string GID = "{gid}";
@@ -572,23 +570,27 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             else
                 meshFilenamePattern = gidAsString.str();
 
+            const auto transformation =
+                _geometryParameters.getCircuitMeshTransformation()
+                    ? transforms[i]
+                    : Matrix4f();
             auto meshFilename =
                 meshedMorphologiesFolder + "/" + meshFilenamePattern;
             meshLoader.importMeshFromFile(
                 meshFilename, scene, _geometryParameters.getGeometryQuality(),
-                transforms[i], material);
+                transformation, material);
             ++gid;
-            ++morphologyCount;
+            ++meshCount;
         }
-        loadParametricGeometry = _geometryParameters.getUseSimulationModel();
+        loadParametricGeometry =
+            _geometryParameters.getCircuitUseSimulationModel();
     }
 #endif
 
     if (loadParametricGeometry)
     {
-        Progress progress("Loading geometries...",
-                          static_cast<size_t>(cr_uris.size() / nbSkippedCells));
-        morphologyCount = 0;
+        Progress progress("Loading geometries...", cr_uris.size());
+        size_t morphologyCount = 0;
 #pragma omp parallel
         {
 #pragma omp for nowait
@@ -620,10 +622,12 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                         (uint16_ts&)compartmentCounts[i],
                         (uint64_ts&)compartmentOffsets[i]));
                 const size_t material =
-                    mvd3Support
-                        ? NB_SYSTEM_MATERIALS +
-                              boost::lexical_cast<size_t>(neuronMatrix[i])
-                        : NO_MATERIAL;
+                    _geometryParameters.getCircuitUseSimulationModel()
+                        ? NB_SYSTEM_MATERIALS
+                        : mvd3Support
+                              ? NB_SYSTEM_MATERIALS +
+                                    boost::lexical_cast<size_t>(neuronMatrix[i])
+                              : NO_MATERIAL;
 
                 if (_geometryParameters.useMetaballs())
                 {
@@ -676,7 +680,8 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         }
     }
 
-    size_t nonSimulatedCells = _geometryParameters.getNonSimulatedCells();
+    size_t nonSimulatedCells =
+        _geometryParameters.getCircuitNonSimulatedCells();
     if (nonSimulatedCells != 0)
     {
         // Non simulated cells
@@ -698,9 +703,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
             nonSimulatedCells = cr_uris.size();
 
         std::stringstream msg;
-        msg << "Loading "
-            << static_cast<size_t>(nonSimulatedCells / nbSkippedCells)
-            << " non-simulated cells";
+        msg << "Loading " << nonSimulatedCells << " non-simulated cells";
 
         neuronMatrix.clear();
         if (mvd3Support)
@@ -708,7 +711,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                             neuronMatrix);
 
         Progress progress(msg.str(), allUris.size());
-        morphologyCount = 0;
+        size_t morphologyCount = 0;
 #pragma omp parallel
         {
 #pragma omp for nowait
@@ -831,7 +834,8 @@ bool MorphologyLoader::importSimulationData(const servus::URI& circuitConfig,
     CircuitSimulationHandlerPtr simulationHandler(
         new CircuitSimulationHandler(_geometryParameters));
     scene.setSimulationHandler(simulationHandler);
-    const std::string& cacheFile = _geometryParameters.getSimulationCacheFile();
+    const std::string& cacheFile =
+        _geometryParameters.getCircuitSimulationCacheFile();
     if (simulationHandler->attachSimulationToCacheFile(cacheFile))
         // Cache already exists, no need to create it.
         return true;
@@ -851,9 +855,9 @@ bool MorphologyLoader::importSimulationData(const servus::URI& circuitConfig,
     const float step = compartmentReport.getTimestep();
 
     const float firstFrame =
-        std::max(start, _geometryParameters.getStartSimulationTime());
+        std::max(start, _geometryParameters.getCircuitStartSimulationTime());
     const float lastFrame =
-        std::min(end, _geometryParameters.getEndSimulationTime());
+        std::min(end, _geometryParameters.getCircuitEndSimulationTime());
     const uint64_t frameSize = compartmentReport.getFrameSize();
 
     const uint64_t nbFrames = (lastFrame - firstFrame) / step;
@@ -896,8 +900,8 @@ bool MorphologyLoader::_positionInCircuitBoundingBox(
 Vector2f MorphologyLoader::_getOffsetAsVector2f(const uint64_t offset)
 {
     Vector2f offsets;
-    offsets.x() = offset % static_cast<uint64_t>(NO_OFFSET);
-    offsets.y() = static_cast<uint32_t>(offset / NO_OFFSET);
+    offsets.x() = static_cast<float>(offset % NO_OFFSET);
+    offsets.y() = std::floor(static_cast<uint32_t>(offset / NO_OFFSET));
     return offsets;
 }
 
