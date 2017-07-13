@@ -33,8 +33,9 @@ class Cone : public Primitive
 {
 public:
     BRAYNS_API Cone(const Vector3f& center, const Vector3f& up,
-                    float centerRadius, float upRadius, float timestamp,
-                    float value);
+                    const float centerRadius, const float upRadius,
+                    const float timestamp = 0.f,
+                    const Vector2f& values = Vector2f(0.f, 0.f));
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
     BRAYNS_API void setCenter(const Vector3f center) { _center = center; }
@@ -56,7 +57,6 @@ private:
     Vector3f _up;
     float _centerRadius;
     float _upRadius;
-    float _value;
 };
 }
 

@@ -23,11 +23,10 @@
 namespace brayns
 {
 Sphere::Sphere(const Vector3f& center, const float radius,
-               const float timestamp, const float value)
-    : Primitive(timestamp)
+               const float timestamp, const Vector2f values)
+    : Primitive(timestamp, values)
     , _center(center)
     , _radius(radius)
-    , _value(value)
 {
     _geometryType = GT_SPHERE;
 }
@@ -39,12 +38,13 @@ size_t Sphere::serializeData(floats& serializedData)
     serializedData.push_back(_center.z());
     serializedData.push_back(_radius);
     serializedData.push_back(_timestamp);
-    serializedData.push_back(_value);
+    serializedData.push_back(_values.x());
+    serializedData.push_back(_values.y());
     return getSerializationSize();
 }
 
 size_t Sphere::getSerializationSize()
 {
-    return 6;
+    return 7;
 }
 }

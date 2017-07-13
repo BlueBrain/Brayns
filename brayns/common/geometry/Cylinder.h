@@ -33,7 +33,8 @@ class Cylinder : public Primitive
 {
 public:
     BRAYNS_API Cylinder(const Vector3f& center, const Vector3f& up,
-                        float radius, float timestamp, float value);
+                        const float radius, const float timestamp = 0.f,
+                        const Vector2f& values = Vector2f(0.f, 0.f));
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
     BRAYNS_API void setCenter(const Vector3f center) { _center = center; }
@@ -41,8 +42,6 @@ public:
     BRAYNS_API void setUp(const Vector3f up) { _center = up; }
     BRAYNS_API float getRadius() const { return _radius; }
     BRAYNS_API void setRadius(const float radius) { _radius = radius; }
-    BRAYNS_API float getValue() const { return _value; }
-    BRAYNS_API void setValue(const float value) { _value = value; }
     BRAYNS_API virtual size_t serializeData(floats& serializedData);
     BRAYNS_API static size_t getSerializationSize();
 
@@ -50,7 +49,6 @@ private:
     Vector3f _center;
     Vector3f _up;
     float _radius;
-    float _value;
 };
 }
 

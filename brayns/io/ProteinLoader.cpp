@@ -438,8 +438,7 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                     Vector3f(position +
                              0.01f * atom.position), // convert from nanometers
                     0.0001f * atom.radius *          // convert from angstrom
-                        _geometryParameters.getRadiusMultiplier(),
-                    0.f, 0.f));
+                        _geometryParameters.getRadiusMultiplier()));
 
                 switch (colorScheme)
                 {

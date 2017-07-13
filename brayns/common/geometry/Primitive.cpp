@@ -22,8 +22,9 @@
 
 namespace brayns
 {
-Primitive::Primitive(const float timestamp)
+Primitive::Primitive(const float timestamp, const Vector2f& values)
     : _timestamp(timestamp)
+    , _values(values)
 {
     _geometryType = GT_UNDEFINED;
 }

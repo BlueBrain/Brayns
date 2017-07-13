@@ -32,22 +32,20 @@ namespace brayns
 class Sphere : public Primitive
 {
 public:
-    BRAYNS_API Sphere(const Vector3f& center, float radius, float timestamp,
-                      float value);
+    BRAYNS_API Sphere(const Vector3f& center, float radius,
+                      float timestamp = 0.f,
+                      const Vector2f values = Vector2f(0.f, 0.f));
 
     BRAYNS_API const Vector3f& getCenter() const { return _center; }
     BRAYNS_API void setCenter(const Vector3f center) { _center = center; }
     BRAYNS_API float getRadius() const { return _radius; }
     BRAYNS_API void setRadius(const float radius) { _radius = radius; }
-    BRAYNS_API float getValue() const { return _value; }
-    BRAYNS_API void setValue(const float value) { _value = value; }
     BRAYNS_API virtual size_t serializeData(floats& serializedData);
     BRAYNS_API static size_t getSerializationSize();
 
 private:
     Vector3f _center;
     float _radius;
-    float _value;
 };
 }
 #endif // SPHERE_H

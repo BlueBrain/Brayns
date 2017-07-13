@@ -38,11 +38,12 @@ void ExtendedSpheres::finalize(ospray::Model *model)
     radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);
     bytesPerExtendedSphere =
-        getParam1i("bytes_per_extended_sphere", 5 * sizeof(float));
+        getParam1i("bytes_per_extended_sphere", 6 * sizeof(float));
     offset_center = getParam1i("offset_center", 0);
     offset_radius = getParam1i("offset_radius", -1);
     offset_timestamp = getParam1i("offset_timestamp", -1);
-    offset_value = getParam1i("offset_value", -1);
+    offset_value_x = getParam1i("offset_value_x", -1);
+    offset_value_y = getParam1i("offset_value_y", -1);
     offset_materialID = getParam1i("offset_materialID", -1);
     data = getParamData("extendedspheres", nullptr);
     materialList = getParamData("materialList", nullptr);
@@ -84,8 +85,8 @@ void ExtendedSpheres::finalize(ospray::Model *model)
                                       ispcMaterialList, numExtendedSpheres,
                                       bytesPerExtendedSphere, radius,
                                       materialID, offset_center, offset_radius,
-                                      offset_timestamp, offset_value,
-                                      offset_materialID);
+                                      offset_timestamp, offset_value_x,
+                                      offset_value_y, offset_materialID);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSpheres, extendedspheres);

@@ -130,7 +130,7 @@ private:
                            SimulationInformation* simulationInformation,
                            SpheresMap& spheres, CylindersMap& cylinders,
                            ConesMap& cones, Boxf& bounds,
-                           const float simulationOffset,
+                           const uint64_t simulationOffset,
                            float& maxDistanceToSoma,
                            const size_t forcedMaterial = NO_MATERIAL);
 
@@ -142,6 +142,8 @@ private:
                                  const size_t forcedMaterial = NO_MATERIAL);
 
     bool _positionInCircuitBoundingBox(const Vector3f& position) const;
+
+    Vector2f _getOffsetAsVector2f(const uint64_t offset);
 
     const GeometryParameters& _geometryParameters;
 };

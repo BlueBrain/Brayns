@@ -40,7 +40,7 @@
 
 namespace
 {
-const float NO_OFFSET = -1.f;
+const uint64_t NO_OFFSET = 1e6;
 }
 
 namespace brayns
@@ -138,8 +138,7 @@ bool MorphologyLoader::_importMorphologyAsMesh(
                      : soma.getMeanRadius() *
                            _geometryParameters.getRadiusMultiplier());
 
-            metaballs.push_back(
-                SpherePtr(new Sphere(center, radius, 0.f, 0.f)));
+            metaballs.push_back(SpherePtr(new Sphere(center, radius)));
             bounds.merge(center);
         }
 
@@ -175,7 +174,7 @@ bool MorphologyLoader::_importMorphologyAsMesh(
 
                 if (radius > 0.f)
                     metaballs.push_back(
-                        SpherePtr(new Sphere(position, radius, 0.f, 0.f)));
+                        SpherePtr(new Sphere(position, radius)));
 
                 bounds.merge(position);
             }
@@ -225,7 +224,7 @@ bool MorphologyLoader::_importMorphology(
     const Matrix4f& transformation,
     SimulationInformation* simulationInformation, SpheresMap& spheres,
     CylindersMap& cylinders, ConesMap& cones, Boxf& bounds,
-    const float simulationOffset, float& maxDistanceToSoma,
+    const uint64_t simulationOffset, float& maxDistanceToSoma,
     const size_t forcedMaterial)
 {
     maxDistanceToSoma = 0.f;
@@ -265,7 +264,7 @@ bool MorphologyLoader::_importMorphology(
 
         size_t sectionId = 0;
 
-        float offset = NO_OFFSET;
+        uint64_t offset = NO_OFFSET;
         if (simulationInformation)
             offset = simulationInformation->getCompartmentOffsets(sectionId);
         else if (simulationOffset != NO_OFFSET)
@@ -288,8 +287,9 @@ bool MorphologyLoader::_importMorphology(
                      : soma.getMeanRadius() *
                            _geometryParameters.getRadiusMultiplier());
 
+            const auto offsets = _getOffsetAsVector2f(offset);
             spheres[material].push_back(
-                SpherePtr(new Sphere(somaPosition, radius, 0.f, offset)));
+                SpherePtr(new Sphere(somaPosition, radius, 0.f, offsets)));
             bounds.merge(somaPosition);
 
             if (_geometryParameters.getUseSimulationModel())
@@ -308,7 +308,7 @@ bool MorphologyLoader::_importMorphology(
                         new Cone(somaPosition, sample, radius,
                                  samples[0].w() * 0.5f *
                                      _geometryParameters.getRadiusMultiplier(),
-                                 0.f, offset)));
+                                 0.f, offsets)));
                     bounds.merge(sample);
                 }
             }
@@ -390,9 +390,10 @@ bool MorphologyLoader::_importMorphology(
                          : samples[i].w() * 0.5f *
                                _geometryParameters.getRadiusMultiplier());
 
+                const auto offsets = _getOffsetAsVector2f(offset);
                 if (radius > 0.f)
                     spheres[material].push_back(SpherePtr(
-                        new Sphere(position, radius, distance, offset)));
+                        new Sphere(position, radius, distance, offsets)));
 
                 bounds.merge(position);
                 if (position != target && radius > 0.f && previousRadius > 0.f)
@@ -400,11 +401,11 @@ bool MorphologyLoader::_importMorphology(
                     if (radius == previousRadius)
                         cylinders[material].push_back(
                             CylinderPtr(new Cylinder(position, target, radius,
-                                                     distance, offset)));
+                                                     distance, offsets)));
                     else
                         cones[material].push_back(ConePtr(
                             new Cone(position, target, radius, previousRadius,
-                                     distance, offset)));
+                                     distance, offsets)));
                     bounds.merge(target);
                 }
                 previousSample = sample;
@@ -636,7 +637,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 if (_importMorphology(uri, morphologyCount, transforms[i],
                                       simulationInformation.get(),
                                       private_spheres, private_cylinders,
-                                      private_cones, private_bounds, -1.f,
+                                      private_cones, private_bounds, NO_OFFSET,
                                       maxDistanceToSoma, material))
 #pragma omp atomic
                     ++morphologyCount;
@@ -890,6 +891,14 @@ bool MorphologyLoader::_positionInCircuitBoundingBox(
 {
     const auto& aabb = _geometryParameters.getCircuitBoundingBox();
     return aabb.getSize() == Vector3f(0.f) ? true : aabb.isIn(position);
+}
+
+Vector2f MorphologyLoader::_getOffsetAsVector2f(const uint64_t offset)
+{
+    Vector2f offsets;
+    offsets.x() = offset % static_cast<uint64_t>(NO_OFFSET);
+    offsets.y() = static_cast<uint32_t>(offset / NO_OFFSET);
+    return offsets;
 }
 
 #else

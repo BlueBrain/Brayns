@@ -134,7 +134,8 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
         const Vector3f center(xPos[gid], yPos[gid], zPos[gid]);
         _positions.push_back(center);
         spheres[0].push_back(
-            SpherePtr(new Sphere(center, radius, 0.f, materialMapping[index])));
+            SpherePtr(new Sphere(center, radius, 0.f,
+                                 Vector2f(materialMapping[index], 0.f))));
         bounds.merge(center);
     }
 
