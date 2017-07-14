@@ -46,7 +46,8 @@ struct ExtendedCones
     int offset_centerRadius;
     int offset_upRadius;
     int offset_timestamp;
-    int offset_value;
+    int offset_value_x;
+    int offset_value_y;
     int offset_materialID;
     int32 numExtendedCones;
     int32 bytesPerCone;
@@ -232,7 +233,8 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
 
     uniform uint8 *conePtr = this->data + this->bytesPerCone * ray.primID;
     // Store value as texture coordinate
-    dg.st.x = *((varying float *)(conePtr + this->offset_value));
+    dg.st.x = *((varying float *)(conePtr + this->offset_value_x));
+    dg.st.y = *((varying float *)(conePtr + this->offset_value_y));
 
     if (flags & DG_NORMALIZE)
     {
@@ -269,8 +271,8 @@ export void ExtendedConesGeometry_set(
     float uniform radius, float uniform length, int uniform materialID,
     int uniform offset_center, int uniform offset_up,
     int uniform offset_centerRadius, int uniform offset_upRadius,
-    int uniform offset_timestamp, int uniform offset_value,
-    int uniform offset_materialID)
+    int uniform offset_timestamp, int uniform offset_value_x,
+    int uniform offset_value_y, int uniform offset_materialID)
 {
     uniform ExtendedCones *uniform geom =
         (uniform ExtendedCones * uniform)_geom;
@@ -293,7 +295,8 @@ export void ExtendedConesGeometry_set(
     geom->offset_centerRadius = offset_centerRadius;
     geom->offset_upRadius = offset_upRadius;
     geom->offset_timestamp = offset_timestamp;
-    geom->offset_value = offset_value;
+    geom->offset_value_x = offset_value_x;
+    geom->offset_value_y = offset_value_y;
     geom->offset_materialID = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);

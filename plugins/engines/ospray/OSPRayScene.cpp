@@ -588,7 +588,7 @@ uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
 
                 ospCommit(_ospExtendedSpheres[materialId]);
 
-                if (geometryParameters.getUseSimulationModel())
+                if (geometryParameters.getCircuitUseSimulationModel())
                     ospAddGeometry(_simulationModel,
                                    _ospExtendedSpheres[materialId]);
                 else
@@ -662,7 +662,7 @@ uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
                                    _ospMaterials[materialId]);
 
                 ospCommit(_ospExtendedCylinders[materialId]);
-                if (geometryParameters.getUseSimulationModel())
+                if (geometryParameters.getCircuitUseSimulationModel())
                     ospAddGeometry(_simulationModel,
                                    _ospExtendedCylinders[materialId]);
                 else
@@ -731,7 +731,7 @@ uint64_t OSPRayScene::_serializeCones(const size_t materialId)
                                    _ospMaterials[materialId]);
 
                 ospCommit(_ospExtendedCones[materialId]);
-                if (geometryParameters.getUseSimulationModel())
+                if (geometryParameters.getCircuitUseSimulationModel())
                     ospAddGeometry(_simulationModel,
                                    _ospExtendedCones[materialId]);
                 else
@@ -820,7 +820,8 @@ void OSPRayScene::buildGeometry()
         // If no timestamp is available, create a default model at timestamp 0
         _models[0] = ospNewModel();
 
-    if (_parametersManager.getGeometryParameters().getUseSimulationModel())
+    if (_parametersManager.getGeometryParameters()
+            .getCircuitUseSimulationModel())
         _simulationModel = ospNewModel();
 
     BRAYNS_INFO << "Models to process: " << _models.size() << std::endl;

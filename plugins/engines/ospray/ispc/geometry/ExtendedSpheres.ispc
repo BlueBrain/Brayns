@@ -109,7 +109,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
                 // Store value as texture coordinate
                 dg.st.x =
                     *((varying float *)(spherePtr + this->offset_value_x));
-                dg.st.x =
+                dg.st.y =
                     *((varying float *)(spherePtr + this->offset_value_y));
             }
         }

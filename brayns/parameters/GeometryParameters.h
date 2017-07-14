@@ -80,27 +80,58 @@ public:
     /** Fesh containting mesh*/
     std::string getMeshFile() const { return _meshFile; }
     /** file containing circuit configuration */
-    std::string getCircuitConfiguration() const { return _circuitConfig; }
+    std::string getCircuitConfiguration() const
+    {
+        return _circuitConfiguration;
+    }
     /** Binary representation of a scene to load */
     std::string getLoadCacheFile() const { return _loadCacheFile; }
     /** Binary representation of a scene to save */
     std::string getSaveCacheFile() const { return _saveCacheFile; }
     /** Circuit target */
-    std::string getTarget() const { return _target; }
+    std::string getCircuitTarget() const { return _circuitTarget; }
     /** Circuit compartment report */
-    std::string getReport() const { return _report; }
+    std::string getCircuitReport() const { return _circuitReport; }
     /** Defines the folder where morphologies meshes are stored. Meshes must
      * have the same name as the h5/SWC morphology file, suffixed with an
      * extension supported by the assimp library
      */
-    std::string getMeshedMorphologiesFolder() const
-    {
-        return _meshedMorphologiesFolder;
-    }
+    std::string getCircuitMeshFolder() const { return _circuitMeshFolder; }
     /** ensity of cells in the circuit in percent (Mainly for testing
      * purposes) */
-    size_t getCircuitDensity() const;
+    float getCircuitDensity() const;
 
+    /**
+     * Defines a bounding box outside of which geometry of a circuit will not be
+     * loaded
+     */
+    const Boxf& getCircuitBoundingBox() const { return _circuitBoundingBox; }
+    void setCircuitBoundingBox(const Boxf& value)
+    {
+        _circuitBoundingBox = value;
+    }
+
+    /**
+     * Defines if a different model is used to handle the simulation geometry.
+     * If set to True, the shading of the main geometry model will be done
+     * using information stored in a secondary model that contains the
+     * simulation information. See OSPRay simulation renderer for more details.
+     */
+    bool getCircuitUseSimulationModel() const
+    {
+        return _circuitUseSimulationModel;
+    }
+    void setCircuitUseSimulationModel(const bool value)
+    {
+        _circuitUseSimulationModel = value;
+    }
+    /**
+     * Return the filename pattern use to load meshes
+     */
+    std::string getCircuitMeshFilenamePattern() const
+    {
+        return _circuitMeshFilenamePattern;
+    };
     /** Radius multiplier applied to spheres, cones and cylinders.
      * @param value Radius multiplier. Multiplies the radius contained in the
      *        data source by the specified value.
@@ -138,21 +169,39 @@ public:
     }
 
     /** Defines if cells with no simulation data should be loaded */
-    size_t getNonSimulatedCells() const { return _nonSimulatedCells; }
-    /** Defines the range of frames to be loaded for the simulation */
-    float getEndSimulationTime() const { return _endSimulationTime; }
-    float getStartSimulationTime() const { return _startSimulationTime; }
-    Vector2f getSimulationValuesRange() const { return _simulationValuesRange; }
-    /** File containing simulation data */
-    const std::string& getSimulationCacheFile() const
+    size_t getCircuitNonSimulatedCells() const
     {
-        return _simulationCacheFile;
+        return _circuitNonSimulatedCells;
+    }
+    /** Defines the range of frames to be loaded for the simulation */
+    float getCircuitEndSimulationTime() const
+    {
+        return _circuitEndSimulationTime;
+    }
+    float getCircuitStartSimulationTime() const
+    {
+        return _circuitStartSimulationTime;
+    }
+    Vector2f getCircuitSimulationValuesRange() const
+    {
+        return _circuitSimulationValuesRange;
+    }
+    /** File containing simulation data */
+    const std::string& getCircuitSimulationCacheFile() const
+    {
+        return _circuitSimulationCacheFile;
     }
 
     /** Size of the simulation histogram */
-    size_t getSimulationHistogramSize() const
+    size_t getCircuitSimulationHistogramSize() const
     {
-        return _simulationHistogramSize;
+        return _circuitSimulationHistogramSize;
+    }
+
+    /** Size of the simulation histogram */
+    size_t getCircuitMeshTransformation() const
+    {
+        return _circuitMeshTransformation;
     }
 
     /** Defines if multiple models should be generated to increase the
@@ -183,28 +232,6 @@ public:
     /** Metaballs enabled? */
     bool useMetaballs() const { return _metaballsGridSize != 0; }
     /**
-     * Defines if a different model is used to handle the simulation geometry.
-     * If set to True, the shading of the main geometry model will be done
-     * using information stored in a secondary model that contains the
-     * simulation information. See OSPRay simulation renderer for more details.
-     */
-    bool getUseSimulationModel() const { return _useSimulationModel; }
-    void setUseSimulationModel(const bool value)
-    {
-        _useSimulationModel = value;
-    }
-
-    /**
-     * Defines a bounding box outside of which geometry of a circuit will not be
-     * loaded
-     */
-    const Boxf& getCircuitBoundingBox() const { return _circuitBoundingBox; }
-    void setCircuitBoundingBox(const Boxf& value)
-    {
-        _circuitBoundingBox = value;
-    }
-
-    /**
      * Defines what memory mode should be used between Brayns and the
      * underlying renderer
      */
@@ -213,54 +240,65 @@ public:
      * Return the full path of the file containing a scene description
      */
     std::string getSceneFile() const { return _sceneFile; };
-    /**
-     * Return the filename pattern use to load meshes
-     */
-    std::string getMeshFilenamePattern() const { return _meshFilenamePattern; };
 protected:
     bool _parse(const po::variables_map& vm) final;
 
-    std::string _morphologyFolder;
+    // Nest
     std::string _NESTCircuit;
     std::string _NESTReport;
     std::string _NESTCacheFile;
+
+    // PDB
     std::string _pdbFile;
     std::string _pdbFolder;
+
+    // XYZ
     std::string _xyzbFile;
-    std::string _h5Folder;
+
+    // Mesh
     std::string _meshFolder;
     std::string _meshFile;
-    std::string _circuitConfig;
+
+    // Circuit
+    std::string _circuitConfiguration;
+    bool _circuitUseSimulationModel;
+    Boxf _circuitBoundingBox;
+    float _circuitDensity;
+    std::string _circuitMeshFilenamePattern;
+    std::string _circuitMeshFolder;
+    std::string _circuitTarget;
+    std::string _circuitReport;
+    size_t _circuitNonSimulatedCells;
+    float _circuitStartSimulationTime;
+    float _circuitEndSimulationTime;
+    Vector2f _circuitSimulationValuesRange;
+    std::string _circuitSimulationCacheFile;
+    size_t _circuitSimulationHistogramSize;
+    bool _circuitMeshTransformation;
+
+    // Scene
     std::string _loadCacheFile;
     std::string _saveCacheFile;
-    std::string _target;
-    std::string _report;
-    size_t _circuitDensity;
-    std::string _meshedMorphologiesFolder;
+    SceneEnvironment _sceneEnvironment;
+    std::string _splashSceneFolder;
+    std::string _sceneFile;
+
+    // Morphology
+    std::string _morphologyFolder;
     float _radiusMultiplier;
     float _radiusCorrection;
     ColorScheme _colorScheme;
-    SceneEnvironment _sceneEnvironment;
     GeometryQuality _geometryQuality;
     size_t _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
-    size_t _nonSimulatedCells;
-    float _startSimulationTime;
-    float _endSimulationTime;
-    Vector2f _simulationValuesRange;
-    std::string _simulationCacheFile;
-    size_t _simulationHistogramSize;
     bool _generateMultipleModels;
-    std::string _splashSceneFolder;
     std::string _molecularSystemConfig;
     size_t _metaballsGridSize;
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
-    bool _useSimulationModel;
-    Boxf _circuitBoundingBox;
+
+    // System parameters
     MemoryMode _memoryMode;
-    std::string _sceneFile;
-    std::string _meshFilenamePattern;
 };
 }
 #endif // GEOMETRYPARAMETERS_H

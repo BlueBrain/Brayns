@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(geomParams.getCircuitConfiguration(), "");
     BOOST_CHECK_EQUAL(geomParams.getLoadCacheFile(), "");
     BOOST_CHECK_EQUAL(geomParams.getSaveCacheFile(), "");
-    BOOST_CHECK_EQUAL(geomParams.getTarget(), "");
-    BOOST_CHECK_EQUAL(geomParams.getReport(), "");
+    BOOST_CHECK_EQUAL(geomParams.getCircuitTarget(), "");
+    BOOST_CHECK_EQUAL(geomParams.getCircuitReport(), "");
     BOOST_CHECK_EQUAL(geomParams.getRadiusMultiplier(), 1.f);
     BOOST_CHECK_EQUAL(geomParams.getRadiusCorrection(), 0.f);
     BOOST_CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
@@ -111,13 +111,13 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(geomParams.getMorphologySectionTypes(),
                       size_t(brayns::MorphologySectionType::all));
     BOOST_CHECK_EQUAL(geomParams.getMorphologyLayout().nbColumns, 0);
-    BOOST_CHECK_EQUAL(geomParams.getNonSimulatedCells(), 0);
-    BOOST_CHECK_EQUAL(geomParams.getStartSimulationTime(), 0.f);
-    BOOST_CHECK_EQUAL(geomParams.getEndSimulationTime(),
+    BOOST_CHECK_EQUAL(geomParams.getCircuitNonSimulatedCells(), 0);
+    BOOST_CHECK_EQUAL(geomParams.getCircuitStartSimulationTime(), 0.f);
+    BOOST_CHECK_EQUAL(geomParams.getCircuitEndSimulationTime(),
                       std::numeric_limits<float>::max());
-    BOOST_CHECK_EQUAL(geomParams.getSimulationValuesRange().x(),
+    BOOST_CHECK_EQUAL(geomParams.getCircuitSimulationValuesRange().x(),
                       std::numeric_limits<float>::max());
-    BOOST_CHECK_EQUAL(geomParams.getSimulationValuesRange().y(),
+    BOOST_CHECK_EQUAL(geomParams.getCircuitSimulationValuesRange().y(),
                       std::numeric_limits<float>::min());
 
     const auto& sceneParams = pm.getSceneParameters();

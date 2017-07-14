@@ -66,7 +66,25 @@ table MorphologyLayout {
     horizontal_spacing: uint;
 }
 
+table CircuitConfiguration {
+    circuit_config_file: string;
+    density: float;
+    bounding_box: [float:6];
+    mesh_filename_pattern: string;
+    mesh_folder: string;
+    mesh_transformation: bool;
+    use_simulation_model: bool;
+    target: string;
+    report: string;
+    non_simulated_cells: uint;
+    start_simulation_time: float;
+    end_simulation_time: float;
+    simulation_values_range: [float:2];
+    simulation_cache_file: string;
+}
+
 table DataSource {
+    circuit_configuration: CircuitConfiguration;
     color_map_file: string;
     morphology_folder: string;
     nest_circuit: string;
@@ -76,7 +94,6 @@ table DataSource {
     xyzb_file: string;
     mesh_folder: string;
     mesh_file: string;
-    circuit_config: string;
     load_cache_file: string;
     save_cache_file: string;
     radius_multiplier: float;
@@ -84,17 +101,6 @@ table DataSource {
     color_scheme: ColorScheme;
     scene_environment: SceneEnvironment;
     geometry_quality: GeometryQuality;
-    target: string;
-    report: string;
-    circuit_density: uint;
-    circuit_bounding_box: [float:6];
-    meshed_morphologies_folder: string;
-    non_simulated_cells: uint;
-    start_simulation_time: float;
-    end_simulation_time: float;
-    simulation_values_range: [float:2];
-    simulation_cache_file: string;
-    use_simulation_model: bool;
     nest_cache_file: string;
     morphology_section_types: [SectionType];
     morphology_layout: MorphologyLayout;
@@ -111,7 +117,6 @@ table DataSource {
     metaballs_samples_from_soma: uint;
     memory_mode: MemoryMode;
     scene_file: string;
-    mesh_filename_pattern: string;
 }
 
 enum Shader: uint {

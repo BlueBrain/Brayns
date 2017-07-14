@@ -379,7 +379,7 @@ private:
         if (!geometryParameters.getMorphologyFolder().empty())
             _loadMorphologyFolder();
 
-        if (!geometryParameters.getReport().empty())
+        if (!geometryParameters.getCircuitReport().empty())
             _loadCompartmentReport();
 
         if (!geometryParameters.getCircuitConfiguration().empty() &&
@@ -634,11 +634,11 @@ private:
         auto& scene = _engine->getScene();
         const std::string& filename =
             geometryParameters.getCircuitConfiguration();
-        const std::string& target = geometryParameters.getTarget();
+        const std::string& target = geometryParameters.getCircuitTarget();
 
         BRAYNS_INFO << "Loading circuit configuration from " << filename
                     << std::endl;
-        const std::string& report = geometryParameters.getReport();
+        const std::string& report = geometryParameters.getCircuitReport();
         MorphologyLoader morphologyLoader(geometryParameters);
         const servus::URI uri(filename);
 #if (BRAYNS_USE_ASSIMP)
@@ -659,8 +659,8 @@ private:
         auto& scene = _engine->getScene();
         const std::string& filename =
             geometryParameters.getCircuitConfiguration();
-        const std::string& target = geometryParameters.getTarget();
-        const std::string& report = geometryParameters.getReport();
+        const std::string& target = geometryParameters.getCircuitTarget();
+        const std::string& report = geometryParameters.getCircuitReport();
         BRAYNS_INFO << "Loading compartment report from " << filename
                     << std::endl;
         MorphologyLoader morphologyLoader(geometryParameters);

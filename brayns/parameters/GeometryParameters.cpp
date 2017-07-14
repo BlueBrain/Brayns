@@ -36,6 +36,29 @@ const std::string PARAM_XYZB_FILE = "xyzb-file";
 const std::string PARAM_MESH_FOLDER = "mesh-folder";
 const std::string PARAM_MESH_FILE = "mesh-file";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
+const std::string PARAM_CIRCUIT_DENSITY = "circuit-density";
+const std::string PARAM_CIRCUIT_USES_SIMULATION_MODEL =
+    "circuit-uses-simulation-model";
+const std::string PARAM_CIRCUIT_BOUNDING_BOX = "circuit-bounding-box";
+const std::string PARAM_CIRCUIT_MESH_FOLDER = "circuit-mesh-folder";
+const std::string PARAM_CIRCUIT_MESH_FILENAME_PATTERN =
+    "circuit-mesh-filename-pattern";
+const std::string PARAM_CIRCUIT_MESH_TRANSFORMATION =
+    "circuit-mesh-transformation";
+const std::string PARAM_CIRCUIT_TARGET = "circuit-target";
+const std::string PARAM_CIRCUIT_REPORT = "circuit-report";
+const std::string PARAM_CIRCUIT_NON_SIMULATED_CELLS =
+    "circuit-non-simulated-cells";
+const std::string PARAM_CIRCUIT_START_SIMULATION_TIME =
+    "circuit-start-simulation-time";
+const std::string PARAM_CIRCUIT_END_SIMULATION_TIME =
+    "circuit-end-simulation-time";
+const std::string PARAM_CIRCUIT_SIMULATION_RANGE =
+    "circuit-simulation-values-range";
+const std::string PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME =
+    "circuit-simulation-cache-file";
+const std::string PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE =
+    "circuit-simulation-histogram-size";
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
 const std::string PARAM_SAVE_CACHE_FILE = "save-cache-file";
 const std::string PARAM_RADIUS_MULTIPLIER = "radius-multiplier";
@@ -43,17 +66,6 @@ const std::string PARAM_RADIUS_CORRECTION = "radius-correction";
 const std::string PARAM_COLOR_SCHEME = "color-scheme";
 const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
-const std::string PARAM_TARGET = "target";
-const std::string PARAM_REPORT = "report";
-const std::string PARAM_CIRCUIT_DENSITY = "circuit-density";
-const std::string PARAM_MESHED_MORPHOLOGIES_FOLDER =
-    "meshed-morphologies-folder";
-const std::string PARAM_NON_SIMULATED_CELLS = "non-simulated-cells";
-const std::string PARAM_START_SIMULATION_TIME = "start-simulation-time";
-const std::string PARAM_END_SIMULATION_TIME = "end-simulation-time";
-const std::string PARAM_SIMULATION_RANGE = "simulation-values-range";
-const std::string PARAM_SIMULATION_CACHE_FILENAME = "simulation-cache-file";
-const std::string PARAM_SIMULATION_HISTOGRAM_SIZE = "simulation-histogram-size";
 const std::string PARAM_NEST_CACHE_FILENAME = "nest-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
@@ -64,11 +76,8 @@ const std::string PARAM_METABALLS_GRIDSIZE = "metaballs-grid-size";
 const std::string PARAM_METABALLS_THRESHOLD = "metaballs-threshold";
 const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
-const std::string PARAM_USE_SIMULATION_MODEL = "use-simulation-model";
-const std::string PARAM_CIRCUIT_BOUNDING_BOX = "circuit-bounding-box";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_SCENE_FILE = "scene-file";
-const std::string PARAM_MESH_FILENAME_PATTERN = "mesh-filename-pattern";
 
 const std::string COLOR_SCHEMES[11] = {"none",
                                        "neuron-by-id",
@@ -93,25 +102,26 @@ namespace brayns
 {
 GeometryParameters::GeometryParameters()
     : AbstractParameters("Geometry")
+    , _circuitUseSimulationModel(false)
+    , _circuitBoundingBox(Vector3f(0.f), Vector3f(0.f))
     , _circuitDensity(100)
+    , _circuitNonSimulatedCells(0)
+    , _circuitStartSimulationTime(0.f)
+    , _circuitEndSimulationTime(std::numeric_limits<float>::max())
+    , _circuitSimulationValuesRange(Vector2f(std::numeric_limits<float>::max(),
+                                             std::numeric_limits<float>::min()))
+    , _circuitSimulationHistogramSize(128)
+    , _circuitMeshTransformation(false)
+    , _sceneEnvironment(SceneEnvironment::none)
     , _radiusMultiplier(1.f)
     , _radiusCorrection(0.f)
     , _colorScheme(ColorScheme::none)
-    , _sceneEnvironment(SceneEnvironment::none)
     , _geometryQuality(GeometryQuality::high)
     , _morphologySectionTypes(size_t(MorphologySectionType::all))
-    , _nonSimulatedCells(0)
-    , _startSimulationTime(0.f)
-    , _endSimulationTime(std::numeric_limits<float>::max())
-    , _simulationValuesRange(Vector2f(std::numeric_limits<float>::max(),
-                                      std::numeric_limits<float>::min()))
-    , _simulationHistogramSize(128)
     , _generateMultipleModels(false)
     , _metaballsGridSize(0)
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
-    , _useSimulationModel(false)
-    , _circuitBoundingBox(Vector3f(0.f), Vector3f(0.f))
     , _memoryMode(MemoryMode::shared)
 {
     _parameters.add_options()(PARAM_MORPHOLOGY_FOLDER.c_str(),
@@ -150,13 +160,13 @@ GeometryParameters::GeometryParameters()
         "Scene environment [none|ground|wall|bounding-box]")(
         PARAM_GEOMETRY_QUALITY.c_str(), po::value<std::string>(),
         "Geometry rendering quality [low|medium|high]")(
-        PARAM_TARGET.c_str(), po::value<std::string>(),
+        PARAM_CIRCUIT_TARGET.c_str(), po::value<std::string>(),
         "Circuit target [string]")(
-        PARAM_CIRCUIT_DENSITY.c_str(), po::value<size_t>(),
-        "Density of cells in the circuit in percent [int]")(
-        PARAM_MESHED_MORPHOLOGIES_FOLDER.c_str(), po::value<std::string>(),
+        PARAM_CIRCUIT_DENSITY.c_str(), po::value<float>(),
+        "Density of cells in the circuit in percent [float]")(
+        PARAM_CIRCUIT_MESH_FOLDER.c_str(), po::value<std::string>(),
         "Folder containing meshed morphologies [string]")(
-        PARAM_REPORT.c_str(), po::value<std::string>(),
+        PARAM_CIRCUIT_REPORT.c_str(), po::value<std::string>(),
         "Circuit report [string]")(
         PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value<size_t>(),
         "Morphology section types (1: soma, 2: axon, 4: dendrite, "
@@ -166,19 +176,21 @@ GeometryParameters::GeometryParameters()
                                "Morphology layout defined by number of "
                                "columns, vertical spacing, horizontal spacing "
                                "[int int int]")(
-        PARAM_NON_SIMULATED_CELLS.c_str(), po::value<size_t>(),
+        PARAM_CIRCUIT_NON_SIMULATED_CELLS.c_str(), po::value<size_t>(),
         "Defines the number of non-simulated cells that should be loaded when "
         "a "
-        "report is specified [int]")(PARAM_START_SIMULATION_TIME.c_str(),
-                                     po::value<float>(),
-                                     "Start simulation timestamp [float]")(
-        PARAM_END_SIMULATION_TIME.c_str(), po::value<float>(),
+        "report is specified [int]")(
+        PARAM_CIRCUIT_START_SIMULATION_TIME.c_str(), po::value<float>(),
+        "Start simulation timestamp [float]")(
+        PARAM_CIRCUIT_END_SIMULATION_TIME.c_str(), po::value<float>(),
         "End simulation timestamp [float]")(
-        PARAM_SIMULATION_RANGE.c_str(), po::value<floats>()->multitoken(),
+        PARAM_CIRCUIT_SIMULATION_RANGE.c_str(),
+        po::value<floats>()->multitoken(),
         "Minimum and maximum values for the simulation [float float]")(
-        PARAM_SIMULATION_CACHE_FILENAME.c_str(), po::value<std::string>(),
+        PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME.c_str(),
+        po::value<std::string>(),
         "Cache file containing simulation data [string]")(
-        PARAM_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value<size_t>(),
+        PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value<size_t>(),
         "Number of values defining the simulation histogram [int]")(
         PARAM_NEST_CACHE_FILENAME.c_str(), po::value<std::string>(),
         "Cache file containing nest data [string]")(
@@ -196,7 +208,7 @@ GeometryParameters::GeometryParameters()
                                "Metaballs threshold [float]")(
         PARAM_METABALLS_SAMPLES_FROM_SOMA.c_str(), po::value<size_t>(),
         "Number of morphology samples (or segments) from soma used by "
-        "automated meshing [int]")(PARAM_USE_SIMULATION_MODEL.c_str(),
+        "automated meshing [int]")(PARAM_CIRCUIT_USES_SIMULATION_MODEL.c_str(),
                                    po::value<bool>(),
                                    "Defines if a different model is used to "
                                    "handle the simulation geometry [bool]")(
@@ -208,9 +220,12 @@ GeometryParameters::GeometryParameters()
         "underlying renderer [shared|replicated]")(
         PARAM_SCENE_FILE.c_str(), po::value<std::string>(),
         "Full path of a file containing a scene description [string]")(
-        PARAM_MESH_FILENAME_PATTERN.c_str(), po::value<std::string>(),
+        PARAM_CIRCUIT_MESH_FILENAME_PATTERN.c_str(), po::value<std::string>(),
         "Pattern used to determine the name of the file containing a meshed "
-        "morphology [string]");
+        "morphology [string]")(PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(),
+                               po::value<bool>(),
+                               "Enable/Disable mesh transformation according "
+                               "to circuit information [bool]");
 }
 
 bool GeometryParameters::_parse(const po::variables_map& vm)
@@ -232,7 +247,7 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_MESH_FILE))
         _meshFile = vm[PARAM_MESH_FILE].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_CONFIG))
-        _circuitConfig = vm[PARAM_CIRCUIT_CONFIG].as<std::string>();
+        _circuitConfiguration = vm[PARAM_CIRCUIT_CONFIG].as<std::string>();
     if (vm.count(PARAM_LOAD_CACHE_FILE))
         _loadCacheFile = vm[PARAM_LOAD_CACHE_FILE].as<std::string>();
     if (vm.count(PARAM_SAVE_CACHE_FILE))
@@ -272,15 +287,14 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             if (geometryQuality == GEOMETRY_QUALITIES[i])
                 _geometryQuality = static_cast<GeometryQuality>(i);
     }
-    if (vm.count(PARAM_TARGET))
-        _target = vm[PARAM_TARGET].as<std::string>();
-    if (vm.count(PARAM_REPORT))
-        _report = vm[PARAM_REPORT].as<std::string>();
+    if (vm.count(PARAM_CIRCUIT_TARGET))
+        _circuitTarget = vm[PARAM_CIRCUIT_TARGET].as<std::string>();
+    if (vm.count(PARAM_CIRCUIT_REPORT))
+        _circuitReport = vm[PARAM_CIRCUIT_REPORT].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_DENSITY))
-        _circuitDensity = vm[PARAM_CIRCUIT_DENSITY].as<size_t>();
-    if (vm.count(PARAM_MESHED_MORPHOLOGIES_FOLDER))
-        _meshedMorphologiesFolder =
-            vm[PARAM_MESHED_MORPHOLOGIES_FOLDER].as<std::string>();
+        _circuitDensity = vm[PARAM_CIRCUIT_DENSITY].as<float>();
+    if (vm.count(PARAM_CIRCUIT_MESH_FOLDER))
+        _circuitMeshFolder = vm[PARAM_CIRCUIT_MESH_FOLDER].as<std::string>();
     if (vm.count(PARAM_MORPHOLOGY_SECTION_TYPES))
         _morphologySectionTypes =
             vm[PARAM_MORPHOLOGY_SECTION_TYPES].as<size_t>();
@@ -294,24 +308,27 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             _morphologyLayout.horizontalSpacing = values[2];
         }
     }
-    if (vm.count(PARAM_NON_SIMULATED_CELLS))
-        _nonSimulatedCells = vm[PARAM_NON_SIMULATED_CELLS].as<size_t>();
-    if (vm.count(PARAM_START_SIMULATION_TIME))
-        _startSimulationTime = vm[PARAM_START_SIMULATION_TIME].as<float>();
-    if (vm.count(PARAM_END_SIMULATION_TIME))
-        _endSimulationTime = vm[PARAM_END_SIMULATION_TIME].as<float>();
-    if (vm.count(PARAM_SIMULATION_RANGE))
+    if (vm.count(PARAM_CIRCUIT_NON_SIMULATED_CELLS))
+        _circuitNonSimulatedCells =
+            vm[PARAM_CIRCUIT_NON_SIMULATED_CELLS].as<size_t>();
+    if (vm.count(PARAM_CIRCUIT_START_SIMULATION_TIME))
+        _circuitStartSimulationTime =
+            vm[PARAM_CIRCUIT_START_SIMULATION_TIME].as<float>();
+    if (vm.count(PARAM_CIRCUIT_END_SIMULATION_TIME))
+        _circuitEndSimulationTime =
+            vm[PARAM_CIRCUIT_END_SIMULATION_TIME].as<float>();
+    if (vm.count(PARAM_CIRCUIT_SIMULATION_RANGE))
     {
-        floats values = vm[PARAM_SIMULATION_RANGE].as<floats>();
+        floats values = vm[PARAM_CIRCUIT_SIMULATION_RANGE].as<floats>();
         if (values.size() == 2)
-            _simulationValuesRange = Vector2f(values[0], values[1]);
+            _circuitSimulationValuesRange = Vector2f(values[0], values[1]);
     }
-    if (vm.count(PARAM_SIMULATION_CACHE_FILENAME))
-        _simulationCacheFile =
-            vm[PARAM_SIMULATION_CACHE_FILENAME].as<std::string>();
-    if (vm.count(PARAM_SIMULATION_HISTOGRAM_SIZE))
-        _simulationHistogramSize =
-            vm[PARAM_SIMULATION_HISTOGRAM_SIZE].as<size_t>();
+    if (vm.count(PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME))
+        _circuitSimulationCacheFile =
+            vm[PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME].as<std::string>();
+    if (vm.count(PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE))
+        _circuitSimulationHistogramSize =
+            vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE].as<size_t>();
     if (vm.count(PARAM_NEST_CACHE_FILENAME))
         _NESTCacheFile = vm[PARAM_NEST_CACHE_FILENAME].as<std::string>();
     if (vm.count(PARAM_GENERATE_MULTIPLE_MODELS))
@@ -329,8 +346,9 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_METABALLS_SAMPLES_FROM_SOMA))
         _metaballsSamplesFromSoma =
             vm[PARAM_METABALLS_SAMPLES_FROM_SOMA].as<size_t>();
-    if (vm.count(PARAM_USE_SIMULATION_MODEL))
-        _useSimulationModel = vm[PARAM_USE_SIMULATION_MODEL].as<bool>();
+    if (vm.count(PARAM_CIRCUIT_USES_SIMULATION_MODEL))
+        _circuitUseSimulationModel =
+            vm[PARAM_CIRCUIT_USES_SIMULATION_MODEL].as<bool>();
     if (vm.count(PARAM_CIRCUIT_BOUNDING_BOX))
     {
         const floats values = vm[PARAM_CIRCUIT_BOUNDING_BOX].as<floats>();
@@ -358,9 +376,12 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     }
     if (vm.count(PARAM_SCENE_FILE))
         _sceneFile = vm[PARAM_SCENE_FILE].as<std::string>();
-    if (vm.count(PARAM_MESH_FILENAME_PATTERN))
-        _meshFilenamePattern =
-            vm[PARAM_MESH_FILENAME_PATTERN].as<std::string>();
+    if (vm.count(PARAM_CIRCUIT_MESH_FILENAME_PATTERN))
+        _circuitMeshFilenamePattern =
+            vm[PARAM_CIRCUIT_MESH_FILENAME_PATTERN].as<std::string>();
+    if (vm.count(PARAM_CIRCUIT_MESH_TRANSFORMATION))
+        _circuitMeshTransformation =
+            vm[PARAM_CIRCUIT_MESH_TRANSFORMATION].as<bool>();
 
     return true;
 }
@@ -383,8 +404,6 @@ void GeometryParameters::print()
                 << std::endl;
     BRAYNS_INFO << "Cache file to save         : " << _saveCacheFile
                 << std::endl;
-    BRAYNS_INFO << "Circuit configuration      : " << _circuitConfig
-                << std::endl;
     BRAYNS_INFO << "Color scheme               : "
                 << getColorSchemeAsString(_colorScheme) << std::endl;
     BRAYNS_INFO << "Radius multiplier          : " << _radiusMultiplier
@@ -395,26 +414,33 @@ void GeometryParameters::print()
                 << getSceneEnvironmentAsString(_sceneEnvironment) << std::endl;
     BRAYNS_INFO << "Geometry quality           : "
                 << getGeometryQualityAsString(_geometryQuality) << std::endl;
-    BRAYNS_INFO << "Target                     : " << _target << std::endl;
-    BRAYNS_INFO << "Report                     : " << _report << std::endl;
-    BRAYNS_INFO << "- Meshes folder            : " << _meshedMorphologiesFolder
+    BRAYNS_INFO << "Circuit configuration      : " << std::endl;
+    BRAYNS_INFO << "- Config file              : " << _circuitConfiguration
                 << std::endl;
-    BRAYNS_INFO << "- Circuit density          : " << _circuitDensity
+    BRAYNS_INFO << "- Target                   : " << _circuitTarget
                 << std::endl;
-    BRAYNS_INFO << "- Non-simulated cells      : " << _nonSimulatedCells
+    BRAYNS_INFO << "- Report                   : " << _circuitReport
                 << std::endl;
-    BRAYNS_INFO << "- Start simulation time    : " << _startSimulationTime
+    BRAYNS_INFO << "- Mesh folder              : " << _circuitMeshFolder
                 << std::endl;
-    BRAYNS_INFO << "- End simulation time      : " << _endSimulationTime
+    BRAYNS_INFO << "- Density                  : " << _circuitDensity
                 << std::endl;
-    BRAYNS_INFO << "- Simulation values range  : " << _simulationValuesRange
+    BRAYNS_INFO << "- Non-simulated cells      : " << _circuitNonSimulatedCells
                 << std::endl;
-    BRAYNS_INFO << "- Simulation cache file    : " << _simulationCacheFile
+    BRAYNS_INFO << "- Start simulation time    : "
+                << _circuitStartSimulationTime << std::endl;
+    BRAYNS_INFO << "- End simulation time      : " << _circuitEndSimulationTime
                 << std::endl;
-    BRAYNS_INFO << "- Simulation histogram size: " << _simulationHistogramSize
-                << std::endl;
+    BRAYNS_INFO << "- Simulation values range  : "
+                << _circuitSimulationValuesRange << std::endl;
+    BRAYNS_INFO << "- Simulation cache file    : "
+                << _circuitSimulationCacheFile << std::endl;
+    BRAYNS_INFO << "- Simulation histogram size: "
+                << _circuitSimulationHistogramSize << std::endl;
     BRAYNS_INFO << "- Bounding box             : " << _circuitBoundingBox
                 << std::endl;
+    BRAYNS_INFO << "- Mesh transformation      : "
+                << (_circuitMeshTransformation ? "Yes" : "No") << std::endl;
     BRAYNS_INFO << "Morphology section types   : " << _morphologySectionTypes
                 << std::endl;
     BRAYNS_INFO << "Morphology Layout          : " << std::endl;
@@ -425,7 +451,7 @@ void GeometryParameters::print()
     BRAYNS_INFO << " - Horizontal spacing      : "
                 << _morphologyLayout.horizontalSpacing << std::endl;
     BRAYNS_INFO << "Generate multiple models   : "
-                << (_generateMultipleModels ? "on" : "off") << std::endl;
+                << (_generateMultipleModels ? "Yes" : "No") << std::endl;
     BRAYNS_INFO << "Splash scene folder        : " << _splashSceneFolder
                 << std::endl;
     BRAYNS_INFO << "Molecular system config    : " << _molecularSystemConfig
@@ -438,13 +464,13 @@ void GeometryParameters::print()
     BRAYNS_INFO << " - Samples from soma       : " << _metaballsSamplesFromSoma
                 << std::endl;
     BRAYNS_INFO << "Use simulation model       : "
-                << (_useSimulationModel ? "yes" : "no") << std::endl;
+                << (_circuitUseSimulationModel ? "Yes" : "No") << std::endl;
     BRAYNS_INFO << "Memory mode                : "
                 << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
                 << std::endl;
     BRAYNS_INFO << "Scene file                 : " << _sceneFile << std::endl;
-    BRAYNS_INFO << "Mesh filename pattern      : " << _meshFilenamePattern
-                << std::endl;
+    BRAYNS_INFO << "Mesh filename pattern      : "
+                << _circuitMeshFilenamePattern << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(
@@ -465,8 +491,8 @@ const std::string& GeometryParameters::getGeometryQualityAsString(
     return GEOMETRY_QUALITIES[static_cast<size_t>(value)];
 }
 
-size_t GeometryParameters::getCircuitDensity() const
+float GeometryParameters::getCircuitDensity() const
 {
-    return std::max(size_t(1), std::min(size_t(100), _circuitDensity));
+    return std::max(0.1f, std::min(100.f, _circuitDensity));
 }
 }
