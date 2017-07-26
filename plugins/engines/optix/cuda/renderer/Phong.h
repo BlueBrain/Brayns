@@ -80,6 +80,7 @@ rtDeclareVariable(float3, volumeOffset, , );
 rtDeclareVariable(float3, volumeElementSpacing, , );
 rtDeclareVariable(float, volumeEpsilon, , );
 rtDeclareVariable(float, volumeDiag, , );
+rtDeclareVariable(uint, volumeSamplesPerRay, , );
 
 // Color map
 rtBuffer<float4> colorMap;
@@ -90,9 +91,9 @@ rtDeclareVariable(uint, colorMapSize, , );
 
 rtBuffer<uchar4, 2> output_buffer;
 
-const float defaultVolumeAlpha = 4.f;
 const float epsilon = 0.01f;
-const float magicExponent = 50.f;
+const uint NB_MAX_SAMPLES_PER_RAY = 32;
+const float DEFAULT_VOLUME_SHADOW_THRESHOLD = 0.5f;
 
 static __device__ float3 refractedVector(const float3 direction,
                                          const float3 normal, const float n1,
@@ -108,22 +109,68 @@ static __device__ float3 refractedVector(const float3 direction,
     return direction;
 }
 
-static __device__ float4 getVolumeContribution(optix::Ray volumeRay,
-                                               int iteration)
+static __device__ void composite(const float4& src, float4& dst)
 {
-    float pathAlpha = 0.f;
-    float3 pathColor = make_float3(0.f);
-    float3 lightContribution = make_float3(1.f);
+    const float alphaCorrection =
+        (float)NB_MAX_SAMPLES_PER_RAY / (float)volumeSamplesPerRay;
+    const float alpha =
+        1.f -
+        pow(1.f - min(src.w, 1.f - 1.f / (float)colorMapSize), alphaCorrection);
+    const float a = alpha * (1.f - dst.w);
+    dst.x = dst.x + src.x * a;
+    dst.y = dst.y + src.y * a;
+    dst.z = dst.z + src.z * a;
+    dst.w += (alpha * (1.f - dst.w));
+}
+
+static __device__ float getVolumeShadowContribution(const optix::Ray& volumeRay)
+{
+    float t = volumeDiag;
+    float shadowIntensity = 0.f;
+    while (t > volumeEpsilon && shadowIntensity < 1.f)
+    {
+        const float3 point = volumeRay.origin + volumeRay.direction * t;
+
+        if (point.x > 0.f && point.x < volumeDimensions.x && point.y > 0.f &&
+            point.y < volumeDimensions.y && point.z > 0.f &&
+            point.z < volumeDimensions.z)
+        {
+            const ulong index =
+                (ulong)((ulong)floor(point.x) +
+                        (ulong)floor(point.y) * volumeDimensions.x +
+                        (ulong)floor(point.z) * volumeDimensions.x *
+                            volumeDimensions.y);
+            const unsigned char voxelValue = volumeData[index];
+
+            const float normalizedValue =
+                (float)colorMapSize * ((float)voxelValue - colorMapMinValue) /
+                colorMapRange;
+            const float4 colorMapColor = colorMap[normalizedValue];
+            if (colorMapColor.w > DEFAULT_VOLUME_SHADOW_THRESHOLD)
+                shadowIntensity = 1.f;
+        }
+        t -= volumeEpsilon;
+    }
+    return shadowIntensity;
+}
+
+static __device__ float4 getVolumeContribution(const optix::Ray& volumeRay,
+                                               const float hit)
+{
+    if (colorMapSize == 0)
+        return make_float4(0.f, 1.f, 0.f, 0.f);
+
+    float4 pathColor = make_float4(0.f);
 
     optix::size_t2 screen = output_buffer.size();
     unsigned int seed =
         tea<16>(screen.x * launch_index.y + launch_index.x, frame);
     const float delta = (float)(seed % (int)(volumeEpsilon + 1));
 
-    float t = volumeEpsilon - delta;
-    const float tMax = t_hit - volumeEpsilon + volumeDiag;
+    float t = hit + volumeEpsilon - delta;
+    const float tMax = hit - volumeEpsilon + volumeDiag;
 
-    while (t < tMax && pathAlpha < 1.f)
+    while (t < tMax && pathColor.w < 1.f)
     {
         const float x = rnd(seed) * volumeEpsilon;
         float3 point = ((volumeRay.origin + volumeRay.direction * (t + x)) -
@@ -138,19 +185,32 @@ static __device__ float4 getVolumeContribution(optix::Ray volumeRay,
                                   (ulong)floor(point.y) * volumeDimensions.x +
                                   (ulong)floor(point.z) * volumeDimensions.x *
                                       volumeDimensions.y);
-
             const unsigned char voxelValue = volumeData[index];
 
-            // Determine light contribution
-            if (shadows != 0.f && iteration > 0)
-            {
-                unsigned int num_lights = lights.size();
-                for (int i = 0; i < num_lights; ++i)
-                {
-                    optix::Ray lightRay = volumeRay;
-                    lightRay.origin = point;
+            const float normalizedValue =
+                ((float)voxelValue - colorMapMinValue) / colorMapRange;
 
+            float4 colorMapColor;
+            if (normalizedValue < 0.f)
+                colorMapColor = colorMap[0];
+            else if (normalizedValue >= 1.f)
+                colorMapColor = colorMap[colorMapSize - 1];
+            else
+                colorMapColor = colorMap[colorMapSize * normalizedValue];
+
+            const float4 emissionIntensity =
+                make_float4(emissionIntensityMap[normalizedValue], 0.f);
+            float4 voxelColor =
+                fmaxf(make_float4(0.f), emissionIntensity + colorMapColor);
+
+            // Determine light contribution
+            if (shadows > 0.f && voxelColor.w > 0.1f)
+            {
+                float shadowIntensity = 0.f;
+                for (int i = 0; i < lights.size(); ++i)
+                {
                     BasicLight light = lights[i];
+                    optix::Ray lightRay = volumeRay;
                     if (light.type == 0)
                     {
                         // Point light
@@ -160,72 +220,37 @@ static __device__ float4 getVolumeContribution(optix::Ray volumeRay,
                             pos += soft_shadows * make_float3(rnd(seed) - 0.5f,
                                                               rnd(seed) - 0.5f,
                                                               rnd(seed) - 0.5f);
+                        lightRay.origin = pos;
                         lightRay.direction = optix::normalize(pos - point);
                     }
                     else
                     {
                         // Directional light
-                        float3 L = -light.dir;
+                        float3 L = light.dir;
                         if (soft_shadows > 0.f)
                             // Soft shadows
                             L += soft_shadows * make_float3(rnd(seed) - 0.5f,
                                                             rnd(seed) - 0.5f,
                                                             rnd(seed) - 0.5f);
-                        lightRay.direction = optix::normalize(L);
+                        lightRay.origin = point;
+                        lightRay.direction = optix::normalize(-1.f * L);
                     }
-                    const float4 voxelColor =
-                        getVolumeContribution(lightRay, iteration - 1);
-                    lightContribution =
-                        lightContribution - make_float3(voxelColor);
-                    pathAlpha += voxelColor.w;
+
+                    shadowIntensity += getVolumeShadowContribution(lightRay);
                 }
+                shadowIntensity = 1.f - shadows * shadowIntensity;
+                voxelColor.x = voxelColor.x * shadowIntensity;
+                voxelColor.y = voxelColor.y * shadowIntensity;
+                voxelColor.z = voxelColor.z * shadowIntensity;
             }
-            lightContribution = make_float3(max(0.f, lightContribution.z),
-                                            max(0.f, lightContribution.y),
-                                            max(0.f, lightContribution.x));
-            pathAlpha = min(1.f, pathAlpha);
-
-            if (colorMapSize != 0)
-            {
-                const float normalizedValue = colorMapSize *
-                                              (voxelValue - colorMapMinValue) /
-                                              colorMapRange;
-                const float4 colorMapColor = colorMap[normalizedValue];
-                const float3 emissionIntensity =
-                    emissionIntensityMap[normalizedValue];
-
-                const float3 voxelColor =
-                    (make_float3(emissionIntensity.z, emissionIntensity.y,
-                                 emissionIntensity.x) +
-                     lightContribution) *
-                    make_float3(colorMapColor.z, colorMapColor.y,
-                                colorMapColor.x);
-
-                const float alphaMagic =
-                    magicExponent * volumeEpsilon / volumeDiag;
-                const float alpha =
-                    1.f - pow(1.f - min(colorMapColor.w,
-                                        1.f - 1.f / (float)colorMapSize),
-                              alphaMagic);
-                pathColor =
-                    pathColor + (voxelColor * alpha * (1.f - pathAlpha));
-                pathAlpha = pathAlpha + (alpha * (1.f - pathAlpha));
-            }
-            else
-            {
-                const float3 voxelColor = {point.x, point.y, point.z};
-                const float alpha = 1.f;
-                pathColor =
-                    pathColor + (voxelColor * alpha * (1.f - pathAlpha));
-                pathAlpha = pathAlpha + (alpha * (1.f - pathAlpha));
-            }
+            composite(voxelColor, pathColor);
         }
         t += volumeEpsilon;
     }
-    if (shadows != 0.f && iteration > 0)
-        pathColor = pathColor * defaultVolumeAlpha;
-    return make_float4(min(1.f, pathColor.x), min(1.f, pathColor.y),
-                       min(1.f, pathColor.z), min(1.f, pathAlpha));
+    return make_float4(max(0.f, min(1.f, pathColor.z)),
+                       max(0.f, min(1.f, pathColor.y)),
+                       max(0.f, min(1.f, pathColor.x)),
+                       max(0.f, min(1.f, pathColor.w)));
 }
 
 static __device__ void phongShadowed(float3 p_Ko)
@@ -241,6 +266,7 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
                                   float p_glossiness, float3 p_normal,
                                   float p_ray_tmax)
 {
+    float3 result = make_float3(0.f);
     // Randomness
     optix::size_t2 screen = output_buffer.size();
     unsigned int seed =
@@ -252,25 +278,14 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
             p_normal +
             p_glossiness * make_float3(rnd(seed) - 0.5f, rnd(seed) - 0.5f,
                                        rnd(seed) - 0.5f));
-    // Ambient contribution
-    float3 result = {0.f, 0.f, 0.f};
-
     // Volume
-    float4 volumeValue = {0.f, 0.f, 0.f, 0.f};
+    float4 volumeColor = make_float4(0.f, 0.f, 0.f, 0.f);
     if (volumeDiag != 0.f)
-    {
-        optix::Ray volumeRay = ray;
-        volumeValue = getVolumeContribution(volumeRay, 1);
-        result.x += volumeValue.x;
-        result.y += volumeValue.y;
-        result.z += volumeValue.z;
-        result += (1.f - volumeValue.w) * bg_color;
-    }
+        volumeColor = getVolumeContribution(ray, t_hit);
 
     // Surface
     float3 hit_point = ray.origin + t_hit * ray.direction;
-
-    float3 light_attenuation = make_float3(1.f - volumeValue.w);
+    float3 light_attenuation = make_float3(1.f - volumeColor.w);
 
     if (fmaxf(p_Ko) < epsilon)
         result += p_Ko * p_Kd;
@@ -444,5 +459,9 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
             }
         }
     }
-    prd.result = result;
+
+    const float4 surfaceColor = make_float4(result, 1.f);
+    composite(surfaceColor, volumeColor);
+
+    prd.result = make_float3(volumeColor);
 }
