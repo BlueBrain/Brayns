@@ -349,7 +349,11 @@ void BaseWindow::display()
 
 void BaseWindow::clearPixels()
 {
-    _screenSpaceProcessor.clear();
+    if (!_brayns.getParametersManager()
+             .getApplicationParameters()
+             .getFilters()
+             .empty())
+        _screenSpaceProcessor.clear();
 }
 
 void BaseWindow::drawPixels(const int* framebuffer)
@@ -388,7 +392,11 @@ void BaseWindow::create(const char* title, const size_t width,
     glutPassiveMotionFunc(glut3dPassiveMouseFunc);
     glutIdleFunc(glut3dIdle);
 
-    _screenSpaceProcessor.init(width, height);
+    if (!_brayns.getParametersManager()
+             .getApplicationParameters()
+             .getFilters()
+             .empty())
+        _screenSpaceProcessor.init(width, height);
 }
 
 void BaseWindow::keypress(const char key, const Vector2f&)
