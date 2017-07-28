@@ -152,7 +152,7 @@ inline vec3f SimulationRenderer_shadeRay(
         if (ray.geomID < 0)
         {
             // No intersection. Return volume contribution + skybox color
-            ray.t = self->abstract.volumeDiag * 2.f;
+            // ray.t = self->abstract.volumeDiag * 2.f;
             vec4f volumetricValue = make_vec4f(0.f);
             vec4f backgroundColor =
                 skyboxMapping((Renderer*)self, ray, self->abstract.numMaterials,
@@ -161,7 +161,9 @@ inline vec3f SimulationRenderer_shadeRay(
             if (self->abstract.volumeData)
             {
                 volumetricValue =
-                    getVolumeContribution(&(self->abstract), ray, sample);
+                    getVolumeContribution(&(self->abstract), ray, sample,
+                                          self->abstract.volumeSamplesPerRay,
+                                          1.f);
                 if (depth == 0)
                     pathOpacity = 1.f - volumetricValue.w;
             }
@@ -209,16 +211,20 @@ inline vec3f SimulationRenderer_shadeRay(
             // surface, and for the current ray generation only. This value is
             // reset and updated for every rebound
             varying vec3f localShadedColor = make_vec3f(0.f);
+            intersectionWeights[depth] = 0.f;
+            intersectionColors[depth] = localShadedColor;
 
             // Get volumetric information
             if (self->abstract.volumeData)
             {
                 vec4f volumetricValue =
-                    getVolumeContribution(&(self->abstract), ray, sample);
-                localOpacity = volumetricValue.w;
+                    getVolumeContribution(&(self->abstract), ray, sample,
+                                          self->abstract.volumeSamplesPerRay,
+                                          1.f);
+                intersectionWeights[depth] = volumetricValue.w;
                 intersectionColors[depth] = localShadedColor =
                     make_vec3f(volumetricValue);
-                if (localOpacity >= 1.f)
+                if (intersectionWeights[depth] >= 1.f)
                 {
                     pathOpacity = 1.f;
                     break;
@@ -301,9 +307,6 @@ inline vec3f SimulationRenderer_shadeRay(
 
             if (localOpacity > 0.01f)
             {
-                intersectionWeights[depth] = 1.f;
-                intersectionColors[depth] = make_vec3f(0.f);
-
                 if (self->simulationModel)
                     // Get color from simulation model
                     getValueFromSimulationModel(self, sample, dg.P, neg(dg.Ng),
@@ -455,9 +458,16 @@ inline vec3f SimulationRenderer_shadeRay(
                 }
 
                 // Store final color for current iteration
-                intersectionColors[depth] =
-                    intersectionColors[depth] +
-                    min(make_vec3f(1.f), localShadedColor + specularColor);
+                const varying vec4f src =
+                    make_vec4f(localShadedColor + specularColor, 1.f);
+                varying vec4f dst = make_vec4f(intersectionColors[depth],
+                                               intersectionWeights[depth]);
+
+                dst = composite(src, dst, self->abstract.volumeSamplesPerRay,
+                                self->abstract.colorMapSize, 1.f);
+
+                intersectionColors[depth] = make_vec3f(dst);
+                intersectionWeights[depth] = dst.w;
 
                 // Update cumulated path opacity
                 pathOpacity += localOpacity;
@@ -560,6 +570,7 @@ export void SimulationRenderer_set(
     const uniform vec3i& volumeDimensions,
     const uniform vec3f& volumeElementSpacing,
     const uniform vec3f& volumeOffset, const uniform float& volumeEpsilon,
+    const uniform int32& volumeSamplesPerRay,
     uniform float* uniform simulationData,
     const uniform int64& simulationDataSize, uniform vec4f* uniform colormap,
     uniform vec3f* uniform emissionIntensitiesMap,
@@ -591,6 +602,7 @@ export void SimulationRenderer_set(
     self->abstract.volumeElementSpacing = volumeElementSpacing;
     self->abstract.volumeOffset = volumeOffset;
     self->abstract.volumeEpsilon = volumeEpsilon;
+    self->abstract.volumeSamplesPerRay = volumeSamplesPerRay;
 
     const uniform vec3f diag =
         make_vec3f(volumeDimensions) * volumeElementSpacing;

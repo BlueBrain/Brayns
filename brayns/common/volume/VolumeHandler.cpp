@@ -100,7 +100,7 @@ float VolumeHandler::getEpsilon(const Vector3f& elementSpacing,
         elementSpacing * _volumeDescriptors.at(_timestamp)->getDimensions();
     const float diagMax = diag.find_max();
     const float epsilon = diagMax / float(samplesPerRay);
-    return epsilon;
+    return std::max(1.f, epsilon);
 }
 
 Vector3ui VolumeHandler::getDimensions() const

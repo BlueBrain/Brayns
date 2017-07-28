@@ -54,6 +54,7 @@ private:
     ospray::vec3f _volumeElementSpacing;
     ospray::vec3f _volumeOffset;
     float _volumeEpsilon;
+    ospray::int32 _volumeSamplesPerRay;
 };
 
 } // ::brayns

@@ -266,7 +266,7 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
 
                             // Diffuse color
                             const varying vec3f localUnshadedColor =
-                                localOpacity * cosNL * localDiffuseColor *
+                                cosNL * localDiffuseColor *
                                     localLightIntensity +
                                 indirectShadingColor * indirectShadingIntensity;
 
@@ -279,7 +279,8 @@ inline vec3f ExtendedOBJRenderer_shadeRay(
 
                             // Add contribution of current light
                             localShadedColor =
-                                localShadedColor + localUnshadedColor;
+                                localShadedColor * (1.f - localOpacity) +
+                                localUnshadedColor * localOpacity;
                         }
                     }
                 }

@@ -74,6 +74,9 @@ void OptiXRenderer::commit()
     auto color = rp.getBackgroundColor();
     _context["ambient_light_color"]->setFloat(color.x(), color.y(), color.z());
     _context["bg_color"]->setFloat(color.x(), color.y(), color.z());
+
+    const auto& vp = _parametersManager.getVolumeParameters();
+    _context["volumeSamplesPerRay"]->setUint(vp.getSamplesPerRay());
 }
 
 void OptiXRenderer::setCamera(CameraPtr camera)

@@ -62,6 +62,7 @@ struct AbstractRenderer
     vec3f volumeOffset;
     float volumeEpsilon;
     float volumeDiag;
+    uint32 volumeSamplesPerRay;
 
     // Transfer function / Color map attributes
     uniform vec4f* uniform colorMap;
@@ -167,6 +168,19 @@ float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
     @param ray Current ray used to traverse the volume
     @return Resulting color and alpha value
 */
-vec4f getVolumeContribution(const uniform AbstractRenderer* uniform self,
-                            Ray& ray, varying ScreenSample& sample,
-                            const int iteration = VOLUME_NB_MAX_REBOUNDS);
+vec4f getVolumeContribution(
+    const uniform AbstractRenderer* uniform self, const varying Ray& ray,
+    varying ScreenSample& sample, const varying uint32 samplesPerRay,
+    const varying int iteration = VOLUME_NB_MAX_REBOUNDS);
+
+/**
+    Returns Computes back to front propagation in the context of volume
+   rendering
+    @param src Source color
+    @param dst Final color
+    @param samplesPerRay Number of samples for the current ray
+    @param colorMapSize Size of the colormap
+*/
+vec4f composite(const varying vec4f& src, varying vec4f& dst,
+                const varying uint32 samplesPerRay,
+                const uniform uint32 colorMapSize, const float ratio);

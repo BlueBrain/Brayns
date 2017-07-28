@@ -64,6 +64,7 @@ void OSPRayRenderer::commit()
 {
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
     SceneParameters& sp = _parametersManager.getSceneParameters();
+    VolumeParameters& vp = _parametersManager.getVolumeParameters();
     ShadingType mt = rp.getShading();
 
     Vector3f color = rp.getBackgroundColor();
@@ -88,6 +89,7 @@ void OSPRayRenderer::commit()
     color = rp.getDetectionFarColor();
     ospSet3f(_renderer, "detectionFarColor", color.x(), color.y(), color.z());
     ospSet1i(_renderer, "materialForSimulation", MATERIAL_SIMULATION);
+    ospSet1i(_renderer, "volumeSamplesPerRay", vp.getSamplesPerRay());
 
     OSPRayScene* osprayScene = static_cast<OSPRayScene*>(_scene.get());
     assert(osprayScene);
