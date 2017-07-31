@@ -79,6 +79,7 @@ table CircuitConfiguration {
     non_simulated_cells: uint;
     start_simulation_time: float;
     end_simulation_time: float;
+    simulation_step: float;
     simulation_values_range: [float:2];
     simulation_cache_file: string;
 }

@@ -668,6 +668,7 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getCircuitStartSimulationTime());
     circuit.setEndSimulationTime(
         geometryParameters.getCircuitEndSimulationTime());
+    circuit.setSimulationStep(geometryParameters.getCircuitSimulationStep());
     circuit.setSimulationValuesRange(
         geometryParameters.getCircuitSimulationValuesRange());
     circuit.setSimulationCacheFile(
@@ -822,6 +823,10 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            std::to_string(
                                _remoteDataSource.getCircuitConfiguration()
                                    .getEndSimulationTime()));
+    _parametersManager.set(
+        "circuit-simulation-step",
+        std::to_string(
+            _remoteDataSource.getCircuitConfiguration().getSimulationStep()));
     _parametersManager.set(
         "circuit-simulation-values-range",
         std::to_string(_remoteDataSource.getCircuitConfiguration()

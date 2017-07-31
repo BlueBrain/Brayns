@@ -858,9 +858,26 @@ bool MorphologyLoader::importSimulationData(const servus::URI& circuitConfig,
         std::max(start, _geometryParameters.getCircuitStartSimulationTime());
     const float lastFrame =
         std::min(end, _geometryParameters.getCircuitEndSimulationTime());
+    const float stepFrame =
+        std::max(step, _geometryParameters.getCircuitSimulationStep());
     const uint64_t frameSize = compartmentReport.getFrameSize();
+    const uint64_t nbFrames = (lastFrame - firstFrame) / stepFrame;
 
-    const uint64_t nbFrames = (lastFrame - firstFrame) / step;
+    BRAYNS_INFO << "-----------------------------------------------------------"
+                   "---------------------"
+                << std::endl;
+    BRAYNS_INFO << "Simulation information" << std::endl;
+    BRAYNS_INFO << "----------------------" << std::endl;
+    BRAYNS_INFO << "Start time       : " << firstFrame << "/" << start
+                << std::endl;
+    BRAYNS_INFO << "End time         : " << lastFrame << "/" << end
+                << std::endl;
+    BRAYNS_INFO << "Time step        : " << stepFrame << "/" << step
+                << std::endl;
+    BRAYNS_INFO << "Number of frames : " << nbFrames << std::endl;
+    BRAYNS_INFO << "-----------------------------------------------------------"
+                   "---------------------"
+                << std::endl;
 
     // Write header
     simulationHandler->setNbFrames(nbFrames);

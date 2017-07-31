@@ -53,6 +53,7 @@ const std::string PARAM_CIRCUIT_START_SIMULATION_TIME =
     "circuit-start-simulation-time";
 const std::string PARAM_CIRCUIT_END_SIMULATION_TIME =
     "circuit-end-simulation-time";
+const std::string PARAM_CIRCUIT_SIMULATION_STEP = "circuit-simulation-step";
 const std::string PARAM_CIRCUIT_SIMULATION_RANGE =
     "circuit-simulation-values-range";
 const std::string PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME =
@@ -184,6 +185,8 @@ GeometryParameters::GeometryParameters()
         "Start simulation timestamp [float]")(
         PARAM_CIRCUIT_END_SIMULATION_TIME.c_str(), po::value<float>(),
         "End simulation timestamp [float]")(
+        PARAM_CIRCUIT_SIMULATION_STEP.c_str(), po::value<float>(),
+        "Step between simulation frames [float]")(
         PARAM_CIRCUIT_SIMULATION_RANGE.c_str(),
         po::value<floats>()->multitoken(),
         "Minimum and maximum values for the simulation [float float]")(
@@ -317,6 +320,8 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_CIRCUIT_END_SIMULATION_TIME))
         _circuitEndSimulationTime =
             vm[PARAM_CIRCUIT_END_SIMULATION_TIME].as<float>();
+    if (vm.count(PARAM_CIRCUIT_SIMULATION_STEP))
+        _circuitSimulationStep = vm[PARAM_CIRCUIT_SIMULATION_STEP].as<float>();
     if (vm.count(PARAM_CIRCUIT_SIMULATION_RANGE))
     {
         floats values = vm[PARAM_CIRCUIT_SIMULATION_RANGE].as<floats>();
@@ -430,6 +435,8 @@ void GeometryParameters::print()
     BRAYNS_INFO << "- Start simulation time    : "
                 << _circuitStartSimulationTime << std::endl;
     BRAYNS_INFO << "- End simulation time      : " << _circuitEndSimulationTime
+                << std::endl;
+    BRAYNS_INFO << "- Simulation step          : " << _circuitSimulationStep
                 << std::endl;
     BRAYNS_INFO << "- Simulation values range  : "
                 << _circuitSimulationValuesRange << std::endl;

@@ -182,6 +182,7 @@ public:
     {
         return _circuitStartSimulationTime;
     }
+    float getCircuitSimulationStep() const { return _circuitSimulationStep; }
     Vector2f getCircuitSimulationValuesRange() const
     {
         return _circuitSimulationValuesRange;
@@ -271,6 +272,7 @@ protected:
     size_t _circuitNonSimulatedCells;
     float _circuitStartSimulationTime;
     float _circuitEndSimulationTime;
+    float _circuitSimulationStep;
     Vector2f _circuitSimulationValuesRange;
     std::string _circuitSimulationCacheFile;
     size_t _circuitSimulationHistogramSize;
