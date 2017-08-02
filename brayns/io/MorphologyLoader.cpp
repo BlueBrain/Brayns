@@ -200,22 +200,24 @@ bool MorphologyLoader::_importMorphologyAsMesh(
 }
 
 bool MorphologyLoader::importMorphology(const servus::URI& uri,
-                                        const int morphologyIndex, Scene& scene)
+                                        const int morphologyIndex, Scene& scene,
+                                        const Matrix4f& transformation)
 {
     bool returnValue = true;
     if (_geometryParameters.useMetaballs())
     {
         returnValue =
             _importMorphologyAsMesh(uri, morphologyIndex, scene.getMaterials(),
-                                    Matrix4f(), scene.getTriangleMeshes(),
+                                    transformation, scene.getTriangleMeshes(),
                                     scene.getWorldBounds());
     }
     float maxDistanceToSoma;
-    returnValue = returnValue &&
-                  _importMorphology(uri, morphologyIndex, Matrix4f(), nullptr,
-                                    scene.getSpheres(), scene.getCylinders(),
-                                    scene.getCones(), scene.getWorldBounds(),
-                                    NO_OFFSET, maxDistanceToSoma);
+    returnValue =
+        returnValue &&
+        _importMorphology(uri, morphologyIndex, transformation, nullptr,
+                          scene.getSpheres(), scene.getCylinders(),
+                          scene.getCones(), scene.getWorldBounds(), NO_OFFSET,
+                          maxDistanceToSoma);
     return returnValue;
 }
 
@@ -485,7 +487,6 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
         return false;
     }
-    const Matrix4fs& transforms = circuit.getTransforms(gids);
     const brain::URIs& uris = circuit.getMorphologyURIs(gids);
 
     brain::GIDSet cr_gids;
@@ -493,9 +494,17 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
     // Load simulation information from compartment reports
     std::unique_ptr<brion::CompartmentReport> compartmentReport = nullptr;
     if (!report.empty())
-        compartmentReport.reset(new brion::CompartmentReport(
-            brion::URI(bc.getReportSource(report).getPath()), brion::MODE_READ,
-            gids));
+        try
+        {
+            compartmentReport.reset(new brion::CompartmentReport(
+                brion::URI(bc.getReportSource(report).getPath()),
+                brion::MODE_READ, gids));
+        }
+        catch (const std::exception& e)
+        {
+            BRAYNS_ERROR << e.what() << std::endl;
+            compartmentReport = nullptr;
+        }
 
     const brion::CompartmentCounts& compartmentCounts =
         compartmentReport ? compartmentReport->getCompartmentCounts()
@@ -504,6 +513,7 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         compartmentReport ? compartmentReport->getOffsets()
                           : brion::SectionOffsets();
     cr_gids = compartmentReport ? compartmentReport->getGIDs() : gids;
+    const Matrix4fs& transforms = circuit.getTransforms(cr_gids);
 
     const auto circuitDensity = _geometryParameters.getCircuitDensity();
     BRAYNS_INFO << "Loading "
@@ -511,12 +521,16 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
                 << " simulated cells" << std::endl;
     brain::URIs cr_uris;
     if (compartmentReport)
+    {
+        Progress progress("Loading URIs...", cr_gids.size());
         for (const auto cr_gid : cr_gids)
         {
+            ++progress;
             const auto it = std::find(gids.begin(), gids.end(), cr_gid);
             const auto index = std::distance(gids.begin(), it);
             cr_uris.push_back(uris[index]);
         }
+    }
     else
         cr_uris = uris;
 

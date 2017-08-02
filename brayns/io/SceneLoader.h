@@ -23,6 +23,7 @@
 
 #include <brayns/common/types.h>
 #include <brayns/io/MeshLoader.h>
+#include <brayns/io/MorphologyLoader.h>
 
 namespace brayns
 {
@@ -36,30 +37,46 @@ public:
 
     /** Imports a file containing the positions and the filename of a list
      * of meshes. All loaded meshes are positioned at the corresponding
-     * coordinates. The file is ASCII and has the following format for every
-     * line:
-     *   x,y,z,filename
+     * coordinates. The file is a space separate ASCII and has the following
+     * format for every line:
      *
-     * @param filename name of the file containing the positions and meshes
+     *   x y z type filename
+     *
+     * type is the kind of geometry that will be loaded (point, morphology or
+     * mesh)
+     *
+     * @param filename name of the file containing the positions and geometry
      *        filenames
-     * @param Scene holding the meshes
-     * @param meshLoader Loader used to load a meshes
+     * @param Scene holding the geometry
+     * @param meshLoader Loader used to load meshes
      * @return true if the file was successfully imported. False otherwise.
      */
     bool importFromFile(const std::string& filename, Scene& scene,
                         MeshLoader& meshLoader);
 
 private:
+    enum class FileType
+    {
+        point = 0,
+        morphology = 1,
+        mesh = 2
+    };
+
     struct Node
     {
         Vector3f position;
         uint16_t materialId;
+        FileType fileType;
         std::string filename;
     };
     typedef std::vector<Node> Nodes;
 
     bool _parsePositions(const std::string& filename);
-    void _importMeshes(Scene& scene, MeshLoader& meshLoader);
+    void _importMorphology(Scene& scene, const Node& node,
+                           const Matrix4f& transformation);
+    void _importMesh(Scene& scene, MeshLoader& loader, const Node& node,
+                     const Matrix4f& transformation);
+    bool _processNodes(Scene& scene, MeshLoader& loader);
 
     const GeometryParameters& _geometryParameters;
 
