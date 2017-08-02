@@ -486,7 +486,6 @@ bool MorphologyLoader::importCircuit(const servus::URI& circuitConfig,
         return false;
     }
     const Matrix4fs& transforms = circuit.getTransforms(gids);
-
     const brain::URIs& uris = circuit.getMorphologyURIs(gids);
 
     brain::GIDSet cr_gids;
@@ -917,8 +916,10 @@ bool MorphologyLoader::_positionInCircuitBoundingBox(
 Vector2f MorphologyLoader::_getOffsetAsVector2f(const uint64_t offset)
 {
     Vector2f offsets;
-    offsets.x() = static_cast<float>(offset % NO_OFFSET);
-    offsets.y() = std::floor(static_cast<uint32_t>(offset / NO_OFFSET));
+    double y = offset / NO_OFFSET;
+    double x = offset - y * NO_OFFSET;
+    offsets.x() = x;
+    offsets.y() = y;
     return offsets;
 }
 

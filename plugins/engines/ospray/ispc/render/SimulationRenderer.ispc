@@ -46,7 +46,9 @@ inline varying vec4f
     lightEmission = make_vec3f(0.f);
     varying vec4f color = make_vec4f(0.f);
     varying float value = 0.f;
-    varying int64 index = dg.st.y * 1e6 + dg.st.x;
+    double x = dg.st.x;
+    double y = dg.st.y;
+    varying uint64 index = y * NO_OFFSET + x;
     if (index >= 0 && index < self->simulationDataSize)
         value = self->simulationData[index];
     else
