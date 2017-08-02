@@ -169,10 +169,8 @@ static void ExtendedCylinders_postIntersect(uniform Geometry *uniform geometry,
             Ns = neg(Ns);
     }
     if ((flags & DG_MATERIALID) && (this->offset_materialID >= 0))
-    {
         dg.materialID = *(
             (uniform uint32 * varying)(cylinderPtr + this->offset_materialID));
-    }
     dg.Ng = Ng;
     dg.Ns = Ns;
 }

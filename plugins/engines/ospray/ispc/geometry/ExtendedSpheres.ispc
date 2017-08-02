@@ -105,12 +105,6 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
 
                 if (this->materialList)
                     dg.material = this->materialList[dg.materialID];
-
-                // Store value as texture coordinate
-                dg.st.x =
-                    *((varying float *)(spherePtr + this->offset_value_x));
-                dg.st.y =
-                    *((varying float *)(spherePtr + this->offset_value_y));
             }
         }
         else

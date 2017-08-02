@@ -21,34 +21,96 @@
 #include "CircuitSimulationHandler.h"
 
 #include <brayns/common/log.h>
+#include <brayns/parameters/GeometryParameters.h>
 
-#include <fstream>
-#include <sys/mman.h>
+#include <brain/brain.h>
+#include <brion/brion.h>
+#include <servus/types.h>
 
 namespace brayns
 {
 CircuitSimulationHandler::CircuitSimulationHandler(
     const GeometryParameters& geometryParameters)
     : AbstractSimulationHandler(geometryParameters)
+    , _compartmentReport(nullptr)
+{
+}
+
+void CircuitSimulationHandler::_initializeReport()
+{
+    const auto& circuitConfig = _geometryParameters.getCircuitConfiguration();
+    const auto& target = _geometryParameters.getCircuitTarget();
+    const auto& report = _geometryParameters.getCircuitReport();
+
+    const brion::BlueConfig bc(circuitConfig);
+    const brain::Circuit circuit(bc);
+    const auto& gids =
+        (target.empty() ? circuit.getGIDs() : circuit.getGIDs(target));
+    if (gids.empty())
+    {
+        BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
+        return;
+    }
+
+    // Load simulation information from compartment reports
+    _compartmentReport.reset(new brion::CompartmentReport(
+        brion::URI(bc.getReportSource(report).getPath()), brion::MODE_READ,
+        gids));
+
+    // Load simulation information from compartment reports
+    const auto reportStartTime = _compartmentReport->getStartTime();
+    const auto reportEndTime = _compartmentReport->getEndTime();
+    const auto reportTimeStep = _compartmentReport->getTimestep();
+
+    _beginFrame = std::max(reportStartTime,
+                           _geometryParameters.getCircuitStartSimulationTime());
+    _endFrame = std::min(reportEndTime,
+                         _geometryParameters.getCircuitEndSimulationTime());
+    _timeBetweenFrames =
+        std::max(reportTimeStep,
+                 _geometryParameters.getCircuitSimulationStep());
+    _frameSize = _compartmentReport->getFrameSize();
+    _frameData = new float[_frameSize];
+    assert(_frameData);
+
+    _nbFrames = (_endFrame - _beginFrame) / _timeBetweenFrames;
+
+    BRAYNS_INFO << "-----------------------------------------------------------"
+                << std::endl;
+    BRAYNS_INFO << "Simulation information" << std::endl;
+    BRAYNS_INFO << "----------------------" << std::endl;
+    BRAYNS_INFO << "Start frame          : " << _beginFrame << "/"
+                << reportStartTime << std::endl;
+    BRAYNS_INFO << "End frame            : " << _endFrame << "/"
+                << reportEndTime << std::endl;
+    BRAYNS_INFO << "Steps between frames : " << _timeBetweenFrames << "/"
+                << reportTimeStep << std::endl;
+    BRAYNS_INFO << "Number of frames : " << _nbFrames << std::endl;
+    BRAYNS_INFO << "-----------------------------------------------------------"
+                << std::endl;
+}
+
+CircuitSimulationHandler::~CircuitSimulationHandler()
 {
 }
 
 void* CircuitSimulationHandler::getFrameData()
 {
-    if (_nbFrames == 0 || _memoryMapPtr == 0)
-        return 0;
+    if (!_compartmentReport)
+        _initializeReport();
 
-    if (!_frameData)
-        _frameData = new float[_frameSize];
-
-    const uint64_t frame = _timestamp;
-    const uint64_t moduloFrame = frame % _nbFrames;
-    const uint64_t index =
-        std::min(_frameSize, std::max(uint64_t(0), moduloFrame));
-    const uint64_t frameSize = _frameSize * sizeof(float);
-    memcpy(_frameData,
-           (unsigned char*)_memoryMapPtr + _headerSize + index * frameSize,
-           frameSize);
+    if (_compartmentReport)
+    {
+        auto frame = _beginFrame + _timestamp * _timeBetweenFrames;
+        frame = std::min(_endFrame, frame);
+        frame = std::max(_beginFrame, frame);
+        auto valuesPtr = _compartmentReport->loadFrame(frame).get();
+        if (valuesPtr)
+        {
+            _currentFrame = frame;
+            memcpy(_frameData, valuesPtr->data(), sizeof(float) * _frameSize);
+        }
+    }
     return _frameData;
 }
 }

@@ -30,6 +30,7 @@ struct ParticleRenderer
     AbstractRenderer abstract;
 
     uniform float* uniform simulationData;
+    int64 simulationDataSize;
     uniform vec4f* uniform transferFunction;
     uniform float* uniform transferFunctionEmissionData;
     uint32 transferFunctionSize;
@@ -43,7 +44,8 @@ inline varying vec4f
     if (!self->simulationData || !self->transferFunction)
         return color;
 
-    const varying float timestamp = self->simulationData[index];
+    varying int32 idx = max(0, min(index, self->simulationDataSize));
+    const varying float timestamp = self->simulationData[idx];
     const varying float spikeValue =
         (timestamp < 0.f)
             ? 0.f
@@ -195,6 +197,7 @@ export void ParticleRenderer_set(
     const uniform int& randomNumber, const uniform float& timestamp,
     const uniform int& spp, void** uniform materials,
     const uniform int32 numMaterials, uniform float* uniform simulationData,
+    const uniform int64 simulationDataSize,
     uniform vec4f* uniform transferFunction,
     uniform float* uniform transferFunctionEmissionData,
     const uniform uint32 transferFunctionSize)
@@ -214,6 +217,7 @@ export void ParticleRenderer_set(
     self->abstract.volumeData = 0;
 
     self->simulationData = (uniform float* uniform)simulationData;
+    self->simulationDataSize = simulationDataSize;
     self->transferFunction = (uniform vec4f * uniform)transferFunction;
     self->transferFunctionEmissionData =
         (uniform float* uniform)transferFunctionEmissionData;

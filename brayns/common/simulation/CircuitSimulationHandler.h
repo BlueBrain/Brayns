@@ -26,8 +26,13 @@
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/types.h>
 
+namespace brion
+{
+class CompartmentReport;
+}
 namespace brayns
 {
+typedef std::unique_ptr<brion::CompartmentReport> CompartmentReportPtr;
 /**
  * @brief The CircuitSimulationHandler class handles simulation frames for the
  * current circuit.
@@ -45,12 +50,20 @@ public:
      * @param geometryParameters Geometry parameters
      */
     CircuitSimulationHandler(const GeometryParameters& geometryParameters);
+    ~CircuitSimulationHandler();
 
     /**
      * @brief Returns a pointer to the current frame in the memory mapped file.
      * @return Pointer to given frame
      */
     void* getFrameData() final;
+
+private:
+    void _initializeReport();
+    CompartmentReportPtr _compartmentReport;
+    double _beginFrame;
+    double _endFrame;
+    double _timeBetweenFrames;
 };
 }
 

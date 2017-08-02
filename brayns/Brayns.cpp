@@ -43,7 +43,6 @@
 #if (BRAYNS_USE_ASSIMP)
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
-#include <brayns/io/SceneLoader.h>
 #endif
 
 #if (BRAYNS_USE_MAGICKPP)
@@ -58,6 +57,7 @@
 #if (BRAYNS_USE_BRION)
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
+#include <brayns/io/SceneLoader.h>
 #include <servus/uri.h>
 #endif
 
@@ -119,9 +119,7 @@ struct Brayns::Impl
 
     void buildScene()
     {
-#if (BRAYNS_USE_ASSIMP)
         _meshLoader.clear();
-#endif
         Scene& scene = _engine->getScene();
         _loadData();
 
@@ -160,7 +158,9 @@ struct Brayns::Impl
         try
         {
             char str[7];
-            snprintf(str, 7, "%06d", int(_engine->getFrameNumber()));
+            snprintf(
+                str, 7, "%06d",
+                int(_parametersManager->getSceneParameters().getTimestamp()));
 
             const std::string filename = frameExportFolder + "/" + str + ".png";
             FrameBuffer& frameBuffer = _engine->getFrameBuffer();
@@ -369,10 +369,10 @@ private:
         if (!geometryParameters.getMeshFile().empty())
             _loadMeshFile(geometryParameters.getMeshFile());
 
+#if (BRAYNS_USE_BRION)
         if (!geometryParameters.getSceneFile().empty())
             _loadSceneFile(geometryParameters.getSceneFile());
 
-#if (BRAYNS_USE_BRION)
         if (!geometryParameters.getNESTCircuit().empty())
             _loadNESTCircuit();
 
@@ -531,20 +531,19 @@ private:
 #endif
     }
 
+#if (BRAYNS_USE_BRION)
+    /**
+     * Loads data from a scene description file (command line parameter
+     * --scene-file)
+     */
     void _loadSceneFile(const std::string& filename)
     {
-#if (BRAYNS_USE_ASSIMP)
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         SceneLoader sceneLoader(geometryParameters);
         sceneLoader.importFromFile(filename, scene, _meshLoader);
-#else
-        BRAYNS_ERROR << "Assimp library is required to load meshes from "
-                     << filename << std::endl;
-#endif
     }
 
-#if (BRAYNS_USE_BRION)
     /**
      * Loads data from a NEST circuit file (command line parameter
      * --nest-circuit)
@@ -607,19 +606,20 @@ private:
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
-        MorphologyLoader morphologyLoader(geometryParameters);
+        MorphologyLoader morphologyLoader(geometryParameters, scene);
 
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
-        size_t i = 0;
+        uint64_t morphologyIndex = 0;
         Progress progress("Loading morphologies from " + folder, files.size());
         for (const auto& file : files)
         {
             ++progress;
             servus::URI uri(file);
-            if (!morphologyLoader.importMorphology(uri, i, scene))
+            if (!morphologyLoader.importSingleMorphology(uri, morphologyIndex,
+                                                         NO_MATERIAL))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
-            ++i;
+            ++morphologyIndex;
         }
     }
 
@@ -639,13 +639,9 @@ private:
         BRAYNS_INFO << "Loading circuit configuration from " << filename
                     << std::endl;
         const std::string& report = geometryParameters.getCircuitReport();
-        MorphologyLoader morphologyLoader(geometryParameters);
+        MorphologyLoader morphologyLoader(geometryParameters, scene);
         const servus::URI uri(filename);
-#if (BRAYNS_USE_ASSIMP)
-        morphologyLoader.importCircuit(uri, target, report, scene, _meshLoader);
-#else
-        morphologyLoader.importCircuit(uri, target, report, scene);
-#endif // BRAYNS_USE_ASSIMP
+        morphologyLoader.importCircuit(uri, target, report, _meshLoader);
     }
 
     /**
@@ -661,21 +657,21 @@ private:
             geometryParameters.getCircuitConfiguration();
         const std::string& target = geometryParameters.getCircuitTarget();
         const std::string& report = geometryParameters.getCircuitReport();
-        BRAYNS_INFO << "Loading compartment report from " << filename
+        BRAYNS_INFO << "Attaching to compartment report from " << filename
                     << std::endl;
-        MorphologyLoader morphologyLoader(geometryParameters);
-        const servus::URI uri(filename);
-        if (morphologyLoader.importSimulationData(uri, target, report, scene))
+
+        CircuitSimulationHandlerPtr simulationHandler(
+            new CircuitSimulationHandler(geometryParameters));
+        scene.setSimulationHandler(simulationHandler);
+
+        auto& sceneParameters = _parametersManager->getSceneParameters();
+        const std::string& colorMapFilename =
+            sceneParameters.getColorMapFilename();
+        if (!colorMapFilename.empty())
         {
-            auto& sceneParameters = _parametersManager->getSceneParameters();
-            const std::string& colorMapFilename =
-                sceneParameters.getColorMapFilename();
-            if (!colorMapFilename.empty())
-            {
-                TransferFunctionLoader transferFunctionLoader;
-                transferFunctionLoader.loadFromFile(colorMapFilename, scene);
-                scene.commitTransferFunctionData();
-            }
+            TransferFunctionLoader transferFunctionLoader;
+            transferFunctionLoader.loadFromFile(colorMapFilename, scene);
+            scene.commitTransferFunctionData();
         }
     }
 #endif // BRAYNS_USE_BRION
@@ -687,15 +683,10 @@ private:
     */
     void _loadMolecularSystem()
     {
-#if (BRAYNS_USE_ASSIMP)
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
         molecularSystemReader.import(scene, _meshLoader);
-#else
-        BRAYNS_ERROR << "Assimp library missing for molecular meshes"
-                     << std::endl;
-#endif
     }
 
     void _setupCameraManipulator(const CameraMode mode)
@@ -956,9 +947,7 @@ private:
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
-#if (BRAYNS_USE_ASSIMP)
     MeshLoader _meshLoader;
-#endif
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;

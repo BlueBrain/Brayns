@@ -47,8 +47,6 @@ const std::string PARAM_CIRCUIT_MESH_TRANSFORMATION =
     "circuit-mesh-transformation";
 const std::string PARAM_CIRCUIT_TARGET = "circuit-target";
 const std::string PARAM_CIRCUIT_REPORT = "circuit-report";
-const std::string PARAM_CIRCUIT_NON_SIMULATED_CELLS =
-    "circuit-non-simulated-cells";
 const std::string PARAM_CIRCUIT_START_SIMULATION_TIME =
     "circuit-start-simulation-time";
 const std::string PARAM_CIRCUIT_END_SIMULATION_TIME =
@@ -56,10 +54,10 @@ const std::string PARAM_CIRCUIT_END_SIMULATION_TIME =
 const std::string PARAM_CIRCUIT_SIMULATION_STEP = "circuit-simulation-step";
 const std::string PARAM_CIRCUIT_SIMULATION_RANGE =
     "circuit-simulation-values-range";
-const std::string PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME =
-    "circuit-simulation-cache-file";
 const std::string PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE =
     "circuit-simulation-histogram-size";
+const std::string PARAM_CIRCUIT_SIMULATION_HISTOGRAM_FILENAME =
+    "circuit-simulation-histogram-file";
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
 const std::string PARAM_SAVE_CACHE_FILE = "save-cache-file";
 const std::string PARAM_RADIUS_MULTIPLIER = "radius-multiplier";
@@ -106,7 +104,6 @@ GeometryParameters::GeometryParameters()
     , _circuitUseSimulationModel(false)
     , _circuitBoundingBox(Vector3f(0.f), Vector3f(0.f))
     , _circuitDensity(100)
-    , _circuitNonSimulatedCells(0)
     , _circuitStartSimulationTime(0.f)
     , _circuitEndSimulationTime(std::numeric_limits<float>::max())
     , _circuitSimulationValuesRange(Vector2f(std::numeric_limits<float>::max(),
@@ -177,24 +174,20 @@ GeometryParameters::GeometryParameters()
                                "Morphology layout defined by number of "
                                "columns, vertical spacing, horizontal spacing "
                                "[int int int]")(
-        PARAM_CIRCUIT_NON_SIMULATED_CELLS.c_str(), po::value<size_t>(),
-        "Defines the number of non-simulated cells that should be loaded when "
-        "a "
-        "report is specified [int]")(
-        PARAM_CIRCUIT_START_SIMULATION_TIME.c_str(), po::value<float>(),
-        "Start simulation timestamp [float]")(
-        PARAM_CIRCUIT_END_SIMULATION_TIME.c_str(), po::value<float>(),
-        "End simulation timestamp [float]")(
-        PARAM_CIRCUIT_SIMULATION_STEP.c_str(), po::value<float>(),
-        "Step between simulation frames [float]")(
+        PARAM_CIRCUIT_START_SIMULATION_TIME.c_str(), po::value<double>(),
+        "Start simulation timestamp [double]")(
+        PARAM_CIRCUIT_END_SIMULATION_TIME.c_str(), po::value<double>(),
+        "End simulation timestamp [double]")(
+        PARAM_CIRCUIT_SIMULATION_STEP.c_str(), po::value<double>(),
+        "Step between simulation frames [double]")(
         PARAM_CIRCUIT_SIMULATION_RANGE.c_str(),
         po::value<floats>()->multitoken(),
         "Minimum and maximum values for the simulation [float float]")(
-        PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME.c_str(),
-        po::value<std::string>(),
-        "Cache file containing simulation data [string]")(
         PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value<size_t>(),
         "Number of values defining the simulation histogram [int]")(
+        PARAM_CIRCUIT_SIMULATION_HISTOGRAM_FILENAME.c_str(),
+        po::value<std::string>(),
+        "File containing simulation histogram [string]")(
         PARAM_NEST_CACHE_FILENAME.c_str(), po::value<std::string>(),
         "Cache file containing nest data [string]")(
         PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value<bool>(),
@@ -311,29 +304,26 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             _morphologyLayout.horizontalSpacing = values[2];
         }
     }
-    if (vm.count(PARAM_CIRCUIT_NON_SIMULATED_CELLS))
-        _circuitNonSimulatedCells =
-            vm[PARAM_CIRCUIT_NON_SIMULATED_CELLS].as<size_t>();
     if (vm.count(PARAM_CIRCUIT_START_SIMULATION_TIME))
         _circuitStartSimulationTime =
-            vm[PARAM_CIRCUIT_START_SIMULATION_TIME].as<float>();
+            vm[PARAM_CIRCUIT_START_SIMULATION_TIME].as<double>();
     if (vm.count(PARAM_CIRCUIT_END_SIMULATION_TIME))
         _circuitEndSimulationTime =
-            vm[PARAM_CIRCUIT_END_SIMULATION_TIME].as<float>();
+            vm[PARAM_CIRCUIT_END_SIMULATION_TIME].as<double>();
     if (vm.count(PARAM_CIRCUIT_SIMULATION_STEP))
-        _circuitSimulationStep = vm[PARAM_CIRCUIT_SIMULATION_STEP].as<float>();
+        _circuitSimulationStep = vm[PARAM_CIRCUIT_SIMULATION_STEP].as<double>();
     if (vm.count(PARAM_CIRCUIT_SIMULATION_RANGE))
     {
         floats values = vm[PARAM_CIRCUIT_SIMULATION_RANGE].as<floats>();
         if (values.size() == 2)
             _circuitSimulationValuesRange = Vector2f(values[0], values[1]);
     }
-    if (vm.count(PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME))
-        _circuitSimulationCacheFile =
-            vm[PARAM_CIRCUIT_SIMULATION_CACHE_FILENAME].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE))
         _circuitSimulationHistogramSize =
             vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE].as<size_t>();
+    if (vm.count(PARAM_CIRCUIT_SIMULATION_HISTOGRAM_FILENAME))
+        _circuitSimulationHistogramFile =
+            vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_FILENAME].as<std::string>();
     if (vm.count(PARAM_NEST_CACHE_FILENAME))
         _NESTCacheFile = vm[PARAM_NEST_CACHE_FILENAME].as<std::string>();
     if (vm.count(PARAM_GENERATE_MULTIPLE_MODELS))
@@ -430,8 +420,6 @@ void GeometryParameters::print()
                 << std::endl;
     BRAYNS_INFO << "- Density                  : " << _circuitDensity
                 << std::endl;
-    BRAYNS_INFO << "- Non-simulated cells      : " << _circuitNonSimulatedCells
-                << std::endl;
     BRAYNS_INFO << "- Start simulation time    : "
                 << _circuitStartSimulationTime << std::endl;
     BRAYNS_INFO << "- End simulation time      : " << _circuitEndSimulationTime
@@ -440,8 +428,8 @@ void GeometryParameters::print()
                 << std::endl;
     BRAYNS_INFO << "- Simulation values range  : "
                 << _circuitSimulationValuesRange << std::endl;
-    BRAYNS_INFO << "- Simulation cache file    : "
-                << _circuitSimulationCacheFile << std::endl;
+    BRAYNS_INFO << "- Simulation file          : "
+                << _circuitSimulationHistogramFile << std::endl;
     BRAYNS_INFO << "- Simulation histogram size: "
                 << _circuitSimulationHistogramSize << std::endl;
     BRAYNS_INFO << "- Bounding box             : " << _circuitBoundingBox

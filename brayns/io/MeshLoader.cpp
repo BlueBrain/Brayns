@@ -51,7 +51,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     Assimp::Importer importer;
     if (!importer.IsExtensionSupported(file.extension().c_str()))
     {
-        BRAYNS_ERROR << "File extension " << file.extension()
+        BRAYNS_DEBUG << "File extension " << file.extension()
                      << " is not supported" << std::endl;
         return false;
     }
@@ -73,7 +73,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     std::ifstream meshFile(filename, std::ios::in);
     if (!meshFile.good())
     {
-        BRAYNS_ERROR << "Could not open file " << filename << std::endl;
+        BRAYNS_DEBUG << "Could not open file " << filename << std::endl;
         return false;
     }
     meshFile.close();
@@ -83,14 +83,14 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
 
     if (!aiScene)
     {
-        BRAYNS_ERROR << "Error parsing " << filename.c_str() << ": "
+        BRAYNS_DEBUG << "Error parsing " << filename.c_str() << ": "
                      << importer.GetErrorString() << std::endl;
         return false;
     }
 
     if (!aiScene->HasMeshes())
     {
-        BRAYNS_ERROR << "Error Finding Model In file. "
+        BRAYNS_DEBUG << "Error Finding Model In file. "
                      << "Did you export an empty scene?" << std::endl;
         return false;
     }
@@ -155,7 +155,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
                 nonTriangulatedFaces = true;
         }
         if (nonTriangulatedFaces)
-            BRAYNS_WARN
+            BRAYNS_DEBUG
                 << "Some faces are not triangulated and have been removed"
                 << std::endl;
 

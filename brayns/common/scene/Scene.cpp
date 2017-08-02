@@ -57,6 +57,7 @@ void Scene::reset()
     _trianglesMeshes.clear();
     _bounds.reset();
     _caDiffusionSimulationHandler.reset();
+    _simulationHandler.reset();
 }
 
 void Scene::setDirty()

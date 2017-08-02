@@ -168,35 +168,31 @@ public:
         return _morphologyLayout;
     }
 
-    /** Defines if cells with no simulation data should be loaded */
-    size_t getCircuitNonSimulatedCells() const
-    {
-        return _circuitNonSimulatedCells;
-    }
     /** Defines the range of frames to be loaded for the simulation */
-    float getCircuitEndSimulationTime() const
+    double getCircuitEndSimulationTime() const
     {
         return _circuitEndSimulationTime;
     }
-    float getCircuitStartSimulationTime() const
+    double getCircuitStartSimulationTime() const
     {
         return _circuitStartSimulationTime;
     }
-    float getCircuitSimulationStep() const { return _circuitSimulationStep; }
+    double getCircuitSimulationStep() const { return _circuitSimulationStep; }
     Vector2f getCircuitSimulationValuesRange() const
     {
         return _circuitSimulationValuesRange;
-    }
-    /** File containing simulation data */
-    const std::string& getCircuitSimulationCacheFile() const
-    {
-        return _circuitSimulationCacheFile;
     }
 
     /** Size of the simulation histogram */
     size_t getCircuitSimulationHistogramSize() const
     {
         return _circuitSimulationHistogramSize;
+    }
+
+    /** Size of the simulation histogram */
+    const std::string& getCircuitSimulationHistogramFile() const
+    {
+        return _circuitSimulationHistogramFile;
     }
 
     /** Size of the simulation histogram */
@@ -269,13 +265,12 @@ protected:
     std::string _circuitMeshFolder;
     std::string _circuitTarget;
     std::string _circuitReport;
-    size_t _circuitNonSimulatedCells;
-    float _circuitStartSimulationTime;
-    float _circuitEndSimulationTime;
-    float _circuitSimulationStep;
+    double _circuitStartSimulationTime;
+    double _circuitEndSimulationTime;
+    double _circuitSimulationStep;
     Vector2f _circuitSimulationValuesRange;
-    std::string _circuitSimulationCacheFile;
     size_t _circuitSimulationHistogramSize;
+    std::string _circuitSimulationHistogramFile;
     bool _circuitMeshTransformation;
 
     // Scene

@@ -111,7 +111,6 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(geomParams.getMorphologySectionTypes(),
                       size_t(brayns::MorphologySectionType::all));
     BOOST_CHECK_EQUAL(geomParams.getMorphologyLayout().nbColumns, 0);
-    BOOST_CHECK_EQUAL(geomParams.getCircuitNonSimulatedCells(), 0);
     BOOST_CHECK_EQUAL(geomParams.getCircuitStartSimulationTime(), 0.f);
     BOOST_CHECK_EQUAL(geomParams.getCircuitEndSimulationTime(),
                       std::numeric_limits<float>::max());

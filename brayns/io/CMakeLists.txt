@@ -9,6 +9,7 @@ set(BRAYNSIO_SOURCES
   TransferFunctionLoader.cpp
   ProteinLoader.cpp
   TextureLoader.cpp
+  SceneLoader.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
@@ -17,6 +18,7 @@ set(BRAYNSIO_PUBLIC_HEADERS
   TransferFunctionLoader.h
   ProteinLoader.h
   TextureLoader.h
+  SceneLoader.h
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
@@ -25,8 +27,8 @@ set(BRAYNSIO_LINK_LIBRARIES
 )
 
 if(ASSIMP_FOUND)
-  list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp MolecularSystemReader.cpp SceneLoader.cpp)
-  list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h MolecularSystemReader.h SceneLoader.h)
+  list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp MolecularSystemReader.cpp)
+  list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h MolecularSystemReader.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE assimp)
 endif()
 

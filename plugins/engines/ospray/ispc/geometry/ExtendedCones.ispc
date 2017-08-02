@@ -228,8 +228,6 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
     dg.material = geometry->material;
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
-    dg.st.x = 0.f;
-    dg.st.y = 0.f;
 
     uniform uint8 *conePtr = this->data + this->bytesPerCone * ray.primID;
     // Store value as texture coordinate
@@ -249,10 +247,8 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
             Ns = neg(Ns);
     }
     if ((flags & DG_MATERIALID) && (this->offset_materialID >= 0))
-    {
         dg.materialID =
             *((uniform uint32 * varying)(conePtr + this->offset_materialID));
-    }
     dg.Ng = Ng;
     dg.Ns = Ns;
 }

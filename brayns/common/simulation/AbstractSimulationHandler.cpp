@@ -55,7 +55,9 @@ AbstractSimulationHandler::~AbstractSimulationHandler()
     }
     if (_cacheFileDescriptor != -1)
         ::close(_cacheFileDescriptor);
-    delete[] _frameData;
+
+    if (_frameData)
+        delete[] _frameData;
 }
 
 void AbstractSimulationHandler::setTimestamp(const float timestamp)

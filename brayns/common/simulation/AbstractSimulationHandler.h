@@ -103,11 +103,11 @@ public:
     /**
      * @brief getCurrentFrame returns the current frame number
      */
-    uint64_t getCurrentFrame() const { return _currentFrame; }
+    double getCurrentFrame() const { return _currentFrame; }
     /**
      * @brief setCurrentFrame sets the current frame number
      */
-    void setCurrentFrame(const uint64_t currentFrame)
+    void setCurrentFrame(const double currentFrame)
     {
         _currentFrame = currentFrame;
     }
@@ -133,7 +133,7 @@ public:
 protected:
     const GeometryParameters& _geometryParameters;
     float _timestamp;
-    uint64_t _currentFrame;
+    double _currentFrame;
     uint64_t _nbFrames;
     uint64_t _frameSize;
 

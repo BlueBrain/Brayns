@@ -23,7 +23,6 @@
 
 #include <brayns/common/types.h>
 #include <brayns/io/MeshLoader.h>
-#include <brayns/io/MorphologyLoader.h>
 
 namespace brayns
 {
@@ -72,10 +71,14 @@ private:
     typedef std::vector<Node> Nodes;
 
     bool _parsePositions(const std::string& filename);
+#ifdef BRAYNS_USE_BRION
     void _importMorphology(Scene& scene, const Node& node,
                            const Matrix4f& transformation);
+#endif
+#ifdef BRAYNS_USE_ASSIMP
     void _importMesh(Scene& scene, MeshLoader& loader, const Node& node,
                      const Matrix4f& transformation);
+#endif
     bool _processNodes(Scene& scene, MeshLoader& loader);
 
     const GeometryParameters& _geometryParameters;
