@@ -23,6 +23,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <fstream>
+#include <servus/uri.h>
 
 namespace brayns
 {
@@ -56,18 +57,24 @@ bool SceneLoader::_parsePositions(const std::string& filename)
         switch (lineData.size())
         {
         case 5:
+        case 6:
         {
             Node node;
             node.position = Vector3f(boost::lexical_cast<float>(lineData[0]),
                                      boost::lexical_cast<float>(lineData[1]),
                                      boost::lexical_cast<float>(lineData[2]));
             node.materialId = boost::lexical_cast<uint16_t>(lineData[3]);
-            node.filename = lineData[4];
+            node.fileType = static_cast<FileType>(
+                boost::lexical_cast<uint16_t>(lineData[4]));
+            if (lineData.size() == 6)
+                node.filename = lineData[5];
             _nodes.push_back(node);
             break;
         }
         default:
-            BRAYNS_ERROR << "Invalid line: " << line << std::endl;
+            BRAYNS_ERROR << "Invalid line, 5 to 6 values were expected, only "
+                         << lineData.size() << " were found" << std::endl;
+            BRAYNS_ERROR << line << std::endl;
             validParsing = false;
             break;
         }
@@ -77,34 +84,63 @@ bool SceneLoader::_parsePositions(const std::string& filename)
     return true;
 }
 
-void SceneLoader::_importMeshes(Scene& scene, MeshLoader& meshLoader)
+void SceneLoader::_importMorphology(Scene& scene, const Node& node,
+                                    const Matrix4f& transformation)
 {
-    // Load mesh at specified positions
-    uint32_t count = 0;
+    MorphologyLoader morphologyLoader(_geometryParameters);
+    const servus::URI uri(node.filename);
+    if (!morphologyLoader.importMorphology(uri, NB_SYSTEM_MATERIALS +
+                                                    node.materialId,
+                                           scene, transformation))
+        BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
+}
+
+void SceneLoader::_importMesh(Scene& scene, MeshLoader& loader,
+                              const Node& node, const Matrix4f& transformation)
+{
+    if (!loader.importMeshFromFile(node.filename, scene,
+                                   _geometryParameters.getGeometryQuality(),
+                                   transformation,
+                                   NB_SYSTEM_MATERIALS + node.materialId))
+        BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
+}
+
+bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
+{
     Progress progress("Loading scene...", _nodes.size());
     for (const auto& node : _nodes)
     {
         ++progress;
-        Matrix4f matrix;
-        matrix.setTranslation(node.position);
-        if (!meshLoader.importMeshFromFile(
-                node.filename, scene, _geometryParameters.getGeometryQuality(),
-                matrix, NB_SYSTEM_MATERIALS + node.materialId))
+        Matrix4f transformation;
+        transformation.setTranslation(node.position);
+        switch (node.fileType)
         {
-            BRAYNS_DEBUG << "Failed to load " << node.filename << std::endl;
+        case FileType::point:
+            scene.getSpheres()[node.materialId].push_back(SpherePtr(
+                new Sphere(node.position,
+                           _geometryParameters.getRadiusMultiplier())));
+            scene.getWorldBounds().merge(node.position);
+            break;
+        case FileType::morphology:
+            _importMorphology(scene, node, transformation);
+            break;
+        case FileType::mesh:
+            _importMesh(scene, meshLoader, node, transformation);
+            break;
+        default:
+            BRAYNS_ERROR << "Unknown file type: "
+                         << static_cast<size_t>(node.fileType) << std::endl;
+            return false;
         }
-        ++count;
     }
+    return true;
 }
 
 bool SceneLoader::importFromFile(const std::string& filename, Scene& scene,
                                  MeshLoader& meshLoader)
 {
     if (_parsePositions(filename))
-        _importMeshes(scene, meshLoader);
-    else
-        return false;
-
-    return true;
+        return _processNodes(scene, meshLoader);
+    return false;
 }
 }
