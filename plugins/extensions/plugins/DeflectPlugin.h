@@ -72,7 +72,7 @@ private:
         bool closeApplication; // True if and EXIT event was received
     };
 
-    void _initializeDeflect();
+    bool _initializeDeflect(bool observerOnly);
     void _sendDeflectFrame(Engine& engine);
     bool _handleDeflectEvents(Engine& engine);
 
@@ -93,7 +93,7 @@ private:
     Vector2d _previousPos;
     bool _pan = false;
     bool _pinch = false;
-    std::unique_ptr<deflect::Stream> _stream;
+    std::unique_ptr<deflect::Observer> _stream;
     ::lexis::render::Stream _params;
     std::string _previousHost;
     Image _lastImage;

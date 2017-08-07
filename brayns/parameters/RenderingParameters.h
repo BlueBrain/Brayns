@@ -72,8 +72,8 @@ public:
     const std::string& getShadingAsString(const ShadingType value) const;
     void setShading(const ShadingType value) { _shading = value; }
     /** Number of samples per pixel */
-    size_t getSamplesPerPixel() const { return _spp; }
-    void setSamplesPerPixel(const size_t value) { _spp = value; }
+    int getSamplesPerPixel() const { return _spp; }
+    void setSamplesPerPixel(const int value) { _spp = value; }
     /** Enables photon emission according to the radiance value of the
      * material */
     bool getLightEmittingMaterials() const { return _lightEmittingMaterials; }
@@ -148,6 +148,12 @@ public:
        Light source follow camera origin
     */
     bool getHeadLight() const { return _headLight; }
+    /** If the rendering should be refined by accumulating multiple passes */
+    bool getAccumulation() const { return _accumulation; }
+    /**
+     * @return true if the deflect streaming module (OSPRay only) shall be used
+     */
+    bool haveDeflectModule() const { return getModule() == "deflect"; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -158,7 +164,8 @@ protected:
     float _ambientOcclusionStrength;
     ShadingType _shading;
     bool _lightEmittingMaterials;
-    size_t _spp;
+    int _spp;
+    bool _accumulation{true};
     float _shadows;
     float _softShadows;
     Vector3f _backgroundColor;

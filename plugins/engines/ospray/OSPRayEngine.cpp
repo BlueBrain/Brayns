@@ -27,6 +27,8 @@
 #include <plugins/engines/ospray/OSPRayRenderer.h>
 #include <plugins/engines/ospray/OSPRayScene.h>
 
+#include <ospray/OSPConfig.h> // TILE_SIZE
+
 namespace brayns
 {
 OSPRayEngine::OSPRayEngine(int argc, const char** argv,
@@ -46,16 +48,17 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
                     << std::endl;
     }
 
+    RenderingParameters& rp = _parametersManager.getRenderingParameters();
+    if (!rp.getModule().empty())
+        ospLoadModule(rp.getModule().c_str());
+
     BRAYNS_INFO << "Initializing renderers" << std::endl;
-    _activeRenderer = _parametersManager.getRenderingParameters().getRenderer();
+    _activeRenderer = rp.getRenderer();
 
     Renderers renderersForScene;
-    for (const auto renderer :
-         parametersManager.getRenderingParameters().getRenderers())
+    for (const auto renderer : rp.getRenderers())
     {
-        const auto& rendererName =
-            parametersManager.getRenderingParameters().getRendererAsString(
-                renderer);
+        const auto& rendererName = rp.getRendererAsString(renderer);
         _renderers[renderer].reset(
             new OSPRayRenderer(rendererName, _parametersManager));
         renderersForScene.push_back(_renderers[renderer]);
@@ -67,14 +70,20 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
 
-    const bool accumulation =
-        _parametersManager.getApplicationParameters().getFilters().empty();
+    bool accumulation = rp.getAccumulation();
+    if (!_parametersManager.getApplicationParameters().getFilters().empty())
+        accumulation = false;
 
-    _frameBuffer.reset(new OSPRayFrameBuffer(_frameSize,
-                                             FrameBufferFormat::rgba_i8,
-                                             accumulation));
-    _camera.reset(new OSPRayCamera(
-        _parametersManager.getRenderingParameters().getCameraType()));
+    auto ospFrameBuffer =
+        new OSPRayFrameBuffer(_frameSize, rp.haveDeflectModule()
+                                              ? FrameBufferFormat::none
+                                              : FrameBufferFormat::rgba_i8,
+                              accumulation);
+    if (rp.haveDeflectModule())
+        ospFrameBuffer->enableDeflectPixelOp();
+
+    _frameBuffer.reset(ospFrameBuffer);
+    _camera.reset(new OSPRayCamera(rp.getCameraType()));
 
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
@@ -111,11 +120,49 @@ void OSPRayEngine::render()
 
 void OSPRayEngine::preRender()
 {
+    const auto& renderParams = _parametersManager.getRenderingParameters();
+    if (renderParams.getAccumulation() != _frameBuffer->getAccumulation())
+    {
+        _frameBuffer->setAccumulation(renderParams.getAccumulation());
+        _frameBuffer->resize(_frameBuffer->getSize());
+    }
+
+    auto osprayFrameBuffer =
+        std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer);
+    const auto& appParams = getParametersManager().getApplicationParameters();
+    osprayFrameBuffer->setStreamingParams(appParams.getStreamCompression(),
+                                          appParams.getStreamQuality(),
+                                          _camera->getType() ==
+                                              CameraType::stereo);
+
     _frameBuffer->map();
 }
 
 void OSPRayEngine::postRender()
 {
     _frameBuffer->unmap();
+}
+
+Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
+{
+    if (!getParametersManager().getRenderingParameters().haveDeflectModule())
+        return Engine::getSupportedFrameSize(size);
+
+    Vector2f result = size;
+    if (getCamera().getType() == CameraType::stereo)
+    {
+        if (size.x() % TILE_SIZE * 2 != 0)
+            result.x() = size.x() - size.x() % TILE_SIZE * 2;
+    }
+    else
+    {
+        if (size.x() % TILE_SIZE != 0)
+            result.x() = size.x() - size.x() % TILE_SIZE;
+    }
+
+    if (size.y() % TILE_SIZE != 0)
+        result.y() = size.y() - size.y() % TILE_SIZE;
+
+    return result;
 }
 }

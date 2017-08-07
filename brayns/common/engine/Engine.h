@@ -77,7 +77,8 @@ public:
     Camera& getCamera() { return *_camera; }
     /** Gets the renderer */
     Renderer& getRenderer();
-
+    /** Gets the parameters manager */
+    ParametersManager& getParametersManager() { return _parametersManager; }
     /** Active renderer */
     void setActiveRenderer(const RendererType renderer);
     RendererType getActiveRenderer() { return _activeRenderer; }
@@ -133,13 +134,15 @@ public:
      */
     size_t getFrameNumber() const { return _frameNumber; }
     /**
-     * @brief Adapts the size of the frame buffer according to camera
+     * Adapts the size of the frame buffer according to camera
      * requirements. Typically, in case of 3D stereo vision, the frame buffer
      * width has to be an even number.
+     * Can be overridden by the engine implementation for specific requirements.
+     *
      * @param size New size of the frame buffer
      * @return Size that matches the camera requirements
      */
-    Vector2ui getSupportedFrameSize(const Vector2ui& size);
+    virtual Vector2ui getSupportedFrameSize(const Vector2ui& size);
 
     /**
      * @return the last operation processed by the engine

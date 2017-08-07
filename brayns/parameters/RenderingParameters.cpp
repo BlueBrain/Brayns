@@ -33,6 +33,7 @@ const std::string PARAM_ENGINE = "engine";
 const std::string PARAM_MODULE = "module";
 const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "samples-per-pixel";
+const std::string PARAM_ACCUMULATION = "accumulation";
 const std::string PARAM_AMBIENT_OCCLUSION = "ambient-occlusion";
 const std::string PARAM_SHADOWS = "shadows";
 const std::string PARAM_SOFT_SHADOWS = "soft-shadows";
@@ -86,6 +87,8 @@ RenderingParameters::RenderingParameters()
         "OSPRay active renderer [basic|simulation|proximity|particle]")(
         PARAM_SPP.c_str(), po::value<size_t>(),
         "Number of samples per pixel [int]")(
+        PARAM_ACCUMULATION.c_str(), po::value<bool>(),
+        "Enable/Disable accumulation [bool]")(
         PARAM_AMBIENT_OCCLUSION.c_str(), po::value<float>(),
         "Ambient occlusion strength [float]")(PARAM_SHADOWS.c_str(),
                                               po::value<float>(),
@@ -137,6 +140,8 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
     }
     if (vm.count(PARAM_SPP))
         _spp = vm[PARAM_SPP].as<size_t>();
+    if (vm.count(PARAM_ACCUMULATION))
+        _accumulation = vm[PARAM_ACCUMULATION].as<bool>();
     if (vm.count(PARAM_AMBIENT_OCCLUSION))
         _ambientOcclusionStrength = vm[PARAM_AMBIENT_OCCLUSION].as<float>();
     if (vm.count(PARAM_SHADOWS))

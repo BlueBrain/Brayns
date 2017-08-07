@@ -68,6 +68,20 @@ public:
         _frameExportFolder = folder;
     }
     std::string getFrameExportFolder() const { return _frameExportFolder; }
+    /** Stream compression enabled */
+    bool getStreamCompression() const { return _streamCompression; }
+    void setStreamCompression(const bool enabled)
+    {
+        _streamCompression = enabled;
+    }
+
+    /** Stream compression quality, 1 (worst) to 100 (best) */
+    unsigned int getStreamQuality() const { return _streamQuality; }
+    void setStreamQuality(const unsigned int quality)
+    {
+        _streamQuality = quality;
+    }
+
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -79,6 +93,8 @@ protected:
     strings _filters;
     bool _autoPublishZeroEQEvents;
     std::string _frameExportFolder;
+    bool _streamCompression{true};
+    unsigned int _streamQuality{80};
 };
 }
 

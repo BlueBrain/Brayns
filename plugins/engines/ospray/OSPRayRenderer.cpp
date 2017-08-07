@@ -44,10 +44,6 @@ OSPRayRenderer::OSPRayRenderer(const std::string& name,
     , _name(name)
     , _camera(0)
 {
-    RenderingParameters& rp = _parametersManager.getRenderingParameters();
-    if (rp.getModule() != "")
-        ospLoadModule(rp.getModule().c_str());
-
     _renderer = ospNewRenderer(name.c_str());
     assert(_renderer);
 }

@@ -41,14 +41,13 @@ public:
     /**
      * @brief Default constructor
      * @param volumeParameters Parameters for the volume (Offset, Scaling, Space
-     * between elements)
+     *        between elements)
      * @param timestampMode Specifies the way the timestamp in handled:
      *        - DEFAULT: Gets the volume corresponding to the timestamp
      *        - MODULO : Gets the volume using the timestamp modulo the number
-     * of volumes attached
-     *                   to the handler
+     *                   of volumes attached to the handler
      *        - BOUNDED: The timestamp is bounded by the timestamp range for the
-     * attached volumes
+     *                   attached volumes
      */
     VolumeHandler(const VolumeParameters& volumeParameters,
                   TimestampMode timestampMode);
@@ -69,7 +68,7 @@ public:
 
     /**
      * @brief Returns the position offset of the 8bit volume in world
-     * coordinates
+     *        coordinates
      * @return Volume offset position for the specified timestamp
      */
     Vector3f getOffset() const;
@@ -88,13 +87,11 @@ public:
 
     /**
      * @brief Returns the epsilon that defines the step used to walk along the
-     * ray when traversing
-     *        the volume. The value is defined according to the dimensions and
-     * scaling of the
-     *        volume, and the number of samples per ray
+     *        ray when traversing the volume. The value is defined according to
+     *        the dimensions and scaling of the volume, and the number of
+     *        samples per ray
      * @param elementSpacing Scaling between elements of the volume. This
-     * attribute represents the
-     *        voxel size
+     *        attribute represents the voxel size
      * @param samplesPerRay Number of samples per ray
      * @return The epsilon
      */
@@ -103,10 +100,8 @@ public:
 
     /**
     * @brief Attaches a memory mapped file to the scene so that renderers can
-    * access the data
-    *        as if it was in memory. The OS is in charge of dealing with the map
-    * file in system
-    *        memory.
+    *        access the data as if it was in memory. The OS is in charge of
+    *        dealing with the map file in system memory.
     * @param timestamp Timestamp for the volume
     * @param volumeFile File containing the 8bit volume
     * @return True if the file was successfully attached, false otherwise
@@ -124,10 +119,8 @@ public:
     TimestampMode getTimestampMode() const { return _timestampMode; }
     /**
      * @brief Sets the timestamp for the volume handler. If the specified
-     * timestamp is different
-     *        from the current one, the current volume is unmapped and the new
-     * one is mapped
-     *        instead
+     *        timestamp is different from the current one, the current volume is
+     *        unmapped and the new one is mapped instead
      * @param timestamp Timestamp for the volume
      */
     void setTimestamp(const float timestamp);
@@ -145,8 +138,7 @@ public:
     void setNbFrames(const uint64_t nbFrames) { _nbFrames = nbFrames; }
     /**
      * @brief The VolumeDescriptor class handles the attribute of a single
-     * volume. The class
-     *        is in charge of the mapping to the volume file
+     *        volume. The class is in charge of the mapping to the volume file
      */
     class VolumeDescriptor
     {

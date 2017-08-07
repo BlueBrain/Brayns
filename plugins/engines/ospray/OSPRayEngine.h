@@ -50,6 +50,12 @@ public:
 
     /** @copydoc Engine::postRender */
     void postRender() final;
+
+    /**
+     * Constrain size to multiples of the OSPRay tile size in case of streaming
+     * using the DeflectPixelOp.
+     */
+    Vector2ui getSupportedFrameSize(const Vector2ui& size) final;
 };
 }
 
