@@ -12,7 +12,7 @@ endif()
 
 # Streaming to display walls
 if(BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 5ff0f8e)
+  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 6111f35)
 endif()
 
 # Data access

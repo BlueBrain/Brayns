@@ -54,6 +54,9 @@ public:
      */
     void extensionInit(ExtensionPlugin&) final;
 
+    /** @copydoc Engine::getMinimumFrameSize */
+    Vector2ui getMinimumFrameSize() const final;
+
 private:
     std::unique_ptr<livre::Engine> _livre;
 };

@@ -983,6 +983,7 @@ void ZeroEQPlugin::_initializeSettings()
         renderingParameters.getSamplesPerPixel());
     _remoteSettings.setAmbientOcclusion(
         renderingParameters.getAmbientOcclusionStrength());
+    _remoteSettings.setAccumulation(renderingParameters.getAccumulation());
     _remoteSettings.setShadows(renderingParameters.getShadows());
     _remoteSettings.setSoftShadows(renderingParameters.getSoftShadows());
     _remoteSettings.setRadiance(
@@ -1049,6 +1050,8 @@ void ZeroEQPlugin::_settingsUpdated()
     _parametersManager.set("ambient-occlusion",
                            std::to_string(
                                _remoteSettings.getAmbientOcclusion()));
+    _parametersManager.set("accumulation",
+                           (_remoteSettings.getAccumulation() ? "1" : "0"));
     _parametersManager.set("shadows",
                            std::to_string(_remoteSettings.getShadows()));
     _parametersManager.set("soft-shadows",

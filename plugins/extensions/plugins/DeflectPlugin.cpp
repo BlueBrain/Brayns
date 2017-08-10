@@ -30,6 +30,8 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/parameters/ApplicationParameters.h>
 
+#include <deflect/SizeHints.h>
+
 #if (BRAYNS_USE_NETWORKING)
 #include "ZeroEQPlugin.h"
 #endif
@@ -81,6 +83,11 @@ DeflectPlugin::DeflectPlugin(KeyboardHandler& keyboardHandler,
 
 bool DeflectPlugin::run(Engine& engine)
 {
+    auto& appParams = engine.getParametersManager().getApplicationParameters();
+    appParams.setStreamingEnabled(_params.getEnabled());
+    appParams.setStreamCompression(_params.getCompression());
+    appParams.setStreamQuality(_params.getQuality());
+
     if (_stream)
     {
         const bool changed = _stream->getId() != _params.getIdString() ||
@@ -102,12 +109,27 @@ bool DeflectPlugin::run(Engine& engine)
         _stream.reset();
     }
 
+    const bool observerOnly = engine.haveDeflectPixelOp();
     if (deflectEnabled && !_stream)
-        _initializeDeflect();
+    {
+        if (_initializeDeflect(observerOnly))
+        {
+            const auto& windowSize = appParams.getWindowSize();
+            deflect::SizeHints sizeHints;
+            sizeHints.preferredWidth = windowSize.x();
+            sizeHints.preferredHeight = windowSize.y();
+            const auto& minSize = engine.getMinimumFrameSize();
+            sizeHints.minWidth = minSize.x();
+            sizeHints.minHeight = minSize.y();
+            _stream->sendSizeHints(sizeHints);
+        }
+    }
 
     if (deflectEnabled && _stream && _stream->isConnected())
     {
-        _sendDeflectFrame(engine);
+        if (!observerOnly)
+            _sendDeflectFrame(engine);
+
         if (_handleDeflectEvents(engine))
         {
             engine.getFrameBuffer().clear();
@@ -118,13 +140,20 @@ bool DeflectPlugin::run(Engine& engine)
     return true;
 }
 
-void DeflectPlugin::_initializeDeflect()
+bool DeflectPlugin::_initializeDeflect(const bool observerOnly)
 {
     try
     {
-        _stream.reset(new deflect::Stream(_params.getIdString(),
-                                          _params.getHostString(),
-                                          _params.getPort()));
+        if (observerOnly)
+        {
+            _stream.reset(new deflect::Observer(_params.getIdString(),
+                                                _params.getHostString(),
+                                                _params.getPort()));
+        }
+        else
+            _stream.reset(new deflect::Stream(_params.getIdString(),
+                                              _params.getHostString(),
+                                              _params.getPort()));
 
         if (_stream->isConnected())
             BRAYNS_INFO << "Deflect successfully connected to Tide on host "
@@ -139,13 +168,14 @@ void DeflectPlugin::_initializeDeflect()
 
         _params.setId(_stream->getId());
         _params.setHost(_stream->getHost());
+        return true;
     }
     catch (std::runtime_error& ex)
     {
         BRAYNS_ERROR << "Deflect failed to initialize. " << ex.what()
                      << std::endl;
         _params.setEnabled(false);
-        return;
+        return false;
     }
 }
 
@@ -156,7 +186,11 @@ void DeflectPlugin::_sendDeflectFrame(Engine& engine)
         if (!_stream->isConnected())
             BRAYNS_INFO << "Stream closed, exiting." << std::endl;
         else
-            BRAYNS_ERROR << "failure in deflectStreamSend()" << std::endl;
+        {
+            BRAYNS_ERROR << "failure in _sendDeflectFrame()" << std::endl;
+            _params.setEnabled(false);
+        }
+
         return;
     }
 
@@ -235,7 +269,10 @@ bool DeflectPlugin::_handleDeflectEvents(Engine& engine)
         }
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
         {
-            engine.reshape(Vector2ui(event.dx, event.dy));
+            engine.getParametersManager()
+                .getApplicationParameters()
+                .setWindowSize(engine.getSupportedFrameSize(
+                    Vector2ui(event.dx, event.dy)));
             break;
         }
         case deflect::Event::EVT_CLOSE:
@@ -283,7 +320,8 @@ void DeflectPlugin::_send(const Engine& engine, const bool swapYAxis)
                                          _lastImage.size.x(),
                                          _lastImage.size.y(), 4);
 
-    _sendFuture = _stream->asyncSend(deflectImage);
+    _sendFuture =
+        static_cast<deflect::Stream&>(*_stream).asyncSend(deflectImage);
 }
 
 Vector2d DeflectPlugin::_getWindowPos(const deflect::Event& event,

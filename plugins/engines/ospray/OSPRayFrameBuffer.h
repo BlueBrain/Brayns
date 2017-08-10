@@ -41,10 +41,15 @@ public:
     uint8_t* getColorBuffer() final { return _colorBuffer; }
     float* getDepthBuffer() final { return _depthBuffer; }
     OSPFrameBuffer impl() { return _frameBuffer; }
+    void enableDeflectPixelOp();
+    void setStreamingParams(bool enabled, bool compression,
+                            unsigned int quality, bool stereo);
+
 private:
     OSPFrameBuffer _frameBuffer;
     uint8_t* _colorBuffer;
     float* _depthBuffer;
+    OSPPixelOp _pixelOp{nullptr};
 };
 }
 #endif // OSPRAYFRAMEBUFFER_H

@@ -181,4 +181,9 @@ void OptiXEngine::postRender()
 {
     _frameBuffer->unmap();
 }
+
+Vector2ui OptiXEngine::getMinimumFrameSize() const
+{
+    return {1, 1};
+}
 }

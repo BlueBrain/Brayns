@@ -161,4 +161,9 @@ void LivreEngine::postRender()
     braynsHistogram.values = livreHistogram.getBinsVector();
     _scene->getVolumeHandler()->setHistogram(braynsHistogram);
 }
+
+Vector2ui LivreEngine::getMinimumFrameSize() const
+{
+    return {1, 1};
+}
 }
