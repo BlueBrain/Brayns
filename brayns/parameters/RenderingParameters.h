@@ -150,10 +150,6 @@ public:
     bool getHeadLight() const { return _headLight; }
     /** If the rendering should be refined by accumulating multiple passes */
     bool getAccumulation() const { return _accumulation; }
-    /**
-     * @return true if the deflect streaming module (OSPRay only) shall be used
-     */
-    bool haveDeflectModule() const { return getModule() == "deflect"; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 

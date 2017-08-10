@@ -90,12 +90,14 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     clear();
 }
 
-void OSPRayFrameBuffer::setStreamingParams(const bool compression,
+void OSPRayFrameBuffer::setStreamingParams(const bool enabled,
+                                           const bool compression,
                                            const unsigned int quality,
                                            const bool stereo)
 {
     if (_pixelOp)
     {
+        ospSet1i(_pixelOp, "enabled", enabled);
         ospSet1i(_pixelOp, "compression", compression);
         ospSet1i(_pixelOp, "quality", quality);
         ospSet1i(_pixelOp, "stereo", stereo);

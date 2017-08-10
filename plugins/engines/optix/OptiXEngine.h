@@ -55,6 +55,9 @@ public:
     /** @copydoc Engine::postRender */
     void postRender() final;
 
+    /** @copydoc Engine::getMinimumFrameSize */
+    Vector2ui getMinimumFrameSize() const final;
+
     uint64_t getTotalMemory() { return _totalMemory; }
 private:
     void _initializeContext();

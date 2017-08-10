@@ -56,6 +56,14 @@ public:
      * using the DeflectPixelOp.
      */
     Vector2ui getSupportedFrameSize(const Vector2ui& size) final;
+
+    /** @copydoc Engine::getMinimumFrameSize */
+    Vector2ui getMinimumFrameSize() const final;
+
+    /** @copydoc Engine::haveDeflectPixelOp */
+    bool haveDeflectPixelOp() const final { return _haveDeflectPixelOp; }
+private:
+    bool _haveDeflectPixelOp{false};
 };
 }
 

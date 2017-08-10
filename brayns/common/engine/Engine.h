@@ -144,6 +144,9 @@ public:
      */
     virtual Vector2ui getSupportedFrameSize(const Vector2ui& size);
 
+    /** @return the minimum frame size in pixels supported by this engine. */
+    virtual Vector2ui getMinimumFrameSize() const = 0;
+
     /**
      * @return the last operation processed by the engine
      */
@@ -152,6 +155,11 @@ public:
      * @return the last normalized progress value (0..1) emitted by the engine
      */
     float getLastProgress() const { return _lastProgress; }
+    /**
+     * @return true if for "--module deflect" the DeflectPixelOp was
+     *         successfully loaded. Only supported for the OSPRay engine.
+     */
+    virtual bool haveDeflectPixelOp() const { return false; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();

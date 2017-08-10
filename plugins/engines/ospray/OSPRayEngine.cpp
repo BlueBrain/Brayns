@@ -40,17 +40,35 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     {
         ospInit(&argc, argv);
     }
-    catch (std::runtime_error&)
+    catch (const std::exception& e)
     {
         // Note: This is necessary because OSPRay does not yet implement a
         // ospDestroy API.
-        BRAYNS_WARN << "OSPRay is already initialized. Did you call it twice? "
-                    << std::endl;
+        BRAYNS_ERROR << "Error during ospInit(): " << e.what() << std::endl;
     }
 
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
     if (!rp.getModule().empty())
-        ospLoadModule(rp.getModule().c_str());
+    {
+        try
+        {
+            const auto error = ospLoadModule(rp.getModule().c_str());
+            if (rp.getModule() == "deflect")
+            {
+                if (error > 0)
+                    BRAYNS_WARN
+                        << "Could not load DeflectPixelOp module, error code "
+                        << error << std::endl;
+                else
+                    _haveDeflectPixelOp = true;
+            }
+        }
+        catch (const std::exception& e)
+        {
+            BRAYNS_ERROR << "Error while loading module " << rp.getModule()
+                         << ": " << e.what() << std::endl;
+        }
+    }
 
     BRAYNS_INFO << "Initializing renderers" << std::endl;
     _activeRenderer = rp.getRenderer();
@@ -75,11 +93,11 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
         accumulation = false;
 
     auto ospFrameBuffer =
-        new OSPRayFrameBuffer(_frameSize, rp.haveDeflectModule()
-                                              ? FrameBufferFormat::none
-                                              : FrameBufferFormat::rgba_i8,
+        new OSPRayFrameBuffer(_frameSize,
+                              haveDeflectPixelOp() ? FrameBufferFormat::none
+                                                   : FrameBufferFormat::rgba_i8,
                               accumulation);
-    if (rp.haveDeflectModule())
+    if (haveDeflectPixelOp())
         ospFrameBuffer->enableDeflectPixelOp();
 
     _frameBuffer.reset(ospFrameBuffer);
@@ -130,7 +148,8 @@ void OSPRayEngine::preRender()
     auto osprayFrameBuffer =
         std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer);
     const auto& appParams = getParametersManager().getApplicationParameters();
-    osprayFrameBuffer->setStreamingParams(appParams.getStreamCompression(),
+    osprayFrameBuffer->setStreamingParams(appParams.getStreamingEnabled(),
+                                          appParams.getStreamCompression(),
                                           appParams.getStreamQuality(),
                                           _camera->getType() ==
                                               CameraType::stereo);
@@ -145,7 +164,7 @@ void OSPRayEngine::postRender()
 
 Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
 {
-    if (!getParametersManager().getRenderingParameters().haveDeflectModule())
+    if (!haveDeflectPixelOp())
         return Engine::getSupportedFrameSize(size);
 
     Vector2f result = size;
@@ -164,5 +183,10 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
         result.y() = size.y() - size.y() % TILE_SIZE;
 
     return result;
+}
+
+Vector2ui OSPRayEngine::getMinimumFrameSize() const
+{
+    return {TILE_SIZE, TILE_SIZE};
 }
 }

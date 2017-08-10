@@ -84,6 +84,7 @@ DeflectPlugin::DeflectPlugin(KeyboardHandler& keyboardHandler,
 bool DeflectPlugin::run(Engine& engine)
 {
     auto& appParams = engine.getParametersManager().getApplicationParameters();
+    appParams.setStreamingEnabled(_params.getEnabled());
     appParams.setStreamCompression(_params.getCompression());
     appParams.setStreamQuality(_params.getQuality());
 
@@ -108,21 +109,18 @@ bool DeflectPlugin::run(Engine& engine)
         _stream.reset();
     }
 
-    const bool observerOnly = engine.getParametersManager()
-                                  .getRenderingParameters()
-                                  .haveDeflectModule();
+    const bool observerOnly = engine.haveDeflectPixelOp();
     if (deflectEnabled && !_stream)
     {
         if (_initializeDeflect(observerOnly))
         {
-            const auto& windowSize = engine.getParametersManager()
-                                         .getApplicationParameters()
-                                         .getWindowSize();
+            const auto& windowSize = appParams.getWindowSize();
             deflect::SizeHints sizeHints;
             sizeHints.preferredWidth = windowSize.x();
             sizeHints.preferredHeight = windowSize.y();
-            sizeHints.minWidth = 64;
-            sizeHints.minHeight = 64;
+            const auto& minSize = engine.getMinimumFrameSize();
+            sizeHints.minWidth = minSize.x();
+            sizeHints.minHeight = minSize.y();
             _stream->sendSizeHints(sizeHints);
         }
     }
