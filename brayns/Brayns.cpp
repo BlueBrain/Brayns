@@ -30,8 +30,6 @@
 #include <brayns/common/log.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/common/simulation/CircuitSimulationHandler.h>
-#include <brayns/common/simulation/SpikeSimulationHandler.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
 
@@ -40,6 +38,8 @@
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
+#include <brayns/io/simulation/CircuitSimulationHandler.h>
+#include <brayns/io/simulation/SpikeSimulationHandler.h>
 #if (BRAYNS_USE_ASSIMP)
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>

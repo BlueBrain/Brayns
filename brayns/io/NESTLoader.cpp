@@ -22,8 +22,8 @@
 
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/log.h>
-#include <brayns/common/simulation/SpikeSimulationHandler.h>
 #include <brayns/common/types.h>
+#include <brayns/io/simulation/SpikeSimulationHandler.h>
 
 #if (BRAYNS_USE_BRION)
 #include <H5Cpp.h>

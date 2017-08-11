@@ -25,8 +25,8 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/common/simulation/CircuitSimulationHandler.h>
 #include <brayns/io/algorithms/MetaballsGenerator.h>
+#include <brayns/io/simulation/CircuitSimulationHandler.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
@@ -90,14 +90,13 @@ public:
     /**
      * @brief importMorphology imports a single morphology from a specified URI
      * @param uri URI of the morphology
-     * @param morphologyIndex Index of the morphology
+     * @param index Index of the morphology
      * @param material Material to use
      * @param transformation Transformation to apply to the morphology
      * @return True is the morphology was successfully imported, false otherwise
      */
-    bool importMorphology(const servus::URI& uri,
-                          const uint64_t morphologyIndex, const size_t material,
-                          const Matrix4f& transformation)
+    bool importMorphology(const servus::URI& uri, const uint64_t index,
+                          const size_t material, const Matrix4f& transformation)
     {
         ParallelSceneContainer sceneContainer(_scene.getSpheres(),
                                               _scene.getCylinders(),
@@ -106,8 +105,8 @@ public:
                                               _scene.getMaterials(),
                                               _scene.getWorldBounds());
 
-        return _importMorphologyFromURI(uri, morphologyIndex, material,
-                                        transformation, sceneContainer);
+        return _importMorphologyFromURI(uri, index, material, transformation,
+                                        sceneContainer);
     }
 
     /**

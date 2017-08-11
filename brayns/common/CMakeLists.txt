@@ -5,13 +5,10 @@
 
 set(BRAYNSCOMMON_SOURCES
   engine/Engine.cpp
+  simulation/AbstractSimulationHandler.cpp
   input/KeyboardHandler.cpp
   volume/VolumeHandler.cpp
   transferFunction/TransferFunction.cpp
-  simulation/CADiffusionSimulationHandler.cpp
-  simulation/AbstractSimulationHandler.cpp
-  simulation/CircuitSimulationHandler.cpp
-  simulation/SpikeSimulationHandler.cpp
   camera/AbstractManipulator.cpp
   camera/Camera.cpp
   camera/FlyingModeManipulator.cpp
@@ -34,6 +31,7 @@ set(BRAYNSCOMMON_SOURCES
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
+  simulation/AbstractSimulationHandler.h
   camera/AbstractManipulator.h
   camera/Camera.h
   camera/FlyingModeManipulator.h
@@ -56,10 +54,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   renderer/FrameBuffer.h
   renderer/Renderer.h
   scene/Scene.h
-  simulation/CADiffusionSimulationHandler.h
-  simulation/AbstractSimulationHandler.h
-  simulation/CircuitSimulationHandler.h
-  simulation/SpikeSimulationHandler.h
   transferFunction/TransferFunction.h
   types.h
   volume/VolumeHandler.h

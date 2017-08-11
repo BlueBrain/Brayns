@@ -4,6 +4,8 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
+  simulation/CADiffusionSimulationHandler.cpp
+  simulation/SpikeSimulationHandler.cpp
   algorithms/MetaballsGenerator.cpp
   XYZBLoader.cpp
   TransferFunctionLoader.cpp
@@ -13,6 +15,8 @@ set(BRAYNSIO_SOURCES
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
+  simulation/CADiffusionSimulationHandler.h
+  simulation/SpikeSimulationHandler.h
   algorithms/MetaballsGenerator.h
   XYZBLoader.h
   TransferFunctionLoader.h
@@ -33,9 +37,17 @@ if(ASSIMP_FOUND)
 endif()
 
 if(Brion_FOUND)
-  list(APPEND BRAYNSIO_SOURCES MorphologyLoader.cpp NESTLoader.cpp)
-  list(APPEND BRAYNSIO_PUBLIC_HEADERS MorphologyLoader.h NESTLoader.h)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES PUBLIC Servus PRIVATE Brion Brain ${HDF5_LIBRARIES})
+  list(APPEND BRAYNSIO_SOURCES
+      MorphologyLoader.cpp
+      NESTLoader.cpp
+      simulation/CircuitSimulationHandler.cpp)
+  list(APPEND BRAYNSIO_PUBLIC_HEADERS
+      MorphologyLoader.h
+      NESTLoader.h
+      simulation/CircuitSimulationHandler.h)
+  list(APPEND BRAYNSIO_LINK_LIBRARIES
+      PUBLIC Servus
+      PRIVATE Brion Brain ${HDF5_LIBRARIES})
 endif()
 
 if(MAGICK++_FOUND)

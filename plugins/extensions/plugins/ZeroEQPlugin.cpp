@@ -27,9 +27,9 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/common/simulation/CADiffusionSimulationHandler.h>
-#include <brayns/common/simulation/SpikeSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
+#include <brayns/io/simulation/CADiffusionSimulationHandler.h>
+#include <brayns/io/simulation/SpikeSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/camera.h>
 
