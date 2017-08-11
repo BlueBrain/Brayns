@@ -27,9 +27,9 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/common/simulation/CADiffusionSimulationHandler.h>
-#include <brayns/common/simulation/SpikeSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
+#include <brayns/io/simulation/CADiffusionSimulationHandler.h>
+#include <brayns/io/simulation/SpikeSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <zerobuf/render/camera.h>
 
@@ -662,8 +662,6 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getCircuitUseSimulationModel());
     circuit.setTarget(geometryParameters.getCircuitTarget());
     circuit.setReport(geometryParameters.getCircuitReport());
-    circuit.setNonSimulatedCells(
-        geometryParameters.getCircuitNonSimulatedCells());
     circuit.setStartSimulationTime(
         geometryParameters.getCircuitStartSimulationTime());
     circuit.setEndSimulationTime(
@@ -671,10 +669,10 @@ void ZeroEQPlugin::_initializeDataSource()
     circuit.setSimulationStep(geometryParameters.getCircuitSimulationStep());
     circuit.setSimulationValuesRange(
         geometryParameters.getCircuitSimulationValuesRange());
-    circuit.setSimulationCacheFile(
-        geometryParameters.getCircuitSimulationCacheFile());
     circuit.setMeshTransformation(
         geometryParameters.getCircuitMeshTransformation());
+    circuit.setHistogramSize(
+        geometryParameters.getCircuitSimulationHistogramSize());
     _remoteDataSource.setCircuitConfiguration(circuit);
 
     _remoteDataSource.setLoadCacheFile(geometryParameters.getLoadCacheFile());
@@ -811,10 +809,6 @@ void ZeroEQPlugin::_dataSourceUpdated()
         (_remoteDataSource.getCircuitConfiguration().getMeshTransformation())
             ? "1"
             : "0");
-    _parametersManager.set("circuit-non-simulated-cells",
-                           std::to_string(
-                               _remoteDataSource.getCircuitConfiguration()
-                                   .getNonSimulatedCells()));
     _parametersManager.set("circuit-start-simulation-time",
                            std::to_string(
                                _remoteDataSource.getCircuitConfiguration()
@@ -833,9 +827,10 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            .getSimulationValuesRange()[0]) +
             " " + std::to_string(_remoteDataSource.getCircuitConfiguration()
                                      .getSimulationValuesRange()[1]));
-    _parametersManager.set("circuit-simulation-cache-file",
-                           _remoteDataSource.getCircuitConfiguration()
-                               .getSimulationCacheFileString());
+    _parametersManager.set(
+        "circuit-simulation-histogram-size",
+        std::to_string(
+            _remoteDataSource.getCircuitConfiguration().getHistogramSize()));
     _parametersManager.set("nest-cache-file",
                            _remoteDataSource.getNestCacheFileString());
     _parametersManager.set(

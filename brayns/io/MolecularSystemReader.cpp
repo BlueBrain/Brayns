@@ -22,8 +22,8 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/common/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/io/ProteinLoader.h>
+#include <brayns/io/simulation/CADiffusionSimulationHandler.h>
 #include <fstream>
 
 namespace brayns

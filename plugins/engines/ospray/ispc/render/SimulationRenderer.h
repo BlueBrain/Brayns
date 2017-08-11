@@ -43,7 +43,7 @@ private:
 
     ospray::Ref<ospray::Data> _volumeData;
     ospray::Ref<ospray::Data> _simulationData;
-    ospray::int64 _simulationDataSize;
+    ospray::uint64 _simulationDataSize;
     ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
     ospray::Ref<ospray::Data> _transferFunctionEmissionData;
     ospray::int32 _transferFunctionSize;

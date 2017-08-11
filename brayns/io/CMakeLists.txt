@@ -4,19 +4,25 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
+  simulation/CADiffusionSimulationHandler.cpp
+  simulation/SpikeSimulationHandler.cpp
   algorithms/MetaballsGenerator.cpp
   XYZBLoader.cpp
   TransferFunctionLoader.cpp
   ProteinLoader.cpp
   TextureLoader.cpp
+  SceneLoader.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
+  simulation/CADiffusionSimulationHandler.h
+  simulation/SpikeSimulationHandler.h
   algorithms/MetaballsGenerator.h
   XYZBLoader.h
   TransferFunctionLoader.h
   ProteinLoader.h
   TextureLoader.h
+  SceneLoader.h
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
@@ -25,15 +31,23 @@ set(BRAYNSIO_LINK_LIBRARIES
 )
 
 if(ASSIMP_FOUND)
-  list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp MolecularSystemReader.cpp SceneLoader.cpp)
-  list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h MolecularSystemReader.h SceneLoader.h)
+  list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp MolecularSystemReader.cpp)
+  list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h MolecularSystemReader.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE assimp)
 endif()
 
 if(Brion_FOUND)
-  list(APPEND BRAYNSIO_SOURCES MorphologyLoader.cpp NESTLoader.cpp)
-  list(APPEND BRAYNSIO_PUBLIC_HEADERS MorphologyLoader.h NESTLoader.h)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES PUBLIC Servus PRIVATE Brion Brain ${HDF5_LIBRARIES})
+  list(APPEND BRAYNSIO_SOURCES
+      MorphologyLoader.cpp
+      NESTLoader.cpp
+      simulation/CircuitSimulationHandler.cpp)
+  list(APPEND BRAYNSIO_PUBLIC_HEADERS
+      MorphologyLoader.h
+      NESTLoader.h
+      simulation/CircuitSimulationHandler.h)
+  list(APPEND BRAYNSIO_LINK_LIBRARIES
+      PUBLIC Servus
+      PRIVATE Brion Brain ${HDF5_LIBRARIES})
 endif()
 
 if(MAGICK++_FOUND)

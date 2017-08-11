@@ -22,8 +22,12 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/io/MorphologyLoader.h>
 #include <fstream>
+
+#ifdef BRAYNS_USE_BRION
 #include <servus/uri.h>
+#endif
 
 namespace brayns
 {
@@ -84,17 +88,20 @@ bool SceneLoader::_parsePositions(const std::string& filename)
     return true;
 }
 
+#ifdef BRAYNS_USE_BRION
 void SceneLoader::_importMorphology(Scene& scene, const Node& node,
                                     const Matrix4f& transformation)
 {
-    MorphologyLoader morphologyLoader(_geometryParameters);
+    MorphologyLoader morphologyLoader(_geometryParameters, scene);
     const servus::URI uri(node.filename);
-    if (!morphologyLoader.importMorphology(uri, NB_SYSTEM_MATERIALS +
-                                                    node.materialId,
-                                           scene, transformation))
+    if (!morphologyLoader.importMorphology(uri, 0, NB_SYSTEM_MATERIALS +
+                                                       node.materialId,
+                                           transformation))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
+#endif
 
+#ifdef BRAYNS_USE_ASSIMP
 void SceneLoader::_importMesh(Scene& scene, MeshLoader& loader,
                               const Node& node, const Matrix4f& transformation)
 {
@@ -104,6 +111,7 @@ void SceneLoader::_importMesh(Scene& scene, MeshLoader& loader,
                                    NB_SYSTEM_MATERIALS + node.materialId))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
+#endif
 
 bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
 {
@@ -122,10 +130,14 @@ bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
             scene.getWorldBounds().merge(node.position);
             break;
         case FileType::morphology:
+#ifdef BRAYNS_USE_BRION
             _importMorphology(scene, node, transformation);
+#endif
             break;
         case FileType::mesh:
+#ifdef BRAYNS_USE_ASSIMP
             _importMesh(scene, meshLoader, node, transformation);
+#endif
             break;
         default:
             BRAYNS_ERROR << "Unknown file type: "

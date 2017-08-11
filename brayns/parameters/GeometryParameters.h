@@ -168,29 +168,19 @@ public:
         return _morphologyLayout;
     }
 
-    /** Defines if cells with no simulation data should be loaded */
-    size_t getCircuitNonSimulatedCells() const
-    {
-        return _circuitNonSimulatedCells;
-    }
     /** Defines the range of frames to be loaded for the simulation */
-    float getCircuitEndSimulationTime() const
+    double getCircuitEndSimulationTime() const
     {
         return _circuitEndSimulationTime;
     }
-    float getCircuitStartSimulationTime() const
+    double getCircuitStartSimulationTime() const
     {
         return _circuitStartSimulationTime;
     }
-    float getCircuitSimulationStep() const { return _circuitSimulationStep; }
+    double getCircuitSimulationStep() const { return _circuitSimulationStep; }
     Vector2f getCircuitSimulationValuesRange() const
     {
         return _circuitSimulationValuesRange;
-    }
-    /** File containing simulation data */
-    const std::string& getCircuitSimulationCacheFile() const
-    {
-        return _circuitSimulationCacheFile;
     }
 
     /** Size of the simulation histogram */
@@ -230,8 +220,8 @@ public:
         return _metaballsSamplesFromSoma;
     }
 
-    /** Metaballs enabled? */
-    bool useMetaballs() const { return _metaballsGridSize != 0; }
+    /** Realistic somas enabled? */
+    bool useRealisticSomas() const { return _metaballsGridSize != 0; }
     /**
      * Defines what memory mode should be used between Brayns and the
      * underlying renderer
@@ -269,12 +259,10 @@ protected:
     std::string _circuitMeshFolder;
     std::string _circuitTarget;
     std::string _circuitReport;
-    size_t _circuitNonSimulatedCells;
-    float _circuitStartSimulationTime;
-    float _circuitEndSimulationTime;
-    float _circuitSimulationStep;
+    double _circuitStartSimulationTime;
+    double _circuitEndSimulationTime;
+    double _circuitSimulationStep;
     Vector2f _circuitSimulationValuesRange;
-    std::string _circuitSimulationCacheFile;
     size_t _circuitSimulationHistogramSize;
     bool _circuitMeshTransformation;
 

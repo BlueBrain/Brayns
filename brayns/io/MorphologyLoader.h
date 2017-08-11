@@ -26,13 +26,11 @@
 #include <brayns/io/MeshLoader.h>
 #include <brayns/parameters/GeometryParameters.h>
 
-#include <servus/types.h>
-
 #include <vector>
 
-namespace brion
+namespace servus
 {
-class CompartmentReport;
+class URI;
 }
 
 namespace brayns
@@ -41,112 +39,45 @@ namespace brayns
  */
 class MorphologyLoader
 {
-    /** Simulation information hold the pointers to data contained by one single
-     * frame of the simulation.
-     * compartmentCounts: Number of compartments per section
-     * compartmentOffsets: Offset for every compartments
-     */
-    class SimulationInformation
-    {
-    public:
-        SimulationInformation(uint16_ts& compartmentCounts,
-                              uint64_ts& compartmentOffsets)
-            : _compartmentCounts(compartmentCounts)
-            , _compartmentOffsets(compartmentOffsets)
-        {
-        }
-
-        const uint16_ts& getCompartmentCounts() const
-        {
-            return _compartmentCounts;
-        }
-
-        const uint16_t& getCompartmentCounts(const size_t sectionId) const
-        {
-            return _compartmentCounts[sectionId];
-        }
-
-        const uint64_t& getCompartmentOffsets(const size_t sectionId) const
-        {
-            return _compartmentOffsets[sectionId];
-        }
-
-    private:
-        const uint16_ts& _compartmentCounts;
-        const uint64_ts& _compartmentOffsets;
-    };
-
 public:
-    MorphologyLoader(const GeometryParameters& geometryParameters);
+    /**
+     * @brief MorphologyLoader
+     * @param geometryParameters
+     * @param scene
+     */
+    MorphologyLoader(const GeometryParameters& geometryParameters,
+                     Scene& scene);
+    ~MorphologyLoader();
 
-    /** Imports morphology from a given SWC or H5 file
-     *
-     * @param uri URI of the morphology
-     * @param morphologyIndex specifies an index for the morphology. This is
-     *        mainly used to give a specific color to every morphology.
-     * @param scene resulting scene
+    /**
+     * @brief Imports morphology from a given SWC or H5 file
+     * @param source URI of the morphology
+     * @param index Specifies an index for the morphology. This is mainly used
+     * to give a specific color to every morphology
+     * @param transformation Transformation to apply to the morphology
      * @return True if the morphology is successfully loaded, false otherwise
      */
-    bool importMorphology(const servus::URI& uri, int morphologyIndex,
-                          Scene& scene,
+    bool importMorphology(const servus::URI& source, const uint64_t index,
+                          const size_t material,
                           const Matrix4f& transformation = Matrix4f());
 
-    /** Imports morphology from a circuit for the given target name
-     *
+    /**
+     * @brief Imports morphology from a circuit for the given target name
      * @param circuitConfig URI of the Circuit Config file
      * @param target Target to be loaded. If empty, the target specified in the
-     *        circuit configuration file is used. If such an entry does not
-     *        exist, all neurons are loaded.
+     * circuit configuration file is used. If such an entry does not exist, all
+     * neurons are loaded.
      * @param report Compartment report to be loaded
-     * @param scene resulting scene
      * @return True if the circuit is successfully loaded, false if the circuit
-     *         contains no cells.
+     * contains no cells.
      */
     bool importCircuit(const servus::URI& circuitConfig,
                        const std::string& target, const std::string& report,
-                       Scene& scene
-#if (BRAYNS_USE_ASSIMP)
-                       ,
-                       MeshLoader& meshLoader
-#endif
-                       );
-
-    /** Imports simulation data into the scene
-     * @param circuitConfig URI of the Circuit Config file
-     * @param target Target to be loaded. If empty, the target specified in the
-     *        circuit configuration file is used. If such an entry does not
-     *        exist, all neurons are loaded.
-     * @param report report to be loaded.
-     * @param scene to load the simulation data in.
-     * @return True if simulation cache file successfully opened or created,
-     * false otherwise
-     */
-    bool importSimulationData(const servus::URI& circuitConfig,
-                              const std::string& target,
-                              const std::string& report, Scene& scene);
+                       MeshLoader& meshLoader);
 
 private:
-    bool _importMorphology(const servus::URI& source, size_t morphologyIndex,
-                           const Matrix4f& transformation,
-                           SimulationInformation* simulationInformation,
-                           SpheresMap& spheres, CylindersMap& cylinders,
-                           ConesMap& cones, Boxf& bounds,
-                           const uint64_t simulationOffset,
-                           float& maxDistanceToSoma,
-                           const size_t forcedMaterial = NO_MATERIAL);
-
-    bool _importMorphologyAsMesh(const servus::URI& source,
-                                 const size_t morphologyIndex,
-                                 MaterialsMap& materials,
-                                 const Matrix4f& transformation,
-                                 TrianglesMeshMap& meshes, Boxf& bounds,
-                                 const size_t forcedMaterial = NO_MATERIAL);
-
-    bool _positionInCircuitBoundingBox(const Vector3f& position) const;
-
-    Vector2f _getOffsetAsVector2f(const uint64_t offset);
-
-    const GeometryParameters& _geometryParameters;
+    class Impl;
+    std::unique_ptr<Impl> _impl;
 };
 }
 

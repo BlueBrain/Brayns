@@ -196,6 +196,8 @@ typedef std::shared_ptr<DeflectPlugin> DeflectPluginPtr;
 class KeyboardHandler;
 typedef std::shared_ptr<KeyboardHandler> KeyboardHandlerPtr;
 
+class MeshLoader;
+
 /** Types of renderers */
 enum class RendererType
 {

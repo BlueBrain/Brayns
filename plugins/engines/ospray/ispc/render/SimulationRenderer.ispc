@@ -23,13 +23,15 @@
 // Brayns
 #include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.ih>
 
+uniform const uniform uint64 OFFSET_MAGIC = 1e6;
+
 struct SimulationRenderer
 {
     AbstractRenderer abstract;
 
     Model* simulationModel;
     uniform float* uniform simulationData;
-    int64 simulationDataSize;
+    uint64 simulationDataSize;
     float threshold;
 };
 
@@ -44,28 +46,31 @@ inline varying vec4f
                        DifferentialGeometry& dg, varying vec3f& lightEmission)
 {
     lightEmission = make_vec3f(0.f);
-    varying vec4f color = make_vec4f(0.f);
-    varying float value = 0.f;
-    double x = dg.st.x;
-    double y = dg.st.y;
-    varying uint64 index = y * NO_OFFSET + x;
-    if (index >= 0 && index < self->simulationDataSize)
+    vec4f color = make_vec4f(0.f, 0.f, 0.f, 1.f);
+
+    float value = 0.f;
+    double x = (double)(dg.st.x);
+    double y = (double)(dg.st.y);
+
+    const uint64 index = (uint64)(y * (double)(OFFSET_MAGIC) + x);
+
+    if (index < self->simulationDataSize)
         value = self->simulationData[index];
     else
         // Value offset is out of range, return error color
-        return make_vec4f(0.f, 0.f, 0.f, 0.f);
+        return color;
 
     if (value < self->threshold)
         return color;
 
     // Normalize the value according colormap size
-    const varying float normalizedValue =
-        self->abstract.colorMapSize *
-        (value - self->abstract.colorMapMinValue) /
-        self->abstract.colorMapRange;
+    uint32 normalizedValue = self->abstract.colorMapSize *
+                             (value - self->abstract.colorMapMinValue) /
+                             self->abstract.colorMapRange;
 
-    if (self->abstract.colorMap)
-        color = self->abstract.colorMap[normalizedValue];
+    normalizedValue = max(0, min(self->abstract.colorMapSize, normalizedValue));
+
+    color = self->abstract.colorMap[normalizedValue];
 
     if (self->abstract.emissionIntensitiesMap)
         lightEmission = self->abstract.emissionIntensitiesMap[normalizedValue];
@@ -574,7 +579,7 @@ export void SimulationRenderer_set(
     const uniform vec3f& volumeOffset, const uniform float& volumeEpsilon,
     const uniform int32& volumeSamplesPerRay,
     uniform float* uniform simulationData,
-    const uniform int64& simulationDataSize, uniform vec4f* uniform colormap,
+    const uniform uint64& simulationDataSize, uniform vec4f* uniform colormap,
     uniform vec3f* uniform emissionIntensitiesMap,
     const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
     const uniform float& colorMapRange, const uniform float& threshold)
@@ -620,5 +625,6 @@ export void SimulationRenderer_set(
     self->simulationModel = (uniform Model * uniform)simulationModel;
     self->simulationData = (uniform float* uniform)simulationData;
     self->simulationDataSize = simulationDataSize;
+
     self->threshold = threshold;
 }

@@ -76,12 +76,11 @@ table CircuitConfiguration {
     use_simulation_model: bool;
     target: string;
     report: string;
-    non_simulated_cells: uint;
     start_simulation_time: float;
     end_simulation_time: float;
     simulation_step: float;
     simulation_values_range: [float:2];
-    simulation_cache_file: string;
+    histogram_size: uint;
 }
 
 table DataSource {

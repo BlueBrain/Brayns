@@ -37,6 +37,7 @@ void ParticleRenderer::commit()
     AbstractRenderer::commit();
 
     _simulationData = getParamData("simulationData");
+    _simulationDataSize = getParam1i("simulationDataSize", 0);
     _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
     _transferFunctionEmissionData =
         getParamData("transferFunctionEmissionData");
@@ -46,6 +47,7 @@ void ParticleRenderer::commit()
         getIE(), (ispc::vec3f&)_bgColor, _randomNumber, _timestamp, _spp,
         _materialPtr, _materialArray.size(),
         _simulationData ? (float*)_simulationData->data : NULL,
+        _simulationDataSize,
         _transferFunctionDiffuseData
             ? (ispc::vec4f*)_transferFunctionDiffuseData->data
             : NULL,
