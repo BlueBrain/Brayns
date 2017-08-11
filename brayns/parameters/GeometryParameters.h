@@ -190,12 +190,6 @@ public:
     }
 
     /** Size of the simulation histogram */
-    const std::string& getCircuitSimulationHistogramFile() const
-    {
-        return _circuitSimulationHistogramFile;
-    }
-
-    /** Size of the simulation histogram */
     size_t getCircuitMeshTransformation() const
     {
         return _circuitMeshTransformation;
@@ -270,7 +264,6 @@ protected:
     double _circuitSimulationStep;
     Vector2f _circuitSimulationValuesRange;
     size_t _circuitSimulationHistogramSize;
-    std::string _circuitSimulationHistogramFile;
     bool _circuitMeshTransformation;
 
     // Scene

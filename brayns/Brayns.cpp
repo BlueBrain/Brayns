@@ -68,6 +68,13 @@ struct Brayns::Impl
     Impl(int argc, const char** argv)
         : _engine(nullptr)
     {
+        BRAYNS_INFO << "     ____                             " << std::endl;
+        BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
+        BRAYNS_INFO << "   / __  / ___/ __ `/ / / / __ \\/ ___/" << std::endl;
+        BRAYNS_INFO << "  / /_/ / /  / /_/ / /_/ / / / (__  ) " << std::endl;
+        BRAYNS_INFO << " /_____/_/   \\__,_/\\__, /_/ /_/____/  " << std::endl;
+        BRAYNS_INFO << "                  /____/              " << std::endl;
+        BRAYNS_INFO << std::endl;
         BRAYNS_INFO << "Parsing command line options" << std::endl;
         _parametersManager.reset(new ParametersManager());
         _parametersManager->parse(argc, argv);
@@ -158,9 +165,7 @@ struct Brayns::Impl
         try
         {
             char str[7];
-            snprintf(
-                str, 7, "%06d",
-                int(_engine->getFrameBuffer());
+            snprintf(str, 7, "%06d", int(_engine->getFrameNumber()));
 
             const std::string filename = frameExportFolder + "/" + str + ".png";
             FrameBuffer& frameBuffer = _engine->getFrameBuffer();

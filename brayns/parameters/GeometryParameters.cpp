@@ -56,8 +56,6 @@ const std::string PARAM_CIRCUIT_SIMULATION_RANGE =
     "circuit-simulation-values-range";
 const std::string PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE =
     "circuit-simulation-histogram-size";
-const std::string PARAM_CIRCUIT_SIMULATION_HISTOGRAM_FILENAME =
-    "circuit-simulation-histogram-file";
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
 const std::string PARAM_SAVE_CACHE_FILE = "save-cache-file";
 const std::string PARAM_RADIUS_MULTIPLIER = "radius-multiplier";
@@ -185,9 +183,6 @@ GeometryParameters::GeometryParameters()
         "Minimum and maximum values for the simulation [float float]")(
         PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value<size_t>(),
         "Number of values defining the simulation histogram [int]")(
-        PARAM_CIRCUIT_SIMULATION_HISTOGRAM_FILENAME.c_str(),
-        po::value<std::string>(),
-        "File containing simulation histogram [string]")(
         PARAM_NEST_CACHE_FILENAME.c_str(), po::value<std::string>(),
         "Cache file containing nest data [string]")(
         PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value<bool>(),
@@ -321,9 +316,6 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE))
         _circuitSimulationHistogramSize =
             vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE].as<size_t>();
-    if (vm.count(PARAM_CIRCUIT_SIMULATION_HISTOGRAM_FILENAME))
-        _circuitSimulationHistogramFile =
-            vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_FILENAME].as<std::string>();
     if (vm.count(PARAM_NEST_CACHE_FILENAME))
         _NESTCacheFile = vm[PARAM_NEST_CACHE_FILENAME].as<std::string>();
     if (vm.count(PARAM_GENERATE_MULTIPLE_MODELS))
@@ -428,8 +420,6 @@ void GeometryParameters::print()
                 << std::endl;
     BRAYNS_INFO << "- Simulation values range  : "
                 << _circuitSimulationValuesRange << std::endl;
-    BRAYNS_INFO << "- Simulation file          : "
-                << _circuitSimulationHistogramFile << std::endl;
     BRAYNS_INFO << "- Simulation histogram size: "
                 << _circuitSimulationHistogramSize << std::endl;
     BRAYNS_INFO << "- Bounding box             : " << _circuitBoundingBox

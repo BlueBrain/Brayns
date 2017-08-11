@@ -81,7 +81,6 @@ table CircuitConfiguration {
     simulation_step: float;
     simulation_values_range: [float:2];
     histogram_size: uint;
-    histogram_file: string;
 }
 
 table DataSource {

@@ -45,12 +45,7 @@ const uint64_t INDEX_MAGIC = 1e6;
 namespace brayns
 {
 typedef std::unique_ptr<brion::CompartmentReport> CompartmentReportPtr;
-typedef brion::CompartmentCounts* CompartmentCountsPtr;
-typedef brion::SectionOffsets* SectionOffsetsPtr;
 
-/**
- * @brief The ParallelSceneContainer class
- */
 struct ParallelSceneContainer
 {
 public:
@@ -74,9 +69,6 @@ public:
     Boxf& _worldBounds;
 };
 
-/**
- * @brief The MorphologyLoader::Impl class
- */
 class MorphologyLoader::Impl
 {
 public:

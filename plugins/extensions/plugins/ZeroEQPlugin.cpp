@@ -673,8 +673,6 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getCircuitMeshTransformation());
     circuit.setHistogramSize(
         geometryParameters.getCircuitSimulationHistogramSize());
-    circuit.setHistogramFile(
-        geometryParameters.getCircuitSimulationHistogramFile());
     _remoteDataSource.setCircuitConfiguration(circuit);
 
     _remoteDataSource.setLoadCacheFile(geometryParameters.getLoadCacheFile());
@@ -833,9 +831,6 @@ void ZeroEQPlugin::_dataSourceUpdated()
         "circuit-simulation-histogram-size",
         std::to_string(
             _remoteDataSource.getCircuitConfiguration().getHistogramSize()));
-    _parametersManager.set(
-        "circuit-simulation-histogram-file",
-        _remoteDataSource.getCircuitConfiguration().getHistogramFileString());
     _parametersManager.set("nest-cache-file",
                            _remoteDataSource.getNestCacheFileString());
     _parametersManager.set(
