@@ -160,7 +160,7 @@ struct Brayns::Impl
             char str[7];
             snprintf(
                 str, 7, "%06d",
-                int(_parametersManager->getSceneParameters().getTimestamp()));
+                int(_engine->getFrameBuffer());
 
             const std::string filename = frameExportFolder + "/" + str + ".png";
             FrameBuffer& frameBuffer = _engine->getFrameBuffer();
