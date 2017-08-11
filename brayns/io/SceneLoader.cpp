@@ -94,9 +94,9 @@ void SceneLoader::_importMorphology(Scene& scene, const Node& node,
 {
     MorphologyLoader morphologyLoader(_geometryParameters, scene);
     const servus::URI uri(node.filename);
-    if (!morphologyLoader.importSingleMorphology(uri, 0, NB_SYSTEM_MATERIALS +
-                                                             node.materialId,
-                                                 transformation))
+    if (!morphologyLoader.importMorphology(uri, 0, NB_SYSTEM_MATERIALS +
+                                                       node.materialId,
+                                           transformation))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
 #endif

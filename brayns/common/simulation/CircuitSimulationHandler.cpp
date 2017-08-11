@@ -32,7 +32,6 @@ namespace brayns
 CircuitSimulationHandler::CircuitSimulationHandler(
     const GeometryParameters& geometryParameters)
     : AbstractSimulationHandler(geometryParameters)
-    , _compartmentReport(nullptr)
 {
 }
 
@@ -70,9 +69,6 @@ void CircuitSimulationHandler::_initializeReport()
         std::max(reportTimeStep,
                  _geometryParameters.getCircuitSimulationStep());
     _frameSize = _compartmentReport->getFrameSize();
-    _frameData = new float[_frameSize];
-    assert(_frameData);
-
     _nbFrames = (_endFrame - _beginFrame) / _timeBetweenFrames;
 
     BRAYNS_INFO << "-----------------------------------------------------------"
@@ -104,13 +100,10 @@ void* CircuitSimulationHandler::getFrameData()
         auto frame = _beginFrame + _timestamp * _timeBetweenFrames;
         frame = std::min(_endFrame, frame);
         frame = std::max(_beginFrame, frame);
-        auto valuesPtr = _compartmentReport->loadFrame(frame).get();
-        if (valuesPtr)
-        {
-            _currentFrame = frame;
-            memcpy(_frameData, valuesPtr->data(), sizeof(float) * _frameSize);
-        }
+        _frameValues = _compartmentReport->loadFrame(frame).get();
+        if (_frameValues)
+            return _frameValues.get()->data();
     }
-    return _frameData;
+    return nullptr;
 }
 }

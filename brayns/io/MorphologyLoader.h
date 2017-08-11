@@ -40,35 +40,36 @@ namespace brayns
 class MorphologyLoader
 {
 public:
+    /**
+     * @brief MorphologyLoader
+     * @param geometryParameters
+     * @param scene
+     */
     MorphologyLoader(const GeometryParameters& geometryParameters,
                      Scene& scene);
     ~MorphologyLoader();
 
-    /** Imports morphology from a given SWC or H5 file
-     *
+    /**
+     * @brief Imports morphology from a given SWC or H5 file
      * @param source URI of the morphology
-     * @param morphologyIndex specifies an index for the morphology. This is
-     *        mainly used to give a specific color to every morphology.
-     * @param scene resulting scene
+     * @param index Specifies an index for the morphology. This is mainly used
+     * to give a specific color to every morphology
+     * @param transformation Transformation to apply to the morphology
      * @return True if the morphology is successfully loaded, false otherwise
      */
-    bool importSingleMorphology(const servus::URI& source,
-                                const uint64_t morphologyIndex,
-                                const size_t material,
-                                const Matrix4f& transformation = Matrix4f());
+    bool importMorphology(const servus::URI& source, const uint64_t index,
+                          const size_t material,
+                          const Matrix4f& transformation = Matrix4f());
 
-    /** Imports morphology from a circuit for the given target name
-     *
+    /**
+     * @brief Imports morphology from a circuit for the given target name
      * @param circuitConfig URI of the Circuit Config file
-     * @param target Target to be loaded. If empty, the target specified in
-     * the
-     *        circuit configuration file is used. If such an entry does not
-     *        exist, all neurons are loaded.
+     * @param target Target to be loaded. If empty, the target specified in the
+     * circuit configuration file is used. If such an entry does not exist, all
+     * neurons are loaded.
      * @param report Compartment report to be loaded
-     * @param scene resulting scene
-     * @return True if the circuit is successfully loaded, false if the
-     * circuit
-     *         contains no cells.
+     * @return True if the circuit is successfully loaded, false if the circuit
+     * contains no cells.
      */
     bool importCircuit(const servus::URI& circuitConfig,
                        const std::string& target, const std::string& report,

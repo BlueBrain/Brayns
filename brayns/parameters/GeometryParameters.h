@@ -226,8 +226,8 @@ public:
         return _metaballsSamplesFromSoma;
     }
 
-    /** Metaballs enabled? */
-    bool useMetaballs() const { return _metaballsGridSize != 0; }
+    /** Realistic somas enabled? */
+    bool useRealisticSomas() const { return _metaballsGridSize != 0; }
     /**
      * Defines what memory mode should be used between Brayns and the
      * underlying renderer

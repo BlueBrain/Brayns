@@ -54,7 +54,7 @@ inline varying vec4f
 
     const uint64 index = (uint64)(y * (double)(OFFSET_MAGIC) + x);
 
-    if (index > 0 && index < self->simulationDataSize)
+    if (index < self->simulationDataSize)
         value = self->simulationData[index];
     else
         // Value offset is out of range, return error color

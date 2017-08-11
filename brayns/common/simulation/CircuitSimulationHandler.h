@@ -35,12 +35,9 @@ namespace brayns
 typedef std::unique_ptr<brion::CompartmentReport> CompartmentReportPtr;
 /**
  * @brief The CircuitSimulationHandler class handles simulation frames for the
- * current circuit.
- *        Frames are stored in a memory mapped file that is accessed according
- * to a specified
- *        timestamp. The CircuitSimulationHandler class is in charge of keeping
- * the handle to the
- *        memory mapped file.
+ * current circuit. Frames are stored in a memory mapped file that is accessed
+ * according to a specified timestamp. The CircuitSimulationHandler class is in
+ * charge of keeping the handle to the memory mapped file.
  */
 class CircuitSimulationHandler : public AbstractSimulationHandler
 {
@@ -64,6 +61,7 @@ private:
     double _beginFrame;
     double _endFrame;
     double _timeBetweenFrames;
+    std::shared_ptr<floats> _frameValues;
 };
 }
 

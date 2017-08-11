@@ -598,8 +598,7 @@ private:
 
     /**
         Loads data from SWC and H5 files located in the folder specified
-       in the
-        geometry parameters (command line parameter --morphology-folder)
+       in the geometry parameters (command line parameter --morphology-folder)
     */
     void _loadMorphologyFolder()
     {
@@ -616,8 +615,8 @@ private:
         {
             ++progress;
             servus::URI uri(file);
-            if (!morphologyLoader.importSingleMorphology(uri, morphologyIndex,
-                                                         NO_MATERIAL))
+            if (!morphologyLoader.importMorphology(uri, morphologyIndex,
+                                                   NO_MATERIAL))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++morphologyIndex;
         }
@@ -625,8 +624,7 @@ private:
 
     /**
         Loads morphologies from circuit configuration (command line
-       parameter
-        --circuit-configuration)
+       parameter --circuit-configuration)
     */
     void _loadCircuitConfiguration()
     {
