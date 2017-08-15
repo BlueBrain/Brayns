@@ -261,7 +261,7 @@ protected:
     std::string _circuitReport;
     double _circuitStartSimulationTime;
     double _circuitEndSimulationTime;
-    double _circuitSimulationStep;
+    double _circuitSimulationStep{0};
     Vector2f _circuitSimulationValuesRange;
     size_t _circuitSimulationHistogramSize;
     bool _circuitMeshTransformation;

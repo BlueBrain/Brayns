@@ -23,7 +23,8 @@
 // Brayns
 #include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.ih>
 
-uniform const uniform uint64 OFFSET_MAGIC = 1e6;
+// needs to be the same in MorphologyLoader.cpp
+uniform const uniform float OFFSET_MAGIC = 1e6;
 
 struct SimulationRenderer
 {
@@ -49,10 +50,8 @@ inline varying vec4f
     vec4f color = make_vec4f(0.f, 0.f, 0.f, 1.f);
 
     float value = 0.f;
-    double x = (double)(dg.st.x);
-    double y = (double)(dg.st.y);
-
-    const uint64 index = (uint64)(y * (double)(OFFSET_MAGIC) + x);
+    const uint64 index = (uint64)(dg.st.x * OFFSET_MAGIC) << 32 |
+                         (uint32)(dg.st.y * OFFSET_MAGIC);
 
     if (index < self->simulationDataSize)
         value = self->simulationData[index];
@@ -64,16 +63,16 @@ inline varying vec4f
         return color;
 
     // Normalize the value according colormap size
-    uint32 normalizedValue = self->abstract.colorMapSize *
-                             (value - self->abstract.colorMapMinValue) /
-                             self->abstract.colorMapRange;
+    const float normalizedValue = (value - self->abstract.colorMapMinValue) /
+                                  self->abstract.colorMapRange;
 
-    normalizedValue = max(0, min(self->abstract.colorMapSize, normalizedValue));
+    const uint32 lookupIndex =
+        max(0.f, min(normalizedValue, 1.f)) * (self->abstract.colorMapSize - 1);
 
-    color = self->abstract.colorMap[normalizedValue];
+    color = self->abstract.colorMap[lookupIndex];
 
     if (self->abstract.emissionIntensitiesMap)
-        lightEmission = self->abstract.emissionIntensitiesMap[normalizedValue];
+        lightEmission = self->abstract.emissionIntensitiesMap[lookupIndex];
 
     return color;
 }
