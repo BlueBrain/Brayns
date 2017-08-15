@@ -39,7 +39,8 @@
 
 namespace
 {
-const uint64_t INDEX_MAGIC = 1e6;
+// needs to be the same in SimulationRenderer.ispc
+const float INDEX_MAGIC = 1e6;
 }
 
 namespace brayns
@@ -325,8 +326,11 @@ private:
     Vector2f _getIndexAsTextureCoordinates(const uint64_t index) const
     {
         Vector2f textureCoordinates;
-        double y = index / INDEX_MAGIC;
-        double x = index - y * INDEX_MAGIC;
+
+        // https://stackoverflow.com/questions/2810280
+        float x = ((index & 0xFFFFFFFF00000000LL) >> 32) / INDEX_MAGIC;
+        float y = (index & 0xFFFFFFFFLL) / INDEX_MAGIC;
+
         textureCoordinates.x() = x;
         textureCoordinates.y() = y;
         return textureCoordinates;
@@ -506,18 +510,16 @@ private:
 
             sectionTypes = _getSectionTypes(morphologySectionTypes);
 
-            const auto& sections = morphology.getSections(sectionTypes);
-
-            size_t sectionId = 0;
             uint64_t offset = 0;
-            if (_compartmentReport)
-                offset = _compartmentReport->getOffsets()[index][sectionId];
 
+            if (_compartmentReport)
+                offset = _compartmentReport->getOffsets()[index][0];
+
+            // Soma
             if (!_geometryParameters.useRealisticSomas() &&
                 morphologySectionTypes &
                     static_cast<size_t>(MorphologySectionType::soma))
             {
-                // Soma
                 const auto& soma = morphology.getSoma();
                 const size_t materialId = _getMaterialFromGeometryParameters(
                     index, material, brain::neuron::SectionType::soma);
@@ -550,24 +552,40 @@ private:
                 }
             }
 
+            // Only the first one or two axon sections are reported, so find the
+            // last one and use its offset for all the other axon sections
+            uint16_t lastAxon = 0;
+            if (_compartmentReport &&
+                (morphologySectionTypes &
+                 static_cast<size_t>(MorphologySectionType::axon)))
+            {
+                const auto& counts =
+                    _compartmentReport->getCompartmentCounts()[index];
+                const auto& axon =
+                    morphology.getSections(brain::neuron::SectionType::axon);
+                for (const auto& section : axon)
+                {
+                    if (counts[section.getID()] > 0)
+                    {
+                        lastAxon = section.getID();
+                        continue;
+                    }
+                    break;
+                }
+            }
+
             // Dendrites and axon
-            for (const auto& section : sections)
+            for (const auto& section : morphology.getSections(sectionTypes))
             {
                 if (section.getType() == brain::neuron::SectionType::soma)
-                {
-                    ++sectionId;
                     continue;
-                }
 
                 const auto materialId =
                     _getMaterialFromGeometryParameters(index, material,
                                                        section.getType());
                 const auto& samples = section.getSamples();
                 if (samples.empty())
-                {
-                    ++sectionId;
                     continue;
-                }
 
                 auto previousSample = samples[0];
                 size_t step = 1;
@@ -595,8 +613,8 @@ private:
                         _compartmentReport->getCompartmentCounts()[index];
                     // Number of compartments usually differs from number of
                     // samples
-                    if (counts[sectionId] > 1)
-                        segmentStep = counts[sectionId] / float(samples.size());
+                    segmentStep =
+                        counts[section.getID()] / float(samples.size());
                 }
 
                 bool done = false;
@@ -612,9 +630,28 @@ private:
                     const auto distance = distanceToSoma + distancesToSoma[i];
 
                     if (_compartmentReport)
-                        offset =
-                            _compartmentReport->getOffsets()[index][sectionId] +
-                            float(i) * segmentStep;
+                    {
+                        const auto& offsets =
+                            _compartmentReport->getOffsets()[index];
+                        const auto& counts =
+                            _compartmentReport->getCompartmentCounts()[index];
+
+                        if (counts[section.getID()] > 0)
+                            offset = offsets[section.getID()] +
+                                     float(i - step) * segmentStep;
+                        else
+                        {
+                            if (section.getType() ==
+                                brain::neuron::SectionType::axon)
+                            {
+                                offset = offsets[lastAxon];
+                            }
+                            else
+                                // This should never happen, but just in case
+                                // use an invalid value to show an error color
+                                offset = std::numeric_limits<uint64_t>::max();
+                        }
+                    }
 
                     const auto sample = samples[i];
                     const auto previousRadius =
@@ -657,7 +694,6 @@ private:
                     }
                     previousSample = sample;
                 }
-                ++sectionId;
             }
         }
         catch (const std::runtime_error& e)
