@@ -70,10 +70,16 @@ void OSPRayScene::reset()
         for (size_t materialId = 0; materialId < _materials.size();
              ++materialId)
         {
-            ospRemoveGeometry(model.second, _ospMeshes[materialId]);
-            ospRemoveGeometry(model.second, _ospExtendedSpheres[materialId]);
-            ospRemoveGeometry(model.second, _ospExtendedCylinders[materialId]);
-            ospRemoveGeometry(model.second, _ospExtendedCones[materialId]);
+            if (_ospMeshes[materialId])
+                ospRemoveGeometry(model.second, _ospMeshes[materialId]);
+            if (_ospExtendedSpheres[materialId])
+                ospRemoveGeometry(model.second,
+                                  _ospExtendedSpheres[materialId]);
+            if (_ospExtendedCylinders[materialId])
+                ospRemoveGeometry(model.second,
+                                  _ospExtendedCylinders[materialId]);
+            if (_ospExtendedCones[materialId])
+                ospRemoveGeometry(model.second, _ospExtendedCones[materialId]);
         }
         ospCommit(model.second);
     }
@@ -885,13 +891,17 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
                        &_trianglesMeshes[materialId].getVertices()[0],
                        _getOSPDataFlags());
 
-        size += _trianglesMeshes[materialId].getNormals().size() * 3 *
-                sizeof(float);
-        OSPData normals =
-            ospNewData(_trianglesMeshes[materialId].getNormals().size(),
-                       OSP_FLOAT3,
-                       &_trianglesMeshes[materialId].getNormals()[0],
-                       _getOSPDataFlags());
+        if (!_trianglesMeshes[materialId].getNormals().empty())
+        {
+            size += _trianglesMeshes[materialId].getNormals().size() * 3 *
+                    sizeof(float);
+            OSPData normals =
+                ospNewData(_trianglesMeshes[materialId].getNormals().size(),
+                           OSP_FLOAT3,
+                           &_trianglesMeshes[materialId].getNormals()[0],
+                           _getOSPDataFlags());
+            ospSetObject(_ospMeshes[materialId], "vertex.normal", normals);
+        }
 
         size +=
             _trianglesMeshes[materialId].getIndices().size() * 3 * sizeof(int);
@@ -900,27 +910,33 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
                        OSP_INT3, &_trianglesMeshes[materialId].getIndices()[0],
                        _getOSPDataFlags());
 
-        size +=
-            _trianglesMeshes[materialId].getColors().size() * 4 * sizeof(float);
-        OSPData colors =
-            ospNewData(_trianglesMeshes[materialId].getColors().size(),
-                       OSP_FLOAT3A,
-                       &_trianglesMeshes[materialId].getColors()[0],
-                       _getOSPDataFlags());
+        if (!_trianglesMeshes[materialId].getColors().empty())
+        {
+            size += _trianglesMeshes[materialId].getColors().size() * 4 *
+                    sizeof(float);
+            OSPData colors =
+                ospNewData(_trianglesMeshes[materialId].getColors().size(),
+                           OSP_FLOAT3A,
+                           &_trianglesMeshes[materialId].getColors()[0],
+                           _getOSPDataFlags());
+            ospSetObject(_ospMeshes[materialId], "vertex.color", colors);
+        }
 
-        size += _trianglesMeshes[materialId].getTextureCoordinates().size() *
+        if (!_trianglesMeshes[materialId].getTextureCoordinates().empty())
+        {
+            size +=
+                _trianglesMeshes[materialId].getTextureCoordinates().size() *
                 2 * sizeof(float);
-        OSPData texCoords = ospNewData(
-            _trianglesMeshes[materialId].getTextureCoordinates().size(),
-            OSP_FLOAT2,
-            &_trianglesMeshes[materialId].getTextureCoordinates()[0],
-            _getOSPDataFlags());
+            OSPData texCoords = ospNewData(
+                _trianglesMeshes[materialId].getTextureCoordinates().size(),
+                OSP_FLOAT2,
+                &_trianglesMeshes[materialId].getTextureCoordinates()[0],
+                _getOSPDataFlags());
+            ospSetObject(_ospMeshes[materialId], "vertex.texcoord", texCoords);
+        }
 
         ospSetObject(_ospMeshes[materialId], "position", vertices);
         ospSetObject(_ospMeshes[materialId], "index", indices);
-        ospSetObject(_ospMeshes[materialId], "vertex.normal", normals);
-        ospSetObject(_ospMeshes[materialId], "vertex.color", colors);
-        ospSetObject(_ospMeshes[materialId], "vertex.texcoord", texCoords);
         ospSet1i(_ospMeshes[materialId], "alpha_type", 0);
         ospSet1i(_ospMeshes[materialId], "alpha_component", 4);
 
@@ -1186,15 +1202,17 @@ void OSPRayScene::commitSimulationData()
     if (!frameData)
         return;
 
+    if (_ospSimulationData)
+        ospRelease(_ospSimulationData);
+    _ospSimulationData = ospNewData(_simulationHandler->getFrameSize(),
+                                    OSP_FLOAT, frameData, _getOSPDataFlags());
+    ospCommit(_ospSimulationData);
+
     for (const auto& renderer : _renderers)
     {
         OSPRayRenderer* osprayRenderer =
             dynamic_cast<OSPRayRenderer*>(renderer.get());
 
-        _ospSimulationData =
-            ospNewData(_simulationHandler->getFrameSize(), OSP_FLOAT, frameData,
-                       _getOSPDataFlags());
-        ospCommit(_ospSimulationData);
         ospSetData(osprayRenderer->impl(), "simulationData",
                    _ospSimulationData);
         ospSet1i(osprayRenderer->impl(), "simulationDataSize",
