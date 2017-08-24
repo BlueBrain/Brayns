@@ -57,8 +57,8 @@
 class Progress : public boost::progress_display
 {
 public:
-    Progress(const std::string& message, const unsigned long expected_count)
-        : boost::progress_display(expected_count, std::cout,
+    Progress(const std::string& message, const unsigned long expectedCount)
+        : boost::progress_display(expectedCount, std::cout,
                                   "[INFO ] " + message + "\n[INFO ] ",
                                   "[INFO ] ", "[INFO ] ")
     {
