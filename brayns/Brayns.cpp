@@ -90,9 +90,7 @@ struct Brayns::Impl
         createEngine();
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        _extensionPluginFactory.reset(
-            new ExtensionPluginFactory(*_parametersManager, *_keyboardHandler,
-                                       *_cameraManipulator));
+        _extensionPluginFactory.reset( new ExtensionPluginFactory(*_parametersManager));
 #endif
     }
 
@@ -215,7 +213,8 @@ struct Brayns::Impl
     void _executePlugins(const Vector2ui& size)
     {
         auto oldEngine = _engine.get();
-        _extensionPluginFactory->execute(*_engine);
+        _extensionPluginFactory->execute(*_engine, *_keyboardHandler,
+                                         *_cameraManipulator);
 
         if (!_engine)
             throw std::runtime_error("No valid engine found, aborting");

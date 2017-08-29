@@ -31,9 +31,7 @@
 namespace brayns
 {
 ExtensionPluginFactory::ExtensionPluginFactory(
-    ParametersManager& parametersManager BRAYNS_UNUSED,
-    KeyboardHandler& keyboardHandler BRAYNS_UNUSED,
-    AbstractManipulator& cameraManipulator BRAYNS_UNUSED)
+    ParametersManager& parametersManager BRAYNS_UNUSED)
 {
 #if (BRAYNS_USE_NETWORKING)
     auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>(parametersManager);
@@ -42,10 +40,9 @@ ExtensionPluginFactory::ExtensionPluginFactory(
 
 #ifdef BRAYNS_USE_DEFLECT
 #if (BRAYNS_USE_NETWORKING)
-    add(std::make_shared<DeflectPlugin>(keyboardHandler, cameraManipulator,
-                                        *zeroeqPlugin));
+    add(std::make_shared<DeflectPlugin>(*zeroeqPlugin));
 #else
-    add(std::make_shared<DeflectPlugin>(keyboardHandler, cameraManipulator));
+    add(std::make_shared<DeflectPlugin>());
 #endif
 #endif
 }
@@ -74,10 +71,12 @@ void ExtensionPluginFactory::clear()
     _plugins.clear();
 }
 
-void ExtensionPluginFactory::execute(Engine& engine)
+void ExtensionPluginFactory::execute(Engine& engine,
+                                     KeyboardHandler& keyboardHandler,
+                                     AbstractManipulator& cameraManipulator)
 {
     for (ExtensionPluginPtr plugin : _plugins)
-        if (!plugin->run(engine))
+        if (!plugin->run(engine, keyboardHandler, cameraManipulator))
             break;
 }
 }

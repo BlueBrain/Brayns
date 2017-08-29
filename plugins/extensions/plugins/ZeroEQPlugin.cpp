@@ -125,7 +125,7 @@ void ZeroEQPlugin::_onChangeEngine()
     _forceRendering = true;
 }
 
-bool ZeroEQPlugin::run(Engine& engine)
+bool ZeroEQPlugin::run(Engine& engine, KeyboardHandler&, AbstractManipulator&)
 {
     if (_engine != &engine || _dirtyEngine)
     {
@@ -457,36 +457,53 @@ void ZeroEQPlugin::_requestMaterialLUT()
     auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
-    _remoteMaterialLUT.getEmission().clear();
-    _remoteMaterialLUT.getDiffuse().clear();
-    _remoteMaterialLUT.getAlpha().clear();
-    _remoteMaterialLUT.getContribution().clear();
+    _remoteMaterialLUT.getEmission().resize(
+        transferFunction.getEmissionIntensities().size());
+    _remoteMaterialLUT.getDiffuse().resize(
+        transferFunction.getDiffuseColors().size());
+    _remoteMaterialLUT.getAlpha().resize(
+        transferFunction.getDiffuseColors().size());
+    _remoteMaterialLUT.getContribution().resize(
+        transferFunction.getContributions().size());
 
+    size_t j = 0;
     for (const auto& diffuseColor : transferFunction.getDiffuseColors())
     {
         ::lexis::render::Color color(diffuseColor.x(), diffuseColor.y(),
                                      diffuseColor.z());
-        _remoteMaterialLUT.getDiffuse().push_back(color);
-        _remoteMaterialLUT.getAlpha().push_back(diffuseColor.w());
+        _remoteMaterialLUT.getDiffuse()[j] = color;
+        _remoteMaterialLUT.getAlpha()[j] = diffuseColor.w();
+        ++j;
     }
 
+    j = 0;
     if (transferFunction.getEmissionIntensities().empty())
+    {
+        _remoteMaterialLUT.getEmission().resize(
+            transferFunction.getDiffuseColors().size());
         for (size_t i = 0; i < transferFunction.getDiffuseColors().size(); ++i)
-            _remoteMaterialLUT.getEmission().push_back({0, 0, 0});
+            _remoteMaterialLUT.getEmission()[j++] = {0, 0, 0};
+    }
     else
         for (const auto& emission : transferFunction.getEmissionIntensities())
         {
             ::lexis::render::Color color(emission.x(), emission.y(),
                                          emission.z());
-            _remoteMaterialLUT.getEmission().push_back(color);
+            _remoteMaterialLUT.getEmission()[j] = color;
+            ++j;
         }
 
+    j = 0;
     if (transferFunction.getContributions().empty())
+    {
+        _remoteMaterialLUT.getContribution().resize(
+            transferFunction.getDiffuseColors().size());
         for (size_t i = 0; i < transferFunction.getDiffuseColors().size(); ++i)
-            _remoteMaterialLUT.getContribution().push_back(0.f);
+            _remoteMaterialLUT.getContribution()[j++] = 0.f;
+    }
     else
         for (const auto& contribution : transferFunction.getContributions())
-            _remoteMaterialLUT.getContribution().push_back(contribution);
+            _remoteMaterialLUT.getContribution()[j++] = contribution;
 
     const auto& range = transferFunction.getValuesRange();
     std::vector<double> rangeVector = {range.x(), range.y()};
