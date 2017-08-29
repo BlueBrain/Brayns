@@ -52,26 +52,16 @@ std::future<T> make_ready_future(const T value)
 namespace brayns
 {
 #if (BRAYNS_USE_NETWORKING)
-DeflectPlugin::DeflectPlugin(KeyboardHandler& keyboardHandler,
-                             AbstractManipulator& cameraManipulator,
-                             ZeroEQPlugin& zeroeq)
+DeflectPlugin::DeflectPlugin(ZeroEQPlugin& zeroeq)
 #else
-DeflectPlugin::DeflectPlugin(KeyboardHandler& keyboardHandler,
-                             AbstractManipulator& cameraManipulator)
+DeflectPlugin::DeflectPlugin()
 #endif
     : ExtensionPlugin()
-    , _keyboardHandler(keyboardHandler)
-    , _cameraManipulator(cameraManipulator)
     , _sendFuture(make_ready_future(true))
 {
-    _keyboardHandler.registerKeyboardShortcut(
-        '*', "Enable/Disable Deflect streaming",
-        [&] { _params.setEnabled(!_params.getEnabled()); });
-
     _params.setEnabled(true); // Streaming will only be activated if
                               // the DEFLECT_HOST environment variable
                               // is defined
-
 #if (BRAYNS_USE_NETWORKING)
     if (!zeroeq)
         return;
@@ -81,7 +71,8 @@ DeflectPlugin::DeflectPlugin(KeyboardHandler& keyboardHandler,
 #endif
 }
 
-bool DeflectPlugin::run(Engine& engine)
+bool DeflectPlugin::run(Engine& engine, KeyboardHandler& keyboardHandler,
+                        AbstractManipulator& cameraManipulator)
 {
     auto& appParams = engine.getParametersManager().getApplicationParameters();
     appParams.setStreamingEnabled(_params.getEnabled());
@@ -130,7 +121,7 @@ bool DeflectPlugin::run(Engine& engine)
         if (!observerOnly)
             _sendDeflectFrame(engine);
 
-        if (_handleDeflectEvents(engine))
+        if (_handleDeflectEvents(engine, keyboardHandler, cameraManipulator))
         {
             engine.getFrameBuffer().clear();
             engine.getRenderer().commit();
@@ -213,7 +204,9 @@ void DeflectPlugin::_sendDeflectFrame(Engine& engine)
         _sendFuture = make_ready_future(true);
 }
 
-bool DeflectPlugin::_handleDeflectEvents(Engine& engine)
+bool DeflectPlugin::_handleDeflectEvents(Engine& engine,
+                                         KeyboardHandler& keyboardHandler,
+                                         AbstractManipulator& cameraManipulator)
 {
     if (!_stream->hasEvent())
         return false;
@@ -234,7 +227,7 @@ bool DeflectPlugin::_handleDeflectEvents(Engine& engine)
             const auto pos =
                 _getWindowPos(event, engine.getFrameBuffer().getSize());
             if (!_pan && !_pinch)
-                _cameraManipulator.dragLeft(pos, _previousPos);
+                cameraManipulator.dragLeft(pos, _previousPos);
             _previousPos = pos;
             _pan = _pinch = false;
             break;
@@ -245,7 +238,7 @@ bool DeflectPlugin::_handleDeflectEvents(Engine& engine)
                 break;
             const auto pos =
                 _getWindowPos(event, engine.getFrameBuffer().getSize());
-            _cameraManipulator.dragMiddle(pos, _previousPos);
+            cameraManipulator.dragMiddle(pos, _previousPos);
             _previousPos = pos;
             _pan = true;
             break;
@@ -258,13 +251,13 @@ bool DeflectPlugin::_handleDeflectEvents(Engine& engine)
                 _getWindowPos(event, engine.getFrameBuffer().getSize());
             const auto delta =
                 _getZoomDelta(event, engine.getFrameBuffer().getSize());
-            _cameraManipulator.wheel(pos, delta * wheelFactor);
+            cameraManipulator.wheel(pos, delta * wheelFactor);
             _pinch = true;
             break;
         }
         case deflect::Event::EVT_KEY_PRESS:
         {
-            _keyboardHandler.handleKeyboardShortcut(event.text[0]);
+            keyboardHandler.handleKeyboardShortcut(event.text[0]);
             break;
         }
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
