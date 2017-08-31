@@ -91,11 +91,6 @@ public:
     void reshape(const Vector2ui& frameSize);
 
     /**
-       Sets up camera manipulator
-    */
-    void setupCameraManipulator(const CameraMode mode);
-
-    /**
        Sets default camera according to scene bounding box
     */
     void setDefaultCamera();

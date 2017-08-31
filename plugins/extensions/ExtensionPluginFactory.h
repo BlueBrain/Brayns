@@ -34,9 +34,7 @@ public:
         Constructs the object and initializes default plugins according to
         application parameters.
     */
-    ExtensionPluginFactory(ParametersManager& parametersManager,
-                           KeyboardHandler& keyboardHandler,
-                           AbstractManipulator& cameraManipulator);
+    ExtensionPluginFactory(ParametersManager& parametersManager);
 
     ~ExtensionPluginFactory();
 
@@ -60,7 +58,8 @@ public:
     /**
        Executes code specific to every registered plugin
      */
-    void execute(Engine& engine);
+    void execute(Engine& engine, KeyboardHandler& keyboardHandler,
+                 AbstractManipulator& cameraManipulator);
 
 private:
     ExtensionPlugins _plugins;

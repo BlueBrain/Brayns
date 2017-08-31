@@ -44,15 +44,14 @@ class DeflectPlugin : public ExtensionPlugin
 {
 public:
 #if (BRAYNS_USE_NETWORKING)
-    DeflectPlugin(KeyboardHandler& keyboardHandler,
-                  AbstractManipulator& cameraManipulator, ZeroEQPlugin& zeroeq);
+    DeflectPlugin(ZeroEQPlugin& zeroeq);
 #else
-    DeflectPlugin(KeyboardHandler& keyboardHandler,
-                  AbstractManipulator& cameraManipulator);
+    DeflectPlugin();
 #endif
 
     /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API bool run(Engine& engine) final;
+    BRAYNS_API bool run(Engine& engine, KeyboardHandler& keyboardHandler,
+                        AbstractManipulator& cameraManipulator) final;
 
 private:
     struct HandledEvents
@@ -74,7 +73,8 @@ private:
 
     bool _initializeDeflect(bool observerOnly);
     void _sendDeflectFrame(Engine& engine);
-    bool _handleDeflectEvents(Engine& engine);
+    bool _handleDeflectEvents(Engine& engine, KeyboardHandler& keyboardHandler,
+                              AbstractManipulator& cameraManipulator);
 
     /** Send an image to DisplayCluster
      *
@@ -86,9 +86,6 @@ private:
                            const Vector2ui& windowSize) const;
     double _getZoomDelta(const deflect::Event& pinchEvent,
                          const Vector2ui& windowSize) const;
-
-    KeyboardHandler& _keyboardHandler;
-    AbstractManipulator& _cameraManipulator;
 
     Vector2d _previousPos;
     bool _pan = false;

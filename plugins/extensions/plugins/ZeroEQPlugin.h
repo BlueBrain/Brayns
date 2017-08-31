@@ -56,7 +56,8 @@ public:
     ~ZeroEQPlugin();
 
     /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API bool run(Engine& engine) final;
+    BRAYNS_API bool run(Engine& engine, KeyboardHandler& keyboardHandler,
+                        AbstractManipulator& cameraManipulator) final;
 
     BRAYNS_API bool operator!() const;
     BRAYNS_API::zeroeq::http::Server* operator->();
