@@ -113,7 +113,8 @@ void SceneLoader::_importMesh(Scene& scene, MeshLoader& loader,
 }
 #endif
 
-bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
+bool SceneLoader::_processNodes(Scene& scene,
+                                MeshLoader& meshLoader BRAYNS_UNUSED)
 {
     Progress progress("Loading scene...", _nodes.size());
     for (const auto& node : _nodes)
