@@ -20,6 +20,8 @@
 
 #include "ZeroEQPlugin.h"
 
+#include <ZeroEQ/zeroeq/http/helpers.h>
+#include <boost/algorithm/string.hpp>
 #include <brayns/Brayns.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
@@ -31,9 +33,9 @@
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
-#include <zerobuf/render/camera.h>
-
 #include <brayns/version.h>
+#include <fstream>
+#include <zerobuf/render/camera.h>
 
 namespace
 {
@@ -61,6 +63,8 @@ const std::string ENDPOINT_MATERIAL_LUT = ENDPOINT_API_VERSION + "material-lut";
 const std::string ENDPOINT_STREAM = ENDPOINT_API_VERSION + "stream";
 const std::string ENDPOINT_STREAM_TO = ENDPOINT_API_VERSION + "stream-to";
 const std::string ENDPOINT_VIEWPORT = ENDPOINT_API_VERSION + "viewport";
+const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER =
+    ENDPOINT_API_VERSION + "circuit-config-builder";
 }
 
 namespace brayns
@@ -178,6 +182,32 @@ void ZeroEQPlugin::handle(servus::Serializable& object)
     object.registerDeserializedCallback([&] { _publisher.publish(object); });
 }
 
+std::future<::zeroeq::http::Response> ZeroEQPlugin::_handleCircuitConfigBuilder(
+    const ::zeroeq::http::Request& request)
+{
+    const auto paramsAsString = request.query;
+    strings params;
+    boost::split(params, paramsAsString, boost::is_any_of("&"));
+
+    const std::string blueConfigFilename = "/tmp/BlueConfig";
+    std::ofstream blueConfig(blueConfigFilename);
+    if (!blueConfig.good())
+        ::zeroeq::http::make_ready_response(
+            ::zeroeq::http::Code::SERVICE_UNAVAILABLE);
+
+    blueConfig << "Run Default" << std::endl << "{" << std::endl;
+    for (auto param : params)
+    {
+        std::replace(param.begin(), param.end(), '=', ' ');
+        blueConfig << param << std::endl;
+    }
+    blueConfig << "}" << std::endl;
+    blueConfig.close();
+    std::string body = "{\"filename\":\"" + blueConfigFilename + "\"}";
+    return ::zeroeq::http::make_ready_response(::zeroeq::http::Code::OK, body,
+                                               "application/json");
+}
+
 void ZeroEQPlugin::_setupHTTPServer()
 {
     const strings& arguments =
@@ -253,6 +283,11 @@ void ZeroEQPlugin::_setupHTTPServer()
     _remoteViewport.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_viewportUpdated, this));
 
+    _httpServer->handle(::zeroeq::http::Method::GET,
+                        ENDPOINT_CIRCUIT_CONFIG_BUILDER,
+                        std::bind(&ZeroEQPlugin::_handleCircuitConfigBuilder,
+                                  this, std::placeholders::_1));
+
     _httpServer->handle(ENDPOINT_CLIP_PLANES, _clipPlanes);
     _clipPlanes.registerDeserializedCallback(
         std::bind(&ZeroEQPlugin::_clipPlanesUpdated, this));
@@ -313,6 +348,9 @@ void ZeroEQPlugin::_setupSubscriber()
 
 void ZeroEQPlugin::_cameraUpdated()
 {
+    const float timestamp =
+        _parametersManager.getSceneParameters().getTimestamp();
+    BRAYNS_INFO << "Camera updated " << timestamp << std::endl;
     _engine->getFrameBuffer().clear();
     _engine->getCamera().commit();
 }
@@ -1149,6 +1187,10 @@ bool ZeroEQPlugin::_requestFrame()
 
 void ZeroEQPlugin::_frameUpdated()
 {
+    const float timestamp =
+        _parametersManager.getSceneParameters().getTimestamp();
+    BRAYNS_INFO << "Frame updated " << timestamp << std::endl;
+
     auto& sceneParams = _parametersManager.getSceneParameters();
     sceneParams.setTimestamp(_remoteFrame.getCurrent());
     sceneParams.setAnimationDelta(_remoteFrame.getDelta());

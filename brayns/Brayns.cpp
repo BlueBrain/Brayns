@@ -90,7 +90,8 @@ struct Brayns::Impl
         createEngine();
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        _extensionPluginFactory.reset( new ExtensionPluginFactory(*_parametersManager));
+        _extensionPluginFactory.reset(
+            new ExtensionPluginFactory(*_parametersManager));
 #endif
     }
 

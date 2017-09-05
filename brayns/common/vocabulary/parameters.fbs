@@ -66,6 +66,12 @@ table MorphologyLayout {
     horizontal_spacing: uint;
 }
 
+table CircuitConfigurationBuilder
+{
+    morphology_folder: string;
+    mvd_file: string;
+}
+
 table CircuitConfiguration {
     circuit_config_file: string;
     density: float;
