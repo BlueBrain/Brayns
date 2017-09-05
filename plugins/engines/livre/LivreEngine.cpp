@@ -81,6 +81,7 @@ LivreEngine::LivreEngine(int argc, char** argv,
             }
         }
     }
+    arguments.push_back("--disable-communicator");
 
     char** newArgv = new char*[arguments.size()];
     for (size_t i = 0; i < arguments.size(); ++i)
