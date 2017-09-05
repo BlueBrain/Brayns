@@ -20,7 +20,6 @@
 
 #include "ZeroEQPlugin.h"
 
-#include <ZeroEQ/zeroeq/http/helpers.h>
 #include <boost/algorithm/string.hpp>
 #include <brayns/Brayns.h>
 #include <brayns/common/camera/Camera.h>
@@ -36,6 +35,7 @@
 #include <brayns/version.h>
 #include <fstream>
 #include <zerobuf/render/camera.h>
+#include <zeroeq/http/helpers.h>
 
 namespace
 {
@@ -182,30 +182,42 @@ void ZeroEQPlugin::handle(servus::Serializable& object)
     object.registerDeserializedCallback([&] { _publisher.publish(object); });
 }
 
+bool ZeroEQPlugin::_writeBlueConfigFile(const std::string& blueConfigFilename,
+                                        const strings& params)
+{
+    std::ofstream blueConfig(blueConfigFilename);
+    if (!blueConfig.good())
+        return false;
+
+    blueConfig << "Run Default" << std::endl << "{" << std::endl;
+    auto parameters = params;
+    for (auto& parameter : parameters)
+    {
+        std::replace(parameter.begin(), parameter.end(), '=', ' ');
+        blueConfig << parameter << std::endl;
+    }
+    blueConfig << "}" << std::endl;
+    blueConfig.close();
+    return true;
+}
+
 std::future<::zeroeq::http::Response> ZeroEQPlugin::_handleCircuitConfigBuilder(
     const ::zeroeq::http::Request& request)
 {
     const auto paramsAsString = request.query;
     strings params;
     boost::split(params, paramsAsString, boost::is_any_of("&"));
-
     const std::string blueConfigFilename = "/tmp/BlueConfig";
-    std::ofstream blueConfig(blueConfigFilename);
-    if (!blueConfig.good())
-        ::zeroeq::http::make_ready_response(
-            ::zeroeq::http::Code::SERVICE_UNAVAILABLE);
-
-    blueConfig << "Run Default" << std::endl << "{" << std::endl;
-    for (auto param : params)
+    if (_writeBlueConfigFile(blueConfigFilename, params))
     {
-        std::replace(param.begin(), param.end(), '=', ' ');
-        blueConfig << param << std::endl;
+        const std::string body =
+            "{\"filename\":\"" + blueConfigFilename + "\"}";
+        return ::zeroeq::http::make_ready_response(::zeroeq::http::Code::OK,
+                                                   body, "application/json");
     }
-    blueConfig << "}" << std::endl;
-    blueConfig.close();
-    std::string body = "{\"filename\":\"" + blueConfigFilename + "\"}";
-    return ::zeroeq::http::make_ready_response(::zeroeq::http::Code::OK, body,
-                                               "application/json");
+    else
+        return ::zeroeq::http::make_ready_response(
+            ::zeroeq::http::Code::SERVICE_UNAVAILABLE);
 }
 
 void ZeroEQPlugin::_setupHTTPServer()

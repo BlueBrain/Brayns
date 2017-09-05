@@ -257,6 +257,9 @@ private:
     void _onNewEngine();
     void _onChangeEngine();
 
+    bool _writeBlueConfigFile(const std::string& blueConfigFilename,
+                              const strings& params);
+
     Engine* _engine = nullptr;
     ParametersManager& _parametersManager;
     tjhandle _compressor;
