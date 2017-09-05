@@ -228,6 +228,9 @@ private:
      */
     bool _requestProgress();
 
+    std::future<::zeroeq::http::Response> _handleCircuitConfigBuilder(
+        const ::zeroeq::http::Request&);
+
     /**
      * @brief Resizes an given image according to the new size
      * @param srcData Source buffer
@@ -253,6 +256,9 @@ private:
 
     void _onNewEngine();
     void _onChangeEngine();
+
+    bool _writeBlueConfigFile(const std::string& blueConfigFilename,
+                              const strings& params);
 
     Engine* _engine = nullptr;
     ParametersManager& _parametersManager;
@@ -282,6 +288,7 @@ private:
     ::brayns::v1::ResetCamera _remoteResetCamera;
     ::brayns::v1::Scene _remoteScene;
     ::brayns::v1::ForceRendering _remoteForceRendering;
+    ::brayns::v1::CircuitConfigurationBuilder _remoteCircuitConfigBuilder;
 
     bool _forceRendering = false;
     bool _dirtyEngine;
