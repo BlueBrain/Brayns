@@ -138,6 +138,15 @@ void OSPRayEngine::render()
 
 void OSPRayEngine::preRender()
 {
+    auto device = ospGetCurrentDevice();
+    if (device)
+    {
+        ospDeviceSet1i(device, "dynamicLoadBalancer",
+                       _parametersManager.getRenderingParameters()
+                           .getDynamicLoadBalancer());
+        ospDeviceCommit(device);
+    }
+
     const auto& renderParams = _parametersManager.getRenderingParameters();
     if (renderParams.getAccumulation() != _frameBuffer->getAccumulation())
     {
