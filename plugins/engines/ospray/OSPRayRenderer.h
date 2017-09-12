@@ -35,6 +35,7 @@ class OSPRayRenderer : public brayns::Renderer
 public:
     OSPRayRenderer(const std::string& name,
                    ParametersManager& parametersMamager);
+    ~OSPRayRenderer();
 
     void render(FrameBufferPtr frameBuffer) final;
     void commit() final;

@@ -50,6 +50,11 @@ OSPRayCamera::OSPRayCamera(const CameraType cameraType)
     _camera = ospNewCamera(cameraAsString.c_str());
 }
 
+OSPRayCamera::~OSPRayCamera()
+{
+    ospRelease(_camera);
+}
+
 void OSPRayCamera::commit()
 {
     const auto& position = getPosition();

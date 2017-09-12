@@ -61,6 +61,36 @@ OSPRayScene::OSPRayScene(Renderers renderers,
 {
 }
 
+OSPRayScene::~OSPRayScene()
+{
+    if (_ospTransferFunctionDiffuseData)
+        ospRelease(_ospTransferFunctionDiffuseData);
+
+    if (_ospTransferFunctionEmissionData)
+        ospRelease(_ospTransferFunctionEmissionData);
+
+    if (_ospSimulationData)
+        ospRelease(_ospSimulationData);
+
+    if (_ospVolumeData)
+        ospRelease(_ospVolumeData);
+
+    for (auto& geom : _ospExtendedSpheres)
+        ospRelease(geom.second);
+    for (auto& geom : _ospExtendedSpheresData)
+        ospRelease(geom.second);
+    for (auto& geom : _ospExtendedCylinders)
+        ospRelease(geom.second);
+    for (auto& geom : _ospExtendedCylindersData)
+        ospRelease(geom.second);
+    for (auto& geom : _ospExtendedCones)
+        ospRelease(geom.second);
+    for (auto& geom : _ospExtendedConesData)
+        ospRelease(geom.second);
+    for (auto& geom : _ospMeshes)
+        ospRelease(geom.second);
+}
+
 void OSPRayScene::reset()
 {
     Scene::reset();
@@ -82,7 +112,9 @@ void OSPRayScene::reset()
                 ospRemoveGeometry(model.second, _ospExtendedCones[materialId]);
         }
         ospCommit(model.second);
+        ospRelease(model.second);
     }
+    _models.clear();
 
     if (_simulationModel)
     {
@@ -96,13 +128,19 @@ void OSPRayScene::reset()
             ospRemoveGeometry(_simulationModel, _ospExtendedCones[materialId]);
         }
         ospCommit(_simulationModel);
+        ospRelease(_simulationModel);
     }
-    _simulationModel = 0;
 
-    _models.clear();
-
+    for (auto& material : _ospMaterials)
+        ospRelease(material);
     _ospMaterials.clear();
+
+    for (auto& texture : _ospTextures)
+        ospRelease(texture.second);
     _ospTextures.clear();
+
+    for (auto& light : _ospLights)
+        ospRelease(light);
     _ospLights.clear();
 
     _serializedSpheresData.clear();
@@ -920,6 +958,7 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
                            &_trianglesMeshes[materialId].getColors()[0],
                            _getOSPDataFlags());
             ospSetObject(_ospMeshes[materialId], "vertex.color", colors);
+            ospRelease(colors);
         }
 
         if (!_trianglesMeshes[materialId].getTextureCoordinates().empty())
@@ -933,10 +972,13 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
                 &_trianglesMeshes[materialId].getTextureCoordinates()[0],
                 _getOSPDataFlags());
             ospSetObject(_ospMeshes[materialId], "vertex.texcoord", texCoords);
+            ospRelease(texCoords);
         }
 
         ospSetObject(_ospMeshes[materialId], "position", vertices);
+        ospRelease(vertices);
         ospSetObject(_ospMeshes[materialId], "index", indices);
+        ospRelease(indices);
         ospSet1i(_ospMeshes[materialId], "alpha_type", 0);
         ospSet1i(_ospMeshes[materialId], "alpha_component", 4);
 
@@ -1017,7 +1059,8 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials(const bool updateOnly)
 {
-    _ospMaterialData = 0;
+    if (_ospMaterialData)
+        ospRelease(_ospMaterialData);
 
     // Determine how many materials need to be created
     size_t maxId = 0;
@@ -1101,27 +1144,35 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
 
 void OSPRayScene::commitTransferFunctionData()
 {
+    if (_ospTransferFunctionDiffuseData)
+        ospRelease(_ospTransferFunctionDiffuseData);
+
+    if (_ospTransferFunctionEmissionData)
+        ospRelease(_ospTransferFunctionEmissionData);
+
+    _ospTransferFunctionDiffuseData =
+        ospNewData(_transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
+                   _transferFunction.getDiffuseColors().data(),
+                   _getOSPDataFlags());
+    ospCommit(_ospTransferFunctionDiffuseData);
+
+    _ospTransferFunctionEmissionData =
+        ospNewData(_transferFunction.getEmissionIntensities().size(),
+                   OSP_FLOAT3,
+                   _transferFunction.getEmissionIntensities().data(),
+                   _getOSPDataFlags());
+    ospCommit(_ospTransferFunctionEmissionData);
+
     for (const auto& renderer : _renderers)
     {
         OSPRayRenderer* osprayRenderer =
             dynamic_cast<OSPRayRenderer*>(renderer.get());
 
         // Transfer function Diffuse colors
-        _ospTransferFunctionDiffuseData =
-            ospNewData(_transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
-                       _transferFunction.getDiffuseColors().data(),
-                       _getOSPDataFlags());
-        ospCommit(_ospTransferFunctionDiffuseData);
         ospSetData(osprayRenderer->impl(), "transferFunctionDiffuseData",
                    _ospTransferFunctionDiffuseData);
 
         // Transfer function emission data
-        _ospTransferFunctionEmissionData =
-            ospNewData(_transferFunction.getEmissionIntensities().size(),
-                       OSP_FLOAT3,
-                       _transferFunction.getEmissionIntensities().data(),
-                       _getOSPDataFlags());
-        ospCommit(_ospTransferFunctionEmissionData);
         ospSetData(osprayRenderer->impl(), "transferFunctionEmissionData",
                    _ospTransferFunctionEmissionData);
 
