@@ -58,6 +58,7 @@ void Scene::reset()
     _bounds.reset();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
+    _renderers.clear();
 }
 
 void Scene::setDirty()

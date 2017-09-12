@@ -35,6 +35,7 @@ class OSPRayCamera : public brayns::Camera
 {
 public:
     OSPRayCamera(const CameraType cameraType);
+    ~OSPRayCamera();
 
     /**
        Commits the changes held by the camera object so that

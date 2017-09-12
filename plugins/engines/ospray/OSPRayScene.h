@@ -44,6 +44,7 @@ class OSPRayScene : public brayns::Scene
 {
 public:
     OSPRayScene(Renderers renderer, ParametersManager& parametersManager);
+    ~OSPRayScene();
 
     /** @copydoc Scene::commit */
     void commit() final;

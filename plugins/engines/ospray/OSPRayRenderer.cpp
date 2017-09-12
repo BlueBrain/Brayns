@@ -48,6 +48,11 @@ OSPRayRenderer::OSPRayRenderer(const std::string& name,
     assert(_renderer);
 }
 
+OSPRayRenderer::~OSPRayRenderer()
+{
+    ospRelease(_renderer);
+}
+
 void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 {
     OSPRayFrameBuffer* osprayFrameBuffer =

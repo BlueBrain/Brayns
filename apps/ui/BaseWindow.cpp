@@ -330,7 +330,8 @@ void BaseWindow::display()
 
     float* buffer = renderOutput.depthBuffer.data();
     _gid = -1;
-    if (buffer && engine.getActiveRenderer() == RendererType::particle)
+    if (buffer &&
+        _brayns.getEngine().getActiveRenderer() == RendererType::particle)
     {
         size_t index =
             (_windowSize.y() - _mouse.y()) * _windowSize.x() + _mouse.x();
