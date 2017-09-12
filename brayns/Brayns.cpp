@@ -784,6 +784,9 @@ private:
         _keyboardHandler->registerKeyboardShortcut(
             'y', "Enable/Disable light emitting materials",
             std::bind(&Brayns::Impl::_toggleLightEmittingMaterials, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            'l', "Toggle load dynamic/static load balancer",
+            std::bind(&Brayns::Impl::_toggleLoadBalancer, this));
     }
 
     void _blackBackground()
@@ -943,6 +946,14 @@ private:
             _parametersManager->getRenderingParameters();
         renderParams.setLightEmittingMaterials(
             !renderParams.getLightEmittingMaterials());
+    }
+
+    void _toggleLoadBalancer()
+    {
+        RenderingParameters& renderParams =
+            _parametersManager->getRenderingParameters();
+        renderParams.setDynamicLoadBalancer(
+            !renderParams.getDynamicLoadBalancer());
     }
 
     std::unique_ptr<EngineFactory> _engineFactory;

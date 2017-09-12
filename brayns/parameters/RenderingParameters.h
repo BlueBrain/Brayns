@@ -82,6 +82,12 @@ public:
         _lightEmittingMaterials = value;
     }
 
+    bool getDynamicLoadBalancer() const { return _dynamicLoadBalancer; }
+    void setDynamicLoadBalancer(const bool value)
+    {
+        _dynamicLoadBalancer = value;
+    }
+
     const Vector3f& getBackgroundColor() const { return _backgroundColor; }
     void setBackgroundColor(const Vector3f& value) { _backgroundColor = value; }
     /**
@@ -172,6 +178,7 @@ protected:
     float _epsilon;
     CameraType _cameraType;
     bool _headLight;
+    bool _dynamicLoadBalancer{false};
 };
 }
 #endif // RENDERINGPARAMETERS_H
