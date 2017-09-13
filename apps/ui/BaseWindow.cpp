@@ -43,7 +43,6 @@
 
 namespace
 {
-const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const int GLUT_WHEEL_SCROLL_UP = 3;
 const int GLUT_WHEEL_SCROLL_DOWN = 4;
 }
@@ -455,18 +454,6 @@ void BaseWindow::specialkey(const int key, const Vector2f&)
 void BaseWindow::_registerKeyboardShortcuts()
 {
     auto& keyHandler = _brayns.getKeyboardHandler();
-    keyHandler.registerKeyboardShortcut(' ', "Camera reset to initial state",
-                                        std::bind(&BaseWindow::_resetCamera,
-                                                  this));
-    keyHandler.registerKeyboardShortcut(
-        '+', "Increase motion speed",
-        std::bind(&BaseWindow::_increaseMotionSpeed, this));
-    keyHandler.registerKeyboardShortcut(
-        '-', "Decrease motion speed",
-        std::bind(&BaseWindow::_decreaseMotionSpeed, this));
-    keyHandler.registerKeyboardShortcut(
-        'c', "Display current camera information",
-        std::bind(&BaseWindow::_displayCameraInformation, this));
     keyHandler.registerKeyboardShortcut(
         'z', "Switch between depth and color buffers",
         std::bind(&BaseWindow::_toggleFrameBuffer, this));
@@ -487,30 +474,6 @@ void BaseWindow::_renderBitmapString(const float x, const float y,
     glRasterPos3f(-1.f, -1.f, 0.f);
 }
 #endif
-
-void BaseWindow::_resetCamera()
-{
-    auto& camera = _brayns.getEngine().getCamera();
-    camera.reset();
-    camera.commit();
-}
-
-void BaseWindow::_increaseMotionSpeed()
-{
-    _brayns.getCameraManipulator().updateMotionSpeed(
-        DEFAULT_MOTION_ACCELERATION);
-}
-
-void BaseWindow::_decreaseMotionSpeed()
-{
-    _brayns.getCameraManipulator().updateMotionSpeed(
-        1.f / DEFAULT_MOTION_ACCELERATION);
-}
-
-void BaseWindow::_displayCameraInformation()
-{
-    BRAYNS_INFO << _brayns.getEngine().getCamera() << std::endl;
-}
 
 void BaseWindow::_toggleFrameBuffer()
 {

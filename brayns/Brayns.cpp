@@ -61,6 +61,12 @@
 #include <servus/uri.h>
 #endif
 
+namespace
+{
+const float DEFAULT_TEST_TIMESTAMP = 10000.f;
+const float DEFAULT_MOTION_ACCELERATION = 1.5f;
+}
+
 namespace brayns
 {
 struct Brayns::Impl
@@ -723,6 +729,15 @@ private:
             '2', "White background",
             std::bind(&Brayns::Impl::_whiteBackground, this));
         _keyboardHandler->registerKeyboardShortcut(
+            '3', "Set gradient materials",
+            std::bind(&Brayns::Impl::_gradientMaterials, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '4', "Set pastel materials",
+            std::bind(&Brayns::Impl::_pastelMaterials, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '5', "Set random materials",
+            std::bind(&Brayns::Impl::_randomMaterials, this));
+        _keyboardHandler->registerKeyboardShortcut(
             '6', "Default renderer",
             std::bind(&Brayns::Impl::_defaultRenderer, this));
         _keyboardHandler->registerKeyboardShortcut(
@@ -787,6 +802,39 @@ private:
         _keyboardHandler->registerKeyboardShortcut(
             'l', "Toggle load dynamic/static load balancer",
             std::bind(&Brayns::Impl::_toggleLoadBalancer, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            'g', "Enable/Disable timestamp auto-increment",
+            std::bind(&Brayns::Impl::_toggleIncrementalTimestamp, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            'x', "Set timestamp to " + std::to_string(DEFAULT_TEST_TIMESTAMP),
+            std::bind(&Brayns::Impl::_defaultTimestamp, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '|', "Create cache file ",
+            std::bind(&Brayns::Impl::_saveSceneToCacheFile, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '{', "Decrease eye separation",
+            std::bind(&Brayns::Impl::_decreaseEyeSeparation, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '}', "Increase eye separation",
+            std::bind(&Brayns::Impl::_increaseEyeSeparation, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '<', "Decrease field of view",
+            std::bind(&Brayns::Impl::_decreaseFieldOfView, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '>', "Increase field of view",
+            std::bind(&Brayns::Impl::_increaseFieldOfView, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            ' ', "Camera reset to initial state",
+            std::bind(&Brayns::Impl::_resetCamera, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '+', "Increase motion speed",
+            std::bind(&Brayns::Impl::_increaseMotionSpeed, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            '-', "Decrease motion speed",
+            std::bind(&Brayns::Impl::_decreaseMotionSpeed, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            'c', "Display current camera information",
+            std::bind(&Brayns::Impl::_displayCameraInformation, this));
     }
 
     void _blackBackground()
@@ -956,12 +1004,104 @@ private:
             !renderParams.getDynamicLoadBalancer());
     }
 
+    void _decreaseFieldOfView()
+    {
+        _fieldOfView -= 1.f;
+        //_fieldOfView = std::max(1.f, _fieldOfView);
+        _engine->getCamera().setFieldOfView(_fieldOfView);
+        BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
+    }
+
+    void _increaseFieldOfView()
+    {
+        _fieldOfView += 1.f;
+        //    _fieldOfView = std::min(179.f, _fieldOfView);
+        _engine->getCamera().setFieldOfView(_fieldOfView);
+        BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
+    }
+
+    void _decreaseEyeSeparation()
+    {
+        _eyeSeparation -= 0.01f;
+        //_eyeSeparation = std::max(0.1f, _eyeSeparation);
+        _engine->getCamera().setEyeSeparation(_eyeSeparation);
+        BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
+    }
+
+    void _increaseEyeSeparation()
+    {
+        _eyeSeparation += 0.01f;
+        //_eyeSeparation = std::min(1.0f, _eyeSeparation);
+        _engine->getCamera().setEyeSeparation(_eyeSeparation);
+        BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
+    }
+
+    void _gradientMaterials()
+    {
+        _engine->initializeMaterials(MaterialType::gradient);
+    }
+
+    void _pastelMaterials()
+    {
+        _engine->initializeMaterials(MaterialType::pastel);
+    }
+
+    void _randomMaterials()
+    {
+        _engine->initializeMaterials(MaterialType::random);
+    }
+
+    void _toggleIncrementalTimestamp()
+    {
+        auto& sceneParams = _parametersManager->getSceneParameters();
+        sceneParams.setAnimationDelta(sceneParams.getAnimationDelta() == 0 ? 1
+                                                                           : 0);
+    }
+
+    void _defaultTimestamp()
+    {
+        auto& sceneParams = _parametersManager->getSceneParameters();
+        sceneParams.setTimestamp(DEFAULT_TEST_TIMESTAMP);
+    }
+
+    void _saveSceneToCacheFile()
+    {
+        auto& scene = _engine->getScene();
+        scene.saveSceneToCacheFile();
+    }
+
+    void _resetCamera()
+    {
+        auto& camera = _engine->getCamera();
+        camera.reset();
+        camera.commit();
+    }
+
+    void _increaseMotionSpeed()
+    {
+        _cameraManipulator->updateMotionSpeed(DEFAULT_MOTION_ACCELERATION);
+    }
+
+    void _decreaseMotionSpeed()
+    {
+        _cameraManipulator->updateMotionSpeed(1.f /
+                                              DEFAULT_MOTION_ACCELERATION);
+    }
+
+    void _displayCameraInformation()
+    {
+        BRAYNS_INFO << _engine->getCamera() << std::endl;
+    }
+
     std::unique_ptr<EngineFactory> _engineFactory;
     ParametersManagerPtr _parametersManager;
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
     MeshLoader _meshLoader;
+
+    float _fieldOfView{45.f};
+    float _eyeSeparation{0.0635f};
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;
