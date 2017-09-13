@@ -36,23 +36,6 @@ public:
     /** Sets the rendering parameters and renders the current frame
      */
     void display();
-
-private:
-    void _registerKeyboardShortcuts() final;
-
-    void _gradientMaterials();
-    void _pastelMaterials();
-    void _randomMaterials();
-    void _toggleIncrementalTimestamp();
-    void _defaultTimestamp();
-    void _saveSceneToCacheFile();
-    void _decreaseFieldOfView();
-    void _increaseFieldOfView();
-    void _decreaseEyeSeparation();
-    void _increaseEyeSeparation();
-
-    float _fieldOfView;
-    float _eyeSeparation;
 };
 }
 #endif // BRAYNSVIEWER_H

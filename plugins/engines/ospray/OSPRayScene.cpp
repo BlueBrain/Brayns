@@ -1059,9 +1059,6 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials(const bool updateOnly)
 {
-    if (_ospMaterialData)
-        ospRelease(_ospMaterialData);
-
     // Determine how many materials need to be created
     size_t maxId = 0;
     for (auto& material : _materials)

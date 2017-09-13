@@ -172,10 +172,6 @@ protected:
     Vector2ui _windowPosition;
 
 private:
-    void _resetCamera();
-    void _increaseMotionSpeed();
-    void _decreaseMotionSpeed();
-    void _displayCameraInformation();
     void _exitApplication();
     void _toggleFrameBuffer();
 
