@@ -41,10 +41,14 @@ void CircuitSimulationHandler::_initializeReport()
     const auto& target = _geometryParameters.getCircuitTarget();
     const auto& report = _geometryParameters.getCircuitReport();
 
+    // TODO: Circuit initialization should be done only once. It's also done in
+    // the morphology loader and the code is therefore duplicated.
     const brion::BlueConfig bc(circuitConfig);
     const brain::Circuit circuit(bc);
-    const auto& gids =
-        (target.empty() ? circuit.getGIDs() : circuit.getGIDs(target));
+    const auto circuitDensity = _geometryParameters.getCircuitDensity() / 100.f;
+    const auto gids =
+        (target.empty() ? circuit.getRandomGIDs(circuitDensity)
+                        : circuit.getRandomGIDs(circuitDensity, target));
     if (gids.empty())
     {
         BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
