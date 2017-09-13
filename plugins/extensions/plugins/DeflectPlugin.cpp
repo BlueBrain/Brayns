@@ -105,7 +105,8 @@ bool DeflectPlugin::run(Engine& engine, KeyboardHandler& keyboardHandler,
     {
         if (_initializeDeflect(observerOnly))
         {
-            const auto& windowSize = appParams.getWindowSize();
+            const auto& windowSize =
+                engine.getSupportedFrameSize(appParams.getWindowSize());
             deflect::SizeHints sizeHints;
             sizeHints.preferredWidth = windowSize.x();
             sizeHints.preferredHeight = windowSize.y();

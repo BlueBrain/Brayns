@@ -84,9 +84,11 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
     _scene.reset(new OSPRayScene(renderersForScene, _parametersManager));
+    _camera.reset(new OSPRayCamera(rp.getCameraType()));
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
-    _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
+    _frameSize = getSupportedFrameSize(
+        _parametersManager.getApplicationParameters().getWindowSize());
 
     bool accumulation = rp.getAccumulation();
     if (!_parametersManager.getApplicationParameters().getFilters().empty())
@@ -101,7 +103,6 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
         ospFrameBuffer->enableDeflectPixelOp();
 
     _frameBuffer.reset(ospFrameBuffer);
-    _camera.reset(new OSPRayCamera(rp.getCameraType()));
 
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
@@ -179,8 +180,8 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
     Vector2f result = size;
     if (getCamera().getType() == CameraType::stereo)
     {
-        if (size.x() % TILE_SIZE * 2 != 0)
-            result.x() = size.x() - size.x() % TILE_SIZE * 2;
+        if (size.x() % (TILE_SIZE * 2) != 0)
+            result.x() = size.x() - size.x() % (TILE_SIZE * 2);
     }
     else
     {
@@ -196,6 +197,8 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const
 {
+    if (getCamera().getType() == CameraType::stereo)
+        return {TILE_SIZE * 2, TILE_SIZE};
     return {TILE_SIZE, TILE_SIZE};
 }
 }
