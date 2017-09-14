@@ -263,10 +263,13 @@ bool DeflectPlugin::_handleDeflectEvents(Engine& engine,
         }
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
         {
+            Vector2ui newSize(event.dx, event.dy);
+            if (engine.getCamera().getType() == CameraType::stereo)
+                newSize.x() *= 2;
+
             engine.getParametersManager()
                 .getApplicationParameters()
-                .setWindowSize(engine.getSupportedFrameSize(
-                    Vector2ui(event.dx, event.dy)));
+                .setWindowSize(engine.getSupportedFrameSize(newSize));
             break;
         }
         case deflect::Event::EVT_CLOSE:
