@@ -58,7 +58,7 @@ public:
     /**
        Executes code specific to every registered plugin
      */
-    void execute(Engine& engine, KeyboardHandler& keyboardHandler,
+    void execute(EnginePtr engine, KeyboardHandler& keyboardHandler,
                  AbstractManipulator& cameraManipulator);
 
 private:

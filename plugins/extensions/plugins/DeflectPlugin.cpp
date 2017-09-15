@@ -71,10 +71,10 @@ DeflectPlugin::DeflectPlugin()
 #endif
 }
 
-bool DeflectPlugin::run(Engine& engine, KeyboardHandler& keyboardHandler,
+bool DeflectPlugin::run(EnginePtr engine, KeyboardHandler& keyboardHandler,
                         AbstractManipulator& cameraManipulator)
 {
-    auto& appParams = engine.getParametersManager().getApplicationParameters();
+    auto& appParams = engine->getParametersManager().getApplicationParameters();
     appParams.setStreamingEnabled(_params.getEnabled());
     appParams.setStreamCompression(_params.getCompression());
     appParams.setStreamQuality(_params.getQuality());
@@ -100,17 +100,17 @@ bool DeflectPlugin::run(Engine& engine, KeyboardHandler& keyboardHandler,
         _stream.reset();
     }
 
-    const bool observerOnly = engine.haveDeflectPixelOp();
+    const bool observerOnly = engine->haveDeflectPixelOp();
     if (deflectEnabled && !_stream)
     {
         if (_initializeDeflect(observerOnly))
         {
             const auto& windowSize =
-                engine.getSupportedFrameSize(appParams.getWindowSize());
+                engine->getSupportedFrameSize(appParams.getWindowSize());
             deflect::SizeHints sizeHints;
             sizeHints.preferredWidth = windowSize.x();
             sizeHints.preferredHeight = windowSize.y();
-            const auto& minSize = engine.getMinimumFrameSize();
+            const auto& minSize = engine->getMinimumFrameSize();
             sizeHints.minWidth = minSize.x();
             sizeHints.minHeight = minSize.y();
             _stream->sendSizeHints(sizeHints);
@@ -120,12 +120,12 @@ bool DeflectPlugin::run(Engine& engine, KeyboardHandler& keyboardHandler,
     if (deflectEnabled && _stream && _stream->isConnected())
     {
         if (!observerOnly)
-            _sendDeflectFrame(engine);
+            _sendDeflectFrame(*engine);
 
-        if (_handleDeflectEvents(engine, keyboardHandler, cameraManipulator))
+        if (_handleDeflectEvents(*engine, keyboardHandler, cameraManipulator))
         {
-            engine.getFrameBuffer().clear();
-            engine.getRenderer().commit();
+            engine->getFrameBuffer().clear();
+            engine->getRenderer().commit();
         }
     }
 

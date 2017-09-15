@@ -42,7 +42,7 @@ public:
      *         if control shall be returned to Brayns main loop for e.g.
      *         rendering a new frame.
      */
-    BRAYNS_API virtual bool run(Engine& _engine,
+    BRAYNS_API virtual bool run(EnginePtr _engine,
                                 KeyboardHandler& keyboardHandler,
                                 AbstractManipulator& cameraManipulator) = 0;
 
