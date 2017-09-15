@@ -23,38 +23,19 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/GeometryParameters.h>
 
-#include <brain/brain.h>
-#include <brion/brion.h>
 #include <servus/types.h>
 
 namespace brayns
 {
 CircuitSimulationHandler::CircuitSimulationHandler(
-    const GeometryParameters& geometryParameters)
+    const GeometryParameters& geometryParameters,
+    const std::string& reportSource, const brion::GIDSet& gids)
     : AbstractSimulationHandler(geometryParameters)
+    , _compartmentReport(nullptr)
 {
-}
-
-void CircuitSimulationHandler::_initializeReport()
-{
-    const auto& circuitConfig = _geometryParameters.getCircuitConfiguration();
-    const auto& target = _geometryParameters.getCircuitTarget();
-    const auto& report = _geometryParameters.getCircuitReport();
-
-    const brion::BlueConfig bc(circuitConfig);
-    const brain::Circuit circuit(bc);
-    const auto& gids =
-        (target.empty() ? circuit.getGIDs() : circuit.getGIDs(target));
-    if (gids.empty())
-    {
-        BRAYNS_ERROR << "Circuit does not contain any cells" << std::endl;
-        return;
-    }
-
-    // Load simulation information from compartment reports
-    _compartmentReport.reset(new brion::CompartmentReport(
-        brion::URI(bc.getReportSource(report).getPath()), brion::MODE_READ,
-        gids));
+    _compartmentReport.reset(
+        new brion::CompartmentReport(brion::URI(reportSource), brion::MODE_READ,
+                                     gids));
 
     // Load simulation information from compartment reports
     const auto reportStartTime = _compartmentReport->getStartTime();
@@ -92,9 +73,6 @@ CircuitSimulationHandler::~CircuitSimulationHandler()
 
 void* CircuitSimulationHandler::getFrameData()
 {
-    if (!_compartmentReport)
-        _initializeReport();
-
     if (_compartmentReport)
     {
         auto frame = _beginFrame + _timestamp * _timeBetweenFrames;

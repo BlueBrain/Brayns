@@ -41,7 +41,7 @@ if(Brion_FOUND)
       MorphologyLoader.cpp
       NESTLoader.cpp
       simulation/CircuitSimulationHandler.cpp)
-  list(APPEND BRAYNSIO_PUBLIC_HEADERS
+  list(APPEND BRAYNSIO_HEADERS
       MorphologyLoader.h
       NESTLoader.h
       simulation/CircuitSimulationHandler.h)

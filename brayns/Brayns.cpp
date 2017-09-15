@@ -38,7 +38,6 @@
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
-#include <brayns/io/simulation/CircuitSimulationHandler.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 #if (BRAYNS_USE_ASSIMP)
 #include <brayns/io/MeshLoader.h>
@@ -390,9 +389,6 @@ private:
         if (!geometryParameters.getMorphologyFolder().empty())
             _loadMorphologyFolder();
 
-        if (!geometryParameters.getCircuitReport().empty())
-            _loadCompartmentReport();
-
         if (!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getLoadCacheFile().empty())
             _loadCircuitConfiguration();
@@ -650,39 +646,9 @@ private:
         const std::string& report = geometryParameters.getCircuitReport();
         MorphologyLoader morphologyLoader(geometryParameters, scene);
         const servus::URI uri(filename);
-        morphologyLoader.importCircuit(uri, target, report, _meshLoader);
+        morphologyLoader.importCircuit(uri, target, report, scene, _meshLoader);
     }
 
-    /**
-        Loads compartment report from circuit configuration (command
-       line
-        parameter --report)
-    */
-    void _loadCompartmentReport()
-    {
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
-        auto& scene = _engine->getScene();
-        const std::string& filename =
-            geometryParameters.getCircuitConfiguration();
-        const std::string& target = geometryParameters.getCircuitTarget();
-        const std::string& report = geometryParameters.getCircuitReport();
-        BRAYNS_INFO << "Attaching to compartment report from " << filename
-                    << std::endl;
-
-        CircuitSimulationHandlerPtr simulationHandler(
-            new CircuitSimulationHandler(geometryParameters));
-        scene.setSimulationHandler(simulationHandler);
-
-        auto& sceneParameters = _parametersManager->getSceneParameters();
-        const std::string& colorMapFilename =
-            sceneParameters.getColorMapFilename();
-        if (!colorMapFilename.empty())
-        {
-            TransferFunctionLoader transferFunctionLoader;
-            transferFunctionLoader.loadFromFile(colorMapFilename, scene);
-            scene.commitTransferFunctionData();
-        }
-    }
 #endif // BRAYNS_USE_BRION
 
     /**

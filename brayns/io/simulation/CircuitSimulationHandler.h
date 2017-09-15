@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -25,14 +25,12 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/types.h>
+#include <brion/brion.h>
 
-namespace brion
-{
-class CompartmentReport;
-}
 namespace brayns
 {
-typedef std::unique_ptr<brion::CompartmentReport> CompartmentReportPtr;
+typedef std::shared_ptr<brion::CompartmentReport> CompartmentReportPtr;
+
 /**
  * @brief The CircuitSimulationHandler class handles simulation frames for the
  * current circuit. Frames are stored in a memory mapped file that is accessed
@@ -45,8 +43,12 @@ public:
     /**
      * @brief Default contructor
      * @param geometryParameters Geometry parameters
+     * @param reportSource path to report source
+     * @param gids GIDS to load
      */
-    CircuitSimulationHandler(const GeometryParameters& geometryParameters);
+    CircuitSimulationHandler(const GeometryParameters& geometryParameters,
+                             const std::string& reportSource,
+                             const brion::GIDSet& gids);
     ~CircuitSimulationHandler();
 
     /**
@@ -55,8 +57,8 @@ public:
      */
     void* getFrameData() final;
 
+    CompartmentReportPtr getCompartmentReport() { return _compartmentReport; }
 private:
-    void _initializeReport();
     CompartmentReportPtr _compartmentReport;
     double _beginFrame;
     double _endFrame;

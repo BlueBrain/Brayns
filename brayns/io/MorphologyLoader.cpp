@@ -45,8 +45,6 @@ const float INDEX_MAGIC = 1e6;
 
 namespace brayns
 {
-typedef std::unique_ptr<brion::CompartmentReport> CompartmentReportPtr;
-
 struct ParallelSceneContainer
 {
 public:
@@ -76,7 +74,6 @@ public:
     Impl(GeometryParameters geometryParameters, Scene& scene)
         : _geometryParameters(geometryParameters)
         , _scene(scene)
-        , _compartmentReport(nullptr)
     {
     }
 
@@ -86,10 +83,12 @@ public:
      * @param index Index of the morphology
      * @param material Material to use
      * @param transformation Transformation to apply to the morphology
+     * @param compartmentReport Compartment report to map to the morphology
      * @return True is the morphology was successfully imported, false otherwise
      */
     bool importMorphology(const servus::URI& uri, const uint64_t index,
-                          const size_t material, const Matrix4f& transformation)
+                          const size_t material, const Matrix4f& transformation,
+                          CompartmentReportPtr compartmentReport = nullptr)
     {
         ParallelSceneContainer sceneContainer(_scene.getSpheres(),
                                               _scene.getCylinders(),
@@ -99,7 +98,7 @@ public:
                                               _scene.getWorldBounds());
 
         return _importMorphologyFromURI(uri, index, material, transformation,
-                                        sceneContainer);
+                                        compartmentReport, sceneContainer);
     }
 
     /**
@@ -111,7 +110,8 @@ public:
      * @return True is the circuit was successfully imported, false otherwise
      */
     bool importCircuit(const servus::URI& uri, const std::string& target,
-                       const std::string& report, MeshLoader& meshLoader)
+                       const std::string& report, Scene& scene,
+                       MeshLoader& meshLoader)
     {
         // Open Circuit and select GIDs according to specified target
         const brion::BlueConfig bc(uri.getPath());
@@ -145,18 +145,21 @@ public:
         }
 
         // Load simulation information from compartment report
+        CompartmentReportPtr compartmentReport = nullptr;
         if (!report.empty())
             try
             {
-                _compartmentReport.reset(new brion::CompartmentReport(
-                    brion::URI(bc.getReportSource(report).getPath()),
-                    brion::MODE_READ, gids));
-                gids = _compartmentReport->getGIDs();
+                CircuitSimulationHandlerPtr simulationHandler(
+                    new CircuitSimulationHandler(
+                        _geometryParameters,
+                        bc.getReportSource(report).getPath(), gids));
+                compartmentReport = simulationHandler->getCompartmentReport();
+                // Attach simulation handler
+                scene.setSimulationHandler(simulationHandler);
             }
             catch (const std::exception& e)
             {
                 BRAYNS_ERROR << e.what() << std::endl;
-                _compartmentReport = nullptr;
             }
 
         const Matrix4fs& transformations = circuit.getTransforms(gids);
@@ -173,7 +176,8 @@ public:
         if (_geometryParameters.getCircuitMeshFolder().empty() ||
             _geometryParameters.getCircuitUseSimulationModel())
             returnValue = returnValue &&
-                          _importMorphologies(circuit, gids, transformations);
+                          _importMorphologies(circuit, gids, transformations,
+                                              compartmentReport);
         return returnValue;
     }
 
@@ -360,15 +364,18 @@ private:
      * @param transformation Transformation to apply to the morphology
      * @param material Material that is forced in case geometry parameters do
      * not apply
+     * @param compartmentReport Compartment report to map to the morphology
+     * @param scene Scene to which the morphology should be loaded into
      * @return True if the loading was successfull, false otherwise
      */
     bool _importMorphologyAsPoint(const uint64_t index, const size_t material,
                                   const Matrix4f& transformation,
+                                  CompartmentReportPtr compartmentReport,
                                   ParallelSceneContainer& scene)
     {
         uint64_t offset = 0;
-        if (_compartmentReport)
-            offset = _compartmentReport->getOffsets()[index][0];
+        if (compartmentReport)
+            offset = compartmentReport->getOffsets()[index][0];
 
         const auto radius = _geometryParameters.getRadiusMultiplier();
         const auto textureCoordinates = _getIndexAsTextureCoordinates(offset);
@@ -476,12 +483,14 @@ private:
      * @param transformation Transformation to apply to the morphology
      * @param material Material that is forced in case geometry parameters
      * do not apply
+     * @param compartmentReport Compartment report to map to the morphology
      * @param scene Scene to which the morphology should be loaded into
      * @return True if the loading was successfull, false otherwise
      */
     bool _importMorphologyFromURI(const servus::URI& uri, const uint64_t index,
                                   const size_t material,
                                   const Matrix4f& transformation,
+                                  CompartmentReportPtr compartmentReport,
                                   ParallelSceneContainer& scene)
     {
         try
@@ -517,8 +526,8 @@ private:
 
             uint64_t offset = 0;
 
-            if (_compartmentReport)
-                offset = _compartmentReport->getOffsets()[index][0];
+            if (compartmentReport)
+                offset = compartmentReport->getOffsets()[index][0];
 
             // Soma
             if (!_geometryParameters.useRealisticSomas() &&
@@ -560,12 +569,12 @@ private:
             // Only the first one or two axon sections are reported, so find the
             // last one and use its offset for all the other axon sections
             uint16_t lastAxon = 0;
-            if (_compartmentReport &&
+            if (compartmentReport &&
                 (morphologySectionTypes &
                  static_cast<size_t>(MorphologySectionType::axon)))
             {
                 const auto& counts =
-                    _compartmentReport->getCompartmentCounts()[index];
+                    compartmentReport->getCompartmentCounts()[index];
                 const auto& axon =
                     morphology.getSections(brain::neuron::SectionType::axon);
                 for (const auto& section : axon)
@@ -612,10 +621,10 @@ private:
                     section.getSampleDistancesToSoma();
 
                 float segmentStep = 0.f;
-                if (_compartmentReport)
+                if (compartmentReport)
                 {
                     const auto& counts =
-                        _compartmentReport->getCompartmentCounts()[index];
+                        compartmentReport->getCompartmentCounts()[index];
                     // Number of compartments usually differs from number of
                     // samples
                     segmentStep =
@@ -634,12 +643,12 @@ private:
 
                     const auto distance = distanceToSoma + distancesToSoma[i];
 
-                    if (_compartmentReport)
+                    if (compartmentReport)
                     {
                         const auto& offsets =
-                            _compartmentReport->getOffsets()[index];
+                            compartmentReport->getOffsets()[index];
                         const auto& counts =
-                            _compartmentReport->getCompartmentCounts()[index];
+                            compartmentReport->getCompartmentCounts()[index];
 
                         if (counts[section.getID()] > 0)
                             offset = offsets[section.getID()] +
@@ -781,6 +790,7 @@ private:
     bool _importMorphology(const servus::URI& source, const uint64_t index,
                            const size_t material,
                            const Matrix4f& transformation,
+                           CompartmentReportPtr compartmentReport,
                            ParallelSceneContainer& scene)
     {
         bool returnValue = true;
@@ -789,19 +799,21 @@ private:
         if (morphologySectionTypes ==
             static_cast<size_t>(MorphologySectionType::soma))
             return _importMorphologyAsPoint(index, material, transformation,
-                                            scene);
+                                            compartmentReport, scene);
         else if (_geometryParameters.useRealisticSomas())
             returnValue = _createRealisticSoma(source, index, material,
                                                transformation, scene);
         returnValue =
-            returnValue && _importMorphologyFromURI(source, index, material,
-                                                    transformation, scene);
+            returnValue &&
+            _importMorphologyFromURI(source, index, material, transformation,
+                                     compartmentReport, scene);
         return returnValue;
     }
 
     bool _importMorphologies(const brain::Circuit& circuit,
                              const brain::GIDSet& gids,
-                             const Matrix4fs& transformations)
+                             const Matrix4fs& transformations,
+                             CompartmentReportPtr compartmentReport)
     {
         const brain::URIs& uris = circuit.getMorphologyURIs(gids);
         size_t loadingFailures = 0;
@@ -839,7 +851,7 @@ private:
 
                 if (!_importMorphology(uri, morphologyIndex, materialId,
                                        transformations[morphologyIndex],
-                                       sceneContainer))
+                                       compartmentReport, sceneContainer))
 #pragma omp atomic
                     ++loadingFailures;
 
@@ -895,7 +907,6 @@ private:
     GeometryParameters _geometryParameters;
     Scene& _scene;
     strings _neuronMatrix;
-    CompartmentReportPtr _compartmentReport;
 };
 
 MorphologyLoader::MorphologyLoader(const GeometryParameters& geometryParameters,
@@ -918,9 +929,9 @@ bool MorphologyLoader::importMorphology(const servus::URI& uri,
 
 bool MorphologyLoader::importCircuit(const servus::URI& uri,
                                      const std::string& target,
-                                     const std::string& report,
+                                     const std::string& report, Scene& scene,
                                      MeshLoader& meshLoader)
 {
-    return _impl->importCircuit(uri, target, report, meshLoader);
+    return _impl->importCircuit(uri, target, report, scene, meshLoader);
 }
 }
