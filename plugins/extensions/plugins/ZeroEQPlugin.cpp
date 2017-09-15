@@ -65,6 +65,9 @@ const std::string ENDPOINT_STREAM_TO = ENDPOINT_API_VERSION + "stream-to";
 const std::string ENDPOINT_VIEWPORT = ENDPOINT_API_VERSION + "viewport";
 const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER =
     ENDPOINT_API_VERSION + "circuit-config-builder";
+
+const size_t NB_MAX_MESSAGES = 20; // Maximum number of ZeroEQ messages to read
+                                   // between each rendering loop
 }
 
 namespace brayns
@@ -150,13 +153,19 @@ bool ZeroEQPlugin::run(Engine& engine, KeyboardHandler&, AbstractManipulator&)
             _publisher.publish(_remoteFrame);
     }
 
+    // In the case of interactions with Jupyter notebooks, HTTP messages are
+    // received in a blocking and sequential manner, meaning that the subscriber
+    // never has more than one message in its queue. In other words, only one
+    // message is processed between each rendering loop. The following code
+    // allows the processing of several messages and performs rendering after
+    // NB_MAX_MESSAGES reads, or if one of the messages forces rendering by
+    // setting the _forceRedering boolean variable to true.
     _forceRendering = false;
-    while (_subscriber.receive(1))
-    {
-        if (_forceRendering)
-            break;
-    }
-    return !_forceRendering;
+    for (size_t i = 0; i < NB_MAX_MESSAGES && !_forceRendering; ++i)
+        while (_subscriber.receive(0))
+        {
+        }
+    return true;
 }
 
 bool ZeroEQPlugin::operator!() const
