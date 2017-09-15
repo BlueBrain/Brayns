@@ -132,11 +132,11 @@ void ZeroEQPlugin::_onChangeEngine()
     _forceRendering = true;
 }
 
-bool ZeroEQPlugin::run(Engine& engine, KeyboardHandler&, AbstractManipulator&)
+bool ZeroEQPlugin::run(EnginePtr engine, KeyboardHandler&, AbstractManipulator&)
 {
-    if (_engine != &engine || _dirtyEngine)
+    if (_engine != engine.get() || _dirtyEngine)
     {
-        _engine = &engine;
+        _engine = engine.get();
         _onNewEngine();
     }
 

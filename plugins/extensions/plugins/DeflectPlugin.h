@@ -50,7 +50,7 @@ public:
 #endif
 
     /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API bool run(Engine& engine, KeyboardHandler& keyboardHandler,
+    BRAYNS_API bool run(EnginePtr engine, KeyboardHandler& keyboardHandler,
                         AbstractManipulator& cameraManipulator) final;
 
 private:

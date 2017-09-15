@@ -219,7 +219,7 @@ struct Brayns::Impl
     void _executePlugins(const Vector2ui& size)
     {
         auto oldEngine = _engine.get();
-        _extensionPluginFactory->execute(*_engine, *_keyboardHandler,
+        _extensionPluginFactory->execute(_engine, *_keyboardHandler,
                                          *_cameraManipulator);
 
         if (!_engine)
