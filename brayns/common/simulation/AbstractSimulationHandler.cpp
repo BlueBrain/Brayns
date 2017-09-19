@@ -33,7 +33,7 @@ namespace brayns
 AbstractSimulationHandler::AbstractSimulationHandler(
     const GeometryParameters& geometryParameters)
     : _geometryParameters(geometryParameters)
-    , _timestamp(-std::numeric_limits<float>::max())
+    , _timestamp(std::numeric_limits<float>::max())
     , _currentFrame(0)
     , _nbFrames(0)
     , _frameSize(0)
