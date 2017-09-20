@@ -57,7 +57,7 @@ common_find_package(Boost REQUIRED COMPONENTS
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 
-if(BRAYNS_IMAGEMAGICK_ENABLED==ON)
+if(BRAYNS_IMAGEMAGICK_ENABLED)
   common_find_package(Magick++ SYSTEM)
 endif()
 
