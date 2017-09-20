@@ -240,37 +240,11 @@ struct Brayns::Impl
     {
         _engine->getCamera().set(renderInput.position, renderInput.target,
                                  renderInput.up);
-        _engine->reshape(renderInput.windowSize);
-        _engine->preRender();
 
-#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        _executePlugins(renderInput.windowSize);
-#endif
-        auto& sceneParams = _parametersManager->getSceneParameters();
-        if (sceneParams.getAnimationDelta() != 0)
-            _engine->commit();
+        _render(renderInput.windowSize);
 
-        Camera& camera = _engine->getCamera();
-        camera.commit();
-
-        Scene& scene = _engine->getScene();
         FrameBuffer& frameBuffer = _engine->getFrameBuffer();
         const Vector2i& frameSize = frameBuffer.getSize();
-
-        if (_parametersManager->getRenderingParameters().getHeadLight())
-        {
-            LightPtr sunLight = scene.getLight(0);
-            DirectionalLight* sun =
-                dynamic_cast<DirectionalLight*>(sunLight.get());
-            if (sun)
-            {
-                sun->setDirection(camera.getTarget() - camera.getPosition());
-                scene.commitLights();
-            }
-        }
-
-        _render();
-
         uint8_t* colorBuffer = frameBuffer.getColorBuffer();
         if (colorBuffer)
         {
@@ -295,33 +269,7 @@ struct Brayns::Impl
         const Vector2ui windowSize =
             _parametersManager->getApplicationParameters().getWindowSize();
 
-        _engine->reshape(windowSize);
-        _engine->preRender();
-
-#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        _executePlugins(windowSize);
-#endif
-        Scene& scene = _engine->getScene();
-        Camera& camera = _engine->getCamera();
-
-        auto& sceneParams = _parametersManager->getSceneParameters();
-        if (sceneParams.getAnimationDelta() != 0)
-            _engine->commit();
-
-        if (_parametersManager->getRenderingParameters().getHeadLight())
-        {
-            LightPtr sunLight = scene.getLight(0);
-            DirectionalLight* sun =
-                dynamic_cast<DirectionalLight*>(sunLight.get());
-            if (sun)
-            {
-                sun->setDirection(camera.getTarget() - camera.getPosition());
-                scene.commitLights();
-            }
-        }
-
-        camera.commit();
-        _render();
+        _render(windowSize);
 
         _engine->postRender();
 
@@ -332,14 +280,40 @@ struct Brayns::Impl
     ParametersManager& getParametersManager() { return *_parametersManager; }
     KeyboardHandler& getKeyboardHandler() { return *_keyboardHandler; }
     AbstractManipulator& getCameraManipulator() { return *_cameraManipulator; }
-
 private:
-    void _render()
+    void _render(const Vector2ui& windowSize)
     {
+        _engine->reshape(windowSize);
+        _engine->preRender();
+
+#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
+        _executePlugins(windowSize);
+#endif
+        _engine->commit();
+
+        Camera& camera = _engine->getCamera();
+        camera.commit();
+
+        if (_parametersManager->getRenderingParameters().getHeadLight())
+        {
+            Scene& scene = _engine->getScene();
+            LightPtr sunLight = scene.getLight(0);
+            DirectionalLight* sun =
+                dynamic_cast<DirectionalLight*>(sunLight.get());
+            if (sun && camera.getModified())
+            {
+                sun->setDirection(camera.getTarget() - camera.getPosition());
+                scene.commitLights();
+            }
+        }
+
         _engine->setActiveRenderer(
             _parametersManager->getRenderingParameters().getRenderer());
         _engine->render();
         _writeFrameToFolder();
+
+        _parametersManager->resetModified();
+        camera.resetModified();
     }
 
     void _loadData()
@@ -413,8 +387,9 @@ private:
                 volumeParameters.getElementSpacing();
             Boxf& worldBounds = scene.getWorldBounds();
             worldBounds.merge(Vector3f(0.f, 0.f, 0.f));
-            worldBounds.merge(volumeOffset + Vector3f(volumeDimensions) *
-                                                 volumeElementSpacing);
+            worldBounds.merge(volumeOffset +
+                              Vector3f(volumeDimensions) *
+                                  volumeElementSpacing);
         }
     }
 

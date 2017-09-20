@@ -119,13 +119,37 @@ std::string OSPRayEngine::name() const
 void OSPRayEngine::commit()
 {
     Engine::commit();
+
+    auto device = ospGetCurrentDevice();
+    if (device && _parametersManager.getRenderingParameters().getModified())
+    {
+        const auto useDynamicLoadBalancer =
+            _parametersManager.getRenderingParameters()
+                .getDynamicLoadBalancer();
+        ospDeviceSet1i(device, "dynamicLoadBalancer", useDynamicLoadBalancer);
+        ospDeviceCommit(device);
+
+        BRAYNS_INFO << "Using "
+                    << (useDynamicLoadBalancer ? "dynamic" : "static")
+                    << " load balancer" << std::endl;
+    }
+
+    auto osprayFrameBuffer =
+        std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer);
+    const auto& appParams = getParametersManager().getApplicationParameters();
+    if (appParams.getModified() || _camera->getModified())
+        osprayFrameBuffer->setStreamingParams(appParams.getStreamingEnabled(),
+                                              appParams.getStreamCompression(),
+                                              appParams.getStreamQuality(),
+                                              _camera->getType() ==
+                                                  CameraType::stereo);
+
     for (const auto& renderer : _renderers)
     {
         _renderers[renderer.first]->setScene(_scene);
         _renderers[renderer.first]->setCamera(_camera);
         _renderers[renderer.first]->commit();
     }
-    _camera->commit();
 }
 
 void OSPRayEngine::render()
@@ -139,30 +163,12 @@ void OSPRayEngine::render()
 
 void OSPRayEngine::preRender()
 {
-    auto device = ospGetCurrentDevice();
-    if (device)
-    {
-        ospDeviceSet1i(device, "dynamicLoadBalancer",
-                       _parametersManager.getRenderingParameters()
-                           .getDynamicLoadBalancer());
-        ospDeviceCommit(device);
-    }
-
     const auto& renderParams = _parametersManager.getRenderingParameters();
     if (renderParams.getAccumulation() != _frameBuffer->getAccumulation())
     {
         _frameBuffer->setAccumulation(renderParams.getAccumulation());
         _frameBuffer->resize(_frameBuffer->getSize());
     }
-
-    auto osprayFrameBuffer =
-        std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer);
-    const auto& appParams = getParametersManager().getApplicationParameters();
-    osprayFrameBuffer->setStreamingParams(appParams.getStreamingEnabled(),
-                                          appParams.getStreamCompression(),
-                                          appParams.getStreamQuality(),
-                                          _camera->getType() ==
-                                              CameraType::stereo);
 
     _frameBuffer->map();
 }

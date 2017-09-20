@@ -67,6 +67,12 @@ void ParametersManager::print()
         parameters->print();
 }
 
+void ParametersManager::resetModified()
+{
+    for (AbstractParameters* parameters : _parameterSets)
+        parameters->resetModified();
+}
+
 ApplicationParameters& ParametersManager::getApplicationParameters()
 {
     return _applicationParameters;

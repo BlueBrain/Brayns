@@ -38,9 +38,12 @@ public:
        specified and is therefore specific to the scene.
     */
     float getTimestamp() const { return _timestamp; }
-    void setTimestamp(const float value) { _timestamp = value; }
+    void setTimestamp(const float value) { updateValue(_timestamp, value); }
     /** The (frame) delta to apply for animations to select the next frame. */
-    void setAnimationDelta(const int32_t animation) { _animation = animation; }
+    void setAnimationDelta(const int32_t animation)
+    {
+        updateValue(_animation, animation);
+    }
     int32_t getAnimationDelta() const { return _animation; }
     const std::string& getColorMapFilename() const { return _colorMapFilename; }
     /**

@@ -41,7 +41,10 @@ public:
 
     /** window size */
     const Vector2ui& getWindowSize() const { return _windowSize; }
-    void setWindowSize(const Vector2ui& size) { _windowSize = size; }
+    void setWindowSize(const Vector2ui& size)
+    {
+        updateValue(_windowSize, size);
+    }
     /** camera name (e.g. Perspective, Stereo, etc. ) */
     std::string getCamera() const { return _camera; }
     /** Benchmarking */
@@ -49,12 +52,12 @@ public:
     /** JPEG compression quality */
     void setJpegCompression(const size_t compression)
     {
-        _jpegCompression = compression;
+        updateValue(_jpegCompression, compression);
     }
     size_t getJpegCompression() const { return _jpegCompression; }
     /** JPEG size */
     const Vector2ui& getJpegSize() const { return _jpegSize; }
-    void setJpegSize(const Vector2ui& size) { _jpegSize = size; }
+    void setJpegSize(const Vector2ui& size) { updateValue(_jpegSize, size); }
     const strings& getFilters() const { return _filters; }
     /**
      * @brief Auto publication of ZeroEQ events is used when several
@@ -65,28 +68,28 @@ public:
     bool getAutoPublishZeroEQEvents() const { return _autoPublishZeroEQEvents; }
     void setFrameExportFolder(const std::string& folder)
     {
-        _frameExportFolder = folder;
+        updateValue(_frameExportFolder, folder);
     }
     std::string getFrameExportFolder() const { return _frameExportFolder; }
     /** Streaming enabled */
     bool getStreamingEnabled() const { return _streamingEnabled; }
     void setStreamingEnabled(const bool enabled)
     {
-        _streamingEnabled = enabled;
+        updateValue(_streamingEnabled, enabled);
     }
 
     /** Stream compression enabled */
     bool getStreamCompression() const { return _streamCompression; }
     void setStreamCompression(const bool enabled)
     {
-        _streamCompression = enabled;
+        updateValue(_streamCompression, enabled);
     }
 
     /** Stream compression quality, 1 (worst) to 100 (best) */
     unsigned int getStreamQuality() const { return _streamQuality; }
     void setStreamQuality(const unsigned int quality)
     {
-        _streamQuality = quality;
+        updateValue(_streamQuality, quality);
     }
 
     /** Folder used by the application to store temporary files */

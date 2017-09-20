@@ -37,7 +37,10 @@ public:
     const std::string& getFolder() const { return _folder; }
     /** File containing volume data */
     const std::string& getFilename() const { return _filename; }
-    void setFilename(const std::string& filename) { _filename = filename; }
+    void setFilename(const std::string& filename)
+    {
+        updateValue(_filename, filename);
+    }
     /** Volume dimension  */
     const Vector3ui& getDimensions() const { return _dimensions; }
     /** Volume scale  */
@@ -45,7 +48,7 @@ public:
     /** Volume offset */
     const Vector3f& getOffset() const { return _offset; }
     /** Volume epsilon */
-    void setSamplesPerRay(const size_t spr) { _spr = spr; }
+    void setSamplesPerRay(const size_t spr) { updateValue(_spr, spr); }
     size_t getSamplesPerRay() const { return _spr; }
 protected:
     bool _parse(const po::variables_map& vm) final;
