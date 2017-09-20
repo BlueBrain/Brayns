@@ -162,6 +162,9 @@ public:
                 BRAYNS_ERROR << e.what() << std::endl;
             }
 
+        if (!_geometryParameters.getLoadCacheFile().empty())
+            return true;
+
         const Matrix4fs& transformations = circuit.getTransforms(gids);
         _logLoadedGIDs(gids);
 
