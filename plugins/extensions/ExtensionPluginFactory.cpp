@@ -71,7 +71,7 @@ void ExtensionPluginFactory::clear()
     _plugins.clear();
 }
 
-void ExtensionPluginFactory::execute(EnginePtr engine,
+void ExtensionPluginFactory::execute(EngineWeakPtr engine,
                                      KeyboardHandler& keyboardHandler,
                                      AbstractManipulator& cameraManipulator)
 {

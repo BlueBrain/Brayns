@@ -60,6 +60,7 @@ typedef std::shared_ptr<Brayns> BraynsPtr;
 
 class Engine;
 typedef std::shared_ptr<Engine> EnginePtr;
+typedef std::weak_ptr<Engine> EngineWeakPtr;
 typedef std::map<std::string, EnginePtr> EngineMap;
 
 class Scene;
