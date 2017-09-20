@@ -71,8 +71,10 @@ public:
        defines the origin, target and up vector of the camera, and an ImageJPEG
        event triggers the rendering and gathers the results in a form of a
        base64 encoded JPEG image.
+       @return true if rendering should continue or false if user inputs
+       requested to stop.
     */
-    BRAYNS_API void render();
+    BRAYNS_API bool render();
 
     /**
        @return the current engine

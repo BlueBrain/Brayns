@@ -155,6 +155,15 @@ public:
      *         successfully loaded. Only supported for the OSPRay engine.
      */
     virtual bool haveDeflectPixelOp() const { return false; }
+    /**
+     * Keep continue to run the engine, aka the user did not request to stop
+     * rendering.
+     */
+    void setKeepRunning(bool keepRunning) { _keepRunning = keepRunning; }
+    /**
+     * @return true if the user wants to continue rendering, false otherwise.
+     */
+    bool getKeepRunning() const { return _keepRunning; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
@@ -170,6 +179,7 @@ protected:
     size_t _frameNumber;
     float _lastProgress;
     std::string _lastOperation;
+    bool _keepRunning{true};
 };
 }
 
