@@ -63,10 +63,13 @@ void Engine::reshape(const Vector2ui& frameSize)
 void Engine::commit()
 {
     auto& sceneParams = _parametersManager.getSceneParameters();
-    sceneParams.setTimestamp(sceneParams.getTimestamp() +
-                             sceneParams.getAnimationDelta());
+    if (sceneParams.getAnimationDelta() != 0)
+    {
+        sceneParams.setTimestamp(sceneParams.getTimestamp() +
+                                 sceneParams.getAnimationDelta());
 
-    _frameBuffer->clear();
+        _frameBuffer->clear();
+    }
 }
 
 void Engine::setDefaultCamera()

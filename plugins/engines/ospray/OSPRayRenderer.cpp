@@ -66,6 +66,10 @@ void OSPRayRenderer::commit()
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
     SceneParameters& sp = _parametersManager.getSceneParameters();
     VolumeParameters& vp = _parametersManager.getVolumeParameters();
+
+    if (!rp.getModified() && !sp.getModified() && !vp.getModified())
+        return;
+
     ShadingType mt = rp.getShading();
 
     Vector3f color = rp.getBackgroundColor();

@@ -97,5 +97,7 @@ void AbstractParameters::set(const std::string& key, const std::string& value)
     delete[] argv;
 
     _parse(vm);
+
+    _modified = true;
 }
 }
