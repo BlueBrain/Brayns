@@ -71,9 +71,14 @@ DeflectPlugin::DeflectPlugin()
 #endif
 }
 
-bool DeflectPlugin::run(EnginePtr engine, KeyboardHandler& keyboardHandler,
+bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
                         AbstractManipulator& cameraManipulator)
 {
+    if (engine_.expired())
+        return true;
+
+    EnginePtr engine = engine_.lock();
+
     auto& appParams = engine->getParametersManager().getApplicationParameters();
     appParams.setStreamingEnabled(_params.getEnabled());
     appParams.setStreamCompression(_params.getCompression());

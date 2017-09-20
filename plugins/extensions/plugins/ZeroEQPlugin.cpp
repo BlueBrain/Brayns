@@ -133,12 +133,19 @@ void ZeroEQPlugin::_onChangeEngine()
     _forceRendering = true;
 }
 
-bool ZeroEQPlugin::run(EnginePtr engine, KeyboardHandler&, AbstractManipulator&)
+bool ZeroEQPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
+                       AbstractManipulator&)
 {
-    if (_engine != engine.get() || _dirtyEngine)
+    bool continueOtherPlugins = true;
+
+    if (engine_.expired())
+        return continueOtherPlugins;
+
+    if (_engine != engine_.lock().get() || _dirtyEngine)
     {
-        _engine = engine.get();
+        _engine = engine_.lock().get();
         _onNewEngine();
+        continueOtherPlugins = false;
     }
 
     const auto& ap = _parametersManager.getApplicationParameters();
@@ -166,7 +173,7 @@ bool ZeroEQPlugin::run(EnginePtr engine, KeyboardHandler&, AbstractManipulator&)
         while (_subscriber.receive(0))
         {
         }
-    return true;
+    return continueOtherPlugins;
 }
 
 bool ZeroEQPlugin::operator!() const
