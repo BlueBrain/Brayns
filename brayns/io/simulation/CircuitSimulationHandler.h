@@ -58,12 +58,13 @@ public:
     void* getFrameData() final;
 
     CompartmentReportPtr getCompartmentReport() { return _compartmentReport; }
+
 private:
     CompartmentReportPtr _compartmentReport;
     double _beginFrame;
     double _endFrame;
     double _timeBetweenFrames;
-    std::shared_ptr<floats> _frameValues;
+    brion::floatsPtr _frameValues;
 };
 }
 

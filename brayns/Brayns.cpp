@@ -330,6 +330,7 @@ struct Brayns::Impl
     ParametersManager& getParametersManager() { return *_parametersManager; }
     KeyboardHandler& getKeyboardHandler() { return *_keyboardHandler; }
     AbstractManipulator& getCameraManipulator() { return *_cameraManipulator; }
+
 private:
     void _render()
     {
@@ -389,8 +390,7 @@ private:
         if (!geometryParameters.getMorphologyFolder().empty())
             _loadMorphologyFolder();
 
-        if (!geometryParameters.getCircuitConfiguration().empty() &&
-            geometryParameters.getLoadCacheFile().empty())
+        if (!geometryParameters.getCircuitConfiguration().empty())
             _loadCircuitConfiguration();
 #endif
 
@@ -411,9 +411,8 @@ private:
                 volumeParameters.getElementSpacing();
             Boxf& worldBounds = scene.getWorldBounds();
             worldBounds.merge(Vector3f(0.f, 0.f, 0.f));
-            worldBounds.merge(volumeOffset +
-                              Vector3f(volumeDimensions) *
-                                  volumeElementSpacing);
+            worldBounds.merge(volumeOffset + Vector3f(volumeDimensions) *
+                                                 volumeElementSpacing);
         }
     }
 
