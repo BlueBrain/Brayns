@@ -278,6 +278,7 @@ bool DeflectPlugin::_handleDeflectEvents(Engine& engine,
             _previousHost.clear();
             _stream.reset();
             _sendFuture = make_ready_future(true);
+            engine.setKeepRunning(false);
             return true;
         default:
             break;

@@ -290,7 +290,7 @@ struct Brayns::Impl
         _engine->postRender();
     }
 
-    void render()
+    bool render()
     {
         const Vector2ui windowSize =
             _parametersManager->getApplicationParameters().getWindowSize();
@@ -324,6 +324,8 @@ struct Brayns::Impl
         _render();
 
         _engine->postRender();
+
+        return _engine->getKeepRunning();
     }
 
     Engine& getEngine() { return *_engine; }
@@ -1089,9 +1091,9 @@ void Brayns::render(const RenderInput& renderInput, RenderOutput& renderOutput)
     _impl->render(renderInput, renderOutput);
 }
 
-void Brayns::render()
+bool Brayns::render()
 {
-    _impl->render();
+    return _impl->render();
 }
 Engine& Brayns::getEngine()
 {

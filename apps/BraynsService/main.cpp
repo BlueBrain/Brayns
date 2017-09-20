@@ -32,8 +32,9 @@ int main(int argc, const char** argv)
         brayns::Brayns brayns(argc, argv);
 
         auto start = std::chrono::system_clock::now();
-        while (true)
-            brayns.render();
+        bool keepRunning = true;
+        while (keepRunning)
+            keepRunning = brayns.render();
         auto end = std::chrono::system_clock::now();
         auto elapsed =
             std::chrono::duration_cast<std::chrono::seconds>(end - start);
