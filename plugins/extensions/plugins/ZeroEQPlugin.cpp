@@ -21,6 +21,7 @@
 #include "ZeroEQPlugin.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
 #include <brayns/Brayns.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
@@ -198,12 +199,34 @@ bool ZeroEQPlugin::_writeBlueConfigFile(const std::string& blueConfigFilename,
     if (!blueConfig.good())
         return false;
 
+    std::map<std::string, std::string> dictionary = {
+        {"morphology_folder", "MorphologyPath"}, {"mvd_file", "CircuitPath"}};
+
     blueConfig << "Run Default" << std::endl << "{" << std::endl;
     auto parameters = params;
     for (auto& parameter : parameters)
     {
-        std::replace(parameter.begin(), parameter.end(), '=', ' ');
-        blueConfig << parameter << std::endl;
+        strings keyValue;
+        boost::char_separator<char> separator("=");
+        boost::tokenizer<boost::char_separator<char>> tokens(parameter,
+                                                             separator);
+        for_each(tokens.begin(), tokens.end(),
+                 [&keyValue](const std::string& s) { keyValue.push_back(s); });
+
+        if (keyValue.size() != 2)
+        {
+            BRAYNS_ERROR << "BlueConfigBuilder: Invalid parameter " << parameter
+                         << std::endl;
+            continue;
+        }
+        if (dictionary.find(keyValue[0]) == dictionary.end())
+        {
+            BRAYNS_ERROR << "BlueConfigBuilder: Unknown parameter "
+                         << keyValue[0] << std::endl;
+            continue;
+        }
+        blueConfig << dictionary[keyValue[0]] << " " << keyValue[1]
+                   << std::endl;
     }
     blueConfig << "}" << std::endl;
     blueConfig.close();
@@ -216,7 +239,9 @@ std::future<::zeroeq::http::Response> ZeroEQPlugin::_handleCircuitConfigBuilder(
     const auto paramsAsString = request.query;
     strings params;
     boost::split(params, paramsAsString, boost::is_any_of("&"));
-    const std::string blueConfigFilename = "/tmp/BlueConfig";
+    const std::string blueConfigFilename =
+        _parametersManager.getApplicationParameters().getTmpFolder() +
+        "/BlueConfig";
     if (_writeBlueConfigFile(blueConfigFilename, params))
     {
         const std::string body =

@@ -33,6 +33,7 @@ const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_FILTERS = "filters";
 const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
+const std::string PARAM_TMP_FOLDER = "tmp-folder";
 #if (BRAYNS_USE_NETWORKING)
 const std::string PARAM_ZEROEQ_AUTO_PUBLISH = "zeroeq-auto-publish";
 #endif
@@ -43,6 +44,7 @@ const size_t DEFAULT_JPEG_WIDTH = DEFAULT_WINDOW_WIDTH;
 const size_t DEFAULT_JPEG_HEIGHT = DEFAULT_WINDOW_HEIGHT;
 const size_t DEFAULT_JPEG_COMPRESSION = 100;
 const std::string DEFAULT_CAMERA = "perspective";
+const std::string DEFAULT_TMP_FOLDER = "/tmp";
 }
 
 namespace brayns
@@ -55,6 +57,7 @@ ApplicationParameters::ApplicationParameters()
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
     , _jpegSize(DEFAULT_JPEG_WIDTH, DEFAULT_JPEG_HEIGHT)
     , _autoPublishZeroEQEvents(false)
+    , _tmpFolder(DEFAULT_TMP_FOLDER)
 {
     _parameters.add_options()(PARAM_WINDOW_SIZE.c_str(),
                               po::value<uints>()->multitoken(),
@@ -65,7 +68,10 @@ ApplicationParameters::ApplicationParameters()
         PARAM_JPEG_COMPRESSION.c_str(), po::value<size_t>(),
         "JPEG compression rate (100 is full quality) [float]")(
         PARAM_JPEG_SIZE.c_str(), po::value<uints>()->multitoken(),
-        "JPEG size [int int]")
+        "JPEG size [int int]")(PARAM_TMP_FOLDER.c_str(),
+                               po::value<std::string>(),
+                               "Folder used by the application to "
+                               "store temporary files [string")
 #if (BRAYNS_USE_NETWORKING)
         (PARAM_ZEROEQ_AUTO_PUBLISH.c_str(), po::value<bool>(),
          "Enable|Disable automatic publishing of zeroeq network events [bool]")
@@ -106,6 +112,8 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
         _filters = vm[PARAM_FILTERS].as<strings>();
     if (vm.count(PARAM_FRAME_EXPORT_FOLDER))
         _frameExportFolder = vm[PARAM_FRAME_EXPORT_FOLDER].as<std::string>();
+    if (vm.count(PARAM_TMP_FOLDER))
+        _tmpFolder = vm[PARAM_TMP_FOLDER].as<std::string>();
 #if (BRAYNS_USE_NETWORKING)
     if (vm.count(PARAM_ZEROEQ_AUTO_PUBLISH))
         _autoPublishZeroEQEvents = vm[PARAM_ZEROEQ_AUTO_PUBLISH].as<bool>();
@@ -124,6 +132,7 @@ void ApplicationParameters::print()
     BRAYNS_INFO << "JPEG Compression            : " << _jpegCompression
                 << std::endl;
     BRAYNS_INFO << "JPEG size                   : " << _jpegSize << std::endl;
+    BRAYNS_INFO << "Temporary folder            : " << _tmpFolder << std::endl;
 #if (BRAYNS_USE_NETWORKING)
     BRAYNS_INFO << "Auto-publish ZeroeEQ events : "
                 << (_autoPublishZeroEQEvents ? "on" : "off") << std::endl;
