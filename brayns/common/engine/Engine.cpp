@@ -50,10 +50,11 @@ void Engine::setActiveRenderer(const RendererType renderer)
 
 void Engine::reshape(const Vector2ui& frameSize)
 {
-    if (_frameBuffer->getSize() == frameSize)
+    const auto size = getSupportedFrameSize(frameSize);
+
+    if (_frameBuffer->getSize() == size)
         return;
 
-    const auto size = getSupportedFrameSize(frameSize);
     _frameBuffer->resize(size);
     _camera->setAspectRatio(static_cast<float>(size.x()) /
                             static_cast<float>(size.y()));
