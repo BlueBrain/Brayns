@@ -24,6 +24,7 @@
 #include <brayns/common/types.h>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace
 {
@@ -45,7 +46,7 @@ const std::string PARAM_CIRCUIT_MESH_FILENAME_PATTERN =
     "circuit-mesh-filename-pattern";
 const std::string PARAM_CIRCUIT_MESH_TRANSFORMATION =
     "circuit-mesh-transformation";
-const std::string PARAM_CIRCUIT_TARGET = "circuit-target";
+const std::string PARAM_CIRCUIT_TARGETS = "circuit-targets";
 const std::string PARAM_CIRCUIT_REPORT = "circuit-report";
 const std::string PARAM_CIRCUIT_START_SIMULATION_TIME =
     "circuit-start-simulation-time";
@@ -76,13 +77,14 @@ const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_SCENE_FILE = "scene-file";
 
-const std::string COLOR_SCHEMES[11] = {"none",
+const std::string COLOR_SCHEMES[12] = {"none",
                                        "neuron-by-id",
                                        "neuron-by-type",
                                        "neuron-by-segment-type",
                                        "neuron-by-layer",
                                        "neuron-by-mtype",
                                        "neuron-by-etype",
+                                       "neuron-by-target",
                                        "protein-by-id",
                                        "protein-atoms",
                                        "protein-chains",
@@ -156,8 +158,8 @@ GeometryParameters::GeometryParameters()
         "Scene environment [none|ground|wall|bounding-box]")(
         PARAM_GEOMETRY_QUALITY.c_str(), po::value<std::string>(),
         "Geometry rendering quality [low|medium|high]")(
-        PARAM_CIRCUIT_TARGET.c_str(), po::value<std::string>(),
-        "Circuit target [string]")(
+        PARAM_CIRCUIT_TARGETS.c_str(), po::value<std::string>(),
+        "Circuit targets [comma separated strings]")(
         PARAM_CIRCUIT_DENSITY.c_str(), po::value<float>(),
         "Density of cells in the circuit in percent [float]")(
         PARAM_CIRCUIT_MESH_FOLDER.c_str(), po::value<std::string>(),
@@ -278,8 +280,8 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             if (geometryQuality == GEOMETRY_QUALITIES[i])
                 _geometryQuality = static_cast<GeometryQuality>(i);
     }
-    if (vm.count(PARAM_CIRCUIT_TARGET))
-        _circuitTarget = vm[PARAM_CIRCUIT_TARGET].as<std::string>();
+    if (vm.count(PARAM_CIRCUIT_TARGETS))
+        _circuitTargets = vm[PARAM_CIRCUIT_TARGETS].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_REPORT))
         _circuitReport = vm[PARAM_CIRCUIT_REPORT].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_DENSITY))
@@ -404,7 +406,7 @@ void GeometryParameters::print()
     BRAYNS_INFO << "Circuit configuration      : " << std::endl;
     BRAYNS_INFO << "- Config file              : " << _circuitConfiguration
                 << std::endl;
-    BRAYNS_INFO << "- Target                   : " << _circuitTarget
+    BRAYNS_INFO << "- Targets                  : " << _circuitTargets
                 << std::endl;
     BRAYNS_INFO << "- Report                   : " << _circuitReport
                 << std::endl;
@@ -479,5 +481,16 @@ const std::string& GeometryParameters::getGeometryQualityAsString(
 float GeometryParameters::getCircuitDensity() const
 {
     return std::max(0.f, std::min(100.f, _circuitDensity));
+}
+
+strings GeometryParameters::getCircuitTargetsAsStrings() const
+{
+    strings targets;
+    boost::char_separator<char> separator(",");
+    boost::tokenizer<boost::char_separator<char>> tokens(_circuitTargets,
+                                                         separator);
+    for_each(tokens.begin(), tokens.end(),
+             [&targets](const std::string& s) { targets.push_back(s); });
+    return targets;
 }
 }

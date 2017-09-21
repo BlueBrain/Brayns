@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(geomParams.getCircuitConfiguration(), "");
     BOOST_CHECK_EQUAL(geomParams.getLoadCacheFile(), "");
     BOOST_CHECK_EQUAL(geomParams.getSaveCacheFile(), "");
-    BOOST_CHECK_EQUAL(geomParams.getCircuitTarget(), "");
+    BOOST_CHECK_EQUAL(geomParams.getCircuitTargets(), "");
     BOOST_CHECK_EQUAL(geomParams.getCircuitReport(), "");
     BOOST_CHECK_EQUAL(geomParams.getRadiusMultiplier(), 1.f);
     BOOST_CHECK_EQUAL(geomParams.getRadiusCorrection(), 0.f);
