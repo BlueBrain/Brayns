@@ -89,6 +89,8 @@ public:
         _streamQuality = quality;
     }
 
+    /** Folder used by the application to store temporary files */
+    std::string getTmpFolder() const { return _tmpFolder; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -103,6 +105,7 @@ protected:
     bool _streamingEnabled{true};
     bool _streamCompression{true};
     unsigned int _streamQuality{80};
+    std::string _tmpFolder;
 };
 }
 
