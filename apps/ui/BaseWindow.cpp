@@ -236,10 +236,7 @@ void BaseWindow::display()
     auto& engine = _brayns.getEngine();
     auto& camera = engine.getCamera();
     if (camera.getModified())
-    {
         engine.getFrameBuffer().clear();
-        engine.getCamera().resetModified();
-    }
 
     const Vector2ui windowSize = _brayns.getParametersManager()
                                      .getApplicationParameters()
@@ -257,7 +254,6 @@ void BaseWindow::display()
     renderInput.target = camera.getTarget();
     renderInput.up = camera.getUp();
 
-    engine.getCamera().commit();
     _brayns.render(renderInput, renderOutput);
 
     GLenum format = GL_RGBA;
