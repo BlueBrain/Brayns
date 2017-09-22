@@ -165,6 +165,7 @@ table Settings {
     jpeg_size: [uint:2];
     jpeg_compression: uint;
     frame_export_folder: string;
+    synchronous_mode: bool;
 }
 
 table ForceRendering

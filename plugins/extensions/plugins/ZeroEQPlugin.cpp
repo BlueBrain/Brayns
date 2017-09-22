@@ -1102,6 +1102,8 @@ void ZeroEQPlugin::_initializeSettings()
     _remoteSettings.setJpegSize({jpegSize[0], jpegSize[1]});
     _remoteSettings.setFrameExportFolder(
         applicationParameters.getFrameExportFolder());
+    _remoteSettings.setSynchronousMode(
+        applicationParameters.getSynchronousMode());
 }
 
 void ZeroEQPlugin::_settingsUpdated()
@@ -1195,6 +1197,8 @@ void ZeroEQPlugin::_settingsUpdated()
         _engine->getFrameBuffer().clear();
     }
 
+    _parametersManager.set("synchronous-mode",
+                           (_remoteSettings.getSynchronousMode() ? "1" : "0"));
     _parametersManager.set("frame-export-folder",
                            _remoteSettings.getFrameExportFolderString());
     if (_remoteSettings.getFrameExportFolderString().empty())

@@ -21,6 +21,7 @@
 #include "CircuitSimulationHandler.h"
 
 #include <brayns/common/log.h>
+#include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <servus/types.h>
@@ -28,9 +29,11 @@
 namespace brayns
 {
 CircuitSimulationHandler::CircuitSimulationHandler(
+    const ApplicationParameters& applicationParameters,
     const GeometryParameters& geometryParameters,
     const std::string& reportSource, const brion::GIDSet& gids)
     : AbstractSimulationHandler(geometryParameters)
+    , _applicationParameters(applicationParameters)
     , _compartmentReport(new brion::CompartmentReport(brion::URI(reportSource),
                                                       brion::MODE_READ, gids))
 {
@@ -67,17 +70,59 @@ CircuitSimulationHandler::~CircuitSimulationHandler()
 {
 }
 
-void* CircuitSimulationHandler::getFrameData()
+bool CircuitSimulationHandler::isReady() const
 {
-    if (_compartmentReport)
+    return _ready;
+}
+
+void* CircuitSimulationHandler::getFrameData(uint32_t frame)
+{
+    frame = _getBoundedFrame(frame);
+
+    if (!_currentFrameFuture.valid() && _currentFrame != frame)
+        _triggerLoading(frame);
+
+    _makeFrameReady(frame);
+
+    return _frameValues ? _frameValues.get()->data() : nullptr;
+}
+
+void CircuitSimulationHandler::_triggerLoading(const uint32_t frame)
+{
+    auto timestamp = _startTime + frame * _dt;
+    timestamp = std::max(_startTime, timestamp);
+    timestamp = std::min(_endTime, timestamp);
+
+    if (_currentFrameFuture.valid())
+        _currentFrameFuture.wait();
+
+    _ready = false;
+    _currentFrameFuture = _compartmentReport->loadFrame(timestamp);
+    _frameValues.reset();
+}
+
+bool CircuitSimulationHandler::_isFrameLoaded() const
+{
+    if (!_currentFrameFuture.valid())
+        return false;
+
+    if (_applicationParameters.getSynchronousMode())
     {
-        auto timestamp = _startTime + _currentFrame * _dt;
-        timestamp = std::min(_endTime, timestamp);
-        timestamp = std::max(_startTime, timestamp);
-        _frameValues = _compartmentReport->loadFrame(timestamp).get();
-        if (_frameValues)
-            return _frameValues.get()->data();
+        _currentFrameFuture.wait();
+        return true;
     }
-    return nullptr;
+
+    return _currentFrameFuture.wait_for(std::chrono::milliseconds(0)) ==
+           std::future_status::ready;
+}
+
+void CircuitSimulationHandler::_makeFrameReady(const uint32_t frame)
+{
+    if (_isFrameLoaded())
+    {
+        _frameValues = _currentFrameFuture.get();
+        _currentFrame = frame;
+        _ready = true;
+    }
 }
 }

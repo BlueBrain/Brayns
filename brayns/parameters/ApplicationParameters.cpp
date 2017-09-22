@@ -34,6 +34,7 @@ const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_FILTERS = "filters";
 const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
 const std::string PARAM_TMP_FOLDER = "tmp-folder";
+const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
 #if (BRAYNS_USE_NETWORKING)
 const std::string PARAM_ZEROEQ_AUTO_PUBLISH = "zeroeq-auto-publish";
 #endif
@@ -71,7 +72,9 @@ ApplicationParameters::ApplicationParameters()
         "JPEG size [int int]")(PARAM_TMP_FOLDER.c_str(),
                                po::value<std::string>(),
                                "Folder used by the application to "
-                               "store temporary files [string")
+                               "store temporary files [string")(
+        PARAM_SYNCHRONOUS_MODE.c_str(), po::value<bool>(),
+        "Enable|Disable synchronous mode rendering vs data loading [bool]")
 #if (BRAYNS_USE_NETWORKING)
         (PARAM_ZEROEQ_AUTO_PUBLISH.c_str(), po::value<bool>(),
          "Enable|Disable automatic publishing of zeroeq network events [bool]")
@@ -114,6 +117,8 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
         _frameExportFolder = vm[PARAM_FRAME_EXPORT_FOLDER].as<std::string>();
     if (vm.count(PARAM_TMP_FOLDER))
         _tmpFolder = vm[PARAM_TMP_FOLDER].as<std::string>();
+    if (vm.count(PARAM_SYNCHRONOUS_MODE))
+        _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
 #if (BRAYNS_USE_NETWORKING)
     if (vm.count(PARAM_ZEROEQ_AUTO_PUBLISH))
         _autoPublishZeroEQEvents = vm[PARAM_ZEROEQ_AUTO_PUBLISH].as<bool>();

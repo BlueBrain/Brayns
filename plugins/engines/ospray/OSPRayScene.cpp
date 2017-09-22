@@ -1242,8 +1242,7 @@ void OSPRayScene::commitVolumeData()
 
 void OSPRayScene::commitSimulationData()
 {
-    if (!_simulationHandler ||
-        !_parametersManager.getSceneParameters().getModified())
+    if (!_simulationHandler)
     {
         return;
     }
@@ -1254,8 +1253,7 @@ void OSPRayScene::commitSimulationData()
     if (_simulationHandler->getCurrentFrame() == animationFrame)
         return;
 
-    _simulationHandler->setCurrentFrame(animationFrame);
-    auto frameData = _simulationHandler->getFrameData();
+    auto frameData = _simulationHandler->getFrameData(animationFrame);
 
     if (!frameData)
         return;

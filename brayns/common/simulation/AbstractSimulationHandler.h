@@ -70,19 +70,13 @@ public:
     */
     BRAYNS_API void writeFrame(std::ofstream& stream, const floats& values);
 
-    /**
-     * @brief sets the current frame for the simulation
-     * @param frame Frame to set
-     */
-    void setCurrentFrame(const uint32_t frame);
-
-    /** @return the current frame for the simulation. */
+    /** @return the current loaded frame for the simulation. */
     uint32_t getCurrentFrame() const { return _currentFrame; }
     /**
-     * @brief returns a void pointer to the simulation data for the current
-     *        frame
+     * @brief returns a void pointer to the simulation data for the given frame
+     * or nullptr if the frame is not loaded yet.
      */
-    virtual void* getFrameData() = 0;
+    virtual void* getFrameData(uint32_t frame) = 0;
 
     /**
      * @brief getFrameSize return the size of the current simulation frame
@@ -118,7 +112,12 @@ public:
     /** @return true if the histogram has changed since the last update. */
     bool histogramChanged() const;
 
+    /** @return true if the requested frame from getFrameData() is ready to
+     * consume and if it is allowed to advance to the next frame. */
+    virtual bool isReady() const { return true; }
 protected:
+    uint32_t _getBoundedFrame(const uint32_t frame) const;
+
     const GeometryParameters& _geometryParameters;
     uint32_t _currentFrame;
     uint32_t _nbFrames;

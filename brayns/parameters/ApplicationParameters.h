@@ -94,6 +94,14 @@ public:
 
     /** Folder used by the application to store temporary files */
     std::string getTmpFolder() const { return _tmpFolder; }
+    /** @return true if synchronous mode is enabled, aka rendering waits for
+     * data loading. */
+    bool getSynchronousMode() const { return _synchronousMode; }
+    void setSynchronousMode(const bool synchronousMode)
+    {
+        updateValue(_synchronousMode, synchronousMode);
+    }
+
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -109,6 +117,7 @@ protected:
     bool _streamCompression{true};
     unsigned int _streamQuality{80};
     std::string _tmpFolder;
+    bool _synchronousMode{false};
 };
 }
 
