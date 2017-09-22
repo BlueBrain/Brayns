@@ -164,15 +164,15 @@ private:
     void _settingsUpdated();
 
     /**
-     * @brief This method is called when simulation frame (timestamp) are
-     * requested by a ZeroEQ event
+     * @brief This method is called when simulation frame are requested by a
+     *        ZeroEQ event
      * @return True if the method was successful, false otherwise
      */
     bool _requestFrame();
 
     /**
-     * @brief This method is called when simulation frame (timestamp) are
-     * updated by a ZeroEQ event
+     * @brief This method is called when simulation frame are updated by a
+     *        ZeroEQ event
      */
     void _frameUpdated();
 

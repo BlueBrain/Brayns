@@ -401,9 +401,6 @@ void ZeroEQPlugin::_setupSubscriber()
 
 void ZeroEQPlugin::_cameraUpdated()
 {
-    const float timestamp =
-        _parametersManager.getSceneParameters().getTimestamp();
-    BRAYNS_INFO << "Camera updated " << timestamp << std::endl;
     _engine->getFrameBuffer().clear();
     _engine->getCamera().commit();
 }
@@ -1040,7 +1037,6 @@ void ZeroEQPlugin::_dataSourceUpdated()
 
 void ZeroEQPlugin::_initializeSettings()
 {
-    auto& sceneParameters = _parametersManager.getSceneParameters();
     auto& renderingParameters = _parametersManager.getRenderingParameters();
     auto& volumeParameters = _parametersManager.getVolumeParameters();
     auto& applicationParameters = _parametersManager.getApplicationParameters();
@@ -1051,7 +1047,6 @@ void ZeroEQPlugin::_initializeSettings()
         _remoteSettings.setEngine(::brayns::v1::Engine::optix);
     else if (renderingParameters.getEngine() == "livre")
         _remoteSettings.setEngine(::brayns::v1::Engine::livre);
-    _remoteSettings.setTimestamp(sceneParameters.getTimestamp());
     _remoteSettings.setVolumeSamplesPerRay(volumeParameters.getSamplesPerRay());
 
     switch (renderingParameters.getRenderer())
@@ -1127,8 +1122,6 @@ void ZeroEQPlugin::_settingsUpdated()
         break;
     }
 
-    _parametersManager.set("timestamp",
-                           std::to_string(_remoteSettings.getTimestamp()));
     _parametersManager.set("volume-samples-per-ray",
                            std::to_string(
                                _remoteSettings.getVolumeSamplesPerRay()));
@@ -1220,8 +1213,8 @@ bool ZeroEQPlugin::_requestFrame()
         std::max(nbFrames, caSimHandler ? caSimHandler->getNbFrames() : 0);
 
     const auto& sceneParams = _parametersManager.getSceneParameters();
-    const auto ts = uint64_t(sceneParams.getTimestamp());
-    const auto current = nbFrames == 0 ? 0 : (ts % nbFrames);
+    const auto current =
+        nbFrames == 0 ? 0 : (sceneParams.getAnimationFrame() % nbFrames);
     const auto animationDelta = sceneParams.getAnimationDelta();
 
     if (current == _remoteFrame.getCurrent() &&
@@ -1240,12 +1233,8 @@ bool ZeroEQPlugin::_requestFrame()
 
 void ZeroEQPlugin::_frameUpdated()
 {
-    const float timestamp =
-        _parametersManager.getSceneParameters().getTimestamp();
-    BRAYNS_INFO << "Frame updated " << timestamp << std::endl;
-
     auto& sceneParams = _parametersManager.getSceneParameters();
-    sceneParams.setTimestamp(_remoteFrame.getCurrent());
+    sceneParams.setAnimationFrame(_remoteFrame.getCurrent());
     sceneParams.setAnimationDelta(_remoteFrame.getDelta());
 
     CADiffusionSimulationHandlerPtr handler =

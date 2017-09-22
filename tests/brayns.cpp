@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(defaults)
                       std::numeric_limits<float>::min());
 
     const auto& sceneParams = pm.getSceneParameters();
-    BOOST_CHECK_EQUAL(sceneParams.getTimestamp(),
-                      std::numeric_limits<float>::max());
+    BOOST_CHECK_EQUAL(sceneParams.getAnimationFrame(),
+                      std::numeric_limits<uint32_t>::max());
 
     const auto& volumeParams = pm.getVolumeParameters();
     BOOST_CHECK_EQUAL(volumeParams.getDimensions(), brayns::Vector3ui(0, 0, 0));

@@ -80,7 +80,7 @@ void OSPRayRenderer::commit()
              rp.getAmbientOcclusionStrength());
 
     ospSet1i(_renderer, "shadingEnabled", (mt == ShadingType::diffuse));
-    ospSet1f(_renderer, "timestamp", sp.getTimestamp());
+    ospSet1f(_renderer, "timestamp", sp.getAnimationFrame());
     ospSet1i(_renderer, "randomNumber", rand() % 10000);
     ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
     ospSet1i(_renderer, "electronShading", (mt == ShadingType::electron));
@@ -99,13 +99,14 @@ void OSPRayRenderer::commit()
     OSPRayScene* osprayScene = static_cast<OSPRayScene*>(_scene.get());
     assert(osprayScene);
 
-    const float ts =
-        _scene->getParametersManager().getSceneParameters().getTimestamp();
-    const auto model = osprayScene->modelImpl(ts);
+    const auto animationFrame =
+        _scene->getParametersManager().getSceneParameters().getAnimationFrame();
+    const auto model = osprayScene->modelImpl(animationFrame);
     if (model)
         ospSetObject(_renderer, "world", *model);
     else
-        BRAYNS_ERROR << "No model found for timestamp " << ts << std::endl;
+        BRAYNS_ERROR << "No model found for animation frame " << animationFrame
+                     << std::endl;
 
     const auto simulationModel = osprayScene->simulationModelImpl();
     if (simulationModel)

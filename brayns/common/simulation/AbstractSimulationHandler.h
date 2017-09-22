@@ -71,16 +71,16 @@ public:
     BRAYNS_API void writeFrame(std::ofstream& stream, const floats& values);
 
     /**
-     * @brief setTimestamp sets the current timestamp for the simulation
-     * @param timestamp Timestamp to set
+     * @brief sets the current frame for the simulation
+     * @param frame Frame to set
      */
-    void setTimestamp(const float timestamp);
+    void setCurrentFrame(const uint32_t frame);
 
-    /** @return the current timestamp for the simulation. */
-    float getTimestamp() const { return _timestamp; }
+    /** @return the current frame for the simulation. */
+    uint32_t getCurrentFrame() const { return _currentFrame; }
     /**
-     * @brief getFrameData returns a void pointer to the simulation data for the
-     * current timestamp
+     * @brief returns a void pointer to the simulation data for the current
+     *        frame
      */
     virtual void* getFrameData() = 0;
 
@@ -95,23 +95,11 @@ public:
     /**
      * @brief getNbFrames returns the number of frame for the current simulation
      */
-    uint64_t getNbFrames() const { return _nbFrames; }
+    uint32_t getNbFrames() const { return _nbFrames; }
     /**
      * @brief setNbFrames sets the number of frame for the current simulation
      */
-    void setNbFrames(const uint64_t nbFrames) { _nbFrames = nbFrames; }
-    /**
-     * @brief getCurrentFrame returns the current frame number
-     */
-    double getCurrentFrame() const { return _currentFrame; }
-    /**
-     * @brief setCurrentFrame sets the current frame number
-     */
-    void setCurrentFrame(const double currentFrame)
-    {
-        _currentFrame = currentFrame;
-    }
-
+    void setNbFrames(const uint32_t nbFrames) { _nbFrames = nbFrames; }
     /**
      * @brief getHistogram returns the Histogram of the values in the current
      * simulation frame. The
@@ -132,9 +120,8 @@ public:
 
 protected:
     const GeometryParameters& _geometryParameters;
-    float _timestamp;
-    double _currentFrame;
-    uint64_t _nbFrames;
+    uint32_t _currentFrame;
+    uint32_t _nbFrames;
     uint64_t _frameSize;
 
     uint64_t _headerSize;

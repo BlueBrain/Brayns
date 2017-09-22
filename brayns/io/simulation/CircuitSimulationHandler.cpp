@@ -31,37 +31,33 @@ CircuitSimulationHandler::CircuitSimulationHandler(
     const GeometryParameters& geometryParameters,
     const std::string& reportSource, const brion::GIDSet& gids)
     : AbstractSimulationHandler(geometryParameters)
-    , _compartmentReport(nullptr)
+    , _compartmentReport(new brion::CompartmentReport(brion::URI(reportSource),
+                                                      brion::MODE_READ, gids))
 {
-    _compartmentReport.reset(
-        new brion::CompartmentReport(brion::URI(reportSource), brion::MODE_READ,
-                                     gids));
-
     // Load simulation information from compartment reports
     const auto reportStartTime = _compartmentReport->getStartTime();
     const auto reportEndTime = _compartmentReport->getEndTime();
     const auto reportTimeStep = _compartmentReport->getTimestep();
 
-    _beginFrame = std::max(reportStartTime,
-                           _geometryParameters.getCircuitStartSimulationTime());
-    _endFrame = std::min(reportEndTime,
-                         _geometryParameters.getCircuitEndSimulationTime());
-    _timeBetweenFrames =
-        std::max(reportTimeStep,
-                 _geometryParameters.getCircuitSimulationStep());
+    _startTime = std::max(reportStartTime,
+                          _geometryParameters.getCircuitStartSimulationTime());
+    _endTime = std::min(reportEndTime,
+                        _geometryParameters.getCircuitEndSimulationTime());
+    _dt = std::max(reportTimeStep,
+                   _geometryParameters.getCircuitSimulationStep());
     _frameSize = _compartmentReport->getFrameSize();
-    _nbFrames = (_endFrame - _beginFrame) / _timeBetweenFrames;
+    _nbFrames = (_endTime - _startTime) / _dt;
 
     BRAYNS_INFO << "-----------------------------------------------------------"
                 << std::endl;
     BRAYNS_INFO << "Simulation information" << std::endl;
     BRAYNS_INFO << "----------------------" << std::endl;
-    BRAYNS_INFO << "Start frame          : " << _beginFrame << "/"
+    BRAYNS_INFO << "Start frame          : " << _startTime << "/"
                 << reportStartTime << std::endl;
-    BRAYNS_INFO << "End frame            : " << _endFrame << "/"
-                << reportEndTime << std::endl;
-    BRAYNS_INFO << "Steps between frames : " << _timeBetweenFrames << "/"
-                << reportTimeStep << std::endl;
+    BRAYNS_INFO << "End frame            : " << _endTime << "/" << reportEndTime
+                << std::endl;
+    BRAYNS_INFO << "Steps between frames : " << _dt << "/" << reportTimeStep
+                << std::endl;
     BRAYNS_INFO << "Number of frames : " << _nbFrames << std::endl;
     BRAYNS_INFO << "-----------------------------------------------------------"
                 << std::endl;
@@ -75,10 +71,10 @@ void* CircuitSimulationHandler::getFrameData()
 {
     if (_compartmentReport)
     {
-        auto frame = _beginFrame + _timestamp * _timeBetweenFrames;
-        frame = std::min(_endFrame, frame);
-        frame = std::max(_beginFrame, frame);
-        _frameValues = _compartmentReport->loadFrame(frame).get();
+        auto timestamp = _startTime + _currentFrame * _dt;
+        timestamp = std::min(_endTime, timestamp);
+        timestamp = std::max(_startTime, timestamp);
+        _frameValues = _compartmentReport->loadFrame(timestamp).get();
         if (_frameValues)
             return _frameValues.get()->data();
     }

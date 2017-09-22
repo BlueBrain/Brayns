@@ -146,7 +146,6 @@ enum Engine: string {
 
 table Settings {
     engine: Engine;
-    timestamp: float;
     volume_samples_per_ray: uint;
     shader: Shader;
     samples_per_pixel: int;

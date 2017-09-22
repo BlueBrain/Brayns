@@ -54,7 +54,7 @@ void OptiXRenderer::commit()
 {
     const auto& sp = _parametersManager.getSceneParameters();
 
-    _context["timestamp"]->setFloat(sp.getTimestamp());
+    _context["timestamp"]->setFloat(sp.getAnimationFrame());
 
     const auto& rp = _parametersManager.getRenderingParameters();
 

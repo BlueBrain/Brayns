@@ -53,9 +53,11 @@ void LivreRenderer::commit()
     const auto& livreParams = _livre.getApplicationParameters();
 
     const uint64_t nbFrames = livreParams.frames[1] - livreParams.frames[0];
-    const uint64_t ts = _parametersManager.getSceneParameters().getTimestamp();
+    const auto animationFrame =
+        _parametersManager.getSceneParameters().getAnimationFrame();
 
-    livreSettings.setFrameNumber(nbFrames == 0 ? 0 : (ts % nbFrames));
+    livreSettings.setFrameNumber(nbFrames == 0 ? 0
+                                               : (animationFrame % nbFrames));
 
     if (_scene->getVolumeHandler())
         _scene->getVolumeHandler()->setNbFrames(nbFrames);

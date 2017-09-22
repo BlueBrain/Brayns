@@ -65,8 +65,8 @@ void Engine::commit()
     auto& sceneParams = _parametersManager.getSceneParameters();
     if (sceneParams.getAnimationDelta() != 0)
     {
-        sceneParams.setTimestamp(sceneParams.getTimestamp() +
-                                 sceneParams.getAnimationDelta());
+        sceneParams.setAnimationFrame(sceneParams.getAnimationFrame() +
+                                      sceneParams.getAnimationDelta());
 
         _frameBuffer->clear();
     }

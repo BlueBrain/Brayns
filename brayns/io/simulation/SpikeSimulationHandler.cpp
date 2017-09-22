@@ -38,8 +38,7 @@ void* SpikeSimulationHandler::getFrameData()
     if (!_frameData)
         _frameData = new float[_frameSize];
 
-    const uint64_t frame = _timestamp;
-    const uint64_t index = frame % _nbFrames;
+    const auto index = _currentFrame % _nbFrames;
     const uint64_t frameSize = _frameSize * sizeof(float);
     memcpy(_frameData,
            (unsigned char*)_memoryMapPtr + _headerSize + index * frameSize,

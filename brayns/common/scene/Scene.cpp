@@ -550,7 +550,7 @@ VolumeHandlerPtr Scene::getVolumeHandler()
         {
             _volumeHandler.reset(
                 new VolumeHandler(_parametersManager.getVolumeParameters(),
-                                  TimestampMode::modulo));
+                                  IndexMode::modulo));
             if (!volumeFile.empty())
             {
                 if (!isVolumeSupported(volumeFile))
@@ -589,12 +589,9 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                 }
 
                 std::sort(filenames.begin(), filenames.end());
-                float timestamp = 0.f;
+                uint32_t index = 0;
                 for (const auto& filename : filenames)
-                {
-                    _volumeHandler->attachVolumeToFile(timestamp, filename);
-                    timestamp += 1.f;
-                }
+                    _volumeHandler->attachVolumeToFile(index++, filename);
             }
         }
     }
