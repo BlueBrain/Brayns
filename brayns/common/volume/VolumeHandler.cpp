@@ -36,12 +36,10 @@ const int NO_DESCRIPTOR = -1;
 namespace brayns
 {
 VolumeHandler::VolumeHandler(const VolumeParameters& volumeParameters,
-                             const TimestampMode timestampMode)
+                             const IndexMode indexMode)
     : _volumeParameters(volumeParameters)
-    , _timestamp(std::numeric_limits<float>::max())
-    , _timestampRange(std::numeric_limits<float>::max(),
-                      std::numeric_limits<float>::min())
-    , _timestampMode(timestampMode)
+    , _currentIndex(std::numeric_limits<uint32_t>::max())
+    , _indexMode(indexMode)
 {
 }
 
@@ -50,54 +48,47 @@ VolumeHandler::~VolumeHandler()
     _volumeDescriptors.clear();
 }
 
-void VolumeHandler::attachVolumeToFile(const float timestamp,
+void VolumeHandler::attachVolumeToFile(const uint32_t index,
                                        const std::string& volumeFile)
 {
-    // Add volume descriptor for specified timestamp
-    _volumeDescriptors[timestamp].reset(
+    // Add volume descriptor for specified index
+    _volumeDescriptors[index].reset(
         new VolumeDescriptor(volumeFile, _volumeParameters.getDimensions(),
                              _volumeParameters.getElementSpacing(),
                              _volumeParameters.getOffset()));
 
-    // Update timestamp range
-    for (const auto& volumeDescriptor : _volumeDescriptors)
-    {
-        _timestampRange.x() =
-            std::min(_timestampRange.x(), volumeDescriptor.first);
-        _timestampRange.y() =
-            std::max(_timestampRange.y(), volumeDescriptor.first);
-    }
-    BRAYNS_INFO << "Attached " << volumeFile << " to timestamp " << timestamp
-                << " " << _timestampRange << std::endl;
+    BRAYNS_INFO << "Attached " << volumeFile << " to index " << index << " ["
+                << _volumeDescriptors.begin()->first << ", "
+                << _volumeDescriptors.rbegin()->first << "]" << std::endl;
 }
 
-void VolumeHandler::setTimestamp(const float timestamp)
+void VolumeHandler::setCurrentIndex(uint32_t index)
 {
-    const float ts = _getBoundedTimestamp(timestamp);
-    if (ts != _timestamp &&
-        _volumeDescriptors.find(ts) != _volumeDescriptors.end())
+    index = _getBoundedIndex(index);
+    if (index != _currentIndex &&
+        _volumeDescriptors.find(index) != _volumeDescriptors.end())
     {
-        if (_volumeDescriptors.find(_timestamp) != _volumeDescriptors.end())
-            _volumeDescriptors[_timestamp]->unmap();
-        _timestamp = ts;
-        _volumeDescriptors[_timestamp]->map();
+        if (_volumeDescriptors.find(_currentIndex) != _volumeDescriptors.end())
+            _volumeDescriptors[_currentIndex]->unmap();
+        _currentIndex = index;
+        _volumeDescriptors[_currentIndex]->map();
     }
 }
 
 void* VolumeHandler::getData() const
 {
-    if (_volumeDescriptors.find(_timestamp) != _volumeDescriptors.end())
-        return _volumeDescriptors.at(_timestamp)->getMemoryMapPtr();
+    if (_volumeDescriptors.find(_currentIndex) != _volumeDescriptors.end())
+        return _volumeDescriptors.at(_currentIndex)->getMemoryMapPtr();
     return nullptr;
 }
 
 float VolumeHandler::getEpsilon(const Vector3f& elementSpacing,
                                 const uint16_t samplesPerRay)
 {
-    if (_volumeDescriptors.find(_timestamp) == _volumeDescriptors.end())
+    if (_volumeDescriptors.find(_currentIndex) == _volumeDescriptors.end())
         return 0.f;
     const Vector3f diag =
-        elementSpacing * _volumeDescriptors.at(_timestamp)->getDimensions();
+        elementSpacing * _volumeDescriptors.at(_currentIndex)->getDimensions();
     const float diagMax = diag.find_max();
     const float epsilon = diagMax / float(samplesPerRay);
     return std::max(1.f, epsilon);
@@ -105,48 +96,48 @@ float VolumeHandler::getEpsilon(const Vector3f& elementSpacing,
 
 Vector3ui VolumeHandler::getDimensions() const
 {
-    if (_volumeDescriptors.find(_timestamp) != _volumeDescriptors.end())
-        return _volumeDescriptors.at(_timestamp)->getDimensions();
+    if (_volumeDescriptors.find(_currentIndex) != _volumeDescriptors.end())
+        return _volumeDescriptors.at(_currentIndex)->getDimensions();
     return Vector3ui();
 }
 
 Vector3f VolumeHandler::getElementSpacing() const
 {
-    if (_volumeDescriptors.find(_timestamp) != _volumeDescriptors.end())
-        return _volumeDescriptors.at(_timestamp)->getElementSpacing();
+    if (_volumeDescriptors.find(_currentIndex) != _volumeDescriptors.end())
+        return _volumeDescriptors.at(_currentIndex)->getElementSpacing();
     return Vector3f();
 }
 
 Vector3f VolumeHandler::getOffset() const
 {
-    if (_volumeDescriptors.find(_timestamp) != _volumeDescriptors.end())
-        return _volumeDescriptors.at(_timestamp)->getOffset();
+    if (_volumeDescriptors.find(_currentIndex) != _volumeDescriptors.end())
+        return _volumeDescriptors.at(_currentIndex)->getOffset();
     return Vector3f();
 }
 
 uint64_t VolumeHandler::getSize() const
 {
-    if (_volumeDescriptors.find(_timestamp) != _volumeDescriptors.end())
-        return _volumeDescriptors.at(_timestamp)->getSize();
+    if (_volumeDescriptors.find(_currentIndex) != _volumeDescriptors.end())
+        return _volumeDescriptors.at(_currentIndex)->getSize();
     return 0;
 }
 
-float VolumeHandler::_getBoundedTimestamp(const float timestamp) const
+uint32_t VolumeHandler::_getBoundedIndex(const uint32_t index) const
 {
-    float result = 0.f;
-    switch (_timestampMode)
+    uint32_t result = 0;
+    switch (_indexMode)
     {
-    case TimestampMode::modulo:
+    case IndexMode::modulo:
         if (_volumeDescriptors.size() != 0)
-            result = size_t(timestamp + _timestampRange.x()) %
+            result = size_t(index + _volumeDescriptors.begin()->first) %
                      _volumeDescriptors.size();
         break;
-    case TimestampMode::bounded:
-        result = std::max(std::min(timestamp, _timestampRange.y()),
-                          _timestampRange.x());
-    case TimestampMode::unchanged:
+    case IndexMode::bounded:
+        result = std::max(std::min(index, _volumeDescriptors.rbegin()->first),
+                          _volumeDescriptors.begin()->first);
+    case IndexMode::unchanged:
     default:
-        result = timestamp;
+        result = index;
     }
     return result;
 }
@@ -213,8 +204,8 @@ void VolumeHandler::VolumeDescriptor::unmap()
 
 const Histogram& VolumeHandler::getHistogram()
 {
-    if (_histograms.find(_timestamp) != _histograms.end())
-        return _histograms[_timestamp];
+    if (_histograms.find(_currentIndex) != _histograms.end())
+        return _histograms[_currentIndex];
 
     std::future<bool> computeHistogram =
         std::async(std::launch::async, [this]() {
@@ -236,12 +227,12 @@ const Histogram& VolumeHandler::getHistogram()
                         ++values[value];
                 }
 
-                _histograms[_timestamp].values.clear();
+                _histograms[_currentIndex].values.clear();
                 for (const auto& value : values)
-                    _histograms[_timestamp].values.push_back(value.second);
-                _histograms[_timestamp].range = Vector2f(minValue, maxValue);
+                    _histograms[_currentIndex].values.push_back(value.second);
+                _histograms[_currentIndex].range = Vector2f(minValue, maxValue);
                 BRAYNS_INFO
-                    << "Histogram range: " << _histograms[_timestamp].range
+                    << "Histogram range: " << _histograms[_currentIndex].range
                     << std::endl;
             }
             return true;
@@ -250,6 +241,6 @@ const Histogram& VolumeHandler::getHistogram()
     computeHistogram.wait();
     computeHistogram.get();
 
-    return _histograms[_timestamp];
+    return _histograms[_currentIndex];
 }
 }

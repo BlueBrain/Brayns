@@ -166,18 +166,25 @@ void OSPRayScene::commit()
     }
 }
 
-OSPModel* OSPRayScene::modelImpl(const size_t timestamp)
+OSPModel* OSPRayScene::modelImpl(const uint32_t index)
 {
-    if (_models.find(timestamp) != _models.end())
-        return &_models[timestamp];
+    if (_models.empty())
+        return nullptr;
+    if (_models.find(index) != _models.end())
+        return &_models[index];
 
-    int index = -1;
-    for (const auto& model : _models)
-        if (model.first <= timestamp)
-            index = model.first;
-    BRAYNS_DEBUG << "Request model for timestamp " << timestamp << ", returned "
-                 << index << std::endl;
-    return index == -1 ? nullptr : &_models[index];
+    auto it = _models.lower_bound(index);
+    if (it != _models.end())
+    {
+        BRAYNS_DEBUG << "Request model index " << index << ", returned "
+                     << it->first << std::endl;
+        return &it->second;
+    }
+
+    auto lastModel = _models.rbegin();
+    BRAYNS_DEBUG << "Request model index " << index << ", returned "
+                 << lastModel->first << std::endl;
+    return &lastModel->second;
 }
 
 void OSPRayScene::_saveCacheFile()
@@ -560,13 +567,13 @@ void OSPRayScene::_loadCacheFile()
     file.close();
 }
 
-void OSPRayScene::_createModel(const size_t timestamp)
+void OSPRayScene::_createModel(const uint32_t index)
 {
-    if (_models.find(timestamp) == _models.end())
+    if (_models.find(index) == _models.end())
     {
-        _models[timestamp] = ospNewModel();
-        BRAYNS_INFO << "Model created for timestamp " << timestamp << ": "
-                    << _models[timestamp] << std::endl;
+        _models[index] = ospNewModel();
+        BRAYNS_INFO << "Model created for index " << index << ": "
+                    << _models[index] << std::endl;
     }
 }
 
@@ -1192,9 +1199,9 @@ void OSPRayScene::commitVolumeData()
     if (!volumeHandler)
         return;
 
-    const float timestamp =
-        _parametersManager.getSceneParameters().getTimestamp();
-    volumeHandler->setTimestamp(timestamp);
+    const auto animationFrame =
+        _parametersManager.getSceneParameters().getAnimationFrame();
+    volumeHandler->setCurrentIndex(animationFrame);
     void* data = volumeHandler->getData();
     if (data)
     {
@@ -1241,13 +1248,13 @@ void OSPRayScene::commitSimulationData()
         return;
     }
 
-    const float timestamp =
-        _parametersManager.getSceneParameters().getTimestamp();
+    const auto animationFrame =
+        _parametersManager.getSceneParameters().getAnimationFrame();
 
-    if (_simulationHandler->getTimestamp() == timestamp)
+    if (_simulationHandler->getCurrentFrame() == animationFrame)
         return;
 
-    _simulationHandler->setTimestamp(timestamp);
+    _simulationHandler->setCurrentFrame(animationFrame);
     auto frameData = _simulationHandler->getFrameData();
 
     if (!frameData)

@@ -22,7 +22,7 @@
 
 namespace
 {
-const std::string PARAM_TIMESTAMP = "timestamp";
+const std::string PARAM_ANIMATION_FRAME = "animation-frame";
 const std::string PARAM_COLOR_MAP_FILE = "color-map-file";
 const std::string PARAM_ENVIRONMENT_MAP = "environment-map";
 }
@@ -31,10 +31,10 @@ namespace brayns
 {
 SceneParameters::SceneParameters()
     : AbstractParameters("Scene")
-    , _timestamp(std::numeric_limits<float>::max())
 {
-    _parameters.add_options()(PARAM_TIMESTAMP.c_str(), po::value<float>(),
-                              "Scene timestamp [float]")(
+    _parameters.add_options()(PARAM_ANIMATION_FRAME.c_str(),
+                              po::value<uint32_t>(),
+                              "Scene animation frame [float]")(
         PARAM_COLOR_MAP_FILE.c_str(), po::value<std::string>(),
         "Color map filename [string]")(PARAM_ENVIRONMENT_MAP.c_str(),
                                        po::value<std::string>(),
@@ -43,8 +43,8 @@ SceneParameters::SceneParameters()
 
 bool SceneParameters::_parse(const po::variables_map& vm)
 {
-    if (vm.count(PARAM_TIMESTAMP))
-        _timestamp = vm[PARAM_TIMESTAMP].as<float>();
+    if (vm.count(PARAM_ANIMATION_FRAME))
+        _animationFrame = vm[PARAM_ANIMATION_FRAME].as<uint32_t>();
     if (vm.count(PARAM_COLOR_MAP_FILE))
         _colorMapFilename = vm[PARAM_COLOR_MAP_FILE].as<std::string>();
     if (vm.count(PARAM_ENVIRONMENT_MAP))
@@ -55,7 +55,7 @@ bool SceneParameters::_parse(const po::variables_map& vm)
 void SceneParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Timestamp                :" << _timestamp << std::endl;
+    BRAYNS_INFO << "Animation frame          :" << _animationFrame << std::endl;
     BRAYNS_INFO << "Color Map filename       :" << _colorMapFilename
                 << std::endl;
     BRAYNS_INFO << "Environment map filename : " << _environmentMap

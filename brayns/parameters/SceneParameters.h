@@ -33,18 +33,18 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    /**
-       Defines the current timestamp for the scene. The unit is not universally
-       specified and is therefore specific to the scene.
-    */
-    float getTimestamp() const { return _timestamp; }
-    void setTimestamp(const float value) { updateValue(_timestamp, value); }
+    uint32_t getAnimationFrame() const { return _animationFrame; }
+    void setAnimationFrame(const uint32_t value)
+    {
+        updateValue(_animationFrame, value);
+    }
+
     /** The (frame) delta to apply for animations to select the next frame. */
     void setAnimationDelta(const int32_t animation)
     {
-        updateValue(_animation, animation);
+        updateValue(_animationDelta, animation);
     }
-    int32_t getAnimationDelta() const { return _animation; }
+    int32_t getAnimationDelta() const { return _animationDelta; }
     const std::string& getColorMapFilename() const { return _colorMapFilename; }
     /**
        file name of the environment map
@@ -53,8 +53,8 @@ public:
 protected:
     bool _parse(const po::variables_map& vm) final;
 
-    float _timestamp;
-    int32_t _animation = 0;
+    uint32_t _animationFrame{std::numeric_limits<uint32_t>::max()};
+    int32_t _animationDelta{0};
     std::string _colorMapFilename;
     std::string _environmentMap;
 };

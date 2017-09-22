@@ -27,13 +27,11 @@
 namespace brayns
 {
 /**
-
    VolumeHandler object
 
    This object contains handle to one or several 8bit volumes. Files containing
-   volumes are accessed
-   via memory maps and each volume is assigned to a given timestamp.
-
+   volumes are accessed via memory maps and each volume is assigned to a given
+   index.
  */
 class VolumeHandler
 {
@@ -42,40 +40,40 @@ public:
      * @brief Default constructor
      * @param volumeParameters Parameters for the volume (Offset, Scaling, Space
      *        between elements)
-     * @param timestampMode Specifies the way the timestamp in handled:
-     *        - DEFAULT: Gets the volume corresponding to the timestamp
-     *        - MODULO : Gets the volume using the timestamp modulo the number
-     *                   of volumes attached to the handler
-     *        - BOUNDED: The timestamp is bounded by the timestamp range for the
+     * @param indexMode Specifies the way the index in handled:
+     *        - DEFAULT: Gets the volume corresponding to the index
+     *        - MODULO : Gets the volume using the index modulo the number of
+     *                   volumes attached to the handler
+     *        - BOUNDED: The index is bounded by the index range for the
      *                   attached volumes
      */
     VolumeHandler(const VolumeParameters& volumeParameters,
-                  TimestampMode timestampMode);
+                  IndexMode indexMode);
 
     ~VolumeHandler();
 
     /**
      * @brief Returns the dimension of the 8bit volume
-     * @return Dimensions of the volume for the specified timestamp
+     * @return Dimensions of the volume
      */
     Vector3ui getDimensions() const;
 
     /**
      * @brief Returns the voxel size of the 8bit volume
-     * @return Voxel size of the volume for the specified timestamp
+     * @return Voxel size of the volume
      */
     Vector3f getElementSpacing() const;
 
     /**
      * @brief Returns the position offset of the 8bit volume in world
      *        coordinates
-     * @return Volume offset position for the specified timestamp
+     * @return Volume offset position
      */
     Vector3f getOffset() const;
 
     /**
      * @brief Returns the size of the 8bit volume in bytes
-     * @return Size of the volume for the specified timestamp
+     * @return Size of the volume
      */
     uint64_t getSize() const;
 
@@ -102,33 +100,33 @@ public:
     * @brief Attaches a memory mapped file to the scene so that renderers can
     *        access the data as if it was in memory. The OS is in charge of
     *        dealing with the map file in system memory.
-    * @param timestamp Timestamp for the volume
+    * @param index Index for the volume
     * @param volumeFile File containing the 8bit volume
     * @return True if the file was successfully attached, false otherwise
     */
-    void attachVolumeToFile(const float timestamp,
+    void attachVolumeToFile(const uint32_t index,
                             const std::string& volumeFile);
 
     /**
-     * @brief Sets the timestamp mode
+     * @brief Sets the index mode
      */
-    void setTimestampMode(const TimestampMode mode) { _timestampMode = mode; }
+    void setIndexMode(const IndexMode mode) { _indexMode = mode; }
     /**
-     * @brief Gets the timestamp mode
+     * @brief Gets the index mode
      */
-    TimestampMode getTimestampMode() const { return _timestampMode; }
+    IndexMode getIndexMode() const { return _indexMode; }
     /**
-     * @brief Sets the timestamp for the volume handler. If the specified
-     *        timestamp is different from the current one, the current volume is
-     *        unmapped and the new one is mapped instead
-     * @param timestamp Timestamp for the volume
+     * @brief Sets the index for the volume handler. If the specified index is
+     *        different from the current one, the current volume is unmapped and
+     *        the new one is mapped instead.
+     * @param index Index for the volume
      */
-    void setTimestamp(const float timestamp);
+    void setCurrentIndex(const uint32_t index);
 
     /** Set the histogram of the currently loaded volume. */
     void setHistogram(const Histogram& histogram)
     {
-        _histograms[_timestamp] = histogram;
+        _histograms[_currentIndex] = histogram;
     }
     /** @return the histogram of the currently loaded volume. */
     const Histogram& getHistogram();
@@ -206,13 +204,12 @@ public:
     typedef std::shared_ptr<VolumeDescriptor> VolumeDescriptorPtr;
 
 private:
-    float _getBoundedTimestamp(const float timestamp) const;
+    uint32_t _getBoundedIndex(const uint32_t index) const;
 
     const VolumeParameters _volumeParameters;
-    std::map<float, VolumeDescriptorPtr> _volumeDescriptors;
-    float _timestamp;
-    Vector2f _timestampRange;
-    TimestampMode _timestampMode;
+    std::map<uint32_t, VolumeDescriptorPtr> _volumeDescriptors;
+    uint32_t _currentIndex;
+    IndexMode _indexMode;
     std::map<float, Histogram> _histograms;
     uint64_t _nbFrames = 0;
 };

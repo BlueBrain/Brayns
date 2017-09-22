@@ -62,7 +62,7 @@
 
 namespace
 {
-const float DEFAULT_TEST_TIMESTAMP = 10000.f;
+const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 }
 
@@ -378,7 +378,7 @@ private:
 
         if (scene.getVolumeHandler())
         {
-            scene.getVolumeHandler()->setTimestamp(0.f);
+            scene.getVolumeHandler()->setCurrentIndex(0);
             const Vector3ui& volumeDimensions =
                 scene.getVolumeHandler()->getDimensions();
             const Vector3f& volumeOffset =
@@ -692,11 +692,11 @@ private:
             '9', "Simulation renderer",
             std::bind(&Brayns::Impl::_simulationRenderer, this));
         _keyboardHandler->registerKeyboardShortcut(
-            '[', "Decrease timestamp by 1",
-            std::bind(&Brayns::Impl::_decreaseTimestamp, this));
+            '[', "Decrease animation frame by 1",
+            std::bind(&Brayns::Impl::_decreaseAnimationFrame, this));
         _keyboardHandler->registerKeyboardShortcut(
-            ']', "Increase timestamp by 1",
-            std::bind(&Brayns::Impl::_increaseTimestamp, this));
+            ']', "Increase animation frame by 1",
+            std::bind(&Brayns::Impl::_increaseAnimationFrame, this));
         _keyboardHandler->registerKeyboardShortcut(
             'e', "Enable eletron shading",
             std::bind(&Brayns::Impl::_electronShading, this));
@@ -721,11 +721,11 @@ private:
             'P', "Disable shading",
             std::bind(&Brayns::Impl::_disableShading, this));
         _keyboardHandler->registerKeyboardShortcut(
-            'r', "Set timestamp to 0",
-            std::bind(&Brayns::Impl::_resetTimestamp, this));
+            'r', "Set animation frame to 0",
+            std::bind(&Brayns::Impl::_resetAnimationFrame, this));
         _keyboardHandler->registerKeyboardShortcut(
-            'R', "Set timestamp to infinity",
-            std::bind(&Brayns::Impl::_infiniteTimestamp, this));
+            'R', "Set animation frame to infinity",
+            std::bind(&Brayns::Impl::_infiniteAnimationFrame, this));
         _keyboardHandler->registerKeyboardShortcut(
             'u', "Enable/Disable shadows",
             std::bind(&Brayns::Impl::_toggleShadows, this));
@@ -745,11 +745,12 @@ private:
             'l', "Toggle load dynamic/static load balancer",
             std::bind(&Brayns::Impl::_toggleLoadBalancer, this));
         _keyboardHandler->registerKeyboardShortcut(
-            'g', "Enable/Disable timestamp auto-increment",
-            std::bind(&Brayns::Impl::_toggleIncrementalTimestamp, this));
+            'g', "Enable/Disable animation playback",
+            std::bind(&Brayns::Impl::_toggleAnimationPlayback, this));
         _keyboardHandler->registerKeyboardShortcut(
-            'x', "Set timestamp to " + std::to_string(DEFAULT_TEST_TIMESTAMP),
-            std::bind(&Brayns::Impl::_defaultTimestamp, this));
+            'x', "Set animation frame to " +
+                     std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
+            std::bind(&Brayns::Impl::_defaultAnimationFrame, this));
         _keyboardHandler->registerKeyboardShortcut(
             '|', "Create cache file ",
             std::bind(&Brayns::Impl::_saveSceneToCacheFile, this));
@@ -828,19 +829,19 @@ private:
         renderParams.setRenderer(RendererType::simulation);
     }
 
-    void _increaseTimestamp()
+    void _increaseAnimationFrame()
     {
         SceneParameters& sceneParams = _parametersManager->getSceneParameters();
-        float ts = sceneParams.getTimestamp();
-        sceneParams.setTimestamp(ts + 1.f);
+        const auto animationFrame = sceneParams.getAnimationFrame();
+        sceneParams.setAnimationFrame(animationFrame + 1);
     }
 
-    void _decreaseTimestamp()
+    void _decreaseAnimationFrame()
     {
         SceneParameters& sceneParams = _parametersManager->getSceneParameters();
-        float ts = sceneParams.getTimestamp();
-        if (ts > 0.f)
-            sceneParams.setTimestamp(ts - 1.f);
+        const auto animationFrame = sceneParams.getAnimationFrame();
+        if (animationFrame > 0)
+            sceneParams.setAnimationFrame(animationFrame - 1);
     }
 
     void _diffuseShading()
@@ -886,16 +887,16 @@ private:
         renderParams.setAmbientOcclusionStrength(aaStrength);
     }
 
-    void _resetTimestamp()
+    void _resetAnimationFrame()
     {
         SceneParameters& sceneParams = _parametersManager->getSceneParameters();
-        sceneParams.setTimestamp(0.f);
+        sceneParams.setAnimationFrame(0);
     }
 
-    void _infiniteTimestamp()
+    void _infiniteAnimationFrame()
     {
         SceneParameters& sceneParams = _parametersManager->getSceneParameters();
-        sceneParams.setTimestamp(std::numeric_limits<size_t>::max());
+        sceneParams.setAnimationFrame(std::numeric_limits<uint32_t>::max());
     }
 
     void _toggleShadows()
@@ -993,17 +994,17 @@ private:
         _engine->initializeMaterials(MaterialType::random);
     }
 
-    void _toggleIncrementalTimestamp()
+    void _toggleAnimationPlayback()
     {
         auto& sceneParams = _parametersManager->getSceneParameters();
         sceneParams.setAnimationDelta(sceneParams.getAnimationDelta() == 0 ? 1
                                                                            : 0);
     }
 
-    void _defaultTimestamp()
+    void _defaultAnimationFrame()
     {
         auto& sceneParams = _parametersManager->getSceneParameters();
-        sceneParams.setTimestamp(DEFAULT_TEST_TIMESTAMP);
+        sceneParams.setAnimationFrame(DEFAULT_TEST_ANIMATION_FRAME);
     }
 
     void _saveSceneToCacheFile()

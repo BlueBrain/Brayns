@@ -37,10 +37,10 @@ void BraynsViewer::display()
     ss << "Brayns Viewer ["
        << _brayns.getParametersManager().getRenderingParameters().getEngine()
        << "] ";
-    size_t ts =
-        _brayns.getParametersManager().getSceneParameters().getTimestamp();
-    if (ts != std::numeric_limits<size_t>::max())
-        ss << " (frame " << ts << ")";
+    auto animationFrame =
+        _brayns.getParametersManager().getSceneParameters().getAnimationFrame();
+    if (animationFrame != std::numeric_limits<uint32_t>::max())
+        ss << " (frame " << animationFrame << ")";
     if (_brayns.getParametersManager()
             .getApplicationParameters()
             .isBenchmarking())

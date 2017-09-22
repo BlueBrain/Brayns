@@ -33,8 +33,7 @@ namespace brayns
 AbstractSimulationHandler::AbstractSimulationHandler(
     const GeometryParameters& geometryParameters)
     : _geometryParameters(geometryParameters)
-    , _timestamp(std::numeric_limits<float>::max())
-    , _currentFrame(0)
+    , _currentFrame(std::numeric_limits<uint32_t>::max())
     , _nbFrames(0)
     , _frameSize(0)
     , _headerSize(0)
@@ -42,7 +41,7 @@ AbstractSimulationHandler::AbstractSimulationHandler(
     , _cacheFileDescriptor(-1)
     , _frameData(nullptr)
 {
-    _histogram.timestamp = _timestamp;
+    _histogram.frame = _currentFrame;
 }
 
 AbstractSimulationHandler::~AbstractSimulationHandler()
@@ -60,10 +59,9 @@ AbstractSimulationHandler::~AbstractSimulationHandler()
         delete[] _frameData;
 }
 
-void AbstractSimulationHandler::setTimestamp(const float timestamp)
+void AbstractSimulationHandler::setCurrentFrame(const uint32_t frame)
 {
-    _timestamp =
-        _nbFrames == 0 ? size_t(timestamp) : size_t(timestamp) % _nbFrames;
+    _currentFrame = _nbFrames == 0 ? frame : frame % _nbFrames;
 }
 
 bool AbstractSimulationHandler::attachSimulationToCacheFile(
@@ -104,9 +102,9 @@ bool AbstractSimulationHandler::attachSimulationToCacheFile(
 
     _headerSize = 2 * sizeof(uint64_t);
 
-    strncpy((char*)&_nbFrames, (char*)_memoryMapPtr, sizeof(uint64_t));
-    strncpy((char*)&_frameSize, ((char*)_memoryMapPtr + sizeof(uint64_t)),
-            sizeof(uint64_t));
+    strncpy((char*)&_nbFrames, (char*)_memoryMapPtr, sizeof(_nbFrames));
+    strncpy((char*)&_frameSize, ((char*)_memoryMapPtr + sizeof(_nbFrames)),
+            sizeof(_frameSize));
 
     BRAYNS_INFO << "Nb Frames: " << _nbFrames << std::endl;
     BRAYNS_INFO << "Frame size: " << _frameSize << std::endl;
@@ -117,8 +115,8 @@ bool AbstractSimulationHandler::attachSimulationToCacheFile(
 
 void AbstractSimulationHandler::writeHeader(std::ofstream& stream)
 {
-    stream.write((char*)&_nbFrames, sizeof(uint64_t));
-    stream.write((char*)&_frameSize, sizeof(uint64_t));
+    stream.write((char*)&_nbFrames, sizeof(_nbFrames));
+    stream.write((char*)&_frameSize, sizeof(_frameSize));
 }
 
 void AbstractSimulationHandler::writeFrame(std::ofstream& stream,
@@ -160,12 +158,12 @@ const Histogram& AbstractSimulationHandler::getHistogram()
 
     // Build histogram
     _histogram.range = range;
-    _histogram.timestamp = _timestamp;
+    _histogram.frame = _currentFrame;
     return _histogram;
 }
 
 bool AbstractSimulationHandler::histogramChanged() const
 {
-    return _timestamp != _histogram.timestamp;
+    return _currentFrame != _histogram.frame;
 }
 }

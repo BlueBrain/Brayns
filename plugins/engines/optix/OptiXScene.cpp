@@ -803,8 +803,8 @@ void OptiXScene::commitSimulationData()
 
 void OptiXScene::commitVolumeData()
 {
-    const float timestamp =
-        _parametersManager.getSceneParameters().getTimestamp();
+    const auto animationFrame =
+        _parametersManager.getSceneParameters().getAnimationFrame();
     VolumeHandlerPtr volumeHandler = getVolumeHandler();
     if (!volumeHandler || !volumeHandler->getData())
     {
@@ -819,7 +819,7 @@ void OptiXScene::commitVolumeData()
         return;
     }
 
-    volumeHandler->setTimestamp(timestamp);
+    volumeHandler->setCurrentIndex(animationFrame);
     void* data = volumeHandler->getData();
     if (data)
     {
@@ -924,9 +924,9 @@ void OptiXScene::_processVolumeAABBGeometry()
         {2, 3, 7, 7, 6, 2}  // Top
     };
 
-    const float timestamp =
-        _parametersManager.getSceneParameters().getTimestamp();
-    volumeHandler->setTimestamp(timestamp);
+    const auto animationFrame =
+        _parametersManager.getSceneParameters().getAnimationFrame();
+    volumeHandler->setCurrentIndex(animationFrame);
     const Vector3f& volumeElementSpacing = volumeHandler->getElementSpacing();
     const Vector3f& volumeOffset = volumeHandler->getOffset();
     const Vector3ui& volumeDimensions = volumeHandler->getDimensions();

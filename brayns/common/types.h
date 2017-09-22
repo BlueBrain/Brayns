@@ -273,14 +273,14 @@ enum class MorphologySectionType
 
 /**
  * @brief The Histogram struct contains the range as well as the values of the
- * simulation histogram
- *        for a given simulation frame, determined by the timestamp
+ *        simulation histogram for a given simulation frame, determined by the
+ *        frame
  */
 struct Histogram
 {
     uint64_ts values;
     Vector2f range;
-    float timestamp;
+    uint32_t frame;
     bool empty() const { return values.empty(); }
 };
 
@@ -339,7 +339,7 @@ enum class CameraStereoMode
     side_by_side
 };
 
-enum class TimestampMode
+enum class IndexMode
 {
     unchanged,
     modulo,
