@@ -32,7 +32,8 @@ namespace brayns
 class SceneLoader
 {
 public:
-    SceneLoader(const GeometryParameters& geometryParameters);
+    SceneLoader(const ApplicationParameters& applicationParameters,
+                const GeometryParameters& geometryParameters);
 
     /** Imports a file containing the positions and the filename of a list
      * of meshes. All loaded meshes are positioned at the corresponding
@@ -81,6 +82,7 @@ private:
 #endif
     bool _processNodes(Scene& scene, MeshLoader& loader);
 
+    const ApplicationParameters& _applicationParameters;
     const GeometryParameters& _geometryParameters;
 
     Nodes _nodes;

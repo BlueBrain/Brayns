@@ -31,8 +31,10 @@
 
 namespace brayns
 {
-SceneLoader::SceneLoader(const GeometryParameters& geometryParameters)
-    : _geometryParameters(geometryParameters)
+SceneLoader::SceneLoader(const ApplicationParameters& applicationParameters,
+                         const GeometryParameters& geometryParameters)
+    : _applicationParameters(applicationParameters)
+    , _geometryParameters(geometryParameters)
 {
 }
 
@@ -92,7 +94,8 @@ bool SceneLoader::_parsePositions(const std::string& filename)
 void SceneLoader::_importMorphology(Scene& scene, const Node& node,
                                     const Matrix4f& transformation)
 {
-    MorphologyLoader morphologyLoader(_geometryParameters, scene);
+    MorphologyLoader morphologyLoader(_applicationParameters,
+                                      _geometryParameters, scene);
     const servus::URI uri(node.filename);
     if (!morphologyLoader.importMorphology(uri, 0, NB_SYSTEM_MATERIALS +
                                                        node.materialId,

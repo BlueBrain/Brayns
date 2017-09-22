@@ -63,7 +63,9 @@ void Engine::reshape(const Vector2ui& frameSize)
 void Engine::commit()
 {
     auto& sceneParams = _parametersManager.getSceneParameters();
-    if (sceneParams.getAnimationDelta() != 0)
+    if ((sceneParams.getModified() || sceneParams.getAnimationDelta() != 0) &&
+        getScene().getSimulationHandler() &&
+        getScene().getSimulationHandler()->isReady())
     {
         sceneParams.setAnimationFrame(sceneParams.getAnimationFrame() +
                                       sceneParams.getAnimationDelta());

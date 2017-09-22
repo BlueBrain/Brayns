@@ -46,24 +46,31 @@ public:
      * @param reportSource path to report source
      * @param gids GIDS to load
      */
-    CircuitSimulationHandler(const GeometryParameters& geometryParameters,
+    CircuitSimulationHandler(const ApplicationParameters& applicationParameters,
+                             const GeometryParameters& geometryParameters,
                              const std::string& reportSource,
                              const brion::GIDSet& gids);
     ~CircuitSimulationHandler();
 
-    /**
-     * @brief Returns a pointer to the current frame in the memory mapped file.
-     * @return Pointer to given frame
-     */
-    void* getFrameData() final;
+    void* getFrameData(uint32_t frame) final;
 
     CompartmentReportPtr getCompartmentReport() { return _compartmentReport; }
+    bool isReady() const final;
+
 private:
+    void _triggerLoading(uint32_t frame);
+    bool _isFrameLoaded() const;
+    void _makeFrameReady(const uint32_t frame);
+
+    const ApplicationParameters& _applicationParameters;
+
     CompartmentReportPtr _compartmentReport;
     double _startTime;
     double _endTime;
     double _dt;
     brion::floatsPtr _frameValues;
+    std::future<brion::floatsPtr> _currentFrameFuture;
+    bool _ready{false};
 };
 }
 

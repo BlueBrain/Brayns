@@ -45,7 +45,8 @@ public:
      * @param geometryParameters
      * @param scene
      */
-    MorphologyLoader(const GeometryParameters& geometryParameters,
+    MorphologyLoader(const ApplicationParameters& applicationParameters,
+                     const GeometryParameters& geometryParameters,
                      Scene& scene);
     ~MorphologyLoader();
 

@@ -71,8 +71,10 @@ public:
 class MorphologyLoader::Impl
 {
 public:
-    Impl(GeometryParameters geometryParameters, Scene& scene)
-        : _geometryParameters(geometryParameters)
+    Impl(const ApplicationParameters& applicationParameters,
+         const GeometryParameters& geometryParameters, Scene& scene)
+        : _applicationParameters(applicationParameters)
+        , _geometryParameters(geometryParameters)
         , _scene(scene)
     {
     }
@@ -151,7 +153,7 @@ public:
             {
                 CircuitSimulationHandlerPtr simulationHandler(
                     new CircuitSimulationHandler(
-                        _geometryParameters,
+                        _applicationParameters, _geometryParameters,
                         bc.getReportSource(report).getPath(), gids));
                 compartmentReport = simulationHandler->getCompartmentReport();
                 // Attach simulation handler
@@ -907,14 +909,17 @@ private:
     }
 
 private:
-    GeometryParameters _geometryParameters;
+    const ApplicationParameters& _applicationParameters;
+    const GeometryParameters& _geometryParameters;
     Scene& _scene;
     strings _neuronMatrix;
 };
 
-MorphologyLoader::MorphologyLoader(const GeometryParameters& geometryParameters,
-                                   Scene& scene)
-    : _impl(new MorphologyLoader::Impl(geometryParameters, scene))
+MorphologyLoader::MorphologyLoader(
+    const ApplicationParameters& applicationParameters,
+    const GeometryParameters& geometryParameters, Scene& scene)
+    : _impl(new MorphologyLoader::Impl(applicationParameters,
+                                       geometryParameters, scene))
 {
 }
 

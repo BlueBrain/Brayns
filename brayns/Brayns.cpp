@@ -521,9 +521,11 @@ private:
      */
     void _loadSceneFile(const std::string& filename)
     {
+        auto& applicationParameters =
+            _parametersManager->getApplicationParameters();
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
-        SceneLoader sceneLoader(geometryParameters);
+        SceneLoader sceneLoader(applicationParameters, geometryParameters);
         sceneLoader.importFromFile(filename, scene, _meshLoader);
     }
 
@@ -585,10 +587,13 @@ private:
     */
     void _loadMorphologyFolder()
     {
+        auto& applicationParameters =
+            _parametersManager->getApplicationParameters();
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
-        MorphologyLoader morphologyLoader(geometryParameters, scene);
+        MorphologyLoader morphologyLoader(applicationParameters,
+                                          geometryParameters, scene);
 
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
@@ -611,6 +616,8 @@ private:
     */
     void _loadCircuitConfiguration()
     {
+        auto& applicationParameters =
+            _parametersManager->getApplicationParameters();
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         const std::string& filename =
@@ -620,7 +627,8 @@ private:
         BRAYNS_INFO << "Loading circuit configuration from " << filename
                     << std::endl;
         const std::string& report = geometryParameters.getCircuitReport();
-        MorphologyLoader morphologyLoader(geometryParameters, scene);
+        MorphologyLoader morphologyLoader(applicationParameters,
+                                          geometryParameters, scene);
         const servus::URI uri(filename);
         morphologyLoader.importCircuit(uri, target, report, scene, _meshLoader);
     }
@@ -778,6 +786,9 @@ private:
         _keyboardHandler->registerKeyboardShortcut(
             'c', "Display current camera information",
             std::bind(&Brayns::Impl::_displayCameraInformation, this));
+        _keyboardHandler->registerKeyboardShortcut(
+            'm', "Toggle synchronous/asynchronous mode",
+            std::bind(&Brayns::Impl::_toggleSynchronousMode, this));
     }
 
     void _blackBackground()
@@ -831,6 +842,12 @@ private:
 
     void _increaseAnimationFrame()
     {
+        if (_engine->getScene().getSimulationHandler() &&
+            !_engine->getScene().getSimulationHandler()->isReady())
+        {
+            return;
+        }
+
         SceneParameters& sceneParams = _parametersManager->getSceneParameters();
         const auto animationFrame = sceneParams.getAnimationFrame();
         sceneParams.setAnimationFrame(animationFrame + 1);
@@ -838,6 +855,12 @@ private:
 
     void _decreaseAnimationFrame()
     {
+        if (_engine->getScene().getSimulationHandler() &&
+            !_engine->getScene().getSimulationHandler()->isReady())
+        {
+            return;
+        }
+
         SceneParameters& sceneParams = _parametersManager->getSceneParameters();
         const auto animationFrame = sceneParams.getAnimationFrame();
         if (animationFrame > 0)
@@ -1034,6 +1057,12 @@ private:
     void _displayCameraInformation()
     {
         BRAYNS_INFO << _engine->getCamera() << std::endl;
+    }
+
+    void _toggleSynchronousMode()
+    {
+        auto& app = _parametersManager->getApplicationParameters();
+        app.setSynchronousMode(!app.getSynchronousMode());
     }
 
     std::unique_ptr<EngineFactory> _engineFactory;

@@ -47,10 +47,10 @@ public:
     SpikeSimulationHandler(const GeometryParameters& geometryParameters);
 
     /**
-     * @brief Returns a pointer to the current frame in the memory mapped file.
+     * @brief Returns a pointer to requested frame in the memory mapped file.
      * @return Pointer to given frame
      */
-    void* getFrameData() final;
+    void* getFrameData(uint32_t frame) final;
 };
 }
 

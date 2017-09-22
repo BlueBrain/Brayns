@@ -59,11 +59,6 @@ AbstractSimulationHandler::~AbstractSimulationHandler()
         delete[] _frameData;
 }
 
-void AbstractSimulationHandler::setCurrentFrame(const uint32_t frame)
-{
-    _currentFrame = _nbFrames == 0 ? frame : frame % _nbFrames;
-}
-
 bool AbstractSimulationHandler::attachSimulationToCacheFile(
     const std::string& cacheFile)
 {
@@ -130,7 +125,9 @@ const Histogram& AbstractSimulationHandler::getHistogram()
     if (!histogramChanged())
         return _histogram;
 
-    float* data = (float*)getFrameData();
+    float* data = (float*)getFrameData(_currentFrame);
+    if (!data)
+        return _histogram;
 
     // Determine range
     Vector2f range(std::numeric_limits<float>::max(),
@@ -165,5 +162,10 @@ const Histogram& AbstractSimulationHandler::getHistogram()
 bool AbstractSimulationHandler::histogramChanged() const
 {
     return _currentFrame != _histogram.frame;
+}
+
+uint32_t AbstractSimulationHandler::_getBoundedFrame(const uint32_t frame) const
+{
+    return _nbFrames == 0 ? frame : frame % _nbFrames;
 }
 }
