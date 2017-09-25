@@ -80,11 +80,6 @@ private:
     void _setupSubscriber();
 
     /**
-     * @brief This method is called when the camera is updated by a ZeroEQ event
-     */
-    void _cameraUpdated();
-
-    /**
      * @brief This method is called when camera reset is invoked by a ZeroEQ
      * event
      */

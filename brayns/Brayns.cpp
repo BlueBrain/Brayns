@@ -1045,7 +1045,6 @@ private:
     {
         auto& camera = _engine->getCamera();
         camera.reset();
-        camera.commit();
     }
 
     void _increaseMotionSpeed()
