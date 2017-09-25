@@ -401,7 +401,6 @@ void ZeroEQPlugin::_setupSubscriber()
 
 void ZeroEQPlugin::_cameraUpdated()
 {
-    _engine->getFrameBuffer().clear();
     _engine->getCamera().commit();
 }
 
@@ -412,7 +411,6 @@ void ZeroEQPlugin::_resetCameraUpdated()
         !sceneParameters.getEnvironmentMap().empty());
     _engine->getCamera().reset();
     _engine->getCamera().commit();
-    _engine->getFrameBuffer().clear();
 }
 
 bool ZeroEQPlugin::_requestScene()
@@ -469,7 +467,6 @@ void ZeroEQPlugin::_sceneUpdated()
 
     scene.commitMaterials(true);
     _engine->getRenderer().commit();
-    _engine->getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_spikesUpdated()
@@ -537,7 +534,6 @@ void ZeroEQPlugin::_materialLUTUpdated()
     else
         transferFunction.setValuesRange(Vector2f(range[0], range[1]));
     scene.commitTransferFunctionData();
-    _engine->getFrameBuffer().clear();
 }
 
 void ZeroEQPlugin::_requestMaterialLUT()
@@ -1104,6 +1100,8 @@ void ZeroEQPlugin::_initializeSettings()
         applicationParameters.getFrameExportFolder());
     _remoteSettings.setSynchronousMode(
         applicationParameters.getSynchronousMode());
+    _remoteSettings.setVarianceThreshold(
+        renderingParameters.getVarianceThreshold());
 }
 
 void ZeroEQPlugin::_settingsUpdated()
@@ -1192,13 +1190,13 @@ void ZeroEQPlugin::_settingsUpdated()
         _parametersManager.getRenderingParameters().getEngine())
         _onChangeEngine();
     else
-    {
         _engine->getRenderer().commit();
-        _engine->getFrameBuffer().clear();
-    }
 
     _parametersManager.set("synchronous-mode",
                            (_remoteSettings.getSynchronousMode() ? "1" : "0"));
+    _parametersManager.set("variance-threshold",
+                           std::to_string(
+                               _remoteSettings.getVarianceThreshold()));
     _parametersManager.set("frame-export-folder",
                            _remoteSettings.getFrameExportFolderString());
     if (_remoteSettings.getFrameExportFolderString().empty())
@@ -1313,7 +1311,6 @@ void ZeroEQPlugin::_clipPlanesUpdated()
     {
         _engine->getCamera().setClipPlanes(clipPlanes);
         _engine->getCamera().commit();
-        _engine->getFrameBuffer().clear();
 
         _publisher.publish(_clipPlanes);
     }

@@ -106,6 +106,12 @@ public:
     /** Call resetModified on all parameters. */
     void resetModified();
 
+    /**
+     * @return true if any of the parameters has been modified since the last
+     * resetModified().
+     */
+    bool isAnyModified() const;
+
 private:
     std::vector<AbstractParameters*> _parameterSets;
     po::options_description _parameters;

@@ -309,7 +309,12 @@ private:
 
         _engine->setActiveRenderer(
             _parametersManager->getRenderingParameters().getRenderer());
+
+        if (_parametersManager->isAnyModified() || camera.getModified())
+            _engine->getFrameBuffer().clear();
+
         _engine->render();
+
         _writeFrameToFolder();
 
         _parametersManager->resetModified();

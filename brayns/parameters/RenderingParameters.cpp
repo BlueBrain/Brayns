@@ -48,6 +48,7 @@ const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
 const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_CAMERA_TYPE = "camera-type";
 const std::string PARAM_HEAD_LIGHT = "head-light";
+const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
 const std::string RENDERERS[4] = {"exobj", "proximityrenderer",
                                   "simulationrenderer", "particlerenderer"};
@@ -115,7 +116,9 @@ RenderingParameters::RenderingParameters()
         PARAM_CAMERA_TYPE.c_str(), po::value<std::string>(),
         "Camera type [perspective|stereo|orthographic|panoramic]")(
         PARAM_HEAD_LIGHT.c_str(), po::value<bool>(),
-        "Enable/Disable light source attached to camera origin [bool]");
+        "Enable/Disable light source attached to camera origin [bool]")(
+        PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),
+        "Threshold for adaptive accumulation [float]");
 
     // Add default renderers
     _renderers.push_back(RendererType::basic);
@@ -193,6 +196,8 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
     }
     if (vm.count(PARAM_HEAD_LIGHT))
         _headLight = vm[PARAM_HEAD_LIGHT].as<bool>();
+    if (vm.count(PARAM_VARIANCE_THRESHOLD))
+        _varianceThreshold = vm[PARAM_VARIANCE_THRESHOLD].as<float>();
     return true;
 }
 

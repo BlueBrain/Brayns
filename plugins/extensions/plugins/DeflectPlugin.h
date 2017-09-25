@@ -73,7 +73,7 @@ private:
 
     bool _initializeDeflect(bool observerOnly);
     void _sendDeflectFrame(Engine& engine);
-    bool _handleDeflectEvents(Engine& engine, KeyboardHandler& keyboardHandler,
+    void _handleDeflectEvents(Engine& engine, KeyboardHandler& keyboardHandler,
                               AbstractManipulator& cameraManipulator);
 
     /** Send an image to DisplayCluster

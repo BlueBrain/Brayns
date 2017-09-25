@@ -127,11 +127,7 @@ bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
         if (!observerOnly)
             _sendDeflectFrame(*engine);
 
-        if (_handleDeflectEvents(*engine, keyboardHandler, cameraManipulator))
-        {
-            engine->getFrameBuffer().clear();
-            engine->getRenderer().commit();
-        }
+        _handleDeflectEvents(*engine, keyboardHandler, cameraManipulator);
     }
 
     return true;
@@ -210,13 +206,10 @@ void DeflectPlugin::_sendDeflectFrame(Engine& engine)
         _sendFuture = make_ready_future(true);
 }
 
-bool DeflectPlugin::_handleDeflectEvents(Engine& engine,
+void DeflectPlugin::_handleDeflectEvents(Engine& engine,
                                          KeyboardHandler& keyboardHandler,
                                          AbstractManipulator& cameraManipulator)
 {
-    if (!_stream->hasEvent())
-        return false;
-
     while (_stream->hasEvent())
     {
         const deflect::Event& event = _stream->getEvent();
@@ -284,13 +277,11 @@ bool DeflectPlugin::_handleDeflectEvents(Engine& engine,
             _stream.reset();
             _sendFuture = make_ready_future(true);
             engine.setKeepRunning(false);
-            return true;
+            break;
         default:
             break;
         }
     }
-
-    return true;
 }
 
 void DeflectPlugin::_send(const Engine& engine, const bool swapYAxis)
