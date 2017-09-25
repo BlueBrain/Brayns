@@ -57,6 +57,10 @@ public:
         _clipPlanes.push_back(Vector4f(0.f, 1.f, 0.f, inf));
         _clipPlanes.push_back(Vector4f(0.f, 0.f, -1.f, inf));
         _clipPlanes.push_back(Vector4f(0.f, 0.f, 1.f, inf));
+
+#if (BRAYNS_USE_NETWORKING)
+        registerDeserializedCallback([this] { modified = true; });
+#endif
     }
 
     void set(const Vector3f& position, const Vector3f& target,
@@ -285,6 +289,7 @@ public:
     void setClipPlanes(const ClipPlanes clipPlanes)
     {
         _clipPlanes = clipPlanes;
+        modified = true;
     }
 
     ClipPlanes& getClipPlanes() { return _clipPlanes; }

@@ -96,12 +96,11 @@ ZeroEQPlugin::~ZeroEQPlugin()
 
 void ZeroEQPlugin::_onNewEngine()
 {
-    servus::Serializable& cam = *_engine->getCamera().getSerializable();
-    cam.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_cameraUpdated, this));
-
     if (_httpServer)
+    {
+        servus::Serializable& cam = *_engine->getCamera().getSerializable();
         _httpServer->handle(ENDPOINT_CAMERA, cam);
+    }
 
     _requests[ ::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER()] = [&] {
         return _publisher.publish(*_engine->getCamera().getSerializable());
@@ -399,18 +398,12 @@ void ZeroEQPlugin::_setupSubscriber()
     _subscriber.subscribe(_remoteFrame);
 }
 
-void ZeroEQPlugin::_cameraUpdated()
-{
-    _engine->getCamera().commit();
-}
-
 void ZeroEQPlugin::_resetCameraUpdated()
 {
     auto& sceneParameters = _parametersManager.getSceneParameters();
     _engine->getCamera().setEnvironmentMap(
         !sceneParameters.getEnvironmentMap().empty());
     _engine->getCamera().reset();
-    _engine->getCamera().commit();
 }
 
 bool ZeroEQPlugin::_requestScene()
@@ -1310,8 +1303,6 @@ void ZeroEQPlugin::_clipPlanesUpdated()
     if (clipPlanes.size() == 6)
     {
         _engine->getCamera().setClipPlanes(clipPlanes);
-        _engine->getCamera().commit();
-
         _publisher.publish(_clipPlanes);
     }
     else
