@@ -166,6 +166,7 @@ table Settings {
     jpeg_compression: uint;
     frame_export_folder: string;
     synchronous_mode: bool;
+    variance_threshold:float;
 }
 
 table ForceRendering

@@ -233,11 +233,6 @@ void BaseWindow::forceRedraw()
 
 void BaseWindow::display()
 {
-    auto& engine = _brayns.getEngine();
-    auto& camera = engine.getCamera();
-    if (camera.getModified())
-        engine.getFrameBuffer().clear();
-
     const Vector2ui windowSize = _brayns.getParametersManager()
                                      .getApplicationParameters()
                                      .getWindowSize();
@@ -249,6 +244,7 @@ void BaseWindow::display()
     RenderInput renderInput;
     RenderOutput renderOutput;
 
+    const auto& camera = _brayns.getEngine().getCamera();
     renderInput.windowSize = _windowSize;
     renderInput.position = camera.getPosition();
     renderInput.target = camera.getTarget();

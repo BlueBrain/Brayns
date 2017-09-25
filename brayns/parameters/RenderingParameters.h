@@ -168,6 +168,20 @@ public:
     bool getHeadLight() const { return _headLight; }
     /** If the rendering should be refined by accumulating multiple passes */
     bool getAccumulation() const { return _accumulation; }
+    /**
+     * @return the threshold where accumulation stops if the variance error
+     * reaches this value.
+     */
+    float getVarianceThreshold() const { return _varianceThreshold; }
+    /**
+     * The threshold where accumulation stops if the variance error reaches this
+     * value.
+     */
+    void setVarianceThreshold(const float value)
+    {
+        updateValue(_varianceThreshold, value);
+    }
+
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -191,6 +205,7 @@ protected:
     CameraType _cameraType;
     bool _headLight;
     bool _dynamicLoadBalancer{false};
+    float _varianceThreshold{-1.f};
 };
 }
 #endif // RENDERINGPARAMETERS_H

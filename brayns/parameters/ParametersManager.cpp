@@ -73,6 +73,16 @@ void ParametersManager::resetModified()
         parameters->resetModified();
 }
 
+bool ParametersManager::isAnyModified() const
+{
+    for (AbstractParameters* parameters : _parameterSets)
+    {
+        if (parameters->getModified())
+            return true;
+    }
+    return false;
+}
+
 ApplicationParameters& ParametersManager::getApplicationParameters()
 {
     return _applicationParameters;

@@ -78,6 +78,7 @@ void OSPRayRenderer::commit()
     ospSet1f(_renderer, "softShadows", rp.getSoftShadows());
     ospSet1f(_renderer, "ambientOcclusionStrength",
              rp.getAmbientOcclusionStrength());
+    ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
 
     ospSet1i(_renderer, "shadingEnabled", (mt == ShadingType::diffuse));
     ospSet1f(_renderer, "timestamp", sp.getAnimationFrame());

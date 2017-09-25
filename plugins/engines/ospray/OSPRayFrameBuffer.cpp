@@ -81,7 +81,7 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
 
     size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
     if (_accumulation)
-        attributes |= OSP_FB_ACCUM;
+        attributes |= OSP_FB_ACCUM | OSP_FB_VARIANCE;
 
     _frameBuffer = ospNewFrameBuffer(size, format, attributes);
     if (_pixelOp)
@@ -107,9 +107,9 @@ void OSPRayFrameBuffer::setStreamingParams(const bool enabled,
 
 void OSPRayFrameBuffer::clear()
 {
-    size_t attributes = 0;
+    size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
     if (_accumulation)
-        attributes |= OSP_FB_ACCUM;
+        attributes |= OSP_FB_ACCUM | OSP_FB_VARIANCE;
     ospFrameBufferClear(_frameBuffer, attributes);
 }
 
