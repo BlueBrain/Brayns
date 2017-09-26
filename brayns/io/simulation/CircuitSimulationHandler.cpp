@@ -98,7 +98,6 @@ void CircuitSimulationHandler::_triggerLoading(const uint32_t frame)
 
     _ready = false;
     _currentFrameFuture = _compartmentReport->loadFrame(timestamp);
-    _frameValues.reset();
 }
 
 bool CircuitSimulationHandler::_isFrameLoaded() const
