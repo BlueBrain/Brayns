@@ -754,7 +754,7 @@ void ZeroEQPlugin::_initializeDataSource()
     circuit.setMeshFolder(geometryParameters.getCircuitMeshFolder());
     circuit.setUseSimulationModel(
         geometryParameters.getCircuitUseSimulationModel());
-    circuit.setTarget(geometryParameters.getCircuitTarget());
+    circuit.setTargets(geometryParameters.getCircuitTargets());
     circuit.setReport(geometryParameters.getCircuitReport());
     circuit.setStartSimulationTime(
         geometryParameters.getCircuitStartSimulationTime());
@@ -875,8 +875,8 @@ void ZeroEQPlugin::_dataSourceUpdated()
                                static_cast<GeometryQuality>(
                                    _remoteDataSource.getGeometryQuality())));
     _parametersManager.set(
-        "circuit-target",
-        _remoteDataSource.getCircuitConfiguration().getTargetString());
+        "circuit-targets",
+        _remoteDataSource.getCircuitConfiguration().getTargetsString());
     _parametersManager.set(
         "circuit-report",
         _remoteDataSource.getCircuitConfiguration().getReportString());

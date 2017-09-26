@@ -627,7 +627,7 @@ private:
         auto& scene = _engine->getScene();
         const std::string& filename =
             geometryParameters.getCircuitConfiguration();
-        const std::string& target = geometryParameters.getCircuitTarget();
+        const auto& targets = geometryParameters.getCircuitTargetsAsStrings();
 
         BRAYNS_INFO << "Loading circuit configuration from " << filename
                     << std::endl;
@@ -635,7 +635,8 @@ private:
         MorphologyLoader morphologyLoader(applicationParameters,
                                           geometryParameters, scene);
         const servus::URI uri(filename);
-        morphologyLoader.importCircuit(uri, target, report, scene, _meshLoader);
+        morphologyLoader.importCircuit(uri, targets, report, scene,
+                                       _meshLoader);
     }
 
 #endif // BRAYNS_USE_BRION

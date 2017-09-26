@@ -42,10 +42,11 @@ enum ColorScheme: uint {
     neuron_by_layer = 4,
     neuron_by_mtype = 5,
     neuron_by_etype = 6,
-    protein_by_id = 7,
-    protein_atoms = 8,
-    protein_chain = 9,
-    protein_residue = 10
+    neuron_by_target = 7,
+    protein_by_id = 8,
+    protein_atoms = 9,
+    protein_chain = 10,
+    protein_residue = 11
 }
 
 enum SceneEnvironment: uint {
@@ -80,7 +81,7 @@ table CircuitConfiguration {
     mesh_folder: string;
     mesh_transformation: bool;
     use_simulation_model: bool;
-    target: string;
+    targets: string;
     report: string;
     start_simulation_time: float;
     end_simulation_time: float;

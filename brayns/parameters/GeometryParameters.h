@@ -88,8 +88,9 @@ public:
     std::string getLoadCacheFile() const { return _loadCacheFile; }
     /** Binary representation of a scene to save */
     std::string getSaveCacheFile() const { return _saveCacheFile; }
-    /** Circuit target */
-    std::string getCircuitTarget() const { return _circuitTarget; }
+    /** Circuit targets */
+    std::string getCircuitTargets() const { return _circuitTargets; }
+    strings getCircuitTargetsAsStrings() const;
     /** Circuit compartment report */
     std::string getCircuitReport() const { return _circuitReport; }
     /** Defines the folder where morphologies meshes are stored. Meshes must
@@ -266,7 +267,7 @@ protected:
     float _circuitDensity;
     std::string _circuitMeshFilenamePattern;
     std::string _circuitMeshFolder;
-    std::string _circuitTarget;
+    std::string _circuitTargets;
     std::string _circuitReport;
     double _circuitStartSimulationTime;
     double _circuitEndSimulationTime;
