@@ -135,16 +135,13 @@ void ZeroEQPlugin::_onChangeEngine()
 bool ZeroEQPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
                        AbstractManipulator&)
 {
-    bool continueOtherPlugins = true;
-
     if (engine_.expired())
-        return continueOtherPlugins;
+        return true;
 
     if (_engine != engine_.lock().get() || _dirtyEngine)
     {
         _engine = engine_.lock().get();
         _onNewEngine();
-        continueOtherPlugins = false;
     }
 
     const auto& ap = _parametersManager.getApplicationParameters();
@@ -172,7 +169,7 @@ bool ZeroEQPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
         while (_subscriber.receive(0))
         {
         }
-    return continueOtherPlugins;
+    return !_dirtyEngine;
 }
 
 bool ZeroEQPlugin::operator!() const
@@ -850,6 +847,9 @@ void ZeroEQPlugin::_initializeDataSource()
 
 void ZeroEQPlugin::_dataSourceUpdated()
 {
+    if (!_engine->isReady())
+        return;
+
     auto& geometryParameters = _parametersManager.getGeometryParameters();
 
     _parametersManager.set("splash-scene-folder",
@@ -1063,8 +1063,7 @@ void ZeroEQPlugin::_dataSourceUpdated()
                                std::to_string(connectivityScale[2]));
     _parametersManager.print();
 
-    _dirtyEngine = true;
-    _onChangeEngine();
+    _engine->buildScene();
 }
 
 void ZeroEQPlugin::_initializeSettings()
@@ -1224,7 +1223,9 @@ void ZeroEQPlugin::_settingsUpdated()
 
     if (_engine->name() !=
         _parametersManager.getRenderingParameters().getEngine())
+    {
         _onChangeEngine();
+    }
     else
         _engine->getRenderer().commit();
 

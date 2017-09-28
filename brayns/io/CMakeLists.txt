@@ -4,29 +4,30 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
+  algorithms/MetaballsGenerator.cpp
+  MeshLoader.cpp
+  MolecularSystemReader.cpp
+  ProteinLoader.cpp
+  SceneLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
   simulation/SpikeSimulationHandler.cpp
-  algorithms/MetaballsGenerator.cpp
-  XYZBLoader.cpp
-  TransferFunctionLoader.cpp
-  ProteinLoader.cpp
   TextureLoader.cpp
-  SceneLoader.cpp
-  MolecularSystemReader.cpp
-  MeshLoader.cpp
+  TransferFunctionLoader.cpp
+  XYZBLoader.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
+  algorithms/MetaballsGenerator.h
+  MeshLoader.h
+  MolecularSystemReader.h
+  ProgressReporter.h
+  ProteinLoader.h
+  SceneLoader.h
   simulation/CADiffusionSimulationHandler.h
   simulation/SpikeSimulationHandler.h
-  algorithms/MetaballsGenerator.h
-  XYZBLoader.h
-  TransferFunctionLoader.h
-  ProteinLoader.h
   TextureLoader.h
-  SceneLoader.h
-  MolecularSystemReader.h
-  MeshLoader.h
+  TransferFunctionLoader.h
+  XYZBLoader.h
 )
 
 set(BRAYNSIO_LINK_LIBRARIES

@@ -21,7 +21,6 @@
 #ifndef BRAYNS_LOG_H
 #define BRAYNS_LOG_H
 
-#include <boost/progress.hpp>
 #include <chrono>
 #include <iostream>
 #define BRAYNS_ERROR std::cerr << "[ERROR] "
@@ -53,16 +52,5 @@
                 .count();                                                \
         std::cout << "[TIMER] " << __duration << " ms" << std::endl;     \
     }
-
-class Progress : public boost::progress_display
-{
-public:
-    Progress(const std::string& message, const unsigned long expectedCount)
-        : boost::progress_display(expectedCount, std::cout,
-                                  "[INFO ] " + message + "\n[INFO ] ",
-                                  "[INFO ] ", "[INFO ] ")
-    {
-    }
-};
 
 #endif

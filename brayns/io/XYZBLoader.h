@@ -22,11 +22,12 @@
 #define XYZBLOADER_H
 
 #include <brayns/common/types.h>
+#include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 namespace brayns
 {
-class XYZBLoader
+class XYZBLoader : public ProgressReporter
 {
 public:
     XYZBLoader(const GeometryParameters& geometryParameters);

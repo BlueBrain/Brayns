@@ -104,6 +104,12 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
 
     _frameBuffer.reset(ospFrameBuffer);
 
+    for (const auto& renderer : _renderers)
+    {
+        _renderers[renderer.first]->setScene(_scene);
+        _renderers[renderer.first]->setCamera(_camera);
+    }
+
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 
@@ -126,12 +132,17 @@ void OSPRayEngine::commit()
         const auto useDynamicLoadBalancer =
             _parametersManager.getRenderingParameters()
                 .getDynamicLoadBalancer();
-        ospDeviceSet1i(device, "dynamicLoadBalancer", useDynamicLoadBalancer);
-        ospDeviceCommit(device);
+        if (_useDynamicLoadBalancer != useDynamicLoadBalancer)
+        {
+            ospDeviceSet1i(device, "dynamicLoadBalancer",
+                           useDynamicLoadBalancer);
+            ospDeviceCommit(device);
+            _useDynamicLoadBalancer = useDynamicLoadBalancer;
 
-        BRAYNS_INFO << "Using "
-                    << (useDynamicLoadBalancer ? "dynamic" : "static")
-                    << " load balancer" << std::endl;
+            BRAYNS_INFO << "Using "
+                        << (useDynamicLoadBalancer ? "dynamic" : "static")
+                        << " load balancer" << std::endl;
+        }
     }
 
     auto osprayFrameBuffer =
@@ -143,13 +154,6 @@ void OSPRayEngine::commit()
                                               appParams.getStreamQuality(),
                                               _camera->getType() ==
                                                   CameraType::stereo);
-
-    for (const auto& renderer : _renderers)
-    {
-        _renderers[renderer.first]->setScene(_scene);
-        _renderers[renderer.first]->setCamera(_camera);
-        _renderers[renderer.first]->commit();
-    }
 }
 
 void OSPRayEngine::render()

@@ -22,6 +22,7 @@ set(BRAYNSCOMMON_SOURCES
   geometry/TrianglesMesh.cpp
   material/Material.cpp
   material/Texture2D.cpp
+  Progress.cpp
   renderer/Renderer.cpp
   renderer/FrameBuffer.cpp
   light/Light.cpp
@@ -51,6 +52,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   log.h
   material/Material.h
   material/Texture2D.h
+  Progress.h
   renderer/FrameBuffer.h
   renderer/Renderer.h
   scene/Scene.h

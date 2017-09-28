@@ -22,6 +22,7 @@
 #define MOLECULARSYSTEMREADER_H
 
 #include <brayns/common/types.h>
+#include <brayns/io/ProgressReporter.h>
 #include <string>
 
 namespace brayns
@@ -46,7 +47,7 @@ typedef std::map<size_t, Vector3fs> ProteinPositions;
  *        - ProteinPositions: File containing the position of each protein
  *        - CalciumPositions: File containing the position of each CA atom
  */
-class MolecularSystemReader
+class MolecularSystemReader : public ProgressReporter
 {
 public:
     /**

@@ -70,8 +70,8 @@ public:
     /** @copydoc Scene::commitTransferFunctionData */
     void commitTransferFunctionData() final;
 
-    /** @copydoc Scene::reset */
-    void reset() final;
+    /** @copydoc Scene::unload */
+    void unload() final;
 
     /** @copydoc Scene::saveSceneToCacheFile */
     void saveSceneToCacheFile() final;
@@ -79,8 +79,8 @@ public:
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
-    OSPModel* modelImpl(const uint32_t index);
-    OSPModel* simulationModelImpl() { return &_simulationModel; };
+    OSPModel modelImpl(const uint32_t index);
+    OSPModel simulationModelImpl() { return _simulationModel; };
 private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
     void _createModel(const uint32_t index);

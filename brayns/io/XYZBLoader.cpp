@@ -45,6 +45,13 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
     bool validParsing = true;
     std::string line;
 
+    size_t numlines = 0;
+    {
+        std::ifstream tmpFile(filename, std::ios::in);
+        numlines = std::count(std::istreambuf_iterator<char>(tmpFile),
+                              std::istreambuf_iterator<char>(), '\n');
+    }
+
     while (validParsing && std::getline(file, line))
     {
         std::vector<float> lineData;
@@ -59,7 +66,6 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
         case 3:
         {
             const Vector3f position(lineData[0], lineData[1], lineData[2]);
-            BRAYNS_INFO << position << std::endl;
             spheres[0].push_back(SpherePtr(
                 new Sphere(position,
                            _geometryParameters.getRadiusMultiplier())));
@@ -71,6 +77,7 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
             validParsing = false;
             break;
         }
+        updateProgress("Loading spheres...", spheres[0].size(), numlines);
     }
 
     file.close();
@@ -92,11 +99,8 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
     file.seekg(0);
 
     SpheresMap& spheres = scene.getSpheres();
-    Progress progress("Loading spheres...", nbPoints);
     while (!file.eof())
     {
-        ++progress;
-
         double x, y, z;
         file.read((char*)&x, sizeof(double));
         file.read((char*)&y, sizeof(double));
@@ -108,6 +112,8 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
         spheres[0].push_back(SpherePtr(
             new Sphere(position, _geometryParameters.getRadiusMultiplier())));
         scene.getWorldBounds().merge(position);
+
+        updateProgress("Loading spheres...", spheres[0].size(), nbPoints);
     }
 
     file.close();

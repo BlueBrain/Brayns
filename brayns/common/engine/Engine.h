@@ -113,11 +113,17 @@ public:
     void initializeMaterials(MaterialType materialType = MaterialType::none);
 
     /**
-     * Recreates the engine according to new parameters, e.g. datasource has
-     * changed or engine type/name. The recreation is delegated to the Brayns
-     * instance.
+     * Recreates the engine according to new engine type/name. The recreation is
+     * delegated to the Brayns instance.
      */
     std::function<void()> recreate;
+
+    /**
+     * Unloads the current scene and loads and builds a new scene according to
+     * datasource parameters. The execution will be asynchronous if
+     * getSynchronousMode() is false.
+     */
+    std::function<void()> buildScene;
 
     /**
      * @brief resets frame number
@@ -145,11 +151,24 @@ public:
     /**
      * @return the last operation processed by the engine
      */
-    const std::string getLastOperation() const { return _lastOperation; }
+    const std::string& getLastOperation() const { return _lastOperation; }
     /**
      * @return the last normalized progress value (0..1) emitted by the engine
      */
     float getLastProgress() const { return _lastProgress; }
+    /**
+     * Set the last normalized progress value (0..1) for any current operation.
+     */
+    void setLastOperation(const std::string& lastOperation)
+    {
+        _lastOperation = lastOperation;
+    }
+
+    /** Set the last operation processed by the engine. */
+    void setLastProgress(const float lastProgress)
+    {
+        _lastProgress = lastProgress;
+    }
     /**
      * @return true if for "--module deflect" the DeflectPixelOp was
      *         successfully loaded. Only supported for the OSPRay engine.
@@ -164,6 +183,13 @@ public:
      * @return true if the user wants to continue rendering, false otherwise.
      */
     bool getKeepRunning() const { return _keepRunning; }
+    /**
+     * @return true if the engine is ready to render and receive updates, false
+     *         if data loading is in progress.
+     */
+    bool isReady() const { return _isReady; }
+    /** @internal */
+    void setReady(const bool isReady) { _isReady = isReady; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
@@ -180,6 +206,7 @@ protected:
     float _lastProgress;
     std::string _lastOperation;
     bool _keepRunning{true};
+    bool _isReady{false};
 };
 }
 

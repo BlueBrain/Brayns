@@ -21,6 +21,7 @@
 
 #include <brayns/Brayns.h>
 
+#include <brayns/common/Progress.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/camera/FlyingModeManipulator.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
@@ -59,10 +60,17 @@
 #include <servus/uri.h>
 #endif
 
+#include <future>
+#ifdef BRAYNS_USE_LUNCHBOX
+#include <lunchbox/threadPool.h>
+#endif
+
 namespace
 {
 const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
+const size_t LOADING_PROGRESS_DATA = 100;
+const size_t LOADING_PROGRESS_STEP = 10;
 }
 
 namespace brayns
@@ -115,49 +123,90 @@ struct Brayns::Impl
         if (!_engine)
             throw std::runtime_error("Unsupported engine: " + engineName);
 
+        _engine->getFrameBuffer().clear();
+        _engine->recreate = std::bind(&Impl::createEngine, this);
+        _engine->buildScene = std::bind(&Impl::buildScene, this);
+        _setupCameraManipulator(CameraMode::inspect);
+
         // Default sun light
         DirectionalLightPtr sunLight(
             new DirectionalLight(DEFAULT_SUN_DIRECTION, DEFAULT_SUN_COLOR,
                                  DEFAULT_SUN_INTENSITY));
         _engine->getScene().addLight(sunLight);
+        _engine->getScene().commitLights();
 
-        // Load data and build geometry
         buildScene();
-
-        _engine->recreate = std::bind(&Impl::createEngine, this);
-
-        BRAYNS_INFO << "Now rendering..." << std::endl;
     }
 
     void buildScene()
     {
-        _meshLoader.clear();
+        _engine->setReady(false);
 
-        Scene& scene = _engine->getScene();
-        _loadData();
+        // if engine does not support scene reloading, recreate it first
+        if (!_engine->getScene().supportsUnloading())
+            createEngine();
 
-        if (scene.empty() && !scene.getVolumeHandler())
+        _engine->setLastOperation("");
+        _engine->setLastProgress(0);
+
+        auto loadFunc = [&] {
+            Progress loadingProgress(
+                "Loading scene...",
+                LOADING_PROGRESS_DATA + 3 * LOADING_PROGRESS_STEP,
+                [&](const std::string& msg, const size_t current,
+                    const size_t total) {
+                    _engine->setLastOperation(msg);
+                    _engine->setLastProgress(float(current) / total);
+                });
+
+            loadingProgress.setMessage("Unloading...");
+            _engine->getScene().unload();
+            loadingProgress += LOADING_PROGRESS_STEP;
+
+            loadingProgress.setMessage("Loading data...");
+            _meshLoader.clear();
+            Scene& scene = _engine->getScene();
+            _loadData(loadingProgress);
+
+            if (scene.empty() && !scene.getVolumeHandler())
+            {
+                BRAYNS_INFO << "Building default scene" << std::endl;
+                scene.buildDefault();
+            }
+
+            scene.buildMaterials();
+            scene.commitVolumeData();
+            scene.commitSimulationData();
+            scene.buildEnvironment();
+
+            loadingProgress.setMessage("Building geometry...");
+            scene.buildGeometry();
+            loadingProgress += LOADING_PROGRESS_STEP;
+
+            loadingProgress.setMessage("Building acceleration structure...");
+            scene.commit();
+            loadingProgress += LOADING_PROGRESS_STEP;
+
+            // Set default camera according to scene bounding box
+            _engine->setDefaultCamera();
+
+            // Set default epsilon according to scene bounding box
+            _engine->setDefaultEpsilon();
+
+            loadingProgress.setMessage("Done");
+            _engine->setReady(true);
+            BRAYNS_INFO << "Now rendering..." << std::endl;
+        };
+
+#ifdef BRAYNS_USE_LUNCHBOX
+        if (!_parametersManager->getApplicationParameters()
+                 .getSynchronousMode())
         {
-            BRAYNS_INFO << "Building default scene" << std::endl;
-            scene.buildDefault();
+            _dataLoadingFuture = _loadingThread.post(loadFunc);
         }
-
-        scene.buildMaterials();
-        scene.commitVolumeData();
-        scene.commitSimulationData();
-        scene.buildEnvironment();
-        scene.buildGeometry();
-        scene.commit();
-
-        // Set default camera according to scene bounding box
-        _setupCameraManipulator(CameraMode::inspect);
-        _engine->setDefaultCamera();
-
-        // Set default epsilon according to scene bounding box
-        _engine->setDefaultEpsilon();
-
-        // Commit changes to the rendering engine
-        _engine->commit();
+        else
+#endif
+            _dataLoadingFuture = std::async(std::launch::deferred, loadFunc);
     }
 
 #if (BRAYNS_USE_MAGICKPP)
@@ -243,24 +292,28 @@ struct Brayns::Impl
         _engine->getCamera().set(renderInput.position, renderInput.target,
                                  renderInput.up);
 
-        _render(renderInput.windowSize);
-
-        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-        const Vector2i& frameSize = frameBuffer.getSize();
-        uint8_t* colorBuffer = frameBuffer.getColorBuffer();
-        if (colorBuffer)
+        if (_render(renderInput.windowSize))
         {
-            const size_t size =
-                frameSize.x() * frameSize.y() * frameBuffer.getColorDepth();
-            renderOutput.colorBuffer.assign(colorBuffer, colorBuffer + size);
-            renderOutput.colorBufferFormat = frameBuffer.getFrameBufferFormat();
-        }
+            FrameBuffer& frameBuffer = _engine->getFrameBuffer();
+            const Vector2i& frameSize = frameBuffer.getSize();
+            uint8_t* colorBuffer = frameBuffer.getColorBuffer();
+            if (colorBuffer)
+            {
+                const size_t size =
+                    frameSize.x() * frameSize.y() * frameBuffer.getColorDepth();
+                renderOutput.colorBuffer.assign(colorBuffer,
+                                                colorBuffer + size);
+                renderOutput.colorBufferFormat =
+                    frameBuffer.getFrameBufferFormat();
+            }
 
-        float* depthBuffer = frameBuffer.getDepthBuffer();
-        if (depthBuffer)
-        {
-            const size_t size = frameSize.x() * frameSize.y();
-            renderOutput.depthBuffer.assign(depthBuffer, depthBuffer + size);
+            float* depthBuffer = frameBuffer.getDepthBuffer();
+            if (depthBuffer)
+            {
+                const size_t size = frameSize.x() * frameSize.y();
+                renderOutput.depthBuffer.assign(depthBuffer,
+                                                depthBuffer + size);
+            }
         }
 
         _engine->postRender();
@@ -283,7 +336,7 @@ struct Brayns::Impl
     KeyboardHandler& getKeyboardHandler() { return *_keyboardHandler; }
     AbstractManipulator& getCameraManipulator() { return *_cameraManipulator; }
 private:
-    void _render(const Vector2ui& windowSize)
+    bool _render(const Vector2ui& windowSize)
     {
         _engine->reshape(windowSize);
         _engine->preRender();
@@ -291,6 +344,22 @@ private:
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         _executePlugins(windowSize);
 #endif
+
+        if (_dataLoadingFuture.valid())
+        {
+#ifdef BRAYNS_USE_LUNCHBOX
+            if (!_parametersManager->getApplicationParameters()
+                     .getSynchronousMode() &&
+                _dataLoadingFuture.wait_for(std::chrono::milliseconds(0)) !=
+                    std::future_status::ready)
+            {
+                return false;
+            }
+#endif
+
+            _dataLoadingFuture.get();
+        }
+
         _engine->commit();
 
         Camera& camera = _engine->getCamera();
@@ -302,7 +371,9 @@ private:
             LightPtr sunLight = scene.getLight(0);
             DirectionalLight* sun =
                 dynamic_cast<DirectionalLight*>(sunLight.get());
-            if (sun && camera.getModified())
+            if (sun &&
+                (camera.getModified() ||
+                 _parametersManager->getRenderingParameters().getModified()))
             {
                 sun->setDirection(camera.getTarget() - camera.getPosition());
                 scene.commitLights();
@@ -321,14 +392,30 @@ private:
 
         _parametersManager->resetModified();
         camera.resetModified();
+
+        return true;
     }
 
-    void _loadData()
+    void _loadData(Progress& loadingProgress)
     {
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& volumeParameters = _parametersManager->getVolumeParameters();
         auto& sceneParameters = _parametersManager->getSceneParameters();
         auto& scene = _engine->getScene();
+
+        size_t nextTic = 0;
+        const size_t tic = LOADING_PROGRESS_DATA;
+        auto progressUpdate = [&](const std::string& msg, const size_t current,
+                                  const size_t total) {
+            loadingProgress.setMessage(msg);
+
+            const size_t newProgress = (current / float(total)) * tic;
+            if (newProgress % tic > nextTic)
+            {
+                loadingProgress += newProgress - nextTic;
+                nextTic = newProgress;
+            }
+        };
 
         // set environment map if applicable
         const std::string& environmentMap =
@@ -349,43 +436,56 @@ private:
         scene.commitTransferFunctionData();
 
         if (!geometryParameters.getPDBFile().empty())
+        {
             _loadPDBFile(geometryParameters.getPDBFile());
+            loadingProgress += tic;
+        }
 
         if (!geometryParameters.getPDBFolder().empty())
-            _loadPDBFolder();
+            _loadPDBFolder(progressUpdate);
 
         if (!geometryParameters.getSplashSceneFolder().empty())
-            _loadMeshFolder(geometryParameters.getSplashSceneFolder());
+            _loadMeshFolder(geometryParameters.getSplashSceneFolder(),
+                            progressUpdate);
 
         if (!geometryParameters.getMeshFolder().empty())
-            _loadMeshFolder(geometryParameters.getMeshFolder());
+            _loadMeshFolder(geometryParameters.getMeshFolder(), progressUpdate);
 
         if (!geometryParameters.getMeshFile().empty())
+        {
             _loadMeshFile(geometryParameters.getMeshFile());
+            loadingProgress += tic;
+        }
 
 #if (BRAYNS_USE_BRION)
         if (!geometryParameters.getSceneFile().empty())
-            _loadSceneFile(geometryParameters.getSceneFile());
+            _loadSceneFile(geometryParameters.getSceneFile(), progressUpdate);
 
         if (!geometryParameters.getNESTCircuit().empty())
+        {
             _loadNESTCircuit();
+            loadingProgress += tic;
+        }
 
         if (!geometryParameters.getMorphologyFolder().empty())
-            _loadMorphologyFolder();
+            _loadMorphologyFolder(progressUpdate);
 
         if (!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getConnectivityFile().empty())
-            _loadCircuitConfiguration();
+            _loadCircuitConfiguration(progressUpdate);
 
         if (!geometryParameters.getConnectivityFile().empty())
             _loadConnectivityFile();
 #endif
 
         if (!geometryParameters.getXYZBFile().empty())
-            _loadXYZBFile();
+        {
+            _loadXYZBFile(progressUpdate);
+            loadingProgress += tic;
+        }
 
         if (!geometryParameters.getMolecularSystemConfig().empty())
-            _loadMolecularSystem();
+            _loadMolecularSystem(progressUpdate);
 
         if (scene.getVolumeHandler())
         {
@@ -407,18 +507,21 @@ private:
     /**
         Loads data from a PDB file (command line parameter --pdb-file)
     */
-    void _loadPDBFolder()
+    void _loadPDBFolder(const Progress::ProgressUpdateCallback& progressUpdate)
     {
         // Load PDB File
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         const std::string& folder = geometryParameters.getPDBFolder();
         const strings filters = {".pdb", ".pdb1"};
         const strings files = parseFolder(folder, filters);
-        Progress progress("Loading PDB folder " + folder, files.size());
+
+        size_t current = 0;
         for (const auto& file : files)
         {
             _loadPDBFile(file);
-            ++progress;
+            ++current;
+            progressUpdate("Loading PDB folder " + folder, current,
+                           files.size());
         }
     }
 
@@ -450,7 +553,7 @@ private:
     /**
         Loads data from a XYZR file (command line parameter --xyzr-file)
     */
-    void _loadXYZBFile()
+    void _loadXYZBFile(const Progress::ProgressUpdateCallback& progressUpdate)
     {
         // Load XYZB File
         auto& geometryParameters = _parametersManager->getGeometryParameters();
@@ -458,6 +561,7 @@ private:
         BRAYNS_INFO << "Loading XYZB file " << geometryParameters.getXYZBFile()
                     << std::endl;
         XYZBLoader xyzbLoader(geometryParameters);
+        xyzbLoader.setProgressUpdate(progressUpdate);
         if (!xyzbLoader.importFromBinaryFile(geometryParameters.getXYZBFile(),
                                              scene))
             BRAYNS_ERROR << "Failed to import "
@@ -468,7 +572,8 @@ private:
         Loads data from mesh files located in the folder specified in
        the geometry parameters (command line parameter --mesh-folder)
     */
-    void _loadMeshFolder(const std::string& folder)
+    void _loadMeshFolder(const std::string& folder,
+                         const Progress::ProgressUpdateCallback& progressUpdate)
     {
         const auto& geometryParameters =
             _parametersManager->getGeometryParameters();
@@ -478,7 +583,8 @@ private:
                            ".stl", ".3ds", ".ase", ".ifc", ".off"};
         strings files = parseFolder(folder, filters);
         size_t i = 0;
-        Progress progress("Loading meshes from " + folder, files.size());
+        std::stringstream msg;
+        msg << "Loading " << files.size() << " meshes from " << folder;
         for (const auto& file : files)
         {
             size_t material =
@@ -490,7 +596,7 @@ private:
                                                 material))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++i;
-            ++progress;
+            progressUpdate(msg.str(), i, files.size());
         }
     }
 
@@ -537,13 +643,15 @@ private:
      * Loads data from a scene description file (command line parameter
      * --scene-file)
      */
-    void _loadSceneFile(const std::string& filename)
+    void _loadSceneFile(const std::string& filename,
+                        const Progress::ProgressUpdateCallback& progressUpdate)
     {
         auto& applicationParameters =
             _parametersManager->getApplicationParameters();
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         SceneLoader sceneLoader(applicationParameters, geometryParameters);
+        sceneLoader.setProgressUpdate(progressUpdate);
         sceneLoader.importFromFile(filename, scene, _meshLoader);
     }
 
@@ -603,7 +711,8 @@ private:
         Loads data from SWC and H5 files located in the folder specified
        in the geometry parameters (command line parameter --morphology-folder)
     */
-    void _loadMorphologyFolder()
+    void _loadMorphologyFolder(
+        const Progress::ProgressUpdateCallback& progressUpdate)
     {
         auto& applicationParameters =
             _parametersManager->getApplicationParameters();
@@ -616,15 +725,15 @@ private:
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
         uint64_t morphologyIndex = 0;
-        Progress progress("Loading morphologies from " + folder, files.size());
         for (const auto& file : files)
         {
-            ++progress;
             servus::URI uri(file);
             if (!morphologyLoader.importMorphology(uri, morphologyIndex,
                                                    NO_MATERIAL))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++morphologyIndex;
+            progressUpdate("Loading morphologies from " + folder,
+                           morphologyIndex, files.size());
         }
     }
 
@@ -632,7 +741,8 @@ private:
         Loads morphologies from circuit configuration (command line
        parameter --circuit-configuration)
     */
-    void _loadCircuitConfiguration()
+    void _loadCircuitConfiguration(
+        const Progress::ProgressUpdateCallback& progressUpdate)
     {
         auto& applicationParameters =
             _parametersManager->getApplicationParameters();
@@ -647,6 +757,8 @@ private:
         const std::string& report = geometryParameters.getCircuitReport();
         MorphologyLoader morphologyLoader(applicationParameters,
                                           geometryParameters, scene);
+        morphologyLoader.setProgressUpdate(progressUpdate);
+
         const servus::URI uri(filename);
         morphologyLoader.importCircuit(uri, targets, report, scene,
                                        _meshLoader);
@@ -658,11 +770,13 @@ private:
        parameter
         --molecular-system-config )
     */
-    void _loadMolecularSystem()
+    void _loadMolecularSystem(
+        const Progress::ProgressUpdateCallback& progressUpdate)
     {
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
+        molecularSystemReader.setProgressUpdate(progressUpdate);
         molecularSystemReader.import(scene, _meshLoader);
     }
 
@@ -1091,6 +1205,15 @@ private:
 
     float _fieldOfView{45.f};
     float _eyeSeparation{0.0635f};
+
+    std::future<void> _dataLoadingFuture;
+#ifdef BRAYNS_USE_LUNCHBOX
+    // it is important to perform loading and unloading in the same thread,
+    // otherwise we leak memory from within ospray/embree. So we don't use
+    // std::async(std::launch::async), but rather a thread pool with one thread
+    // that remains for the entire application lifetime.
+    lunchbox::ThreadPool _loadingThread{1};
+#endif
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     ExtensionPluginFactoryPtr _extensionPluginFactory;

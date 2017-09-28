@@ -24,6 +24,7 @@
 #include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
+#include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
@@ -51,7 +52,7 @@ namespace brayns
  * forward.
  * @todo Move this loaded to Brion
  */
-class NESTLoader
+class NESTLoader : public ProgressReporter
 {
 public:
     NESTLoader(const GeometryParameters& geometryParameters);

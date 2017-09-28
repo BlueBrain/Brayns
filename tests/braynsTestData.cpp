@@ -78,10 +78,15 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {
-        app,        "--circuit-config", BBP_TEST_BLUECONFIG3,
-        "--target", "Layer1",           "--circuit-last-simulation-frame",
-        "1"};
+    const char* argv[] = {app,
+                          "--synchronous-mode",
+                          "on",
+                          "--circuit-config",
+                          BBP_TEST_BLUECONFIG3,
+                          "--target",
+                          "Layer1",
+                          "--circuit-last-simulation-frame",
+                          "1"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -99,7 +104,8 @@ BOOST_AUTO_TEST_CASE(render_protein_and_compare)
 
     const char* app = testSuite.argv[0];
     const std::string pdbFile(BRAYNS_TESTDATA + std::string("1bna.pdb"));
-    const char* argv[] = {app, "--pdb-file", pdbFile.c_str()};
+    const char* argv[] = {app, "--synchronous-mode", "on", "--pdb-file",
+                          pdbFile.c_str()};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -117,7 +123,8 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
 
     const char* app = testSuite.argv[0];
     const std::string pdbFile(BRAYNS_TESTDATA + std::string("1bna.pdb"));
-    const char* argv[] = {app, "--pdb-file", pdbFile.c_str(), "--camera-type",
+    const char* argv[] = {app,          "--synchronous-mode", "on",
+                          "--pdb-file", pdbFile.c_str(),      "--camera-type",
                           "stereo"};
     const int argc = sizeof(argv) / sizeof(char*);
 

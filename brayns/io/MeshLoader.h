@@ -46,7 +46,7 @@ public:
      * @param filename name of the file containing the meshes
      * @param Scene holding the meshes
      * @param transformation Position, orientation and scale to apply to the
-     * mesh
+     *        mesh
      * @param defaultMaterial Default material for the whole mesh. If set to
      *        NO_MATERIAL, materials from the mesh file are used. Otherwise,
      *        all meshes are forced to that specific material.
@@ -59,7 +59,7 @@ public:
     /** Exports meshes to a given file
      *
      * @param filename destination file name
-     * @param Scene holding the meshes
+     * @param scene Scene holding the meshes
      */
     bool exportMeshToFile(const std::string& filename, Scene& scene) const;
 

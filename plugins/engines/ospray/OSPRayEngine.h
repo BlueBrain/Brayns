@@ -64,6 +64,7 @@ public:
     bool haveDeflectPixelOp() const final { return _haveDeflectPixelOp; }
 private:
     bool _haveDeflectPixelOp{false};
+    bool _useDynamicLoadBalancer{false};
 };
 }
 

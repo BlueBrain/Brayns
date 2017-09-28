@@ -19,4 +19,8 @@ if(BRAYNS_IMAGEMAGICK_ENABLED)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE ${Magick++_LIBRARIES})
 endif()
 
+if(TARGET Lunchbox)
+  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE Lunchbox)
+endif()
+
 common_library(brayns)

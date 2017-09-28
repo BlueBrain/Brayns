@@ -67,11 +67,8 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
 {
     uint64_t proteinCount = 0;
-    Progress progress("Loading proteins...", _nbProteins);
     for (const auto& proteinPosition : _proteinPositions)
     {
-        ++progress;
-
         const auto& protein = _proteins.find(proteinPosition.first);
         if (!_proteinFolder.empty())
             // Load PDB files
@@ -109,6 +106,8 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
                 if (_proteinFolder.empty())
                     ++proteinCount;
             }
+
+        updateProgress("Loading proteins...", proteinCount, _nbProteins);
     }
 
     // Update materials

@@ -62,6 +62,8 @@ public:
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
+    /** @copydoc Scene::supportsUnloading */
+    bool supportsUnloading() const final { return false; }
 private:
     livre::Engine& _livre;
 };
