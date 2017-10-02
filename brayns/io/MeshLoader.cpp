@@ -20,6 +20,8 @@
 
 #include "MeshLoader.h"
 
+#include <assimp/IOSystem.hpp> // must come before Exporter.hpp
+
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
