@@ -130,7 +130,9 @@ struct Brayns::Impl
 
     void buildScene()
     {
+#if (BRAYNS_USE_ASSIMP)
         _meshLoader.clear();
+#endif
         Scene& scene = _engine->getScene();
         _loadData();
 
@@ -648,10 +650,15 @@ private:
     */
     void _loadMolecularSystem()
     {
+#if (BRAYNS_USE_ASSIMP)
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
         molecularSystemReader.import(scene, _meshLoader);
+#else
+        BRAYNS_ERROR << "Assimp library is required to load molecular system "
+                     << std::endl;
+#endif
     }
 
     void _setupCameraManipulator(const CameraMode mode)
@@ -1075,7 +1082,9 @@ private:
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
+#if (BRAYNS_USE_ASSIMP)
     MeshLoader _meshLoader;
+#endif
 
     float _fieldOfView{45.f};
     float _eyeSeparation{0.0635f};

@@ -15,4 +15,8 @@ set(BRAYNS_SOURCES Brayns.cpp)
 set(BRAYNS_LINK_LIBRARIES
     PUBLIC braynsParameters braynsCommon braynsIO braynsPlugins)
 
+if(BRAYNS_IMAGEMAGICK_ENABLED)
+  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE ${Magick++_LIBRARIES})
+endif()
+
 common_library(brayns)

@@ -36,6 +36,9 @@ SceneLoader::SceneLoader(const ApplicationParameters& applicationParameters,
     : _applicationParameters(applicationParameters)
     , _geometryParameters(geometryParameters)
 {
+#ifndef BRAYNS_USE_BRION
+    BRAYNS_UNUSED_VAR(_applicationParameters);
+#endif
 }
 
 bool SceneLoader::_parsePositions(const std::string& filename)

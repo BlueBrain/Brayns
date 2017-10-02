@@ -52,6 +52,8 @@ typedef ::int64_t index_t;
 #define BRAYNS_UNUSED
 #endif
 
+#define BRAYNS_UNUSED_VAR(x) (void)x;
+
 namespace brayns
 {
 // Forward declarations
