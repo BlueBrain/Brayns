@@ -104,7 +104,7 @@ else()
 endif()
 
 # Mesh loading
-common_find_package(assimp REQUIRED)
+common_find_package(assimp SYSTEM)
 if(ASSIMP_FOUND)
   option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ON)
 else()

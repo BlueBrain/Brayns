@@ -22,7 +22,6 @@
 #define SceneLoader_H
 
 #include <brayns/common/types.h>
-#include <brayns/io/MeshLoader.h>
 
 namespace brayns
 {
@@ -52,7 +51,7 @@ public:
      * @return true if the file was successfully imported. False otherwise.
      */
     bool importFromFile(const std::string& filename, Scene& scene,
-                        MeshLoader& meshLoader);
+                        MeshLoaderPtr meshLoader = nullptr);
 
 private:
     enum class FileType
@@ -76,11 +75,9 @@ private:
     void _importMorphology(Scene& scene, const Node& node,
                            const Matrix4f& transformation);
 #endif
-#ifdef BRAYNS_USE_ASSIMP
-    void _importMesh(Scene& scene, MeshLoader& loader, const Node& node,
+    void _importMesh(Scene& scene, MeshLoaderPtr loader, const Node& node,
                      const Matrix4f& transformation);
-#endif
-    bool _processNodes(Scene& scene, MeshLoader& loader);
+    bool _processNodes(Scene& scene, MeshLoaderPtr loader);
 
     const ApplicationParameters& _applicationParameters;
     const GeometryParameters& _geometryParameters;

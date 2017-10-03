@@ -76,6 +76,11 @@ const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_SCENE_FILE = "scene-file";
+const std::string PARAM_MATRIX_FILE = "matrix-file";
+const std::string PARAM_MATRIX_ID = "matrix-id";
+const std::string PARAM_MATRIX_SHOW_CONNECTIONS = "matrix-show-connections";
+const std::string PARAM_MATRIX_DIMENSION_RANGE = "matrix-dimension-range";
+const std::string PARAM_MATRIX_SCALE = "matrix-scale";
 
 const std::string COLOR_SCHEMES[12] = {"none",
                                        "neuron-by-id",
@@ -121,6 +126,9 @@ GeometryParameters::GeometryParameters()
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
     , _memoryMode(MemoryMode::shared)
+    , _matrixId{0}
+    , _matrixDimensionRange{0, std::numeric_limits<unsigned int>::max()}
+    , _matrixScale{1.f, 1.f, 1.f}
 {
     _parameters.add_options()(PARAM_MORPHOLOGY_FOLDER.c_str(),
                               po::value<std::string>(),
@@ -218,7 +226,18 @@ GeometryParameters::GeometryParameters()
         "morphology [string]")(PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(),
                                po::value<bool>(),
                                "Enable/Disable mesh transformation according "
-                               "to circuit information [bool]");
+                               "to circuit information [bool]")(
+        PARAM_MATRIX_FILE.c_str(), po::value<std::string>(),
+        "H5 file containing neuron matrix [string]")(
+        PARAM_MATRIX_ID.c_str(), po::value<size_t>(),
+        "H5 file containing neuron matrix id [int]")(
+        PARAM_MATRIX_SHOW_CONNECTIONS.c_str(), po::value<bool>(),
+        "Show connections between cells [bool]")(
+        PARAM_MATRIX_DIMENSION_RANGE.c_str(),
+        po::value<size_ts>()->multitoken(),
+        "Range of dimensions [int int]")(PARAM_MATRIX_SCALE.c_str(),
+                                         po::value<floats>()->multitoken(),
+                                         "Matrix scaling [float float float]");
 }
 
 bool GeometryParameters::_parse(const po::variables_map& vm)
@@ -372,6 +391,31 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
         _circuitMeshTransformation =
             vm[PARAM_CIRCUIT_MESH_TRANSFORMATION].as<bool>();
 
+    // Matrix
+    if (vm.count(PARAM_MATRIX_FILE))
+        _matrixFile = vm[PARAM_MATRIX_FILE].as<std::string>();
+    if (vm.count(PARAM_MATRIX_ID))
+        _matrixId = vm[PARAM_MATRIX_ID].as<size_t>();
+    if (vm.count(PARAM_MATRIX_SHOW_CONNECTIONS))
+        _matrixShowConnections = vm[PARAM_MATRIX_SHOW_CONNECTIONS].as<bool>();
+    if (vm.count(PARAM_MATRIX_DIMENSION_RANGE))
+    {
+        const size_ts values = vm[PARAM_MATRIX_DIMENSION_RANGE].as<size_ts>();
+        if (values.size() == 2)
+            _matrixDimensionRange = Vector2ui(values[0], values[1]);
+        else
+            BRAYNS_ERROR << "Invalid number of values for "
+                         << PARAM_MATRIX_DIMENSION_RANGE << std::endl;
+    }
+    if (vm.count(PARAM_MATRIX_SCALE))
+    {
+        const floats values = vm[PARAM_MATRIX_SCALE].as<floats>();
+        if (values.size() == 3)
+            _matrixScale = Vector3f(values[0], values[1], values[2]);
+        else
+            BRAYNS_ERROR << "Invalid number of values for "
+                         << PARAM_MATRIX_SCALE << std::endl;
+    }
     return true;
 }
 
@@ -406,27 +450,27 @@ void GeometryParameters::print()
     BRAYNS_INFO << "Circuit configuration      : " << std::endl;
     BRAYNS_INFO << "- Config file              : " << _circuitConfiguration
                 << std::endl;
-    BRAYNS_INFO << "- Targets                  : " << _circuitTargets
+    BRAYNS_INFO << " - Targets                 : " << _circuitTargets
                 << std::endl;
-    BRAYNS_INFO << "- Report                   : " << _circuitReport
+    BRAYNS_INFO << " - Report                  : " << _circuitReport
                 << std::endl;
-    BRAYNS_INFO << "- Mesh folder              : " << _circuitMeshFolder
+    BRAYNS_INFO << " - Mesh folder             : " << _circuitMeshFolder
                 << std::endl;
-    BRAYNS_INFO << "- Density                  : " << _circuitDensity
+    BRAYNS_INFO << " - Density                 : " << _circuitDensity
                 << std::endl;
-    BRAYNS_INFO << "- Start simulation time    : "
+    BRAYNS_INFO << " - Start simulation time   : "
                 << _circuitStartSimulationTime << std::endl;
-    BRAYNS_INFO << "- End simulation time      : " << _circuitEndSimulationTime
+    BRAYNS_INFO << " - End simulation time     : " << _circuitEndSimulationTime
                 << std::endl;
-    BRAYNS_INFO << "- Simulation step          : " << _circuitSimulationStep
+    BRAYNS_INFO << " - Simulation step         : " << _circuitSimulationStep
                 << std::endl;
-    BRAYNS_INFO << "- Simulation values range  : "
+    BRAYNS_INFO << " - Simulation values range : "
                 << _circuitSimulationValuesRange << std::endl;
-    BRAYNS_INFO << "- Simulation histogram size: "
+    BRAYNS_INFO << " - Histogram size          : "
                 << _circuitSimulationHistogramSize << std::endl;
-    BRAYNS_INFO << "- Bounding box             : " << _circuitBoundingBox
+    BRAYNS_INFO << " - Bounding box            : " << _circuitBoundingBox
                 << std::endl;
-    BRAYNS_INFO << "- Mesh transformation      : "
+    BRAYNS_INFO << " - Mesh transformation     : "
                 << (_circuitMeshTransformation ? "Yes" : "No") << std::endl;
     BRAYNS_INFO << "Morphology section types   : " << _morphologySectionTypes
                 << std::endl;
@@ -458,6 +502,14 @@ void GeometryParameters::print()
     BRAYNS_INFO << "Scene file                 : " << _sceneFile << std::endl;
     BRAYNS_INFO << "Mesh filename pattern      : "
                 << _circuitMeshFilenamePattern << std::endl;
+    BRAYNS_INFO << "Matrix                     : " << std::endl;
+    BRAYNS_INFO << " - file                    : " << _matrixFile << std::endl;
+    BRAYNS_INFO << " - Id                      : " << _matrixId << std::endl;
+    BRAYNS_INFO << " - Show connections        : "
+                << (_matrixShowConnections ? "Yes" : "No") << std::endl;
+    BRAYNS_INFO << " - Dimension range         : " << _matrixDimensionRange
+                << std::endl;
+    BRAYNS_INFO << " - Scale                   : " << _matrixScale << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(

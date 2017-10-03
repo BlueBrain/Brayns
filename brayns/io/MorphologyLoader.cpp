@@ -32,6 +32,10 @@
 #include <brion/brion.h>
 #include <servus/types.h>
 
+#if (BRAYNS_USE_ASSIMP)
+#include <brayns/io/MeshLoader.h>
+#endif
+
 #include <algorithm>
 #include <fstream>
 
@@ -117,7 +121,7 @@ public:
      */
     bool importCircuit(const servus::URI& uri, const strings& targets,
                        const std::string& report, Scene& scene,
-                       MeshLoader& meshLoader)
+                       MeshLoaderPtr meshLoader)
     {
         bool returnValue = true;
         try
@@ -205,9 +209,10 @@ public:
             _populateNeuronMatrix(bc, allGids);
 
             // Import meshes
-            returnValue =
-                returnValue && _importMeshes(allGids, transformations,
-                                             targetGIDOffsets, meshLoader);
+            if (meshLoader)
+                returnValue =
+                    returnValue && _importMeshes(allGids, transformations,
+                                                 targetGIDOffsets, meshLoader);
 
             // Import morphologies
             if (_geometryParameters.getCircuitMeshFolder().empty() ||
@@ -786,7 +791,7 @@ private:
     bool _importMeshes(const brain::GIDSet& gids,
                        const Matrix4fs& transformations,
                        const GIDOffsets& targetGIDOffsets,
-                       MeshLoader& meshLoader)
+                       MeshLoaderPtr meshLoader)
     {
         size_t loadingFailures = 0;
         const auto meshedMorphologiesFolder =
@@ -812,32 +817,15 @@ private:
                     : NB_SYSTEM_MATERIALS +
                           boost::lexical_cast<size_t>(_neuronMatrix[meshIndex]);
 
-            // Define mesh filename according to file pattern and GID
-            auto meshFilenamePattern =
-                _geometryParameters.getCircuitMeshFilenamePattern();
-            std::stringstream gidAsString;
-            gidAsString << gid;
-            const std::string GID = "{gid}";
-            if (!meshFilenamePattern.empty())
-                meshFilenamePattern.replace(meshFilenamePattern.find(GID),
-                                            GID.length(), gidAsString.str());
-            else
-                meshFilenamePattern = gidAsString.str();
-            auto meshFilename =
-                meshedMorphologiesFolder + "/" + meshFilenamePattern;
-
             // Load mesh from file
             const auto transformation =
                 _geometryParameters.getCircuitMeshTransformation()
                     ? transformations[meshIndex]
                     : Matrix4f();
-            if (!meshLoader.importMeshFromFile(
-                    meshFilename, _scene,
-                    _geometryParameters.getGeometryQuality(), transformation,
-                    materialId))
-            {
+            if (!meshLoader->importMeshFromFile(
+                    meshLoader->getMeshFilenameFromGID(gid), _scene,
+                    transformation, materialId))
                 ++loadingFailures;
-            }
             ++meshIndex;
         }
         if (loadingFailures != 0)
@@ -847,7 +835,7 @@ private:
     }
 #else
     bool _importMeshes(const brain::GIDSet&, const Matrix4fs&,
-                       const GIDOffsets&, MeshLoader&)
+                       const GIDOffsets&, MeshLoaderPtr)
     {
         BRAYNS_ERROR << "assimp dependency is required to load meshes"
                      << std::endl;
@@ -1009,7 +997,7 @@ bool MorphologyLoader::importMorphology(const servus::URI& uri,
 bool MorphologyLoader::importCircuit(const servus::URI& uri,
                                      const strings& targets,
                                      const std::string& report, Scene& scene,
-                                     MeshLoader& meshLoader)
+                                     MeshLoaderPtr meshLoader)
 {
     return _impl->importCircuit(uri, targets, report, scene, meshLoader);
 }

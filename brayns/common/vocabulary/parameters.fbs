@@ -90,6 +90,15 @@ table CircuitConfiguration {
     histogram_size: uint;
 }
 
+table MatrixConfiguration
+{
+    filename: string;
+    id: uint;
+    show_connections: bool;
+    dimension_range: [uint:2];
+    scale: [float:3];
+}
+
 table DataSource {
     circuit_configuration: CircuitConfiguration;
     color_map_file: string;
@@ -124,6 +133,7 @@ table DataSource {
     metaballs_samples_from_soma: uint;
     memory_mode: MemoryMode;
     scene_file: string;
+    matrix_configuration: MatrixConfiguration;
 }
 
 enum Shader: uint {

@@ -22,8 +22,10 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/io/MeshLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
+
 #include <fstream>
 
 namespace brayns
@@ -34,7 +36,7 @@ MolecularSystemReader::MolecularSystemReader(
 {
 }
 
-bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
+bool MolecularSystemReader::import(Scene& scene, MeshLoaderPtr meshLoader)
 {
     _nbProteins = 0;
     if (!_loadConfiguration())
@@ -62,10 +64,8 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
     return true;
 }
 
-bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
+bool MolecularSystemReader::_createScene(Scene& scene, MeshLoaderPtr meshLoader)
 {
-    const auto quality = _geometryParameters.getGeometryQuality();
-
     uint64_t proteinCount = 0;
     Progress progress("Loading proteins...", _nbProteins);
     for (const auto& proteinPosition : _proteinPositions)
@@ -85,7 +85,7 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
                 ++proteinCount;
             }
 
-        if (!_meshFolder.empty())
+        if (meshLoader && !_meshFolder.empty())
             // Load meshes
             for (const auto& position : proteinPosition.second)
             {
@@ -104,8 +104,8 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
                 // Scale mesh to match PDB units. PDB are in angstrom, and
                 // positions are
                 // in micrometers
-                meshLoader.importMeshFromFile(objFilename, scene, quality,
-                                              transformation, material);
+                meshLoader->importMeshFromFile(objFilename, scene,
+                                               transformation, material);
 
                 if (_proteinFolder.empty())
                     ++proteinCount;

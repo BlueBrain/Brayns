@@ -58,7 +58,7 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
                 if (error > 0)
                     BRAYNS_WARN
                         << "Could not load DeflectPixelOp module, error code "
-                        << error << std::endl;
+                        << (int)error << std::endl;
                 else
                     _haveDeflectPixelOp = true;
             }

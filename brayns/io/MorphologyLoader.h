@@ -23,7 +23,6 @@
 
 #include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/types.h>
-#include <brayns/io/MeshLoader.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <vector>
@@ -75,7 +74,7 @@ public:
      */
     bool importCircuit(const servus::URI& circuitConfig, const strings& targets,
                        const std::string& report, Scene& scene,
-                       MeshLoader& meshLoader);
+                       MeshLoaderPtr meshLoader = nullptr);
 
 private:
     class Impl;

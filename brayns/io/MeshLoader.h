@@ -39,7 +39,7 @@ namespace brayns
 class MeshLoader
 {
 public:
-    MeshLoader();
+    MeshLoader(GeometryParameters& geometryParameters);
 
     /** Imports meshes from a given file
      *
@@ -55,7 +55,6 @@ public:
      * @return true if the file was successfully imported. False otherwise.
      */
     bool importMeshFromFile(const std::string& filename, Scene& scene,
-                            GeometryQuality geometryQuality,
                             const Matrix4f& transformation,
                             const size_t defaultMaterial);
 
@@ -71,10 +70,22 @@ public:
      */
     void clear();
 
+    /**
+     * @brief getMeshFilenameFromGID Returns the name of the mesh file according
+     * to the --circuit-mesh-folder, --circuit-mesh-filename-pattern command
+     * line arguments and a GID
+     * @param gid GID of the cell
+     * @return A string with the full path of the mesh file
+     */
+    std::string getMeshFilenameFromGID(const uint64_t gid);
+
 private:
+#if (BRAYNS_USE_ASSIMP)
     void _createMaterials(Scene& scene, const aiScene* aiScene,
                           const std::string& folder);
+#endif
 
+    GeometryParameters& _geometryParameters;
     std::map<size_t, size_t> _meshIndex;
 };
 }

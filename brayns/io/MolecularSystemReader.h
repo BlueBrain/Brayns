@@ -22,8 +22,6 @@
 #define MOLECULARSYSTEMREADER_H
 
 #include <brayns/common/types.h>
-#include <brayns/io/MeshLoader.h>
-
 #include <string>
 
 namespace brayns
@@ -65,10 +63,10 @@ public:
      * @param meshLoader Mesh loader used to load the meshes
      * @return True if the system is successfully loaded, false otherwise
      */
-    bool import(Scene& scene, MeshLoader& meshLoader);
+    bool import(Scene& scene, MeshLoaderPtr meshLoader = nullptr);
 
 private:
-    bool _createScene(Scene& scene, MeshLoader& meshLoader);
+    bool _createScene(Scene& scene, MeshLoaderPtr meshLoader = nullptr);
     bool _loadConfiguration();
     bool _loadProteins();
     bool _loadPositions();

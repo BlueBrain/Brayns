@@ -35,14 +35,12 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
+#include <brayns/io/MeshLoader.h>
+#include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
-#if (BRAYNS_USE_ASSIMP)
-#include <brayns/io/MeshLoader.h>
-#include <brayns/io/MolecularSystemReader.h>
-#endif
 
 #if (BRAYNS_USE_MAGICKPP)
 #include <Magick++.h>
@@ -54,6 +52,7 @@
 #endif
 
 #if (BRAYNS_USE_BRION)
+#include <brayns/io/MatrixLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
 #include <brayns/io/SceneLoader.h>
@@ -72,6 +71,7 @@ struct Brayns::Impl
 {
     Impl(int argc, const char** argv)
         : _engine(nullptr)
+        , _meshLoader(nullptr)
     {
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
@@ -84,6 +84,10 @@ struct Brayns::Impl
         _parametersManager.reset(new ParametersManager());
         _parametersManager->parse(argc, argv);
         _parametersManager->print();
+
+        // Initialize Mesh loader
+        _meshLoader.reset(
+            new MeshLoader(_parametersManager->getGeometryParameters()));
 
         // Initialize keyboard handler
         _keyboardHandler.reset(new KeyboardHandler());
@@ -130,9 +134,9 @@ struct Brayns::Impl
 
     void buildScene()
     {
-#if (BRAYNS_USE_ASSIMP)
-        _meshLoader.clear();
-#endif
+        if (_meshLoader)
+            _meshLoader->clear();
+
         Scene& scene = _engine->getScene();
         _loadData();
 
@@ -339,9 +343,6 @@ private:
             material.setTexture(TT_DIFFUSE, environmentMap);
         }
 
-        if (!geometryParameters.getSplashSceneFolder().empty())
-            _loadMeshFolder(geometryParameters.getSplashSceneFolder());
-
         const std::string& colorMapFilename =
             sceneParameters.getColorMapFilename();
         if (!colorMapFilename.empty())
@@ -356,6 +357,9 @@ private:
 
         if (!geometryParameters.getPDBFolder().empty())
             _loadPDBFolder();
+
+        if (!geometryParameters.getSplashSceneFolder().empty())
+            _loadMeshFolder(geometryParameters.getSplashSceneFolder());
 
         if (!geometryParameters.getMeshFolder().empty())
             _loadMeshFolder(geometryParameters.getMeshFolder());
@@ -373,8 +377,12 @@ private:
         if (!geometryParameters.getMorphologyFolder().empty())
             _loadMorphologyFolder();
 
-        if (!geometryParameters.getCircuitConfiguration().empty())
+        if (!geometryParameters.getCircuitConfiguration().empty() &&
+            geometryParameters.getMatrixFile().empty())
             _loadCircuitConfiguration();
+
+        if (!geometryParameters.getMatrixFile().empty())
+            _loadMatrixFile();
 #endif
 
         if (!geometryParameters.getXYZBFile().empty())
@@ -466,7 +474,6 @@ private:
     */
     void _loadMeshFolder(const std::string& folder)
     {
-#if (BRAYNS_USE_ASSIMP)
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
 
@@ -482,17 +489,12 @@ private:
                     ? NB_SYSTEM_MATERIALS + i
                     : NO_MATERIAL;
 
-            if (!_meshLoader.importMeshFromFile(
-                    file, scene, geometryParameters.getGeometryQuality(),
-                    Matrix4f(), material))
+            if (!_meshLoader->importMeshFromFile(file, scene, Matrix4f(),
+                                                 material))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++i;
             ++progress;
         }
-#else
-        BRAYNS_ERROR << "Assimp library is required to load meshes from "
-                     << folder << std::endl;
-#endif
     }
 
     /**
@@ -500,7 +502,6 @@ private:
     */
     void _loadMeshFile(const std::string& filename)
     {
-#if (BRAYNS_USE_ASSIMP)
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
 
@@ -511,17 +512,27 @@ private:
                 ? NB_SYSTEM_MATERIALS
                 : NO_MATERIAL;
 
-        if (!_meshLoader.importMeshFromFile(
-                filename, scene, geometryParameters.getGeometryQuality(),
-                Matrix4f(), material))
+        if (!_meshLoader->importMeshFromFile(filename, scene, Matrix4f(),
+                                             material))
             BRAYNS_ERROR << "Failed to import " << filename << std::endl;
-#else
-        BRAYNS_ERROR << "Assimp library is required to load meshes from "
-                     << filename << std::endl;
-#endif
     }
 
 #if (BRAYNS_USE_BRION)
+    /**
+        Loads data from a neuron matrix file (command line parameter
+       --matrix-file)
+    */
+    void _loadMatrixFile()
+    {
+        // Load Matrix File
+        GeometryParameters& geometryParameters =
+            _parametersManager->getGeometryParameters();
+        MatrixLoader matrixLoader(geometryParameters);
+        if (!matrixLoader.importFromFile(_engine->getScene(), _meshLoader))
+            BRAYNS_ERROR << "Failed to import "
+                         << geometryParameters.getMatrixFile() << std::endl;
+    }
+
     /**
      * Loads data from a scene description file (command line parameter
      * --scene-file)
@@ -640,7 +651,6 @@ private:
         morphologyLoader.importCircuit(uri, targets, report, scene,
                                        _meshLoader);
     }
-
 #endif // BRAYNS_USE_BRION
 
     /**
@@ -650,15 +660,10 @@ private:
     */
     void _loadMolecularSystem()
     {
-#if (BRAYNS_USE_ASSIMP)
         auto& geometryParameters = _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
         molecularSystemReader.import(scene, _meshLoader);
-#else
-        BRAYNS_ERROR << "Assimp library is required to load molecular system "
-                     << std::endl;
-#endif
     }
 
     void _setupCameraManipulator(const CameraMode mode)
@@ -1082,9 +1087,7 @@ private:
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
-#if (BRAYNS_USE_ASSIMP)
-    MeshLoader _meshLoader;
-#endif
+    MeshLoaderPtr _meshLoader;
 
     float _fieldOfView{45.f};
     float _eyeSeparation{0.0635f};

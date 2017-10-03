@@ -769,6 +769,22 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getCircuitSimulationHistogramSize());
     _remoteDataSource.setCircuitConfiguration(circuit);
 
+    // Matrix
+    ::brayns::v1::MatrixConfiguration matrix;
+    matrix.setFilename(geometryParameters.getMatrixFile());
+    matrix.setId(geometryParameters.getMatrixId());
+    matrix.setShowConnections(geometryParameters.getMatrixShowConnections());
+    const auto& matrixDimensionRange =
+        geometryParameters.getMatrixDimensionRange();
+    const uint32_ts dimensions = {matrixDimensionRange.x(),
+                                  matrixDimensionRange.y()};
+    matrix.setDimensionRange(dimensions);
+    const auto& matrixScale = geometryParameters.getMatrixScale();
+    const floats range = {matrixScale.x(), matrixScale.y(), matrixScale.z()};
+    matrix.setScale(range);
+    _remoteDataSource.setMatrixConfiguration(matrix);
+
+    // Other parameters
     _remoteDataSource.setLoadCacheFile(geometryParameters.getLoadCacheFile());
     _remoteDataSource.setSaveCacheFile(geometryParameters.getSaveCacheFile());
     _remoteDataSource.setRadiusMultiplier(
@@ -1018,6 +1034,28 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            _remoteDataSource.getCircuitConfiguration()
                                .getMeshFilenamePatternString());
 
+    _parametersManager.set(
+        "matrix-file",
+        _remoteDataSource.getMatrixConfiguration().getFilenameString());
+    _parametersManager.set(
+        "matrix-id",
+        std::to_string(_remoteDataSource.getMatrixConfiguration().getId()));
+    _parametersManager.set(
+        "matrix-show-connections",
+        (_remoteDataSource.getMatrixConfiguration().getShowConnections()
+             ? "1"
+             : "0"));
+    const auto& matrixDimensionRange =
+        _remoteDataSource.getMatrixConfiguration().getDimensionRange();
+    _parametersManager.set("matrix-dimension-range",
+                           std::to_string(matrixDimensionRange[0]) + " " +
+                               std::to_string(matrixDimensionRange[1]));
+    const auto& matrixScale =
+        _remoteDataSource.getMatrixConfiguration().getScale();
+    _parametersManager.set("matrix-scale",
+                           std::to_string(matrixScale[0]) + " " +
+                               std::to_string(matrixScale[1]) + " " +
+                               std::to_string(matrixScale[2]));
     _parametersManager.print();
 
     _dirtyEngine = true;

@@ -12,6 +12,8 @@ set(BRAYNSIO_SOURCES
   ProteinLoader.cpp
   TextureLoader.cpp
   SceneLoader.cpp
+  MolecularSystemReader.cpp
+  MeshLoader.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
@@ -23,25 +25,23 @@ set(BRAYNSIO_PUBLIC_HEADERS
   ProteinLoader.h
   TextureLoader.h
   SceneLoader.h
+  MolecularSystemReader.h
+  MeshLoader.h
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
   PRIVATE braynsParameters braynsCommon vmmlib
-    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${ASSIMP_LIBRARIES}
 )
-
-if(BRAYNS_ASSIMP_ENABLED)
-  list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp MolecularSystemReader.cpp)
-  list(APPEND BRAYNSIO_PUBLIC_HEADERS MeshLoader.h MolecularSystemReader.h)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE ${ASSIMP_LIBRARIES})
-endif()
 
 if(BRAYNS_BRION_ENABLED)
   list(APPEND BRAYNSIO_SOURCES
+      MatrixLoader.cpp
       MorphologyLoader.cpp
       NESTLoader.cpp
       simulation/CircuitSimulationHandler.cpp)
   list(APPEND BRAYNSIO_HEADERS
+      MatrixLoader.h
       MorphologyLoader.h
       NESTLoader.h
       simulation/CircuitSimulationHandler.h)

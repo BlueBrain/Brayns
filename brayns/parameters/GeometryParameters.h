@@ -241,6 +241,16 @@ public:
      * Return the full path of the file containing a scene description
      */
     std::string getSceneFile() const { return _sceneFile; };
+    /** File containing neuron matrix */
+    std::string getMatrixFile() const { return _matrixFile; }
+    /** Matrix id */
+    size_t getMatrixId() const { return _matrixId; }
+    /** Show/Hide connection in matrix */
+    size_t getMatrixShowConnections() const { return _matrixShowConnections; }
+    /** Range of dimensions */
+    Vector2ui getMatrixDimensionRange() const { return _matrixDimensionRange; }
+    /** Range of dimensions */
+    Vector3f getMatrixScale() const { return _matrixScale; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -299,6 +309,13 @@ protected:
 
     // System parameters
     MemoryMode _memoryMode;
+
+    // Topology matrix
+    std::string _matrixFile;
+    size_t _matrixId;
+    bool _matrixShowConnections;
+    Vector2ui _matrixDimensionRange;
+    Vector3f _matrixScale;
 };
 }
 #endif // GEOMETRYPARAMETERS_H
