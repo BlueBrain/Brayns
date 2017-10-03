@@ -190,8 +190,8 @@ typedef std::vector<ExtensionPluginPtr> ExtensionPlugins;
 class ExtensionPluginFactory;
 typedef std::unique_ptr<ExtensionPluginFactory> ExtensionPluginFactoryPtr;
 
-class ZeroEQPlugin;
-typedef std::shared_ptr<ZeroEQPlugin> ZeroEQPluginPtr;
+class RocketsPlugin;
+typedef std::shared_ptr<RocketsPlugin> RocketsPluginPtr;
 
 class DeflectPlugin;
 typedef std::shared_ptr<DeflectPlugin> DeflectPluginPtr;

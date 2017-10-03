@@ -22,7 +22,7 @@
 
 #include <plugins/extensions/plugins/ExtensionPlugin.h>
 #if (BRAYNS_USE_NETWORKING)
-#include <plugins/extensions/plugins/ZeroEQPlugin.h>
+#include <plugins/extensions/plugins/RocketsPlugin.h>
 #endif
 #ifdef BRAYNS_USE_DEFLECT
 #include <plugins/extensions/plugins/DeflectPlugin.h>
@@ -34,16 +34,11 @@ ExtensionPluginFactory::ExtensionPluginFactory(
     ParametersManager& parametersManager BRAYNS_UNUSED)
 {
 #if (BRAYNS_USE_NETWORKING)
-    auto zeroeqPlugin = std::make_shared<ZeroEQPlugin>(parametersManager);
-    add(zeroeqPlugin);
+    add(std::make_shared<RocketsPlugin>(parametersManager));
 #endif
 
 #ifdef BRAYNS_USE_DEFLECT
-#if (BRAYNS_USE_NETWORKING)
-    add(std::make_shared<DeflectPlugin>(*zeroeqPlugin));
-#else
-    add(std::make_shared<DeflectPlugin>());
-#endif
+    add(std::make_shared<DeflectPlugin>(parametersManager));
 #endif
 }
 

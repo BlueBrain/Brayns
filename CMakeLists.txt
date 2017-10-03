@@ -34,12 +34,12 @@ common_find_package(Boost REQUIRED COMPONENTS
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 
-# ZeroEQ and HTTP messaging
+# HTTP messaging
 common_find_package(LibJpegTurbo)
 common_find_package(Lexis)
+common_find_package(Rockets)
 common_find_package(ZeroBuf)
-common_find_package(ZeroEQ)
-if(LibJpegTurbo_FOUND AND TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ)
+if(LibJpegTurbo_FOUND AND TARGET Lexis AND TARGET Rockets AND TARGET ZeroBuf)
   option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
   if(BRAYNS_NETWORKING_ENABLED)
     list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)

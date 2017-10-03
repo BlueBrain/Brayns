@@ -36,10 +36,6 @@
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
-#ifdef BRAYNS_USE_ZEROEQ
-#include <plugins/extensions/plugins/ZeroEQPlugin.h>
-#endif
-
 namespace brayns
 {
 LivreEngine::LivreEngine(int argc, char** argv,
@@ -125,17 +121,6 @@ LivreEngine::~LivreEngine()
 std::string LivreEngine::name() const
 {
     return "livre";
-}
-
-void LivreEngine::extensionInit(ExtensionPlugin& plugin LB_UNUSED)
-{
-#ifdef BRAYNS_USE_ZEROEQ
-    ZeroEQPlugin* zeroeqPlugin = dynamic_cast<ZeroEQPlugin*>(&plugin);
-    if (!zeroeqPlugin)
-        return;
-
-    zeroeqPlugin->handle(_livre->getFrameData().getVRParameters());
-#endif
 }
 
 void LivreEngine::commit()

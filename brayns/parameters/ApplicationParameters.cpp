@@ -35,9 +35,6 @@ const std::string PARAM_FILTERS = "filters";
 const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
 const std::string PARAM_TMP_FOLDER = "tmp-folder";
 const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
-#if (BRAYNS_USE_NETWORKING)
-const std::string PARAM_ZEROEQ_AUTO_PUBLISH = "zeroeq-auto-publish";
-#endif
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -57,7 +54,6 @@ ApplicationParameters::ApplicationParameters()
     , _benchmarking(false)
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
     , _jpegSize(DEFAULT_JPEG_WIDTH, DEFAULT_JPEG_HEIGHT)
-    , _autoPublishZeroEQEvents(false)
     , _tmpFolder(DEFAULT_TMP_FOLDER)
 {
     _parameters.add_options()(PARAM_WINDOW_SIZE.c_str(),
@@ -75,10 +71,6 @@ ApplicationParameters::ApplicationParameters()
                                "store temporary files [string")(
         PARAM_SYNCHRONOUS_MODE.c_str(), po::value<bool>(),
         "Enable|Disable synchronous mode rendering vs data loading [bool]")
-#if (BRAYNS_USE_NETWORKING)
-        (PARAM_ZEROEQ_AUTO_PUBLISH.c_str(), po::value<bool>(),
-         "Enable|Disable automatic publishing of zeroeq network events [bool]")
-#endif
             (PARAM_FILTERS.c_str(), po::value<strings>()->multitoken(),
              "Screen space filters [string]")(
                 PARAM_FRAME_EXPORT_FOLDER.c_str(), po::value<std::string>(),
@@ -119,10 +111,6 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
         _tmpFolder = vm[PARAM_TMP_FOLDER].as<std::string>();
     if (vm.count(PARAM_SYNCHRONOUS_MODE))
         _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
-#if (BRAYNS_USE_NETWORKING)
-    if (vm.count(PARAM_ZEROEQ_AUTO_PUBLISH))
-        _autoPublishZeroEQEvents = vm[PARAM_ZEROEQ_AUTO_PUBLISH].as<bool>();
-#endif
 
     return true;
 }
@@ -138,9 +126,5 @@ void ApplicationParameters::print()
                 << std::endl;
     BRAYNS_INFO << "JPEG size                   : " << _jpegSize << std::endl;
     BRAYNS_INFO << "Temporary folder            : " << _tmpFolder << std::endl;
-#if (BRAYNS_USE_NETWORKING)
-    BRAYNS_INFO << "Auto-publish ZeroeEQ events : "
-                << (_autoPublishZeroEQEvents ? "on" : "off") << std::endl;
-#endif
 }
 }

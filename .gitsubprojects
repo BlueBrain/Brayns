@@ -2,8 +2,8 @@
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git f4b3706)
 
 if(BRAYNS_NETWORKING_ENABLED)
+  git_subproject(Rockets ssh://bbpcode.epfl.ch/viz/Rockets master)
   git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git f1245ae)
-  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git d8218c5)
 endif()
 
 if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
@@ -12,7 +12,7 @@ endif()
 
 # Streaming to display walls
 if(BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 6111f35)
+  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 9ea8bc9)
 endif()
 
 # Data access
