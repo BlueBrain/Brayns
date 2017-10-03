@@ -34,7 +34,7 @@ namespace brayns
 class ConnectivityLoader
 {
 public:
-    ConnectivityLoader(GeometryParameters& geometryParameters);
+    ConnectivityLoader(const GeometryParameters& geometryParameters);
 
     /**
      * @brief importFromFile loads cells from circuit (--circuit-config command
@@ -44,17 +44,17 @@ public:
      * @param meshLoader Loader used to load meshes
      * @return True if the loading was successful, false otherwise
      */
-    bool importFromFile(Scene& scene, MeshLoaderPtr meshLoader = nullptr);
+    bool importFromFile(Scene& scene, MeshLoader& meshLoader);
 
 private:
     bool _importMatrix();
     bool _importMesh(const uint64_t gid, const Matrix4f& transformation,
                      const size_t materialId, Scene& scene,
-                     MeshLoaderPtr meshLoader = nullptr);
+                     MeshLoader& meshLoader);
 
     std::map<uint64_t, uint64_ts> _emitors;
     std::map<uint64_t, size_t> _receptors;
-    GeometryParameters& _geometryParameters;
+    const GeometryParameters& _geometryParameters;
 };
 }
 #endif // CONNECTIVITY_LOADER_H

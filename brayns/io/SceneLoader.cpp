@@ -108,18 +108,16 @@ void SceneLoader::_importMorphology(Scene& scene, const Node& node,
 }
 #endif
 
-void SceneLoader::_importMesh(Scene& scene, MeshLoaderPtr loader,
+void SceneLoader::_importMesh(Scene& scene, MeshLoader& loader,
                               const Node& node, const Matrix4f& transformation)
 {
-    if (!loader)
-        return;
-
-    if (!loader->importMeshFromFile(node.filename, scene, transformation,
-                                    NB_SYSTEM_MATERIALS + node.materialId))
+    if (!loader.importMeshFromFile(_geometryParameters, node.filename, scene,
+                                   transformation,
+                                   NB_SYSTEM_MATERIALS + node.materialId))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
 
-bool SceneLoader::_processNodes(Scene& scene, MeshLoaderPtr meshLoader)
+bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
 {
     Progress progress("Loading scene...", _nodes.size());
     for (const auto& node : _nodes)
@@ -141,8 +139,7 @@ bool SceneLoader::_processNodes(Scene& scene, MeshLoaderPtr meshLoader)
 #endif
             break;
         case FileType::mesh:
-            if (meshLoader)
-                _importMesh(scene, meshLoader, node, transformation);
+            _importMesh(scene, meshLoader, node, transformation);
             break;
         default:
             BRAYNS_ERROR << "Unknown file type: "
@@ -154,7 +151,7 @@ bool SceneLoader::_processNodes(Scene& scene, MeshLoaderPtr meshLoader)
 }
 
 bool SceneLoader::importFromFile(const std::string& filename, Scene& scene,
-                                 MeshLoaderPtr meshLoader)
+                                 MeshLoader& meshLoader)
 {
     if (_parsePositions(filename))
         return _processNodes(scene, meshLoader);

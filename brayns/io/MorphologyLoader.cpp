@@ -121,7 +121,7 @@ public:
      */
     bool importCircuit(const servus::URI& uri, const strings& targets,
                        const std::string& report, Scene& scene,
-                       MeshLoaderPtr meshLoader)
+                       MeshLoader& meshLoader)
     {
         bool returnValue = true;
         try
@@ -209,10 +209,9 @@ public:
             _populateNeuronMatrix(bc, allGids);
 
             // Import meshes
-            if (meshLoader)
-                returnValue =
-                    returnValue && _importMeshes(allGids, transformations,
-                                                 targetGIDOffsets, meshLoader);
+            returnValue =
+                returnValue && _importMeshes(allGids, transformations,
+                                             targetGIDOffsets, meshLoader);
 
             // Import morphologies
             if (_geometryParameters.getCircuitMeshFolder().empty() ||
@@ -791,7 +790,7 @@ private:
     bool _importMeshes(const brain::GIDSet& gids,
                        const Matrix4fs& transformations,
                        const GIDOffsets& targetGIDOffsets,
-                       MeshLoaderPtr meshLoader)
+                       MeshLoader& meshLoader)
     {
         size_t loadingFailures = 0;
         const auto meshedMorphologiesFolder =
@@ -822,9 +821,10 @@ private:
                 _geometryParameters.getCircuitMeshTransformation()
                     ? transformations[meshIndex]
                     : Matrix4f();
-            if (!meshLoader->importMeshFromFile(
-                    meshLoader->getMeshFilenameFromGID(gid), _scene,
-                    transformation, materialId))
+            if (!meshLoader.importMeshFromFile(
+                    _geometryParameters,
+                    meshLoader.getMeshFilenameFromGID(_geometryParameters, gid),
+                    _scene, transformation, materialId))
                 ++loadingFailures;
             ++meshIndex;
         }
@@ -997,7 +997,7 @@ bool MorphologyLoader::importMorphology(const servus::URI& uri,
 bool MorphologyLoader::importCircuit(const servus::URI& uri,
                                      const strings& targets,
                                      const std::string& report, Scene& scene,
-                                     MeshLoaderPtr meshLoader)
+                                     MeshLoader& meshLoader)
 {
     return _impl->importCircuit(uri, targets, report, scene, meshLoader);
 }

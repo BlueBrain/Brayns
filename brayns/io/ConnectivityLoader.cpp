@@ -38,7 +38,8 @@ const std::string H5_MATRIX_PREFIX = "/matrix_";
 
 namespace brayns
 {
-ConnectivityLoader::ConnectivityLoader(GeometryParameters& geometryParameters)
+ConnectivityLoader::ConnectivityLoader(
+    const GeometryParameters& geometryParameters)
     : _geometryParameters(geometryParameters)
 {
 }
@@ -107,24 +108,24 @@ bool ConnectivityLoader::_importMatrix()
 bool ConnectivityLoader::_importMesh(const uint64_t gid,
                                      const Matrix4f& transformation,
                                      const size_t materialId, Scene& scene,
-                                     MeshLoaderPtr meshLoader)
+                                     MeshLoader& meshLoader)
 {
-    if (!meshLoader)
-        return false;
     const auto meshedMorphologiesFolder =
         _geometryParameters.getCircuitMeshFolder();
     if (meshedMorphologiesFolder.empty())
         return true;
 
     // Load mesh from file
-    if (!meshLoader->importMeshFromFile(meshLoader->getMeshFilenameFromGID(gid),
-                                        scene, transformation, materialId))
+    if (!meshLoader.importMeshFromFile(
+            _geometryParameters,
+            meshLoader.getMeshFilenameFromGID(_geometryParameters, gid), scene,
+            transformation, materialId))
         return false;
 
     return true;
 }
 
-bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoaderPtr meshLoader)
+bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
 {
     try
     {
@@ -210,8 +211,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoaderPtr meshLoader)
                 ratio * _geometryParameters.getRadiusMultiplier();
 
             bool createSphere = true;
-            if (meshLoader &&
-                !_geometryParameters.getCircuitMeshFolder().empty())
+            if (!_geometryParameters.getCircuitMeshFolder().empty())
             {
                 const uint64_t gid = *std::next(gids.begin(), emitor.first);
                 const auto transformation =

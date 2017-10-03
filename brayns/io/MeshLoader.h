@@ -39,7 +39,7 @@ namespace brayns
 class MeshLoader
 {
 public:
-    MeshLoader(GeometryParameters& geometryParameters);
+    MeshLoader();
 
     /** Imports meshes from a given file
      *
@@ -52,7 +52,8 @@ public:
      *        all meshes are forced to that specific material.
      * @return true if the file was successfully imported. False otherwise.
      */
-    bool importMeshFromFile(const std::string& filename, Scene& scene,
+    bool importMeshFromFile(const GeometryParameters& geometryParameters,
+                            const std::string& filename, Scene& scene,
                             const Matrix4f& transformation,
                             const size_t defaultMaterial);
 
@@ -75,7 +76,8 @@ public:
      * @param gid GID of the cell
      * @return A string with the full path of the mesh file
      */
-    std::string getMeshFilenameFromGID(const uint64_t gid);
+    std::string getMeshFilenameFromGID(
+        const GeometryParameters& geometryParameters, const uint64_t gid);
 
 private:
 #if (BRAYNS_USE_ASSIMP)
@@ -83,7 +85,6 @@ private:
                           const std::string& folder);
 #endif
 
-    GeometryParameters& _geometryParameters;
     std::map<size_t, size_t> _meshIndex;
 };
 }

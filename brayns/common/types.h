@@ -200,7 +200,6 @@ class KeyboardHandler;
 typedef std::shared_ptr<KeyboardHandler> KeyboardHandlerPtr;
 
 class MeshLoader;
-typedef std::shared_ptr<MeshLoader> MeshLoaderPtr;
 
 /** Types of renderers */
 enum class RendererType

@@ -35,8 +35,7 @@
 
 namespace brayns
 {
-MeshLoader::MeshLoader(GeometryParameters& geometryParameters)
-    : _geometryParameters(geometryParameters)
+MeshLoader::MeshLoader()
 {
 }
 
@@ -46,9 +45,9 @@ void MeshLoader::clear()
 }
 
 #if (BRAYNS_USE_ASSIMP)
-bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
-                                    const Matrix4f& transformation,
-                                    const size_t defaultMaterial)
+bool MeshLoader::importMeshFromFile(
+    const GeometryParameters& geometryParameters, const std::string& filename,
+    Scene& scene, const Matrix4f& transformation, const size_t defaultMaterial)
 {
     const boost::filesystem::path file = filename;
     Assimp::Importer importer;
@@ -60,7 +59,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     }
 
     size_t quality;
-    switch (_geometryParameters.getGeometryQuality())
+    switch (geometryParameters.getGeometryQuality())
     {
     case GeometryQuality::medium:
         quality = aiProcessPreset_TargetRealtime_Quality;
@@ -326,12 +325,13 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
     }
 }
 
-std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
+std::string MeshLoader::getMeshFilenameFromGID(
+    const GeometryParameters& geometryParameters, const uint64_t gid)
 {
     const auto meshedMorphologiesFolder =
-        _geometryParameters.getCircuitMeshFolder();
+        geometryParameters.getCircuitMeshFolder();
     auto meshFilenamePattern =
-        _geometryParameters.getCircuitMeshFilenamePattern();
+        geometryParameters.getCircuitMeshFilenamePattern();
     const std::string gidAsString = std::to_string(gid);
     const std::string GID = "{gid}";
     if (!meshFilenamePattern.empty())

@@ -71,7 +71,6 @@ struct Brayns::Impl
 {
     Impl(int argc, const char** argv)
         : _engine(nullptr)
-        , _meshLoader(nullptr)
     {
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
@@ -84,10 +83,6 @@ struct Brayns::Impl
         _parametersManager.reset(new ParametersManager());
         _parametersManager->parse(argc, argv);
         _parametersManager->print();
-
-        // Initialize Mesh loader
-        _meshLoader.reset(
-            new MeshLoader(_parametersManager->getGeometryParameters()));
 
         // Initialize keyboard handler
         _keyboardHandler.reset(new KeyboardHandler());
@@ -134,8 +129,7 @@ struct Brayns::Impl
 
     void buildScene()
     {
-        if (_meshLoader)
-            _meshLoader->clear();
+        _meshLoader.clear();
 
         Scene& scene = _engine->getScene();
         _loadData();
@@ -474,7 +468,8 @@ private:
     */
     void _loadMeshFolder(const std::string& folder)
     {
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        const auto& geometryParameters =
+            _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
 
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
@@ -489,8 +484,8 @@ private:
                     ? NB_SYSTEM_MATERIALS + i
                     : NO_MATERIAL;
 
-            if (!_meshLoader->importMeshFromFile(file, scene, Matrix4f(),
-                                                 material))
+            if (!_meshLoader.importMeshFromFile(geometryParameters, file, scene,
+                                                Matrix4f(), material))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++i;
             ++progress;
@@ -502,7 +497,8 @@ private:
     */
     void _loadMeshFile(const std::string& filename)
     {
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        const auto& geometryParameters =
+            _parametersManager->getGeometryParameters();
         auto& scene = _engine->getScene();
 
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
@@ -512,8 +508,8 @@ private:
                 ? NB_SYSTEM_MATERIALS
                 : NO_MATERIAL;
 
-        if (!_meshLoader->importMeshFromFile(filename, scene, Matrix4f(),
-                                             material))
+        if (!_meshLoader.importMeshFromFile(geometryParameters, filename, scene,
+                                            Matrix4f(), material))
             BRAYNS_ERROR << "Failed to import " << filename << std::endl;
     }
 
@@ -1089,7 +1085,7 @@ private:
     EnginePtr _engine;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
-    MeshLoaderPtr _meshLoader;
+    MeshLoader _meshLoader;
 
     float _fieldOfView{45.f};
     float _eyeSeparation{0.0635f};

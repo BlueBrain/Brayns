@@ -63,10 +63,10 @@ public:
      * @param meshLoader Mesh loader used to load the meshes
      * @return True if the system is successfully loaded, false otherwise
      */
-    bool import(Scene& scene, MeshLoaderPtr meshLoader = nullptr);
+    bool import(Scene& scene, MeshLoader& meshLoader);
 
 private:
-    bool _createScene(Scene& scene, MeshLoaderPtr meshLoader = nullptr);
+    bool _createScene(Scene& scene, MeshLoader& meshLoader);
     bool _loadConfiguration();
     bool _loadProteins();
     bool _loadPositions();

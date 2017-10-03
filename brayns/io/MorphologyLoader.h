@@ -74,7 +74,7 @@ public:
      */
     bool importCircuit(const servus::URI& circuitConfig, const strings& targets,
                        const std::string& report, Scene& scene,
-                       MeshLoaderPtr meshLoader = nullptr);
+                       MeshLoader& meshLoader);
 
 private:
     class Impl;

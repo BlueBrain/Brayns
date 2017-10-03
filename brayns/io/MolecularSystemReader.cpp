@@ -36,7 +36,7 @@ MolecularSystemReader::MolecularSystemReader(
 {
 }
 
-bool MolecularSystemReader::import(Scene& scene, MeshLoaderPtr meshLoader)
+bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 {
     _nbProteins = 0;
     if (!_loadConfiguration())
@@ -64,7 +64,7 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoaderPtr meshLoader)
     return true;
 }
 
-bool MolecularSystemReader::_createScene(Scene& scene, MeshLoaderPtr meshLoader)
+bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
 {
     uint64_t proteinCount = 0;
     Progress progress("Loading proteins...", _nbProteins);
@@ -85,7 +85,7 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoaderPtr meshLoader)
                 ++proteinCount;
             }
 
-        if (meshLoader && !_meshFolder.empty())
+        if (!_meshFolder.empty())
             // Load meshes
             for (const auto& position : proteinPosition.second)
             {
@@ -104,8 +104,8 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoaderPtr meshLoader)
                 // Scale mesh to match PDB units. PDB are in angstrom, and
                 // positions are
                 // in micrometers
-                meshLoader->importMeshFromFile(objFilename, scene,
-                                               transformation, material);
+                meshLoader.importMeshFromFile(_geometryParameters, objFilename,
+                                              scene, transformation, material);
 
                 if (_proteinFolder.empty())
                     ++proteinCount;
