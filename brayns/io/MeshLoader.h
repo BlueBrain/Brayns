@@ -45,8 +45,6 @@ public:
      *
      * @param filename name of the file containing the meshes
      * @param Scene holding the meshes
-     * @param geometryQuality can be low, medium or high. Appart from low,
-     * normals are automatically generated is not in the file.
      * @param transformation Position, orientation and scale to apply to the
      * mesh
      * @param defaultMaterial Default material for the whole mesh. If set to

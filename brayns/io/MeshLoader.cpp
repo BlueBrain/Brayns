@@ -332,7 +332,7 @@ std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
         _geometryParameters.getCircuitMeshFolder();
     auto meshFilenamePattern =
         _geometryParameters.getCircuitMeshFilenamePattern();
-    std::string gidAsString = std::to_string(gid);
+    const std::string gidAsString = std::to_string(gid);
     const std::string GID = "{gid}";
     if (!meshFilenamePattern.empty())
         meshFilenamePattern.replace(meshFilenamePattern.find(GID), GID.length(),
