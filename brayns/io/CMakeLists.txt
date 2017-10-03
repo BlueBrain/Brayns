@@ -36,12 +36,12 @@ set(BRAYNSIO_LINK_LIBRARIES
 
 if(BRAYNS_BRION_ENABLED)
   list(APPEND BRAYNSIO_SOURCES
-      MatrixLoader.cpp
+      ConnectivityLoader.cpp
       MorphologyLoader.cpp
       NESTLoader.cpp
       simulation/CircuitSimulationHandler.cpp)
   list(APPEND BRAYNSIO_HEADERS
-      MatrixLoader.h
+      ConnectivityLoader.h
       MorphologyLoader.h
       NESTLoader.h
       simulation/CircuitSimulationHandler.h)

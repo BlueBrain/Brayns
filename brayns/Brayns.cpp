@@ -52,7 +52,7 @@
 #endif
 
 #if (BRAYNS_USE_BRION)
-#include <brayns/io/MatrixLoader.h>
+#include <brayns/io/ConnectivityLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
 #include <brayns/io/SceneLoader.h>
@@ -378,11 +378,11 @@ private:
             _loadMorphologyFolder();
 
         if (!geometryParameters.getCircuitConfiguration().empty() &&
-            geometryParameters.getMatrixFile().empty())
+            geometryParameters.getConnectivityFile().empty())
             _loadCircuitConfiguration();
 
-        if (!geometryParameters.getMatrixFile().empty())
-            _loadMatrixFile();
+        if (!geometryParameters.getConnectivityFile().empty())
+            _loadConnectivityFile();
 #endif
 
         if (!geometryParameters.getXYZBFile().empty())
@@ -519,18 +519,20 @@ private:
 
 #if (BRAYNS_USE_BRION)
     /**
-        Loads data from a neuron matrix file (command line parameter
-       --matrix-file)
+        Loads data from a neuron connectivity file (command line parameter
+       --connectivity-file)
     */
-    void _loadMatrixFile()
+    void _loadConnectivityFile()
     {
-        // Load Matrix File
+        // Load Connectivity File
         GeometryParameters& geometryParameters =
             _parametersManager->getGeometryParameters();
-        MatrixLoader matrixLoader(geometryParameters);
-        if (!matrixLoader.importFromFile(_engine->getScene(), _meshLoader))
+        ConnectivityLoader connectivityLoader(geometryParameters);
+        if (!connectivityLoader.importFromFile(_engine->getScene(),
+                                               _meshLoader))
             BRAYNS_ERROR << "Failed to import "
-                         << geometryParameters.getMatrixFile() << std::endl;
+                         << geometryParameters.getConnectivityFile()
+                         << std::endl;
     }
 
     /**

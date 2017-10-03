@@ -242,15 +242,21 @@ public:
      */
     std::string getSceneFile() const { return _sceneFile; };
     /** File containing neuron matrix */
-    std::string getMatrixFile() const { return _matrixFile; }
+    std::string getConnectivityFile() const { return _connectivityFile; }
     /** Matrix id */
-    size_t getMatrixId() const { return _matrixId; }
+    size_t getConnectivityMatrixId() const { return _connectivityMatrixId; }
     /** Show/Hide connection in matrix */
-    size_t getMatrixShowConnections() const { return _matrixShowConnections; }
+    size_t getConnectivityShowConnections() const
+    {
+        return _connectivityShowConnections;
+    }
     /** Range of dimensions */
-    Vector2ui getMatrixDimensionRange() const { return _matrixDimensionRange; }
+    Vector2ui getConnectivityDimensionRange() const
+    {
+        return _connectivityDimensionRange;
+    }
     /** Range of dimensions */
-    Vector3f getMatrixScale() const { return _matrixScale; }
+    Vector3f getConnectivityScale() const { return _connectivityScale; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -310,12 +316,12 @@ protected:
     // System parameters
     MemoryMode _memoryMode;
 
-    // Topology matrix
-    std::string _matrixFile;
-    size_t _matrixId;
-    bool _matrixShowConnections;
-    Vector2ui _matrixDimensionRange;
-    Vector3f _matrixScale;
+    // Connectivity matrix
+    std::string _connectivityFile;
+    size_t _connectivityMatrixId;
+    bool _connectivityShowConnections;
+    Vector2ui _connectivityDimensionRange;
+    Vector3f _connectivityScale;
 };
 }
 #endif // GEOMETRYPARAMETERS_H

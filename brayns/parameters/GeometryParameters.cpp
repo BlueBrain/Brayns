@@ -76,11 +76,13 @@ const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_SCENE_FILE = "scene-file";
-const std::string PARAM_MATRIX_FILE = "matrix-file";
-const std::string PARAM_MATRIX_ID = "matrix-id";
-const std::string PARAM_MATRIX_SHOW_CONNECTIONS = "matrix-show-connections";
-const std::string PARAM_MATRIX_DIMENSION_RANGE = "matrix-dimension-range";
-const std::string PARAM_MATRIX_SCALE = "matrix-scale";
+const std::string PARAM_CONNECTIVITY_FILE = "connectivity-file";
+const std::string PARAM_CONNECTIVITY_MATRIX_ID = "connectivity-matrix-id";
+const std::string PARAM_CONNECTIVITY_SHOW_CONNECTIONS =
+    "connectivity-show-connections";
+const std::string PARAM_CONNECTIVITY_DIMENSION_RANGE =
+    "connectivity-dimension-range";
+const std::string PARAM_CONNECTIVITY_SCALE = "connectivity-scale";
 
 const std::string COLOR_SCHEMES[12] = {"none",
                                        "neuron-by-id",
@@ -126,9 +128,9 @@ GeometryParameters::GeometryParameters()
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
     , _memoryMode(MemoryMode::shared)
-    , _matrixId{0}
-    , _matrixDimensionRange{0, std::numeric_limits<unsigned int>::max()}
-    , _matrixScale{1.f, 1.f, 1.f}
+    , _connectivityMatrixId{0}
+    , _connectivityDimensionRange{0, std::numeric_limits<unsigned int>::max()}
+    , _connectivityScale{1.f, 1.f, 1.f}
 {
     _parameters.add_options()(PARAM_MORPHOLOGY_FOLDER.c_str(),
                               po::value<std::string>(),
@@ -227,17 +229,16 @@ GeometryParameters::GeometryParameters()
                                po::value<bool>(),
                                "Enable/Disable mesh transformation according "
                                "to circuit information [bool]")(
-        PARAM_MATRIX_FILE.c_str(), po::value<std::string>(),
-        "H5 file containing neuron matrix [string]")(
-        PARAM_MATRIX_ID.c_str(), po::value<size_t>(),
-        "H5 file containing neuron matrix id [int]")(
-        PARAM_MATRIX_SHOW_CONNECTIONS.c_str(), po::value<bool>(),
+        PARAM_CONNECTIVITY_FILE.c_str(), po::value<std::string>(),
+        "H5 file containing neuron connectivity [string]")(
+        PARAM_CONNECTIVITY_MATRIX_ID.c_str(), po::value<size_t>(),
+        "Connectivity matrix id [int]")(
+        PARAM_CONNECTIVITY_SHOW_CONNECTIONS.c_str(), po::value<bool>(),
         "Show connections between cells [bool]")(
-        PARAM_MATRIX_DIMENSION_RANGE.c_str(),
-        po::value<size_ts>()->multitoken(),
-        "Range of dimensions [int int]")(PARAM_MATRIX_SCALE.c_str(),
-                                         po::value<floats>()->multitoken(),
-                                         "Matrix scaling [float float float]");
+        PARAM_CONNECTIVITY_DIMENSION_RANGE.c_str(),
+        po::value<size_ts>()->multitoken(), "Range of dimensions [int int]")(
+        PARAM_CONNECTIVITY_SCALE.c_str(), po::value<floats>()->multitoken(),
+        "Connectivity scaling [float float float]");
 }
 
 bool GeometryParameters::_parse(const po::variables_map& vm)
@@ -391,30 +392,32 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
         _circuitMeshTransformation =
             vm[PARAM_CIRCUIT_MESH_TRANSFORMATION].as<bool>();
 
-    // Matrix
-    if (vm.count(PARAM_MATRIX_FILE))
-        _matrixFile = vm[PARAM_MATRIX_FILE].as<std::string>();
-    if (vm.count(PARAM_MATRIX_ID))
-        _matrixId = vm[PARAM_MATRIX_ID].as<size_t>();
-    if (vm.count(PARAM_MATRIX_SHOW_CONNECTIONS))
-        _matrixShowConnections = vm[PARAM_MATRIX_SHOW_CONNECTIONS].as<bool>();
-    if (vm.count(PARAM_MATRIX_DIMENSION_RANGE))
+    // Neuron connectivity
+    if (vm.count(PARAM_CONNECTIVITY_FILE))
+        _connectivityFile = vm[PARAM_CONNECTIVITY_FILE].as<std::string>();
+    if (vm.count(PARAM_CONNECTIVITY_MATRIX_ID))
+        _connectivityMatrixId = vm[PARAM_CONNECTIVITY_MATRIX_ID].as<size_t>();
+    if (vm.count(PARAM_CONNECTIVITY_SHOW_CONNECTIONS))
+        _connectivityShowConnections =
+            vm[PARAM_CONNECTIVITY_SHOW_CONNECTIONS].as<bool>();
+    if (vm.count(PARAM_CONNECTIVITY_DIMENSION_RANGE))
     {
-        const size_ts values = vm[PARAM_MATRIX_DIMENSION_RANGE].as<size_ts>();
+        const size_ts values =
+            vm[PARAM_CONNECTIVITY_DIMENSION_RANGE].as<size_ts>();
         if (values.size() == 2)
-            _matrixDimensionRange = Vector2ui(values[0], values[1]);
+            _connectivityDimensionRange = Vector2ui(values[0], values[1]);
         else
             BRAYNS_ERROR << "Invalid number of values for "
-                         << PARAM_MATRIX_DIMENSION_RANGE << std::endl;
+                         << PARAM_CONNECTIVITY_DIMENSION_RANGE << std::endl;
     }
-    if (vm.count(PARAM_MATRIX_SCALE))
+    if (vm.count(PARAM_CONNECTIVITY_SCALE))
     {
-        const floats values = vm[PARAM_MATRIX_SCALE].as<floats>();
+        const floats values = vm[PARAM_CONNECTIVITY_SCALE].as<floats>();
         if (values.size() == 3)
-            _matrixScale = Vector3f(values[0], values[1], values[2]);
+            _connectivityScale = Vector3f(values[0], values[1], values[2]);
         else
             BRAYNS_ERROR << "Invalid number of values for "
-                         << PARAM_MATRIX_SCALE << std::endl;
+                         << PARAM_CONNECTIVITY_SCALE << std::endl;
     }
     return true;
 }
@@ -502,14 +505,17 @@ void GeometryParameters::print()
     BRAYNS_INFO << "Scene file                 : " << _sceneFile << std::endl;
     BRAYNS_INFO << "Mesh filename pattern      : "
                 << _circuitMeshFilenamePattern << std::endl;
-    BRAYNS_INFO << "Matrix                     : " << std::endl;
-    BRAYNS_INFO << " - file                    : " << _matrixFile << std::endl;
-    BRAYNS_INFO << " - Id                      : " << _matrixId << std::endl;
-    BRAYNS_INFO << " - Show connections        : "
-                << (_matrixShowConnections ? "Yes" : "No") << std::endl;
-    BRAYNS_INFO << " - Dimension range         : " << _matrixDimensionRange
+    BRAYNS_INFO << "Connectivity               : " << std::endl;
+    BRAYNS_INFO << " - File                    : " << _connectivityFile
                 << std::endl;
-    BRAYNS_INFO << " - Scale                   : " << _matrixScale << std::endl;
+    BRAYNS_INFO << " - Matrix Id               : " << _connectivityMatrixId
+                << std::endl;
+    BRAYNS_INFO << " - Show connections        : "
+                << (_connectivityShowConnections ? "Yes" : "No") << std::endl;
+    BRAYNS_INFO << " - Dimension range         : "
+                << _connectivityDimensionRange << std::endl;
+    BRAYNS_INFO << " - Scale                   : " << _connectivityScale
+                << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(

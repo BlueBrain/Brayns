@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
+ *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MATRIX_LOADER_H
-#define MATRIX_LOADER_H
+#ifndef CONNECTIVITY_LOADER_H
+#define CONNECTIVITY_LOADER_H
 
 #include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -30,14 +31,14 @@ namespace brayns
 {
 /** Loads connectivity matrix and morphologies from H5, and Circuit Config file
  */
-class MatrixLoader
+class ConnectivityLoader
 {
 public:
-    MatrixLoader(GeometryParameters& geometryParameters);
+    ConnectivityLoader(GeometryParameters& geometryParameters);
 
     /**
      * @brief importFromFile loads cells from circuit (--circuit-config command
-     * line argument) and creates connections according to the --matrix-*
+     * line argument) and creates connections according to the --connectivity-*
      * command line arguments.
      * @param scene Scene to be populated
      * @param meshLoader Loader used to load meshes
@@ -56,4 +57,4 @@ private:
     GeometryParameters& _geometryParameters;
 };
 }
-#endif // MATRIX_LOADER_H
+#endif // CONNECTIVITY_LOADER_H

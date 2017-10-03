@@ -769,20 +769,24 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getCircuitSimulationHistogramSize());
     _remoteDataSource.setCircuitConfiguration(circuit);
 
-    // Matrix
-    ::brayns::v1::MatrixConfiguration matrix;
-    matrix.setFilename(geometryParameters.getMatrixFile());
-    matrix.setId(geometryParameters.getMatrixId());
-    matrix.setShowConnections(geometryParameters.getMatrixShowConnections());
-    const auto& matrixDimensionRange =
-        geometryParameters.getMatrixDimensionRange();
-    const uint32_ts dimensions = {matrixDimensionRange.x(),
-                                  matrixDimensionRange.y()};
-    matrix.setDimensionRange(dimensions);
-    const auto& matrixScale = geometryParameters.getMatrixScale();
-    const floats range = {matrixScale.x(), matrixScale.y(), matrixScale.z()};
-    matrix.setScale(range);
-    _remoteDataSource.setMatrixConfiguration(matrix);
+    // Connectivity
+    ::brayns::v1::ConnectivityConfiguration connectivityConfiguration;
+    connectivityConfiguration.setFilename(
+        geometryParameters.getConnectivityFile());
+    connectivityConfiguration.setMatrixId(
+        geometryParameters.getConnectivityMatrixId());
+    connectivityConfiguration.setShowConnections(
+        geometryParameters.getConnectivityShowConnections());
+    const auto& connectivityDimensionRange =
+        geometryParameters.getConnectivityDimensionRange();
+    const uint32_ts dimensions = {connectivityDimensionRange.x(),
+                                  connectivityDimensionRange.y()};
+    connectivityConfiguration.setDimensionRange(dimensions);
+    const auto& connectivityScale = geometryParameters.getConnectivityScale();
+    const floats range = {connectivityScale.x(), connectivityScale.y(),
+                          connectivityScale.z()};
+    connectivityConfiguration.setScale(range);
+    _remoteDataSource.setConnectivityConfiguration(connectivityConfiguration);
 
     // Other parameters
     _remoteDataSource.setLoadCacheFile(geometryParameters.getLoadCacheFile());
@@ -1035,27 +1039,28 @@ void ZeroEQPlugin::_dataSourceUpdated()
                                .getMeshFilenamePatternString());
 
     _parametersManager.set(
-        "matrix-file",
-        _remoteDataSource.getMatrixConfiguration().getFilenameString());
+        "connectivity-file",
+        _remoteDataSource.getConnectivityConfiguration().getFilenameString());
     _parametersManager.set(
-        "matrix-id",
-        std::to_string(_remoteDataSource.getMatrixConfiguration().getId()));
+        "connectivity-matrix-id",
+        std::to_string(
+            _remoteDataSource.getConnectivityConfiguration().getMatrixId()));
     _parametersManager.set(
-        "matrix-show-connections",
-        (_remoteDataSource.getMatrixConfiguration().getShowConnections()
+        "connectivity-show-connections",
+        (_remoteDataSource.getConnectivityConfiguration().getShowConnections()
              ? "1"
              : "0"));
-    const auto& matrixDimensionRange =
-        _remoteDataSource.getMatrixConfiguration().getDimensionRange();
-    _parametersManager.set("matrix-dimension-range",
-                           std::to_string(matrixDimensionRange[0]) + " " +
-                               std::to_string(matrixDimensionRange[1]));
-    const auto& matrixScale =
-        _remoteDataSource.getMatrixConfiguration().getScale();
-    _parametersManager.set("matrix-scale",
-                           std::to_string(matrixScale[0]) + " " +
-                               std::to_string(matrixScale[1]) + " " +
-                               std::to_string(matrixScale[2]));
+    const auto& connectivityDimensionRange =
+        _remoteDataSource.getConnectivityConfiguration().getDimensionRange();
+    _parametersManager.set("connectivity-dimension-range",
+                           std::to_string(connectivityDimensionRange[0]) + " " +
+                               std::to_string(connectivityDimensionRange[1]));
+    const auto& connectivityScale =
+        _remoteDataSource.getConnectivityConfiguration().getScale();
+    _parametersManager.set("connectivity-scale",
+                           std::to_string(connectivityScale[0]) + " " +
+                               std::to_string(connectivityScale[1]) + " " +
+                               std::to_string(connectivityScale[2]));
     _parametersManager.print();
 
     _dirtyEngine = true;

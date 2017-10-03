@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
+ *                     Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -26,7 +27,7 @@
 #include <brain/brain.h>
 #include <brion/brion.h>
 
-#include "MatrixLoader.h"
+#include "ConnectivityLoader.h"
 
 namespace
 {
@@ -37,23 +38,24 @@ const std::string H5_MATRIX_PREFIX = "/matrix_";
 
 namespace brayns
 {
-MatrixLoader::MatrixLoader(GeometryParameters& geometryParameters)
+ConnectivityLoader::ConnectivityLoader(GeometryParameters& geometryParameters)
     : _geometryParameters(geometryParameters)
 {
 }
 
-bool MatrixLoader::_importMatrix()
+bool ConnectivityLoader::_importMatrix()
 {
     try
     {
-        const std::string& matrixFile = _geometryParameters.getMatrixFile();
-        BRAYNS_INFO << "Loading matrix from " << matrixFile << std::endl;
+        const std::string& matrixFile =
+            _geometryParameters.getConnectivityFile();
+        BRAYNS_INFO << "Loading connectivity from " << matrixFile << std::endl;
 
         H5::H5File matrices(matrixFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
         H5::DataSet dataset;
         const std::string matrix =
             H5_MATRIX_PREFIX +
-            std::to_string(_geometryParameters.getMatrixId());
+            std::to_string(_geometryParameters.getConnectivityMatrixId());
         try
         {
             dataset = matrices.openDataSet(matrix);
@@ -102,10 +104,10 @@ bool MatrixLoader::_importMatrix()
     return true;
 }
 
-bool MatrixLoader::_importMesh(const uint64_t gid,
-                               const Matrix4f& transformation,
-                               const size_t materialId, Scene& scene,
-                               MeshLoaderPtr meshLoader)
+bool ConnectivityLoader::_importMesh(const uint64_t gid,
+                                     const Matrix4f& transformation,
+                                     const size_t materialId, Scene& scene,
+                                     MeshLoaderPtr meshLoader)
 {
     if (!meshLoader)
         return false;
@@ -122,7 +124,7 @@ bool MatrixLoader::_importMesh(const uint64_t gid,
     return true;
 }
 
-bool MatrixLoader::importFromFile(Scene& scene, MeshLoaderPtr meshLoader)
+bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoaderPtr meshLoader)
 {
     try
     {
@@ -158,9 +160,9 @@ bool MatrixLoader::importFromFile(Scene& scene, MeshLoaderPtr meshLoader)
         }
 
         // Build scene
-        const auto& scale = _geometryParameters.getMatrixScale();
+        const auto& scale = _geometryParameters.getConnectivityScale();
         const auto& dimensionRange =
-            _geometryParameters.getMatrixDimensionRange();
+            _geometryParameters.getConnectivityDimensionRange();
         const auto& transforms = circuit.getTransforms(gids);
 
         // Place inactive cells
@@ -234,7 +236,7 @@ bool MatrixLoader::importFromFile(Scene& scene, MeshLoaderPtr meshLoader)
                 continue;
             }
 
-            if (_geometryParameters.getMatrixShowConnections())
+            if (_geometryParameters.getConnectivityShowConnections())
                 for (const auto& dest : emitor.second)
                 {
                     const auto centerDest =
