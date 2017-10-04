@@ -822,9 +822,8 @@ private:
                     ? transformations[meshIndex]
                     : Matrix4f();
             if (!meshLoader.importMeshFromFile(
-                    _geometryParameters,
-                    meshLoader.getMeshFilenameFromGID(_geometryParameters, gid),
-                    _scene, transformation, materialId))
+                    meshLoader.getMeshFilenameFromGID(gid), _scene,
+                    transformation, materialId))
                 ++loadingFailures;
             ++meshIndex;
         }

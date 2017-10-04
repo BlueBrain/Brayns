@@ -102,10 +102,9 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
                         : NO_MATERIAL;
 
                 // Scale mesh to match PDB units. PDB are in angstrom, and
-                // positions are
-                // in micrometers
-                meshLoader.importMeshFromFile(_geometryParameters, objFilename,
-                                              scene, transformation, material);
+                // positions are in micrometers
+                meshLoader.importMeshFromFile(objFilename, scene,
+                                              transformation, material);
 
                 if (_proteinFolder.empty())
                     ++proteinCount;

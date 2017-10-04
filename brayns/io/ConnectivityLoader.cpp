@@ -116,10 +116,8 @@ bool ConnectivityLoader::_importMesh(const uint64_t gid,
         return true;
 
     // Load mesh from file
-    if (!meshLoader.importMeshFromFile(
-            _geometryParameters,
-            meshLoader.getMeshFilenameFromGID(_geometryParameters, gid), scene,
-            transformation, materialId))
+    if (!meshLoader.importMeshFromFile(meshLoader.getMeshFilenameFromGID(gid),
+                                       scene, transformation, materialId))
         return false;
 
     return true;

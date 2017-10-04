@@ -71,6 +71,8 @@ struct Brayns::Impl
 {
     Impl(int argc, const char** argv)
         : _engine(nullptr)
+        , _parametersManager(new ParametersManager())
+        , _meshLoader(_parametersManager->getGeometryParameters())
     {
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
@@ -79,8 +81,8 @@ struct Brayns::Impl
         BRAYNS_INFO << " /_____/_/   \\__,_/\\__, /_/ /_/____/  " << std::endl;
         BRAYNS_INFO << "                  /____/              " << std::endl;
         BRAYNS_INFO << std::endl;
+
         BRAYNS_INFO << "Parsing command line options" << std::endl;
-        _parametersManager.reset(new ParametersManager());
         _parametersManager->parse(argc, argv);
         _parametersManager->print();
 
@@ -484,8 +486,8 @@ private:
                     ? NB_SYSTEM_MATERIALS + i
                     : NO_MATERIAL;
 
-            if (!_meshLoader.importMeshFromFile(geometryParameters, file, scene,
-                                                Matrix4f(), material))
+            if (!_meshLoader.importMeshFromFile(file, scene, Matrix4f(),
+                                                material))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++i;
             ++progress;
@@ -508,8 +510,8 @@ private:
                 ? NB_SYSTEM_MATERIALS
                 : NO_MATERIAL;
 
-        if (!_meshLoader.importMeshFromFile(geometryParameters, filename, scene,
-                                            Matrix4f(), material))
+        if (!_meshLoader.importMeshFromFile(filename, scene, Matrix4f(),
+                                            material))
             BRAYNS_ERROR << "Failed to import " << filename << std::endl;
     }
 
@@ -1081,8 +1083,8 @@ private:
     }
 
     std::unique_ptr<EngineFactory> _engineFactory;
-    ParametersManagerPtr _parametersManager;
     EnginePtr _engine;
+    ParametersManagerPtr _parametersManager;
     KeyboardHandlerPtr _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
     MeshLoader _meshLoader;
