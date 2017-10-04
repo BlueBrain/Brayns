@@ -61,43 +61,46 @@ public:
     void print() final;
 
     /** folder containing SWC and H5 files */
-    std::string getMorphologyFolder() const { return _morphologyFolder; }
+    const std::string& getMorphologyFolder() const { return _morphologyFolder; }
     /**
      * @brief getNESTCircuit
      * @return
      */
-    std::string getNESTCircuit() const { return _NESTCircuit; }
-    std::string getNESTReport() const { return _NESTReport; }
-    std::string getNESTCacheFile() const { return _NESTCacheFile; }
+    const std::string& getNESTCircuit() const { return _NESTCircuit; }
+    const std::string& getNESTReport() const { return _NESTReport; }
+    const std::string& getNESTCacheFile() const { return _NESTCacheFile; }
     /** PDB file */
-    std::string getPDBFile() const { return _pdbFile; }
+    const std::string& getPDBFile() const { return _pdbFile; }
     /** PDB folder */
-    std::string getPDBFolder() const { return _pdbFolder; }
+    const std::string& getPDBFolder() const { return _pdbFolder; }
     /** XYZR file */
-    std::string getXYZBFile() const { return _xyzbFile; }
+    const std::string& getXYZBFile() const { return _xyzbFile; }
     /** folder containing mesh files */
-    std::string getMeshFolder() const { return _meshFolder; }
+    const std::string& getMeshFolder() const { return _meshFolder; }
     /** Fesh containting mesh*/
-    std::string getMeshFile() const { return _meshFile; }
+    const std::string& getMeshFile() const { return _meshFile; }
     /** file containing circuit configuration */
-    std::string getCircuitConfiguration() const
+    const std::string& getCircuitConfiguration() const
     {
         return _circuitConfiguration;
     }
     /** Binary representation of a scene to load */
-    std::string getLoadCacheFile() const { return _loadCacheFile; }
+    const std::string& getLoadCacheFile() const { return _loadCacheFile; }
     /** Binary representation of a scene to save */
-    std::string getSaveCacheFile() const { return _saveCacheFile; }
+    const std::string& getSaveCacheFile() const { return _saveCacheFile; }
     /** Circuit targets */
-    std::string getCircuitTargets() const { return _circuitTargets; }
+    const std::string& getCircuitTargets() const { return _circuitTargets; }
     strings getCircuitTargetsAsStrings() const;
     /** Circuit compartment report */
-    std::string getCircuitReport() const { return _circuitReport; }
+    const std::string& getCircuitReport() const { return _circuitReport; }
     /** Defines the folder where morphologies meshes are stored. Meshes must
      * have the same name as the h5/SWC morphology file, suffixed with an
      * extension supported by the assimp library
      */
-    std::string getCircuitMeshFolder() const { return _circuitMeshFolder; }
+    const std::string& getCircuitMeshFolder() const
+    {
+        return _circuitMeshFolder;
+    }
     /** ensity of cells in the circuit in percent (Mainly for testing
      * purposes) */
     float getCircuitDensity() const;
@@ -129,10 +132,10 @@ public:
     /**
      * Return the filename pattern use to load meshes
      */
-    std::string getCircuitMeshFilenamePattern() const
+    const std::string& getCircuitMeshFilenamePattern() const
     {
         return _circuitMeshFilenamePattern;
-    };
+    }
     /** Radius multiplier applied to spheres, cones and cylinders.
      * @param value Radius multiplier. Multiplies the radius contained in the
      *        data source by the specified value.
@@ -213,7 +216,10 @@ public:
     {
         updateValue(_splashSceneFolder, value);
     }
-    std::string getSplashSceneFolder() const { return _splashSceneFolder; }
+    const std::string& getSplashSceneFolder() const
+    {
+        return _splashSceneFolder;
+    }
     /** Biological assembly */
     const std::string& getMolecularSystemConfig() const
     {
@@ -240,9 +246,9 @@ public:
     /**
      * Return the full path of the file containing a scene description
      */
-    std::string getSceneFile() const { return _sceneFile; };
+    const std::string& getSceneFile() const { return _sceneFile; };
     /** File containing neuron matrix */
-    std::string getConnectivityFile() const { return _connectivityFile; }
+    const std::string& getConnectivityFile() const { return _connectivityFile; }
     /** Matrix id */
     size_t getConnectivityMatrixId() const { return _connectivityMatrixId; }
     /** Show/Hide connection in matrix */
