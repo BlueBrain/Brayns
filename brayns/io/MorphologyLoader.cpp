@@ -32,6 +32,10 @@
 #include <brion/brion.h>
 #include <servus/types.h>
 
+#if (BRAYNS_USE_ASSIMP)
+#include <brayns/io/MeshLoader.h>
+#endif
+
 #include <algorithm>
 #include <fstream>
 
@@ -812,32 +816,15 @@ private:
                     : NB_SYSTEM_MATERIALS +
                           boost::lexical_cast<size_t>(_neuronMatrix[meshIndex]);
 
-            // Define mesh filename according to file pattern and GID
-            auto meshFilenamePattern =
-                _geometryParameters.getCircuitMeshFilenamePattern();
-            std::stringstream gidAsString;
-            gidAsString << gid;
-            const std::string GID = "{gid}";
-            if (!meshFilenamePattern.empty())
-                meshFilenamePattern.replace(meshFilenamePattern.find(GID),
-                                            GID.length(), gidAsString.str());
-            else
-                meshFilenamePattern = gidAsString.str();
-            auto meshFilename =
-                meshedMorphologiesFolder + "/" + meshFilenamePattern;
-
             // Load mesh from file
             const auto transformation =
                 _geometryParameters.getCircuitMeshTransformation()
                     ? transformations[meshIndex]
                     : Matrix4f();
             if (!meshLoader.importMeshFromFile(
-                    meshFilename, _scene,
-                    _geometryParameters.getGeometryQuality(), transformation,
-                    materialId))
-            {
+                    meshLoader.getMeshFilenameFromGID(gid), _scene,
+                    transformation, materialId))
                 ++loadingFailures;
-            }
             ++meshIndex;
         }
         if (loadingFailures != 0)
@@ -847,7 +834,7 @@ private:
     }
 #else
     bool _importMeshes(const brain::GIDSet&, const Matrix4fs&,
-                       const GIDOffsets&, MeshLoader&)
+                       const GIDOffsets&, MeshLoaderPtr)
     {
         BRAYNS_ERROR << "assimp dependency is required to load meshes"
                      << std::endl;

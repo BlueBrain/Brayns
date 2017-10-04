@@ -22,6 +22,7 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/io/MeshLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <fstream>
 
@@ -107,20 +108,15 @@ void SceneLoader::_importMorphology(Scene& scene, const Node& node,
 }
 #endif
 
-#ifdef BRAYNS_USE_ASSIMP
 void SceneLoader::_importMesh(Scene& scene, MeshLoader& loader,
                               const Node& node, const Matrix4f& transformation)
 {
-    if (!loader.importMeshFromFile(node.filename, scene,
-                                   _geometryParameters.getGeometryQuality(),
-                                   transformation,
+    if (!loader.importMeshFromFile(node.filename, scene, transformation,
                                    NB_SYSTEM_MATERIALS + node.materialId))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
-#endif
 
-bool SceneLoader::_processNodes(Scene& scene,
-                                MeshLoader& meshLoader BRAYNS_UNUSED)
+bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
 {
     Progress progress("Loading scene...", _nodes.size());
     for (const auto& node : _nodes)
@@ -142,9 +138,7 @@ bool SceneLoader::_processNodes(Scene& scene,
 #endif
             break;
         case FileType::mesh:
-#ifdef BRAYNS_USE_ASSIMP
             _importMesh(scene, meshLoader, node, transformation);
-#endif
             break;
         default:
             BRAYNS_ERROR << "Unknown file type: "

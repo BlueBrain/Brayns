@@ -23,7 +23,6 @@
 
 #include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/types.h>
-#include <brayns/io/MeshLoader.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <vector>

@@ -769,6 +769,26 @@ void ZeroEQPlugin::_initializeDataSource()
         geometryParameters.getCircuitSimulationHistogramSize());
     _remoteDataSource.setCircuitConfiguration(circuit);
 
+    // Connectivity
+    ::brayns::v1::ConnectivityConfiguration connectivityConfiguration;
+    connectivityConfiguration.setFilename(
+        geometryParameters.getConnectivityFile());
+    connectivityConfiguration.setMatrixId(
+        geometryParameters.getConnectivityMatrixId());
+    connectivityConfiguration.setShowConnections(
+        geometryParameters.getConnectivityShowConnections());
+    const auto& connectivityDimensionRange =
+        geometryParameters.getConnectivityDimensionRange();
+    const uint32_ts dimensions = {connectivityDimensionRange.x(),
+                                  connectivityDimensionRange.y()};
+    connectivityConfiguration.setDimensionRange(dimensions);
+    const auto& connectivityScale = geometryParameters.getConnectivityScale();
+    const floats range = {connectivityScale.x(), connectivityScale.y(),
+                          connectivityScale.z()};
+    connectivityConfiguration.setScale(range);
+    _remoteDataSource.setConnectivityConfiguration(connectivityConfiguration);
+
+    // Other parameters
     _remoteDataSource.setLoadCacheFile(geometryParameters.getLoadCacheFile());
     _remoteDataSource.setSaveCacheFile(geometryParameters.getSaveCacheFile());
     _remoteDataSource.setRadiusMultiplier(
@@ -1018,6 +1038,29 @@ void ZeroEQPlugin::_dataSourceUpdated()
                            _remoteDataSource.getCircuitConfiguration()
                                .getMeshFilenamePatternString());
 
+    _parametersManager.set(
+        "connectivity-file",
+        _remoteDataSource.getConnectivityConfiguration().getFilenameString());
+    _parametersManager.set(
+        "connectivity-matrix-id",
+        std::to_string(
+            _remoteDataSource.getConnectivityConfiguration().getMatrixId()));
+    _parametersManager.set(
+        "connectivity-show-connections",
+        (_remoteDataSource.getConnectivityConfiguration().getShowConnections()
+             ? "1"
+             : "0"));
+    const auto& connectivityDimensionRange =
+        _remoteDataSource.getConnectivityConfiguration().getDimensionRange();
+    _parametersManager.set("connectivity-dimension-range",
+                           std::to_string(connectivityDimensionRange[0]) + " " +
+                               std::to_string(connectivityDimensionRange[1]));
+    const auto& connectivityScale =
+        _remoteDataSource.getConnectivityConfiguration().getScale();
+    _parametersManager.set("connectivity-scale",
+                           std::to_string(connectivityScale[0]) + " " +
+                               std::to_string(connectivityScale[1]) + " " +
+                               std::to_string(connectivityScale[2]));
     _parametersManager.print();
 
     _dirtyEngine = true;

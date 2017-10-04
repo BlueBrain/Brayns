@@ -20,22 +20,23 @@
 
 #include "MeshLoader.h"
 
-#include <assimp/IOSystem.hpp> // must come before Exporter.hpp
-
+#if (BRAYNS_USE_ASSIMP)
 #include <assimp/Exporter.hpp>
+#include <assimp/IOSystem.hpp> // must come before Exporter.hpp
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-
 #include <boost/filesystem.hpp>
 #include <brayns/common/log.h>
 #include <fstream>
+#endif
 
 #include <brayns/common/scene/Scene.h>
 
 namespace brayns
 {
-MeshLoader::MeshLoader()
+MeshLoader::MeshLoader(const GeometryParameters& geometryParameters)
+    : _geometryParameters(geometryParameters)
 {
 }
 
@@ -44,8 +45,8 @@ void MeshLoader::clear()
     _meshIndex.clear();
 }
 
+#if (BRAYNS_USE_ASSIMP)
 bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
-                                    GeometryQuality geometryQuality,
                                     const Matrix4f& transformation,
                                     const size_t defaultMaterial)
 {
@@ -59,7 +60,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     }
 
     size_t quality;
-    switch (geometryQuality)
+    switch (_geometryParameters.getGeometryQuality())
     {
     case GeometryQuality::medium:
         quality = aiProcessPreset_TargetRealtime_Quality;
@@ -324,4 +325,46 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
         mat.setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f : value1f);
     }
 }
+
+std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
+{
+    const auto meshedMorphologiesFolder =
+        _geometryParameters.getCircuitMeshFolder();
+    auto meshFilenamePattern =
+        _geometryParameters.getCircuitMeshFilenamePattern();
+    const std::string gidAsString = std::to_string(gid);
+    const std::string GID = "{gid}";
+    if (!meshFilenamePattern.empty())
+        meshFilenamePattern.replace(meshFilenamePattern.find(GID), GID.length(),
+                                    gidAsString);
+    else
+        meshFilenamePattern = gidAsString;
+    return meshedMorphologiesFolder + "/" + meshFilenamePattern;
+}
+#else
+namespace
+{
+const std::string NO_ASSIMP_MESSAGE =
+    "The assimp library is required to load meshes";
+}
+
+bool MeshLoader::importMeshFromFile(const std::string&, Scene&, const Matrix4f&,
+                                    const size_t)
+{
+    BRAYNS_ERROR << NO_ASSIMP_MESSAGE << std::endl;
+    return false;
+}
+
+bool MeshLoader::exportMeshToFile(const std::string&, Scene&) const
+{
+    BRAYNS_ERROR << NO_ASSIMP_MESSAGE << std::endl;
+    return false;
+}
+
+std::string MeshLoader::getMeshFilenameFromGID(const uint64_t)
+{
+    BRAYNS_ERROR << NO_ASSIMP_MESSAGE << std::endl;
+    return "";
+}
+#endif
 }

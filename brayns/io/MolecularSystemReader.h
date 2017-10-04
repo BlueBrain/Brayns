@@ -22,8 +22,6 @@
 #define MOLECULARSYSTEMREADER_H
 
 #include <brayns/common/types.h>
-#include <brayns/io/MeshLoader.h>
-
 #include <string>
 
 namespace brayns
