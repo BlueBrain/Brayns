@@ -23,6 +23,7 @@
 
 #include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/types.h>
+#include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <vector>
@@ -36,7 +37,7 @@ namespace brayns
 {
 /** Loads morphologies from SWC and H5, and Circuit Config files
  */
-class MorphologyLoader
+class MorphologyLoader : public ProgressReporter
 {
 public:
     /**

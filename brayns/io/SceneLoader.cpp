@@ -118,10 +118,11 @@ void SceneLoader::_importMesh(Scene& scene, MeshLoader& loader,
 
 bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
 {
-    Progress progress("Loading scene...", _nodes.size());
+    size_t progress = 0;
     for (const auto& node : _nodes)
     {
         ++progress;
+        updateProgress("Loading scene...", progress, _nodes.size());
         Matrix4f transformation;
         transformation.setTranslation(node.position);
         switch (node.fileType)

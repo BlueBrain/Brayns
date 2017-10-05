@@ -23,6 +23,7 @@
 #define CONNECTIVITY_LOADER_H
 
 #include <brayns/common/types.h>
+#include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <string>
@@ -31,7 +32,7 @@ namespace brayns
 {
 /** Loads connectivity matrix and morphologies from H5, and Circuit Config file
  */
-class ConnectivityLoader
+class ConnectivityLoader : public ProgressReporter
 {
 public:
     ConnectivityLoader(const GeometryParameters& geometryParameters);

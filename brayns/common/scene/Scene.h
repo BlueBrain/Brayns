@@ -65,8 +65,6 @@ public:
      */
     BRAYNS_API virtual void commit() = 0;
 
-    BRAYNS_API void clearMaterials();
-
     /**
         Creates the materials handled by the scene, and available to the
         scene geometry
@@ -240,10 +238,8 @@ public:
         return _transferFunction;
     }
 
-    /**
-        Resets the current scene (Geometry, lights, materials, etc).
-    */
-    BRAYNS_API virtual void reset();
+    /** Unloads geometry, materials, lights, models, etc. to free memory. */
+    BRAYNS_API virtual void unload();
 
     /**
         Saves geometry a binary cache file defined by the --save-cache-file
@@ -258,10 +254,6 @@ public:
     BRAYNS_API virtual bool isVolumeSupported(
         const std::string& volumeFile) const = 0;
 
-    /**
-     * @return Active renderers
-     */
-    BRAYNS_API Renderers& getRenderers() { return _renderers; }
     /**
      * @brief Sets spheres as dirty, meaning that they need to be serialized
      *        and sent to the rendering engine
@@ -295,6 +287,18 @@ public:
      *        serialized and sent to the rendering engine
      */
     BRAYNS_API void setDirty();
+
+    /**
+     * @return true if unload() can be performed. Some implementations might not
+     *         support it, hence deletion of the scene or the entire engine is
+     * required.
+     */
+    virtual bool supportsUnloading() const { return true; }
+    /**
+     * @internal needed to ensure deletion wrt cyclic dependency
+     *           scene<->renderer
+     */
+    virtual void reset();
 
 protected:
     // Parameters

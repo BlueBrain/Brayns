@@ -122,10 +122,8 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
     Boxf& bounds = scene.getWorldBounds();
     const float radius = _geometryParameters.getRadiusMultiplier();
 
-    Progress progress("Loading neurons...", _frameSize);
     for (uint64_t gid = 0; gid < _frameSize; ++gid)
     {
-        ++progress;
         // Create a unique index for the combination of R,G and B values. This
         // index will then be used to identify the color that should be applied
         // to the sphere by the renderer
@@ -137,6 +135,7 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
             SpherePtr(new Sphere(center, radius, 0.f,
                                  Vector2f(materialMapping[index], 0.f))));
         bounds.merge(center);
+        updateProgress("Loading neurons...", spheres[0].size(), _frameSize);
     }
 
     BRAYNS_INFO << "Finished loading " << _frameSize << " neurons" << std::endl;
@@ -221,7 +220,6 @@ bool NESTLoader::_loadBinarySpikes(const std::string& spikesFilename)
     _values.reserve(_nbElements);
     _gids.reserve(_nbElements);
     size_t i = 0;
-    Progress progress("Loading spikes...", _nbElements);
     while (!file.eof())
     {
         file.read((char*)&value, sizeof(float));
@@ -229,7 +227,7 @@ bool NESTLoader::_loadBinarySpikes(const std::string& spikesFilename)
         file.read((char*)&gid, sizeof(uint32_t));
         _gids.push_back(gid);
         ++i;
-        ++progress;
+        updateProgress("Loading spikes...", i, _nbElements);
     }
 
     _spikesStart = _values[0];             // First spike timestamp after header

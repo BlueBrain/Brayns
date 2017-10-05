@@ -78,8 +78,10 @@ class MorphologyLoader::Impl
 {
 public:
     Impl(const ApplicationParameters& applicationParameters,
-         const GeometryParameters& geometryParameters, Scene& scene)
-        : _applicationParameters(applicationParameters)
+         const GeometryParameters& geometryParameters, Scene& scene,
+         MorphologyLoader& parent)
+        : _parent(parent)
+        , _applicationParameters(applicationParameters)
         , _geometryParameters(geometryParameters)
         , _scene(scene)
     {
@@ -802,11 +804,8 @@ private:
         // Loading meshes is currently sequential. TODO: Make it parallel!!!
         std::stringstream message;
         message << "Loading " << gids.size() << " meshes...";
-        Progress progress(message.str(), gids.size());
         for (const auto& gid : gids)
         {
-            ++progress;
-
             const size_t materialId =
                 _neuronMatrix.empty()
                     ? _getMaterialFromGeometryParameters(
@@ -826,6 +825,7 @@ private:
                     transformation, materialId))
                 ++loadingFailures;
             ++meshIndex;
+            _parent.updateProgress(message.str(), meshIndex, gids.size());
         }
         if (loadingFailures != 0)
             BRAYNS_WARN << "Failed to import " << loadingFailures << " meshes"
@@ -879,15 +879,15 @@ private:
         size_t loadingFailures = 0;
         std::stringstream message;
         message << "Loading " << uris.size() << " morphologies...";
-        Progress progress(message.str(), uris.size());
+        std::atomic_size_t current{0};
 #pragma omp parallel
         {
 #pragma omp for nowait
             for (uint64_t morphologyIndex = 0; morphologyIndex < uris.size();
                  ++morphologyIndex)
             {
-#pragma omp critical
-                ++progress;
+                ++current;
+                _parent.updateProgress(message.str(), current, uris.size());
 
                 SpheresMap spheres;
                 CylindersMap cylinders;
@@ -965,6 +965,7 @@ private:
     }
 
 private:
+    MorphologyLoader& _parent;
     const ApplicationParameters& _applicationParameters;
     const GeometryParameters& _geometryParameters;
     Scene& _scene;
@@ -975,7 +976,7 @@ MorphologyLoader::MorphologyLoader(
     const ApplicationParameters& applicationParameters,
     const GeometryParameters& geometryParameters, Scene& scene)
     : _impl(new MorphologyLoader::Impl(applicationParameters,
-                                       geometryParameters, scene))
+                                       geometryParameters, scene, *this))
 {
 }
 

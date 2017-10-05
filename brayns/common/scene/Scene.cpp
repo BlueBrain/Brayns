@@ -50,6 +50,12 @@ Scene::~Scene()
 
 void Scene::reset()
 {
+    unload();
+    _renderers.clear();
+}
+
+void Scene::unload()
+{
     setDirty();
     _spheres.clear();
     _cylinders.clear();
@@ -58,7 +64,9 @@ void Scene::reset()
     _bounds.reset();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
-    _renderers.clear();
+    _materials.clear();
+    _textures.clear();
+    _volumeHandler.reset();
 }
 
 void Scene::setDirty()
@@ -67,11 +75,6 @@ void Scene::setDirty()
     _cylindersDirty = true;
     _conesDirty = true;
     _trianglesMeshesDirty = true;
-}
-
-void Scene::clearMaterials()
-{
-    _materials.clear();
 }
 
 void Scene::buildMaterials()

@@ -77,7 +77,6 @@ bool ConnectivityLoader::_importMatrix()
 
         std::stringstream message;
         message << "Reading " << dims[0] << "x" << dims[1] << " matrix...";
-        Progress progress(message.str(), dims[0]);
         for (size_t x = 0; x < dims[0]; ++x)
         {
             for (size_t y = 0; y < dims[1]; ++y)
@@ -92,7 +91,7 @@ bool ConnectivityLoader::_importMatrix()
                         _receptors[y]++;
                 }
             }
-            ++progress;
+            updateProgress(message.str(), x+1, dims[0]);
         }
         dataset.close();
     }

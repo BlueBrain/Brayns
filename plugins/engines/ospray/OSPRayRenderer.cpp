@@ -102,16 +102,10 @@ void OSPRayRenderer::commit()
 
     const auto animationFrame =
         _scene->getParametersManager().getSceneParameters().getAnimationFrame();
-    const auto model = osprayScene->modelImpl(animationFrame);
-    if (model)
-        ospSetObject(_renderer, "world", *model);
-    else
-        BRAYNS_ERROR << "No model found for animation frame " << animationFrame
-                     << std::endl;
 
-    const auto simulationModel = osprayScene->simulationModelImpl();
-    if (simulationModel)
-        ospSetObject(_renderer, "simulationModel", *simulationModel);
+    ospSetObject(_renderer, "world", osprayScene->modelImpl(animationFrame));
+    ospSetObject(_renderer, "simulationModel",
+                 osprayScene->simulationModelImpl());
     ospCommit(_renderer);
 }
 

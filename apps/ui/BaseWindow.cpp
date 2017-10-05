@@ -291,14 +291,6 @@ void BaseWindow::display()
         {
             glDrawPixels(_windowSize.x(), _windowSize.y(), format, type,
                          buffer);
-            if (_displayHelp)
-            {
-                auto& keyHandler = _brayns.getKeyboardHandler();
-                glLogicOp(GL_XOR);
-                glEnable(GL_COLOR_LOGIC_OP);
-                _renderBitmapString(-0.98f, 0.95f, keyHandler.help());
-                glDisable(GL_COLOR_LOGIC_OP);
-            }
         }
     }
     else
@@ -317,6 +309,15 @@ void BaseWindow::display()
         ssProcData.depthType = GL_FLOAT;
 
         _screenSpaceProcessor.draw(ssProcData);
+    }
+
+    if (_displayHelp)
+    {
+        auto& keyHandler = _brayns.getKeyboardHandler();
+        glLogicOp(GL_XOR);
+        glEnable(GL_COLOR_LOGIC_OP);
+        _renderBitmapString(-0.98f, 0.95f, keyHandler.help());
+        glDisable(GL_COLOR_LOGIC_OP);
     }
 
     float* buffer = renderOutput.depthBuffer.data();
@@ -346,6 +347,9 @@ void BaseWindow::clearPixels()
              .getFilters()
              .empty())
         _screenSpaceProcessor.clear();
+
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void BaseWindow::drawPixels(const int* framebuffer)

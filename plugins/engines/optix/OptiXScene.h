@@ -50,7 +50,7 @@ public:
     OptiXScene(Renderers renderer, ParametersManager& parametersManager,
                optix::Context& context);
 
-    ~OptiXScene();
+    ~OptiXScene() = default;
 
     /** @copydoc Scene::commit */
     void commit() final;
@@ -76,14 +76,17 @@ public:
     /** @copydoc Scene::commitTransferFunctionData */
     void commitTransferFunctionData() final;
 
-    /** @copydoc Scene::reset */
-    void reset() final;
+    /** @copydoc Scene::unload */
+    void unload() final;
 
     /** @copydoc Scene::saveSceneToCacheFile */
     void saveSceneToCacheFile() final;
 
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
+
+    /** @internal */
+    void reset() final;
 
 private:
     void _processVolumeAABBGeometry();

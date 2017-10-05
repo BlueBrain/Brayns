@@ -22,13 +22,14 @@
 #define SceneLoader_H
 
 #include <brayns/common/types.h>
+#include <brayns/io/ProgressReporter.h>
 
 namespace brayns
 {
 /**
  * Loads meshes according to given positions in space
  */
-class SceneLoader
+class SceneLoader : public ProgressReporter
 {
 public:
     SceneLoader(const ApplicationParameters& applicationParameters,
@@ -46,7 +47,7 @@ public:
      *
      * @param filename name of the file containing the positions and geometry
      *        filenames
-     * @param Scene holding the geometry
+     * @param scene Scene holding the geometry
      * @param meshLoader Loader used to load meshes
      * @return true if the file was successfully imported. False otherwise.
      */

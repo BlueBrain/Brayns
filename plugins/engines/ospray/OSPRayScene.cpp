@@ -69,32 +69,13 @@ OSPRayScene::~OSPRayScene()
     if (_ospTransferFunctionEmissionData)
         ospRelease(_ospTransferFunctionEmissionData);
 
-    if (_ospSimulationData)
-        ospRelease(_ospSimulationData);
-
-    if (_ospVolumeData)
-        ospRelease(_ospVolumeData);
-
-    for (auto& geom : _ospExtendedSpheres)
-        ospRelease(geom.second);
-    for (auto& geom : _ospExtendedSpheresData)
-        ospRelease(geom.second);
-    for (auto& geom : _ospExtendedCylinders)
-        ospRelease(geom.second);
-    for (auto& geom : _ospExtendedCylindersData)
-        ospRelease(geom.second);
-    for (auto& geom : _ospExtendedCones)
-        ospRelease(geom.second);
-    for (auto& geom : _ospExtendedConesData)
-        ospRelease(geom.second);
-    for (auto& geom : _ospMeshes)
-        ospRelease(geom.second);
+    for (auto& light : _ospLights)
+        ospRelease(light);
+    _ospLights.clear();
 }
 
-void OSPRayScene::reset()
+void OSPRayScene::unload()
 {
-    Scene::reset();
-
     for (const auto& model : _models)
     {
         for (size_t materialId = 0; materialId < _materials.size();
@@ -131,6 +112,8 @@ void OSPRayScene::reset()
         ospRelease(_simulationModel);
     }
 
+    Scene::unload();
+
     for (auto& material : _ospMaterials)
         ospRelease(material);
     _ospMaterials.clear();
@@ -138,10 +121,6 @@ void OSPRayScene::reset()
     for (auto& texture : _ospTextures)
         ospRelease(texture.second);
     _ospTextures.clear();
-
-    for (auto& light : _ospLights)
-        ospRelease(light);
-    _ospLights.clear();
 
     _serializedSpheresData.clear();
     _serializedCylindersData.clear();
@@ -153,6 +132,34 @@ void OSPRayScene::reset()
     _timestampSpheresIndices.clear();
     _timestampCylindersIndices.clear();
     _timestampConesIndices.clear();
+
+    if (_ospSimulationData)
+        ospRelease(_ospSimulationData);
+
+    if (_ospVolumeData)
+        ospRelease(_ospVolumeData);
+
+    for (auto& geom : _ospExtendedSpheres)
+        ospRelease(geom.second);
+    _ospExtendedSpheres.clear();
+    for (auto& geom : _ospExtendedSpheresData)
+        ospRelease(geom.second);
+    _ospExtendedSpheresData.clear();
+    for (auto& geom : _ospExtendedCylinders)
+        ospRelease(geom.second);
+    _ospExtendedCylinders.clear();
+    for (auto& geom : _ospExtendedCylindersData)
+        ospRelease(geom.second);
+    _ospExtendedCylindersData.clear();
+    for (auto& geom : _ospExtendedCones)
+        ospRelease(geom.second);
+    _ospExtendedCones.clear();
+    for (auto& geom : _ospExtendedConesData)
+        ospRelease(geom.second);
+    _ospExtendedConesData.clear();
+    for (auto& geom : _ospMeshes)
+        ospRelease(geom.second);
+    _ospMeshes.clear();
 }
 
 void OSPRayScene::commit()
@@ -166,25 +173,25 @@ void OSPRayScene::commit()
     }
 }
 
-OSPModel* OSPRayScene::modelImpl(const uint32_t index)
+OSPModel OSPRayScene::modelImpl(const uint32_t index)
 {
     if (_models.empty())
         return nullptr;
     if (_models.find(index) != _models.end())
-        return &_models[index];
+        return _models[index];
 
     auto it = _models.lower_bound(index);
     if (it != _models.end())
     {
         BRAYNS_DEBUG << "Request model index " << index << ", returned "
                      << it->first << std::endl;
-        return &it->second;
+        return it->second;
     }
 
     auto lastModel = _models.rbegin();
     BRAYNS_DEBUG << "Request model index " << index << ", returned "
                  << lastModel->first << std::endl;
-    return &lastModel->second;
+    return lastModel->second;
 }
 
 void OSPRayScene::_saveCacheFile()
@@ -878,7 +885,6 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Models to process: " << _models.size() << std::endl;
 
     uint64_t size = serializeGeometry();
-    commitLights();
 
     if (!_parametersManager.getGeometryParameters().getLoadCacheFile().empty())
         _loadCacheFile();

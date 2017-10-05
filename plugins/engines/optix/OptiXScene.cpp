@@ -106,74 +106,145 @@ OptiXScene::OptiXScene(Renderers renderer, ParametersManager& parametersManager,
                                              CUDA_FUNCTION_INTERSECTION);
 }
 
-OptiXScene::~OptiXScene()
-{
-    reset();
-}
-
 void OptiXScene::reset()
 {
+    // need to free optix data here as in dtor context is already gone
+    if (_lightBuffer)
+        _lightBuffer->destroy();
+    _lightBuffer = nullptr;
+
+    if (_phong_ch)
+        _phong_ch->destroy();
+    _phong_ch = nullptr;
+
+    if (_phong_ch_textured)
+        _phong_ch_textured->destroy();
+    _phong_ch_textured = nullptr;
+
+    if (_phong_ah)
+        _phong_ah->destroy();
+    _phong_ah = nullptr;
+
+    if (_spheresBoundsProgram)
+        _spheresBoundsProgram->destroy();
+    _spheresBoundsProgram = nullptr;
+
+    if (_spheresIntersectProgram)
+        _spheresIntersectProgram->destroy();
+    _spheresIntersectProgram = nullptr;
+
+    if (_cylindersBoundsProgram)
+        _cylindersBoundsProgram->destroy();
+    _cylindersBoundsProgram = nullptr;
+
+    if (_cylindersIntersectProgram)
+        _cylindersIntersectProgram->destroy();
+    _cylindersIntersectProgram = nullptr;
+
+    if (_conesBoundsProgram)
+        _conesBoundsProgram->destroy();
+    _conesBoundsProgram = nullptr;
+
+    if (_conesIntersectProgram)
+        _conesIntersectProgram->destroy();
+    _conesIntersectProgram = nullptr;
+
+    if (_meshBoundsProgram)
+        _meshBoundsProgram->destroy();
+    _meshBoundsProgram = nullptr;
+
+    if (_meshIntersectProgram)
+        _meshIntersectProgram->destroy();
+    _meshIntersectProgram = nullptr;
+
     Scene::reset();
+}
+
+void OptiXScene::unload()
+{
+    Scene::unload();
 
     // Geometry
+    for (auto& i : _geometryInstances)
+        i->destroy();
     _geometryInstances.clear();
+    if (_geometryGroup)
+        _geometryGroup->destroy();
     _geometryGroup = nullptr;
 
     // Volume
+    if (_volumeBuffer)
+        _volumeBuffer->destroy();
     _volumeBuffer = nullptr;
 
     // Color map
+    if (_colorMapBuffer)
+        _colorMapBuffer->destroy();
     _colorMapBuffer = nullptr;
+    if (_emissionIntensityMapBuffer)
+        _emissionIntensityMapBuffer->destroy();
     _emissionIntensityMapBuffer = nullptr;
 
     // Spheres
+    for (auto& i : _spheresBuffers)
+        i.second->destroy();
     _spheresBuffers.clear();
+    for (auto& i : _optixSpheres)
+        i.second->destroy();
     _optixSpheres.clear();
     _serializedSpheresData.clear();
     _serializedSpheresDataSize.clear();
     _timestampSpheresIndices.clear();
 
     // Cylinders
+    for (auto& i : _cylindersBuffers)
+        i.second->destroy();
     _cylindersBuffers.clear();
+    for (auto& i : _optixCylinders)
+        i.second->destroy();
     _optixCylinders.clear();
     _serializedCylindersData.clear();
     _timestampCylindersIndices.clear();
     _serializedCylindersDataSize.clear();
 
     // Cones
+    for (auto& i : _conesBuffers)
+        i.second->destroy();
     _conesBuffers.clear();
+    for (auto& i : _optixCones)
+        i.second->destroy();
     _optixCones.clear();
     _serializedConesData.clear();
     _serializedConesDataSize.clear();
     _timestampConesIndices.clear();
 
     // Meshes
+    if (_mesh)
+        _mesh->destroy();
     _mesh = nullptr;
+    if (_verticesBuffer)
+        _verticesBuffer->destroy();
     _verticesBuffer = nullptr;
+    if (_indicesBuffer)
+        _indicesBuffer->destroy();
     _indicesBuffer = nullptr;
+    if (_normalsBuffer)
+        _normalsBuffer->destroy();
     _normalsBuffer = nullptr;
+    if (_textureCoordsBuffer)
+        _textureCoordsBuffer->destroy();
     _textureCoordsBuffer = nullptr;
+    if (_materialsBuffer)
+        _materialsBuffer->destroy();
     _materialsBuffer = nullptr;
 
-    // Lights
-    _lightBuffer = nullptr;
-
     // Textures
+    for (auto& i : _optixTextures)
+        i.second->destroy();
     _optixTextures.clear();
+    for (auto& i : _optixTextureSamplers)
+        i.second->destroy();
     _optixTextureSamplers.clear();
-
-    // Programs
-    _phong_ch = nullptr;
-    _phong_ch_textured = nullptr;
-    _phong_ah = nullptr;
-    _spheresBoundsProgram = nullptr;
-    _spheresIntersectProgram = nullptr;
-    _cylindersBoundsProgram = nullptr;
-    _cylindersIntersectProgram = nullptr;
-    _conesBoundsProgram = nullptr;
-    _conesIntersectProgram = nullptr;
-    _meshBoundsProgram = nullptr;
-    _meshIntersectProgram = nullptr;
 }
 
 void OptiXScene::commit()
@@ -208,7 +279,6 @@ void OptiXScene::buildGeometry()
     // Make sure lights and materials have been initialized before assigning
     // the geometry
     commitMaterials();
-    commitLights();
 
     _geometryInstances.clear();
 
