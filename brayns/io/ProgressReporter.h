@@ -33,11 +33,10 @@ namespace brayns
 class ProgressReporter
 {
 public:
-    ProgressReporter() = default;
-    ~ProgressReporter() = default;
+    virtual ~ProgressReporter() = default;
 
     /** Set a new callback function which is called on each updateProgress(). */
-    void setProgressUpdate(const Progress::ProgressUpdateCallback& func)
+    void setProgressCallback(const Progress::UpdateCallback& func)
     {
         _progressUpdate = func;
     }
@@ -50,10 +49,10 @@ public:
                         const size_t expected)
     {
         if (_progressUpdate)
-            _progressUpdate(message, current, expected);
+            _progressUpdate(message, float(current) / expected);
     }
 
 private:
-    Progress::ProgressUpdateCallback _progressUpdate;
+    Progress::UpdateCallback _progressUpdate;
 };
 }

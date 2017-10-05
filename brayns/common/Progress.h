@@ -40,10 +40,9 @@ class Progress
 public:
     /**
      * The callback for each progress update with the signature (message,
-     * current count, expected count)
+     * fraction of progress in 0..1 range)
      */
-    using ProgressUpdateCallback =
-        std::function<void(const std::string&, size_t, size_t)>;
+    using UpdateCallback = std::function<void(const std::string&, float)>;
 
     /**
      * Setup the progress and already report progress '0' on the given callback.
@@ -53,9 +52,8 @@ public:
      * @param updateCallback a user-defined callback to be called on each
      *        update.
      */
-    Progress(const std::string& message, unsigned long expectedCount,
-             const ProgressUpdateCallback& updateCallback =
-                 ProgressUpdateCallback());
+    Progress(const std::string& message, size_t expectedCount,
+             const UpdateCallback& updateCallback = UpdateCallback());
 
     /**
      * Reports 'expected count' on the callback to ensure completion of the

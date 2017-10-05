@@ -156,19 +156,20 @@ public:
      * @return the last normalized progress value (0..1) emitted by the engine
      */
     float getLastProgress() const { return _lastProgress; }
-    /**
-     * Set the last normalized progress value (0..1) for any current operation.
-     */
+    /** Set the last operation processed by the engine. */
     void setLastOperation(const std::string& lastOperation)
     {
         _lastOperation = lastOperation;
     }
 
-    /** Set the last operation processed by the engine. */
+    /**
+     * Set the last normalized progress value (0..1) for any current operation.
+     */
     void setLastProgress(const float lastProgress)
     {
         _lastProgress = lastProgress;
     }
+
     /**
      * @return true if for "--module deflect" the DeflectPixelOp was
      *         successfully loaded. Only supported for the OSPRay engine.

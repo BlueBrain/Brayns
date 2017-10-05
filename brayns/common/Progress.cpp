@@ -31,32 +31,30 @@ namespace brayns
 class Progress::Impl
 {
 public:
-    Impl(const std::string& message, const unsigned long expectedCount,
-         const ProgressUpdateCallback& updateCallback)
+    Impl(const std::string& message, const size_t expectedCount,
+         const UpdateCallback& updateCallback)
         : _display(expectedCount, std::cout,
                    "[INFO ] " + message + "\n[INFO ] ", "[INFO ] ", "[INFO ] ")
         , _message(message)
         , _updateCallback(updateCallback)
     {
         if (_updateCallback)
-            _updateCallback(_message, 0, _display.expected_count());
+            _updateCallback(_message, 0);
     }
 
     ~Impl()
     {
         if (_updateCallback)
-            _updateCallback(_message, _display.expected_count(),
-                            _display.expected_count());
+            _updateCallback(_message, 1);
     }
 
     boost::progress_display _display;
     std::string _message;
-    Progress::ProgressUpdateCallback _updateCallback;
+    Progress::UpdateCallback _updateCallback;
 };
 
-Progress::Progress(const std::string& message,
-                   const unsigned long expectedCount,
-                   const ProgressUpdateCallback& updateCallback)
+Progress::Progress(const std::string& message, const size_t expectedCount,
+                   const UpdateCallback& updateCallback)
     : _impl(new Impl(message, expectedCount, updateCallback))
 
 {
@@ -85,9 +83,7 @@ void Progress::setMessage(const std::string& message)
 #endif
         _impl->_message = message;
 
-    if (_impl->_updateCallback)
-        _impl->_updateCallback(_impl->_message, _impl->_display.count(),
-                               _impl->_display.expected_count());
+    operator+=(0);
 }
 
 void Progress::operator++()
@@ -104,8 +100,9 @@ void Progress::operator+=(const size_t increment)
 #ifdef BRAYNS_USE_OPENMP
         if (omp_get_thread_num() == 0)
 #endif
-            _impl->_updateCallback(_impl->_message, _impl->_display.count(),
-                                   _impl->_display.expected_count());
+            _impl->_updateCallback(_impl->_message,
+                                   float(_impl->_display.count()) /
+                                       _impl->_display.expected_count());
 }
 
 size_t Progress::getCurrent() const
