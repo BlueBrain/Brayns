@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(renderParams.getEngine(), "ospray");
     BOOST_CHECK_EQUAL(renderParams.getModule(), "");
     BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::basic);
-    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 4);
+    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 6);
     BOOST_CHECK(!renderParams.getShadows());
     BOOST_CHECK(!renderParams.getSoftShadows());
     BOOST_CHECK_EQUAL(renderParams.getAmbientOcclusionStrength(), 0.f);
@@ -144,8 +144,10 @@ BOOST_AUTO_TEST_CASE(defaults)
 BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
-    brayns::Brayns brayns(testSuite.argc,
-                          const_cast<const char**>(testSuite.argv));
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app, "--synchronous-mode", "on"};
+    const int argc = sizeof(argv) / sizeof(char*);
+    brayns::Brayns brayns(argc, argv);
 
     auto& fb = brayns.getEngine().getFrameBuffer();
     const auto& size = fb.getSize();
@@ -154,7 +156,7 @@ BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 
     uint16_t depth = fb.getColorDepth();
     const size_t bytes = size[0] * size[1] * depth;
-    std::vector<uint8_t> oldBuffer(bytes);
+    std::vector<uint8_t> oldBuffer(bytes, 0);
 
     fb.clear();
     brayns.render();

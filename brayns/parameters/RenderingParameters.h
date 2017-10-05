@@ -47,6 +47,7 @@ public:
     /** OSPRay renderer */
     RendererType getRenderer() const { return _renderer; }
     const std::string& getRendererAsString(const RendererType value) const;
+    const std::string& getRendererNameAsString(const RendererType value) const;
     void setRenderer(const RendererType renderer)
     {
         updateValue(_renderer, renderer);

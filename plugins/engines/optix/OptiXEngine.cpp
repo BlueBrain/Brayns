@@ -46,7 +46,7 @@ OptiXEngine::OptiXEngine(int, const char**,
          parametersManager.getRenderingParameters().getRenderers())
     {
         const auto& rendererName =
-            parametersManager.getRenderingParameters().getRendererAsString(
+            parametersManager.getRenderingParameters().getRendererNameAsString(
                 renderer);
         _renderers[renderer].reset(
             new OptiXRenderer(rendererName, _parametersManager, _context));
