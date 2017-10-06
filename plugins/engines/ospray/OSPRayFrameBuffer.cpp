@@ -21,6 +21,7 @@
 #include "OSPRayFrameBuffer.h"
 
 #include <brayns/common/log.h>
+#include <brayns/parameters/ApplicationParameters.h>
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
@@ -90,16 +91,17 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     clear();
 }
 
-void OSPRayFrameBuffer::setStreamingParams(const bool enabled,
-                                           const bool compression,
-                                           const unsigned int quality,
+void OSPRayFrameBuffer::setStreamingParams(const ApplicationParameters& params,
                                            const bool stereo)
 {
     if (_pixelOp)
     {
-        ospSet1i(_pixelOp, "enabled", enabled);
-        ospSet1i(_pixelOp, "compression", compression);
-        ospSet1i(_pixelOp, "quality", quality);
+        ospSetString(_pixelOp, "id", params.getStreamId().c_str());
+        ospSetString(_pixelOp, "hostname", params.getStreamHostname().c_str());
+        ospSet1i(_pixelOp, "port", params.getStreamPort());
+        ospSet1i(_pixelOp, "enabled", params.getStreamingEnabled());
+        ospSet1i(_pixelOp, "compression", params.getStreamCompression());
+        ospSet1i(_pixelOp, "quality", params.getStreamQuality());
         ospSet1i(_pixelOp, "stereo", stereo);
         ospCommit(_pixelOp);
     }
