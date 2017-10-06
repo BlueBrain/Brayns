@@ -28,6 +28,7 @@
 #include <plugins/engines/ospray/OSPRayScene.h>
 
 #include <ospray/OSPConfig.h> // TILE_SIZE
+#include <ospray/version.h>
 
 namespace brayns
 {
@@ -57,8 +58,13 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
             {
                 if (error > 0)
                     BRAYNS_WARN
+#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR < 3))
                         << "Could not load DeflectPixelOp module, error code "
                         << (int)error << std::endl;
+#else
+                        << ospDeviceGetLastErrorMsg(ospGetCurrentDevice())
+                        << std::endl;
+#endif
                 else
                     _haveDeflectPixelOp = true;
             }
@@ -149,9 +155,7 @@ void OSPRayEngine::commit()
         std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer);
     const auto& appParams = getParametersManager().getApplicationParameters();
     if (appParams.getModified() || _camera->getModified())
-        osprayFrameBuffer->setStreamingParams(appParams.getStreamingEnabled(),
-                                              appParams.getStreamCompression(),
-                                              appParams.getStreamQuality(),
+        osprayFrameBuffer->setStreamingParams(appParams,
                                               _camera->getType() ==
                                                   CameraType::stereo);
 }
