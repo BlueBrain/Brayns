@@ -66,6 +66,9 @@ public:
      * server. */
     BRAYNS_API void handle(servus::Serializable& object);
 
+    /** @return the versioned API prefix for appending new endpoints. */
+    BRAYNS_API std::string getEndpointAPIVersion() const;
+
 private:
     /**
      * @brief Initializes HTTP server

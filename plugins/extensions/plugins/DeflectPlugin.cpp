@@ -47,6 +47,9 @@ std::future<T> make_ready_future(const T value)
     promise.set_value(value);
     return promise.get_future();
 }
+
+const std::string ENDPOINT_STREAM = "stream";
+const std::string ENDPOINT_STREAM_TO = "stream-to";
 }
 
 namespace brayns
@@ -66,8 +69,9 @@ DeflectPlugin::DeflectPlugin()
     if (!zeroeq)
         return;
 
-    zeroeq->handleGET(_params);
-    zeroeq->handlePUT("lexis/render/stream-to", _params);
+    zeroeq->handle(zeroeq.getEndpointAPIVersion() + ENDPOINT_STREAM, _params);
+    zeroeq->handlePUT(zeroeq.getEndpointAPIVersion() + ENDPOINT_STREAM_TO,
+                      _params);
 #endif
 }
 
@@ -83,6 +87,9 @@ bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
     appParams.setStreamingEnabled(_params.getEnabled());
     appParams.setStreamCompression(_params.getCompression());
     appParams.setStreamQuality(_params.getQuality());
+    appParams.setStreamHost(_params.getHostString());
+    appParams.setStreamPort(_params.getPort());
+    appParams.setStreamId(_params.getIdString());
 
     if (_stream)
     {
