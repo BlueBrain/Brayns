@@ -92,6 +92,19 @@ public:
         updateValue(_streamQuality, quality);
     }
 
+    /** Stream ID; defaults to DEFLECT_ID if empty */
+    const std::string& getStreamId() const { return _streamId; }
+    void setStreamId(const std::string& id) { updateValue(_streamId, id); }
+    /** Stream hostname; defaults to DEFLECT_HOST if empty */
+    const std::string& getStreamHostname() const { return _streamHostname; }
+    void setStreamHost(const std::string& host)
+    {
+        updateValue(_streamHostname, host);
+    }
+
+    /** Stream port; defaults to 1701 if empty */
+    uint16_t getStreamPort() const { return _streamPort; }
+    void setStreamPort(const uint16_t port) { updateValue(_streamPort, port); }
     /** Folder used by the application to store temporary files */
     std::string getTmpFolder() const { return _tmpFolder; }
     /** @return true if synchronous mode is enabled, aka rendering waits for
@@ -116,6 +129,9 @@ protected:
     bool _streamingEnabled{true};
     bool _streamCompression{true};
     unsigned int _streamQuality{80};
+    uint16_t _streamPort{1701};
+    std::string _streamHostname;
+    std::string _streamId;
     std::string _tmpFolder;
     bool _synchronousMode{false};
 };

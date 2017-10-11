@@ -61,8 +61,6 @@ const std::string ENDPOINT_CLIP_PLANES = ENDPOINT_API_VERSION + "clip-planes";
 const std::string ENDPOINT_FRAME = ENDPOINT_API_VERSION + "frame";
 const std::string ENDPOINT_IMAGE_JPEG = ENDPOINT_API_VERSION + "image-jpeg";
 const std::string ENDPOINT_MATERIAL_LUT = ENDPOINT_API_VERSION + "material-lut";
-const std::string ENDPOINT_STREAM = ENDPOINT_API_VERSION + "stream";
-const std::string ENDPOINT_STREAM_TO = ENDPOINT_API_VERSION + "stream-to";
 const std::string ENDPOINT_VIEWPORT = ENDPOINT_API_VERSION + "viewport";
 const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER =
     ENDPOINT_API_VERSION + "circuit-config-builder";
@@ -92,6 +90,11 @@ ZeroEQPlugin::~ZeroEQPlugin()
 {
     if (_compressor)
         tjDestroy(_compressor);
+}
+
+std::string ZeroEQPlugin::getEndpointAPIVersion() const
+{
+    return ENDPOINT_API_VERSION;
 }
 
 void ZeroEQPlugin::_onNewEngine()
