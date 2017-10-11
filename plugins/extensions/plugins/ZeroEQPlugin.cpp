@@ -1094,6 +1094,12 @@ void ZeroEQPlugin::_initializeSettings()
     case RendererType::simulation:
         _remoteSettings.setShader(::brayns::v1::Shader::simulation);
         break;
+    case RendererType::geometryNormals:
+        _remoteSettings.setShader(::brayns::v1::Shader::geometry_normals);
+        break;
+    case RendererType::shadingNormals:
+        _remoteSettings.setShader(::brayns::v1::Shader::shading_normals);
+        break;
     default:
         _remoteSettings.setShader(::brayns::v1::Shader::basic);
         break;
@@ -1166,6 +1172,9 @@ void ZeroEQPlugin::_settingsUpdated()
     _parametersManager.set("renderer", renderingParameters.getRendererAsString(
                                            static_cast<RendererType>(
                                                _remoteSettings.getShader())));
+    BRAYNS_INFO << renderingParameters.getRendererAsString(
+                       static_cast<RendererType>(_remoteSettings.getShader()))
+                << std::endl;
     switch (_remoteSettings.getShading())
     {
     case ::brayns::v1::Shading::diffuse:

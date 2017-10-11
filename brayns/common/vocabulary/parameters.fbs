@@ -140,7 +140,9 @@ enum Shader: uint {
     basic,
     proximity,
     simulation,
-    particle
+    particle,
+    geometry_normals,
+    shading_normals
 }
 
 enum Shading: uint {

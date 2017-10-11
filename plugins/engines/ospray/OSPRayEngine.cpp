@@ -82,7 +82,7 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     Renderers renderersForScene;
     for (const auto renderer : rp.getRenderers())
     {
-        const auto& rendererName = rp.getRendererAsString(renderer);
+        const auto& rendererName = rp.getRendererNameAsString(renderer);
         _renderers[renderer].reset(
             new OSPRayRenderer(rendererName, _parametersManager));
         renderersForScene.push_back(_renderers[renderer]);

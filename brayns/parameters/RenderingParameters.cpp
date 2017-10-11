@@ -50,8 +50,12 @@ const std::string PARAM_CAMERA_TYPE = "camera-type";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
-const std::string RENDERERS[4] = {"exobj", "proximityrenderer",
-                                  "simulationrenderer", "particlerenderer"};
+const std::string RENDERERS[6] = {"basic",           "proximity",
+                                  "simulation",      "particle",
+                                  "geometrynormals", "shadingnormals"};
+const std::string RENDERER_NAMES[6] = {
+    "exobj",      "proximityrenderer", "simulationrenderer", "particlerenderer",
+    "raycast_Ng", "raycast_Ns"};
 
 const std::string CAMERA_TYPES[5] = {"perspective", "stereo", "orthographic",
                                      "panoramic", "clipped"};
@@ -125,6 +129,8 @@ RenderingParameters::RenderingParameters()
     _renderers.push_back(RendererType::simulation);
     _renderers.push_back(RendererType::particle);
     _renderers.push_back(RendererType::proximity);
+    _renderers.push_back(RendererType::geometryNormals);
+    _renderers.push_back(RendererType::shadingNormals);
 }
 
 bool RenderingParameters::_parse(const po::variables_map& vm)
@@ -243,6 +249,12 @@ const std::string& RenderingParameters::getRendererAsString(
     const RendererType value) const
 {
     return RENDERERS[static_cast<size_t>(value)];
+}
+
+const std::string& RenderingParameters::getRendererNameAsString(
+    const RendererType value) const
+{
+    return RENDERER_NAMES[static_cast<size_t>(value)];
 }
 
 const std::string& RenderingParameters::getCameraTypeAsString(
