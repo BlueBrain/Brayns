@@ -96,10 +96,10 @@ public:
      * @param compartmentReport Compartment report to map to the morphology
      * @return True is the morphology was successfully imported, false otherwise
      */
-    bool importMorphology(const servus::URI& uri, const uint64_t index,
-                          const size_t material, const Matrix4f& transformation,
-                          const GIDOffsets& targetGIDOffsets,
-                          CompartmentReportPtr compartmentReport = nullptr)
+    bool importMorphology(
+        const servus::URI& uri, const uint64_t index, const size_t material,
+        const Matrix4f& transformation, const GIDOffsets& targetGIDOffsets,
+        CompartmentReportPtr compartmentReport = nullptr) const
     {
         ParallelSceneContainer sceneContainer(_scene.getSpheres(),
                                               _scene.getCylinders(),
@@ -559,7 +559,7 @@ private:
                                   const Matrix4f& transformation,
                                   CompartmentReportPtr compartmentReport,
                                   const GIDOffsets& targetGIDOffsets,
-                                  ParallelSceneContainer& scene)
+                                  ParallelSceneContainer& scene) const
     {
         try
         {
@@ -720,20 +720,29 @@ private:
                         const auto& counts =
                             compartmentReport->getCompartmentCounts()[index];
 
-                        if (counts[section.getID()] > 0)
-                            offset = offsets[section.getID()] +
-                                     float(i - step) * segmentStep;
-                        else
+                        // update the offset if we have enough compartments aka
+                        // a full compartment report. Otherwise we keep the soma
+                        // offset which happens for soma reports and use this
+                        // for all the sections
+                        if (section.getID() < counts.size())
                         {
-                            if (section.getType() ==
-                                brain::neuron::SectionType::axon)
-                            {
-                                offset = offsets[lastAxon];
-                            }
+                            if (counts[section.getID()] > 0)
+                                offset = offsets[section.getID()] +
+                                         float(i - step) * segmentStep;
                             else
-                                // This should never happen, but just in case
-                                // use an invalid value to show an error color
-                                offset = std::numeric_limits<uint64_t>::max();
+                            {
+                                if (section.getType() ==
+                                    brain::neuron::SectionType::axon)
+                                {
+                                    offset = offsets[lastAxon];
+                                }
+                                else
+                                    // This should never happen, but just in
+                                    // case use an invalid value to show an
+                                    // error color
+                                    offset =
+                                        std::numeric_limits<uint64_t>::max();
+                            }
                         }
                     }
 
