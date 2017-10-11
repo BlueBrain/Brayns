@@ -434,6 +434,9 @@ bool ZeroEQPlugin::_requestScene()
 
 void ZeroEQPlugin::_sceneUpdated()
 {
+    if (!_engine->isReady())
+        return;
+
     auto& materials = _remoteScene.getMaterials();
     auto& scene = _engine->getScene();
 
@@ -459,7 +462,6 @@ void ZeroEQPlugin::_sceneUpdated()
     }
 
     scene.commitMaterials(true);
-    _engine->getRenderer().commit();
 }
 
 void ZeroEQPlugin::_spikesUpdated()
@@ -486,6 +488,9 @@ void ZeroEQPlugin::_spikesUpdated()
 
 void ZeroEQPlugin::_materialLUTUpdated()
 {
+    if (!_engine->isReady())
+        return;
+
     auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
 
@@ -1172,9 +1177,7 @@ void ZeroEQPlugin::_settingsUpdated()
     _parametersManager.set("renderer", renderingParameters.getRendererAsString(
                                            static_cast<RendererType>(
                                                _remoteSettings.getShader())));
-    BRAYNS_INFO << renderingParameters.getRendererAsString(
-                       static_cast<RendererType>(_remoteSettings.getShader()))
-                << std::endl;
+
     switch (_remoteSettings.getShading())
     {
     case ::brayns::v1::Shading::diffuse:
@@ -1238,8 +1241,6 @@ void ZeroEQPlugin::_settingsUpdated()
     {
         _onChangeEngine();
     }
-    else
-        _engine->getRenderer().commit();
 
     _parametersManager.set("synchronous-mode",
                            (_remoteSettings.getSynchronousMode() ? "1" : "0"));
@@ -1290,7 +1291,7 @@ void ZeroEQPlugin::_frameUpdated()
 
     CADiffusionSimulationHandlerPtr handler =
         _engine->getScene().getCADiffusionSimulationHandler();
-    if (handler)
+    if (handler && _engine->isReady())
     {
         auto& scene = _engine->getScene();
         handler->setFrame(scene, _remoteFrame.getCurrent());
@@ -1298,8 +1299,6 @@ void ZeroEQPlugin::_frameUpdated()
         scene.serializeGeometry();
         scene.commit();
     }
-
-    _engine->commit();
 }
 
 bool ZeroEQPlugin::_requestViewport()
@@ -1314,7 +1313,6 @@ void ZeroEQPlugin::_viewportUpdated()
 {
     _parametersManager.getApplicationParameters().setWindowSize(
         Vector2ui{_remoteViewport.getSize()});
-    _engine->commit();
 }
 
 bool ZeroEQPlugin::_requestSimulationHistogram()
