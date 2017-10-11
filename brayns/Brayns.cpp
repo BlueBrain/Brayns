@@ -224,7 +224,7 @@ struct Brayns::Impl
 private:
     void _loadScene()
     {
-        Progress loadingProgress("Loading scene...",
+        Progress loadingProgress("Loading scene ...",
                                  LOADING_PROGRESS_DATA +
                                      3 * LOADING_PROGRESS_STEP,
                                  [this](const std::string& msg,
@@ -233,11 +233,11 @@ private:
                                      _engine->setLastProgress(progress);
                                  });
 
-        loadingProgress.setMessage("Unloading...");
+        loadingProgress.setMessage("Unloading ...");
         _engine->getScene().unload();
         loadingProgress += LOADING_PROGRESS_STEP;
 
-        loadingProgress.setMessage("Loading data...");
+        loadingProgress.setMessage("Loading data ...");
         _meshLoader.clear();
         Scene& scene = _engine->getScene();
         _loadData(loadingProgress);
@@ -253,11 +253,11 @@ private:
         scene.commitSimulationData();
         scene.buildEnvironment();
 
-        loadingProgress.setMessage("Building geometry...");
+        loadingProgress.setMessage("Building geometry ...");
         scene.buildGeometry();
         loadingProgress += LOADING_PROGRESS_STEP;
 
-        loadingProgress.setMessage("Building acceleration structure...");
+        loadingProgress.setMessage("Building acceleration structure ...");
         scene.commit();
         loadingProgress += LOADING_PROGRESS_STEP;
 
@@ -269,7 +269,7 @@ private:
 
         loadingProgress.setMessage("Done");
         _engine->setReady(true);
-        BRAYNS_INFO << "Now rendering..." << std::endl;
+        BRAYNS_INFO << "Now rendering ..." << std::endl;
     }
 
 #if (BRAYNS_USE_MAGICKPP)
