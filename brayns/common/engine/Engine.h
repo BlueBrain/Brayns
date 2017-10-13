@@ -190,7 +190,7 @@ public:
      */
     bool isReady() const { return _isReady; }
     /** @internal */
-    void setReady(const bool isReady) { _isReady = isReady; }
+    void setReady(const bool isReady_) { _isReady = isReady_; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
