@@ -96,7 +96,7 @@ bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
         const bool changed = _stream->getId() != _params.getIdString() ||
                              _stream->getHost() != _params.getHostString();
         if (changed)
-            _stream.reset();
+            _closeStream();
     }
 
     if (_previousHost != _params.getHostString())
@@ -107,15 +107,12 @@ bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
 
     const bool deflectEnabled = _params.getEnabled();
     if (_stream && _stream->isConnected() && !deflectEnabled)
-    {
-        BRAYNS_INFO << "Closing Deflect stream" << std::endl;
-        _stream.reset();
-    }
+        _closeStream();
 
     const bool observerOnly = engine->haveDeflectPixelOp();
     if (deflectEnabled && !_stream)
     {
-        if (_initializeDeflect(observerOnly))
+        if (_startStream(observerOnly))
         {
             const auto& windowSize =
                 engine->getSupportedFrameSize(appParams.getWindowSize());
@@ -140,7 +137,16 @@ bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
     return true;
 }
 
-bool DeflectPlugin::_initializeDeflect(const bool observerOnly)
+void DeflectPlugin::_closeStream()
+{
+    BRAYNS_INFO << "Closing Deflect stream" << std::endl;
+
+    _sendFuture.wait();
+    _sendFuture = make_ready_future(true);
+    _stream.reset();
+}
+
+bool DeflectPlugin::_startStream(const bool observerOnly)
 {
     try
     {
@@ -281,10 +287,9 @@ void DeflectPlugin::_handleDeflectEvents(Engine& engine,
             _params.setEnabled(false);
             _params.setHost("");
             _previousHost.clear();
-            _stream.reset();
-            _sendFuture = make_ready_future(true);
-            engine.setKeepRunning(false);
-            break;
+
+            _closeStream();
+            return;
         default:
             break;
         }

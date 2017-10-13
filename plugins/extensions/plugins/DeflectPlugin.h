@@ -71,7 +71,9 @@ private:
         bool closeApplication; // True if and EXIT event was received
     };
 
-    bool _initializeDeflect(bool observerOnly);
+    bool _startStream(bool observerOnly);
+    void _closeStream();
+
     void _sendDeflectFrame(Engine& engine);
     void _handleDeflectEvents(Engine& engine, KeyboardHandler& keyboardHandler,
                               AbstractManipulator& cameraManipulator);
