@@ -24,6 +24,10 @@
 
 #include <functional>
 
+#ifdef BRAYNS_USE_OPENMP
+#include <omp.h>
+#endif
+
 namespace brayns
 {
 /**
@@ -48,8 +52,11 @@ public:
     void updateProgress(const std::string& message, const size_t current,
                         const size_t expected)
     {
-        if (_progressUpdate)
-            _progressUpdate(message, float(current) / expected);
+#ifdef BRAYNS_USE_OPENMP
+        if (omp_get_thread_num() == 0)
+#endif
+            if (_progressUpdate)
+                _progressUpdate(message, float(current) / expected);
     }
 
 private:
