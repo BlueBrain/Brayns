@@ -429,6 +429,11 @@ bool ZeroEQPlugin::_requestScene()
         m.setGlossiness(material.getGlossiness());
         ms.push_back(m);
     }
+
+    const auto& boundsMin = scene.getWorldBounds().getMin();
+    const auto& boundsMax = scene.getWorldBounds().getMax();
+    _remoteScene.setBounds({{boundsMin.begin(), boundsMin.end()},
+                            {boundsMax.begin(), boundsMax.end()}});
     return true;
 }
 

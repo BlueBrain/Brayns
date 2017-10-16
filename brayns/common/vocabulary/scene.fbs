@@ -31,6 +31,12 @@ table Material {
     glossiness: float;
 }
 
+table Bounds {
+    min: [float:3];
+    max: [float:3];
+}
+
 table Scene {
     materials: [Material];
+    bounds: Bounds;
 }
