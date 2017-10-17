@@ -242,6 +242,12 @@ public:
     BRAYNS_API virtual void unload();
 
     /**
+        Loads geometry a binary cache file defined by the --load-cache-file
+       command line parameter
+    */
+    BRAYNS_API virtual void loadSceneFromCacheFile() = 0;
+
+    /**
         Saves geometry a binary cache file defined by the --save-cache-file
        command line parameter
     */

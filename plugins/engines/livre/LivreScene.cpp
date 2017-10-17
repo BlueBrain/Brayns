@@ -103,6 +103,10 @@ void LivreScene::commitSimulationData()
 {
 }
 
+void LivreScene::loadSceneFromCacheFile()
+{
+}
+
 void LivreScene::saveSceneToCacheFile()
 {
 }

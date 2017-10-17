@@ -57,6 +57,9 @@ public:
     void commitSimulationData() final;
 
     /** Unsupported by Livre. */
+    void loadSceneFromCacheFile() final;
+
+    /** Unsupported by Livre. */
     void saveSceneToCacheFile() final;
 
     /** @copydoc Scene::isVolumeSupported */

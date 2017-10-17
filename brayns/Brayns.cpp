@@ -248,13 +248,17 @@ private:
             scene.buildDefault();
         }
 
-        scene.buildMaterials();
-        scene.commitVolumeData();
-        scene.commitSimulationData();
         scene.buildEnvironment();
 
-        loadingProgress.setMessage("Building geometry ...");
-        scene.buildGeometry();
+        if (_parametersManager->getGeometryParameters()
+                .getLoadCacheFile()
+                .empty())
+        {
+            scene.buildMaterials();
+            loadingProgress.setMessage("Building geometry ...");
+            scene.buildGeometry();
+        }
+
         loadingProgress += LOADING_PROGRESS_STEP;
 
         loadingProgress.setMessage("Building acceleration structure ...");
@@ -443,6 +447,12 @@ private:
             transferFunctionLoader.loadFromFile(colorMapFilename, scene);
         }
         scene.commitTransferFunctionData();
+
+        if (!geometryParameters.getLoadCacheFile().empty())
+        {
+            scene.loadSceneFromCacheFile();
+            loadingProgress += tic;
+        }
 
         if (!geometryParameters.getPDBFile().empty())
         {

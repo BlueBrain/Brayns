@@ -79,6 +79,9 @@ public:
     /** @copydoc Scene::unload */
     void unload() final;
 
+    /** @copydoc Scene::loadSceneFromCacheFile */
+    void loadSceneFromCacheFile() final;
+
     /** @copydoc Scene::saveSceneToCacheFile */
     void saveSceneToCacheFile() final;
 

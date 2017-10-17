@@ -247,6 +247,10 @@ void OptiXScene::unload()
     _optixTextureSamplers.clear();
 }
 
+void OptiXScene::loadSceneFromCacheFile()
+{
+}
+
 void OptiXScene::commit()
 {
     if (_geometryGroup)

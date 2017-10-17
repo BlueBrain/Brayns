@@ -369,10 +369,11 @@ void OSPRayScene::_saveCacheFile()
     BRAYNS_INFO << "Scene successfully saved" << std::endl;
 }
 
-void OSPRayScene::_loadCacheFile()
+void OSPRayScene::loadSceneFromCacheFile()
 {
-    const std::string& filename =
-        _parametersManager.getGeometryParameters().getLoadCacheFile();
+    const auto& geomParams = _parametersManager.getGeometryParameters();
+
+    const std::string& filename = geomParams.getLoadCacheFile();
     BRAYNS_INFO << "Loading scene from binary file: " << filename << std::endl;
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.good())
@@ -403,6 +404,9 @@ void OSPRayScene::_loadCacheFile()
         BRAYNS_INFO << "Model for ts " << ts << " created" << std::endl;
         _models[ts] = ospNewModel();
     }
+
+    if (geomParams.getCircuitUseSimulationModel() && !_simulationModel)
+        _simulationModel = ospNewModel();
 
     size_t nbMaterials;
     file.read((char*)&nbMaterials, sizeof(size_t));
@@ -519,49 +523,33 @@ void OSPRayScene::_loadCacheFile()
         _serializeCones(materialId);
 
         // Vertices
-        _trianglesMeshes[materialId].getVertices().clear();
-        bufferSize = 0;
         file.read((char*)&bufferSize, sizeof(size_t));
-        for (size_t i = 0; i < bufferSize / sizeof(Vector3f); ++i)
-        {
-            Vector3f vertex;
-            file.read((char*)&vertex, sizeof(Vector3f));
-            _trianglesMeshes[materialId].getVertices().push_back(vertex);
-        }
+        _trianglesMeshes[materialId].getVertices().resize(bufferSize /
+                                                          sizeof(Vector3f));
+        file.read((char*)_trianglesMeshes[materialId].getVertices().data(),
+                  bufferSize);
 
         // Indices
-        _trianglesMeshes[materialId].getIndices().clear();
-        bufferSize = 0;
         file.read((char*)&bufferSize, sizeof(size_t));
-        for (size_t i = 0; i < bufferSize / sizeof(Vector3ui); ++i)
-        {
-            Vector3ui index;
-            file.read((char*)&index, sizeof(Vector3ui));
-            _trianglesMeshes[materialId].getIndices().push_back(index);
-        }
+        _trianglesMeshes[materialId].getIndices().resize(bufferSize /
+                                                         sizeof(Vector3ui));
+        file.read((char*)_trianglesMeshes[materialId].getIndices().data(),
+                  bufferSize);
 
         // Normals
-        _trianglesMeshes[materialId].getNormals().clear();
-        bufferSize = 0;
         file.read((char*)&bufferSize, sizeof(size_t));
-        for (size_t i = 0; i < bufferSize / sizeof(Vector3f); ++i)
-        {
-            Vector3f normal;
-            file.read((char*)&normal, sizeof(Vector3f));
-            _trianglesMeshes[materialId].getNormals().push_back(normal);
-        }
+        _trianglesMeshes[materialId].getNormals().resize(bufferSize /
+                                                         sizeof(Vector3f));
+        file.read((char*)_trianglesMeshes[materialId].getNormals().data(),
+                  bufferSize);
 
         // Texture coordinates
-        _trianglesMeshes[materialId].getTextureCoordinates().clear();
-        bufferSize = 0;
         file.read((char*)&bufferSize, sizeof(size_t));
-        for (size_t i = 0; i < bufferSize / sizeof(Vector2f); ++i)
-        {
-            Vector2f texCoord;
-            file.read((char*)&texCoord, sizeof(Vector2f));
-            _trianglesMeshes[materialId].getTextureCoordinates().push_back(
-                texCoord);
-        }
+        _trianglesMeshes[materialId].getTextureCoordinates().resize(
+            bufferSize / sizeof(Vector2f));
+        file.read(
+            (char*)_trianglesMeshes[materialId].getTextureCoordinates().data(),
+            bufferSize);
 
         _buildMeshOSPGeometry(materialId);
     }
@@ -571,7 +559,6 @@ void OSPRayScene::_loadCacheFile()
 
     BRAYNS_INFO << _bounds << std::endl;
     BRAYNS_INFO << "Scene successfully loaded" << std::endl;
-    file.close();
 }
 
 void OSPRayScene::_createModel(const uint32_t index)
@@ -862,7 +849,9 @@ void OSPRayScene::buildGeometry()
 
     commitMaterials();
 
-    if (_parametersManager.getGeometryParameters().getGenerateMultipleModels())
+    const auto& geomParams = _parametersManager.getGeometryParameters();
+
+    if (geomParams.getGenerateMultipleModels())
         // Initialize models according to timestamps
         for (auto& material : _materials)
         {
@@ -878,16 +867,12 @@ void OSPRayScene::buildGeometry()
         // If no timestamp is available, create a default model at timestamp 0
         _models[0] = ospNewModel();
 
-    if (_parametersManager.getGeometryParameters()
-            .getCircuitUseSimulationModel())
+    if (geomParams.getCircuitUseSimulationModel() && !_simulationModel)
         _simulationModel = ospNewModel();
 
     BRAYNS_INFO << "Models to process: " << _models.size() << std::endl;
 
-    uint64_t size = serializeGeometry();
-
-    if (!_parametersManager.getGeometryParameters().getLoadCacheFile().empty())
-        _loadCacheFile();
+    const size_t size = serializeGeometry();
 
     size_t totalNbSpheres = 0;
     size_t totalNbCylinders = 0;
@@ -921,7 +906,7 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "---------------------------------------------------"
                 << std::endl;
 
-    if (!_parametersManager.getGeometryParameters().getSaveCacheFile().empty())
+    if (!geomParams.getSaveCacheFile().empty())
         _saveCacheFile();
 }
 

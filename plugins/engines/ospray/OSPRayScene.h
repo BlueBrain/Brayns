@@ -73,6 +73,9 @@ public:
     /** @copydoc Scene::unload */
     void unload() final;
 
+    /** @copydoc Scene::loadSceneFromCacheFile */
+    void loadSceneFromCacheFile() final;
+
     /** @copydoc Scene::saveSceneToCacheFile */
     void saveSceneToCacheFile() final;
 
@@ -91,7 +94,6 @@ private:
     uint64_t _serializeCones(const size_t materialId);
     uint64_t _buildMeshOSPGeometry(const size_t materialId);
 
-    void _loadCacheFile();
     void _saveCacheFile();
 
     std::map<uint32_t, OSPModel> _models;
