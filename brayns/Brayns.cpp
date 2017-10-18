@@ -250,13 +250,15 @@ private:
 
         scene.buildEnvironment();
 
-        if (_parametersManager->getGeometryParameters()
-                .getLoadCacheFile()
-                .empty())
+        const auto& geomParams = _parametersManager->getGeometryParameters();
+        if (geomParams.getLoadCacheFile().empty())
         {
             scene.buildMaterials();
             loadingProgress.setMessage("Building geometry ...");
             scene.buildGeometry();
+
+            if (!geomParams.getSaveCacheFile().empty())
+                scene.saveToCacheFile();
         }
 
         loadingProgress += LOADING_PROGRESS_STEP;
@@ -450,7 +452,7 @@ private:
 
         if (!geometryParameters.getLoadCacheFile().empty())
         {
-            scene.loadSceneFromCacheFile();
+            scene.loadFromCacheFile();
             loadingProgress += tic;
         }
 
@@ -1182,7 +1184,7 @@ private:
     void _saveSceneToCacheFile()
     {
         auto& scene = _engine->getScene();
-        scene.saveSceneToCacheFile();
+        scene.saveToCacheFile();
     }
 
     void _resetCamera()

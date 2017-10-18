@@ -194,7 +194,7 @@ OSPModel OSPRayScene::modelImpl(const uint32_t index)
     return lastModel->second;
 }
 
-void OSPRayScene::_saveCacheFile()
+void OSPRayScene::saveToCacheFile()
 {
     const std::string& filename =
         _parametersManager.getGeometryParameters().getSaveCacheFile();
@@ -369,7 +369,7 @@ void OSPRayScene::_saveCacheFile()
     BRAYNS_INFO << "Scene successfully saved" << std::endl;
 }
 
-void OSPRayScene::loadSceneFromCacheFile()
+void OSPRayScene::loadFromCacheFile()
 {
     const auto& geomParams = _parametersManager.getGeometryParameters();
 
@@ -905,9 +905,6 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Total    : " << size << " bytes" << std::endl;
     BRAYNS_INFO << "---------------------------------------------------"
                 << std::endl;
-
-    if (!geomParams.getSaveCacheFile().empty())
-        _saveCacheFile();
 }
 
 uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
@@ -1311,11 +1308,6 @@ OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)
     _ospTextures[textureName] = ospTexture;
 
     return ospTexture;
-}
-
-void OSPRayScene::saveSceneToCacheFile()
-{
-    _saveCacheFile();
 }
 
 bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const

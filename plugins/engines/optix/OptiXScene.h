@@ -79,11 +79,11 @@ public:
     /** @copydoc Scene::unload */
     void unload() final;
 
-    /** @copydoc Scene::loadSceneFromCacheFile */
-    void loadSceneFromCacheFile() final;
+    /** @copydoc Scene::loadFromCacheFile */
+    void loadFromCacheFile() final;
 
-    /** @copydoc Scene::saveSceneToCacheFile */
-    void saveSceneToCacheFile() final;
+    /** @copydoc Scene::saveToCacheFile */
+    void saveToCacheFile() final;
 
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
