@@ -247,6 +247,10 @@ void OptiXScene::unload()
     _optixTextureSamplers.clear();
 }
 
+void OptiXScene::loadFromCacheFile()
+{
+}
+
 void OptiXScene::commit()
 {
     if (_geometryGroup)
@@ -1030,10 +1034,9 @@ uint64_t OptiXScene::_getBvhSize(const uint64_t nbElements) const
     return 64 * 1.3f * nbElements;
 }
 
-void OptiXScene::saveSceneToCacheFile()
+void OptiXScene::saveToCacheFile()
 {
-    BRAYNS_ERROR << "OptiXScene::saveSceneToCacheFile not implemented"
-                 << std::endl;
+    BRAYNS_ERROR << "OptiXScene::saveToCacheFile not implemented" << std::endl;
 }
 
 bool OptiXScene::isVolumeSupported(const std::string& volumeFile) const

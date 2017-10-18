@@ -73,8 +73,11 @@ public:
     /** @copydoc Scene::unload */
     void unload() final;
 
-    /** @copydoc Scene::saveSceneToCacheFile */
-    void saveSceneToCacheFile() final;
+    /** @copydoc Scene::loadFromCacheFile */
+    void loadFromCacheFile() final;
+
+    /** @copydoc Scene::saveToCacheFile */
+    void saveToCacheFile() final;
 
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
@@ -90,9 +93,6 @@ private:
     uint64_t _serializeCylinders(const size_t materialId);
     uint64_t _serializeCones(const size_t materialId);
     uint64_t _buildMeshOSPGeometry(const size_t materialId);
-
-    void _loadCacheFile();
-    void _saveCacheFile();
 
     std::map<uint32_t, OSPModel> _models;
     OSPModel _simulationModel;

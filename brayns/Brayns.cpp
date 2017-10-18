@@ -248,13 +248,19 @@ private:
             scene.buildDefault();
         }
 
-        scene.buildMaterials();
-        scene.commitVolumeData();
-        scene.commitSimulationData();
         scene.buildEnvironment();
 
-        loadingProgress.setMessage("Building geometry ...");
-        scene.buildGeometry();
+        const auto& geomParams = _parametersManager->getGeometryParameters();
+        if (geomParams.getLoadCacheFile().empty())
+        {
+            scene.buildMaterials();
+            loadingProgress.setMessage("Building geometry ...");
+            scene.buildGeometry();
+
+            if (!geomParams.getSaveCacheFile().empty())
+                scene.saveToCacheFile();
+        }
+
         loadingProgress += LOADING_PROGRESS_STEP;
 
         loadingProgress.setMessage("Building acceleration structure ...");
@@ -443,6 +449,12 @@ private:
             transferFunctionLoader.loadFromFile(colorMapFilename, scene);
         }
         scene.commitTransferFunctionData();
+
+        if (!geometryParameters.getLoadCacheFile().empty())
+        {
+            scene.loadFromCacheFile();
+            loadingProgress += tic;
+        }
 
         if (!geometryParameters.getPDBFile().empty())
         {
@@ -1172,7 +1184,7 @@ private:
     void _saveSceneToCacheFile()
     {
         auto& scene = _engine->getScene();
-        scene.saveSceneToCacheFile();
+        scene.saveToCacheFile();
     }
 
     void _resetCamera()
