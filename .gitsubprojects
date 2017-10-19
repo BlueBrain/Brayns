@@ -2,8 +2,9 @@
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git f4b3706)
 
 if(BRAYNS_NETWORKING_ENABLED)
-  git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git f1245ae)
-  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git d8218c5)
+  git_subproject(Servus https://github.com/HBPVIS/Servus.git 2e9a23a)
+  git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 6d403bc)
+  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 1e66ee3)
 endif()
 
 if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
@@ -12,14 +13,13 @@ endif()
 
 # Streaming to display walls
 if(BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 6111f35)
+  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 1a1fb97)
 endif()
 
 # Data access
 if(BRAYNS_BRION_ENABLED)
-  git_subproject(Servus https://github.com/HBPVIS/Servus.git eee5765)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git bea8f83)
-  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 1a96478)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git af46c14)
+  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 41ac72b)
 endif()
 
 # Livre rendering engine
