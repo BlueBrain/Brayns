@@ -43,7 +43,7 @@ public:
      */
     EngineFactory(int argc, const char** argv,
                   ParametersManager& parametersManager);
-    ~EngineFactory() {}
+
     /**
      * @brief Gets the instance of the engine corresponding the given name. If
      *        the instance does not exist, it is created. If the name is

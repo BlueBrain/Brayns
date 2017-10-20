@@ -1321,7 +1321,7 @@ bool RocketsPlugin::_requestClipPlanes()
 
 void RocketsPlugin::_streamParamsUpdated()
 {
-    auto& params = _engine->getParametersManager().getApplicationParameters();
+    auto& params = _parametersManager.getApplicationParameters();
     params.setStreamingEnabled(_streamParams.getEnabled());
     params.setStreamCompression(_streamParams.getCompression());
     params.setStreamQuality(_streamParams.getQuality());
@@ -1332,7 +1332,7 @@ void RocketsPlugin::_streamParamsUpdated()
 
 bool RocketsPlugin::_requestStreamParams()
 {
-    auto& params = _engine->getParametersManager().getApplicationParameters();
+    auto& params = _parametersManager.getApplicationParameters();
     _streamParams.setEnabled(params.getStreamingEnabled());
     _streamParams.setCompression(params.getStreamCompression());
     _streamParams.setQuality(params.getStreamQuality());

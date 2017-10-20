@@ -86,11 +86,8 @@ bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
         _closeStream();
 
     const bool observerOnly = engine->haveDeflectPixelOp();
-    if (deflectEnabled && !_stream)
-    {
-        if (_startStream(observerOnly))
-            _sendSizeHints(*engine);
-    }
+    if (deflectEnabled && !_stream && _startStream(observerOnly))
+        _sendSizeHints(*engine);
 
     if (deflectEnabled && _stream && _stream->isConnected())
     {
