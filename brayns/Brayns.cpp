@@ -379,9 +379,10 @@ private:
         Camera& camera = _engine->getCamera();
         camera.commit();
 
+        Scene& scene = _engine->getScene();
+
         if (_parametersManager->getRenderingParameters().getHeadLight())
         {
-            Scene& scene = _engine->getScene();
             LightPtr sunLight = scene.getLight(0);
             DirectionalLight* sun =
                 dynamic_cast<DirectionalLight*>(sunLight.get());
@@ -397,8 +398,11 @@ private:
         _engine->setActiveRenderer(
             _parametersManager->getRenderingParameters().getRenderer());
 
-        if (_parametersManager->isAnyModified() || camera.getModified())
+        if (_parametersManager->isAnyModified() || camera.getModified() ||
+            scene.getModified())
+        {
             _engine->getFrameBuffer().clear();
+        }
 
         _engine->render();
 
@@ -406,6 +410,7 @@ private:
 
         _parametersManager->resetModified();
         camera.resetModified();
+        scene.resetModified();
 
         return true;
     }

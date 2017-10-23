@@ -54,9 +54,19 @@ void Scene::reset()
     _renderers.clear();
 }
 
+bool Scene::getModified() const
+{
+    return _modified;
+}
+
+void Scene::resetModified()
+{
+    _modified = false;
+}
+
 void Scene::unload()
 {
-    setDirty();
+    _markGeometryDirty();
     _spheres.clear();
     _cylinders.clear();
     _cones.clear();
@@ -69,12 +79,13 @@ void Scene::unload()
     _volumeHandler.reset();
 }
 
-void Scene::setDirty()
+void Scene::_markGeometryDirty()
 {
     _spheresDirty = true;
     _cylindersDirty = true;
     _conesDirty = true;
     _trianglesMeshesDirty = true;
+    _modified = true;
 }
 
 void Scene::buildMaterials()
@@ -204,7 +215,7 @@ void Scene::buildDefault()
 {
     BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
 
-    setDirty();
+    _markGeometryDirty();
 
     const Vector3f WHITE = {1.f, 1.f, 1.f};
 
