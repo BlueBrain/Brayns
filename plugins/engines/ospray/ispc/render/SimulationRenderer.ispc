@@ -34,6 +34,7 @@ struct SimulationRenderer
     uniform float* uniform simulationData;
     uint64 simulationDataSize;
     float threshold;
+    float detectionDistance;
 };
 
 /**
@@ -101,7 +102,7 @@ inline void getValueFromSimulationModel(
     colorRay.dir = getRandomVector(sample, normal, self->abstract.randomNumber);
     colorRay.t0 = 0.f;
     colorRay.time = infinity;
-    colorRay.t = infinity;
+    colorRay.t = self->detectionDistance;
     colorRay.primID = -1;
     colorRay.geomID = -1;
     colorRay.instID = -1;
@@ -581,7 +582,8 @@ export void SimulationRenderer_set(
     const uniform uint64& simulationDataSize, uniform vec4f* uniform colormap,
     uniform vec3f* uniform emissionIntensitiesMap,
     const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
-    const uniform float& colorMapRange, const uniform float& threshold)
+    const uniform float& colorMapRange, const uniform float& threshold,
+    const uniform float& detectionDistance)
 {
     uniform SimulationRenderer* uniform self =
         (uniform SimulationRenderer * uniform)_self;
@@ -626,4 +628,5 @@ export void SimulationRenderer_set(
     self->simulationDataSize = simulationDataSize;
 
     self->threshold = threshold;
+    self->detectionDistance = detectionDistance;
 }
