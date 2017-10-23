@@ -1132,6 +1132,7 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
         ospSetData(osprayRenderer->impl(), "materials", _ospMaterialData);
         ospCommit(osprayRenderer->impl());
     }
+    _modified = true;
 }
 
 void OSPRayScene::commitTransferFunctionData()
@@ -1178,7 +1179,10 @@ void OSPRayScene::commitTransferFunctionData()
         ospSet1f(osprayRenderer->impl(), "transferFunctionRange",
                  _transferFunction.getValuesRange().y() -
                      _transferFunction.getValuesRange().x());
+
+        ospCommit(osprayRenderer->impl());
     }
+    _modified = true;
 }
 
 void OSPRayScene::commitVolumeData()
@@ -1226,6 +1230,7 @@ void OSPRayScene::commitVolumeData()
             ospSet1f(osprayRenderer->impl(), "volumeEpsilon", epsilon);
         }
     }
+    _modified = true;
 }
 
 void OSPRayScene::commitSimulationData()
@@ -1263,6 +1268,7 @@ void OSPRayScene::commitSimulationData()
                  _simulationHandler->getFrameSize());
         ospCommit(osprayRenderer->impl());
     }
+    _modified = true;
 }
 
 OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)

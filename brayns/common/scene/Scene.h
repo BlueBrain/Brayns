@@ -266,35 +266,6 @@ public:
      */
     BRAYNS_API void setSpheresDirty(const bool value) { _spheresDirty = value; }
     /**
-     * @brief Sets cylinders as dirty, meaning that they need to be serialized
-     *        and sent to the rendering engine
-     */
-    BRAYNS_API void setCylindersDirty(const bool value)
-    {
-        _cylindersDirty = value;
-    }
-
-    /**
-     * @brief Sets cones as dirty, meaning that they need to be serialized
-     *        and sent to the rendering engine
-     */
-    BRAYNS_API void setConesDirty(const bool value) { _conesDirty = value; }
-    /**
-     * @brief Sets meshes as dirty, meaning that they need to be serialized
-     *        and sent to the rendering engine
-     */
-    BRAYNS_API void setTrianglesMeshesDirty(const bool value)
-    {
-        _trianglesMeshesDirty = value;
-    }
-
-    /**
-     * @brief Sets all geometries as dirty, meaning that they need to be
-     *        serialized and sent to the rendering engine
-     */
-    BRAYNS_API void setDirty();
-
-    /**
      * @return true if unload() can be performed. Some implementations might not
      *         support it, hence deletion of the scene or the entire engine is
      * required.
@@ -305,6 +276,14 @@ public:
      *           scene<->renderer
      */
     virtual void reset();
+
+    /**
+       @return true if any modification happend after the last resetModified()
+    */
+    BRAYNS_API bool getModified() const;
+
+    /** Reset the modified flag */
+    BRAYNS_API void resetModified();
 
 protected:
     // Parameters
@@ -334,6 +313,11 @@ protected:
 
     // Scene
     Boxf _bounds;
+
+    bool _modified = false;
+
+private:
+    void _markGeometryDirty();
 };
 }
 #endif // SCENE_H
