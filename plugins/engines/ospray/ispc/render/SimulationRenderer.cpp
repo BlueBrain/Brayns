@@ -54,6 +54,7 @@ void SimulationRenderer::commit()
     _transferFunctionMinValue = getParam1f("transferFunctionMinValue", 0.f);
     _transferFunctionRange = getParam1f("transferFunctionRange", 0.f);
     _threshold = getParam1f("threshold", _transferFunctionMinValue);
+    _detectionDistance = getParam1f("detectionDistance", 15.f);
 
     ispc::SimulationRenderer_set(
         getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
@@ -73,7 +74,7 @@ void SimulationRenderer::commit()
             ? (ispc::vec3f*)_transferFunctionEmissionData->data
             : NULL,
         _transferFunctionSize, _transferFunctionMinValue,
-        _transferFunctionRange, _threshold);
+        _transferFunctionRange, _threshold, _detectionDistance);
 }
 
 SimulationRenderer::SimulationRenderer()
