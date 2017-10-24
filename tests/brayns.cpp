@@ -41,8 +41,10 @@ BOOST_AUTO_TEST_CASE(simple_construction)
 BOOST_AUTO_TEST_CASE(defaults)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
-    brayns::Brayns brayns(testSuite.argc,
-                          const_cast<const char**>(testSuite.argv));
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app, "--synchronous-mode", "on"};
+    const int argc = sizeof(argv) / sizeof(char*);
+    brayns::Brayns brayns(argc, argv);
 
     auto& camera = brayns.getEngine().getCamera();
     BOOST_CHECK(camera.getType() == brayns::CameraType::perspective);
