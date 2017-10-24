@@ -107,6 +107,7 @@ struct Brayns::Impl
         _extensionPluginFactory.reset(
             new ExtensionPluginFactory(*_parametersManager));
 #endif
+        _dataLoadingFuture.wait();
     }
 
     void createEngine()
