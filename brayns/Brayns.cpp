@@ -98,7 +98,7 @@ struct Brayns::Impl
         createEngine();
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        // after createEngine() to execue in parallel to scene loading
+        // after createEngine() to execute in parallel to scene loading
         _extensionPluginFactory.reset(
             new ExtensionPluginFactory(_parametersManager));
 #endif
@@ -109,6 +109,8 @@ struct Brayns::Impl
 
     void createEngine()
     {
+        _engine.reset(); // Free resources before creating a new engine
+
         const auto& engineName =
             _parametersManager.getRenderingParameters().getEngine();
         _engine = _engineFactory.create(engineName);
