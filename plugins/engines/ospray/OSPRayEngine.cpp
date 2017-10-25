@@ -39,7 +39,16 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     try
     {
-        ospInit(&argc, argv);
+        // Ospray messes up with argv, need to pass a copy
+        strings arguments;
+        for (int i = 0; i < argc; ++i)
+            arguments.push_back(argv[i]);
+
+        std::vector<const char*> newArgv;
+        for (const auto& arg : arguments)
+            newArgv.push_back(arg.c_str());
+
+        ospInit(&argc, newArgv.data());
     }
     catch (const std::exception& e)
     {
