@@ -29,7 +29,8 @@ namespace brayns
 class LivreEngine : public Engine
 {
 public:
-    LivreEngine(int argc, char** argv, ParametersManager& parametersManager);
+    LivreEngine(int argc, const char** argv,
+                ParametersManager& parametersManager);
 
     ~LivreEngine();
 

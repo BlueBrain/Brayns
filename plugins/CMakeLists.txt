@@ -19,7 +19,6 @@ set(BRAYNSPLUGINS_PUBLIC_HEADERS
 if(BRAYNS_DEFLECT_ENABLED OR BRAYNS_NETWORKING_ENABLED)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/ExtensionPluginFactory.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/ExtensionPluginFactory.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Lexis)
 endif()
 
 if(BRAYNS_DEFLECT_ENABLED)
@@ -31,8 +30,8 @@ endif()
 if(BRAYNS_NETWORKING_ENABLED)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/RocketsPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/RocketsPlugin.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC Rockets BraynsZeroBufRender
-    ${LibJpegTurbo_LIBRARIES})
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC Lexis Rockets
+    BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
 endif()
 
 if(BRAYNS_OSPRAY_ENABLED)

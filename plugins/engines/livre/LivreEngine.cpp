@@ -38,7 +38,7 @@
 
 namespace brayns
 {
-LivreEngine::LivreEngine(int argc, char** argv,
+LivreEngine::LivreEngine(int argc, const char** argv,
                          ParametersManager& parametersManager)
     : Engine(parametersManager)
 {

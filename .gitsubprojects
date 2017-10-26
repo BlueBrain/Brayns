@@ -2,12 +2,9 @@
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git f4b3706)
 
 if(BRAYNS_NETWORKING_ENABLED)
+  git_subproject(Lexis https://github.com/HBPVis/Lexis.git f84436c)
   git_subproject(Rockets ssh://bbpcode.epfl.ch/viz/Rockets master)
   git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git f1245ae)
-endif()
-
-if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Lexis https://github.com/HBPVis/Lexis.git a4e458a)
 endif()
 
 # Streaming to display walls
@@ -17,12 +14,12 @@ endif()
 
 # Data access
 if(BRAYNS_BRION_ENABLED)
-  git_subproject(Servus https://github.com/HBPVIS/Servus.git eee5765)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git bea8f83)
+  git_subproject(Servus https://github.com/HBPVIS/Servus.git 2e9a23a)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git 5396f1e)
   git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 1a96478)
 endif()
 
 # Livre rendering engine
 if(BRAYNS_LIVRE_ENABLED)
-  git_subproject(Livre https://github.com/BlueBrain/Livre.git 379c6fb)
+  git_subproject(Livre https://github.com/BlueBrain/Livre.git 1b341a6)
 endif()

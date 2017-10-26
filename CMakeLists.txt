@@ -50,7 +50,7 @@ endif()
 
 # Streaming to display walls
 common_find_package(Deflect)
-if(TARGET Lexis AND TARGET Deflect)
+if(TARGET Deflect)
   option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
 else()
   unset(BRAYNS_DEFLECT_ENABLED)
