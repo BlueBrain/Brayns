@@ -27,7 +27,7 @@
 namespace
 {
 const std::string DEFAULT_ENGINE = "ospray";
-const std::string DEFAULT_RENDERER = "exobj";
+const std::string DEFAULT_RENDERER = "basic";
 
 const std::string PARAM_ENGINE = "engine";
 const std::string PARAM_MODULE = "module";
@@ -54,7 +54,7 @@ const std::string RENDERERS[6] = {"basic",           "proximity",
                                   "simulation",      "particle",
                                   "geometrynormals", "shadingnormals"};
 const std::string RENDERER_NAMES[6] = {
-    "exobj",      "proximityrenderer", "simulationrenderer", "particlerenderer",
+    "basic",      "proximityrenderer", "simulationrenderer", "particlerenderer",
     "raycast_Ng", "raycast_Ns"};
 
 const std::string CAMERA_TYPES[5] = {"perspective", "stereo", "orthographic",
