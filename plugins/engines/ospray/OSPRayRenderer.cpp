@@ -32,7 +32,7 @@
 // sure that the hbpKernel library is loaded.
 #include <plugins/engines/ospray/ispc/render/BasicRenderer.h>
 #include <plugins/engines/ospray/ispc/render/ProximityRenderer.h>
-brayns::BasicRenderer extendedObjRenderer;
+brayns::BasicRenderer basicRenderer;
 brayns::ProximityRenderer proximityRenderer;
 #endif
 
