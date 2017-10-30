@@ -35,13 +35,12 @@
 
 using namespace optix;
 
-#define SPHERE_SIZE 6
-
 rtBuffer<float> spheres;
 
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, ); 
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, ); 
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
+rtDeclareVariable(unsigned int, sphere_size, ,);
 
 // Global variables
 rtDeclareVariable(float, timestamp, , );
@@ -50,7 +49,7 @@ template<bool use_robust_method>
 static __device__
 void intersect_sphere( int primIdx )
 {
-    const int idx = primIdx * SPHERE_SIZE;
+    const int idx = primIdx * sphere_size;
     const float ts = spheres[ idx + 4 ];
     if( ts >= timestamp )
         return;
@@ -124,7 +123,7 @@ RT_PROGRAM void robust_intersect( int primIdx )
 
 RT_PROGRAM void bounds( int primIdx, float result[6] )
 {
-    const int idx = primIdx * SPHERE_SIZE;
+    const int idx = primIdx * sphere_size;
     const float3 cen = { spheres[ idx ], spheres[ idx + 1 ], spheres[ idx + 2 ] };
     const float3 rad = make_float3( spheres[ idx + 3 ] );
 

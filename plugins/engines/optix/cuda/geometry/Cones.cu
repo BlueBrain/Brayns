@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  * Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
@@ -28,8 +28,7 @@ using namespace optix;
 
 // Global variables
 rtDeclareVariable(float, timestamp, , );
-
-#define CONES_SIZE 10
+rtDeclareVariable(unsigned int, cone_size, ,);
 
 rtBuffer<float> cones;
 
@@ -42,7 +41,7 @@ template<bool use_robust_method>
 static __device__
 void intersect_cone( int primIdx )
 {
-    const int idx = primIdx * CONES_SIZE;
+    const int idx = primIdx * cone_size;
     const float ts = cones[ idx + 8 ];
     if( ts >= timestamp )
         return;
@@ -191,7 +190,7 @@ RT_PROGRAM void robust_intersect( int primIdx )
 
 RT_PROGRAM void bounds( int primIdx, float result[6] )
 {
-    const int idx = primIdx * CONES_SIZE;
+    const int idx = primIdx * cone_size;
     const float3 v0 = { cones[ idx ], cones[ idx + 1 ], cones[ idx + 2 ] };
     const float3 v1 = { cones[ idx + 3 ], cones[ idx + 4 ], cones[ idx + 5 ] };
     const float radius = max( cones[ idx + 6 ], cones[ idx + 7 ] );
