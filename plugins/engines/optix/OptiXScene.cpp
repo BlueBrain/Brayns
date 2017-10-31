@@ -162,8 +162,6 @@ void OptiXScene::reset()
 
 void OptiXScene::unload()
 {
-    Scene::unload();
-
     // Geometry
     for (auto& i : _geometryInstances)
         i->destroy();
@@ -238,6 +236,11 @@ void OptiXScene::unload()
         _materialsBuffer->destroy();
     _materialsBuffer = nullptr;
 
+    // Materials
+    for (auto& material : _optixMaterials)
+        material->destroy();
+    _optixMaterials.clear();
+
     // Textures
     for (auto& i : _optixTextures)
         i.second->destroy();
@@ -245,6 +248,8 @@ void OptiXScene::unload()
     for (auto& i : _optixTextureSamplers)
         i.second->destroy();
     _optixTextureSamplers.clear();
+
+    Scene::unload();
 }
 
 void OptiXScene::loadFromCacheFile()
@@ -296,6 +301,16 @@ void OptiXScene::buildGeometry()
     BRAYNS_INFO << "Total GPU : " << totalGPUMemory << " bytes ("
                 << totalGPUMemory / 1048576 << " MB)" << std::endl;
     BRAYNS_INFO << "----------------------------------------" << std::endl;
+
+    // Initialize Volume data
+    _volumeBuffer =
+        _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE, 0);
+    _context["volumeData"]->setBuffer(_volumeBuffer);
+    _context["volumeDimensions"]->setUint(0, 0, 0);
+    _context["volumeScale"]->setFloat(0.f, 0.f, 0.f);
+    _context["volumePosition"]->setFloat(0.f, 0.f, 0.f);
+    _context["volumeEpsilon"]->setFloat(0.f);
+    _context["volumeDiag"]->setFloat(0.f);
 
     // Geometry hierarchy
     commit();
@@ -358,6 +373,7 @@ void OptiXScene::commitLights()
 uint64_t OptiXScene::_serializeSpheres()
 {
     // Load geometry to GPU
+    _context["sphere_size"]->setUint(Sphere::getSerializationSize());
     size_t totalNbSpheres = 0;
     for (auto& material : _materials)
     {
@@ -412,6 +428,7 @@ uint64_t OptiXScene::_serializeSpheres()
 
 uint64_t OptiXScene::_serializeCylinders()
 {
+    _context["cylinder_size"]->setUint(Cylinder::getSerializationSize());
     size_t totalNbCylinders = 0;
     for (auto& material : _materials)
     {
@@ -467,7 +484,7 @@ uint64_t OptiXScene::_serializeCylinders()
 
 uint64_t OptiXScene::_serializeCones()
 {
-    // Load geometry to GPU
+    _context["cone_size"]->setUint(Cone::getSerializationSize());
     size_t totalNbCones = 0;
     for (auto& material : _materials)
     {
@@ -871,7 +888,7 @@ bool OptiXScene::_createTexture2D(const std::string& textureName)
 
 void OptiXScene::commitSimulationData()
 {
-    BRAYNS_ERROR << "OptiXScene::commitSimulationData not implemented"
+    BRAYNS_DEBUG << "OptiXScene::commitSimulationData not implemented"
                  << std::endl;
 }
 
@@ -1036,7 +1053,7 @@ uint64_t OptiXScene::_getBvhSize(const uint64_t nbElements) const
 
 void OptiXScene::saveToCacheFile()
 {
-    BRAYNS_ERROR << "OptiXScene::saveToCacheFile not implemented" << std::endl;
+    BRAYNS_DEBUG << "OptiXScene::saveToCacheFile not implemented" << std::endl;
 }
 
 bool OptiXScene::isVolumeSupported(const std::string& volumeFile) const
