@@ -1,10 +1,14 @@
 # Docker container for running Brayns as a service
 # Check https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user for best practices.
-FROM ubuntu:xenial
+
+# This Dockerfile leverages multi-stage builds, available since Docker 17.05
+# See: https://docs.docker.com/engine/userguide/eng-image/multistage-build/#use-multi-stage-builds
+
+# Image where Brayns is built
+FROM ubuntu:xenial as builder
+LABEL maintainer="bbp-svc-viz@groupes.epfl.ch"
 
 ENV DIST_PATH /app/dist
-ENV BUILD_TOOLS build-essential cmake ninja-build git
-
 
 # Get ISPC
 # https://ispc.github.io/downloads.html
@@ -17,14 +21,10 @@ RUN mkdir -p ${ISPC_PATH} \
  && apt-get -y install wget \
  && wget http://netix.dl.sourceforge.net/project/ispcmirror/v${ISPC_VERSION}/${ISPC_DIR}.tar.gz \
  && tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1 \
- && rm $ISPC_DIR.tar.gz \
- && apt-get -y remove wget \
- && apt-get -y autoremove \
- && apt-get clean
+ && rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
 
 # Add ispc bin to the PATH
 ENV PATH $PATH:${ISPC_PATH}
-
 
 # Install Embree
 # https://github.com/embree/embree
@@ -32,27 +32,22 @@ ENV EMBREE_VERSION 2.17.0
 ENV EMBREE_SRC /app/embree
 
 RUN mkdir -p ${EMBREE_SRC} \
- && apt-get update \
- && apt-get -y install ${BUILD_TOOLS} \
- && apt-get -y install freeglut3-dev \
+ && apt-get -y install \
+    build-essential \
+    cmake \
+    freeglut3-dev \
+    git \
     libtbb-dev \
     libxi-dev \
     libxmu-dev \
+    ninja-build \
  && git clone https://github.com/embree/embree.git ${EMBREE_SRC} \
  && cd ${EMBREE_SRC} \
  && git checkout v${EMBREE_VERSION} \
  && mkdir -p build \
  && cd build \
  && cmake .. -GNinja -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
- && ninja install \
- && cd /app \
- && rm -rf ${EMBREE_SRC} \
- && apt-get -y remove ${BUILD_TOOLS} \
- && apt-get -y remove freeglut3-dev libtbb-dev libxi-dev libxmu-dev \
- && apt-get -y autoremove \
- && apt-get clean
-
-
+ && ninja install
 
 # Install OSPray
 # https://github.com/ospray/OSPRay
@@ -61,8 +56,8 @@ ENV OSPRAY_SRC /app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
  && apt-get update \
- && apt-get -y install ${BUILD_TOOLS} \
- && apt-get -y install freeglut3-dev \
+ && apt-get -y install \
+    freeglut3-dev \
     libglu1-mesa-dev \
     libtbb-dev \
     libxi-dev \
@@ -74,14 +69,7 @@ RUN mkdir -p ${OSPRAY_SRC} \
  && mkdir -p build \
  && cd build \
  && cmake .. -GNinja -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
- && ninja install \
- && cd /app \
- && rm -rf ${OSPRAY_SRC} \
- && apt-get -y remove ${BUILD_TOOLS} \
- && apt-get -y remove freeglut3-dev libglu1-mesa-dev libtbb-dev libxi-dev libxmu-dev xorg-dev \
- && apt-get -y autoremove \
- && apt-get clean
-
+ && ninja install
 
 # Set working dir and copy Brayns assets
 ENV BRAYNS_SRC /app/brayns
@@ -93,8 +81,6 @@ ADD . ${BRAYNS_SRC}
 # https://github.com/BlueBrain/Brayns
 RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && cd ${BRAYNS_SRC} \
- && apt-get update \
- && apt-get -y install ${BUILD_TOOLS} \
  && apt-get -y install \
     freeglut3-dev \
     libassimp-dev \
@@ -123,17 +109,50 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCLONE_SUBPROJECTS=ON \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
- && ninja install \
- && cd /app \
- && rm -rf ${BRAYNS_SRC}/build \
- && apt-get -y remove ${BUILD_TOOLS} \
- && apt-get -y purge *-dev python-pyparsing \
- && apt-get clean
+ && ninja install
+
+# Final image, containing only Brayns and libraries required to run it
+FROM ubuntu:xenial
+RUN apt-get update \
+ && apt-get install -y \
+    freeglut3 \
+    libassimp3v5 \
+    libboost-atomic1.58.0 \
+    libboost-chrono1.58.0 \
+    libboost-date-time1.58.0 \
+    libboost-filesystem1.58.0 \
+    libboost-program-options1.58.0 \
+    libboost-regex1.58.0 \
+    libboost-serialization1.58.0 \
+    libboost-system1.58.0 \
+    libboost-thread1.58.0 \
+    libglew1.13 \
+    libgomp1 \
+    libhdf5-10 \
+    libhdf5-cpp-11 \
+    libhdf5-cpp-11 \
+    libhwloc5 \
+    libmagick++-6.q16-5v5 \
+    libmagickwand-6.q16-2 \
+    libqt5concurrent5 \
+    libqt5network5 \
+    libtbb2 \
+    libturbojpeg \
+    libxmu6 \
+    libzmq5 \
+ && rm -rf /var/lib/apt/lists/*
+
+# The COPY command below will:
+# 1. create a container based on the `builder` image (but do not start it)
+#    Equivalent to the `docker create` command
+# 2. create a new image layer containing the
+#    /app/dist directory of this new container
+#    Equivalent to the `docker copy` command.
+COPY --from=builder /app/dist /app/dist
 
 # Add binaries from dist to the PATH
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib
-ENV PATH $PATH:${DIST_PATH}/bin
-
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/app/dist/lib
+ENV PATH /app/dist/bin:$PATH
 
 # Expose a port from the container
 # For more ports, use the `--expose` flag when running the container,
