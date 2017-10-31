@@ -68,7 +68,7 @@ public:
                                const std::string& filename);
     BRAYNS_API void lock() { _locked = true; }
     BRAYNS_API void unlock() { _locked = false; }
-    BRAYNS_API bool locked() { return _locked; }
+    BRAYNS_API bool locked() const { return _locked; }
 private:
     Vector3f _color;
     Vector3f _specularColor;
