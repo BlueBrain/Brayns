@@ -996,7 +996,7 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
 void OSPRayScene::commitLights()
 {
     size_t lightCount = 0;
-    for (auto light : _lights)
+    for (const auto& light : _lights)
     {
         DirectionalLight* directionalLight =
             dynamic_cast<DirectionalLight*>(light.get());
