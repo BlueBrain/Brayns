@@ -66,7 +66,9 @@ public:
     BRAYNS_API TextureTypes& getTextures() { return _textures; }
     BRAYNS_API void setTexture(const TextureType& type,
                                const std::string& filename);
-
+    BRAYNS_API void lock() { _locked = true; }
+    BRAYNS_API void unlock() { _locked = false; }
+    BRAYNS_API bool locked() { return _locked; }
 private:
     Vector3f _color;
     Vector3f _specularColor;
@@ -77,6 +79,7 @@ private:
     float _emission;
     float _glossiness;
     TextureTypes _textures;
+    bool _locked;
 };
 }
 #endif // MATERIAL_H

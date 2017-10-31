@@ -259,21 +259,26 @@ inline vec3f SimulationRenderer_shadeRay(
                     localLightEmission += mat->a;
 
                     // Glossiness
-                    localNormal = normalize(
-                        localNormal +
-                        mat->g * getRandomVector(sample, localNormal,
-                                                 self->abstract.randomNumber));
+                    if (mat->glossiness > 0.f)
+                        localNormal = normalize(
+                            localNormal +
+                            mat->glossiness *
+                                getRandomVector(sample, localNormal,
+                                                self->abstract.randomNumber));
                     // Refraction index
                     localRefraction = mat->refraction;
 
                     // Opacity
-                    localOpacity += mat->d * get1f(mat->map_d, dg.st, 1.f);
+                    if (valid(mat->map_d))
+                        localOpacity += mat->d * get1f(mat->map_d, dg.st, 1.f);
+                    else
+                        localOpacity += mat->d;
 
                     // Diffuse color
                     localDiffuseColor = mat->Kd * make_vec3f(dg.color);
-                    if (mat->map_Kd)
+                    if (valid(mat->map_Kd))
                     {
-                        vec4f localDiffuseColorFromMap =
+                        const vec4f localDiffuseColorFromMap =
                             get4f(mat->map_Kd, dg.st);
                         localDiffuseColor =
                             localDiffuseColor *
@@ -282,30 +287,37 @@ inline vec3f SimulationRenderer_shadeRay(
                     }
 
                     // Specular color
-                    localSpecularColor = max(localSpecularColor,
-                                             mat->Ks * get3f(mat->map_Ks, dg.st,
-                                                             make_vec3f(1.f)));
+                    if (valid(mat->map_Ks))
+                        localSpecularColor =
+                            max(localSpecularColor,
+                                mat->Ks *
+                                    get3f(mat->map_Ks, dg.st, make_vec3f(1.f)));
+                    else
+                        localSpecularColor = max(localSpecularColor, mat->Ks);
 
                     // Specular exponent
-                    localSpecularExponent =
-                        max(localSpecularExponent,
-                            mat->Ns * get1f(mat->map_Ns, dg.st, 1.f));
+                    if (valid(mat->map_Ns))
+                        localSpecularExponent =
+                            max(localSpecularExponent,
+                                mat->Ns * get1f(mat->map_Ns, dg.st, 1.f));
+                    else
+                        localSpecularExponent =
+                            max(localSpecularExponent, mat->Ns);
 
                     // Normal mapping
-                    if (mat->map_Normal)
+                    if (valid(mat->map_Bump))
                     {
-                        vec3f n =
-                            get3f(mat->map_Normal, dg.st, make_vec3f(0.f)) -
-                            0.5f;
+                        const vec3f n =
+                            get3f(mat->map_Bump, dg.st, make_vec3f(0.f)) - 0.5f;
                         localNormal.x -= n.x;
                         localNormal.y -= n.y;
                     }
 
-                    // localReflection index
+                    // Reflection index
                     localReflection = mat->reflection;
-                    if (mat->map_reflection)
+                    if (valid(mat->map_reflection))
                     {
-                        vec3f n =
+                        const vec3f n =
                             get3f(mat->map_reflection, dg.st, make_vec3f(0.f));
                         localReflection *= (n.x + n.y + n.z) / 3.f;
                     }
@@ -321,7 +333,8 @@ inline vec3f SimulationRenderer_shadeRay(
                                                 localDiffuseColor,
                                                 localLightEmission);
 
-                // Intersection point with geometry, slightly above the surface,
+                // Intersection point with geometry, slightly above the
+                // surface,
                 // along the normal
                 const varying vec3f intersection =
                     dg.P + self->abstract.super.epsilon * dg.Ng;
@@ -332,8 +345,8 @@ inline vec3f SimulationRenderer_shadeRay(
                 const varying vec3f reflectedDirection =
                     ray.dir - 2.f * dot(ray.dir, localNormal) * localNormal;
 
-                if (self->abstract.ambientOcclusionStrength != 0.f &&
-                    localLightEmission == 0.f)
+                if (self->abstract.ambientOcclusionStrength > 0.f &&
+                    localLightEmission < 0.01f)
                 {
                     // Indirect illumination
                     DifferentialGeometry geometry;
@@ -435,8 +448,8 @@ inline vec3f SimulationRenderer_shadeRay(
                             cosLR += localLightEmission;
 
                             // Process shadows
-                            if (self->abstract.shadows != 0.f &&
-                                localLightEmission == 0.f)
+                            if (self->abstract.shadows > 0.f &&
+                                localLightEmission < 0.01f)
                                 localLightIntensity =
                                     shadedLightIntensity(&(self->abstract), ray,
                                                          sample, intersection,
@@ -447,7 +460,8 @@ inline vec3f SimulationRenderer_shadeRay(
                             const varying vec3f localUnshadedColor =
                                 cosNL * localLightIntensity *
                                     (
-                                        // Affect shading with color determined
+                                        // Affect shading with color
+                                        // determined
                                         // by
                                         // simulation value
                                         (localSimulationColor *
@@ -486,7 +500,8 @@ inline vec3f SimulationRenderer_shadeRay(
                     const float angle = dot(ray.dir, localNormal);
                     if (localRefraction == oldlocalRefraction)
                         if (angle < 0.f)
-                            // Set localRefraction to default index if exiting
+                            // Set localRefraction to default index if
+                            // exiting
                             // volume
                             localRefraction = 1.f;
 
@@ -534,7 +549,8 @@ inline vec3f SimulationRenderer_shadeRay(
     if (depth >= NB_MAX_REBOUNDS)
         sample.z = 1.f - log(zDepth) / 10.f;
 
-    // Back to front computation of final color according to colors and weights
+    // Back to front computation of final color according to colors and
+    // weights
     // of each ray generation
     sample.alpha = pathOpacity;
     for (int i = depth - 1; i >= 0; --i)

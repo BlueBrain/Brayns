@@ -50,12 +50,20 @@ const std::string PARAM_CAMERA_TYPE = "camera-type";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
-const std::string RENDERERS[6] = {"basic",           "proximity",
-                                  "simulation",      "particle",
-                                  "geometrynormals", "shadingnormals"};
-const std::string RENDERER_NAMES[6] = {
-    "exobj",      "proximityrenderer", "simulationrenderer", "particlerenderer",
-    "raycast_Ng", "raycast_Ns"};
+const std::string RENDERERS[7] = {"basic",
+                                  "proximity",
+                                  "simulation",
+                                  "particle",
+                                  "geometrynormals",
+                                  "shadingnormals",
+                                  "scientificvisualization"};
+const std::string RENDERER_NAMES[7] = {"basic",
+                                       "proximityrenderer",
+                                       "simulationrenderer",
+                                       "particlerenderer",
+                                       "raycast_Ng",
+                                       "raycast_Ns",
+                                       "scivis"};
 
 const std::string CAMERA_TYPES[5] = {"perspective", "stereo", "orthographic",
                                      "panoramic", "clipped"};
@@ -131,6 +139,7 @@ RenderingParameters::RenderingParameters()
     _renderers.push_back(RendererType::proximity);
     _renderers.push_back(RendererType::geometryNormals);
     _renderers.push_back(RendererType::shadingNormals);
+    _renderers.push_back(RendererType::scientificvisualization);
 }
 
 bool RenderingParameters::_parse(const po::variables_map& vm)

@@ -142,7 +142,8 @@ enum Shader: uint {
     simulation,
     particle,
     geometry_normals,
-    shading_normals
+    shading_normals,
+    scientific_visualization
 }
 
 enum Shading: uint {

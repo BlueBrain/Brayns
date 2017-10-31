@@ -43,10 +43,14 @@ struct TextureTypeMaterialAttribute
     std::string attribute;
 };
 
-static TextureTypeMaterialAttribute textureTypeMaterialAttribute[6] = {
-    {TT_DIFFUSE, "map_kd"},  {TT_NORMALS, "map_Normal"},
-    {TT_SPECULAR, "map_ks"}, {TT_EMISSIVE, "map_a"},
-    {TT_OPACITY, "map_d"},   {TT_REFLECTION, "map_Reflection"}};
+static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
+    {TT_DIFFUSE, "map_kd"},
+    {TT_NORMALS, "map_bump"},
+    {TT_SPECULAR, "map_ks"},
+    {TT_EMISSIVE, "map_a"},
+    {TT_OPACITY, "map_d"},
+    {TT_REFLECTION, "map_reflection"},
+    {TT_REFRACTION, "map_refraction"}};
 
 OSPRayScene::OSPRayScene(Renderers renderers,
                          ParametersManager& parametersManager)
@@ -991,63 +995,59 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
 
 void OSPRayScene::commitLights()
 {
+    size_t lightCount = 0;
+    for (auto light : _lights)
+    {
+        DirectionalLight* directionalLight =
+            dynamic_cast<DirectionalLight*>(light.get());
+        if (directionalLight)
+        {
+            if (_ospLights.size() <= lightCount)
+                _ospLights.push_back(ospNewLight(nullptr, "DirectionalLight"));
+
+            const Vector3f color = directionalLight->getColor();
+            ospSet3f(_ospLights[lightCount], "color", color.x(), color.y(),
+                     color.z());
+            const Vector3f direction = directionalLight->getDirection();
+            ospSet3f(_ospLights[lightCount], "direction", direction.x(),
+                     direction.y(), direction.z());
+            ospSet1f(_ospLights[lightCount], "intensity",
+                     directionalLight->getIntensity());
+            ospCommit(_ospLights[lightCount]);
+        }
+        else
+        {
+            PointLight* pointLight = dynamic_cast<PointLight*>(light.get());
+            if (pointLight)
+            {
+                if (_ospLights.size() <= lightCount)
+                    _ospLights.push_back(ospNewLight(nullptr, "PointLight"));
+
+                const Vector3f position = pointLight->getPosition();
+                ospSet3f(_ospLights[lightCount], "position", position.x(),
+                         position.y(), position.z());
+                const Vector3f color = pointLight->getColor();
+                ospSet3f(_ospLights[lightCount], "color", color.x(), color.y(),
+                         color.z());
+                ospSet1f(_ospLights[lightCount], "intensity",
+                         pointLight->getIntensity());
+                ospSet1f(_ospLights[lightCount], "radius",
+                         pointLight->getCutoffDistance());
+                ospCommit(_ospLights[lightCount]);
+            }
+        }
+    }
+
+    if (_ospLightData)
+        ospRelease(_ospLightData);
+    _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT, &_ospLights[0],
+                               _getOSPDataFlags());
+    ospCommit(_ospLightData);
+
     for (auto renderer : _renderers)
     {
         OSPRayRenderer* osprayRenderer =
             dynamic_cast<OSPRayRenderer*>(renderer.get());
-
-        size_t lightCount = 0;
-        for (auto light : _lights)
-        {
-            DirectionalLight* directionalLight =
-                dynamic_cast<DirectionalLight*>(light.get());
-            if (directionalLight != 0)
-            {
-                if (_ospLights.size() <= lightCount)
-                    _ospLights.push_back(ospNewLight(osprayRenderer->impl(),
-                                                     "DirectionalLight"));
-
-                const Vector3f color = directionalLight->getColor();
-                ospSet3f(_ospLights[lightCount], "color", color.x(), color.y(),
-                         color.z());
-                const Vector3f direction = directionalLight->getDirection();
-                ospSet3f(_ospLights[lightCount], "direction", direction.x(),
-                         direction.y(), direction.z());
-                ospSet1f(_ospLights[lightCount], "intensity",
-                         directionalLight->getIntensity());
-                ospCommit(_ospLights[lightCount]);
-            }
-            else
-            {
-                PointLight* pointLight = dynamic_cast<PointLight*>(light.get());
-                if (pointLight != 0)
-                {
-                    if (_ospLights.size() <= lightCount)
-                        _ospLights.push_back(
-                            ospNewLight(osprayRenderer->impl(), "PointLight"));
-
-                    const Vector3f position = pointLight->getPosition();
-                    ospSet3f(_ospLights[lightCount], "position", position.x(),
-                             position.y(), position.z());
-                    const Vector3f color = pointLight->getColor();
-                    ospSet3f(_ospLights[lightCount], "color", color.x(),
-                             color.y(), color.z());
-                    ospSet1f(_ospLights[lightCount], "intensity",
-                             pointLight->getIntensity());
-                    ospSet1f(_ospLights[lightCount], "radius",
-                             pointLight->getCutoffDistance());
-                    ospCommit(_ospLights[lightCount]);
-                }
-            }
-            ++lightCount;
-        }
-
-        if (_ospLightData == 0)
-        {
-            _ospLightData = ospNewData(_lights.size(), OSP_OBJECT,
-                                       &_ospLights[0], _getOSPDataFlags());
-            ospCommit(_ospLightData);
-        }
         ospSetData(osprayRenderer->impl(), "lights", _ospLightData);
     }
 }
@@ -1069,13 +1069,8 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
     for (auto& material : _materials)
     {
         if (_ospMaterials.size() <= material.first)
-            for (const auto& renderer : _renderers)
-            {
-                OSPRayRenderer* osprayRenderer =
-                    dynamic_cast<OSPRayRenderer*>(renderer.get());
-                _ospMaterials.push_back(ospNewMaterial(osprayRenderer->impl(),
-                                                       "ExtendedOBJMaterial"));
-            }
+            _ospMaterials.push_back(
+                ospNewMaterial(nullptr, "ExtendedOBJMaterial"));
 
         auto& ospMaterial = _ospMaterials[material.first];
 
@@ -1090,7 +1085,10 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
         ospSet1f(ospMaterial, "reflection",
                  material.second.getReflectionIndex());
         ospSet1f(ospMaterial, "a", material.second.getEmission());
-        ospSet1f(ospMaterial, "g", material.second.getGlossiness());
+        ospSet1f(ospMaterial, "glossiness", material.second.getGlossiness());
+
+        for (const auto& textureType : textureTypeMaterialAttribute)
+            ospSetObject(ospMaterial, textureType.attribute.c_str(), nullptr);
 
         if (!updateOnly)
         {

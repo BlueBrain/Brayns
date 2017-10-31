@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(renderParams.getEngine(), "ospray");
     BOOST_CHECK_EQUAL(renderParams.getModule(), "");
     BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::basic);
-    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 6);
+    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 7);
     BOOST_CHECK(!renderParams.getShadows());
     BOOST_CHECK(!renderParams.getSoftShadows());
     BOOST_CHECK_EQUAL(renderParams.getAmbientOcclusionStrength(), 0.f);

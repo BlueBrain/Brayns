@@ -835,8 +835,8 @@ private:
             '4', "Set pastel materials",
             std::bind(&Brayns::Impl::_pastelMaterials, this));
         _keyboardHandler.registerKeyboardShortcut(
-            '5', "Set random materials",
-            std::bind(&Brayns::Impl::_randomMaterials, this));
+            '5', "Scientific visualization renderer",
+            std::bind(&Brayns::Impl::_scivisRenderer, this));
         _keyboardHandler.registerKeyboardShortcut(
             '6', "Default renderer",
             std::bind(&Brayns::Impl::_defaultRenderer, this));
@@ -960,6 +960,13 @@ private:
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
         renderParams.setBackgroundColor(Vector3f(1.f, 1.f, 1.f));
+    }
+
+    void _scivisRenderer()
+    {
+        RenderingParameters& renderParams =
+            _parametersManager.getRenderingParameters();
+        renderParams.setRenderer(RendererType::scientificvisualization);
     }
 
     void _defaultRenderer()

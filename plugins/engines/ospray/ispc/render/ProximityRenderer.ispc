@@ -89,12 +89,16 @@ inline vec3f ProximityRenderer_shadeRay(
             emission = mat->a;
 
             // glossiness
-            normal = normalize(
-                normal +
-                mat->g * getRandomVector(sample, normal,
-                                         self->abstract.randomNumber));
+            if (mat->glossiness > 0.f)
+                normal =
+                    normalize(normal +
+                              mat->glossiness *
+                                  getRandomVector(sample, normal,
+                                                  self->abstract.randomNumber));
             // Opacity
-            opacity = mat->d * get1f(mat->map_d, dg.st, 1.f);
+            opacity = mat->d;
+            if (valid(mat->map_d))
+                opacity *= get1f(mat->map_d, dg.st, 1.f);
 
             // Diffuse color
             Kd = mat->Kd * make_vec3f(dg.color);

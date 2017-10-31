@@ -296,7 +296,7 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   ispc/geometry/ExtendedCones.ispc
   ispc/geometry/ExtendedSpheres.ispc
   ispc/render/ExtendedOBJMaterial.ispc
-  ispc/render/ExtendedOBJRenderer.ispc
+  ispc/render/BasicRenderer.ispc
   ispc/render/ProximityRenderer.ispc
   ispc/render/SimulationRenderer.ispc
   ispc/render/ParticleRenderer.ispc
@@ -309,7 +309,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/geometry/ExtendedCylinders.cpp
   ispc/geometry/ExtendedSpheres.cpp
   ispc/render/ExtendedOBJMaterial.cpp
-  ispc/render/ExtendedOBJRenderer.cpp
+  ispc/render/BasicRenderer.cpp
   ispc/render/ProximityRenderer.cpp
   ispc/render/SimulationRenderer.cpp
   ispc/render/ParticleRenderer.cpp
@@ -327,7 +327,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   ispc/geometry/ExtendedCylinders.h
   ispc/geometry/ExtendedSpheres.h
   ispc/render/ExtendedOBJMaterial.h
-  ispc/render/ExtendedOBJRenderer.h
+  ispc/render/BasicRenderer.h
   ispc/render/ProximityRenderer.h
   ispc/render/SimulationRenderer.h
   ispc/render/ParticleRenderer.h

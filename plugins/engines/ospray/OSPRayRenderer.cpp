@@ -25,17 +25,6 @@
 #include "OSPRayRenderer.h"
 #include "OSPRayScene.h"
 
-#ifndef __APPLE__
-// GCC automtically removes the library if the application does not
-// make an explicit use of one of its classes. In the case of OSPRay
-// classes are loaded dynamicaly. The following line is only to make
-// sure that the hbpKernel library is loaded.
-#include <plugins/engines/ospray/ispc/render/ExtendedOBJRenderer.h>
-#include <plugins/engines/ospray/ispc/render/ProximityRenderer.h>
-brayns::ExtendedOBJRenderer extendedObjRenderer;
-brayns::ProximityRenderer proximityRenderer;
-#endif
-
 namespace brayns
 {
 OSPRayRenderer::OSPRayRenderer(const std::string& name,
@@ -74,10 +63,12 @@ void OSPRayRenderer::commit()
 
     Vector3f color = rp.getBackgroundColor();
     ospSet3f(_renderer, "bgColor", color.x(), color.y(), color.z());
+    ospSet1i(_renderer, "shadowsEnabled", rp.getShadows() > 0.f);
     ospSet1f(_renderer, "shadows", rp.getShadows());
     ospSet1f(_renderer, "softShadows", rp.getSoftShadows());
-    ospSet1f(_renderer, "ambientOcclusionStrength",
-             rp.getAmbientOcclusionStrength());
+    ospSet1f(_renderer, "aoWeight", rp.getAmbientOcclusionStrength());
+    ospSet1i(_renderer, "aoSamples", 1);
+    ospSet1f(_renderer, "aoDistance", rp.getDetectionDistance());
     ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
 
     ospSet1i(_renderer, "shadingEnabled", (mt == ShadingType::diffuse));
@@ -86,7 +77,6 @@ void OSPRayRenderer::commit()
     ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
     ospSet1i(_renderer, "electronShading", (mt == ShadingType::electron));
     ospSet1f(_renderer, "epsilon", rp.getEpsilon());
-    ospSet1i(_renderer, "moving", false);
     ospSet1f(_renderer, "detectionDistance", rp.getDetectionDistance());
     ospSet1i(_renderer, "detectionOnDifferentMaterial",
              rp.getDetectionOnDifferentMaterial());
