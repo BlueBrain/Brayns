@@ -98,14 +98,15 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects && \
     freeglut3-dev \
     libassimp-dev \
     libboost-all-dev \
+    libglew-dev \
     libglu1-mesa-dev \
     libhdf5-serial-dev \
     libjpeg-turbo8-dev \
     libmagick++-dev \
     libturbojpeg \
     libxi-dev \
-    libzmq3-dev \
     libxmu-dev \
+    libzmq3-dev \
     python-pyparsing \
     qtbase5-dev \
     qtdeclarative5-dev \
