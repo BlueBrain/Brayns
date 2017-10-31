@@ -1039,15 +1039,17 @@ void OSPRayScene::commitLights()
         }
     }
 
-    _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT, &_ospLights[0],
-                               _getOSPDataFlags());
-    ospCommit(_ospLightData);
-
-    for (auto renderer : _renderers)
+    if (!_ospLightData)
     {
-        OSPRayRenderer* osprayRenderer =
-            dynamic_cast<OSPRayRenderer*>(renderer.get());
-        ospSetData(osprayRenderer->impl(), "lights", _ospLightData);
+        _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT,
+                                   &_ospLights[0], _getOSPDataFlags());
+        ospCommit(_ospLightData);
+        for (auto renderer : _renderers)
+        {
+            OSPRayRenderer* osprayRenderer =
+                dynamic_cast<OSPRayRenderer*>(renderer.get());
+            ospSetData(osprayRenderer->impl(), "lights", _ospLightData);
+        }
     }
 }
 
