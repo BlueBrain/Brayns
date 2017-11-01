@@ -1015,6 +1015,7 @@ void OSPRayScene::commitLights()
             ospSet1f(_ospLights[lightCount], "intensity",
                      directionalLight->getIntensity());
             ospCommit(_ospLights[lightCount]);
+            ++lightCount;
         }
         else
         {
@@ -1035,6 +1036,7 @@ void OSPRayScene::commitLights()
                 ospSet1f(_ospLights[lightCount], "radius",
                          pointLight->getCutoffDistance());
                 ospCommit(_ospLights[lightCount]);
+                ++lightCount;
             }
         }
     }
