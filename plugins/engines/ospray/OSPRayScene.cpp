@@ -55,13 +55,13 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
 OSPRayScene::OSPRayScene(Renderers renderers,
                          ParametersManager& parametersManager)
     : Scene(renderers, parametersManager)
-    , _simulationModel(0)
-    , _ospLightData(0)
-    , _ospMaterialData(0)
-    , _ospVolumeData(0)
-    , _ospSimulationData(0)
-    , _ospTransferFunctionDiffuseData(0)
-    , _ospTransferFunctionEmissionData(0)
+    , _simulationModel(nullptr)
+    , _ospLightData(nullptr)
+    , _ospMaterialData(nullptr)
+    , _ospVolumeData(nullptr)
+    , _ospSimulationData(nullptr)
+    , _ospTransferFunctionDiffuseData(nullptr)
+    , _ospTransferFunctionEmissionData(nullptr)
 {
 }
 
@@ -114,6 +114,7 @@ void OSPRayScene::unload()
         }
         ospCommit(_simulationModel);
         ospRelease(_simulationModel);
+        _simulationModel = nullptr;
     }
 
     Scene::unload();
@@ -1014,6 +1015,7 @@ void OSPRayScene::commitLights()
             ospSet1f(_ospLights[lightCount], "intensity",
                      directionalLight->getIntensity());
             ospCommit(_ospLights[lightCount]);
+            ++lightCount;
         }
         else
         {
@@ -1034,21 +1036,22 @@ void OSPRayScene::commitLights()
                 ospSet1f(_ospLights[lightCount], "radius",
                          pointLight->getCutoffDistance());
                 ospCommit(_ospLights[lightCount]);
+                ++lightCount;
             }
         }
     }
 
-    if (_ospLightData)
-        ospRelease(_ospLightData);
-    _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT, &_ospLights[0],
-                               _getOSPDataFlags());
-    ospCommit(_ospLightData);
-
-    for (auto renderer : _renderers)
+    if (!_ospLightData)
     {
-        OSPRayRenderer* osprayRenderer =
-            dynamic_cast<OSPRayRenderer*>(renderer.get());
-        ospSetData(osprayRenderer->impl(), "lights", _ospLightData);
+        _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT,
+                                   &_ospLights[0], _getOSPDataFlags());
+        ospCommit(_ospLightData);
+        for (auto renderer : _renderers)
+        {
+            OSPRayRenderer* osprayRenderer =
+                dynamic_cast<OSPRayRenderer*>(renderer.get());
+            ospSetData(osprayRenderer->impl(), "lights", _ospLightData);
+        }
     }
 }
 
