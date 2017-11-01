@@ -206,7 +206,8 @@ enum class RendererType
     simulation,
     particle,
     geometryNormals,
-    shadingNormals
+    shadingNormals,
+    scientificvisualization
 };
 typedef std::vector<RendererType> RendererTypes;
 typedef std::map<RendererType, RendererPtr> RendererMap;

@@ -55,7 +55,7 @@ void AbstractRenderer::commit()
     _bgColor = getParam3f("bgColor", ospray::vec3f(1.f));
     _shadows = getParam1f("shadows", 0.f);
     _softShadows = getParam1f("softShadows", 0.f);
-    _ambientOcclusionStrength = getParam1f("ambientOcclusionStrength", 0.f);
+    _ambientOcclusionStrength = getParam1f("aoWeight", 0.f);
     _shadingEnabled = bool(getParam1i("shadingEnabled", 1));
     _randomNumber = getParam1i("randomNumber", 0);
     _timestamp = getParam1f("timestamp", 0.f);

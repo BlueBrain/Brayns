@@ -25,26 +25,30 @@
 #include <ospray/SDK/common/Material.ih>
 #include <ospray/SDK/math/vec.ih>
 #include <ospray/SDK/texture/Texture2D.ih>
+#include <ospray/SDK/texture/TextureParam.ih>
+#include <ospray/SDK/volume/Volume.ih>
 
 struct ExtendedOBJMaterial
 {
-    uniform Material base;
+    uniform Material super;
 
-    const uniform Texture2D *map_d;
+    TextureParam map_d;
     float d;
-    const uniform Texture2D *map_refraction;
-    float refraction;
-    const uniform Texture2D *map_reflection;
-    float reflection;
-    const uniform Texture2D *map_a;
-    float a;
-    float g;
-    const uniform Texture2D *map_Kd;
+    TextureParam map_Kd;
     vec3f Kd;
-    const uniform Texture2D *map_Ks;
+    TextureParam map_Ks;
     vec3f Ks;
-    const uniform Texture2D *map_Ns;
+    TextureParam map_Ns;
     float Ns;
-    const uniform Texture2D *map_Bump;
-    const uniform Texture2D *map_Normal;
+    TextureParam map_Bump;
+    linear2f rot_Bump;
+    uniform Volume *uniform volume;
+
+    float glossiness;
+    TextureParam map_a;
+    float a;
+    TextureParam map_refraction;
+    float refraction;
+    TextureParam map_reflection;
+    float reflection;
 };

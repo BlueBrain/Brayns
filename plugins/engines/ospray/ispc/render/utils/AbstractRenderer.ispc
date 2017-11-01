@@ -107,13 +107,13 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
                 {
                     // Light emitting material
                     vec3f localDiffuseColor = mat->Kd;
-                    if (mat->map_Kd)
+                    if (valid(mat->map_Kd))
                         localDiffuseColor = get3f(mat->map_Kd, geometry.st);
 
                     // intensity
                     vec3f Ka = make_vec3f(mat->a);
                     indirectShadingPower = mat->a;
-                    if (mat->map_a)
+                    if (valid(mat->map_a))
                     {
                         Ka = get3f(mat->map_a, geometry.st);
                         indirectShadingPower = reduce_max(Ka);
@@ -211,15 +211,14 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
                 foreach_unique(mat in objMaterial)
                 {
                     materialOpacity = mat->d;
-                    if (mat->map_d != 0)
+                    if (valid(mat->map_d))
                     {
-                        vec4f d_map = mat->map_d->get(mat->map_d, dg.st);
+                        vec4f d_map = get4f(mat->map_d, dg.st);
                         materialOpacity = d_map.x;
                     }
-                    else if (mat->map_Kd != 0)
+                    else if (valid(mat->map_Kd))
                     {
-                        vec4f localDiffuseColor_map =
-                            mat->map_Kd->get(mat->map_Kd, dg.st);
+                        vec4f localDiffuseColor_map = get4f(mat->map_Kd, dg.st);
                         materialOpacity = 1.f - localDiffuseColor_map.w;
                     }
                 }
