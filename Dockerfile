@@ -7,14 +7,13 @@
 # Image where Brayns is built
 FROM ubuntu:xenial as builder
 LABEL maintainer="bbp-svc-viz@groupes.epfl.ch"
-
-ENV DIST_PATH /app/dist
+ARG DIST_PATH=/app/dist
 
 # Get ISPC
 # https://ispc.github.io/downloads.html
-ENV ISPC_VERSION 1.9.1
-ENV ISPC_DIR ispc-v${ISPC_VERSION}-linux
-ENV ISPC_PATH /app/$ISPC_DIR
+ARG ISPC_VERSION=1.9.1
+ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
+ARG ISPC_PATH=/app/$ISPC_DIR
 
 RUN mkdir -p ${ISPC_PATH} \
  && apt-get update \
@@ -28,8 +27,8 @@ ENV PATH $PATH:${ISPC_PATH}
 
 # Install Embree
 # https://github.com/embree/embree
-ENV EMBREE_VERSION 2.17.0
-ENV EMBREE_SRC /app/embree
+ARG EMBREE_VERSION=2.17.0
+ARG EMBREE_SRC=/app/embree
 
 RUN mkdir -p ${EMBREE_SRC} \
  && apt-get -y install \
@@ -51,8 +50,8 @@ RUN mkdir -p ${EMBREE_SRC} \
 
 # Install OSPray
 # https://github.com/ospray/OSPRay
-ENV OSPRAY_VERSION 1.4.0
-ENV OSPRAY_SRC /app/ospray
+ARG OSPRAY_VERSION=1.4.0
+ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
  && apt-get update \
@@ -72,7 +71,7 @@ RUN mkdir -p ${OSPRAY_SRC} \
  && ninja install
 
 # Set working dir and copy Brayns assets
-ENV BRAYNS_SRC /app/brayns
+ARG BRAYNS_SRC=/app/brayns
 WORKDIR /app
 ADD . ${BRAYNS_SRC}
 
@@ -113,6 +112,8 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
 
 # Final image, containing only Brayns and libraries required to run it
 FROM ubuntu:xenial
+ARG DIST_PATH=/app/dist
+
 RUN apt-get update \
  && apt-get install -y \
     freeglut3 \
@@ -148,11 +149,11 @@ RUN apt-get update \
 # 2. create a new image layer containing the
 #    /app/dist directory of this new container
 #    Equivalent to the `docker copy` command.
-COPY --from=builder /app/dist /app/dist
+COPY --from=builder ${DIST_PATH} ${DIST_PATH}
 
 # Add binaries from dist to the PATH
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/app/dist/lib
-ENV PATH /app/dist/bin:$PATH
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib
+ENV PATH ${DIST_PATH}/bin:$PATH
 
 # Expose a port from the container
 # For more ports, use the `--expose` flag when running the container,
