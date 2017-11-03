@@ -36,6 +36,9 @@
 
 #include <fstream>
 
+#include "json.hpp"
+using json = nlohmann::json;
+
 namespace
 {
 const std::string ENDPOINT_API_VERSION = "v1/";
@@ -161,14 +164,54 @@ bool RocketsPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
             _httpServer->process(0);
     }
 
+    _broadcastWebsocketMessages();
+
     return !_dirtyEngine;
+}
+
+void RocketsPlugin::_broadcastWebsocketMessages()
+{
+    if (_httpServer->getConnectionCount() == 0)
+        return;
+
+    if (_engine->getCamera().getModified())
+    {
+        json message;
+        message["event"] = ENDPOINT_CAMERA;
+        message["data"] = _engine->getCamera().getSerializable()->toJSON();
+        _httpServer->broadcastText(message.dump());
+    }
+}
+
+std::string RocketsPlugin::_processWebsocketMessage(const std::string& message)
+{
+    try
+    {
+        auto jsonData = json::parse(message);
+        const std::string event = jsonData["event"];
+        auto i = _websocketEvents.find(event);
+        if (i == _websocketEvents.end())
+            return "Unknown websocket event " + event;
+
+        if (!i->second(jsonData["data"].dump()))
+            return "Could not update object " + event;
+        return "";
+    }
+    catch (const std::exception& exc)
+    {
+        BRAYNS_ERROR << "Error in websocket message handling: " << exc.what()
+                     << std::endl;
+        return "Error in websocket message handling: " +
+               std::string(exc.what());
+    }
 }
 
 void RocketsPlugin::_setupHTTPServer()
 {
     try
     {
-        _httpServer.reset(new rockets::Server{_getHttpInterface(), "", 0});
+        _httpServer.reset(
+            new rockets::Server{_getHttpInterface(), "rockets", 0});
         BRAYNS_INFO << "Registering http handlers on " << _httpServer->getURI()
                     << std::endl;
     }
@@ -178,6 +221,9 @@ void RocketsPlugin::_setupHTTPServer()
                      << std::endl;
         return;
     }
+
+    _httpServer->handleText(std::bind(&RocketsPlugin::_processWebsocketMessage,
+                                      this, std::placeholders::_1));
 
     _handleVersion();
     _handleStreaming();
@@ -270,6 +316,7 @@ void RocketsPlugin::_handle(const std::string& endpoint,
 {
     _httpServer->handle(endpoint, obj);
     _handleSchema(endpoint, obj);
+    _handleWebsocketEvent(endpoint, obj);
 }
 
 void RocketsPlugin::_handleGET(const std::string& endpoint,
@@ -284,6 +331,7 @@ void RocketsPlugin::_handlePUT(const std::string& endpoint,
 {
     _httpServer->handlePUT(endpoint, obj);
     _handleSchema(endpoint, obj);
+    _handleWebsocketEvent(endpoint, obj);
 }
 
 void RocketsPlugin::_handleSchema(const std::string& endpoint,
@@ -300,6 +348,14 @@ void RocketsPlugin::_remove(const std::string& endpoint)
 {
     _httpServer->remove(endpoint);
     _httpServer->remove(endpoint + "/schema");
+}
+
+void RocketsPlugin::_handleWebsocketEvent(const std::string& endpoint,
+                                          servus::Serializable& obj)
+{
+    _websocketEvents[endpoint] = [&obj](const std::string& data) {
+        return obj.fromJSON(data);
+    };
 }
 
 void RocketsPlugin::_handleVersion()
