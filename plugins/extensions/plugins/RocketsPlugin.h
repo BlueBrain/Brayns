@@ -73,6 +73,11 @@ private:
                        const servus::Serializable& obj);
     void _remove(const std::string& endpoint);
 
+    void _broadcastWebsocketMessages();
+    std::string _processWebsocketMessage(const std::string& message);
+    void _handleWebsocketEvent(const std::string& endpoint,
+                               servus::Serializable& obj);
+
     void _handleVersion();
     void _handleStreaming();
 
@@ -140,6 +145,10 @@ private:
 
     bool _writeBlueConfigFile(const std::string& filename,
                               const std::map<std::string, std::string>& params);
+
+    using WebsocketEventMap =
+        std::map<std::string, std::function<bool(const std::string&)>>;
+    WebsocketEventMap _websocketEvents;
 
     Engine* _engine = nullptr;
     ParametersManager& _parametersManager;
