@@ -411,6 +411,7 @@ private:
         _parametersManager.resetModified();
         camera.resetModified();
         scene.resetModified();
+        _engine->resetModified();
 
         return true;
     }

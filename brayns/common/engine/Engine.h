@@ -164,6 +164,7 @@ public:
     void setLastProgress(const float lastProgress)
     {
         _lastProgress = lastProgress;
+        _modified = true;
     }
 
     /**
@@ -185,8 +186,10 @@ public:
      *         if data loading is in progress.
      */
     bool isReady() const { return _isReady; }
+    bool getModified() const { return _modified; }
     /** @internal */
     void setReady(const bool isReady_) { _isReady = isReady_; }
+    void resetModified() { _modified = false; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
@@ -204,6 +207,7 @@ protected:
     std::string _lastOperation;
     bool _keepRunning{true};
     bool _isReady{false};
+    bool _modified{false};
 };
 }
 
