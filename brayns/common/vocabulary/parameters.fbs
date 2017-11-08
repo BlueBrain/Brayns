@@ -181,6 +181,7 @@ table Settings {
     frame_export_folder: string;
     synchronous_mode: bool;
     variance_threshold:float;
+    image_stream_fps: uint;
 }
 
 table ForceRendering

@@ -46,8 +46,18 @@ void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 {
     OSPRayFrameBuffer* osprayFrameBuffer =
         dynamic_cast<OSPRayFrameBuffer*>(frameBuffer.get());
-    ospRenderFrame(osprayFrameBuffer->impl(), _renderer,
-                   OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
+    const auto variance =
+        ospRenderFrame(osprayFrameBuffer->impl(), _renderer,
+                       OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
+
+    if (!frameBuffer->getAccumulation())
+        return;
+
+    if (variance == std::numeric_limits<float>::infinity())
+        _hasNewImage = true;
+    else
+        _hasNewImage = std::abs(_prevVariance - variance) > 0.01;
+    _prevVariance = variance;
 }
 
 void OSPRayRenderer::commit()

@@ -130,6 +130,13 @@ private:
     void _resizeImage(unsigned int* srcData, const Vector2i& srcSize,
                       const Vector2i& dstSize, uints& dstData);
 
+    struct tjDeleter
+    {
+        void operator()(uint8_t* ptr) { tjFree(ptr); }
+    };
+
+    using JpegData = std::unique_ptr<uint8_t, tjDeleter>;
+
     /**
      * @brief Encodes an RAW image buffer into JPEG
      * @param width Image width
@@ -139,9 +146,17 @@ private:
      * @param dataSize Returned buffer size
      * @return Destination buffer
      */
-    uint8_t* _encodeJpeg(const uint32_t width, const uint32_t height,
+    JpegData _encodeJpeg(const uint32_t width, const uint32_t height,
                          const uint8_t* rawData, const int32_t pixelFormat,
                          unsigned long& dataSize);
+
+    struct ImageJPEG
+    {
+        unsigned long size{0};
+        JpegData data;
+    };
+
+    ImageJPEG _createJPEG();
 
     bool _writeBlueConfigFile(const std::string& filename,
                               const std::map<std::string, std::string>& params);
@@ -179,6 +194,24 @@ private:
     ::brayns::v1::Scene _remoteScene;
     ::brayns::v1::ForceRendering _remoteForceRendering;
     ::brayns::v1::CircuitConfigurationBuilder _remoteCircuitConfigBuilder;
+
+    class Timer
+    {
+    public:
+        using clock = std::chrono::high_resolution_clock;
+
+        void start() { _startTime = clock::now(); }
+        void restart() { start(); }
+        float elapsed()
+        {
+            return std::chrono::duration<float>{clock::now() - _startTime}
+                .count();
+        }
+
+        Timer() { start(); }
+    private:
+        clock::time_point _startTime;
+    } _timer;
 };
 }
 

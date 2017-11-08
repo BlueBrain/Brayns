@@ -58,6 +58,13 @@ public:
     /** JPEG size */
     const Vector2ui& getJpegSize() const { return _jpegSize; }
     void setJpegSize(const Vector2ui& size) { updateValue(_jpegSize, size); }
+    /** Image stream FPS */
+    size_t getImageStreamFPS() const { return _imageStreamFPS; }
+    void setImageStreamFPS(const size_t fps)
+    {
+        updateValue(_imageStreamFPS, fps);
+    }
+
     const strings& getFilters() const { return _filters; }
     void setFrameExportFolder(const std::string& folder)
     {
@@ -126,6 +133,7 @@ protected:
     std::string _streamId;
     std::string _tmpFolder;
     bool _synchronousMode{false};
+    size_t _imageStreamFPS{60};
 };
 }
 
