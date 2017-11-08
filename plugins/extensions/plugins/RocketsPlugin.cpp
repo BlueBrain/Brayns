@@ -42,31 +42,26 @@ using json = nlohmann::json;
 namespace
 {
 const std::string ENDPOINT_API_VERSION = "v1/";
-const std::string ENDPOINT_CAMERA = ENDPOINT_API_VERSION + "camera";
-const std::string ENDPOINT_DATA_SOURCE = ENDPOINT_API_VERSION + "data-source";
-const std::string ENDPOINT_FORCE_RENDERING =
-    ENDPOINT_API_VERSION + "force-rendering";
-const std::string ENDPOINT_FRAME_BUFFERS =
-    ENDPOINT_API_VERSION + "frame-buffers";
-const std::string ENDPOINT_RESET_CAMERA = ENDPOINT_API_VERSION + "reset-camera";
-const std::string ENDPOINT_SCENE = ENDPOINT_API_VERSION + "scene";
-const std::string ENDPOINT_SETTINGS = ENDPOINT_API_VERSION + "settings";
-const std::string ENDPOINT_SIMULATION_HISTOGRAM =
-    ENDPOINT_API_VERSION + "simulation-histogram";
-const std::string ENDPOINT_SPIKES = ENDPOINT_API_VERSION + "spikes";
-const std::string ENDPOINT_VOLUME_HISTOGRAM =
-    ENDPOINT_API_VERSION + "volume-histogram";
-const std::string ENDPOINT_VERSION = ENDPOINT_API_VERSION + "version";
-const std::string ENDPOINT_PROGRESS = ENDPOINT_API_VERSION + "progress";
-const std::string ENDPOINT_CLIP_PLANES = ENDPOINT_API_VERSION + "clip-planes";
-const std::string ENDPOINT_FRAME = ENDPOINT_API_VERSION + "frame";
-const std::string ENDPOINT_IMAGE_JPEG = ENDPOINT_API_VERSION + "image-jpeg";
-const std::string ENDPOINT_MATERIAL_LUT = ENDPOINT_API_VERSION + "material-lut";
-const std::string ENDPOINT_VIEWPORT = ENDPOINT_API_VERSION + "viewport";
-const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER =
-    ENDPOINT_API_VERSION + "circuit-config-builder";
-const std::string ENDPOINT_STREAM = ENDPOINT_API_VERSION + "stream";
-const std::string ENDPOINT_STREAM_TO = ENDPOINT_API_VERSION + "stream-to";
+const std::string ENDPOINT_CAMERA = "camera";
+const std::string ENDPOINT_DATA_SOURCE = "data-source";
+const std::string ENDPOINT_FORCE_RENDERING = "force-rendering";
+const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
+const std::string ENDPOINT_RESET_CAMERA = "reset-camera";
+const std::string ENDPOINT_SCENE = "scene";
+const std::string ENDPOINT_SETTINGS = "settings";
+const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
+const std::string ENDPOINT_SPIKES = "spikes";
+const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
+const std::string ENDPOINT_VERSION = "version";
+const std::string ENDPOINT_PROGRESS = "progress";
+const std::string ENDPOINT_CLIP_PLANES = "clip-planes";
+const std::string ENDPOINT_FRAME = "frame";
+const std::string ENDPOINT_IMAGE_JPEG = "image-jpeg";
+const std::string ENDPOINT_MATERIAL_LUT = "material-lut";
+const std::string ENDPOINT_VIEWPORT = "viewport";
+const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER = "circuit-config-builder";
+const std::string ENDPOINT_STREAM = "stream";
+const std::string ENDPOINT_STREAM_TO = "stream-to";
 
 const std::string JSON_TYPE = "application/json";
 
@@ -282,7 +277,7 @@ void RocketsPlugin::_setupHTTPServer()
         std::bind(&RocketsPlugin::_viewportUpdated, this));
 
     _httpServer->handle(rockets::http::Method::GET,
-                        ENDPOINT_CIRCUIT_CONFIG_BUILDER,
+                        ENDPOINT_API_VERSION + ENDPOINT_CIRCUIT_CONFIG_BUILDER,
                         std::bind(&RocketsPlugin::_handleCircuitConfigBuilder,
                                   this, std::placeholders::_1));
 
@@ -322,7 +317,7 @@ std::string RocketsPlugin::_getHttpInterface() const
 void RocketsPlugin::_handle(const std::string& endpoint,
                             servus::Serializable& obj)
 {
-    _httpServer->handle(endpoint, obj);
+    _httpServer->handle(ENDPOINT_API_VERSION + endpoint, obj);
     _handleSchema(endpoint, obj);
     _handleWebsocketEvent(endpoint, obj);
 }
@@ -330,14 +325,14 @@ void RocketsPlugin::_handle(const std::string& endpoint,
 void RocketsPlugin::_handleGET(const std::string& endpoint,
                                const servus::Serializable& obj)
 {
-    _httpServer->handleGET(endpoint, obj);
+    _httpServer->handleGET(ENDPOINT_API_VERSION + endpoint, obj);
     _handleSchema(endpoint, obj);
 }
 
 void RocketsPlugin::_handlePUT(const std::string& endpoint,
                                servus::Serializable& obj)
 {
-    _httpServer->handlePUT(endpoint, obj);
+    _httpServer->handlePUT(ENDPOINT_API_VERSION + endpoint, obj);
     _handleSchema(endpoint, obj);
     _handleWebsocketEvent(endpoint, obj);
 }
@@ -346,16 +341,19 @@ void RocketsPlugin::_handleSchema(const std::string& endpoint,
                                   const servus::Serializable& obj)
 {
     using namespace rockets::http;
-    _httpServer->handle(Method::GET, endpoint + "/schema", [&obj](
-                                                               const Request&) {
-        return make_ready_response(Code::OK, obj.getSchema(), JSON_TYPE);
-    });
+    _httpServer->handle(Method::GET,
+                        ENDPOINT_API_VERSION + endpoint + "/schema",
+                        [&obj](const Request&) {
+                            return make_ready_response(Code::OK,
+                                                       obj.getSchema(),
+                                                       JSON_TYPE);
+                        });
 }
 
 void RocketsPlugin::_remove(const std::string& endpoint)
 {
-    _httpServer->remove(endpoint);
-    _httpServer->remove(endpoint + "/schema");
+    _httpServer->remove(ENDPOINT_API_VERSION + endpoint);
+    _httpServer->remove(ENDPOINT_API_VERSION + endpoint + "/schema");
 }
 
 void RocketsPlugin::_handleWebsocketEvent(const std::string& endpoint,
@@ -370,8 +368,9 @@ void RocketsPlugin::_handleVersion()
 {
     static brayns::Version version;
     using namespace rockets::http;
-    _httpServer->handleGET(ENDPOINT_VERSION, version);
-    _httpServer->handle(Method::GET, ENDPOINT_VERSION + "/schema",
+    _httpServer->handleGET(ENDPOINT_API_VERSION + ENDPOINT_VERSION, version);
+    _httpServer->handle(Method::GET,
+                        ENDPOINT_API_VERSION + ENDPOINT_VERSION + "/schema",
                         [&](const Request&) {
                             return make_ready_response(Code::OK,
                                                        version.getSchema(),
