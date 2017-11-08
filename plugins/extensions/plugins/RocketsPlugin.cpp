@@ -154,21 +154,33 @@ bool RocketsPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
         _onNewEngine();
     }
 
-    // In the case of interactions with Jupyter notebooks, HTTP messages are
-    // received in a blocking and sequential manner, meaning that the subscriber
-    // never has more than one message in its queue. In other words, only one
-    // message is processed between each rendering loop. The following code
-    // allows the processing of several messages and performs rendering after
-    // NB_MAX_MESSAGES reads, or if one of the messages forces rendering by
-    // setting the _forceRedering boolean variable to true.
-    _forceRendering = false;
-    if (_httpServer)
-    {
-        for (size_t i = 0; i < NB_MAX_MESSAGES && !_forceRendering; ++i)
-            _httpServer->process(0);
-    }
+    if (!_httpServer)
+        return !_dirtyEngine;
 
-    _broadcastWebsocketMessages();
+    try
+    {
+        _broadcastWebsocketMessages();
+
+        // In the case of interactions with Jupyter notebooks, HTTP messages are
+        // received in a blocking and sequential manner, meaning that the
+        // subscriber never has more than one message in its queue. In other
+        // words, only one message is processed between each rendering loop. The
+        // following code allows the processing of several messages and performs
+        // rendering after NB_MAX_MESSAGES reads, or if one of the messages
+        // forces rendering by setting the _forceRedering boolean variable to
+        // true.
+        _forceRendering = false;
+        if (_httpServer)
+        {
+            for (size_t i = 0; i < NB_MAX_MESSAGES && !_forceRendering; ++i)
+                _httpServer->process(0);
+        }
+    }
+    catch (const std::exception& exc)
+    {
+        BRAYNS_ERROR << "Error while handling HTTP/websocket messages: "
+                     << exc.what() << std::endl;
+    }
 
     return !_dirtyEngine;
 }
@@ -184,6 +196,21 @@ void RocketsPlugin::_broadcastWebsocketMessages()
             _buildJsonMessage(ENDPOINT_CAMERA,
                               _engine->getCamera().getSerializable()->toJSON());
         _httpServer->broadcastText(message);
+    }
+
+    if (_engine->getRenderer().hasNewImage())
+    {
+        const auto fps =
+            _parametersManager.getApplicationParameters().getImageStreamFPS();
+        if (_timer.elapsed() < 1.f / fps)
+            return;
+
+        _timer.restart();
+
+        const auto image = _createJPEG();
+        if (image.size > 0)
+            _httpServer->broadcastBinary((const char*)image.data.get(),
+                                         image.size);
     }
 }
 
@@ -619,56 +646,11 @@ void RocketsPlugin::_resizeImage(unsigned int* srcData, const Vector2i& srcSize,
 
 bool RocketsPlugin::_requestImageJPEG()
 {
-    if (!_processingImageJpeg)
-    {
-        _processingImageJpeg = true;
-        const auto& newFrameSize =
-            _parametersManager.getApplicationParameters().getJpegSize();
-        if (newFrameSize.x() == 0 || newFrameSize.y() == 0)
-        {
-            BRAYNS_ERROR << "Encountered invalid size of image JPEG: "
-                         << newFrameSize << std::endl;
-            _processingImageJpeg = false;
-            return false;
-        }
+    auto image = _createJPEG();
+    if (image.size == 0)
+        return false;
 
-        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-        const auto& frameSize = frameBuffer.getSize();
-        unsigned int* colorBuffer = (unsigned int*)frameBuffer.getColorBuffer();
-        if (colorBuffer)
-        {
-            unsigned int* resizedColorBuffer = colorBuffer;
-
-            uints resizedBuffer;
-            if (frameSize != newFrameSize)
-            {
-                _resizeImage(colorBuffer, frameSize, newFrameSize,
-                             resizedBuffer);
-                resizedColorBuffer = resizedBuffer.data();
-            }
-
-            int32_t pixelFormat = TJPF_RGBX;
-            switch (frameBuffer.getFrameBufferFormat())
-            {
-            case FrameBufferFormat::bgra_i8:
-                pixelFormat = TJPF_BGRX;
-                break;
-            case FrameBufferFormat::rgba_i8:
-            default:
-                pixelFormat = TJPF_RGBX;
-            }
-
-            unsigned long jpegSize = 0;
-            uint8_t* jpegData = _encodeJpeg((uint32_t)newFrameSize.x(),
-                                            (uint32_t)newFrameSize.y(),
-                                            (uint8_t*)resizedColorBuffer,
-                                            pixelFormat, jpegSize);
-
-            _remoteImageJPEG.setData(jpegData, jpegSize);
-            tjFree(jpegData);
-        }
-        _processingImageJpeg = false;
-    }
+    _remoteImageJPEG.setData(image.data.get(), image.size);
     return true;
 }
 
@@ -1156,6 +1138,8 @@ void RocketsPlugin::_initializeSettings()
         applicationParameters.getSynchronousMode());
     _remoteSettings.setVarianceThreshold(
         renderingParameters.getVarianceThreshold());
+    _remoteSettings.setImageStreamFps(
+        applicationParameters.getImageStreamFPS());
 }
 
 void RocketsPlugin::_settingsUpdated()
@@ -1240,6 +1224,7 @@ void RocketsPlugin::_settingsUpdated()
     app.setJpegSize(Vector2ui{_remoteSettings.getJpegSize()});
     app.setJpegCompression(
         std::min(_remoteSettings.getJpegCompression(), 100u));
+    app.setImageStreamFPS(_remoteSettings.getImageStreamFps());
 
     if (_engine->name() !=
         _parametersManager.getRenderingParameters().getEngine())
@@ -1432,10 +1417,11 @@ std::future<rockets::http::Response> RocketsPlugin::_handleCircuitConfigBuilder(
     return make_ready_response(Code::SERVICE_UNAVAILABLE);
 }
 
-uint8_t* RocketsPlugin::_encodeJpeg(const uint32_t width, const uint32_t height,
-                                    const uint8_t* rawData,
-                                    const int32_t pixelFormat,
-                                    unsigned long& dataSize)
+RocketsPlugin::JpegData RocketsPlugin::_encodeJpeg(const uint32_t width,
+                                                   const uint32_t height,
+                                                   const uint8_t* rawData,
+                                                   const int32_t pixelFormat,
+                                                   unsigned long& dataSize)
 {
     uint8_t* tjSrcBuffer = const_cast<uint8_t*>(rawData);
     const int32_t color_components = 4; // Color Depth
@@ -1457,7 +1443,57 @@ uint8_t* RocketsPlugin::_encodeJpeg(const uint32_t width, const uint32_t height,
         BRAYNS_ERROR << "libjpeg-turbo image conversion failure" << std::endl;
         return 0;
     }
-    return static_cast<uint8_t*>(tjJpegBuf);
+    return JpegData{tjJpegBuf};
+}
+
+RocketsPlugin::ImageJPEG RocketsPlugin::_createJPEG()
+{
+    if (_processingImageJpeg)
+        return ImageJPEG();
+
+    _processingImageJpeg = true;
+    const auto& newFrameSize =
+        _parametersManager.getApplicationParameters().getJpegSize();
+    if (newFrameSize.x() == 0 || newFrameSize.y() == 0)
+    {
+        BRAYNS_ERROR << "Encountered invalid size of image JPEG: "
+                     << newFrameSize << std::endl;
+
+        return ImageJPEG();
+    }
+
+    FrameBuffer& frameBuffer = _engine->getFrameBuffer();
+    const auto& frameSize = frameBuffer.getSize();
+    unsigned int* colorBuffer = (unsigned int*)frameBuffer.getColorBuffer();
+    if (!colorBuffer)
+        return ImageJPEG();
+
+    unsigned int* resizedColorBuffer = colorBuffer;
+
+    uints resizedBuffer;
+    if (frameSize != newFrameSize)
+    {
+        _resizeImage(colorBuffer, frameSize, newFrameSize, resizedBuffer);
+        resizedColorBuffer = resizedBuffer.data();
+    }
+
+    int32_t pixelFormat = TJPF_RGBX;
+    switch (frameBuffer.getFrameBufferFormat())
+    {
+    case FrameBufferFormat::bgra_i8:
+        pixelFormat = TJPF_BGRX;
+        break;
+    case FrameBufferFormat::rgba_i8:
+    default:
+        pixelFormat = TJPF_RGBX;
+    }
+
+    ImageJPEG image;
+    image.data =
+        _encodeJpeg((uint32_t)newFrameSize.x(), (uint32_t)newFrameSize.y(),
+                    (uint8_t*)resizedColorBuffer, pixelFormat, image.size);
+    _processingImageJpeg = false;
+    return image;
 }
 
 bool RocketsPlugin::_writeBlueConfigFile(

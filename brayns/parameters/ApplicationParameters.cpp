@@ -35,12 +35,13 @@ const std::string PARAM_FILTERS = "filters";
 const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
 const std::string PARAM_TMP_FOLDER = "tmp-folder";
 const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
+const std::string PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_WIDTH = DEFAULT_WINDOW_WIDTH;
 const size_t DEFAULT_JPEG_HEIGHT = DEFAULT_WINDOW_HEIGHT;
-const size_t DEFAULT_JPEG_COMPRESSION = 100;
+const size_t DEFAULT_JPEG_COMPRESSION = 90;
 const std::string DEFAULT_CAMERA = "perspective";
 const std::string DEFAULT_TMP_FOLDER = "/tmp";
 }
@@ -63,18 +64,20 @@ ApplicationParameters::ApplicationParameters()
         "Camera type [string]")(PARAM_BENCHMARKING.c_str(), po::value<bool>(),
                                 "Enable|Disable benchmarking [bool]")(
         PARAM_JPEG_COMPRESSION.c_str(), po::value<size_t>(),
-        "JPEG compression rate (100 is full quality) [float]")(
+        "JPEG compression rate (100 is full quality) [int]")(
         PARAM_JPEG_SIZE.c_str(), po::value<uints>()->multitoken(),
         "JPEG size [int int]")(PARAM_TMP_FOLDER.c_str(),
                                po::value<std::string>(),
                                "Folder used by the application to "
                                "store temporary files [string")(
         PARAM_SYNCHRONOUS_MODE.c_str(), po::value<bool>(),
-        "Enable|Disable synchronous mode rendering vs data loading [bool]")
-            (PARAM_FILTERS.c_str(), po::value<strings>()->multitoken(),
-             "Screen space filters [string]")(
-                PARAM_FRAME_EXPORT_FOLDER.c_str(), po::value<std::string>(),
-                "Folder where frames are exported as PNG images [string]");
+        "Enable|Disable synchronous mode rendering vs data loading [bool]")(
+        PARAM_IMAGE_STREAM_FPS.c_str(), po::value<size_t>(),
+        "Image stream FPS (60 default), [int]")(
+        PARAM_FILTERS.c_str(), po::value<strings>()->multitoken(),
+        "Screen space filters [string]")(
+        PARAM_FRAME_EXPORT_FOLDER.c_str(), po::value<std::string>(),
+        "Folder where frames are exported as PNG images [string]");
 }
 
 bool ApplicationParameters::_parse(const po::variables_map& vm)
@@ -111,6 +114,8 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
         _tmpFolder = vm[PARAM_TMP_FOLDER].as<std::string>();
     if (vm.count(PARAM_SYNCHRONOUS_MODE))
         _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
+    if (vm.count(PARAM_IMAGE_STREAM_FPS))
+        _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();
 
     return true;
 }
@@ -126,5 +131,9 @@ void ApplicationParameters::print()
                 << std::endl;
     BRAYNS_INFO << "JPEG size                   : " << _jpegSize << std::endl;
     BRAYNS_INFO << "Temporary folder            : " << _tmpFolder << std::endl;
+    BRAYNS_INFO << "Synchronous mode            : " << _synchronousMode
+                << std::endl;
+    BRAYNS_INFO << "Image stream FPS            : " << _imageStreamFPS
+                << std::endl;
 }
 }

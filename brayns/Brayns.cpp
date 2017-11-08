@@ -30,6 +30,7 @@
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/log.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
@@ -395,8 +396,13 @@ private:
         if (_parametersManager.isAnyModified() || camera.getModified() ||
             scene.getModified())
         {
+            _engine->getRenderer().hasNewImage(true);
             _engine->getFrameBuffer().clear();
         }
+        else
+            // we assume no new image here, but accumulation inside the renderer
+            // might decide otherwise
+            _engine->getRenderer().hasNewImage(false);
 
         _engine->render();
 
