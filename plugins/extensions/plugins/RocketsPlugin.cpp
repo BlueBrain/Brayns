@@ -72,6 +72,15 @@ const std::string JSON_TYPE = "application/json";
 
 const size_t NB_MAX_MESSAGES = 20; // Maximum number of network messages to read
                                    // between each rendering loop
+
+std::string _buildJsonMessage(const std::string& event, const std::string data,
+                              const bool error = false)
+{
+    json message;
+    message["event"] = event;
+    message[error ? "error" : "data"] = data;
+    return message.dump(4 /*indent*/);
+}
 }
 
 namespace servus
@@ -176,10 +185,10 @@ void RocketsPlugin::_broadcastWebsocketMessages()
 
     if (_engine->getCamera().getModified())
     {
-        json message;
-        message["event"] = ENDPOINT_CAMERA;
-        message["data"] = _engine->getCamera().getSerializable()->toJSON();
-        _httpServer->broadcastText(message.dump());
+        const auto& message =
+            _buildJsonMessage(ENDPOINT_CAMERA,
+                              _engine->getCamera().getSerializable()->toJSON());
+        _httpServer->broadcastText(message);
     }
 }
 
@@ -191,18 +200,17 @@ std::string RocketsPlugin::_processWebsocketMessage(const std::string& message)
         const std::string event = jsonData["event"];
         auto i = _websocketEvents.find(event);
         if (i == _websocketEvents.end())
-            return "Unknown websocket event " + event;
+            return _buildJsonMessage(event, "Unknown websocket event", true);
 
         if (!i->second(jsonData["data"].dump()))
-            return "Could not update object " + event;
+            return _buildJsonMessage(event, "Could not update object", true);
         return "";
     }
     catch (const std::exception& exc)
     {
         BRAYNS_ERROR << "Error in websocket message handling: " << exc.what()
                      << std::endl;
-        return "Error in websocket message handling: " +
-               std::string(exc.what());
+        return _buildJsonMessage("exception", exc.what(), true);
     }
 }
 
