@@ -198,6 +198,14 @@ void RocketsPlugin::_broadcastWebsocketMessages()
         _httpServer->broadcastText(message);
     }
 
+    if (_engine->getModified())
+    {
+        _requestProgress();
+        const auto& message =
+            _buildJsonMessage(ENDPOINT_PROGRESS, _remoteProgress.toJSON());
+        _httpServer->broadcastText(message);
+    }
+
     if (_engine->getRenderer().hasNewImage())
     {
         const auto fps =
