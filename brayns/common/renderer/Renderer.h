@@ -37,7 +37,7 @@ public:
     void setScene(ScenePtr scene) { _scene = scene; };
     virtual void setCamera(CameraPtr camera) = 0;
 
-    void hasNewImage(const bool hasNewImage) { _hasNewImage = hasNewImage; }
+    void hasNewImage(const bool hasNewImage_) { _hasNewImage = hasNewImage_; }
     bool hasNewImage() const { return _hasNewImage; }
 protected:
     ParametersManager& _parametersManager;

@@ -73,7 +73,7 @@ std::string _buildJsonMessage(const std::string& event, const std::string data,
 {
     json message;
     message["event"] = event;
-    message[error ? "error" : "data"] = data;
+    message[error ? "error" : "data"] = json::parse(data);
     return message.dump(4 /*indent*/);
 }
 }
