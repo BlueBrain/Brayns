@@ -91,7 +91,7 @@ bool ConnectivityLoader::_importMatrix()
                         _receptors[y]++;
                 }
             }
-            updateProgress(message.str(), x+1, dims[0]);
+            updateProgress(message.str(), x + 1, dims[0]);
         }
         dataset.close();
     }
@@ -165,7 +165,6 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
 
         // Place inactive cells
         for (uint64_t i = 0; i < gids.size(); ++i)
-        {
             if (_emitors.find(i) == _emitors.end() &&
                 _receptors.find(i) == _receptors.end())
             {
@@ -176,8 +175,6 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                 scene.getSpheres()[NB_SYSTEM_MATERIALS].push_back(
                     SpherePtr(new Sphere(centerSource, radiusSource)));
             }
-            ++i;
-        }
 
         // Place active cells and connections
         std::stringstream message;
