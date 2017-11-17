@@ -170,11 +170,8 @@ bool RocketsPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
         // forces rendering by setting the _forceRedering boolean variable to
         // true.
         _forceRendering = false;
-        if (_httpServer)
-        {
-            for (size_t i = 0; i < NB_MAX_MESSAGES && !_forceRendering; ++i)
-                _httpServer->process(0);
-        }
+        for (size_t i = 0; i < NB_MAX_MESSAGES && !_forceRendering; ++i)
+            _httpServer->process(0);
     }
     catch (const std::exception& exc)
     {
@@ -191,20 +188,10 @@ void RocketsPlugin::_broadcastWebsocketMessages()
         return;
 
     if (_engine->getCamera().getModified())
-    {
-        const auto& message =
-            _buildJsonMessage(ENDPOINT_CAMERA,
-                              _engine->getCamera().getSerializable()->toJSON());
-        _httpServer->broadcastText(message);
-    }
+        _httpServer->broadcastText(_wsOutgoing[ENDPOINT_CAMERA]());
 
     if (_engine->getModified())
-    {
-        _requestProgress();
-        const auto& message =
-            _buildJsonMessage(ENDPOINT_PROGRESS, _remoteProgress.toJSON());
-        _httpServer->broadcastText(message);
-    }
+        _httpServer->broadcastText(_wsOutgoing[ENDPOINT_PROGRESS]());
 
     if (_engine->getRenderer().hasNewImage())
     {
@@ -222,19 +209,22 @@ void RocketsPlugin::_broadcastWebsocketMessages()
     }
 }
 
-std::string RocketsPlugin::_processWebsocketMessage(const std::string& message)
+rockets::ws::Response RocketsPlugin::_processWebsocketMessage(
+    const std::string& message)
 {
     try
     {
         auto jsonData = json::parse(message);
         const std::string event = jsonData["event"];
-        auto i = _websocketEvents.find(event);
-        if (i == _websocketEvents.end())
+        auto i = _wsIncoming.find(event);
+        if (i == _wsIncoming.end())
             return _buildJsonMessage(event, "Unknown websocket event", true);
 
         if (!i->second(jsonData["data"].dump()))
             return _buildJsonMessage(event, "Could not update object", true);
-        return "";
+
+        // re-broadcast to all other clients
+        return rockets::ws::Response{message, rockets::ws::Recipient::others};
     }
     catch (const std::exception& exc)
     {
@@ -260,8 +250,7 @@ void RocketsPlugin::_setupHTTPServer()
         return;
     }
 
-    _httpServer->handleText(std::bind(&RocketsPlugin::_processWebsocketMessage,
-                                      this, std::placeholders::_1));
+    _setupWebsocket();
 
     _handleVersion();
     _handleStreaming();
@@ -337,6 +326,37 @@ void RocketsPlugin::_setupHTTPServer()
     _remoteProgress.registerSerializeCallback([this] { _requestProgress(); });
 }
 
+void RocketsPlugin::_setupWebsocket()
+{
+    _wsOutgoing[ENDPOINT_CAMERA] = [this] {
+        return _buildJsonMessage(
+            ENDPOINT_CAMERA, _engine->getCamera().getSerializable()->toJSON());
+    };
+    _wsOutgoing[ENDPOINT_PROGRESS] = [this] {
+        _requestProgress();
+        return _buildJsonMessage(ENDPOINT_PROGRESS, _remoteProgress.toJSON());
+    };
+
+    _httpServer->handleOpen([this]() {
+        std::vector<rockets::ws::Response> responses;
+        for (auto& i : _wsOutgoing)
+            responses.push_back({i.second(), rockets::ws::Recipient::sender,
+                                 rockets::ws::Format::text});
+
+        const auto image = _createJPEG();
+        if (image.size > 0)
+        {
+            std::string message;
+            message.assign((const char*)image.data.get(), image.size);
+            responses.push_back({message, rockets::ws::Recipient::sender,
+                                 rockets::ws::Format::binary});
+        }
+        return responses;
+    });
+    _httpServer->handleText(std::bind(&RocketsPlugin::_processWebsocketMessage,
+                                      this, std::placeholders::_1));
+}
+
 std::string RocketsPlugin::_getHttpInterface() const
 {
     const auto& params = _parametersManager.getApplicationParameters();
@@ -394,7 +414,7 @@ void RocketsPlugin::_remove(const std::string& endpoint)
 void RocketsPlugin::_handleWebsocketEvent(const std::string& endpoint,
                                           servus::Serializable& obj)
 {
-    _websocketEvents[endpoint] = [&obj](const std::string& data) {
+    _wsIncoming[endpoint] = [&obj](const std::string& data) {
         return obj.fromJSON(data);
     };
 }
