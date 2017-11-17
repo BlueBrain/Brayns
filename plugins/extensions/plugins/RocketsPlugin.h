@@ -64,6 +64,7 @@ private:
     void _onChangeEngine();
 
     void _setupHTTPServer();
+    void _setupWebsocket();
     std::string _getHttpInterface() const;
     void _handle(const std::string& endpoint, servus::Serializable& obj);
     void _handleGET(const std::string& endpoint,
@@ -74,7 +75,7 @@ private:
     void _remove(const std::string& endpoint);
 
     void _broadcastWebsocketMessages();
-    std::string _processWebsocketMessage(const std::string& message);
+    rockets::ws::Response _processWebsocketMessage(const std::string& message);
     void _handleWebsocketEvent(const std::string& endpoint,
                                servus::Serializable& obj);
 
@@ -161,9 +162,12 @@ private:
     bool _writeBlueConfigFile(const std::string& filename,
                               const std::map<std::string, std::string>& params);
 
-    using WebsocketEventMap =
+    using WsIncomingMap =
         std::map<std::string, std::function<bool(const std::string&)>>;
-    WebsocketEventMap _websocketEvents;
+    WsIncomingMap _wsIncoming;
+
+    using WsOutgoingMap = std::map<std::string, std::function<std::string()>>;
+    WsOutgoingMap _wsOutgoing;
 
     Engine* _engine = nullptr;
     ParametersManager& _parametersManager;
