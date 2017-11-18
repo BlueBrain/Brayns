@@ -37,16 +37,13 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
+#include <brayns/io/ImageManager.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
-
-#if (BRAYNS_USE_MAGICKPP)
-#include <Magick++.h>
-#endif
 
 #include <plugins/engines/EngineFactory.h>
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
@@ -217,6 +214,20 @@ struct Brayns::Impl
     }
 
 private:
+    void _writeFrameToFile()
+    {
+        const auto& frameExportFolder =
+            _parametersManager.getApplicationParameters()
+                .getFrameExportFolder();
+        if (frameExportFolder.empty())
+            return;
+        char str[7];
+        snprintf(str, 7, "%06d", int(_engine->getFrameNumber()));
+        const auto filename = frameExportFolder + "/" + str + ".png";
+        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
+        ImageManager::exportFrameBufferToFile(frameBuffer, filename);
+    }
+
     void _loadScene()
     {
         Progress loadingProgress("Loading scene ...",
@@ -272,63 +283,6 @@ private:
         _engine->setReady(true);
         BRAYNS_INFO << "Now rendering ..." << std::endl;
     }
-
-#if (BRAYNS_USE_MAGICKPP)
-    void _writeFrameToFolder()
-    {
-        const auto& frameExportFolder =
-            _parametersManager.getApplicationParameters()
-                .getFrameExportFolder();
-        if (frameExportFolder.empty())
-            return;
-        try
-        {
-            char str[7];
-            snprintf(str, 7, "%06d", int(_engine->getFrameNumber()));
-
-            const std::string filename = frameExportFolder + "/" + str + ".png";
-            FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-            std::string format;
-            switch (frameBuffer.getFrameBufferFormat())
-            {
-            case FrameBufferFormat::rgba_i8:
-                format = "RGBA";
-                break;
-            case FrameBufferFormat::rgb_i8:
-                format = "RGB";
-                break;
-            default:
-                BRAYNS_ERROR
-                    << "Unsupported frame buffer format. Cannot export "
-                       "frame to file as PNG image"
-                    << std::endl;
-                return;
-            }
-            uint8_t* colorBuffer = frameBuffer.getColorBuffer();
-            const auto& size = frameBuffer.getSize();
-            Magick::Image image(size.x(), size.y(), format, Magick::CharPixel,
-                                colorBuffer);
-            image.flip();
-            image.write(filename);
-        }
-        catch (Magick::Warning& warning)
-        {
-            BRAYNS_WARN << warning.what() << std::endl;
-            return;
-        }
-        catch (Magick::Error& error)
-        {
-            BRAYNS_ERROR << error.what() << std::endl;
-            return;
-        }
-    }
-#else
-    void _writeFrameToFolder()
-    {
-        BRAYNS_DEBUG << "ImageMagick is required to export frames as PNG files"
-                     << std::endl;
-    }
-#endif
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     void _executePlugins(const Vector2ui& size)
@@ -406,7 +360,7 @@ private:
 
         _engine->render();
 
-        _writeFrameToFolder();
+        _writeFrameToFile();
 
         _parametersManager.resetModified();
         camera.resetModified();

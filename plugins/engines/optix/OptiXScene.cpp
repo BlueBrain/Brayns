@@ -25,7 +25,7 @@
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/log.h>
 #include <brayns/common/volume/VolumeHandler.h>
-#include <brayns/io/TextureLoader.h>
+#include <brayns/io/ImageManager.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <plugins/engines/optix/cuda/braynsOptiXCudaPlugin_generated_Cones.cu.ptx.h>
@@ -769,11 +769,11 @@ void OptiXScene::commitMaterials(const bool updateOnly)
             assert(optixMaterial);
             for (const auto texture : material.second.getTextures())
             {
-                TextureLoader textureLoader;
                 if (texture.second != TEXTURE_NAME_SIMULATION)
                 {
-                    if (textureLoader.loadTexture(_textures, texture.first,
-                                                  texture.second))
+                    if (ImageManager::importTextureFromFile(_textures,
+                                                            texture.first,
+                                                            texture.second))
                     {
                         optixMaterial->setClosestHitProgram(0,
                                                             _phong_ch_textured);

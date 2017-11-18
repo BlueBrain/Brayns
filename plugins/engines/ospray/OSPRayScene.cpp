@@ -27,7 +27,7 @@
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
-#include <brayns/io/TextureLoader.h>
+#include <brayns/io/ImageManager.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/SceneParameters.h>
 
@@ -1098,10 +1098,10 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
             // Textures
             for (auto texture : material.second.getTextures())
             {
-                TextureLoader textureLoader;
                 if (texture.second != TEXTURE_NAME_SIMULATION)
-                    textureLoader.loadTexture(_textures, texture.first,
-                                              texture.second);
+                    ImageManager::importTextureFromFile(_textures,
+                                                        texture.first,
+                                                        texture.second);
                 else
                     BRAYNS_ERROR << "Failed to load texture: " << texture.second
                                  << std::endl;

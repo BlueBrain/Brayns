@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,9 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TextureLoader.h"
-
+#include "ImageManager.h"
 #include <brayns/common/log.h>
+#include <brayns/common/renderer/FrameBuffer.h>
 
 #if (BRAYNS_USE_MAGICKPP)
 #include <Magick++.h>
@@ -28,16 +28,63 @@
 
 namespace brayns
 {
-TextureLoader::TextureLoader()
+ImageManager::ImageManager()
 {
 }
 
-#if (BRAYNS_USE_MAGICKPP)
-
-bool TextureLoader::loadTexture(TexturesMap& textures,
-                                const TextureType textureType,
-                                const std::string& filename)
+bool ImageManager::exportFrameBufferToFile(
+    FrameBuffer& frameBuffer BRAYNS_UNUSED,
+    const std::string& filename BRAYNS_UNUSED)
 {
+#if (BRAYNS_USE_MAGICKPP)
+    try
+    {
+        std::string format;
+        switch (frameBuffer.getFrameBufferFormat())
+        {
+        case FrameBufferFormat::rgba_i8:
+            format = "RGBA";
+            break;
+        case FrameBufferFormat::rgb_i8:
+            format = "RGB";
+            break;
+        default:
+            BRAYNS_ERROR << "Unsupported frame buffer format. Cannot export "
+                            "frame to file as PNG image"
+                         << std::endl;
+            return false;
+        }
+        uint8_t* colorBuffer = frameBuffer.getColorBuffer();
+        const auto& size = frameBuffer.getSize();
+        Magick::Image image(size.x(), size.y(), format, Magick::CharPixel,
+                            colorBuffer);
+        image.flip();
+        image.write(filename);
+    }
+    catch (Magick::Warning& warning)
+    {
+        BRAYNS_WARN << warning.what() << std::endl;
+        return false;
+    }
+    catch (Magick::Error& error)
+    {
+        BRAYNS_ERROR << error.what() << std::endl;
+        return false;
+    }
+    return true;
+#else
+    BRAYNS_DEBUG << "ImageMagick is required to export frames to file"
+                 << std::endl;
+    return false;
+#endif
+}
+
+bool ImageManager::importTextureFromFile(
+    TexturesMap& textures BRAYNS_UNUSED,
+    const TextureType textureType BRAYNS_UNUSED,
+    const std::string& filename BRAYNS_UNUSED)
+{
+#if (BRAYNS_USE_MAGICKPP)
     if (textures.find(filename) != textures.end())
         return true;
 
@@ -76,13 +123,10 @@ bool TextureLoader::loadTexture(TexturesMap& textures,
         return false;
     }
     return true;
-}
-#else  // BRAYNS_USE_MAGICKPP
-bool TextureLoader::loadTexture(TexturesMap&, const TextureType,
-                                const std::string& filename)
-{
-    BRAYNS_ERROR << "ImageMagick is required to load " << filename << std::endl;
+#else
+    BRAYNS_DEBUG << "ImageMagick is required to load images from file"
+                 << std::endl;
     return false;
+#endif
 }
-#endif // BRAYNS_USE_MAGICKPP
 }
