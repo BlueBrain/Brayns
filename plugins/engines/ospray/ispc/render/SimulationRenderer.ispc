@@ -37,50 +37,205 @@ struct SimulationRenderer
     float detectionDistance;
 };
 
+struct ShadingAttributes
+{
+    const uniform SimulationRenderer* uniform self;
+    varying DifferentialGeometry* dg;
+    vec3f origin;
+    vec3f normal;
+    vec3f reflectedNormal;
+    float refraction;
+    float reflection;
+    float opacity;
+    vec3f diffuseColor;
+    vec3f specularColor;
+    float specularExponent;
+    vec3f lightEmissionColor;
+    float lightEmissionIntensity;
+    vec4f simulationColor;
+    vec3f indirectColor;
+    float indirectIntensity;
+    vec3f volumeColor;
+    float volumeIntensity;
+    vec3f shadingContribution;
+    vec3f finalContribution;
+};
+
+inline void SimulationRenderer_initializeShadingAttributes(
+    const uniform SimulationRenderer* uniform self, ShadingAttributes& sa)
+{
+    sa.self = self;
+    sa.dg = 0;
+
+    // Final contribution
+    sa.finalContribution = make_vec3f(0.f);
+
+    // Simulation contribution
+    sa.simulationColor = make_vec4f(0.f);
+
+    // Indirect light contribution
+    sa.indirectColor = make_vec3f(0.f);
+    sa.indirectIntensity = 0.f;
+
+    // Light emission
+    sa.lightEmissionColor = make_vec3f(0.f);
+    sa.lightEmissionIntensity = 0.f;
+
+    // Volume
+    sa.volumeColor = make_vec3f(0.f);
+    sa.volumeIntensity = 0.f;
+
+    // Specular color
+    sa.specularColor = make_vec3f(0.f);
+    sa.specularExponent = 0.f;
+
+    // Shading contribution
+    sa.shadingContribution = make_vec3f(0.f);
+
+    // Other attributes
+    sa.reflection = 0.f;
+    sa.refraction = 1.f;
+    sa.opacity = 1.f;
+}
+
+inline void SimulationRenderer_setShadingAttributes(
+    const uniform SimulationRenderer* uniform self, DifferentialGeometry& dg,
+    varying ScreenSample& sample, Ray& ray, ShadingAttributes& sa)
+{
+    sa.dg = &dg;
+
+    // Intersection point with geometry
+    sa.origin = dg.P;
+
+    // Shading normal
+    sa.normal = dg.Ns;
+
+    // Reflected shading normal
+    sa.reflectedNormal = ray.dir - 2.f * dot(ray.dir, sa.normal) * sa.normal;
+
+    // Process material attributes
+    const uniform Material* material = dg.material;
+    const uniform ExtendedOBJMaterial* objMaterial =
+        (const uniform ExtendedOBJMaterial*)material;
+    if (!objMaterial)
+    {
+        // Diffuse color
+        sa.diffuseColor = make_vec3f(dg.color);
+
+        // if no material is defined, localOpacity is stored in the alpha
+        // component of the RGBA color
+        sa.opacity = dg.color.w;
+        return;
+    }
+
+    foreach_unique(mat in objMaterial)
+    {
+        // Light emission intensity
+        sa.lightEmissionIntensity += mat->a;
+
+        // Glossiness
+        if (mat->glossiness > 0.f)
+        {
+            sa.normal =
+                sa.normal +
+                mat->glossiness * getRandomVector(sample, sa.normal,
+                                                  self->abstract.randomNumber);
+            sa.normal = normalize(sa.normal);
+        }
+
+        // Refraction index
+        sa.refraction = mat->refraction;
+
+        // Opacity
+        if (valid(mat->map_d))
+            sa.opacity = mat->d * get1f(mat->map_d, dg.st, 1.f);
+        else
+            sa.opacity = mat->d;
+
+        // Diffuse color
+        sa.diffuseColor = mat->Kd * make_vec3f(dg.color);
+        if (valid(mat->map_Kd))
+        {
+            const vec4f diffuseColorFromMap = get4f(mat->map_Kd, dg.st);
+            sa.diffuseColor = sa.diffuseColor * make_vec3f(diffuseColorFromMap);
+            sa.opacity = diffuseColorFromMap.w;
+        }
+
+        // Specular color
+        if (valid(mat->map_Ks))
+            sa.specularColor =
+                max(sa.specularColor,
+                    mat->Ks * get3f(mat->map_Ks, dg.st, make_vec3f(1.f)));
+        else
+            sa.specularColor = max(sa.specularColor, mat->Ks);
+
+        // Specular exponent
+        if (valid(mat->map_Ns))
+            sa.specularExponent = max(sa.specularExponent,
+                                      mat->Ns * get1f(mat->map_Ns, dg.st, 1.f));
+        else
+            sa.specularExponent = max(sa.specularExponent, mat->Ns);
+
+        // Normal mapping
+        if (valid(mat->map_Bump))
+        {
+            const vec3f n = get3f(mat->map_Bump, dg.st, make_vec3f(0.f)) - 0.5f;
+            sa.normal.x -= n.x;
+            sa.normal.y -= n.y;
+        }
+
+        // Reflection index
+        sa.reflection = mat->reflection;
+        if (valid(mat->map_reflection))
+        {
+            const vec3f value =
+                get3f(mat->map_reflection, dg.st, make_vec3f(0.f));
+            sa.reflection *= (value.x + value.y + value.z) / 3.f;
+        }
+    }
+}
+
 /**
-  The getSimulationValue reads simulation value from the simulation data buffer.
+  The SimulationRenderer_processSimulationContribution reads simulation value
+  from the simulation data buffer.
   The geometry contains the offset of the buffer in it's X texture coordinates.
   The value from the simulation data buffer is then converted into a color,
   according to the colormap.
   */
-inline varying vec4f
-    getSimulationValue(const uniform SimulationRenderer* uniform self,
-                       DifferentialGeometry& dg, varying vec3f& lightEmission)
+inline void SimulationRenderer_processSimulationValue(
+    ShadingAttributes& sa, varying DifferentialGeometry* dg)
 {
-    lightEmission = make_vec3f(0.f);
-    vec4f color = make_vec4f(0.f, 0.f, 0.f, 1.f);
-
     float value = 0.f;
-    const uint64 index = (uint64)(dg.st.x * OFFSET_MAGIC) << 32 |
-                         (uint32)(dg.st.y * OFFSET_MAGIC);
+    const uint64 index = (uint64)(dg->st.x * OFFSET_MAGIC) << 32 |
+                         (uint32)(dg->st.y * OFFSET_MAGIC);
 
-    if (index < self->simulationDataSize)
-        value = self->simulationData[index];
+    if (index < sa.self->simulationDataSize)
+        value = sa.self->simulationData[index];
     else
         // Value offset is out of range, return error color
-        return color;
+        return;
 
-    if (value < self->threshold)
-        return color;
+    if (value < sa.self->threshold)
+        return;
 
     // Normalize the value according colormap size
-    const float normalizedValue = (value - self->abstract.colorMapMinValue) /
-                                  self->abstract.colorMapRange;
+    const float normalizedValue = (value - sa.self->abstract.colorMapMinValue) /
+                                  sa.self->abstract.colorMapRange;
 
-    const uint32 lookupIndex =
-        max(0.f, min(normalizedValue, 1.f)) * (self->abstract.colorMapSize - 1);
+    const uint32 lookupIndex = max(0.f, min(normalizedValue, 1.f)) *
+                               (sa.self->abstract.colorMapSize - 1);
 
-    color = self->abstract.colorMap[lookupIndex];
+    sa.simulationColor = sa.self->abstract.colorMap[lookupIndex];
 
-    if (self->abstract.emissionIntensitiesMap)
-        lightEmission = self->abstract.emissionIntensitiesMap[lookupIndex];
-
-    return color;
+    if (sa.self->abstract.emissionIntensitiesMap)
+        sa.lightEmissionColor =
+            sa.self->abstract.emissionIntensitiesMap[lookupIndex];
 }
 
 /**
-  The purpose of the getValueFromSimulationModel function is to retreive the
-  value of the simulation from a secondary model attached to the OSPRay scene.
+  The purpose of the SimulationRenderer_processSimulationContribution function
+  is to retreive the  value of the simulation from a secondary model attached to
+  the OSPRay scene.
   The geometry is defined by the primary model, but the shading is computed
   according to a second, non-visible model that contains the simulation values.
   In the case of circuit rendering for examples, neurons are meshes, and
@@ -90,49 +245,185 @@ inline varying vec4f
   the secondary model. When the secondary model is intersected, the simulation
   value is retrieved and used to shade the surface of the mesh.
 */
-inline void getValueFromSimulationModel(
-    const uniform SimulationRenderer* uniform self,
-    varying ScreenSample& sample, const varying vec3f& intersection,
-    const varying vec3f& normal, const int materialID,
-    varying vec3f& simulationColor, varying float& lightEmission)
+inline void SimulationRenderer_processSimulationContribution(
+    varying ScreenSample& sample, ShadingAttributes& sa, const int materialID)
 {
+    if (!sa.self->simulationModel)
+    {
+        SimulationRenderer_processSimulationValue(sa, sa.dg);
+        return;
+    }
+
     // Get simulation color from simulation model
-    varying Ray colorRay;
-    colorRay.org = intersection;
-    colorRay.dir = getRandomVector(sample, normal, self->abstract.randomNumber);
+    Ray colorRay;
+    colorRay.org = sa.origin;
+    colorRay.dir = getRandomVector(sample, sa.normal * -1.f,
+                                   sa.self->abstract.randomNumber);
     colorRay.t0 = 0.f;
     colorRay.time = infinity;
-    colorRay.t = self->detectionDistance;
+    colorRay.t = sa.self->detectionDistance;
     colorRay.primID = -1;
     colorRay.geomID = -1;
     colorRay.instID = -1;
 
     // Trace ray to hit the simulation model
-    traceRay(self->simulationModel, colorRay);
+    traceRay(sa.self->simulationModel, colorRay);
 
-    if (colorRay.geomID >= 0)
+    if (colorRay.geomID < 0)
+        sa.simulationColor = make_vec4f(0.f, 1.f, 0.f, 1.f);
+    else
     {
         // Intersection found. Simulation ray hit a primitive
-        DifferentialGeometry colorDg;
-        postIntersect(self->simulationModel, colorDg, colorRay,
+        varying DifferentialGeometry colorDg;
+        postIntersect(sa.self->simulationModel, colorDg, colorRay,
                       DG_MATERIALID | DG_TEXCOORD);
-        if (materialID == colorDg.materialID && self->simulationData)
-        {
+        if (materialID == colorDg.materialID && sa.self->simulationData)
             // The mesh and it's corresponding representation in the
             // simulation model must use the same material ID. This is to
             // make sure that one neuron is not shaded with the simulation
             // value of another neuron.
-            vec3f emission = make_vec3f(0.f);
-            const vec4f color = getSimulationValue(self, colorDg, emission);
-            simulationColor =
-                simulationColor * (1.f - color.w) + make_vec3f(color) * color.w;
-            lightEmission = reduce_max(emission);
+            SimulationRenderer_processSimulationValue(sa, &colorDg);
+    }
+}
+
+inline vec3f SimulationRenderer_getBackgroundColor(
+    const uniform SimulationRenderer* uniform self,
+    varying ScreenSample& sample, const int depth, float& pathOpacity)
+{
+    // No intersection. Return volume contribution + skybox color
+    vec3f color;
+    vec4f volumetricValue = make_vec4f(0.f);
+    vec4f backgroundColor =
+        skyboxMapping((Renderer*)self, sample.ray, self->abstract.numMaterials,
+                      self->abstract.materials);
+
+    if (self->abstract.volumeData)
+    {
+        volumetricValue =
+            getVolumeContribution(&(self->abstract), sample.ray, sample,
+                                  self->abstract.volumeSamplesPerRay, 1.f);
+        if (depth == 0)
+            pathOpacity = 1.f - volumetricValue.w;
+    }
+
+    color = volumetricValue.w * make_vec3f(volumetricValue) +
+            (1.f - volumetricValue.w) * make_vec3f(backgroundColor);
+    return color;
+}
+
+inline void SimulationRenderer_computeIndirectShading(
+    varying ScreenSample& sample, ShadingAttributes& sa)
+
+{
+    if (sa.self->abstract.ambientOcclusionStrength == 0.f ||
+        sa.lightEmissionIntensity > 0.01f)
+        return;
+
+    DifferentialGeometry dg;
+    if (indirectShading(&(sa.self->abstract), sample, sa.origin, sa.normal, dg,
+                        sa.indirectColor, sa.indirectIntensity))
+    {
+        sa.indirectColor =
+            sa.indirectColor * sa.self->abstract.ambientOcclusionStrength;
+
+        sa.indirectIntensity *= sa.self->abstract.ambientOcclusionStrength;
+    }
+}
+
+inline void SimulationRenderer_processLightShading(DifferentialGeometry& dg,
+                                                   varying ScreenSample& sample,
+                                                   ShadingAttributes& sa)
+{
+    // Shading for all lights defined in the scene
+    sa.shadingContribution = make_vec3f(0.f);
+    for (uniform int i = 0;
+         sa.self->abstract.lights && i < sa.self->abstract.numLights; ++i)
+    {
+        const uniform Light* uniform light = sa.self->abstract.lights[i];
+        const vec2f s = make_vec2f(0.5f);
+        const varying Light_SampleRes lightSample = light->sample(light, dg, s);
+        const vec3f radiance = lightSample.weight;
+        const varying vec3f lightDirection = lightSample.dir;
+
+        if (reduce_max(radiance) > 0.f)
+        {
+            float cosNL = 1.f;
+            vec3f specularColor = make_vec3f(0.f);
+
+            // Phong + Blinn shading
+            const bool shadingEnabled = sa.self->abstract.shadingEnabled;
+            if (shadingEnabled)
+            {
+                cosNL = dot(lightDirection, sa.normal);
+
+                // Specular color
+                const float cosLR = dot(lightDirection, sa.reflectedNormal);
+                specularColor =
+                    sa.specularColor * powf(cosLR, sa.specularExponent);
+            }
+
+            // Process shadows
+            const bool shadowsEnabled = sa.self->abstract.shadows > 0.f &&
+                                        sa.lightEmissionIntensity < 0.01f;
+            const float alpha =
+                shadowsEnabled
+                    ? shadedLightIntensity(&(sa.self->abstract), sample,
+                                           sa.origin, sa.normal, lightDirection)
+                    : 1.f;
+            sa.shadingContribution = sa.shadingContribution + specularColor +
+                                     alpha * cosNL * sa.diffuseColor;
         }
     }
-    else
-        // No intersection, color is initialized with the first value of the
-        // colormap
-        simulationColor = make_vec3f(self->abstract.colorMap[0]);
+}
+
+inline void SimulationRenderer_processElectronShading(
+    varying ScreenSample& sample, ShadingAttributes& sa)
+{
+    // Electron Shading
+    const vec3f viewer = normalize(sample.ray.org - sa.origin);
+    const float el = max(0.f, dot(viewer, sa.normal));
+    const float cosNL = sa.lightEmissionIntensity + (1.f - el);
+    sa.shadingContribution = sa.diffuseColor * cosNL * sa.opacity;
+}
+
+inline void SimulationRenderer_processVolumeContribution(
+    varying ScreenSample& sample, ShadingAttributes& sa, Ray& ray)
+{
+    if (sa.self->abstract.volumeData)
+    {
+        const vec4f volumetricValue =
+            getVolumeContribution(&(sa.self->abstract), ray, sample,
+                                  sa.self->abstract.volumeSamplesPerRay, 1.f);
+        sa.volumeColor = make_vec3f(volumetricValue);
+        sa.volumeIntensity = volumetricValue.w;
+    }
+}
+
+inline void SimulationRenderer_processFinalContribution(ShadingAttributes& sa)
+{
+    // Indirect contribution
+    const vec3f indirectContribution = sa.indirectColor * sa.indirectIntensity;
+
+    // Simulation contribution
+    const vec3f simulationColor = make_vec3f(sa.simulationColor);
+    const float alpha = sa.simulationColor.w;
+
+    // Sum up all surface shading contributions
+    vec3f totalContributions =
+        sa.shadingContribution * (1.f - alpha) +
+        sa.shadingContribution * simulationColor * alpha + indirectContribution;
+
+    // Add volumetic contribution
+    if (sa.self->abstract.volumeData)
+    {
+        const vec4f src = make_vec4f(sa.volumeColor, sa.volumeIntensity);
+        vec4f dst = make_vec4f(totalContributions, 1.f);
+        totalContributions = make_vec3f(
+            composite(src, dst, sa.self->abstract.volumeSamplesPerRay,
+                      sa.self->abstract.colorMapSize, 1.f));
+    }
+
+    sa.finalContribution = totalContributions;
 }
 
 inline vec3f SimulationRenderer_shadeRay(
@@ -140,420 +431,134 @@ inline vec3f SimulationRenderer_shadeRay(
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
-    varying float pathOpacity = 0.f;
-    varying int depth = 0;
-    varying float oldlocalRefraction = 1.f;
+    float pathOpacity = 0.f;
+    unsigned int depth = 0;
+    float oldlocalRefraction = 1.f;
+    bool moreRebounds = true;
 
-    varying float intersectionWeights[NB_MAX_REBOUNDS];
-    varying vec3f intersectionColors[NB_MAX_REBOUNDS];
-    varying vec3f specularColor = make_vec3f(0.f);
-    varying float zDepth = 0.f;
-    sample.z = 1.f;
-    varying float tend = ray.t;
+    float intersectionWeights[NB_MAX_REBOUNDS];
+    vec3f intersectionColors[NB_MAX_REBOUNDS];
+    vec3f specularColor = make_vec3f(0.f);
+    float tend = ray.t;
 
-    varying bool moreRebounds = true;
+    sample.alpha = 1.f;
+    sample.z = log(infinity);
+
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
     {
-        traceRay(self->abstract.super.model, ray);
+        // Initialize current ray contribution
+        intersectionWeights[depth] = 0.f;
+        intersectionColors[depth] = make_vec3f(0.f);
 
+        ShadingAttributes sa;
+        SimulationRenderer_initializeShadingAttributes(self, sa);
+
+        // Trace ray
+        traceRay(self->abstract.super.model, ray);
         if (ray.geomID < 0)
         {
             // No intersection. Return volume contribution + skybox color
-            // ray.t = self->abstract.volumeDiag * 2.f;
-            vec4f volumetricValue = make_vec4f(0.f);
-            vec4f backgroundColor =
-                skyboxMapping((Renderer*)self, ray, self->abstract.numMaterials,
-                              self->abstract.materials);
-
-            if (self->abstract.volumeData)
-            {
-                volumetricValue =
-                    getVolumeContribution(&(self->abstract), ray, sample,
-                                          self->abstract.volumeSamplesPerRay,
-                                          1.f);
-                if (depth == 0)
-                    pathOpacity = 1.f - volumetricValue.w;
-            }
-
-            intersectionColors[depth] =
-                volumetricValue.w * make_vec3f(volumetricValue) +
-                (1.f - volumetricValue.w) * make_vec3f(backgroundColor);
-            sample.z = 1.f - log(zDepth) / 10.f;
+            sa.shadingContribution =
+                SimulationRenderer_getBackgroundColor(self, sample, depth,
+                                                      pathOpacity);
             moreRebounds = false;
         }
         else
         {
-            // Retreive information about the geometry, typically geometry ID,
-            // normal to the surface, material ID, texture coordinates, etc.
+            if (depth == 0)
+                sample.z = log(ray.t) / 10.f;
+
             DifferentialGeometry dg;
             postIntersect(self->abstract.super.model, dg, ray,
                           DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                               DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
-            // Initialisation for the current intersection
-            varying float localLightEmission = 0.f;
-            varying float localRefraction = 1.f;
-            varying float localReflection = 0.f;
-            varying float localOpacity = 0.f;
-            varying vec3f localSimulationColor = make_vec3f(0.f);
-            varying float localSimulationIntensity = 0.f;
-            varying vec3f localDiffuseColor = make_vec3f(0.f);
-            varying vec3f localSpecularColor = make_vec3f(0.f);
-            varying float localSpecularExponent = 0.f;
-            varying vec3f localNormal = dg.Ns;
-            varying float localLightIntensity = 1.f;
+            // Initialize shading attributes for current iteration
+            SimulationRenderer_setShadingAttributes(self, dg, sample, ray, sa);
 
-            // Get simulation value from geometry ID if no simulation model
-            // is used.
-            varying vec3f lightEmission = make_vec3f(0.f);
-            vec4f simulationValue = make_vec4f(0.f);
-            if (!self->simulationModel && self->simulationData)
-                simulationValue = getSimulationValue(self, dg, lightEmission);
+            // Get simulation value from geometry ID if no simulation model is
+            // used
+            SimulationRenderer_processSimulationContribution(sample, sa,
+                                                             dg.materialID);
 
-            localSimulationColor = lightEmission + make_vec3f(simulationValue);
-            localSimulationIntensity = simulationValue.w;
-            localLightEmission = reduce_max(lightEmission);
-
-            // localShadedColor defines the color for the current intersected
-            // surface, and for the current ray generation only. This value is
-            // reset and updated for every rebound
-            varying vec3f localShadedColor = make_vec3f(0.f);
-            intersectionWeights[depth] = 0.f;
-            intersectionColors[depth] = localShadedColor;
-
-            // Get volumetric information
-            if (self->abstract.volumeData)
+            if (sa.opacity > 0.01f && moreRebounds)
             {
-                vec4f volumetricValue =
-                    getVolumeContribution(&(self->abstract), ray, sample,
-                                          self->abstract.volumeSamplesPerRay,
-                                          1.f);
-                intersectionWeights[depth] = volumetricValue.w;
-                intersectionColors[depth] = localShadedColor =
-                    make_vec3f(volumetricValue);
-                if (intersectionWeights[depth] >= 1.f)
-                {
-                    pathOpacity = 1.f;
-                    break;
-                }
-            }
+                // Compute indirect shading contribution
+                SimulationRenderer_computeIndirectShading(sample, sa);
 
-            // Process material attributes
-            const uniform Material* material = dg.material;
-            const uniform ExtendedOBJMaterial* objMaterial =
-                (const uniform ExtendedOBJMaterial*)material;
-            if (!objMaterial)
-            {
-                // Diffuse color
-                localDiffuseColor = make_vec3f(dg.color);
-                // if no material is defined, localOpacity is stored in the
-                // alpha
-                // component of the RGBA color
-                localOpacity = dg.color.w;
-            }
-            else
-            {
-                foreach_unique(mat in objMaterial)
-                {
-                    // Light emission strength
-                    localLightEmission += mat->a;
-
-                    // Glossiness
-                    if (mat->glossiness > 0.f)
-                        localNormal = normalize(
-                            localNormal +
-                            mat->glossiness *
-                                getRandomVector(sample, localNormal,
-                                                self->abstract.randomNumber));
-                    // Refraction index
-                    localRefraction = mat->refraction;
-
-                    // Opacity
-                    if (valid(mat->map_d))
-                        localOpacity += mat->d * get1f(mat->map_d, dg.st, 1.f);
-                    else
-                        localOpacity += mat->d;
-
-                    // Diffuse color
-                    localDiffuseColor = mat->Kd * make_vec3f(dg.color);
-                    if (valid(mat->map_Kd))
-                    {
-                        const vec4f localDiffuseColorFromMap =
-                            get4f(mat->map_Kd, dg.st);
-                        localDiffuseColor =
-                            localDiffuseColor *
-                            make_vec3f(localDiffuseColorFromMap);
-                        localOpacity *= localDiffuseColorFromMap.w;
-                    }
-
-                    // Specular color
-                    if (valid(mat->map_Ks))
-                        localSpecularColor =
-                            max(localSpecularColor,
-                                mat->Ks *
-                                    get3f(mat->map_Ks, dg.st, make_vec3f(1.f)));
-                    else
-                        localSpecularColor = max(localSpecularColor, mat->Ks);
-
-                    // Specular exponent
-                    if (valid(mat->map_Ns))
-                        localSpecularExponent =
-                            max(localSpecularExponent,
-                                mat->Ns * get1f(mat->map_Ns, dg.st, 1.f));
-                    else
-                        localSpecularExponent =
-                            max(localSpecularExponent, mat->Ns);
-
-                    // Normal mapping
-                    if (valid(mat->map_Bump))
-                    {
-                        const vec3f n =
-                            get3f(mat->map_Bump, dg.st, make_vec3f(0.f)) - 0.5f;
-                        localNormal.x -= n.x;
-                        localNormal.y -= n.y;
-                    }
-
-                    // Reflection index
-                    localReflection = mat->reflection;
-                    if (valid(mat->map_reflection))
-                    {
-                        const vec3f n =
-                            get3f(mat->map_reflection, dg.st, make_vec3f(0.f));
-                        localReflection *= (n.x + n.y + n.z) / 3.f;
-                    }
-                }
-            }
-
-            if (localOpacity > 0.01f)
-            {
-                if (self->simulationModel)
-                    // Get color from simulation model
-                    getValueFromSimulationModel(self, sample, dg.P, neg(dg.Ng),
-                                                dg.materialID,
-                                                localDiffuseColor,
-                                                localLightEmission);
-
-                // Intersection point with geometry, slightly above the
-                // surface,
-                // along the normal
-                const varying vec3f intersection =
-                    dg.P + self->abstract.super.epsilon * dg.Ng;
-
-                // Indirect shading
-                varying vec3f indirectShadingColor = make_vec3f(0.f);
-                varying float indirectShadingIntensity = 0.f;
-                const varying vec3f reflectedDirection =
-                    ray.dir - 2.f * dot(ray.dir, localNormal) * localNormal;
-
-                if (self->abstract.ambientOcclusionStrength > 0.f &&
-                    localLightEmission < 0.01f)
-                {
-                    // Indirect illumination
-                    DifferentialGeometry geometry;
-                    if (indirectShading(&(self->abstract), ray, sample,
-                                        intersection, localNormal, geometry,
-                                        indirectShadingColor,
-                                        indirectShadingIntensity))
-                    {
-                        indirectShadingColor =
-                            indirectShadingColor *
-                            self->abstract.ambientOcclusionStrength;
-
-                        indirectShadingIntensity *=
-                            self->abstract.ambientOcclusionStrength;
-
-                        // Get simulation value from geometry ID
-                        varying vec3f lightEmission = make_vec3f(0.f);
-                        vec4f simulationValue = make_vec4f(0.f);
-
-                        if (self->simulationData)
-                            simulationValue = getSimulationValue(self, geometry,
-                                                                 lightEmission);
-
-                        indirectShadingColor = indirectShadingColor +
-                                               lightEmission +
-                                               make_vec3f(simulationValue);
-
-                        indirectShadingIntensity += reduce_max(lightEmission);
-                    }
-                }
-
-                if (self->abstract.numLights == 0)
-                {
-                    // No lights defined
-                    localLightIntensity = localLightEmission;
-                    localLightIntensity =
-                        max(localLightIntensity, indirectShadingIntensity);
-                    localShadedColor = localShadedColor +
-                                       localOpacity * (localDiffuseColor +
-                                                       indirectShadingColor);
-                }
-                else if (self->abstract.electronShadingEnabled)
-                {
-                    // Electron Shading
-                    localLightIntensity = 1.f;
-                    const varying vec3f viewer =
-                        normalize(ray.org - intersection);
-                    const varying float el = max(0.f, dot(viewer, localNormal));
-                    varying float cosNL = localLightEmission + (1.f - el);
-                    localShadedColor =
-                        localShadedColor +
-                        localOpacity * cosNL *
-                            (
-                                // Affect shading with color determined by
-                                // simulation value
-                                (localSimulationColor *
-                                 localSimulationIntensity) +
-                                (1.f - localSimulationIntensity) *
-                                    localDiffuseColor) +
-                        indirectShadingColor * indirectShadingIntensity;
-                }
+                // Process surface shading
+                if (self->abstract.electronShadingEnabled)
+                    SimulationRenderer_processElectronShading(sample, sa);
                 else
-                {
-                    // Shading for all lights defined in the scene
-                    for (uniform int i = 0;
-                         self->abstract.lights && i < self->abstract.numLights;
-                         ++i)
-                    {
-                        const uniform Light* uniform light =
-                            self->abstract.lights[i];
-                        const varying vec2f s = make_vec2f(0.5f);
-                        const varying Light_SampleRes lightSample =
-                            light->sample(light, dg, s);
-                        varying vec3f radiance =
-                            lightSample.weight + indirectShadingIntensity;
-                        varying vec3f lightDirection = lightSample.dir;
+                    SimulationRenderer_processLightShading(dg, sample, sa);
 
-                        if (reduce_max(radiance) > 0.f)
-                        {
-                            varying float cosNL = 1.f;
-                            varying float cosLR = 1.f;
-                            // Phong + Blinn shading
-                            if (self->abstract.shadingEnabled)
-                            {
-                                cosNL = min(1.f, max(0.f, dot(lightDirection,
-                                                              localNormal)));
-                                cosLR =
-                                    min(1.f, max(0.f, dot(lightDirection,
-                                                          reflectedDirection)));
-
-                                // Specular color
-                                specularColor =
-                                    specularColor +
-                                    localSpecularColor *
-                                        powf(cosLR, localSpecularExponent);
-                            }
-
-                            cosNL += localLightEmission;
-                            cosLR += localLightEmission;
-
-                            // Process shadows
-                            if (self->abstract.shadows > 0.f &&
-                                localLightEmission < 0.01f)
-                                localLightIntensity =
-                                    shadedLightIntensity(&(self->abstract), ray,
-                                                         sample, intersection,
-                                                         localNormal,
-                                                         lightDirection);
-
-                            // Diffuse color
-                            const varying vec3f localUnshadedColor =
-                                cosNL * localLightIntensity *
-                                    (
-                                        // Affect shading with color
-                                        // determined
-                                        // by
-                                        // simulation value
-                                        (localSimulationColor *
-                                         localSimulationIntensity) +
-                                        (1.f - localSimulationIntensity) *
-                                            localDiffuseColor) +
-                                indirectShadingColor * indirectShadingIntensity;
-
-                            // Add contribution of current light
-                            localShadedColor =
-                                localShadedColor * (1.f - localOpacity) +
-                                localUnshadedColor * localOpacity;
-                        }
-                    }
-                }
-
-                // Store final color for current iteration
-                const varying vec4f src =
-                    make_vec4f(localShadedColor + specularColor, 1.f);
-                varying vec4f dst = make_vec4f(intersectionColors[depth],
-                                               intersectionWeights[depth]);
-
-                dst = composite(src, dst, self->abstract.volumeSamplesPerRay,
-                                self->abstract.colorMapSize, 1.f);
-
-                intersectionColors[depth] = make_vec3f(dst);
-                intersectionWeights[depth] = dst.w;
-
-                // Update cumulated path opacity
-                pathOpacity += localOpacity;
-                pathOpacity = min(1.f, pathOpacity);
-
-                // Prepare ray for next iteration
-                if (localOpacity < 1.f)
-                {
-                    const float angle = dot(ray.dir, localNormal);
-                    if (localRefraction == oldlocalRefraction)
-                        if (angle < 0.f)
-                            // Set localRefraction to default index if
-                            // exiting
-                            // volume
-                            localRefraction = 1.f;
-
-                    ray.t0 = self->abstract.super.epsilon;
-                    ray.dir =
-                        refractedVector(ray.dir, localNormal,
-                                        oldlocalRefraction, localRefraction);
-                    ray.org = dg.P + self->abstract.super.epsilon * ray.dir;
-
-                    intersectionWeights[depth] = 1.f - localOpacity;
-                    oldlocalRefraction = localRefraction;
-                    ++depth;
-                }
-                else if (localReflection > 0.f)
-                {
-                    ray.dir = reflectedDirection;
-                    ray.t0 = self->abstract.super.epsilon;
-                    ray.org = intersection;
-                    intersectionWeights[depth] = localReflection;
-                    ++depth;
-                }
-                else
-                    moreRebounds = false;
+                // Get volume contribution
+                SimulationRenderer_processVolumeContribution(sample, sa, ray);
             }
             else
                 // Fully transparent object. Ignore intersection
                 ray.t0 = ray.t + 1.f;
-
-            // Z-Depth
-            zDepth += localOpacity * ray.t;
-            sample.z = log(zDepth) / 10.f;
-
-            // Next ray
-            tend -= ray.t;
-            if (tend < 0.f)
-                break;
-            ray.t = tend;
-            ray.primID = -1;
-            ray.geomID = -1;
-            ray.instID = -1;
         }
+
+        // Combine all contributions
+        SimulationRenderer_processFinalContribution(sa);
+
+        // Store final compositing for current ray iteration
+        intersectionColors[depth] = sa.finalContribution;
+        intersectionWeights[depth] = sa.opacity;
+
+        // Update cumulated path opacity
+        pathOpacity += sa.opacity;
+        pathOpacity = min(1.f, pathOpacity);
+
+        // Prepare ray for next iteration
+        if (sa.opacity < 1.f)
+        {
+            const float angle = dot(ray.dir, sa.normal);
+            if (sa.refraction == oldlocalRefraction)
+                if (angle < 0.f)
+                    sa.refraction = 1.f;
+
+            ray.t0 = self->abstract.super.epsilon;
+            ray.dir = refractedVector(ray.dir, sa.normal, oldlocalRefraction,
+                                      sa.refraction);
+            ray.org = sa.origin + self->abstract.super.epsilon * ray.dir;
+
+            intersectionWeights[depth] = 1.f - sa.opacity;
+            oldlocalRefraction = sa.refraction;
+            ++depth;
+        }
+        else if (sa.reflection > 0.f)
+        {
+            ray.dir = sa.reflectedNormal;
+            ray.t0 = self->abstract.super.epsilon;
+            ray.org =
+                sa.origin + self->abstract.super.epsilon * sa.reflectedNormal;
+            intersectionWeights[depth] = sa.reflection;
+            ++depth;
+        }
+        else
+            moreRebounds = false;
+
+        // Next ray
+        tend -= ray.t;
+        if (tend < 0.f)
+            break;
+
+        ray.t = tend;
+        ray.primID = -1;
+        ray.geomID = -1;
+        ray.instID = -1;
     }
 
-    // Z-Depth
-    if (depth >= NB_MAX_REBOUNDS)
-        sample.z = 1.f - log(zDepth) / 10.f;
-
-    // Back to front computation of final color according to colors and
-    // weights
+    // Back to front computation of final color according to colors and  weights
     // of each ray generation
     sample.alpha = pathOpacity;
-    for (int i = depth - 1; i >= 0; --i)
+    if (depth == 1)
+        return intersectionColors[1] * intersectionWeights[0] +
+               intersectionColors[0] * (1.f - intersectionWeights[0]);
+
+    for (int i = depth - 2; i >= 0; --i)
         intersectionColors[i] =
             intersectionColors[i + 1] * intersectionWeights[i] +
             intersectionColors[i] * (1.f - intersectionWeights[i]);

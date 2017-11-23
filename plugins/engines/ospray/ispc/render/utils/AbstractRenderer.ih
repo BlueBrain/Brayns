@@ -77,7 +77,6 @@ struct AbstractRenderer
    information about the
     intersected geometry, if any.
     @param self Pointer to the current renderer
-    @param ray Current ray used to initialize the random ray
     @param sample Screen sample
     @param intersection First ray intersection with the surface
     @param normal Normal to the surface
@@ -90,14 +89,11 @@ struct AbstractRenderer
     @param randomDirection Computed random direction
     @return true if a geometry intersects the random ray, false otherwise
 */
-bool launchRandomRay(const uniform AbstractRenderer* uniform self,
-                     const varying Ray& ray, varying ScreenSample& sample,
-                     const varying vec3f& intersection,
-                     const varying vec3f& normal,
-                     DifferentialGeometry& geometry,
-                     varying vec3f& backgroundColor,
-                     varying float& distanceToIntersection,
-                     varying vec3f& randomDirection);
+bool launchRandomRay(
+    const uniform AbstractRenderer* uniform self, varying ScreenSample& sample,
+    const varying vec3f& intersection, const varying vec3f& normal,
+    DifferentialGeometry& geometry, varying vec3f& backgroundColor,
+    varying float& distanceToIntersection, varying vec3f& randomDirection);
 
 /**
     Returns the refracted vector according to the direction of the incident ray,
@@ -135,7 +131,7 @@ vec3f refractedVector(const varying vec3f& direction,
            between the intersection and the geometry intersect by the random
    ray.
 */
-bool indirectShading(const uniform AbstractRenderer* uniform self, Ray& ray,
+bool indirectShading(const uniform AbstractRenderer* uniform self,
                      varying ScreenSample& sample,
                      const varying vec3f& intersection,
                      const varying vec3f& normal,
@@ -147,7 +143,6 @@ bool indirectShading(const uniform AbstractRenderer* uniform self, Ray& ray,
     Returns the normalized light intensity decreased by the opacity of the
    intersected surfaces.
     @param self Pointer to the current renderer
-    @param ray Current ray used to initialize the random ray
     @param sample Screen sample
     @param intersection First ray intersection with the surface
     @param normal Normal to the surface
@@ -155,10 +150,10 @@ bool indirectShading(const uniform AbstractRenderer* uniform self, Ray& ray,
     @return Intensity of shaded light
 */
 float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
-                           Ray& ray, varying ScreenSample& sample,
+                           varying ScreenSample& sample,
                            const varying vec3f& intersection,
                            const varying vec3f& normal,
-                           varying vec3f& lightDirection);
+                           const varying vec3f& lightDirection);
 
 /**
     Returns the contribution (color and alpha) of a ray going through the volume

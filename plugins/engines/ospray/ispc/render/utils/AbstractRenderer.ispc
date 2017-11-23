@@ -21,11 +21,10 @@
 #include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.ih>
 
 inline bool launchRandomRay(
-    const uniform AbstractRenderer* uniform self, const varying Ray& ray,
-    varying ScreenSample& sample, const varying vec3f& intersection,
-    const varying vec3f& normal, DifferentialGeometry& geometry,
-    varying vec3f& backgroundColor, varying float& distanceToIntersection,
-    varying vec3f& randomDirection)
+    const uniform AbstractRenderer* uniform self, varying ScreenSample& sample,
+    const varying vec3f& intersection, const varying vec3f& normal,
+    DifferentialGeometry& geometry, varying vec3f& backgroundColor,
+    varying float& distanceToIntersection, varying vec3f& randomDirection)
 {
     randomDirection = getRandomVector(sample, normal, self->randomNumber);
     backgroundColor = self->bgColor;
@@ -35,11 +34,9 @@ inline bool launchRandomRay(
         // normal
         randomDirection = neg(randomDirection);
 
-    varying Ray randomRay;
+    varying Ray randomRay = sample.ray;
     setRay(randomRay, intersection, randomDirection);
     randomRay.t0 = self->super.epsilon;
-    randomRay.time = ray.time;
-    randomRay.t = ray.t;
     randomRay.primID = -1;
     randomRay.geomID = -1;
     randomRay.instID = -1;
@@ -77,7 +74,7 @@ inline vec3f refractedVector(const varying vec3f& direction,
 }
 
 inline bool indirectShading(const uniform AbstractRenderer* uniform self,
-                            Ray& ray, varying ScreenSample& sample,
+                            varying ScreenSample& sample,
                             const varying vec3f& intersection,
                             const varying vec3f& normal,
                             DifferentialGeometry& geometry,
@@ -90,9 +87,9 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
 
     // Launch a random ray
     varying vec3f randomDirection;
-    if (launchRandomRay((AbstractRenderer*)self, ray, sample, intersection,
-                        normal, geometry, backgroundColor,
-                        distanceToIntersection, randomDirection))
+    if (launchRandomRay((AbstractRenderer*)self, sample, intersection, normal,
+                        geometry, backgroundColor, distanceToIntersection,
+                        randomDirection))
     {
         // Determine material of intersected geometry
         const uniform Material* material = geometry.material;
@@ -153,20 +150,20 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
 }
 
 inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
-                                  Ray& ray, varying ScreenSample& sample,
+                                  varying ScreenSample& sample,
                                   const varying vec3f& intersection,
                                   const varying vec3f& normal,
-                                  varying vec3f& lightDirection)
+                                  const varying vec3f& lightDirection)
 {
+    vec3f ld = lightDirection;
     if (self->softShadows != 0.f)
         // Slightly alter light direction for Soft shadows
-        lightDirection =
-            normalize(lightDirection +
-                      self->softShadows *
-                          getRandomVector(sample, normal, self->randomNumber));
+        ld = normalize(ld +
+                       self->softShadows *
+                           getRandomVector(sample, normal, self->randomNumber));
 
     Ray shadowRay;
-    setRay(shadowRay, intersection, lightDirection);
+    setRay(shadowRay, intersection, ld);
     shadowRay.t0 = self->super.epsilon;
     shadowRay.time = sample.ray.time;
     shadowRay.t = infinity;
