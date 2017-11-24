@@ -61,7 +61,7 @@ struct ShadingAttributes
     vec3f finalContribution;
 };
 
-inline void SimulationRenderer_initializeShadingAttributes(
+inline void initializeShadingAttributes(
     const uniform SimulationRenderer* uniform self, ShadingAttributes& sa)
 {
     sa.self = self;
@@ -98,7 +98,7 @@ inline void SimulationRenderer_initializeShadingAttributes(
     sa.opacity = 1.f;
 }
 
-inline void SimulationRenderer_setShadingAttributes(
+inline void setGeometryShadingAttributes(
     const uniform SimulationRenderer* uniform self, DifferentialGeometry& dg,
     varying ScreenSample& sample, Ray& ray, ShadingAttributes& sa)
 {
@@ -196,14 +196,14 @@ inline void SimulationRenderer_setShadingAttributes(
 }
 
 /**
-  The SimulationRenderer_processSimulationContribution reads simulation value
+  The processSimulationContribution reads simulation value
   from the simulation data buffer.
   The geometry contains the offset of the buffer in it's X texture coordinates.
   The value from the simulation data buffer is then converted into a color,
   according to the colormap.
   */
-inline void SimulationRenderer_processSimulationValue(
-    ShadingAttributes& sa, varying DifferentialGeometry* dg)
+inline void processSimulationValue(ShadingAttributes& sa,
+                                   varying DifferentialGeometry* dg)
 {
     float value = 0.f;
     const uint64 index = (uint64)(dg->st.x * OFFSET_MAGIC) << 32 |
@@ -233,9 +233,8 @@ inline void SimulationRenderer_processSimulationValue(
 }
 
 /**
-  The purpose of the SimulationRenderer_processSimulationContribution function
-  is to retreive the  value of the simulation from a secondary model attached to
-  the OSPRay scene.
+  The purpose of the processSimulationContribution function is to retreive the
+  value of the simulation from a secondary model attached to the OSPRay scene.
   The geometry is defined by the primary model, but the shading is computed
   according to a second, non-visible model that contains the simulation values.
   In the case of circuit rendering for examples, neurons are meshes, and
@@ -245,12 +244,13 @@ inline void SimulationRenderer_processSimulationValue(
   the secondary model. When the secondary model is intersected, the simulation
   value is retrieved and used to shade the surface of the mesh.
 */
-inline void SimulationRenderer_processSimulationContribution(
-    varying ScreenSample& sample, ShadingAttributes& sa, const int materialID)
+inline void processSimulationContribution(varying ScreenSample& sample,
+                                          ShadingAttributes& sa,
+                                          const int materialID)
 {
     if (!sa.self->simulationModel)
     {
-        SimulationRenderer_processSimulationValue(sa, sa.dg);
+        processSimulationValue(sa, sa.dg);
         return;
     }
 
@@ -282,37 +282,23 @@ inline void SimulationRenderer_processSimulationContribution(
             // simulation model must use the same material ID. This is to
             // make sure that one neuron is not shaded with the simulation
             // value of another neuron.
-            SimulationRenderer_processSimulationValue(sa, &colorDg);
+            processSimulationValue(sa, &colorDg);
     }
 }
 
-inline vec3f SimulationRenderer_getBackgroundColor(
-    const uniform SimulationRenderer* uniform self,
-    varying ScreenSample& sample, const int depth, float& pathOpacity)
+inline void processBackgroundColor(varying ScreenSample& sample,
+                                   ShadingAttributes& sa)
 {
     // No intersection. Return volume contribution + skybox color
-    vec3f color;
-    vec4f volumetricValue = make_vec4f(0.f);
-    vec4f backgroundColor =
-        skyboxMapping((Renderer*)self, sample.ray, self->abstract.numMaterials,
-                      self->abstract.materials);
+    const vec4f bgColor = skyboxMapping((Renderer*)sa.self, sample.ray,
+                                        sa.self->abstract.numMaterials,
+                                        sa.self->abstract.materials);
 
-    if (self->abstract.volumeData)
-    {
-        volumetricValue =
-            getVolumeContribution(&(self->abstract), sample.ray, sample,
-                                  self->abstract.volumeSamplesPerRay, 1.f);
-        if (depth == 0)
-            pathOpacity = 1.f - volumetricValue.w;
-    }
-
-    color = volumetricValue.w * make_vec3f(volumetricValue) +
-            (1.f - volumetricValue.w) * make_vec3f(backgroundColor);
-    return color;
+    sa.shadingContribution = make_vec3f(bgColor);
 }
 
-inline void SimulationRenderer_computeIndirectShading(
-    varying ScreenSample& sample, ShadingAttributes& sa)
+inline void computeIndirectShading(varying ScreenSample& sample,
+                                   ShadingAttributes& sa)
 
 {
     if (sa.self->abstract.ambientOcclusionStrength == 0.f ||
@@ -330,9 +316,9 @@ inline void SimulationRenderer_computeIndirectShading(
     }
 }
 
-inline void SimulationRenderer_processLightShading(DifferentialGeometry& dg,
-                                                   varying ScreenSample& sample,
-                                                   ShadingAttributes& sa)
+inline void processLightShading(DifferentialGeometry& dg,
+                                varying ScreenSample& sample,
+                                ShadingAttributes& sa)
 {
     // Shading for all lights defined in the scene
     sa.shadingContribution = make_vec3f(0.f);
@@ -376,8 +362,8 @@ inline void SimulationRenderer_processLightShading(DifferentialGeometry& dg,
     }
 }
 
-inline void SimulationRenderer_processElectronShading(
-    varying ScreenSample& sample, ShadingAttributes& sa)
+inline void processElectronShading(varying ScreenSample& sample,
+                                   ShadingAttributes& sa)
 {
     // Electron Shading
     const vec3f viewer = normalize(sample.ray.org - sa.origin);
@@ -386,8 +372,8 @@ inline void SimulationRenderer_processElectronShading(
     sa.shadingContribution = sa.diffuseColor * cosNL * sa.opacity;
 }
 
-inline void SimulationRenderer_processVolumeContribution(
-    varying ScreenSample& sample, ShadingAttributes& sa, Ray& ray)
+inline void processVolumeContribution(varying ScreenSample& sample,
+                                      ShadingAttributes& sa, Ray& ray)
 {
     if (sa.self->abstract.volumeData)
     {
@@ -399,30 +385,31 @@ inline void SimulationRenderer_processVolumeContribution(
     }
 }
 
-inline void SimulationRenderer_processFinalContribution(ShadingAttributes& sa)
+inline void processFinalContribution(ShadingAttributes& sa)
 {
-    // Indirect contribution
+    // Indirect light contribution
     const vec3f indirectContribution = sa.indirectColor * sa.indirectIntensity;
 
     // Simulation contribution
     const vec3f simulationColor = make_vec3f(sa.simulationColor);
-    const float alpha = sa.simulationColor.w;
+    float alpha = sa.simulationColor.w;
 
-    // Sum up all surface shading contributions
+    // Volume contribution
+    const vec3f volumeColor = make_vec3f(sa.volumeColor);
+
     vec3f totalContributions =
-        sa.shadingContribution * (1.f - alpha) +
+        (sa.shadingContribution + simulationColor) * (1.f - alpha) +
         sa.shadingContribution * simulationColor * alpha + indirectContribution;
 
-    // Add volumetic contribution
+    // Total contribution
     if (sa.self->abstract.volumeData)
-    {
-        const vec4f src = make_vec4f(sa.volumeColor, sa.volumeIntensity);
-        vec4f dst = make_vec4f(totalContributions, 1.f);
-        totalContributions = make_vec3f(
-            composite(src, dst, sa.self->abstract.volumeSamplesPerRay,
-                      sa.self->abstract.colorMapSize, 1.f));
-    }
+        totalContributions =
+            (sa.shadingContribution + simulationColor + volumeColor) *
+                (1.f - alpha) +
+            sa.shadingContribution * simulationColor * volumeColor * alpha +
+            indirectContribution;
 
+    // Store final contribution
     sa.finalContribution = totalContributions;
 }
 
@@ -450,50 +437,54 @@ inline vec3f SimulationRenderer_shadeRay(
         intersectionWeights[depth] = 0.f;
         intersectionColors[depth] = make_vec3f(0.f);
 
+        // Shading attributes store all color contributions for the current ray
         ShadingAttributes sa;
-        SimulationRenderer_initializeShadingAttributes(self, sa);
+        initializeShadingAttributes(self, sa);
 
         // Trace ray
         traceRay(self->abstract.super.model, ray);
+
+        // Z-Depth
+        if (depth == 0)
+            sample.z = log(ray.t) / 10.f;
+
         if (ray.geomID < 0)
         {
-            // No intersection. Return volume contribution + skybox color
-            sa.shadingContribution =
-                SimulationRenderer_getBackgroundColor(self, sample, depth,
-                                                      pathOpacity);
+            // Background contribution
+            processBackgroundColor(sample, sa);
+
+            // Volume contribution
+            processVolumeContribution(sample, sa, ray);
+
+            // No Geometry intersection. No need to iterate more
             moreRebounds = false;
         }
         else
         {
-            if (depth == 0)
-                sample.z = log(ray.t) / 10.f;
-
             DifferentialGeometry dg;
             postIntersect(self->abstract.super.model, dg, ray,
                           DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                               DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
-            // Initialize shading attributes for current iteration
-            SimulationRenderer_setShadingAttributes(self, dg, sample, ray, sa);
+            // Initialize geometry shading attributes
+            setGeometryShadingAttributes(self, dg, sample, ray, sa);
 
-            // Get simulation value from geometry ID if no simulation model is
-            // used
-            SimulationRenderer_processSimulationContribution(sample, sa,
-                                                             dg.materialID);
+            // Compute simulation contribution
+            processSimulationContribution(sample, sa, dg.materialID);
 
             if (sa.opacity > 0.01f && moreRebounds)
             {
-                // Compute indirect shading contribution
-                SimulationRenderer_computeIndirectShading(sample, sa);
+                // Compute indirect lightening contribution
+                computeIndirectShading(sample, sa);
 
-                // Process surface shading
+                // Compute surface shading
                 if (self->abstract.electronShadingEnabled)
-                    SimulationRenderer_processElectronShading(sample, sa);
+                    processElectronShading(sample, sa);
                 else
-                    SimulationRenderer_processLightShading(dg, sample, sa);
+                    processLightShading(dg, sample, sa);
 
-                // Get volume contribution
-                SimulationRenderer_processVolumeContribution(sample, sa, ray);
+                // Compute volume contribution
+                processVolumeContribution(sample, sa, ray);
             }
             else
                 // Fully transparent object. Ignore intersection
@@ -501,7 +492,7 @@ inline vec3f SimulationRenderer_shadeRay(
         }
 
         // Combine all contributions
-        SimulationRenderer_processFinalContribution(sa);
+        processFinalContribution(sa);
 
         // Store final compositing for current ray iteration
         intersectionColors[depth] = sa.finalContribution;
@@ -509,7 +500,6 @@ inline vec3f SimulationRenderer_shadeRay(
 
         // Update cumulated path opacity
         pathOpacity += sa.opacity;
-        pathOpacity = min(1.f, pathOpacity);
 
         // Prepare ray for next iteration
         if (sa.opacity < 1.f)
@@ -551,9 +541,11 @@ inline vec3f SimulationRenderer_shadeRay(
         ray.instID = -1;
     }
 
+    // Alpha
+    sample.alpha = min(1.f, pathOpacity);
+
     // Back to front computation of final color according to colors and  weights
     // of each ray generation
-    sample.alpha = pathOpacity;
     if (depth == 1)
         return intersectionColors[1] * intersectionWeights[0] +
                intersectionColors[0] * (1.f - intersectionWeights[0]);

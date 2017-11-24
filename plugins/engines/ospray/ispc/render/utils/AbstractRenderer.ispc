@@ -273,9 +273,9 @@ inline bool intersectBox(const uniform AbstractRenderer* uniform self, Ray& ray,
     return tnear <= tfar;
 }
 
-inline vec4f composite(const varying vec4f& src, varying vec4f& dst,
-                       const varying uint32 samplesPerRay,
-                       const uniform uint32 colorMapSize, const float ratio)
+inline void composite(const varying vec4f& src, varying vec4f& dst,
+                      const varying uint32 samplesPerRay,
+                      const uniform uint32 colorMapSize, const float ratio)
 {
     const float alphaCorrection =
         ratio * (float)NB_MAX_SAMPLES_PER_RAY / (float)samplesPerRay;
@@ -287,7 +287,6 @@ inline vec4f composite(const varying vec4f& src, varying vec4f& dst,
     dst.y = dst.y + src.y * a;
     dst.z = dst.z + src.z * a;
     dst.w += (alpha * (1.f - dst.w));
-    return dst;
 }
 
 // AABB-Ray intersection ( http://prideout.net/blog/?p=64 ).
@@ -334,11 +333,9 @@ inline varying float getVolumeShadowContribution(
 
     // Ray marching from light source to voxel
     const vec3i dimensions = self->volumeDimensions;
-    const float random =
-        getRandomValue(sample, self->randomNumber) * self->volumeEpsilon;
-    float t = t1 + random;
+    float t = t1;
     float shadowIntensity = 0.f;
-    while (t > random && shadowIntensity < 1.f)
+    while (t > shadowIntensity < 1.f)
     {
         vec3f point = ray.org + ray.dir * t;
 
@@ -380,21 +377,15 @@ inline varying vec4f getVolumeContribution(
     if (!intersectBox(self, ray, aabbMin, aabbMax, t0, t1))
         return make_vec4f(0.f, 0.f, 0.f, 0.f);
 
-    const float baseEpsilon = self->volumeDiag / samplesPerRay;
     const float epsilon = max(0.001f, (t1 - t0) / samplesPerRay);
-    const float alphaRatio = epsilon / baseEpsilon;
 
     // Ray marching
     vec4f pathColor = make_vec4f(0.f);
-    const float delta = (float)((self->randomNumber) % (int)(epsilon + 1));
-    float t = t0 - delta;
+    float t = t0;
     while (t < t1 && pathColor.w < 1.f)
     {
-        const float random =
-            getRandomValue(sample, self->randomNumber) * epsilon;
-        vec3f point =
-            ((ray.org + ray.dir * (t + random)) - self->volumeOffset) /
-            self->volumeElementSpacing;
+        vec3f point = ((ray.org + ray.dir * t) - self->volumeOffset) /
+                      self->volumeElementSpacing;
 
         if (point.x > 0.f && point.x < self->volumeDimensions.x &&
             point.y > 0.f && point.y < self->volumeDimensions.y &&
@@ -464,8 +455,8 @@ inline varying vec4f getVolumeContribution(
                 voxelColor.y = voxelColor.y * giAttenuation;
                 voxelColor.z = voxelColor.z * giAttenuation;
             }
-            pathColor = composite(voxelColor, pathColor, samplesPerRay,
-                                  self->colorMapSize, alphaRatio);
+            composite(voxelColor, pathColor, samplesPerRay, self->colorMapSize,
+                      0.02f);
         }
 
         t += epsilon;

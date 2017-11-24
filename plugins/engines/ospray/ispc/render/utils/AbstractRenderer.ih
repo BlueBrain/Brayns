@@ -176,6 +176,6 @@ vec4f getVolumeContribution(
     @param samplesPerRay Number of samples for the current ray
     @param colorMapSize Size of the colormap
 */
-vec4f composite(const varying vec4f& src, varying vec4f& dst,
-                const varying uint32 samplesPerRay,
-                const uniform uint32 colorMapSize, const float ratio);
+void composite(const varying vec4f& src, varying vec4f& dst,
+               const varying uint32 samplesPerRay,
+               const uniform uint32 colorMapSize, const float ratio);
