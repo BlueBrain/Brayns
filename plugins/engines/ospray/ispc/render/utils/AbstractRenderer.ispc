@@ -240,48 +240,11 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
     return intensity;
 }
 
-// AABB-Ray intersection ( http://prideout.net/blog/?p=64 ).
-inline bool intersectBox(const uniform AbstractRenderer* uniform self, Ray& ray,
-                         float& tnear, float& tfar)
-{
-    // We need to avoid division by zero in "vec3 invR = 1.0 / ray.dir;"
-    if (ray.dir.x == 0.f)
-        ray.dir.x = self->super.epsilon;
-
-    if (ray.dir.y == 0.f)
-        ray.dir.y = self->super.epsilon;
-
-    if (ray.dir.z == 0.f)
-        ray.dir.z = self->super.epsilon;
-
-    const vec3f aabbMin = self->volumeOffset;
-    const vec3f aabbMax = self->volumeOffset +
-                          self->volumeDimensions.x * self->volumeElementSpacing;
-
-    const vec3f invR = 1.f / ray.dir;
-    const vec3f tbot = invR * (aabbMin - ray.org);
-    const vec3f ttop = invR * (aabbMax - ray.org);
-    const vec3f tmin = min(ttop, tbot);
-    const vec3f tmax = max(ttop, tbot);
-
-    vec2f t = max(make_vec2f(tmin.x, tmin.x), make_vec2f(tmin.y, tmin.z));
-    tnear = max(t.x, t.y);
-
-    t = min(make_vec2f(tmax.x, tmax.x), make_vec2f(tmax.y, tmax.z));
-    tfar = min(t.x, t.y);
-
-    return tnear <= tfar;
-}
-
 inline void composite(const varying vec4f& src, varying vec4f& dst,
-                      const varying uint32 samplesPerRay,
-                      const uniform uint32 colorMapSize, const float ratio)
+                      const varying float alphaCorrection)
 {
-    const float alphaCorrection =
-        ratio * (float)NB_MAX_SAMPLES_PER_RAY / (float)samplesPerRay;
     const float alpha =
-        1.f -
-        pow(1.f - min(src.w, 1.f - 1.f / (float)colorMapSize), alphaCorrection);
+        1.f - pow(1.f - min(src.w, 1.f - 1.f / 256.f), alphaCorrection);
     const float a = alpha * (1.f - dst.w);
     dst.x = dst.x + src.x * a;
     dst.y = dst.y + src.y * a;
@@ -332,15 +295,17 @@ inline varying float getVolumeShadowContribution(
         return 0.f;
 
     // Ray marching from light source to voxel
+    const float epsilon = max(0.01f, (t1 - t0) / self->volumeSamplesPerRay);
     const vec3i dimensions = self->volumeDimensions;
-    float t = t1;
+    const float random = getRandomValue(sample, self->randomNumber) * epsilon;
     float shadowIntensity = 0.f;
-    while (t > shadowIntensity < 1.f)
+    for (float t = t1 - random; t > epsilon && shadowIntensity < 1.f;
+         t -= epsilon)
     {
         vec3f point = ray.org + ray.dir * t;
 
-        if (point.x > 0.f && point.x < dimensions.x && point.y > 0.f &&
-            point.y < dimensions.y && point.z > 0.f && point.z < dimensions.z)
+        if (point.x >= 0.f && point.x < dimensions.x && point.y >= 0.f &&
+            point.y < dimensions.y && point.z >= 0.f && point.z < dimensions.z)
         {
             uint64 index = (uint64)(
                 (uint64)floor(point.x) + (uint64)floor(point.y) * dimensions.x +
@@ -352,18 +317,15 @@ inline varying float getVolumeShadowContribution(
                 self->colorMapSize * (voxelValue - self->colorMapMinValue) /
                 self->colorMapRange;
             const vec4f colorMapColor = self->colorMap[normalizedValue];
-            if (colorMapColor.w > DEFAULT_VOLUME_SHADOW_THRESHOLD)
-                shadowIntensity = 1.f;
+            shadowIntensity += colorMapColor.w;
         }
-        t -= self->volumeEpsilon;
     }
     return shadowIntensity;
 }
 
 inline varying vec4f getVolumeContribution(
     const uniform AbstractRenderer* uniform self, const varying Ray& ray,
-    varying ScreenSample& sample, const varying uint32 samplesPerRay,
-    const varying int iteration)
+    varying ScreenSample& sample, const varying int iteration)
 {
     if (!self->colorMap)
         return make_vec4f(0.f, 1.f, 0.f, 0.f);
@@ -377,21 +339,22 @@ inline varying vec4f getVolumeContribution(
     if (!intersectBox(self, ray, aabbMin, aabbMax, t0, t1))
         return make_vec4f(0.f, 0.f, 0.f, 0.f);
 
-    const float epsilon = max(0.001f, (t1 - t0) / samplesPerRay);
-
     // Ray marching
     vec4f pathColor = make_vec4f(0.f);
-    float t = t0;
-    while (t < t1 && pathColor.w < 1.f)
+    const float epsilon = max(0.01f, (t1 - t0) / self->volumeSamplesPerRay);
+    const float random = getRandomValue(sample, self->randomNumber) * epsilon;
+    t0 -= random;
+    t1 -= random;
+    for (float t = t0; t < t1 && pathColor.w < 1.f; t += epsilon)
     {
-        vec3f point = ((ray.org + ray.dir * t) - self->volumeOffset) /
-                      self->volumeElementSpacing;
+        const vec3f point = ((ray.org + ray.dir * t) - self->volumeOffset) /
+                            self->volumeElementSpacing;
 
-        if (point.x > 0.f && point.x < self->volumeDimensions.x &&
-            point.y > 0.f && point.y < self->volumeDimensions.y &&
-            point.z > 0.f && point.z < self->volumeDimensions.z)
+        if (point.x >= 0.f && point.x < self->volumeDimensions.x &&
+            point.y >= 0.f && point.y < self->volumeDimensions.y &&
+            point.z >= 0.f && point.z < self->volumeDimensions.z)
         {
-            uint64 index =
+            const uint64 index =
                 (uint64)((uint64)floor(point.x) +
                          (uint64)floor(point.y) * self->volumeDimensions.x +
                          (uint64)floor(point.z) * self->volumeDimensions.x *
@@ -402,22 +365,26 @@ inline varying vec4f getVolumeContribution(
             const float normalizedValue =
                 (voxelValue - self->colorMapMinValue) / self->colorMapRange;
 
+            // Voxel color and opacity
             vec4f colorMapColor;
             if (normalizedValue < 0.f)
                 colorMapColor = self->colorMap[0];
-            else if (normalizedValue >= 1.f)
+            else if (normalizedValue > 1.f)
                 colorMapColor = self->colorMap[self->colorMapSize - 1];
             else
                 colorMapColor =
                     self->colorMap[self->colorMapSize * normalizedValue];
 
+            // Light emission intensity
             const vec4f emissionIntensity =
                 make_vec4f(self->emissionIntensitiesMap[normalizedValue], 0.f);
             vec4f voxelColor =
                 max(make_vec4f(0.f), emissionIntensity + colorMapColor);
+
+            // Shadow intensity
             float shadowIntensity = 0.f;
             vec4f giContribution = make_vec4f(0.f);
-            if (self->shadows > 0.f && voxelColor.w > 0.1f && iteration > 0)
+            if (self->shadows > 0.f && voxelColor.w > 0.01f && iteration > 0)
             {
                 // Determine global illumination contribution
                 for (uniform int i = 0; self->lights && i < self->numLights;
@@ -455,11 +422,10 @@ inline varying vec4f getVolumeContribution(
                 voxelColor.y = voxelColor.y * giAttenuation;
                 voxelColor.z = voxelColor.z * giAttenuation;
             }
-            composite(voxelColor, pathColor, samplesPerRay, self->colorMapSize,
-                      0.02f);
-        }
 
-        t += epsilon;
+            // Compose final voxel color
+            composite(voxelColor, pathColor, (float)self->volumeSamplesPerRay);
+        }
     }
     return make_vec4f(min(1.f, pathColor.x), min(1.f, pathColor.y),
                       min(1.f, pathColor.z), min(1.f, pathColor.w));

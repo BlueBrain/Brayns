@@ -378,8 +378,7 @@ inline void processVolumeContribution(varying ScreenSample& sample,
     if (sa.self->abstract.volumeData)
     {
         const vec4f volumetricValue =
-            getVolumeContribution(&(sa.self->abstract), ray, sample,
-                                  sa.self->abstract.volumeSamplesPerRay, 1.f);
+            getVolumeContribution(&(sa.self->abstract), ray, sample, 1.f);
         sa.volumeColor = make_vec3f(volumetricValue);
         sa.volumeIntensity = volumetricValue.w;
     }
@@ -397,20 +396,17 @@ inline void processFinalContribution(ShadingAttributes& sa)
     // Volume contribution
     const vec3f volumeColor = make_vec3f(sa.volumeColor);
 
+    // Surface + volume final contribution
     vec3f totalContributions =
         (sa.shadingContribution + simulationColor) * (1.f - alpha) +
         sa.shadingContribution * simulationColor * alpha + indirectContribution;
 
-    // Total contribution
-    if (sa.self->abstract.volumeData)
-        totalContributions =
-            (sa.shadingContribution + simulationColor + volumeColor) *
-                (1.f - alpha) +
-            sa.shadingContribution * simulationColor * volumeColor * alpha +
-            indirectContribution;
+    vec4f dst = make_vec4f(totalContributions, 1.f - sa.volumeIntensity);
+    const vec4f src = make_vec4f(sa.volumeColor, sa.volumeIntensity);
+    composite(src, dst, sa.self->abstract.volumeSamplesPerRay);
 
     // Store final contribution
-    sa.finalContribution = totalContributions;
+    sa.finalContribution = make_vec3f(dst);
 }
 
 inline vec3f SimulationRenderer_shadeRay(

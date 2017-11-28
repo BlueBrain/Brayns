@@ -165,7 +165,7 @@ float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
 */
 vec4f getVolumeContribution(
     const uniform AbstractRenderer* uniform self, const varying Ray& ray,
-    varying ScreenSample& sample, const varying uint32 samplesPerRay,
+    varying ScreenSample& sample,
     const varying int iteration = VOLUME_NB_MAX_REBOUNDS);
 
 /**
@@ -174,8 +174,6 @@ vec4f getVolumeContribution(
     @param src Source color
     @param dst Final color
     @param samplesPerRay Number of samples for the current ray
-    @param colorMapSize Size of the colormap
 */
 void composite(const varying vec4f& src, varying vec4f& dst,
-               const varying uint32 samplesPerRay,
-               const uniform uint32 colorMapSize, const float ratio);
+               const varying float alphaCorrection);
