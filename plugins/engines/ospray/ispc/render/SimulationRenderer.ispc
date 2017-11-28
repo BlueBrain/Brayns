@@ -369,7 +369,7 @@ inline void processElectronShading(varying ScreenSample& sample,
     const vec3f viewer = normalize(sample.ray.org - sa.origin);
     const float el = max(0.f, dot(viewer, sa.normal));
     const float cosNL = sa.lightEmissionIntensity + (1.f - el);
-    sa.shadingContribution = sa.diffuseColor * cosNL * sa.opacity;
+    sa.shadingContribution = sa.diffuseColor * cosNL;
 }
 
 inline void processVolumeContribution(varying ScreenSample& sample,
@@ -416,27 +416,20 @@ inline vec3f SimulationRenderer_shadeRay(
     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
-    float pathOpacity = 0.f;
+    vec3f color = make_vec3f(0.f);
+
+    float pathOpacity = 1.f;
     unsigned int depth = 0;
     float oldlocalRefraction = 1.f;
     bool moreRebounds = true;
 
-    float intersectionWeights[NB_MAX_REBOUNDS];
-    vec3f intersectionColors[NB_MAX_REBOUNDS];
-    vec3f specularColor = make_vec3f(0.f);
-    float tend = ray.t;
-
-    sample.alpha = 1.f;
     const float maxUint16 = 65535; // Max value for a uint16. Brayns exports the
                                    // depth buffer as an array of uint16 values
     sample.z = maxUint16;
+    sample.alpha = 1.f;
 
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
     {
-        // Initialize current ray contribution
-        intersectionWeights[depth] = 0.f;
-        intersectionColors[depth] = make_vec3f(0.f);
-
         // Shading attributes store all color contributions for the current ray
         ShadingAttributes sa;
         initializeShadingAttributes(self, sa);
@@ -457,14 +450,18 @@ inline vec3f SimulationRenderer_shadeRay(
         }
         else
         {
+            // Get intersection information
             DifferentialGeometry dg;
             postIntersect(self->abstract.super.model, dg, ray,
                           DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                               DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
-            // Z-Depth
+            // Z-Depth and Alpha
             if (depth == 0)
+            {
+                sample.alpha = sa.opacity;
                 sample.z = min(maxUint16, ray.t);
+            }
 
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, sa);
@@ -494,14 +491,11 @@ inline vec3f SimulationRenderer_shadeRay(
         // Combine all contributions
         processFinalContribution(sa);
 
-        // Store final compositing for current ray iteration
-        intersectionColors[depth] = sa.finalContribution;
-        intersectionWeights[depth] = sa.opacity;
-
-        // Update cumulated path opacity
-        pathOpacity += sa.opacity;
+        color =
+            sa.finalContribution * pathOpacity + color * (1.f - pathOpacity);
 
         // Prepare ray for next iteration
+        float alpha = 1.f;
         if (sa.opacity < 1.f)
         {
             const float angle = dot(ray.dir, sa.normal);
@@ -514,7 +508,7 @@ inline vec3f SimulationRenderer_shadeRay(
                                       sa.refraction);
             ray.org = sa.origin + self->abstract.super.epsilon * ray.dir;
 
-            intersectionWeights[depth] = 1.f - sa.opacity;
+            pathOpacity *= (1.f - sa.opacity);
             oldlocalRefraction = sa.refraction;
             ++depth;
         }
@@ -524,37 +518,19 @@ inline vec3f SimulationRenderer_shadeRay(
             ray.t0 = self->abstract.super.epsilon;
             ray.org =
                 sa.origin + self->abstract.super.epsilon * sa.reflectedNormal;
-            intersectionWeights[depth] = sa.reflection;
+            pathOpacity *= sa.reflection;
             ++depth;
         }
         else
             moreRebounds = false;
 
-        // Next ray
-        tend -= ray.t;
-        if (tend < 0.f)
-            break;
-
-        ray.t = tend;
+        ray.t = maxUint16;
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
     }
 
-    // Alpha
-    sample.alpha = min(1.f, pathOpacity);
-
-    // Back to front computation of final color according to colors and  weights
-    // of each ray generation
-    if (depth == 1)
-        return intersectionColors[1] * intersectionWeights[0] +
-               intersectionColors[0] * (1.f - intersectionWeights[0]);
-
-    for (int i = depth - 1; i >= 0; --i)
-        intersectionColors[i] =
-            intersectionColors[i + 1] * intersectionWeights[i] +
-            intersectionColors[i] * (1.f - intersectionWeights[i]);
-    return intersectionColors[0];
+    return color;
 }
 
 void SimulationRenderer_renderSample(uniform Renderer* uniform _self,
