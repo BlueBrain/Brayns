@@ -130,9 +130,6 @@ inline void setGeometryShadingAttributes(
 
     foreach_unique(mat in objMaterial)
     {
-        // Light emission intensity
-        sa.lightEmissionIntensity += mat->a;
-
         // Glossiness
         if (mat->glossiness > 0.f)
         {
@@ -175,6 +172,10 @@ inline void setGeometryShadingAttributes(
                                       mat->Ns * get1f(mat->map_Ns, dg.st, 1.f));
         else
             sa.specularExponent = max(sa.specularExponent, mat->Ns);
+
+        // Light emission intensity
+        sa.lightEmissionIntensity += mat->a;
+        sa.lightEmissionColor = sa.diffuseColor;
 
         // Normal mapping
         if (valid(mat->map_Bump))
@@ -229,6 +230,7 @@ inline void processSimulationValue(ShadingAttributes& sa,
 
     if (sa.self->abstract.emissionIntensitiesMap)
         sa.lightEmissionColor =
+            sa.lightEmissionColor +
             sa.self->abstract.emissionIntensitiesMap[lookupIndex];
 }
 
@@ -260,7 +262,7 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     colorRay.dir = getRandomVector(sample, sa.normal * -1.f,
                                    sa.self->abstract.randomNumber);
     colorRay.t0 = 0.f;
-    colorRay.time = infinity;
+    colorRay.time = RAY_INFINITY;
     colorRay.t = sa.self->detectionDistance;
     colorRay.primID = -1;
     colorRay.geomID = -1;
@@ -365,10 +367,9 @@ inline void processLightShading(DifferentialGeometry& dg,
 inline void processElectronShading(varying ScreenSample& sample,
                                    ShadingAttributes& sa)
 {
-    // Electron Shading
     const vec3f viewer = normalize(sample.ray.org - sa.origin);
     const float el = max(0.f, dot(viewer, sa.normal));
-    const float cosNL = sa.lightEmissionIntensity + (1.f - el);
+    const float cosNL = 1.f - el;
     sa.shadingContribution = sa.diffuseColor * cosNL;
 }
 
@@ -393,22 +394,24 @@ inline void processFinalContribution(ShadingAttributes& sa)
     const vec3f simulationColor = make_vec3f(sa.simulationColor);
     float alpha = sa.simulationColor.w;
 
-    // Volume contribution
-    const vec3f volumeColor = make_vec3f(sa.volumeColor);
-
     // Surface + volume final contribution
     vec3f totalContributions =
         (sa.shadingContribution + simulationColor) * (1.f - alpha) +
         sa.shadingContribution * simulationColor * alpha + indirectContribution;
 
+    // Volume contribution
     vec4f dst = make_vec4f(totalContributions, 1.f - sa.volumeIntensity);
     const vec4f src = make_vec4f(sa.volumeColor, sa.volumeIntensity);
     composite(src, dst, sa.self->abstract.volumeSamplesPerRay);
 
+    // Light emission contribution
+    const vec3f finalContribution =
+        make_vec3f(dst) + sa.lightEmissionIntensity * sa.lightEmissionColor;
+
     // Store final contribution
-    sa.finalContribution.x = max(0.f, min(1.f, dst.x));
-    sa.finalContribution.y = max(0.f, min(1.f, dst.y));
-    sa.finalContribution.z = max(0.f, min(1.f, dst.z));
+    sa.finalContribution.x = max(0.f, min(1.f, finalContribution.x));
+    sa.finalContribution.y = max(0.f, min(1.f, finalContribution.y));
+    sa.finalContribution.z = max(0.f, min(1.f, finalContribution.z));
 }
 
 inline vec3f SimulationRenderer_shadeRay(
@@ -423,9 +426,7 @@ inline vec3f SimulationRenderer_shadeRay(
     float oldlocalRefraction = 1.f;
     bool moreRebounds = true;
 
-    const float maxUint16 = 65535; // Max value for a uint16. Brayns exports the
-                                   // depth buffer as an array of uint16 values
-    sample.z = maxUint16;
+    sample.z = RAY_INFINITY;
     sample.alpha = 1.f;
 
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
@@ -460,7 +461,7 @@ inline vec3f SimulationRenderer_shadeRay(
             if (depth == 0)
             {
                 sample.alpha = sa.opacity;
-                sample.z = min(maxUint16, ray.t);
+                sample.z = min(RAY_INFINITY, ray.t);
             }
 
             // Initialize geometry shading attributes
@@ -498,12 +499,13 @@ inline vec3f SimulationRenderer_shadeRay(
         float alpha = 1.f;
         if (sa.opacity < 1.f)
         {
+            // Refraction
             const float angle = dot(ray.dir, sa.normal);
             if (abs(sa.refraction - oldlocalRefraction) < 0.001f)
                 if (angle > 0.f)
                     sa.refraction = 1.f;
 
-            ray.t0 = self->abstract.super.epsilon;
+            ray.t0 = 0.f;
             ray.dir = refractedVector(ray.dir, sa.normal, oldlocalRefraction,
                                       sa.refraction);
             ray.org = sa.origin + self->abstract.super.epsilon * ray.dir;
@@ -514,8 +516,9 @@ inline vec3f SimulationRenderer_shadeRay(
         }
         else if (sa.reflection > 0.f)
         {
+            // Reflection
+            ray.t0 = 0.f;
             ray.dir = sa.reflectedNormal;
-            ray.t0 = self->abstract.super.epsilon;
             ray.org =
                 sa.origin + self->abstract.super.epsilon * sa.reflectedNormal;
             pathOpacity *= sa.reflection;
@@ -524,7 +527,7 @@ inline vec3f SimulationRenderer_shadeRay(
         else
             moreRebounds = false;
 
-        ray.t = maxUint16;
+        ray.t = RAY_INFINITY;
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
