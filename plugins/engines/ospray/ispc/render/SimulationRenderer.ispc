@@ -406,7 +406,9 @@ inline void processFinalContribution(ShadingAttributes& sa)
     composite(src, dst, sa.self->abstract.volumeSamplesPerRay);
 
     // Store final contribution
-    sa.finalContribution = make_vec3f(dst);
+    sa.finalContribution.x = max(0.f, min(1.f, dst.x));
+    sa.finalContribution.y = max(0.f, min(1.f, dst.y));
+    sa.finalContribution.z = max(0.f, min(1.f, dst.z));
 }
 
 inline vec3f SimulationRenderer_shadeRay(
@@ -425,7 +427,9 @@ inline vec3f SimulationRenderer_shadeRay(
     float tend = ray.t;
 
     sample.alpha = 1.f;
-    sample.z = log(infinity);
+    const float maxUint16 = 65535; // Max value for a uint16. Brayns exports the
+                                   // depth buffer as an array of uint16 values
+    sample.z = maxUint16;
 
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
     {
@@ -439,10 +443,6 @@ inline vec3f SimulationRenderer_shadeRay(
 
         // Trace ray
         traceRay(self->abstract.super.model, ray);
-
-        // Z-Depth
-        if (depth == 0)
-            sample.z = log(ray.t) / 10.f;
 
         if (ray.geomID < 0)
         {
@@ -461,6 +461,10 @@ inline vec3f SimulationRenderer_shadeRay(
             postIntersect(self->abstract.super.model, dg, ray,
                           DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                               DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
+
+            // Z-Depth
+            if (depth == 0)
+                sample.z = min(maxUint16, ray.t);
 
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, sa);
@@ -501,8 +505,8 @@ inline vec3f SimulationRenderer_shadeRay(
         if (sa.opacity < 1.f)
         {
             const float angle = dot(ray.dir, sa.normal);
-            if (sa.refraction == oldlocalRefraction)
-                if (angle < 0.f)
+            if (abs(sa.refraction - oldlocalRefraction) < 0.001f)
+                if (angle > 0.f)
                     sa.refraction = 1.f;
 
             ray.t0 = self->abstract.super.epsilon;
@@ -546,7 +550,7 @@ inline vec3f SimulationRenderer_shadeRay(
         return intersectionColors[1] * intersectionWeights[0] +
                intersectionColors[0] * (1.f - intersectionWeights[0]);
 
-    for (int i = depth - 2; i >= 0; --i)
+    for (int i = depth - 1; i >= 0; --i)
         intersectionColors[i] =
             intersectionColors[i + 1] * intersectionWeights[i] +
             intersectionColors[i] * (1.f - intersectionWeights[i]);

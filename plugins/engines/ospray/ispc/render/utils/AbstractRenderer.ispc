@@ -65,9 +65,9 @@ inline vec3f refractedVector(const varying vec3f& direction,
 {
     if (n2 == 0.f)
         return direction;
-    const varying float eta = n1 / n2;
-    const varying float cos1 = -dot(direction, normal);
-    const varying float cos2 = 1.f - eta * eta * (1.f - cos1 * cos1);
+    const float eta = n1 / n2;
+    const float cos1 = -dot(direction, normal);
+    const float cos2 = 1.f - eta * eta * (1.f - cos1 * cos1);
     if (cos2 > 0.f)
         return eta * direction + (eta * cos1 - sqrt(cos2)) * normal;
     return direction;
