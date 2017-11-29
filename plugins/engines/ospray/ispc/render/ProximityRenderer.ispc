@@ -89,10 +89,10 @@ inline vec3f ProximityRenderer_shadeRay(
             emission = mat->a;
 
             // glossiness
-            if (mat->glossiness > 0.f)
+            if (mat->glossiness < 1.f)
                 normal =
                     normalize(normal +
-                              mat->glossiness *
+                              (1.f - mat->glossiness) *
                                   getRandomVector(sample, normal,
                                                   self->abstract.randomNumber));
             // Opacity

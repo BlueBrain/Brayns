@@ -5,7 +5,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSPLUGINS_LINK_LIBRARIES
-  PUBLIC braynsCommon vmmlib)
+  PUBLIC braynsCommon braynsIO vmmlib)
 
 set(BRAYNSPLUGINS_SOURCES
   engines/EngineFactory.cpp
