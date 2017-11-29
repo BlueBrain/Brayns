@@ -82,7 +82,7 @@ void ExtendedOBJMaterial::commit()
     map_a = (ospray::Texture2D *)getParamObject("map_a", nullptr);
 
     // Glossiness
-    glossiness = getParam1f("glossiness", 0.f);
+    glossiness = getParam1f("glossiness", 1.f);
 
     ispc::ExtendedOBJMaterial_set(
         getIE(), map_d ? map_d->getIE() : nullptr,

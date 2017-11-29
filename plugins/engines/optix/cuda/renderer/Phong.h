@@ -273,11 +273,12 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
         tea<16>(screen.x * launch_index.y + launch_index.x, frame);
 
     // Glossiness
-    if (p_glossiness > 0.f)
-        p_normal = optix::normalize(
-            p_normal +
-            p_glossiness * make_float3(rnd(seed) - 0.5f, rnd(seed) - 0.5f,
-                                       rnd(seed) - 0.5f));
+    if (p_glossiness < 1.f)
+        p_normal =
+            optix::normalize(p_normal +
+                             (1.f - p_glossiness) *
+                                 make_float3(rnd(seed) - 0.5f, rnd(seed) - 0.5f,
+                                             rnd(seed) - 0.5f));
     // Volume
     float4 volumeColor = make_float4(0.f, 0.f, 0.f, 0.f);
     if (volumeDiag != 0.f)

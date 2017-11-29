@@ -222,7 +222,9 @@ private:
         if (frameExportFolder.empty())
             return;
         char str[7];
-        snprintf(str, 7, "%06d", int(_engine->getFrameNumber()));
+        const auto frame =
+            _parametersManager.getSceneParameters().getAnimationFrame();
+        snprintf(str, 7, "%06d", int(frame));
         const auto filename = frameExportFolder + "/" + str + ".png";
         FrameBuffer& frameBuffer = _engine->getFrameBuffer();
         ImageManager::exportFrameBufferToFile(frameBuffer, filename);
