@@ -695,9 +695,9 @@ bool RocketsPlugin::_requestFrameBuffers()
         uint16_ts depths;
         const size_t size = frameSize.x() * frameSize.y();
         depths.reserve(size);
+
         for (size_t i = 0; i < size; ++i)
-            depths.push_back(std::numeric_limits<uint16_t>::max() *
-                             depthBuffer[i]);
+            depths.push_back(depthBuffer[i]);
         _remoteFrameBuffers.setDepth(reinterpret_cast<const uint8_t*>(
                                          depths.data()),
                                      depths.size() * sizeof(uint16_t));

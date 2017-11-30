@@ -25,15 +25,13 @@
 float getRandomValue(varying ScreenSample& sample, const int randomNumber);
 
 /**
-    Returns a random direction based on location in the frame buffer, the
-   normal
-    to the surface and rotation parameters for the precomputed hard-coded
-   random
-    distribution.
+    Returns a random direction based on location in the frame buffer, the normal
+   to the surface and rotation parameters for the precomputed hard-coded random
+   distribution.
     @param sample Frame buffer sample being rendered
     @param normal Normal vector to the surface
     @param randomNumber A random number that introduces noise in the
-           distribution
+   distribution
     @return A random direction based on specified parameters
 */
 vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
@@ -43,10 +41,10 @@ vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
     Returns tangent vectors for a given normal.
     @param normal Given normal vector
     @param tangent The tangent vector is typically regarded as one vector that
-           exists within the surface's plane (for a flat surface) or which lies
-           tangent to a reference point on a curved surface
+   exists within the surface's plane (for a flat surface) or which lies tangent
+   to a reference point on a curved surface
     @param biTangent The BiTangent vector which is effectively the "other"
-           tangent vector for the surface, which is orthogonal to both the
-           Normal vector and the chosen tangent vector
+   tangent vector for the surface, which is orthogonal to both the Normal vector
+   and the chosen tangent vector
 */
 void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent);

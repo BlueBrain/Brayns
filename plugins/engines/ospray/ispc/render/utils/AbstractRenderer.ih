@@ -74,10 +74,8 @@ struct AbstractRenderer
 
 /**
     Launches a random ray in the half-hemishere of the surface and returns
-   information about the
-    intersected geometry, if any.
+   information about the intersected geometry, if any.
     @param self Pointer to the current renderer
-    @param ray Current ray used to initialize the random ray
     @param sample Screen sample
     @param intersection First ray intersection with the surface
     @param normal Normal to the surface
@@ -85,24 +83,19 @@ struct AbstractRenderer
     @param backgroundColor Background color in case the random ray does not hit
    any geometry
     @param distanceToIntersection distanceToIntersection between surface
-   intersection and the
-           geometry hit by the random ray
+   intersection and the geometry hit by the random ray
     @param randomDirection Computed random direction
     @return true if a geometry intersects the random ray, false otherwise
 */
-bool launchRandomRay(const uniform AbstractRenderer* uniform self,
-                     const varying Ray& ray, varying ScreenSample& sample,
-                     const varying vec3f& intersection,
-                     const varying vec3f& normal,
-                     DifferentialGeometry& geometry,
-                     varying vec3f& backgroundColor,
-                     varying float& distanceToIntersection,
-                     varying vec3f& randomDirection);
+bool launchRandomRay(
+    const uniform AbstractRenderer* uniform self, varying ScreenSample& sample,
+    const varying vec3f& intersection, const varying vec3f& normal,
+    DifferentialGeometry& geometry, varying vec3f& backgroundColor,
+    varying float& distanceToIntersection, varying vec3f& randomDirection);
 
 /**
     Returns the refracted vector according to the direction of the incident ray,
-   he normal to the
-    surface, and localRefraction indices
+   he normal to the surface, and localRefraction indices
     @param direction Direction of the incident ray
     @param normal Normal to the surface
     @param n1 In localRefraction index
@@ -115,14 +108,11 @@ vec3f refractedVector(const varying vec3f& direction,
 
 /**
     Computes indirect shading for secondary rays. A random ray is launched in
-   the half-hemisphere
-    defined by the normal to the surface hit by the first generation ray. If the
-   random ray hits a
-    light emitting surface, the contribution of the light is returned, otherwise
-   the ambient
-    occlusion algorithmn is applied. If no geometry is intersected by the random
-   ray, the
-    contribution is the background or the skymap color if defined.
+   the half-hemisphere defined by the normal to the surface hit by the first
+   generation ray. If the random ray hits a light emitting surface, the
+   contribution of the light is returned, otherwise the ambient occlusion
+   algorithmn is applied. If no geometry is intersected by the random
+   ray, the contribution is the background or the skymap color if defined.
     @param self Pointer to the current renderer
     @param ray Current ray used to initialize the random ray
     @param sample Screen sample
@@ -131,11 +121,10 @@ vec3f refractedVector(const varying vec3f& direction,
     @param geometry Geometry intersected by the random ray
     @param indirectShadingColor Resulting color from the random ray
     @param indirectShadingPower Resulting intensity according to the distance to
-   intersection
-           between the intersection and the geometry intersect by the random
-   ray.
+   intersection between the intersection and the geometry intersect by the
+   random ray.
 */
-bool indirectShading(const uniform AbstractRenderer* uniform self, Ray& ray,
+bool indirectShading(const uniform AbstractRenderer* uniform self,
                      varying ScreenSample& sample,
                      const varying vec3f& intersection,
                      const varying vec3f& normal,
@@ -147,7 +136,6 @@ bool indirectShading(const uniform AbstractRenderer* uniform self, Ray& ray,
     Returns the normalized light intensity decreased by the opacity of the
    intersected surfaces.
     @param self Pointer to the current renderer
-    @param ray Current ray used to initialize the random ray
     @param sample Screen sample
     @param intersection First ray intersection with the surface
     @param normal Normal to the surface
@@ -155,23 +143,21 @@ bool indirectShading(const uniform AbstractRenderer* uniform self, Ray& ray,
     @return Intensity of shaded light
 */
 float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
-                           Ray& ray, varying ScreenSample& sample,
+                           varying ScreenSample& sample,
                            const varying vec3f& intersection,
                            const varying vec3f& normal,
-                           varying vec3f& lightDirection);
+                           const varying vec3f& lightDirection);
 
 /**
     Returns the contribution (color and alpha) of a ray going through the volume
-   attached to the
-    scene
+   attached to the scene
     @param self Pointer to the current renderer
     @param ray Current ray used to traverse the volume
     @return Resulting color and alpha value
 */
-vec4f getVolumeContribution(
-    const uniform AbstractRenderer* uniform self, const varying Ray& ray,
-    varying ScreenSample& sample, const varying uint32 samplesPerRay,
-    const varying int iteration = VOLUME_NB_MAX_REBOUNDS);
+vec4f getVolumeContribution(const uniform AbstractRenderer* uniform self,
+                            const varying Ray& ray,
+                            varying ScreenSample& sample);
 
 /**
     Returns Computes back to front propagation in the context of volume
@@ -179,8 +165,6 @@ vec4f getVolumeContribution(
     @param src Source color
     @param dst Final color
     @param samplesPerRay Number of samples for the current ray
-    @param colorMapSize Size of the colormap
 */
-vec4f composite(const varying vec4f& src, varying vec4f& dst,
-                const varying uint32 samplesPerRay,
-                const uniform uint32 colorMapSize, const float ratio);
+void composite(const varying vec4f& src, varying vec4f& dst,
+               const varying float alphaCorrection);
