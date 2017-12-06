@@ -28,6 +28,12 @@ if(BRAYNS_DEFLECT_ENABLED)
 endif()
 
 if(BRAYNS_NETWORKING_ENABLED)
+  # bug in cppcheck while checking json.hpp
+  if(CPPCHECK_VERSION VERSION_LESS 1.78)
+    list(APPEND CPPCHECK_EXTRA_ARGS --error-exitcode=0)
+  endif()
+  list(APPEND CPPCHECK_EXTRA_ARGS
+    --suppress=*:${CMAKE_CURRENT_SOURCE_DIR}/extensions/plugins/json.hpp)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/RocketsPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/RocketsPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC Lexis Rockets
