@@ -84,6 +84,7 @@ public:
        @return Application parameters for the current scene
     */
     BRAYNS_API ApplicationParameters& getApplicationParameters();
+    BRAYNS_API const ApplicationParameters& getApplicationParameters() const;
 
     /**
        Gets scene parameters

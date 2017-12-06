@@ -5,19 +5,20 @@
 
 set(BRAYNSIO_SOURCES
   algorithms/MetaballsGenerator.cpp
+  ImageManager.cpp
   MeshLoader.cpp
   MolecularSystemReader.cpp
   ProteinLoader.cpp
   SceneLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
   simulation/SpikeSimulationHandler.cpp
-  TextureLoader.cpp
   TransferFunctionLoader.cpp
   XYZBLoader.cpp
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
   algorithms/MetaballsGenerator.h
+  ImageManager.h
   MeshLoader.h
   MolecularSystemReader.h
   ProgressReporter.h
@@ -25,7 +26,6 @@ set(BRAYNSIO_PUBLIC_HEADERS
   SceneLoader.h
   simulation/CADiffusionSimulationHandler.h
   simulation/SpikeSimulationHandler.h
-  TextureLoader.h
   TransferFunctionLoader.h
   XYZBLoader.h
 )

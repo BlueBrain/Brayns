@@ -33,70 +33,46 @@
 #include <plugins/engines/livre/LivreEngine.h>
 #endif
 
-namespace brayns
+namespace
 {
-EngineFactory::EngineFactory(int argc, const char** argv,
-                             ParametersManager& parametersManager)
-    : _parametersManager(parametersManager)
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
 {
-    for (int i = 0; i < argc; ++i)
-        _arguments.push_back(argv[i]);
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
 }
 
-EnginePtr EngineFactory::get(const std::string& name)
+namespace brayns
 {
-    if (_engines.find(name) != _engines.end())
-        return _engines[name];
+EngineFactory::EngineFactory(const int argc, const char** argv,
+                             ParametersManager& parametersManager)
+    : _argc{argc}
+    , _argv{argv}
+    , _parametersManager{parametersManager}
+{
+}
+
+std::unique_ptr<Engine> EngineFactory::create(const std::string& name)
+{
     try
     {
 #if (BRAYNS_USE_OSPRAY)
         if (name == "ospray")
-        {
-            const char** argv = new const char*[_arguments.size()];
-            for (size_t i = 0; i < _arguments.size(); ++i)
-                argv[i] = _arguments[i].c_str();
-            _engines[name] = EnginePtr(
-                new OSPRayEngine(_arguments.size(), argv, _parametersManager));
-            delete[] argv;
-            return _engines[name];
-        }
+            return make_unique<OSPRayEngine>(_argc, _argv, _parametersManager);
 #endif
 #if (BRAYNS_USE_OPTIX)
         if (name == "optix")
-        {
-            const char** argv = new const char*[_arguments.size()];
-            for (size_t i = 0; i < _arguments.size(); ++i)
-                argv[i] = _arguments[i].c_str();
-            _engines[name] = EnginePtr(
-                new OptiXEngine(_arguments.size(), argv, _parametersManager));
-            delete[] argv;
-            return _engines[name];
-        }
+            return make_unique<OptiXEngine>(_argc, _argv, _parametersManager);
 #endif
 #if (BRAYNS_USE_LIVRE)
         if (name == "livre")
-        {
-            char** argv = new char*[_arguments.size()];
-            for (size_t i = 0; i < _arguments.size(); ++i)
-                argv[i] = const_cast<char*>(_arguments[i].c_str());
-            _engines[name] = EnginePtr(
-                new LivreEngine(_arguments.size(), argv, _parametersManager));
-            delete[] argv;
-            return _engines[name];
-        }
+            return make_unique<LivreEngine>(_argc, _argv, _parametersManager);
 #endif
     }
     catch (const std::runtime_error& e)
     {
         BRAYNS_ERROR << "Engine creation failed: " << e.what() << std::endl;
     }
-
-    return EnginePtr();
-}
-
-void EngineFactory::remove(EnginePtr engine)
-{
-    if (engine)
-        _engines.erase(engine->name());
+    return std::unique_ptr<Engine>();
 }
 }

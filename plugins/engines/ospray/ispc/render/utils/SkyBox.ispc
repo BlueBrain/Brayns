@@ -36,7 +36,7 @@ vec4f skyboxMapping(const uniform Renderer* uniform renderer, Ray& ray,
     const varying float radius = 1e6;
     const uniform ExtendedOBJMaterial* uniform mat =
         (const uniform ExtendedOBJMaterial* uniform)materials[MATERIAL_SKYBOX];
-    if (!mat->map_Kd)
+    if (!valid(mat->map_Kd))
         return result;
 
     // solve the equation sphere-ray to find the intersections

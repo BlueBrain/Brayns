@@ -73,10 +73,20 @@ void OptiXFrameBuffer::resize(const Vector2ui& frameSize)
                                           _frameSize.x(), _frameSize.y());
     _context["output_buffer"]->set(_frameBuffer);
 
-    _accumBuffer =
-        _context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
-                               RT_FORMAT_FLOAT4, _frameSize.x(),
-                               _frameSize.y());
+    if (_accumulation)
+    {
+        _accumBuffer =
+            _context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
+                                   RT_FORMAT_FLOAT4, _frameSize.x(),
+                                   _frameSize.y());
+    }
+    else
+    {
+        _accumBuffer =
+            _context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
+                                   RT_FORMAT_FLOAT4, 0, 0);
+    }
+
     _context["accum_buffer"]->set(_accumBuffer);
 
     clear();
@@ -95,7 +105,11 @@ void OptiXFrameBuffer::map()
 
     rtBufferMap(_frameBuffer->get(), &_imageData);
 
-    _context["frame"]->setUint(_accumulationFrame++);
+    if (_accumulation)
+        _context["frame"]->setUint(_accumulationFrame++);
+    else
+        _context["frame"]->setUint(0);
+
     switch (_frameBufferFormat)
     {
     case FrameBufferFormat::rgba_i8:

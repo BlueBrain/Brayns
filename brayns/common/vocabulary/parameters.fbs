@@ -142,7 +142,8 @@ enum Shader: uint {
     simulation,
     particle,
     geometry_normals,
-    shading_normals
+    shading_normals,
+    scientific_visualization
 }
 
 enum Shading: uint {
@@ -180,6 +181,7 @@ table Settings {
     frame_export_folder: string;
     synchronous_mode: bool;
     variance_threshold:float;
+    image_stream_fps: uint;
 }
 
 table ForceRendering

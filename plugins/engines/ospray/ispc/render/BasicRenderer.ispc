@@ -39,7 +39,9 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
 {
     Ray ray = sample.ray;
     varying vec3f color = make_vec3f(0.f);
-    sample.z = 1.f;
+
+    sample.z = RAY_INFINITY;
+    sample.alpha = 0.f;
 
     traceRay(self->abstract.super.model, ray);
 
@@ -50,7 +52,7 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
                                          self->abstract.numMaterials,
                                          self->abstract.materials));
         sample.alpha = 0.f;
-        return self->abstract.bgColor;
+        return color;
     }
 
     DifferentialGeometry dg;
@@ -62,11 +64,11 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     uniform ExtendedOBJMaterial* objMaterial =
         (uniform ExtendedOBJMaterial*)material;
 
-    vec3f Kd;
+    vec3f Kd = make_vec3f(0.f);
     if (!objMaterial)
         Kd = make_vec3f(dg.color);
     else
-        foreach_unique(mat in objMaterial) Kd = mat->Kd;
+        foreach_unique(mat in objMaterial) Kd = mat->Kd * make_vec3f(dg.color);
 
     // Head-light shading
     const vec3f intersection = dg.P + self->abstract.super.epsilon * dg.Ns;
@@ -75,7 +77,8 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     sample.alpha = 1.f;
 
     // Z-Depth
-    sample.z = log(ray.t) / 10.f;
+    sample.z = min(RAY_INFINITY, ray.t);
+    sample.alpha = 1.f;
 
     return color;
 }

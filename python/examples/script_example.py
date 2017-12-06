@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016, Blue Brain Project
-#                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Copyright (c) 2016-2017, Blue Brain Project
+#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns
 # <https://github.com/BlueBrain/Brayns>
@@ -29,98 +29,48 @@ from brayns.brayns import *
 brayns = Brayns('http://localhost:5000')
 
 # --------------------------------------------------
-# Activate default renderer
+# Activate default viewport
 # --------------------------------------------------
-brayns.renderer = BRAYNS_RENDERER_DEFAULT
-
-# --------------------------------------------------
-# Activate no shading shader
-# --------------------------------------------------
-brayns.shader = BRAYNS_SHADER_DIFFUSE
-
-# --------------------------------------------------
-# set ambient occlusion strength
-# --------------------------------------------------
-brayns.ambient_occlusion = 1.0
-
-# --------------------------------------------------
-# Activate shadows and make them soft
-# --------------------------------------------------
-brayns.shadows = True
-brayns.soft_shadows = True
+viewport = brayns.viewport
+viewport.size = [512, 256]
 
 # --------------------------------------------------
 # Define and set camera defined by origin, look-at,
 # up vector, aperture and focal length
 # --------------------------------------------------
-camera = Camera()
-camera.origin = [0.0,0.0,-3.0]
-camera.look_at = [0.0,0.0,0.0]
-brayns.camera = camera
+camera = brayns.camera
+camera.origin = [0.5, 0.5, 2.0]
+camera.look_at = [0.5, 0.5, 0.5]
+camera.up_vector = [0, 1, 0]
 
 # --------------------------------------------------
-# Set material 0 to white
+# Rendering settings
 # --------------------------------------------------
-material = Material()
-material.index = 0
-material.diffuse_color = [1.0,1.0,1.0]
-material.specular_color= [1.0,1.0,1.0]
-material.specular_exponent = 100.0
-material.opacity = 1.0
-brayns.material = material
+settings = brayns.settings
 
-# --------------------------------------------------
 # Set background color
-# --------------------------------------------------
-brayns.background_color = [0.1, 0.1, 0.1]
-
-# --------------------------------------------------
+settings.background_color = [0.1, 0.1, 0.5]
 # set source image size
-# --------------------------------------------------
-brayns.window_size = [512, 512]
-
-# --------------------------------------------------
+settings.window_size = [512, 512]
 # Set number of samples per pixel
-# --------------------------------------------------
-brayns.samples_per_pixel = 1
+settings.samples_per_pixel = 1
+# Activate basic shader
+settings.shader = BRAYNS_SHADER_SCIENTIFIC_VISUALIZATION
+# set ambient occlusion strength
+settings.ambient_occlusion = 1
 
-# --------------------------------------------------
-# Define transfer function for electrical simulation
-# --------------------------------------------------
-transfer_function = TransferFunction()
+# Activate shadows and make them soft
+settings.shadows = 0.5
+settings.soft_shadows = 0.02
 
-# Define control points for all attributes (R,G,B,A)
-red_control_points = [
-    [ -92.0915, 0.1 ], [-61.0, 0.1 ],
-    [-50.0, 0.8 ], [0.0, 0.0], [49.5497, 1]]
-transfer_function.set_control_points(
-    BRAYNS_ATTRIBUTE_RED, red_control_points)
-
-green_control_points = [
-    [ -92.0915, 0.1 ], [-55.0, 0.1 ],
-    [-50.0, 0.5 ], [49.5497, 1]]
-transfer_function.set_control_points(
-    BRAYNS_ATTRIBUTE_GREEN, green_control_points)
-
-blue_control_points = [
-    [ -92.0915, 0.1 ], [-50.0, 0.1 ],
-    [-58.0, 0.0 ], [0.0, 0.1]]
-transfer_function.set_control_points(
-    BRAYNS_ATTRIBUTE_BLUE, blue_control_points)
-
-alpha_control_points = [
-    [ -92.0915, 1.0 ], [49.5497, 1]]
-transfer_function.set_control_points(
-    BRAYNS_ATTRIBUTE_ALPHA, alpha_control_points)
-
-# Set transfer function
-brayns.transfer_function = transfer_function
+# Epsilon
+settings.epsilon = 0.001
 
 # --------------------------------------------------
 # Get JPEG image back and save it to example.jpg
 # --------------------------------------------------
-brayns.image_jpeg_size = [512, 512]
-brayns.image_jpeg_quality = 100
+settings.jpeg_size = [512, 512]
+settings.jpeg_compression = 100
 image = brayns.image_jpeg
 if image is not None:
     image.save('example.jpg')

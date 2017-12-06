@@ -41,8 +41,10 @@ BOOST_AUTO_TEST_CASE(simple_construction)
 BOOST_AUTO_TEST_CASE(defaults)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
-    brayns::Brayns brayns(testSuite.argc,
-                          const_cast<const char**>(testSuite.argv));
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app, "--synchronous-mode", "on"};
+    const int argc = sizeof(argv) / sizeof(char*);
+    brayns::Brayns brayns(argc, argv);
 
     auto& camera = brayns.getEngine().getCamera();
     BOOST_CHECK(camera.getType() == brayns::CameraType::perspective);
@@ -67,14 +69,15 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
     BOOST_CHECK_EQUAL(appParams.getCamera(), "perspective");
     BOOST_CHECK(!appParams.isBenchmarking());
-    BOOST_CHECK_EQUAL(appParams.getJpegCompression(), 100);
+    BOOST_CHECK_EQUAL(appParams.getJpegCompression(), 90);
     BOOST_CHECK_EQUAL(appParams.getJpegSize(), brayns::Vector2ui(800, 600));
+    BOOST_CHECK_EQUAL(appParams.getImageStreamFPS(), 60);
 
     const auto& renderParams = pm.getRenderingParameters();
     BOOST_CHECK_EQUAL(renderParams.getEngine(), "ospray");
     BOOST_CHECK_EQUAL(renderParams.getModule(), "");
     BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::basic);
-    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 6);
+    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 7);
     BOOST_CHECK(!renderParams.getShadows());
     BOOST_CHECK(!renderParams.getSoftShadows());
     BOOST_CHECK_EQUAL(renderParams.getAmbientOcclusionStrength(), 0.f);

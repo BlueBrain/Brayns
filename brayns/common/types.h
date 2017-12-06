@@ -63,7 +63,6 @@ typedef std::shared_ptr<Brayns> BraynsPtr;
 class Engine;
 typedef std::shared_ptr<Engine> EnginePtr;
 typedef std::weak_ptr<Engine> EngineWeakPtr;
-typedef std::map<std::string, EnginePtr> EngineMap;
 
 class Scene;
 typedef std::shared_ptr<Scene> ScenePtr;
@@ -177,11 +176,9 @@ typedef std::vector<size_t> size_ts;
 class AbstractParameters;
 class ApplicationParameters;
 class GeometryParameters;
+class ParametersManager;
 class RenderingParameters;
 class SceneParameters;
-
-class ParametersManager;
-typedef std::shared_ptr<ParametersManager> ParametersManagerPtr;
 
 class ExtensionPlugin;
 typedef std::shared_ptr<ExtensionPlugin> ExtensionPluginPtr;
@@ -190,8 +187,8 @@ typedef std::vector<ExtensionPluginPtr> ExtensionPlugins;
 class ExtensionPluginFactory;
 typedef std::unique_ptr<ExtensionPluginFactory> ExtensionPluginFactoryPtr;
 
-class ZeroEQPlugin;
-typedef std::shared_ptr<ZeroEQPlugin> ZeroEQPluginPtr;
+class RocketsPlugin;
+typedef std::shared_ptr<RocketsPlugin> RocketsPluginPtr;
 
 class DeflectPlugin;
 typedef std::shared_ptr<DeflectPlugin> DeflectPluginPtr;
@@ -209,7 +206,8 @@ enum class RendererType
     simulation,
     particle,
     geometryNormals,
-    shadingNormals
+    shadingNormals,
+    scientificvisualization
 };
 typedef std::vector<RendererType> RendererTypes;
 typedef std::map<RendererType, RendererPtr> RendererMap;

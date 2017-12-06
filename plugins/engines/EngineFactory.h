@@ -35,7 +35,7 @@ class EngineFactory
 {
 public:
     /**
-     * @brief Default constructor
+     * @brief Constructor
      * @param argc Number of command line arguments
      * @param argv Command line arguments
      * @param parametersManager Container for all parameters (application,
@@ -43,27 +43,20 @@ public:
      */
     EngineFactory(int argc, const char** argv,
                   ParametersManager& parametersManager);
-    ~EngineFactory() {}
+
     /**
-     * @brief Gets the instance of the engine corresponding the given name. If
-     *        the instance does not exist, it is created. If the name is
-     *        incorrect, a null pointer is returned.
-     * @param name of the engine (opray, optix, firerays)
+     * @brief Create an instance of the engine corresponding the given name. If
+     *        the name is incorrect, a null pointer is returned.
+     * @param name of the engine (opray, optix, livre)
      * @return A pointer to the engine, null if the engine could not be
      *         instanciated
      */
-    EnginePtr get(const std::string& name);
-
-    /**
-     * Remove the given engine from the factory. Note that the engine might not
-     * be destroyed, depending on other shared_ptrs holding it.
-     */
-    void remove(EnginePtr engine);
+    std::unique_ptr<Engine> create(const std::string& name);
 
 private:
-    strings _arguments;
+    int _argc;
+    const char** _argv;
     ParametersManager& _parametersManager;
-    EngineMap _engines;
 };
 }
 

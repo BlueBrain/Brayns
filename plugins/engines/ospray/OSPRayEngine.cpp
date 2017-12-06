@@ -39,7 +39,16 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     try
     {
-        ospInit(&argc, argv);
+        // Ospray messes up with argv, need to pass a copy
+        strings arguments;
+        for (int i = 0; i < argc; ++i)
+            arguments.push_back(argv[i]);
+
+        std::vector<const char*> newArgv;
+        for (const auto& arg : arguments)
+            newArgv.push_back(arg.c_str());
+
+        ospInit(&argc, newArgv.data());
     }
     catch (const std::exception& e)
     {
@@ -153,11 +162,12 @@ void OSPRayEngine::commit()
 
     auto osprayFrameBuffer =
         std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer);
-    const auto& appParams = getParametersManager().getApplicationParameters();
+    const auto& appParams = _parametersManager.getApplicationParameters();
     if (appParams.getModified() || _camera->getModified())
-        osprayFrameBuffer->setStreamingParams(appParams,
-                                              _camera->getType() ==
-                                                  CameraType::stereo);
+    {
+        const bool isStereo = _camera->getType() == CameraType::stereo;
+        osprayFrameBuffer->setStreamingParams(appParams, isStereo);
+    }
 }
 
 void OSPRayEngine::render()

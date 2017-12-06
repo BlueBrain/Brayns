@@ -48,6 +48,7 @@ private:
     std::string _name;
     OSPRayCamera* _camera;
     OSPRenderer _renderer;
+    float _prevVariance{std::numeric_limits<float>::infinity()};
 };
 }
 

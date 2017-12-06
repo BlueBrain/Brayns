@@ -88,6 +88,11 @@ ApplicationParameters& ParametersManager::getApplicationParameters()
     return _applicationParameters;
 }
 
+const ApplicationParameters& ParametersManager::getApplicationParameters() const
+{
+    return _applicationParameters;
+}
+
 RenderingParameters& ParametersManager::getRenderingParameters()
 {
     return _renderingParameters;

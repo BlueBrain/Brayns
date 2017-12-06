@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016, Blue Brain Project
-#                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Copyright (c) 2016-2017, Blue Brain Project
+#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns
 # <https://github.com/BlueBrain/Brayns>
@@ -22,4 +22,4 @@
 # All rights reserved. Do not distribute without further notice.
 
 ''' version '''
-VERSION = "0.1.0"
+VERSION = '0.1.0'

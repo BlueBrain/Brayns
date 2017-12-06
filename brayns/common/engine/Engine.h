@@ -59,11 +59,9 @@ public:
      * Called after the given extension plugin was created to perform
      * engine-specific initialization on a given extension.
      */
-    virtual void extensionInit(ExtensionPlugin&){};
-
+    virtual void extensionInit(ExtensionPlugin&) {}
     /** Renders the current scene and populates the frame buffer accordingly */
     virtual void render();
-
     /** Executes engine specific pre-render operations */
     virtual void preRender() {}
     /** Executes engine specific post-render operations */
@@ -77,8 +75,6 @@ public:
     Camera& getCamera() { return *_camera; }
     /** Gets the renderer */
     Renderer& getRenderer();
-    /** Gets the parameters manager */
-    ParametersManager& getParametersManager() { return _parametersManager; }
     /** Active renderer */
     void setActiveRenderer(const RendererType renderer);
     RendererType getActiveRenderer() { return _activeRenderer; }
@@ -168,6 +164,7 @@ public:
     void setLastProgress(const float lastProgress)
     {
         _lastProgress = lastProgress;
+        _modified = true;
     }
 
     /**
@@ -189,8 +186,10 @@ public:
      *         if data loading is in progress.
      */
     bool isReady() const { return _isReady; }
+    bool getModified() const { return _modified; }
     /** @internal */
     void setReady(const bool isReady_) { _isReady = isReady_; }
+    void resetModified() { _modified = false; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
@@ -208,6 +207,7 @@ protected:
     std::string _lastOperation;
     bool _keepRunning{true};
     bool _isReady{false};
+    bool _modified{false};
 };
 }
 

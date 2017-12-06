@@ -163,8 +163,7 @@ void Scene::setMaterials(const MaterialType materialType)
             break;
         case MaterialType::gradient:
         {
-            const float a =
-                float(std::rand() % nbMaterials) / float(nbMaterials);
+            const float a = float(i) / float(nbMaterials);
             material.setColor(Vector3f(a, 0.f, 1.f - a));
             break;
         }

@@ -25,20 +25,19 @@ using namespace optix;
 // Global variables
 rtDeclareVariable(float, timestamp, , );
 
-#define CYLINDER_SIZE 9
-
 rtBuffer<float> cylinders;
 
 // Geometry specific variables
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
+rtDeclareVariable(unsigned int, cylinder_size, ,);
 
 template<bool use_robust_method>
 static __device__
 void intersect_cylinder( int primIdx )
 {
-    const int idx = primIdx * CYLINDER_SIZE;
+    const int idx = primIdx * cylinder_size;
     const float ts = cylinders[ idx + 7 ];
     if( ts >= timestamp )
         return;
@@ -120,7 +119,7 @@ RT_PROGRAM void robust_intersect( int primIdx )
 
 RT_PROGRAM void bounds( int primIdx, float result[6] )
 {
-    const int idx = primIdx * CYLINDER_SIZE;
+    const int idx = primIdx * cylinder_size;
     const float3 v0 = { cylinders[ idx ], cylinders[ idx + 1 ], cylinders[ idx + 2 ] };
     const float3 v1 = { cylinders[ idx + 3 ], cylinders[ idx + 4 ], cylinders[ idx + 5 ] };
     const float radius = cylinders[ idx + 6 ];

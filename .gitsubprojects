@@ -1,28 +1,25 @@
 # -*- mode: cmake -*-
-git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git f4b3706)
+git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git f36655b)
 
 if(BRAYNS_NETWORKING_ENABLED)
-  git_subproject(Servus https://github.com/HBPVIS/Servus.git 2e9a23a)
-  git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 6d403bc)
-  git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 1e66ee3)
-endif()
-
-if(BRAYNS_NETWORKING_ENABLED OR BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Lexis https://github.com/HBPVis/Lexis.git a4e458a)
+  git_subproject(Lexis https://github.com/HBPVis/Lexis.git f84436c)
+  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git e93e1e4)
+  git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 96e793d)
 endif()
 
 # Streaming to display walls
 if(BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 1a1fb97)
+  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git cc4c732)
 endif()
 
 # Data access
 if(BRAYNS_BRION_ENABLED)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git af46c14)
+  git_subproject(Servus https://github.com/HBPVIS/Servus.git 2e9a23a)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git d265ed3)
   git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 41ac72b)
 endif()
 
 # Livre rendering engine
 if(BRAYNS_LIVRE_ENABLED)
-  git_subproject(Livre https://github.com/BlueBrain/Livre.git 379c6fb)
+  git_subproject(Livre https://github.com/BlueBrain/Livre.git 1b341a6)
 endif()
