@@ -27,7 +27,7 @@
 namespace brayns
 {
 /**
-   Defines the abstract representation of a extension plug-in. What we mean by
+   Defines the abstract representation of an extension plug-in. What we mean by
    extension is a set a functionalities that are not provided by the core of
    the application. For example, exposing a REST interface via HTTP, or
    streaming images to an distant display.
@@ -35,7 +35,8 @@ namespace brayns
 class ExtensionPlugin
 {
 public:
-    virtual ~ExtensionPlugin() {}
+    virtual ~ExtensionPlugin() = default;
+
     /**
      * Executes the core functionnalities of the plugin
      * @return true if other plugins are allowed to continue execution or false
@@ -47,7 +48,8 @@ public:
                                 AbstractManipulator& cameraManipulator) = 0;
 
 protected:
-    ExtensionPlugin();
+    ExtensionPlugin() = default;
 };
 }
-#endif // EXTENSIONPLUGIN_H
+
+#endif

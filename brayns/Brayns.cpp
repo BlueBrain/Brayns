@@ -30,22 +30,20 @@
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/log.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
+#include <brayns/io/ImageManager.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/XYZBLoader.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
-
-#if (BRAYNS_USE_MAGICKPP)
-#include <Magick++.h>
-#endif
 
 #include <plugins/engines/EngineFactory.h>
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
@@ -78,9 +76,8 @@ namespace brayns
 struct Brayns::Impl
 {
     Impl(int argc, const char** argv)
-        : _engine(nullptr)
-        , _parametersManager(new ParametersManager())
-        , _meshLoader(_parametersManager->getGeometryParameters())
+        : _engineFactory{argc, argv, _parametersManager}
+        , _meshLoader(_parametersManager.getGeometryParameters())
     {
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
@@ -91,35 +88,30 @@ struct Brayns::Impl
         BRAYNS_INFO << std::endl;
 
         BRAYNS_INFO << "Parsing command line options" << std::endl;
-        _parametersManager->parse(argc, argv);
-        _parametersManager->print();
+        _parametersManager.parse(argc, argv);
+        _parametersManager.print();
 
-        // Initialize keyboard handler
-        _keyboardHandler.reset(new KeyboardHandler());
         _registerKeyboardShortcuts();
 
-        // Get rendering engine
-        _engineFactory.reset(
-            new EngineFactory(argc, argv, *_parametersManager));
         createEngine();
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
+        // after createEngine() to execute in parallel to scene loading
         _extensionPluginFactory.reset(
-            new ExtensionPluginFactory(*_parametersManager));
+            new ExtensionPluginFactory(_parametersManager));
 #endif
+
+        if (!isAsyncMode())
+            _dataLoadingFuture.get();
     }
 
     void createEngine()
     {
-        if (_engine)
-        {
-            _engineFactory->remove(_engine);
-            _engine.reset();
-        }
+        _engine.reset(); // Free resources before creating a new engine
 
         const auto& engineName =
-            _parametersManager->getRenderingParameters().getEngine();
-        _engine = _engineFactory->get(engineName);
+            _parametersManager.getRenderingParameters().getEngine();
+        _engine = _engineFactory.create(engineName);
         if (!_engine)
             throw std::runtime_error("Unsupported engine: " + engineName);
 
@@ -196,7 +188,7 @@ struct Brayns::Impl
     bool render()
     {
         const Vector2ui windowSize =
-            _parametersManager->getApplicationParameters().getWindowSize();
+            _parametersManager.getApplicationParameters().getWindowSize();
 
         _render(windowSize);
 
@@ -206,8 +198,8 @@ struct Brayns::Impl
     }
 
     Engine& getEngine() { return *_engine; }
-    ParametersManager& getParametersManager() { return *_parametersManager; }
-    KeyboardHandler& getKeyboardHandler() { return *_keyboardHandler; }
+    ParametersManager& getParametersManager() { return _parametersManager; }
+    KeyboardHandler& getKeyboardHandler() { return _keyboardHandler; }
     AbstractManipulator& getCameraManipulator() { return *_cameraManipulator; }
     bool isLoadingFinished() const
     {
@@ -217,11 +209,27 @@ struct Brayns::Impl
     }
     bool isAsyncMode() const
     {
-        return !_parametersManager->getApplicationParameters()
+        return !_parametersManager.getApplicationParameters()
                     .getSynchronousMode();
     }
 
 private:
+    void _writeFrameToFile()
+    {
+        const auto& frameExportFolder =
+            _parametersManager.getApplicationParameters()
+                .getFrameExportFolder();
+        if (frameExportFolder.empty())
+            return;
+        char str[7];
+        const auto frame =
+            _parametersManager.getSceneParameters().getAnimationFrame();
+        snprintf(str, 7, "%06d", int(frame));
+        const auto filename = frameExportFolder + "/" + str + ".png";
+        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
+        ImageManager::exportFrameBufferToFile(frameBuffer, filename);
+    }
+
     void _loadScene()
     {
         Progress loadingProgress("Loading scene ...",
@@ -250,7 +258,7 @@ private:
 
         scene.buildEnvironment();
 
-        const auto& geomParams = _parametersManager->getGeometryParameters();
+        const auto& geomParams = _parametersManager.getGeometryParameters();
         if (geomParams.getLoadCacheFile().empty())
         {
             scene.buildMaterials();
@@ -278,74 +286,17 @@ private:
         BRAYNS_INFO << "Now rendering ..." << std::endl;
     }
 
-#if (BRAYNS_USE_MAGICKPP)
-    void _writeFrameToFolder()
-    {
-        const auto& frameExportFolder =
-            _parametersManager->getApplicationParameters()
-                .getFrameExportFolder();
-        if (frameExportFolder.empty())
-            return;
-        try
-        {
-            char str[7];
-            snprintf(str, 7, "%06d", int(_engine->getFrameNumber()));
-
-            const std::string filename = frameExportFolder + "/" + str + ".png";
-            FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-            std::string format;
-            switch (frameBuffer.getFrameBufferFormat())
-            {
-            case FrameBufferFormat::rgba_i8:
-                format = "RGBA";
-                break;
-            case FrameBufferFormat::rgb_i8:
-                format = "RGB";
-                break;
-            default:
-                BRAYNS_ERROR
-                    << "Unsupported frame buffer format. Cannot export "
-                       "frame to file as PNG image"
-                    << std::endl;
-                return;
-            }
-            uint8_t* colorBuffer = frameBuffer.getColorBuffer();
-            const auto& size = frameBuffer.getSize();
-            Magick::Image image(size.x(), size.y(), format, Magick::CharPixel,
-                                colorBuffer);
-            image.flip();
-            image.write(filename);
-        }
-        catch (Magick::Warning& warning)
-        {
-            BRAYNS_WARN << warning.what() << std::endl;
-            return;
-        }
-        catch (Magick::Error& error)
-        {
-            BRAYNS_ERROR << error.what() << std::endl;
-            return;
-        }
-    }
-#else
-    void _writeFrameToFolder()
-    {
-        BRAYNS_DEBUG << "ImageMagick is required to export frames as PNG files"
-                     << std::endl;
-    }
-#endif
-
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
     void _executePlugins(const Vector2ui& size)
     {
         auto oldEngine = _engine.get();
-        _extensionPluginFactory->execute(_engine, *_keyboardHandler,
+        _extensionPluginFactory->execute(_engine, _keyboardHandler,
                                          *_cameraManipulator);
 
         if (!_engine)
             throw std::runtime_error("No valid engine found, aborting");
 
-        // the ZeroEQ plugin can create a new engine
+        // the network plugin can create a new engine
         if (_engine.get() != oldEngine)
         {
             _engine->reshape(size);
@@ -381,14 +332,14 @@ private:
 
         Scene& scene = _engine->getScene();
 
-        if (_parametersManager->getRenderingParameters().getHeadLight())
+        if (_parametersManager.getRenderingParameters().getHeadLight())
         {
             LightPtr sunLight = scene.getLight(0);
             DirectionalLight* sun =
                 dynamic_cast<DirectionalLight*>(sunLight.get());
             if (sun &&
                 (camera.getModified() ||
-                 _parametersManager->getRenderingParameters().getModified()))
+                 _parametersManager.getRenderingParameters().getModified()))
             {
                 sun->setDirection(camera.getTarget() - camera.getPosition());
                 scene.commitLights();
@@ -396,30 +347,36 @@ private:
         }
 
         _engine->setActiveRenderer(
-            _parametersManager->getRenderingParameters().getRenderer());
+            _parametersManager.getRenderingParameters().getRenderer());
 
-        if (_parametersManager->isAnyModified() || camera.getModified() ||
+        if (_parametersManager.isAnyModified() || camera.getModified() ||
             scene.getModified())
         {
+            _engine->getRenderer().hasNewImage(true);
             _engine->getFrameBuffer().clear();
         }
+        else
+            // we assume no new image here, but accumulation inside the renderer
+            // might decide otherwise
+            _engine->getRenderer().hasNewImage(false);
 
         _engine->render();
 
-        _writeFrameToFolder();
+        _writeFrameToFile();
 
-        _parametersManager->resetModified();
+        _parametersManager.resetModified();
         camera.resetModified();
         scene.resetModified();
+        _engine->resetModified();
 
         return true;
     }
 
     void _loadData(Progress& loadingProgress)
     {
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
-        auto& volumeParameters = _parametersManager->getVolumeParameters();
-        auto& sceneParameters = _parametersManager->getSceneParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
+        auto& volumeParameters = _parametersManager.getVolumeParameters();
+        auto& sceneParameters = _parametersManager.getSceneParameters();
         auto& scene = _engine->getScene();
 
         size_t nextTic = 0;
@@ -439,7 +396,7 @@ private:
 
         // set environment map if applicable
         const std::string& environmentMap =
-            _parametersManager->getSceneParameters().getEnvironmentMap();
+            _parametersManager.getSceneParameters().getEnvironmentMap();
         if (!environmentMap.empty())
         {
             auto& material = scene.getMaterials()[MATERIAL_SKYBOX];
@@ -536,7 +493,7 @@ private:
     void _loadPDBFolder(const Progress::UpdateCallback& progressUpdate)
     {
         // Load PDB File
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         const std::string& folder = geometryParameters.getPDBFolder();
         const strings filters = {".pdb", ".pdb1"};
         const strings files = parseFolder(folder, filters);
@@ -557,7 +514,7 @@ private:
     void _loadPDBFile(const std::string& filename)
     {
         // Load PDB File
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         std::string pdbFile = filename;
         if (pdbFile == "")
@@ -582,7 +539,7 @@ private:
     void _loadXYZBFile(const Progress::UpdateCallback& progressUpdate)
     {
         // Load XYZB File
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         BRAYNS_INFO << "Loading XYZB file " << geometryParameters.getXYZBFile()
                     << std::endl;
@@ -602,7 +559,7 @@ private:
                          const Progress::UpdateCallback& progressUpdate)
     {
         const auto& geometryParameters =
-            _parametersManager->getGeometryParameters();
+            _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
 
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
@@ -632,7 +589,7 @@ private:
     void _loadMeshFile(const std::string& filename)
     {
         const auto& geometryParameters =
-            _parametersManager->getGeometryParameters();
+            _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
 
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
@@ -656,7 +613,7 @@ private:
     {
         // Load Connectivity File
         GeometryParameters& geometryParameters =
-            _parametersManager->getGeometryParameters();
+            _parametersManager.getGeometryParameters();
         ConnectivityLoader connectivityLoader(geometryParameters);
         if (!connectivityLoader.importFromFile(_engine->getScene(),
                                                _meshLoader))
@@ -673,8 +630,8 @@ private:
                         const Progress::UpdateCallback& progressUpdate)
     {
         auto& applicationParameters =
-            _parametersManager->getApplicationParameters();
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+            _parametersManager.getApplicationParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         SceneLoader sceneLoader(applicationParameters, geometryParameters);
         sceneLoader.setProgressCallback(progressUpdate);
@@ -687,7 +644,7 @@ private:
      */
     void _loadNESTCircuit()
     {
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
 
         const std::string& circuit(geometryParameters.getNESTCircuit());
@@ -709,7 +666,7 @@ private:
             {
                 SpikeSimulationHandlerPtr simulationHandler(
                     new SpikeSimulationHandler(
-                        _parametersManager->getGeometryParameters()));
+                        _parametersManager.getGeometryParameters()));
                 if (!simulationHandler->attachSimulationToCacheFile(cacheFile))
                 {
                     if (!loader.importSpikeReport(
@@ -740,8 +697,8 @@ private:
     void _loadMorphologyFolder(const Progress::UpdateCallback& progressUpdate)
     {
         auto& applicationParameters =
-            _parametersManager->getApplicationParameters();
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+            _parametersManager.getApplicationParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
         MorphologyLoader morphologyLoader(applicationParameters,
@@ -770,8 +727,8 @@ private:
         const Progress::UpdateCallback& progressUpdate)
     {
         auto& applicationParameters =
-            _parametersManager->getApplicationParameters();
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+            _parametersManager.getApplicationParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const std::string& filename =
             geometryParameters.getCircuitConfiguration();
@@ -797,7 +754,7 @@ private:
     */
     void _loadMolecularSystem(const Progress::UpdateCallback& progressUpdate)
     {
-        auto& geometryParameters = _parametersManager->getGeometryParameters();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
         molecularSystemReader.setProgressCallback(progressUpdate);
@@ -813,136 +770,136 @@ private:
         case CameraMode::flying:
             _cameraManipulator.reset(
                 new FlyingModeManipulator(_engine->getCamera(),
-                                          *_keyboardHandler));
+                                          _keyboardHandler));
             break;
         case CameraMode::inspect:
             _cameraManipulator.reset(
                 new InspectCenterManipulator(_engine->getCamera(),
-                                             *_keyboardHandler));
+                                             _keyboardHandler));
             break;
         };
     }
 
     void _registerKeyboardShortcuts()
     {
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '0', "Black background",
             std::bind(&Brayns::Impl::_blackBackground, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '1', "Gray background",
             std::bind(&Brayns::Impl::_grayBackground, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '2', "White background",
             std::bind(&Brayns::Impl::_whiteBackground, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '3', "Set gradient materials",
             std::bind(&Brayns::Impl::_gradientMaterials, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '4', "Set pastel materials",
             std::bind(&Brayns::Impl::_pastelMaterials, this));
-        _keyboardHandler->registerKeyboardShortcut(
-            '5', "Set random materials",
-            std::bind(&Brayns::Impl::_randomMaterials, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
+            '5', "Scientific visualization renderer",
+            std::bind(&Brayns::Impl::_scivisRenderer, this));
+        _keyboardHandler.registerKeyboardShortcut(
             '6', "Default renderer",
             std::bind(&Brayns::Impl::_defaultRenderer, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '7', "Particle renderer",
             std::bind(&Brayns::Impl::_particleRenderer, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '8', "Proximity renderer",
             std::bind(&Brayns::Impl::_proximityRenderer, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '9', "Simulation renderer",
             std::bind(&Brayns::Impl::_simulationRenderer, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '[', "Decrease animation frame by 1",
             std::bind(&Brayns::Impl::_decreaseAnimationFrame, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             ']', "Increase animation frame by 1",
             std::bind(&Brayns::Impl::_increaseAnimationFrame, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'e', "Enable eletron shading",
             std::bind(&Brayns::Impl::_electronShading, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'f', "Enable fly mode", [this]() {
                 Brayns::Impl::_setupCameraManipulator(CameraMode::flying);
             });
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'i', "Enable inspect mode", [this]() {
                 Brayns::Impl::_setupCameraManipulator(CameraMode::inspect);
             });
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'o', "Decrease ambient occlusion strength",
             std::bind(&Brayns::Impl::_decreaseAmbientOcclusionStrength, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'O', "Increase ambient occlusion strength",
             std::bind(&Brayns::Impl::_increaseAmbientOcclusionStrength, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'p', "Enable diffuse shading",
             std::bind(&Brayns::Impl::_diffuseShading, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'P', "Disable shading",
             std::bind(&Brayns::Impl::_disableShading, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'r', "Set animation frame to 0",
             std::bind(&Brayns::Impl::_resetAnimationFrame, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'R', "Set animation frame to infinity",
             std::bind(&Brayns::Impl::_infiniteAnimationFrame, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'u', "Enable/Disable shadows",
             std::bind(&Brayns::Impl::_toggleShadows, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'U', "Enable/Disable soft shadows",
             std::bind(&Brayns::Impl::_toggleSoftShadows, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             't', "Multiply samples per ray by 2",
             std::bind(&Brayns::Impl::_increaseSamplesPerRay, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'T', "Divide samples per ray by 2",
             std::bind(&Brayns::Impl::_decreaseSamplesPerRay, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'y', "Enable/Disable light emitting materials",
             std::bind(&Brayns::Impl::_toggleLightEmittingMaterials, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'l', "Toggle load dynamic/static load balancer",
             std::bind(&Brayns::Impl::_toggleLoadBalancer, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'g', "Enable/Disable animation playback",
             std::bind(&Brayns::Impl::_toggleAnimationPlayback, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'x', "Set animation frame to " +
                      std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
             std::bind(&Brayns::Impl::_defaultAnimationFrame, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '|', "Create cache file ",
             std::bind(&Brayns::Impl::_saveSceneToCacheFile, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '{', "Decrease eye separation",
             std::bind(&Brayns::Impl::_decreaseEyeSeparation, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '}', "Increase eye separation",
             std::bind(&Brayns::Impl::_increaseEyeSeparation, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '<', "Decrease field of view",
             std::bind(&Brayns::Impl::_decreaseFieldOfView, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '>', "Increase field of view",
             std::bind(&Brayns::Impl::_increaseFieldOfView, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             ' ', "Camera reset to initial state",
             std::bind(&Brayns::Impl::_resetCamera, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '+', "Increase motion speed",
             std::bind(&Brayns::Impl::_increaseMotionSpeed, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             '-', "Decrease motion speed",
             std::bind(&Brayns::Impl::_decreaseMotionSpeed, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'c', "Display current camera information",
             std::bind(&Brayns::Impl::_displayCameraInformation, this));
-        _keyboardHandler->registerKeyboardShortcut(
+        _keyboardHandler.registerKeyboardShortcut(
             'm', "Toggle synchronous/asynchronous mode",
             std::bind(&Brayns::Impl::_toggleSynchronousMode, this));
     }
@@ -950,49 +907,56 @@ private:
     void _blackBackground()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setBackgroundColor(Vector3f(0.f, 0.f, 0.f));
     }
 
     void _grayBackground()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setBackgroundColor(Vector3f(0.5f, 0.5f, 0.5f));
     }
 
     void _whiteBackground()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setBackgroundColor(Vector3f(1.f, 1.f, 1.f));
+    }
+
+    void _scivisRenderer()
+    {
+        RenderingParameters& renderParams =
+            _parametersManager.getRenderingParameters();
+        renderParams.setRenderer(RendererType::scientificvisualization);
     }
 
     void _defaultRenderer()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setRenderer(RendererType::basic);
     }
 
     void _particleRenderer()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setRenderer(RendererType::particle);
     }
 
     void _proximityRenderer()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setRenderer(RendererType::proximity);
     }
 
     void _simulationRenderer()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setRenderer(RendererType::simulation);
     }
 
@@ -1004,7 +968,7 @@ private:
             return;
         }
 
-        SceneParameters& sceneParams = _parametersManager->getSceneParameters();
+        SceneParameters& sceneParams = _parametersManager.getSceneParameters();
         const auto animationFrame = sceneParams.getAnimationFrame();
         sceneParams.setAnimationFrame(animationFrame + 1);
     }
@@ -1017,7 +981,7 @@ private:
             return;
         }
 
-        SceneParameters& sceneParams = _parametersManager->getSceneParameters();
+        SceneParameters& sceneParams = _parametersManager.getSceneParameters();
         const auto animationFrame = sceneParams.getAnimationFrame();
         if (animationFrame > 0)
             sceneParams.setAnimationFrame(animationFrame - 1);
@@ -1026,28 +990,28 @@ private:
     void _diffuseShading()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setShading(ShadingType::diffuse);
     }
 
     void _electronShading()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setShading(ShadingType::electron);
     }
 
     void _disableShading()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setShading(ShadingType::none);
     }
 
     void _increaseAmbientOcclusionStrength()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         float aaStrength = renderParams.getAmbientOcclusionStrength();
         aaStrength += 0.1f;
         if (aaStrength > 1.f)
@@ -1058,7 +1022,7 @@ private:
     void _decreaseAmbientOcclusionStrength()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         float aaStrength = renderParams.getAmbientOcclusionStrength();
         aaStrength -= 0.1f;
         if (aaStrength < 0.f)
@@ -1068,27 +1032,27 @@ private:
 
     void _resetAnimationFrame()
     {
-        SceneParameters& sceneParams = _parametersManager->getSceneParameters();
+        SceneParameters& sceneParams = _parametersManager.getSceneParameters();
         sceneParams.setAnimationFrame(0);
     }
 
     void _infiniteAnimationFrame()
     {
-        SceneParameters& sceneParams = _parametersManager->getSceneParameters();
+        SceneParameters& sceneParams = _parametersManager.getSceneParameters();
         sceneParams.setAnimationFrame(std::numeric_limits<uint32_t>::max());
     }
 
     void _toggleShadows()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setShadows(renderParams.getShadows() == 0.f ? 1.f : 0.f);
     }
 
     void _toggleSoftShadows()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setSoftShadows(renderParams.getSoftShadows() == 0.f ? 0.1f
                                                                          : 0.f);
     }
@@ -1096,7 +1060,7 @@ private:
     void _increaseSamplesPerRay()
     {
         VolumeParameters& volumeParams =
-            _parametersManager->getVolumeParameters();
+            _parametersManager.getVolumeParameters();
         volumeParams.setSamplesPerRay(volumeParams.getSamplesPerRay() * 2);
         _engine->getScene().commitVolumeData();
     }
@@ -1104,7 +1068,7 @@ private:
     void _decreaseSamplesPerRay()
     {
         VolumeParameters& volumeParams =
-            _parametersManager->getVolumeParameters();
+            _parametersManager.getVolumeParameters();
         if (volumeParams.getSamplesPerRay() >= 4)
             volumeParams.setSamplesPerRay(volumeParams.getSamplesPerRay() / 2);
         _engine->getScene().commitVolumeData();
@@ -1113,7 +1077,7 @@ private:
     void _toggleLightEmittingMaterials()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setLightEmittingMaterials(
             !renderParams.getLightEmittingMaterials());
     }
@@ -1121,7 +1085,7 @@ private:
     void _toggleLoadBalancer()
     {
         RenderingParameters& renderParams =
-            _parametersManager->getRenderingParameters();
+            _parametersManager.getRenderingParameters();
         renderParams.setDynamicLoadBalancer(
             !renderParams.getDynamicLoadBalancer());
     }
@@ -1175,14 +1139,14 @@ private:
 
     void _toggleAnimationPlayback()
     {
-        auto& sceneParams = _parametersManager->getSceneParameters();
+        auto& sceneParams = _parametersManager.getSceneParameters();
         sceneParams.setAnimationDelta(sceneParams.getAnimationDelta() == 0 ? 1
                                                                            : 0);
     }
 
     void _defaultAnimationFrame()
     {
-        auto& sceneParams = _parametersManager->getSceneParameters();
+        auto& sceneParams = _parametersManager.getSceneParameters();
         sceneParams.setAnimationFrame(DEFAULT_TEST_ANIMATION_FRAME);
     }
 
@@ -1216,14 +1180,14 @@ private:
 
     void _toggleSynchronousMode()
     {
-        auto& app = _parametersManager->getApplicationParameters();
+        auto& app = _parametersManager.getApplicationParameters();
         app.setSynchronousMode(!app.getSynchronousMode());
     }
 
-    std::unique_ptr<EngineFactory> _engineFactory;
+    ParametersManager _parametersManager;
+    EngineFactory _engineFactory;
     EnginePtr _engine;
-    ParametersManagerPtr _parametersManager;
-    KeyboardHandlerPtr _keyboardHandler;
+    KeyboardHandler _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
     MeshLoader _meshLoader;
 

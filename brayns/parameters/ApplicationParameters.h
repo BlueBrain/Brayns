@@ -58,14 +58,14 @@ public:
     /** JPEG size */
     const Vector2ui& getJpegSize() const { return _jpegSize; }
     void setJpegSize(const Vector2ui& size) { updateValue(_jpegSize, size); }
+    /** Image stream FPS */
+    size_t getImageStreamFPS() const { return _imageStreamFPS; }
+    void setImageStreamFPS(const size_t fps)
+    {
+        updateValue(_imageStreamFPS, fps);
+    }
+
     const strings& getFilters() const { return _filters; }
-    /**
-     * @brief Auto publication of ZeroEQ events is used when several
-     * applications supporting the ZeroEQ protocol are started and need to
-     * be remain synchronized.
-     * @return True if auto publication is enabled, false otherwize
-     */
-    bool getAutoPublishZeroEQEvents() const { return _autoPublishZeroEQEvents; }
     void setFrameExportFolder(const std::string& folder)
     {
         updateValue(_frameExportFolder, folder);
@@ -124,9 +124,8 @@ protected:
     size_t _jpegCompression;
     Vector2ui _jpegSize;
     strings _filters;
-    bool _autoPublishZeroEQEvents;
     std::string _frameExportFolder;
-    bool _streamingEnabled{true};
+    bool _streamingEnabled{false};
     bool _streamCompression{true};
     unsigned int _streamQuality{80};
     uint16_t _streamPort{1701};
@@ -134,6 +133,7 @@ protected:
     std::string _streamId;
     std::string _tmpFolder;
     bool _synchronousMode{false};
+    size_t _imageStreamFPS{60};
 };
 }
 

@@ -30,16 +30,19 @@ class Renderer
 {
 public:
     BRAYNS_API Renderer(ParametersManager& parametersManager);
-    BRAYNS_API virtual ~Renderer() {}
-    BRAYNS_API virtual void render(FrameBufferPtr frameBuffer) = 0;
+    virtual ~Renderer() {}
+    virtual void render(FrameBufferPtr frameBuffer) = 0;
 
-    BRAYNS_API virtual void commit() = 0;
-    BRAYNS_API void setScene(ScenePtr scene) { _scene = scene; };
-    BRAYNS_API virtual void setCamera(CameraPtr camera) = 0;
+    virtual void commit() = 0;
+    void setScene(ScenePtr scene) { _scene = scene; };
+    virtual void setCamera(CameraPtr camera) = 0;
 
+    void hasNewImage(const bool hasNewImage_) { _hasNewImage = hasNewImage_; }
+    bool hasNewImage() const { return _hasNewImage; }
 protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;
+    bool _hasNewImage{true};
 };
 }
 #endif // RENDERER_H

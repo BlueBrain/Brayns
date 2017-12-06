@@ -5,10 +5,9 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSPLUGINS_LINK_LIBRARIES
-  PUBLIC braynsCommon vmmlib)
+  PUBLIC braynsCommon braynsIO vmmlib)
 
 set(BRAYNSPLUGINS_SOURCES
-  extensions/plugins/ExtensionPlugin.cpp
   engines/EngineFactory.cpp
 )
 
@@ -20,7 +19,6 @@ set(BRAYNSPLUGINS_PUBLIC_HEADERS
 if(BRAYNS_DEFLECT_ENABLED OR BRAYNS_NETWORKING_ENABLED)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/ExtensionPluginFactory.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/ExtensionPluginFactory.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Lexis)
 endif()
 
 if(BRAYNS_DEFLECT_ENABLED)
@@ -30,10 +28,10 @@ if(BRAYNS_DEFLECT_ENABLED)
 endif()
 
 if(BRAYNS_NETWORKING_ENABLED)
-  list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/ZeroEQPlugin.cpp)
-  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/ZeroEQPlugin.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
-    PUBLIC ZeroEQ ZeroEQHTTP BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
+  list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/RocketsPlugin.cpp)
+  list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/RocketsPlugin.h)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC Lexis Rockets
+    BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
 endif()
 
 if(BRAYNS_OSPRAY_ENABLED)

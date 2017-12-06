@@ -17,14 +17,20 @@ endif()
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
 set(BRAYNS_PORT_DEPEND "assimp boost ImageMagick glew tbb")
 
-set(EMBREE_MAX_ISA "AVX512KNL" CACHE STRING "MAX ISA SSE,AVX,AVX2,AVX512KNL")
-
 # Enable cloning of all optional subprojects for CI builds
 if($ENV{TRAVIS})
-  set(BRAYNS_NETWORKING_ENABLED ON)
-  set(BRAYNS_DEFLECT_ENABLED ON)
-  set(BRAYNS_BRION_ENABLED ON)
-  set(BRAYNS_LIVRE_ENABLED ON)
+  if(NOT DEFINED BRAYNS_NETWORKING_ENABLED)
+    set(BRAYNS_NETWORKING_ENABLED ON)
+  endif()
+  if(NOT DEFINED BRAYNS_DEFLECT_ENABLED)
+    set(BRAYNS_DEFLECT_ENABLED ON)
+  endif()
+  if(NOT DEFINED BRAYNS_BRION_ENABLED)
+    set(BRAYNS_BRION_ENABLED ON)
+  endif()
+  if(NOT DEFINED BRAYNS_LIVRE_ENABLED)
+    set(BRAYNS_LIVRE_ENABLED ON)
+  endif()
 endif()
 include(Common)
 
@@ -34,12 +40,12 @@ common_find_package(Boost REQUIRED COMPONENTS
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 
-# ZeroEQ and HTTP messaging
+# HTTP messaging
 common_find_package(LibJpegTurbo)
 common_find_package(Lexis)
+common_find_package(Rockets)
 common_find_package(ZeroBuf)
-common_find_package(ZeroEQ)
-if(LibJpegTurbo_FOUND AND TARGET Lexis AND TARGET ZeroBuf AND TARGET ZeroEQ)
+if(LibJpegTurbo_FOUND AND TARGET Lexis AND TARGET Rockets AND TARGET ZeroBuf)
   option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
   if(BRAYNS_NETWORKING_ENABLED)
     list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)
@@ -50,7 +56,7 @@ endif()
 
 # Streaming to display walls
 common_find_package(Deflect)
-if(TARGET Lexis AND TARGET Deflect)
+if(TARGET Deflect)
   option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
 else()
   unset(BRAYNS_DEFLECT_ENABLED)

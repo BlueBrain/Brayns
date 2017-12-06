@@ -29,7 +29,8 @@ namespace brayns
 class LivreEngine : public Engine
 {
 public:
-    LivreEngine(int argc, char** argv, ParametersManager& parametersManager);
+    LivreEngine(int argc, const char** argv,
+                ParametersManager& parametersManager);
 
     ~LivreEngine();
 
@@ -47,12 +48,6 @@ public:
      * the rendering.
      */
     void postRender() final;
-
-    /**
-     * Register Livre-specific serializables, i.e. VolumeRendererParameters, in
-     * ZeroEQPlugin.
-     */
-    void extensionInit(ExtensionPlugin&) final;
 
     /** @copydoc Engine::getMinimumFrameSize */
     Vector2ui getMinimumFrameSize() const final;

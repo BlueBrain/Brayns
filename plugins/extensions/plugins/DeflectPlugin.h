@@ -25,29 +25,13 @@
 
 #include <brayns/api.h>
 #include <deflect/Stream.h>
-#include <lexis/render/stream.h>
 
 namespace brayns
 {
-#if (BRAYNS_USE_NETWORKING)
-class ZeroEQPlugin;
-#endif
-
-struct Image
-{
-    std::vector<char> data;
-    Vector2ui size;
-    FrameBufferFormat format;
-};
-
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
-#if (BRAYNS_USE_NETWORKING)
-    DeflectPlugin(ZeroEQPlugin& zeroeq);
-#else
-    DeflectPlugin();
-#endif
+    DeflectPlugin(ParametersManager& parametersManager);
 
     /** @copydoc ExtensionPlugin::run */
     BRAYNS_API bool run(EngineWeakPtr engine, KeyboardHandler& keyboardHandler,
@@ -71,32 +55,38 @@ private:
         bool closeApplication; // True if and EXIT event was received
     };
 
+    struct Image
+    {
+        std::vector<char> data;
+        Vector2ui size;
+        FrameBufferFormat format;
+    };
+
     bool _startStream(bool observerOnly);
     void _closeStream();
 
-    void _sendDeflectFrame(Engine& engine);
     void _handleDeflectEvents(Engine& engine, KeyboardHandler& keyboardHandler,
                               AbstractManipulator& cameraManipulator);
 
-    /** Send an image to DisplayCluster
-     *
-     * @param swapYAxis enables a vertical flip operation on the image
-     */
-    void _send(const Engine& engine, bool swapYAxis);
-
+    void _sendSizeHints(Engine& engine);
+    void _sendDeflectFrame(Engine& engine);
+    void _copyToLastImage(FrameBuffer& frameBuffer);
+    deflect::Stream::Future _sendLastImage(CameraType cameraType);
+    deflect::PixelFormat _getDeflectImageFormat(FrameBufferFormat format) const;
     Vector2d _getWindowPos(const deflect::Event& event,
                            const Vector2ui& windowSize) const;
     double _getZoomDelta(const deflect::Event& pinchEvent,
                          const Vector2ui& windowSize) const;
 
+    ApplicationParameters& _params;
     Vector2d _previousPos;
     bool _pan = false;
     bool _pinch = false;
     std::unique_ptr<deflect::Observer> _stream;
-    ::lexis::render::Stream _params;
     std::string _previousHost;
     Image _lastImage;
     deflect::Stream::Future _sendFuture;
 };
 }
-#endif // DEFLECTPLUGIN_H
+
+#endif

@@ -393,6 +393,8 @@ void BaseWindow::create(const char* title, const size_t width,
              .getFilters()
              .empty())
         _screenSpaceProcessor.init(width, height);
+
+    _registerKeyboardShortcuts();
 }
 
 void BaseWindow::keypress(const char key, const Vector2f&)

@@ -67,6 +67,15 @@ public:
     BRAYNS_API void setTexture(const TextureType& type,
                                const std::string& filename);
 
+    /* @brief Prevents material attributes to be updated. Any update will be
+     * ignored. This is used when one wants to avoid material attibutes to be
+     * modifiied during the life time of the scene
+    */
+    BRAYNS_API void lock() { _locked = true; }
+    /* @brief Allows material attributes to be modified */
+    BRAYNS_API void unlock() { _locked = false; }
+    /* @return True if material attributes can be updated, false otherwise */
+    BRAYNS_API bool locked() const { return _locked; }
 private:
     Vector3f _color;
     Vector3f _specularColor;
@@ -77,6 +86,7 @@ private:
     float _emission;
     float _glossiness;
     TextureTypes _textures;
+    bool _locked;
 };
 }
 #endif // MATERIAL_H

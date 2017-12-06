@@ -18,10 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ZeroEQPlugin.h"
+#include "RocketsPlugin.h"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
 #include <brayns/Brayns.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
@@ -34,95 +32,104 @@
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/version.h>
-#include <fstream>
 #include <zerobuf/render/camera.h>
-#include <zeroeq/http/helpers.h>
+
+#include <fstream>
+
+#include "json.hpp"
+using json = nlohmann::json;
 
 namespace
 {
 const std::string ENDPOINT_API_VERSION = "v1/";
-const std::string ENDPOINT_CAMERA = ENDPOINT_API_VERSION + "camera";
-const std::string ENDPOINT_DATA_SOURCE = ENDPOINT_API_VERSION + "data-source";
-const std::string ENDPOINT_FORCE_RENDERING =
-    ENDPOINT_API_VERSION + "force-rendering";
-const std::string ENDPOINT_FRAME_BUFFERS =
-    ENDPOINT_API_VERSION + "frame-buffers";
-const std::string ENDPOINT_RESET_CAMERA = ENDPOINT_API_VERSION + "reset-camera";
-const std::string ENDPOINT_SCENE = ENDPOINT_API_VERSION + "scene";
-const std::string ENDPOINT_SETTINGS = ENDPOINT_API_VERSION + "settings";
-const std::string ENDPOINT_SIMULATION_HISTOGRAM =
-    ENDPOINT_API_VERSION + "simulation-histogram";
-const std::string ENDPOINT_SPIKES = ENDPOINT_API_VERSION + "spikes";
-const std::string ENDPOINT_VOLUME_HISTOGRAM =
-    ENDPOINT_API_VERSION + "volume-histogram";
-const std::string ENDPOINT_VERSION = ENDPOINT_API_VERSION + "version";
-const std::string ENDPOINT_PROGRESS = ENDPOINT_API_VERSION + "progress";
-const std::string ENDPOINT_CLIP_PLANES = ENDPOINT_API_VERSION + "clip-planes";
-const std::string ENDPOINT_FRAME = ENDPOINT_API_VERSION + "frame";
-const std::string ENDPOINT_IMAGE_JPEG = ENDPOINT_API_VERSION + "image-jpeg";
-const std::string ENDPOINT_MATERIAL_LUT = ENDPOINT_API_VERSION + "material-lut";
-const std::string ENDPOINT_VIEWPORT = ENDPOINT_API_VERSION + "viewport";
-const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER =
-    ENDPOINT_API_VERSION + "circuit-config-builder";
+const std::string ENDPOINT_CAMERA = "camera";
+const std::string ENDPOINT_DATA_SOURCE = "data-source";
+const std::string ENDPOINT_FORCE_RENDERING = "force-rendering";
+const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
+const std::string ENDPOINT_RESET_CAMERA = "reset-camera";
+const std::string ENDPOINT_SCENE = "scene";
+const std::string ENDPOINT_SETTINGS = "settings";
+const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
+const std::string ENDPOINT_SPIKES = "spikes";
+const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
+const std::string ENDPOINT_VERSION = "version";
+const std::string ENDPOINT_PROGRESS = "progress";
+const std::string ENDPOINT_CLIP_PLANES = "clip-planes";
+const std::string ENDPOINT_FRAME = "frame";
+const std::string ENDPOINT_IMAGE_JPEG = "image-jpeg";
+const std::string ENDPOINT_MATERIAL_LUT = "material-lut";
+const std::string ENDPOINT_VIEWPORT = "viewport";
+const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER = "circuit-config-builder";
+const std::string ENDPOINT_STREAM = "stream";
+const std::string ENDPOINT_STREAM_TO = "stream-to";
 
-const size_t NB_MAX_MESSAGES = 20; // Maximum number of ZeroEQ messages to read
+const std::string JSON_TYPE = "application/json";
+
+const size_t NB_MAX_MESSAGES = 20; // Maximum number of network messages to read
                                    // between each rendering loop
+
+std::string _buildJsonMessage(const std::string& event, const std::string data,
+                              const bool error = false)
+{
+    json message;
+    message["event"] = event;
+    message[error ? "error" : "data"] = json::parse(data);
+    return message.dump(4 /*indent*/);
+}
+}
+
+namespace servus
+{
+inline std::string to_json(const Serializable& obj)
+{
+    return obj.toJSON();
+}
+inline bool from_json(Serializable& obj, const std::string& json)
+{
+    return obj.fromJSON(json);
+}
 }
 
 namespace brayns
 {
-ZeroEQPlugin::ZeroEQPlugin(ParametersManager& parametersManager)
+inline std::string to_json(const Version& obj)
+{
+    return obj.toJSON();
+}
+
+RocketsPlugin::RocketsPlugin(ParametersManager& parametersManager)
     : ExtensionPlugin()
     , _parametersManager(parametersManager)
     , _compressor(tjInitCompress())
-    , _processingImageJpeg(false)
-    , _remoteProgress(0)
-    , _dirtyEngine(false)
 {
     _setupHTTPServer();
-    _setupRequests();
-    _setupSubscriber();
     _initializeDataSource();
     _initializeSettings();
 }
 
-ZeroEQPlugin::~ZeroEQPlugin()
+RocketsPlugin::~RocketsPlugin()
 {
     if (_compressor)
         tjDestroy(_compressor);
 }
 
-std::string ZeroEQPlugin::getEndpointAPIVersion() const
-{
-    return ENDPOINT_API_VERSION;
-}
-
-void ZeroEQPlugin::_onNewEngine()
+void RocketsPlugin::_onNewEngine()
 {
     if (_httpServer)
-    {
-        servus::Serializable& cam = *_engine->getCamera().getSerializable();
-        _httpServer->handle(ENDPOINT_CAMERA, cam);
-    }
-
-    _requests[ ::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER()] = [&] {
-        return _publisher.publish(*_engine->getCamera().getSerializable());
-    };
+        _handle(ENDPOINT_CAMERA, *_engine->getCamera().getSerializable());
 
     _engine->extensionInit(*this);
     _dirtyEngine = false;
 }
 
-void ZeroEQPlugin::_onChangeEngine()
+void RocketsPlugin::_onChangeEngine()
 {
-    servus::Serializable& cam = *_engine->getCamera().getSerializable();
+    auto& cam = *_engine->getCamera().getSerializable();
     cam.registerDeserializedCallback(
         servus::Serializable::DeserializedCallback());
 
     if (_httpServer)
-        _httpServer->remove(ENDPOINT_CAMERA);
-
-    _requests.erase(::brayns::v1::Camera::ZEROBUF_TYPE_IDENTIFIER());
+        _remove(ENDPOINT_CAMERA);
 
     try
     {
@@ -135,8 +142,8 @@ void ZeroEQPlugin::_onChangeEngine()
     _forceRendering = true;
 }
 
-bool ZeroEQPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
-                       AbstractManipulator&)
+bool RocketsPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
+                        AbstractManipulator&)
 {
     if (engine_.expired())
         return true;
@@ -147,258 +154,306 @@ bool ZeroEQPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
         _onNewEngine();
     }
 
-    const auto& ap = _parametersManager.getApplicationParameters();
-    if (ap.getAutoPublishZeroEQEvents())
+    if (!_httpServer)
+        return !_dirtyEngine;
+
+    try
     {
-        if (_requestVolumeHistogram())
-            _publisher.publish(_remoteVolumeHistogram);
+        _broadcastWebsocketMessages();
 
-        if (_requestSimulationHistogram())
-            _publisher.publish(_remoteSimulationHistogram);
-
-        if (_requestFrame())
-            _publisher.publish(_remoteFrame);
+        // In the case of interactions with Jupyter notebooks, HTTP messages are
+        // received in a blocking and sequential manner, meaning that the
+        // subscriber never has more than one message in its queue. In other
+        // words, only one message is processed between each rendering loop. The
+        // following code allows the processing of several messages and performs
+        // rendering after NB_MAX_MESSAGES reads, or if one of the messages
+        // forces rendering by setting the _forceRedering boolean variable to
+        // true.
+        _forceRendering = false;
+        for (size_t i = 0; i < NB_MAX_MESSAGES && !_forceRendering; ++i)
+            _httpServer->process(0);
+    }
+    catch (const std::exception& exc)
+    {
+        BRAYNS_ERROR << "Error while handling HTTP/websocket messages: "
+                     << exc.what() << std::endl;
     }
 
-    // In the case of interactions with Jupyter notebooks, HTTP messages are
-    // received in a blocking and sequential manner, meaning that the subscriber
-    // never has more than one message in its queue. In other words, only one
-    // message is processed between each rendering loop. The following code
-    // allows the processing of several messages and performs rendering after
-    // NB_MAX_MESSAGES reads, or if one of the messages forces rendering by
-    // setting the _forceRedering boolean variable to true.
-    _forceRendering = false;
-    for (size_t i = 0; i < NB_MAX_MESSAGES && !_forceRendering; ++i)
-        while (_subscriber.receive(0))
-        {
-        }
     return !_dirtyEngine;
 }
 
-bool ZeroEQPlugin::operator!() const
+void RocketsPlugin::_broadcastWebsocketMessages()
 {
-    return !_httpServer;
-}
+    if (_httpServer->getConnectionCount() == 0)
+        return;
 
-::zeroeq::http::Server* ZeroEQPlugin::operator->()
-{
-    return _httpServer.get();
-}
+    if (_engine->getCamera().getModified())
+        _httpServer->broadcastText(_wsOutgoing[ENDPOINT_CAMERA]());
 
-void ZeroEQPlugin::handle(servus::Serializable& object)
-{
-    if (_httpServer)
-        _httpServer->handle(object);
-    _subscriber.subscribe(object);
-    _requests[object.getTypeIdentifier()] = [&] {
-        return _publisher.publish(object);
-    };
+    if (_engine->getModified())
+        _httpServer->broadcastText(_wsOutgoing[ENDPOINT_PROGRESS]());
 
-    // publish updates from HTTP to subscribers, e.g. livreGUI
-    object.registerDeserializedCallback([&] { _publisher.publish(object); });
-}
-
-bool ZeroEQPlugin::_writeBlueConfigFile(const std::string& blueConfigFilename,
-                                        const strings& params)
-{
-    std::ofstream blueConfig(blueConfigFilename);
-    if (!blueConfig.good())
-        return false;
-
-    std::map<std::string, std::string> dictionary = {
-        {"morphology_folder", "MorphologyPath"}, {"mvd_file", "CircuitPath"}};
-
-    blueConfig << "Run Default" << std::endl << "{" << std::endl;
-    auto parameters = params;
-    for (auto& parameter : parameters)
+    if (_engine->getRenderer().hasNewImage())
     {
-        strings keyValue;
-        boost::char_separator<char> separator("=");
-        boost::tokenizer<boost::char_separator<char>> tokens(parameter,
-                                                             separator);
-        for_each(tokens.begin(), tokens.end(),
-                 [&keyValue](const std::string& s) { keyValue.push_back(s); });
+        const auto fps =
+            _parametersManager.getApplicationParameters().getImageStreamFPS();
+        if (_timer.elapsed() < 1.f / fps)
+            return;
 
-        if (keyValue.size() != 2)
-        {
-            BRAYNS_ERROR << "BlueConfigBuilder: Invalid parameter " << parameter
-                         << std::endl;
-            continue;
-        }
-        if (dictionary.find(keyValue[0]) == dictionary.end())
-        {
-            BRAYNS_ERROR << "BlueConfigBuilder: Unknown parameter "
-                         << keyValue[0] << std::endl;
-            continue;
-        }
-        blueConfig << dictionary[keyValue[0]] << " " << keyValue[1]
-                   << std::endl;
+        _timer.restart();
+
+        const auto image = _createJPEG();
+        if (image.size > 0)
+            _httpServer->broadcastBinary((const char*)image.data.get(),
+                                         image.size);
     }
-    blueConfig << "}" << std::endl;
-    blueConfig.close();
-    return true;
 }
 
-std::future<::zeroeq::http::Response> ZeroEQPlugin::_handleCircuitConfigBuilder(
-    const ::zeroeq::http::Request& request)
+rockets::ws::Response RocketsPlugin::_processWebsocketMessage(
+    const std::string& message)
 {
-    const auto paramsAsString = request.query;
-    strings params;
-    boost::split(params, paramsAsString, boost::is_any_of("&"));
-    const std::string blueConfigFilename =
-        _parametersManager.getApplicationParameters().getTmpFolder() +
-        "/BlueConfig";
-    if (_writeBlueConfigFile(blueConfigFilename, params))
+    try
     {
-        const std::string body =
-            "{\"filename\":\"" + blueConfigFilename + "\"}";
-        return ::zeroeq::http::make_ready_response(::zeroeq::http::Code::OK,
-                                                   body, "application/json");
+        auto jsonData = json::parse(message);
+        const std::string event = jsonData["event"];
+        auto i = _wsIncoming.find(event);
+        if (i == _wsIncoming.end())
+            return _buildJsonMessage(event, "Unknown websocket event", true);
+
+        if (!i->second(jsonData["data"].dump()))
+            return _buildJsonMessage(event, "Could not update object", true);
+
+        // re-broadcast to all other clients
+        return rockets::ws::Response{message, rockets::ws::Recipient::others};
     }
-    else
-        return ::zeroeq::http::make_ready_response(
-            ::zeroeq::http::Code::SERVICE_UNAVAILABLE);
+    catch (const std::exception& exc)
+    {
+        BRAYNS_ERROR << "Error in websocket message handling: " << exc.what()
+                     << std::endl;
+        return _buildJsonMessage("exception", exc.what(), true);
+    }
 }
 
-void ZeroEQPlugin::_setupHTTPServer()
+void RocketsPlugin::_setupHTTPServer()
 {
-    const strings& arguments =
-        _parametersManager.getApplicationParameters().arguments();
-    char** argv = new char*[arguments.size()];
-    for (size_t i = 0; i < arguments.size(); ++i)
-        argv[i] = const_cast<char*>(arguments[i].c_str());
-
-    _httpServer = ::zeroeq::http::Server::parse(arguments.size(),
-                                                const_cast<const char**>(argv),
-                                                _subscriber);
-    delete[] argv;
-
-    if (!_httpServer)
+    try
     {
-        BRAYNS_ERROR << "HTTP could not be initialized" << std::endl;
+        _httpServer.reset(
+            new rockets::Server{_getHttpInterface(), "rockets", 0});
+        BRAYNS_INFO << "Registering http handlers on " << _httpServer->getURI()
+                    << std::endl;
+    }
+    catch (const std::runtime_error& e)
+    {
+        BRAYNS_ERROR << "HTTP could not be initialized: '" << e.what() << "'"
+                     << std::endl;
         return;
     }
 
-    BRAYNS_INFO << "Registering handlers on " << _httpServer->getURI()
-                << std::endl;
+    _setupWebsocket();
 
-    _httpServer->handleGET(ENDPOINT_VERSION, brayns::Version::getSchema(),
-                           &brayns::Version::toJSON);
+    _handleVersion();
+    _handleStreaming();
 
-    _httpServer->handleGET(ENDPOINT_IMAGE_JPEG, _remoteImageJPEG);
-    _remoteImageJPEG.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestImageJPEG, this));
+    _handleGET(ENDPOINT_IMAGE_JPEG, _remoteImageJPEG);
+    _remoteImageJPEG.registerSerializeCallback([this] { _requestImageJPEG(); });
 
-    _httpServer->handleGET(ENDPOINT_FRAME_BUFFERS, _remoteFrameBuffers);
+    _handleGET(ENDPOINT_FRAME_BUFFERS, _remoteFrameBuffers);
     _remoteFrameBuffers.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestFrameBuffers, this));
+        [this] { _requestFrameBuffers(); });
 
-    _httpServer->handlePUT(ENDPOINT_RESET_CAMERA, _remoteResetCamera);
+    _handlePUT(ENDPOINT_RESET_CAMERA, _remoteResetCamera);
     _remoteResetCamera.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_resetCameraUpdated, this));
+        std::bind(&RocketsPlugin::_resetCameraUpdated, this));
 
-    _httpServer->handle(ENDPOINT_SCENE, _remoteScene);
+    _handle(ENDPOINT_SCENE, _remoteScene);
     _remoteScene.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_sceneUpdated, this));
-    _remoteScene.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestScene, this));
+        std::bind(&RocketsPlugin::_sceneUpdated, this));
+    _remoteScene.registerSerializeCallback([this] { _requestScene(); });
 
-    _httpServer->handle(ENDPOINT_SPIKES, _remoteSpikes);
+    _handle(ENDPOINT_SPIKES, _remoteSpikes);
     _remoteSpikes.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_spikesUpdated, this));
-    _remoteSpikes.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestSpikes, this));
+        std::bind(&RocketsPlugin::_spikesUpdated, this));
+    _remoteSpikes.registerSerializeCallback([this] { _requestSpikes(); });
 
-    _httpServer->handle(ENDPOINT_MATERIAL_LUT, _remoteMaterialLUT);
+    _handle(ENDPOINT_MATERIAL_LUT, _remoteMaterialLUT);
     _remoteMaterialLUT.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_materialLUTUpdated, this));
+        std::bind(&RocketsPlugin::_materialLUTUpdated, this));
     _remoteMaterialLUT.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestMaterialLUT, this));
+        std::bind(&RocketsPlugin::_requestMaterialLUT, this));
 
-    _httpServer->handle(ENDPOINT_DATA_SOURCE, _remoteDataSource);
+    _handle(ENDPOINT_DATA_SOURCE, _remoteDataSource);
     _remoteDataSource.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_dataSourceUpdated, this));
+        std::bind(&RocketsPlugin::_dataSourceUpdated, this));
 
-    _httpServer->handle(ENDPOINT_SETTINGS, _remoteSettings);
+    _handle(ENDPOINT_SETTINGS, _remoteSettings);
     _remoteSettings.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_settingsUpdated, this));
+        std::bind(&RocketsPlugin::_settingsUpdated, this));
 
-    _httpServer->handle(ENDPOINT_FRAME, _remoteFrame);
-    _remoteFrame.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestFrame, this));
+    _handle(ENDPOINT_FRAME, _remoteFrame);
+    _remoteFrame.registerSerializeCallback([this] { _requestFrame(); });
     _remoteFrame.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_frameUpdated, this));
+        std::bind(&RocketsPlugin::_frameUpdated, this));
 
-    _httpServer->handle(ENDPOINT_VIEWPORT, _remoteViewport);
-    _remoteViewport.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestViewport, this));
+    _handle(ENDPOINT_VIEWPORT, _remoteViewport);
+    _remoteViewport.registerSerializeCallback([this] { _requestViewport(); });
     _remoteViewport.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_viewportUpdated, this));
+        std::bind(&RocketsPlugin::_viewportUpdated, this));
 
-    _httpServer->handle(::zeroeq::http::Method::GET,
-                        ENDPOINT_CIRCUIT_CONFIG_BUILDER,
-                        std::bind(&ZeroEQPlugin::_handleCircuitConfigBuilder,
+    _httpServer->handle(rockets::http::Method::GET,
+                        ENDPOINT_API_VERSION + ENDPOINT_CIRCUIT_CONFIG_BUILDER,
+                        std::bind(&RocketsPlugin::_handleCircuitConfigBuilder,
                                   this, std::placeholders::_1));
 
-    _httpServer->handle(ENDPOINT_CLIP_PLANES, _clipPlanes);
+    _handle(ENDPOINT_CLIP_PLANES, _clipPlanes);
     _clipPlanes.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_clipPlanesUpdated, this));
-    _clipPlanes.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestClipPlanes, this));
+        std::bind(&RocketsPlugin::_clipPlanesUpdated, this));
+    _clipPlanes.registerSerializeCallback([this] { _requestClipPlanes(); });
 
-    _httpServer->handleGET(ENDPOINT_SIMULATION_HISTOGRAM,
-                           _remoteSimulationHistogram);
+    _handleGET(ENDPOINT_SIMULATION_HISTOGRAM, _remoteSimulationHistogram);
     _remoteSimulationHistogram.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestSimulationHistogram, this));
+        [this] { _requestSimulationHistogram(); });
 
-    _httpServer->handleGET(ENDPOINT_VOLUME_HISTOGRAM, _remoteVolumeHistogram);
+    _handleGET(ENDPOINT_VOLUME_HISTOGRAM, _remoteVolumeHistogram);
     _remoteVolumeHistogram.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestVolumeHistogram, this));
+        [this] { _requestVolumeHistogram(); });
 
-    _httpServer->handle(ENDPOINT_FORCE_RENDERING, _remoteForceRendering);
+    _handle(ENDPOINT_FORCE_RENDERING, _remoteForceRendering);
     _remoteForceRendering.registerDeserializedCallback(
-        std::bind(&ZeroEQPlugin::_forceRenderingUpdated, this));
+        std::bind(&RocketsPlugin::_forceRenderingUpdated, this));
 
-    _httpServer->handleGET(ENDPOINT_PROGRESS, _remoteProgress);
-    _remoteProgress.registerSerializeCallback(
-        std::bind(&ZeroEQPlugin::_requestProgress, this));
+    _handleGET(ENDPOINT_PROGRESS, _remoteProgress);
+    _remoteProgress.registerSerializeCallback([this] { _requestProgress(); });
 }
 
-void ZeroEQPlugin::_setupRequests()
+void RocketsPlugin::_setupWebsocket()
 {
-    _requests[ ::lexis::render::ImageJPEG::ZEROBUF_TYPE_IDENTIFIER()] = [&] {
-        _requestImageJPEG();
-        return _publisher.publish(_remoteImageJPEG);
+    _wsOutgoing[ENDPOINT_CAMERA] = [this] {
+        return _buildJsonMessage(
+            ENDPOINT_CAMERA, _engine->getCamera().getSerializable()->toJSON());
+    };
+    _wsOutgoing[ENDPOINT_PROGRESS] = [this] {
+        _requestProgress();
+        return _buildJsonMessage(ENDPOINT_PROGRESS, _remoteProgress.toJSON());
     };
 
-    _requests[ ::lexis::render::Frame::ZEROBUF_TYPE_IDENTIFIER()] = [&] {
-        _requestFrame();
-        return _publisher.publish(_remoteFrame);
-    };
+    _httpServer->handleOpen([this]() {
+        std::vector<rockets::ws::Response> responses;
+        for (auto& i : _wsOutgoing)
+            responses.push_back({i.second(), rockets::ws::Recipient::sender,
+                                 rockets::ws::Format::text});
 
-    _requests[v1::FrameBuffers::ZEROBUF_TYPE_IDENTIFIER()] = [&] {
-        _requestFrameBuffers();
-        return _publisher.publish(_remoteFrameBuffers);
-    };
-
-    ::lexis::render::ClipPlanes clipPlanes;
-    _requests[clipPlanes.getTypeIdentifier()] =
-        std::bind(&ZeroEQPlugin::_requestClipPlanes, this);
-
-    _requests[v1::Spikes::ZEROBUF_TYPE_IDENTIFIER()] = [&] {
-        _requestSpikes();
-        return _publisher.publish(_remoteSpikes);
-    };
+        const auto image = _createJPEG();
+        if (image.size > 0)
+        {
+            std::string message;
+            message.assign((const char*)image.data.get(), image.size);
+            responses.push_back({message, rockets::ws::Recipient::sender,
+                                 rockets::ws::Format::binary});
+        }
+        return responses;
+    });
+    _httpServer->handleText(std::bind(&RocketsPlugin::_processWebsocketMessage,
+                                      this, std::placeholders::_1));
 }
 
-void ZeroEQPlugin::_setupSubscriber()
+std::string RocketsPlugin::_getHttpInterface() const
 {
-    _subscriber.subscribe(_remoteMaterialLUT);
-    _subscriber.subscribe(_clipPlanes);
-    _subscriber.subscribe(_remoteFrame);
+    const auto& params = _parametersManager.getApplicationParameters();
+    const auto& args = params.arguments();
+    for (int i = 0; i < (int)args.size() - 1; ++i)
+    {
+        if (args[i] == "--http-server" || args[i] == "--zeroeq-http-server")
+            return args[i + 1];
+    }
+    return std::string();
 }
 
-void ZeroEQPlugin::_resetCameraUpdated()
+void RocketsPlugin::_handle(const std::string& endpoint,
+                            servus::Serializable& obj)
+{
+    _httpServer->handle(ENDPOINT_API_VERSION + endpoint, obj);
+    _handleSchema(endpoint, obj);
+    _handleWebsocketEvent(endpoint, obj);
+}
+
+void RocketsPlugin::_handleGET(const std::string& endpoint,
+                               const servus::Serializable& obj)
+{
+    _httpServer->handleGET(ENDPOINT_API_VERSION + endpoint, obj);
+    _handleSchema(endpoint, obj);
+}
+
+void RocketsPlugin::_handlePUT(const std::string& endpoint,
+                               servus::Serializable& obj)
+{
+    _httpServer->handlePUT(ENDPOINT_API_VERSION + endpoint, obj);
+    _handleSchema(endpoint, obj);
+    _handleWebsocketEvent(endpoint, obj);
+}
+
+void RocketsPlugin::_handleSchema(const std::string& endpoint,
+                                  const servus::Serializable& obj)
+{
+    using namespace rockets::http;
+    _httpServer->handle(Method::GET,
+                        ENDPOINT_API_VERSION + endpoint + "/schema",
+                        [&obj](const Request&) {
+                            return make_ready_response(Code::OK,
+                                                       obj.getSchema(),
+                                                       JSON_TYPE);
+                        });
+}
+
+void RocketsPlugin::_remove(const std::string& endpoint)
+{
+    _httpServer->remove(ENDPOINT_API_VERSION + endpoint);
+    _httpServer->remove(ENDPOINT_API_VERSION + endpoint + "/schema");
+}
+
+void RocketsPlugin::_handleWebsocketEvent(const std::string& endpoint,
+                                          servus::Serializable& obj)
+{
+    _wsIncoming[endpoint] = [&obj](const std::string& data) {
+        return obj.fromJSON(data);
+    };
+}
+
+void RocketsPlugin::_handleVersion()
+{
+    static brayns::Version version;
+    using namespace rockets::http;
+    _httpServer->handleGET(ENDPOINT_API_VERSION + ENDPOINT_VERSION, version);
+    _httpServer->handle(Method::GET,
+                        ENDPOINT_API_VERSION + ENDPOINT_VERSION + "/schema",
+                        [&](const Request&) {
+                            return make_ready_response(Code::OK,
+                                                       version.getSchema(),
+                                                       JSON_TYPE);
+                        });
+}
+
+void RocketsPlugin::_handleStreaming()
+{
+#if BRAYNS_USE_DEFLECT
+    _handle(ENDPOINT_STREAM, _streamParams);
+    _handlePUT(ENDPOINT_STREAM_TO, _streamParams);
+    _streamParams.registerDeserializedCallback(
+        std::bind(&RocketsPlugin::_streamParamsUpdated, this));
+    _streamParams.registerSerializeCallback([this] { _requestStreamParams(); });
+#else
+    _handleGET(ENDPOINT_STREAM, _streamParams);
+    using namespace rockets::http;
+    auto respondNotImplemented = [](const Request&) {
+        const auto message = "Brayns was not compiled with streaming support";
+        return make_ready_response(Code::NOT_IMPLEMENTED, message);
+    };
+    _httpServer->handle(Method::PUT, ENDPOINT_STREAM, respondNotImplemented);
+    _httpServer->handle(Method::PUT, ENDPOINT_STREAM_TO, respondNotImplemented);
+#endif
+}
+
+void RocketsPlugin::_resetCameraUpdated()
 {
     auto& sceneParameters = _parametersManager.getSceneParameters();
     _engine->getCamera().setEnvironmentMap(
@@ -406,7 +461,7 @@ void ZeroEQPlugin::_resetCameraUpdated()
     _engine->getCamera().reset();
 }
 
-bool ZeroEQPlugin::_requestScene()
+bool RocketsPlugin::_requestScene()
 {
     auto& ms = _remoteScene.getMaterials();
     ms.clear();
@@ -437,7 +492,7 @@ bool ZeroEQPlugin::_requestScene()
     return true;
 }
 
-void ZeroEQPlugin::_sceneUpdated()
+void RocketsPlugin::_sceneUpdated()
 {
     if (!_engine->isReady())
         return;
@@ -469,7 +524,7 @@ void ZeroEQPlugin::_sceneUpdated()
     scene.commitMaterials(true);
 }
 
-void ZeroEQPlugin::_spikesUpdated()
+void RocketsPlugin::_spikesUpdated()
 {
 #if 0
     AbstractSimulationHandlerPtr simulationHandler =
@@ -491,7 +546,7 @@ void ZeroEQPlugin::_spikesUpdated()
 #endif
 }
 
-void ZeroEQPlugin::_materialLUTUpdated()
+void RocketsPlugin::_materialLUTUpdated()
 {
     if (!_engine->isReady())
         return;
@@ -539,7 +594,7 @@ void ZeroEQPlugin::_materialLUTUpdated()
     scene.commitTransferFunctionData();
 }
 
-void ZeroEQPlugin::_requestMaterialLUT()
+void RocketsPlugin::_requestMaterialLUT()
 {
     auto& scene = _engine->getScene();
     TransferFunction& transferFunction = scene.getTransferFunction();
@@ -597,8 +652,8 @@ void ZeroEQPlugin::_requestMaterialLUT()
     _remoteMaterialLUT.setRange(rangeVector);
 }
 
-void ZeroEQPlugin::_resizeImage(unsigned int* srcData, const Vector2i& srcSize,
-                                const Vector2i& dstSize, uints& dstData)
+void RocketsPlugin::_resizeImage(unsigned int* srcData, const Vector2i& srcSize,
+                                 const Vector2i& dstSize, uints& dstData)
 {
     dstData.reserve(dstSize.x() * dstSize.y());
     size_t x_ratio =
@@ -617,62 +672,17 @@ void ZeroEQPlugin::_resizeImage(unsigned int* srcData, const Vector2i& srcSize,
     }
 }
 
-bool ZeroEQPlugin::_requestImageJPEG()
+bool RocketsPlugin::_requestImageJPEG()
 {
-    if (!_processingImageJpeg)
-    {
-        _processingImageJpeg = true;
-        const auto& newFrameSize =
-            _parametersManager.getApplicationParameters().getJpegSize();
-        if (newFrameSize.x() == 0 || newFrameSize.y() == 0)
-        {
-            BRAYNS_ERROR << "Encountered invalid size of image JPEG: "
-                         << newFrameSize << std::endl;
-            _processingImageJpeg = false;
-            return false;
-        }
+    auto image = _createJPEG();
+    if (image.size == 0)
+        return false;
 
-        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-        const auto& frameSize = frameBuffer.getSize();
-        unsigned int* colorBuffer = (unsigned int*)frameBuffer.getColorBuffer();
-        if (colorBuffer)
-        {
-            unsigned int* resizedColorBuffer = colorBuffer;
-
-            uints resizedBuffer;
-            if (frameSize != newFrameSize)
-            {
-                _resizeImage(colorBuffer, frameSize, newFrameSize,
-                             resizedBuffer);
-                resizedColorBuffer = resizedBuffer.data();
-            }
-
-            int32_t pixelFormat = TJPF_RGBX;
-            switch (frameBuffer.getFrameBufferFormat())
-            {
-            case FrameBufferFormat::bgra_i8:
-                pixelFormat = TJPF_BGRX;
-                break;
-            case FrameBufferFormat::rgba_i8:
-            default:
-                pixelFormat = TJPF_RGBX;
-            }
-
-            unsigned long jpegSize = 0;
-            uint8_t* jpegData = _encodeJpeg((uint32_t)newFrameSize.x(),
-                                            (uint32_t)newFrameSize.y(),
-                                            (uint8_t*)resizedColorBuffer,
-                                            pixelFormat, jpegSize);
-
-            _remoteImageJPEG.setData(jpegData, jpegSize);
-            tjFree(jpegData);
-        }
-        _processingImageJpeg = false;
-    }
+    _remoteImageJPEG.setData(image.data.get(), image.size);
     return true;
 }
 
-bool ZeroEQPlugin::_requestFrameBuffers()
+bool RocketsPlugin::_requestFrameBuffers()
 {
     auto& frameBuffer = _engine->getFrameBuffer();
     const Vector2i frameSize = frameBuffer.getSize();
@@ -685,9 +695,9 @@ bool ZeroEQPlugin::_requestFrameBuffers()
         uint16_ts depths;
         const size_t size = frameSize.x() * frameSize.y();
         depths.reserve(size);
+
         for (size_t i = 0; i < size; ++i)
-            depths.push_back(std::numeric_limits<uint16_t>::max() *
-                             depthBuffer[i]);
+            depths.push_back(depthBuffer[i]);
         _remoteFrameBuffers.setDepth(reinterpret_cast<const uint8_t*>(
                                          depths.data()),
                                      depths.size() * sizeof(uint16_t));
@@ -706,7 +716,7 @@ bool ZeroEQPlugin::_requestFrameBuffers()
     return true;
 }
 
-bool ZeroEQPlugin::_requestSpikes()
+bool RocketsPlugin::_requestSpikes()
 {
 #if 0
     AbstractSimulationHandlerPtr simulationHandler = _engine->getScene().getSimulationHandler();
@@ -730,7 +740,7 @@ bool ZeroEQPlugin::_requestSpikes()
     return true;
 }
 
-void ZeroEQPlugin::_initializeDataSource()
+void RocketsPlugin::_initializeDataSource()
 {
     auto& sceneParameters = _parametersManager.getSceneParameters();
     auto& geometryParameters = _parametersManager.getGeometryParameters();
@@ -858,7 +868,7 @@ void ZeroEQPlugin::_initializeDataSource()
     _remoteDataSource.setSceneFile(geometryParameters.getSceneFile());
 }
 
-void ZeroEQPlugin::_dataSourceUpdated()
+void RocketsPlugin::_dataSourceUpdated()
 {
     if (!_engine->isReady())
         return;
@@ -1079,7 +1089,7 @@ void ZeroEQPlugin::_dataSourceUpdated()
     _engine->buildScene();
 }
 
-void ZeroEQPlugin::_initializeSettings()
+void RocketsPlugin::_initializeSettings()
 {
     auto& renderingParameters = _parametersManager.getRenderingParameters();
     auto& volumeParameters = _parametersManager.getVolumeParameters();
@@ -1156,9 +1166,11 @@ void ZeroEQPlugin::_initializeSettings()
         applicationParameters.getSynchronousMode());
     _remoteSettings.setVarianceThreshold(
         renderingParameters.getVarianceThreshold());
+    _remoteSettings.setImageStreamFps(
+        applicationParameters.getImageStreamFPS());
 }
 
-void ZeroEQPlugin::_settingsUpdated()
+void RocketsPlugin::_settingsUpdated()
 {
     const auto& renderingParameters =
         _parametersManager.getRenderingParameters();
@@ -1240,6 +1252,7 @@ void ZeroEQPlugin::_settingsUpdated()
     app.setJpegSize(Vector2ui{_remoteSettings.getJpegSize()});
     app.setJpegCompression(
         std::min(_remoteSettings.getJpegCompression(), 100u));
+    app.setImageStreamFPS(_remoteSettings.getImageStreamFps());
 
     if (_engine->name() !=
         _parametersManager.getRenderingParameters().getEngine())
@@ -1258,7 +1271,7 @@ void ZeroEQPlugin::_settingsUpdated()
         _engine->resetFrameNumber();
 }
 
-bool ZeroEQPlugin::_requestFrame()
+bool RocketsPlugin::_requestFrame()
 {
     auto caSimHandler = _engine->getScene().getCADiffusionSimulationHandler();
     auto simHandler = _engine->getScene().getSimulationHandler();
@@ -1288,7 +1301,7 @@ bool ZeroEQPlugin::_requestFrame()
     return true;
 }
 
-void ZeroEQPlugin::_frameUpdated()
+void RocketsPlugin::_frameUpdated()
 {
     auto& sceneParams = _parametersManager.getSceneParameters();
     sceneParams.setAnimationFrame(_remoteFrame.getCurrent());
@@ -1306,7 +1319,7 @@ void ZeroEQPlugin::_frameUpdated()
     }
 }
 
-bool ZeroEQPlugin::_requestViewport()
+bool RocketsPlugin::_requestViewport()
 {
     const auto& windowSize =
         _parametersManager.getApplicationParameters().getWindowSize();
@@ -1314,13 +1327,13 @@ bool ZeroEQPlugin::_requestViewport()
     return true;
 }
 
-void ZeroEQPlugin::_viewportUpdated()
+void RocketsPlugin::_viewportUpdated()
 {
     _parametersManager.getApplicationParameters().setWindowSize(
         Vector2ui{_remoteViewport.getSize()});
 }
 
-bool ZeroEQPlugin::_requestSimulationHistogram()
+bool RocketsPlugin::_requestSimulationHistogram()
 {
     auto simulationHandler = _engine->getScene().getSimulationHandler();
     if (!simulationHandler || !simulationHandler->histogramChanged())
@@ -1333,7 +1346,7 @@ bool ZeroEQPlugin::_requestSimulationHistogram()
     return true;
 }
 
-bool ZeroEQPlugin::_requestVolumeHistogram()
+bool RocketsPlugin::_requestVolumeHistogram()
 {
     auto volumeHandler = _engine->getScene().getVolumeHandler();
     if (!volumeHandler)
@@ -1346,7 +1359,7 @@ bool ZeroEQPlugin::_requestVolumeHistogram()
     return true;
 }
 
-void ZeroEQPlugin::_clipPlanesUpdated()
+void RocketsPlugin::_clipPlanesUpdated()
 {
     const auto& bounds = _engine->getScene().getWorldBounds();
     const auto& size = bounds.getSize();
@@ -1360,16 +1373,13 @@ void ZeroEQPlugin::_clipPlanesUpdated()
             Vector4f(normal[0], normal[1], normal[2], distance));
     }
     if (clipPlanes.size() == 6)
-    {
         _engine->getCamera().setClipPlanes(clipPlanes);
-        _publisher.publish(_clipPlanes);
-    }
     else
         BRAYNS_ERROR << "Invalid number of clip planes. Expected 6, received "
                      << clipPlanes.size() << std::endl;
 }
 
-bool ZeroEQPlugin::_requestClipPlanes()
+bool RocketsPlugin::_requestClipPlanes()
 {
     std::vector<::lexis::render::detail::Plane> planes;
     const auto& clipPlanes = _engine->getCamera().getClipPlanes();
@@ -1385,22 +1395,61 @@ bool ZeroEQPlugin::_requestClipPlanes()
     return true;
 }
 
-void ZeroEQPlugin::_forceRenderingUpdated()
+void RocketsPlugin::_streamParamsUpdated()
+{
+    auto& params = _parametersManager.getApplicationParameters();
+    params.setStreamingEnabled(_streamParams.getEnabled());
+    params.setStreamCompression(_streamParams.getCompression());
+    params.setStreamQuality(_streamParams.getQuality());
+    params.setStreamHost(_streamParams.getHostString());
+    params.setStreamPort(_streamParams.getPort());
+    params.setStreamId(_streamParams.getIdString());
+}
+
+bool RocketsPlugin::_requestStreamParams()
+{
+    auto& params = _parametersManager.getApplicationParameters();
+    _streamParams.setEnabled(params.getStreamingEnabled());
+    _streamParams.setCompression(params.getStreamCompression());
+    _streamParams.setQuality(params.getStreamQuality());
+    _streamParams.setHost(params.getStreamHostname());
+    _streamParams.setPort(params.getStreamPort());
+    _streamParams.setId(params.getStreamId());
+    return true;
+}
+
+void RocketsPlugin::_forceRenderingUpdated()
 {
     _forceRendering = true;
 }
 
-bool ZeroEQPlugin::_requestProgress()
+bool RocketsPlugin::_requestProgress()
 {
     _remoteProgress.setAmount(_engine->getLastProgress());
     _remoteProgress.setOperation(_engine->getLastOperation());
     return true;
 }
 
-uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width, const uint32_t height,
-                                   const uint8_t* rawData,
-                                   const int32_t pixelFormat,
-                                   unsigned long& dataSize)
+std::future<rockets::http::Response> RocketsPlugin::_handleCircuitConfigBuilder(
+    const rockets::http::Request& request)
+{
+    using namespace rockets::http;
+
+    const auto& params = _parametersManager.getApplicationParameters();
+    const auto filename = params.getTmpFolder() + "/BlueConfig";
+    if (_writeBlueConfigFile(filename, request.query))
+    {
+        const std::string body = "{\"filename\":\"" + filename + "\"}";
+        return make_ready_response(Code::OK, body, JSON_TYPE);
+    }
+    return make_ready_response(Code::SERVICE_UNAVAILABLE);
+}
+
+RocketsPlugin::JpegData RocketsPlugin::_encodeJpeg(const uint32_t width,
+                                                   const uint32_t height,
+                                                   const uint8_t* rawData,
+                                                   const int32_t pixelFormat,
+                                                   unsigned long& dataSize)
 {
     uint8_t* tjSrcBuffer = const_cast<uint8_t*>(rawData);
     const int32_t color_components = 4; // Color Depth
@@ -1422,6 +1471,83 @@ uint8_t* ZeroEQPlugin::_encodeJpeg(const uint32_t width, const uint32_t height,
         BRAYNS_ERROR << "libjpeg-turbo image conversion failure" << std::endl;
         return 0;
     }
-    return static_cast<uint8_t*>(tjJpegBuf);
+    return JpegData{tjJpegBuf};
+}
+
+RocketsPlugin::ImageJPEG RocketsPlugin::_createJPEG()
+{
+    if (_processingImageJpeg)
+        return ImageJPEG();
+
+    _processingImageJpeg = true;
+    const auto& newFrameSize =
+        _parametersManager.getApplicationParameters().getJpegSize();
+    if (newFrameSize.x() == 0 || newFrameSize.y() == 0)
+    {
+        BRAYNS_ERROR << "Encountered invalid size of image JPEG: "
+                     << newFrameSize << std::endl;
+
+        return ImageJPEG();
+    }
+
+    FrameBuffer& frameBuffer = _engine->getFrameBuffer();
+    const auto& frameSize = frameBuffer.getSize();
+    unsigned int* colorBuffer = (unsigned int*)frameBuffer.getColorBuffer();
+    if (!colorBuffer)
+        return ImageJPEG();
+
+    unsigned int* resizedColorBuffer = colorBuffer;
+
+    uints resizedBuffer;
+    if (frameSize != newFrameSize)
+    {
+        _resizeImage(colorBuffer, frameSize, newFrameSize, resizedBuffer);
+        resizedColorBuffer = resizedBuffer.data();
+    }
+
+    int32_t pixelFormat = TJPF_RGBX;
+    switch (frameBuffer.getFrameBufferFormat())
+    {
+    case FrameBufferFormat::bgra_i8:
+        pixelFormat = TJPF_BGRX;
+        break;
+    case FrameBufferFormat::rgba_i8:
+    default:
+        pixelFormat = TJPF_RGBX;
+    }
+
+    ImageJPEG image;
+    image.data =
+        _encodeJpeg((uint32_t)newFrameSize.x(), (uint32_t)newFrameSize.y(),
+                    (uint8_t*)resizedColorBuffer, pixelFormat, image.size);
+    _processingImageJpeg = false;
+    return image;
+}
+
+bool RocketsPlugin::_writeBlueConfigFile(
+    const std::string& filename,
+    const std::map<std::string, std::string>& params)
+{
+    std::ofstream blueConfig(filename);
+    if (!blueConfig.good())
+        return false;
+
+    std::map<std::string, std::string> dictionary = {
+        {"morphology_folder", "MorphologyPath"}, {"mvd_file", "CircuitPath"}};
+
+    blueConfig << "Run Default" << std::endl << "{" << std::endl;
+    for (const auto& kv : params)
+    {
+        if (dictionary.find(kv.first) == dictionary.end())
+        {
+            BRAYNS_ERROR << "BlueConfigBuilder: Unknown parameter " << kv.first
+                         << std::endl;
+            continue;
+        }
+        blueConfig << dictionary[kv.first] << " " << kv.second << std::endl;
+    }
+    blueConfig << "}" << std::endl;
+    blueConfig.close();
+    return true;
 }
 }

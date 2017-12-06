@@ -21,11 +21,10 @@
 #include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.ih>
 
 inline bool launchRandomRay(
-    const uniform AbstractRenderer* uniform self, const varying Ray& ray,
-    varying ScreenSample& sample, const varying vec3f& intersection,
-    const varying vec3f& normal, DifferentialGeometry& geometry,
-    varying vec3f& backgroundColor, varying float& distanceToIntersection,
-    varying vec3f& randomDirection)
+    const uniform AbstractRenderer* uniform self, varying ScreenSample& sample,
+    const varying vec3f& intersection, const varying vec3f& normal,
+    DifferentialGeometry& geometry, varying vec3f& backgroundColor,
+    varying float& distanceToIntersection, varying vec3f& randomDirection)
 {
     randomDirection = getRandomVector(sample, normal, self->randomNumber);
     backgroundColor = self->bgColor;
@@ -35,11 +34,10 @@ inline bool launchRandomRay(
         // normal
         randomDirection = neg(randomDirection);
 
-    varying Ray randomRay;
+    varying Ray randomRay = sample.ray;
     setRay(randomRay, intersection, randomDirection);
     randomRay.t0 = self->super.epsilon;
-    randomRay.time = ray.time;
-    randomRay.t = ray.t;
+    randomRay.t = RAY_INFINITY;
     randomRay.primID = -1;
     randomRay.geomID = -1;
     randomRay.instID = -1;
@@ -68,16 +66,16 @@ inline vec3f refractedVector(const varying vec3f& direction,
 {
     if (n2 == 0.f)
         return direction;
-    const varying float eta = n1 / n2;
-    const varying float cos1 = -dot(direction, normal);
-    const varying float cos2 = 1.f - eta * eta * (1.f - cos1 * cos1);
+    const float eta = n1 / n2;
+    const float cos1 = -dot(direction, normal);
+    const float cos2 = 1.f - eta * eta * (1.f - cos1 * cos1);
     if (cos2 > 0.f)
         return eta * direction + (eta * cos1 - sqrt(cos2)) * normal;
     return direction;
 }
 
 inline bool indirectShading(const uniform AbstractRenderer* uniform self,
-                            Ray& ray, varying ScreenSample& sample,
+                            varying ScreenSample& sample,
                             const varying vec3f& intersection,
                             const varying vec3f& normal,
                             DifferentialGeometry& geometry,
@@ -90,9 +88,9 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
 
     // Launch a random ray
     varying vec3f randomDirection;
-    if (launchRandomRay((AbstractRenderer*)self, ray, sample, intersection,
-                        normal, geometry, backgroundColor,
-                        distanceToIntersection, randomDirection))
+    if (launchRandomRay((AbstractRenderer*)self, sample, intersection, normal,
+                        geometry, backgroundColor, distanceToIntersection,
+                        randomDirection))
     {
         // Determine material of intersected geometry
         const uniform Material* material = geometry.material;
@@ -107,13 +105,13 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
                 {
                     // Light emitting material
                     vec3f localDiffuseColor = mat->Kd;
-                    if (mat->map_Kd)
+                    if (valid(mat->map_Kd))
                         localDiffuseColor = get3f(mat->map_Kd, geometry.st);
 
                     // intensity
                     vec3f Ka = make_vec3f(mat->a);
                     indirectShadingPower = mat->a;
-                    if (mat->map_a)
+                    if (valid(mat->map_a))
                     {
                         Ka = get3f(mat->map_a, geometry.st);
                         indirectShadingPower = reduce_max(Ka);
@@ -153,20 +151,20 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
 }
 
 inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
-                                  Ray& ray, varying ScreenSample& sample,
+                                  varying ScreenSample& sample,
                                   const varying vec3f& intersection,
                                   const varying vec3f& normal,
-                                  varying vec3f& lightDirection)
+                                  const varying vec3f& lightDirection)
 {
+    vec3f ld = lightDirection;
     if (self->softShadows != 0.f)
         // Slightly alter light direction for Soft shadows
-        lightDirection =
-            normalize(lightDirection +
-                      self->softShadows *
-                          getRandomVector(sample, normal, self->randomNumber));
+        ld = normalize(ld +
+                       self->softShadows *
+                           getRandomVector(sample, normal, self->randomNumber));
 
     Ray shadowRay;
-    setRay(shadowRay, intersection, lightDirection);
+    setRay(shadowRay, intersection, ld);
     shadowRay.t0 = self->super.epsilon;
     shadowRay.time = sample.ray.time;
     shadowRay.t = infinity;
@@ -211,15 +209,14 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
                 foreach_unique(mat in objMaterial)
                 {
                     materialOpacity = mat->d;
-                    if (mat->map_d != 0)
+                    if (valid(mat->map_d))
                     {
-                        vec4f d_map = mat->map_d->get(mat->map_d, dg.st);
+                        vec4f d_map = get4f(mat->map_d, dg.st);
                         materialOpacity = d_map.x;
                     }
-                    else if (mat->map_Kd != 0)
+                    else if (valid(mat->map_Kd))
                     {
-                        vec4f localDiffuseColor_map =
-                            mat->map_Kd->get(mat->map_Kd, dg.st);
+                        vec4f localDiffuseColor_map = get4f(mat->map_Kd, dg.st);
                         materialOpacity = 1.f - localDiffuseColor_map.w;
                     }
                 }
@@ -244,54 +241,16 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
     return intensity;
 }
 
-// AABB-Ray intersection ( http://prideout.net/blog/?p=64 ).
-inline bool intersectBox(const uniform AbstractRenderer* uniform self, Ray& ray,
-                         float& tnear, float& tfar)
+inline void composite(const varying vec4f& src, varying vec4f& dst,
+                      const varying float alphaCorrection)
 {
-    // We need to avoid division by zero in "vec3 invR = 1.0 / ray.dir;"
-    if (ray.dir.x == 0.f)
-        ray.dir.x = self->super.epsilon;
-
-    if (ray.dir.y == 0.f)
-        ray.dir.y = self->super.epsilon;
-
-    if (ray.dir.z == 0.f)
-        ray.dir.z = self->super.epsilon;
-
-    const vec3f aabbMin = self->volumeOffset;
-    const vec3f aabbMax = self->volumeOffset +
-                          self->volumeDimensions.x * self->volumeElementSpacing;
-
-    const vec3f invR = 1.f / ray.dir;
-    const vec3f tbot = invR * (aabbMin - ray.org);
-    const vec3f ttop = invR * (aabbMax - ray.org);
-    const vec3f tmin = min(ttop, tbot);
-    const vec3f tmax = max(ttop, tbot);
-
-    vec2f t = max(make_vec2f(tmin.x, tmin.x), make_vec2f(tmin.y, tmin.z));
-    tnear = max(t.x, t.y);
-
-    t = min(make_vec2f(tmax.x, tmax.x), make_vec2f(tmax.y, tmax.z));
-    tfar = min(t.x, t.y);
-
-    return tnear <= tfar;
-}
-
-inline vec4f composite(const varying vec4f& src, varying vec4f& dst,
-                       const varying uint32 samplesPerRay,
-                       const uniform uint32 colorMapSize, const float ratio)
-{
-    const float alphaCorrection =
-        ratio * (float)NB_MAX_SAMPLES_PER_RAY / (float)samplesPerRay;
     const float alpha =
-        1.f -
-        pow(1.f - min(src.w, 1.f - 1.f / (float)colorMapSize), alphaCorrection);
+        1.f - pow(1.f - min(src.w, 1.f - 1.f / 256.f), alphaCorrection);
     const float a = alpha * (1.f - dst.w);
     dst.x = dst.x + src.x * a;
     dst.y = dst.y + src.y * a;
     dst.z = dst.z + src.z * a;
     dst.w += (alpha * (1.f - dst.w));
-    return dst;
 }
 
 // AABB-Ray intersection ( http://prideout.net/blog/?p=64 ).
@@ -337,17 +296,17 @@ inline varying float getVolumeShadowContribution(
         return 0.f;
 
     // Ray marching from light source to voxel
+    const float epsilon = max(0.01f, (t1 - t0) / self->volumeSamplesPerRay);
     const vec3i dimensions = self->volumeDimensions;
-    const float random =
-        getRandomValue(sample, self->randomNumber) * self->volumeEpsilon;
-    float t = t1 + random;
+    const float random = getRandomValue(sample, self->randomNumber) * epsilon;
     float shadowIntensity = 0.f;
-    while (t > random && shadowIntensity < 1.f)
+    for (float t = t1 - random; t > epsilon && shadowIntensity < 1.f;
+         t -= epsilon)
     {
         vec3f point = ray.org + ray.dir * t;
 
-        if (point.x > 0.f && point.x < dimensions.x && point.y > 0.f &&
-            point.y < dimensions.y && point.z > 0.f && point.z < dimensions.z)
+        if (point.x >= 0.f && point.x < dimensions.x && point.y >= 0.f &&
+            point.y < dimensions.y && point.z >= 0.f && point.z < dimensions.z)
         {
             uint64 index = (uint64)(
                 (uint64)floor(point.x) + (uint64)floor(point.y) * dimensions.x +
@@ -359,18 +318,15 @@ inline varying float getVolumeShadowContribution(
                 self->colorMapSize * (voxelValue - self->colorMapMinValue) /
                 self->colorMapRange;
             const vec4f colorMapColor = self->colorMap[normalizedValue];
-            if (colorMapColor.w > DEFAULT_VOLUME_SHADOW_THRESHOLD)
-                shadowIntensity = 1.f;
+            shadowIntensity += colorMapColor.w;
         }
-        t -= self->volumeEpsilon;
     }
     return shadowIntensity;
 }
 
-inline varying vec4f getVolumeContribution(
-    const uniform AbstractRenderer* uniform self, const varying Ray& ray,
-    varying ScreenSample& sample, const varying uint32 samplesPerRay,
-    const varying int iteration)
+inline varying vec4f
+    getVolumeContribution(const uniform AbstractRenderer* uniform self,
+                          const varying Ray& ray, varying ScreenSample& sample)
 {
     if (!self->colorMap)
         return make_vec4f(0.f, 1.f, 0.f, 0.f);
@@ -384,27 +340,22 @@ inline varying vec4f getVolumeContribution(
     if (!intersectBox(self, ray, aabbMin, aabbMax, t0, t1))
         return make_vec4f(0.f, 0.f, 0.f, 0.f);
 
-    const float baseEpsilon = self->volumeDiag / samplesPerRay;
-    const float epsilon = max(0.001f, (t1 - t0) / samplesPerRay);
-    const float alphaRatio = epsilon / baseEpsilon;
-
     // Ray marching
     vec4f pathColor = make_vec4f(0.f);
-    const float delta = (float)((self->randomNumber) % (int)(epsilon + 1));
-    float t = t0 - delta;
-    while (t < t1 && pathColor.w < 1.f)
+    const float epsilon = max(0.01f, (t1 - t0) / self->volumeSamplesPerRay);
+    const float random = getRandomValue(sample, self->randomNumber) * epsilon;
+    t0 -= random;
+    t1 -= random;
+    for (float t = t0; t < t1 && pathColor.w < 1.f; t += epsilon)
     {
-        const float random =
-            getRandomValue(sample, self->randomNumber) * epsilon;
-        vec3f point =
-            ((ray.org + ray.dir * (t + random)) - self->volumeOffset) /
-            self->volumeElementSpacing;
+        const vec3f point = ((ray.org + ray.dir * t) - self->volumeOffset) /
+                            self->volumeElementSpacing;
 
-        if (point.x > 0.f && point.x < self->volumeDimensions.x &&
-            point.y > 0.f && point.y < self->volumeDimensions.y &&
-            point.z > 0.f && point.z < self->volumeDimensions.z)
+        if (point.x >= 0.f && point.x < self->volumeDimensions.x &&
+            point.y >= 0.f && point.y < self->volumeDimensions.y &&
+            point.z >= 0.f && point.z < self->volumeDimensions.z)
         {
-            uint64 index =
+            const uint64 index =
                 (uint64)((uint64)floor(point.x) +
                          (uint64)floor(point.y) * self->volumeDimensions.x +
                          (uint64)floor(point.z) * self->volumeDimensions.x *
@@ -415,22 +366,26 @@ inline varying vec4f getVolumeContribution(
             const float normalizedValue =
                 (voxelValue - self->colorMapMinValue) / self->colorMapRange;
 
+            // Voxel color and opacity
             vec4f colorMapColor;
             if (normalizedValue < 0.f)
                 colorMapColor = self->colorMap[0];
-            else if (normalizedValue >= 1.f)
+            else if (normalizedValue > 1.f)
                 colorMapColor = self->colorMap[self->colorMapSize - 1];
             else
                 colorMapColor =
                     self->colorMap[self->colorMapSize * normalizedValue];
 
+            // Light emission intensity
             const vec4f emissionIntensity =
                 make_vec4f(self->emissionIntensitiesMap[normalizedValue], 0.f);
             vec4f voxelColor =
                 max(make_vec4f(0.f), emissionIntensity + colorMapColor);
+
+            // Shadow intensity
             float shadowIntensity = 0.f;
             vec4f giContribution = make_vec4f(0.f);
-            if (self->shadows > 0.f && voxelColor.w > 0.1f && iteration > 0)
+            if (self->shadows > 0.f && voxelColor.w > 0.01f)
             {
                 // Determine global illumination contribution
                 for (uniform int i = 0; self->lights && i < self->numLights;
@@ -468,11 +423,10 @@ inline varying vec4f getVolumeContribution(
                 voxelColor.y = voxelColor.y * giAttenuation;
                 voxelColor.z = voxelColor.z * giAttenuation;
             }
-            pathColor = composite(voxelColor, pathColor, samplesPerRay,
-                                  self->colorMapSize, alphaRatio);
-        }
 
-        t += epsilon;
+            // Compose final voxel color
+            composite(voxelColor, pathColor, (float)self->volumeSamplesPerRay);
+        }
     }
     return make_vec4f(min(1.f, pathColor.x), min(1.f, pathColor.y),
                       min(1.f, pathColor.z), min(1.f, pathColor.w));

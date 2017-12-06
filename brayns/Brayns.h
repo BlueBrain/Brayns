@@ -67,7 +67,7 @@ public:
        Renders color and depth buffers of the current scene, according to
        default parameters. This is typicaly used by an application that does
        not provide any on-screen visualization. In such cases, input and output
-       parameters are provided by ZeroEQ events. For instance, a camera event
+       parameters are provided by network events. For instance, a camera event
        defines the origin, target and up vector of the camera, and an ImageJPEG
        event triggers the rendering and gathers the results in a form of a
        base64 encoded JPEG image.
