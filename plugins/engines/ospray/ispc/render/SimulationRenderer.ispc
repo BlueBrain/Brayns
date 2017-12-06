@@ -482,6 +482,16 @@ inline vec3f SimulationRenderer_shadeRay(
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
 
+            if (attributes.opacity == 0.f)
+            {
+                ray.t0 = ray.t + self->abstract.super.epsilon;
+                ray.t = RAY_INFINITY;
+                ray.primID = -1;
+                ray.geomID = -1;
+                ray.instID = -1;
+                continue;
+            }
+
             // Compute simulation contribution
             processSimulationContribution(sample, attributes, dg.materialID);
 
