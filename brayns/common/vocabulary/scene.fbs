@@ -29,6 +29,7 @@ table Material {
     refraction_index: float;
     light_emission: float;
     glossiness: float;
+    cast_simulation_data: bool;
 }
 
 table Bounds {

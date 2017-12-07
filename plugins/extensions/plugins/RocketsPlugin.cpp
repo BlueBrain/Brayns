@@ -482,6 +482,7 @@ bool RocketsPlugin::_requestScene()
         m.setRefractionIndex(material.getRefractionIndex());
         m.setLightEmission(material.getEmission());
         m.setGlossiness(material.getGlossiness());
+        m.setCastSimulationData(material.getCastSimulationData());
         ms.push_back(m);
     }
 
@@ -519,6 +520,7 @@ void RocketsPlugin::_sceneUpdated()
         material.setRefractionIndex(m.getRefractionIndex());
         material.setEmission(m.getLightEmission());
         material.setGlossiness(m.getGlossiness());
+        material.setCastSimulationData(m.getCastSimulationData());
     }
 
     scene.commitMaterials(true);

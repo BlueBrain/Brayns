@@ -52,6 +52,7 @@ struct ShadingAttributes
     float specularExponent;
     vec3f lightEmissionColor;
     float lightEmissionIntensity;
+    bool castSimulationData;
     vec4f simulationColor;
     vec3f indirectColor;
     float indirectIntensity;
@@ -72,6 +73,7 @@ inline void initializeShadingAttributes(
     attributes.finalContribution = make_vec3f(0.f);
 
     // Simulation contribution
+    attributes.castSimulationData = true;
     attributes.simulationColor = make_vec4f(0.f);
 
     // Indirect light contribution
@@ -198,6 +200,9 @@ inline void setGeometryShadingAttributes(
                 get3f(mat->map_reflection, dg.st, make_vec3f(0.f));
             attributes.reflection *= (value.x + value.y + value.z) / 3.f;
         }
+
+        // Cast simulation data
+        attributes.castSimulationData = mat->castSimulationData;
     }
 
     // Update reflected shading normal
@@ -261,6 +266,9 @@ inline void processSimulationContribution(varying ScreenSample& sample,
                                           ShadingAttributes& attributes,
                                           const int materialID)
 {
+    if (!attributes.castSimulationData)
+        return;
+
     if (!attributes.self->simulationModel)
     {
         processSimulationValue(attributes, attributes.dg);

@@ -45,6 +45,7 @@ struct ExtendedOBJMaterial
     uniform Volume *uniform volume;
 
     float glossiness;
+    bool castSimulationData;
     TextureParam map_a;
     float a;
     TextureParam map_refraction;

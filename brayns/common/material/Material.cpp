@@ -31,6 +31,7 @@ Material::Material()
     , _refractionIndex(1.f)
     , _emission(0.f)
     , _glossiness(1.f)
+    , _castSimulationData(true)
     , _locked(false)
 {
 }

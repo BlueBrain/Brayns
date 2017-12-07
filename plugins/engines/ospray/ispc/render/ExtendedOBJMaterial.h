@@ -76,6 +76,9 @@ struct ExtendedOBJMaterial : public ospray::Material
     ospray::affine2f xform_Bump;
     ospray::linear2f rot_Bump;
 
+    /*! Casts simulation data */
+    bool castSimulationData;
+
     std::string toString() const final
     {
         return "brayns::extendedobjrenderer::ExtendedOBJMaterial";
