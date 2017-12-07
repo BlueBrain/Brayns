@@ -84,6 +84,9 @@ void ExtendedOBJMaterial::commit()
     // Glossiness
     glossiness = getParam1f("glossiness", 1.f);
 
+    // Cast simulation data
+    castSimulationData = getParam1i("cast_simulation_data", true);
+
     ispc::ExtendedOBJMaterial_set(
         getIE(), map_d ? map_d->getIE() : nullptr,
         (const ispc::AffineSpace2f &)xform_d, d,
@@ -92,7 +95,7 @@ void ExtendedOBJMaterial::commit()
         map_Reflection ? map_Reflection->getIE() : nullptr,
         (const ispc::AffineSpace2f &)xform_Reflection, reflection,
         map_a ? map_a->getIE() : nullptr, (const ispc::AffineSpace2f &)xform_a,
-        a, glossiness, map_Kd ? map_Kd->getIE() : nullptr,
+        a, glossiness, castSimulationData, map_Kd ? map_Kd->getIE() : nullptr,
         (const ispc::AffineSpace2f &)xform_Kd, (ispc::vec3f &)Kd,
         map_Ks ? map_Ks->getIE() : nullptr,
         (const ispc::AffineSpace2f &)xform_Ks, (ispc::vec3f &)Ks,

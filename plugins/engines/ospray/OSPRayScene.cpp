@@ -1089,6 +1089,8 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
                  material.second.getReflectionIndex());
         ospSet1f(ospMaterial, "a", material.second.getEmission());
         ospSet1f(ospMaterial, "glossiness", material.second.getGlossiness());
+        ospSet1i(ospMaterial, "cast_simulation_data",
+                 material.second.getCastSimulationData());
 
         for (const auto& textureType : textureTypeMaterialAttribute)
             ospSetObject(ospMaterial, textureType.attribute.c_str(), nullptr);
