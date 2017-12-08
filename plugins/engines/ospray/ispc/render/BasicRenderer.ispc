@@ -40,7 +40,7 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     Ray ray = sample.ray;
     varying vec3f color = make_vec3f(0.f);
 
-    sample.z = RAY_INFINITY;
+    sample.z = inf;
     sample.alpha = 0.f;
 
     traceRay(self->abstract.super.model, ray);
@@ -77,7 +77,7 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     sample.alpha = 1.f;
 
     // Z-Depth
-    sample.z = min(RAY_INFINITY, ray.t);
+    sample.z = ray.t;
     sample.alpha = 1.f;
 
     return color;

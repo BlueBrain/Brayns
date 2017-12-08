@@ -30,7 +30,3 @@
 #define VOLUME_NB_MAX_REBOUNDS 1
 #define DEFAULT_SKYBOX_INTENSITY 0.3f
 #define NB_MAX_SAMPLES_PER_RAY 32
-
-// Max value for a uint16. Brayns exports the depth buffer as
-// an array of uint16 values
-#define RAY_INFINITY 65535.f
