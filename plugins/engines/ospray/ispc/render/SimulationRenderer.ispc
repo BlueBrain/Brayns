@@ -281,7 +281,7 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     colorRay.dir = getRandomVector(sample, attributes.normal * -1.f,
                                    attributes.self->abstract.randomNumber);
     colorRay.t0 = 0.f;
-    colorRay.time = RAY_INFINITY;
+    colorRay.time = inf;
     colorRay.t = attributes.self->detectionDistance;
     colorRay.primID = -1;
     colorRay.geomID = -1;
@@ -452,7 +452,7 @@ inline vec3f SimulationRenderer_shadeRay(
     float oldlocalRefraction = 1.f;
     bool moreRebounds = true;
 
-    sample.z = RAY_INFINITY;
+    sample.z = inf;
     sample.alpha = 0.f;
 
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
@@ -485,7 +485,7 @@ inline vec3f SimulationRenderer_shadeRay(
 
             // Z-Depth
             if (depth == 0)
-                sample.z = min(RAY_INFINITY, ray.t);
+                sample.z = ray.t;
 
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
@@ -493,7 +493,7 @@ inline vec3f SimulationRenderer_shadeRay(
             if (attributes.opacity == 0.f)
             {
                 ray.t0 = ray.t + self->abstract.super.epsilon;
-                ray.t = RAY_INFINITY;
+                ray.t = inf;
                 ray.primID = -1;
                 ray.geomID = -1;
                 ray.instID = -1;
@@ -565,7 +565,7 @@ inline vec3f SimulationRenderer_shadeRay(
         // Alpha
         sample.alpha += attributes.opacity;
 
-        ray.t = RAY_INFINITY;
+        ray.t = inf;
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;

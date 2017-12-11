@@ -37,7 +37,7 @@ inline bool launchRandomRay(
     varying Ray randomRay = sample.ray;
     setRay(randomRay, intersection, randomDirection);
     randomRay.t0 = self->super.epsilon;
-    randomRay.t = RAY_INFINITY;
+    randomRay.t = inf;
     randomRay.primID = -1;
     randomRay.geomID = -1;
     randomRay.instID = -1;

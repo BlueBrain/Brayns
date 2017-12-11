@@ -693,17 +693,9 @@ bool RocketsPlugin::_requestFrameBuffers()
     _remoteFrameBuffers.setWidth(frameSize.x());
     _remoteFrameBuffers.setHeight(frameSize.y());
     if (depthBuffer)
-    {
-        uint16_ts depths;
-        const size_t size = frameSize.x() * frameSize.y();
-        depths.reserve(size);
-
-        for (size_t i = 0; i < size; ++i)
-            depths.push_back(depthBuffer[i]);
-        _remoteFrameBuffers.setDepth(reinterpret_cast<const uint8_t*>(
-                                         depths.data()),
-                                     depths.size() * sizeof(uint16_t));
-    }
+        _remoteFrameBuffers.setDepth(
+            reinterpret_cast<const uint8_t*>(depthBuffer),
+            frameSize.x() * frameSize.y() * sizeof(float));
     else
         _remoteFrameBuffers.setDepth(0, 0);
 
