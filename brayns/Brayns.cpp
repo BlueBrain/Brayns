@@ -320,7 +320,10 @@ private:
         {
 #ifdef BRAYNS_USE_LUNCHBOX
             if (isAsyncMode())
+            {
+                _engine->resetModified();
                 return false;
+            }
 #endif
             _dataLoadingFuture.get();
         }

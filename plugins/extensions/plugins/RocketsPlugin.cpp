@@ -187,13 +187,13 @@ void RocketsPlugin::_broadcastWebsocketMessages()
     if (_httpServer->getConnectionCount() == 0)
         return;
 
-    if (_engine->getCamera().getModified())
+    if (_engine->isReady() && _engine->getCamera().getModified())
         _httpServer->broadcastText(_wsOutgoing[ENDPOINT_CAMERA]());
 
     if (_engine->getModified())
         _httpServer->broadcastText(_wsOutgoing[ENDPOINT_PROGRESS]());
 
-    if (_engine->getRenderer().hasNewImage())
+    if (_engine->isReady() && _engine->getRenderer().hasNewImage())
     {
         const auto fps =
             _parametersManager.getApplicationParameters().getImageStreamFPS();
