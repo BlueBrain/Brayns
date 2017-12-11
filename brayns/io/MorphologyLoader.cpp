@@ -129,8 +129,8 @@ public:
         try
         {
             // Open Circuit and select GIDs according to specified target
+            const brain::Circuit circuit(uri);
             const brion::BlueConfig bc(uri.getPath());
-            const brain::Circuit circuit(bc);
             const auto circuitDensity =
                 _geometryParameters.getCircuitDensity() / 100.f;
 
@@ -206,9 +206,10 @@ public:
             const Matrix4fs& transformations = circuit.getTransforms(allGids);
             _logLoadedGIDs(allGids);
 
-            // Read Brion circuit and pouplate neuron matrix. This is necessary
-            // to identify layers, e-types, m-types, etc.
-            _populateNeuronMatrix(bc, allGids);
+            _populateLayerIds(bc, allGids);
+            _electrophysiologyTypes =
+                circuit.getElectrophysiologyTypes(allGids);
+            _morphologyTypes = circuit.getMorphologyTypes(allGids);
 
             // Import meshes
             returnValue =
@@ -299,6 +300,24 @@ private:
                     break;
                 }
             break;
+        case ColorScheme::neuron_by_etype:
+            if (index < _electrophysiologyTypes.size())
+                materialId = _electrophysiologyTypes[index];
+            else
+                BRAYNS_DEBUG << "Failed to get neuron E-type" << std::endl;
+            break;
+        case ColorScheme::neuron_by_mtype:
+            if (index < _morphologyTypes.size())
+                materialId = _morphologyTypes[index];
+            else
+                BRAYNS_DEBUG << "Failed to get neuron M-type" << std::endl;
+            break;
+        case ColorScheme::neuron_by_layer:
+            if (index < _layerIds.size())
+                materialId = _layerIds[index];
+            else
+                BRAYNS_DEBUG << "Failed to get neuron layer" << std::endl;
+            break;
         default:
             materialId = NO_MATERIAL;
         }
@@ -331,59 +350,27 @@ private:
     }
 
     /**
-     * @brief _getNeuronAttributes converts the --color-scheme geometry
-     * parameters into brion::NeuronAttributes is applicable
-     * @return brion::NeuronAttributes corresponding to the selected color
-     * scheme
-     */
-    brion::NeuronAttributes _getNeuronAttributes() const
-    {
-        brion::NeuronAttributes neuronAttributes;
-        switch (_geometryParameters.getColorScheme())
-        {
-        case ColorScheme::neuron_by_layer:
-            neuronAttributes = brion::NEURON_LAYER;
-            break;
-        case ColorScheme::neuron_by_mtype:
-            neuronAttributes = brion::NEURON_MTYPE;
-            break;
-        case ColorScheme::neuron_by_etype:
-            neuronAttributes = brion::NEURON_ETYPE;
-            break;
-        default:
-            neuronAttributes = brion::NEURON_ALL;
-            break;
-        }
-        return neuronAttributes;
-    }
-
-    /**
-     * @brief _populateNeuronMatrix populates the neuron matrix according to the
-     * --color-scheme geometry parameter. This is currently only supported for
-     * the MVD2 format.
+     * @brief _populateLayerIds populates the neuron layer IDs. This is
+     * currently only supported for the MVD2 format.
      * @param blueConfig Configuration of the circuit
-     * @param gids GIDs of the neurons for which the matrix is required
+     * @param gids GIDs of the neurons
      */
-    void _populateNeuronMatrix(const brion::BlueConfig& blueConfig,
-                               const brain::GIDSet& gids)
+    void _populateLayerIds(const brion::BlueConfig& blueConfig,
+                           const brain::GIDSet& gids)
     {
-        _neuronMatrix.clear();
-        brion::NeuronAttributes neuronAttributes = _getNeuronAttributes();
-        if (neuronAttributes == brion::NEURON_ALL)
-            return;
+        _layerIds.clear();
         try
         {
             brion::Circuit brionCircuit(blueConfig.getCircuitSource());
-            for (const auto& a : brionCircuit.get(gids, neuronAttributes))
-                _neuronMatrix.push_back(a[0]);
+            for (const auto& a : brionCircuit.get(gids, brion::NEURON_LAYER))
+                _layerIds.push_back(std::stoi(a[0]));
         }
         catch (...)
         {
-            BRAYNS_WARN
-                << "Only MVD2 format is currently supported by Brion "
-                   "circuits. Color scheme by layer, e-type or m-type is "
-                   "not available for this circuit"
-                << std::endl;
+            BRAYNS_WARN << "Only MVD2 format is currently supported by Brion "
+                           "circuits. Color scheme by layer not available for "
+                           "this circuit"
+                        << std::endl;
         }
     }
 
@@ -815,14 +802,9 @@ private:
         message << "Loading " << gids.size() << " meshes...";
         for (const auto& gid : gids)
         {
-            const size_t materialId =
-                _neuronMatrix.empty()
-                    ? _getMaterialFromGeometryParameters(
-                          meshIndex, NO_MATERIAL,
-                          brain::neuron::SectionType::undefined,
-                          targetGIDOffsets)
-                    : NB_SYSTEM_MATERIALS +
-                          boost::lexical_cast<size_t>(_neuronMatrix[meshIndex]);
+            const size_t materialId = _getMaterialFromGeometryParameters(
+                meshIndex, NO_MATERIAL, brain::neuron::SectionType::undefined,
+                targetGIDOffsets);
 
             // Load mesh from file
             const auto transformation =
@@ -912,11 +894,10 @@ private:
                 const size_t materialId =
                     _geometryParameters.getCircuitUseSimulationModel()
                         ? NB_SYSTEM_MATERIALS
-                        : _neuronMatrix.empty()
-                              ? NO_MATERIAL
-                              : NB_SYSTEM_MATERIALS +
-                                    boost::lexical_cast<size_t>(
-                                        _neuronMatrix[morphologyIndex]);
+                        : _getMaterialFromGeometryParameters(
+                              morphologyIndex, NO_MATERIAL,
+                              brain::neuron::SectionType::undefined,
+                              targetGIDOffsets);
 
                 if (!_importMorphology(uri, morphologyIndex, materialId,
                                        transformations[morphologyIndex],
@@ -978,7 +959,9 @@ private:
     const ApplicationParameters& _applicationParameters;
     const GeometryParameters& _geometryParameters;
     Scene& _scene;
-    strings _neuronMatrix;
+    size_ts _layerIds;
+    size_ts _electrophysiologyTypes;
+    size_ts _morphologyTypes;
 };
 
 MorphologyLoader::MorphologyLoader(
