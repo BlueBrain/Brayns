@@ -27,6 +27,7 @@
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/log.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/parameters/SceneParameters.h>
@@ -151,6 +152,16 @@ void BaseWindow::mouseButton(const int button, const bool released,
     else
         _currButtonState = _currButtonState | (1 << button);
     _currModifiers = glutGetModifiers();
+
+    if (_currModifiers & GLUT_ACTIVE_SHIFT && released)
+    {
+        const auto& result = _brayns.getEngine().getRenderer().pick(
+            {pos.x() / float(_windowSize.x()),
+             1.f - pos.y() / float(_windowSize.y())});
+        _brayns.getEngine().getFrameBuffer().clear();
+        if (result.hit)
+            _brayns.getEngine().getCamera().setTarget(result.pos);
+    }
 
     if (button == GLUT_WHEEL_SCROLL_UP || button == GLUT_WHEEL_SCROLL_DOWN)
     {

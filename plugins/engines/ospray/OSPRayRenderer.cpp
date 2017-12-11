@@ -116,4 +116,30 @@ void OSPRayRenderer::setCamera(CameraPtr camera)
     ospSetObject(_renderer, "camera", _camera->impl());
     ospCommit(_renderer);
 }
+
+Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
+{
+    OSPPickResult ospResult;
+    osp::vec2f pos{pickPos.x(), pickPos.y()};
+
+    // HACK: as the time for picking is set to 0.5 and interpolated in a
+    // (default) 0..0 range, the ray.time will be 0. So all geometries that have
+    // a time > 0 (like branches that have distance to the soma for the growing
+    // use-case), cannot be picked. So we make the range as large as possible to
+    // make ray.time be as large as possible.
+    ospSet1f(_camera->impl(), "shutterClose", INFINITY);
+    ospCommit(_camera->impl());
+
+    ospPick(&ospResult, _renderer, pos);
+
+    // UNDO HACK
+    ospSet1f(_camera->impl(), "shutterClose", 0.f);
+    ospCommit(_camera->impl());
+
+    PickResult result;
+    result.hit = ospResult.hit;
+    result.pos = {ospResult.position.x, ospResult.position.y,
+                  ospResult.position.z};
+    return result;
+}
 }
