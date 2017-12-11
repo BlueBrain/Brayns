@@ -42,6 +42,8 @@ public:
 
     void setCamera(CameraPtr camera) final;
 
+    PickResult pick(const Vector2f& pickPos) final;
+
     const std::string& getName() const { return _name; }
     OSPRenderer impl() const { return _renderer; }
 private:

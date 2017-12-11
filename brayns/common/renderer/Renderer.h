@@ -39,6 +39,16 @@ public:
 
     void hasNewImage(const bool hasNewImage_) { _hasNewImage = hasNewImage_; }
     bool hasNewImage() const { return _hasNewImage; }
+    struct PickResult
+    {
+        bool hit{false};
+        Vector3f pos;
+    };
+    virtual PickResult pick(const Vector2f& /*pickPos*/)
+    {
+        return PickResult();
+    }
+
 protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;
