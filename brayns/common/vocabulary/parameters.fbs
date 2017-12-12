@@ -164,6 +164,7 @@ table Settings {
     shader: Shader;
     samples_per_pixel: int;
     ambient_occlusion: float;
+    ambient_occlusion_distance: float;
     accumulation: bool;
     shadows: float;
     soft_shadows: float;

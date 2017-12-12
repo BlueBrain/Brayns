@@ -69,6 +69,14 @@ public:
     {
         updateValue(_ambientOcclusionStrength, value);
     }
+    float getAmbientOcclusionDistance() const
+    {
+        return _ambientOcclusionDistance;
+    }
+    void setAmbientOcclusionDistance(const float value)
+    {
+        updateValue(_ambientOcclusionDistance, value);
+    }
 
     /** Shading applied to the geometry
      */
@@ -191,6 +199,7 @@ protected:
     RendererType _renderer;
     RendererTypes _renderers;
     float _ambientOcclusionStrength;
+    float _ambientOcclusionDistance;
     ShadingType _shading;
     bool _lightEmittingMaterials;
     int _spp;

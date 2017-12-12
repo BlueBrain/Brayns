@@ -1135,6 +1135,8 @@ void RocketsPlugin::_initializeSettings()
         renderingParameters.getSamplesPerPixel());
     _remoteSettings.setAmbientOcclusion(
         renderingParameters.getAmbientOcclusionStrength());
+    _remoteSettings.setAmbientOcclusionDistance(
+        renderingParameters.getAmbientOcclusionDistance());
     _remoteSettings.setAccumulation(renderingParameters.getAccumulation());
     _remoteSettings.setShadows(renderingParameters.getShadows());
     _remoteSettings.setSoftShadows(renderingParameters.getSoftShadows());
@@ -1207,6 +1209,9 @@ void RocketsPlugin::_settingsUpdated()
     _parametersManager.set("ambient-occlusion",
                            std::to_string(
                                _remoteSettings.getAmbientOcclusion()));
+    _parametersManager.set("ambient-occlusion-distance",
+                           std::to_string(
+                               _remoteSettings.getAmbientOcclusionDistance()));
     _parametersManager.set("accumulation",
                            (_remoteSettings.getAccumulation() ? "1" : "0"));
     _parametersManager.set("shadows",
