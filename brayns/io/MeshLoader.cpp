@@ -66,9 +66,10 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     case GeometryQuality::medium:
         quality = aiProcessPreset_TargetRealtime_Fast;
         break;
-    default:
     case GeometryQuality::high:
-        quality = aiProcess_GenNormals;
+    default:
+        quality = aiProcess_GenSmoothNormals;
+        break;
     }
 
     std::ifstream meshFile(filename, std::ios::in);
