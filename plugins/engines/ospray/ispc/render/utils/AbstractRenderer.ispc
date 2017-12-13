@@ -37,7 +37,7 @@ inline bool launchRandomRay(
     varying Ray randomRay = sample.ray;
     setRay(randomRay, intersection, randomDirection);
     randomRay.t0 = self->super.epsilon;
-    randomRay.t = inf;
+    randomRay.t = self->ambientOcclusionDistance;
     randomRay.primID = -1;
     randomRay.geomID = -1;
     randomRay.instID = -1;

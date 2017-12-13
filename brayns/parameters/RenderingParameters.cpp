@@ -35,6 +35,8 @@ const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "samples-per-pixel";
 const std::string PARAM_ACCUMULATION = "accumulation";
 const std::string PARAM_AMBIENT_OCCLUSION = "ambient-occlusion";
+const std::string PARAM_AMBIENT_OCCLUSION_DISTANCE =
+    "ambient-occlusion-distance";
 const std::string PARAM_SHADOWS = "shadows";
 const std::string PARAM_SOFT_SHADOWS = "soft-shadows";
 const std::string PARAM_SHADING = "shading";
@@ -78,6 +80,7 @@ RenderingParameters::RenderingParameters()
     , _engine(DEFAULT_ENGINE)
     , _renderer(RendererType::basic)
     , _ambientOcclusionStrength(0.f)
+    , _ambientOcclusionDistance(1.20f)
     , _shading(ShadingType::diffuse)
     , _lightEmittingMaterials(false)
     , _spp(1)
@@ -103,7 +106,9 @@ RenderingParameters::RenderingParameters()
         PARAM_ACCUMULATION.c_str(), po::value<bool>(),
         "Enable/Disable accumulation [bool]")(
         PARAM_AMBIENT_OCCLUSION.c_str(), po::value<float>(),
-        "Ambient occlusion strength [float]")(PARAM_SHADOWS.c_str(),
+        "Ambient occlusion distance [float]")(
+        PARAM_AMBIENT_OCCLUSION_DISTANCE.c_str(), po::value<float>(),
+        "Ambient occlusion distance [float]")(PARAM_SHADOWS.c_str(),
                                               po::value<float>(),
                                               "Shadows intensity [float]")(
         PARAM_SOFT_SHADOWS.c_str(), po::value<float>(),
@@ -162,6 +167,9 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
         _accumulation = vm[PARAM_ACCUMULATION].as<bool>();
     if (vm.count(PARAM_AMBIENT_OCCLUSION))
         _ambientOcclusionStrength = vm[PARAM_AMBIENT_OCCLUSION].as<float>();
+    if (vm.count(PARAM_AMBIENT_OCCLUSION_DISTANCE))
+        _ambientOcclusionDistance =
+            vm[PARAM_AMBIENT_OCCLUSION_DISTANCE].as<float>();
     if (vm.count(PARAM_SHADOWS))
         _shadows = vm[PARAM_SHADOWS].as<float>();
     if (vm.count(PARAM_SOFT_SHADOWS))
@@ -229,8 +237,11 @@ void RenderingParameters::print()
     BRAYNS_INFO << "Renderer                          :"
                 << getRendererAsString(_renderer) << std::endl;
     BRAYNS_INFO << "Samples per pixel                 :" << _spp << std::endl;
-    BRAYNS_INFO << "Ambient occlusion strength        :"
+    BRAYNS_INFO << "Ambient occlusion                 :" << std::endl;
+    BRAYNS_INFO << "- Strength                        :"
                 << _ambientOcclusionStrength << std::endl;
+    BRAYNS_INFO << "- Distance                        :"
+                << _ambientOcclusionDistance << std::endl;
     BRAYNS_INFO << "Shadows                           :" << _shadows
                 << std::endl;
     BRAYNS_INFO << "Soft shadows                      :" << _softShadows

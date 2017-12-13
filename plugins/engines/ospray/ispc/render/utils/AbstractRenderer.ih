@@ -50,6 +50,7 @@ struct AbstractRenderer
     bool shadingEnabled;
     float softShadows;
     float ambientOcclusionStrength;
+    float ambientOcclusionDistance;
     bool electronShadingEnabled;
     int randomNumber;
     float timestamp;

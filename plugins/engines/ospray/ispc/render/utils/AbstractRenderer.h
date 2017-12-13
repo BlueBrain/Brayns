@@ -63,6 +63,7 @@ protected:
     float _shadows;
     float _softShadows;
     float _ambientOcclusionStrength;
+    float _ambientOcclusionDistance;
     bool _shadingEnabled;
     bool _electronShadingEnabled;
     bool _gradientBackgroundEnabled;

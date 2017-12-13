@@ -599,6 +599,7 @@ export void SimulationRenderer_set(
     const uniform vec3f& bgColor, const uniform float& shadows,
     const uniform float& softShadows,
     const uniform float& ambientOcclusionStrength,
+    const uniform float& ambientOcclusionDistance,
     const uniform bool& shadingEnabled, const uniform int& randomNumber,
     const uniform float& timestamp, const uniform int& spp,
     const uniform bool& electronShadingEnabled, void** uniform lights,
@@ -622,6 +623,7 @@ export void SimulationRenderer_set(
     self->abstract.shadows = shadows;
     self->abstract.softShadows = softShadows;
     self->abstract.ambientOcclusionStrength = ambientOcclusionStrength;
+    self->abstract.ambientOcclusionDistance = ambientOcclusionDistance;
     self->abstract.shadingEnabled = shadingEnabled;
     self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
