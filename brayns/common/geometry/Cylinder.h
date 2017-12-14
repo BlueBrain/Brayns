@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,34 +21,27 @@
 #ifndef CYLINDER_H
 #define CYLINDER_H
 
-#include "Primitive.h"
-
-#include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <map>
 
 namespace brayns
 {
-class Cylinder : public Primitive
+struct Cylinder
 {
-public:
-    BRAYNS_API Cylinder(const Vector3f& center, const Vector3f& up,
-                        const float radius, const float timestamp = 0.f,
-                        const Vector2f& values = Vector2f(0.f, 0.f));
+    Cylinder(const Vector3f c, const Vector3f u, const float r,
+             const float ts = 0.f, const Vector2f v = Vector2f(0.f, 0.f))
+    {
+        center = c;
+        up = u;
+        radius = r;
+        timestamp = ts;
+        values = v;
+    }
 
-    BRAYNS_API const Vector3f& getCenter() const { return _center; }
-    BRAYNS_API void setCenter(const Vector3f center) { _center = center; }
-    BRAYNS_API const Vector3f& getUp() const { return _up; }
-    BRAYNS_API void setUp(const Vector3f up) { _center = up; }
-    BRAYNS_API float getRadius() const { return _radius; }
-    BRAYNS_API void setRadius(const float radius) { _radius = radius; }
-    BRAYNS_API virtual size_t serializeData(floats& serializedData);
-    BRAYNS_API static size_t getSerializationSize();
-
-private:
-    Vector3f _center;
-    Vector3f _up;
-    float _radius;
+    Vector3f center;
+    Vector3f up;
+    float radius{0};
+    float timestamp{0};
+    Vector2f values;
 };
 }
 

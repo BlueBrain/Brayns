@@ -104,7 +104,7 @@ void Scene::buildMaterials()
             _materials.find(cones.first) == _materials.end())
             _materials[cones.first] = Material();
     for (auto& meshes : _trianglesMeshes)
-        if (!meshes.second.getIndices().empty() &&
+        if (!meshes.second.indices.empty() &&
             _materials.find(meshes.first) == _materials.end())
             _materials[meshes.first] = Material();
 
@@ -254,19 +254,18 @@ void Scene::buildDefault()
         for (size_t i = 0; i < 6; ++i)
         {
             const auto position = positions[indices[material][i]];
-            trianglesMesh.getVertices().push_back(position);
+            trianglesMesh.vertices.push_back(position);
             _bounds.merge(position);
         }
-        trianglesMesh.getIndices().push_back(Vector3ui(0, 1, 2));
-        trianglesMesh.getIndices().push_back(Vector3ui(3, 4, 5));
+        trianglesMesh.indices.push_back(Vector3ui(0, 1, 2));
+        trianglesMesh.indices.push_back(Vector3ui(3, 4, 5));
     }
 
     size_t material = NB_SYSTEM_MATERIALS + 7;
 
     // Sphere
     {
-        _spheres[material].push_back(
-            SpherePtr(new Sphere(Vector3f(0.25f, 0.26f, 0.30f), 0.25f)));
+        addSphere(material, Sphere(Vector3f(0.25f, 0.26f, 0.30f), 0.25f));
         auto& m = _materials[material];
         m.setOpacity(0.3f);
         m.setRefractionIndex(1.1f);
@@ -276,11 +275,10 @@ void Scene::buildDefault()
     }
 
     // Cylinder
-    ++material;
-    _cylinders[material].push_back(
-        CylinderPtr(new Cylinder(Vector3f(0.25f, 0.126f, 0.75f),
-                                 Vector3f(0.75f, 0.126f, 0.75f), 0.125f)));
     {
+        ++material;
+        addCylinder(material, Cylinder(Vector3f(0.25f, 0.126f, 0.75f),
+                                       Vector3f(0.75f, 0.126f, 0.75f), 0.125f));
         auto& m = _materials[material];
         m.setColor(Vector3f(0.1f, 0.1f, 0.8f));
         m.setSpecularColor(WHITE);
@@ -288,11 +286,10 @@ void Scene::buildDefault()
     }
 
     // Cone
-    ++material;
-    _cones[material].push_back(
-        ConePtr(new Cone(Vector3f(0.75f, 0.01f, 0.25f),
-                         Vector3f(0.75f, 0.5f, 0.25f), 0.15f, 0.f)));
     {
+        ++material;
+        addCone(material, Cone(Vector3f(0.75f, 0.01f, 0.25f),
+                               Vector3f(0.75f, 0.5f, 0.25f), 0.15f, 0.f));
         auto& m = _materials[material];
         m.setReflectionIndex(0.8f);
         m.setSpecularColor(WHITE);
@@ -300,23 +297,23 @@ void Scene::buildDefault()
     }
 
     // Lamp
-    ++material;
-    const Vector3f lampInfo = {0.15f, 0.99f, 0.15f};
-    const Vector3f lampPositions[4] = {
-        {0.5f - lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
-        {0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
-        {0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()},
-        {0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()}};
-    for (size_t i = 0; i < 4; ++i)
-        _trianglesMeshes[material].getVertices().push_back(lampPositions[i]);
-    _trianglesMeshes[material].getIndices().push_back(Vector3i(2, 1, 0));
-    _trianglesMeshes[material].getIndices().push_back(Vector3i(0, 3, 2));
     {
+        ++material;
+        const Vector3f lampInfo = {0.15f, 0.99f, 0.15f};
+        const Vector3f lampPositions[4] = {
+            {0.5f - lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
+            {0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
+            {0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()},
+            {0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()}};
+        for (size_t i = 0; i < 4; ++i)
+            _trianglesMeshes[material].vertices.push_back(lampPositions[i]);
+        _trianglesMeshes[material].indices.push_back(Vector3i(2, 1, 0));
+        _trianglesMeshes[material].indices.push_back(Vector3i(0, 3, 2));
+
         auto& m = _materials[material];
         m.setColor(WHITE);
         m.setEmission(5.f);
     }
-
     BRAYNS_INFO << "Bounding Box: " << _bounds << std::endl;
 }
 
@@ -338,58 +335,58 @@ void Scene::buildEnvironment()
 
         Vector3i i;
         const size_t material = 0;
-        size_t meshIndex = _trianglesMeshes[material].getIndices().size();
+        size_t meshIndex = _trianglesMeshes[material].indices.size();
 
         Vector4f v;
         const Vector4f n(0.f, 1.f, 0.f, 0.f);
         v = Vector4f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() - s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(0.f, 0.f));
         v = Vector4f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() - s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(tiles, 0.f));
         v = Vector4f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() + s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(tiles, tiles));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        _trianglesMeshes[material].getIndices().push_back(i);
+        _trianglesMeshes[material].indices.push_back(i);
         meshIndex += 3;
 
         v = Vector4f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() + s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(tiles, tiles));
         v = Vector4f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() + s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(0.f, tiles));
         v = Vector4f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() - s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(0.f, 0.f));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        _trianglesMeshes[material].getIndices().push_back(i);
+        _trianglesMeshes[material].indices.push_back(i);
         break;
     }
     case SceneEnvironment::wall:
@@ -403,50 +400,50 @@ void Scene::buildEnvironment()
         const Vector3f c = _bounds.getCenter();
         Vector3i i;
         const size_t material = 0;
-        size_t meshIndex = _trianglesMeshes[material].getIndices().size();
+        size_t meshIndex = _trianglesMeshes[material].indices.size();
         Vector4f v;
         const Vector4f n(0.f, 0.f, -1.f, 0.f);
         v = Vector4f(c.x() - s.x() * scale.x(), c.y() - s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(0.f, 0.f));
         v = Vector4f(c.x() + s.x() * scale.x(), c.y() - s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(tiles, 0.f));
         v = Vector4f(c.x() + s.x() * scale.x(), c.y() + s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(tiles, tiles));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        _trianglesMeshes[material].getIndices().push_back(i);
+        _trianglesMeshes[material].indices.push_back(i);
         meshIndex += 3;
         v = Vector4f(c.x() + s.x() * scale.x(), c.y() + s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(tiles, tiles));
         v = Vector4f(c.x() - s.x() * scale.x(), c.y() + s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(0.f, tiles));
         v = Vector4f(c.x() - s.x() * scale.x(), c.y() - s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].getVertices().push_back(v);
-        _trianglesMeshes[material].getNormals().push_back(n);
-        _trianglesMeshes[material].getTextureCoordinates().push_back(
+        _trianglesMeshes[material].vertices.push_back(v);
+        _trianglesMeshes[material].normals.push_back(n);
+        _trianglesMeshes[material].textureCoordinates.push_back(
             Vector2f(0.f, 0.f));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        _trianglesMeshes[material].getIndices().push_back(i);
+        _trianglesMeshes[material].indices.push_back(i);
         break;
     }
     case SceneEnvironment::bounding_box:
@@ -467,35 +464,22 @@ void Scene::buildEnvironment()
         };
 
         for (size_t i = 0; i < 8; ++i)
-            _spheres[material].push_back(
-                SpherePtr(new Sphere(positions[i], radius)));
+            addSphere(material, Sphere(positions[i], radius));
 
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[0], positions[1], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[2], positions[3], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[4], positions[5], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[6], positions[7], radius)));
+        addCylinder(material, Cylinder(positions[0], positions[1], radius));
+        addCylinder(material, Cylinder(positions[2], positions[3], radius));
+        addCylinder(material, Cylinder(positions[4], positions[5], radius));
+        addCylinder(material, Cylinder(positions[6], positions[7], radius));
 
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[0], positions[2], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[1], positions[3], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[4], positions[6], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[5], positions[7], radius)));
+        addCylinder(material, Cylinder(positions[0], positions[2], radius));
+        addCylinder(material, Cylinder(positions[1], positions[3], radius));
+        addCylinder(material, Cylinder(positions[4], positions[6], radius));
+        addCylinder(material, Cylinder(positions[5], positions[7], radius));
 
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[0], positions[4], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[1], positions[5], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[2], positions[6], radius)));
-        _cylinders[material].push_back(
-            CylinderPtr(new Cylinder(positions[3], positions[7], radius)));
+        addCylinder(material, Cylinder(positions[0], positions[4], radius));
+        addCylinder(material, Cylinder(positions[1], positions[5], radius));
+        addCylinder(material, Cylinder(positions[2], positions[6], radius));
+        addCylinder(material, Cylinder(positions[3], positions[7], radius));
 
         break;
     }
@@ -620,5 +604,66 @@ bool Scene::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
            _trianglesMeshes.empty();
+}
+
+void Scene::addSphere(const size_t materialId, const Sphere& sphere)
+{
+    _spheres[materialId].push_back(sphere);
+    _bounds.merge(sphere.center);
+}
+
+void Scene::addCylinder(const size_t materialId, const Cylinder& cylinder)
+{
+    _cylinders[materialId].push_back(cylinder);
+    _bounds.merge(cylinder.center);
+    _bounds.merge(cylinder.up);
+}
+
+void Scene::addCone(const size_t materialId, const Cone& cone)
+{
+    _cones[materialId].push_back(cone);
+    _bounds.merge(cone.center);
+    _bounds.merge(cone.up);
+}
+
+void Scene::setSphere(const size_t materialId, const uint64_t index,
+                      const Sphere& sphere)
+{
+    auto& spheres = _spheres[materialId];
+    if (index < spheres.size())
+    {
+        spheres[index] = sphere;
+        _bounds.merge(sphere.center);
+    }
+    else
+        BRAYNS_ERROR << "Invalid index " << index << std::endl;
+}
+
+void Scene::setCone(const size_t materialId, const uint64_t index,
+                    const Cone& cone)
+{
+    auto& cones = _cones[materialId];
+    if (index < cones.size())
+    {
+        cones[index] = cone;
+        _bounds.merge(cone.center);
+        _bounds.merge(cone.up);
+    }
+    else
+        BRAYNS_ERROR << "Invalid index " << index << std::endl;
+}
+
+void Scene::setCylinder(const size_t materialId, const uint64_t index,
+                        const Cylinder& cylinder)
+{
+    auto& cylinders = _cylinders[materialId];
+    if (index < cylinders.size())
+    {
+        cylinders[index] = cylinder;
+        _bounds.merge(cylinder.center);
+        _bounds.merge(cylinder.up);
+    }
+    else
+        BRAYNS_ERROR << "Invalid index " << index << std::endl;
 }
 }

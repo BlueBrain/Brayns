@@ -120,7 +120,6 @@ table DataSource {
     nest_cache_file: string;
     morphology_section_types: [SectionType];
     morphology_layout: MorphologyLayout;
-    generate_multiple_models: bool;
     volume_folder: string;
     volume_file: string;
     volume_dimensions: [uint:3];

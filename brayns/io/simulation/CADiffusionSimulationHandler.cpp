@@ -102,11 +102,8 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
         BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
                     << std::endl;
         for (const auto position : _calciumPositions)
-        {
-            SpherePtr sphere(new Sphere(position, CALCIUM_RADIUS));
-            scene.getSpheres()[MATERIAL_CA_SIMULATION].push_back(sphere);
-            scene.getWorldBounds().merge(position);
-        }
+            scene.addSphere(MATERIAL_CA_SIMULATION,
+                            Sphere(position, CALCIUM_RADIUS));
         _spheresCreated = true;
     }
     else
@@ -114,12 +111,8 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
         uint64_t i = 0;
         for (const auto position : _calciumPositions)
         {
-            auto& spheres = scene.getSpheres()[MATERIAL_CA_SIMULATION];
-            if (i < spheres.size())
-                spheres[i]->setCenter(position);
-            else
-                BRAYNS_WARN << "Invalid number of positions in "
-                            << _simulationFiles[frame] << std::endl;
+            scene.setSphere(i, MATERIAL_CA_SIMULATION,
+                            Sphere(position, CALCIUM_RADIUS));
             ++i;
         }
     }

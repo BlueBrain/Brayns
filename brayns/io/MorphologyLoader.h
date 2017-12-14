@@ -21,7 +21,6 @@
 #ifndef MORPHOLOGY_LOADER_H
 #define MORPHOLOGY_LOADER_H
 
-#include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/types.h>
 #include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>

@@ -66,10 +66,9 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
         case 3:
         {
             const Vector3f position(lineData[0], lineData[1], lineData[2]);
-            spheres[0].push_back(SpherePtr(
-                new Sphere(position,
-                           _geometryParameters.getRadiusMultiplier())));
-            scene.getWorldBounds().merge(position);
+            scene.addSphere(0,
+                            Sphere(position,
+                                   _geometryParameters.getRadiusMultiplier()));
             break;
         }
         default:
@@ -109,9 +108,8 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
         BRAYNS_DEBUG << x << "," << y << "," << z << std::endl;
 
         const Vector3f position(x, y, z);
-        spheres[0].push_back(SpherePtr(
-            new Sphere(position, _geometryParameters.getRadiusMultiplier())));
-        scene.getWorldBounds().merge(position);
+        const auto radius = _geometryParameters.getRadiusMultiplier();
+        scene.addSphere(0, Sphere(position, radius));
 
         updateProgress("Loading spheres...", spheres[0].size(), nbPoints);
     }

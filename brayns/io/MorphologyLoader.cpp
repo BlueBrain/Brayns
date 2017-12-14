@@ -54,24 +54,43 @@ typedef std::vector<uint64_t> GIDOffsets;
 struct ParallelSceneContainer
 {
 public:
-    ParallelSceneContainer(SpheresMap& spheres, CylindersMap& cylinders,
-                           ConesMap& cones, TrianglesMeshMap& trianglesMeshes,
-                           MaterialsMap& materials, Boxf& worldBounds)
-        : _spheres(spheres)
-        , _cylinders(cylinders)
-        , _cones(cones)
-        , _trianglesMeshes(trianglesMeshes)
-        , _materials(materials)
-        , _worldBounds(worldBounds)
+    ParallelSceneContainer(SpheresMap& s, CylindersMap& cy, ConesMap& co,
+                           TrianglesMeshMap& tm, MaterialsMap& m, Boxf& wb)
+        : spheres(s)
+        , cylinders(cy)
+        , cones(co)
+        , trianglesMeshes(tm)
+        , materials(m)
+        , worldBounds(wb)
     {
     }
 
-    SpheresMap& _spheres;
-    CylindersMap& _cylinders;
-    ConesMap& _cones;
-    TrianglesMeshMap& _trianglesMeshes;
-    MaterialsMap& _materials;
-    Boxf& _worldBounds;
+    void add(const size_t materialId, const Sphere& sphere)
+    {
+        spheres[materialId].push_back(sphere);
+        worldBounds.merge(sphere.center);
+    }
+
+    void add(const size_t materialId, const Cylinder& cylinder)
+    {
+        cylinders[materialId].push_back(cylinder);
+        worldBounds.merge(cylinder.center);
+        worldBounds.merge(cylinder.up);
+    }
+
+    void add(const size_t materialId, const Cone& cone)
+    {
+        cones[materialId].push_back(cone);
+        worldBounds.merge(cone.center);
+        worldBounds.merge(cone.up);
+    }
+
+    SpheresMap& spheres;
+    CylindersMap& cylinders;
+    ConesMap& cones;
+    TrianglesMeshMap& trianglesMeshes;
+    MaterialsMap& materials;
+    Boxf& worldBounds;
 };
 
 class MorphologyLoader::Impl
@@ -434,9 +453,8 @@ private:
             _getMaterialFromGeometryParameters(index, material,
                                                brain::neuron::SectionType::soma,
                                                targetGIDOffsets);
-        scene._spheres[materialId].push_back(SpherePtr(
-            new Sphere(somaPosition, radius, 0.f, textureCoordinates)));
-        scene._worldBounds.merge(somaPosition);
+        scene.add(materialId,
+                  Sphere(somaPosition, radius, 0.f, textureCoordinates));
         return true;
     }
 
@@ -466,15 +484,16 @@ private:
             const auto sectionTypes = _getSectionTypes(morphologySectionTypes);
             const auto& sections = morphology.getSections(sectionTypes);
 
-            Spheres metaballs;
+            Vector4fs metaballs;
             if (morphologySectionTypes & size_t(MorphologySectionType::soma))
             {
                 // Soma
                 const auto& soma = morphology.getSoma();
                 const auto center = soma.getCentroid();
                 const auto radius = _getCorrectedRadius(soma.getMeanRadius());
-                metaballs.push_back(SpherePtr(new Sphere(center, radius)));
-                scene._worldBounds.merge(center);
+                metaballs.push_back(
+                    Vector4f(center.x(), center.y(), center.z(), radius));
+                scene.worldBounds.merge(center);
             }
 
             // Dendrites and axon
@@ -503,10 +522,10 @@ private:
                     const Vector3f position(sample.x(), sample.y(), sample.z());
                     const auto radius = _getCorrectedRadius(sample.w() * 0.5f);
                     if (radius > 0.f)
-                        metaballs.push_back(
-                            SpherePtr(new Sphere(position, radius)));
+                        metaballs.push_back(Vector4f(position.x(), position.y(),
+                                                     position.z(), radius));
 
-                    scene._worldBounds.merge(position);
+                    scene.worldBounds.merge(position);
                 }
             }
 
@@ -518,8 +537,8 @@ private:
                 index, material, brain::neuron::SectionType::soma,
                 targetGIDOffsets);
             metaballsGenerator.generateMesh(metaballs, gridSize, threshold,
-                                            scene._materials, materialId,
-                                            scene._trianglesMeshes);
+                                            scene.materials, materialId,
+                                            scene.trianglesMeshes);
         }
         catch (const std::runtime_error& e)
         {
@@ -597,9 +616,8 @@ private:
                 const auto radius = _getCorrectedRadius(soma.getMeanRadius());
                 const auto textureCoordinates =
                     _getIndexAsTextureCoordinates(offset);
-                scene._spheres[materialId].push_back(SpherePtr(
-                    new Sphere(somaPosition, radius, 0.f, textureCoordinates)));
-                scene._worldBounds.merge(somaPosition);
+                scene.add(materialId, Sphere(somaPosition, radius, 0.f,
+                                             textureCoordinates));
 
                 if (_geometryParameters.getCircuitUseSimulationModel())
                 {
@@ -613,11 +631,10 @@ private:
                         const auto& samples = child.getSamples();
                         const Vector3f sample = {samples[0].x(), samples[0].y(),
                                                  samples[0].z()};
-                        scene._cones[materialId].push_back(ConePtr(
-                            new Cone(somaPosition, sample, radius,
-                                     _getCorrectedRadius(samples[0].w() * 0.5f),
-                                     0.f, textureCoordinates)));
-                        scene._worldBounds.merge(sample);
+                        scene.add(materialId, Cone(somaPosition, sample, radius,
+                                                   _getCorrectedRadius(
+                                                       samples[0].w() * 0.5f),
+                                                   0.f, textureCoordinates));
                     }
                 }
             }
@@ -749,27 +766,21 @@ private:
 
                     if (radius > 0.f)
                     {
-                        auto& spheres = scene._spheres[materialId];
-                        spheres.push_back(
-                            SpherePtr(new Sphere(position, radius, distance,
-                                                 textureCoordinates)));
-                        scene._worldBounds.merge(position);
+                        scene.add(materialId, Sphere(position, radius, distance,
+                                                     textureCoordinates));
 
                         if (position != target && previousRadius > 0.f)
                         {
-                            auto& cylinders = scene._cylinders[materialId];
-                            auto& cones = scene._cones[materialId];
                             if (radius == previousRadius)
-                                cylinders.push_back(CylinderPtr(
-                                    new Cylinder(position, target, radius,
-                                                 distance,
-                                                 textureCoordinates)));
+                                scene.add(materialId,
+                                          Cylinder(position, target, radius,
+                                                   distance,
+                                                   textureCoordinates));
                             else
-                                cones.push_back(
-                                    ConePtr(new Cone(position, target, radius,
-                                                     previousRadius, distance,
-                                                     textureCoordinates)));
-                            scene._worldBounds.merge(target);
+                                scene.add(materialId,
+                                          Cone(position, target, radius,
+                                               previousRadius, distance,
+                                               textureCoordinates));
                         }
                     }
                     previousSample = sample;
@@ -912,8 +923,8 @@ private:
                     const auto id = sphere.first;
                     _scene.getSpheres()[id].insert(
                         _scene.getSpheres()[id].end(),
-                        sceneContainer._spheres[id].begin(),
-                        sceneContainer._spheres[id].end());
+                        sceneContainer.spheres[id].begin(),
+                        sceneContainer.spheres[id].end());
                 }
 
 #pragma omp critical
@@ -922,8 +933,8 @@ private:
                     const auto id = cylinder.first;
                     _scene.getCylinders()[id].insert(
                         _scene.getCylinders()[id].end(),
-                        sceneContainer._cylinders[id].begin(),
-                        sceneContainer._cylinders[id].end());
+                        sceneContainer.cylinders[id].begin(),
+                        sceneContainer.cylinders[id].end());
                 }
 
 #pragma omp critical
@@ -932,8 +943,8 @@ private:
                     const auto id = cone.first;
                     _scene.getCones()[id].insert(
                         _scene.getCones()[id].end(),
-                        sceneContainer._cones[id].begin(),
-                        sceneContainer._cones[id].end());
+                        sceneContainer.cones[id].begin(),
+                        sceneContainer.cones[id].end());
                 }
 
 #pragma omp critical

@@ -208,9 +208,6 @@ public:
         return _circuitMeshTransformation;
     }
 
-    /** Defines if multiple models should be generated to increase the
-        rendering performance */
-    bool getGenerateMultipleModels() const { return _generateMultipleModels; }
     /** Splash scene folder */
     void setSplashSceneFolder(const std::string& value)
     {

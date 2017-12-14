@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,42 +21,29 @@
 #ifndef CONE_H
 #define CONE_H
 
-#include "Primitive.h"
-
-#include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <map>
 
 namespace brayns
 {
-class Cone : public Primitive
+struct Cone
 {
-public:
-    BRAYNS_API Cone(const Vector3f& center, const Vector3f& up,
-                    const float centerRadius, const float upRadius,
-                    const float timestamp = 0.f,
-                    const Vector2f& values = Vector2f(0.f, 0.f));
-
-    BRAYNS_API const Vector3f& getCenter() const { return _center; }
-    BRAYNS_API void setCenter(const Vector3f center) { _center = center; }
-    BRAYNS_API const Vector3f& getUp() const { return _up; }
-    BRAYNS_API void setUp(const Vector3f up) { _up = up; }
-    BRAYNS_API float getCenterRadius() const { return _centerRadius; }
-    BRAYNS_API void setCenterRadius(const float radius)
+    Cone(const Vector3f c, const Vector3f u, const float cr, const float ur,
+         const float ts = 0.f, const Vector2f v = Vector2f(0.f, 0.f))
     {
-        _centerRadius = radius;
+        center = c;
+        up = u;
+        centerRadius = cr;
+        upRadius = ur;
+        timestamp = ts;
+        values = v;
     }
 
-    BRAYNS_API float getUpRadius() const { return _upRadius; }
-    BRAYNS_API void setUpRadius(const float radius) { _upRadius = radius; }
-    BRAYNS_API virtual size_t serializeData(floats& serializedData);
-    BRAYNS_API static size_t getSerializationSize();
-
-private:
-    Vector3f _center;
-    Vector3f _up;
-    float _centerRadius;
-    float _upRadius;
+    Vector3f center;
+    Vector3f up;
+    float centerRadius{0};
+    float upRadius{0};
+    float timestamp{0};
+    Vector2f values;
 };
 }
 

@@ -836,8 +836,6 @@ void RocketsPlugin::_initializeDataSource()
         morphologyLayout.horizontalSpacing);
     _remoteDataSource.setMorphologyLayout(remoteMorphologyLayout);
 
-    _remoteDataSource.setGenerateMultipleModels(
-        geometryParameters.getGenerateMultipleModels());
     _remoteDataSource.setVolumeFolder(volumeParameters.getFolder());
     _remoteDataSource.setVolumeFile(volumeParameters.getFilename());
     _remoteDataSource.setVolumeDimensions(
@@ -1004,11 +1002,6 @@ void RocketsPlugin::_dataSourceUpdated()
     layoutAsString +=
         " " + std::to_string(remoteMorphologyLayout.getHorizontalSpacing());
     _parametersManager.set("morphology-layout", layoutAsString);
-
-    _parametersManager.set("generate-multiple-models",
-                           (_remoteDataSource.getGenerateMultipleModels()
-                                ? "1"
-                                : "0"));
     _parametersManager.set("volume-folder",
                            _remoteDataSource.getVolumeFolderString());
     _parametersManager.set("volume-file",

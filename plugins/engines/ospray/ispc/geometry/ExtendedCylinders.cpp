@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -16,6 +16,9 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+// Brayns
+#include <brayns/common/geometry/Cylinder.h>
 
 // ospray
 #include "ExtendedCylinders.h"
@@ -35,9 +38,9 @@ void ExtendedCylinders::finalize(ospray::Model *model)
 {
     radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);
-    bytesPerCylinder = getParam1i("bytes_per_cylinder", 10 * sizeof(float));
-    offset_v0 = getParam1i("offset_v0", 0);
-    offset_v1 = getParam1i("offset_v1", 3 * sizeof(float));
+    bytesPerCylinder = getParam1i("bytes_per_cylinder", sizeof(brayns::Cylinder));
+    offset_center = getParam1i("offset_center", 0);
+    offset_up = getParam1i("offset_up", 3 * sizeof(float));
     offset_radius = getParam1i("offset_radius", 6 * sizeof(float));
     offset_timestamp = getParam1i("offset_timestamp", 7 * sizeof(float));
     offset_value_x = getParam1i("offset_value_x", 8 * sizeof(float));
@@ -52,8 +55,8 @@ void ExtendedCylinders::finalize(ospray::Model *model)
     numExtendedCylinders = data->numBytes / bytesPerCylinder;
     ispc::ExtendedCylindersGeometry_set(getIE(), model->getIE(), data->data,
                                         numExtendedCylinders, bytesPerCylinder,
-                                        radius, materialID, offset_v0,
-                                        offset_v1, offset_radius,
+                                        radius, materialID, offset_center,
+                                        offset_up, offset_radius,
                                         offset_timestamp, offset_value_x,
                                         offset_value_y, offset_materialID);
 }

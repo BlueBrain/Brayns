@@ -35,7 +35,7 @@
 
 namespace brayns
 {
-const size_t CACHE_VERSION = 7;
+const size_t CACHE_VERSION = 8;
 
 struct TextureTypeMaterialAttribute
 {
@@ -55,6 +55,7 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
 OSPRayScene::OSPRayScene(Renderers renderers,
                          ParametersManager& parametersManager)
     : Scene(renderers, parametersManager)
+    , _model(nullptr)
     , _simulationModel(nullptr)
     , _ospLightData(nullptr)
     , _ospMaterialData(nullptr)
@@ -80,26 +81,24 @@ OSPRayScene::~OSPRayScene()
 
 void OSPRayScene::unload()
 {
-    for (const auto& model : _models)
+    if (_model)
     {
         for (size_t materialId = 0; materialId < _materials.size();
              ++materialId)
         {
             if (_ospMeshes[materialId])
-                ospRemoveGeometry(model.second, _ospMeshes[materialId]);
+                ospRemoveGeometry(_model, _ospMeshes[materialId]);
             if (_ospExtendedSpheres[materialId])
-                ospRemoveGeometry(model.second,
-                                  _ospExtendedSpheres[materialId]);
+                ospRemoveGeometry(_model, _ospExtendedSpheres[materialId]);
             if (_ospExtendedCylinders[materialId])
-                ospRemoveGeometry(model.second,
-                                  _ospExtendedCylinders[materialId]);
+                ospRemoveGeometry(_model, _ospExtendedCylinders[materialId]);
             if (_ospExtendedCones[materialId])
-                ospRemoveGeometry(model.second, _ospExtendedCones[materialId]);
+                ospRemoveGeometry(_model, _ospExtendedCones[materialId]);
         }
-        ospCommit(model.second);
-        ospRelease(model.second);
+        ospCommit(_model);
+        ospRelease(_model);
+        _model = nullptr;
     }
-    _models.clear();
 
     if (_simulationModel)
     {
@@ -126,17 +125,6 @@ void OSPRayScene::unload()
     for (auto& texture : _ospTextures)
         ospRelease(texture.second);
     _ospTextures.clear();
-
-    _serializedSpheresData.clear();
-    _serializedCylindersData.clear();
-    _serializedConesData.clear();
-    _serializedSpheresDataSize.clear();
-    _serializedCylindersDataSize.clear();
-    _serializedConesDataSize.clear();
-
-    _timestampSpheresIndices.clear();
-    _timestampCylindersIndices.clear();
-    _timestampConesIndices.clear();
 
     if (_ospSimulationData)
         ospRelease(_ospSimulationData);
@@ -169,34 +157,14 @@ void OSPRayScene::unload()
 
 void OSPRayScene::commit()
 {
-    for (auto model : _models)
-        ospCommit(model.second);
+    if (_model)
+        ospCommit(_model);
+
     if (_simulationModel)
     {
         BRAYNS_INFO << "Committing simulation model" << std::endl;
         ospCommit(_simulationModel);
     }
-}
-
-OSPModel OSPRayScene::modelImpl(const uint32_t index)
-{
-    if (_models.empty())
-        return nullptr;
-    if (_models.find(index) != _models.end())
-        return _models[index];
-
-    auto it = _models.lower_bound(index);
-    if (it != _models.end())
-    {
-        BRAYNS_DEBUG << "Request model index " << index << ", returned "
-                     << it->first << std::endl;
-        return it->second;
-    }
-
-    auto lastModel = _models.rbegin();
-    BRAYNS_DEBUG << "Request model index " << index << ", returned "
-                 << lastModel->first << std::endl;
-    return lastModel->second;
 }
 
 void OSPRayScene::saveToCacheFile()
@@ -209,12 +177,6 @@ void OSPRayScene::saveToCacheFile()
     const size_t version = CACHE_VERSION;
     file.write((char*)&version, sizeof(size_t));
     BRAYNS_INFO << "Version: " << version << std::endl;
-
-    const size_t nbModels = _models.size();
-    file.write((char*)&nbModels, sizeof(size_t));
-    BRAYNS_INFO << nbModels << " models" << std::endl;
-    for (const auto& model : _models)
-        file.write((char*)&model.first, sizeof(size_t));
 
     const size_t nbMaterials = _materials.size();
     file.write((char*)&nbMaterials, sizeof(size_t));
@@ -250,112 +212,85 @@ void OSPRayScene::saveToCacheFile()
         size_t bufferSize;
 
         // Spheres
-        bufferSize = _timestampSpheresIndices[materialId].size();
+        bufferSize = _spheres[materialId].size();
         file.write((char*)&bufferSize, sizeof(size_t));
-        for (const auto& index : _timestampSpheresIndices[materialId])
-        {
-            file.write((char*)&index.first, sizeof(size_t));
-            file.write((char*)&index.second, sizeof(size_t));
-        }
-
-        bufferSize = _serializedSpheresDataSize[materialId] *
-                     Sphere::getSerializationSize() * sizeof(float);
+        bufferSize = _spheres[materialId].size() * sizeof(Sphere);
         file.write((char*)&bufferSize, sizeof(size_t));
-        file.write((char*)_serializedSpheresData[materialId].data(),
-                   bufferSize);
+        file.write((char*)_spheres[materialId].data(), bufferSize);
         if (bufferSize != 0)
             BRAYNS_DEBUG << "[" << materialId << "] "
-                         << _serializedSpheresDataSize[materialId] << " Spheres"
+                         << _spheres[materialId].size() << " Spheres"
                          << std::endl;
 
         // Cylinders
-        bufferSize = _timestampCylindersIndices[materialId].size();
+        bufferSize = _cylinders[materialId].size();
         file.write((char*)&bufferSize, sizeof(size_t));
-        for (const auto& index : _timestampCylindersIndices[materialId])
-        {
-            file.write((char*)&index.first, sizeof(size_t));
-            file.write((char*)&index.second, sizeof(size_t));
-        }
-
-        bufferSize = _serializedCylindersDataSize[materialId] *
-                     Cylinder::getSerializationSize() * sizeof(float);
+        bufferSize = _cylinders[materialId].size() * sizeof(Cylinder);
         file.write((char*)&bufferSize, sizeof(size_t));
-        file.write((char*)_serializedCylindersData[materialId].data(),
-                   bufferSize);
+        file.write((char*)_cylinders[materialId].data(), bufferSize);
         if (bufferSize != 0)
             BRAYNS_DEBUG << "[" << materialId << "] "
-                         << _serializedCylindersDataSize[materialId]
-                         << " Cylinders" << std::endl;
+                         << _cylinders[materialId].size() << " Cylinders"
+                         << std::endl;
 
         // Cones
-        bufferSize = _timestampConesIndices[materialId].size();
+        bufferSize = _cones[materialId].size();
         file.write((char*)&bufferSize, sizeof(size_t));
-        for (const auto& index : _timestampConesIndices[materialId])
-        {
-            file.write((char*)&index.first, sizeof(size_t));
-            file.write((char*)&index.second, sizeof(size_t));
-        }
-
-        bufferSize = _serializedConesDataSize[materialId] *
-                     Cone::getSerializationSize() * sizeof(float);
+        bufferSize = _cones[materialId].size() * sizeof(Cone);
         file.write((char*)&bufferSize, sizeof(size_t));
-        file.write((char*)_serializedConesData[materialId].data(), bufferSize);
+        file.write((char*)_cones[materialId].data(), bufferSize);
         if (bufferSize != 0)
             BRAYNS_DEBUG << "[" << materialId << "] "
-                         << _serializedConesDataSize[materialId] << " Cones"
-                         << std::endl;
+                         << _cones[materialId].size() << " Cones" << std::endl;
 
         if (_trianglesMeshes.find(materialId) != _trianglesMeshes.end())
         {
             // Vertices
-            bufferSize = _trianglesMeshes[materialId].getVertices().size() *
-                         sizeof(Vector3f);
+            bufferSize =
+                _trianglesMeshes[materialId].vertices.size() * sizeof(Vector3f);
             file.write((char*)&bufferSize, sizeof(size_t));
-            file.write((char*)_trianglesMeshes[materialId].getVertices().data(),
-                       bufferSize);
-            if (bufferSize != 0)
-                BRAYNS_DEBUG
-                    << "[" << materialId << "] "
-                    << _trianglesMeshes[materialId].getVertices().size()
-                    << " Vertices" << std::endl;
-
-            // Indices
-            bufferSize = _trianglesMeshes[materialId].getIndices().size() *
-                         sizeof(Vector3ui);
-            file.write((char*)&bufferSize, sizeof(size_t));
-            file.write((char*)_trianglesMeshes[materialId].getIndices().data(),
+            file.write((char*)_trianglesMeshes[materialId].vertices.data(),
                        bufferSize);
             if (bufferSize != 0)
                 BRAYNS_DEBUG << "[" << materialId << "] "
-                             << _trianglesMeshes[materialId].getIndices().size()
+                             << _trianglesMeshes[materialId].vertices.size()
+                             << " Vertices" << std::endl;
+
+            // Indices
+            bufferSize =
+                _trianglesMeshes[materialId].indices.size() * sizeof(Vector3ui);
+            file.write((char*)&bufferSize, sizeof(size_t));
+            file.write((char*)_trianglesMeshes[materialId].indices.data(),
+                       bufferSize);
+            if (bufferSize != 0)
+                BRAYNS_DEBUG << "[" << materialId << "] "
+                             << _trianglesMeshes[materialId].indices.size()
                              << " Indices" << std::endl;
 
             // Normals
-            bufferSize = _trianglesMeshes[materialId].getNormals().size() *
-                         sizeof(Vector3f);
+            bufferSize =
+                _trianglesMeshes[materialId].normals.size() * sizeof(Vector3f);
             file.write((char*)&bufferSize, sizeof(size_t));
-            file.write((char*)_trianglesMeshes[materialId].getNormals().data(),
+            file.write((char*)_trianglesMeshes[materialId].normals.data(),
                        bufferSize);
             if (bufferSize != 0)
                 BRAYNS_DEBUG << "[" << materialId << "] "
-                             << _trianglesMeshes[materialId].getNormals().size()
+                             << _trianglesMeshes[materialId].normals.size()
                              << " Normals" << std::endl;
 
             // Texture coordinates
             bufferSize =
-                _trianglesMeshes[materialId].getTextureCoordinates().size() *
+                _trianglesMeshes[materialId].textureCoordinates.size() *
                 sizeof(Vector2f);
             file.write((char*)&bufferSize, sizeof(size_t));
-            file.write((char*)_trianglesMeshes[materialId]
-                           .getTextureCoordinates()
-                           .data(),
-                       bufferSize);
+            file.write(
+                (char*)_trianglesMeshes[materialId].textureCoordinates.data(),
+                bufferSize);
             if (bufferSize != 0)
-                BRAYNS_DEBUG << "[" << materialId << "] "
-                             << _trianglesMeshes[materialId]
-                                    .getTextureCoordinates()
-                                    .size()
-                             << " Texture coordinates" << std::endl;
+                BRAYNS_DEBUG
+                    << "[" << materialId << "] "
+                    << _trianglesMeshes[materialId].textureCoordinates.size()
+                    << " Texture coordinates" << std::endl;
         }
         else
         {
@@ -398,18 +333,6 @@ void OSPRayScene::loadFromCacheFile()
         return;
     }
 
-    _models.clear();
-    size_t nbModels;
-    file.read((char*)&nbModels, sizeof(size_t));
-    BRAYNS_INFO << nbModels << " models" << std::endl;
-    for (size_t model = 0; model < nbModels; ++model)
-    {
-        size_t ts;
-        file.read((char*)&ts, sizeof(size_t));
-        BRAYNS_INFO << "Model for ts " << ts << " created" << std::endl;
-        _models[ts] = ospNewModel();
-    }
-
     if (geomParams.getCircuitUseSimulationModel() && !_simulationModel)
         _simulationModel = ospNewModel();
 
@@ -450,111 +373,67 @@ void OSPRayScene::loadFromCacheFile()
     {
         // Spheres
         size_t bufferSize = 0;
-
         file.read((char*)&bufferSize, sizeof(size_t));
-        for (size_t i = 0; i < bufferSize; ++i)
-        {
-            size_t ts;
-            file.read((char*)&ts, sizeof(size_t));
-            size_t index;
-            file.read((char*)&index, sizeof(size_t));
-            _timestampSpheresIndices[materialId][ts] = index;
-        }
-
-        file.read((char*)&bufferSize, sizeof(size_t));
-        _serializedSpheresDataSize[materialId] =
-            bufferSize / (Sphere::getSerializationSize() * sizeof(float));
         if (bufferSize != 0)
         {
-            BRAYNS_DEBUG << "[" << materialId << "] "
-                         << _serializedSpheresDataSize[materialId] << " Spheres"
-                         << std::endl;
-            _serializedSpheresData[materialId].resize(bufferSize);
-            file.read((char*)_serializedSpheresData[materialId].data(),
-                      bufferSize);
+            const auto nbElements = bufferSize / sizeof(Sphere);
+            BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
+                         << " Spheres" << std::endl;
+            _spheres[materialId].reserve(nbElements);
+            file.read((char*)_spheres[materialId].data(), bufferSize);
         }
-        _serializeSpheres(materialId);
 
         // Cylinders
         bufferSize = 0;
         file.read((char*)&bufferSize, sizeof(size_t));
-        for (size_t i = 0; i < bufferSize; ++i)
-        {
-            size_t ts;
-            file.read((char*)&ts, sizeof(size_t));
-            size_t index;
-            file.read((char*)&index, sizeof(size_t));
-            _timestampCylindersIndices[materialId][ts] = index;
-        }
-
-        file.read((char*)&bufferSize, sizeof(size_t));
-        _serializedCylindersDataSize[materialId] =
-            bufferSize / (Cylinder::getSerializationSize() * sizeof(float));
         if (bufferSize != 0)
         {
-            BRAYNS_DEBUG << "[" << materialId << "] "
-                         << _serializedCylindersDataSize[materialId]
+            const auto nbElements = bufferSize / sizeof(Sphere);
+            BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
                          << " Cylinders" << std::endl;
-            _serializedCylindersData[materialId].reserve(bufferSize);
-            file.read((char*)_serializedCylindersData[materialId].data(),
-                      bufferSize);
+            _cylinders[materialId].reserve(nbElements);
+            file.read((char*)_cylinders[materialId].data(), bufferSize);
         }
-        _serializeCylinders(materialId);
 
         // Cones
         bufferSize = 0;
         file.read((char*)&bufferSize, sizeof(size_t));
-        for (size_t i = 0; i < bufferSize; ++i)
-        {
-            size_t ts;
-            file.read((char*)&ts, sizeof(size_t));
-            size_t index;
-            file.read((char*)&index, sizeof(size_t));
-            _timestampConesIndices[materialId][ts] = index;
-        }
-
-        file.read((char*)&bufferSize, sizeof(size_t));
-        _serializedConesDataSize[materialId] =
-            bufferSize / (Cone::getSerializationSize() * sizeof(float));
         if (bufferSize != 0)
         {
-            BRAYNS_DEBUG << "[" << materialId << "] "
-                         << _serializedConesDataSize[materialId] << " Cones"
+            const auto nbElements = bufferSize / sizeof(Sphere);
+            BRAYNS_DEBUG << "[" << materialId << "] " << nbElements << " Cones"
                          << std::endl;
-            _serializedConesData[materialId].reserve(bufferSize);
-            file.read((char*)_serializedConesData[materialId].data(),
-                      bufferSize);
+            _cones[materialId].reserve(nbElements);
+            file.read((char*)_cones[materialId].data(), bufferSize);
         }
-        _serializeCones(materialId);
 
         // Vertices
         file.read((char*)&bufferSize, sizeof(size_t));
-        _trianglesMeshes[materialId].getVertices().resize(bufferSize /
-                                                          sizeof(Vector3f));
-        file.read((char*)_trianglesMeshes[materialId].getVertices().data(),
+        _trianglesMeshes[materialId].vertices.reserve(bufferSize /
+                                                      sizeof(Vector3f));
+        file.read((char*)_trianglesMeshes[materialId].vertices.data(),
                   bufferSize);
 
         // Indices
         file.read((char*)&bufferSize, sizeof(size_t));
-        _trianglesMeshes[materialId].getIndices().resize(bufferSize /
-                                                         sizeof(Vector3ui));
-        file.read((char*)_trianglesMeshes[materialId].getIndices().data(),
+        _trianglesMeshes[materialId].indices.reserve(bufferSize /
+                                                     sizeof(Vector3ui));
+        file.read((char*)_trianglesMeshes[materialId].indices.data(),
                   bufferSize);
 
         // Normals
         file.read((char*)&bufferSize, sizeof(size_t));
-        _trianglesMeshes[materialId].getNormals().resize(bufferSize /
-                                                         sizeof(Vector3f));
-        file.read((char*)_trianglesMeshes[materialId].getNormals().data(),
+        _trianglesMeshes[materialId].normals.reserve(bufferSize /
+                                                     sizeof(Vector3f));
+        file.read((char*)_trianglesMeshes[materialId].normals.data(),
                   bufferSize);
 
         // Texture coordinates
         file.read((char*)&bufferSize, sizeof(size_t));
-        _trianglesMeshes[materialId].getTextureCoordinates().resize(
+        _trianglesMeshes[materialId].textureCoordinates.reserve(
             bufferSize / sizeof(Vector2f));
-        file.read(
-            (char*)_trianglesMeshes[materialId].getTextureCoordinates().data(),
-            bufferSize);
+        file.read((char*)_trianglesMeshes[materialId].textureCoordinates.data(),
+                  bufferSize);
 
         _buildMeshOSPGeometry(materialId);
     }
@@ -566,285 +445,124 @@ void OSPRayScene::loadFromCacheFile()
     BRAYNS_INFO << "Scene successfully loaded" << std::endl;
 }
 
-void OSPRayScene::_createModel(const uint32_t index)
-{
-    if (_models.find(index) == _models.end())
-    {
-        _models[index] = ospNewModel();
-        BRAYNS_INFO << "Model created for index " << index << ": "
-                    << _models[index] << std::endl;
-    }
-}
-
 uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
 {
+    if (_spheres.find(materialId) == _spheres.end())
+        return 0;
+
+    const auto& spheres = _spheres[materialId];
+    const auto bufferSize = spheres.size() * sizeof(Sphere);
+    if (_ospExtendedSpheres.find(materialId) != _ospExtendedSpheres.end())
+        ospRemoveGeometry(_model, _ospExtendedSpheres[materialId]);
+
+    _ospExtendedSpheres[materialId] = ospNewGeometry("extendedspheres");
+    _ospExtendedSpheresData[materialId] =
+        ospNewData(bufferSize / sizeof(float), OSP_FLOAT, spheres.data(),
+                   _getOSPDataFlags());
+
+    ospSetObject(_ospExtendedSpheres[materialId], "extendedspheres",
+                 _ospExtendedSpheresData[materialId]);
+
+    if (_ospMaterials[materialId])
+        ospSetMaterial(_ospExtendedSpheres[materialId],
+                       _ospMaterials[materialId]);
+
+    ospCommit(_ospExtendedSpheres[materialId]);
+
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
-    uint64_t size = 0;
+    if (geometryParameters.getCircuitUseSimulationModel())
+        ospAddGeometry(_simulationModel, _ospExtendedSpheres[materialId]);
+    else
+        ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
 
-    size_t count = 0;
-    if (_spheres.find(materialId) != _spheres.end())
-        for (const auto& sphere : _spheres[materialId])
-        {
-            const float ts =
-                (_models.size() == 1) ? 0.f : sphere->getTimestamp();
-            size += sphere->serializeData(_serializedSpheresData[materialId]);
-            ++_serializedSpheresDataSize[materialId];
-            _timestampSpheresIndices[materialId][ts] = ++count;
-        }
-
-    // Extended spheres
-    for (const auto& timestampSpheresIndex :
-         _timestampSpheresIndices[materialId])
-    {
-        const size_t spheresBufferSize =
-            timestampSpheresIndex.second * Sphere::getSerializationSize();
-
-        for (const auto& model : _models)
-        {
-            if (timestampSpheresIndex.first <= model.first)
-            {
-                if (_ospExtendedSpheres.find(materialId) !=
-                    _ospExtendedSpheres.end())
-                    ospRemoveGeometry(model.second,
-                                      _ospExtendedSpheres[materialId]);
-
-                _ospExtendedSpheres[materialId] =
-                    ospNewGeometry("extendedspheres");
-
-                _ospExtendedSpheresData[materialId] =
-                    ospNewData(spheresBufferSize, OSP_FLOAT,
-                               &_serializedSpheresData[materialId][0],
-                               _getOSPDataFlags());
-
-                ospSetObject(_ospExtendedSpheres[materialId], "extendedspheres",
-                             _ospExtendedSpheresData[materialId]);
-                ospSet1i(_ospExtendedSpheres[materialId],
-                         "bytes_per_extended_sphere",
-                         Sphere::getSerializationSize() * sizeof(float));
-                ospSet1i(_ospExtendedSpheres[materialId], "materialID",
-                         materialId);
-                ospSet1i(_ospExtendedSpheres[materialId], "offset_radius",
-                         3 * sizeof(float));
-                ospSet1i(_ospExtendedSpheres[materialId], "offset_timestamp",
-                         4 * sizeof(float));
-                ospSet1i(_ospExtendedSpheres[materialId], "offset_value_x",
-                         5 * sizeof(float));
-                ospSet1i(_ospExtendedSpheres[materialId], "offset_value_y",
-                         6 * sizeof(float));
-
-                if (_ospMaterials[materialId])
-                    ospSetMaterial(_ospExtendedSpheres[materialId],
-                                   _ospMaterials[materialId]);
-
-                ospCommit(_ospExtendedSpheres[materialId]);
-
-                if (geometryParameters.getCircuitUseSimulationModel())
-                    ospAddGeometry(_simulationModel,
-                                   _ospExtendedSpheres[materialId]);
-                else
-                    ospAddGeometry(model.second,
-                                   _ospExtendedSpheres[materialId]);
-            }
-        }
-    }
-    return size;
+    return bufferSize;
 }
 
 uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
 {
+    if (_cylinders.find(materialId) == _cylinders.end())
+        return 0;
+
+    const auto& cylinders = _cylinders[materialId];
+    const auto bufferSize = cylinders.size() * sizeof(Cylinder);
+    if (_ospExtendedCylinders.find(materialId) != _ospExtendedCylinders.end())
+        ospRemoveGeometry(_model, _ospExtendedCylinders[materialId]);
+
+    _ospExtendedCylinders[materialId] = ospNewGeometry("extendedcylinders");
+    _ospExtendedCylindersData[materialId] =
+        ospNewData(bufferSize / sizeof(float), OSP_FLOAT, cylinders.data(),
+                   _getOSPDataFlags());
+    ospSetObject(_ospExtendedCylinders[materialId], "extendedcylinders",
+                 _ospExtendedCylindersData[materialId]);
+
+    if (_ospMaterials[materialId])
+        ospSetMaterial(_ospExtendedCylinders[materialId],
+                       _ospMaterials[materialId]);
+
+    ospCommit(_ospExtendedCylinders[materialId]);
+
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
-    uint64_t size = 0;
-
-    size_t count = 0;
-    if (_cylinders.find(materialId) != _cylinders.end())
-        for (const auto& cylinder : _cylinders[materialId])
-        {
-            const float ts =
-                (_models.size() == 1) ? 0.f : cylinder->getTimestamp();
-            size +=
-                cylinder->serializeData(_serializedCylindersData[materialId]);
-            ++_serializedCylindersDataSize[materialId];
-            _timestampCylindersIndices[materialId][ts] = ++count;
-        }
-
-    // Extended cylinders
-    for (const auto& timestampCylindersIndex :
-         _timestampCylindersIndices[materialId])
-    {
-        const size_t cylindersBufferSize =
-            timestampCylindersIndex.second * Cylinder::getSerializationSize();
-
-        for (const auto& model : _models)
-        {
-            if (timestampCylindersIndex.first <= model.first)
-            {
-                if (_ospExtendedCylinders.find(materialId) !=
-                    _ospExtendedCylinders.end())
-                    ospRemoveGeometry(model.second,
-                                      _ospExtendedCylinders[materialId]);
-
-                _ospExtendedCylinders[materialId] =
-                    ospNewGeometry("extendedcylinders");
-                assert(_ospExtendedCylinders[materialId]);
-
-                _ospExtendedCylindersData[materialId] =
-                    ospNewData(cylindersBufferSize, OSP_FLOAT,
-                               &_serializedCylindersData[materialId][0],
-                               _getOSPDataFlags());
-
-                ospSet1i(_ospExtendedCylinders[materialId], "materialID",
-                         materialId);
-                ospSetObject(_ospExtendedCylinders[materialId],
-                             "extendedcylinders",
-                             _ospExtendedCylindersData[materialId]);
-                ospSet1i(_ospExtendedCylinders[materialId],
-                         "bytes_per_extended_cylinder",
-                         Cylinder::getSerializationSize() * sizeof(float));
-                ospSet1i(_ospExtendedCylinders[materialId], "offset_timestamp",
-                         7 * sizeof(float));
-                ospSet1i(_ospExtendedCylinders[materialId], "offset_value_x",
-                         8 * sizeof(float));
-                ospSet1i(_ospExtendedCylinders[materialId], "offset_value_y",
-                         9 * sizeof(float));
-
-                if (_ospMaterials[materialId])
-                    ospSetMaterial(_ospExtendedCylinders[materialId],
-                                   _ospMaterials[materialId]);
-
-                ospCommit(_ospExtendedCylinders[materialId]);
-                if (geometryParameters.getCircuitUseSimulationModel())
-                    ospAddGeometry(_simulationModel,
-                                   _ospExtendedCylinders[materialId]);
-                else
-                    ospAddGeometry(model.second,
-                                   _ospExtendedCylinders[materialId]);
-            }
-        }
-    }
-    return size;
+    if (geometryParameters.getCircuitUseSimulationModel())
+        ospAddGeometry(_simulationModel, _ospExtendedCylinders[materialId]);
+    else
+        ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
+    return bufferSize;
 }
 
 uint64_t OSPRayScene::_serializeCones(const size_t materialId)
 {
+    if (_cones.find(materialId) == _cones.end())
+        return 0;
+
+    const auto& cones = _cones[materialId];
+    const auto bufferSize = cones.size() * sizeof(Cone);
+    if (_ospExtendedCones.find(materialId) != _ospExtendedCones.end())
+        ospRemoveGeometry(_model, _ospExtendedCones[materialId]);
+
+    _ospExtendedCones[materialId] = ospNewGeometry("extendedcones");
+    _ospExtendedConesData[materialId] =
+        ospNewData(bufferSize / sizeof(float), OSP_FLOAT, cones.data(),
+                   _getOSPDataFlags());
+    ospSetObject(_ospExtendedCones[materialId], "extendedcones",
+                 _ospExtendedConesData[materialId]);
+
+    if (_ospMaterials[materialId])
+        ospSetMaterial(_ospExtendedCones[materialId],
+                       _ospMaterials[materialId]);
+
+    ospCommit(_ospExtendedCones[materialId]);
+
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
-    uint64_t size = 0;
-
-    size_t count = 0;
-    if (_cones.find(materialId) != _cones.end())
-        for (const auto& cone : _cones[materialId])
-        {
-            const float ts = (_models.size() == 1) ? 0.f : cone->getTimestamp();
-            size += cone->serializeData(_serializedConesData[materialId]);
-            ++_serializedConesDataSize[materialId];
-            _timestampConesIndices[materialId][ts] = ++count;
-        }
-
-    // Extended cones
-    for (const auto& timestampConesIndex : _timestampConesIndices[materialId])
-    {
-        const size_t conesBufferSize =
-            timestampConesIndex.second * Cone::getSerializationSize();
-
-        for (const auto& model : _models)
-        {
-            if (timestampConesIndex.first <= model.first)
-            {
-                if (_ospExtendedCones.find(materialId) !=
-                    _ospExtendedCones.end())
-                    ospRemoveGeometry(model.second,
-                                      _ospExtendedCones[materialId]);
-
-                _ospExtendedCones[materialId] = ospNewGeometry("extendedcones");
-                assert(_ospExtendedCones[materialId]);
-
-                _ospExtendedConesData[materialId] =
-                    ospNewData(conesBufferSize, OSP_FLOAT,
-                               &_serializedConesData[materialId][0],
-                               _getOSPDataFlags());
-
-                ospSet1i(_ospExtendedCones[materialId], "materialID",
-                         materialId);
-                ospSetObject(_ospExtendedCones[materialId], "extendedcones",
-                             _ospExtendedConesData[materialId]);
-                ospSet1i(_ospExtendedCones[materialId],
-                         "bytes_per_extended_cone",
-                         Cone::getSerializationSize() * sizeof(float));
-                ospSet1i(_ospExtendedCones[materialId], "offset_timestamp",
-                         8 * sizeof(float));
-                ospSet1i(_ospExtendedCones[materialId], "offset_value_x",
-                         9 * sizeof(float));
-                ospSet1i(_ospExtendedCones[materialId], "offset_value_y",
-                         10 * sizeof(float));
-
-                if (_ospMaterials[materialId])
-                    ospSetMaterial(_ospExtendedCones[materialId],
-                                   _ospMaterials[materialId]);
-
-                ospCommit(_ospExtendedCones[materialId]);
-                if (geometryParameters.getCircuitUseSimulationModel())
-                    ospAddGeometry(_simulationModel,
-                                   _ospExtendedCones[materialId]);
-                else
-                    ospAddGeometry(model.second, _ospExtendedCones[materialId]);
-            }
-        }
-    }
-    return size;
+    if (geometryParameters.getCircuitUseSimulationModel())
+        ospAddGeometry(_simulationModel, _ospExtendedCones[materialId]);
+    else
+        ospAddGeometry(_model, _ospExtendedCones[materialId]);
+    return bufferSize;
 }
 
 uint64_t OSPRayScene::serializeGeometry()
 {
     uint64_t size = 0;
-
     if (_spheresDirty)
-    {
-        _serializedSpheresDataSize.clear();
-        _timestampSpheresIndices.clear();
-        _serializedSpheresData.clear();
-        for (auto& material : _materials)
-        {
-            const auto materialId = material.first;
-            _serializedSpheresDataSize[materialId] = 0;
-            size += _serializeSpheres(materialId);
-        }
-        _spheresDirty = false;
-    }
+        for (const auto& material : _materials)
+            size += _serializeSpheres(material.first);
 
     if (_cylindersDirty)
-    {
-        _serializedCylindersData.clear();
-        _serializedCylindersDataSize.clear();
-        _timestampCylindersIndices.clear();
-        for (auto& material : _materials)
-        {
-            const auto materialId = material.first;
-            _serializedCylindersDataSize[materialId] = 0;
-            size += _serializeCylinders(materialId);
-        }
-        _cylindersDirty = false;
-    }
+        for (const auto& material : _materials)
+            size += _serializeCylinders(material.first);
 
     if (_conesDirty)
-    {
-        _serializedConesData.clear();
-        _serializedConesDataSize.clear();
-        _timestampConesIndices.clear();
-        for (auto& material : _materials)
-        {
-            const auto materialId = material.first;
-            _serializedConesDataSize[materialId] = 0;
-            size += _serializeCones(materialId);
-        }
-        _conesDirty = false;
-    }
+        for (const auto& material : _materials)
+            size += _serializeCones(material.first);
 
-    // Triangle meshes
     if (_trianglesMeshesDirty)
-    {
-        for (auto& material : _materials)
+        for (const auto& material : _materials)
             size += _buildMeshOSPGeometry(material.first);
-        _trianglesMeshesDirty = false;
-    }
+
+    _spheresDirty = false;
+    _cylindersDirty = false;
+    _conesDirty = false;
+    _trianglesMeshesDirty = false;
     return size;
 }
 
@@ -856,26 +574,10 @@ void OSPRayScene::buildGeometry()
 
     const auto& geomParams = _parametersManager.getGeometryParameters();
 
-    if (geomParams.getGenerateMultipleModels())
-        // Initialize models according to timestamps
-        for (auto& material : _materials)
-        {
-            for (const auto& sphere : _spheres[material.first])
-                _createModel(sphere->getTimestamp());
-            for (const auto& cylinder : _cylinders[material.first])
-                _createModel(cylinder->getTimestamp());
-            for (const auto& cone : _cones[material.first])
-                _createModel(cone->getTimestamp());
-        }
-
-    if (_models.size() == 0)
-        // If no timestamp is available, create a default model at timestamp 0
-        _models[0] = ospNewModel();
+    _model = ospNewModel();
 
     if (geomParams.getCircuitUseSimulationModel() && !_simulationModel)
         _simulationModel = ospNewModel();
-
-    BRAYNS_INFO << "Models to process: " << _models.size() << std::endl;
 
     const size_t size = serializeGeometry();
 
@@ -887,27 +589,27 @@ void OSPRayScene::buildGeometry()
     for (auto& material : _materials)
     {
         const auto materialId = material.first;
-        totalNbSpheres += _serializedSpheresDataSize[materialId];
-        totalNbCylinders += _serializedCylindersDataSize[materialId];
-        totalNbCones += _serializedConesDataSize[materialId];
+        totalNbSpheres += _spheres[materialId].size();
+        totalNbCylinders += _cylinders[materialId].size();
+        totalNbCones += _cones[materialId].size();
         if (_trianglesMeshes.find(materialId) != _trianglesMeshes.end())
         {
-            totalNbVertices +=
-                _trianglesMeshes[materialId].getVertices().size();
-            totalNbIndices += _trianglesMeshes[materialId].getIndices().size();
+            totalNbVertices += _trianglesMeshes[materialId].vertices.size();
+            totalNbIndices += _trianglesMeshes[materialId].indices.size();
         }
     }
 
     BRAYNS_INFO << "---------------------------------------------------"
                 << std::endl;
-    BRAYNS_INFO << "Geometry information" << std::endl;
+    BRAYNS_INFO << "Geometry inforesizermation" << std::endl;
     BRAYNS_INFO << "Spheres  : " << totalNbSpheres << std::endl;
     BRAYNS_INFO << "Cylinders: " << totalNbCylinders << std::endl;
     BRAYNS_INFO << "Cones    : " << totalNbCones << std::endl;
     BRAYNS_INFO << "Vertices : " << totalNbVertices << std::endl;
     BRAYNS_INFO << "Indices  : " << totalNbIndices << std::endl;
     BRAYNS_INFO << "Materials: " << _materials.size() << std::endl;
-    BRAYNS_INFO << "Total    : " << size << " bytes" << std::endl;
+    BRAYNS_INFO << "Total    : " << size << " bytes (" << size / 1048576
+                << " MB)" << std::endl;
     BRAYNS_INFO << "---------------------------------------------------"
                 << std::endl;
 }
@@ -921,55 +623,49 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
         _ospMeshes[materialId] = ospNewGeometry("trianglemesh");
         assert(_ospMeshes[materialId]);
 
-        size += _trianglesMeshes[materialId].getVertices().size() * 3 *
-                sizeof(float);
+        size +=
+            _trianglesMeshes[materialId].vertices.size() * 3 * sizeof(float);
         OSPData vertices =
-            ospNewData(_trianglesMeshes[materialId].getVertices().size(),
-                       OSP_FLOAT3,
-                       &_trianglesMeshes[materialId].getVertices()[0],
+            ospNewData(_trianglesMeshes[materialId].vertices.size(), OSP_FLOAT3,
+                       &_trianglesMeshes[materialId].vertices[0],
                        _getOSPDataFlags());
 
-        if (!_trianglesMeshes[materialId].getNormals().empty())
+        if (!_trianglesMeshes[materialId].normals.empty())
         {
-            size += _trianglesMeshes[materialId].getNormals().size() * 3 *
-                    sizeof(float);
+            size +=
+                _trianglesMeshes[materialId].normals.size() * 3 * sizeof(float);
             OSPData normals =
-                ospNewData(_trianglesMeshes[materialId].getNormals().size(),
-                           OSP_FLOAT3,
-                           &_trianglesMeshes[materialId].getNormals()[0],
+                ospNewData(_trianglesMeshes[materialId].normals.size(),
+                           OSP_FLOAT3, &_trianglesMeshes[materialId].normals[0],
                            _getOSPDataFlags());
             ospSetObject(_ospMeshes[materialId], "vertex.normal", normals);
         }
 
-        size +=
-            _trianglesMeshes[materialId].getIndices().size() * 3 * sizeof(int);
+        size += _trianglesMeshes[materialId].indices.size() * 3 * sizeof(int);
         OSPData indices =
-            ospNewData(_trianglesMeshes[materialId].getIndices().size(),
-                       OSP_INT3, &_trianglesMeshes[materialId].getIndices()[0],
+            ospNewData(_trianglesMeshes[materialId].indices.size(), OSP_INT3,
+                       &_trianglesMeshes[materialId].indices[0],
                        _getOSPDataFlags());
 
-        if (!_trianglesMeshes[materialId].getColors().empty())
+        if (!_trianglesMeshes[materialId].colors.empty())
         {
-            size += _trianglesMeshes[materialId].getColors().size() * 4 *
-                    sizeof(float);
+            size +=
+                _trianglesMeshes[materialId].colors.size() * 4 * sizeof(float);
             OSPData colors =
-                ospNewData(_trianglesMeshes[materialId].getColors().size(),
-                           OSP_FLOAT3A,
-                           &_trianglesMeshes[materialId].getColors()[0],
+                ospNewData(_trianglesMeshes[materialId].colors.size(),
+                           OSP_FLOAT3A, &_trianglesMeshes[materialId].colors[0],
                            _getOSPDataFlags());
             ospSetObject(_ospMeshes[materialId], "vertex.color", colors);
             ospRelease(colors);
         }
 
-        if (!_trianglesMeshes[materialId].getTextureCoordinates().empty())
+        if (!_trianglesMeshes[materialId].textureCoordinates.empty())
         {
-            size +=
-                _trianglesMeshes[materialId].getTextureCoordinates().size() *
-                2 * sizeof(float);
+            size += _trianglesMeshes[materialId].textureCoordinates.size() * 2 *
+                    sizeof(float);
             OSPData texCoords = ospNewData(
-                _trianglesMeshes[materialId].getTextureCoordinates().size(),
-                OSP_FLOAT2,
-                &_trianglesMeshes[materialId].getTextureCoordinates()[0],
+                _trianglesMeshes[materialId].textureCoordinates.size(),
+                OSP_FLOAT2, &_trianglesMeshes[materialId].textureCoordinates[0],
                 _getOSPDataFlags());
             ospSetObject(_ospMeshes[materialId], "vertex.texcoord", texCoords);
             ospRelease(texCoords);
@@ -988,8 +684,7 @@ uint64_t OSPRayScene::_buildMeshOSPGeometry(const size_t materialId)
         ospCommit(_ospMeshes[materialId]);
 
         // Meshes are by default added to all timestamps
-        for (const auto& model : _models)
-            ospAddGeometry(model.second, _ospMeshes[materialId]);
+        ospAddGeometry(_model, _ospMeshes[materialId]);
     }
     return size;
 }

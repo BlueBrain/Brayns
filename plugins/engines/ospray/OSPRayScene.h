@@ -82,19 +82,17 @@ public:
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
-    OSPModel modelImpl(const uint32_t index);
+    OSPModel modelImpl() { return _model; };
     OSPModel simulationModelImpl() { return _simulationModel; };
 private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
-    void _createModel(const uint32_t index);
     uint32_t _getOSPDataFlags();
-
     uint64_t _serializeSpheres(const size_t materialId);
     uint64_t _serializeCylinders(const size_t materialId);
     uint64_t _serializeCones(const size_t materialId);
     uint64_t _buildMeshOSPGeometry(const size_t materialId);
 
-    std::map<uint32_t, OSPModel> _models;
+    OSPModel _model;
     OSPModel _simulationModel;
     std::vector<OSPMaterial> _ospMaterials;
     std::map<std::string, OSPTexture2D> _ospTextures;
@@ -114,17 +112,6 @@ private:
     std::map<size_t, OSPGeometry> _ospExtendedCones;
     std::map<size_t, OSPData> _ospExtendedConesData;
     std::map<size_t, OSPGeometry> _ospMeshes;
-
-    std::map<size_t, floats> _serializedSpheresData;
-    std::map<size_t, floats> _serializedCylindersData;
-    std::map<size_t, floats> _serializedConesData;
-    std::map<size_t, size_t> _serializedSpheresDataSize;
-    std::map<size_t, size_t> _serializedCylindersDataSize;
-    std::map<size_t, size_t> _serializedConesDataSize;
-
-    std::map<size_t, std::map<size_t, size_t>> _timestampSpheresIndices;
-    std::map<size_t, std::map<size_t, size_t>> _timestampCylindersIndices;
-    std::map<size_t, std::map<size_t, size_t>> _timestampConesIndices;
 };
 }
 #endif // OSPRAYSCENE_H
