@@ -48,7 +48,7 @@ public:
      */
     CircuitSimulationHandler(const ApplicationParameters& applicationParameters,
                              const GeometryParameters& geometryParameters,
-                             const std::string& reportSource,
+                             const brion::URI& reportSource,
                              const brion::GIDSet& gids);
     ~CircuitSimulationHandler();
 
