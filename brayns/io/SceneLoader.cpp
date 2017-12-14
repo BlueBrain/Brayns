@@ -129,8 +129,8 @@ bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
         {
         case FileType::point:
             scene.addSphere(node.materialId,
-                            Sphere(node.position,
-                                   _geometryParameters.getRadiusMultiplier()));
+                            {node.position,
+                             _geometryParameters.getRadiusMultiplier()});
             break;
         case FileType::morphology:
 #ifdef BRAYNS_USE_BRION

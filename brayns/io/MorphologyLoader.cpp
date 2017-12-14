@@ -65,20 +65,20 @@ public:
     {
     }
 
-    void add(const size_t materialId, const Sphere& sphere)
+    void addSphere(const size_t materialId, const Sphere& sphere)
     {
         spheres[materialId].push_back(sphere);
         worldBounds.merge(sphere.center);
     }
 
-    void add(const size_t materialId, const Cylinder& cylinder)
+    void addCylinder(const size_t materialId, const Cylinder& cylinder)
     {
         cylinders[materialId].push_back(cylinder);
         worldBounds.merge(cylinder.center);
         worldBounds.merge(cylinder.up);
     }
 
-    void add(const size_t materialId, const Cone& cone)
+    void addCone(const size_t materialId, const Cone& cone)
     {
         cones[materialId].push_back(cone);
         worldBounds.merge(cone.center);
@@ -211,6 +211,9 @@ public:
                             bc.getReportSource(report).getPath(), allGids));
                     compartmentReport =
                         simulationHandler->getCompartmentReport();
+                    // Only keep simulated GIDs
+                    if (compartmentReport)
+                        allGids = compartmentReport->getGIDs();
                     // Attach simulation handler
                     scene.setSimulationHandler(simulationHandler);
                 }
@@ -453,8 +456,8 @@ private:
             _getMaterialFromGeometryParameters(index, material,
                                                brain::neuron::SectionType::soma,
                                                targetGIDOffsets);
-        scene.add(materialId,
-                  Sphere(somaPosition, radius, 0.f, textureCoordinates));
+        scene.addSphere(materialId,
+                        {somaPosition, radius, 0.f, textureCoordinates});
         return true;
     }
 
@@ -616,8 +619,8 @@ private:
                 const auto radius = _getCorrectedRadius(soma.getMeanRadius());
                 const auto textureCoordinates =
                     _getIndexAsTextureCoordinates(offset);
-                scene.add(materialId, Sphere(somaPosition, radius, 0.f,
-                                             textureCoordinates));
+                scene.addSphere(materialId, {somaPosition, radius, 0.f,
+                                             textureCoordinates});
 
                 if (_geometryParameters.getCircuitUseSimulationModel())
                 {
@@ -629,12 +632,12 @@ private:
                     for (const auto& child : children)
                     {
                         const auto& samples = child.getSamples();
-                        const Vector3f sample = {samples[0].x(), samples[0].y(),
-                                                 samples[0].z()};
-                        scene.add(materialId, Cone(somaPosition, sample, radius,
+                        const Vector3f sample{samples[0].x(), samples[0].y(),
+                                              samples[0].z()};
+                        scene.addCone(materialId, {somaPosition, sample, radius,
                                                    _getCorrectedRadius(
                                                        samples[0].w() * 0.5f),
-                                                   0.f, textureCoordinates));
+                                                   0.f, textureCoordinates});
                     }
                 }
             }
@@ -766,21 +769,21 @@ private:
 
                     if (radius > 0.f)
                     {
-                        scene.add(materialId, Sphere(position, radius, distance,
-                                                     textureCoordinates));
+                        scene.addSphere(materialId, {position, radius, distance,
+                                                     textureCoordinates});
 
                         if (position != target && previousRadius > 0.f)
                         {
                             if (radius == previousRadius)
-                                scene.add(materialId,
-                                          Cylinder(position, target, radius,
+                                scene.addCylinder(materialId,
+                                                  {position, target, radius,
                                                    distance,
-                                                   textureCoordinates));
+                                                   textureCoordinates});
                             else
-                                scene.add(materialId,
-                                          Cone(position, target, radius,
+                                scene.addCone(materialId,
+                                              {position, target, radius,
                                                previousRadius, distance,
-                                               textureCoordinates));
+                                               textureCoordinates});
                         }
                     }
                     previousSample = sample;

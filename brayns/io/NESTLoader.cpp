@@ -130,8 +130,8 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
             xColor[gid] * 65536 + yColor[gid] * 256 + zColor[gid];
         const Vector3f center(xPos[gid], yPos[gid], zPos[gid]);
         _positions.push_back(center);
-        scene.addSphere(0, Sphere(center, radius, 0.f,
-                            Vector2f(materialMapping[index], 0.f)));
+        scene.addSphere(0,
+                        {center, radius, 0.f, {materialMapping[index], 0.f}});
         updateProgress("Loading neurons...", spheres[0].size(), _frameSize);
     }
 

@@ -29,13 +29,13 @@ struct Cone
 {
     Cone(const Vector3f c, const Vector3f u, const float cr, const float ur,
          const float ts = 0.f, const Vector2f v = Vector2f(0.f, 0.f))
+        : center{c}
+        , up{u}
+        , centerRadius{cr}
+        , upRadius{ur}
+        , timestamp{ts}
+        , values{v}
     {
-        center = c;
-        up = u;
-        centerRadius = cr;
-        upRadius = ur;
-        timestamp = ts;
-        values = v;
     }
 
     Vector3f center;

@@ -443,7 +443,7 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                 // Convert radius from angstrom
                 const auto radius = 0.0001f * atom.radius *
                                     _geometryParameters.getRadiusMultiplier();
-                scene.addSphere(materialId, Sphere(center, radius));
+                scene.addSphere(materialId, {center, radius});
             }
         }
         file.close();

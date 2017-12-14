@@ -102,8 +102,7 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
         BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
                     << std::endl;
         for (const auto position : _calciumPositions)
-            scene.addSphere(MATERIAL_CA_SIMULATION,
-                            Sphere(position, CALCIUM_RADIUS));
+            scene.addSphere(MATERIAL_CA_SIMULATION, {position, CALCIUM_RADIUS});
         _spheresCreated = true;
     }
     else

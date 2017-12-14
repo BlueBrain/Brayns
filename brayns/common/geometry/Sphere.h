@@ -29,11 +29,11 @@ struct Sphere
 {
     Sphere(const Vector3f c, float r, float ts = 0.f,
            const Vector2f v = Vector2f(0.f, 0.f))
+        : center{c}
+        , radius{r}
+        , timestamp{ts}
+        , values{v}
     {
-        center = c;
-        radius = r;
-        timestamp = ts;
-        values = v;
     }
 
     Vector3f center;

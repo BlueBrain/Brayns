@@ -173,7 +173,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                 const auto radiusSource =
                     _geometryParameters.getRadiusMultiplier();
                 scene.addSphere(NB_SYSTEM_MATERIALS,
-                                Sphere(centerSource, radiusSource));
+                                {centerSource, radiusSource});
             }
 
         // Place active cells and connections
@@ -212,7 +212,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                                             scene, meshLoader);
             }
             if (createSphere)
-                scene.addSphere(materialId, Sphere(centerSource, radiusSource));
+                scene.addSphere(materialId, {centerSource, radiusSource});
 
             // Connections
             if (emitor.second.size() < dimensionRange.x() ||
@@ -236,12 +236,10 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     // remaining 90%
                     const auto arrowTarget =
                         centerSource + 0.1f * (centerDest - centerSource);
-                    const Cone cone(centerSource, arrowTarget, radiusSource,
-                                    radiusDest);
-                    scene.addCone(materialId, cone);
-                    const Cylinder cylinder(arrowTarget, centerDest,
-                                            radiusDest);
-                    scene.addCylinder(materialId, cylinder);
+                    scene.addCone(materialId, {centerSource, arrowTarget,
+                                               radiusSource, radiusDest});
+                    scene.addCylinder(materialId,
+                                      {arrowTarget, centerDest, radiusDest});
                 }
             ++progress;
         }

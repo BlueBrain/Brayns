@@ -265,7 +265,7 @@ void Scene::buildDefault()
 
     // Sphere
     {
-        addSphere(material, Sphere(Vector3f(0.25f, 0.26f, 0.30f), 0.25f));
+        addSphere(material, {{0.25f, 0.26f, 0.30f}, 0.25f});
         auto& m = _materials[material];
         m.setOpacity(0.3f);
         m.setRefractionIndex(1.1f);
@@ -277,10 +277,10 @@ void Scene::buildDefault()
     // Cylinder
     {
         ++material;
-        addCylinder(material, Cylinder(Vector3f(0.25f, 0.126f, 0.75f),
-                                       Vector3f(0.75f, 0.126f, 0.75f), 0.125f));
+        addCylinder(material,
+                    {{0.25f, 0.126f, 0.75f}, {0.75f, 0.126f, 0.75f}, 0.125f});
         auto& m = _materials[material];
-        m.setColor(Vector3f(0.1f, 0.1f, 0.8f));
+        m.setColor({0.1f, 0.1f, 0.8f});
         m.setSpecularColor(WHITE);
         m.setSpecularExponent(10.f);
     }
@@ -288,8 +288,8 @@ void Scene::buildDefault()
     // Cone
     {
         ++material;
-        addCone(material, Cone(Vector3f(0.75f, 0.01f, 0.25f),
-                               Vector3f(0.75f, 0.5f, 0.25f), 0.15f, 0.f));
+        addCone(material,
+                {{0.75f, 0.01f, 0.25f}, {0.75f, 0.5f, 0.25f}, 0.15f, 0.f});
         auto& m = _materials[material];
         m.setReflectionIndex(0.8f);
         m.setSpecularColor(WHITE);
@@ -466,20 +466,20 @@ void Scene::buildEnvironment()
         for (size_t i = 0; i < 8; ++i)
             addSphere(material, Sphere(positions[i], radius));
 
-        addCylinder(material, Cylinder(positions[0], positions[1], radius));
-        addCylinder(material, Cylinder(positions[2], positions[3], radius));
-        addCylinder(material, Cylinder(positions[4], positions[5], radius));
-        addCylinder(material, Cylinder(positions[6], positions[7], radius));
+        addCylinder(material, {positions[0], positions[1], radius});
+        addCylinder(material, {positions[2], positions[3], radius});
+        addCylinder(material, {positions[4], positions[5], radius});
+        addCylinder(material, {positions[6], positions[7], radius});
 
-        addCylinder(material, Cylinder(positions[0], positions[2], radius));
-        addCylinder(material, Cylinder(positions[1], positions[3], radius));
-        addCylinder(material, Cylinder(positions[4], positions[6], radius));
-        addCylinder(material, Cylinder(positions[5], positions[7], radius));
+        addCylinder(material, {positions[0], positions[2], radius});
+        addCylinder(material, {positions[1], positions[3], radius});
+        addCylinder(material, {positions[4], positions[6], radius});
+        addCylinder(material, {positions[5], positions[7], radius});
 
-        addCylinder(material, Cylinder(positions[0], positions[4], radius));
-        addCylinder(material, Cylinder(positions[1], positions[5], radius));
-        addCylinder(material, Cylinder(positions[2], positions[6], radius));
-        addCylinder(material, Cylinder(positions[3], positions[7], radius));
+        addCylinder(material, {positions[0], positions[4], radius});
+        addCylinder(material, {positions[1], positions[5], radius});
+        addCylinder(material, {positions[2], positions[6], radius});
+        addCylinder(material, {positions[3], positions[7], radius});
 
         break;
     }

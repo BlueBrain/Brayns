@@ -109,7 +109,7 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
 
         const Vector3f position(x, y, z);
         const auto radius = _geometryParameters.getRadiusMultiplier();
-        scene.addSphere(0, Sphere(position, radius));
+        scene.addSphere(0, {position, radius});
 
         updateProgress("Loading spheres...", spheres[0].size(), nbPoints);
     }
