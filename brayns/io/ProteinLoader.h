@@ -21,7 +21,6 @@
 #ifndef PROTEINLOADER_H
 #define PROTEINLOADER_H
 
-#include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>

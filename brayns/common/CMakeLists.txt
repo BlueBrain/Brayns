@@ -14,12 +14,6 @@ set(BRAYNSCOMMON_SOURCES
   camera/FlyingModeManipulator.cpp
   camera/InspectCenterManipulator.cpp
   scene/Scene.cpp
-  geometry/Primitive.cpp
-  geometry/Geometry.cpp
-  geometry/Sphere.cpp
-  geometry/Cylinder.cpp
-  geometry/Cone.cpp
-  geometry/TrianglesMesh.cpp
   material/Material.cpp
   material/Texture2D.cpp
   Progress.cpp
@@ -41,8 +35,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   exceptions.h
   geometry/Cone.h
   geometry/Cylinder.h
-  geometry/Geometry.h
-  geometry/Primitive.h
   geometry/Sphere.h
   geometry/TrianglesMesh.h
   input/KeyboardHandler.h

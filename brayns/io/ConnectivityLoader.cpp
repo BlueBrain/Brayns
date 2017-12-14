@@ -172,8 +172,8 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     transforms[i].getTranslation() * scale;
                 const auto radiusSource =
                     _geometryParameters.getRadiusMultiplier();
-                scene.getSpheres()[NB_SYSTEM_MATERIALS].push_back(
-                    SpherePtr(new Sphere(centerSource, radiusSource)));
+                scene.addSphere(NB_SYSTEM_MATERIALS,
+                                {centerSource, radiusSource});
             }
 
         // Place active cells and connections
@@ -189,10 +189,6 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
             // connections
             const size_t materialId =
                 NB_SYSTEM_MATERIALS + emitor.second.size();
-            auto& spheres = scene.getSpheres()[materialId];
-            auto& cylinders = scene.getCylinders()[materialId];
-            auto& cones = scene.getCones()[materialId];
-            auto& bounds = scene.getWorldBounds();
 
             // The size of the cell depends on the number of incoming
             // connections
@@ -216,11 +212,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                                             scene, meshLoader);
             }
             if (createSphere)
-            {
-                spheres.push_back(
-                    SpherePtr(new Sphere(centerSource, radiusSource)));
-                bounds.merge(centerSource);
-            }
+                scene.addSphere(materialId, {centerSource, radiusSource});
 
             // Connections
             if (emitor.second.size() < dimensionRange.x() ||
@@ -244,14 +236,10 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     // remaining 90%
                     const auto arrowTarget =
                         centerSource + 0.1f * (centerDest - centerSource);
-                    cones.push_back(
-                        ConePtr(new Cone(centerSource, arrowTarget,
-                                         radiusSource, radiusDest)));
-                    bounds.merge(arrowTarget);
-
-                    cylinders.push_back(CylinderPtr(
-                        new Cylinder(arrowTarget, centerDest, radiusDest)));
-                    bounds.merge(centerDest);
+                    scene.addCone(materialId, {centerSource, arrowTarget,
+                                               radiusSource, radiusDest});
+                    scene.addCylinder(materialId,
+                                      {arrowTarget, centerDest, radiusDest});
                 }
             ++progress;
         }

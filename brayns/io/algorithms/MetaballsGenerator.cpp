@@ -323,7 +323,7 @@ MetaballsGenerator::~MetaballsGenerator()
     _clear();
 }
 
-void MetaballsGenerator::_buildVerticesAndCubes(const Spheres& metaballs,
+void MetaballsGenerator::_buildVerticesAndCubes(const Vector4fs& metaballs,
                                                 const size_t gridSize,
                                                 const size_t defaultMaterialId,
                                                 const float scale)
@@ -331,7 +331,7 @@ void MetaballsGenerator::_buildVerticesAndCubes(const Spheres& metaballs,
     // Determine bounding box
     Boxf bounds;
     for (const auto& ball : metaballs)
-        bounds.merge(ball->getCenter());
+        bounds.merge(Vector3f(ball.x(), ball.y(), ball.z()));
     const Vector3f center = bounds.getCenter();
 
     // Upscale the bounding box to make sure there is no whole in the isosurface
@@ -346,76 +346,82 @@ void MetaballsGenerator::_buildVerticesAndCubes(const Spheres& metaballs,
 #pragma omp parallel for
     for (x = 0; x < incrementedSize; ++x)
     {
-        for (size_t y = 0; y < incrementedSize; ++y)
-        {
-            for (size_t z = 0; z < incrementedSize; ++z)
+            for (size_t y = 0; y < incrementedSize; ++y)
             {
-                CubeGridVertex cgv;
-                cgv.position.x() = rescaledBounds.getMin().x() +
-                                   x * rescaledSize.x() / gridSize;
-                cgv.position.y() = rescaledBounds.getMin().y() +
-                                   y * rescaledSize.y() / gridSize;
-                cgv.position.z() = rescaledBounds.getMin().z() +
-                                   z * rescaledSize.z() / gridSize;
+                for (size_t z = 0; z < incrementedSize; ++z)
+                {
+                    CubeGridVertex cgv;
+                    cgv.position.x() = rescaledBounds.getMin().x() +
+                                       x * rescaledSize.x() / gridSize;
+                    cgv.position.y() = rescaledBounds.getMin().y() +
+                                       y * rescaledSize.y() / gridSize;
+                    cgv.position.z() = rescaledBounds.getMin().z() +
+                                       z * rescaledSize.z() / gridSize;
 
-                cgv.texCoords.x() =
-                    static_cast<float>(x) / static_cast<float>(gridSize);
-                cgv.texCoords.y() =
-                    static_cast<float>(y) / static_cast<float>(gridSize);
-                cgv.texCoords.z() = 0.f;
+                    cgv.texCoords.x() =
+                        static_cast<float>(x) / static_cast<float>(gridSize);
+                    cgv.texCoords.y() =
+                        static_cast<float>(y) / static_cast<float>(gridSize);
+                    cgv.texCoords.z() = 0.f;
 
-                cgv.value = 0.f;
-                cgv.normal = {0.f, 0.f, 0.f};
+                    cgv.value = 0.f;
+                    cgv.normal = {0.f, 0.f, 0.f};
 
-                cgv.materialId = defaultMaterialId;
+                    cgv.materialId = defaultMaterialId;
 
-                const size_t index = x * incrementedSize * incrementedSize +
-                                     y * incrementedSize + z;
+                    const size_t index = x * incrementedSize * incrementedSize +
+                                         y * incrementedSize + z;
 
-                _vertices[index] = cgv;
+                    _vertices[index] = cgv;
+                }
             }
-        }
     }
 
     _cubes.resize(gridSize * gridSize * gridSize);
 #pragma omp parallel for
     for (x = 0; x < gridSize; ++x)
     {
-        for (size_t y = 0; y < gridSize; ++y)
-        {
-            for (size_t z = 0; z < gridSize; ++z)
+            for (size_t y = 0; y < gridSize; ++y)
             {
-                CubeGridCube cgc;
-                cgc.vertices[0] =
-                    &_vertices[(x * incrementedSize + y) * incrementedSize + z];
-                cgc.vertices[1] =
-                    &_vertices[(x * incrementedSize + y) * incrementedSize + z +
-                               1];
-                cgc.vertices[2] = &_vertices[(x * incrementedSize + (y + 1)) *
-                                                 incrementedSize +
-                                             z + 1];
-                cgc.vertices[3] = &_vertices[(x * incrementedSize + (y + 1)) *
-                                                 incrementedSize +
-                                             z];
-                cgc.vertices[4] = &_vertices[((x + 1) * incrementedSize + y) *
-                                                 incrementedSize +
-                                             z];
-                cgc.vertices[5] = &_vertices[((x + 1) * incrementedSize + y) *
-                                                 incrementedSize +
-                                             z + 1];
-                cgc.vertices[6] =
-                    &_vertices[((x + 1) * incrementedSize + (y + 1)) *
-                                   incrementedSize +
-                               z + 1];
-                cgc.vertices[7] =
-                    &_vertices[((x + 1) * incrementedSize + (y + 1)) *
-                                   incrementedSize +
-                               z];
+                for (size_t z = 0; z < gridSize; ++z)
+                {
+                    CubeGridCube cgc;
+                    cgc.vertices[0] =
+                        &_vertices[(x * incrementedSize + y) * incrementedSize +
+                                   z];
+                    cgc.vertices[1] =
+                        &_vertices[(x * incrementedSize + y) * incrementedSize +
+                                   z + 1];
+                    cgc.vertices[2] =
+                        &_vertices[(x * incrementedSize + (y + 1)) *
+                                       incrementedSize +
+                                   z + 1];
+                    cgc.vertices[3] =
+                        &_vertices[(x * incrementedSize + (y + 1)) *
+                                       incrementedSize +
+                                   z];
+                    cgc.vertices[4] =
+                        &_vertices[((x + 1) * incrementedSize + y) *
+                                       incrementedSize +
+                                   z];
+                    cgc.vertices[5] =
+                        &_vertices[((x + 1) * incrementedSize + y) *
+                                       incrementedSize +
+                                   z + 1];
+                    cgc.vertices[6] =
+                        &_vertices[((x + 1) * incrementedSize + (y + 1)) *
+                                       incrementedSize +
+                                   z + 1];
+                    cgc.vertices[7] =
+                        &_vertices[((x + 1) * incrementedSize + (y + 1)) *
+                                       incrementedSize +
+                                   z];
 
-                const size_t index = x * gridSize * gridSize + y * gridSize + z;
-                _cubes[index] = cgc;
+                    const size_t index =
+                        x * gridSize * gridSize + y * gridSize + z;
+                    _cubes[index] = cgc;
+                }
             }
-        }
     }
 
     BRAYNS_DEBUG << "Nb metaballs   : " << metaballs.size() << std::endl;
@@ -426,7 +432,7 @@ void MetaballsGenerator::_buildVerticesAndCubes(const Spheres& metaballs,
                  << std::endl;
 }
 
-void MetaballsGenerator::_buildTriangles(const Spheres& metaballs,
+void MetaballsGenerator::_buildTriangles(const Vector4fs& metaballs,
                                          const float threshold,
                                          MaterialsMap& materials,
                                          const size_t defaultMaterialId,
@@ -435,9 +441,10 @@ void MetaballsGenerator::_buildTriangles(const Spheres& metaballs,
 #pragma omp parallel
     for (const auto metaball : metaballs)
     {
-        const auto radius = metaball->getRadius();
+        const auto radius = metaball.w();
         const auto squaredRadius = radius * radius;
-        const auto& ballPosition = metaball->getCenter();
+        const auto& ballPosition =
+            Vector3f(metaball.x(), metaball.y(), metaball.z());
 
 #pragma omp parallel
         for (auto& vertex : _vertices)
@@ -533,10 +540,10 @@ void MetaballsGenerator::_buildTriangles(const Spheres& metaballs,
             }
         }
 
-        auto& vertices = triangles[defaultMaterialId].getVertices();
-        auto& normals = triangles[defaultMaterialId].getNormals();
-        auto& colors = triangles[defaultMaterialId].getColors();
-        auto& indices = triangles[defaultMaterialId].getIndices();
+        auto& vertices = triangles[defaultMaterialId].vertices;
+        auto& normals = triangles[defaultMaterialId].normals;
+        auto& colors = triangles[defaultMaterialId].colors;
+        auto& indices = triangles[defaultMaterialId].indices;
 
         for (auto k = 0; METABALLS_TRIANGLES[cubeIndex][k] != -1; k += 3)
         {
@@ -583,7 +590,7 @@ void MetaballsGenerator::_clear()
     _cubes.clear();
 }
 
-void MetaballsGenerator::generateMesh(const Spheres& metaballs,
+void MetaballsGenerator::generateMesh(const Vector4fs& metaballs,
                                       const size_t gridSize,
                                       const float threshold,
                                       MaterialsMap& materials,

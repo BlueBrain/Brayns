@@ -434,26 +434,16 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                     ++i;
                 }
 
-                SpherePtr sphere(new Sphere(
-                    Vector3f(position +
-                             0.01f * atom.position), // convert from nanometers
-                    0.0001f * atom.radius *          // convert from angstrom
-                        _geometryParameters.getRadiusMultiplier()));
-
-                switch (colorScheme)
-                {
-                case ColorScheme::protein_by_id:
-                {
-                    const auto material =
-                        proteinIndex % scene.getMaterials().size();
-                    scene.getSpheres()[material].push_back(sphere);
-                }
-                break;
-                default:
-                    scene.getSpheres()[atom.materialId].push_back(sphere);
-                }
-
-                scene.getWorldBounds().merge(sphere->getCenter());
+                const auto materialId =
+                    colorScheme == ColorScheme::protein_by_id
+                        ? proteinIndex % scene.getMaterials().size()
+                        : atom.materialId;
+                // Convert position from nanometers
+                const auto center = position + 0.01f * atom.position;
+                // Convert radius from angstrom
+                const auto radius = 0.0001f * atom.radius *
+                                    _geometryParameters.getRadiusMultiplier();
+                scene.addSphere(materialId, {center, radius});
             }
         }
         file.close();

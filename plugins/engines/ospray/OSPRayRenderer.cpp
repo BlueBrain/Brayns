@@ -100,10 +100,7 @@ void OSPRayRenderer::commit()
     OSPRayScene* osprayScene = static_cast<OSPRayScene*>(_scene.get());
     assert(osprayScene);
 
-    const auto animationFrame =
-        _scene->getParametersManager().getSceneParameters().getAnimationFrame();
-
-    ospSetObject(_renderer, "world", osprayScene->modelImpl(animationFrame));
+    ospSetObject(_renderer, "world", osprayScene->modelImpl());
     ospSetObject(_renderer, "simulationModel",
                  osprayScene->simulationModelImpl());
     ospCommit(_renderer);

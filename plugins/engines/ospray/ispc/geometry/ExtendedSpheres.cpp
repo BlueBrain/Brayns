@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -17,7 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <vector>
+// Brayns
+#include <brayns/common/geometry/Sphere.h>
 
 // ospray
 #include "ExtendedSpheres.h"
@@ -38,12 +39,12 @@ void ExtendedSpheres::finalize(ospray::Model *model)
     radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);
     bytesPerExtendedSphere =
-        getParam1i("bytes_per_extended_sphere", 6 * sizeof(float));
+        getParam1i("bytes_per_extended_sphere", sizeof(brayns::Sphere));
     offset_center = getParam1i("offset_center", 0);
-    offset_radius = getParam1i("offset_radius", -1);
-    offset_timestamp = getParam1i("offset_timestamp", -1);
-    offset_value_x = getParam1i("offset_value_x", -1);
-    offset_value_y = getParam1i("offset_value_y", -1);
+    offset_radius = getParam1i("offset_radius", 3 * sizeof(float));
+    offset_timestamp = getParam1i("offset_timestamp", 4 * sizeof(float));
+    offset_value_x = getParam1i("offset_value_x", 5 * sizeof(float));
+    offset_value_y = getParam1i("offset_value_y", 6 * sizeof(float));
     offset_materialID = getParam1i("offset_materialID", -1);
     data = getParamData("extendedspheres", nullptr);
     materialList = getParamData("materialList", nullptr);

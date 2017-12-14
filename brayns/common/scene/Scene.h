@@ -285,6 +285,61 @@ public:
     /** Reset the modified flag */
     BRAYNS_API void resetModified();
 
+    /**
+      Adds a sphere to the scene
+      @param materialId Material of the sphere
+      @param sphere Sphere to add
+      @return Index of the sphere for the specified material
+      */
+    BRAYNS_API uint64_t addSphere(const size_t materialId, const Sphere& sphere);
+
+    /**
+      Adds a cone to the scene
+      @param materialId Material of the cone
+      @param cone Cone to add
+      @return Index of the sphere for the specified material
+      */
+    BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
+
+    /**
+      Adds a cylinder to the scene
+      @param materialId Material of the cylinder
+      @param cylinder Cylinder to add
+      @return Index of the sphere for the specified material
+      */
+    BRAYNS_API uint64_t addCylinder(const size_t materialId,
+                                const Cylinder& cylinder);
+
+    /**
+      Replaces a sphere in the scene
+      @param materialId Material of the sphere
+      @param index Index of the sphere in the scene, for the given material
+      @param sphere New sphere
+
+      */
+    BRAYNS_API void setSphere(const size_t materialId, const uint64_t index,
+                              const Sphere& sphere);
+
+    /**
+      Replaces a cone in the scene
+      @param materialId Material of the cone
+      @param index Index of the cone in the scene, for the given material
+      @param cone New sphere
+
+      */
+    BRAYNS_API void setCone(const size_t materialId, const uint64_t index,
+                            const Cone& cone);
+
+    /**
+      Replaces a cylinder in the scene
+      @param materialId Material of the cylinder
+      @param index Index of the cylinder in the scene, for the given material
+      @param cylinder New cylinder
+
+      */
+    BRAYNS_API void setCylinder(const size_t materialId, const uint64_t index,
+                                const Cylinder& cylinder);
+
 protected:
     // Parameters
     ParametersManager& _parametersManager;

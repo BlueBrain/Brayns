@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -17,6 +17,9 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+// Brayns
+#include <brayns/common/geometry/Cone.h>
 
 // ospray
 #include "ExtendedCones.h"
@@ -37,7 +40,7 @@ void ExtendedCones::finalize(ospray::Model *model)
     radius = getParam1f("radius", 0.01f);
     length = getParam1f("length", 0.01f);
     materialID = getParam1i("materialID", 0);
-    bytesPerCone = getParam1i("bytes_per_extended_cone", 11 * sizeof(float));
+    bytesPerCone = getParam1i("bytes_per_extended_cone", sizeof(brayns::Cone));
     offset_center = getParam1i("offset_center", 0);
     offset_up = getParam1i("offset_up", 3 * sizeof(float));
     offset_centerRadius = getParam1i("offset_centerRadius", 6 * sizeof(float));

@@ -97,9 +97,9 @@ private:
 
     uint64_t _getBvhSize(const uint64_t nbElements) const;
 
-    uint64_t _serializeSpheres();
-    uint64_t _serializeCylinders();
-    uint64_t _serializeCones();
+    uint64_t _serializeSpheres(const size_t materialId);
+    uint64_t _serializeCylinders(const size_t materialId);
+    uint64_t _serializeCones(const size_t materialId);
     uint64_t _processMeshes();
 
     optix::Context& _context;
@@ -115,23 +115,14 @@ private:
     optix::Buffer _emissionIntensityMapBuffer;
 
     // Spheres
-    std::map<size_t, floats> _serializedSpheresData;
-    std::map<size_t, size_t> _serializedSpheresDataSize;
-    std::map<size_t, size_t> _timestampSpheresIndices;
     std::map<size_t, optix::Buffer> _spheresBuffers;
     std::map<size_t, optix::Geometry> _optixSpheres;
 
     // Cylinders
-    std::map<size_t, floats> _serializedCylindersData;
-    std::map<size_t, size_t> _serializedCylindersDataSize;
-    std::map<size_t, size_t> _timestampCylindersIndices;
     std::map<size_t, optix::Buffer> _cylindersBuffers;
     std::map<size_t, optix::Geometry> _optixCylinders;
 
     // Cones
-    std::map<size_t, floats> _serializedConesData;
-    std::map<size_t, size_t> _serializedConesDataSize;
-    std::map<size_t, size_t> _timestampConesIndices;
     std::map<size_t, optix::Buffer> _conesBuffers;
     std::map<size_t, optix::Geometry> _optixCones;
 

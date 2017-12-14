@@ -67,7 +67,6 @@ const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_NEST_CACHE_FILENAME = "nest-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
-const std::string PARAM_GENERATE_MULTIPLE_MODELS = "generate-multiple-models";
 const std::string PARAM_SPLASH_SCENE_FOLDER = "splash-scene-folder";
 const std::string PARAM_MOLECULAR_SYSTEM_CONFIG = "molecular-system-config";
 const std::string PARAM_METABALLS_GRIDSIZE = "metaballs-grid-size";
@@ -123,7 +122,6 @@ GeometryParameters::GeometryParameters()
     , _colorScheme(ColorScheme::none)
     , _geometryQuality(GeometryQuality::high)
     , _morphologySectionTypes(size_t(MorphologySectionType::all))
-    , _generateMultipleModels(false)
     , _metaballsGridSize(0)
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
@@ -197,11 +195,8 @@ GeometryParameters::GeometryParameters()
         "Number of values defining the simulation histogram [int]")(
         PARAM_NEST_CACHE_FILENAME.c_str(), po::value<std::string>(),
         "Cache file containing nest data [string]")(
-        PARAM_GENERATE_MULTIPLE_MODELS.c_str(), po::value<bool>(),
-        "Enable/Disable generation of multiple models based on geometry "
-        "timestamps [bool]")(PARAM_SPLASH_SCENE_FOLDER.c_str(),
-                             po::value<std::string>(),
-                             "Folder containing splash scene folder [string]")(
+        PARAM_SPLASH_SCENE_FOLDER.c_str(), po::value<std::string>(),
+        "Folder containing splash scene folder [string]")(
         PARAM_MOLECULAR_SYSTEM_CONFIG.c_str(), po::value<std::string>(),
         "Molecular system configuration [string]")(
         PARAM_METABALLS_GRIDSIZE.c_str(), po::value<size_t>(),
@@ -340,8 +335,6 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE].as<size_t>();
     if (vm.count(PARAM_NEST_CACHE_FILENAME))
         _NESTCacheFile = vm[PARAM_NEST_CACHE_FILENAME].as<std::string>();
-    if (vm.count(PARAM_GENERATE_MULTIPLE_MODELS))
-        _generateMultipleModels = vm[PARAM_GENERATE_MULTIPLE_MODELS].as<bool>();
     if (vm.count(PARAM_SPLASH_SCENE_FOLDER))
         _splashSceneFolder = vm[PARAM_SPLASH_SCENE_FOLDER].as<std::string>();
     if (vm.count(PARAM_MOLECULAR_SYSTEM_CONFIG))
@@ -484,8 +477,6 @@ void GeometryParameters::print()
                 << _morphologyLayout.verticalSpacing << std::endl;
     BRAYNS_INFO << " - Horizontal spacing      : "
                 << _morphologyLayout.horizontalSpacing << std::endl;
-    BRAYNS_INFO << "Generate multiple models   : "
-                << (_generateMultipleModels ? "Yes" : "No") << std::endl;
     BRAYNS_INFO << "Splash scene folder        : " << _splashSceneFolder
                 << std::endl;
     BRAYNS_INFO << "Molecular system config    : " << _molecularSystemConfig

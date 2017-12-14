@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,31 +21,25 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "Primitive.h"
-
-#include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <map>
 
 namespace brayns
 {
-class Sphere : public Primitive
+struct Sphere
 {
-public:
-    BRAYNS_API Sphere(const Vector3f& center, float radius,
-                      float timestamp = 0.f,
-                      const Vector2f values = Vector2f(0.f, 0.f));
+    Sphere(const Vector3f c, float r, float ts = 0.f,
+           const Vector2f v = Vector2f(0.f, 0.f))
+        : center{c}
+        , radius{r}
+        , timestamp{ts}
+        , values{v}
+    {
+    }
 
-    BRAYNS_API const Vector3f& getCenter() const { return _center; }
-    BRAYNS_API void setCenter(const Vector3f center) { _center = center; }
-    BRAYNS_API float getRadius() const { return _radius; }
-    BRAYNS_API void setRadius(const float radius) { _radius = radius; }
-    BRAYNS_API virtual size_t serializeData(floats& serializedData);
-    BRAYNS_API static size_t getSerializationSize();
-
-private:
-    Vector3f _center;
-    float _radius;
+    Vector3f center;
+    float radius{0};
+    float timestamp{0};
+    Vector2f values;
 };
 }
 #endif // SPHERE_H

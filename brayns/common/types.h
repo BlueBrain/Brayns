@@ -41,6 +41,20 @@ typedef ::int8_t int8;
 typedef ::uint8_t uint8;
 typedef ::int64_t index_t;
 
+typedef std::vector<std::string> strings;
+typedef std::vector<float> floats;
+typedef std::vector<int> ints;
+typedef std::vector<unsigned int> uints;
+typedef std::vector<int8_t> int8_ts;
+typedef std::vector<uint8_t> uint8_ts;
+typedef std::vector<int16_t> int16_ts;
+typedef std::vector<uint16_t> uint16_ts;
+typedef std::vector<int32_t> int32_ts;
+typedef std::vector<uint32_t> uint32_ts;
+typedef std::vector<int64_t> int64_ts;
+typedef std::vector<uint64_t> uint64_ts;
+typedef std::vector<size_t> size_ts;
+
 #if BRAYNS_USE_MAGICKPP
 #define MAGICKCORE_HDRI_ENABLE true
 #define MAGICKCORE_QUANTUM_DEPTH 32
@@ -98,30 +112,19 @@ typedef std::shared_ptr<VolumeParameters> VolumeParametersPtr;
 class ExtensionController;
 typedef std::shared_ptr<ExtensionController> ExtensionControllerPtr;
 
-class Geometry;
-typedef std::vector<Geometry*> Geometries;
-
-class Primitive;
-typedef std::shared_ptr<Primitive> PrimitivePtr;
-typedef std::vector<PrimitivePtr> Primitives;
-typedef std::map<size_t, Primitives> PrimitivesMap;
-
-class Sphere;
-typedef std::shared_ptr<Sphere> SpherePtr;
-typedef std::vector<SpherePtr> Spheres;
+struct Sphere;
+typedef std::vector<Sphere> Spheres;
 typedef std::map<size_t, Spheres> SpheresMap;
 
-class Cylinder;
-typedef std::shared_ptr<Cylinder> CylinderPtr;
-typedef std::vector<CylinderPtr> Cylinders;
+struct Cylinder;
+typedef std::vector<Cylinder> Cylinders;
 typedef std::map<size_t, Cylinders> CylindersMap;
 
-class Cone;
-typedef std::shared_ptr<Cone> ConePtr;
-typedef std::vector<ConePtr> Cones;
+struct Cone;
+typedef std::vector<Cone> Cones;
 typedef std::map<size_t, Cones> ConesMap;
 
-class TrianglesMesh;
+struct TrianglesMesh;
 typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 
 class Material;
@@ -158,20 +161,6 @@ typedef std::shared_ptr<CADiffusionSimulationHandler>
 
 class VolumeHandler;
 typedef std::shared_ptr<VolumeHandler> VolumeHandlerPtr;
-
-typedef std::vector<std::string> strings;
-typedef std::vector<float> floats;
-typedef std::vector<int> ints;
-typedef std::vector<unsigned int> uints;
-typedef std::vector<int8_t> int8_ts;
-typedef std::vector<uint8_t> uint8_ts;
-typedef std::vector<int16_t> int16_ts;
-typedef std::vector<uint16_t> uint16_ts;
-typedef std::vector<int32_t> int32_ts;
-typedef std::vector<uint32_t> uint32_ts;
-typedef std::vector<int64_t> int64_ts;
-typedef std::vector<uint64_t> uint64_ts;
-typedef std::vector<size_t> size_ts;
 
 class AbstractParameters;
 class ApplicationParameters;

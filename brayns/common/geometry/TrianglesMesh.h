@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,36 +21,17 @@
 #ifndef TRIANGLESMESH_H
 #define TRIANGLESMESH_H
 
-#include "Geometry.h"
-
-#include <brayns/api.h>
 #include <brayns/common/types.h>
-#include <map>
-#include <vector>
 
 namespace brayns
 {
-BRAYNS_API class TrianglesMesh : Geometry
+struct TrianglesMesh
 {
-public:
-    BRAYNS_API TrianglesMesh();
-    BRAYNS_API ~TrianglesMesh();
-
-    BRAYNS_API Vector3fs& getVertices() { return _vertices; }
-    BRAYNS_API Vector3fs& getNormals() { return _normals; }
-    BRAYNS_API Vector4fs& getColors() { return _colors; }
-    BRAYNS_API Vector3uis& getIndices() { return _indices; }
-    BRAYNS_API Vector2fs& getTextureCoordinates()
-    {
-        return _textureCoordinates;
-    }
-
-private:
-    Vector3fs _vertices;
-    Vector3fs _normals;
-    Vector4fs _colors;
-    Vector3uis _indices;
-    Vector2fs _textureCoordinates;
+    Vector3fs vertices;
+    Vector3fs normals;
+    Vector4fs colors;
+    Vector3uis indices;
+    Vector2fs textureCoordinates;
 };
 }
 

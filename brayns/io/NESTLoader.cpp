@@ -119,7 +119,6 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
     SpheresMap& spheres = scene.getSpheres();
     spheres[0].reserve(_frameSize);
     _positions.reserve(_frameSize);
-    Boxf& bounds = scene.getWorldBounds();
     const float radius = _geometryParameters.getRadiusMultiplier();
 
     for (uint64_t gid = 0; gid < _frameSize; ++gid)
@@ -131,10 +130,8 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
             xColor[gid] * 65536 + yColor[gid] * 256 + zColor[gid];
         const Vector3f center(xPos[gid], yPos[gid], zPos[gid]);
         _positions.push_back(center);
-        spheres[0].push_back(
-            SpherePtr(new Sphere(center, radius, 0.f,
-                                 Vector2f(materialMapping[index], 0.f))));
-        bounds.merge(center);
+        scene.addSphere(0,
+                        {center, radius, 0.f, {materialMapping[index], 0.f}});
         updateProgress("Loading neurons...", spheres[0].size(), _frameSize);
     }
 

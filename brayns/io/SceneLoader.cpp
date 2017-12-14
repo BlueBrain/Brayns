@@ -128,10 +128,9 @@ bool SceneLoader::_processNodes(Scene& scene, MeshLoader& meshLoader)
         switch (node.fileType)
         {
         case FileType::point:
-            scene.getSpheres()[node.materialId].push_back(SpherePtr(
-                new Sphere(node.position,
-                           _geometryParameters.getRadiusMultiplier())));
-            scene.getWorldBounds().merge(node.position);
+            scene.addSphere(node.materialId,
+                            {node.position,
+                             _geometryParameters.getRadiusMultiplier()});
             break;
         case FileType::morphology:
 #ifdef BRAYNS_USE_BRION

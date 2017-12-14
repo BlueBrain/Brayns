@@ -21,7 +21,6 @@
 #ifndef NEST_LOADER_H
 #define NEST_LOADER_H
 
-#include <brayns/common/geometry/Primitive.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 #include <brayns/io/ProgressReporter.h>
