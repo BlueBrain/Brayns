@@ -606,24 +606,27 @@ bool Scene::empty() const
            _trianglesMeshes.empty();
 }
 
-void Scene::addSphere(const size_t materialId, const Sphere& sphere)
+uint64_t Scene::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _spheres[materialId].push_back(sphere);
     _bounds.merge(sphere.center);
+    return _spheres[materialId].size() - 1;
 }
 
-void Scene::addCylinder(const size_t materialId, const Cylinder& cylinder)
+uint64_t Scene::addCylinder(const size_t materialId, const Cylinder& cylinder)
 {
     _cylinders[materialId].push_back(cylinder);
     _bounds.merge(cylinder.center);
     _bounds.merge(cylinder.up);
+    return _cylinders[materialId].size() - 1;
 }
 
-void Scene::addCone(const size_t materialId, const Cone& cone)
+uint64_t Scene::addCone(const size_t materialId, const Cone& cone)
 {
     _cones[materialId].push_back(cone);
     _bounds.merge(cone.center);
     _bounds.merge(cone.up);
+    return _cones[materialId].size() - 1;
 }
 
 void Scene::setSphere(const size_t materialId, const uint64_t index,

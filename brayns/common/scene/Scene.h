@@ -32,11 +32,6 @@
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
-namespace
-{
-const uint8_t SPHERE_SIZE = 7;
-}
-
 namespace brayns
 {
 /**
@@ -294,22 +289,25 @@ public:
       Adds a sphere to the scene
       @param materialId Material of the sphere
       @param sphere Sphere to add
+      @return Index of the sphere for the specified material
       */
-    BRAYNS_API void addSphere(const size_t materialId, const Sphere& sphere);
+    BRAYNS_API uint64_t addSphere(const size_t materialId, const Sphere& sphere);
 
     /**
       Adds a cone to the scene
       @param materialId Material of the cone
       @param cone Cone to add
+      @return Index of the sphere for the specified material
       */
-    BRAYNS_API void addCone(const size_t materialId, const Cone& cone);
+    BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
 
     /**
       Adds a cylinder to the scene
       @param materialId Material of the cylinder
       @param cylinder Cylinder to add
+      @return Index of the sphere for the specified material
       */
-    BRAYNS_API void addCylinder(const size_t materialId,
+    BRAYNS_API uint64_t addCylinder(const size_t materialId,
                                 const Cylinder& cylinder);
 
     /**
