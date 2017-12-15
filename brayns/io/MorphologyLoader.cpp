@@ -206,9 +206,10 @@ public:
                 try
                 {
                     CircuitSimulationHandlerPtr simulationHandler(
-                        new CircuitSimulationHandler(
-                            _applicationParameters, _geometryParameters,
-                            bc.getReportSource(report).getPath(), allGids));
+                        new CircuitSimulationHandler(_applicationParameters,
+                                                     _geometryParameters,
+                                                     bc.getReportSource(report),
+                                                     allGids));
                     compartmentReport =
                         simulationHandler->getCompartmentReport();
                     // Only keep simulated GIDs

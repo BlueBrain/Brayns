@@ -31,11 +31,11 @@ namespace brayns
 CircuitSimulationHandler::CircuitSimulationHandler(
     const ApplicationParameters& applicationParameters,
     const GeometryParameters& geometryParameters,
-    const std::string& reportSource, const brion::GIDSet& gids)
+    const brion::URI& reportSource, const brion::GIDSet& gids)
     : AbstractSimulationHandler(geometryParameters)
     , _applicationParameters(applicationParameters)
-    , _compartmentReport(new brion::CompartmentReport(brion::URI(reportSource),
-                                                      brion::MODE_READ, gids))
+    , _compartmentReport(
+          new brion::CompartmentReport(reportSource, brion::MODE_READ, gids))
 {
     // Load simulation information from compartment reports
     const auto reportStartTime = _compartmentReport->getStartTime();
