@@ -268,6 +268,8 @@ private:
             if (!geomParams.getSaveCacheFile().empty())
                 scene.saveToCacheFile();
         }
+        else
+            scene.buildGeometry();
 
         loadingProgress += LOADING_PROGRESS_STEP;
 

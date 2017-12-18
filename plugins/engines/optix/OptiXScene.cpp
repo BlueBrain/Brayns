@@ -243,10 +243,6 @@ void OptiXScene::unload()
     Scene::unload();
 }
 
-void OptiXScene::loadFromCacheFile()
-{
-}
-
 void OptiXScene::commit()
 {
     if (_geometryGroup)
@@ -952,11 +948,6 @@ uint64_t OptiXScene::_getBvhSize(const uint64_t nbElements) const
 {
     // An estimate of the BVH size
     return 64 * 1.3f * nbElements;
-}
-
-void OptiXScene::saveToCacheFile()
-{
-    BRAYNS_DEBUG << "OptiXScene::saveToCacheFile not implemented" << std::endl;
 }
 
 bool OptiXScene::isVolumeSupported(const std::string& volumeFile) const

@@ -38,6 +38,7 @@ struct Cone
     {
     }
 
+    Cone() {}
     Vector3f center;
     Vector3f up;
     float centerRadius{0};
