@@ -29,9 +29,6 @@
 #if (BRAYNS_USE_OPTIX)
 #include <plugins/engines/optix/OptiXEngine.h>
 #endif
-#if (BRAYNS_USE_LIVRE)
-#include <plugins/engines/livre/LivreEngine.h>
-#endif
 
 namespace
 {
@@ -52,7 +49,8 @@ EngineFactory::EngineFactory(const int argc, const char** argv,
 {
 }
 
-std::unique_ptr<Engine> EngineFactory::create(const std::string& name)
+std::unique_ptr<Engine> EngineFactory::create(
+    const std::string& name BRAYNS_UNUSED)
 {
     try
     {
@@ -63,10 +61,6 @@ std::unique_ptr<Engine> EngineFactory::create(const std::string& name)
 #if (BRAYNS_USE_OPTIX)
         if (name == "optix")
             return make_unique<OptiXEngine>(_argc, _argv, _parametersManager);
-#endif
-#if (BRAYNS_USE_LIVRE)
-        if (name == "livre")
-            return make_unique<LivreEngine>(_argc, _argv, _parametersManager);
 #endif
     }
     catch (const std::runtime_error& e)

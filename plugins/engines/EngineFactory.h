@@ -47,7 +47,7 @@ public:
     /**
      * @brief Create an instance of the engine corresponding the given name. If
      *        the name is incorrect, a null pointer is returned.
-     * @param name of the engine (opray, optix, livre)
+     * @param name of the engine (opray, optix)
      * @return A pointer to the engine, null if the engine could not be
      *         instanciated
      */

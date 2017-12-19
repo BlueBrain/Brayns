@@ -28,9 +28,6 @@ if($ENV{TRAVIS})
   if(NOT DEFINED BRAYNS_BRION_ENABLED)
     set(BRAYNS_BRION_ENABLED ON)
   endif()
-  if(NOT DEFINED BRAYNS_LIVRE_ENABLED)
-    set(BRAYNS_LIVRE_ENABLED ON)
-  endif()
 endif()
 include(Common)
 
@@ -93,14 +90,6 @@ else()
   unset(BRAYNS_OPTIX_ENABLED)
 endif()
 
-# Livre rendering engine
-common_find_package(Livre)
-if(TARGET LivreLib)
-  option(BRAYNS_LIVRE_ENABLED "Activate Livre rendering engine" ON)
-else()
-  unset(BRAYNS_LIVRE_ENABLED)
-endif()
-
 # Image processing
 common_find_package(Magick++ SYSTEM)
 if(Magick++_FOUND)
@@ -133,9 +122,9 @@ common_find_package_post()
 # BRAYNS applications and libraries
 # ------------------------------------------------------------------------------
 
-if(NOT(OPTIX_FOUND AND CUDA_FOUND) AND NOT OSPRAY_FOUND AND NOT TARGET LivreLib)
+if(NOT(OPTIX_FOUND AND CUDA_FOUND) AND NOT OSPRAY_FOUND)
   message(WARNING
-      "Neither OptiX+CUDA, OSPRay nor Livre were found. Brayns cannot work without an engine" )
+      "Neither OptiX+CUDA nor OSPRay were found. Brayns cannot work without an engine" )
 endif()
 
 if(BRAYNS_OSPRAY_ENABLED)

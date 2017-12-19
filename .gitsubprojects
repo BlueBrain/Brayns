@@ -18,8 +18,3 @@ if(BRAYNS_BRION_ENABLED)
   git_subproject(Brion https://github.com/BlueBrain/Brion.git 065d0a0)
   git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 41ac72b)
 endif()
-
-# Livre rendering engine
-if(BRAYNS_LIVRE_ENABLED)
-  git_subproject(Livre https://github.com/BlueBrain/Livre.git 1b341a6)
-endif()

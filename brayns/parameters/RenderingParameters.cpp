@@ -96,7 +96,7 @@ RenderingParameters::RenderingParameters()
     , _headLight(false)
 {
     _parameters.add_options()(PARAM_ENGINE.c_str(), po::value<std::string>(),
-                              "Engine name [ospray|optix|livre]")(
+                              "Engine name [ospray|optix]")(
         PARAM_MODULE.c_str(), po::value<std::string>(),
         "OSPRay module name [string]")(
         PARAM_RENDERER.c_str(), po::value<std::string>(),

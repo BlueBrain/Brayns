@@ -1086,8 +1086,6 @@ void RocketsPlugin::_initializeSettings()
         _remoteSettings.setEngine(::brayns::v1::Engine::ospray);
     else if (renderingParameters.getEngine() == "optix")
         _remoteSettings.setEngine(::brayns::v1::Engine::optix);
-    else if (renderingParameters.getEngine() == "livre")
-        _remoteSettings.setEngine(::brayns::v1::Engine::livre);
     _remoteSettings.setVolumeSamplesPerRay(volumeParameters.getSamplesPerRay());
 
     switch (renderingParameters.getRenderer())
@@ -1171,9 +1169,6 @@ void RocketsPlugin::_settingsUpdated()
         break;
     case ::brayns::v1::Engine::optix:
         _parametersManager.getRenderingParameters().setEngine("optix");
-        break;
-    case ::brayns::v1::Engine::livre:
-        _parametersManager.getRenderingParameters().setEngine("livre");
         break;
     }
 

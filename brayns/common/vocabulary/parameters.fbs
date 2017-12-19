@@ -153,8 +153,7 @@ enum Shading: uint {
 
 enum Engine: string {
     ospray,
-    optix,
-    livre
+    optix
 }
 
 table Settings {
