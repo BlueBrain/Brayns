@@ -68,7 +68,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
         break;
     case GeometryQuality::high:
     default:
-        quality = aiProcess_GenSmoothNormals;
+        quality = aiProcess_GenSmoothNormals | aiProcess_Triangulate;
         break;
     }
 
