@@ -49,7 +49,7 @@ public:
      * @param triangles Generated triangles
      */
     void generateMesh(const Vector4fs& metaballs, const size_t gridSize,
-                      const float threshold, MaterialsMap& materials,
+                      const float threshold, Materials& materials,
                       const size_t defaultMaterialId,
                       TrianglesMeshMap& triangles);
 
@@ -89,13 +89,13 @@ private:
 
     void _clear();
 
-    void _buildVerticesAndCubes(const Vector4fs& metaballs, const size_t gridSize,
+    void _buildVerticesAndCubes(const Vector4fs& metaballs,
+                                const size_t gridSize,
                                 const size_t defaultMaterialId,
                                 const float scale = 5.f);
 
     void _buildTriangles(const Vector4fs& metaballs, const float threshold,
-                         MaterialsMap& materials,
-                         const size_t defaultMaterialId,
+                         Materials& materials, const size_t defaultMaterialId,
                          TrianglesMeshMap& triangles);
 
     SurfaceVertices _edgeVertices;

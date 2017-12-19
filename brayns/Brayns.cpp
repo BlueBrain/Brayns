@@ -248,6 +248,7 @@ private:
         loadingProgress.setMessage("Loading data ...");
         _meshLoader.clear();
         Scene& scene = _engine->getScene();
+        scene.buildMaterials();
         _loadData(loadingProgress);
 
         if (scene.empty() && !scene.getVolumeHandler())
@@ -261,7 +262,6 @@ private:
         const auto& geomParams = _parametersManager.getGeometryParameters();
         if (geomParams.getLoadCacheFile().empty())
         {
-            scene.buildMaterials();
             loadingProgress.setMessage("Building geometry ...");
             scene.buildGeometry();
 

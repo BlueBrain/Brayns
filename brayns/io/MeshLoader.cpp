@@ -33,6 +33,9 @@
 
 #include <brayns/common/scene/Scene.h>
 
+#define BRAYNS_USE_ASSIMP \
+    1 //************* REMOVE BEFORE PUSH ******************
+
 namespace brayns
 {
 MeshLoader::MeshLoader(const GeometryParameters& geometryParameters)
@@ -50,6 +53,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
                                     const Matrix4f& transformation,
                                     const size_t defaultMaterial)
 {
+    _materialOffset = scene.getMaterials().size();
     const boost::filesystem::path file = filename;
     Assimp::Importer importer;
     if (!importer.IsExtensionSupported(file.extension().c_str()))
@@ -98,8 +102,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     }
 
     boost::filesystem::path filepath = filename;
-    if (defaultMaterial == NO_MATERIAL)
-        _createMaterials(scene, aiScene, filepath.parent_path().string());
+    _createMaterials(scene, aiScene, filepath.parent_path().string());
 
     size_t nbVertices = 0;
     size_t nbFaces = 0;
@@ -108,9 +111,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     {
         aiMesh* mesh = aiScene->mMeshes[m];
         const size_t materialId =
-            (defaultMaterial == NO_MATERIAL
-                 ? NB_SYSTEM_MATERIALS + mesh->mMaterialIndex
-                 : defaultMaterial);
+            _getMaterialId(mesh->mMaterialIndex, defaultMaterial);
 
         auto& triangleMesh = triangleMeshes[materialId];
 
@@ -258,10 +259,9 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
                  << std::endl;
     for (size_t m = 0; m < aiScene->mNumMaterials; ++m)
     {
-        const size_t materialId = NB_SYSTEM_MATERIALS + m;
-        aiMaterial* material = aiScene->mMaterials[m];
-        auto& materials = scene.getMaterials();
-        auto& mat = materials[materialId];
+        const size_t materialId = _getMaterialId(m);
+        aiMaterial* aimaterial = aiScene->mMaterials[m];
+        auto& material = scene.getMaterial(materialId);
 
         struct TextureTypeMapping
         {
@@ -281,18 +281,20 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
         for (size_t textureType = 0; textureType < NB_TEXTURE_TYPES;
              ++textureType)
         {
-            if (material->GetTextureCount(
+            if (aimaterial->GetTextureCount(
                     textureTypeMapping[textureType].aiType) > 0)
             {
                 aiString path;
-                if (material->GetTexture(textureTypeMapping[textureType].aiType,
-                                         0, &path, nullptr, nullptr, nullptr,
-                                         nullptr, nullptr) == AI_SUCCESS)
+                if (aimaterial->GetTexture(
+                        textureTypeMapping[textureType].aiType, 0, &path,
+                        nullptr, nullptr, nullptr, nullptr,
+                        nullptr) == AI_SUCCESS)
                 {
                     const std::string filename = folder + "/" + path.data;
                     BRAYNS_DEBUG << "Loading texture [" << materialId
                                  << "] :" << filename << std::endl;
-                    mat.getTextures()[textureTypeMapping[textureType].type] =
+                    material
+                        .getTextures()[textureTypeMapping[textureType].type] =
                         filename;
                 }
             }
@@ -300,32 +302,33 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
 
         aiColor3D value3f(0.f, 0.f, 0.f);
         float value1f;
-        material->Get(AI_MATKEY_COLOR_DIFFUSE, value3f);
-        mat.setColor(Vector3f(value3f.r, value3f.g, value3f.b));
+        aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value3f);
+        material.setColor(Vector3f(value3f.r, value3f.g, value3f.b));
 
         value1f = 0.f;
-        material->Get(AI_MATKEY_REFLECTIVITY, value1f);
-        mat.setReflectionIndex(value1f);
+        aimaterial->Get(AI_MATKEY_REFLECTIVITY, value1f);
+        material.setReflectionIndex(value1f);
 
         value3f = aiColor3D(0.f, 0.f, 0.f);
-        material->Get(AI_MATKEY_COLOR_SPECULAR, value3f);
-        mat.setSpecularColor(Vector3f(value3f.r, value3f.g, value3f.b));
+        aimaterial->Get(AI_MATKEY_COLOR_SPECULAR, value3f);
+        material.setSpecularColor(Vector3f(value3f.r, value3f.g, value3f.b));
 
         value1f = 0.f;
-        material->Get(AI_MATKEY_SHININESS, value1f);
-        mat.setSpecularExponent(fabs(value1f) < 0.01f ? 100.f : value1f);
+        aimaterial->Get(AI_MATKEY_SHININESS, value1f);
+        material.setSpecularExponent(fabs(value1f) < 0.01f ? 100.f : value1f);
 
         value3f = aiColor3D(0.f, 0.f, 0.f);
-        material->Get(AI_MATKEY_COLOR_EMISSIVE, value3f);
-        mat.setEmission(value3f.r);
+        aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, value3f);
+        material.setEmission(value3f.r);
 
         value1f = 0.f;
-        material->Get(AI_MATKEY_OPACITY, value1f);
-        mat.setOpacity(fabs(value1f) < 0.01f ? 1.f : value1f);
+        aimaterial->Get(AI_MATKEY_OPACITY, value1f);
+        material.setOpacity(fabs(value1f) < 0.01f ? 1.f : value1f);
 
         value1f = 0.f;
-        material->Get(AI_MATKEY_REFRACTI, value1f);
-        mat.setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f : value1f);
+        aimaterial->Get(AI_MATKEY_REFRACTI, value1f);
+        material.setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f
+                                                                : value1f);
     }
 }
 
@@ -344,6 +347,14 @@ std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
         meshFilenamePattern = gidAsString;
     return meshedMorphologiesFolder + "/" + meshFilenamePattern;
 }
+
+size_t MeshLoader::_getMaterialId(const size_t materialId,
+                                  const size_t defaultMaterial)
+{
+    return (defaultMaterial == NO_MATERIAL ? _materialOffset + materialId
+                                           : defaultMaterial);
+}
+
 #else
 namespace
 {

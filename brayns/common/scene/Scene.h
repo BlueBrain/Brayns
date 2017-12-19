@@ -66,35 +66,6 @@ public:
     BRAYNS_API virtual void commit() = 0;
 
     /**
-        Creates the materials handled by the scene, and available to the
-        scene geometry
-    */
-    BRAYNS_API void buildMaterials();
-
-    /**
-        Sets the materials handled by the scene, and available to the
-        scene geometry
-        @param materialType Specifies the algorithm that is used to create
-               the materials. For instance MT_RANDOM creates materials with
-               random colors, transparency, reflection, and light emission
-    */
-    BRAYNS_API void setMaterials(
-        MaterialType materialType = MaterialType::none);
-
-    /**
-        Returns the material object for a given index
-        @return Material object
-    */
-    BRAYNS_API Material& getMaterial(size_t index);
-
-    /**
-        Commit materials to renderers
-        @param updateOnly If true, materials are not recreated and textures are
-               not reassigned
-    */
-    BRAYNS_API virtual void commitMaterials(const bool updateOnly = false) = 0;
-
-    /**
         Commit lights to renderers
     */
     BRAYNS_API virtual void commitLights() = 0;
@@ -187,10 +158,6 @@ public:
         Returns cones handled by the scene
     */
     BRAYNS_API ConesMap& getCones() { return _cones; }
-    /**
-        Returns materials handled by the scene
-    */
-    BRAYNS_API MaterialsMap& getMaterials() { return _materials; }
     /**
         Returns textures handled by the scene
     */
@@ -360,7 +327,56 @@ public:
     BRAYNS_API void setCylinder(const size_t materialId, const uint64_t index,
                                 const Cylinder& cylinder);
 
+    /**
+      Adds a material to the scene
+      @param material Material to add
+      @return index of the new material
+      */
+    BRAYNS_API size_t addMaterial(const Material& material);
+
+    /**
+        Returns the material object for a given index
+        @return Reference to material object
+    */
+    BRAYNS_API Material& getMaterial(size_t index);
+
+    /**
+        Set the material object for a given index
+        @param index Index of material in the scene
+        @param material Material object
+    */
+    BRAYNS_API void setMaterial(const size_t index, const Material& material);
+
+    /**
+        Creates the materials handled by the scene, and available to the
+        scene geometry
+    */
+    BRAYNS_API void buildMaterials();
+
+    /**
+        Commit materials to renderers
+        @param updateOnly If true, materials are not recreated and textures are
+               not reassigned
+    */
+    BRAYNS_API virtual void commitMaterials(const bool updateOnly = false) = 0;
+
+    /**
+        Returns materials handled by the scene
+    */
+    BRAYNS_API Materials& getMaterials() { return _materials; }
+    /**
+        Sets the materials handled by the scene, and available to the
+        scene geometry
+        @param materialType Specifies the algorithm that is used to create
+               the materials. For instance MT_RANDOM creates materials with
+               random colors, transparency, reflection, and light emission
+    */
+    BRAYNS_API void setMaterials(
+        MaterialType materialType = MaterialType::none);
+
 protected:
+    void _buildMissingMaterials(const size_t materialId);
+
     // Parameters
     ParametersManager& _parametersManager;
     Renderers _renderers;
@@ -374,7 +390,7 @@ protected:
     bool _conesDirty;
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty;
-    MaterialsMap _materials;
+    Materials _materials;
     TexturesMap _textures;
     Lights _lights;
 

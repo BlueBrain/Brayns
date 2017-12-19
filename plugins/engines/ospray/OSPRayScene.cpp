@@ -342,20 +342,20 @@ uint64_t OSPRayScene::serializeGeometry()
 {
     uint64_t size = 0;
     if (_spheresDirty)
-        for (const auto& material : _materials)
-            size += _serializeSpheres(material.first);
+        for (size_t i = 0; i < _materials.size(); ++i)
+            size += _serializeSpheres(i);
 
     if (_cylindersDirty)
-        for (const auto& material : _materials)
-            size += _serializeCylinders(material.first);
+        for (size_t i = 0; i < _materials.size(); ++i)
+            size += _serializeCylinders(i);
 
     if (_conesDirty)
-        for (const auto& material : _materials)
-            size += _serializeCones(material.first);
+        for (size_t i = 0; i < _materials.size(); ++i)
+            size += _serializeCones(i);
 
     if (_trianglesMeshesDirty)
-        for (const auto& material : _materials)
-            size += _serializeMeshes(material.first);
+        for (size_t i = 0; i < _materials.size(); ++i)
+            size += _serializeMeshes(i);
 
     _spheresDirty = false;
     _cylindersDirty = false;
@@ -384,20 +384,16 @@ void OSPRayScene::buildGeometry()
     size_t totalNbCones = 0;
     size_t totalNbVertices = 0;
     size_t totalNbIndices = 0;
-    for (auto& material : _materials)
+    for (const auto& spheres : _spheres)
+        totalNbSpheres += spheres.second.size();
+    for (const auto& cylinders : _cylinders)
+        totalNbCylinders += cylinders.second.size();
+    for (const auto& cones : _cones)
+        totalNbCones += cones.second.size();
+    for (const auto& trianglesMeshes : _trianglesMeshes)
     {
-        const auto materialId = material.first;
-        if (_spheres.find(materialId) != _spheres.end())
-            totalNbSpheres += _spheres[materialId].size();
-        if (_cylinders.find(materialId) != _cylinders.end())
-            totalNbCylinders += _cylinders[materialId].size();
-        if (_cones.find(materialId) != _cones.end())
-            totalNbCones += _cones[materialId].size();
-        if (_trianglesMeshes.find(materialId) != _trianglesMeshes.end())
-        {
-            totalNbVertices += _trianglesMeshes[materialId].vertices.size();
-            totalNbIndices += _trianglesMeshes[materialId].indices.size();
-        }
+        totalNbVertices += trianglesMeshes.second.vertices.size();
+        totalNbIndices += trianglesMeshes.second.indices.size();
     }
 
     BRAYNS_INFO << "---------------------------------------------------"
@@ -478,40 +474,27 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials(const bool updateOnly)
 {
-    // Determine how many materials need to be created
-    size_t maxId = 0;
-    for (auto& material : _materials)
-        maxId = std::max(maxId, material.first);
-
-    for (size_t i = 0; i < maxId; ++i)
-        if (_materials.find(i) == _materials.end())
-            _materials[i] = Material();
-
-    BRAYNS_INFO << "Committing " << maxId + 1 << " OSPRay materials"
-                << std::endl;
-
-    for (auto& material : _materials)
+    for (size_t i = 0; i < _materials.size(); ++i)
     {
-        if (_ospMaterials.size() <= material.first)
+        if (_ospMaterials.size() <= i)
             _ospMaterials.push_back(
                 ospNewMaterial(nullptr, "ExtendedOBJMaterial"));
 
-        auto& ospMaterial = _ospMaterials[material.first];
+        auto& ospMaterial = _ospMaterials[i];
+        auto& material = _materials[i];
 
-        Vector3f value3f = material.second.getColor();
+        Vector3f value3f = material.getColor();
         ospSet3f(ospMaterial, "kd", value3f.x(), value3f.y(), value3f.z());
-        value3f = material.second.getSpecularColor();
+        value3f = material.getSpecularColor();
         ospSet3f(ospMaterial, "ks", value3f.x(), value3f.y(), value3f.z());
-        ospSet1f(ospMaterial, "ns", material.second.getSpecularExponent());
-        ospSet1f(ospMaterial, "d", material.second.getOpacity());
-        ospSet1f(ospMaterial, "refraction",
-                 material.second.getRefractionIndex());
-        ospSet1f(ospMaterial, "reflection",
-                 material.second.getReflectionIndex());
-        ospSet1f(ospMaterial, "a", material.second.getEmission());
-        ospSet1f(ospMaterial, "glossiness", material.second.getGlossiness());
+        ospSet1f(ospMaterial, "ns", material.getSpecularExponent());
+        ospSet1f(ospMaterial, "d", material.getOpacity());
+        ospSet1f(ospMaterial, "refraction", material.getRefractionIndex());
+        ospSet1f(ospMaterial, "reflection", material.getReflectionIndex());
+        ospSet1f(ospMaterial, "a", material.getEmission());
+        ospSet1f(ospMaterial, "glossiness", material.getGlossiness());
         ospSet1i(ospMaterial, "cast_simulation_data",
-                 material.second.getCastSimulationData());
+                 material.getCastSimulationData());
 
         for (const auto& textureType : textureTypeMaterialAttribute)
             ospSetObject(ospMaterial, textureType.attribute.c_str(), nullptr);
@@ -519,7 +502,7 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
         if (!updateOnly)
         {
             // Textures
-            for (auto texture : material.second.getTextures())
+            for (auto texture : material.getTextures())
             {
                 if (texture.second != TEXTURE_NAME_SIMULATION)
                     ImageManager::importTextureFromFile(_textures,
@@ -538,8 +521,8 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
                 BRAYNS_DEBUG
                     << "Texture assigned to "
                     << textureTypeMaterialAttribute[texture.first].attribute
-                    << " of material " << material.first << ": "
-                    << texture.second << std::endl;
+                    << " of material " << i << ": " << texture.second
+                    << std::endl;
             }
         }
         ospCommit(ospMaterial);

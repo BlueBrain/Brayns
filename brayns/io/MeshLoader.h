@@ -83,8 +83,11 @@ private:
                           const std::string& folder);
 #endif
 
+    size_t _getMaterialId(const size_t materialId,
+                          const size_t defaultMaterial = NO_MATERIAL);
     std::map<size_t, size_t> _meshIndex;
     const GeometryParameters& _geometryParameters;
+    size_t _materialOffset;
 };
 }
 
