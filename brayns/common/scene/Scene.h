@@ -241,17 +241,36 @@ public:
     /** Unloads geometry, materials, lights, models, etc. to free memory. */
     BRAYNS_API virtual void unload();
 
-    /**
-        Loads geometry a binary cache file defined by the --load-cache-file
-       command line parameter
+    /** Loads geometry a binary cache file defined by the --load-cache-file
+       command line parameter. The cache file is a binary representation of the
+       following structure:
+       - Version
+       - Number of materials
+       - Materials
+       - For each material:
+         - Number of spheres
+         - Spheres
+         - Number of cylinders
+         - Cylinders
+         - Number of cones
+         - Cones
+         - Number of vertices
+         - Vertices
+         - Number of indices
+         - Indices
+         - Number of normals
+         - Normals
+         - Number of texture coordinates
+         - Texture coordinates
+       - Scene bounds
     */
-    BRAYNS_API virtual void loadFromCacheFile() = 0;
+    BRAYNS_API void loadFromCacheFile();
 
     /**
         Saves geometry a binary cache file defined by the --save-cache-file
-       command line parameter
+       command line parameter. See loadFromCacheFile for file structure
     */
-    BRAYNS_API virtual void saveToCacheFile() = 0;
+    BRAYNS_API void saveToCacheFile();
 
     /**
      * @return true if the given volume file is supported by the engines' scene.
@@ -291,7 +310,8 @@ public:
       @param sphere Sphere to add
       @return Index of the sphere for the specified material
       */
-    BRAYNS_API uint64_t addSphere(const size_t materialId, const Sphere& sphere);
+    BRAYNS_API uint64_t addSphere(const size_t materialId,
+                                  const Sphere& sphere);
 
     /**
       Adds a cone to the scene
@@ -308,7 +328,7 @@ public:
       @return Index of the sphere for the specified material
       */
     BRAYNS_API uint64_t addCylinder(const size_t materialId,
-                                const Cylinder& cylinder);
+                                    const Cylinder& cylinder);
 
     /**
       Replaces a sphere in the scene

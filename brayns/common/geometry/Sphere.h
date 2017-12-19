@@ -28,13 +28,15 @@ namespace brayns
 struct Sphere
 {
     Sphere(const Vector3f c, float r, float ts = 0.f,
-           const Vector2f v = Vector2f(0.f, 0.f))
+           const Vector2f v = Vector2f())
         : center{c}
         , radius{r}
         , timestamp{ts}
         , values{v}
     {
     }
+
+    Sphere() = default;
 
     Vector3f center;
     float radius{0};

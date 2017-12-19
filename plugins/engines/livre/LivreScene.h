@@ -56,12 +56,6 @@ public:
     /** Unsupported by Livre. */
     void commitSimulationData() final;
 
-    /** Unsupported by Livre. */
-    void loadFromCacheFile() final;
-
-    /** Unsupported by Livre. */
-    void saveToCacheFile() final;
-
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 

@@ -1,8 +1,12 @@
 ./
+Build/
 build/
+debug/
+release/
 Brion/
 Deflect/
 FlatBuffers/
+Livre/
 Lexis/
 Lunchbox/
 MVDTool/

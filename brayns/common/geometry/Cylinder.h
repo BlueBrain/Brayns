@@ -28,7 +28,7 @@ namespace brayns
 struct Cylinder
 {
     Cylinder(const Vector3f c, const Vector3f u, const float r,
-             const float ts = 0.f, const Vector2f v = Vector2f(0.f, 0.f))
+             const float ts = 0.f, const Vector2f v = Vector2f())
         : center{c}
         , up{u}
         , radius{r}
@@ -36,6 +36,8 @@ struct Cylinder
         , values{v}
     {
     }
+
+    Cylinder() = default;
 
     Vector3f center;
     Vector3f up;
