@@ -37,7 +37,8 @@ struct Cylinder
     {
     }
 
-    Cylinder() {}
+    Cylinder() = default;
+
     Vector3f center;
     Vector3f up;
     float radius{0};

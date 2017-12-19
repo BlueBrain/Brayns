@@ -103,14 +103,6 @@ void LivreScene::commitSimulationData()
 {
 }
 
-void LivreScene::loadFromCacheFile()
-{
-}
-
-void LivreScene::saveToCacheFile()
-{
-}
-
 bool LivreScene::isVolumeSupported(const std::string& volumeFile) const
 {
     return livre::DataSource::handles(servus::URI(volumeFile));

@@ -36,7 +36,8 @@ struct Sphere
     {
     }
 
-    Sphere() {}
+    Sphere() = default;
+
     Vector3f center;
     float radius{0};
     float timestamp{0};
