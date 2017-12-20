@@ -99,12 +99,6 @@ public:
     /**
        Initializes materials for the current scene
        @param colorMap Predefined color map
-             MT_DEFAULT: Random colors
-             MT_RANDOM: Random materials including transparency, reflection and
-                        light emission
-             MT_SHADES_OF_GREY: 255 shades of grey
-             MT_GRADIENT: Gradient from red to yellow
-             MT_PASTEL_COLORS: Random pastel colors
     */
     void initializeMaterials(
         MaterialsColorMap colorMap = MaterialsColorMap::none);

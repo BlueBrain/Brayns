@@ -722,7 +722,6 @@ void Scene::saveToCacheFile()
     }
 
     // Save geometry
-    ;
     for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
     {
         size_t nbElements{0};

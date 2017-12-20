@@ -354,8 +354,7 @@ public:
 
     /**
         Commit materials to renderers
-        @param updateOnly If true, materials are not recreated and textures are
-               not reassigned
+        @param action Defines if materials should be created or updated
     */
     BRAYNS_API virtual void commitMaterials(
         const Action action = Action::create) = 0;

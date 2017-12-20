@@ -33,9 +33,6 @@
 
 #include <brayns/common/scene/Scene.h>
 
-#define BRAYNS_USE_ASSIMP \
-    1 //************* REMOVE BEFORE PUSH ******************
-
 namespace brayns
 {
 MeshLoader::MeshLoader(const GeometryParameters& geometryParameters)
