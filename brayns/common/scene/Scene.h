@@ -348,17 +348,17 @@ public:
     BRAYNS_API void setMaterial(const size_t index, const Material& material);
 
     /**
-        Creates the materials handled by the scene, and available to the
-        scene geometry
+        Resets materials and builds the system ones (Bounding box, skymap, etc)
     */
-    BRAYNS_API void buildMaterials();
+    BRAYNS_API void resetMaterials();
 
     /**
         Commit materials to renderers
         @param updateOnly If true, materials are not recreated and textures are
                not reassigned
     */
-    BRAYNS_API virtual void commitMaterials(const bool updateOnly = false) = 0;
+    BRAYNS_API virtual void commitMaterials(
+        const Action action = Action::create) = 0;
 
     /**
         Returns materials handled by the scene
@@ -371,8 +371,8 @@ public:
                the materials. For instance MT_RANDOM creates materials with
                random colors, transparency, reflection, and light emission
     */
-    BRAYNS_API void setMaterials(
-        MaterialType materialType = MaterialType::none);
+    BRAYNS_API void setMaterialsColorMap(
+        MaterialsColorMap colorMap = MaterialsColorMap::none);
 
 protected:
     void _buildMissingMaterials(const size_t materialId);

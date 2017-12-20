@@ -282,11 +282,6 @@ struct Histogram
 const size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
 const size_t NB_SYSTEM_MATERIALS = 6;
 const size_t MATERIAL_SYSTEM = 0;
-const size_t MATERIAL_SKYBOX = 1;
-const size_t MATERIAL_BOUNDING_BOX = 2;
-const size_t MATERIAL_SIMULATION = 3;
-const size_t MATERIAL_INVISIBLE = 4;
-const size_t MATERIAL_CA_SIMULATION = 5;
 const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
 const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 
@@ -299,12 +294,29 @@ enum class MemoryMode
 /** Defines how materials should be created */
 enum class MaterialType
 {
+    surface = 0,            // Material for surfaces (default)
+    skybox = 1,             // Material for the skybox
+    bounding_box = 2,       // Material for bounding boxes
+    voltage_simulation = 3, // Material for voltage simulation data
+    calcium_simulation = 4, // Material for calcium simulation data
+    invisible = 5           // Material used to hide geometry
+};
+
+enum class MaterialsColorMap
+{
     none,           // Random colors
     random,         // Random materials including transparency, reflection,
                     // and light emission
     shades_of_grey, // 255 shades of grey
     gradient,       // Gradient from red to yellow
     pastel          // Random pastel colors
+};
+
+/** Generic action that can be performed on a scene object */
+enum class Action
+{
+    create,
+    update
 };
 
 enum class ShadingType

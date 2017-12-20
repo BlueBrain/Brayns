@@ -472,14 +472,25 @@ void OSPRayScene::commitLights()
     }
 }
 
-void OSPRayScene::commitMaterials(const bool updateOnly)
+void OSPRayScene::commitMaterials(const Action action)
 {
+    if (action == Action::create)
+    {
+        // Create materials
+        for (auto& material : _ospMaterials)
+            ospRelease(material);
+        _ospMaterials.clear();
+        _ospMaterials.reserve(_materials.size());
+        for (size_t i = 0; i < _materials.size(); ++i)
+        {
+            auto ospMaterial = ospNewMaterial(nullptr, "ExtendedOBJMaterial");
+            _ospMaterials.push_back(ospMaterial);
+        }
+    }
+
     for (size_t i = 0; i < _materials.size(); ++i)
     {
-        if (_ospMaterials.size() <= i)
-            _ospMaterials.push_back(
-                ospNewMaterial(nullptr, "ExtendedOBJMaterial"));
-
+        // update material
         auto& ospMaterial = _ospMaterials[i];
         auto& material = _materials[i];
 
@@ -499,31 +510,26 @@ void OSPRayScene::commitMaterials(const bool updateOnly)
         for (const auto& textureType : textureTypeMaterialAttribute)
             ospSetObject(ospMaterial, textureType.attribute.c_str(), nullptr);
 
-        if (!updateOnly)
+        // Textures
+        for (auto texture : material.getTextures())
         {
-            // Textures
-            for (auto texture : material.getTextures())
-            {
-                if (texture.second != TEXTURE_NAME_SIMULATION)
-                    ImageManager::importTextureFromFile(_textures,
-                                                        texture.first,
-                                                        texture.second);
-                else
-                    BRAYNS_ERROR << "Failed to load texture: " << texture.second
-                                 << std::endl;
+            if (texture.second != TEXTURE_NAME_SIMULATION)
+                ImageManager::importTextureFromFile(_textures, texture.first,
+                                                    texture.second);
+            else
+                BRAYNS_ERROR << "Failed to load texture: " << texture.second
+                             << std::endl;
 
-                OSPTexture2D ospTexture = _createTexture2D(texture.second);
-                ospSetObject(ospMaterial,
-                             textureTypeMaterialAttribute[texture.first]
-                                 .attribute.c_str(),
-                             ospTexture);
+            OSPTexture2D ospTexture = _createTexture2D(texture.second);
+            ospSetObject(
+                ospMaterial,
+                textureTypeMaterialAttribute[texture.first].attribute.c_str(),
+                ospTexture);
 
-                BRAYNS_DEBUG
-                    << "Texture assigned to "
-                    << textureTypeMaterialAttribute[texture.first].attribute
-                    << " of material " << i << ": " << texture.second
-                    << std::endl;
-            }
+            BRAYNS_DEBUG
+                << "Texture assigned to "
+                << textureTypeMaterialAttribute[texture.first].attribute
+                << " of material " << i << ": " << texture.second << std::endl;
         }
         ospCommit(ospMaterial);
     }

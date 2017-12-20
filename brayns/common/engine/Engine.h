@@ -98,7 +98,7 @@ public:
 
     /**
        Initializes materials for the current scene
-       @param materialType Predefined sets of colors
+       @param colorMap Predefined color map
              MT_DEFAULT: Random colors
              MT_RANDOM: Random materials including transparency, reflection and
                         light emission
@@ -106,7 +106,8 @@ public:
              MT_GRADIENT: Gradient from red to yellow
              MT_PASTEL_COLORS: Random pastel colors
     */
-    void initializeMaterials(MaterialType materialType = MaterialType::none);
+    void initializeMaterials(
+        MaterialsColorMap colorMap = MaterialsColorMap::none);
 
     /**
      * Recreates the engine according to new engine type/name. The recreation is

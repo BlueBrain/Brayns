@@ -97,12 +97,14 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
 
     // Load Calcium positions
     _loadCalciumPositions(frame);
+    const size_t materialId =
+        static_cast<size_t>(MaterialType::calcium_simulation);
     if (!_spheresCreated)
     {
         BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
                     << std::endl;
         for (const auto position : _calciumPositions)
-            scene.addSphere(MATERIAL_CA_SIMULATION, {position, CALCIUM_RADIUS});
+            scene.addSphere(materialId, {position, CALCIUM_RADIUS});
         _spheresCreated = true;
     }
     else
@@ -110,8 +112,7 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
         uint64_t i = 0;
         for (const auto position : _calciumPositions)
         {
-            scene.setSphere(i, MATERIAL_CA_SIMULATION,
-                            Sphere(position, CALCIUM_RADIUS));
+            scene.setSphere(i, materialId, Sphere(position, CALCIUM_RADIUS));
             ++i;
         }
     }

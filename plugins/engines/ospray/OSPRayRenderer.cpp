@@ -94,7 +94,8 @@ void OSPRayRenderer::commit()
     ospSet3f(_renderer, "detectionNearColor", color.x(), color.y(), color.z());
     color = rp.getDetectionFarColor();
     ospSet3f(_renderer, "detectionFarColor", color.x(), color.y(), color.z());
-    ospSet1i(_renderer, "materialForSimulation", MATERIAL_SIMULATION);
+    ospSet1i(_renderer, "materialForSimulation",
+             static_cast<size_t>(MaterialType::voltage_simulation));
     ospSet1i(_renderer, "volumeSamplesPerRay", vp.getSamplesPerRay());
 
     OSPRayScene* osprayScene = static_cast<OSPRayScene*>(_scene.get());

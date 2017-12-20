@@ -94,30 +94,33 @@ void Scene::_markGeometryDirty()
     _modified = true;
 }
 
-void Scene::buildMaterials()
+void Scene::resetMaterials()
 {
-    BRAYNS_INFO << "Building materials" << std::endl;
+    BRAYNS_INFO << "Building system materials" << std::endl;
+    _materials.clear();
     for (size_t i = 0; i < NB_SYSTEM_MATERIALS; ++i)
     {
         Material material;
-        switch (i)
+        switch (MaterialType(i))
         {
-        case MATERIAL_BOUNDING_BOX:
+        case MaterialType::bounding_box:
             material.setColor(Vector3f(1.f, 1.f, 1.f));
             material.setEmission(10.f);
             break;
-        case MATERIAL_INVISIBLE:
+        case MaterialType::invisible:
             material.setOpacity(0.f);
             material.setRefractionIndex(1.f);
             material.setColor(Vector3f(1.f, 1.f, 1.f));
             material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
+            break;
+        default:
             break;
         }
         _materials.push_back(material);
     }
 }
 
-void Scene::setMaterials(const MaterialType materialType)
+void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
 {
     const auto nbMaterials = _materials.size();
     for (size_t i = NB_SYSTEM_MATERIALS; i < nbMaterials; ++i)
@@ -127,9 +130,9 @@ void Scene::setMaterials(const MaterialType materialType)
         material.setOpacity(1.f);
         material.setReflectionIndex(0.f);
 
-        switch (materialType)
+        switch (colorMap)
         {
-        case MaterialType::none:
+        case MaterialsColorMap::none:
             switch (i)
             {
             case 0: // Default
@@ -151,19 +154,19 @@ void Scene::setMaterials(const MaterialType materialType)
                                            float(std::rand() % 255) / 255.f));
             }
             break;
-        case MaterialType::gradient:
+        case MaterialsColorMap::gradient:
         {
             const float a = float(i) / float(nbMaterials);
             material.setColor(Vector3f(a, 0.f, 1.f - a));
             break;
         }
-        case MaterialType::pastel:
+        case MaterialsColorMap::pastel:
             material.setColor(
                 Vector3f(0.5f + float(std::rand() % 127) / 255.f,
                          0.5f + float(std::rand() % 127) / 255.f,
                          0.5f + float(std::rand() % 127) / 255.f));
             break;
-        case MaterialType::random:
+        case MaterialsColorMap::random:
             material.setColor(Vector3f(float(rand() % 255) / 255.f,
                                        float(rand() % 255) / 255.f,
                                        float(rand() % 255) / 255.f));
@@ -185,14 +188,14 @@ void Scene::setMaterials(const MaterialType materialType)
                 material.setSpecularExponent(10.f);
             }
             break;
-        case MaterialType::shades_of_grey:
+        case MaterialsColorMap::shades_of_grey:
             float value = float(std::rand() % 255) / 255.f;
             material.setColor(Vector3f(value, value, value));
             break;
         }
         _materials[i] = material;
     }
-    commitMaterials();
+    commitMaterials(Action::update);
 }
 
 Material& Scene::getMaterial(size_t index)
@@ -439,7 +442,7 @@ void Scene::buildEnvironment()
     }
     case SceneEnvironment::bounding_box:
     {
-        const size_t material = MATERIAL_BOUNDING_BOX;
+        const size_t material = static_cast<size_t>(MaterialType::bounding_box);
         const Vector3f s = _bounds.getSize() / 2.f;
         const Vector3f c = _bounds.getCenter();
         const float radius = s.length() / 500.f;
@@ -863,8 +866,7 @@ void Scene::loadFromCacheFile()
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
     // Materials
-    _materials.clear();
-    buildMaterials();
+    resetMaterials();
     for (size_t i = 0; i < nbMaterials; ++i)
     {
         size_t id;

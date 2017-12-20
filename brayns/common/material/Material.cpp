@@ -23,7 +23,8 @@
 namespace brayns
 {
 Material::Material()
-    : _color(1.f, 1.f, 1.f)
+    : _materialType(MaterialType::surface)
+    , _color(1.f, 1.f, 1.f)
     , _specularColor(1.f, 1.f, 1.f)
     , _specularExponent(10.f)
     , _reflectionIndex(0.f)

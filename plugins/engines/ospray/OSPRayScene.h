@@ -57,7 +57,7 @@ public:
     void commitLights() final;
 
     /** @copydoc Scene::commitMaterials */
-    void commitMaterials(const bool updateOnly = false) final;
+    void commitMaterials(const Action action = Action::create) final;
 
     /** @copydoc Scene::commitSimulationData */
     void commitSimulationData() final;
