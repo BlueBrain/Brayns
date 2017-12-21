@@ -11,7 +11,7 @@ ARG DIST_PATH=/app/dist
 
 # Get ISPC
 # https://ispc.github.io/downloads.html
-ARG ISPC_VERSION=1.9.1
+ARG ISPC_VERSION=1.9.2
 ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
 ARG ISPC_PATH=/app/$ISPC_DIR
 
@@ -27,7 +27,7 @@ ENV PATH $PATH:${ISPC_PATH}
 
 # Install Embree
 # https://github.com/embree/embree
-ARG EMBREE_VERSION=2.17.0
+ARG EMBREE_VERSION=2.17.1
 ARG EMBREE_SRC=/app/embree
 
 RUN mkdir -p ${EMBREE_SRC} \
@@ -50,7 +50,7 @@ RUN mkdir -p ${EMBREE_SRC} \
 
 # Install OSPray
 # https://github.com/ospray/OSPRay
-ARG OSPRAY_VERSION=1.4.0
+ARG OSPRAY_VERSION=1.4.2
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
@@ -93,7 +93,7 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     libturbojpeg \
     libxi-dev \
     libxmu-dev \
-    libzmq3-dev \
+    libwebsockets-dev \
     python-pyparsing \
     qtbase5-dev \
     qtdeclarative5-dev \
@@ -140,7 +140,6 @@ RUN apt-get update \
     libtbb2 \
     libturbojpeg \
     libxmu6 \
-    libzmq5 \
  && rm -rf /var/lib/apt/lists/*
 
 # The COPY command below will:
