@@ -34,7 +34,11 @@ class Material
 {
 public:
     Material();
-
+    BRAYNS_API MaterialType getType() const { return _materialType; }
+    BRAYNS_API void setType(const MaterialType materialType)
+    {
+        _materialType = materialType;
+    }
     BRAYNS_API void setColor(const Vector3f& value) { _color = value; }
     BRAYNS_API Vector3f& getColor() { return _color; }
     BRAYNS_API void setSpecularColor(const Vector3f& value)
@@ -85,6 +89,7 @@ public:
     /* @return True if material attributes can be updated, false otherwise */
     BRAYNS_API bool locked() const { return _locked; }
 private:
+    MaterialType _materialType;
     Vector3f _color;
     Vector3f _specularColor;
     float _specularExponent;

@@ -248,6 +248,7 @@ private:
         loadingProgress.setMessage("Loading data ...");
         _meshLoader.clear();
         Scene& scene = _engine->getScene();
+        scene.resetMaterials();
         _loadData(loadingProgress);
 
         if (scene.empty() && !scene.getVolumeHandler())
@@ -261,7 +262,6 @@ private:
         const auto& geomParams = _parametersManager.getGeometryParameters();
         if (geomParams.getLoadCacheFile().empty())
         {
-            scene.buildMaterials();
             loadingProgress.setMessage("Building geometry ...");
             scene.buildGeometry();
 
@@ -404,7 +404,8 @@ private:
             _parametersManager.getSceneParameters().getEnvironmentMap();
         if (!environmentMap.empty())
         {
-            auto& material = scene.getMaterials()[MATERIAL_SKYBOX];
+            const size_t materialId = static_cast<size_t>(MaterialType::skybox);
+            auto& material = scene.getMaterials()[materialId];
             material.setTexture(TT_DIFFUSE, environmentMap);
         }
 
@@ -1129,17 +1130,17 @@ private:
 
     void _gradientMaterials()
     {
-        _engine->initializeMaterials(MaterialType::gradient);
+        _engine->initializeMaterials(MaterialsColorMap::gradient);
     }
 
     void _pastelMaterials()
     {
-        _engine->initializeMaterials(MaterialType::pastel);
+        _engine->initializeMaterials(MaterialsColorMap::pastel);
     }
 
     void _randomMaterials()
     {
-        _engine->initializeMaterials(MaterialType::random);
+        _engine->initializeMaterials(MaterialsColorMap::random);
     }
 
     void _toggleAnimationPlayback()

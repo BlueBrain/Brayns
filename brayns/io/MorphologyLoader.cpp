@@ -55,7 +55,7 @@ struct ParallelSceneContainer
 {
 public:
     ParallelSceneContainer(SpheresMap& s, CylindersMap& cy, ConesMap& co,
-                           TrianglesMeshMap& tm, MaterialsMap& m, Boxf& wb)
+                           TrianglesMeshMap& tm, Materials& m, Boxf& wb)
         : spheres(s)
         , cylinders(cy)
         , cones(co)
@@ -65,14 +65,22 @@ public:
     {
     }
 
+    void _buildMissingMaterials(const size_t materialId)
+    {
+        if (materialId >= materials.size())
+            materials.resize(materialId + 1);
+    }
+
     void addSphere(const size_t materialId, const Sphere& sphere)
     {
+        _buildMissingMaterials(materialId);
         spheres[materialId].push_back(sphere);
         worldBounds.merge(sphere.center);
     }
 
     void addCylinder(const size_t materialId, const Cylinder& cylinder)
     {
+        _buildMissingMaterials(materialId);
         cylinders[materialId].push_back(cylinder);
         worldBounds.merge(cylinder.center);
         worldBounds.merge(cylinder.up);
@@ -80,6 +88,7 @@ public:
 
     void addCone(const size_t materialId, const Cone& cone)
     {
+        _buildMissingMaterials(materialId);
         cones[materialId].push_back(cone);
         worldBounds.merge(cone.center);
         worldBounds.merge(cone.up);
@@ -89,7 +98,7 @@ public:
     CylindersMap& cylinders;
     ConesMap& cones;
     TrianglesMeshMap& trianglesMeshes;
-    MaterialsMap& materials;
+    Materials& materials;
     Boxf& worldBounds;
 };
 
@@ -103,6 +112,7 @@ public:
         , _applicationParameters(applicationParameters)
         , _geometryParameters(geometryParameters)
         , _scene(scene)
+        , _materialsOffset(scene.getMaterials().size())
     {
     }
 
@@ -287,7 +297,11 @@ private:
         const GIDOffsets& targetGIDOffsets) const
     {
         if (material != NO_MATERIAL)
-            return material;
+            return _materialsOffset + material;
+
+        if (_geometryParameters.getCircuitUseSimulationModel())
+            return _materialsOffset;
+
         size_t materialId = 0;
         switch (_geometryParameters.getColorScheme())
         {
@@ -344,7 +358,7 @@ private:
         default:
             materialId = NO_MATERIAL;
         }
-        return NB_SYSTEM_MATERIALS + materialId;
+        return _materialsOffset + materialId;
     }
 
     /**
@@ -840,7 +854,7 @@ private:
     }
 #else
     bool _importMeshes(const brain::GIDSet&, const Matrix4fs&,
-                       const GIDOffsets&, MeshLoaderPtr)
+                       const GIDOffsets&, MeshLoader&)
     {
         BRAYNS_ERROR << "assimp dependency is required to load meshes"
                      << std::endl;
@@ -899,20 +913,16 @@ private:
                 CylindersMap cylinders;
                 ConesMap cones;
                 TrianglesMeshMap triangleMeshes;
-                MaterialsMap materials;
+                Materials materials;
                 Boxf bounds;
                 ParallelSceneContainer sceneContainer(spheres, cylinders, cones,
                                                       triangleMeshes, materials,
                                                       bounds);
                 const auto& uri = uris[morphologyIndex];
 
-                const size_t materialId =
-                    _geometryParameters.getCircuitUseSimulationModel()
-                        ? NB_SYSTEM_MATERIALS
-                        : _getMaterialFromGeometryParameters(
-                              morphologyIndex, NO_MATERIAL,
-                              brain::neuron::SectionType::undefined,
-                              targetGIDOffsets);
+                const size_t materialId = _getMaterialFromGeometryParameters(
+                    morphologyIndex, NO_MATERIAL,
+                    brain::neuron::SectionType::undefined, targetGIDOffsets);
 
                 if (!_importMorphology(uri, morphologyIndex, materialId,
                                        transformations[morphologyIndex],
@@ -920,6 +930,10 @@ private:
                                        sceneContainer))
 #pragma omp atomic
                     ++loadingFailures;
+
+#pragma omp critical
+                for (size_t i = 0; i < materials.size(); ++i)
+                    _scene.setMaterial(i, materials[i]);
 
 #pragma omp critical
                 for (const auto& sphere : spheres)
@@ -952,10 +966,6 @@ private:
                 }
 
 #pragma omp critical
-                for (const auto& material : materials)
-                    _scene.getMaterials()[material.first] = material.second;
-
-#pragma omp critical
                 _scene.getWorldBounds().merge(bounds);
             }
         }
@@ -977,6 +987,7 @@ private:
     size_ts _layerIds;
     size_ts _electrophysiologyTypes;
     size_ts _morphologyTypes;
+    size_t _materialsOffset;
 };
 
 MorphologyLoader::MorphologyLoader(

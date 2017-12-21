@@ -523,7 +523,7 @@ void RocketsPlugin::_sceneUpdated()
         material.setCastSimulationData(m.getCastSimulationData());
     }
 
-    scene.commitMaterials(true);
+    scene.commitMaterials(Action::update);
 }
 
 void RocketsPlugin::_spikesUpdated()

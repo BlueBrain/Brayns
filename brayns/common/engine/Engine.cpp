@@ -107,9 +107,9 @@ void Engine::setDefaultEpsilon()
     }
 }
 
-void Engine::initializeMaterials(const MaterialType materialType)
+void Engine::initializeMaterials(const MaterialsColorMap colorMap)
 {
-    _scene->setMaterials(materialType);
+    _scene->setMaterialsColorMap(colorMap);
     _scene->commit();
 }
 
