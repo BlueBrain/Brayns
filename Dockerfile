@@ -127,6 +127,7 @@ RUN apt-get update \
     libboost-serialization1.58.0 \
     libboost-system1.58.0 \
     libboost-thread1.58.0 \
+    libboost-iostreams1.58.0 \
     libglew1.13 \
     libgomp1 \
     libhdf5-10 \
@@ -140,6 +141,7 @@ RUN apt-get update \
     libtbb2 \
     libturbojpeg \
     libxmu6 \
+    libwebsockets7 \
  && rm -rf /var/lib/apt/lists/*
 
 # The COPY command below will:
