@@ -23,6 +23,8 @@
 
 #include "AbstractParameters.h"
 
+SERIALIZATION_ACCESS(VolumeParameters)
+
 namespace brayns
 {
 class VolumeParameters final : public AbstractParameters
@@ -39,7 +41,7 @@ public:
     const std::string& getFilename() const { return _filename; }
     void setFilename(const std::string& filename)
     {
-        updateValue(_filename, filename);
+        _updateValue(_filename, filename);
     }
     /** Volume dimension  */
     const Vector3ui& getDimensions() const { return _dimensions; }
@@ -48,7 +50,7 @@ public:
     /** Volume offset */
     const Vector3f& getOffset() const { return _offset; }
     /** Volume epsilon */
-    void setSamplesPerRay(const size_t spr) { updateValue(_spr, spr); }
+    void setSamplesPerRay(const size_t spr) { _updateValue(_spr, spr); }
     size_t getSamplesPerRay() const { return _spr; }
 protected:
     bool _parse(const po::variables_map& vm) final;
@@ -59,6 +61,8 @@ protected:
     Vector3f _elementSpacing;
     Vector3f _offset;
     size_t _spr;
+
+    SERIALIZATION_FRIEND(VolumeParameters)
 };
 }
 #endif // VOLUMEPARAMETERS_H

@@ -18,23 +18,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace brayns.v1;
+#include "AnimationParameters.h"
 
-enum CameraStereoMode: uint {
-    none = 0,
-    left = 1,
-    right = 2,
-    side_by_side= 3
+namespace
+{
+const std::string PARAM_ANIMATION_FRAME = "animation-frame";
 }
 
-table Camera
+namespace brayns
 {
-  origin: [float:3];
-  look_at: [float:3];
-  up: [float:3];
-  field_of_view: float = 45;
-  aperture: float = 0;
-  focal_length: float = 0;
-  stereo_mode: CameraStereoMode;
-  eye_separation: float = 0.0635;
+AnimationParameters::AnimationParameters()
+    : AbstractParameters("Animation")
+{
+    _parameters.add_options()(PARAM_ANIMATION_FRAME.c_str(),
+                              po::value<uint32_t>(),
+                              "Scene animation frame [float]");
+}
+
+bool AnimationParameters::_parse(const po::variables_map& vm)
+{
+    if (vm.count(PARAM_ANIMATION_FRAME))
+        _current = vm[PARAM_ANIMATION_FRAME].as<uint32_t>();
+    return true;
+}
+
+void AnimationParameters::print()
+{
+    AbstractParameters::print();
+    BRAYNS_INFO << "Animation frame          :" << _current << std::endl;
+}
 }

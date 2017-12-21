@@ -41,7 +41,7 @@ public:
     ~OptiXEngine();
 
     /** @copydoc Engine::name */
-    std::string name() const final;
+    EngineType name() const final;
 
     /** @copydoc Engine::commit */
     void commit() final;

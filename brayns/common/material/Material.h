@@ -26,6 +26,8 @@
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
 
+SERIALIZATION_ACCESS(Material)
+
 namespace brayns
 {
 typedef std::map<TextureType, std::string> TextureTypes;
@@ -101,6 +103,8 @@ private:
     bool _castSimulationData;
     TextureTypes _textures;
     bool _locked;
+
+    SERIALIZATION_FRIEND(Material)
 };
 }
 #endif // MATERIAL_H

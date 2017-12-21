@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(appParams.getImageStreamFPS(), 60);
 
     const auto& renderParams = pm.getRenderingParameters();
-    BOOST_CHECK_EQUAL(renderParams.getEngine(), "ospray");
+    BOOST_CHECK(renderParams.getEngine() == brayns::EngineType::ospray);
     BOOST_CHECK_EQUAL(renderParams.getModule(), "");
     BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::basic);
     BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 7);
@@ -122,8 +122,8 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(geomParams.getCircuitSimulationValuesRange().y(),
                       std::numeric_limits<float>::min());
 
-    const auto& sceneParams = pm.getSceneParameters();
-    BOOST_CHECK_EQUAL(sceneParams.getAnimationFrame(),
+    const auto& animParams = pm.getAnimationParameters();
+    BOOST_CHECK_EQUAL(animParams.getFrame(),
                       std::numeric_limits<uint32_t>::max());
 
     const auto& volumeParams = pm.getVolumeParameters();
@@ -134,9 +134,10 @@ BOOST_AUTO_TEST_CASE(defaults)
                       brayns::Vector3f(0.f, 0.f, 0.f));
     BOOST_CHECK_EQUAL(volumeParams.getSamplesPerRay(), 128);
 
-    auto& scene = brayns.getEngine().getScene();
+    const auto& sceneParams = pm.getSceneParameters();
     BOOST_CHECK_EQUAL(sceneParams.getEnvironmentMap(), "");
 
+    auto& scene = brayns.getEngine().getScene();
     brayns::Boxf defaultBoundingBox;
     defaultBoundingBox.merge(brayns::Vector3f(0, 0, 0));
     defaultBoundingBox.merge(brayns::Vector3f(1, 1, 1));

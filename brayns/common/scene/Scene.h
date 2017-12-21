@@ -22,6 +22,7 @@
 #define SCENE_H
 
 #include <brayns/api.h>
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Sphere.h>
@@ -42,7 +43,7 @@ namespace brayns
    that are used to describe the 3D scene to be rendered. Scene is the base
    class for rendering-engine-specific inherited scenes.
  */
-class Scene
+class Scene : public BaseObject
 {
 public:
     /**
@@ -264,14 +265,6 @@ public:
     virtual void reset();
 
     /**
-       @return true if any modification happend after the last resetModified()
-    */
-    BRAYNS_API bool getModified() const;
-
-    /** Reset the modified flag */
-    BRAYNS_API void resetModified();
-
-    /**
       Adds a sphere to the scene
       @param materialId Material of the sphere
       @param sphere Sphere to add
@@ -403,8 +396,6 @@ protected:
 
     // Scene
     Boxf _bounds;
-
-    bool _modified = false;
 
 private:
     void _markGeometryDirty();

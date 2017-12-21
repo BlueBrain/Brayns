@@ -50,16 +50,16 @@ EngineFactory::EngineFactory(const int argc, const char** argv,
 }
 
 std::unique_ptr<Engine> EngineFactory::create(
-    const std::string& name BRAYNS_UNUSED)
+    const EngineType name BRAYNS_UNUSED)
 {
     try
     {
 #if (BRAYNS_USE_OSPRAY)
-        if (name == "ospray")
+        if (name == EngineType::ospray)
             return make_unique<OSPRayEngine>(_argc, _argv, _parametersManager);
 #endif
 #if (BRAYNS_USE_OPTIX)
-        if (name == "optix")
+        if (name == EngineType::optix)
             return make_unique<OptiXEngine>(_argc, _argv, _parametersManager);
 #endif
     }

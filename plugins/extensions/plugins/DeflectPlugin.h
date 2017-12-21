@@ -78,7 +78,8 @@ private:
     double _getZoomDelta(const deflect::Event& pinchEvent,
                          const Vector2ui& windowSize) const;
 
-    ApplicationParameters& _params;
+    ApplicationParameters& _appParams;
+    StreamParameters& _params;
     Vector2d _previousPos;
     bool _pan = false;
     bool _pinch = false;

@@ -21,7 +21,7 @@
 #include "OSPRayFrameBuffer.h"
 
 #include <brayns/common/log.h>
-#include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/parameters/StreamParameters.h>
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
@@ -91,17 +91,17 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     clear();
 }
 
-void OSPRayFrameBuffer::setStreamingParams(const ApplicationParameters& params,
+void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params,
                                            const bool stereo)
 {
     if (_pixelOp)
     {
-        ospSetString(_pixelOp, "id", params.getStreamId().c_str());
-        ospSetString(_pixelOp, "hostname", params.getStreamHostname().c_str());
-        ospSet1i(_pixelOp, "port", params.getStreamPort());
-        ospSet1i(_pixelOp, "enabled", params.getStreamingEnabled());
-        ospSet1i(_pixelOp, "compression", params.getStreamCompression());
-        ospSet1i(_pixelOp, "quality", params.getStreamQuality());
+        ospSetString(_pixelOp, "id", params.getId().c_str());
+        ospSetString(_pixelOp, "hostname", params.getHostname().c_str());
+        ospSet1i(_pixelOp, "port", params.getPort());
+        ospSet1i(_pixelOp, "enabled", params.getEnabled());
+        ospSet1i(_pixelOp, "compression", params.getCompression());
+        ospSet1i(_pixelOp, "quality", params.getQuality());
         ospSet1i(_pixelOp, "stereo", stereo);
         ospCommit(_pixelOp);
     }

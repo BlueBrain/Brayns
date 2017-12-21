@@ -39,10 +39,8 @@ common_find_package(OpenMP)
 
 # HTTP messaging
 common_find_package(LibJpegTurbo)
-common_find_package(Lexis)
 common_find_package(Rockets)
-common_find_package(ZeroBuf)
-if(LibJpegTurbo_FOUND AND TARGET Lexis AND TARGET Rockets AND TARGET ZeroBuf)
+if(LibJpegTurbo_FOUND AND TARGET Rockets)
   option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
   if(BRAYNS_NETWORKING_ENABLED)
     list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)

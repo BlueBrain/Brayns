@@ -545,7 +545,7 @@ void OSPRayScene::commitMaterials(const Action action)
         ospSetData(osprayRenderer->impl(), "materials", _ospMaterialData);
         ospCommit(osprayRenderer->impl());
     }
-    _modified = true;
+    markModified();
 }
 
 void OSPRayScene::commitTransferFunctionData()
@@ -595,7 +595,7 @@ void OSPRayScene::commitTransferFunctionData()
 
         ospCommit(osprayRenderer->impl());
     }
-    _modified = true;
+    markModified();
 }
 
 void OSPRayScene::commitVolumeData()
@@ -604,11 +604,12 @@ void OSPRayScene::commitVolumeData()
     if (!volumeHandler)
         return;
 
-    const auto animationFrame =
-        _parametersManager.getSceneParameters().getAnimationFrame();
+    const auto& ap = _parametersManager.getAnimationParameters();
+    const auto& vp = _parametersManager.getVolumeParameters();
+    const auto animationFrame = ap.getFrame();
     volumeHandler->setCurrentIndex(animationFrame);
     void* data = volumeHandler->getData();
-    if (data)
+    if (data && (ap.getModified() || vp.getModified()))
     {
         for (const auto& renderer : _renderers)
         {
@@ -642,8 +643,8 @@ void OSPRayScene::commitVolumeData()
                 _parametersManager.getVolumeParameters().getSamplesPerRay());
             ospSet1f(osprayRenderer->impl(), "volumeEpsilon", epsilon);
         }
+        markModified();
     }
-    _modified = true;
 }
 
 void OSPRayScene::commitSimulationData()
@@ -654,7 +655,7 @@ void OSPRayScene::commitSimulationData()
     }
 
     const auto animationFrame =
-        _parametersManager.getSceneParameters().getAnimationFrame();
+        _parametersManager.getAnimationParameters().getFrame();
 
     if (_simulationHandler->getCurrentFrame() == animationFrame)
         return;
@@ -681,7 +682,7 @@ void OSPRayScene::commitSimulationData()
                  _simulationHandler->getFrameSize());
         ospCommit(osprayRenderer->impl());
     }
-    _modified = true;
+    markModified();
 }
 
 OSPTexture2D OSPRayScene::_createTexture2D(const std::string& textureName)

@@ -37,7 +37,7 @@ public:
     bool importFromBinaryFile(const std::string& filename, Scene& scene);
 
 private:
-    GeometryParameters _geometryParameters;
+    const GeometryParameters& _geometryParameters;
 };
 }
 

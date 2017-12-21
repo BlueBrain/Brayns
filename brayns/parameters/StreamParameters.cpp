@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,26 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace brayns.v1;
+#include "StreamParameters.h"
 
-table Material {
-    diffuse_color : [float:3];
-    specular_color: [float:3];
-    specular_exponent: float;
-    reflection_index : float;
-    opacity: float;
-    refraction_index: float;
-    light_emission: float;
-    glossiness: float;
-    cast_simulation_data: bool;
+namespace brayns
+{
+StreamParameters::StreamParameters()
+    : AbstractParameters("Stream")
+{
 }
 
-table Bounds {
-    min: [float:3];
-    max: [float:3];
+bool StreamParameters::_parse(const po::variables_map&)
+{
+    return true;
 }
 
-table Scene {
-    materials: [Material];
-    bounds: Bounds;
+void StreamParameters::print()
+{
+    AbstractParameters::print();
+}
 }

@@ -94,7 +94,6 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     libxi-dev \
     libxmu-dev \
     libwebsockets-dev \
-    python-pyparsing \
     qtbase5-dev \
     qtdeclarative5-dev \
     xorg-dev \
@@ -131,7 +130,6 @@ RUN apt-get update \
     libglew1.13 \
     libgomp1 \
     libhdf5-10 \
-    libhdf5-cpp-11 \
     libhdf5-cpp-11 \
     libhwloc5 \
     libmagick++-6.q16-5v5 \

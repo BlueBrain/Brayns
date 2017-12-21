@@ -102,7 +102,7 @@ struct Brayns::Impl
 #endif
 
         if (!isAsyncMode())
-            _dataLoadingFuture.get();
+            _finishLoadScene();
     }
 
     void createEngine()
@@ -113,7 +113,10 @@ struct Brayns::Impl
             _parametersManager.getRenderingParameters().getEngine();
         _engine = _engineFactory.create(engineName);
         if (!_engine)
-            throw std::runtime_error("Unsupported engine: " + engineName);
+            throw std::runtime_error(
+                "Unsupported engine: " +
+                _parametersManager.getRenderingParameters().getEngineAsString(
+                    engineName));
 
         _engine->recreate = std::bind(&Impl::createEngine, this);
         _engine->buildScene = std::bind(&Impl::buildScene, this);
@@ -223,7 +226,7 @@ private:
             return;
         char str[7];
         const auto frame =
-            _parametersManager.getSceneParameters().getAnimationFrame();
+            _parametersManager.getAnimationParameters().getFrame();
         snprintf(str, 7, "%06d", int(frame));
         const auto filename = frameExportFolder + "/" + str + ".png";
         FrameBuffer& frameBuffer = _engine->getFrameBuffer();
@@ -232,14 +235,18 @@ private:
 
     void _loadScene()
     {
-        Progress loadingProgress("Loading scene ...",
-                                 LOADING_PROGRESS_DATA +
-                                     3 * LOADING_PROGRESS_STEP,
-                                 [this](const std::string& msg,
-                                        const float progress) {
-                                     _engine->setLastOperation(msg);
-                                     _engine->setLastProgress(progress);
-                                 });
+        // fix race condition: we have to wait until rendering is finished
+        while (_rendering)
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        Progress loadingProgress(
+            "Loading scene ...",
+            LOADING_PROGRESS_DATA + 3 * LOADING_PROGRESS_STEP,
+            [this](const std::string& msg, const float progress) {
+                std::lock_guard<std::mutex> lock(_engine->getProgress().mutex);
+                _engine->setLastOperation(msg);
+                _engine->setLastProgress(progress);
+            });
 
         loadingProgress.setMessage("Unloading ...");
         _engine->getScene().unload();
@@ -277,15 +284,21 @@ private:
         scene.commit();
         loadingProgress += LOADING_PROGRESS_STEP;
 
+        loadingProgress.setMessage("Done");
+        _engine->setReady(true);
+        BRAYNS_INFO << "Now rendering ..." << std::endl;
+    }
+
+    // do this in the main thread again to avoid race conditions
+    void _finishLoadScene()
+    {
+        _dataLoadingFuture.get();
+
         // Set default camera according to scene bounding box
         _engine->setDefaultCamera();
 
         // Set default epsilon according to scene bounding box
         _engine->setDefaultEpsilon();
-
-        loadingProgress.setMessage("Done");
-        _engine->setReady(true);
-        BRAYNS_INFO << "Now rendering ..." << std::endl;
     }
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
@@ -309,10 +322,26 @@ private:
     void _executePlugins(const Vector2ui&) {}
 #endif
 
+    void _updateAnimation()
+    {
+        if (!isLoadingFinished())
+            return;
+
+        auto simHandler = _engine->getScene().getSimulationHandler();
+        auto& animParams = _parametersManager.getAnimationParameters();
+        if ((animParams.getModified() || animParams.getDelta() != 0) &&
+            simHandler && simHandler->isReady())
+        {
+            animParams.setFrame(animParams.getFrame() + animParams.getDelta());
+        }
+    }
+
     bool _render(const Vector2ui& windowSize)
     {
         _engine->reshape(windowSize);
         _engine->preRender();
+
+        _updateAnimation();
 
 #if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
         _executePlugins(windowSize);
@@ -323,12 +352,16 @@ private:
 #ifdef BRAYNS_USE_LUNCHBOX
             if (isAsyncMode())
             {
-                _engine->resetModified();
+                _engine->getProgress().resetModified();
                 return false;
             }
 #endif
-            _dataLoadingFuture.get();
+            _finishLoadScene();
         }
+        else if (_dataLoadingFuture.valid())
+            _finishLoadScene();
+
+        _rendering = true;
 
         _engine->commit();
 
@@ -337,6 +370,12 @@ private:
             camera.commit();
 
         Scene& scene = _engine->getScene();
+
+        if (scene.getTransferFunction().getModified())
+        {
+            scene.commitTransferFunctionData();
+            scene.getTransferFunction().resetModified();
+        }
 
         if (_parametersManager.getRenderingParameters().getHeadLight())
         {
@@ -373,7 +412,9 @@ private:
         _parametersManager.resetModified();
         camera.resetModified();
         scene.resetModified();
-        _engine->resetModified();
+        _engine->getProgress().resetModified();
+
+        _rendering = false;
 
         return true;
     }
@@ -417,7 +458,6 @@ private:
             TransferFunctionLoader transferFunctionLoader;
             transferFunctionLoader.loadFromFile(colorMapFilename, scene);
         }
-        scene.commitTransferFunctionData();
 
         if (!geometryParameters.getLoadCacheFile().empty())
         {
@@ -479,6 +519,7 @@ private:
 
         if (scene.getVolumeHandler())
         {
+            scene.commitTransferFunctionData();
             scene.getVolumeHandler()->setCurrentIndex(0);
             const Vector3ui& volumeDimensions =
                 scene.getVolumeHandler()->getDimensions();
@@ -692,7 +733,6 @@ private:
                 }
 
                 scene.setSimulationHandler(simulationHandler);
-                scene.commitTransferFunctionData();
             }
         }
     }
@@ -975,9 +1015,9 @@ private:
             return;
         }
 
-        SceneParameters& sceneParams = _parametersManager.getSceneParameters();
-        const auto animationFrame = sceneParams.getAnimationFrame();
-        sceneParams.setAnimationFrame(animationFrame + 1);
+        auto& animParams = _parametersManager.getAnimationParameters();
+        const auto animationFrame = animParams.getFrame();
+        animParams.setFrame(animationFrame + 1);
     }
 
     void _decreaseAnimationFrame()
@@ -988,10 +1028,10 @@ private:
             return;
         }
 
-        SceneParameters& sceneParams = _parametersManager.getSceneParameters();
-        const auto animationFrame = sceneParams.getAnimationFrame();
+        auto& animParams = _parametersManager.getAnimationParameters();
+        const auto animationFrame = animParams.getFrame();
         if (animationFrame > 0)
-            sceneParams.setAnimationFrame(animationFrame - 1);
+            animParams.setFrame(animationFrame - 1);
     }
 
     void _diffuseShading()
@@ -1039,14 +1079,14 @@ private:
 
     void _resetAnimationFrame()
     {
-        SceneParameters& sceneParams = _parametersManager.getSceneParameters();
-        sceneParams.setAnimationFrame(0);
+        auto& animParams = _parametersManager.getAnimationParameters();
+        animParams.setFrame(0);
     }
 
     void _infiniteAnimationFrame()
     {
-        SceneParameters& sceneParams = _parametersManager.getSceneParameters();
-        sceneParams.setAnimationFrame(std::numeric_limits<uint32_t>::max());
+        auto& animParams = _parametersManager.getAnimationParameters();
+        animParams.setFrame(std::numeric_limits<uint32_t>::max());
     }
 
     void _toggleShadows()
@@ -1069,7 +1109,6 @@ private:
         VolumeParameters& volumeParams =
             _parametersManager.getVolumeParameters();
         volumeParams.setSamplesPerRay(volumeParams.getSamplesPerRay() * 2);
-        _engine->getScene().commitVolumeData();
     }
 
     void _decreaseSamplesPerRay()
@@ -1078,7 +1117,6 @@ private:
             _parametersManager.getVolumeParameters();
         if (volumeParams.getSamplesPerRay() >= 4)
             volumeParams.setSamplesPerRay(volumeParams.getSamplesPerRay() / 2);
-        _engine->getScene().commitVolumeData();
     }
 
     void _toggleLightEmittingMaterials()
@@ -1146,15 +1184,14 @@ private:
 
     void _toggleAnimationPlayback()
     {
-        auto& sceneParams = _parametersManager.getSceneParameters();
-        sceneParams.setAnimationDelta(sceneParams.getAnimationDelta() == 0 ? 1
-                                                                           : 0);
+        auto& animParams = _parametersManager.getAnimationParameters();
+        animParams.setDelta(animParams.getDelta() == 0 ? 1 : 0);
     }
 
     void _defaultAnimationFrame()
     {
-        auto& sceneParams = _parametersManager.getSceneParameters();
-        sceneParams.setAnimationFrame(DEFAULT_TEST_ANIMATION_FRAME);
+        auto& animParams = _parametersManager.getAnimationParameters();
+        animParams.setFrame(DEFAULT_TEST_ANIMATION_FRAME);
     }
 
     void _saveSceneToCacheFile()
@@ -1202,6 +1239,10 @@ private:
     float _eyeSeparation{0.0635f};
 
     std::future<void> _dataLoadingFuture;
+
+    // protect rendering vs. data loading/unloading
+    std::atomic_bool _rendering{false};
+
 #ifdef BRAYNS_USE_LUNCHBOX
     // it is important to perform loading and unloading in the same thread,
     // otherwise we leak memory from within ospray/embree. So we don't use

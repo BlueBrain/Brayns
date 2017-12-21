@@ -34,10 +34,21 @@ if(BRAYNS_NETWORKING_ENABLED)
   endif()
   list(APPEND CPPCHECK_EXTRA_ARGS
     --suppress=*:${CMAKE_CURRENT_SOURCE_DIR}/extensions/plugins/json.hpp)
-  list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/RocketsPlugin.cpp)
+  list(APPEND BRAYNSPLUGINS_HEADERS
+    extensions/plugins/ImageGenerator.h
+    extensions/plugins/SDK.h
+  )
+  list(APPEND BRAYNSPLUGINS_SOURCES
+    extensions/plugins/ImageGenerator.cpp
+    extensions/plugins/RocketsPlugin.cpp
+    extensions/plugins/staticjson/staticjson.cpp
+    extensions/plugins/base64/base64.cpp
+  )
+  set_source_files_properties(extensions/plugins/staticjson/staticjson.cpp
+    PROPERTIES COMPILE_FLAGS -Wno-shadow)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/RocketsPlugin.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC Lexis Rockets
-    BraynsZeroBufRender ${LibJpegTurbo_LIBRARIES})
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC Rockets
+    ${LibJpegTurbo_LIBRARIES})
 endif()
 
 if(BRAYNS_OSPRAY_ENABLED)
@@ -52,3 +63,8 @@ if(BRAYNS_OPTIX_ENABLED)
 endif()
 
 common_library(braynsPlugins)
+
+# needed for staticjson and rapidjson
+if(BRAYNS_NETWORKING_ENABLED)
+  target_include_directories(braynsPlugins SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/extensions/plugins)
+endif()
