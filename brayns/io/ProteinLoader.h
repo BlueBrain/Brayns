@@ -55,7 +55,7 @@ public:
     Vector3f getMaterialKd(size_t index);
 
 private:
-    GeometryParameters _geometryParameters;
+    const GeometryParameters& _geometryParameters;
 };
 }
 

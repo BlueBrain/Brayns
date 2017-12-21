@@ -25,6 +25,8 @@
 
 #include <brayns/common/types.h>
 
+SERIALIZATION_ACCESS(GeometryParameters)
+
 namespace brayns
 {
 /**
@@ -35,16 +37,38 @@ namespace brayns
  */
 struct MorphologyLayout
 {
-    MorphologyLayout()
-        : nbColumns(0)
-        , verticalSpacing(0)
-        , horizontalSpacing(0)
-    {
-    }
+    size_t nbColumns{0};
+    size_t verticalSpacing{0};
+    size_t horizontalSpacing{0};
+};
 
-    size_t nbColumns;
-    size_t verticalSpacing;
-    size_t horizontalSpacing;
+struct CircuitConfiguration
+{
+    std::string _circuitConfiguration;
+    bool _circuitUseSimulationModel{false};
+    Boxf _circuitBoundingBox{{0, 0, 0}, {0, 0, 0}};
+    float _circuitDensity{100};
+    std::string _circuitMeshFilenamePattern;
+    std::string _circuitMeshFolder;
+    std::string _circuitTargets;
+    std::string _circuitReport;
+    double _circuitStartSimulationTime{0};
+    double _circuitEndSimulationTime{std::numeric_limits<float>::max()};
+    double _circuitSimulationStep{0};
+    Vector2f _circuitSimulationValuesRange{std::numeric_limits<float>::max(),
+                                           std::numeric_limits<float>::min()};
+    size_t _circuitSimulationHistogramSize{128};
+    bool _circuitMeshTransformation{false};
+};
+
+struct ConnectivityConfiguration
+{
+    std::string _connectivityFile;
+    size_t _connectivityMatrixId{0};
+    bool _connectivityShowConnections{false};
+    Vector2ui _connectivityDimensionRange{
+        0, std::numeric_limits<unsigned int>::max()};
+    Vector3f _connectivityScale{1.f, 1.f, 1.f};
 };
 
 /** Manages geometry parameters
@@ -82,24 +106,30 @@ public:
     /** file containing circuit configuration */
     const std::string& getCircuitConfiguration() const
     {
-        return _circuitConfiguration;
+        return _circuitConfiguration._circuitConfiguration;
     }
     /** Binary representation of a scene to load */
     const std::string& getLoadCacheFile() const { return _loadCacheFile; }
     /** Binary representation of a scene to save */
     const std::string& getSaveCacheFile() const { return _saveCacheFile; }
     /** Circuit targets */
-    const std::string& getCircuitTargets() const { return _circuitTargets; }
+    const std::string& getCircuitTargets() const
+    {
+        return _circuitConfiguration._circuitTargets;
+    }
     strings getCircuitTargetsAsStrings() const;
     /** Circuit compartment report */
-    const std::string& getCircuitReport() const { return _circuitReport; }
+    const std::string& getCircuitReport() const
+    {
+        return _circuitConfiguration._circuitReport;
+    }
     /** Defines the folder where morphologies meshes are stored. Meshes must
      * have the same name as the h5/SWC morphology file, suffixed with an
      * extension supported by the assimp library
      */
     const std::string& getCircuitMeshFolder() const
     {
-        return _circuitMeshFolder;
+        return _circuitConfiguration._circuitMeshFolder;
     }
     /** ensity of cells in the circuit in percent (Mainly for testing
      * purposes) */
@@ -109,10 +139,13 @@ public:
      * Defines a bounding box outside of which geometry of a circuit will not be
      * loaded
      */
-    const Boxf& getCircuitBoundingBox() const { return _circuitBoundingBox; }
+    const Boxf& getCircuitBoundingBox() const
+    {
+        return _circuitConfiguration._circuitBoundingBox;
+    }
     void setCircuitBoundingBox(const Boxf& value)
     {
-        updateValue(_circuitBoundingBox, value);
+        _updateValue(_circuitConfiguration._circuitBoundingBox, value);
     }
 
     /**
@@ -123,18 +156,18 @@ public:
      */
     bool getCircuitUseSimulationModel() const
     {
-        return _circuitUseSimulationModel;
+        return _circuitConfiguration._circuitUseSimulationModel;
     }
     void setCircuitUseSimulationModel(const bool value)
     {
-        updateValue(_circuitUseSimulationModel, value);
+        _updateValue(_circuitConfiguration._circuitUseSimulationModel, value);
     }
     /**
      * Return the filename pattern use to load meshes
      */
     const std::string& getCircuitMeshFilenamePattern() const
     {
-        return _circuitMeshFilenamePattern;
+        return _circuitConfiguration._circuitMeshFilenamePattern;
     }
     /** Radius multiplier applied to spheres, cones and cylinders.
      * @param value Radius multiplier. Multiplies the radius contained in the
@@ -142,7 +175,7 @@ public:
      */
     void setRadiusMultiplier(const float value)
     {
-        updateValue(_radiusMultiplier, value);
+        _updateValue(_radiusMultiplier, value);
     }
     float getRadiusMultiplier() const { return _radiusMultiplier; }
     /** Radius correction applied to spheres and cylinders.
@@ -151,7 +184,7 @@ public:
      */
     void setRadiusCorrection(const float value)
     {
-        updateValue(_radiusCorrection, value);
+        _updateValue(_radiusCorrection, value);
     }
     float getRadiusCorrection() const { return _radiusCorrection; }
     /** Enables a different color for every molecule/morphology/mesh when
@@ -161,7 +194,7 @@ public:
     const std::string& getColorSchemeAsString(const ColorScheme value) const;
     void setColorScheme(const ColorScheme value)
     {
-        updateValue(_colorScheme, value);
+        _updateValue(_colorScheme, value);
     }
     /** Scene environment (none, ground, wall, bounding_box ) */
     SceneEnvironment getSceneEnvironment() const { return _sceneEnvironment; }
@@ -184,34 +217,37 @@ public:
     /** Defines the range of frames to be loaded for the simulation */
     double getCircuitEndSimulationTime() const
     {
-        return _circuitEndSimulationTime;
+        return _circuitConfiguration._circuitEndSimulationTime;
     }
     double getCircuitStartSimulationTime() const
     {
-        return _circuitStartSimulationTime;
+        return _circuitConfiguration._circuitStartSimulationTime;
     }
-    double getCircuitSimulationStep() const { return _circuitSimulationStep; }
+    double getCircuitSimulationStep() const
+    {
+        return _circuitConfiguration._circuitSimulationStep;
+    }
     Vector2f getCircuitSimulationValuesRange() const
     {
-        return _circuitSimulationValuesRange;
+        return _circuitConfiguration._circuitSimulationValuesRange;
     }
 
     /** Size of the simulation histogram */
     size_t getCircuitSimulationHistogramSize() const
     {
-        return _circuitSimulationHistogramSize;
+        return _circuitConfiguration._circuitSimulationHistogramSize;
     }
 
     /** Size of the simulation histogram */
     size_t getCircuitMeshTransformation() const
     {
-        return _circuitMeshTransformation;
+        return _circuitConfiguration._circuitMeshTransformation;
     }
 
     /** Splash scene folder */
     void setSplashSceneFolder(const std::string& value)
     {
-        updateValue(_splashSceneFolder, value);
+        _updateValue(_splashSceneFolder, value);
     }
     const std::string& getSplashSceneFolder() const
     {
@@ -245,21 +281,31 @@ public:
      */
     const std::string& getSceneFile() const { return _sceneFile; };
     /** File containing neuron matrix */
-    const std::string& getConnectivityFile() const { return _connectivityFile; }
+    const std::string& getConnectivityFile() const
+    {
+        return _connectivityConfiguration._connectivityFile;
+    }
     /** Matrix id */
-    size_t getConnectivityMatrixId() const { return _connectivityMatrixId; }
+    size_t getConnectivityMatrixId() const
+    {
+        return _connectivityConfiguration._connectivityMatrixId;
+    }
     /** Show/Hide connection in matrix */
     size_t getConnectivityShowConnections() const
     {
-        return _connectivityShowConnections;
+        return _connectivityConfiguration._connectivityShowConnections;
     }
     /** Range of dimensions */
     Vector2ui getConnectivityDimensionRange() const
     {
-        return _connectivityDimensionRange;
+        return _connectivityConfiguration._connectivityDimensionRange;
     }
     /** Range of dimensions */
-    Vector3f getConnectivityScale() const { return _connectivityScale; }
+    Vector3f getConnectivityScale() const
+    {
+        return _connectivityConfiguration._connectivityScale;
+    }
+
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -280,20 +326,7 @@ protected:
     std::string _meshFile;
 
     // Circuit
-    std::string _circuitConfiguration;
-    bool _circuitUseSimulationModel;
-    Boxf _circuitBoundingBox;
-    float _circuitDensity;
-    std::string _circuitMeshFilenamePattern;
-    std::string _circuitMeshFolder;
-    std::string _circuitTargets;
-    std::string _circuitReport;
-    double _circuitStartSimulationTime;
-    double _circuitEndSimulationTime;
-    double _circuitSimulationStep{0};
-    Vector2f _circuitSimulationValuesRange;
-    size_t _circuitSimulationHistogramSize;
-    bool _circuitMeshTransformation;
+    CircuitConfiguration _circuitConfiguration;
 
     // Scene
     std::string _loadCacheFile;
@@ -319,12 +352,9 @@ protected:
     // System parameters
     MemoryMode _memoryMode;
 
-    // Connectivity matrix
-    std::string _connectivityFile;
-    size_t _connectivityMatrixId;
-    bool _connectivityShowConnections;
-    Vector2ui _connectivityDimensionRange;
-    Vector3f _connectivityScale;
+    ConnectivityConfiguration _connectivityConfiguration;
+
+    SERIALIZATION_FRIEND(GeometryParameters)
 };
 }
 #endif // GEOMETRYPARAMETERS_H

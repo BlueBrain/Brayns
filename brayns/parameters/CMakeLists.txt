@@ -7,20 +7,24 @@
 set(BRAYNSPARAMETERS_SOURCES
   ParametersManager.cpp
   AbstractParameters.cpp
+  AnimationParameters.cpp
   RenderingParameters.cpp
   GeometryParameters.cpp
   ApplicationParameters.cpp
   SceneParameters.cpp
+  StreamParameters.cpp
   VolumeParameters.cpp
 )
 
 set(BRAYNSPARAMETERS_PUBLIC_HEADERS
   ParametersManager.h
   AbstractParameters.h
+  AnimationParameters.h
   RenderingParameters.h
   GeometryParameters.h
   ApplicationParameters.h
   SceneParameters.h
+  StreamParameters.h
   VolumeParameters.h
 )
 

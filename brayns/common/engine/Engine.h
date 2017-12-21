@@ -21,7 +21,10 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
+
+#include <mutex>
 
 namespace brayns
 {
@@ -47,13 +50,13 @@ public:
     /**
        @return the name of the engine
     */
-    virtual std::string name() const = 0;
+    virtual EngineType name() const = 0;
 
     /**
        Commits changes to the engine. This include scene and camera
        modifications
     */
-    virtual void commit();
+    virtual void commit() = 0;
 
     /**
      * Called after the given extension plugin was created to perform
@@ -139,18 +142,26 @@ public:
     /** @return the minimum frame size in pixels supported by this engine. */
     virtual Vector2ui getMinimumFrameSize() const = 0;
 
-    /**
-     * @return the last operation processed by the engine
-     */
-    const std::string& getLastOperation() const { return _lastOperation; }
-    /**
-     * @return the last normalized progress value (0..1) emitted by the engine
-     */
-    float getLastProgress() const { return _lastProgress; }
+    struct Progress : public BaseObject
+    {
+        std::string operation;
+        float amount{0.f};
+        mutable std::mutex mutex;
+
+        template <typename T>
+        void updateValue(T& member, const T& newValue)
+        {
+            _updateValue(member, newValue);
+        }
+    };
+
+    /** @return the current progress of the engine */
+    const Progress& getProgress() const { return _progress; }
+    Progress& getProgress() { return _progress; }
     /** Set the last operation processed by the engine. */
     void setLastOperation(const std::string& lastOperation)
     {
-        _lastOperation = lastOperation;
+        _progress.updateValue(_progress.operation, lastOperation);
     }
 
     /**
@@ -158,8 +169,7 @@ public:
      */
     void setLastProgress(const float lastProgress)
     {
-        _lastProgress = lastProgress;
-        _modified = true;
+        _progress.updateValue(_progress.amount, lastProgress);
     }
 
     /**
@@ -181,10 +191,8 @@ public:
      *         if data loading is in progress.
      */
     bool isReady() const { return _isReady; }
-    bool getModified() const { return _modified; }
     /** @internal */
     void setReady(const bool isReady_) { _isReady = isReady_; }
-    void resetModified() { _modified = false; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
@@ -198,11 +206,9 @@ protected:
     FrameBufferPtr _frameBuffer;
 
     size_t _frameNumber;
-    float _lastProgress;
-    std::string _lastOperation;
+    Progress _progress;
     bool _keepRunning{true};
     bool _isReady{false};
-    bool _modified{false};
 };
 }
 

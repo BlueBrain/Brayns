@@ -144,14 +144,13 @@ void OptiXEngine::_initializeContext()
     }
 }
 
-std::string OptiXEngine::name() const
+EngineType OptiXEngine::name() const
 {
-    return "optix";
+    return EngineType::optix;
 }
 
 void OptiXEngine::commit()
 {
-    Engine::commit();
     for (const auto& renderer : _renderers)
     {
         _renderers[renderer.first]->setScene(_scene);

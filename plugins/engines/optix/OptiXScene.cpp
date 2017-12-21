@@ -781,7 +781,7 @@ void OptiXScene::commitSimulationData()
 void OptiXScene::commitVolumeData()
 {
     const auto animationFrame =
-        _parametersManager.getSceneParameters().getAnimationFrame();
+        _parametersManager.getAnimationParameters().getFrame();
     VolumeHandlerPtr volumeHandler = getVolumeHandler();
     if (!volumeHandler || !volumeHandler->getData())
     {
@@ -902,7 +902,7 @@ void OptiXScene::_processVolumeAABBGeometry()
     };
 
     const auto animationFrame =
-        _parametersManager.getSceneParameters().getAnimationFrame();
+        _parametersManager.getAnimationParameters().getFrame();
     volumeHandler->setCurrentIndex(animationFrame);
     const Vector3f& volumeElementSpacing = volumeHandler->getElementSpacing();
     const Vector3f& volumeOffset = volumeHandler->getOffset();

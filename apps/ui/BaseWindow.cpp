@@ -160,7 +160,11 @@ void BaseWindow::mouseButton(const int button, const bool released,
              1.f - pos.y() / float(_windowSize.y())});
         _brayns.getEngine().getFrameBuffer().clear();
         if (result.hit)
+        {
             _brayns.getEngine().getCamera().setTarget(result.pos);
+            // updates position based on new target and current rotation
+            _brayns.getCameraManipulator().rotate(result.pos, 0, 0, false);
+        }
     }
 
     if (button == GLUT_WHEEL_SCROLL_UP || button == GLUT_WHEEL_SCROLL_DOWN)

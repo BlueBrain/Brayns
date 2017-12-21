@@ -38,5 +38,6 @@ void TransferFunction::clear()
     _emissionIntensities.clear();
     _contributions.clear();
     _valuesRange = Vector2f();
+    markModified();
 }
 }

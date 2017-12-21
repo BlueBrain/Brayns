@@ -49,12 +49,12 @@ namespace brayns
 {
 DeflectPlugin::DeflectPlugin(ParametersManager& parametersManager)
     : ExtensionPlugin()
-    , _params{parametersManager.getApplicationParameters()}
+    , _appParams{parametersManager.getApplicationParameters()}
+    , _params{parametersManager.getStreamParameters()}
     , _sendFuture{make_ready_future(true)}
 {
-    _params.setStreamingEnabled(true); // Streaming will only be activated if
-                                       // the DEFLECT_HOST environment variable
-                                       // is defined
+    _params.setEnabled(true); // Streaming will only be activated if the
+                              // DEFLECT_HOST environment variable is defined
 }
 
 bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
@@ -67,21 +67,20 @@ bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
 
     if (_stream)
     {
-        const bool changed =
-            _stream->getId() != _params.getStreamId() ||
-            _stream->getHost() != _params.getStreamHostname() ||
-            _stream->getPort() != _params.getStreamPort();
+        const bool changed = _stream->getId() != _params.getId() ||
+                             _stream->getHost() != _params.getHostname() ||
+                             _stream->getPort() != _params.getPort();
         if (changed)
             _closeStream();
     }
 
-    if (_previousHost != _params.getStreamHostname())
+    if (_previousHost != _params.getHostname())
     {
-        _params.setStreamingEnabled(true);
-        _previousHost = _params.getStreamHostname();
+        _params.setEnabled(true);
+        _previousHost = _params.getHostname();
     }
 
-    const bool deflectEnabled = _params.getStreamingEnabled();
+    const bool deflectEnabled = _params.getEnabled();
     if (_stream && _stream->isConnected() && !deflectEnabled)
         _closeStream();
 
@@ -106,15 +105,15 @@ bool DeflectPlugin::_startStream(const bool observerOnly)
     {
         if (observerOnly)
         {
-            _stream.reset(new deflect::Observer(_params.getStreamId(),
-                                                _params.getStreamHostname(),
-                                                _params.getStreamPort()));
+            _stream.reset(new deflect::Observer(_params.getId(),
+                                                _params.getHostname(),
+                                                _params.getPort()));
         }
         else
         {
-            _stream.reset(new deflect::Stream(_params.getStreamId(),
-                                              _params.getStreamHostname(),
-                                              _params.getStreamPort()));
+            _stream.reset(new deflect::Stream(_params.getId(),
+                                              _params.getHostname(),
+                                              _params.getPort()));
         }
 
         if (_stream->isConnected())
@@ -128,15 +127,15 @@ bool DeflectPlugin::_startStream(const bool observerOnly)
             BRAYNS_ERROR << "Deflect failed to register for events!"
                          << std::endl;
 
-        _params.setStreamId(_stream->getId());
-        _params.setStreamHost(_stream->getHost());
+        _params.setId(_stream->getId());
+        _params.setHost(_stream->getHost());
         return true;
     }
     catch (std::runtime_error& ex)
     {
         BRAYNS_ERROR << "Deflect failed to initialize. " << ex.what()
                      << std::endl;
-        _params.setStreamingEnabled(false);
+        _params.setEnabled(false);
         return false;
     }
 }
@@ -209,13 +208,13 @@ void DeflectPlugin::_handleDeflectEvents(Engine& engine,
             if (engine.getCamera().getType() == CameraType::stereo)
                 newSize.x() *= 2;
 
-            _params.setWindowSize(engine.getSupportedFrameSize(newSize));
+            _appParams.setWindowSize(engine.getSupportedFrameSize(newSize));
             break;
         }
         case deflect::Event::EVT_CLOSE:
         {
-            _params.setStreamingEnabled(false);
-            _params.setStreamHost("");
+            _params.setEnabled(false);
+            _params.setHost("");
             _previousHost.clear();
 
             _closeStream();
@@ -229,7 +228,7 @@ void DeflectPlugin::_handleDeflectEvents(Engine& engine,
 
 void DeflectPlugin::_sendSizeHints(Engine& engine)
 {
-    const auto size = engine.getSupportedFrameSize(_params.getWindowSize());
+    const auto size = engine.getSupportedFrameSize(_appParams.getWindowSize());
     const auto minSize = engine.getMinimumFrameSize();
 
     auto sizeHints = deflect::SizeHints();
@@ -249,7 +248,7 @@ void DeflectPlugin::_sendDeflectFrame(Engine& engine)
         else
         {
             BRAYNS_ERROR << "failure in _sendDeflectFrame()" << std::endl;
-            _params.setStreamingEnabled(false);
+            _params.setEnabled(false);
         }
         return;
     }
@@ -287,8 +286,8 @@ deflect::Stream::Future DeflectPlugin::_sendLastImage(
     if (cameraType == CameraType::stereo)
         deflectImage.view = deflect::View::side_by_side;
 
-    deflectImage.compressionQuality = _params.getStreamQuality();
-    deflectImage.compressionPolicy = _params.getStreamCompression()
+    deflectImage.compressionQuality = _params.getQuality();
+    deflectImage.compressionPolicy = _params.getCompression()
                                          ? deflect::COMPRESSION_ON
                                          : deflect::COMPRESSION_OFF;
     deflect::ImageWrapper::swapYAxis((void*)_lastImage.data.data(),

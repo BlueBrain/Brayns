@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+SERIALIZATION_ACCESS(ApplicationParameters)
+
 namespace brayns
 {
 /** Manages application parameters
@@ -43,7 +45,7 @@ public:
     const Vector2ui& getWindowSize() const { return _windowSize; }
     void setWindowSize(const Vector2ui& size)
     {
-        updateValue(_windowSize, size);
+        _updateValue(_windowSize, size);
     }
     /** camera name (e.g. Perspective, Stereo, etc. ) */
     std::string getCamera() const { return _camera; }
@@ -52,59 +54,25 @@ public:
     /** JPEG compression quality */
     void setJpegCompression(const size_t compression)
     {
-        updateValue(_jpegCompression, compression);
+        _updateValue(_jpegCompression, compression);
     }
     size_t getJpegCompression() const { return _jpegCompression; }
     /** JPEG size */
     const Vector2ui& getJpegSize() const { return _jpegSize; }
-    void setJpegSize(const Vector2ui& size) { updateValue(_jpegSize, size); }
+    void setJpegSize(const Vector2ui& size) { _updateValue(_jpegSize, size); }
     /** Image stream FPS */
     size_t getImageStreamFPS() const { return _imageStreamFPS; }
     void setImageStreamFPS(const size_t fps)
     {
-        updateValue(_imageStreamFPS, fps);
+        _updateValue(_imageStreamFPS, fps);
     }
 
     const strings& getFilters() const { return _filters; }
     void setFrameExportFolder(const std::string& folder)
     {
-        updateValue(_frameExportFolder, folder);
+        _updateValue(_frameExportFolder, folder);
     }
     std::string getFrameExportFolder() const { return _frameExportFolder; }
-    /** Streaming enabled */
-    bool getStreamingEnabled() const { return _streamingEnabled; }
-    void setStreamingEnabled(const bool enabled)
-    {
-        updateValue(_streamingEnabled, enabled);
-    }
-
-    /** Stream compression enabled */
-    bool getStreamCompression() const { return _streamCompression; }
-    void setStreamCompression(const bool enabled)
-    {
-        updateValue(_streamCompression, enabled);
-    }
-
-    /** Stream compression quality, 1 (worst) to 100 (best) */
-    unsigned int getStreamQuality() const { return _streamQuality; }
-    void setStreamQuality(const unsigned int quality)
-    {
-        updateValue(_streamQuality, quality);
-    }
-
-    /** Stream ID; defaults to DEFLECT_ID if empty */
-    const std::string& getStreamId() const { return _streamId; }
-    void setStreamId(const std::string& id) { updateValue(_streamId, id); }
-    /** Stream hostname; defaults to DEFLECT_HOST if empty */
-    const std::string& getStreamHostname() const { return _streamHostname; }
-    void setStreamHost(const std::string& host)
-    {
-        updateValue(_streamHostname, host);
-    }
-
-    /** Stream port; defaults to 1701 if empty */
-    uint16_t getStreamPort() const { return _streamPort; }
-    void setStreamPort(const uint16_t port) { updateValue(_streamPort, port); }
     /** Folder used by the application to store temporary files */
     std::string getTmpFolder() const { return _tmpFolder; }
     /** @return true if synchronous mode is enabled, aka rendering waits for
@@ -112,7 +80,7 @@ public:
     bool getSynchronousMode() const { return _synchronousMode; }
     void setSynchronousMode(const bool synchronousMode)
     {
-        updateValue(_synchronousMode, synchronousMode);
+        _updateValue(_synchronousMode, synchronousMode);
     }
 
 protected:
@@ -125,15 +93,11 @@ protected:
     Vector2ui _jpegSize;
     strings _filters;
     std::string _frameExportFolder;
-    bool _streamingEnabled{false};
-    bool _streamCompression{true};
-    unsigned int _streamQuality{80};
-    uint16_t _streamPort{1701};
-    std::string _streamHostname;
-    std::string _streamId;
     std::string _tmpFolder;
     bool _synchronousMode{false};
     size_t _imageStreamFPS{60};
+
+    SERIALIZATION_FRIEND(ApplicationParameters)
 };
 }
 

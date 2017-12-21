@@ -107,7 +107,7 @@ public:
      * frame. The Histogram
      *        is specific to the current frame, not to the whole simulation.
      */
-    const Histogram& getHistogram();
+    Histogram& getHistogram();
 
     /** @return true if the histogram has changed since the last update. */
     bool histogramChanged() const;

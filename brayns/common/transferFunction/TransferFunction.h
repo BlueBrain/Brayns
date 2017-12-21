@@ -21,11 +21,12 @@
 #ifndef TRANSFERFUNCTION_H
 #define TRANSFERFUNCTION_H
 
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
 
 namespace brayns
 {
-class TransferFunction
+class TransferFunction : public BaseObject
 {
 public:
     TransferFunction();
@@ -54,10 +55,10 @@ public:
      * @brief Get transfer function range of values
      * @return A tuple of 2 floats with min and max value
      */
-    const Vector2f& getValuesRange() const { return _valuesRange; }
+    Vector2f& getValuesRange() { return _valuesRange; }
     void setValuesRange(const Vector2f& valuesRange)
     {
-        _valuesRange = valuesRange;
+        _updateValue(_valuesRange, valuesRange);
     }
 
 private:

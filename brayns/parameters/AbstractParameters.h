@@ -21,6 +21,7 @@
 #ifndef ABSTRACTPARAMETERS_H
 #define ABSTRACTPARAMETERS_H
 
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 
@@ -31,7 +32,7 @@ namespace brayns
 /**
    Base class defining command line parameters
  */
-class AbstractParameters
+class AbstractParameters : public BaseObject
 {
 public:
     /**
@@ -70,36 +71,12 @@ public:
 
     const strings& arguments() const;
 
-    /**
-     * @return true if any parameter has been modified sinc the last
-     * resetModified().
-     */
-    bool getModified() const { return _modified; }
-    /**
-     * Reset the modified state, typically done after changes have been applied.
-     */
-    void resetModified() { _modified = false; }
-    /**
-     * Helper function for derived classes to update a parameter and mark it
-     * modified if it has changed.
-     */
-    template <typename T>
-    void updateValue(T& member, const T& newValue)
-    {
-        if (member != newValue)
-        {
-            member = newValue;
-            _modified = true;
-        }
-    }
-
 protected:
     virtual bool _parse(const po::variables_map&) = 0;
 
     std::string _name;
     po::options_description _parameters;
     strings _arguments;
-    bool _modified{true};
 };
 }
 #endif // ABSTRACTPARAMETERS_H

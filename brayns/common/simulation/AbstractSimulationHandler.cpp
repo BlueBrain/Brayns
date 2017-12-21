@@ -120,7 +120,7 @@ void AbstractSimulationHandler::writeFrame(std::ofstream& stream,
     stream.write((char*)values.data(), values.size() * sizeof(float));
 }
 
-const Histogram& AbstractSimulationHandler::getHistogram()
+Histogram& AbstractSimulationHandler::getHistogram()
 {
     if (!histogramChanged())
         return _histogram;

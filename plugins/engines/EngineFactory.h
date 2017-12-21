@@ -51,7 +51,7 @@ public:
      * @return A pointer to the engine, null if the engine could not be
      *         instanciated
      */
-    std::unique_ptr<Engine> create(const std::string& name);
+    std::unique_ptr<Engine> create(EngineType name);
 
 private:
     int _argc;

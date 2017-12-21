@@ -62,12 +62,16 @@ void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 
 void OSPRayRenderer::commit()
 {
+    AnimationParameters& ap = _parametersManager.getAnimationParameters();
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
     SceneParameters& sp = _parametersManager.getSceneParameters();
     VolumeParameters& vp = _parametersManager.getVolumeParameters();
 
-    if (!rp.getModified() && !sp.getModified() && !vp.getModified())
+    if (!ap.getModified() && !rp.getModified() && !sp.getModified() &&
+        !vp.getModified() && !_scene->getModified())
+    {
         return;
+    }
 
     ShadingType mt = rp.getShading();
 
@@ -82,7 +86,7 @@ void OSPRayRenderer::commit()
     ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
 
     ospSet1i(_renderer, "shadingEnabled", (mt == ShadingType::diffuse));
-    ospSet1f(_renderer, "timestamp", sp.getAnimationFrame());
+    ospSet1f(_renderer, "timestamp", ap.getFrame());
     ospSet1i(_renderer, "randomNumber", rand() % 10000);
     ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
     ospSet1i(_renderer, "electronShading", (mt == ShadingType::electron));

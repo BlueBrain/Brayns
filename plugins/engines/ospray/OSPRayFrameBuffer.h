@@ -42,7 +42,7 @@ public:
     float* getDepthBuffer() final { return _depthBuffer; }
     OSPFrameBuffer impl() { return _frameBuffer; }
     void enableDeflectPixelOp();
-    void setStreamingParams(const ApplicationParameters& params, bool stereo);
+    void setStreamingParams(const StreamParameters& params, bool stereo);
 
 private:
     OSPFrameBuffer _frameBuffer;

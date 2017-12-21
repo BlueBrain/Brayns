@@ -98,6 +98,6 @@ void AbstractParameters::set(const std::string& key, const std::string& value)
 
     _parse(vm);
 
-    _modified = true;
+    markModified();
 }
 }

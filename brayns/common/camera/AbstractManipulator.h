@@ -44,6 +44,7 @@ public:
 
     float getRotationSpeed() const;
     float getWheelSpeed() const;
+    void rotate(const Vector3f& pivot, float du, float dv, bool updateTarget);
 
 protected:
     /*! target camera */
@@ -61,7 +62,6 @@ protected:
     float _rotationSpeed;
 
     void translate(const Vector3f& v, bool updateTarget);
-    void rotate(const Vector3f& pivot, float du, float dv, bool updateTarget);
 };
 }
 

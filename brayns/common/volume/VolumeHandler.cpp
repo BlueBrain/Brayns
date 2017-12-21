@@ -202,7 +202,7 @@ void VolumeHandler::VolumeDescriptor::unmap()
     }
 }
 
-const Histogram& VolumeHandler::getHistogram()
+Histogram& VolumeHandler::getHistogram()
 {
     if (_histograms.find(_currentIndex) != _histograms.end())
         return _histograms[_currentIndex];

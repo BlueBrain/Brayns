@@ -32,7 +32,6 @@ namespace brayns
 {
 Engine::Engine(ParametersManager& parametersManager)
     : _parametersManager(parametersManager)
-    , _lastProgress(0)
 {
     resetFrameNumber();
 }
@@ -59,20 +58,6 @@ void Engine::reshape(const Vector2ui& frameSize)
     _frameBuffer->resize(size);
     _camera->setAspectRatio(static_cast<float>(size.x()) /
                             static_cast<float>(size.y()));
-}
-
-void Engine::commit()
-{
-    auto& sceneParams = _parametersManager.getSceneParameters();
-    if ((sceneParams.getModified() || sceneParams.getAnimationDelta() != 0) &&
-        getScene().getSimulationHandler() &&
-        getScene().getSimulationHandler()->isReady())
-    {
-        sceneParams.setAnimationFrame(sceneParams.getAnimationFrame() +
-                                      sceneParams.getAnimationDelta());
-
-        _frameBuffer->clear();
-    }
 }
 
 void Engine::setDefaultCamera()
