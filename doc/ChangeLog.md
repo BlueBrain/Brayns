@@ -1,6 +1,47 @@
 Changelog {#Changelog}
 =========
 
+# Release 0.4 (21-12-2017)
+
+* [#263](https://github.com/BlueBrain/Brayns/pull/263):
+  Remove livre engine
+* [#255](https://github.com/BlueBrain/Brayns/pull/255):
+  Add pick() to Renderer; use shift+click in braynsViewer for camera target change
+* [#253](https://github.com/BlueBrain/Brayns/pull/253):
+  Use minimal post-processing for high quality to speedup mesh loading
+* [#251](https://github.com/BlueBrain/Brayns/pull/251):
+  Added cast_simulation_data attribute to materials
+* [#240](https://github.com/BlueBrain/Brayns/pull/240):
+  Add websockets support
+* [#239](https://github.com/BlueBrain/Brayns/pull/239):
+  Allow use of OSPRay default renderers
+* [#230](https://github.com/BlueBrain/Brayns/pull/230):
+  Add docker support
+* [#227](https://github.com/BlueBrain/Brayns/pull/227):
+  Provide scene bounds in HTTP to ease camera manipulation
+* [#223](https://github.com/BlueBrain/Brayns/pull/223):
+  Added support for geometry and shading normals OSPRay renderers
+* [#222](https://github.com/BlueBrain/Brayns/pull/222):
+  Implement async loading to unblock datasource update request from HTTP
+* [#220](https://github.com/BlueBrain/Brayns/pull/220):
+  Added neuron connectivity matrix visualizer
+* [#215](https://github.com/BlueBrain/Brayns/pull/215):
+  Add synchronous mode to asynchronously load compartment report frames
+* [#195](https://github.com/BlueBrain/Brayns/pull/195):
+  Add support for DeflectPixelOp for optimized streaming with OSPRay
+* [#191](https://github.com/BlueBrain/Brayns/pull/191):
+  Added circuit-simulation-step command line parameter
+* [#187](https://github.com/BlueBrain/Brayns/pull/187):
+  Refactored circuit related command line parameters
+* [#183](https://github.com/BlueBrain/Brayns/pull/183):
+  Added --mesh-filename-pattern command line argument
+* [#181](https://github.com/BlueBrain/Brayns/pull/181):
+  Fixed simulation offset issue when loading morphologies
+* [#177](https://github.com/BlueBrain/Brayns/pull/177):
+  Added scene file loader
+* [#173](https://github.com/BlueBrain/Brayns/pull/173):
+  Added --mesh-file command line argument to load single mesh file
+
 # Release 0.3 (01-06-2017)
 
 * [#158](https://github.com/BlueBrain/Brayns/pull/158):
