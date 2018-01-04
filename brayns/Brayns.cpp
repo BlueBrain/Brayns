@@ -333,7 +333,8 @@ private:
         _engine->commit();
 
         Camera& camera = _engine->getCamera();
-        camera.commit();
+        if (camera.getModified())
+            camera.commit();
 
         Scene& scene = _engine->getScene();
 

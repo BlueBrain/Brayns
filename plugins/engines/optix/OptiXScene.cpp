@@ -264,8 +264,6 @@ void OptiXScene::commit()
 
     _context["top_object"]->set(_geometryGroup);
     _context["top_shadower"]->set(_geometryGroup);
-
-    _context->validate();
 }
 
 void OptiXScene::buildGeometry()

@@ -57,9 +57,6 @@ OSPRayCamera::~OSPRayCamera()
 
 void OSPRayCamera::commit()
 {
-    if (!getModified())
-        return;
-
     const auto& position = getPosition();
     const auto& target = getTarget();
     const auto dir = normalize(target - position);

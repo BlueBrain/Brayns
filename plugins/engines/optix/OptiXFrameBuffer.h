@@ -34,8 +34,9 @@ namespace brayns
 class OptiXFrameBuffer : public brayns::FrameBuffer
 {
 public:
-    OptiXFrameBuffer(const Vector2ui& frameSize, FrameBufferFormat colorDepth,
-                     bool accumulation, optix::Context& context);
+    OptiXFrameBuffer(const Vector2ui& frameSize,
+                     const FrameBufferFormat colorDepth,
+                     const bool accumulation, optix::Context& context);
 
     ~OptiXFrameBuffer();
 
@@ -50,12 +51,13 @@ public:
     uint8_t* getColorBuffer() final { return _colorBuffer; }
     float* getDepthBuffer() final { return 0; }
 private:
+    void _cleanup();
     optix::Buffer _frameBuffer;
     optix::Buffer _accumBuffer;
     optix::Context& _context;
     uint8_t* _colorBuffer;
     float* _depthBuffer;
-    uint16_t _accumulationFrame;
+    uint16_t _accumulationFrameNumber;
     void* _imageData;
 };
 }

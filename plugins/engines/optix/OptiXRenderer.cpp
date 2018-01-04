@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -26,6 +26,25 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
+namespace
+{
+const std::string CUDA_TIMESTAMP = "timestamp";
+const std::string CUDA_MAX_DEPTH = "max_depth";
+const std::string CUDA_RADIANCE_RAY_TYPE = "radiance_ray_type";
+const std::string CUDA_SHADOW_RAY_TYPE = "shadow_ray_type";
+const std::string CUDA_SCENE_EPSILON = "scene_epsilon";
+const std::string CUDA_DIFFUSE_SHADING = "shading_enabled";
+const std::string CUDA_ELECTRON_SHADING = "electron_shading_enabled";
+const std::string CUDA_SHADOWS = "shadows";
+const std::string CUDA_SOFT_SHADOWS = "soft_shadows";
+const std::string CUDA_AMBIENT_OCCLUSION_STRENGTH =
+    "ambient_occlusion_strength";
+const std::string CUDA_AMBIENT_LIGHT_COLOR = "ambient_light_color";
+const std::string CUDA_BACKGROUND_COLOR = "bg_color";
+const std::string CUDA_VOLUME_SAMPLES_PER_RAY = "volumeSamplesPerRay";
+const std::string CUDA_JITTER = "jitter4";
+}
+
 namespace brayns
 {
 OptiXRenderer::OptiXRenderer(const std::string& /*name*/,
@@ -43,7 +62,7 @@ void OptiXRenderer::render(FrameBufferPtr frameBuffer)
                             (float)rand() / (float)RAND_MAX,
                             (float)rand() / (float)RAND_MAX,
                             (float)rand() / (float)RAND_MAX};
-    _context["jitter4"]->setFloat(jitter);
+    _context[CUDA_JITTER]->setFloat(jitter);
 
     // Render
     const Vector2ui& size = frameBuffer->getSize();
@@ -60,29 +79,30 @@ void OptiXRenderer::commit()
 {
     const auto& sp = _parametersManager.getSceneParameters();
 
-    _context["timestamp"]->setFloat(sp.getAnimationFrame());
+    _context[CUDA_TIMESTAMP]->setFloat(sp.getAnimationFrame());
 
     const auto& rp = _parametersManager.getRenderingParameters();
 
-    _context["max_depth"]->setUint(10);
-    _context["radiance_ray_type"]->setUint(0);
-    _context["shadow_ray_type"]->setUint(1);
-    _context["scene_epsilon"]->setFloat(rp.getEpsilon());
+    _context[CUDA_MAX_DEPTH]->setUint(10u);
+    _context[CUDA_RADIANCE_RAY_TYPE]->setUint(0u);
+    _context[CUDA_SHADOW_RAY_TYPE]->setUint(1u);
+    _context[CUDA_SCENE_EPSILON]->setFloat(rp.getEpsilon());
 
     auto mt = rp.getShading();
-    _context["shading_enabled"]->setUint(mt == ShadingType::diffuse);
-    _context["electron_shading_enabled"]->setUint(mt == ShadingType::electron);
-    _context["shadows"]->setFloat(rp.getShadows());
-    _context["soft_shadows"]->setFloat(rp.getSoftShadows());
-    _context["ambient_occlusion_strength"]->setFloat(
+    _context[CUDA_DIFFUSE_SHADING]->setUint(mt == ShadingType::diffuse);
+    _context[CUDA_ELECTRON_SHADING]->setUint(mt == ShadingType::electron);
+    _context[CUDA_SHADOWS]->setFloat(rp.getShadows());
+    _context[CUDA_SOFT_SHADOWS]->setFloat(rp.getSoftShadows());
+    _context[CUDA_AMBIENT_OCCLUSION_STRENGTH]->setFloat(
         rp.getAmbientOcclusionStrength());
 
     auto color = rp.getBackgroundColor();
-    _context["ambient_light_color"]->setFloat(color.x(), color.y(), color.z());
-    _context["bg_color"]->setFloat(color.x(), color.y(), color.z());
+    _context[CUDA_AMBIENT_LIGHT_COLOR]->setFloat(color.x(), color.y(),
+                                                 color.z());
+    _context[CUDA_BACKGROUND_COLOR]->setFloat(color.x(), color.y(), color.z());
 
     const auto& vp = _parametersManager.getVolumeParameters();
-    _context["volumeSamplesPerRay"]->setUint(vp.getSamplesPerRay());
+    _context[CUDA_VOLUME_SAMPLES_PER_RAY]->setUint(vp.getSamplesPerRay());
 }
 
 void OptiXRenderer::setCamera(CameraPtr camera)

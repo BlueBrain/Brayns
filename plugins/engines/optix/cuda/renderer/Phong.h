@@ -54,7 +54,7 @@ rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 rtDeclareVariable(float, t_hit, rtIntersectionDistance, );
 rtDeclareVariable(PerRayData_radiance, prd, rtPayload, );
 rtDeclareVariable(PerRayData_shadow, prd_shadow, rtPayload, );
-rtDeclareVariable(unsigned int, frame, , );
+rtDeclareVariable(unsigned int, frame_number, , );
 rtDeclareVariable(uint2, launch_index, rtLaunchIndex, );
 rtDeclareVariable(unsigned int, max_depth, , );
 rtBuffer<BasicLight> lights;
@@ -164,7 +164,7 @@ static __device__ float4 getVolumeContribution(const optix::Ray& volumeRay,
 
     optix::size_t2 screen = output_buffer.size();
     unsigned int seed =
-        tea<16>(screen.x * launch_index.y + launch_index.x, frame);
+        tea<16>(screen.x * launch_index.y + launch_index.x, frame_number);
     const float delta = (float)(seed % (int)(volumeEpsilon + 1));
 
     float t = hit + volumeEpsilon - delta;
@@ -270,7 +270,7 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
     // Randomness
     optix::size_t2 screen = output_buffer.size();
     unsigned int seed =
-        tea<16>(screen.x * launch_index.y + launch_index.x, frame);
+        tea<16>(screen.x * launch_index.y + launch_index.x, frame_number);
 
     // Glossiness
     if (p_glossiness < 1.f)
