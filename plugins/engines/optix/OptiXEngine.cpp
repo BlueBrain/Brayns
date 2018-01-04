@@ -61,7 +61,7 @@ OptiXEngine::OptiXEngine(int, const char**,
     _frameSize = _parametersManager.getApplicationParameters().getWindowSize();
 
     const bool accumulation =
-        _parametersManager.getApplicationParameters().getFilters().empty();
+        _parametersManager.getRenderingParameters().getAccumulation();
     const bool environmentMap =
         !parametersManager.getSceneParameters().getEnvironmentMap().empty();
 
@@ -158,7 +158,6 @@ void OptiXEngine::commit()
         _renderers[renderer.first]->setCamera(_camera);
         _renderers[renderer.first]->commit();
     }
-    _camera->commit();
 }
 
 void OptiXEngine::render()

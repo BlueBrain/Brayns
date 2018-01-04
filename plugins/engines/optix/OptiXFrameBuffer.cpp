@@ -24,37 +24,51 @@
 
 #include <optixu/optixu_math_namespace.h>
 
+namespace
+{
+const std::string CUDA_OUTPUT_BUFFER = "output_buffer";
+const std::string CUDA_ACCUMULATION_BUFFER = "accum_buffer";
+const std::string CUDA_FRAME_NUMBER = "frame_number";
+}
+
 namespace brayns
 {
 OptiXFrameBuffer::OptiXFrameBuffer(const Vector2ui& frameSize,
-                                   FrameBufferFormat colorDepth,
-                                   bool accumulation, optix::Context& context)
+                                   const FrameBufferFormat colorDepth,
+                                   const bool accumulation,
+                                   optix::Context& context)
     : FrameBuffer(frameSize, colorDepth, accumulation)
-    , _frameBuffer(0)
-    , _accumBuffer(0)
+    , _frameBuffer(nullptr)
+    , _accumBuffer(nullptr)
     , _context(context)
-    , _colorBuffer(0)
-    , _depthBuffer(0)
-    , _accumulationFrame(0)
-    , _imageData(0)
+    , _colorBuffer(nullptr)
+    , _depthBuffer(nullptr)
+    , _accumulationFrameNumber(1u)
+    , _imageData(nullptr)
 {
     resize(frameSize);
 }
 
 OptiXFrameBuffer::~OptiXFrameBuffer()
 {
+    _cleanup();
+}
+
+void OptiXFrameBuffer::_cleanup()
+{
     unmap();
     if (_frameBuffer)
         _frameBuffer->destroy();
+    _frameBuffer = nullptr;
     if (_accumBuffer)
         _accumBuffer->destroy();
+    _accumBuffer = nullptr;
 }
 
 void OptiXFrameBuffer::resize(const Vector2ui& frameSize)
 {
     _frameSize = frameSize;
-
-    unmap();
+    _cleanup();
 
     RTformat format;
     switch (_frameBufferFormat)
@@ -71,30 +85,20 @@ void OptiXFrameBuffer::resize(const Vector2ui& frameSize)
 
     _frameBuffer = _context->createBuffer(RT_BUFFER_OUTPUT, format,
                                           _frameSize.x(), _frameSize.y());
-    _context["output_buffer"]->set(_frameBuffer);
+    _context[CUDA_OUTPUT_BUFFER]->set(_frameBuffer);
 
-    if (_accumulation)
-    {
-        _accumBuffer =
-            _context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
-                                   RT_FORMAT_FLOAT4, _frameSize.x(),
-                                   _frameSize.y());
-    }
-    else
-    {
-        _accumBuffer =
-            _context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
-                                   RT_FORMAT_FLOAT4, 0, 0);
-    }
+    _accumBuffer =
+        _context->createBuffer(RT_BUFFER_INPUT_OUTPUT, RT_FORMAT_FLOAT4,
+                               _frameSize.x(), _frameSize.y());
 
-    _context["accum_buffer"]->set(_accumBuffer);
+    _context[CUDA_ACCUMULATION_BUFFER]->set(_accumBuffer);
 
     clear();
 }
 
 void OptiXFrameBuffer::clear()
 {
-    _accumulationFrame = 0;
+    _accumulationFrameNumber = 1u;
 }
 
 void OptiXFrameBuffer::map()
@@ -106,9 +110,9 @@ void OptiXFrameBuffer::map()
     rtBufferMap(_frameBuffer->get(), &_imageData);
 
     if (_accumulation)
-        _context["frame"]->setUint(_accumulationFrame++);
+        _context[CUDA_FRAME_NUMBER]->setUint(_accumulationFrameNumber++);
     else
-        _context["frame"]->setUint(0);
+        _context[CUDA_FRAME_NUMBER]->setUint(1u);
 
     switch (_frameBufferFormat)
     {

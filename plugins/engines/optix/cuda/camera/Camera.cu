@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ rtBuffer<uchar4, 2>              output_buffer;
 rtBuffer<float4, 2>              accum_buffer;
 rtDeclareVariable(rtObject,      top_object, , );
 rtDeclareVariable(unsigned int,  radiance_ray_type, , );
-rtDeclareVariable(unsigned int,  frame, , );
+rtDeclareVariable(unsigned int,  frame_number, , );
 rtDeclareVariable(uint2,         launch_index, rtLaunchIndex, );
 
 rtDeclareVariable(float, aperture_radius, , );
@@ -91,12 +91,12 @@ RT_PROGRAM void camera()
 {
     size_t2 screen = output_buffer.size();
     unsigned int seed =
-        tea< 16 >( screen.x * launch_index.y + launch_index.x, frame );
+        tea< 16 >( screen.x * launch_index.y + launch_index.x, frame_number );
 
     // Subpixel jitter: send the ray through a different position inside the pixel each time,
     // to provide antialiasing.
     float2 subpixel_jitter =
-        frame == 0 ?
+        frame_number == 1 ?
         make_float2(0.0f, 0.0f) :
         make_float2( rnd( seed ) - 0.5f, rnd( seed ) - 0.5f );
 
@@ -124,6 +124,7 @@ RT_PROGRAM void camera()
     optix::Ray ray( ray_origin, ray_direction, radiance_ray_type, near, far );
 
     PerRayData_radiance prd;
+    prd.result = make_float3(0.f);
     prd.importance = 1.f;
     prd.depth = 0;
 
@@ -131,10 +132,10 @@ RT_PROGRAM void camera()
 
     float4 acc_val = accum_buffer[ launch_index ];
 
-    if( frame > 0 )
+    if( frame_number > 1 )
         acc_val = lerp(
             acc_val,
-            make_float4( prd.result, 0.f), 1.0f / static_cast<float>( frame+1 ));
+            make_float4( prd.result, 1.f), 1.f / (float)frame_number );
     else
         acc_val = make_float4( prd.result, 1.f );
 
@@ -144,6 +145,8 @@ RT_PROGRAM void camera()
 
 RT_PROGRAM void exception()
 {
+    const unsigned int code = rtGetExceptionCode();
+    rtPrintf( "Caught exception 0x%X at launch index (%d,%d)\n", code, launch_index.x, launch_index.y );
     output_buffer[ launch_index ] = make_color( bad_color );
 }
 

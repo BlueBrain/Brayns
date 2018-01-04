@@ -263,6 +263,8 @@ void RenderingParameters::print()
                 << std::endl;
     BRAYNS_INFO << "Camera type                       : "
                 << getCameraTypeAsString(_cameraType) << std::endl;
+    BRAYNS_INFO << "Accumulation                      : "
+                << (_accumulation ? "on" : "off") << std::endl;
 }
 
 const std::string& RenderingParameters::getRendererAsString(
