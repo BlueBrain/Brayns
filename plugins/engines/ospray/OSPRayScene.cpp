@@ -380,6 +380,10 @@ void OSPRayScene::buildGeometry()
     if (geomParams.getCircuitUseSimulationModel() && !_simulationModel)
         _simulationModel = ospNewModel();
 
+    // Optix needs a bounding box around the volume so that if can find
+    // intersections before initiating the traversal
+    _processVolumeAABBGeometry();
+
     const size_t size = serializeGeometry();
 
     size_t totalNbSpheres = 0;
@@ -509,6 +513,8 @@ void OSPRayScene::commitMaterials(const Action action)
         ospSet1f(ospMaterial, "glossiness", material.getGlossiness());
         ospSet1i(ospMaterial, "cast_simulation_data",
                  material.getCastSimulationData());
+        ospSet1i(ospMaterial, "skybox",
+                 material.getType() == MaterialType::skybox);
 
         for (const auto& textureType : textureTypeMaterialAttribute)
             ospSetObject(ospMaterial, textureType.attribute.c_str(), nullptr);

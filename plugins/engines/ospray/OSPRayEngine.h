@@ -65,6 +65,7 @@ public:
 private:
     bool _haveDeflectPixelOp{false};
     bool _useDynamicLoadBalancer{false};
+    EngineType _type{EngineType::ospray};
 };
 }
 

@@ -58,11 +58,6 @@ if(BRAYNS_OSPRAY_ENABLED)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOSPRayEnginePlugin)
 endif()
 
-if(BRAYNS_OPTIX_ENABLED)
-  add_subdirectory(engines/optix)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOptiXEnginePlugin)
-endif()
-
 common_library(braynsPlugins)
 
 # needed for staticjson and rapidjson

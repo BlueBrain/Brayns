@@ -79,15 +79,6 @@ else()
   unset(BRAYNS_OSPRAY_ENABLED)
 endif()
 
-# OptiX rendering engine
-common_find_package(OptiX SYSTEM)
-common_find_package(CUDA SYSTEM)
-if(OPTIX_FOUND AND CUDA_FOUND)
-  option(BRAYNS_OPTIX_ENABLED "Activate OptiX rendering engine" ON)
-else()
-  unset(BRAYNS_OPTIX_ENABLED)
-endif()
-
 # Image processing
 common_find_package(Magick++ SYSTEM)
 if(Magick++_FOUND)
@@ -120,9 +111,8 @@ common_find_package_post()
 # BRAYNS applications and libraries
 # ------------------------------------------------------------------------------
 
-if(NOT(OPTIX_FOUND AND CUDA_FOUND) AND NOT OSPRAY_FOUND)
-  message(WARNING
-      "Neither OptiX+CUDA nor OSPRay were found. Brayns cannot work without an engine" )
+if(NOT OSPRAY_FOUND)
+  message(WARNING "OSPRay not found. Brayns cannot work without an engine" )
 endif()
 
 if(BRAYNS_OSPRAY_ENABLED)
@@ -160,8 +150,18 @@ endif()
 
 add_subdirectory(plugins)
 add_subdirectory(brayns)
-
 add_subdirectory(tests)
+
+# OptiX module
+if(BRAYNS_OSPRAY_ENABLED)
+  option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" ON)
+  if(BRAYNS_OPTIX_ENABLED)
+    add_subdirectory(ospray_modules/optix)
+    if(TARGET ospray_module_optix)
+      add_dependencies(braynsOSPRayEnginePlugin ospray_module_optix)
+    endif()
+  endif()
+endif()
 
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 include(DoxygenRule)

@@ -47,7 +47,6 @@ rtBuffer<float3> vertices_buffer;
 rtBuffer<float3> normal_buffer;
 rtBuffer<float2> texcoord_buffer;
 rtBuffer<int3>   indices_buffer;
-rtBuffer<int>    material_buffer;
 
 rtDeclareVariable(float3, texcoord,         attribute texcoord, );
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
@@ -105,7 +104,7 @@ void meshIntersect( int primIdx )
                   back_hit_point,
                   front_hit_point );
 
-      rtReportIntersection(material_buffer[primIdx]);
+      rtReportIntersection(0);
     }
   }
 }

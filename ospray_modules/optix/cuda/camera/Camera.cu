@@ -65,6 +65,9 @@ rtDeclareVariable(float4, clip_plane4, , );
 rtDeclareVariable(float4, clip_plane5, , );
 rtDeclareVariable(float4, clip_plane6, , );
 
+// For MPI rendering
+//rtDeclareVariable(float2, offset, , );
+
 __device__ void getClippingValues(
         const float3& ray_origin, const float3& ray_direction,
         float& near, float& far )
@@ -102,6 +105,8 @@ RT_PROGRAM void camera()
 
     float2 d = (make_float2(launch_index) + subpixel_jitter) / make_float2(screen) * 2.f - 1.f;
 
+//    d.x += offset.x;
+//    d.y += offset.y;
     float3 ray_origin = eye;
     float3 ray_direction = d.x * U + d.y * V + W;
 

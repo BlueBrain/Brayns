@@ -48,6 +48,15 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
         for (const auto& arg : arguments)
             newArgv.push_back(arg.c_str());
 
+        if (parametersManager.getRenderingParameters().getEngine() ==
+            EngineType::optix)
+        {
+            _type = EngineType::optix;
+            argc += 2;
+            newArgv.push_back("--osp:module:optix");
+            newArgv.push_back("--osp:device:optix");
+        }
+
         ospInit(&argc, newArgv.data());
     }
     catch (const std::exception& e)
@@ -100,6 +109,8 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     BRAYNS_INFO << "Initializing scene" << std::endl;
     _scene.reset(new OSPRayScene(renderersForScene, _parametersManager));
     _camera.reset(new OSPRayCamera(rp.getCameraType()));
+    _camera->setEnvironmentMap(
+        !parametersManager.getSceneParameters().getEnvironmentMap().empty());
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize = getSupportedFrameSize(
@@ -130,11 +141,23 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
 
 OSPRayEngine::~OSPRayEngine()
 {
+    if (_scene)
+        _scene->reset();
+    _scene.reset();
+    _frameBuffer.reset();
+    _renderers.clear();
+    _camera.reset();
+
+    // HACK: need ospFinish() here; currently used by optix module to properly
+    // destroy optix context
+    if (name() == EngineType::optix)
+        ospLoadModule("exit");
 }
 
 EngineType OSPRayEngine::name() const
 {
-    return EngineType::ospray;
+    // can be ospray or optix
+    return _type;
 }
 
 void OSPRayEngine::commit()
