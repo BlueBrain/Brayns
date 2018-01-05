@@ -1,8 +1,8 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * This file is part of https://github.com/BlueBrain/ospray-modules
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,9 +18,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OPTIXTYPES_H
-#define OPTIXTYPES_H
+#pragma once
 
-#include <optixu/optixpp_namespace.h>
+#include <ospray/SDK/lights/Light.h>
 
-#endif // OPTIXTYPES_H
+#include "../CommonStructs.h"
+
+namespace bbp
+{
+namespace optix
+{
+struct Light : public ospray::Light
+{
+    enum class Type
+    {
+        Point,
+        Directional
+    };
+
+    explicit Light(const Type type_)
+        : type(type_)
+    {
+    }
+    ~Light() = default;
+    void commit() override;
+
+    BasicLight optixLight;
+    const Type type;
+};
+}
+}

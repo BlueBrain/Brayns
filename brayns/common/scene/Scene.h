@@ -362,6 +362,7 @@ public:
 
 protected:
     void _buildMissingMaterials(const size_t materialId);
+    void _processVolumeAABBGeometry();
 
     // Parameters
     ParametersManager& _parametersManager;

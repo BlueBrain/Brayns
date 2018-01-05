@@ -617,6 +617,60 @@ void Scene::_buildMissingMaterials(const size_t materialId)
         _materials.resize(materialId + 1);
 }
 
+void Scene::_processVolumeAABBGeometry()
+{
+    VolumeHandlerPtr volumeHandler = getVolumeHandler();
+    if (!volumeHandler)
+        return;
+
+    const Vector3f positions[8] = {
+        {0.f, 0.f, 0.f}, {1.f, 0.f, 0.f}, //    6--------7
+        {0.f, 1.f, 0.f},                  //   /|       /|
+        {1.f, 1.f, 0.f},                  //  2--------3 |
+        {0.f, 0.f, 1.f},                  //  | |      | |
+        {1.f, 0.f, 1.f},                  //  | 4------|-5
+        {0.f, 1.f, 1.f},                  //  |/       |/
+        {1.f, 1.f, 1.f}                   //  0--------1
+    };
+
+    const uint16_t indices[6][6] = {
+        {0, 1, 3, 3, 2, 0}, // Front
+        {1, 5, 7, 7, 3, 1}, // Right
+        {5, 4, 6, 6, 7, 5}, // Back
+        {4, 0, 2, 2, 6, 4}, // Left
+        {0, 1, 5, 5, 4, 0}, // Bottom
+        {2, 3, 7, 7, 6, 2}  // Top
+    };
+
+    const auto animationFrame =
+        _parametersManager.getAnimationParameters().getFrame();
+    volumeHandler->setCurrentIndex(animationFrame);
+    const Vector3f& volumeElementSpacing = volumeHandler->getElementSpacing();
+    const Vector3f& volumeOffset = volumeHandler->getOffset();
+    const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
+
+    const size_t materialId = static_cast<size_t>(MaterialType::invisible);
+    uint64_t offset = _trianglesMeshes[materialId].vertices.size();
+    for (size_t face = 0; face < 6; ++face)
+    {
+        for (size_t index = 0; index < 6; ++index)
+        {
+            const Vector3f position = positions[indices[face][index]] *
+                                          volumeElementSpacing *
+                                          volumeDimensions +
+                                      volumeOffset;
+
+            _trianglesMeshes[materialId].vertices.push_back(position);
+            _bounds.merge(position);
+        }
+        const size_t index = offset + face * 6;
+        _trianglesMeshes[materialId].indices.push_back(
+            Vector3ui(index + 0, index + 1, index + 2));
+        _trianglesMeshes[materialId].indices.push_back(
+            Vector3ui(index + 3, index + 4, index + 5));
+    }
+}
+
 uint64_t Scene::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _buildMissingMaterials(materialId);
