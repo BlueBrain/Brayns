@@ -25,49 +25,35 @@ RUN mkdir -p ${ISPC_PATH} \
 # Add ispc bin to the PATH
 ENV PATH $PATH:${ISPC_PATH}
 
-# Install Embree
-# https://github.com/embree/embree
+# Install embree
+# https://github.com/embree/embree/releases
 ARG EMBREE_VERSION=2.17.1
-ARG EMBREE_SRC=/app/embree
+ARG EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
 
-RUN mkdir -p ${EMBREE_SRC} \
- && apt-get -y install \
-    build-essential \
-    cmake \
-    freeglut3-dev \
-    git \
-    libtbb-dev \
-    libxi-dev \
-    libxmu-dev \
-    ninja-build \
- && git clone https://github.com/embree/embree.git ${EMBREE_SRC} \
- && cd ${EMBREE_SRC} \
- && git checkout v${EMBREE_VERSION} \
- && mkdir -p build \
- && cd build \
- && cmake .. -GNinja -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
- && ninja install
+RUN mkdir -p ${DIST_PATH} \
+  && wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE} \
+  && tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1
 
-# Install OSPray
-# https://github.com/ospray/OSPRay
-ARG OSPRAY_VERSION=1.4.2
+# Install OSPRay
+# https://github.com/ospray/ospray/releases
+ARG OSPRAY_VERSION=1.4.3
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
- && apt-get update \
- && apt-get -y install \
-    freeglut3-dev \
-    libglu1-mesa-dev \
-    libtbb-dev \
-    libxi-dev \
-    libxmu-dev \
-    xorg-dev \
+  && apt-get -y install \
+     build-essential \
+     cmake \
+     git \
+     ninja-build \
+     libtbb-dev \
  && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
  && cd ${OSPRAY_SRC} \
  && git checkout v${OSPRAY_VERSION} \
  && mkdir -p build \
  && cd build \
- && cmake .. -GNinja -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
+ && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
+    -DOSPRAY_ENABLE_APPS=OFF \
+    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
  && ninja install
 
 # Set working dir and copy Brayns assets
@@ -81,33 +67,33 @@ ADD . ${BRAYNS_SRC}
 RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && cd ${BRAYNS_SRC} \
  && apt-get -y install \
-    freeglut3-dev \
     libassimp-dev \
-    libboost-all-dev \
-    libglew-dev \
-    libglu1-mesa-dev \
+    libboost-date-time-dev \
+    libboost-filesystem-dev \
+    libboost-iostreams-dev \
+    libboost-program-options-dev \
+    libboost-regex-dev \
+    libboost-serialization-dev \
+    libboost-system-dev \
+    libboost-test-dev \
     libhdf5-serial-dev \
     libjpeg-turbo8-dev \
     libmagick++-dev \
-    libtbb-dev \
     libturbojpeg \
-    libxi-dev \
-    libxmu-dev \
     libwebsockets-dev \
     qtbase5-dev \
-    qtdeclarative5-dev \
-    xorg-dev \
  && git submodule update --init --recursive --remote \
  && mkdir -p build \
  && cd build \
- && cmake .. -GNinja \
+ && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
     -DBRAYNS_BRION_ENABLED=ON \
     -DBRAYNS_DEFLECT_ENABLED=ON \
     -DBRAYNS_NETWORKING_ENABLED=ON \
     -DCLONE_SUBPROJECTS=ON \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
- && ninja install
+    -DBUILD_PYTHON_BINDINGS=OFF \
+ && ninja mvd-tool Brayns-install
 
 # Final image, containing only Brayns and libraries required to run it
 FROM ubuntu:xenial
@@ -115,30 +101,21 @@ ARG DIST_PATH=/app/dist
 
 RUN apt-get update \
  && apt-get install -y \
-    freeglut3 \
     libassimp3v5 \
-    libboost-atomic1.58.0 \
-    libboost-chrono1.58.0 \
-    libboost-date-time1.58.0 \
     libboost-filesystem1.58.0 \
     libboost-program-options1.58.0 \
     libboost-regex1.58.0 \
     libboost-serialization1.58.0 \
     libboost-system1.58.0 \
-    libboost-thread1.58.0 \
     libboost-iostreams1.58.0 \
-    libglew1.13 \
     libgomp1 \
     libhdf5-10 \
     libhdf5-cpp-11 \
-    libhwloc5 \
     libmagick++-6.q16-5v5 \
     libmagickwand-6.q16-2 \
     libqt5concurrent5 \
     libqt5network5 \
-    libtbb2 \
     libturbojpeg \
-    libxmu6 \
     libwebsockets7 \
  && rm -rf /var/lib/apt/lists/*
 
