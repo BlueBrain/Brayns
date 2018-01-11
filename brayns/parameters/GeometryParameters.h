@@ -207,7 +207,10 @@ public:
         const GeometryQuality value) const;
 
     /** Morphology section types*/
-    size_t getMorphologySectionTypes() const { return _morphologySectionTypes; }
+    const MorphologySectionTypes& getMorphologySectionTypes() const
+    {
+        return _morphologySectionTypes;
+    }
     /** Morphology layout */
     const MorphologyLayout& getMorphologyLayout() const
     {
@@ -341,7 +344,7 @@ protected:
     float _radiusCorrection;
     ColorScheme _colorScheme;
     GeometryQuality _geometryQuality;
-    size_t _morphologySectionTypes;
+    MorphologySectionTypes _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
     bool _generateMultipleModels;
     std::string _molecularSystemConfig;

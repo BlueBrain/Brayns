@@ -58,7 +58,6 @@ STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
                         {"high", brayns::GeometryQuality::high});
 
 STATICJSON_DECLARE_ENUM(brayns::MorphologySectionType,
-                        {"undefined", brayns::MorphologySectionType::undefined},
                         {"soma", brayns::MorphologySectionType::soma},
                         {"axon", brayns::MorphologySectionType::axon},
                         {"dendrite", brayns::MorphologySectionType::dendrite},
