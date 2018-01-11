@@ -256,13 +256,22 @@ enum class GeometryQuality
 /** Morphology element types */
 enum class MorphologySectionType
 {
-    undefined = 0x00,
     soma = 0x01,
     axon = 0x02,
     dendrite = 0x04,
     apical_dendrite = 0x08,
     all = 0xff
 };
+using MorphologySectionTypes = std::vector<MorphologySectionType>;
+
+template <typename T>
+size_t enumsToBitmask(const std::vector<T> enums)
+{
+    size_t bit{0};
+    for (auto& val : enums)
+        bit |= size_t(val);
+    return bit;
+}
 
 /**
  * @brief The Histogram struct contains the range as well as the values of the

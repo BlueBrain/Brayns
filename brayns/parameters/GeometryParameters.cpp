@@ -112,7 +112,7 @@ GeometryParameters::GeometryParameters()
     , _radiusCorrection(0.f)
     , _colorScheme(ColorScheme::none)
     , _geometryQuality(GeometryQuality::high)
-    , _morphologySectionTypes(size_t(MorphologySectionType::all))
+    , _morphologySectionTypes{MorphologySectionType::all}
     , _metaballsGridSize(0)
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
@@ -297,8 +297,20 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
         _circuitConfiguration._circuitMeshFolder =
             vm[PARAM_CIRCUIT_MESH_FOLDER].as<std::string>();
     if (vm.count(PARAM_MORPHOLOGY_SECTION_TYPES))
-        _morphologySectionTypes =
-            vm[PARAM_MORPHOLOGY_SECTION_TYPES].as<size_t>();
+    {
+        _morphologySectionTypes.clear();
+        const auto bits = vm[PARAM_MORPHOLOGY_SECTION_TYPES].as<size_t>();
+        if (bits & size_t(MorphologySectionType::soma))
+            _morphologySectionTypes.push_back(MorphologySectionType::soma);
+        if (bits & size_t(MorphologySectionType::axon))
+            _morphologySectionTypes.push_back(MorphologySectionType::axon);
+        if (bits & size_t(MorphologySectionType::dendrite))
+            _morphologySectionTypes.push_back(MorphologySectionType::dendrite);
+        if (bits & size_t(MorphologySectionType::apical_dendrite))
+            _morphologySectionTypes.push_back(
+                MorphologySectionType::apical_dendrite);
+    }
+
     if (vm.count(PARAM_MORPHOLOGY_LAYOUT))
     {
         size_ts values = vm[PARAM_MORPHOLOGY_LAYOUT].as<size_ts>();
@@ -473,8 +485,8 @@ void GeometryParameters::print()
                 << (_circuitConfiguration._circuitMeshTransformation ? "Yes"
                                                                      : "No")
                 << std::endl;
-    BRAYNS_INFO << "Morphology section types   : " << _morphologySectionTypes
-                << std::endl;
+    BRAYNS_INFO << "Morphology section types   : "
+                << enumsToBitmask(_morphologySectionTypes) << std::endl;
     BRAYNS_INFO << "Morphology Layout          : " << std::endl;
     BRAYNS_INFO << " - Columns                 : "
                 << _morphologyLayout.nbColumns << std::endl;

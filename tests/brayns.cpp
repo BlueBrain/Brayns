@@ -111,8 +111,10 @@ BOOST_AUTO_TEST_CASE(defaults)
                 brayns::SceneEnvironment::none);
     BOOST_CHECK(geomParams.getGeometryQuality() ==
                 brayns::GeometryQuality::high);
-    BOOST_CHECK_EQUAL(geomParams.getMorphologySectionTypes(),
-                      size_t(brayns::MorphologySectionType::all));
+    BOOST_CHECK_EQUAL(
+        brayns::enumsToBitmask(geomParams.getMorphologySectionTypes()),
+        brayns::enumsToBitmask(std::vector<brayns::MorphologySectionType>{
+            brayns::MorphologySectionType::all}));
     BOOST_CHECK_EQUAL(geomParams.getMorphologyLayout().nbColumns, 0);
     BOOST_CHECK_EQUAL(geomParams.getCircuitStartSimulationTime(), 0.f);
     BOOST_CHECK_EQUAL(geomParams.getCircuitEndSimulationTime(),

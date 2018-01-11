@@ -496,7 +496,7 @@ private:
         try
         {
             const size_t morphologySectionTypes =
-                _geometryParameters.getMorphologySectionTypes();
+                enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
 
             brain::neuron::Morphology morphology(uri, transformation);
             const auto sectionTypes = _getSectionTypes(morphologySectionTypes);
@@ -590,7 +590,7 @@ private:
             Vector3f translation;
 
             const size_t morphologySectionTypes =
-                _geometryParameters.getMorphologySectionTypes();
+                enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
 
             brain::neuron::Morphology morphology(uri, transformation);
             brain::neuron::SectionTypes sectionTypes;
@@ -871,7 +871,7 @@ private:
     {
         bool returnValue = true;
         const size_t morphologySectionTypes =
-            _geometryParameters.getMorphologySectionTypes();
+            enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
         if (morphologySectionTypes ==
             static_cast<size_t>(MorphologySectionType::soma))
             return _importMorphologyAsPoint(index, material, transformation,
