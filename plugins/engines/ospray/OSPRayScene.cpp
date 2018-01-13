@@ -156,7 +156,10 @@ void OSPRayScene::unload()
 void OSPRayScene::commit()
 {
     if (_model)
+    {
+        BRAYNS_INFO << "Committing main model" << std::endl;
         ospCommit(_model);
+    }
 
     if (_simulationModel)
     {

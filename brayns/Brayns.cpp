@@ -267,16 +267,11 @@ private:
         scene.buildEnvironment();
 
         const auto& geomParams = _parametersManager.getGeometryParameters();
-        if (geomParams.getLoadCacheFile().empty())
-        {
-            loadingProgress.setMessage("Building geometry ...");
-            scene.buildGeometry();
-
-            if (!geomParams.getSaveCacheFile().empty())
-                scene.saveToCacheFile();
-        }
-        else
-            scene.buildGeometry();
+        loadingProgress.setMessage("Building geometry ...");
+        scene.buildGeometry();
+        if (geomParams.getLoadCacheFile().empty() &&
+            !geomParams.getSaveCacheFile().empty())
+            scene.saveToCacheFile();
 
         loadingProgress += LOADING_PROGRESS_STEP;
 

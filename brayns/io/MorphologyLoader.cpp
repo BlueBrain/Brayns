@@ -294,12 +294,12 @@ private:
     size_t _getMaterialFromGeometryParameters(
         const uint64_t index, const size_t material,
         const brain::neuron::SectionType sectionType,
-        const GIDOffsets& targetGIDOffsets) const
+        const GIDOffsets& targetGIDOffsets, bool isMesh = false) const
     {
         if (material != NO_MATERIAL)
             return _materialsOffset + material;
 
-        if (_geometryParameters.getCircuitUseSimulationModel())
+        if (!isMesh && _geometryParameters.getCircuitUseSimulationModel())
             return _materialsOffset;
 
         size_t materialId = 0;
@@ -833,7 +833,7 @@ private:
         {
             const size_t materialId = _getMaterialFromGeometryParameters(
                 meshIndex, NO_MATERIAL, brain::neuron::SectionType::undefined,
-                targetGIDOffsets);
+                targetGIDOffsets, true);
 
             // Load mesh from file
             const auto transformation =
