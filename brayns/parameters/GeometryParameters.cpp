@@ -243,7 +243,7 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_MESH_FILE))
         _meshFile = vm[PARAM_MESH_FILE].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_CONFIG))
-        _circuitConfiguration._circuitConfiguration =
+        _circuitConfiguration.circuitConfigFile =
             vm[PARAM_CIRCUIT_CONFIG].as<std::string>();
     if (vm.count(PARAM_LOAD_CACHE_FILE))
         _loadCacheFile = vm[PARAM_LOAD_CACHE_FILE].as<std::string>();
@@ -285,16 +285,15 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
                 _geometryQuality = static_cast<GeometryQuality>(i);
     }
     if (vm.count(PARAM_CIRCUIT_TARGETS))
-        _circuitConfiguration._circuitTargets =
+        _circuitConfiguration.targets =
             vm[PARAM_CIRCUIT_TARGETS].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_REPORT))
-        _circuitConfiguration._circuitReport =
+        _circuitConfiguration.report =
             vm[PARAM_CIRCUIT_REPORT].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_DENSITY))
-        _circuitConfiguration._circuitDensity =
-            vm[PARAM_CIRCUIT_DENSITY].as<float>();
+        _circuitConfiguration.density = vm[PARAM_CIRCUIT_DENSITY].as<float>();
     if (vm.count(PARAM_CIRCUIT_MESH_FOLDER))
-        _circuitConfiguration._circuitMeshFolder =
+        _circuitConfiguration.meshFolder =
             vm[PARAM_CIRCUIT_MESH_FOLDER].as<std::string>();
     if (vm.count(PARAM_MORPHOLOGY_SECTION_TYPES))
     {
@@ -322,23 +321,23 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
         }
     }
     if (vm.count(PARAM_CIRCUIT_START_SIMULATION_TIME))
-        _circuitConfiguration._circuitStartSimulationTime =
+        _circuitConfiguration.startSimulationTime =
             vm[PARAM_CIRCUIT_START_SIMULATION_TIME].as<double>();
     if (vm.count(PARAM_CIRCUIT_END_SIMULATION_TIME))
-        _circuitConfiguration._circuitEndSimulationTime =
+        _circuitConfiguration.endSimulationTime =
             vm[PARAM_CIRCUIT_END_SIMULATION_TIME].as<double>();
     if (vm.count(PARAM_CIRCUIT_SIMULATION_STEP))
-        _circuitConfiguration._circuitSimulationStep =
+        _circuitConfiguration.simulationStep =
             vm[PARAM_CIRCUIT_SIMULATION_STEP].as<double>();
     if (vm.count(PARAM_CIRCUIT_SIMULATION_RANGE))
     {
         floats values = vm[PARAM_CIRCUIT_SIMULATION_RANGE].as<floats>();
         if (values.size() == 2)
-            _circuitConfiguration._circuitSimulationValuesRange =
+            _circuitConfiguration.simulationValuesRange =
                 Vector2f(values[0], values[1]);
     }
     if (vm.count(PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE))
-        _circuitConfiguration._circuitSimulationHistogramSize =
+        _circuitConfiguration.simulationHistogramSize =
             vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE].as<size_t>();
     if (vm.count(PARAM_NEST_CACHE_FILENAME))
         _NESTCacheFile = vm[PARAM_NEST_CACHE_FILENAME].as<std::string>();
@@ -356,20 +355,19 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
         _metaballsSamplesFromSoma =
             vm[PARAM_METABALLS_SAMPLES_FROM_SOMA].as<size_t>();
     if (vm.count(PARAM_CIRCUIT_USES_SIMULATION_MODEL))
-        _circuitConfiguration._circuitUseSimulationModel =
+        _circuitConfiguration.useSimulationModel =
             vm[PARAM_CIRCUIT_USES_SIMULATION_MODEL].as<bool>();
     if (vm.count(PARAM_CIRCUIT_BOUNDING_BOX))
     {
         const floats values = vm[PARAM_CIRCUIT_BOUNDING_BOX].as<floats>();
         if (values.size() == 6)
         {
-            _circuitConfiguration._circuitBoundingBox.reset();
-            _circuitConfiguration._circuitBoundingBox.merge(
+            _circuitConfiguration.boundingBox.reset();
+            _circuitConfiguration.boundingBox.merge(
                 Vector3f(values[0], values[1], values[2]));
-            _circuitConfiguration._circuitBoundingBox.merge(
+            _circuitConfiguration.boundingBox.merge(
                 Vector3f(values[3], values[4], values[5]));
-            BRAYNS_ERROR << _circuitConfiguration._circuitBoundingBox
-                         << std::endl;
+            BRAYNS_ERROR << _circuitConfiguration.boundingBox << std::endl;
         }
         else
             BRAYNS_ERROR << "Invalid number of values for "
@@ -387,10 +385,10 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_SCENE_FILE))
         _sceneFile = vm[PARAM_SCENE_FILE].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_MESH_FILENAME_PATTERN))
-        _circuitConfiguration._circuitMeshFilenamePattern =
+        _circuitConfiguration.meshFilenamePattern =
             vm[PARAM_CIRCUIT_MESH_FILENAME_PATTERN].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_MESH_TRANSFORMATION))
-        _circuitConfiguration._circuitMeshTransformation =
+        _circuitConfiguration.meshTransformation =
             vm[PARAM_CIRCUIT_MESH_TRANSFORMATION].as<bool>();
 
     // Neuron connectivity
@@ -457,33 +455,29 @@ void GeometryParameters::print()
                 << getGeometryQualityAsString(_geometryQuality) << std::endl;
     BRAYNS_INFO << "Circuit configuration      : " << std::endl;
     BRAYNS_INFO << "- Config file              : "
-                << _circuitConfiguration._circuitConfiguration << std::endl;
+                << _circuitConfiguration.circuitConfigFile << std::endl;
     BRAYNS_INFO << " - Targets                 : "
-                << _circuitConfiguration._circuitTargets << std::endl;
+                << _circuitConfiguration.targets << std::endl;
     BRAYNS_INFO << " - Report                  : "
-                << _circuitConfiguration._circuitReport << std::endl;
+                << _circuitConfiguration.report << std::endl;
     BRAYNS_INFO << " - Mesh folder             : "
-                << _circuitConfiguration._circuitMeshFolder << std::endl;
+                << _circuitConfiguration.meshFolder << std::endl;
     BRAYNS_INFO << " - Density                 : "
-                << _circuitConfiguration._circuitDensity << std::endl;
+                << _circuitConfiguration.density << std::endl;
     BRAYNS_INFO << " - Start simulation time   : "
-                << _circuitConfiguration._circuitStartSimulationTime
-                << std::endl;
+                << _circuitConfiguration.startSimulationTime << std::endl;
     BRAYNS_INFO << " - End simulation time     : "
-                << _circuitConfiguration._circuitEndSimulationTime << std::endl;
+                << _circuitConfiguration.endSimulationTime << std::endl;
     BRAYNS_INFO << " - Simulation step         : "
-                << _circuitConfiguration._circuitSimulationStep << std::endl;
+                << _circuitConfiguration.simulationStep << std::endl;
     BRAYNS_INFO << " - Simulation values range : "
-                << _circuitConfiguration._circuitSimulationValuesRange
-                << std::endl;
+                << _circuitConfiguration.simulationValuesRange << std::endl;
     BRAYNS_INFO << " - Histogram size          : "
-                << _circuitConfiguration._circuitSimulationHistogramSize
-                << std::endl;
+                << _circuitConfiguration.simulationHistogramSize << std::endl;
     BRAYNS_INFO << " - Bounding box            : "
-                << _circuitConfiguration._circuitBoundingBox << std::endl;
+                << _circuitConfiguration.boundingBox << std::endl;
     BRAYNS_INFO << " - Mesh transformation     : "
-                << (_circuitConfiguration._circuitMeshTransformation ? "Yes"
-                                                                     : "No")
+                << (_circuitConfiguration.meshTransformation ? "Yes" : "No")
                 << std::endl;
     BRAYNS_INFO << "Morphology section types   : "
                 << enumsToBitmask(_morphologySectionTypes) << std::endl;
@@ -506,16 +500,14 @@ void GeometryParameters::print()
     BRAYNS_INFO << " - Samples from soma       : " << _metaballsSamplesFromSoma
                 << std::endl;
     BRAYNS_INFO << "Use simulation model       : "
-                << (_circuitConfiguration._circuitUseSimulationModel ? "Yes"
-                                                                     : "No")
+                << (_circuitConfiguration.useSimulationModel ? "Yes" : "No")
                 << std::endl;
     BRAYNS_INFO << "Memory mode                : "
                 << (_memoryMode == MemoryMode::shared ? "Shared" : "Replicated")
                 << std::endl;
     BRAYNS_INFO << "Scene file                 : " << _sceneFile << std::endl;
     BRAYNS_INFO << "Mesh filename pattern      : "
-                << _circuitConfiguration._circuitMeshFilenamePattern
-                << std::endl;
+                << _circuitConfiguration.meshFilenamePattern << std::endl;
     BRAYNS_INFO << "Connectivity               : " << std::endl;
     BRAYNS_INFO << " - File                    : "
                 << _connectivityConfiguration._connectivityFile << std::endl;
@@ -554,8 +546,7 @@ const std::string& GeometryParameters::getGeometryQualityAsString(
 
 float GeometryParameters::getCircuitDensity() const
 {
-    return std::max(0.f,
-                    std::min(100.f, _circuitConfiguration._circuitDensity));
+    return std::max(0.f, std::min(100.f, _circuitConfiguration.density));
 }
 
 strings GeometryParameters::getCircuitTargetsAsStrings() const
@@ -563,7 +554,7 @@ strings GeometryParameters::getCircuitTargetsAsStrings() const
     strings targets;
     boost::char_separator<char> separator(",");
     boost::tokenizer<boost::char_separator<char>> tokens(
-        _circuitConfiguration._circuitTargets, separator);
+        _circuitConfiguration.targets, separator);
     for_each(tokens.begin(), tokens.end(),
              [&targets](const std::string& s) { targets.push_back(s); });
     return targets;

@@ -95,6 +95,13 @@ public:
      */
     void setNbFrames(const uint32_t nbFrames) { _nbFrames = nbFrames; }
     /**
+     * @return the dt of the simulation in getUnit() time unit; 0 if not
+     *         reported
+     */
+    double getDt() const { return _dt; }
+    /** @return the time unit of the simulation; empty if not reported. */
+    const std::string& getUnit() const { return _unit; }
+    /**
      * @brief getHistogram returns the Histogram of the values in the current
      * simulation frame. The
      *        size of the histogram is defined by the
@@ -119,15 +126,17 @@ protected:
     uint32_t _getBoundedFrame(const uint32_t frame) const;
 
     const GeometryParameters& _geometryParameters;
-    uint32_t _currentFrame;
-    uint32_t _nbFrames;
-    uint64_t _frameSize;
+    uint32_t _currentFrame{std::numeric_limits<uint32_t>::max()};
+    uint32_t _nbFrames{0};
+    uint64_t _frameSize{0};
+    double _dt{0};
+    std::string _unit;
 
-    uint64_t _headerSize;
-    void* _memoryMapPtr;
-    int _cacheFileDescriptor;
+    uint64_t _headerSize{0};
+    void* _memoryMapPtr{nullptr};
+    int _cacheFileDescriptor{-1};
     Histogram _histogram;
-    float* _frameData;
+    float* _frameData{nullptr};
 };
 }
 #endif // ABSTRACTSIMULATIONHANDLER_H

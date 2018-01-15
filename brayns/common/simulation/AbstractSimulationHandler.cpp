@@ -33,13 +33,6 @@ namespace brayns
 AbstractSimulationHandler::AbstractSimulationHandler(
     const GeometryParameters& geometryParameters)
     : _geometryParameters(geometryParameters)
-    , _currentFrame(std::numeric_limits<uint32_t>::max())
-    , _nbFrames(0)
-    , _frameSize(0)
-    , _headerSize(0)
-    , _memoryMapPtr(0)
-    , _cacheFileDescriptor(-1)
-    , _frameData(nullptr)
 {
     _histogram.frame = _currentFrame;
 }

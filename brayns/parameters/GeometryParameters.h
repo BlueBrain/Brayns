@@ -44,21 +44,21 @@ struct MorphologyLayout
 
 struct CircuitConfiguration
 {
-    std::string _circuitConfiguration;
-    bool _circuitUseSimulationModel{false};
-    Boxf _circuitBoundingBox{{0, 0, 0}, {0, 0, 0}};
-    float _circuitDensity{100};
-    std::string _circuitMeshFilenamePattern;
-    std::string _circuitMeshFolder;
-    std::string _circuitTargets;
-    std::string _circuitReport;
-    double _circuitStartSimulationTime{0};
-    double _circuitEndSimulationTime{std::numeric_limits<float>::max()};
-    double _circuitSimulationStep{0};
-    Vector2f _circuitSimulationValuesRange{std::numeric_limits<float>::max(),
-                                           std::numeric_limits<float>::min()};
-    size_t _circuitSimulationHistogramSize{128};
-    bool _circuitMeshTransformation{false};
+    std::string circuitConfigFile;
+    bool useSimulationModel{false};
+    Boxf boundingBox{{0, 0, 0}, {0, 0, 0}};
+    float density{100};
+    std::string meshFilenamePattern;
+    std::string meshFolder;
+    std::string targets;
+    std::string report;
+    double startSimulationTime{0};
+    double endSimulationTime{std::numeric_limits<float>::max()};
+    double simulationStep{0};
+    Vector2f simulationValuesRange{std::numeric_limits<float>::max(),
+                                   std::numeric_limits<float>::min()};
+    size_t simulationHistogramSize{128};
+    bool meshTransformation{false};
 };
 
 struct ConnectivityConfiguration
@@ -106,7 +106,7 @@ public:
     /** file containing circuit configuration */
     const std::string& getCircuitConfiguration() const
     {
-        return _circuitConfiguration._circuitConfiguration;
+        return _circuitConfiguration.circuitConfigFile;
     }
     /** Binary representation of a scene to load */
     const std::string& getLoadCacheFile() const { return _loadCacheFile; }
@@ -115,13 +115,13 @@ public:
     /** Circuit targets */
     const std::string& getCircuitTargets() const
     {
-        return _circuitConfiguration._circuitTargets;
+        return _circuitConfiguration.targets;
     }
     strings getCircuitTargetsAsStrings() const;
     /** Circuit compartment report */
     const std::string& getCircuitReport() const
     {
-        return _circuitConfiguration._circuitReport;
+        return _circuitConfiguration.report;
     }
     /** Defines the folder where morphologies meshes are stored. Meshes must
      * have the same name as the h5/SWC morphology file, suffixed with an
@@ -129,7 +129,7 @@ public:
      */
     const std::string& getCircuitMeshFolder() const
     {
-        return _circuitConfiguration._circuitMeshFolder;
+        return _circuitConfiguration.meshFolder;
     }
     /** ensity of cells in the circuit in percent (Mainly for testing
      * purposes) */
@@ -141,11 +141,11 @@ public:
      */
     const Boxf& getCircuitBoundingBox() const
     {
-        return _circuitConfiguration._circuitBoundingBox;
+        return _circuitConfiguration.boundingBox;
     }
     void setCircuitBoundingBox(const Boxf& value)
     {
-        _updateValue(_circuitConfiguration._circuitBoundingBox, value);
+        _updateValue(_circuitConfiguration.boundingBox, value);
     }
 
     /**
@@ -156,18 +156,18 @@ public:
      */
     bool getCircuitUseSimulationModel() const
     {
-        return _circuitConfiguration._circuitUseSimulationModel;
+        return _circuitConfiguration.useSimulationModel;
     }
     void setCircuitUseSimulationModel(const bool value)
     {
-        _updateValue(_circuitConfiguration._circuitUseSimulationModel, value);
+        _updateValue(_circuitConfiguration.useSimulationModel, value);
     }
     /**
      * Return the filename pattern use to load meshes
      */
     const std::string& getCircuitMeshFilenamePattern() const
     {
-        return _circuitConfiguration._circuitMeshFilenamePattern;
+        return _circuitConfiguration.meshFilenamePattern;
     }
     /** Radius multiplier applied to spheres, cones and cylinders.
      * @param value Radius multiplier. Multiplies the radius contained in the
@@ -220,31 +220,31 @@ public:
     /** Defines the range of frames to be loaded for the simulation */
     double getCircuitEndSimulationTime() const
     {
-        return _circuitConfiguration._circuitEndSimulationTime;
+        return _circuitConfiguration.endSimulationTime;
     }
     double getCircuitStartSimulationTime() const
     {
-        return _circuitConfiguration._circuitStartSimulationTime;
+        return _circuitConfiguration.startSimulationTime;
     }
     double getCircuitSimulationStep() const
     {
-        return _circuitConfiguration._circuitSimulationStep;
+        return _circuitConfiguration.simulationStep;
     }
     Vector2f getCircuitSimulationValuesRange() const
     {
-        return _circuitConfiguration._circuitSimulationValuesRange;
+        return _circuitConfiguration.simulationValuesRange;
     }
 
     /** Size of the simulation histogram */
     size_t getCircuitSimulationHistogramSize() const
     {
-        return _circuitConfiguration._circuitSimulationHistogramSize;
+        return _circuitConfiguration.simulationHistogramSize;
     }
 
     /** Size of the simulation histogram */
     size_t getCircuitMeshTransformation() const
     {
-        return _circuitConfiguration._circuitMeshTransformation;
+        return _circuitConfiguration.meshTransformation;
     }
 
     /** Splash scene folder */
