@@ -498,12 +498,16 @@ void Scene::clearLights()
 
 void Scene::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
+    auto& ap = _parametersManager.getAnimationParameters();
     _simulationHandler = handler;
     if (_simulationHandler)
-        _parametersManager.getAnimationParameters().setEnd(
-            _simulationHandler->getNbFrames());
+    {
+        ap.setDt(_simulationHandler->getDt());
+        ap.setUnit(_simulationHandler->getUnit());
+        ap.setEnd(_simulationHandler->getNbFrames());
+    }
     else
-        _parametersManager.getAnimationParameters().reset();
+        ap.reset();
 }
 
 AbstractSimulationHandlerPtr Scene::getSimulationHandler() const

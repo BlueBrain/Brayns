@@ -48,6 +48,7 @@ CircuitSimulationHandler::CircuitSimulationHandler(
                         _geometryParameters.getCircuitEndSimulationTime());
     _dt = std::max(reportTimeStep,
                    _geometryParameters.getCircuitSimulationStep());
+    _unit = _compartmentReport->getTimeUnit();
     _frameSize = _compartmentReport->getFrameSize();
     _nbFrames = (_endTime - _startTime) / _dt;
 
