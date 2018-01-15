@@ -65,8 +65,8 @@ const size_t NB_MAX_MESSAGES = 20; // Maximum number of network messages to read
                                    // between each rendering loop
 
 // JSON for websocket text messages
-std::string buildJsonMessage(const std::string& event, const std::string data,
-                             const bool error = false)
+std::string _buildJsonMessage(const std::string& event, const std::string data,
+                              const bool error)
 {
     rapidjson::Document message(rapidjson::kObjectType);
 
@@ -86,6 +86,17 @@ std::string buildJsonMessage(const std::string& event, const std::string data,
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
     message.Accept(writer);
     return sb.GetString();
+}
+
+std::string buildJsonMessage(const std::string& event, const std::string data)
+{
+    return _buildJsonMessage(event, data, false);
+}
+
+std::string buildJsonErrorMessage(const std::string& event,
+                                  const std::string data)
+{
+    return _buildJsonMessage(event, data, true);
 }
 
 std::string hyphenatedToCamelCase(const std::string& scoreString)
@@ -270,16 +281,26 @@ rockets::ws::Response RocketsPlugin::_processWebsocketMessage(
     {
         rapidjson::Document jsonData;
         jsonData.Parse(message.c_str());
-        const std::string event = jsonData["event"].GetString();
+        auto eventStr = jsonData["event"].GetString();
+        if (!eventStr)
+            return buildJsonErrorMessage("exception", "Missing event type");
+
+        const std::string event{eventStr};
         auto i = _wsIncoming.find(event);
         if (i == _wsIncoming.end())
-            return buildJsonMessage(event, "Unknown websocket event", true);
+            return buildJsonErrorMessage(event, "Unknown websocket event");
 
         rapidjson::StringBuffer sb;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-        jsonData["data"].Accept(writer);
-        if (!i->second(sb.GetString()))
-            return buildJsonMessage(event, "Could not update object", true);
+        rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+        if (!jsonData["data"].Accept(writer))
+            return buildJsonErrorMessage(event, "Could not parse data");
+
+        auto dataStr = sb.GetString();
+        if (!eventStr)
+            return buildJsonErrorMessage(event, "Data is empty");
+
+        if (!i->second(dataStr))
+            return buildJsonErrorMessage(event, "Could not update object");
 
         // re-broadcast to all other clients
         return rockets::ws::Response{message, rockets::ws::Recipient::others};
@@ -288,7 +309,7 @@ rockets::ws::Response RocketsPlugin::_processWebsocketMessage(
     {
         BRAYNS_ERROR << "Error in websocket message handling: " << exc.what()
                      << std::endl;
-        return buildJsonMessage("exception", exc.what(), true);
+        return buildJsonErrorMessage("exception", exc.what());
     }
 }
 
