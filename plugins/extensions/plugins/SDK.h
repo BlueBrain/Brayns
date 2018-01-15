@@ -241,29 +241,27 @@ void init(brayns::MorphologyLayout* m, ObjectHandler* h)
 
 void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
 {
-    h->add_property("circuit_config_file", &c->_circuitConfiguration,
+    h->add_property("circuit_config_file", &c->circuitConfigFile,
                     Flags::Optional);
-    h->add_property("density", &c->_circuitDensity, Flags::Optional);
-    h->add_property("bounding_box", &c->_circuitBoundingBox, Flags::Optional);
-    h->add_property("mesh_filename_pattern", &c->_circuitMeshFilenamePattern,
+    h->add_property("density", &c->density, Flags::Optional);
+    h->add_property("bounding_box", &c->boundingBox, Flags::Optional);
+    h->add_property("mesh_filename_pattern", &c->meshFilenamePattern,
                     Flags::Optional);
-    h->add_property("mesh_folder", &c->_circuitMeshFolder, Flags::Optional);
-    h->add_property("mesh_transformation", &c->_circuitMeshTransformation,
+    h->add_property("mesh_folder", &c->meshFolder, Flags::Optional);
+    h->add_property("mesh_transformation", &c->meshTransformation,
                     Flags::Optional);
-    h->add_property("use_simulation_model", &c->_circuitUseSimulationModel,
+    h->add_property("use_simulation_model", &c->useSimulationModel,
                     Flags::Optional);
-    h->add_property("targets", &c->_circuitTargets, Flags::Optional);
-    h->add_property("report", &c->_circuitReport, Flags::Optional);
-    h->add_property("start_simulation_time", &c->_circuitStartSimulationTime,
+    h->add_property("targets", &c->targets, Flags::Optional);
+    h->add_property("report", &c->report, Flags::Optional);
+    h->add_property("start_simulation_time", &c->startSimulationTime,
                     Flags::Optional);
-    h->add_property("end_simulation_time", &c->_circuitEndSimulationTime,
+    h->add_property("end_simulation_time", &c->endSimulationTime,
                     Flags::Optional);
-    h->add_property("simulation_step", &c->_circuitSimulationStep,
-                    Flags::Optional);
+    h->add_property("simulation_step", &c->simulationStep, Flags::Optional);
     h->add_property("simulation_values_range",
-                    Vector2fArray(c->_circuitSimulationValuesRange),
-                    Flags::Optional);
-    h->add_property("histogram_size", &c->_circuitSimulationHistogramSize,
+                    Vector2fArray(c->simulationValuesRange), Flags::Optional);
+    h->add_property("histogram_size", &c->simulationHistogramSize,
                     Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
@@ -412,6 +410,8 @@ void init(brayns::AnimationParameters* a, ObjectHandler* h)
     h->add_property("end", &a->_end, Flags::Optional);
     h->add_property("current", &a->_current, Flags::Optional);
     h->add_property("delta", &a->_delta, Flags::Optional);
+    h->add_property("dt", &a->_dt, Flags::Optional);
+    h->add_property("unit", &a->_unit, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 }

@@ -54,8 +54,12 @@ public:
     {
         _updateValue(_end, std::numeric_limits<uint32_t>::max());
         _updateValue(_current, std::numeric_limits<uint32_t>::max());
+        _updateValue(_unit, std::string());
+        _updateValue(_dt, 0.);
     }
 
+    void setUnit(const std::string& unit) { _updateValue(_unit, unit); }
+    void setDt(const double dt) { _updateValue(_dt, dt); }
 private:
     bool _parse(const po::variables_map& vm) final;
 
@@ -70,6 +74,8 @@ private:
     uint32_t _end{std::numeric_limits<uint32_t>::max()};
     uint32_t _current{std::numeric_limits<uint32_t>::max()};
     int32_t _delta{0};
+    double _dt{0};
+    std::string _unit;
 
     SERIALIZATION_FRIEND(AnimationParameters)
 };
