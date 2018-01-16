@@ -57,6 +57,29 @@ RUN mkdir -p ${OSPRAY_SRC} \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
  && ninja install
 
+# Install libwebsockets (2.0 from Debian is not reliable)
+# https://github.com/warmcat/libwebsockets/releases
+ARG LWS_VERSION=1.7.1
+ARG LWS_SRC=/app/libwebsockets
+ARG LWS_FILE=v${LWS_VERSION}.tar.gz
+
+RUN mkdir -p ${LWS_SRC} \
+ && wget https://github.com/warmcat/libwebsockets/archive/${LWS_FILE} \
+ && tar zxvf ${LWS_FILE} -C ${LWS_SRC} --strip-components=1 \
+ && cd ${LWS_SRC} \
+ && mkdir -p build \
+ && cd build \
+ && cmake .. -GNinja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLWS_STATIC_PIC=ON \
+    -DLWS_WITH_SSL=OFF \
+    -DLWS_WITH_ZLIB=OFF \
+    -DLWS_WITHOUT_EXTENSIONS=ON \
+    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
+ && ninja install \
+ && rm -rf ${DIST_PATH}/lib/cmake/libwebsockets
+
+
 # Set working dir and copy Brayns assets
 ARG BRAYNS_SRC=/app/brayns
 WORKDIR /app
@@ -80,12 +103,11 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     libhdf5-serial-dev \
     libmagick++-dev \
     libturbojpeg0-dev \
-    libwebsockets-dev \
     qtbase5-dev \
  && git submodule update --init --recursive --remote \
  && mkdir -p build \
  && cd build \
- && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
+ && PKG_CONFIG_PATH=${DIST_PATH}/lib/pkgconfig CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
     -DBRAYNS_BRION_ENABLED=ON \
     -DBRAYNS_DEFLECT_ENABLED=ON \
     -DBRAYNS_NETWORKING_ENABLED=ON \
@@ -117,7 +139,6 @@ RUN apt-get update \
     libqt5concurrent5 \
     libqt5network5 \
     libturbojpeg0 \
-    libwebsockets8 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
