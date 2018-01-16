@@ -198,11 +198,8 @@ void init(brayns::TransferFunction* t, ObjectHandler* h)
 
 void init(brayns::Boxf* b, ObjectHandler* h)
 {
-    static brayns::Vector3f bMin, bMax;
-    bMin = b->getMin();
-    bMax = b->getMax();
-    h->add_property("min", Vector3fArray(bMin));
-    h->add_property("max", Vector3fArray(bMax));
+    h->add_property("min", Vector3fArray(b->_min));
+    h->add_property("max", Vector3fArray(b->_max));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
