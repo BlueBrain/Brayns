@@ -5,7 +5,7 @@
 # See: https://docs.docker.com/engine/userguide/eng-image/multistage-build/#use-multi-stage-builds
 
 # Image where Brayns is built
-FROM ubuntu:xenial as builder
+FROM debian:9.3-slim as builder
 LABEL maintainer="bbp-svc-viz@groupes.epfl.ch"
 ARG DIST_PATH=/app/dist
 
@@ -32,7 +32,8 @@ ARG EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
 
 RUN mkdir -p ${DIST_PATH} \
   && wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE} \
-  && tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1
+  && tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1 \
+  && rm -rf ${DIST_PATH}/bin ${DIST_PATH}/doc
 
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
@@ -46,7 +47,7 @@ RUN mkdir -p ${OSPRAY_SRC} \
      git \
      ninja-build \
      libtbb-dev \
- && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
+ && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} --depth 1 \
  && cd ${OSPRAY_SRC} \
  && git checkout v${OSPRAY_VERSION} \
  && mkdir -p build \
@@ -77,9 +78,8 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     libboost-system-dev \
     libboost-test-dev \
     libhdf5-serial-dev \
-    libjpeg-turbo8-dev \
     libmagick++-dev \
-    libturbojpeg \
+    libturbojpeg0-dev \
     libwebsockets-dev \
     qtbase5-dev \
  && git submodule update --init --recursive --remote \
@@ -93,31 +93,33 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
- && ninja mvd-tool Brayns-install
+ && ninja mvd-tool Brayns-install \
+ && rm -rf ${DIST_PATH}/include ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it
-FROM ubuntu:xenial
+FROM debian:9.3-slim
 ARG DIST_PATH=/app/dist
 
 RUN apt-get update \
  && apt-get install -y \
     libassimp3v5 \
-    libboost-filesystem1.58.0 \
-    libboost-program-options1.58.0 \
-    libboost-regex1.58.0 \
-    libboost-serialization1.58.0 \
-    libboost-system1.58.0 \
-    libboost-iostreams1.58.0 \
+    libboost-filesystem1.62.0 \
+    libboost-program-options1.62.0 \
+    libboost-regex1.62.0 \
+    libboost-serialization1.62.0 \
+    libboost-system1.62.0 \
+    libboost-iostreams1.62.0 \
     libgomp1 \
-    libhdf5-10 \
-    libhdf5-cpp-11 \
-    libmagick++-6.q16-5v5 \
-    libmagickwand-6.q16-2 \
+    libhdf5-100 \
+    libhdf5-cpp-100 \
+    libmagick++-6.q16-7 \
+    libmagickwand-6.q16-3 \
     libqt5concurrent5 \
     libqt5network5 \
-    libturbojpeg \
-    libwebsockets7 \
- && rm -rf /var/lib/apt/lists/*
+    libturbojpeg0 \
+    libwebsockets8 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # The COPY command below will:
 # 1. create a container based on the `builder` image (but do not start it)
