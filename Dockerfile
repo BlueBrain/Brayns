@@ -9,6 +9,32 @@ FROM debian:9.3-slim as builder
 LABEL maintainer="bbp-svc-viz@groupes.epfl.ch"
 ARG DIST_PATH=/app/dist
 
+# Install packages
+RUN apt-get update \
+ && apt-get -y --no-install-recommends install \
+    build-essential \
+    cmake \
+    git \
+    ninja-build \
+    libassimp-dev \
+    libboost-date-time-dev \
+    libboost-filesystem-dev \
+    libboost-iostreams-dev \
+    libboost-program-options-dev \
+    libboost-regex-dev \
+    libboost-serialization-dev \
+    libboost-system-dev \
+    libboost-test-dev \
+    libhdf5-serial-dev \
+    libmagick++-dev \
+    libtbb-dev \
+    libturbojpeg0-dev \
+    qtbase5-dev \
+    wget \
+    ca-certificates \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 # Get ISPC
 # https://ispc.github.io/downloads.html
 ARG ISPC_VERSION=1.9.2
@@ -16,8 +42,6 @@ ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
 ARG ISPC_PATH=/app/$ISPC_DIR
 
 RUN mkdir -p ${ISPC_PATH} \
- && apt-get update \
- && apt-get -y install wget \
  && wget http://netix.dl.sourceforge.net/project/ispcmirror/v${ISPC_VERSION}/${ISPC_DIR}.tar.gz \
  && tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1 \
  && rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
@@ -41,12 +65,6 @@ ARG OSPRAY_VERSION=1.4.3
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
-  && apt-get -y install \
-     build-essential \
-     cmake \
-     git \
-     ninja-build \
-     libtbb-dev \
  && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} --depth 1 \
  && cd ${OSPRAY_SRC} \
  && git checkout v${OSPRAY_VERSION} \
@@ -90,20 +108,6 @@ ADD . ${BRAYNS_SRC}
 # https://github.com/BlueBrain/Brayns
 RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && cd ${BRAYNS_SRC} \
- && apt-get -y install \
-    libassimp-dev \
-    libboost-date-time-dev \
-    libboost-filesystem-dev \
-    libboost-iostreams-dev \
-    libboost-program-options-dev \
-    libboost-regex-dev \
-    libboost-serialization-dev \
-    libboost-system-dev \
-    libboost-test-dev \
-    libhdf5-serial-dev \
-    libmagick++-dev \
-    libturbojpeg0-dev \
-    qtbase5-dev \
  && git submodule update --init --recursive --remote \
  && mkdir -p build \
  && cd build \
@@ -123,7 +127,7 @@ FROM debian:9.3-slim
 ARG DIST_PATH=/app/dist
 
 RUN apt-get update \
- && apt-get install -y \
+ && apt-get -y --no-install-recommends install \
     libassimp3v5 \
     libboost-filesystem1.62.0 \
     libboost-program-options1.62.0 \
