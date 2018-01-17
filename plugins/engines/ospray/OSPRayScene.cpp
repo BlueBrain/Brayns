@@ -653,9 +653,7 @@ void OSPRayScene::commitVolumeData()
 void OSPRayScene::commitSimulationData()
 {
     if (!_simulationHandler)
-    {
         return;
-    }
 
     const auto animationFrame =
         _parametersManager.getAnimationParameters().getFrame();

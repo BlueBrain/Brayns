@@ -60,7 +60,7 @@ public:
 private:
     void _triggerLoading(uint32_t frame);
     bool _isFrameLoaded() const;
-    void _makeFrameReady(const uint32_t frame);
+    bool _makeFrameReady(uint32_t frame);
 
     const ApplicationParameters& _applicationParameters;
 
