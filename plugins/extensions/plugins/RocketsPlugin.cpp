@@ -299,11 +299,12 @@ rockets::ws::Response RocketsPlugin::_processWebsocketMessage(
         if (!eventStr)
             return buildJsonErrorMessage(event, "Data is empty");
 
-        if (!i->second(dataStr))
+        std::string response;
+        if (!i->second(dataStr, response))
             return buildJsonErrorMessage(event, "Could not update object");
 
         // re-broadcast to all other clients
-        return rockets::ws::Response{message, rockets::ws::Recipient::others};
+        return rockets::ws::Response{response, rockets::ws::Recipient::others};
     }
     catch (const std::exception& exc)
     {
@@ -523,8 +524,14 @@ void RocketsPlugin::_handlePUT(const std::string& endpoint, T& obj,
 
     _handleSchema(endpoint, obj);
 
-    _wsIncoming[endpoint] = [&obj, postUpdateFunc](const std::string& data) {
-        return from_json(obj, data, postUpdateFunc);
+    _wsIncoming[endpoint] = [&obj, postUpdateFunc](const std::string& data,
+                                                   std::string& newData) {
+        if (from_json(obj, data, postUpdateFunc))
+        {
+            newData = to_json(obj);
+            return true;
+        }
+        return false;
     };
 }
 
