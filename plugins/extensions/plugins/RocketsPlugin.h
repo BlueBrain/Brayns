@@ -92,7 +92,8 @@ private:
                               const std::map<std::string, std::string>& params);
 
     using WsIncomingMap =
-        std::map<std::string, std::function<bool(const std::string&)>>;
+        std::map<std::string,
+                 std::function<bool(const std::string&, std::string& newData)>>;
     WsIncomingMap _wsIncoming;
 
     using WsOutgoingMap = std::map<std::string, std::function<std::string()>>;
