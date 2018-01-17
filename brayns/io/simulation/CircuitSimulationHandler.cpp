@@ -83,7 +83,8 @@ void* CircuitSimulationHandler::getFrameData(uint32_t frame)
     if (!_currentFrameFuture.valid() && _currentFrame != frame)
         _triggerLoading(frame);
 
-    _makeFrameReady(frame);
+    if (!_makeFrameReady(frame))
+        return nullptr;
 
     return _frameValues ? _frameValues.get()->data() : nullptr;
 }
@@ -116,13 +117,23 @@ bool CircuitSimulationHandler::_isFrameLoaded() const
            std::future_status::ready;
 }
 
-void CircuitSimulationHandler::_makeFrameReady(const uint32_t frame)
+bool CircuitSimulationHandler::_makeFrameReady(const uint32_t frame)
 {
     if (_isFrameLoaded())
     {
-        _frameValues = _currentFrameFuture.get();
+        try
+        {
+            _frameValues = _currentFrameFuture.get();
+        }
+        catch (const std::exception& e)
+        {
+            BRAYNS_ERROR << "Error loading simulation frame " << frame << ": "
+                         << e.what() << std::endl;
+            return false;
+        }
         _currentFrame = frame;
         _ready = true;
     }
+    return true;
 }
 }
