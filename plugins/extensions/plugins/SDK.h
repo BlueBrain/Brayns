@@ -223,7 +223,7 @@ void init(brayns::Material* m, ObjectHandler* h)
 void init(brayns::Scene* s, ObjectHandler* h)
 {
     h->add_property("bounds", &s->getWorldBounds(),
-                    Flags::IgnoreWrite | Flags::Optional);
+                    Flags::IgnoreRead | Flags::Optional);
     h->add_property("materials", &s->getMaterials());
     h->set_flags(Flags::DisallowUnknownKey);
 }
@@ -353,6 +353,8 @@ void init(brayns::RenderingParameters* r, ObjectHandler* h)
     h->add_property("shadows", &r->_shadows, Flags::Optional);
     h->add_property("soft_shadows", &r->_softShadows, Flags::Optional);
     h->add_property("ambient_occlusion", &r->_ambientOcclusionStrength,
+                    Flags::Optional);
+    h->add_property("ambient_occlusion_distance", &r->_ambientOcclusionDistance,
                     Flags::Optional);
     h->add_property("accumulation", &r->_accumulation, Flags::Optional);
     h->add_property("radiance", &r->_lightEmittingMaterials, Flags::Optional);
