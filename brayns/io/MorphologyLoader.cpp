@@ -210,6 +210,9 @@ public:
                 targetGIDOffsets.push_back(allGids.size());
             }
 
+            if (allGids.empty())
+                return false;
+
             // Load simulation information from compartment report
             CompartmentReportPtr compartmentReport = nullptr;
             if (!report.empty())
