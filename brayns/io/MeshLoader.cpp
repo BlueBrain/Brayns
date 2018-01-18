@@ -102,6 +102,8 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
 
     if( defaultMaterial == NO_MATERIAL)
         _createMaterials(scene, aiScene, filepath.parent_path().string());
+    else
+        scene.getMaterial(defaultMaterial);
 
     size_t nbVertices = 0;
     size_t nbFaces = 0;
