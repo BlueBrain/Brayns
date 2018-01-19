@@ -140,8 +140,9 @@ Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
 
     PickResult result;
     result.hit = ospResult.hit;
-    result.pos = {ospResult.position.x, ospResult.position.y,
-                  ospResult.position.z};
+    if (result.hit)
+        result.pos = {ospResult.position.x, ospResult.position.y,
+                      ospResult.position.z};
     return result;
 }
 }

@@ -36,7 +36,8 @@ if(BRAYNS_NETWORKING_ENABLED)
     --suppress=*:${CMAKE_CURRENT_SOURCE_DIR}/extensions/plugins/json.hpp)
   list(APPEND BRAYNSPLUGINS_HEADERS
     extensions/plugins/ImageGenerator.h
-    extensions/plugins/SDK.h
+    extensions/plugins/jsonSerialization.h
+    extensions/plugins/jsonUtils.h
   )
   list(APPEND BRAYNSPLUGINS_SOURCES
     extensions/plugins/ImageGenerator.cpp

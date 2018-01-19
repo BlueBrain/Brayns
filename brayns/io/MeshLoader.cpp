@@ -100,7 +100,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
 
     boost::filesystem::path filepath = filename;
 
-    if( defaultMaterial == NO_MATERIAL)
+    if (defaultMaterial == NO_MATERIAL)
         _createMaterials(scene, aiScene, filepath.parent_path().string());
     else
         scene.getMaterial(defaultMaterial);
