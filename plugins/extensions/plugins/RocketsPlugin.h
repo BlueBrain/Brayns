@@ -25,10 +25,13 @@
 #include "ImageGenerator.h"
 
 #include <brayns/api.h>
+#include <rockets/jsonrpc/server.h>
 #include <rockets/server.h>
 
 namespace brayns
 {
+struct RpcDocumentation;
+
 /**
    The RocketsPlugin is in charge of exposing a both an http/REST interface to
    the outside world. The http server is configured according
@@ -45,11 +48,10 @@ public:
                         AbstractManipulator& cameraManipulator) final;
 
 private:
-    void _onNewEngine();
-
-    void _setupHTTPServer();
-    void _setupWebsocket();
     std::string _getHttpInterface() const;
+    void _setupRocketsServer();
+    void _setupWebsocket();
+    void _broadcastWebsocketMessages();
 
     template <class T>
     void _handle(const std::string& endpoint, T& obj);
@@ -66,22 +68,32 @@ private:
     template <class T, class F>
     void _handlePUT(const std::string& endpoint, T& obj, F postUpdateFunc);
 
+    template <class P, class R>
+    void _handleRPC(const std::string& method, const RpcDocumentation& doc,
+                    std::function<R(P)> action);
+
+    void _handleRPC(const std::string& method, const std::string& description,
+                    std::function<void()> action);
+
     template <class T>
-    void _handleSchema(const std::string& endpoint, T& obj);
+    void _handleObjectSchema(const std::string& endpoint, T& obj);
 
-    void _remove(const std::string& endpoint);
+    void _handleSchema(const std::string& endpoint, const std::string& schema);
 
-    void _broadcastWebsocketMessages();
-    rockets::ws::Response _processWebsocketMessage(const std::string& message);
+    void _registerEndpoints();
 
-    void _handleVersion();
-    void _handleStreaming();
-    void _handleImageJPEG();
     void _handleApplicationParams();
     void _handleGeometryParams();
-    void _handleVolumeParams();
+    void _handleImageJPEG();
     void _handleSimulationHistogram();
+    void _handleStreaming();
+    void _handleVersion();
     void _handleVolumeHistogram();
+    void _handleVolumeParams();
+
+    void _handleInspect();
+    void _handleQuit();
+    void _handleResetCamera();
 
     std::future<rockets::http::Response> _handleCircuitConfigBuilder(
         const rockets::http::Request&);
@@ -89,21 +101,19 @@ private:
     bool _writeBlueConfigFile(const std::string& filename,
                               const std::map<std::string, std::string>& params);
 
-    using WsIncomingMap =
-        std::map<std::string,
-                 std::function<bool(const std::string&, std::string& newData)>>;
-    WsIncomingMap _wsIncoming;
+    using WsClientConnectNotifications =
+        std::map<std::string, std::function<std::string()>>;
+    WsClientConnectNotifications _wsClientConnectNotifications;
 
-    using WsOutgoingMap = std::map<std::string, std::function<std::string()>>;
-    WsOutgoingMap _wsOutgoing;
-
-    using WsBroadcastMap = std::map<std::string, std::function<void()>>;
-    WsBroadcastMap _wsBroadcasts;
+    using WsBroadcastOperations = std::map<std::string, std::function<void()>>;
+    WsBroadcastOperations _wsBroadcastOperations;
 
     EnginePtr _engine;
     ParametersManager& _parametersManager;
 
-    std::unique_ptr<rockets::Server> _httpServer;
+    std::unique_ptr<rockets::Server> _rocketsServer;
+    using JsonRpcServer = rockets::jsonrpc::Server<rockets::Server>;
+    std::unique_ptr<JsonRpcServer> _jsonrpcServer;
 
     ImageGenerator _imageGenerator;
 

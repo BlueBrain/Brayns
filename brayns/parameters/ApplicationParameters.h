@@ -80,6 +80,12 @@ public:
         _updateValue(_synchronousMode, synchronousMode);
     }
 
+    const std::string& getHttpServerURI() const { return _httpServerURI; }
+    void setHttpServerURI(const std::string& httpServerURI)
+    {
+        _updateValue(_httpServerURI, httpServerURI);
+    }
+
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -92,6 +98,7 @@ protected:
     std::string _tmpFolder;
     bool _synchronousMode{false};
     size_t _imageStreamFPS{60};
+    std::string _httpServerURI;
 
     SERIALIZATION_FRIEND(ApplicationParameters)
 };

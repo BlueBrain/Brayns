@@ -1,4 +1,4 @@
-# Copyright (c) 2016, EPFL/Blue Brain Project
+# Copyright (c) 2016-2018, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Daniel.Nachbaur@epfl.ch
 #
@@ -13,6 +13,10 @@ else()
   list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp)
 endif()
 if(NOT BRAYNS_OSPRAY_ENABLED)
-  list(APPEND EXCLUDE_FROM_TESTS brayns.cpp braynsTestData.cpp)
+  list(APPEND EXCLUDE_FROM_TESTS brayns.cpp braynsTestData.cpp webAPI.cpp)
 endif()
+
+list(APPEND LCOV_EXCLUDE 'plugins/extensions/plugins/base64/*'
+                         'plugins/extensions/plugins/rapidjson/*'
+                         'plugins/extensions/plugins/staticjson/*')
 include(CommonCTest)

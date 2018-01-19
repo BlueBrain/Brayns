@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -23,6 +23,7 @@
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/parameters/AnimationParameters.h>
@@ -32,6 +33,7 @@
 #include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/StreamParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
+#include <brayns/version.h>
 #include <plugins/extensions/plugins/ImageGenerator.h>
 
 #include "base64/base64.h"
@@ -121,6 +123,13 @@ STATICJSON_DECLARE_ENUM(brayns::EngineType,
 
 namespace staticjson
 {
+void init(brayns::Renderer::PickResult* p, ObjectHandler* h)
+{
+    h->add_property("hit", &p->hit);
+    h->add_property("position", Vector3fArray(p->pos));
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 void init(brayns::ClipPlane* c, ObjectHandler* h)
 {
     h->add_property("normal", Vector3fArray(*c));
@@ -414,4 +423,54 @@ void init(brayns::AnimationParameters* a, ObjectHandler* h)
     h->add_property("unit", &a->_unit, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
+}
+
+namespace brayns
+{
+template <class T, class F>
+inline bool from_json(T& obj, const std::string& json, F postUpdateFunc = [] {})
+{
+    staticjson::ParseStatus status;
+    const auto success =
+        staticjson::from_json_string(json.c_str(), &obj, &status);
+    if (success)
+    {
+        obj.markModified();
+        if (std::function<void(T&)>(postUpdateFunc))
+            postUpdateFunc(obj);
+    }
+    else
+        BRAYNS_ERROR << status.description() << std::endl;
+    return success;
+}
+}
+
+// for rockets::jsonrpc
+template <class T>
+inline std::string to_json(const T& obj)
+{
+    return staticjson::to_pretty_json_string(obj);
+}
+template <>
+inline std::string to_json(const brayns::Engine::Progress& obj)
+{
+    std::lock_guard<std::mutex> lock(obj.mutex);
+    return staticjson::to_pretty_json_string(obj);
+}
+template <>
+inline std::string to_json(const brayns::Version& obj)
+{
+    return obj.toJSON();
+}
+
+template <class T>
+bool from_json(T& obj, const std::string& json)
+{
+    return staticjson::from_json_string(json.c_str(), &obj, nullptr);
+}
+template <>
+bool from_json(brayns::Vector2f& obj, const std::string& json)
+{
+    return staticjson::from_json_string(json.c_str(), Vector2fArray(obj),
+                                        nullptr);
 }

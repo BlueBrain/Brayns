@@ -38,7 +38,8 @@ void ExtendedCylinders::finalize(ospray::Model *model)
 {
     radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);
-    bytesPerCylinder = getParam1i("bytes_per_cylinder", sizeof(brayns::Cylinder));
+    bytesPerCylinder =
+        getParam1i("bytes_per_cylinder", sizeof(brayns::Cylinder));
     offset_center = getParam1i("offset_center", 0);
     offset_up = getParam1i("offset_up", 3 * sizeof(float));
     offset_radius = getParam1i("offset_radius", 6 * sizeof(float));
