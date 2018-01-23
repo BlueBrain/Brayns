@@ -57,9 +57,6 @@ public:
         _updateValue(_jpegCompression, compression);
     }
     size_t getJpegCompression() const { return _jpegCompression; }
-    /** JPEG size */
-    const Vector2ui& getJpegSize() const { return _jpegSize; }
-    void setJpegSize(const Vector2ui& size) { _updateValue(_jpegSize, size); }
     /** Image stream FPS */
     size_t getImageStreamFPS() const { return _imageStreamFPS; }
     void setImageStreamFPS(const size_t fps)
@@ -90,7 +87,6 @@ protected:
     Vector2ui _windowSize;
     bool _benchmarking;
     size_t _jpegCompression;
-    Vector2ui _jpegSize;
     strings _filters;
     std::string _frameExportFolder;
     std::string _tmpFolder;

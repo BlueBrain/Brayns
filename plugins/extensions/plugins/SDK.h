@@ -291,7 +291,6 @@ void init(brayns::StreamParameters* s, ObjectHandler* h)
 void init(brayns::ApplicationParameters* a, ObjectHandler* h)
 {
     h->add_property("jpeg_compression", &a->_jpegCompression, Flags::Optional);
-    h->add_property("jpeg_size", Vector2uiArray(a->_jpegSize), Flags::Optional);
     h->add_property("frame_export_folder", &a->_frameExportFolder,
                     Flags::Optional);
     h->add_property("synchronous_mode", &a->_synchronousMode, Flags::Optional);

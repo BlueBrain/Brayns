@@ -70,7 +70,6 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(appParams.getCamera(), "perspective");
     BOOST_CHECK(!appParams.isBenchmarking());
     BOOST_CHECK_EQUAL(appParams.getJpegCompression(), 90);
-    BOOST_CHECK_EQUAL(appParams.getJpegSize(), brayns::Vector2ui(800, 600));
     BOOST_CHECK_EQUAL(appParams.getImageStreamFPS(), 60);
 
     const auto& renderParams = pm.getRenderingParameters();

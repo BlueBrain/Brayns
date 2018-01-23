@@ -39,8 +39,6 @@ const std::string PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
-const size_t DEFAULT_JPEG_WIDTH = DEFAULT_WINDOW_WIDTH;
-const size_t DEFAULT_JPEG_HEIGHT = DEFAULT_WINDOW_HEIGHT;
 const size_t DEFAULT_JPEG_COMPRESSION = 90;
 const std::string DEFAULT_CAMERA = "perspective";
 const std::string DEFAULT_TMP_FOLDER = "/tmp";
@@ -54,7 +52,6 @@ ApplicationParameters::ApplicationParameters()
     , _windowSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
     , _benchmarking(false)
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
-    , _jpegSize(DEFAULT_JPEG_WIDTH, DEFAULT_JPEG_HEIGHT)
     , _tmpFolder(DEFAULT_TMP_FOLDER)
 {
     _parameters.add_options()(PARAM_WINDOW_SIZE.c_str(),
@@ -97,15 +94,6 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
         _benchmarking = vm[PARAM_BENCHMARKING].as<bool>();
     if (vm.count(PARAM_JPEG_COMPRESSION))
         _jpegCompression = vm[PARAM_JPEG_COMPRESSION].as<size_t>();
-    if (vm.count(PARAM_JPEG_SIZE))
-    {
-        uints values = vm[PARAM_JPEG_SIZE].as<uints>();
-        if (values.size() == 2)
-        {
-            _jpegSize.x() = values[0];
-            _jpegSize.y() = values[1];
-        }
-    }
     if (vm.count(PARAM_FILTERS))
         _filters = vm[PARAM_FILTERS].as<strings>();
     if (vm.count(PARAM_FRAME_EXPORT_FOLDER))
@@ -129,7 +117,6 @@ void ApplicationParameters::print()
                 << (_benchmarking ? "on" : "off") << std::endl;
     BRAYNS_INFO << "JPEG Compression            : " << _jpegCompression
                 << std::endl;
-    BRAYNS_INFO << "JPEG size                   : " << _jpegSize << std::endl;
     BRAYNS_INFO << "Temporary folder            : " << _tmpFolder << std::endl;
     BRAYNS_INFO << "Synchronous mode            : " << _synchronousMode
                 << std::endl;

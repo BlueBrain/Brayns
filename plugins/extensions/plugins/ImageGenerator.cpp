@@ -25,26 +25,6 @@
 
 namespace brayns
 {
-void ImageGenerator::_resizeImage(uint8_t* srcData, const Vector2i& srcSize,
-                                  const Vector2i& dstSize, uint8_ts& dstData)
-{
-    dstData.reserve(dstSize.x() * dstSize.y());
-    size_t x_ratio =
-        static_cast<size_t>(((srcSize.x() << 16) / dstSize.x()) + 1);
-    size_t y_ratio =
-        static_cast<size_t>(((srcSize.y() << 16) / dstSize.y()) + 1);
-
-    for (int y = 0; y < dstSize.y(); ++y)
-    {
-        for (int x = 0; x < dstSize.x(); ++x)
-        {
-            const size_t x2 = ((x * x_ratio) >> 16);
-            const size_t y2 = ((y * y_ratio) >> 16);
-            dstData[(y * dstSize.x()) + x] = srcData[(y2 * srcSize.x()) + x2];
-        }
-    }
-}
-
 ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
     const uint32_t width, const uint32_t height, const uint8_t* rawData,
     const int32_t pixelFormat, unsigned long& dataSize)
@@ -77,28 +57,10 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer)
         return ImageJPEG();
 
     _processingImageJpeg = true;
-    const auto& newFrameSize = _appParams.getJpegSize();
-    if (newFrameSize.x() == 0 || newFrameSize.y() == 0)
-    {
-        BRAYNS_ERROR << "Encountered invalid size of image JPEG: "
-                     << newFrameSize << std::endl;
 
-        return ImageJPEG();
-    }
-
-    const auto& frameSize = frameBuffer.getSize();
     auto colorBuffer = frameBuffer.getColorBuffer();
     if (!colorBuffer)
         return ImageJPEG();
-
-    auto resizedColorBuffer = colorBuffer;
-
-    uint8_ts resizedBuffer;
-    if (frameSize != newFrameSize)
-    {
-        _resizeImage(colorBuffer, frameSize, newFrameSize, resizedBuffer);
-        resizedColorBuffer = resizedBuffer.data();
-    }
 
     int32_t pixelFormat = TJPF_RGBX;
     switch (frameBuffer.getFrameBufferFormat())
@@ -111,9 +73,10 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer)
         pixelFormat = TJPF_RGBX;
     }
 
+    const auto& frameSize = frameBuffer.getSize();
     ImageJPEG image;
-    image.data = _encodeJpeg(newFrameSize.x(), newFrameSize.y(),
-                             resizedColorBuffer, pixelFormat, image.size);
+    image.data = _encodeJpeg(frameSize.x(), frameSize.y(), colorBuffer,
+                             pixelFormat, image.size);
     _processingImageJpeg = false;
     return image;
 }
