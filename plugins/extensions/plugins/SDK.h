@@ -155,6 +155,7 @@ void init(brayns::FrameBuffer* f, ObjectHandler* h)
     static std::string diffuse, depth;
 
     frameSize = f->getSize();
+    f->map();
     diffuse = base64_encode(f->getColorBuffer(),
                             frameSize.x() * frameSize.y() * f->getColorDepth());
 
@@ -164,6 +165,7 @@ void init(brayns::FrameBuffer* f, ObjectHandler* h)
             base64_encode(reinterpret_cast<const uint8_t*>(f->getDepthBuffer()),
                           frameSize.x() * frameSize.y() * sizeof(float));
     }
+    f->unmap();
 
     h->add_property("width", &frameSize[0]);
     h->add_property("height", &frameSize[1]);

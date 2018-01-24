@@ -161,7 +161,7 @@ struct Brayns::Impl
         _engine->getCamera().set(renderInput.position, renderInput.target,
                                  renderInput.up);
 
-        if (_render(renderInput.windowSize))
+        if (_render())
         {
             FrameBuffer& frameBuffer = _engine->getFrameBuffer();
             const Vector2i& frameSize = frameBuffer.getSize();
@@ -190,10 +190,7 @@ struct Brayns::Impl
 
     bool render()
     {
-        const Vector2ui windowSize =
-            _parametersManager.getApplicationParameters().getWindowSize();
-
-        _render(windowSize);
+        _render();
 
         _engine->postRender();
 
@@ -296,27 +293,6 @@ private:
         _engine->setDefaultEpsilon();
     }
 
-#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-    void _executePlugins(const Vector2ui& size)
-    {
-        auto oldEngine = _engine.get();
-        _extensionPluginFactory->execute(_engine, _keyboardHandler,
-                                         *_cameraManipulator);
-
-        if (!_engine)
-            throw std::runtime_error("No valid engine found, aborting");
-
-        // the network plugin can create a new engine
-        if (_engine.get() != oldEngine)
-        {
-            _engine->reshape(size);
-            _engine->preRender();
-        }
-    }
-#else
-    void _executePlugins(const Vector2ui&) {}
-#endif
-
     void _updateAnimation()
     {
         if (!isLoadingFinished())
@@ -331,16 +307,17 @@ private:
         }
     }
 
-    bool _render(const Vector2ui& windowSize)
+    bool _render()
     {
+        _extensionPluginFactory->execute(_engine, _keyboardHandler,
+                                         *_cameraManipulator);
+
+        const Vector2ui windowSize =
+            _parametersManager.getApplicationParameters().getWindowSize();
+
         _engine->reshape(windowSize);
         _engine->preRender();
-
         _updateAnimation();
-
-#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        _executePlugins(windowSize);
-#endif
 
         if (!isLoadingFinished())
         {
