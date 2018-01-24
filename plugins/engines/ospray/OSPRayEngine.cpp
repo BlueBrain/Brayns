@@ -65,7 +65,7 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
             const auto error = ospLoadModule(rp.getModule().c_str());
             if (rp.getModule() == "deflect")
             {
-                if (error > 0)
+                if (error != OSP_NO_ERROR)
                     BRAYNS_WARN
 #if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR < 3))
                         << "Could not load DeflectPixelOp module, error code "

@@ -416,6 +416,7 @@ private:
             const size_t materialId = static_cast<size_t>(MaterialType::skybox);
             auto& material = scene.getMaterials()[materialId];
             material.setTexture(TT_DIFFUSE, environmentMap);
+            material.setType(MaterialType::skybox);
         }
 
         const std::string& colorMapFilename =
