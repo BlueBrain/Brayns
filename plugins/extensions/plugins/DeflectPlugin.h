@@ -34,7 +34,7 @@ public:
     DeflectPlugin(ParametersManager& parametersManager);
 
     /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API bool run(EngineWeakPtr engine, KeyboardHandler& keyboardHandler,
+    BRAYNS_API bool run(EnginePtr engine, KeyboardHandler& keyboardHandler,
                         AbstractManipulator& cameraManipulator) final;
 
 private:

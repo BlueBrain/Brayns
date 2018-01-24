@@ -347,7 +347,7 @@ void init(brayns::GeometryParameters* g, ObjectHandler* h)
 
 void init(brayns::RenderingParameters* r, ObjectHandler* h)
 {
-    h->add_property("engine", &r->_engine, Flags::Optional);
+    h->add_property("engine", &r->_engine, Flags::IgnoreRead);
     h->add_property("samples_per_pixel", &r->_spp, Flags::Optional);
     h->add_property("shader", &r->_renderer, Flags::Optional);
     h->add_property("shading", &r->_shading, Flags::Optional);

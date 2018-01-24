@@ -118,7 +118,6 @@ struct Brayns::Impl
                 _parametersManager.getRenderingParameters().getEngineAsString(
                     engineName));
 
-        _engine->recreate = std::bind(&Impl::createEngine, this);
         _engine->buildScene = std::bind(&Impl::buildScene, this);
         _setupCameraManipulator(CameraMode::inspect);
 
@@ -135,10 +134,6 @@ struct Brayns::Impl
     void buildScene()
     {
         _engine->setReady(false);
-
-        // if engine does not support scene reloading, recreate it first
-        if (!_engine->getScene().supportsUnloading())
-            createEngine();
 
         _engine->setLastOperation("");
         _engine->setLastProgress(0);

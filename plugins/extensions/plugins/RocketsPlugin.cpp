@@ -182,66 +182,33 @@ RocketsPlugin::~RocketsPlugin()
 
 void RocketsPlugin::_onNewEngine()
 {
-    if (_httpServer)
-    {
-        _handle(ENDPOINT_CAMERA, _engine->getCamera());
-        _handleGET(ENDPOINT_PROGRESS, _engine->getProgress());
-        _handleGET(ENDPOINT_FRAME_BUFFERS, _engine->getFrameBuffer(),
-                   [](const FrameBuffer&) { return false; });
-        _handle(ENDPOINT_MATERIAL_LUT,
-                _engine->getScene().getTransferFunction());
+    _handle(ENDPOINT_CAMERA, _engine->getCamera());
+    _handleGET(ENDPOINT_PROGRESS, _engine->getProgress());
+    _handleGET(ENDPOINT_FRAME_BUFFERS, _engine->getFrameBuffer(),
+               [](const FrameBuffer&) { return false; });
+    _handle(ENDPOINT_MATERIAL_LUT, _engine->getScene().getTransferFunction());
 
-        _handleGET(ENDPOINT_SCENE, _engine->getScene(),
-                   [&](const Scene& scene) {
-                       return _engine->isReady() && scene.getModified();
-                   });
-        _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
-                   [](Scene& scene) { scene.commitMaterials(Action::update); });
+    _handleGET(ENDPOINT_SCENE, _engine->getScene(), [&](const Scene& scene) {
+        return _engine->isReady() && scene.getModified();
+    });
+    _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
+               [](Scene& scene) { scene.commitMaterials(Action::update); });
 
-        _handleSimulationHistogram();
-        _handleVolumeHistogram();
-    }
-
-    _engine->extensionInit(*this);
-    _dirtyEngine = false;
+    _handleSimulationHistogram();
+    _handleVolumeHistogram();
 }
 
-void RocketsPlugin::_onChangeEngine()
-{
-    if (_httpServer)
-    {
-        _remove(ENDPOINT_CAMERA);
-        _remove(ENDPOINT_PROGRESS);
-        _remove(ENDPOINT_FRAME_BUFFERS);
-        _remove(ENDPOINT_MATERIAL_LUT);
-        _remove(ENDPOINT_SCENE);
-        _remove(ENDPOINT_SIMULATION_HISTOGRAM);
-        _remove(ENDPOINT_VOLUME_HISTOGRAM);
-    }
-
-    try
-    {
-        _engine->recreate();
-    }
-    catch (const std::runtime_error&)
-    {
-    }
-}
-
-bool RocketsPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
+bool RocketsPlugin::run(EnginePtr engine, KeyboardHandler&,
                         AbstractManipulator&)
 {
-    if (engine_.expired())
+    if (!_httpServer)
         return true;
 
-    if (_engine != engine_.lock().get() || _dirtyEngine)
+    if (_engine != engine)
     {
-        _engine = engine_.lock().get();
+        _engine = engine;
         _onNewEngine();
     }
-
-    if (!_httpServer)
-        return !_dirtyEngine;
 
     try
     {
@@ -262,7 +229,7 @@ bool RocketsPlugin::run(EngineWeakPtr engine_, KeyboardHandler&,
                      << exc.what() << std::endl;
     }
 
-    return !_dirtyEngine;
+    return true;
 }
 
 void RocketsPlugin::_broadcastWebsocketMessages()
@@ -374,17 +341,6 @@ void RocketsPlugin::_handleVolumeHistogram()
                         });
 }
 
-void RocketsPlugin::_handleRenderingParams()
-{
-    auto& params = _parametersManager.getRenderingParameters();
-    auto postUpdate = [this](RenderingParameters& params_) {
-        if (_engine->name() != params_.getEngine())
-            _onChangeEngine();
-    };
-    _handleGET(ENDPOINT_RENDERING_PARAMS, params);
-    _handlePUT(ENDPOINT_RENDERING_PARAMS, params, postUpdate);
-}
-
 void RocketsPlugin::_handleVolumeParams()
 {
     auto& params = _parametersManager.getVolumeParameters();
@@ -420,8 +376,10 @@ void RocketsPlugin::_setupHTTPServer()
 
     _handleApplicationParams();
     _handleGeometryParams();
-    _handleRenderingParams();
     _handleVolumeParams();
+
+    _handle(ENDPOINT_RENDERING_PARAMS,
+            _parametersManager.getRenderingParameters());
     _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
 
     _handle(ENDPOINT_FRAME, _parametersManager.getAnimationParameters());

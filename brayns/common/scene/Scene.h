@@ -253,12 +253,6 @@ public:
      */
     BRAYNS_API void setSpheresDirty(const bool value) { _spheresDirty = value; }
     /**
-     * @return true if unload() can be performed. Some implementations might not
-     *         support it, hence deletion of the scene or the entire engine is
-     * required.
-     */
-    virtual bool supportsUnloading() const { return true; }
-    /**
      * @internal needed to ensure deletion wrt cyclic dependency
      *           scene<->renderer
      */
