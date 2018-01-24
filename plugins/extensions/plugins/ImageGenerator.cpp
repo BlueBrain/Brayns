@@ -58,9 +58,13 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer)
 
     _processingImageJpeg = true;
 
+    frameBuffer.map();
     auto colorBuffer = frameBuffer.getColorBuffer();
     if (!colorBuffer)
+    {
+        frameBuffer.unmap();
         return ImageJPEG();
+    }
 
     int32_t pixelFormat = TJPF_RGBX;
     switch (frameBuffer.getFrameBufferFormat())
@@ -77,6 +81,7 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer)
     ImageJPEG image;
     image.data = _encodeJpeg(frameSize.x(), frameSize.y(), colorBuffer,
                              pixelFormat, image.size);
+    frameBuffer.unmap();
     _processingImageJpeg = false;
     return image;
 }
