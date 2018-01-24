@@ -58,11 +58,6 @@ public:
     */
     virtual void commit() = 0;
 
-    /**
-     * Called after the given extension plugin was created to perform
-     * engine-specific initialization on a given extension.
-     */
-    virtual void extensionInit(ExtensionPlugin&) {}
     /** Renders the current scene and populates the frame buffer accordingly */
     virtual void render();
     /** Executes engine specific pre-render operations */
@@ -105,12 +100,6 @@ public:
     */
     void initializeMaterials(
         MaterialsColorMap colorMap = MaterialsColorMap::none);
-
-    /**
-     * Recreates the engine according to new engine type/name. The recreation is
-     * delegated to the Brayns instance.
-     */
-    std::function<void()> recreate;
 
     /**
      * Unloads the current scene and loads and builds a new scene according to

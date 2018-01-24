@@ -57,14 +57,9 @@ DeflectPlugin::DeflectPlugin(ParametersManager& parametersManager)
                               // DEFLECT_HOST environment variable is defined
 }
 
-bool DeflectPlugin::run(EngineWeakPtr engine_, KeyboardHandler& keyboardHandler,
+bool DeflectPlugin::run(EnginePtr engine, KeyboardHandler& keyboardHandler,
                         AbstractManipulator& cameraManipulator)
 {
-    if (engine_.expired())
-        return true;
-
-    EnginePtr engine = engine_.lock();
-
     if (_stream)
     {
         const bool changed = _stream->getId() != _params.getId() ||

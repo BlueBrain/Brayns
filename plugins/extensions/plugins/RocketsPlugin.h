@@ -41,12 +41,11 @@ public:
     ~RocketsPlugin();
 
     /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API bool run(EngineWeakPtr engine, KeyboardHandler& keyboardHandler,
+    BRAYNS_API bool run(EnginePtr engine, KeyboardHandler& keyboardHandler,
                         AbstractManipulator& cameraManipulator) final;
 
 private:
     void _onNewEngine();
-    void _onChangeEngine();
 
     void _setupHTTPServer();
     void _setupWebsocket();
@@ -80,7 +79,6 @@ private:
     void _handleImageJPEG();
     void _handleApplicationParams();
     void _handleGeometryParams();
-    void _handleRenderingParams();
     void _handleVolumeParams();
     void _handleSimulationHistogram();
     void _handleVolumeHistogram();
@@ -102,12 +100,10 @@ private:
     using WsBroadcastMap = std::map<std::string, std::function<void()>>;
     WsBroadcastMap _wsBroadcasts;
 
-    Engine* _engine = nullptr;
+    EnginePtr _engine;
     ParametersManager& _parametersManager;
 
     std::unique_ptr<rockets::Server> _httpServer;
-
-    bool _dirtyEngine = false;
 
     ImageGenerator _imageGenerator;
 

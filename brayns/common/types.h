@@ -84,7 +84,6 @@ class Brayns;
 
 class Engine;
 typedef std::shared_ptr<Engine> EnginePtr;
-typedef std::weak_ptr<Engine> EngineWeakPtr;
 
 class Scene;
 typedef std::shared_ptr<Scene> ScenePtr;
