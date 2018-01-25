@@ -157,14 +157,17 @@ inline std::string to_json(const Version& obj)
 template <class T, class F>
 inline bool from_json(T& obj, const std::string& json, F postUpdateFunc = [] {})
 {
+    staticjson::ParseStatus status;
     const auto success =
-        staticjson::from_json_string(json.c_str(), &obj, nullptr);
+        staticjson::from_json_string(json.c_str(), &obj, &status);
     if (success)
     {
         obj.markModified();
         if (std::function<void(T&)>(postUpdateFunc))
             postUpdateFunc(obj);
     }
+    else
+        BRAYNS_ERROR << status.description() << std::endl;
     return success;
 }
 
