@@ -304,6 +304,8 @@ private:
 
     bool _render()
     {
+        _updateAnimation();
+
         _extensionPluginFactory->execute(_engine, _keyboardHandler,
                                          *_cameraManipulator);
 
@@ -312,7 +314,6 @@ private:
 
         _engine->reshape(windowSize);
         _engine->preRender();
-        _updateAnimation();
 
         if (!isLoadingFinished())
         {
