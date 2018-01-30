@@ -38,7 +38,8 @@ int main(int argc, const char** argv)
         auto end = std::chrono::system_clock::now();
         auto elapsed =
             std::chrono::duration_cast<std::chrono::seconds>(end - start);
-        BRAYNS_INFO << " ellapsed time: " << elapsed.count() << std::endl;
+        BRAYNS_INFO << "Service was running for " << elapsed.count()
+                    << " seconds" << std::endl;
     }
     catch (const std::runtime_error& e)
     {
