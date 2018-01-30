@@ -154,7 +154,13 @@ add_subdirectory(tests)
 
 # OptiX module
 if(BRAYNS_OSPRAY_ENABLED)
-  option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" ON)
+  # Needs OSPRay version with a fix, so enable on your risk
+  # https://github.com/ospray/ospray/commit/851b3e52120982470276ce2cbc04b5de654ddbde
+  if(OSPRAY_VERSION VERSION_LESS 1.5.0)
+    option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" OFF)
+  else()
+    option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" ON)
+  endif()
   if(BRAYNS_OPTIX_ENABLED)
     add_subdirectory(ospray_modules/optix)
     if(TARGET ospray_module_optix)
