@@ -322,6 +322,10 @@ private:
             {
                 _parametersManager.resetModified();
                 _engine->getProgress().resetModified();
+
+                // limit any updates (Deflect, Rockets) to a reasonable number
+                // while we are loading (and not rendering).
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 return false;
             }
 #endif
