@@ -25,7 +25,7 @@
 #include <rockets/jsonrpc/client.h>
 #include <rockets/ws/client.h>
 
-#define BOOST_TEST_MODULE brayns_SDK
+#define BOOST_TEST_MODULE braynsWebAPI
 #include <boost/test/unit_test.hpp>
 
 #ifdef __GNUC__
@@ -149,7 +149,7 @@ rapidjson::Document to_json(const std::string& data)
     return object;
 }
 
-BOOST_GLOBAL_FIXTURE(ClientServer)
+BOOST_GLOBAL_FIXTURE(ClientServer);
 
 BOOST_AUTO_TEST_CASE(reset_camera)
 {
