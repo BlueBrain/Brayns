@@ -302,19 +302,17 @@ void RocketsPlugin::_handleSchema(const std::string& endpoint,
 
 void RocketsPlugin::_registerEndpoints()
 {
-    _handleVersion();
-    _handleStreaming();
-    _handleImageJPEG();
-
     _handleApplicationParams();
     _handleGeometryParams();
+    _handleImageJPEG();
+    _handleStreaming();
+    _handleVersion();
     _handleVolumeParams();
 
+    _handle(ENDPOINT_FRAME, _parametersManager.getAnimationParameters());
     _handle(ENDPOINT_RENDERING_PARAMS,
             _parametersManager.getRenderingParameters());
     _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
-
-    _handle(ENDPOINT_FRAME, _parametersManager.getAnimationParameters());
 
     _rocketsServer->handle(
         rockets::http::Method::GET,
@@ -325,16 +323,14 @@ void RocketsPlugin::_registerEndpoints()
     // following endpoints need a valid engine
     _handle(ENDPOINT_CAMERA, _engine->getCamera());
     _handleGET(ENDPOINT_PROGRESS, _engine->getProgress());
-    _handleGET(ENDPOINT_FRAME_BUFFERS, _engine->getFrameBuffer(),
-               [](const FrameBuffer&) { return false; });
     _handle(ENDPOINT_MATERIAL_LUT, _engine->getScene().getTransferFunction());
-
     _handleGET(ENDPOINT_SCENE, _engine->getScene(), [&](const Scene& scene) {
         return _engine->isReady() && scene.getModified();
     });
     _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
                [](Scene& scene) { scene.commitMaterials(Action::update); });
 
+    _handleFrameBuffer();
     _handleSimulationHistogram();
     _handleVolumeHistogram();
 
@@ -352,6 +348,15 @@ void RocketsPlugin::_handleApplicationParams()
     };
     _handleGET(ENDPOINT_APP_PARAMS, params);
     _handlePUT(ENDPOINT_APP_PARAMS, params, postUpdate);
+}
+
+void RocketsPlugin::_handleFrameBuffer()
+{
+    // don't add framebuffer to websockets for performance
+    using namespace rockets::http;
+    _rocketsServer->handleGET(ENDPOINT_API_VERSION + ENDPOINT_FRAME_BUFFERS,
+                              _engine->getFrameBuffer());
+    _handleObjectSchema(ENDPOINT_FRAME_BUFFERS, _engine->getFrameBuffer());
 }
 
 void RocketsPlugin::_handleGeometryParams()
@@ -460,7 +465,6 @@ void RocketsPlugin::_handleVersion()
     _wsClientConnectNotifications[ENDPOINT_VERSION] = [this] {
         return _jsonrpcServer->makeNotification(ENDPOINT_VERSION, version);
     };
-    ;
 }
 
 void RocketsPlugin::_handleVolumeHistogram()

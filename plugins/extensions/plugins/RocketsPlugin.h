@@ -83,6 +83,7 @@ private:
     void _registerEndpoints();
 
     void _handleApplicationParams();
+    void _handleFrameBuffer();
     void _handleGeometryParams();
     void _handleImageJPEG();
     void _handleSimulationHistogram();
