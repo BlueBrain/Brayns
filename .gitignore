@@ -5,17 +5,12 @@ debug/
 release/
 Brion/
 Deflect/
-FlatBuffers/
-Livre/
-Lexis/
 Lunchbox/
 MVDTool/
 Pydoxine/
-RESTBridge/
 Rockets/
 Servus/
 vmmlib/
-ZeroBuf/
 CMakeFiles
 .DS_Store
 *~

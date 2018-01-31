@@ -16,18 +16,14 @@ braynsViewer --morphology-folder ~/morphologies
 ### Loading a circuit
 
 The --circuit-config command line argument define the BlueConfig or
-CircuitConfig to be loaded by Brayns. The --target command line argument
-specified the circuit target, and the --report command line argument specifies
-the simulation report to be rendered. Note that when a report is specified,
-the --simulation-cache-file command line argument needs to be specified in order
- to generate the cache file that Brayns needs to render the simulation. If the
- simulation cache file already exists, Brayns connects to it. If it does not,
- Brayns creates it.
+CircuitConfig to be loaded by Brayns. The --circuit-targets command line argument
+specified the circuit target (or multiples separated by comma), and the --circuit-report
+command line argument specifies the simulation report to be rendered.
 
 Example of how to load a circuit with voltages simulation for layer 1 cells
 ```
-braynsViewer --circuit-config ~/circuits/BlueConfig --target Layer1 --report
-voltages --simulation-cache-file ~/circuits/cache
+braynsViewer --circuit-config ~/circuits/BlueConfig --circuit-targets Layer1 
+--circuit-report voltages
 ```
 
 ![Layer1](images/Layer1.png)
@@ -305,11 +301,9 @@ used by Brayns. Three engines are currently supported:
 http://www.ospray.org/]
 - OptiX: [A software development kit for achieving high performance ray tracing
 on the GPU|https://developer.nvidia.com/optix]
-- Livre: [A Large-scale Interactive Volume Rendering Engine, a out-of-core,
-multi-node, multi-gpu, OpenGL volume rendering engine|https://github.com/BlueBrain/Livre]
 
 ```
-braynsViewer --engine <ospray|optix|livre>
+braynsViewer --engine <ospray|optix>
 ```
 
 ## Renderers

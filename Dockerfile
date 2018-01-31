@@ -77,7 +77,7 @@ RUN mkdir -p ${OSPRAY_SRC} \
 
 # Install libwebsockets (2.0 from Debian is not reliable)
 # https://github.com/warmcat/libwebsockets/releases
-ARG LWS_VERSION=1.7.1
+ARG LWS_VERSION=2.3.0
 ARG LWS_SRC=/app/libwebsockets
 ARG LWS_FILE=v${LWS_VERSION}.tar.gz
 
@@ -92,7 +92,9 @@ RUN mkdir -p ${LWS_SRC} \
     -DLWS_STATIC_PIC=ON \
     -DLWS_WITH_SSL=OFF \
     -DLWS_WITH_ZLIB=OFF \
+    -DLWS_WITH_ZIP_FOPS=OFF \
     -DLWS_WITHOUT_EXTENSIONS=ON \
+    -DLWS_WITHOUT_TESTAPPS=ON \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
  && ninja install \
  && rm -rf ${DIST_PATH}/lib/cmake/libwebsockets
