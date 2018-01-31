@@ -44,7 +44,7 @@ void BraynsViewer::display()
             .getApplicationParameters()
             .isBenchmarking())
     {
-        ss << " @ " << _fps.getFPS();
+        ss << " @ " << _timer.perSecondSmoothed() << " FPS";
     }
     setTitle(ss.str());
 

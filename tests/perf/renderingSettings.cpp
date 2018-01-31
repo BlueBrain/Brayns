@@ -20,6 +20,7 @@
 
 #include <brayns/Brayns.h>
 
+#include <brayns/common/Timer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/engine/Engine.h>
@@ -30,19 +31,12 @@
 #define BOOST_TEST_MODULE brayns
 #include <boost/test/unit_test.hpp>
 
-#include <chrono>
-
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::chrono::milliseconds;
-
 BOOST_AUTO_TEST_CASE(default_scene_benckmark)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
     brayns::Brayns brayns(testSuite.argc,
                           const_cast<const char**>(testSuite.argv));
 
-    high_resolution_clock::time_point startTime;
     uint64_t reference, shadows, softShadows, ambientOcclusion, allOptions;
 
     // Set default rendering parameters
@@ -51,21 +45,20 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     brayns.getEngine().commit();
 
     // Start timer
-    startTime = high_resolution_clock::now();
+    brayns::Timer timer;
+    timer.start();
     brayns.render();
-    reference =
-        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
-            .count();
+    timer.stop();
+    reference = timer.milliseconds();
 
     // Shadows
     params.getRenderingParameters().setShadows(true);
     brayns.getEngine().commit();
 
-    startTime = high_resolution_clock::now();
+    timer.start();
     brayns.render();
-    shadows =
-        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
-            .count();
+    timer.stop();
+    shadows = timer.milliseconds();
 
     // Shadows
     float t = float(shadows) / float(reference);
@@ -75,11 +68,10 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     params.getRenderingParameters().setSoftShadows(1.f);
     brayns.getEngine().commit();
 
-    startTime = high_resolution_clock::now();
+    timer.start();
     brayns.render();
-    softShadows =
-        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
-            .count();
+    timer.stop();
+    softShadows = timer.milliseconds();
 
     // Soft shadows
     t = float(softShadows) / float(reference);
@@ -93,11 +85,10 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
     brayns.getEngine().commit();
 
-    startTime = high_resolution_clock::now();
+    timer.start();
     brayns.render();
-    ambientOcclusion =
-        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
-            .count();
+    timer.stop();
+    ambientOcclusion = timer.milliseconds();
 
     // Ambient occlusion
     t = float(ambientOcclusion) / float(reference);
@@ -111,11 +102,10 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
     brayns.getEngine().commit();
 
-    startTime = high_resolution_clock::now();
+    timer.start();
     brayns.render();
-    allOptions =
-        duration_cast<milliseconds>(high_resolution_clock::now() - startTime)
-            .count();
+    timer.stop();
+    allOptions = timer.milliseconds();
 
     // All options
     t = float(allOptions) / float(reference);

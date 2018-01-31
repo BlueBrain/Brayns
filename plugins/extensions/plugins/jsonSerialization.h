@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/Statistics.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
@@ -123,6 +124,13 @@ STATICJSON_DECLARE_ENUM(brayns::EngineType,
 
 namespace staticjson
 {
+void init(brayns::Statistics* s, ObjectHandler* h)
+{
+    h->add_property("fps", &s->_fps);
+    h->add_property("scene_size_in_bytes", &s->_sceneSizeInBytes);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 void init(brayns::Renderer::PickResult* p, ObjectHandler* h)
 {
     h->add_property("hit", &p->hit);

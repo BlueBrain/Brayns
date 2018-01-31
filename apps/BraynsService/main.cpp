@@ -18,9 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <chrono>
-
 #include <brayns/Brayns.h>
+#include <brayns/common/Timer.h>
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 
@@ -31,14 +30,13 @@ int main(int argc, const char** argv)
         BRAYNS_INFO << "Initializing Service..." << std::endl;
         brayns::Brayns brayns(argc, argv);
 
-        auto start = std::chrono::system_clock::now();
+        brayns::Timer timer;
+        timer.start();
         bool keepRunning = true;
         while (keepRunning)
             keepRunning = brayns.render();
-        auto end = std::chrono::system_clock::now();
-        auto elapsed =
-            std::chrono::duration_cast<std::chrono::seconds>(end - start);
-        BRAYNS_INFO << "Service was running for " << elapsed.count()
+        timer.stop();
+        BRAYNS_INFO << "Service was running for " << timer.seconds()
                     << " seconds" << std::endl;
     }
     catch (const std::runtime_error& e)

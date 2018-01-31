@@ -22,6 +22,7 @@
 #include <brayns/Brayns.h>
 
 #include <brayns/common/Progress.h>
+#include <brayns/common/Timer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/camera/FlyingModeManipulator.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
@@ -286,6 +287,9 @@ private:
 
         // Set default epsilon according to scene bounding box
         _engine->setDefaultEpsilon();
+
+        _engine->getStatistics().setSceneSizeInBytes(
+            _engine->getScene().getSizeInBytes());
     }
 
     void _updateAnimation()
@@ -335,6 +339,7 @@ private:
             _finishLoadScene();
 
         _rendering = true;
+        _renderTimer.start();
 
         _engine->commit();
 
@@ -388,6 +393,8 @@ private:
         _engine->getProgress().resetModified();
 
         _rendering = false;
+        _renderTimer.stop();
+        _engine->getStatistics().setFPS(_renderTimer.perSecondSmoothed());
 
         return true;
     }
@@ -1216,6 +1223,8 @@ private:
 
     // protect rendering vs. data loading/unloading
     std::atomic_bool _rendering{false};
+
+    Timer _renderTimer;
 
 #ifdef BRAYNS_USE_LUNCHBOX
     // it is important to perform loading and unloading in the same thread,

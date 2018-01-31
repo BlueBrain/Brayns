@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+/* Copyright (c) 2018, EPFL/Blue Brain Project
+ *
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,25 +18,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef BRAYNS_LOG_H
-#define BRAYNS_LOG_H
+#pragma once
 
-#include <iostream>
-#define BRAYNS_ERROR std::cerr << "[ERROR] "
-#define BRAYNS_WARN std::cerr << "[WARN ] "
-#define BRAYNS_INFO std::cout << "[INFO ] "
-#ifdef NDEBUG
-#define BRAYNS_DEBUG \
-    if (false)       \
-    std::cout
-#else
-#define BRAYNS_DEBUG std::cout << "[DEBUG] "
-#endif
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/types.h>
 
-#define BRAYNS_THROW(exc)                        \
-    {                                            \
-        BRAYNS_ERROR << exc.what() << std::endl; \
-        throw exc;                               \
+SERIALIZATION_ACCESS(Statistics)
+
+namespace brayns
+{
+/** Captures various statistics about rendering, scenes, etc. */
+class Statistics : public BaseObject
+{
+public:
+    double getFPS() const { return _fps; }
+    void setFPS(const double fps) { _updateValue(_fps, fps); }
+    size_t getSceneSizeInBytes() const { return _sceneSizeInBytes; }
+    void setSceneSizeInBytes(const size_t sceneSizeInBytes)
+    {
+        _updateValue(_sceneSizeInBytes, sceneSizeInBytes);
     }
 
-#endif
+private:
+    double _fps{0.0};
+    size_t _sceneSizeInBytes{0};
+
+    SERIALIZATION_FRIEND(Statistics)
+};
+}

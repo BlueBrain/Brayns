@@ -25,6 +25,7 @@
 #include "ImageGenerator.h"
 
 #include <brayns/api.h>
+#include <brayns/common/Timer.h>
 #include <rockets/jsonrpc/server.h>
 #include <rockets/server.h>
 
@@ -118,23 +119,7 @@ private:
 
     ImageGenerator _imageGenerator;
 
-    class Timer
-    {
-    public:
-        using clock = std::chrono::high_resolution_clock;
-
-        void start() { _startTime = clock::now(); }
-        void restart() { start(); }
-        float elapsed()
-        {
-            return std::chrono::duration<float>{clock::now() - _startTime}
-                .count();
-        }
-
-        Timer() { start(); }
-    private:
-        clock::time_point _startTime;
-    } _timer;
+    Timer _timer;
 };
 }
 
