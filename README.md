@@ -38,7 +38,7 @@ Command line arguments are documented in the [User Guide](doc/UserGuide.md).
 
 The following platforms and build environments are tested:
 
-* Linux: Ubuntu 16.04, RHEL 6.8 (Makefile, x64)
+* Linux: Ubuntu 16.04, Debian 9, RHEL 6.8 (Makefile, x64)
 
 The [API documentation](http://bluebrain.github.io/Brayns-0.1/index.html)
 can be found on [bluebrain.github.io](http://bluebrain.github.io/).
@@ -64,28 +64,28 @@ Download and extract [ISPC compiler 1.9.1 archive](https://ispc.github.io/downlo
 
 #### Embree
 
-Clone embree 2.16.1 in the same folder level as ISPC compiler
+Clone embree in the same folder level as ISPC compiler
 
 ```
   git clone https://github.com/embree/embree.git
   mkdir embree/Build
   cd embree/Build
-  git checkout 788d912
+  git checkout <latest_release>
   cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
 ```
 
 #### OSPRay
 
-Clone OSPRay 1.2.1 in the same folder level as ISPC compiler
+Clone OSPRay in the same folder level as ISPC compiler
 
 ```
   git clone https://github.com/ospray/OSPRay.git
   mkdir OSPRay/Build
   cd OSPRay/Build
-  git checkout be966e3
-  export embree_DIR=<Brayns_installation_folder>
-  cmake .. -DOSPRAY_USE_EXTERNAL_EMBREE=ON -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
+  git checkout <latest_release>
+  export CMAKE_PREFIX_PATH=<Brayns_installation_folder>
+  cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
 ```
 
@@ -95,7 +95,7 @@ Clone OSPRay 1.2.1 in the same folder level as ISPC compiler
   git clone --recursive https://github.com/BlueBrain/Brayns.git
   mkdir Brayns/Build
   cd Brayns/Build
-  CMAKE_PREFIX_PATH=<Brayns_installation_folder>/lib/cmake/embree-2.14.0:<Brayns_installation_folder>/lib/cmake/ospray-1.2.0 cmake .. -DCLONE_SUBPROJECTS=ON -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
+  cmake .. -DCLONE_SUBPROJECTS=ON -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
 ```
 

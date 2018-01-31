@@ -2,7 +2,7 @@ Brayns is a minimalistic visualiser that can perform ray-traced rendering of neu
 
 Brayns is licensed under the LGPL, unless noted otherwise, e.g., for external dependencies. See file LGPL.txt for the full license. External dependencies are either LGPL or BSD-licensed. See file ACKNOWLEDGEMENTS.txt and AUTHORS.txt for further details.
 
-Copyright (c) 2015-2016, EPFL/Blue Brain Project and AUTHORS.txt.
+Copyright (c) 2015-2018, EPFL/Blue Brain Project and AUTHORS.txt.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
