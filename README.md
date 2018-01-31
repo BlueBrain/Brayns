@@ -122,15 +122,12 @@ cmake .. -DBRAYNS_DEFLECT_ENABLED=ON:OFF
 cmake .. -DBRAYNS_IMAGEMAGICK_ENABLED=ON:OFF
 ```
 
-#### Enable/Disable HTTP/REST interface.
- [Servus](https://github.com/HBPVIS/Servus),
- [ZeroBuf](https://github.com/HBPVIS/ZeroBuf),
- [Lexis](https://github.com/HBPVIS/Lexis),
+#### Enable/Disable HTTP/REST/Websockets interface.
  [LibJpegTurbo](http://libjpeg-turbo.virtualgl.org) and
- [ZeroEQ](https://github.com/HBPVIS/ZeroEQ).
+ [Rockets](https://github.com/BlueBrain/Rockets).
  See documentation for REST API details.
 ```
-cmake .. -DBRAYNS_REST_ENABLED=ON:OFF
+cmake .. -DBRAYNS_NETWORKING_ENABLED=ON:OFF
 ```
 
 ## Running Brayns viewer
