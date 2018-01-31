@@ -51,7 +51,7 @@ public:
     void buildGeometry() final;
 
     /** @copydoc Scene::serializeGeometry */
-    uint64_t serializeGeometry() final;
+    void serializeGeometry() final;
 
     /** @copydoc Scene::commitLights */
     void commitLights() final;

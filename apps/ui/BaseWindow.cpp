@@ -254,7 +254,7 @@ void BaseWindow::display()
     if (windowSize != _windowSize)
         glutReshapeWindow(windowSize.x(), windowSize.y());
 
-    _fps.start();
+    _timer.start();
 
     RenderInput renderInput;
     RenderOutput renderOutput;
@@ -346,7 +346,7 @@ void BaseWindow::display()
             _gid = buffer[index];
     }
 
-    _fps.stop();
+    _timer.stop();
 
     glutSwapBuffers();
 

@@ -33,25 +33,26 @@
 namespace
 {
 const std::string ENDPOINT_API_VERSION = "v1/";
-const std::string ENDPOINT_CAMERA = "camera";
-const std::string ENDPOINT_DATA_SOURCE = "data-source";
-const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
-const std::string ENDPOINT_SCENE = "scene";
 const std::string ENDPOINT_APP_PARAMS = "application-parameters";
-const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
-const std::string ENDPOINT_RENDERING_PARAMS = "rendering-parameters";
-const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
-const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
-const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
-const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
-const std::string ENDPOINT_VERSION = "version";
-const std::string ENDPOINT_PROGRESS = "progress";
+const std::string ENDPOINT_CAMERA = "camera";
+const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER = "circuit-config-builder";
+const std::string ENDPOINT_DATA_SOURCE = "data-source";
 const std::string ENDPOINT_FRAME = "frame";
+const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
+const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
 const std::string ENDPOINT_IMAGE_JPEG = "image-jpeg";
 const std::string ENDPOINT_MATERIAL_LUT = "material-lut";
-const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER = "circuit-config-builder";
+const std::string ENDPOINT_PROGRESS = "progress";
+const std::string ENDPOINT_RENDERING_PARAMS = "rendering-parameters";
+const std::string ENDPOINT_SCENE = "scene";
+const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
+const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
+const std::string ENDPOINT_STATISTICS = "statistics";
 const std::string ENDPOINT_STREAM = "stream";
 const std::string ENDPOINT_STREAM_TO = "stream-to";
+const std::string ENDPOINT_VERSION = "version";
+const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
+const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
@@ -166,6 +167,7 @@ void RocketsPlugin::_setupRocketsServer()
     }
 
     _setupWebsocket();
+    _timer.start();
 }
 
 void RocketsPlugin::_setupWebsocket()
@@ -329,6 +331,8 @@ void RocketsPlugin::_registerEndpoints()
     });
     _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
                [](Scene& scene) { scene.commitMaterials(Action::update); });
+    _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics(),
+               [&](const Statistics&) { return _engine->isReady(); });
 
     _handleFrameBuffer();
     _handleSimulationHistogram();
@@ -400,10 +404,10 @@ void RocketsPlugin::_handleImageJPEG()
         {
             const auto fps = _parametersManager.getApplicationParameters()
                                  .getImageStreamFPS();
-            if (_timer.elapsed() < 1.f / fps)
+            if (_timer.elapsed() < 1.0 / fps)
                 return;
 
-            _timer.restart();
+            _timer.start();
 
             const auto image =
                 _imageGenerator.createJPEG(_engine->getFrameBuffer());

@@ -26,7 +26,6 @@ set(BRAYNSCOMMON_SOURCES
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
-  simulation/AbstractSimulationHandler.h
   camera/AbstractManipulator.h
   camera/Camera.h
   camera/FlyingModeManipulator.h
@@ -48,10 +47,13 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   renderer/FrameBuffer.h
   renderer/Renderer.h
   scene/Scene.h
+  simulation/AbstractSimulationHandler.h
+  Statistics.h
+  Timer.h
   transferFunction/TransferFunction.h
   types.h
-  volume/VolumeHandler.h
   utils/Utils.h
+  volume/VolumeHandler.h
 )
 
 set(BRAYNSCOMMON_LINK_LIBRARIES

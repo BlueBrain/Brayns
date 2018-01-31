@@ -341,30 +341,29 @@ OSPModel OSPRayScene::_getActiveModel()
     return model;
 }
 
-uint64_t OSPRayScene::serializeGeometry()
+void OSPRayScene::serializeGeometry()
 {
-    uint64_t size = 0;
+    _sizeInBytes = 0;
     if (_spheresDirty)
         for (size_t i = 0; i < _materials.size(); ++i)
-            size += _serializeSpheres(i);
+            _sizeInBytes += _serializeSpheres(i);
 
     if (_cylindersDirty)
         for (size_t i = 0; i < _materials.size(); ++i)
-            size += _serializeCylinders(i);
+            _sizeInBytes += _serializeCylinders(i);
 
     if (_conesDirty)
         for (size_t i = 0; i < _materials.size(); ++i)
-            size += _serializeCones(i);
+            _sizeInBytes += _serializeCones(i);
 
     if (_trianglesMeshesDirty)
         for (size_t i = 0; i < _materials.size(); ++i)
-            size += _serializeMeshes(i);
+            _sizeInBytes += _serializeMeshes(i);
 
     _spheresDirty = false;
     _cylindersDirty = false;
     _conesDirty = false;
     _trianglesMeshesDirty = false;
-    return size;
 }
 
 void OSPRayScene::buildGeometry()
@@ -384,7 +383,7 @@ void OSPRayScene::buildGeometry()
     // intersections before initiating the traversal
     _processVolumeAABBGeometry();
 
-    const size_t size = serializeGeometry();
+    serializeGeometry();
 
     size_t totalNbSpheres = 0;
     size_t totalNbCylinders = 0;
@@ -412,8 +411,8 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Vertices : " << totalNbVertices << std::endl;
     BRAYNS_INFO << "Indices  : " << totalNbIndices << std::endl;
     BRAYNS_INFO << "Materials: " << _materials.size() << std::endl;
-    BRAYNS_INFO << "Total    : " << size << " bytes (" << size / 1048576
-                << " MB)" << std::endl;
+    BRAYNS_INFO << "Total    : " << _sizeInBytes << " bytes ("
+                << _sizeInBytes / 1048576 << " MB)" << std::endl;
     BRAYNS_INFO << "---------------------------------------------------"
                 << std::endl;
 }

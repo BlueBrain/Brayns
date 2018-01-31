@@ -19,6 +19,7 @@
  */
 
 #include <brayns/Brayns.h>
+#include <brayns/common/Timer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/log.h>
@@ -31,23 +32,20 @@ int main(int argc, const char** argv)
     {
         const size_t nbFrames = 100;
 
-        std::chrono::high_resolution_clock::time_point startTime;
-        uint64_t duration;
-        startTime = std::chrono::high_resolution_clock::now();
+        brayns::Timer timer;
 
+        timer.start();
         brayns::Brayns brayns(argc, argv);
+        timer.stop();
 
-        duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-                       std::chrono::high_resolution_clock::now() - startTime)
-                       .count();
-        BRAYNS_INFO << "[PERF] Scene initialization took " << duration
-                    << " milliseconds" << std::endl;
+        BRAYNS_INFO << "[PERF] Scene initialization took "
+                    << timer.milliseconds() << " milliseconds" << std::endl;
 
         auto& engine = brayns.getEngine();
         auto& scene = engine.getScene();
         auto& bounds = scene.getWorldBounds();
         const float radius = bounds.getSize().find_max();
-        startTime = std::chrono::high_resolution_clock::now();
+        timer.start();
         for (size_t frame = 0; frame < nbFrames; ++frame)
         {
             const brayns::Vector3f target = bounds.getCenter();
@@ -60,13 +58,12 @@ int main(int argc, const char** argv)
 
             brayns.render();
         }
-        duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-                       std::chrono::high_resolution_clock::now() - startTime)
-                       .count();
+        timer.stop();
+
         BRAYNS_INFO << "[PERF] Rendering " << nbFrames << " frames took "
-                    << duration << " milliseconds" << std::endl;
+                    << timer.milliseconds() << " milliseconds" << std::endl;
         BRAYNS_INFO << "[PERF] Frames per second: "
-                    << nbFrames / (duration / 1000.f) << std::endl;
+                    << nbFrames / timer.seconds() << std::endl;
     }
     catch (const std::runtime_error& e)
     {

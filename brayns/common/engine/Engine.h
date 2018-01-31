@@ -21,8 +21,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <brayns/common/BaseObject.h>
-#include <brayns/common/types.h>
+#include <brayns/common/Statistics.h>
 
 #include <mutex>
 
@@ -182,6 +181,7 @@ public:
     bool isReady() const { return _isReady; }
     /** @internal */
     void setReady(const bool isReady_) { _isReady = isReady_; }
+    Statistics& getStatistics() { return _statistics; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
@@ -193,6 +193,7 @@ protected:
     RendererMap _renderers;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
+    Statistics _statistics;
 
     size_t _frameNumber;
     Progress _progress;

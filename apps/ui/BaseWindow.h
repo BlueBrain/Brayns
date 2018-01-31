@@ -26,13 +26,8 @@
 #endif
 
 #include <apps/ui/gl/ScreenSpaceProcessor.h>
+#include <brayns/common/Timer.h>
 #include <brayns/common/types.h>
-
-#include <chrono>
-
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::chrono::milliseconds;
 
 namespace brayns
 {
@@ -42,23 +37,6 @@ void initGLUT(int* ac, const char** av);
 
 /*! switch over to GLUT for control flow. This functoin will not return */
 void runGLUT();
-
-/*! helper class that allows for easily computing (smoothed) frame rate */
-struct FPSCounter
-{
-    high_resolution_clock::time_point _startTime;
-    uint64_t _duration;
-
-    void start() { _startTime = high_resolution_clock::now(); }
-    void stop()
-    {
-        _duration = duration_cast<milliseconds>(high_resolution_clock::now() -
-                                                _startTime)
-                        .count();
-    }
-
-    float getFPS() { return 1000.f / _duration; }
-};
 
 /**
  * The different types of frame buffer targets for rendering.
@@ -161,7 +139,7 @@ protected:
     int _windowID;
     Vector2ui _windowSize;
 
-    FPSCounter _fps;
+    Timer _timer;
 
     ScreenSpaceProcessor _screenSpaceProcessor;
 

@@ -78,9 +78,8 @@ public:
 
     /**
         Serializes scene geometry into rendering engine specific data structures
-        @return The total size of the serialized data
     */
-    BRAYNS_API virtual uint64_t serializeGeometry() = 0;
+    BRAYNS_API virtual void serializeGeometry() = 0;
 
     /**
         Attach simulation data to renderer
@@ -360,6 +359,8 @@ public:
     BRAYNS_API void setMaterialsColorMap(
         MaterialsColorMap colorMap = MaterialsColorMap::none);
 
+    /** @return the current size in bytes of the loaded geometry. */
+    size_t getSizeInBytes() const { return _sizeInBytes; }
 protected:
     void _buildMissingMaterials(const size_t materialId);
     void _processVolumeAABBGeometry();
@@ -391,6 +392,8 @@ protected:
 
     // Scene
     Boxf _bounds;
+
+    size_t _sizeInBytes{0};
 
 private:
     void _markGeometryDirty();

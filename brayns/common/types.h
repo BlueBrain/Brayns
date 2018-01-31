@@ -102,14 +102,6 @@ typedef std::vector<RendererPtr> Renderers;
 class FrameBuffer;
 typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
 
-class ApplicationParameters;
-
-class GeometryParameters;
-
-class RenderingParameters;
-
-class VolumeParameters;
-
 struct Sphere;
 typedef std::vector<Sphere> Spheres;
 typedef std::map<size_t, Spheres> SpheresMap;
@@ -165,6 +157,7 @@ class ParametersManager;
 class RenderingParameters;
 class SceneParameters;
 class StreamParameters;
+class VolumeParameters;
 
 class ExtensionPlugin;
 typedef std::shared_ptr<ExtensionPlugin> ExtensionPluginPtr;
@@ -180,6 +173,8 @@ class DeflectPlugin;
 class KeyboardHandler;
 
 class MeshLoader;
+
+class Statistics;
 
 /** Types of renderers */
 enum class RendererType
