@@ -256,11 +256,12 @@ void RocketsPlugin::_handlePUT(const std::string& endpoint, T& obj,
 
     _handleObjectSchema(endpoint, obj);
 
-    _jsonrpcServer->bind(endpoint, [this, &obj, postUpdateFunc](
+    _jsonrpcServer->bind(endpoint, [this, endpoint, &obj, postUpdateFunc](
                                        rockets::jsonrpc::Request request) {
         if (from_json(obj, request.message, postUpdateFunc))
         {
-            _rocketsServer->broadcastText(to_json(obj), {request.clientID});
+            const auto& msg = _jsonrpcServer->makeNotification(endpoint, obj);
+            _rocketsServer->broadcastText(msg, {request.clientID});
             return rockets::jsonrpc::Response{"null"};
         }
         return rockets::jsonrpc::Response::invalidParams();
