@@ -313,6 +313,8 @@ private:
         _extensionPluginFactory->execute(_engine, _keyboardHandler,
                                          *_cameraManipulator);
 
+        _engine->getStatistics().resetModified();
+
         const Vector2ui windowSize =
             _parametersManager.getApplicationParameters().getWindowSize();
 
@@ -394,7 +396,13 @@ private:
 
         _rendering = false;
         _renderTimer.stop();
-        _engine->getStatistics().setFPS(_renderTimer.perSecondSmoothed());
+
+        _fpsUpdateElapsed += _renderTimer.milliseconds();
+        if (_fpsUpdateElapsed > 750)
+        {
+            _engine->getStatistics().setFPS(_renderTimer.perSecondSmoothed());
+            _fpsUpdateElapsed = 0;
+        }
 
         return true;
     }
@@ -1225,6 +1233,7 @@ private:
     std::atomic_bool _rendering{false};
 
     Timer _renderTimer;
+    int64_t _fpsUpdateElapsed{0};
 
 #ifdef BRAYNS_USE_LUNCHBOX
     // it is important to perform loading and unloading in the same thread,

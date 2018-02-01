@@ -333,7 +333,9 @@ void RocketsPlugin::_registerEndpoints()
     _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
                [](Scene& scene) { scene.commitMaterials(Action::update); });
     _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics(),
-               [&](const Statistics&) { return _engine->isReady(); });
+               [&](const Statistics& statistics) {
+                   return _engine->isReady() && statistics.getModified();
+               });
 
     _handleFrameBuffer();
     _handleSimulationHistogram();
