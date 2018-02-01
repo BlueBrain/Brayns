@@ -524,7 +524,10 @@ void RocketsPlugin::_handleQuit()
 void RocketsPlugin::_handleResetCamera()
 {
     _handleRPC(METHOD_RESET_CAMERA, "Resets the camera to its initial values",
-               [this] { _engine->getCamera().reset(); });
+               [this] {
+                   _engine->getCamera().reset();
+                   _jsonrpcServer->emit(ENDPOINT_CAMERA, _engine->getCamera());
+               });
 }
 
 std::future<rockets::http::Response> RocketsPlugin::_handleCircuitConfigBuilder(
