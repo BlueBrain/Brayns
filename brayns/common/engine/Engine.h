@@ -27,6 +27,14 @@
 
 namespace brayns
 {
+struct SnapshotParams
+{
+    int samplesPerPixel{1};
+    Vector2ui size;
+    std::string format; // ImageMagick formats apply
+    size_t quality{100};
+};
+
 /**
  * Abstract implementation of the ray-tracing engine. What we call the
  * ray-tracing engine is a 3rd party acceleration library, typically OSPRay,
@@ -182,6 +190,17 @@ public:
     /** @internal */
     void setReady(const bool isReady_) { _isReady = isReady_; }
     Statistics& getStatistics() { return _statistics; }
+    /**
+     * Render a snapshot with the given parameters. Result is available in
+     * framebuffer.
+     *
+     * @note not threadsafe and not safe vs render()
+     * @param params the snapshot parameter to take
+     * @throws std::runtime_error if engine is not ready or snapshot creation
+     *         failed
+     */
+    void snapshot(const SnapshotParams& params);
+
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();

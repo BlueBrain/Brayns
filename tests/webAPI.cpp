@@ -18,8 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "jsonSerialization.h"
+
 #include <brayns/Brayns.h>
 #include <brayns/common/engine/Engine.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <rockets/jsonrpc/client.h>
@@ -28,42 +31,12 @@
 #define BOOST_TEST_MODULE braynsWebAPI
 #include <boost/test/unit_test.hpp>
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#endif
-#include <plugins/extensions/plugins/rapidjson/document.h>
-#include <plugins/extensions/plugins/rapidjson/prettywriter.h>
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+#include "ImageGenerator.h"
 
 template <typename T>
 bool is_ready(const std::future<T>& f)
 {
     return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
-}
-
-std::string buildRequest(const std::string& method, const size_t id,
-                         const std::string& params)
-{
-    using namespace rapidjson;
-    Document object(kObjectType);
-
-    object.AddMember(StringRef("jsonrpc"), StringRef("2.0"),
-                     object.GetAllocator());
-    object.AddMember(StringRef("method"), StringRef(method.c_str()),
-                     object.GetAllocator());
-    object.AddMember(StringRef("id"), id, object.GetAllocator());
-
-    Document param(kObjectType);
-    param.Parse(params.c_str());
-    object.AddMember(StringRef("params"), param, object.GetAllocator());
-
-    StringBuffer buffer;
-    PrettyWriter<StringBuffer> writer(buffer);
-    object.Accept(writer);
-    return buffer.GetString();
 }
 
 class ClientServer
@@ -99,21 +72,29 @@ public:
         _instance = this;
     }
 
-    rapidjson::Document makeRequest(const std::string& method,
-                                    const std::string& params = std::string())
+    template <typename Params, typename RetVal>
+    RetVal makeRequest(const std::string& method, const Params& params)
     {
-        auto responseFuture = client.request(method, params);
+        auto responseFuture = client.request<Params, RetVal>(method, params);
         while (!is_ready(responseFuture))
         {
             brayns->render();
             wsClient.process(0);
         }
 
-        using namespace rapidjson;
-        Document object(kObjectType);
-        auto response = responseFuture.get();
-        object.Parse(response.result.c_str());
-        return object;
+        return responseFuture.get();
+    }
+
+    bool makeRequest(const std::string& method)
+    {
+        auto responseFuture = client.request(method, {});
+        while (!is_ready(responseFuture))
+        {
+            brayns->render();
+            wsClient.process(0);
+        }
+
+        return responseFuture.get().result == "\"OK\"";
     }
 
 private:
@@ -125,48 +106,80 @@ private:
 
 ClientServer* ClientServer::_instance{nullptr};
 
-rapidjson::Document makeRequest(const std::string& method,
-                                const std::string& params = std::string())
+template <typename Params, typename RetVal>
+RetVal makeRequest(const std::string& method, const Params& params)
 {
-    return ClientServer::instance().makeRequest(method, params);
+    return ClientServer::instance().makeRequest<Params, RetVal>(method, params);
 }
 
-std::ostream& operator<<(std::ostream& os, const rapidjson::Value& value)
+bool makeRequest(const std::string& method)
 {
-    using namespace rapidjson;
-    StringBuffer sb;
-    PrettyWriter<StringBuffer> writer(sb);
-    value.Accept(writer);
-    os << sb.GetString() << std::endl;
-    return os;
-}
-
-rapidjson::Document to_json(const std::string& data)
-{
-    using namespace rapidjson;
-    Document object(kObjectType);
-    object.Parse(data.c_str());
-    return object;
+    return ClientServer::instance().makeRequest(method);
 }
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
 BOOST_AUTO_TEST_CASE(reset_camera)
 {
-    BOOST_CHECK(makeRequest("reset-camera") == to_json("\"OK\""));
+    BOOST_CHECK(makeRequest("reset-camera"));
 }
 
 BOOST_AUTO_TEST_CASE(inspect)
 {
-    auto inspectResult = makeRequest("inspect", "[0.5,0.5]");
-    BOOST_CHECK(inspectResult["hit"].GetBool());
-    auto jsonArray = inspectResult["position"].GetArray();
-    const brayns::Vector3f position{jsonArray[0].GetFloat(),
-                                    jsonArray[1].GetFloat(),
-                                    jsonArray[2].GetFloat()};
-    BOOST_CHECK(position.equals(
+    auto inspectResult =
+        makeRequest<std::array<float, 2>, brayns::Renderer::PickResult>(
+            "inspect", {{0.5, 0.5}});
+    BOOST_CHECK(inspectResult.hit);
+    BOOST_CHECK(inspectResult.pos.equals(
         {0.500001490116119, 0.500001490116119, 1.19209289550781e-7}));
 
-    auto failedInspectResult = makeRequest("inspect", "[10,-10]");
-    BOOST_CHECK(!failedInspectResult["hit"].GetBool());
+    auto failedInspectResult =
+        makeRequest<std::array<float, 2>, brayns::Renderer::PickResult>(
+            "inspect", {{10, -10}});
+    BOOST_CHECK(!failedInspectResult.hit);
+}
+
+#ifdef BRAYNS_USE_MAGICKPP
+BOOST_AUTO_TEST_CASE(snapshot)
+{
+    brayns::SnapshotParams params;
+    params.format = "jpg";
+    params.size = {5, 5};
+    params.quality = 75;
+
+    auto image =
+        makeRequest<brayns::SnapshotParams,
+                    brayns::ImageGenerator::ImageBase64>("snapshot", params);
+    BOOST_CHECK_EQUAL(image.data,
+                      "/9j/4AAQSkZJRgABAQAAAQABAAD/"
+                      "2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4n"
+                      "ICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/"
+                      "2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy"
+                      "MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/"
+                      "wAARCAAFAAUDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAX/"
+                      "xAAgEAABAwMFAQAAAAAAAAAAAAACAAEEAwURBxIhMkGB/"
+                      "8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/"
+                      "xAAcEQACAgIDAAAAAAAAAAAAAAABAgADBEEFEdH/2gAMAwEAAhEDEQA/"
+                      "AJ0PVMbfBjwxsrmMekFJiKU3O0WHPT3GfqIir6OLxGqUlNDZ9hVsboT/"
+                      "2Q==");
+}
+#endif
+
+BOOST_AUTO_TEST_CASE(snapshot_empty_params)
+{
+    BOOST_CHECK_THROW((makeRequest<brayns::SnapshotParams,
+                                   brayns::ImageGenerator::ImageBase64>(
+                          "snapshot", brayns::SnapshotParams())),
+                      rockets::jsonrpc::response_error);
+}
+
+BOOST_AUTO_TEST_CASE(snapshot_illegal_format)
+{
+    brayns::SnapshotParams params;
+    params.size = {5, 5};
+    params.format = "";
+    BOOST_CHECK_THROW(
+        (makeRequest<brayns::SnapshotParams,
+                     brayns::ImageGenerator::ImageBase64>("snapshot", params)),
+        rockets::jsonrpc::response_error);
 }

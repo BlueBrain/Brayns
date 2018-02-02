@@ -57,6 +57,9 @@ void OSPRayFrameBuffer::enableDeflectPixelOp()
 
 void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
 {
+    if (frameSize.product() == 0)
+        throw std::runtime_error("Invalid size for framebuffer resize");
+
     _frameSize = frameSize;
 
     if (_frameBuffer)

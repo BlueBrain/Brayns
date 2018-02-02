@@ -157,7 +157,7 @@ struct Brayns::Impl
         _engine->getCamera().set(renderInput.position, renderInput.target,
                                  renderInput.up);
 
-        if (_render())
+        if (_render(renderInput.windowSize))
         {
             FrameBuffer& frameBuffer = _engine->getFrameBuffer();
             const Vector2i& frameSize = frameBuffer.getSize();
@@ -186,7 +186,9 @@ struct Brayns::Impl
 
     bool render()
     {
-        _render();
+        const Vector2ui windowSize =
+            _parametersManager.getApplicationParameters().getWindowSize();
+        _render(windowSize);
 
         _engine->postRender();
 
@@ -306,7 +308,7 @@ private:
         }
     }
 
-    bool _render()
+    bool _render(const Vector2ui& windowSize)
     {
         _updateAnimation();
 
@@ -314,9 +316,6 @@ private:
                                          *_cameraManipulator);
 
         _engine->getStatistics().resetModified();
-
-        const Vector2ui windowSize =
-            _parametersManager.getApplicationParameters().getWindowSize();
 
         _engine->reshape(windowSize);
         _engine->preRender();
@@ -346,8 +345,7 @@ private:
         _engine->commit();
 
         Camera& camera = _engine->getCamera();
-        if (camera.getModified())
-            camera.commit();
+        camera.commit();
 
         Scene& scene = _engine->getScene();
 

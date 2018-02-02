@@ -96,6 +96,7 @@ private:
     void _handleInspect();
     void _handleQuit();
     void _handleResetCamera();
+    void _handleSnapshot();
 
     std::future<rockets::http::Response> _handleCircuitConfigBuilder(
         const rockets::http::Request&);
