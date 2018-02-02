@@ -452,8 +452,9 @@ void RocketsPlugin::_handleStreaming()
         const auto message = "Brayns was not compiled with streaming support";
         return make_ready_response(Code::NOT_IMPLEMENTED, message);
     };
-    _httpServer->handle(Method::PUT, ENDPOINT_STREAM, respondNotImplemented);
-    _httpServer->handle(Method::PUT, ENDPOINT_STREAM_TO, respondNotImplemented);
+    _rocketsServer->handle(Method::PUT, ENDPOINT_STREAM, respondNotImplemented);
+    _rocketsServer->handle(Method::PUT, ENDPOINT_STREAM_TO,
+                           respondNotImplemented);
 #endif
 }
 
