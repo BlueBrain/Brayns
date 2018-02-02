@@ -16,6 +16,8 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
   list(APPEND EXCLUDE_FROM_TESTS brayns.cpp braynsTestData.cpp webAPI.cpp)
 endif()
 
+include_directories(${PROJECT_SOURCE_DIR}/plugins/extensions/plugins)
+
 list(APPEND LCOV_EXCLUDE 'plugins/extensions/plugins/base64/*'
                          'plugins/extensions/plugins/rapidjson/*'
                          'plugins/extensions/plugins/staticjson/*')

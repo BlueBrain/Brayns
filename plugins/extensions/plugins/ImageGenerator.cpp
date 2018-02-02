@@ -23,11 +23,17 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/parameters/ApplicationParameters.h>
 
+#ifdef BRAYNS_USE_MAGICKPP
+#include <Magick++.h>
+#endif
+
+#include "base64/base64.h"
+
 namespace brayns
 {
 ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
     const uint32_t width, const uint32_t height, const uint8_t* rawData,
-    const int32_t pixelFormat, unsigned long& dataSize)
+    const int32_t pixelFormat, const uint8_t quality, unsigned long& dataSize)
 {
     uint8_t* tjSrcBuffer = const_cast<uint8_t*>(rawData);
     const int32_t color_components = 4; // Color Depth
@@ -41,7 +47,7 @@ ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
     const int32_t success =
         tjCompress2(_compressor, tjSrcBuffer, width, tjPitch, height,
                     tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
-                    _appParams.getJpegCompression(), tjFlags);
+                    quality, tjFlags);
 
     if (success != 0)
     {
@@ -51,7 +57,41 @@ ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
     return ImageJPEG::JpegData{tjJpegBuf};
 }
 
-ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer)
+ImageGenerator::ImageBase64 ImageGenerator::createImage(
+    FrameBuffer& frameBuffer, const std::string& format, const uint8_t quality)
+{
+#ifdef BRAYNS_USE_MAGICKPP
+    try
+    {
+        frameBuffer.map();
+        auto colorBuffer = frameBuffer.getColorBuffer();
+        Magick::Image image(frameBuffer.getSize().x(),
+                            frameBuffer.getSize().y(), "RGBA",
+                            MagickCore::CharPixel, colorBuffer);
+        image.magick(format);
+        image.quality(quality);
+
+        Magick::Blob blob;
+        image.flip();
+        image.write(&blob);
+        frameBuffer.unmap();
+
+        return {blob.base64()};
+    }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error(e.what());
+    }
+#else
+    BRAYNS_WARN << "No assimp found, will take TurboJPEG snapshot; "
+                << "ignoring format '" << format << "'" << std::endl;
+    const auto& jpeg = createJPEG(frameBuffer, quality);
+    return {base64_encode(jpeg.data.get(), jpeg.size)};
+#endif
+}
+
+ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer,
+                                                     const uint8_t quality)
 {
     if (_processingImageJpeg)
         return ImageJPEG();
@@ -80,7 +120,7 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer)
     const auto& frameSize = frameBuffer.getSize();
     ImageJPEG image;
     image.data = _encodeJpeg(frameSize.x(), frameSize.y(), colorBuffer,
-                             pixelFormat, image.size);
+                             pixelFormat, quality, image.size);
     frameBuffer.unmap();
     _processingImageJpeg = false;
     return image;

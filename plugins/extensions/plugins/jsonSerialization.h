@@ -124,6 +124,15 @@ STATICJSON_DECLARE_ENUM(brayns::EngineType,
 
 namespace staticjson
 {
+void init(brayns::SnapshotParams* s, ObjectHandler* h)
+{
+    h->add_property("format", &s->format);
+    h->add_property("quality", &s->quality, Flags::Optional);
+    h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
+    h->add_property("size", Vector2uiArray(s->size));
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 void init(brayns::Statistics* s, ObjectHandler* h)
 {
     h->add_property("fps", &s->_fps);
@@ -191,11 +200,9 @@ void init(brayns::FrameBuffer* f, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::ImageGenerator::ImageJPEG* i, ObjectHandler* h)
+void init(brayns::ImageGenerator::ImageBase64* i, ObjectHandler* h)
 {
-    static std::string data;
-    data = base64_encode(i->data.get(), i->size);
-    h->add_property("data", &data);
+    h->add_property("data", &i->data);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

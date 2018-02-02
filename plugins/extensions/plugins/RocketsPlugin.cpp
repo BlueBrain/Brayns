@@ -55,8 +55,9 @@ const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
 const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 const std::string METHOD_INSPECT = "inspect";
-const std::string METHOD_RESET_CAMERA = "reset-camera";
 const std::string METHOD_QUIT = "quit";
+const std::string METHOD_RESET_CAMERA = "reset-camera";
+const std::string METHOD_SNAPSHOT = "snapshot";
 
 const std::string JSON_TYPE = "application/json";
 
@@ -90,7 +91,6 @@ namespace brayns
 RocketsPlugin::RocketsPlugin(ParametersManager& parametersManager)
     : ExtensionPlugin()
     , _parametersManager(parametersManager)
-    , _imageGenerator(parametersManager.getApplicationParameters())
 {
     _setupRocketsServer();
 }
@@ -181,7 +181,10 @@ void RocketsPlugin::_setupWebsocket()
         if (_engine->isReady())
         {
             const auto image =
-                _imageGenerator.createJPEG(_engine->getFrameBuffer());
+                _imageGenerator.createJPEG(_engine->getFrameBuffer(),
+                                           _parametersManager
+                                               .getApplicationParameters()
+                                               .getJpegCompression());
             if (image.size > 0)
             {
                 std::string message;
@@ -342,8 +345,9 @@ void RocketsPlugin::_registerEndpoints()
     _handleVolumeHistogram();
 
     _handleInspect();
-    _handleResetCamera();
     _handleQuit();
+    _handleResetCamera();
+    _handleSnapshot();
 }
 
 void RocketsPlugin::_handleApplicationParams()
@@ -384,10 +388,19 @@ void RocketsPlugin::_handleImageJPEG()
     auto func = [&](const Request&) {
         if (!_engine->isReady())
             return make_ready_response(Code::NOT_SUPPORTED);
-        const auto obj = _imageGenerator.createJPEG(_engine->getFrameBuffer());
-        if (obj.size == 0)
-            return make_ready_response(Code::BAD_REQUEST);
-        return make_ready_response(Code::OK, to_json(obj), JSON_TYPE);
+        try
+        {
+            const auto obj =
+                _imageGenerator.createImage(_engine->getFrameBuffer(), "jpg",
+                                            _parametersManager
+                                                .getApplicationParameters()
+                                                .getJpegCompression());
+            return make_ready_response(Code::OK, to_json(obj), JSON_TYPE);
+        }
+        catch (const std::runtime_error& e)
+        {
+            return make_ready_response(Code::BAD_REQUEST, e.what());
+        }
     };
     _rocketsServer->handle(Method::GET,
                            ENDPOINT_API_VERSION + ENDPOINT_IMAGE_JPEG, func);
@@ -395,7 +408,7 @@ void RocketsPlugin::_handleImageJPEG()
     _rocketsServer->handle(
         Method::GET, ENDPOINT_API_VERSION + ENDPOINT_IMAGE_JPEG + "/schema",
         [&](const Request&) {
-            ImageGenerator::ImageJPEG obj;
+            ImageGenerator::ImageBase64 obj;
             return make_ready_response(Code::OK,
                                        getSchema(obj, hyphenatedToCamelCase(
                                                           ENDPOINT_IMAGE_JPEG)),
@@ -405,15 +418,16 @@ void RocketsPlugin::_handleImageJPEG()
     _wsBroadcastOperations[ENDPOINT_IMAGE_JPEG] = [this] {
         if (_engine->isReady() && _engine->getRenderer().hasNewImage())
         {
-            const auto fps = _parametersManager.getApplicationParameters()
-                                 .getImageStreamFPS();
+            const auto& params = _parametersManager.getApplicationParameters();
+            const auto fps = params.getImageStreamFPS();
             if (_timer.elapsed() < 1.0 / fps)
                 return;
 
             _timer.start();
 
             const auto image =
-                _imageGenerator.createJPEG(_engine->getFrameBuffer());
+                _imageGenerator.createJPEG(_engine->getFrameBuffer(),
+                                           params.getJpegCompression());
             if (image.size > 0)
                 _rocketsServer->broadcastBinary((const char*)image.data.get(),
                                                 image.size);
@@ -531,6 +545,26 @@ void RocketsPlugin::_handleResetCamera()
                    _engine->getCamera().reset();
                    _jsonrpcServer->emit(ENDPOINT_CAMERA, _engine->getCamera());
                });
+}
+
+void RocketsPlugin::_handleSnapshot()
+{
+    RpcDocumentation doc{"Make a snapshot of the current view", "settings",
+                         "Snapshot settings for quality and size"};
+    _handleRPC<SnapshotParams, ImageGenerator::ImageBase64>(
+        METHOD_SNAPSHOT, doc, [this](const SnapshotParams& params) {
+            try
+            {
+                _engine->snapshot(params);
+                return _imageGenerator.createImage(_engine->getFrameBuffer(),
+                                                   params.format,
+                                                   params.quality);
+            }
+            catch (const std::runtime_error& e)
+            {
+                throw rockets::jsonrpc::response_error(e.what(), -1);
+            }
+        });
 }
 
 std::future<rockets::http::Response> RocketsPlugin::_handleCircuitConfigBuilder(

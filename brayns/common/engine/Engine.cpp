@@ -58,6 +58,7 @@ void Engine::reshape(const Vector2ui& frameSize)
     _frameBuffer->resize(size);
     _camera->setAspectRatio(static_cast<float>(size.x()) /
                             static_cast<float>(size.y()));
+    _camera->commit();
 }
 
 void Engine::setDefaultCamera()
@@ -120,5 +121,25 @@ Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
         // In case of 3D stereo vision, make sure the width is even
         result.x() = size.x() - 1;
     return result;
+}
+
+void Engine::snapshot(const SnapshotParams& params)
+{
+    if (!isReady())
+        throw std::runtime_error("Engine not ready");
+
+    auto& rp = _parametersManager.getRenderingParameters();
+    const auto oldSpp = rp.getSamplesPerPixel();
+
+    reshape(params.size);
+    rp.setSamplesPerPixel(params.samplesPerPixel);
+
+    preRender();
+    render();
+    postRender();
+
+    rp.setSamplesPerPixel(oldSpp);
+    // reshape() is always done with current windowsize from app params, so no
+    // need to reshape back
 }
 }

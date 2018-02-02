@@ -29,16 +29,18 @@ namespace brayns
 class ImageGenerator
 {
 public:
-    ImageGenerator(const ApplicationParameters& appParams)
-        : _appParams(appParams)
-    {
-    }
+    ImageGenerator() = default;
 
     ~ImageGenerator()
     {
         if (_compressor)
             tjDestroy(_compressor);
     }
+
+    struct ImageBase64
+    {
+        std::string data;
+    };
 
     struct ImageJPEG
     {
@@ -51,19 +53,18 @@ public:
         unsigned long size{0};
     };
 
-    ImageJPEG createJPEG(FrameBuffer& frameBuffer);
+    ImageBase64 createImage(FrameBuffer& frameBuffer, const std::string& format,
+                            uint8_t quality);
+
+    ImageJPEG createJPEG(FrameBuffer& frameBuffer, uint8_t quality);
 
 private:
     bool _processingImageJpeg = false;
     tjhandle _compressor{tjInitCompress()};
-    const ApplicationParameters& _appParams;
 
-    void _resizeImage(uint8_t* srcData, const Vector2i& srcSize,
-                      const Vector2i& dstSize, uint8_ts& dstData);
-    ImageJPEG::JpegData _encodeJpeg(const uint32_t width, const uint32_t height,
-                                    const uint8_t* rawData,
-                                    const int32_t pixelFormat,
-                                    unsigned long& dataSize);
+    ImageJPEG::JpegData _encodeJpeg(uint32_t width, uint32_t height,
+                                    const uint8_t* rawData, int32_t pixelFormat,
+                                    uint8_t quality, unsigned long& dataSize);
 };
 }
 
