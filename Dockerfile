@@ -29,7 +29,6 @@ RUN apt-get update \
     libmagick++-dev \
     libtbb-dev \
     libturbojpeg0-dev \
-    qtbase5-dev \
     wget \
     ca-certificates \
  && apt-get clean \
@@ -115,7 +114,6 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && cd build \
  && PKG_CONFIG_PATH=${DIST_PATH}/lib/pkgconfig CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
     -DBRAYNS_BRION_ENABLED=ON \
-    -DBRAYNS_DEFLECT_ENABLED=ON \
     -DBRAYNS_NETWORKING_ENABLED=ON \
     -DCLONE_SUBPROJECTS=ON \
     -DCMAKE_BUILD_TYPE=Release \
@@ -142,8 +140,6 @@ RUN apt-get update \
     libhdf5-cpp-100 \
     libmagick++-6.q16-7 \
     libmagickwand-6.q16-3 \
-    libqt5concurrent5 \
-    libqt5network5 \
     libturbojpeg0 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
