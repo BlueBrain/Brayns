@@ -26,14 +26,6 @@
 #if (BRAYNS_USE_OSPRAY)
 #include <plugins/engines/ospray/OSPRayEngine.h>
 #endif
-namespace
-{
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-}
 
 namespace brayns
 {
@@ -52,7 +44,8 @@ std::unique_ptr<Engine> EngineFactory::create(
     {
 #if (BRAYNS_USE_OSPRAY)
         if (name == EngineType::ospray || name == EngineType::optix)
-            return make_unique<OSPRayEngine>(_argc, _argv, _parametersManager);
+            return std::make_unique<OSPRayEngine>(_argc, _argv,
+                                                  _parametersManager);
 #endif
     }
     catch (const std::runtime_error& e)
