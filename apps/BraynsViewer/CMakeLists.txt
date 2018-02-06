@@ -11,7 +11,7 @@ set(BRAYNSVIEWER_HEADERS
 )
 
 set(BRAYNSVIEWER_LINK_LIBRARIES
-  PUBLIC brayns braynsCommon braynsIO braynsParameters braynsUI
+  PUBLIC brayns braynsCommon braynsIO braynsParameters braynsUI ${OPENGL_gl_LIBRARY}
 )
 
 common_application(braynsViewer)
