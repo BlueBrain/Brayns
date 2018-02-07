@@ -111,12 +111,11 @@ void FrameBuffer::beginFrame()
         pixelOp->beginFrame();
 }
 
-float FrameBuffer::endFrame(const float errorThreshold)
+float FrameBuffer::endFrame(const float /*errorThreshold*/)
 {
     if (pixelOp)
         pixelOp->endFrame();
-    return errorThreshold +
-           0.1f; // keep rendering by lying of still having errors
+    return ospcommon::inf; // keep rendering by lying of still having errors
 }
 
 const void *FrameBuffer::mapDepthBuffer()
