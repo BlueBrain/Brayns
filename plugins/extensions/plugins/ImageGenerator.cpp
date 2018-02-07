@@ -31,6 +31,32 @@
 
 namespace brayns
 {
+namespace
+{
+#ifdef BRAYNS_USE_MAGICKPP
+std::string getImageMagickPixelFormat(const FrameBufferFormat format)
+{
+    std::string pixelFormat;
+    switch (format)
+    {
+    case FrameBufferFormat::rgba_i8:
+        pixelFormat = "RGBA";
+        break;
+    case FrameBufferFormat::bgra_i8:
+        pixelFormat = "RGBA";
+        break;
+    case FrameBufferFormat::rgb_i8:
+        pixelFormat = "RGB";
+        break;
+    case FrameBufferFormat::rgb_f32:
+    default:
+        throw std::runtime_error("Unsupported frame buffer format");
+    }
+    return pixelFormat;
+}
+#endif
+}
+
 ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
     const uint32_t width, const uint32_t height, const uint8_t* rawData,
     const int32_t pixelFormat, const uint8_t quality, unsigned long& dataSize)
@@ -64,16 +90,21 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
     try
     {
         frameBuffer.map();
+
+        const auto& pixelFormat =
+            getImageMagickPixelFormat(frameBuffer.getFrameBufferFormat());
         auto colorBuffer = frameBuffer.getColorBuffer();
         Magick::Image image(frameBuffer.getSize().x(),
-                            frameBuffer.getSize().y(), "RGBA",
+                            frameBuffer.getSize().y(), pixelFormat,
                             MagickCore::CharPixel, colorBuffer);
         image.magick(format);
         image.quality(quality);
+        image.depth(8); // force 8 bit to avoid 16-bit tiff
+        image.flip();
 
         Magick::Blob blob;
-        image.flip();
         image.write(&blob);
+
         frameBuffer.unmap();
 
         return {blob.base64()};
