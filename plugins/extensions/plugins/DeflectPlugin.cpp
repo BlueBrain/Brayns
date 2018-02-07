@@ -249,6 +249,7 @@ void DeflectPlugin::_sendDeflectFrame(Engine& engine)
     }
 
     auto& frameBuffer = engine.getFrameBuffer();
+    frameBuffer.map();
     if (frameBuffer.getColorBuffer())
     {
         _copyToLastImage(frameBuffer);
@@ -256,6 +257,7 @@ void DeflectPlugin::_sendDeflectFrame(Engine& engine)
     }
     else
         _sendFuture = make_ready_future(true);
+    frameBuffer.unmap();
 }
 
 void DeflectPlugin::_copyToLastImage(FrameBuffer& frameBuffer)
