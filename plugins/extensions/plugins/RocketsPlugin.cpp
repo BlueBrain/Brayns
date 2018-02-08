@@ -29,6 +29,7 @@
 #include <brayns/common/volume/VolumeHandler.h>
 
 #include <fstream>
+#include <rockets/jsonrpc/helpers.h>
 
 namespace
 {
@@ -229,12 +230,12 @@ void RocketsPlugin::_handleGET(const std::string& endpoint, T& obj,
     _handleObjectSchema(endpoint, obj);
 
     _wsClientConnectNotifications[endpoint] = [this, &obj, endpoint] {
-        return _jsonrpcServer->makeNotification(endpoint, obj);
+        return rockets::jsonrpc::makeNotification(endpoint, obj);
     };
 
     _wsBroadcastOperations[endpoint] = [this, &obj, endpoint, modifiedFunc] {
         if (modifiedFunc(obj))
-            _jsonrpcServer->emit(endpoint, obj);
+            _jsonrpcServer->notify(endpoint, obj);
     };
 }
 
@@ -263,7 +264,7 @@ void RocketsPlugin::_handlePUT(const std::string& endpoint, T& obj,
                                        rockets::jsonrpc::Request request) {
         if (from_json(obj, request.message, postUpdateFunc))
         {
-            const auto& msg = _jsonrpcServer->makeNotification(endpoint, obj);
+            const auto& msg = rockets::jsonrpc::makeNotification(endpoint, obj);
             _rocketsServer->broadcastText(msg, {request.clientID});
             return rockets::jsonrpc::Response{"null"};
         }
@@ -485,7 +486,7 @@ void RocketsPlugin::_handleVersion()
                                                           JSON_TYPE);
                            });
     _wsClientConnectNotifications[ENDPOINT_VERSION] = [this] {
-        return _jsonrpcServer->makeNotification(ENDPOINT_VERSION, version);
+        return rockets::jsonrpc::makeNotification(ENDPOINT_VERSION, version);
     };
 }
 
@@ -543,7 +544,8 @@ void RocketsPlugin::_handleResetCamera()
     _handleRPC(METHOD_RESET_CAMERA, "Resets the camera to its initial values",
                [this] {
                    _engine->getCamera().reset();
-                   _jsonrpcServer->emit(ENDPOINT_CAMERA, _engine->getCamera());
+                   _jsonrpcServer->notify(ENDPOINT_CAMERA,
+                                          _engine->getCamera());
                });
 }
 
