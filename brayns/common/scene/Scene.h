@@ -352,7 +352,7 @@ public:
     /**
         Sets the materials handled by the scene, and available to the
         scene geometry
-        @param materialType Specifies the algorithm that is used to create
+        @param colorMap Specifies the algorithm that is used to create
                the materials. For instance MT_RANDOM creates materials with
                random colors, transparency, reflection, and light emission
     */
