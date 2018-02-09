@@ -970,7 +970,7 @@ private:
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setRenderer(RendererType::basic);
+        renderParams.setRenderer(RendererType::default_);
     }
 
     void _particleRenderer()

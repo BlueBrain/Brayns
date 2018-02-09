@@ -94,7 +94,7 @@ STATICJSON_DECLARE_ENUM(brayns::MemoryMode,
                         {"replicated", brayns::MemoryMode::replicated});
 
 STATICJSON_DECLARE_ENUM(
-    brayns::RendererType, {"basic", brayns::RendererType::basic},
+    brayns::RendererType, {"default", brayns::RendererType::default_},
     {"proximity", brayns::RendererType::proximity},
     {"simulation", brayns::RendererType::simulation},
     {"particle", brayns::RendererType::particle},

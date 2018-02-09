@@ -215,7 +215,7 @@ public:
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
 private:
-    CameraType _type{CameraType::perspective};
+    CameraType _type{CameraType::default_};
     Vector3f _position;
     Vector3f _target;
     Vector3f _up;

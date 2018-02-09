@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -45,28 +45,30 @@ const std::string PARAM_DETECTION_ON_DIFFERENT_MATERIAL =
 const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
 const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
 const std::string PARAM_EPSILON = "epsilon";
-const std::string PARAM_CAMERA_TYPE = "camera-type";
+const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
 const std::string ENGINES[2] = {"ospray", "optix"};
-const std::string RENDERERS[7] = {"basic",
+const std::string RENDERERS[7] = {"default",
                                   "proximity",
                                   "simulation",
                                   "particle",
                                   "geometrynormals",
                                   "shadingnormals",
                                   "scientificvisualization"};
-const std::string RENDERER_NAMES[7] = {"basic",
-                                       "proximityrenderer",
-                                       "simulationrenderer",
-                                       "particlerenderer",
-                                       "raycast_Ng",
-                                       "raycast_Ns",
-                                       "scivis"};
 
-const std::string CAMERA_TYPES[5] = {"perspective", "stereo", "orthographic",
-                                     "panoramic", "clipped"};
+const std::string RENDERER_INTERNAL_NAMES[7] = {"basic",
+                                                "proximityrenderer",
+                                                "simulationrenderer",
+                                                "particlerenderer",
+                                                "raycast_Ng",
+                                                "raycast_Ns",
+                                                "scivis"};
+
+const std::string CAMERA_TYPE_NAMES[5] = {"perspective", "stereo",
+                                          "orthographic", "panoramic",
+                                          "clipped"};
 
 const std::string SHADING_TYPES[3] = {"none", "diffuse", "electron"};
 }
@@ -76,7 +78,7 @@ namespace brayns
 RenderingParameters::RenderingParameters()
     : AbstractParameters("Rendering")
     , _engine(EngineType::ospray)
-    , _renderer(RendererType::basic)
+    , _renderer(RendererType::default_)
     , _ambientOcclusionStrength(0.f)
     , _ambientOcclusionDistance(1.20f)
     , _shading(ShadingType::diffuse)
@@ -90,7 +92,7 @@ RenderingParameters::RenderingParameters()
     , _detectionNearColor(1.f, 0.f, 0.f)
     , _detectionFarColor(0.f, 1.f, 0.f)
     , _epsilon(0.f)
-    , _cameraType(CameraType::perspective)
+    , _cameraType(CameraType::default_)
     , _headLight(false)
 {
     _parameters.add_options()(PARAM_ENGINE.c_str(), po::value<std::string>(),
@@ -98,7 +100,7 @@ RenderingParameters::RenderingParameters()
         PARAM_MODULE.c_str(), po::value<std::string>(),
         "OSPRay module name [string]")(
         PARAM_RENDERER.c_str(), po::value<std::string>(),
-        "OSPRay active renderer [basic|simulation|proximity|particle]")(
+        "OSPRay active renderer [default|simulation|proximity|particle]")(
         PARAM_SPP.c_str(), po::value<size_t>(),
         "Number of samples per pixel [int]")(
         PARAM_ACCUMULATION.c_str(), po::value<bool>(),
@@ -128,21 +130,41 @@ RenderingParameters::RenderingParameters()
         PARAM_EPSILON.c_str(), po::value<float>(),
         "All intersection distances less than the "
         "epsilon value are ignored by the ray-tracer [float]")(
-        PARAM_CAMERA_TYPE.c_str(), po::value<std::string>(),
-        "Camera type [perspective|stereo|orthographic|panoramic]")(
+        PARAM_CAMERA.c_str(), po::value<std::string>(),
+        "Camera [perspective|stereo|orthographic|panoramic]")(
         PARAM_HEAD_LIGHT.c_str(), po::value<bool>(),
         "Enable/Disable light source attached to camera origin [bool]")(
         PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),
         "Threshold for adaptive accumulation [float]");
 
-    // Add default renderers
-    _renderers.push_back(RendererType::basic);
+    initializeDefaultRenderers();
+    initializeDefaultCameras();
+}
+
+void RenderingParameters::initializeDefaultRenderers()
+{
+    _rendererNames.clear();
+    for (size_t i = 0; i < sizeof(RENDERER_INTERNAL_NAMES) /
+                               sizeof(RENDERER_INTERNAL_NAMES[0]);
+         ++i)
+        _rendererNames.push_back(RENDERER_INTERNAL_NAMES[i]);
+
+    _renderers.clear();
+    _renderers.push_back(RendererType::default_);
     _renderers.push_back(RendererType::simulation);
     _renderers.push_back(RendererType::particle);
     _renderers.push_back(RendererType::proximity);
     _renderers.push_back(RendererType::geometryNormals);
     _renderers.push_back(RendererType::shadingNormals);
     _renderers.push_back(RendererType::scientificvisualization);
+}
+
+void RenderingParameters::initializeDefaultCameras()
+{
+    _cameraTypeNames.clear();
+    for (size_t i = 0;
+         i < sizeof(CAMERA_TYPE_NAMES) / sizeof(CAMERA_TYPE_NAMES[0]); ++i)
+        _cameraTypeNames.push_back(CAMERA_TYPE_NAMES[i]);
 }
 
 bool RenderingParameters::_parse(const po::variables_map& vm)
@@ -159,11 +181,21 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
         _module = vm[PARAM_MODULE].as<std::string>();
     if (vm.count(PARAM_RENDERER))
     {
-        _renderer = RendererType::basic;
+        _renderer = RendererType::default_;
+        bool found = false;
         const std::string& renderer = vm[PARAM_RENDERER].as<std::string>();
-        for (size_t i = 0; i < sizeof(RENDERERS) / sizeof(RENDERERS[0]); ++i)
-            if (renderer == RENDERERS[i])
+        for (size_t i = 0; !found && i < _rendererNames.size(); ++i)
+            if (renderer == _rendererNames[i])
+            {
                 _renderer = static_cast<RendererType>(i);
+                found = true;
+            }
+        if (!found)
+        {
+            BRAYNS_INFO << "'" << renderer << "' replaces default renderer"
+                        << std::endl;
+            _rendererNames[0] = renderer;
+        }
     }
     if (vm.count(PARAM_SPP))
         _spp = vm[PARAM_SPP].as<size_t>();
@@ -212,14 +244,23 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
     }
     if (vm.count(PARAM_EPSILON))
         _epsilon = vm[PARAM_EPSILON].as<float>();
-    if (vm.count(PARAM_CAMERA_TYPE))
+    if (vm.count(PARAM_CAMERA))
     {
-        _cameraType = CameraType::perspective;
-        const std::string& cameraType = vm[PARAM_CAMERA_TYPE].as<std::string>();
-        for (size_t i = 0; i < sizeof(CAMERA_TYPES) / sizeof(CAMERA_TYPES[0]);
-             ++i)
-            if (cameraType == CAMERA_TYPES[i])
+        _cameraType = CameraType::default_;
+        const std::string& cameraTypeName = vm[PARAM_CAMERA].as<std::string>();
+        bool found = false;
+        for (size_t i = 0; !found && i < _cameraTypeNames.size(); ++i)
+            if (cameraTypeName == _cameraTypeNames[i])
+            {
                 _cameraType = static_cast<CameraType>(i);
+                found = true;
+            }
+        if (!found)
+        {
+            BRAYNS_INFO << "'" << cameraTypeName << "' replaces default camera"
+                        << std::endl;
+            _cameraTypeNames[0] = cameraTypeName;
+        }
     }
     if (vm.count(PARAM_HEAD_LIGHT))
         _headLight = vm[PARAM_HEAD_LIGHT].as<bool>();
@@ -286,13 +327,13 @@ const std::string& RenderingParameters::getRendererAsString(
 const std::string& RenderingParameters::getRendererNameAsString(
     const RendererType value) const
 {
-    return RENDERER_NAMES[static_cast<size_t>(value)];
+    return _rendererNames[static_cast<size_t>(value)];
 }
 
 const std::string& RenderingParameters::getCameraTypeAsString(
     const CameraType value) const
 {
-    return CAMERA_TYPES[static_cast<size_t>(value)];
+    return _cameraTypeNames[static_cast<size_t>(value)];
 }
 
 const std::string& RenderingParameters::getShadingAsString(

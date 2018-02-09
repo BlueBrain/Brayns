@@ -48,6 +48,7 @@ public:
     /** OSPRay module */
     const std::string& getModule() const { return _module; }
     /** OSPRay renderer */
+    void initializeDefaultRenderers();
     RendererType getRenderer() const { return _renderer; }
     const std::string& getRendererAsString(const RendererType value) const;
     const std::string& getRendererNameAsString(const RendererType value) const;
@@ -166,6 +167,7 @@ public:
     /**
        Camera type
     */
+    void initializeDefaultCameras();
     CameraType getCameraType() const { return _cameraType; }
     const std::string& getCameraTypeAsString(const CameraType value) const;
 
@@ -204,6 +206,7 @@ protected:
     std::string _module;
     RendererType _renderer;
     RendererTypes _renderers;
+    strings _rendererNames;
     float _ambientOcclusionStrength;
     float _ambientOcclusionDistance;
     ShadingType _shading;
@@ -219,6 +222,7 @@ protected:
     Vector3f _detectionFarColor;
     float _epsilon;
     CameraType _cameraType;
+    strings _cameraTypeNames;
     bool _headLight;
     bool _dynamicLoadBalancer{false};
     float _varianceThreshold{-1.f};

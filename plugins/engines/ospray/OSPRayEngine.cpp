@@ -108,7 +108,7 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
     _scene.reset(new OSPRayScene(renderersForScene, _parametersManager));
-    _camera.reset(new OSPRayCamera(rp.getCameraType()));
+    _camera.reset(new OSPRayCamera(_parametersManager));
     _camera->setEnvironmentMap(
         !parametersManager.getSceneParameters().getEnvironmentMap().empty());
 
