@@ -22,7 +22,7 @@ neurons. It provides an abstraction of the underlying rendering engines, so that
 the best possible acceleration libraries can be used for the relevant hardware.
 (https://github.com/BlueBrain/Brayns.git).
 
-To keep track of the changes between releases check the [changelog](doc/Changelog.md).
+To keep track of the changes between releases check the [changelog](Changelog.md).
 
 Contact: bbp-open-source@googlegroups.com
 

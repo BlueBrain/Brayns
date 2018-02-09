@@ -1,0 +1,7 @@
+future-release=0.5.0
+user=BlueBrain
+project=Brayns
+output=Changelog.md
+compare-link=false
+date-format=%d-%m-%Y
+author=false
