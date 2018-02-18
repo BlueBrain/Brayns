@@ -30,7 +30,7 @@
 #include <optixu/optixu_math_namespace.h>
 
 // Plane intersection -- used for refining triangle hit points.  Note
-// that this skips zero denom check (for rays perpindicular to plane normal)
+// that this skips zero denom check (for rays perpendicular to plane normal)
 // since we know that the ray intersects the plane.
 static __device__ __inline__ float intersectPlane(
     const optix::float3& origin, const optix::float3& direction,

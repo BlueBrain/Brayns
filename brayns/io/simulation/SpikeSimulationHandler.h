@@ -41,7 +41,7 @@ class SpikeSimulationHandler : public AbstractSimulationHandler
 {
 public:
     /**
-     * @brief Default contructor
+     * @brief Default constructor
      * @param geometryParameters Geometry parameters
      */
     SpikeSimulationHandler(const GeometryParameters& geometryParameters);

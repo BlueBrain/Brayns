@@ -40,14 +40,14 @@ struct SnapshotParams
  * ray-tracing engine is a 3rd party acceleration library, typically OSPRay,
  * Optix or FireRays, that provides hardware acceleration.
  * An engine holds a native implementation of a scene, a camera, a frame buffer
- * and of one or serveral renderers according to the capatilities of the
+ * and of one or several renderers according to the capatilities of the
  * acceleration library.
  */
 class Engine
 {
 public:
     /**
-     * @brief Engine contructor
+     * @brief Engine constructor
      * @param parametersManager holds all engine parameters (geometry,
      * rendering, etc)
      */

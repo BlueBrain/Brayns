@@ -92,7 +92,7 @@ inline vec3f ParticleRenderer_shadeRay(
             if (depth == 0)
                 sample.alpha = 1.f;
 
-            // Retreive information about the geometry, typically geometry ID,
+            // Retrieve information about the geometry, typically geometry ID,
             // normal to the surface, material ID, texture coordinates, etc.
             DifferentialGeometry dg;
             postIntersect(self->abstract.super.model, dg, ray,
