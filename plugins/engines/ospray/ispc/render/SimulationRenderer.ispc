@@ -505,7 +505,7 @@ inline vec3f SimulationRenderer_shadeRay(
 
             if (attributes.opacity > 0.01f && moreRebounds)
             {
-                // Compute indirect lightning contribution
+                // Compute indirect lighting contribution
                 computeIndirectShading(sample, attributes);
 
                 // Compute surface shading
