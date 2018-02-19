@@ -251,9 +251,9 @@ bool NESTLoader::_load(const float timestamp)
     for (size_t i = 0; i < _nbElements; ++i)
     {
         const float time = _values[i];
-        // Whith the next check, simulation only plays forward because the value
+        // With the next check, simulation only plays forward because the value
         // that is stored
-        // is the last time the spike occured for this neuron.
+        // is the last time the spike occurred for this neuron.
         if (time < start)
             continue;
 

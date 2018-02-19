@@ -37,7 +37,7 @@ struct FrameBuffer : public ospray::FrameBuffer
     ~FrameBuffer();
 
     //! \brief common function to help printf-debugging
-    /*! \detailed Every derived class should overrride this! */
+    /*! \detailed Every derived class should override this! */
     std::string toString() const override;
 
     void setTile(ospray::Tile &tile) override;

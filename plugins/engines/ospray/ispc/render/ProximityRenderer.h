@@ -40,7 +40,7 @@ namespace brayns
     intersection point of the surface.
 
     This renderer can be configured using the following entries:
-    - detectionDistance: Maximum distance for surrouding geometry detection
+    - detectionDistance: Maximum distance for surrounding geometry detection
     - materialTestEnabled: If true, detection will be disabled for geometry that
     has the same material as the hit surface.
     - electronShadingEnabled: If true, geometries are renderered using the

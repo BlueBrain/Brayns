@@ -82,7 +82,7 @@ public:
                                const std::string& filename);
 
     /* @brief Prevents material attributes to be updated. Any update will be
-     * ignored. This is used when one wants to avoid material attibutes to be
+     * ignored. This is used when one wants to avoid material attributes to be
      * modifiied during the life time of the scene
     */
     BRAYNS_API void lock() { _locked = true; }

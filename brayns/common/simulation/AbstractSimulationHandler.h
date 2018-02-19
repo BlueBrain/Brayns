@@ -34,7 +34,7 @@ class AbstractSimulationHandler
 {
 public:
     /**
-     * @brief Default contructor
+     * @brief Default constructor
      * @param geometryParameters Geometry parameters
      */
     AbstractSimulationHandler(const GeometryParameters& geometryParameters);

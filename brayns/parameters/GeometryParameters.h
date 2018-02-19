@@ -101,7 +101,7 @@ public:
     const std::string& getXYZBFile() const { return _xyzbFile; }
     /** folder containing mesh files */
     const std::string& getMeshFolder() const { return _meshFolder; }
-    /** Fesh containting mesh*/
+    /** Fesh containing mesh*/
     const std::string& getMeshFile() const { return _meshFile; }
     /** file containing circuit configuration */
     const std::string& getCircuitConfiguration() const
