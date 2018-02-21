@@ -185,7 +185,7 @@ public:
     CameraStereoMode getStereoMode() const { return _stereoMode; }
     /**
        @brief Sets the eye separation of the stereo camera
-       @param eyeSeparation The new distance bewteen eyes
+       @param eyeSeparation The new distance between eyes
     */
     void setEyeSeparation(float eyeSeparation)
     {

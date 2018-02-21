@@ -117,7 +117,7 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
                         indirectShadingPower = reduce_max(Ka);
                     }
 
-                    // Returned color is the one material with weigth according
+                    // Returned color is the one material with weight according
                     // intensity and distance to intersection
                     indirectShadingColor = localDiffuseColor * Ka;
                     indirectShadingPower /= distanceToIntersection;

@@ -280,7 +280,7 @@ struct Histogram
     bool empty() const { return values.empty(); }
 };
 
-/** Some 'special' materials are used by Brayns to acomplish specific features
+/** Some 'special' materials are used by Brayns to accomplish specific features
  *  such as skyboxes.
  */
 const size_t NO_MATERIAL = std::numeric_limits<size_t>::max();

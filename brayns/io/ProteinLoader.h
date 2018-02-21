@@ -42,7 +42,7 @@ public:
      * @param position Position of protein in space
      * @param proteinIndex Index of the protein when more than one is loaded
      * @param scene Resulting scene
-     * @return true if PDB file was successufully loaded, false otherwize
+     * @return true if PDB file was successufully loaded, false otherwise
      */
     bool importPDBFile(const std::string& filename, const Vector3f& position,
                        const size_t proteinIndex, Scene& scene);

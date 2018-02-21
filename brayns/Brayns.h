@@ -43,7 +43,7 @@ namespace brayns
     in the rendering parameters and is invoked by the render method for
     generating the frames.
 
-    Underlying rendering engines support CPU, GPU and heterogenous architectures
+    Underlying rendering engines support CPU, GPU and heterogeneous architectures
 
     This object exposes the basic API for Brayns
 */
@@ -65,7 +65,7 @@ public:
 
     /**
        Renders color and depth buffers of the current scene, according to
-       default parameters. This is typicaly used by an application that does
+       default parameters. This is typically used by an application that does
        not provide any on-screen visualization. In such cases, input and output
        parameters are provided by network events. For instance, a camera event
        defines the origin, target and up vector of the camera, and an ImageJPEG

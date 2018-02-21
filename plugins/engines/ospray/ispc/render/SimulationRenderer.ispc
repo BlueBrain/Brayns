@@ -251,7 +251,7 @@ inline void processSimulationValue(ShadingAttributes& attributes,
 }
 
 /**
-  The purpose of the processSimulationContribution function is to retreive the
+  The purpose of the processSimulationContribution function is to retrieve the
   value of the simulation from a secondary model attached to the OSPRay scene.
   The geometry is defined by the primary model, but the shading is computed
   according to a second, non-visible model that contains the simulation values.
@@ -505,7 +505,7 @@ inline vec3f SimulationRenderer_shadeRay(
 
             if (attributes.opacity > 0.01f && moreRebounds)
             {
-                // Compute indirect lightening contribution
+                // Compute indirect lighting contribution
                 computeIndirectShading(sample, attributes);
 
                 // Compute surface shading

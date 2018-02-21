@@ -52,7 +52,7 @@ struct OSPRAY_SDK_INTERFACE ClippedPerspectiveCamera : public Camera
     ClippedPerspectiveCamera();
 
     //! \brief common function to help printf-debugging
-    /*! Every derived class should overrride this! */
+    /*! Every derived class should override this! */
     virtual std::string toString() const
     {
         return "ospray::ClippedPerspectiveCamera";

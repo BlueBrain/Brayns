@@ -455,7 +455,7 @@ private:
      * not apply
      * @param compartmentReport Compartment report to map to the morphology
      * @param scene Scene to which the morphology should be loaded into
-     * @return True if the loading was successfull, false otherwise
+     * @return True if the loading was successful, false otherwise
      */
     bool _importMorphologyAsPoint(const uint64_t index, const size_t material,
                                   const Matrix4f& transformation,
@@ -488,7 +488,7 @@ private:
      * @param material Material that is forced in case geometry parameters
      * do not apply
      * @param scene Scene to which the morphology should be loaded into
-     * @return True if the loading was successfull, false otherwise
+     * @return True if the loading was successful, false otherwise
      */
     bool _createRealisticSoma(const servus::URI& uri, const uint64_t index,
                               const size_t material,
@@ -579,7 +579,7 @@ private:
      * do not apply
      * @param compartmentReport Compartment report to map to the morphology
      * @param scene Scene to which the morphology should be loaded into
-     * @return True if the loading was successfull, false otherwise
+     * @return True if the loading was successful, false otherwise
      */
     bool _importMorphologyFromURI(const servus::URI& uri, const uint64_t index,
                                   const size_t material,

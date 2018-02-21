@@ -26,7 +26,7 @@
 namespace brayns
 {
 /**
- * The engine factory is in charge of instanciating engines according to their
+ * The engine factory is in charge of instantiating engines according to their
  * name (ospray, optix or firerays). If Brayns does not find the 3rd party
  * library at compilation time, the according lib is not generated and the
  * get method returns a null pointer.
@@ -49,7 +49,7 @@ public:
      *        the name is incorrect, a null pointer is returned.
      * @param name of the engine (opray, optix)
      * @return A pointer to the engine, null if the engine could not be
-     *         instanciated
+     *         instantiated
      */
     std::unique_ptr<Engine> create(EngineType name);
 

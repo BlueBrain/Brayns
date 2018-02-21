@@ -37,7 +37,7 @@ class CADiffusionSimulationHandler
 {
 public:
     /**
-     * @brief Default contructor
+     * @brief Default constructor
      * @param simulationFolder Folder containing files with the CA atom
      *        positions. Files must have a .dat extension.
      */

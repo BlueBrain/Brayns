@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
                           "off",
                           "--pdb-file",
                           pdbFile.c_str(),
-                          "--camera-type",
+                          "--camera",
                           "stereo"};
     const int argc = sizeof(argv) / sizeof(char*);
 

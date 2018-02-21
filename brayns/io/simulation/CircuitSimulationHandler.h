@@ -41,7 +41,7 @@ class CircuitSimulationHandler : public AbstractSimulationHandler
 {
 public:
     /**
-     * @brief Default contructor
+     * @brief Default constructor
      * @param geometryParameters Geometry parameters
      * @param reportSource path to report source
      * @param gids GIDS to load
