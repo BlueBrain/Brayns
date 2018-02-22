@@ -112,6 +112,7 @@ void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params,
 
 void OSPRayFrameBuffer::clear()
 {
+    FrameBuffer::clear();
     size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
     if (_accumulation)
         attributes |= OSP_FB_ACCUM | OSP_FB_VARIANCE;
@@ -123,6 +124,7 @@ void OSPRayFrameBuffer::map()
     if (_frameBufferFormat == FrameBufferFormat::none)
         return;
 
+    lock();
     _colorBuffer = (uint8_t*)ospMapFrameBuffer(_frameBuffer, OSP_FB_COLOR);
     _depthBuffer = (float*)ospMapFrameBuffer(_frameBuffer, OSP_FB_DEPTH);
 }
@@ -143,5 +145,7 @@ void OSPRayFrameBuffer::unmap()
         ospUnmapFrameBuffer(_depthBuffer, _frameBuffer);
         _depthBuffer = 0;
     }
+
+    unlock();
 }
 }

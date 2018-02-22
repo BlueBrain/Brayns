@@ -57,34 +57,18 @@ std::string getImageMagickPixelFormat(const FrameBufferFormat format)
 #endif
 }
 
-ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
-    const uint32_t width, const uint32_t height, const uint8_t* rawData,
-    const int32_t pixelFormat, const uint8_t quality, unsigned long& dataSize)
+ImageGenerator::~ImageGenerator()
 {
-    uint8_t* tjSrcBuffer = const_cast<uint8_t*>(rawData);
-    const int32_t color_components = 4; // Color Depth
-    const int32_t tjPitch = width * color_components;
-    const int32_t tjPixelFormat = pixelFormat;
-
-    uint8_t* tjJpegBuf = 0;
-    const int32_t tjJpegSubsamp = TJSAMP_444;
-    const int32_t tjFlags = TJXOP_ROT180;
-
-    const int32_t success =
-        tjCompress2(_compressor, tjSrcBuffer, width, tjPitch, height,
-                    tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
-                    quality, tjFlags);
-
-    if (success != 0)
-    {
-        BRAYNS_ERROR << "libjpeg-turbo image conversion failure" << std::endl;
-        return 0;
-    }
-    return ImageJPEG::JpegData{tjJpegBuf};
+#ifdef BRAYNS_USE_LIBJPEGTURBO
+    if (_compressor)
+        tjDestroy(_compressor);
+#endif
 }
 
 ImageGenerator::ImageBase64 ImageGenerator::createImage(
-    FrameBuffer& frameBuffer, const std::string& format, const uint8_t quality)
+    FrameBuffer& frameBuffer BRAYNS_UNUSED,
+    const std::string& format BRAYNS_UNUSED,
+    const uint8_t quality BRAYNS_UNUSED)
 {
 #ifdef BRAYNS_USE_MAGICKPP
     try
@@ -113,22 +97,21 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
     {
         throw std::runtime_error(e.what());
     }
-#else
+#elif defined BRAYNS_USE_LIBJPEGTURBO
     BRAYNS_WARN << "No assimp found, will take TurboJPEG snapshot; "
                 << "ignoring format '" << format << "'" << std::endl;
     const auto& jpeg = createJPEG(frameBuffer, quality);
     return {base64_encode(jpeg.data.get(), jpeg.size)};
+#else
+    throw std::runtime_error(
+        "Neither ImageMagick not TurboJPEG available; cannot create any image");
 #endif
 }
 
-ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer,
-                                                     const uint8_t quality)
+ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
+    FrameBuffer& frameBuffer BRAYNS_UNUSED, const uint8_t quality BRAYNS_UNUSED)
 {
-    if (_processingImageJpeg)
-        return ImageJPEG();
-
-    _processingImageJpeg = true;
-
+#ifdef BRAYNS_USE_LIBJPEGTURBO
     frameBuffer.map();
     auto colorBuffer = frameBuffer.getColorBuffer();
     if (!colorBuffer)
@@ -153,7 +136,37 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(FrameBuffer& frameBuffer,
     image.data = _encodeJpeg(frameSize.x(), frameSize.y(), colorBuffer,
                              pixelFormat, quality, image.size);
     frameBuffer.unmap();
-    _processingImageJpeg = false;
     return image;
+#else
+    return {};
+#endif
 }
+
+#ifdef BRAYNS_USE_LIBJPEGTURBO
+ImageGenerator::ImageJPEG::JpegData ImageGenerator::_encodeJpeg(
+    const uint32_t width, const uint32_t height, const uint8_t* rawData,
+    const int32_t pixelFormat, const uint8_t quality, unsigned long& dataSize)
+{
+    uint8_t* tjSrcBuffer = const_cast<uint8_t*>(rawData);
+    const int32_t color_components = 4; // Color Depth
+    const int32_t tjPitch = width * color_components;
+    const int32_t tjPixelFormat = pixelFormat;
+
+    uint8_t* tjJpegBuf = 0;
+    const int32_t tjJpegSubsamp = TJSAMP_444;
+    const int32_t tjFlags = TJXOP_ROT180;
+
+    const int32_t success =
+        tjCompress2(_compressor, tjSrcBuffer, width, tjPitch, height,
+                    tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
+                    quality, tjFlags);
+
+    if (success != 0)
+    {
+        BRAYNS_ERROR << "libjpeg-turbo image conversion failure" << std::endl;
+        return 0;
+    }
+    return ImageJPEG::JpegData{tjJpegBuf};
+}
+#endif
 }

@@ -1,6 +1,5 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                          Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,38 +17,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef RENDERER_H
-#define RENDERER_H
+#pragma once
 
-#include <brayns/api.h>
-#include <brayns/parameters/ParametersManager.h>
+#include <rockets/socketBasedInterface.h>
+#include <rockets/socketListener.h>
+
+#include <map>
+#include <uvw.hpp>
 
 namespace brayns
 {
-class Renderer
+/**
+ * Implements a rockets::SocketListener to be integrated in a libuv event loop.
+ */
+class SocketListener : public rockets::SocketListener
 {
 public:
-    BRAYNS_API Renderer(ParametersManager& parametersManager);
-    virtual ~Renderer() {}
-    virtual float render(FrameBufferPtr frameBuffer) = 0;
+    SocketListener(rockets::SocketBasedInterface& interface);
 
-    virtual void commit() = 0;
-    void setScene(ScenePtr scene) { _scene = scene; };
-    virtual void setCamera(CameraPtr camera) = 0;
+    void onNewSocket(const rockets::SocketDescriptor fd, int mode) final;
 
-    struct PickResult
-    {
-        bool hit{false};
-        Vector3f pos;
-    };
-    virtual PickResult pick(const Vector2f& /*pickPos*/)
-    {
-        return PickResult();
-    }
+    void onUpdateSocket(const rockets::SocketDescriptor fd, int mode) final;
 
-protected:
-    ParametersManager& _parametersManager;
-    ScenePtr _scene;
+    void onDeleteSocket(const rockets::SocketDescriptor fd) final;
+
+    std::function<void()> postReceive;
+
+private:
+    std::map<rockets::SocketDescriptor, std::shared_ptr<uvw::PollHandle>>
+        _handles;
+    rockets::SocketBasedInterface& _iface;
 };
 }
-#endif // RENDERER_H

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -387,6 +387,7 @@ void init(brayns::RenderingParameters* r, ObjectHandler* h)
     h->add_property("head_light", &r->_headLight, Flags::Optional);
     h->add_property("variance_threshold", &r->_varianceThreshold,
                     Flags::Optional);
+    h->add_property("max_accum_frames", &r->_maxAccumFrames, Flags::Optional);
     h->add_property("background_color", Vector3fArray(r->_backgroundColor),
                     Flags::Optional);
     h->add_property("detection_distance", &r->_detectionDistance,

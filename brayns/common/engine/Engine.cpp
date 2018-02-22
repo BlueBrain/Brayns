@@ -26,6 +26,8 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 
+#include <brayns/io/ImageManager.h>
+
 #include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
@@ -33,7 +35,6 @@ namespace brayns
 Engine::Engine(ParametersManager& parametersManager)
     : _parametersManager(parametersManager)
 {
-    resetFrameNumber();
 }
 
 Engine::~Engine()
@@ -99,19 +100,33 @@ void Engine::initializeMaterials(const MaterialsColorMap colorMap)
     _scene->commit();
 }
 
+void Engine::commit()
+{
+    _scene->commitVolumeData();
+    _scene->commitSimulationData();
+    _renderers[_activeRenderer]->commit();
+}
+
 void Engine::render()
 {
-    ++_frameNumber;
+    auto fb = _snapshotFrameBuffer ? _snapshotFrameBuffer : _frameBuffer;
+    _lastVariance = _renderers[_activeRenderer]->render(fb);
+}
+
+void Engine::postRender()
+{
+    if (!_snapshotFrameBuffer)
+    {
+        _writeFrameToFile();
+        return;
+    }
+
+    _processSnapshot();
 }
 
 Renderer& Engine::getRenderer()
 {
     return *_renderers[_activeRenderer];
-}
-
-void Engine::resetFrameNumber()
-{
-    _frameNumber = -1;
 }
 
 Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
@@ -123,23 +138,77 @@ Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
     return result;
 }
 
-void Engine::snapshot(const SnapshotParams& params)
+void Engine::snapshot(const SnapshotParams& params, SnapshotReadyCallback cb)
 {
-    if (!isReady())
-        throw std::runtime_error("Engine not ready");
+    if (_snapshotFrameBuffer)
+        throw std::runtime_error("Already a snapshot pending");
 
-    auto& rp = _parametersManager.getRenderingParameters();
-    const auto oldSpp = rp.getSamplesPerPixel();
+    _cb = cb;
+    _snapshotSpp = params.samplesPerPixel;
 
-    reshape(params.size);
-    rp.setSamplesPerPixel(params.samplesPerPixel);
+    _snapshotFrameBuffer =
+        createFrameBuffer(params.size, FrameBufferFormat::rgba_i8, true);
 
-    preRender();
-    render();
-    postRender();
+    _snapshotCamera = createCamera(getCamera().getType());
+    *_snapshotCamera = getCamera();
+    _snapshotCamera->setAspectRatio(float(params.size.x()) / params.size.y());
+    _snapshotCamera->commit();
+    _restoreSpp =
+        _parametersManager.getRenderingParameters().getSamplesPerPixel();
+    _parametersManager.getRenderingParameters().setSamplesPerPixel(1);
+    _renderers[_activeRenderer]->setCamera(_snapshotCamera);
 
-    rp.setSamplesPerPixel(oldSpp);
-    // reshape() is always done with current windowsize from app params, so no
-    // need to reshape back
+    setLastOperation("Render snapshot ...");
+    setLastProgress(0.f);
+}
+
+bool Engine::continueRendering() const
+{
+    if (_snapshotFrameBuffer)
+    {
+        if (_snapshotSpp < 2)
+            return false;
+        return _snapshotFrameBuffer->numAccumFrames() < size_t(_snapshotSpp);
+    }
+
+    return _lastVariance > 1 && _frameBuffer->getAccumulation() &&
+           (_frameBuffer->numAccumFrames() <
+            _parametersManager.getRenderingParameters().getMaxAccumFrames());
+}
+
+void Engine::_processSnapshot()
+{
+    setLastProgress(float(_snapshotFrameBuffer->numAccumFrames()) /
+                    _snapshotSpp);
+    if (_snapshotFrameBuffer->numAccumFrames() == size_t(_snapshotSpp) ||
+        _snapshotCancelled)
+    {
+        if (_snapshotCancelled)
+            setLastProgress(1.f);
+        else
+            _cb(_snapshotFrameBuffer);
+
+        _renderers[_activeRenderer]->setCamera(_camera);
+        _parametersManager.getRenderingParameters().setSamplesPerPixel(
+            _restoreSpp);
+
+        _snapshotCamera.reset();
+        _snapshotFrameBuffer.reset();
+        _snapshotCancelled = false;
+    }
+}
+
+void Engine::_writeFrameToFile()
+{
+    const auto& frameExportFolder =
+        _parametersManager.getApplicationParameters().getFrameExportFolder();
+    if (frameExportFolder.empty())
+        return;
+    char str[7];
+    const auto frame = _parametersManager.getAnimationParameters().getFrame();
+    snprintf(str, 7, "%06d", int(frame));
+    const auto filename = frameExportFolder + "/" + str + ".png";
+    FrameBuffer& frameBuffer = getFrameBuffer();
+    ImageManager::exportFrameBufferToFile(frameBuffer, filename);
 }
 }

@@ -56,6 +56,10 @@ public:
         const char* argv[] = {app, "--http-server", ":0"};
         const int argc = sizeof(argv) / sizeof(char*);
         brayns.reset(new brayns::Brayns(argc, argv));
+        brayns->createPlugins();
+        brayns->getParametersManager()
+            .getApplicationParameters()
+            .setImageStreamFPS(0);
         brayns->render();
 
         const auto uri = brayns->getParametersManager()

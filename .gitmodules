@@ -1,3 +1,6 @@
 [submodule "CMake/common"]
 	path = CMake/common
 	url = https://github.com/Eyescale/CMake
+[submodule "uvw"]
+	path = uvw
+	url = https://github.com/skypjack/uvw.git

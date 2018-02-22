@@ -7,7 +7,7 @@
 set(BRAYNSSERVICE_SOURCES main.cpp)
 
 set(BRAYNSSERVICE_LINK_LIBRARIES
-  PUBLIC brayns braynsCommon braynsIO braynsParameters
+  PUBLIC brayns braynsCommon braynsIO braynsParameters ${libuv_LIBRARIES}
 )
 
 common_application(braynsService)

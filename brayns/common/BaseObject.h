@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  *
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -32,9 +32,9 @@ public:
 
     /**
      * @return true if any parameter has been modified since the last
-     * resetModified().
+     *         resetModified().
      */
-    bool getModified() const { return _modified; }
+    bool isModified() const { return _modified; }
     /**
      * Reset the modified state, typically done after changes have been applied.
      */

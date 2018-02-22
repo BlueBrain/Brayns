@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -31,11 +31,14 @@ namespace brayns
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
-    DeflectPlugin(ParametersManager& parametersManager);
+    DeflectPlugin(EnginePtr engine, ParametersManager& parametersManager);
 
-    /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API bool run(EnginePtr engine, KeyboardHandler& keyboardHandler,
-                        AbstractManipulator& cameraManipulator) final;
+    /** Handle stream setup and incoming events. */
+    BRAYNS_API void preRender(KeyboardHandler& keyboardHandler,
+                              AbstractManipulator& cameraManipulator) final;
+
+    /** Send rendered frame. */
+    BRAYNS_API void postRender() final;
 
 private:
     struct HandledEvents
@@ -64,6 +67,7 @@ private:
 
     bool _startStream(bool observerOnly);
     void _closeStream();
+    void _setupSocketListener();
 
     void _handleDeflectEvents(Engine& engine, KeyboardHandler& keyboardHandler,
                               AbstractManipulator& cameraManipulator);

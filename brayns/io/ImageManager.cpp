@@ -54,12 +54,14 @@ bool ImageManager::exportFrameBufferToFile(
                          << std::endl;
             return false;
         }
+        frameBuffer.map();
         uint8_t* colorBuffer = frameBuffer.getColorBuffer();
         const auto& size = frameBuffer.getSize();
         Magick::Image image(size.x(), size.y(), format, Magick::CharPixel,
                             colorBuffer);
         image.flip();
         image.write(filename);
+        frameBuffer.unmap();
     }
     catch (Magick::Warning& warning)
     {

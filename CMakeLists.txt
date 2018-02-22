@@ -6,7 +6,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(Brayns VERSION 0.5.0)
+project(Brayns VERSION 0.6.0)
 set(Brayns_VERSION_ABI 1)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
@@ -37,11 +37,22 @@ common_find_package(Boost REQUIRED COMPONENTS
   filesystem system program_options unit_test_framework)
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
+common_find_package(libuv)
+
+if(libuv_FOUND)
+  if(libuv_VERSION VERSION_LESS 1.9.0)
+    add_definitions(-DUV_DISCONNECT=4)
+  endif()
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/uvw)
+    message(FATAL_ERROR "uvw missing, run: git submodule update --init")
+  endif()
+  include_directories(SYSTEM uvw/src)
+endif()
 
 # HTTP messaging
 common_find_package(LibJpegTurbo)
 common_find_package(Rockets)
-if(LibJpegTurbo_FOUND AND TARGET Rockets)
+if(TARGET Rockets)
   option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
   if(BRAYNS_NETWORKING_ENABLED)
     list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)
@@ -139,9 +150,13 @@ if(BRAYNS_VIEWER_ENABLED)
   add_subdirectory(apps/BraynsViewer)
 endif()
 
-option(BRAYNS_SERVICE_ENABLED "Brayns Service" ON)
-if(BRAYNS_SERVICE_ENABLED)
-  add_subdirectory(apps/BraynsService)
+if(libuv_FOUND)
+  option(BRAYNS_SERVICE_ENABLED "Brayns Service" ON)
+  if(BRAYNS_SERVICE_ENABLED)
+    add_subdirectory(apps/BraynsService)
+  endif()
+else()
+  unset(BRAYNS_SERVICE_ENABLED)
 endif()
 
 option(BRAYNS_BENCHMARK_ENABLED "Brayns Benchmark" ON)

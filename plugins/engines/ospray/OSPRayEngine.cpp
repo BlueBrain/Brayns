@@ -100,10 +100,10 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     Renderers renderersForScene = _createRenderers();
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene.reset(new OSPRayScene(renderersForScene, _parametersManager));
+    _scene = std::make_shared<OSPRayScene>(renderersForScene, _parametersManager);
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
-    _createCamera();
+    _camera = createCamera(rp.getCameraType());
 
     _camera->setEnvironmentMap(
         !parametersManager.getSceneParameters().getEnvironmentMap().empty());
@@ -116,15 +116,14 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     if (!_parametersManager.getApplicationParameters().getFilters().empty())
         accumulation = false;
 
-    auto ospFrameBuffer =
-        new OSPRayFrameBuffer(_frameSize,
-                              haveDeflectPixelOp() ? FrameBufferFormat::none
-                                                   : FrameBufferFormat::rgba_i8,
-                              accumulation);
+    _frameBuffer =
+        createFrameBuffer(_frameSize,
+                          haveDeflectPixelOp() ? FrameBufferFormat::none
+                                               : FrameBufferFormat::rgba_i8,
+                          accumulation);
     if (haveDeflectPixelOp())
-        ospFrameBuffer->enableDeflectPixelOp();
-
-    _frameBuffer.reset(ospFrameBuffer);
+        std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer)
+            ->enableDeflectPixelOp();
 
     for (const auto& renderer : _renderers)
     {
@@ -158,8 +157,10 @@ EngineType OSPRayEngine::name() const
 
 void OSPRayEngine::commit()
 {
+    Engine::commit();
+
     auto device = ospGetCurrentDevice();
-    if (device && _parametersManager.getRenderingParameters().getModified())
+    if (device && _parametersManager.getRenderingParameters().isModified())
     {
         const auto useDynamicLoadBalancer =
             _parametersManager.getRenderingParameters()
@@ -180,20 +181,11 @@ void OSPRayEngine::commit()
     auto osprayFrameBuffer =
         std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer);
     const auto& streamParams = _parametersManager.getStreamParameters();
-    if (streamParams.getModified() || _camera->getModified())
+    if (streamParams.isModified() || _camera->isModified())
     {
         const bool isStereo = _camera->getType() == CameraType::stereo;
         osprayFrameBuffer->setStreamingParams(streamParams, isStereo);
     }
-}
-
-void OSPRayEngine::render()
-{
-    Engine::render();
-    _scene->commitVolumeData();
-    _scene->commitSimulationData();
-    _renderers[_activeRenderer]->commit();
-    _renderers[_activeRenderer]->render(_frameBuffer);
 }
 
 void OSPRayEngine::preRender()
@@ -204,13 +196,6 @@ void OSPRayEngine::preRender()
         _frameBuffer->setAccumulation(renderParams.getAccumulation());
         _frameBuffer->resize(_frameBuffer->getSize());
     }
-
-    _frameBuffer->map();
-}
-
-void OSPRayEngine::postRender()
-{
-    _frameBuffer->unmap();
 }
 
 Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
@@ -243,27 +228,6 @@ Vector2ui OSPRayEngine::getMinimumFrameSize() const
     return {TILE_SIZE, TILE_SIZE};
 }
 
-void OSPRayEngine::_createCamera()
-{
-    auto& rp = _parametersManager.getRenderingParameters();
-    const auto cameraType = rp.getCameraType();
-    auto cameraTypeAsString = rp.getCameraTypeAsString(cameraType);
-    try
-    {
-        _camera =
-            std::make_shared<OSPRayCamera>(cameraType, cameraTypeAsString);
-    }
-    catch (const std::runtime_error& e)
-    {
-        BRAYNS_WARN << e.what() << ". Using default camera instead"
-                    << std::endl;
-        rp.initializeDefaultCameras();
-        cameraTypeAsString = rp.getCameraTypeAsString(CameraType::default_);
-        _camera =
-            std::make_shared<OSPRayCamera>(cameraType, cameraTypeAsString);
-    }
-}
-
 Renderers OSPRayEngine::_createRenderers()
 {
     Renderers renderersForScene;
@@ -288,5 +252,31 @@ Renderers OSPRayEngine::_createRenderers()
         renderersForScene.push_back(_renderers[renderer]);
     }
     return renderersForScene;
+}
+
+FrameBufferPtr OSPRayEngine::createFrameBuffer(
+    const Vector2ui& frameSize, const FrameBufferFormat frameBufferFormat,
+    const bool accumulation)
+{
+    return std::make_shared<OSPRayFrameBuffer>(frameSize, frameBufferFormat,
+                                               accumulation);
+}
+
+CameraPtr OSPRayEngine::createCamera(const CameraType type)
+{
+    auto& rp = _parametersManager.getRenderingParameters();
+    auto cameraTypeAsString = rp.getCameraTypeAsString(type);
+    try
+    {
+        return std::make_shared<OSPRayCamera>(type, cameraTypeAsString);
+    }
+    catch (const std::runtime_error& e)
+    {
+        BRAYNS_WARN << e.what() << ". Using default camera instead"
+                    << std::endl;
+        rp.initializeDefaultCameras();
+        cameraTypeAsString = rp.getCameraTypeAsString(CameraType::default_);
+        return std::make_shared<OSPRayCamera>(type, cameraTypeAsString);
+    }
 }
 }

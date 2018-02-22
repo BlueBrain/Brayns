@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,54 +18,76 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef IMAGEGENERATOR_H
-#define IMAGEGENERATOR_H
+#pragma once
 
 #include <brayns/common/types.h>
+
+#ifdef BRAYNS_USE_LIBJPEGTURBO
 #include <turbojpeg.h>
+#endif
 
 namespace brayns
 {
+/**
+ * A class which creates images for network communication from a FrameBuffer.
+ */
 class ImageGenerator
 {
 public:
     ImageGenerator() = default;
-
-    ~ImageGenerator()
-    {
-        if (_compressor)
-            tjDestroy(_compressor);
-    }
+    ~ImageGenerator();
 
     struct ImageBase64
     {
         std::string data;
     };
 
+    /**
+     * Create a base64-encoded image from the given framebuffer in a specified
+     * image format and quality.
+     *
+     * @param frameBuffer the framebuffer to use for getting the pixels
+     * @param format ImageMagick format string, or JPEG if ImageMagick is not
+     *               available
+     * @param quality image format specific quality number
+     * @return base64-encoded image
+     * @throw std::runtime_error if image conversion failed or neither
+     *                           ImageMagick nor TurboJPEG is available
+     */
+    ImageBase64 createImage(FrameBuffer& frameBuffer, const std::string& format,
+                            uint8_t quality);
+
     struct ImageJPEG
     {
+#ifdef BRAYNS_USE_LIBJPEGTURBO
         struct tjDeleter
         {
             void operator()(uint8_t* ptr) { tjFree(ptr); }
         };
         using JpegData = std::unique_ptr<uint8_t, tjDeleter>;
+#else
+        using JpegData = std::unique_ptr<uint8_t>;
+#endif
         JpegData data;
         unsigned long size{0};
     };
 
-    ImageBase64 createImage(FrameBuffer& frameBuffer, const std::string& format,
-                            uint8_t quality);
-
+    /**
+     * Create a JPEG image from the given framebuffer in a specified quality.
+     *
+     * @param frameBuffer the framebuffer to use for getting the pixels
+     * @param quality 1..100 JPEG quality
+     * @return JPEG image with a size > 0 if valid, size == 0 on error.
+     */
     ImageJPEG createJPEG(FrameBuffer& frameBuffer, uint8_t quality);
 
 private:
-    bool _processingImageJpeg = false;
+#ifdef BRAYNS_USE_LIBJPEGTURBO
     tjhandle _compressor{tjInitCompress()};
 
     ImageJPEG::JpegData _encodeJpeg(uint32_t width, uint32_t height,
                                     const uint8_t* rawData, int32_t pixelFormat,
                                     uint8_t quality, unsigned long& dataSize);
+#endif
 };
 }
-
-#endif

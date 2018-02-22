@@ -617,7 +617,7 @@ void OSPRayScene::commitVolumeData()
     const auto animationFrame = ap.getFrame();
     volumeHandler->setCurrentIndex(animationFrame);
     void* data = volumeHandler->getData();
-    if (data && (ap.getModified() || vp.getModified()))
+    if (data && (ap.isModified() || vp.isModified()))
     {
         for (const auto& renderer : _renderers)
         {
