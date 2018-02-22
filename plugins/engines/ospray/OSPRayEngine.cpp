@@ -97,18 +97,14 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     BRAYNS_INFO << "Initializing renderers" << std::endl;
     _activeRenderer = rp.getRenderer();
 
-    Renderers renderersForScene;
-    for (const auto renderer : rp.getRenderers())
-    {
-        const auto& rendererName = rp.getRendererNameAsString(renderer);
-        _renderers[renderer].reset(
-            new OSPRayRenderer(rendererName, _parametersManager));
-        renderersForScene.push_back(_renderers[renderer]);
-    }
+    Renderers renderersForScene = _createRenderers();
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
     _scene.reset(new OSPRayScene(renderersForScene, _parametersManager));
-    _camera.reset(new OSPRayCamera(_parametersManager));
+
+    BRAYNS_INFO << "Initializing camera" << std::endl;
+    _createCamera();
+
     _camera->setEnvironmentMap(
         !parametersManager.getSceneParameters().getEnvironmentMap().empty());
 
@@ -245,5 +241,52 @@ Vector2ui OSPRayEngine::getMinimumFrameSize() const
     if (getCamera().getType() == CameraType::stereo)
         return {TILE_SIZE * 2, TILE_SIZE};
     return {TILE_SIZE, TILE_SIZE};
+}
+
+void OSPRayEngine::_createCamera()
+{
+    auto& rp = _parametersManager.getRenderingParameters();
+    const auto cameraType = rp.getCameraType();
+    auto cameraTypeAsString = rp.getCameraTypeAsString(cameraType);
+    try
+    {
+        _camera =
+            std::make_shared<OSPRayCamera>(cameraType, cameraTypeAsString);
+    }
+    catch (const std::runtime_error& e)
+    {
+        BRAYNS_WARN << e.what() << ". Using default camera instead"
+                    << std::endl;
+        rp.initializeDefaultCameras();
+        cameraTypeAsString = rp.getCameraTypeAsString(CameraType::default_);
+        _camera =
+            std::make_shared<OSPRayCamera>(cameraType, cameraTypeAsString);
+    }
+}
+
+Renderers OSPRayEngine::_createRenderers()
+{
+    Renderers renderersForScene;
+    auto& rp = _parametersManager.getRenderingParameters();
+    for (const auto& renderer : rp.getRenderers())
+    {
+        auto name = rp.getRendererAsString(renderer);
+        try
+        {
+            _renderers[renderer] =
+                std::make_shared<OSPRayRenderer>(name, _parametersManager);
+        }
+        catch (const std::runtime_error& e)
+        {
+            BRAYNS_WARN << e.what() << ". Using default renderer instead"
+                        << std::endl;
+            rp.initializeDefaultRenderers();
+            name = rp.getRendererAsString(RendererType::default_);
+            _renderers[renderer] =
+                std::make_shared<OSPRayRenderer>(name, _parametersManager);
+        }
+        renderersForScene.push_back(_renderers[renderer]);
+    }
+    return renderersForScene;
 }
 }

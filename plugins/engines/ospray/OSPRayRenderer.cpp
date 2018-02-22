@@ -32,22 +32,10 @@ OSPRayRenderer::OSPRayRenderer(const std::string& name,
     : Renderer(parametersManager)
     , _name(name)
     , _camera(0)
-    , _renderer(0)
+    , _renderer{ospNewRenderer(name.c_str())}
 {
-    _renderer = ospNewRenderer(name.c_str());
     if (!_renderer)
-    {
-        BRAYNS_WARN
-            << "'" << name << "'"
-            << " is not a registered renderer, using default renderer instead"
-            << std::endl;
-        auto& rp = parametersManager.getRenderingParameters();
-        rp.initializeDefaultRenderers();
-        const auto& defaultRenderer =
-            rp.getRendererNameAsString(RendererType::default_);
-        _renderer = ospNewRenderer(defaultRenderer.c_str());
-    }
-    assert(_renderer);
+        throw std::runtime_error(name + " is not a registered renderer");
 }
 
 OSPRayRenderer::~OSPRayRenderer()

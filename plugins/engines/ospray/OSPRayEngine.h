@@ -63,6 +63,9 @@ public:
     /** @copydoc Engine::haveDeflectPixelOp */
     bool haveDeflectPixelOp() const final { return _haveDeflectPixelOp; }
 private:
+    void _createCamera();
+    Renderers _createRenderers();
+
     bool _haveDeflectPixelOp{false};
     bool _useDynamicLoadBalancer{false};
     EngineType _type{EngineType::ospray};

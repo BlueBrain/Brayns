@@ -27,23 +27,12 @@
 
 namespace brayns
 {
-OSPRayCamera::OSPRayCamera(ParametersManager& parametersManager)
-    : Camera(parametersManager.getRenderingParameters().getCameraType())
+OSPRayCamera::OSPRayCamera(const CameraType& type, const std::string& name)
+    : Camera(type)
+    , _camera{ospNewCamera(name.c_str())}
 {
-    auto& rp = parametersManager.getRenderingParameters();
-    auto cameraTypeAsString = rp.getCameraTypeAsString(getType());
-    _camera = ospNewCamera(cameraTypeAsString.c_str());
     if (!_camera)
-    {
-        BRAYNS_WARN
-            << "'" << cameraTypeAsString << "'"
-            << " is not a registered camera, using default camera instead"
-            << std::endl;
-        rp.initializeDefaultCameras();
-        cameraTypeAsString = rp.getCameraTypeAsString(CameraType::default_);
-        _camera = ospNewCamera(cameraTypeAsString.c_str());
-    }
-    assert(_camera);
+        throw std::runtime_error(name + " is not a registered camera");
 }
 
 OSPRayCamera::~OSPRayCamera()

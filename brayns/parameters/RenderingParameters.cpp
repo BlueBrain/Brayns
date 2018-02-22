@@ -49,28 +49,30 @@ const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
-const std::string ENGINES[2] = {"ospray", "optix"};
-const std::string RENDERERS[7] = {"default",
-                                  "proximity",
-                                  "simulation",
-                                  "particle",
-                                  "geometrynormals",
-                                  "shadingnormals",
-                                  "scientificvisualization"};
+const std::array<std::string, 2> ENGINES = {"ospray", "optix"};
+const std::array<std::string, 7> RENDERERS = {"default",
+                                              "proximity",
+                                              "simulation",
+                                              "particle",
+                                              "geometrynormals",
+                                              "shadingnormals",
+                                              "scientificvisualization"};
 
-const std::string RENDERER_INTERNAL_NAMES[7] = {"basic",
-                                                "proximityrenderer",
-                                                "simulationrenderer",
-                                                "particlerenderer",
-                                                "raycast_Ng",
-                                                "raycast_Ns",
-                                                "scivis"};
+const std::array<std::string, 7> RENDERER_INTERNAL_NAMES = {
+    "basic",
+    "proximityrenderer",
+    "simulationrenderer",
+    "particlerenderer",
+    "raycast_Ng",
+    "raycast_Ns",
+    "scivis"};
 
-const std::string CAMERA_TYPE_NAMES[5] = {"perspective", "stereo",
-                                          "orthographic", "panoramic",
-                                          "clipped"};
+const std::array<std::string, 5> CAMERA_TYPE_NAMES = {"perspective", "stereo",
+                                                      "orthographic",
+                                                      "panoramic", "clipped"};
 
-const std::string SHADING_TYPES[3] = {"none", "diffuse", "electron"};
+const std::array<std::string, 3> SHADING_TYPES = {"none", "diffuse",
+                                                  "electron"};
 }
 
 namespace brayns
@@ -79,6 +81,7 @@ RenderingParameters::RenderingParameters()
     : AbstractParameters("Rendering")
     , _engine(EngineType::ospray)
     , _renderer(RendererType::default_)
+    , _cameraType(CameraType::default_)
     , _ambientOcclusionStrength(0.f)
     , _ambientOcclusionDistance(1.20f)
     , _shading(ShadingType::diffuse)
@@ -92,7 +95,6 @@ RenderingParameters::RenderingParameters()
     , _detectionNearColor(1.f, 0.f, 0.f)
     , _detectionFarColor(0.f, 1.f, 0.f)
     , _epsilon(0.f)
-    , _cameraType(CameraType::default_)
     , _headLight(false)
 {
     _parameters.add_options()(PARAM_ENGINE.c_str(), po::value<std::string>(),
@@ -143,12 +145,8 @@ RenderingParameters::RenderingParameters()
 
 void RenderingParameters::initializeDefaultRenderers()
 {
-    _rendererNames.clear();
-    for (size_t i = 0; i < sizeof(RENDERER_INTERNAL_NAMES) /
-                               sizeof(RENDERER_INTERNAL_NAMES[0]);
-         ++i)
-        _rendererNames.push_back(RENDERER_INTERNAL_NAMES[i]);
-
+    _rendererNames = {RENDERER_INTERNAL_NAMES.begin(),
+                      RENDERER_INTERNAL_NAMES.end()};
     _renderers.clear();
     _renderers.push_back(RendererType::default_);
     _renderers.push_back(RendererType::simulation);
@@ -161,10 +159,7 @@ void RenderingParameters::initializeDefaultRenderers()
 
 void RenderingParameters::initializeDefaultCameras()
 {
-    _cameraTypeNames.clear();
-    for (size_t i = 0;
-         i < sizeof(CAMERA_TYPE_NAMES) / sizeof(CAMERA_TYPE_NAMES[0]); ++i)
-        _cameraTypeNames.push_back(CAMERA_TYPE_NAMES[i]);
+    _cameraTypeNames = {CAMERA_TYPE_NAMES.begin(), CAMERA_TYPE_NAMES.end()};
 }
 
 bool RenderingParameters::_parse(const po::variables_map& vm)
@@ -182,20 +177,18 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_RENDERER))
     {
         _renderer = RendererType::default_;
-        bool found = false;
-        const std::string& renderer = vm[PARAM_RENDERER].as<std::string>();
-        for (size_t i = 0; !found && i < _rendererNames.size(); ++i)
-            if (renderer == _rendererNames[i])
-            {
-                _renderer = static_cast<RendererType>(i);
-                found = true;
-            }
-        if (!found)
+        const std::string& rendererName = vm[PARAM_RENDERER].as<std::string>();
+        auto it = std::find(_rendererNames.begin(), _rendererNames.end(),
+                            rendererName);
+        if (it == _rendererNames.end())
         {
-            BRAYNS_INFO << "'" << renderer << "' replaces default renderer"
+            BRAYNS_INFO << "'" << rendererName << "' replaces default renderer"
                         << std::endl;
-            _rendererNames[0] = renderer;
+            _rendererNames[0] = rendererName;
         }
+        else
+            _renderer = static_cast<RendererType>(
+                std::distance(_rendererNames.begin(), it));
     }
     if (vm.count(PARAM_SPP))
         _spp = vm[PARAM_SPP].as<size_t>();
@@ -248,19 +241,17 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
     {
         _cameraType = CameraType::default_;
         const std::string& cameraTypeName = vm[PARAM_CAMERA].as<std::string>();
-        bool found = false;
-        for (size_t i = 0; !found && i < _cameraTypeNames.size(); ++i)
-            if (cameraTypeName == _cameraTypeNames[i])
-            {
-                _cameraType = static_cast<CameraType>(i);
-                found = true;
-            }
-        if (!found)
+        auto it = std::find(_cameraTypeNames.begin(), _cameraTypeNames.end(),
+                            cameraTypeName);
+        if (it == _cameraTypeNames.end())
         {
             BRAYNS_INFO << "'" << cameraTypeName << "' replaces default camera"
                         << std::endl;
             _cameraTypeNames[0] = cameraTypeName;
         }
+        else
+            _cameraType = static_cast<CameraType>(
+                std::distance(_cameraTypeNames.begin(), it));
     }
     if (vm.count(PARAM_HEAD_LIGHT))
         _headLight = vm[PARAM_HEAD_LIGHT].as<bool>();
@@ -319,12 +310,6 @@ const std::string& RenderingParameters::getEngineAsString(
 }
 
 const std::string& RenderingParameters::getRendererAsString(
-    const RendererType value) const
-{
-    return RENDERERS[static_cast<size_t>(value)];
-}
-
-const std::string& RenderingParameters::getRendererNameAsString(
     const RendererType value) const
 {
     return _rendererNames[static_cast<size_t>(value)];
