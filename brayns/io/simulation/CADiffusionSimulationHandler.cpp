@@ -36,8 +36,6 @@ namespace brayns
 {
 CADiffusionSimulationHandler::CADiffusionSimulationHandler(
     const std::string& simulationFolder)
-    : _currentFrame(std::numeric_limits<size_t>::max())
-    , _spheresCreated(false)
 {
     BRAYNS_DEBUG << "Loading Calcium simulation from " << simulationFolder
                  << std::endl;
