@@ -879,9 +879,6 @@ private:
             'r', "Set animation frame to 0",
             std::bind(&Brayns::Impl::_resetAnimationFrame, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'R', "Set animation frame to infinity",
-            std::bind(&Brayns::Impl::_infiniteAnimationFrame, this));
-        _keyboardHandler.registerKeyboardShortcut(
             'u', "Enable/Disable shadows",
             std::bind(&Brayns::Impl::_toggleShadows, this));
         _keyboardHandler.registerKeyboardShortcut(
@@ -1068,12 +1065,6 @@ private:
     {
         auto& animParams = _parametersManager.getAnimationParameters();
         animParams.setFrame(0);
-    }
-
-    void _infiniteAnimationFrame()
-    {
-        auto& animParams = _parametersManager.getAnimationParameters();
-        animParams.setFrame(std::numeric_limits<uint32_t>::max());
     }
 
     void _toggleShadows()

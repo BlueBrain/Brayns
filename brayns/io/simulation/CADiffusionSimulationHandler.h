@@ -61,8 +61,8 @@ private:
 
     std::map<size_t, std::string> _simulationFiles;
     Vector3fs _calciumPositions;
-    size_t _currentFrame;
-    bool _spheresCreated;
+    size_t _currentFrame{std::numeric_limits<size_t>::max()};
+    bool _spheresCreated{false};
 };
 }
 #endif // CADIFFUSIONSIMULATIONHANDLER_H
