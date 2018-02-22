@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     brayns::Brayns brayns(argc, argv);
 
     auto& camera = brayns.getEngine().getCamera();
-    BOOST_CHECK(camera.getType() == brayns::CameraType::perspective);
+    BOOST_CHECK(camera.getType() == brayns::CameraType::default_);
     BOOST_CHECK_EQUAL(camera.getPosition(), brayns::Vector3f(0.5f, 0.5f, 1.5f));
     BOOST_CHECK_EQUAL(camera.getTarget(), brayns::Vector3f(0.5f, 0.5f, 0.5f));
     BOOST_CHECK_EQUAL(camera.getUp(), brayns::Vector3f(0, 1, 0));
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     const auto& renderParams = pm.getRenderingParameters();
     BOOST_CHECK(renderParams.getEngine() == brayns::EngineType::ospray);
     BOOST_CHECK_EQUAL(renderParams.getModule(), "");
-    BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::basic);
+    BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::default_);
     BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 7);
     BOOST_CHECK(!renderParams.getShadows());
     BOOST_CHECK(!renderParams.getSoftShadows());
@@ -91,8 +91,7 @@ BOOST_AUTO_TEST_CASE(defaults)
                       brayns::Vector3f(1, 0, 0));
     BOOST_CHECK_EQUAL(renderParams.getDetectionFarColor(),
                       brayns::Vector3f(0, 1, 0));
-    BOOST_CHECK(renderParams.getCameraType() ==
-                brayns::CameraType::perspective);
+    BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
 
     const auto& geomParams = pm.getGeometryParameters();
     BOOST_CHECK_EQUAL(geomParams.getMorphologyFolder(), "");

@@ -21,33 +21,18 @@
 #include "OSPRayCamera.h"
 
 #include <brayns/common/log.h>
+#include <brayns/parameters/ParametersManager.h>
+
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
 {
-OSPRayCamera::OSPRayCamera(const CameraType cameraType)
-    : Camera(cameraType)
+OSPRayCamera::OSPRayCamera(const CameraType& type, const std::string& name)
+    : Camera(type)
+    , _camera{ospNewCamera(name.c_str())}
 {
-    std::string cameraAsString;
-    switch (getType())
-    {
-    case CameraType::stereo:
-        cameraAsString = "stereo";
-        break;
-    case CameraType::orthographic:
-        cameraAsString = "orthographic";
-        break;
-    case CameraType::panoramic:
-        cameraAsString = "panoramic";
-        break;
-    case CameraType::clipped:
-        cameraAsString = "clippedperspective";
-        break;
-    default:
-        cameraAsString = "perspective";
-        break;
-    }
-    _camera = ospNewCamera(cameraAsString.c_str());
+    if (!_camera)
+        throw std::runtime_error(name + " is not a registered camera");
 }
 
 OSPRayCamera::~OSPRayCamera()

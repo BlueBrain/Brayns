@@ -329,7 +329,7 @@ braynsViewer --epsilon 0.001
 
 ## Camera types
 
-The --camera-type command line argument defines the type of camera to be used
+The --camera command line argument defines the type of camera to be used
 by the renderer. Four cameras are currently supported.
 - perspective: Perspective camera
 - stereo: Side-by-side camera
@@ -338,7 +338,7 @@ by the renderer. Four cameras are currently supported.
 - clipped: Perspective camera allowing clipping planes
 
 ```
-braynsViewer --camera-type orthographic
+braynsViewer --camera orthographic
 ```
 
 ## Head light

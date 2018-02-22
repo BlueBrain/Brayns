@@ -179,7 +179,7 @@ class Statistics;
 /** Types of renderers */
 enum class RendererType
 {
-    basic,
+    default_,
     proximity,
     simulation,
     particle,
@@ -332,7 +332,7 @@ enum class ShadingType
 
 enum class CameraType
 {
-    perspective,
+    default_, // Perspective
     stereo,
     orthographic,
     panoramic,
