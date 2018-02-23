@@ -208,10 +208,10 @@ private:
 
     const VolumeParameters& _volumeParameters;
     std::map<uint32_t, VolumeDescriptorPtr> _volumeDescriptors;
-    uint32_t _currentIndex;
+    uint32_t _currentIndex{std::numeric_limits<uint32_t>::max()};
     IndexMode _indexMode;
     std::map<float, Histogram> _histograms;
-    uint64_t _nbFrames = 0;
+    uint64_t _nbFrames{0};
 };
 }
 

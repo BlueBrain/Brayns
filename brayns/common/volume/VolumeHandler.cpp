@@ -38,7 +38,6 @@ namespace brayns
 VolumeHandler::VolumeHandler(const VolumeParameters& volumeParameters,
                              const IndexMode indexMode)
     : _volumeParameters(volumeParameters)
-    , _currentIndex(std::numeric_limits<uint32_t>::max())
     , _indexMode(indexMode)
 {
 }

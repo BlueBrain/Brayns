@@ -52,8 +52,8 @@ public:
     uint32_t getEnd() const { return _end; }
     void reset()
     {
-        _updateValue(_end, std::numeric_limits<uint32_t>::max());
-        _updateValue(_current, std::numeric_limits<uint32_t>::max());
+        _updateValue(_end, 0u);
+        _updateValue(_current, 0u);
         _updateValue(_unit, std::string());
         _updateValue(_dt, 0.);
     }
@@ -66,13 +66,12 @@ private:
     uint32_t adjustCurrent(const uint32_t newCurrent) const
     {
         const auto nbFrames = _end - _start;
-        return nbFrames == 0 ? std::numeric_limits<uint32_t>::max()
-                             : _start + (newCurrent % nbFrames);
+        return nbFrames == 0 ? 0 : _start + (newCurrent % nbFrames);
     }
 
     uint32_t _start{0};
-    uint32_t _end{std::numeric_limits<uint32_t>::max()};
-    uint32_t _current{std::numeric_limits<uint32_t>::max()};
+    uint32_t _end{0};
+    uint32_t _current{0};
     int32_t _delta{0};
     double _dt{0};
     std::string _unit;
