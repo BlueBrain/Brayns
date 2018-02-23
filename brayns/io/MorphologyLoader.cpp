@@ -125,10 +125,10 @@ public:
      * @param compartmentReport Compartment report to map to the morphology
      * @return True is the morphology was successfully imported, false otherwise
      */
-    bool importMorphology(
-        const servus::URI& uri, const uint64_t index, const size_t material,
-        const Matrix4f& transformation, const GIDOffsets& targetGIDOffsets,
-        CompartmentReportPtr compartmentReport = nullptr) const
+    bool importMorphology(const servus::URI& source, const uint64_t index,
+                          const size_t material, const Matrix4f& transformation,
+                          const GIDOffsets& targetGIDOffsets,
+                          CompartmentReportPtr compartmentReport = nullptr)
     {
         ParallelSceneContainer sceneContainer(_scene.getSpheres(),
                                               _scene.getCylinders(),
@@ -137,9 +137,9 @@ public:
                                               _scene.getMaterials(),
                                               _scene.getWorldBounds());
 
-        return _importMorphologyFromURI(uri, index, material, transformation,
-                                        compartmentReport, targetGIDOffsets,
-                                        sceneContainer);
+        return _importMorphology(source, index, material, transformation,
+                                 compartmentReport, targetGIDOffsets,
+                                 sceneContainer);
     }
 
     /**
