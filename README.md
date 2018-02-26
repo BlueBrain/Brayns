@@ -56,7 +56,7 @@ More documentation is available on DockerHub: https://hub.docker.com/r/bluebrain
 ### Start the Sauron web UI
 
 ```
-Run with docker run -ti --rm -p 8080:8080 bluebrain/sauron
+docker run -ti --rm -p 8080:8080 bluebrain/sauron
 ```
 
 More documentation is available on DockerHub: https://hub.docker.com/r/bluebrain/sauron/
