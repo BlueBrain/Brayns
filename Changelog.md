@@ -1,6 +1,22 @@
 # Change Log
 
-## [0.5.0](https://github.com/BlueBrain/Brayns/tree/0.5.0) (08-02-2018)
+## [0.5.0](https://github.com/BlueBrain/Brayns/tree/0.5.0) (23-02-2018)
+**Implemented enhancements:**
+
+- Allow use of renderers and cameras defined in external modules [\#310](https://github.com/BlueBrain/Brayns/pull/310)
+
+**Fixed bugs:**
+
+- Fix frame end/current params for no simulation [\#312](https://github.com/BlueBrain/Brayns/issues/312)
+- Report 0 for end and current in animation params/frame if appropriate; fix \#312 [\#318](https://github.com/BlueBrain/Brayns/pull/318)
+- Fixed realistic soma for single morphologies [\#317](https://github.com/BlueBrain/Brayns/pull/317)
+
+**Merged pull requests:**
+
+- Misc. typos [\#309](https://github.com/BlueBrain/Brayns/pull/309)
+- Adapt to latest Rockets [\#308](https://github.com/BlueBrain/Brayns/pull/308)
+
+## [0.5.0-beta](https://github.com/BlueBrain/Brayns/tree/0.5.0-beta) (08-02-2018)
 **Implemented enhancements:**
 
 - Snapshot feature as RPC for frontend [\#287](https://github.com/BlueBrain/Brayns/issues/287)
@@ -33,7 +49,9 @@
 
 **Merged pull requests:**
 
+- Release preparations [\#307](https://github.com/BlueBrain/Brayns/pull/307)
 - Force 8-bit tiff creation; fixes usage in python with PIL [\#305](https://github.com/BlueBrain/Brayns/pull/305)
+- Fix very nasty linking Bug on BraynsViewer due to the indirect OpenGL [\#304](https://github.com/BlueBrain/Brayns/pull/304)
 - Move to C++14 [\#303](https://github.com/BlueBrain/Brayns/pull/303)
 - Cleanups [\#298](https://github.com/BlueBrain/Brayns/pull/298)
 - No more zeroeq; fixes default Docker image entrypoint [\#296](https://github.com/BlueBrain/Brayns/pull/296)
