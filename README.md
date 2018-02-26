@@ -1,6 +1,6 @@
 # Brayns
 
-![Brayns](doc/images/Brayns.png)
+![Brayns](doc/images/Brayns.jpg)
 
 One of the keys towards understanding how the brain works as a whole is
 visualisation of how the individual cells function. In particular, the more
