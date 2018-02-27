@@ -36,7 +36,7 @@ RAPIDJSON_DIAG_OFF(4244) // conversion from kXxxFlags to 'uint16_t', possible
                          // loss of data
 #endif
 
-#ifdef __clang__
+#if (defined(__clang__) && !defined(__APPLE__))
 RAPIDJSON_DIAG_OFF(padded)
 RAPIDJSON_DIAG_OFF(switch - enum)
 RAPIDJSON_DIAG_OFF(c++ 98 - compat)
@@ -952,7 +952,7 @@ public:
 
     //! Destructor.
     /*! Need to destruct elements of array, members of object, or copy-string.
-    */
+     */
     ~GenericValue()
     {
         if (Allocator::kNeedFree)
@@ -992,7 +992,7 @@ public:
     //! Assignment with move semantics.
     /*! \param rhs Source of the assignment. It will become a null value after
      * assignment.
-    */
+     */
     GenericValue& operator=(GenericValue& rhs) RAPIDJSON_NOEXCEPT
     {
         RAPIDJSON_ASSERT(this != &rhs);
@@ -1174,7 +1174,7 @@ public:
     //! Equal-to operator with primitive types
     /*! \tparam T Either \ref Type, \c int, \c unsigned, \c int64_t, \c
      * uint64_t, \c double, \c true, \c false
-    */
+     */
     template <typename T>
     RAPIDJSON_DISABLEIF_RETURN(
         (internal::OrExpr<internal::IsPointer<T>, internal::IsGenericValue<T>>),
@@ -2219,7 +2219,7 @@ public:
     //! Get the value as double type.
     /*! \note If the value is 64-bit integer type, it may lose precision. Use \c
      * IsLosslessDouble() to check whether the converison is lossless.
-    */
+     */
     double GetDouble() const
     {
         RAPIDJSON_ASSERT(IsNumber());
@@ -2240,7 +2240,7 @@ public:
     //! Get the value as float type.
     /*! \note If the value is 64-bit integer type, it may lose precision. Use \c
      * IsLosslessFloat() to check whether the converison is lossless.
-    */
+     */
     float GetFloat() const { return static_cast<float>(GetDouble()); }
     GenericValue& SetInt(int i)
     {
@@ -2294,7 +2294,7 @@ public:
     //! Get the length of string.
     /*! Since rapidjson permits "\\u0000" in the json string,
      * strlen(v.GetString()) may not equal to v.GetStringLength().
-    */
+     */
     SizeType GetStringLength() const
     {
         RAPIDJSON_ASSERT(IsString());
@@ -3049,7 +3049,7 @@ public:
 
     //! Parse JSON text from a read-only string (with \ref kParseDefaultFlags)
     /*! \param str Read-only zero-terminated string to be parsed.
-    */
+     */
     GenericDocument& Parse(const Ch* str)
     {
         return Parse<kParseDefaultFlags>(str);
@@ -3136,6 +3136,7 @@ public:
 
     //! Get the capacity of stack in bytes.
     size_t GetStackCapacity() const { return stack_.GetCapacity(); }
+
 private:
     // clear stack on any exit from ParseStream, e.g. due to exception
     struct ClearStackOnExit
@@ -3145,6 +3146,7 @@ private:
         {
         }
         ~ClearStackOnExit() { d_.ClearStack(); }
+
     private:
         ClearStackOnExit(const ClearStackOnExit&);
         ClearStackOnExit& operator=(const ClearStackOnExit&);

@@ -45,7 +45,7 @@ RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
 RAPIDJSON_DIAG_OFF(4702) // unreachable code
 #endif
 
-#ifdef __clang__
+#if (defined(__clang__) && !defined(__APPLE__))
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(old - style - cast)
 RAPIDJSON_DIAG_OFF(padded)
@@ -351,8 +351,9 @@ inline const char* SkipWhitespace_SIMD(const char* p)
     {
         const __m128i s = _mm_load_si128(reinterpret_cast<const __m128i*>(p));
         const int r = _mm_cvtsi128_si32(
-            _mm_cmpistrm(w, s, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY |
-                                   _SIDD_BIT_MASK | _SIDD_NEGATIVE_POLARITY));
+            _mm_cmpistrm(w, s,
+                         _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY |
+                             _SIDD_BIT_MASK | _SIDD_NEGATIVE_POLARITY));
         if (r != 0)
         {       // some of characters is non-whitespace
 #ifdef _MSC_VER // Find the index of first non-whitespace
@@ -383,8 +384,9 @@ inline const char* SkipWhitespace_SIMD(const char* p, const char* end)
     {
         const __m128i s = _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
         const int r = _mm_cvtsi128_si32(
-            _mm_cmpistrm(w, s, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY |
-                                   _SIDD_BIT_MASK | _SIDD_NEGATIVE_POLARITY));
+            _mm_cmpistrm(w, s,
+                         _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY |
+                             _SIDD_BIT_MASK | _SIDD_NEGATIVE_POLARITY));
         if (r != 0)
         {       // some of characters is non-whitespace
 #ifdef _MSC_VER // Find the index of first non-whitespace
@@ -641,6 +643,7 @@ public:
     ParseErrorCode GetParseErrorCode() const { return parseResult_.Code(); }
     //! Get the position of last parsing error in input, 0 otherwise.
     size_t GetErrorOffset() const { return parseResult_.Offset(); }
+
 protected:
     void SetParseError(ParseErrorCode code, size_t offset)
     {
@@ -661,6 +664,7 @@ private:
         {
         }
         ~ClearStackOnExit() { r_.ClearStack(); }
+
     private:
         GenericReader& r_;
         ClearStackOnExit(const ClearStackOnExit&);
@@ -954,6 +958,7 @@ private:
 
         size_t Length() const { return length_; }
         Ch* Pop() { return stack_.template Pop<Ch>(length_); }
+
     private:
         StackStream(const StackStream&);
         StackStream& operator=(const StackStream&);
@@ -1359,6 +1364,7 @@ private:
         size_t Tell() { return is.Tell(); }
         size_t Length() { return 0; }
         const char* Pop() { return 0; }
+
     protected:
         NumberStream& operator=(const NumberStream&);
 

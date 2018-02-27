@@ -42,7 +42,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
 #endif
 
-#ifdef __clang__
+#if (defined(__clang__) && !defined(__APPLE__))
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(padded)
 RAPIDJSON_DIAG_OFF(unreachable - code)

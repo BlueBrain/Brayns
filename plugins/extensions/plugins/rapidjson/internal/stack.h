@@ -22,7 +22,7 @@
 #include "../allocators.h"
 #include "swap.h"
 
-#if defined(__clang__)
+#if (defined(__clang__) && !defined(__APPLE__))
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++ 98 - compat)
 #endif
@@ -35,7 +35,7 @@ namespace internal
 
 //! A type-unsafe stack for storing different types of data.
 /*! \tparam Allocator Allocator for allocating stack memory.
-*/
+ */
 template <typename Allocator>
 class Stack
 {
