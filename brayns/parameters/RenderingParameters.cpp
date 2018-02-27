@@ -49,30 +49,20 @@ const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
-const std::array<std::string, 2> ENGINES = {"ospray", "optix"};
-const std::array<std::string, 7> RENDERERS = {"default",
-                                              "proximity",
-                                              "simulation",
-                                              "particle",
-                                              "geometrynormals",
-                                              "shadingnormals",
-                                              "scientificvisualization"};
+const std::array<std::string, 2> ENGINES = {{"ospray", "optix"}};
+const std::array<std::string, 7> RENDERERS = {
+    {"default", "proximity", "simulation", "particle", "geometrynormals",
+     "shadingnormals", "scientificvisualization"}};
 
 const std::array<std::string, 7> RENDERER_INTERNAL_NAMES = {
-    "basic",
-    "proximityrenderer",
-    "simulationrenderer",
-    "particlerenderer",
-    "raycast_Ng",
-    "raycast_Ns",
-    "scivis"};
+    {"basic", "proximityrenderer", "simulationrenderer", "particlerenderer",
+     "raycast_Ng", "raycast_Ns", "scivis"}};
 
-const std::array<std::string, 5> CAMERA_TYPE_NAMES = {"perspective", "stereo",
-                                                      "orthographic",
-                                                      "panoramic", "clipped"};
+const std::array<std::string, 5> CAMERA_TYPE_NAMES = {
+    {"perspective", "stereo", "orthographic", "panoramic", "clipped"}};
 
-const std::array<std::string, 3> SHADING_TYPES = {"none", "diffuse",
-                                                  "electron"};
+const std::array<std::string, 3> SHADING_TYPES = {
+    {"none", "diffuse", "electron"}};
 }
 
 namespace brayns

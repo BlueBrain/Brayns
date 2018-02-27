@@ -28,7 +28,7 @@
 
 #include "internal/stack.h"
 
-#if defined(__clang__)
+#if (defined(__clang__) && !defined(__APPLE__))
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++ 98 - compat)
 #endif

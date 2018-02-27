@@ -35,8 +35,10 @@ namespace internal
 #ifdef __GNUC__
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(effc++)
+#if (defined(__clang__) && !defined(__APPLE__))
 RAPIDJSON_DIAG_OFF(array - bounds) // some gcc versions generate wrong warnings
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59124
+#endif
 #endif
 
 inline void GrisuRound(char* buffer, int len, uint64_t delta, uint64_t rest,

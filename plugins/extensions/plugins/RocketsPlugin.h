@@ -58,7 +58,7 @@ private:
     void _handle(const std::string& endpoint, T& obj);
 
     template <class T, class F = std::function<bool(const T&)>>
-    void _handleGET(const std::string& endpoint, T& obj,
+    void _handleGET(const std::string& endpoint, T&,
                     F modifiedFunc = [](const T& obj) {
                         return obj.getModified();
                     });
