@@ -36,11 +36,13 @@ void OpenDeckCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
     const float alpha = screen.x * -pi;
     const float y = self->imgPlane_size_y * (screen.y - 0.5f);
     vec3f dir = normalize(make_vec3f(sinf(alpha), y, -cosf(alpha)));
-    const LinearSpace3f cameraSpace = make_LinearSpace3f( self->dir_cam, self->dir_dv, self->dir_du);
-    dir = normalize( cameraSpace * dir );
+    const LinearSpace3f cameraSpace =
+        make_LinearSpace3f(self->dir_cam, self->dir_dv, self->dir_du);
+    dir = normalize(cameraSpace * dir);
 
     const float time = Camera_shutterTime(_self, sample.time);
-    setRay(ray, self->org, normalize(dir), self->super.nearClip, infinity, time);
+    vec3f org = self->org;
+    setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
 }
 
 /*! create a new ispc-side version of a OpenDeckcamera - with given
@@ -56,9 +58,11 @@ export void *uniform OpenDeckCamera_create(void *uniform cppE)
     return self;
 }
 
-export void OpenDeckCamera_set(
-    void *uniform _self, const uniform vec3f &org, const uniform vec3f &dir_cam,
-    const uniform vec3f &dir_du, const uniform vec3f &dir_dv, const uniform float imgPlane_size_y)
+export void OpenDeckCamera_set(void *uniform _self, const uniform vec3f &org,
+                               const uniform vec3f &dir_cam,
+                               const uniform vec3f &dir_du,
+                               const uniform vec3f &dir_dv,
+                               const uniform float imgPlane_size_y)
 {
     uniform OpenDeckCamera *uniform self =
         (uniform OpenDeckCamera * uniform)_self;
