@@ -1,6 +1,7 @@
 # Copyright (c) 2015-2018, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -167,6 +168,7 @@ if(BRAYNS_OSPRAY_ENABLED)
       add_dependencies(braynsOSPRayEnginePlugin ospray_module_optix)
     endif()
   endif()
+  add_subdirectory(ospray_modules/opendeck) 
 endif()
 
 set(DOXYGEN_EXTRA_INPUT "${PROJECT_SOURCE_DIR}/Changelog.md")
