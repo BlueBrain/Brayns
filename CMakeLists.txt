@@ -171,8 +171,9 @@ add_subdirectory(plugins)
 add_subdirectory(brayns)
 add_subdirectory(tests)
 
-# OptiX module
+# OSPRay modules
 if(BRAYNS_OSPRAY_ENABLED)
+  # Optix module
   # Needs OSPRay version with a fix, so enable on your risk
   # https://github.com/ospray/ospray/commit/851b3e52120982470276ce2cbc04b5de654ddbde
   if(OSPRAY_VERSION VERSION_LESS 1.5.0)
@@ -186,7 +187,15 @@ if(BRAYNS_OSPRAY_ENABLED)
       add_dependencies(braynsOSPRayEnginePlugin ospray_module_optix)
     endif()
   endif()
-  add_subdirectory(ospray_modules/opendeck)
+
+  # OpenDeck module
+  option(BRAYNS_OPENDECK_ENABLED "Activate OpenDeck module" OFF)
+  if(BRAYNS_OPENDECK_ENABLED)
+    add_subdirectory(ospray_modules/opendeck)
+    if(TARGET ospray_module_opendeck)
+      add_dependencies(braynsOSPRayEnginePlugin ospray_module_opendeck)
+    endif()
+  endif()
 endif()
 
 set(DOXYGEN_EXTRA_INPUT "${PROJECT_SOURCE_DIR}/Changelog.md")
