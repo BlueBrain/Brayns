@@ -72,6 +72,13 @@ else()
   unset(BRAYNS_DEFLECT_ENABLED)
 endif()
 
+# Topology viewer
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/plugins/extensions/usecases/TopologyViewer)
+  list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_TOPOLOGY_VIEWER_PLUGIN_ENABLED)
+  add_definitions(-DBRAYNS_USE_TOPOLOGY_VIEWER_PLUGIN)
+  add_subdirectory(plugins/extensions/usecases/TopologyViewer)
+endif()
+
 # Data access
 common_find_package(Brion)
 common_find_package(Servus)
@@ -114,6 +121,7 @@ endif()
 common_find_package(GLUT SYSTEM)
 common_find_package(GLEW SYSTEM)
 common_find_package(OpenGL)
+
 if(GLUT_FOUND AND GLEW_FOUND AND OPENGL_FOUND)
   option(BRAYNS_VIEWER_ENABLED "Brayns Viewer" ON)
 else()

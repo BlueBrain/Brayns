@@ -13,6 +13,7 @@ Servus/
 vmmlib/
 HighFive/
 Keyv/
+plugins/extensions/usecases/
 CMakeFiles
 .DS_Store
 *~

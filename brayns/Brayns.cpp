@@ -62,6 +62,10 @@
 #include <servus/uri.h>
 #endif
 
+#if BRAYNS_USE_TOPOLOGY_VIEWER_PLUGIN
+#include <plugins/extensions/usecases/TopologyViewer/TopologyViewerPlugin.h>
+#endif
+
 #include <future>
 #ifdef BRAYNS_USE_LUNCHBOX
 #include <lunchbox/threadPool.h>
@@ -112,6 +116,11 @@ struct Brayns::Impl
 #ifdef BRAYNS_USE_DEFLECT
         _extensionPluginFactory.add(
             std::make_shared<DeflectPlugin>(_engine, _parametersManager));
+#endif
+#ifdef BRAYNS_USE_TOPOLOGY_VIEWER_PLUGIN
+        _extensionPluginFactory.add(
+            std::make_shared<TopologyViewerPlugin>(_engine,
+                                                   _parametersManager));
 #endif
     }
 
