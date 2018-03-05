@@ -86,6 +86,23 @@ std::string hyphenatedToCamelCase(const std::string& hyphenated)
 
 namespace brayns
 {
+template <class T, class F>
+inline bool from_json(T& obj, const std::string& json, F postUpdateFunc = [] {})
+{
+    staticjson::ParseStatus status;
+    const auto success =
+        staticjson::from_json_string(json.c_str(), &obj, &status);
+    if (success)
+    {
+        obj.markModified();
+        if (std::function<void(T&)>(postUpdateFunc))
+            postUpdateFunc(obj);
+    }
+    else
+        BRAYNS_ERROR << status.description() << std::endl;
+    return success;
+}
+
 RocketsPlugin::RocketsPlugin(EnginePtr engine,
                              ParametersManager& parametersManager)
     : ExtensionPlugin(engine)
@@ -616,5 +633,37 @@ bool RocketsPlugin::_writeBlueConfigFile(
     blueConfig << "}" << std::endl;
     blueConfig.close();
     return true;
+}
+
+void RocketsPlugin::_registerRequest(const std::string& name,
+                                     const RetParamFunc& action)
+{
+    _jsonrpcServer->bind(name, [action](
+                                   const rockets::jsonrpc::Request& request) {
+        return rockets::jsonrpc::Response{action(request.message)};
+    });
+}
+
+void RocketsPlugin::_registerRequest(const std::string& name,
+                                     const RetFunc& action)
+{
+    _jsonrpcServer->bind(name, [action](const rockets::jsonrpc::Request&) {
+        return rockets::jsonrpc::Response{action()};
+    });
+}
+
+void RocketsPlugin::_registerNotification(const std::string& name,
+                                          const ParamFunc& action)
+{
+    _jsonrpcServer->connect(name,
+                            [action](const rockets::jsonrpc::Request& request) {
+                                action(request.message);
+                            });
+}
+
+void RocketsPlugin::_registerNotification(const std::string& name,
+                                          const VoidFunc& action)
+{
+    _jsonrpcServer->connect(name, [action] { action(); });
 }
 }

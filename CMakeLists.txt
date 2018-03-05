@@ -50,6 +50,7 @@ if(libuv_FOUND)
     message(FATAL_ERROR "uvw missing, run: git submodule update --init")
   endif()
   include_directories(SYSTEM uvw/src)
+  list(APPEND LCOV_EXCLUDE 'uvw/*')
 endif()
 
 # HTTP messaging

@@ -56,8 +56,11 @@ if(BRAYNS_NETWORKING_ENABLED)
   if(libuv_FOUND)
     list(APPEND BRAYNSPLUGINS_HEADERS extensions/plugins/SocketListener.h)
     list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/SocketListener.cpp)
-    list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC ${libuv_LIBRARIES})
   endif()
+endif()
+
+if(libuv_FOUND)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC ${libuv_LIBRARIES})
 endif()
 
 if(BRAYNS_OSPRAY_ENABLED)

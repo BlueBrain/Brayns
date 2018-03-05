@@ -82,6 +82,8 @@ namespace brayns
 // Forward declarations
 class Brayns;
 
+class ActionInterface;
+
 class Engine;
 typedef std::shared_ptr<Engine> EnginePtr;
 

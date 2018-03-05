@@ -15,6 +15,9 @@ endif()
 if(NOT BRAYNS_OSPRAY_ENABLED)
   list(APPEND EXCLUDE_FROM_TESTS brayns.cpp braynsTestData.cpp webAPI.cpp)
 endif()
+if(NOT BRAYNS_NETWORKING_ENABLED)
+  list(APPEND EXCLUDE_FROM_TESTS webAPI.cpp)
+endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/plugins/extensions/plugins)
 

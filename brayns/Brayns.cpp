@@ -36,8 +36,6 @@
 #include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
 
-#include <brayns/parameters/ParametersManager.h>
-
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
@@ -46,7 +44,6 @@
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 
 #include <plugins/engines/EngineFactory.h>
-#include <plugins/extensions/ExtensionPluginFactory.h>
 #ifdef BRAYNS_USE_NETWORKING
 #include <plugins/extensions/plugins/RocketsPlugin.h>
 #endif
@@ -83,9 +80,15 @@ namespace brayns
 {
 struct Brayns::Impl
 {
-    Impl(int argc, const char** argv)
-        : _engineFactory{argc, argv, _parametersManager}
+    EnginePtr _engine;
+    std::shared_ptr<ActionInterface> _actionInterface;
+
+    Impl(int argc, const char** argv, ParametersManager& parametersManager,
+         ExtensionPluginFactory& extensionPluginFactory)
+        : _parametersManager(parametersManager)
+        , _engineFactory{argc, argv, _parametersManager}
         , _meshLoader(_parametersManager.getGeometryParameters())
+        , _extensionPluginFactory(extensionPluginFactory)
     {
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
@@ -110,8 +113,10 @@ struct Brayns::Impl
     void createPlugins()
     {
 #if (BRAYNS_USE_NETWORKING)
-        _extensionPluginFactory.add(
-            std::make_shared<RocketsPlugin>(_engine, _parametersManager));
+        auto rocketsPlugin =
+            std::make_shared<RocketsPlugin>(_engine, _parametersManager);
+        _extensionPluginFactory.add(rocketsPlugin);
+        _actionInterface = rocketsPlugin;
 #endif
 #ifdef BRAYNS_USE_DEFLECT
         _extensionPluginFactory.add(
@@ -1207,9 +1212,8 @@ private:
         app.setSynchronousMode(!app.getSynchronousMode());
     }
 
-    ParametersManager _parametersManager;
+    ParametersManager& _parametersManager;
     EngineFactory _engineFactory;
-    EnginePtr _engine;
     KeyboardHandler _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
     MeshLoader _meshLoader;
@@ -1233,14 +1237,15 @@ private:
     lunchbox::ThreadPool _loadingThread{1};
 #endif
 
-    ExtensionPluginFactory _extensionPluginFactory;
+    ExtensionPluginFactory& _extensionPluginFactory;
 };
 
 // -------------------------------------------------------------------------------------------------
 
 Brayns::Brayns(int argc, const char** argv)
-    : _impl(new Impl(argc, argv))
+    : _impl(new Impl(argc, argv, _parametersManager, _extensionPluginFactory))
 {
+    _engine = _impl->_engine;
 }
 
 Brayns::~Brayns()
@@ -1269,6 +1274,7 @@ bool Brayns::render()
 void Brayns::createPlugins()
 {
     _impl->createPlugins();
+    _actionInterface = _impl->_actionInterface;
 }
 
 bool Brayns::preRender()
