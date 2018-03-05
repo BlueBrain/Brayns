@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -42,14 +42,8 @@ public:
     /** @copydoc Engine::commit */
     void commit() final;
 
-    /** @copydoc Engine::render */
-    void render() final;
-
     /** @copydoc Engine::preRender */
     void preRender() final;
-
-    /** @copydoc Engine::postRender */
-    void postRender() final;
 
     /**
      * Constrain size to multiples of the OSPRay tile size in case of streaming
@@ -62,8 +56,13 @@ public:
 
     /** @copydoc Engine::haveDeflectPixelOp */
     bool haveDeflectPixelOp() const final { return _haveDeflectPixelOp; }
+    FrameBufferPtr createFrameBuffer(const Vector2ui& frameSize,
+                                     FrameBufferFormat frameBufferFormat,
+                                     bool accumulation) final;
+
+    CameraPtr createCamera(CameraType type) final;
+
 private:
-    void _createCamera();
     Renderers _createRenderers();
 
     bool _haveDeflectPixelOp{false};

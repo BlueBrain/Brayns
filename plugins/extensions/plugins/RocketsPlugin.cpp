@@ -62,9 +62,6 @@ const std::string METHOD_SNAPSHOT = "snapshot";
 
 const std::string JSON_TYPE = "application/json";
 
-const size_t NB_MAX_MESSAGES = 20; // Maximum number of network messages to read
-                                   // between each rendering loop
-
 std::string hyphenatedToCamelCase(const std::string& hyphenated)
 {
     std::string camel = hyphenated;
@@ -89,8 +86,9 @@ std::string hyphenatedToCamelCase(const std::string& hyphenated)
 
 namespace brayns
 {
-RocketsPlugin::RocketsPlugin(ParametersManager& parametersManager)
-    : ExtensionPlugin()
+RocketsPlugin::RocketsPlugin(EnginePtr engine,
+                             ParametersManager& parametersManager)
+    : ExtensionPlugin(engine)
     , _parametersManager(parametersManager)
 {
     _setupRocketsServer();
@@ -98,40 +96,32 @@ RocketsPlugin::RocketsPlugin(ParametersManager& parametersManager)
 
 RocketsPlugin::~RocketsPlugin()
 {
+    if (_rocketsServer)
+        _rocketsServer->setSocketListener(nullptr);
 }
 
-bool RocketsPlugin::run(EnginePtr engine, KeyboardHandler&,
-                        AbstractManipulator&)
+void RocketsPlugin::preRender(KeyboardHandler&, AbstractManipulator&)
 {
-    if (!_rocketsServer)
-        return true;
-
-    if (_engine != engine)
-    {
-        _engine = engine;
-        _registerEndpoints();
-    }
+    if (!_rocketsServer || _socketListener)
+        return;
 
     try
     {
-        _broadcastWebsocketMessages();
-
-        // In the case of interactions with Jupyter notebooks, HTTP messages are
-        // received in a blocking and sequential manner, meaning that the
-        // subscriber never has more than one message in its queue. In other
-        // words, only one message is processed between each rendering loop. The
-        // following code allows the processing of several messages and performs
-        // rendering after NB_MAX_MESSAGES reads.
-        for (size_t i = 0; i < NB_MAX_MESSAGES; ++i)
-            _rocketsServer->process(0);
+        _rocketsServer->process(0);
     }
     catch (const std::exception& exc)
     {
         BRAYNS_ERROR << "Error while handling HTTP/websocket messages: "
                      << exc.what() << std::endl;
     }
+}
 
-    return true;
+void RocketsPlugin::postRender()
+{
+    if (!_rocketsServer)
+        return;
+
+    _broadcastWebsocketMessages();
 }
 
 std::string RocketsPlugin::_getHttpInterface() const
@@ -157,6 +147,20 @@ void RocketsPlugin::_setupRocketsServer()
 
         _jsonrpcServer.reset(new JsonRpcServer(*_rocketsServer));
 
+#ifdef BRAYNS_USE_LIBUV
+        try
+        {
+            _socketListener = std::make_unique<SocketListener>(*_rocketsServer);
+            _socketListener->setPostReceiveCallback(_engine->triggerRender);
+            _rocketsServer->setSocketListener(_socketListener.get());
+        }
+        catch (const std::runtime_error& e)
+        {
+            BRAYNS_DEBUG << "Failed to setup rockets socket listener: "
+                         << e.what() << std::endl;
+        }
+#endif
+
         _parametersManager.getApplicationParameters().setHttpServerURI(
             _rocketsServer->getURI());
     }
@@ -168,6 +172,7 @@ void RocketsPlugin::_setupRocketsServer()
     }
 
     _setupWebsocket();
+    _registerEndpoints();
     _timer.start();
 }
 
@@ -179,20 +184,15 @@ void RocketsPlugin::_setupWebsocket()
             responses.push_back({i.second(), rockets::ws::Recipient::sender,
                                  rockets::ws::Format::text});
 
-        if (_engine->isReady())
+        const auto image = _imageGenerator.createJPEG(
+            _engine->getFrameBuffer(),
+            _parametersManager.getApplicationParameters().getJpegCompression());
+        if (image.size > 0)
         {
-            const auto image =
-                _imageGenerator.createJPEG(_engine->getFrameBuffer(),
-                                           _parametersManager
-                                               .getApplicationParameters()
-                                               .getJpegCompression());
-            if (image.size > 0)
-            {
-                std::string message;
-                message.assign((const char*)image.data.get(), image.size);
-                responses.push_back({message, rockets::ws::Recipient::sender,
-                                     rockets::ws::Format::binary});
-            }
+            std::string message;
+            message.assign((const char*)image.data.get(), image.size);
+            responses.push_back({message, rockets::ws::Recipient::sender,
+                                 rockets::ws::Format::binary});
         }
         return responses;
     });
@@ -289,6 +289,16 @@ void RocketsPlugin::_handleRPC(const std::string& method,
     _handleSchema(method, buildJsonRpcSchema(method, description));
 }
 
+template <class P, class R>
+void RocketsPlugin::_handleAsyncRPC(
+    const std::string& method, const RpcDocumentation& doc,
+    std::function<void(P, rockets::jsonrpc::AsyncResponse)> action,
+    rockets::jsonrpc::AsyncReceiver::CancelRequestCallback cancel)
+{
+    _jsonrpcServer->bindAsync<P>(method, action, cancel);
+    _handleSchema(method, buildJsonRpcSchema<P, R>(method, doc));
+}
+
 template <class T>
 void RocketsPlugin::_handleObjectSchema(const std::string& endpoint, T& obj)
 {
@@ -309,13 +319,13 @@ void RocketsPlugin::_handleSchema(const std::string& endpoint,
 
 void RocketsPlugin::_registerEndpoints()
 {
-    _handleApplicationParams();
     _handleGeometryParams();
     _handleImageJPEG();
     _handleStreaming();
     _handleVersion();
     _handleVolumeParams();
 
+    _handle(ENDPOINT_APP_PARAMS, _parametersManager.getApplicationParameters());
     _handle(ENDPOINT_FRAME, _parametersManager.getAnimationParameters());
     _handle(ENDPOINT_RENDERING_PARAMS,
             _parametersManager.getRenderingParameters());
@@ -331,15 +341,10 @@ void RocketsPlugin::_registerEndpoints()
     _handle(ENDPOINT_CAMERA, _engine->getCamera());
     _handleGET(ENDPOINT_PROGRESS, _engine->getProgress());
     _handle(ENDPOINT_MATERIAL_LUT, _engine->getScene().getTransferFunction());
-    _handleGET(ENDPOINT_SCENE, _engine->getScene(), [&](const Scene& scene) {
-        return _engine->isReady() && scene.getModified();
-    });
+    _handleGET(ENDPOINT_SCENE, _engine->getScene());
     _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
                [](Scene& scene) { scene.commitMaterials(Action::update); });
-    _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics(),
-               [&](const Statistics& statistics) {
-                   return _engine->isReady() && statistics.getModified();
-               });
+    _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
 
     _handleFrameBuffer();
     _handleSimulationHistogram();
@@ -349,17 +354,6 @@ void RocketsPlugin::_registerEndpoints()
     _handleQuit();
     _handleResetCamera();
     _handleSnapshot();
-}
-
-void RocketsPlugin::_handleApplicationParams()
-{
-    auto& params = _parametersManager.getApplicationParameters();
-    auto postUpdate = [this](ApplicationParameters& params_) {
-        if (params_.getFrameExportFolder().empty())
-            _engine->resetFrameNumber();
-    };
-    _handleGET(ENDPOINT_APP_PARAMS, params);
-    _handlePUT(ENDPOINT_APP_PARAMS, params, postUpdate);
 }
 
 void RocketsPlugin::_handleFrameBuffer()
@@ -375,8 +369,7 @@ void RocketsPlugin::_handleGeometryParams()
 {
     auto& params = _parametersManager.getGeometryParameters();
     auto postUpdate = [this](GeometryParameters&) {
-        if (_engine->isReady())
-            _engine->buildScene();
+        _engine->markRebuildScene();
     };
     _handleGET(ENDPOINT_GEOMETRY_PARAMS, params);
     _handlePUT(ENDPOINT_GEOMETRY_PARAMS, params, postUpdate);
@@ -387,8 +380,6 @@ void RocketsPlugin::_handleImageJPEG()
     using namespace rockets::http;
 
     auto func = [&](const Request&) {
-        if (!_engine->isReady())
-            return make_ready_response(Code::NOT_SUPPORTED);
         try
         {
             const auto obj =
@@ -417,7 +408,7 @@ void RocketsPlugin::_handleImageJPEG()
         });
 
     _wsBroadcastOperations[ENDPOINT_IMAGE_JPEG] = [this] {
-        if (_engine->isReady() && _engine->getRenderer().hasNewImage())
+        if (_engine->getFrameBuffer().isModified())
         {
             const auto& params = _parametersManager.getApplicationParameters();
             const auto fps = params.getImageStreamFPS();
@@ -514,8 +505,7 @@ void RocketsPlugin::_handleVolumeParams()
 {
     auto& params = _parametersManager.getVolumeParameters();
     auto postUpdate = [this](VolumeParameters&) {
-        if (_engine->isReady())
-            _engine->buildScene();
+        _engine->markRebuildScene();
     };
     _handleGET(ENDPOINT_VOLUME_PARAMS, params);
     _handlePUT(ENDPOINT_VOLUME_PARAMS, params, postUpdate);
@@ -553,20 +543,37 @@ void RocketsPlugin::_handleSnapshot()
 {
     RpcDocumentation doc{"Make a snapshot of the current view", "settings",
                          "Snapshot settings for quality and size"};
-    _handleRPC<SnapshotParams, ImageGenerator::ImageBase64>(
-        METHOD_SNAPSHOT, doc, [this](const SnapshotParams& params) {
+    _handleAsyncRPC<SnapshotParams, ImageGenerator::ImageBase64>(
+        METHOD_SNAPSHOT, doc,
+        [this](const SnapshotParams& params,
+               rockets::jsonrpc::AsyncResponse callback) {
             try
             {
-                _engine->snapshot(params);
-                return _imageGenerator.createImage(_engine->getFrameBuffer(),
-                                                   params.format,
-                                                   params.quality);
+                auto readyCallback =
+                    [ callback, params,
+                      &imageGenerator = _imageGenerator ](FrameBufferPtr fb)
+                {
+                    try
+                    {
+                        callback(rockets::jsonrpc::Response{to_json(
+                            imageGenerator.createImage(*fb, params.format,
+                                                       params.quality))});
+                    }
+                    catch (const std::runtime_error& e)
+                    {
+                        callback(rockets::jsonrpc::Response{
+                            rockets::jsonrpc::Response::Error{e.what(), -1}});
+                    }
+                };
+                _engine->snapshot(params, readyCallback);
             }
             catch (const std::runtime_error& e)
             {
-                throw rockets::jsonrpc::response_error(e.what(), -1);
+                callback(rockets::jsonrpc::Response{
+                    rockets::jsonrpc::Response::Error{e.what(), -1}});
             }
-        });
+        },
+        [this] { _engine->cancelSnapshot(); });
 }
 
 std::future<rockets::http::Response> RocketsPlugin::_handleCircuitConfigBuilder(

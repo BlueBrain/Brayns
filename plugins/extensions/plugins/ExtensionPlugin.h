@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -27,10 +27,10 @@
 namespace brayns
 {
 /**
-   Defines the abstract representation of an extension plug-in. What we mean by
-   extension is a set a functionalities that are not provided by the core of
-   the application. For example, exposing a REST interface via HTTP, or
-   streaming images to an distant display.
+ * Defines the abstract representation of an extension plug-in. What we mean by
+ * extension is a set a functionalities that are not provided by the core of the
+ * application. For example, exposing a REST interface via HTTP, or streaming
+ * images to an distant display.
  */
 class ExtensionPlugin
 {
@@ -38,17 +38,23 @@ public:
     virtual ~ExtensionPlugin() = default;
 
     /**
-     * Executes the core functionnalities of the plugin
-     * @return true if other plugins are allowed to continue execution or false
-     *         if control shall be returned to Brayns main loop for e.g.
-     *         rendering a new frame.
+     * Called from Brayns::preRender() to prepare the engine based on the
+     * plugins' need for an upcoming render().
      */
-    BRAYNS_API virtual bool run(EnginePtr _engine,
-                                KeyboardHandler& keyboardHandler,
-                                AbstractManipulator& cameraManipulator) = 0;
+    virtual void preRender(KeyboardHandler& keyboardHandler BRAYNS_UNUSED,
+                           AbstractManipulator& cameraManipulator BRAYNS_UNUSED)
+    {
+    }
 
+    /** Called from Brayns::postRender() after render() has finished. */
+    virtual void postRender() {}
 protected:
-    ExtensionPlugin() = default;
+    ExtensionPlugin(EnginePtr engine)
+        : _engine(engine)
+    {
+    }
+
+    EnginePtr _engine;
 };
 }
 

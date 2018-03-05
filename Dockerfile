@@ -29,6 +29,7 @@ RUN apt-get update \
     libmagick++-dev \
     libtbb-dev \
     libturbojpeg0-dev \
+    libuv1-dev \
     wget \
     ca-certificates \
  && apt-get clean \
@@ -109,7 +110,7 @@ ADD . ${BRAYNS_SRC}
 # https://github.com/BlueBrain/Brayns
 RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && cd ${BRAYNS_SRC} \
- && git submodule update --init --recursive --remote \
+ && git submodule update --init --recursive \
  && mkdir -p build \
  && cd build \
  && PKG_CONFIG_PATH=${DIST_PATH}/lib/pkgconfig CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
@@ -141,6 +142,7 @@ RUN apt-get update \
     libmagick++-6.q16-7 \
     libmagickwand-6.q16-3 \
     libturbojpeg0 \
+    libuv1 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

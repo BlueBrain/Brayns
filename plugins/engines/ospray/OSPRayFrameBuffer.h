@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -24,6 +24,8 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <ospray.h>
 
+#include <mutex>
+
 namespace brayns
 {
 class OSPRayFrameBuffer : public brayns::FrameBuffer
@@ -38,6 +40,8 @@ public:
     void map() final;
     void unmap() final;
 
+    void lock() { _mapMutex.lock(); }
+    void unlock() { _mapMutex.unlock(); }
     uint8_t* getColorBuffer() final { return _colorBuffer; }
     float* getDepthBuffer() final { return _depthBuffer; }
     OSPFrameBuffer impl() { return _frameBuffer; }
@@ -49,6 +53,9 @@ private:
     uint8_t* _colorBuffer;
     float* _depthBuffer;
     OSPPixelOp _pixelOp{nullptr};
+
+    // protect map/unmap vs ospRenderFrame
+    std::mutex _mapMutex;
 };
 }
 #endif // OSPRAYFRAMEBUFFER_H

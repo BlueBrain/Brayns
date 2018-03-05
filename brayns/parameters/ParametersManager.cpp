@@ -79,7 +79,7 @@ bool ParametersManager::isAnyModified() const
 {
     for (AbstractParameters* parameters : _parameterSets)
     {
-        if (parameters->getModified())
+        if (parameters->isModified())
             return true;
     }
     return false;

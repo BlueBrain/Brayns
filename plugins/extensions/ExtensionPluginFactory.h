@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -30,11 +30,7 @@ namespace brayns
 class ExtensionPluginFactory
 {
 public:
-    /**
-        Constructs the object and initializes default plugins according to
-        application parameters.
-    */
-    ExtensionPluginFactory(ParametersManager& parametersManager);
+    ExtensionPluginFactory() = default;
 
     ~ExtensionPluginFactory();
 
@@ -55,11 +51,14 @@ public:
      */
     void clear();
 
+    /** Calls preRender() on all registered plugins from Brayns::preRender(). */
+    void preRender(KeyboardHandler& keyboardHandler,
+                   AbstractManipulator& cameraManipulator);
+
     /**
-       Executes code specific to every registered plugin
+     * Calls postRender() on all registered plugins from Brayns::postRender().
      */
-    void execute(EnginePtr engine, KeyboardHandler& keyboardHandler,
-                 AbstractManipulator& cameraManipulator);
+    void postRender();
 
 private:
     ExtensionPlugins _plugins;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -198,6 +198,17 @@ public:
         _updateValue(_varianceThreshold, value);
     }
 
+    /**
+     * The maximum number of accumulation frames before engine signals to stop
+     * continuation of rendering.
+     *
+     * @sa Engine::continueRendering()
+     */
+    void setMaxAccumFrames(const size_t value)
+    {
+        _updateValue(_maxAccumFrames, value);
+    }
+    size_t getMaxAccumFrames() const { return _maxAccumFrames; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -225,6 +236,7 @@ protected:
     bool _headLight;
     bool _dynamicLoadBalancer{false};
     float _varianceThreshold{-1.f};
+    size_t _maxAccumFrames{100};
 
     SERIALIZATION_FRIEND(RenderingParameters)
 };

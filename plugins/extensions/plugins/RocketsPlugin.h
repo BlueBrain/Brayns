@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -24,8 +24,13 @@
 #include "ExtensionPlugin.h"
 #include "ImageGenerator.h"
 
+#ifdef BRAYNS_USE_LIBUV
+#include "SocketListener.h"
+#endif
+
 #include <brayns/api.h>
 #include <brayns/common/Timer.h>
+#include <rockets/jsonrpc/asyncReceiver.h>
 #include <rockets/jsonrpc/server.h>
 #include <rockets/server.h>
 
@@ -41,12 +46,27 @@ struct RpcDocumentation;
 class RocketsPlugin : public ExtensionPlugin
 {
 public:
-    RocketsPlugin(ParametersManager& parametersManager);
+    RocketsPlugin(EnginePtr engine, ParametersManager& parametersManager);
     ~RocketsPlugin();
 
-    /** @copydoc ExtensionPlugin::run */
-    BRAYNS_API bool run(EnginePtr engine, KeyboardHandler& keyboardHandler,
-                        AbstractManipulator& cameraManipulator) final;
+    /**
+     * In case no event loop is available, this processes in- and outgoing HTTP
+     * and websocket messages.
+     *
+     * Otherwise, this is a NOP as the incoming message processing is done by
+     * the SocketListener.
+     */
+    BRAYNS_API void preRender(KeyboardHandler& keyboardHandler,
+                              AbstractManipulator& cameraManipulator) final;
+
+    /**
+     * Enqueue all modified and registered objects for broadcast.
+     *
+     * In case of an event loop, the outgoing messages are automatically send by
+     * the SocketListener. Otherwise, the next call to preRender() will send all
+     * pending broadcasts.
+     */
+    BRAYNS_API void postRender() final;
 
 private:
     std::string _getHttpInterface() const;
@@ -60,7 +80,7 @@ private:
     template <class T, class F = std::function<bool(const T&)>>
     void _handleGET(const std::string& endpoint, T&,
                     F modifiedFunc = [](const T& obj) {
-                        return obj.getModified();
+                        return obj.isModified();
                     });
 
     template <class T>
@@ -76,6 +96,12 @@ private:
     void _handleRPC(const std::string& method, const std::string& description,
                     std::function<void()> action);
 
+    template <class P, class R>
+    void _handleAsyncRPC(
+        const std::string& method, const RpcDocumentation& doc,
+        std::function<void(P, rockets::jsonrpc::AsyncResponse)> action,
+        rockets::jsonrpc::AsyncReceiver::CancelRequestCallback cancel);
+
     template <class T>
     void _handleObjectSchema(const std::string& endpoint, T& obj);
 
@@ -83,7 +109,6 @@ private:
 
     void _registerEndpoints();
 
-    void _handleApplicationParams();
     void _handleFrameBuffer();
     void _handleGeometryParams();
     void _handleImageJPEG();
@@ -111,12 +136,17 @@ private:
     using WsBroadcastOperations = std::map<std::string, std::function<void()>>;
     WsBroadcastOperations _wsBroadcastOperations;
 
-    EnginePtr _engine;
     ParametersManager& _parametersManager;
 
     std::unique_ptr<rockets::Server> _rocketsServer;
-    using JsonRpcServer = rockets::jsonrpc::Server<rockets::Server>;
+    using JsonRpcServer =
+        rockets::jsonrpc::Server<rockets::Server,
+                                 rockets::jsonrpc::AsyncReceiver>;
     std::unique_ptr<JsonRpcServer> _jsonrpcServer;
+
+#ifdef BRAYNS_USE_LIBUV
+    std::unique_ptr<SocketListener> _socketListener;
+#endif
 
     ImageGenerator _imageGenerator;
 

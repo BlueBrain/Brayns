@@ -31,7 +31,6 @@ OSPRayRenderer::OSPRayRenderer(const std::string& name,
                                ParametersManager& parametersManager)
     : Renderer(parametersManager)
     , _name(name)
-    , _camera(0)
     , _renderer{ospNewRenderer(name.c_str())}
 {
     if (!_renderer)
@@ -45,20 +44,16 @@ OSPRayRenderer::~OSPRayRenderer()
 
 void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 {
-    OSPRayFrameBuffer* osprayFrameBuffer =
-        dynamic_cast<OSPRayFrameBuffer*>(frameBuffer.get());
-    const auto variance =
-        ospRenderFrame(osprayFrameBuffer->impl(), _renderer,
-                       OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
+    auto osprayFrameBuffer =
+        std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
+    osprayFrameBuffer->lock();
 
-    if (!frameBuffer->getAccumulation())
-        return;
+    _variance = ospRenderFrame(osprayFrameBuffer->impl(), _renderer,
+                               OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
 
-    if (variance == std::numeric_limits<float>::infinity())
-        _hasNewImage = true;
-    else
-        _hasNewImage = std::abs(_prevVariance - variance) > 0.01;
-    _prevVariance = variance;
+    osprayFrameBuffer->incrementAccumFrames();
+    osprayFrameBuffer->markModified();
+    osprayFrameBuffer->unlock();
 }
 
 void OSPRayRenderer::commit()
@@ -68,8 +63,8 @@ void OSPRayRenderer::commit()
     SceneParameters& sp = _parametersManager.getSceneParameters();
     VolumeParameters& vp = _parametersManager.getVolumeParameters();
 
-    if (!ap.getModified() && !rp.getModified() && !sp.getModified() &&
-        !vp.getModified() && !_scene->getModified())
+    if (!ap.isModified() && !rp.isModified() && !sp.isModified() &&
+        !vp.isModified() && !_scene->isModified())
     {
         return;
     }

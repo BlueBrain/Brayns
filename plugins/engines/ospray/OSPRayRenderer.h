@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -39,7 +39,7 @@ public:
 
     void render(FrameBufferPtr frameBuffer) final;
     void commit() final;
-
+    float getVariance() const final { return _variance; }
     void setCamera(CameraPtr camera) final;
 
     PickResult pick(const Vector2f& pickPos) final;
@@ -48,9 +48,9 @@ public:
     OSPRenderer impl() const { return _renderer; }
 private:
     std::string _name;
-    OSPRayCamera* _camera;
+    OSPRayCamera* _camera{nullptr};
     OSPRenderer _renderer;
-    float _prevVariance{std::numeric_limits<float>::infinity()};
+    float _variance{std::numeric_limits<float>::max()};
 };
 }
 

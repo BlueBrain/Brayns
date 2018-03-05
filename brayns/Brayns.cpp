@@ -38,7 +38,6 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/io/ImageManager.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
@@ -47,11 +46,15 @@
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 
 #include <plugins/engines/EngineFactory.h>
-#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
 #include <plugins/extensions/ExtensionPluginFactory.h>
+#ifdef BRAYNS_USE_NETWORKING
+#include <plugins/extensions/plugins/RocketsPlugin.h>
+#endif
+#ifdef BRAYNS_USE_DEFLECT
+#include <plugins/extensions/plugins/DeflectPlugin.h>
 #endif
 
-#if (BRAYNS_USE_BRION)
+#ifdef BRAYNS_USE_BRION
 #include <brayns/io/ConnectivityLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
@@ -96,14 +99,113 @@ struct Brayns::Impl
 
         createEngine();
 
-#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-        // after createEngine() to execute in parallel to scene loading
-        _extensionPluginFactory.reset(
-            new ExtensionPluginFactory(_parametersManager));
-#endif
-
         if (!isAsyncMode())
             _finishLoadScene();
+    }
+
+    void createPlugins()
+    {
+#if (BRAYNS_USE_NETWORKING)
+        _extensionPluginFactory.add(
+            std::make_shared<RocketsPlugin>(_engine, _parametersManager));
+#endif
+#ifdef BRAYNS_USE_DEFLECT
+        _extensionPluginFactory.add(
+            std::make_shared<DeflectPlugin>(_engine, _parametersManager));
+#endif
+    }
+
+    bool preRender()
+    {
+        std::lock_guard<std::mutex> lock{_renderMutex};
+
+        if (!isLoadingFinished())
+        {
+#ifdef BRAYNS_USE_LUNCHBOX
+            if (isAsyncMode())
+            {
+                postRender();
+
+                return false;
+            }
+#endif
+            _finishLoadScene();
+        }
+        else if (_dataLoadingFuture.valid())
+            _finishLoadScene();
+
+        _extensionPluginFactory.preRender(_keyboardHandler,
+                                          *_cameraManipulator);
+
+        _updateAnimation();
+
+        _engine->setActiveRenderer(
+            _parametersManager.getRenderingParameters().getRenderer());
+
+        const Vector2ui windowSize =
+            _parametersManager.getApplicationParameters().getWindowSize();
+
+        _engine->reshape(windowSize);
+        _engine->preRender();
+
+        _engine->commit();
+
+        Camera& camera = _engine->getCamera();
+        camera.commit();
+
+        Scene& scene = _engine->getScene();
+
+        if (scene.getTransferFunction().isModified())
+            scene.commitTransferFunctionData();
+
+        if (_parametersManager.getRenderingParameters().getHeadLight())
+        {
+            LightPtr sunLight = scene.getLight(0);
+            auto sun = std::dynamic_pointer_cast<DirectionalLight>(sunLight);
+            if (sun &&
+                (camera.isModified() ||
+                 _parametersManager.getRenderingParameters().isModified()))
+            {
+                sun->setDirection(camera.getTarget() - camera.getPosition());
+                scene.commitLights();
+            }
+        }
+
+        if (_parametersManager.isAnyModified() || camera.isModified() ||
+            scene.isModified())
+        {
+            _engine->getFrameBuffer().clear();
+        }
+
+        _engine->getScene().getTransferFunction().resetModified();
+        _parametersManager.resetModified();
+        _engine->getCamera().resetModified();
+        _engine->getScene().resetModified();
+
+        return true;
+    }
+
+    void postRender()
+    {
+        _engine->postRender();
+
+        _fpsUpdateElapsed += _renderTimer.milliseconds();
+        if (_fpsUpdateElapsed > 750)
+        {
+            _engine->getStatistics().setFPS(_renderTimer.perSecondSmoothed());
+            _fpsUpdateElapsed = 0;
+        }
+
+        // WAR to keep clients updated about current animation frame
+        auto& ap = _parametersManager.getAnimationParameters();
+        if (ap.getDelta() != 0)
+            ap.markModified();
+
+        _extensionPluginFactory.postRender();
+
+        _engine->getProgress().resetModified();
+        _engine->getFrameBuffer().resetModified();
+        _engine->getStatistics().resetModified();
     }
 
     void createEngine()
@@ -119,7 +221,6 @@ struct Brayns::Impl
                 _parametersManager.getRenderingParameters().getEngineAsString(
                     engineName));
 
-        _engine->buildScene = std::bind(&Impl::buildScene, this);
         _setupCameraManipulator(CameraMode::inspect);
 
         // Default sun light
@@ -134,65 +235,68 @@ struct Brayns::Impl
 
     void buildScene()
     {
-        _engine->setReady(false);
+        if (!isLoadingFinished())
+            throw std::runtime_error("Build scene already in progress");
 
         _engine->setLastOperation("");
         _engine->setLastProgress(0);
 
+        std::promise<void> promise;
+        _dataLoadingFuture = promise.get_future();
+
 #ifdef BRAYNS_USE_LUNCHBOX
         if (isAsyncMode())
-        {
-            _dataLoadingFuture =
-                _loadingThread.post(std::bind(&Brayns::Impl::_loadScene, this));
-        }
+            _loadingThread.post(std::bind(&Brayns::Impl::_loadScene, this))
+                .get();
         else
 #endif
-            _dataLoadingFuture =
-                std::async(std::launch::deferred,
-                           std::bind(&Brayns::Impl::_loadScene, this));
+            _loadScene();
+
+        promise.set_value();
     }
 
-    void render(const RenderInput& renderInput, RenderOutput& renderOutput)
+    bool preRender(const RenderInput& renderInput)
     {
         _engine->getCamera().set(renderInput.position, renderInput.target,
                                  renderInput.up);
+        _parametersManager.getApplicationParameters().setWindowSize(
+            renderInput.windowSize);
 
-        if (_render(renderInput.windowSize))
-        {
-            FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-            const Vector2i& frameSize = frameBuffer.getSize();
-            uint8_t* colorBuffer = frameBuffer.getColorBuffer();
-            if (colorBuffer)
-            {
-                const size_t size =
-                    frameSize.x() * frameSize.y() * frameBuffer.getColorDepth();
-                renderOutput.colorBuffer.assign(colorBuffer,
-                                                colorBuffer + size);
-                renderOutput.colorBufferFormat =
-                    frameBuffer.getFrameBufferFormat();
-            }
-
-            float* depthBuffer = frameBuffer.getDepthBuffer();
-            if (depthBuffer)
-            {
-                const size_t size = frameSize.x() * frameSize.y();
-                renderOutput.depthBuffer.assign(depthBuffer,
-                                                depthBuffer + size);
-            }
-        }
-
-        _engine->postRender();
+        return preRender();
     }
 
-    bool render()
+    void postRender(RenderOutput& renderOutput)
     {
-        const Vector2ui windowSize =
-            _parametersManager.getApplicationParameters().getWindowSize();
-        _render(windowSize);
+        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
+        frameBuffer.map();
+        const Vector2i& frameSize = frameBuffer.getSize();
+        uint8_t* colorBuffer = frameBuffer.getColorBuffer();
+        if (colorBuffer)
+        {
+            const size_t size =
+                frameSize.x() * frameSize.y() * frameBuffer.getColorDepth();
+            renderOutput.colorBuffer.assign(colorBuffer, colorBuffer + size);
+            renderOutput.colorBufferFormat = frameBuffer.getFrameBufferFormat();
+        }
 
-        _engine->postRender();
+        float* depthBuffer = frameBuffer.getDepthBuffer();
+        if (depthBuffer)
+        {
+            const size_t size = frameSize.x() * frameSize.y();
+            renderOutput.depthBuffer.assign(depthBuffer, depthBuffer + size);
+        }
+        frameBuffer.unmap();
 
-        return _engine->getKeepRunning();
+        postRender();
+    }
+
+    void render()
+    {
+        std::lock_guard<std::mutex> lock{_renderMutex};
+
+        _renderTimer.start();
+        _engine->render();
+        _renderTimer.stop();
     }
 
     Engine& getEngine() { return *_engine; }
@@ -212,33 +316,16 @@ struct Brayns::Impl
     }
 
 private:
-    void _writeFrameToFile()
-    {
-        const auto& frameExportFolder =
-            _parametersManager.getApplicationParameters()
-                .getFrameExportFolder();
-        if (frameExportFolder.empty())
-            return;
-        char str[7];
-        const auto frame =
-            _parametersManager.getAnimationParameters().getFrame();
-        snprintf(str, 7, "%06d", int(frame));
-        const auto filename = frameExportFolder + "/" + str + ".png";
-        FrameBuffer& frameBuffer = _engine->getFrameBuffer();
-        ImageManager::exportFrameBufferToFile(frameBuffer, filename);
-    }
-
     void _loadScene()
     {
         // fix race condition: we have to wait until rendering is finished
-        while (_rendering)
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::lock_guard<std::mutex> lock{_renderMutex};
 
         Progress loadingProgress(
             "Loading scene ...",
             LOADING_PROGRESS_DATA + 3 * LOADING_PROGRESS_STEP,
             [this](const std::string& msg, const float progress) {
-                std::lock_guard<std::mutex> lock(_engine->getProgress().mutex);
+                std::lock_guard<std::mutex> lock_(_engine->getProgress().mutex);
                 _engine->setLastOperation(msg);
                 _engine->setLastProgress(progress);
             });
@@ -275,7 +362,6 @@ private:
         loadingProgress += LOADING_PROGRESS_STEP;
 
         loadingProgress.setMessage("Done");
-        _engine->setReady(true);
         BRAYNS_INFO << "Now rendering ..." << std::endl;
     }
 
@@ -292,6 +378,9 @@ private:
 
         _engine->getStatistics().setSceneSizeInBytes(
             _engine->getScene().getSizeInBytes());
+
+        // finish reporting of progress
+        postRender();
     }
 
     void _updateAnimation()
@@ -301,108 +390,11 @@ private:
 
         auto simHandler = _engine->getScene().getSimulationHandler();
         auto& animParams = _parametersManager.getAnimationParameters();
-        if ((animParams.getModified() || animParams.getDelta() != 0) &&
+        if ((animParams.isModified() || animParams.getDelta() != 0) &&
             simHandler && simHandler->isReady())
         {
             animParams.setFrame(animParams.getFrame() + animParams.getDelta());
         }
-    }
-
-    bool _render(const Vector2ui& windowSize)
-    {
-        _updateAnimation();
-
-        _extensionPluginFactory->execute(_engine, _keyboardHandler,
-                                         *_cameraManipulator);
-
-        _engine->getStatistics().resetModified();
-
-        _engine->reshape(windowSize);
-        _engine->preRender();
-
-        if (!isLoadingFinished())
-        {
-#ifdef BRAYNS_USE_LUNCHBOX
-            if (isAsyncMode())
-            {
-                _parametersManager.resetModified();
-                _engine->getProgress().resetModified();
-
-                // limit any updates (Deflect, Rockets) to a reasonable number
-                // while we are loading (and not rendering).
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                return false;
-            }
-#endif
-            _finishLoadScene();
-        }
-        else if (_dataLoadingFuture.valid())
-            _finishLoadScene();
-
-        _rendering = true;
-        _renderTimer.start();
-
-        _engine->commit();
-
-        Camera& camera = _engine->getCamera();
-        camera.commit();
-
-        Scene& scene = _engine->getScene();
-
-        if (scene.getTransferFunction().getModified())
-        {
-            scene.commitTransferFunctionData();
-            scene.getTransferFunction().resetModified();
-        }
-
-        if (_parametersManager.getRenderingParameters().getHeadLight())
-        {
-            LightPtr sunLight = scene.getLight(0);
-            DirectionalLight* sun =
-                dynamic_cast<DirectionalLight*>(sunLight.get());
-            if (sun &&
-                (camera.getModified() ||
-                 _parametersManager.getRenderingParameters().getModified()))
-            {
-                sun->setDirection(camera.getTarget() - camera.getPosition());
-                scene.commitLights();
-            }
-        }
-
-        _engine->setActiveRenderer(
-            _parametersManager.getRenderingParameters().getRenderer());
-
-        if (_parametersManager.isAnyModified() || camera.getModified() ||
-            scene.getModified())
-        {
-            _engine->getRenderer().hasNewImage(true);
-            _engine->getFrameBuffer().clear();
-        }
-        else
-            // we assume no new image here, but accumulation inside the renderer
-            // might decide otherwise
-            _engine->getRenderer().hasNewImage(false);
-
-        _engine->render();
-
-        _writeFrameToFile();
-
-        _parametersManager.resetModified();
-        camera.resetModified();
-        scene.resetModified();
-        _engine->getProgress().resetModified();
-
-        _rendering = false;
-        _renderTimer.stop();
-
-        _fpsUpdateElapsed += _renderTimer.milliseconds();
-        if (_fpsUpdateElapsed > 750)
-        {
-            _engine->getStatistics().setFPS(_renderTimer.perSecondSmoothed());
-            _fpsUpdateElapsed = 0;
-        }
-
-        return true;
     }
 
     void _loadData(Progress& loadingProgress)
@@ -1218,8 +1210,8 @@ private:
 
     std::future<void> _dataLoadingFuture;
 
-    // protect rendering vs. data loading/unloading
-    std::atomic_bool _rendering{false};
+    // protect render() vs preRender() when doing all the commit()
+    std::mutex _renderMutex;
 
     Timer _renderTimer;
     int64_t _fpsUpdateElapsed{0};
@@ -1232,9 +1224,7 @@ private:
     lunchbox::ThreadPool _loadingThread{1};
 #endif
 
-#if (BRAYNS_USE_DEFLECT || BRAYNS_USE_NETWORKING)
-    ExtensionPluginFactoryPtr _extensionPluginFactory;
-#endif
+    ExtensionPluginFactory _extensionPluginFactory;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -1250,17 +1240,53 @@ Brayns::~Brayns()
 
 void Brayns::render(const RenderInput& renderInput, RenderOutput& renderOutput)
 {
-    _impl->render(renderInput, renderOutput);
+    if (_impl->preRender(renderInput))
+    {
+        _impl->render();
+        _impl->postRender(renderOutput);
+    }
 }
 
 bool Brayns::render()
 {
+    if (_impl->preRender())
+    {
+        _impl->render();
+        _impl->postRender();
+    }
+    return _impl->getEngine().getKeepRunning();
+}
+
+void Brayns::createPlugins()
+{
+    _impl->createPlugins();
+}
+
+bool Brayns::preRender()
+{
+    return _impl->preRender();
+}
+
+void Brayns::renderOnly()
+{
     return _impl->render();
 }
+
+void Brayns::postRender()
+{
+    _impl->postRender();
+}
+
+void Brayns::buildScene()
+{
+    _impl->buildScene();
+}
+
 Engine& Brayns::getEngine()
 {
     return _impl->getEngine();
 }
+
 ParametersManager& Brayns::getParametersManager()
 {
     return _impl->getParametersManager();

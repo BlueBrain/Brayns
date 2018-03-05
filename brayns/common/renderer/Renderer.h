@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -33,12 +33,12 @@ public:
     virtual ~Renderer() {}
     virtual void render(FrameBufferPtr frameBuffer) = 0;
 
+    /** @return the variance from the previous render(). */
+    virtual float getVariance() const { return 0.f; }
     virtual void commit() = 0;
     void setScene(ScenePtr scene) { _scene = scene; };
     virtual void setCamera(CameraPtr camera) = 0;
 
-    void hasNewImage(const bool hasNewImage_) { _hasNewImage = hasNewImage_; }
-    bool hasNewImage() const { return _hasNewImage; }
     struct PickResult
     {
         bool hit{false};
@@ -52,7 +52,6 @@ public:
 protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;
-    bool _hasNewImage{true};
 };
 }
 #endif // RENDERER_H

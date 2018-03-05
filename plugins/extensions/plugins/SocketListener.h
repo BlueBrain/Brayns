@@ -1,6 +1,5 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
- *
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ *                          Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,42 +19,37 @@
 
 #pragma once
 
-#include <atomic>
+#include <rockets/socketBasedInterface.h>
+#include <rockets/socketListener.h>
+
+#include <map>
+#include <uvw.hpp>
 
 namespace brayns
 {
-class BaseObject
+/**
+ * Implements a rockets::SocketListener to be integrated in a libuv event loop.
+ */
+class SocketListener : public rockets::SocketListener
 {
 public:
-    BaseObject() = default;
-    virtual ~BaseObject() = default;
+    SocketListener(rockets::SocketBasedInterface& interface);
 
-    /**
-     * @return true if any parameter has been modified since the last
-     *         resetModified().
-     */
-    bool isModified() const { return _modified; }
-    /**
-     * Reset the modified state, typically done after changes have been applied.
-     */
-    void resetModified() { _modified = false; }
-    void markModified() { _modified = true; }
-protected:
-    /**
-     * Helper function for derived classes to update a parameter and mark it
-     * modified if it has changed.
-     */
-    template <typename T>
-    void _updateValue(T& member, const T& newValue)
+    void setPostReceiveCallback(const std::function<void()>& callback)
     {
-        if (member != newValue)
-        {
-            member = newValue;
-            _modified = true;
-        }
+        _postReceive = callback;
     }
 
+    void onNewSocket(const rockets::SocketDescriptor fd, int mode) final;
+
+    void onUpdateSocket(const rockets::SocketDescriptor fd, int mode) final;
+
+    void onDeleteSocket(const rockets::SocketDescriptor fd) final;
+
 private:
-    std::atomic_bool _modified{true};
+    std::map<rockets::SocketDescriptor, std::shared_ptr<uvw::PollHandle>>
+        _handles;
+    rockets::SocketBasedInterface& _iface;
+    std::function<void()> _postReceive;
 };
 }

@@ -164,7 +164,6 @@ typedef std::shared_ptr<ExtensionPlugin> ExtensionPluginPtr;
 typedef std::vector<ExtensionPluginPtr> ExtensionPlugins;
 
 class ExtensionPluginFactory;
-typedef std::unique_ptr<ExtensionPluginFactory> ExtensionPluginFactoryPtr;
 
 class RocketsPlugin;
 

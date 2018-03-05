@@ -21,27 +21,9 @@
 #include "ExtensionPluginFactory.h"
 
 #include <plugins/extensions/plugins/ExtensionPlugin.h>
-#if (BRAYNS_USE_NETWORKING)
-#include <plugins/extensions/plugins/RocketsPlugin.h>
-#endif
-#ifdef BRAYNS_USE_DEFLECT
-#include <plugins/extensions/plugins/DeflectPlugin.h>
-#endif
 
 namespace brayns
 {
-ExtensionPluginFactory::ExtensionPluginFactory(
-    ParametersManager& parametersManager BRAYNS_UNUSED)
-{
-#if (BRAYNS_USE_NETWORKING)
-    add(std::make_shared<RocketsPlugin>(parametersManager));
-#endif
-
-#ifdef BRAYNS_USE_DEFLECT
-    add(std::make_shared<DeflectPlugin>(parametersManager));
-#endif
-}
-
 ExtensionPluginFactory::~ExtensionPluginFactory()
 {
     clear();
@@ -66,12 +48,16 @@ void ExtensionPluginFactory::clear()
     _plugins.clear();
 }
 
-void ExtensionPluginFactory::execute(EnginePtr engine,
-                                     KeyboardHandler& keyboardHandler,
-                                     AbstractManipulator& cameraManipulator)
+void ExtensionPluginFactory::preRender(KeyboardHandler& keyboardHandler,
+                                       AbstractManipulator& cameraManipulator)
 {
     for (ExtensionPluginPtr plugin : _plugins)
-        if (!plugin->run(engine, keyboardHandler, cameraManipulator))
-            break;
+        plugin->preRender(keyboardHandler, cameraManipulator);
+}
+
+void ExtensionPluginFactory::postRender()
+{
+    for (ExtensionPluginPtr plugin : _plugins)
+        plugin->postRender();
 }
 }

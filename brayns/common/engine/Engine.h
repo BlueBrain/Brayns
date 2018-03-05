@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -54,23 +54,21 @@ public:
     explicit Engine(ParametersManager& parametersManager);
     virtual ~Engine();
 
-    /**
-       @return the name of the engine
-    */
+    /** @return the name of the engine */
     virtual EngineType name() const = 0;
 
     /**
-       Commits changes to the engine. This include scene and camera
-       modifications
-    */
-    virtual void commit() = 0;
+     * Commits changes to the engine. This include scene, camera and renderer
+     * modifications
+     */
+    virtual void commit();
 
     /** Renders the current scene and populates the frame buffer accordingly */
-    virtual void render();
+    void render();
     /** Executes engine specific pre-render operations */
     virtual void preRender() {}
     /** Executes engine specific post-render operations */
-    virtual void postRender() {}
+    virtual void postRender();
     /** Gets the scene */
     Scene& getScene() { return *_scene; }
     /** Gets the frame buffer */
@@ -108,22 +106,20 @@ public:
     void initializeMaterials(
         MaterialsColorMap colorMap = MaterialsColorMap::none);
 
-    /**
-     * Unloads the current scene and loads and builds a new scene according to
-     * datasource parameters. The execution will be asynchronous if
-     * getSynchronousMode() is false.
-     */
-    std::function<void()> buildScene;
+    /** Mark the scene for building with Brayns::buildScene(). */
+    void markRebuildScene(const bool rebuild = true)
+    {
+        _rebuildScene = rebuild;
+    }
 
+    /** @return true if Brayns::buildScene() shall be called. */
+    bool rebuildScene() const { return _rebuildScene; }
     /**
-     * @brief resets frame number
+     * Callback when a new frame shall be triggered. Currently called by event
+     * plugins Deflect and Rockets.
      */
-    void resetFrameNumber();
+    std::function<void()> triggerRender;
 
-    /**
-     * @returns the current frame number
-     */
-    size_t getFrameNumber() const { return _frameNumber; }
     /**
      * Adapts the size of the frame buffer according to camera
      * requirements. Typically, in case of 3D stereo vision, the frame buffer
@@ -182,28 +178,55 @@ public:
      * @return true if the user wants to continue rendering, false otherwise.
      */
     bool getKeepRunning() const { return _keepRunning; }
-    /**
-     * @return true if the engine is ready to render and receive updates, false
-     *         if data loading is in progress.
-     */
-    bool isReady() const { return _isReady; }
-    /** @internal */
-    void setReady(const bool isReady_) { _isReady = isReady_; }
     Statistics& getStatistics() { return _statistics; }
+    using SnapshotReadyCallback = std::function<void(FrameBufferPtr)>;
+
     /**
-     * Render a snapshot with the given parameters. Result is available in
-     * framebuffer.
+     * Setup render of a snapshot with the given parameters. Calls to render()
+     * start updating the framebuffer that will be provided in the ready
+     * callback, once the snapshot is ready according to given parameters.
+     * Currently determined by the number of accumulation samples.
      *
-     * @note not threadsafe and not safe vs render()
+     * Once the snaphot is done or cancelled, the framebuffer is reset and
+     * render() continues normally.
+     *
+     * If the snapshot creation has been cancelled with cancelSnapshot(), the
+     * ready callback will not be called.
+     *
      * @param params the snapshot parameter to take
-     * @throws std::runtime_error if engine is not ready or snapshot creation
-     *         failed
+     * @param cb callback when the snapshot is ready and can be obtained from
+     *           the given framebuffer
+     * @throws std::runtime_error if a previous snapshot creation has not been
+     *                            finished yet
      */
-    void snapshot(const SnapshotParams& params);
+    void snapshot(const SnapshotParams& params, SnapshotReadyCallback cb);
+
+    /**
+     * Cancel a current pending snapshot. Will reset the framebuffer, so that
+     * render() continues normally.
+     */
+    void cancelSnapshot() { _snapshotCancelled = true; }
+    /**
+     * @return true if render() calls shall be continued, based on current
+     *         accumulation and snapshot settings.
+     * @sa RenderingParameters::setMaxAccumFrames
+     */
+    bool continueRendering() const;
+
+    /** Factory method to create an engine-specific framebuffer. */
+    virtual FrameBufferPtr createFrameBuffer(
+        const Vector2ui& frameSize, FrameBufferFormat frameBufferFormat,
+        bool accumulation) = 0;
+
+    /** Factory method to create an engine-specific camera. */
+    virtual CameraPtr createCamera(CameraType type) = 0;
 
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
+
+    void _processSnapshot();
+    void _writeFrameToFile();
 
     ParametersManager& _parametersManager;
     ScenePtr _scene;
@@ -214,10 +237,16 @@ protected:
     FrameBufferPtr _frameBuffer;
     Statistics _statistics;
 
-    size_t _frameNumber;
     Progress _progress;
     bool _keepRunning{true};
-    bool _isReady{false};
+    bool _rebuildScene{false};
+
+    int _snapshotSpp{0};
+    int _restoreSpp{0};
+    SnapshotReadyCallback _cb;
+    FrameBufferPtr _snapshotFrameBuffer;
+    CameraPtr _snapshotCamera;
+    bool _snapshotCancelled{false};
 };
 }
 

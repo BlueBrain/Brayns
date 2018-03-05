@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -46,6 +46,8 @@ public:
     BRAYNS_API Camera(CameraType cameraType);
 
     BRAYNS_API virtual ~Camera();
+
+    BRAYNS_API Camera& operator=(const Camera& rhs);
 
     /**
        Sets position, target and up vector
@@ -215,7 +217,7 @@ public:
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
 private:
-    CameraType _type{CameraType::default_};
+    const CameraType _type{CameraType::default_};
     Vector3f _position;
     Vector3f _target;
     Vector3f _up;

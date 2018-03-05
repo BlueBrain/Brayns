@@ -35,6 +35,33 @@ Camera::~Camera()
 {
 }
 
+Camera& Camera::operator=(const Camera& rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    setPosition(rhs.getPosition());
+    setTarget(rhs.getTarget());
+    setUp(rhs.getUp());
+
+    _initialPosition = rhs._initialPosition;
+    _initialTarget = rhs._initialTarget;
+    _initialUp = rhs._initialUp;
+
+    setAspectRatio(getAspectRatio());
+    setAperture(getAperture());
+    setFocalLength(getFocalLength());
+    setFieldOfView(getFieldOfView());
+    setStereoMode(getStereoMode());
+    setEyeSeparation(getEyeSeparation());
+
+    setClipPlanes(getClipPlanes());
+
+    _matrix = rhs._matrix;
+
+    return *this;
+}
+
 void Camera::set(const Vector3f& position, const Vector3f& target,
                  const Vector3f& upVector)
 {
