@@ -37,9 +37,9 @@ public:
                    ParametersManager& parametersMamager);
     ~OSPRayRenderer();
 
-    float render(FrameBufferPtr frameBuffer) final;
+    void render(FrameBufferPtr frameBuffer) final;
     void commit() final;
-
+    float getVariance() const final { return _variance; }
     void setCamera(CameraPtr camera) final;
 
     PickResult pick(const Vector2f& pickPos) final;
@@ -50,6 +50,7 @@ private:
     std::string _name;
     OSPRayCamera* _camera{nullptr};
     OSPRenderer _renderer;
+    float _variance{std::numeric_limits<float>::max()};
 };
 }
 

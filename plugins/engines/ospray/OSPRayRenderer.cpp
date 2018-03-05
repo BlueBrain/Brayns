@@ -42,20 +42,18 @@ OSPRayRenderer::~OSPRayRenderer()
     ospRelease(_renderer);
 }
 
-float OSPRayRenderer::render(FrameBufferPtr frameBuffer)
+void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 {
     auto osprayFrameBuffer =
         std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
     osprayFrameBuffer->lock();
 
-    const auto variance =
-        ospRenderFrame(osprayFrameBuffer->impl(), _renderer,
-                       OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
+    _variance = ospRenderFrame(osprayFrameBuffer->impl(), _renderer,
+                               OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
 
     osprayFrameBuffer->incrementAccumFrames();
     osprayFrameBuffer->markModified();
     osprayFrameBuffer->unlock();
-    return variance;
 }
 
 void OSPRayRenderer::commit()

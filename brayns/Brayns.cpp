@@ -250,9 +250,7 @@ struct Brayns::Impl
                 .get();
         else
 #endif
-            std::async(std::launch::deferred,
-                       std::bind(&Brayns::Impl::_loadScene, this))
-                .get();
+            _loadScene();
 
         promise.set_value();
     }

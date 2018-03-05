@@ -29,6 +29,165 @@
 
 #include <thread>
 
+class BraynsService
+{
+public:
+    BraynsService(int argc, const char** argv)
+        : _brayns(argc, argv)
+        , _renderingDone{_mainLoop->resource<uvw::AsyncHandle>()}
+        , _eventRendering{_mainLoop->resource<uvw::IdleHandle>()}
+        , _accumRendering{_mainLoop->resource<uvw::IdleHandle>()}
+        , _progressUpdate{_mainLoop->resource<uvw::TimerHandle>()}
+        , _checkIdleRendering{_mainLoop->resource<uvw::CheckHandle>()}
+        , _triggerRendering{_renderLoop->resource<uvw::AsyncHandle>()}
+        , _stopRenderThread{_renderLoop->resource<uvw::AsyncHandle>()}
+    {
+        _checkIdleRendering->start();
+
+        _setupMainThread();
+        _setupRenderThread();
+
+        _brayns.createPlugins();
+    }
+
+    void run()
+    {
+        // Start render & main loop
+        std::thread renderThread(
+            [& _renderLoop = _renderLoop] { _renderLoop->run(); });
+        _mainLoop->run();
+
+        // Finished
+        renderThread.join();
+    }
+
+private:
+    void _setupMainThread()
+    {
+        // triggered after rendering, send events to rockets
+        _renderingDone->on<uvw::AsyncEvent>([& brayns = _brayns](const auto&,
+                                                                 auto&) {
+            brayns.postRender();
+        });
+
+        // events from rockets, trigger rendering
+        _brayns.getEngine().triggerRender = [& eventRendering = _eventRendering]
+        {
+            eventRendering->start();
+        };
+
+        // render or data load trigger from events
+        _eventRendering->on<uvw::IdleEvent>([&](const auto&, auto&) {
+            _eventRendering->stop();
+            _accumRendering->stop();
+            _timeSinceLastEvent.start();
+
+            // stop event loop(s) and exit application
+            if (!_brayns.getEngine().getKeepRunning())
+            {
+                _stopRenderThread->send();
+                _mainLoop->stop();
+                return;
+            }
+
+            // data loading
+            if (_brayns.getEngine().rebuildScene())
+            {
+                if (_isLoading)
+                    return;
+
+                _isLoading = true;
+
+                _checkIdleRendering->stop();
+
+                // broadcast progress updates every 100ms
+                _progressUpdate->start(std::chrono::milliseconds(0),
+                                       std::chrono::milliseconds(100));
+
+                // async load execution
+                auto work = _mainLoop->resource<uvw::WorkReq>(
+                    [&] { _brayns.buildScene(); });
+
+                // async load finished, restore everything to continue rendering
+                work->template on<uvw::WorkEvent>([&](const auto&, auto&) {
+                    _brayns.getEngine().markRebuildScene(false);
+                    _progressUpdate->stop();
+                    _progressUpdate->close();
+                    _isLoading = false;
+
+                    _checkIdleRendering->start();
+                    _eventRendering->start();
+                });
+
+                work->queue();
+                return;
+            }
+
+            // rendering
+            if (_brayns.preRender())
+                _triggerRendering->send();
+        });
+
+        // send progress updates while we are loading
+        _progressUpdate->on<uvw::TimerEvent>([& brayns = _brayns](const auto&,
+                                                                  auto&) {
+            brayns.postRender();
+        });
+
+        // send final progress update, once loading is finished
+        _progressUpdate->on<uvw::CloseEvent>([& brayns = _brayns](const auto&,
+                                                                  auto&) {
+            brayns.postRender();
+        });
+
+        // start accum rendering when we have no more other events
+        _checkIdleRendering->on<uvw::CheckEvent>([& accumRendering =
+                                                      _accumRendering](
+            const auto&, auto&) { accumRendering->start(); });
+
+        // accumulation rendering on idle; re-triggered by _checkIdleRendering
+        _accumRendering->on<uvw::IdleEvent>([&](const auto&, auto&) {
+            if (_timeSinceLastEvent.elapsed() < _idleRenderingDelay)
+                return;
+
+            if (_brayns.preRender() && _brayns.getEngine().continueRendering())
+                _triggerRendering->send();
+
+            _accumRendering->stop();
+        });
+    }
+
+    void _setupRenderThread()
+    {
+        // rendering, triggered from main thread
+        _triggerRendering->on<uvw::AsyncEvent>([&](const auto&, auto&) {
+            _brayns.renderOnly();
+            _renderingDone->send();
+        });
+
+        // stop render loop, triggered from main thread
+        _stopRenderThread->once<uvw::AsyncEvent>([& renderLoop = _renderLoop](
+            const auto&, auto&) { renderLoop->stop(); });
+    }
+
+    brayns::Brayns _brayns;
+
+    std::shared_ptr<uvw::Loop> _mainLoop{uvw::Loop::getDefault()};
+    std::shared_ptr<uvw::AsyncHandle> _renderingDone;
+    std::shared_ptr<uvw::IdleHandle> _eventRendering;
+    std::shared_ptr<uvw::IdleHandle> _accumRendering;
+    std::shared_ptr<uvw::TimerHandle> _progressUpdate;
+    std::shared_ptr<uvw::CheckHandle> _checkIdleRendering;
+
+    std::shared_ptr<uvw::Loop> _renderLoop{uvw::Loop::create()};
+    std::shared_ptr<uvw::AsyncHandle> _triggerRendering;
+    std::shared_ptr<uvw::AsyncHandle> _stopRenderThread;
+
+    const float _idleRenderingDelay{0.1f};
+    bool _isLoading{false};
+    brayns::Timer _timeSinceLastEvent;
+};
+
 int main(int argc, const char** argv)
 {
     try
@@ -38,131 +197,10 @@ int main(int argc, const char** argv)
         brayns::Timer timer;
         timer.start();
 
-        brayns::Brayns brayns(argc, argv);
+        BraynsService service(argc, argv);
 
-        auto mainLoop = uvw::Loop::getDefault();
-        auto renderingDone = mainLoop->resource<uvw::AsyncHandle>();
-        auto eventRendering = mainLoop->resource<uvw::IdleHandle>();
-        auto accumRendering = mainLoop->resource<uvw::IdleHandle>();
-        auto progressUpdate = mainLoop->resource<uvw::TimerHandle>();
-        auto checkIdleRendering = mainLoop->resource<uvw::CheckHandle>();
-        checkIdleRendering->start();
+        service.run();
 
-        auto renderLoop = uvw::Loop::create();
-        auto triggerRendering = renderLoop->resource<uvw::AsyncHandle>();
-        auto stopRenderThread = renderLoop->resource<uvw::AsyncHandle>();
-
-        // main thread
-        const float idleRenderingDelay = 0.1f;
-        bool isLoading = false;
-        brayns::Timer timeSinceLastEvent;
-        {
-            // triggered after rendering, send events to rockets
-            renderingDone->on<uvw::AsyncEvent>(
-                [&](const auto&, auto&) { brayns.postRender(); });
-
-            // events from rockets
-            brayns.getEngine().triggerRender = [&] { eventRendering->start(); };
-
-            // render or data load trigger from events
-            eventRendering->on<uvw::IdleEvent>([&](const auto&, auto&) {
-                eventRendering->stop();
-                accumRendering->stop();
-                timeSinceLastEvent.start();
-
-                // stop event loop(s) and exit application
-                if (!brayns.getEngine().getKeepRunning())
-                {
-                    stopRenderThread->send();
-                    mainLoop->stop();
-                    return;
-                }
-
-                // data loading
-                if (brayns.getEngine().rebuildScene())
-                {
-                    if (isLoading)
-                        return;
-
-                    isLoading = true;
-
-                    checkIdleRendering->stop();
-
-                    // broadcast progress updates every 100ms
-                    progressUpdate->start(std::chrono::milliseconds(0),
-                                          std::chrono::milliseconds(100));
-
-                    // async load execution
-                    auto work = mainLoop->resource<uvw::WorkReq>(
-                        [&] { brayns.buildScene(); });
-
-                    // async load finished, restore everything to continue
-                    // rendering
-                    work->template on<uvw::WorkEvent>([&](const auto&, auto&) {
-                        brayns.getEngine().markRebuildScene(false);
-                        progressUpdate->stop();
-                        progressUpdate->close();
-                        isLoading = false;
-
-                        checkIdleRendering->start();
-                        eventRendering->start();
-                    });
-
-                    work->queue();
-                    return;
-                }
-
-                // rendering
-                if (brayns.preRender())
-                    triggerRendering->send();
-            });
-
-            // send progress updates while we are loading
-            progressUpdate->on<uvw::TimerEvent>(
-                [&](const auto&, auto&) { brayns.postRender(); });
-
-            // send final progress update, once loading is finished
-            progressUpdate->on<uvw::CloseEvent>(
-                [&](const auto&, auto&) { brayns.postRender(); });
-
-            // start accum rendering when we have no more other events
-            checkIdleRendering->on<uvw::CheckEvent>(
-                [&](const auto&, auto&) { accumRendering->start(); });
-
-            // render trigger from going into idle
-            accumRendering->on<uvw::IdleEvent>([&](const auto&, auto&) {
-                if (timeSinceLastEvent.elapsed() < idleRenderingDelay)
-                    return;
-
-                if (brayns.preRender() &&
-                    brayns.getEngine().continueRendering())
-                    triggerRendering->send();
-
-                accumRendering->stop();
-            });
-        }
-
-        // render thread
-        {
-            // rendering
-            triggerRendering->on<uvw::AsyncEvent>([&](const auto&, auto&) {
-                brayns.renderOnly();
-                renderingDone->send();
-            });
-
-            // stop render loop
-            stopRenderThread->once<uvw::AsyncEvent>(
-                [&](const auto&, auto&) { renderLoop->stop(); });
-        }
-
-        brayns.createPlugins();
-
-        // Start render & main loop
-        std::thread renderThread([&] { renderLoop->run(); });
-        mainLoop->run();
-
-        // Finished
-        renderThread.join();
         timer.stop();
         BRAYNS_INFO << "Service was running for " << timer.seconds()
                     << " seconds" << std::endl;

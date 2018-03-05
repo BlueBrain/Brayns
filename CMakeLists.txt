@@ -40,6 +40,9 @@ common_find_package(OpenMP)
 common_find_package(libuv)
 
 if(libuv_FOUND)
+  # The libuv version of Ubuntu 16.04 is too old to have this definition that is
+  # required by uvw (in fact, it uses an old enough version as well to make
+  # things work, but couldn't go further).
   if(libuv_VERSION VERSION_LESS 1.9.0)
     add_definitions(-DUV_DISCONNECT=4)
   endif()
@@ -183,7 +186,7 @@ if(BRAYNS_OSPRAY_ENABLED)
       add_dependencies(braynsOSPRayEnginePlugin ospray_module_optix)
     endif()
   endif()
-  add_subdirectory(ospray_modules/opendeck) 
+  add_subdirectory(ospray_modules/opendeck)
 endif()
 
 set(DOXYGEN_EXTRA_INPUT "${PROJECT_SOURCE_DIR}/Changelog.md")

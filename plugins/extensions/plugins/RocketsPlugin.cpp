@@ -151,7 +151,7 @@ void RocketsPlugin::_setupRocketsServer()
         try
         {
             _socketListener = std::make_unique<SocketListener>(*_rocketsServer);
-            _socketListener->postReceive = _engine->triggerRender;
+            _socketListener->setPostReceiveCallback(_engine->triggerRender);
             _rocketsServer->setSocketListener(_socketListener.get());
         }
         catch (const std::runtime_error& e)

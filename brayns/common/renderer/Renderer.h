@@ -31,8 +31,10 @@ class Renderer
 public:
     BRAYNS_API Renderer(ParametersManager& parametersManager);
     virtual ~Renderer() {}
-    virtual float render(FrameBufferPtr frameBuffer) = 0;
+    virtual void render(FrameBufferPtr frameBuffer) = 0;
 
+    /** @return the variance from the previous render(). */
+    virtual float getVariance() const { return 0.f; }
     virtual void commit() = 0;
     void setScene(ScenePtr scene) { _scene = scene; };
     virtual void setCamera(CameraPtr camera) = 0;

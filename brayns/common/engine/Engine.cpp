@@ -110,7 +110,7 @@ void Engine::commit()
 void Engine::render()
 {
     auto fb = _snapshotFrameBuffer ? _snapshotFrameBuffer : _frameBuffer;
-    _lastVariance = _renderers[_activeRenderer]->render(fb);
+    _renderers[_activeRenderer]->render(fb);
 }
 
 void Engine::postRender()
@@ -171,7 +171,8 @@ bool Engine::continueRendering() const
         return _snapshotFrameBuffer->numAccumFrames() < size_t(_snapshotSpp);
     }
 
-    return _lastVariance > 1 && _frameBuffer->getAccumulation() &&
+    return _renderers.at(_activeRenderer)->getVariance() > 1 &&
+           _frameBuffer->getAccumulation() &&
            (_frameBuffer->numAccumFrames() <
             _parametersManager.getRenderingParameters().getMaxAccumFrames());
 }

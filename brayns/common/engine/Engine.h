@@ -239,7 +239,6 @@ protected:
 
     Progress _progress;
     bool _keepRunning{true};
-    float _lastVariance{std::numeric_limits<float>::infinity()};
     bool _rebuildScene{false};
 
     int _snapshotSpp{0};

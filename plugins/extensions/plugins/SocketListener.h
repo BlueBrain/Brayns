@@ -35,17 +35,21 @@ class SocketListener : public rockets::SocketListener
 public:
     SocketListener(rockets::SocketBasedInterface& interface);
 
+    void setPostReceiveCallback(const std::function<void()>& callback)
+    {
+        _postReceive = callback;
+    }
+
     void onNewSocket(const rockets::SocketDescriptor fd, int mode) final;
 
     void onUpdateSocket(const rockets::SocketDescriptor fd, int mode) final;
 
     void onDeleteSocket(const rockets::SocketDescriptor fd) final;
 
-    std::function<void()> postReceive;
-
 private:
     std::map<rockets::SocketDescriptor, std::shared_ptr<uvw::PollHandle>>
         _handles;
     rockets::SocketBasedInterface& _iface;
+    std::function<void()> _postReceive;
 };
 }
