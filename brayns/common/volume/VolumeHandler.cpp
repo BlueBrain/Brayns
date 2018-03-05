@@ -44,6 +44,12 @@ VolumeHandler::VolumeHandler(const VolumeParameters& volumeParameters,
 
 VolumeHandler::~VolumeHandler()
 {
+    clear();
+}
+
+void VolumeHandler::clear()
+{
+    _currentIndex = std::numeric_limits<uint32_t>::max();
     _volumeDescriptors.clear();
 }
 
@@ -61,15 +67,15 @@ void VolumeHandler::attachVolumeToFile(const uint32_t index,
                 << _volumeDescriptors.rbegin()->first << "]" << std::endl;
 }
 
-void VolumeHandler::setCurrentIndex(uint32_t index)
+void VolumeHandler::setCurrentIndex(const uint32_t index)
 {
-    index = _getBoundedIndex(index);
-    if (index != _currentIndex &&
-        _volumeDescriptors.find(index) != _volumeDescriptors.end())
+    const auto i = _getBoundedIndex(index);
+    if (i != _currentIndex &&
+        _volumeDescriptors.find(i) != _volumeDescriptors.end())
     {
         if (_volumeDescriptors.find(_currentIndex) != _volumeDescriptors.end())
             _volumeDescriptors[_currentIndex]->unmap();
-        _currentIndex = index;
+        _currentIndex = i;
         _volumeDescriptors[_currentIndex]->map();
     }
 }

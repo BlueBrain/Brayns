@@ -612,23 +612,41 @@ void OSPRayScene::commitVolumeData()
     if (!volumeHandler)
         return;
 
-    const auto& ap = _parametersManager.getAnimationParameters();
     const auto& vp = _parametersManager.getVolumeParameters();
+    if (vp.isModified())
+    {
+        // Cleanup existing volume data in handler and renderers
+        volumeHandler->clear();
+
+        // An empty array has to be assigned to the renderers
+        _ospVolumeDataSize = 0;
+        _ospVolumeData =
+            ospNewData(_ospVolumeDataSize, OSP_UCHAR, 0, _getOSPDataFlags());
+        ospCommit(_ospVolumeData);
+        for (const auto& renderer : _renderers)
+        {
+            OSPRayRenderer* osprayRenderer =
+                dynamic_cast<OSPRayRenderer*>(renderer.get());
+            ospSetData(osprayRenderer->impl(), "volumeData", _ospVolumeData);
+        }
+    }
+
+    const auto& ap = _parametersManager.getAnimationParameters();
     const auto animationFrame = ap.getFrame();
     volumeHandler->setCurrentIndex(animationFrame);
     void* data = volumeHandler->getData();
-    if (data && (ap.isModified() || vp.isModified()))
+    if (data && _ospVolumeDataSize == 0)
     {
+        // Set volume data to renderers
+        _ospVolumeDataSize = volumeHandler->getSize();
+        _ospVolumeData =
+            ospNewData(_ospVolumeDataSize, OSP_UCHAR, data, _getOSPDataFlags());
+        ospCommit(_ospVolumeData);
         for (const auto& renderer : _renderers)
         {
             OSPRayRenderer* osprayRenderer =
                 dynamic_cast<OSPRayRenderer*>(renderer.get());
 
-            const size_t size = volumeHandler->getSize();
-
-            _ospVolumeData =
-                ospNewData(size, OSP_UCHAR, data, _getOSPDataFlags());
-            ospCommit(_ospVolumeData);
             ospSetData(osprayRenderer->impl(), "volumeData", _ospVolumeData);
 
             const Vector3ui& dimensions = volumeHandler->getDimensions();
@@ -648,7 +666,7 @@ void OSPRayScene::commitVolumeData()
 
             const float epsilon = volumeHandler->getEpsilon(
                 elementSpacing,
-                _parametersManager.getVolumeParameters().getSamplesPerRay());
+                _parametersManager.getRenderingParameters().getSamplesPerRay());
             ospSet1f(osprayRenderer->impl(), "volumeEpsilon", epsilon);
         }
         markModified();

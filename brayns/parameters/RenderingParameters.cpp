@@ -48,6 +48,7 @@ const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
+const std::string PARAM_SPR = "samples-per-ray";
 
 const std::array<std::string, 2> ENGINES = {{"ospray", "optix"}};
 const std::array<std::string, 7> RENDERERS = {
@@ -63,6 +64,8 @@ const std::array<std::string, 5> CAMERA_TYPE_NAMES = {
 
 const std::array<std::string, 3> SHADING_TYPES = {
     {"none", "diffuse", "electron"}};
+
+const size_t DEFAULT_SAMPLES_PER_RAY = 128;
 }
 
 namespace brayns
@@ -72,20 +75,21 @@ RenderingParameters::RenderingParameters()
     , _engine(EngineType::ospray)
     , _renderer(RendererType::default_)
     , _cameraType(CameraType::default_)
-    , _ambientOcclusionStrength(0.f)
-    , _ambientOcclusionDistance(1.20f)
-    , _shading(ShadingType::diffuse)
-    , _lightEmittingMaterials(false)
-    , _spp(1)
-    , _shadows(0.f)
-    , _softShadows(0.f)
+    , _ambientOcclusionStrength{0.f}
+    , _ambientOcclusionDistance{1.2f}
+    , _shading{ShadingType::diffuse}
+    , _lightEmittingMaterials{false}
+    , _spp{1}
+    , _shadows{0.f}
+    , _softShadows{0.f}
     , _backgroundColor(Vector3f(0.f, 0.f, 0.f))
-    , _detectionDistance(1.f)
-    , _detectionOnDifferentMaterial(true)
-    , _detectionNearColor(1.f, 0.f, 0.f)
-    , _detectionFarColor(0.f, 1.f, 0.f)
-    , _epsilon(0.f)
-    , _headLight(false)
+    , _detectionDistance{1.f}
+    , _detectionOnDifferentMaterial{true}
+    , _detectionNearColor{1.f, 0.f, 0.f}
+    , _detectionFarColor{0.f, 1.f, 0.f}
+    , _epsilon{0.f}
+    , _headLight{false}
+    , _spr{DEFAULT_SAMPLES_PER_RAY}
 {
     _parameters.add_options()(PARAM_ENGINE.c_str(), po::value<std::string>(),
                               "Engine name [ospray|optix]")(
@@ -127,7 +131,9 @@ RenderingParameters::RenderingParameters()
         PARAM_HEAD_LIGHT.c_str(), po::value<bool>(),
         "Enable/Disable light source attached to camera origin [bool]")(
         PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),
-        "Threshold for adaptive accumulation [float]");
+        "Threshold for adaptive accumulation [float]")(PARAM_SPR.c_str(),
+                                                       po::value<size_t>(),
+                                                       "Samples per ray [int]");
 
     initializeDefaultRenderers();
     initializeDefaultCameras();
@@ -247,6 +253,8 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
         _headLight = vm[PARAM_HEAD_LIGHT].as<bool>();
     if (vm.count(PARAM_VARIANCE_THRESHOLD))
         _varianceThreshold = vm[PARAM_VARIANCE_THRESHOLD].as<float>();
+    if (vm.count(PARAM_SPR))
+        _spr = vm[PARAM_SPR].as<size_t>();
     return true;
 }
 
@@ -291,6 +299,7 @@ void RenderingParameters::print()
                 << getCameraTypeAsString(_cameraType) << std::endl;
     BRAYNS_INFO << "Accumulation                      : "
                 << (_accumulation ? "on" : "off") << std::endl;
+    BRAYNS_INFO << "Samples per ray                   : " << _spr << std::endl;
 }
 
 const std::string& RenderingParameters::getEngineAsString(

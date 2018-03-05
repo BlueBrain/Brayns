@@ -92,6 +92,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(renderParams.getDetectionFarColor(),
                       brayns::Vector3f(0, 1, 0));
     BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
+    BOOST_CHECK_EQUAL(renderParams.getSamplesPerRay(), 128);
 
     const auto& geomParams = pm.getGeometryParameters();
     BOOST_CHECK_EQUAL(geomParams.getMorphologyFolder(), "");
@@ -131,7 +132,6 @@ BOOST_AUTO_TEST_CASE(defaults)
                       brayns::Vector3f(1.f, 1.f, 1.f));
     BOOST_CHECK_EQUAL(volumeParams.getOffset(),
                       brayns::Vector3f(0.f, 0.f, 0.f));
-    BOOST_CHECK_EQUAL(volumeParams.getSamplesPerRay(), 128);
 
     const auto& sceneParams = pm.getSceneParameters();
     BOOST_CHECK_EQUAL(sceneParams.getEnvironmentMap(), "");

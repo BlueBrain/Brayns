@@ -49,9 +49,6 @@ public:
     const Vector3f& getElementSpacing() const { return _elementSpacing; }
     /** Volume offset */
     const Vector3f& getOffset() const { return _offset; }
-    /** Volume epsilon */
-    void setSamplesPerRay(const size_t spr) { _updateValue(_spr, spr); }
-    size_t getSamplesPerRay() const { return _spr; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -60,7 +57,6 @@ protected:
     Vector3ui _dimensions;
     Vector3f _elementSpacing;
     Vector3f _offset;
-    size_t _spr;
 
     SERIALIZATION_FRIEND(VolumeParameters)
 };

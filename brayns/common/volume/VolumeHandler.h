@@ -52,6 +52,8 @@ public:
 
     ~VolumeHandler();
 
+    void clear();
+
     /**
      * @brief Returns the dimension of the 8bit volume
      * @return Dimensions of the volume
@@ -146,6 +148,8 @@ public:
                          const Vector3f& elementSpacing,
                          const Vector3f& offset);
         ~VolumeDescriptor();
+
+        void clear();
 
         /**
          * @brief Maps the volume to the corresponding _filename
