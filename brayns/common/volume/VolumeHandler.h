@@ -149,8 +149,6 @@ public:
                          const Vector3f& offset);
         ~VolumeDescriptor();
 
-        void clear();
-
         /**
          * @brief Maps the volume to the corresponding _filename
          */
