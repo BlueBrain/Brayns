@@ -24,6 +24,7 @@
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/parameters/ParametersManager.h>
+#include <plugins/extensions/plugins/ExtensionPlugin.h>
 
 #include <rockets/jsonrpc/client.h>
 #include <rockets/ws/client.h>
@@ -69,8 +70,8 @@ public:
         auto connectFuture = wsClient.connect("ws://" + uri, "rockets");
         while (!is_ready(connectFuture))
         {
-            brayns->render();
             wsClient.process(5);
+            brayns->render();
         }
         connectFuture.get();
         _instance = this;
@@ -82,25 +83,52 @@ public:
         auto responseFuture = client.request<Params, RetVal>(method, params);
         while (!is_ready(responseFuture))
         {
-            brayns->render();
             wsClient.process(0);
+            brayns->render();
         }
 
         return responseFuture.get();
     }
 
-    bool makeRequest(const std::string& method)
+    template <typename RetVal>
+    RetVal makeRequest(const std::string& method)
     {
-        auto responseFuture = client.request(method, {});
+        auto responseFuture = client.request<RetVal>(method);
         while (!is_ready(responseFuture))
         {
-            brayns->render();
             wsClient.process(0);
+            brayns->render();
         }
 
-        return responseFuture.get().result == "\"OK\"";
+        return responseFuture.get();
     }
 
+    template <typename Params>
+    void makeNotification(const std::string& method, const Params& params)
+    {
+        client.notify<Params>(method, params);
+
+        wsClient.process(5);
+        for (size_t i = 0; i < 10; ++i)
+            brayns->render();
+    }
+
+    void makeNotification(const std::string& method)
+    {
+        client.notify(method, std::string());
+
+        wsClient.process(5);
+        for (size_t i = 0; i < 10; ++i)
+            brayns->render();
+    }
+
+    template <typename T>
+    std::shared_ptr<T> addPlugin()
+    {
+        return brayns->addPlugin<T>();
+    }
+
+    brayns::Brayns& getBrayns() { return *brayns; }
 private:
     static ClientServer* _instance;
     std::unique_ptr<brayns::Brayns> brayns;
@@ -116,16 +144,42 @@ RetVal makeRequest(const std::string& method, const Params& params)
     return ClientServer::instance().makeRequest<Params, RetVal>(method, params);
 }
 
-bool makeRequest(const std::string& method)
+template <typename RetVal>
+RetVal makeRequest(const std::string& method)
 {
-    return ClientServer::instance().makeRequest(method);
+    return ClientServer::instance().makeRequest<RetVal>(method);
+}
+
+template <typename Params>
+void makeNotification(const std::string& method, const Params& params)
+{
+    ClientServer::instance().makeNotification<Params>(method, params);
+}
+
+void makeNotification(const std::string& method)
+{
+    ClientServer::instance().makeNotification(method);
+}
+
+template <typename T>
+std::shared_ptr<T> addPlugin()
+{
+    return ClientServer::instance().addPlugin<T>();
+}
+
+brayns::Brayns& Brayns()
+{
+    return ClientServer::instance().getBrayns();
 }
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
 BOOST_AUTO_TEST_CASE(reset_camera)
 {
-    BOOST_CHECK(makeRequest("reset-camera"));
+    const auto target = Brayns().getEngine().getCamera().getTarget();
+    Brayns().getEngine().getCamera().setTarget({1, 2, 3});
+    makeNotification("reset-camera");
+    BOOST_CHECK_EQUAL(Brayns().getEngine().getCamera().getTarget(), target);
 }
 
 BOOST_AUTO_TEST_CASE(inspect)
@@ -186,4 +240,46 @@ BOOST_AUTO_TEST_CASE(snapshot_illegal_format)
         (makeRequest<brayns::SnapshotParams,
                      brayns::ImageGenerator::ImageBase64>("snapshot", params)),
         rockets::jsonrpc::response_error);
+}
+
+using Vec2 = std::array<unsigned, 2>;
+const Vec2 vecVal{{1, 1}};
+
+class MyPlugin : public brayns::ExtensionPlugin
+{
+public:
+    MyPlugin(brayns::EnginePtr engine, brayns::ParametersManager&,
+             brayns::ActionInterface* actions)
+        : brayns::ExtensionPlugin(engine)
+    {
+        BOOST_REQUIRE(actions);
+
+        actions->registerNotification("hello", [&] { ++numCalls; });
+        actions->registerNotification<Vec2>("foo", [&](const Vec2& vec) {
+            ++numCalls;
+            BOOST_CHECK(vec == vecVal);
+        });
+
+        actions->registerRequest<std::string>("who", [&] {
+            ++numCalls;
+            return "me";
+        });
+        actions->registerRequest<Vec2, Vec2>("echo", [&](const Vec2& vec) {
+            ++numCalls;
+            return vec;
+        });
+    }
+
+    size_t numCalls{0};
+};
+
+BOOST_AUTO_TEST_CASE(plugin_actions)
+{
+    auto myPlugin = addPlugin<MyPlugin>();
+
+    makeNotification("hello");
+    makeNotification<Vec2>("foo", vecVal);
+    BOOST_CHECK_EQUAL(makeRequest<std::string>("who"), "me");
+    BOOST_CHECK((makeRequest<Vec2, Vec2>("echo", vecVal) == vecVal));
+    BOOST_CHECK_EQUAL(myPlugin->numCalls, 4);
 }

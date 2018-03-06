@@ -124,7 +124,7 @@ STATICJSON_DECLARE_ENUM(brayns::EngineType,
 
 namespace staticjson
 {
-void init(brayns::SnapshotParams* s, ObjectHandler* h)
+inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
 {
     h->add_property("format", &s->format);
     h->add_property("quality", &s->quality, Flags::Optional);
@@ -133,28 +133,28 @@ void init(brayns::SnapshotParams* s, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::Statistics* s, ObjectHandler* h)
+inline void init(brayns::Statistics* s, ObjectHandler* h)
 {
     h->add_property("fps", &s->_fps);
     h->add_property("scene_size_in_bytes", &s->_sceneSizeInBytes);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::Renderer::PickResult* p, ObjectHandler* h)
+inline void init(brayns::Renderer::PickResult* p, ObjectHandler* h)
 {
     h->add_property("hit", &p->hit);
     h->add_property("position", Vector3fArray(p->pos));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::ClipPlane* c, ObjectHandler* h)
+inline void init(brayns::ClipPlane* c, ObjectHandler* h)
 {
     h->add_property("normal", Vector3fArray(*c));
     h->add_property("d", &c->array[3]);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::Camera* c, ObjectHandler* h)
+inline void init(brayns::Camera* c, ObjectHandler* h)
 {
     h->add_property("origin", Vector3fArray(c->_position), Flags::Optional);
     h->add_property("look_at", Vector3fArray(c->_target), Flags::Optional);
@@ -168,14 +168,14 @@ void init(brayns::Camera* c, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::Engine::Progress* p, ObjectHandler* h)
+inline void init(brayns::Engine::Progress* p, ObjectHandler* h)
 {
     h->add_property("amount", &p->amount);
     h->add_property("operation", &p->operation);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::FrameBuffer* f, ObjectHandler* h)
+inline void init(brayns::FrameBuffer* f, ObjectHandler* h)
 {
     static brayns::Vector2ui frameSize;
     static std::string diffuse, depth;
@@ -200,13 +200,13 @@ void init(brayns::FrameBuffer* f, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::ImageGenerator::ImageBase64* i, ObjectHandler* h)
+inline void init(brayns::ImageGenerator::ImageBase64* i, ObjectHandler* h)
 {
     h->add_property("data", &i->data);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::TransferFunction* t, ObjectHandler* h)
+inline void init(brayns::TransferFunction* t, ObjectHandler* h)
 {
     h->add_property("range", Vector2fArray(t->getValuesRange()),
                     Flags::Optional);
@@ -222,14 +222,14 @@ void init(brayns::TransferFunction* t, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::Boxf* b, ObjectHandler* h)
+inline void init(brayns::Boxf* b, ObjectHandler* h)
 {
     h->add_property("min", Vector3fArray(b->_min));
     h->add_property("max", Vector3fArray(b->_max));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::Material* m, ObjectHandler* h)
+inline void init(brayns::Material* m, ObjectHandler* h)
 {
     h->add_property("diffuse_color", Vector3fArray(m->_color), Flags::Optional);
     h->add_property("specular_color", Vector3fArray(m->_specularColor),
@@ -246,7 +246,7 @@ void init(brayns::Material* m, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::Scene* s, ObjectHandler* h)
+inline void init(brayns::Scene* s, ObjectHandler* h)
 {
     h->add_property("bounds", &s->getWorldBounds(),
                     Flags::IgnoreRead | Flags::Optional);
@@ -254,7 +254,7 @@ void init(brayns::Scene* s, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::MorphologyLayout* m, ObjectHandler* h)
+inline void init(brayns::MorphologyLayout* m, ObjectHandler* h)
 {
     h->add_property("nb_columns", &m->nbColumns);
     h->add_property("vertical_spacing", &m->verticalSpacing);
@@ -262,7 +262,7 @@ void init(brayns::MorphologyLayout* m, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
+inline void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
 {
     h->add_property("circuit_config_file", &c->circuitConfigFile,
                     Flags::Optional);
@@ -289,7 +289,7 @@ void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::ConnectivityConfiguration* c, ObjectHandler* h)
+inline void init(brayns::ConnectivityConfiguration* c, ObjectHandler* h)
 {
     h->add_property("filename", &c->_connectivityFile, Flags::Optional);
     h->add_property("matrix_id", &c->_connectivityMatrixId, Flags::Optional);
@@ -303,7 +303,7 @@ void init(brayns::ConnectivityConfiguration* c, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::StreamParameters* s, ObjectHandler* h)
+inline void init(brayns::StreamParameters* s, ObjectHandler* h)
 {
     h->add_property("host", &s->_host, Flags::Optional);
     h->add_property("enabled", &s->_enabled, Flags::Optional);
@@ -314,7 +314,7 @@ void init(brayns::StreamParameters* s, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::ApplicationParameters* a, ObjectHandler* h)
+inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
 {
     h->add_property("jpeg_compression", &a->_jpegCompression, Flags::Optional);
     h->add_property("frame_export_folder", &a->_frameExportFolder,
@@ -326,7 +326,7 @@ void init(brayns::ApplicationParameters* a, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::GeometryParameters* g, ObjectHandler* h)
+inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
 {
     h->add_property("morphology_folder", &g->_morphologyFolder,
                     Flags::Optional);
@@ -369,7 +369,7 @@ void init(brayns::GeometryParameters* g, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::RenderingParameters* r, ObjectHandler* h)
+inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 {
     h->add_property("engine", &r->_engine, Flags::IgnoreRead | Flags::Optional);
     h->add_property("samples_per_pixel", &r->_spp, Flags::Optional);
@@ -402,14 +402,14 @@ void init(brayns::RenderingParameters* r, ObjectHandler* h)
     h->add_property("samples_per_ray", &r->_spr, Flags::Optional);
 }
 
-void init(brayns::SceneParameters* s, ObjectHandler* h)
+inline void init(brayns::SceneParameters* s, ObjectHandler* h)
 {
     h->add_property("color_map_file", &s->_colorMapFilename, Flags::Optional);
     h->add_property("environment_map", &s->_environmentMap, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::VolumeParameters* v, ObjectHandler* h)
+inline void init(brayns::VolumeParameters* v, ObjectHandler* h)
 {
     h->add_property("volume_folder", &v->_folder, Flags::Optional);
     h->add_property("volume_file", &v->_filename, Flags::Optional);
@@ -422,14 +422,14 @@ void init(brayns::VolumeParameters* v, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::Histogram* hi, ObjectHandler* h)
+inline void init(brayns::Histogram* hi, ObjectHandler* h)
 {
     h->add_property("values", &hi->values);
     h->add_property("range", Vector2fArray(hi->range));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-void init(brayns::AnimationParameters* a, ObjectHandler* h)
+inline void init(brayns::AnimationParameters* a, ObjectHandler* h)
 {
     h->add_property("start", &a->_start, Flags::Optional);
     h->add_property("end", &a->_end, Flags::Optional);
@@ -438,26 +438,6 @@ void init(brayns::AnimationParameters* a, ObjectHandler* h)
     h->add_property("dt", &a->_dt, Flags::Optional);
     h->add_property("unit", &a->_unit, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
-}
-}
-
-namespace brayns
-{
-template <class T, class F>
-inline bool from_json(T& obj, const std::string& json, F postUpdateFunc = [] {})
-{
-    staticjson::ParseStatus status;
-    const auto success =
-        staticjson::from_json_string(json.c_str(), &obj, &status);
-    if (success)
-    {
-        obj.markModified();
-        if (std::function<void(T&)>(postUpdateFunc))
-            postUpdateFunc(obj);
-    }
-    else
-        BRAYNS_ERROR << status.description() << std::endl;
-    return success;
 }
 }
 
@@ -480,12 +460,12 @@ inline std::string to_json(const brayns::Version& obj)
 }
 
 template <class T>
-bool from_json(T& obj, const std::string& json)
+inline bool from_json(T& obj, const std::string& json)
 {
     return staticjson::from_json_string(json.c_str(), &obj, nullptr);
 }
 template <>
-bool from_json(brayns::Vector2f& obj, const std::string& json)
+inline bool from_json(brayns::Vector2f& obj, const std::string& json)
 {
     return staticjson::from_json_string(json.c_str(), Vector2fArray(obj),
                                         nullptr);

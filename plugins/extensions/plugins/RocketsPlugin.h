@@ -29,6 +29,7 @@
 #endif
 
 #include <brayns/api.h>
+#include <brayns/common/ActionInterface.h>
 #include <brayns/common/Timer.h>
 #include <rockets/jsonrpc/asyncReceiver.h>
 #include <rockets/jsonrpc/server.h>
@@ -43,7 +44,7 @@ struct RpcDocumentation;
    the outside world. The http server is configured according
    to the --http-server parameter provided by ApplicationParameters.
  */
-class RocketsPlugin : public ExtensionPlugin
+class RocketsPlugin : public ExtensionPlugin, public ActionInterface
 {
 public:
     RocketsPlugin(EnginePtr engine, ParametersManager& parametersManager);
@@ -151,6 +152,14 @@ private:
     ImageGenerator _imageGenerator;
 
     Timer _timer;
+
+    void _registerRequest(const std::string& name,
+                          const RetParamFunc& action) final;
+    void _registerRequest(const std::string& name, const RetFunc& action) final;
+    void _registerNotification(const std::string& name,
+                               const ParamFunc& action) final;
+    void _registerNotification(const std::string& name,
+                               const VoidFunc& action) final;
 };
 }
 
