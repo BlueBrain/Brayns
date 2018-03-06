@@ -399,6 +399,7 @@ void init(brayns::RenderingParameters* r, ObjectHandler* h)
     h->add_property("detection_far_color", Vector3fArray(r->_detectionFarColor),
                     Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
+    h->add_property("samples_per_ray", &r->_spr, Flags::Optional);
 }
 
 void init(brayns::SceneParameters* s, ObjectHandler* h)
@@ -410,7 +411,6 @@ void init(brayns::SceneParameters* s, ObjectHandler* h)
 
 void init(brayns::VolumeParameters* v, ObjectHandler* h)
 {
-    h->add_property("samples_per_ray", &v->_spr, Flags::Optional);
     h->add_property("volume_folder", &v->_folder, Flags::Optional);
     h->add_property("volume_file", &v->_filename, Flags::Optional);
     h->add_property("volume_dimensions", Vector3uiArray(v->_dimensions),

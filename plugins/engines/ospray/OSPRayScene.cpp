@@ -471,9 +471,9 @@ void OSPRayScene::commitLights()
         ospCommit(_ospLightData);
         for (auto renderer : _renderers)
         {
-            OSPRayRenderer* osprayRenderer =
-                dynamic_cast<OSPRayRenderer*>(renderer.get());
-            ospSetData(osprayRenderer->impl(), "lights", _ospLightData);
+            auto impl =
+                std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
+            ospSetData(impl, "lights", _ospLightData);
         }
     }
 }
@@ -548,10 +548,9 @@ void OSPRayScene::commitMaterials(const Action action)
 
     for (const auto& renderer : _renderers)
     {
-        OSPRayRenderer* osprayRenderer =
-            dynamic_cast<OSPRayRenderer*>(renderer.get());
-        ospSetData(osprayRenderer->impl(), "materials", _ospMaterialData);
-        ospCommit(osprayRenderer->impl());
+        auto impl = std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
+        ospSetData(impl, "materials", _ospMaterialData);
+        ospCommit(impl);
     }
     markModified();
 }
@@ -579,29 +578,26 @@ void OSPRayScene::commitTransferFunctionData()
 
     for (const auto& renderer : _renderers)
     {
-        OSPRayRenderer* osprayRenderer =
-            dynamic_cast<OSPRayRenderer*>(renderer.get());
+        auto impl = std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
 
         // Transfer function Diffuse colors
-        ospSetData(osprayRenderer->impl(), "transferFunctionDiffuseData",
+        ospSetData(impl, "transferFunctionDiffuseData",
                    _ospTransferFunctionDiffuseData);
 
         // Transfer function emission data
-        ospSetData(osprayRenderer->impl(), "transferFunctionEmissionData",
+        ospSetData(impl, "transferFunctionEmissionData",
                    _ospTransferFunctionEmissionData);
 
         // Transfer function size
-        ospSet1i(osprayRenderer->impl(), "transferFunctionSize",
+        ospSet1i(impl, "transferFunctionSize",
                  _transferFunction.getDiffuseColors().size());
 
         // Transfer function range
-        ospSet1f(osprayRenderer->impl(), "transferFunctionMinValue",
+        ospSet1f(impl, "transferFunctionMinValue",
                  _transferFunction.getValuesRange().x());
-        ospSet1f(osprayRenderer->impl(), "transferFunctionRange",
+        ospSet1f(impl, "transferFunctionRange",
                  _transferFunction.getValuesRange().y() -
                      _transferFunction.getValuesRange().x());
-
-        ospCommit(osprayRenderer->impl());
     }
     markModified();
 }
@@ -612,44 +608,56 @@ void OSPRayScene::commitVolumeData()
     if (!volumeHandler)
         return;
 
-    const auto& ap = _parametersManager.getAnimationParameters();
     const auto& vp = _parametersManager.getVolumeParameters();
+    if (vp.isModified())
+    {
+        // Cleanup existing volume data in handler and renderers
+        volumeHandler->clear();
+
+        // An empty array has to be assigned to the renderers
+        _ospVolumeDataSize = 0;
+        _ospVolumeData =
+            ospNewData(_ospVolumeDataSize, OSP_UCHAR, 0, _getOSPDataFlags());
+        ospCommit(_ospVolumeData);
+        for (const auto& renderer : _renderers)
+        {
+            auto impl =
+                std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
+            ospSetData(impl, "volumeData", _ospVolumeData);
+        }
+    }
+
+    const auto& ap = _parametersManager.getAnimationParameters();
     const auto animationFrame = ap.getFrame();
     volumeHandler->setCurrentIndex(animationFrame);
     void* data = volumeHandler->getData();
-    if (data && (ap.isModified() || vp.isModified()))
+    if (data && _ospVolumeDataSize == 0)
     {
+        // Set volume data to renderers
+        _ospVolumeDataSize = volumeHandler->getSize();
+        _ospVolumeData =
+            ospNewData(_ospVolumeDataSize, OSP_UCHAR, data, _getOSPDataFlags());
+        ospCommit(_ospVolumeData);
         for (const auto& renderer : _renderers)
         {
-            OSPRayRenderer* osprayRenderer =
-                dynamic_cast<OSPRayRenderer*>(renderer.get());
+            auto impl =
+                std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
 
-            const size_t size = volumeHandler->getSize();
-
-            _ospVolumeData =
-                ospNewData(size, OSP_UCHAR, data, _getOSPDataFlags());
-            ospCommit(_ospVolumeData);
-            ospSetData(osprayRenderer->impl(), "volumeData", _ospVolumeData);
-
-            const Vector3ui& dimensions = volumeHandler->getDimensions();
-            ospSet3i(osprayRenderer->impl(), "volumeDimensions", dimensions.x(),
-                     dimensions.y(), dimensions.z());
-
-            const Vector3f& elementSpacing =
+            ospSetData(impl, "volumeData", _ospVolumeData);
+            const auto& dimensions = volumeHandler->getDimensions();
+            ospSet3i(impl, "volumeDimensions", dimensions.x(), dimensions.y(),
+                     dimensions.z());
+            const auto& elementSpacing =
                 _parametersManager.getVolumeParameters().getElementSpacing();
-            ospSet3f(osprayRenderer->impl(), "volumeElementSpacing",
-                     elementSpacing.x(), elementSpacing.y(),
-                     elementSpacing.z());
-
-            const Vector3f& offset =
+            ospSet3f(impl, "volumeElementSpacing", elementSpacing.x(),
+                     elementSpacing.y(), elementSpacing.z());
+            const auto& offset =
                 _parametersManager.getVolumeParameters().getOffset();
-            ospSet3f(osprayRenderer->impl(), "volumeOffset", offset.x(),
-                     offset.y(), offset.z());
-
-            const float epsilon = volumeHandler->getEpsilon(
+            ospSet3f(impl, "volumeOffset", offset.x(), offset.y(), offset.z());
+            const auto epsilon = volumeHandler->getEpsilon(
                 elementSpacing,
-                _parametersManager.getVolumeParameters().getSamplesPerRay());
-            ospSet1f(osprayRenderer->impl(), "volumeEpsilon", epsilon);
+                _parametersManager.getRenderingParameters().getSamplesPerRay());
+            ospSet1f(impl, "volumeEpsilon", epsilon);
         }
         markModified();
     }
@@ -679,14 +687,10 @@ void OSPRayScene::commitSimulationData()
 
     for (const auto& renderer : _renderers)
     {
-        OSPRayRenderer* osprayRenderer =
-            dynamic_cast<OSPRayRenderer*>(renderer.get());
-
-        ospSetData(osprayRenderer->impl(), "simulationData",
-                   _ospSimulationData);
-        ospSet1i(osprayRenderer->impl(), "simulationDataSize",
+        auto impl = std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
+        ospSetData(impl, "simulationData", _ospSimulationData);
+        ospSet1i(impl, "simulationDataSize",
                  _simulationHandler->getFrameSize());
-        ospCommit(osprayRenderer->impl());
     }
     markModified();
 }

@@ -52,6 +52,8 @@ public:
 
     ~VolumeHandler();
 
+    void clear();
+
     /**
      * @brief Returns the dimension of the 8bit volume
      * @return Dimensions of the volume

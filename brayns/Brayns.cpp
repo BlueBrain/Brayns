@@ -1085,17 +1085,17 @@ private:
 
     void _increaseSamplesPerRay()
     {
-        VolumeParameters& volumeParams =
-            _parametersManager.getVolumeParameters();
-        volumeParams.setSamplesPerRay(volumeParams.getSamplesPerRay() * 2);
+        RenderingParameters& renderParams =
+            _parametersManager.getRenderingParameters();
+        renderParams.setSamplesPerRay(renderParams.getSamplesPerRay() * 2);
     }
 
     void _decreaseSamplesPerRay()
     {
-        VolumeParameters& volumeParams =
-            _parametersManager.getVolumeParameters();
-        if (volumeParams.getSamplesPerRay() >= 4)
-            volumeParams.setSamplesPerRay(volumeParams.getSamplesPerRay() / 2);
+        RenderingParameters& renderParams =
+            _parametersManager.getRenderingParameters();
+        if (renderParams.getSamplesPerRay() >= 4)
+            renderParams.setSamplesPerRay(renderParams.getSamplesPerRay() / 2);
     }
 
     void _toggleLightEmittingMaterials()

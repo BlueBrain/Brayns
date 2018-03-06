@@ -94,6 +94,7 @@ private:
     OSPData _ospLightData;
     OSPData _ospMaterialData;
     OSPData _ospVolumeData;
+    uint64_t _ospVolumeDataSize{0};
     OSPData _ospSimulationData;
     OSPData _ospTransferFunctionDiffuseData;
     OSPData _ospTransferFunctionEmissionData;

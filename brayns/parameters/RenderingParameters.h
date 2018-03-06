@@ -209,6 +209,13 @@ public:
         _updateValue(_maxAccumFrames, value);
     }
     size_t getMaxAccumFrames() const { return _maxAccumFrames; }
+    /**
+     * @brief Defines the number of samples per ray for ray-casting rendering
+     * (typically volumes)
+     * @param spr Number of samples per ray
+     */
+    void setSamplesPerRay(const size_t spr) { _updateValue(_spr, spr); }
+    size_t getSamplesPerRay() const { return _spr; }
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -237,6 +244,7 @@ protected:
     bool _dynamicLoadBalancer{false};
     float _varianceThreshold{-1.f};
     size_t _maxAccumFrames{100};
+    size_t _spr;
 
     SERIALIZATION_FRIEND(RenderingParameters)
 };
