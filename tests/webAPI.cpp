@@ -167,19 +167,19 @@ std::shared_ptr<T> addPlugin()
     return ClientServer::instance().addPlugin<T>();
 }
 
-brayns::Brayns& Brayns()
+brayns::Camera& getCamera()
 {
-    return ClientServer::instance().getBrayns();
+    return ClientServer::instance().getBrayns().getEngine().getCamera();
 }
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
 BOOST_AUTO_TEST_CASE(reset_camera)
 {
-    const auto target = Brayns().getEngine().getCamera().getTarget();
-    Brayns().getEngine().getCamera().setTarget({1, 2, 3});
+    const auto target = getCamera().getTarget();
+    getCamera().setTarget({1, 2, 3});
     makeNotification("reset-camera");
-    BOOST_CHECK_EQUAL(Brayns().getEngine().getCamera().getTarget(), target);
+    BOOST_CHECK_EQUAL(getCamera().getTarget(), target);
 }
 
 BOOST_AUTO_TEST_CASE(inspect)
