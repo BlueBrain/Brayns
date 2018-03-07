@@ -52,7 +52,8 @@ std::future<T> make_ready_future(const T value)
 namespace brayns
 {
 DeflectPlugin::DeflectPlugin(EnginePtr engine,
-                             ParametersManager& parametersManager)
+                             ParametersManager& parametersManager,
+                             ActionInterface* actionInterface BRAYNS_UNUSED)
     : ExtensionPlugin(engine)
     , _appParams{parametersManager.getApplicationParameters()}
     , _params{parametersManager.getStreamParameters()}

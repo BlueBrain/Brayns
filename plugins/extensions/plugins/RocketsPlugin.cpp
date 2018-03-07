@@ -104,7 +104,8 @@ inline bool from_json(T& obj, const std::string& json, F postUpdateFunc = [] {})
 }
 
 RocketsPlugin::RocketsPlugin(EnginePtr engine,
-                             ParametersManager& parametersManager)
+                             ParametersManager& parametersManager,
+                             ActionInterface* actionInterface BRAYNS_UNUSED)
     : ExtensionPlugin(engine)
     , _parametersManager(parametersManager)
 {

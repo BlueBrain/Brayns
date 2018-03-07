@@ -31,7 +31,8 @@ namespace brayns
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
-    DeflectPlugin(EnginePtr engine, ParametersManager& parametersManager);
+    DeflectPlugin(EnginePtr engine, ParametersManager& parametersManager,
+                  ActionInterface* actionInterface);
 
     /** Handle stream setup and incoming events. */
     BRAYNS_API void preRender(KeyboardHandler& keyboardHandler,
