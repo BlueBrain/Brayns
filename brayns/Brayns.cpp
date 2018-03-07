@@ -81,7 +81,6 @@ namespace brayns
 struct Brayns::Impl
 {
     EnginePtr _engine;
-    std::shared_ptr<ActionInterface> _actionInterface;
 
     Impl(int argc, const char** argv, ParametersManager& parametersManager,
          ExtensionPluginFactory& extensionPluginFactory)
@@ -108,25 +107,6 @@ struct Brayns::Impl
 
         if (!isAsyncMode())
             _finishLoadScene();
-    }
-
-    void createPlugins()
-    {
-#if (BRAYNS_USE_NETWORKING)
-        auto rocketsPlugin =
-            std::make_shared<RocketsPlugin>(_engine, _parametersManager);
-        _extensionPluginFactory.add(rocketsPlugin);
-        _actionInterface = rocketsPlugin;
-#endif
-#ifdef BRAYNS_USE_DEFLECT
-        _extensionPluginFactory.add(
-            std::make_shared<DeflectPlugin>(_engine, _parametersManager));
-#endif
-#ifdef BRAYNS_USE_TOPOLOGY_VIEWER_PLUGIN
-        _extensionPluginFactory.add(
-            std::make_shared<TopologyViewerPlugin>(_engine,
-                                                   _parametersManager));
-#endif
     }
 
     bool preRender()
@@ -1273,8 +1253,15 @@ bool Brayns::render()
 
 void Brayns::createPlugins()
 {
-    _impl->createPlugins();
-    _actionInterface = _impl->_actionInterface;
+#if (BRAYNS_USE_NETWORKING)
+    _actionInterface = addPlugin<RocketsPlugin>();
+#endif
+#ifdef BRAYNS_USE_DEFLECT
+    addPlugin<DeflectPlugin>();
+#endif
+#ifdef BRAYNS_USE_TOPOLOGY_VIEWER_PLUGIN
+    addPlugin<TopologyViewerPlugin>();
+#endif
 }
 
 bool Brayns::preRender()

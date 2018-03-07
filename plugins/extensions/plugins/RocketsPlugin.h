@@ -47,7 +47,8 @@ struct RpcDocumentation;
 class RocketsPlugin : public ExtensionPlugin, public ActionInterface
 {
 public:
-    RocketsPlugin(EnginePtr engine, ParametersManager& parametersManager);
+    RocketsPlugin(EnginePtr engine, ParametersManager& parametersManager,
+                  ActionInterface* ActionInterface);
     ~RocketsPlugin();
 
     /**
