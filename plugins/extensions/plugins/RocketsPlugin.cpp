@@ -123,6 +123,12 @@ void RocketsPlugin::preRender(KeyboardHandler&, AbstractManipulator&)
     if (!_rocketsServer || _socketListener)
         return;
 
+    // https://github.com/BlueBrain/Brayns/issues/342
+    // WAR: modifications by braynsViewer have to be broadcasted. Don't do this
+    // for braynsService, as otherwise messages that arrive while we're
+    // rendering (async rendering!) are re-broadcasted.
+    _broadcastWebsocketMessages();
+
     try
     {
         _rocketsServer->process(0);
@@ -139,7 +145,12 @@ void RocketsPlugin::postRender()
     if (!_rocketsServer)
         return;
 
-    _broadcastWebsocketMessages();
+    // only broadcast changes that are a result of the rendering. All other
+    // changes are already broadcasted in preRender().
+    _wsBroadcastOperations[ENDPOINT_FRAME]();
+    _wsBroadcastOperations[ENDPOINT_IMAGE_JPEG]();
+    _wsBroadcastOperations[ENDPOINT_PROGRESS]();
+    _wsBroadcastOperations[ENDPOINT_STATISTICS]();
 }
 
 std::string RocketsPlugin::_getHttpInterface() const

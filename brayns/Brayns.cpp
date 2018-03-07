@@ -197,6 +197,7 @@ struct Brayns::Impl
 
         _extensionPluginFactory.postRender();
 
+        ap.resetModified();
         _engine->getProgress().resetModified();
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();
