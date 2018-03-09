@@ -38,7 +38,7 @@ TransferFunctionLoader::TransferFunctionLoader()
 }
 
 bool TransferFunctionLoader::loadFromFile(const std::string& filename,
-                                          Scene& scene)
+                                          const Vector2f& range, Scene& scene)
 {
     BRAYNS_INFO << "Loading transfer function color map from " << filename
                 << std::endl;
@@ -90,9 +90,8 @@ bool TransferFunctionLoader::loadFromFile(const std::string& filename,
         ++nbEntries;
     }
 
-    _range = Vector2f(0.f, nbEntries);
-    transferFunction.setValuesRange(_range);
-    BRAYNS_INFO << "Transfer function values range: " << _range << std::endl;
+    transferFunction.setValuesRange(range);
+    BRAYNS_INFO << "Transfer function values range: " << range << std::endl;
     file.close();
     return validParsing;
 }
