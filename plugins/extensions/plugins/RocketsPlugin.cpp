@@ -153,6 +153,16 @@ void RocketsPlugin::postRender()
     _wsBroadcastOperations[ENDPOINT_STATISTICS]();
 }
 
+void RocketsPlugin::postSceneLoading()
+{
+    if (!_rocketsServer)
+        return;
+
+    _wsBroadcastOperations[ENDPOINT_CAMERA]();
+    _wsBroadcastOperations[ENDPOINT_PROGRESS]();
+    _wsBroadcastOperations[ENDPOINT_STATISTICS]();
+}
+
 std::string RocketsPlugin::_getHttpInterface() const
 {
     const auto& params = _parametersManager.getApplicationParameters();

@@ -62,13 +62,17 @@ public:
                               AbstractManipulator& cameraManipulator) final;
 
     /**
-     * Enqueue all modified and registered objects for broadcast.
-     *
-     * In case of an event loop, the outgoing messages are automatically send by
-     * the SocketListener. Otherwise, the next call to preRender() will send all
-     * pending broadcasts.
+     * Enqueue modified and registered objects for broadcast that have changed
+     * after the rendering is finished (framebuffer, animation params, progress,
+     * statistics).
      */
     BRAYNS_API void postRender() final;
+
+    /**
+     * Enqueue modified and registered objects for broadcast that have changed
+     * after scene loading is finished (camera, progress, statistics).
+     */
+    BRAYNS_API void postSceneLoading() final;
 
 private:
     std::string _getHttpInterface() const;

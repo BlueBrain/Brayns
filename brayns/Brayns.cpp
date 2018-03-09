@@ -122,18 +122,21 @@ struct Brayns::Impl
 #ifdef BRAYNS_USE_LUNCHBOX
             if (isAsyncMode())
             {
-                postRender();
-
+                postSceneLoading();
                 return false;
             }
 #endif
-            _finishLoadScene();
         }
-        else if (_dataLoadingFuture.valid())
-            _finishLoadScene();
 
         _extensionPluginFactory.preRender(_keyboardHandler,
                                           *_cameraManipulator);
+
+        Scene& scene = _engine->getScene();
+
+        // consider updates on the scene also from plugins, not only 'our own'
+        // built-in data loading
+        if (scene.isModified())
+            _finishLoadScene();
 
         _updateAnimation();
 
@@ -150,8 +153,6 @@ struct Brayns::Impl
 
         Camera& camera = _engine->getCamera();
         camera.commit();
-
-        Scene& scene = _engine->getScene();
 
         if (scene.getTransferFunction().isModified())
             scene.commitTransferFunctionData();
@@ -204,6 +205,13 @@ struct Brayns::Impl
         ap.resetModified();
         _engine->getProgress().resetModified();
         _engine->getFrameBuffer().resetModified();
+        _engine->getStatistics().resetModified();
+    }
+
+    void postSceneLoading()
+    {
+        _extensionPluginFactory.postSceneLoading();
+        _engine->getProgress().resetModified();
         _engine->getStatistics().resetModified();
     }
 
@@ -352,7 +360,9 @@ private:
         scene.buildGeometry();
         if (geomParams.getLoadCacheFile().empty() &&
             !geomParams.getSaveCacheFile().empty())
+        {
             scene.saveToCacheFile();
+        }
 
         loadingProgress += LOADING_PROGRESS_STEP;
 
@@ -367,7 +377,8 @@ private:
     // do this in the main thread again to avoid race conditions
     void _finishLoadScene()
     {
-        _dataLoadingFuture.get();
+        if (_dataLoadingFuture.valid())
+            _dataLoadingFuture.get();
 
         // Set default camera according to scene bounding box
         _engine->setDefaultCamera();
@@ -379,7 +390,7 @@ private:
             _engine->getScene().getSizeInBytes());
 
         // finish reporting of progress
-        postRender();
+        postSceneLoading();
     }
 
     void _updateAnimation()
