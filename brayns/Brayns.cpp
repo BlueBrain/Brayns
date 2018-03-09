@@ -63,6 +63,10 @@
 #include <plugins/extensions/usecases/TopologyViewer/TopologyViewerPlugin.h>
 #endif
 
+#ifdef BRAYNS_USE_MEMBRANELESS_ORGANELLES_PLUGIN
+#include <plugins/extensions/usecases/MembranelessOrganelles/MembranelessOrganellesPlugin.h>
+#endif
+
 #include <future>
 #ifdef BRAYNS_USE_LUNCHBOX
 #include <lunchbox/threadPool.h>
@@ -1262,6 +1266,9 @@ void Brayns::createPlugins()
 #endif
 #ifdef BRAYNS_USE_TOPOLOGY_VIEWER_PLUGIN
     addPlugin<TopologyViewerPlugin>();
+#endif
+#ifdef BRAYNS_USE_MEMBRANELESS_ORGANELLES_PLUGIN
+    addPlugin<MembranelessOrganellesPlugin>();
 #endif
 }
 
