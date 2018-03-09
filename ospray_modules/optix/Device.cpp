@@ -109,7 +109,7 @@ OSPModel Device::newModel()
 
 void Device::commit(OSPObject _object)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert2(object, "null object in LocalDevice::commit()");
     object->commit();
 }
@@ -139,15 +139,15 @@ OSPData Device::newData(size_t nitems, OSPDataType format, const void *init,
 
 void Device::setVoidPtr(OSPObject _object, const char *bufName, void *v)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
-    object->findParam(bufName, true)->set(v);
+    object->setParam(bufName, v);
 }
 
 void Device::removeParam(OSPObject _object, const char *name)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(name != nullptr && "invalid identifier for object parameter");
     object->removeParam(name);
@@ -162,10 +162,10 @@ int Device::setRegion(OSPVolume /*_volume*/, const void * /*source*/,
 
 void Device::setString(OSPObject _object, const char *bufName, const char *s)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
-    object->findParam(bufName, true)->set(s);
+    object->setParam<std::string>(bufName, s);
 }
 
 int Device::loadModule(const char *name)
@@ -179,82 +179,81 @@ int Device::loadModule(const char *name)
 
 void Device::setFloat(OSPObject _object, const char *bufName, const float f)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
 
-    ManagedObject::Param *param = object->findParam(bufName, true);
-    param->set(f);
+    object->setParam(bufName, f);
 }
 
 void Device::setInt(OSPObject _object, const char *bufName, const int i)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
 
-    object->findParam(bufName, true)->set(i);
+    object->setParam(bufName, i);
 }
 
 void Device::setVec2f(OSPObject _object, const char *bufName,
                       const ospray::vec2f &v)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
 
-    object->findParam(bufName, true)->set(v);
+    object->setParam(bufName, v);
 }
 
 void Device::setVec3f(OSPObject _object, const char *bufName,
                       const ospray::vec3f &v)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
 
-    object->findParam(bufName, true)->set(v);
+    object->setParam(bufName, v);
 }
 
 void Device::setVec4f(OSPObject _object, const char *bufName,
                       const ospray::vec4f &v)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
 
-    object->findParam(bufName, true)->set(v);
+    object->setParam(bufName, v);
 }
 
 void Device::setVec2i(OSPObject _object, const char *bufName,
                       const ospray::vec2i &v)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
 
-    object->findParam(bufName, true)->set(v);
+    object->setParam(bufName, v);
 }
 
 void Device::setVec3i(OSPObject _object, const char *bufName,
                       const ospray::vec3i &v)
 {
-    ManagedObject *object = (ManagedObject *)_object;
+    ospray::ManagedObject *object = (ospray::ManagedObject *)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
 
-    object->findParam(bufName, true)->set(v);
+    object->setParam(bufName, v);
 }
 
 void Device::setObject(OSPObject _target, const char *bufName, OSPObject _value)
 {
-    ManagedObject *target = (ManagedObject *)_target;
-    ManagedObject *value = (ManagedObject *)_value;
+    ospray::ManagedObject *target = (ospray::ManagedObject *)_target;
+    ospray::ManagedObject *value = (ospray::ManagedObject *)_value;
 
     Assert(target != nullptr && "invalid target object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
 
-    target->set(bufName, value);
+    target->setParam(bufName, value);
 }
 
 OSPPixelOp Device::newPixelOp(const char * /*type*/)
@@ -330,6 +329,17 @@ OSPMaterial Device::newMaterial(OSPRenderer _renderer, const char *type)
     return (OSPMaterial)material;
 }
 
+#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR > 4))
+OSPMaterial Device::newMaterial(const char *renderer_type,
+                                const char *material_type)
+{
+    auto renderer = newRenderer(renderer_type);
+    auto material = newMaterial(renderer, material_type);
+    release(renderer);
+    return material;
+}
+#endif
+
 OSPTransferFunction Device::newTransferFunction(const char * /*type*/)
 {
     return nullptr;
@@ -344,6 +354,16 @@ OSPLight Device::newLight(OSPRenderer _renderer, const char *type)
     light->refInc();
     return (OSPLight)light;
 }
+
+#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR > 4))
+OSPLight Device::newLight(const char *renderer_type, const char *light_type)
+{
+    auto renderer = newRenderer(renderer_type);
+    auto light = newLight(renderer, light_type);
+    release(renderer);
+    return light;
+}
+#endif
 
 void Device::frameBufferClear(OSPFrameBuffer _fb,
                               const ospray::uint32 fbChannelFlags)
@@ -403,7 +423,7 @@ void Device::release(OSPObject _obj)
 {
     if (!_obj)
         return;
-    ManagedObject *obj = (ManagedObject *)_obj;
+    ospray::ManagedObject *obj = (ospray::ManagedObject *)_obj;
 
     // TODO: would need to check for refcount == 1, but private. So better move
     // this to our own Texture2D class' dtor.

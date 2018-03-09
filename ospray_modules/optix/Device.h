@@ -22,6 +22,7 @@
 
 #include <ospray/SDK/api/Device.h>
 #include <ospray/SDK/common/Managed.h>
+#include <ospray/version.h>
 
 #include <optixu/optixpp_namespace.h>
 #include <optixu/optixu_math_stream_namespace.h>
@@ -52,6 +53,12 @@ struct Device : public ospray::api::Device
 
     /*! have given renderer create a new Light */
     OSPLight newLight(OSPRenderer _renderer, const char *type) override;
+
+#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR > 4))
+    /*! have given renderer create a new Light */
+    OSPLight newLight(const char *renderer_type,
+                      const char *light_type) override;
+#endif
 
     /*! map frame buffer */
     const void *frameBufferMap(OSPFrameBuffer fb,
@@ -157,6 +164,12 @@ struct Device : public ospray::api::Device
 
     /*! have given renderer create a new material */
     OSPMaterial newMaterial(OSPRenderer _renderer, const char *type) override;
+
+#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR > 4))
+    /*! have given renderer create a new material */
+    OSPMaterial newMaterial(const char *renderer_type,
+                            const char *material_type) override;
+#endif
 
     /*! create a new camera object (out of list of registered cameras) */
     OSPCamera newCamera(const char *type) override;
