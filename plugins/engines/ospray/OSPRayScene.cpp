@@ -598,6 +598,7 @@ void OSPRayScene::commitTransferFunctionData()
         ospSet1f(impl, "transferFunctionRange",
                  _transferFunction.getValuesRange().y() -
                      _transferFunction.getValuesRange().x());
+        ospCommit(impl);
     }
     markModified();
 }

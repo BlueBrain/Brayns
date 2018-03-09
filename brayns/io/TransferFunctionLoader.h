@@ -48,11 +48,13 @@ public:
     /**
      * @brief Loads values from a transfer function file
      * @param filename Full file name of the transfer function file
+     * @param range Range of values to which the transfer function is applied
      * @param scene Scene holding the transfer function
-     * @return True if the colormap file was successfully loaded, false
+     * @return True if the transfer function file was successfully loaded, false
      *         otherwise
      */
-    bool loadFromFile(const std::string& filename, Scene& scene);
+    bool loadFromFile(const std::string& filename, const Vector2f& range,
+                      Scene& scene);
 
 private:
     Vector2f _range;

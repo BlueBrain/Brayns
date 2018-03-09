@@ -434,7 +434,8 @@ private:
         if (!colorMapFilename.empty())
         {
             TransferFunctionLoader transferFunctionLoader;
-            transferFunctionLoader.loadFromFile(colorMapFilename, scene);
+            transferFunctionLoader.loadFromFile(
+                colorMapFilename, sceneParameters.getColorMapRange(), scene);
         }
 
         if (!geometryParameters.getLoadCacheFile().empty())

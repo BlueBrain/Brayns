@@ -405,6 +405,8 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 inline void init(brayns::SceneParameters* s, ObjectHandler* h)
 {
     h->add_property("color_map_file", &s->_colorMapFilename, Flags::Optional);
+    h->add_property("color_map_range", Vector2fArray(s->_colorMapRange),
+                    Flags::Optional);
     h->add_property("environment_map", &s->_environmentMap, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
