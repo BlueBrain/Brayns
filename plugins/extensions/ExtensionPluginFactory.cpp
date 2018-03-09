@@ -60,4 +60,10 @@ void ExtensionPluginFactory::postRender()
     for (ExtensionPluginPtr plugin : _plugins)
         plugin->postRender();
 }
+
+void ExtensionPluginFactory::postSceneLoading()
+{
+    for (ExtensionPluginPtr plugin : _plugins)
+        plugin->postSceneLoading();
+}
 }

@@ -60,6 +60,12 @@ public:
      */
     void postRender();
 
+    /**
+     * Calls postSceneLoading() on all registered plugins after scene has
+     * finished loading.
+     */
+    void postSceneLoading();
+
 private:
     ExtensionPlugins _plugins;
 };

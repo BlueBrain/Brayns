@@ -48,6 +48,12 @@ public:
 
     /** Called from Brayns::postRender() after render() has finished. */
     virtual void postRender() {}
+
+    /**
+     * Called after scene has finished loading.
+     */
+    virtual void postSceneLoading() {}
+
 protected:
     ExtensionPlugin(EnginePtr engine)
         : _engine(engine)
