@@ -61,6 +61,9 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   OSPRayCamera.h
 )
 
+set_source_files_properties(OSPRayScene.cpp
+  PROPERTIES COMPILE_FLAGS -Wno-deprecated)
+
 set(BRAYNSOSPRAYENGINEPLUGIN_LINK_LIBRARIES
     PUBLIC vmmlib braynsCommon braynsIO ${OSPRAY_LIBRARIES}
 )
