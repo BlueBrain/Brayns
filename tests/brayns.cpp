@@ -67,7 +67,6 @@ BOOST_AUTO_TEST_CASE(defaults)
     auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();
     BOOST_CHECK_EQUAL(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
-    BOOST_CHECK_EQUAL(appParams.getCamera(), "perspective");
     BOOST_CHECK(!appParams.isBenchmarking());
     BOOST_CHECK_EQUAL(appParams.getJpegCompression(), 90);
     BOOST_CHECK_EQUAL(appParams.getImageStreamFPS(), 60);
@@ -75,6 +74,8 @@ BOOST_AUTO_TEST_CASE(defaults)
     const auto& renderParams = pm.getRenderingParameters();
     BOOST_CHECK(renderParams.getEngine() == brayns::EngineType::ospray);
     BOOST_CHECK_EQUAL(renderParams.getModule(), "");
+    BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
+    BOOST_CHECK(renderParams.getStereoMode() == brayns::StereoMode::none);
     BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::default_);
     BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 7);
     BOOST_CHECK(!renderParams.getShadows());

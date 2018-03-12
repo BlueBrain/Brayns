@@ -219,7 +219,8 @@ public:
         bool accumulation) = 0;
 
     /** Factory method to create an engine-specific camera. */
-    virtual CameraPtr createCamera(CameraType type) = 0;
+    virtual CameraPtr createCamera(const CameraType type,
+                                   const StereoMode stereoMode) = 0;
 
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);

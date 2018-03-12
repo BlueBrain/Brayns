@@ -27,7 +27,6 @@
 namespace
 {
 const std::string PARAM_WINDOW_SIZE = "window-size";
-const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
@@ -40,7 +39,6 @@ const std::string PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_COMPRESSION = 90;
-const std::string DEFAULT_CAMERA = "perspective";
 const std::string DEFAULT_TMP_FOLDER = "/tmp";
 }
 
@@ -48,18 +46,15 @@ namespace brayns
 {
 ApplicationParameters::ApplicationParameters()
     : AbstractParameters("Application")
-    , _camera(DEFAULT_CAMERA)
     , _windowSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
     , _benchmarking(false)
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
     , _tmpFolder(DEFAULT_TMP_FOLDER)
 {
-    _parameters.add_options()(PARAM_WINDOW_SIZE.c_str(),
-                              po::value<uints>()->multitoken(),
-                              "Window size [int int]")(
-        PARAM_CAMERA.c_str(), po::value<std::string>(),
-        "Camera type [string]")(PARAM_BENCHMARKING.c_str(), po::value<bool>(),
-                                "Enable|Disable benchmarking [bool]")(
+    _parameters.add_options()(
+        PARAM_WINDOW_SIZE.c_str(), po::value<uints>()->multitoken(),
+        "Window size [int int]")(PARAM_BENCHMARKING.c_str(), po::value<bool>(),
+                                 "Enable|Disable benchmarking [bool]")(
         PARAM_JPEG_COMPRESSION.c_str(), po::value<size_t>(),
         "JPEG compression rate (100 is full quality) [int]")(
         PARAM_JPEG_SIZE.c_str(), po::value<uints>()->multitoken(),
@@ -88,8 +83,6 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
             _windowSize.y() = values[1];
         }
     }
-    if (vm.count(PARAM_CAMERA))
-        _camera = vm[PARAM_CAMERA].as<std::string>();
     if (vm.count(PARAM_BENCHMARKING))
         _benchmarking = vm[PARAM_BENCHMARKING].as<bool>();
     if (vm.count(PARAM_JPEG_COMPRESSION))
@@ -112,7 +105,6 @@ void ApplicationParameters::print()
 {
     AbstractParameters::print();
     BRAYNS_INFO << "Window size                 : " << _windowSize << std::endl;
-    BRAYNS_INFO << "Camera                      : " << _camera << std::endl;
     BRAYNS_INFO << "Benchmarking                : "
                 << (_benchmarking ? "on" : "off") << std::endl;
     BRAYNS_INFO << "JPEG Compression            : " << _jpegCompression

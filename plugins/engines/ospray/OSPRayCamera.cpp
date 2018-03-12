@@ -27,8 +27,9 @@
 
 namespace brayns
 {
-OSPRayCamera::OSPRayCamera(const CameraType& type, const std::string& name)
-    : Camera(type)
+OSPRayCamera::OSPRayCamera(const CameraType type, const StereoMode stereoMode,
+                           const std::string& name)
+    : Camera(type, stereoMode)
     , _camera{ospNewCamera(name.c_str())}
 {
     if (!_camera)

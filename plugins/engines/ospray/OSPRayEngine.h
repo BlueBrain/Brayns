@@ -60,7 +60,8 @@ public:
                                      FrameBufferFormat frameBufferFormat,
                                      bool accumulation) final;
 
-    CameraPtr createCamera(CameraType type) final;
+    CameraPtr createCamera(const CameraType type,
+                           const StereoMode stereoMode) final;
 
 private:
     Renderers _createRenderers();

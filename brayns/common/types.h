@@ -334,13 +334,12 @@ enum class ShadingType
 enum class CameraType
 {
     default_, // Perspective
-    stereo,
     orthographic,
     panoramic,
     clipped
 };
 
-enum class CameraStereoMode
+enum class StereoMode
 {
     none = 0,
     left,

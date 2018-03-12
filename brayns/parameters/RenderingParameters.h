@@ -216,6 +216,18 @@ public:
      */
     void setSamplesPerRay(const size_t spr) { _updateValue(_spr, spr); }
     size_t getSamplesPerRay() const { return _spr; }
+    /**
+     * @brief Defines the number of samples per ray for ray-casting rendering
+     * (typically volumes)
+     * @param spr Number of samples per ray
+     */
+    void setStereoMode(const StereoMode stereoMode)
+    {
+        _updateValue(_stereoMode, stereoMode);
+    }
+    StereoMode getStereoMode() const { return _stereoMode; }
+    const std::string& getStereoModeAsString(const StereoMode value) const;
+
 protected:
     bool _parse(const po::variables_map& vm) final;
 
@@ -224,7 +236,8 @@ protected:
     RendererType _renderer;
     RendererTypes _renderers;
     strings _rendererNames;
-    CameraType _cameraType;
+    CameraType _cameraType{CameraType::default_};
+    StereoMode _stereoMode{StereoMode::none};
     strings _cameraTypeNames;
     float _ambientOcclusionStrength;
     float _ambientOcclusionDistance;

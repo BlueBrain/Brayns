@@ -47,8 +47,6 @@ public:
     {
         _updateValue(_windowSize, size);
     }
-    /** camera name (e.g. Perspective, Stereo, etc. ) */
-    std::string getCamera() const { return _camera; }
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
     /** JPEG compression quality */
@@ -89,7 +87,6 @@ public:
 protected:
     bool _parse(const po::variables_map& vm) final;
 
-    std::string _camera;
     Vector2ui _windowSize;
     bool _benchmarking;
     size_t _jpegCompression;

@@ -24,11 +24,10 @@
 
 namespace brayns
 {
-Camera::Camera(const CameraType cameraType)
-    : _type(cameraType)
+Camera::Camera(const CameraType cameraType, const StereoMode stereoMode)
+    : _type{cameraType}
+    , _stereoMode{stereoMode}
 {
-    if (_type == CameraType::stereo)
-        setStereoMode(CameraStereoMode::side_by_side);
 }
 
 Camera::~Camera()
