@@ -65,7 +65,7 @@ ARG OSPRAY_VERSION=1.4.3
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
- && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} --depth 1 \
+ && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
  && cd ${OSPRAY_SRC} \
  && git checkout v${OSPRAY_VERSION} \
  && mkdir -p build \
