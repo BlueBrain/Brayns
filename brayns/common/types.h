@@ -161,6 +161,7 @@ class SceneParameters;
 class StreamParameters;
 class VolumeParameters;
 
+class PluginAPI;
 class ExtensionPlugin;
 typedef std::shared_ptr<ExtensionPlugin> ExtensionPluginPtr;
 typedef std::vector<ExtensionPluginPtr> ExtensionPlugins;

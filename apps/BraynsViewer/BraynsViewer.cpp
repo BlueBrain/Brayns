@@ -32,7 +32,7 @@ namespace brayns
 BraynsViewer::BraynsViewer(Brayns& brayns)
     : BaseWindow(brayns)
 {
-    brayns.createPlugins();
+    brayns.loadPlugins();
 }
 
 void BraynsViewer::display()

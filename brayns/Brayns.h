@@ -25,10 +25,6 @@
 #include <brayns/api.h>
 #include <brayns/common/types.h>
 
-#include <brayns/common/ActionInterface.h>
-#include <brayns/parameters/ParametersManager.h>
-#include <plugins/extensions/ExtensionPluginFactory.h>
-
 namespace brayns
 {
 /**
@@ -58,13 +54,13 @@ public:
     BRAYNS_API ~Brayns();
 
     /**
-     * Creates all registered plugins. Shall be invoked before starting any
-     * rendering.
+     * Creates built-in plugins and loads specified dynamic plugins. Shall be
+     * invoked before starting any rendering.
      *
      * In a setup using event loops, one wants to postpone this call until the
      * event loop is setup'd correctly to use it from within a plugin.
      */
-    BRAYNS_API void createPlugins();
+    BRAYNS_API void loadPlugins();
 
     /** @name Simple execution API  */
     //@{
@@ -155,31 +151,7 @@ public:
      */
     BRAYNS_API AbstractManipulator& getCameraManipulator();
 
-    /**
-     * Create and add the given plugin type to Brayns. The constructor signature
-     * of the plugin must be:
-     * @code
-     * MyPlugin(EnginePtr, ParametersManager&, ActionInterface*)
-     * @endcode
-     *
-     * @note the ActionInterface can be nullptr, so handle this in your plugin
-     *       accordingly.
-     */
-    template <typename T>
-    std::shared_ptr<T> addPlugin()
-    {
-        auto plugin{std::make_shared<T>(_engine, _parametersManager,
-                                        _actionInterface.get())};
-        _extensionPluginFactory.add(plugin);
-        return plugin;
-    }
-
 private:
-    EnginePtr _engine;
-    ParametersManager _parametersManager;
-    ExtensionPluginFactory _extensionPluginFactory;
-    std::shared_ptr<ActionInterface> _actionInterface;
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

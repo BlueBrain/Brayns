@@ -26,6 +26,7 @@
 
 namespace
 {
+const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_WINDOW_SIZE = "window-size";
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
@@ -51,7 +52,10 @@ ApplicationParameters::ApplicationParameters()
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
     , _tmpFolder(DEFAULT_TMP_FOLDER)
 {
-    _parameters.add_options()(
+    _parameters.add_options()(PARAM_PLUGIN.c_str(),
+                              po::value<strings>(&_plugins)->composing(),
+                              "Dynamic plugin to load from LD_LIBRARY_PATH; "
+                              "can be repeated to load multiple plugins")(
         PARAM_WINDOW_SIZE.c_str(), po::value<uints>()->multitoken(),
         "Window size [int int]")(PARAM_BENCHMARKING.c_str(), po::value<bool>(),
                                  "Enable|Disable benchmarking [bool]")(
