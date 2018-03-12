@@ -21,6 +21,7 @@
 
 #include <brayns/Brayns.h>
 
+#include <brayns/PluginAPI.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/camera/Camera.h>
@@ -36,6 +37,8 @@
 #include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
 
+#include <brayns/parameters/ParametersManager.h>
+
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
@@ -44,6 +47,7 @@
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 
 #include <plugins/engines/EngineFactory.h>
+#include <plugins/extensions/ExtensionPluginFactory.h>
 #ifdef BRAYNS_USE_NETWORKING
 #include <plugins/extensions/plugins/RocketsPlugin.h>
 #endif
@@ -59,17 +63,13 @@
 #include <servus/uri.h>
 #endif
 
-#if BRAYNS_USE_TOPOLOGY_VIEWER_PLUGIN
-#include <plugins/extensions/usecases/TopologyViewer/TopologyViewerPlugin.h>
-#endif
-
-#ifdef BRAYNS_USE_MEMBRANELESS_ORGANELLES_PLUGIN
-#include <plugins/extensions/usecases/MembranelessOrganelles/MembranelessOrganellesPlugin.h>
-#endif
-
 #include <future>
 #ifdef BRAYNS_USE_LUNCHBOX
 #include <lunchbox/threadPool.h>
+#endif
+
+#ifdef BRAYNS_USE_OSPRAY
+#include <ospcommon/library.h>
 #endif
 
 namespace
@@ -82,16 +82,11 @@ const size_t LOADING_PROGRESS_STEP = 10;
 
 namespace brayns
 {
-struct Brayns::Impl
+struct Brayns::Impl : public PluginAPI
 {
-    EnginePtr _engine;
-
-    Impl(int argc, const char** argv, ParametersManager& parametersManager,
-         ExtensionPluginFactory& extensionPluginFactory)
-        : _parametersManager(parametersManager)
-        , _engineFactory{argc, argv, _parametersManager}
+    Impl(int argc, const char** argv)
+        : _engineFactory{argc, argv, _parametersManager}
         , _meshLoader(_parametersManager.getGeometryParameters())
-        , _extensionPluginFactory(extensionPluginFactory)
     {
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
@@ -113,6 +108,55 @@ struct Brayns::Impl
             _finishLoadScene();
     }
 
+    void addPlugins()
+    {
+#ifdef BRAYNS_USE_NETWORKING
+        auto plugin{std::make_shared<RocketsPlugin>(_engine, this)};
+        _extensionPluginFactory.add(plugin);
+        _actionInterface = plugin;
+#endif
+#ifdef BRAYNS_USE_DEFLECT
+        _extensionPluginFactory.add(
+            std::make_shared<DeflectPlugin>(_engine, this));
+#endif
+    }
+
+    void loadPlugins()
+    {
+#ifdef BRAYNS_USE_OSPRAY
+
+        for (const auto& pluginName :
+             _parametersManager.getApplicationParameters().getPlugins())
+        {
+            try
+            {
+                ospcommon::Library library(pluginName);
+                auto createSym = library.getSymbol("brayns_plugin_create");
+                if (!createSym)
+                {
+                    BRAYNS_ERROR << "Plugin '" << pluginName
+                                 << "' is not a valid Brayns plugin; missing "
+                                    "brayns_plugin_create()"
+                                 << std::endl;
+                    return;
+                }
+
+                ExtensionPlugin* (*createFunc)(PluginAPI*) =
+                    (ExtensionPlugin * (*)(PluginAPI*))createSym;
+                auto plugin = createFunc(this);
+
+                _extensionPluginFactory.add(ExtensionPluginPtr{plugin});
+                BRAYNS_INFO << "Loaded plugin '" << pluginName << "'"
+                            << std::endl;
+            }
+            catch (const std::runtime_error& exc)
+            {
+                BRAYNS_ERROR << exc.what() << std::endl;
+            }
+        }
+#endif
+    }
+
     bool preRender()
     {
         std::lock_guard<std::mutex> lock{_renderMutex};
@@ -128,8 +172,7 @@ struct Brayns::Impl
 #endif
         }
 
-        _extensionPluginFactory.preRender(_keyboardHandler,
-                                          *_cameraManipulator);
+        _extensionPluginFactory.preRender();
 
         Scene& scene = _engine->getScene();
 
@@ -307,9 +350,20 @@ struct Brayns::Impl
     }
 
     Engine& getEngine() { return *_engine; }
-    ParametersManager& getParametersManager() { return _parametersManager; }
-    KeyboardHandler& getKeyboardHandler() { return _keyboardHandler; }
-    AbstractManipulator& getCameraManipulator() { return *_cameraManipulator; }
+    ParametersManager& getParametersManager() final
+    {
+        return _parametersManager;
+    }
+    KeyboardHandler& getKeyboardHandler() final { return _keyboardHandler; }
+    AbstractManipulator& getCameraManipulator() final
+    {
+        return *_cameraManipulator;
+    }
+    ActionInterface* getActionInterface() final
+    {
+        return _actionInterface.get();
+    }
+    Scene& getScene() final { return _engine->getScene(); }
     bool isLoadingFinished() const
     {
         return !_dataLoadingFuture.valid() ||
@@ -1209,8 +1263,9 @@ private:
         app.setSynchronousMode(!app.getSynchronousMode());
     }
 
-    ParametersManager& _parametersManager;
+    ParametersManager _parametersManager;
     EngineFactory _engineFactory;
+    EnginePtr _engine;
     KeyboardHandler _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
     MeshLoader _meshLoader;
@@ -1234,15 +1289,15 @@ private:
     lunchbox::ThreadPool _loadingThread{1};
 #endif
 
-    ExtensionPluginFactory& _extensionPluginFactory;
+    ExtensionPluginFactory _extensionPluginFactory;
+    std::shared_ptr<ActionInterface> _actionInterface;
 };
 
 // -------------------------------------------------------------------------------------------------
 
 Brayns::Brayns(int argc, const char** argv)
-    : _impl(new Impl(argc, argv, _parametersManager, _extensionPluginFactory))
+    : _impl(new Impl(argc, argv))
 {
-    _engine = _impl->_engine;
 }
 
 Brayns::~Brayns()
@@ -1268,20 +1323,10 @@ bool Brayns::render()
     return _impl->getEngine().getKeepRunning();
 }
 
-void Brayns::createPlugins()
+void Brayns::loadPlugins()
 {
-#if (BRAYNS_USE_NETWORKING)
-    _actionInterface = addPlugin<RocketsPlugin>();
-#endif
-#ifdef BRAYNS_USE_DEFLECT
-    addPlugin<DeflectPlugin>();
-#endif
-#ifdef BRAYNS_USE_TOPOLOGY_VIEWER_PLUGIN
-    addPlugin<TopologyViewerPlugin>();
-#endif
-#ifdef BRAYNS_USE_MEMBRANELESS_ORGANELLES_PLUGIN
-    addPlugin<MembranelessOrganellesPlugin>();
-#endif
+    _impl->addPlugins();
+    _impl->loadPlugins();
 }
 
 bool Brayns::preRender()

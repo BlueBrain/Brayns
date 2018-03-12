@@ -52,8 +52,7 @@ public:
     void clear();
 
     /** Calls preRender() on all registered plugins from Brayns::preRender(). */
-    void preRender(KeyboardHandler& keyboardHandler,
-                   AbstractManipulator& cameraManipulator);
+    void preRender();
 
     /**
      * Calls postRender() on all registered plugins from Brayns::postRender().

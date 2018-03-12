@@ -31,6 +31,17 @@ namespace brayns
  * extension is a set a functionalities that are not provided by the core of the
  * application. For example, exposing a REST interface via HTTP, or streaming
  * images to an distant display.
+ *
+ * For a plugin to be loaded dynamically at runtime, the following function
+ * must be available in the library:
+ *
+ * @code
+ * extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI*)
+ * @endcode
+ *
+ * It must return the instance of the plugin, and from hereon Brayns owns the
+ * plugin and calls preRender() and postRender() accordingly.
+ * In the shutdown sequence of Brayns, the plugin will be destructed properly.
  */
 class ExtensionPlugin
 {
@@ -41,26 +52,13 @@ public:
      * Called from Brayns::preRender() to prepare the engine based on the
      * plugins' need for an upcoming render().
      */
-    virtual void preRender(KeyboardHandler& keyboardHandler BRAYNS_UNUSED,
-                           AbstractManipulator& cameraManipulator BRAYNS_UNUSED)
-    {
-    }
-
+    virtual void preRender() {}
     /** Called from Brayns::postRender() after render() has finished. */
     virtual void postRender() {}
-
     /**
      * Called after scene has finished loading.
      */
     virtual void postSceneLoading() {}
-
-protected:
-    ExtensionPlugin(EnginePtr engine)
-        : _engine(engine)
-    {
-    }
-
-    EnginePtr _engine;
 };
 }
 

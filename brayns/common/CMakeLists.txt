@@ -58,8 +58,8 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
 )
 
 set(BRAYNSCOMMON_LINK_LIBRARIES
-    PUBLIC braynsParameters vmmlib
-      ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+  PUBLIC vmmlib
+  PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 
 common_library(braynsCommon)

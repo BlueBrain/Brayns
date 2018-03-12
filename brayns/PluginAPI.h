@@ -1,6 +1,7 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,30 +19,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef DEFLECTPLUGIN_H
-#define DEFLECTPLUGIN_H
+#pragma once
 
-#include "ExtensionPlugin.h"
-
-#include <brayns/api.h>
+#include <brayns/common/types.h>
 
 namespace brayns
 {
-class DeflectPlugin : public ExtensionPlugin
+/** The API that plugins can use to interact with Brayns. */
+class PluginAPI
 {
 public:
-    DeflectPlugin(EnginePtr engine, PluginAPI* api);
+    virtual ~PluginAPI() = default;
 
-    /** Handle stream setup and incoming events. */
-    BRAYNS_API void preRender() final;
+    /** @return access to the scene of Brayns. */
+    virtual Scene& getScene() = 0;
 
-    /** Send rendered frame. */
-    BRAYNS_API void postRender() final;
+    /** @return access to the parameters of Brayns. */
+    virtual ParametersManager& getParametersManager() = 0;
 
-private:
-    class Impl;
-    std::shared_ptr<Impl> _impl;
+    /** @return access to the action interface of Brayns. */
+    virtual ActionInterface* getActionInterface() = 0;
+
+    /** @return access to the keyboard handler of Brayns. */
+    virtual KeyboardHandler& getKeyboardHandler() = 0;
+
+    /** @return access to the camera manipulator of Brayns. */
+    virtual AbstractManipulator& getCameraManipulator() = 0;
 };
 }
-
-#endif

@@ -5,7 +5,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSPLUGINS_LINK_LIBRARIES
-  PUBLIC braynsCommon braynsIO vmmlib)
+  PRIVATE braynsCommon braynsIO vmmlib)
 
 set(BRAYNSPLUGINS_SOURCES
   engines/EngineFactory.cpp
@@ -25,14 +25,6 @@ if(BRAYNS_DEFLECT_ENABLED)
   list(APPEND BRAYNSPLUGINS_SOURCES extensions/plugins/DeflectPlugin.cpp)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS extensions/plugins/DeflectPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES Deflect)
-endif()
-
-if(BRAYNS_TOPOLOGY_VIEWER_PLUGIN_ENABLED)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC topologyViewer)
-endif()
-
-if(BRAYNS_MEMBRANELESS_ORGANELLES_PLUGIN_ENABLED)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC usecase_membraneless_organelles)
 endif()
 
 if(BRAYNS_NETWORKING_ENABLED)
@@ -64,12 +56,12 @@ if(BRAYNS_NETWORKING_ENABLED)
 endif()
 
 if(libuv_FOUND)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC ${libuv_LIBRARIES})
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE ${libuv_LIBRARIES})
 endif()
 
 if(BRAYNS_OSPRAY_ENABLED)
   add_subdirectory(engines/ospray)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC braynsOSPRayEnginePlugin)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE braynsOSPRayEnginePlugin)
 endif()
 
 common_library(braynsPlugins)

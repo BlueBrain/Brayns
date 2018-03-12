@@ -41,6 +41,8 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
+    /** Runtime plugins to load in Brayns::loadPlugins. */
+    const strings& getPlugins() const { return _plugins; }
     /** window size */
     const Vector2ui& getWindowSize() const { return _windowSize; }
     void setWindowSize(const Vector2ui& size)
@@ -87,6 +89,7 @@ public:
 protected:
     bool _parse(const po::variables_map& vm) final;
 
+    strings _plugins;
     Vector2ui _windowSize;
     bool _benchmarking;
     size_t _jpegCompression;

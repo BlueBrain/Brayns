@@ -48,11 +48,10 @@ void ExtensionPluginFactory::clear()
     _plugins.clear();
 }
 
-void ExtensionPluginFactory::preRender(KeyboardHandler& keyboardHandler,
-                                       AbstractManipulator& cameraManipulator)
+void ExtensionPluginFactory::preRender()
 {
     for (ExtensionPluginPtr plugin : _plugins)
-        plugin->preRender(keyboardHandler, cameraManipulator);
+        plugin->preRender();
 }
 
 void ExtensionPluginFactory::postRender()

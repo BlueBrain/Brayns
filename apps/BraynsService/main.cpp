@@ -47,7 +47,7 @@ public:
         _setupMainThread();
         _setupRenderThread();
 
-        _brayns.createPlugins();
+        _brayns.loadPlugins();
     }
 
     void run()

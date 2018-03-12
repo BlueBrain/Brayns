@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,30 +18,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef DEFLECTPLUGIN_H
-#define DEFLECTPLUGIN_H
+#define BOOST_TEST_MODULE braynsPlugin
 
-#include "ExtensionPlugin.h"
+#include "jsonSerialization.h"
 
-#include <brayns/api.h>
+#include "ClientServer.h"
 
-namespace brayns
+using Vec2 = std::array<unsigned, 2>;
+const Vec2 vecVal{{1, 1}};
+
+BOOST_AUTO_TEST_CASE(plugin_actions)
 {
-class DeflectPlugin : public ExtensionPlugin
-{
-public:
-    DeflectPlugin(EnginePtr engine, PluginAPI* api);
-
-    /** Handle stream setup and incoming events. */
-    BRAYNS_API void preRender() final;
-
-    /** Send rendered frame. */
-    BRAYNS_API void postRender() final;
-
-private:
-    class Impl;
-    std::shared_ptr<Impl> _impl;
-};
+    ClientServer clientServer({"--plugin", "myPlugin"});
+    makeNotification("hello");
+    makeNotification<Vec2>("foo", vecVal);
+    BOOST_CHECK_EQUAL(makeRequest<std::string>("who"), "me");
+    BOOST_CHECK((makeRequest<Vec2, Vec2>("echo", vecVal) == vecVal));
 }
-
-#endif

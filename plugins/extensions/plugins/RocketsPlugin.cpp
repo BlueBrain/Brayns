@@ -26,10 +26,15 @@
 
 #include "jsonUtils.h"
 
+#include <brayns/PluginAPI.h>
 #include <brayns/common/volume/VolumeHandler.h>
 
 #include <fstream>
 #include <rockets/jsonrpc/helpers.h>
+
+#ifdef BRAYNS_USE_LIBUV
+#include "SocketListener.h"
+#endif
 
 namespace
 {
@@ -103,11 +108,9 @@ inline bool from_json(T& obj, const std::string& json, F postUpdateFunc = [] {})
     return success;
 }
 
-RocketsPlugin::RocketsPlugin(EnginePtr engine,
-                             ParametersManager& parametersManager,
-                             ActionInterface* actionInterface BRAYNS_UNUSED)
-    : ExtensionPlugin(engine)
-    , _parametersManager(parametersManager)
+RocketsPlugin::RocketsPlugin(EnginePtr engine, PluginAPI* api)
+    : _engine(engine)
+    , _parametersManager(api->getParametersManager())
 {
     _setupRocketsServer();
 }
@@ -118,7 +121,7 @@ RocketsPlugin::~RocketsPlugin()
         _rocketsServer->setSocketListener(nullptr);
 }
 
-void RocketsPlugin::preRender(KeyboardHandler&, AbstractManipulator&)
+void RocketsPlugin::preRender()
 {
     if (!_rocketsServer || _socketListener)
         return;
