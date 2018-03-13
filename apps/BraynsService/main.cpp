@@ -48,6 +48,9 @@ public:
         _setupRenderThread();
 
         _brayns.loadPlugins();
+
+        // launch first frame; after that, only events will trigger that
+        _eventRendering->start();
     }
 
     void run()
