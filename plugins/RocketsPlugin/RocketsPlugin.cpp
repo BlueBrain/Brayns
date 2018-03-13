@@ -26,8 +26,8 @@
 
 #include "jsonUtils.h"
 
-#include <brayns/PluginAPI.h>
 #include <brayns/common/volume/VolumeHandler.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 #include <fstream>
 #include <rockets/jsonrpc/helpers.h>

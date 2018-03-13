@@ -21,7 +21,6 @@
 #include "DeflectPlugin.h"
 
 #include <brayns/Brayns.h>
-#include <brayns/PluginAPI.h>
 #include <brayns/common/camera/AbstractManipulator.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
@@ -30,6 +29,7 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 #include <deflect/SizeHints.h>
 #include <deflect/Stream.h>
@@ -65,8 +65,9 @@ public:
         , _cameraManipulator(api->getCameraManipulator())
         , _sendFuture{make_ready_future(true)}
     {
-        _params.setEnabled(true); // Streaming will only be activated if the
-        // DEFLECT_HOST environment variable is defined
+        // Streaming will only be activated if the DEFLECT_HOST environment
+        // variable is defined
+        _params.setEnabled(true);
     }
 
     void preRender()
@@ -236,8 +237,8 @@ private:
             case deflect::Event::EVT_VIEW_SIZE_CHANGED:
             {
                 Vector2ui newSize(event.dx, event.dy);
-                const auto isStereo =
-                    _renderingParams.getStereoMode() == StereoMode::side_by_side;
+                const auto isStereo = _renderingParams.getStereoMode() ==
+                                      StereoMode::side_by_side;
                 if (isStereo)
                     newSize.x() *= 2;
 
@@ -320,7 +321,8 @@ private:
         deflect::ImageWrapper deflectImage(_lastImage.data.data(),
                                            _lastImage.size.x(),
                                            _lastImage.size.y(), format);
-        const auto isStereo = _renderingParams.getStereoMode() == StereoMode::side_by_side;
+        const auto isStereo =
+            _renderingParams.getStereoMode() == StereoMode::side_by_side;
         if (isStereo)
             deflectImage.view = deflect::View::side_by_side;
 

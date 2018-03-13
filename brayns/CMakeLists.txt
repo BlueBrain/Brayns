@@ -7,15 +7,15 @@
 add_subdirectory(parameters)
 add_subdirectory(common)
 add_subdirectory(io)
+add_subdirectory(pluginapi)
 
-set(BRAYNS_PUBLIC_HEADERS Brayns.h PluginAPI.h)
+set(BRAYNS_PUBLIC_HEADERS Brayns.h)
 
 set(BRAYNS_SOURCES Brayns.cpp)
 
 set(BRAYNS_LINK_LIBRARIES
   PUBLIC braynsParameters braynsCommon
-         ${EMBREE_LIBRARY} # embree has to be exposed PUBLIC, don't know why
-  PRIVATE braynsIO braynsPlugins)
+  PRIVATE braynsIO braynsPlugins braynsPluginAPI)
 
 if(TARGET Lunchbox)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE Lunchbox)

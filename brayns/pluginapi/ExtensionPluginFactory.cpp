@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,30 +18,51 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef DEFLECTPLUGIN_H
-#define DEFLECTPLUGIN_H
+#include "ExtensionPluginFactory.h"
 
 #include "ExtensionPlugin.h"
 
-#include <brayns/api.h>
-
 namespace brayns
 {
-class DeflectPlugin : public ExtensionPlugin
+ExtensionPluginFactory::~ExtensionPluginFactory()
 {
-public:
-    DeflectPlugin(EnginePtr engine, PluginAPI* api);
-
-    /** Handle stream setup and incoming events. */
-    BRAYNS_API void preRender() final;
-
-    /** Send rendered frame. */
-    BRAYNS_API void postRender() final;
-
-private:
-    class Impl;
-    std::shared_ptr<Impl> _impl;
-};
+    clear();
 }
 
-#endif
+void ExtensionPluginFactory::remove(ExtensionPluginPtr plugin)
+{
+    ExtensionPlugins::iterator it =
+        std::find(_plugins.begin(), _plugins.end(), plugin);
+    if (it != _plugins.end())
+        _plugins.erase(it);
+}
+
+void ExtensionPluginFactory::add(ExtensionPluginPtr plugin)
+{
+    remove(plugin);
+    _plugins.push_back(plugin);
+}
+
+void ExtensionPluginFactory::clear()
+{
+    _plugins.clear();
+}
+
+void ExtensionPluginFactory::preRender()
+{
+    for (ExtensionPluginPtr plugin : _plugins)
+        plugin->preRender();
+}
+
+void ExtensionPluginFactory::postRender()
+{
+    for (ExtensionPluginPtr plugin : _plugins)
+        plugin->postRender();
+}
+
+void ExtensionPluginFactory::postSceneLoading()
+{
+    for (ExtensionPluginPtr plugin : _plugins)
+        plugin->postSceneLoading();
+}
+}

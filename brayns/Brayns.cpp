@@ -21,7 +21,6 @@
 
 #include <brayns/Brayns.h>
 
-#include <brayns/PluginAPI.h>
 #include <brayns/common/Progress.h>
 #include <brayns/common/Timer.h>
 #include <brayns/common/camera/Camera.h>
@@ -46,13 +45,14 @@
 #include <brayns/io/XYZBLoader.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 
+#include <brayns/pluginapi/ExtensionPluginFactory.h>
+#include <brayns/pluginapi/PluginAPI.h>
 #include <plugins/engines/EngineFactory.h>
-#include <plugins/extensions/ExtensionPluginFactory.h>
 #ifdef BRAYNS_USE_NETWORKING
-#include <plugins/extensions/plugins/RocketsPlugin.h>
+#include <plugins/RocketsPlugin/RocketsPlugin.h>
 #endif
 #ifdef BRAYNS_USE_DEFLECT
-#include <plugins/extensions/plugins/DeflectPlugin.h>
+#include <plugins/DeflectPlugin/DeflectPlugin.h>
 #endif
 
 #ifdef BRAYNS_USE_BRION
@@ -124,7 +124,6 @@ struct Brayns::Impl : public PluginAPI
     void loadPlugins()
     {
 #ifdef BRAYNS_USE_OSPRAY
-
         for (const auto& pluginName :
              _parametersManager.getApplicationParameters().getPlugins())
         {
