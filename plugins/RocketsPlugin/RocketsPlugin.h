@@ -22,16 +22,9 @@
 #define ROCKETSPLUGIN_H
 
 #include <brayns/api.h>
+#include <brayns/common/ActionInterface.h>
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
-
-#include <brayns/common/ActionInterface.h>
-#include <brayns/common/Timer.h>
-#include <rockets/jsonrpc/asyncReceiver.h>
-#include <rockets/jsonrpc/server.h>
-#include <rockets/server.h>
-
-#include "ImageGenerator.h"
 
 namespace brayns
 {
@@ -47,7 +40,6 @@ class RocketsPlugin : public ExtensionPlugin, public ActionInterface
 {
 public:
     RocketsPlugin(EnginePtr engine, PluginAPI* api);
-    ~RocketsPlugin();
 
     /**
      * In case no event loop is available, this processes in- and outgoing HTTP
@@ -72,90 +64,8 @@ public:
     BRAYNS_API void postSceneLoading() final;
 
 private:
-    std::string _getHttpInterface() const;
-    void _setupRocketsServer();
-    void _setupWebsocket();
-    void _broadcastWebsocketMessages();
-
-    template <class T>
-    void _handle(const std::string& endpoint, T& obj);
-
-    template <class T, class F = std::function<bool(const T&)>>
-    void _handleGET(const std::string& endpoint, T&,
-                    F modifiedFunc = [](const T& obj) {
-                        return obj.isModified();
-                    });
-
-    template <class T>
-    void _handlePUT(const std::string& endpoint, T& obj);
-
-    template <class T, class F>
-    void _handlePUT(const std::string& endpoint, T& obj, F postUpdateFunc);
-
-    template <class P, class R>
-    void _handleRPC(const std::string& method, const RpcDocumentation& doc,
-                    std::function<R(P)> action);
-
-    void _handleRPC(const std::string& method, const std::string& description,
-                    std::function<void()> action);
-
-    template <class P, class R>
-    void _handleAsyncRPC(
-        const std::string& method, const RpcDocumentation& doc,
-        std::function<void(P, rockets::jsonrpc::AsyncResponse)> action,
-        rockets::jsonrpc::AsyncReceiver::CancelRequestCallback cancel);
-
-    template <class T>
-    void _handleObjectSchema(const std::string& endpoint, T& obj);
-
-    void _handleSchema(const std::string& endpoint, const std::string& schema);
-
-    void _registerEndpoints();
-
-    void _handleFrameBuffer();
-    void _handleGeometryParams();
-    void _handleImageJPEG();
-    void _handleSimulationHistogram();
-    void _handleStreaming();
-    void _handleVersion();
-    void _handleVolumeHistogram();
-    void _handleVolumeParams();
-
-    void _handleInspect();
-    void _handleQuit();
-    void _handleResetCamera();
-    void _handleSnapshot();
-
-    std::future<rockets::http::Response> _handleCircuitConfigBuilder(
-        const rockets::http::Request&);
-
-    bool _writeBlueConfigFile(const std::string& filename,
-                              const std::map<std::string, std::string>& params);
-
-    EnginePtr _engine;
-
-    using WsClientConnectNotifications =
-        std::map<std::string, std::function<std::string()>>;
-    WsClientConnectNotifications _wsClientConnectNotifications;
-
-    using WsBroadcastOperations = std::map<std::string, std::function<void()>>;
-    WsBroadcastOperations _wsBroadcastOperations;
-
-    ParametersManager& _parametersManager;
-
-    std::unique_ptr<rockets::Server> _rocketsServer;
-    using JsonRpcServer =
-        rockets::jsonrpc::Server<rockets::Server,
-                                 rockets::jsonrpc::AsyncReceiver>;
-    std::unique_ptr<JsonRpcServer> _jsonrpcServer;
-
-#ifdef BRAYNS_USE_LIBUV
-    std::unique_ptr<SocketListener> _socketListener;
-#endif
-
-    ImageGenerator _imageGenerator;
-
-    Timer _timer;
+    class Impl;
+    std::shared_ptr<Impl> _impl;
 
     void _registerRequest(const std::string& name,
                           const RetParamFunc& action) final;

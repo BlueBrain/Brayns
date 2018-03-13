@@ -36,7 +36,7 @@ if(BRAYNS_NETWORKING_ENABLED)
   set_source_files_properties(RocketsPlugin/staticjson/staticjson.cpp
     PROPERTIES COMPILE_FLAGS -Wno-shadow)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS RocketsPlugin/RocketsPlugin.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PUBLIC Rockets)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE Rockets)
   if(LibJpegTurbo_FOUND)
     list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
   endif()
