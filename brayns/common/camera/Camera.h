@@ -41,9 +41,9 @@ class Camera : public BaseObject
 public:
     /**
        Default constructor
-       @param cameraType Type of camera (Perpective, Stereo, etc)
+       @param cameraType Type of camera (Perpective, orthographic, etc)
     */
-    BRAYNS_API Camera(CameraType cameraType);
+    BRAYNS_API Camera(const CameraType cameraType);
 
     BRAYNS_API virtual ~Camera();
 
@@ -176,15 +176,11 @@ public:
        Side)
        @param stereoMode The new stereo mode
     */
-    void setStereoMode(CameraStereoMode stereoMode)
+    void setStereoMode(StereoMode stereoMode)
     {
         _updateValue(_stereoMode, stereoMode);
     }
-
-    /**
-      @return the stereo mode of the Camera
-    */
-    CameraStereoMode getStereoMode() const { return _stereoMode; }
+    StereoMode getStereoMode() const { return _stereoMode; }
     /**
        @brief Sets the eye separation of the stereo camera
        @param eyeSeparation The new distance between eyes
@@ -231,7 +227,7 @@ private:
     float _focalLength{0.f};
     float _fieldOfView{45.f};
 
-    CameraStereoMode _stereoMode{CameraStereoMode::none};
+    StereoMode _stereoMode{StereoMode::none};
     float _eyeSeparation{0.0635f};
 
     ClipPlanes _clipPlanes{

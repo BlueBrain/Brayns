@@ -76,13 +76,14 @@ private:
     void _sendSizeHints(Engine& engine);
     void _sendDeflectFrame(Engine& engine);
     void _copyToLastImage(FrameBuffer& frameBuffer);
-    deflect::Stream::Future _sendLastImage(CameraType cameraType);
+    deflect::Stream::Future _sendLastImage();
     deflect::PixelFormat _getDeflectImageFormat(FrameBufferFormat format) const;
     Vector2d _getWindowPos(const deflect::Event& event,
                            const Vector2ui& windowSize) const;
     double _getZoomDelta(const deflect::Event& pinchEvent,
                          const Vector2ui& windowSize) const;
 
+    RenderingParameters& _renderingParams;
     ApplicationParameters& _appParams;
     StreamParameters& _params;
     Vector2d _previousPos;

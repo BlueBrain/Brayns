@@ -100,7 +100,8 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     Renderers renderersForScene = _createRenderers();
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene = std::make_shared<OSPRayScene>(renderersForScene, _parametersManager);
+    _scene =
+        std::make_shared<OSPRayScene>(renderersForScene, _parametersManager);
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
     _camera = createCamera(rp.getCameraType());
@@ -183,7 +184,8 @@ void OSPRayEngine::commit()
     const auto& streamParams = _parametersManager.getStreamParameters();
     if (streamParams.isModified() || _camera->isModified())
     {
-        const bool isStereo = _camera->getType() == CameraType::stereo;
+        const auto& rp = _parametersManager.getRenderingParameters();
+        const auto isStereo = rp.getStereoMode() == StereoMode::side_by_side;
         osprayFrameBuffer->setStreamingParams(streamParams, isStereo);
     }
 }
@@ -204,7 +206,9 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
         return Engine::getSupportedFrameSize(size);
 
     Vector2f result = size;
-    if (getCamera().getType() == CameraType::stereo)
+    const auto& rp = _parametersManager.getRenderingParameters();
+    const auto isStereo = rp.getStereoMode() == StereoMode::side_by_side;
+    if (isStereo)
     {
         if (size.x() % (TILE_SIZE * 2) != 0)
             result.x() = size.x() - size.x() % (TILE_SIZE * 2);
@@ -223,7 +227,9 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const
 {
-    if (getCamera().getType() == CameraType::stereo)
+    const auto& rp = _parametersManager.getRenderingParameters();
+    const auto isStereo = rp.getStereoMode() == StereoMode::side_by_side;
+    if (isStereo)
         return {TILE_SIZE * 2, TILE_SIZE};
     return {TILE_SIZE, TILE_SIZE};
 }
@@ -265,18 +271,18 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
 CameraPtr OSPRayEngine::createCamera(const CameraType type)
 {
     auto& rp = _parametersManager.getRenderingParameters();
-    auto cameraTypeAsString = rp.getCameraTypeAsString(type);
+    auto name = rp.getCameraTypeAsString(type);
     try
     {
-        return std::make_shared<OSPRayCamera>(type, cameraTypeAsString);
+        return std::make_shared<OSPRayCamera>(type, name);
     }
     catch (const std::runtime_error& e)
     {
         BRAYNS_WARN << e.what() << ". Using default camera instead"
                     << std::endl;
         rp.initializeDefaultCameras();
-        cameraTypeAsString = rp.getCameraTypeAsString(CameraType::default_);
-        return std::make_shared<OSPRayCamera>(type, cameraTypeAsString);
+        name = rp.getCameraTypeAsString(CameraType::default_);
+        return std::make_shared<OSPRayCamera>(type, name);
     }
 }
 }

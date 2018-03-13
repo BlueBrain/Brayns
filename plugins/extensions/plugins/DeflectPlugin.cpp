@@ -55,6 +55,7 @@ DeflectPlugin::DeflectPlugin(EnginePtr engine,
                              ParametersManager& parametersManager,
                              ActionInterface* actionInterface BRAYNS_UNUSED)
     : ExtensionPlugin(engine)
+    , _renderingParams{parametersManager.getRenderingParameters()}
     , _appParams{parametersManager.getApplicationParameters()}
     , _params{parametersManager.getStreamParameters()}
     , _sendFuture{make_ready_future(true)}
@@ -225,7 +226,9 @@ void DeflectPlugin::_handleDeflectEvents(Engine& engine,
         case deflect::Event::EVT_VIEW_SIZE_CHANGED:
         {
             Vector2ui newSize(event.dx, event.dy);
-            if (engine.getCamera().getType() == CameraType::stereo)
+            const auto isStereo =
+                _renderingParams.getStereoMode() == StereoMode::side_by_side;
+            if (isStereo)
                 newSize.x() *= 2;
 
             _appParams.setWindowSize(engine.getSupportedFrameSize(newSize));
@@ -278,7 +281,7 @@ void DeflectPlugin::_sendDeflectFrame(Engine& engine)
     if (frameBuffer.getColorBuffer())
     {
         _copyToLastImage(frameBuffer);
-        _sendFuture = _sendLastImage(engine.getCamera().getType());
+        _sendFuture = _sendLastImage();
     }
     else
         _sendFuture = make_ready_future(true);
@@ -297,15 +300,16 @@ void DeflectPlugin::_copyToLastImage(FrameBuffer& frameBuffer)
     _lastImage.format = frameBuffer.getFrameBufferFormat();
 }
 
-deflect::Stream::Future DeflectPlugin::_sendLastImage(
-    const CameraType cameraType)
+deflect::Stream::Future DeflectPlugin::_sendLastImage()
 {
     const auto format = _getDeflectImageFormat(_lastImage.format);
 
     deflect::ImageWrapper deflectImage(_lastImage.data.data(),
                                        _lastImage.size.x(), _lastImage.size.y(),
                                        format);
-    if (cameraType == CameraType::stereo)
+    const auto isStereo =
+        _renderingParams.getStereoMode() == StereoMode::side_by_side;
+    if (isStereo)
         deflectImage.view = deflect::View::side_by_side;
 
     deflectImage.compressionQuality = _params.getQuality();

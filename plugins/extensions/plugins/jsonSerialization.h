@@ -48,12 +48,10 @@
 #pragma GCC diagnostic pop
 #endif
 
-STATICJSON_DECLARE_ENUM(brayns::CameraStereoMode,
-                        {"none", brayns::CameraStereoMode::none},
-                        {"left", brayns::CameraStereoMode::left},
-                        {"right", brayns::CameraStereoMode::right},
-                        {"side_by_side",
-                         brayns::CameraStereoMode::side_by_side});
+STATICJSON_DECLARE_ENUM(brayns::StereoMode, {"none", brayns::StereoMode::none},
+                        {"left", brayns::StereoMode::left},
+                        {"right", brayns::StereoMode::right},
+                        {"side_by_side", brayns::StereoMode::side_by_side});
 
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
                         {"low", brayns::GeometryQuality::low},
@@ -162,7 +160,6 @@ inline void init(brayns::Camera* c, ObjectHandler* h)
     h->add_property("field_of_view", &c->_fieldOfView, Flags::Optional);
     h->add_property("aperture", &c->_aperture, Flags::Optional);
     h->add_property("focal_length", &c->_focalLength, Flags::Optional);
-    h->add_property("stereo_mode", &c->_stereoMode, Flags::Optional);
     h->add_property("eye_separation", &c->_eyeSeparation, Flags::Optional);
     h->add_property("clip_planes", &c->_clipPlanes, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
@@ -400,6 +397,7 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
                     Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
     h->add_property("samples_per_ray", &r->_spr, Flags::Optional);
+    h->add_property("stereo_mode", &r->_stereoMode, Flags::Optional);
 }
 
 inline void init(brayns::SceneParameters* s, ObjectHandler* h)

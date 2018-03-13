@@ -46,6 +46,7 @@ const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
 const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
 const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_CAMERA = "camera";
+const std::string PARAM_STEREO_MODE = "stereo-mode";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 const std::string PARAM_SPR = "samples-per-ray";
@@ -59,8 +60,11 @@ const std::array<std::string, 7> RENDERER_INTERNAL_NAMES = {
     {"basic", "proximityrenderer", "simulationrenderer", "particlerenderer",
      "raycast_Ng", "raycast_Ns", "scivis"}};
 
-const std::array<std::string, 5> CAMERA_TYPE_NAMES = {
-    {"perspective", "stereo", "orthographic", "panoramic", "clipped"}};
+const std::array<std::string, 4> CAMERA_TYPE_NAMES = {
+    {"perspective", "orthographic", "panoramic", "clipped"}};
+
+const std::array<std::string, 4> STEREO_MODES = {
+    {"none", "left", "right", "side-by-side"}};
 
 const std::array<std::string, 3> SHADING_TYPES = {
     {"none", "diffuse", "electron"}};
@@ -74,7 +78,6 @@ RenderingParameters::RenderingParameters()
     : AbstractParameters("Rendering")
     , _engine(EngineType::ospray)
     , _renderer(RendererType::default_)
-    , _cameraType(CameraType::default_)
     , _ambientOcclusionStrength{0.f}
     , _ambientOcclusionDistance{1.2f}
     , _shading{ShadingType::diffuse}
@@ -128,6 +131,8 @@ RenderingParameters::RenderingParameters()
         "epsilon value are ignored by the ray-tracer [float]")(
         PARAM_CAMERA.c_str(), po::value<std::string>(),
         "Camera [perspective|stereo|orthographic|panoramic]")(
+        PARAM_STEREO_MODE.c_str(), po::value<std::string>(),
+        "Stereo mode [none|left|right|side-by-side]")(
         PARAM_HEAD_LIGHT.c_str(), po::value<bool>(),
         "Enable/Disable light source attached to camera origin [bool]")(
         PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),
@@ -249,6 +254,14 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
             _cameraType = static_cast<CameraType>(
                 std::distance(_cameraTypeNames.begin(), it));
     }
+    if (vm.count(PARAM_STEREO_MODE))
+    {
+        _stereoMode = StereoMode::none;
+        const std::string& stereoMode = vm[PARAM_STEREO_MODE].as<std::string>();
+        for (size_t i = 0; i < STEREO_MODES.size(); ++i)
+            if (stereoMode == STEREO_MODES[i])
+                _stereoMode = static_cast<StereoMode>(i);
+    }
     if (vm.count(PARAM_HEAD_LIGHT))
         _headLight = vm[PARAM_HEAD_LIGHT].as<bool>();
     if (vm.count(PARAM_VARIANCE_THRESHOLD))
@@ -295,8 +308,10 @@ void RenderingParameters::print()
                 << std::endl;
     BRAYNS_INFO << "Epsilon                           : " << _epsilon
                 << std::endl;
-    BRAYNS_INFO << "Camera type                       : "
+    BRAYNS_INFO << "Camera                            : "
                 << getCameraTypeAsString(_cameraType) << std::endl;
+    BRAYNS_INFO << "Stereo mode                       : "
+                << getStereoModeAsString(_stereoMode) << std::endl;
     BRAYNS_INFO << "Accumulation                      : "
                 << (_accumulation ? "on" : "off") << std::endl;
     BRAYNS_INFO << "Samples per ray                   : " << _spr << std::endl;
@@ -318,6 +333,12 @@ const std::string& RenderingParameters::getCameraTypeAsString(
     const CameraType value) const
 {
     return _cameraTypeNames[static_cast<size_t>(value)];
+}
+
+const std::string& RenderingParameters::getStereoModeAsString(
+    const StereoMode value) const
+{
+    return STEREO_MODES[static_cast<size_t>(value)];
 }
 
 const std::string& RenderingParameters::getShadingAsString(

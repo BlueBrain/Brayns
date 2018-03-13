@@ -133,8 +133,8 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
                           "off",
                           "--pdb-file",
                           pdbFile.c_str(),
-                          "--camera",
-                          "stereo"};
+                          "--stereo-mode",
+                          "side-by-side"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);

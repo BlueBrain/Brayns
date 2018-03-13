@@ -25,10 +25,8 @@
 namespace brayns
 {
 Camera::Camera(const CameraType cameraType)
-    : _type(cameraType)
+    : _type{cameraType}
 {
-    if (_type == CameraType::stereo)
-        setStereoMode(CameraStereoMode::side_by_side);
 }
 
 Camera::~Camera()

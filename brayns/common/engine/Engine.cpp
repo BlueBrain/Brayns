@@ -105,6 +105,13 @@ void Engine::commit()
     _scene->commitVolumeData();
     _scene->commitSimulationData();
     _renderers[_activeRenderer]->commit();
+
+    const auto& rp = _parametersManager.getRenderingParameters();
+    if (rp.getStereoMode() != _camera->getStereoMode())
+    {
+        _camera->setStereoMode(rp.getStereoMode());
+        _camera->commit();
+    }
 }
 
 void Engine::render()
@@ -132,7 +139,9 @@ Renderer& Engine::getRenderer()
 Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
 {
     Vector2f result = size;
-    if (getCamera().getType() == CameraType::stereo && size.x() % 2 != 0)
+    if (_parametersManager.getRenderingParameters().getStereoMode() ==
+            StereoMode::side_by_side &&
+        size.x() % 2 != 0)
         // In case of 3D stereo vision, make sure the width is even
         result.x() = size.x() - 1;
     return result;
