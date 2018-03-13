@@ -27,6 +27,7 @@ set(BRAYNSCOMMON_SOURCES
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   ActionInterface.h
+  BaseObject.h
   camera/AbstractManipulator.h
   camera/Camera.h
   camera/FlyingModeManipulator.h
@@ -44,6 +45,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   log.h
   material/Material.h
   material/Texture2D.h
+  mathTypes.h
   Progress.h
   renderer/FrameBuffer.h
   renderer/Renderer.h
@@ -57,6 +59,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   volume/VolumeHandler.h
 )
 
+set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
   PUBLIC vmmlib
   PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}

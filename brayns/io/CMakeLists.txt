@@ -54,4 +54,5 @@ if(BRAYNS_IMAGEMAGICK_ENABLED)
   list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE ${Magick++_LIBRARIES})
 endif()
 
+set(BRAYNSIO_INCLUDE_NAME brayns/io)
 common_library(braynsIO)

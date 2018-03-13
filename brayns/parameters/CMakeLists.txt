@@ -32,4 +32,5 @@ set(BRAYNSPARAMETERS_LINK_LIBRARIES
     PRIVATE vmmlib ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
+set(BRAYNSPARAMETERS_INCLUDE_NAME brayns/parameters)
 common_library(braynsParameters)
