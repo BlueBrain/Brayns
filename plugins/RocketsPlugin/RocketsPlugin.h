@@ -28,9 +28,6 @@
 
 namespace brayns
 {
-struct RpcDocumentation;
-class SocketListener;
-
 /**
    The RocketsPlugin is in charge of exposing a both an http/REST interface to
    the outside world. The http server is configured according

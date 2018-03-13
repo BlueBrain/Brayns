@@ -16,4 +16,5 @@ set(BRAYNSPLUGINAPI_LINK_LIBRARIES
   PUBLIC braynsCommon
 )
 
+set(BRAYNSPLUGINAPI_INCLUDE_NAME brayns/pluginapi)
 common_library(braynsPluginAPI)

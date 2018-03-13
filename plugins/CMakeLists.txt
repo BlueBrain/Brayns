@@ -58,6 +58,13 @@ if(BRAYNS_OSPRAY_ENABLED)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE braynsOSPRayEnginePlugin)
 endif()
 
+if(CPPCHECK_VERSION VERSION_LESS 1.78)
+  list(APPEND CPPCHECK_EXTRA_ARGS --error-exitcode=0 --force)
+endif()
+
+set(BRAYNSPLUGINS_OMIT_LIBRARY_HEADER ON)
+set(BRAYNSPLUGINS_OMIT_VERSION_HEADERS ON)
+set(BRAYNSPLUGINS_INCLUDE_NAME plugins)
 common_library(braynsPlugins)
 
 # needed for staticjson and rapidjson
