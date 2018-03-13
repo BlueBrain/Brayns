@@ -60,8 +60,8 @@ const std::array<std::string, 7> RENDERER_INTERNAL_NAMES = {
     {"basic", "proximityrenderer", "simulationrenderer", "particlerenderer",
      "raycast_Ng", "raycast_Ns", "scivis"}};
 
-const std::array<std::string, 5> CAMERA_TYPE_NAMES = {
-    {"perspective", "stereo", "orthographic", "panoramic", "clipped"}};
+const std::array<std::string, 4> CAMERA_TYPE_NAMES = {
+    {"perspective", "orthographic", "panoramic", "clipped"}};
 
 const std::array<std::string, 4> STEREO_MODES = {
     {"none", "left", "right", "side-by-side"}};
@@ -258,8 +258,7 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
     {
         _stereoMode = StereoMode::none;
         const std::string& stereoMode = vm[PARAM_STEREO_MODE].as<std::string>();
-        for (size_t i = 0; i < sizeof(STEREO_MODES) / sizeof(STEREO_MODES[0]);
-             ++i)
+        for (size_t i = 0; i < STEREO_MODES.size(); ++i)
             if (stereoMode == STEREO_MODES[i])
                 _stereoMode = static_cast<StereoMode>(i);
     }

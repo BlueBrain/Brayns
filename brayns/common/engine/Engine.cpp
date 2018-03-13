@@ -151,8 +151,7 @@ void Engine::snapshot(const SnapshotParams& params, SnapshotReadyCallback cb)
     _snapshotFrameBuffer =
         createFrameBuffer(params.size, FrameBufferFormat::rgba_i8, true);
 
-    _snapshotCamera =
-        createCamera(getCamera().getType(), getCamera().getStereoMode());
+    _snapshotCamera = createCamera(getCamera().getType());
     *_snapshotCamera = getCamera();
     _snapshotCamera->setAspectRatio(float(params.size.x()) / params.size.y());
     _snapshotCamera->commit();

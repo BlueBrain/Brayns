@@ -104,7 +104,7 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
         std::make_shared<OSPRayScene>(renderersForScene, _parametersManager);
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
-    _camera = createCamera(rp.getCameraType(), rp.getStereoMode());
+    _camera = createCamera(rp.getCameraType());
 
     _camera->setEnvironmentMap(
         !parametersManager.getSceneParameters().getEnvironmentMap().empty());
@@ -268,14 +268,13 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
                                                accumulation);
 }
 
-CameraPtr OSPRayEngine::createCamera(const CameraType type,
-                                     const StereoMode stereoMode)
+CameraPtr OSPRayEngine::createCamera(const CameraType type)
 {
     auto& rp = _parametersManager.getRenderingParameters();
     auto name = rp.getCameraTypeAsString(type);
     try
     {
-        return std::make_shared<OSPRayCamera>(type, stereoMode, name);
+        return std::make_shared<OSPRayCamera>(type, name);
     }
     catch (const std::runtime_error& e)
     {
@@ -283,7 +282,7 @@ CameraPtr OSPRayEngine::createCamera(const CameraType type,
                     << std::endl;
         rp.initializeDefaultCameras();
         name = rp.getCameraTypeAsString(CameraType::default_);
-        return std::make_shared<OSPRayCamera>(type, stereoMode, name);
+        return std::make_shared<OSPRayCamera>(type, name);
     }
 }
 }

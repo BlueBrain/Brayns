@@ -217,9 +217,9 @@ public:
     void setSamplesPerRay(const size_t spr) { _updateValue(_spr, spr); }
     size_t getSamplesPerRay() const { return _spr; }
     /**
-     * @brief Defines the number of samples per ray for ray-casting rendering
-     * (typically volumes)
-     * @param spr Number of samples per ray
+     * @brief Defines the stereo mode
+     * @param stereoMode Stereo mode can be none, left eye, right eye or
+     * side-by-side
      */
     void setStereoMode(const StereoMode stereoMode)
     {

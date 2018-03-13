@@ -24,9 +24,8 @@
 
 namespace brayns
 {
-Camera::Camera(const CameraType cameraType, const StereoMode stereoMode)
+Camera::Camera(const CameraType cameraType)
     : _type{cameraType}
-    , _stereoMode{stereoMode}
 {
 }
 

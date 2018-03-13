@@ -43,7 +43,7 @@ public:
        Default constructor
        @param cameraType Type of camera (Perpective, orthographic, etc)
     */
-    BRAYNS_API Camera(const CameraType cameraType, const StereoMode stereoMode);
+    BRAYNS_API Camera(const CameraType cameraType);
 
     BRAYNS_API virtual ~Camera();
 
