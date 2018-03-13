@@ -125,7 +125,7 @@ endif()
 
 common_find_package_post()
 
-list(APPEND BRAYNS_DEPENDENT_LIBRARIES Rockets vmmlib)
+list(APPEND BRAYNS_DEPENDENT_LIBRARIES vmmlib)
 
 # ------------------------------------------------------------------------------
 # BRAYNS applications and libraries

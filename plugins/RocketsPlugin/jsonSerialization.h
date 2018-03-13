@@ -35,8 +35,8 @@
 #include <brayns/parameters/StreamParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 #include <brayns/version.h>
-#include <plugins/extensions/plugins/ImageGenerator.h>
 
+#include "ImageGenerator.h"
 #include "base64/base64.h"
 
 #ifdef __GNUC__

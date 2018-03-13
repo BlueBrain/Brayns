@@ -18,11 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "jsonSerialization.h"
+#include "../plugins/RocketsPlugin/jsonSerialization.h"
 
-#include <brayns/PluginAPI.h>
 #include <brayns/common/ActionInterface.h>
-#include <plugins/extensions/plugins/ExtensionPlugin.h>
+#include <brayns/pluginapi/ExtensionPlugin.h>
+#include <brayns/pluginapi/PluginAPI.h>
 
 #include <boost/test/unit_test.hpp>
 

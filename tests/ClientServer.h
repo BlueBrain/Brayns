@@ -36,6 +36,9 @@ bool is_ready(const std::future<T>& f)
     return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
 }
 
+const size_t CLIENT_PROCESS_TIMEOUT = 5;  /*ms*/
+const size_t SERVER_PROCESS_RETRIES = 10; /*ms*/
+
 class ClientServer
 {
 public:
@@ -69,7 +72,7 @@ public:
         auto connectFuture = wsClient.connect("ws://" + uri, "rockets");
         while (!is_ready(connectFuture))
         {
-            wsClient.process(5);
+            wsClient.process(CLIENT_PROCESS_TIMEOUT);
             brayns->render();
         }
         connectFuture.get();
@@ -107,8 +110,8 @@ public:
     {
         client.notify<Params>(method, params);
 
-        wsClient.process(5);
-        for (size_t i = 0; i < 10; ++i)
+        wsClient.process(CLIENT_PROCESS_TIMEOUT);
+        for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
             brayns->render();
     }
 
@@ -116,8 +119,8 @@ public:
     {
         client.notify(method, std::string());
 
-        wsClient.process(5);
-        for (size_t i = 0; i < 10; ++i)
+        wsClient.process(CLIENT_PROCESS_TIMEOUT);
+        for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
             brayns->render();
     }
 

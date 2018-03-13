@@ -18,15 +18,16 @@ endif()
 if(BRAYNS_NETWORKING_ENABLED)
   add_library(myPlugin SHARED myPlugin.cpp)
   target_link_libraries(myPlugin brayns)
+  target_include_directories(myPlugin SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
   list(APPEND EXCLUDE_FROM_TESTS myPlugin.cpp)
   list(APPEND TEST_LIBRARIES Rockets braynsPlugins myPlugin)
 else()
   list(APPEND EXCLUDE_FROM_TESTS plugin.cpp webAPI.cpp myPlugin.cpp)
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/plugins/extensions/plugins)
+include_directories(${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
 
-list(APPEND LCOV_EXCLUDE 'plugins/extensions/plugins/base64/*'
-                         'plugins/extensions/plugins/rapidjson/*'
-                         'plugins/extensions/plugins/staticjson/*')
+list(APPEND LCOV_EXCLUDE 'plugins/RocketsPlugin/base64/*'
+                         'plugins/RocketsPlugin/rapidjson/*'
+                         'plugins/RocketsPlugin/staticjson/*')
 include(CommonCTest)

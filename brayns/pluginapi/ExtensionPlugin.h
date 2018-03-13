@@ -21,9 +21,6 @@
 #ifndef EXTENSIONPLUGIN_H
 #define EXTENSIONPLUGIN_H
 
-#include <brayns/api.h>
-#include <brayns/common/types.h>
-
 namespace brayns
 {
 /**

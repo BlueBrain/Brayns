@@ -21,15 +21,17 @@
 #ifndef ROCKETSPLUGIN_H
 #define ROCKETSPLUGIN_H
 
-#include "ExtensionPlugin.h"
-#include "ImageGenerator.h"
-
 #include <brayns/api.h>
+#include <brayns/common/types.h>
+#include <brayns/pluginapi/ExtensionPlugin.h>
+
 #include <brayns/common/ActionInterface.h>
 #include <brayns/common/Timer.h>
 #include <rockets/jsonrpc/asyncReceiver.h>
 #include <rockets/jsonrpc/server.h>
 #include <rockets/server.h>
+
+#include "ImageGenerator.h"
 
 namespace brayns
 {

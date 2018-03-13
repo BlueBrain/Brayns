@@ -20,13 +20,13 @@
 
 #define BOOST_TEST_MODULE braynsWebAPI
 
-#include "jsonSerialization.h"
+#include <jsonSerialization.h>
 
 #include "ClientServer.h"
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/Renderer.h>
 
-#include "ImageGenerator.h"
+#include <ImageGenerator.h>
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
