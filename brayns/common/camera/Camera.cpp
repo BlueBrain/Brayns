@@ -50,7 +50,7 @@ Camera& Camera::operator=(const Camera& rhs)
     setAperture(getAperture());
     setFocalLength(getFocalLength());
     setFieldOfView(getFieldOfView());
-    setStereoMode(getStereoMode());
+    setStereoMode(rhs._stereoMode);
     setEyeSeparation(getEyeSeparation());
 
     setClipPlanes(getClipPlanes());

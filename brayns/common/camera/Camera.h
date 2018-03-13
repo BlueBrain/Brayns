@@ -180,10 +180,6 @@ public:
     {
         _updateValue(_stereoMode, stereoMode);
     }
-
-    /**
-      @return the stereo mode of the Camera
-    */
     StereoMode getStereoMode() const { return _stereoMode; }
     /**
        @brief Sets the eye separation of the stereo camera
@@ -216,6 +212,9 @@ public:
       @return the camera clip planes
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
+protected:
+    StereoMode _stereoMode{StereoMode::none};
+
 private:
     const CameraType _type{CameraType::default_};
     Vector3f _position;
@@ -231,7 +230,6 @@ private:
     float _focalLength{0.f};
     float _fieldOfView{45.f};
 
-    StereoMode _stereoMode{StereoMode::none};
     float _eyeSeparation{0.0635f};
 
     ClipPlanes _clipPlanes{

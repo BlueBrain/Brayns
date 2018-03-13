@@ -105,13 +105,6 @@ void OSPRayRenderer::commit()
     ospSetObject(_renderer, "simulationModel",
                  osprayScene->simulationModelImpl());
     ospCommit(_renderer);
-
-    // Handle stereo mode that, in OSPRay, is a camera attribute
-    if (rp.getStereoMode() != _camera->getStereoMode())
-    {
-        _camera->setStereoMode(rp.getStereoMode());
-        _camera->commit();
-    }
 }
 
 void OSPRayRenderer::setCamera(CameraPtr camera)

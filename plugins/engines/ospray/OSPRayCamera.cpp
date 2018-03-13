@@ -27,8 +27,7 @@
 
 namespace brayns
 {
-OSPRayCamera::OSPRayCamera(const CameraType type,
-                           const std::string& name)
+OSPRayCamera::OSPRayCamera(const CameraType type, const std::string& name)
     : Camera(type)
     , _camera{ospNewCamera(name.c_str())}
 {
@@ -57,7 +56,7 @@ void OSPRayCamera::commit()
     ospSet1f(_camera, "aspect", getAspectRatio());
     ospSet1f(_camera, "apertureRadius", getAperture());
     ospSet1f(_camera, "focusDistance", getFocalLength());
-    ospSet1i(_camera, "stereoMode", static_cast<uint>(getStereoMode()));
+    ospSet1i(_camera, "stereoMode", static_cast<uint>(_stereoMode));
     ospSet1f(_camera, "interpupillaryDistance", getEyeSeparation());
     ospSet1f(_camera, "fovy", getFieldOfView());
     ospSet1f(_camera, "architectural", true);

@@ -105,6 +105,13 @@ void Engine::commit()
     _scene->commitVolumeData();
     _scene->commitSimulationData();
     _renderers[_activeRenderer]->commit();
+
+    const auto& rp = _parametersManager.getRenderingParameters();
+    if (rp.getStereoMode() != _camera->getStereoMode())
+    {
+        _camera->setStereoMode(rp.getStereoMode());
+        _camera->commit();
+    }
 }
 
 void Engine::render()
