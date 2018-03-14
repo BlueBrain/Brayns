@@ -50,7 +50,7 @@ inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
         memcpy(dest, scanline, sizeof(dest[0]) * w);
     }
 
-    return std::move(result);
+    return result;
 }
 
 inline bool compareTestImage(const std::string& filename,

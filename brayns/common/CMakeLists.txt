@@ -8,7 +8,6 @@ set(BRAYNSCOMMON_SOURCES
   engine/Engine.cpp
   simulation/AbstractSimulationHandler.cpp
   input/KeyboardHandler.cpp
-  volume/VolumeHandler.cpp
   transferFunction/TransferFunction.cpp
   camera/AbstractManipulator.cpp
   camera/Camera.cpp
@@ -27,13 +26,18 @@ set(BRAYNSCOMMON_SOURCES
   utils/base64/base64.cpp
   utils/ImageUtils.cpp
   utils/Utils.cpp
+  volume/SharedDataVolume.cpp
+  volume/Volume.cpp
 )
 
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   ActionInterface.h
   BaseObject.h
   ImageManager.h
+  Progress.h
   PropertyMap.h
+  Statistics.h
+  Timer.h
   Transformation.h
   camera/AbstractManipulator.h
   camera/Camera.h
@@ -57,21 +61,20 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   material/Material.h
   material/Texture2D.h
   mathTypes.h
-  Progress.h
   renderer/FrameBuffer.h
   renderer/Renderer.h
   scene/Model.h
   scene/Scene.h
   simulation/AbstractSimulationHandler.h
-  Statistics.h
-  Timer.h
-  transferFunction/TransferFunction.h
   tasks/Task.h
   tasks/TaskFunctor.h
   tasks/TaskRuntimeError.h
+  transferFunction/TransferFunction.h
   types.h
   utils/Utils.h
-  volume/VolumeHandler.h
+  volume/BrickedVolume.h
+  volume/SharedDataVolume.h
+  volume/Volume.h
 )
 
 set(BRAYNSCOMMON_HEADERS

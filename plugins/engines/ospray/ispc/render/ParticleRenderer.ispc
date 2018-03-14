@@ -207,8 +207,6 @@ export void ParticleRenderer_set(
     self->abstract.timestamp = timestamp;
     self->abstract.spp = spp;
 
-    self->abstract.volumeData = 0;
-
     self->simulationData = (uniform float* uniform)simulationData;
     self->simulationDataSize = simulationDataSize;
     self->transferFunction = (uniform vec4f * uniform)transferFunction;

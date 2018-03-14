@@ -25,7 +25,6 @@
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/utils/Utils.h>
-#include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 
@@ -61,13 +60,6 @@ Scene& Scene::operator=(const Scene& rhs)
     _backgroundMaterial->markModified();
 
     _lights = rhs._lights;
-
-    if (rhs._volumeHandler)
-    {
-        _volumeHandler = std::make_shared<VolumeHandler>(
-            _parametersManager.getVolumeParameters(), IndexMode::modulo);
-        *_volumeHandler = *rhs._volumeHandler;
-    }
 
     if (rhs._simulationHandler)
     {
@@ -106,8 +98,7 @@ size_t Scene::getSizeInBytes() const
 size_t Scene::getNumModels() const
 {
     std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
-    const auto size = _modelDescriptors.size();
-    return size;
+    return _modelDescriptors.size();
 }
 
 void Scene::addLight(LightPtr light)
@@ -208,84 +199,6 @@ void Scene::setCADiffusionSimulationHandler(
 CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
 {
     return _caDiffusionSimulationHandler;
-}
-
-void Scene::resetVolumeHandler()
-{
-    const auto& vp = _parametersManager.getVolumeParameters();
-    const auto& volumeFile = vp.getFilename();
-    const auto& volumeFolder = vp.getFolder();
-    if (volumeFile.empty() && volumeFolder.empty())
-        return;
-
-    try
-    {
-        if (_volumeHandler)
-            removeModel(_volumeModelId);
-
-        std::string modelPath;
-        _volumeHandler.reset(new VolumeHandler(vp, IndexMode::modulo));
-        if (!volumeFile.empty())
-        {
-            if (!isVolumeSupported(volumeFile))
-            {
-                _volumeHandler.reset();
-                return;
-            }
-            _volumeHandler->attachVolumeToFile(0, volumeFile);
-            modelPath = volumeFile;
-        }
-        else
-        {
-            strings filenames = parseFolder(volumeFolder, {".raw"});
-            if (filenames.empty())
-            {
-                _volumeHandler.reset();
-                return;
-            }
-
-            std::sort(filenames.begin(), filenames.end());
-            uint32_t index = 0;
-            for (const auto& filename : filenames)
-                _volumeHandler->attachVolumeToFile(index++, filename);
-            modelPath = filenames[0];
-        }
-
-        // Add volume model
-        const auto& dimensions = vp.getDimensions();
-        const auto& spacing = vp.getElementSpacing();
-        const auto& offset = vp.getOffset();
-        auto model = createModel();
-        model->updateBounds(offset);
-        model->updateBounds(offset + dimensions);
-        model->buildBoundingBox();
-        _volumeModelId = addModel(std::make_shared<ModelDescriptor>(
-            std::move(model), "Volume", modelPath,
-            ModelMetadata{
-                {"dimensions", std::to_string(dimensions.x()) + " " +
-                                   std::to_string(dimensions.y()) + " " +
-                                   std::to_string(dimensions.z())},
-                {"element-spacing", std::to_string(spacing.x()) + " " +
-                                        std::to_string(spacing.y()) + " " +
-                                        std::to_string(spacing.z())},
-                {"offset", std::to_string(offset.x()) + " " +
-                               std::to_string(offset.y()) + " " +
-                               std::to_string(offset.z())}}));
-
-        _transferFunction.markModified();
-    }
-    catch (const std::runtime_error& e)
-    {
-        BRAYNS_ERROR << e.what() << std::endl;
-    }
-
-    if (_volumeHandler)
-        _parametersManager.getAnimationParameters().setEnd(
-            _volumeHandler->getNbFrames());
-    else
-        _parametersManager.getAnimationParameters().reset();
-
-    return;
 }
 
 bool Scene::empty() const

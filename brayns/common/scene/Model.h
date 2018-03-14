@@ -255,6 +255,12 @@ public:
         return _trianglesMeshes;
     }
 
+    /** Add a volume to the model*/
+    BRAYNS_API void addVolume(VolumePtr);
+
+    /** Remove a volume from the model */
+    BRAYNS_API void removeVolume(VolumePtr);
+
     /**
      * @brief logInformation Logs information about the model, like the number
      * of primitives, and the associated memory footprint.
@@ -307,6 +313,12 @@ public:
     /** @return the size in bytes of all geometries. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
     void markInstancesDirty() { _instancesDirty = true; }
+    const Volumes& getVolumes() const { return _volumes; }
+    bool isVolumesDirty() const { return _volumesDirty; }
+    void resetVolumesDirty() { _volumesDirty = false; }
+    /** @internal */
+    void updateSizeInBytes();
+
 protected:
     MaterialMap _materials;
     SpheresMap _spheres;
@@ -334,6 +346,9 @@ protected:
     SDFGeometryData _sdf;
     bool _sdfGeometriesDirty{false};
     bool _instancesDirty{true};
+
+    Volumes _volumes;
+    bool _volumesDirty{true};
 
     size_t _sizeInBytes{0};
 

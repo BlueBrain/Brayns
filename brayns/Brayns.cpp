@@ -34,7 +34,6 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
-#include <brayns/common/volume/VolumeHandler.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
@@ -42,6 +41,7 @@
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
+#include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 
@@ -195,6 +195,9 @@ struct Brayns::Impl : public PluginAPI
 
         scene.commit();
 
+        _engine->getStatistics().setSceneSizeInBytes(
+            _engine->getScene().getSizeInBytes());
+
         _sceneWasModified = _sceneWasModified || scene.isModified();
         if (scene.isModified())
             _finishLoadScene();
@@ -305,6 +308,11 @@ struct Brayns::Impl : public PluginAPI
                         ([&scene = _engine->getScene(), & params =
                                 _parametersManager.getGeometryParameters()] {
                             return std::make_unique<ProteinLoader>(scene, params);
+                        }));
+        REGISTER_LOADER(VolumeLoader,
+                        ([&scene = _engine->getScene(), & params =
+                                _parametersManager.getVolumeParameters()] {
+                            return std::make_unique<VolumeLoader>(scene, params);
                         }));
         REGISTER_LOADER(XYZBLoader,
                         ([&scene = _engine->getScene(), & params =
@@ -462,9 +470,6 @@ private:
         if (_dataLoadingFuture.valid())
             _dataLoadingFuture.get();
 
-        _engine->getStatistics().setSceneSizeInBytes(
-            _engine->getScene().getSizeInBytes());
-
         // finish reporting of progress
         postSceneLoading();
     }
@@ -537,23 +542,6 @@ private:
 
         if (!geometryParameters.getMolecularSystemConfig().empty())
             _loadMolecularSystem(updateProgress);
-
-        auto& volumeParameters = _parametersManager.getVolumeParameters();
-        if (scene.getVolumeHandler())
-        {
-            scene.commitTransferFunctionData();
-            scene.getVolumeHandler()->setCurrentIndex(0);
-            const Vector3ui& volumeDimensions =
-                scene.getVolumeHandler()->getDimensions();
-            const Vector3f& volumeOffset =
-                scene.getVolumeHandler()->getOffset();
-            const Vector3f& volumeElementSpacing =
-                volumeParameters.getElementSpacing();
-            auto bounds = scene.getBounds();
-            bounds.merge(Vector3f(0.f, 0.f, 0.f));
-            bounds.merge(volumeOffset +
-                         Vector3f(volumeDimensions) * volumeElementSpacing);
-        }
 
         scene.saveToCacheFile();
         scene.buildEnvironmentMap();

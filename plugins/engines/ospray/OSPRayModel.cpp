@@ -20,6 +20,7 @@
 
 #include "OSPRayModel.h"
 #include "OSPRayMaterial.h"
+#include "OSPRayVolume.h"
 #include "utils.h"
 
 #include <brayns/common/Transformation.h>
@@ -383,6 +384,12 @@ void OSPRayModel::_commitSDFGeometries()
 
 void OSPRayModel::commit()
 {
+    for (auto volume : _volumes)
+    {
+        auto ospVolume = std::dynamic_pointer_cast<OSPRayVolume>(volume);
+        ospVolume->commit();
+    }
+
     if (!dirty())
         return;
 
