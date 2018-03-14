@@ -62,6 +62,8 @@ public:
     BRAYNS_API void setInitialState(const Vector3f& position,
                                     const Vector3f& target, const Vector3f& up);
 
+    BRAYNS_API void setInitialState(const Boxf& boundingBox);
+
     /**
        Gets camera type
        @return The type of camera (Perpective, Stereo, etc)
