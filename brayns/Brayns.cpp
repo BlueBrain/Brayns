@@ -302,6 +302,12 @@ struct Brayns::Impl : public PluginAPI
             _loadScene();
 
         promise.set_value();
+
+        const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
+
+        auto& camera = _engine->getCamera();
+        camera.setInitialState(_engine->getScene().getWorldBounds());
+        camera.setAspectRatio(frameSize.x() / frameSize.y());
     }
 
     bool preRender(const RenderInput& renderInput)
@@ -358,6 +364,7 @@ struct Brayns::Impl : public PluginAPI
     {
         return *_cameraManipulator;
     }
+    Camera& getCamera() final { return _engine->getCamera(); }
     ActionInterface* getActionInterface() final
     {
         return _actionInterface.get();
@@ -432,9 +439,6 @@ private:
     {
         if (_dataLoadingFuture.valid())
             _dataLoadingFuture.get();
-
-        // Set default camera according to scene bounding box
-        _engine->setDefaultCamera();
 
         // Set default epsilon according to scene bounding box
         _engine->setDefaultEpsilon();
