@@ -62,26 +62,6 @@ void Engine::reshape(const Vector2ui& frameSize)
     _camera->commit();
 }
 
-void Engine::setDefaultCamera()
-{
-    const Vector2i& frameSize = _frameBuffer->getSize();
-
-    const Boxf& worldBounds = _scene->getWorldBounds();
-    const Vector3f& target = worldBounds.getCenter();
-    const Vector3f& diag = worldBounds.getSize();
-    Vector3f position = target;
-    position.z() += diag.find_max();
-
-    const Vector3f up = Vector3f(0.f, 1.f, 0.f);
-    _camera->setInitialState(position, target, up);
-    _camera->setAspectRatio(static_cast<float>(frameSize.x()) /
-                            static_cast<float>(frameSize.y()));
-
-    BRAYNS_INFO << "World bounding box: " << worldBounds << std::endl;
-    BRAYNS_INFO << "World center      : " << worldBounds.getCenter()
-                << std::endl;
-}
-
 void Engine::setDefaultEpsilon()
 {
     float epsilon = _parametersManager.getRenderingParameters().getEpsilon();

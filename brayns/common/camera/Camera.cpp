@@ -77,6 +77,21 @@ void Camera::setInitialState(const Vector3f& position, const Vector3f& target,
     set(position, target, upVector);
 }
 
+BRAYNS_API void Camera::setInitialState(const Boxf& boundingBox)
+{
+    const Vector3f& target = boundingBox.getCenter();
+    const Vector3f& diag = boundingBox.getSize();
+    Vector3f position = target;
+    position.z() += diag.find_max();
+
+    const Vector3f up = Vector3f(0.f, 1.f, 0.f);
+    setInitialState(position, target, up);
+
+    BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
+    BRAYNS_INFO << "World center      : " << boundingBox.getCenter()
+                << std::endl;
+}
+
 void Camera::reset()
 {
     set(_initialPosition, _initialTarget, _initialUp);

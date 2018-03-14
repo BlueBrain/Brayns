@@ -45,5 +45,8 @@ public:
 
     /** @return access to the camera manipulator of Brayns. */
     virtual AbstractManipulator& getCameraManipulator() = 0;
+
+    /** @return access to the camera of Brayns. */
+    virtual Camera& getCamera() = 0;
 };
 }
