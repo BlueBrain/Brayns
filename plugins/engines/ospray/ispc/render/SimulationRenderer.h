@@ -41,7 +41,6 @@ public:
 private:
     ospray::Model *_simulationModel;
 
-    ospray::Ref<ospray::Data> _volumeData;
     ospray::Ref<ospray::Data> _simulationData;
     ospray::uint64 _simulationDataSize;
     ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
@@ -50,10 +49,6 @@ private:
     float _transferFunctionMinValue;
     float _transferFunctionRange;
     float _threshold;
-    ospray::vec3i _volumeDimensions;
-    ospray::vec3f _volumeElementSpacing;
-    ospray::vec3f _volumeOffset;
-    float _volumeEpsilon;
     ospray::int32 _volumeSamplesPerRay;
     float _detectionDistance;
 };

@@ -406,12 +406,18 @@ inline void processElectronShading(varying ScreenSample& sample,
 inline void processVolumeContribution(varying ScreenSample& sample,
                                       ShadingAttributes& attributes, Ray& ray)
 {
-    if (attributes.self->abstract.volumeData)
+    // if (attributes.self->abstract.volumeData)
+    for (uniform int32 i = 0;
+         i < attributes.self->abstract.super.model->volumeCount; i++)
     {
+        Volume* uniform volume_i =
+            attributes.self->abstract.super.model->volumes[i];
         const vec4f volumetricValue =
-            getVolumeContribution(&(attributes.self->abstract), ray, sample);
+            getVolumeContribution(volume_i, &(attributes.self->abstract), ray,
+                                  sample);
         attributes.volumeColor = make_vec3f(volumetricValue);
         attributes.volumeIntensity = volumetricValue.w;
+        break;
     }
 }
 
@@ -619,11 +625,7 @@ export void SimulationRenderer_set(
     const uniform bool& shadingEnabled, const uniform int& randomNumber,
     const uniform float& timestamp, const uniform int& spp,
     const uniform bool& electronShadingEnabled, void** uniform lights,
-    const uniform int32 numLights, uniform uint8* uniform volumeData,
-    const uniform vec3i& volumeDimensions,
-    const uniform vec3f& volumeElementSpacing,
-    const uniform vec3f& volumeOffset, const uniform float& volumeEpsilon,
-    const uniform int32& volumeSamplesPerRay,
+    const uniform int32 numLights,const uniform int32& volumeSamplesPerRay,
     uniform float* uniform simulationData,
     const uniform uint64& simulationDataSize, uniform vec4f* uniform colormap,
     uniform vec3f* uniform emissionIntensitiesMap,
@@ -650,16 +652,7 @@ export void SimulationRenderer_set(
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
 
-    self->abstract.volumeData = (uniform uint8 * uniform)volumeData;
-    self->abstract.volumeDimensions = volumeDimensions;
-    self->abstract.volumeElementSpacing = volumeElementSpacing;
-    self->abstract.volumeOffset = volumeOffset;
-    self->abstract.volumeEpsilon = volumeEpsilon;
     self->abstract.volumeSamplesPerRay = volumeSamplesPerRay;
-
-    const uniform vec3f diag =
-        make_vec3f(volumeDimensions) * volumeElementSpacing;
-    self->abstract.volumeDiag = max(diag.x, max(diag.y, diag.z));
 
     self->abstract.colorMap = (uniform vec4f * uniform)colormap;
     self->abstract.emissionIntensitiesMap =

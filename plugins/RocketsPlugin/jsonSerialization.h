@@ -499,14 +499,23 @@ inline void init(brayns::SceneParameters* s, ObjectHandler* h)
 
 inline void init(brayns::VolumeParameters* v, ObjectHandler* h)
 {
-    h->add_property("volume_folder", &v->_folder, Flags::Optional);
-    h->add_property("volume_file", &v->_filename, Flags::Optional);
     h->add_property("volume_dimensions", Vector3uiArray(v->_dimensions),
                     Flags::Optional);
     h->add_property("volume_element_spacing", Vector3fArray(v->_elementSpacing),
                     Flags::Optional);
     h->add_property("volume_offset", Vector3fArray(v->_offset),
                     Flags::Optional);
+
+    h->add_property("gradient_shading", &v->_gradientShading, Flags::Optional);
+    h->add_property("single_shade", &v->_singleShade, Flags::Optional);
+    h->add_property("pre_integration", &v->_preIntegration, Flags::Optional);
+    h->add_property("adaptive_max_sampling_rate", &v->_adaptiveMaxSamplingRate,
+                    Flags::Optional);
+    h->add_property("adaptive_sampling", &v->_adaptiveSampling,
+                    Flags::Optional);
+    h->add_property("sampling_rate", &v->_samplingRate, Flags::Optional);
+    h->add_property("specular", Vector3fArray(v->_specular), Flags::Optional);
+    h->add_property("clip_box", &v->_clipBox, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

@@ -54,13 +54,6 @@ struct AbstractRenderer
     float timestamp;
     int spp;
 
-    // Volume attributes
-    uniform uint8* uniform volumeData;
-    vec3i volumeDimensions;
-    vec3f volumeElementSpacing;
-    vec3f volumeOffset;
-    float volumeEpsilon;
-    float volumeDiag;
     uint32 volumeSamplesPerRay;
 
     // Transfer function / Color map attributes
@@ -155,7 +148,8 @@ float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
     @param ray Current ray used to traverse the volume
     @return Resulting color and alpha value
 */
-vec4f getVolumeContribution(const uniform AbstractRenderer* uniform self,
+vec4f getVolumeContribution(Volume* uniform volume,
+                            const uniform AbstractRenderer* uniform self,
                             const varying Ray& ray,
                             varying ScreenSample& sample);
 

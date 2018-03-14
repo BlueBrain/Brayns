@@ -49,32 +49,33 @@ public:
     /** @copydoc Scene::commitLights */
     bool commitLights() final;
 
-    void commitSimulationData();
-    void commitVolumeData();
-
     /** @copydoc Scene::commitTransferFunctionData */
     bool commitTransferFunctionData() final;
 
-    /** @copydoc Scene::isVolumeSupported */
-    bool isVolumeSupported(const std::string& volumeFile) const final;
-
+    SharedDataVolumePtr createSharedDataVolume(const Vector3ui& dimensions,
+                                               const Vector3f& spacing,
+                                               const DataType type) const final;
+    BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
+                                         const Vector3f& spacing,
+                                         const DataType type) const final;
     ModelPtr createModel() const final;
 
     OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _rootSimulationModel; }
-    void resetVolumeHandler() final;
-
 private:
+    void _commitSimulationData();
+    bool _commitVolumeData();
+
     OSPModel _rootModel{nullptr};
     OSPModel _rootSimulationModel{nullptr};
 
     std::vector<OSPLight> _ospLights;
     OSPData _ospLightData{nullptr};
 
-    OSPData _ospVolumeData{nullptr};
-    uint64_t _ospVolumeDataSize{0};
-
     OSPData _ospSimulationData{nullptr};
+
+    OSPTransferFunction _ospTransferFunction{
+        ospNewTransferFunction("piecewise_linear")};
 
     OSPData _ospTransferFunctionEmissionData{nullptr};
     OSPData _ospTransferFunctionDiffuseData{nullptr};

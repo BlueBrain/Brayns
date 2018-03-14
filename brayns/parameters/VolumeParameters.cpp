@@ -22,8 +22,6 @@
 
 namespace
 {
-const std::string PARAM_VOLUME_FOLDER = "volume-folder";
-const std::string PARAM_VOLUME_FILENAME = "volume-file";
 const std::string PARAM_VOLUME_DIMENSIONS = "volume-dimensions";
 const std::string PARAM_VOLUME_ELEMENT_SPACING = "volume-element-spacing";
 const std::string PARAM_VOLUME_OFFSET = "volume-offset";
@@ -38,10 +36,6 @@ VolumeParameters::VolumeParameters()
     , _offset(0.f, 0.f, 0.f)
 {
     _parameters.add_options()(
-        PARAM_VOLUME_FOLDER.c_str(), po::value<std::string>(),
-        "Folder containing RAW 8bit volume files [string]")(
-        PARAM_VOLUME_FILENAME.c_str(), po::value<std::string>(),
-        "File containing RAW 8bit volume data [string]")(
         PARAM_VOLUME_DIMENSIONS.c_str(), po::value<size_ts>()->multitoken(),
         "Volume dimensions [int int int]")(
         PARAM_VOLUME_ELEMENT_SPACING.c_str(), po::value<floats>()->multitoken(),
@@ -52,12 +46,6 @@ VolumeParameters::VolumeParameters()
 
 void VolumeParameters::parse(const po::variables_map& vm)
 {
-    if (vm.count(PARAM_VOLUME_FOLDER))
-        _folder = vm[PARAM_VOLUME_FOLDER].as<std::string>();
-
-    if (vm.count(PARAM_VOLUME_FILENAME))
-        _filename = vm[PARAM_VOLUME_FILENAME].as<std::string>();
-
     if (vm.count(PARAM_VOLUME_DIMENSIONS))
     {
         size_ts values = vm[PARAM_VOLUME_DIMENSIONS].as<size_ts>();
@@ -82,8 +70,6 @@ void VolumeParameters::parse(const po::variables_map& vm)
 void VolumeParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Folder          : " << _folder << std::endl;
-    BRAYNS_INFO << "Filename        : " << _filename << std::endl;
     BRAYNS_INFO << "Dimensions      : " << _dimensions << std::endl;
     BRAYNS_INFO << "Element spacing : " << _elementSpacing << std::endl;
     BRAYNS_INFO << "Offset          : " << _offset << std::endl;

@@ -11,6 +11,7 @@ set(BRAYNSIO_SOURCES
   simulation/CADiffusionSimulationHandler.cpp
   simulation/SpikeSimulationHandler.cpp
   TransferFunctionLoader.cpp
+  VolumeLoader.cpp
   XYZBLoader.cpp
 )
 
@@ -22,6 +23,7 @@ set(BRAYNSIO_PUBLIC_HEADERS
   simulation/CADiffusionSimulationHandler.h
   simulation/SpikeSimulationHandler.h
   TransferFunctionLoader.h
+  VolumeLoader.h
   XYZBLoader.h
 )
 

@@ -35,28 +35,70 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    /** Folder containing volume files */
-    const std::string& getFolder() const { return _folder; }
-    /** File containing volume data */
-    const std::string& getFilename() const { return _filename; }
-    void setFilename(const std::string& filename)
-    {
-        _updateValue(_filename, filename);
-    }
-    /** Volume dimension  */
+    /** Volume dimensions  */
     const Vector3ui& getDimensions() const { return _dimensions; }
+    void setDimensions(const Vector3ui& dim) { _updateValue(_dimensions, dim); }
     /** Volume scale  */
     const Vector3f& getElementSpacing() const { return _elementSpacing; }
+    void setElementSpacing(const Vector3f& spacing)
+    {
+        _updateValue(_elementSpacing, spacing);
+    }
     /** Volume offset */
     const Vector3f& getOffset() const { return _offset; }
+    void setGradientShading(const bool enabled)
+    {
+        _updateValue(_gradientShading, enabled);
+    }
+    bool getGradientShading() const { return _gradientShading; }
+    void setSingleShade(const bool enabled)
+    {
+        _updateValue(_singleShade, enabled);
+    }
+    bool getSingleShade() const { return _singleShade; }
+    void setPreIntegration(const bool enabled)
+    {
+        _updateValue(_preIntegration, enabled);
+    }
+    bool getPreIntegration() const { return _preIntegration; }
+    void setAdaptiveSampling(const bool enabled)
+    {
+        _updateValue(_adaptiveSampling, enabled);
+    }
+    bool getAdaptiveSampling() const { return _adaptiveSampling; }
+    void setAdaptiveMaxSamplingRate(const float value)
+    {
+        _updateValue(_adaptiveMaxSamplingRate, value);
+    }
+    float getAdaptiveMaxSamplingRate() const
+    {
+        return _adaptiveMaxSamplingRate;
+    }
+
+    void setSamplingRate(const float value)
+    {
+        _updateValue(_samplingRate, value);
+    }
+    float getSamplingRate() const { return _samplingRate; }
+    void setSpecular(const Vector3f& value) { _updateValue(_specular, value); }
+    const Vector3f& getSpecular() const { return _specular; }
+    void setClipBox(const Boxf& value) { _updateValue(_clipBox, value); }
+    const Boxf& getClipBox() const { return _clipBox; }
 protected:
     void parse(const po::variables_map& vm) final;
 
-    std::string _folder;
-    std::string _filename;
     Vector3ui _dimensions;
     Vector3f _elementSpacing;
     Vector3f _offset;
+
+    bool _gradientShading{false};
+    bool _singleShade{true};
+    bool _preIntegration{false};
+    float _adaptiveMaxSamplingRate{2.f};
+    bool _adaptiveSampling{true};
+    float _samplingRate{0.125f};
+    Vector3f _specular{0.3f, 0.3f, 0.3f};
+    Boxf _clipBox;
 
     SERIALIZATION_FRIEND(VolumeParameters)
 };

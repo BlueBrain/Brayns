@@ -22,6 +22,7 @@
 #include "OSPRayMaterial.h"
 #include "OSPRayModel.h"
 #include "OSPRayRenderer.h"
+#include "OSPRayVolume.h"
 #include "utils.h"
 
 #include <brayns/common/ImageManager.h>
@@ -31,7 +32,6 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/common/volume/VolumeHandler.h>
 
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -48,15 +48,15 @@ OSPRayScene::OSPRayScene(const Renderers& renderers,
     , _memoryManagementFlags(memoryManagementFlags)
 {
     _backgroundMaterial = std::make_shared<OSPRayMaterial>();
+    ospCommit(_ospTransferFunction);
 }
 
 OSPRayScene::~OSPRayScene()
 {
+    ospRelease(_ospTransferFunction);
+
     if (_ospSimulationData)
         ospRelease(_ospSimulationData);
-
-    if (_ospVolumeData)
-        ospRelease(_ospVolumeData);
 
     if (_ospTransferFunctionDiffuseData)
         ospRelease(_ospTransferFunctionDiffuseData);
@@ -78,12 +78,12 @@ OSPRayScene::~OSPRayScene()
 void OSPRayScene::commit()
 {
     const bool rebuildScene = isModified();
+    const bool addRemoveVolumes = _commitVolumeData();
 
-    commitVolumeData();
-    commitSimulationData();
+    _commitSimulationData();
     commitTransferFunctionData();
 
-    if (!rebuildScene)
+    if (!rebuildScene && !addRemoveVolumes)
         return;
 
     _activeModels.clear();
@@ -118,6 +118,18 @@ void OSPRayScene::commit()
                 _rootSimulationModel = ospNewModel();
             addInstance(_rootSimulationModel, impl.getSimulationModel(),
                         transformation);
+        }
+
+        // add volumes to root model, because scivis renderer does not consider
+        // volumes from instances
+        if (modelDescriptor->getVisible())
+        {
+            for (auto volume : modelDescriptor->getModel().getVolumes())
+            {
+                auto ospVolume =
+                    std::dynamic_pointer_cast<OSPRayVolume>(volume);
+                ospAddVolume(_rootModel, ospVolume->impl());
+            }
         }
 
         Boxf instancesBounds;
@@ -226,6 +238,31 @@ bool OSPRayScene::commitTransferFunctionData()
     if (!_transferFunction.isModified())
         return false;
 
+    // for volumes
+    Vector3fs colors;
+    colors.reserve(_transferFunction.getDiffuseColors().size());
+    floats opacities;
+    opacities.reserve(_transferFunction.getDiffuseColors().size());
+
+    for (const auto& i : _transferFunction.getDiffuseColors())
+    {
+        colors.push_back({i.x(), i.y(), i.z()});
+        opacities.push_back(i.w());
+    }
+
+    OSPData colorsData = ospNewData(colors.size(), OSP_FLOAT3, colors.data());
+    ospSetData(_ospTransferFunction, "colors", colorsData);
+    ospRelease(colorsData);
+    ospSet2f(_ospTransferFunction, "valueRange",
+             _transferFunction.getValuesRange().x(),
+             _transferFunction.getValuesRange().y());
+    OSPData opacityValuesData =
+        ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
+    ospSetData(_ospTransferFunction, "opacities", opacityValuesData);
+    ospRelease(opacityValuesData);
+    ospCommit(_ospTransferFunction);
+
+    // for simulation
     if (_ospTransferFunctionDiffuseData)
         ospRelease(_ospTransferFunctionDiffuseData);
 
@@ -274,82 +311,32 @@ bool OSPRayScene::commitTransferFunctionData()
     return true;
 }
 
-void OSPRayScene::resetVolumeHandler()
+bool OSPRayScene::_commitVolumeData()
 {
-    Scene::resetVolumeHandler();
-
-    // Release previous data
-    if (_ospVolumeData)
-        ospRelease(_ospVolumeData);
-    _ospVolumeData = nullptr;
-    _ospVolumeDataSize = 0;
-
-    // An empty array has to be assigned to the renderers
-    for (const auto& renderer : _renderers)
+    bool rebuildScene = false;
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    for (auto modelDescriptor : _modelDescriptors)
     {
-        auto impl = std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
-        ospSetData(impl, "volumeData", 0);
-    }
-}
-
-void OSPRayScene::commitVolumeData()
-{
-    auto& vp = _parametersManager.getVolumeParameters();
-    const auto& ap = _parametersManager.getAnimationParameters();
-    if ((_volumeHandler && _volumeHandler->isModified()) || ap.isModified() ||
-        vp.isModified())
-    {
-        resetVolumeHandler();
-
-        if (!getVolumeHandler())
-            return;
-
-        const auto animationFrame = ap.getFrame();
-        _volumeHandler->setCurrentIndex(animationFrame);
-        _volumeHandler->resetModified();
-        auto data = _volumeHandler->getData();
-        if (data)
+        auto& model = modelDescriptor->getModel();
+        if (model.isVolumesDirty())
         {
-            // Mark volume parameters as unmodified
-            vp.resetModified();
-
-            // Set volume data to renderers
-            _ospVolumeDataSize = _volumeHandler->getSize();
-            _ospVolumeData = ospNewData(_ospVolumeDataSize, OSP_UCHAR, data,
-                                        _memoryManagementFlags);
-            ospCommit(_ospVolumeData);
-
-            const auto& dimensions = _volumeHandler->getDimensions();
-            for (const auto& renderer : _renderers)
-            {
-                auto impl =
-                    std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
-
-                ospSetData(impl, "volumeData", _ospVolumeData);
-                ospSet3i(impl, "volumeDimensions", dimensions.x(),
-                         dimensions.y(), dimensions.z());
-                const auto& elementSpacing =
-                    _parametersManager.getVolumeParameters()
-                        .getElementSpacing();
-                ospSet3f(impl, "volumeElementSpacing", elementSpacing.x(),
-                         elementSpacing.y(), elementSpacing.z());
-                const auto& offset =
-                    _parametersManager.getVolumeParameters().getOffset();
-                ospSet3f(impl, "volumeOffset", offset.x(), offset.y(),
-                         offset.z());
-                const auto epsilon = _volumeHandler->getEpsilon(
-                    elementSpacing, _parametersManager.getRenderingParameters()
-                                        .getSamplesPerRay());
-                ospSet1f(impl, "volumeEpsilon", epsilon);
-            }
-            BRAYNS_INFO << "Commited volume data. Dimensions: " << dimensions
-                        << std::endl;
-            markModified();
+            rebuildScene = true;
+            model.resetVolumesDirty();
         }
+        for (auto volume : model.getVolumes())
+        {
+            if (volume->isModified() || rebuildScene)
+            {
+                volume->commit();
+                markModified(); // to reset accumulation if new blocks are added
+            }
+        }
+        modelDescriptor->getModel().updateSizeInBytes();
     }
+    return rebuildScene;
 }
 
-void OSPRayScene::commitSimulationData()
+void OSPRayScene::_commitSimulationData()
 {
     if (!_simulationHandler)
         return;
@@ -386,13 +373,26 @@ void OSPRayScene::commitSimulationData()
     markModified(); // triggers framebuffer clear
 }
 
-bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
-{
-    return boost::algorithm::ends_with(volumeFile, ".raw");
-}
-
 ModelPtr OSPRayScene::createModel() const
 {
     return std::make_unique<OSPRayModel>();
+}
+
+SharedDataVolumePtr OSPRayScene::createSharedDataVolume(
+    const Vector3ui& dimensions, const Vector3f& spacing,
+    const DataType type) const
+{
+    return std::make_shared<OSPRaySharedDataVolume>(
+        dimensions, spacing, type, _parametersManager.getVolumeParameters(),
+        _ospTransferFunction);
+}
+
+BrickedVolumePtr OSPRayScene::createBrickedVolume(const Vector3ui& dimensions,
+                                                  const Vector3f& spacing,
+                                                  const DataType type) const
+{
+    return std::make_shared<OSPRayBrickedVolume>(
+        dimensions, spacing, type, _parametersManager.getVolumeParameters(),
+        _ospTransferFunction);
 }
 }
