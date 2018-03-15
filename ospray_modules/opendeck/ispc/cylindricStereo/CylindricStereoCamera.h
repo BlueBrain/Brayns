@@ -1,6 +1,6 @@
 /* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille_favreau@hotmail.com>
+ * Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,12 +18,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
+#pragma once
+
+#include <ospray/SDK/camera/Camera.h>
 
 namespace ospray
 {
-extern "C" void ospray_init_module_opendeck()
+/**
+ * This camera is designed for the opendeck. It has a fixed
+ * vertical field of view of 48.549 degrees. The rays are using
+ * cylindrical projection for the x axis and perspective projection
+ * for the y axis of an image. This camera create an omnidirectional
+ * stereo pair of images.
+ */
+struct CylindricStereoCamera : public Camera
 {
-    std::cout << "[MODULE] initializing opendeck plugin" << std::endl;
-}
-}
+    CylindricStereoCamera();
+    virtual ~CylindricStereoCamera() override = default;
+    virtual std::string toString() const override;
+    virtual void commit() override;
+
+    typedef enum {
+        OSP_STEREO_NONE,
+        OSP_STEREO_LEFT,
+        OSP_STEREO_RIGHT,
+        OSP_STEREO_SIDE_BY_SIDE
+    } StereoMode;
+};
+
+} // ::ospray

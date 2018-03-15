@@ -1,6 +1,6 @@
-/* Copyright (c) 2018, Cyrille Favreau
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille_favreau@hotmail.com>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -19,16 +19,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OpenDeckCamera.ih"
+#include "CylindricCamera.ih"
 #include "math/LinearSpace.ih"
 #include "math/math.ih"
 #include "math/sampling.ih"
 
-void OpenDeckCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
-                            const varying CameraSample &sample)
+void CylindricCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
+                             const varying CameraSample &sample)
 {
-    uniform OpenDeckCamera *uniform self =
-        (uniform OpenDeckCamera * uniform)_self;
+    uniform CylindricCamera *uniform self =
+        (uniform CylindricCamera * uniform)_self;
 
     vec2f screen = sample.screen;
     screen = Camera_subRegion(_self, screen);
@@ -49,23 +49,23 @@ void OpenDeckCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
     pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference
     parameters */
-export void *uniform OpenDeckCamera_create(void *uniform cppE)
+export void *uniform CylindricCamera_create(void *uniform cppE)
 {
-    uniform OpenDeckCamera *uniform self = uniform new uniform OpenDeckCamera;
+    uniform CylindricCamera *uniform self = uniform new uniform CylindricCamera;
     self->super.cppEquivalent = cppE;
-    self->super.initRay = OpenDeckCamera_initRay;
+    self->super.initRay = CylindricCamera_initRay;
     self->super.doesDOF = false;
     return self;
 }
 
-export void OpenDeckCamera_set(void *uniform _self, const uniform vec3f &org,
-                               const uniform vec3f &dir_cam,
-                               const uniform vec3f &dir_du,
-                               const uniform vec3f &dir_dv,
-                               const uniform float imgPlane_size_y)
+export void CylindricCamera_set(void *uniform _self, const uniform vec3f &org,
+                                const uniform vec3f &dir_cam,
+                                const uniform vec3f &dir_du,
+                                const uniform vec3f &dir_dv,
+                                const uniform float imgPlane_size_y)
 {
-    uniform OpenDeckCamera *uniform self =
-        (uniform OpenDeckCamera * uniform)_self;
+    uniform CylindricCamera *uniform self =
+        (uniform CylindricCamera * uniform)_self;
     self->org = org;
     self->dir_cam = dir_cam;
     self->dir_du = dir_du;

@@ -1,6 +1,6 @@
-/* Copyright (c) 2018, Cyrille Favreau
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille_favreau@hotmail.com>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -21,15 +21,23 @@
 
 #pragma once
 
-#include <ospray/SDK/camera/Camera.ih>
+#include <ospray/SDK/camera/Camera.h>
 
-struct OpenDeckCamera
+namespace ospray
 {
-    Camera super;
 
-    vec3f org;
-    vec3f dir_cam;
-    vec3f dir_du;
-    vec3f dir_dv;
-    float imgPlane_size_y;
+/**
+ * This camera is designed for the opendeck. It has a fixed
+ * vertical field of view of 48.549 degrees. The rays are using
+ * cylindrical projection for the x axis and perspective projection
+ * for the y axis of an image.
+ */
+struct CylindricCamera : public Camera
+{
+    CylindricCamera();
+    virtual ~CylindricCamera() override = default;
+    virtual std::string toString() const override;
+    virtual void commit() override;
 };
+
+} // ::ospray
