@@ -53,13 +53,13 @@ docker run -ti --rm -p 8200:8200 bluebrain/brayns
 
 More documentation is available on DockerHub: https://hub.docker.com/r/bluebrain/brayns/
 
-### Start the Sauron web UI
+### Start the Brayns web UI
 
 ```
-docker run -ti --rm -p 8080:8080 bluebrain/sauron
+docker run -ti --rm -p 8080:8080 bluebrain/brayns-ui
 ```
 
-More documentation is available on DockerHub: https://hub.docker.com/r/bluebrain/sauron/
+More documentation is available on DockerHub: https://hub.docker.com/r/bluebrain/brayns-ui/
 
 ## Building from Source
 
