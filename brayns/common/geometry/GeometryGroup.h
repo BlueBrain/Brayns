@@ -46,6 +46,13 @@ public:
     BRAYNS_API bool empty() const;
 
     /**
+        Sets enability of the geometry group. If disabled, the group is not
+       rendered
+      */
+    BRAYNS_API bool enabled() { return _enabled; }
+    BRAYNS_API void enable() { _enabled = true; }
+    BRAYNS_API void disable() { _enabled = false; }
+    /**
         Returns the bounding box for the whole scene
     */
     Boxf& getBounds() { return _bounds; }
@@ -158,8 +165,6 @@ public:
      */
     MaterialManager& getMaterialManager() { return _materialManager; }
 private:
-    void _markGeometryDirty();
-
     MaterialManager& _materialManager;
     SpheresMap _spheres;
     bool _spheresDirty{true};
@@ -170,6 +175,7 @@ private:
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
     Boxf _bounds;
+    bool _enabled{true};
 };
 }
 

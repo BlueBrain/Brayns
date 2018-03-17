@@ -173,7 +173,8 @@ void OSPRayScene::commit()
 uint64_t OSPRayScene::_serializeSpheres(const size_t groupId,
                                         const size_t materialId)
 {
-    auto& s = _geometryGroups[groupId].getSpheres();
+    auto& group = _geometryGroups[groupId];
+    auto& s = group.getSpheres();
     if (s.find(materialId) == s.end())
         return 0;
 
@@ -203,13 +204,15 @@ uint64_t OSPRayScene::_serializeSpheres(const size_t groupId,
     else
         ospAddGeometry(model, _ospExtendedSpheres[materialId]);
 
+    group.setSpheresDirty(false);
     return bufferSize;
 }
 
 uint64_t OSPRayScene::_serializeCylinders(const size_t groupId,
                                           const size_t materialId)
 {
-    auto& c = _geometryGroups[groupId].getCylinders();
+    auto& group = _geometryGroups[groupId];
+    auto& c = group.getCylinders();
     if (c.find(materialId) == c.end())
         return 0;
 
@@ -237,13 +240,15 @@ uint64_t OSPRayScene::_serializeCylinders(const size_t groupId,
         ospAddGeometry(_simulationModel, _ospExtendedCylinders[materialId]);
     else
         ospAddGeometry(model, _ospExtendedCylinders[materialId]);
+    group.setCylindersDirty(false);
     return bufferSize;
 }
 
 uint64_t OSPRayScene::_serializeCones(const size_t groupId,
                                       const size_t materialId)
 {
-    auto& c = _geometryGroups[groupId].getCones();
+    auto& group = _geometryGroups[groupId];
+    auto& c = group.getCones();
     if (c.find(materialId) == c.end())
         return 0;
 
@@ -271,13 +276,15 @@ uint64_t OSPRayScene::_serializeCones(const size_t groupId,
         ospAddGeometry(_simulationModel, _ospExtendedCones[materialId]);
     else
         ospAddGeometry(model, _ospExtendedCones[materialId]);
+    group.setConesDirty(false);
     return bufferSize;
 }
 
 uint64_t OSPRayScene::_serializeMeshes(const size_t groupId,
                                        const size_t materialId)
 {
-    auto& t = _geometryGroups[groupId].getTrianglesMeshes();
+    auto& group = _geometryGroups[groupId];
+    auto& t = group.getTrianglesMeshes();
     if (t.find(materialId) == t.end())
         return 0;
 
@@ -339,6 +346,7 @@ uint64_t OSPRayScene::_serializeMeshes(const size_t groupId,
     ospCommit(_ospMeshes[materialId]);
 
     ospAddGeometry(_rootModel, _ospMeshes[materialId]);
+    group.setTrianglesMeshesDirty(false);
     return size;
 }
 
@@ -357,6 +365,8 @@ void OSPRayScene::serializeGeometry()
     for (size_t g = 0; g < _geometryGroups.size(); ++g)
     {
         auto& group = _geometryGroups[g];
+        if (!group.enabled())
+            continue;
         _sizeInBytes = 0;
         if (group.spheresDirty())
             for (size_t i = 0; i < nbMaterials; ++i)
