@@ -37,16 +37,12 @@ GeometryGroup::~GeometryGroup()
 void GeometryGroup::unload()
 {
     _spheres.clear();
-    _cylinders.clear();
-    _cones.clear();
-    _trianglesMeshes.clear();
-}
-
-void GeometryGroup::_markGeometryDirty()
-{
     _spheresDirty = true;
+    _cylinders.clear();
     _cylindersDirty = true;
+    _cones.clear();
     _conesDirty = true;
+    _trianglesMeshes.clear();
     _trianglesMeshesDirty = true;
 }
 
@@ -58,34 +54,17 @@ bool GeometryGroup::empty() const
 
 uint64_t GeometryGroup::addSphere(const size_t materialId, const Sphere& sphere)
 {
+    _spheresDirty = true;
     _materialManager.buildMissingMaterials(materialId);
     _spheres[materialId].push_back(sphere);
     _bounds.merge(sphere.center);
     return _spheres[materialId].size() - 1;
 }
 
-uint64_t GeometryGroup::addCylinder(const size_t materialId,
-                                    const Cylinder& cylinder)
-{
-    _materialManager.buildMissingMaterials(materialId);
-    _cylinders[materialId].push_back(cylinder);
-    _bounds.merge(cylinder.center);
-    _bounds.merge(cylinder.up);
-    return _cylinders[materialId].size() - 1;
-}
-
-uint64_t GeometryGroup::addCone(const size_t materialId, const Cone& cone)
-{
-    _materialManager.buildMissingMaterials(materialId);
-    _cones[materialId].push_back(cone);
-    _bounds.merge(cone.center);
-    _bounds.merge(cone.up);
-    return _cones[materialId].size() - 1;
-}
-
 void GeometryGroup::setSphere(const size_t materialId, const uint64_t index,
                               const Sphere& sphere)
 {
+    _spheresDirty = true;
     auto& spheres = _spheres[materialId];
     if (index < spheres.size())
     {
@@ -97,24 +76,21 @@ void GeometryGroup::setSphere(const size_t materialId, const uint64_t index,
         BRAYNS_ERROR << "Invalid index " << index << std::endl;
 }
 
-void GeometryGroup::setCone(const size_t materialId, const uint64_t index,
-                            const Cone& cone)
+uint64_t GeometryGroup::addCylinder(const size_t materialId,
+                                    const Cylinder& cylinder)
 {
-    auto& cones = _cones[materialId];
-    if (index < cones.size())
-    {
-        _materialManager.buildMissingMaterials(materialId);
-        cones[index] = cone;
-        _bounds.merge(cone.center);
-        _bounds.merge(cone.up);
-    }
-    else
-        BRAYNS_ERROR << "Invalid index " << index << std::endl;
+    _cylindersDirty = true;
+    _materialManager.buildMissingMaterials(materialId);
+    _cylinders[materialId].push_back(cylinder);
+    _bounds.merge(cylinder.center);
+    _bounds.merge(cylinder.up);
+    return _cylinders[materialId].size() - 1;
 }
 
 void GeometryGroup::setCylinder(const size_t materialId, const uint64_t index,
                                 const Cylinder& cylinder)
 {
+    _cylindersDirty = true;
     auto& cylinders = _cylinders[materialId];
     if (index < cylinders.size())
     {
@@ -122,6 +98,32 @@ void GeometryGroup::setCylinder(const size_t materialId, const uint64_t index,
         cylinders[index] = cylinder;
         _bounds.merge(cylinder.center);
         _bounds.merge(cylinder.up);
+    }
+    else
+        BRAYNS_ERROR << "Invalid index " << index << std::endl;
+}
+
+uint64_t GeometryGroup::addCone(const size_t materialId, const Cone& cone)
+{
+    _conesDirty = true;
+    _materialManager.buildMissingMaterials(materialId);
+    _cones[materialId].push_back(cone);
+    _bounds.merge(cone.center);
+    _bounds.merge(cone.up);
+    return _cones[materialId].size() - 1;
+}
+
+void GeometryGroup::setCone(const size_t materialId, const uint64_t index,
+                            const Cone& cone)
+{
+    _conesDirty = true;
+    auto& cones = _cones[materialId];
+    if (index < cones.size())
+    {
+        _materialManager.buildMissingMaterials(materialId);
+        cones[index] = cone;
+        _bounds.merge(cone.center);
+        _bounds.merge(cone.up);
     }
     else
         BRAYNS_ERROR << "Invalid index " << index << std::endl;

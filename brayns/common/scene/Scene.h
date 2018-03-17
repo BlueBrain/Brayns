@@ -143,6 +143,11 @@ public:
     BRAYNS_API GeometryGroup& getGeometryGroup(const size_t index);
 
     /**
+        @return geometry groups
+      */
+    BRAYNS_API GeometryGroups& getGeometryGroups();
+
+    /**
         Builds a default scene made of a Cornell box, a refelctive cube, and
         a transparent sphere
     */
