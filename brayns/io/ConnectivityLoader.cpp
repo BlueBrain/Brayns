@@ -20,6 +20,7 @@
  */
 
 #include <H5Cpp.h>
+#include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/io/MeshLoader.h>
@@ -106,7 +107,8 @@ bool ConnectivityLoader::_importMatrix()
 
 bool ConnectivityLoader::_importMesh(const uint64_t gid,
                                      const Matrix4f& transformation,
-                                     const size_t materialId, Scene& scene,
+                                     const size_t materialId,
+                                     GeometryGroup& group,
                                      MeshLoader& meshLoader)
 {
     const auto meshedMorphologiesFolder =
@@ -116,7 +118,7 @@ bool ConnectivityLoader::_importMesh(const uint64_t gid,
 
     // Load mesh from file
     if (!meshLoader.importMeshFromFile(meshLoader.getMeshFilenameFromGID(gid),
-                                       scene, transformation, materialId))
+                                       group, transformation, materialId))
         return false;
 
     return true;
@@ -158,6 +160,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
         }
 
         // Build scene
+        GeometryGroup group(scene.getMaterialManager());
         const auto& scale = _geometryParameters.getConnectivityScale();
         const auto& dimensionRange =
             _geometryParameters.getConnectivityDimensionRange();
@@ -172,7 +175,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     transforms[i].getTranslation() * scale;
                 const auto radiusSource =
                     _geometryParameters.getRadiusMultiplier();
-                scene.addSphere(NB_SYSTEM_MATERIALS,
+                group.addSphere(NB_SYSTEM_MATERIALS,
                                 {centerSource, radiusSource});
             }
 
@@ -209,10 +212,10 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                         ? transforms[emitor.first]
                         : Matrix4f();
                 createSphere = !_importMesh(gid, transformation, materialId,
-                                            scene, meshLoader);
+                                            group, meshLoader);
             }
             if (createSphere)
-                scene.addSphere(materialId, {centerSource, radiusSource});
+                group.addSphere(materialId, {centerSource, radiusSource});
 
             // Connections
             if (emitor.second.size() < dimensionRange.x() ||
@@ -236,13 +239,14 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     // remaining 90%
                     const auto arrowTarget =
                         centerSource + 0.1f * (centerDest - centerSource);
-                    scene.addCone(materialId, {centerSource, arrowTarget,
+                    group.addCone(materialId, {centerSource, arrowTarget,
                                                radiusSource, radiusDest});
-                    scene.addCylinder(materialId,
+                    group.addCylinder(materialId,
                                       {arrowTarget, centerDest, radiusDest});
                 }
             ++progress;
         }
+        scene.addGeometryGroup(group);
     }
     catch (const std::exception& e)
     {

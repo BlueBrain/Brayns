@@ -20,7 +20,7 @@
 
 #include "ProteinLoader.h"
 
-#include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
@@ -312,7 +312,8 @@ ProteinLoader::ProteinLoader(const GeometryParameters& geometryParameters)
 
 bool ProteinLoader::importPDBFile(const std::string& filename,
                                   const Vector3f& position,
-                                  const size_t proteinIndex, Scene& scene)
+                                  const size_t proteinIndex,
+                                  GeometryGroup& group)
 {
     int index(0);
     std::ifstream file(filename.c_str());
@@ -393,6 +394,8 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                 i = 0;
                 bool found = false;
                 const auto colorScheme = _geometryParameters.getColorScheme();
+                const auto nbMaterials =
+                    group.getMaterialManager().getMaterials().size();
                 while (!found && i < colorMapSize)
                 {
                     if (atomName == colorMap[i].symbol)
@@ -401,16 +404,16 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                         switch (colorScheme)
                         {
                         case ColorScheme::protein_chains:
-                            atom.materialId = NB_SYSTEM_MATERIALS +
-                                              abs(atom.chainId) %
-                                                  (scene.getMaterials().size() -
-                                                   NB_SYSTEM_MATERIALS);
+                            atom.materialId =
+                                NB_SYSTEM_MATERIALS +
+                                abs(atom.chainId) %
+                                    (nbMaterials - NB_SYSTEM_MATERIALS);
                             break;
                         case ColorScheme::protein_residues:
-                            atom.materialId = NB_SYSTEM_MATERIALS +
-                                              abs(atom.residue) %
-                                                  (scene.getMaterials().size() -
-                                                   NB_SYSTEM_MATERIALS);
+                            atom.materialId =
+                                NB_SYSTEM_MATERIALS +
+                                abs(atom.residue) %
+                                    (nbMaterials - NB_SYSTEM_MATERIALS);
                             break;
                         default:
                             atom.materialId = static_cast<int>(i);
@@ -436,14 +439,14 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
 
                 const auto materialId =
                     colorScheme == ColorScheme::protein_by_id
-                        ? proteinIndex % scene.getMaterials().size()
+                        ? proteinIndex % nbMaterials
                         : atom.materialId;
                 // Convert position from nanometers
                 const auto center = position + 0.01f * atom.position;
                 // Convert radius from angstrom
                 const auto radius = 0.0001f * atom.radius *
                                     _geometryParameters.getRadiusMultiplier();
-                scene.addSphere(materialId, {center, radius});
+                group.addSphere(materialId, {center, radius});
             }
         }
         file.close();

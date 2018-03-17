@@ -23,6 +23,7 @@
 #include <brayns/common/Statistics.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
@@ -247,7 +248,7 @@ inline void init(brayns::Scene* s, ObjectHandler* h)
 {
     h->add_property("bounds", &s->getWorldBounds(),
                     Flags::IgnoreRead | Flags::Optional);
-    h->add_property("materials", &s->getMaterials());
+    h->add_property("materials", &s->getMaterialManager().getMaterials());
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

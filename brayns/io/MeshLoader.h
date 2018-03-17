@@ -44,7 +44,7 @@ public:
     /** Imports meshes from a given file
      *
      * @param filename name of the file containing the meshes
-     * @param scene Scene holding the meshes
+     * @param group Geometry group holding the meshes
      * @param transformation Position, orientation and scale to apply to the
      *        mesh
      * @param defaultMaterial Default material for the whole mesh. If set to
@@ -52,7 +52,7 @@ public:
      *        all meshes are forced to that specific material.
      * @return true if the file was successfully imported. False otherwise.
      */
-    bool importMeshFromFile(const std::string& filename, Scene& scene,
+    bool importMeshFromFile(const std::string& filename, GeometryGroup& group,
                             const Matrix4f& transformation,
                             const size_t defaultMaterial);
 
@@ -61,7 +61,8 @@ public:
      * @param filename destination file name
      * @param scene Scene holding the meshes
      */
-    bool exportMeshToFile(const std::string& filename, Scene& scene) const;
+    bool exportMeshToFile(const std::string& filename,
+                          GeometryGroup& group) const;
 
     /**
      * @brief Clear all internal buffers
@@ -79,8 +80,8 @@ public:
 
 private:
 #if (BRAYNS_USE_ASSIMP)
-    void _createMaterials(Scene& scene, const aiScene* aiScene,
-                          const std::string& folder);
+    void _createMaterials(MaterialManager& materialManager,
+                          const aiScene* aiScene, const std::string& folder);
 #endif
 
     size_t _getMaterialId(const size_t materialId,

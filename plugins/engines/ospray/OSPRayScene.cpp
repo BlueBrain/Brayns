@@ -21,9 +21,11 @@
 #include "OSPRayScene.h"
 #include "OSPRayRenderer.h"
 
+#include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/log.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
@@ -53,7 +55,7 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
 OSPRayScene::OSPRayScene(Renderers renderers,
                          ParametersManager& parametersManager)
     : Scene(renderers, parametersManager)
-    , _model(nullptr)
+    , _rootModel(nullptr)
     , _simulationModel(nullptr)
     , _ospLightData(nullptr)
     , _ospMaterialData(nullptr)
@@ -79,29 +81,29 @@ OSPRayScene::~OSPRayScene()
 
 void OSPRayScene::unload()
 {
-    if (_model)
+    const auto nbMaterials = _materialManager.getMaterials().size();
+    if (_rootModel)
     {
-        for (size_t materialId = 0; materialId < _materials.size();
-             ++materialId)
+        for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
         {
             if (_ospMeshes[materialId])
-                ospRemoveGeometry(_model, _ospMeshes[materialId]);
+                ospRemoveGeometry(_rootModel, _ospMeshes[materialId]);
             if (_ospExtendedSpheres[materialId])
-                ospRemoveGeometry(_model, _ospExtendedSpheres[materialId]);
+                ospRemoveGeometry(_rootModel, _ospExtendedSpheres[materialId]);
             if (_ospExtendedCylinders[materialId])
-                ospRemoveGeometry(_model, _ospExtendedCylinders[materialId]);
+                ospRemoveGeometry(_rootModel,
+                                  _ospExtendedCylinders[materialId]);
             if (_ospExtendedCones[materialId])
-                ospRemoveGeometry(_model, _ospExtendedCones[materialId]);
+                ospRemoveGeometry(_rootModel, _ospExtendedCones[materialId]);
         }
-        ospCommit(_model);
-        ospRelease(_model);
-        _model = nullptr;
+        ospCommit(_rootModel);
+        ospRelease(_rootModel);
+        _rootModel = nullptr;
     }
 
     if (_simulationModel)
     {
-        for (size_t materialId = 0; materialId < _materials.size();
-             ++materialId)
+        for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
         {
             ospRemoveGeometry(_simulationModel,
                               _ospExtendedSpheres[materialId]);
@@ -155,10 +157,10 @@ void OSPRayScene::unload()
 
 void OSPRayScene::commit()
 {
-    if (_model)
+    if (_rootModel)
     {
-        BRAYNS_INFO << "Committing main model" << std::endl;
-        ospCommit(_model);
+        BRAYNS_INFO << "Committing root model" << std::endl;
+        ospCommit(_rootModel);
     }
 
     if (_simulationModel)
@@ -170,11 +172,12 @@ void OSPRayScene::commit()
 
 uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
 {
-    if (_spheres.find(materialId) == _spheres.end())
+    auto& s = _geometryGroups[0].getSpheres();
+    if (s.find(materialId) == s.end())
         return 0;
 
     auto model = _getActiveModel();
-    const auto& spheres = _spheres[materialId];
+    const auto& spheres = s[materialId];
     const auto bufferSize = spheres.size() * sizeof(Sphere);
     if (_ospExtendedSpheres.find(materialId) != _ospExtendedSpheres.end())
         ospRemoveGeometry(model, _ospExtendedSpheres[materialId]);
@@ -204,11 +207,12 @@ uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
 
 uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
 {
-    if (_cylinders.find(materialId) == _cylinders.end())
+    auto& c = _geometryGroups[0].getCylinders();
+    if (c.find(materialId) == c.end())
         return 0;
 
     auto model = _getActiveModel();
-    const auto& cylinders = _cylinders[materialId];
+    const auto& cylinders = c[materialId];
     const auto bufferSize = cylinders.size() * sizeof(Cylinder);
     if (_ospExtendedCylinders.find(materialId) != _ospExtendedCylinders.end())
         ospRemoveGeometry(model, _ospExtendedCylinders[materialId]);
@@ -236,11 +240,12 @@ uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
 
 uint64_t OSPRayScene::_serializeCones(const size_t materialId)
 {
-    if (_cones.find(materialId) == _cones.end())
+    auto& c = _geometryGroups[0].getCones();
+    if (c.find(materialId) == c.end())
         return 0;
 
     auto model = _getActiveModel();
-    const auto& cones = _cones[materialId];
+    const auto& cones = c[materialId];
     const auto bufferSize = cones.size() * sizeof(Cone);
     if (_ospExtendedCones.find(materialId) != _ospExtendedCones.end())
         ospRemoveGeometry(model, _ospExtendedCones[materialId]);
@@ -268,14 +273,15 @@ uint64_t OSPRayScene::_serializeCones(const size_t materialId)
 
 uint64_t OSPRayScene::_serializeMeshes(const size_t materialId)
 {
-    if (_trianglesMeshes.find(materialId) == _trianglesMeshes.end())
+    auto& t = _geometryGroups[0].getTrianglesMeshes();
+    if (t.find(materialId) == t.end())
         return 0;
 
     uint64_t size = 0;
     _ospMeshes[materialId] = ospNewGeometry("trianglemesh");
     assert(_ospMeshes[materialId]);
 
-    auto& trianglesMesh = _trianglesMeshes[materialId];
+    auto& trianglesMesh = t[materialId];
     size += trianglesMesh.vertices.size() * 3 * sizeof(float);
     OSPData vertices =
         ospNewData(trianglesMesh.vertices.size(), OSP_FLOAT3,
@@ -328,13 +334,13 @@ uint64_t OSPRayScene::_serializeMeshes(const size_t materialId)
 
     ospCommit(_ospMeshes[materialId]);
 
-    ospAddGeometry(_model, _ospMeshes[materialId]);
+    ospAddGeometry(_rootModel, _ospMeshes[materialId]);
     return size;
 }
 
 OSPModel OSPRayScene::_getActiveModel()
 {
-    auto model = _model;
+    auto model = _rootModel;
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
     if (geometryParameters.getCircuitUseSimulationModel())
         model = _simulationModel;
@@ -343,27 +349,29 @@ OSPModel OSPRayScene::_getActiveModel()
 
 void OSPRayScene::serializeGeometry()
 {
+    GeometryGroup& group = _geometryGroups[0]; // TODO: for each group
+    const auto nbMaterials = group.getMaterialManager().getMaterials().size();
     _sizeInBytes = 0;
-    if (_spheresDirty)
-        for (size_t i = 0; i < _materials.size(); ++i)
+    if (group.spheresDirty())
+        for (size_t i = 0; i < nbMaterials; ++i)
             _sizeInBytes += _serializeSpheres(i);
 
-    if (_cylindersDirty)
-        for (size_t i = 0; i < _materials.size(); ++i)
+    if (group.cylindersDirty())
+        for (size_t i = 0; i < nbMaterials; ++i)
             _sizeInBytes += _serializeCylinders(i);
 
-    if (_conesDirty)
-        for (size_t i = 0; i < _materials.size(); ++i)
+    if (group.conesDirty())
+        for (size_t i = 0; i < nbMaterials; ++i)
             _sizeInBytes += _serializeCones(i);
 
-    if (_trianglesMeshesDirty)
-        for (size_t i = 0; i < _materials.size(); ++i)
+    if (group.trianglesMeshesDirty())
+        for (size_t i = 0; i < nbMaterials; ++i)
             _sizeInBytes += _serializeMeshes(i);
 
-    _spheresDirty = false;
-    _cylindersDirty = false;
-    _conesDirty = false;
-    _trianglesMeshesDirty = false;
+    group.setSpheresDirty(false);
+    group.setCylindersDirty(false);
+    group.setConesDirty(false);
+    group.setTrianglesMeshesDirty(false);
 }
 
 void OSPRayScene::buildGeometry()
@@ -374,7 +382,7 @@ void OSPRayScene::buildGeometry()
 
     const auto& geomParams = _parametersManager.getGeometryParameters();
 
-    _model = ospNewModel();
+    _rootModel = ospNewModel();
 
     if (geomParams.getCircuitUseSimulationModel() && !_simulationModel)
         _simulationModel = ospNewModel();
@@ -390,13 +398,14 @@ void OSPRayScene::buildGeometry()
     size_t totalNbCones = 0;
     size_t totalNbVertices = 0;
     size_t totalNbIndices = 0;
-    for (const auto& spheres : _spheres)
+    GeometryGroup& group = _geometryGroups[0]; // TODO: for each group
+    for (const auto& spheres : group.getSpheres())
         totalNbSpheres += spheres.second.size();
-    for (const auto& cylinders : _cylinders)
+    for (const auto& cylinders : group.getCylinders())
         totalNbCylinders += cylinders.second.size();
-    for (const auto& cones : _cones)
+    for (const auto& cones : group.getCones())
         totalNbCones += cones.second.size();
-    for (const auto& trianglesMeshes : _trianglesMeshes)
+    for (const auto& trianglesMeshes : group.getTrianglesMeshes())
     {
         totalNbVertices += trianglesMeshes.second.vertices.size();
         totalNbIndices += trianglesMeshes.second.indices.size();
@@ -410,7 +419,9 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Cones    : " << totalNbCones << std::endl;
     BRAYNS_INFO << "Vertices : " << totalNbVertices << std::endl;
     BRAYNS_INFO << "Indices  : " << totalNbIndices << std::endl;
-    BRAYNS_INFO << "Materials: " << _materials.size() << std::endl;
+    BRAYNS_INFO << "Materials: "
+                << group.getMaterialManager().getMaterials().size()
+                << std::endl;
     BRAYNS_INFO << "Total    : " << _sizeInBytes << " bytes ("
                 << _sizeInBytes / 1048576 << " MB)" << std::endl;
     BRAYNS_INFO << "---------------------------------------------------"
@@ -480,25 +491,28 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials(const Action action)
 {
+    GeometryGroup& group = _geometryGroups[0]; // TODO: for each group
+    auto& materials = group.getMaterialManager().getMaterials();
+    const auto nbMaterials = materials.size();
     if (action == Action::create)
     {
         // Create materials
         for (auto& material : _ospMaterials)
             ospRelease(material);
         _ospMaterials.clear();
-        _ospMaterials.reserve(_materials.size());
-        for (size_t i = 0; i < _materials.size(); ++i)
+        _ospMaterials.reserve(nbMaterials);
+        for (size_t i = 0; i < nbMaterials; ++i)
         {
             auto ospMaterial = ospNewMaterial(nullptr, "ExtendedOBJMaterial");
             _ospMaterials.push_back(ospMaterial);
         }
     }
 
-    for (size_t i = 0; i < _materials.size(); ++i)
+    for (size_t i = 0; i < nbMaterials; ++i)
     {
         // update material
         auto& ospMaterial = _ospMaterials[i];
-        auto& material = _materials[i];
+        auto& material = materials[i];
 
         Vector3f value3f = material.getColor();
         ospSet3f(ospMaterial, "kd", value3f.x(), value3f.y(), value3f.z());
@@ -542,8 +556,8 @@ void OSPRayScene::commitMaterials(const Action action)
         ospCommit(ospMaterial);
     }
 
-    _ospMaterialData = ospNewData(_materials.size(), OSP_OBJECT,
-                                  &_ospMaterials[0], _getOSPDataFlags());
+    _ospMaterialData = ospNewData(nbMaterials, OSP_OBJECT, &_ospMaterials[0],
+                                  _getOSPDataFlags());
     ospCommit(_ospMaterialData);
 
     for (const auto& renderer : _renderers)

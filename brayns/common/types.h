@@ -104,6 +104,9 @@ typedef std::vector<RendererPtr> Renderers;
 class FrameBuffer;
 typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
 
+class GeometryGroup;
+typedef std::vector<GeometryGroup> GeometryGroups;
+
 struct Sphere;
 typedef std::vector<Sphere> Spheres;
 typedef std::map<size_t, Spheres> SpheresMap;
@@ -119,6 +122,7 @@ typedef std::map<size_t, Cones> ConesMap;
 struct TrianglesMesh;
 typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 
+class MaterialManager;
 class Material;
 typedef std::vector<Material> Materials;
 

@@ -20,9 +20,7 @@
 
 #include "MorphologyLoader.h"
 
-#include <brayns/common/geometry/Cone.h>
-#include <brayns/common/geometry/Cylinder.h>
-#include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/io/algorithms/MetaballsGenerator.h>
@@ -51,17 +49,18 @@ namespace brayns
 {
 typedef std::vector<uint64_t> GIDOffsets;
 
-struct ParallelSceneContainer
+struct ParallelGeometryGroupContainer
 {
 public:
-    ParallelSceneContainer(SpheresMap& s, CylindersMap& cy, ConesMap& co,
-                           TrianglesMeshMap& tm, Materials& m, Boxf& wb)
+    ParallelGeometryGroupContainer(SpheresMap& s, CylindersMap& cy,
+                                   ConesMap& co, TrianglesMeshMap& tm,
+                                   Materials& m, Boxf& wb)
         : spheres(s)
         , cylinders(cy)
         , cones(co)
         , trianglesMeshes(tm)
         , materials(m)
-        , worldBounds(wb)
+        , bounds(wb)
     {
     }
 
@@ -75,23 +74,23 @@ public:
     {
         _buildMissingMaterials(materialId);
         spheres[materialId].push_back(sphere);
-        worldBounds.merge(sphere.center);
+        bounds.merge(sphere.center);
     }
 
     void addCylinder(const size_t materialId, const Cylinder& cylinder)
     {
         _buildMissingMaterials(materialId);
         cylinders[materialId].push_back(cylinder);
-        worldBounds.merge(cylinder.center);
-        worldBounds.merge(cylinder.up);
+        bounds.merge(cylinder.center);
+        bounds.merge(cylinder.up);
     }
 
     void addCone(const size_t materialId, const Cone& cone)
     {
         _buildMissingMaterials(materialId);
         cones[materialId].push_back(cone);
-        worldBounds.merge(cone.center);
-        worldBounds.merge(cone.up);
+        bounds.merge(cone.center);
+        bounds.merge(cone.up);
     }
 
     SpheresMap& spheres;
@@ -99,20 +98,19 @@ public:
     ConesMap& cones;
     TrianglesMeshMap& trianglesMeshes;
     Materials& materials;
-    Boxf& worldBounds;
+    Boxf& bounds;
 };
 
 class MorphologyLoader::Impl
 {
 public:
     Impl(const ApplicationParameters& applicationParameters,
-         const GeometryParameters& geometryParameters, Scene& scene,
+         const GeometryParameters& geometryParameters, const size_t nbMaterials,
          MorphologyLoader& parent)
         : _parent(parent)
         , _applicationParameters(applicationParameters)
         , _geometryParameters(geometryParameters)
-        , _scene(scene)
-        , _materialsOffset(scene.getMaterials().size())
+        , _materialsOffset(nbMaterials)
     {
     }
 
@@ -127,19 +125,18 @@ public:
      */
     bool importMorphology(const servus::URI& source, const uint64_t index,
                           const size_t material, const Matrix4f& transformation,
+                          GeometryGroup& group,
                           const GIDOffsets& targetGIDOffsets,
                           CompartmentReportPtr compartmentReport = nullptr)
     {
-        ParallelSceneContainer sceneContainer(_scene.getSpheres(),
-                                              _scene.getCylinders(),
-                                              _scene.getCones(),
-                                              _scene.getTriangleMeshes(),
-                                              _scene.getMaterials(),
-                                              _scene.getWorldBounds());
+        ParallelGeometryGroupContainer groupContainer(
+            group.getSpheres(), group.getCylinders(), group.getCones(),
+            group.getTrianglesMeshes(),
+            group.getMaterialManager().getMaterials(), group.getBounds());
 
         return _importMorphology(source, index, material, transformation,
                                  compartmentReport, targetGIDOffsets,
-                                 sceneContainer);
+                                 groupContainer);
     }
 
     /**
@@ -157,6 +154,9 @@ public:
         bool returnValue = true;
         try
         {
+            // Geometry group (one for the whole circuit)
+            GeometryGroup group(scene.getMaterialManager());
+
             // Open Circuit and select GIDs according to specified target
             const brain::Circuit circuit(uri);
             const brion::BlueConfig bc(uri.getPath());
@@ -249,7 +249,7 @@ public:
 
             // Import meshes
             returnValue =
-                returnValue && _importMeshes(allGids, transformations,
+                returnValue && _importMeshes(allGids, transformations, group,
                                              targetGIDOffsets, meshLoader);
 
             // Import morphologies
@@ -258,7 +258,10 @@ public:
                 returnValue =
                     returnValue &&
                     _importMorphologies(circuit, allGids, transformations,
-                                        targetGIDOffsets, compartmentReport);
+                                        group, targetGIDOffsets,
+                                        compartmentReport);
+
+            scene.addGeometryGroup(group);
         }
         catch (const std::exception& error)
         {
@@ -461,7 +464,7 @@ private:
                                   const Matrix4f& transformation,
                                   CompartmentReportPtr compartmentReport,
                                   const GIDOffsets& targetGIDOffsets,
-                                  ParallelSceneContainer& scene)
+                                  ParallelGeometryGroupContainer& group)
     {
         uint64_t offset = 0;
         if (compartmentReport)
@@ -474,7 +477,7 @@ private:
             _getMaterialFromGeometryParameters(index, material,
                                                brain::neuron::SectionType::soma,
                                                targetGIDOffsets);
-        scene.addSphere(materialId,
+        group.addSphere(materialId,
                         {somaPosition, radius, 0.f, textureCoordinates});
         return true;
     }
@@ -494,7 +497,7 @@ private:
                               const size_t material,
                               const Matrix4f& transformation,
                               const GIDOffsets& targetGIDOffsets,
-                              ParallelSceneContainer& scene)
+                              ParallelGeometryGroupContainer& group)
     {
         try
         {
@@ -514,7 +517,7 @@ private:
                 const auto radius = _getCorrectedRadius(soma.getMeanRadius());
                 metaballs.push_back(
                     Vector4f(center.x(), center.y(), center.z(), radius));
-                scene.worldBounds.merge(center);
+                group.bounds.merge(center);
             }
 
             // Dendrites and axon
@@ -546,7 +549,7 @@ private:
                         metaballs.push_back(Vector4f(position.x(), position.y(),
                                                      position.z(), radius));
 
-                    scene.worldBounds.merge(position);
+                    group.bounds.merge(position);
                 }
             }
 
@@ -558,8 +561,8 @@ private:
                 index, material, brain::neuron::SectionType::soma,
                 targetGIDOffsets);
             metaballsGenerator.generateMesh(metaballs, gridSize, threshold,
-                                            scene.materials, materialId,
-                                            scene.trianglesMeshes);
+                                            group.materials, materialId,
+                                            group.trianglesMeshes);
         }
         catch (const std::runtime_error& e)
         {
@@ -586,7 +589,7 @@ private:
                                   const Matrix4f& transformation,
                                   CompartmentReportPtr compartmentReport,
                                   const GIDOffsets& targetGIDOffsets,
-                                  ParallelSceneContainer& scene) const
+                                  ParallelGeometryGroupContainer& group) const
     {
         try
         {
@@ -637,7 +640,7 @@ private:
                 const auto radius = _getCorrectedRadius(soma.getMeanRadius());
                 const auto textureCoordinates =
                     _getIndexAsTextureCoordinates(offset);
-                scene.addSphere(materialId, {somaPosition, radius, 0.f,
+                group.addSphere(materialId, {somaPosition, radius, 0.f,
                                              textureCoordinates});
 
                 if (_geometryParameters.getCircuitUseSimulationModel())
@@ -652,7 +655,7 @@ private:
                         const auto& samples = child.getSamples();
                         const Vector3f sample{samples[0].x(), samples[0].y(),
                                               samples[0].z()};
-                        scene.addCone(materialId, {somaPosition, sample, radius,
+                        group.addCone(materialId, {somaPosition, sample, radius,
                                                    _getCorrectedRadius(
                                                        samples[0].w() * 0.5f),
                                                    0.f, textureCoordinates});
@@ -787,18 +790,18 @@ private:
 
                     if (radius > 0.f)
                     {
-                        scene.addSphere(materialId, {position, radius, distance,
+                        group.addSphere(materialId, {position, radius, distance,
                                                      textureCoordinates});
 
                         if (position != target && previousRadius > 0.f)
                         {
                             if (radius == previousRadius)
-                                scene.addCylinder(materialId,
+                                group.addCylinder(materialId,
                                                   {position, target, radius,
                                                    distance,
                                                    textureCoordinates});
                             else
-                                scene.addCone(materialId,
+                                group.addCone(materialId,
                                               {position, target, radius,
                                                previousRadius, distance,
                                                textureCoordinates});
@@ -818,7 +821,7 @@ private:
 
 #if (BRAYNS_USE_ASSIMP)
     bool _importMeshes(const brain::GIDSet& gids,
-                       const Matrix4fs& transformations,
+                       const Matrix4fs& transformations, GeometryGroup& group,
                        const GIDOffsets& targetGIDOffsets,
                        MeshLoader& meshLoader)
     {
@@ -844,7 +847,7 @@ private:
                     ? transformations[meshIndex]
                     : Matrix4f();
             if (!meshLoader.importMeshFromFile(
-                    meshLoader.getMeshFilenameFromGID(gid), _scene,
+                    meshLoader.getMeshFilenameFromGID(gid), group,
                     transformation, materialId))
                 ++loadingFailures;
             ++meshIndex;
@@ -870,7 +873,7 @@ private:
                            const Matrix4f& transformation,
                            CompartmentReportPtr compartmentReport,
                            const GIDOffsets& targetGIDOffsets,
-                           ParallelSceneContainer& scene)
+                           ParallelGeometryGroupContainer& group)
     {
         bool returnValue = true;
         const size_t morphologySectionTypes =
@@ -879,22 +882,23 @@ private:
             static_cast<size_t>(MorphologySectionType::soma))
             return _importMorphologyAsPoint(index, material, transformation,
                                             compartmentReport, targetGIDOffsets,
-                                            scene);
+                                            group);
         else if (_geometryParameters.useRealisticSomas())
             returnValue =
                 _createRealisticSoma(source, index, material, transformation,
-                                     targetGIDOffsets, scene);
+                                     targetGIDOffsets, group);
         returnValue =
             returnValue &&
             _importMorphologyFromURI(source, index, material, transformation,
                                      compartmentReport, targetGIDOffsets,
-                                     scene);
+                                     group);
         return returnValue;
     }
 
     bool _importMorphologies(const brain::Circuit& circuit,
                              const brain::GIDSet& gids,
                              const Matrix4fs& transformations,
+                             GeometryGroup& group,
                              const GIDOffsets& targetGIDOffsets,
                              CompartmentReportPtr compartmentReport)
     {
@@ -918,9 +922,11 @@ private:
                 TrianglesMeshMap triangleMeshes;
                 Materials materials;
                 Boxf bounds;
-                ParallelSceneContainer sceneContainer(spheres, cylinders, cones,
-                                                      triangleMeshes, materials,
-                                                      bounds);
+                ParallelGeometryGroupContainer sceneContainer(spheres,
+                                                              cylinders, cones,
+                                                              triangleMeshes,
+                                                              materials,
+                                                              bounds);
                 const auto& uri = uris[morphologyIndex];
 
                 const size_t materialId = _getMaterialFromGeometryParameters(
@@ -936,14 +942,14 @@ private:
 
 #pragma omp critical
                 for (size_t i = 0; i < materials.size(); ++i)
-                    _scene.setMaterial(i, materials[i]);
+                    group.getMaterialManager().set(i, materials[i]);
 
 #pragma omp critical
                 for (const auto& sphere : spheres)
                 {
                     const auto id = sphere.first;
-                    _scene.getSpheres()[id].insert(
-                        _scene.getSpheres()[id].end(),
+                    group.getSpheres()[id].insert(
+                        group.getSpheres()[id].end(),
                         sceneContainer.spheres[id].begin(),
                         sceneContainer.spheres[id].end());
                 }
@@ -952,8 +958,8 @@ private:
                 for (const auto& cylinder : cylinders)
                 {
                     const auto id = cylinder.first;
-                    _scene.getCylinders()[id].insert(
-                        _scene.getCylinders()[id].end(),
+                    group.getCylinders()[id].insert(
+                        group.getCylinders()[id].end(),
                         sceneContainer.cylinders[id].begin(),
                         sceneContainer.cylinders[id].end());
                 }
@@ -962,14 +968,14 @@ private:
                 for (const auto& cone : cones)
                 {
                     const auto id = cone.first;
-                    _scene.getCones()[id].insert(
-                        _scene.getCones()[id].end(),
+                    group.getCones()[id].insert(
+                        group.getCones()[id].end(),
                         sceneContainer.cones[id].begin(),
                         sceneContainer.cones[id].end());
                 }
 
 #pragma omp critical
-                _scene.getWorldBounds().merge(bounds);
+                group.getBounds().merge(bounds);
             }
         }
 
@@ -986,7 +992,6 @@ private:
     MorphologyLoader& _parent;
     const ApplicationParameters& _applicationParameters;
     const GeometryParameters& _geometryParameters;
-    Scene& _scene;
     size_ts _layerIds;
     size_ts _electrophysiologyTypes;
     size_ts _morphologyTypes;
@@ -995,9 +1000,9 @@ private:
 
 MorphologyLoader::MorphologyLoader(
     const ApplicationParameters& applicationParameters,
-    const GeometryParameters& geometryParameters, Scene& scene)
+    const GeometryParameters& geometryParameters, const size_t nbMaterials)
     : _impl(new MorphologyLoader::Impl(applicationParameters,
-                                       geometryParameters, scene, *this))
+                                       geometryParameters, nbMaterials, *this))
 {
 }
 
@@ -1008,10 +1013,11 @@ MorphologyLoader::~MorphologyLoader()
 bool MorphologyLoader::importMorphology(const servus::URI& uri,
                                         const uint64_t index,
                                         const size_t material,
+                                        GeometryGroup& group,
                                         const Matrix4f& transformation)
 {
     const GIDOffsets targetGIDOffsets;
-    return _impl->importMorphology(uri, index, material, transformation,
+    return _impl->importMorphology(uri, index, material, transformation, group,
                                    targetGIDOffsets);
 }
 
