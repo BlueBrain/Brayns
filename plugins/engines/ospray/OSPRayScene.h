@@ -78,12 +78,21 @@ public:
     OSPModel simulationModelImpl() { return _simulationModel; }
 private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
+    void _commitOSPMaterial(OSPMaterial ospMaterial, Material& material);
+
     OSPModel _getActiveModel();
     uint32_t _getOSPDataFlags();
-    uint64_t _serializeSpheres(const size_t groupId, const size_t materialId);
-    uint64_t _serializeCylinders(const size_t groupId, const size_t materialId);
-    uint64_t _serializeCones(const size_t groupId, const size_t materialId);
-    uint64_t _serializeMeshes(const size_t groupId, const size_t materialId);
+    uint64_t _serializeSpheres(const size_t groupId,
+                               const size_t groupMaterialId,
+                               const size_t ospMaterialId);
+    uint64_t _serializeCylinders(const size_t groupId,
+                                 const size_t groupMaterialId,
+                                 const size_t ospMaterialId);
+    uint64_t _serializeCones(const size_t groupId, const size_t groupMaterialId,
+                             const size_t ospMaterialId);
+    uint64_t _serializeMeshes(const size_t groupId,
+                              const size_t groupMaterialId,
+                              const size_t ospMaterialId);
 
     OSPModel _rootModel;
     std::vector<OSPGeometry> _models;

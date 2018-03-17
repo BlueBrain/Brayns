@@ -399,13 +399,12 @@ private:
             });
 
         loadingProgress.setMessage("Unloading ...");
-        _engine->getScene().unload();
+        Scene& scene = _engine->getScene();
+        scene.unload();
         loadingProgress += LOADING_PROGRESS_STEP;
 
         loadingProgress.setMessage("Loading data ...");
         _meshLoader.clear();
-        Scene& scene = _engine->getScene();
-        scene.getMaterialManager().reset();
         _loadData(loadingProgress);
 
         if (scene.empty() && !scene.getVolumeHandler())
@@ -601,7 +600,7 @@ private:
         // Load PDB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group(scene.getMaterialManager());
+        GeometryGroup group;
         std::string pdbFile = filename;
         if (pdbFile == "")
         {
@@ -629,7 +628,7 @@ private:
         // Load XYZB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group(scene.getMaterialManager());
+        GeometryGroup group;
         BRAYNS_INFO << "Loading XYZB file " << geometryParameters.getXYZBFile()
                     << std::endl;
         XYZBLoader xyzbLoader(geometryParameters);
@@ -652,7 +651,7 @@ private:
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group(scene.getMaterialManager());
+        GeometryGroup group;
 
         const strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
                                  ".stl", ".3ds", ".ase", ".ifc", ".off"};
@@ -684,7 +683,7 @@ private:
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group(scene.getMaterialManager());
+        GeometryGroup group;
 
         const auto material =
             geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
@@ -793,7 +792,7 @@ private:
             _parametersManager.getApplicationParameters();
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group(scene.getMaterialManager());
+        GeometryGroup group;
         const auto& folder = geometryParameters.getMorphologyFolder();
         MorphologyLoader morphologyLoader(
             applicationParameters, geometryParameters,

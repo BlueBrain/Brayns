@@ -65,9 +65,35 @@ void Scene::unload()
         geometryGroup.unload();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
-    _materialManager.clear();
     _textures.clear();
     _volumeHandler.reset();
+    _initializeSystemMaterials();
+}
+
+void Scene::_initializeSystemMaterials()
+{
+    BRAYNS_INFO << "Building system materials" << std::endl;
+    _materialManager.clear();
+    for (size_t i = 0; i < NB_SYSTEM_MATERIALS; ++i)
+    {
+        Material material;
+        switch (MaterialType(i))
+        {
+        case MaterialType::bounding_box:
+            material.setColor(Vector3f(1.f, 1.f, 1.f));
+            material.setEmission(10.f);
+            break;
+        case MaterialType::invisible:
+            material.setOpacity(0.f);
+            material.setRefractionIndex(1.f);
+            material.setColor(Vector3f(1.f, 1.f, 1.f));
+            material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
+            break;
+        default:
+            break;
+        }
+        _materialManager.set(i, material);
+    }
 }
 
 void Scene::_markGeometryDirty()
@@ -78,76 +104,86 @@ void Scene::_markGeometryDirty()
 
 void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
 {
-    const auto nbMaterials = _materialManager.getMaterials().size();
-    for (size_t i = NB_SYSTEM_MATERIALS; i < nbMaterials; ++i)
-    {
-        auto& material = _materialManager.get(i);
-        material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
-        material.setOpacity(1.f);
-        material.setReflectionIndex(0.f);
+    if (_geometryGroups.empty())
+        return;
 
-        switch (colorMap)
+    for (auto& group : _geometryGroups)
+    {
+        size_t materialId = 0;
+        for (auto& material : group.getMaterialManager().getMaterials())
         {
-        case MaterialsColorMap::none:
-            switch (i)
+            material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
+            material.setOpacity(1.f);
+            material.setReflectionIndex(0.f);
+
+            switch (colorMap)
             {
-            case 0: // Default
-            case 1: // Soma
-                material.setColor(Vector3f(0.9f, 0.9f, 0.9f));
+            case MaterialsColorMap::none:
+                switch (materialId)
+                {
+                case 0: // Default
+                case 1: // Soma
+                    material.setColor(Vector3f(0.9f, 0.9f, 0.9f));
+                    break;
+                case 2: // Axon
+                    material.setColor(Vector3f(0.2f, 0.2f, 0.8f));
+                    break;
+                case 3: // Dendrite
+                    material.setColor(Vector3f(0.8f, 0.2f, 0.2f));
+                    break;
+                case 4: // Apical dendrite
+                    material.setColor(Vector3f(0.8f, 0.2f, 0.8f));
+                    break;
+                default:
+                    material.setColor(
+                        Vector3f(float(std::rand() % 255) / 255.f,
+                                 float(std::rand() % 255) / 255.f,
+                                 float(std::rand() % 255) / 255.f));
+                }
                 break;
-            case 2: // Axon
-                material.setColor(Vector3f(0.2f, 0.2f, 0.8f));
-                break;
-            case 3: // Dendrite
-                material.setColor(Vector3f(0.8f, 0.2f, 0.2f));
-                break;
-            case 4: // Apical dendrite
-                material.setColor(Vector3f(0.8f, 0.2f, 0.8f));
-                break;
-            default:
-                material.setColor(Vector3f(float(std::rand() % 255) / 255.f,
-                                           float(std::rand() % 255) / 255.f,
-                                           float(std::rand() % 255) / 255.f));
-            }
-            break;
-        case MaterialsColorMap::gradient:
-        {
-            const float a = float(i) / float(nbMaterials);
-            material.setColor(Vector3f(a, 0.f, 1.f - a));
-            break;
-        }
-        case MaterialsColorMap::pastel:
-            material.setColor(
-                Vector3f(0.5f + float(std::rand() % 127) / 255.f,
-                         0.5f + float(std::rand() % 127) / 255.f,
-                         0.5f + float(std::rand() % 127) / 255.f));
-            break;
-        case MaterialsColorMap::random:
-            material.setColor(Vector3f(float(rand() % 255) / 255.f,
-                                       float(rand() % 255) / 255.f,
-                                       float(rand() % 255) / 255.f));
-            switch (rand() % 4)
+            case MaterialsColorMap::gradient:
             {
-            case 0:
-                // Transparent
-                material.setOpacity(float(std::rand() % 100) / 100.f);
-                material.setRefractionIndex(0.98f);
-                material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
-                material.setSpecularExponent(10.f);
-            case 1:
-                // Light emmitter
-                material.setEmission(1.f);
-            case 2:
-                // Reflector
-                material.setReflectionIndex(float(std::rand() % 100) / 100.f);
-                material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
-                material.setSpecularExponent(10.f);
+                const auto nbMaterials =
+                    group.getMaterialManager().getMaterials().size();
+                const float a = float(materialId) / float(nbMaterials);
+                material.setColor(Vector3f(a, 0.f, 1.f - a));
+                break;
             }
-            break;
-        case MaterialsColorMap::shades_of_grey:
-            float value = float(std::rand() % 255) / 255.f;
-            material.setColor(Vector3f(value, value, value));
-            break;
+            case MaterialsColorMap::pastel:
+                material.setColor(
+                    Vector3f(0.5f + float(std::rand() % 127) / 255.f,
+                             0.5f + float(std::rand() % 127) / 255.f,
+                             0.5f + float(std::rand() % 127) / 255.f));
+                break;
+            case MaterialsColorMap::random:
+                material.setColor(Vector3f(float(rand() % 255) / 255.f,
+                                           float(rand() % 255) / 255.f,
+                                           float(rand() % 255) / 255.f));
+                switch (rand() % 4)
+                {
+                case 0:
+                    // Transparent
+                    material.setOpacity(float(std::rand() % 100) / 100.f);
+                    material.setRefractionIndex(0.98f);
+                    material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
+                    material.setSpecularExponent(10.f);
+                case 1:
+                    // Light emmitter
+                    material.setEmission(1.f);
+                case 2:
+                    // Reflector
+                    material.setReflectionIndex(float(std::rand() % 100) /
+                                                100.f);
+                    material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
+                    material.setSpecularExponent(10.f);
+                }
+                break;
+            case MaterialsColorMap::shades_of_grey:
+                float value = float(std::rand() % 255) / 255.f;
+                material.setColor(Vector3f(value, value, value));
+                break;
+            }
+            ++materialId;
         }
     }
     commitMaterials(Action::update);
@@ -184,7 +220,8 @@ void Scene::buildDefault()
                                 {0.8f, 0.8f, 0.8f}, {0.f, 1.f, 0.f},
                                 {0.8f, 0.8f, 0.8f}, {0.8f, 0.8f, 0.8f}};
 
-    GeometryGroup group(_materialManager);
+    GeometryGroup group;
+    size_t materialId = 0;
     for (size_t i = 1; i < 6; ++i)
     {
         // Cornell box
@@ -195,7 +232,7 @@ void Scene::buildDefault()
         material.setReflectionIndex(i == 4 ? 0.2f : 0.f);
         material.setGlossiness(i == 4 ? 0.9f : 1.f);
         material.setOpacity(1.f);
-        const auto materialId = _materialManager.add(material);
+        group.getMaterialManager().set(materialId, material);
 
         auto& meshes = group.getTrianglesMeshes()[materialId];
         for (size_t j = 0; j < 6; ++j)
@@ -206,6 +243,7 @@ void Scene::buildDefault()
         }
         meshes.indices.push_back(Vector3ui(0, 1, 2));
         meshes.indices.push_back(Vector3ui(3, 4, 5));
+        ++materialId;
     }
 
     {
@@ -217,8 +255,9 @@ void Scene::buildDefault()
         material.setColor(WHITE);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(100.f);
-        const auto materialId = _materialManager.add(material);
+        group.getMaterialManager().set(materialId, material);
         group.addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
+        ++materialId;
     }
 
     {
@@ -227,10 +266,11 @@ void Scene::buildDefault()
         material.setColor({0.1f, 0.1f, 0.8f});
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
-        const auto materialId = _materialManager.add(material);
+        group.getMaterialManager().set(materialId, material);
         group.addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
                                        {0.75f, 0.126f, 0.75f},
                                        0.125f});
+        ++materialId;
     }
 
     {
@@ -239,11 +279,12 @@ void Scene::buildDefault()
         material.setReflectionIndex(0.8f);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
-        const auto materialId = _materialManager.add(material);
+        group.getMaterialManager().set(materialId, material);
         group.addCone(materialId, {{0.75f, 0.01f, 0.25f},
                                    {0.75f, 0.5f, 0.25f},
                                    0.15f,
                                    0.f});
+        ++materialId;
     }
 
     {
@@ -251,7 +292,7 @@ void Scene::buildDefault()
         Material material;
         material.setColor(WHITE);
         material.setEmission(5.f);
-        const auto materialId = _materialManager.add(material);
+        group.getMaterialManager().set(materialId, material);
         const Vector3f lampInfo = {0.15f, 0.99f, 0.15f};
         const Vector3f lampPositions[4] = {
             {0.5f - lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
@@ -269,7 +310,7 @@ void Scene::buildDefault()
 
 void Scene::buildEnvironment()
 {
-    GeometryGroup group(_materialManager);
+    GeometryGroup group;
     const auto sceneBounds = getBounds();
     auto& meshes = group.getTrianglesMeshes();
     switch (_parametersManager.getGeometryParameters().getSceneEnvironment())
@@ -452,7 +493,6 @@ void Scene::clearLights()
 {
     _lights.clear();
 }
-
 void Scene::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
     auto& ap = _parametersManager.getAnimationParameters();
@@ -602,7 +642,7 @@ void Scene::_processVolumeAABBGeometry()
     const Vector3f& volumeOffset = volumeHandler->getOffset();
     const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
 
-    GeometryGroup group(_materialManager);
+    GeometryGroup group;
     const size_t materialId = static_cast<size_t>(MaterialType::invisible);
     auto& meshes = group.getTrianglesMeshes()[materialId];
     uint64_t offset = meshes.vertices.size();
@@ -645,40 +685,41 @@ void Scene::saveToCacheFile()
     file.write((char*)&version, sizeof(size_t));
     BRAYNS_INFO << "Version: " << version << std::endl;
 
-    const size_t nbMaterials = _materialManager.getMaterials().size();
-    file.write((char*)&nbMaterials, sizeof(size_t));
-    BRAYNS_INFO << nbMaterials << " materials" << std::endl;
-
-    // Save materials
-    for (auto& material : _materialManager.getMaterials())
-    {
-        Vector3f value3f;
-        value3f = material.getColor();
-        file.write((char*)&value3f, sizeof(Vector3f));
-        value3f = material.getSpecularColor();
-        file.write((char*)&value3f, sizeof(Vector3f));
-        float value = material.getSpecularExponent();
-        file.write((char*)&value, sizeof(float));
-        value = material.getReflectionIndex();
-        file.write((char*)&value, sizeof(float));
-        value = material.getOpacity();
-        file.write((char*)&value, sizeof(float));
-        value = material.getRefractionIndex();
-        file.write((char*)&value, sizeof(float));
-        value = material.getEmission();
-        file.write((char*)&value, sizeof(float));
-        value = material.getGlossiness();
-        file.write((char*)&value, sizeof(float));
-        const bool boolean = material.getCastSimulationData();
-        file.write((char*)&boolean, sizeof(bool));
-        // TODO: Textures
-    }
-
     // Save geometry
     size_t nbElements = _geometryGroups.size();
     file.write((char*)&nbElements, sizeof(size_t));
     for (auto& group : _geometryGroups)
     {
+        const size_t nbMaterials =
+            group.getMaterialManager().getMaterials().size();
+        file.write((char*)&nbMaterials, sizeof(size_t));
+        BRAYNS_INFO << nbMaterials << " materials" << std::endl;
+
+        // Save materials
+        for (auto& material : group.getMaterialManager().getMaterials())
+        {
+            Vector3f value3f;
+            value3f = material.getColor();
+            file.write((char*)&value3f, sizeof(Vector3f));
+            value3f = material.getSpecularColor();
+            file.write((char*)&value3f, sizeof(Vector3f));
+            float value = material.getSpecularExponent();
+            file.write((char*)&value, sizeof(float));
+            value = material.getReflectionIndex();
+            file.write((char*)&value, sizeof(float));
+            value = material.getOpacity();
+            file.write((char*)&value, sizeof(float));
+            value = material.getRefractionIndex();
+            file.write((char*)&value, sizeof(float));
+            value = material.getEmission();
+            file.write((char*)&value, sizeof(float));
+            value = material.getGlossiness();
+            file.write((char*)&value, sizeof(float));
+            const bool boolean = material.getCastSimulationData();
+            file.write((char*)&boolean, sizeof(bool));
+            // TODO: Textures
+        }
+
         for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
         {
             uint64_t bufferSize{0};
@@ -827,36 +868,6 @@ void Scene::loadFromCacheFile()
     file.read((char*)&nbMaterials, sizeof(size_t));
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
-    // Materials
-    _materialManager.clear();
-    _materialManager.getMaterials().resize(nbMaterials);
-    for (size_t i = 0; i < nbMaterials; ++i)
-    {
-        auto& material = _materialManager.get(i);
-        Vector3f value3f;
-        file.read((char*)&value3f, sizeof(Vector3f));
-        material.setColor(value3f);
-        file.read((char*)&value3f, sizeof(Vector3f));
-        material.setSpecularColor(value3f);
-        float value;
-        file.read((char*)&value, sizeof(float));
-        material.setSpecularExponent(value);
-        file.read((char*)&value, sizeof(float));
-        material.setReflectionIndex(value);
-        file.read((char*)&value, sizeof(float));
-        material.setOpacity(value);
-        file.read((char*)&value, sizeof(float));
-        material.setRefractionIndex(value);
-        file.read((char*)&value, sizeof(float));
-        material.setEmission(value);
-        file.read((char*)&value, sizeof(float));
-        material.setGlossiness(value);
-        bool boolean;
-        file.read((char*)&boolean, sizeof(bool));
-        material.setCastSimulationData(boolean);
-        // TODO: Textures
-    }
-
     // Geometry
     size_t nbGeometryGroups = 0;
     size_t nbSpheres = 0;
@@ -870,7 +881,36 @@ void Scene::loadFromCacheFile()
     file.read((char*)&nbGeometryGroups, sizeof(size_t));
     for (size_t groupId = 0; groupId < nbGeometryGroups; ++groupId)
     {
-        GeometryGroup group(_materialManager);
+        GeometryGroup group;
+        // Materials
+        group.getMaterialManager().clear();
+        for (size_t i = 0; i < nbMaterials; ++i)
+        {
+            auto& material = group.getMaterialManager().get(i);
+            Vector3f value3f;
+            file.read((char*)&value3f, sizeof(Vector3f));
+            material.setColor(value3f);
+            file.read((char*)&value3f, sizeof(Vector3f));
+            material.setSpecularColor(value3f);
+            float value;
+            file.read((char*)&value, sizeof(float));
+            material.setSpecularExponent(value);
+            file.read((char*)&value, sizeof(float));
+            material.setReflectionIndex(value);
+            file.read((char*)&value, sizeof(float));
+            material.setOpacity(value);
+            file.read((char*)&value, sizeof(float));
+            material.setRefractionIndex(value);
+            file.read((char*)&value, sizeof(float));
+            material.setEmission(value);
+            file.read((char*)&value, sizeof(float));
+            material.setGlossiness(value);
+            bool boolean;
+            file.read((char*)&boolean, sizeof(bool));
+            material.setCastSimulationData(boolean);
+            // TODO: Textures
+        }
+
         for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
         {
             uint64_t bufferSize{0};
@@ -987,5 +1027,15 @@ Boxf Scene::getBounds()
     for (auto& group : _geometryGroups)
         bounds.merge(group.getBounds());
     return bounds;
+}
+
+uint64_t Scene::_getNbMaterials()
+{
+    // Scene materials
+    uint64_t nbMaterials = _materialManager.getMaterials().size();
+    // Geometry materials
+    for (auto& group : _geometryGroups)
+        nbMaterials += group.getMaterialManager().getMaterials().size();
+    return nbMaterials;
 }
 }

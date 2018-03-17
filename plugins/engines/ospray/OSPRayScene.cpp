@@ -81,7 +81,7 @@ OSPRayScene::~OSPRayScene()
 
 void OSPRayScene::unload()
 {
-    const auto nbMaterials = _materialManager.getMaterials().size();
+    const auto nbMaterials = _getNbMaterials();
     if (_rootModel)
     {
         for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
@@ -171,128 +171,121 @@ void OSPRayScene::commit()
 }
 
 uint64_t OSPRayScene::_serializeSpheres(const size_t groupId,
-                                        const size_t materialId)
+                                        const size_t groupMaterialId,
+                                        const size_t ospMaterialId)
 {
     auto& group = _geometryGroups[groupId];
     auto& s = group.getSpheres();
-    if (s.find(materialId) == s.end())
-        return 0;
-
     auto model = _getActiveModel();
-    const auto& spheres = s[materialId];
+    const auto& spheres = s[groupMaterialId];
     const auto bufferSize = spheres.size() * sizeof(Sphere);
-    if (_ospExtendedSpheres.find(materialId) != _ospExtendedSpheres.end())
-        ospRemoveGeometry(model, _ospExtendedSpheres[materialId]);
+    if (_ospExtendedSpheres.find(ospMaterialId) != _ospExtendedSpheres.end())
+        ospRemoveGeometry(model, _ospExtendedSpheres[ospMaterialId]);
 
-    _ospExtendedSpheres[materialId] = ospNewGeometry("extendedspheres");
-    _ospExtendedSpheresData[materialId] =
+    _ospExtendedSpheres[ospMaterialId] = ospNewGeometry("extendedspheres");
+    _ospExtendedSpheresData[ospMaterialId] =
         ospNewData(bufferSize / sizeof(float), OSP_FLOAT, spheres.data(),
                    _getOSPDataFlags());
 
-    ospSetObject(_ospExtendedSpheres[materialId], "extendedspheres",
-                 _ospExtendedSpheresData[materialId]);
+    ospSetObject(_ospExtendedSpheres[ospMaterialId], "extendedspheres",
+                 _ospExtendedSpheresData[ospMaterialId]);
 
-    if (_ospMaterials[materialId])
-        ospSetMaterial(_ospExtendedSpheres[materialId],
-                       _ospMaterials[materialId]);
+    if (_ospMaterials[ospMaterialId])
+        ospSetMaterial(_ospExtendedSpheres[ospMaterialId],
+                       _ospMaterials[ospMaterialId]);
 
-    ospCommit(_ospExtendedSpheres[materialId]);
+    ospCommit(_ospExtendedSpheres[ospMaterialId]);
 
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
     if (geometryParameters.getCircuitUseSimulationModel())
-        ospAddGeometry(_simulationModel, _ospExtendedSpheres[materialId]);
+        ospAddGeometry(_simulationModel, _ospExtendedSpheres[ospMaterialId]);
     else
-        ospAddGeometry(model, _ospExtendedSpheres[materialId]);
+        ospAddGeometry(model, _ospExtendedSpheres[ospMaterialId]);
 
     group.setSpheresDirty(false);
     return bufferSize;
 }
 
 uint64_t OSPRayScene::_serializeCylinders(const size_t groupId,
-                                          const size_t materialId)
+                                          const size_t groupMaterialId,
+                                          const size_t ospMaterialId)
 {
     auto& group = _geometryGroups[groupId];
     auto& c = group.getCylinders();
-    if (c.find(materialId) == c.end())
-        return 0;
-
     auto model = _getActiveModel();
-    const auto& cylinders = c[materialId];
+    const auto& cylinders = c[groupMaterialId];
     const auto bufferSize = cylinders.size() * sizeof(Cylinder);
-    if (_ospExtendedCylinders.find(materialId) != _ospExtendedCylinders.end())
-        ospRemoveGeometry(model, _ospExtendedCylinders[materialId]);
+    if (_ospExtendedCylinders.find(ospMaterialId) !=
+        _ospExtendedCylinders.end())
+        ospRemoveGeometry(model, _ospExtendedCylinders[ospMaterialId]);
 
-    _ospExtendedCylinders[materialId] = ospNewGeometry("extendedcylinders");
-    _ospExtendedCylindersData[materialId] =
+    _ospExtendedCylinders[ospMaterialId] = ospNewGeometry("extendedcylinders");
+    _ospExtendedCylindersData[ospMaterialId] =
         ospNewData(bufferSize / sizeof(float), OSP_FLOAT, cylinders.data(),
                    _getOSPDataFlags());
-    ospSetObject(_ospExtendedCylinders[materialId], "extendedcylinders",
-                 _ospExtendedCylindersData[materialId]);
+    ospSetObject(_ospExtendedCylinders[ospMaterialId], "extendedcylinders",
+                 _ospExtendedCylindersData[ospMaterialId]);
 
-    if (_ospMaterials[materialId])
-        ospSetMaterial(_ospExtendedCylinders[materialId],
-                       _ospMaterials[materialId]);
+    if (_ospMaterials[ospMaterialId])
+        ospSetMaterial(_ospExtendedCylinders[ospMaterialId],
+                       _ospMaterials[ospMaterialId]);
 
-    ospCommit(_ospExtendedCylinders[materialId]);
+    ospCommit(_ospExtendedCylinders[ospMaterialId]);
 
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
     if (geometryParameters.getCircuitUseSimulationModel())
-        ospAddGeometry(_simulationModel, _ospExtendedCylinders[materialId]);
+        ospAddGeometry(_simulationModel, _ospExtendedCylinders[ospMaterialId]);
     else
-        ospAddGeometry(model, _ospExtendedCylinders[materialId]);
+        ospAddGeometry(model, _ospExtendedCylinders[ospMaterialId]);
     group.setCylindersDirty(false);
     return bufferSize;
 }
 
 uint64_t OSPRayScene::_serializeCones(const size_t groupId,
-                                      const size_t materialId)
+                                      const size_t groupMaterialId,
+                                      const size_t ospMaterialId)
 {
     auto& group = _geometryGroups[groupId];
     auto& c = group.getCones();
-    if (c.find(materialId) == c.end())
-        return 0;
-
     auto model = _getActiveModel();
-    const auto& cones = c[materialId];
+    const auto& cones = c[groupMaterialId];
     const auto bufferSize = cones.size() * sizeof(Cone);
-    if (_ospExtendedCones.find(materialId) != _ospExtendedCones.end())
-        ospRemoveGeometry(model, _ospExtendedCones[materialId]);
+    if (_ospExtendedCones.find(ospMaterialId) != _ospExtendedCones.end())
+        ospRemoveGeometry(model, _ospExtendedCones[ospMaterialId]);
 
-    _ospExtendedCones[materialId] = ospNewGeometry("extendedcones");
-    _ospExtendedConesData[materialId] =
+    _ospExtendedCones[ospMaterialId] = ospNewGeometry("extendedcones");
+    _ospExtendedConesData[ospMaterialId] =
         ospNewData(bufferSize / sizeof(float), OSP_FLOAT, cones.data(),
                    _getOSPDataFlags());
-    ospSetObject(_ospExtendedCones[materialId], "extendedcones",
-                 _ospExtendedConesData[materialId]);
+    ospSetObject(_ospExtendedCones[ospMaterialId], "extendedcones",
+                 _ospExtendedConesData[ospMaterialId]);
 
-    if (_ospMaterials[materialId])
-        ospSetMaterial(_ospExtendedCones[materialId],
-                       _ospMaterials[materialId]);
+    if (_ospMaterials[ospMaterialId])
+        ospSetMaterial(_ospExtendedCones[ospMaterialId],
+                       _ospMaterials[ospMaterialId]);
 
-    ospCommit(_ospExtendedCones[materialId]);
+    ospCommit(_ospExtendedCones[ospMaterialId]);
 
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
     if (geometryParameters.getCircuitUseSimulationModel())
-        ospAddGeometry(_simulationModel, _ospExtendedCones[materialId]);
+        ospAddGeometry(_simulationModel, _ospExtendedCones[ospMaterialId]);
     else
-        ospAddGeometry(model, _ospExtendedCones[materialId]);
+        ospAddGeometry(model, _ospExtendedCones[ospMaterialId]);
     group.setConesDirty(false);
     return bufferSize;
 }
 
 uint64_t OSPRayScene::_serializeMeshes(const size_t groupId,
-                                       const size_t materialId)
+                                       const size_t groupMaterialId,
+                                       const size_t ospMaterialId)
 {
     auto& group = _geometryGroups[groupId];
     auto& t = group.getTrianglesMeshes();
-    if (t.find(materialId) == t.end())
-        return 0;
-
     uint64_t size = 0;
-    _ospMeshes[materialId] = ospNewGeometry("trianglemesh");
-    assert(_ospMeshes[materialId]);
+    _ospMeshes[ospMaterialId] = ospNewGeometry("trianglemesh");
+    assert(_ospMeshes[ospMaterialId]);
 
-    auto& trianglesMesh = t[materialId];
+    auto& trianglesMesh = t[groupMaterialId];
     size += trianglesMesh.vertices.size() * 3 * sizeof(float);
     OSPData vertices =
         ospNewData(trianglesMesh.vertices.size(), OSP_FLOAT3,
@@ -304,7 +297,7 @@ uint64_t OSPRayScene::_serializeMeshes(const size_t groupId,
         OSPData normals =
             ospNewData(trianglesMesh.normals.size(), OSP_FLOAT3,
                        trianglesMesh.normals.data(), _getOSPDataFlags());
-        ospSetObject(_ospMeshes[materialId], "vertex.normal", normals);
+        ospSetObject(_ospMeshes[ospMaterialId], "vertex.normal", normals);
     }
 
     size += trianglesMesh.indices.size() * 3 * sizeof(int);
@@ -318,7 +311,7 @@ uint64_t OSPRayScene::_serializeMeshes(const size_t groupId,
         OSPData colors =
             ospNewData(trianglesMesh.colors.size(), OSP_FLOAT3A,
                        trianglesMesh.colors.data(), _getOSPDataFlags());
-        ospSetObject(_ospMeshes[materialId], "vertex.color", colors);
+        ospSetObject(_ospMeshes[ospMaterialId], "vertex.color", colors);
         ospRelease(colors);
     }
 
@@ -329,23 +322,23 @@ uint64_t OSPRayScene::_serializeMeshes(const size_t groupId,
             ospNewData(trianglesMesh.textureCoordinates.size(), OSP_FLOAT2,
                        trianglesMesh.textureCoordinates.data(),
                        _getOSPDataFlags());
-        ospSetObject(_ospMeshes[materialId], "vertex.texcoord", texCoords);
+        ospSetObject(_ospMeshes[ospMaterialId], "vertex.texcoord", texCoords);
         ospRelease(texCoords);
     }
 
-    ospSetObject(_ospMeshes[materialId], "position", vertices);
+    ospSetObject(_ospMeshes[ospMaterialId], "position", vertices);
     ospRelease(vertices);
-    ospSetObject(_ospMeshes[materialId], "index", indices);
+    ospSetObject(_ospMeshes[ospMaterialId], "index", indices);
     ospRelease(indices);
-    ospSet1i(_ospMeshes[materialId], "alpha_type", 0);
-    ospSet1i(_ospMeshes[materialId], "alpha_component", 4);
+    ospSet1i(_ospMeshes[ospMaterialId], "alpha_type", 0);
+    ospSet1i(_ospMeshes[ospMaterialId], "alpha_component", 4);
 
-    if (_ospMaterials[materialId])
-        ospSetMaterial(_ospMeshes[materialId], _ospMaterials[materialId]);
+    if (_ospMaterials[ospMaterialId])
+        ospSetMaterial(_ospMeshes[ospMaterialId], _ospMaterials[ospMaterialId]);
 
-    ospCommit(_ospMeshes[materialId]);
+    ospCommit(_ospMeshes[ospMaterialId]);
 
-    ospAddGeometry(_rootModel, _ospMeshes[materialId]);
+    ospAddGeometry(_rootModel, _ospMeshes[ospMaterialId]);
     group.setTrianglesMeshesDirty(false);
     return size;
 }
@@ -361,32 +354,36 @@ OSPModel OSPRayScene::_getActiveModel()
 
 void OSPRayScene::serializeGeometry()
 {
-    const auto nbMaterials = _materialManager.getMaterials().size();
+    uint64_t materialId = _materialManager.getMaterials().size();
     for (size_t g = 0; g < _geometryGroups.size(); ++g)
     {
         auto& group = _geometryGroups[g];
         if (!group.enabled())
             continue;
+        const auto nbMaterials =
+            group.getMaterialManager().getMaterials().size();
+
         _sizeInBytes = 0;
         if (group.spheresDirty())
             for (size_t i = 0; i < nbMaterials; ++i)
-                _sizeInBytes += _serializeSpheres(g, i);
+                _sizeInBytes += _serializeSpheres(g, i, i + materialId);
 
         if (group.cylindersDirty())
             for (size_t i = 0; i < nbMaterials; ++i)
-                _sizeInBytes += _serializeCylinders(g, i);
+                _sizeInBytes += _serializeCylinders(g, i, i + materialId);
 
         if (group.conesDirty())
             for (size_t i = 0; i < nbMaterials; ++i)
-                _sizeInBytes += _serializeCones(g, i);
+                _sizeInBytes += _serializeCones(g, i, i + materialId);
 
         if (group.trianglesMeshesDirty())
             for (size_t i = 0; i < nbMaterials; ++i)
-                _sizeInBytes += _serializeMeshes(g, i);
+                _sizeInBytes += _serializeMeshes(g, i, i + materialId);
         group.setSpheresDirty(false);
         group.setCylindersDirty(false);
         group.setConesDirty(false);
         group.setTrianglesMeshesDirty(false);
+        materialId += nbMaterials;
     }
 }
 
@@ -437,8 +434,7 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Cones    : " << totalNbCones << std::endl;
     BRAYNS_INFO << "Vertices : " << totalNbVertices << std::endl;
     BRAYNS_INFO << "Indices  : " << totalNbIndices << std::endl;
-    BRAYNS_INFO << "Materials: " << _materialManager.getMaterials().size()
-                << std::endl;
+    BRAYNS_INFO << "Materials: " << _getNbMaterials() << std::endl;
     BRAYNS_INFO << "Total    : " << _sizeInBytes << " bytes ("
                 << _sizeInBytes / 1048576 << " MB)" << std::endl;
     BRAYNS_INFO << "---------------------------------------------------"
@@ -506,10 +502,53 @@ void OSPRayScene::commitLights()
     }
 }
 
+void OSPRayScene::_commitOSPMaterial(OSPMaterial ospMaterial,
+                                     Material& material)
+{
+    Vector3f value3f = material.getColor();
+    ospSet3f(ospMaterial, "kd", value3f.x(), value3f.y(), value3f.z());
+    value3f = material.getSpecularColor();
+    ospSet3f(ospMaterial, "ks", value3f.x(), value3f.y(), value3f.z());
+    ospSet1f(ospMaterial, "ns", material.getSpecularExponent());
+    ospSet1f(ospMaterial, "d", material.getOpacity());
+    ospSet1f(ospMaterial, "refraction", material.getRefractionIndex());
+    ospSet1f(ospMaterial, "reflection", material.getReflectionIndex());
+    ospSet1f(ospMaterial, "a", material.getEmission());
+    ospSet1f(ospMaterial, "glossiness", material.getGlossiness());
+    ospSet1i(ospMaterial, "cast_simulation_data",
+             material.getCastSimulationData());
+    ospSet1i(ospMaterial, "skybox", material.getType() == MaterialType::skybox);
+
+    for (const auto& textureType : textureTypeMaterialAttribute)
+        ospSetObject(ospMaterial, textureType.attribute.c_str(), nullptr);
+
+    // Textures
+    for (auto texture : material.getTextures())
+    {
+        if (texture.second != TEXTURE_NAME_SIMULATION)
+            ImageManager::importTextureFromFile(_textures, texture.first,
+                                                texture.second);
+        else
+            BRAYNS_ERROR << "Failed to load texture: " << texture.second
+                         << std::endl;
+
+        OSPTexture2D ospTexture = _createTexture2D(texture.second);
+        ospSetObject(
+            ospMaterial,
+            textureTypeMaterialAttribute[texture.first].attribute.c_str(),
+            ospTexture);
+
+        BRAYNS_DEBUG << "Texture assigned to "
+                     << textureTypeMaterialAttribute[texture.first].attribute
+                     << ": " << texture.second << std::endl;
+    }
+    ospCommit(ospMaterial);
+}
+
 void OSPRayScene::commitMaterials(const Action action)
 {
-    auto& materials = _materialManager.getMaterials();
-    const auto nbMaterials = materials.size();
+    auto nbMaterials = _getNbMaterials();
+
     if (action == Action::create)
     {
         // Create materials
@@ -524,53 +563,23 @@ void OSPRayScene::commitMaterials(const Action action)
         }
     }
 
-    for (size_t i = 0; i < nbMaterials; ++i)
+    size_t materialId = 0;
+    // Scene materials
+    for (auto& material : _materialManager.getMaterials())
     {
-        // update material
-        auto& ospMaterial = _ospMaterials[i];
-        auto& material = materials[i];
-
-        Vector3f value3f = material.getColor();
-        ospSet3f(ospMaterial, "kd", value3f.x(), value3f.y(), value3f.z());
-        value3f = material.getSpecularColor();
-        ospSet3f(ospMaterial, "ks", value3f.x(), value3f.y(), value3f.z());
-        ospSet1f(ospMaterial, "ns", material.getSpecularExponent());
-        ospSet1f(ospMaterial, "d", material.getOpacity());
-        ospSet1f(ospMaterial, "refraction", material.getRefractionIndex());
-        ospSet1f(ospMaterial, "reflection", material.getReflectionIndex());
-        ospSet1f(ospMaterial, "a", material.getEmission());
-        ospSet1f(ospMaterial, "glossiness", material.getGlossiness());
-        ospSet1i(ospMaterial, "cast_simulation_data",
-                 material.getCastSimulationData());
-        ospSet1i(ospMaterial, "skybox",
-                 material.getType() == MaterialType::skybox);
-
-        for (const auto& textureType : textureTypeMaterialAttribute)
-            ospSetObject(ospMaterial, textureType.attribute.c_str(), nullptr);
-
-        // Textures
-        for (auto texture : material.getTextures())
-        {
-            if (texture.second != TEXTURE_NAME_SIMULATION)
-                ImageManager::importTextureFromFile(_textures, texture.first,
-                                                    texture.second);
-            else
-                BRAYNS_ERROR << "Failed to load texture: " << texture.second
-                             << std::endl;
-
-            OSPTexture2D ospTexture = _createTexture2D(texture.second);
-            ospSetObject(
-                ospMaterial,
-                textureTypeMaterialAttribute[texture.first].attribute.c_str(),
-                ospTexture);
-
-            BRAYNS_DEBUG
-                << "Texture assigned to "
-                << textureTypeMaterialAttribute[texture.first].attribute
-                << " of material " << i << ": " << texture.second << std::endl;
-        }
-        ospCommit(ospMaterial);
+        auto& ospMaterial = _ospMaterials[materialId];
+        _commitOSPMaterial(ospMaterial, material);
+        ++materialId;
     }
+
+    // Geometry materials
+    for (auto& group : _geometryGroups)
+        for (auto& material : group.getMaterialManager().getMaterials())
+        {
+            auto& ospMaterial = _ospMaterials[materialId];
+            _commitOSPMaterial(ospMaterial, material);
+            ++materialId;
+        }
 
     _ospMaterialData = ospNewData(nbMaterials, OSP_OBJECT, &_ospMaterials[0],
                                   _getOSPDataFlags());

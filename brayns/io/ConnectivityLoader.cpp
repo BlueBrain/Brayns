@@ -160,7 +160,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
         }
 
         // Build scene
-        GeometryGroup group(scene.getMaterialManager());
+        GeometryGroup group;
         const auto& scale = _geometryParameters.getConnectivityScale();
         const auto& dimensionRange =
             _geometryParameters.getConnectivityDimensionRange();

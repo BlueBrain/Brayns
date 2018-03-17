@@ -155,7 +155,7 @@ bool SceneLoader::importFromFile(const std::string& filename, Scene& scene,
                                  MeshLoader& meshLoader)
 {
     bool result = false;
-    GeometryGroup group(scene.getMaterialManager());
+    GeometryGroup group;
     if (_parsePositions(filename))
         result = _processNodes(group, meshLoader);
     scene.addGeometryGroup(group);

@@ -21,16 +21,10 @@
 #include "GeometryGroup.h"
 
 #include <brayns/common/log.h>
-#include <brayns/common/material/MaterialManager.h>
 
 namespace brayns
 {
-GeometryGroup::GeometryGroup(MaterialManager& materialManager)
-    : _materialManager(materialManager)
-{
-}
-
-GeometryGroup::~GeometryGroup()
+GeometryGroup::GeometryGroup()
 {
 }
 
@@ -55,7 +49,7 @@ bool GeometryGroup::empty() const
 uint64_t GeometryGroup::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _spheresDirty = true;
-    _materialManager.buildMissingMaterials(materialId);
+    _materialManager.set(materialId);
     _spheres[materialId].push_back(sphere);
     _bounds.merge(sphere.center);
     return _spheres[materialId].size() - 1;
@@ -68,7 +62,6 @@ void GeometryGroup::setSphere(const size_t materialId, const uint64_t index,
     auto& spheres = _spheres[materialId];
     if (index < spheres.size())
     {
-        _materialManager.buildMissingMaterials(materialId);
         spheres[index] = sphere;
         _bounds.merge(sphere.center);
     }
@@ -80,7 +73,7 @@ uint64_t GeometryGroup::addCylinder(const size_t materialId,
                                     const Cylinder& cylinder)
 {
     _cylindersDirty = true;
-    _materialManager.buildMissingMaterials(materialId);
+    _materialManager.set(materialId);
     _cylinders[materialId].push_back(cylinder);
     _bounds.merge(cylinder.center);
     _bounds.merge(cylinder.up);
@@ -94,7 +87,6 @@ void GeometryGroup::setCylinder(const size_t materialId, const uint64_t index,
     auto& cylinders = _cylinders[materialId];
     if (index < cylinders.size())
     {
-        _materialManager.buildMissingMaterials(materialId);
         cylinders[index] = cylinder;
         _bounds.merge(cylinder.center);
         _bounds.merge(cylinder.up);
@@ -106,7 +98,7 @@ void GeometryGroup::setCylinder(const size_t materialId, const uint64_t index,
 uint64_t GeometryGroup::addCone(const size_t materialId, const Cone& cone)
 {
     _conesDirty = true;
-    _materialManager.buildMissingMaterials(materialId);
+    _materialManager.set(materialId);
     _cones[materialId].push_back(cone);
     _bounds.merge(cone.center);
     _bounds.merge(cone.up);
@@ -120,7 +112,6 @@ void GeometryGroup::setCone(const size_t materialId, const uint64_t index,
     auto& cones = _cones[materialId];
     if (index < cones.size())
     {
-        _materialManager.buildMissingMaterials(materialId);
         cones[index] = cone;
         _bounds.merge(cone.center);
         _bounds.merge(cone.up);

@@ -23,6 +23,7 @@
 #include <brayns/common/Statistics.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
+#include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
@@ -244,11 +245,18 @@ inline void init(brayns::Material* m, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::GeometryGroup* g, ObjectHandler* h)
+{
+    h->add_property("enabled", &g->_enabled, Flags::Optional);
+    h->add_property("materials", &g->getMaterialManager().getMaterials());
+}
+
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
     brayns::Boxf bounds{s->getBounds()};
     h->add_property("bounds", &bounds, Flags::IgnoreRead | Flags::Optional);
     h->add_property("materials", &s->getMaterialManager().getMaterials());
+    h->add_property("geometry_groups", &s->getGeometryGroups());
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

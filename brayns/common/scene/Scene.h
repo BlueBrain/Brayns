@@ -145,8 +145,7 @@ public:
     /**
         @return geometry groups
       */
-    BRAYNS_API GeometryGroups& getGeometryGroups();
-
+    BRAYNS_API GeometryGroups& getGeometryGroups() { return _geometryGroups; }
     /**
         Builds a default scene made of a Cornell box, a refelctive cube, and
         a transparent sphere
@@ -277,6 +276,8 @@ public:
     size_t getSizeInBytes() const { return _sizeInBytes; }
 protected:
     void _processVolumeAABBGeometry();
+    void _initializeSystemMaterials();
+    uint64_t _getNbMaterials();
 
     // Parameters
     ParametersManager& _parametersManager;
