@@ -32,9 +32,10 @@ class XYZBLoader : public ProgressReporter
 public:
     XYZBLoader(const GeometryParameters& geometryParameters);
 
-    bool importFromFile(const std::string& filename, Scene& scene);
+    bool importFromFile(const std::string& filename, GeometryGroup& group);
 
-    bool importFromBinaryFile(const std::string& filename, Scene& scene);
+    bool importFromBinaryFile(const std::string& filename,
+                              GeometryGroup& group);
 
 private:
     const GeometryParameters& _geometryParameters;

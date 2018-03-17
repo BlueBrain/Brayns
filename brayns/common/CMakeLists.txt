@@ -5,6 +5,7 @@
 
 set(BRAYNSCOMMON_SOURCES
   engine/Engine.cpp
+  geometry/GeometryGroup.cpp
   simulation/AbstractSimulationHandler.cpp
   input/KeyboardHandler.cpp
   volume/VolumeHandler.cpp
@@ -15,6 +16,7 @@ set(BRAYNSCOMMON_SOURCES
   camera/InspectCenterManipulator.cpp
   scene/Scene.cpp
   material/Material.cpp
+  material/MaterialManager.cpp
   material/Texture2D.cpp
   Progress.cpp
   renderer/Renderer.cpp
@@ -28,6 +30,7 @@ set(BRAYNSCOMMON_SOURCES
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   ActionInterface.h
   BaseObject.h
+  geometry/GeometryGroup.h
   camera/AbstractManipulator.h
   camera/Camera.h
   camera/FlyingModeManipulator.h
@@ -43,6 +46,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   light/Light.h
   light/PointLight.h
   log.h
+  material/MaterialManager.h
   material/Material.h
   material/Texture2D.h
   mathTypes.h

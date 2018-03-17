@@ -20,7 +20,7 @@
 
 #include "CADiffusionSimulationHandler.h"
 
-#include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -85,7 +85,8 @@ bool CADiffusionSimulationHandler::_loadCalciumPositions(const size_t frame)
     return true;
 }
 
-void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
+void CADiffusionSimulationHandler::setFrame(GeometryGroup& group,
+                                            const size_t frame)
 {
     BRAYNS_DEBUG << "Setting Calcium Positions frame to " << frame << std::endl;
     if (frame == _currentFrame)
@@ -102,7 +103,7 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
         BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
                     << std::endl;
         for (const auto position : _calciumPositions)
-            scene.addSphere(materialId, {position, CALCIUM_RADIUS});
+            group.addSphere(materialId, {position, CALCIUM_RADIUS});
         _spheresCreated = true;
     }
     else
@@ -110,7 +111,7 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
         uint64_t i = 0;
         for (const auto position : _calciumPositions)
         {
-            scene.setSphere(i, materialId, Sphere(position, CALCIUM_RADIUS));
+            group.setSphere(i, materialId, Sphere(position, CALCIUM_RADIUS));
             ++i;
         }
     }

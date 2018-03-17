@@ -20,6 +20,7 @@
 
 #include "Scene.h"
 
+#include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/volume/VolumeHandler.h>
@@ -41,10 +42,6 @@ namespace brayns
 Scene::Scene(Renderers renderers, ParametersManager& parametersManager)
     : _parametersManager(parametersManager)
     , _renderers(renderers)
-    , _spheresDirty(true)
-    , _cylindersDirty(true)
-    , _conesDirty(true)
-    , _trianglesMeshesDirty(true)
     , _volumeHandler(nullptr)
     , _simulationHandler(nullptr)
     , _caDiffusionSimulationHandler(nullptr)
@@ -64,59 +61,28 @@ void Scene::reset()
 void Scene::unload()
 {
     _markGeometryDirty();
-    _spheres.clear();
-    _cylinders.clear();
-    _cones.clear();
-    _trianglesMeshes.clear();
+    for (auto& geometryGroup : _geometryGroups)
+        geometryGroup.unload();
     _bounds.reset();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
-    _materials.clear();
+    _materialManager.clear();
     _textures.clear();
     _volumeHandler.reset();
 }
 
 void Scene::_markGeometryDirty()
 {
-    _spheresDirty = true;
-    _cylindersDirty = true;
-    _conesDirty = true;
-    _trianglesMeshesDirty = true;
+    _geometryGroupsDirty = true;
     markModified();
-}
-
-void Scene::resetMaterials()
-{
-    BRAYNS_INFO << "Building system materials" << std::endl;
-    _materials.clear();
-    for (size_t i = 0; i < NB_SYSTEM_MATERIALS; ++i)
-    {
-        Material material;
-        switch (MaterialType(i))
-        {
-        case MaterialType::bounding_box:
-            material.setColor(Vector3f(1.f, 1.f, 1.f));
-            material.setEmission(10.f);
-            break;
-        case MaterialType::invisible:
-            material.setOpacity(0.f);
-            material.setRefractionIndex(1.f);
-            material.setColor(Vector3f(1.f, 1.f, 1.f));
-            material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
-            break;
-        default:
-            break;
-        }
-        _materials.push_back(material);
-    }
 }
 
 void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
 {
-    const auto nbMaterials = _materials.size();
+    const auto nbMaterials = _materialManager.getMaterials().size();
     for (size_t i = NB_SYSTEM_MATERIALS; i < nbMaterials; ++i)
     {
-        auto& material = _materials[i];
+        auto& material = _materialManager.get(i);
         material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
         material.setOpacity(1.f);
         material.setReflectionIndex(0.f);
@@ -184,15 +150,8 @@ void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
             material.setColor(Vector3f(value, value, value));
             break;
         }
-        _materials[i] = material;
     }
     commitMaterials(Action::update);
-}
-
-Material& Scene::getMaterial(size_t index)
-{
-    _buildMissingMaterials(index);
-    return _materials[index];
 }
 
 void Scene::buildDefault()
@@ -226,6 +185,7 @@ void Scene::buildDefault()
                                 {0.8f, 0.8f, 0.8f}, {0.f, 1.f, 0.f},
                                 {0.8f, 0.8f, 0.8f}, {0.8f, 0.8f, 0.8f}};
 
+    GeometryGroup gg(_materialManager);
     for (size_t i = 1; i < 6; ++i)
     {
         // Cornell box
@@ -236,17 +196,17 @@ void Scene::buildDefault()
         material.setReflectionIndex(i == 4 ? 0.2f : 0.f);
         material.setGlossiness(i == 4 ? 0.9f : 1.f);
         material.setOpacity(1.f);
-        const auto materialId = addMaterial(material);
+        const auto materialId = _materialManager.add(material);
 
-        auto& trianglesMesh = _trianglesMeshes[materialId];
+        auto& meshes = gg.getTrianglesMeshes()[materialId];
         for (size_t j = 0; j < 6; ++j)
         {
             const auto position = positions[indices[i][j]];
-            trianglesMesh.vertices.push_back(position);
+            meshes.vertices.push_back(position);
             _bounds.merge(position);
         }
-        trianglesMesh.indices.push_back(Vector3ui(0, 1, 2));
-        trianglesMesh.indices.push_back(Vector3ui(3, 4, 5));
+        meshes.indices.push_back(Vector3ui(0, 1, 2));
+        meshes.indices.push_back(Vector3ui(3, 4, 5));
     }
 
     {
@@ -258,8 +218,8 @@ void Scene::buildDefault()
         material.setColor(WHITE);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(100.f);
-        const auto materialId = addMaterial(material);
-        addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
+        const auto materialId = _materialManager.add(material);
+        gg.addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
     }
 
     {
@@ -268,9 +228,10 @@ void Scene::buildDefault()
         material.setColor({0.1f, 0.1f, 0.8f});
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
-        const auto materialId = addMaterial(material);
-        addCylinder(materialId,
-                    {{0.25f, 0.126f, 0.75f}, {0.75f, 0.126f, 0.75f}, 0.125f});
+        const auto materialId = _materialManager.add(material);
+        gg.addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
+                                    {0.75f, 0.126f, 0.75f},
+                                    0.125f});
     }
 
     {
@@ -279,9 +240,9 @@ void Scene::buildDefault()
         material.setReflectionIndex(0.8f);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
-        const auto materialId = addMaterial(material);
-        addCone(materialId,
-                {{0.75f, 0.01f, 0.25f}, {0.75f, 0.5f, 0.25f}, 0.15f, 0.f});
+        const auto materialId = _materialManager.add(material);
+        gg.addCone(materialId,
+                   {{0.75f, 0.01f, 0.25f}, {0.75f, 0.5f, 0.25f}, 0.15f, 0.f});
     }
 
     {
@@ -289,23 +250,27 @@ void Scene::buildDefault()
         Material material;
         material.setColor(WHITE);
         material.setEmission(5.f);
-        const auto materialId = addMaterial(material);
+        const auto materialId = _materialManager.add(material);
         const Vector3f lampInfo = {0.15f, 0.99f, 0.15f};
         const Vector3f lampPositions[4] = {
             {0.5f - lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()},
             {0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()}};
+        auto& meshes = gg.getTrianglesMeshes()[materialId];
         for (size_t i = 0; i < 4; ++i)
-            _trianglesMeshes[materialId].vertices.push_back(lampPositions[i]);
-        _trianglesMeshes[materialId].indices.push_back(Vector3i(2, 1, 0));
-        _trianglesMeshes[materialId].indices.push_back(Vector3i(0, 3, 2));
+            meshes.vertices.push_back(lampPositions[i]);
+        meshes.indices.push_back(Vector3i(2, 1, 0));
+        meshes.indices.push_back(Vector3i(0, 3, 2));
     }
     BRAYNS_INFO << "Bounding Box: " << _bounds << std::endl;
+    _geometryGroups.push_back(gg);
 }
 
 void Scene::buildEnvironment()
 {
+    GeometryGroup gg(_materialManager);
+    auto& meshes = gg.getTrianglesMeshes();
     switch (_parametersManager.getGeometryParameters().getSceneEnvironment())
     {
     case SceneEnvironment::none:
@@ -322,58 +287,52 @@ void Scene::buildEnvironment()
 
         Vector3i i;
         const size_t material = 0;
-        size_t meshIndex = _trianglesMeshes[material].indices.size();
+        size_t meshIndex = meshes[material].indices.size();
 
         Vector4f v;
         const Vector4f n(0.f, 1.f, 0.f, 0.f);
         v = Vector4f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() - s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(0.f, 0.f));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(0.f, 0.f));
         v = Vector4f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() - s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(tiles, 0.f));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(tiles, 0.f));
         v = Vector4f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() + s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(tiles, tiles));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(tiles, tiles));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        _trianglesMeshes[material].indices.push_back(i);
+        meshes[material].indices.push_back(i);
         meshIndex += 3;
 
         v = Vector4f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() + s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(tiles, tiles));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(tiles, tiles));
         v = Vector4f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() + s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(0.f, tiles));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(0.f, tiles));
         v = Vector4f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
                      c.z() - s.z() * scale.z(), 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(0.f, 0.f));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(0.f, 0.f));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        _trianglesMeshes[material].indices.push_back(i);
+        meshes[material].indices.push_back(i);
         break;
     }
     case SceneEnvironment::wall:
@@ -387,50 +346,44 @@ void Scene::buildEnvironment()
         const Vector3f c = _bounds.getCenter();
         Vector3i i;
         const size_t material = 0;
-        size_t meshIndex = _trianglesMeshes[material].indices.size();
+        size_t meshIndex = meshes[material].indices.size();
         Vector4f v;
         const Vector4f n(0.f, 0.f, -1.f, 0.f);
         v = Vector4f(c.x() - s.x() * scale.x(), c.y() - s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(0.f, 0.f));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(0.f, 0.f));
         v = Vector4f(c.x() + s.x() * scale.x(), c.y() - s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(tiles, 0.f));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(tiles, 0.f));
         v = Vector4f(c.x() + s.x() * scale.x(), c.y() + s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(tiles, tiles));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(tiles, tiles));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        _trianglesMeshes[material].indices.push_back(i);
+        meshes[material].indices.push_back(i);
         meshIndex += 3;
         v = Vector4f(c.x() + s.x() * scale.x(), c.y() + s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(tiles, tiles));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(tiles, tiles));
         v = Vector4f(c.x() - s.x() * scale.x(), c.y() + s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(0.f, tiles));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(0.f, tiles));
         v = Vector4f(c.x() - s.x() * scale.x(), c.y() - s.y() * scale.y(),
                      c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        _trianglesMeshes[material].vertices.push_back(v);
-        _trianglesMeshes[material].normals.push_back(n);
-        _trianglesMeshes[material].textureCoordinates.push_back(
-            Vector2f(0.f, 0.f));
+        meshes[material].vertices.push_back(v);
+        meshes[material].normals.push_back(n);
+        meshes[material].textureCoordinates.push_back(Vector2f(0.f, 0.f));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        _trianglesMeshes[material].indices.push_back(i);
+        meshes[material].indices.push_back(i);
         break;
     }
     case SceneEnvironment::bounding_box:
@@ -451,26 +404,27 @@ void Scene::buildEnvironment()
         };
 
         for (size_t i = 0; i < 8; ++i)
-            addSphere(material, Sphere(positions[i], radius));
+            gg.addSphere(material, Sphere(positions[i], radius));
 
-        addCylinder(material, {positions[0], positions[1], radius});
-        addCylinder(material, {positions[2], positions[3], radius});
-        addCylinder(material, {positions[4], positions[5], radius});
-        addCylinder(material, {positions[6], positions[7], radius});
+        gg.addCylinder(material, {positions[0], positions[1], radius});
+        gg.addCylinder(material, {positions[2], positions[3], radius});
+        gg.addCylinder(material, {positions[4], positions[5], radius});
+        gg.addCylinder(material, {positions[6], positions[7], radius});
 
-        addCylinder(material, {positions[0], positions[2], radius});
-        addCylinder(material, {positions[1], positions[3], radius});
-        addCylinder(material, {positions[4], positions[6], radius});
-        addCylinder(material, {positions[5], positions[7], radius});
+        gg.addCylinder(material, {positions[0], positions[2], radius});
+        gg.addCylinder(material, {positions[1], positions[3], radius});
+        gg.addCylinder(material, {positions[4], positions[6], radius});
+        gg.addCylinder(material, {positions[5], positions[7], radius});
 
-        addCylinder(material, {positions[0], positions[4], radius});
-        addCylinder(material, {positions[1], positions[5], radius});
-        addCylinder(material, {positions[2], positions[6], radius});
-        addCylinder(material, {positions[3], positions[7], radius});
+        gg.addCylinder(material, {positions[0], positions[4], radius});
+        gg.addCylinder(material, {positions[1], positions[5], radius});
+        gg.addCylinder(material, {positions[2], positions[6], radius});
+        gg.addCylinder(material, {positions[3], positions[7], radius});
 
         break;
     }
     }
+    _geometryGroups.push_back(gg);
 }
 
 void Scene::addLight(LightPtr light)
@@ -609,14 +563,10 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 
 bool Scene::empty() const
 {
-    return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-           _trianglesMeshes.empty();
-}
-
-void Scene::_buildMissingMaterials(const size_t materialId)
-{
-    if (materialId >= _materials.size())
-        _materials.resize(materialId + 1);
+    bool empty = true;
+    for (const auto& geometryGroup : _geometryGroups)
+        empty = empty && geometryGroup.empty();
+    return empty;
 }
 
 void Scene::_processVolumeAABBGeometry()
@@ -651,8 +601,10 @@ void Scene::_processVolumeAABBGeometry()
     const Vector3f& volumeOffset = volumeHandler->getOffset();
     const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
 
+    GeometryGroup gg(_materialManager);
     const size_t materialId = static_cast<size_t>(MaterialType::invisible);
-    uint64_t offset = _trianglesMeshes[materialId].vertices.size();
+    auto& meshes = gg.getTrianglesMeshes()[materialId];
+    uint64_t offset = meshes.vertices.size();
     for (size_t face = 0; face < 6; ++face)
     {
         for (size_t index = 0; index < 6; ++index)
@@ -662,85 +614,13 @@ void Scene::_processVolumeAABBGeometry()
                                           volumeDimensions +
                                       volumeOffset;
 
-            _trianglesMeshes[materialId].vertices.push_back(position);
+            meshes.vertices.push_back(position);
             _bounds.merge(position);
         }
         const size_t index = offset + face * 6;
-        _trianglesMeshes[materialId].indices.push_back(
-            Vector3ui(index + 0, index + 1, index + 2));
-        _trianglesMeshes[materialId].indices.push_back(
-            Vector3ui(index + 3, index + 4, index + 5));
+        meshes.indices.push_back(Vector3ui(index + 0, index + 1, index + 2));
+        meshes.indices.push_back(Vector3ui(index + 3, index + 4, index + 5));
     }
-}
-
-uint64_t Scene::addSphere(const size_t materialId, const Sphere& sphere)
-{
-    _buildMissingMaterials(materialId);
-    _spheres[materialId].push_back(sphere);
-    _bounds.merge(sphere.center);
-    return _spheres[materialId].size() - 1;
-}
-
-uint64_t Scene::addCylinder(const size_t materialId, const Cylinder& cylinder)
-{
-    _buildMissingMaterials(materialId);
-    _cylinders[materialId].push_back(cylinder);
-    _bounds.merge(cylinder.center);
-    _bounds.merge(cylinder.up);
-    return _cylinders[materialId].size() - 1;
-}
-
-uint64_t Scene::addCone(const size_t materialId, const Cone& cone)
-{
-    _buildMissingMaterials(materialId);
-    _cones[materialId].push_back(cone);
-    _bounds.merge(cone.center);
-    _bounds.merge(cone.up);
-    return _cones[materialId].size() - 1;
-}
-
-void Scene::setSphere(const size_t materialId, const uint64_t index,
-                      const Sphere& sphere)
-{
-    auto& spheres = _spheres[materialId];
-    if (index < spheres.size())
-    {
-        _buildMissingMaterials(materialId);
-        spheres[index] = sphere;
-        _bounds.merge(sphere.center);
-    }
-    else
-        BRAYNS_ERROR << "Invalid index " << index << std::endl;
-}
-
-void Scene::setCone(const size_t materialId, const uint64_t index,
-                    const Cone& cone)
-{
-    auto& cones = _cones[materialId];
-    if (index < cones.size())
-    {
-        _buildMissingMaterials(materialId);
-        cones[index] = cone;
-        _bounds.merge(cone.center);
-        _bounds.merge(cone.up);
-    }
-    else
-        BRAYNS_ERROR << "Invalid index " << index << std::endl;
-}
-
-void Scene::setCylinder(const size_t materialId, const uint64_t index,
-                        const Cylinder& cylinder)
-{
-    auto& cylinders = _cylinders[materialId];
-    if (index < cylinders.size())
-    {
-        _buildMissingMaterials(materialId);
-        cylinders[index] = cylinder;
-        _bounds.merge(cylinder.center);
-        _bounds.merge(cylinder.up);
-    }
-    else
-        BRAYNS_ERROR << "Invalid index " << index << std::endl;
 }
 
 void Scene::saveToCacheFile()
@@ -759,12 +639,12 @@ void Scene::saveToCacheFile()
     file.write((char*)&version, sizeof(size_t));
     BRAYNS_INFO << "Version: " << version << std::endl;
 
-    const size_t nbMaterials = _materials.size();
+    const size_t nbMaterials = _materialManager.getMaterials().size();
     file.write((char*)&nbMaterials, sizeof(size_t));
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
     // Save materials
-    for (auto& material : _materials)
+    for (auto& material : _materialManager.getMaterials())
     {
         Vector3f value3f;
         value3f = material.getColor();
@@ -789,110 +669,117 @@ void Scene::saveToCacheFile()
     }
 
     // Save geometry
-    for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
+    size_t nbElements = _geometryGroups.size();
+    file.write((char*)&nbElements, sizeof(size_t));
+    for (auto& gg : _geometryGroups)
     {
-        size_t nbElements{0};
-        uint64_t bufferSize{0};
+        for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
+        {
+            uint64_t bufferSize{0};
 
-        // Spheres
-        if (_spheres.find(materialId) != _spheres.end())
-        {
-            const auto& spheres = _spheres[materialId];
-            nbElements = spheres.size();
-            file.write((char*)&nbElements, sizeof(size_t));
-            bufferSize = nbElements * sizeof(Sphere);
-            file.write((char*)spheres.data(), bufferSize);
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
-                         << " spheres" << std::endl;
-        }
-        else
-        {
-            nbElements = 0;
-            file.write((char*)&nbElements, sizeof(size_t));
-        }
-
-        // Cylinders
-        if (_cylinders.find(materialId) != _cylinders.end())
-        {
-            const auto& cylinders = _cylinders[materialId];
-            nbElements = cylinders.size();
-            file.write((char*)&nbElements, sizeof(size_t));
-            bufferSize = nbElements * sizeof(Cylinder);
-            file.write((char*)cylinders.data(), bufferSize);
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
-                         << " cylinders" << std::endl;
-        }
-        else
-        {
-            nbElements = 0;
-            file.write((char*)&nbElements, sizeof(size_t));
-        }
-
-        // Cones
-        if (_cones.find(materialId) != _cones.end())
-        {
-            const auto& cones = _cones[materialId];
-            nbElements = cones.size();
-            file.write((char*)&nbElements, sizeof(size_t));
-            bufferSize = nbElements * sizeof(Cone);
-            file.write((char*)cones.data(), bufferSize);
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbElements << " cones"
-                         << std::endl;
-        }
-        else
-        {
-            nbElements = 0;
-            file.write((char*)&nbElements, sizeof(size_t));
-        }
-
-        if (_trianglesMeshes.find(materialId) != _trianglesMeshes.end())
-        {
-            const auto& triangesMesh = _trianglesMeshes[materialId];
-            // Vertices
-            nbElements = triangesMesh.vertices.size();
-            file.write((char*)&nbElements, sizeof(size_t));
-            bufferSize = nbElements * sizeof(Vector3f);
-            file.write((char*)triangesMesh.vertices.data(), bufferSize);
-            if (nbElements != 0)
+            // Spheres
+            auto& spheres = gg.getSpheres();
+            if (spheres.find(materialId) != spheres.end())
+            {
+                auto& data = spheres[materialId];
+                nbElements = data.size();
+                file.write((char*)&nbElements, sizeof(size_t));
+                bufferSize = nbElements * sizeof(Sphere);
+                file.write((char*)data.data(), bufferSize);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
-                             << " vertices" << std::endl;
+                             << " spheres" << std::endl;
+            }
+            else
+            {
+                nbElements = 0;
+                file.write((char*)&nbElements, sizeof(size_t));
+            }
 
-            // Indices
-            nbElements = triangesMesh.indices.size();
-            file.write((char*)&nbElements, sizeof(size_t));
-            bufferSize = nbElements * sizeof(Vector3ui);
-            file.write((char*)triangesMesh.indices.data(), bufferSize);
-            if (nbElements != 0)
+            // Cylinders
+            auto& cylinders = gg.getCylinders();
+            if (cylinders.find(materialId) != cylinders.end())
+            {
+                auto& data = cylinders[materialId];
+                nbElements = data.size();
+                file.write((char*)&nbElements, sizeof(size_t));
+                bufferSize = nbElements * sizeof(Cylinder);
+                file.write((char*)data.data(), bufferSize);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
-                             << " indices" << std::endl;
+                             << " cylinders" << std::endl;
+            }
+            else
+            {
+                nbElements = 0;
+                file.write((char*)&nbElements, sizeof(size_t));
+            }
 
-            // Normals
-            nbElements = triangesMesh.normals.size();
-            file.write((char*)&nbElements, sizeof(size_t));
-            bufferSize = nbElements * sizeof(Vector3f);
-            file.write((char*)triangesMesh.normals.data(), bufferSize);
-            if (nbElements != 0)
+            // Cones
+            auto& cones = gg.getCones();
+            if (cones.find(materialId) != cones.end())
+            {
+                auto& data = cones[materialId];
+                nbElements = data.size();
+                file.write((char*)&nbElements, sizeof(size_t));
+                bufferSize = nbElements * sizeof(Cone);
+                file.write((char*)data.data(), bufferSize);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
-                             << " normals" << std::endl;
+                             << " cones" << std::endl;
+            }
+            else
+            {
+                nbElements = 0;
+                file.write((char*)&nbElements, sizeof(size_t));
+            }
 
-            // Texture coordinates
-            nbElements = triangesMesh.textureCoordinates.size();
-            file.write((char*)&nbElements, sizeof(size_t));
-            bufferSize = nbElements * sizeof(Vector2f);
-            file.write((char*)triangesMesh.textureCoordinates.data(),
-                       bufferSize);
-            if (nbElements != 0)
-                BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
-                             << " texture coordinates" << std::endl;
-        }
-        else
-        {
-            nbElements = 0;
-            file.write((char*)&nbElements, sizeof(size_t)); // No vertices
-            file.write((char*)&nbElements, sizeof(size_t)); // No indices
-            file.write((char*)&nbElements, sizeof(size_t)); // No normals
-            file.write((char*)&nbElements,
-                       sizeof(size_t)); // No Texture coordinates
+            auto& meshes = gg.getTrianglesMeshes();
+            if (meshes.find(materialId) != meshes.end())
+            {
+                auto& data = meshes[materialId];
+                // Vertices
+                nbElements = data.vertices.size();
+                file.write((char*)&nbElements, sizeof(size_t));
+                bufferSize = nbElements * sizeof(Vector3f);
+                file.write((char*)data.vertices.data(), bufferSize);
+                if (nbElements != 0)
+                    BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
+                                 << " vertices" << std::endl;
+
+                // Indices
+                nbElements = data.indices.size();
+                file.write((char*)&nbElements, sizeof(size_t));
+                bufferSize = nbElements * sizeof(Vector3ui);
+                file.write((char*)data.indices.data(), bufferSize);
+                if (nbElements != 0)
+                    BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
+                                 << " indices" << std::endl;
+
+                // Normals
+                nbElements = data.normals.size();
+                file.write((char*)&nbElements, sizeof(size_t));
+                bufferSize = nbElements * sizeof(Vector3f);
+                file.write((char*)data.normals.data(), bufferSize);
+                if (nbElements != 0)
+                    BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
+                                 << " normals" << std::endl;
+
+                // Texture coordinates
+                nbElements = data.textureCoordinates.size();
+                file.write((char*)&nbElements, sizeof(size_t));
+                bufferSize = nbElements * sizeof(Vector2f);
+                file.write((char*)data.textureCoordinates.data(), bufferSize);
+                if (nbElements != 0)
+                    BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
+                                 << " texture coordinates" << std::endl;
+            }
+            else
+            {
+                nbElements = 0;
+                file.write((char*)&nbElements, sizeof(size_t)); // No vertices
+                file.write((char*)&nbElements, sizeof(size_t)); // No indices
+                file.write((char*)&nbElements, sizeof(size_t)); // No normals
+                file.write((char*)&nbElements,
+                           sizeof(size_t)); // No Texture coordinates
+            }
         }
     }
 
@@ -933,11 +820,11 @@ void Scene::loadFromCacheFile()
     BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
     // Materials
-    _materials.clear();
-    _materials.resize(nbMaterials);
+    _materialManager.clear();
+    _materialManager.getMaterials().resize(nbMaterials);
     for (size_t i = 0; i < nbMaterials; ++i)
     {
-        auto& material = _materials[i];
+        auto& material = _materialManager.get(i);
         Vector3f value3f;
         file.read((char*)&value3f, sizeof(Vector3f));
         material.setColor(value3f);
@@ -963,6 +850,7 @@ void Scene::loadFromCacheFile()
     }
 
     // Geometry
+    size_t nbGeometryGroups = 0;
     size_t nbSpheres = 0;
     size_t nbCylinders = 0;
     size_t nbCones = 0;
@@ -970,99 +858,105 @@ void Scene::loadFromCacheFile()
     size_t nbIndices = 0;
     size_t nbNormals = 0;
     size_t nbTexCoords = 0;
-    for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
+
+    file.read((char*)&nbGeometryGroups, sizeof(size_t));
+    for (size_t groupId = 0; groupId < nbGeometryGroups; ++groupId)
     {
-        uint64_t bufferSize{0};
-
-        // Spheres
-        file.read((char*)&nbSpheres, sizeof(size_t));
-        if (nbSpheres != 0)
+        GeometryGroup gg(_materialManager);
+        for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
         {
-            bufferSize = nbSpheres * sizeof(Sphere);
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbSpheres << " spheres"
-                         << std::endl;
-            _spheres[materialId].resize(nbSpheres);
-            file.read((char*)_spheres[materialId].data(), bufferSize);
-        }
+            uint64_t bufferSize{0};
 
-        // Cylinders
-        file.read((char*)&nbCylinders, sizeof(size_t));
-        if (nbCylinders != 0)
-        {
-            bufferSize = nbCylinders * sizeof(Cylinder);
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbCylinders
-                         << " cylinders" << std::endl;
-            _cylinders[materialId].resize(nbCylinders);
-            file.read((char*)_cylinders[materialId].data(), bufferSize);
-        }
+            // Spheres
+            file.read((char*)&nbSpheres, sizeof(size_t));
+            if (nbSpheres != 0)
+            {
+                bufferSize = nbSpheres * sizeof(Sphere);
+                BRAYNS_DEBUG << "[" << materialId << "] " << nbSpheres
+                             << " spheres" << std::endl;
+                auto& spheres = gg.getSpheres()[materialId];
+                spheres.resize(nbSpheres);
+                file.read((char*)spheres.data(), bufferSize);
+            }
 
-        // Cones
-        file.read((char*)&nbCones, sizeof(size_t));
-        if (nbCones != 0)
-        {
-            bufferSize = nbCones * sizeof(Cone);
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbCones << " cones"
-                         << std::endl;
-            _cones[materialId].resize(nbCones);
-            file.read((char*)_cones[materialId].data(), bufferSize);
-        }
+            // Cylinders
+            file.read((char*)&nbCylinders, sizeof(size_t));
+            if (nbCylinders != 0)
+            {
+                bufferSize = nbCylinders * sizeof(Cylinder);
+                BRAYNS_DEBUG << "[" << materialId << "] " << nbCylinders
+                             << " cylinders" << std::endl;
+                auto& cylinders = gg.getCylinders()[materialId];
+                cylinders.resize(nbCylinders);
+                file.read((char*)cylinders.data(), bufferSize);
+            }
 
-        // Vertices
-        file.read((char*)&nbVertices, sizeof(size_t));
-        if (nbVertices != 0)
-        {
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbVertices
-                         << " vertices" << std::endl;
-            _trianglesMeshes[materialId].vertices.resize(nbVertices);
-            bufferSize = nbVertices * sizeof(Vector3f);
-            file.read((char*)_trianglesMeshes[materialId].vertices.data(),
-                      bufferSize);
-        }
+            // Cones
+            file.read((char*)&nbCones, sizeof(size_t));
+            if (nbCones != 0)
+            {
+                bufferSize = nbCones * sizeof(Cone);
+                BRAYNS_DEBUG << "[" << materialId << "] " << nbCones << " cones"
+                             << std::endl;
+                auto& cones = gg.getCones()[materialId];
+                cones.resize(nbCones);
+                file.read((char*)cones.data(), bufferSize);
+            }
 
-        // Indices
-        file.read((char*)&nbIndices, sizeof(size_t));
-        if (nbIndices != 0)
-        {
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbIndices << " indices"
-                         << std::endl;
-            _trianglesMeshes[materialId].indices.resize(nbIndices);
-            bufferSize = nbIndices * sizeof(Vector3ui);
-            file.read((char*)_trianglesMeshes[materialId].indices.data(),
-                      bufferSize);
-        }
+            // Meshes
+            auto& meshes = gg.getTrianglesMeshes()[materialId];
+            // Vertices
+            file.read((char*)&nbVertices, sizeof(size_t));
+            if (nbVertices != 0)
+            {
+                BRAYNS_DEBUG << "[" << materialId << "] " << nbVertices
+                             << " vertices" << std::endl;
+                meshes.vertices.resize(nbVertices);
+                bufferSize = nbVertices * sizeof(Vector3f);
+                file.read((char*)meshes.vertices.data(), bufferSize);
+            }
 
-        // Normals
-        file.read((char*)&nbNormals, sizeof(size_t));
-        if (nbNormals != 0)
-        {
-            BRAYNS_DEBUG << "[" << materialId << "] " << nbNormals << " normals"
-                         << std::endl;
-            _trianglesMeshes[materialId].normals.resize(nbNormals);
-            bufferSize = nbNormals * sizeof(Vector3f);
-            file.read((char*)_trianglesMeshes[materialId].normals.data(),
-                      bufferSize);
-        }
+            // Indices
+            file.read((char*)&nbIndices, sizeof(size_t));
+            if (nbIndices != 0)
+            {
+                BRAYNS_DEBUG << "[" << materialId << "] " << nbIndices
+                             << " indices" << std::endl;
+                meshes.indices.resize(nbIndices);
+                bufferSize = nbIndices * sizeof(Vector3ui);
+                file.read((char*)meshes.indices.data(), bufferSize);
+            }
 
-        // Texture coordinates
-        file.read((char*)&nbTexCoords, sizeof(size_t));
-        if (nbTexCoords != 0)
-        {
-            BRAYNS_DEBUG << "Material " << materialId << ": " << nbTexCoords
-                         << " texture coordinates" << std::endl;
-            _trianglesMeshes[materialId].textureCoordinates.resize(nbTexCoords);
-            bufferSize = nbTexCoords * sizeof(Vector2f);
-            file.read(
-                (char*)_trianglesMeshes[materialId].textureCoordinates.data(),
-                bufferSize);
-        }
+            // Normals
+            file.read((char*)&nbNormals, sizeof(size_t));
+            if (nbNormals != 0)
+            {
+                BRAYNS_DEBUG << "[" << materialId << "] " << nbNormals
+                             << " normals" << std::endl;
+                meshes.normals.resize(nbNormals);
+                bufferSize = nbNormals * sizeof(Vector3f);
+                file.read((char*)meshes.normals.data(), bufferSize);
+            }
 
-        BRAYNS_INFO << "[" << materialId << "] " << nbSpheres << " spheres, "
-                    << nbCylinders << " cylinders, " << nbCones << " cones, "
-                    << nbVertices << " vertices, " << nbIndices << " indices, "
-                    << nbNormals << " normals, " << nbTexCoords
-                    << " texture coordinates" << std::endl;
+            // Texture coordinates
+            file.read((char*)&nbTexCoords, sizeof(size_t));
+            if (nbTexCoords != 0)
+            {
+                BRAYNS_DEBUG << "Material " << materialId << ": " << nbTexCoords
+                             << " texture coordinates" << std::endl;
+                meshes.textureCoordinates.resize(nbTexCoords);
+                bufferSize = nbTexCoords * sizeof(Vector2f);
+                file.read((char*)meshes.textureCoordinates.data(), bufferSize);
+            }
+
+            BRAYNS_INFO << "[" << materialId << "] " << nbSpheres
+                        << " spheres, " << nbCylinders << " cylinders, "
+                        << nbCones << " cones, " << nbVertices << " vertices, "
+                        << nbIndices << " indices, " << nbNormals
+                        << " normals, " << nbTexCoords << " texture coordinates"
+                        << std::endl;
+        }
     }
-
     // Scene bounds
     file.read((char*)&_bounds, sizeof(Boxf));
     BRAYNS_DEBUG << "AABB: " << _bounds << std::endl;
@@ -1071,15 +965,8 @@ void Scene::loadFromCacheFile()
     BRAYNS_INFO << "Scene successfully loaded" << std::endl;
 }
 
-size_t Scene::addMaterial(const Material& material)
+void Scene::addGeometryGroup(const GeometryGroup& geometryGroup)
 {
-    _materials.push_back(material);
-    return _materials.size() - 1;
-}
-
-void Scene::setMaterial(const size_t index, const Material& material)
-{
-    _buildMissingMaterials(index);
-    _materials[index] = material;
+    _geometryGroups.push_back(geometryGroup);
 }
 }

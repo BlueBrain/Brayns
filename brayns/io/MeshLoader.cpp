@@ -31,6 +31,7 @@
 #include <fstream>
 #endif
 
+#include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/scene/Scene.h>
 
 namespace brayns
@@ -46,11 +47,12 @@ void MeshLoader::clear()
 }
 
 #if (BRAYNS_USE_ASSIMP)
-bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
+bool MeshLoader::importMeshFromFile(const std::string& filename,
+                                    GeometryGroup& group,
                                     const Matrix4f& transformation,
                                     const size_t defaultMaterial)
 {
-    _materialOffset = scene.getMaterials().size();
+    _materialOffset = group.getMaterialManager().getMaterials().size();
     const boost::filesystem::path file = filename;
     Assimp::Importer importer;
     if (!importer.IsExtensionSupported(file.extension().c_str()))
@@ -100,14 +102,16 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
 
     boost::filesystem::path filepath = filename;
 
+    auto& materialManager = group.getMaterialManager();
     if (defaultMaterial == NO_MATERIAL)
-        _createMaterials(scene, aiScene, filepath.parent_path().string());
+        _createMaterials(materialManager, aiScene,
+                         filepath.parent_path().string());
     else
-        scene.getMaterial(defaultMaterial);
+        materialManager.get(defaultMaterial);
 
     size_t nbVertices = 0;
     size_t nbFaces = 0;
-    auto& triangleMeshes = scene.getTriangleMeshes();
+    auto& triangleMeshes = group.getTrianglesMeshes();
     for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
     {
         aiMesh* mesh = aiScene->mMeshes[m];
@@ -130,7 +134,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
             const Vector3f transformedVertex = {vertex.x(), vertex.y(),
                                                 vertex.z()};
             triangleMesh.vertices.push_back(transformedVertex);
-            scene.getWorldBounds().merge(transformedVertex);
+            group.getBounds().merge(transformedVertex);
             if (mesh->HasNormals())
             {
                 const auto& n = mesh->mNormals[i];
@@ -182,10 +186,10 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
 }
 
 bool MeshLoader::exportMeshToFile(const std::string& filename,
-                                  Scene& scene) const
+                                  GeometryGroup& group) const
 {
     // Save to OBJ
-    size_t nbMaterials = scene.getMaterials().size();
+    size_t nbMaterials = group.getMaterialManager().getMaterials().size();
     aiScene aiScene;
     aiScene.mMaterials = new aiMaterial*[nbMaterials];
     aiScene.mNumMaterials = nbMaterials;
@@ -210,10 +214,10 @@ bool MeshLoader::exportMeshToFile(const std::string& filename,
     }
 
     aiScene.mNumMeshes = nbMaterials;
-    aiScene.mMeshes = new aiMesh*[scene.getMaterials().size()];
+    aiScene.mMeshes = new aiMesh*[nbMaterials];
     size_t numVertex = 0;
     size_t numFace = 0;
-    auto& triangleMeshes = scene.getTriangleMeshes();
+    auto& triangleMeshes = group.getTrianglesMeshes();
     for (size_t meshIndex = 0; meshIndex < aiScene.mNumMeshes; ++meshIndex)
     {
         aiMesh mesh;
@@ -253,7 +257,8 @@ bool MeshLoader::exportMeshToFile(const std::string& filename,
     return true;
 }
 
-void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
+void MeshLoader::_createMaterials(MaterialManager& materialManager,
+                                  const aiScene* aiScene,
                                   const std::string& folder)
 {
     BRAYNS_DEBUG << "Loading " << aiScene->mNumMaterials << " materials"
@@ -262,7 +267,7 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
     {
         const size_t materialId = _getMaterialId(m);
         aiMaterial* aimaterial = aiScene->mMaterials[m];
-        auto& material = scene.getMaterial(materialId);
+        auto& material = materialManager.get(materialId);
 
         struct TextureTypeMapping
         {
@@ -363,8 +368,8 @@ const std::string NO_ASSIMP_MESSAGE =
     "The assimp library is required to load meshes";
 }
 
-bool MeshLoader::importMeshFromFile(const std::string&, Scene&, const Matrix4f&,
-                                    const size_t)
+bool MeshLoader::importMeshFromFile(const std::string&, GeometryGroup&,
+                                    const Matrix4f&, const size_t)
 {
     BRAYNS_ERROR << NO_ASSIMP_MESSAGE << std::endl;
     return false;

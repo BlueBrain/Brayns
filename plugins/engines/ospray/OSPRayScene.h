@@ -74,7 +74,7 @@ public:
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
-    OSPModel modelImpl() { return _model; }
+    OSPModel modelImpl() { return _rootModel; }
     OSPModel simulationModelImpl() { return _simulationModel; }
 private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
@@ -85,7 +85,8 @@ private:
     uint64_t _serializeCones(const size_t materialId);
     uint64_t _serializeMeshes(const size_t materialId);
 
-    OSPModel _model;
+    OSPModel _rootModel;
+    std::vector<OSPGeometry> _models;
     OSPModel _simulationModel;
     std::vector<OSPMaterial> _ospMaterials;
     std::map<std::string, OSPTexture2D> _ospTextures;

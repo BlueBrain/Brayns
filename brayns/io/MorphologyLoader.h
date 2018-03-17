@@ -46,7 +46,7 @@ public:
      */
     MorphologyLoader(const ApplicationParameters& applicationParameters,
                      const GeometryParameters& geometryParameters,
-                     Scene& scene);
+                     const size_t nbMaterials);
     ~MorphologyLoader();
 
     /**
@@ -58,7 +58,7 @@ public:
      * @return True if the morphology is successfully loaded, false otherwise
      */
     bool importMorphology(const servus::URI& source, const uint64_t index,
-                          const size_t material,
+                          const size_t material, GeometryGroup& group,
                           const Matrix4f& transformation = Matrix4f());
 
     /**
