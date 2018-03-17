@@ -53,33 +53,25 @@ struct ParallelGeometryGroupContainer
 {
 public:
     ParallelGeometryGroupContainer(SpheresMap& s, CylindersMap& cy,
-                                   ConesMap& co, TrianglesMeshMap& tm,
-                                   Materials& m, Boxf& wb)
+                                   ConesMap& co, TrianglesMeshMap& tm, Boxf& wb)
         : spheres(s)
         , cylinders(cy)
         , cones(co)
         , trianglesMeshes(tm)
-        , materials(m)
         , bounds(wb)
     {
     }
 
-    void _buildMissingMaterials(const size_t materialId)
-    {
-        if (materialId >= materials.size())
-            materials.resize(materialId + 1);
-    }
-
     void addSphere(const size_t materialId, const Sphere& sphere)
     {
-        _buildMissingMaterials(materialId);
+        setMaterial(materialId);
         spheres[materialId].push_back(sphere);
         bounds.merge(sphere.center);
     }
 
     void addCylinder(const size_t materialId, const Cylinder& cylinder)
     {
-        _buildMissingMaterials(materialId);
+        setMaterial(materialId);
         cylinders[materialId].push_back(cylinder);
         bounds.merge(cylinder.center);
         bounds.merge(cylinder.up);
@@ -87,17 +79,33 @@ public:
 
     void addCone(const size_t materialId, const Cone& cone)
     {
-        _buildMissingMaterials(materialId);
+        setMaterial(materialId);
         cones[materialId].push_back(cone);
         bounds.merge(cone.center);
         bounds.merge(cone.up);
+    }
+
+    void setMaterial(const size_t materialId)
+    {
+        const auto iter =
+            std::find(materialIds.begin(), materialIds.end(), materialId);
+        if (iter == materialIds.end())
+            materialIds.push_back(materialId);
+    }
+
+    size_t materialIndex(const size_t materialId)
+    {
+        const auto it =
+            std::find(materialIds.begin(), materialIds.end(), materialId);
+        const auto distance = std::distance(materialIds.begin(), it);
+        return distance;
     }
 
     SpheresMap& spheres;
     CylindersMap& cylinders;
     ConesMap& cones;
     TrianglesMeshMap& trianglesMeshes;
-    Materials& materials;
+    std::vector<size_t> materialIds;
     Boxf& bounds;
 };
 
@@ -131,8 +139,7 @@ public:
     {
         ParallelGeometryGroupContainer groupContainer(
             group.getSpheres(), group.getCylinders(), group.getCones(),
-            group.getTrianglesMeshes(),
-            group.getMaterialManager().getMaterials(), group.getBounds());
+            group.getTrianglesMeshes(), group.getBounds());
 
         return _importMorphology(source, index, material, transformation,
                                  compartmentReport, targetGIDOffsets,
@@ -155,7 +162,7 @@ public:
         try
         {
             // Geometry group (one for the whole circuit)
-            GeometryGroup group(scene.getMaterialManager());
+            GeometryGroup group;
 
             // Open Circuit and select GIDs according to specified target
             const brain::Circuit circuit(uri);
@@ -561,8 +568,7 @@ private:
                 index, material, brain::neuron::SectionType::soma,
                 targetGIDOffsets);
             metaballsGenerator.generateMesh(metaballs, gridSize, threshold,
-                                            group.materials, materialId,
-                                            group.trianglesMeshes);
+                                            materialId, group.trianglesMeshes);
         }
         catch (const std::runtime_error& e)
         {
@@ -920,12 +926,10 @@ private:
                 CylindersMap cylinders;
                 ConesMap cones;
                 TrianglesMeshMap triangleMeshes;
-                Materials materials;
                 Boxf bounds;
-                ParallelGeometryGroupContainer sceneContainer(spheres,
+                ParallelGeometryGroupContainer groupContainer(spheres,
                                                               cylinders, cones,
                                                               triangleMeshes,
-                                                              materials,
                                                               bounds);
                 const auto& uri = uris[morphologyIndex];
 
@@ -936,44 +940,40 @@ private:
                 if (!_importMorphology(uri, morphologyIndex, materialId,
                                        transformations[morphologyIndex],
                                        compartmentReport, targetGIDOffsets,
-                                       sceneContainer))
+                                       groupContainer))
 #pragma omp atomic
                     ++loadingFailures;
 
 #pragma omp critical
-                for (size_t i = 0; i < materials.size(); ++i)
-                    group.getMaterialManager().set(i, materials[i]);
-
+                for (const auto& material : groupContainer.materialIds)
+                    group.getMaterialManager().set(material);
 #pragma omp critical
                 for (const auto& sphere : spheres)
                 {
-                    const auto id = sphere.first;
-                    group.getSpheres()[id].insert(
-                        group.getSpheres()[id].end(),
-                        sceneContainer.spheres[id].begin(),
-                        sceneContainer.spheres[id].end());
+                    const auto index =
+                        group.getMaterialManager().position(sphere.first);
+                    group.getSpheres()[index].insert(
+                        group.getSpheres()[index].end(), sphere.second.begin(),
+                        sphere.second.end());
                 }
-
 #pragma omp critical
                 for (const auto& cylinder : cylinders)
                 {
-                    const auto id = cylinder.first;
-                    group.getCylinders()[id].insert(
-                        group.getCylinders()[id].end(),
-                        sceneContainer.cylinders[id].begin(),
-                        sceneContainer.cylinders[id].end());
+                    const auto index =
+                        group.getMaterialManager().position(cylinder.first);
+                    group.getCylinders()[index].insert(
+                        group.getCylinders()[index].end(),
+                        cylinder.second.begin(), cylinder.second.end());
                 }
-
 #pragma omp critical
                 for (const auto& cone : cones)
                 {
-                    const auto id = cone.first;
-                    group.getCones()[id].insert(
-                        group.getCones()[id].end(),
-                        sceneContainer.cones[id].begin(),
-                        sceneContainer.cones[id].end());
+                    const auto index =
+                        group.getMaterialManager().position(cone.first);
+                    group.getCones()[index].insert(
+                        group.getCones()[index].end(), cone.second.begin(),
+                        cone.second.end());
                 }
-
 #pragma omp critical
                 group.getBounds().merge(bounds);
             }

@@ -123,6 +123,8 @@ struct TrianglesMesh;
 typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 
 class MaterialManager;
+typedef std::shared_ptr<MaterialManager> MaterialManagerPtr;
+
 class Material;
 typedef std::vector<Material> Materials;
 

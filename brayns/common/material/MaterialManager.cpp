@@ -38,53 +38,39 @@ void MaterialManager::clear()
     _materials.clear();
 }
 
-void MaterialManager::buildMissingMaterials(const size_t materialId)
-{
-    if (materialId >= _materials.size())
-        _materials.resize(materialId + 1);
-}
-
 Material& MaterialManager::get(const size_t index)
 {
-    buildMissingMaterials(index);
-    return _materials[index];
-}
-
-size_t MaterialManager::add(const Material& material)
-{
-    _materials.push_back(material);
-    return _materials.size() - 1;
+    return _materials[_materialMapping[index]];
 }
 
 void MaterialManager::set(const size_t index, const Material& material)
 {
-    buildMissingMaterials(index);
-    _materials[index] = material;
+    if (_materialMapping.find(index) == _materialMapping.end())
+    {
+        _materialMapping[index] = _materials.size();
+        _materials.push_back(material);
+    }
+    else
+    {
+        const auto position = _materialMapping[index];
+        _materials[position] = material;
+    }
+}
+
+void MaterialManager::set(const size_t index)
+{
+    if (_materialMapping.find(index) == _materialMapping.end())
+        set(index, Material());
+}
+
+size_t MaterialManager::position(const size_t materialId)
+{
+    const auto it = _materialMapping.find(materialId);
+    const auto distance = std::distance(_materialMapping.begin(), it);
+    return distance;
 }
 
 void MaterialManager::reset()
 {
-    BRAYNS_INFO << "Building system materials" << std::endl;
-    clear();
-    for (size_t i = 0; i < NB_SYSTEM_MATERIALS; ++i)
-    {
-        Material material;
-        switch (MaterialType(i))
-        {
-        case MaterialType::bounding_box:
-            material.setColor(Vector3f(1.f, 1.f, 1.f));
-            material.setEmission(10.f);
-            break;
-        case MaterialType::invisible:
-            material.setOpacity(0.f);
-            material.setRefractionIndex(1.f);
-            material.setColor(Vector3f(1.f, 1.f, 1.f));
-            material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
-            break;
-        default:
-            break;
-        }
-        _materials.push_back(material);
-    }
 }
 }

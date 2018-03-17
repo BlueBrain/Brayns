@@ -26,18 +26,20 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
+#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/types.h>
+
+SERIALIZATION_ACCESS(GeometryGroup)
 
 namespace brayns
 {
 class GeometryGroup
 {
 public:
-    GeometryGroup(MaterialManager& materialManager);
-    BRAYNS_API virtual ~GeometryGroup();
+    GeometryGroup();
 
     /** Unloads geometry, materials, lights, models, etc. to free memory. */
-    BRAYNS_API virtual void unload();
+    BRAYNS_API void unload();
 
     /**
         Return true if the geometry group does not contain any geometry. False
@@ -165,7 +167,7 @@ public:
      */
     MaterialManager& getMaterialManager() { return _materialManager; }
 private:
-    MaterialManager& _materialManager;
+    MaterialManager _materialManager;
     SpheresMap _spheres;
     bool _spheresDirty{true};
     CylindersMap _cylinders;
@@ -176,7 +178,8 @@ private:
     bool _trianglesMeshesDirty{true};
     Boxf _bounds;
     bool _enabled{true};
+
+    SERIALIZATION_FRIEND(GeometryGroup)
 };
 }
-
 #endif // GEOMETRYGROUP_H
