@@ -95,8 +95,7 @@ public:
     /**
         Returns the bounding box for the whole scene
     */
-    Boxf& getWorldBounds() { return _bounds; }
-    const Boxf& getWorldBounds() const { return _bounds; }
+    Boxf getBounds();
     /**
         Build an environment in addition to the loaded data, and according to
         the geometry parameters (command line parameter --scene-environment).
@@ -292,9 +291,6 @@ protected:
     AbstractSimulationHandlerPtr _simulationHandler;
     TransferFunction _transferFunction;
     CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler;
-
-    // Scene
-    Boxf _bounds;
 
     size_t _sizeInBytes{0};
 

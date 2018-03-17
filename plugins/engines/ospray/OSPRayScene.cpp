@@ -170,9 +170,10 @@ void OSPRayScene::commit()
     }
 }
 
-uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
+uint64_t OSPRayScene::_serializeSpheres(const size_t groupId,
+                                        const size_t materialId)
 {
-    auto& s = _geometryGroups[0].getSpheres();
+    auto& s = _geometryGroups[groupId].getSpheres();
     if (s.find(materialId) == s.end())
         return 0;
 
@@ -205,9 +206,10 @@ uint64_t OSPRayScene::_serializeSpheres(const size_t materialId)
     return bufferSize;
 }
 
-uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
+uint64_t OSPRayScene::_serializeCylinders(const size_t groupId,
+                                          const size_t materialId)
 {
-    auto& c = _geometryGroups[0].getCylinders();
+    auto& c = _geometryGroups[groupId].getCylinders();
     if (c.find(materialId) == c.end())
         return 0;
 
@@ -238,9 +240,10 @@ uint64_t OSPRayScene::_serializeCylinders(const size_t materialId)
     return bufferSize;
 }
 
-uint64_t OSPRayScene::_serializeCones(const size_t materialId)
+uint64_t OSPRayScene::_serializeCones(const size_t groupId,
+                                      const size_t materialId)
 {
-    auto& c = _geometryGroups[0].getCones();
+    auto& c = _geometryGroups[groupId].getCones();
     if (c.find(materialId) == c.end())
         return 0;
 
@@ -271,9 +274,10 @@ uint64_t OSPRayScene::_serializeCones(const size_t materialId)
     return bufferSize;
 }
 
-uint64_t OSPRayScene::_serializeMeshes(const size_t materialId)
+uint64_t OSPRayScene::_serializeMeshes(const size_t groupId,
+                                       const size_t materialId)
 {
-    auto& t = _geometryGroups[0].getTrianglesMeshes();
+    auto& t = _geometryGroups[groupId].getTrianglesMeshes();
     if (t.find(materialId) == t.end())
         return 0;
 
@@ -349,29 +353,31 @@ OSPModel OSPRayScene::_getActiveModel()
 
 void OSPRayScene::serializeGeometry()
 {
-    GeometryGroup& group = _geometryGroups[0]; // TODO: for each group
-    const auto nbMaterials = group.getMaterialManager().getMaterials().size();
-    _sizeInBytes = 0;
-    if (group.spheresDirty())
-        for (size_t i = 0; i < nbMaterials; ++i)
-            _sizeInBytes += _serializeSpheres(i);
+    const auto nbMaterials = _materialManager.getMaterials().size();
+    for (size_t g = 0; g < _geometryGroups.size(); ++g)
+    {
+        auto& group = _geometryGroups[g];
+        _sizeInBytes = 0;
+        if (group.spheresDirty())
+            for (size_t i = 0; i < nbMaterials; ++i)
+                _sizeInBytes += _serializeSpheres(g, i);
 
-    if (group.cylindersDirty())
-        for (size_t i = 0; i < nbMaterials; ++i)
-            _sizeInBytes += _serializeCylinders(i);
+        if (group.cylindersDirty())
+            for (size_t i = 0; i < nbMaterials; ++i)
+                _sizeInBytes += _serializeCylinders(g, i);
 
-    if (group.conesDirty())
-        for (size_t i = 0; i < nbMaterials; ++i)
-            _sizeInBytes += _serializeCones(i);
+        if (group.conesDirty())
+            for (size_t i = 0; i < nbMaterials; ++i)
+                _sizeInBytes += _serializeCones(g, i);
 
-    if (group.trianglesMeshesDirty())
-        for (size_t i = 0; i < nbMaterials; ++i)
-            _sizeInBytes += _serializeMeshes(i);
-
-    group.setSpheresDirty(false);
-    group.setCylindersDirty(false);
-    group.setConesDirty(false);
-    group.setTrianglesMeshesDirty(false);
+        if (group.trianglesMeshesDirty())
+            for (size_t i = 0; i < nbMaterials; ++i)
+                _sizeInBytes += _serializeMeshes(g, i);
+        group.setSpheresDirty(false);
+        group.setCylindersDirty(false);
+        group.setConesDirty(false);
+        group.setTrianglesMeshesDirty(false);
+    }
 }
 
 void OSPRayScene::buildGeometry()
@@ -393,22 +399,24 @@ void OSPRayScene::buildGeometry()
 
     serializeGeometry();
 
-    size_t totalNbSpheres = 0;
-    size_t totalNbCylinders = 0;
-    size_t totalNbCones = 0;
-    size_t totalNbVertices = 0;
-    size_t totalNbIndices = 0;
-    GeometryGroup& group = _geometryGroups[0]; // TODO: for each group
-    for (const auto& spheres : group.getSpheres())
-        totalNbSpheres += spheres.second.size();
-    for (const auto& cylinders : group.getCylinders())
-        totalNbCylinders += cylinders.second.size();
-    for (const auto& cones : group.getCones())
-        totalNbCones += cones.second.size();
-    for (const auto& trianglesMeshes : group.getTrianglesMeshes())
+    uint64_t totalNbSpheres = 0;
+    uint64_t totalNbCylinders = 0;
+    uint64_t totalNbCones = 0;
+    uint64_t totalNbVertices = 0;
+    uint64_t totalNbIndices = 0;
+    for (auto& group : _geometryGroups)
     {
-        totalNbVertices += trianglesMeshes.second.vertices.size();
-        totalNbIndices += trianglesMeshes.second.indices.size();
+        for (const auto& spheres : group.getSpheres())
+            totalNbSpheres += spheres.second.size();
+        for (const auto& cylinders : group.getCylinders())
+            totalNbCylinders += cylinders.second.size();
+        for (const auto& cones : group.getCones())
+            totalNbCones += cones.second.size();
+        for (const auto& trianglesMeshes : group.getTrianglesMeshes())
+        {
+            totalNbVertices += trianglesMeshes.second.vertices.size();
+            totalNbIndices += trianglesMeshes.second.indices.size();
+        }
     }
 
     BRAYNS_INFO << "---------------------------------------------------"
@@ -419,8 +427,7 @@ void OSPRayScene::buildGeometry()
     BRAYNS_INFO << "Cones    : " << totalNbCones << std::endl;
     BRAYNS_INFO << "Vertices : " << totalNbVertices << std::endl;
     BRAYNS_INFO << "Indices  : " << totalNbIndices << std::endl;
-    BRAYNS_INFO << "Materials: "
-                << group.getMaterialManager().getMaterials().size()
+    BRAYNS_INFO << "Materials: " << _materialManager.getMaterials().size()
                 << std::endl;
     BRAYNS_INFO << "Total    : " << _sizeInBytes << " bytes ("
                 << _sizeInBytes / 1048576 << " MB)" << std::endl;
@@ -491,8 +498,7 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials(const Action action)
 {
-    GeometryGroup& group = _geometryGroups[0]; // TODO: for each group
-    auto& materials = group.getMaterialManager().getMaterials();
+    auto& materials = _materialManager.getMaterials();
     const auto nbMaterials = materials.size();
     if (action == Action::create)
     {

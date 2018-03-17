@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     brayns::Boxf defaultBoundingBox;
     defaultBoundingBox.merge(brayns::Vector3f(0, 0, 0));
     defaultBoundingBox.merge(brayns::Vector3f(1, 1, 1));
-    BOOST_CHECK_EQUAL(scene.getWorldBounds(), defaultBoundingBox);
+    BOOST_CHECK_EQUAL(scene.getBounds(), defaultBoundingBox);
     BOOST_CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
 }
 

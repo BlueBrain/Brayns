@@ -307,7 +307,7 @@ struct Brayns::Impl : public PluginAPI
         const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
 
         auto& camera = _engine->getCamera();
-        camera.setInitialState(_engine->getScene().getWorldBounds());
+        camera.setInitialState(_engine->getScene().getBounds());
         camera.setAspectRatio(frameSize.x() / frameSize.y());
     }
 
@@ -468,7 +468,6 @@ private:
     void _loadData(Progress& loadingProgress)
     {
         auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& volumeParameters = _parametersManager.getVolumeParameters();
         auto& sceneParameters = _parametersManager.getSceneParameters();
         auto& scene = _engine->getScene();
 
@@ -570,17 +569,6 @@ private:
         {
             scene.commitTransferFunctionData();
             scene.getVolumeHandler()->setCurrentIndex(0);
-            const Vector3ui& volumeDimensions =
-                scene.getVolumeHandler()->getDimensions();
-            const Vector3f& volumeOffset =
-                scene.getVolumeHandler()->getOffset();
-            const Vector3f& volumeElementSpacing =
-                volumeParameters.getElementSpacing();
-            Boxf& worldBounds = scene.getWorldBounds();
-            worldBounds.merge(Vector3f(0.f, 0.f, 0.f));
-            worldBounds.merge(volumeOffset +
-                              Vector3f(volumeDimensions) *
-                                  volumeElementSpacing);
         }
     }
 

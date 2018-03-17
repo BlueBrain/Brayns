@@ -34,7 +34,7 @@
 
 namespace
 {
-const size_t CACHE_VERSION = 8;
+const size_t CACHE_VERSION = 9;
 }
 
 namespace brayns
@@ -63,7 +63,6 @@ void Scene::unload()
     _markGeometryDirty();
     for (auto& geometryGroup : _geometryGroups)
         geometryGroup.unload();
-    _bounds.reset();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
     _materialManager.clear();
@@ -185,7 +184,7 @@ void Scene::buildDefault()
                                 {0.8f, 0.8f, 0.8f}, {0.f, 1.f, 0.f},
                                 {0.8f, 0.8f, 0.8f}, {0.8f, 0.8f, 0.8f}};
 
-    GeometryGroup gg(_materialManager);
+    GeometryGroup group(_materialManager);
     for (size_t i = 1; i < 6; ++i)
     {
         // Cornell box
@@ -198,12 +197,12 @@ void Scene::buildDefault()
         material.setOpacity(1.f);
         const auto materialId = _materialManager.add(material);
 
-        auto& meshes = gg.getTrianglesMeshes()[materialId];
+        auto& meshes = group.getTrianglesMeshes()[materialId];
         for (size_t j = 0; j < 6; ++j)
         {
             const auto position = positions[indices[i][j]];
             meshes.vertices.push_back(position);
-            _bounds.merge(position);
+            group.getBounds().merge(position);
         }
         meshes.indices.push_back(Vector3ui(0, 1, 2));
         meshes.indices.push_back(Vector3ui(3, 4, 5));
@@ -219,7 +218,7 @@ void Scene::buildDefault()
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(100.f);
         const auto materialId = _materialManager.add(material);
-        gg.addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
+        group.addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
     }
 
     {
@@ -229,9 +228,9 @@ void Scene::buildDefault()
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
         const auto materialId = _materialManager.add(material);
-        gg.addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
-                                    {0.75f, 0.126f, 0.75f},
-                                    0.125f});
+        group.addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
+                                       {0.75f, 0.126f, 0.75f},
+                                       0.125f});
     }
 
     {
@@ -241,8 +240,10 @@ void Scene::buildDefault()
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
         const auto materialId = _materialManager.add(material);
-        gg.addCone(materialId,
-                   {{0.75f, 0.01f, 0.25f}, {0.75f, 0.5f, 0.25f}, 0.15f, 0.f});
+        group.addCone(materialId, {{0.75f, 0.01f, 0.25f},
+                                   {0.75f, 0.5f, 0.25f},
+                                   0.15f,
+                                   0.f});
     }
 
     {
@@ -257,20 +258,20 @@ void Scene::buildDefault()
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()},
             {0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()}};
-        auto& meshes = gg.getTrianglesMeshes()[materialId];
+        auto& meshes = group.getTrianglesMeshes()[materialId];
         for (size_t i = 0; i < 4; ++i)
             meshes.vertices.push_back(lampPositions[i]);
         meshes.indices.push_back(Vector3i(2, 1, 0));
         meshes.indices.push_back(Vector3i(0, 3, 2));
     }
-    BRAYNS_INFO << "Bounding Box: " << _bounds << std::endl;
-    _geometryGroups.push_back(gg);
+    _geometryGroups.push_back(group);
 }
 
 void Scene::buildEnvironment()
 {
-    GeometryGroup gg(_materialManager);
-    auto& meshes = gg.getTrianglesMeshes();
+    GeometryGroup group(_materialManager);
+    const auto sceneBounds = getBounds();
+    auto& meshes = group.getTrianglesMeshes();
     switch (_parametersManager.getGeometryParameters().getSceneEnvironment())
     {
     case SceneEnvironment::none:
@@ -280,10 +281,10 @@ void Scene::buildEnvironment()
         // Ground
         const Vector3f scale(4.f, 0.5f, 4.f);
         const float tiles = 8.f;
-        const float S =
-            0.5f * std::min(_bounds.getSize().x(), _bounds.getSize().z());
-        const Vector3f s(S, _bounds.getSize().y(), S);
-        const Vector3f c = _bounds.getCenter();
+        const float S = 0.5f * std::min(sceneBounds.getSize().x(),
+                                        sceneBounds.getSize().z());
+        const Vector3f s(S, sceneBounds.getSize().y(), S);
+        const Vector3f c = sceneBounds.getCenter();
 
         Vector3i i;
         const size_t material = 0;
@@ -340,10 +341,10 @@ void Scene::buildEnvironment()
         // Wall
         const Vector3f scale(1.f, 1.f, 1.f);
         const float tiles = 4.f;
-        const float S =
-            0.5f * std::min(_bounds.getSize().x(), _bounds.getSize().z());
-        const Vector3f s(S, _bounds.getSize().y(), S);
-        const Vector3f c = _bounds.getCenter();
+        const float S = 0.5f * std::min(sceneBounds.getSize().x(),
+                                        sceneBounds.getSize().z());
+        const Vector3f s(S, sceneBounds.getSize().y(), S);
+        const Vector3f c = sceneBounds.getCenter();
         Vector3i i;
         const size_t material = 0;
         size_t meshIndex = meshes[material].indices.size();
@@ -389,8 +390,8 @@ void Scene::buildEnvironment()
     case SceneEnvironment::bounding_box:
     {
         const size_t material = static_cast<size_t>(MaterialType::bounding_box);
-        const Vector3f s = _bounds.getSize() / 2.f;
-        const Vector3f c = _bounds.getCenter();
+        const Vector3f s = sceneBounds.getSize() / 2.f;
+        const Vector3f c = sceneBounds.getCenter();
         const float radius = s.length() / 500.f;
         const Vector3f positions[8] = {
             {c.x() - s.x(), c.y() - s.y(), c.z() - s.z()},
@@ -404,27 +405,27 @@ void Scene::buildEnvironment()
         };
 
         for (size_t i = 0; i < 8; ++i)
-            gg.addSphere(material, Sphere(positions[i], radius));
+            group.addSphere(material, Sphere(positions[i], radius));
 
-        gg.addCylinder(material, {positions[0], positions[1], radius});
-        gg.addCylinder(material, {positions[2], positions[3], radius});
-        gg.addCylinder(material, {positions[4], positions[5], radius});
-        gg.addCylinder(material, {positions[6], positions[7], radius});
+        group.addCylinder(material, {positions[0], positions[1], radius});
+        group.addCylinder(material, {positions[2], positions[3], radius});
+        group.addCylinder(material, {positions[4], positions[5], radius});
+        group.addCylinder(material, {positions[6], positions[7], radius});
 
-        gg.addCylinder(material, {positions[0], positions[2], radius});
-        gg.addCylinder(material, {positions[1], positions[3], radius});
-        gg.addCylinder(material, {positions[4], positions[6], radius});
-        gg.addCylinder(material, {positions[5], positions[7], radius});
+        group.addCylinder(material, {positions[0], positions[2], radius});
+        group.addCylinder(material, {positions[1], positions[3], radius});
+        group.addCylinder(material, {positions[4], positions[6], radius});
+        group.addCylinder(material, {positions[5], positions[7], radius});
 
-        gg.addCylinder(material, {positions[0], positions[4], radius});
-        gg.addCylinder(material, {positions[1], positions[5], radius});
-        gg.addCylinder(material, {positions[2], positions[6], radius});
-        gg.addCylinder(material, {positions[3], positions[7], radius});
+        group.addCylinder(material, {positions[0], positions[4], radius});
+        group.addCylinder(material, {positions[1], positions[5], radius});
+        group.addCylinder(material, {positions[2], positions[6], radius});
+        group.addCylinder(material, {positions[3], positions[7], radius});
 
         break;
     }
     }
-    _geometryGroups.push_back(gg);
+    _geometryGroups.push_back(group);
 }
 
 void Scene::addLight(LightPtr light)
@@ -601,9 +602,9 @@ void Scene::_processVolumeAABBGeometry()
     const Vector3f& volumeOffset = volumeHandler->getOffset();
     const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
 
-    GeometryGroup gg(_materialManager);
+    GeometryGroup group(_materialManager);
     const size_t materialId = static_cast<size_t>(MaterialType::invisible);
-    auto& meshes = gg.getTrianglesMeshes()[materialId];
+    auto& meshes = group.getTrianglesMeshes()[materialId];
     uint64_t offset = meshes.vertices.size();
     for (size_t face = 0; face < 6; ++face)
     {
@@ -615,12 +616,17 @@ void Scene::_processVolumeAABBGeometry()
                                       volumeOffset;
 
             meshes.vertices.push_back(position);
-            _bounds.merge(position);
+            group.getBounds().merge(position);
         }
         const size_t index = offset + face * 6;
         meshes.indices.push_back(Vector3ui(index + 0, index + 1, index + 2));
         meshes.indices.push_back(Vector3ui(index + 3, index + 4, index + 5));
     }
+
+    group.getBounds().merge(Vector3f(0.f, 0.f, 0.f));
+    group.getBounds().merge(volumeOffset +
+                            Vector3f(volumeDimensions) * volumeElementSpacing);
+    _geometryGroups.push_back(group);
 }
 
 void Scene::saveToCacheFile()
@@ -671,14 +677,14 @@ void Scene::saveToCacheFile()
     // Save geometry
     size_t nbElements = _geometryGroups.size();
     file.write((char*)&nbElements, sizeof(size_t));
-    for (auto& gg : _geometryGroups)
+    for (auto& group : _geometryGroups)
     {
         for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
         {
             uint64_t bufferSize{0};
 
             // Spheres
-            auto& spheres = gg.getSpheres();
+            auto& spheres = group.getSpheres();
             if (spheres.find(materialId) != spheres.end())
             {
                 auto& data = spheres[materialId];
@@ -696,7 +702,7 @@ void Scene::saveToCacheFile()
             }
 
             // Cylinders
-            auto& cylinders = gg.getCylinders();
+            auto& cylinders = group.getCylinders();
             if (cylinders.find(materialId) != cylinders.end())
             {
                 auto& data = cylinders[materialId];
@@ -714,7 +720,7 @@ void Scene::saveToCacheFile()
             }
 
             // Cones
-            auto& cones = gg.getCones();
+            auto& cones = group.getCones();
             if (cones.find(materialId) != cones.end())
             {
                 auto& data = cones[materialId];
@@ -731,7 +737,7 @@ void Scene::saveToCacheFile()
                 file.write((char*)&nbElements, sizeof(size_t));
             }
 
-            auto& meshes = gg.getTrianglesMeshes();
+            auto& meshes = group.getTrianglesMeshes();
             if (meshes.find(materialId) != meshes.end())
             {
                 auto& data = meshes[materialId];
@@ -781,11 +787,13 @@ void Scene::saveToCacheFile()
                            sizeof(size_t)); // No Texture coordinates
             }
         }
+
+        // Bounds
+        const auto bounds = group.getBounds();
+        file.write((char*)&bounds, sizeof(Boxf));
+        BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
 
-    // Scene bounds
-    file.write((char*)&_bounds, sizeof(Boxf));
-    BRAYNS_DEBUG << "AABB: " << _bounds << std::endl;
     file.close();
 
     BRAYNS_INFO << "Scene successfully saved" << std::endl;
@@ -862,7 +870,7 @@ void Scene::loadFromCacheFile()
     file.read((char*)&nbGeometryGroups, sizeof(size_t));
     for (size_t groupId = 0; groupId < nbGeometryGroups; ++groupId)
     {
-        GeometryGroup gg(_materialManager);
+        GeometryGroup group(_materialManager);
         for (size_t materialId = 0; materialId < nbMaterials; ++materialId)
         {
             uint64_t bufferSize{0};
@@ -874,7 +882,7 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbSpheres * sizeof(Sphere);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbSpheres
                              << " spheres" << std::endl;
-                auto& spheres = gg.getSpheres()[materialId];
+                auto& spheres = group.getSpheres()[materialId];
                 spheres.resize(nbSpheres);
                 file.read((char*)spheres.data(), bufferSize);
             }
@@ -886,7 +894,7 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbCylinders * sizeof(Cylinder);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbCylinders
                              << " cylinders" << std::endl;
-                auto& cylinders = gg.getCylinders()[materialId];
+                auto& cylinders = group.getCylinders()[materialId];
                 cylinders.resize(nbCylinders);
                 file.read((char*)cylinders.data(), bufferSize);
             }
@@ -898,13 +906,13 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbCones * sizeof(Cone);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbCones << " cones"
                              << std::endl;
-                auto& cones = gg.getCones()[materialId];
+                auto& cones = group.getCones()[materialId];
                 cones.resize(nbCones);
                 file.read((char*)cones.data(), bufferSize);
             }
 
             // Meshes
-            auto& meshes = gg.getTrianglesMeshes()[materialId];
+            auto& meshes = group.getTrianglesMeshes()[materialId];
             // Vertices
             file.read((char*)&nbVertices, sizeof(size_t));
             if (nbVertices != 0)
@@ -956,10 +964,13 @@ void Scene::loadFromCacheFile()
                         << " normals, " << nbTexCoords << " texture coordinates"
                         << std::endl;
         }
+
+        // Bounds
+        Boxf bounds;
+        file.read((char*)&bounds, sizeof(Boxf));
+        group.getBounds().merge(bounds);
+        BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
-    // Scene bounds
-    file.read((char*)&_bounds, sizeof(Boxf));
-    BRAYNS_DEBUG << "AABB: " << _bounds << std::endl;
     file.close();
 
     BRAYNS_INFO << "Scene successfully loaded" << std::endl;
@@ -968,5 +979,13 @@ void Scene::loadFromCacheFile()
 void Scene::addGeometryGroup(const GeometryGroup& geometryGroup)
 {
     _geometryGroups.push_back(geometryGroup);
+}
+
+Boxf Scene::getBounds()
+{
+    Boxf bounds;
+    for (auto& group : _geometryGroups)
+        bounds.merge(group.getBounds());
+    return bounds;
 }
 }
