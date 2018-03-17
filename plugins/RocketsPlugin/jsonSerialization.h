@@ -246,8 +246,8 @@ inline void init(brayns::Material* m, ObjectHandler* h)
 
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
-    h->add_property("bounds", &s->getWorldBounds(),
-                    Flags::IgnoreRead | Flags::Optional);
+    brayns::Boxf bounds{s->getBounds()};
+    h->add_property("bounds", &bounds, Flags::IgnoreRead | Flags::Optional);
     h->add_property("materials", &s->getMaterialManager().getMaterials());
     h->set_flags(Flags::DisallowUnknownKey);
 }
