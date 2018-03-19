@@ -43,7 +43,7 @@ std::string getImageMagickPixelFormat(const FrameBufferFormat format)
         pixelFormat = "RGBA";
         break;
     case FrameBufferFormat::bgra_i8:
-        pixelFormat = "RGBA";
+        pixelFormat = "BGRA";
         break;
     case FrameBufferFormat::rgb_i8:
         pixelFormat = "RGB";
