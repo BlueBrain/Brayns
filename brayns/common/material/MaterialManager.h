@@ -36,7 +36,7 @@ public:
 
     /**
         Set the material object for a given index.
-        @param index Index of material in the scene
+        @param index Index of material
         @param material Material object
     */
     BRAYNS_API void set(const size_t index, const Material& material);
@@ -44,15 +44,25 @@ public:
     /**
         Set a default material object for a given index, if the material does
        not already exists
-        @param index Index of material in the scene
+        @param index Index of material
     */
     BRAYNS_API void set(const size_t index);
     /**
         Returns the material object for a given index
+        @param index Index of material
         @return Reference to material object
     */
     BRAYNS_API Material& get(size_t index);
+
+    /**
+        @return All materials
+    */
     BRAYNS_API Materials& getMaterials() { return _materials; }
+    /**
+        Returns the position of the material in the internal vector
+        @param index Index of material
+        @return Position of the material in the internal vector
+    */
     BRAYNS_API size_t position(const size_t materialId);
 
 private:
