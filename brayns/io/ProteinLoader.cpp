@@ -394,8 +394,6 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                 i = 0;
                 bool found = false;
                 const auto colorScheme = _geometryParameters.getColorScheme();
-                const auto nbMaterials =
-                    group.getMaterialManager().getMaterials().size();
                 while (!found && i < colorMapSize)
                 {
                     if (atomName == colorMap[i].symbol)
@@ -404,16 +402,10 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                         switch (colorScheme)
                         {
                         case ColorScheme::protein_chains:
-                            atom.materialId =
-                                NB_SYSTEM_MATERIALS +
-                                abs(atom.chainId) %
-                                    (nbMaterials - NB_SYSTEM_MATERIALS);
+                            atom.materialId = abs(atom.chainId);
                             break;
                         case ColorScheme::protein_residues:
-                            atom.materialId =
-                                NB_SYSTEM_MATERIALS +
-                                abs(atom.residue) %
-                                    (nbMaterials - NB_SYSTEM_MATERIALS);
+                            atom.materialId = atom.residue;
                             break;
                         default:
                             atom.materialId = static_cast<int>(i);
@@ -438,15 +430,21 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                 }
 
                 const auto materialId =
-                    colorScheme == ColorScheme::protein_by_id
-                        ? proteinIndex % nbMaterials
-                        : atom.materialId;
+                    colorScheme == ColorScheme::protein_by_id ? proteinIndex
+                                                              : atom.materialId;
                 // Convert position from nanometers
                 const auto center = position + 0.01f * atom.position;
                 // Convert radius from angstrom
                 const auto radius = 0.0001f * atom.radius *
                                     _geometryParameters.getRadiusMultiplier();
-                group.addSphere(materialId, {center, radius});
+
+                auto& materialManager = group.getMaterialManager();
+                auto& material = materialManager.get(materialId);
+                material.setColor(Vector3f(colorMap[materialId].R / 255.f,
+                                           colorMap[materialId].G / 255.f,
+                                           colorMap[materialId].B / 255.f));
+                group.addSphere(materialManager.position(materialId),
+                                {center, radius});
             }
         }
         file.close();
