@@ -138,8 +138,7 @@ public:
 
         // https://github.com/BlueBrain/Brayns/issues/342
         // WAR: modifications by braynsViewer have to be broadcasted. Don't do
-        // this
-        // for braynsService, as otherwise messages that arrive while we're
+        // this for braynsService, as otherwise messages that arrive while we're
         // rendering (async rendering!) are re-broadcasted.
         _broadcastWebsocketMessages();
 
@@ -156,7 +155,7 @@ public:
 
     void postRender()
     {
-        if (!_rocketsServer)
+        if (!_rocketsServer || _rocketsServer->getConnectionCount() == 0)
             return;
 
         // only broadcast changes that are a result of the rendering. All other
@@ -478,9 +477,14 @@ public:
                 const auto& params =
                     _parametersManager.getApplicationParameters();
                 const auto fps = params.getImageStreamFPS();
-                if (_timer.elapsed() < 1.0 / fps)
+                const auto elapsed = _timer.elapsed() + _leftover;
+                const auto duration = 1.0 / fps;
+                if (elapsed < duration)
                     return;
 
+                _leftover = elapsed - duration;
+                for (; _leftover > duration;)
+                    _leftover -= duration;
                 _timer.start();
 
                 const auto image =
@@ -714,6 +718,7 @@ public:
     ImageGenerator _imageGenerator;
 
     Timer _timer;
+    float _leftover{0.f};
 };
 
 RocketsPlugin::RocketsPlugin(EnginePtr engine, PluginAPI* api)
