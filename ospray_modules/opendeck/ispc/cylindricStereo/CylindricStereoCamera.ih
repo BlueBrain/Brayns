@@ -1,7 +1,6 @@
-/* Copyright (c) 2018, Cyrille Favreau
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille_favreau@hotmail.com>
- *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+ * Responsible Author: Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,16 +20,17 @@
 
 #pragma once
 
-#include <ospray/SDK/camera/Camera.h>
+#include <ospray/SDK/camera/Camera.ih>
 
-namespace ospray
+struct CylindricStereoCamera
 {
-struct OpenDeckCamera : public Camera
-{
-    OpenDeckCamera();
-    virtual ~OpenDeckCamera() override = default;
-    virtual std::string toString() const override;
-    virtual void commit() override;
+    Camera super;
+
+    vec3f org;
+    vec3f dir_cam;
+    vec3f dir_du;
+    vec3f dir_dv;
+    float interpupillaryDistance;
+    float imgPlane_size_y;
+    bool side_by_side;
 };
-
-} // ::ospray

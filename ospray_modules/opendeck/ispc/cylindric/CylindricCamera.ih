@@ -1,6 +1,7 @@
 /* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille_favreau@hotmail.com>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,12 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
+#pragma once
 
-namespace ospray
+#include <ospray/SDK/camera/Camera.ih>
+
+struct CylindricCamera
 {
-extern "C" void ospray_init_module_opendeck()
-{
-    std::cout << "[MODULE] initializing opendeck plugin" << std::endl;
-}
-}
+    Camera super;
+
+    vec3f org;
+    vec3f dir_cam;
+    vec3f dir_du;
+    vec3f dir_dv;
+    float imgPlane_size_y;
+};

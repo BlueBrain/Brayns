@@ -1,6 +1,7 @@
 # Copyright (c) 2018, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 # Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+#                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
@@ -12,10 +13,12 @@ include(Common)
 
 set(OSPRAY_MODULE_OPENDECK_SOURCES
     opendeck.cpp
-    ispc/camera/OpenDeckCamera.cpp)
+    ispc/cylindric/CylindricCamera.cpp
+    ispc/cylindricStereo/CylindricStereoCamera.cpp)
 
 set(OSPRAY_MODULE_OPENDECK_ISPC_SOURCES
-    ispc/camera/OpenDeckCamera.ispc)
+    ispc/cylindric/CylindricCamera.ispc
+    ispc/cylindricStereo/CylindricStereoCamera.ispc)
 
 # Compile ispc code
 list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})

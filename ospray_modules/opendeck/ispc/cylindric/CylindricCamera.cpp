@@ -1,6 +1,6 @@
-/* Copyright (c) 2018, Cyrille Favreau
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille_favreau@hotmail.com>
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
@@ -19,26 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OpenDeckCamera.h"
-#include "OpenDeckCamera_ispc.h"
+#include "CylindricCamera.h"
+#include "CylindricCamera_ispc.h"
+
+#define OPENDECK_FOV_Y 48.549f
 
 namespace ospray
 {
-OpenDeckCamera::OpenDeckCamera()
+CylindricCamera::CylindricCamera()
 {
-    ispcEquivalent = ispc::OpenDeckCamera_create(this);
+    ispcEquivalent = ispc::CylindricCamera_create(this);
 }
 
-std::string OpenDeckCamera::toString() const
+std::string CylindricCamera::toString() const
 {
-    return "ospray::OpenDeckCamera";
+    return "ospray::CylindricCamera";
 }
 
-void OpenDeckCamera::commit()
+void CylindricCamera::commit()
 {
     Camera::commit();
 
-    const float fovy = getParamf("fovy", 60.f);
+    const float fovy = OPENDECK_FOV_Y;
+    std::cout << "FOV::::::::::::::: " << fovy << std::endl;
 
     dir = normalize(dir);
     const vec3f dir_du = normalize(cross(dir, up));
@@ -48,13 +51,13 @@ void OpenDeckCamera::commit()
     const vec3f org = pos;
     const float imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * fovy));
 
-    ispc::OpenDeckCamera_set(getIE(), (const ispc::vec3f&)org,
-                             (const ispc::vec3f&)dir,
-                             (const ispc::vec3f&)dir_du,
-                             (const ispc::vec3f&)dir_dv,
-                             imgPlane_size_y);
+    ispc::CylindricCamera_set(getIE(), (const ispc::vec3f&)org,
+                                       (const ispc::vec3f&)dir,
+                                       (const ispc::vec3f&)dir_du,
+                                       (const ispc::vec3f&)dir_dv,
+                                       imgPlane_size_y);
 }
 
-OSP_REGISTER_CAMERA(OpenDeckCamera, opendeck);
+OSP_REGISTER_CAMERA(CylindricCamera, cylindric);
 
 } // ::ospray
