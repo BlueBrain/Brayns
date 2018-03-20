@@ -354,6 +354,7 @@ OSPModel OSPRayScene::_getActiveModel()
 
 void OSPRayScene::serializeGeometry()
 {
+    _sizeInBytes = 0;
     uint64_t materialId = _materialManager.getMaterials().size();
     for (size_t g = 0; g < _geometryGroups.size(); ++g)
     {
@@ -363,7 +364,6 @@ void OSPRayScene::serializeGeometry()
         const auto nbMaterials =
             group.getMaterialManager().getMaterials().size();
 
-        _sizeInBytes = 0;
         if (group.spheresDirty())
             for (size_t i = 0; i < nbMaterials; ++i)
                 _sizeInBytes += _serializeSpheres(g, i, i + materialId);

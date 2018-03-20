@@ -608,16 +608,10 @@ private:
             BRAYNS_INFO << "Loading PDB file " << pdbFile << std::endl;
         }
         ProteinLoader proteinLoader(geometryParameters);
-        if (!proteinLoader.importPDBFile(pdbFile, Vector3f(0, 0, 0), 0, group))
+        if (proteinLoader.importPDBFile(pdbFile, Vector3f(0, 0, 0), 0, group))
+            scene.addGeometryGroup(group);
+        else
             BRAYNS_ERROR << "Failed to import " << pdbFile << std::endl;
-
-        auto& materials = group.getMaterialManager().getMaterials();
-        for (size_t i = 0; i < materials.size(); ++i)
-        {
-            auto& material = materials[i];
-            material.setColor(proteinLoader.getMaterialKd(i));
-        }
-        scene.addGeometryGroup(group);
     }
 
     /**
