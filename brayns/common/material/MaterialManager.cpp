@@ -40,6 +40,8 @@ void MaterialManager::clear()
 
 Material& MaterialManager::get(const size_t index)
 {
+    if (_materialMapping.find(index) == _materialMapping.end())
+        set(index);
     return _materials[_materialMapping[index]];
 }
 
@@ -51,16 +53,16 @@ void MaterialManager::set(const size_t index, const Material& material)
         _materials.push_back(material);
     }
     else
-    {
-        const auto position = _materialMapping[index];
-        _materials[position] = material;
-    }
+        _materials[_materialMapping[index]] = material;
 }
 
 void MaterialManager::set(const size_t index)
 {
     if (_materialMapping.find(index) == _materialMapping.end())
-        set(index, Material());
+    {
+        _materialMapping[index] = _materials.size();
+        _materials.push_back(Material());
+    }
 }
 
 size_t MaterialManager::position(const size_t materialId)
@@ -68,9 +70,5 @@ size_t MaterialManager::position(const size_t materialId)
     const auto it = _materialMapping.find(materialId);
     const auto distance = std::distance(_materialMapping.begin(), it);
     return distance;
-}
-
-void MaterialManager::reset()
-{
 }
 }

@@ -35,14 +35,15 @@ public:
     BRAYNS_API void clear();
 
     /**
-        Set the material object for a given index
+        Set the material object for a given index.
         @param index Index of material in the scene
         @param material Material object
     */
     BRAYNS_API void set(const size_t index, const Material& material);
 
     /**
-        Set a default material object for a given index
+        Set a default material object for a given index, if the material does
+       not already exists
         @param index Index of material in the scene
     */
     BRAYNS_API void set(const size_t index);
@@ -52,11 +53,6 @@ public:
     */
     BRAYNS_API Material& get(size_t index);
     BRAYNS_API Materials& getMaterials() { return _materials; }
-    /**
-        Resets materials and builds the system ones (Bounding box, skymap, etc)
-    */
-    BRAYNS_API void reset();
-
     BRAYNS_API size_t position(const size_t materialId);
 
 private:
