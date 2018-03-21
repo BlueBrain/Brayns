@@ -162,7 +162,7 @@ public:
         try
         {
             // Geometry group (one for the whole circuit)
-            GeometryGroup group;
+            GeometryGroup& group = scene.addGeometryGroup();
 
             // Open Circuit and select GIDs according to specified target
             const brain::Circuit circuit(uri);
@@ -267,8 +267,6 @@ public:
                     _importMorphologies(circuit, allGids, transformations,
                                         group, targetGIDOffsets,
                                         compartmentReport);
-
-            scene.addGeometryGroup(group);
         }
         catch (const std::exception& error)
         {

@@ -600,7 +600,7 @@ private:
         // Load PDB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group;
+        GeometryGroup& group = scene.addGeometryGroup();
         std::string pdbFile = filename;
         if (pdbFile == "")
         {
@@ -608,9 +608,7 @@ private:
             BRAYNS_INFO << "Loading PDB file " << pdbFile << std::endl;
         }
         ProteinLoader proteinLoader(geometryParameters);
-        if (proteinLoader.importPDBFile(pdbFile, Vector3f(0, 0, 0), 0, group))
-            scene.addGeometryGroup(group);
-        else
+        if (!proteinLoader.importPDBFile(pdbFile, Vector3f(0, 0, 0), 0, group))
             BRAYNS_ERROR << "Failed to import " << pdbFile << std::endl;
     }
 
@@ -622,15 +620,13 @@ private:
         // Load XYZB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group;
+        GeometryGroup& group = scene.addGeometryGroup();
         BRAYNS_INFO << "Loading XYZB file " << geometryParameters.getXYZBFile()
                     << std::endl;
         XYZBLoader xyzbLoader(geometryParameters);
         xyzbLoader.setProgressCallback(progressUpdate);
-        if (xyzbLoader.importFromBinaryFile(geometryParameters.getXYZBFile(),
-                                            group))
-            scene.addGeometryGroup(group);
-        else
+        if (!xyzbLoader.importFromBinaryFile(geometryParameters.getXYZBFile(),
+                                             group))
             BRAYNS_ERROR << "Failed to import "
                          << geometryParameters.getXYZBFile() << std::endl;
     }
@@ -645,11 +641,14 @@ private:
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group;
 
         const strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
                                  ".stl", ".3ds", ".ase", ".ifc", ".off"};
         const auto files = parseFolder(folder, filters);
+        if (files.empty())
+            return;
+
+        GeometryGroup& group = scene.addGeometryGroup();
         size_t i = 0;
         std::stringstream msg;
         msg << "Loading " << files.size() << " meshes from " << folder;
@@ -666,7 +665,6 @@ private:
             ++i;
             progressUpdate(msg.str(), float(i) / files.size());
         }
-        scene.addGeometryGroup(group);
     }
 
     /**
@@ -677,17 +675,15 @@ private:
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group;
+        GeometryGroup& group = scene.addGeometryGroup();
 
         const auto material =
             geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
                 ? NB_SYSTEM_MATERIALS
                 : NO_MATERIAL;
 
-        if (_meshLoader.importMeshFromFile(filename, group, Matrix4f(),
-                                           material))
-            scene.addGeometryGroup(group);
-        else
+        if (!_meshLoader.importMeshFromFile(filename, group, Matrix4f(),
+                                            material))
             BRAYNS_ERROR << "Failed to import " << filename << std::endl;
     }
 
@@ -786,7 +782,8 @@ private:
             _parametersManager.getApplicationParameters();
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup group;
+        GeometryGroup& group = scene.addGeometryGroup();
+
         const auto& folder = geometryParameters.getMorphologyFolder();
         MorphologyLoader morphologyLoader(
             applicationParameters, geometryParameters,
@@ -805,7 +802,6 @@ private:
             progressUpdate("Loading morphologies from " + folder,
                            float(morphologyIndex) / files.size());
         }
-        scene.addGeometryGroup(group);
     }
 
     /**

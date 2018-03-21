@@ -405,7 +405,7 @@ public:
                 _engine->getScene().getTransferFunction());
         _handleGET(ENDPOINT_SCENE, _engine->getScene());
         _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
-                   [](Scene& scene) { scene.commitMaterials(Action::update); });
+                   [](Scene& scene) { scene.commit(); });
         _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
 
         _handleFrameBuffer();

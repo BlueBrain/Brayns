@@ -22,6 +22,7 @@
 #define GEOMETRYGROUP_H
 
 #include <brayns/api.h>
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Sphere.h>
@@ -33,10 +34,11 @@ SERIALIZATION_ACCESS(GeometryGroup)
 
 namespace brayns
 {
-class GeometryGroup
+class GeometryGroup : public BaseObject
 {
 public:
     GeometryGroup();
+    BRAYNS_API virtual ~GeometryGroup();
 
     /** Unloads geometry, materials, lights, models, etc. to free memory. */
     BRAYNS_API void unload();
@@ -54,6 +56,7 @@ public:
     BRAYNS_API bool enabled() { return _enabled; }
     BRAYNS_API void enable() { _enabled = true; }
     BRAYNS_API void disable() { _enabled = false; }
+    BRAYNS_API bool dirty();
     /**
         Returns the bounding box for the whole scene
     */

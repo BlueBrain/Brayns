@@ -128,9 +128,9 @@ public:
     /**
         Adds a geometry group to the scene
       */
-    BRAYNS_API void addGeometryGroup(const GeometryGroup& geometryGroup);
+    BRAYNS_API GeometryGroup& addGeometryGroup();
 
-    /**
+    /**commitMaterials
         Removes a geometry group from the scene
         @param index Index of the geometry group
       */
@@ -190,7 +190,8 @@ public:
     /**
         Gets the Calcium diffusion simulation handler
     */
-    CADiffusionSimulationHandlerPtr getCADiffusionSimulationHandler() const;
+    CADiffusionSimucommitMaterialslationHandlerPtr
+        getCADiffusionSimulationHandler() const;
 
     /**
         Build a color map from a file, according to the colormap-file scene

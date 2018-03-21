@@ -119,4 +119,10 @@ void GeometryGroup::setCone(const size_t materialId, const uint64_t index,
     else
         BRAYNS_ERROR << "Invalid index " << index << std::endl;
 }
+
+bool GeometryGroup::dirty()
+{
+    return _spheresDirty || _cylindersDirty || _conesDirty ||
+           _trianglesMeshesDirty;
+}
 }
