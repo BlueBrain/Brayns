@@ -220,7 +220,7 @@ void Scene::buildDefault()
                                 {0.8f, 0.8f, 0.8f}, {0.f, 1.f, 0.f},
                                 {0.8f, 0.8f, 0.8f}, {0.8f, 0.8f, 0.8f}};
 
-    GeometryGroup group;
+    GeometryGroup& group = addGeometryGroup();
     size_t materialId = 0;
     for (size_t i = 1; i < 6; ++i)
     {
@@ -305,18 +305,20 @@ void Scene::buildDefault()
         meshes.indices.push_back(Vector3i(2, 1, 0));
         meshes.indices.push_back(Vector3i(0, 3, 2));
     }
-    _geometryGroups.push_back(group);
 }
 
 void Scene::buildEnvironment()
 {
-    GeometryGroup group;
+    const auto sceneEnvironment =
+        _parametersManager.getGeometryParameters().getSceneEnvironment();
+    if (sceneEnvironment == SceneEnvironment::none)
+        return;
+
+    GeometryGroup& group = addGeometryGroup();
     const auto sceneBounds = getBounds();
     auto& meshes = group.getTrianglesMeshes();
-    switch (_parametersManager.getGeometryParameters().getSceneEnvironment())
+    switch (sceneEnvironment)
     {
-    case SceneEnvironment::none:
-        break;
     case SceneEnvironment::ground:
     {
         // Ground
@@ -328,109 +330,118 @@ void Scene::buildEnvironment()
         const Vector3f c = sceneBounds.getCenter();
 
         Vector3i i;
-        const size_t material = 0;
-        size_t meshIndex = meshes[material].indices.size();
+        const size_t materialId = 0;
+        Material material;
+        material.setColor(Vector3f(1, 1, 1));
+        group.getMaterialManager().set(materialId, material);
+        size_t meshIndex = meshes[materialId].indices.size();
 
-        Vector4f v;
-        const Vector4f n(0.f, 1.f, 0.f, 0.f);
-        v = Vector4f(c.x() - s.x() * scale.x(),
+        Vector3f v;
+        const Vector3f n(0.f, 1.f, 0.f);
+        v = Vector3f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
-                     c.z() - s.z() * scale.z(), 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(0.f, 0.f));
-        v = Vector4f(c.x() + s.x() * scale.x(),
+                     c.z() - s.z() * scale.z());
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(0.f, 0.f));
+        v = Vector3f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
-                     c.z() - s.z() * scale.z(), 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(tiles, 0.f));
-        v = Vector4f(c.x() + s.x() * scale.x(),
+                     c.z() - s.z() * scale.z());
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(tiles, 0.f));
+        v = Vector3f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
-                     c.z() + s.z() * scale.z(), 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(tiles, tiles));
+                     c.z() + s.z() * scale.z());
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(tiles, tiles));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        meshes[material].indices.push_back(i);
+        meshes[materialId].indices.push_back(i);
         meshIndex += 3;
 
-        v = Vector4f(c.x() + s.x() * scale.x(),
+        v = Vector3f(c.x() + s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
-                     c.z() + s.z() * scale.z(), 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(tiles, tiles));
-        v = Vector4f(c.x() - s.x() * scale.x(),
+                     c.z() + s.z() * scale.z());
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(tiles, tiles));
+        v = Vector3f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
-                     c.z() + s.z() * scale.z(), 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(0.f, tiles));
-        v = Vector4f(c.x() - s.x() * scale.x(),
+                     c.z() + s.z() * scale.z());
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(0.f, tiles));
+        v = Vector3f(c.x() - s.x() * scale.x(),
                      c.y() - s.y() * scale.y() * 1.001f,
-                     c.z() - s.z() * scale.z(), 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(0.f, 0.f));
+                     c.z() - s.z() * scale.z());
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(0.f, 0.f));
         i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        meshes[material].indices.push_back(i);
+        meshes[materialId].indices.push_back(i);
         break;
     }
     case SceneEnvironment::wall:
     {
         // Wall
-        const Vector3f scale(1.f, 1.f, 1.f);
+        const Vector3f scale(3.f, 3.f, 1.f);
         const float tiles = 4.f;
         const float S = 0.5f * std::min(sceneBounds.getSize().x(),
-                                        sceneBounds.getSize().z());
-        const Vector3f s(S, sceneBounds.getSize().y(), S);
+                                        sceneBounds.getSize().y());
+        const Vector3f s(S, sceneBounds.getSize().z(), S);
         const Vector3f c = sceneBounds.getCenter();
+
+        const size_t materialId = 0;
+        Material material;
+        material.setColor(Vector3f(1, 1, 1));
+        group.getMaterialManager().set(materialId, material);
+
+        Vector3f v;
         Vector3i i;
-        const size_t material = 0;
-        size_t meshIndex = meshes[material].indices.size();
-        Vector4f v;
-        const Vector4f n(0.f, 0.f, -1.f, 0.f);
-        v = Vector4f(c.x() - s.x() * scale.x(), c.y() - s.y() * scale.y(),
-                     c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(0.f, 0.f));
-        v = Vector4f(c.x() + s.x() * scale.x(), c.y() - s.y() * scale.y(),
-                     c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(tiles, 0.f));
-        v = Vector4f(c.x() + s.x() * scale.x(), c.y() + s.y() * scale.y(),
-                     c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(tiles, tiles));
-        i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        meshes[material].indices.push_back(i);
-        meshIndex += 3;
-        v = Vector4f(c.x() + s.x() * scale.x(), c.y() + s.y() * scale.y(),
-                     c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(tiles, tiles));
-        v = Vector4f(c.x() - s.x() * scale.x(), c.y() + s.y() * scale.y(),
-                     c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(0.f, tiles));
-        v = Vector4f(c.x() - s.x() * scale.x(), c.y() - s.y() * scale.y(),
-                     c.z() + s.z() * scale.z() * 1.001f, 0.f);
-        meshes[material].vertices.push_back(v);
-        meshes[material].normals.push_back(n);
-        meshes[material].textureCoordinates.push_back(Vector2f(0.f, 0.f));
-        i = Vector3i(meshIndex, meshIndex + 1, meshIndex + 2);
-        meshes[material].indices.push_back(i);
+        const Vector3f n(0.f, 0.f, -1.f);
+        v = Vector3f(c.x() - s.x() * scale.x(), c.y() - s.y() * scale.y(),
+                     c.z() - s.z() * scale.z() * 1.001f);
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(0.f, 0.f));
+        v = Vector3f(c.x() + s.x() * scale.x(), c.y() - s.y() * scale.y(),
+                     c.z() - s.z() * scale.z() * 1.001f);
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(tiles, 0.f));
+        v = Vector3f(c.x() + s.x() * scale.x(), c.y() + s.y() * scale.y(),
+                     c.z() - s.z() * scale.z() * 1.001f);
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(tiles, tiles));
+        i = Vector3i(0, 1, 2);
+        meshes[materialId].indices.push_back(i);
+        v = Vector3f(c.x() + s.x() * scale.x(), c.y() + s.y() * scale.y(),
+                     c.z() - s.z() * scale.z() * 1.001f);
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(tiles, tiles));
+        v = Vector3f(c.x() - s.x() * scale.x(), c.y() + s.y() * scale.y(),
+                     c.z() - s.z() * scale.z() * 1.001f);
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(0.f, tiles));
+        v = Vector3f(c.x() - s.x() * scale.x(), c.y() - s.y() * scale.y(),
+                     c.z() - s.z() * scale.z() * 1.001f);
+        meshes[materialId].vertices.push_back(v);
+        meshes[materialId].normals.push_back(n);
+        meshes[materialId].textureCoordinates.push_back(Vector2f(0.f, 0.f));
+        i = Vector3i(3, 4, 5);
+        meshes[materialId].indices.push_back(i);
         break;
     }
     case SceneEnvironment::bounding_box:
     {
-        const size_t material = static_cast<size_t>(MaterialType::bounding_box);
+        const size_t materialId = 0;
+        Material material;
+        material.setColor(Vector3f(1, 1, 1));
+        group.getMaterialManager().set(materialId, material);
         const Vector3f s = sceneBounds.getSize() / 2.f;
         const Vector3f c = sceneBounds.getCenter();
         const float radius = s.length() / 500.f;
@@ -446,27 +457,28 @@ void Scene::buildEnvironment()
         };
 
         for (size_t i = 0; i < 8; ++i)
-            group.addSphere(material, Sphere(positions[i], radius));
+            group.addSphere(materialId, Sphere(positions[i], radius));
 
-        group.addCylinder(material, {positions[0], positions[1], radius});
-        group.addCylinder(material, {positions[2], positions[3], radius});
-        group.addCylinder(material, {positions[4], positions[5], radius});
-        group.addCylinder(material, {positions[6], positions[7], radius});
+        group.addCylinder(materialId, {positions[0], positions[1], radius});
+        group.addCylinder(materialId, {positions[2], positions[3], radius});
+        group.addCylinder(materialId, {positions[4], positions[5], radius});
+        group.addCylinder(materialId, {positions[6], positions[7], radius});
 
-        group.addCylinder(material, {positions[0], positions[2], radius});
-        group.addCylinder(material, {positions[1], positions[3], radius});
-        group.addCylinder(material, {positions[4], positions[6], radius});
-        group.addCylinder(material, {positions[5], positions[7], radius});
+        group.addCylinder(materialId, {positions[0], positions[2], radius});
+        group.addCylinder(materialId, {positions[1], positions[3], radius});
+        group.addCylinder(materialId, {positions[4], positions[6], radius});
+        group.addCylinder(materialId, {positions[5], positions[7], radius});
 
-        group.addCylinder(material, {positions[0], positions[4], radius});
-        group.addCylinder(material, {positions[1], positions[5], radius});
-        group.addCylinder(material, {positions[2], positions[6], radius});
-        group.addCylinder(material, {positions[3], positions[7], radius});
+        group.addCylinder(materialId, {positions[0], positions[4], radius});
+        group.addCylinder(materialId, {positions[1], positions[5], radius});
+        group.addCylinder(materialId, {positions[2], positions[6], radius});
+        group.addCylinder(materialId, {positions[3], positions[7], radius});
 
         break;
     }
+    default:
+        break;
     }
-    _geometryGroups.push_back(group);
 }
 
 void Scene::addLight(LightPtr light)
@@ -642,7 +654,7 @@ void Scene::_processVolumeAABBGeometry()
     const Vector3f& volumeOffset = volumeHandler->getOffset();
     const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
 
-    GeometryGroup group;
+    GeometryGroup& group = addGeometryGroup();
     const size_t materialId = static_cast<size_t>(MaterialType::invisible);
     auto& meshes = group.getTrianglesMeshes()[materialId];
     uint64_t offset = meshes.vertices.size();
@@ -666,7 +678,6 @@ void Scene::_processVolumeAABBGeometry()
     group.getBounds().merge(Vector3f(0.f, 0.f, 0.f));
     group.getBounds().merge(volumeOffset +
                             Vector3f(volumeDimensions) * volumeElementSpacing);
-    _geometryGroups.push_back(group);
 }
 
 void Scene::saveToCacheFile()
@@ -1016,9 +1027,10 @@ void Scene::loadFromCacheFile()
     BRAYNS_INFO << "Scene successfully loaded" << std::endl;
 }
 
-void Scene::addGeometryGroup(const GeometryGroup& geometryGroup)
+GeometryGroup& Scene::addGeometryGroup()
 {
-    _geometryGroups.push_back(geometryGroup);
+    _geometryGroups.push_back(GeometryGroup());
+    return _geometryGroups[_geometryGroups.size() - 1];
 }
 
 Boxf Scene::getBounds()

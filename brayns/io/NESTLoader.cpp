@@ -117,7 +117,7 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
     BRAYNS_INFO << "Number of materials: " << materialMapping.size()
                 << std::endl;
 
-    GeometryGroup group;
+    GeometryGroup& group = scene.addGeometryGroup();
     SpheresMap& spheres = group.getSpheres();
     spheres[0].reserve(_frameSize);
     _positions.reserve(_frameSize);
@@ -136,7 +136,6 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
                         {center, radius, 0.f, {materialMapping[index], 0.f}});
         updateProgress("Loading neurons...", spheres[0].size(), _frameSize);
     }
-    scene.addGeometryGroup(group);
 
     BRAYNS_INFO << "Finished loading " << _frameSize << " neurons" << std::endl;
 }

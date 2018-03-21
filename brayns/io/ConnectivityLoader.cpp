@@ -160,7 +160,8 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
         }
 
         // Build scene
-        GeometryGroup group;
+        GeometryGroup& group = scene.addGeometryGroup();
+
         const auto& scale = _geometryParameters.getConnectivityScale();
         const auto& dimensionRange =
             _geometryParameters.getConnectivityDimensionRange();
@@ -246,7 +247,6 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                 }
             ++progress;
         }
-        scene.addGeometryGroup(group);
     }
     catch (const std::exception& e)
     {

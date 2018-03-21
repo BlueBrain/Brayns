@@ -31,6 +31,12 @@
 
 namespace brayns
 {
+struct GeometryGroupAttributes
+{
+    GeometryGroup* geometryGroup;
+    OSPModel model;
+};
+
 /**
 
    OSPRray specific scene
@@ -80,6 +86,7 @@ private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
     void _commitOSPMaterial(OSPMaterial ospMaterial, Material& material);
 
+    void _syncOSPModelsWithGeometryGroups();
     OSPModel _getActiveModel();
     uint32_t _getOSPDataFlags();
     uint64_t _serializeSpheres(const size_t groupId,
@@ -95,7 +102,7 @@ private:
                               const size_t ospMaterialId);
 
     OSPModel _rootModel;
-    std::vector<OSPGeometry> _models;
+    std::vector<GeometryGroupAttributes> _ospGeometryGroups;
     OSPModel _simulationModel;
     std::vector<OSPMaterial> _ospMaterials;
     std::map<std::string, OSPTexture2D> _ospTextures;

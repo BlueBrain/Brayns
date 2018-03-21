@@ -39,7 +39,7 @@ MolecularSystemReader::MolecularSystemReader(
 
 bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 {
-    GeometryGroup group;
+    GeometryGroup& group = scene.addGeometryGroup();
     _nbProteins = 0;
     if (!_loadConfiguration())
         return false;
@@ -62,7 +62,6 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
                 << std::endl;
     BRAYNS_INFO << "Total number of proteins          : " << _nbProteins
                 << std::endl;
-    scene.addGeometryGroup(group);
     return true;
 }
 
