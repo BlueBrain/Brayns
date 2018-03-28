@@ -352,20 +352,22 @@ inline void processLightShading(DifferentialGeometry& dg,
         if (reduce_max(radiance) > 0.f)
         {
             float cosNL = 1.f;
-            vec3f specularColor = make_vec3f(0.f);
 
             // Phong + Blinn shading
             const bool shadingEnabled =
                 attributes.self->abstract.shadingEnabled;
             if (shadingEnabled)
             {
-                cosNL = dot(lightDirection, attributes.normal);
-
                 // Specular color
+                cosNL = dot(lightDirection, attributes.normal);
                 const float cosLR =
                     dot(lightDirection, attributes.reflectedNormal);
-                specularColor = attributes.specularColor *
-                                powf(cosLR, attributes.specularExponent);
+                const vec3f specularColor =
+                    attributes.specularColor *
+                    powf(cosLR, attributes.specularExponent);
+                attributes.specularColor =
+                    (i == 0 ? specularColor
+                            : max(specularColor, attributes.specularColor));
             }
 
             // Process shadows
@@ -379,7 +381,7 @@ inline void processLightShading(DifferentialGeometry& dg,
                                            lightDirection)
                     : 1.f;
             attributes.shadingContribution =
-                attributes.shadingContribution + specularColor +
+                attributes.shadingContribution +
                 alpha * cosNL * attributes.diffuseColor;
         }
     }
@@ -421,6 +423,9 @@ inline void processFinalContribution(ShadingAttributes& attributes)
         (attributes.shadingContribution + simulationColor) * (1.f - alpha) +
         attributes.shadingContribution * simulationColor * alpha +
         indirectContribution;
+
+    // Specular contribution
+    totalContributions = totalContributions + attributes.specularColor;
 
     // Volume contribution
     vec4f dst =
@@ -529,18 +534,36 @@ inline vec3f SimulationRenderer_shadeRay(
                 color * (1.f - pathOpacity);
 
         // Prepare ray for next iteration
+        bool doRefraction = (attributes.opacity < 1.f);
+        bool doReflection = (attributes.reflection > 0.f);
+        if (doRefraction && doReflection)
+        {
+            // Switch between refraction and reflection
+            const bool refract =
+                ((sample.sampleID.x + sample.sampleID.y + sample.sampleID.z) %
+                     2 ==
+                 1);
+            doRefraction = refract;
+            doReflection = !refract;
+        }
+
         float alpha = 1.f;
-        if (attributes.opacity < 1.f)
+        if (doRefraction)
         {
             // Refraction
-            const float angle = dot(ray.dir, attributes.normal);
-            if (abs(attributes.refraction - oldlocalRefraction) < 0.001f)
-                if (angle > 0.f)
-                    attributes.refraction = 1.f;
+            vec3f correctedNormal = attributes.normal;
+            const float angle = dot(ray.dir, correctedNormal);
+            if (abs(attributes.refraction - oldlocalRefraction) < 0.001f &&
+                angle < 0.f)
+            {
+                // Exiting object, back to air (refraction index = 1)
+                attributes.refraction = 1.f;
+                correctedNormal = correctedNormal * -1.f;
+            }
 
             ray.t0 = 0.f;
             ray.dir =
-                refractedVector(ray.dir, attributes.normal, oldlocalRefraction,
+                refractedVector(ray.dir, correctedNormal, oldlocalRefraction,
                                 attributes.refraction);
             ray.org =
                 attributes.origin + self->abstract.super.epsilon * ray.dir;
@@ -549,7 +572,7 @@ inline vec3f SimulationRenderer_shadeRay(
             oldlocalRefraction = attributes.refraction;
             ++depth;
         }
-        else if (attributes.reflection > 0.f)
+        else if (doReflection)
         {
             // Reflection
             ray.t0 = 0.f;

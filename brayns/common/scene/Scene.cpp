@@ -233,7 +233,8 @@ void Scene::buildDefault()
         material.setColor(colors[i]);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
-        material.setReflectionIndex(i == 4 ? 0.8f : 0.f);
+        material.setReflectionIndex(i == 4 ? 0.2f : 0.f);
+        material.setGlossiness(i == 4 ? 0.9f : 1.f);
         material.setOpacity(1.f);
         const auto materialId = addMaterial(material);
 
@@ -251,8 +252,9 @@ void Scene::buildDefault()
     {
         // Sphere
         Material material;
-        material.setOpacity(0.3f);
-        material.setRefractionIndex(1.1f);
+        material.setOpacity(0.2f);
+        material.setRefractionIndex(1.5f);
+        material.setReflectionIndex(0.1f);
         material.setColor(WHITE);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(100.f);
