@@ -50,148 +50,149 @@ Scene::Scene(Renderers renderers, ParametersManager& parametersManager)
 
 Scene::~Scene()
 {
+    BRAYNS_FCT_ENTRY
+    reset();
 }
 
 void Scene::reset()
 {
+    BRAYNS_FCT_ENTRY
     unload();
     _renderers.clear();
 }
 
 void Scene::unload()
 {
+    BRAYNS_FCT_ENTRY
+    _materialManager->clear();
     _markGeometryDirty();
-    for (auto& geometryGroup : _geometryGroups)
-        geometryGroup.unload();
+    for (auto geometryGroup : _geometryGroups)
+        geometryGroup->unload();
+    _geometryGroups.clear();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
-    _textures.clear();
     _volumeHandler.reset();
     _initializeSystemMaterials();
 }
 
 void Scene::_initializeSystemMaterials()
 {
-    BRAYNS_INFO << "Building system materials" << std::endl;
-    _materialManager.clear();
+    BRAYNS_FCT_ENTRY
+    _materialManager->clear();
     for (size_t i = 0; i < NB_SYSTEM_MATERIALS; ++i)
     {
         Material material;
         switch (MaterialType(i))
         {
         case MaterialType::bounding_box:
-            material.setColor(Vector3f(1.f, 1.f, 1.f));
+            material.setDiffuseColor(Vector3f(1.f, 1.f, 1.f));
             material.setEmission(10.f);
             break;
         case MaterialType::invisible:
             material.setOpacity(0.f);
             material.setRefractionIndex(1.f);
-            material.setColor(Vector3f(1.f, 1.f, 1.f));
+            material.setDiffuseColor(Vector3f(1.f, 1.f, 1.f));
             material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
             break;
         default:
             break;
         }
-        _materialManager.set(i, material);
+        _materialManager->add(material);
     }
 }
 
 void Scene::_markGeometryDirty()
 {
+    BRAYNS_FCT_ENTRY
     _geometryGroupsDirty = true;
     markModified();
 }
 
 void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
 {
-    if (_geometryGroups.empty())
-        return;
+    BRAYNS_FCT_ENTRY
 
-    for (auto& group : _geometryGroups)
+    size_t materialId = 0;
+    for (auto& material : _materialManager->getMaterials())
     {
-        size_t materialId = 0;
-        for (auto& material : group.getMaterialManager().getMaterials())
-        {
-            material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
-            material.setOpacity(1.f);
-            material.setReflectionIndex(0.f);
+        material.setSpecularColor(Vector3f(0.f, 0.f, 0.f));
+        material.setOpacity(1.f);
+        material.setReflectionIndex(0.f);
 
-            switch (colorMap)
+        switch (colorMap)
+        {
+        case MaterialsColorMap::none:
+            switch (materialId)
             {
-            case MaterialsColorMap::none:
-                switch (materialId)
-                {
-                case 0: // Default
-                case 1: // Soma
-                    material.setColor(Vector3f(0.9f, 0.9f, 0.9f));
-                    break;
-                case 2: // Axon
-                    material.setColor(Vector3f(0.2f, 0.2f, 0.8f));
-                    break;
-                case 3: // Dendrite
-                    material.setColor(Vector3f(0.8f, 0.2f, 0.2f));
-                    break;
-                case 4: // Apical dendrite
-                    material.setColor(Vector3f(0.8f, 0.2f, 0.8f));
-                    break;
-                default:
-                    material.setColor(
-                        Vector3f(float(std::rand() % 255) / 255.f,
-                                 float(std::rand() % 255) / 255.f,
-                                 float(std::rand() % 255) / 255.f));
-                }
+            case 0: // Default
+            case 1: // Soma
+                material.setDiffuseColor(Vector3f(0.9f, 0.9f, 0.9f));
                 break;
-            case MaterialsColorMap::gradient:
-            {
-                const auto nbMaterials =
-                    group.getMaterialManager().getMaterials().size();
-                const float a = float(materialId) / float(nbMaterials);
-                material.setColor(Vector3f(a, 0.f, 1.f - a));
+            case 2: // Axon
+                material.setDiffuseColor(Vector3f(0.2f, 0.2f, 0.8f));
                 break;
+            case 3: // Dendrite
+                material.setDiffuseColor(Vector3f(0.8f, 0.2f, 0.2f));
+                break;
+            case 4: // Apical dendrite
+                material.setDiffuseColor(Vector3f(0.8f, 0.2f, 0.8f));
+                break;
+            default:
+                material.setDiffuseColor(
+                    Vector3f(float(std::rand() % 255) / 255.f,
+                             float(std::rand() % 255) / 255.f,
+                             float(std::rand() % 255) / 255.f));
             }
-            case MaterialsColorMap::pastel:
-                material.setColor(
-                    Vector3f(0.5f + float(std::rand() % 127) / 255.f,
-                             0.5f + float(std::rand() % 127) / 255.f,
-                             0.5f + float(std::rand() % 127) / 255.f));
-                break;
-            case MaterialsColorMap::random:
-                material.setColor(Vector3f(float(rand() % 255) / 255.f,
-                                           float(rand() % 255) / 255.f,
-                                           float(rand() % 255) / 255.f));
-                switch (rand() % 4)
-                {
-                case 0:
-                    // Transparent
-                    material.setOpacity(float(std::rand() % 100) / 100.f);
-                    material.setRefractionIndex(0.98f);
-                    material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
-                    material.setSpecularExponent(10.f);
-                case 1:
-                    // Light emmitter
-                    material.setEmission(1.f);
-                case 2:
-                    // Reflector
-                    material.setReflectionIndex(float(std::rand() % 100) /
-                                                100.f);
-                    material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
-                    material.setSpecularExponent(10.f);
-                }
-                break;
-            case MaterialsColorMap::shades_of_grey:
-                float value = float(std::rand() % 255) / 255.f;
-                material.setColor(Vector3f(value, value, value));
-                break;
-            }
-            ++materialId;
+            break;
+        case MaterialsColorMap::gradient:
+        {
+            const auto nbMaterials = _materialManager->getMaterials().size();
+            const float a = float(materialId) / float(nbMaterials);
+            material.setDiffuseColor(Vector3f(a, 0.f, 1.f - a));
+            break;
         }
+        case MaterialsColorMap::pastel:
+            material.setDiffuseColor(
+                Vector3f(0.5f + float(std::rand() % 127) / 255.f,
+                         0.5f + float(std::rand() % 127) / 255.f,
+                         0.5f + float(std::rand() % 127) / 255.f));
+            break;
+        case MaterialsColorMap::random:
+            material.setDiffuseColor(Vector3f(float(rand() % 255) / 255.f,
+                                              float(rand() % 255) / 255.f,
+                                              float(rand() % 255) / 255.f));
+            switch (rand() % 4)
+            {
+            case 0:
+                // Transparent
+                material.setOpacity(float(std::rand() % 100) / 100.f);
+                material.setRefractionIndex(0.98f);
+                material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
+                material.setSpecularExponent(10.f);
+            case 1:
+                // Light emmitter
+                material.setEmission(1.f);
+            case 2:
+                // Reflector
+                material.setReflectionIndex(float(std::rand() % 100) / 100.f);
+                material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
+                material.setSpecularExponent(10.f);
+            }
+            break;
+        case MaterialsColorMap::shades_of_grey:
+            float value = float(std::rand() % 255) / 255.f;
+            material.setDiffuseColor(Vector3f(value, value, value));
+            break;
+        }
+        ++materialId;
     }
-    commitMaterials(Action::update);
+
+    _materialManager->markModified();
 }
 
 void Scene::buildDefault()
 {
-    BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
+    BRAYNS_FCT_ENTRY
 
     _markGeometryDirty();
 
@@ -220,30 +221,28 @@ void Scene::buildDefault()
                                 {0.8f, 0.8f, 0.8f}, {0.f, 1.f, 0.f},
                                 {0.8f, 0.8f, 0.8f}, {0.8f, 0.8f, 0.8f}};
 
-    GeometryGroup& group = addGeometryGroup();
-    size_t materialId = 0;
+    auto group = addGeometryGroup();
     for (size_t i = 1; i < 6; ++i)
     {
         // Cornell box
         Material material;
-        material.setColor(colors[i]);
+        material.setDiffuseColor(colors[i]);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
         material.setReflectionIndex(i == 4 ? 0.2f : 0.f);
         material.setGlossiness(i == 4 ? 0.9f : 1.f);
         material.setOpacity(1.f);
-        group.getMaterialManager().set(materialId, material);
+        const auto materialId = _materialManager->add(material);
 
-        auto& meshes = group.getTrianglesMeshes()[materialId];
+        auto& meshes = group->getTrianglesMeshes()[materialId];
         for (size_t j = 0; j < 6; ++j)
         {
             const auto position = positions[indices[i][j]];
             meshes.vertices.push_back(position);
-            group.getBounds().merge(position);
+            group->getBounds().merge(position);
         }
         meshes.indices.push_back(Vector3ui(0, 1, 2));
         meshes.indices.push_back(Vector3ui(3, 4, 5));
-        ++materialId;
     }
 
     {
@@ -252,25 +251,23 @@ void Scene::buildDefault()
         material.setOpacity(0.2f);
         material.setRefractionIndex(1.5f);
         material.setReflectionIndex(0.1f);
-        material.setColor(WHITE);
+        material.setDiffuseColor(WHITE);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(100.f);
-        group.getMaterialManager().set(materialId, material);
-        group.addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
-        ++materialId;
+        const auto materialId = _materialManager->add(material);
+        group->addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
     }
 
     {
         // Cylinder
         Material material;
-        material.setColor({0.1f, 0.1f, 0.8f});
+        material.setDiffuseColor({0.1f, 0.1f, 0.8f});
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
-        group.getMaterialManager().set(materialId, material);
-        group.addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
-                                       {0.75f, 0.126f, 0.75f},
-                                       0.125f});
-        ++materialId;
+        const auto materialId = _materialManager->add(material);
+        group->addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
+                                        {0.75f, 0.126f, 0.75f},
+                                        0.125f});
     }
 
     {
@@ -279,27 +276,26 @@ void Scene::buildDefault()
         material.setReflectionIndex(0.8f);
         material.setSpecularColor(WHITE);
         material.setSpecularExponent(10.f);
-        group.getMaterialManager().set(materialId, material);
-        group.addCone(materialId, {{0.75f, 0.01f, 0.25f},
-                                   {0.75f, 0.5f, 0.25f},
-                                   0.15f,
-                                   0.f});
-        ++materialId;
+        const auto materialId = _materialManager->add(material);
+        group->addCone(materialId, {{0.75f, 0.01f, 0.25f},
+                                    {0.75f, 0.5f, 0.25f},
+                                    0.15f,
+                                    0.f});
     }
 
     {
         // Lamp
         Material material;
-        material.setColor(WHITE);
+        material.setDiffuseColor(WHITE);
         material.setEmission(5.f);
-        group.getMaterialManager().set(materialId, material);
+        const auto materialId = _materialManager->add(material);
         const Vector3f lampInfo = {0.15f, 0.99f, 0.15f};
         const Vector3f lampPositions[4] = {
             {0.5f - lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()},
             {0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()}};
-        auto& meshes = group.getTrianglesMeshes()[materialId];
+        auto& meshes = group->getTrianglesMeshes()[materialId];
         for (size_t i = 0; i < 4; ++i)
             meshes.vertices.push_back(lampPositions[i]);
         meshes.indices.push_back(Vector3i(2, 1, 0));
@@ -309,14 +305,16 @@ void Scene::buildDefault()
 
 void Scene::buildEnvironment()
 {
+    BRAYNS_FCT_ENTRY
+
     const auto sceneEnvironment =
         _parametersManager.getGeometryParameters().getSceneEnvironment();
     if (sceneEnvironment == SceneEnvironment::none)
         return;
 
-    GeometryGroup& group = addGeometryGroup();
+    auto group = addGeometryGroup();
     const auto sceneBounds = getBounds();
-    auto& meshes = group.getTrianglesMeshes();
+    auto& meshes = group->getTrianglesMeshes();
     switch (sceneEnvironment)
     {
     case SceneEnvironment::ground:
@@ -330,10 +328,9 @@ void Scene::buildEnvironment()
         const Vector3f c = sceneBounds.getCenter();
 
         Vector3i i;
-        const size_t materialId = 0;
         Material material;
-        material.setColor(Vector3f(1, 1, 1));
-        group.getMaterialManager().set(materialId, material);
+        material.setDiffuseColor(Vector3f(1, 1, 1));
+        const auto materialId = _materialManager->add(material);
         size_t meshIndex = meshes[materialId].indices.size();
 
         Vector3f v;
@@ -392,10 +389,9 @@ void Scene::buildEnvironment()
         const Vector3f s(S, sceneBounds.getSize().z(), S);
         const Vector3f c = sceneBounds.getCenter();
 
-        const size_t materialId = 0;
         Material material;
-        material.setColor(Vector3f(1, 1, 1));
-        group.getMaterialManager().set(materialId, material);
+        material.setDiffuseColor(Vector3f(1, 1, 1));
+        const auto materialId = _materialManager->add(material);
 
         Vector3f v;
         Vector3i i;
@@ -438,10 +434,9 @@ void Scene::buildEnvironment()
     }
     case SceneEnvironment::bounding_box:
     {
-        const size_t materialId = 0;
         Material material;
-        material.setColor(Vector3f(1, 1, 1));
-        group.getMaterialManager().set(materialId, material);
+        material.setDiffuseColor(Vector3f(1, 1, 1));
+        const auto materialId = _materialManager->add(material);
         const Vector3f s = sceneBounds.getSize() / 2.f;
         const Vector3f c = sceneBounds.getCenter();
         const float radius = s.length() / 500.f;
@@ -457,22 +452,22 @@ void Scene::buildEnvironment()
         };
 
         for (size_t i = 0; i < 8; ++i)
-            group.addSphere(materialId, Sphere(positions[i], radius));
+            group->addSphere(materialId, Sphere(positions[i], radius));
 
-        group.addCylinder(materialId, {positions[0], positions[1], radius});
-        group.addCylinder(materialId, {positions[2], positions[3], radius});
-        group.addCylinder(materialId, {positions[4], positions[5], radius});
-        group.addCylinder(materialId, {positions[6], positions[7], radius});
+        group->addCylinder(materialId, {positions[0], positions[1], radius});
+        group->addCylinder(materialId, {positions[2], positions[3], radius});
+        group->addCylinder(materialId, {positions[4], positions[5], radius});
+        group->addCylinder(materialId, {positions[6], positions[7], radius});
 
-        group.addCylinder(materialId, {positions[0], positions[2], radius});
-        group.addCylinder(materialId, {positions[1], positions[3], radius});
-        group.addCylinder(materialId, {positions[4], positions[6], radius});
-        group.addCylinder(materialId, {positions[5], positions[7], radius});
+        group->addCylinder(materialId, {positions[0], positions[2], radius});
+        group->addCylinder(materialId, {positions[1], positions[3], radius});
+        group->addCylinder(materialId, {positions[4], positions[6], radius});
+        group->addCylinder(materialId, {positions[5], positions[7], radius});
 
-        group.addCylinder(materialId, {positions[0], positions[4], radius});
-        group.addCylinder(materialId, {positions[1], positions[5], radius});
-        group.addCylinder(materialId, {positions[2], positions[6], radius});
-        group.addCylinder(materialId, {positions[3], positions[7], radius});
+        group->addCylinder(materialId, {positions[0], positions[4], radius});
+        group->addCylinder(materialId, {positions[1], positions[5], radius});
+        group->addCylinder(materialId, {positions[2], positions[6], radius});
+        group->addCylinder(materialId, {positions[3], positions[7], radius});
 
         break;
     }
@@ -483,12 +478,14 @@ void Scene::buildEnvironment()
 
 void Scene::addLight(LightPtr light)
 {
+    BRAYNS_FCT_ENTRY
     removeLight(light);
     _lights.push_back(light);
 }
 
 void Scene::removeLight(LightPtr light)
 {
+    BRAYNS_FCT_ENTRY
     Lights::iterator it = std::find(_lights.begin(), _lights.end(), light);
     if (it != _lights.end())
         _lights.erase(it);
@@ -496,6 +493,7 @@ void Scene::removeLight(LightPtr light)
 
 LightPtr Scene::getLight(const size_t index)
 {
+    BRAYNS_FCT_ENTRY
     if (index < _lights.size())
         return _lights[index];
     return 0;
@@ -503,10 +501,13 @@ LightPtr Scene::getLight(const size_t index)
 
 void Scene::clearLights()
 {
+    BRAYNS_FCT_ENTRY
     _lights.clear();
 }
+
 void Scene::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
+    BRAYNS_FCT_ENTRY
     auto& ap = _parametersManager.getAnimationParameters();
     _simulationHandler = handler;
     if (_simulationHandler)
@@ -527,6 +528,7 @@ AbstractSimulationHandlerPtr Scene::getSimulationHandler() const
 void Scene::setCADiffusionSimulationHandler(
     CADiffusionSimulationHandlerPtr handler)
 {
+    BRAYNS_FCT_ENTRY
     _caDiffusionSimulationHandler = handler;
     if (_caDiffusionSimulationHandler)
         _parametersManager.getAnimationParameters().setEnd(
@@ -537,6 +539,7 @@ void Scene::setCADiffusionSimulationHandler(
 
 CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
 {
+    BRAYNS_FCT_ENTRY
     return _caDiffusionSimulationHandler;
 }
 
@@ -616,14 +619,16 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 
 bool Scene::empty() const
 {
+    BRAYNS_FCT_ENTRY
     bool empty = true;
-    for (const auto& geometryGroup : _geometryGroups)
-        empty = empty && geometryGroup.empty();
+    for (const auto& group : _geometryGroups)
+        empty = empty && group->empty();
     return empty;
 }
 
 void Scene::_processVolumeAABBGeometry()
 {
+    BRAYNS_FCT_ENTRY
     VolumeHandlerPtr volumeHandler = getVolumeHandler();
     if (!volumeHandler)
         return;
@@ -654,9 +659,9 @@ void Scene::_processVolumeAABBGeometry()
     const Vector3f& volumeOffset = volumeHandler->getOffset();
     const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
 
-    GeometryGroup& group = addGeometryGroup();
+    auto group = addGeometryGroup();
     const size_t materialId = static_cast<size_t>(MaterialType::invisible);
-    auto& meshes = group.getTrianglesMeshes()[materialId];
+    auto& meshes = group->getTrianglesMeshes()[materialId];
     uint64_t offset = meshes.vertices.size();
     for (size_t face = 0; face < 6; ++face)
     {
@@ -668,20 +673,21 @@ void Scene::_processVolumeAABBGeometry()
                                       volumeOffset;
 
             meshes.vertices.push_back(position);
-            group.getBounds().merge(position);
+            group->getBounds().merge(position);
         }
         const size_t index = offset + face * 6;
         meshes.indices.push_back(Vector3ui(index + 0, index + 1, index + 2));
         meshes.indices.push_back(Vector3ui(index + 3, index + 4, index + 5));
     }
 
-    group.getBounds().merge(Vector3f(0.f, 0.f, 0.f));
-    group.getBounds().merge(volumeOffset +
-                            Vector3f(volumeDimensions) * volumeElementSpacing);
+    group->getBounds().merge(Vector3f(0.f, 0.f, 0.f));
+    group->getBounds().merge(volumeOffset +
+                             Vector3f(volumeDimensions) * volumeElementSpacing);
 }
 
 void Scene::saveToCacheFile()
 {
+    BRAYNS_FCT_ENTRY
     const auto& filename =
         _parametersManager.getGeometryParameters().getSaveCacheFile();
     BRAYNS_INFO << "Saving scene to binary file: " << filename << std::endl;
@@ -699,18 +705,17 @@ void Scene::saveToCacheFile()
     // Save geometry
     size_t nbElements = _geometryGroups.size();
     file.write((char*)&nbElements, sizeof(size_t));
-    for (auto& group : _geometryGroups)
+    for (auto group : _geometryGroups)
     {
-        const size_t nbMaterials =
-            group.getMaterialManager().getMaterials().size();
+        const size_t nbMaterials = _materialManager->getMaterials().size();
         file.write((char*)&nbMaterials, sizeof(size_t));
         BRAYNS_INFO << nbMaterials << " materials" << std::endl;
 
         // Save materials
-        for (auto& material : group.getMaterialManager().getMaterials())
+        for (auto& material : _materialManager->getMaterials())
         {
             Vector3f value3f;
-            value3f = material.getColor();
+            value3f = material.getDiffuseColor();
             file.write((char*)&value3f, sizeof(Vector3f));
             value3f = material.getSpecularColor();
             file.write((char*)&value3f, sizeof(Vector3f));
@@ -736,7 +741,7 @@ void Scene::saveToCacheFile()
             uint64_t bufferSize{0};
 
             // Spheres
-            auto& spheres = group.getSpheres();
+            auto& spheres = group->getSpheres();
             if (spheres.find(materialId) != spheres.end())
             {
                 auto& data = spheres[materialId];
@@ -754,7 +759,7 @@ void Scene::saveToCacheFile()
             }
 
             // Cylinders
-            auto& cylinders = group.getCylinders();
+            auto& cylinders = group->getCylinders();
             if (cylinders.find(materialId) != cylinders.end())
             {
                 auto& data = cylinders[materialId];
@@ -772,7 +777,7 @@ void Scene::saveToCacheFile()
             }
 
             // Cones
-            auto& cones = group.getCones();
+            auto& cones = group->getCones();
             if (cones.find(materialId) != cones.end())
             {
                 auto& data = cones[materialId];
@@ -789,7 +794,7 @@ void Scene::saveToCacheFile()
                 file.write((char*)&nbElements, sizeof(size_t));
             }
 
-            auto& meshes = group.getTrianglesMeshes();
+            auto& meshes = group->getTrianglesMeshes();
             if (meshes.find(materialId) != meshes.end())
             {
                 auto& data = meshes[materialId];
@@ -831,7 +836,7 @@ void Scene::saveToCacheFile()
             }
             else
             {
-                nbElements = 0;
+                BRAYNS_FCT_ENTRY nbElements = 0;
                 file.write((char*)&nbElements, sizeof(size_t)); // No vertices
                 file.write((char*)&nbElements, sizeof(size_t)); // No indices
                 file.write((char*)&nbElements, sizeof(size_t)); // No normals
@@ -841,7 +846,7 @@ void Scene::saveToCacheFile()
         }
 
         // Bounds
-        const auto bounds = group.getBounds();
+        const auto& bounds = group->getBounds();
         file.write((char*)&bounds, sizeof(Boxf));
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
@@ -853,6 +858,8 @@ void Scene::saveToCacheFile()
 
 void Scene::loadFromCacheFile()
 {
+    BRAYNS_FCT_ENTRY
+
     const auto& geomParams = _parametersManager.getGeometryParameters();
     const auto& filename = geomParams.getLoadCacheFile();
     BRAYNS_INFO << "Loading scene from binary file: " << filename << std::endl;
@@ -892,15 +899,15 @@ void Scene::loadFromCacheFile()
     file.read((char*)&nbGeometryGroups, sizeof(size_t));
     for (size_t groupId = 0; groupId < nbGeometryGroups; ++groupId)
     {
-        GeometryGroup group;
+        auto group = addGeometryGroup();
         // Materials
-        group.getMaterialManager().clear();
+        _materialManager->clear();
         for (size_t i = 0; i < nbMaterials; ++i)
         {
-            auto& material = group.getMaterialManager().get(i);
+            auto& material = _materialManager->get(i);
             Vector3f value3f;
             file.read((char*)&value3f, sizeof(Vector3f));
-            material.setColor(value3f);
+            material.setDiffuseColor(value3f);
             file.read((char*)&value3f, sizeof(Vector3f));
             material.setSpecularColor(value3f);
             float value;
@@ -933,7 +940,7 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbSpheres * sizeof(Sphere);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbSpheres
                              << " spheres" << std::endl;
-                auto& spheres = group.getSpheres()[materialId];
+                auto& spheres = group->getSpheres()[materialId];
                 spheres.resize(nbSpheres);
                 file.read((char*)spheres.data(), bufferSize);
             }
@@ -945,7 +952,7 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbCylinders * sizeof(Cylinder);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbCylinders
                              << " cylinders" << std::endl;
-                auto& cylinders = group.getCylinders()[materialId];
+                auto& cylinders = group->getCylinders()[materialId];
                 cylinders.resize(nbCylinders);
                 file.read((char*)cylinders.data(), bufferSize);
             }
@@ -957,13 +964,13 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbCones * sizeof(Cone);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbCones << " cones"
                              << std::endl;
-                auto& cones = group.getCones()[materialId];
+                auto& cones = group->getCones()[materialId];
                 cones.resize(nbCones);
                 file.read((char*)cones.data(), bufferSize);
             }
 
             // Meshes
-            auto& meshes = group.getTrianglesMeshes()[materialId];
+            auto& meshes = group->getTrianglesMeshes()[materialId];
             // Vertices
             file.read((char*)&nbVertices, sizeof(size_t));
             if (nbVertices != 0)
@@ -1019,7 +1026,7 @@ void Scene::loadFromCacheFile()
         // Bounds
         Boxf bounds;
         file.read((char*)&bounds, sizeof(Boxf));
-        group.getBounds().merge(bounds);
+        group->getBounds().merge(bounds);
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
     file.close();
@@ -1027,27 +1034,16 @@ void Scene::loadFromCacheFile()
     BRAYNS_INFO << "Scene successfully loaded" << std::endl;
 }
 
-GeometryGroup& Scene::addGeometryGroup()
-{
-    _geometryGroups.push_back(GeometryGroup());
-    return _geometryGroups[_geometryGroups.size() - 1];
-}
-
 Boxf Scene::getBounds()
 {
+    BRAYNS_FCT_ENTRY
     Boxf bounds;
-    for (auto& group : _geometryGroups)
-        bounds.merge(group.getBounds());
+    for (size_t i = 0; i < _geometryGroups.size(); ++i)
+    {
+        const auto& groupAttributes = _geometryGroupAttributes[i];
+        if (groupAttributes.enabled)
+            bounds.merge(_geometryGroups[i]->getBounds());
+    }
     return bounds;
-}
-
-uint64_t Scene::_getNbMaterials()
-{
-    // Scene materials
-    uint64_t nbMaterials = _materialManager.getMaterials().size();
-    // Geometry materials
-    for (auto& group : _geometryGroups)
-        nbMaterials += group.getMaterialManager().getMaterials().size();
-    return nbMaterials;
 }
 }

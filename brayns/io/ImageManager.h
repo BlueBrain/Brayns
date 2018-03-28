@@ -50,12 +50,11 @@ public:
     /**
      * @brief Import a Texture from file
      * @param textures A map of textures handled internally by Brayns
-     * @param textureType Type of texture: Diffuse, Normal, etc
+     * @param id of the texture
      * @param filename Full name of the texture file
      * @return True is import was successful, false otherwise
      */
-    static bool importTextureFromFile(TexturesMap& textures,
-                                      const TextureType textureType,
+    static bool importTextureFromFile(TexturesMap& textures, const size_t id,
                                       const std::string& filename);
 };
 }

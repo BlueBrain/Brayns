@@ -37,11 +37,15 @@ namespace brayns
 class GeometryGroup : public BaseObject
 {
 public:
-    GeometryGroup();
+    BRAYNS_API GeometryGroup();
+    BRAYNS_API GeometryGroup(MaterialManagerPtr materialManager);
+    BRAYNS_API GeometryGroup(const GeometryGroup& rhs);
+    BRAYNS_API GeometryGroup& operator=(const GeometryGroup& rhs);
+
     BRAYNS_API virtual ~GeometryGroup();
 
     /** Unloads geometry, materials, lights, models, etc. to free memory. */
-    BRAYNS_API void unload();
+    BRAYNS_API virtual void unload();
 
     /**
         Return true if the geometry group does not contain any geometry. False
@@ -50,17 +54,14 @@ public:
     BRAYNS_API bool empty() const;
 
     /**
-        Sets enability of the geometry group. If disabled, the group is not
-       rendered
-      */
-    BRAYNS_API bool enabled() { return _enabled; }
-    BRAYNS_API void enable() { _enabled = true; }
-    BRAYNS_API void disable() { _enabled = false; }
-    BRAYNS_API bool dirty();
+        Return true if the geometry group is dirty, false otherwize
+    */
+    BRAYNS_API bool dirty() const;
+
     /**
         Returns the bounding box for the whole scene
     */
-    Boxf& getBounds() { return _bounds; }
+    Boxf& getBounds();
     /**
         Returns spheres handled by the geometry group
     */
@@ -79,7 +80,10 @@ public:
      * @brief Sets spheres as dirty, meaning that they need to be serialized
      *        and sent to the rendering engine
      */
-    BRAYNS_API void setSpheresDirty(const bool value) { _spheresDirty = value; }
+    BRAYNS_API void setSpheresDirty(const bool value)
+    {
+        _updateValue(_spheresDirty, value);
+    }
     BRAYNS_API bool spheresDirty() { return _spheresDirty; }
     /**
         Returns cylinders handled by the scene
@@ -120,7 +124,7 @@ public:
      */
     BRAYNS_API void setCylindersDirty(const bool value)
     {
-        _cylindersDirty = value;
+        _updateValue(_cylindersDirty, value);
     }
     BRAYNS_API bool cylindersDirty() { return _cylindersDirty; }
     /**
@@ -147,7 +151,10 @@ public:
      * @brief Sets cones as dirty, meaning that they need to be serialized
      *        and sent to the rendering engine
      */
-    BRAYNS_API void setConesDirty(const bool value) { _conesDirty = value; }
+    BRAYNS_API void setConesDirty(const bool value)
+    {
+        _updateValue(_conesDirty, value);
+    }
     BRAYNS_API bool conesDirty() { return _conesDirty; }
     /**
         Returns triangle meshes handled by the geometry group
@@ -165,12 +172,10 @@ public:
         _trianglesMeshesDirty = value;
     }
     BRAYNS_API bool trianglesMeshesDirty() { return _trianglesMeshesDirty; }
-    /**
-     * @return The material manager used by the geometry group
-     */
-    MaterialManager& getMaterialManager() { return _materialManager; }
-private:
-    MaterialManager _materialManager;
+    BRAYNS_API void logInformation();
+
+protected:
+    MaterialManagerPtr _materialManager;
     SpheresMap _spheres;
     bool _spheresDirty{true};
     CylindersMap _cylinders;
@@ -180,7 +185,6 @@ private:
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
     Boxf _bounds;
-    bool _enabled{true};
 
     SERIALIZATION_FRIEND(GeometryGroup)
 };

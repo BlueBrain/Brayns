@@ -67,7 +67,8 @@ public:
     bool import(Scene& scene, MeshLoader& meshLoader);
 
 private:
-    bool _createScene(GeometryGroup& group, MeshLoader& meshLoader);
+    bool _createScene(GeometryGroup& group, MeshLoader& meshLoader,
+                      MaterialManager& materialManager);
     bool _loadConfiguration();
     bool _loadProteins();
     bool _loadPositions();

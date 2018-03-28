@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,28 +18,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef BRAYNS_LOG_H
-#define BRAYNS_LOG_H
+#ifndef OSPRAYMATERIALMANAGER_H
+#define OSPRAYMATERIALMANAGER_H
 
-#include <iostream>
-#define BRAYNS_ERROR std::cerr << "[ERROR] "
-#define BRAYNS_WARN std::cerr << "[WARN ] "
-#define BRAYNS_INFO std::cout << "[INFO ] "
-#ifdef NDEBUG
-#define BRAYNS_DEBUG \
-    if (false)       \
-    std::cout
-#define BRAYNS_FCT_ENTRY
-#else
-#define BRAYNS_DEBUG std::cout << "[DEBUG] "
-#define BRAYNS_FCT_ENTRY \
-    std::cout << "[ENTRY] " << __FILE__ << ": " << __FUNCTION__ << std::endl;
-#endif
+#include <brayns/common/material/MaterialManager.h>
+#include <ospray_cpp/Data.h>
 
-#define BRAYNS_THROW(exc)                        \
-    {                                            \
-        BRAYNS_ERROR << exc.what() << std::endl; \
-        throw exc;                               \
-    }
+namespace brayns
+{
+class OSPRayMaterialManager : public MaterialManager
+{
+public:
+    OSPRayMaterialManager(const uint32_t flags);
 
-#endif
+    void commit() final;
+    OSPMaterial getOSPMaterial(const size_t index);
+    OSPData getData() { return _ospMaterialData; }
+private:
+    void _commitMaterial(OSPMaterial ospMaterial, Material& material);
+    OSPTexture2D _createTexture2D(const size_t id);
+    std::vector<OSPMaterial> _ospMaterials;
+    OSPData _ospMaterialData{nullptr};
+    std::map<size_t, OSPTexture2D> _ospTextures;
+    size_t _memoryManagementFlags{OSP_DATA_SHARED_BUFFER};
+};
+}
+
+#endif // OSPRAYMATERIALMANAGER_H

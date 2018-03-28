@@ -22,52 +22,71 @@
 #define MATERIALMANAGER_H
 
 #include <brayns/api.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/common/types.h>
+
+SERIALIZATION_ACCESS(MaterialManager)
 
 namespace brayns
 {
-class MaterialManager
+class MaterialManager : public BaseObject
 {
 public:
     MaterialManager();
     BRAYNS_API virtual ~MaterialManager();
 
+    /**
+     * Called after material-related changes have been made
+     */
+    BRAYNS_API virtual void commit() = 0;
+
     BRAYNS_API void clear();
 
     /**
-        Set the material object for a given index.
-        @param index Index of material
+        Adds a material object
         @param material Material object
+        @return Index of the new material
     */
-    BRAYNS_API void set(const size_t index, const Material& material);
+    BRAYNS_API size_t add(const Material& material);
 
     /**
-        Set a default material object for a given index, if the material does
-       not already exists
-        @param index Index of material
+        Replaces a material object
+        @param material Material object
+        @return Index of the material
     */
-    BRAYNS_API void set(const size_t index);
+    BRAYNS_API void set(const size_t index, Material material);
+
+    /**
+        Removes a material object at a given index
+        @param index Index of material to remove
+    */
+    BRAYNS_API void remove(const size_t index);
     /**
         Returns the material object for a given index
         @param index Index of material
         @return Reference to material object
     */
-    BRAYNS_API Material& get(size_t index);
+    BRAYNS_API Material& get(const size_t index);
 
+    /**
+        Checks the existence of a material. Raises an exception if the material
+       is not registered
+        @param index Index of material
+    */
+    BRAYNS_API void check(const size_t index);
     /**
         @return All materials
     */
     BRAYNS_API Materials& getMaterials() { return _materials; }
-    /**
-        Returns the position of the material in the internal vector
-        @param index Index of material
-        @return Position of the material in the internal vector
-    */
-    BRAYNS_API size_t position(const size_t materialId);
+    BRAYNS_API size_t size() { return _materials.size(); }
+    BRAYNS_API size_t addTexture(const std::string& filename);
+    BRAYNS_API void removeTexture(const size_t id);
 
-private:
+protected:
     Materials _materials;
-    std::map<size_t, size_t> _materialMapping;
+    TexturesMap _textures;
+
+    SERIALIZATION_FRIEND(MaterialManager)
 };
 }
 

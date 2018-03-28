@@ -230,6 +230,7 @@ inline void init(brayns::Boxf* b, ObjectHandler* h)
 
 inline void init(brayns::Material* m, ObjectHandler* h)
 {
+    h->add_property("id", &m->_id, Flags::Optional);
     h->add_property("diffuse_color", Vector3fArray(m->_color), Flags::Optional);
     h->add_property("specular_color", Vector3fArray(m->_specularColor),
                     Flags::Optional);
@@ -245,18 +246,23 @@ inline void init(brayns::Material* m, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::GeometryGroup* g, ObjectHandler* h)
+inline void init(brayns::GroupAttributes* g, ObjectHandler* h)
 {
-    h->add_property("enabled", &g->_enabled, Flags::Optional);
-    h->add_property("materials", &g->getMaterialManager().getMaterials());
+    h->add_property("enabled", &g->enabled, Flags::Optional);
 }
 
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
     brayns::Boxf bounds{s->getBounds()};
     h->add_property("bounds", &bounds, Flags::IgnoreRead | Flags::Optional);
-    h->add_property("materials", &s->getMaterialManager().getMaterials());
-    h->add_property("geometry_groups", &s->getGeometryGroups());
+    h->add_property("geometry_groups", &s->getGeometryGroupAttributes());
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::MaterialManager* m, ObjectHandler* h)
+{
+    h->add_property("materials", &m->getMaterials(),
+                    Flags::IgnoreRead | Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

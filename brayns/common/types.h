@@ -105,7 +105,15 @@ class FrameBuffer;
 typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
 
 class GeometryGroup;
-typedef std::vector<GeometryGroup> GeometryGroups;
+typedef std::shared_ptr<GeometryGroup> GeometryGroupPtr;
+typedef std::vector<GeometryGroupPtr> GeometryGroups;
+
+struct GroupAttributes
+{
+    bool enabled;
+    Matrix4f transformation;
+};
+typedef std::vector<GroupAttributes> GeometryGroupAttributes;
 
 struct Sphere;
 typedef std::vector<Sphere> Spheres;
@@ -130,7 +138,7 @@ typedef std::vector<Material> Materials;
 
 class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;
-typedef std::map<std::string, Texture2DPtr> TexturesMap;
+typedef std::map<size_t, Texture2DPtr> TexturesMap;
 
 class Light;
 typedef std::shared_ptr<Light> LightPtr;
@@ -322,13 +330,6 @@ enum class MaterialsColorMap
     shades_of_grey, // 255 shades of grey
     gradient,       // Gradient from red to yellow
     pastel          // Random pastel colors
-};
-
-/** Generic action that can be performed on a scene object */
-enum class Action
-{
-    create,
-    update
 };
 
 enum class ShadingType

@@ -49,10 +49,11 @@ void MeshLoader::clear()
 #if (BRAYNS_USE_ASSIMP)
 bool MeshLoader::importMeshFromFile(const std::string& filename,
                                     GeometryGroup& group,
+                                    MaterialManager& materialManager,
                                     const Matrix4f& transformation,
                                     const size_t defaultMaterial)
 {
-    _materialOffset = group.getMaterialManager().getMaterials().size();
+    _materialOffset = materialManager.getMaterials().size();
     const boost::filesystem::path file = filename;
     Assimp::Importer importer;
     if (!importer.IsExtensionSupported(file.extension().c_str()))
@@ -102,7 +103,6 @@ bool MeshLoader::importMeshFromFile(const std::string& filename,
 
     boost::filesystem::path filepath = filename;
 
-    auto& materialManager = group.getMaterialManager();
     if (defaultMaterial == NO_MATERIAL)
         _createMaterials(materialManager, aiScene,
                          filepath.parent_path().string());
@@ -186,10 +186,11 @@ bool MeshLoader::importMeshFromFile(const std::string& filename,
 }
 
 bool MeshLoader::exportMeshToFile(const std::string& filename,
-                                  GeometryGroup& group) const
+                                  GeometryGroup& group,
+                                  MaterialManager& materialManager) const
 {
     // Save to OBJ
-    size_t nbMaterials = group.getMaterialManager().getMaterials().size();
+    size_t nbMaterials = materialManager.getMaterials().size();
     aiScene aiScene;
     aiScene.mMaterials = new aiMaterial*[nbMaterials];
     aiScene.mNumMaterials = nbMaterials;
@@ -265,9 +266,9 @@ void MeshLoader::_createMaterials(MaterialManager& materialManager,
                  << std::endl;
     for (size_t m = 0; m < aiScene->mNumMaterials; ++m)
     {
-        const size_t materialId = _getMaterialId(m);
+        //        const size_t materialId = _getMaterialId(m);
         aiMaterial* aimaterial = aiScene->mMaterials[m];
-        auto& material = materialManager.get(materialId);
+        Material material;
 
         struct TextureTypeMapping
         {
@@ -297,11 +298,11 @@ void MeshLoader::_createMaterials(MaterialManager& materialManager,
                         nullptr) == AI_SUCCESS)
                 {
                     const std::string filename = folder + "/" + path.data;
-                    BRAYNS_DEBUG << "Loading texture [" << materialId
-                                 << "] :" << filename << std::endl;
-                    material
-                        .getTextures()[textureTypeMapping[textureType].type] =
-                        filename;
+                    BRAYNS_DEBUG << "Loading texture: " << filename
+                                 << std::endl;
+                    auto textureId = materialManager.addTexture(filename);
+                    material.setTexture(textureTypeMapping[textureType].type,
+                                        textureId);
                 }
             }
         }
@@ -309,7 +310,7 @@ void MeshLoader::_createMaterials(MaterialManager& materialManager,
         aiColor3D value3f(0.f, 0.f, 0.f);
         float value1f;
         aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value3f);
-        material.setColor(Vector3f(value3f.r, value3f.g, value3f.b));
+        material.setDiffuseColor(Vector3f(value3f.r, value3f.g, value3f.b));
 
         value1f = 0.f;
         aimaterial->Get(AI_MATKEY_REFLECTIVITY, value1f);
@@ -335,6 +336,7 @@ void MeshLoader::_createMaterials(MaterialManager& materialManager,
         aimaterial->Get(AI_MATKEY_REFRACTI, value1f);
         material.setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f
                                                                 : value1f);
+        materialManager.add(material);
     }
 }
 

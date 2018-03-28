@@ -59,6 +59,7 @@ const std::string ENDPOINT_PROGRESS = "progress";
 const std::string ENDPOINT_RENDERING_PARAMS = "rendering-parameters";
 const std::string ENDPOINT_SCENE = "scene";
 const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
+const std::string ENDPOINT_MATERIAL_MANAGER = "material-manager";
 const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
 const std::string ENDPOINT_STATISTICS = "statistics";
 const std::string ENDPOINT_STREAM = "stream";
@@ -406,6 +407,13 @@ public:
         _handleGET(ENDPOINT_SCENE, _engine->getScene());
         _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
                    [](Scene& scene) { scene.commit(); });
+
+        _handleGET(ENDPOINT_MATERIAL_MANAGER,
+                   _engine->getScene().getMaterialManager());
+        _handlePUT(ENDPOINT_MATERIAL_MANAGER,
+                   _engine->getScene().getMaterialManager(),
+                   [](MaterialManager& manager) { manager.commit(); });
+
         _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
 
         _handleFrameBuffer();
@@ -649,6 +657,15 @@ public:
                 }
             },
             [this] { _engine->cancelSnapshot(); });
+    }
+
+    std::future<rockets::http::Response> _handleMaterial(
+        const rockets::http::Request& request)
+    {
+        using namespace rockets::http;
+        BRAYNS_INFO << "Material: " << request.body << std::endl;
+
+        return make_ready_response(Code::OK, "", JSON_TYPE);
     }
 
     std::future<rockets::http::Response> _handleCircuitConfigBuilder(

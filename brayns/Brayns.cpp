@@ -491,9 +491,10 @@ private:
         if (!environmentMap.empty())
         {
             const size_t materialId = static_cast<size_t>(MaterialType::skybox);
-            auto& material =
-                scene.getMaterialManager().getMaterials()[materialId];
-            material.setTexture(TT_DIFFUSE, environmentMap);
+            auto textureId =
+                scene.getMaterialManager().addTexture(environmentMap);
+            auto& material = scene.getMaterialManager().get(materialId);
+            material.setTexture(TT_DIFFUSE, textureId);
             material.setType(MaterialType::skybox);
         }
 
@@ -600,7 +601,8 @@ private:
         // Load PDB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup& group = scene.addGeometryGroup();
+        auto& materialManager = scene.getMaterialManager();
+        auto group = scene.addGeometryGroup();
         std::string pdbFile = filename;
         if (pdbFile == "")
         {
@@ -608,7 +610,8 @@ private:
             BRAYNS_INFO << "Loading PDB file " << pdbFile << std::endl;
         }
         ProteinLoader proteinLoader(geometryParameters);
-        if (!proteinLoader.importPDBFile(pdbFile, Vector3f(0, 0, 0), 0, group))
+        if (!proteinLoader.importPDBFile(pdbFile, {0, 0, 0}, 0, *group,
+                                         materialManager))
             BRAYNS_ERROR << "Failed to import " << pdbFile << std::endl;
     }
 
@@ -620,13 +623,13 @@ private:
         // Load XYZB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup& group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup();
         BRAYNS_INFO << "Loading XYZB file " << geometryParameters.getXYZBFile()
                     << std::endl;
         XYZBLoader xyzbLoader(geometryParameters);
         xyzbLoader.setProgressCallback(progressUpdate);
         if (!xyzbLoader.importFromBinaryFile(geometryParameters.getXYZBFile(),
-                                             group))
+                                             *group))
             BRAYNS_ERROR << "Failed to import "
                          << geometryParameters.getXYZBFile() << std::endl;
     }
@@ -648,7 +651,7 @@ private:
         if (files.empty())
             return;
 
-        GeometryGroup& group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup();
         size_t i = 0;
         std::stringstream msg;
         msg << "Loading " << files.size() << " meshes from " << folder;
@@ -659,8 +662,9 @@ private:
                     ? NB_SYSTEM_MATERIALS + i
                     : NO_MATERIAL;
 
-            if (!_meshLoader.importMeshFromFile(file, group, Matrix4f(),
-                                                material))
+            if (!_meshLoader.importMeshFromFile(file, *group,
+                                                scene.getMaterialManager(),
+                                                Matrix4f(), material))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++i;
             progressUpdate(msg.str(), float(i) / files.size());
@@ -675,15 +679,16 @@ private:
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup& group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup();
 
         const auto material =
             geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
                 ? NB_SYSTEM_MATERIALS
                 : NO_MATERIAL;
 
-        if (!_meshLoader.importMeshFromFile(filename, group, Matrix4f(),
-                                            material))
+        if (!_meshLoader.importMeshFromFile(filename, *group,
+                                            scene.getMaterialManager(),
+                                            Matrix4f(), material))
             BRAYNS_ERROR << "Failed to import " << filename << std::endl;
     }
 
@@ -782,12 +787,12 @@ private:
             _parametersManager.getApplicationParameters();
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        GeometryGroup& group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup();
 
         const auto& folder = geometryParameters.getMorphologyFolder();
-        MorphologyLoader morphologyLoader(
-            applicationParameters, geometryParameters,
-            group.getMaterialManager().getMaterials().size());
+        MorphologyLoader morphologyLoader(applicationParameters,
+                                          geometryParameters,
+                                          scene.getMaterialManager().size());
 
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
@@ -796,7 +801,7 @@ private:
         {
             servus::URI uri(file);
             if (!morphologyLoader.importMorphology(uri, morphologyIndex,
-                                                   NO_MATERIAL, group))
+                                                   NO_MATERIAL, *group))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++morphologyIndex;
             progressUpdate("Loading morphologies from " + folder,

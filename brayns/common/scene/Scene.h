@@ -68,11 +68,6 @@ public:
     BRAYNS_API virtual void buildGeometry() = 0;
 
     /**
-        Serializes scene geometry into rendering engine specific data structures
-    */
-    BRAYNS_API virtual void serializeGeometry() = 0;
-
-    /**
         Commit lights to renderers
     */
     BRAYNS_API virtual void commitLights() = 0;
@@ -93,10 +88,10 @@ public:
     BRAYNS_API virtual void commitTransferFunctionData() = 0;
 
     /**
-        Returns the bounding box for the whole scene
+        Returns the bounding box of the scene
     */
     Boxf getBounds();
-    /**
+    /**getGeometryGroups
         Build an environment in addition to the loaded data, and according to
         the geometry parameters (command line parameter --scene-environment).
     */
@@ -128,19 +123,13 @@ public:
     /**
         Adds a geometry group to the scene
       */
-    BRAYNS_API GeometryGroup& addGeometryGroup();
+    BRAYNS_API virtual GeometryGroupPtr addGeometryGroup() = 0;
 
-    /**commitMaterials
+    /**
         Removes a geometry group from the scene
         @param index Index of the geometry group
       */
-    BRAYNS_API void removeGeometryGroup(const size_t index);
-
-    /**
-        Returns the geometry group for the specified index
-        @param index Index of the geometry group
-      */
-    BRAYNS_API GeometryGroup& getGeometryGroup(const size_t index);
+    BRAYNS_API virtual void removeGeometryGroup(const size_t index) = 0;
 
     /**
         @return geometry groups
@@ -162,10 +151,6 @@ public:
         return _parametersManager;
     }
 
-    /**
-        Returns textures handled by the scene
-    */
-    BRAYNS_API TexturesMap& getTextures() { return _textures; }
     /**
         Returns the simulutation handler
     */
@@ -190,8 +175,7 @@ public:
     /**
         Gets the Calcium diffusion simulation handler
     */
-    CADiffusionSimucommitMaterialslationHandlerPtr
-        getCADiffusionSimulationHandler() const;
+    CADiffusionSimulationHandlerPtr getCADiffusionSimulationHandler() const;
 
     /**
         Build a color map from a file, according to the colormap-file scene
@@ -217,7 +201,7 @@ public:
          - Number of cylinders
          - Cylinders
          - Number of cones
-         - Cones
+         -Texture2DPtr Cones
          - Number of vertices
          - Vertices
          - Number of indices
@@ -226,7 +210,7 @@ public:
          - Normals
          - Number of texture coordinates
          - Texture coordinates
-       - Scene bounds
+       - STexture2DPtrcene bounds
     */
     BRAYNS_API void loadFromCacheFile();
 
@@ -251,17 +235,15 @@ public:
 
     /**
         Commit materials to renderers
-        @param action Defines if materials should be created or updated
     */
-    BRAYNS_API virtual void commitMaterials(
-        const Action action = Action::create) = 0;
+    BRAYNS_API virtual void commitMaterials() = 0;
 
     /**
         Returns material manager of the scene
     */
     BRAYNS_API MaterialManager& getMaterialManager()
     {
-        return _materialManager;
+        return *_materialManager;
     }
     /**
         Sets the materials handled by the scene, and available to the
@@ -275,10 +257,14 @@ public:
 
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
+    GeometryGroupAttributes& getGeometryGroupAttributes()
+    {
+        return _geometryGroupAttributes;
+    }
+
 protected:
     void _processVolumeAABBGeometry();
     void _initializeSystemMaterials();
-    uint64_t _getNbMaterials();
 
     // Parameters
     ParametersManager& _parametersManager;
@@ -286,9 +272,9 @@ protected:
 
     // Model
     GeometryGroups _geometryGroups;
+    GeometryGroupAttributes _geometryGroupAttributes;
     bool _geometryGroupsDirty{true};
-    MaterialManager _materialManager;
-    TexturesMap _textures;
+    MaterialManagerPtr _materialManager;
     Lights _lights;
 
     // Volume

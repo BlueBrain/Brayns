@@ -23,22 +23,48 @@
 namespace brayns
 {
 Material::Material()
-    : _materialType(MaterialType::surface)
-    , _color(1.f, 1.f, 1.f)
-    , _specularColor(1.f, 1.f, 1.f)
-    , _specularExponent(10.f)
-    , _reflectionIndex(0.f)
-    , _opacity(1.f)
-    , _refractionIndex(1.f)
-    , _emission(0.f)
-    , _glossiness(1.f)
-    , _castSimulationData(true)
-    , _locked(false)
+    : BaseObject()
 {
 }
 
-void Material::setTexture(const TextureType& type, const std::string& filename)
+Material::Material(const Material& rhs)
 {
-    _textures[type] = filename;
+    this->_color = rhs._color;
+    this->_id = rhs._id;
+    this->_materialType = rhs._materialType;
+    this->_color = rhs._color;
+    this->_specularColor = rhs._specularColor;
+    this->_specularExponent = rhs._specularExponent;
+    this->_reflectionIndex = rhs._reflectionIndex;
+    this->_opacity = rhs._opacity;
+    this->_refractionIndex = rhs._refractionIndex;
+    this->_emission = rhs._emission;
+    this->_glossiness = rhs._glossiness;
+    this->_castSimulationData = rhs._castSimulationData;
+    this->_textureTypes = rhs._textureTypes;
+}
+
+Material& Material::operator=(const Material& rhs)
+{
+    this->_color = rhs._color;
+    this->_id = rhs._id;
+    this->_materialType = rhs._materialType;
+    this->_color = rhs._color;
+    this->_specularColor = rhs._specularColor;
+    this->_specularExponent = rhs._specularExponent;
+    this->_reflectionIndex = rhs._reflectionIndex;
+    this->_opacity = rhs._opacity;
+    this->_refractionIndex = rhs._refractionIndex;
+    this->_emission = rhs._emission;
+    this->_glossiness = rhs._glossiness;
+    this->_castSimulationData = rhs._castSimulationData;
+    this->_textureTypes = rhs._textureTypes;
+    return *this;
+}
+
+void Material::setTexture(const TextureType& type, const size_t id)
+{
+    _textureTypes[type] = id;
+    markModified();
 }
 }

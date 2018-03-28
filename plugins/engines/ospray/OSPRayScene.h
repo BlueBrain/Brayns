@@ -29,14 +29,10 @@
 #include <ospray_cpp/Model.h>
 #include <ospray_cpp/Texture2D.h>
 
+#include "OSPRayMaterialManager.h"
+
 namespace brayns
 {
-struct GeometryGroupAttributes
-{
-    GeometryGroup* geometryGroup;
-    OSPModel model;
-};
-
 /**
 
    OSPRray specific scene
@@ -56,14 +52,11 @@ public:
     /** @copydoc Scene::buildGeometry */
     void buildGeometry() final;
 
-    /** @copydoc Scene::serializeGeometry */
-    void serializeGeometry() final;
-
     /** @copydoc Scene::commitLights */
     void commitLights() final;
 
     /** @copydoc Scene::commitMaterials */
-    void commitMaterials(const Action action = Action::create) final;
+    void commitMaterials() final;
 
     /** @copydoc Scene::commitSimulationData */
     void commitSimulationData() final;
@@ -80,49 +73,31 @@ public:
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
-    OSPModel modelImpl() { return _rootModel; }
+    /** @copydoc Scene::addGeometryGroup */
+    GeometryGroupPtr addGeometryGroup() final;
+
+    /** @copydoc Scene::removeGeometryGroup */
+    void removeGeometryGroup(const size_t index) final;
+
+    OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _simulationModel; }
 private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
-    void _commitOSPMaterial(OSPMaterial ospMaterial, Material& material);
 
-    void _syncOSPModelsWithGeometryGroups();
     OSPModel _getActiveModel();
     uint32_t _getOSPDataFlags();
-    uint64_t _serializeSpheres(const size_t groupId,
-                               const size_t groupMaterialId,
-                               const size_t ospMaterialId);
-    uint64_t _serializeCylinders(const size_t groupId,
-                                 const size_t groupMaterialId,
-                                 const size_t ospMaterialId);
-    uint64_t _serializeCones(const size_t groupId, const size_t groupMaterialId,
-                             const size_t ospMaterialId);
-    uint64_t _serializeMeshes(const size_t groupId,
-                              const size_t groupMaterialId,
-                              const size_t ospMaterialId);
 
-    OSPModel _rootModel;
+    OSPModel _rootModel{nullptr};
     std::vector<GeometryGroupAttributes> _ospGeometryGroups;
-    OSPModel _simulationModel;
-    std::vector<OSPMaterial> _ospMaterials;
-    std::map<std::string, OSPTexture2D> _ospTextures;
+    OSPModel _simulationModel{nullptr};
 
     std::vector<OSPLight> _ospLights;
-    OSPData _ospLightData;
-    OSPData _ospMaterialData;
-    OSPData _ospVolumeData;
+    OSPData _ospLightData{nullptr};
+    OSPData _ospVolumeData{nullptr};
     uint64_t _ospVolumeDataSize{0};
-    OSPData _ospSimulationData;
-    OSPData _ospTransferFunctionDiffuseData;
-    OSPData _ospTransferFunctionEmissionData;
-
-    std::map<size_t, OSPGeometry> _ospExtendedSpheres;
-    std::map<size_t, OSPData> _ospExtendedSpheresData;
-    std::map<size_t, OSPGeometry> _ospExtendedCylinders;
-    std::map<size_t, OSPData> _ospExtendedCylindersData;
-    std::map<size_t, OSPGeometry> _ospExtendedCones;
-    std::map<size_t, OSPData> _ospExtendedConesData;
-    std::map<size_t, OSPGeometry> _ospMeshes;
+    OSPData _ospSimulationData{nullptr};
+    OSPData _ospTransferFunctionEmissionData{nullptr};
+    OSPData _ospTransferFunctionDiffuseData{nullptr};
 };
 }
 #endif // OSPRAYSCENE_H
