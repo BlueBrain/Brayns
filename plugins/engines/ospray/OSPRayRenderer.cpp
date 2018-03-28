@@ -101,7 +101,7 @@ void OSPRayRenderer::commit()
     OSPRayScene* osprayScene = static_cast<OSPRayScene*>(_scene.get());
     assert(osprayScene);
 
-    ospSetObject(_renderer, "world", osprayScene->modelImpl());
+    ospSetObject(_renderer, "world", osprayScene->getModel());
     ospSetObject(_renderer, "simulationModel",
                  osprayScene->simulationModelImpl());
     ospCommit(_renderer);

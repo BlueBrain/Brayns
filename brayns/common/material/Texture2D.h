@@ -27,26 +27,13 @@
 
 namespace brayns
 {
-enum TextureType
-{
-    TT_DIFFUSE = 0,
-    TT_NORMALS,
-    TT_BUMP,
-    TT_SPECULAR,
-    TT_EMISSIVE,
-    TT_OPACITY,
-    TT_REFLECTION,
-    TT_REFRACTION,
-    TT_OCCLUSION
-};
-
 class Texture2D
 {
 public:
     BRAYNS_API Texture2D();
 
-    BRAYNS_API TextureType getType() const { return _type; }
-    BRAYNS_API void setType(TextureType value) { _type = value; }
+    BRAYNS_API std::string getFilename() const { return _filename; }
+    BRAYNS_API void setFilename(const std::string& value) { _filename = value; }
     BRAYNS_API size_t getNbChannels() const { return _nbChannels; }
     BRAYNS_API void setNbChannels(size_t value) { _nbChannels = value; }
     BRAYNS_API size_t getDepth() const { return _depth; }
@@ -59,7 +46,7 @@ public:
     BRAYNS_API void setRawData(unsigned char* data, size_t size);
 
 private:
-    TextureType _type;                   // Diffuse, normal, bump, etc
+    std::string _filename;
     size_t _nbChannels;                  // Number of color channels per pixel
     size_t _depth;                       // Bytes per color channel
     size_t _width;                       // Pixels per row

@@ -77,11 +77,11 @@ void Engine::setDefaultEpsilon()
 void Engine::initializeMaterials(const MaterialsColorMap colorMap)
 {
     _scene->setMaterialsColorMap(colorMap);
-    _scene->commit();
 }
 
 void Engine::commit()
 {
+    _scene->commitMaterials();
     _scene->commitVolumeData();
     _scene->commitSimulationData();
     _renderers[_activeRenderer]->commit();

@@ -21,7 +21,7 @@
 #ifndef PROTEINLOADER_H
 #define PROTEINLOADER_H
 
-#include <brayns/common/material/Material.h>
+#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <string>
@@ -45,14 +45,8 @@ public:
      * @return true if PDB file was successufully loaded, false otherwise
      */
     bool importPDBFile(const std::string& filename, const Vector3f& position,
-                       const size_t proteinIndex, GeometryGroup& group);
-
-    /** Returns the RGB composants for a given atom index, and according to the
-     * JMol scheme
-     *
-     * @param index Index of the material
-     */
-    Vector3f getMaterialKd(size_t index);
+                       const size_t proteinIndex, GeometryGroup& group,
+                       MaterialManager& materialManager);
 
 private:
     const GeometryParameters& _geometryParameters;

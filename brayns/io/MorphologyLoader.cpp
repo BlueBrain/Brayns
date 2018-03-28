@@ -162,7 +162,7 @@ public:
         try
         {
             // Geometry group (one for the whole circuit)
-            GeometryGroup& group = scene.addGeometryGroup();
+            auto group = scene.addGeometryGroup();
 
             // Open Circuit and select GIDs according to specified target
             const brain::Circuit circuit(uri);
@@ -256,7 +256,8 @@ public:
 
             // Import meshes
             returnValue =
-                returnValue && _importMeshes(allGids, transformations, group,
+                returnValue && _importMeshes(allGids, transformations, *group,
+                                             scene.getMaterialManager(),
                                              targetGIDOffsets, meshLoader);
 
             // Import morphologies
@@ -265,8 +266,10 @@ public:
                 returnValue =
                     returnValue &&
                     _importMorphologies(circuit, allGids, transformations,
-                                        group, targetGIDOffsets,
+                                        *group, targetGIDOffsets,
                                         compartmentReport);
+            // Create materials
+            _createMaterials(*group, scene.getMaterialManager());
         }
         catch (const std::exception& error)
         {
@@ -279,6 +282,25 @@ public:
     }
 
 private:
+    void _createMaterials(GeometryGroup& group,
+                          MaterialManager& materialManager)
+    {
+        size_t maxMaterialId = 0;
+        for (auto& spheres : group.getSpheres())
+            maxMaterialId = std::max(maxMaterialId, spheres.first);
+        for (auto& cylinders : group.getCylinders())
+            maxMaterialId = std::max(maxMaterialId, cylinders.first);
+        for (auto& cones : group.getCones())
+            maxMaterialId = std::max(maxMaterialId, cones.first);
+        for (auto& meshes : group.getTrianglesMeshes())
+            maxMaterialId = std::max(maxMaterialId, meshes.first);
+
+        for (size_t i = 0; i < maxMaterialId; ++i)
+        {
+            Material material;
+            materialManager.add(material);
+        }
+    }
     /**
      * @brief _getCorrectedRadius Modifies the radius of the geometry according
      * to --radius-multiplier and --radius-correction geometry parameters
@@ -826,6 +848,7 @@ private:
 #if (BRAYNS_USE_ASSIMP)
     bool _importMeshes(const brain::GIDSet& gids,
                        const Matrix4fs& transformations, GeometryGroup& group,
+                       MaterialManager& materialManager,
                        const GIDOffsets& targetGIDOffsets,
                        MeshLoader& meshLoader)
     {
@@ -852,7 +875,7 @@ private:
                     : Matrix4f();
             if (!meshLoader.importMeshFromFile(
                     meshLoader.getMeshFilenameFromGID(gid), group,
-                    transformation, materialId))
+                    materialManager, transformation, materialId))
                 ++loadingFailures;
             ++meshIndex;
             _parent.updateProgress(message.str(), meshIndex, gids.size());
@@ -942,14 +965,14 @@ private:
 #pragma omp atomic
                     ++loadingFailures;
 
-#pragma omp critical
-                for (const auto& material : groupContainer.materialIds)
-                    group.getMaterialManager().set(material);
+// TODO: Create materials before loading the circuit
+//#pragma omp critical
+//                for (const auto& material : groupContainer.materialIds)
+//                    group.getMaterialManager().createIfMissing(material.first);
 #pragma omp critical
                 for (const auto& sphere : spheres)
                 {
-                    const auto index =
-                        group.getMaterialManager().position(sphere.first);
+                    const auto index = sphere.first;
                     group.getSpheres()[index].insert(
                         group.getSpheres()[index].end(), sphere.second.begin(),
                         sphere.second.end());
@@ -957,8 +980,7 @@ private:
 #pragma omp critical
                 for (const auto& cylinder : cylinders)
                 {
-                    const auto index =
-                        group.getMaterialManager().position(cylinder.first);
+                    const auto index = cylinder.first;
                     group.getCylinders()[index].insert(
                         group.getCylinders()[index].end(),
                         cylinder.second.begin(), cylinder.second.end());
@@ -966,8 +988,7 @@ private:
 #pragma omp critical
                 for (const auto& cone : cones)
                 {
-                    const auto index =
-                        group.getMaterialManager().position(cone.first);
+                    const auto index = cone.first;
                     group.getCones()[index].insert(
                         group.getCones()[index].end(), cone.second.begin(),
                         cone.second.end());

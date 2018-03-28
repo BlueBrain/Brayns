@@ -36,7 +36,9 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/render/ProximityRenderer.cpp
   ispc/render/SimulationRenderer.cpp
   ispc/render/ParticleRenderer.cpp
+  OSPRayMaterialManager.cpp
   OSPRayEngine.cpp
+  OSPRayGeometryGroup.cpp
   OSPRayScene.cpp
   OSPRayRenderer.cpp
   OSPRayFrameBuffer.cpp
@@ -56,13 +58,17 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   ispc/render/ParticleRenderer.h
   OSPRayEngine.h
   OSPRayScene.h
+  OSPRayGeometryGroup.h
+  OSPRayMaterialManager.h
   OSPRayRenderer.h
   OSPRayFrameBuffer.h
   OSPRayCamera.h
 )
 
-set_source_files_properties(OSPRayScene.cpp
-  PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
+set_source_files_properties(
+    OSPRayScene.cpp
+    OSPRayMaterialManager.cpp
+    PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
 
 set(BRAYNSOSPRAYENGINEPLUGIN_LINK_LIBRARIES
     PRIVATE vmmlib braynsCommon braynsIO ${OSPRAY_LIBRARIES}

@@ -22,6 +22,7 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
+#include <brayns/io/ImageManager.h>
 
 namespace brayns
 {
@@ -38,37 +39,62 @@ void MaterialManager::clear()
     _materials.clear();
 }
 
+void MaterialManager::check(const size_t index)
+{
+    get(index);
+}
+
 Material& MaterialManager::get(const size_t index)
 {
-    if (_materialMapping.find(index) == _materialMapping.end())
-        set(index);
-    return _materials[_materialMapping[index]];
+    if (index < _materials.size())
+        return _materials[index];
+    else
+        throw std::runtime_error("Index out of bounds");
 }
 
-void MaterialManager::set(const size_t index, const Material& material)
+void MaterialManager::set(const size_t index, Material material)
 {
-    if (_materialMapping.find(index) == _materialMapping.end())
+    if (index < _materials.size())
     {
-        _materialMapping[index] = _materials.size();
-        _materials.push_back(material);
+        const auto it = _materials.begin() + index;
+        _materials.erase(it);
+        _materials.insert(it, material);
     }
     else
-        _materials[_materialMapping[index]] = material;
+        throw std::runtime_error("Index out of bounds");
 }
 
-void MaterialManager::set(const size_t index)
+size_t MaterialManager::add(const Material& material)
 {
-    if (_materialMapping.find(index) == _materialMapping.end())
+    _materials.push_back(material);
+    return _materials.size() - 1;
+}
+
+void MaterialManager::remove(const size_t index)
+{
+    if (index < _materials.size())
+        _materials.erase(_materials.begin() + index);
+}
+
+size_t MaterialManager::addTexture(const std::string& filename)
+{
+    // Check if texture is already loaded
+    size_t index = 0;
+    bool found = false;
+    for (auto texture : _textures)
     {
-        _materialMapping[index] = _materials.size();
-        _materials.push_back(Material());
+        if (texture.second->getFilename() == filename)
+        {
+            found = true;
+            break;
+        }
+        ++index;
     }
-}
-
-size_t MaterialManager::position(const size_t materialId)
-{
-    const auto it = _materialMapping.find(materialId);
-    const auto distance = std::distance(_materialMapping.begin(), it);
-    return distance;
+    if (!found)
+    {
+        ++index;
+        ImageManager::importTextureFromFile(_textures, index, filename);
+    }
+    return index;
 }
 }

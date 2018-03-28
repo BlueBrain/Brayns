@@ -53,6 +53,7 @@ public:
      * @return true if the file was successfully imported. False otherwise.
      */
     bool importMeshFromFile(const std::string& filename, GeometryGroup& group,
+                            MaterialManager& materialManager,
                             const Matrix4f& transformation,
                             const size_t defaultMaterial);
 
@@ -61,8 +62,8 @@ public:
      * @param filename destination file name
      * @param scene Scene holding the meshes
      */
-    bool exportMeshToFile(const std::string& filename,
-                          GeometryGroup& group) const;
+    bool exportMeshToFile(const std::string& filename, GeometryGroup& group,
+                          MaterialManager& materialManager) const;
 
     /**
      * @brief Clear all internal buffers

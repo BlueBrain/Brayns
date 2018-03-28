@@ -51,7 +51,7 @@ private:
     bool _importMatrix();
     bool _importMesh(const uint64_t gid, const Matrix4f& transformation,
                      const size_t materialId, GeometryGroup& group,
-                     MeshLoader& meshLoader);
+                     MaterialManager& materialManager, MeshLoader& meshLoader);
 
     std::map<uint64_t, uint64_ts> _emitors;
     std::map<uint64_t, size_t> _receptors;

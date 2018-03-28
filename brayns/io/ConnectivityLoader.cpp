@@ -109,6 +109,7 @@ bool ConnectivityLoader::_importMesh(const uint64_t gid,
                                      const Matrix4f& transformation,
                                      const size_t materialId,
                                      GeometryGroup& group,
+                                     MaterialManager& materialManager,
                                      MeshLoader& meshLoader)
 {
     const auto meshedMorphologiesFolder =
@@ -118,7 +119,8 @@ bool ConnectivityLoader::_importMesh(const uint64_t gid,
 
     // Load mesh from file
     if (!meshLoader.importMeshFromFile(meshLoader.getMeshFilenameFromGID(gid),
-                                       group, transformation, materialId))
+                                       group, materialManager, transformation,
+                                       materialId))
         return false;
 
     return true;
@@ -160,7 +162,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
         }
 
         // Build scene
-        GeometryGroup& group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup();
 
         const auto& scale = _geometryParameters.getConnectivityScale();
         const auto& dimensionRange =
@@ -176,8 +178,8 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     transforms[i].getTranslation() * scale;
                 const auto radiusSource =
                     _geometryParameters.getRadiusMultiplier();
-                group.addSphere(NB_SYSTEM_MATERIALS,
-                                {centerSource, radiusSource});
+                group->addSphere(NB_SYSTEM_MATERIALS,
+                                 {centerSource, radiusSource});
             }
 
         // Place active cells and connections
@@ -212,11 +214,12 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     _geometryParameters.getCircuitMeshTransformation()
                         ? transforms[emitor.first]
                         : Matrix4f();
-                createSphere = !_importMesh(gid, transformation, materialId,
-                                            group, meshLoader);
+                createSphere =
+                    !_importMesh(gid, transformation, materialId, *group,
+                                 scene.getMaterialManager(), meshLoader);
             }
             if (createSphere)
-                group.addSphere(materialId, {centerSource, radiusSource});
+                group->addSphere(materialId, {centerSource, radiusSource});
 
             // Connections
             if (emitor.second.size() < dimensionRange.x() ||
@@ -240,10 +243,10 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     // remaining 90%
                     const auto arrowTarget =
                         centerSource + 0.1f * (centerDest - centerSource);
-                    group.addCone(materialId, {centerSource, arrowTarget,
-                                               radiusSource, radiusDest});
-                    group.addCylinder(materialId,
-                                      {arrowTarget, centerDest, radiusDest});
+                    group->addCone(materialId, {centerSource, arrowTarget,
+                                                radiusSource, radiusDest});
+                    group->addCylinder(materialId,
+                                       {arrowTarget, centerDest, radiusDest});
                 }
             ++progress;
         }

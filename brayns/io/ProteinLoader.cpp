@@ -22,6 +22,8 @@
 
 #include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
+#include <brayns/common/material/Material.h>
+#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 
@@ -313,8 +315,11 @@ ProteinLoader::ProteinLoader(const GeometryParameters& geometryParameters)
 bool ProteinLoader::importPDBFile(const std::string& filename,
                                   const Vector3f& position,
                                   const size_t proteinIndex,
-                                  GeometryGroup& group)
+                                  GeometryGroup& group,
+                                  MaterialManager& materialManager)
 {
+    std::map<size_t, Sphere> spheres;
+
     int index(0);
     std::ifstream file(filename.c_str());
     if (!file.is_open())
@@ -429,33 +434,33 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                     ++i;
                 }
 
-                const auto materialId =
-                    colorScheme == ColorScheme::protein_by_id ? proteinIndex
-                                                              : atom.materialId;
                 // Convert position from nanometers
                 const auto center = position + 0.01f * atom.position;
+
                 // Convert radius from angstrom
                 const auto radius = 0.0001f * atom.radius *
                                     _geometryParameters.getRadiusMultiplier();
 
-                auto& materialManager = group.getMaterialManager();
-                auto& material = materialManager.get(materialId);
-                material.setColor(Vector3f(colorMap[materialId].R / 255.f,
-                                           colorMap[materialId].G / 255.f,
-                                           colorMap[materialId].B / 255.f));
-                group.addSphere(materialManager.position(materialId),
-                                {center, radius});
+                const auto materialId =
+                    colorScheme == ColorScheme::protein_by_id ? proteinIndex
+                                                              : atom.materialId;
+                spheres[materialId] = {center, radius};
             }
         }
         file.close();
+
+        // Add materials and spheres
+        for (const auto& sphere : spheres)
+        {
+            auto materialId = sphere.first;
+            Material material;
+            material.setDiffuseColor(Vector3f(colorMap[index].R / 255.f,
+                                              colorMap[index].G / 255.f,
+                                              colorMap[index].B / 255.f));
+            materialId = materialManager.add(material);
+            group.addSphere(materialId, sphere.second);
+        }
     }
-
     return true;
-}
-
-Vector3f ProteinLoader::getMaterialKd(const size_t index)
-{
-    return Vector3f(colorMap[index].R / 255.f, colorMap[index].G / 255.f,
-                    colorMap[index].B / 255.f);
 }
 }

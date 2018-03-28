@@ -25,7 +25,46 @@
 namespace brayns
 {
 GeometryGroup::GeometryGroup()
+    : _materialManager(nullptr)
 {
+}
+
+GeometryGroup::GeometryGroup(const GeometryGroup& rhs)
+{
+    this->_materialManager = rhs._materialManager;
+    this->_spheres = rhs._spheres;
+    this->_spheresDirty = rhs._spheresDirty;
+    this->_cylinders = rhs._cylinders;
+    this->_cylindersDirty = rhs._cylindersDirty;
+    this->_cones = rhs._cones;
+    this->_conesDirty = rhs._conesDirty;
+    this->_trianglesMeshes = rhs._trianglesMeshes;
+    this->_trianglesMeshesDirty = rhs._trianglesMeshesDirty;
+    this->_bounds = rhs._bounds;
+}
+
+GeometryGroup::GeometryGroup(MaterialManagerPtr materialManager)
+    : _materialManager(materialManager)
+{
+}
+
+GeometryGroup::~GeometryGroup()
+{
+}
+
+GeometryGroup& GeometryGroup::operator=(const GeometryGroup& rhs)
+{
+    this->_materialManager = rhs._materialManager;
+    this->_spheres = rhs._spheres;
+    this->_spheresDirty = rhs._spheresDirty;
+    this->_cylinders = rhs._cylinders;
+    this->_cylindersDirty = rhs._cylindersDirty;
+    this->_cones = rhs._cones;
+    this->_conesDirty = rhs._conesDirty;
+    this->_trianglesMeshes = rhs._trianglesMeshes;
+    this->_trianglesMeshesDirty = rhs._trianglesMeshesDirty;
+    this->_bounds = rhs._bounds;
+    return *this;
 }
 
 void GeometryGroup::unload()
@@ -49,7 +88,7 @@ bool GeometryGroup::empty() const
 uint64_t GeometryGroup::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _spheresDirty = true;
-    _materialManager.set(materialId);
+    _materialManager->check(materialId);
     _spheres[materialId].push_back(sphere);
     _bounds.merge(sphere.center);
     return _spheres[materialId].size() - 1;
@@ -73,7 +112,7 @@ uint64_t GeometryGroup::addCylinder(const size_t materialId,
                                     const Cylinder& cylinder)
 {
     _cylindersDirty = true;
-    _materialManager.set(materialId);
+    _materialManager->check(materialId);
     _cylinders[materialId].push_back(cylinder);
     _bounds.merge(cylinder.center);
     _bounds.merge(cylinder.up);
@@ -98,7 +137,7 @@ void GeometryGroup::setCylinder(const size_t materialId, const uint64_t index,
 uint64_t GeometryGroup::addCone(const size_t materialId, const Cone& cone)
 {
     _conesDirty = true;
-    _materialManager.set(materialId);
+    _materialManager->check(materialId);
     _cones[materialId].push_back(cone);
     _bounds.merge(cone.center);
     _bounds.merge(cone.up);
@@ -120,9 +159,31 @@ void GeometryGroup::setCone(const size_t materialId, const uint64_t index,
         BRAYNS_ERROR << "Invalid index " << index << std::endl;
 }
 
-bool GeometryGroup::dirty()
+bool GeometryGroup::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
            _trianglesMeshesDirty;
+}
+
+void GeometryGroup::logInformation()
+{
+    const uint64_t sizeInBytes =
+        _spheres.size() * sizeof(Sphere) +
+        _cylinders.size() * sizeof(Cylinder) + _cones.size() * sizeof(Cone) +
+        _trianglesMeshes.size() * sizeof(TrianglesMesh);
+    BRAYNS_INFO << "---------------------------------------------------"
+                << std::endl;
+    BRAYNS_INFO << "Geometry group information:" << std::endl;
+    BRAYNS_INFO << "Spheres  : " << _spheres.size() << std::endl;
+    BRAYNS_INFO << "Cylinders: " << _cylinders.size() << std::endl;
+    BRAYNS_INFO << "Cones    : " << _cones.size() << std::endl;
+    BRAYNS_INFO << "Meshes   : " << _trianglesMeshes.size() << std::endl;
+    BRAYNS_INFO << "Total    : " << sizeInBytes << " bytes ("
+                << sizeInBytes / 1048576 << " MB)" << std::endl;
+}
+
+Boxf& GeometryGroup::getBounds()
+{
+    return _bounds;
 }
 }

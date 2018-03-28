@@ -82,14 +82,10 @@ bool ImageManager::exportFrameBufferToFile(
 }
 
 bool ImageManager::importTextureFromFile(
-    TexturesMap& textures BRAYNS_UNUSED,
-    const TextureType textureType BRAYNS_UNUSED,
+    TexturesMap& textures BRAYNS_UNUSED, const size_t id,
     const std::string& filename BRAYNS_UNUSED)
 {
 #if (BRAYNS_USE_MAGICKPP)
-    if (textures.find(filename) != textures.end())
-        return true;
-
     try
     {
         Magick::Image image(filename);
@@ -99,7 +95,6 @@ bool ImageManager::importTextureFromFile(
         size_t totalSize = blob.length();
 
         Texture2DPtr texture(new Texture2D);
-        texture->setType(textureType);
         texture->setWidth(image.columns());
         texture->setHeight(image.rows());
         texture->setNbChannels(image.matte() ? 4 : 3);
@@ -110,7 +105,7 @@ bool ImageManager::importTextureFromFile(
                      << texture->getHeight() << "x" << texture->getNbChannels()
                      << "x" << texture->getDepth()
                      << " added to the texture cache" << std::endl;
-        textures[filename] = texture;
+        textures[id] = texture;
     }
     catch (Magick::Warning& warning)
     {
