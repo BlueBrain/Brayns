@@ -74,13 +74,14 @@ public:
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
     /** @copydoc Scene::addGeometryGroup */
-    GeometryGroupPtr addGeometryGroup() final;
+    GeometryGroupPtr addGeometryGroup(const std::string& name,
+                                      const std::string& uri) final;
 
     /** @copydoc Scene::removeGeometryGroup */
     void removeGeometryGroup(const size_t index) final;
 
     OSPModel getModel() { return _rootModel; }
-    OSPModel simulationModelImpl() { return _simulationModel; }
+    OSPModel simulationModelImpl() { return _rootSimulationModel; }
 private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
 
@@ -89,7 +90,7 @@ private:
 
     OSPModel _rootModel{nullptr};
     std::vector<GeometryGroupAttributes> _ospGeometryGroups;
-    OSPModel _simulationModel{nullptr};
+    OSPModel _rootSimulationModel{nullptr};
 
     std::vector<OSPLight> _ospLights;
     OSPData _ospLightData{nullptr};

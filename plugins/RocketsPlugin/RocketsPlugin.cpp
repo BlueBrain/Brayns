@@ -408,11 +408,8 @@ public:
         _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
                    [](Scene& scene) { scene.commit(); });
 
-        _handleGET(ENDPOINT_MATERIAL_MANAGER,
-                   _engine->getScene().getMaterialManager());
-        _handlePUT(ENDPOINT_MATERIAL_MANAGER,
-                   _engine->getScene().getMaterialManager(),
-                   [](MaterialManager& manager) { manager.commit(); });
+        _handle(ENDPOINT_MATERIAL_MANAGER,
+                _engine->getScene().getMaterialManager());
 
         _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
 

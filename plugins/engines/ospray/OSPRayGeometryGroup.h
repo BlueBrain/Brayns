@@ -42,7 +42,11 @@ public:
     void commitMaterials(const uint32_t flags);
     uint64_t commit();
     OSPModel getModel() { return _model; }
-    OSPGeometry getInstance();
+    OSPGeometry getInstance(const Vector3f& translation,
+                            const Vector3f& rotation, const Vector3f& scale);
+    OSPGeometry getSimulationModelInstance(const Vector3f& translation,
+                                           const Vector3f& rotation,
+                                           const Vector3f& scale);
 
 private:
     uint64_t _commitSpheres(const size_t materialId);
@@ -53,6 +57,7 @@ private:
     OSPModel _model{nullptr};
     OSPModel _simulationModel{nullptr};
     OSPGeometry _instance{nullptr};
+    OSPGeometry _simulationModelInstance{nullptr};
 
     std::map<size_t, OSPGeometry> _ospExtendedSpheres;
     std::map<size_t, OSPData> _ospExtendedSpheresData;

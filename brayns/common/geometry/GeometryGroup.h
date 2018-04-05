@@ -169,10 +169,16 @@ public:
      */
     BRAYNS_API void setTrianglesMeshesDirty(const bool value)
     {
-        _trianglesMeshesDirty = value;
+        _updateValue(_trianglesMeshesDirty, value);
     }
     BRAYNS_API bool trianglesMeshesDirty() { return _trianglesMeshesDirty; }
     BRAYNS_API void logInformation();
+
+    BRAYNS_API bool useSimulationModel() const { return _useSimulationModel; }
+    BRAYNS_API void useSimulationModel(const bool value)
+    {
+        _updateValue(_useSimulationModel, value);
+    }
 
 protected:
     MaterialManagerPtr _materialManager;
@@ -185,6 +191,7 @@ protected:
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
     Boxf _bounds;
+    bool _useSimulationModel{false};
 
     SERIALIZATION_FRIEND(GeometryGroup)
 };

@@ -123,7 +123,8 @@ public:
     /**
         Adds a geometry group to the scene
       */
-    BRAYNS_API virtual GeometryGroupPtr addGeometryGroup() = 0;
+    BRAYNS_API virtual GeometryGroupPtr addGeometryGroup(
+        const std::string& name, const std::string& uri = "") = 0;
 
     /**
         Removes a geometry group from the scene

@@ -68,7 +68,6 @@ public:
     BRAYNS_API Material(const Material& rhs);
     BRAYNS_API Material& operator=(const Material& rhs);
 
-    BRAYNS_API size_t getId() const { return _id; }
     BRAYNS_API MaterialType getType() const { return _materialType; }
     BRAYNS_API void setType(const MaterialType materialType)
     {
@@ -120,7 +119,6 @@ public:
     BRAYNS_API void setTexture(const TextureType& type, const size_t id);
 
 protected:
-    size_t _id{0};
     MaterialType _materialType{MaterialType::surface};
     Vector3f _color{1.f, 1.f, 1.f};
     Vector3f _specularColor{1.f, 1.f, 1.f};

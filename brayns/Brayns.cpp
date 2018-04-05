@@ -602,7 +602,7 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         auto& materialManager = scene.getMaterialManager();
-        auto group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup("Protein");
         std::string pdbFile = filename;
         if (pdbFile == "")
         {
@@ -623,7 +623,7 @@ private:
         // Load XYZB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        auto group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup("PointCloud");
         BRAYNS_INFO << "Loading XYZB file " << geometryParameters.getXYZBFile()
                     << std::endl;
         XYZBLoader xyzbLoader(geometryParameters);
@@ -651,12 +651,12 @@ private:
         if (files.empty())
             return;
 
-        auto group = scene.addGeometryGroup();
         size_t i = 0;
         std::stringstream msg;
         msg << "Loading " << files.size() << " meshes from " << folder;
         for (const auto& file : files)
         {
+            auto group = scene.addGeometryGroup("Mesh" + std::to_string(i));
             size_t material =
                 geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
                     ? NB_SYSTEM_MATERIALS + i
@@ -679,7 +679,7 @@ private:
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        auto group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup("Mesh");
 
         const auto material =
             geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
@@ -787,7 +787,7 @@ private:
             _parametersManager.getApplicationParameters();
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        auto group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup("Morphology");
 
         const auto& folder = geometryParameters.getMorphologyFolder();
         MorphologyLoader morphologyLoader(applicationParameters,

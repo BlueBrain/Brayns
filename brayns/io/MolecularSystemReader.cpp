@@ -39,7 +39,7 @@ MolecularSystemReader::MolecularSystemReader(
 
 bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 {
-    auto group = scene.addGeometryGroup();
+    auto group = scene.addGeometryGroup("MolecularSystem");
     MaterialManager& materialManager = scene.getMaterialManager();
     _nbProteins = 0;
     if (!_loadConfiguration())

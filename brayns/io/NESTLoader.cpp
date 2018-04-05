@@ -117,7 +117,7 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
     BRAYNS_INFO << "Number of materials: " << materialMapping.size()
                 << std::endl;
 
-    auto group = scene.addGeometryGroup();
+    auto group = scene.addGeometryGroup("NESTCircuit");
     SpheresMap& spheres = group->getSpheres();
     spheres[0].reserve(_frameSize);
     _positions.reserve(_frameSize);

@@ -110,8 +110,13 @@ typedef std::vector<GeometryGroupPtr> GeometryGroups;
 
 struct GroupAttributes
 {
+    std::string name;
+    std::string uri;
     bool enabled;
-    Matrix4f transformation;
+    bool boundingBox;
+    Vector3f translation;
+    Vector3f scale;
+    Vector3f rotation;
 };
 typedef std::vector<GroupAttributes> GeometryGroupAttributes;
 

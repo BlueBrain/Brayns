@@ -30,7 +30,6 @@ Material::Material()
 Material::Material(const Material& rhs)
 {
     this->_color = rhs._color;
-    this->_id = rhs._id;
     this->_materialType = rhs._materialType;
     this->_color = rhs._color;
     this->_specularColor = rhs._specularColor;
@@ -46,8 +45,10 @@ Material::Material(const Material& rhs)
 
 Material& Material::operator=(const Material& rhs)
 {
+    if (this == &rhs)
+        return *this;
+
     this->_color = rhs._color;
-    this->_id = rhs._id;
     this->_materialType = rhs._materialType;
     this->_color = rhs._color;
     this->_specularColor = rhs._specularColor;

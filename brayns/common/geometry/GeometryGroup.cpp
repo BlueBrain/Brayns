@@ -54,6 +54,9 @@ GeometryGroup::~GeometryGroup()
 
 GeometryGroup& GeometryGroup::operator=(const GeometryGroup& rhs)
 {
+    if (this == &rhs)
+        return *this;
+
     this->_materialManager = rhs._materialManager;
     this->_spheres = rhs._spheres;
     this->_spheresDirty = rhs._spheresDirty;

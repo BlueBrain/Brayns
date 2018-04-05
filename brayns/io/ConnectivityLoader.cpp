@@ -162,7 +162,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
         }
 
         // Build scene
-        auto group = scene.addGeometryGroup();
+        auto group = scene.addGeometryGroup("Connectivity");
 
         const auto& scale = _geometryParameters.getConnectivityScale();
         const auto& dimensionRange =
