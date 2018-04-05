@@ -41,27 +41,23 @@ void MaterialManager::clear()
 
 void MaterialManager::check(const size_t index)
 {
-    get(index);
+    if (index > _materials.size())
+        for (size_t i = _materials.size(); i <= index; ++i)
+            add(Material());
 }
 
 Material& MaterialManager::get(const size_t index)
 {
-    if (index < _materials.size())
-        return _materials[index];
-    else
-        throw std::runtime_error("Index out of bounds");
+    check(index);
+    return _materials[index];
 }
 
 void MaterialManager::set(const size_t index, Material material)
 {
-    if (index < _materials.size())
-    {
-        const auto it = _materials.begin() + index;
-        _materials.erase(it);
-        _materials.insert(it, material);
-    }
-    else
-        throw std::runtime_error("Index out of bounds");
+    check(index);
+    const auto it = _materials.begin() + index;
+    _materials.erase(it);
+    _materials.insert(it, material);
 }
 
 size_t MaterialManager::add(const Material& material)

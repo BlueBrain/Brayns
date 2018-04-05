@@ -162,7 +162,9 @@ public:
         try
         {
             // Geometry group (one for the whole circuit)
-            auto group = scene.addGeometryGroup();
+            auto group = scene.addGeometryGroup("Circuit");
+            group->useSimulationModel(
+                _geometryParameters.getCircuitUseSimulationModel());
 
             // Open Circuit and select GIDs according to specified target
             const brain::Circuit circuit(uri);
@@ -300,6 +302,7 @@ private:
             Material material;
             materialManager.add(material);
         }
+        materialManager.markModified();
     }
     /**
      * @brief _getCorrectedRadius Modifies the radius of the geometry according

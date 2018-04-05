@@ -70,35 +70,6 @@ void OSPRayScene::unload()
         ospRelease(_ospVolumeData);
 }
 
-void OSPRayScene::commit()
-{
-    BRAYNS_FCT_ENTRY
-
-    if (_simulationModel)
-    {
-        BRAYNS_INFO << "Committing simulation model" << std::endl;
-        ospCommit(_simulationModel);
-    }
-
-    if (_rootModel)
-        ospRelease(_rootModel);
-    _rootModel = ospNewModel();
-
-    for (size_t i = 0; i < _geometryGroupAttributes.size(); ++i)
-    {
-        const auto& groupAttributes = _geometryGroupAttributes[i];
-        if (groupAttributes.enabled)
-        {
-            auto impl = std::static_pointer_cast<OSPRayGeometryGroup>(
-                _geometryGroups[i]);
-            impl->commit();
-            ospAddGeometry(_rootModel, impl->getInstance());
-        }
-    }
-    BRAYNS_INFO << "Committing root model" << std::endl;
-    ospCommit(_rootModel);
-}
-
 OSPModel OSPRayScene::_getActiveModel()
 {
     BRAYNS_FCT_ENTRY
@@ -106,7 +77,7 @@ OSPModel OSPRayScene::_getActiveModel()
     auto model = _rootModel;
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
     if (geometryParameters.getCircuitUseSimulationModel())
-        model = _simulationModel;
+        model = _rootSimulationModel;
     return model;
 }
 
@@ -117,8 +88,8 @@ void OSPRayScene::buildGeometry()
     commitMaterials();
 
     const auto& geomParams = _parametersManager.getGeometryParameters();
-    if (geomParams.getCircuitUseSimulationModel() && !_simulationModel)
-        _simulationModel = ospNewModel();
+    if (geomParams.getCircuitUseSimulationModel() && !_rootSimulationModel)
+        _rootSimulationModel = ospNewModel();
 
     // Optix needs a bounding box around the volume so that if can find
     // intersections before initiating the traversal
@@ -130,6 +101,49 @@ void OSPRayScene::buildGeometry()
         if (groupAttributes.enabled)
             _geometryGroups[i]->logInformation();
     }
+}
+
+void OSPRayScene::commit()
+{
+    BRAYNS_FCT_ENTRY
+
+    if (_rootModel)
+        ospRelease(_rootModel);
+    _rootModel = ospNewModel();
+
+    if (_rootSimulationModel)
+        ospRelease(_rootSimulationModel);
+    _rootSimulationModel = nullptr;
+
+    for (size_t i = 0; i < _geometryGroupAttributes.size(); ++i)
+    {
+        const auto& groupAttributes = _geometryGroupAttributes[i];
+        if (groupAttributes.enabled)
+        {
+            auto impl = std::static_pointer_cast<OSPRayGeometryGroup>(
+                _geometryGroups[i]);
+            impl->commit();
+            ospAddGeometry(_rootModel,
+                           impl->getInstance(groupAttributes.translation,
+                                             groupAttributes.rotation,
+                                             groupAttributes.scale));
+            if (impl->useSimulationModel())
+            {
+                if (!_rootSimulationModel)
+                    _rootSimulationModel = ospNewModel();
+                ospAddGeometry(_rootSimulationModel,
+                               impl->getSimulationModelInstance(
+                                   groupAttributes.translation,
+                                   groupAttributes.rotation,
+                                   groupAttributes.scale));
+            }
+        }
+    }
+
+    BRAYNS_DEBUG << "Committing root models" << std::endl;
+    ospCommit(_rootModel);
+    if (_rootSimulationModel)
+        ospCommit(_rootSimulationModel);
 }
 
 void OSPRayScene::commitLights()
@@ -381,11 +395,13 @@ uint32_t OSPRayScene::_getOSPDataFlags()
                : 0;
 }
 
-GeometryGroupPtr OSPRayScene::addGeometryGroup()
+GeometryGroupPtr OSPRayScene::addGeometryGroup(const std::string& name,
+                                               const std::string& uri)
 {
     BRAYNS_FCT_ENTRY
 
-    _geometryGroupAttributes.push_back({true, Matrix4f()});
+    _geometryGroupAttributes.push_back(
+        {name, uri, true, true, {0, 0, 0}, {1, 1, 1}, {0, 0, 0}});
     _geometryGroups.push_back(
         std::make_shared<OSPRayGeometryGroup>(_materialManager));
     return _geometryGroups[_geometryGroups.size() - 1];

@@ -69,6 +69,7 @@ void Scene::unload()
     for (auto geometryGroup : _geometryGroups)
         geometryGroup->unload();
     _geometryGroups.clear();
+    _geometryGroupAttributes.clear();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
     _volumeHandler.reset();
@@ -221,7 +222,7 @@ void Scene::buildDefault()
                                 {0.8f, 0.8f, 0.8f}, {0.f, 1.f, 0.f},
                                 {0.8f, 0.8f, 0.8f}, {0.8f, 0.8f, 0.8f}};
 
-    auto group = addGeometryGroup();
+    auto group = addGeometryGroup("CornellBox");
     for (size_t i = 1; i < 6; ++i)
     {
         // Cornell box
@@ -312,7 +313,7 @@ void Scene::buildEnvironment()
     if (sceneEnvironment == SceneEnvironment::none)
         return;
 
-    auto group = addGeometryGroup();
+    auto group = addGeometryGroup("BoundingBox");
     const auto sceneBounds = getBounds();
     auto& meshes = group->getTrianglesMeshes();
     switch (sceneEnvironment)
@@ -659,7 +660,7 @@ void Scene::_processVolumeAABBGeometry()
     const Vector3f& volumeOffset = volumeHandler->getOffset();
     const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
 
-    auto group = addGeometryGroup();
+    auto group = addGeometryGroup("VolumeContainer");
     const size_t materialId = static_cast<size_t>(MaterialType::invisible);
     auto& meshes = group->getTrianglesMeshes()[materialId];
     uint64_t offset = meshes.vertices.size();
@@ -899,7 +900,7 @@ void Scene::loadFromCacheFile()
     file.read((char*)&nbGeometryGroups, sizeof(size_t));
     for (size_t groupId = 0; groupId < nbGeometryGroups; ++groupId)
     {
-        auto group = addGeometryGroup();
+        auto group = addGeometryGroup("ToBeDefined");
         // Materials
         _materialManager->clear();
         for (size_t i = 0; i < nbMaterials; ++i)

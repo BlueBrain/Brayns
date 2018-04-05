@@ -43,6 +43,7 @@ OSPRayGeometryGroup::~OSPRayGeometryGroup()
 void OSPRayGeometryGroup::unload()
 {
     BRAYNS_FCT_ENTRY
+
     for (auto& geom : _ospExtendedSpheres)
         ospRelease(geom.second);
     _ospExtendedSpheres.clear();
@@ -65,23 +66,39 @@ void OSPRayGeometryGroup::unload()
         ospRelease(geom.second);
     _ospMeshes.clear();
 
-    for (auto geom : _ospExtendedSpheres)
-        ospRemoveGeometry(_model, geom.second);
-    for (auto geom : _ospExtendedCylinders)
-        ospRemoveGeometry(_model, geom.second);
-    for (auto geom : _ospExtendedCones)
-        ospRemoveGeometry(_model, geom.second);
+    if (_useSimulationModel)
+    {
+        for (auto geom : _ospExtendedSpheres)
+            ospRemoveGeometry(_simulationModel, geom.second);
+        for (auto geom : _ospExtendedCylinders)
+            ospRemoveGeometry(_simulationModel, geom.second);
+        for (auto geom : _ospExtendedCones)
+            ospRemoveGeometry(_simulationModel, geom.second);
+    }
+    else
+    {
+        for (auto geom : _ospExtendedSpheres)
+            ospRemoveGeometry(_model, geom.second);
+        for (auto geom : _ospExtendedCylinders)
+            ospRemoveGeometry(_model, geom.second);
+        for (auto geom : _ospExtendedCones)
+            ospRemoveGeometry(_model, geom.second);
+    }
 
     if (_model)
+    {
+        ospCommit(_model);
         ospRelease(_model);
+    }
     _model = nullptr;
 
     if (_simulationModel)
     {
         ospCommit(_simulationModel);
         ospRelease(_simulationModel);
-        _simulationModel = nullptr;
     }
+    _simulationModel = nullptr;
+
     _updateValue(_spheresDirty, true);
     _updateValue(_cylindersDirty, true);
     _updateValue(_conesDirty, true);
@@ -111,12 +128,10 @@ uint64_t OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
 
     ospCommit(_ospExtendedSpheres[materialId]);
 
-    //    const auto& geometryParameters =
-    //    _parametersManager.getGeometryParameters();
-    //    if (geometryParameters.getCircuitUseSimulationModel())
-    //        ospAddGeometry(_simulationModel, _ospExtendedSpheres[materialId]);
-    //    else
-    ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
+    if (_useSimulationModel)
+        ospAddGeometry(_simulationModel, _ospExtendedSpheres[materialId]);
+    else
+        ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
 
     _updateValue(_spheresDirty, false);
     return bufferSize;
@@ -144,13 +159,10 @@ uint64_t OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
 
     ospCommit(_ospExtendedCylinders[materialId]);
 
-    //    const auto& geometryParameters =
-    //    _parametersManager.getGeometryParameters();
-    //    if (geometryParameters.getCircuitUseSimulationModel())
-    //        ospAddGeometry(_simulationModel,
-    //        _ospExtendedCylinders[materialId]);
-    //    else
-    ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
+    if (_useSimulationModel)
+        ospAddGeometry(_simulationModel, _ospExtendedCylinders[materialId]);
+    else
+        ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
     _updateValue(_cylindersDirty, false);
     return bufferSize;
 }
@@ -177,12 +189,10 @@ uint64_t OSPRayGeometryGroup::_commitCones(const size_t materialId)
 
     ospCommit(_ospExtendedCones[materialId]);
 
-    //    const auto& geometryParameters =
-    //    _parametersManager.getGeometryParameters();
-    //    if (geometryParameters.getCircuitUseSimulationModel())
-    //        ospAddGeometry(_simulationModel, _ospExtendedCones[materialId]);
-    //    else
-    ospAddGeometry(_model, _ospExtendedCones[materialId]);
+    if (_useSimulationModel)
+        ospAddGeometry(_simulationModel, _ospExtendedCones[materialId]);
+    else
+        ospAddGeometry(_model, _ospExtendedCones[materialId]);
     _updateValue(_conesDirty, false);
     return bufferSize;
 }
@@ -262,6 +272,9 @@ uint64_t OSPRayGeometryGroup::commit()
     if (!_model)
         _model = ospNewModel();
 
+    if (!_simulationModel)
+        _simulationModel = ospNewModel();
+
     uint64_t size{0};
     if (_spheresDirty)
         for (const auto& spheres : _spheres)
@@ -283,14 +296,48 @@ uint64_t OSPRayGeometryGroup::commit()
     return size;
 }
 
-OSPGeometry OSPRayGeometryGroup::getInstance()
+OSPGeometry OSPRayGeometryGroup::getInstance(const Vector3f& translation,
+                                             const Vector3f& rotation,
+                                             const Vector3f& scale)
 {
-    if (!_instance)
-    {
-        ospcommon::affine3f transformation =
-            ospcommon::affine3f(ospcommon::one);
-        _instance = ospNewInstance(_model, (osp::affine3f&)transformation);
-    }
+    if (_instance)
+        ospRelease(_instance);
+
+    ospcommon::affine3f transformation = ospcommon::affine3f(ospcommon::one);
+    transformation *= transformation.scale({scale.x(), scale.y(), scale.z()});
+    transformation *= transformation.translate(
+        {translation.x(), translation.y(), translation.z()});
+    if (rotation.x() != 0.f)
+        transformation *= transformation.rotate({1, 0, 0}, rotation.x());
+    if (rotation.y() != 0.f)
+        transformation *= transformation.rotate({0, 1, 0}, rotation.y());
+    if (rotation.z() != 0.f)
+        transformation *= transformation.rotate({0, 0, 1}, rotation.z());
+
+    _instance = ospNewInstance(_model, (osp::affine3f&)transformation);
     return _instance;
+}
+
+OSPGeometry OSPRayGeometryGroup::getSimulationModelInstance(
+    const Vector3f& translation, const Vector3f& rotation,
+    const Vector3f& scale)
+{
+    if (_simulationModelInstance)
+        ospRelease(_simulationModelInstance);
+
+    ospcommon::affine3f transformation = ospcommon::affine3f(ospcommon::one);
+    transformation *= transformation.scale({scale.x(), scale.y(), scale.z()});
+    transformation *= transformation.translate(
+        {translation.x(), translation.y(), translation.z()});
+    if (rotation.x() != 0.f)
+        transformation *= transformation.rotate({1, 0, 0}, rotation.x());
+    if (rotation.y() != 0.f)
+        transformation *= transformation.rotate({0, 1, 0}, rotation.y());
+    if (rotation.z() != 0.f)
+        transformation *= transformation.rotate({0, 0, 1}, rotation.z());
+
+    _simulationModelInstance =
+        ospNewInstance(_simulationModel, (osp::affine3f&)transformation);
+    return _simulationModelInstance;
 }
 }
