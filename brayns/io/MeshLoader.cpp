@@ -181,7 +181,6 @@ bool MeshLoader::importMeshFromFile(const std::string& filename,
 
     BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and " << nbFaces
                  << " faces" << std::endl;
-
     return true;
 }
 

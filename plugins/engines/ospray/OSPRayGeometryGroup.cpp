@@ -26,6 +26,8 @@ OSPRayGeometryGroup::OSPRayGeometryGroup(MaterialManagerPtr materialManager)
     : GeometryGroup(materialManager)
 {
     BRAYNS_FCT_ENTRY
+
+    _instances.push_back(nullptr);
 }
 
 void OSPRayGeometryGroup::setMemoryFlags(const size_t memoryManagementFlags)
@@ -43,6 +45,25 @@ OSPRayGeometryGroup::~OSPRayGeometryGroup()
 void OSPRayGeometryGroup::unload()
 {
     BRAYNS_FCT_ENTRY
+
+    if (_useSimulationModel)
+    {
+        for (auto geom : _ospExtendedSpheres)
+            ospRemoveGeometry(_simulationModel, geom.second);
+        for (auto geom : _ospExtendedCylinders)
+            ospRemoveGeometry(_simulationModel, geom.second);
+        for (auto geom : _ospExtendedCones)
+            ospRemoveGeometry(_simulationModel, geom.second);
+    }
+    else
+    {
+        for (auto geom : _ospExtendedSpheres)
+            ospRemoveGeometry(_model, geom.second);
+        for (auto geom : _ospExtendedCylinders)
+            ospRemoveGeometry(_model, geom.second);
+        for (auto geom : _ospExtendedCones)
+            ospRemoveGeometry(_model, geom.second);
+    }
 
     for (auto& geom : _ospExtendedSpheres)
         ospRelease(geom.second);
@@ -66,25 +87,6 @@ void OSPRayGeometryGroup::unload()
         ospRelease(geom.second);
     _ospMeshes.clear();
 
-    if (_useSimulationModel)
-    {
-        for (auto geom : _ospExtendedSpheres)
-            ospRemoveGeometry(_simulationModel, geom.second);
-        for (auto geom : _ospExtendedCylinders)
-            ospRemoveGeometry(_simulationModel, geom.second);
-        for (auto geom : _ospExtendedCones)
-            ospRemoveGeometry(_simulationModel, geom.second);
-    }
-    else
-    {
-        for (auto geom : _ospExtendedSpheres)
-            ospRemoveGeometry(_model, geom.second);
-        for (auto geom : _ospExtendedCylinders)
-            ospRemoveGeometry(_model, geom.second);
-        for (auto geom : _ospExtendedCones)
-            ospRemoveGeometry(_model, geom.second);
-    }
-
     if (_model)
     {
         ospCommit(_model);
@@ -103,9 +105,11 @@ void OSPRayGeometryGroup::unload()
     _updateValue(_cylindersDirty, true);
     _updateValue(_conesDirty, true);
     _updateValue(_trianglesMeshesDirty, true);
+
+    _instances.push_back(nullptr);
 }
 
-uint64_t OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
+void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
 {
     BRAYNS_FCT_ENTRY
     const auto& spheres = _spheres[materialId];
@@ -134,10 +138,9 @@ uint64_t OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
         ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
 
     _updateValue(_spheresDirty, false);
-    return bufferSize;
 }
 
-uint64_t OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
+void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
 {
     BRAYNS_FCT_ENTRY
     const auto& cylinders = _cylinders[materialId];
@@ -164,10 +167,9 @@ uint64_t OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
     else
         ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
     _updateValue(_cylindersDirty, false);
-    return bufferSize;
 }
 
-uint64_t OSPRayGeometryGroup::_commitCones(const size_t materialId)
+void OSPRayGeometryGroup::_commitCones(const size_t materialId)
 {
     BRAYNS_FCT_ENTRY
     const auto& cones = _cones[materialId];
@@ -194,38 +196,32 @@ uint64_t OSPRayGeometryGroup::_commitCones(const size_t materialId)
     else
         ospAddGeometry(_model, _ospExtendedCones[materialId]);
     _updateValue(_conesDirty, false);
-    return bufferSize;
 }
 
-uint64_t OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
+void OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
 {
     BRAYNS_FCT_ENTRY
-    uint64_t size = 0;
     _ospMeshes[materialId] = ospNewGeometry("trianglemesh");
 
     auto& trianglesMesh = _trianglesMeshes[materialId];
-    size += trianglesMesh.vertices.size() * 3 * sizeof(float);
     OSPData vertices =
         ospNewData(trianglesMesh.vertices.size(), OSP_FLOAT3,
                    trianglesMesh.vertices.data(), _memoryManagementFlags);
 
     if (!trianglesMesh.normals.empty())
     {
-        size += trianglesMesh.normals.size() * 3 * sizeof(float);
         OSPData normals =
             ospNewData(trianglesMesh.normals.size(), OSP_FLOAT3,
                        trianglesMesh.normals.data(), _memoryManagementFlags);
         ospSetObject(_ospMeshes[materialId], "vertex.normal", normals);
     }
 
-    size += trianglesMesh.indices.size() * 3 * sizeof(int);
     OSPData indices =
         ospNewData(trianglesMesh.indices.size(), OSP_INT3,
                    trianglesMesh.indices.data(), _memoryManagementFlags);
 
     if (!trianglesMesh.colors.empty())
     {
-        size += trianglesMesh.colors.size() * 4 * sizeof(float);
         OSPData colors =
             ospNewData(trianglesMesh.colors.size(), OSP_FLOAT3A,
                        trianglesMesh.colors.data(), _memoryManagementFlags);
@@ -235,7 +231,6 @@ uint64_t OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
 
     if (!trianglesMesh.textureCoordinates.empty())
     {
-        size += trianglesMesh.textureCoordinates.size() * 2 * sizeof(float);
         OSPData texCoords =
             ospNewData(trianglesMesh.textureCoordinates.size(), OSP_FLOAT2,
                        trianglesMesh.textureCoordinates.data(),
@@ -259,13 +254,12 @@ uint64_t OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
 
     ospAddGeometry(_model, _ospMeshes[materialId]);
     _updateValue(_trianglesMeshesDirty, false);
-    return size;
 }
 
-uint64_t OSPRayGeometryGroup::commit()
+void OSPRayGeometryGroup::commit()
 {
     if (!dirty())
-        return 0;
+        return;
 
     BRAYNS_FCT_ENTRY
 
@@ -275,33 +269,35 @@ uint64_t OSPRayGeometryGroup::commit()
     if (!_simulationModel)
         _simulationModel = ospNewModel();
 
-    uint64_t size{0};
     if (_spheresDirty)
         for (const auto& spheres : _spheres)
-            size += _commitSpheres(spheres.first);
+            _commitSpheres(spheres.first);
 
     if (_cylindersDirty)
         for (const auto& cylinders : _cylinders)
-            size += _commitCylinders(cylinders.first);
+            _commitCylinders(cylinders.first);
 
     if (_conesDirty)
         for (const auto& cones : _cones)
-            size += _commitCones(cones.first);
+            _commitCones(cones.first);
 
     if (_trianglesMeshesDirty)
         for (const auto& meshes : _trianglesMeshes)
-            size += _commitMeshes(meshes.first);
+            _commitMeshes(meshes.first);
 
-    ospCommit(_model);
-    return size;
+    return;
 }
 
-OSPGeometry OSPRayGeometryGroup::getInstance(const Vector3f& translation,
+OSPGeometry OSPRayGeometryGroup::getInstance(const size_t index,
+                                             const Vector3f& translation,
                                              const Vector3f& rotation,
                                              const Vector3f& scale)
 {
-    if (_instance)
-        ospRelease(_instance);
+    if (index < _instances.size())
+        _instances.push_back(nullptr);
+
+    if (_instances[index])
+        ospRelease(_instances[index]);
 
     ospcommon::affine3f transformation = ospcommon::affine3f(ospcommon::one);
     transformation *= transformation.scale({scale.x(), scale.y(), scale.z()});
@@ -314,8 +310,9 @@ OSPGeometry OSPRayGeometryGroup::getInstance(const Vector3f& translation,
     if (rotation.z() != 0.f)
         transformation *= transformation.rotate({0, 0, 1}, rotation.z());
 
-    _instance = ospNewInstance(_model, (osp::affine3f&)transformation);
-    return _instance;
+    _instances[index] = ospNewInstance(_model, (osp::affine3f&)transformation);
+    ospCommit(_instances[index]);
+    return _instances[index];
 }
 
 OSPGeometry OSPRayGeometryGroup::getSimulationModelInstance(
@@ -338,6 +335,7 @@ OSPGeometry OSPRayGeometryGroup::getSimulationModelInstance(
 
     _simulationModelInstance =
         ospNewInstance(_simulationModel, (osp::affine3f&)transformation);
+    ospCommit(_simulationModelInstance);
     return _simulationModelInstance;
 }
 }

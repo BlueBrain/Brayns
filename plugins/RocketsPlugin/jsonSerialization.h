@@ -245,14 +245,22 @@ inline void init(brayns::Material* m, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::GroupTransformation* g, ObjectHandler* h)
+{
+    h->add_property("translation", Vector3fArray(g->_translation));
+    h->add_property("scale", Vector3fArray(g->_scale));
+    h->add_property("rotation", Vector3fArray(g->_rotation));
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 inline void init(brayns::GroupAttributes* g, ObjectHandler* h)
 {
-    h->add_property("name", &g->name, Flags::Optional);
-    h->add_property("enabled", &g->enabled, Flags::Optional);
-    h->add_property("translation", Vector3fArray(g->translation),
-                    Flags::Optional);
-    h->add_property("scale", Vector3fArray(g->scale), Flags::Optional);
-    h->add_property("rotation", Vector3fArray(g->rotation), Flags::Optional);
+    h->add_property("name", &g->_name, Flags::Optional);
+    h->add_property("uri", &g->_uri, Flags::Optional);
+    h->add_property("enabled", &g->_enabled, Flags::Optional);
+    h->add_property("bounding_box", &g->_boundingBox, Flags::Optional);
+    h->add_property("transformations", &g->_transformations);
+    h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::Scene* s, ObjectHandler* h)

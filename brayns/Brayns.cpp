@@ -656,10 +656,13 @@ private:
         msg << "Loading " << files.size() << " meshes from " << folder;
         for (const auto& file : files)
         {
-            auto group = scene.addGeometryGroup("Mesh" + std::to_string(i));
+            const auto name = file.substr(file.find_last_of("/\\") + 1);
+            auto group = scene.addGeometryGroup(name);
+            const auto nbMaterial =
+                scene.getMaterialManager().getMaterials().size();
             size_t material =
                 geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-                    ? NB_SYSTEM_MATERIALS + i
+                    ? nbMaterial + i
                     : NO_MATERIAL;
 
             if (!_meshLoader.importMeshFromFile(file, *group,

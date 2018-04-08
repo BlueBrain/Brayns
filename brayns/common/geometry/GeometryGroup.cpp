@@ -24,6 +24,41 @@
 
 namespace brayns
 {
+GroupTransformation::GroupTransformation(const GroupTransformation& rhs)
+{
+    this->_translation = rhs._translation;
+    this->_scale = rhs._scale;
+    this->_rotation = rhs._rotation;
+}
+
+GroupTransformation& GroupTransformation::operator=(
+    const GroupTransformation& rhs)
+{
+    this->_translation = rhs._translation;
+    this->_scale = rhs._scale;
+    this->_rotation = rhs._rotation;
+    return *this;
+}
+
+GroupAttributes::GroupAttributes(const GroupAttributes& rhs)
+{
+    this->_name = rhs._name;
+    this->_uri = rhs._uri;
+    this->_enabled = rhs._enabled;
+    this->_boundingBox = rhs._boundingBox;
+    this->_transformations = rhs._transformations;
+}
+
+GroupAttributes& GroupAttributes::operator=(const GroupAttributes& rhs)
+{
+    this->_name = rhs._name;
+    this->_uri = rhs._uri;
+    this->_enabled = rhs._enabled;
+    this->_boundingBox = rhs._boundingBox;
+    this->_transformations = rhs._transformations;
+    return *this;
+}
+
 GeometryGroup::GeometryGroup()
     : _materialManager(nullptr)
 {

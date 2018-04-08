@@ -40,23 +40,24 @@ public:
 
     void unload() final;
     void commitMaterials(const uint32_t flags);
-    uint64_t commit();
+    void commit();
     OSPModel getModel() { return _model; }
-    OSPGeometry getInstance(const Vector3f& translation,
+    size_t getNbInstances() const { return _instances.size(); };
+    OSPGeometry getInstance(const size_t index, const Vector3f& translation,
                             const Vector3f& rotation, const Vector3f& scale);
     OSPGeometry getSimulationModelInstance(const Vector3f& translation,
                                            const Vector3f& rotation,
                                            const Vector3f& scale);
 
 private:
-    uint64_t _commitSpheres(const size_t materialId);
-    uint64_t _commitCylinders(const size_t materialId);
-    uint64_t _commitCones(const size_t materialId);
-    uint64_t _commitMeshes(const size_t materialId);
+    void _commitSpheres(const size_t materialId);
+    void _commitCylinders(const size_t materialId);
+    void _commitCones(const size_t materialId);
+    void _commitMeshes(const size_t materialId);
 
     OSPModel _model{nullptr};
     OSPModel _simulationModel{nullptr};
-    OSPGeometry _instance{nullptr};
+    std::vector<OSPGeometry> _instances;
     OSPGeometry _simulationModelInstance{nullptr};
 
     std::map<size_t, OSPGeometry> _ospExtendedSpheres;

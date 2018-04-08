@@ -30,10 +30,63 @@
 #include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/types.h>
 
+SERIALIZATION_ACCESS(GroupTransformation)
 SERIALIZATION_ACCESS(GeometryGroup)
+SERIALIZATION_ACCESS(GroupAttributes)
 
 namespace brayns
 {
+struct GroupTransformation : public BaseObject
+{
+    GroupTransformation() {}
+    GroupTransformation(const GroupTransformation& rhs);
+    GroupTransformation& operator=(const GroupTransformation& rhs);
+
+    Vector3f& translation() { return _translation; }
+    void translation(const Vector3f& value)
+    {
+        _updateValue(_translation, value);
+    }
+    Vector3f& scale() { return _scale; }
+    void scale(const Vector3f& value) { _updateValue(_scale, value); }
+    Vector3f& rotation() { return _rotation; }
+    void rotation(const Vector3f& value) { _updateValue(_rotation, value); }
+private:
+    Vector3f _translation{0, 0, 0};
+    Vector3f _scale{1, 1, 1};
+    Vector3f _rotation{0, 0, 0};
+
+    SERIALIZATION_FRIEND(GroupTransformation)
+};
+
+struct GroupAttributes : public BaseObject
+{
+    GroupAttributes() {}
+    GroupAttributes(const GroupAttributes& rhs);
+    GroupAttributes& operator=(const GroupAttributes& rhs);
+
+    GroupAttributes(const std::string& name, const std::string& uri,
+                    const bool enabled, const bool boundingBox)
+        : _name(name)
+        , _uri(uri)
+        , _enabled(enabled)
+        , _boundingBox(boundingBox)
+    {
+        _transformations.push_back(GroupTransformation());
+    }
+
+    bool enabled() const { return _enabled; }
+    GroupTransformations& transformations() { return _transformations; }
+private:
+    std::string _name;
+    std::string _uri;
+    bool _enabled;
+    bool _boundingBox;
+    GroupTransformations _transformations;
+
+    SERIALIZATION_FRIEND(GroupAttributes)
+};
+
 class GeometryGroup : public BaseObject
 {
 public:
