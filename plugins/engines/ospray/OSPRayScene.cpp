@@ -98,7 +98,7 @@ void OSPRayScene::buildGeometry()
     for (size_t i = 0; i < _geometryGroupAttributes.size(); ++i)
     {
         const auto& groupAttributes = _geometryGroupAttributes[i];
-        if (groupAttributes.enabled)
+        if (groupAttributes.enabled())
             _geometryGroups[i]->logInformation();
     }
 }
@@ -115,27 +115,34 @@ void OSPRayScene::commit()
         ospRelease(_rootSimulationModel);
     _rootSimulationModel = nullptr;
 
-    for (size_t i = 0; i < _geometryGroupAttributes.size(); ++i)
+    for (size_t g = 0; g < _geometryGroups.size(); ++g)
     {
-        const auto& groupAttributes = _geometryGroupAttributes[i];
-        if (groupAttributes.enabled)
+        auto& groupAttributes = _geometryGroupAttributes[g];
+        if (groupAttributes.enabled())
         {
             auto impl = std::static_pointer_cast<OSPRayGeometryGroup>(
-                _geometryGroups[i]);
+                _geometryGroups[g]);
             impl->commit();
-            ospAddGeometry(_rootModel,
-                           impl->getInstance(groupAttributes.translation,
-                                             groupAttributes.rotation,
-                                             groupAttributes.scale));
+
+            for (size_t i = 0; i < groupAttributes.transformations().size();
+                 ++i)
+            {
+                auto& transform = groupAttributes.transformations()[i];
+                ospAddGeometry(_rootModel,
+                               impl->getInstance(i, transform.translation(),
+                                                 transform.rotation(),
+                                                 transform.scale()));
+            }
+
             if (impl->useSimulationModel())
             {
+                auto& transform = groupAttributes.transformations()[0];
                 if (!_rootSimulationModel)
                     _rootSimulationModel = ospNewModel();
                 ospAddGeometry(_rootSimulationModel,
                                impl->getSimulationModelInstance(
-                                   groupAttributes.translation,
-                                   groupAttributes.rotation,
-                                   groupAttributes.scale));
+                                   transform.translation(),
+                                   transform.rotation(), transform.scale()));
             }
         }
     }
@@ -400,8 +407,25 @@ GeometryGroupPtr OSPRayScene::addGeometryGroup(const std::string& name,
 {
     BRAYNS_FCT_ENTRY
 
-    _geometryGroupAttributes.push_back(
-        {name, uri, true, true, {0, 0, 0}, {1, 1, 1}, {0, 0, 0}});
+    GroupAttributes groupAttributes(name, uri, true, true);
+#if 0
+    srand(time(0));
+    for (size_t i = 0; i < 99999; ++i)
+    {
+        const size_t s = 500;
+        const float h = s / 2.f;
+        GroupTransformation transform;
+        transform.translation(Vector3f(float(rand() % s) - h,
+                                       float(rand() % s) - h,
+                                       float(rand() % s) - h));
+        transform.rotation(
+            Vector3f(rand() % s - h, rand() % s - h, rand() % s - h));
+        //        const size_t scale = (rand() % 30 - 15) / 2.f;
+        //        transform.scale(Vector3f(scale, scale, scale));
+        groupAttributes.transformations().push_back(transform);
+    }
+#endif
+    _geometryGroupAttributes.push_back(groupAttributes);
     _geometryGroups.push_back(
         std::make_shared<OSPRayGeometryGroup>(_materialManager));
     return _geometryGroups[_geometryGroups.size() - 1];

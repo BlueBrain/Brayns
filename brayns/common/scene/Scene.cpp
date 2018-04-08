@@ -1042,7 +1042,7 @@ Boxf Scene::getBounds()
     for (size_t i = 0; i < _geometryGroups.size(); ++i)
     {
         const auto& groupAttributes = _geometryGroupAttributes[i];
-        if (groupAttributes.enabled)
+        if (groupAttributes.enabled())
             bounds.merge(_geometryGroups[i]->getBounds());
     }
     return bounds;

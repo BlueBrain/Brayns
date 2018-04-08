@@ -108,16 +108,10 @@ class GeometryGroup;
 typedef std::shared_ptr<GeometryGroup> GeometryGroupPtr;
 typedef std::vector<GeometryGroupPtr> GeometryGroups;
 
-struct GroupAttributes
-{
-    std::string name;
-    std::string uri;
-    bool enabled;
-    bool boundingBox;
-    Vector3f translation;
-    Vector3f scale;
-    Vector3f rotation;
-};
+struct GroupTransformation;
+typedef std::vector<GroupTransformation> GroupTransformations;
+
+struct GroupAttributes;
 typedef std::vector<GroupAttributes> GeometryGroupAttributes;
 
 struct Sphere;
