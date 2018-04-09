@@ -265,7 +265,6 @@ void MeshLoader::_createMaterials(MaterialManager& materialManager,
                  << std::endl;
     for (size_t m = 0; m < aiScene->mNumMaterials; ++m)
     {
-        //        const size_t materialId = _getMaterialId(m);
         aiMaterial* aimaterial = aiScene->mMaterials[m];
         Material material;
 

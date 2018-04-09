@@ -45,6 +45,9 @@ public:
     size_t getNbInstances() const { return _instances.size(); };
     OSPGeometry getInstance(const size_t index, const Vector3f& translation,
                             const Vector3f& rotation, const Vector3f& scale);
+    OSPGeometry getBoundingBoxModelInstance(const Vector3f& translation,
+                                            const Vector3f& rotation,
+                                            const Vector3f& scale);
     OSPGeometry getSimulationModelInstance(const Vector3f& translation,
                                            const Vector3f& rotation,
                                            const Vector3f& scale);
@@ -54,12 +57,20 @@ private:
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);
     void _commitMeshes(const size_t materialId);
-
     OSPModel _model{nullptr};
-    OSPModel _simulationModel{nullptr};
     std::vector<OSPGeometry> _instances;
+
+    // Bounding box
+    void _buildBoundingBox();
+    size_t _boudingBoxMaterialId{0};
+    OSPModel _boundingBoxModel{nullptr};
+    OSPGeometry _boundingBoxModelInstance{nullptr};
+
+    // Simulation model
+    OSPModel _simulationModel{nullptr};
     OSPGeometry _simulationModelInstance{nullptr};
 
+    // OSPRay data
     std::map<size_t, OSPGeometry> _ospExtendedSpheres;
     std::map<size_t, OSPData> _ospExtendedSpheresData;
     std::map<size_t, OSPGeometry> _ospExtendedCylinders;
