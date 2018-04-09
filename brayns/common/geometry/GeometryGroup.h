@@ -66,22 +66,25 @@ struct GroupAttributes : public BaseObject
     GroupAttributes& operator=(const GroupAttributes& rhs);
 
     GroupAttributes(const std::string& name, const std::string& uri,
-                    const bool enabled, const bool boundingBox)
+                    const bool enabled)
         : _name(name)
         , _uri(uri)
         , _enabled(enabled)
-        , _boundingBox(boundingBox)
+        , _visible(true)
+        , _boundingBox(true)
     {
         _transformations.push_back(GroupTransformation());
     }
 
     bool enabled() const { return _enabled; }
+    bool visible() const { return _visible; }
     bool boundingBox() const { return _boundingBox; }
     GroupTransformations& transformations() { return _transformations; }
 private:
     std::string _name;
     std::string _uri;
     bool _enabled;
+    bool _visible;
     bool _boundingBox;
     GroupTransformations _transformations;
 
