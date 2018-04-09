@@ -130,7 +130,7 @@ void OSPRayScene::commit()
                                        transform.translation(),
                                        transform.rotation(),
                                        transform.scale()));
-                else
+                if (groupAttributes.visible())
                     ospAddGeometry(_rootModel,
                                    impl->getInstance(i, transform.translation(),
                                                      transform.rotation(),
@@ -410,7 +410,7 @@ GeometryGroupPtr OSPRayScene::addGeometryGroup(const std::string& name,
 {
     BRAYNS_FCT_ENTRY
 
-    GroupAttributes groupAttributes(name, uri, true, false);
+    GroupAttributes groupAttributes(name, uri, true);
 #if 0
     srand(time(0));
     for (size_t i = 0; i < 99999; ++i)
