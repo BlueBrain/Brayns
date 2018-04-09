@@ -101,12 +101,59 @@ void OSPRayGeometryGroup::unload()
     }
     _simulationModel = nullptr;
 
-    _updateValue(_spheresDirty, true);
-    _updateValue(_cylindersDirty, true);
-    _updateValue(_conesDirty, true);
-    _updateValue(_trianglesMeshesDirty, true);
+    if (_boundingBoxModel)
+        ospRelease(_boundingBoxModel);
+    _boundingBoxModel = nullptr;
+
+    _updateValue(_spheresDirty, false);
+    _updateValue(_cylindersDirty, false);
+    _updateValue(_conesDirty, false);
+    _updateValue(_trianglesMeshesDirty, false);
 
     _instances.push_back(nullptr);
+}
+
+void OSPRayGeometryGroup::_buildBoundingBox()
+{
+    if (_boundingBoxModel)
+        return;
+
+    _boundingBoxModel = ospNewModel();
+
+    _boudingBoxMaterialId = 0;
+    const Vector3f s = _bounds.getSize() / 2.f;
+    const Vector3f c = _bounds.getCenter();
+    const float radius = s.length() / 200.f;
+    const Vector3f positions[8] = {
+        {c.x() - s.x(), c.y() - s.y(), c.z() - s.z()},
+        {c.x() + s.x(), c.y() - s.y(), c.z() - s.z()}, //    6--------7
+        {c.x() - s.x(), c.y() + s.y(), c.z() - s.z()}, //   /|       /|
+        {c.x() + s.x(), c.y() + s.y(), c.z() - s.z()}, //  2--------3 |
+        {c.x() - s.x(), c.y() - s.y(), c.z() + s.z()}, //  | |      | |
+        {c.x() + s.x(), c.y() - s.y(), c.z() + s.z()}, //  | 4------|-5
+        {c.x() - s.x(), c.y() + s.y(), c.z() + s.z()}, //  |/       |/
+        {c.x() + s.x(), c.y() + s.y(), c.z() + s.z()}  //  0--------1
+    };
+
+    for (size_t i = 0; i < 8; ++i)
+        addSphere(_boudingBoxMaterialId, Sphere(positions[i], radius));
+
+    addCylinder(_boudingBoxMaterialId, {positions[0], positions[1], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[2], positions[3], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[4], positions[5], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[6], positions[7], radius});
+
+    addCylinder(_boudingBoxMaterialId, {positions[0], positions[2], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[1], positions[3], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[4], positions[6], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[5], positions[7], radius});
+
+    addCylinder(_boudingBoxMaterialId, {positions[0], positions[4], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[1], positions[5], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[2], positions[6], radius});
+    addCylinder(_boudingBoxMaterialId, {positions[3], positions[7], radius});
+
+    ospCommit(_boundingBoxModel);
 }
 
 void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
@@ -134,6 +181,8 @@ void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
 
     if (_useSimulationModel)
         ospAddGeometry(_simulationModel, _ospExtendedSpheres[materialId]);
+    else if (materialId == _boudingBoxMaterialId)
+        ospAddGeometry(_boundingBoxModel, _ospExtendedSpheres[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
 
@@ -164,6 +213,8 @@ void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
 
     if (_useSimulationModel)
         ospAddGeometry(_simulationModel, _ospExtendedCylinders[materialId]);
+    else if (materialId == _boudingBoxMaterialId)
+        ospAddGeometry(_boundingBoxModel, _ospExtendedCylinders[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
     _updateValue(_cylindersDirty, false);
@@ -193,6 +244,8 @@ void OSPRayGeometryGroup::_commitCones(const size_t materialId)
 
     if (_useSimulationModel)
         ospAddGeometry(_simulationModel, _ospExtendedCones[materialId]);
+    else if (materialId == _boudingBoxMaterialId)
+        ospAddGeometry(_boundingBoxModel, _ospExtendedCones[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedCones[materialId]);
     _updateValue(_conesDirty, false);
@@ -285,6 +338,13 @@ void OSPRayGeometryGroup::commit()
         for (const auto& meshes : _trianglesMeshes)
             _commitMeshes(meshes.first);
 
+    // Bounding box
+    _buildBoundingBox();
+
+    // Commit models
+    ospCommit(_model);
+    ospCommit(_boundingBoxModel);
+    ospCommit(_simulationModel);
     return;
 }
 
@@ -337,5 +397,29 @@ OSPGeometry OSPRayGeometryGroup::getSimulationModelInstance(
         ospNewInstance(_simulationModel, (osp::affine3f&)transformation);
     ospCommit(_simulationModelInstance);
     return _simulationModelInstance;
+}
+
+OSPGeometry OSPRayGeometryGroup::getBoundingBoxModelInstance(
+    const Vector3f& translation, const Vector3f& rotation,
+    const Vector3f& scale)
+{
+    if (_boundingBoxModelInstance)
+        ospRelease(_boundingBoxModelInstance);
+
+    ospcommon::affine3f transformation = ospcommon::affine3f(ospcommon::one);
+    transformation *= transformation.scale({scale.x(), scale.y(), scale.z()});
+    transformation *= transformation.translate(
+        {translation.x(), translation.y(), translation.z()});
+    if (rotation.x() != 0.f)
+        transformation *= transformation.rotate({1, 0, 0}, rotation.x());
+    if (rotation.y() != 0.f)
+        transformation *= transformation.rotate({0, 1, 0}, rotation.y());
+    if (rotation.z() != 0.f)
+        transformation *= transformation.rotate({0, 0, 1}, rotation.z());
+
+    _boundingBoxModelInstance =
+        ospNewInstance(_boundingBoxModel, (osp::affine3f&)transformation);
+    ospCommit(_boundingBoxModelInstance);
+    return _boundingBoxModelInstance;
 }
 }

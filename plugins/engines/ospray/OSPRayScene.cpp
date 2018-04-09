@@ -87,10 +87,6 @@ void OSPRayScene::buildGeometry()
 
     commitMaterials();
 
-    const auto& geomParams = _parametersManager.getGeometryParameters();
-    if (geomParams.getCircuitUseSimulationModel() && !_rootSimulationModel)
-        _rootSimulationModel = ospNewModel();
-
     // Optix needs a bounding box around the volume so that if can find
     // intersections before initiating the traversal
     _processVolumeAABBGeometry();
@@ -115,7 +111,7 @@ void OSPRayScene::commit()
         ospRelease(_rootSimulationModel);
     _rootSimulationModel = nullptr;
 
-    for (size_t g = 0; g < _geometryGroups.size(); ++g)
+    for (size_t g = 0; g < _geometryGroupAttributes.size(); ++g)
     {
         auto& groupAttributes = _geometryGroupAttributes[g];
         if (groupAttributes.enabled())
@@ -128,10 +124,17 @@ void OSPRayScene::commit()
                  ++i)
             {
                 auto& transform = groupAttributes.transformations()[i];
-                ospAddGeometry(_rootModel,
-                               impl->getInstance(i, transform.translation(),
-                                                 transform.rotation(),
-                                                 transform.scale()));
+                if (groupAttributes.boundingBox())
+                    ospAddGeometry(_rootModel,
+                                   impl->getBoundingBoxModelInstance(
+                                       transform.translation(),
+                                       transform.rotation(),
+                                       transform.scale()));
+                else
+                    ospAddGeometry(_rootModel,
+                                   impl->getInstance(i, transform.translation(),
+                                                     transform.rotation(),
+                                                     transform.scale()));
             }
 
             if (impl->useSimulationModel())
@@ -407,12 +410,12 @@ GeometryGroupPtr OSPRayScene::addGeometryGroup(const std::string& name,
 {
     BRAYNS_FCT_ENTRY
 
-    GroupAttributes groupAttributes(name, uri, true, true);
+    GroupAttributes groupAttributes(name, uri, true, false);
 #if 0
     srand(time(0));
     for (size_t i = 0; i < 99999; ++i)
     {
-        const size_t s = 500;
+        const size_t s = 1500;
         const float h = s / 2.f;
         GroupTransformation transform;
         transform.translation(Vector3f(float(rand() % s) - h,

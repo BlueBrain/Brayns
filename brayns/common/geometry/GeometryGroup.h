@@ -76,6 +76,7 @@ struct GroupAttributes : public BaseObject
     }
 
     bool enabled() const { return _enabled; }
+    bool boundingBox() const { return _boundingBox; }
     GroupTransformations& transformations() { return _transformations; }
 private:
     std::string _name;
