@@ -29,7 +29,8 @@ namespace brayns
 class OSPRayMaterialManager : public MaterialManager
 {
 public:
-    OSPRayMaterialManager(const uint32_t flags);
+    OSPRayMaterialManager(ParametersManager& parametersManager,
+                          const uint32_t flags);
 
     void commit() final;
     OSPMaterial getOSPMaterial(const size_t index);

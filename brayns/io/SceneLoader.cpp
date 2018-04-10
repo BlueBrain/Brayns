@@ -23,6 +23,7 @@
 #include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <fstream>
@@ -101,13 +102,13 @@ void SceneLoader::_importMorphology(GeometryGroup& group,
                                     const Node& node,
                                     const Matrix4f& transformation)
 {
+    const auto nbMaterials = materialManager.getMaterials().size();
     MorphologyLoader morphologyLoader(_applicationParameters,
-                                      _geometryParameters,
-                                      materialManager.getMaterials().size());
+                                      _geometryParameters, nbMaterials);
     const servus::URI uri(node.filename);
-    if (!morphologyLoader.importMorphology(uri, 0, NB_SYSTEM_MATERIALS +
-                                                       node.materialId,
-                                           group, transformation))
+    if (!morphologyLoader.importMorphology(uri, 0,
+                                           nbMaterials + node.materialId, group,
+                                           materialManager, transformation))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
 #endif
@@ -116,9 +117,12 @@ void SceneLoader::_importMesh(GeometryGroup& group, MeshLoader& loader,
                               MaterialManager& materialManager,
                               const Node& node, const Matrix4f& transformation)
 {
-    if (!loader.importMeshFromFile(node.filename, group, materialManager,
+    const auto fileName = node.filename;
+    const auto meshName = getNameFromFullPath(fileName);
+    const auto nbMaterials = materialManager.getMaterials().size();
+    if (!loader.importMeshFromFile(fileName, meshName, group, materialManager,
                                    transformation,
-                                   NB_SYSTEM_MATERIALS + node.materialId))
+                                   nbMaterials + node.materialId))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
 

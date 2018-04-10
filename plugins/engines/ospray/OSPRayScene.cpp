@@ -37,11 +37,12 @@
 namespace brayns
 {
 OSPRayScene::OSPRayScene(Renderers renderers,
-                         ParametersManager& parametersManager)
-    : Scene(renderers, parametersManager)
+                         ParametersManager& parametersManager,
+                         MaterialManager& materialManager,
+                         const size_t memoryManagementFlags)
+    : Scene(renderers, parametersManager, materialManager)
+    , _memoryManagementFlags(memoryManagementFlags)
 {
-    _materialManager =
-        std::make_shared<OSPRayMaterialManager>(_getOSPDataFlags());
 }
 
 OSPRayScene::~OSPRayScene()
@@ -90,18 +91,13 @@ void OSPRayScene::buildGeometry()
     // Optix needs a bounding box around the volume so that if can find
     // intersections before initiating the traversal
     _processVolumeAABBGeometry();
-
-    for (size_t i = 0; i < _geometryGroupAttributes.size(); ++i)
-    {
-        const auto& groupAttributes = _geometryGroupAttributes[i];
-        if (groupAttributes.enabled())
-            _geometryGroups[i]->logInformation();
-    }
 }
 
 void OSPRayScene::commit()
 {
     BRAYNS_FCT_ENTRY
+
+    _materialManager.commit();
 
     if (_rootModel)
         ospRelease(_rootModel);
@@ -127,14 +123,9 @@ void OSPRayScene::commit()
                 if (groupAttributes.boundingBox())
                     ospAddGeometry(_rootModel,
                                    impl->getBoundingBoxModelInstance(
-                                       transform.translation(),
-                                       transform.rotation(),
-                                       transform.scale()));
+                                       transform));
                 if (groupAttributes.visible())
-                    ospAddGeometry(_rootModel,
-                                   impl->getInstance(i, transform.translation(),
-                                                     transform.rotation(),
-                                                     transform.scale()));
+                    ospAddGeometry(_rootModel, impl->getInstance(i, transform));
             }
 
             if (impl->useSimulationModel())
@@ -143,10 +134,9 @@ void OSPRayScene::commit()
                 if (!_rootSimulationModel)
                     _rootSimulationModel = ospNewModel();
                 ospAddGeometry(_rootSimulationModel,
-                               impl->getSimulationModelInstance(
-                                   transform.translation(),
-                                   transform.rotation(), transform.scale()));
+                               impl->getSimulationModelInstance(transform));
             }
+            impl->logInformation();
         }
     }
 
@@ -208,7 +198,7 @@ void OSPRayScene::commitLights()
     if (!_ospLightData)
     {
         _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT,
-                                   &_ospLights[0], _getOSPDataFlags());
+                                   &_ospLights[0], _memoryManagementFlags);
         ospCommit(_ospLightData);
         for (auto renderer : _renderers)
         {
@@ -221,13 +211,12 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials()
 {
-    if (!_materialManager->isModified())
+    if (!_materialManager.isModified())
         return;
 
     BRAYNS_FCT_ENTRY
 
-    auto impl =
-        std::static_pointer_cast<OSPRayMaterialManager>(_materialManager);
+    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
     impl->commit();
     auto materialData = impl->getData();
 
@@ -238,7 +227,7 @@ void OSPRayScene::commitMaterials()
         ospSetData(rendererImpl, "materials", materialData);
         ospCommit(rendererImpl);
     }
-    _materialManager->resetModified();
+    _materialManager.resetModified();
 }
 
 void OSPRayScene::commitTransferFunctionData()
@@ -254,14 +243,14 @@ void OSPRayScene::commitTransferFunctionData()
     _ospTransferFunctionDiffuseData =
         ospNewData(_transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
                    _transferFunction.getDiffuseColors().data(),
-                   _getOSPDataFlags());
+                   _memoryManagementFlags);
     ospCommit(_ospTransferFunctionDiffuseData);
 
     _ospTransferFunctionEmissionData =
         ospNewData(_transferFunction.getEmissionIntensities().size(),
                    OSP_FLOAT3,
                    _transferFunction.getEmissionIntensities().data(),
-                   _getOSPDataFlags());
+                   _memoryManagementFlags);
     ospCommit(_ospTransferFunctionEmissionData);
 
     for (const auto& renderer : _renderers)
@@ -307,8 +296,8 @@ void OSPRayScene::commitVolumeData()
 
         // An empty array has to be assigned to the renderers
         _ospVolumeDataSize = 0;
-        _ospVolumeData =
-            ospNewData(_ospVolumeDataSize, OSP_UCHAR, 0, _getOSPDataFlags());
+        _ospVolumeData = ospNewData(_ospVolumeDataSize, OSP_UCHAR, 0,
+                                    _memoryManagementFlags);
         ospCommit(_ospVolumeData);
         for (const auto& renderer : _renderers)
         {
@@ -326,8 +315,8 @@ void OSPRayScene::commitVolumeData()
     {
         // Set volume data to renderers
         _ospVolumeDataSize = volumeHandler->getSize();
-        _ospVolumeData =
-            ospNewData(_ospVolumeDataSize, OSP_UCHAR, data, _getOSPDataFlags());
+        _ospVolumeData = ospNewData(_ospVolumeDataSize, OSP_UCHAR, data,
+                                    _memoryManagementFlags);
         ospCommit(_ospVolumeData);
         for (const auto& renderer : _renderers)
         {
@@ -374,8 +363,9 @@ void OSPRayScene::commitSimulationData()
 
     if (_ospSimulationData)
         ospRelease(_ospSimulationData);
-    _ospSimulationData = ospNewData(_simulationHandler->getFrameSize(),
-                                    OSP_FLOAT, frameData, _getOSPDataFlags());
+    _ospSimulationData =
+        ospNewData(_simulationHandler->getFrameSize(), OSP_FLOAT, frameData,
+                   _memoryManagementFlags);
     ospCommit(_ospSimulationData);
 
     for (const auto& renderer : _renderers)
@@ -393,16 +383,6 @@ bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
     BRAYNS_FCT_ENTRY
 
     return boost::algorithm::ends_with(volumeFile, ".raw");
-}
-
-uint32_t OSPRayScene::_getOSPDataFlags()
-{
-    BRAYNS_FCT_ENTRY
-
-    return _parametersManager.getGeometryParameters().getMemoryMode() ==
-                   MemoryMode::shared
-               ? OSP_DATA_SHARED_BUFFER
-               : 0;
 }
 
 GeometryGroupPtr OSPRayScene::addGeometryGroup(const std::string& name,
@@ -430,7 +410,7 @@ GeometryGroupPtr OSPRayScene::addGeometryGroup(const std::string& name,
 #endif
     _geometryGroupAttributes.push_back(groupAttributes);
     _geometryGroups.push_back(
-        std::make_shared<OSPRayGeometryGroup>(_materialManager));
+        std::make_shared<OSPRayGeometryGroup>(name, _materialManager));
     return _geometryGroups[_geometryGroups.size() - 1];
 }
 

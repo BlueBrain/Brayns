@@ -307,11 +307,11 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     }
 }
 
-inline void processBackgroundColor(varying ScreenSample& sample,
+inline void processBackgroundColor(varying ScreenSample& sample, Ray& ray,
                                    ShadingAttributes& attributes)
 {
     // No intersection. Return volume contribution + skybox color
-    const vec4f bgColor = skyboxMapping((Renderer*)attributes.self, sample.ray,
+    const vec4f bgColor = skyboxMapping((Renderer*)attributes.self, ray,
                                         attributes.self->abstract.numMaterials,
                                         attributes.self->abstract.materials);
 
@@ -472,7 +472,7 @@ inline vec3f SimulationRenderer_shadeRay(
         if (ray.geomID < 0)
         {
             // Background contribution
-            processBackgroundColor(sample, attributes);
+            processBackgroundColor(sample, ray, attributes);
 
             // Volume contribution
             processVolumeContribution(sample, attributes, ray);

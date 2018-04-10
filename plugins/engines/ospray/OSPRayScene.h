@@ -43,7 +43,9 @@ namespace brayns
 class OSPRayScene : public brayns::Scene
 {
 public:
-    OSPRayScene(Renderers renderer, ParametersManager& parametersManager);
+    OSPRayScene(Renderers renderer, ParametersManager& parametersManager,
+                MaterialManager& materialManager,
+                const size_t memoryManagementFlags);
     ~OSPRayScene();
 
     /** @copydoc Scene::commit */
@@ -86,7 +88,6 @@ private:
     OSPTexture2D _createTexture2D(const std::string& textureName);
 
     OSPModel _getActiveModel();
-    uint32_t _getOSPDataFlags();
 
     OSPModel _rootModel{nullptr};
     std::vector<GeometryGroupAttributes> _ospGeometryGroups;
@@ -99,6 +100,8 @@ private:
     OSPData _ospSimulationData{nullptr};
     OSPData _ospTransferFunctionEmissionData{nullptr};
     OSPData _ospTransferFunctionDiffuseData{nullptr};
+
+    size_t _memoryManagementFlags{0};
 };
 }
 #endif // OSPRAYSCENE_H

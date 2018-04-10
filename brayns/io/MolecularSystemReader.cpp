@@ -23,6 +23,7 @@
 #include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
@@ -40,7 +41,7 @@ MolecularSystemReader::MolecularSystemReader(
 bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 {
     auto group = scene.addGeometryGroup("MolecularSystem");
-    MaterialManager& materialManager = scene.getMaterialManager();
+    auto& materialManager = scene.getMaterialManager();
     _nbProteins = 0;
     if (!_loadConfiguration())
         return false;
@@ -55,7 +56,8 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
     if (!_calciumSimulationFolder.empty())
     {
         CADiffusionSimulationHandlerPtr handler(
-            new CADiffusionSimulationHandler(_calciumSimulationFolder));
+            new CADiffusionSimulationHandler(scene.getMaterialManager(),
+                                             _calciumSimulationFolder));
         handler->setFrame(*group, 0);
         scene.setCADiffusionSimulationHandler(handler);
     }
@@ -92,20 +94,18 @@ bool MolecularSystemReader::_createScene(GeometryGroup& group,
             {
                 const Vector3f scale = {1.f, 1.f, 1.f};
                 const Matrix4f transformation(position, scale);
-                const auto objFilename =
-                    _meshFolder + '/' + protein->second + ".obj";
                 const auto& materials = materialManager.getMaterials();
-                const size_t material =
-                    _geometryParameters.getColorScheme() ==
-                            ColorScheme::protein_by_id
-                        ? NB_SYSTEM_MATERIALS +
-                              proteinCount %
-                                  (materials.size() - NB_SYSTEM_MATERIALS)
-                        : NO_MATERIAL;
+                const size_t material = _geometryParameters.getColorScheme() ==
+                                                ColorScheme::protein_by_id
+                                            ? proteinCount % materials.size()
+                                            : NO_MATERIAL;
 
                 // Scale mesh to match PDB units. PDB are in angstrom, and
                 // positions are in micrometers
-                meshLoader.importMeshFromFile(objFilename, group,
+                const auto fileName =
+                    _meshFolder + '/' + protein->second + ".obj";
+                const auto meshName = getNameFromFullPath(fileName);
+                meshLoader.importMeshFromFile(fileName, meshName, group,
                                               materialManager, transformation,
                                               material);
 

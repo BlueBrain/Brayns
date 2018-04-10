@@ -33,7 +33,8 @@ namespace brayns
 class OSPRayGeometryGroup : public GeometryGroup
 {
 public:
-    OSPRayGeometryGroup(MaterialManagerPtr materialManager);
+    OSPRayGeometryGroup(const std::string& name,
+                        MaterialManager& materialManager);
     ~OSPRayGeometryGroup() final;
 
     void setMemoryFlags(const size_t memoryManagementFlags);
@@ -43,16 +44,16 @@ public:
     void commit();
     OSPModel getModel() { return _model; }
     size_t getNbInstances() const { return _instances.size(); };
-    OSPGeometry getInstance(const size_t index, const Vector3f& translation,
-                            const Vector3f& rotation, const Vector3f& scale);
-    OSPGeometry getBoundingBoxModelInstance(const Vector3f& translation,
-                                            const Vector3f& rotation,
-                                            const Vector3f& scale);
-    OSPGeometry getSimulationModelInstance(const Vector3f& translation,
-                                           const Vector3f& rotation,
-                                           const Vector3f& scale);
+    OSPGeometry getInstance(const size_t index,
+                            GroupTransformation& transformation);
+    OSPGeometry getBoundingBoxModelInstance(
+        GroupTransformation& transformation);
+    OSPGeometry getSimulationModelInstance(GroupTransformation& transformation);
 
 private:
+    osp::affine3f _groupTransformationToAffine3f(
+        GroupTransformation& transformation);
+
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);

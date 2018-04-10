@@ -28,6 +28,7 @@
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(Material)
+SERIALIZATION_ACCESS(TextureDescriptor)
 
 namespace brayns
 {
@@ -59,7 +60,23 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
     {TT_REFLECTION, "map_reflection"},
     {TT_REFRACTION, "map_refraction"}};
 
-typedef std::map<TextureType, size_t> TextureTypes;
+class TextureDescriptor : public BaseObject
+{
+public:
+    BRAYNS_API TextureDescriptor();
+    BRAYNS_API TextureDescriptor(const TextureType type, const size_t id);
+    BRAYNS_API TextureDescriptor(const TextureDescriptor& rhs);
+    BRAYNS_API TextureDescriptor& operator=(const TextureDescriptor& rhs);
+
+    BRAYNS_API size_t getId() const { return _id; }
+    BRAYNS_API TextureType getType() const { return _type; }
+private:
+    TextureType _type;
+    size_t _id;
+
+    SERIALIZATION_FRIEND(TextureDescriptor)
+};
+typedef std::vector<TextureDescriptor> TextureDescriptors;
 
 class Material : public BaseObject
 {
@@ -68,10 +85,10 @@ public:
     BRAYNS_API Material(const Material& rhs);
     BRAYNS_API Material& operator=(const Material& rhs);
 
-    BRAYNS_API MaterialType getType() const { return _materialType; }
-    BRAYNS_API void setType(const MaterialType materialType)
+    BRAYNS_API std::string getName() const { return _name; }
+    BRAYNS_API void setName(const std::string& value)
     {
-        _updateValue(_materialType, materialType);
+        _updateValue(_name, value);
     }
     BRAYNS_API void setDiffuseColor(const Vector3f& value)
     {
@@ -115,11 +132,14 @@ public:
     {
         return _castSimulationData;
     }
-    BRAYNS_API TextureTypes& getTextureTypes() { return _textureTypes; }
-    BRAYNS_API void setTexture(const TextureType& type, const size_t id);
+    BRAYNS_API TextureDescriptors& getTextureDescriptors()
+    {
+        return _textureDescriptors;
+    }
+    BRAYNS_API void addTexture(const TextureType& type, const size_t id);
 
 protected:
-    MaterialType _materialType{MaterialType::surface};
+    std::string _name{"undefined"};
     Vector3f _color{1.f, 1.f, 1.f};
     Vector3f _specularColor{1.f, 1.f, 1.f};
     float _specularExponent{10.f};
@@ -129,7 +149,7 @@ protected:
     float _emission{0.f};
     float _glossiness{1.f};
     bool _castSimulationData{true};
-    TextureTypes _textureTypes;
+    TextureDescriptors _textureDescriptors;
 
     SERIALIZATION_FRIEND(Material)
 };

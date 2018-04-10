@@ -112,6 +112,17 @@ STATICJSON_DECLARE_ENUM(brayns::EngineType,
                         {"ospray", brayns::EngineType::ospray},
                         {"optix", brayns::EngineType::optix});
 
+STATICJSON_DECLARE_ENUM(brayns::TextureType,
+                        {"diffuse", brayns::TextureType::TT_DIFFUSE},
+                        {"normals", brayns::TextureType::TT_NORMALS},
+                        {"bump", brayns::TextureType::TT_BUMP},
+                        {"specular", brayns::TextureType::TT_SPECULAR},
+                        {"emissive", brayns::TextureType::TT_EMISSIVE},
+                        {"opacity", brayns::TextureType::TT_OPACITY},
+                        {"reflection", brayns::TextureType::TT_REFLECTION},
+                        {"refraction", brayns::TextureType::TT_REFRACTION},
+                        {"occlusion", brayns::TextureType::TT_OCCLUSION});
+
 // c-array to std.array: https://stackoverflow.com/questions/11205186
 #define Vector2uiArray(vec) \
     reinterpret_cast<std::array<unsigned, 2>*>(&(vec).array[0])
@@ -228,8 +239,16 @@ inline void init(brayns::Boxf* b, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::TextureDescriptor* t, ObjectHandler* h)
+{
+    h->add_property("type", &t->_type, Flags::Optional);
+    h->add_property("id", &t->_id, Flags::Optional);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 inline void init(brayns::Material* m, ObjectHandler* h)
 {
+    h->add_property("name", &m->_name, Flags::Optional);
     h->add_property("diffuse_color", Vector3fArray(m->_color), Flags::Optional);
     h->add_property("specular_color", Vector3fArray(m->_specularColor),
                     Flags::Optional);
@@ -242,6 +261,7 @@ inline void init(brayns::Material* m, ObjectHandler* h)
     h->add_property("glossiness", &m->_glossiness, Flags::Optional);
     h->add_property("cast_simulation_data", &m->_castSimulationData,
                     Flags::Optional);
+    h->add_property("textures", &m->getTextureDescriptors());
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

@@ -21,6 +21,7 @@
 #include "CADiffusionSimulationHandler.h"
 
 #include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -35,7 +36,8 @@ const float CALCIUM_RADIUS = 0.00194f;
 namespace brayns
 {
 CADiffusionSimulationHandler::CADiffusionSimulationHandler(
-    const std::string& simulationFolder)
+    MaterialManager& materialManager, const std::string& simulationFolder)
+    : _materialManager(materialManager)
 {
     BRAYNS_DEBUG << "Loading Calcium simulation from " << simulationFolder
                  << std::endl;
@@ -96,8 +98,10 @@ void CADiffusionSimulationHandler::setFrame(GeometryGroup& group,
 
     // Load Calcium positions
     _loadCalciumPositions(frame);
-    const size_t materialId =
-        static_cast<size_t>(MaterialType::calcium_simulation);
+    Material material;
+    material.setDiffuseColor({1.f, 1.f, 1.f});
+    material.setName("Calcium");
+    const size_t materialId = _materialManager.add(material);
     if (!_spheresCreated)
     {
         BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"

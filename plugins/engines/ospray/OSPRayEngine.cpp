@@ -99,9 +99,15 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
 
     Renderers renderersForScene = _createRenderers();
 
+    const auto ospFlags = _getOSPDataFlags();
+    BRAYNS_INFO << "Initializing material manager" << std::endl;
+    _materialManager =
+        std::make_shared<OSPRayMaterialManager>(_parametersManager, ospFlags);
+
     BRAYNS_INFO << "Initializing scene" << std::endl;
     _scene =
-        std::make_shared<OSPRayScene>(renderersForScene, _parametersManager);
+        std::make_shared<OSPRayScene>(renderersForScene, _parametersManager,
+                                      *_materialManager, ospFlags);
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
     _camera = createCamera(rp.getCameraType());
@@ -284,5 +290,15 @@ CameraPtr OSPRayEngine::createCamera(const CameraType type)
         name = rp.getCameraTypeAsString(CameraType::default_);
         return std::make_shared<OSPRayCamera>(type, name);
     }
+}
+
+uint32_t OSPRayEngine::_getOSPDataFlags()
+{
+    BRAYNS_FCT_ENTRY
+
+    return _parametersManager.getGeometryParameters().getMemoryMode() ==
+                   MemoryMode::shared
+               ? OSP_DATA_SHARED_BUFFER
+               : 0;
 }
 }

@@ -135,6 +135,8 @@ typedef std::shared_ptr<MaterialManager> MaterialManagerPtr;
 class Material;
 typedef std::vector<Material> Materials;
 
+class TextureDescriptor;
+
 class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;
 typedef std::map<size_t, Texture2DPtr> TexturesMap;
@@ -299,26 +301,11 @@ struct Histogram
  *  such as skyboxes.
  */
 const size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
-const size_t NB_SYSTEM_MATERIALS = 6;
-const size_t MATERIAL_SYSTEM = 0;
-const std::string TEXTURE_NAME_SKYBOX = "SKYBOX";
-const std::string TEXTURE_NAME_SIMULATION = "SIMULATION";
 
 enum class MemoryMode
 {
     shared,
     replicated
-};
-
-/** Defines how materials should be created */
-enum class MaterialType
-{
-    surface = 0,            // Material for surfaces (default)
-    skybox = 1,             // Material for the skybox
-    bounding_box = 2,       // Material for bounding boxes
-    voltage_simulation = 3, // Material for voltage simulation data
-    calcium_simulation = 4, // Material for calcium simulation data
-    invisible = 5           // Material used to hide geometry
 };
 
 enum class MaterialsColorMap

@@ -61,8 +61,10 @@ GroupAttributes& GroupAttributes::operator=(const GroupAttributes& rhs)
     return *this;
 }
 
-GeometryGroup::GeometryGroup(MaterialManagerPtr materialManager)
+GeometryGroup::GeometryGroup(const std::string& name,
+                             MaterialManager& materialManager)
     : _materialManager(materialManager)
+    , _name(name)
 {
 }
 
@@ -91,7 +93,7 @@ bool GeometryGroup::empty() const
 uint64_t GeometryGroup::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _spheresDirty = true;
-    _materialManager->check(materialId);
+    _materialManager.check(materialId);
     _spheres[materialId].push_back(sphere);
     _bounds.merge(sphere.center);
     return _spheres[materialId].size() - 1;
@@ -115,7 +117,7 @@ uint64_t GeometryGroup::addCylinder(const size_t materialId,
                                     const Cylinder& cylinder)
 {
     _cylindersDirty = true;
-    _materialManager->check(materialId);
+    _materialManager.check(materialId);
     _cylinders[materialId].push_back(cylinder);
     _bounds.merge(cylinder.center);
     _bounds.merge(cylinder.up);
@@ -140,7 +142,7 @@ void GeometryGroup::setCylinder(const size_t materialId, const uint64_t index,
 uint64_t GeometryGroup::addCone(const size_t materialId, const Cone& cone)
 {
     _conesDirty = true;
-    _materialManager->check(materialId);
+    _materialManager.check(materialId);
     _cones[materialId].push_back(cone);
     _bounds.merge(cone.center);
     _bounds.merge(cone.up);
@@ -170,18 +172,45 @@ bool GeometryGroup::dirty() const
 
 void GeometryGroup::logInformation()
 {
-    const uint64_t sizeInBytes =
-        _spheres.size() * sizeof(Sphere) +
-        _cylinders.size() * sizeof(Cylinder) + _cones.size() * sizeof(Cone) +
-        _trianglesMeshes.size() * sizeof(TrianglesMesh);
+    uint64_t sizeInBytes = 0;
+    uint64_t nbSpheres = 0;
+    uint64_t nbCylinders = 0;
+    uint64_t nbCones = 0;
+    uint64_t nbMeshes = 0;
+    for (const auto& spheres : _spheres)
+    {
+        sizeInBytes += spheres.second.size() * sizeof(Sphere);
+        nbSpheres += spheres.second.size();
+    }
+    for (const auto& cylinders : _cylinders)
+    {
+        sizeInBytes += cylinders.second.size() * sizeof(Cylinder);
+        nbCylinders += cylinders.second.size();
+    }
+    for (const auto& cones : _cones)
+    {
+        sizeInBytes += cones.second.size() * sizeof(Cones);
+        nbCones += cones.second.size();
+    }
+    for (const auto& trianglesMesh : _trianglesMeshes)
+    {
+        const auto& mesh = trianglesMesh.second;
+        sizeInBytes += mesh.indices.size() * sizeof(Vector3f);
+        sizeInBytes += mesh.normals.size() * sizeof(Vector3f);
+        sizeInBytes += mesh.colors.size() * sizeof(Vector4f);
+        sizeInBytes += mesh.indices.size() * sizeof(Vector3ui);
+        sizeInBytes += mesh.textureCoordinates.size() * sizeof(Vector2f);
+        ++nbMeshes;
+    }
+
     BRAYNS_INFO << "---------------------------------------------------"
                 << std::endl;
-    BRAYNS_INFO << "Geometry group information:" << std::endl;
-    BRAYNS_INFO << "Spheres  : " << _spheres.size() << std::endl;
-    BRAYNS_INFO << "Cylinders: " << _cylinders.size() << std::endl;
-    BRAYNS_INFO << "Cones    : " << _cones.size() << std::endl;
-    BRAYNS_INFO << "Meshes   : " << _trianglesMeshes.size() << std::endl;
-    BRAYNS_INFO << "Total    : " << sizeInBytes << " bytes ("
+    BRAYNS_INFO << "Group " << _name << std::endl;
+    BRAYNS_INFO << "- Spheres  : " << nbSpheres << std::endl;
+    BRAYNS_INFO << "- Cylinders: " << nbCylinders << std::endl;
+    BRAYNS_INFO << "- Cones    : " << nbCones << std::endl;
+    BRAYNS_INFO << "- Meshes   : " << nbMeshes << std::endl;
+    BRAYNS_INFO << "- Total    : " << sizeInBytes << " bytes ("
                 << sizeInBytes / 1048576 << " MB)" << std::endl;
 }
 
