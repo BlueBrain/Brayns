@@ -91,13 +91,10 @@ private:
     SERIALIZATION_FRIEND(GroupAttributes)
 };
 
-class GeometryGroup : public BaseObject
+class GeometryGroup
 {
 public:
-    BRAYNS_API GeometryGroup();
     BRAYNS_API GeometryGroup(MaterialManagerPtr materialManager);
-    BRAYNS_API GeometryGroup(const GeometryGroup& rhs);
-    BRAYNS_API GeometryGroup& operator=(const GeometryGroup& rhs);
 
     BRAYNS_API virtual ~GeometryGroup();
 
@@ -137,10 +134,7 @@ public:
      * @brief Sets spheres as dirty, meaning that they need to be serialized
      *        and sent to the rendering engine
      */
-    BRAYNS_API void setSpheresDirty(const bool value)
-    {
-        _updateValue(_spheresDirty, value);
-    }
+    BRAYNS_API void setSpheresDirty(const bool value) { _spheresDirty = value; }
     BRAYNS_API bool spheresDirty() { return _spheresDirty; }
     /**
         Returns cylinders handled by the scene
@@ -181,7 +175,7 @@ public:
      */
     BRAYNS_API void setCylindersDirty(const bool value)
     {
-        _updateValue(_cylindersDirty, value);
+        _cylindersDirty = value;
     }
     BRAYNS_API bool cylindersDirty() { return _cylindersDirty; }
     /**
@@ -208,10 +202,7 @@ public:
      * @brief Sets cones as dirty, meaning that they need to be serialized
      *        and sent to the rendering engine
      */
-    BRAYNS_API void setConesDirty(const bool value)
-    {
-        _updateValue(_conesDirty, value);
-    }
+    BRAYNS_API void setConesDirty(const bool value) { _conesDirty = value; }
     BRAYNS_API bool conesDirty() { return _conesDirty; }
     /**
         Returns triangle meshes handled by the geometry group
@@ -226,7 +217,7 @@ public:
      */
     BRAYNS_API void setTrianglesMeshesDirty(const bool value)
     {
-        _updateValue(_trianglesMeshesDirty, value);
+        _trianglesMeshesDirty = value;
     }
     BRAYNS_API bool trianglesMeshesDirty() { return _trianglesMeshesDirty; }
     BRAYNS_API void logInformation();
@@ -234,7 +225,7 @@ public:
     BRAYNS_API bool useSimulationModel() const { return _useSimulationModel; }
     BRAYNS_API void useSimulationModel(const bool value)
     {
-        _updateValue(_useSimulationModel, value);
+        _useSimulationModel = value;
     }
 
 protected:
