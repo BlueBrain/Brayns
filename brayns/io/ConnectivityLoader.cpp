@@ -22,7 +22,10 @@
 #include <H5Cpp.h>
 #include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
+#include <brayns/common/material/Material.h>
+#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/io/MeshLoader.h>
 
 #include <brain/brain.h>
@@ -118,8 +121,10 @@ bool ConnectivityLoader::_importMesh(const uint64_t gid,
         return true;
 
     // Load mesh from file
-    if (!meshLoader.importMeshFromFile(meshLoader.getMeshFilenameFromGID(gid),
-                                       group, materialManager, transformation,
+    const auto fileName = meshLoader.getMeshFilenameFromGID(gid);
+    const auto meshName = getNameFromFullPath(fileName);
+    if (!meshLoader.importMeshFromFile(fileName, meshName, group,
+                                       materialManager, transformation,
                                        materialId))
         return false;
 
@@ -170,6 +175,10 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
         const auto& transforms = circuit.getTransforms(gids);
 
         // Place inactive cells
+        auto& materialManager = scene.getMaterialManager();
+        Material material;
+        material.setName("Inactive_cells");
+        const auto materialId = materialManager.add(material);
         for (uint64_t i = 0; i < gids.size(); ++i)
             if (_emitors.find(i) == _emitors.end() &&
                 _receptors.find(i) == _receptors.end())
@@ -178,9 +187,22 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     transforms[i].getTranslation() * scale;
                 const auto radiusSource =
                     _geometryParameters.getRadiusMultiplier();
-                group->addSphere(NB_SYSTEM_MATERIALS,
-                                 {centerSource, radiusSource});
+                group->addSphere(materialId, {centerSource, radiusSource});
             }
+
+        // Determine materials to create
+        std::set<size_t> materials;
+        for (const auto& emitor : _emitors)
+            materials.insert(emitor.second.size());
+        size_t materialIndex{0};
+        for (size_t i = 0; i < materials.size(); ++i)
+        {
+            Material groupMaterial;
+            groupMaterial.setName("group_" + std::to_string(i));
+            const auto groupMaterialId = materialManager.add(material);
+            if (i == 0)
+                materialIndex = groupMaterialId;
+        }
 
         // Place active cells and connections
         std::stringstream message;
@@ -193,8 +215,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                 transforms[emitor.first].getTranslation() * scale;
             // The color of the cell depends on the number of outgoing
             // connections
-            const size_t materialId =
-                NB_SYSTEM_MATERIALS + emitor.second.size();
+            const size_t groupMaterialId = materialIndex + emitor.second.size();
 
             // The size of the cell depends on the number of incoming
             // connections
@@ -219,7 +240,7 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                                  scene.getMaterialManager(), meshLoader);
             }
             if (createSphere)
-                group->addSphere(materialId, {centerSource, radiusSource});
+                group->addSphere(groupMaterialId, {centerSource, radiusSource});
 
             // Connections
             if (emitor.second.size() < dimensionRange.x() ||
@@ -243,9 +264,9 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
                     // remaining 90%
                     const auto arrowTarget =
                         centerSource + 0.1f * (centerDest - centerSource);
-                    group->addCone(materialId, {centerSource, arrowTarget,
-                                                radiusSource, radiusDest});
-                    group->addCylinder(materialId,
+                    group->addCone(groupMaterialId, {centerSource, arrowTarget,
+                                                     radiusSource, radiusDest});
+                    group->addCylinder(groupMaterialId,
                                        {arrowTarget, centerDest, radiusDest});
                 }
             ++progress;

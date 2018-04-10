@@ -23,6 +23,7 @@
 #include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/io/algorithms/MetaballsGenerator.h>
 #include <brayns/io/simulation/CircuitSimulationHandler.h>
 
@@ -132,8 +133,9 @@ public:
      * @return True is the morphology was successfully imported, false otherwise
      */
     bool importMorphology(const servus::URI& source, const uint64_t index,
-                          const size_t material, const Matrix4f& transformation,
-                          GeometryGroup& group,
+                          const size_t materialId,
+                          const Matrix4f& transformation, GeometryGroup& group,
+                          MaterialManager& materialManager,
                           const GIDOffsets& targetGIDOffsets,
                           CompartmentReportPtr compartmentReport = nullptr)
     {
@@ -141,7 +143,10 @@ public:
             group.getSpheres(), group.getCylinders(), group.getCones(),
             group.getTrianglesMeshes(), group.getBounds());
 
-        return _importMorphology(source, index, material, transformation,
+        Material material;
+        material.setName(group.getName() + '_' + std::to_string(materialId));
+        const auto id = materialManager.add(material);
+        return _importMorphology(source, index, id, transformation,
                                  compartmentReport, targetGIDOffsets,
                                  groupContainer);
     }
@@ -287,7 +292,7 @@ private:
     void _createMaterials(GeometryGroup& group,
                           MaterialManager& materialManager)
     {
-        size_t maxMaterialId = 0;
+        size_t maxMaterialId = materialManager.getMaterials().size();
         for (auto& spheres : group.getSpheres())
             maxMaterialId = std::max(maxMaterialId, spheres.first);
         for (auto& cylinders : group.getCylinders())
@@ -297,9 +302,12 @@ private:
         for (auto& meshes : group.getTrianglesMeshes())
             maxMaterialId = std::max(maxMaterialId, meshes.first);
 
+        BRAYNS_ERROR << "--> " << maxMaterialId << std::endl;
+
         for (size_t i = 0; i < maxMaterialId; ++i)
         {
             Material material;
+            material.setName(group.getName() + '_' + std::to_string(i));
             materialManager.add(material);
         }
         materialManager.markModified();
@@ -876,9 +884,11 @@ private:
                 _geometryParameters.getCircuitMeshTransformation()
                     ? transformations[meshIndex]
                     : Matrix4f();
-            if (!meshLoader.importMeshFromFile(
-                    meshLoader.getMeshFilenameFromGID(gid), group,
-                    materialManager, transformation, materialId))
+            const auto fileName = meshLoader.getMeshFilenameFromGID(gid);
+            const auto meshName = getNameFromFullPath(fileName);
+            if (!meshLoader.importMeshFromFile(fileName, meshName, group,
+                                               materialManager, transformation,
+                                               materialId))
                 ++loadingFailures;
             ++meshIndex;
             _parent.updateProgress(message.str(), meshIndex, gids.size());
@@ -899,7 +909,7 @@ private:
 #endif
 
     bool _importMorphology(const servus::URI& source, const uint64_t index,
-                           const size_t material,
+                           const size_t materialId,
                            const Matrix4f& transformation,
                            CompartmentReportPtr compartmentReport,
                            const GIDOffsets& targetGIDOffsets,
@@ -910,16 +920,16 @@ private:
             enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
         if (morphologySectionTypes ==
             static_cast<size_t>(MorphologySectionType::soma))
-            return _importMorphologyAsPoint(index, material, transformation,
+            return _importMorphologyAsPoint(index, materialId, transformation,
                                             compartmentReport, targetGIDOffsets,
                                             group);
         else if (_geometryParameters.useRealisticSomas())
             returnValue =
-                _createRealisticSoma(source, index, material, transformation,
+                _createRealisticSoma(source, index, materialId, transformation,
                                      targetGIDOffsets, group);
         returnValue =
             returnValue &&
-            _importMorphologyFromURI(source, index, material, transformation,
+            _importMorphologyFromURI(source, index, materialId, transformation,
                                      compartmentReport, targetGIDOffsets,
                                      group);
         return returnValue;
@@ -1036,11 +1046,12 @@ bool MorphologyLoader::importMorphology(const servus::URI& uri,
                                         const uint64_t index,
                                         const size_t material,
                                         GeometryGroup& group,
+                                        MaterialManager& materialManager,
                                         const Matrix4f& transformation)
 {
     const GIDOffsets targetGIDOffsets;
     return _impl->importMorphology(uri, index, material, transformation, group,
-                                   targetGIDOffsets);
+                                   materialManager, targetGIDOffsets);
 }
 
 bool MorphologyLoader::importCircuit(const servus::URI& uri,

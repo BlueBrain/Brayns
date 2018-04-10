@@ -22,6 +22,29 @@
 
 namespace brayns
 {
+TextureDescriptor::TextureDescriptor()
+{
+}
+
+TextureDescriptor::TextureDescriptor(const TextureType type, const size_t id)
+    : _type(type)
+    , _id(id)
+{
+}
+
+TextureDescriptor::TextureDescriptor(const TextureDescriptor& rhs)
+{
+    this->_type = rhs._type;
+    this->_id = rhs._id;
+}
+
+TextureDescriptor& TextureDescriptor::operator=(const TextureDescriptor& rhs)
+{
+    this->_type = rhs._type;
+    this->_id = rhs._id;
+    return *this;
+}
+
 Material::Material()
     : BaseObject()
 {
@@ -30,7 +53,7 @@ Material::Material()
 Material::Material(const Material& rhs)
 {
     this->_color = rhs._color;
-    this->_materialType = rhs._materialType;
+    this->_name = rhs._name;
     this->_color = rhs._color;
     this->_specularColor = rhs._specularColor;
     this->_specularExponent = rhs._specularExponent;
@@ -40,7 +63,7 @@ Material::Material(const Material& rhs)
     this->_emission = rhs._emission;
     this->_glossiness = rhs._glossiness;
     this->_castSimulationData = rhs._castSimulationData;
-    this->_textureTypes = rhs._textureTypes;
+    this->_textureDescriptors = rhs._textureDescriptors;
 }
 
 Material& Material::operator=(const Material& rhs)
@@ -49,7 +72,7 @@ Material& Material::operator=(const Material& rhs)
         return *this;
 
     this->_color = rhs._color;
-    this->_materialType = rhs._materialType;
+    this->_name = rhs._name;
     this->_color = rhs._color;
     this->_specularColor = rhs._specularColor;
     this->_specularExponent = rhs._specularExponent;
@@ -59,13 +82,14 @@ Material& Material::operator=(const Material& rhs)
     this->_emission = rhs._emission;
     this->_glossiness = rhs._glossiness;
     this->_castSimulationData = rhs._castSimulationData;
-    this->_textureTypes = rhs._textureTypes;
+    this->_textureDescriptors = rhs._textureDescriptors;
     return *this;
 }
 
-void Material::setTexture(const TextureType& type, const size_t id)
+void Material::addTexture(const TextureType& type, const size_t id)
 {
-    _textureTypes[type] = id;
+    TextureDescriptor textureDescriptor{type, id};
+    _textureDescriptors.push_back(textureDescriptor);
     markModified();
 }
 }

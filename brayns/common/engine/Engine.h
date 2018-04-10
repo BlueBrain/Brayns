@@ -226,6 +226,7 @@ protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;
+    MaterialManagerPtr _materialManager;
     RendererType _activeRenderer;
     RendererMap _renderers;
     Vector2i _frameSize;

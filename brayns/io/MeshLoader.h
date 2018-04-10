@@ -43,7 +43,8 @@ public:
 
     /** Imports meshes from a given file
      *
-     * @param filename name of the file containing the meshes
+     * @param fileName Name of the file containing the meshes
+     * @param meshName Human-readable name of the mesh
      * @param group Geometry group holding the meshes
      * @param transformation Position, orientation and scale to apply to the
      *        mesh
@@ -52,7 +53,8 @@ public:
      *        all meshes are forced to that specific material.
      * @return true if the file was successfully imported. False otherwise.
      */
-    bool importMeshFromFile(const std::string& filename, GeometryGroup& group,
+    bool importMeshFromFile(const std::string& fileName,
+                            const std::string& meshName, GeometryGroup& group,
                             MaterialManager& materialManager,
                             const Matrix4f& transformation,
                             const size_t defaultMaterial);
@@ -81,8 +83,9 @@ public:
 
 private:
 #if (BRAYNS_USE_ASSIMP)
-    void _createMaterials(MaterialManager& materialManager,
-                          const aiScene* aiScene, const std::string& folder);
+    size_t _createMaterials(const std::string& meshName,
+                            MaterialManager& materialManager,
+                            const aiScene* aiScene, const std::string& folder);
 #endif
 
     size_t _getMaterialId(const size_t materialId,

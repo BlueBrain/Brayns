@@ -47,14 +47,14 @@ void MeshLoader::clear()
 }
 
 #if (BRAYNS_USE_ASSIMP)
-bool MeshLoader::importMeshFromFile(const std::string& filename,
+bool MeshLoader::importMeshFromFile(const std::string& fileName,
+                                    const std::string& meshName,
                                     GeometryGroup& group,
                                     MaterialManager& materialManager,
                                     const Matrix4f& transformation,
                                     const size_t defaultMaterial)
 {
-    _materialOffset = materialManager.getMaterials().size();
-    const boost::filesystem::path file = filename;
+    const boost::filesystem::path file = fileName;
     Assimp::Importer importer;
     if (!importer.IsExtensionSupported(file.extension().c_str()))
     {
@@ -76,20 +76,20 @@ bool MeshLoader::importMeshFromFile(const std::string& filename,
         break;
     }
 
-    std::ifstream meshFile(filename, std::ios::in);
+    std::ifstream meshFile(fileName, std::ios::in);
     if (!meshFile.good())
     {
-        BRAYNS_DEBUG << "Could not open file " << filename << std::endl;
+        BRAYNS_DEBUG << "Could not open file " << fileName << std::endl;
         return false;
     }
     meshFile.close();
 
     const aiScene* aiScene = nullptr;
-    aiScene = importer.ReadFile(filename.c_str(), quality);
+    aiScene = importer.ReadFile(fileName.c_str(), quality);
 
     if (!aiScene)
     {
-        BRAYNS_DEBUG << "Error parsing " << filename.c_str() << ": "
+        BRAYNS_DEBUG << "Error parsing " << fileName.c_str() << ": "
                      << importer.GetErrorString() << std::endl;
         return false;
     }
@@ -101,13 +101,10 @@ bool MeshLoader::importMeshFromFile(const std::string& filename,
         return false;
     }
 
-    boost::filesystem::path filepath = filename;
+    boost::filesystem::path filepath = fileName;
 
-    if (defaultMaterial == NO_MATERIAL)
-        _createMaterials(materialManager, aiScene,
-                         filepath.parent_path().string());
-    else
-        materialManager.get(defaultMaterial);
+    _materialOffset = _createMaterials(meshName, materialManager, aiScene,
+                                       filepath.parent_path().string());
 
     size_t nbVertices = 0;
     size_t nbFaces = 0;
@@ -257,12 +254,15 @@ bool MeshLoader::exportMeshToFile(const std::string& filename,
     return true;
 }
 
-void MeshLoader::_createMaterials(MaterialManager& materialManager,
-                                  const aiScene* aiScene,
-                                  const std::string& folder)
+size_t MeshLoader::_createMaterials(const std::string& meshName,
+                                    MaterialManager& materialManager,
+                                    const aiScene* aiScene,
+                                    const std::string& folder)
 {
     BRAYNS_DEBUG << "Loading " << aiScene->mNumMaterials << " materials"
                  << std::endl;
+
+    size_t materialOffset = materialManager.getMaterials().size();
     for (size_t m = 0; m < aiScene->mNumMaterials; ++m)
     {
         aiMaterial* aimaterial = aiScene->mMaterials[m];
@@ -298,8 +298,8 @@ void MeshLoader::_createMaterials(MaterialManager& materialManager,
                     const std::string filename = folder + "/" + path.data;
                     BRAYNS_DEBUG << "Loading texture: " << filename
                                  << std::endl;
-                    auto textureId = materialManager.addTexture(filename);
-                    material.setTexture(textureTypeMapping[textureType].type,
+                    const auto textureId = materialManager.addTexture(filename);
+                    material.addTexture(textureTypeMapping[textureType].type,
                                         textureId);
                 }
             }
@@ -312,6 +312,7 @@ void MeshLoader::_createMaterials(MaterialManager& materialManager,
 
         value1f = 0.f;
         aimaterial->Get(AI_MATKEY_REFLECTIVITY, value1f);
+        // material.setReflectionIndex(value1f);
         material.setReflectionIndex(value1f);
 
         value3f = aiColor3D(0.f, 0.f, 0.f);
@@ -334,8 +335,13 @@ void MeshLoader::_createMaterials(MaterialManager& materialManager,
         aimaterial->Get(AI_MATKEY_REFRACTI, value1f);
         material.setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f
                                                                 : value1f);
+        aiString valueString;
+        aimaterial->Get(AI_MATKEY_NAME, valueString);
+        std::string name{valueString.C_Str()};
+        material.setName(meshName + '_' + name);
         materialManager.add(material);
     }
+    return materialOffset;
 }
 
 std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)

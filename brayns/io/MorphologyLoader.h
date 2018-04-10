@@ -58,7 +58,8 @@ public:
      * @return True if the morphology is successfully loaded, false otherwise
      */
     bool importMorphology(const servus::URI& source, const uint64_t index,
-                          const size_t material, GeometryGroup& group,
+                          const size_t materialId, GeometryGroup& group,
+                          MaterialManager& materialManager,
                           const Matrix4f& transformation = Matrix4f());
 
     /**

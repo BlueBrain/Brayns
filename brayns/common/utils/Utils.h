@@ -26,6 +26,13 @@
 namespace brayns
 {
 strings parseFolder(const std::string& folder, const strings& filters);
+
+/**
+ * @brief Determines the name of the file according to its full path
+ * @param fileName Full path to of the file
+ * @return Name of the file
+ */
+std::string getNameFromFullPath(const std::string& fileName);
 }
 
 #endif // UTILS_H

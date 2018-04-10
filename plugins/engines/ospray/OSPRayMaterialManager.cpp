@@ -25,8 +25,10 @@
 
 namespace brayns
 {
-OSPRayMaterialManager::OSPRayMaterialManager(const uint32_t flags)
-    : _memoryManagementFlags(flags)
+OSPRayMaterialManager::OSPRayMaterialManager(
+    ParametersManager& parametersManager, const uint32_t flags)
+    : MaterialManager(parametersManager)
+    , _memoryManagementFlags(flags)
 {
     BRAYNS_FCT_ENTRY
 }
@@ -51,19 +53,18 @@ void OSPRayMaterialManager::_commitMaterial(OSPMaterial ospMaterial,
     ospSet1f(ospMaterial, "glossiness", material.getGlossiness());
     ospSet1i(ospMaterial, "cast_simulation_data",
              material.getCastSimulationData());
-    ospSet1i(ospMaterial, "skybox", material.getType() == MaterialType::skybox);
 
     for (const auto& textureType : textureTypeMaterialAttribute)
         ospSetObject(ospMaterial, textureType.attribute.c_str(), nullptr);
 
     // Textures
-    for (auto textureType : material.getTextureTypes())
+    for (auto textureDescriptor : material.getTextureDescriptors())
     {
-        OSPTexture2D ospTexture = _createTexture2D(textureType.second);
-        ospSetObject(
-            ospMaterial,
-            textureTypeMaterialAttribute[textureType.first].attribute.c_str(),
-            ospTexture);
+        OSPTexture2D ospTexture = _createTexture2D(textureDescriptor.getId());
+        ospSetObject(ospMaterial,
+                     textureTypeMaterialAttribute[textureDescriptor.getType()]
+                         .attribute.c_str(),
+                     ospTexture);
     }
     ospCommit(ospMaterial);
     material.resetModified();
@@ -98,9 +99,9 @@ OSPTexture2D OSPRayMaterialManager::_createTexture2D(const size_t id)
             type = OSP_TEXTURE_RGBA32F;
     }
 
-    BRAYNS_DEBUG << "Creating OSPRay texture from " << texture->getFilename()
-                 << ": " << texture->getWidth() << "x" << texture->getHeight()
-                 << "x" << (int)type << std::endl;
+    BRAYNS_INFO << "Creating OSPRay texture from " << texture->getFilename()
+                << ": " << texture->getWidth() << "x" << texture->getHeight()
+                << "x" << (int)type << std::endl;
 
     osp::vec2i texSize{int(texture->getWidth()), int(texture->getHeight())};
     OSPTexture2D ospTexture =

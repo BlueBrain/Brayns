@@ -318,7 +318,7 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                                   GeometryGroup& group,
                                   MaterialManager& materialManager)
 {
-    std::map<size_t, Sphere> spheres;
+    std::map<size_t, Spheres> spheres;
 
     int index(0);
     std::ifstream file(filename.c_str());
@@ -444,21 +444,23 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                 const auto materialId =
                     colorScheme == ColorScheme::protein_by_id ? proteinIndex
                                                               : atom.materialId;
-                spheres[materialId] = {center, radius};
+                spheres[materialId].push_back({center, radius});
             }
         }
         file.close();
 
         // Add materials and spheres
-        for (const auto& sphere : spheres)
+        for (const auto& spheresPerMaterial : spheres)
         {
-            auto materialId = sphere.first;
+            auto materialId = spheresPerMaterial.first;
             Material material;
-            material.setDiffuseColor(Vector3f(colorMap[index].R / 255.f,
-                                              colorMap[index].G / 255.f,
-                                              colorMap[index].B / 255.f));
+            material.setName(colorMap[materialId].symbol);
+            material.setDiffuseColor(Vector3f(colorMap[materialId].R / 255.f,
+                                              colorMap[materialId].G / 255.f,
+                                              colorMap[materialId].B / 255.f));
             materialId = materialManager.add(material);
-            group.addSphere(materialId, sphere.second);
+            for (const auto& sphere : spheresPerMaterial.second)
+                group.addSphere(materialId, sphere);
         }
     }
     return true;

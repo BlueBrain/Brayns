@@ -22,8 +22,9 @@
 
 namespace brayns
 {
-OSPRayGeometryGroup::OSPRayGeometryGroup(MaterialManagerPtr materialManager)
-    : GeometryGroup(materialManager)
+OSPRayGeometryGroup::OSPRayGeometryGroup(const std::string& name,
+                                         MaterialManager& materialManager)
+    : GeometryGroup(name, materialManager)
 {
     BRAYNS_FCT_ENTRY
 
@@ -120,7 +121,11 @@ void OSPRayGeometryGroup::_buildBoundingBox()
 
     _boundingBoxModel = ospNewModel();
 
-    _boudingBoxMaterialId = 0;
+    Material material;
+    material.setDiffuseColor({1, 1, 1});
+    material.setEmission(1.f);
+    material.setName(_name + "_bounding_box");
+    _boudingBoxMaterialId = _materialManager.add(material);
     const Vector3f s = _bounds.getSize() / 2.f;
     const Vector3f c = _bounds.getCenter();
     const float radius = s.length() / 200.f;
@@ -154,6 +159,8 @@ void OSPRayGeometryGroup::_buildBoundingBox()
     addCylinder(_boudingBoxMaterialId, {positions[3], positions[7], radius});
 
     ospCommit(_boundingBoxModel);
+
+    _materialManager.commit();
 }
 
 void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
@@ -172,8 +179,7 @@ void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
     ospSetObject(_ospExtendedSpheres[materialId], "extendedspheres",
                  _ospExtendedSpheresData[materialId]);
 
-    auto impl =
-        std::static_pointer_cast<OSPRayMaterialManager>(_materialManager);
+    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
     const auto& ospMaterial = impl->getOSPMaterial(materialId);
     ospSetMaterial(_ospExtendedSpheres[materialId], ospMaterial);
 
@@ -204,8 +210,7 @@ void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
     ospSetObject(_ospExtendedCylinders[materialId], "extendedcylinders",
                  _ospExtendedCylindersData[materialId]);
 
-    auto impl =
-        std::static_pointer_cast<OSPRayMaterialManager>(_materialManager);
+    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
     const auto& ospMaterial = impl->getOSPMaterial(materialId);
     ospSetMaterial(_ospExtendedCylinders[materialId], ospMaterial);
 
@@ -235,8 +240,7 @@ void OSPRayGeometryGroup::_commitCones(const size_t materialId)
     ospSetObject(_ospExtendedCones[materialId], "extendedcones",
                  _ospExtendedConesData[materialId]);
 
-    auto impl =
-        std::static_pointer_cast<OSPRayMaterialManager>(_materialManager);
+    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
     const auto& ospMaterial = impl->getOSPMaterial(materialId);
     ospSetMaterial(_ospExtendedCones[materialId], ospMaterial);
 
@@ -299,8 +303,7 @@ void OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
     ospSet1i(_ospMeshes[materialId], "alpha_type", 0);
     ospSet1i(_ospMeshes[materialId], "alpha_component", 4);
 
-    auto impl =
-        std::static_pointer_cast<OSPRayMaterialManager>(_materialManager);
+    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
     const auto& ospMaterial = impl->getOSPMaterial(materialId);
     ospSetMaterial(_ospMeshes[materialId], ospMaterial);
     ospCommit(_ospMeshes[materialId]);
@@ -348,10 +351,26 @@ void OSPRayGeometryGroup::commit()
     return;
 }
 
-OSPGeometry OSPRayGeometryGroup::getInstance(const size_t index,
-                                             const Vector3f& translation,
-                                             const Vector3f& rotation,
-                                             const Vector3f& scale)
+osp::affine3f OSPRayGeometryGroup::_groupTransformationToAffine3f(
+    GroupTransformation& transformation)
+{
+    ospcommon::affine3f t = ospcommon::affine3f(ospcommon::one);
+    const auto& scale = transformation.scale();
+    t *= t.scale({scale.x(), scale.y(), scale.z()});
+    const auto& translation = transformation.translation();
+    t *= t.translate({translation.x(), translation.y(), translation.z()});
+    const auto& rotation = transformation.rotation();
+    if (rotation.x() != 0.f)
+        t *= t.rotate({1, 0, 0}, rotation.x());
+    if (rotation.y() != 0.f)
+        t *= t.rotate({0, 1, 0}, rotation.y());
+    if (rotation.z() != 0.f)
+        t *= t.rotate({0, 0, 1}, rotation.z());
+    return (osp::affine3f&)t;
+}
+
+OSPGeometry OSPRayGeometryGroup::getInstance(
+    const size_t index, GroupTransformation& transformation)
 {
     if (index < _instances.size())
         _instances.push_back(nullptr);
@@ -359,66 +378,34 @@ OSPGeometry OSPRayGeometryGroup::getInstance(const size_t index,
     if (_instances[index])
         ospRelease(_instances[index]);
 
-    ospcommon::affine3f transformation = ospcommon::affine3f(ospcommon::one);
-    transformation *= transformation.scale({scale.x(), scale.y(), scale.z()});
-    transformation *= transformation.translate(
-        {translation.x(), translation.y(), translation.z()});
-    if (rotation.x() != 0.f)
-        transformation *= transformation.rotate({1, 0, 0}, rotation.x());
-    if (rotation.y() != 0.f)
-        transformation *= transformation.rotate({0, 1, 0}, rotation.y());
-    if (rotation.z() != 0.f)
-        transformation *= transformation.rotate({0, 0, 1}, rotation.z());
-
-    _instances[index] = ospNewInstance(_model, (osp::affine3f&)transformation);
+    _instances[index] =
+        ospNewInstance(_model, _groupTransformationToAffine3f(transformation));
     ospCommit(_instances[index]);
     return _instances[index];
 }
 
 OSPGeometry OSPRayGeometryGroup::getSimulationModelInstance(
-    const Vector3f& translation, const Vector3f& rotation,
-    const Vector3f& scale)
+    GroupTransformation& transformation)
 {
     if (_simulationModelInstance)
         ospRelease(_simulationModelInstance);
 
-    ospcommon::affine3f transformation = ospcommon::affine3f(ospcommon::one);
-    transformation *= transformation.scale({scale.x(), scale.y(), scale.z()});
-    transformation *= transformation.translate(
-        {translation.x(), translation.y(), translation.z()});
-    if (rotation.x() != 0.f)
-        transformation *= transformation.rotate({1, 0, 0}, rotation.x());
-    if (rotation.y() != 0.f)
-        transformation *= transformation.rotate({0, 1, 0}, rotation.y());
-    if (rotation.z() != 0.f)
-        transformation *= transformation.rotate({0, 0, 1}, rotation.z());
-
     _simulationModelInstance =
-        ospNewInstance(_simulationModel, (osp::affine3f&)transformation);
+        ospNewInstance(_simulationModel,
+                       _groupTransformationToAffine3f(transformation));
     ospCommit(_simulationModelInstance);
     return _simulationModelInstance;
 }
 
 OSPGeometry OSPRayGeometryGroup::getBoundingBoxModelInstance(
-    const Vector3f& translation, const Vector3f& rotation,
-    const Vector3f& scale)
+    GroupTransformation& transformation)
 {
     if (_boundingBoxModelInstance)
         ospRelease(_boundingBoxModelInstance);
 
-    ospcommon::affine3f transformation = ospcommon::affine3f(ospcommon::one);
-    transformation *= transformation.scale({scale.x(), scale.y(), scale.z()});
-    transformation *= transformation.translate(
-        {translation.x(), translation.y(), translation.z()});
-    if (rotation.x() != 0.f)
-        transformation *= transformation.rotate({1, 0, 0}, rotation.x());
-    if (rotation.y() != 0.f)
-        transformation *= transformation.rotate({0, 1, 0}, rotation.y());
-    if (rotation.z() != 0.f)
-        transformation *= transformation.rotate({0, 0, 1}, rotation.z());
-
     _boundingBoxModelInstance =
-        ospNewInstance(_boundingBoxModel, (osp::affine3f&)transformation);
+        ospNewInstance(_boundingBoxModel,
+                       _groupTransformationToAffine3f(transformation));
     ospCommit(_boundingBoxModelInstance);
     return _boundingBoxModelInstance;
 }

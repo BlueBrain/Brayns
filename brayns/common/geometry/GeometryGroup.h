@@ -52,9 +52,10 @@ struct GroupTransformation : public BaseObject
     Vector3f& rotation() { return _rotation; }
     void rotation(const Vector3f& value) { _updateValue(_rotation, value); }
 private:
-    Vector3f _translation{0, 0, 0};
-    Vector3f _scale{1, 1, 1};
-    Vector3f _rotation{0, 0, 0};
+    Vector3f _Center{0.f, 0.f, 0.f};
+    Vector3f _translation{0.f, 0.f, 0.f};
+    Vector3f _scale{1.f, 1.f, 1.f};
+    Vector3f _rotation{0.f, 0.f, 0.f};
 
     SERIALIZATION_FRIEND(GroupTransformation)
 };
@@ -94,7 +95,8 @@ private:
 class GeometryGroup
 {
 public:
-    BRAYNS_API GeometryGroup(MaterialManagerPtr materialManager);
+    BRAYNS_API GeometryGroup(const std::string& name,
+                             MaterialManager& materialManager);
 
     BRAYNS_API virtual ~GeometryGroup();
 
@@ -113,7 +115,11 @@ public:
     BRAYNS_API bool dirty() const;
 
     /**
-        Returns the bounding box for the whole scene
+        Returns the name of the group
+    */
+    std::string getName() const { return _name; }
+    /**
+        Returns the bounding box for the group
     */
     Boxf& getBounds();
     /**
@@ -229,7 +235,8 @@ public:
     }
 
 protected:
-    MaterialManagerPtr _materialManager;
+    MaterialManager& _materialManager;
+    std::string _name;
     SpheresMap _spheres;
     bool _spheresDirty{true};
     CylindersMap _cylinders;

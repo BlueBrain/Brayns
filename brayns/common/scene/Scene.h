@@ -52,7 +52,8 @@ public:
         @todo The scene must not know about the renderer
               https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
     */
-    BRAYNS_API Scene(Renderers renderers, ParametersManager& parametersManager);
+    BRAYNS_API Scene(Renderers renderers, ParametersManager& parametersManager,
+                     MaterialManager& materialManager);
 
     BRAYNS_API virtual ~Scene();
 
@@ -244,7 +245,7 @@ public:
     */
     BRAYNS_API MaterialManager& getMaterialManager()
     {
-        return *_materialManager;
+        return _materialManager;
     }
     /**
         Sets the materials handled by the scene, and available to the
@@ -265,17 +266,16 @@ public:
 
 protected:
     void _processVolumeAABBGeometry();
-    void _initializeSystemMaterials();
 
-    // Parameters
-    ParametersManager& _parametersManager;
+    // Managers
     Renderers _renderers;
+    ParametersManager& _parametersManager;
+    MaterialManager& _materialManager;
 
     // Model
     GeometryGroups _geometryGroups;
     GeometryGroupAttributes _geometryGroupAttributes;
     bool _geometryGroupsDirty{true};
-    MaterialManagerPtr _materialManager;
     Lights _lights;
 
     // Volume

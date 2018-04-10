@@ -23,11 +23,14 @@
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/io/ImageManager.h>
+#include <brayns/parameters/ParametersManager.h>
 
 namespace brayns
 {
-MaterialManager::MaterialManager()
+MaterialManager::MaterialManager(ParametersManager& parametersManager)
+    : _parametersManager(parametersManager)
 {
+    clear();
 }
 
 MaterialManager::~MaterialManager()
@@ -37,6 +40,7 @@ MaterialManager::~MaterialManager()
 void MaterialManager::clear()
 {
     _materials.clear();
+    _initializeSystemMaterials();
 }
 
 void MaterialManager::check(const size_t index)
@@ -88,9 +92,27 @@ size_t MaterialManager::addTexture(const std::string& filename)
     }
     if (!found)
     {
-        ++index;
+        BRAYNS_INFO << "Loading texture from " << filename << std::endl;
         ImageManager::importTextureFromFile(_textures, index, filename);
     }
     return index;
+}
+
+void MaterialManager::_initializeSystemMaterials()
+{
+    BRAYNS_FCT_ENTRY
+
+    Material material;
+    material.setDiffuseColor(Vector3f(1.f, 1.f, 1.f));
+    material.setEmission(10.f);
+    material.setName("scene_skybox");
+
+    // set environment map if applicable
+    const auto& environmentMap =
+        _parametersManager.getSceneParameters().getEnvironmentMap();
+    if (!environmentMap.empty())
+        material.addTexture(TT_DIFFUSE, 0);
+
+    add(material);
 }
 }

@@ -32,7 +32,7 @@ namespace brayns
 class MaterialManager : public BaseObject
 {
 public:
-    MaterialManager();
+    MaterialManager(ParametersManager& parametersManager);
     BRAYNS_API virtual ~MaterialManager();
 
     /**
@@ -83,8 +83,11 @@ public:
     BRAYNS_API void removeTexture(const size_t id);
 
 protected:
+    void _initializeSystemMaterials();
+
     Materials _materials;
     TexturesMap _textures;
+    ParametersManager& _parametersManager;
 
     SERIALIZATION_FRIEND(MaterialManager)
 };
