@@ -105,10 +105,10 @@ void OSPRayGeometryGroup::unload()
         ospRelease(_boundingBoxModel);
     _boundingBoxModel = nullptr;
 
-    _updateValue(_spheresDirty, false);
-    _updateValue(_cylindersDirty, false);
-    _updateValue(_conesDirty, false);
-    _updateValue(_trianglesMeshesDirty, false);
+    _spheresDirty = false;
+    _cylindersDirty = false;
+    _conesDirty = false;
+    _trianglesMeshesDirty = false;
 
     _instances.push_back(nullptr);
 }
@@ -186,7 +186,7 @@ void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
     else
         ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
 
-    _updateValue(_spheresDirty, false);
+    _spheresDirty = false;
 }
 
 void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
@@ -217,7 +217,7 @@ void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
         ospAddGeometry(_boundingBoxModel, _ospExtendedCylinders[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
-    _updateValue(_cylindersDirty, false);
+    _cylindersDirty = false;
 }
 
 void OSPRayGeometryGroup::_commitCones(const size_t materialId)
@@ -248,7 +248,7 @@ void OSPRayGeometryGroup::_commitCones(const size_t materialId)
         ospAddGeometry(_boundingBoxModel, _ospExtendedCones[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedCones[materialId]);
-    _updateValue(_conesDirty, false);
+    _conesDirty = false;
 }
 
 void OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
@@ -306,7 +306,7 @@ void OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
     ospCommit(_ospMeshes[materialId]);
 
     ospAddGeometry(_model, _ospMeshes[materialId]);
-    _updateValue(_trianglesMeshesDirty, false);
+    _trianglesMeshesDirty = false;
 }
 
 void OSPRayGeometryGroup::commit()

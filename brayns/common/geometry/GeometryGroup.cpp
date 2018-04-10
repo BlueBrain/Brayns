@@ -61,25 +61,6 @@ GroupAttributes& GroupAttributes::operator=(const GroupAttributes& rhs)
     return *this;
 }
 
-GeometryGroup::GeometryGroup()
-    : _materialManager(nullptr)
-{
-}
-
-GeometryGroup::GeometryGroup(const GeometryGroup& rhs)
-{
-    this->_materialManager = rhs._materialManager;
-    this->_spheres = rhs._spheres;
-    this->_spheresDirty = rhs._spheresDirty;
-    this->_cylinders = rhs._cylinders;
-    this->_cylindersDirty = rhs._cylindersDirty;
-    this->_cones = rhs._cones;
-    this->_conesDirty = rhs._conesDirty;
-    this->_trianglesMeshes = rhs._trianglesMeshes;
-    this->_trianglesMeshesDirty = rhs._trianglesMeshesDirty;
-    this->_bounds = rhs._bounds;
-}
-
 GeometryGroup::GeometryGroup(MaterialManagerPtr materialManager)
     : _materialManager(materialManager)
 {
@@ -87,24 +68,6 @@ GeometryGroup::GeometryGroup(MaterialManagerPtr materialManager)
 
 GeometryGroup::~GeometryGroup()
 {
-}
-
-GeometryGroup& GeometryGroup::operator=(const GeometryGroup& rhs)
-{
-    if (this == &rhs)
-        return *this;
-
-    this->_materialManager = rhs._materialManager;
-    this->_spheres = rhs._spheres;
-    this->_spheresDirty = rhs._spheresDirty;
-    this->_cylinders = rhs._cylinders;
-    this->_cylindersDirty = rhs._cylindersDirty;
-    this->_cones = rhs._cones;
-    this->_conesDirty = rhs._conesDirty;
-    this->_trianglesMeshes = rhs._trianglesMeshes;
-    this->_trianglesMeshesDirty = rhs._trianglesMeshesDirty;
-    this->_bounds = rhs._bounds;
-    return *this;
 }
 
 void GeometryGroup::unload()
