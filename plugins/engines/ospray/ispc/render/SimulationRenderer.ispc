@@ -539,10 +539,7 @@ inline vec3f SimulationRenderer_shadeRay(
         if (doRefraction && doReflection)
         {
             // Switch between refraction and reflection
-            const bool refract =
-                ((sample.sampleID.x + sample.sampleID.y + sample.sampleID.z) %
-                     2 ==
-                 1);
+            const bool refract = sample.sampleID.z % 2 == 1;
             doRefraction = refract;
             doReflection = !refract;
         }
