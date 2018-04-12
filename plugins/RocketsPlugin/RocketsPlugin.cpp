@@ -277,7 +277,7 @@ public:
 
         _handleObjectSchema(endpoint, obj);
 
-        _wsClientConnectNotifications[endpoint] = [this, &obj, endpoint] {
+        _wsClientConnectNotifications[endpoint] = [&obj, endpoint] {
             return rockets::jsonrpc::makeNotification(endpoint, obj);
         };
 
@@ -549,7 +549,7 @@ public:
                 return make_ready_response(Code::OK, version.getSchema(),
                                            JSON_TYPE);
             });
-        _wsClientConnectNotifications[ENDPOINT_VERSION] = [this] {
+        _wsClientConnectNotifications[ENDPOINT_VERSION] = [] {
             return rockets::jsonrpc::makeNotification(ENDPOINT_VERSION,
                                                       version);
         };
