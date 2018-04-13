@@ -63,8 +63,7 @@ void AbstractRenderer::commit()
     _spp = getParam1i("spp", 1);
     _electronShadingEnabled = bool(getParam1i("electronShading", 0));
 
-    // Those materials are used for simulation mapping only
-    _materialData = (ospray::Data*)getParamData("materials");
+    _materialData = (ospray::Data*)getParamData("materials", nullptr);
     _materialArray.clear();
     if (_materialData)
         for (size_t i = 0; i < _materialData->size(); ++i)

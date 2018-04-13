@@ -51,9 +51,6 @@ public:
     /** @copydoc Scene::commit */
     void commit() final;
 
-    /** @copydoc Scene::buildGeometry */
-    void buildGeometry() final;
-
     /** @copydoc Scene::commitLights */
     void commitLights() final;
 

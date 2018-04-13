@@ -44,6 +44,8 @@ OSPRayRenderer::~OSPRayRenderer()
 
 void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 {
+    BRAYNS_FCT_ENTRY
+
     auto osprayFrameBuffer =
         std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
     osprayFrameBuffer->lock();
@@ -58,16 +60,10 @@ void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 
 void OSPRayRenderer::commit()
 {
+    BRAYNS_FCT_ENTRY
+
     AnimationParameters& ap = _parametersManager.getAnimationParameters();
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
-    SceneParameters& sp = _parametersManager.getSceneParameters();
-    VolumeParameters& vp = _parametersManager.getVolumeParameters();
-
-    if (!ap.isModified() && !rp.isModified() && !sp.isModified() &&
-        !vp.isModified() && !_scene->isModified())
-    {
-        return;
-    }
 
     ShadingType mt = rp.getShading();
 
@@ -107,6 +103,8 @@ void OSPRayRenderer::commit()
 
 void OSPRayRenderer::setCamera(CameraPtr camera)
 {
+    BRAYNS_FCT_ENTRY
+
     _camera = static_cast<OSPRayCamera*>(camera.get());
     assert(_camera);
     ospSetObject(_renderer, "camera", _camera->impl());
@@ -115,6 +113,8 @@ void OSPRayRenderer::setCamera(CameraPtr camera)
 
 Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
 {
+    BRAYNS_FCT_ENTRY
+
     OSPPickResult ospResult;
     osp::vec2f pos{pickPos.x(), pickPos.y()};
 

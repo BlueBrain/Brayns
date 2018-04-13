@@ -286,8 +286,8 @@ inline void init(brayns::GroupAttributes* g, ObjectHandler* h)
 
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
-    brayns::Boxf bounds{s->getBounds()};
-    h->add_property("bounds", &bounds, Flags::IgnoreRead | Flags::Optional);
+    s->getBounds();
+    h->add_property("bounds", &s->_bounds, Flags::IgnoreRead | Flags::Optional);
     h->add_property("geometry_groups", &s->getGeometryGroupAttributes());
     h->set_flags(Flags::DisallowUnknownKey);
 }

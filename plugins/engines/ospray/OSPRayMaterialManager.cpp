@@ -28,9 +28,14 @@ namespace brayns
 OSPRayMaterialManager::OSPRayMaterialManager(
     ParametersManager& parametersManager, const uint32_t flags)
     : MaterialManager(parametersManager)
-    , _memoryManagementFlags(flags)
+    , _memoryManagementFlags{flags}
 {
-    BRAYNS_FCT_ENTRY
+}
+
+OSPRayMaterialManager::~OSPRayMaterialManager()
+{
+    for (auto ospMaterial : _ospMaterials)
+        ospRelease(ospMaterial);
 }
 
 void OSPRayMaterialManager::_commitMaterial(OSPMaterial ospMaterial,
@@ -73,6 +78,7 @@ void OSPRayMaterialManager::_commitMaterial(OSPMaterial ospMaterial,
 OSPTexture2D OSPRayMaterialManager::_createTexture2D(const size_t id)
 {
     BRAYNS_FCT_ENTRY
+
     if (_ospTextures.find(id) != _ospTextures.end())
         return _ospTextures[id];
 
@@ -118,33 +124,39 @@ OSPTexture2D OSPRayMaterialManager::_createTexture2D(const size_t id)
 void OSPRayMaterialManager::commit()
 {
     BRAYNS_FCT_ENTRY
-    if (_ospMaterialData)
-        ospRelease(_ospMaterialData);
 
-    for (size_t i = 0; i < _materials.size(); ++i)
+    if (!isModified())
+        return;
+
+    for (size_t i = 0; i < _ospMaterials.size(); ++i)
     {
         auto& material = _materials[i];
-        OSPMaterial ospMaterial = nullptr;
-        if (_ospMaterials.size() <= i)
-        {
-            // OSP Material does not exist, create it
-            ospMaterial = ospNewMaterial(nullptr, "ExtendedOBJMaterial");
-            _ospMaterials.push_back(ospMaterial);
-        }
-        else
-            ospMaterial = _ospMaterials[i];
+        auto ospMaterial = _ospMaterials[i];
         _commitMaterial(ospMaterial, material);
     }
+
+    if (_ospMaterialData)
+        ospRelease(_ospMaterialData);
     _ospMaterialData = ospNewData(_ospMaterials.size(), OSP_OBJECT,
                                   &_ospMaterials[0], _memoryManagementFlags);
     ospCommit(_ospMaterialData);
-    markModified();
+    resetModified();
 }
 
 OSPMaterial OSPRayMaterialManager::getOSPMaterial(const size_t index)
 {
-    for (size_t i = _ospMaterials.size() + 1; i < index; ++i)
-        _ospMaterials.push_back(ospNewMaterial(nullptr, "ExtendedOBJMaterial"));
+    BRAYNS_FCT_ENTRY
+
+    for (size_t i = _ospMaterials.size(); i <= index; ++i)
+    {
+        // Create missing OSP materials if necessary
+        auto& material = _materials[i];
+        OSPMaterial ospMaterial =
+            ospNewMaterial(nullptr, "ExtendedOBJMaterial");
+        _ospMaterials.push_back(ospMaterial);
+        _commitMaterial(ospMaterial, material);
+        markModified();
+    }
     return _ospMaterials[index];
 }
 }

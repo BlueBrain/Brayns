@@ -174,7 +174,8 @@ struct Brayns::Impl : public PluginAPI
 
         _extensionPluginFactory.preRender();
 
-        Scene& scene = _engine->getScene();
+        auto& scene = _engine->getScene();
+        auto& camera = _engine->getCamera();
 
         // consider updates on the scene also from plugins, not only 'our own'
         // built-in data loading
@@ -186,19 +187,19 @@ struct Brayns::Impl : public PluginAPI
         _engine->setActiveRenderer(
             _parametersManager.getRenderingParameters().getRenderer());
 
-        const Vector2ui windowSize =
+        const auto windowSize =
             _parametersManager.getApplicationParameters().getWindowSize();
 
         _engine->reshape(windowSize);
         _engine->preRender();
 
+        if (_parametersManager.isAnyModified() || camera.isModified() ||
+            scene.isModified() || scene.getTransferFunction().isModified())
+            _engine->getFrameBuffer().clear();
+
         _engine->commit();
 
-        Camera& camera = _engine->getCamera();
         camera.commit();
-
-        if (scene.getTransferFunction().isModified())
-            scene.commitTransferFunctionData();
 
         if (_parametersManager.getRenderingParameters().getHeadLight())
         {
@@ -213,13 +214,6 @@ struct Brayns::Impl : public PluginAPI
             }
         }
 
-        if (_parametersManager.isAnyModified() || camera.isModified() ||
-            scene.isModified())
-        {
-            _engine->getFrameBuffer().clear();
-        }
-
-        _engine->getScene().getTransferFunction().resetModified();
         _parametersManager.resetModified();
         _engine->getCamera().resetModified();
         _engine->getScene().resetModified();
@@ -229,6 +223,8 @@ struct Brayns::Impl : public PluginAPI
 
     void postRender()
     {
+        std::lock_guard<std::mutex> lock{_renderMutex};
+
         _engine->postRender();
 
         _fpsUpdateElapsed += _renderTimer.milliseconds();
@@ -391,7 +387,7 @@ private:
 
         Progress loadingProgress(
             "Loading scene ...",
-            LOADING_PROGRESS_DATA + 3 * LOADING_PROGRESS_STEP,
+            LOADING_PROGRESS_DATA + 2 * LOADING_PROGRESS_STEP,
             [this](const std::string& msg, const float progress) {
                 std::lock_guard<std::mutex> lock_(_engine->getProgress().mutex);
                 _engine->setLastOperation(msg);
@@ -416,18 +412,12 @@ private:
         scene.buildEnvironment();
 
         const auto& geomParams = _parametersManager.getGeometryParameters();
-        loadingProgress.setMessage("Building geometry ...");
-        scene.buildGeometry();
         if (geomParams.getLoadCacheFile().empty() &&
             !geomParams.getSaveCacheFile().empty())
         {
             scene.saveToCacheFile();
         }
 
-        loadingProgress += LOADING_PROGRESS_STEP;
-
-        loadingProgress.setMessage("Building acceleration structure ...");
-        scene.commit();
         loadingProgress += LOADING_PROGRESS_STEP;
 
         loadingProgress.setMessage("Done");

@@ -406,7 +406,7 @@ public:
                 _engine->getScene().getTransferFunction());
         _handleGET(ENDPOINT_SCENE, _engine->getScene());
         _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
-                   [](Scene& scene) { scene.commit(); });
+                   [](Scene& scene) { scene.markModified(); });
 
         _handle(ENDPOINT_MATERIAL_MANAGER,
                 _engine->getScene().getMaterialManager());
@@ -744,17 +744,14 @@ void RocketsPlugin::preRender()
 {
     _impl->preRender();
 }
-
 void RocketsPlugin::postRender()
 {
     _impl->postRender();
 }
-
 void RocketsPlugin::postSceneLoading()
 {
     _impl->postSceneLoading();
 }
-
 void RocketsPlugin::_registerRequest(const std::string& name,
                                      const RetParamFunc& action)
 {

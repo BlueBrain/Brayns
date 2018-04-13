@@ -22,6 +22,8 @@
 #define BRAYNS_LOG_H
 
 #include <iostream>
+#include <thread>
+
 #define BRAYNS_ERROR std::cerr << "[ERROR] "
 #define BRAYNS_WARN std::cerr << "[WARN ] "
 #define BRAYNS_INFO std::cout << "[INFO ] "
@@ -32,8 +34,9 @@
 #define BRAYNS_FCT_ENTRY
 #else
 #define BRAYNS_DEBUG std::cout << "[DEBUG] "
-#define BRAYNS_FCT_ENTRY \
-    std::cout << "[ENTRY] " << __FILE__ << ": " << __FUNCTION__ << std::endl;
+#define BRAYNS_FCT_ENTRY                                                      \
+    std::cout << "[" << std::this_thread::get_id() << "][ENTRY] " << __FILE__ \
+              << ": " << __FUNCTION__ << std::endl;
 #endif
 
 #define BRAYNS_THROW(exc)                        \
