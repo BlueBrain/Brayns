@@ -23,6 +23,7 @@
 #include <brayns/common/geometry/GeometryGroup.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/io/NESTLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
@@ -53,19 +54,23 @@ Scene::Scene(Renderers renderers, ParametersManager& parametersManager,
 Scene::~Scene()
 {
     BRAYNS_FCT_ENTRY
+
     reset();
 }
 
 void Scene::reset()
 {
     BRAYNS_FCT_ENTRY
+
     unload();
     _renderers.clear();
+    _bounds.reset();
 }
 
 void Scene::unload()
 {
     BRAYNS_FCT_ENTRY
+
     _materialManager.clear();
     _markGeometryDirty();
     for (auto geometryGroup : _geometryGroups)
@@ -75,11 +80,14 @@ void Scene::unload()
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
     _volumeHandler.reset();
+
+    markModified();
 }
 
 void Scene::_markGeometryDirty()
 {
     BRAYNS_FCT_ENTRY
+
     _geometryGroupsDirty = true;
     markModified();
 }
@@ -463,6 +471,7 @@ void Scene::buildEnvironment()
 void Scene::addLight(LightPtr light)
 {
     BRAYNS_FCT_ENTRY
+
     removeLight(light);
     _lights.push_back(light);
 }
@@ -470,6 +479,7 @@ void Scene::addLight(LightPtr light)
 void Scene::removeLight(LightPtr light)
 {
     BRAYNS_FCT_ENTRY
+
     Lights::iterator it = std::find(_lights.begin(), _lights.end(), light);
     if (it != _lights.end())
         _lights.erase(it);
@@ -478,6 +488,7 @@ void Scene::removeLight(LightPtr light)
 LightPtr Scene::getLight(const size_t index)
 {
     BRAYNS_FCT_ENTRY
+
     if (index < _lights.size())
         return _lights[index];
     return 0;
@@ -486,12 +497,14 @@ LightPtr Scene::getLight(const size_t index)
 void Scene::clearLights()
 {
     BRAYNS_FCT_ENTRY
+
     _lights.clear();
 }
 
 void Scene::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
     BRAYNS_FCT_ENTRY
+
     auto& ap = _parametersManager.getAnimationParameters();
     _simulationHandler = handler;
     if (_simulationHandler)
@@ -513,6 +526,7 @@ void Scene::setCADiffusionSimulationHandler(
     CADiffusionSimulationHandlerPtr handler)
 {
     BRAYNS_FCT_ENTRY
+
     _caDiffusionSimulationHandler = handler;
     if (_caDiffusionSimulationHandler)
         _parametersManager.getAnimationParameters().setEnd(
@@ -523,12 +537,13 @@ void Scene::setCADiffusionSimulationHandler(
 
 CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
 {
-    BRAYNS_FCT_ENTRY
     return _caDiffusionSimulationHandler;
 }
 
 VolumeHandlerPtr Scene::getVolumeHandler()
 {
+    BRAYNS_FCT_ENTRY
+
     const auto& volumeFile =
         _parametersManager.getVolumeParameters().getFilename();
     const auto& volumeFolder =
@@ -585,6 +600,17 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                 for (const auto& filename : filenames)
                     _volumeHandler->attachVolumeToFile(index++, filename);
             }
+
+            // Add geometry group
+            _volumeHandler->setCurrentIndex(0);
+            const auto& dimensions = _volumeHandler->getDimensions();
+            const auto& offset = _volumeHandler->getOffset();
+            const auto name = getNameFromFullPath(volumeFile);
+            auto group = addGeometryGroup(name);
+            group->getBounds().merge(offset);
+            group->getBounds().merge(offset + dimensions);
+
+            _parametersManager.getVolumeParameters().resetModified();
         }
     }
     catch (const std::runtime_error& e)
@@ -604,6 +630,7 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 bool Scene::empty() const
 {
     BRAYNS_FCT_ENTRY
+
     bool empty = true;
     for (const auto& group : _geometryGroups)
         empty = empty && group->empty();
@@ -613,6 +640,7 @@ bool Scene::empty() const
 void Scene::_processVolumeAABBGeometry()
 {
     BRAYNS_FCT_ENTRY
+
     VolumeHandlerPtr volumeHandler = getVolumeHandler();
     if (!volumeHandler)
         return;
@@ -675,6 +703,7 @@ void Scene::_processVolumeAABBGeometry()
 void Scene::saveToCacheFile()
 {
     BRAYNS_FCT_ENTRY
+
     const auto& filename =
         _parametersManager.getGeometryParameters().getSaveCacheFile();
     BRAYNS_INFO << "Saving scene to binary file: " << filename << std::endl;
@@ -1021,16 +1050,17 @@ void Scene::loadFromCacheFile()
     BRAYNS_INFO << "Scene successfully loaded" << std::endl;
 }
 
-Boxf Scene::getBounds()
+Boxf& Scene::getBounds()
 {
     BRAYNS_FCT_ENTRY
-    Boxf bounds;
+
+    _bounds.reset();
     for (size_t i = 0; i < _geometryGroups.size(); ++i)
     {
         const auto& groupAttributes = _geometryGroupAttributes[i];
         if (groupAttributes.enabled())
-            bounds.merge(_geometryGroups[i]->getBounds());
+            _bounds.merge(_geometryGroups[i]->getBounds());
     }
-    return bounds;
+    return _bounds;
 }
 }

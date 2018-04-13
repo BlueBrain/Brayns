@@ -116,9 +116,6 @@ void OSPRayGeometryGroup::unload()
 
 void OSPRayGeometryGroup::_buildBoundingBox()
 {
-    if (_boundingBoxModel)
-        return;
-
     _boundingBoxModel = ospNewModel();
 
     Material material;
@@ -159,8 +156,6 @@ void OSPRayGeometryGroup::_buildBoundingBox()
     addCylinder(_boudingBoxMaterialId, {positions[3], positions[7], radius});
 
     ospCommit(_boundingBoxModel);
-
-    _materialManager.commit();
 }
 
 void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
@@ -180,7 +175,7 @@ void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
                  _ospExtendedSpheresData[materialId]);
 
     auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    const auto& ospMaterial = impl->getOSPMaterial(materialId);
+    auto ospMaterial = impl->getOSPMaterial(materialId);
     ospSetMaterial(_ospExtendedSpheres[materialId], ospMaterial);
 
     ospCommit(_ospExtendedSpheres[materialId]);
@@ -191,8 +186,6 @@ void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
         ospAddGeometry(_boundingBoxModel, _ospExtendedSpheres[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
-
-    _spheresDirty = false;
 }
 
 void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
@@ -211,7 +204,7 @@ void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
                  _ospExtendedCylindersData[materialId]);
 
     auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    const auto& ospMaterial = impl->getOSPMaterial(materialId);
+    auto ospMaterial = impl->getOSPMaterial(materialId);
     ospSetMaterial(_ospExtendedCylinders[materialId], ospMaterial);
 
     ospCommit(_ospExtendedCylinders[materialId]);
@@ -222,7 +215,6 @@ void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
         ospAddGeometry(_boundingBoxModel, _ospExtendedCylinders[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
-    _cylindersDirty = false;
 }
 
 void OSPRayGeometryGroup::_commitCones(const size_t materialId)
@@ -241,7 +233,7 @@ void OSPRayGeometryGroup::_commitCones(const size_t materialId)
                  _ospExtendedConesData[materialId]);
 
     auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    const auto& ospMaterial = impl->getOSPMaterial(materialId);
+    auto ospMaterial = impl->getOSPMaterial(materialId);
     ospSetMaterial(_ospExtendedCones[materialId], ospMaterial);
 
     ospCommit(_ospExtendedCones[materialId]);
@@ -252,7 +244,6 @@ void OSPRayGeometryGroup::_commitCones(const size_t materialId)
         ospAddGeometry(_boundingBoxModel, _ospExtendedCones[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedCones[materialId]);
-    _conesDirty = false;
 }
 
 void OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
@@ -304,12 +295,11 @@ void OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
     ospSet1i(_ospMeshes[materialId], "alpha_component", 4);
 
     auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    const auto& ospMaterial = impl->getOSPMaterial(materialId);
+    auto ospMaterial = impl->getOSPMaterial(materialId);
     ospSetMaterial(_ospMeshes[materialId], ospMaterial);
     ospCommit(_ospMeshes[materialId]);
 
     ospAddGeometry(_model, _ospMeshes[materialId]);
-    _trianglesMeshesDirty = false;
 }
 
 void OSPRayGeometryGroup::commit()
@@ -325,30 +315,43 @@ void OSPRayGeometryGroup::commit()
     if (!_simulationModel)
         _simulationModel = ospNewModel();
 
+    // Bounding box
+    if (!_boundingBoxModel)
+        _buildBoundingBox();
+
+    // Group geometry
     if (_spheresDirty)
+    {
         for (const auto& spheres : _spheres)
             _commitSpheres(spheres.first);
+        _spheresDirty = false;
+    }
 
     if (_cylindersDirty)
+    {
         for (const auto& cylinders : _cylinders)
             _commitCylinders(cylinders.first);
+        _cylindersDirty = false;
+    }
 
     if (_conesDirty)
+    {
         for (const auto& cones : _cones)
             _commitCones(cones.first);
+        _conesDirty = false;
+    }
 
     if (_trianglesMeshesDirty)
+    {
         for (const auto& meshes : _trianglesMeshes)
             _commitMeshes(meshes.first);
-
-    // Bounding box
-    _buildBoundingBox();
+        _trianglesMeshesDirty = false;
+    }
 
     // Commit models
     ospCommit(_model);
     ospCommit(_boundingBoxModel);
     ospCommit(_simulationModel);
-    return;
 }
 
 osp::affine3f OSPRayGeometryGroup::_groupTransformationToAffine3f(

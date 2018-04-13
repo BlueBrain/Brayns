@@ -31,10 +31,11 @@ class OSPRayMaterialManager : public MaterialManager
 public:
     OSPRayMaterialManager(ParametersManager& parametersManager,
                           const uint32_t flags);
+    ~OSPRayMaterialManager();
 
     void commit() final;
     OSPMaterial getOSPMaterial(const size_t index);
-    OSPData getData() { return _ospMaterialData; }
+    OSPData getOSPMaterialData() { return _ospMaterialData; }
 private:
     void _commitMaterial(OSPMaterial ospMaterial, Material& material);
     OSPTexture2D _createTexture2D(const size_t id);

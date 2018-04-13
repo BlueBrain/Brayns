@@ -302,8 +302,6 @@ private:
         for (auto& meshes : group.getTrianglesMeshes())
             maxMaterialId = std::max(maxMaterialId, meshes.first);
 
-        BRAYNS_ERROR << "--> " << maxMaterialId << std::endl;
-
         for (size_t i = 0; i < maxMaterialId; ++i)
         {
             Material material;

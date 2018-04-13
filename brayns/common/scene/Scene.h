@@ -29,6 +29,8 @@
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
+SERIALIZATION_ACCESS(Scene)
+
 namespace brayns
 {
 /**
@@ -64,11 +66,6 @@ public:
     BRAYNS_API virtual void commit() = 0;
 
     /**
-        Converts scene geometry into rendering engine specific data structures
-    */
-    BRAYNS_API virtual void buildGeometry() = 0;
-
-    /**
         Commit lights to renderers
     */
     BRAYNS_API virtual void commitLights() = 0;
@@ -91,7 +88,7 @@ public:
     /**
         Returns the bounding box of the scene
     */
-    Boxf getBounds();
+    Boxf& getBounds();
     /**getGeometryGroups
         Build an environment in addition to the loaded data, and according to
         the geometry parameters (command line parameter --scene-environment).
@@ -137,7 +134,7 @@ public:
         @return geometry groups
       */
     BRAYNS_API GeometryGroups& getGeometryGroups() { return _geometryGroups; }
-    /**
+    /**registry
         Builds a default scene made of a Cornell box, a refelctive cube, and
         a transparent sphere
     */
@@ -287,9 +284,12 @@ protected:
     CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler;
 
     size_t _sizeInBytes{0};
+    Boxf _bounds;
 
 private:
     void _markGeometryDirty();
+
+    SERIALIZATION_FRIEND(Scene)
 };
 }
 #endif // SCENE_H

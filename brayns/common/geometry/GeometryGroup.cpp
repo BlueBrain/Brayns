@@ -66,6 +66,7 @@ GeometryGroup::GeometryGroup(const std::string& name,
     : _materialManager(materialManager)
     , _name(name)
 {
+    _bounds.reset();
 }
 
 GeometryGroup::~GeometryGroup()
@@ -82,6 +83,7 @@ void GeometryGroup::unload()
     _conesDirty = true;
     _trianglesMeshes.clear();
     _trianglesMeshesDirty = true;
+    _bounds.reset();
 }
 
 bool GeometryGroup::empty() const
@@ -172,6 +174,8 @@ bool GeometryGroup::dirty() const
 
 void GeometryGroup::logInformation()
 {
+    BRAYNS_FCT_ENTRY
+
     uint64_t sizeInBytes = 0;
     uint64_t nbSpheres = 0;
     uint64_t nbCylinders = 0;
@@ -203,15 +207,13 @@ void GeometryGroup::logInformation()
         ++nbMeshes;
     }
 
-    BRAYNS_INFO << "---------------------------------------------------"
-                << std::endl;
-    BRAYNS_INFO << "Group " << _name << std::endl;
-    BRAYNS_INFO << "- Spheres  : " << nbSpheres << std::endl;
-    BRAYNS_INFO << "- Cylinders: " << nbCylinders << std::endl;
-    BRAYNS_INFO << "- Cones    : " << nbCones << std::endl;
-    BRAYNS_INFO << "- Meshes   : " << nbMeshes << std::endl;
-    BRAYNS_INFO << "- Total    : " << sizeInBytes << " bytes ("
-                << sizeInBytes / 1048576 << " MB)" << std::endl;
+    BRAYNS_DEBUG << "Group " << _name << std::endl;
+    BRAYNS_DEBUG << "- Spheres  : " << nbSpheres << std::endl;
+    BRAYNS_DEBUG << "- Cylinders: " << nbCylinders << std::endl;
+    BRAYNS_DEBUG << "- Cones    : " << nbCones << std::endl;
+    BRAYNS_DEBUG << "- Meshes   : " << nbMeshes << std::endl;
+    BRAYNS_DEBUG << "- Total    : " << sizeInBytes << " bytes ("
+                 << sizeInBytes / 1048576 << " MB)" << std::endl;
 }
 
 Boxf& GeometryGroup::getBounds()

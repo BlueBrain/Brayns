@@ -82,22 +82,15 @@ OSPModel OSPRayScene::_getActiveModel()
     return model;
 }
 
-void OSPRayScene::buildGeometry()
-{
-    BRAYNS_FCT_ENTRY
-
-    commitMaterials();
-
-    // Optix needs a bounding box around the volume so that if can find
-    // intersections before initiating the traversal
-    _processVolumeAABBGeometry();
-}
-
 void OSPRayScene::commit()
 {
     BRAYNS_FCT_ENTRY
 
-    _materialManager.commit();
+    if (_transferFunction.isModified())
+        commitTransferFunctionData();
+
+    if (!isModified())
+        return;
 
     if (_rootModel)
         ospRelease(_rootModel);
@@ -144,6 +137,8 @@ void OSPRayScene::commit()
     ospCommit(_rootModel);
     if (_rootSimulationModel)
         ospCommit(_rootSimulationModel);
+
+    resetModified();
 }
 
 void OSPRayScene::commitLights()
@@ -211,27 +206,25 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials()
 {
-    if (!_materialManager.isModified())
-        return;
-
     BRAYNS_FCT_ENTRY
 
-    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    impl->commit();
-    auto materialData = impl->getData();
-
-    for (const auto& renderer : _renderers)
-    {
-        auto rendererImpl =
-            std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
-        ospSetData(rendererImpl, "materials", materialData);
-        ospCommit(rendererImpl);
-    }
-    _materialManager.resetModified();
+    const auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
+    auto materialData = impl->getOSPMaterialData();
+    if (materialData)
+        for (auto renderer : _renderers)
+        {
+            auto rendererImpl =
+                std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
+            ospSetData(rendererImpl, "materials", materialData);
+            ospCommit(rendererImpl);
+        }
 }
 
 void OSPRayScene::commitTransferFunctionData()
 {
+    if (!_transferFunction.isModified())
+        return;
+
     BRAYNS_FCT_ENTRY
 
     if (_ospTransferFunctionDiffuseData)
@@ -277,7 +270,7 @@ void OSPRayScene::commitTransferFunctionData()
                      _transferFunction.getValuesRange().x());
         ospCommit(impl);
     }
-    markModified();
+    _transferFunction.resetModified();
 }
 
 void OSPRayScene::commitVolumeData()
@@ -339,7 +332,6 @@ void OSPRayScene::commitVolumeData()
                 _parametersManager.getRenderingParameters().getSamplesPerRay());
             ospSet1f(impl, "volumeEpsilon", epsilon);
         }
-        markModified();
     }
 }
 
@@ -375,7 +367,6 @@ void OSPRayScene::commitSimulationData()
         ospSet1i(impl, "simulationDataSize",
                  _simulationHandler->getFrameSize());
     }
-    markModified();
 }
 
 bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
