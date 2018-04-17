@@ -40,7 +40,6 @@ MaterialManager::~MaterialManager()
 void MaterialManager::clear()
 {
     _materials.clear();
-    _initializeSystemMaterials();
 }
 
 void MaterialManager::check(const size_t index)
@@ -98,7 +97,7 @@ size_t MaterialManager::addTexture(const std::string& filename)
     return index;
 }
 
-void MaterialManager::_initializeSystemMaterials()
+void MaterialManager::initializeSystemMaterials()
 {
     BRAYNS_FCT_ENTRY
 

@@ -100,14 +100,10 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     Renderers renderersForScene = _createRenderers();
 
     const auto ospFlags = _getOSPDataFlags();
-    BRAYNS_INFO << "Initializing material manager" << std::endl;
-    _materialManager =
-        std::make_shared<OSPRayMaterialManager>(_parametersManager, ospFlags);
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene =
-        std::make_shared<OSPRayScene>(renderersForScene, _parametersManager,
-                                      *_materialManager, ospFlags);
+    _scene = std::make_shared<OSPRayScene>(renderersForScene,
+                                           _parametersManager, ospFlags);
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
     _camera = createCamera(rp.getCameraType());
@@ -209,9 +205,10 @@ void OSPRayEngine::preRender()
         clearFrameBuffer = true;
     }
 
-    if (_materialManager->isModified())
+    auto& materialManager = _scene->getMaterialManager();
+    if (materialManager.isModified())
     {
-        _materialManager->commit();
+        materialManager.commit();
         _scene->commitMaterials();
         clearFrameBuffer = true;
     }
