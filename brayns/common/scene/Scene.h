@@ -119,23 +119,23 @@ public:
     BRAYNS_API void clearLights();
 
     /**
-        Adds a geometry group to the scene
+        Adds a model to the scene
       */
-    BRAYNS_API virtual GeometryGroupPtr addGeometryGroup(
-        const std::string& name, const std::string& uri = "") = 0;
+    BRAYNS_API virtual ModelPtr addModel(const std::string& name,
+                                         const std::string& uri = "") = 0;
 
     /**
         Removes a geometry group from the scene
-        @param index Index of the geometry group
+        @param index Index of the model
       */
-    BRAYNS_API virtual void removeGeometryGroup(const size_t index) = 0;
+    BRAYNS_API virtual void removeModel(const size_t index) = 0;
 
     /**
         @return geometry groups
       */
-    BRAYNS_API GeometryGroups& getGeometryGroups() { return _geometryGroups; }
+    BRAYNS_API Models& getModels() { return _models; }
     /**registry
-        Builds a default scene made of a Cornell box, a refelctive cube, and
+        Builds a default scene made of a Cornell box, a reflective cube, and
         a transparent sphere
     */
     BRAYNS_API void buildDefault();
@@ -256,11 +256,7 @@ public:
 
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
-    GeometryGroupAttributes& getGeometryGroupAttributes()
-    {
-        return _geometryGroupAttributes;
-    }
-
+    ModelDescriptors& getModelDescriptors() { return _modelDescriptors; }
 protected:
     void _processVolumeAABBGeometry();
 
@@ -270,8 +266,8 @@ protected:
     MaterialManager& _materialManager;
 
     // Model
-    GeometryGroups _geometryGroups;
-    GeometryGroupAttributes _geometryGroupAttributes;
+    Models _models;
+    ModelDescriptors _modelDescriptors;
     bool _geometryGroupsDirty{true};
     Lights _lights;
 

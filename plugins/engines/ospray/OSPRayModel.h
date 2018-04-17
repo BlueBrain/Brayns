@@ -23,19 +23,18 @@
 
 #include "OSPRayMaterialManager.h"
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <ospray_cpp/Data.h>
 
 namespace brayns
 {
-class OSPRayGeometryGroup : public GeometryGroup
+class OSPRayModel : public Model
 {
 public:
-    OSPRayGeometryGroup(const std::string& name,
-                        MaterialManager& materialManager);
-    ~OSPRayGeometryGroup() final;
+    OSPRayModel(const std::string& name, MaterialManager& materialManager);
+    ~OSPRayModel() final;
 
     void setMemoryFlags(const size_t memoryManagementFlags);
 
@@ -45,14 +44,14 @@ public:
     OSPModel getModel() { return _model; }
     size_t getNbInstances() const { return _instances.size(); };
     OSPGeometry getInstance(const size_t index,
-                            GroupTransformation& transformation);
+                            ModelTransformation& transformation);
     OSPGeometry getBoundingBoxModelInstance(
-        GroupTransformation& transformation);
-    OSPGeometry getSimulationModelInstance(GroupTransformation& transformation);
+        ModelTransformation& transformation);
+    OSPGeometry getSimulationModelInstance(ModelTransformation& transformation);
 
 private:
     osp::affine3f _groupTransformationToAffine3f(
-        GroupTransformation& transformation);
+        ModelTransformation& transformation);
 
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);

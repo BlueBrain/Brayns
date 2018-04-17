@@ -18,32 +18,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OSPRayGeometryGroup.h"
+#include "OSPRayModel.h"
 
 namespace brayns
 {
-OSPRayGeometryGroup::OSPRayGeometryGroup(const std::string& name,
-                                         MaterialManager& materialManager)
-    : GeometryGroup(name, materialManager)
+OSPRayModel::OSPRayModel(const std::string& name,
+                         MaterialManager& materialManager)
+    : Model(name, materialManager)
 {
     BRAYNS_FCT_ENTRY
 
     _instances.push_back(nullptr);
 }
 
-void OSPRayGeometryGroup::setMemoryFlags(const size_t memoryManagementFlags)
+void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
 {
     BRAYNS_FCT_ENTRY
     _memoryManagementFlags = memoryManagementFlags;
 }
 
-OSPRayGeometryGroup::~OSPRayGeometryGroup()
+OSPRayModel::~OSPRayModel()
 {
     BRAYNS_FCT_ENTRY
     unload();
 }
 
-void OSPRayGeometryGroup::unload()
+void OSPRayModel::unload()
 {
     BRAYNS_FCT_ENTRY
 
@@ -114,7 +114,7 @@ void OSPRayGeometryGroup::unload()
     _instances.push_back(nullptr);
 }
 
-void OSPRayGeometryGroup::_buildBoundingBox()
+void OSPRayModel::_buildBoundingBox()
 {
     _boundingBoxModel = ospNewModel();
 
@@ -158,7 +158,7 @@ void OSPRayGeometryGroup::_buildBoundingBox()
     ospCommit(_boundingBoxModel);
 }
 
-void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
+void OSPRayModel::_commitSpheres(const size_t materialId)
 {
     BRAYNS_FCT_ENTRY
     const auto& spheres = _spheres[materialId];
@@ -188,7 +188,7 @@ void OSPRayGeometryGroup::_commitSpheres(const size_t materialId)
         ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
 }
 
-void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
+void OSPRayModel::_commitCylinders(const size_t materialId)
 {
     BRAYNS_FCT_ENTRY
     const auto& cylinders = _cylinders[materialId];
@@ -217,7 +217,7 @@ void OSPRayGeometryGroup::_commitCylinders(const size_t materialId)
         ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
 }
 
-void OSPRayGeometryGroup::_commitCones(const size_t materialId)
+void OSPRayModel::_commitCones(const size_t materialId)
 {
     BRAYNS_FCT_ENTRY
     const auto& cones = _cones[materialId];
@@ -246,7 +246,7 @@ void OSPRayGeometryGroup::_commitCones(const size_t materialId)
         ospAddGeometry(_model, _ospExtendedCones[materialId]);
 }
 
-void OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
+void OSPRayModel::_commitMeshes(const size_t materialId)
 {
     BRAYNS_FCT_ENTRY
     _ospMeshes[materialId] = ospNewGeometry("trianglemesh");
@@ -302,7 +302,7 @@ void OSPRayGeometryGroup::_commitMeshes(const size_t materialId)
     ospAddGeometry(_model, _ospMeshes[materialId]);
 }
 
-void OSPRayGeometryGroup::commit()
+void OSPRayModel::commit()
 {
     if (!dirty())
         return;
@@ -354,8 +354,8 @@ void OSPRayGeometryGroup::commit()
     ospCommit(_simulationModel);
 }
 
-osp::affine3f OSPRayGeometryGroup::_groupTransformationToAffine3f(
-    GroupTransformation& transformation)
+osp::affine3f OSPRayModel::_groupTransformationToAffine3f(
+    ModelTransformation& transformation)
 {
     ospcommon::affine3f t = ospcommon::affine3f(ospcommon::one);
     const auto& scale = transformation.scale();
@@ -372,8 +372,8 @@ osp::affine3f OSPRayGeometryGroup::_groupTransformationToAffine3f(
     return (osp::affine3f&)t;
 }
 
-OSPGeometry OSPRayGeometryGroup::getInstance(
-    const size_t index, GroupTransformation& transformation)
+OSPGeometry OSPRayModel::getInstance(const size_t index,
+                                     ModelTransformation& transformation)
 {
     if (index < _instances.size())
         _instances.push_back(nullptr);
@@ -387,8 +387,8 @@ OSPGeometry OSPRayGeometryGroup::getInstance(
     return _instances[index];
 }
 
-OSPGeometry OSPRayGeometryGroup::getSimulationModelInstance(
-    GroupTransformation& transformation)
+OSPGeometry OSPRayModel::getSimulationModelInstance(
+    ModelTransformation& transformation)
 {
     if (_simulationModelInstance)
         ospRelease(_simulationModelInstance);
@@ -400,8 +400,8 @@ OSPGeometry OSPRayGeometryGroup::getSimulationModelInstance(
     return _simulationModelInstance;
 }
 
-OSPGeometry OSPRayGeometryGroup::getBoundingBoxModelInstance(
-    GroupTransformation& transformation)
+OSPGeometry OSPRayModel::getBoundingBoxModelInstance(
+    ModelTransformation& transformation)
 {
     if (_boundingBoxModelInstance)
         ospRelease(_boundingBoxModelInstance);

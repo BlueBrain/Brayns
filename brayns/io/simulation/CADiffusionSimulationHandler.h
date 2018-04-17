@@ -46,12 +46,12 @@ public:
 
     /**
      * @brief setFrame Sets the frame to load
-     * @param group Geometry group to be populated with spheres. When setFrame
-     * is called for the first time, spheres are created. Otherwise, sphere
+     * @param model Model to be populated with spheres. When setFrame is called
+     * for the first time, spheres are created. Otherwise, sphere
      * positions are updated with the new values
      * @param frame Frame to load
      */
-    void setFrame(GeometryGroup& group, const size_t frame);
+    void setFrame(Model& model, const size_t frame);
 
     /**
      * @return Returns the number of frames for the current simulation

@@ -45,7 +45,7 @@ public:
      * @return true if PDB file was successufully loaded, false otherwise
      */
     bool importPDBFile(const std::string& filename, const Vector3f& position,
-                       const size_t proteinIndex, GeometryGroup& group,
+                       const size_t proteinIndex, Model& model,
                        MaterialManager& materialManager);
 
 private:

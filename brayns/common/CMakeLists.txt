@@ -5,7 +5,7 @@
 
 set(BRAYNSCOMMON_SOURCES
   engine/Engine.cpp
-  geometry/GeometryGroup.cpp
+  geometry/Model.cpp
   simulation/AbstractSimulationHandler.cpp
   input/KeyboardHandler.cpp
   volume/VolumeHandler.cpp
@@ -30,7 +30,7 @@ set(BRAYNSCOMMON_SOURCES
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   ActionInterface.h
   BaseObject.h
-  geometry/GeometryGroup.h
+  geometry/Model.h
   camera/AbstractManipulator.h
   camera/Camera.h
   camera/FlyingModeManipulator.h

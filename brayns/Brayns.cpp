@@ -27,7 +27,7 @@
 #include <brayns/common/camera/FlyingModeManipulator.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/engine/Engine.h>
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/log.h>
@@ -592,7 +592,7 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         auto& materialManager = scene.getMaterialManager();
-        auto group = scene.addGeometryGroup(getNameFromFullPath(fileName));
+        auto model = scene.addModel(getNameFromFullPath(fileName));
         std::string pdbFileName = fileName;
         if (pdbFileName == "")
         {
@@ -600,7 +600,7 @@ private:
             BRAYNS_INFO << "Loading PDB file " << pdbFileName << std::endl;
         }
         ProteinLoader proteinLoader(geometryParameters);
-        if (!proteinLoader.importPDBFile(pdbFileName, {0, 0, 0}, 0, *group,
+        if (!proteinLoader.importPDBFile(pdbFileName, {0, 0, 0}, 0, *model,
                                          materialManager))
             BRAYNS_ERROR << "Failed to import " << pdbFileName << std::endl;
     }
@@ -614,11 +614,11 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto fileName = geometryParameters.getXYZBFile();
-        auto group = scene.addGeometryGroup(getNameFromFullPath(fileName));
+        auto model = scene.addModel(getNameFromFullPath(fileName));
         BRAYNS_INFO << "Loading XYZB file " << fileName << std::endl;
         XYZBLoader xyzbLoader(geometryParameters);
         xyzbLoader.setProgressCallback(progressUpdate);
-        if (!xyzbLoader.importFromBinaryFile(fileName, *group))
+        if (!xyzbLoader.importFromBinaryFile(fileName, *model))
             BRAYNS_ERROR << "Failed to import " << fileName << std::endl;
     }
 
@@ -645,7 +645,7 @@ private:
         for (const auto& fileName : files)
         {
             const auto name = getNameFromFullPath(fileName);
-            auto group = scene.addGeometryGroup(name);
+            auto model = scene.addModel(name);
             const auto nbMaterial =
                 scene.getMaterialManager().getMaterials().size();
             size_t material =
@@ -653,7 +653,7 @@ private:
                     ? nbMaterial + i
                     : NO_MATERIAL;
 
-            if (!_meshLoader.importMeshFromFile(fileName, name, *group,
+            if (!_meshLoader.importMeshFromFile(fileName, name, *model,
                                                 scene.getMaterialManager(),
                                                 Matrix4f(), material))
                 BRAYNS_ERROR << "Failed to import " << fileName << std::endl;
@@ -669,8 +669,8 @@ private:
     {
         const auto name = getNameFromFullPath(fileName);
         auto& scene = _engine->getScene();
-        auto group = scene.addGeometryGroup(name);
-        if (!_meshLoader.importMeshFromFile(fileName, name, *group,
+        auto model = scene.addModel(name);
+        if (!_meshLoader.importMeshFromFile(fileName, name, *model,
                                             scene.getMaterialManager(),
                                             Matrix4f(), NO_MATERIAL))
             BRAYNS_ERROR << "Failed to import " << fileName << std::endl;
@@ -784,10 +784,10 @@ private:
         for (const auto& fileName : files)
         {
             const auto name = getNameFromFullPath(fileName);
-            auto group = scene.addGeometryGroup(name);
+            auto model = scene.addModel(name);
             servus::URI uri(fileName);
             if (!morphologyLoader.importMorphology(uri, morphologyIndex,
-                                                   morphologyIndex, *group,
+                                                   morphologyIndex, *model,
                                                    materialManager))
                 BRAYNS_ERROR << "Failed to import " << fileName << std::endl;
             ++morphologyIndex;
@@ -827,9 +827,8 @@ private:
 #endif // BRAYNS_USE_BRION
 
     /**
-        Loads molecular system from configuration (command line
-       parameter
-        --molecular-system-config )
+        Loads molecular system from configuration (command line parameter
+       --molecular-system-config )
     */
     void _loadMolecularSystem(const Progress::UpdateCallback& progressUpdate)
     {

@@ -20,7 +20,7 @@
 
 #include "Scene.h"
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/utils/Utils.h>
@@ -73,10 +73,10 @@ void Scene::unload()
 
     _materialManager.clear();
     _markGeometryDirty();
-    for (auto geometryGroup : _geometryGroups)
-        geometryGroup->unload();
-    _geometryGroups.clear();
-    _geometryGroupAttributes.clear();
+    for (auto model : _models)
+        model->unload();
+    _models.clear();
+    _modelDescriptors.clear();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
     _volumeHandler.reset();
@@ -205,7 +205,7 @@ void Scene::buildDefault()
                                 {0.8f, 0.8f, 0.8f}, {0.f, 1.f, 0.f},
                                 {0.8f, 0.8f, 0.8f}, {0.8f, 0.8f, 0.8f}};
 
-    auto group = addGeometryGroup("CornellBox");
+    auto model = addModel("CornellBox");
     for (size_t i = 1; i < 6; ++i)
     {
         // Cornell box
@@ -219,12 +219,12 @@ void Scene::buildDefault()
         material.setName("cornellbox_wall" + std::to_string(i));
         const auto materialId = _materialManager.add(material);
 
-        auto& meshes = group->getTrianglesMeshes()[materialId];
+        auto& meshes = model->getTrianglesMeshes()[materialId];
         for (size_t j = 0; j < 6; ++j)
         {
             const auto position = positions[indices[i][j]];
             meshes.vertices.push_back(position);
-            group->getBounds().merge(position);
+            model->getBounds().merge(position);
         }
         meshes.indices.push_back(Vector3ui(0, 1, 2));
         meshes.indices.push_back(Vector3ui(3, 4, 5));
@@ -241,7 +241,7 @@ void Scene::buildDefault()
         material.setSpecularExponent(100.f);
         material.setName("cornellbox_sphere");
         const auto materialId = _materialManager.add(material);
-        group->addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
+        model->addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
     }
 
     {
@@ -252,7 +252,7 @@ void Scene::buildDefault()
         material.setSpecularExponent(10.f);
         material.setName("cornellbox_cylinder");
         const auto materialId = _materialManager.add(material);
-        group->addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
+        model->addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
                                         {0.75f, 0.126f, 0.75f},
                                         0.125f});
     }
@@ -265,7 +265,7 @@ void Scene::buildDefault()
         material.setSpecularExponent(10.f);
         material.setName("cornellbox_cone");
         const auto materialId = _materialManager.add(material);
-        group->addCone(materialId, {{0.75f, 0.01f, 0.25f},
+        model->addCone(materialId, {{0.75f, 0.01f, 0.25f},
                                     {0.75f, 0.5f, 0.25f},
                                     0.15f,
                                     0.f});
@@ -284,7 +284,7 @@ void Scene::buildDefault()
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()},
             {0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()}};
-        auto& meshes = group->getTrianglesMeshes()[materialId];
+        auto& meshes = model->getTrianglesMeshes()[materialId];
         for (size_t i = 0; i < 4; ++i)
             meshes.vertices.push_back(lampPositions[i]);
         meshes.indices.push_back(Vector3i(2, 1, 0));
@@ -301,9 +301,9 @@ void Scene::buildEnvironment()
     if (sceneEnvironment == SceneEnvironment::none)
         return;
 
-    auto group = addGeometryGroup("scene_environment");
+    auto model = addModel("scene_environment");
     const auto sceneBounds = getBounds();
-    auto& meshes = group->getTrianglesMeshes();
+    auto& meshes = model->getTrianglesMeshes();
     switch (sceneEnvironment)
     {
     case SceneEnvironment::ground:
@@ -444,22 +444,22 @@ void Scene::buildEnvironment()
         };
 
         for (size_t i = 0; i < 8; ++i)
-            group->addSphere(materialId, Sphere(positions[i], radius));
+            model->addSphere(materialId, Sphere(positions[i], radius));
 
-        group->addCylinder(materialId, {positions[0], positions[1], radius});
-        group->addCylinder(materialId, {positions[2], positions[3], radius});
-        group->addCylinder(materialId, {positions[4], positions[5], radius});
-        group->addCylinder(materialId, {positions[6], positions[7], radius});
+        model->addCylinder(materialId, {positions[0], positions[1], radius});
+        model->addCylinder(materialId, {positions[2], positions[3], radius});
+        model->addCylinder(materialId, {positions[4], positions[5], radius});
+        model->addCylinder(materialId, {positions[6], positions[7], radius});
 
-        group->addCylinder(materialId, {positions[0], positions[2], radius});
-        group->addCylinder(materialId, {positions[1], positions[3], radius});
-        group->addCylinder(materialId, {positions[4], positions[6], radius});
-        group->addCylinder(materialId, {positions[5], positions[7], radius});
+        model->addCylinder(materialId, {positions[0], positions[2], radius});
+        model->addCylinder(materialId, {positions[1], positions[3], radius});
+        model->addCylinder(materialId, {positions[4], positions[6], radius});
+        model->addCylinder(materialId, {positions[5], positions[7], radius});
 
-        group->addCylinder(materialId, {positions[0], positions[4], radius});
-        group->addCylinder(materialId, {positions[1], positions[5], radius});
-        group->addCylinder(materialId, {positions[2], positions[6], radius});
-        group->addCylinder(materialId, {positions[3], positions[7], radius});
+        model->addCylinder(materialId, {positions[0], positions[4], radius});
+        model->addCylinder(materialId, {positions[1], positions[5], radius});
+        model->addCylinder(materialId, {positions[2], positions[6], radius});
+        model->addCylinder(materialId, {positions[3], positions[7], radius});
 
         break;
     }
@@ -606,9 +606,9 @@ VolumeHandlerPtr Scene::getVolumeHandler()
             const auto& dimensions = _volumeHandler->getDimensions();
             const auto& offset = _volumeHandler->getOffset();
             const auto name = getNameFromFullPath(volumeFile);
-            auto group = addGeometryGroup(name);
-            group->getBounds().merge(offset);
-            group->getBounds().merge(offset + dimensions);
+            auto model = addModel(name);
+            model->getBounds().merge(offset);
+            model->getBounds().merge(offset + dimensions);
 
             _parametersManager.getVolumeParameters().resetModified();
         }
@@ -632,8 +632,8 @@ bool Scene::empty() const
     BRAYNS_FCT_ENTRY
 
     bool empty = true;
-    for (const auto& group : _geometryGroups)
-        empty = empty && group->empty();
+    for (const auto& model : _models)
+        empty = empty && model->empty();
     return empty;
 }
 
@@ -671,12 +671,12 @@ void Scene::_processVolumeAABBGeometry()
     const Vector3f& volumeOffset = volumeHandler->getOffset();
     const Vector3ui& volumeDimensions = volumeHandler->getDimensions();
 
-    auto group = addGeometryGroup("VolumeContainer");
+    auto model = addModel("VolumeContainer");
     Material material;
     material.setOpacity(0.f);
     material.setName("volume_container");
     const size_t materialId = _materialManager.add(material);
-    auto& meshes = group->getTrianglesMeshes()[materialId];
+    auto& meshes = model->getTrianglesMeshes()[materialId];
     uint64_t offset = meshes.vertices.size();
     for (size_t face = 0; face < 6; ++face)
     {
@@ -688,15 +688,15 @@ void Scene::_processVolumeAABBGeometry()
                                       volumeOffset;
 
             meshes.vertices.push_back(position);
-            group->getBounds().merge(position);
+            model->getBounds().merge(position);
         }
         const size_t index = offset + face * 6;
         meshes.indices.push_back(Vector3ui(index + 0, index + 1, index + 2));
         meshes.indices.push_back(Vector3ui(index + 3, index + 4, index + 5));
     }
 
-    group->getBounds().merge(Vector3f(0.f, 0.f, 0.f));
-    group->getBounds().merge(volumeOffset +
+    model->getBounds().merge(Vector3f(0.f, 0.f, 0.f));
+    model->getBounds().merge(volumeOffset +
                              Vector3f(volumeDimensions) * volumeElementSpacing);
 }
 
@@ -719,9 +719,9 @@ void Scene::saveToCacheFile()
     BRAYNS_INFO << "Version: " << version << std::endl;
 
     // Save geometry
-    size_t nbElements = _geometryGroups.size();
+    size_t nbElements = _models.size();
     file.write((char*)&nbElements, sizeof(size_t));
-    for (auto group : _geometryGroups)
+    for (auto model : _models)
     {
         const size_t nbMaterials = _materialManager.getMaterials().size();
         file.write((char*)&nbMaterials, sizeof(size_t));
@@ -757,7 +757,7 @@ void Scene::saveToCacheFile()
             uint64_t bufferSize{0};
 
             // Spheres
-            auto& spheres = group->getSpheres();
+            auto& spheres = model->getSpheres();
             if (spheres.find(materialId) != spheres.end())
             {
                 auto& data = spheres[materialId];
@@ -775,7 +775,7 @@ void Scene::saveToCacheFile()
             }
 
             // Cylinders
-            auto& cylinders = group->getCylinders();
+            auto& cylinders = model->getCylinders();
             if (cylinders.find(materialId) != cylinders.end())
             {
                 auto& data = cylinders[materialId];
@@ -793,7 +793,7 @@ void Scene::saveToCacheFile()
             }
 
             // Cones
-            auto& cones = group->getCones();
+            auto& cones = model->getCones();
             if (cones.find(materialId) != cones.end())
             {
                 auto& data = cones[materialId];
@@ -810,7 +810,7 @@ void Scene::saveToCacheFile()
                 file.write((char*)&nbElements, sizeof(size_t));
             }
 
-            auto& meshes = group->getTrianglesMeshes();
+            auto& meshes = model->getTrianglesMeshes();
             if (meshes.find(materialId) != meshes.end())
             {
                 auto& data = meshes[materialId];
@@ -862,7 +862,7 @@ void Scene::saveToCacheFile()
         }
 
         // Bounds
-        const auto& bounds = group->getBounds();
+        const auto& bounds = model->getBounds();
         file.write((char*)&bounds, sizeof(Boxf));
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
@@ -915,7 +915,7 @@ void Scene::loadFromCacheFile()
     file.read((char*)&nbGeometryGroups, sizeof(size_t));
     for (size_t groupId = 0; groupId < nbGeometryGroups; ++groupId)
     {
-        auto group = addGeometryGroup("ToBeDefined");
+        auto model = addModel("ToBeDefined");
         // Materials
         _materialManager.clear();
         for (size_t i = 0; i < nbMaterials; ++i)
@@ -956,7 +956,7 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbSpheres * sizeof(Sphere);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbSpheres
                              << " spheres" << std::endl;
-                auto& spheres = group->getSpheres()[materialId];
+                auto& spheres = model->getSpheres()[materialId];
                 spheres.resize(nbSpheres);
                 file.read((char*)spheres.data(), bufferSize);
             }
@@ -968,7 +968,7 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbCylinders * sizeof(Cylinder);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbCylinders
                              << " cylinders" << std::endl;
-                auto& cylinders = group->getCylinders()[materialId];
+                auto& cylinders = model->getCylinders()[materialId];
                 cylinders.resize(nbCylinders);
                 file.read((char*)cylinders.data(), bufferSize);
             }
@@ -980,13 +980,13 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbCones * sizeof(Cone);
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbCones << " cones"
                              << std::endl;
-                auto& cones = group->getCones()[materialId];
+                auto& cones = model->getCones()[materialId];
                 cones.resize(nbCones);
                 file.read((char*)cones.data(), bufferSize);
             }
 
             // Meshes
-            auto& meshes = group->getTrianglesMeshes()[materialId];
+            auto& meshes = model->getTrianglesMeshes()[materialId];
             // Vertices
             file.read((char*)&nbVertices, sizeof(size_t));
             if (nbVertices != 0)
@@ -1042,7 +1042,7 @@ void Scene::loadFromCacheFile()
         // Bounds
         Boxf bounds;
         file.read((char*)&bounds, sizeof(Boxf));
-        group->getBounds().merge(bounds);
+        model->getBounds().merge(bounds);
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
     file.close();
@@ -1055,11 +1055,11 @@ Boxf& Scene::getBounds()
     BRAYNS_FCT_ENTRY
 
     _bounds.reset();
-    for (size_t i = 0; i < _geometryGroups.size(); ++i)
+    for (size_t i = 0; i < _models.size(); ++i)
     {
-        const auto& groupAttributes = _geometryGroupAttributes[i];
-        if (groupAttributes.enabled())
-            _bounds.merge(_geometryGroups[i]->getBounds());
+        const auto& modelDescriptor = _modelDescriptors[i];
+        if (modelDescriptor.enabled())
+            _bounds.merge(_models[i]->getBounds());
     }
     return _bounds;
 }
