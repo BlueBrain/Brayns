@@ -20,7 +20,7 @@
 
 #include "ProteinLoader.h"
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/MaterialManager.h>
@@ -314,8 +314,7 @@ ProteinLoader::ProteinLoader(const GeometryParameters& geometryParameters)
 
 bool ProteinLoader::importPDBFile(const std::string& filename,
                                   const Vector3f& position,
-                                  const size_t proteinIndex,
-                                  GeometryGroup& group,
+                                  const size_t proteinIndex, Model& model,
                                   MaterialManager& materialManager)
 {
     std::map<size_t, Spheres> spheres;
@@ -460,7 +459,7 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                                               colorMap[materialId].B / 255.f));
             materialId = materialManager.add(material);
             for (const auto& sphere : spheresPerMaterial.second)
-                group.addSphere(materialId, sphere);
+                model.addSphere(materialId, sphere);
         }
     }
     return true;

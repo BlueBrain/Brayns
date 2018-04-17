@@ -18,21 +18,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "GeometryGroup.h"
+#include "Model.h"
 
 #include <brayns/common/log.h>
 
 namespace brayns
 {
-GroupTransformation::GroupTransformation(const GroupTransformation& rhs)
+ModelTransformation::ModelTransformation(const ModelTransformation& rhs)
 {
     this->_translation = rhs._translation;
     this->_scale = rhs._scale;
     this->_rotation = rhs._rotation;
 }
 
-GroupTransformation& GroupTransformation::operator=(
-    const GroupTransformation& rhs)
+ModelTransformation& ModelTransformation::operator=(
+    const ModelTransformation& rhs)
 {
     this->_translation = rhs._translation;
     this->_scale = rhs._scale;
@@ -40,7 +40,7 @@ GroupTransformation& GroupTransformation::operator=(
     return *this;
 }
 
-GroupAttributes::GroupAttributes(const GroupAttributes& rhs)
+ModelDescriptor::ModelDescriptor(const ModelDescriptor& rhs)
 {
     this->_name = rhs._name;
     this->_uri = rhs._uri;
@@ -50,7 +50,7 @@ GroupAttributes::GroupAttributes(const GroupAttributes& rhs)
     this->_transformations = rhs._transformations;
 }
 
-GroupAttributes& GroupAttributes::operator=(const GroupAttributes& rhs)
+ModelDescriptor& ModelDescriptor::operator=(const ModelDescriptor& rhs)
 {
     this->_name = rhs._name;
     this->_uri = rhs._uri;
@@ -61,19 +61,18 @@ GroupAttributes& GroupAttributes::operator=(const GroupAttributes& rhs)
     return *this;
 }
 
-GeometryGroup::GeometryGroup(const std::string& name,
-                             MaterialManager& materialManager)
+Model::Model(const std::string& name, MaterialManager& materialManager)
     : _materialManager(materialManager)
     , _name(name)
 {
     _bounds.reset();
 }
 
-GeometryGroup::~GeometryGroup()
+Model::~Model()
 {
 }
 
-void GeometryGroup::unload()
+void Model::unload()
 {
     _spheres.clear();
     _spheresDirty = true;
@@ -86,13 +85,13 @@ void GeometryGroup::unload()
     _bounds.reset();
 }
 
-bool GeometryGroup::empty() const
+bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
            _trianglesMeshes.empty();
 }
 
-uint64_t GeometryGroup::addSphere(const size_t materialId, const Sphere& sphere)
+uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _spheresDirty = true;
     _materialManager.check(materialId);
@@ -101,8 +100,8 @@ uint64_t GeometryGroup::addSphere(const size_t materialId, const Sphere& sphere)
     return _spheres[materialId].size() - 1;
 }
 
-void GeometryGroup::setSphere(const size_t materialId, const uint64_t index,
-                              const Sphere& sphere)
+void Model::setSphere(const size_t materialId, const uint64_t index,
+                      const Sphere& sphere)
 {
     _spheresDirty = true;
     auto& spheres = _spheres[materialId];
@@ -115,8 +114,7 @@ void GeometryGroup::setSphere(const size_t materialId, const uint64_t index,
         BRAYNS_ERROR << "Invalid index " << index << std::endl;
 }
 
-uint64_t GeometryGroup::addCylinder(const size_t materialId,
-                                    const Cylinder& cylinder)
+uint64_t Model::addCylinder(const size_t materialId, const Cylinder& cylinder)
 {
     _cylindersDirty = true;
     _materialManager.check(materialId);
@@ -126,8 +124,8 @@ uint64_t GeometryGroup::addCylinder(const size_t materialId,
     return _cylinders[materialId].size() - 1;
 }
 
-void GeometryGroup::setCylinder(const size_t materialId, const uint64_t index,
-                                const Cylinder& cylinder)
+void Model::setCylinder(const size_t materialId, const uint64_t index,
+                        const Cylinder& cylinder)
 {
     _cylindersDirty = true;
     auto& cylinders = _cylinders[materialId];
@@ -141,7 +139,7 @@ void GeometryGroup::setCylinder(const size_t materialId, const uint64_t index,
         BRAYNS_ERROR << "Invalid index " << index << std::endl;
 }
 
-uint64_t GeometryGroup::addCone(const size_t materialId, const Cone& cone)
+uint64_t Model::addCone(const size_t materialId, const Cone& cone)
 {
     _conesDirty = true;
     _materialManager.check(materialId);
@@ -151,8 +149,8 @@ uint64_t GeometryGroup::addCone(const size_t materialId, const Cone& cone)
     return _cones[materialId].size() - 1;
 }
 
-void GeometryGroup::setCone(const size_t materialId, const uint64_t index,
-                            const Cone& cone)
+void Model::setCone(const size_t materialId, const uint64_t index,
+                    const Cone& cone)
 {
     _conesDirty = true;
     auto& cones = _cones[materialId];
@@ -166,13 +164,13 @@ void GeometryGroup::setCone(const size_t materialId, const uint64_t index,
         BRAYNS_ERROR << "Invalid index " << index << std::endl;
 }
 
-bool GeometryGroup::dirty() const
+bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
            _trianglesMeshesDirty;
 }
 
-void GeometryGroup::logInformation()
+void Model::logInformation()
 {
     BRAYNS_FCT_ENTRY
 
@@ -207,7 +205,7 @@ void GeometryGroup::logInformation()
         ++nbMeshes;
     }
 
-    BRAYNS_DEBUG << "Group " << _name << std::endl;
+    BRAYNS_DEBUG << "Model " << _name << std::endl;
     BRAYNS_DEBUG << "- Spheres  : " << nbSpheres << std::endl;
     BRAYNS_DEBUG << "- Cylinders: " << nbCylinders << std::endl;
     BRAYNS_DEBUG << "- Cones    : " << nbCones << std::endl;
@@ -216,7 +214,7 @@ void GeometryGroup::logInformation()
                  << sizeInBytes / 1048576 << " MB)" << std::endl;
 }
 
-Boxf& GeometryGroup::getBounds()
+Boxf& Model::getBounds()
 {
     return _bounds;
 }

@@ -20,7 +20,7 @@
 
 #include "SceneLoader.h"
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
@@ -97,7 +97,7 @@ bool SceneLoader::_parsePositions(const std::string& filename)
 }
 
 #ifdef BRAYNS_USE_BRION
-void SceneLoader::_importMorphology(GeometryGroup& group,
+void SceneLoader::_importMorphology(Model& model,
                                     MaterialManager& materialManager,
                                     const Node& node,
                                     const Matrix4f& transformation)
@@ -107,26 +107,26 @@ void SceneLoader::_importMorphology(GeometryGroup& group,
                                       _geometryParameters, nbMaterials);
     const servus::URI uri(node.filename);
     if (!morphologyLoader.importMorphology(uri, 0,
-                                           nbMaterials + node.materialId, group,
+                                           nbMaterials + node.materialId, model,
                                            materialManager, transformation))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
 #endif
 
-void SceneLoader::_importMesh(GeometryGroup& group, MeshLoader& loader,
+void SceneLoader::_importMesh(Model& model, MeshLoader& loader,
                               MaterialManager& materialManager,
                               const Node& node, const Matrix4f& transformation)
 {
     const auto fileName = node.filename;
     const auto meshName = getNameFromFullPath(fileName);
     const auto nbMaterials = materialManager.getMaterials().size();
-    if (!loader.importMeshFromFile(fileName, meshName, group, materialManager,
+    if (!loader.importMeshFromFile(fileName, meshName, model, materialManager,
                                    transformation,
                                    nbMaterials + node.materialId))
         BRAYNS_ERROR << "Failed to load " << node.filename << std::endl;
 }
 
-bool SceneLoader::_processNodes(GeometryGroup& group, MeshLoader& meshLoader,
+bool SceneLoader::_processNodes(Model& model, MeshLoader& meshLoader,
                                 MaterialManager& materialManager)
 {
     size_t progress = 0;
@@ -139,17 +139,17 @@ bool SceneLoader::_processNodes(GeometryGroup& group, MeshLoader& meshLoader,
         switch (node.fileType)
         {
         case FileType::point:
-            group.addSphere(node.materialId,
+            model.addSphere(node.materialId,
                             {node.position,
                              _geometryParameters.getRadiusMultiplier()});
             break;
         case FileType::morphology:
 #ifdef BRAYNS_USE_BRION
-            _importMorphology(group, materialManager, node, transformation);
+            _importMorphology(model, materialManager, node, transformation);
 #endif
             break;
         case FileType::mesh:
-            _importMesh(group, meshLoader, materialManager, node,
+            _importMesh(model, meshLoader, materialManager, node,
                         transformation);
             break;
         default:
@@ -165,9 +165,9 @@ bool SceneLoader::importFromFile(const std::string& filename, Scene& scene,
                                  MeshLoader& meshLoader)
 {
     bool result = false;
-    auto group = scene.addGeometryGroup("Scene");
+    auto model = scene.addModel("Scene");
     if (_parsePositions(filename))
-        result = _processNodes(*group, meshLoader, scene.getMaterialManager());
+        result = _processNodes(*model, meshLoader, scene.getMaterialManager());
     return result;
 }
 }

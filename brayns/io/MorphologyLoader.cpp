@@ -20,7 +20,7 @@
 
 #include "MorphologyLoader.h"
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
@@ -134,17 +134,17 @@ public:
      */
     bool importMorphology(const servus::URI& source, const uint64_t index,
                           const size_t materialId,
-                          const Matrix4f& transformation, GeometryGroup& group,
+                          const Matrix4f& transformation, Model& model,
                           MaterialManager& materialManager,
                           const GIDOffsets& targetGIDOffsets,
                           CompartmentReportPtr compartmentReport = nullptr)
     {
         ParallelGeometryGroupContainer groupContainer(
-            group.getSpheres(), group.getCylinders(), group.getCones(),
-            group.getTrianglesMeshes(), group.getBounds());
+            model.getSpheres(), model.getCylinders(), model.getCones(),
+            model.getTrianglesMeshes(), model.getBounds());
 
         Material material;
-        material.setName(group.getName() + '_' + std::to_string(materialId));
+        material.setName(model.getName() + '_' + std::to_string(materialId));
         const auto id = materialManager.add(material);
         return _importMorphology(source, index, id, transformation,
                                  compartmentReport, targetGIDOffsets,
@@ -167,8 +167,8 @@ public:
         try
         {
             // Geometry group (one for the whole circuit)
-            auto group = scene.addGeometryGroup("Circuit");
-            group->useSimulationModel(
+            auto model = scene.addModel("Circuit");
+            model->useSimulationModel(
                 _geometryParameters.getCircuitUseSimulationModel());
 
             // Open Circuit and select GIDs according to specified target
@@ -263,7 +263,7 @@ public:
 
             // Import meshes
             returnValue =
-                returnValue && _importMeshes(allGids, transformations, *group,
+                returnValue && _importMeshes(allGids, transformations, *model,
                                              scene.getMaterialManager(),
                                              targetGIDOffsets, meshLoader);
 
@@ -273,10 +273,10 @@ public:
                 returnValue =
                     returnValue &&
                     _importMorphologies(circuit, allGids, transformations,
-                                        *group, targetGIDOffsets,
+                                        *model, targetGIDOffsets,
                                         compartmentReport);
             // Create materials
-            _createMaterials(*group, scene.getMaterialManager());
+            _createMaterials(*model, scene.getMaterialManager());
         }
         catch (const std::exception& error)
         {
@@ -289,23 +289,22 @@ public:
     }
 
 private:
-    void _createMaterials(GeometryGroup& group,
-                          MaterialManager& materialManager)
+    void _createMaterials(Model& model, MaterialManager& materialManager)
     {
         size_t maxMaterialId = materialManager.getMaterials().size();
-        for (auto& spheres : group.getSpheres())
+        for (auto& spheres : model.getSpheres())
             maxMaterialId = std::max(maxMaterialId, spheres.first);
-        for (auto& cylinders : group.getCylinders())
+        for (auto& cylinders : model.getCylinders())
             maxMaterialId = std::max(maxMaterialId, cylinders.first);
-        for (auto& cones : group.getCones())
+        for (auto& cones : model.getCones())
             maxMaterialId = std::max(maxMaterialId, cones.first);
-        for (auto& meshes : group.getTrianglesMeshes())
+        for (auto& meshes : model.getTrianglesMeshes())
             maxMaterialId = std::max(maxMaterialId, meshes.first);
 
         for (size_t i = 0; i < maxMaterialId; ++i)
         {
             Material material;
-            material.setName(group.getName() + '_' + std::to_string(i));
+            material.setName(model.getName() + '_' + std::to_string(i));
             materialManager.add(material);
         }
         materialManager.markModified();
@@ -856,7 +855,7 @@ private:
 
 #if (BRAYNS_USE_ASSIMP)
     bool _importMeshes(const brain::GIDSet& gids,
-                       const Matrix4fs& transformations, GeometryGroup& group,
+                       const Matrix4fs& transformations, Model& model,
                        MaterialManager& materialManager,
                        const GIDOffsets& targetGIDOffsets,
                        MeshLoader& meshLoader)
@@ -884,7 +883,7 @@ private:
                     : Matrix4f();
             const auto fileName = meshLoader.getMeshFilenameFromGID(gid);
             const auto meshName = getNameFromFullPath(fileName);
-            if (!meshLoader.importMeshFromFile(fileName, meshName, group,
+            if (!meshLoader.importMeshFromFile(fileName, meshName, model,
                                                materialManager, transformation,
                                                materialId))
                 ++loadingFailures;
@@ -935,8 +934,7 @@ private:
 
     bool _importMorphologies(const brain::Circuit& circuit,
                              const brain::GIDSet& gids,
-                             const Matrix4fs& transformations,
-                             GeometryGroup& group,
+                             const Matrix4fs& transformations, Model& model,
                              const GIDOffsets& targetGIDOffsets,
                              CompartmentReportPtr compartmentReport)
     {
@@ -984,28 +982,28 @@ private:
                 for (const auto& sphere : spheres)
                 {
                     const auto index = sphere.first;
-                    group.getSpheres()[index].insert(
-                        group.getSpheres()[index].end(), sphere.second.begin(),
+                    model.getSpheres()[index].insert(
+                        model.getSpheres()[index].end(), sphere.second.begin(),
                         sphere.second.end());
                 }
 #pragma omp critical
                 for (const auto& cylinder : cylinders)
                 {
                     const auto index = cylinder.first;
-                    group.getCylinders()[index].insert(
-                        group.getCylinders()[index].end(),
+                    model.getCylinders()[index].insert(
+                        model.getCylinders()[index].end(),
                         cylinder.second.begin(), cylinder.second.end());
                 }
 #pragma omp critical
                 for (const auto& cone : cones)
                 {
                     const auto index = cone.first;
-                    group.getCones()[index].insert(
-                        group.getCones()[index].end(), cone.second.begin(),
+                    model.getCones()[index].insert(
+                        model.getCones()[index].end(), cone.second.begin(),
                         cone.second.end());
                 }
 #pragma omp critical
-                group.getBounds().merge(bounds);
+                model.getBounds().merge(bounds);
             }
         }
 
@@ -1042,13 +1040,12 @@ MorphologyLoader::~MorphologyLoader()
 
 bool MorphologyLoader::importMorphology(const servus::URI& uri,
                                         const uint64_t index,
-                                        const size_t material,
-                                        GeometryGroup& group,
+                                        const size_t material, Model& model,
                                         MaterialManager& materialManager,
                                         const Matrix4f& transformation)
 {
     const GIDOffsets targetGIDOffsets;
-    return _impl->importMorphology(uri, index, material, transformation, group,
+    return _impl->importMorphology(uri, index, material, transformation, model,
                                    materialManager, targetGIDOffsets);
 }
 

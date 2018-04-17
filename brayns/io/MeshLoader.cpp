@@ -31,7 +31,7 @@
 #include <fstream>
 #endif
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/scene/Scene.h>
 
 namespace brayns
@@ -48,8 +48,7 @@ void MeshLoader::clear()
 
 #if (BRAYNS_USE_ASSIMP)
 bool MeshLoader::importMeshFromFile(const std::string& fileName,
-                                    const std::string& meshName,
-                                    GeometryGroup& group,
+                                    const std::string& meshName, Model& model,
                                     MaterialManager& materialManager,
                                     const Matrix4f& transformation,
                                     const size_t defaultMaterial)
@@ -108,7 +107,7 @@ bool MeshLoader::importMeshFromFile(const std::string& fileName,
 
     size_t nbVertices = 0;
     size_t nbFaces = 0;
-    auto& triangleMeshes = group.getTrianglesMeshes();
+    auto& triangleMeshes = model.getTrianglesMeshes();
     for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
     {
         aiMesh* mesh = aiScene->mMeshes[m];
@@ -131,7 +130,7 @@ bool MeshLoader::importMeshFromFile(const std::string& fileName,
             const Vector3f transformedVertex = {vertex.x(), vertex.y(),
                                                 vertex.z()};
             triangleMesh.vertices.push_back(transformedVertex);
-            group.getBounds().merge(transformedVertex);
+            model.getBounds().merge(transformedVertex);
             if (mesh->HasNormals())
             {
                 const auto& n = mesh->mNormals[i];
@@ -181,8 +180,7 @@ bool MeshLoader::importMeshFromFile(const std::string& fileName,
     return true;
 }
 
-bool MeshLoader::exportMeshToFile(const std::string& filename,
-                                  GeometryGroup& group,
+bool MeshLoader::exportMeshToFile(const std::string& filename, Model& model,
                                   MaterialManager& materialManager) const
 {
     // Save to OBJ
@@ -214,7 +212,7 @@ bool MeshLoader::exportMeshToFile(const std::string& filename,
     aiScene.mMeshes = new aiMesh*[nbMaterials];
     size_t numVertex = 0;
     size_t numFace = 0;
-    auto& triangleMeshes = group.getTrianglesMeshes();
+    auto& triangleMeshes = model.getTrianglesMeshes();
     for (size_t meshIndex = 0; meshIndex < aiScene.mNumMeshes; ++meshIndex)
     {
         aiMesh mesh;

@@ -104,15 +104,15 @@ typedef std::vector<RendererPtr> Renderers;
 class FrameBuffer;
 typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
 
-class GeometryGroup;
-typedef std::shared_ptr<GeometryGroup> GeometryGroupPtr;
-typedef std::vector<GeometryGroupPtr> GeometryGroups;
+class Model;
+typedef std::shared_ptr<Model> ModelPtr;
+typedef std::vector<ModelPtr> Models;
 
-struct GroupTransformation;
-typedef std::vector<GroupTransformation> GroupTransformations;
+struct ModelTransformation;
+typedef std::vector<ModelTransformation> ModelTransformations;
 
-struct GroupAttributes;
-typedef std::vector<GroupAttributes> GeometryGroupAttributes;
+struct ModelDescriptor;
+typedef std::vector<ModelDescriptor> ModelDescriptors;
 
 struct Sphere;
 typedef std::vector<Sphere> Spheres;

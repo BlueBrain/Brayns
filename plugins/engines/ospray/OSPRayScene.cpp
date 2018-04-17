@@ -19,10 +19,10 @@
  */
 
 #include "OSPRayScene.h"
-#include "OSPRayGeometryGroup.h"
+#include "OSPRayModel.h"
 #include "OSPRayRenderer.h"
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/log.h>
@@ -100,30 +100,29 @@ void OSPRayScene::commit()
         ospRelease(_rootSimulationModel);
     _rootSimulationModel = nullptr;
 
-    for (size_t g = 0; g < _geometryGroupAttributes.size(); ++g)
+    for (size_t g = 0; g < _modelDescriptors.size(); ++g)
     {
-        auto& groupAttributes = _geometryGroupAttributes[g];
-        if (groupAttributes.enabled())
+        auto& modelDescriptor = _modelDescriptors[g];
+        if (modelDescriptor.enabled())
         {
-            auto impl = std::static_pointer_cast<OSPRayGeometryGroup>(
-                _geometryGroups[g]);
+            auto impl = std::static_pointer_cast<OSPRayModel>(_models[g]);
             impl->commit();
 
-            for (size_t i = 0; i < groupAttributes.transformations().size();
+            for (size_t i = 0; i < modelDescriptor.transformations().size();
                  ++i)
             {
-                auto& transform = groupAttributes.transformations()[i];
-                if (groupAttributes.boundingBox())
+                auto& transform = modelDescriptor.transformations()[i];
+                if (modelDescriptor.boundingBox())
                     ospAddGeometry(_rootModel,
                                    impl->getBoundingBoxModelInstance(
                                        transform));
-                if (groupAttributes.visible())
+                if (modelDescriptor.visible())
                     ospAddGeometry(_rootModel, impl->getInstance(i, transform));
             }
 
             if (impl->useSimulationModel())
             {
-                auto& transform = groupAttributes.transformations()[0];
+                auto& transform = modelDescriptor.transformations()[0];
                 if (!_rootSimulationModel)
                     _rootSimulationModel = ospNewModel();
                 ospAddGeometry(_rootSimulationModel,
@@ -376,40 +375,21 @@ bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
     return boost::algorithm::ends_with(volumeFile, ".raw");
 }
 
-GeometryGroupPtr OSPRayScene::addGeometryGroup(const std::string& name,
-                                               const std::string& uri)
+ModelPtr OSPRayScene::addModel(const std::string& name, const std::string& uri)
 {
     BRAYNS_FCT_ENTRY
 
-    GroupAttributes groupAttributes(name, uri, true);
-#if 0
-    srand(time(0));
-    for (size_t i = 0; i < 99999; ++i)
-    {
-        const size_t s = 1500;
-        const float h = s / 2.f;
-        GroupTransformation transform;
-        transform.translation(Vector3f(float(rand() % s) - h,
-                                       float(rand() % s) - h,
-                                       float(rand() % s) - h));
-        transform.rotation(
-            Vector3f(rand() % s - h, rand() % s - h, rand() % s - h));
-        //        const size_t scale = (rand() % 30 - 15) / 2.f;
-        //        transform.scale(Vector3f(scale, scale, scale));
-        groupAttributes.transformations().push_back(transform);
-    }
-#endif
-    _geometryGroupAttributes.push_back(groupAttributes);
-    _geometryGroups.push_back(
-        std::make_shared<OSPRayGeometryGroup>(name, _materialManager));
-    return _geometryGroups[_geometryGroups.size() - 1];
+    ModelDescriptor modelDescriptor(name, uri, true);
+    _modelDescriptors.push_back(modelDescriptor);
+    _models.push_back(std::make_shared<OSPRayModel>(name, _materialManager));
+    return _models[_models.size() - 1];
 }
 
-void OSPRayScene::removeGeometryGroup(const size_t index)
+void OSPRayScene::removeModel(const size_t index)
 {
     BRAYNS_FCT_ENTRY
 
-    _geometryGroupAttributes.erase(_geometryGroupAttributes.begin() + index);
-    _geometryGroups.erase(_geometryGroups.begin() + index);
+    _modelDescriptors.erase(_modelDescriptors.begin() + index);
+    _models.erase(_models.begin() + index);
 }
 }

@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <fstream>
@@ -32,8 +32,7 @@ XYZBLoader::XYZBLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-bool XYZBLoader::importFromFile(const std::string& filename,
-                                GeometryGroup& group)
+bool XYZBLoader::importFromFile(const std::string& filename, Model& model)
 {
     BRAYNS_INFO << "Loading xyz file from " << filename << std::endl;
     std::ifstream file(filename, std::ios::in);
@@ -68,7 +67,7 @@ bool XYZBLoader::importFromFile(const std::string& filename,
         case 3:
         {
             const Vector3f position(lineData[0], lineData[1], lineData[2]);
-            group.addSphere(0,
+            model.addSphere(0,
                             Sphere(position,
                                    _geometryParameters.getRadiusMultiplier()));
             break;
@@ -87,8 +86,7 @@ bool XYZBLoader::importFromFile(const std::string& filename,
     return validParsing;
 }
 
-bool XYZBLoader::importFromBinaryFile(const std::string& filename,
-                                      GeometryGroup& group)
+bool XYZBLoader::importFromBinaryFile(const std::string& filename, Model& model)
 {
     BRAYNS_INFO << "Loading xyzb file from " << filename << std::endl;
     std::ifstream file(filename, std::ios::in | std::fstream::binary);
@@ -114,7 +112,7 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename,
 
         const Vector3f position(x, y, z);
         const auto radius = _geometryParameters.getRadiusMultiplier();
-        group.addSphere(0, {position, radius});
+        model.addSphere(0, {position, radius});
 
         if (count % (nbPoints / 100) == 0)
             updateProgress("Loading spheres...", count, nbPoints);

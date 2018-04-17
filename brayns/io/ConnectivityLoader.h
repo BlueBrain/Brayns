@@ -50,7 +50,7 @@ public:
 private:
     bool _importMatrix();
     bool _importMesh(const uint64_t gid, const Matrix4f& transformation,
-                     const size_t materialId, GeometryGroup& group,
+                     const size_t materialId, Model& model,
                      MaterialManager& materialManager, MeshLoader& meshLoader);
 
     std::map<uint64_t, uint64_ts> _emitors;

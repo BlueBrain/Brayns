@@ -73,14 +73,13 @@ private:
 
     bool _parsePositions(const std::string& filename);
 #ifdef BRAYNS_USE_BRION
-    void _importMorphology(GeometryGroup& group,
-                           MaterialManager& materialManager, const Node& node,
-                           const Matrix4f& transformation);
+    void _importMorphology(Model& model, MaterialManager& materialManager,
+                           const Node& node, const Matrix4f& transformation);
 #endif
-    void _importMesh(GeometryGroup& group, MeshLoader& loader,
+    void _importMesh(Model& model, MeshLoader& loader,
                      MaterialManager& materialManager, const Node& node,
                      const Matrix4f& transformation);
-    bool _processNodes(GeometryGroup& group, MeshLoader& loader,
+    bool _processNodes(Model& model, MeshLoader& loader,
                        MaterialManager& materialManager);
 
     const ApplicationParameters& _applicationParameters;

@@ -20,7 +20,7 @@
 
 #include "MolecularSystemReader.h"
 
-#include <brayns/common/geometry/GeometryGroup.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
@@ -40,7 +40,7 @@ MolecularSystemReader::MolecularSystemReader(
 
 bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 {
-    auto group = scene.addGeometryGroup("MolecularSystem");
+    auto model = scene.addModel("MolecularSystem");
     auto& materialManager = scene.getMaterialManager();
     _nbProteins = 0;
     if (!_loadConfiguration())
@@ -50,7 +50,7 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
     if (!_loadPositions())
         return false;
 
-    if (!_createScene(*group, meshLoader, materialManager))
+    if (!_createScene(*model, meshLoader, materialManager))
         return false;
 
     if (!_calciumSimulationFolder.empty())
@@ -58,7 +58,7 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
         CADiffusionSimulationHandlerPtr handler(
             new CADiffusionSimulationHandler(scene.getMaterialManager(),
                                              _calciumSimulationFolder));
-        handler->setFrame(*group, 0);
+        handler->setFrame(*model, 0);
         scene.setCADiffusionSimulationHandler(handler);
     }
     BRAYNS_INFO << "Total number of different proteins: " << _proteins.size()
@@ -68,8 +68,7 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
     return true;
 }
 
-bool MolecularSystemReader::_createScene(GeometryGroup& group,
-                                         MeshLoader& meshLoader,
+bool MolecularSystemReader::_createScene(Model& model, MeshLoader& meshLoader,
                                          MaterialManager& materialManager)
 {
     uint64_t proteinCount = 0;
@@ -83,7 +82,7 @@ bool MolecularSystemReader::_createScene(GeometryGroup& group,
                 const auto pdbFilename =
                     _proteinFolder + '/' + protein->second + ".pdb";
                 ProteinLoader loader(_geometryParameters);
-                loader.importPDBFile(pdbFilename, position, proteinCount, group,
+                loader.importPDBFile(pdbFilename, position, proteinCount, model,
                                      materialManager);
                 ++proteinCount;
             }
@@ -105,7 +104,7 @@ bool MolecularSystemReader::_createScene(GeometryGroup& group,
                 const auto fileName =
                     _meshFolder + '/' + protein->second + ".obj";
                 const auto meshName = getNameFromFullPath(fileName);
-                meshLoader.importMeshFromFile(fileName, meshName, group,
+                meshLoader.importMeshFromFile(fileName, meshName, model,
                                               materialManager, transformation,
                                               material);
 

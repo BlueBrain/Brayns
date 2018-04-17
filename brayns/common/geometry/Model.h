@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef GEOMETRYGROUP_H
-#define GEOMETRYGROUP_H
+#ifndef Model_H
+#define Model_H
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
@@ -30,17 +30,17 @@
 #include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/types.h>
 
-SERIALIZATION_ACCESS(GroupTransformation)
-SERIALIZATION_ACCESS(GeometryGroup)
-SERIALIZATION_ACCESS(GroupAttributes)
+SERIALIZATION_ACCESS(ModelTransformation)
+SERIALIZATION_ACCESS(Model)
+SERIALIZATION_ACCESS(ModelDescriptor)
 
 namespace brayns
 {
-struct GroupTransformation : public BaseObject
+struct ModelTransformation : public BaseObject
 {
-    GroupTransformation() {}
-    GroupTransformation(const GroupTransformation& rhs);
-    GroupTransformation& operator=(const GroupTransformation& rhs);
+    ModelTransformation() {}
+    ModelTransformation(const ModelTransformation& rhs);
+    ModelTransformation& operator=(const ModelTransformation& rhs);
 
     Vector3f& translation() { return _translation; }
     void translation(const Vector3f& value)
@@ -57,16 +57,16 @@ private:
     Vector3f _scale{1.f, 1.f, 1.f};
     Vector3f _rotation{0.f, 0.f, 0.f};
 
-    SERIALIZATION_FRIEND(GroupTransformation)
+    SERIALIZATION_FRIEND(ModelTransformation)
 };
 
-struct GroupAttributes : public BaseObject
+struct ModelDescriptor : public BaseObject
 {
-    GroupAttributes() {}
-    GroupAttributes(const GroupAttributes& rhs);
-    GroupAttributes& operator=(const GroupAttributes& rhs);
+    ModelDescriptor() {}
+    ModelDescriptor(const ModelDescriptor& rhs);
+    ModelDescriptor& operator=(const ModelDescriptor& rhs);
 
-    GroupAttributes(const std::string& name, const std::string& uri,
+    ModelDescriptor(const std::string& name, const std::string& uri,
                     const bool enabled)
         : _name(name)
         , _uri(uri)
@@ -74,56 +74,55 @@ struct GroupAttributes : public BaseObject
         , _visible(true)
         , _boundingBox(true)
     {
-        _transformations.push_back(GroupTransformation());
+        _transformations.push_back(ModelTransformation());
     }
 
     bool enabled() const { return _enabled; }
     bool visible() const { return _visible; }
     bool boundingBox() const { return _boundingBox; }
-    GroupTransformations& transformations() { return _transformations; }
+    ModelTransformations& transformations() { return _transformations; }
 private:
     std::string _name;
     std::string _uri;
     bool _enabled;
     bool _visible;
     bool _boundingBox;
-    GroupTransformations _transformations;
+    ModelTransformations _transformations;
 
-    SERIALIZATION_FRIEND(GroupAttributes)
+    SERIALIZATION_FRIEND(ModelDescriptor)
 };
 
-class GeometryGroup
+class Model
 {
 public:
-    BRAYNS_API GeometryGroup(const std::string& name,
-                             MaterialManager& materialManager);
+    BRAYNS_API Model(const std::string& name, MaterialManager& materialManager);
 
-    BRAYNS_API virtual ~GeometryGroup();
+    BRAYNS_API virtual ~Model();
 
     /** Unloads geometry, materials, lights, models, etc. to free memory. */
     BRAYNS_API virtual void unload();
 
     /**
-        Return true if the geometry group does not contain any geometry. False
+        Return true if the geometry Model does not contain any geometry. False
        otherwize
     */
     BRAYNS_API bool empty() const;
 
     /**
-        Return true if the geometry group is dirty, false otherwize
+        Return true if the geometry Model is dirty, false otherwize
     */
     BRAYNS_API bool dirty() const;
 
     /**
-        Returns the name of the group
+        Returns the name of the Model
     */
     std::string getName() const { return _name; }
     /**
-        Returns the bounding box for the group
+        Returns the bounding box for the Model
     */
     Boxf& getBounds();
     /**
-        Returns spheres handled by the geometry group
+        Returns spheres handled by the geometry Model
     */
     BRAYNS_API SpheresMap& getSpheres() { return _spheres; }
     /**
@@ -146,7 +145,7 @@ public:
         Returns cylinders handled by the scene
     */
     /**
-      Adds a sphere to the geometry group
+      Adds a sphere to the geometry Model
       @param materialId Material of the sphere
       @param sphere Sphere to add
       @return Index of the sphere for the specified material
@@ -155,7 +154,7 @@ public:
                                   const Sphere& sphere);
 
     /**
-        Returns cylinders handled by the geometry group
+        Returns cylinders handled by the geometry Model
       */
     BRAYNS_API CylindersMap& getCylinders() { return _cylinders; }
     /**
@@ -185,7 +184,7 @@ public:
     }
     BRAYNS_API bool cylindersDirty() { return _cylindersDirty; }
     /**
-        Returns cones handled by the geometry group
+        Returns cones handled by the geometry Model
     */
     BRAYNS_API ConesMap& getCones() { return _cones; }
     /**
@@ -211,7 +210,7 @@ public:
     BRAYNS_API void setConesDirty(const bool value) { _conesDirty = value; }
     BRAYNS_API bool conesDirty() { return _conesDirty; }
     /**
-        Returns triangle meshes handled by the geometry group
+        Returns triangle meshes handled by the geometry Model
     */
     BRAYNS_API TrianglesMeshMap& getTrianglesMeshes()
     {
@@ -248,7 +247,7 @@ protected:
     Boxf _bounds;
     bool _useSimulationModel{false};
 
-    SERIALIZATION_FRIEND(GeometryGroup)
+    SERIALIZATION_FRIEND(Model)
 };
 }
-#endif // GEOMETRYGROUP_H
+#endif // Model_H

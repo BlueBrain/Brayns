@@ -38,7 +38,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/render/ParticleRenderer.cpp
   OSPRayMaterialManager.cpp
   OSPRayEngine.cpp
-  OSPRayGeometryGroup.cpp
+  OSPRayModel.cpp
   OSPRayScene.cpp
   OSPRayRenderer.cpp
   OSPRayFrameBuffer.cpp
@@ -58,7 +58,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   ispc/render/ParticleRenderer.h
   OSPRayEngine.h
   OSPRayScene.h
-  OSPRayGeometryGroup.h
+  OSPRayModel.h
   OSPRayMaterialManager.h
   OSPRayRenderer.h
   OSPRayFrameBuffer.h
