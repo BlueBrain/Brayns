@@ -395,7 +395,7 @@ private:
             });
 
         loadingProgress.setMessage("Unloading ...");
-        Scene& scene = _engine->getScene();
+        auto& scene = _engine->getScene();
         scene.unload();
         loadingProgress += LOADING_PROGRESS_STEP;
 

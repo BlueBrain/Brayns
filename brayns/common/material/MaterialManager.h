@@ -81,10 +81,9 @@ public:
     BRAYNS_API size_t size() { return _materials.size(); }
     BRAYNS_API size_t addTexture(const std::string& filename);
     BRAYNS_API void removeTexture(const size_t id);
+    BRAYNS_API void initializeSystemMaterials();
 
 protected:
-    void _initializeSystemMaterials();
-
     Materials _materials;
     TexturesMap _textures;
     ParametersManager& _parametersManager;

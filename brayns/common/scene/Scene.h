@@ -54,8 +54,7 @@ public:
         @todo The scene must not know about the renderer
               https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
     */
-    BRAYNS_API Scene(Renderers renderers, ParametersManager& parametersManager,
-                     MaterialManager& materialManager);
+    BRAYNS_API Scene(Renderers renderers, ParametersManager& parametersManager);
 
     BRAYNS_API virtual ~Scene();
 
@@ -242,7 +241,7 @@ public:
     */
     BRAYNS_API MaterialManager& getMaterialManager()
     {
-        return _materialManager;
+        return *_materialManager;
     }
     /**
         Sets the materials handled by the scene, and available to the
@@ -263,7 +262,7 @@ protected:
     // Managers
     Renderers _renderers;
     ParametersManager& _parametersManager;
-    MaterialManager& _materialManager;
+    MaterialManagerPtr _materialManager{nullptr};
 
     // Model
     Models _models;
@@ -272,12 +271,12 @@ protected:
     Lights _lights;
 
     // Volume
-    VolumeHandlerPtr _volumeHandler;
+    VolumeHandlerPtr _volumeHandler{nullptr};
 
     // Simulation
-    AbstractSimulationHandlerPtr _simulationHandler;
+    AbstractSimulationHandlerPtr _simulationHandler{nullptr};
     TransferFunction _transferFunction;
-    CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler;
+    CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler{nullptr};
 
     size_t _sizeInBytes{0};
     Boxf _bounds;

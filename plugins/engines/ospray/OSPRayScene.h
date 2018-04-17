@@ -44,7 +44,6 @@ class OSPRayScene : public brayns::Scene
 {
 public:
     OSPRayScene(Renderers renderer, ParametersManager& parametersManager,
-                MaterialManager& materialManager,
                 const size_t memoryManagementFlags);
     ~OSPRayScene();
 

@@ -38,11 +38,13 @@ namespace brayns
 {
 OSPRayScene::OSPRayScene(Renderers renderers,
                          ParametersManager& parametersManager,
-                         MaterialManager& materialManager,
                          const size_t memoryManagementFlags)
-    : Scene(renderers, parametersManager, materialManager)
+    : Scene(renderers, parametersManager)
     , _memoryManagementFlags(memoryManagementFlags)
 {
+    _materialManager =
+        std::make_shared<OSPRayMaterialManager>(_parametersManager,
+                                                memoryManagementFlags);
 }
 
 OSPRayScene::~OSPRayScene()
@@ -207,7 +209,8 @@ void OSPRayScene::commitMaterials()
 {
     BRAYNS_FCT_ENTRY
 
-    const auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
+    const auto impl =
+        std::static_pointer_cast<OSPRayMaterialManager>(_materialManager);
     auto materialData = impl->getOSPMaterialData();
     if (materialData)
         for (auto renderer : _renderers)
@@ -381,7 +384,7 @@ ModelPtr OSPRayScene::addModel(const std::string& name, const std::string& uri)
 
     ModelDescriptor modelDescriptor(name, uri, true);
     _modelDescriptors.push_back(modelDescriptor);
-    _models.push_back(std::make_shared<OSPRayModel>(name, _materialManager));
+    _models.push_back(std::make_shared<OSPRayModel>(name, *_materialManager));
     return _models[_models.size() - 1];
 }
 
