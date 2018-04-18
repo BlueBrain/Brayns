@@ -62,8 +62,6 @@ OSPRayScene::~OSPRayScene()
 
 void OSPRayScene::unload()
 {
-    BRAYNS_FCT_ENTRY
-
     Scene::unload();
 
     if (_ospSimulationData)
@@ -75,8 +73,6 @@ void OSPRayScene::unload()
 
 OSPModel OSPRayScene::_getActiveModel()
 {
-    BRAYNS_FCT_ENTRY
-
     auto model = _rootModel;
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
     if (geometryParameters.getCircuitUseSimulationModel())
@@ -86,8 +82,6 @@ OSPModel OSPRayScene::_getActiveModel()
 
 void OSPRayScene::commit()
 {
-    BRAYNS_FCT_ENTRY
-
     if (_transferFunction.isModified())
         commitTransferFunctionData();
 
@@ -144,8 +138,6 @@ void OSPRayScene::commit()
 
 void OSPRayScene::commitLights()
 {
-    BRAYNS_FCT_ENTRY
-
     size_t lightCount = 0;
     for (const auto& light : _lights)
     {
@@ -207,8 +199,6 @@ void OSPRayScene::commitLights()
 
 void OSPRayScene::commitMaterials()
 {
-    BRAYNS_FCT_ENTRY
-
     const auto impl =
         std::static_pointer_cast<OSPRayMaterialManager>(_materialManager);
     auto materialData = impl->getOSPMaterialData();
@@ -226,8 +216,6 @@ void OSPRayScene::commitTransferFunctionData()
 {
     if (!_transferFunction.isModified())
         return;
-
-    BRAYNS_FCT_ENTRY
 
     if (_ospTransferFunctionDiffuseData)
         ospRelease(_ospTransferFunctionDiffuseData);
@@ -280,8 +268,6 @@ void OSPRayScene::commitVolumeData()
     const auto volumeHandler = getVolumeHandler();
     if (!volumeHandler)
         return;
-
-    BRAYNS_FCT_ENTRY
 
     const auto& vp = _parametersManager.getVolumeParameters();
     if (vp.isModified())
@@ -342,8 +328,6 @@ void OSPRayScene::commitSimulationData()
     if (!_simulationHandler)
         return;
 
-    BRAYNS_FCT_ENTRY
-
     const auto animationFrame =
         _parametersManager.getAnimationParameters().getFrame();
 
@@ -373,15 +357,11 @@ void OSPRayScene::commitSimulationData()
 
 bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
 {
-    BRAYNS_FCT_ENTRY
-
     return boost::algorithm::ends_with(volumeFile, ".raw");
 }
 
 ModelPtr OSPRayScene::addModel(const std::string& name, const std::string& uri)
 {
-    BRAYNS_FCT_ENTRY
-
     ModelDescriptor modelDescriptor(name, uri, true);
     _modelDescriptors.push_back(modelDescriptor);
     _models.push_back(std::make_shared<OSPRayModel>(name, *_materialManager));
@@ -390,8 +370,6 @@ ModelPtr OSPRayScene::addModel(const std::string& name, const std::string& uri)
 
 void OSPRayScene::removeModel(const size_t index)
 {
-    BRAYNS_FCT_ENTRY
-
     _modelDescriptors.erase(_modelDescriptors.begin() + index);
     _models.erase(_models.begin() + index);
 }

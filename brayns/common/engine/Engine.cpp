@@ -45,16 +45,12 @@ Engine::~Engine()
 
 void Engine::setActiveRenderer(const RendererType renderer)
 {
-    BRAYNS_FCT_ENTRY
-
     if (_activeRenderer != renderer)
         _activeRenderer = renderer;
 }
 
 void Engine::reshape(const Vector2ui& frameSize)
 {
-    BRAYNS_FCT_ENTRY
-
     const auto size = getSupportedFrameSize(frameSize);
 
     if (_frameBuffer->getSize() == size)
@@ -68,8 +64,6 @@ void Engine::reshape(const Vector2ui& frameSize)
 
 void Engine::setDefaultEpsilon()
 {
-    BRAYNS_FCT_ENTRY
-
     float epsilon = _parametersManager.getRenderingParameters().getEpsilon();
     if (epsilon == 0.f)
     {
@@ -82,15 +76,11 @@ void Engine::setDefaultEpsilon()
 
 void Engine::initializeMaterials(const MaterialsColorMap colorMap)
 {
-    BRAYNS_FCT_ENTRY
-
     _scene->setMaterialsColorMap(colorMap);
 }
 
 void Engine::commit()
 {
-    BRAYNS_FCT_ENTRY
-
     _scene->commitVolumeData();
     _scene->commitSimulationData();
     _scene->commitTransferFunctionData();
@@ -106,16 +96,12 @@ void Engine::commit()
 
 void Engine::render()
 {
-    BRAYNS_FCT_ENTRY
-
     auto fb = _snapshotFrameBuffer ? _snapshotFrameBuffer : _frameBuffer;
     _renderers[_activeRenderer]->render(fb);
 }
 
 void Engine::postRender()
 {
-    BRAYNS_FCT_ENTRY
-
     if (!_snapshotFrameBuffer)
     {
         _writeFrameToFile();
@@ -132,8 +118,6 @@ Renderer& Engine::getRenderer()
 
 Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
 {
-    BRAYNS_FCT_ENTRY
-
     Vector2f result = size;
     if (_parametersManager.getRenderingParameters().getStereoMode() ==
             StereoMode::side_by_side &&
@@ -145,8 +129,6 @@ Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
 
 void Engine::snapshot(const SnapshotParams& params, SnapshotReadyCallback cb)
 {
-    BRAYNS_FCT_ENTRY
-
     if (_snapshotFrameBuffer)
         throw std::runtime_error("Already a snapshot pending");
 
@@ -171,8 +153,6 @@ void Engine::snapshot(const SnapshotParams& params, SnapshotReadyCallback cb)
 
 bool Engine::continueRendering() const
 {
-    BRAYNS_FCT_ENTRY
-
     if (_snapshotFrameBuffer)
     {
         if (_snapshotSpp < 2)
@@ -188,8 +168,6 @@ bool Engine::continueRendering() const
 
 void Engine::_processSnapshot()
 {
-    BRAYNS_FCT_ENTRY
-
     setLastProgress(float(_snapshotFrameBuffer->numAccumFrames()) /
                     _snapshotSpp);
     if (_snapshotFrameBuffer->numAccumFrames() == size_t(_snapshotSpp) ||
@@ -212,8 +190,6 @@ void Engine::_processSnapshot()
 
 void Engine::_writeFrameToFile()
 {
-    BRAYNS_FCT_ENTRY
-
     const auto& frameExportFolder =
         _parametersManager.getApplicationParameters().getFrameExportFolder();
     if (frameExportFolder.empty())

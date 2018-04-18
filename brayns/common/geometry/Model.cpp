@@ -172,8 +172,6 @@ bool Model::dirty() const
 
 void Model::logInformation()
 {
-    BRAYNS_FCT_ENTRY
-
     uint64_t sizeInBytes = 0;
     uint64_t nbSpheres = 0;
     uint64_t nbCylinders = 0;

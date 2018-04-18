@@ -31,12 +31,8 @@
 #define BRAYNS_DEBUG \
     if (false)       \
     std::cout
-#define BRAYNS_FCT_ENTRY
 #else
 #define BRAYNS_DEBUG std::cout << "[DEBUG] "
-#define BRAYNS_FCT_ENTRY                                                      \
-    std::cout << "[" << std::this_thread::get_id() << "][ENTRY] " << __FILE__ \
-              << ": " << __FUNCTION__ << std::endl;
 #endif
 
 #define BRAYNS_THROW(exc)                        \
