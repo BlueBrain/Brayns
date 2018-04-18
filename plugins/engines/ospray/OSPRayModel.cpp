@@ -26,27 +26,21 @@ OSPRayModel::OSPRayModel(const std::string& name,
                          MaterialManager& materialManager)
     : Model(name, materialManager)
 {
-    BRAYNS_FCT_ENTRY
-
     _instances.push_back(nullptr);
 }
 
 void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
 {
-    BRAYNS_FCT_ENTRY
     _memoryManagementFlags = memoryManagementFlags;
 }
 
 OSPRayModel::~OSPRayModel()
 {
-    BRAYNS_FCT_ENTRY
     unload();
 }
 
 void OSPRayModel::unload()
 {
-    BRAYNS_FCT_ENTRY
-
     if (_useSimulationModel)
     {
         for (auto geom : _ospExtendedSpheres)
@@ -160,7 +154,6 @@ void OSPRayModel::_buildBoundingBox()
 
 void OSPRayModel::_commitSpheres(const size_t materialId)
 {
-    BRAYNS_FCT_ENTRY
     const auto& spheres = _spheres[materialId];
     const auto bufferSize = spheres.size() * sizeof(Sphere);
     if (_ospExtendedSpheres.find(materialId) != _ospExtendedSpheres.end())
@@ -190,7 +183,6 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
 
 void OSPRayModel::_commitCylinders(const size_t materialId)
 {
-    BRAYNS_FCT_ENTRY
     const auto& cylinders = _cylinders[materialId];
     const auto bufferSize = cylinders.size() * sizeof(Cylinder);
     if (_ospExtendedCylinders.find(materialId) != _ospExtendedCylinders.end())
@@ -219,7 +211,6 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
 
 void OSPRayModel::_commitCones(const size_t materialId)
 {
-    BRAYNS_FCT_ENTRY
     const auto& cones = _cones[materialId];
     const auto bufferSize = cones.size() * sizeof(Cone);
     if (_ospExtendedCones.find(materialId) != _ospExtendedCones.end())
@@ -248,7 +239,6 @@ void OSPRayModel::_commitCones(const size_t materialId)
 
 void OSPRayModel::_commitMeshes(const size_t materialId)
 {
-    BRAYNS_FCT_ENTRY
     _ospMeshes[materialId] = ospNewGeometry("trianglemesh");
 
     auto& trianglesMesh = _trianglesMeshes[materialId];
@@ -306,8 +296,6 @@ void OSPRayModel::commit()
 {
     if (!dirty())
         return;
-
-    BRAYNS_FCT_ENTRY
 
     if (!_model)
         _model = ospNewModel();

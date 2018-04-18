@@ -99,8 +99,6 @@ size_t MaterialManager::addTexture(const std::string& filename)
 
 void MaterialManager::initializeSystemMaterials()
 {
-    BRAYNS_FCT_ENTRY
-
     Material material;
     material.setDiffuseColor(Vector3f(1.f, 1.f, 1.f));
     material.setEmission(10.f);

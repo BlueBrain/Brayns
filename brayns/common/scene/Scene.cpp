@@ -48,15 +48,11 @@ Scene::Scene(Renderers renderers, ParametersManager& parametersManager)
 
 Scene::~Scene()
 {
-    BRAYNS_FCT_ENTRY
-
     reset();
 }
 
 void Scene::reset()
 {
-    BRAYNS_FCT_ENTRY
-
     unload();
     _renderers.clear();
     _bounds.reset();
@@ -64,8 +60,6 @@ void Scene::reset()
 
 void Scene::unload()
 {
-    BRAYNS_FCT_ENTRY
-
     _materialManager->clear();
     _materialManager->initializeSystemMaterials();
     _markGeometryDirty();
@@ -82,16 +76,12 @@ void Scene::unload()
 
 void Scene::_markGeometryDirty()
 {
-    BRAYNS_FCT_ENTRY
-
     _geometryGroupsDirty = true;
     markModified();
 }
 
 void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
 {
-    BRAYNS_FCT_ENTRY
-
     size_t materialId = 0;
     for (auto& material : _materialManager->getMaterials())
     {
@@ -172,8 +162,6 @@ void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
 
 void Scene::buildDefault()
 {
-    BRAYNS_FCT_ENTRY
-
     _markGeometryDirty();
 
     const Vector3f WHITE = {1.f, 1.f, 1.f};
@@ -290,8 +278,6 @@ void Scene::buildDefault()
 
 void Scene::buildEnvironment()
 {
-    BRAYNS_FCT_ENTRY
-
     const auto sceneEnvironment =
         _parametersManager.getGeometryParameters().getSceneEnvironment();
     if (sceneEnvironment == SceneEnvironment::none)
@@ -466,16 +452,12 @@ void Scene::buildEnvironment()
 
 void Scene::addLight(LightPtr light)
 {
-    BRAYNS_FCT_ENTRY
-
     removeLight(light);
     _lights.push_back(light);
 }
 
 void Scene::removeLight(LightPtr light)
 {
-    BRAYNS_FCT_ENTRY
-
     Lights::iterator it = std::find(_lights.begin(), _lights.end(), light);
     if (it != _lights.end())
         _lights.erase(it);
@@ -483,8 +465,6 @@ void Scene::removeLight(LightPtr light)
 
 LightPtr Scene::getLight(const size_t index)
 {
-    BRAYNS_FCT_ENTRY
-
     if (index < _lights.size())
         return _lights[index];
     return 0;
@@ -492,15 +472,11 @@ LightPtr Scene::getLight(const size_t index)
 
 void Scene::clearLights()
 {
-    BRAYNS_FCT_ENTRY
-
     _lights.clear();
 }
 
 void Scene::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
-    BRAYNS_FCT_ENTRY
-
     auto& ap = _parametersManager.getAnimationParameters();
     _simulationHandler = handler;
     if (_simulationHandler)
@@ -521,8 +497,6 @@ AbstractSimulationHandlerPtr Scene::getSimulationHandler() const
 void Scene::setCADiffusionSimulationHandler(
     CADiffusionSimulationHandlerPtr handler)
 {
-    BRAYNS_FCT_ENTRY
-
     _caDiffusionSimulationHandler = handler;
     if (_caDiffusionSimulationHandler)
         _parametersManager.getAnimationParameters().setEnd(
@@ -538,8 +512,6 @@ CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
 
 VolumeHandlerPtr Scene::getVolumeHandler()
 {
-    BRAYNS_FCT_ENTRY
-
     const auto& volumeFile =
         _parametersManager.getVolumeParameters().getFilename();
     const auto& volumeFolder =
@@ -625,8 +597,6 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 
 bool Scene::empty() const
 {
-    BRAYNS_FCT_ENTRY
-
     bool empty = true;
     for (const auto& model : _models)
         empty = empty && model->empty();
@@ -635,8 +605,6 @@ bool Scene::empty() const
 
 void Scene::_processVolumeAABBGeometry()
 {
-    BRAYNS_FCT_ENTRY
-
     VolumeHandlerPtr volumeHandler = getVolumeHandler();
     if (!volumeHandler)
         return;
@@ -698,8 +666,6 @@ void Scene::_processVolumeAABBGeometry()
 
 void Scene::saveToCacheFile()
 {
-    BRAYNS_FCT_ENTRY
-
     const auto& filename =
         _parametersManager.getGeometryParameters().getSaveCacheFile();
     BRAYNS_INFO << "Saving scene to binary file: " << filename << std::endl;
@@ -874,8 +840,6 @@ void Scene::saveToCacheFile()
 
 void Scene::loadFromCacheFile()
 {
-    BRAYNS_FCT_ENTRY
-
     const auto& geomParams = _parametersManager.getGeometryParameters();
     const auto& filename = geomParams.getLoadCacheFile();
     BRAYNS_INFO << "Loading scene from binary file: " << filename << std::endl;
@@ -1075,8 +1039,6 @@ void Scene::loadFromCacheFile()
 
 Boxf& Scene::getBounds()
 {
-    BRAYNS_FCT_ENTRY
-
     _bounds.reset();
     for (size_t i = 0; i < _models.size(); ++i)
     {

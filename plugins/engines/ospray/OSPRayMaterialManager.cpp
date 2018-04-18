@@ -44,8 +44,6 @@ void OSPRayMaterialManager::_commitMaterial(OSPMaterial ospMaterial,
     if (!material.isModified())
         return;
 
-    BRAYNS_FCT_ENTRY
-
     auto diffuse = material.getDiffuseColor();
     ospSet3f(ospMaterial, "kd", diffuse.x(), diffuse.y(), diffuse.z());
     auto specular = material.getSpecularColor();
@@ -77,8 +75,6 @@ void OSPRayMaterialManager::_commitMaterial(OSPMaterial ospMaterial,
 
 OSPTexture2D OSPRayMaterialManager::_createTexture2D(const size_t id)
 {
-    BRAYNS_FCT_ENTRY
-
     if (_ospTextures.find(id) != _ospTextures.end())
         return _ospTextures[id];
 
@@ -123,8 +119,6 @@ OSPTexture2D OSPRayMaterialManager::_createTexture2D(const size_t id)
 
 void OSPRayMaterialManager::commit()
 {
-    BRAYNS_FCT_ENTRY
-
     if (!isModified())
         return;
 
@@ -145,8 +139,6 @@ void OSPRayMaterialManager::commit()
 
 OSPMaterial OSPRayMaterialManager::getOSPMaterial(const size_t index)
 {
-    BRAYNS_FCT_ENTRY
-
     for (size_t i = _ospMaterials.size(); i <= index; ++i)
     {
         // Create missing OSP materials if necessary

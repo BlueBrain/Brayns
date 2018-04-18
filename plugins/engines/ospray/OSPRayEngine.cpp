@@ -160,8 +160,6 @@ EngineType OSPRayEngine::name() const
 
 void OSPRayEngine::commit()
 {
-    BRAYNS_FCT_ENTRY
-
     Engine::commit();
 
     auto device = ospGetCurrentDevice();
@@ -196,8 +194,6 @@ void OSPRayEngine::commit()
 
 void OSPRayEngine::preRender()
 {
-    BRAYNS_FCT_ENTRY
-
     bool clearFrameBuffer = false;
     if (_scene->isModified())
     {
@@ -226,8 +222,6 @@ void OSPRayEngine::preRender()
 
 Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
 {
-    BRAYNS_FCT_ENTRY
-
     if (!haveDeflectPixelOp())
         return Engine::getSupportedFrameSize(size);
 
@@ -253,8 +247,6 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const
 {
-    BRAYNS_FCT_ENTRY
-
     const auto& rp = _parametersManager.getRenderingParameters();
     const auto isStereo = rp.getStereoMode() == StereoMode::side_by_side;
     if (isStereo)
@@ -264,8 +256,6 @@ Vector2ui OSPRayEngine::getMinimumFrameSize() const
 
 Renderers OSPRayEngine::_createRenderers()
 {
-    BRAYNS_FCT_ENTRY
-
     Renderers renderersForScene;
     auto& rp = _parametersManager.getRenderingParameters();
     for (const auto& renderer : rp.getRenderers())
@@ -294,16 +284,12 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
     const Vector2ui& frameSize, const FrameBufferFormat frameBufferFormat,
     const bool accumulation)
 {
-    BRAYNS_FCT_ENTRY
-
     return std::make_shared<OSPRayFrameBuffer>(frameSize, frameBufferFormat,
                                                accumulation);
 }
 
 CameraPtr OSPRayEngine::createCamera(const CameraType type)
 {
-    BRAYNS_FCT_ENTRY
-
     auto& rp = _parametersManager.getRenderingParameters();
     auto name = rp.getCameraTypeAsString(type);
     try
@@ -322,8 +308,6 @@ CameraPtr OSPRayEngine::createCamera(const CameraType type)
 
 uint32_t OSPRayEngine::_getOSPDataFlags()
 {
-    BRAYNS_FCT_ENTRY
-
     return _parametersManager.getGeometryParameters().getMemoryMode() ==
                    MemoryMode::shared
                ? OSP_DATA_SHARED_BUFFER
