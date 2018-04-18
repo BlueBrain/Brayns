@@ -66,13 +66,9 @@ struct ModelDescriptor : public BaseObject
     ModelDescriptor(const ModelDescriptor& rhs);
     ModelDescriptor& operator=(const ModelDescriptor& rhs);
 
-    ModelDescriptor(const std::string& name, const std::string& uri,
-                    const bool enabled)
+    ModelDescriptor(const std::string& name, const std::string& uri)
         : _name(name)
         , _uri(uri)
-        , _enabled(enabled)
-        , _visible(true)
-        , _boundingBox(true)
     {
         _transformations.push_back(ModelTransformation());
     }
@@ -84,9 +80,9 @@ struct ModelDescriptor : public BaseObject
 private:
     std::string _name;
     std::string _uri;
-    bool _enabled;
-    bool _visible;
-    bool _boundingBox;
+    bool _enabled{true};
+    bool _visible{true};
+    bool _boundingBox{false};
     ModelTransformations _transformations;
 
     SERIALIZATION_FRIEND(ModelDescriptor)
