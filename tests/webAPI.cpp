@@ -64,6 +64,7 @@ BOOST_AUTO_TEST_CASE(snapshot)
     auto image =
         makeRequest<brayns::SnapshotParams,
                     brayns::ImageGenerator::ImageBase64>("snapshot", params);
+    std::cout << image.data << std::endl;
     BOOST_CHECK_EQUAL(image.data,
                       "/9j/4AAQSkZJRgABAQAAAQABAAD/"
                       "2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4n"
@@ -71,11 +72,11 @@ BOOST_AUTO_TEST_CASE(snapshot)
                       "2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy"
                       "MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/"
                       "wAARCAAFAAUDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAX/"
-                      "xAAgEAABAwMFAQAAAAAAAAAAAAACAAEEAwURBxIhMkGB/"
-                      "8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/"
-                      "xAAcEQACAgIDAAAAAAAAAAAAAAABAgADBEEFEdH/2gAMAwEAAhEDEQA/"
-                      "AJ0PVMbfBjwxsrmMekFJiKU3O0WHPT3GfqIir6OLxGqUlNDZ9hVsboT/"
-                      "2Q==");
+                      "xAAfEAABBAAHAAAAAAAAAAAAAAABAAIRIQMEBxIVMUH/"
+                      "xAAVAQEBAAAAAAAAAAAAAAAAAAACBf/"
+                      "EABkRAAEFAAAAAAAAAAAAAAAAAAABAxETUf/"
+                      "aAAwDAQACEQMRAD8AiDWoBu3gHOEky/OibMxWGKHQ9gWSbREVGhvASp/"
+                      "/2Q==");
 }
 #endif
 

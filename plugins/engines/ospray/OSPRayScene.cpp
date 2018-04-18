@@ -362,7 +362,7 @@ bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
 
 ModelPtr OSPRayScene::addModel(const std::string& name, const std::string& uri)
 {
-    ModelDescriptor modelDescriptor(name, uri, true);
+    ModelDescriptor modelDescriptor(name, uri);
     _modelDescriptors.push_back(modelDescriptor);
     _models.push_back(std::make_shared<OSPRayModel>(name, *_materialManager));
     return _models[_models.size() - 1];
