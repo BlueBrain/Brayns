@@ -262,13 +262,13 @@ Renderers OSPRayEngine::_createRenderers()
 
 FrameBufferPtr OSPRayEngine::createFrameBuffer(
     const Vector2ui& frameSize, const FrameBufferFormat frameBufferFormat,
-    const bool accumulation)
+    const bool accumulation) const
 {
     return std::make_shared<OSPRayFrameBuffer>(frameSize, frameBufferFormat,
                                                accumulation);
 }
 
-CameraPtr OSPRayEngine::createCamera(const CameraType type)
+CameraPtr OSPRayEngine::createCamera(const CameraType type) const
 {
     auto& rp = _parametersManager.getRenderingParameters();
     auto name = rp.getCameraTypeAsString(type);
@@ -284,5 +284,12 @@ CameraPtr OSPRayEngine::createCamera(const CameraType type)
         name = rp.getCameraTypeAsString(CameraType::default_);
         return std::make_shared<OSPRayCamera>(type, name);
     }
+}
+
+RendererPtr OSPRayEngine::createRenderer(const RendererType type) const
+{
+    auto& rp = _parametersManager.getRenderingParameters();
+    return std::make_shared<OSPRayRenderer>(rp.getRendererAsString(type),
+                                            _parametersManager);
 }
 }

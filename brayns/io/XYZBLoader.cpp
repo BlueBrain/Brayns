@@ -20,6 +20,7 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 #include <fstream>
 
 #include "XYZBLoader.h"
@@ -31,28 +32,28 @@ XYZBLoader::XYZBLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
+void XYZBLoader::importFromBlob(const Blob& blob, Scene& scene)
 {
-    BRAYNS_INFO << "Loading xyz file from " << filename << std::endl;
-    std::ifstream file(filename, std::ios::in);
-    if (!file.good())
-    {
-        BRAYNS_ERROR << "Could not open file " << filename << std::endl;
-        return false;
-    }
+    BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
-    SpheresMap& spheres = scene.getSpheres();
-    bool validParsing = true;
-    std::string line;
-
+    std::stringstream stream(blob.data);
     size_t numlines = 0;
     {
-        std::ifstream tmpFile(filename, std::ios::in);
-        numlines = std::count(std::istreambuf_iterator<char>(tmpFile),
+        numlines = std::count(std::istreambuf_iterator<char>(stream),
                               std::istreambuf_iterator<char>(), '\n');
     }
+    stream.seekg(0);
 
-    while (validParsing && std::getline(file, line))
+    const size_t materialID = 0;
+    auto& spheres = scene.getSpheres()[materialID];
+    const size_t startOffset = spheres.size();
+    spheres.reserve(spheres.size() + numlines);
+
+    size_t i = 0;
+    std::string line;
+    std::stringstream msg;
+    msg << "Loading " << shortenString(blob.name) << " ..." << std::endl;
+    while (std::getline(stream, line))
     {
         std::vector<float> lineData;
         std::stringstream lineStream(line);
@@ -66,55 +67,41 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
         case 3:
         {
             const Vector3f position(lineData[0], lineData[1], lineData[2]);
-            scene.addSphere(0,
-                            Sphere(position,
-                                   _geometryParameters.getRadiusMultiplier()));
+            scene.addSphere(materialID,
+                            {position,
+                             _geometryParameters.getRadiusMultiplier()});
             break;
         }
         default:
-            BRAYNS_ERROR << "Invalid line: " << line << std::endl;
-            validParsing = false;
-            break;
+            throw std::runtime_error("Invalid content in line " +
+                                     std::to_string(i + 1) + ": " + line);
         }
-        updateProgress("Loading spheres...", spheres[0].size(), numlines);
+        updateProgress(msg.str(), i++, numlines);
     }
 
-    file.close();
-    return validParsing;
+    const float maxDim = scene.getWorldBounds().getSize().find_max();
+    if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
+    {
+        const float newRadius = maxDim / 100.f;
+        BRAYNS_WARN << "Given radius "
+                    << _geometryParameters.getRadiusMultiplier()
+                    << " is too big for this scene, using radius " << newRadius
+                    << " now" << std::endl;
+
+        for (i = 0; i < numlines; ++i)
+            spheres[i + startOffset].radius = newRadius;
+    }
 }
 
-bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
+void XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
 {
-    BRAYNS_INFO << "Loading xyzb file from " << filename << std::endl;
-    std::ifstream file(filename, std::ios::in | std::fstream::binary);
+    std::ifstream file(filename);
     if (!file.good())
-    {
-        BRAYNS_ERROR << "Could not open file " << filename << std::endl;
-        return false;
-    }
-
-    file.seekg(0, std::ios_base::end);
-    uint64_t nbPoints = file.tellg() / (3 * sizeof(double));
-    file.seekg(0);
-
-    SpheresMap& spheres = scene.getSpheres();
-    while (!file.eof())
-    {
-        double x, y, z;
-        file.read((char*)&x, sizeof(double));
-        file.read((char*)&y, sizeof(double));
-        file.read((char*)&z, sizeof(double));
-
-        BRAYNS_DEBUG << x << "," << y << "," << z << std::endl;
-
-        const Vector3f position(x, y, z);
-        const auto radius = _geometryParameters.getRadiusMultiplier();
-        scene.addSphere(0, {position, radius});
-
-        updateProgress("Loading spheres...", spheres[0].size(), nbPoints);
-    }
-
-    file.close();
-    return true;
+        throw std::runtime_error("Could not open file " + filename);
+    importFromBlob({"xyz",
+                    filename,
+                    {std::istreambuf_iterator<char>(file),
+                     std::istreambuf_iterator<char>()}},
+                   scene);
 }
 }

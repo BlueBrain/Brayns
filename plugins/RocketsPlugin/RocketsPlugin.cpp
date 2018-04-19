@@ -27,20 +27,22 @@
 #include "jsonUtils.h"
 
 #include <brayns/common/Timer.h>
+#include <brayns/common/tasks/Task.h>
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include <fstream>
-#include <rockets/jsonrpc/helpers.h>
+#include <brayns/tasks/UploadBinaryTask.h>
+#include <brayns/tasks/UploadPathTask.h>
 
 #ifdef BRAYNS_USE_LIBUV
-#include "SocketListener.h"
+#include <uvw.hpp>
 #endif
 
-#include <rockets/jsonrpc/asyncReceiver.h>
+#include <rockets/jsonrpc/helpers.h>
 #include <rockets/jsonrpc/server.h>
 #include <rockets/server.h>
 
+#include "BinaryRequests.h"
 #include "ImageGenerator.h"
 
 namespace
@@ -48,14 +50,12 @@ namespace
 const std::string ENDPOINT_API_VERSION = "v1/";
 const std::string ENDPOINT_APP_PARAMS = "application-parameters";
 const std::string ENDPOINT_CAMERA = "camera";
-const std::string ENDPOINT_CIRCUIT_CONFIG_BUILDER = "circuit-config-builder";
 const std::string ENDPOINT_DATA_SOURCE = "data-source";
 const std::string ENDPOINT_FRAME = "frame";
 const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
 const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
 const std::string ENDPOINT_IMAGE_JPEG = "image-jpeg";
 const std::string ENDPOINT_MATERIAL_LUT = "material-lut";
-const std::string ENDPOINT_PROGRESS = "progress";
 const std::string ENDPOINT_RENDERING_PARAMS = "rendering-parameters";
 const std::string ENDPOINT_SCENE = "scene";
 const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
@@ -69,10 +69,13 @@ const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_QUIT = "quit";
+const std::string METHOD_UPLOAD_PATH = "upload-path";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
 const std::string METHOD_SNAPSHOT = "snapshot";
 
 const std::string JSON_TYPE = "application/json";
+
+using Response = rockets::jsonrpc::Response;
 
 std::string hyphenatedToCamelCase(const std::string& hyphenated)
 {
@@ -127,13 +130,21 @@ public:
 
     ~Impl()
     {
+        // cancel all pending tasks; cancel() will remove itself from _tasks
+        while (!_tasks.empty())
+        {
+            auto task = _tasks.begin()->second;
+            _tasks.begin()->first->cancel();
+            task->wait();
+        }
+
         if (_rocketsServer)
             _rocketsServer->setSocketListener(nullptr);
     }
 
     void preRender()
     {
-        if (!_rocketsServer || _socketListener)
+        if (!_rocketsServer || !_manualProcessing)
             return;
 
         // https://github.com/BlueBrain/Brayns/issues/342
@@ -162,7 +173,6 @@ public:
         // changes are already broadcasted in preRender().
         _wsBroadcastOperations[ENDPOINT_FRAME]();
         _wsBroadcastOperations[ENDPOINT_IMAGE_JPEG]();
-        _wsBroadcastOperations[ENDPOINT_PROGRESS]();
         _wsBroadcastOperations[ENDPOINT_STATISTICS]();
     }
 
@@ -172,7 +182,6 @@ public:
             return;
 
         _wsBroadcastOperations[ENDPOINT_CAMERA]();
-        _wsBroadcastOperations[ENDPOINT_PROGRESS]();
         _wsBroadcastOperations[ENDPOINT_STATISTICS]();
     }
 
@@ -192,28 +201,23 @@ public:
     {
         try
         {
-            _rocketsServer.reset(
-                new rockets::Server{_getHttpInterface(), "rockets", 0});
+#ifdef BRAYNS_USE_LIBUV
+            if (uvw::Loop::getDefault()->alive())
+            {
+                _rocketsServer.reset(new rockets::Server{uv_default_loop(),
+                                                         _getHttpInterface(),
+                                                         "rockets"});
+                _manualProcessing = false;
+            }
+            else
+#endif
+                _rocketsServer.reset(
+                    new rockets::Server{_getHttpInterface(), "rockets", 0});
+
             BRAYNS_INFO << "Rockets server running on "
                         << _rocketsServer->getURI() << std::endl;
 
             _jsonrpcServer.reset(new JsonRpcServer(*_rocketsServer));
-
-#ifdef BRAYNS_USE_LIBUV
-            try
-            {
-                _socketListener =
-                    std::make_unique<SocketListener>(*_rocketsServer);
-                _socketListener->setPostReceiveCallback(_engine->triggerRender);
-                _rocketsServer->setSocketListener(_socketListener.get());
-            }
-            catch (const std::runtime_error& e)
-            {
-                BRAYNS_DEBUG
-                    << "Failed to setup rockets socket listener: " << e.what()
-                    << std::endl;
-            }
-#endif
 
             _parametersManager.getApplicationParameters().setHttpServerURI(
                 _rocketsServer->getURI());
@@ -252,6 +256,15 @@ public:
             }
             return responses;
         });
+
+        _rocketsServer->handleClose([this](const uintptr_t clientID) {
+            _binaryRequests.removeRequest(clientID);
+            return std::vector<rockets::ws::Response>{};
+        });
+
+        _rocketsServer->handleBinary(std::bind(&BinaryRequests::processMessage,
+                                               std::ref(_binaryRequests),
+                                               std::placeholders::_1));
     }
 
     void _broadcastWebsocketMessages()
@@ -318,6 +331,8 @@ public:
                                            rockets::jsonrpc::Request request) {
             if (from_json(obj, request.message, postUpdateFunc))
             {
+                _engine->triggerRender();
+
                 const auto& msg =
                     rockets::jsonrpc::makeNotification(endpoint, obj);
                 _rocketsServer->broadcastText(msg, {request.clientID});
@@ -350,13 +365,144 @@ public:
     }
 
     template <class P, class R>
-    void _handleAsyncRPC(
-        const std::string& method, const RpcDocumentation& doc,
-        std::function<void(P, rockets::jsonrpc::AsyncResponse)> action,
-        rockets::jsonrpc::AsyncReceiver::CancelRequestCallback cancel)
+    void _handleAsyncRPC(const std::string& method, const RpcDocumentation& doc,
+                         std::function<rockets::jsonrpc::CancelRequestCallback(
+                             P, uintptr_t, rockets::jsonrpc::AsyncResponse,
+                             rockets::jsonrpc::ProgressUpdateCallback)>
+                             action)
     {
-        _jsonrpcServer->bindAsync<P>(method, action, cancel);
+        _jsonrpcServer->bindAsync<P>(method, action);
         _handleSchema(method, buildJsonRpcSchema<P, R>(method, doc));
+    }
+
+    template <class P, class R>
+    void _handleTask(
+        const std::string& method, const RpcDocumentation& doc,
+        std::function<std::shared_ptr<TaskT<R>>(P, uintptr_t)> createTask)
+    {
+        // define the action that is executed on every incoming request from the
+        // client:
+        // - create the task that shall be executed
+        // - wire the result of task to the response callback from rockets
+        // - setup progress reporting during the task execution using libuv
+        // - wire the cancel request from rockets to the task
+
+        auto action = [&tasks = _tasks, &binaryRequests = _binaryRequests,
+                createTask, & server = _jsonrpcServer, &mutex = _tasksMutex]
+                (P params, auto clientID, auto respond, auto progressCb)
+        {
+            // transform task error to rockets error response
+            auto errorCallback = [respond](const TaskRuntimeError& error) {
+                respond({Response::Error{error.what(), error.code(),
+                                         error.data()}});
+            };
+
+            try
+            {
+                // transform task result to rockets response
+                auto readyCallback = [respond](R result) {
+                    try
+                    {
+                        respond({to_json(result)});
+                    }
+                    catch (const std::runtime_error& e)
+                    {
+                        respond({Response::Error{e.what(), -1}});
+                    }
+                };
+
+                // create the task that shall be executed for this request
+                auto task = createTask(params, clientID);
+
+                std::function<void()> finishProgress = [task] {
+                    task->progress("Done", 1.f);
+                };
+
+// setup periodic progress reporting if we have libuv running
+#ifdef BRAYNS_USE_LIBUV
+                if (uvw::Loop::getDefault()->alive())
+                {
+                    auto progressUpdate =
+                        uvw::Loop::getDefault()->resource<uvw::TimerHandle>();
+
+                    auto sendProgress =
+                        [ progressCb, &progress = task->getProgress() ]
+                    {
+                        progress.consume(progressCb);
+                    };
+                    progressUpdate->on<uvw::TimerEvent>(
+                        [sendProgress](const auto&, auto&) { sendProgress(); });
+
+                    finishProgress = [task, progressUpdate, sendProgress] {
+                        task->progress("Done", 1.f);
+                        sendProgress();
+                        progressUpdate->stop();
+                        progressUpdate->close();
+                    };
+
+                    progressUpdate->start(std::chrono::milliseconds(0),
+                                          std::chrono::milliseconds(100));
+                }
+#endif
+
+                // setup the continuation task that handles the result or error
+                // of the task to handle the responses to rockets accordingly.
+                auto responseTask = std::make_shared<async::task<void>>(
+                    task->task().then([readyCallback, errorCallback, &tasks,
+                                       &binaryRequests, task, finishProgress,
+                                       &mutex](typename TaskT<R>::Type result) {
+                        finishProgress();
+
+                        try
+                        {
+                            readyCallback(result.get());
+                        }
+                        catch (const TaskRuntimeError& e)
+                        {
+                            errorCallback(e);
+                        }
+                        catch (const std::exception& e)
+                        {
+                            errorCallback({e.what()});
+                        }
+                        catch (const async::task_canceled&)
+                        {
+                            task->finishCancel();
+                        }
+
+                        std::lock_guard<std::mutex> lock(mutex);
+                        tasks.erase(task);
+                        binaryRequests.removeTask(task);
+                    }));
+
+                std::lock_guard<std::mutex> lock(mutex);
+                tasks.emplace(task, responseTask);
+
+                // forward the cancel request from rockets to the task
+                auto cancel = [task, responseTask](auto done) {
+                    task->cancel(done);
+                };
+
+                task->schedule();
+
+                return rockets::jsonrpc::CancelRequestCallback(cancel);
+            }
+            // respond errors during the setup of the task
+            catch (const BinaryTaskError& e)
+            {
+                errorCallback({e.what(), e.code(), to_json(e.error())});
+            }
+            catch (const TaskRuntimeError& e)
+            {
+                errorCallback(e);
+            }
+            catch (const std::exception& e)
+            {
+                errorCallback({e.what()});
+            }
+            return rockets::jsonrpc::CancelRequestCallback();
+        };
+        _handleAsyncRPC<P, R>(method, doc, action);
     }
 
     template <class T>
@@ -392,15 +538,8 @@ public:
                 _parametersManager.getRenderingParameters());
         _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
 
-        _rocketsServer->handle(rockets::http::Method::GET,
-                               ENDPOINT_API_VERSION +
-                                   ENDPOINT_CIRCUIT_CONFIG_BUILDER,
-                               std::bind(&Impl::_handleCircuitConfigBuilder,
-                                         this, std::placeholders::_1));
-
         // following endpoints need a valid engine
         _handle(ENDPOINT_CAMERA, _engine->getCamera());
-        _handleGET(ENDPOINT_PROGRESS, _engine->getProgress());
         _handle(ENDPOINT_MATERIAL_LUT,
                 _engine->getScene().getTransferFunction());
         _handleGET(ENDPOINT_SCENE, _engine->getScene());
@@ -416,6 +555,9 @@ public:
         _handleQuit();
         _handleResetCamera();
         _handleSnapshot();
+
+        _handleUploadBinary();
+        _handleUploadPath();
     }
 
     void _handleFrameBuffer()
@@ -599,8 +741,10 @@ public:
 
     void _handleQuit()
     {
-        _handleRPC(METHOD_QUIT, "Quit the application",
-                   [this] { _engine->setKeepRunning(false); });
+        _handleRPC(METHOD_QUIT, "Quit the application", [engine = _engine] {
+            engine->setKeepRunning(false);
+            engine->triggerRender();
+        });
     }
 
     void _handleResetCamera()
@@ -610,6 +754,7 @@ public:
                        _engine->getCamera().reset();
                        _jsonrpcServer->notify(ENDPOINT_CAMERA,
                                               _engine->getCamera());
+                       _engine->triggerRender();
                    });
     }
 
@@ -617,81 +762,39 @@ public:
     {
         RpcDocumentation doc{"Make a snapshot of the current view", "settings",
                              "Snapshot settings for quality and size"};
-        _handleAsyncRPC<SnapshotParams, ImageGenerator::ImageBase64>(
+        _handleTask<SnapshotParams, ImageGenerator::ImageBase64>(
             METHOD_SNAPSHOT, doc,
-            [this](const SnapshotParams& params,
-                   rockets::jsonrpc::AsyncResponse callback) {
-                try
-                {
-                    auto readyCallback =
-                        [ callback, params,
-                          &imageGenerator = _imageGenerator ](FrameBufferPtr fb)
-                    {
-                        try
-                        {
-                            callback(rockets::jsonrpc::Response{to_json(
-                                imageGenerator.createImage(*fb, params.format,
-                                                           params.quality))});
-                        }
-                        catch (const std::runtime_error& e)
-                        {
-                            callback(rockets::jsonrpc::Response{
-                                rockets::jsonrpc::Response::Error{e.what(),
-                                                                  -1}});
-                        }
-                    };
-                    _engine->snapshot(params, readyCallback);
-                }
-                catch (const std::runtime_error& e)
-                {
-                    callback(rockets::jsonrpc::Response{
-                        rockets::jsonrpc::Response::Error{e.what(), -1}});
-                }
-            },
-            [this] { _engine->cancelSnapshot(); });
+            std::bind(createSnapshotTask, std::placeholders::_1,
+                      std::placeholders::_2, std::ref(*_engine),
+                      std::ref(_imageGenerator)));
     }
 
-    std::future<rockets::http::Response> _handleCircuitConfigBuilder(
-        const rockets::http::Request& request)
+    void _handleUploadBinary()
     {
-        using namespace rockets::http;
+        RpcDocumentation doc{"Upload files to load geometry", "params",
+                             "Array of file parameters: size, type and name"};
 
-        const auto& params = _parametersManager.getApplicationParameters();
-        const auto filename = params.getTmpFolder() + "/BlueConfig";
-        if (_writeBlueConfigFile(filename, request.query))
-        {
-            const std::string body = "{\"filename\":\"" + filename + "\"}";
-            return make_ready_response(Code::OK, body, JSON_TYPE);
-        }
-        return make_ready_response(Code::SERVICE_UNAVAILABLE);
+        _handleTask<BinaryParams, bool>(
+            METHOD_UPLOAD_BINARY, doc,
+            std::bind(&BinaryRequests::createTask, std::ref(_binaryRequests),
+                      std::placeholders::_1, std::placeholders::_2,
+                      _parametersManager.getGeometryParameters()
+                          .getSupportedDataTypes(),
+                      _engine));
     }
 
-    bool _writeBlueConfigFile(const std::string& filename,
-                              const std::map<std::string, std::string>& params)
+    void _handleUploadPath()
     {
-        std::ofstream blueConfig(filename);
-        if (!blueConfig.good())
-            return false;
+        RpcDocumentation doc{"Upload remote path to load geometry from",
+                             "params", "Array of paths, either file or folder"};
 
-        std::map<std::string, std::string> dictionary = {{"morphology_folder",
-                                                          "MorphologyPath"},
-                                                         {"mvd_file",
-                                                          "CircuitPath"}};
-
-        blueConfig << "Run Default" << std::endl << "{" << std::endl;
-        for (const auto& kv : params)
-        {
-            if (dictionary.find(kv.first) == dictionary.end())
-            {
-                BRAYNS_ERROR << "BlueConfigBuilder: Unknown parameter "
-                             << kv.first << std::endl;
-                continue;
-            }
-            blueConfig << dictionary[kv.first] << " " << kv.second << std::endl;
-        }
-        blueConfig << "}" << std::endl;
-        blueConfig.close();
-        return true;
+        _handleTask<std::vector<std::string>, bool>(
+            METHOD_UPLOAD_PATH, doc,
+            std::bind(createUploadPathTask, std::placeholders::_1,
+                      std::placeholders::_2,
+                      _parametersManager.getGeometryParameters()
+                          .getSupportedDataTypes(),
+                      _engine));
     }
 
     EnginePtr _engine;
@@ -706,19 +809,20 @@ public:
     ParametersManager& _parametersManager;
 
     std::unique_ptr<rockets::Server> _rocketsServer;
-    using JsonRpcServer =
-        rockets::jsonrpc::Server<rockets::Server,
-                                 rockets::jsonrpc::AsyncReceiver>;
+    using JsonRpcServer = rockets::jsonrpc::Server<rockets::Server>;
     std::unique_ptr<JsonRpcServer> _jsonrpcServer;
 
-#ifdef BRAYNS_USE_LIBUV
-    std::unique_ptr<SocketListener> _socketListener;
-#endif
+    bool _manualProcessing{true};
 
     ImageGenerator _imageGenerator;
 
     Timer _timer;
     float _leftover{0.f};
+
+    std::map<TaskPtr, std::shared_ptr<async::task<void>>> _tasks;
+    std::mutex _tasksMutex;
+
+    BinaryRequests _binaryRequests;
 };
 
 RocketsPlugin::RocketsPlugin(EnginePtr engine, PluginAPI* api)
@@ -744,10 +848,11 @@ void RocketsPlugin::postSceneLoading()
 void RocketsPlugin::_registerRequest(const std::string& name,
                                      const RetParamFunc& action)
 {
-    _impl->_jsonrpcServer->bind(
-        name, [action](const rockets::jsonrpc::Request& request) {
-            return rockets::jsonrpc::Response{action(request.message)};
-        });
+    _impl->_jsonrpcServer->bind(name,
+                                [action](
+                                    const rockets::jsonrpc::Request& request) {
+                                    return Response{action(request.message)};
+                                });
 }
 
 void RocketsPlugin::_registerRequest(const std::string& name,
@@ -755,7 +860,7 @@ void RocketsPlugin::_registerRequest(const std::string& name,
 {
     _impl->_jsonrpcServer->bind(name,
                                 [action](const rockets::jsonrpc::Request&) {
-                                    return rockets::jsonrpc::Response{action()};
+                                    return Response{action()};
                                 });
 }
 

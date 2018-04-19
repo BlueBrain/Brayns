@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/Brayns.h>
+#include <brayns/common/engine/Engine.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <boost/test/unit_test.hpp>
@@ -58,78 +59,91 @@ public:
         for (const auto& arg : additionalArgv)
             argv.push_back(arg);
         const int argc = argv.size();
-        brayns.reset(new brayns::Brayns(argc, argv.data()));
-        brayns->loadPlugins();
-        brayns->getParametersManager()
+        _brayns.reset(new brayns::Brayns(argc, argv.data()));
+        _brayns->loadPlugins();
+        _brayns->getParametersManager()
             .getApplicationParameters()
             .setImageStreamFPS(0);
-        brayns->render();
+        _brayns->render();
 
-        const auto uri = brayns->getParametersManager()
+        connect(_wsClient);
+        _instance = this;
+    }
+
+    void connect(rockets::ws::Client& client)
+    {
+        const auto uri = _brayns->getParametersManager()
                              .getApplicationParameters()
                              .getHttpServerURI();
 
-        auto connectFuture = wsClient.connect("ws://" + uri, "rockets");
+        auto connectFuture = client.connect("ws://" + uri, "rockets");
         while (!is_ready(connectFuture))
         {
-            wsClient.process(CLIENT_PROCESS_TIMEOUT);
-            brayns->render();
+            client.process(CLIENT_PROCESS_TIMEOUT);
+            _brayns->render();
         }
         connectFuture.get();
-        _instance = this;
     }
 
     template <typename Params, typename RetVal>
     RetVal makeRequest(const std::string& method, const Params& params)
     {
-        auto responseFuture = client.request<Params, RetVal>(method, params);
-        while (!is_ready(responseFuture))
+        auto request = _client.request<Params, RetVal>(method, params);
+        while (!request.is_ready())
         {
-            wsClient.process(0);
-            brayns->render();
+            _wsClient.process(0);
+            _brayns->render();
         }
 
-        return responseFuture.get();
+        return request.get();
     }
 
     template <typename RetVal>
     RetVal makeRequest(const std::string& method)
     {
-        auto responseFuture = client.request<RetVal>(method);
-        while (!is_ready(responseFuture))
+        auto request = _client.request<RetVal>(method);
+        while (!request.is_ready())
         {
-            wsClient.process(0);
-            brayns->render();
+            _wsClient.process(0);
+            _brayns->render();
         }
 
-        return responseFuture.get();
+        return request.get();
     }
 
     template <typename Params>
     void makeNotification(const std::string& method, const Params& params)
     {
-        client.notify<Params>(method, params);
+        _client.notify<Params>(method, params);
 
-        wsClient.process(CLIENT_PROCESS_TIMEOUT);
+        _wsClient.process(CLIENT_PROCESS_TIMEOUT);
         for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
-            brayns->render();
+            _brayns->render();
     }
 
     void makeNotification(const std::string& method)
     {
-        client.notify(method, std::string());
+        _client.notify(method, std::string());
 
-        wsClient.process(CLIENT_PROCESS_TIMEOUT);
+        _wsClient.process(CLIENT_PROCESS_TIMEOUT);
         for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
-            brayns->render();
+            _brayns->render();
     }
 
-    brayns::Brayns& getBrayns() { return *brayns; }
+    auto& getBrayns() { return *_brayns; }
+    auto& getWsClient() { return _wsClient; }
+    auto& getJsonRpcClient() { return _client; }
+    void process()
+    {
+        _wsClient.process(10);
+        _brayns->preRender();
+    }
+
 private:
     static ClientServer* _instance;
-    std::unique_ptr<brayns::Brayns> brayns;
-    rockets::ws::Client wsClient;
-    rockets::jsonrpc::Client<rockets::ws::Client> client{wsClient};
+    std::unique_ptr<brayns::Brayns> _brayns;
+    rockets::ws::Client _wsClient;
+    rockets::jsonrpc::Client<rockets::ws::Client> _client{_wsClient};
 };
 
 ClientServer* ClientServer::_instance{nullptr};
@@ -160,4 +174,24 @@ void makeNotification(const std::string& method)
 brayns::Camera& getCamera()
 {
     return ClientServer::instance().getBrayns().getEngine().getCamera();
+}
+
+auto& getWsClient()
+{
+    return ClientServer::instance().getWsClient();
+}
+
+auto& getJsonRpcClient()
+{
+    return ClientServer::instance().getJsonRpcClient();
+}
+
+void process()
+{
+    ClientServer::instance().process();
+}
+
+void connect(rockets::ws::Client& client)
+{
+    ClientServer::instance().connect(client);
 }

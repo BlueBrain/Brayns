@@ -64,7 +64,7 @@ void OSPRayRenderer::commit()
     VolumeParameters& vp = _parametersManager.getVolumeParameters();
 
     if (!ap.isModified() && !rp.isModified() && !sp.isModified() &&
-        !vp.isModified() && !_scene->isModified())
+        !vp.isModified() && !_scene->isModified() && !_dirty)
     {
         return;
     }
@@ -105,6 +105,7 @@ void OSPRayRenderer::commit()
     ospSetObject(_renderer, "simulationModel",
                  osprayScene->simulationModelImpl());
     ospCommit(_renderer);
+    _dirty = false;
 }
 
 void OSPRayRenderer::setCamera(CameraPtr camera)
@@ -112,7 +113,7 @@ void OSPRayRenderer::setCamera(CameraPtr camera)
     _camera = static_cast<OSPRayCamera*>(camera.get());
     assert(_camera);
     ospSetObject(_renderer, "camera", _camera->impl());
-    ospCommit(_renderer);
+    _dirty = true;
 }
 
 Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)

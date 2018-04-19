@@ -5,7 +5,7 @@
 # See: https://docs.docker.com/engine/userguide/eng-image/multistage-build/#use-multi-stage-builds
 
 # Image where Brayns is built
-FROM debian:9.3-slim as builder
+FROM debian:buster-slim as builder
 LABEL maintainer="bbp-svc-viz@groupes.epfl.ch"
 ARG DIST_PATH=/app/dist
 
@@ -51,7 +51,7 @@ ENV PATH $PATH:${ISPC_PATH}
 
 # Install embree
 # https://github.com/embree/embree/releases
-ARG EMBREE_VERSION=2.17.1
+ARG EMBREE_VERSION=2.17.4
 ARG EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
 
 RUN mkdir -p ${DIST_PATH} \
@@ -61,7 +61,7 @@ RUN mkdir -p ${DIST_PATH} \
 
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
-ARG OSPRAY_VERSION=1.4.3
+ARG OSPRAY_VERSION=1.5.0
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
@@ -89,12 +89,13 @@ RUN mkdir -p ${LWS_SRC} \
  && cd build \
  && cmake .. -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLWS_STATIC_PIC=ON \
+    -DLWS_WITH_STATIC=OFF \
     -DLWS_WITH_SSL=OFF \
     -DLWS_WITH_ZLIB=OFF \
     -DLWS_WITH_ZIP_FOPS=OFF \
     -DLWS_WITHOUT_EXTENSIONS=ON \
     -DLWS_WITHOUT_TESTAPPS=ON \
+    -DLWS_WITH_LIBUV=ON \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
  && ninja install \
  && rm -rf ${DIST_PATH}/lib/cmake/libwebsockets
@@ -120,16 +121,17 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
+    -DCOMMON_DISABLE_WERROR=TRUE \
  && ninja mvd-tool Brayns-install \
- && rm -rf ${DIST_PATH}/include ${DIST_PATH}/share
+ && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it
-FROM debian:9.3-slim
+FROM debian:buster-slim
 ARG DIST_PATH=/app/dist
 
 RUN apt-get update \
  && apt-get -y --no-install-recommends install \
-    libassimp3v5 \
+    libassimp4 \
     libboost-filesystem1.62.0 \
     libboost-program-options1.62.0 \
     libboost-regex1.62.0 \
@@ -139,8 +141,7 @@ RUN apt-get update \
     libgomp1 \
     libhdf5-100 \
     libhdf5-cpp-100 \
-    libmagick++-6.q16-7 \
-    libmagickwand-6.q16-3 \
+    libmagick++-6.q16-8 \
     libturbojpeg0 \
     libuv1 \
  && apt-get clean \

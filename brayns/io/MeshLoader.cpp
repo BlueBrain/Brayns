@@ -20,10 +20,11 @@
 
 #include "MeshLoader.h"
 
-#if (BRAYNS_USE_ASSIMP)
+#ifdef BRAYNS_USE_ASSIMP
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp> // must come before Exporter.hpp
 #include <assimp/Importer.hpp>
+#include <assimp/ProgressHandler.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <boost/filesystem.hpp>
@@ -32,12 +33,55 @@
 #endif
 
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 
 namespace brayns
 {
+#ifdef BRAYNS_USE_ASSIMP
+class ProgressWatcher : public Assimp::ProgressHandler
+{
+public:
+    ProgressWatcher(ProgressReporter& parent, const std::string& filename)
+        : _parent(parent)
+    {
+        _msg << "Loading " << shortenString(filename) << " ..." << std::endl;
+    }
+
+    bool Update(const float percentage) final
+    {
+        _parent.updateProgress(_msg.str(), percentage * 50, 100);
+        return true;
+    }
+
+private:
+    ProgressReporter& _parent;
+    std::function<void()> _cancelCheck;
+    std::stringstream _msg;
+};
+#endif
+
 MeshLoader::MeshLoader(const GeometryParameters& geometryParameters)
     : _geometryParameters(geometryParameters)
 {
+}
+
+std::set<std::string> MeshLoader::getSupportedDataTypes()
+{
+    std::set<std::string> types;
+#ifdef BRAYNS_USE_ASSIMP
+    std::string extensions;
+    Assimp::Importer importer;
+    importer.GetExtensionList(extensions);
+
+    std::istringstream stream(extensions);
+    std::string s;
+    while (std::getline(stream, s, ';'))
+    {
+        auto pos = s.find_last_of(".");
+        types.insert(pos == std::string::npos ? s : s.substr(pos + 1));
+    }
+#endif
+    return types;
 }
 
 void MeshLoader::clear()
@@ -45,7 +89,7 @@ void MeshLoader::clear()
     _meshIndex.clear();
 }
 
-#if (BRAYNS_USE_ASSIMP)
+#ifdef BRAYNS_USE_ASSIMP
 bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
                                     const Matrix4f& transformation,
                                     const size_t defaultMaterial)
@@ -53,24 +97,13 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     _materialOffset = scene.getMaterials().size();
     const boost::filesystem::path file = filename;
     Assimp::Importer importer;
+    auto watcher = new ProgressWatcher(*this, filename);
+    importer.SetProgressHandler(watcher);
     if (!importer.IsExtensionSupported(file.extension().c_str()))
     {
         BRAYNS_DEBUG << "File extension " << file.extension()
                      << " is not supported" << std::endl;
         return false;
-    }
-
-    size_t quality;
-    switch (_geometryParameters.getGeometryQuality())
-    {
-    case GeometryQuality::low:
-    case GeometryQuality::medium:
-        quality = aiProcessPreset_TargetRealtime_Fast;
-        break;
-    case GeometryQuality::high:
-    default:
-        quality = aiProcess_GenSmoothNormals | aiProcess_Triangulate;
-        break;
     }
 
     std::ifstream meshFile(filename, std::ios::in);
@@ -81,104 +114,47 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     }
     meshFile.close();
 
-    const aiScene* aiScene = nullptr;
-    aiScene = importer.ReadFile(filename.c_str(), quality);
+    const aiScene* aiScene = importer.ReadFile(filename.c_str(), _getQuality());
 
     if (!aiScene)
     {
-        BRAYNS_DEBUG << "Error parsing " << filename.c_str() << ": "
+        BRAYNS_DEBUG << "Error parsing mesh " << filename.c_str() << ": "
                      << importer.GetErrorString() << std::endl;
         return false;
     }
 
     if (!aiScene->HasMeshes())
     {
-        BRAYNS_DEBUG << "Error Finding Model In file. "
-                     << "Did you export an empty scene?" << std::endl;
+        BRAYNS_DEBUG << "Error finding meshes in scene" << std::endl;
         return false;
     }
 
     boost::filesystem::path filepath = filename;
-
-    if (defaultMaterial == NO_MATERIAL)
-        _createMaterials(scene, aiScene, filepath.parent_path().string());
-    else
-        scene.getMaterial(defaultMaterial);
-
-    size_t nbVertices = 0;
-    size_t nbFaces = 0;
-    auto& triangleMeshes = scene.getTriangleMeshes();
-    for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
-    {
-        aiMesh* mesh = aiScene->mMeshes[m];
-        const size_t materialId =
-            _getMaterialId(mesh->mMaterialIndex, defaultMaterial);
-
-        auto& triangleMesh = triangleMeshes[materialId];
-
-        nbVertices += mesh->mNumVertices;
-        triangleMesh.vertices.reserve(nbVertices);
-        if (mesh->HasNormals())
-            triangleMesh.normals.reserve(nbVertices);
-        if (mesh->HasTextureCoords(0))
-            triangleMesh.textureCoordinates.reserve(nbVertices);
-        for (size_t i = 0; i < mesh->mNumVertices; ++i)
-        {
-            const auto& v = mesh->mVertices[i];
-            const Vector4f vertex =
-                transformation * Vector4f(v.x, v.y, v.z, 1.f);
-            const Vector3f transformedVertex = {vertex.x(), vertex.y(),
-                                                vertex.z()};
-            triangleMesh.vertices.push_back(transformedVertex);
-            scene.getWorldBounds().merge(transformedVertex);
-            if (mesh->HasNormals())
-            {
-                const auto& n = mesh->mNormals[i];
-                const Vector4f normal =
-                    transformation * Vector4f(n.x, n.y, n.z, 0.f);
-                const Vector3f transformedNormal = {normal.x(), normal.y(),
-                                                    normal.z()};
-                triangleMesh.normals.push_back(transformedNormal);
-            }
-
-            if (mesh->HasTextureCoords(0))
-            {
-                const auto& t = mesh->mTextureCoords[0][i];
-                const Vector2f texCoord(t.x, -t.y);
-                triangleMesh.textureCoordinates.push_back(texCoord);
-            }
-        }
-        bool nonTriangulatedFaces = false;
-        nbFaces += mesh->mNumFaces;
-        triangleMesh.indices.reserve(nbFaces);
-        if (_meshIndex.find(materialId) == _meshIndex.end())
-            _meshIndex[materialId] = 0;
-        const auto meshIndex = _meshIndex[materialId];
-        for (size_t f = 0; f < mesh->mNumFaces; ++f)
-        {
-            if (mesh->mFaces[f].mNumIndices == 3)
-            {
-                const Vector3ui ind =
-                    Vector3ui(meshIndex + mesh->mFaces[f].mIndices[0],
-                              meshIndex + mesh->mFaces[f].mIndices[1],
-                              meshIndex + mesh->mFaces[f].mIndices[2]);
-                triangleMesh.indices.push_back(ind);
-            }
-            else
-                nonTriangulatedFaces = true;
-        }
-        if (nonTriangulatedFaces)
-            BRAYNS_DEBUG
-                << "Some faces are not triangulated and have been removed"
-                << std::endl;
-
-        _meshIndex[materialId] += mesh->mNumVertices;
-    }
-
-    BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and " << nbFaces
-                 << " faces" << std::endl;
-
+    _postLoad(aiScene, scene, transformation, defaultMaterial,
+              filepath.parent_path().string());
     return true;
+}
+
+void MeshLoader::importMeshFromBlob(const Blob& blob, Scene& scene,
+                                    const Matrix4f& transformation,
+                                    const size_t defaultMaterial)
+{
+    _materialOffset = scene.getMaterials().size();
+    Assimp::Importer importer;
+    auto watcher = new ProgressWatcher(*this, blob.name);
+    importer.SetProgressHandler(watcher);
+
+    const aiScene* aiScene =
+        importer.ReadFileFromMemory(blob.data.data(), blob.data.size(),
+                                    _getQuality(), blob.type.c_str());
+
+    if (!aiScene)
+        throw std::runtime_error(importer.GetErrorString());
+
+    if (!aiScene->HasMeshes())
+        throw std::runtime_error("No meshes found");
+
+    _postLoad(aiScene, scene, transformation, defaultMaterial);
 }
 
 bool MeshLoader::exportMeshToFile(const std::string& filename,
@@ -330,6 +306,106 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
         aimaterial->Get(AI_MATKEY_REFRACTI, value1f);
         material.setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f
                                                                 : value1f);
+    }
+}
+
+void MeshLoader::_postLoad(const aiScene* aiScene, Scene& scene,
+                           const Matrix4f& transformation,
+                           const size_t defaultMaterial,
+                           const std::string& folder)
+{
+    if (defaultMaterial == NO_MATERIAL)
+        _createMaterials(scene, aiScene, folder);
+    else
+        scene.getMaterial(defaultMaterial);
+
+    size_t nbVertices = 0;
+    size_t nbFaces = 0;
+    auto& triangleMeshes = scene.getTriangleMeshes();
+    for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
+    {
+        aiMesh* mesh = aiScene->mMeshes[m];
+        const size_t materialId =
+            _getMaterialId(mesh->mMaterialIndex, defaultMaterial);
+
+        auto& triangleMesh = triangleMeshes[materialId];
+
+        nbVertices += mesh->mNumVertices;
+        triangleMesh.vertices.reserve(nbVertices);
+        if (mesh->HasNormals())
+            triangleMesh.normals.reserve(nbVertices);
+        if (mesh->HasTextureCoords(0))
+            triangleMesh.textureCoordinates.reserve(nbVertices);
+        for (size_t i = 0; i < mesh->mNumVertices; ++i)
+        {
+            const auto& v = mesh->mVertices[i];
+            const Vector4f vertex =
+                transformation * Vector4f(v.x, v.y, v.z, 1.f);
+            const Vector3f transformedVertex = {vertex.x(), vertex.y(),
+                                                vertex.z()};
+            triangleMesh.vertices.push_back(transformedVertex);
+            scene.getWorldBounds().merge(transformedVertex);
+            if (mesh->HasNormals())
+            {
+                const auto& n = mesh->mNormals[i];
+                const Vector4f normal =
+                    transformation * Vector4f(n.x, n.y, n.z, 0.f);
+                const Vector3f transformedNormal = {normal.x(), normal.y(),
+                                                    normal.z()};
+                triangleMesh.normals.push_back(transformedNormal);
+            }
+
+            if (mesh->HasTextureCoords(0))
+            {
+                const auto& t = mesh->mTextureCoords[0][i];
+                const Vector2f texCoord(t.x, -t.y);
+                triangleMesh.textureCoordinates.push_back(texCoord);
+            }
+        }
+        bool nonTriangulatedFaces = false;
+        nbFaces += mesh->mNumFaces;
+        triangleMesh.indices.reserve(nbFaces);
+        if (_meshIndex.find(materialId) == _meshIndex.end())
+            _meshIndex[materialId] = 0;
+        const auto meshIndex = _meshIndex[materialId];
+        for (size_t f = 0; f < mesh->mNumFaces; ++f)
+        {
+            if (mesh->mFaces[f].mNumIndices == 3)
+            {
+                const Vector3ui ind =
+                    Vector3ui(meshIndex + mesh->mFaces[f].mIndices[0],
+                              meshIndex + mesh->mFaces[f].mIndices[1],
+                              meshIndex + mesh->mFaces[f].mIndices[2]);
+                triangleMesh.indices.push_back(ind);
+            }
+            else
+                nonTriangulatedFaces = true;
+        }
+        if (nonTriangulatedFaces)
+            BRAYNS_DEBUG
+                << "Some faces are not triangulated and have been removed"
+                << std::endl;
+
+        _meshIndex[materialId] += mesh->mNumVertices;
+
+        updateProgress("Post-processing mesh ...",
+                       50 + ((m + 1) * 50.f) / aiScene->mNumMeshes, 100);
+    }
+
+    BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and " << nbFaces
+                 << " faces" << std::endl;
+}
+
+size_t MeshLoader::_getQuality() const
+{
+    switch (_geometryParameters.getGeometryQuality())
+    {
+    case GeometryQuality::low:
+    case GeometryQuality::medium:
+        return aiProcessPreset_TargetRealtime_Fast;
+    case GeometryQuality::high:
+    default:
+        return aiProcess_GenSmoothNormals | aiProcess_Triangulate;
     }
 }
 

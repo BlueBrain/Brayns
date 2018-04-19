@@ -4,3 +4,6 @@
 [submodule "uvw"]
 	path = uvw
 	url = https://github.com/skypjack/uvw.git
+[submodule "async++"]
+	path = async++
+	url = https://github.com/Amanieu/asyncplusplus.git

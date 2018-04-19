@@ -1,5 +1,6 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
- *                          Daniel.Nachbaur@epfl.ch
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,37 +20,30 @@
 
 #pragma once
 
-#include <rockets/socketBasedInterface.h>
-#include <rockets/socketListener.h>
-
-#include <map>
-#include <uvw.hpp>
+#include <brayns/common/tasks/Task.h>
 
 namespace brayns
 {
 /**
- * Implements a rockets::SocketListener to be integrated in a libuv event loop.
+ * A task which loads data from a list of paths and adds the loaded data to the
+ * scene.
  */
-class SocketListener : public rockets::SocketListener
+class UploadPathTask : public TaskT<bool>
 {
 public:
-    SocketListener(rockets::SocketBasedInterface& interface);
-
-    void setPostReceiveCallback(const std::function<void()>& callback)
-    {
-        _postReceive = callback;
-    }
-
-    void onNewSocket(const rockets::SocketDescriptor fd, int mode) final;
-
-    void onUpdateSocket(const rockets::SocketDescriptor fd, int mode) final;
-
-    void onDeleteSocket(const rockets::SocketDescriptor fd) final;
+    UploadPathTask(std::vector<std::string>&& paths,
+                   const std::set<std::string>& supportedTypes,
+                   EnginePtr engine);
 
 private:
-    std::map<rockets::SocketDescriptor, std::shared_ptr<uvw::PollHandle>>
-        _handles;
-    rockets::SocketBasedInterface& _iface;
-    std::function<void()> _postReceive;
+    std::vector<async::task<void>> _loadTasks;
 };
+
+auto createUploadPathTask(std::vector<std::string>&& paths, const uintptr_t,
+                          const std::set<std::string>& supportedTypes,
+                          EnginePtr engine)
+{
+    return std::make_shared<UploadPathTask>(std::move(paths), supportedTypes,
+                                            engine);
+}
 }

@@ -169,14 +169,17 @@ void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
                 material.setRefractionIndex(0.98f);
                 material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
                 material.setSpecularExponent(10.f);
+                break;
             case 1:
                 // Light emmitter
                 material.setEmission(1.f);
+                break;
             case 2:
                 // Reflector
                 material.setReflectionIndex(float(std::rand() % 100) / 100.f);
                 material.setSpecularColor(Vector3f(0.01f, 0.01f, 0.01f));
                 material.setSpecularExponent(10.f);
+                break;
             }
             break;
         case MaterialsColorMap::shades_of_grey:
@@ -533,7 +536,7 @@ CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
     return _caDiffusionSimulationHandler;
 }
 
-VolumeHandlerPtr Scene::getVolumeHandler()
+VolumeHandlerPtr Scene::getVolumeHandler() const
 {
     const auto& volumeFile =
         _parametersManager.getVolumeParameters().getFilename();
@@ -610,7 +613,7 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 bool Scene::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-           _trianglesMeshes.empty();
+           _trianglesMeshes.empty() && !getVolumeHandler();
 }
 
 void Scene::_buildMissingMaterials(const size_t materialId)

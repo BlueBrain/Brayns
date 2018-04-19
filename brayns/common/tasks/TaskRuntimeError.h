@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+ *
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,27 +18,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef XYZBLOADER_H
-#define XYZBLOADER_H
+#pragma once
 
-#include <brayns/common/types.h>
-#include <brayns/io/ProgressReporter.h>
-#include <brayns/parameters/GeometryParameters.h>
+#include <stdexcept>
 
 namespace brayns
 {
-class XYZBLoader : public ProgressReporter
+/**
+ * An exception type that shall be thrown during any point during the task
+ * execution to provide useful errors for the user.
+ */
+class TaskRuntimeError : public std::runtime_error
 {
 public:
-    XYZBLoader(const GeometryParameters& geometryParameters);
+    TaskRuntimeError(const std::string& message, const int code = -1,
+                     const std::string& data = "")
+        : std::runtime_error(message.c_str())
+        , _code(code)
+        , _data(data)
+    {
+    }
 
-    void importFromBlob(const Blob& blob, Scene& scene);
-
-    void importFromFile(const std::string& filename, Scene& scene);
-
+    /** @return the error code. */
+    int code() const { return _code; }
+    /** @return the task-specific error data. */
+    const std::string& data() const { return _data; }
 private:
-    const GeometryParameters& _geometryParameters;
+    const int _code;
+    const std::string _data;
 };
 }
-
-#endif // XYZBLOADER_H

@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <brayns/common/Progress.h>
-
 #include <functional>
 
 #ifdef BRAYNS_USE_OPENMP
@@ -39,8 +37,14 @@ class ProgressReporter
 public:
     virtual ~ProgressReporter() = default;
 
+    /**
+     * The callback for each progress update with the signature (message,
+     * fraction of progress in 0..1 range)
+     */
+    using UpdateCallback = std::function<void(const std::string&, float)>;
+
     /** Set a new callback function which is called on each updateProgress(). */
-    void setProgressCallback(const Progress::UpdateCallback& func)
+    void setProgressCallback(const UpdateCallback& func)
     {
         _progressUpdate = func;
     }
@@ -60,6 +64,6 @@ public:
     }
 
 private:
-    Progress::UpdateCallback _progressUpdate;
+    UpdateCallback _progressUpdate;
 };
 }
