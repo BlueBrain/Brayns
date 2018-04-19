@@ -107,6 +107,7 @@ typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
 class Model;
 typedef std::shared_ptr<Model> ModelPtr;
 typedef std::vector<ModelPtr> Models;
+typedef std::map<std::string, std::string> ModelMetadata;
 
 struct ModelTransformation;
 typedef std::vector<ModelTransformation> ModelTransformations;
