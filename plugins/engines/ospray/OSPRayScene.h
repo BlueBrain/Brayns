@@ -72,7 +72,8 @@ public:
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
     /** @copydoc Scene::addModel */
-    ModelPtr addModel(const std::string& name, const std::string& uri) final;
+    ModelPtr addModel(const std::string& name,
+                      const ModelMetadata& metadata) final;
 
     /** @copydoc Scene::removeModel */
     void removeModel(const size_t index) final;

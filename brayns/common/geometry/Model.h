@@ -66,9 +66,9 @@ struct ModelDescriptor : public BaseObject
     ModelDescriptor(const ModelDescriptor& rhs);
     ModelDescriptor& operator=(const ModelDescriptor& rhs);
 
-    ModelDescriptor(const std::string& name, const std::string& uri)
+    ModelDescriptor(const std::string& name, const ModelMetadata& metadata)
         : _name(name)
-        , _uri(uri)
+        , _metadata(metadata)
     {
         _transformations.push_back(ModelTransformation());
     }
@@ -77,9 +77,10 @@ struct ModelDescriptor : public BaseObject
     bool visible() const { return _visible; }
     bool boundingBox() const { return _boundingBox; }
     ModelTransformations& transformations() { return _transformations; }
+    ModelMetadata& getMetadata() { return _metadata; }
 private:
     std::string _name;
-    std::string _uri;
+    ModelMetadata _metadata;
     bool _enabled{true};
     bool _visible{true};
     bool _boundingBox{false};

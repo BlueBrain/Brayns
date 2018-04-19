@@ -40,7 +40,9 @@ MolecularSystemReader::MolecularSystemReader(
 
 bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 {
-    auto model = scene.addModel("MolecularSystem");
+    ModelMetadata metadata = {{"molecular-system-config",
+                               _geometryParameters.getMolecularSystemConfig()}};
+    auto model = scene.addModel("MolecularSystem", metadata);
     auto& materialManager = scene.getMaterialManager();
     _nbProteins = 0;
     if (!_loadConfiguration())

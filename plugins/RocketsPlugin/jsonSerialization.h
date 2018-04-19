@@ -276,11 +276,11 @@ inline void init(brayns::ModelTransformation* g, ObjectHandler* h)
 inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
 {
     h->add_property("name", &g->_name, Flags::Optional);
-    h->add_property("uri", &g->_uri, Flags::Optional);
     h->add_property("enabled", &g->_enabled, Flags::Optional);
     h->add_property("visible", &g->_visible, Flags::Optional);
     h->add_property("bounding_box", &g->_boundingBox, Flags::Optional);
     h->add_property("transformations", &g->_transformations);
+    h->add_property("metadata", &g->_metadata);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

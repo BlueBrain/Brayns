@@ -360,9 +360,10 @@ bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
     return boost::algorithm::ends_with(volumeFile, ".raw");
 }
 
-ModelPtr OSPRayScene::addModel(const std::string& name, const std::string& uri)
+ModelPtr OSPRayScene::addModel(const std::string& name,
+                               const ModelMetadata& metadata)
 {
-    ModelDescriptor modelDescriptor(name, uri);
+    ModelDescriptor modelDescriptor(name, metadata);
     _modelDescriptors.push_back(modelDescriptor);
     _models.push_back(std::make_shared<OSPRayModel>(name, *_materialManager));
     return _models[_models.size() - 1];

@@ -43,21 +43,21 @@ ModelTransformation& ModelTransformation::operator=(
 ModelDescriptor::ModelDescriptor(const ModelDescriptor& rhs)
 {
     this->_name = rhs._name;
-    this->_uri = rhs._uri;
     this->_enabled = rhs._enabled;
     this->_visible = rhs._visible;
     this->_boundingBox = rhs._boundingBox;
     this->_transformations = rhs._transformations;
+    this->_metadata = rhs._metadata;
 }
 
 ModelDescriptor& ModelDescriptor::operator=(const ModelDescriptor& rhs)
 {
     this->_name = rhs._name;
-    this->_uri = rhs._uri;
     this->_enabled = rhs._enabled;
     this->_visible = rhs._visible;
     this->_boundingBox = rhs._boundingBox;
     this->_transformations = rhs._transformations;
+    this->_metadata = rhs._metadata;
     return *this;
 }
 

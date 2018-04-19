@@ -120,8 +120,8 @@ public:
     /**
         Adds a model to the scene
       */
-    BRAYNS_API virtual ModelPtr addModel(const std::string& name,
-                                         const std::string& uri = "") = 0;
+    BRAYNS_API virtual ModelPtr addModel(
+        const std::string& name, const ModelMetadata& metadata = {}) = 0;
 
     /**
         Removes a geometry group from the scene

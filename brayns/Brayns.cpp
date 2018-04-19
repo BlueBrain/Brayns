@@ -592,7 +592,8 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         auto& materialManager = scene.getMaterialManager();
-        auto model = scene.addModel(getNameFromFullPath(fileName));
+        auto model =
+            scene.addModel(getNameFromFullPath(fileName), {{"uri", fileName}});
         std::string pdbFileName = fileName;
         if (pdbFileName == "")
         {
@@ -614,7 +615,8 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto fileName = geometryParameters.getXYZBFile();
-        auto model = scene.addModel(getNameFromFullPath(fileName));
+        auto model =
+            scene.addModel(getNameFromFullPath(fileName), {{"uri", fileName}});
         BRAYNS_INFO << "Loading XYZB file " << fileName << std::endl;
         XYZBLoader xyzbLoader(geometryParameters);
         xyzbLoader.setProgressCallback(progressUpdate);
@@ -645,7 +647,7 @@ private:
         for (const auto& fileName : files)
         {
             const auto name = getNameFromFullPath(fileName);
-            auto model = scene.addModel(name);
+            auto model = scene.addModel(name, {{"uri", fileName}});
             const auto nbMaterial =
                 scene.getMaterialManager().getMaterials().size();
             size_t material =
@@ -669,7 +671,7 @@ private:
     {
         const auto name = getNameFromFullPath(fileName);
         auto& scene = _engine->getScene();
-        auto model = scene.addModel(name);
+        auto model = scene.addModel(name, {{"uri", fileName}});
         if (!_meshLoader.importMeshFromFile(fileName, name, *model,
                                             scene.getMaterialManager(),
                                             Matrix4f(), NO_MATERIAL))
@@ -784,7 +786,7 @@ private:
         for (const auto& fileName : files)
         {
             const auto name = getNameFromFullPath(fileName);
-            auto model = scene.addModel(name);
+            auto model = scene.addModel(name, {{"uri", fileName}});
             servus::URI uri(fileName);
             if (!morphologyLoader.importMorphology(uri, morphologyIndex,
                                                    morphologyIndex, *model,

@@ -167,9 +167,16 @@ public:
         try
         {
             // Geometry group (one for the whole circuit)
-            auto model = scene.addModel("Circuit");
-            model->useSimulationModel(
-                _geometryParameters.getCircuitUseSimulationModel());
+            ModelMetadata metadata = {
+                {"config", _geometryParameters.getCircuitConfiguration()},
+                {"density",
+                 std::to_string(_geometryParameters.getCircuitDensity())},
+                {"report", _geometryParameters.getCircuitReport()},
+                {"targets", _geometryParameters.getCircuitTargets()},
+                {"mesh-filename-pattern",
+                 _geometryParameters.getCircuitMeshFilenamePattern()},
+                {"mesh-folder", _geometryParameters.getCircuitMeshFolder()}};
+            auto model = scene.addModel("Circuit", metadata);
 
             // Open Circuit and select GIDs according to specified target
             const brain::Circuit circuit(uri);
