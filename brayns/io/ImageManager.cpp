@@ -82,7 +82,7 @@ bool ImageManager::exportFrameBufferToFile(
 }
 
 bool ImageManager::importTextureFromFile(
-    TexturesMap& textures BRAYNS_UNUSED, const size_t id,
+    TexturesMap& textures BRAYNS_UNUSED, const size_t id BRAYNS_UNUSED,
     const std::string& filename BRAYNS_UNUSED)
 {
 #if (BRAYNS_USE_MAGICKPP)
