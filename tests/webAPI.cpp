@@ -72,11 +72,11 @@ BOOST_AUTO_TEST_CASE(snapshot)
                       "2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy"
                       "MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/"
                       "wAARCAAFAAUDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAX/"
-                      "xAAfEAABBAAHAAAAAAAAAAAAAAABAAIRIQMEBxIVMUH/"
-                      "xAAVAQEBAAAAAAAAAAAAAAAAAAACBf/"
-                      "EABkRAAEFAAAAAAAAAAAAAAAAAAABAxETUf/"
-                      "aAAwDAQACEQMRAD8AiDWoBu3gHOEky/OibMxWGKHQ9gWSbREVGhvASp/"
-                      "/2Q==");
+                      "xAAgEAABAwMFAQAAAAAAAAAAAAACAAEEAwURBxIhMkGB/"
+                      "8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/"
+                      "xAAcEQACAgIDAAAAAAAAAAAAAAABAgADBEEFEdH/2gAMAwEAAhEDEQA/"
+                      "AJ0PVMbfBjwxsrmMekFJiKU3O0WHPT3GfqIir6OLxGqUlNDZ9hVsboT/"
+                      "2Q==");
 }
 #endif
 
