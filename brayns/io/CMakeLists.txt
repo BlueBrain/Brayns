@@ -9,7 +9,6 @@ set(BRAYNSIO_SOURCES
   MeshLoader.cpp
   MolecularSystemReader.cpp
   ProteinLoader.cpp
-  SceneLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
   simulation/SpikeSimulationHandler.cpp
   TransferFunctionLoader.cpp
@@ -23,7 +22,6 @@ set(BRAYNSIO_PUBLIC_HEADERS
   MolecularSystemReader.h
   ProgressReporter.h
   ProteinLoader.h
-  SceneLoader.h
   simulation/CADiffusionSimulationHandler.h
   simulation/SpikeSimulationHandler.h
   TransferFunctionLoader.h
@@ -37,12 +35,10 @@ set(BRAYNSIO_LINK_LIBRARIES
 
 if(BRAYNS_BRION_ENABLED)
   list(APPEND BRAYNSIO_SOURCES
-      ConnectivityLoader.cpp
       MorphologyLoader.cpp
       NESTLoader.cpp
       simulation/CircuitSimulationHandler.cpp)
   list(APPEND BRAYNSIO_HEADERS
-      ConnectivityLoader.h
       MorphologyLoader.h
       NESTLoader.h
       simulation/CircuitSimulationHandler.h)

@@ -105,8 +105,7 @@ export void* uniform BasicRenderer_create(void* uniform cppE)
 export void BasicRenderer_set(void* uniform _self, const uniform vec3f& bgColor,
                               const uniform float& timestamp,
                               const uniform int& spp, void** uniform lights,
-                              uniform int32 numLights, void** uniform materials,
-                              uniform int32 numMaterials)
+                              uniform int32 numLights)
 {
     uniform BasicRenderer* uniform self =
         (uniform BasicRenderer * uniform)_self;
@@ -117,8 +116,4 @@ export void BasicRenderer_set(void* uniform _self, const uniform vec3f& bgColor,
 
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
-
-    self->abstract.materials =
-        (const uniform ExtendedOBJMaterial* uniform* uniform)materials;
-    self->abstract.numMaterials = numMaterials;
 }

@@ -21,55 +21,28 @@
 #include "Model.h"
 
 #include <brayns/common/log.h>
+#include <brayns/common/material/Material.h>
+#include <brayns/common/material/Texture2D.h>
 
 namespace brayns
 {
-ModelTransformation::ModelTransformation(const ModelTransformation& rhs)
+ModelDescriptor::~ModelDescriptor()
 {
-    this->_translation = rhs._translation;
-    this->_scale = rhs._scale;
-    this->_rotation = rhs._rotation;
+    if (_model)
+    {
+        _model->unload();
+        _model.reset();
+    }
 }
 
-ModelTransformation& ModelTransformation::operator=(
-    const ModelTransformation& rhs)
-{
-    this->_translation = rhs._translation;
-    this->_scale = rhs._scale;
-    this->_rotation = rhs._rotation;
-    return *this;
-}
-
-ModelDescriptor::ModelDescriptor(const ModelDescriptor& rhs)
-{
-    this->_name = rhs._name;
-    this->_enabled = rhs._enabled;
-    this->_visible = rhs._visible;
-    this->_boundingBox = rhs._boundingBox;
-    this->_transformations = rhs._transformations;
-    this->_metadata = rhs._metadata;
-}
-
-ModelDescriptor& ModelDescriptor::operator=(const ModelDescriptor& rhs)
-{
-    this->_name = rhs._name;
-    this->_enabled = rhs._enabled;
-    this->_visible = rhs._visible;
-    this->_boundingBox = rhs._boundingBox;
-    this->_transformations = rhs._transformations;
-    this->_metadata = rhs._metadata;
-    return *this;
-}
-
-Model::Model(const std::string& name, MaterialManager& materialManager)
-    : _materialManager(materialManager)
-    , _name(name)
+Model::Model()
 {
     _bounds.reset();
 }
 
 Model::~Model()
 {
+    unload();
 }
 
 void Model::unload()
@@ -94,7 +67,6 @@ bool Model::empty() const
 uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _spheresDirty = true;
-    _materialManager.check(materialId);
     _spheres[materialId].push_back(sphere);
     _bounds.merge(sphere.center);
     return _spheres[materialId].size() - 1;
@@ -117,7 +89,6 @@ void Model::setSphere(const size_t materialId, const uint64_t index,
 uint64_t Model::addCylinder(const size_t materialId, const Cylinder& cylinder)
 {
     _cylindersDirty = true;
-    _materialManager.check(materialId);
     _cylinders[materialId].push_back(cylinder);
     _bounds.merge(cylinder.center);
     _bounds.merge(cylinder.up);
@@ -142,7 +113,6 @@ void Model::setCylinder(const size_t materialId, const uint64_t index,
 uint64_t Model::addCone(const size_t materialId, const Cone& cone)
 {
     _conesDirty = true;
-    _materialManager.check(materialId);
     _cones[materialId].push_back(cone);
     _bounds.merge(cone.center);
     _bounds.merge(cone.up);
@@ -168,6 +138,88 @@ bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
            _trianglesMeshesDirty;
+}
+
+void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
+{
+    size_t index = 0;
+    for (auto material : _materials)
+    {
+        material.second->setSpecularColor(Vector3f(0.f));
+        material.second->setOpacity(1.f);
+        material.second->setReflectionIndex(0.f);
+
+        switch (colorMap)
+        {
+        case MaterialsColorMap::none:
+            switch (index)
+            {
+            case 0: // Default
+            case 1: // Soma
+                material.second->setDiffuseColor(Vector3f(0.9f, 0.9f, 0.9f));
+                break;
+            case 2: // Axon
+                material.second->setDiffuseColor(Vector3f(0.2f, 0.2f, 0.8f));
+                break;
+            case 3: // Dendrite
+                material.second->setDiffuseColor(Vector3f(0.8f, 0.2f, 0.2f));
+                break;
+            case 4: // Apical dendrite
+                material.second->setDiffuseColor(Vector3f(0.8f, 0.2f, 0.8f));
+                break;
+            default:
+                material.second->setDiffuseColor(
+                    Vector3f(float(std::rand() % 255) / 255.f,
+                             float(std::rand() % 255) / 255.f,
+                             float(std::rand() % 255) / 255.f));
+            }
+            break;
+        case MaterialsColorMap::gradient:
+        {
+            const float a = float(index) / float(_materials.size());
+            material.second->setDiffuseColor(Vector3f(a, 0.f, 1.f - a));
+            break;
+        }
+        case MaterialsColorMap::pastel:
+            material.second->setDiffuseColor(
+                Vector3f(0.5f + float(std::rand() % 127) / 255.f,
+                         0.5f + float(std::rand() % 127) / 255.f,
+                         0.5f + float(std::rand() % 127) / 255.f));
+            break;
+        case MaterialsColorMap::random:
+            material.second->setDiffuseColor(
+                Vector3f(float(rand() % 255) / 255.f,
+                         float(rand() % 255) / 255.f,
+                         float(rand() % 255) / 255.f));
+            switch (rand() % 4)
+            {
+            case 0:
+                // Transparent
+                material.second->setOpacity(float(std::rand() % 100) / 100.f);
+                material.second->setRefractionIndex(0.98f);
+                material.second->setSpecularColor(
+                    Vector3f(0.01f, 0.01f, 0.01f));
+                material.second->setSpecularExponent(10.f);
+            case 1:
+                // Light emmitter
+                material.second->setEmission(1.f);
+            case 2:
+                // Reflector
+                material.second->setReflectionIndex(float(std::rand() % 100) /
+                                                    100.f);
+                material.second->setSpecularColor(
+                    Vector3f(0.01f, 0.01f, 0.01f));
+                material.second->setSpecularExponent(10.f);
+            }
+            break;
+        case MaterialsColorMap::shades_of_grey:
+            float value = float(std::rand() % 255) / 255.f;
+            material.second->setDiffuseColor(Vector3f(value, value, value));
+            break;
+        }
+        material.second->commit();
+        ++index;
+    }
 }
 
 void Model::logInformation()
@@ -203,7 +255,7 @@ void Model::logInformation()
         ++nbMeshes;
     }
 
-    BRAYNS_DEBUG << "Model " << _name << std::endl;
+    BRAYNS_DEBUG << "Model " << std::endl;
     BRAYNS_DEBUG << "- Spheres  : " << nbSpheres << std::endl;
     BRAYNS_DEBUG << "- Cylinders: " << nbCylinders << std::endl;
     BRAYNS_DEBUG << "- Cones    : " << nbCones << std::endl;
@@ -212,8 +264,10 @@ void Model::logInformation()
                  << sizeInBytes / 1048576 << " MB)" << std::endl;
 }
 
-Boxf& Model::getBounds()
+MaterialPtr Model::getMaterial(const size_t materialId)
 {
-    return _bounds;
+    if (_materials.find(materialId) == _materials.end())
+        return nullptr;
+    return _materials[materialId];
 }
 }

@@ -19,24 +19,24 @@
  */
 
 #include "OSPRayModel.h"
+#include "OSPRayMaterial.h"
+
+#include <brayns/common/material/Material.h>
+namespace
+{
+const size_t BOUNDINGBOX_MATERIAL_ID = 9999;
+}
 
 namespace brayns
 {
-OSPRayModel::OSPRayModel(const std::string& name,
-                         MaterialManager& materialManager)
-    : Model(name, materialManager)
+OSPRayModel::~OSPRayModel()
 {
-    _instances.push_back(nullptr);
+    ospRelease(_model);
 }
 
 void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
 {
     _memoryManagementFlags = memoryManagementFlags;
-}
-
-OSPRayModel::~OSPRayModel()
-{
-    unload();
 }
 
 void OSPRayModel::unload()
@@ -104,19 +104,15 @@ void OSPRayModel::unload()
     _cylindersDirty = false;
     _conesDirty = false;
     _trianglesMeshesDirty = false;
-
-    _instances.push_back(nullptr);
 }
 
 void OSPRayModel::_buildBoundingBox()
 {
     _boundingBoxModel = ospNewModel();
 
-    Material material;
-    material.setDiffuseColor({1, 1, 1});
-    material.setEmission(1.f);
-    material.setName(_name + "_bounding_box");
-    _boudingBoxMaterialId = _materialManager.add(material);
+    auto material = createMaterial(BOUNDINGBOX_MATERIAL_ID, "bounding_box");
+    material->setDiffuseColor({1, 1, 1});
+    material->setEmission(1.f);
     const Vector3f s = _bounds.getSize() / 2.f;
     const Vector3f c = _bounds.getCenter();
     const float radius = s.length() / 200.f;
@@ -132,22 +128,22 @@ void OSPRayModel::_buildBoundingBox()
     };
 
     for (size_t i = 0; i < 8; ++i)
-        addSphere(_boudingBoxMaterialId, Sphere(positions[i], radius));
+        addSphere(BOUNDINGBOX_MATERIAL_ID, Sphere(positions[i], radius));
 
-    addCylinder(_boudingBoxMaterialId, {positions[0], positions[1], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[2], positions[3], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[4], positions[5], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[6], positions[7], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[0], positions[1], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[2], positions[3], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[4], positions[5], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[6], positions[7], radius});
 
-    addCylinder(_boudingBoxMaterialId, {positions[0], positions[2], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[1], positions[3], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[4], positions[6], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[5], positions[7], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[0], positions[2], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[1], positions[3], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[4], positions[6], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[5], positions[7], radius});
 
-    addCylinder(_boudingBoxMaterialId, {positions[0], positions[4], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[1], positions[5], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[2], positions[6], radius});
-    addCylinder(_boudingBoxMaterialId, {positions[3], positions[7], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[0], positions[4], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[1], positions[5], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[2], positions[6], radius});
+    addCylinder(BOUNDINGBOX_MATERIAL_ID, {positions[3], positions[7], radius});
 
     ospCommit(_boundingBoxModel);
 }
@@ -167,15 +163,14 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
     ospSetObject(_ospExtendedSpheres[materialId], "extendedspheres",
                  _ospExtendedSpheresData[materialId]);
 
-    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    auto ospMaterial = impl->getOSPMaterial(materialId);
-    ospSetMaterial(_ospExtendedSpheres[materialId], ospMaterial);
-
+    auto impl =
+        std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
+    ospSetMaterial(_ospExtendedSpheres[materialId], impl->getOSPMaterial());
     ospCommit(_ospExtendedSpheres[materialId]);
 
     if (_useSimulationModel)
         ospAddGeometry(_simulationModel, _ospExtendedSpheres[materialId]);
-    else if (materialId == _boudingBoxMaterialId)
+    else if (materialId == BOUNDINGBOX_MATERIAL_ID)
         ospAddGeometry(_boundingBoxModel, _ospExtendedSpheres[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
@@ -195,15 +190,15 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
     ospSetObject(_ospExtendedCylinders[materialId], "extendedcylinders",
                  _ospExtendedCylindersData[materialId]);
 
-    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    auto ospMaterial = impl->getOSPMaterial(materialId);
-    ospSetMaterial(_ospExtendedCylinders[materialId], ospMaterial);
+    auto impl =
+        std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
+    ospSetMaterial(_ospExtendedCylinders[materialId], impl->getOSPMaterial());
 
     ospCommit(_ospExtendedCylinders[materialId]);
 
     if (_useSimulationModel)
         ospAddGeometry(_simulationModel, _ospExtendedCylinders[materialId]);
-    else if (materialId == _boudingBoxMaterialId)
+    else if (materialId == BOUNDINGBOX_MATERIAL_ID)
         ospAddGeometry(_boundingBoxModel, _ospExtendedCylinders[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
@@ -223,15 +218,14 @@ void OSPRayModel::_commitCones(const size_t materialId)
     ospSetObject(_ospExtendedCones[materialId], "extendedcones",
                  _ospExtendedConesData[materialId]);
 
-    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    auto ospMaterial = impl->getOSPMaterial(materialId);
-    ospSetMaterial(_ospExtendedCones[materialId], ospMaterial);
-
+    auto impl =
+        std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
+    ospSetMaterial(_ospExtendedCones[materialId], impl->getOSPMaterial());
     ospCommit(_ospExtendedCones[materialId]);
 
     if (_useSimulationModel)
         ospAddGeometry(_simulationModel, _ospExtendedCones[materialId]);
-    else if (materialId == _boudingBoxMaterialId)
+    else if (materialId == BOUNDINGBOX_MATERIAL_ID)
         ospAddGeometry(_boundingBoxModel, _ospExtendedCones[materialId]);
     else
         ospAddGeometry(_model, _ospExtendedCones[materialId]);
@@ -284,9 +278,9 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
     ospSet1i(_ospMeshes[materialId], "alpha_type", 0);
     ospSet1i(_ospMeshes[materialId], "alpha_component", 4);
 
-    auto impl = dynamic_cast<OSPRayMaterialManager*>(&_materialManager);
-    auto ospMaterial = impl->getOSPMaterial(materialId);
-    ospSetMaterial(_ospMeshes[materialId], ospMaterial);
+    auto impl =
+        std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
+    ospSetMaterial(_ospMeshes[materialId], impl->getOSPMaterial());
     ospCommit(_ospMeshes[materialId]);
 
     ospAddGeometry(_model, _ospMeshes[materialId]);
@@ -302,6 +296,10 @@ void OSPRayModel::commit()
 
     if (!_simulationModel)
         _simulationModel = ospNewModel();
+
+    // Materials
+    for (auto material : _materials)
+        material.second->commit();
 
     // Bounding box
     if (!_boundingBoxModel)
@@ -363,16 +361,18 @@ osp::affine3f OSPRayModel::_groupTransformationToAffine3f(
 OSPGeometry OSPRayModel::getInstance(const size_t index,
                                      ModelTransformation& transformation)
 {
-    if (index < _instances.size())
-        _instances.push_back(nullptr);
+    auto it = _instances.find(index);
+    if (it != _instances.end())
+    {
+        ospRelease(it->second);
+        _instances.erase(it);
+    }
 
-    if (_instances[index])
-        ospRelease(_instances[index]);
-
-    _instances[index] =
+    OSPGeometry instance =
         ospNewInstance(_model, _groupTransformationToAffine3f(transformation));
-    ospCommit(_instances[index]);
-    return _instances[index];
+    ospCommit(instance);
+    _instances[index] = instance;
+    return instance;
 }
 
 OSPGeometry OSPRayModel::getSimulationModelInstance(
@@ -399,5 +399,14 @@ OSPGeometry OSPRayModel::getBoundingBoxModelInstance(
                        _groupTransformationToAffine3f(transformation));
     ospCommit(_boundingBoxModelInstance);
     return _boundingBoxModelInstance;
+}
+
+MaterialPtr OSPRayModel::createMaterial(const size_t materialId,
+                                        const std::string& name)
+{
+    MaterialPtr material = std::make_shared<OSPRayMaterial>();
+    material->setName(name);
+    _materials[materialId] = material;
+    return material;
 }
 }

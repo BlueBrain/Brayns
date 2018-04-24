@@ -24,6 +24,7 @@
 
 #include <plugins/engines/ospray/OSPRayCamera.h>
 #include <plugins/engines/ospray/OSPRayFrameBuffer.h>
+#include <plugins/engines/ospray/OSPRayMaterial.h>
 #include <plugins/engines/ospray/OSPRayRenderer.h>
 #include <plugins/engines/ospray/OSPRayScene.h>
 
@@ -198,14 +199,6 @@ void OSPRayEngine::preRender()
     if (_scene->isModified())
     {
         _scene->commit();
-        clearFrameBuffer = true;
-    }
-
-    auto& materialManager = _scene->getMaterialManager();
-    if (materialManager.isModified())
-    {
-        materialManager.commit();
-        _scene->commitMaterials();
         clearFrameBuffer = true;
     }
 

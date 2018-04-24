@@ -27,7 +27,6 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
-#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(ModelTransformation)
@@ -38,9 +37,9 @@ namespace brayns
 {
 struct ModelTransformation : public BaseObject
 {
-    ModelTransformation() {}
-    ModelTransformation(const ModelTransformation& rhs);
-    ModelTransformation& operator=(const ModelTransformation& rhs);
+    ModelTransformation() = default;
+    ModelTransformation(ModelTransformation&& rhs) = default;
+    ModelTransformation& operator=(ModelTransformation&& rhs) = default;
 
     Vector3f& translation() { return _translation; }
     void translation(const Vector3f& value)
@@ -62,13 +61,16 @@ private:
 
 struct ModelDescriptor : public BaseObject
 {
-    ModelDescriptor() {}
-    ModelDescriptor(const ModelDescriptor& rhs);
-    ModelDescriptor& operator=(const ModelDescriptor& rhs);
+    ModelDescriptor() = default;
+    ~ModelDescriptor();
+    ModelDescriptor(ModelDescriptor&& rhs) = default;
+    ModelDescriptor& operator=(ModelDescriptor&& rhs) = default;
 
-    ModelDescriptor(const std::string& name, const ModelMetadata& metadata)
+    ModelDescriptor(const std::string& name, const ModelMetadata& metadata,
+                    ModelPtr model = nullptr)
         : _name(name)
         , _metadata(metadata)
+        , _model(model)
     {
         _transformations.push_back(ModelTransformation());
     }
@@ -78,13 +80,16 @@ struct ModelDescriptor : public BaseObject
     bool boundingBox() const { return _boundingBox; }
     ModelTransformations& transformations() { return _transformations; }
     ModelMetadata& getMetadata() { return _metadata; }
+    const std::string& getName() const { return _name; }
+    ModelPtr getModel() const { return _model; }
 private:
     std::string _name;
     ModelMetadata _metadata;
     bool _enabled{true};
     bool _visible{true};
-    bool _boundingBox{false};
+    bool _boundingBox{true};
     ModelTransformations _transformations;
+    ModelPtr _model{nullptr};
 
     SERIALIZATION_FRIEND(ModelDescriptor)
 };
@@ -92,7 +97,7 @@ private:
 class Model
 {
 public:
-    BRAYNS_API Model(const std::string& name, MaterialManager& materialManager);
+    BRAYNS_API Model();
 
     BRAYNS_API virtual ~Model();
 
@@ -111,25 +116,21 @@ public:
     BRAYNS_API bool dirty() const;
 
     /**
-        Returns the name of the Model
-    */
-    std::string getName() const { return _name; }
-    /**
         Returns the bounding box for the Model
     */
-    Boxf& getBounds();
+    Boxf& getBounds() { return _bounds; }
     /**
         Returns spheres handled by the geometry Model
     */
     BRAYNS_API SpheresMap& getSpheres() { return _spheres; }
     /**
-      Replaces a sphere in the scene
+      Replaces a sphere in the model
       @param materialId Material of the sphere
-      @param index Index of the sphere in the scene, for the given material
+      @param index Index of the sphere in the model, for the given material
       @param sphere New sphere
 
       */
-    BRAYNS_API void setSphere(const size_t materialId, const uint64_t index,
+    BRAYNS_API void setSphere(const size_t material, const uint64_t index,
                               const Sphere& sphere);
 
     /**
@@ -139,7 +140,7 @@ public:
     BRAYNS_API void setSpheresDirty(const bool value) { _spheresDirty = value; }
     BRAYNS_API bool spheresDirty() { return _spheresDirty; }
     /**
-        Returns cylinders handled by the scene
+        Returns cylinders handled by the model
     */
     /**
       Adds a sphere to the geometry Model
@@ -147,29 +148,28 @@ public:
       @param sphere Sphere to add
       @return Index of the sphere for the specified material
       */
-    BRAYNS_API uint64_t addSphere(const size_t materialId,
-                                  const Sphere& sphere);
+    BRAYNS_API uint64_t addSphere(const size_t material, const Sphere& sphere);
 
     /**
         Returns cylinders handled by the geometry Model
       */
     BRAYNS_API CylindersMap& getCylinders() { return _cylinders; }
     /**
-      Replaces a cylinder in the scene
+      Replaces a cylinder in the model
       @param materialId Material of the cylinder
-      @param index Index of the cylinder in the scene, for the given material
+      @param index Index of the cylinder in the model, for the given material
       @param cylinder New cylinder
 
       */
-    BRAYNS_API void setCylinder(const size_t materialId, const uint64_t index,
+    BRAYNS_API void setCylinder(const size_t material, const uint64_t index,
                                 const Cylinder& cylinder);
     /**
-      Adds a cylinder to the scene
+      Adds a cylinder to the model
       @param materialId Material of the cylinder
       @param cylinder Cylinder to add
       @return Index of the sphere for the specified material
       */
-    BRAYNS_API uint64_t addCylinder(const size_t materialId,
+    BRAYNS_API uint64_t addCylinder(const size_t material,
                                     const Cylinder& cylinder);
     /**
      * @brief Sets cylinders as dirty, meaning that they need to be serialized
@@ -185,16 +185,16 @@ public:
     */
     BRAYNS_API ConesMap& getCones() { return _cones; }
     /**
-      Replaces a cone in the scene
+      Replaces a cone in the model
       @param materialId Material of the cone
-      @param index Index of the cone in the scene, for the given material
+      @param index Index of the cone in the model, for the given material
       @param cone New sphere
 
       */
     BRAYNS_API void setCone(const size_t materialId, const uint64_t index,
                             const Cone& cone);
     /**
-      Adds a cone to the scene
+      Adds a cone to the model
       @param materialId Material of the cone
       @param cone Cone to add
       @return Index of the sphere for the specified material
@@ -230,9 +230,23 @@ public:
         _useSimulationModel = value;
     }
 
+    /**
+        Sets the materials handled by the model, and available to the geometry
+        @param colorMap Specifies the algorithm that is used to create the
+       materials. For instance MT_RANDOM creates materials with random colors,
+       transparency, reflection, and light emission
+    */
+    void BRAYNS_API setMaterialsColorMap(const MaterialsColorMap colorMap);
+
+    /** Factory method to create an engine-specific material. */
+    virtual MaterialPtr createMaterial(const size_t materialId,
+                                       const std::string& name) = 0;
+
+    MaterialMap& getMaterials() { return _materials; }
+    MaterialPtr getMaterial(const size_t materialId);
+
 protected:
-    MaterialManager& _materialManager;
-    std::string _name;
+    MaterialMap _materials;
     SpheresMap _spheres;
     bool _spheresDirty{true};
     CylindersMap _cylinders;

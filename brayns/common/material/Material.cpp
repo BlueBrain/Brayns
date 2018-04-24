@@ -20,76 +20,41 @@
 
 #include "Material.h"
 
+#include <brayns/io/ImageManager.h>
+
 namespace brayns
 {
-TextureDescriptor::TextureDescriptor()
-{
-}
-
-TextureDescriptor::TextureDescriptor(const TextureType type, const size_t id)
-    : _type(type)
-    , _id(id)
-{
-}
-
-TextureDescriptor::TextureDescriptor(const TextureDescriptor& rhs)
-{
-    this->_type = rhs._type;
-    this->_id = rhs._id;
-}
-
-TextureDescriptor& TextureDescriptor::operator=(const TextureDescriptor& rhs)
-{
-    this->_type = rhs._type;
-    this->_id = rhs._id;
-    return *this;
-}
-
 Material::Material()
     : BaseObject()
 {
 }
 
-Material::Material(const Material& rhs)
+Texture2DPtr Material::getTexture(const TextureType& type)
 {
-    this->_color = rhs._color;
-    this->_name = rhs._name;
-    this->_color = rhs._color;
-    this->_specularColor = rhs._specularColor;
-    this->_specularExponent = rhs._specularExponent;
-    this->_reflectionIndex = rhs._reflectionIndex;
-    this->_opacity = rhs._opacity;
-    this->_refractionIndex = rhs._refractionIndex;
-    this->_emission = rhs._emission;
-    this->_glossiness = rhs._glossiness;
-    this->_castSimulationData = rhs._castSimulationData;
-    this->_textureDescriptors = rhs._textureDescriptors;
+    if (_textureDescriptors.find(type) == _textureDescriptors.end())
+        return nullptr;
+    return _textureDescriptors[type];
 }
 
-Material& Material::operator=(const Material& rhs)
+bool Material::_loadTexture(const std::string& fileName)
 {
-    if (this == &rhs)
-        return *this;
+    if (_textures.find(fileName) != _textures.end())
+        return true;
 
-    this->_color = rhs._color;
-    this->_name = rhs._name;
-    this->_color = rhs._color;
-    this->_specularColor = rhs._specularColor;
-    this->_specularExponent = rhs._specularExponent;
-    this->_reflectionIndex = rhs._reflectionIndex;
-    this->_opacity = rhs._opacity;
-    this->_refractionIndex = rhs._refractionIndex;
-    this->_emission = rhs._emission;
-    this->_glossiness = rhs._glossiness;
-    this->_castSimulationData = rhs._castSimulationData;
-    this->_textureDescriptors = rhs._textureDescriptors;
-    return *this;
+    auto texture = ImageManager::importTextureFromFile(fileName);
+    if (!texture)
+        return false;
+
+    _textures[fileName] = texture;
+    return true;
 }
 
-void Material::addTexture(const TextureType& type, const size_t id)
+void Material::setTexture(const std::string& fileName, const TextureType& type)
 {
-    TextureDescriptor textureDescriptor{type, id};
-    _textureDescriptors.push_back(textureDescriptor);
+    if (_textures.find(fileName) == _textures.end())
+        if (!_loadTexture(fileName))
+            throw std::runtime_error("Failed to load texture from " + fileName);
+    _textureDescriptors[type] = _textures[fileName];
     markModified();
 }
 }

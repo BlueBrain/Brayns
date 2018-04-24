@@ -16,7 +16,6 @@ set(BRAYNSCOMMON_SOURCES
   camera/InspectCenterManipulator.cpp
   scene/Scene.cpp
   material/Material.cpp
-  material/MaterialManager.cpp
   material/Texture2D.cpp
   Progress.cpp
   renderer/Renderer.cpp
@@ -46,7 +45,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   light/Light.h
   light/PointLight.h
   log.h
-  material/MaterialManager.h
   material/Material.h
   material/Texture2D.h
   mathTypes.h

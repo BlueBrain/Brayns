@@ -20,8 +20,9 @@
 
 #include "CADiffusionSimulationHandler.h"
 
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/geometry/Model.h>
-#include <brayns/common/material/MaterialManager.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -31,13 +32,13 @@
 namespace
 {
 const float CALCIUM_RADIUS = 0.00194f;
+const size_t CALCIUM_MATERIAL_ID = 0;
 }
 
 namespace brayns
 {
 CADiffusionSimulationHandler::CADiffusionSimulationHandler(
-    MaterialManager& materialManager, const std::string& simulationFolder)
-    : _materialManager(materialManager)
+    const std::string& simulationFolder)
 {
     BRAYNS_DEBUG << "Loading Calcium simulation from " << simulationFolder
                  << std::endl;
@@ -97,16 +98,14 @@ void CADiffusionSimulationHandler::setFrame(Model& model, const size_t frame)
 
     // Load Calcium positions
     _loadCalciumPositions(frame);
-    Material material;
-    material.setDiffuseColor({1.f, 1.f, 1.f});
-    material.setName("Calcium");
-    const size_t materialId = _materialManager.add(material);
+    auto material = model.createMaterial(CALCIUM_MATERIAL_ID, "Calcium");
+    material->setDiffuseColor({1.f, 1.f, 1.f});
     if (!_spheresCreated)
     {
         BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
                     << std::endl;
         for (const auto position : _calciumPositions)
-            model.addSphere(materialId, {position, CALCIUM_RADIUS});
+            model.addSphere(CALCIUM_MATERIAL_ID, {position, CALCIUM_RADIUS});
         _spheresCreated = true;
     }
     else
@@ -114,7 +113,8 @@ void CADiffusionSimulationHandler::setFrame(Model& model, const size_t frame)
         uint64_t i = 0;
         for (const auto position : _calciumPositions)
         {
-            model.setSphere(i, materialId, Sphere(position, CALCIUM_RADIUS));
+            model.setSphere(CALCIUM_MATERIAL_ID, i,
+                            Sphere(position, CALCIUM_RADIUS));
             ++i;
         }
     }

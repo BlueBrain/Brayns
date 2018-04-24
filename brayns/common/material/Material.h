@@ -60,30 +60,19 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
     {TT_REFLECTION, "map_reflection"},
     {TT_REFRACTION, "map_refraction"}};
 
-class TextureDescriptor : public BaseObject
-{
-public:
-    BRAYNS_API TextureDescriptor();
-    BRAYNS_API TextureDescriptor(const TextureType type, const size_t id);
-    BRAYNS_API TextureDescriptor(const TextureDescriptor& rhs);
-    BRAYNS_API TextureDescriptor& operator=(const TextureDescriptor& rhs);
-
-    BRAYNS_API size_t getId() const { return _id; }
-    BRAYNS_API TextureType getType() const { return _type; }
-private:
-    TextureType _type;
-    size_t _id;
-
-    SERIALIZATION_FRIEND(TextureDescriptor)
-};
-typedef std::vector<TextureDescriptor> TextureDescriptors;
+typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
 
 class Material : public BaseObject
 {
 public:
     BRAYNS_API Material();
-    BRAYNS_API Material(const Material& rhs);
-    BRAYNS_API Material& operator=(const Material& rhs);
+    BRAYNS_API Material(Material&& rhs) = default;
+    BRAYNS_API Material& operator=(Material&& rhs) = default;
+
+    /**
+     * Called after material change
+     */
+    BRAYNS_API virtual void commit() = 0;
 
     BRAYNS_API std::string getName() const { return _name; }
     BRAYNS_API void setName(const std::string& value)
@@ -92,9 +81,9 @@ public:
     }
     BRAYNS_API void setDiffuseColor(const Vector3f& value)
     {
-        _updateValue(_color, value);
+        _updateValue(_diffuseColor, value);
     }
-    BRAYNS_API Vector3f& getDiffuseColor() { return _color; }
+    BRAYNS_API Vector3f& getDiffuseColor() { return _diffuseColor; }
     BRAYNS_API void setSpecularColor(const Vector3f& value)
     {
         _updateValue(_specularColor, value);
@@ -136,11 +125,16 @@ public:
     {
         return _textureDescriptors;
     }
-    BRAYNS_API void addTexture(const TextureType& type, const size_t id);
+    BRAYNS_API void setTexture(const std::string& fileName,
+                               const TextureType& type);
+
+    BRAYNS_API Texture2DPtr getTexture(const TextureType& type);
 
 protected:
+    bool _loadTexture(const std::string& fileName);
+
     std::string _name{"undefined"};
-    Vector3f _color{1.f, 1.f, 1.f};
+    Vector3f _diffuseColor{1.f, 1.f, 1.f};
     Vector3f _specularColor{1.f, 1.f, 1.f};
     float _specularExponent{10.f};
     float _reflectionIndex{0.f};
@@ -149,6 +143,7 @@ protected:
     float _emission{0.f};
     float _glossiness{1.f};
     bool _castSimulationData{true};
+    TexturesMap _textures;
     TextureDescriptors _textureDescriptors;
 
     SERIALIZATION_FRIEND(Material)

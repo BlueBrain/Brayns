@@ -195,8 +195,7 @@ export void* uniform ParticleRenderer_create(void* uniform cppE)
 export void ParticleRenderer_set(
     void* uniform _self, const uniform vec3f& bgColor,
     const uniform int& randomNumber, const uniform float& timestamp,
-    const uniform int& spp, void** uniform materials,
-    const uniform int32 numMaterials, uniform float* uniform simulationData,
+    const uniform int& spp, uniform float* uniform simulationData,
     const uniform int64 simulationDataSize,
     uniform vec4f* uniform transferFunction,
     uniform float* uniform transferFunctionEmissionData,
@@ -209,10 +208,6 @@ export void ParticleRenderer_set(
     self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
     self->abstract.spp = spp;
-
-    self->abstract.materials =
-        (const uniform ExtendedOBJMaterial* uniform* uniform)materials;
-    self->abstract.numMaterials = numMaterials;
 
     self->abstract.volumeData = 0;
 

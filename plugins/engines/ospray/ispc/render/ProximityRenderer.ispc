@@ -226,8 +226,7 @@ export void ProximityRenderer_set(
     const uniform bool& detectionOnDifferentMaterial,
     const uniform int& randomNumber, const uniform float& timestamp,
     const uniform int& spp, const uniform bool& electronShadingEnabled,
-    void** uniform lights, uniform int32 numLights, void** uniform materials,
-    uniform int32 numMaterials)
+    void** uniform lights, uniform int32 numLights)
 {
     uniform ProximityRenderer* uniform self =
         (uniform ProximityRenderer * uniform)_self;
@@ -239,9 +238,6 @@ export void ProximityRenderer_set(
     self->abstract.electronShadingEnabled = electronShadingEnabled;
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
-    self->abstract.materials =
-        (const uniform ExtendedOBJMaterial* uniform* uniform)materials;
-    self->abstract.numMaterials = numMaterials;
 
     self->nearColor = nearColor;
     self->farColor = farColor;

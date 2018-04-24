@@ -623,8 +623,7 @@ export void SimulationRenderer_set(
     const uniform bool& shadingEnabled, const uniform int& randomNumber,
     const uniform float& timestamp, const uniform int& spp,
     const uniform bool& electronShadingEnabled, void** uniform lights,
-    const uniform int32 numLights, void** uniform materials,
-    const uniform int32 numMaterials, uniform uint8* uniform volumeData,
+    const uniform int32 numLights, uniform uint8* uniform volumeData,
     const uniform vec3i& volumeDimensions,
     const uniform vec3f& volumeElementSpacing,
     const uniform vec3f& volumeOffset, const uniform float& volumeEpsilon,
@@ -652,10 +651,6 @@ export void SimulationRenderer_set(
 
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
-
-    self->abstract.materials =
-        (const uniform ExtendedOBJMaterial* uniform* uniform)materials;
-    self->abstract.numMaterials = numMaterials;
 
     self->abstract.volumeData = (uniform uint8 * uniform)volumeData;
     self->abstract.volumeDimensions = volumeDimensions;

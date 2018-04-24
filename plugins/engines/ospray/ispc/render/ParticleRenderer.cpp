@@ -45,7 +45,6 @@ void ParticleRenderer::commit()
 
     ispc::ParticleRenderer_set(
         getIE(), (ispc::vec3f&)_bgColor, _randomNumber, _timestamp, _spp,
-        _materialPtr, _materialArray.size(),
         _simulationData ? (float*)_simulationData->data : NULL,
         _simulationDataSize,
         _transferFunctionDiffuseData

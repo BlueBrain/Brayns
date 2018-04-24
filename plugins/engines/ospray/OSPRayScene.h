@@ -29,8 +29,6 @@
 #include <ospray_cpp/Model.h>
 #include <ospray_cpp/Texture2D.h>
 
-#include "OSPRayMaterialManager.h"
-
 namespace brayns
 {
 /**
@@ -52,9 +50,6 @@ public:
 
     /** @copydoc Scene::commitLights */
     void commitLights() final;
-
-    /** @copydoc Scene::commitMaterials */
-    void commitMaterials() final;
 
     /** @copydoc Scene::commitSimulationData */
     void commitSimulationData() final;
@@ -81,12 +76,9 @@ public:
     OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _rootSimulationModel; }
 private:
-    OSPTexture2D _createTexture2D(const std::string& textureName);
-
     OSPModel _getActiveModel();
 
     OSPModel _rootModel{nullptr};
-    std::vector<ModelDescriptor> _ospModelDescriptors;
     OSPModel _rootSimulationModel{nullptr};
 
     std::vector<OSPLight> _ospLights;

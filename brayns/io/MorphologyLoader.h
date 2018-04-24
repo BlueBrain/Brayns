@@ -45,8 +45,7 @@ public:
      * @param scene
      */
     MorphologyLoader(const ApplicationParameters& applicationParameters,
-                     const GeometryParameters& geometryParameters,
-                     const size_t nbMaterials);
+                     const GeometryParameters& geometryParameters);
     ~MorphologyLoader();
 
     /**
@@ -58,8 +57,7 @@ public:
      * @return True if the morphology is successfully loaded, false otherwise
      */
     bool importMorphology(const servus::URI& source, const uint64_t index,
-                          const size_t materialId, Model& model,
-                          MaterialManager& materialManager,
+                          Model& model,
                           const Matrix4f& transformation = Matrix4f());
 
     /**
