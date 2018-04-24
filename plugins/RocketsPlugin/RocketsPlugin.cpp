@@ -59,7 +59,6 @@ const std::string ENDPOINT_PROGRESS = "progress";
 const std::string ENDPOINT_RENDERING_PARAMS = "rendering-parameters";
 const std::string ENDPOINT_SCENE = "scene";
 const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
-const std::string ENDPOINT_MATERIAL_MANAGER = "material-manager";
 const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
 const std::string ENDPOINT_STATISTICS = "statistics";
 const std::string ENDPOINT_STREAM = "stream";
@@ -407,9 +406,6 @@ public:
         _handleGET(ENDPOINT_SCENE, _engine->getScene());
         _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
                    [](Scene& scene) { scene.markModified(); });
-
-        _handle(ENDPOINT_MATERIAL_MANAGER,
-                _engine->getScene().getMaterialManager());
 
         _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
 

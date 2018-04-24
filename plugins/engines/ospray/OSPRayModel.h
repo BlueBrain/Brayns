@@ -21,8 +21,6 @@
 #ifndef OSPRAYGEOMETRYGROUP_H
 #define OSPRAYGEOMETRYGROUP_H
 
-#include "OSPRayMaterialManager.h"
-
 #include <brayns/common/geometry/Model.h>
 #include <brayns/parameters/ParametersManager.h>
 
@@ -33,7 +31,7 @@ namespace brayns
 class OSPRayModel : public Model
 {
 public:
-    OSPRayModel(const std::string& name, MaterialManager& materialManager);
+    OSPRayModel() = default;
     ~OSPRayModel() final;
 
     void setMemoryFlags(const size_t memoryManagementFlags);
@@ -49,6 +47,9 @@ public:
         ModelTransformation& transformation);
     OSPGeometry getSimulationModelInstance(ModelTransformation& transformation);
 
+    MaterialPtr createMaterial(const size_t materialId,
+                               const std::string& name) final;
+
 private:
     osp::affine3f _groupTransformationToAffine3f(
         ModelTransformation& transformation);
@@ -58,7 +59,7 @@ private:
     void _commitCones(const size_t materialId);
     void _commitMeshes(const size_t materialId);
     OSPModel _model{nullptr};
-    std::vector<OSPGeometry> _instances;
+    std::map<size_t, OSPGeometry> _instances;
 
     // Bounding box
     void _buildBoundingBox();

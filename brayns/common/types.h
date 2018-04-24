@@ -115,6 +115,10 @@ typedef std::vector<ModelTransformation> ModelTransformations;
 struct ModelDescriptor;
 typedef std::vector<ModelDescriptor> ModelDescriptors;
 
+class Material;
+typedef std::shared_ptr<Material> MaterialPtr;
+typedef std::map<size_t, MaterialPtr> MaterialMap;
+
 struct Sphere;
 typedef std::vector<Sphere> Spheres;
 typedef std::map<size_t, Spheres> SpheresMap;
@@ -130,17 +134,11 @@ typedef std::map<size_t, Cones> ConesMap;
 struct TrianglesMesh;
 typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 
-class MaterialManager;
-typedef std::shared_ptr<MaterialManager> MaterialManagerPtr;
-
-class Material;
-typedef std::vector<Material> Materials;
-
 class TextureDescriptor;
 
 class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;
-typedef std::map<size_t, Texture2DPtr> TexturesMap;
+typedef std::map<std::string, Texture2DPtr> TexturesMap;
 
 class Light;
 typedef std::shared_ptr<Light> LightPtr;

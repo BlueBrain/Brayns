@@ -21,7 +21,6 @@
 #ifndef PROTEINLOADER_H
 #define PROTEINLOADER_H
 
-#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <string>
@@ -45,8 +44,7 @@ public:
      * @return true if PDB file was successufully loaded, false otherwise
      */
     bool importPDBFile(const std::string& filename, const Vector3f& position,
-                       const size_t proteinIndex, Model& model,
-                       MaterialManager& materialManager);
+                       const size_t proteinIndex, Model& model);
 
 private:
     const GeometryParameters& _geometryParameters;

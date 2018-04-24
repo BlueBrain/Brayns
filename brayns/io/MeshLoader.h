@@ -48,24 +48,12 @@ public:
      * @param group Geometry group holding the meshes
      * @param transformation Position, orientation and scale to apply to the
      *        mesh
-     * @param defaultMaterial Default material for the whole mesh. If set to
-     *        NO_MATERIAL, materials from the mesh file are used. Otherwise,
-     *        all meshes are forced to that specific material.
      * @return true if the file was successfully imported. False otherwise.
      */
     bool importMeshFromFile(const std::string& fileName,
-                            const std::string& meshName, Model& model,
-                            MaterialManager& materialManager,
-                            const Matrix4f& transformation,
-                            const size_t defaultMaterial);
-
-    /** Exports meshes to a given file
-     *
-     * @param filename destination file name
-     * @param scene Scene holding the meshes
-     */
-    bool exportMeshToFile(const std::string& filename, Model& model,
-                          MaterialManager& materialManager) const;
+                            const std::string& meshName,
+                            const size_t materialId, Model& model,
+                            const Matrix4f& transformation);
 
     /**
      * @brief Clear all internal buffers
@@ -83,16 +71,11 @@ public:
 
 private:
 #if (BRAYNS_USE_ASSIMP)
-    size_t _createMaterials(const std::string& meshName,
-                            MaterialManager& materialManager,
-                            const aiScene* aiScene, const std::string& folder);
+    void _createMaterials(const std::string& meshName, Model& model,
+                          const aiScene* aiScene, const std::string& folder);
 #endif
 
-    size_t _getMaterialId(const size_t materialId,
-                          const size_t defaultMaterial = NO_MATERIAL);
-    std::map<size_t, size_t> _meshIndex;
     const GeometryParameters& _geometryParameters;
-    size_t _materialOffset;
 };
 }
 

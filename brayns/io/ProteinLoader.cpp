@@ -20,10 +20,10 @@
 
 #include "ProteinLoader.h"
 
+#include <brayns/common/engine/Engine.h>
 #include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
-#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 
@@ -314,8 +314,7 @@ ProteinLoader::ProteinLoader(const GeometryParameters& geometryParameters)
 
 bool ProteinLoader::importPDBFile(const std::string& filename,
                                   const Vector3f& position,
-                                  const size_t proteinIndex, Model& model,
-                                  MaterialManager& materialManager)
+                                  const size_t proteinIndex, Model& model)
 {
     std::map<size_t, Spheres> spheres;
 
@@ -449,17 +448,16 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
         file.close();
 
         // Add materials and spheres
+        size_t i = 0;
         for (const auto& spheresPerMaterial : spheres)
         {
-            auto materialId = spheresPerMaterial.first;
-            Material material;
-            material.setName(colorMap[materialId].symbol);
-            material.setDiffuseColor(Vector3f(colorMap[materialId].R / 255.f,
-                                              colorMap[materialId].G / 255.f,
-                                              colorMap[materialId].B / 255.f));
-            materialId = materialManager.add(material);
+            auto material = model.createMaterial(i, colorMap[i].symbol);
+            material->setDiffuseColor({colorMap[i].R / 255.f,
+                                       colorMap[i].G / 255.f,
+                                       colorMap[i].B / 255.f});
             for (const auto& sphere : spheresPerMaterial.second)
-                model.addSphere(materialId, sphere);
+                model.addSphere(i, sphere);
+            ++i;
         }
     }
     return true;

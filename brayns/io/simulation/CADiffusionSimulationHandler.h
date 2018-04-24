@@ -41,8 +41,7 @@ public:
      * @param simulationFolder Folder containing files with the CA atom
      *        positions. Files must have a .dat extension.
      */
-    CADiffusionSimulationHandler(MaterialManager& materialManager,
-                                 const std::string& simulationFolder);
+    CADiffusionSimulationHandler(const std::string& simulationFolder);
 
     /**
      * @brief setFrame Sets the frame to load
@@ -60,7 +59,6 @@ public:
 private:
     bool _loadCalciumPositions(const size_t frame);
 
-    MaterialManager& _materialManager;
     std::map<size_t, std::string> _simulationFiles;
     Vector3fs _calciumPositions;
     size_t _currentFrame{std::numeric_limits<size_t>::max()};

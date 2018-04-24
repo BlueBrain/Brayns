@@ -239,17 +239,11 @@ inline void init(brayns::Boxf* b, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::TextureDescriptor* t, ObjectHandler* h)
-{
-    h->add_property("type", &t->_type, Flags::Optional);
-    h->add_property("id", &t->_id, Flags::Optional);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
 inline void init(brayns::Material* m, ObjectHandler* h)
 {
     h->add_property("name", &m->_name, Flags::Optional);
-    h->add_property("diffuse_color", Vector3fArray(m->_color), Flags::Optional);
+    h->add_property("diffuse_color", Vector3fArray(m->_diffuseColor),
+                    Flags::Optional);
     h->add_property("specular_color", Vector3fArray(m->_specularColor),
                     Flags::Optional);
     h->add_property("specular_exponent", &m->_specularExponent,
@@ -261,7 +255,6 @@ inline void init(brayns::Material* m, ObjectHandler* h)
     h->add_property("glossiness", &m->_glossiness, Flags::Optional);
     h->add_property("cast_simulation_data", &m->_castSimulationData,
                     Flags::Optional);
-    h->add_property("textures", &m->getTextureDescriptors());
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -286,15 +279,9 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
 
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
-    s->getBounds();
-    h->add_property("bounds", &s->_bounds, Flags::IgnoreRead | Flags::Optional);
-    h->add_property("models", &s->getModelDescriptors());
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
-inline void init(brayns::MaterialManager* m, ObjectHandler* h)
-{
-    h->add_property("materials", &m->getMaterials());
+    auto bounds = s->getBounds();
+    h->add_property("bounds", &bounds, Flags::IgnoreRead | Flags::Optional);
+    h->add_property("models", &s->getModelDescriptors(), Flags::IgnoreRead);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

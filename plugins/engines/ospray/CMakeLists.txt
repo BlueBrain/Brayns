@@ -36,7 +36,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/render/ProximityRenderer.cpp
   ispc/render/SimulationRenderer.cpp
   ispc/render/ParticleRenderer.cpp
-  OSPRayMaterialManager.cpp
+  OSPRayMaterial.cpp
   OSPRayEngine.cpp
   OSPRayModel.cpp
   OSPRayScene.cpp
@@ -59,7 +59,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   OSPRayEngine.h
   OSPRayScene.h
   OSPRayModel.h
-  OSPRayMaterialManager.h
+  OSPRayMaterial.h
   OSPRayRenderer.h
   OSPRayFrameBuffer.h
   OSPRayCamera.h
@@ -67,7 +67,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
 
 set_source_files_properties(
     OSPRayScene.cpp
-    OSPRayMaterialManager.cpp
+    OSPRayMaterial.cpp
     PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
 
 set(BRAYNSOSPRAYENGINEPLUGIN_LINK_LIBRARIES

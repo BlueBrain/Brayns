@@ -81,8 +81,7 @@ bool ImageManager::exportFrameBufferToFile(
 #endif
 }
 
-bool ImageManager::importTextureFromFile(
-    TexturesMap& textures BRAYNS_UNUSED, const size_t id BRAYNS_UNUSED,
+Texture2DPtr ImageManager::importTextureFromFile(
     const std::string& filename BRAYNS_UNUSED)
 {
 #if (BRAYNS_USE_MAGICKPP)
@@ -105,25 +104,23 @@ bool ImageManager::importTextureFromFile(
                      << texture->getHeight() << "x" << texture->getNbChannels()
                      << "x" << texture->getDepth()
                      << " added to the texture cache" << std::endl;
-        textures[id] = texture;
+        return texture;
     }
     catch (Magick::Warning& warning)
     {
         // Handle any other Magick++ warning.
         BRAYNS_WARN << warning.what() << std::endl;
-        return false;
     }
     catch (Magick::ErrorFileOpen& error)
     {
         // Process Magick++ file open error
         BRAYNS_ERROR << error.what() << std::endl;
-        return false;
     }
-    return true;
+    return nullptr;
 #else
     BRAYNS_DEBUG << "ImageMagick is required to load images from file"
                  << std::endl;
-    return false;
+    return nullptr;
 #endif
 }
 }

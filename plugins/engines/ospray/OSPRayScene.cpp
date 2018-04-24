@@ -42,9 +42,6 @@ OSPRayScene::OSPRayScene(Renderers renderers,
     : Scene(renderers, parametersManager)
     , _memoryManagementFlags(memoryManagementFlags)
 {
-    _materialManager =
-        std::make_shared<OSPRayMaterialManager>(_parametersManager,
-                                                memoryManagementFlags);
 }
 
 OSPRayScene::~OSPRayScene()
@@ -96,12 +93,13 @@ void OSPRayScene::commit()
         ospRelease(_rootSimulationModel);
     _rootSimulationModel = nullptr;
 
-    for (size_t g = 0; g < _modelDescriptors.size(); ++g)
+    for (auto& modelDescriptor : _modelDescriptors)
     {
-        auto& modelDescriptor = _modelDescriptors[g];
         if (modelDescriptor.enabled())
         {
-            auto impl = std::static_pointer_cast<OSPRayModel>(_models[g]);
+            auto impl = std::static_pointer_cast<OSPRayModel>(
+                modelDescriptor.getModel());
+            assert(impl);
             impl->commit();
 
             for (size_t i = 0; i < modelDescriptor.transformations().size();
@@ -197,21 +195,6 @@ void OSPRayScene::commitLights()
     }
 }
 
-void OSPRayScene::commitMaterials()
-{
-    const auto impl =
-        std::static_pointer_cast<OSPRayMaterialManager>(_materialManager);
-    auto materialData = impl->getOSPMaterialData();
-    if (materialData)
-        for (auto renderer : _renderers)
-        {
-            auto rendererImpl =
-                std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
-            ospSetData(rendererImpl, "materials", materialData);
-            ospCommit(rendererImpl);
-        }
-}
-
 void OSPRayScene::commitTransferFunctionData()
 {
     if (!_transferFunction.isModified())
@@ -268,7 +251,6 @@ void OSPRayScene::commitVolumeData()
     const auto volumeHandler = getVolumeHandler();
     if (!volumeHandler)
         return;
-
     const auto& vp = _parametersManager.getVolumeParameters();
     if (vp.isModified())
     {
@@ -363,15 +345,13 @@ bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
 ModelPtr OSPRayScene::addModel(const std::string& name,
                                const ModelMetadata& metadata)
 {
-    ModelDescriptor modelDescriptor(name, metadata);
-    _modelDescriptors.push_back(modelDescriptor);
-    _models.push_back(std::make_shared<OSPRayModel>(name, *_materialManager));
-    return _models[_models.size() - 1];
+    _modelDescriptors.push_back(
+        {name, metadata, std::make_shared<OSPRayModel>()});
+    return _modelDescriptors[_modelDescriptors.size() - 1].getModel();
 }
 
 void OSPRayScene::removeModel(const size_t index)
 {
     _modelDescriptors.erase(_modelDescriptors.begin() + index);
-    _models.erase(_models.begin() + index);
 }
 }

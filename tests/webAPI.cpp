@@ -64,7 +64,6 @@ BOOST_AUTO_TEST_CASE(snapshot)
     auto image =
         makeRequest<brayns::SnapshotParams,
                     brayns::ImageGenerator::ImageBase64>("snapshot", params);
-    std::cout << image.data << std::endl;
     BOOST_CHECK_EQUAL(image.data,
                       "/9j/4AAQSkZJRgABAQAAAQABAAD/"
                       "2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4n"

@@ -74,11 +74,6 @@ void Engine::setDefaultEpsilon()
     }
 }
 
-void Engine::initializeMaterials(const MaterialsColorMap colorMap)
-{
-    _scene->setMaterialsColorMap(colorMap);
-}
-
 void Engine::commit()
 {
     _scene->commitVolumeData();

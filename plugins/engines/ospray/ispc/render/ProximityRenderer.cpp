@@ -48,8 +48,7 @@ void ProximityRenderer::commit()
                                 (ispc::vec3f&)_farColor, _detectionDistance,
                                 _detectionOnDifferentMaterial, _randomNumber,
                                 _timestamp, _spp, _electronShadingEnabled,
-                                _lightPtr, _lightArray.size(), _materialPtr,
-                                _materialArray.size());
+                                _lightPtr, _lightArray.size());
 }
 
 ProximityRenderer::ProximityRenderer()

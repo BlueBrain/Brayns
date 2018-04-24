@@ -43,7 +43,6 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
     ModelMetadata metadata = {{"molecular-system-config",
                                _geometryParameters.getMolecularSystemConfig()}};
     auto model = scene.addModel("MolecularSystem", metadata);
-    auto& materialManager = scene.getMaterialManager();
     _nbProteins = 0;
     if (!_loadConfiguration())
         return false;
@@ -52,14 +51,13 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
     if (!_loadPositions())
         return false;
 
-    if (!_createScene(*model, meshLoader, materialManager))
+    if (!_createScene(*model, meshLoader))
         return false;
 
     if (!_calciumSimulationFolder.empty())
     {
         CADiffusionSimulationHandlerPtr handler(
-            new CADiffusionSimulationHandler(scene.getMaterialManager(),
-                                             _calciumSimulationFolder));
+            new CADiffusionSimulationHandler(_calciumSimulationFolder));
         handler->setFrame(*model, 0);
         scene.setCADiffusionSimulationHandler(handler);
     }
@@ -70,8 +68,7 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
     return true;
 }
 
-bool MolecularSystemReader::_createScene(Model& model, MeshLoader& meshLoader,
-                                         MaterialManager& materialManager)
+bool MolecularSystemReader::_createScene(Model& model, MeshLoader& meshLoader)
 {
     uint64_t proteinCount = 0;
     for (const auto& proteinPosition : _proteinPositions)
@@ -84,8 +81,8 @@ bool MolecularSystemReader::_createScene(Model& model, MeshLoader& meshLoader,
                 const auto pdbFilename =
                     _proteinFolder + '/' + protein->second + ".pdb";
                 ProteinLoader loader(_geometryParameters);
-                loader.importPDBFile(pdbFilename, position, proteinCount, model,
-                                     materialManager);
+                loader.importPDBFile(pdbFilename, position, proteinCount,
+                                     model);
                 ++proteinCount;
             }
 
@@ -95,20 +92,19 @@ bool MolecularSystemReader::_createScene(Model& model, MeshLoader& meshLoader,
             {
                 const Vector3f scale = {1.f, 1.f, 1.f};
                 const Matrix4f transformation(position, scale);
-                const auto& materials = materialManager.getMaterials();
-                const size_t material = _geometryParameters.getColorScheme() ==
-                                                ColorScheme::protein_by_id
-                                            ? proteinCount % materials.size()
-                                            : NO_MATERIAL;
+                const size_t materialId =
+                    _geometryParameters.getColorScheme() ==
+                            ColorScheme::protein_by_id
+                        ? proteinCount
+                        : NO_MATERIAL;
 
                 // Scale mesh to match PDB units. PDB are in angstrom, and
                 // positions are in micrometers
                 const auto fileName =
                     _meshFolder + '/' + protein->second + ".obj";
                 const auto meshName = getNameFromFullPath(fileName);
-                meshLoader.importMeshFromFile(fileName, meshName, model,
-                                              materialManager, transformation,
-                                              material);
+                meshLoader.importMeshFromFile(fileName, meshName, materialId,
+                                              model, transformation);
 
                 if (_proteinFolder.empty())
                     ++proteinCount;

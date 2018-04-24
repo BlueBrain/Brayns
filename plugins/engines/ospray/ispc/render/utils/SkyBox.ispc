@@ -30,6 +30,10 @@ vec4f skyboxMapping(const uniform Renderer* uniform renderer, Ray& ray,
                         materials)
 {
     varying vec4f result = make_vec4f(renderer->bgColor);
+
+    // TODO:
+    return result;
+
     if (nbMaterials <= MATERIAL_SKYBOX)
         return result;
 

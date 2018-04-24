@@ -23,7 +23,6 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/material/MaterialManager.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
@@ -87,13 +86,7 @@ public:
     /**
         Returns the bounding box of the scene
     */
-    Boxf& getBounds();
-    /**getGeometryGroups
-        Build an environment in addition to the loaded data, and according to
-        the geometry parameters (command line parameter --scene-environment).
-    */
-    BRAYNS_API void buildEnvironment();
-
+    Boxf getBounds();
     /**
         Attaches a light source to the scene
         @param light Object representing the light source
@@ -129,10 +122,6 @@ public:
       */
     BRAYNS_API virtual void removeModel(const size_t index) = 0;
 
-    /**
-        @return geometry groups
-      */
-    BRAYNS_API Models& getModels() { return _models; }
     /**registry
         Builds a default scene made of a Cornell box, a reflective cube, and
         a transparent sphere
@@ -231,41 +220,23 @@ public:
      */
     virtual void reset();
 
-    /**
-        Commit materials to renderers
-    */
-    BRAYNS_API virtual void commitMaterials() = 0;
-
-    /**
-        Returns material manager of the scene
-    */
-    BRAYNS_API MaterialManager& getMaterialManager()
-    {
-        return *_materialManager;
-    }
-    /**
-        Sets the materials handled by the scene, and available to the
-        scene geometry
-        @param colorMap Specifies the algorithm that is used to create
-               the materials. For instance MT_RANDOM creates materials with
-               random colors, transparency, reflection, and light emission
-    */
-    BRAYNS_API void setMaterialsColorMap(
-        MaterialsColorMap colorMap = MaterialsColorMap::none);
-
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
     ModelDescriptors& getModelDescriptors() { return _modelDescriptors; }
-protected:
-    void _processVolumeAABBGeometry();
+    /**
+     * @brief initializeMaterials Initializes materials for all models in the
+     * scene
+     * @param colorMap Color map to use for every individual model
+     */
+    void setMaterialsColorMap(
+        MaterialsColorMap colorMap = MaterialsColorMap::none);
 
+protected:
     // Managers
     Renderers _renderers;
     ParametersManager& _parametersManager;
-    MaterialManagerPtr _materialManager{nullptr};
 
     // Model
-    Models _models;
     ModelDescriptors _modelDescriptors;
     bool _geometryGroupsDirty{true};
     Lights _lights;
@@ -279,7 +250,6 @@ protected:
     CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler{nullptr};
 
     size_t _sizeInBytes{0};
-    Boxf _bounds;
 
 private:
     void _markGeometryDirty();
