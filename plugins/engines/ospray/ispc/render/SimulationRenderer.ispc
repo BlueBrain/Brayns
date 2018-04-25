@@ -312,8 +312,7 @@ inline void processBackgroundColor(varying ScreenSample& sample, Ray& ray,
 {
     // No intersection. Return volume contribution + skybox color
     const vec4f bgColor = skyboxMapping((Renderer*)attributes.self, ray,
-                                        attributes.self->abstract.numMaterials,
-                                        attributes.self->abstract.materials);
+                                        attributes.self->abstract.bgMaterial);
 
     attributes.shadingContribution = make_vec3f(bgColor);
 }
@@ -616,7 +615,7 @@ export void* uniform SimulationRenderer_create(void* uniform cppE)
 
 export void SimulationRenderer_set(
     void* uniform _self, void* uniform simulationModel,
-    const uniform vec3f& bgColor, const uniform float& shadows,
+    void* uniform bgMaterial, const uniform float& shadows,
     const uniform float& softShadows,
     const uniform float& ambientOcclusionStrength,
     const uniform float& ambientOcclusionDistance,
@@ -638,7 +637,9 @@ export void SimulationRenderer_set(
     uniform SimulationRenderer* uniform self =
         (uniform SimulationRenderer * uniform)_self;
 
-    self->abstract.bgColor = bgColor;
+    self->abstract.bgMaterial =
+        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+
     self->abstract.shadows = shadows;
     self->abstract.softShadows = softShadows;
     self->abstract.ambientOcclusionStrength = ambientOcclusionStrength;

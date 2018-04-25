@@ -23,7 +23,6 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/material/Texture2D.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
@@ -231,10 +230,11 @@ public:
     void setMaterialsColorMap(
         MaterialsColorMap colorMap = MaterialsColorMap::none);
 
+    MaterialPtr getBackgroundMaterial() { return _backgroundMaterial; }
 protected:
-    // Managers
     Renderers _renderers;
     ParametersManager& _parametersManager;
+    MaterialPtr _backgroundMaterial;
 
     // Model
     ModelDescriptors _modelDescriptors;

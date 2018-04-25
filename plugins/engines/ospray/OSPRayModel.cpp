@@ -113,6 +113,8 @@ void OSPRayModel::_buildBoundingBox()
     auto material = createMaterial(BOUNDINGBOX_MATERIAL_ID, "bounding_box");
     material->setDiffuseColor({1, 1, 1});
     material->setEmission(1.f);
+    material->setCastSimulationData(false);
+    material->commit();
     const Vector3f s = _bounds.getSize() / 2.f;
     const Vector3f c = _bounds.getCenter();
     const float radius = s.length() / 200.f;

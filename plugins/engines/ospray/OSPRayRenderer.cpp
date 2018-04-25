@@ -22,6 +22,7 @@
 
 #include "OSPRayCamera.h"
 #include "OSPRayFrameBuffer.h"
+#include "OSPRayMaterial.h"
 #include "OSPRayRenderer.h"
 #include "OSPRayScene.h"
 
@@ -63,8 +64,6 @@ void OSPRayRenderer::commit()
 
     ShadingType mt = rp.getShading();
 
-    Vector3f color = rp.getBackgroundColor();
-    ospSet3f(_renderer, "bgColor", color.x(), color.y(), color.z());
     ospSet1i(_renderer, "shadowsEnabled", rp.getShadows() > 0.f);
     ospSet1f(_renderer, "shadows", rp.getShadows());
     ospSet1f(_renderer, "softShadows", rp.getSoftShadows());
@@ -82,18 +81,25 @@ void OSPRayRenderer::commit()
     ospSet1f(_renderer, "detectionDistance", rp.getDetectionDistance());
     ospSet1i(_renderer, "detectionOnDifferentMaterial",
              rp.getDetectionOnDifferentMaterial());
-    color = rp.getDetectionNearColor();
+    auto color = rp.getDetectionNearColor();
     ospSet3f(_renderer, "detectionNearColor", color.x(), color.y(), color.z());
     color = rp.getDetectionFarColor();
     ospSet3f(_renderer, "detectionFarColor", color.x(), color.y(), color.z());
     ospSet1i(_renderer, "volumeSamplesPerRay", rp.getSamplesPerRay());
 
-    OSPRayScene* osprayScene = static_cast<OSPRayScene*>(_scene.get());
-    assert(osprayScene);
+    auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
+    auto bgMaterial = std::static_pointer_cast<OSPRayMaterial>(
+        scene->getBackgroundMaterial());
+    if (bgMaterial)
+    {
+        bgMaterial->setDiffuseColor(rp.getBackgroundColor());
+        bgMaterial->commit();
+        auto ospBgMaterial = bgMaterial->getOSPMaterial();
+        ospSetObject(_renderer, "bgMaterial", ospBgMaterial);
+    }
 
-    ospSetObject(_renderer, "world", osprayScene->getModel());
-    ospSetObject(_renderer, "simulationModel",
-                 osprayScene->simulationModelImpl());
+    ospSetObject(_renderer, "world", scene->getModel());
+    ospSetObject(_renderer, "simulationModel", scene->simulationModelImpl());
     ospCommit(_renderer);
 }
 

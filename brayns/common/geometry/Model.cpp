@@ -148,6 +148,7 @@ void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
         material.second->setSpecularColor(Vector3f(0.f));
         material.second->setOpacity(1.f);
         material.second->setReflectionIndex(0.f);
+        material.second->setEmission(0.f);
 
         switch (colorMap)
         {
@@ -191,25 +192,53 @@ void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
                 Vector3f(float(rand() % 255) / 255.f,
                          float(rand() % 255) / 255.f,
                          float(rand() % 255) / 255.f));
-            switch (rand() % 4)
+            switch (rand() % 10)
             {
             case 0:
-                // Transparent
+                // Transparency only
                 material.second->setOpacity(float(std::rand() % 100) / 100.f);
-                material.second->setRefractionIndex(0.98f);
-                material.second->setSpecularColor(
-                    Vector3f(0.01f, 0.01f, 0.01f));
+                material.second->setRefractionIndex(1.2f);
+                material.second->setSpecularColor(Vector3f(1.f));
                 material.second->setSpecularExponent(10.f);
+                break;
             case 1:
-                // Light emmitter
-                material.second->setEmission(1.f);
+                // Light emission
+                material.second->setEmission(std::rand() % 20);
+                break;
             case 2:
-                // Reflector
+                // Reflection only
                 material.second->setReflectionIndex(float(std::rand() % 100) /
                                                     100.f);
-                material.second->setSpecularColor(
-                    Vector3f(0.01f, 0.01f, 0.01f));
+                material.second->setSpecularColor(Vector3f(1.f));
                 material.second->setSpecularExponent(10.f);
+                break;
+            case 3:
+                // Reflection and refraction
+                material.second->setReflectionIndex(float(std::rand() % 100) /
+                                                    100.f);
+                material.second->setOpacity(float(std::rand() % 100) / 100.f);
+                material.second->setRefractionIndex(1.2f);
+                material.second->setSpecularColor(Vector3f(1.f));
+                material.second->setSpecularExponent(10.f);
+                break;
+            case 4:
+                // Reflection and glossiness
+                material.second->setReflectionIndex(float(std::rand() % 100) /
+                                                    100.f);
+                material.second->setSpecularColor(Vector3f(1.f));
+                material.second->setSpecularExponent(10.f);
+                material.second->setGlossiness(float(std::rand() % 100) /
+                                               100.f);
+                break;
+            case 5:
+                // Transparency and glossiness
+                material.second->setOpacity(float(std::rand() % 100) / 100.f);
+                material.second->setRefractionIndex(1.2f);
+                material.second->setSpecularColor(Vector3f(1.f));
+                material.second->setSpecularExponent(10.f);
+                material.second->setGlossiness(float(std::rand() % 100) /
+                                               100.f);
+                break;
             }
             break;
         case MaterialsColorMap::shades_of_grey:

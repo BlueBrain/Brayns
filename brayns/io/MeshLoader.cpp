@@ -20,8 +20,6 @@
 
 #include "MeshLoader.h"
 
-#define BRAYNS_USE_ASSIMP 1 // !!!!!!!!!! TO REMOVE !!!!!!!!!!!!!
-
 #if (BRAYNS_USE_ASSIMP)
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp> // must come before Exporter.hpp

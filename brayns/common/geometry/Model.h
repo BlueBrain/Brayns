@@ -87,7 +87,7 @@ private:
     ModelMetadata _metadata;
     bool _enabled{true};
     bool _visible{true};
-    bool _boundingBox{true};
+    bool _boundingBox{false};
     ModelTransformations _transformations;
     ModelPtr _model{nullptr};
 

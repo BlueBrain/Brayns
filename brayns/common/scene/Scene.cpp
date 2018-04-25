@@ -660,6 +660,7 @@ void Scene::buildDefault()
         }
         trianglesMesh.indices.push_back(Vector3ui(0, 1, 2));
         trianglesMesh.indices.push_back(Vector3ui(3, 4, 5));
+        model->getBounds().merge(positions[i]);
         ++materialId;
     }
 

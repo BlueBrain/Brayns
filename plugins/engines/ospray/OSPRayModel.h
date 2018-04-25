@@ -37,7 +37,6 @@ public:
     void setMemoryFlags(const size_t memoryManagementFlags);
 
     void unload() final;
-    void commitMaterials(const uint32_t flags);
     void commit();
     OSPModel getModel() { return _model; }
     size_t getNbInstances() const { return _instances.size(); };
