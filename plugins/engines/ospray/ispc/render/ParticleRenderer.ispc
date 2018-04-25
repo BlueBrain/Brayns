@@ -74,8 +74,7 @@ inline vec3f ParticleRenderer_shadeRay(
     varying float opacity = 0.f;
 
     varying vec3f intersectionColor = make_vec3f(
-        skyboxMapping((Renderer*)self, ray, self->abstract.numMaterials,
-                      self->abstract.materials));
+        skyboxMapping((Renderer*)self, ray, self->abstract.bgMaterial));
 
     while (path_opacity < 1.f && depth < NB_MAX_REBOUNDS)
     {
@@ -193,7 +192,7 @@ export void* uniform ParticleRenderer_create(void* uniform cppE)
 }
 
 export void ParticleRenderer_set(
-    void* uniform _self, const uniform vec3f& bgColor,
+    void* uniform _self, void* uniform bgMaterial,
     const uniform int& randomNumber, const uniform float& timestamp,
     const uniform int& spp, uniform float* uniform simulationData,
     const uniform int64 simulationDataSize,
@@ -204,7 +203,9 @@ export void ParticleRenderer_set(
     uniform ParticleRenderer* uniform self =
         (uniform ParticleRenderer * uniform)_self;
 
-    self->abstract.bgColor = bgColor;
+    self->abstract.bgMaterial =
+        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+
     self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
     self->abstract.spp = spp;

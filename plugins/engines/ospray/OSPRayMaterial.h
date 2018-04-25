@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,18 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef OSPRAYMATERIAL_H
+#define OSPRAYMATERIAL_H
 
-#include <ospray/SDK/math/vec.ih>
-#include <plugins/engines/ospray/ispc/render/ExtendedOBJMaterial.ih>
+#include <brayns/common/material/Material.h>
+#include <ospray_cpp/Data.h>
 
-/**
-    Returns the color of the skybox for a given ray. If no material is defined
-   for the skybox, the background color of the renderer is returned.
-    @param renderer Pointer to current renderer
-    @param ray Current ray
-    @param bgMaterial Background material
-    @return The RGBA color of the skybox
-*/
-vec4f skyboxMapping(const uniform Renderer* uniform renderer, Ray& ray,
-                    const uniform ExtendedOBJMaterial* uniform bgMaterial);
+namespace brayns
+{
+class OSPRayMaterial : public Material
+{
+public:
+    OSPRayMaterial();
+    ~OSPRayMaterial();
+
+    void commit() final;
+
+    OSPMaterial getOSPMaterial() { return _ospMaterial; }
+private:
+    OSPTexture2D _createOSPTexture2D(Texture2DPtr texture);
+    OSPMaterial _ospMaterial;
+    std::map<TextureType, OSPTexture2D> _ospTextures;
+};
+}
+
+#endif // OSPRAYMATERIAL_H

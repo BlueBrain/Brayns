@@ -27,7 +27,7 @@ inline bool launchRandomRay(
     varying float& distanceToIntersection, varying vec3f& randomDirection)
 {
     randomDirection = getRandomVector(sample, normal, self->randomNumber);
-    backgroundColor = self->bgColor;
+    backgroundColor = make_vec3f(0.f);
 
     if (dot(randomDirection, normal) < 0.f)
         // Invert direction of random ray direction is opposite to surface
@@ -46,9 +46,8 @@ inline bool launchRandomRay(
     if (randomRay.geomID < 0)
     {
         // No intersection
-        backgroundColor =
-            make_vec3f(skyboxMapping((Renderer*)self, randomRay,
-                                     self->numMaterials, self->materials));
+        backgroundColor = make_vec3f(
+            skyboxMapping((Renderer*)self, randomRay, self->bgMaterial));
         return false;
     }
 

@@ -19,6 +19,7 @@
  */
 
 #include "OSPRayScene.h"
+#include "OSPRayMaterial.h"
 #include "OSPRayModel.h"
 #include "OSPRayRenderer.h"
 
@@ -42,6 +43,7 @@ OSPRayScene::OSPRayScene(Renderers renderers,
     : Scene(renderers, parametersManager)
     , _memoryManagementFlags(memoryManagementFlags)
 {
+    _backgroundMaterial = std::make_shared<OSPRayMaterial>();
 }
 
 OSPRayScene::~OSPRayScene()

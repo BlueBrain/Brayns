@@ -48,9 +48,8 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     if (ray.geomID < 0)
     {
         // No intersection. Return skybox color
-        color = make_vec3f(skyboxMapping((Renderer*)self, ray,
-                                         self->abstract.numMaterials,
-                                         self->abstract.materials));
+        color = make_vec3f(
+            skyboxMapping((Renderer*)self, ray, self->abstract.bgMaterial));
         sample.alpha = 0.f;
         return color;
     }
@@ -102,7 +101,7 @@ export void* uniform BasicRenderer_create(void* uniform cppE)
     return self;
 }
 
-export void BasicRenderer_set(void* uniform _self, const uniform vec3f& bgColor,
+export void BasicRenderer_set(void* uniform _self, void* uniform bgMaterial,
                               const uniform float& timestamp,
                               const uniform int& spp, void** uniform lights,
                               uniform int32 numLights)
@@ -110,7 +109,8 @@ export void BasicRenderer_set(void* uniform _self, const uniform vec3f& bgColor,
     uniform BasicRenderer* uniform self =
         (uniform BasicRenderer * uniform)_self;
 
-    self->abstract.bgColor = bgColor;
+    self->abstract.bgMaterial =
+        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
     self->abstract.timestamp = timestamp;
     self->abstract.spp = spp;
 

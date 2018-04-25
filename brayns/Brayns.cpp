@@ -59,7 +59,6 @@
 #ifdef BRAYNS_USE_BRION
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
-#include <brayns/io/SceneLoader.h>
 #include <servus/uri.h>
 #endif
 
@@ -472,23 +471,15 @@ private:
             }
         };
 
-#if 0 // TODO
-        // set environment map if applicable
-        const std::string& environmentMap =
+        const auto& environmentMap =
             _parametersManager.getSceneParameters().getEnvironmentMap();
         if (!environmentMap.empty())
         {
-            const size_t materialId = 0;
-            auto textureId =
-                scene.getMaterialManager().addTexture(environmentMap);
-            auto& material = scene.getMaterialManager().get(materialId);
-            material.addTexture(TT_DIFFUSE, textureId);
-            material.setName("skybox");
+            auto bgMaterial = scene.getBackgroundMaterial();
+            bgMaterial->setTexture(environmentMap, TT_DIFFUSE);
         }
-#endif
 
-        const std::string& colorMapFilename =
-            sceneParameters.getColorMapFilename();
+        const auto& colorMapFilename = sceneParameters.getColorMapFilename();
         if (!colorMapFilename.empty())
         {
             TransferFunctionLoader transferFunctionLoader;
@@ -825,8 +816,8 @@ private:
             '3', "Set gradient materials",
             std::bind(&Brayns::Impl::_gradientMaterials, this));
         _keyboardHandler.registerKeyboardShortcut(
-            '4', "Set pastel materials",
-            std::bind(&Brayns::Impl::_pastelMaterials, this));
+            '4', "Set random materials",
+            std::bind(&Brayns::Impl::_randomMaterials, this));
         _keyboardHandler.registerKeyboardShortcut(
             '5', "Scientific visualization renderer",
             std::bind(&Brayns::Impl::_scivisRenderer, this));
@@ -1144,16 +1135,19 @@ private:
     void _gradientMaterials()
     {
         _engine->getScene().setMaterialsColorMap(MaterialsColorMap::gradient);
+        _engine->getFrameBuffer().clear();
     }
 
     void _pastelMaterials()
     {
         _engine->getScene().setMaterialsColorMap(MaterialsColorMap::pastel);
+        _engine->getFrameBuffer().clear();
     }
 
     void _randomMaterials()
     {
         _engine->getScene().setMaterialsColorMap(MaterialsColorMap::random);
+        _engine->getFrameBuffer().clear();
     }
 
     void _toggleAnimationPlayback()
