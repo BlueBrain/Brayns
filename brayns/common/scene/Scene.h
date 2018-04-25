@@ -23,15 +23,11 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
-#include <brayns/common/geometry/Cone.h>
-#include <brayns/common/geometry/Cylinder.h>
-#include <brayns/common/geometry/Sphere.h>
-#include <brayns/common/geometry/TrianglesMesh.h>
-#include <brayns/common/material/Material.h>
-#include <brayns/common/material/Texture2D.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
+
+SERIALIZATION_ACCESS(Scene)
 
 namespace brayns
 {
@@ -72,16 +68,6 @@ public:
     BRAYNS_API virtual void commitLights() = 0;
 
     /**
-        Converts scene geometry into rendering engine specific data structures
-    */
-    BRAYNS_API virtual void buildGeometry() = 0;
-
-    /**
-        Serializes scene geometry into rendering engine specific data structures
-    */
-    BRAYNS_API virtual void serializeGeometry() = 0;
-
-    /**
         Attach simulation data to renderer
     */
     BRAYNS_API virtual void commitSimulationData() = 0;
@@ -97,16 +83,9 @@ public:
     BRAYNS_API virtual void commitTransferFunctionData() = 0;
 
     /**
-        Returns the bounding box for the whole scene
+        Returns the bounding box of the scene
     */
-    Boxf& getWorldBounds() { return _bounds; }
-    const Boxf& getWorldBounds() const { return _bounds; }
-    /**
-        Build an environment in addition to the loaded data, and according to
-        the geometry parameters (command line parameter --scene-environment).
-    */
-    BRAYNS_API void buildEnvironment();
-
+    Boxf getBounds();
     /**
         Attaches a light source to the scene
         @param light Object representing the light source
@@ -131,7 +110,19 @@ public:
     BRAYNS_API void clearLights();
 
     /**
-        Builds a default scene made of a Cornell box, a refelctive cube, and
+        Adds a model to the scene
+      */
+    BRAYNS_API virtual ModelPtr addModel(
+        const std::string& name, const ModelMetadata& metadata = {}) = 0;
+
+    /**
+        Removes a geometry group from the scene
+        @param index Index of the model
+      */
+    BRAYNS_API virtual void removeModel(const size_t index) = 0;
+
+    /**registry
+        Builds a default scene made of a Cornell box, a reflective cube, and
         a transparent sphere
     */
     BRAYNS_API void buildDefault();
@@ -144,30 +135,6 @@ public:
     BRAYNS_API ParametersManager& getParametersManager()
     {
         return _parametersManager;
-    }
-
-    /**
-        Returns spheres handled by the scene
-    */
-    BRAYNS_API SpheresMap& getSpheres() { return _spheres; }
-    /**
-        Returns cylinders handled by the scene
-    */
-    BRAYNS_API CylindersMap& getCylinders() { return _cylinders; }
-    /**
-        Returns cones handled by the scene
-    */
-    BRAYNS_API ConesMap& getCones() { return _cones; }
-    /**
-        Returns textures handled by the scene
-    */
-    BRAYNS_API TexturesMap& getTextures() { return _textures; }
-    /**
-        Returns triangle meshes handled by the scene
-    */
-    BRAYNS_API TrianglesMeshMap& getTriangleMeshes()
-    {
-        return _trianglesMeshes;
     }
 
     /**
@@ -220,7 +187,7 @@ public:
          - Number of cylinders
          - Cylinders
          - Number of cones
-         - Cones
+         -Texture2DPtr Cones
          - Number of vertices
          - Vertices
          - Number of indices
@@ -229,7 +196,7 @@ public:
          - Normals
          - Number of texture coordinates
          - Texture coordinates
-       - Scene bounds
+       - STexture2DPtrcene bounds
     */
     BRAYNS_API void loadFromCacheFile();
 
@@ -247,156 +214,47 @@ public:
         const std::string& volumeFile) const = 0;
 
     /**
-     * @brief Sets spheres as dirty, meaning that they need to be serialized
-     *        and sent to the rendering engine
-     */
-    BRAYNS_API void setSpheresDirty(const bool value) { _spheresDirty = value; }
-    /**
      * @internal needed to ensure deletion wrt cyclic dependency
      *           scene<->renderer
      */
     virtual void reset();
 
-    /**
-      Adds a sphere to the scene
-      @param materialId Material of the sphere
-      @param sphere Sphere to add
-      @return Index of the sphere for the specified material
-      */
-    BRAYNS_API uint64_t addSphere(const size_t materialId,
-                                  const Sphere& sphere);
-
-    /**
-      Adds a cone to the scene
-      @param materialId Material of the cone
-      @param cone Cone to add
-      @return Index of the sphere for the specified material
-      */
-    BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
-
-    /**
-      Adds a cylinder to the scene
-      @param materialId Material of the cylinder
-      @param cylinder Cylinder to add
-      @return Index of the sphere for the specified material
-      */
-    BRAYNS_API uint64_t addCylinder(const size_t materialId,
-                                    const Cylinder& cylinder);
-
-    /**
-      Replaces a sphere in the scene
-      @param materialId Material of the sphere
-      @param index Index of the sphere in the scene, for the given material
-      @param sphere New sphere
-
-      */
-    BRAYNS_API void setSphere(const size_t materialId, const uint64_t index,
-                              const Sphere& sphere);
-
-    /**
-      Replaces a cone in the scene
-      @param materialId Material of the cone
-      @param index Index of the cone in the scene, for the given material
-      @param cone New sphere
-
-      */
-    BRAYNS_API void setCone(const size_t materialId, const uint64_t index,
-                            const Cone& cone);
-
-    /**
-      Replaces a cylinder in the scene
-      @param materialId Material of the cylinder
-      @param index Index of the cylinder in the scene, for the given material
-      @param cylinder New cylinder
-
-      */
-    BRAYNS_API void setCylinder(const size_t materialId, const uint64_t index,
-                                const Cylinder& cylinder);
-
-    /**
-      Adds a material to the scene
-      @param material Material to add
-      @return index of the new material
-      */
-    BRAYNS_API size_t addMaterial(const Material& material);
-
-    /**
-        Returns the material object for a given index
-        @return Reference to material object
-    */
-    BRAYNS_API Material& getMaterial(size_t index);
-
-    /**
-        Set the material object for a given index
-        @param index Index of material in the scene
-        @param material Material object
-    */
-    BRAYNS_API void setMaterial(const size_t index, const Material& material);
-
-    /**
-        Resets materials and builds the system ones (Bounding box, skymap, etc)
-    */
-    BRAYNS_API void resetMaterials();
-
-    /**
-        Commit materials to renderers
-        @param action Defines if materials should be created or updated
-    */
-    BRAYNS_API virtual void commitMaterials(
-        const Action action = Action::create) = 0;
-
-    /**
-        Returns materials handled by the scene
-    */
-    BRAYNS_API Materials& getMaterials() { return _materials; }
-    /**
-        Sets the materials handled by the scene, and available to the
-        scene geometry
-        @param colorMap Specifies the algorithm that is used to create
-               the materials. For instance MT_RANDOM creates materials with
-               random colors, transparency, reflection, and light emission
-    */
-    BRAYNS_API void setMaterialsColorMap(
-        MaterialsColorMap colorMap = MaterialsColorMap::none);
-
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
-protected:
-    void _buildMissingMaterials(const size_t materialId);
-    void _processVolumeAABBGeometry();
+    ModelDescriptors& getModelDescriptors() { return _modelDescriptors; }
+    /**
+     * @brief initializeMaterials Initializes materials for all models in the
+     * scene
+     * @param colorMap Color map to use for every individual model
+     */
+    void setMaterialsColorMap(
+        MaterialsColorMap colorMap = MaterialsColorMap::none);
 
-    // Parameters
-    ParametersManager& _parametersManager;
+    MaterialPtr getBackgroundMaterial() { return _backgroundMaterial; }
+protected:
     Renderers _renderers;
+    ParametersManager& _parametersManager;
+    MaterialPtr _backgroundMaterial;
 
     // Model
-    SpheresMap _spheres;
-    bool _spheresDirty;
-    CylindersMap _cylinders;
-    bool _cylindersDirty;
-    ConesMap _cones;
-    bool _conesDirty;
-    TrianglesMeshMap _trianglesMeshes;
-    bool _trianglesMeshesDirty;
-    Materials _materials;
-    TexturesMap _textures;
+    ModelDescriptors _modelDescriptors;
+    bool _geometryGroupsDirty{true};
     Lights _lights;
 
     // Volume
-    VolumeHandlerPtr _volumeHandler;
+    VolumeHandlerPtr _volumeHandler{nullptr};
 
     // Simulation
-    AbstractSimulationHandlerPtr _simulationHandler;
+    AbstractSimulationHandlerPtr _simulationHandler{nullptr};
     TransferFunction _transferFunction;
-    CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler;
-
-    // Scene
-    Boxf _bounds;
+    CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler{nullptr};
 
     size_t _sizeInBytes{0};
 
 private:
     void _markGeometryDirty();
+
+    SERIALIZATION_FRIEND(Scene)
 };
 }
 #endif // SCENE_H

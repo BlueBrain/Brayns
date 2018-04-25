@@ -405,7 +405,8 @@ public:
                 _engine->getScene().getTransferFunction());
         _handleGET(ENDPOINT_SCENE, _engine->getScene());
         _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
-                   [](Scene& scene) { scene.commitMaterials(Action::update); });
+                   [](Scene& scene) { scene.markModified(); });
+
         _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
 
         _handleFrameBuffer();
@@ -651,6 +652,15 @@ public:
             [this] { _engine->cancelSnapshot(); });
     }
 
+    std::future<rockets::http::Response> _handleMaterial(
+        const rockets::http::Request& request)
+    {
+        using namespace rockets::http;
+        BRAYNS_INFO << "Material: " << request.body << std::endl;
+
+        return make_ready_response(Code::OK, "", JSON_TYPE);
+    }
+
     std::future<rockets::http::Response> _handleCircuitConfigBuilder(
         const rockets::http::Request& request)
     {
@@ -730,17 +740,14 @@ void RocketsPlugin::preRender()
 {
     _impl->preRender();
 }
-
 void RocketsPlugin::postRender()
 {
     _impl->postRender();
 }
-
 void RocketsPlugin::postSceneLoading()
 {
     _impl->postSceneLoading();
 }
-
 void RocketsPlugin::_registerRequest(const std::string& name,
                                      const RetParamFunc& action)
 {

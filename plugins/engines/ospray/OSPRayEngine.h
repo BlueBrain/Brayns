@@ -63,6 +63,8 @@ public:
     CameraPtr createCamera(const CameraType type) final;
 
 private:
+    uint32_t _getOSPDataFlags();
+
     Renderers _createRenderers();
 
     bool _haveDeflectPixelOp{false};

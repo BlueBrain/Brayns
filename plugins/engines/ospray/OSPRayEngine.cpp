@@ -24,6 +24,7 @@
 
 #include <plugins/engines/ospray/OSPRayCamera.h>
 #include <plugins/engines/ospray/OSPRayFrameBuffer.h>
+#include <plugins/engines/ospray/OSPRayMaterial.h>
 #include <plugins/engines/ospray/OSPRayRenderer.h>
 #include <plugins/engines/ospray/OSPRayScene.h>
 
@@ -99,9 +100,11 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
 
     Renderers renderersForScene = _createRenderers();
 
+    const auto ospFlags = _getOSPDataFlags();
+
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene =
-        std::make_shared<OSPRayScene>(renderersForScene, _parametersManager);
+    _scene = std::make_shared<OSPRayScene>(renderersForScene,
+                                           _parametersManager, ospFlags);
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
     _camera = createCamera(rp.getCameraType());
@@ -192,12 +195,22 @@ void OSPRayEngine::commit()
 
 void OSPRayEngine::preRender()
 {
+    bool clearFrameBuffer = false;
+    if (_scene->isModified())
+    {
+        _scene->commit();
+        clearFrameBuffer = true;
+    }
+
     const auto& renderParams = _parametersManager.getRenderingParameters();
     if (renderParams.getAccumulation() != _frameBuffer->getAccumulation())
     {
         _frameBuffer->setAccumulation(renderParams.getAccumulation());
         _frameBuffer->resize(_frameBuffer->getSize());
     }
+
+    if (clearFrameBuffer)
+        _frameBuffer->clear();
 }
 
 Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
@@ -284,5 +297,13 @@ CameraPtr OSPRayEngine::createCamera(const CameraType type)
         name = rp.getCameraTypeAsString(CameraType::default_);
         return std::make_shared<OSPRayCamera>(type, name);
     }
+}
+
+uint32_t OSPRayEngine::_getOSPDataFlags()
+{
+    return _parametersManager.getGeometryParameters().getMemoryMode() ==
+                   MemoryMode::shared
+               ? OSP_DATA_SHARED_BUFFER
+               : 0;
 }
 }

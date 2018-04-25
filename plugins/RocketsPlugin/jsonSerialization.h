@@ -23,6 +23,8 @@
 #include <brayns/common/Statistics.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
+#include <brayns/common/geometry/Model.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
@@ -109,6 +111,17 @@ STATICJSON_DECLARE_ENUM(brayns::ShadingType,
 STATICJSON_DECLARE_ENUM(brayns::EngineType,
                         {"ospray", brayns::EngineType::ospray},
                         {"optix", brayns::EngineType::optix});
+
+STATICJSON_DECLARE_ENUM(brayns::TextureType,
+                        {"diffuse", brayns::TextureType::TT_DIFFUSE},
+                        {"normals", brayns::TextureType::TT_NORMALS},
+                        {"bump", brayns::TextureType::TT_BUMP},
+                        {"specular", brayns::TextureType::TT_SPECULAR},
+                        {"emissive", brayns::TextureType::TT_EMISSIVE},
+                        {"opacity", brayns::TextureType::TT_OPACITY},
+                        {"reflection", brayns::TextureType::TT_REFLECTION},
+                        {"refraction", brayns::TextureType::TT_REFRACTION},
+                        {"occlusion", brayns::TextureType::TT_OCCLUSION});
 
 // c-array to std.array: https://stackoverflow.com/questions/11205186
 #define Vector2uiArray(vec) \
@@ -228,7 +241,9 @@ inline void init(brayns::Boxf* b, ObjectHandler* h)
 
 inline void init(brayns::Material* m, ObjectHandler* h)
 {
-    h->add_property("diffuse_color", Vector3fArray(m->_color), Flags::Optional);
+    h->add_property("name", &m->_name, Flags::Optional);
+    h->add_property("diffuse_color", Vector3fArray(m->_diffuseColor),
+                    Flags::Optional);
     h->add_property("specular_color", Vector3fArray(m->_specularColor),
                     Flags::Optional);
     h->add_property("specular_exponent", &m->_specularExponent,
@@ -243,11 +258,30 @@ inline void init(brayns::Material* m, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::ModelTransformation* g, ObjectHandler* h)
+{
+    h->add_property("translation", Vector3fArray(g->_translation));
+    h->add_property("scale", Vector3fArray(g->_scale));
+    h->add_property("rotation", Vector3fArray(g->_rotation));
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
+{
+    h->add_property("name", &g->_name, Flags::Optional);
+    h->add_property("enabled", &g->_enabled, Flags::Optional);
+    h->add_property("visible", &g->_visible, Flags::Optional);
+    h->add_property("bounding_box", &g->_boundingBox, Flags::Optional);
+    h->add_property("transformations", &g->_transformations);
+    h->add_property("metadata", &g->_metadata);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
-    h->add_property("bounds", &s->getWorldBounds(),
-                    Flags::IgnoreRead | Flags::Optional);
-    h->add_property("materials", &s->getMaterials());
+    auto bounds = s->getBounds();
+    h->add_property("bounds", &bounds, Flags::IgnoreRead | Flags::Optional);
+    h->add_property("models", &s->getModelDescriptors(), Flags::IgnoreRead);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

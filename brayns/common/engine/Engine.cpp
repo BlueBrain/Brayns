@@ -67,23 +67,18 @@ void Engine::setDefaultEpsilon()
     float epsilon = _parametersManager.getRenderingParameters().getEpsilon();
     if (epsilon == 0.f)
     {
-        const Vector3f& worldBoundsSize = _scene->getWorldBounds().getSize();
-        epsilon = worldBoundsSize.length() / 1e6f;
+        const Vector3f& boundsSize = _scene->getBounds().getSize();
+        epsilon = boundsSize.length() / 1e6f;
         BRAYNS_INFO << "Default epsilon: " << epsilon << std::endl;
         _parametersManager.getRenderingParameters().setEpsilon(epsilon);
     }
-}
-
-void Engine::initializeMaterials(const MaterialsColorMap colorMap)
-{
-    _scene->setMaterialsColorMap(colorMap);
-    _scene->commit();
 }
 
 void Engine::commit()
 {
     _scene->commitVolumeData();
     _scene->commitSimulationData();
+    _scene->commitTransferFunctionData();
     _renderers[_activeRenderer]->commit();
 
     const auto& rp = _parametersManager.getRenderingParameters();

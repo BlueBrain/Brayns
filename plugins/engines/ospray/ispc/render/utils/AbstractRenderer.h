@@ -23,6 +23,9 @@
 #ifndef ABSTRACTRENDERER_H
 #define ABSTRACTRENDERER_H
 
+// obj
+#include <plugins/engines/ospray/ispc/render/ExtendedOBJMaterial.h>
+
 // ospray
 #include <ospray/SDK/common/Material.h>
 #include <ospray/SDK/render/Renderer.h>
@@ -51,15 +54,12 @@ public:
 protected:
     std::vector<void*> _lightArray;
     void** _lightPtr;
-    std::vector<void*> _materialArray;
-    void** _materialPtr;
 
     Model* _world;
     Camera* _camera;
-    ospray::Data* _materialData;
     ospray::Data* _lightData;
 
-    ospray::vec3f _bgColor;
+    brayns::obj::ExtendedOBJMaterial* _bgMaterial;
     float _shadows;
     float _softShadows;
     float _ambientOcclusionStrength;

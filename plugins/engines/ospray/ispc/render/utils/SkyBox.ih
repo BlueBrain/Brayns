@@ -21,17 +21,15 @@
 #pragma once
 
 #include <ospray/SDK/math/vec.ih>
+#include <plugins/engines/ospray/ispc/render/ExtendedOBJMaterial.ih>
 
 /**
     Returns the color of the skybox for a given ray. If no material is defined
    for the skybox, the background color of the renderer is returned.
     @param renderer Pointer to current renderer
     @param ray Current ray
-    @param materials Pointer to the list of materials held by the renderer
-    @param nbMaterials Number of materials held by the renderer
+    @param bgMaterial Background material
     @return The RGBA color of the skybox
 */
 vec4f skyboxMapping(const uniform Renderer* uniform renderer, Ray& ray,
-                    const uniform unsigned int32 nbMaterials,
-                    const uniform ExtendedOBJMaterial* uniform* uniform
-                        materials);
+                    const uniform ExtendedOBJMaterial* uniform bgMaterial);

@@ -25,18 +25,12 @@
 #include <plugins/engines/ospray/ispc/render/utils/Consts.ih>
 
 vec4f skyboxMapping(const uniform Renderer* uniform renderer, Ray& ray,
-                    const uniform unsigned int32 nbMaterials,
-                    const uniform ExtendedOBJMaterial* uniform* uniform
-                        materials)
+                    const uniform ExtendedOBJMaterial* uniform bgMaterial)
 {
-    varying vec4f result = make_vec4f(renderer->bgColor);
-    if (nbMaterials <= MATERIAL_SKYBOX)
-        return result;
+    varying vec4f result = make_vec4f(bgMaterial->Kd);
 
     const varying float radius = 1e6;
-    const uniform ExtendedOBJMaterial* uniform mat =
-        (const uniform ExtendedOBJMaterial* uniform)materials[MATERIAL_SKYBOX];
-    if (!valid(mat->map_Kd))
+    if (!valid(bgMaterial->map_Kd))
         return result;
 
     // solve the equation sphere-ray to find the intersections
@@ -73,5 +67,5 @@ vec4f skyboxMapping(const uniform Renderer* uniform renderer, Ray& ray,
         st = {((atan2(intersection.x, intersection.z) / PI) + 1.f) * .5f,
               -(asin(intersection.y) / PI) + .5f};
 
-    return get4f(mat->map_Kd, st);
+    return get4f(bgMaterial->map_Kd, st);
 }

@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <fstream>
@@ -31,7 +32,7 @@ XYZBLoader::XYZBLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
+bool XYZBLoader::importFromFile(const std::string& filename, Model& model)
 {
     BRAYNS_INFO << "Loading xyz file from " << filename << std::endl;
     std::ifstream file(filename, std::ios::in);
@@ -41,7 +42,6 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
         return false;
     }
 
-    SpheresMap& spheres = scene.getSpheres();
     bool validParsing = true;
     std::string line;
 
@@ -52,6 +52,7 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
                               std::istreambuf_iterator<char>(), '\n');
     }
 
+    uint64_t count = 0;
     while (validParsing && std::getline(file, line))
     {
         std::vector<float> lineData;
@@ -66,7 +67,7 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
         case 3:
         {
             const Vector3f position(lineData[0], lineData[1], lineData[2]);
-            scene.addSphere(0,
+            model.addSphere(0,
                             Sphere(position,
                                    _geometryParameters.getRadiusMultiplier()));
             break;
@@ -76,14 +77,16 @@ bool XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
             validParsing = false;
             break;
         }
-        updateProgress("Loading spheres...", spheres[0].size(), numlines);
+        if (count % (numlines / 100) == 0)
+            updateProgress("Loading spheres...", count, numlines);
+        ++count;
     }
 
     file.close();
     return validParsing;
 }
 
-bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
+bool XYZBLoader::importFromBinaryFile(const std::string& filename, Model& model)
 {
     BRAYNS_INFO << "Loading xyzb file from " << filename << std::endl;
     std::ifstream file(filename, std::ios::in | std::fstream::binary);
@@ -97,7 +100,7 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
     uint64_t nbPoints = file.tellg() / (3 * sizeof(double));
     file.seekg(0);
 
-    SpheresMap& spheres = scene.getSpheres();
+    uint64_t count = 0;
     while (!file.eof())
     {
         double x, y, z;
@@ -109,11 +112,12 @@ bool XYZBLoader::importFromBinaryFile(const std::string& filename, Scene& scene)
 
         const Vector3f position(x, y, z);
         const auto radius = _geometryParameters.getRadiusMultiplier();
-        scene.addSphere(0, {position, radius});
+        model.addSphere(0, {position, radius});
 
-        updateProgress("Loading spheres...", spheres[0].size(), nbPoints);
+        if (count % (nbPoints / 100) == 0)
+            updateProgress("Loading spheres...", count, nbPoints);
+        ++count;
     }
-
     file.close();
     return true;
 }

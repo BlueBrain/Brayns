@@ -20,8 +20,10 @@
 
 #include "MolecularSystemReader.h"
 
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
@@ -38,6 +40,9 @@ MolecularSystemReader::MolecularSystemReader(
 
 bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
 {
+    ModelMetadata metadata = {{"molecular-system-config",
+                               _geometryParameters.getMolecularSystemConfig()}};
+    auto model = scene.addModel("MolecularSystem", metadata);
     _nbProteins = 0;
     if (!_loadConfiguration())
         return false;
@@ -46,25 +51,24 @@ bool MolecularSystemReader::import(Scene& scene, MeshLoader& meshLoader)
     if (!_loadPositions())
         return false;
 
-    if (!_createScene(scene, meshLoader))
+    if (!_createScene(*model, meshLoader))
         return false;
 
     if (!_calciumSimulationFolder.empty())
     {
         CADiffusionSimulationHandlerPtr handler(
             new CADiffusionSimulationHandler(_calciumSimulationFolder));
-        handler->setFrame(scene, 0);
+        handler->setFrame(*model, 0);
         scene.setCADiffusionSimulationHandler(handler);
     }
     BRAYNS_INFO << "Total number of different proteins: " << _proteins.size()
                 << std::endl;
     BRAYNS_INFO << "Total number of proteins          : " << _nbProteins
                 << std::endl;
-
     return true;
 }
 
-bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
+bool MolecularSystemReader::_createScene(Model& model, MeshLoader& meshLoader)
 {
     uint64_t proteinCount = 0;
     for (const auto& proteinPosition : _proteinPositions)
@@ -78,7 +82,7 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
                     _proteinFolder + '/' + protein->second + ".pdb";
                 ProteinLoader loader(_geometryParameters);
                 loader.importPDBFile(pdbFilename, position, proteinCount,
-                                     scene);
+                                     model);
                 ++proteinCount;
             }
 
@@ -88,38 +92,25 @@ bool MolecularSystemReader::_createScene(Scene& scene, MeshLoader& meshLoader)
             {
                 const Vector3f scale = {1.f, 1.f, 1.f};
                 const Matrix4f transformation(position, scale);
-                const auto objFilename =
-                    _meshFolder + '/' + protein->second + ".obj";
-                const size_t material =
+                const size_t materialId =
                     _geometryParameters.getColorScheme() ==
                             ColorScheme::protein_by_id
-                        ? NB_SYSTEM_MATERIALS +
-                              proteinCount % (scene.getMaterials().size() -
-                                              NB_SYSTEM_MATERIALS)
+                        ? proteinCount
                         : NO_MATERIAL;
 
                 // Scale mesh to match PDB units. PDB are in angstrom, and
                 // positions are in micrometers
-                meshLoader.importMeshFromFile(objFilename, scene,
-                                              transformation, material);
+                const auto fileName =
+                    _meshFolder + '/' + protein->second + ".obj";
+                const auto meshName = getNameFromFullPath(fileName);
+                meshLoader.importMeshFromFile(fileName, meshName, materialId,
+                                              model, transformation);
 
                 if (_proteinFolder.empty())
                     ++proteinCount;
             }
 
         updateProgress("Loading proteins...", proteinCount, _nbProteins);
-    }
-
-    // Update materials
-    if (_geometryParameters.getColorScheme() != ColorScheme::protein_by_id)
-    {
-        size_t index = 0;
-        for (auto& material : scene.getMaterials())
-        {
-            ProteinLoader loader(_geometryParameters);
-            material.setColor(loader.getMaterialKd(index));
-            ++index;
-        }
     }
     return true;
 }
