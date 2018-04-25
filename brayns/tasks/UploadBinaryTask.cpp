@@ -35,26 +35,7 @@ UploadBinaryTask::UploadBinaryTask(const BinaryParams& params,
     if (params.empty())
         throw MISSING_PARAMS;
 
-    // pre-check for validity of given params
-    for (size_t i = 0; i < params.size(); ++i)
-    {
-        const auto& param = params[i];
-        if (param.type.empty() || param.size == 0)
-            throw MISSING_PARAMS;
-
-        auto found = std::find_if(supportedTypes.cbegin(),
-                                  supportedTypes.cend(), [&](auto val) {
-                                      return lowerCase(val).find(
-                                                 lowerCase(param.type)) !=
-                                             std::string::npos;
-                                  });
-
-        if (found == supportedTypes.end() && param.type != "forever")
-            throw UNSUPPORTED_TYPE(
-                {i, {supportedTypes.begin(), supportedTypes.end()}});
-
-        _totalBytes += param.size;
-    }
+    _checkValidity(supportedTypes);
 
     _chunks.resize(params.size());
 
@@ -66,7 +47,7 @@ UploadBinaryTask::UploadBinaryTask(const BinaryParams& params,
 
         // use progress increment as we might receive data for next file which
         // updates progress as well
-        functor.setProgressFunc([&progress=_progress,
+        functor.setProgressFunc([&progress=progress,
                       amountPerTask = (1.f-CHUNK_PROGRESS_WEIGHT)/params.size()]
         (auto msg, auto increment, auto){
             progress.increment(msg, increment*amountPerTask);
@@ -115,7 +96,7 @@ void UploadBinaryTask::appendBlob(const std::string& blob)
     _receivedBytes += blob.size();
     std::stringstream msg;
     msg << "Receiving " << _params[_index].name << " ...";
-    _progress.increment(msg.str(), _progressBytes() - before);
+    progress.increment(msg.str(), _progressBytes() - before);
 
     // if this blob is complete, start the loading
     if (_blob.size() == _params[_index].size)
@@ -127,6 +108,30 @@ void UploadBinaryTask::appendBlob(const std::string& blob)
         ++_index;
         if (_index < _params.size())
             _blob.reserve(_params[_index].size);
+    }
+}
+
+void UploadBinaryTask::_checkValidity(
+    const std::set<std::string>& supportedTypes)
+{
+    for (size_t i = 0; i < _params.size(); ++i)
+    {
+        const auto& param = _params[i];
+        if (param.type.empty() || param.size == 0)
+            throw MISSING_PARAMS;
+
+        const auto found =
+            std::find_if(supportedTypes.cbegin(), supportedTypes.cend(),
+                         [&](const auto& val) {
+                             return lowerCase(val).find(lowerCase(
+                                        param.type)) != std::string::npos;
+                         });
+
+        if (found == supportedTypes.end() && param.type != "forever")
+            throw UNSUPPORTED_TYPE(
+                {i, {supportedTypes.begin(), supportedTypes.end()}});
+
+        _totalBytes += param.size;
     }
 }
 }

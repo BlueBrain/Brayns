@@ -29,11 +29,13 @@
 #pragma GCC diagnostic pop
 #endif
 
+#include <string>
+
 namespace brayns
 {
 /**
  * A base class for functors that can be used for Tasks. It provides support for
- * progress supporting and cancellation during execution.
+ * progress reporting and cancellation during execution.
  */
 class TaskFunctor
 {

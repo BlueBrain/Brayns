@@ -34,9 +34,9 @@ inline std::string shortenString(const std::string& string,
     if (string.length() <= maxLength)
         return string;
 
-    float spacePerPart = (maxLength - ELLIPSIS.length()) / 2.0;
-    auto beforeEllipsis = string.substr(0, std::ceil(spacePerPart));
-    auto afterEllipsis =
+    const float spacePerPart = (maxLength - ELLIPSIS.length()) / 2.f;
+    const auto beforeEllipsis = string.substr(0, std::ceil(spacePerPart));
+    const auto afterEllipsis =
         string.substr(string.size() - std::floor(spacePerPart));
 
     return beforeEllipsis + ELLIPSIS + afterEllipsis;
@@ -44,9 +44,8 @@ inline std::string shortenString(const std::string& string,
 
 inline auto lowerCase(std::string str)
 {
-    std::string retval = str;
-    std::transform(retval.begin(), retval.end(), retval.begin(), ::tolower);
-    return retval;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
 }
 }
 

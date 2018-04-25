@@ -17,7 +17,9 @@ set(BRAYNSTASKS_PUBLIC_HEADERS
 )
 
 set(BRAYNSTASKS_INCLUDE_NAME brayns/tasks)
-set(BRAYNSTASKS_LINK_LIBRARIES PUBLIC braynsCommon braynsParameters braynsIO
+set(BRAYNSTASKS_LINK_LIBRARIES
+  PUBLIC braynsCommon braynsParameters braynsIO
+  PRIVATE ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 
 common_library(braynsTasks)

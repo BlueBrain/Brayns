@@ -28,22 +28,14 @@ namespace brayns
  * A task which loads data from a list of paths and adds the loaded data to the
  * scene.
  */
-class UploadPathTask : public TaskT<bool>
+class UploadPathTask : public Task<bool>
 {
 public:
-    UploadPathTask(std::vector<std::string>&& paths,
+    UploadPathTask(const std::vector<std::string>& paths,
                    const std::set<std::string>& supportedTypes,
                    EnginePtr engine);
 
 private:
     std::vector<async::task<void>> _loadTasks;
 };
-
-auto createUploadPathTask(std::vector<std::string>&& paths, const uintptr_t,
-                          const std::set<std::string>& supportedTypes,
-                          EnginePtr engine)
-{
-    return std::make_shared<UploadPathTask>(std::move(paths), supportedTypes,
-                                            engine);
-}
 }

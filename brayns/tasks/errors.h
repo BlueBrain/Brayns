@@ -34,16 +34,14 @@ struct BinaryError
 class BinaryTaskError : public TaskRuntimeError
 {
 public:
-    BinaryTaskError(const std::string& message, const int code,
-                    const BinaryError& error)
-        : TaskRuntimeError(message, code)
-        , _error(error)
+    BinaryTaskError(const std::string& message, const int code_,
+                    const BinaryError& error_)
+        : TaskRuntimeError(message, code_)
+        , error(error_)
     {
     }
 
-    const auto& error() const { return _error; }
-private:
-    const BinaryError _error;
+    const BinaryError error;
 };
 
 const TaskRuntimeError ALREADY_PENDING_REQUEST{"Already pending binary request",

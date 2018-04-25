@@ -30,7 +30,7 @@ namespace brayns
 {
 /**
  * A progress object which offers thread-safe progress updates and thread-safe
- * consumation of the current progress if it has changed in between.
+ * consumption of the current progress if it has changed in between.
  */
 class Progress : public BaseObject
 {

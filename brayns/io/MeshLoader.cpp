@@ -37,6 +37,9 @@
 
 namespace brayns
 {
+const size_t TOTAL_PROGRESS = 100;
+const size_t LOADING_FRACTION = 50;
+const size_t POST_PROCESSING_FRACTION = TOTAL_PROGRESS - LOADING_FRACTION;
 #ifdef BRAYNS_USE_ASSIMP
 class ProgressWatcher : public Assimp::ProgressHandler
 {
@@ -49,7 +52,8 @@ public:
 
     bool Update(const float percentage) final
     {
-        _parent.updateProgress(_msg.str(), percentage * 50, 100);
+        _parent.updateProgress(_msg.str(), percentage * LOADING_FRACTION,
+                               TOTAL_PROGRESS);
         return true;
     }
 
@@ -97,8 +101,7 @@ bool MeshLoader::importMeshFromFile(const std::string& filename, Scene& scene,
     _materialOffset = scene.getMaterials().size();
     const boost::filesystem::path file = filename;
     Assimp::Importer importer;
-    auto watcher = new ProgressWatcher(*this, filename);
-    importer.SetProgressHandler(watcher);
+    importer.SetProgressHandler(new ProgressWatcher(*this, filename));
     if (!importer.IsExtensionSupported(file.extension().c_str()))
     {
         BRAYNS_DEBUG << "File extension " << file.extension()
@@ -141,8 +144,7 @@ void MeshLoader::importMeshFromBlob(const Blob& blob, Scene& scene,
 {
     _materialOffset = scene.getMaterials().size();
     Assimp::Importer importer;
-    auto watcher = new ProgressWatcher(*this, blob.name);
-    importer.SetProgressHandler(watcher);
+    importer.SetProgressHandler(new ProgressWatcher(*this, blob.name));
 
     const aiScene* aiScene =
         importer.ReadFileFromMemory(blob.data.data(), blob.data.size(),
@@ -388,8 +390,10 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Scene& scene,
 
         _meshIndex[materialId] += mesh->mNumVertices;
 
+        const auto currentProgress =
+            ((m + 1) * POST_PROCESSING_FRACTION) / float(aiScene->mNumMeshes);
         updateProgress("Post-processing mesh ...",
-                       50 + ((m + 1) * 50.f) / aiScene->mNumMeshes, 100);
+                       LOADING_FRACTION + currentProgress, TOTAL_PROGRESS);
     }
 
     BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and " << nbFaces

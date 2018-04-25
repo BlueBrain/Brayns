@@ -378,7 +378,7 @@ public:
     template <class P, class R>
     void _handleTask(
         const std::string& method, const RpcDocumentation& doc,
-        std::function<std::shared_ptr<TaskT<R>>(P, uintptr_t)> createTask)
+        std::function<std::shared_ptr<Task<R>>(P, uintptr_t)> createTask)
     {
         // define the action that is executed on every incoming request from the
         // client:
@@ -388,19 +388,19 @@ public:
         // - wire the cancel request from rockets to the task
 
         auto action = [&tasks = _tasks, &binaryRequests = _binaryRequests,
-                createTask, & server = _jsonrpcServer, &mutex = _tasksMutex]
+                createTask,  &mutex = _tasksMutex]
                 (P params, auto clientID, auto respond, auto progressCb)
         {
             // transform task error to rockets error response
             auto errorCallback = [respond](const TaskRuntimeError& error) {
-                respond({Response::Error{error.what(), error.code(),
-                                         error.data()}});
+                respond(
+                    {Response::Error{error.what(), error.code, error.data}});
             };
 
             try
             {
                 // transform task result to rockets response
-                auto readyCallback = [respond](R result) {
+                auto readyCallback = [respond](const R& result) {
                     try
                     {
                         respond({to_json(result)});
@@ -415,7 +415,7 @@ public:
                 auto task = createTask(params, clientID);
 
                 std::function<void()> finishProgress = [task] {
-                    task->progress("Done", 1.f);
+                    task->progress.update("Done", 1.f);
                 };
 
 // setup periodic progress reporting if we have libuv running
@@ -426,7 +426,7 @@ public:
                         uvw::Loop::getDefault()->resource<uvw::TimerHandle>();
 
                     auto sendProgress =
-                        [ progressCb, &progress = task->getProgress() ]
+                        [ progressCb, &progress = task->progress ]
                     {
                         progress.consume(progressCb);
                     };
@@ -434,7 +434,7 @@ public:
                         [sendProgress](const auto&, auto&) { sendProgress(); });
 
                     finishProgress = [task, progressUpdate, sendProgress] {
-                        task->progress("Done", 1.f);
+                        task->progress.update("Done", 1.f);
                         sendProgress();
                         progressUpdate->stop();
                         progressUpdate->close();
@@ -448,9 +448,9 @@ public:
                 // setup the continuation task that handles the result or error
                 // of the task to handle the responses to rockets accordingly.
                 auto responseTask = std::make_shared<async::task<void>>(
-                    task->task().then([readyCallback, errorCallback, &tasks,
-                                       &binaryRequests, task, finishProgress,
-                                       &mutex](typename TaskT<R>::Type result) {
+                    task->get().then([readyCallback, errorCallback, &tasks,
+                                      &binaryRequests, task, finishProgress,
+                                      &mutex](typename Task<R>::Type result) {
                         finishProgress();
 
                         try
@@ -490,7 +490,7 @@ public:
             // respond errors during the setup of the task
             catch (const BinaryTaskError& e)
             {
-                errorCallback({e.what(), e.code(), to_json(e.error())});
+                errorCallback({e.what(), e.code, to_json(e.error)});
             }
             catch (const TaskRuntimeError& e)
             {
@@ -762,11 +762,16 @@ public:
     {
         RpcDocumentation doc{"Make a snapshot of the current view", "settings",
                              "Snapshot settings for quality and size"};
+        auto func = [ engine = _engine,
+                      &imageGenerator = _imageGenerator ](const auto& params,
+                                                          const auto)
+        {
+            using SnapshotTask = DeferredTask<ImageGenerator::ImageBase64>;
+            return std::make_shared<SnapshotTask>(
+                SnapshotFunctor{*engine, params, imageGenerator});
+        };
         _handleTask<SnapshotParams, ImageGenerator::ImageBase64>(
-            METHOD_SNAPSHOT, doc,
-            std::bind(createSnapshotTask, std::placeholders::_1,
-                      std::placeholders::_2, std::ref(*_engine),
-                      std::ref(_imageGenerator)));
+            METHOD_SNAPSHOT, doc, func);
     }
 
     void _handleUploadBinary()
@@ -788,13 +793,17 @@ public:
         RpcDocumentation doc{"Upload remote path to load geometry from",
                              "params", "Array of paths, either file or folder"};
 
-        _handleTask<std::vector<std::string>, bool>(
-            METHOD_UPLOAD_PATH, doc,
-            std::bind(createUploadPathTask, std::placeholders::_1,
-                      std::placeholders::_2,
-                      _parametersManager.getGeometryParameters()
-                          .getSupportedDataTypes(),
-                      _engine));
+        auto func = [
+            supportedTypes = _parametersManager.getGeometryParameters()
+                                 .getSupportedDataTypes(),
+            engine = _engine
+        ](const auto& paths, const auto)
+        {
+            return std::make_shared<UploadPathTask>(paths, supportedTypes,
+                                                    engine);
+        };
+        _handleTask<std::vector<std::string>, bool>(METHOD_UPLOAD_PATH, doc,
+                                                    func);
     }
 
     EnginePtr _engine;

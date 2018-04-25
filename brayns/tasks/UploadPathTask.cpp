@@ -29,7 +29,7 @@
 
 namespace brayns
 {
-UploadPathTask::UploadPathTask(std::vector<std::string>&& paths,
+UploadPathTask::UploadPathTask(const std::vector<std::string>& paths,
                                const std::set<std::string>& supportedTypes,
                                EnginePtr engine)
 {
@@ -76,7 +76,7 @@ UploadPathTask::UploadPathTask(std::vector<std::string>&& paths,
         functor.setCancelToken(_cancelToken);
 
         functor.setProgressFunc(
-            [& progress = _progress,
+            [& progress = progress,
              amountPerTask = 1.f / paths.size() ](auto msg, auto increment,
                                                   auto) {
                 progress.increment(msg, increment * amountPerTask);

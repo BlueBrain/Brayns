@@ -391,8 +391,8 @@ struct RenderOutput
 
 class Progress;
 
-class Task;
-using TaskPtr = std::shared_ptr<Task>;
+class AbstractTask;
+using TaskPtr = std::shared_ptr<AbstractTask>;
 
 struct Blob
 {

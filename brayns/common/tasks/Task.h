@@ -31,10 +31,10 @@ namespace brayns
  * support for progress reporting during the execution and cancellation of the
  * execution.
  */
-class Task
+class AbstractTask
 {
 public:
-    virtual ~Task() = default;
+    virtual ~AbstractTask() = default;
 
     /**
      * Cancels the task if is either waiting to be scheduled or already running.
@@ -45,6 +45,8 @@ public:
      */
     void cancel(std::function<void()> done = {})
     {
+        if (_cancelled)
+            return;
         _cancelDone = done;
         _cancelled = true;
         _cancelToken.cancel();
@@ -69,17 +71,11 @@ public:
      */
     virtual void schedule() = 0;
 
-    /** Report progress during the task execution. */
-    void progress(const std::string& message, const float amount)
-    {
-        _progress.update(message, amount);
-    }
-
     /** @return access to the progress of task. */
-    Progress& getProgress() { return _progress; }
+    Progress progress{"Scheduling task ..."};
+
 protected:
     async::cancellation_token _cancelToken;
-    Progress _progress{"Scheduling task ..."};
     std::function<void()> _cancelDone;
     std::atomic_bool _cancelled{false};
 
@@ -91,11 +87,11 @@ private:
  * A task type which is directly scheduled after creation. Its result after
  * successful execution is of type T.
  *
- * It accepts any functors of type TaskFunctor will be provided with cancel
+ * If the functor is of type TaskFunctor, it will be provided with cancel
  * support and progress feedback possibility.
  */
 template <typename T>
-class TaskT : public Task
+class Task : public AbstractTask
 {
 public:
     using Type = async::task<T>;
@@ -103,14 +99,13 @@ public:
     /**
      * Create an empty task; use task() and async++ to do something meaningful.
      */
-    TaskT() = default;
+    Task() = default;
 
     /** Create and schedule a task with the given functor or lambda. */
     template <typename F>
-    TaskT(F&& functor)
+    Task(F&& functor)
     {
-        _setupFunctor(functor);
-        _task = async::spawn(functor);
+        _task = async::spawn(_setupFunctor(functor));
     }
 
     /** NOP for this task; tasks are running after construction. */
@@ -120,9 +115,9 @@ public:
      * @return the result of tasks, or an exception in case of errors or
      *         cancellation.
      */
-    T get() { return _task.get(); }
+    T result() { return _task.get(); }
     /** @return access to the async++ task for chaining, assignment, etc. */
-    auto& task() { return _task; }
+    auto& get() { return _task; }
 protected:
     Type _task;
 
@@ -133,7 +128,7 @@ protected:
         {
             auto& taskFunctor = static_cast<TaskFunctor&>(functor);
             taskFunctor.setProgressFunc(
-                std::bind(&Progress::update, std::ref(_progress),
+                std::bind(&Progress::update, std::ref(progress),
                           std::placeholders::_1, std::placeholders::_3));
             taskFunctor.setCancelToken(_cancelToken);
         }
@@ -146,14 +141,14 @@ protected:
  * schedule().
  */
 template <typename T>
-class DeferredTask : public TaskT<T>
+class DeferredTask : public Task<T>
 {
 public:
     template <typename F>
     DeferredTask(F&& functor)
     {
-        TaskT<T>::_task = _e.get_task().then(
-            TaskT<T>::template _setupFunctor(std::move(functor)));
+        Task<T>::_task = _e.get_task().then(
+            Task<T>::template _setupFunctor(std::move(functor)));
     }
 
     void schedule() final { _e.set(); }

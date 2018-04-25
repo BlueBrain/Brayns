@@ -37,7 +37,7 @@ using BinaryParams = std::vector<BinaryParam>;
  * A task which receives blobs of files, triggers loading for each received blob
  * and adds the loaded data to the scene.
  */
-class UploadBinaryTask : public TaskT<bool>
+class UploadBinaryTask : public Task<bool>
 {
 public:
     UploadBinaryTask(const BinaryParams& params,
@@ -54,6 +54,7 @@ private:
     std::string _blob;
     size_t _index{0};
 
+    void _checkValidity(const std::set<std::string>& supportedTypes);
     void _cancel() final
     {
         for (auto& i : _chunks)
@@ -69,11 +70,4 @@ private:
     size_t _receivedBytes{0};
     const float CHUNK_PROGRESS_WEIGHT{0.5f};
 };
-
-auto createUploadBinaryTask(const BinaryParams& params,
-                            const std::set<std::string>& supportedTypes,
-                            EnginePtr engine)
-{
-    return std::make_shared<UploadBinaryTask>(params, supportedTypes, engine);
-}
 }

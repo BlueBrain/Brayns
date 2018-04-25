@@ -104,12 +104,4 @@ private:
     ImageGenerator& _imageGenerator;
     std::shared_lock<std::shared_timed_mutex> _dataLock;
 };
-
-auto createSnapshotTask(const SnapshotParams& params, const uintptr_t,
-                        Engine& engine, ImageGenerator& imageGenerator)
-{
-    using SnapshotTask = DeferredTask<ImageGenerator::ImageBase64>;
-    return std::make_shared<SnapshotTask>(
-        SnapshotFunctor{engine, params, imageGenerator});
-}
 }

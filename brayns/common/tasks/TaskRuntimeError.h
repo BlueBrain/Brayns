@@ -25,26 +25,21 @@
 namespace brayns
 {
 /**
- * An exception type that shall be thrown during any point during the task
- * execution to provide useful errors for the user.
+ * An exception type that shall be thrown at any point during the task execution
+ * to provide useful errors for the user.
  */
 class TaskRuntimeError : public std::runtime_error
 {
 public:
-    TaskRuntimeError(const std::string& message, const int code = -1,
-                     const std::string& data = "")
-        : std::runtime_error(message.c_str())
-        , _code(code)
-        , _data(data)
+    TaskRuntimeError(const std::string& message, const int code_ = -1,
+                     const std::string& data_ = "")
+        : std::runtime_error(message)
+        , code(code_)
+        , data(data_)
     {
     }
 
-    /** @return the error code. */
-    int code() const { return _code; }
-    /** @return the task-specific error data. */
-    const std::string& data() const { return _data; }
-private:
-    const int _code;
-    const std::string _data;
+    const int code;
+    const std::string data;
 };
 }

@@ -409,9 +409,9 @@ private:
         _meshLoader.clear();
 
         scene.resetMaterials();
-        const bool success = _loadData(loadingProgress);
+        _loadData(loadingProgress);
 
-        if (!success || (scene.empty() && !scene.getVolumeHandler()))
+        if (scene.empty() && !scene.getVolumeHandler())
         {
             scene.unload();
             _meshLoader.clear();
@@ -467,7 +467,7 @@ private:
         }
     }
 
-    bool _loadData(boost::progress_display& loadingProgress)
+    void _loadData(boost::progress_display& loadingProgress)
     {
         size_t nextTic = 0;
         const size_t tic = LOADING_PROGRESS_DATA;
@@ -584,7 +584,6 @@ private:
                               Vector3f(volumeDimensions) *
                                   volumeElementSpacing);
         }
-        return true;
     }
 
     /**
