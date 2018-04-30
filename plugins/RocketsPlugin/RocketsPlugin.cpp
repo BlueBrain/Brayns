@@ -48,9 +48,9 @@
 namespace
 {
 const std::string ENDPOINT_API_VERSION = "v1/";
+const std::string ENDPOINT_ANIMATION_PARAMS = "animation-params";
 const std::string ENDPOINT_APP_PARAMS = "application-parameters";
 const std::string ENDPOINT_CAMERA = "camera";
-const std::string ENDPOINT_FRAME = "frame";
 const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
 const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
 const std::string ENDPOINT_IMAGE_JPEG = "image-jpeg";
@@ -170,7 +170,7 @@ public:
 
         // only broadcast changes that are a result of the rendering. All other
         // changes are already broadcasted in preRender().
-        _wsBroadcastOperations[ENDPOINT_FRAME]();
+        _wsBroadcastOperations[ENDPOINT_ANIMATION_PARAMS]();
         _wsBroadcastOperations[ENDPOINT_IMAGE_JPEG]();
         _wsBroadcastOperations[ENDPOINT_STATISTICS]();
     }
@@ -532,7 +532,8 @@ public:
 
         _handle(ENDPOINT_APP_PARAMS,
                 _parametersManager.getApplicationParameters());
-        _handle(ENDPOINT_FRAME, _parametersManager.getAnimationParameters());
+        _handle(ENDPOINT_ANIMATION_PARAMS,
+                _parametersManager.getAnimationParameters());
         _handle(ENDPOINT_RENDERING_PARAMS,
                 _parametersManager.getRenderingParameters());
         _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
