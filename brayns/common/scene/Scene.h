@@ -376,12 +376,12 @@ public:
     /**
      * Load the data from the given file.
      *
-     * @param filename the file containing the data to import
+     * @param path the file or folder containing the data to import
      * @param transformation the transformation to apply for the added model
      * @param materialID the default material ot use
      * @param cb the callback for progress updates from the loader
      */
-    void load(const std::string& filename, const Matrix4f& transformation,
+    void load(const std::string& path, const Matrix4f& transformation,
               const size_t materialID, Loader::UpdateCallback cb);
 
     /** @return the registry for all supported loaders of this scene. */

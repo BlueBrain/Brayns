@@ -199,10 +199,10 @@ void Scene::load(Blob&& blob, const Matrix4f& transformation,
                          cb);
 }
 
-void Scene::load(const std::string& filename, const Matrix4f& transformation,
+void Scene::load(const std::string& path, const Matrix4f& transformation,
                  const size_t materialID, Loader::UpdateCallback cb)
 {
-    _loaderRegistry.load(filename, *this, transformation, materialID, cb);
+    _loaderRegistry.load(path, *this, transformation, materialID, cb);
 }
 
 Material& Scene::getMaterial(size_t index)

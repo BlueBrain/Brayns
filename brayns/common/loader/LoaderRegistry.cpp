@@ -83,9 +83,11 @@ void LoaderRegistry::load(const std::string& path, Scene& scene,
         if (fs::is_directory(path))
         {
             fs::directory_iterator begin(path), end;
-            const int numFiles = std::count_if(begin, end, [](const auto& d) {
-                return !fs::is_directory(d.path());
-            });
+            const int numFiles =
+                std::count_if(begin, end, [this, &entry](const auto& d) {
+                    return !fs::is_directory(d.path()) &&
+                           this->_isSupported(entry, d.path().string());
+                });
 
             float total = 0.f;
             auto progressCb = [cb, numFiles, &total](auto msg, auto amount) {
@@ -101,8 +103,6 @@ void LoaderRegistry::load(const std::string& path, Scene& scene,
                 if (_isSupported(entry, currentPath))
                     loader->importFromFile(currentPath, scene, transformation,
                                            materialID);
-                else
-                    progressCb("Skip file", 1.f);
             }
         }
         else

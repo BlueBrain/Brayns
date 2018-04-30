@@ -106,8 +106,31 @@ public:
             return offset + materialId;
         };
 
-        return _importMorphology(source, index, materialFunc, transformation,
-                                 compartmentReport, sceneContainer);
+        return importMorphology(source, index, materialFunc, transformation,
+                                compartmentReport, sceneContainer);
+    }
+
+    bool importMorphology(const servus::URI& source, const uint64_t index,
+                          MaterialFunc materialFunc,
+                          const Matrix4f& transformation,
+                          CompartmentReportPtr compartmentReport,
+                          ParallelSceneContainer& scene)
+    {
+        bool returnValue = true;
+        const size_t morphologySectionTypes =
+            enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
+        if (morphologySectionTypes ==
+            static_cast<size_t>(MorphologySectionType::soma))
+            return _importMorphologyAsPoint(index, materialFunc, transformation,
+                                            compartmentReport, scene);
+        else if (_geometryParameters.useRealisticSomas())
+            returnValue = _createRealisticSoma(source, materialFunc,
+                                               transformation, scene);
+        returnValue =
+            returnValue &&
+            _importMorphologyFromURI(source, index, materialFunc,
+                                     transformation, compartmentReport, scene);
+        return returnValue;
     }
 
 private:
@@ -528,30 +551,6 @@ private:
         return true;
     }
 
-public:
-    bool _importMorphology(const servus::URI& source, const uint64_t index,
-                           MaterialFunc materialFunc,
-                           const Matrix4f& transformation,
-                           CompartmentReportPtr compartmentReport,
-                           ParallelSceneContainer& scene)
-    {
-        bool returnValue = true;
-        const size_t morphologySectionTypes =
-            enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
-        if (morphologySectionTypes ==
-            static_cast<size_t>(MorphologySectionType::soma))
-            return _importMorphologyAsPoint(index, materialFunc, transformation,
-                                            compartmentReport, scene);
-        else if (_geometryParameters.useRealisticSomas())
-            returnValue = _createRealisticSoma(source, materialFunc,
-                                               transformation, scene);
-        returnValue =
-            returnValue &&
-            _importMorphologyFromURI(source, index, materialFunc,
-                                     transformation, compartmentReport, scene);
-        return returnValue;
-    }
-
 private:
     const GeometryParameters& _geometryParameters;
 };
@@ -602,7 +601,7 @@ bool MorphologyLoader::_importMorphology(const servus::URI& source,
                                          CompartmentReportPtr compartmentReport,
                                          ParallelSceneContainer& scene)
 {
-    return _impl->_importMorphology(source, index, materialFunc, transformation,
-                                    compartmentReport, scene);
+    return _impl->importMorphology(source, index, materialFunc, transformation,
+                                   compartmentReport, scene);
 }
 }
