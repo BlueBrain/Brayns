@@ -54,4 +54,13 @@ strings parseFolder(const std::string& folder, const strings& filters)
     std::sort(files.begin(), files.end());
     return files;
 }
+
+std::string getNameFromFullPath(const std::string& fileName)
+{
+    // Remove folder
+    std::string name = fileName.substr(fileName.find_last_of("/\\") + 1);
+    // Remove extension
+    name = name.substr(0, name.find_last_of("."));
+    return name;
+}
 }

@@ -73,22 +73,16 @@ public:
     std::string getMeshFilenameFromGID(const uint64_t gid);
 
 private:
-#ifdef BRAYNS_USE_ASSIMP
-    void _createMaterials(Scene& scene, const aiScene* aiScene,
-                          const std::string& folder);
+#if (BRAYNS_USE_ASSIMP)
+    void _createMaterials(const std::string& meshName, Model& model,
+                          const aiScene* aiScene, const std::string& folder);
 
     void _postLoad(const aiScene* aiScene, Scene& scene,
                    const Matrix4f& transformation, const size_t defaultMaterial,
                    const std::string& folder = "");
     size_t _getQuality() const;
 #endif
-
-    size_t _getMaterialId(const size_t materialId,
-                          const size_t defaultMaterial = NO_MATERIAL);
-
-    std::map<size_t, size_t> _meshIndex;
     const GeometryParameters& _geometryParameters;
-    size_t _materialOffset;
 };
 }
 

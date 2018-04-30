@@ -43,13 +43,13 @@ void ProximityRenderer::commit()
     _detectionOnDifferentMaterial =
         bool(getParam1i("detectionOnDifferentMaterial", 0));
 
-    ispc::ProximityRenderer_set(getIE(), (ispc::vec3f&)_bgColor,
+    ispc::ProximityRenderer_set(getIE(),
+                                (_bgMaterial ? _bgMaterial->getIE() : nullptr),
                                 (ispc::vec3f&)_nearColor,
                                 (ispc::vec3f&)_farColor, _detectionDistance,
                                 _detectionOnDifferentMaterial, _randomNumber,
                                 _timestamp, _spp, _electronShadingEnabled,
-                                _lightPtr, _lightArray.size(), _materialPtr,
-                                _materialArray.size());
+                                _lightPtr, _lightArray.size());
 }
 
 ProximityRenderer::ProximityRenderer()

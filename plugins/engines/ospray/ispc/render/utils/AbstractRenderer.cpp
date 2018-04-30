@@ -22,9 +22,6 @@
 
 #include "AbstractRenderer.h"
 
-// obj
-#include <plugins/engines/ospray/ispc/render/ExtendedOBJMaterial.h>
-
 // ospray
 #include <ospray/SDK/common/Data.h>
 #include <ospray/SDK/lights/Light.h>
@@ -52,7 +49,6 @@ void AbstractRenderer::commit()
 
     _lightPtr = _lightArray.empty() ? nullptr : &_lightArray[0];
 
-    _bgColor = getParam3f("bgColor", ospray::vec3f(1.f));
     _shadows = getParam1f("shadows", 0.f);
     _softShadows = getParam1f("softShadows", 0.f);
     _ambientOcclusionStrength = getParam1f("aoWeight", 0.f);
@@ -62,15 +58,9 @@ void AbstractRenderer::commit()
     _timestamp = getParam1f("timestamp", 0.f);
     _spp = getParam1i("spp", 1);
     _electronShadingEnabled = bool(getParam1i("electronShading", 0));
-
-    // Those materials are used for simulation mapping only
-    _materialData = (ospray::Data*)getParamData("materials");
-    _materialArray.clear();
-    if (_materialData)
-        for (size_t i = 0; i < _materialData->size(); ++i)
-            _materialArray.push_back(
-                ((ospray::Material**)_materialData->data)[i]->getIE());
-    _materialPtr = _materialArray.empty() ? nullptr : &_materialArray[0];
+    _bgMaterial =
+        (brayns::obj::ExtendedOBJMaterial*)getParamObject("bgMaterial",
+                                                          nullptr);
 }
 
 /*! \brief create a material of given type */

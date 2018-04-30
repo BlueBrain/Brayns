@@ -20,25 +20,41 @@
 
 #include "Material.h"
 
+#include <brayns/io/ImageManager.h>
+
 namespace brayns
 {
 Material::Material()
-    : _materialType(MaterialType::surface)
-    , _color(1.f, 1.f, 1.f)
-    , _specularColor(1.f, 1.f, 1.f)
-    , _specularExponent(10.f)
-    , _reflectionIndex(0.f)
-    , _opacity(1.f)
-    , _refractionIndex(1.f)
-    , _emission(0.f)
-    , _glossiness(1.f)
-    , _castSimulationData(true)
-    , _locked(false)
+    : BaseObject()
 {
 }
 
-void Material::setTexture(const TextureType& type, const std::string& filename)
+Texture2DPtr Material::getTexture(const TextureType& type)
 {
-    _textures[type] = filename;
+    if (_textureDescriptors.find(type) == _textureDescriptors.end())
+        return nullptr;
+    return _textureDescriptors[type];
+}
+
+bool Material::_loadTexture(const std::string& fileName)
+{
+    if (_textures.find(fileName) != _textures.end())
+        return true;
+
+    auto texture = ImageManager::importTextureFromFile(fileName);
+    if (!texture)
+        return false;
+
+    _textures[fileName] = texture;
+    return true;
+}
+
+void Material::setTexture(const std::string& fileName, const TextureType& type)
+{
+    if (_textures.find(fileName) == _textures.end())
+        if (!_loadTexture(fileName))
+            throw std::runtime_error("Failed to load texture from " + fileName);
+    _textureDescriptors[type] = _textures[fileName];
+    markModified();
 }
 }

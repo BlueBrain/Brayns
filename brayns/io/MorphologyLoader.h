@@ -23,6 +23,7 @@
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
+#include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <brain/neuron/types.h>
@@ -66,8 +67,8 @@ public:
      * @param transformation Transformation to apply to the morphology
      * @return True if the morphology is successfully loaded, false otherwise
      */
-    bool importMorphology(const servus::URI& source, Scene& scene,
-                          const uint64_t index, const size_t material,
+    bool importMorphology(const servus::URI& source, const uint64_t index,
+                          Model& model,
                           const Matrix4f& transformation = Matrix4f());
 
 private:

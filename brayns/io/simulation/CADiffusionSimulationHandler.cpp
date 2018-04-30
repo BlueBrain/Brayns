@@ -20,7 +20,9 @@
 
 #include "CADiffusionSimulationHandler.h"
 
-#include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/engine/Engine.h>
+#include <brayns/common/geometry/Model.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -30,6 +32,7 @@
 namespace
 {
 const float CALCIUM_RADIUS = 0.00194f;
+const size_t CALCIUM_MATERIAL_ID = 0;
 }
 
 namespace brayns
@@ -85,7 +88,7 @@ bool CADiffusionSimulationHandler::_loadCalciumPositions(const size_t frame)
     return true;
 }
 
-void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
+void CADiffusionSimulationHandler::setFrame(Model& model, const size_t frame)
 {
     BRAYNS_DEBUG << "Setting Calcium Positions frame to " << frame << std::endl;
     if (frame == _currentFrame)
@@ -95,14 +98,14 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
 
     // Load Calcium positions
     _loadCalciumPositions(frame);
-    const size_t materialId =
-        static_cast<size_t>(MaterialType::calcium_simulation);
+    auto material = model.createMaterial(CALCIUM_MATERIAL_ID, "Calcium");
+    material->setDiffuseColor({1.f, 1.f, 1.f});
     if (!_spheresCreated)
     {
         BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
                     << std::endl;
         for (const auto position : _calciumPositions)
-            scene.addSphere(materialId, {position, CALCIUM_RADIUS});
+            model.addSphere(CALCIUM_MATERIAL_ID, {position, CALCIUM_RADIUS});
         _spheresCreated = true;
     }
     else
@@ -110,7 +113,8 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
         uint64_t i = 0;
         for (const auto position : _calciumPositions)
         {
-            scene.setSphere(i, materialId, Sphere(position, CALCIUM_RADIUS));
+            model.setSphere(CALCIUM_MATERIAL_ID, i,
+                            Sphere(position, CALCIUM_RADIUS));
             ++i;
         }
     }

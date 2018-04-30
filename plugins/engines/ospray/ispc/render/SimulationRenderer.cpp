@@ -58,11 +58,10 @@ void SimulationRenderer::commit()
 
     ispc::SimulationRenderer_set(
         getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
-        (ispc::vec3f&)_bgColor, _shadows, _softShadows,
+        (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
         _ambientOcclusionStrength, _ambientOcclusionDistance, _shadingEnabled,
         _randomNumber, _timestamp, _spp, _electronShadingEnabled, _lightPtr,
-        _lightArray.size(), _materialPtr, _materialArray.size(),
-        _volumeData ? (uint8*)_volumeData->data : NULL,
+        _lightArray.size(), _volumeData ? (uint8*)_volumeData->data : NULL,
         (ispc::vec3i&)_volumeDimensions, (ispc::vec3f&)_volumeElementSpacing,
         (ispc::vec3f&)_volumeOffset, _volumeEpsilon, _volumeSamplesPerRay,
         _simulationData ? (float*)_simulationData->data : NULL,

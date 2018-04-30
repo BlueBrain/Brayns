@@ -29,9 +29,6 @@
 #include <brayns/common/Timer.h>
 #include <brayns/common/tasks/Task.h>
 #include <brayns/common/volume/VolumeHandler.h>
-
-#include <brayns/parameters/ParametersManager.h>
-
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brayns/tasks/UploadBinaryTask.h>
@@ -539,7 +536,8 @@ public:
                 _engine->getScene().getTransferFunction());
         _handleGET(ENDPOINT_SCENE, _engine->getScene());
         _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
-                   [](Scene& scene) { scene.commitMaterials(Action::update); });
+                   [](Scene& scene) { scene.markModified(); });
+
         _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
 
         _handleFrameBuffer();

@@ -307,13 +307,12 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     }
 }
 
-inline void processBackgroundColor(varying ScreenSample& sample,
+inline void processBackgroundColor(varying ScreenSample& sample, Ray& ray,
                                    ShadingAttributes& attributes)
 {
     // No intersection. Return volume contribution + skybox color
-    const vec4f bgColor = skyboxMapping((Renderer*)attributes.self, sample.ray,
-                                        attributes.self->abstract.numMaterials,
-                                        attributes.self->abstract.materials);
+    const vec4f bgColor = skyboxMapping((Renderer*)attributes.self, ray,
+                                        attributes.self->abstract.bgMaterial);
 
     attributes.shadingContribution = make_vec3f(bgColor);
 }
@@ -472,7 +471,7 @@ inline vec3f SimulationRenderer_shadeRay(
         if (ray.geomID < 0)
         {
             // Background contribution
-            processBackgroundColor(sample, attributes);
+            processBackgroundColor(sample, ray, attributes);
 
             // Volume contribution
             processVolumeContribution(sample, attributes, ray);
@@ -616,15 +615,14 @@ export void* uniform SimulationRenderer_create(void* uniform cppE)
 
 export void SimulationRenderer_set(
     void* uniform _self, void* uniform simulationModel,
-    const uniform vec3f& bgColor, const uniform float& shadows,
+    void* uniform bgMaterial, const uniform float& shadows,
     const uniform float& softShadows,
     const uniform float& ambientOcclusionStrength,
     const uniform float& ambientOcclusionDistance,
     const uniform bool& shadingEnabled, const uniform int& randomNumber,
     const uniform float& timestamp, const uniform int& spp,
     const uniform bool& electronShadingEnabled, void** uniform lights,
-    const uniform int32 numLights, void** uniform materials,
-    const uniform int32 numMaterials, uniform uint8* uniform volumeData,
+    const uniform int32 numLights, uniform uint8* uniform volumeData,
     const uniform vec3i& volumeDimensions,
     const uniform vec3f& volumeElementSpacing,
     const uniform vec3f& volumeOffset, const uniform float& volumeEpsilon,
@@ -639,7 +637,9 @@ export void SimulationRenderer_set(
     uniform SimulationRenderer* uniform self =
         (uniform SimulationRenderer * uniform)_self;
 
-    self->abstract.bgColor = bgColor;
+    self->abstract.bgMaterial =
+        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+
     self->abstract.shadows = shadows;
     self->abstract.softShadows = softShadows;
     self->abstract.ambientOcclusionStrength = ambientOcclusionStrength;
@@ -652,10 +652,6 @@ export void SimulationRenderer_set(
 
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
-
-    self->abstract.materials =
-        (const uniform ExtendedOBJMaterial* uniform* uniform)materials;
-    self->abstract.numMaterials = numMaterials;
 
     self->abstract.volumeData = (uniform uint8 * uniform)volumeData;
     self->abstract.volumeDimensions = volumeDimensions;

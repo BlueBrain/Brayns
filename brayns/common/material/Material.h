@@ -22,87 +22,129 @@
 #define MATERIAL_H
 
 #include <brayns/api.h>
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(Material)
+SERIALIZATION_ACCESS(TextureDescriptor)
 
 namespace brayns
 {
-typedef std::map<TextureType, std::string> TextureTypes;
+enum TextureType
+{
+    TT_DIFFUSE = 0,
+    TT_NORMALS,
+    TT_BUMP,
+    TT_SPECULAR,
+    TT_EMISSIVE,
+    TT_OPACITY,
+    TT_REFLECTION,
+    TT_REFRACTION,
+    TT_OCCLUSION
+};
 
-class Material
+struct TextureTypeMaterialAttribute
+{
+    TextureType type;
+    std::string attribute;
+};
+
+static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
+    {TT_DIFFUSE, "map_kd"},
+    {TT_NORMALS, "map_bump"},
+    {TT_SPECULAR, "map_ks"},
+    {TT_EMISSIVE, "map_a"},
+    {TT_OPACITY, "map_d"},
+    {TT_REFLECTION, "map_reflection"},
+    {TT_REFRACTION, "map_refraction"}};
+
+typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
+
+class Material : public BaseObject
 {
 public:
-    Material();
-    BRAYNS_API MaterialType getType() const { return _materialType; }
-    BRAYNS_API void setType(const MaterialType materialType)
+    BRAYNS_API Material();
+    BRAYNS_API Material(Material&& rhs) = default;
+    BRAYNS_API Material& operator=(Material&& rhs) = default;
+
+    /**
+     * Called after material change
+     */
+    BRAYNS_API virtual void commit() = 0;
+
+    BRAYNS_API std::string getName() const { return _name; }
+    BRAYNS_API void setName(const std::string& value)
     {
-        _materialType = materialType;
+        _updateValue(_name, value);
     }
-    BRAYNS_API void setColor(const Vector3f& value) { _color = value; }
-    BRAYNS_API Vector3f& getColor() { return _color; }
+    BRAYNS_API void setDiffuseColor(const Vector3f& value)
+    {
+        _updateValue(_diffuseColor, value);
+    }
+    BRAYNS_API Vector3f& getDiffuseColor() { return _diffuseColor; }
     BRAYNS_API void setSpecularColor(const Vector3f& value)
     {
-        _specularColor = value;
+        _updateValue(_specularColor, value);
     }
     BRAYNS_API Vector3f& getSpecularColor() { return _specularColor; }
     BRAYNS_API void setSpecularExponent(float value)
     {
-        _specularExponent = value;
+        _updateValue(_specularExponent, value);
     }
     BRAYNS_API float getSpecularExponent() const { return _specularExponent; }
     BRAYNS_API void setReflectionIndex(float value)
     {
-        _reflectionIndex = value;
+        _updateValue(_reflectionIndex, value);
     }
     BRAYNS_API float getReflectionIndex() const { return _reflectionIndex; }
-    BRAYNS_API void setOpacity(float value) { _opacity = value; }
+    BRAYNS_API void setOpacity(float value) { _updateValue(_opacity, value); }
     BRAYNS_API float getOpacity() const { return _opacity; }
     BRAYNS_API void setRefractionIndex(float value)
     {
-        _refractionIndex = value;
+        _updateValue(_refractionIndex, value);
     }
     BRAYNS_API float getRefractionIndex() const { return _refractionIndex; }
-    BRAYNS_API void setEmission(float value) { _emission = value; }
+    BRAYNS_API void setEmission(float value) { _updateValue(_emission, value); }
     BRAYNS_API float getEmission() const { return _emission; }
-    BRAYNS_API void setGlossiness(float value) { _glossiness = value; }
+    BRAYNS_API void setGlossiness(float value)
+    {
+        _updateValue(_glossiness, value);
+    }
     BRAYNS_API float getGlossiness() const { return _glossiness; }
     BRAYNS_API void setCastSimulationData(bool value)
     {
-        _castSimulationData = value;
+        _updateValue(_castSimulationData, value);
     }
     BRAYNS_API bool getCastSimulationData() const
     {
         return _castSimulationData;
     }
-    BRAYNS_API TextureTypes& getTextures() { return _textures; }
-    BRAYNS_API void setTexture(const TextureType& type,
-                               const std::string& filename);
+    BRAYNS_API TextureDescriptors& getTextureDescriptors()
+    {
+        return _textureDescriptors;
+    }
+    BRAYNS_API void setTexture(const std::string& fileName,
+                               const TextureType& type);
 
-    /* @brief Prevents material attributes to be updated. Any update will be
-     * ignored. This is used when one wants to avoid material attributes to be
-     * modifiied during the life time of the scene
-    */
-    BRAYNS_API void lock() { _locked = true; }
-    /* @brief Allows material attributes to be modified */
-    BRAYNS_API void unlock() { _locked = false; }
-    /* @return True if material attributes can be updated, false otherwise */
-    BRAYNS_API bool locked() const { return _locked; }
-private:
-    MaterialType _materialType;
-    Vector3f _color;
-    Vector3f _specularColor;
-    float _specularExponent;
-    float _reflectionIndex;
-    float _opacity;
-    float _refractionIndex;
-    float _emission;
-    float _glossiness;
-    bool _castSimulationData;
-    TextureTypes _textures;
-    bool _locked;
+    BRAYNS_API Texture2DPtr getTexture(const TextureType& type);
+
+protected:
+    bool _loadTexture(const std::string& fileName);
+
+    std::string _name{"undefined"};
+    Vector3f _diffuseColor{1.f, 1.f, 1.f};
+    Vector3f _specularColor{1.f, 1.f, 1.f};
+    float _specularExponent{10.f};
+    float _reflectionIndex{0.f};
+    float _opacity{1.f};
+    float _refractionIndex{1.f};
+    float _emission{0.f};
+    float _glossiness{1.f};
+    bool _castSimulationData{true};
+    TexturesMap _textures;
+    TextureDescriptors _textureDescriptors;
 
     SERIALIZATION_FRIEND(Material)
 };

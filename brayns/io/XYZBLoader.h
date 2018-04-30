@@ -33,11 +33,11 @@ public:
 
     static std::set<std::string> getSupportedDataTypes();
 
-    void importFromBlob(Blob&& blob, Scene& scene,
+    void importFromBlob(Blob&& blob, Model& model,
                         const Matrix4f& transformation,
                         const size_t materialID) final;
 
-    void importFromFile(const std::string& filename, Scene& scene,
+    void importFromFile(const std::string& filename, Model& model,
                         const Matrix4f& transformation,
                         const size_t materialID) final;
 

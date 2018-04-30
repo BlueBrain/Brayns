@@ -18,13 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "XYZBLoader.h"
-
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
-
 #include <fstream>
+
+#include "XYZBLoader.h"
 
 namespace brayns
 {
@@ -33,18 +33,8 @@ XYZBLoader::XYZBLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-std::set<std::string> XYZBLoader::getSupportedDataTypes()
+void XYZBLoader::importFromBlob(const Blob& blob, Model& model)
 {
-    return {"xyz"};
-}
-
-void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
-                                const Matrix4f& transformation,
-                                size_t materialID)
-{
-    if (materialID == NO_MATERIAL)
-        materialID = 0;
-
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
     std::stringstream stream(blob.data);
@@ -55,6 +45,7 @@ void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
     }
     stream.seekg(0);
 
+    const size_t materialID = 0;
     auto& spheres = scene.getSpheres()[materialID];
     const size_t startOffset = spheres.size();
     spheres.reserve(spheres.size() + numlines);
@@ -114,6 +105,6 @@ void XYZBLoader::importFromFile(const std::string& filename, Scene& scene,
                     filename,
                     {std::istreambuf_iterator<char>(file),
                      std::istreambuf_iterator<char>()}},
-                   scene, transformation, materialID);
+                   model, transformation, materialID);
 }
 }

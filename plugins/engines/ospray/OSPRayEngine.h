@@ -66,6 +66,8 @@ public:
         const RenderingParameters& renderingParameters) const final;
 
 private:
+    uint32_t _getOSPDataFlags();
+
     Renderers _createRenderers();
 
     bool _haveDeflectPixelOp{false};

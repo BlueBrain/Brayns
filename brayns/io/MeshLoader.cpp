@@ -32,6 +32,7 @@
 #include <fstream>
 #endif
 
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 
@@ -409,6 +410,7 @@ size_t MeshLoader::_getQuality() const
     }
 }
 
+
 std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
 {
     const auto meshedMorphologiesFolder =
@@ -424,14 +426,6 @@ std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
         meshFilenamePattern = gidAsString;
     return meshedMorphologiesFolder + "/" + meshFilenamePattern;
 }
-
-size_t MeshLoader::_getMaterialId(const size_t materialId,
-                                  const size_t defaultMaterial)
-{
-    return (defaultMaterial == NO_MATERIAL ? _materialOffset + materialId
-                                           : defaultMaterial);
-}
-
 #else
 namespace
 {

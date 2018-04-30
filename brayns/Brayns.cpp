@@ -185,7 +185,7 @@ struct Brayns::Impl : public PluginAPI
         if (!dataLock.try_lock())
             return false;
 
-        Scene& scene = _engine->getScene();
+        auto& scene = _engine->getScene();
 
         // consider updates on the scene also from plugins, not only 'our own'
         // built-in data loading
@@ -197,7 +197,7 @@ struct Brayns::Impl : public PluginAPI
         _engine->setActiveRenderer(
             _parametersManager.getRenderingParameters().getRenderer());
 
-        const Vector2ui windowSize =
+        const auto windowSize =
             _parametersManager.getApplicationParameters().getWindowSize();
 
         _engine->reshape(windowSize);
@@ -342,12 +342,6 @@ struct Brayns::Impl : public PluginAPI
             _loadScene();
 
         promise.set_value();
-
-        const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
-
-        auto& camera = _engine->getCamera();
-        camera.setInitialState(_engine->getScene().getWorldBounds());
-        camera.setAspectRatio(frameSize.x() / frameSize.y());
     }
 
     bool preRender(const RenderInput& renderInput)
@@ -434,7 +428,7 @@ private:
             LOADING_PROGRESS_DATA + 3 * LOADING_PROGRESS_STEP, std::cout,
             "[INFO ] Loading scene ...\n[INFO ] ", "[INFO ] ", "[INFO ] ");
 
-        Scene& scene = _engine->getScene();
+        auto& scene = _engine->getScene();
 
         scene.unload();
         loadingProgress += LOADING_PROGRESS_STEP;
@@ -481,6 +475,12 @@ private:
 
         _engine->getStatistics().setSceneSizeInBytes(
             _engine->getScene().getSizeInBytes());
+
+        // Set default camera position
+        const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
+        auto& camera = _engine->getCamera();
+        camera.setInitialState(_engine->getScene().getBounds());
+        camera.setAspectRatio(frameSize.x() / frameSize.y());
 
         // finish reporting of progress
         postSceneLoading();
@@ -584,9 +584,6 @@ private:
         if (!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getConnectivityFile().empty())
             _loadCircuitConfiguration(updateProgress);
-
-        if (!geometryParameters.getConnectivityFile().empty())
-            _loadConnectivityFile();
 #endif
 
         if (!geometryParameters.getXYZBFile().empty())
@@ -742,23 +739,6 @@ private:
 
 #if (BRAYNS_USE_BRION)
     /**
-        Loads data from a neuron connectivity file (command line parameter
-       --connectivity-file)
-    */
-    void _loadConnectivityFile()
-    {
-        // Load Connectivity File
-        GeometryParameters& geometryParameters =
-            _parametersManager.getGeometryParameters();
-        ConnectivityLoader connectivityLoader(geometryParameters);
-        if (!connectivityLoader.importFromFile(_engine->getScene(),
-                                               _meshLoader))
-            BRAYNS_ERROR << "Failed to import "
-                         << geometryParameters.getConnectivityFile()
-                         << std::endl;
-    }
-
-    /**
      * Loads data from a NEST circuit file (command line parameter
      * --nest-circuit)
      */
@@ -908,8 +888,8 @@ private:
             '3', "Set gradient materials",
             std::bind(&Brayns::Impl::_gradientMaterials, this));
         _keyboardHandler.registerKeyboardShortcut(
-            '4', "Set pastel materials",
-            std::bind(&Brayns::Impl::_pastelMaterials, this));
+            '4', "Set random materials",
+            std::bind(&Brayns::Impl::_randomMaterials, this));
         _keyboardHandler.registerKeyboardShortcut(
             '5', "Scientific visualization renderer",
             std::bind(&Brayns::Impl::_scivisRenderer, this));
@@ -1226,17 +1206,20 @@ private:
 
     void _gradientMaterials()
     {
-        _engine->initializeMaterials(MaterialsColorMap::gradient);
+        _engine->getScene().setMaterialsColorMap(MaterialsColorMap::gradient);
+        _engine->getFrameBuffer().clear();
     }
 
     void _pastelMaterials()
     {
-        _engine->initializeMaterials(MaterialsColorMap::pastel);
+        _engine->getScene().setMaterialsColorMap(MaterialsColorMap::pastel);
+        _engine->getFrameBuffer().clear();
     }
 
     void _randomMaterials()
     {
-        _engine->initializeMaterials(MaterialsColorMap::random);
+        _engine->getScene().setMaterialsColorMap(MaterialsColorMap::random);
+        _engine->getFrameBuffer().clear();
     }
 
     void _toggleAnimationPlayback()

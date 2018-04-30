@@ -20,8 +20,10 @@
 
 #include "ProteinLoader.h"
 
-#include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/engine/Engine.h>
+#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 
@@ -312,8 +314,10 @@ ProteinLoader::ProteinLoader(const GeometryParameters& geometryParameters)
 
 bool ProteinLoader::importPDBFile(const std::string& filename,
                                   const Vector3f& position,
-                                  const size_t proteinIndex, Scene& scene)
+                                  const size_t proteinIndex, Model& model)
 {
+    std::map<size_t, Spheres> spheres;
+
     int index(0);
     std::ifstream file(filename.c_str());
     if (!file.is_open())
@@ -401,16 +405,10 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                         switch (colorScheme)
                         {
                         case ColorScheme::protein_chains:
-                            atom.materialId = NB_SYSTEM_MATERIALS +
-                                              abs(atom.chainId) %
-                                                  (scene.getMaterials().size() -
-                                                   NB_SYSTEM_MATERIALS);
+                            atom.materialId = abs(atom.chainId);
                             break;
                         case ColorScheme::protein_residues:
-                            atom.materialId = NB_SYSTEM_MATERIALS +
-                                              abs(atom.residue) %
-                                                  (scene.getMaterials().size() -
-                                                   NB_SYSTEM_MATERIALS);
+                            atom.materialId = atom.residue;
                             break;
                         default:
                             atom.materialId = static_cast<int>(i);
@@ -434,27 +432,34 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                     ++i;
                 }
 
-                const auto materialId =
-                    colorScheme == ColorScheme::protein_by_id
-                        ? proteinIndex % scene.getMaterials().size()
-                        : atom.materialId;
                 // Convert position from nanometers
                 const auto center = position + 0.01f * atom.position;
+
                 // Convert radius from angstrom
                 const auto radius = 0.0001f * atom.radius *
                                     _geometryParameters.getRadiusMultiplier();
-                scene.addSphere(materialId, {center, radius});
+
+                const auto materialId =
+                    colorScheme == ColorScheme::protein_by_id ? proteinIndex
+                                                              : atom.materialId;
+                spheres[materialId].push_back({center, radius});
             }
         }
         file.close();
+
+        // Add materials and spheres
+        size_t i = 0;
+        for (const auto& spheresPerMaterial : spheres)
+        {
+            auto material = model.createMaterial(i, colorMap[i].symbol);
+            material->setDiffuseColor({colorMap[i].R / 255.f,
+                                       colorMap[i].G / 255.f,
+                                       colorMap[i].B / 255.f});
+            for (const auto& sphere : spheresPerMaterial.second)
+                model.addSphere(i, sphere);
+            ++i;
+        }
     }
-
     return true;
-}
-
-Vector3f ProteinLoader::getMaterialKd(const size_t index)
-{
-    return Vector3f(colorMap[index].R / 255.f, colorMap[index].G / 255.f,
-                    colorMap[index].B / 255.f);
 }
 }

@@ -28,6 +28,8 @@ class BaseObject
 {
 public:
     virtual ~BaseObject() = default;
+    BaseObject(BaseObject&& rhs) = default;
+    BaseObject& operator=(BaseObject&& rhs) = default;
 
     /**
      * @return true if any parameter has been modified since the last
@@ -55,6 +57,6 @@ protected:
     }
 
 private:
-    std::atomic_bool _modified{true};
+    bool _modified{true};
 };
 }
