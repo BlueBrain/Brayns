@@ -53,66 +53,15 @@ std::set<std::string> LoaderRegistry::supportedTypes() const
     return result;
 }
 
-void LoaderRegistry::load(Blob&& blob, Scene& scene,
-                          const Matrix4f& transformation,
-                          const size_t materialID, Loader::UpdateCallback cb)
+LoaderPtr LoaderRegistry::createLoader(const std::string& type) const
 {
     for (const auto& entry : _loaders)
     {
-        if (!_isSupported(entry, blob.type))
+        if (!_isSupported(entry, type))
             continue;
-        auto loader = entry.createLoader();
-        loader->setProgressCallback(cb);
-        loader->importFromBlob(std::move(blob), scene, transformation,
-                               materialID);
-        break;
+        return entry.createLoader();
     }
-}
-
-void LoaderRegistry::load(const std::string& path, Scene& scene,
-                          const Matrix4f& transformation,
-                          const size_t materialID, Loader::UpdateCallback cb)
-{
-    for (const auto& entry : _loaders)
-    {
-        if (!_isSupported(entry, path))
-            continue;
-
-        auto loader = entry.createLoader();
-
-        if (fs::is_directory(path))
-        {
-            fs::directory_iterator begin(path), end;
-            const int numFiles =
-                std::count_if(begin, end, [this, &entry](const auto& d) {
-                    return !fs::is_directory(d.path()) &&
-                           this->_isSupported(entry, d.path().string());
-                });
-
-            float total = 0.f;
-            auto progressCb = [cb, numFiles, &total](auto msg, auto amount) {
-                total += amount / numFiles;
-                cb(msg, total);
-            };
-            loader->setProgressCallback(progressCb);
-
-            for (const auto& i :
-                 boost::make_iterator_range(fs::directory_iterator(path), {}))
-            {
-                const auto& currentPath = i.path().string();
-                if (_isSupported(entry, currentPath))
-                    loader->importFromFile(currentPath, scene, transformation,
-                                           materialID);
-            }
-        }
-        else
-        {
-            loader->setProgressCallback(cb);
-            loader->importFromFile(path, scene, transformation, materialID);
-        }
-        return;
-    }
-    throw std::runtime_error("no loader found");
+    throw std::runtime_error("No loader found for " + type);
 }
 
 bool LoaderRegistry::_isSupported(const LoaderInfo& loader,

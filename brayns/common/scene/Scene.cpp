@@ -29,6 +29,7 @@
 #include <brayns/parameters/ParametersManager.h>
 
 #include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 #include <fstream>
 
 namespace
@@ -195,14 +196,55 @@ void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
 void Scene::load(Blob&& blob, const Matrix4f& transformation,
                  const size_t materialID, Loader::UpdateCallback cb)
 {
-    _loaderRegistry.load(std::move(blob), *this, transformation, materialID,
-                         cb);
+    auto loader = _loaderRegistry.createLoader(blob.type);
+    loader->setProgressCallback(cb);
+    loader->importFromBlob(std::move(blob), *this, transformation, materialID);
 }
 
 void Scene::load(const std::string& path, const Matrix4f& transformation,
                  const size_t materialID, Loader::UpdateCallback cb)
 {
-    _loaderRegistry.load(path, *this, transformation, materialID, cb);
+    if (fs::is_directory(path))
+    {
+        fs::directory_iterator begin(path), end;
+        const int numFiles =
+            std::count_if(begin, end,
+                          [& registry = _loaderRegistry](const auto& d) {
+                              return !fs::is_directory(d.path()) &&
+                                     registry.isSupported(d.path().string());
+                          });
+
+        float totalProgress = 0.f;
+
+        for (const auto& i :
+             boost::make_iterator_range(fs::directory_iterator(path), {}))
+        {
+            const auto& currentPath = i.path().string();
+            if (fs::is_directory(i.path()) ||
+                !_loaderRegistry.isSupported(currentPath))
+            {
+                continue;
+            }
+            auto loader = _loaderRegistry.createLoader(currentPath);
+
+            auto progressCb = [cb, numFiles, totalProgress](auto msg,
+                                                            auto amount) {
+                cb(msg, totalProgress + (amount / numFiles));
+            };
+
+            loader->setProgressCallback(progressCb);
+            loader->importFromFile(currentPath, *this, transformation,
+                                   materialID);
+
+            totalProgress += 1.f / numFiles;
+        }
+    }
+    else
+    {
+        auto loader = _loaderRegistry.createLoader(path);
+        loader->setProgressCallback(cb);
+        loader->importFromFile(path, *this, transformation, materialID);
+    }
 }
 
 Material& Scene::getMaterial(size_t index)
@@ -578,15 +620,13 @@ VolumeHandlerPtr Scene::getVolumeHandler() const
             {
                 strings filenames;
 
-                boost::filesystem::directory_iterator endIter;
-                if (boost::filesystem::is_directory(volumeFolder))
+                fs::directory_iterator endIter;
+                if (fs::is_directory(volumeFolder))
                 {
-                    for (boost::filesystem::directory_iterator dirIter(
-                             volumeFolder);
+                    for (fs::directory_iterator dirIter(volumeFolder);
                          dirIter != endIter; ++dirIter)
                     {
-                        if (boost::filesystem::is_regular_file(
-                                dirIter->status()))
+                        if (fs::is_regular_file(dirIter->status()))
                         {
                             const std::string& filename =
                                 dirIter->path().string();

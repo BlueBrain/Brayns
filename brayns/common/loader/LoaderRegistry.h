@@ -56,17 +56,11 @@ public:
     std::set<std::string> supportedTypes() const;
 
     /**
-     * Load the given blob into the given scene by choosing the first matching
-     * loader based on the blob's type.
+     * Create a loader that can load the given type (from blob or filename).
      *
-     * @param blob the blob containing the data to import
-     * @param scene the scene where to add the loaded model to
-     * @param transformation the transformation to apply for the added model
-     * @param materialID the default material ot use
-     * @param cb the callback for progress updates from the loader
+     * @param type the type of blob or file for choosing the right loader
      */
-    void load(Blob&& blob, Scene& scene, const Matrix4f& transformation,
-              const size_t materialID, Loader::UpdateCallback cb);
+    LoaderPtr createLoader(const std::string& type) const;
 
     /**
      * Load the given file or folder into the given scene by choosing the first
