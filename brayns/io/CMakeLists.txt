@@ -5,11 +5,11 @@
 
 set(BRAYNSIO_SOURCES
   algorithms/MetaballsGenerator.cpp
+  CircuitLoader.cpp
   ImageManager.cpp
   MeshLoader.cpp
   MolecularSystemReader.cpp
   ProteinLoader.cpp
-  SceneLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
   simulation/SpikeSimulationHandler.cpp
   TransferFunctionLoader.cpp
@@ -18,16 +18,19 @@ set(BRAYNSIO_SOURCES
 
 set(BRAYNSIO_PUBLIC_HEADERS
   algorithms/MetaballsGenerator.h
+  CircuitLoader.h
   ImageManager.h
   MeshLoader.h
   MolecularSystemReader.h
-  ProgressReporter.h
   ProteinLoader.h
-  SceneLoader.h
   simulation/CADiffusionSimulationHandler.h
   simulation/SpikeSimulationHandler.h
   TransferFunctionLoader.h
   XYZBLoader.h
+)
+
+set(BRAYNSIO_HEADERS
+  circuitLoaderCommon.h
 )
 
 set(BRAYNSIO_LINK_LIBRARIES
@@ -47,7 +50,7 @@ if(BRAYNS_BRION_ENABLED)
       NESTLoader.h
       simulation/CircuitSimulationHandler.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES
-      PRIVATE Brion Brain ${HDF5_LIBRARIES})
+      PUBLIC Brion PRIVATE Brain ${HDF5_LIBRARIES})
 endif()
 
 if(BRAYNS_IMAGEMAGICK_ENABLED)

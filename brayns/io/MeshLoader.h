@@ -22,10 +22,9 @@
 #define MESHLOADER_H
 
 #include <brayns/common/geometry/TrianglesMesh.h>
+#include <brayns/common/loader/Loader.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
-#include <brayns/common/types.h>
-#include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <string>
@@ -37,31 +36,20 @@ namespace brayns
 /** Loads meshes from files using the assimp library
  * http://assimp.sourceforge.net
  */
-class MeshLoader : public ProgressReporter
+class MeshLoader : public Loader
 {
 public:
     MeshLoader(const GeometryParameters& geometryParameters);
 
     static std::set<std::string> getSupportedDataTypes();
 
-    /** Imports meshes from a given file
-     *
-     * @param filename name of the file containing the meshes
-     * @param scene Scene holding the meshes
-     * @param transformation Position, orientation and scale to apply to the
-     *        mesh
-     * @param defaultMaterial Default material for the whole mesh. If set to
-     *        NO_MATERIAL, materials from the mesh file are used. Otherwise,
-     *        all meshes are forced to that specific material.
-     * @return true if the file was successfully imported. False otherwise.
-     */
-    bool importMeshFromFile(const std::string& filename, Scene& scene,
-                            const Matrix4f& transformation,
-                            const size_t defaultMaterial);
+    void importFromBlob(Blob&& blob, Scene& scene,
+                        const Matrix4f& transformation,
+                        const size_t materialID) final;
 
-    void importMeshFromBlob(const Blob& blob, Scene& scene,
-                            const Matrix4f& transformation,
-                            const size_t defaultMaterial);
+    void importFromFile(const std::string& filename, Scene& scene,
+                        const Matrix4f& transformation,
+                        const size_t materialID) final;
 
     /** Exports meshes to a given file
      *

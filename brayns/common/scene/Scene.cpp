@@ -192,6 +192,19 @@ void Scene::setMaterialsColorMap(const MaterialsColorMap colorMap)
     commitMaterials(Action::update);
 }
 
+void Scene::load(Blob&& blob, const Matrix4f& transformation,
+                 const size_t materialID, Loader::UpdateCallback cb)
+{
+    _loaderRegistry.load(std::move(blob), *this, transformation, materialID,
+                         cb);
+}
+
+void Scene::load(const std::string& filename, const Matrix4f& transformation,
+                 const size_t materialID, Loader::UpdateCallback cb)
+{
+    _loaderRegistry.load(filename, *this, transformation, materialID, cb);
+}
+
 Material& Scene::getMaterial(size_t index)
 {
     _buildMissingMaterials(index);

@@ -65,5 +65,4 @@ inline TaskRuntimeError LOADING_BINARY_FAILED(const std::string& error)
 
 const TaskRuntimeError INVALID_PATH{"Invalid path: no access or not existant",
                                     -1735};
-const TaskRuntimeError UNSUPPORTED_FOLDERS{"Folders are not supported", -1736};
 }

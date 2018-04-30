@@ -22,8 +22,8 @@
 #ifndef CONNECTIVITY_LOADER_H
 #define CONNECTIVITY_LOADER_H
 
+#include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
-#include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <string>
@@ -32,10 +32,21 @@ namespace brayns
 {
 /** Loads connectivity matrix and morphologies from H5, and Circuit Config file
  */
-class ConnectivityLoader : public ProgressReporter
+class ConnectivityLoader : public Loader
 {
 public:
     ConnectivityLoader(const GeometryParameters& geometryParameters);
+
+    void importFromBlob(Blob&&, Scene&, const Matrix4f&, const size_t) final
+    {
+        throw std::runtime_error("Unsupported");
+    }
+
+    void importFromFile(const std::string&, Scene&, const Matrix4f&,
+                        const size_t) final
+    {
+        throw std::runtime_error("Unsupported");
+    }
 
     /**
      * @brief importFromFile loads cells from circuit (--circuit-config command

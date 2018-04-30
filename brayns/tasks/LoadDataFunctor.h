@@ -44,20 +44,13 @@ private:
     void _performLoad(const std::function<void()>& loadData);
 
     void _loadData(Blob&& blob);
-    void _loadXYZBBlob(Blob&& blob);
-    void _loadMeshBlob(Blob&& blob);
-
     void _loadData(const std::string& path);
-    void _loadXYZBFile(const std::string& path);
-    void _loadMeshFile(const std::string& path);
 
     void _postLoad(bool cancellable = true);
 
     void _updateProgress(const std::string& message, const size_t increment);
 
     std::function<void(std::string, float)> _getProgressFunc();
-
-    bool _forever(const std::string& name) const;
 
     EnginePtr _engine;
     bool _loadDefaultScene{false};

@@ -279,10 +279,6 @@ public:
      * underlying renderer
      */
     MemoryMode getMemoryMode() const { return _memoryMode; };
-    /**
-     * Return the full path of the file containing a scene description
-     */
-    const std::string& getSceneFile() const { return _sceneFile; };
     /** File containing neuron matrix */
     const std::string& getConnectivityFile() const
     {
@@ -307,11 +303,6 @@ public:
     Vector3f getConnectivityScale() const
     {
         return _connectivityConfiguration._connectivityScale;
-    }
-
-    std::set<std::string>& getSupportedDataTypes()
-    {
-        return _supportedDataTypes;
     }
 
 protected:
@@ -341,7 +332,6 @@ protected:
     std::string _saveCacheFile;
     SceneEnvironment _sceneEnvironment;
     std::string _splashSceneFolder;
-    std::string _sceneFile;
 
     // Morphology
     std::string _morphologyFolder;
@@ -359,8 +349,6 @@ protected:
 
     // System parameters
     MemoryMode _memoryMode;
-
-    std::set<std::string> _supportedDataTypes;
 
     ConnectivityConfiguration _connectivityConfiguration;
 
