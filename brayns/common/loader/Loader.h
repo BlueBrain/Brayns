@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  *
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <functional>
+#include <brayns/common/types.h>
 
 #ifdef BRAYNS_USE_OPENMP
 #include <omp.h>
@@ -29,13 +29,37 @@
 namespace brayns
 {
 /**
- * A base class for any loader who wishes to report progress during loading
- * operations.
+ * A base class for data loaders to unify loading data from blobs and files, and
+ * provide progress feedback.
  */
-class ProgressReporter
+class Loader
 {
 public:
-    virtual ~ProgressReporter() = default;
+    virtual ~Loader() = default;
+
+    /**
+     * Import the data from the blob and add it to the scene.
+     *
+     * @param blob the blob containing the data to import
+     * @param scene the scene where to add the loaded model to
+     * @param transformation the transformation to apply for the added model
+     * @param materialID the default material ot use
+     */
+    virtual void importFromBlob(Blob&& blob, Scene& scene,
+                                const Matrix4f& transformation,
+                                const size_t materialID) = 0;
+
+    /**
+     * Import the data from the given file and add it to the scene.
+     *
+     * @param filename the file containing the data to import
+     * @param scene the scene where to add the loaded model to
+     * @param transformation the transformation to apply for the added model
+     * @param materialID the default material ot use
+     */
+    virtual void importFromFile(const std::string& filename, Scene& scene,
+                                const Matrix4f& transformation,
+                                const size_t materialID) = 0;
 
     /**
      * The callback for each progress update with the signature (message,

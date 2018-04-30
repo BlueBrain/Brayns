@@ -42,14 +42,12 @@ public:
      * Only one upload per client at a time is permitted.
      */
     auto createTask(const BinaryParams& params, uintptr_t clientID,
-                    const std::set<std::string>& supportedTypes,
                     EnginePtr engine)
     {
         if (_binaryRequests.count(clientID) != 0)
             throw ALREADY_PENDING_REQUEST;
 
-        auto task =
-            std::make_shared<UploadBinaryTask>(params, supportedTypes, engine);
+        auto task = std::make_shared<UploadBinaryTask>(params, engine);
         _binaryRequests.emplace(clientID, task);
         _requests.emplace(task, clientID);
 

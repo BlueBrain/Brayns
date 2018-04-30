@@ -21,8 +21,8 @@
 #ifndef MOLECULARSYSTEMREADER_H
 #define MOLECULARSYSTEMREADER_H
 
+#include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
-#include <brayns/io/ProgressReporter.h>
 #include <string>
 
 namespace brayns
@@ -47,7 +47,7 @@ typedef std::map<size_t, Vector3fs> ProteinPositions;
  *        - ProteinPositions: File containing the position of each protein
  *        - CalciumPositions: File containing the position of each CA atom
  */
-class MolecularSystemReader : public ProgressReporter
+class MolecularSystemReader : public Loader
 {
 public:
     /**
@@ -55,6 +55,17 @@ public:
      * @param geometryParameters Geometry parameters
      */
     MolecularSystemReader(const GeometryParameters& geometryParameters);
+
+    void importFromBlob(Blob&&, Scene&, const Matrix4f&, const size_t) final
+    {
+        throw std::runtime_error("Unsupported");
+    }
+
+    void importFromFile(const std::string&, Scene&, const Matrix4f&,
+                        const size_t) final
+    {
+        throw std::runtime_error("Unsupported");
+    }
 
     /**
      * @brief Imports proteins and shapes from the Molecular System

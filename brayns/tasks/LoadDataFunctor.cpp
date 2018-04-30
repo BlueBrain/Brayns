@@ -27,9 +27,6 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/scene/Scene.h>
 
-#include <brayns/io/MeshLoader.h>
-#include <brayns/io/XYZBLoader.h>
-
 #include <brayns/parameters/ParametersManager.h>
 
 #include <boost/filesystem.hpp>
@@ -67,6 +64,9 @@ void LoadDataFunctor::operator()(Blob&& blob)
 
 void LoadDataFunctor::operator()(const std::string& path)
 {
+    const boost::filesystem::path path_ = path;
+    if (!boost::filesystem::exists(path_))
+        throw INVALID_PATH;
     _performLoad([&] { _loadData(path); });
 }
 
@@ -109,76 +109,13 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
 
 void LoadDataFunctor::_loadData(Blob&& blob)
 {
-    // for unit tests
-    if (_forever(blob.type))
-        return;
-
-    if (blob.type == "xyz")
-        _loadXYZBBlob(std::move(blob));
-    else
-        _loadMeshBlob(std::move(blob));
-}
-
-void LoadDataFunctor::_loadXYZBBlob(Blob&& blob)
-{
-    auto& scene = _engine->getScene();
-    XYZBLoader xyzbLoader(
-        _engine->getParametersManager().getGeometryParameters());
-    xyzbLoader.setProgressCallback(_getProgressFunc());
-    xyzbLoader.importFromBlob(blob, scene);
-}
-
-void LoadDataFunctor::_loadMeshBlob(Blob&& blob)
-{
-    const auto& geometryParameters =
-        _engine->getParametersManager().getGeometryParameters();
-    auto& scene = _engine->getScene();
-    const size_t material =
-        geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-            ? NB_SYSTEM_MATERIALS
-            : NO_MATERIAL;
-    MeshLoader meshLoader(geometryParameters);
-    meshLoader.setProgressCallback(_getProgressFunc());
-    meshLoader.importMeshFromBlob(blob, scene, Matrix4f(), material);
+    _engine->getScene().load(std::move(blob), Matrix4f(), NO_MATERIAL,
+                             _getProgressFunc());
 }
 
 void LoadDataFunctor::_loadData(const std::string& path)
 {
-    if (_forever(path))
-        return;
-
-    auto extension = boost::filesystem::extension(path);
-    if (extension.empty())
-        return;
-
-    extension = extension.erase(0, 1);
-    if (extension == "xyz")
-        _loadXYZBFile(path);
-    else
-        _loadMeshFile(path);
-}
-
-void LoadDataFunctor::_loadXYZBFile(const std::string& path)
-{
-    auto& scene = _engine->getScene();
-    XYZBLoader xyzbLoader(
-        _engine->getParametersManager().getGeometryParameters());
-    xyzbLoader.setProgressCallback(_getProgressFunc());
-    xyzbLoader.importFromFile(path, scene);
-}
-
-void LoadDataFunctor::_loadMeshFile(const std::string& path)
-{
-    const auto& geometryParameters =
-        _engine->getParametersManager().getGeometryParameters();
-    auto& scene = _engine->getScene();
-    const size_t material =
-        geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-            ? NB_SYSTEM_MATERIALS
-            : NO_MATERIAL;
-    MeshLoader meshLoader(geometryParameters);
-    meshLoader.setProgressCallback(_getProgressFunc());
-    meshLoader.importMeshFromFile(path, scene, Matrix4f(), material);
+    _engine->getScene().load(path, Matrix4f(), NO_MATERIAL, _getProgressFunc());
 }
 
 void LoadDataFunctor::_postLoad(const bool cancellable)
@@ -232,18 +169,5 @@ std::function<void(std::string, float)> LoadDataFunctor::_getProgressFunc()
             _nextTic = newProgress;
         }
     };
-}
-
-bool LoadDataFunctor::_forever(const std::string& name) const
-{
-    if (name != "forever")
-        return false;
-
-    for (;;)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        cancelCheck();
-    }
-    return true;
 }
 }

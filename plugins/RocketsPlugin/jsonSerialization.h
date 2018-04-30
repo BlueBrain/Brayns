@@ -370,7 +370,6 @@ inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
     h->add_property("metaballs_samples_from_soma",
                     &g->_metaballsSamplesFromSoma, Flags::Optional);
     h->add_property("memory_mode", &g->_memoryMode, Flags::Optional);
-    h->add_property("scene_file", &g->_sceneFile, Flags::Optional);
     h->add_property("circuit_configuration", &g->_circuitConfiguration,
                     Flags::Optional);
     h->add_property("connectivity_configuration",

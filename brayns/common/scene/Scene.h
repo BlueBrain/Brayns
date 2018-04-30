@@ -27,6 +27,7 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
+#include <brayns/common/loader/LoaderRegistry.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
@@ -361,6 +362,30 @@ public:
 
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
+    /**
+     * Load the data from the given blob.
+     *
+     * @param blob the blob containing the data to import
+     * @param transformation the transformation to apply for the added model
+     * @param materialID the default material ot use
+     * @param cb the callback for progress updates from the loader
+     */
+    void load(Blob&& blob, const Matrix4f& transformation,
+              const size_t materialID, Loader::UpdateCallback cb);
+
+    /**
+     * Load the data from the given file.
+     *
+     * @param path the file or folder containing the data to import
+     * @param transformation the transformation to apply for the added model
+     * @param materialID the default material ot use
+     * @param cb the callback for progress updates from the loader
+     */
+    void load(const std::string& path, const Matrix4f& transformation,
+              const size_t materialID, Loader::UpdateCallback cb);
+
+    /** @return the registry for all supported loaders of this scene. */
+    LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
 protected:
     void _buildMissingMaterials(const size_t materialId);
     void _processVolumeAABBGeometry();
@@ -394,6 +419,8 @@ protected:
     Boxf _bounds;
 
     size_t _sizeInBytes{0};
+
+    LoaderRegistry _loaderRegistry;
 
 private:
     void _markGeometryDirty();

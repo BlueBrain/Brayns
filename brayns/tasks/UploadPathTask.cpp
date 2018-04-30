@@ -23,48 +23,25 @@
 #include "LoadDataFunctor.h"
 #include "errors.h"
 
-#include <brayns/common/utils/Utils.h>
-
-#include <boost/filesystem.hpp>
+#include <brayns/common/engine/Engine.h>
+#include <brayns/common/scene/Scene.h>
 
 namespace brayns
 {
 UploadPathTask::UploadPathTask(const std::vector<std::string>& paths,
-                               const std::set<std::string>& supportedTypes,
                                EnginePtr engine)
 {
     if (paths.empty())
         throw MISSING_PARAMS;
 
+    const auto& registry = engine->getScene().getLoaderRegistry();
+    const auto& supportedTypes = registry.supportedTypes();
+
     // pre-check for validity of given paths
     for (size_t i = 0; i < paths.size(); ++i)
     {
         const auto& path = paths[i];
-
-        if (path == "forever")
-            continue;
-
-        const boost::filesystem::path path_ = path;
-        if (!boost::filesystem::exists(path_))
-            throw INVALID_PATH;
-
-        if (boost::filesystem::is_directory(path_))
-            throw UNSUPPORTED_FOLDERS;
-
-        if (!path_.has_extension())
-            throw UNSUPPORTED_TYPE(
-                {i, {supportedTypes.begin(), supportedTypes.end()}});
-
-        const auto extension = boost::filesystem::extension(path_).erase(0, 1);
-
-        auto found =
-            std::find_if(supportedTypes.cbegin(), supportedTypes.cend(),
-                         [&](auto val) {
-                             return lowerCase(val).find(lowerCase(extension)) !=
-                                    std::string::npos;
-                         });
-
-        if (found == supportedTypes.end())
+        if (!registry.isSupported(path))
             throw UNSUPPORTED_TYPE(
                 {i, {supportedTypes.begin(), supportedTypes.end()}});
     }

@@ -31,9 +31,7 @@ namespace brayns
 class UploadPathTask : public Task<bool>
 {
 public:
-    UploadPathTask(const std::vector<std::string>& paths,
-                   const std::set<std::string>& supportedTypes,
-                   EnginePtr engine);
+    UploadPathTask(const std::vector<std::string>& paths, EnginePtr engine);
 
 private:
     std::vector<async::task<void>> _loadTasks;

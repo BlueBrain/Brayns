@@ -50,7 +50,6 @@ namespace
 const std::string ENDPOINT_API_VERSION = "v1/";
 const std::string ENDPOINT_APP_PARAMS = "application-parameters";
 const std::string ENDPOINT_CAMERA = "camera";
-const std::string ENDPOINT_DATA_SOURCE = "data-source";
 const std::string ENDPOINT_FRAME = "frame";
 const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
 const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
@@ -782,10 +781,7 @@ public:
         _handleTask<BinaryParams, bool>(
             METHOD_UPLOAD_BINARY, doc,
             std::bind(&BinaryRequests::createTask, std::ref(_binaryRequests),
-                      std::placeholders::_1, std::placeholders::_2,
-                      _parametersManager.getGeometryParameters()
-                          .getSupportedDataTypes(),
-                      _engine));
+                      std::placeholders::_1, std::placeholders::_2, _engine));
     }
 
     void _handleUploadPath()
@@ -793,14 +789,9 @@ public:
         RpcDocumentation doc{"Upload remote path to load geometry from",
                              "params", "Array of paths, either file or folder"};
 
-        auto func = [
-            supportedTypes = _parametersManager.getGeometryParameters()
-                                 .getSupportedDataTypes(),
-            engine = _engine
-        ](const auto& paths, const auto)
+        auto func = [engine = _engine](const auto& paths, const auto)
         {
-            return std::make_shared<UploadPathTask>(paths, supportedTypes,
-                                                    engine);
+            return std::make_shared<UploadPathTask>(paths, engine);
         };
         _handleTask<std::vector<std::string>, bool>(METHOD_UPLOAD_PATH, doc,
                                                     func);

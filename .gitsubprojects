@@ -2,7 +2,7 @@
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git d7681fe)
 
 if(BRAYNS_NETWORKING_ENABLED)
-  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git 9b2cde4)
+  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git 646fafc)
 endif()
 
 # Streaming to display walls

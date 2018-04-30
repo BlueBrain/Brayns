@@ -23,19 +23,18 @@
 #include "LoadDataFunctor.h"
 #include "errors.h"
 
-#include <brayns/common/utils/Utils.h>
+#include <brayns/common/engine/Engine.h>
+#include <brayns/common/scene/Scene.h>
 
 namespace brayns
 {
-UploadBinaryTask::UploadBinaryTask(const BinaryParams& params,
-                                   const std::set<std::string>& supportedTypes,
-                                   EnginePtr engine)
+UploadBinaryTask::UploadBinaryTask(const BinaryParams& params, EnginePtr engine)
     : _params(params)
 {
     if (params.empty())
         throw MISSING_PARAMS;
 
-    _checkValidity(supportedTypes);
+    _checkValidity(engine);
 
     _chunks.resize(params.size());
 
@@ -111,25 +110,22 @@ void UploadBinaryTask::appendBlob(const std::string& blob)
     }
 }
 
-void UploadBinaryTask::_checkValidity(
-    const std::set<std::string>& supportedTypes)
+void UploadBinaryTask::_checkValidity(EnginePtr engine)
 {
+    const auto& registry = engine->getScene().getLoaderRegistry();
+
+    // pre-check for validity of given params
     for (size_t i = 0; i < _params.size(); ++i)
     {
         const auto& param = _params[i];
         if (param.type.empty() || param.size == 0)
             throw MISSING_PARAMS;
 
-        const auto found =
-            std::find_if(supportedTypes.cbegin(), supportedTypes.cend(),
-                         [&](const auto& val) {
-                             return lowerCase(val).find(lowerCase(
-                                        param.type)) != std::string::npos;
-                         });
-
-        if (found == supportedTypes.end() && param.type != "forever")
-            throw UNSUPPORTED_TYPE(
-                {i, {supportedTypes.begin(), supportedTypes.end()}});
+        if (!registry.isSupported(param.type))
+        {
+            const auto& types = registry.supportedTypes();
+            throw UNSUPPORTED_TYPE({i, {types.begin(), types.end()}});
+        }
 
         _totalBytes += param.size;
     }

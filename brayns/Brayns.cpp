@@ -37,6 +37,7 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
+#include <brayns/io/CircuitLoader.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
@@ -58,7 +59,6 @@
 #include <brayns/io/ConnectivityLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
-#include <brayns/io/SceneLoader.h>
 #include <servus/uri.h>
 #endif
 
@@ -81,6 +81,9 @@ const size_t LOADING_PROGRESS_DATA = 100;
 const size_t LOADING_PROGRESS_STEP = 10;
 }
 
+#define REGISTER_LOADER(LOADER, FUNC) \
+    registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
+
 namespace brayns
 {
 struct Brayns::Impl : public PluginAPI
@@ -89,11 +92,6 @@ struct Brayns::Impl : public PluginAPI
         : _engineFactory{argc, argv, _parametersManager}
         , _meshLoader(_parametersManager.getGeometryParameters())
     {
-        auto& types =
-            _parametersManager.getGeometryParameters().getSupportedDataTypes();
-        types = MeshLoader::getSupportedDataTypes();
-        types.insert("xyz");
-
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
         BRAYNS_INFO << "   / __  / ___/ __ `/ / / / __ \\/ ___/" << std::endl;
@@ -288,6 +286,28 @@ struct Brayns::Impl : public PluginAPI
                                  DEFAULT_SUN_INTENSITY));
         _engine->getScene().addLight(sunLight);
         _engine->getScene().commitLights();
+
+        auto& registry = _engine->getScene().getLoaderRegistry();
+        REGISTER_LOADER(MeshLoader,
+                        [& params =
+                                _parametersManager.getGeometryParameters()] {
+                            return std::make_unique<MeshLoader>(params);
+                        });
+        REGISTER_LOADER(XYZBLoader,
+                        [& params =
+                                _parametersManager.getGeometryParameters()] {
+                            return std::make_unique<XYZBLoader>(params);
+                        });
+        REGISTER_LOADER(MorphologyLoader,
+                        [& params =
+                                _parametersManager.getGeometryParameters()] {
+                            return std::make_unique<MorphologyLoader>(params);
+                        });
+        REGISTER_LOADER(CircuitLoader, [& params = _parametersManager] {
+            return std::make_unique<CircuitLoader>(
+                params.getApplicationParameters(),
+                params.getGeometryParameters());
+        });
 
         buildScene();
     }
@@ -539,9 +559,6 @@ private:
         }
 
 #if (BRAYNS_USE_BRION)
-        if (!geometryParameters.getSceneFile().empty())
-            _loadSceneFile(geometryParameters.getSceneFile(), updateProgress);
-
         if (!geometryParameters.getNESTCircuit().empty())
         {
             _loadNESTCircuit();
@@ -589,7 +606,7 @@ private:
     /**
         Loads data from a PDB file (command line parameter --pdb-file)
     */
-    void _loadPDBFolder(const ProgressReporter::UpdateCallback& progressUpdate)
+    void _loadPDBFolder(const Loader::UpdateCallback& progressUpdate)
     {
         // Load PDB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
@@ -635,7 +652,7 @@ private:
     /**
         Loads data from a XYZR file (command line parameter --xyzr-file)
     */
-    void _loadXYZBFile(const ProgressReporter::UpdateCallback& progressUpdate)
+    void _loadXYZBFile(const Loader::UpdateCallback& progressUpdate)
     {
         // Load XYZB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
@@ -646,7 +663,8 @@ private:
         xyzbLoader.setProgressCallback(progressUpdate);
         try
         {
-            xyzbLoader.importFromFile(geometryParameters.getXYZBFile(), scene);
+            xyzbLoader.importFromFile(geometryParameters.getXYZBFile(), scene,
+                                      Matrix4f(), NO_MATERIAL);
         }
         catch (const std::runtime_error& e)
         {
@@ -661,7 +679,7 @@ private:
        the geometry parameters (command line parameter --mesh-folder)
     */
     void _loadMeshFolder(const std::string& folder,
-                         const ProgressReporter::UpdateCallback& progressUpdate)
+                         const Loader::UpdateCallback& progressUpdate)
     {
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
@@ -680,9 +698,14 @@ private:
                     ? NB_SYSTEM_MATERIALS + i
                     : NO_MATERIAL;
 
-            if (!_meshLoader.importMeshFromFile(file, scene, Matrix4f(),
-                                                material))
+            try
+            {
+                _meshLoader.importFromFile(file, scene, Matrix4f(), material);
+            }
+            catch (...)
+            {
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
+            }
             ++i;
             progressUpdate(msg.str(), float(i) / files.size());
         }
@@ -701,9 +724,7 @@ private:
                 ? NB_SYSTEM_MATERIALS
                 : NO_MATERIAL;
 
-        if (!_meshLoader.importMeshFromFile(filename, scene, Matrix4f(),
-                                            material))
-            BRAYNS_ERROR << "Failed to import " << filename << std::endl;
+        _meshLoader.importFromFile(filename, scene, Matrix4f(), material);
     }
 
 #if (BRAYNS_USE_BRION)
@@ -722,22 +743,6 @@ private:
             BRAYNS_ERROR << "Failed to import "
                          << geometryParameters.getConnectivityFile()
                          << std::endl;
-    }
-
-    /**
-     * Loads data from a scene description file (command line parameter
-     * --scene-file)
-     */
-    void _loadSceneFile(const std::string& filename,
-                        const ProgressReporter::UpdateCallback& progressUpdate)
-    {
-        auto& applicationParameters =
-            _parametersManager.getApplicationParameters();
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-        SceneLoader sceneLoader(applicationParameters, geometryParameters);
-        sceneLoader.setProgressCallback(progressUpdate);
-        sceneLoader.importFromFile(filename, scene, _meshLoader);
     }
 
     /**
@@ -795,16 +800,12 @@ private:
         Loads data from SWC and H5 files located in the folder specified
        in the geometry parameters (command line parameter --morphology-folder)
     */
-    void _loadMorphologyFolder(
-        const ProgressReporter::UpdateCallback& progressUpdate)
+    void _loadMorphologyFolder(const Loader::UpdateCallback& progressUpdate)
     {
-        auto& applicationParameters =
-            _parametersManager.getApplicationParameters();
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
-        MorphologyLoader morphologyLoader(applicationParameters,
-                                          geometryParameters, scene);
+        MorphologyLoader morphologyLoader(geometryParameters);
 
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
@@ -812,7 +813,7 @@ private:
         for (const auto& file : files)
         {
             servus::URI uri(file);
-            if (!morphologyLoader.importMorphology(uri, morphologyIndex,
+            if (!morphologyLoader.importMorphology(uri, scene, morphologyIndex,
                                                    NO_MATERIAL))
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             ++morphologyIndex;
@@ -825,8 +826,7 @@ private:
         Loads morphologies from circuit configuration (command line
        parameter --circuit-configuration)
     */
-    void _loadCircuitConfiguration(
-        const ProgressReporter::UpdateCallback& progressUpdate)
+    void _loadCircuitConfiguration(const Loader::UpdateCallback& progressUpdate)
     {
         auto& applicationParameters =
             _parametersManager.getApplicationParameters();
@@ -839,13 +839,11 @@ private:
         BRAYNS_INFO << "Loading circuit configuration from " << filename
                     << std::endl;
         const std::string& report = geometryParameters.getCircuitReport();
-        MorphologyLoader morphologyLoader(applicationParameters,
-                                          geometryParameters, scene);
-        morphologyLoader.setProgressCallback(progressUpdate);
+        CircuitLoader circuitLoader(applicationParameters, geometryParameters);
+        circuitLoader.setProgressCallback(progressUpdate);
 
         const servus::URI uri(filename);
-        morphologyLoader.importCircuit(uri, targets, report, scene,
-                                       _meshLoader);
+        circuitLoader.importCircuit(uri, targets, report, scene);
     }
 #endif // BRAYNS_USE_BRION
 
@@ -854,8 +852,7 @@ private:
        parameter
         --molecular-system-config )
     */
-    void _loadMolecularSystem(
-        const ProgressReporter::UpdateCallback& progressUpdate)
+    void _loadMolecularSystem(const Loader::UpdateCallback& progressUpdate)
     {
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();

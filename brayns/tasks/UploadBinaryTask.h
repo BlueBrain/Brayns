@@ -40,9 +40,7 @@ using BinaryParams = std::vector<BinaryParam>;
 class UploadBinaryTask : public Task<bool>
 {
 public:
-    UploadBinaryTask(const BinaryParams& params,
-                     const std::set<std::string>& supportedTypes,
-                     EnginePtr engine);
+    UploadBinaryTask(const BinaryParams& params, EnginePtr engine);
 
     void appendBlob(const std::string& blob);
 
@@ -54,7 +52,7 @@ private:
     std::string _blob;
     size_t _index{0};
 
-    void _checkValidity(const std::set<std::string>& supportedTypes);
+    void _checkValidity(EnginePtr engine);
     void _cancel() final
     {
         for (auto& i : _chunks)

@@ -18,15 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MORPHOLOGY_LOADER_H
-#define MORPHOLOGY_LOADER_H
+#pragma once
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
-
-#include <brain/neuron/types.h>
-#include <brion/types.h>
 
 #include <vector>
 
@@ -37,16 +33,15 @@ class URI;
 
 namespace brayns
 {
-class CircuitLoader;
-struct ParallelSceneContainer;
-using GIDOffsets = std::vector<uint64_t>;
-
-/** Loads morphologies from SWC and H5, and Circuit Config files */
-class MorphologyLoader : public Loader
+/**
+ * Load circuit from BlueConfig or CircuitConfig file, including simulation.
+ */
+class CircuitLoader : public Loader
 {
 public:
-    MorphologyLoader(const GeometryParameters& geometryParameters);
-    ~MorphologyLoader();
+    CircuitLoader(const ApplicationParameters& applicationParameters,
+                  const GeometryParameters& geometryParameters);
+    ~CircuitLoader();
 
     static std::set<std::string> getSupportedDataTypes();
 
@@ -59,29 +54,21 @@ public:
                         const size_t materialID) final;
 
     /**
-     * @brief Imports morphology from a given SWC or H5 file
-     * @param source URI of the morphology
-     * @param index Specifies an index for the morphology. This is mainly used
-     * to give a specific color to every morphology
-     * @param transformation Transformation to apply to the morphology
-     * @return True if the morphology is successfully loaded, false otherwise
+     * @brief Imports morphology from a circuit for the given target name
+     * @param circuitConfig URI of the Circuit Config file
+     * @param targets Targets to be loaded. If empty, the target specified in
+     * the circuit configuration file is used. If such an entry does not exist,
+     * all neurons are loaded.
+     * @param report Compartment report to be loaded
+     * @param scene Scene into which the circuit is imported
+     * @return True if the circuit is successfully loaded, false if the circuit
+     * contains no cells.
      */
-    bool importMorphology(const servus::URI& source, Scene& scene,
-                          const uint64_t index, const size_t material,
-                          const Matrix4f& transformation = Matrix4f());
+    bool importCircuit(const servus::URI& circuitConfig, const strings& targets,
+                       const std::string& report, Scene& scene);
 
 private:
-    using CompartmentReportPtr = std::shared_ptr<brion::CompartmentReport>;
-    using MaterialFunc = std::function<size_t(brain::neuron::SectionType)>;
-    bool _importMorphology(const servus::URI& source, const uint64_t index,
-                           MaterialFunc materialFunc,
-                           const Matrix4f& transformation,
-                           CompartmentReportPtr compartmentReport,
-                           ParallelSceneContainer& scene);
-    friend class CircuitLoader;
     class Impl;
     std::unique_ptr<Impl> _impl;
 };
 }
-
-#endif // MORPHOLOGY_LOADER_H

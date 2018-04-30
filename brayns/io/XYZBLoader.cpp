@@ -18,12 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "XYZBLoader.h"
+
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
-#include <fstream>
 
-#include "XYZBLoader.h"
+#include <fstream>
 
 namespace brayns
 {
@@ -32,8 +33,18 @@ XYZBLoader::XYZBLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-void XYZBLoader::importFromBlob(const Blob& blob, Scene& scene)
+std::set<std::string> XYZBLoader::getSupportedDataTypes()
 {
+    return {"xyz"};
+}
+
+void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
+                                const Matrix4f& transformation,
+                                size_t materialID)
+{
+    if (materialID == NO_MATERIAL)
+        materialID = 0;
+
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
     std::stringstream stream(blob.data);
@@ -44,7 +55,6 @@ void XYZBLoader::importFromBlob(const Blob& blob, Scene& scene)
     }
     stream.seekg(0);
 
-    const size_t materialID = 0;
     auto& spheres = scene.getSpheres()[materialID];
     const size_t startOffset = spheres.size();
     spheres.reserve(spheres.size() + numlines);
@@ -66,9 +76,9 @@ void XYZBLoader::importFromBlob(const Blob& blob, Scene& scene)
         {
         case 3:
         {
-            const Vector3f position(lineData[0], lineData[1], lineData[2]);
+            const Vector4f position(lineData[0], lineData[1], lineData[2], 1.f);
             scene.addSphere(materialID,
-                            {position,
+                            {transformation * position,
                              _geometryParameters.getRadiusMultiplier()});
             break;
         }
@@ -93,7 +103,9 @@ void XYZBLoader::importFromBlob(const Blob& blob, Scene& scene)
     }
 }
 
-void XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
+void XYZBLoader::importFromFile(const std::string& filename, Scene& scene,
+                                const Matrix4f& transformation,
+                                const size_t materialID)
 {
     std::ifstream file(filename);
     if (!file.good())
@@ -102,6 +114,6 @@ void XYZBLoader::importFromFile(const std::string& filename, Scene& scene)
                     filename,
                     {std::istreambuf_iterator<char>(file),
                      std::istreambuf_iterator<char>()}},
-                   scene);
+                   scene, transformation, materialID);
 }
 }
