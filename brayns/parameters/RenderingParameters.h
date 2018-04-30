@@ -231,33 +231,33 @@ public:
 protected:
     bool _parse(const po::variables_map& vm) final;
 
-    EngineType _engine;
+    EngineType _engine{EngineType::ospray};
     std::string _module;
-    RendererType _renderer;
+    RendererType _renderer{RendererType::default_};
     RendererTypes _renderers;
     strings _rendererNames;
     CameraType _cameraType{CameraType::default_};
     StereoMode _stereoMode{StereoMode::none};
     strings _cameraTypeNames;
-    float _ambientOcclusionStrength;
-    float _ambientOcclusionDistance;
-    ShadingType _shading;
-    bool _lightEmittingMaterials;
-    int _spp;
+    float _ambientOcclusionStrength{0.f};
+    float _ambientOcclusionDistance{1.2f};
+    ShadingType _shading{ShadingType::diffuse};
+    bool _lightEmittingMaterials{false};
+    int _spp{1};
     bool _accumulation{true};
-    float _shadows;
-    float _softShadows;
-    Vector3f _backgroundColor;
-    float _detectionDistance;
-    bool _detectionOnDifferentMaterial;
-    Vector3f _detectionNearColor;
-    Vector3f _detectionFarColor;
-    float _epsilon;
-    bool _headLight;
+    float _shadows{0.f};
+    float _softShadows{0.f};
+    Vector3f _backgroundColor{0.f, 0.f, 0.f};
+    float _detectionDistance{1.f};
+    bool _detectionOnDifferentMaterial{true};
+    Vector3f _detectionNearColor{1.f, 0.f, 0.f};
+    Vector3f _detectionFarColor{0.f, 1.f, 0.f};
+    float _epsilon{0.f};
+    bool _headLight{false};
     bool _dynamicLoadBalancer{false};
     float _varianceThreshold{-1.f};
     size_t _maxAccumFrames{100};
-    size_t _spr;
+    size_t _spr{128};
 
     SERIALIZATION_FRIEND(RenderingParameters)
 };

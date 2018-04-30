@@ -22,15 +22,17 @@
 #define RENDERER_H
 
 #include <brayns/api.h>
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/parameters/AnimationParameters.h>
+#include <brayns/parameters/RenderingParameters.h>
 
 namespace brayns
 {
 class Renderer
 {
 public:
-    BRAYNS_API Renderer(ParametersManager& parametersManager);
-    virtual ~Renderer() {}
+    BRAYNS_API Renderer(const AnimationParameters& animationParameters,
+                        const RenderingParameters& renderingParameters);
+    virtual ~Renderer() = default;
     virtual void render(FrameBufferPtr frameBuffer) = 0;
 
     /** @return the variance from the previous render(). */
@@ -50,7 +52,8 @@ public:
     }
 
 protected:
-    ParametersManager& _parametersManager;
+    const AnimationParameters& _animationParameters;
+    const RenderingParameters& _renderingParameters;
     ScenePtr _scene;
 };
 }

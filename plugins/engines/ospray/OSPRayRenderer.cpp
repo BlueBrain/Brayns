@@ -28,8 +28,9 @@
 namespace brayns
 {
 OSPRayRenderer::OSPRayRenderer(const std::string& name,
-                               ParametersManager& parametersManager)
-    : Renderer(parametersManager)
+                               const AnimationParameters& animationParameters,
+                               const RenderingParameters& renderingParameters)
+    : Renderer(animationParameters, renderingParameters)
     , _name(name)
     , _renderer{ospNewRenderer(name.c_str())}
 {
@@ -58,13 +59,11 @@ void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 
 void OSPRayRenderer::commit()
 {
-    AnimationParameters& ap = _parametersManager.getAnimationParameters();
-    RenderingParameters& rp = _parametersManager.getRenderingParameters();
-    SceneParameters& sp = _parametersManager.getSceneParameters();
-    VolumeParameters& vp = _parametersManager.getVolumeParameters();
+    const AnimationParameters& ap = _animationParameters;
+    const RenderingParameters& rp = _renderingParameters;
 
-    if (!ap.isModified() && !rp.isModified() && !sp.isModified() &&
-        !vp.isModified() && !_scene->isModified() && !_dirty)
+    if (!ap.isModified() && !rp.isModified() && !_scene->isModified() &&
+        !_dirty)
     {
         return;
     }

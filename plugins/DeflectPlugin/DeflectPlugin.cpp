@@ -28,7 +28,10 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
+
 #include <brayns/parameters/ApplicationParameters.h>
+#include <brayns/parameters/ParametersManager.h>
+
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <deflect/SizeHints.h>

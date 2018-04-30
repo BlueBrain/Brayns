@@ -152,7 +152,9 @@ public:
     /** Factory method to create an engine-specific camera. */
     virtual CameraPtr createCamera(const CameraType type) const = 0;
 
-    virtual RendererPtr createRenderer(const RendererType type) const = 0;
+    virtual RendererPtr createRenderer(
+        const RendererType type, const AnimationParameters& animationParameters,
+        const RenderingParameters& renderingParameters) const = 0;
 
     auto& dataMutex() { return _dataMutex; }
     auto& getParametersManager() { return _parametersManager; }

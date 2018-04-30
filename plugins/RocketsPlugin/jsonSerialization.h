@@ -51,6 +51,12 @@
 #pragma GCC diagnostic pop
 #endif
 
+STATICJSON_DECLARE_ENUM(brayns::CameraType,
+                        {"default", brayns::CameraType::default_},
+                        {"orthographic", brayns::CameraType::orthographic},
+                        {"panoramic", brayns::CameraType::panoramic},
+                        {"clipped", brayns::CameraType::clipped});
+
 STATICJSON_DECLARE_ENUM(brayns::StereoMode, {"none", brayns::StereoMode::none},
                         {"left", brayns::StereoMode::left},
                         {"right", brayns::StereoMode::right},
@@ -142,11 +148,15 @@ inline void init(brayns::BinaryError* s, ObjectHandler* h)
 
 inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
 {
+    h->add_property("animation_parameters", &s->animParams, Flags::Optional);
+    h->add_property("camera", &s->camera, Flags::Optional);
     h->add_property("format", &s->format);
+    h->add_property("name", &s->name, Flags::Optional);
     h->add_property("quality", &s->quality, Flags::Optional);
+    h->add_property("rendering_parameters", &s->renderingParams,
+                    Flags::Optional);
     h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
     h->add_property("size", Vector2uiArray(s->size));
-    h->add_property("name", &s->name, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -173,14 +183,16 @@ inline void init(brayns::ClipPlane* c, ObjectHandler* h)
 
 inline void init(brayns::Camera* c, ObjectHandler* h)
 {
-    h->add_property("origin", Vector3fArray(c->_position), Flags::Optional);
-    h->add_property("look_at", Vector3fArray(c->_target), Flags::Optional);
-    h->add_property("up", Vector3fArray(c->_up), Flags::Optional);
-    h->add_property("field_of_view", &c->_fieldOfView, Flags::Optional);
     h->add_property("aperture", &c->_aperture, Flags::Optional);
-    h->add_property("focal_length", &c->_focalLength, Flags::Optional);
-    h->add_property("eye_separation", &c->_eyeSeparation, Flags::Optional);
     h->add_property("clip_planes", &c->_clipPlanes, Flags::Optional);
+    h->add_property("eye_separation", &c->_eyeSeparation, Flags::Optional);
+    h->add_property("field_of_view", &c->_fieldOfView, Flags::Optional);
+    h->add_property("focal_length", &c->_focalLength, Flags::Optional);
+    h->add_property("look_at", Vector3fArray(c->_target), Flags::Optional);
+    h->add_property("origin", Vector3fArray(c->_position), Flags::Optional);
+    h->add_property("stereo_mode", &c->_stereoMode, Flags::Optional);
+    h->add_property("type", &c->_type, Flags::Optional);
+    h->add_property("up", Vector3fArray(c->_up), Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

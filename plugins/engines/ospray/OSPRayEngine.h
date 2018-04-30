@@ -61,7 +61,9 @@ public:
                                      bool accumulation) const final;
 
     CameraPtr createCamera(const CameraType type) const final;
-    RendererPtr createRenderer(const RendererType type) const final;
+    RendererPtr createRenderer(
+        const RendererType type, const AnimationParameters& animationParameters,
+        const RenderingParameters& renderingParameters) const final;
 
 private:
     Renderers _createRenderers();

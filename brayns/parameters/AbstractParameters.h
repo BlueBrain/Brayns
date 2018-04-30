@@ -42,7 +42,7 @@ public:
     AbstractParameters(const std::string& name)
         : _name(name){};
 
-    virtual ~AbstractParameters() {}
+    virtual ~AbstractParameters() = default;
     /**
        Parses parameters managed by the class
        @param argc number of command line parameters

@@ -27,7 +27,6 @@ namespace brayns
 class BaseObject
 {
 public:
-    BaseObject() = default;
     virtual ~BaseObject() = default;
 
     /**

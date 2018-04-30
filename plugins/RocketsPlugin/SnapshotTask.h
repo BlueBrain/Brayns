@@ -29,14 +29,19 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/utils/Utils.h>
 
+#include <brayns/parameters/ParametersManager.h>
+
 namespace brayns
 {
 struct SnapshotParams
 {
+    std::unique_ptr<AnimationParameters> animParams;
+    std::unique_ptr<Camera> camera;
+    std::unique_ptr<RenderingParameters> renderingParams;
     int samplesPerPixel{1};
     Vector2ui size;
-    std::string format; // ImageMagick formats apply
     size_t quality{100};
+    std::string format; // ImageMagick formats apply
     std::string name;
 };
 
@@ -47,21 +52,36 @@ struct SnapshotParams
 class SnapshotFunctor : public TaskFunctor
 {
 public:
-    SnapshotFunctor(Engine& engine, const SnapshotParams& params,
+    SnapshotFunctor(Engine& engine, SnapshotParams&& params,
                     ImageGenerator& imageGenerator)
-        : _frameBuffer(engine.createFrameBuffer(params.size,
+        : _params(std::move(params))
+        , _frameBuffer(engine.createFrameBuffer(_params.size,
                                                 FrameBufferFormat::rgba_i8,
                                                 true))
-        , _camera(engine.createCamera(engine.getCamera().getType()))
+        , _camera(engine.createCamera(_params.camera
+                                          ? _params.camera->getType()
+                                          : engine.getCamera().getType()))
         , _scene(engine.getScenePtr())
-        , _renderer(engine.createRenderer(engine.getActiveRenderer()))
-        , _params(params)
+        , _renderer(engine.createRenderer(
+              engine.getActiveRenderer(),
+              _params.animParams
+                  ? *_params.animParams
+                  : engine.getParametersManager().getAnimationParameters(),
+              _params.renderingParams
+                  ? *_params.renderingParams
+                  : engine.getParametersManager().getRenderingParameters()))
         , _imageGenerator(imageGenerator)
         , _dataLock(engine.dataMutex(), std::defer_lock)
     {
-        *_camera = engine.getCamera();
-        _camera->setAspectRatio(float(params.size.x()) / params.size.y());
+        if (_params.camera)
+            *_camera = *_params.camera;
+        else
+            *_camera = engine.getCamera();
+        _camera->setAspectRatio(float(_params.size.x()) / _params.size.y());
         _camera->commit();
+
+        if (_params.renderingParams)
+            _params.renderingParams->setSamplesPerPixel(1);
 
         _renderer->setCamera(_camera);
     }
@@ -96,11 +116,11 @@ public:
     }
 
 private:
+    SnapshotParams _params;
     FrameBufferPtr _frameBuffer;
     CameraPtr _camera;
     ScenePtr _scene;
     RendererPtr _renderer;
-    SnapshotParams _params;
     ImageGenerator& _imageGenerator;
     std::shared_lock<std::shared_timed_mutex> _dataLock;
 };

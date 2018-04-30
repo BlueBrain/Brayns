@@ -29,6 +29,9 @@
 #include <brayns/common/Timer.h>
 #include <brayns/common/tasks/Task.h>
 #include <brayns/common/volume/VolumeHandler.h>
+
+#include <brayns/parameters/ParametersManager.h>
+
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <brayns/tasks/UploadBinaryTask.h>
@@ -68,9 +71,9 @@ const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_QUIT = "quit";
-const std::string METHOD_UPLOAD_PATH = "upload-path";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
 const std::string METHOD_SNAPSHOT = "snapshot";
+const std::string METHOD_UPLOAD_PATH = "upload-path";
 
 const std::string JSON_TYPE = "application/json";
 
@@ -411,7 +414,7 @@ public:
                 };
 
                 // create the task that shall be executed for this request
-                auto task = createTask(params, clientID);
+                auto task = createTask(std::move(params), clientID);
 
                 std::function<void()> finishProgress = [task] {
                     task->progress.update("Done", 1.f);
@@ -762,13 +765,13 @@ public:
     {
         RpcDocumentation doc{"Make a snapshot of the current view", "settings",
                              "Snapshot settings for quality and size"};
-        auto func = [ engine = _engine,
-                      &imageGenerator = _imageGenerator ](const auto& params,
-                                                          const auto)
+        auto func =
+            [ engine = _engine,
+              &imageGenerator = _imageGenerator ](auto&& params, const auto)
         {
             using SnapshotTask = DeferredTask<ImageGenerator::ImageBase64>;
             return std::make_shared<SnapshotTask>(
-                SnapshotFunctor{*engine, params, imageGenerator});
+                SnapshotFunctor{*engine, std::move(params), imageGenerator});
         };
         _handleTask<SnapshotParams, ImageGenerator::ImageBase64>(
             METHOD_SNAPSHOT, doc, func);

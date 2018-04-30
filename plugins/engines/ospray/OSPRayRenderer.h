@@ -34,7 +34,8 @@ class OSPRayRenderer : public brayns::Renderer
 {
 public:
     OSPRayRenderer(const std::string& name,
-                   ParametersManager& parametersMamager);
+                   const AnimationParameters& animationParameters,
+                   const RenderingParameters& renderingParameters);
     ~OSPRayRenderer();
 
     void render(FrameBufferPtr frameBuffer) final;
