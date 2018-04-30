@@ -58,7 +58,6 @@
 #endif
 
 #ifdef BRAYNS_USE_BRION
-#include <brayns/io/ConnectivityLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
 #include <servus/uri.h>
@@ -92,7 +91,6 @@ struct Brayns::Impl : public PluginAPI
 {
     Impl(int argc, const char** argv)
         : _engineFactory{argc, argv, _parametersManager}
-        , _meshLoader(_parametersManager.getGeometryParameters())
     {
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
@@ -433,23 +431,16 @@ private:
         scene.unload();
         loadingProgress += LOADING_PROGRESS_STEP;
 
-        _meshLoader.clear();
-
-        scene.resetMaterials();
         _loadData(loadingProgress);
 
         if (scene.empty() && !scene.getVolumeHandler())
         {
             scene.unload();
-            _meshLoader.clear();
             BRAYNS_INFO << "Building default scene" << std::endl;
             scene.buildDefault();
         }
 
-        scene.buildEnvironment();
-
         const auto& geomParams = _parametersManager.getGeometryParameters();
-        scene.buildGeometry();
         if (geomParams.getLoadCacheFile().empty() &&
             !geomParams.getSaveCacheFile().empty())
         {
@@ -523,15 +514,12 @@ private:
         auto& sceneParameters = _parametersManager.getSceneParameters();
         auto& scene = _engine->getScene();
 
-        // set environment map if applicable
-        const std::string& environmentMap =
+        const auto& environmentMap =
             _parametersManager.getSceneParameters().getEnvironmentMap();
         if (!environmentMap.empty())
         {
-            const size_t materialId = static_cast<size_t>(MaterialType::skybox);
-            auto& material = scene.getMaterials()[materialId];
-            material.setTexture(TT_DIFFUSE, environmentMap);
-            material.setType(MaterialType::skybox);
+            auto bgMaterial = scene.getBackgroundMaterial();
+            bgMaterial->setTexture(environmentMap, TT_DIFFUSE);
         }
 
         const std::string& colorMapFilename =
@@ -605,11 +593,10 @@ private:
                 scene.getVolumeHandler()->getOffset();
             const Vector3f& volumeElementSpacing =
                 volumeParameters.getElementSpacing();
-            Boxf& worldBounds = scene.getWorldBounds();
-            worldBounds.merge(Vector3f(0.f, 0.f, 0.f));
-            worldBounds.merge(volumeOffset +
-                              Vector3f(volumeDimensions) *
-                                  volumeElementSpacing);
+            auto bounds = scene.getBounds();
+            bounds.merge(Vector3f(0.f, 0.f, 0.f));
+            bounds.merge(volumeOffset +
+                         Vector3f(volumeDimensions) * volumeElementSpacing);
         }
     }
 
@@ -637,26 +624,19 @@ private:
     /**
         Loads data from a PDB file (command line parameter --pdb-file)
     */
-    void _loadPDBFile(const std::string& filename)
+    void _loadPDBFile(const std::string& fileName)
     {
         // Load PDB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        std::string pdbFile = filename;
-        if (pdbFile == "")
+        std::string pdbFileName = fileName;
+        if (pdbFileName == "")
         {
-            pdbFile = geometryParameters.getPDBFile();
-            BRAYNS_INFO << "Loading PDB file " << pdbFile << std::endl;
+            pdbFileName = geometryParameters.getPDBFile();
+            BRAYNS_INFO << "Loading PDB file " << pdbFileName << std::endl;
         }
         ProteinLoader proteinLoader(geometryParameters);
-        if (!proteinLoader.importPDBFile(pdbFile, Vector3f(0, 0, 0), 0, scene))
-            BRAYNS_ERROR << "Failed to import " << pdbFile << std::endl;
-
-        for (size_t i = 0; i < scene.getMaterials().size(); ++i)
-        {
-            auto& material = scene.getMaterials()[i];
-            material.setColor(proteinLoader.getMaterialKd(i));
-        }
+        proteinLoader.importFromFile(pdbFileName, scene);
     }
 
     /**
@@ -673,8 +653,8 @@ private:
         xyzbLoader.setProgressCallback(progressUpdate);
         try
         {
-            xyzbLoader.importFromFile(geometryParameters.getXYZBFile(), scene,
-                                      Matrix4f(), NO_MATERIAL);
+            const auto fileName = geometryParameters.getXYZBFile();
+            xyzbLoader.importFromFile(fileName, scene);
         }
         catch (const std::runtime_error& e)
         {
@@ -698,26 +678,28 @@ private:
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
                            ".stl", ".3ds", ".ase", ".ifc", ".off"};
         strings files = parseFolder(folder, filters);
-        size_t i = 0;
+        size_t index = 0;
         std::stringstream msg;
         msg << "Loading " << files.size() << " meshes from " << folder;
         for (const auto& file : files)
         {
-            size_t material =
+            size_t materialId =
                 geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-                    ? NB_SYSTEM_MATERIALS + i
+                    ? index
                     : NO_MATERIAL;
 
             try
             {
-                _meshLoader.importFromFile(file, scene, Matrix4f(), material);
+                MeshLoader meshLoader(geometryParameters);
+                meshLoader.importFromFile(file, scene, index, Matrix4f(),
+                                          materialId);
             }
             catch (...)
             {
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             }
-            ++i;
-            progressUpdate(msg.str(), float(i) / files.size());
+            ++index;
+            progressUpdate(msg.str(), float(index) / files.size());
         }
     }
 
@@ -729,12 +711,8 @@ private:
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        size_t material =
-            geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-                ? NB_SYSTEM_MATERIALS
-                : NO_MATERIAL;
-
-        _meshLoader.importFromFile(filename, scene, Matrix4f(), material);
+        MeshLoader meshLoader(geometryParameters);
+        meshLoader.importFromFile(filename, scene);
     }
 
 #if (BRAYNS_USE_BRION)
@@ -798,17 +776,15 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
+        auto model = scene.createModel("morphologies", {{"uri", folder}});
         MorphologyLoader morphologyLoader(geometryParameters);
-
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
-        uint64_t morphologyIndex = 0;
-        for (const auto& file : files)
+        size_t morphologyIndex = 0;
+        for (const auto& fileName : files)
         {
-            servus::URI uri(file);
-            if (!morphologyLoader.importMorphology(uri, scene, morphologyIndex,
-                                                   NO_MATERIAL))
-                BRAYNS_ERROR << "Failed to import " << file << std::endl;
+            morphologyLoader.importMorphology(servus::URI(fileName), *model,
+                                              morphologyIndex);
             ++morphologyIndex;
             progressUpdate("Loading morphologies from " + folder,
                            float(morphologyIndex) / files.size());
@@ -841,9 +817,8 @@ private:
 #endif // BRAYNS_USE_BRION
 
     /**
-        Loads molecular system from configuration (command line
-       parameter
-        --molecular-system-config )
+        Loads molecular system from configuration (command line parameter
+       --molecular-system-config )
     */
     void _loadMolecularSystem(const Loader::UpdateCallback& progressUpdate)
     {
@@ -851,7 +826,8 @@ private:
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
         molecularSystemReader.setProgressCallback(progressUpdate);
-        molecularSystemReader.import(scene, _meshLoader);
+        const auto fileName = geometryParameters.getMolecularSystemConfig();
+        molecularSystemReader.importFromFile(fileName, scene);
     }
 
     void _setupCameraManipulator(const CameraMode mode)
@@ -1270,10 +1246,9 @@ private:
 
     ParametersManager _parametersManager;
     EngineFactory _engineFactory;
-    EnginePtr _engine;
+    EnginePtr _engine{nullptr};
     KeyboardHandler _keyboardHandler;
-    AbstractManipulatorPtr _cameraManipulator;
-    MeshLoader _meshLoader;
+    AbstractManipulatorPtr _cameraManipulator{nullptr};
 
     float _fieldOfView{45.f};
     float _eyeSeparation{0.0635f};

@@ -20,8 +20,8 @@
 
 #include "NESTLoader.h"
 
-#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
@@ -117,7 +117,7 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
     BRAYNS_INFO << "Number of materials: " << materialMapping.size()
                 << std::endl;
 
-    auto model = scene.addModel("NESTCircuit");
+    auto model = scene.createModel("NESTCircuit");
     SpheresMap& spheres = model->getSpheres();
     spheres[0].reserve(_frameSize);
     _positions.reserve(_frameSize);

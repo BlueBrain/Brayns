@@ -45,8 +45,9 @@ const size_t SERVER_PROCESS_RETRIES = 10; /*ms*/
 class ForeverLoader : public brayns::Loader
 {
 public:
-    void importFromBlob(brayns::Blob&&, brayns::Scene&, const brayns::Matrix4f&,
-                        const size_t) final
+    void importFromBlob(brayns::Blob&&, brayns::Scene&, const size_t = 0,
+                        const brayns::Matrix4f& = brayns::Matrix4f(),
+                        const size_t = brayns::NO_MATERIAL) final
     {
         for (;;)
         {
@@ -55,8 +56,9 @@ public:
         }
     }
 
-    void importFromFile(const std::string&, brayns::Scene&,
-                        const brayns::Matrix4f&, const size_t) final
+    void importFromFile(const std::string&, brayns::Scene&, const size_t = 0,
+                        const brayns::Matrix4f& = brayns::Matrix4f(),
+                        const size_t = brayns::NO_MATERIAL) final
     {
         for (;;)
         {

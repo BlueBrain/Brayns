@@ -42,24 +42,28 @@ public:
      *
      * @param blob the blob containing the data to import
      * @param scene the scene where to add the loaded model to
+     * @param index Index of the element, mainly used for material assignment
      * @param transformation the transformation to apply for the added model
-     * @param materialID the default material ot use
+     * @param defaultMaterialId the default material ot use
      */
-    virtual void importFromBlob(Blob&& blob, Scene& scene,
-                                const Matrix4f& transformation,
-                                const size_t materialID) = 0;
+    virtual void importFromBlob(
+        Blob&& blob, Scene& scene, const size_t index = 0,
+        const Matrix4f& transformation = Matrix4f(),
+        const size_t defaultMaterialId = NO_MATERIAL) = 0;
 
     /**
      * Import the data from the given file and add it to the scene.
      *
      * @param filename the file containing the data to import
      * @param scene the scene where to add the loaded model to
+     * @param index Index of the element, mainly used for material assignment
      * @param transformation the transformation to apply for the added model
-     * @param materialID the default material ot use
+     * @param materialId the default material ot use
      */
-    virtual void importFromFile(const std::string& filename, Scene& scene,
-                                const Matrix4f& transformation,
-                                const size_t materialID) = 0;
+    virtual void importFromFile(
+        const std::string& filename, Scene& scene, const size_t index = 0,
+        const Matrix4f& transformation = Matrix4f(),
+        const size_t defaultMaterialId = NO_MATERIAL) = 0;
 
     /**
      * The callback for each progress update with the signature (message,

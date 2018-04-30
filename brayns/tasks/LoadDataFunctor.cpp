@@ -80,7 +80,6 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
         _loadDefaultScene = true;
 
         _updateProgress("Loading data ...", LOADING_PROGRESS_STEP);
-        scene.resetMaterials();
         try
         {
             loadData();
@@ -117,11 +116,8 @@ void LoadDataFunctor::_postLoad(const bool cancellable)
 {
     Scene& scene = _engine->getScene();
 
-    scene.buildEnvironment();
-
     if (cancellable)
         _updateProgress("Building geometry ...", LOADING_PROGRESS_STEP);
-    scene.buildGeometry();
 
     const auto& geomParams =
         _engine->getParametersManager().getGeometryParameters();
@@ -141,7 +137,7 @@ void LoadDataFunctor::_postLoad(const bool cancellable)
     const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
 
     auto& camera = _engine->getCamera();
-    camera.setInitialState(_engine->getScene().getWorldBounds());
+    camera.setInitialState(_engine->getScene().getBounds());
     camera.setAspectRatio(frameSize.x() / frameSize.y());
     _engine->triggerRender();
 }

@@ -47,14 +47,6 @@ inline auto lowerCase(std::string str)
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
-
-/**
- * @brief Determines the name of the file according to its full path
- * @param fileName Full path to of the file
- * @return Name of the file
- */
-std::string getNameFromFullPath(const std::string& fileName);
-
 }
 
 #endif // UTILS_H

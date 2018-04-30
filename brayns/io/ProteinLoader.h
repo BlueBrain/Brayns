@@ -21,6 +21,7 @@
 #ifndef PROTEINLOADER_H
 #define PROTEINLOADER_H
 
+#include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <string>
@@ -30,21 +31,32 @@ namespace brayns
 /** Loads protein from PDB files
  * http://www.rcsb.org
  */
-class ProteinLoader
+class ProteinLoader : public Loader
 {
 public:
     ProteinLoader(const GeometryParameters& geometryParameters);
 
     /** Imports atoms from a given PDB file
      *
-     * @param filename PDB file to import
-     * @param position Position of protein in space
-     * @param proteinIndex Index of the protein when more than one is loaded
-     * @param group Resulting geometry group
-     * @return true if PDB file was successufully loaded, false otherwise
+     * @param fileName name of the file containing the meshes
+     * @param scene Scene holding the mesh
+     * @param transformation Position, orientation and scale to apply to the
+     *        mesh
+     * @param defaultMaterial Default material for the whole mesh. If set to
+     *        NO_MATERIAL, materials from the mesh file are used. Otherwise,
+     *        all meshes are forced to that specific material.
      */
-    bool importPDBFile(const std::string& filename, const Vector3f& position,
-                       const size_t proteinIndex, Model& model);
+    void importFromFile(const std::string& fileName, Scene& scene,
+                        const size_t index = 0,
+                        const Matrix4f& transformation = Matrix4f(),
+                        const size_t defaultMaterialId = NO_MATERIAL) final;
+
+    void importFromBlob(Blob&&, Scene&, const size_t = 0,
+                        const Matrix4f& = Matrix4f(),
+                        const size_t = NO_MATERIAL) final
+    {
+        throw std::runtime_error("Unsupported");
+    }
 
 private:
     const GeometryParameters& _geometryParameters;

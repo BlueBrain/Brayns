@@ -346,11 +346,11 @@ osp::affine3f OSPRayModel::_groupTransformationToAffine3f(
     ModelTransformation& transformation)
 {
     ospcommon::affine3f t = ospcommon::affine3f(ospcommon::one);
-    const auto& scale = transformation.scale();
+    const auto& scale = transformation.getScale();
     t *= t.scale({scale.x(), scale.y(), scale.z()});
-    const auto& translation = transformation.translation();
+    const auto& translation = transformation.getTranslation();
     t *= t.translate({translation.x(), translation.y(), translation.z()});
-    const auto& rotation = transformation.rotation();
+    const auto& rotation = transformation.getRotation();
     if (rotation.x() != 0.f)
         t *= t.rotate({1, 0, 0}, rotation.x());
     if (rotation.y() != 0.f)

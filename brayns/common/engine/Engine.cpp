@@ -76,10 +76,13 @@ void Engine::setDefaultEpsilon()
 
 void Engine::commit()
 {
-    _scene->commitVolumeData();
-    _scene->commitSimulationData();
-    _scene->commitTransferFunctionData();
+    bool clearFrame = _scene->commitVolumeData() ||
+                      _scene->commitSimulationData() ||
+                      _scene->commitTransferFunctionData();
     _renderers[_activeRenderer]->commit();
+
+    if (clearFrame)
+        _frameBuffer->clear();
 
     const auto& rp = _parametersManager.getRenderingParameters();
     if (rp.getStereoMode() != _camera->getStereoMode())

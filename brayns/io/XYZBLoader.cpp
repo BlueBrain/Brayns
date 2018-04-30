@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <fstream>
@@ -33,7 +33,15 @@ XYZBLoader::XYZBLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-void XYZBLoader::importFromBlob(const Blob& blob, Model& model)
+std::set<std::string> XYZBLoader::getSupportedDataTypes()
+{
+    return {"xyz"};
+}
+
+void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
+                                const size_t index BRAYNS_UNUSED,
+                                const Matrix4f& transformation,
+                                const size_t defaultMaterialId BRAYNS_UNUSED)
 {
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
@@ -45,8 +53,12 @@ void XYZBLoader::importFromBlob(const Blob& blob, Model& model)
     }
     stream.seekg(0);
 
-    const size_t materialID = 0;
-    auto& spheres = scene.getSpheres()[materialID];
+    auto model = scene.createModel("PointCloud");
+
+    const auto materialId = 0;
+    model->createMaterial(materialId, "PointCloud");
+    auto& spheres = model->getSpheres()[materialId];
+
     const size_t startOffset = spheres.size();
     spheres.reserve(spheres.size() + numlines);
 
@@ -68,9 +80,9 @@ void XYZBLoader::importFromBlob(const Blob& blob, Model& model)
         case 3:
         {
             const Vector4f position(lineData[0], lineData[1], lineData[2], 1.f);
-            scene.addSphere(materialID,
-                            {transformation * position,
-                             _geometryParameters.getRadiusMultiplier()});
+            model->addSphere(materialId,
+                             {transformation * position,
+                              _geometryParameters.getRadiusMultiplier()});
             break;
         }
         default:
@@ -80,7 +92,7 @@ void XYZBLoader::importFromBlob(const Blob& blob, Model& model)
         updateProgress(msg.str(), i++, numlines);
     }
 
-    const float maxDim = scene.getWorldBounds().getSize().find_max();
+    const float maxDim = scene.getBounds().getSize().find_max();
     if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
     {
         const float newRadius = maxDim / 100.f;
@@ -95,8 +107,9 @@ void XYZBLoader::importFromBlob(const Blob& blob, Model& model)
 }
 
 void XYZBLoader::importFromFile(const std::string& filename, Scene& scene,
+                                const size_t index,
                                 const Matrix4f& transformation,
-                                const size_t materialID)
+                                const size_t defaultMaterialId)
 {
     std::ifstream file(filename);
     if (!file.good())
@@ -105,6 +118,6 @@ void XYZBLoader::importFromFile(const std::string& filename, Scene& scene,
                     filename,
                     {std::istreambuf_iterator<char>(file),
                      std::istreambuf_iterator<char>()}},
-                   model, transformation, materialID);
+                   scene, index, transformation, defaultMaterialId);
 }
 }

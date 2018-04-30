@@ -49,16 +49,16 @@ public:
     void commit() final;
 
     /** @copydoc Scene::commitLights */
-    void commitLights() final;
+    bool commitLights() final;
 
     /** @copydoc Scene::commitSimulationData */
-    void commitSimulationData() final;
+    bool commitSimulationData() final;
 
     /** @copydoc Scene::commitVolumeData */
-    void commitVolumeData() final;
+    bool commitVolumeData() final;
 
     /** @copydoc Scene::commitTransferFunctionData */
-    void commitTransferFunctionData() final;
+    bool commitTransferFunctionData() final;
 
     /** @copydoc Scene::unload */
     void unload() final;
@@ -67,8 +67,8 @@ public:
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
     /** @copydoc Scene::addModel */
-    ModelPtr addModel(const std::string& name,
-                      const ModelMetadata& metadata) final;
+    ModelPtr createModel(const std::string& name,
+                         const ModelMetadata& metadata) final;
 
     /** @copydoc Scene::removeModel */
     void removeModel(const size_t index) final;

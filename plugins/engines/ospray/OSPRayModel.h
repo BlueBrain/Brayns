@@ -21,7 +21,7 @@
 #ifndef OSPRAYGEOMETRYGROUP_H
 #define OSPRAYGEOMETRYGROUP_H
 
-#include <brayns/common/geometry/Model.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #include <ospray_cpp/Data.h>

@@ -23,6 +23,7 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
+#include <brayns/common/loader/LoaderRegistry.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
@@ -63,24 +64,29 @@ public:
     BRAYNS_API virtual void commit() = 0;
 
     /**
-        Commit lights to renderers
-    */
-    BRAYNS_API virtual void commitLights() = 0;
+     * @brief commitLights commits lights to renderers
+     * @return True if lights were committed, false otherwise
+     */
+    BRAYNS_API virtual bool commitLights() = 0;
 
     /**
-        Attach simulation data to renderer
-    */
-    BRAYNS_API virtual void commitSimulationData() = 0;
+     * @brief commitSimulationData commits simulation data to renderers
+     * @return True if data was committed, false otherwise
+     */
+    BRAYNS_API virtual bool commitSimulationData() = 0;
 
     /**
-        Attach volume data to renderer
-    */
-    BRAYNS_API virtual void commitVolumeData() = 0;
+     * @brief commitVolumeData commits volume data to renderers
+     * @return True if data was committed, false otherwise
+     */
+    BRAYNS_API virtual bool commitVolumeData() = 0;
 
     /**
-        Commit transfer function data to renderer
-    */
-    BRAYNS_API virtual void commitTransferFunctionData() = 0;
+     * @brief commitTransferFunctionData commits transfer function data to
+     * renderers
+     * @return True if data was committed, false otherwise
+     */
+    BRAYNS_API virtual bool commitTransferFunctionData() = 0;
 
     /**
         Returns the bounding box of the scene
@@ -112,7 +118,7 @@ public:
     /**
         Adds a model to the scene
       */
-    BRAYNS_API virtual ModelPtr addModel(
+    BRAYNS_API virtual ModelPtr createModel(
         const std::string& name, const ModelMetadata& metadata = {}) = 0;
 
     /**
@@ -231,6 +237,30 @@ public:
         MaterialsColorMap colorMap = MaterialsColorMap::none);
 
     MaterialPtr getBackgroundMaterial() { return _backgroundMaterial; }
+    /**
+     * Load the data from the given blob.
+     *
+     * @param blob the blob containing the data to import
+     * @param transformation the transformation to apply for the added model
+     * @param materialID the default material ot use
+     * @param cb the callback for progress updates from the loader
+     */
+    void load(Blob&& blob, const Matrix4f& transformation,
+              const size_t materialID, Loader::UpdateCallback cb);
+
+    /**
+     * Load the data from the given file.
+     *
+     * @param path the file or folder containing the data to import
+     * @param transformation the transformation to apply for the added model
+     * @param materialID the default material ot use
+     * @param cb the callback for progress updates from the loader
+     */
+    void load(const std::string& path, const Matrix4f& transformation,
+              const size_t materialID, Loader::UpdateCallback cb);
+
+    /** @return the registry for all supported loaders of this scene. */
+    LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
 protected:
     Renderers _renderers;
     ParametersManager& _parametersManager;
@@ -250,6 +280,8 @@ protected:
     CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler{nullptr};
 
     size_t _sizeInBytes{0};
+
+    LoaderRegistry _loaderRegistry;
 
 private:
     void _markGeometryDirty();

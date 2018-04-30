@@ -21,11 +21,12 @@
 #include "ProteinLoader.h"
 
 #include <brayns/common/engine/Engine.h>
-#include <brayns/common/geometry/Model.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
+#include <brayns/common/utils/Utils.h>
 
 #include <assert.h>
 #include <fstream>
@@ -312,19 +313,20 @@ ProteinLoader::ProteinLoader(const GeometryParameters& geometryParameters)
 {
 }
 
-bool ProteinLoader::importPDBFile(const std::string& filename,
-                                  const Vector3f& position,
-                                  const size_t proteinIndex, Model& model)
+void ProteinLoader::importFromFile(const std::string& fileName, Scene& scene,
+                                   const size_t index,
+                                   const Matrix4f& transformation,
+                                   const size_t defaultMaterialId BRAYNS_UNUSED)
 {
+    const std::string modelName = shortenString(fileName);
+    auto model = scene.createModel(modelName, {{"uri", fileName}});
+
     std::map<size_t, Spheres> spheres;
 
-    int index(0);
-    std::ifstream file(filename.c_str());
+    size_t lineIndex{0};
+    std::ifstream file(fileName.c_str());
     if (!file.is_open())
-    {
-        BRAYNS_ERROR << "Could not open " << filename << std::endl;
-        return false;
-    }
+        throw std::runtime_error("Could not open " + fileName);
     else
     {
         while (file.good())
@@ -339,8 +341,8 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                 atom.chainId = 0;
                 atom.residue = 0;
                 atom.processed = false;
-                atom.index = index;
-                index++;
+                atom.index = lineIndex;
+                lineIndex++;
                 std::string atomName;
                 std::string atomCode;
                 size_t i = 0;
@@ -433,14 +435,15 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
                 }
 
                 // Convert position from nanometers
-                const auto center = position + 0.01f * atom.position;
+                const auto center =
+                    transformation.getTranslation() + 0.01f * atom.position;
 
                 // Convert radius from angstrom
                 const auto radius = 0.0001f * atom.radius *
                                     _geometryParameters.getRadiusMultiplier();
 
                 const auto materialId =
-                    colorScheme == ColorScheme::protein_by_id ? proteinIndex
+                    colorScheme == ColorScheme::protein_by_id ? index
                                                               : atom.materialId;
                 spheres[materialId].push_back({center, radius});
             }
@@ -451,15 +454,14 @@ bool ProteinLoader::importPDBFile(const std::string& filename,
         size_t i = 0;
         for (const auto& spheresPerMaterial : spheres)
         {
-            auto material = model.createMaterial(i, colorMap[i].symbol);
+            auto material = model->createMaterial(i, colorMap[i].symbol);
             material->setDiffuseColor({colorMap[i].R / 255.f,
                                        colorMap[i].G / 255.f,
                                        colorMap[i].B / 255.f});
             for (const auto& sphere : spheresPerMaterial.second)
-                model.addSphere(i, sphere);
+                model->addSphere(i, sphere);
             ++i;
         }
     }
-    return true;
 }
 }

@@ -26,54 +26,43 @@
 
 namespace brayns
 {
-struct ParallelSceneContainer
+struct ParallelModelContainer
 {
 public:
-    ParallelSceneContainer(SpheresMap& s, CylindersMap& cy, ConesMap& co,
-                           TrianglesMeshMap& tm, Materials& m, Boxf& wb)
+    ParallelModelContainer(SpheresMap& s, CylindersMap& cy, ConesMap& co,
+                           TrianglesMeshMap& tm, Boxf& wb)
         : spheres(s)
         , cylinders(cy)
         , cones(co)
         , trianglesMeshes(tm)
-        , materials(m)
-        , worldBounds(wb)
+        , bounds(wb)
     {
-    }
-
-    void _buildMissingMaterials(const size_t materialId)
-    {
-        if (materialId >= materials.size())
-            materials.resize(materialId + 1);
     }
 
     void addSphere(const size_t materialId, const Sphere& sphere)
     {
-        _buildMissingMaterials(materialId);
         spheres[materialId].push_back(sphere);
-        worldBounds.merge(sphere.center);
+        bounds.merge(sphere.center);
     }
 
     void addCylinder(const size_t materialId, const Cylinder& cylinder)
     {
-        _buildMissingMaterials(materialId);
         cylinders[materialId].push_back(cylinder);
-        worldBounds.merge(cylinder.center);
-        worldBounds.merge(cylinder.up);
+        bounds.merge(cylinder.center);
+        bounds.merge(cylinder.up);
     }
 
     void addCone(const size_t materialId, const Cone& cone)
     {
-        _buildMissingMaterials(materialId);
         cones[materialId].push_back(cone);
-        worldBounds.merge(cone.center);
-        worldBounds.merge(cone.up);
+        bounds.merge(cone.center);
+        bounds.merge(cone.up);
     }
 
     SpheresMap& spheres;
     CylindersMap& cylinders;
     ConesMap& cones;
     TrianglesMeshMap& trianglesMeshes;
-    Materials& materials;
-    Boxf& worldBounds;
+    Boxf& bounds;
 };
 }

@@ -23,10 +23,10 @@
 #include <brayns/common/Statistics.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
-#include <brayns/common/geometry/Model.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/parameters/AnimationParameters.h>

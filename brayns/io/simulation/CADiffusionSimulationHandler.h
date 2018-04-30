@@ -45,12 +45,12 @@ public:
 
     /**
      * @brief setFrame Sets the frame to load
-     * @param model Model to be populated with spheres. When setFrame is called
+     * @param scene Scene to be populated with spheres. When setFrame is called
      * for the first time, spheres are created. Otherwise, sphere
      * positions are updated with the new values
      * @param frame Frame to load
      */
-    void setFrame(Model& model, const size_t frame);
+    void setFrame(Scene& scene, const size_t frame);
 
     /**
      * @return Returns the number of frames for the current simulation
@@ -62,7 +62,6 @@ private:
     std::map<size_t, std::string> _simulationFiles;
     Vector3fs _calciumPositions;
     size_t _currentFrame{std::numeric_limits<size_t>::max()};
-    bool _spheresCreated{false};
 };
 }
 #endif // CADIFFUSIONSIMULATIONHANDLER_H

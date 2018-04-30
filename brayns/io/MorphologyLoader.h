@@ -23,7 +23,6 @@
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
-#include <brayns/io/ProgressReporter.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <brain/neuron/types.h>
@@ -39,7 +38,7 @@ class URI;
 namespace brayns
 {
 class CircuitLoader;
-struct ParallelSceneContainer;
+struct ParallelModelContainer;
 using GIDOffsets = std::vector<uint64_t>;
 
 /** Loads morphologies from SWC and H5, and Circuit Config files */
@@ -51,12 +50,12 @@ public:
 
     static std::set<std::string> getSupportedDataTypes();
 
-    void importFromBlob(Blob&& blob, Scene& scene,
+    void importFromBlob(Blob&& blob, Scene& scene, const size_t index,
                         const Matrix4f& transformation,
                         const size_t materialID) final;
 
     void importFromFile(const std::string& filename, Scene& scene,
-                        const Matrix4f& transformation,
+                        const size_t index, const Matrix4f& transformation,
                         const size_t materialID) final;
 
     /**
@@ -67,8 +66,8 @@ public:
      * @param transformation Transformation to apply to the morphology
      * @return True if the morphology is successfully loaded, false otherwise
      */
-    bool importMorphology(const servus::URI& source, const uint64_t index,
-                          Model& model,
+    bool importMorphology(const servus::URI& source, Model& model,
+                          const uint64_t index = 0,
                           const Matrix4f& transformation = Matrix4f());
 
 private:
@@ -78,7 +77,7 @@ private:
                            MaterialFunc materialFunc,
                            const Matrix4f& transformation,
                            CompartmentReportPtr compartmentReport,
-                           ParallelSceneContainer& scene);
+                           ParallelModelContainer& model);
     friend class CircuitLoader;
     class Impl;
     std::unique_ptr<Impl> _impl;

@@ -22,6 +22,8 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
+#include <brayns/common/scene/Model.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/io/NESTLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
@@ -62,8 +64,6 @@ void Scene::unload()
     _modelDescriptors.clear();
     _caDiffusionSimulationHandler.reset();
     _simulationHandler.reset();
-    _materials.clear();
-    _textures.clear();
     _volumeHandler.reset();
 
     markModified();
@@ -135,7 +135,7 @@ CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
     return _caDiffusionSimulationHandler;
 }
 
-VolumeHandlerPtr Scene::getVolumeHandler() const
+VolumeHandlerPtr Scene::getVolumeHandler()
 {
     const auto& volumeFile =
         _parametersManager.getVolumeParameters().getFilename();
@@ -191,6 +191,28 @@ VolumeHandlerPtr Scene::getVolumeHandler() const
                 for (const auto& filename : filenames)
                     _volumeHandler->attachVolumeToFile(index++, filename);
             }
+
+            // Add volume model
+            _volumeHandler->setCurrentIndex(0);
+            const auto& dimensions = _volumeHandler->getDimensions();
+            const auto& spacing = _volumeHandler->getElementSpacing();
+            const auto& offset = _volumeHandler->getOffset();
+            const auto name = shortenString(volumeFile);
+            auto model = createModel(
+                name,
+                {{"uri", volumeFile},
+                 {"dimensions", std::to_string(dimensions.x()) + " " +
+                                    std::to_string(dimensions.y()) + " " +
+                                    std::to_string(dimensions.z())},
+                 {"element-spacing", std::to_string(spacing.x()) + " " +
+                                         std::to_string(spacing.y()) + " " +
+                                         std::to_string(spacing.z())},
+                 {"offset", std::to_string(offset.x()) + " " +
+                                std::to_string(offset.y()) + " " +
+                                std::to_string(offset.z())}});
+            model->getBounds().merge(offset);
+            model->getBounds().merge(offset + dimensions);
+            _parametersManager.getVolumeParameters().resetModified();
         }
     }
     catch (const std::runtime_error& e)
@@ -215,6 +237,61 @@ bool Scene::empty() const
     return empty;
 }
 
+void Scene::load(Blob&& blob, const Matrix4f& transformation,
+                 const size_t materialID, Loader::UpdateCallback cb)
+{
+    auto loader = _loaderRegistry.createLoader(blob.type);
+    loader->setProgressCallback(cb);
+    loader->importFromBlob(std::move(blob), *this, 0, transformation,
+                           materialID);
+}
+
+void Scene::load(const std::string& path, const Matrix4f& transformation,
+                 const size_t materialID, Loader::UpdateCallback cb)
+{
+    if (fs::is_directory(path))
+    {
+        fs::directory_iterator begin(path), end;
+        const int numFiles =
+            std::count_if(begin, end,
+                          [& registry = _loaderRegistry](const auto& d) {
+                              return !fs::is_directory(d.path()) &&
+                                     registry.isSupported(d.path().string());
+                          });
+
+        float totalProgress = 0.f;
+
+        for (const auto& i :
+             boost::make_iterator_range(fs::directory_iterator(path), {}))
+        {
+            const auto& currentPath = i.path().string();
+            if (fs::is_directory(i.path()) ||
+                !_loaderRegistry.isSupported(currentPath))
+            {
+                continue;
+            }
+            auto loader = _loaderRegistry.createLoader(currentPath);
+
+            auto progressCb = [cb, numFiles, totalProgress](auto msg,
+                                                            auto amount) {
+                cb(msg, totalProgress + (amount / numFiles));
+            };
+
+            loader->setProgressCallback(progressCb);
+            loader->importFromFile(currentPath, *this, 0, transformation,
+                                   materialID);
+
+            totalProgress += 1.f / numFiles;
+        }
+    }
+    else
+    {
+        auto loader = _loaderRegistry.createLoader(path);
+        loader->setProgressCallback(cb);
+        loader->importFromFile(path, *this, 0, transformation, materialID);
+    }
+}
+
 void Scene::saveToCacheFile()
 {
     const auto& filename =
@@ -231,55 +308,55 @@ void Scene::saveToCacheFile()
     file.write((char*)&version, sizeof(size_t));
     BRAYNS_INFO << "Version: " << version << std::endl;
 
-    const size_t nbMaterials = _materialManager->getMaterials().size();
-    file.write((char*)&nbMaterials, sizeof(size_t));
-    BRAYNS_INFO << nbMaterials << " materials" << std::endl;
-
-    size_t nbElements;
-
-    // Save materials
-    for (auto& material : _materialManager->getMaterials())
-    {
-        const auto name = material.getName();
-        nbElements = name.length();
-        file.write((char*)&nbElements, sizeof(size_t));
-        file.write((char*)name.c_str(), nbElements * sizeof(char));
-
-        Vector3f value3f;
-        value3f = material.getDiffuseColor();
-        file.write((char*)&value3f, sizeof(Vector3f));
-        value3f = material.getSpecularColor();
-        file.write((char*)&value3f, sizeof(Vector3f));
-        float value = material.getSpecularExponent();
-        file.write((char*)&value, sizeof(float));
-        value = material.getReflectionIndex();
-        file.write((char*)&value, sizeof(float));
-        value = material.getOpacity();
-        file.write((char*)&value, sizeof(float));
-        value = mate_modelDescriptorsrial.getRefractionIndex();
-        file.write((char*)&value, sizeof(float));
-        value = material.getEmission();
-        file.write((char*)&value, sizeof(float));
-        value = material.getGlossiness();
-        file.write((char*)&value, sizeof(float));
-        const bool boolean = material.getCastSimulationData();
-        file.write((char*)&boolean, sizeof(bool));
-        // TODO: Textures
-    }
-
     // Save geometry
-    nbElements = _models.size();
+    size_t nbElements = _modelDescriptors.size();
     file.write((char*)&nbElements, sizeof(size_t));
-    for (auto model : _models)
+    for (auto& modelDescriptor : _modelDescriptors)
     {
-        size_t nbElements{0};
         uint64_t bufferSize{0};
 
         // Model name
-        const auto name = model->getName();
+        auto name = modelDescriptor.getName();
         nbElements = name.length();
         file.write((char*)&nbElements, sizeof(size_t));
         file.write((char*)name.c_str(), nbElements * sizeof(char));
+
+        const auto model = modelDescriptor.getModel();
+        const auto materials = model->getMaterials();
+        const auto nbMaterials = materials.size();
+        file.write((char*)&nbMaterials, sizeof(size_t));
+        BRAYNS_INFO << nbMaterials << " materials" << std::endl;
+
+        // Save materials
+        for (auto& material : materials)
+        {
+            file.write((char*)&material.first, sizeof(size_t));
+
+            name = material.second->getName();
+            nbElements = name.length();
+            file.write((char*)&nbElements, sizeof(size_t));
+            file.write((char*)name.c_str(), nbElements * sizeof(char));
+
+            Vector3f value3f;
+            value3f = material.second->getDiffuseColor();
+            file.write((char*)&value3f, sizeof(Vector3f));
+            value3f = material.second->getSpecularColor();
+            file.write((char*)&value3f, sizeof(Vector3f));
+            float value = material.second->getSpecularExponent();
+            file.write((char*)&value, sizeof(float));
+            value = material.second->getReflectionIndex();
+            file.write((char*)&value, sizeof(float));
+            value = material.second->getOpacity();
+            file.write((char*)&value, sizeof(float));
+            value = material.second->getRefractionIndex();
+            file.write((char*)&value, sizeof(float));
+            value = material.second->getEmission();
+            file.write((char*)&value, sizeof(float));
+            value = material.second->getGlossiness();
+            file.write((char*)&value, sizeof(float));
+            const bool boolean = material.second->getCastSimulationData();
+            file.write((char*)&boolean, sizeof(bool));
+        }
 
         // Spheres
         nbElements = model->getSpheres().size();
@@ -297,11 +374,6 @@ void Scene::saveToCacheFile()
             BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
                          << " spheres" << std::endl;
         }
-        else
-        {
-            nbElements = 0;
-            file.write((char*)&nbElements, sizeof(size_t));
-        }
 
         // Cylinders
         nbElements = model->getCylinders().size();
@@ -318,11 +390,6 @@ void Scene::saveToCacheFile()
             file.write((char*)data.data(), bufferSize);
             BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
                          << " cylinders" << std::endl;
-        }
-        else
-        {
-            nbElements = 0;
-            file.write((char*)&nbElements, sizeof(size_t));
         }
 
         // Cones
@@ -395,11 +462,7 @@ void Scene::saveToCacheFile()
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
 
-    // Scene bounds
-    file.write((char*)&_bounds, sizeof(Boxf));
-    BRAYNS_DEBUG << "AABB: " << _bounds << std::endl;
     file.close();
-
     BRAYNS_INFO << "Scene successfully saved" << std::endl;
 }
 
@@ -427,46 +490,6 @@ void Scene::loadFromCacheFile()
         return;
     }
 
-    size_t nbMaterials;
-    file.read((char*)&nbMaterials, sizeof(size_t));
-    BRAYNS_INFO << nbMaterials << " materials" << std::endl;
-
-    // Materials
-    _materials.clear();
-    _materials.resize(nbMaterials);
-    for (size_t i = 0; i < nbMaterials; ++i)
-    {
-        Material material;
-        file.read((char*)&nbElements, sizeof(size_t));
-        char name[255];
-        file.read((char*)&name, nbElements * sizeof(char));
-        material.setName(name);
-
-        Vector3f value3f;
-        file.read((char*)&value3f, sizeof(Vector3f));
-        material.setDiffuseColor(value3f);
-        file.read((char*)&value3f, sizeof(Vector3f));
-        material.setSpecularColor(value3f);
-        float value;
-        file.read((char*)&value, sizeof(float));
-        material.setSpecularExponent(value);
-        file.read((char*)&value, sizeof(float));
-        material.setReflectionIndex(value);
-        file.read((char*)&value, sizeof(float));
-        material.setOpacity(value);
-        file.read((char*)&value, sizeof(float));
-        material.setRefractionIndex(value);
-        file.read((char*)&value, sizeof(float));
-        material.setEmission(value);
-        file.read((char*)&value, sizeof(float));
-        material.setGlossiness(value);
-        bool boolean;
-        file.read((char*)&boolean, sizeof(bool));
-        material.setCastSimulationData(boolean);
-        _materialManager->add(material);
-        // TODO: Textures
-    }
-
     // Geometry
     size_t nbModels = 0;
     size_t nbSpheres = 0;
@@ -481,16 +504,57 @@ void Scene::loadFromCacheFile()
     file.read((char*)&nbModels, sizeof(size_t));
     for (size_t modelId = 0; modelId < nbModels; ++modelId)
     {
-        size_t materialId;
-
         // Model name
+        size_t nbElements;
         file.read((char*)&nbElements, sizeof(size_t));
         char name[255];
         file.read((char*)&name, nbElements * sizeof(char));
+        name[nbElements] = 0;
 
-        auto model = addModel(name);
+        // Create model
+        auto model = createModel(name);
+
+        size_t nbMaterials;
+        file.read((char*)&nbMaterials, sizeof(size_t));
+        BRAYNS_INFO << nbMaterials << " materials" << std::endl;
+
+        // Materials
+        size_t materialId;
+        for (size_t i = 0; i < nbMaterials; ++i)
+        {
+            file.read((char*)&materialId, sizeof(size_t));
+
+            char materialName[255];
+            file.read((char*)&nbElements, sizeof(size_t));
+            file.read((char*)&materialName, nbElements * sizeof(char));
+            materialName[nbElements] = 0;
+
+            auto material = model->createMaterial(materialId, materialName);
+
+            Vector3f value3f;
+            file.read((char*)&value3f, sizeof(Vector3f));
+            material->setDiffuseColor(value3f);
+            file.read((char*)&value3f, sizeof(Vector3f));
+            material->setSpecularColor(value3f);
+            float value;
+            file.read((char*)&value, sizeof(float));
+            material->setSpecularExponent(value);
+            file.read((char*)&value, sizeof(float));
+            material->setReflectionIndex(value);
+            file.read((char*)&value, sizeof(float));
+            material->setOpacity(value);
+            file.read((char*)&value, sizeof(float));
+            material->setRefractionIndex(value);
+            file.read((char*)&value, sizeof(float));
+            material->setEmission(value);
+            file.read((char*)&value, sizeof(float));
+            material->setGlossiness(value);
+            bool boolean;
+            file.read((char*)&boolean, sizeof(bool));
+            material->setCastSimulationData(boolean);
+        }
+
         uint64_t bufferSize{0};
-
         // Spheres
         file.read((char*)&nbSpheres, sizeof(size_t));
         for (size_t i = 0; i < nbSpheres; ++i)
@@ -501,8 +565,7 @@ void Scene::loadFromCacheFile()
             BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
                          << " spheres" << std::endl;
             auto& spheres = model->getSpheres()[materialId];
-            spheres.resize(nbElements);delDescriptor(name, metadata);
-            _modelDescriptors
+            spheres.resize(nbElements);
             file.read((char*)spheres.data(), bufferSize);
         }
 
@@ -541,7 +604,6 @@ void Scene::loadFromCacheFile()
             file.read((char*)&materialId, sizeof(size_t));
             auto& meshes = model->getTrianglesMeshes()[materialId];
             // VerticesdelDescriptor(name, metadata);
-            _modelDescriptors
             file.read((char*)&nbVertices, sizeof(size_t));
             if (nbVertices != 0)
             {
@@ -562,8 +624,7 @@ void Scene::loadFromCacheFile()
                 bufferSize = nbIndices * sizeof(Vector3ui);
                 file.read((char*)meshes.indices.data(), bufferSize);
             }
-            delDescriptor(name, metadata);
-                _modelDescriptors
+
             // Normals
             file.read((char*)&nbNormals, sizeof(size_t));
             if (nbNormals != 0)
@@ -600,11 +661,7 @@ void Scene::loadFromCacheFile()
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
 
-    // Scene bounds
-    file.read((char*)&_bounds, sizeof(Boxf));
-    BRAYNS_DEBUG << "AABB: " << _bounds << std::endl;
     file.close();
-
     BRAYNS_INFO << "Scene successfully loaded" << std::endl;
 }
 
@@ -612,7 +669,7 @@ void Scene::buildDefault()
 {
     BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
 
-    auto model = addModel("DefaultScene");
+    auto model = createModel("DefaultScene");
 
     const Vector3f WHITE = {1.f, 1.f, 1.f};
 
@@ -732,7 +789,7 @@ Boxf Scene::getBounds()
 {
     Boxf bounds;
     for (const auto& modelDescriptor : _modelDescriptors)
-        if (modelDescriptor.enabled())
+        if (modelDescriptor.getEnabled())
             bounds.merge(modelDescriptor.getModel()->getBounds());
     return bounds;
 }
