@@ -140,6 +140,7 @@ uint32_t VolumeHandler::_getBoundedIndex(const uint32_t index) const
     case IndexMode::bounded:
         result = std::max(std::min(index, _volumeDescriptors.rbegin()->first),
                           _volumeDescriptors.begin()->first);
+        break;
     case IndexMode::unchanged:
     default:
         result = index;

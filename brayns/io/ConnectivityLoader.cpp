@@ -28,6 +28,7 @@
 #include <brion/brion.h>
 
 #include "ConnectivityLoader.h"
+#include <boost/progress.hpp>
 
 namespace
 {
@@ -178,8 +179,11 @@ bool ConnectivityLoader::importFromFile(Scene& scene, MeshLoader& meshLoader)
 
         // Place active cells and connections
         std::stringstream message;
-        message << "Building scene with " << _emitors.size() << " cells";
-        Progress progress(message.str(), _emitors.size());
+        message << "Building scene with " << _emitors.size() << " cells ...";
+        boost::progress_display progress(_emitors.size(), std::cout,
+                                         "[INFO ] " + message.str() +
+                                             "\n[INFO ] ",
+                                         "[INFO ] ", "[INFO ] ");
         for (const auto& emitor : _emitors)
         {
             // Cells

@@ -88,6 +88,7 @@ private:
             // stop event loop(s) and exit application
             if (!_brayns.getEngine().getKeepRunning())
             {
+                _brayns.getEngine().triggerRender = [] {};
                 _stopRenderThread->send();
                 _mainLoop->stop();
                 return;

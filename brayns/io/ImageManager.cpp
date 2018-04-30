@@ -112,15 +112,14 @@ bool ImageManager::importTextureFromFile(
                      << " added to the texture cache" << std::endl;
         textures[filename] = texture;
     }
-    catch (Magick::Warning& warning)
+    catch (const Magick::Warning& warning)
     {
         // Handle any other Magick++ warning.
         BRAYNS_WARN << warning.what() << std::endl;
         return false;
     }
-    catch (Magick::ErrorFileOpen& error)
+    catch (const Magick::Error& error)
     {
-        // Process Magick++ file open error
         BRAYNS_ERROR << error.what() << std::endl;
         return false;
     }

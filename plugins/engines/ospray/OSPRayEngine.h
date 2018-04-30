@@ -58,9 +58,10 @@ public:
     bool haveDeflectPixelOp() const final { return _haveDeflectPixelOp; }
     FrameBufferPtr createFrameBuffer(const Vector2ui& frameSize,
                                      FrameBufferFormat frameBufferFormat,
-                                     bool accumulation) final;
+                                     bool accumulation) const final;
 
-    CameraPtr createCamera(const CameraType type) final;
+    CameraPtr createCamera(const CameraType type) const final;
+    RendererPtr createRenderer(const RendererType type) const final;
 
 private:
     Renderers _createRenderers();

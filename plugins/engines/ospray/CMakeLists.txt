@@ -65,7 +65,7 @@ set_source_files_properties(OSPRayScene.cpp
   PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
 
 set(BRAYNSOSPRAYENGINEPLUGIN_LINK_LIBRARIES
-    PRIVATE vmmlib braynsCommon braynsIO ${OSPRAY_LIBRARIES}
+    PRIVATE vmmlib braynsCommon braynsParameters braynsIO ${OSPRAY_LIBRARIES}
 )
 
 # reuse ispc setup and macros from ospray

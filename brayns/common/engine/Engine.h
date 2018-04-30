@@ -23,18 +23,10 @@
 
 #include <brayns/common/Statistics.h>
 
-#include <mutex>
+#include <shared_mutex>
 
 namespace brayns
 {
-struct SnapshotParams
-{
-    int samplesPerPixel{1};
-    Vector2ui size;
-    std::string format; // ImageMagick formats apply
-    size_t quality{100};
-};
-
 /**
  * Abstract implementation of the ray-tracing engine. What we call the
  * ray-tracing engine is a 3rd party acceleration library, typically OSPRay,
@@ -71,6 +63,7 @@ public:
     virtual void postRender();
     /** Gets the scene */
     Scene& getScene() { return *_scene; }
+    auto getScenePtr() { return _scene; }
     /** Gets the frame buffer */
     FrameBuffer& getFrameBuffer() { return *_frameBuffer; }
     /** Gets the camera */
@@ -113,7 +106,7 @@ public:
      * Callback when a new frame shall be triggered. Currently called by event
      * plugins Deflect and Rockets.
      */
-    std::function<void()> triggerRender;
+    std::function<void()> triggerRender{[] {}};
 
     /**
      * Adapts the size of the frame buffer according to camera
@@ -128,36 +121,6 @@ public:
 
     /** @return the minimum frame size in pixels supported by this engine. */
     virtual Vector2ui getMinimumFrameSize() const = 0;
-
-    struct Progress : public BaseObject
-    {
-        std::string operation;
-        float amount{0.f};
-        mutable std::mutex mutex;
-
-        template <typename T>
-        void updateValue(T& member, const T& newValue)
-        {
-            _updateValue(member, newValue);
-        }
-    };
-
-    /** @return the current progress of the engine */
-    const Progress& getProgress() const { return _progress; }
-    Progress& getProgress() { return _progress; }
-    /** Set the last operation processed by the engine. */
-    void setLastOperation(const std::string& lastOperation)
-    {
-        _progress.updateValue(_progress.operation, lastOperation);
-    }
-
-    /**
-     * Set the last normalized progress value (0..1) for any current operation.
-     */
-    void setLastProgress(const float lastProgress)
-    {
-        _progress.updateValue(_progress.amount, lastProgress);
-    }
 
     /**
      * @return true if for "--module deflect" the DeflectPixelOp was
@@ -174,36 +137,9 @@ public:
      */
     bool getKeepRunning() const { return _keepRunning; }
     Statistics& getStatistics() { return _statistics; }
-    using SnapshotReadyCallback = std::function<void(FrameBufferPtr)>;
-
-    /**
-     * Setup render of a snapshot with the given parameters. Calls to render()
-     * start updating the framebuffer that will be provided in the ready
-     * callback, once the snapshot is ready according to given parameters.
-     * Currently determined by the number of accumulation samples.
-     *
-     * Once the snaphot is done or cancelled, the framebuffer is reset and
-     * render() continues normally.
-     *
-     * If the snapshot creation has been cancelled with cancelSnapshot(), the
-     * ready callback will not be called.
-     *
-     * @param params the snapshot parameter to take
-     * @param cb callback when the snapshot is ready and can be obtained from
-     *           the given framebuffer
-     * @throws std::runtime_error if a previous snapshot creation has not been
-     *                            finished yet
-     */
-    void snapshot(const SnapshotParams& params, SnapshotReadyCallback cb);
-
-    /**
-     * Cancel a current pending snapshot. Will reset the framebuffer, so that
-     * render() continues normally.
-     */
-    void cancelSnapshot() { _snapshotCancelled = true; }
     /**
      * @return true if render() calls shall be continued, based on current
-     *         accumulation and snapshot settings.
+     *         accumulation settings.
      * @sa RenderingParameters::setMaxAccumFrames
      */
     bool continueRendering() const;
@@ -211,16 +147,19 @@ public:
     /** Factory method to create an engine-specific framebuffer. */
     virtual FrameBufferPtr createFrameBuffer(
         const Vector2ui& frameSize, FrameBufferFormat frameBufferFormat,
-        bool accumulation) = 0;
+        bool accumulation) const = 0;
 
     /** Factory method to create an engine-specific camera. */
-    virtual CameraPtr createCamera(const CameraType type) = 0;
+    virtual CameraPtr createCamera(const CameraType type) const = 0;
 
+    virtual RendererPtr createRenderer(const RendererType type) const = 0;
+
+    auto& dataMutex() { return _dataMutex; }
+    auto& getParametersManager() { return _parametersManager; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
 
-    void _processSnapshot();
     void _writeFrameToFile();
 
     ParametersManager& _parametersManager;
@@ -232,16 +171,11 @@ protected:
     FrameBufferPtr _frameBuffer;
     Statistics _statistics;
 
-    Progress _progress;
     bool _keepRunning{true};
     bool _rebuildScene{false};
 
-    int _snapshotSpp{0};
-    int _restoreSpp{0};
-    SnapshotReadyCallback _cb;
-    FrameBufferPtr _snapshotFrameBuffer;
-    CameraPtr _snapshotCamera;
-    bool _snapshotCancelled{false};
+    // protect render() vs preRender() when doing all the commit()
+    std::shared_timed_mutex _dataMutex;
 };
 }
 

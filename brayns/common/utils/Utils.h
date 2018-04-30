@@ -26,6 +26,27 @@
 namespace brayns
 {
 strings parseFolder(const std::string& folder, const strings& filters);
+
+const std::string ELLIPSIS("...");
+inline std::string shortenString(const std::string& string,
+                                 const size_t maxLength = 32)
+{
+    if (string.length() <= maxLength)
+        return string;
+
+    const float spacePerPart = (maxLength - ELLIPSIS.length()) / 2.f;
+    const auto beforeEllipsis = string.substr(0, std::ceil(spacePerPart));
+    const auto afterEllipsis =
+        string.substr(string.size() - std::floor(spacePerPart));
+
+    return beforeEllipsis + ELLIPSIS + afterEllipsis;
+}
+
+inline auto lowerCase(std::string str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
 }
 
 #endif // UTILS_H

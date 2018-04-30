@@ -23,9 +23,11 @@ endif()
 
 if(BRAYNS_NETWORKING_ENABLED)
   list(APPEND BRAYNSPLUGINS_HEADERS
+    RocketsPlugin/BinaryRequests.h
     RocketsPlugin/ImageGenerator.h
     RocketsPlugin/jsonSerialization.h
     RocketsPlugin/jsonUtils.h
+    RocketsPlugin/SnapshotTask.h
   )
   list(APPEND BRAYNSPLUGINS_SOURCES
     RocketsPlugin/ImageGenerator.cpp
@@ -36,16 +38,12 @@ if(BRAYNS_NETWORKING_ENABLED)
   set_source_files_properties(RocketsPlugin/staticjson/staticjson.cpp
     PROPERTIES COMPILE_FLAGS -Wno-shadow)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS RocketsPlugin/RocketsPlugin.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE Rockets)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE Rockets braynsParameters braynsTasks)
   if(LibJpegTurbo_FOUND)
     list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
   endif()
   if(BRAYNS_IMAGEMAGICK_ENABLED)
     list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE ${Magick++_LIBRARIES})
-  endif()
-  if(libuv_FOUND)
-    list(APPEND BRAYNSPLUGINS_HEADERS RocketsPlugin/SocketListener.h)
-    list(APPEND BRAYNSPLUGINS_SOURCES RocketsPlugin/SocketListener.cpp)
   endif()
 endif()
 

@@ -34,9 +34,12 @@
 #include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/StreamParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
+#include <brayns/tasks/UploadBinaryTask.h>
+#include <brayns/tasks/errors.h>
 #include <brayns/version.h>
 
 #include "ImageGenerator.h"
+#include "SnapshotTask.h"
 #include "base64/base64.h"
 
 #ifdef __GNUC__
@@ -122,12 +125,28 @@ STATICJSON_DECLARE_ENUM(brayns::EngineType,
 
 namespace staticjson
 {
+inline void init(brayns::BinaryParam* s, ObjectHandler* h)
+{
+    h->add_property("size", &s->size);
+    h->add_property("type", &s->type);
+    h->add_property("name", &s->name, Flags::Optional);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
+inline void init(brayns::BinaryError* s, ObjectHandler* h)
+{
+    h->add_property("index", &s->index);
+    h->add_property("supported_types", &s->supportedTypes);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
 {
     h->add_property("format", &s->format);
     h->add_property("quality", &s->quality, Flags::Optional);
     h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
     h->add_property("size", Vector2uiArray(s->size));
+    h->add_property("name", &s->name, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -162,13 +181,6 @@ inline void init(brayns::Camera* c, ObjectHandler* h)
     h->add_property("focal_length", &c->_focalLength, Flags::Optional);
     h->add_property("eye_separation", &c->_eyeSeparation, Flags::Optional);
     h->add_property("clip_planes", &c->_clipPlanes, Flags::Optional);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
-inline void init(brayns::Engine::Progress* p, ObjectHandler* h)
-{
-    h->add_property("amount", &p->amount);
-    h->add_property("operation", &p->operation);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -447,12 +459,7 @@ inline std::string to_json(const T& obj)
 {
     return staticjson::to_pretty_json_string(obj);
 }
-template <>
-inline std::string to_json(const brayns::Engine::Progress& obj)
-{
-    std::lock_guard<std::mutex> lock(obj.mutex);
-    return staticjson::to_pretty_json_string(obj);
-}
+
 template <>
 inline std::string to_json(const brayns::Version& obj)
 {

@@ -183,7 +183,7 @@ public:
     /**
         Returns volume data
     */
-    BRAYNS_API VolumeHandlerPtr getVolumeHandler();
+    BRAYNS_API VolumeHandlerPtr getVolumeHandler() const;
 
     /**
         Sets the Calcium diffusion simulation handler
@@ -383,7 +383,7 @@ protected:
     Lights _lights;
 
     // Volume
-    VolumeHandlerPtr _volumeHandler;
+    mutable VolumeHandlerPtr _volumeHandler;
 
     // Simulation
     AbstractSimulationHandlerPtr _simulationHandler;

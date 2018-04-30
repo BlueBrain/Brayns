@@ -16,7 +16,6 @@ set(BRAYNSCOMMON_SOURCES
   scene/Scene.cpp
   material/Material.cpp
   material/Texture2D.cpp
-  Progress.cpp
   renderer/Renderer.cpp
   renderer/FrameBuffer.cpp
   light/Light.cpp
@@ -54,6 +53,9 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   Statistics.h
   Timer.h
   transferFunction/TransferFunction.h
+  tasks/Task.h
+  tasks/TaskFunctor.h
+  tasks/TaskRuntimeError.h
   types.h
   utils/Utils.h
   volume/VolumeHandler.h
@@ -61,7 +63,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
 
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
-  PUBLIC vmmlib
+  PUBLIC vmmlib Async++
   PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 

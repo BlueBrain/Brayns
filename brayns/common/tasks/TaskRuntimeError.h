@@ -1,5 +1,6 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
- *                          Daniel.Nachbaur@epfl.ch
+ *
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,37 +20,26 @@
 
 #pragma once
 
-#include <rockets/socketBasedInterface.h>
-#include <rockets/socketListener.h>
-
-#include <map>
-#include <uvw.hpp>
+#include <stdexcept>
 
 namespace brayns
 {
 /**
- * Implements a rockets::SocketListener to be integrated in a libuv event loop.
+ * An exception type that shall be thrown at any point during the task execution
+ * to provide useful errors for the user.
  */
-class SocketListener : public rockets::SocketListener
+class TaskRuntimeError : public std::runtime_error
 {
 public:
-    SocketListener(rockets::SocketBasedInterface& interface);
-
-    void setPostReceiveCallback(const std::function<void()>& callback)
+    TaskRuntimeError(const std::string& message, const int code_ = -1,
+                     const std::string& data_ = "")
+        : std::runtime_error(message)
+        , code(code_)
+        , data(data_)
     {
-        _postReceive = callback;
     }
 
-    void onNewSocket(const rockets::SocketDescriptor fd, int mode) final;
-
-    void onUpdateSocket(const rockets::SocketDescriptor fd, int mode) final;
-
-    void onDeleteSocket(const rockets::SocketDescriptor fd) final;
-
-private:
-    std::map<rockets::SocketDescriptor, std::shared_ptr<uvw::PollHandle>>
-        _handles;
-    rockets::SocketBasedInterface& _iface;
-    std::function<void()> _postReceive;
+    const int code;
+    const std::string data;
 };
 }

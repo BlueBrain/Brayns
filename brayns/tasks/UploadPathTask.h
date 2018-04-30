@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,27 +18,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef XYZBLOADER_H
-#define XYZBLOADER_H
+#pragma once
 
-#include <brayns/common/types.h>
-#include <brayns/io/ProgressReporter.h>
-#include <brayns/parameters/GeometryParameters.h>
+#include <brayns/common/tasks/Task.h>
 
 namespace brayns
 {
-class XYZBLoader : public ProgressReporter
+/**
+ * A task which loads data from a list of paths and adds the loaded data to the
+ * scene.
+ */
+class UploadPathTask : public Task<bool>
 {
 public:
-    XYZBLoader(const GeometryParameters& geometryParameters);
-
-    void importFromBlob(const Blob& blob, Scene& scene);
-
-    void importFromFile(const std::string& filename, Scene& scene);
+    UploadPathTask(const std::vector<std::string>& paths,
+                   const std::set<std::string>& supportedTypes,
+                   EnginePtr engine);
 
 private:
-    const GeometryParameters& _geometryParameters;
+    std::vector<async::task<void>> _loadTasks;
 };
 }
-
-#endif // XYZBLOADER_H

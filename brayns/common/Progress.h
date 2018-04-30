@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  *
  * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
@@ -20,73 +20,60 @@
 
 #pragma once
 
+#include <brayns/common/BaseObject.h>
+
 #include <functional>
-#include <memory>
+#include <mutex>
 #include <string>
 
 namespace brayns
 {
 /**
- * A class which tracks and reports progress of an operation/execution.
- * It reports on stdout using boost::progress_display and also reports to a
- * user-defined callback.
- *
- * It is safe to use in threaded environments like OpenMP for-loops. In that
- * case, only the first OpenMP thread reports progress, but still tracks from
- * all threads.
+ * A progress object which offers thread-safe progress updates and thread-safe
+ * consumption of the current progress if it has changed in between.
  */
-class Progress
+class Progress : public BaseObject
 {
 public:
-    /**
-     * The callback for each progress update with the signature (message,
-     * fraction of progress in 0..1 range)
-     */
-    using UpdateCallback = std::function<void(const std::string&, float)>;
+    Progress() = default;
+    explicit Progress(const std::string& operation)
+        : _operation(operation)
+    {
+    }
+
+    /** Update the progress with a new absolute amount. */
+    void update(const std::string& operation, const float amount)
+    {
+        std::lock_guard<std::mutex> lock_(_mutex);
+        _updateValue(_operation, operation);
+        _updateValue(_amount, amount);
+    }
+
+    /** Update the progress with the given increment. */
+    void increment(const std::string& operation, const float increment)
+    {
+        std::lock_guard<std::mutex> lock_(_mutex);
+        _updateValue(_operation, operation);
+        _updateValue(_amount, _amount + increment);
+    }
 
     /**
-     * Setup the progress and already report progress '0' on the given callback.
-     * @param message the current operation that takes place
-     * @param expectedCount the expected count of updates when the reporting
-     *        should finish
-     * @param updateCallback a user-defined callback to be called on each
-     *        update.
+     * Call the provided callback with the current progress if it has changed
+     * since the last invokation.
      */
-    Progress(const std::string& message, size_t expectedCount,
-             const UpdateCallback& updateCallback = UpdateCallback());
-
-    /**
-     * Reports 'expected count' on the callback to ensure completion of the
-     * progress reporting.
-     */
-    ~Progress();
-
-    Progress(Progress&& rhs);
-    Progress& operator=(Progress&& rhs);
-
-    /**
-     * Update the message for a running progress. Only supported for the
-     * callback, the stdout printing is unaffected.
-     */
-    void setMessage(const std::string& message);
-
-    /**
-     * Increment the progress by one, which may report to stdout, but always to
-     * the callback.
-     */
-    void operator++();
-
-    /**
-     * Increment the progress by any value, which may report to stdout, but
-     * always to the callback.
-     */
-    void operator+=(size_t increment);
-
-    /** @return the current progress count. */
-    size_t getCurrent() const;
+    void consume(std::function<void(std::string, float)> callback)
+    {
+        std::lock_guard<std::mutex> lock_(_mutex);
+        if (isModified())
+        {
+            callback(_operation, _amount);
+            resetModified();
+        }
+    }
 
 private:
-    class Impl;
-    std::unique_ptr<Impl> _impl;
+    std::string _operation;
+    float _amount{0.f};
+    std::mutex _mutex;
 };
 }
