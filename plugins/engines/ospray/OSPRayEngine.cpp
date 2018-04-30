@@ -22,6 +22,8 @@
 
 #include <brayns/common/input/KeyboardHandler.h>
 
+#include <brayns/parameters/ParametersManager.h>
+
 #include <plugins/engines/ospray/OSPRayCamera.h>
 #include <plugins/engines/ospray/OSPRayFrameBuffer.h>
 #include <plugins/engines/ospray/OSPRayRenderer.h>
@@ -243,8 +245,8 @@ Renderers OSPRayEngine::_createRenderers()
         auto name = rp.getRendererAsString(renderer);
         try
         {
-            _renderers[renderer] =
-                std::make_shared<OSPRayRenderer>(name, _parametersManager);
+            _renderers[renderer] = std::make_shared<OSPRayRenderer>(
+                name, _parametersManager.getAnimationParameters(), rp);
         }
         catch (const std::runtime_error& e)
         {
@@ -252,8 +254,8 @@ Renderers OSPRayEngine::_createRenderers()
                         << std::endl;
             rp.initializeDefaultRenderers();
             name = rp.getRendererAsString(RendererType::default_);
-            _renderers[renderer] =
-                std::make_shared<OSPRayRenderer>(name, _parametersManager);
+            _renderers[renderer] = std::make_shared<OSPRayRenderer>(
+                name, _parametersManager.getAnimationParameters(), rp);
         }
         renderersForScene.push_back(_renderers[renderer]);
     }
@@ -286,10 +288,12 @@ CameraPtr OSPRayEngine::createCamera(const CameraType type) const
     }
 }
 
-RendererPtr OSPRayEngine::createRenderer(const RendererType type) const
+RendererPtr OSPRayEngine::createRenderer(
+    const RendererType type, const AnimationParameters& animationParameters,
+    const RenderingParameters& renderingParameters) const
 {
-    auto& rp = _parametersManager.getRenderingParameters();
-    return std::make_shared<OSPRayRenderer>(rp.getRendererAsString(type),
-                                            _parametersManager);
+    return std::make_shared<OSPRayRenderer>(
+        renderingParameters.getRendererAsString(type), animationParameters,
+        renderingParameters);
 }
 }

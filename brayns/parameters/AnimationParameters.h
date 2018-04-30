@@ -27,7 +27,7 @@ SERIALIZATION_ACCESS(AnimationParameters)
 
 namespace brayns
 {
-class AnimationParameters final : public AbstractParameters
+class AnimationParameters : public AbstractParameters
 {
 public:
     AnimationParameters();

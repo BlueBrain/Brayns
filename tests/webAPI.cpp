@@ -23,10 +23,7 @@
 #include <jsonSerialization.h>
 
 #include "ClientServer.h"
-#include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/Renderer.h>
-
-#include <ImageGenerator.h>
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
@@ -51,49 +48,4 @@ BOOST_AUTO_TEST_CASE(inspect)
         makeRequest<std::array<float, 2>, brayns::Renderer::PickResult>(
             "inspect", {{10, -10}});
     BOOST_CHECK(!failedInspectResult.hit);
-}
-
-#ifdef BRAYNS_USE_MAGICKPP
-BOOST_AUTO_TEST_CASE(snapshot)
-{
-    brayns::SnapshotParams params;
-    params.format = "jpg";
-    params.size = {5, 5};
-    params.quality = 75;
-
-    auto image =
-        makeRequest<brayns::SnapshotParams,
-                    brayns::ImageGenerator::ImageBase64>("snapshot", params);
-    BOOST_CHECK_EQUAL(image.data,
-                      "/9j/4AAQSkZJRgABAQAAAQABAAD/"
-                      "2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4n"
-                      "ICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/"
-                      "2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy"
-                      "MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/"
-                      "wAARCAAFAAUDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAX/"
-                      "xAAgEAABAwMFAQAAAAAAAAAAAAACAAEEAwURBxIhMkGB/"
-                      "8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/"
-                      "xAAcEQACAgIDAAAAAAAAAAAAAAABAgADBEEFEdH/2gAMAwEAAhEDEQA/"
-                      "AJ0PVMbfBjwxsrmMekFJiKU3O0WHPT3GfqIir6OLxGqUlNDZ9hVsboT/"
-                      "2Q==");
-}
-#endif
-
-BOOST_AUTO_TEST_CASE(snapshot_empty_params)
-{
-    BOOST_CHECK_THROW((makeRequest<brayns::SnapshotParams,
-                                   brayns::ImageGenerator::ImageBase64>(
-                          "snapshot", brayns::SnapshotParams())),
-                      rockets::jsonrpc::response_error);
-}
-
-BOOST_AUTO_TEST_CASE(snapshot_illegal_format)
-{
-    brayns::SnapshotParams params;
-    params.size = {5, 5};
-    params.format = "";
-    BOOST_CHECK_THROW(
-        (makeRequest<brayns::SnapshotParams,
-                     brayns::ImageGenerator::ImageBase64>("snapshot", params)),
-        rockets::jsonrpc::response_error);
 }

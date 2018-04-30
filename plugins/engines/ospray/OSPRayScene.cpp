@@ -28,7 +28,9 @@
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/io/ImageManager.h>
+
 #include <brayns/parameters/GeometryParameters.h>
+#include <brayns/parameters/ParametersManager.h>
 #include <brayns/parameters/SceneParameters.h>
 
 #include <boost/algorithm/string/predicate.hpp> // ends_with

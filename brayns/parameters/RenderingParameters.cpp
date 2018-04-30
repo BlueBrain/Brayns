@@ -68,31 +68,12 @@ const std::array<std::string, 4> STEREO_MODES = {
 
 const std::array<std::string, 3> SHADING_TYPES = {
     {"none", "diffuse", "electron"}};
-
-const size_t DEFAULT_SAMPLES_PER_RAY = 128;
 }
 
 namespace brayns
 {
 RenderingParameters::RenderingParameters()
     : AbstractParameters("Rendering")
-    , _engine(EngineType::ospray)
-    , _renderer(RendererType::default_)
-    , _ambientOcclusionStrength{0.f}
-    , _ambientOcclusionDistance{1.2f}
-    , _shading{ShadingType::diffuse}
-    , _lightEmittingMaterials{false}
-    , _spp{1}
-    , _shadows{0.f}
-    , _softShadows{0.f}
-    , _backgroundColor(Vector3f(0.f, 0.f, 0.f))
-    , _detectionDistance{1.f}
-    , _detectionOnDifferentMaterial{true}
-    , _detectionNearColor{1.f, 0.f, 0.f}
-    , _detectionFarColor{0.f, 1.f, 0.f}
-    , _epsilon{0.f}
-    , _headLight{false}
-    , _spr{DEFAULT_SAMPLES_PER_RAY}
 {
     _parameters.add_options()(PARAM_ENGINE.c_str(), po::value<std::string>(),
                               "Engine name [ospray|optix]")(

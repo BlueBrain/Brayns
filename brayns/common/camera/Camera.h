@@ -39,6 +39,7 @@ namespace brayns
 class Camera : public BaseObject
 {
 public:
+    Camera() = default;
     /**
        Default constructor
        @param cameraType Type of camera (Perpective, orthographic, etc)
@@ -114,7 +115,7 @@ public:
        Commits the changes held by the camera object so that
        attributes become available to the underlying rendering engine
     */
-    BRAYNS_API virtual void commit() = 0;
+    BRAYNS_API virtual void commit(){};
 
     /**
        The field of view is the extent of the observable world that is seen at
@@ -200,7 +201,8 @@ public:
     BRAYNS_API void reset();
 
     /** Enable/disables environment mapping */
-    BRAYNS_API virtual void setEnvironmentMap(const bool environmentMap) = 0;
+    BRAYNS_API virtual void setEnvironmentMap(
+        const bool environmentMap BRAYNS_UNUSED){};
 
     /**
       Sets the camera clip planes
@@ -215,7 +217,7 @@ public:
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
 private:
-    const CameraType _type{CameraType::default_};
+    CameraType _type{CameraType::default_};
     Vector3f _position;
     Vector3f _target;
     Vector3f _up;
