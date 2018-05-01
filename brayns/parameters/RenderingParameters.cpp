@@ -144,7 +144,7 @@ void RenderingParameters::initializeDefaultCameras()
     _cameraTypeNames = {CAMERA_TYPE_NAMES.begin(), CAMERA_TYPE_NAMES.end()};
 }
 
-bool RenderingParameters::_parse(const po::variables_map& vm)
+void RenderingParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_ENGINE))
     {
@@ -249,7 +249,7 @@ bool RenderingParameters::_parse(const po::variables_map& vm)
         _varianceThreshold = vm[PARAM_VARIANCE_THRESHOLD].as<float>();
     if (vm.count(PARAM_SPR))
         _spr = vm[PARAM_SPR].as<size_t>();
-    return true;
+    markModified();
 }
 
 void RenderingParameters::print()

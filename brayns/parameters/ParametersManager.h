@@ -128,12 +128,13 @@ public:
     bool isAnyModified() const;
 
 private:
-    std::vector<AbstractParameters*> _parameterSets;
     po::options_description _parameters;
+
+    std::vector<AbstractParameters*> _parameterSets;
     AnimationParameters _animationParameters;
     ApplicationParameters _applicationParameters;
-    RenderingParameters _renderingParameters;
     GeometryParameters _geometryParameters;
+    RenderingParameters _renderingParameters;
     SceneParameters _sceneParameters;
     StreamParameters _streamParameters;
     VolumeParameters _volumeParameters;

@@ -41,7 +41,7 @@ SceneParameters::SceneParameters()
                                          "Environment map filename [string]");
 }
 
-bool SceneParameters::_parse(const po::variables_map& vm)
+void SceneParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_COLOR_MAP_FILE))
         _colorMapFilename = vm[PARAM_COLOR_MAP_FILE].as<std::string>();
@@ -53,7 +53,7 @@ bool SceneParameters::_parse(const po::variables_map& vm)
     }
     if (vm.count(PARAM_ENVIRONMENT_MAP))
         _environmentMap = vm[PARAM_ENVIRONMENT_MAP].as<std::string>();
-    return true;
+    markModified();
 }
 
 void SceneParameters::print()

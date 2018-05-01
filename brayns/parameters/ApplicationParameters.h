@@ -86,8 +86,10 @@ public:
         _updateValue(_httpServerURI, httpServerURI);
     }
 
+    const strings& getInputPaths() const { return _inputPaths; }
+    po::positional_options_description& posArgs() { return _positionalArgs; }
 protected:
-    bool _parse(const po::variables_map& vm) final;
+    void parse(const po::variables_map& vm) final;
 
     strings _plugins;
     Vector2ui _windowSize;
@@ -99,6 +101,10 @@ protected:
     bool _synchronousMode{false};
     size_t _imageStreamFPS{60};
     std::string _httpServerURI;
+
+    strings _inputPaths;
+
+    po::positional_options_description _positionalArgs;
 
     SERIALIZATION_FRIEND(ApplicationParameters)
 };

@@ -35,11 +35,11 @@ AnimationParameters::AnimationParameters()
                               "Scene animation frame [float]");
 }
 
-bool AnimationParameters::_parse(const po::variables_map& vm)
+void AnimationParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_ANIMATION_FRAME))
         _current = vm[PARAM_ANIMATION_FRAME].as<uint32_t>();
-    return true;
+    markModified();
 }
 
 void AnimationParameters::print()

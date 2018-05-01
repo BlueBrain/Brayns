@@ -50,7 +50,7 @@ public:
     /** Volume offset */
     const Vector3f& getOffset() const { return _offset; }
 protected:
-    bool _parse(const po::variables_map& vm) final;
+    void parse(const po::variables_map& vm) final;
 
     std::string _folder;
     std::string _filename;

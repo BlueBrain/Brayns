@@ -19,85 +19,14 @@
  */
 
 #include "AbstractParameters.h"
-#include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include <brayns/common/types.h>
 #include <ostream>
 
 namespace brayns
 {
-bool AbstractParameters::parse(int argc, const char** argv)
-{
-    for (int i = 1; i < argc; ++i)
-        _arguments.push_back(argv[i]);
-
-    try
-    {
-        po::variables_map vm;
-        po::parsed_options parsedOptions =
-            po::command_line_parser(argc, argv)
-                .options(_parameters)
-                .style(po::command_line_style::unix_style ^
-                       po::command_line_style::allow_short)
-                .allow_unregistered()
-                .run();
-        po::store(parsedOptions, vm);
-        po::notify(vm);
-        _parse(vm);
-    }
-    catch (po::error& e)
-    {
-        BRAYNS_ERROR << e.what() << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-void AbstractParameters::usage()
-{
-    std::cout << _name << " parameters:" << std::endl
-              << std::endl
-              << _parameters << std::endl;
-}
-
 void AbstractParameters::print()
 {
     BRAYNS_INFO << "-= " << _name << " parameters =-" << std::endl;
-}
-
-const strings& AbstractParameters::arguments() const
-{
-    return _arguments;
-}
-
-void AbstractParameters::set(const std::string& key, const std::string& value)
-{
-    const std::string p = "--" + key;
-    std::vector<std::string> strs;
-    boost::split(strs, value, boost::is_any_of(" "));
-
-    const size_t argc = 2 + strs.size();
-    const char** argv = new const char*[argc];
-    argv[0] = "";
-    argv[1] = p.c_str();
-    for (size_t i = 0; i < strs.size(); ++i)
-        argv[2 + i] = strs[i].c_str();
-
-    po::variables_map vm;
-    po::parsed_options parsedOptions =
-        po::command_line_parser(argc, argv)
-            .options(_parameters)
-            .style(po::command_line_style::unix_style ^
-                   po::command_line_style::allow_short)
-            .allow_unregistered()
-            .run();
-    po::store(parsedOptions, vm);
-    po::notify(vm);
-    delete[] argv;
-
-    _parse(vm);
-
-    markModified();
 }
 }

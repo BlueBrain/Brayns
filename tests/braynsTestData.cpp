@@ -72,6 +72,23 @@ void checkFiles(const std::string& filenameA, const std::string& filenameB,
                        0);
 }
 
+BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const char* app = testSuite.argv[0];
+    auto path = BRAYNS_TESTDATA + std::string("files/monkey.xyz");
+    const char* argv[] = {app, path.c_str(), "--accumulation", "off"};
+    const int argc = sizeof(argv) / sizeof(char*);
+
+    brayns::Brayns brayns(argc, argv);
+    brayns.render();
+#ifdef GENERATE_TESTDATA
+    writeTestData("testdataMonkey.bin", brayns.getEngine().getFrameBuffer());
+#endif
+    compareTestData("testdataMonkey.bin", brayns.getEngine().getFrameBuffer());
+}
+
 #ifdef BRAYNS_USE_BBPTESTDATA
 BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
 {
@@ -85,10 +102,8 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
                           "off",
                           "--circuit-config",
                           BBP_TEST_BLUECONFIG3,
-                          "--target",
-                          "Layer1",
-                          "--circuit-last-simulation-frame",
-                          "1"};
+                          "--circuit-targets",
+                          "Layer1"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);

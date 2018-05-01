@@ -229,7 +229,7 @@ public:
     const std::string& getStereoModeAsString(const StereoMode value) const;
 
 protected:
-    bool _parse(const po::variables_map& vm) final;
+    void parse(const po::variables_map& vm) final;
 
     EngineType _engine{EngineType::ospray};
     std::string _module;

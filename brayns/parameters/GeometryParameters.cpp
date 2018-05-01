@@ -221,7 +221,7 @@ GeometryParameters::GeometryParameters()
         "Connectivity scaling [float float float]");
 }
 
-bool GeometryParameters::_parse(const po::variables_map& vm)
+void GeometryParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_MORPHOLOGY_FOLDER))
         _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as<std::string>();
@@ -417,7 +417,7 @@ bool GeometryParameters::_parse(const po::variables_map& vm)
             BRAYNS_ERROR << "Invalid number of values for "
                          << PARAM_CONNECTIVITY_SCALE << std::endl;
     }
-    return true;
+    markModified();
 }
 
 void GeometryParameters::print()

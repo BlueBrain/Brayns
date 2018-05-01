@@ -187,34 +187,26 @@ public:
         _wsBroadcastOperations[ENDPOINT_STATISTICS]();
     }
 
-    std::string _getHttpInterface() const
-    {
-        const auto& params = _parametersManager.getApplicationParameters();
-        const auto& args = params.arguments();
-        for (int i = 0; i < (int)args.size() - 1; ++i)
-        {
-            if (args[i] == "--http-server")
-                return args[i + 1];
-        }
-        return std::string();
-    }
-
     void _setupRocketsServer()
     {
         try
         {
+            const auto& appParams =
+                _parametersManager.getApplicationParameters();
 #ifdef BRAYNS_USE_LIBUV
             if (uvw::Loop::getDefault()->alive())
             {
-                _rocketsServer.reset(new rockets::Server{uv_default_loop(),
-                                                         _getHttpInterface(),
-                                                         "rockets"});
+                _rocketsServer.reset(
+                    new rockets::Server{uv_default_loop(),
+                                        appParams.getHttpServerURI(),
+                                        "rockets"});
                 _manualProcessing = false;
             }
             else
 #endif
                 _rocketsServer.reset(
-                    new rockets::Server{_getHttpInterface(), "rockets", 0});
+                    new rockets::Server{appParams.getHttpServerURI(), "rockets",
+                                        0});
 
             BRAYNS_INFO << "Rockets server running on "
                         << _rocketsServer->getURI() << std::endl;

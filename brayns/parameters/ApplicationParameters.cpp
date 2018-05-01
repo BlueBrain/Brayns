@@ -26,16 +26,18 @@
 
 namespace
 {
-const std::string PARAM_PLUGIN = "plugin";
-const std::string PARAM_WINDOW_SIZE = "window-size";
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
-const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
-const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_FILTERS = "filters";
 const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
-const std::string PARAM_TMP_FOLDER = "tmp-folder";
-const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
+const std::string PARAM_HTTP_SERVER = "http-server";
 const std::string PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
+const std::string PARAM_INPUT_PATHS = "input-paths";
+const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
+const std::string PARAM_JPEG_SIZE = "jpeg-size";
+const std::string PARAM_PLUGIN = "plugin";
+const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
+const std::string PARAM_TMP_FOLDER = "tmp-folder";
+const std::string PARAM_WINDOW_SIZE = "window-size";
 
 const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
@@ -52,10 +54,13 @@ ApplicationParameters::ApplicationParameters()
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
     , _tmpFolder(DEFAULT_TMP_FOLDER)
 {
-    _parameters.add_options()(PARAM_PLUGIN.c_str(),
-                              po::value<strings>(&_plugins)->composing(),
-                              "Dynamic plugin to load from LD_LIBRARY_PATH; "
-                              "can be repeated to load multiple plugins")(
+    _parameters.add_options()(PARAM_HTTP_SERVER.c_str(),
+                              po::value<std::string>(), "HTTP interface")(
+        PARAM_INPUT_PATHS.c_str(), po::value<std::vector<std::string>>(),
+        "List of files/folders to load data from")(
+        PARAM_PLUGIN.c_str(), po::value<strings>(&_plugins)->composing(),
+        "Dynamic plugin to load from LD_LIBRARY_PATH; "
+        "can be repeated to load multiple plugins")(
         PARAM_WINDOW_SIZE.c_str(), po::value<uints>()->multitoken(),
         "Window size [int int]")(PARAM_BENCHMARKING.c_str(), po::value<bool>(),
                                  "Enable|Disable benchmarking [bool]")(
@@ -74,10 +79,16 @@ ApplicationParameters::ApplicationParameters()
         "Screen space filters [string]")(
         PARAM_FRAME_EXPORT_FOLDER.c_str(), po::value<std::string>(),
         "Folder where frames are exported as PNG images [string]");
+
+    _positionalArgs.add(PARAM_INPUT_PATHS.c_str(), -1);
 }
 
-bool ApplicationParameters::_parse(const po::variables_map& vm)
+void ApplicationParameters::parse(const po::variables_map& vm)
 {
+    if (vm.count(PARAM_INPUT_PATHS))
+        _inputPaths = vm[PARAM_INPUT_PATHS].as<strings>();
+    if (vm.count(PARAM_HTTP_SERVER))
+        _httpServerURI = vm[PARAM_HTTP_SERVER].as<std::string>();
     if (vm.count(PARAM_WINDOW_SIZE))
     {
         uints values = vm[PARAM_WINDOW_SIZE].as<uints>();
@@ -102,7 +113,7 @@ bool ApplicationParameters::_parse(const po::variables_map& vm)
     if (vm.count(PARAM_IMAGE_STREAM_FPS))
         _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();
 
-    return true;
+    markModified();
 }
 
 void ApplicationParameters::print()
