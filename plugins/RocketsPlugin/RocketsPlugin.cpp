@@ -54,7 +54,7 @@ const std::string ENDPOINT_CAMERA = "camera";
 const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
 const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
 const std::string ENDPOINT_IMAGE_JPEG = "image-jpeg";
-const std::string ENDPOINT_MATERIAL_LUT = "material-lut";
+const std::string ENDPOINT_TRANSFER_FUNCTION = "transfer-function";
 const std::string ENDPOINT_RENDERING_PARAMS = "rendering-parameters";
 const std::string ENDPOINT_SCENE = "scene";
 const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
@@ -540,7 +540,7 @@ public:
 
         // following endpoints need a valid engine
         _handle(ENDPOINT_CAMERA, _engine->getCamera());
-        _handle(ENDPOINT_MATERIAL_LUT,
+        _handle(ENDPOINT_TRANSFER_FUNCTION,
                 _engine->getScene().getTransferFunction());
         _handleGET(ENDPOINT_SCENE, _engine->getScene());
         _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
