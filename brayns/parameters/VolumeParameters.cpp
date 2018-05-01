@@ -50,7 +50,7 @@ VolumeParameters::VolumeParameters()
         "Volume offset [int int int]");
 }
 
-bool VolumeParameters::_parse(const po::variables_map& vm)
+void VolumeParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_VOLUME_FOLDER))
         _folder = vm[PARAM_VOLUME_FOLDER].as<std::string>();
@@ -76,7 +76,7 @@ bool VolumeParameters::_parse(const po::variables_map& vm)
         if (values.size() == 3)
             _offset = Vector3f(values[0], values[1], values[2]);
     }
-    return true;
+    markModified();
 }
 
 void VolumeParameters::print()

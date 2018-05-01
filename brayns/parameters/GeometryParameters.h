@@ -306,7 +306,7 @@ public:
     }
 
 protected:
-    bool _parse(const po::variables_map& vm) final;
+    void parse(const po::variables_map& vm) final;
 
     // Nest
     std::string _NESTCircuit;

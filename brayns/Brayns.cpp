@@ -45,6 +45,8 @@
 #include <brayns/io/XYZBLoader.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 
+#include <brayns/tasks/UploadPathTask.h>
+
 #include <brayns/pluginapi/ExtensionPluginFactory.h>
 #include <brayns/pluginapi/PluginAPI.h>
 #include <plugins/engines/EngineFactory.h>
@@ -309,6 +311,17 @@ struct Brayns::Impl : public PluginAPI
                 params.getGeometryParameters());
         });
 
+        const auto& paths =
+            _parametersManager.getApplicationParameters().getInputPaths();
+        if (!paths.empty())
+        {
+            UploadPathTask task(paths, _engine);
+            if (!task.result())
+                throw std::runtime_error("Loading failed");
+            return;
+        }
+
+        // 'legacy' loading from geometry params
         buildScene();
     }
 

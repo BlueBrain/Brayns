@@ -22,17 +22,22 @@
 
 #include <brayns/parameters/AbstractParameters.h>
 
+#include <boost/algorithm/string.hpp>
+
 namespace brayns
 {
 ParametersManager::ParametersManager()
 {
     registerParameters(&_animationParameters);
-    registerParameters(&_sceneParameters);
-    registerParameters(&_streamParameters);
     registerParameters(&_applicationParameters);
     registerParameters(&_geometryParameters);
     registerParameters(&_renderingParameters);
+    registerParameters(&_sceneParameters);
+    registerParameters(&_streamParameters);
     registerParameters(&_volumeParameters);
+
+    for (auto parameters : _parameterSets)
+        _parameters.add(parameters->parameters());
 }
 
 void ParametersManager::registerParameters(AbstractParameters* parameters)
@@ -51,16 +56,35 @@ void ParametersManager::parse(int argc, const char** argv)
     {
         usage();
         exit(0);
+        return;
     }
-    else
-        for (AbstractParameters* parameters : _parameterSets)
-            parameters->parse(argc, argv);
+
+    try
+    {
+        po::variables_map vm;
+        po::parsed_options parsedOptions =
+            po::command_line_parser(argc, argv)
+                .options(_parameters)
+                .positional(_applicationParameters.posArgs())
+                .style(po::command_line_style::unix_style ^
+                       po::command_line_style::allow_short)
+                .allow_unregistered()
+                .run();
+        po::store(parsedOptions, vm);
+        po::notify(vm);
+
+        for (auto parameters : _parameterSets)
+            parameters->parse(vm);
+    }
+    catch (po::error& e)
+    {
+        BRAYNS_ERROR << e.what() << std::endl;
+    }
 }
 
 void ParametersManager::usage()
 {
-    for (AbstractParameters* parameters : _parameterSets)
-        parameters->usage();
+    std::cout << _parameters << std::endl;
 }
 
 void ParametersManager::print()
@@ -127,7 +151,17 @@ VolumeParameters& ParametersManager::getVolumeParameters()
 
 void ParametersManager::set(const std::string& key, const std::string& value)
 {
-    for (AbstractParameters* parameters : _parameterSets)
-        parameters->set(key, value);
+    const std::string p = "--" + key;
+    strings strs;
+    boost::split(strs, value, boost::is_any_of(" "));
+
+    const size_t argc = 2 + strs.size();
+    auto argv = std::make_unique<const char* []>(argc);
+    argv[0] = "";
+    argv[1] = p.c_str();
+    for (size_t i = 0; i < strs.size(); ++i)
+        argv[2 + i] = strs[i].c_str();
+
+    parse(argc, argv.get());
 }
 }

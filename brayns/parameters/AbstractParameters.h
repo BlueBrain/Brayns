@@ -40,43 +40,28 @@ public:
        @param name Display name for the set of parameters
      */
     AbstractParameters(const std::string& name)
-        : _name(name){};
+        : _name(name)
+        , _parameters(name)
+    {
+    }
 
     virtual ~AbstractParameters() = default;
     /**
        Parses parameters managed by the class
-       @param argc number of command line parameters
-       @param argv actual command line parameters
-       @return a map of the variables identified by the parsing
+       @param vm the variables map of all arguments passed by the user
      */
-    bool parse(int argc, const char** argv);
-
-    /**
-       Displays the usage of registered parameters
-     */
-    void usage();
+    virtual void parse(const po::variables_map& vm) = 0;
 
     /**
        Displays values of registered parameters
      */
     virtual void print();
 
-    /**
-       Sets a parameter. If the parameter is not registered, Action is ignored
-       and a warning message is traced
-       @param key Name of the parameter
-       @param value Value of the parameter
-     */
-    void set(const std::string& key, const std::string& value);
-
-    const strings& arguments() const;
-
+    po::options_description& parameters() { return _parameters; }
 protected:
-    virtual bool _parse(const po::variables_map&) = 0;
-
     std::string _name;
+
     po::options_description _parameters;
-    strings _arguments;
 };
 }
 #endif // ABSTRACTPARAMETERS_H

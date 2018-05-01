@@ -27,11 +27,6 @@ StreamParameters::StreamParameters()
 {
 }
 
-bool StreamParameters::_parse(const po::variables_map&)
-{
-    return true;
-}
-
 void StreamParameters::print()
 {
     AbstractParameters::print();

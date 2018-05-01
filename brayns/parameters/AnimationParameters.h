@@ -61,7 +61,7 @@ public:
     void setUnit(const std::string& unit) { _updateValue(_unit, unit); }
     void setDt(const double dt) { _updateValue(_dt, dt); }
 private:
-    bool _parse(const po::variables_map& vm) final;
+    void parse(const po::variables_map& vm) final;
 
     uint32_t adjustCurrent(const uint32_t newCurrent) const
     {

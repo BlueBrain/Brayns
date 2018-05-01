@@ -42,7 +42,7 @@ public:
     */
     const std::string& getEnvironmentMap() const { return _environmentMap; }
 protected:
-    bool _parse(const po::variables_map& vm) final;
+    void parse(const po::variables_map& vm) final;
 
     std::string _colorMapFilename;
     Vector2f _colorMapRange{0.f, 255.f};

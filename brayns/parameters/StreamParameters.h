@@ -58,8 +58,7 @@ public:
     unsigned getPort() const { return _port; }
     void setPort(const unsigned port) { _updateValue(_port, port); }
 private:
-    bool _parse(const po::variables_map& vm) final;
-
+    void parse(const po::variables_map&) final {}
     std::string _host;
     bool _enabled{true};
     std::string _id;
