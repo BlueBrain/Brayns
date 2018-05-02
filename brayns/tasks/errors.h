@@ -62,7 +62,4 @@ inline TaskRuntimeError LOADING_BINARY_FAILED(const std::string& error)
 {
     return {error, -1734};
 }
-
-const TaskRuntimeError INVALID_PATH{"Invalid path: no access or not existant",
-                                    -1735};
 }
