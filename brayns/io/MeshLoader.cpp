@@ -273,30 +273,32 @@ void MeshLoader::_createMaterials(Scene& scene, const aiScene* aiScene,
             }
         }
 
-        aiColor3D value3f(0.f, 0.f, 0.f);
+        aiColor4D value4f(0.f);
         float value1f;
-        aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value3f);
-        material.setColor(Vector3f(value3f.r, value3f.g, value3f.b));
+        aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value4f);
+        material.setColor(Vector3f(value4f.r, value4f.g, value4f.b));
+
+        value1f = 0.f;
+        if (aimaterial->Get(AI_MATKEY_OPACITY, value1f) != AI_SUCCESS)
+            material.setOpacity(value4f.a);
+        else
+            material.setOpacity(fabs(value1f) < 0.01f ? 1.f : value1f);
 
         value1f = 0.f;
         aimaterial->Get(AI_MATKEY_REFLECTIVITY, value1f);
         material.setReflectionIndex(value1f);
 
-        value3f = aiColor3D(0.f, 0.f, 0.f);
-        aimaterial->Get(AI_MATKEY_COLOR_SPECULAR, value3f);
-        material.setSpecularColor(Vector3f(value3f.r, value3f.g, value3f.b));
+        value4f = aiColor4D(0.f);
+        aimaterial->Get(AI_MATKEY_COLOR_SPECULAR, value4f);
+        material.setSpecularColor(Vector3f(value4f.r, value4f.g, value4f.b));
 
         value1f = 0.f;
         aimaterial->Get(AI_MATKEY_SHININESS, value1f);
         material.setSpecularExponent(fabs(value1f) < 0.01f ? 100.f : value1f);
 
-        value3f = aiColor3D(0.f, 0.f, 0.f);
-        aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, value3f);
-        material.setEmission(value3f.r);
-
-        value1f = 0.f;
-        aimaterial->Get(AI_MATKEY_OPACITY, value1f);
-        material.setOpacity(fabs(value1f) < 0.01f ? 1.f : value1f);
+        value4f = aiColor4D(0.f);
+        aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, value4f);
+        material.setEmission(value4f.r);
 
         value1f = 0.f;
         aimaterial->Get(AI_MATKEY_REFRACTI, value1f);
