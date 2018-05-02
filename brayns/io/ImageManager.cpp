@@ -94,9 +94,8 @@ bool ImageManager::importTextureFromFile(
     {
         Magick::Image image(filename);
         Magick::Blob blob;
-        image.magick("RGB"); // Set JPEG output format
+        image.magick(image.matte() ? "RGBA" : "RGB"); // Set JPEG output format
         image.write(&blob);
-        size_t totalSize = blob.length();
 
         Texture2DPtr texture(new Texture2D);
         texture->setType(textureType);
@@ -104,7 +103,7 @@ bool ImageManager::importTextureFromFile(
         texture->setHeight(image.rows());
         texture->setNbChannels(image.matte() ? 4 : 3);
         texture->setDepth(1);
-        texture->setRawData((unsigned char*)blob.data(), totalSize);
+        texture->setRawData((unsigned char*)blob.data(), blob.length());
 
         BRAYNS_DEBUG << filename << ": " << texture->getWidth() << "x"
                      << texture->getHeight() << "x" << texture->getNbChannels()
