@@ -28,8 +28,6 @@ class BaseObject
 {
 public:
     virtual ~BaseObject() = default;
-    BaseObject(BaseObject&& rhs) = default;
-    BaseObject& operator=(BaseObject&& rhs) = default;
 
     /**
      * @return true if any parameter has been modified since the last

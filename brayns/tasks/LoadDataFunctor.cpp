@@ -74,11 +74,6 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
         while (!_lock.try_lock_for(std::chrono::seconds(1)))
             _updateProgress("Waiting for scene access ...", 0.f);
 
-        _updateProgress("Unloading ...", 0.f);
-        Scene& scene = _engine->getScene();
-        scene.unload();
-        _loadDefaultScene = true;
-
         _updateProgress("Loading data ...", LOADING_PROGRESS_STEP);
         try
         {
@@ -89,9 +84,9 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
             throw LOADING_BINARY_FAILED(e.what());
         }
 
+        Scene& scene = _engine->getScene();
         if (!scene.empty())
             _postLoad();
-        _loadDefaultScene = false;
     }
     catch (...)
     {

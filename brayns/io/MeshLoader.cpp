@@ -149,7 +149,6 @@ void MeshLoader::importFromBlob(Blob&& blob, Scene& scene,
         throw std::runtime_error("No meshes found");
 
     auto model = scene.createModel(blob.name);
-    std::cout << blob.name << std::endl;
     _postLoad(aiScene, *model, transformation, defaultMaterialId);
 }
 
@@ -161,7 +160,6 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 
     for (size_t m = 0; m < aiScene->mNumMaterials; ++m)
     {
-        const size_t materialId = _getMaterialId(m);
         aiMaterial* aimaterial = aiScene->mMaterials[m];
 
         aiString valueString;
@@ -208,7 +206,7 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
         aiColor4D value4f(0.f);
         float value1f;
         aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value4f);
-        material.setColor(Vector3f(value4f.r, value4f.g, value4f.b));
+        material->setDiffuseColor(Vector3f(value4f.r, value4f.g, value4f.b));
 
         value1f = 0.f;
         if (aimaterial->Get(AI_MATKEY_OPACITY, value1f) != AI_SUCCESS)
@@ -235,7 +233,7 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
         value1f = 0.f;
         aimaterial->Get(AI_MATKEY_REFRACTI, value1f);
         material->setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f
-                                                                : value1f);
+                                                                 : value1f);
     }
 }
 
@@ -326,7 +324,6 @@ size_t MeshLoader::_getQuality() const
         return aiProcess_GenSmoothNormals | aiProcess_Triangulate;
     }
 }
-
 
 std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
 {

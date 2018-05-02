@@ -63,8 +63,8 @@ void OSPRayRenderer::commit()
     const AnimationParameters& ap = _animationParameters;
     const RenderingParameters& rp = _renderingParameters;
 
-    if (!ap.isModified() && !rp.isModified() && !sp.isModified() &&
-        !vp.isModified() && !_scene->isModified() && !_dirty)
+    if (!ap.isModified() && !rp.isModified() && !_scene->isModified() &&
+        !_dirty)
     {
         return;
     }
@@ -90,12 +90,10 @@ void OSPRayRenderer::commit()
     ospSet1f(_renderer, "detectionDistance", rp.getDetectionDistance());
     ospSet1i(_renderer, "detectionOnDifferentMaterial",
              rp.getDetectionOnDifferentMaterial());
-    auto color = rp.getDetectionNearColor();
+    color = rp.getDetectionNearColor();
     ospSet3f(_renderer, "detectionNearColor", color.x(), color.y(), color.z());
     color = rp.getDetectionFarColor();
     ospSet3f(_renderer, "detectionFarColor", color.x(), color.y(), color.z());
-    ospSet1i(_renderer, "materialForSimulation",
-             static_cast<size_t>(MaterialType::voltage_simulation));
     ospSet1i(_renderer, "volumeSamplesPerRay", rp.getSamplesPerRay());
 
     auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
