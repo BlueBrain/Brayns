@@ -53,56 +53,67 @@ void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
     }
     stream.seekg(0);
 
-    auto model = scene.createModel("PointCloud");
+    const std::string name = "MemoryPointCloud";
+    auto model = scene.createModel(name);
 
-    const auto materialId = 0;
-    model->createMaterial(materialId, "PointCloud");
-    auto& spheres = model->getSpheres()[materialId];
-
-    const size_t startOffset = spheres.size();
-    spheres.reserve(spheres.size() + numlines);
-
-    size_t i = 0;
-    std::string line;
-    std::stringstream msg;
-    msg << "Loading " << shortenString(blob.name) << " ..." << std::endl;
-    while (std::getline(stream, line))
+    try
     {
-        std::vector<float> lineData;
-        std::stringstream lineStream(line);
+        const auto materialId = 0;
+        model->createMaterial(materialId, name);
+        auto& spheres = model->getSpheres()[materialId];
 
-        float value;
-        while (lineStream >> value)
-            lineData.push_back(value);
+        const size_t startOffset = spheres.size();
+        spheres.reserve(spheres.size() + numlines);
 
-        switch (lineData.size())
+        size_t i = 0;
+        std::string line;
+        std::stringstream msg;
+        msg << "Loading " << shortenString(blob.name) << " ..." << std::endl;
+        while (std::getline(stream, line))
         {
-        case 3:
+            std::vector<float> lineData;
+            std::stringstream lineStream(line);
+
+            float value;
+            while (lineStream >> value)
+                lineData.push_back(value);
+
+            switch (lineData.size())
+            {
+            case 3:
+            {
+                const Vector4f position(lineData[0], lineData[1], lineData[2],
+                                        1.f);
+                model->addSphere(materialId,
+                                 {transformation * position,
+                                  _geometryParameters.getRadiusMultiplier()});
+                break;
+            }
+            default:
+                throw std::runtime_error("Invalid content in line " +
+                                         std::to_string(i + 1) + ": " + line);
+            }
+            updateProgress(msg.str(), i++, numlines);
+        }
+
+        const float maxDim = scene.getBounds().getSize().find_max();
+        if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
         {
-            const Vector4f position(lineData[0], lineData[1], lineData[2], 1.f);
-            model->addSphere(materialId,
-                             {transformation * position,
-                              _geometryParameters.getRadiusMultiplier()});
-            break;
+            const float newRadius = maxDim / 100.f;
+            BRAYNS_WARN << "Given radius "
+                        << _geometryParameters.getRadiusMultiplier()
+                        << " is too big for this scene, using radius "
+                        << newRadius << " now" << std::endl;
+
+            for (i = 0; i < numlines; ++i)
+                spheres[i + startOffset].radius = newRadius;
         }
-        default:
-            throw std::runtime_error("Invalid content in line " +
-                                     std::to_string(i + 1) + ": " + line);
-        }
-        updateProgress(msg.str(), i++, numlines);
     }
-
-    const float maxDim = scene.getBounds().getSize().find_max();
-    if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
+    catch (const std::runtime_error&)
     {
-        const float newRadius = maxDim / 100.f;
-        BRAYNS_WARN << "Given radius "
-                    << _geometryParameters.getRadiusMultiplier()
-                    << " is too big for this scene, using radius " << newRadius
-                    << " now" << std::endl;
-
-        for (i = 0; i < numlines; ++i)
-            spheres[i + startOffset].radius = newRadius;
+        // Failed to load point cloud. Removing last created model
+        scene.removeModel(scene.getModelDescriptors().size() - 1);
+        throw;
     }
 }
 

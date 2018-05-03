@@ -787,10 +787,20 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 
 Boxf Scene::getBounds()
 {
+    size_t nbEnabledModels{0};
     Boxf bounds;
     for (const auto& modelDescriptor : _modelDescriptors)
         if (modelDescriptor.getEnabled())
+        {
             bounds.merge(modelDescriptor.getModel()->getBounds());
+            ++nbEnabledModels;
+        }
+    if (nbEnabledModels == 0)
+    {
+        // If no model is enabled. return unity bounding box
+        bounds.merge({0, 0, 0});
+        bounds.merge({1, 1, 1});
+    }
     return bounds;
 }
 }

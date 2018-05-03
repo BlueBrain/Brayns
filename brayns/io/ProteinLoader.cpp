@@ -454,12 +454,14 @@ void ProteinLoader::importFromFile(const std::string& fileName, Scene& scene,
         size_t i = 0;
         for (const auto& spheresPerMaterial : spheres)
         {
-            auto material = model->createMaterial(i, colorMap[i].symbol);
-            material->setDiffuseColor({colorMap[i].R / 255.f,
-                                       colorMap[i].G / 255.f,
-                                       colorMap[i].B / 255.f});
+            const auto materialId = spheresPerMaterial.first;
+            auto material =
+                model->createMaterial(materialId, colorMap[i].symbol);
+            material->setDiffuseColor({colorMap[materialId].R / 255.f,
+                                       colorMap[materialId].G / 255.f,
+                                       colorMap[materialId].B / 255.f});
             for (const auto& sphere : spheresPerMaterial.second)
-                model->addSphere(i, sphere);
+                model->addSphere(materialId, sphere);
             ++i;
         }
     }

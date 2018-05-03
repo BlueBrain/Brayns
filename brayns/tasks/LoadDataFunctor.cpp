@@ -128,13 +128,7 @@ void LoadDataFunctor::_postLoad(const bool cancellable)
     scene.commit();
 
     BRAYNS_INFO << "Now rendering ..." << std::endl;
-
-    const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
-
-    auto& camera = _engine->getCamera();
-    camera.setInitialState(_engine->getScene().getBounds());
-    camera.setAspectRatio(frameSize.x() / frameSize.y());
-    _engine->triggerRender();
+    _engine->setDefaultCamera();
 }
 
 void LoadDataFunctor::_updateProgress(const std::string& message,

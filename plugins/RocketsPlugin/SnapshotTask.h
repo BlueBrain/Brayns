@@ -77,7 +77,6 @@ public:
             *_camera = *_params.camera;
         else
             *_camera = engine.getCamera();
-        _camera->setAspectRatio(float(_params.size.x()) / _params.size.y());
         _camera->commit();
 
         if (_params.renderingParams)

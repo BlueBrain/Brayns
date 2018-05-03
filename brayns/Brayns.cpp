@@ -453,6 +453,7 @@ private:
         loadingProgress += LOADING_PROGRESS_STEP;
 
         BRAYNS_INFO << "Now rendering ..." << std::endl;
+        _engine->setDefaultCamera();
     }
 
     // do this in the main thread again to avoid race conditions
