@@ -435,7 +435,7 @@ public:
                     };
 
                     progressUpdate->start(std::chrono::milliseconds(0),
-                                          std::chrono::milliseconds(100));
+                                          std::chrono::milliseconds(800));
                 }
 #endif
 
