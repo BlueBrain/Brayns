@@ -27,26 +27,20 @@ namespace brayns
 {
 strings parseFolder(const std::string& folder, const strings& filters);
 
-const std::string ELLIPSIS("...");
-inline std::string shortenString(const std::string& string,
-                                 const size_t maxLength = 32)
-{
-    if (string.length() <= maxLength)
-        return string;
-
-    const float spacePerPart = (maxLength - ELLIPSIS.length()) / 2.f;
-    const auto beforeEllipsis = string.substr(0, std::ceil(spacePerPart));
-    const auto afterEllipsis =
-        string.substr(string.size() - std::floor(spacePerPart));
-
-    return beforeEllipsis + ELLIPSIS + afterEllipsis;
-}
+std::string shortenString(const std::string& string,
+                          const size_t maxLength = 32);
 
 inline auto lowerCase(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
+
+bool isSupportedArchiveType(const std::string& extension);
+bool isArchive(const std::string& filename);
+bool isArchive(const Blob& blob);
+void extractFile(const std::string& filename, const std::string& destination);
+void extractBlob(Blob&& blob, const std::string& destination);
 }
 
 #endif // UTILS_H

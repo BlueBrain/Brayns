@@ -235,6 +235,9 @@ void Scene::load(const std::string& path, const Matrix4f& transformation,
                                      registry.isSupported(d.path().string());
                           });
 
+        if (numFiles == 0)
+            throw std::runtime_error("No supported file found to load");
+
         float totalProgress = 0.f;
 
         for (const auto& i :

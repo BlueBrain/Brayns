@@ -26,8 +26,12 @@
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 
 #include <brayns/parameters/ParametersManager.h>
+
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
 namespace brayns
 {
@@ -43,11 +47,49 @@ LoadDataFunctor::LoadDataFunctor(EnginePtr engine)
 
 void LoadDataFunctor::operator()(Blob&& blob)
 {
+    // extract the archive and treat it as 'load from folder'
+    if (isArchive(blob))
+    {
+        struct Scope
+        {
+            Scope(Blob&& blob, LoadDataFunctor& parent)
+            {
+                fs::create_directories(path);
+
+                extractBlob(std::move(blob), path.string());
+                parent._performLoad([&] { parent._loadData(path.string()); });
+            }
+
+            ~Scope() { fs::remove_all(path); }
+            fs::path path = fs::temp_directory_path() / fs::unique_path();
+        } scope(std::move(blob), *this);
+        return;
+    }
+
     _performLoad([&] { _loadData(std::move(blob)); });
 }
 
 void LoadDataFunctor::operator()(const std::string& path)
 {
+    // extract the archive and treat it as 'load from folder'
+    if (isArchive(path))
+    {
+        struct Scope
+        {
+            Scope(const std::string& file, LoadDataFunctor& parent)
+            {
+                fs::create_directories(path);
+
+                extractFile(file, path.string());
+                parent._performLoad([&] { parent._loadData(path.string()); });
+            }
+
+            ~Scope() { fs::remove_all(path); }
+            fs::path path = fs::temp_directory_path() / fs::unique_path();
+        } scope(path, *this);
+        return;
+    }
+
     _performLoad([&] { _loadData(path); });
 }
 

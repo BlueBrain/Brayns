@@ -71,6 +71,7 @@ set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
   PUBLIC vmmlib Async++
   PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+          ${LibArchive_LIBRARIES}
 )
 
 common_library(braynsCommon)

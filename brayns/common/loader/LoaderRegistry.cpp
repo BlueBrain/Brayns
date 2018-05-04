@@ -90,6 +90,9 @@ bool LoaderRegistry::_isSupported(const LoaderInfo& loader,
     else
         extension = extension.erase(0, 1);
 
+    if (isSupportedArchiveType(extension))
+        return true;
+
     const auto& types = loader.supportedTypes();
     const auto found =
         std::find_if(types.cbegin(), types.cend(), [extension](auto val) {
