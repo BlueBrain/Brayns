@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/common/Statistics.h>
+#include <brayns/common/Transformation.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/material/Material.h>
@@ -141,6 +142,8 @@ STATICJSON_DECLARE_ENUM(brayns::TextureType,
     reinterpret_cast<std::array<float, 2>*>(&(vec).array[0])
 #define Vector3fArray(vec) \
     reinterpret_cast<std::array<float, 3>*>(&(vec).array[0])
+#define Vector4fArray(vec) \
+    reinterpret_cast<std::array<float, 4>*>(&(vec).array[0])
 
 namespace staticjson
 {
@@ -282,29 +285,30 @@ inline void init(brayns::Material* m, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::ModelTransformation* g, ObjectHandler* h)
+inline void init(brayns::Transformation* g, ObjectHandler* h)
 {
     h->add_property("translation", Vector3fArray(g->_translation));
-    h->add_property("scale", Vector3fArray(g->_scale));
-    h->add_property("rotation", Vector3fArray(g->_rotation));
+    h->add_property("scaling", Vector3fArray(g->_scale));
+    h->add_property("rotation", Vector4fArray(g->_rotation));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
 {
     h->add_property("name", &g->_name, Flags::Optional);
-    h->add_property("enabled", &g->_enabled, Flags::Optional);
+    h->add_property("path", &g->_path, Flags::Optional);
     h->add_property("visible", &g->_visible, Flags::Optional);
     h->add_property("bounding_box", &g->_boundingBox, Flags::Optional);
     h->add_property("transformations", &g->_transformations);
     h->add_property("metadata", &g->_metadata);
+    h->add_property("bounds", &g->_model->getBounds());
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
-    auto bounds = s->getBounds();
-    h->add_property("bounds", &bounds, Flags::IgnoreRead | Flags::Optional);
+    h->add_property("bounds", &s->getBounds(),
+                    Flags::IgnoreRead | Flags::Optional);
     h->add_property("models", &s->getModelDescriptors(), Flags::IgnoreRead);
     h->set_flags(Flags::DisallowUnknownKey);
 }

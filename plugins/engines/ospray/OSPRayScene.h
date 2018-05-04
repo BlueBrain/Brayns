@@ -24,10 +24,7 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 
-#include <ospray_cpp/Data.h>
-#include <ospray_cpp/Light.h>
-#include <ospray_cpp/Model.h>
-#include <ospray_cpp/Texture2D.h>
+#include <ospray.h>
 
 namespace brayns
 {
@@ -60,15 +57,12 @@ public:
     /** @copydoc Scene::commitTransferFunctionData */
     bool commitTransferFunctionData() final;
 
-    /** @copydoc Scene::unload */
-    void unload() final;
-
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
     /** @copydoc Scene::addModel */
-    ModelPtr createModel(const std::string& name,
-                         const ModelMetadata& metadata) final;
+    Model& createModel(const std::string& name, const std::string& path,
+                       const ModelMetadata& metadata) final;
 
     /** @copydoc Scene::removeModel */
     void removeModel(const size_t index) final;
@@ -83,9 +77,12 @@ private:
 
     std::vector<OSPLight> _ospLights;
     OSPData _ospLightData{nullptr};
+
     OSPData _ospVolumeData{nullptr};
     uint64_t _ospVolumeDataSize{0};
+
     OSPData _ospSimulationData{nullptr};
+
     OSPData _ospTransferFunctionEmissionData{nullptr};
     OSPData _ospTransferFunctionDiffuseData{nullptr};
 

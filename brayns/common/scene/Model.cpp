@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,6 +20,7 @@
 
 #include "Model.h"
 
+#include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
@@ -27,39 +28,14 @@
 namespace brayns
 {
 ModelDescriptor::ModelDescriptor(const std::string& name,
+                                 const std::string& path,
                                  const ModelMetadata& metadata, ModelPtr model)
     : _name(name)
+    , _path(path)
     , _metadata(metadata)
-    , _model(model)
+    , _transformations{1}
+    , _model(std::move(model))
 {
-    _transformations.push_back(ModelTransformation());
-}
-
-ModelDescriptor::~ModelDescriptor()
-{
-    if (_model)
-    {
-        _model->unload();
-        _model.reset();
-    }
-}
-
-Model::~Model()
-{
-    unload();
-}
-
-void Model::unload()
-{
-    _spheres.clear();
-    _spheresDirty = true;
-    _cylinders.clear();
-    _cylindersDirty = true;
-    _cones.clear();
-    _conesDirty = true;
-    _trianglesMeshes.clear();
-    _trianglesMeshesDirty = true;
-    _bounds.reset();
 }
 
 bool Model::empty() const
@@ -251,12 +227,13 @@ void Model::logInformation()
                 << std::endl;
 }
 
-MaterialPtr Model::getMaterial(const size_t materialId)
+MaterialPtr Model::getMaterial(const size_t materialId) const
 {
-    if (_materials.find(materialId) == _materials.end())
+    const auto it = _materials.find(materialId);
+    if (it == _materials.end())
         throw std::runtime_error("Material " + std::to_string(materialId) +
                                  " is not registered in the model");
-    return _materials[materialId];
+    return it->second;
 }
 
 void Model::createMissingMaterials()
@@ -272,13 +249,10 @@ void Model::createMissingMaterials()
         materialIds.insert(meshes.first);
 
     for (const auto materialId : materialIds)
-        try
-        {
-            getMaterial(materialId);
-        }
-        catch (const std::runtime_error&)
-        {
+    {
+        const auto it = _materials.find(materialId);
+        if (it == _materials.end())
             createMaterial(materialId, std::to_string(materialId));
-        }
+    }
 }
 }

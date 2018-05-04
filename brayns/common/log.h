@@ -22,7 +22,6 @@
 #define BRAYNS_LOG_H
 
 #include <iostream>
-#include <thread>
 
 #define BRAYNS_ERROR std::cerr << "[ERROR] "
 #define BRAYNS_WARN std::cerr << "[WARN ] "

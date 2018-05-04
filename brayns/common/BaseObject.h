@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <atomic>
-
 namespace brayns
 {
 class BaseObject

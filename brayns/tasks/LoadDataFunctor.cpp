@@ -33,26 +33,12 @@ namespace brayns
 {
 const size_t LOADING_PROGRESS_DATA = 100;
 const size_t LOADING_PROGRESS_STEP = 10;
-const float TOTAL_PROGRESS = 3 * LOADING_PROGRESS_STEP + LOADING_PROGRESS_DATA;
+const float TOTAL_PROGRESS = 2 * LOADING_PROGRESS_STEP + LOADING_PROGRESS_DATA;
 
 LoadDataFunctor::LoadDataFunctor(EnginePtr engine)
     : _engine(engine)
     , _lock{_engine->dataMutex(), std::defer_lock}
 {
-}
-
-LoadDataFunctor::~LoadDataFunctor()
-{
-    if (!_loadDefaultScene)
-        return;
-
-    // load default scene if we got cancelled or any other error occurred
-    Scene& scene = _engine->getScene();
-    scene.unload();
-    BRAYNS_INFO << "Building default scene" << std::endl;
-    scene.buildDefault();
-
-    _postLoad(false);
 }
 
 void LoadDataFunctor::operator()(Blob&& blob)
@@ -74,7 +60,7 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
         while (!_lock.try_lock_for(std::chrono::seconds(1)))
             _updateProgress("Waiting for scene access ...", 0.f);
 
-        _updateProgress("Loading data ...", LOADING_PROGRESS_STEP);
+        _updateProgress("Loading data ...", 0.f);
         try
         {
             loadData();

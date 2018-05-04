@@ -20,12 +20,12 @@
 
 #include "Scene.h"
 
+#include <brayns/common/Transformation.h>
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
-#include <brayns/io/NESTLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -47,32 +47,9 @@ Scene::Scene(Renderers renderers, ParametersManager& parametersManager)
 {
 }
 
-Scene::~Scene()
-{
-    reset();
-}
-
 void Scene::reset()
 {
-    unload();
     _renderers.clear();
-}
-
-void Scene::unload()
-{
-    _markGeometryDirty();
-    _modelDescriptors.clear();
-    _caDiffusionSimulationHandler.reset();
-    _simulationHandler.reset();
-    _volumeHandler.reset();
-
-    markModified();
-}
-
-void Scene::_markGeometryDirty()
-{
-    _geometryGroupsDirty = true;
-    markModified();
 }
 
 void Scene::addLight(LightPtr light)
@@ -198,10 +175,9 @@ VolumeHandlerPtr Scene::getVolumeHandler()
             const auto& spacing = _volumeHandler->getElementSpacing();
             const auto& offset = _volumeHandler->getOffset();
             const auto name = shortenString(volumeFile);
-            auto model = createModel(
-                name,
-                {{"uri", volumeFile},
-                 {"dimensions", std::to_string(dimensions.x()) + " " +
+            auto& model = createModel(
+                name, volumeFile,
+                {{"dimensions", std::to_string(dimensions.x()) + " " +
                                     std::to_string(dimensions.y()) + " " +
                                     std::to_string(dimensions.z())},
                  {"element-spacing", std::to_string(spacing.x()) + " " +
@@ -210,8 +186,8 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                  {"offset", std::to_string(offset.x()) + " " +
                                 std::to_string(offset.y()) + " " +
                                 std::to_string(offset.z())}});
-            model->getBounds().merge(offset);
-            model->getBounds().merge(offset + dimensions);
+            model.getBounds().merge(offset);
+            model.getBounds().merge(offset + dimensions);
             _parametersManager.getVolumeParameters().resetModified();
         }
     }
@@ -231,10 +207,10 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 
 bool Scene::empty() const
 {
-    bool empty = true;
     for (const auto& modelDescriptor : _modelDescriptors)
-        empty = empty && modelDescriptor.getModel()->empty();
-    return empty;
+        if (!modelDescriptor.getModel().empty())
+            return false;
+    return true;
 }
 
 void Scene::load(Blob&& blob, const Matrix4f& transformation,
@@ -321,8 +297,8 @@ void Scene::saveToCacheFile()
         file.write((char*)&nbElements, sizeof(size_t));
         file.write((char*)name.c_str(), nbElements * sizeof(char));
 
-        const auto model = modelDescriptor.getModel();
-        const auto materials = model->getMaterials();
+        auto& model = modelDescriptor.getModel();
+        const auto& materials = model.getMaterials();
         const auto nbMaterials = materials.size();
         file.write((char*)&nbMaterials, sizeof(size_t));
         BRAYNS_INFO << nbMaterials << " materials" << std::endl;
@@ -359,9 +335,9 @@ void Scene::saveToCacheFile()
         }
 
         // Spheres
-        nbElements = model->getSpheres().size();
+        nbElements = model.getSpheres().size();
         file.write((char*)&nbElements, sizeof(size_t));
-        for (auto& spheres : model->getSpheres())
+        for (auto& spheres : model.getSpheres())
         {
             const auto materialId = spheres.first;
             file.write((char*)&materialId, sizeof(size_t));
@@ -376,9 +352,9 @@ void Scene::saveToCacheFile()
         }
 
         // Cylinders
-        nbElements = model->getCylinders().size();
+        nbElements = model.getCylinders().size();
         file.write((char*)&nbElements, sizeof(size_t));
-        for (auto& cylinders : model->getCylinders())
+        for (auto& cylinders : model.getCylinders())
         {
             const auto materialId = cylinders.first;
             file.write((char*)&materialId, sizeof(size_t));
@@ -393,9 +369,9 @@ void Scene::saveToCacheFile()
         }
 
         // Cones
-        nbElements = model->getCones().size();
+        nbElements = model.getCones().size();
         file.write((char*)&nbElements, sizeof(size_t));
-        for (auto& cones : model->getCones())
+        for (auto& cones : model.getCones())
         {
             const auto materialId = cones.first;
             file.write((char*)&materialId, sizeof(size_t));
@@ -410,9 +386,9 @@ void Scene::saveToCacheFile()
         }
 
         // Meshes
-        nbElements = model->getTrianglesMeshes().size();
+        nbElements = model.getTrianglesMeshes().size();
         file.write((char*)&nbElements, sizeof(size_t));
-        for (const auto& meshes : model->getTrianglesMeshes())
+        for (const auto& meshes : model.getTrianglesMeshes())
         {
             const auto materialId = meshes.first;
             file.write((char*)&materialId, sizeof(size_t));
@@ -457,7 +433,7 @@ void Scene::saveToCacheFile()
         }
 
         // Bounds
-        const auto& bounds = model->getBounds();
+        const auto& bounds = model.getBounds();
         file.write((char*)&bounds, sizeof(Boxf));
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
@@ -512,7 +488,7 @@ void Scene::loadFromCacheFile()
         name[nbElements] = 0;
 
         // Create model
-        auto model = createModel(name);
+        auto& model = createModel(name);
 
         size_t nbMaterials;
         file.read((char*)&nbMaterials, sizeof(size_t));
@@ -529,7 +505,7 @@ void Scene::loadFromCacheFile()
             file.read((char*)&materialName, nbElements * sizeof(char));
             materialName[nbElements] = 0;
 
-            auto material = model->createMaterial(materialId, materialName);
+            auto material = model.createMaterial(materialId, materialName);
 
             Vector3f value3f;
             file.read((char*)&value3f, sizeof(Vector3f));
@@ -564,7 +540,7 @@ void Scene::loadFromCacheFile()
             bufferSize = nbElements * sizeof(Sphere);
             BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
                          << " spheres" << std::endl;
-            auto& spheres = model->getSpheres()[materialId];
+            auto& spheres = model.getSpheres()[materialId];
             spheres.resize(nbElements);
             file.read((char*)spheres.data(), bufferSize);
         }
@@ -578,7 +554,7 @@ void Scene::loadFromCacheFile()
             bufferSize = nbElements * sizeof(Cylinder);
             BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
                          << " cylinders" << std::endl;
-            auto& cylinders = model->getCylinders()[materialId];
+            auto& cylinders = model.getCylinders()[materialId];
             cylinders.resize(nbElements);
             file.read((char*)cylinders.data(), bufferSize);
         }
@@ -592,7 +568,7 @@ void Scene::loadFromCacheFile()
             bufferSize = nbElements * sizeof(Cone);
             BRAYNS_DEBUG << "[" << materialId << "] " << nbElements << " cones"
                          << std::endl;
-            auto& cones = model->getCones()[materialId];
+            auto& cones = model.getCones()[materialId];
             cones.resize(nbElements);
             file.read((char*)cones.data(), bufferSize);
         }
@@ -602,7 +578,7 @@ void Scene::loadFromCacheFile()
         for (size_t i = 0; i < nbMeshes; ++i)
         {
             file.read((char*)&materialId, sizeof(size_t));
-            auto& meshes = model->getTrianglesMeshes()[materialId];
+            auto& meshes = model.getTrianglesMeshes()[materialId];
             // VerticesdelDescriptor(name, metadata);
             file.read((char*)&nbVertices, sizeof(size_t));
             if (nbVertices != 0)
@@ -657,7 +633,7 @@ void Scene::loadFromCacheFile()
         // Bounds
         Boxf bounds;
         file.read((char*)&bounds, sizeof(Boxf));
-        model->getBounds().merge(bounds);
+        model.getBounds().merge(bounds);
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
 
@@ -669,7 +645,7 @@ void Scene::buildDefault()
 {
     BRAYNS_INFO << "Building default Cornell Box scene" << std::endl;
 
-    auto model = createModel("DefaultScene");
+    auto& model = createModel("DefaultScene");
 
     const Vector3f WHITE = {1.f, 1.f, 1.f};
 
@@ -701,8 +677,8 @@ void Scene::buildDefault()
     {
         // Cornell box
         auto material =
-            model->createMaterial(materialId,
-                                  "wall_" + std::to_string(materialId));
+            model.createMaterial(materialId,
+                                 "wall_" + std::to_string(materialId));
         material->setDiffuseColor(colors[i]);
         material->setSpecularColor(WHITE);
         material->setSpecularExponent(10.f);
@@ -710,7 +686,7 @@ void Scene::buildDefault()
         material->setGlossiness(i == 4 ? 0.9f : 1.f);
         material->setOpacity(1.f);
 
-        auto& trianglesMesh = model->getTrianglesMeshes()[materialId];
+        auto& trianglesMesh = model.getTrianglesMeshes()[materialId];
         for (size_t j = 0; j < 6; ++j)
         {
             const auto position = positions[indices[i][j]];
@@ -718,51 +694,51 @@ void Scene::buildDefault()
         }
         trianglesMesh.indices.push_back(Vector3ui(0, 1, 2));
         trianglesMesh.indices.push_back(Vector3ui(3, 4, 5));
-        model->getBounds().merge(positions[i]);
+        model.getBounds().merge(positions[i]);
         ++materialId;
     }
 
     {
         // Sphere
-        auto material = model->createMaterial(materialId, "sphere");
+        auto material = model.createMaterial(materialId, "sphere");
         material->setOpacity(0.2f);
         material->setRefractionIndex(1.5f);
         material->setReflectionIndex(0.1f);
         material->setDiffuseColor(WHITE);
         material->setSpecularColor(WHITE);
         material->setSpecularExponent(100.f);
-        model->addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
+        model.addSphere(materialId, {{0.25f, 0.26f, 0.30f}, 0.25f});
         ++materialId;
     }
 
     {
         // Cylinder
-        auto material = model->createMaterial(materialId, "cylinder");
+        auto material = model.createMaterial(materialId, "cylinder");
         material->setDiffuseColor({0.1f, 0.1f, 0.8f});
         material->setSpecularColor(WHITE);
         material->setSpecularExponent(10.f);
-        model->addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
-                                        {0.75f, 0.126f, 0.75f},
-                                        0.125f});
+        model.addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
+                                       {0.75f, 0.126f, 0.75f},
+                                       0.125f});
         ++materialId;
     }
 
     {
         // Cone
-        auto material = model->createMaterial(materialId, "cone");
+        auto material = model.createMaterial(materialId, "cone");
         material->setReflectionIndex(0.8f);
         material->setSpecularColor(WHITE);
         material->setSpecularExponent(10.f);
-        model->addCone(materialId, {{0.75f, 0.01f, 0.25f},
-                                    {0.75f, 0.5f, 0.25f},
-                                    0.15f,
-                                    0.f});
+        model.addCone(materialId, {{0.75f, 0.01f, 0.25f},
+                                   {0.75f, 0.5f, 0.25f},
+                                   0.15f,
+                                   0.f});
         ++materialId;
     }
 
     {
         // Lamp
-        auto material = model->createMaterial(materialId, "lamp");
+        auto material = model.createMaterial(materialId, "lamp");
         material->setDiffuseColor(WHITE);
         material->setEmission(5.f);
         const Vector3f lampInfo = {0.15f, 0.99f, 0.15f};
@@ -771,36 +747,34 @@ void Scene::buildDefault()
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f - lampInfo.z()},
             {0.5f + lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()},
             {0.5f - lampInfo.x(), lampInfo.y(), 0.5f + lampInfo.z()}};
-        auto& trianglesMesh = model->getTrianglesMeshes()[materialId];
+        auto& trianglesMesh = model.getTrianglesMeshes()[materialId];
         for (size_t i = 0; i < 4; ++i)
             trianglesMesh.vertices.push_back(lampPositions[i]);
         trianglesMesh.indices.push_back(Vector3i(2, 1, 0));
         trianglesMesh.indices.push_back(Vector3i(0, 3, 2));
     }
+    commit();
 }
 
 void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 {
     for (auto& modelDescriptors : _modelDescriptors)
-        modelDescriptors.getModel()->setMaterialsColorMap(colorMap);
+        modelDescriptors.getModel().setMaterialsColorMap(colorMap);
 }
 
-Boxf Scene::getBounds()
+void Scene::_computeBounds()
 {
     size_t nbEnabledModels{0};
-    Boxf bounds;
+    _bounds.reset();
     for (const auto& modelDescriptor : _modelDescriptors)
         if (modelDescriptor.getEnabled())
         {
-            bounds.merge(modelDescriptor.getModel()->getBounds());
+            _bounds.merge(modelDescriptor.getModel().getBounds());
             ++nbEnabledModels;
         }
+
     if (nbEnabledModels == 0)
-    {
-        // If no model is enabled. return unity bounding box
-        bounds.merge({0, 0, 0});
-        bounds.merge({1, 1, 1});
-    }
-    return bounds;
+        // If no model is enabled. return empty bounding box
+        _bounds.merge({0, 0, 0});
 }
 }

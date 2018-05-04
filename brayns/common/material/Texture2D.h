@@ -32,7 +32,7 @@ class Texture2D
 public:
     BRAYNS_API Texture2D();
 
-    BRAYNS_API std::string getFilename() const { return _filename; }
+    BRAYNS_API const std::string& getFilename() const { return _filename; }
     BRAYNS_API void setFilename(const std::string& value) { _filename = value; }
     BRAYNS_API size_t getNbChannels() const { return _nbChannels; }
     BRAYNS_API void setNbChannels(size_t value) { _nbChannels = value; }

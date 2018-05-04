@@ -24,16 +24,13 @@
 
 namespace brayns
 {
-Material::Material()
-    : BaseObject()
+Texture2DPtr Material::getTexture(const TextureType& type) const
 {
-}
-
-Texture2DPtr Material::getTexture(const TextureType& type)
-{
-    if (_textureDescriptors.find(type) == _textureDescriptors.end())
-        return nullptr;
-    return _textureDescriptors[type];
+    const auto it = _textureDescriptors.find(type);
+    if (it == _textureDescriptors.end())
+        throw std::runtime_error("Failed to get texture with type " +
+                                 std::to_string(static_cast<int>(type)));
+    return it->second;
 }
 
 bool Material::_loadTexture(const std::string& fileName)

@@ -535,7 +535,6 @@ void MetaballsGenerator::_buildTriangles(const Vector4fs& metaballs,
 
         auto& vertices = triangles[defaultMaterialId].vertices;
         auto& normals = triangles[defaultMaterialId].normals;
-        // auto& colors = triangles[defaultMaterialId].colors;
         auto& indices = triangles[defaultMaterialId].indices;
 
         for (auto k = 0; METABALLS_TRIANGLES[cubeIndex][k] != -1; k += 3)
@@ -562,14 +561,6 @@ void MetaballsGenerator::_buildTriangles(const Vector4fs& metaballs,
 
                 const auto normal = normalize(_edgeVertices[index].normal);
                 normals.push_back(normal);
-
-                /* TODO
-                if (defaultMaterialId == NO_MATERIAL)
-                {
-                    auto& material = materials[_edgeVertices[index].materialId];
-                    colors.push_back(material.getColor());
-                }
-                */
             }
 
             indices.push_back(

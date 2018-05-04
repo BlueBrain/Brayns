@@ -21,25 +21,15 @@
 #include "OSPRayModel.h"
 #include "OSPRayMaterial.h"
 
+#include <brayns/common/Transformation.h>
 #include <brayns/common/material/Material.h>
-namespace
-{
-const size_t BOUNDINGBOX_MATERIAL_ID = 9999;
-}
+#include <brayns/common/scene/Scene.h>
+
+#include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
 {
 OSPRayModel::~OSPRayModel()
-{
-    ospRelease(_model);
-}
-
-void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
-{
-    _memoryManagementFlags = memoryManagementFlags;
-}
-
-void OSPRayModel::unload()
 {
     if (_useSimulationModel)
     {
@@ -83,27 +73,18 @@ void OSPRayModel::unload()
     _ospMeshes.clear();
 
     if (_model)
-    {
-        ospCommit(_model);
         ospRelease(_model);
-    }
-    _model = nullptr;
 
     if (_simulationModel)
-    {
-        ospCommit(_simulationModel);
         ospRelease(_simulationModel);
-    }
-    _simulationModel = nullptr;
 
     if (_boundingBoxModel)
         ospRelease(_boundingBoxModel);
-    _boundingBoxModel = nullptr;
+}
 
-    _spheresDirty = false;
-    _cylindersDirty = false;
-    _conesDirty = false;
-    _trianglesMeshesDirty = false;
+void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
+{
+    _memoryManagementFlags = memoryManagementFlags;
 }
 
 void OSPRayModel::_buildBoundingBox()
@@ -343,25 +324,30 @@ void OSPRayModel::commit()
 }
 
 osp::affine3f OSPRayModel::_groupTransformationToAffine3f(
-    ModelTransformation& transformation)
+    const Transformation& transformation) const
 {
     ospcommon::affine3f t = ospcommon::affine3f(ospcommon::one);
     const auto& scale = transformation.getScale();
     t *= t.scale({scale.x(), scale.y(), scale.z()});
     const auto& translation = transformation.getTranslation();
     t *= t.translate({translation.x(), translation.y(), translation.z()});
-    const auto& rotation = transformation.getRotation();
-    if (rotation.x() != 0.f)
-        t *= t.rotate({1, 0, 0}, rotation.x());
-    if (rotation.y() != 0.f)
-        t *= t.rotate({0, 1, 0}, rotation.y());
-    if (rotation.z() != 0.f)
-        t *= t.rotate({0, 0, 1}, rotation.z());
+
+    const auto& matrix = transformation.getRotation().getRotationMatrix();
+    const float x = atan2(matrix(2, 1), matrix(2, 2));
+    const float y = atan2(-matrix(2, 0),
+                          sqrt(powf(matrix(2, 1), 2) + powf(matrix(2, 2), 2)));
+    const float z = atan2(matrix(1, 0), matrix(0, 0));
+    if (x != 0.f)
+        t *= t.rotate({1, 0, 0}, x);
+    if (y != 0.f)
+        t *= t.rotate({0, 1, 0}, y);
+    if (z != 0.f)
+        t *= t.rotate({0, 0, 1}, z);
     return (osp::affine3f&)t;
 }
 
 OSPGeometry OSPRayModel::getInstance(const size_t index,
-                                     ModelTransformation& transformation)
+                                     const Transformation& transformation)
 {
     auto it = _instances.find(index);
     if (it != _instances.end())
@@ -378,7 +364,7 @@ OSPGeometry OSPRayModel::getInstance(const size_t index,
 }
 
 OSPGeometry OSPRayModel::getSimulationModelInstance(
-    ModelTransformation& transformation)
+    const Transformation& transformation)
 {
     if (_simulationModelInstance)
         ospRelease(_simulationModelInstance);
@@ -391,7 +377,7 @@ OSPGeometry OSPRayModel::getSimulationModelInstance(
 }
 
 OSPGeometry OSPRayModel::getBoundingBoxModelInstance(
-    ModelTransformation& transformation)
+    const Transformation& transformation)
 {
     if (_boundingBoxModelInstance)
         ospRelease(_boundingBoxModelInstance);

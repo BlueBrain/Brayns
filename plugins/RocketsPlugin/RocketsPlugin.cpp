@@ -534,9 +534,7 @@ public:
         _handle(ENDPOINT_CAMERA, _engine->getCamera());
         _handle(ENDPOINT_TRANSFER_FUNCTION,
                 _engine->getScene().getTransferFunction());
-        _handleGET(ENDPOINT_SCENE, _engine->getScene());
-        _handlePUT(ENDPOINT_SCENE, _engine->getScene(),
-                   [](Scene& scene) { scene.markModified(); });
+        _handle(ENDPOINT_SCENE, _engine->getScene());
 
         _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
 

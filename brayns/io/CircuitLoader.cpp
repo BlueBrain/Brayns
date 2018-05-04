@@ -54,7 +54,6 @@ public:
         {
             // Model (one for the whole circuit)
             ModelMetadata metadata = {
-                {"config", _geometryParameters.getCircuitConfiguration()},
                 {"density",
                  std::to_string(_geometryParameters.getCircuitDensity())},
                 {"report", _geometryParameters.getCircuitReport()},
@@ -62,7 +61,7 @@ public:
                 {"mesh-filename-pattern",
                  _geometryParameters.getCircuitMeshFilenamePattern()},
                 {"mesh-folder", _geometryParameters.getCircuitMeshFolder()}};
-            auto model = scene.createModel("Circuit", metadata);
+            auto& model = scene.createModel("Circuit", source, metadata);
 
             // Open Circuit and select GIDs according to specified target
             const brion::BlueConfig bc(source);
@@ -162,19 +161,19 @@ public:
             // Import morphologies
             const auto useSimulationModel =
                 _geometryParameters.getCircuitUseSimulationModel();
-            model->useSimulationModel(useSimulationModel);
+            model.useSimulationModel(useSimulationModel);
             if (_geometryParameters.getCircuitMeshFolder().empty() ||
                 useSimulationModel)
             {
                 MorphologyLoader morphLoader(_geometryParameters);
                 returnValue =
                     returnValue &&
-                    _importMorphologies(circuit, *model, allGids,
+                    _importMorphologies(circuit, model, allGids,
                                         transformations, targetGIDOffsets,
                                         compartmentReport, morphLoader);
             }
             // Create materials
-            model->createMissingMaterials();
+            model.createMissingMaterials();
         }
         catch (const std::exception& error)
         {

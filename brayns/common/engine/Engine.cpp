@@ -76,9 +76,13 @@ void Engine::setDefaultEpsilon()
 
 void Engine::commit()
 {
-    bool clearFrame = _scene->commitVolumeData() ||
-                      _scene->commitSimulationData() ||
-                      _scene->commitTransferFunctionData();
+    bool clearFrame = false;
+    if (_scene->commitVolumeData())
+        clearFrame = true;
+    if (_scene->commitSimulationData())
+        clearFrame = true;
+    if (_scene->commitTransferFunctionData())
+        clearFrame = true;
     _renderers[_activeRenderer]->commit();
 
     if (clearFrame)

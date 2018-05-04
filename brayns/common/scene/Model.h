@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -29,39 +29,11 @@
 #include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/types.h>
 
-SERIALIZATION_ACCESS(ModelTransformation)
 SERIALIZATION_ACCESS(Model)
 SERIALIZATION_ACCESS(ModelDescriptor)
 
 namespace brayns
 {
-/**
-* @brief The ModelTransformation struct defines the translation, rotation and
-* scaling parameters to be applied to a model
-*/
-struct ModelTransformation : public BaseObject
-{
-    ModelTransformation() = default;
-    ModelTransformation(ModelTransformation&& rhs) = default;
-    ModelTransformation& operator=(ModelTransformation&& rhs) = default;
-
-    Vector3f& getTranslation() { return _translation; }
-    void setTranslation(const Vector3f& value)
-    {
-        _updateValue(_translation, value);
-    }
-    Vector3f& getScale() { return _scale; }
-    void setScale(const Vector3f& value) { _updateValue(_scale, value); }
-    Vector3f& getRotation() { return _rotation; }
-    void setRotation(const Vector3f& value) { _updateValue(_rotation, value); }
-private:
-    Vector3f _translation{0.f, 0.f, 0.f};
-    Vector3f _scale{1.f, 1.f, 1.f};
-    Vector3f _rotation{0.f, 0.f, 0.f};
-
-    SERIALIZATION_FRIEND(ModelTransformation)
-};
-
 /**
  * @brief The ModelDescriptor struct defines the metadata attached to a model.
  * Model descriptor are exposed via the HTTP/WS interface.
@@ -75,28 +47,32 @@ private:
 struct ModelDescriptor : public BaseObject
 {
     ModelDescriptor() = default;
-    ~ModelDescriptor();
     ModelDescriptor(ModelDescriptor&& rhs) = default;
     ModelDescriptor& operator=(ModelDescriptor&& rhs) = default;
 
-    ModelDescriptor(const std::string& name, const ModelMetadata& metadata,
-                    ModelPtr model);
+    ModelDescriptor(const std::string& name, const std::string& path,
+                    const ModelMetadata& metadata, ModelPtr model);
 
-    bool getEnabled() const { return _enabled; }
+    bool getEnabled() const { return _visible || _boundingBox; }
     bool getVisible() const { return _visible; }
     bool getBoundingBox() const { return _boundingBox; }
-    ModelTransformations& getTransformations() { return _transformations; }
-    ModelMetadata& getMetadata() { return _metadata; }
-    std::string& getName() { return _name; }
-    ModelPtr getModel() const { return _model; }
+    const Transformations& getTransformations() const
+    {
+        return _transformations;
+    }
+    const ModelMetadata& getMetadata() const { return _metadata; }
+    const std::string& getName() const { return _name; }
+    const std::string& getPath() const { return _path; }
+    const Model& getModel() const { return *_model; }
+    Model& getModel() { return *_model; }
 private:
     std::string _name;
+    std::string _path;
     ModelMetadata _metadata;
-    bool _enabled{true};
     bool _visible{true};
     bool _boundingBox{false};
-    ModelTransformations _transformations;
-    ModelPtr _model{nullptr};
+    Transformations _transformations;
+    ModelPtr _model;
 
     SERIALIZATION_FRIEND(ModelDescriptor)
 };
@@ -113,10 +89,7 @@ class Model
 public:
     BRAYNS_API Model() = default;
 
-    BRAYNS_API virtual ~Model();
-
-    /** Unloads geometry, materials, lights, models, etc. to free memory. */
-    BRAYNS_API virtual void unload();
+    BRAYNS_API virtual ~Model() = default;
 
     /**
         Return true if the geometry Model does not contain any geometry. False
@@ -132,6 +105,7 @@ public:
     /**
         Returns the bounds for the Model
     */
+    const Boxf& getBounds() const { return _bounds; }
     Boxf& getBounds() { return _bounds; }
     /**
         Returns spheres handled by the Model
@@ -214,13 +188,14 @@ public:
      * @return The map of materials handled by the model
      */
     BRAYNS_API MaterialMap& getMaterials() { return _materials; }
+    BRAYNS_API const MaterialMap& getMaterials() const { return _materials; }
     /**
      * @brief getMaterial Returns a pointer to a specific material
      * @param materialId Id of the material
      * @return A pointer to the material or an exception if the material is not
      * registered in the model
      */
-    BRAYNS_API MaterialPtr getMaterial(const size_t materialId);
+    BRAYNS_API MaterialPtr getMaterial(const size_t materialId) const;
 
 protected:
     MaterialMap _materials;

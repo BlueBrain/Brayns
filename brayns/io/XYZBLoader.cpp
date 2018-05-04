@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,13 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "XYZBLoader.h"
+
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
+
 #include <fstream>
 
-#include "XYZBLoader.h"
+#include <boost/filesystem.hpp>
 
 namespace brayns
 {
@@ -53,14 +56,15 @@ void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
     }
     stream.seekg(0);
 
-    const std::string name = "MemoryPointCloud";
-    auto model = scene.createModel(name);
+    const auto name = boost::filesystem::basename({blob.name});
+    auto& model = scene.createModel(name, blob.name);
 
     try
     {
-        const auto materialId = 0;
-        model->createMaterial(materialId, name);
-        auto& spheres = model->getSpheres()[materialId];
+        const auto materialId =
+            (defaultMaterialId == NO_MATERIAL ? 0 : defaultMaterialId);
+        model.createMaterial(materialId, name);
+        auto& spheres = model.getSpheres()[materialId];
 
         const size_t startOffset = spheres.size();
         spheres.reserve(spheres.size() + numlines);
@@ -84,9 +88,9 @@ void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
             {
                 const Vector4f position(lineData[0], lineData[1], lineData[2],
                                         1.f);
-                model->addSphere(materialId,
-                                 {transformation * position,
-                                  _geometryParameters.getRadiusMultiplier()});
+                model.addSphere(materialId,
+                                {transformation * position,
+                                 _geometryParameters.getRadiusMultiplier()});
                 break;
             }
             default:
@@ -96,7 +100,7 @@ void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
             updateProgress(msg.str(), i++, numlines);
         }
 
-        const float maxDim = scene.getBounds().getSize().find_max();
+        const float maxDim = model.getBounds().getSize().find_max();
         if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
         {
             const float newRadius = maxDim / 100.f;

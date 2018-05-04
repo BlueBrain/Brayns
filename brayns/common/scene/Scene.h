@@ -55,8 +55,6 @@ public:
     */
     BRAYNS_API Scene(Renderers renderers, ParametersManager& parametersManager);
 
-    BRAYNS_API virtual ~Scene();
-
     /**
      * Called after scene-related changes have been made before rendering the
      * scene.
@@ -91,7 +89,7 @@ public:
     /**
         Returns the bounding box of the scene
     */
-    Boxf getBounds();
+    Boxf& getBounds() { return _bounds; }
     /**
         Attaches a light source to the scene
         @param light Object representing the light source
@@ -118,8 +116,9 @@ public:
     /**
         Adds a model to the scene
       */
-    BRAYNS_API virtual ModelPtr createModel(
-        const std::string& name, const ModelMetadata& metadata = {}) = 0;
+    BRAYNS_API virtual Model& createModel(
+        const std::string& name, const std::string& path = "",
+        const ModelMetadata& metadata = {}) = 0;
 
     /**
         Removes a geometry group from the scene
@@ -127,7 +126,7 @@ public:
       */
     BRAYNS_API virtual void removeModel(const size_t index) = 0;
 
-    /**registry
+    /**
         Builds a default scene made of a Cornell box, a reflective cube, and
         a transparent sphere
     */
@@ -177,9 +176,6 @@ public:
     {
         return _transferFunction;
     }
-
-    /** Unloads geometry, materials, lights, models, etc. to free memory. */
-    BRAYNS_API virtual void unload();
 
     /** Loads geometry a binary cache file defined by the --load-cache-file
        command line parameter. The cache file is a binary representation of the
@@ -236,7 +232,7 @@ public:
     void setMaterialsColorMap(
         MaterialsColorMap colorMap = MaterialsColorMap::none);
 
-    MaterialPtr getBackgroundMaterial() { return _backgroundMaterial; }
+    MaterialPtr getBackgroundMaterial() const { return _backgroundMaterial; }
     /**
      * Load the data from the given blob.
      *
@@ -262,13 +258,14 @@ public:
     /** @return the registry for all supported loaders of this scene. */
     LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
 protected:
+    void _computeBounds();
+
     Renderers _renderers;
     ParametersManager& _parametersManager;
     MaterialPtr _backgroundMaterial;
 
     // Model
     ModelDescriptors _modelDescriptors;
-    bool _geometryGroupsDirty{true};
     Lights _lights;
 
     // Volume
@@ -282,10 +279,9 @@ protected:
     size_t _sizeInBytes{0};
 
     LoaderRegistry _loaderRegistry;
+    Boxf _bounds;
 
 private:
-    void _markGeometryDirty();
-
     SERIALIZATION_FRIEND(Scene)
 };
 }

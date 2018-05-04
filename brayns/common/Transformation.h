@@ -18,28 +18,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYMATERIAL_H
-#define OSPRAYMATERIAL_H
+#ifndef TRANSFORMATION_H
+#define TRANSFORMATION_H
 
-#include <brayns/common/material/Material.h>
-#include <ospray.h>
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/types.h>
+
+SERIALIZATION_ACCESS(Transformation)
 
 namespace brayns
 {
-class OSPRayMaterial : public Material
+/**
+* @brief Defines the translation, rotation and scaling parameters to be applied
+* to a scene asset.
+*/
+struct Transformation : public BaseObject
 {
 public:
-    OSPRayMaterial();
-    ~OSPRayMaterial();
+    const Vector3f& getTranslation() const { return _translation; }
+    void setTranslation(const Vector3f& value)
+    {
+        _updateValue(_translation, value);
+    }
+    const Vector3f& getScale() const { return _scale; }
+    void setScale(const Vector3f& value) { _updateValue(_scale, value); }
+    const Quaternionf& getRotation() const { return _rotation; }
+    void setRotation(const Quaternionf& value)
+    {
+        _updateValue(_rotation, value);
+    }
 
-    void commit() final;
-
-    OSPMaterial getOSPMaterial() { return _ospMaterial; }
 private:
-    OSPTexture2D _createOSPTexture2D(Texture2DPtr texture);
-    OSPMaterial _ospMaterial;
-    std::map<TextureType, OSPTexture2D> _ospTextures;
+    Vector3f _translation{0.f, 0.f, 0.f};
+    Vector3f _scale{1.f, 1.f, 1.f};
+    Quaternionf _rotation;
+
+    SERIALIZATION_FRIEND(Transformation)
 };
 }
 
-#endif // OSPRAYMATERIAL_H
+#endif // TRANSFORMATION_H

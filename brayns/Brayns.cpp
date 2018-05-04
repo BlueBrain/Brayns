@@ -313,6 +313,12 @@ struct Brayns::Impl : public PluginAPI
             _parametersManager.getApplicationParameters().getInputPaths();
         if (!paths.empty())
         {
+            if (paths.size() == 1 && paths[0] == "demo")
+            {
+                _engine->getScene().buildDefault();
+                return;
+            }
+
             UploadPathTask task(paths, _engine);
             if (!task.result())
                 throw std::runtime_error("Loading failed");
@@ -428,17 +434,9 @@ private:
 
         auto& scene = _engine->getScene();
 
-        scene.unload();
         loadingProgress += LOADING_PROGRESS_STEP;
 
         _loadData(loadingProgress);
-
-        if (scene.empty() && !scene.getVolumeHandler())
-        {
-            scene.unload();
-            BRAYNS_INFO << "Building default scene" << std::endl;
-            scene.buildDefault();
-        }
 
         const auto& geomParams = _parametersManager.getGeometryParameters();
         if (geomParams.getLoadCacheFile().empty() &&
@@ -469,10 +467,7 @@ private:
             _engine->getScene().getSizeInBytes());
 
         // Set default camera position
-        const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
-        auto& camera = _engine->getCamera();
-        camera.setInitialState(_engine->getScene().getBounds());
-        camera.setAspectRatio(frameSize.x() / frameSize.y());
+        _engine->setDefaultCamera();
 
         // finish reporting of progress
         postSceneLoading();
@@ -777,14 +772,14 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
-        auto model = scene.createModel("morphologies", {{"uri", folder}});
+        auto& model = scene.createModel("morphologies", folder);
         MorphologyLoader morphologyLoader(geometryParameters);
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
         size_t morphologyIndex = 0;
         for (const auto& fileName : files)
         {
-            morphologyLoader.importMorphology(servus::URI(fileName), *model,
+            morphologyLoader.importMorphology(servus::URI(fileName), model,
                                               morphologyIndex);
             ++morphologyIndex;
             progressUpdate("Loading morphologies from " + folder,
@@ -1187,12 +1182,6 @@ private:
         _engine->getFrameBuffer().clear();
     }
 
-    void _pastelMaterials()
-    {
-        _engine->getScene().setMaterialsColorMap(MaterialsColorMap::pastel);
-        _engine->getFrameBuffer().clear();
-    }
-
     void _randomMaterials()
     {
         _engine->getScene().setMaterialsColorMap(MaterialsColorMap::random);
@@ -1247,9 +1236,9 @@ private:
 
     ParametersManager _parametersManager;
     EngineFactory _engineFactory;
-    EnginePtr _engine{nullptr};
+    EnginePtr _engine;
     KeyboardHandler _keyboardHandler;
-    AbstractManipulatorPtr _cameraManipulator{nullptr};
+    AbstractManipulatorPtr _cameraManipulator;
 
     float _fieldOfView{45.f};
     float _eyeSeparation{0.0635f};

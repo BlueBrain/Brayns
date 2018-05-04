@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(defaults)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "--synchronous-mode", "on"};
+    const char* argv[] = {app, "demo", "--synchronous-mode", "on"};
     const int argc = sizeof(argv) / sizeof(char*);
     brayns::Brayns brayns(argc, argv);
 
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "--synchronous-mode", "on"};
+    const char* argv[] = {app, "demo", "--synchronous-mode", "on"};
     const int argc = sizeof(argv) / sizeof(char*);
     brayns::Brayns brayns(argc, argv);
 

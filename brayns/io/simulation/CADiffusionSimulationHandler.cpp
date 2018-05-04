@@ -20,6 +20,7 @@
 
 #include "CADiffusionSimulationHandler.h"
 
+#include <brayns/common/Transformation.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Model.h>
@@ -104,21 +105,21 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
     bool found = false;
     while (index < models.size() && !found)
     {
-        found = models[index].getName() == modelName;
+        found = (models[index].getName() == modelName);
         ++index;
     }
     if (found)
         models.erase(models.begin() + index - 1);
 
-    auto model = scene.createModel(modelName);
+    auto& model = scene.createModel(modelName);
 
     // Load Calcium positions
     _loadCalciumPositions(frame);
-    auto material = model->createMaterial(CALCIUM_MATERIAL_ID, "Calcium");
+    auto material = model.createMaterial(CALCIUM_MATERIAL_ID, "Calcium");
     material->setDiffuseColor({1.f, 1.f, 1.f});
     BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
                 << std::endl;
     for (const auto position : _calciumPositions)
-        model->addSphere(CALCIUM_MATERIAL_ID, {position, CALCIUM_RADIUS});
+        model.addSphere(CALCIUM_MATERIAL_ID, {position, CALCIUM_RADIUS});
 }
 }

@@ -105,12 +105,11 @@ class FrameBuffer;
 typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
 
 class Model;
-typedef std::shared_ptr<Model> ModelPtr;
-typedef std::vector<ModelPtr> Models;
+typedef std::unique_ptr<Model> ModelPtr;
 typedef std::map<std::string, std::string> ModelMetadata;
 
-struct ModelTransformation;
-typedef std::vector<ModelTransformation> ModelTransformations;
+struct Transformation;
+typedef std::vector<Transformation> Transformations;
 
 struct ModelDescriptor;
 typedef std::vector<ModelDescriptor> ModelDescriptors;
@@ -297,9 +296,10 @@ struct Histogram
 };
 
 /** Some 'special' materials are used by Brayns to accomplish specific features
- *  such as skyboxes.
+ *  such as bounding boxes.
  */
 const size_t NO_MATERIAL = std::numeric_limits<size_t>::max();
+const size_t BOUNDINGBOX_MATERIAL_ID = NO_MATERIAL - 1;
 
 enum class MemoryMode
 {

@@ -66,10 +66,9 @@ void OSPRayMaterial::commit()
         if (texture)
         {
             _ospTextures[texType] = _createOSPTexture2D(texture);
-            ospSetObject(
-                _ospMaterial,
-                textureTypeMaterialAttribute[texType].attribute.c_str(),
-                _ospTextures[texType]);
+            const auto str =
+                textureTypeMaterialAttribute[texType].attribute.c_str();
+            ospSetObject(_ospMaterial, str, _ospTextures[texType]);
         }
     }
 

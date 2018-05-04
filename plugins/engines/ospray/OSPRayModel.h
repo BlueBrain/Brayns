@@ -24,7 +24,7 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <ospray_cpp/Data.h>
+#include <ospray.h>
 
 namespace brayns
 {
@@ -36,22 +36,22 @@ public:
 
     void setMemoryFlags(const size_t memoryManagementFlags);
 
-    void unload() final;
     void commit();
-    OSPModel getModel() { return _model; }
-    size_t getNbInstances() const { return _instances.size(); };
+    OSPModel getModel() const { return _model; }
+    size_t getNbInstances() const { return _instances.size(); }
     OSPGeometry getInstance(const size_t index,
-                            ModelTransformation& transformation);
+                            const Transformation& transformation);
     OSPGeometry getBoundingBoxModelInstance(
-        ModelTransformation& transformation);
-    OSPGeometry getSimulationModelInstance(ModelTransformation& transformation);
+        const Transformation& transformation);
+    OSPGeometry getSimulationModelInstance(
+        const Transformation& transformation);
 
     MaterialPtr createMaterial(const size_t materialId,
                                const std::string& name) final;
 
 private:
     osp::affine3f _groupTransformationToAffine3f(
-        ModelTransformation& transformation);
+        const Transformation& transformation) const;
 
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);

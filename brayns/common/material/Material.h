@@ -51,10 +51,9 @@ struct TextureTypeMaterialAttribute
     std::string attribute;
 };
 
-static TextureTypeMaterialAttribute textureTypeMaterialAttribute[8] = {
+static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
     {TT_DIFFUSE, "map_kd"},
     {TT_NORMALS, "map_bump"},
-    {TT_BUMP, "map_bump"},
     {TT_SPECULAR, "map_ks"},
     {TT_EMISSIVE, "map_ns"},
     {TT_OPACITY, "map_d"},
@@ -66,16 +65,12 @@ typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
 class Material : public BaseObject
 {
 public:
-    BRAYNS_API Material();
-    BRAYNS_API Material(Material&& rhs) = default;
-    BRAYNS_API Material& operator=(Material&& rhs) = default;
-
     /**
      * Called after material change
      */
     BRAYNS_API virtual void commit() = 0;
 
-    BRAYNS_API std::string getName() const { return _name; }
+    BRAYNS_API const std::string& getName() const { return _name; }
     BRAYNS_API void setName(const std::string& value)
     {
         _updateValue(_name, value);
@@ -84,12 +79,15 @@ public:
     {
         _updateValue(_diffuseColor, value);
     }
-    BRAYNS_API Vector3f& getDiffuseColor() { return _diffuseColor; }
+    BRAYNS_API const Vector3f& getDiffuseColor() const { return _diffuseColor; }
     BRAYNS_API void setSpecularColor(const Vector3f& value)
     {
         _updateValue(_specularColor, value);
     }
-    BRAYNS_API Vector3f& getSpecularColor() { return _specularColor; }
+    BRAYNS_API const Vector3f& getSpecularColor() const
+    {
+        return _specularColor;
+    }
     BRAYNS_API void setSpecularExponent(float value)
     {
         _updateValue(_specularExponent, value);
@@ -122,14 +120,14 @@ public:
     {
         return _castSimulationData;
     }
-    BRAYNS_API TextureDescriptors& getTextureDescriptors()
+    BRAYNS_API const TextureDescriptors& getTextureDescriptors() const
     {
         return _textureDescriptors;
     }
     BRAYNS_API void setTexture(const std::string& fileName,
                                const TextureType& type);
 
-    BRAYNS_API Texture2DPtr getTexture(const TextureType& type);
+    BRAYNS_API Texture2DPtr getTexture(const TextureType& type) const;
 
 protected:
     bool _loadTexture(const std::string& fileName);

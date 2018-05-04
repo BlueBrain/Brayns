@@ -30,6 +30,8 @@
 #include <brain/brain.h>
 #include <brion/brion.h>
 
+#include <boost/filesystem.hpp>
+
 namespace
 {
 // needs to be the same in SimulationRenderer.ispc
@@ -584,11 +586,11 @@ void MorphologyLoader::importFromFile(
     const Matrix4f& transformation,
     const size_t defaultMaterialId BRAYNS_UNUSED)
 {
-    const auto modelName = shortenString(fileName);
+    const auto modelName = boost::filesystem::basename({fileName});
     updateProgress("Loading " + modelName + " ...", 0, 100);
-    auto model = scene.createModel(modelName, {{"uri", fileName}});
-    importMorphology(servus::URI(fileName), *model, index, transformation);
-    model->createMissingMaterials();
+    auto& model = scene.createModel(modelName, fileName);
+    importMorphology(servus::URI(fileName), model, index, transformation);
+    model.createMissingMaterials();
     updateProgress("Loading " + modelName + " ...", 100, 100);
 }
 
