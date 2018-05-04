@@ -35,7 +35,6 @@ class LoadDataFunctor : public TaskFunctor
 {
 public:
     LoadDataFunctor(EnginePtr engine);
-    ~LoadDataFunctor();
     LoadDataFunctor(LoadDataFunctor&&) = default;
     void operator()(Blob&& blob);
     void operator()(const std::string& path);
@@ -53,7 +52,6 @@ private:
     std::function<void(std::string, float)> _getProgressFunc();
 
     EnginePtr _engine;
-    bool _loadDefaultScene{false};
     size_t _currentProgress{0};
     size_t _nextTic{0};
     std::unique_lock<std::shared_timed_mutex> _lock;

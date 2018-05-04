@@ -25,6 +25,7 @@
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
+#include <brayns/common/types.h>
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <string>
@@ -43,25 +44,24 @@ public:
 
     static std::set<std::string> getSupportedDataTypes();
 
-    void importFromBlob(Blob&& blob, Scene& scene,
-                        const Matrix4f& transformation,
-                        const size_t materialID) final;
-
-    void importFromFile(const std::string& filename, Scene& scene,
-                        const Matrix4f& transformation,
-                        const size_t materialID) final;
-
-    /** Exports meshes to a given file
+    /** Imports meshes from a given file
      *
-     * @param filename destination file name
-     * @param scene Scene holding the meshes
+     * @param fileName name of the file containing the meshes
+     * @param scene Scene holding the mesh
+     * @param transformation Position, orientation and scale to apply to the
+     *        mesh
+     * @param defaultMaterial Default material for the whole mesh. If set to
+     *        NO_MATERIAL, materials from the mesh file are used. Otherwise,
+     *        all meshes are forced to that specific material.
      */
-    bool exportMeshToFile(const std::string& filename, Scene& scene) const;
+    void importFromFile(const std::string& fileName, Scene& scene,
+                        const size_t index = 0,
+                        const Matrix4f& transformation = Matrix4f(),
+                        const size_t defaultMaterial = NO_MATERIAL) final;
 
-    /**
-     * @brief Clear all internal buffers
-     */
-    void clear();
+    void importFromBlob(Blob&& blob, Scene& scene, const size_t index = 0,
+                        const Matrix4f& transformation = Matrix4f(),
+                        const size_t defaultMaterial = NO_MATERIAL) final;
 
     /**
      * @brief getMeshFilenameFromGID Returns the name of the mesh file according
@@ -73,22 +73,16 @@ public:
     std::string getMeshFilenameFromGID(const uint64_t gid);
 
 private:
-#ifdef BRAYNS_USE_ASSIMP
-    void _createMaterials(Scene& scene, const aiScene* aiScene,
+#if (BRAYNS_USE_ASSIMP)
+    void _createMaterials(Model& model, const aiScene* aiScene,
                           const std::string& folder);
 
-    void _postLoad(const aiScene* aiScene, Scene& scene,
+    void _postLoad(const aiScene* aiScene, Model& model,
                    const Matrix4f& transformation, const size_t defaultMaterial,
                    const std::string& folder = "");
     size_t _getQuality() const;
 #endif
-
-    size_t _getMaterialId(const size_t materialId,
-                          const size_t defaultMaterial = NO_MATERIAL);
-
-    std::map<size_t, size_t> _meshIndex;
     const GeometryParameters& _geometryParameters;
-    size_t _materialOffset;
 };
 }
 

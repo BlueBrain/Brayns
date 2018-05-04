@@ -43,7 +43,7 @@ int main(int argc, const char** argv)
 
         auto& engine = brayns.getEngine();
         auto& scene = engine.getScene();
-        auto& bounds = scene.getWorldBounds();
+        const auto bounds = scene.getBounds();
         const float radius = bounds.getSize().find_max();
         timer.start();
         for (size_t frame = 0; frame < nbFrames; ++frame)

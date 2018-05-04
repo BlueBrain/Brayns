@@ -45,8 +45,8 @@ const size_t SERVER_PROCESS_RETRIES = 10; /*ms*/
 class ForeverLoader : public brayns::Loader
 {
 public:
-    void importFromBlob(brayns::Blob&&, brayns::Scene&, const brayns::Matrix4f&,
-                        const size_t) final
+    void importFromBlob(brayns::Blob&&, brayns::Scene&, const size_t,
+                        const brayns::Matrix4f&, const size_t) final
     {
         for (;;)
         {
@@ -55,7 +55,7 @@ public:
         }
     }
 
-    void importFromFile(const std::string&, brayns::Scene&,
+    void importFromFile(const std::string&, brayns::Scene&, const size_t,
                         const brayns::Matrix4f&, const size_t) final
     {
         for (;;)
@@ -81,8 +81,8 @@ public:
     {
         auto& testSuite = boost::unit_test::framework::master_test_suite();
         const char* app = testSuite.argv[0];
-        std::vector<const char*> argv{app, "--http-server", ":0",
-                                      "--circuit-density", "1"};
+        std::vector<const char*> argv{
+            app, "demo", "--http-server", ":0", "--circuit-density", "1"};
         for (const auto& arg : additionalArgv)
             argv.push_back(arg);
         const int argc = argv.size();
@@ -205,6 +205,11 @@ void makeNotification(const std::string& method)
 brayns::Camera& getCamera()
 {
     return ClientServer::instance().getBrayns().getEngine().getCamera();
+}
+
+brayns::Scene& getScene()
+{
+    return ClientServer::instance().getBrayns().getEngine().getScene();
 }
 
 auto& getWsClient()

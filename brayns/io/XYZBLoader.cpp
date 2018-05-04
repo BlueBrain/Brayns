@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,10 +21,13 @@
 #include "XYZBLoader.h"
 
 #include <brayns/common/log.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 
 #include <fstream>
+
+#include <boost/filesystem.hpp>
 
 namespace brayns
 {
@@ -39,12 +42,10 @@ std::set<std::string> XYZBLoader::getSupportedDataTypes()
 }
 
 void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
+                                const size_t index BRAYNS_UNUSED,
                                 const Matrix4f& transformation,
-                                size_t materialID)
+                                const size_t defaultMaterialId BRAYNS_UNUSED)
 {
-    if (materialID == NO_MATERIAL)
-        materialID = 0;
-
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
     std::stringstream stream(blob.data);
@@ -55,57 +56,75 @@ void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
     }
     stream.seekg(0);
 
-    auto& spheres = scene.getSpheres()[materialID];
-    const size_t startOffset = spheres.size();
-    spheres.reserve(spheres.size() + numlines);
+    const auto name = boost::filesystem::basename({blob.name});
+    auto& model = scene.createModel(name, blob.name);
 
-    size_t i = 0;
-    std::string line;
-    std::stringstream msg;
-    msg << "Loading " << shortenString(blob.name) << " ..." << std::endl;
-    while (std::getline(stream, line))
+    try
     {
-        std::vector<float> lineData;
-        std::stringstream lineStream(line);
+        const auto materialId =
+            (defaultMaterialId == NO_MATERIAL ? 0 : defaultMaterialId);
+        model.createMaterial(materialId, name);
+        auto& spheres = model.getSpheres()[materialId];
 
-        float value;
-        while (lineStream >> value)
-            lineData.push_back(value);
+        const size_t startOffset = spheres.size();
+        spheres.reserve(spheres.size() + numlines);
 
-        switch (lineData.size())
+        size_t i = 0;
+        std::string line;
+        std::stringstream msg;
+        msg << "Loading " << shortenString(blob.name) << " ..." << std::endl;
+        while (std::getline(stream, line))
         {
-        case 3:
+            std::vector<float> lineData;
+            std::stringstream lineStream(line);
+
+            float value;
+            while (lineStream >> value)
+                lineData.push_back(value);
+
+            switch (lineData.size())
+            {
+            case 3:
+            {
+                const Vector4f position(lineData[0], lineData[1], lineData[2],
+                                        1.f);
+                model.addSphere(materialId,
+                                {transformation * position,
+                                 _geometryParameters.getRadiusMultiplier()});
+                break;
+            }
+            default:
+                throw std::runtime_error("Invalid content in line " +
+                                         std::to_string(i + 1) + ": " + line);
+            }
+            updateProgress(msg.str(), i++, numlines);
+        }
+
+        const float maxDim = model.getBounds().getSize().find_max();
+        if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
         {
-            const Vector4f position(lineData[0], lineData[1], lineData[2], 1.f);
-            scene.addSphere(materialID,
-                            {transformation * position,
-                             _geometryParameters.getRadiusMultiplier()});
-            break;
+            const float newRadius = maxDim / 100.f;
+            BRAYNS_WARN << "Given radius "
+                        << _geometryParameters.getRadiusMultiplier()
+                        << " is too big for this scene, using radius "
+                        << newRadius << " now" << std::endl;
+
+            for (i = 0; i < numlines; ++i)
+                spheres[i + startOffset].radius = newRadius;
         }
-        default:
-            throw std::runtime_error("Invalid content in line " +
-                                     std::to_string(i + 1) + ": " + line);
-        }
-        updateProgress(msg.str(), i++, numlines);
     }
-
-    const float maxDim = scene.getWorldBounds().getSize().find_max();
-    if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
+    catch (const std::runtime_error&)
     {
-        const float newRadius = maxDim / 100.f;
-        BRAYNS_WARN << "Given radius "
-                    << _geometryParameters.getRadiusMultiplier()
-                    << " is too big for this scene, using radius " << newRadius
-                    << " now" << std::endl;
-
-        for (i = 0; i < numlines; ++i)
-            spheres[i + startOffset].radius = newRadius;
+        // Failed to load point cloud. Removing last created model
+        scene.removeModel(scene.getModelDescriptors().size() - 1);
+        throw;
     }
 }
 
 void XYZBLoader::importFromFile(const std::string& filename, Scene& scene,
+                                const size_t index,
                                 const Matrix4f& transformation,
-                                const size_t materialID)
+                                const size_t defaultMaterialId)
 {
     std::ifstream file(filename);
     if (!file.good())
@@ -114,6 +133,6 @@ void XYZBLoader::importFromFile(const std::string& filename, Scene& scene,
                     filename,
                     {std::istreambuf_iterator<char>(file),
                      std::istreambuf_iterator<char>()}},
-                   scene, transformation, materialID);
+                   scene, index, transformation, defaultMaterialId);
 }
 }

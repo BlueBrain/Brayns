@@ -21,6 +21,7 @@
 #include "CircuitLoader.h"
 #include "circuitLoaderCommon.h"
 
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/io/simulation/CircuitSimulationHandler.h>
 
@@ -48,11 +49,20 @@ public:
     bool importCircuit(const std::string& source, const strings& targets,
                        const std::string& report, Scene& scene)
     {
-        _materialsOffset = scene.getMaterials().size();
-
         bool returnValue = true;
         try
         {
+            // Model (one for the whole circuit)
+            ModelMetadata metadata = {
+                {"density",
+                 std::to_string(_geometryParameters.getCircuitDensity())},
+                {"report", _geometryParameters.getCircuitReport()},
+                {"targets", _geometryParameters.getCircuitTargets()},
+                {"mesh-filename-pattern",
+                 _geometryParameters.getCircuitMeshFilenamePattern()},
+                {"mesh-folder", _geometryParameters.getCircuitMeshFolder()}};
+            auto& model = scene.createModel("Circuit", source, metadata);
+
             // Open Circuit and select GIDs according to specified target
             const brion::BlueConfig bc(source);
             const brain::Circuit circuit(bc);
@@ -149,16 +159,21 @@ public:
                                              targetGIDOffsets);
 
             // Import morphologies
+            const auto useSimulationModel =
+                _geometryParameters.getCircuitUseSimulationModel();
+            model.useSimulationModel(useSimulationModel);
             if (_geometryParameters.getCircuitMeshFolder().empty() ||
-                _geometryParameters.getCircuitUseSimulationModel())
+                useSimulationModel)
             {
                 MorphologyLoader morphLoader(_geometryParameters);
                 returnValue =
                     returnValue &&
-                    _importMorphologies(circuit, scene, allGids,
+                    _importMorphologies(circuit, model, allGids,
                                         transformations, targetGIDOffsets,
                                         compartmentReport, morphLoader);
             }
+            // Create materials
+            model.createMissingMaterials();
         }
         catch (const std::exception& error)
         {
@@ -300,7 +315,7 @@ private:
         if (meshedMorphologiesFolder.empty())
             return true;
 
-        uint64_t meshIndex = 0;
+        size_t meshIndex = 0;
         // Loading meshes is currently sequential. TODO: Make it parallel!!!
         std::stringstream message;
         message << "Loading " << gids.size() << " meshes...";
@@ -319,7 +334,8 @@ private:
             {
                 meshLoader.importFromFile(meshLoader.getMeshFilenameFromGID(
                                               gid),
-                                          scene, transformation, materialId);
+                                          scene, meshIndex, transformation,
+                                          materialId);
             }
             catch (...)
             {
@@ -343,7 +359,7 @@ private:
     }
 #endif
 
-    bool _importMorphologies(const brain::Circuit& circuit, Scene& scene,
+    bool _importMorphologies(const brain::Circuit& circuit, Model& model,
                              const brain::GIDSet& gids,
                              const Matrix4fs& transformations,
                              const GIDOffsets& targetGIDOffsets,
@@ -368,11 +384,9 @@ private:
                 CylindersMap cylinders;
                 ConesMap cones;
                 TrianglesMeshMap triangleMeshes;
-                Materials materials;
                 Boxf bounds;
-                ParallelSceneContainer sceneContainer(spheres, cylinders, cones,
-                                                      triangleMeshes, materials,
-                                                      bounds);
+                ParallelModelContainer modelContainer(spheres, cylinders, cones,
+                                                      triangleMeshes, bounds);
                 const auto& uri = uris[morphologyIndex];
 
                 if (!morphLoader._importMorphology(
@@ -382,46 +396,35 @@ private:
                                   std::placeholders::_1, targetGIDOffsets,
                                   false),
                         transformations[morphologyIndex], compartmentReport,
-                        sceneContainer))
+                        modelContainer))
 #pragma omp atomic
                     ++loadingFailures;
-
-#pragma omp critical
-                for (size_t i = 0; i < materials.size(); ++i)
-                    scene.setMaterial(i, materials[i]);
-
 #pragma omp critical
                 for (const auto& sphere : spheres)
                 {
-                    const auto id = sphere.first;
-                    scene.getSpheres()[id].insert(
-                        scene.getSpheres()[id].end(),
-                        sceneContainer.spheres[id].begin(),
-                        sceneContainer.spheres[id].end());
+                    const auto index = sphere.first;
+                    model.getSpheres()[index].insert(
+                        model.getSpheres()[index].end(), sphere.second.begin(),
+                        sphere.second.end());
                 }
-
 #pragma omp critical
                 for (const auto& cylinder : cylinders)
                 {
-                    const auto id = cylinder.first;
-                    scene.getCylinders()[id].insert(
-                        scene.getCylinders()[id].end(),
-                        sceneContainer.cylinders[id].begin(),
-                        sceneContainer.cylinders[id].end());
+                    const auto index = cylinder.first;
+                    model.getCylinders()[index].insert(
+                        model.getCylinders()[index].end(),
+                        cylinder.second.begin(), cylinder.second.end());
                 }
-
 #pragma omp critical
                 for (const auto& cone : cones)
                 {
-                    const auto id = cone.first;
-                    scene.getCones()[id].insert(
-                        scene.getCones()[id].end(),
-                        sceneContainer.cones[id].begin(),
-                        sceneContainer.cones[id].end());
+                    const auto index = cone.first;
+                    model.getCones()[index].insert(
+                        model.getCones()[index].end(), cone.second.begin(),
+                        cone.second.end());
                 }
-
 #pragma omp critical
-                scene.getWorldBounds().merge(bounds);
+                model.getBounds().merge(bounds);
             }
         }
 
@@ -461,6 +464,7 @@ std::set<std::string> CircuitLoader::getSupportedDataTypes()
 }
 
 void CircuitLoader::importFromBlob(Blob&& /*blob*/, Scene& /*scene*/,
+                                   const size_t /*index*/,
                                    const Matrix4f& /*transformation*/,
                                    const size_t /*materialID*/)
 {
@@ -468,6 +472,7 @@ void CircuitLoader::importFromBlob(Blob&& /*blob*/, Scene& /*scene*/,
 }
 
 void CircuitLoader::importFromFile(const std::string& filename, Scene& scene,
+                                   const size_t /*index*/,
                                    const Matrix4f& /*transformation*/,
                                    const size_t /*materialID*/)
 {

@@ -49,14 +49,11 @@ public:
 
     /**
      * @brief Import a Texture from file
-     * @param textures A map of textures handled internally by Brayns
-     * @param textureType Type of texture: Diffuse, Normal, etc
      * @param filename Full name of the texture file
-     * @return True is import was successful, false otherwise
+     * @return Pointer to Texture2D object is import was successful, nullptr
+     * otherwise
      */
-    static bool importTextureFromFile(TexturesMap& textures,
-                                      const TextureType textureType,
-                                      const std::string& filename);
+    static Texture2DPtr importTextureFromFile(const std::string& filename);
 };
 }
 #endif // IMAGEMANAGER_H

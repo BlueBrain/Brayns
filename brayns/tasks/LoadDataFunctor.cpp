@@ -33,26 +33,12 @@ namespace brayns
 {
 const size_t LOADING_PROGRESS_DATA = 100;
 const size_t LOADING_PROGRESS_STEP = 10;
-const float TOTAL_PROGRESS = 3 * LOADING_PROGRESS_STEP + LOADING_PROGRESS_DATA;
+const float TOTAL_PROGRESS = 2 * LOADING_PROGRESS_STEP + LOADING_PROGRESS_DATA;
 
 LoadDataFunctor::LoadDataFunctor(EnginePtr engine)
     : _engine(engine)
     , _lock{_engine->dataMutex(), std::defer_lock}
 {
-}
-
-LoadDataFunctor::~LoadDataFunctor()
-{
-    if (!_loadDefaultScene)
-        return;
-
-    // load default scene if we got cancelled or any other error occurred
-    Scene& scene = _engine->getScene();
-    scene.unload();
-    BRAYNS_INFO << "Building default scene" << std::endl;
-    scene.buildDefault();
-
-    _postLoad(false);
 }
 
 void LoadDataFunctor::operator()(Blob&& blob)
@@ -74,13 +60,7 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
         while (!_lock.try_lock_for(std::chrono::seconds(1)))
             _updateProgress("Waiting for scene access ...", 0.f);
 
-        _updateProgress("Unloading ...", 0.f);
-        Scene& scene = _engine->getScene();
-        scene.unload();
-        _loadDefaultScene = true;
-
-        _updateProgress("Loading data ...", LOADING_PROGRESS_STEP);
-        scene.resetMaterials();
+        _updateProgress("Loading data ...", 0.f);
         try
         {
             loadData();
@@ -90,9 +70,9 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
             throw LOADING_BINARY_FAILED(e.what());
         }
 
+        Scene& scene = _engine->getScene();
         if (!scene.empty())
             _postLoad();
-        _loadDefaultScene = false;
     }
     catch (...)
     {
@@ -117,11 +97,8 @@ void LoadDataFunctor::_postLoad(const bool cancellable)
 {
     Scene& scene = _engine->getScene();
 
-    scene.buildEnvironment();
-
     if (cancellable)
         _updateProgress("Building geometry ...", LOADING_PROGRESS_STEP);
-    scene.buildGeometry();
 
     const auto& geomParams =
         _engine->getParametersManager().getGeometryParameters();
@@ -137,13 +114,7 @@ void LoadDataFunctor::_postLoad(const bool cancellable)
     scene.commit();
 
     BRAYNS_INFO << "Now rendering ..." << std::endl;
-
-    const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
-
-    auto& camera = _engine->getCamera();
-    camera.setInitialState(_engine->getScene().getWorldBounds());
-    camera.setAspectRatio(frameSize.x() / frameSize.y());
-    _engine->triggerRender();
+    _engine->setDefaultCamera();
 }
 
 void LoadDataFunctor::_updateProgress(const std::string& message,

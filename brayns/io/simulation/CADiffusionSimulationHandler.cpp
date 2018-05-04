@@ -20,7 +20,10 @@
 
 #include "CADiffusionSimulationHandler.h"
 
-#include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/Transformation.h>
+#include <brayns/common/engine/Engine.h>
+#include <brayns/common/material/Material.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -30,6 +33,7 @@
 namespace
 {
 const float CALCIUM_RADIUS = 0.00194f;
+const size_t CALCIUM_MATERIAL_ID = 0;
 }
 
 namespace brayns
@@ -93,26 +97,29 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
 
     _currentFrame = frame;
 
+    const std::string modelName = "CAFrame";
+
+    // Remove existing model if it exists
+    auto& models = scene.getModelDescriptors();
+    size_t index = 0;
+    bool found = false;
+    while (index < models.size() && !found)
+    {
+        found = (models[index].getName() == modelName);
+        ++index;
+    }
+    if (found)
+        models.erase(models.begin() + index - 1);
+
+    auto& model = scene.createModel(modelName);
+
     // Load Calcium positions
     _loadCalciumPositions(frame);
-    const size_t materialId =
-        static_cast<size_t>(MaterialType::calcium_simulation);
-    if (!_spheresCreated)
-    {
-        BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
-                    << std::endl;
-        for (const auto position : _calciumPositions)
-            scene.addSphere(materialId, {position, CALCIUM_RADIUS});
-        _spheresCreated = true;
-    }
-    else
-    {
-        uint64_t i = 0;
-        for (const auto position : _calciumPositions)
-        {
-            scene.setSphere(i, materialId, Sphere(position, CALCIUM_RADIUS));
-            ++i;
-        }
-    }
+    auto material = model.createMaterial(CALCIUM_MATERIAL_ID, "Calcium");
+    material->setDiffuseColor({1.f, 1.f, 1.f});
+    BRAYNS_INFO << "Creating " << _calciumPositions.size() << " CA spheres"
+                << std::endl;
+    for (const auto position : _calciumPositions)
+        model.addSphere(CALCIUM_MATERIAL_ID, {position, CALCIUM_RADIUS});
 }
 }

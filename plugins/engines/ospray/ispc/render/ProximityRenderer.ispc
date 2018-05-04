@@ -53,10 +53,9 @@ inline vec3f ProximityRenderer_shadeRay(
         color =
             color +
             path_opacity * make_vec3f(skyboxMapping((Renderer*)self, ray,
-                                                    self->abstract.numMaterials,
-                                                    self->abstract.materials));
+                                                    self->abstract.bgMaterial));
         sample.alpha = 0.f;
-        return self->abstract.bgColor + color + colorKs;
+        return color;
     }
 
     DifferentialGeometry dg;
@@ -220,28 +219,26 @@ export void* uniform ProximityRenderer_create(void* uniform cppE)
 }
 
 export void ProximityRenderer_set(
-    void* uniform _self, const uniform vec3f& bgColor,
+    void* uniform _self, void* uniform bgMaterial,
     const uniform vec3f& nearColor, const uniform vec3f& farColor,
     const uniform float& detectionDistance,
     const uniform bool& detectionOnDifferentMaterial,
     const uniform int& randomNumber, const uniform float& timestamp,
     const uniform int& spp, const uniform bool& electronShadingEnabled,
-    void** uniform lights, uniform int32 numLights, void** uniform materials,
-    uniform int32 numMaterials)
+    void** uniform lights, uniform int32 numLights)
 {
     uniform ProximityRenderer* uniform self =
         (uniform ProximityRenderer * uniform)_self;
 
-    self->abstract.bgColor = bgColor;
+    self->abstract.bgMaterial =
+        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+
     self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
     self->abstract.spp = spp;
     self->abstract.electronShadingEnabled = electronShadingEnabled;
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
-    self->abstract.materials =
-        (const uniform ExtendedOBJMaterial* uniform* uniform)materials;
-    self->abstract.numMaterials = numMaterials;
 
     self->nearColor = nearColor;
     self->farColor = farColor;

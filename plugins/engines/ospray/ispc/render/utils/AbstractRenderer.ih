@@ -43,9 +43,7 @@ struct AbstractRenderer
     // Rendering attributes
     const uniform Light* uniform* uniform lights;
     uint32 numLights;
-    const uniform ExtendedOBJMaterial* uniform* uniform materials;
-    uint32 numMaterials;
-    vec3f bgColor;
+    ExtendedOBJMaterial* bgMaterial;
     float shadows;
     bool shadingEnabled;
     float softShadows;

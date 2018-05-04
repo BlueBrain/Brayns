@@ -21,6 +21,7 @@
 #include "MorphologyLoader.h"
 #include "circuitLoaderCommon.h"
 
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 
@@ -28,6 +29,8 @@
 
 #include <brain/brain.h>
 #include <brion/brion.h>
+
+#include <boost/filesystem.hpp>
 
 namespace
 {
@@ -49,30 +52,29 @@ public:
      * @brief importMorphology imports a single morphology from a specified URI
      * @param uri URI of the morphology
      * @param index Index of the morphology
-     * @param material Material to use
+     * @param defaultMaterialId Material to use
      * @param transformation Transformation to apply to the morphology
      * @param compartmentReport Compartment report to map to the morphology
      * @return True is the morphology was successfully imported, false otherwise
      */
-    bool importMorphology(const servus::URI& source, Scene& scene,
-                          const uint64_t index, const size_t material,
-                          const Matrix4f& transformation,
+    bool importMorphology(const servus::URI& source, Model& model,
+                          const uint64_t index, const Matrix4f& transformation,
+                          const size_t defaultMaterialId = NO_MATERIAL,
                           CompartmentReportPtr compartmentReport = nullptr)
     {
-        ParallelSceneContainer sceneContainer(scene.getSpheres(),
-                                              scene.getCylinders(),
-                                              scene.getCones(),
-                                              scene.getTriangleMeshes(),
-                                              scene.getMaterials(),
-                                              scene.getWorldBounds());
+        ParallelModelContainer modelContainer(model.getSpheres(),
+                                              model.getCylinders(),
+                                              model.getCones(),
+                                              model.getTrianglesMeshes(),
+                                              model.getBounds());
 
         auto materialFunc = [
-            material, offset = scene.getMaterials().size(),
+            defaultMaterialId,
             colorScheme = _geometryParameters.getColorScheme(), index
         ](auto sectionType)
         {
-            if (material != NO_MATERIAL)
-                return offset + material;
+            if (defaultMaterialId != NO_MATERIAL)
+                return defaultMaterialId;
 
             size_t materialId = 0;
             switch (colorScheme)
@@ -103,18 +105,21 @@ public:
             default:
                 materialId = 0;
             }
-            return offset + materialId;
+            return materialId;
         };
 
-        return importMorphology(source, index, materialFunc, transformation,
-                                compartmentReport, sceneContainer);
+        const bool returnValue =
+            importMorphology(source, index, materialFunc, transformation,
+                             compartmentReport, modelContainer);
+        model.createMissingMaterials();
+        return returnValue;
     }
 
     bool importMorphology(const servus::URI& source, const uint64_t index,
                           MaterialFunc materialFunc,
                           const Matrix4f& transformation,
                           CompartmentReportPtr compartmentReport,
-                          ParallelSceneContainer& scene)
+                          ParallelModelContainer& model)
     {
         bool returnValue = true;
         const size_t morphologySectionTypes =
@@ -122,14 +127,14 @@ public:
         if (morphologySectionTypes ==
             static_cast<size_t>(MorphologySectionType::soma))
             return _importMorphologyAsPoint(index, materialFunc, transformation,
-                                            compartmentReport, scene);
+                                            compartmentReport, model);
         else if (_geometryParameters.useRealisticSomas())
             returnValue = _createRealisticSoma(source, materialFunc,
-                                               transformation, scene);
+                                               transformation, model);
         returnValue =
             returnValue &&
             _importMorphologyFromURI(source, index, materialFunc,
-                                     transformation, compartmentReport, scene);
+                                     transformation, compartmentReport, model);
         return returnValue;
     }
 
@@ -207,7 +212,7 @@ private:
                                   MaterialFunc materialFunc,
                                   const Matrix4f& transformation,
                                   CompartmentReportPtr compartmentReport,
-                                  ParallelSceneContainer& scene)
+                                  ParallelModelContainer& model)
     {
         uint64_t offset = 0;
         if (compartmentReport)
@@ -217,7 +222,7 @@ private:
         const auto textureCoordinates = _getIndexAsTextureCoordinates(offset);
         const auto somaPosition = transformation.getTranslation();
         const auto materialId = materialFunc(brain::neuron::SectionType::soma);
-        scene.addSphere(materialId,
+        model.addSphere(materialId,
                         {somaPosition, radius, 0.f, textureCoordinates});
         return true;
     }
@@ -235,7 +240,7 @@ private:
      */
     bool _createRealisticSoma(const servus::URI& uri, MaterialFunc materialFunc,
                               const Matrix4f& transformation,
-                              ParallelSceneContainer& scene)
+                              ParallelModelContainer& model)
     {
         try
         {
@@ -255,7 +260,7 @@ private:
                 const auto radius = _getCorrectedRadius(soma.getMeanRadius());
                 metaballs.push_back(
                     Vector4f(center.x(), center.y(), center.z(), radius));
-                scene.worldBounds.merge(center);
+                model.bounds.merge(center);
             }
 
             // Dendrites and axon
@@ -287,7 +292,7 @@ private:
                         metaballs.push_back(Vector4f(position.x(), position.y(),
                                                      position.z(), radius));
 
-                    scene.worldBounds.merge(position);
+                    model.bounds.merge(position);
                 }
             }
 
@@ -298,8 +303,7 @@ private:
             const auto materialId =
                 materialFunc(brain::neuron::SectionType::soma);
             metaballsGenerator.generateMesh(metaballs, gridSize, threshold,
-                                            scene.materials, materialId,
-                                            scene.trianglesMeshes);
+                                            materialId, model.trianglesMeshes);
         }
         catch (const std::runtime_error& e)
         {
@@ -325,7 +329,7 @@ private:
                                   MaterialFunc materialFunc,
                                   const Matrix4f& transformation,
                                   CompartmentReportPtr compartmentReport,
-                                  ParallelSceneContainer& scene) const
+                                  ParallelModelContainer& model) const
     {
         try
         {
@@ -375,7 +379,7 @@ private:
                 const auto radius = _getCorrectedRadius(soma.getMeanRadius());
                 const auto textureCoordinates =
                     _getIndexAsTextureCoordinates(offset);
-                scene.addSphere(materialId, {somaPosition, radius, 0.f,
+                model.addSphere(materialId, {somaPosition, radius, 0.f,
                                              textureCoordinates});
 
                 if (_geometryParameters.getCircuitUseSimulationModel())
@@ -390,7 +394,7 @@ private:
                         const auto& samples = child.getSamples();
                         const Vector3f sample{samples[0].x(), samples[0].y(),
                                               samples[0].z()};
-                        scene.addCone(materialId, {somaPosition, sample, radius,
+                        model.addCone(materialId, {somaPosition, sample, radius,
                                                    _getCorrectedRadius(
                                                        samples[0].w() * 0.5f),
                                                    0.f, textureCoordinates});
@@ -522,18 +526,18 @@ private:
 
                     if (radius > 0.f)
                     {
-                        scene.addSphere(materialId, {position, radius, distance,
+                        model.addSphere(materialId, {position, radius, distance,
                                                      textureCoordinates});
 
                         if (position != target && previousRadius > 0.f)
                         {
                             if (radius == previousRadius)
-                                scene.addCylinder(materialId,
+                                model.addCylinder(materialId,
                                                   {position, target, radius,
                                                    distance,
                                                    textureCoordinates});
                             else
-                                scene.addCone(materialId,
+                                model.addCone(materialId,
                                               {position, target, radius,
                                                previousRadius, distance,
                                                textureCoordinates});
@@ -570,28 +574,31 @@ std::set<std::string> MorphologyLoader::getSupportedDataTypes()
 }
 
 void MorphologyLoader::importFromBlob(Blob&& /*blob*/, Scene& /*scene*/,
+                                      const size_t /*index*/,
                                       const Matrix4f& /*transformation*/,
                                       const size_t /*materialID*/)
 {
     throw std::runtime_error("Load morphology from memory not supported");
 }
 
-void MorphologyLoader::importFromFile(const std::string& filename, Scene& scene,
-                                      const Matrix4f& transformation,
-                                      const size_t materialID)
+void MorphologyLoader::importFromFile(
+    const std::string& fileName, Scene& scene, const size_t index,
+    const Matrix4f& transformation,
+    const size_t defaultMaterialId BRAYNS_UNUSED)
 {
-    updateProgress("Loading " + shortenString(filename) + " ...", 0, 100);
-    importMorphology(servus::URI(filename), scene, 0, materialID,
-                     transformation);
-    updateProgress("Loading " + shortenString(filename) + " ...", 100, 100);
+    const auto modelName = boost::filesystem::basename({fileName});
+    updateProgress("Loading " + modelName + " ...", 0, 100);
+    auto& model = scene.createModel(modelName, fileName);
+    importMorphology(servus::URI(fileName), model, index, transformation);
+    model.createMissingMaterials();
+    updateProgress("Loading " + modelName + " ...", 100, 100);
 }
 
-bool MorphologyLoader::importMorphology(const servus::URI& uri, Scene& scene,
-                                        const uint64_t index,
-                                        const size_t material,
+bool MorphologyLoader::importMorphology(const servus::URI& uri, Model& model,
+                                        const size_t index,
                                         const Matrix4f& transformation)
 {
-    return _impl->importMorphology(uri, scene, index, material, transformation);
+    return _impl->importMorphology(uri, model, index, transformation);
 }
 
 bool MorphologyLoader::_importMorphology(const servus::URI& source,
@@ -599,9 +606,9 @@ bool MorphologyLoader::_importMorphology(const servus::URI& source,
                                          MaterialFunc materialFunc,
                                          const Matrix4f& transformation,
                                          CompartmentReportPtr compartmentReport,
-                                         ParallelSceneContainer& scene)
+                                         ParallelModelContainer& model)
 {
     return _impl->importMorphology(source, index, materialFunc, transformation,
-                                   compartmentReport, scene);
+                                   compartmentReport, model);
 }
 }

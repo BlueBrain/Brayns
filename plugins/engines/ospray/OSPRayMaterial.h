@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,26 +18,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef BRAYNS_LOG_H
-#define BRAYNS_LOG_H
+#ifndef OSPRAYMATERIAL_H
+#define OSPRAYMATERIAL_H
 
-#include <iostream>
+#include <brayns/common/material/Material.h>
+#include <ospray.h>
 
-#define BRAYNS_ERROR std::cerr << "[ERROR] "
-#define BRAYNS_WARN std::cerr << "[WARN ] "
-#define BRAYNS_INFO std::cout << "[INFO ] "
-#ifdef NDEBUG
-#define BRAYNS_DEBUG \
-    if (false)       \
-    std::cout
-#else
-#define BRAYNS_DEBUG std::cout << "[DEBUG] "
-#endif
+namespace brayns
+{
+class OSPRayMaterial : public Material
+{
+public:
+    OSPRayMaterial();
+    ~OSPRayMaterial();
 
-#define BRAYNS_THROW(exc)                        \
-    {                                            \
-        BRAYNS_ERROR << exc.what() << std::endl; \
-        throw exc;                               \
-    }
+    void commit() final;
 
-#endif
+    OSPMaterial getOSPMaterial() { return _ospMaterial; }
+private:
+    OSPTexture2D _createOSPTexture2D(Texture2DPtr texture);
+    OSPMaterial _ospMaterial;
+    std::map<TextureType, OSPTexture2D> _ospTextures;
+};
+}
+
+#endif // OSPRAYMATERIAL_H

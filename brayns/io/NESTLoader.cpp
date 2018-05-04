@@ -20,8 +20,9 @@
 
 #include "NESTLoader.h"
 
-#include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/log.h>
+#include <brayns/common/scene/Model.h>
+#include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
 #include <brayns/io/simulation/SpikeSimulationHandler.h>
 
@@ -116,7 +117,8 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
     BRAYNS_INFO << "Number of materials: " << materialMapping.size()
                 << std::endl;
 
-    SpheresMap& spheres = scene.getSpheres();
+    auto& model = scene.createModel("NESTCircuit");
+    SpheresMap& spheres = model.getSpheres();
     spheres[0].reserve(_frameSize);
     _positions.reserve(_frameSize);
     const float radius = _geometryParameters.getRadiusMultiplier();
@@ -130,7 +132,7 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
             xColor[gid] * 65536 + yColor[gid] * 256 + zColor[gid];
         const Vector3f center(xPos[gid], yPos[gid], zPos[gid]);
         _positions.push_back(center);
-        scene.addSphere(0,
+        model.addSphere(0,
                         {center, radius, 0.f, {materialMapping[index], 0.f}});
         updateProgress("Loading neurons...", spheres[0].size(), _frameSize);
     }

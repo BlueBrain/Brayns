@@ -56,33 +56,24 @@ public:
      */
     MolecularSystemReader(const GeometryParameters& geometryParameters);
 
-    void importFromBlob(Blob&&, Scene&, const Matrix4f&, const size_t) final
+    void importFromFile(const std::string& fileName, Scene& scene,
+                        const size_t index = 0,
+                        const Matrix4f& transformation = Matrix4f(),
+                        const size_t = NO_MATERIAL) final;
+
+    void importFromBlob(Blob&&, Scene&, const size_t = 0,
+                        const Matrix4f& = Matrix4f(),
+                        const size_t = NO_MATERIAL) final
     {
         throw std::runtime_error("Unsupported");
     }
-
-    void importFromFile(const std::string&, Scene&, const Matrix4f&,
-                        const size_t) final
-    {
-        throw std::runtime_error("Unsupported");
-    }
-
-    /**
-     * @brief Imports proteins and shapes from the Molecular System
-     *        Configutation file, defined by the --molecular-system-config
-     *        command line argument
-     * @param scene Resulting scene
-     * @param meshLoader Mesh loader used to load the meshes
-     * @return True if the system is successfully loaded, false otherwise
-     */
-    bool import(Scene& scene, MeshLoader& meshLoader);
 
 private:
-    bool _createScene(Scene& scene, MeshLoader& meshLoader);
-    bool _loadConfiguration();
+    bool _createScene(Scene& scene);
+    bool _loadConfiguration(const std::string& fileName);
     bool _loadProteins();
     bool _loadPositions();
-    void _writePositionstoFile(const std::string& filename);
+    void _writePositionstoFile(const std::string& fileName);
 
     const GeometryParameters& _geometryParameters;
     std::string _proteinFolder;

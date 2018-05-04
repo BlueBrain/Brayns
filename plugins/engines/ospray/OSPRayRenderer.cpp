@@ -22,6 +22,7 @@
 
 #include "OSPRayCamera.h"
 #include "OSPRayFrameBuffer.h"
+#include "OSPRayMaterial.h"
 #include "OSPRayRenderer.h"
 #include "OSPRayScene.h"
 
@@ -93,16 +94,21 @@ void OSPRayRenderer::commit()
     ospSet3f(_renderer, "detectionNearColor", color.x(), color.y(), color.z());
     color = rp.getDetectionFarColor();
     ospSet3f(_renderer, "detectionFarColor", color.x(), color.y(), color.z());
-    ospSet1i(_renderer, "materialForSimulation",
-             static_cast<size_t>(MaterialType::voltage_simulation));
     ospSet1i(_renderer, "volumeSamplesPerRay", rp.getSamplesPerRay());
 
-    OSPRayScene* osprayScene = static_cast<OSPRayScene*>(_scene.get());
-    assert(osprayScene);
+    auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
+    auto bgMaterial = std::static_pointer_cast<OSPRayMaterial>(
+        scene->getBackgroundMaterial());
+    if (bgMaterial)
+    {
+        bgMaterial->setDiffuseColor(rp.getBackgroundColor());
+        bgMaterial->commit();
+        auto ospBgMaterial = bgMaterial->getOSPMaterial();
+        ospSetObject(_renderer, "bgMaterial", ospBgMaterial);
+    }
 
-    ospSetObject(_renderer, "world", osprayScene->modelImpl());
-    ospSetObject(_renderer, "simulationModel",
-                 osprayScene->simulationModelImpl());
+    ospSetObject(_renderer, "world", scene->getModel());
+    ospSetObject(_renderer, "simulationModel", scene->simulationModelImpl());
     ospCommit(_renderer);
     _dirty = false;
 }

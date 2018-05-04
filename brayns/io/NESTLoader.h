@@ -56,13 +56,14 @@ class NESTLoader : public Loader
 public:
     NESTLoader(const GeometryParameters& geometryParameters);
 
-    void importFromBlob(Blob&&, Scene&, const Matrix4f&, const size_t) final
+    void importFromBlob(Blob&&, Scene&, const size_t, const Matrix4f&,
+                        const size_t) final
     {
         throw std::runtime_error("Unsupported");
     }
 
-    void importFromFile(const std::string&, Scene&, const Matrix4f&,
-                        const size_t) final
+    void importFromFile(const std::string&, Scene&, const size_t,
+                        const Matrix4f&, const size_t) final
     {
         throw std::runtime_error("Unsupported");
     }

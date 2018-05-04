@@ -67,24 +67,26 @@ void Engine::setDefaultEpsilon()
     float epsilon = _parametersManager.getRenderingParameters().getEpsilon();
     if (epsilon == 0.f)
     {
-        const Vector3f& worldBoundsSize = _scene->getWorldBounds().getSize();
-        epsilon = worldBoundsSize.length() / 1e6f;
+        const Vector3f& boundsSize = _scene->getBounds().getSize();
+        epsilon = boundsSize.length() / 1e6f;
         BRAYNS_INFO << "Default epsilon: " << epsilon << std::endl;
         _parametersManager.getRenderingParameters().setEpsilon(epsilon);
     }
 }
 
-void Engine::initializeMaterials(const MaterialsColorMap colorMap)
-{
-    _scene->setMaterialsColorMap(colorMap);
-    _scene->commit();
-}
-
 void Engine::commit()
 {
-    _scene->commitVolumeData();
-    _scene->commitSimulationData();
+    bool clearFrame = false;
+    if (_scene->commitVolumeData())
+        clearFrame = true;
+    if (_scene->commitSimulationData())
+        clearFrame = true;
+    if (_scene->commitTransferFunctionData())
+        clearFrame = true;
     _renderers[_activeRenderer]->commit();
+
+    if (clearFrame)
+        _frameBuffer->clear();
 
     const auto& rp = _parametersManager.getRenderingParameters();
     if (rp.getStereoMode() != _camera->getStereoMode())
@@ -140,5 +142,13 @@ void Engine::_writeFrameToFile()
     const auto filename = frameExportFolder + "/" + str + ".png";
     FrameBuffer& frameBuffer = getFrameBuffer();
     ImageManager::exportFrameBufferToFile(frameBuffer, filename);
+}
+
+void Engine::setDefaultCamera()
+{
+    const auto frameSize = Vector2f(_frameBuffer->getSize());
+    _camera->setInitialState(_scene->getBounds());
+    _camera->setAspectRatio(frameSize.x() / frameSize.y());
+    triggerRender();
 }
 }

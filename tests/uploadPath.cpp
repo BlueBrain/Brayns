@@ -124,6 +124,20 @@ BOOST_AUTO_TEST_CASE(obj)
         UPLOAD_PATH, {BRAYNS_TESTDATA + std::string("files/bennu.obj")})));
 }
 
+BOOST_AUTO_TEST_CASE(xyz_obj)
+{
+    const auto initialNbModels = getScene().getModelDescriptors().size();
+    BOOST_CHECK((makeRequest<std::vector<std::string>, bool>(
+        UPLOAD_PATH, {BRAYNS_TESTDATA + std::string("files/monkey.xyz")})));
+    BOOST_CHECK((makeRequest<std::vector<std::string>, bool>(
+        UPLOAD_PATH, {BRAYNS_TESTDATA + std::string("files/bennu.obj")})));
+    auto newNbModels = getScene().getModelDescriptors().size();
+    BOOST_CHECK_EQUAL(initialNbModels + 2, newNbModels);
+    getScene().removeModel(newNbModels - 1);
+    newNbModels = getScene().getModelDescriptors().size();
+    BOOST_CHECK_EQUAL(initialNbModels + 1, newNbModels);
+}
+
 BOOST_AUTO_TEST_CASE(multiple_files)
 {
     BOOST_CHECK((makeRequest<std::vector<std::string>, bool>(

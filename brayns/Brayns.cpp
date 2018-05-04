@@ -58,7 +58,6 @@
 #endif
 
 #ifdef BRAYNS_USE_BRION
-#include <brayns/io/ConnectivityLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
 #include <servus/uri.h>
@@ -92,7 +91,6 @@ struct Brayns::Impl : public PluginAPI
 {
     Impl(int argc, const char** argv)
         : _engineFactory{argc, argv, _parametersManager}
-        , _meshLoader(_parametersManager.getGeometryParameters())
     {
         BRAYNS_INFO << "     ____                             " << std::endl;
         BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
@@ -185,7 +183,7 @@ struct Brayns::Impl : public PluginAPI
         if (!dataLock.try_lock())
             return false;
 
-        Scene& scene = _engine->getScene();
+        auto& scene = _engine->getScene();
 
         // consider updates on the scene also from plugins, not only 'our own'
         // built-in data loading
@@ -197,7 +195,7 @@ struct Brayns::Impl : public PluginAPI
         _engine->setActiveRenderer(
             _parametersManager.getRenderingParameters().getRenderer());
 
-        const Vector2ui windowSize =
+        const auto windowSize =
             _parametersManager.getApplicationParameters().getWindowSize();
 
         _engine->reshape(windowSize);
@@ -315,6 +313,12 @@ struct Brayns::Impl : public PluginAPI
             _parametersManager.getApplicationParameters().getInputPaths();
         if (!paths.empty())
         {
+            if (paths.size() == 1 && paths[0] == "demo")
+            {
+                _engine->getScene().buildDefault();
+                return;
+            }
+
             UploadPathTask task(paths, _engine);
             if (!task.result())
                 throw std::runtime_error("Loading failed");
@@ -342,12 +346,6 @@ struct Brayns::Impl : public PluginAPI
             _loadScene();
 
         promise.set_value();
-
-        const auto frameSize = Vector2f(_engine->getFrameBuffer().getSize());
-
-        auto& camera = _engine->getCamera();
-        camera.setInitialState(_engine->getScene().getWorldBounds());
-        camera.setAspectRatio(frameSize.x() / frameSize.y());
     }
 
     bool preRender(const RenderInput& renderInput)
@@ -434,28 +432,13 @@ private:
             LOADING_PROGRESS_DATA + 3 * LOADING_PROGRESS_STEP, std::cout,
             "[INFO ] Loading scene ...\n[INFO ] ", "[INFO ] ", "[INFO ] ");
 
-        Scene& scene = _engine->getScene();
+        auto& scene = _engine->getScene();
 
-        scene.unload();
         loadingProgress += LOADING_PROGRESS_STEP;
 
-        _meshLoader.clear();
-
-        scene.resetMaterials();
         _loadData(loadingProgress);
 
-        if (scene.empty() && !scene.getVolumeHandler())
-        {
-            scene.unload();
-            _meshLoader.clear();
-            BRAYNS_INFO << "Building default scene" << std::endl;
-            scene.buildDefault();
-        }
-
-        scene.buildEnvironment();
-
         const auto& geomParams = _parametersManager.getGeometryParameters();
-        scene.buildGeometry();
         if (geomParams.getLoadCacheFile().empty() &&
             !geomParams.getSaveCacheFile().empty())
         {
@@ -468,6 +451,7 @@ private:
         loadingProgress += LOADING_PROGRESS_STEP;
 
         BRAYNS_INFO << "Now rendering ..." << std::endl;
+        _engine->setDefaultCamera();
     }
 
     // do this in the main thread again to avoid race conditions
@@ -481,6 +465,9 @@ private:
 
         _engine->getStatistics().setSceneSizeInBytes(
             _engine->getScene().getSizeInBytes());
+
+        // Set default camera position
+        _engine->setDefaultCamera();
 
         // finish reporting of progress
         postSceneLoading();
@@ -523,15 +510,12 @@ private:
         auto& sceneParameters = _parametersManager.getSceneParameters();
         auto& scene = _engine->getScene();
 
-        // set environment map if applicable
-        const std::string& environmentMap =
+        const auto& environmentMap =
             _parametersManager.getSceneParameters().getEnvironmentMap();
         if (!environmentMap.empty())
         {
-            const size_t materialId = static_cast<size_t>(MaterialType::skybox);
-            auto& material = scene.getMaterials()[materialId];
-            material.setTexture(TT_DIFFUSE, environmentMap);
-            material.setType(MaterialType::skybox);
+            auto bgMaterial = scene.getBackgroundMaterial();
+            bgMaterial->setTexture(environmentMap, TT_DIFFUSE);
         }
 
         const std::string& colorMapFilename =
@@ -584,9 +568,6 @@ private:
         if (!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getConnectivityFile().empty())
             _loadCircuitConfiguration(updateProgress);
-
-        if (!geometryParameters.getConnectivityFile().empty())
-            _loadConnectivityFile();
 #endif
 
         if (!geometryParameters.getXYZBFile().empty())
@@ -608,11 +589,10 @@ private:
                 scene.getVolumeHandler()->getOffset();
             const Vector3f& volumeElementSpacing =
                 volumeParameters.getElementSpacing();
-            Boxf& worldBounds = scene.getWorldBounds();
-            worldBounds.merge(Vector3f(0.f, 0.f, 0.f));
-            worldBounds.merge(volumeOffset +
-                              Vector3f(volumeDimensions) *
-                                  volumeElementSpacing);
+            auto bounds = scene.getBounds();
+            bounds.merge(Vector3f(0.f, 0.f, 0.f));
+            bounds.merge(volumeOffset +
+                         Vector3f(volumeDimensions) * volumeElementSpacing);
         }
     }
 
@@ -640,26 +620,19 @@ private:
     /**
         Loads data from a PDB file (command line parameter --pdb-file)
     */
-    void _loadPDBFile(const std::string& filename)
+    void _loadPDBFile(const std::string& fileName)
     {
         // Load PDB File
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        std::string pdbFile = filename;
-        if (pdbFile == "")
+        std::string pdbFileName = fileName;
+        if (pdbFileName == "")
         {
-            pdbFile = geometryParameters.getPDBFile();
-            BRAYNS_INFO << "Loading PDB file " << pdbFile << std::endl;
+            pdbFileName = geometryParameters.getPDBFile();
+            BRAYNS_INFO << "Loading PDB file " << pdbFileName << std::endl;
         }
         ProteinLoader proteinLoader(geometryParameters);
-        if (!proteinLoader.importPDBFile(pdbFile, Vector3f(0, 0, 0), 0, scene))
-            BRAYNS_ERROR << "Failed to import " << pdbFile << std::endl;
-
-        for (size_t i = 0; i < scene.getMaterials().size(); ++i)
-        {
-            auto& material = scene.getMaterials()[i];
-            material.setColor(proteinLoader.getMaterialKd(i));
-        }
+        proteinLoader.importFromFile(pdbFileName, scene);
     }
 
     /**
@@ -676,8 +649,8 @@ private:
         xyzbLoader.setProgressCallback(progressUpdate);
         try
         {
-            xyzbLoader.importFromFile(geometryParameters.getXYZBFile(), scene,
-                                      Matrix4f(), NO_MATERIAL);
+            const auto fileName = geometryParameters.getXYZBFile();
+            xyzbLoader.importFromFile(fileName, scene);
         }
         catch (const std::runtime_error& e)
         {
@@ -701,26 +674,28 @@ private:
         strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
                            ".stl", ".3ds", ".ase", ".ifc", ".off"};
         strings files = parseFolder(folder, filters);
-        size_t i = 0;
+        size_t index = 0;
         std::stringstream msg;
         msg << "Loading " << files.size() << " meshes from " << folder;
         for (const auto& file : files)
         {
-            size_t material =
+            size_t materialId =
                 geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-                    ? NB_SYSTEM_MATERIALS + i
+                    ? index
                     : NO_MATERIAL;
 
             try
             {
-                _meshLoader.importFromFile(file, scene, Matrix4f(), material);
+                MeshLoader meshLoader(geometryParameters);
+                meshLoader.importFromFile(file, scene, index, Matrix4f(),
+                                          materialId);
             }
             catch (...)
             {
                 BRAYNS_ERROR << "Failed to import " << file << std::endl;
             }
-            ++i;
-            progressUpdate(msg.str(), float(i) / files.size());
+            ++index;
+            progressUpdate(msg.str(), float(index) / files.size());
         }
     }
 
@@ -732,32 +707,11 @@ private:
         const auto& geometryParameters =
             _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        size_t material =
-            geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-                ? NB_SYSTEM_MATERIALS
-                : NO_MATERIAL;
-
-        _meshLoader.importFromFile(filename, scene, Matrix4f(), material);
+        MeshLoader meshLoader(geometryParameters);
+        meshLoader.importFromFile(filename, scene);
     }
 
 #if (BRAYNS_USE_BRION)
-    /**
-        Loads data from a neuron connectivity file (command line parameter
-       --connectivity-file)
-    */
-    void _loadConnectivityFile()
-    {
-        // Load Connectivity File
-        GeometryParameters& geometryParameters =
-            _parametersManager.getGeometryParameters();
-        ConnectivityLoader connectivityLoader(geometryParameters);
-        if (!connectivityLoader.importFromFile(_engine->getScene(),
-                                               _meshLoader))
-            BRAYNS_ERROR << "Failed to import "
-                         << geometryParameters.getConnectivityFile()
-                         << std::endl;
-    }
-
     /**
      * Loads data from a NEST circuit file (command line parameter
      * --nest-circuit)
@@ -818,17 +772,15 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
+        auto& model = scene.createModel("morphologies", folder);
         MorphologyLoader morphologyLoader(geometryParameters);
-
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
-        uint64_t morphologyIndex = 0;
-        for (const auto& file : files)
+        size_t morphologyIndex = 0;
+        for (const auto& fileName : files)
         {
-            servus::URI uri(file);
-            if (!morphologyLoader.importMorphology(uri, scene, morphologyIndex,
-                                                   NO_MATERIAL))
-                BRAYNS_ERROR << "Failed to import " << file << std::endl;
+            morphologyLoader.importMorphology(servus::URI(fileName), model,
+                                              morphologyIndex);
             ++morphologyIndex;
             progressUpdate("Loading morphologies from " + folder,
                            float(morphologyIndex) / files.size());
@@ -861,9 +813,8 @@ private:
 #endif // BRAYNS_USE_BRION
 
     /**
-        Loads molecular system from configuration (command line
-       parameter
-        --molecular-system-config )
+        Loads molecular system from configuration (command line parameter
+       --molecular-system-config )
     */
     void _loadMolecularSystem(const Loader::UpdateCallback& progressUpdate)
     {
@@ -871,7 +822,8 @@ private:
         auto& scene = _engine->getScene();
         MolecularSystemReader molecularSystemReader(geometryParameters);
         molecularSystemReader.setProgressCallback(progressUpdate);
-        molecularSystemReader.import(scene, _meshLoader);
+        const auto fileName = geometryParameters.getMolecularSystemConfig();
+        molecularSystemReader.importFromFile(fileName, scene);
     }
 
     void _setupCameraManipulator(const CameraMode mode)
@@ -908,8 +860,8 @@ private:
             '3', "Set gradient materials",
             std::bind(&Brayns::Impl::_gradientMaterials, this));
         _keyboardHandler.registerKeyboardShortcut(
-            '4', "Set pastel materials",
-            std::bind(&Brayns::Impl::_pastelMaterials, this));
+            '4', "Set random materials",
+            std::bind(&Brayns::Impl::_randomMaterials, this));
         _keyboardHandler.registerKeyboardShortcut(
             '5', "Scientific visualization renderer",
             std::bind(&Brayns::Impl::_scivisRenderer, this));
@@ -1226,17 +1178,14 @@ private:
 
     void _gradientMaterials()
     {
-        _engine->initializeMaterials(MaterialsColorMap::gradient);
-    }
-
-    void _pastelMaterials()
-    {
-        _engine->initializeMaterials(MaterialsColorMap::pastel);
+        _engine->getScene().setMaterialsColorMap(MaterialsColorMap::gradient);
+        _engine->getFrameBuffer().clear();
     }
 
     void _randomMaterials()
     {
-        _engine->initializeMaterials(MaterialsColorMap::random);
+        _engine->getScene().setMaterialsColorMap(MaterialsColorMap::random);
+        _engine->getFrameBuffer().clear();
     }
 
     void _toggleAnimationPlayback()
@@ -1290,7 +1239,6 @@ private:
     EnginePtr _engine;
     KeyboardHandler _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
-    MeshLoader _meshLoader;
 
     float _fieldOfView{45.f};
     float _eyeSeparation{0.0635f};
