@@ -16,6 +16,7 @@ RUN apt-get update \
     cmake \
     git \
     ninja-build \
+    libarchive-dev \
     libassimp-dev \
     libboost-date-time-dev \
     libboost-filesystem-dev \
@@ -131,6 +132,7 @@ ARG DIST_PATH=/app/dist
 
 RUN apt-get update \
  && apt-get -y --no-install-recommends install \
+    libarchive13 \
     libassimp4 \
     libboost-filesystem1.62.0 \
     libboost-program-options1.62.0 \
