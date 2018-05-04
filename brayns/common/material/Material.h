@@ -45,21 +45,6 @@ enum TextureType
     TT_OCCLUSION
 };
 
-struct TextureTypeMaterialAttribute
-{
-    TextureType type;
-    std::string attribute;
-};
-
-static TextureTypeMaterialAttribute textureTypeMaterialAttribute[7] = {
-    {TT_DIFFUSE, "map_kd"},
-    {TT_NORMALS, "map_bump"},
-    {TT_SPECULAR, "map_ks"},
-    {TT_EMISSIVE, "map_ns"},
-    {TT_OPACITY, "map_d"},
-    {TT_REFLECTION, "map_reflection"},
-    {TT_REFRACTION, "map_refraction"}};
-
 typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
 
 class Material : public BaseObject
