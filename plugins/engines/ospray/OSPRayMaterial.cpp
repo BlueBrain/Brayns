@@ -24,6 +24,22 @@
 
 namespace brayns
 {
+struct TextureTypeMaterialAttribute
+{
+    TextureType type;
+    std::string attribute;
+};
+
+static TextureTypeMaterialAttribute textureTypeMaterialAttribute[8] = {
+    {TT_DIFFUSE, "map_kd"},
+    {TT_NORMALS, "map_bump"},
+    {TT_BUMP, "map_bump"},
+    {TT_SPECULAR, "map_ks"},
+    {TT_EMISSIVE, "map_ns"},
+    {TT_OPACITY, "map_d"},
+    {TT_REFLECTION, "map_reflection"},
+    {TT_REFRACTION, "map_refraction"}};
+
 OSPRayMaterial::OSPRayMaterial()
     : _ospMaterial(ospNewMaterial(nullptr, "ExtendedOBJMaterial"))
 {
