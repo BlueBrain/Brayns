@@ -117,7 +117,8 @@ public:
       @param sphere Sphere to add
       @return Index of the sphere for the specified material
       */
-    BRAYNS_API uint64_t addSphere(const size_t material, const Sphere& sphere);
+    BRAYNS_API uint64_t addSphere(const size_t materialId,
+                                  const Sphere& sphere);
 
     /**
         Returns cylinders handled by the model
@@ -129,7 +130,7 @@ public:
       @param cylinder Cylinder to add
       @return Index of the sphere for the specified material
       */
-    BRAYNS_API uint64_t addCylinder(const size_t material,
+    BRAYNS_API uint64_t addCylinder(const size_t materialId,
                                     const Cylinder& cylinder);
     /**
         Returns cones handled by the model

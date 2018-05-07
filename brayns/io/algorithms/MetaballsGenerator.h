@@ -44,7 +44,6 @@ public:
      * @param threshold Points in 3D space that fall below the threshold
      *        (when run through the function) are ONE, while points above the
      *        threshold are ZERO
-     * @param materials
      * @param defaultMaterialId Default material to apply to the generated mesh
      * @param triangles Generated triangles
      */
