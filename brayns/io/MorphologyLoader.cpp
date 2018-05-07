@@ -588,9 +588,10 @@ void MorphologyLoader::importFromFile(
 {
     const auto modelName = boost::filesystem::basename({fileName});
     updateProgress("Loading " + modelName + " ...", 0, 100);
-    auto& model = scene.createModel(modelName, fileName);
-    importMorphology(servus::URI(fileName), model, index, transformation);
-    model.createMissingMaterials();
+    auto model = scene.createModel();
+    importMorphology(servus::URI(fileName), *model, index, transformation);
+    model->createMissingMaterials();
+    scene.addModel(std::move(model), modelName, fileName);
     updateProgress("Loading " + modelName + " ...", 100, 100);
 }
 

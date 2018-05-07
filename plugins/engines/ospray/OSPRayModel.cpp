@@ -72,14 +72,23 @@ OSPRayModel::~OSPRayModel()
         ospRelease(geom.second);
     _ospMeshes.clear();
 
-    if (_model)
-        ospRelease(_model);
+    if (_simulationModelInstance)
+        ospRelease(_simulationModelInstance);
 
     if (_simulationModel)
         ospRelease(_simulationModel);
 
+    if (_boundingBoxModelInstance)
+        ospRelease(_boundingBoxModelInstance);
+
     if (_boundingBoxModel)
         ospRelease(_boundingBoxModel);
+
+    for (auto& i : _instances)
+        ospRelease(i.second);
+
+    if (_model)
+        ospRelease(_model);
 }
 
 void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)

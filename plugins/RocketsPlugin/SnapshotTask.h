@@ -27,6 +27,7 @@
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
+#include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 
 #include <brayns/parameters/ParametersManager.h>
@@ -71,7 +72,7 @@ public:
                   ? *_params.renderingParams
                   : engine.getParametersManager().getRenderingParameters()))
         , _imageGenerator(imageGenerator)
-        , _dataLock(engine.dataMutex(), std::defer_lock)
+        , _dataLock(_scene->dataMutex(), std::defer_lock)
     {
         if (_params.camera)
             *_camera = *_params.camera;

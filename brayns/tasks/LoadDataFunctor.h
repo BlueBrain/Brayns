@@ -23,8 +23,6 @@
 #include <brayns/common/tasks/TaskFunctor.h>
 #include <brayns/common/types.h>
 
-#include <shared_mutex>
-
 namespace brayns
 {
 /**
@@ -45,8 +43,6 @@ private:
     void _loadData(Blob&& blob);
     void _loadData(const std::string& path);
 
-    void _postLoad(bool cancellable = true);
-
     void _updateProgress(const std::string& message, const size_t increment);
 
     std::function<void(std::string, float)> _getProgressFunc();
@@ -54,6 +50,5 @@ private:
     EnginePtr _engine;
     size_t _currentProgress{0};
     size_t _nextTic{0};
-    std::unique_lock<std::shared_timed_mutex> _lock;
 };
 }

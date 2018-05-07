@@ -23,8 +23,6 @@
 
 #include <brayns/common/Statistics.h>
 
-#include <shared_mutex>
-
 namespace brayns
 {
 /**
@@ -161,7 +159,6 @@ public:
         const RendererType type, const AnimationParameters& animationParameters,
         const RenderingParameters& renderingParameters) const = 0;
 
-    auto& dataMutex() { return _dataMutex; }
     auto& getParametersManager() { return _parametersManager; }
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
@@ -180,9 +177,6 @@ protected:
 
     bool _keepRunning{true};
     bool _rebuildScene{false};
-
-    // protect render() vs preRender() when doing all the commit()
-    std::shared_timed_mutex _dataMutex;
 };
 }
 

@@ -31,6 +31,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
@@ -79,7 +80,6 @@ namespace
 const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const size_t LOADING_PROGRESS_DATA = 100;
-const size_t LOADING_PROGRESS_STEP = 10;
 }
 
 #define REGISTER_LOADER(LOADER, FUNC) \
@@ -108,7 +108,10 @@ struct Brayns::Impl : public PluginAPI
 
         createEngine();
 
+        _engine->getScene().commit();
+        _engine->setDefaultCamera();
         _finishLoadScene();
+        _engine->getScene().resetModified();
     }
 
     void addPlugins()
@@ -178,17 +181,21 @@ struct Brayns::Impl : public PluginAPI
         if (!lock.try_lock())
             return false;
 
-        std::shared_lock<std::shared_timed_mutex> dataLock{_engine->dataMutex(),
-                                                           std::defer_lock};
-        if (!dataLock.try_lock())
-            return false;
-
         auto& scene = _engine->getScene();
-
-        // consider updates on the scene also from plugins, not only 'our own'
-        // built-in data loading
+        bool resetScene = false;
         if (scene.isModified())
-            _finishLoadScene();
+        {
+            // only apply changes from the scene if the scene is not used
+            // currently by some task, e.g. snapshot.
+            std::unique_lock<std::shared_timed_mutex> dataLock{
+                scene.dataMutex(), std::defer_lock};
+            if (dataLock.try_lock())
+            {
+                scene.commit();
+                _finishLoadScene();
+                resetScene = true;
+            }
+        }
 
         _updateAnimation();
 
@@ -205,9 +212,6 @@ struct Brayns::Impl : public PluginAPI
 
         Camera& camera = _engine->getCamera();
         camera.commit();
-
-        if (scene.getTransferFunction().isModified())
-            scene.commitTransferFunctionData();
 
         if (_parametersManager.getRenderingParameters().getHeadLight())
         {
@@ -231,7 +235,8 @@ struct Brayns::Impl : public PluginAPI
         _engine->getScene().getTransferFunction().resetModified();
         _parametersManager.resetModified();
         _engine->getCamera().resetModified();
-        _engine->getScene().resetModified();
+        if (resetScene)
+            _engine->getScene().resetModified();
 
         return true;
     }
@@ -339,11 +344,11 @@ struct Brayns::Impl : public PluginAPI
 
 #ifdef BRAYNS_USE_LUNCHBOX
         if (isAsyncMode())
-            _loadingThread.post(std::bind(&Brayns::Impl::_loadScene, this))
+            _loadingThread.post(std::bind(&Brayns::Impl::_loadData, this))
                 .get();
         else
 #endif
-            _loadScene();
+            _loadData();
 
         promise.set_value();
     }
@@ -387,7 +392,7 @@ struct Brayns::Impl : public PluginAPI
     {
         std::lock_guard<std::mutex> lock{_renderMutex};
         std::shared_lock<std::shared_timed_mutex> dataLock{
-            _engine->dataMutex()};
+            _engine->getScene().dataMutex()};
 
         _renderTimer.start();
         _engine->render();
@@ -423,37 +428,6 @@ struct Brayns::Impl : public PluginAPI
     }
 
 private:
-    void _loadScene()
-    {
-        // fix race condition: we have to wait until rendering is finished
-        std::lock_guard<std::shared_timed_mutex> lock{_engine->dataMutex()};
-
-        boost::progress_display loadingProgress(
-            LOADING_PROGRESS_DATA + 3 * LOADING_PROGRESS_STEP, std::cout,
-            "[INFO ] Loading scene ...\n[INFO ] ", "[INFO ] ", "[INFO ] ");
-
-        auto& scene = _engine->getScene();
-
-        loadingProgress += LOADING_PROGRESS_STEP;
-
-        _loadData(loadingProgress);
-
-        const auto& geomParams = _parametersManager.getGeometryParameters();
-        if (geomParams.getLoadCacheFile().empty() &&
-            !geomParams.getSaveCacheFile().empty())
-        {
-            scene.saveToCacheFile();
-        }
-
-        loadingProgress += LOADING_PROGRESS_STEP;
-
-        scene.commit();
-        loadingProgress += LOADING_PROGRESS_STEP;
-
-        BRAYNS_INFO << "Now rendering ..." << std::endl;
-        _engine->setDefaultCamera();
-    }
-
     // do this in the main thread again to avoid race conditions
     void _finishLoadScene()
     {
@@ -465,9 +439,6 @@ private:
 
         _engine->getStatistics().setSceneSizeInBytes(
             _engine->getScene().getSizeInBytes());
-
-        // Set default camera position
-        _engine->setDefaultCamera();
 
         // finish reporting of progress
         postSceneLoading();
@@ -487,8 +458,12 @@ private:
         }
     }
 
-    void _loadData(boost::progress_display& loadingProgress)
+    void _loadData()
     {
+        boost::progress_display loadingProgress(
+            LOADING_PROGRESS_DATA, std::cout,
+            "[INFO ] Loading scene ...\n[INFO ] ", "[INFO ] ", "[INFO ] ");
+
         size_t nextTic = 0;
         const size_t tic = LOADING_PROGRESS_DATA;
         auto updateProgress = [&nextTic,
@@ -594,6 +569,7 @@ private:
             bounds.merge(volumeOffset +
                          Vector3f(volumeDimensions) * volumeElementSpacing);
         }
+        scene.saveToCacheFile();
     }
 
     /**
@@ -772,19 +748,20 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
         const auto& folder = geometryParameters.getMorphologyFolder();
-        auto& model = scene.createModel("morphologies", folder);
+        auto model = scene.createModel();
         MorphologyLoader morphologyLoader(geometryParameters);
         const strings filters = {".swc", ".h5"};
         const strings files = parseFolder(folder, filters);
         size_t morphologyIndex = 0;
         for (const auto& fileName : files)
         {
-            morphologyLoader.importMorphology(servus::URI(fileName), model,
+            morphologyLoader.importMorphology(servus::URI(fileName), *model,
                                               morphologyIndex);
             ++morphologyIndex;
             progressUpdate("Loading morphologies from " + folder,
                            float(morphologyIndex) / files.size());
         }
+        scene.addModel(std::move(model), "morphologies", folder);
     }
 
     /**
@@ -1179,13 +1156,11 @@ private:
     void _gradientMaterials()
     {
         _engine->getScene().setMaterialsColorMap(MaterialsColorMap::gradient);
-        _engine->getFrameBuffer().clear();
     }
 
     void _randomMaterials()
     {
         _engine->getScene().setMaterialsColorMap(MaterialsColorMap::random);
-        _engine->getFrameBuffer().clear();
     }
 
     void _toggleAnimationPlayback()

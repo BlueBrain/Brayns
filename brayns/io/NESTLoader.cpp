@@ -117,8 +117,8 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
     BRAYNS_INFO << "Number of materials: " << materialMapping.size()
                 << std::endl;
 
-    auto& model = scene.createModel("NESTCircuit");
-    SpheresMap& spheres = model.getSpheres();
+    auto model = scene.createModel();
+    SpheresMap& spheres = model->getSpheres();
     spheres[0].reserve(_frameSize);
     _positions.reserve(_frameSize);
     const float radius = _geometryParameters.getRadiusMultiplier();
@@ -132,10 +132,12 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
             xColor[gid] * 65536 + yColor[gid] * 256 + zColor[gid];
         const Vector3f center(xPos[gid], yPos[gid], zPos[gid]);
         _positions.push_back(center);
-        model.addSphere(0,
-                        {center, radius, 0.f, {materialMapping[index], 0.f}});
+        model->addSphere(0,
+                         {center, radius, 0.f, {materialMapping[index], 0.f}});
         updateProgress("Loading neurons...", spheres[0].size(), _frameSize);
     }
+
+    scene.addModel(std::move(model), "NESTCircuit");
 
     BRAYNS_INFO << "Finished loading " << _frameSize << " neurons" << std::endl;
 }

@@ -320,8 +320,7 @@ void ProteinLoader::importFromFile(const std::string& fileName, Scene& scene,
                                    const Matrix4f& transformation,
                                    const size_t defaultMaterialId BRAYNS_UNUSED)
 {
-    const auto modelName = boost::filesystem::basename({fileName});
-    auto& model = scene.createModel(modelName, fileName);
+    auto model = scene.createModel();
 
     std::map<size_t, Spheres> spheres;
 
@@ -457,13 +456,15 @@ void ProteinLoader::importFromFile(const std::string& fileName, Scene& scene,
         {
             const auto materialId = spheresPerMaterial.first;
             auto material =
-                model.createMaterial(materialId, colorMap[materialId].symbol);
+                model->createMaterial(materialId, colorMap[materialId].symbol);
             material->setDiffuseColor({colorMap[materialId].R / 255.f,
                                        colorMap[materialId].G / 255.f,
                                        colorMap[materialId].B / 255.f});
             for (const auto& sphere : spheresPerMaterial.second)
-                model.addSphere(materialId, sphere);
+                model->addSphere(materialId, sphere);
         }
     }
+    const auto modelName = boost::filesystem::basename({fileName});
+    scene.addModel(std::move(model), modelName, fileName);
 }
 }

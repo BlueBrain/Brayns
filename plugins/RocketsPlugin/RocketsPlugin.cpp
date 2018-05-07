@@ -181,6 +181,8 @@ public:
             return;
 
         _wsBroadcastOperations[ENDPOINT_CAMERA]();
+        _wsBroadcastOperations[ENDPOINT_RENDERING_PARAMS](); // epsilon
+        _wsBroadcastOperations[ENDPOINT_SCENE]();            // bounds
         _wsBroadcastOperations[ENDPOINT_STATISTICS]();
     }
 

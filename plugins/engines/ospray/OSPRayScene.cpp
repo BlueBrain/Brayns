@@ -66,6 +66,12 @@ OSPRayScene::~OSPRayScene()
     for (auto& light : _ospLights)
         ospRelease(light);
     _ospLights.clear();
+
+    if (_rootModel)
+        ospRelease(_rootModel);
+
+    if (_rootSimulationModel)
+        ospRelease(_rootSimulationModel);
 }
 
 OSPModel OSPRayScene::_getActiveModel()
@@ -79,10 +85,13 @@ OSPModel OSPRayScene::_getActiveModel()
 
 void OSPRayScene::commit()
 {
-    if (_transferFunction.isModified())
-        commitTransferFunctionData();
+    const bool isModified_ = isModified();
 
-    if (!isModified())
+    commitVolumeData();
+    commitSimulationData();
+    commitTransferFunctionData();
+
+    if (!isModified_)
         return;
 
     if (_rootModel)
@@ -98,31 +107,23 @@ void OSPRayScene::commit()
         if (modelDescriptor.getEnabled())
         {
             auto& impl = static_cast<OSPRayModel&>(modelDescriptor.getModel());
-            impl.commit();
-
-            auto& transformations = modelDescriptor.getTransformations();
-            for (size_t i = 0; i < transformations.size(); ++i)
+            const auto& transformation = modelDescriptor.getTransformation();
+            if (modelDescriptor.getBoundingBox())
+                ospAddGeometry(_rootModel, impl.getBoundingBoxModelInstance(
+                                               transformation));
+            if (modelDescriptor.getVisible())
             {
-                const auto& transformation = transformations[i];
-                if (modelDescriptor.getBoundingBox())
-                    ospAddGeometry(_rootModel, impl.getBoundingBoxModelInstance(
-                                                   transformation));
-                if (modelDescriptor.getVisible())
-                {
-                    BRAYNS_INFO << "Committing " << modelDescriptor.getName()
-                                << std::endl;
-                    ospAddGeometry(_rootModel,
-                                   impl.getInstance(i, transformation));
-                }
+                BRAYNS_INFO << "Committing " << modelDescriptor.getName()
+                            << std::endl;
+                ospAddGeometry(_rootModel, impl.getInstance(0, transformation));
             }
 
             if (impl.getUseSimulationModel())
             {
-                const auto& transform = transformations[0];
                 if (!_rootSimulationModel)
                     _rootSimulationModel = ospNewModel();
                 ospAddGeometry(_rootSimulationModel,
-                               impl.getSimulationModelInstance(transform));
+                               impl.getSimulationModelInstance(transformation));
             }
             impl.logInformation();
         }
@@ -247,6 +248,7 @@ bool OSPRayScene::commitTransferFunctionData()
         ospCommit(impl);
     }
     _transferFunction.resetModified();
+    markModified();
     return true;
 }
 
@@ -308,6 +310,7 @@ bool OSPRayScene::commitVolumeData()
             ospSet1f(impl, "volumeEpsilon", epsilon);
         }
     }
+    markModified();
     return true;
 }
 
@@ -341,6 +344,7 @@ bool OSPRayScene::commitSimulationData()
         ospSet1i(impl, "simulationDataSize",
                  _simulationHandler->getFrameSize());
     }
+    markModified();
     return true;
 }
 
@@ -349,18 +353,8 @@ bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
     return boost::algorithm::ends_with(volumeFile, ".raw");
 }
 
-Model& OSPRayScene::createModel(const std::string& name,
-                                const std::string& path,
-                                const ModelMetadata& metadata)
+ModelPtr OSPRayScene::createModel() const
 {
-    _modelDescriptors.push_back(
-        {name, path, metadata, std::make_unique<OSPRayModel>()});
-    markModified();
-    return _modelDescriptors[_modelDescriptors.size() - 1].getModel();
-}
-
-void OSPRayScene::removeModel(const size_t index)
-{
-    _modelDescriptors.erase(_modelDescriptors.begin() + index);
+    return std::make_unique<OSPRayModel>();
 }
 }
