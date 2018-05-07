@@ -61,11 +61,7 @@ public:
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
     /** @copydoc Scene::createModel */
-    Model& createModel(const std::string& name, const std::string& path,
-                       const ModelMetadata& metadata) final;
-
-    /** @copydoc Scene::removeModel */
-    void removeModel(const size_t index) final;
+    ModelPtr createModel() const final;
 
     OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _rootSimulationModel; }

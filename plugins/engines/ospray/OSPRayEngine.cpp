@@ -197,22 +197,12 @@ void OSPRayEngine::commit()
 
 void OSPRayEngine::preRender()
 {
-    bool clearFrameBuffer = false;
-    if (_scene->isModified())
-    {
-        _scene->commit();
-        clearFrameBuffer = true;
-    }
-
     const auto& renderParams = _parametersManager.getRenderingParameters();
     if (renderParams.getAccumulation() != _frameBuffer->getAccumulation())
     {
         _frameBuffer->setAccumulation(renderParams.getAccumulation());
         _frameBuffer->resize(_frameBuffer->getSize());
     }
-
-    if (clearFrameBuffer)
-        _frameBuffer->clear();
 }
 
 Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)

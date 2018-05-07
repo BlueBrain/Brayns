@@ -36,7 +36,7 @@ public:
 
     void setMemoryFlags(const size_t memoryManagementFlags);
 
-    void commit();
+    void commit() final;
     OSPModel getModel() const { return _model; }
     size_t getNbInstances() const { return _instances.size(); }
     OSPGeometry getInstance(const size_t index,

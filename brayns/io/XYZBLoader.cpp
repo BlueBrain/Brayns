@@ -56,69 +56,61 @@ void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
     }
     stream.seekg(0);
 
+    auto model = scene.createModel();
+
     const auto name = boost::filesystem::basename({blob.name});
-    auto& model = scene.createModel(name, blob.name);
+    const auto materialId =
+        (defaultMaterialId == NO_MATERIAL ? 0 : defaultMaterialId);
+    model->createMaterial(materialId, name);
+    auto& spheres = model->getSpheres()[materialId];
 
-    try
+    const size_t startOffset = spheres.size();
+    spheres.reserve(spheres.size() + numlines);
+
+    size_t i = 0;
+    std::string line;
+    std::stringstream msg;
+    msg << "Loading " << shortenString(blob.name) << " ..." << std::endl;
+    while (std::getline(stream, line))
     {
-        const auto materialId =
-            (defaultMaterialId == NO_MATERIAL ? 0 : defaultMaterialId);
-        model.createMaterial(materialId, name);
-        auto& spheres = model.getSpheres()[materialId];
+        std::vector<float> lineData;
+        std::stringstream lineStream(line);
 
-        const size_t startOffset = spheres.size();
-        spheres.reserve(spheres.size() + numlines);
+        float value;
+        while (lineStream >> value)
+            lineData.push_back(value);
 
-        size_t i = 0;
-        std::string line;
-        std::stringstream msg;
-        msg << "Loading " << shortenString(blob.name) << " ..." << std::endl;
-        while (std::getline(stream, line))
+        switch (lineData.size())
         {
-            std::vector<float> lineData;
-            std::stringstream lineStream(line);
-
-            float value;
-            while (lineStream >> value)
-                lineData.push_back(value);
-
-            switch (lineData.size())
-            {
-            case 3:
-            {
-                const Vector4f position(lineData[0], lineData[1], lineData[2],
-                                        1.f);
-                model.addSphere(materialId,
-                                {transformation * position,
-                                 _geometryParameters.getRadiusMultiplier()});
-                break;
-            }
-            default:
-                throw std::runtime_error("Invalid content in line " +
-                                         std::to_string(i + 1) + ": " + line);
-            }
-            updateProgress(msg.str(), i++, numlines);
-        }
-
-        const float maxDim = model.getBounds().getSize().find_max();
-        if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
+        case 3:
         {
-            const float newRadius = maxDim / 100.f;
-            BRAYNS_WARN << "Given radius "
-                        << _geometryParameters.getRadiusMultiplier()
-                        << " is too big for this scene, using radius "
-                        << newRadius << " now" << std::endl;
-
-            for (i = 0; i < numlines; ++i)
-                spheres[i + startOffset].radius = newRadius;
+            const Vector4f position(lineData[0], lineData[1], lineData[2], 1.f);
+            model->addSphere(materialId,
+                             {transformation * position,
+                              _geometryParameters.getRadiusMultiplier()});
+            break;
         }
+        default:
+            throw std::runtime_error("Invalid content in line " +
+                                     std::to_string(i + 1) + ": " + line);
+        }
+        updateProgress(msg.str(), i++, numlines);
     }
-    catch (const std::runtime_error&)
+
+    const float maxDim = model->getBounds().getSize().find_max();
+    if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
     {
-        // Failed to load point cloud. Removing last created model
-        scene.removeModel(scene.getModelDescriptors().size() - 1);
-        throw;
+        const float newRadius = maxDim / 100.f;
+        BRAYNS_WARN << "Given radius "
+                    << _geometryParameters.getRadiusMultiplier()
+                    << " is too big for this scene, using radius " << newRadius
+                    << " now" << std::endl;
+
+        for (i = 0; i < numlines; ++i)
+            spheres[i + startOffset].radius = newRadius;
     }
+
+    scene.addModel(std::move(model), name, blob.name);
 }
 
 void XYZBLoader::importFromFile(const std::string& filename, Scene& scene,

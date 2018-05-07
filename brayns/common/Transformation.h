@@ -32,7 +32,7 @@ namespace brayns
 * @brief Defines the translation, rotation and scaling parameters to be applied
 * to a scene asset.
 */
-struct Transformation : public BaseObject
+class Transformation : public BaseObject
 {
 public:
     const Vector3f& getTranslation() const { return _translation; }

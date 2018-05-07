@@ -299,7 +299,7 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
     h->add_property("path", &g->_path, Flags::Optional);
     h->add_property("visible", &g->_visible, Flags::Optional);
     h->add_property("bounding_box", &g->_boundingBox, Flags::Optional);
-    h->add_property("transformations", &g->_transformations);
+    h->add_property("transformation", &g->_transformation);
     h->add_property("metadata", &g->_metadata);
     h->add_property("bounds", &g->_model->getBounds());
     h->set_flags(Flags::DisallowUnknownKey);

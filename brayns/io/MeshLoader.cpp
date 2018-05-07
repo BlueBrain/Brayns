@@ -124,10 +124,11 @@ void MeshLoader::importFromFile(const std::string& fileName, Scene& scene,
         throw std::runtime_error("Error finding meshes in scene");
 
     boost::filesystem::path filepath = fileName;
-    auto& model =
-        scene.createModel(boost::filesystem::basename(filepath), fileName);
-    _postLoad(aiScene, model, transformation, defaultMaterialId,
+    auto model = scene.createModel();
+    _postLoad(aiScene, *model, transformation, defaultMaterialId,
               filepath.parent_path().string());
+    scene.addModel(std::move(model), boost::filesystem::basename(filepath),
+                   fileName);
 }
 
 void MeshLoader::importFromBlob(Blob&& blob, Scene& scene,
@@ -148,9 +149,10 @@ void MeshLoader::importFromBlob(Blob&& blob, Scene& scene,
     if (!aiScene->HasMeshes())
         throw std::runtime_error("No meshes found");
 
-    auto& model =
-        scene.createModel(boost::filesystem::basename({blob.name}), blob.name);
-    _postLoad(aiScene, model, transformation, defaultMaterialId);
+    auto model = scene.createModel();
+    _postLoad(aiScene, *model, transformation, defaultMaterialId);
+    scene.addModel(std::move(model), boost::filesystem::basename({blob.name}),
+                   blob.name);
 }
 
 void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,

@@ -33,7 +33,6 @@ ModelDescriptor::ModelDescriptor(const std::string& name,
     : _name(name)
     , _path(path)
     , _metadata(metadata)
-    , _transformations{1}
     , _model(std::move(model))
 {
 }
@@ -189,41 +188,41 @@ void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
 
 void Model::logInformation()
 {
-    uint64_t sizeInBytes = 0;
+    _sizeInBytes = 0;
     uint64_t nbSpheres = 0;
     uint64_t nbCylinders = 0;
     uint64_t nbCones = 0;
     uint64_t nbMeshes = 0;
     for (const auto& spheres : _spheres)
     {
-        sizeInBytes += spheres.second.size() * sizeof(Sphere);
+        _sizeInBytes += spheres.second.size() * sizeof(Sphere);
         nbSpheres += spheres.second.size();
     }
     for (const auto& cylinders : _cylinders)
     {
-        sizeInBytes += cylinders.second.size() * sizeof(Cylinder);
+        _sizeInBytes += cylinders.second.size() * sizeof(Cylinder);
         nbCylinders += cylinders.second.size();
     }
     for (const auto& cones : _cones)
     {
-        sizeInBytes += cones.second.size() * sizeof(Cones);
+        _sizeInBytes += cones.second.size() * sizeof(Cones);
         nbCones += cones.second.size();
     }
     for (const auto& trianglesMesh : _trianglesMeshes)
     {
         const auto& mesh = trianglesMesh.second;
-        sizeInBytes += mesh.indices.size() * sizeof(Vector3f);
-        sizeInBytes += mesh.normals.size() * sizeof(Vector3f);
-        sizeInBytes += mesh.colors.size() * sizeof(Vector4f);
-        sizeInBytes += mesh.indices.size() * sizeof(Vector3ui);
-        sizeInBytes += mesh.textureCoordinates.size() * sizeof(Vector2f);
+        _sizeInBytes += mesh.indices.size() * sizeof(Vector3f);
+        _sizeInBytes += mesh.normals.size() * sizeof(Vector3f);
+        _sizeInBytes += mesh.colors.size() * sizeof(Vector4f);
+        _sizeInBytes += mesh.indices.size() * sizeof(Vector3ui);
+        _sizeInBytes += mesh.textureCoordinates.size() * sizeof(Vector2f);
         ++nbMeshes;
     }
 
     BRAYNS_INFO << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders
                 << ", Cones: " << nbCones << ", Meshes: " << nbMeshes
-                << ", Memory: " << sizeInBytes << " bytes ("
-                << sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
+                << ", Memory: " << _sizeInBytes << " bytes ("
+                << _sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
                 << std::endl;
 }
 

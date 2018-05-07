@@ -23,6 +23,7 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
+#include <brayns/common/Transformation.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/Sphere.h>
@@ -44,8 +45,9 @@ namespace brayns
  * - If set to true, the bounding box attribute displays a bounding box for the
  * current model
  */
-struct ModelDescriptor : public BaseObject
+class ModelDescriptor : public BaseObject
 {
+public:
     ModelDescriptor() = default;
     ModelDescriptor(ModelDescriptor&& rhs) = default;
     ModelDescriptor& operator=(ModelDescriptor&& rhs) = default;
@@ -56,10 +58,7 @@ struct ModelDescriptor : public BaseObject
     bool getEnabled() const { return _visible || _boundingBox; }
     bool getVisible() const { return _visible; }
     bool getBoundingBox() const { return _boundingBox; }
-    const Transformations& getTransformations() const
-    {
-        return _transformations;
-    }
+    const Transformation& getTransformation() const { return _transformation; }
     const ModelMetadata& getMetadata() const { return _metadata; }
     const std::string& getName() const { return _name; }
     const std::string& getPath() const { return _path; }
@@ -71,14 +70,14 @@ private:
     ModelMetadata _metadata;
     bool _visible{true};
     bool _boundingBox{false};
-    Transformations _transformations;
+    Transformation _transformation;
     ModelPtr _model;
 
     SERIALIZATION_FRIEND(ModelDescriptor)
 };
 
 /**
- * @brief The asbtract Model class holds the geometry attached to an asset of
+ * The abstract Model class holds the geometry attached to an asset of
  * the scene (mesh, circuit, volume, etc). The model handles resources attached
  * to the geometry such as implementation specific classes, and acceleration
  * structures). Models provide a simple API to manipulate primitives (spheres,
@@ -91,15 +90,15 @@ public:
 
     BRAYNS_API virtual ~Model() = default;
 
-    /**
-        Return true if the geometry Model does not contain any geometry. False
-       otherwize
-    */
-    BRAYNS_API bool empty() const;
+    virtual void commit() = 0;
 
     /**
-        Return true if the geometry Model is dirty, false otherwize
-    */
+     * @return true if the geometry Model does not contain any geometry, false
+     *         otherwise
+     */
+    BRAYNS_API bool empty() const;
+
+    /** @return true if the geometry Model is dirty, false otherwise */
     BRAYNS_API bool dirty() const;
 
     /**
@@ -188,7 +187,6 @@ public:
      * by the model
      * @return The map of materials handled by the model
      */
-    BRAYNS_API MaterialMap& getMaterials() { return _materials; }
     BRAYNS_API const MaterialMap& getMaterials() const { return _materials; }
     /**
      * @brief getMaterial Returns a pointer to a specific material
@@ -198,6 +196,8 @@ public:
      */
     BRAYNS_API MaterialPtr getMaterial(const size_t materialId) const;
 
+    /** @return the size in bytes of all geometries. */
+    size_t getSizeInBytes() const { return _sizeInBytes; }
 protected:
     MaterialMap _materials;
     SpheresMap _spheres;
@@ -210,6 +210,8 @@ protected:
     bool _trianglesMeshesDirty{true};
     Boxf _bounds;
     bool _useSimulationModel{false};
+
+    size_t _sizeInBytes{0};
 
     SERIALIZATION_FRIEND(Model)
 };

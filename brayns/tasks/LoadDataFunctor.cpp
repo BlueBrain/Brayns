@@ -35,13 +35,10 @@ namespace fs = boost::filesystem;
 
 namespace brayns
 {
-const size_t LOADING_PROGRESS_DATA = 100;
-const size_t LOADING_PROGRESS_STEP = 10;
-const float TOTAL_PROGRESS = 2 * LOADING_PROGRESS_STEP + LOADING_PROGRESS_DATA;
+const float TOTAL_PROGRESS = 100.f;
 
 LoadDataFunctor::LoadDataFunctor(EnginePtr engine)
     : _engine(engine)
-    , _lock{_engine->dataMutex(), std::defer_lock}
 {
 }
 
@@ -97,12 +94,6 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
 {
     try
     {
-        // fix race condition: we need exclusive access to the scene as we
-        // unload the current one. So no rendering & snapshot must occur.
-        while (!_lock.try_lock_for(std::chrono::seconds(1)))
-            _updateProgress("Waiting for scene access ...", 0.f);
-
-        _updateProgress("Loading data ...", 0.f);
         try
         {
             loadData();
@@ -111,10 +102,6 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
         {
             throw LOADING_BINARY_FAILED(e.what());
         }
-
-        Scene& scene = _engine->getScene();
-        if (!scene.empty())
-            _postLoad();
     }
     catch (...)
     {
@@ -135,30 +122,6 @@ void LoadDataFunctor::_loadData(const std::string& path)
     _engine->getScene().load(path, Matrix4f(), NO_MATERIAL, _getProgressFunc());
 }
 
-void LoadDataFunctor::_postLoad(const bool cancellable)
-{
-    Scene& scene = _engine->getScene();
-
-    if (cancellable)
-        _updateProgress("Building geometry ...", LOADING_PROGRESS_STEP);
-
-    const auto& geomParams =
-        _engine->getParametersManager().getGeometryParameters();
-    if (geomParams.getLoadCacheFile().empty() &&
-        !geomParams.getSaveCacheFile().empty())
-    {
-        scene.saveToCacheFile();
-    }
-
-    if (cancellable)
-        _updateProgress("Building acceleration structure ...",
-                        LOADING_PROGRESS_STEP);
-    scene.commit();
-
-    BRAYNS_INFO << "Now rendering ..." << std::endl;
-    _engine->setDefaultCamera();
-}
-
 void LoadDataFunctor::_updateProgress(const std::string& message,
                                       const size_t increment)
 {
@@ -171,8 +134,8 @@ std::function<void(std::string, float)> LoadDataFunctor::_getProgressFunc()
 {
     return [this](const std::string& msg, const float progress) {
         cancelCheck();
-        const size_t newProgress = progress * LOADING_PROGRESS_DATA;
-        if (newProgress % LOADING_PROGRESS_DATA > _nextTic)
+        const size_t newProgress = progress * TOTAL_PROGRESS;
+        if (newProgress % size_t(TOTAL_PROGRESS) > _nextTic)
         {
             _updateProgress(msg, newProgress - _nextTic);
             _nextTic = newProgress;

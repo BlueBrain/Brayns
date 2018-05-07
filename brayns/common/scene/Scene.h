@@ -28,6 +28,8 @@
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
+#include <shared_mutex>
+
 SERIALIZATION_ACCESS(Scene)
 
 namespace brayns
@@ -113,18 +115,20 @@ public:
     */
     BRAYNS_API void clearLights();
 
+    BRAYNS_API virtual ModelPtr createModel() const = 0;
+
     /**
         Adds a model to the scene
       */
-    BRAYNS_API virtual Model& createModel(
-        const std::string& name, const std::string& path = "",
-        const ModelMetadata& metadata = {}) = 0;
+    BRAYNS_API void addModel(ModelPtr model, const std::string& name,
+                             const std::string& path = "",
+                             const ModelMetadata& metadata = {});
 
     /**
-        Removes a geometry group from the scene
+        Removes a model from the scene
         @param index Index of the model
       */
-    BRAYNS_API virtual void removeModel(const size_t index) = 0;
+    BRAYNS_API void removeModel(const size_t index);
 
     /**
         Builds a default scene made of a Cornell box, a reflective cube, and
@@ -222,7 +226,7 @@ public:
     virtual void reset();
 
     /** @return the current size in bytes of the loaded geometry. */
-    size_t getSizeInBytes() const { return _sizeInBytes; }
+    size_t getSizeInBytes() const;
     ModelDescriptors& getModelDescriptors() { return _modelDescriptors; }
     /**
      * @brief initializeMaterials Initializes materials for all models in the
@@ -257,6 +261,8 @@ public:
 
     /** @return the registry for all supported loaders of this scene. */
     LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
+    /** Used to lock the scene to avoid changes applied by commit(). */
+    auto& dataMutex() { return _dataMutex; }
 protected:
     void _computeBounds();
 
@@ -276,10 +282,9 @@ protected:
     TransferFunction _transferFunction;
     CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler{nullptr};
 
-    size_t _sizeInBytes{0};
-
     LoaderRegistry _loaderRegistry;
     Boxf _bounds;
+    std::shared_timed_mutex _dataMutex;
 
 private:
     SERIALIZATION_FRIEND(Scene)
