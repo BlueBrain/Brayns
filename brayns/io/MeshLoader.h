@@ -44,16 +44,6 @@ public:
 
     static std::set<std::string> getSupportedDataTypes();
 
-    /** Imports meshes from a given file
-     *
-     * @param fileName name of the file containing the meshes
-     * @param scene Scene holding the mesh
-     * @param transformation Position, orientation and scale to apply to the
-     *        mesh
-     * @param defaultMaterial Default material for the whole mesh. If set to
-     *        NO_MATERIAL, materials from the mesh file are used. Otherwise,
-     *        all meshes are forced to that specific material.
-     */
     void importFromFile(const std::string& fileName, Scene& scene,
                         const size_t index = 0,
                         const Matrix4f& transformation = Matrix4f(),

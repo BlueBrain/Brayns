@@ -31,6 +31,8 @@
 #include <assert.h>
 #include <fstream>
 
+#include <boost/filesystem.hpp>
+
 namespace brayns
 {
 /** Structure containing the positions of the proteins in space
@@ -318,7 +320,7 @@ void ProteinLoader::importFromFile(const std::string& fileName, Scene& scene,
                                    const Matrix4f& transformation,
                                    const size_t defaultMaterialId BRAYNS_UNUSED)
 {
-    const std::string modelName = shortenString(fileName);
+    const auto modelName = boost::filesystem::basename({fileName});
     auto& model = scene.createModel(modelName, fileName);
 
     std::map<size_t, Spheres> spheres;

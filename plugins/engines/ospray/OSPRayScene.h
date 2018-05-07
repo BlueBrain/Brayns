@@ -60,7 +60,7 @@ public:
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
-    /** @copydoc Scene::addModel */
+    /** @copydoc Scene::createModel */
     Model& createModel(const std::string& name, const std::string& path,
                        const ModelMetadata& metadata) final;
 

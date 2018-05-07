@@ -44,7 +44,7 @@ public:
      * @param scene the scene where to add the loaded model to
      * @param index Index of the element, mainly used for material assignment
      * @param transformation the transformation to apply for the added model
-     * @param defaultMaterialId the default material ot use
+     * @param defaultMaterialId the default material to use
      */
     virtual void importFromBlob(
         Blob&& blob, Scene& scene, const size_t index = 0,
@@ -58,7 +58,7 @@ public:
      * @param scene the scene where to add the loaded model to
      * @param index Index of the element, mainly used for material assignment
      * @param transformation the transformation to apply for the added model
-     * @param materialId the default material ot use
+     * @param defaultMaterialId the default material to use
      */
     virtual void importFromFile(
         const std::string& filename, Scene& scene, const size_t index = 0,
