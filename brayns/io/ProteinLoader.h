@@ -36,6 +36,8 @@ class ProteinLoader : public Loader
 public:
     ProteinLoader(const GeometryParameters& geometryParameters);
 
+    static std::set<std::string> getSupportedDataTypes();
+
     void importFromFile(const std::string& fileName, Scene& scene,
                         const size_t index = 0,
                         const Matrix4f& transformation = Matrix4f(),

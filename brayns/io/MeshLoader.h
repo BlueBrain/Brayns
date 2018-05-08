@@ -67,7 +67,7 @@ private:
     void _createMaterials(Model& model, const aiScene* aiScene,
                           const std::string& folder);
 
-    void _postLoad(const aiScene* aiScene, Model& model,
+    void _postLoad(const aiScene* aiScene, Model& model, const size_t index,
                    const Matrix4f& transformation, const size_t defaultMaterial,
                    const std::string& folder = "");
     size_t _getQuality() const;

@@ -96,9 +96,6 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(renderParams.getSamplesPerRay(), 128);
 
     const auto& geomParams = pm.getGeometryParameters();
-    BOOST_CHECK_EQUAL(geomParams.getMorphologyFolder(), "");
-    BOOST_CHECK_EQUAL(geomParams.getPDBFile(), "");
-    BOOST_CHECK_EQUAL(geomParams.getMeshFolder(), "");
     BOOST_CHECK_EQUAL(geomParams.getCircuitConfiguration(), "");
     BOOST_CHECK_EQUAL(geomParams.getLoadCacheFile(), "");
     BOOST_CHECK_EQUAL(geomParams.getSaveCacheFile(), "");
