@@ -64,9 +64,10 @@ UploadPathTask::UploadPathTask(const std::vector<std::string>& paths,
 
     // wait for loading of all paths to be finished
     _task = async::when_all(_loadTasks)
-                .then([](std::vector<async::task<void>> results) {
+                .then([engine](std::vector<async::task<void>> results) {
                     for (auto& result : results)
                         result.get(); // exception is propagated to caller
+                    engine->triggerRender();
                     return true;
                 });
 }

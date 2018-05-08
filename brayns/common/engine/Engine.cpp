@@ -138,6 +138,5 @@ void Engine::setDefaultCamera()
     const auto frameSize = Vector2f(_frameBuffer->getSize());
     _camera->setInitialState(_scene->getBounds());
     _camera->setAspectRatio(frameSize.x() / frameSize.y());
-    triggerRender();
 }
 }
