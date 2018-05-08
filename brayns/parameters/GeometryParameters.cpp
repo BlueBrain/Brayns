@@ -28,14 +28,8 @@
 
 namespace
 {
-const std::string PARAM_MORPHOLOGY_FOLDER = "morphology-folder";
 const std::string PARAM_NEST_CIRCUIT = "nest-circuit";
 const std::string PARAM_NEST_REPORT = "nest-report";
-const std::string PARAM_PDB_FILE = "pdb-file";
-const std::string PARAM_PDB_FOLDER = "pdb-folder";
-const std::string PARAM_XYZB_FILE = "xyzb-file";
-const std::string PARAM_MESH_FOLDER = "mesh-folder";
-const std::string PARAM_MESH_FILE = "mesh-file";
 const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
 const std::string PARAM_CIRCUIT_DENSITY = "circuit-density";
 const std::string PARAM_CIRCUIT_USES_SIMULATION_MODEL =
@@ -67,7 +61,6 @@ const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_NEST_CACHE_FILENAME = "nest-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
-const std::string PARAM_SPLASH_SCENE_FOLDER = "splash-scene-folder";
 const std::string PARAM_MOLECULAR_SYSTEM_CONFIG = "molecular-system-config";
 const std::string PARAM_METABALLS_GRIDSIZE = "metaballs-grid-size";
 const std::string PARAM_METABALLS_THRESHOLD = "metaballs-threshold";
@@ -117,25 +110,13 @@ GeometryParameters::GeometryParameters()
     , _metaballsSamplesFromSoma(3)
     , _memoryMode(MemoryMode::shared)
 {
-    _parameters.add_options()(PARAM_MORPHOLOGY_FOLDER.c_str(),
+    _parameters.add_options()(PARAM_NEST_CIRCUIT.c_str(),
                               po::value<std::string>(),
-                              "Folder containing SWC and H5 files [string]")(
-        PARAM_NEST_CIRCUIT.c_str(), po::value<std::string>(),
-        "H5 file containing the NEST circuit [string]")(
+                              "H5 file containing the NEST circuit [string]")(
         PARAM_NEST_REPORT.c_str(), po::value<std::string>(),
         "NEST simulation report file [string]")(
-        PARAM_MESH_FOLDER.c_str(), po::value<std::string>(),
-        "Folder containing mesh files [string]")(PARAM_MESH_FILE.c_str(),
-                                                 po::value<std::string>(),
-                                                 "Mesh file [string]")(
-        PARAM_PDB_FILE.c_str(), po::value<std::string>(),
-        "PDB filename [string]")(PARAM_PDB_FOLDER.c_str(),
-                                 po::value<std::string>(),
-                                 "Folder containing PDB files [string]")(
-        PARAM_XYZB_FILE.c_str(), po::value<std::string>(),
-        "XYZB filename [string]")(PARAM_CIRCUIT_CONFIG.c_str(),
-                                  po::value<std::string>(),
-                                  "Circuit configuration filename [string]")(
+        PARAM_CIRCUIT_CONFIG.c_str(), po::value<std::string>(),
+        "Circuit configuration filename [string]")(
         PARAM_LOAD_CACHE_FILE.c_str(), po::value<std::string>(),
         "Load binary container of a scene [string]")(
         PARAM_SAVE_CACHE_FILE.c_str(), po::value<std::string>(),
@@ -182,8 +163,6 @@ GeometryParameters::GeometryParameters()
         "Number of values defining the simulation histogram [int]")(
         PARAM_NEST_CACHE_FILENAME.c_str(), po::value<std::string>(),
         "Cache file containing nest data [string]")(
-        PARAM_SPLASH_SCENE_FOLDER.c_str(), po::value<std::string>(),
-        "Folder containing splash scene folder [string]")(
         PARAM_MOLECULAR_SYSTEM_CONFIG.c_str(), po::value<std::string>(),
         "Molecular system configuration [string]")(
         PARAM_METABALLS_GRIDSIZE.c_str(), po::value<size_t>(),
@@ -223,22 +202,10 @@ GeometryParameters::GeometryParameters()
 
 void GeometryParameters::parse(const po::variables_map& vm)
 {
-    if (vm.count(PARAM_MORPHOLOGY_FOLDER))
-        _morphologyFolder = vm[PARAM_MORPHOLOGY_FOLDER].as<std::string>();
     if (vm.count(PARAM_NEST_CIRCUIT))
         _NESTCircuit = vm[PARAM_NEST_CIRCUIT].as<std::string>();
     if (vm.count(PARAM_NEST_REPORT))
         _NESTReport = vm[PARAM_NEST_REPORT].as<std::string>();
-    if (vm.count(PARAM_PDB_FILE))
-        _pdbFile = vm[PARAM_PDB_FILE].as<std::string>();
-    if (vm.count(PARAM_PDB_FOLDER))
-        _pdbFolder = vm[PARAM_PDB_FOLDER].as<std::string>();
-    if (vm.count(PARAM_XYZB_FILE))
-        _xyzbFile = vm[PARAM_XYZB_FILE].as<std::string>();
-    if (vm.count(PARAM_MESH_FOLDER))
-        _meshFolder = vm[PARAM_MESH_FOLDER].as<std::string>();
-    if (vm.count(PARAM_MESH_FILE))
-        _meshFile = vm[PARAM_MESH_FILE].as<std::string>();
     if (vm.count(PARAM_CIRCUIT_CONFIG))
         _circuitConfiguration.circuitConfigFile =
             vm[PARAM_CIRCUIT_CONFIG].as<std::string>();
@@ -338,8 +305,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
             vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE].as<size_t>();
     if (vm.count(PARAM_NEST_CACHE_FILENAME))
         _NESTCacheFile = vm[PARAM_NEST_CACHE_FILENAME].as<std::string>();
-    if (vm.count(PARAM_SPLASH_SCENE_FOLDER))
-        _splashSceneFolder = vm[PARAM_SPLASH_SCENE_FOLDER].as<std::string>();
     if (vm.count(PARAM_MOLECULAR_SYSTEM_CONFIG))
         _molecularSystemConfig =
             vm[PARAM_MOLECULAR_SYSTEM_CONFIG].as<std::string>();
@@ -423,17 +388,10 @@ void GeometryParameters::parse(const po::variables_map& vm)
 void GeometryParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Morphology folder          : " << _morphologyFolder
-                << std::endl;
     BRAYNS_INFO << "NEST circuit file          : " << _NESTCircuit << std::endl;
     BRAYNS_INFO << "NEST simulation report file: " << _NESTReport << std::endl;
     BRAYNS_INFO << "NEST cache file            : " << _NESTCacheFile
                 << std::endl;
-    BRAYNS_INFO << "PDB file                   : " << _pdbFile << std::endl;
-    BRAYNS_INFO << "PDB folder                 : " << _pdbFolder << std::endl;
-    BRAYNS_INFO << "XYZB file                  : " << _xyzbFile << std::endl;
-    BRAYNS_INFO << "Mesh folder                : " << _meshFolder << std::endl;
-    BRAYNS_INFO << "Mesh file                  : " << _meshFile << std::endl;
     BRAYNS_INFO << "Cache file to load         : " << _loadCacheFile
                 << std::endl;
     BRAYNS_INFO << "Cache file to save         : " << _saveCacheFile
@@ -483,8 +441,6 @@ void GeometryParameters::print()
                 << _morphologyLayout.verticalSpacing << std::endl;
     BRAYNS_INFO << " - Horizontal spacing      : "
                 << _morphologyLayout.horizontalSpacing << std::endl;
-    BRAYNS_INFO << "Splash scene folder        : " << _splashSceneFolder
-                << std::endl;
     BRAYNS_INFO << "Molecular system config    : " << _molecularSystemConfig
                 << std::endl;
     BRAYNS_INFO << "Metaballs                  : " << std::endl;

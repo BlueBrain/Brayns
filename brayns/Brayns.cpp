@@ -298,6 +298,11 @@ struct Brayns::Impl : public PluginAPI
                                 _parametersManager.getGeometryParameters()] {
                             return std::make_unique<MeshLoader>(params);
                         });
+        REGISTER_LOADER(ProteinLoader,
+                        [& params =
+                                _parametersManager.getGeometryParameters()] {
+                            return std::make_unique<ProteinLoader>(params);
+                        });
         REGISTER_LOADER(XYZBLoader,
                         [& params =
                                 _parametersManager.getGeometryParameters()] {
@@ -508,28 +513,6 @@ private:
             loadingProgress += tic;
         }
 
-        if (!geometryParameters.getPDBFile().empty())
-        {
-            _loadPDBFile(geometryParameters.getPDBFile());
-            loadingProgress += tic;
-        }
-
-        if (!geometryParameters.getPDBFolder().empty())
-            _loadPDBFolder(updateProgress);
-
-        if (!geometryParameters.getSplashSceneFolder().empty())
-            _loadMeshFolder(geometryParameters.getSplashSceneFolder(),
-                            updateProgress);
-
-        if (!geometryParameters.getMeshFolder().empty())
-            _loadMeshFolder(geometryParameters.getMeshFolder(), updateProgress);
-
-        if (!geometryParameters.getMeshFile().empty())
-        {
-            _loadMeshFile(geometryParameters.getMeshFile());
-            loadingProgress += tic;
-        }
-
 #if (BRAYNS_USE_BRION)
         if (!geometryParameters.getNESTCircuit().empty())
         {
@@ -537,19 +520,10 @@ private:
             loadingProgress += tic;
         }
 
-        if (!geometryParameters.getMorphologyFolder().empty())
-            _loadMorphologyFolder(updateProgress);
-
         if (!geometryParameters.getCircuitConfiguration().empty() &&
             geometryParameters.getConnectivityFile().empty())
             _loadCircuitConfiguration(updateProgress);
 #endif
-
-        if (!geometryParameters.getXYZBFile().empty())
-        {
-            _loadXYZBFile(updateProgress);
-            loadingProgress += tic;
-        }
 
         if (!geometryParameters.getMolecularSystemConfig().empty())
             _loadMolecularSystem(updateProgress);
@@ -570,121 +544,6 @@ private:
                          Vector3f(volumeDimensions) * volumeElementSpacing);
         }
         scene.saveToCacheFile();
-    }
-
-    /**
-        Loads data from a PDB file (command line parameter --pdb-file)
-    */
-    void _loadPDBFolder(const Loader::UpdateCallback& progressUpdate)
-    {
-        // Load PDB File
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        const std::string& folder = geometryParameters.getPDBFolder();
-        const strings filters = {".pdb", ".pdb1"};
-        const strings files = parseFolder(folder, filters);
-
-        size_t current = 0;
-        for (const auto& file : files)
-        {
-            _loadPDBFile(file);
-            ++current;
-            progressUpdate("Loading PDB folder " + folder,
-                           float(current) / files.size());
-        }
-    }
-
-    /**
-        Loads data from a PDB file (command line parameter --pdb-file)
-    */
-    void _loadPDBFile(const std::string& fileName)
-    {
-        // Load PDB File
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-        std::string pdbFileName = fileName;
-        if (pdbFileName == "")
-        {
-            pdbFileName = geometryParameters.getPDBFile();
-            BRAYNS_INFO << "Loading PDB file " << pdbFileName << std::endl;
-        }
-        ProteinLoader proteinLoader(geometryParameters);
-        proteinLoader.importFromFile(pdbFileName, scene);
-    }
-
-    /**
-        Loads data from a XYZR file (command line parameter --xyzr-file)
-    */
-    void _loadXYZBFile(const Loader::UpdateCallback& progressUpdate)
-    {
-        // Load XYZB File
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-        BRAYNS_INFO << "Loading XYZB file " << geometryParameters.getXYZBFile()
-                    << std::endl;
-        XYZBLoader xyzbLoader(geometryParameters);
-        xyzbLoader.setProgressCallback(progressUpdate);
-        try
-        {
-            const auto fileName = geometryParameters.getXYZBFile();
-            xyzbLoader.importFromFile(fileName, scene);
-        }
-        catch (const std::runtime_error& e)
-        {
-            BRAYNS_ERROR << "Failed to import "
-                         << geometryParameters.getXYZBFile() << ": " << e.what()
-                         << std::endl;
-        }
-    }
-
-    /**
-        Loads data from mesh files located in the folder specified in
-       the geometry parameters (command line parameter --mesh-folder)
-    */
-    void _loadMeshFolder(const std::string& folder,
-                         const Loader::UpdateCallback& progressUpdate)
-    {
-        const auto& geometryParameters =
-            _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-
-        strings filters = {".obj", ".dae", ".fbx", ".ply", ".lwo",
-                           ".stl", ".3ds", ".ase", ".ifc", ".off"};
-        strings files = parseFolder(folder, filters);
-        size_t index = 0;
-        std::stringstream msg;
-        msg << "Loading " << files.size() << " meshes from " << folder;
-        for (const auto& file : files)
-        {
-            size_t materialId =
-                geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-                    ? index
-                    : NO_MATERIAL;
-
-            try
-            {
-                MeshLoader meshLoader(geometryParameters);
-                meshLoader.importFromFile(file, scene, index, Matrix4f(),
-                                          materialId);
-            }
-            catch (...)
-            {
-                BRAYNS_ERROR << "Failed to import " << file << std::endl;
-            }
-            ++index;
-            progressUpdate(msg.str(), float(index) / files.size());
-        }
-    }
-
-    /**
-        Loads data from mesh file (command line parameter --mesh-file)
-    */
-    void _loadMeshFile(const std::string& filename)
-    {
-        const auto& geometryParameters =
-            _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-        MeshLoader meshLoader(geometryParameters);
-        meshLoader.importFromFile(filename, scene);
     }
 
 #if (BRAYNS_USE_BRION)
@@ -737,31 +596,6 @@ private:
                 scene.setSimulationHandler(simulationHandler);
             }
         }
-    }
-
-    /**
-        Loads data from SWC and H5 files located in the folder specified
-       in the geometry parameters (command line parameter --morphology-folder)
-    */
-    void _loadMorphologyFolder(const Loader::UpdateCallback& progressUpdate)
-    {
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-        const auto& folder = geometryParameters.getMorphologyFolder();
-        auto model = scene.createModel();
-        MorphologyLoader morphologyLoader(geometryParameters);
-        const strings filters = {".swc", ".h5"};
-        const strings files = parseFolder(folder, filters);
-        size_t morphologyIndex = 0;
-        for (const auto& fileName : files)
-        {
-            morphologyLoader.importMorphology(servus::URI(fileName), *model,
-                                              morphologyIndex);
-            ++morphologyIndex;
-            progressUpdate("Loading morphologies from " + folder,
-                           float(morphologyIndex) / files.size());
-        }
-        scene.addModel(std::move(model), "morphologies", folder);
     }
 
     /**

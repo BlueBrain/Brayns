@@ -387,16 +387,9 @@ inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
 
 inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
 {
-    h->add_property("morphology_folder", &g->_morphologyFolder,
-                    Flags::Optional);
     h->add_property("nest_circuit", &g->_NESTCircuit, Flags::Optional);
     h->add_property("nest_report", &g->_NESTReport, Flags::Optional);
     h->add_property("nest_cache_file", &g->_NESTCacheFile, Flags::Optional);
-    h->add_property("pdb_file", &g->_pdbFile, Flags::Optional);
-    h->add_property("pdb_folder", &g->_pdbFolder, Flags::Optional);
-    h->add_property("xyzb_file", &g->_xyzbFile, Flags::Optional);
-    h->add_property("mesh_folder", &g->_meshFolder, Flags::Optional);
-    h->add_property("mesh_file", &g->_meshFile, Flags::Optional);
     h->add_property("load_cache_file", &g->_loadCacheFile, Flags::Optional);
     h->add_property("save_cache_file", &g->_saveCacheFile, Flags::Optional);
     h->add_property("radius_multiplier", &g->_radiusMultiplier,

@@ -315,155 +315,156 @@ ProteinLoader::ProteinLoader(const GeometryParameters& geometryParameters)
 {
 }
 
+std::set<std::string> ProteinLoader::getSupportedDataTypes()
+{
+    return {"pdb"};
+}
+
 void ProteinLoader::importFromFile(const std::string& fileName, Scene& scene,
                                    const size_t index,
                                    const Matrix4f& transformation,
                                    const size_t defaultMaterialId BRAYNS_UNUSED)
 {
-    auto model = scene.createModel();
-
-    std::map<size_t, Spheres> spheres;
-
-    size_t lineIndex{0};
     std::ifstream file(fileName.c_str());
     if (!file.is_open())
         throw std::runtime_error("Could not open " + fileName);
-    else
+
+    size_t lineIndex{0};
+    std::map<size_t, Spheres> spheres;
+
+    while (file.good())
     {
-        while (file.good())
+        std::string line;
+        std::string value;
+        std::getline(file, line);
+        if (line.find("ATOM") == 0 || line.find("HETATM") == 0)
         {
-            std::string line;
-            std::string value;
-            std::getline(file, line);
-            if (line.find("ATOM") == 0 || line.find("HETATM") == 0)
+            // Atom
+            Atom atom;
+            atom.chainId = 0;
+            atom.residue = 0;
+            atom.processed = false;
+            atom.index = lineIndex;
+            lineIndex++;
+            std::string atomName;
+            std::string atomCode;
+            size_t i = 0;
+            while (i < line.length())
             {
-                // Atom
-                Atom atom;
-                atom.chainId = 0;
-                atom.residue = 0;
-                atom.processed = false;
-                atom.index = lineIndex;
-                lineIndex++;
-                std::string atomName;
-                std::string atomCode;
-                size_t i = 0;
-                while (i < line.length())
+                switch (i)
                 {
-                    switch (i)
+                case 6: // ID
+                case 12:
+                case 76: // Atom name
+                case 22: // ChainID
+                case 30: // x
+                case 38: // y
+                case 46: // z
+                    value = "";
+                    break;
+                case 21:
+                    atom.chainId = (int)line.at(i) - 64;
+                    break;
+                case 11:
+                    atom.id = static_cast<int>(atoi(value.c_str()));
+                    break;
+                case 17:
+                    atomCode = value;
+                    break;
+                case 79:
+                    atomName = value;
+                    break;
+                case 26:
+                    atom.residue = static_cast<int>(atoi(value.c_str()));
+                    break;
+                case 37:
+                    atom.position[0] = static_cast<float>(atof(value.c_str()));
+                    break;
+                case 45:
+                    atom.position[1] = static_cast<float>(atof(value.c_str()));
+                    break;
+                case 53:
+                    atom.position[2] = static_cast<float>(atof(value.c_str()));
+                    break;
+                default:
+                    if (line.at(i) != ' ')
+                        value += line.at(i);
+                    break;
+                }
+                i++;
+            }
+
+            // Material
+            atom.materialId = 0;
+            i = 0;
+            bool found = false;
+            const auto colorScheme = _geometryParameters.getColorScheme();
+            while (!found && i < colorMapSize)
+            {
+                if (atomName == colorMap[i].symbol)
+                {
+                    found = true;
+                    switch (colorScheme)
                     {
-                    case 6: // ID
-                    case 12:
-                    case 76: // Atom name
-                    case 22: // ChainID
-                    case 30: // x
-                    case 38: // y
-                    case 46: // z
-                        value = "";
+                    case ColorScheme::protein_chains:
+                        atom.materialId = abs(atom.chainId);
                         break;
-                    case 21:
-                        atom.chainId = (int)line.at(i) - 64;
-                        break;
-                    case 11:
-                        atom.id = static_cast<int>(atoi(value.c_str()));
-                        break;
-                    case 17:
-                        atomCode = value;
-                        break;
-                    case 79:
-                        atomName = value;
-                        break;
-                    case 26:
-                        atom.residue = static_cast<int>(atoi(value.c_str()));
-                        break;
-                    case 37:
-                        atom.position[0] =
-                            static_cast<float>(atof(value.c_str()));
-                        break;
-                    case 45:
-                        atom.position[1] =
-                            static_cast<float>(atof(value.c_str()));
-                        break;
-                    case 53:
-                        atom.position[2] =
-                            static_cast<float>(atof(value.c_str()));
+                    case ColorScheme::protein_residues:
+                        atom.materialId = atom.residue;
                         break;
                     default:
-                        if (line.at(i) != ' ')
-                            value += line.at(i);
+                        atom.materialId = static_cast<int>(i);
                         break;
                     }
-                    i++;
                 }
-
-                // Material
-                atom.materialId = 0;
-                i = 0;
-                bool found = false;
-                const auto colorScheme = _geometryParameters.getColorScheme();
-                while (!found && i < colorMapSize)
-                {
-                    if (atomName == colorMap[i].symbol)
-                    {
-                        found = true;
-                        switch (colorScheme)
-                        {
-                        case ColorScheme::protein_chains:
-                            atom.materialId = abs(atom.chainId);
-                            break;
-                        case ColorScheme::protein_residues:
-                            atom.materialId = atom.residue;
-                            break;
-                        default:
-                            atom.materialId = static_cast<int>(i);
-                            break;
-                        }
-                    }
-                    ++i;
-                }
-
-                // Radius
-                atom.radius = DEFAULT_RADIUS;
-                i = 0;
-                found = false;
-                while (!found && i < colorMapSize)
-                {
-                    if (atomName == atomic_radii[i].Symbol)
-                    {
-                        atom.radius = atomic_radii[i].radius;
-                        found = true;
-                    }
-                    ++i;
-                }
-
-                // Convert position from nanometers
-                const auto center =
-                    transformation.getTranslation() + 0.01f * atom.position;
-
-                // Convert radius from angstrom
-                const auto radius = 0.0001f * atom.radius *
-                                    _geometryParameters.getRadiusMultiplier();
-
-                const auto materialId =
-                    colorScheme == ColorScheme::protein_by_id ? index
-                                                              : atom.materialId;
-                spheres[materialId].push_back({center, radius});
+                ++i;
             }
-        }
-        file.close();
 
-        // Add materials and spheres
-        for (const auto& spheresPerMaterial : spheres)
-        {
-            const auto materialId = spheresPerMaterial.first;
-            auto material =
-                model->createMaterial(materialId, colorMap[materialId].symbol);
-            material->setDiffuseColor({colorMap[materialId].R / 255.f,
-                                       colorMap[materialId].G / 255.f,
-                                       colorMap[materialId].B / 255.f});
-            for (const auto& sphere : spheresPerMaterial.second)
-                model->addSphere(materialId, sphere);
+            // Radius
+            atom.radius = DEFAULT_RADIUS;
+            i = 0;
+            found = false;
+            while (!found && i < colorMapSize)
+            {
+                if (atomName == atomic_radii[i].Symbol)
+                {
+                    atom.radius = atomic_radii[i].radius;
+                    found = true;
+                }
+                ++i;
+            }
+
+            // Convert position from nanometers
+            const auto center =
+                transformation.getTranslation() + 0.01f * atom.position;
+
+            // Convert radius from angstrom
+            const auto radius = 0.0001f * atom.radius *
+                                _geometryParameters.getRadiusMultiplier();
+
+            const auto materialId = colorScheme == ColorScheme::protein_by_id
+                                        ? index
+                                        : atom.materialId;
+            spheres[materialId].push_back({center, radius});
         }
     }
+    file.close();
+
+    auto model = scene.createModel();
+
+    // Add materials and spheres
+    for (const auto& spheresPerMaterial : spheres)
+    {
+        const auto materialId = spheresPerMaterial.first;
+        auto material =
+            model->createMaterial(materialId, colorMap[materialId].symbol);
+        material->setDiffuseColor({colorMap[materialId].R / 255.f,
+                                   colorMap[materialId].G / 255.f,
+                                   colorMap[materialId].B / 255.f});
+        for (const auto& sphere : spheresPerMaterial.second)
+            model->addSphere(materialId, sphere);
+    }
+
     const auto modelName = boost::filesystem::basename({fileName});
     scene.addModel(std::move(model), modelName, fileName);
 }

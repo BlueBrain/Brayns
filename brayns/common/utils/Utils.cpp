@@ -23,6 +23,7 @@
 #include <brayns/common/log.h>
 
 #include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
 #ifdef BRAYNS_USE_LIBARCHIVE
 #include <archive.h>
@@ -34,13 +35,13 @@ namespace brayns
 strings parseFolder(const std::string& folder, const strings& filters)
 {
     strings files;
-    boost::filesystem::directory_iterator endIter;
-    if (boost::filesystem::is_directory(folder))
+    fs::directory_iterator endIter;
+    if (fs::is_directory(folder))
     {
-        for (boost::filesystem::directory_iterator dirIter(folder);
-             dirIter != endIter; ++dirIter)
+        for (fs::directory_iterator dirIter(folder); dirIter != endIter;
+             ++dirIter)
         {
-            if (boost::filesystem::is_regular_file(dirIter->status()))
+            if (fs::is_regular_file(dirIter->status()))
             {
                 const auto filename = dirIter->path().c_str();
                 if (filters.empty())
@@ -80,46 +81,54 @@ bool isSupportedArchiveType(const std::string& extension BRAYNS_UNUSED)
 #ifdef BRAYNS_USE_LIBARCHIVE
     // No way to get all supported types from libarchive...
     // Extend this list if you feel your favorite archive type should be here
-    const std::set<std::string> extensions{"zip", "tar.gz", "tgz", "tar.bz2",
-                                           "rar"};
+    const std::set<std::string> extensions{"zip", "gz", "tgz", "bz2", "rar"};
     return extensions.find(extension) != extensions.end();
 #else
     return false;
 #endif
 }
 
-bool isArchive(const std::string& filename BRAYNS_UNUSED)
-{
 #ifdef BRAYNS_USE_LIBARCHIVE
-    auto a = archive_read_new();
-    archive_read_support_format_all(a);
-    archive_read_support_filter_all(a);
-    const bool result =
-        archive_read_open_filename(a, filename.c_str(), 10240) == ARCHIVE_OK;
-    archive_read_free(a);
-    return result;
-#else
-    return false;
-#endif
+archive* _openArchive(const std::string& filename)
+{
+    auto archive = archive_read_new();
+    archive_read_support_format_all(archive);
+    archive_read_support_filter_all(archive);
+
+    // non-tar archives like gz, bzip2, ... need to be added as raw
+    auto extension = fs::extension(filename);
+    if (!extension.empty())
+    {
+        if (isSupportedArchiveType(extension.erase(0, 1)))
+            archive_read_support_format_raw(archive);
+    }
+    if (archive_read_open_filename(archive, filename.c_str(), 10240) ==
+        ARCHIVE_OK)
+        return archive;
+    return nullptr;
 }
 
-bool isArchive(const Blob& blob BRAYNS_UNUSED)
+archive* _openArchive(const Blob& blob)
 {
-#ifdef BRAYNS_USE_LIBARCHIVE
-    auto a = archive_read_new();
-    archive_read_support_format_all(a);
-    archive_read_support_filter_all(a);
-    const bool result =
-        archive_read_open_memory(a, (void*)blob.data.data(),
-                                 blob.data.size()) == ARCHIVE_OK;
-    archive_read_free(a);
-    return result;
-#else
-    return false;
-#endif
+    auto archive = archive_read_new();
+    archive_read_support_format_all(archive);
+    archive_read_support_filter_all(archive);
+
+    // non-tar archives like gz, bzip2, ... need to be added as raw
+    auto extension = fs::extension(blob.name);
+    if (!extension.empty())
+    {
+        if (isSupportedArchiveType(extension.erase(0, 1)))
+            archive_read_support_format_raw(archive);
+    }
+    if (archive_read_open_memory(archive, (void*)blob.data.data(),
+                                 blob.data.size()) == ARCHIVE_OK)
+    {
+        return archive;
+    }
+    return nullptr;
 }
 
-#ifdef BRAYNS_USE_LIBARCHIVE
 int copy_data(struct archive* ar, struct archive* aw)
 {
     for (;;)
@@ -142,7 +151,8 @@ int copy_data(struct archive* ar, struct archive* aw)
     }
 }
 
-void _extractArchive(archive* archive, const std::string& destination)
+void _extractArchive(archive* archive, const std::string& filename,
+                     const std::string& destination)
 {
     auto writer = archive_write_disk_new();
     archive_write_disk_set_options(writer, 0);
@@ -163,6 +173,10 @@ void _extractArchive(archive* archive, const std::string& destination)
                 archive_error_string(archive));
         }
         const char* currentFile = archive_entry_pathname(entry);
+
+        // magic 'data' file for gzip archives is useless to us, so rename it
+        if (std::string(currentFile) == "data")
+            currentFile = filename.c_str();
         const std::string fullOutputPath = destination + "/" + currentFile;
         archive_entry_set_pathname(entry, fullOutputPath.c_str());
         r = archive_write_header(writer, entry);
@@ -192,19 +206,40 @@ void _extractArchive(archive* archive, const std::string& destination)
 }
 #endif
 
+bool isArchive(const std::string& filename BRAYNS_UNUSED)
+{
+#ifdef BRAYNS_USE_LIBARCHIVE
+    auto archive = _openArchive(filename);
+    if (!archive)
+        return false;
+    archive_read_free(archive);
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool isArchive(const Blob& blob BRAYNS_UNUSED)
+{
+#ifdef BRAYNS_USE_LIBARCHIVE
+    auto archive = _openArchive(blob);
+    if (!archive)
+        return false;
+    archive_read_free(archive);
+    return true;
+#else
+    return false;
+#endif
+}
+
 void extractFile(const std::string& filename BRAYNS_UNUSED,
                  const std::string& destination BRAYNS_UNUSED)
 {
 #ifdef BRAYNS_USE_LIBARCHIVE
-    auto archive = archive_read_new();
-    archive_read_support_format_all(archive);
-    archive_read_support_filter_all(archive);
-    if (archive_read_open_filename(archive, filename.c_str(), 10240) <
-        ARCHIVE_OK)
-    {
-        throw std::runtime_error("Blob is not a supported archive type");
-    }
-    _extractArchive(archive, destination);
+    auto archive = _openArchive(filename);
+    if (!archive)
+        throw std::runtime_error(filename + " is not a supported archive type");
+    _extractArchive(archive, fs::basename(filename), destination);
 #else
     throw std::runtime_error("No support for archives; missing libarchive");
 #endif
@@ -214,15 +249,10 @@ void extractBlob(Blob&& blob BRAYNS_UNUSED,
                  const std::string& destination BRAYNS_UNUSED)
 {
 #ifdef BRAYNS_USE_LIBARCHIVE
-    auto archive = archive_read_new();
-    archive_read_support_format_all(archive);
-    archive_read_support_filter_all(archive);
-    if (archive_read_open_memory(archive, (void*)blob.data.data(),
-                                 blob.data.size()) < ARCHIVE_OK)
-    {
+    auto archive = _openArchive(blob);
+    if (!archive)
         throw std::runtime_error("Blob is not a supported archive type");
-    }
-    _extractArchive(archive, destination);
+    _extractArchive(archive, fs::basename(blob.name), destination);
 #else
     throw std::runtime_error("No support for archives; missing libarchive");
 #endif

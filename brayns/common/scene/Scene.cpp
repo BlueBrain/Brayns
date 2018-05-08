@@ -264,6 +264,7 @@ void Scene::load(const std::string& path, const Matrix4f& transformation,
 
         float totalProgress = 0.f;
 
+        size_t index = 0;
         for (const auto& i :
              boost::make_iterator_range(fs::directory_iterator(path), {}))
         {
@@ -281,7 +282,7 @@ void Scene::load(const std::string& path, const Matrix4f& transformation,
             };
 
             loader->setProgressCallback(progressCb);
-            loader->importFromFile(currentPath, *this, 0, transformation,
+            loader->importFromFile(currentPath, *this, index++, transformation,
                                    materialID);
 
             totalProgress += 1.f / numFiles;

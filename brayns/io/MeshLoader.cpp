@@ -90,7 +90,7 @@ std::set<std::string> MeshLoader::getSupportedDataTypes()
 
 #ifdef BRAYNS_USE_ASSIMP
 void MeshLoader::importFromFile(const std::string& fileName, Scene& scene,
-                                const size_t index BRAYNS_UNUSED,
+                                const size_t index,
                                 const Matrix4f& transformation,
                                 const size_t defaultMaterialId)
 {
@@ -124,14 +124,13 @@ void MeshLoader::importFromFile(const std::string& fileName, Scene& scene,
 
     boost::filesystem::path filepath = fileName;
     auto model = scene.createModel();
-    _postLoad(aiScene, *model, transformation, defaultMaterialId,
+    _postLoad(aiScene, *model, index, transformation, defaultMaterialId,
               filepath.parent_path().string());
     scene.addModel(std::move(model), boost::filesystem::basename(filepath),
                    fileName);
 }
 
-void MeshLoader::importFromBlob(Blob&& blob, Scene& scene,
-                                const size_t index BRAYNS_UNUSED,
+void MeshLoader::importFromBlob(Blob&& blob, Scene& scene, const size_t index,
                                 const Matrix4f& transformation,
                                 const size_t defaultMaterialId)
 {
@@ -149,7 +148,7 @@ void MeshLoader::importFromBlob(Blob&& blob, Scene& scene,
         throw std::runtime_error("No meshes found");
 
     auto model = scene.createModel();
-    _postLoad(aiScene, *model, transformation, defaultMaterialId);
+    _postLoad(aiScene, *model, index, transformation, defaultMaterialId);
     scene.addModel(std::move(model), boost::filesystem::basename({blob.name}),
                    blob.name);
 }
@@ -240,11 +239,16 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 }
 
 void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
-                           const Matrix4f& transformation,
+                           const size_t index, const Matrix4f& transformation,
                            const size_t defaultMaterialId,
                            const std::string& folder)
 {
-    if (defaultMaterialId == NO_MATERIAL)
+    const size_t materialId =
+        _geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
+            ? index
+            : defaultMaterialId;
+
+    if (materialId == NO_MATERIAL)
         _createMaterials(model, aiScene, folder);
 
     size_t nbVertices = 0;

@@ -84,8 +84,6 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    /** folder containing SWC and H5 files */
-    const std::string& getMorphologyFolder() const { return _morphologyFolder; }
     /**
      * @brief getNESTCircuit
      * @return
@@ -93,16 +91,6 @@ public:
     const std::string& getNESTCircuit() const { return _NESTCircuit; }
     const std::string& getNESTReport() const { return _NESTReport; }
     const std::string& getNESTCacheFile() const { return _NESTCacheFile; }
-    /** PDB file */
-    const std::string& getPDBFile() const { return _pdbFile; }
-    /** PDB folder */
-    const std::string& getPDBFolder() const { return _pdbFolder; }
-    /** XYZR file */
-    const std::string& getXYZBFile() const { return _xyzbFile; }
-    /** folder containing mesh files */
-    const std::string& getMeshFolder() const { return _meshFolder; }
-    /** Fesh containing mesh*/
-    const std::string& getMeshFile() const { return _meshFile; }
     /** file containing circuit configuration */
     const std::string& getCircuitConfiguration() const
     {
@@ -247,15 +235,6 @@ public:
         return _circuitConfiguration.meshTransformation;
     }
 
-    /** Splash scene folder */
-    void setSplashSceneFolder(const std::string& value)
-    {
-        _updateValue(_splashSceneFolder, value);
-    }
-    const std::string& getSplashSceneFolder() const
-    {
-        return _splashSceneFolder;
-    }
     /** Biological assembly */
     const std::string& getMolecularSystemConfig() const
     {
@@ -313,17 +292,6 @@ protected:
     std::string _NESTReport;
     std::string _NESTCacheFile;
 
-    // PDB
-    std::string _pdbFile;
-    std::string _pdbFolder;
-
-    // XYZ
-    std::string _xyzbFile;
-
-    // Mesh
-    std::string _meshFolder;
-    std::string _meshFile;
-
     // Circuit
     CircuitConfiguration _circuitConfiguration;
 
@@ -331,17 +299,14 @@ protected:
     std::string _loadCacheFile;
     std::string _saveCacheFile;
     SceneEnvironment _sceneEnvironment;
-    std::string _splashSceneFolder;
 
     // Morphology
-    std::string _morphologyFolder;
     float _radiusMultiplier;
     float _radiusCorrection;
     ColorScheme _colorScheme;
     GeometryQuality _geometryQuality;
     MorphologySectionTypes _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
-    bool _generateMultipleModels;
     std::string _molecularSystemConfig;
     size_t _metaballsGridSize;
     float _metaballsThreshold;
