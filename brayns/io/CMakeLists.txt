@@ -6,7 +6,6 @@
 set(BRAYNSIO_SOURCES
   algorithms/MetaballsGenerator.cpp
   CircuitLoader.cpp
-  ImageManager.cpp
   MeshLoader.cpp
   MolecularSystemReader.cpp
   ProteinLoader.cpp
@@ -19,7 +18,6 @@ set(BRAYNSIO_SOURCES
 set(BRAYNSIO_PUBLIC_HEADERS
   algorithms/MetaballsGenerator.h
   CircuitLoader.h
-  ImageManager.h
   MeshLoader.h
   MolecularSystemReader.h
   ProteinLoader.h
@@ -49,10 +47,6 @@ if(BRAYNS_BRION_ENABLED)
       simulation/CircuitSimulationHandler.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES
       PUBLIC Brion PRIVATE Brain ${HDF5_LIBRARIES})
-endif()
-
-if(BRAYNS_IMAGEMAGICK_ENABLED)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES PRIVATE ${Magick++_LIBRARIES})
 endif()
 
 set(BRAYNSIO_INCLUDE_NAME brayns/io)
