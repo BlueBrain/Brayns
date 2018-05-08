@@ -4,6 +4,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSCOMMON_SOURCES
+  ImageManager.cpp
   engine/Engine.cpp
   simulation/AbstractSimulationHandler.cpp
   input/KeyboardHandler.cpp
@@ -29,6 +30,7 @@ set(BRAYNSCOMMON_SOURCES
 set(BRAYNSCOMMON_PUBLIC_HEADERS
   ActionInterface.h
   BaseObject.h
+  ImageManager.h
   Transformation.h
   camera/AbstractManipulator.h
   camera/Camera.h
@@ -71,7 +73,7 @@ set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
   PUBLIC vmmlib Async++
   PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-          ${LibArchive_LIBRARIES}
+          ${LibArchive_LIBRARIES} ${Magick++_LIBRARIES}
 )
 
 common_library(braynsCommon)

@@ -20,7 +20,7 @@
 
 #include "Material.h"
 
-#include <brayns/io/ImageManager.h>
+#include <brayns/common/ImageManager.h>
 
 namespace brayns
 {

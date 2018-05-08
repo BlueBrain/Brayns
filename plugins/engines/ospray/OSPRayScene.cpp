@@ -23,6 +23,7 @@
 #include "OSPRayModel.h"
 #include "OSPRayRenderer.h"
 
+#include <brayns/common/ImageManager.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/light/PointLight.h>
@@ -30,7 +31,6 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 #include <brayns/common/volume/VolumeHandler.h>
-#include <brayns/io/ImageManager.h>
 
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>

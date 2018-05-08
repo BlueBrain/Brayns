@@ -26,7 +26,6 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/VolumeHandler.h>
-#include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 

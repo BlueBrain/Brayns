@@ -26,7 +26,7 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 
-#include <brayns/io/ImageManager.h>
+#include <brayns/common/ImageManager.h>
 
 #include <brayns/parameters/ParametersManager.h>
 
