@@ -22,6 +22,7 @@
 #include "OSPRayMaterial.h"
 #include "OSPRayModel.h"
 #include "OSPRayRenderer.h"
+#include "transform.h"
 
 #include <brayns/common/ImageManager.h>
 #include <brayns/common/Transformation.h>
@@ -74,15 +75,6 @@ OSPRayScene::~OSPRayScene()
         ospRelease(_rootSimulationModel);
 }
 
-OSPModel OSPRayScene::_getActiveModel()
-{
-    auto model = _rootModel;
-    const auto& geometryParameters = _parametersManager.getGeometryParameters();
-    if (geometryParameters.getCircuitUseSimulationModel())
-        model = _rootSimulationModel;
-    return model;
-}
-
 void OSPRayScene::commit()
 {
     const bool isModified_ = isModified();
@@ -109,21 +101,21 @@ void OSPRayScene::commit()
             auto& impl = static_cast<OSPRayModel&>(modelDescriptor.getModel());
             const auto& transformation = modelDescriptor.getTransformation();
             if (modelDescriptor.getBoundingBox())
-                ospAddGeometry(_rootModel, impl.getBoundingBoxModelInstance(
-                                               transformation));
+                _addInstance(_rootModel, impl.getBoundingBoxModel(),
+                             transformation);
+
             if (modelDescriptor.getVisible())
             {
                 BRAYNS_INFO << "Committing " << modelDescriptor.getName()
                             << std::endl;
-                ospAddGeometry(_rootModel, impl.getInstance(0, transformation));
-            }
-
-            if (impl.getUseSimulationModel())
-            {
-                if (!_rootSimulationModel)
-                    _rootSimulationModel = ospNewModel();
-                ospAddGeometry(_rootSimulationModel,
-                               impl.getSimulationModelInstance(transformation));
+                _addInstance(_rootModel, impl.getModel(), transformation);
+                if (impl.getUseSimulationModel())
+                {
+                    if (!_rootSimulationModel)
+                        _rootSimulationModel = ospNewModel();
+                    _addInstance(_rootSimulationModel,
+                                 impl.getSimulationModel(), transformation);
+                }
             }
             impl.logInformation();
         }
@@ -356,5 +348,15 @@ bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
 ModelPtr OSPRayScene::createModel() const
 {
     return std::make_unique<OSPRayModel>();
+}
+
+void OSPRayScene::_addInstance(OSPModel rootModel, OSPModel modelToAdd,
+                               const Transformation& transform)
+{
+    OSPGeometry instance =
+        ospNewInstance(modelToAdd, transformationToAffine3f(transform));
+    ospCommit(instance);
+    ospAddGeometry(rootModel, instance);
+    ospRelease(instance);
 }
 }

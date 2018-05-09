@@ -142,6 +142,16 @@ public:
       @return Index of the sphere for the specified material
       */
     BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
+
+    /**
+     * Add a model to the model. The submodel will be added as an
+     * instance/reference at the given transformations as part of commit().
+     *
+     * Note that model is 'moved', so this model will own the added model from
+     * now on.
+     */
+    BRAYNS_API void addModel(ModelPtr model, const Transformations& transform);
+
     /**
         Returns triangle meshes handled by the model
     */
@@ -196,6 +206,8 @@ public:
      */
     BRAYNS_API MaterialPtr getMaterial(const size_t materialId) const;
 
+    BRAYNS_API virtual void buildBoundingBox() = 0;
+
     /** @return the size in bytes of all geometries. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
 protected:
@@ -208,6 +220,13 @@ protected:
     bool _conesDirty{true};
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
+    struct SubModel
+    {
+        ModelPtr model;
+        Transformations transforms;
+    };
+    std::vector<SubModel> _models;
+    bool _modelsDirty{true};
     Boxf _bounds;
     bool _useSimulationModel{false};
 

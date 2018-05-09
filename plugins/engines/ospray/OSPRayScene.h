@@ -66,7 +66,8 @@ public:
     OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _rootSimulationModel; }
 private:
-    OSPModel _getActiveModel();
+    void _addInstance(OSPModel rootModel, OSPModel modelToAdd,
+                      const Transformation& transform);
 
     OSPModel _rootModel{nullptr};
     OSPModel _rootSimulationModel{nullptr};

@@ -109,6 +109,7 @@ typedef std::unique_ptr<Model> ModelPtr;
 typedef std::map<std::string, std::string> ModelMetadata;
 
 class Transformation;
+using Transformations = std::vector<Transformation>;
 
 class ModelDescriptor;
 typedef std::vector<ModelDescriptor> ModelDescriptors;

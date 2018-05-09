@@ -69,10 +69,17 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
     return _cones[materialId].size() - 1;
 }
 
+void Model::addModel(ModelPtr model, const Transformations& transform)
+{
+    _bounds.merge(model->getBounds());
+    _models.push_back({std::move(model), transform});
+    _modelsDirty = true;
+}
+
 bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
-           _trianglesMeshesDirty;
+           _trianglesMeshesDirty || _modelsDirty;
 }
 
 void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)

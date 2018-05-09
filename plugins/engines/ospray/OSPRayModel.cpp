@@ -20,12 +20,11 @@
 
 #include "OSPRayModel.h"
 #include "OSPRayMaterial.h"
+#include "transform.h"
 
 #include <brayns/common/Transformation.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Scene.h>
-
-#include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
 {
@@ -72,20 +71,11 @@ OSPRayModel::~OSPRayModel()
         ospRelease(geom.second);
     _ospMeshes.clear();
 
-    if (_simulationModelInstance)
-        ospRelease(_simulationModelInstance);
-
     if (_simulationModel)
         ospRelease(_simulationModel);
 
-    if (_boundingBoxModelInstance)
-        ospRelease(_boundingBoxModelInstance);
-
     if (_boundingBoxModel)
         ospRelease(_boundingBoxModel);
-
-    for (auto& i : _instances)
-        ospRelease(i.second);
 
     if (_model)
         ospRelease(_model);
@@ -96,8 +86,10 @@ void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
     _memoryManagementFlags = memoryManagementFlags;
 }
 
-void OSPRayModel::_buildBoundingBox()
+void OSPRayModel::buildBoundingBox()
 {
+    if (_boundingBoxModel)
+        return;
     _boundingBoxModel = ospNewModel();
 
     auto material = createMaterial(BOUNDINGBOX_MATERIAL_ID, "bounding_box");
@@ -293,10 +285,6 @@ void OSPRayModel::commit()
     for (auto material : _materials)
         material.second->commit();
 
-    // Bounding box
-    if (!_boundingBoxModel)
-        _buildBoundingBox();
-
     // Group geometry
     if (_spheresDirty)
     {
@@ -326,76 +314,29 @@ void OSPRayModel::commit()
         _trianglesMeshesDirty = false;
     }
 
+    if (_modelsDirty)
+    {
+        for (const auto& entry : _models)
+        {
+            entry.model->commit();
+            auto ospModel = static_cast<OSPRayModel*>(entry.model.get());
+            for (const auto& transform : entry.transforms)
+            {
+                auto instance =
+                    ospNewInstance(ospModel->getModel(),
+                                   transformationToAffine3f(transform));
+                ospCommit(instance);
+                ospAddGeometry(_model, instance);
+                ospRelease(instance);
+            }
+        }
+        _modelsDirty = false;
+    }
+
     // Commit models
     ospCommit(_model);
     ospCommit(_boundingBoxModel);
     ospCommit(_simulationModel);
-}
-
-osp::affine3f OSPRayModel::_groupTransformationToAffine3f(
-    const Transformation& transformation) const
-{
-    ospcommon::affine3f t = ospcommon::affine3f(ospcommon::one);
-    const auto& scale = transformation.getScale();
-    t *= t.scale({scale.x(), scale.y(), scale.z()});
-    const auto& translation = transformation.getTranslation();
-    t *= t.translate({translation.x(), translation.y(), translation.z()});
-
-    const auto& matrix = transformation.getRotation().getRotationMatrix();
-    const float x = atan2(matrix(2, 1), matrix(2, 2));
-    const float y = atan2(-matrix(2, 0),
-                          sqrt(powf(matrix(2, 1), 2) + powf(matrix(2, 2), 2)));
-    const float z = atan2(matrix(1, 0), matrix(0, 0));
-    if (x != 0.f)
-        t *= t.rotate({1, 0, 0}, x);
-    if (y != 0.f)
-        t *= t.rotate({0, 1, 0}, y);
-    if (z != 0.f)
-        t *= t.rotate({0, 0, 1}, z);
-    return (osp::affine3f&)t;
-}
-
-OSPGeometry OSPRayModel::getInstance(const size_t index,
-                                     const Transformation& transformation)
-{
-    auto it = _instances.find(index);
-    if (it != _instances.end())
-    {
-        ospRelease(it->second);
-        _instances.erase(it);
-    }
-
-    OSPGeometry instance =
-        ospNewInstance(_model, _groupTransformationToAffine3f(transformation));
-    ospCommit(instance);
-    _instances[index] = instance;
-    return instance;
-}
-
-OSPGeometry OSPRayModel::getSimulationModelInstance(
-    const Transformation& transformation)
-{
-    if (_simulationModelInstance)
-        ospRelease(_simulationModelInstance);
-
-    _simulationModelInstance =
-        ospNewInstance(_simulationModel,
-                       _groupTransformationToAffine3f(transformation));
-    ospCommit(_simulationModelInstance);
-    return _simulationModelInstance;
-}
-
-OSPGeometry OSPRayModel::getBoundingBoxModelInstance(
-    const Transformation& transformation)
-{
-    if (_boundingBoxModelInstance)
-        ospRelease(_boundingBoxModelInstance);
-
-    _boundingBoxModelInstance =
-        ospNewInstance(_boundingBoxModel,
-                       _groupTransformationToAffine3f(transformation));
-    ospCommit(_boundingBoxModelInstance);
-    return _boundingBoxModelInstance;
 }
 
 MaterialPtr OSPRayModel::createMaterial(const size_t materialId,

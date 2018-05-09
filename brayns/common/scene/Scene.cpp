@@ -87,6 +87,7 @@ void Scene::clearLights()
 void Scene::addModel(ModelPtr model, const std::string& name,
                      const std::string& path, const ModelMetadata& metadata)
 {
+    model->buildBoundingBox();
     model->commit();
     _modelDescriptors.push_back({name, path, metadata, std::move(model)});
     markModified();
