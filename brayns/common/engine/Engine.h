@@ -152,6 +152,10 @@ public:
         const Vector2ui& frameSize, FrameBufferFormat frameBufferFormat,
         bool accumulation) const = 0;
 
+    virtual ScenePtr createScene(
+        const Renderers& renderers,
+        ParametersManager& parametersManager) const = 0;
+
     /** Factory method to create an engine-specific camera. */
     virtual CameraPtr createCamera(const CameraType type) const = 0;
 

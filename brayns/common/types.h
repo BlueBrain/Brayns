@@ -112,7 +112,7 @@ class Transformation;
 using Transformations = std::vector<Transformation>;
 
 class ModelDescriptor;
-typedef std::vector<ModelDescriptor> ModelDescriptors;
+typedef std::vector<std::shared_ptr<ModelDescriptor>> ModelDescriptors;
 
 class Material;
 typedef std::shared_ptr<Material> MaterialPtr;

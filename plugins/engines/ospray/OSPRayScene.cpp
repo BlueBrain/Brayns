@@ -41,7 +41,7 @@
 
 namespace brayns
 {
-OSPRayScene::OSPRayScene(Renderers renderers,
+OSPRayScene::OSPRayScene(const Renderers& renderers,
                          ParametersManager& parametersManager,
                          const size_t memoryManagementFlags)
     : Scene(renderers, parametersManager)
@@ -94,19 +94,19 @@ void OSPRayScene::commit()
         ospRelease(_rootSimulationModel);
     _rootSimulationModel = nullptr;
 
-    for (auto& modelDescriptor : _modelDescriptors)
+    for (auto modelDescriptor : _modelDescriptors)
     {
-        if (modelDescriptor.getEnabled())
+        if (modelDescriptor->getEnabled())
         {
-            auto& impl = static_cast<OSPRayModel&>(modelDescriptor.getModel());
-            const auto& transformation = modelDescriptor.getTransformation();
-            if (modelDescriptor.getBoundingBox())
+            auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
+            const auto& transformation = modelDescriptor->getTransformation();
+            if (modelDescriptor->getBoundingBox())
                 _addInstance(_rootModel, impl.getBoundingBoxModel(),
                              transformation);
 
-            if (modelDescriptor.getVisible())
+            if (modelDescriptor->getVisible())
             {
-                BRAYNS_INFO << "Committing " << modelDescriptor.getName()
+                BRAYNS_INFO << "Committing " << modelDescriptor->getName()
                             << std::endl;
                 _addInstance(_rootModel, impl.getModel(), transformation);
                 if (impl.getUseSimulationModel())

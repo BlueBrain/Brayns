@@ -62,7 +62,6 @@ public:
         , _camera(engine.createCamera(_params.camera
                                           ? _params.camera->getType()
                                           : engine.getCamera().getType()))
-        , _scene(engine.getScenePtr())
         , _renderer(engine.createRenderer(
               engine.getActiveRenderer(),
               _params.animParams
@@ -71,36 +70,37 @@ public:
               _params.renderingParams
                   ? *_params.renderingParams
                   : engine.getParametersManager().getRenderingParameters()))
+        , _scene(engine.createScene({_renderer}, engine.getParametersManager()))
         , _imageGenerator(imageGenerator)
-        , _dataLock(_scene->dataMutex(), std::defer_lock)
     {
         if (_params.camera)
             *_camera = *_params.camera;
         else
             *_camera = engine.getCamera();
+
+        *_scene = engine.getScene();
+    }
+
+    ImageGenerator::ImageBase64 operator()()
+    {
         _camera->setAspectRatio(float(_params.size.x()) / _params.size.y());
         _camera->commit();
+
+        _scene->commitLights();
+        _scene->commit();
 
         if (_params.renderingParams)
             _params.renderingParams->setSamplesPerPixel(1);
 
         _renderer->setCamera(_camera);
-    }
-
-    ImageGenerator::ImageBase64 operator()()
-    {
-        while (!_dataLock.try_lock_for(std::chrono::seconds(1)))
-            progress("Waiting for scene access ...", 0.f, 0.f);
-
         _renderer->setScene(_scene);
         _renderer->commit();
 
         std::stringstream msg;
-        msg << "Render snapshot ";
-        if (_params.name.empty())
-            msg << "...";
-        else
-            msg << shortenString(_params.name) << " ...";
+        msg << "Render snapshot";
+        if (!_params.name.empty())
+            msg << " " << shortenString(_params.name);
+        msg << " ...";
 
         while (_frameBuffer->numAccumFrames() !=
                size_t(_params.samplesPerPixel))
@@ -111,7 +111,6 @@ public:
                          _params.samplesPerPixel);
         }
 
-        _dataLock.unlock();
         return _imageGenerator.createImage(*_frameBuffer, _params.format,
                                            _params.quality);
     }
@@ -120,9 +119,8 @@ private:
     SnapshotParams _params;
     FrameBufferPtr _frameBuffer;
     CameraPtr _camera;
-    ScenePtr _scene;
     RendererPtr _renderer;
+    ScenePtr _scene;
     ImageGenerator& _imageGenerator;
-    std::shared_lock<std::shared_timed_mutex> _dataLock;
 };
 }

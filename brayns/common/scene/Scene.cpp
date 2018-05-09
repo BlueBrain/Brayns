@@ -40,10 +40,25 @@ const size_t CACHE_VERSION = 9;
 
 namespace brayns
 {
-Scene::Scene(Renderers renderers, ParametersManager& parametersManager)
+Scene::Scene(const Renderers& renderers, ParametersManager& parametersManager)
     : _renderers(renderers)
     , _parametersManager(parametersManager)
 {
+}
+
+Scene& Scene::operator=(const Scene& rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    _modelDescriptors = rhs._modelDescriptors;
+    _backgroundMaterial = rhs._backgroundMaterial;
+    _lights = rhs._lights;
+    _volumeHandler = rhs._volumeHandler;
+    _simulationHandler = rhs._simulationHandler;
+    _transferFunction = rhs._transferFunction;
+    _caDiffusionSimulationHandler = rhs._caDiffusionSimulationHandler;
+    return *this;
 }
 
 void Scene::reset()
@@ -54,8 +69,8 @@ void Scene::reset()
 size_t Scene::getSizeInBytes() const
 {
     size_t sizeInBytes = 0;
-    for (const auto& modelDescriptor : _modelDescriptors)
-        sizeInBytes += modelDescriptor.getModel().getSizeInBytes();
+    for (auto modelDescriptor : _modelDescriptors)
+        sizeInBytes += modelDescriptor->getModel().getSizeInBytes();
     return sizeInBytes;
 }
 
@@ -89,7 +104,9 @@ void Scene::addModel(ModelPtr model, const std::string& name,
 {
     model->buildBoundingBox();
     model->commit();
-    _modelDescriptors.push_back({name, path, metadata, std::move(model)});
+    _modelDescriptors.push_back(
+        std::make_shared<ModelDescriptor>(name, path, metadata,
+                                          std::move(model)));
     markModified();
 }
 
@@ -230,8 +247,8 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 
 bool Scene::empty() const
 {
-    for (const auto& modelDescriptor : _modelDescriptors)
-        if (!modelDescriptor.getModel().empty())
+    for (auto modelDescriptor : _modelDescriptors)
+        if (!modelDescriptor->getModel().empty())
             return false;
     return true;
 }
@@ -322,17 +339,17 @@ void Scene::saveToCacheFile()
     // Save geometry
     size_t nbElements = _modelDescriptors.size();
     file.write((char*)&nbElements, sizeof(size_t));
-    for (auto& modelDescriptor : _modelDescriptors)
+    for (auto modelDescriptor : _modelDescriptors)
     {
         uint64_t bufferSize{0};
 
         // Model name
-        auto name = modelDescriptor.getName();
+        auto name = modelDescriptor->getName();
         nbElements = name.length();
         file.write((char*)&nbElements, sizeof(size_t));
         file.write((char*)name.c_str(), nbElements * sizeof(char));
 
-        auto& model = modelDescriptor.getModel();
+        auto& model = modelDescriptor->getModel();
         const auto& materials = model.getMaterials();
         const auto nbMaterials = materials.size();
         file.write((char*)&nbMaterials, sizeof(size_t));
@@ -795,8 +812,8 @@ void Scene::buildDefault()
 
 void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 {
-    for (auto& modelDescriptors : _modelDescriptors)
-        modelDescriptors.getModel().setMaterialsColorMap(colorMap);
+    for (auto modelDescriptors : _modelDescriptors)
+        modelDescriptors->getModel().setMaterialsColorMap(colorMap);
     markModified();
 }
 
@@ -804,10 +821,10 @@ void Scene::_computeBounds()
 {
     size_t nbEnabledModels{0};
     _bounds.reset();
-    for (const auto& modelDescriptor : _modelDescriptors)
-        if (modelDescriptor.getEnabled())
+    for (auto modelDescriptor : _modelDescriptors)
+        if (modelDescriptor->getEnabled())
         {
-            _bounds.merge(modelDescriptor.getModel().getBounds());
+            _bounds.merge(modelDescriptor->getModel().getBounds());
             ++nbEnabledModels;
         }
 

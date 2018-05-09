@@ -105,7 +105,7 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
     bool found = false;
     while (index < models.size() && !found)
     {
-        found = (models[index].getName() == modelName);
+        found = (models[index]->getName() == modelName);
         ++index;
     }
     if (found)
