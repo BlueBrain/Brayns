@@ -89,13 +89,21 @@ Texture2DPtr ImageManager::importTextureFromFile(
     {
         Magick::Image image(filename);
         Magick::Blob blob;
+#if MagickLibVersion >= 0x700
+        image.magick(image.alpha() ? "RGBA" : "RGB"); // Set JPEG output format
+#else
         image.magick(image.matte() ? "RGBA" : "RGB"); // Set JPEG output format
+#endif
         image.write(&blob);
 
         Texture2DPtr texture(new Texture2D);
         texture->setWidth(image.columns());
         texture->setHeight(image.rows());
+#if MagickLibVersion >= 0x700
+        texture->setNbChannels(image.alpha() ? 4 : 3);
+#else
         texture->setNbChannels(image.matte() ? 4 : 3);
+#endif
         texture->setDepth(1);
         texture->setRawData((unsigned char*)blob.data(), blob.length());
 
