@@ -52,19 +52,31 @@ public:
     ModelDescriptor(ModelDescriptor&& rhs) = default;
     ModelDescriptor& operator=(ModelDescriptor&& rhs) = default;
 
-    ModelDescriptor(const std::string& name, const std::string& path,
-                    const ModelMetadata& metadata, ModelPtr model);
+    ModelDescriptor(const size_t id, const std::string& name,
+                    const std::string& path, const ModelMetadata& metadata,
+                    ModelPtr model);
 
     bool getEnabled() const { return _visible || _boundingBox; }
     bool getVisible() const { return _visible; }
+    void setVisible(const bool visible) { _updateValue(_visible, visible); }
     bool getBoundingBox() const { return _boundingBox; }
+    void setBoundingBox(const bool enabled)
+    {
+        _updateValue(_boundingBox, enabled);
+    }
     const Transformation& getTransformation() const { return _transformation; }
+    void setTransformation(const Transformation& transformation)
+    {
+        _updateValue(_transformation, transformation);
+    }
     const ModelMetadata& getMetadata() const { return _metadata; }
+    size_t getID() const { return _id; }
     const std::string& getName() const { return _name; }
     const std::string& getPath() const { return _path; }
     const Model& getModel() const { return *_model; }
     Model& getModel() { return *_model; }
 private:
+    size_t _id{0};
     std::string _name;
     std::string _path;
     ModelMetadata _metadata;

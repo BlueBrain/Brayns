@@ -130,6 +130,21 @@ public:
     }
 
     template <typename RetVal>
+    RetVal makeRequest(const std::string& method, const std::string& params)
+    {
+        auto request = _client.request(method, params);
+        while (!request.is_ready())
+        {
+            _wsClient.process(0);
+            _brayns->render();
+        }
+
+        RetVal retVal;
+        ::from_json(retVal, request.get().result);
+        return retVal;
+    }
+
+    template <typename RetVal>
     RetVal makeRequest(const std::string& method)
     {
         auto request = _client.request<RetVal>(method);
@@ -183,6 +198,12 @@ template <typename Params, typename RetVal>
 RetVal makeRequest(const std::string& method, const Params& params)
 {
     return ClientServer::instance().makeRequest<Params, RetVal>(method, params);
+}
+
+template <typename RetVal>
+RetVal makeRequest(const std::string& method, const std::string& params)
+{
+    return ClientServer::instance().makeRequest<RetVal>(method, params);
 }
 
 template <typename RetVal>

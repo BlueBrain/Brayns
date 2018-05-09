@@ -16,21 +16,22 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
   list(APPEND EXCLUDE_FROM_TESTS
     brayns.cpp
     braynsTestData.cpp
+    model.cpp
     plugin.cpp
     snapshot.cpp
     uploadBinary.cpp
     uploadPath.cpp
     webAPI.cpp)
 endif()
+list(APPEND EXCLUDE_FROM_TESTS myPlugin.cpp)
 if(BRAYNS_NETWORKING_ENABLED)
   add_library(myPlugin SHARED myPlugin.cpp)
   target_link_libraries(myPlugin brayns braynsPlugins ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
   target_include_directories(myPlugin SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
-  list(APPEND EXCLUDE_FROM_TESTS myPlugin.cpp)
   list(APPEND TEST_LIBRARIES Rockets braynsPlugins myPlugin)
 else()
   list(APPEND EXCLUDE_FROM_TESTS
-    myPlugin.cpp
+    model.cpp
     plugin.cpp
     snapshot.cpp
     uploadBinary.cpp

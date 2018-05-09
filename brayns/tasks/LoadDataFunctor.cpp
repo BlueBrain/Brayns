@@ -94,20 +94,13 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
 {
     try
     {
-        try
-        {
-            loadData();
-        }
-        catch (const std::exception& e)
-        {
-            throw LOADING_BINARY_FAILED(e.what());
-        }
+        loadData();
     }
-    catch (...)
+    catch (const std::exception& e)
     {
         progress("Loading failed",
                  (TOTAL_PROGRESS - _currentProgress) / TOTAL_PROGRESS, 1.f);
-        throw;
+        throw LOADING_BINARY_FAILED(e.what());
     }
 }
 
