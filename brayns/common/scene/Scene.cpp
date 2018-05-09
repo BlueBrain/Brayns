@@ -105,14 +105,19 @@ void Scene::addModel(ModelPtr model, const std::string& name,
     model->buildBoundingBox();
     model->commit();
     _modelDescriptors.push_back(
-        std::make_shared<ModelDescriptor>(name, path, metadata,
+        std::make_shared<ModelDescriptor>(_modelID++, name, path, metadata,
                                           std::move(model)));
     markModified();
 }
 
-void Scene::removeModel(const size_t index)
+void Scene::removeModel(const size_t id)
 {
-    _modelDescriptors.erase(_modelDescriptors.begin() + index);
+    auto i = std::remove_if(_modelDescriptors.begin(), _modelDescriptors.end(),
+                            [id](auto desc) { return id == desc->getID(); });
+    if (i == _modelDescriptors.end())
+        return;
+
+    _modelDescriptors.erase(i, _modelDescriptors.end());
     markModified();
 }
 

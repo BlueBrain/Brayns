@@ -127,9 +127,9 @@ public:
 
     /**
         Removes a model from the scene
-        @param index Index of the model
+        @param id id of the model (descriptor)
       */
-    BRAYNS_API void removeModel(const size_t index);
+    BRAYNS_API void removeModel(const size_t id);
 
     /**
         Builds a default scene made of a Cornell box, a reflective cube, and
@@ -270,6 +270,7 @@ protected:
     MaterialPtr _backgroundMaterial;
 
     // Model
+    size_t _modelID{0};
     ModelDescriptors _modelDescriptors;
     Lights _lights;
 

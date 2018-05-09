@@ -72,9 +72,9 @@ UploadBinaryTask::UploadBinaryTask(const BinaryParams& params, EnginePtr engine)
                 .then([engine](
                     async::when_any_result<std::vector<async::task<void>>>
                         results) {
+                    engine->triggerRender();
                     // exception is propagated to caller
                     results.tasks[results.index].get();
-                    engine->triggerRender();
                     return true;
                 });
 }

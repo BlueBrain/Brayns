@@ -68,8 +68,10 @@ const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_QUIT = "quit";
+const std::string METHOD_REMOVE_MODEL = "remove-model";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
 const std::string METHOD_SNAPSHOT = "snapshot";
+const std::string METHOD_UPDATE_MODEL = "update-model";
 const std::string METHOD_UPLOAD_PATH = "upload-path";
 
 const std::string JSON_TYPE = "application/json";
@@ -551,6 +553,9 @@ public:
 
         _handleUploadBinary();
         _handleUploadPath();
+
+        _handleRemoveModel();
+        _handleUpdateModel();
     }
 
     void _handleFrameBuffer()
@@ -789,6 +794,49 @@ public:
         };
         _handleTask<std::vector<std::string>, bool>(METHOD_UPLOAD_PATH, doc,
                                                     func);
+    }
+
+    void _handleRemoveModel()
+    {
+        RpcDocumentation doc{
+            "Remove the model(s) with the given ID(s) from the scene", "ids",
+            "Array of model IDs"};
+        _handleRPC<size_ts, bool>(METHOD_REMOVE_MODEL, doc,
+                                  [engine = _engine](const size_ts& ids) {
+                                      for (const auto id : ids)
+                                          engine->getScene().removeModel(id);
+                                      engine->triggerRender();
+                                      return true;
+                                  });
+    }
+
+    void _handleUpdateModel()
+    {
+        _jsonrpcServer->bind(
+            METHOD_UPDATE_MODEL,
+            [engine = _engine](const rockets::jsonrpc::Request& request) {
+                ModelDescriptor newDesc;
+                if (!::from_json(newDesc, request.message))
+                    return Response::invalidParams();
+
+                auto& models = engine->getScene().getModelDescriptors();
+                auto i = std::find_if(models.begin(), models.end(),
+                                      [id = newDesc.getID()](auto desc) {
+                                          return id == desc->getID();
+                                      });
+                if (i == models.end())
+                    return Response{to_json(false)};
+
+                ::from_json(**i, request.message);
+                engine->getScene().markModified();
+                engine->triggerRender();
+                return Response{to_json(true)};
+            });
+        RpcDocumentation doc{"Update the model with the given values", "model",
+                             "Model descriptor"};
+        _handleSchema(METHOD_UPDATE_MODEL,
+                      buildJsonRpcSchema<ModelDescriptor, bool>(
+                          METHOD_UPDATE_MODEL, doc));
     }
 
     EnginePtr _engine;

@@ -27,10 +27,11 @@
 
 namespace brayns
 {
-ModelDescriptor::ModelDescriptor(const std::string& name,
+ModelDescriptor::ModelDescriptor(const size_t id, const std::string& name,
                                  const std::string& path,
                                  const ModelMetadata& metadata, ModelPtr model)
-    : _name(name)
+    : _id(id)
+    , _name(name)
     , _path(path)
     , _metadata(metadata)
     , _model(std::move(model))
@@ -40,7 +41,7 @@ ModelDescriptor::ModelDescriptor(const std::string& name,
 bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-           _trianglesMeshes.empty();
+           _trianglesMeshes.empty() && _models.empty();
 }
 
 uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)

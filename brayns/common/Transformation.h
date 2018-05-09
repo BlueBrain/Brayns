@@ -48,6 +48,12 @@ public:
         _updateValue(_rotation, value);
     }
 
+    bool operator==(const Transformation& rhs) const
+    {
+        return _translation == rhs._translation && _rotation == rhs._rotation &&
+               _scale == rhs._scale;
+    }
+    bool operator!=(const Transformation& rhs) const { return !(*this == rhs); }
 private:
     Vector3f _translation{0.f, 0.f, 0.f};
     Vector3f _scale{1.f, 1.f, 1.f};
