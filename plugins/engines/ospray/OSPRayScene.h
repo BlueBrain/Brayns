@@ -38,7 +38,7 @@ namespace brayns
 class OSPRayScene : public brayns::Scene
 {
 public:
-    OSPRayScene(Renderers renderer, ParametersManager& parametersManager,
+    OSPRayScene(const Renderers& renderers, ParametersManager& parametersManager,
                 const size_t memoryManagementFlags);
     ~OSPRayScene();
 

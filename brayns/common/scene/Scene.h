@@ -28,8 +28,6 @@
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
-#include <shared_mutex>
-
 SERIALIZATION_ACCESS(Scene)
 
 namespace brayns
@@ -55,7 +53,10 @@ public:
         @todo The scene must not know about the renderer
               https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
     */
-    BRAYNS_API Scene(Renderers renderers, ParametersManager& parametersManager);
+    BRAYNS_API Scene(const Renderers& renderers,
+                     ParametersManager& parametersManager);
+
+    BRAYNS_API Scene& operator=(const Scene& rhs);
 
     /**
      * Called after scene-related changes have been made before rendering the
@@ -261,8 +262,6 @@ public:
 
     /** @return the registry for all supported loaders of this scene. */
     LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
-    /** Used to lock the scene to avoid changes applied by commit(). */
-    auto& dataMutex() { return _dataMutex; }
 protected:
     void _computeBounds();
 
@@ -284,7 +283,6 @@ protected:
 
     LoaderRegistry _loaderRegistry;
     Boxf _bounds;
-    std::shared_timed_mutex _dataMutex;
 
 private:
     SERIALIZATION_FRIEND(Scene)

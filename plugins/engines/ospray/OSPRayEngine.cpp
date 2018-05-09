@@ -273,6 +273,13 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
                                                accumulation);
 }
 
+ScenePtr OSPRayEngine::createScene(const Renderers& renderers,
+                                   ParametersManager& parametersManager) const
+{
+    return std::make_shared<OSPRayScene>(renderers, parametersManager,
+                                         _getOSPDataFlags());
+}
+
 CameraPtr OSPRayEngine::createCamera(const CameraType type) const
 {
     auto& rp = _parametersManager.getRenderingParameters();
@@ -300,7 +307,7 @@ RendererPtr OSPRayEngine::createRenderer(
         renderingParameters);
 }
 
-uint32_t OSPRayEngine::_getOSPDataFlags()
+uint32_t OSPRayEngine::_getOSPDataFlags() const
 {
     return _parametersManager.getGeometryParameters().getMemoryMode() ==
                    MemoryMode::shared

@@ -182,19 +182,10 @@ struct Brayns::Impl : public PluginAPI
             return false;
 
         auto& scene = _engine->getScene();
-        bool resetScene = false;
         if (scene.isModified())
         {
-            // only apply changes from the scene if the scene is not used
-            // currently by some task, e.g. snapshot.
-            std::unique_lock<std::shared_timed_mutex> dataLock{
-                scene.dataMutex(), std::defer_lock};
-            if (dataLock.try_lock())
-            {
-                scene.commit();
-                _finishLoadScene();
-                resetScene = true;
-            }
+            scene.commit();
+            _finishLoadScene();
         }
 
         _updateAnimation();
@@ -235,8 +226,7 @@ struct Brayns::Impl : public PluginAPI
         _engine->getScene().getTransferFunction().resetModified();
         _parametersManager.resetModified();
         _engine->getCamera().resetModified();
-        if (resetScene)
-            _engine->getScene().resetModified();
+        _engine->getScene().resetModified();
 
         return true;
     }
@@ -396,8 +386,6 @@ struct Brayns::Impl : public PluginAPI
     void render()
     {
         std::lock_guard<std::mutex> lock{_renderMutex};
-        std::shared_lock<std::shared_timed_mutex> dataLock{
-            _engine->getScene().dataMutex()};
 
         _renderTimer.start();
         _engine->render();
