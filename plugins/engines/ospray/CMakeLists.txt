@@ -65,6 +65,10 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   OSPRayCamera.h
 )
 
+set(BRAYNSOSPRAYENGINEPLUGIN_HEADERS
+  transform.h
+)
+
 set_source_files_properties(
     OSPRayScene.cpp
     OSPRayMaterial.cpp

@@ -38,37 +38,26 @@ public:
 
     void commit() final;
     OSPModel getModel() const { return _model; }
-    size_t getNbInstances() const { return _instances.size(); }
-    OSPGeometry getInstance(const size_t index,
-                            const Transformation& transformation);
-    OSPGeometry getBoundingBoxModelInstance(
-        const Transformation& transformation);
-    OSPGeometry getSimulationModelInstance(
-        const Transformation& transformation);
-
+    OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
+    OSPModel getSimulationModel() const { return _simulationModel; }
     MaterialPtr createMaterial(const size_t materialId,
                                const std::string& name) final;
 
-private:
-    osp::affine3f _groupTransformationToAffine3f(
-        const Transformation& transformation) const;
+    void buildBoundingBox() final;
 
+private:
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);
     void _commitMeshes(const size_t materialId);
     OSPModel _model{nullptr};
-    std::map<size_t, OSPGeometry> _instances;
 
     // Bounding box
-    void _buildBoundingBox();
     size_t _boudingBoxMaterialId{0};
     OSPModel _boundingBoxModel{nullptr};
-    OSPGeometry _boundingBoxModelInstance{nullptr};
 
     // Simulation model
     OSPModel _simulationModel{nullptr};
-    OSPGeometry _simulationModelInstance{nullptr};
 
     // OSPRay data
     std::map<size_t, OSPGeometry> _ospExtendedSpheres;
