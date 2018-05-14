@@ -58,8 +58,6 @@ rapidjson::Document getRPCParameterSchema(const std::string& paramName,
     rapidjson::Document schema = staticjson::export_json_schema(&paramVal);
 
     using namespace rapidjson;
-    schema.AddMember(StringRef("required"), Value(kTrueType),
-                     schema.GetAllocator());
     schema.AddMember(StringRef("name"),
                      Value(paramName.c_str(), schema.GetAllocator()),
                      schema.GetAllocator());
