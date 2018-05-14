@@ -20,20 +20,36 @@
 
 #pragma once
 
-#include <brayns/common/tasks/Task.h>
+#include <brayns/common/tasks/TaskFunctor.h>
+#include <brayns/common/types.h>
 
 namespace brayns
 {
 /**
- * A task which loads data from a list of paths and adds the loaded data to the
- * scene.
+ * A task functor which loads data from blob or file path and adds the loaded
+ * data to the scene.
  */
-class UploadPathTask : public Task<bool>
+class LoadModelFunctor : public TaskFunctor
 {
 public:
-    UploadPathTask(const std::vector<std::string>& paths, EnginePtr engine);
+    LoadModelFunctor(EnginePtr engine);
+    LoadModelFunctor(LoadModelFunctor&&) = default;
+    ModelDescriptorPtr operator()(Blob&& blob);
+    ModelDescriptorPtr operator()(const std::string& path);
 
 private:
-    std::vector<async::task<void>> _loadTasks;
+    ModelDescriptorPtr _performLoad(
+        const std::function<ModelDescriptorPtr()>& loadData);
+
+    ModelDescriptorPtr _loadData(Blob&& blob);
+    ModelDescriptorPtr _loadData(const std::string& path);
+
+    void _updateProgress(const std::string& message, const size_t increment);
+
+    std::function<void(std::string, float)> _getProgressFunc();
+
+    EnginePtr _engine;
+    size_t _currentProgress{0};
+    size_t _nextTic{0};
 };
 }

@@ -44,14 +44,15 @@ public:
 
     static std::set<std::string> getSupportedDataTypes();
 
-    void importFromFile(const std::string& fileName, Scene& scene,
-                        const size_t index = 0,
-                        const Matrix4f& transformation = Matrix4f(),
-                        const size_t defaultMaterial = NO_MATERIAL) final;
+    ModelDescriptorPtr importFromFile(
+        const std::string& fileName, Scene& scene, const size_t index = 0,
+        const Matrix4f& transformation = Matrix4f(),
+        const size_t defaultMaterial = NO_MATERIAL) final;
 
-    void importFromBlob(Blob&& blob, Scene& scene, const size_t index = 0,
-                        const Matrix4f& transformation = Matrix4f(),
-                        const size_t defaultMaterial = NO_MATERIAL) final;
+    ModelDescriptorPtr importFromBlob(
+        Blob&& blob, Scene& scene, const size_t index = 0,
+        const Matrix4f& transformation = Matrix4f(),
+        const size_t defaultMaterial = NO_MATERIAL) final;
 
     /**
      * @brief getMeshFilenameFromGID Returns the name of the mesh file according

@@ -320,10 +320,10 @@ std::set<std::string> ProteinLoader::getSupportedDataTypes()
     return {"pdb"};
 }
 
-void ProteinLoader::importFromFile(const std::string& fileName, Scene& scene,
-                                   const size_t index,
-                                   const Matrix4f& transformation,
-                                   const size_t defaultMaterialId BRAYNS_UNUSED)
+ModelDescriptorPtr ProteinLoader::importFromFile(
+    const std::string& fileName, Scene& scene, const size_t index,
+    const Matrix4f& transformation,
+    const size_t defaultMaterialId BRAYNS_UNUSED)
 {
     std::ifstream file(fileName.c_str());
     if (!file.is_open())
@@ -466,6 +466,6 @@ void ProteinLoader::importFromFile(const std::string& fileName, Scene& scene,
     }
 
     const auto modelName = boost::filesystem::basename({fileName});
-    scene.addModel(std::move(model), modelName, fileName);
+    return scene.addModel(std::move(model), modelName, fileName);
 }
 }

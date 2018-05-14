@@ -19,47 +19,47 @@
  */
 
 #include <brayns/common/log.h>
-#include <brayns/tasks/UploadBinaryTask.h>
+#include <brayns/tasks/AddModelFromBlobTask.h>
 #include <brayns/tasks/errors.h>
 
 #include <rockets/jsonrpc/types.h>
 
 namespace brayns
 {
-const std::string METHOD_UPLOAD_BINARY = "upload-binary";
+const std::string METHOD_REQUEST_MODEL_UPLOAD = "request-model-upload";
 
 /**
- * Manage requests for the upload-binary RPC by receiving and delegating the
- * blobs to the correct request.
+ * Manage requests for the request-model-upload RPC by receiving and delegating
+ * the blobs to the correct request.
  */
 class BinaryRequests
 {
 public:
     /**
-     * Create and remember the UploadBinaryTask for upcoming receives of binary
-     * data to delegate them to the task.
+     * Create and remember the AddModelFromBlobTask for upcoming receives of
+     * binary data to delegate them to the task.
      *
      * Only one upload per client at a time is permitted.
      */
-    auto createTask(const BinaryParams& params, uintptr_t clientID,
+    auto createTask(const BinaryParam& param, uintptr_t clientID,
                     EnginePtr engine)
     {
         if (_binaryRequests.count(clientID) != 0)
             throw ALREADY_PENDING_REQUEST;
 
-        auto task = std::make_shared<UploadBinaryTask>(params, engine);
+        auto task = std::make_shared<AddModelFromBlobTask>(param, engine);
         _binaryRequests.emplace(clientID, task);
         _requests.emplace(task, clientID);
 
         return task;
     }
 
-    /** The receive and delegate of blobs to the UploadBinaryTask. */
+    /** The receive and delegate of blobs to the AddModelFromBlobTask. */
     rockets::ws::Response processMessage(const rockets::ws::Request& wsRequest)
     {
         if (_binaryRequests.count(wsRequest.clientID) == 0)
         {
-            BRAYNS_ERROR << "Missing RPC " << METHOD_UPLOAD_BINARY
+            BRAYNS_ERROR << "Missing RPC " << METHOD_REQUEST_MODEL_UPLOAD
                          << " or cancelled?" << std::endl;
             return {};
         }
@@ -91,7 +91,7 @@ public:
     }
 
 private:
-    std::map<uintptr_t, std::shared_ptr<UploadBinaryTask>> _binaryRequests;
+    std::map<uintptr_t, std::shared_ptr<AddModelFromBlobTask>> _binaryRequests;
     std::map<TaskPtr, uintptr_t> _requests;
 };
 }

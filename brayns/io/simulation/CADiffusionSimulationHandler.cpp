@@ -99,17 +99,7 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
 
     const std::string modelName = "CAFrame";
 
-    // Remove existing model if it exists
-    auto& models = scene.getModelDescriptors();
-    size_t index = 0;
-    bool found = false;
-    while (index < models.size() && !found)
-    {
-        found = (models[index]->getName() == modelName);
-        ++index;
-    }
-    if (found)
-        models.erase(models.begin() + index - 1);
+    scene.removeModel(_modelID);
 
     auto model = scene.createModel();
 
@@ -121,6 +111,6 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
                 << std::endl;
     for (const auto position : _calciumPositions)
         model->addSphere(CALCIUM_MATERIAL_ID, {position, CALCIUM_RADIUS});
-    scene.addModel(std::move(model), modelName);
+    _modelID = scene.addModel(std::move(model), modelName)->getID();
 }
 }

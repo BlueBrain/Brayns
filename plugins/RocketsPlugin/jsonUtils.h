@@ -34,6 +34,14 @@
 
 namespace brayns
 {
+/** @return JSON schema from JSON-serializable type */
+template <class T>
+std::string getSchema(const std::string& title)
+{
+    T obj;
+    return getSchema(obj, title);
+}
+
 /** @return JSON schema from JSON-serializable object */
 template <class T>
 std::string getSchema(T& obj, const std::string& title)

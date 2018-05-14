@@ -35,10 +35,11 @@ namespace brayns
    This object is the OSPRay specific implementation of a scene
 
 */
-class OSPRayScene : public brayns::Scene
+class OSPRayScene : public Scene
 {
 public:
-    OSPRayScene(const Renderers& renderers, ParametersManager& parametersManager,
+    OSPRayScene(const Renderers& renderers,
+                ParametersManager& parametersManager,
                 const size_t memoryManagementFlags);
     ~OSPRayScene();
 
@@ -60,7 +61,6 @@ public:
     /** @copydoc Scene::isVolumeSupported */
     bool isVolumeSupported(const std::string& volumeFile) const final;
 
-    /** @copydoc Scene::createModel */
     ModelPtr createModel() const final;
 
     OSPModel getModel() { return _rootModel; }

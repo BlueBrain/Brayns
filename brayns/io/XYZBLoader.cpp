@@ -41,10 +41,10 @@ std::set<std::string> XYZBLoader::getSupportedDataTypes()
     return {"xyz"};
 }
 
-void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
-                                const size_t index BRAYNS_UNUSED,
-                                const Matrix4f& transformation,
-                                const size_t defaultMaterialId BRAYNS_UNUSED)
+ModelDescriptorPtr XYZBLoader::importFromBlob(
+    Blob&& blob, Scene& scene, const size_t index BRAYNS_UNUSED,
+    const Matrix4f& transformation,
+    const size_t defaultMaterialId BRAYNS_UNUSED)
 {
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
@@ -110,21 +110,21 @@ void XYZBLoader::importFromBlob(Blob&& blob, Scene& scene,
             spheres[i + startOffset].radius = newRadius;
     }
 
-    scene.addModel(std::move(model), name, blob.name);
+    return scene.addModel(std::move(model), name, blob.name);
 }
 
-void XYZBLoader::importFromFile(const std::string& filename, Scene& scene,
-                                const size_t index,
-                                const Matrix4f& transformation,
-                                const size_t defaultMaterialId)
+ModelDescriptorPtr XYZBLoader::importFromFile(const std::string& filename,
+                                              Scene& scene, const size_t index,
+                                              const Matrix4f& transformation,
+                                              const size_t defaultMaterialId)
 {
     std::ifstream file(filename);
     if (!file.good())
         throw std::runtime_error("Could not open file " + filename);
-    importFromBlob({"xyz",
-                    filename,
-                    {std::istreambuf_iterator<char>(file),
-                     std::istreambuf_iterator<char>()}},
-                   scene, index, transformation, defaultMaterialId);
+    return importFromBlob({"xyz",
+                           filename,
+                           {std::istreambuf_iterator<char>(file),
+                            std::istreambuf_iterator<char>()}},
+                          scene, index, transformation, defaultMaterialId);
 }
 }

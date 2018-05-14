@@ -94,6 +94,7 @@ void OSPRayScene::commit()
         ospRelease(_rootSimulationModel);
     _rootSimulationModel = nullptr;
 
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
     for (auto modelDescriptor : _modelDescriptors)
     {
         if (modelDescriptor->getEnabled())

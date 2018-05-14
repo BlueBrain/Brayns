@@ -111,6 +111,8 @@ public:
                          _params.samplesPerPixel);
         }
 
+        _scene->reset();
+
         return _imageGenerator.createImage(*_frameBuffer, _params.format,
                                            _params.quality);
     }

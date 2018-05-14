@@ -38,7 +38,7 @@ MolecularSystemReader::MolecularSystemReader(
 {
 }
 
-void MolecularSystemReader::importFromFile(
+ModelDescriptorPtr MolecularSystemReader::importFromFile(
     const std::string& fileName, Scene& scene, const size_t index BRAYNS_UNUSED,
     const Matrix4f& transformation BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED)
@@ -65,6 +65,7 @@ void MolecularSystemReader::importFromFile(
                 << std::endl;
     BRAYNS_INFO << "Total number of proteins          : " << _nbProteins
                 << std::endl;
+    return {};
 }
 
 bool MolecularSystemReader::_createScene(Scene& scene)

@@ -89,10 +89,10 @@ std::set<std::string> MeshLoader::getSupportedDataTypes()
 }
 
 #ifdef BRAYNS_USE_ASSIMP
-void MeshLoader::importFromFile(const std::string& fileName, Scene& scene,
-                                const size_t index,
-                                const Matrix4f& transformation,
-                                const size_t defaultMaterialId)
+ModelDescriptorPtr MeshLoader::importFromFile(const std::string& fileName,
+                                              Scene& scene, const size_t index,
+                                              const Matrix4f& transformation,
+                                              const size_t defaultMaterialId)
 {
     const boost::filesystem::path file = fileName;
     Assimp::Importer importer;
@@ -126,13 +126,14 @@ void MeshLoader::importFromFile(const std::string& fileName, Scene& scene,
     auto model = scene.createModel();
     _postLoad(aiScene, *model, index, transformation, defaultMaterialId,
               filepath.parent_path().string());
-    scene.addModel(std::move(model), boost::filesystem::basename(filepath),
-                   fileName);
+    return scene.addModel(std::move(model),
+                          boost::filesystem::basename(filepath), fileName);
 }
 
-void MeshLoader::importFromBlob(Blob&& blob, Scene& scene, const size_t index,
-                                const Matrix4f& transformation,
-                                const size_t defaultMaterialId)
+ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, Scene& scene,
+                                              const size_t index,
+                                              const Matrix4f& transformation,
+                                              const size_t defaultMaterialId)
 {
     Assimp::Importer importer;
     importer.SetProgressHandler(new ProgressWatcher(*this, blob.name));
@@ -149,8 +150,8 @@ void MeshLoader::importFromBlob(Blob&& blob, Scene& scene, const size_t index,
 
     auto model = scene.createModel();
     _postLoad(aiScene, *model, index, transformation, defaultMaterialId);
-    scene.addModel(std::move(model), boost::filesystem::basename({blob.name}),
-                   blob.name);
+    return scene.addModel(std::move(model),
+                          boost::filesystem::basename({blob.name}), blob.name);
 }
 
 void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,

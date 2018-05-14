@@ -31,8 +31,8 @@
 #include <brayns/common/volume/VolumeHandler.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
-#include <brayns/tasks/UploadBinaryTask.h>
-#include <brayns/tasks/UploadPathTask.h>
+#include <brayns/tasks/AddModelFromBlobTask.h>
+#include <brayns/tasks/AddModelTask.h>
 
 #ifdef BRAYNS_USE_LIBUV
 #include <uvw.hpp>
@@ -66,13 +66,13 @@ const std::string ENDPOINT_VERSION = "version";
 const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
 const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
+const std::string METHOD_ADD_MODEL = "add-model";
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_QUIT = "quit";
 const std::string METHOD_REMOVE_MODEL = "remove-model";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
 const std::string METHOD_SNAPSHOT = "snapshot";
 const std::string METHOD_UPDATE_MODEL = "update-model";
-const std::string METHOD_UPLOAD_PATH = "upload-path";
 
 const std::string JSON_TYPE = "application/json";
 
@@ -501,6 +501,12 @@ public:
     }
 
     template <class T>
+    void _handleObjectSchema(const std::string& endpoint)
+    {
+        _handleSchema(endpoint, getSchema<T>(hyphenatedToCamelCase(endpoint)));
+    }
+
+    template <class T>
     void _handleObjectSchema(const std::string& endpoint, T& obj)
     {
         _handleSchema(endpoint,
@@ -551,8 +557,8 @@ public:
         _handleResetCamera();
         _handleSnapshot();
 
-        _handleUploadBinary();
-        _handleUploadPath();
+        _handleRequestModelUpload();
+        _handleAddModel();
 
         _handleRemoveModel();
         _handleUpdateModel();
@@ -604,10 +610,9 @@ public:
         _rocketsServer->handle(
             Method::GET, ENDPOINT_API_VERSION + ENDPOINT_IMAGE_JPEG + "/schema",
             [&](const Request&) {
-                ImageGenerator::ImageBase64 obj;
                 return make_ready_response(
-                    Code::OK,
-                    getSchema(obj, hyphenatedToCamelCase(ENDPOINT_IMAGE_JPEG)),
+                    Code::OK, getSchema<ImageGenerator::ImageBase64>(
+                                  hyphenatedToCamelCase(ENDPOINT_IMAGE_JPEG)),
                     JSON_TYPE);
             });
 
@@ -639,8 +644,7 @@ public:
 
     void _handleSimulationHistogram()
     {
-        Histogram tmp;
-        _handleObjectSchema(ENDPOINT_SIMULATION_HISTOGRAM, tmp);
+        _handleObjectSchema<Histogram>(ENDPOINT_SIMULATION_HISTOGRAM);
 
         using namespace rockets::http;
 
@@ -697,8 +701,7 @@ public:
 
     void _handleVolumeHistogram()
     {
-        Histogram tmp;
-        _handleObjectSchema(ENDPOINT_VOLUME_HISTOGRAM, tmp);
+        _handleObjectSchema<Histogram>(ENDPOINT_VOLUME_HISTOGRAM);
 
         using namespace rockets::http;
 
@@ -772,28 +775,32 @@ public:
             METHOD_SNAPSHOT, doc, func);
     }
 
-    void _handleUploadBinary()
+    void _handleRequestModelUpload()
     {
-        RpcDocumentation doc{"Upload files to load geometry", "params",
-                             "Array of file parameters: size, type and name"};
+        RpcDocumentation doc{
+            "Request upload of blob to trigger adding of model after blob has "
+            "been received; returns model descriptor on success",
+            "param", "size, type, name, transformation, etc."};
 
-        _handleTask<BinaryParams, bool>(
-            METHOD_UPLOAD_BINARY, doc,
+        _handleTask<BinaryParam, ModelDescriptorPtr>(
+            METHOD_REQUEST_MODEL_UPLOAD, doc,
             std::bind(&BinaryRequests::createTask, std::ref(_binaryRequests),
                       std::placeholders::_1, std::placeholders::_2, _engine));
     }
 
-    void _handleUploadPath()
+    void _handleAddModel()
     {
-        RpcDocumentation doc{"Upload remote path to load geometry from",
-                             "params", "Array of paths, either file or folder"};
+        RpcDocumentation doc{
+            "Add model from remote path; returns model descriptor on success",
+            "model_param",
+            "Model parameters including name, path, transformation, etc."};
 
-        auto func = [engine = _engine](const auto& paths, const auto)
+        auto func = [engine = _engine](const auto& modelParam, const auto)
         {
-            return std::make_shared<UploadPathTask>(paths, engine);
+            return std::make_shared<AddModelTask>(modelParam, engine);
         };
-        _handleTask<std::vector<std::string>, bool>(METHOD_UPLOAD_PATH, doc,
-                                                    func);
+        _handleTask<ModelParams, ModelDescriptorPtr>(METHOD_ADD_MODEL, doc,
+                                                     func);
     }
 
     void _handleRemoveModel()

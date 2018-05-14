@@ -18,13 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LoadDataFunctor.h"
+#include "LoadModelFunctor.h"
 
 #include "errors.h"
 
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 
@@ -37,64 +38,68 @@ namespace brayns
 {
 const float TOTAL_PROGRESS = 100.f;
 
-LoadDataFunctor::LoadDataFunctor(EnginePtr engine)
+LoadModelFunctor::LoadModelFunctor(EnginePtr engine)
     : _engine(engine)
 {
 }
 
-void LoadDataFunctor::operator()(Blob&& blob)
+ModelDescriptorPtr LoadModelFunctor::operator()(Blob&& blob)
 {
     // extract the archive and treat it as 'load from folder'
     if (isArchive(blob))
     {
         struct Scope
         {
-            Scope(Blob&& blob, LoadDataFunctor& parent)
+            Scope() { fs::create_directories(_path); }
+            ~Scope() { fs::remove_all(_path); }
+            ModelDescriptorPtr operator()(Blob&& blob, LoadModelFunctor& parent)
             {
-                fs::create_directories(path);
-
-                extractBlob(std::move(blob), path.string());
-                parent._performLoad([&] { parent._loadData(path.string()); });
+                extractBlob(std::move(blob), _path.string());
+                return parent._performLoad(
+                    [&] { return parent._loadData(_path.string()); });
             }
 
-            ~Scope() { fs::remove_all(path); }
-            fs::path path = fs::temp_directory_path() / fs::unique_path();
-        } scope(std::move(blob), *this);
-        return;
+        private:
+            fs::path _path = fs::temp_directory_path() / fs::unique_path();
+        } scope;
+        return scope(std::move(blob), *this);
     }
 
-    _performLoad([&] { _loadData(std::move(blob)); });
+    return _performLoad([&] { return _loadData(std::move(blob)); });
 }
 
-void LoadDataFunctor::operator()(const std::string& path)
+ModelDescriptorPtr LoadModelFunctor::operator()(const std::string& path)
 {
     // extract the archive and treat it as 'load from folder'
     if (isArchive(path))
     {
         struct Scope
         {
-            Scope(const std::string& file, LoadDataFunctor& parent)
+            Scope() { fs::create_directories(_path); }
+            ~Scope() { fs::remove_all(_path); }
+            ModelDescriptorPtr operator()(const std::string& file,
+                                          LoadModelFunctor& parent)
             {
-                fs::create_directories(path);
-
-                extractFile(file, path.string());
-                parent._performLoad([&] { parent._loadData(path.string()); });
+                extractFile(file, _path.string());
+                return parent._performLoad(
+                    [&] { return parent._loadData(_path.string()); });
             }
 
-            ~Scope() { fs::remove_all(path); }
-            fs::path path = fs::temp_directory_path() / fs::unique_path();
-        } scope(path, *this);
-        return;
+        private:
+            fs::path _path = fs::temp_directory_path() / fs::unique_path();
+        } scope;
+        return scope(path, *this);
     }
 
-    _performLoad([&] { _loadData(path); });
+    return _performLoad([&] { return _loadData(path); });
 }
 
-void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
+ModelDescriptorPtr LoadModelFunctor::_performLoad(
+    const std::function<ModelDescriptorPtr()>& loadData)
 {
     try
     {
-        loadData();
+        return loadData();
     }
     catch (const std::exception& e)
     {
@@ -104,26 +109,27 @@ void LoadDataFunctor::_performLoad(const std::function<void()>& loadData)
     }
 }
 
-void LoadDataFunctor::_loadData(Blob&& blob)
+ModelDescriptorPtr LoadModelFunctor::_loadData(Blob&& blob)
 {
-    _engine->getScene().load(std::move(blob), Matrix4f(), NO_MATERIAL,
-                             _getProgressFunc());
+    return _engine->getScene().load(std::move(blob), Matrix4f(), NO_MATERIAL,
+                                    _getProgressFunc());
 }
 
-void LoadDataFunctor::_loadData(const std::string& path)
+ModelDescriptorPtr LoadModelFunctor::_loadData(const std::string& path)
 {
-    _engine->getScene().load(path, Matrix4f(), NO_MATERIAL, _getProgressFunc());
+    return _engine->getScene().load(path, Matrix4f(), NO_MATERIAL,
+                                    _getProgressFunc());
 }
 
-void LoadDataFunctor::_updateProgress(const std::string& message,
-                                      const size_t increment)
+void LoadModelFunctor::_updateProgress(const std::string& message,
+                                       const size_t increment)
 {
     _currentProgress += increment;
     progress(message, increment / TOTAL_PROGRESS,
              _currentProgress / TOTAL_PROGRESS);
 }
 
-std::function<void(std::string, float)> LoadDataFunctor::_getProgressFunc()
+std::function<void(std::string, float)> LoadModelFunctor::_getProgressFunc()
 {
     return [this](const std::string& msg, const float progress) {
         cancelCheck();

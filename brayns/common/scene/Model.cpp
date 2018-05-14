@@ -25,17 +25,45 @@
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
 
+#include <boost/filesystem.hpp>
+
 namespace brayns
 {
+ModelParams::ModelParams(const std::string& path)
+    : _name(boost::filesystem::basename(path))
+    , _path(path)
+{
+}
+
+ModelParams::ModelParams(const std::string& name, const std::string& path)
+    : _name(name)
+    , _path(path)
+{
+}
+
 ModelDescriptor::ModelDescriptor(const size_t id, const std::string& name,
                                  const std::string& path,
                                  const ModelMetadata& metadata, ModelPtr model)
-    : _id(id)
-    , _name(name)
-    , _path(path)
+    : ModelParams(name, path)
+    , _id(id)
     , _metadata(metadata)
     , _model(std::move(model))
 {
+}
+
+ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
+{
+    if (this == &rhs)
+        return *this;
+    _updateValue(_boundingBox, rhs.getBoundingBox());
+    if (rhs.getName().empty())
+        _updateValue(_name, boost::filesystem::basename(rhs.getPath()));
+    else
+        _updateValue(_name, rhs.getName());
+    _updateValue(_path, rhs.getPath());
+    _updateValue(_transformation, rhs.getTransformation());
+    _updateValue(_visible, rhs.getVisible());
+    return *this;
 }
 
 bool Model::empty() const
