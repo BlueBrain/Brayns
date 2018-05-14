@@ -15,11 +15,12 @@ set(BRAYNS_PUBLIC_HEADERS Brayns.h)
 set(BRAYNS_SOURCES Brayns.cpp)
 
 set(BRAYNS_LINK_LIBRARIES
-  PUBLIC braynsParameters braynsCommon braynsTasks
-  PRIVATE braynsIO braynsPlugins braynsPluginAPI ${OSPRAY_COMMON_LIBRARY})
+  PUBLIC braynsParameters braynsCommon
+  PRIVATE braynsIO braynsPlugins braynsPluginAPI braynsTasks ${OSPRAY_COMMON_LIBRARY})
 
 if(TARGET Lunchbox)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE Lunchbox)
 endif()
 
+set(BRAYNS_OMIT_EXPORT ON)
 common_library(brayns)
