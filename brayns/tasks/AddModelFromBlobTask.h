@@ -20,51 +20,52 @@
 
 #pragma once
 
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/tasks/Task.h>
 
 namespace brayns
 {
-struct BinaryParam
+struct BinaryParam;
+}
+SERIALIZATION_ACCESS(BinaryParam)
+
+namespace brayns
+{
+struct BinaryParam : ModelParams
 {
     size_t size{0};   //!< size in bytes of file
     std::string type; //!< file extension or type (MESH, POINTS, CIRCUIT)
-    std::string name{"data"}; //!< name of the file
+    SERIALIZATION_FRIEND(BinaryParam)
 };
 
-using BinaryParams = std::vector<BinaryParam>;
-
 /**
- * A task which receives blobs of files, triggers loading for each received blob
- * and adds the loaded data to the scene.
+ * A task which receives a file blob, triggers loading of the received blob
+ * and adds the loaded model to the engines' scene.
  */
-class UploadBinaryTask : public Task<bool>
+class AddModelFromBlobTask : public Task<ModelDescriptorPtr>
 {
 public:
-    UploadBinaryTask(const BinaryParams& params, EnginePtr engine);
+    AddModelFromBlobTask(const BinaryParam& param, EnginePtr engine);
 
     void appendBlob(const std::string& blob);
 
 private:
-    std::vector<async::task<void>> _loadTasks;
-    std::vector<async::event_task<Blob>> _chunks;
-    async::event_task<void> _errorEvent;
-    std::vector<async::task<void>> _finishTasks;
-    std::string _blob;
-    size_t _index{0};
-
     void _checkValidity(EnginePtr engine);
     void _cancel() final
     {
-        for (auto& i : _chunks)
-            i.set_exception(std::make_exception_ptr(async::task_canceled()));
+        _chunkEvent.set_exception(
+            std::make_exception_ptr(async::task_canceled()));
     }
     float _progressBytes() const
     {
-        return CHUNK_PROGRESS_WEIGHT * ((float)_receivedBytes / _totalBytes);
+        return CHUNK_PROGRESS_WEIGHT * ((float)_receivedBytes / _param.size);
     }
 
-    BinaryParams _params;
-    size_t _totalBytes{0};
+    async::event_task<Blob> _chunkEvent;
+    async::event_task<ModelDescriptorPtr> _errorEvent;
+    std::vector<async::task<ModelDescriptorPtr>> _finishTasks;
+    std::string _blob;
+    BinaryParam _param;
     size_t _receivedBytes{0};
     const float CHUNK_PROGRESS_WEIGHT{0.5f};
 };

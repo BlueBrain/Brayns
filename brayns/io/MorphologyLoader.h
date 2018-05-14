@@ -50,13 +50,15 @@ public:
 
     static std::set<std::string> getSupportedDataTypes();
 
-    void importFromBlob(Blob&& blob, Scene& scene, const size_t index,
-                        const Matrix4f& transformation,
-                        const size_t materialID) final;
+    ModelDescriptorPtr importFromBlob(Blob&& blob, Scene& scene,
+                                      const size_t index,
+                                      const Matrix4f& transformation,
+                                      const size_t materialID) final;
 
-    void importFromFile(const std::string& filename, Scene& scene,
-                        const size_t index, const Matrix4f& transformation,
-                        const size_t materialID) final;
+    ModelDescriptorPtr importFromFile(const std::string& filename, Scene& scene,
+                                      const size_t index,
+                                      const Matrix4f& transformation,
+                                      const size_t materialID) final;
 
     /**
      * @brief Imports morphology from a given SWC or H5 file

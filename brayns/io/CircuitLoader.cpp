@@ -46,10 +46,12 @@ public:
     {
     }
 
-    bool importCircuit(const std::string& source, const strings& targets,
-                       const std::string& report, Scene& scene)
+    ModelDescriptorPtr importCircuit(const std::string& source,
+                                     const strings& targets,
+                                     const std::string& report, Scene& scene)
     {
         bool returnValue = true;
+        ModelDescriptorPtr modelDesc;
         try
         {
             // Model (one for the whole circuit)
@@ -117,7 +119,7 @@ public:
             }
 
             if (allGids.empty())
-                return false;
+                return {};
 
             // Load simulation information from compartment report
             CompartmentReportPtr compartmentReport = nullptr;
@@ -143,7 +145,7 @@ public:
                 }
 
             if (!_geometryParameters.getLoadCacheFile().empty())
-                return true;
+                return {};
 
             const Matrix4fs& transformations = circuit.getTransforms(allGids);
             _logLoadedGIDs(allGids);
@@ -175,16 +177,19 @@ public:
             // Create materials
             model->createMissingMaterials();
 
-            scene.addModel(std::move(model), "Circuit", source, metadata);
+            modelDesc =
+                scene.addModel(std::move(model), "Circuit", source, metadata);
         }
         catch (const std::exception& error)
         {
             BRAYNS_ERROR << "Failed to open " << source << ": " << error.what()
                          << std::endl;
-            return false;
+            return {};
         }
 
-        return returnValue;
+        if (returnValue)
+            return modelDesc;
+        return {};
     }
 
 private:
@@ -465,26 +470,24 @@ std::set<std::string> CircuitLoader::getSupportedDataTypes()
     return {"BlueConfig", "BlueConfig3", "CircuitConfig", "circuit"};
 }
 
-void CircuitLoader::importFromBlob(Blob&& /*blob*/, Scene& /*scene*/,
-                                   const size_t /*index*/,
-                                   const Matrix4f& /*transformation*/,
-                                   const size_t /*materialID*/)
+ModelDescriptorPtr CircuitLoader::importFromBlob(
+    Blob&& /*blob*/, Scene& /*scene*/, const size_t /*index*/,
+    const Matrix4f& /*transformation*/, const size_t /*materialID*/)
 {
     throw std::runtime_error("Loading circuit from blob is not supported");
 }
 
-void CircuitLoader::importFromFile(const std::string& filename, Scene& scene,
-                                   const size_t /*index*/,
-                                   const Matrix4f& /*transformation*/,
-                                   const size_t /*materialID*/)
+ModelDescriptorPtr CircuitLoader::importFromFile(
+    const std::string& filename, Scene& scene, const size_t /*index*/,
+    const Matrix4f& /*transformation*/, const size_t /*materialID*/)
 {
-    _impl->importCircuit(filename, {}, "", scene);
+    return _impl->importCircuit(filename, {}, "", scene);
 }
 
 bool CircuitLoader::importCircuit(const servus::URI& uri,
                                   const strings& targets,
                                   const std::string& report, Scene& scene)
 {
-    return _impl->importCircuit(uri.getPath(), targets, report, scene);
+    return !(!_impl->importCircuit(uri.getPath(), targets, report, scene));
 }
 }

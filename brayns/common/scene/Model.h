@@ -31,30 +31,24 @@
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(Model)
+SERIALIZATION_ACCESS(ModelParams)
 SERIALIZATION_ACCESS(ModelDescriptor)
 
 namespace brayns
 {
-/**
- * @brief The ModelDescriptor struct defines the metadata attached to a model.
- * Model descriptor are exposed via the HTTP/WS interface.
- * - Enabling a model means that the model is part of scene. If disabled, the
- * model still exists in Brayns, but is removed from the rendered scene.
- * - The visible attribute defines if the model should be visible or not. If
- * invisible, the model is removed from the BVH.
- * - If set to true, the bounding box attribute displays a bounding box for the
- * current model
- */
-class ModelDescriptor : public BaseObject
+class ModelParams : public BaseObject
 {
 public:
-    ModelDescriptor() = default;
-    ModelDescriptor(ModelDescriptor&& rhs) = default;
-    ModelDescriptor& operator=(ModelDescriptor&& rhs) = default;
+    ModelParams() = default;
 
-    ModelDescriptor(const size_t id, const std::string& name,
-                    const std::string& path, const ModelMetadata& metadata,
-                    ModelPtr model);
+    ModelParams(const std::string& path);
+    ModelParams(const std::string& name, const std::string& path);
+
+    ModelParams(ModelParams&& rhs) = default;
+    ModelParams& operator=(ModelParams&& rhs) = default;
+
+    ModelParams(const ModelParams& rhs) = default;
+    ModelParams& operator=(const ModelParams& rhs) = default;
 
     bool getEnabled() const { return _visible || _boundingBox; }
     bool getVisible() const { return _visible; }
@@ -69,20 +63,52 @@ public:
     {
         _updateValue(_transformation, transformation);
     }
+    void setName(const std::string& name) { _updateValue(_name, name); }
+    const std::string& getName() const { return _name; }
+    void setPath(const std::string& path) { _updateValue(_path, path); }
+    const std::string& getPath() const { return _path; }
+protected:
+    std::string _name;
+    std::string _path;
+    bool _visible{true};
+    bool _boundingBox{false};
+    Transformation _transformation;
+
+    SERIALIZATION_FRIEND(ModelParams)
+};
+
+/**
+ * @brief The ModelDescriptor struct defines the metadata attached to a model.
+ * Model descriptor are exposed via the HTTP/WS interface.
+ * - Enabling a model means that the model is part of scene. If disabled, the
+ * model still exists in Brayns, but is removed from the rendered scene.
+ * - The visible attribute defines if the model should be visible or not. If
+ * invisible, the model is removed from the BVH.
+ * - If set to true, the bounding box attribute displays a bounding box for the
+ * current model
+ */
+class ModelDescriptor : public ModelParams
+{
+public:
+    ModelDescriptor() = default;
+
+    ModelDescriptor(ModelDescriptor&& rhs) = default;
+    ModelDescriptor& operator=(ModelDescriptor&& rhs) = default;
+
+    ModelDescriptor(const size_t id, const std::string& name,
+                    const std::string& path, const ModelMetadata& metadata,
+                    ModelPtr model);
+
+    ModelDescriptor& operator=(const ModelParams& rhs);
+
     const ModelMetadata& getMetadata() const { return _metadata; }
     size_t getID() const { return _id; }
-    const std::string& getName() const { return _name; }
-    const std::string& getPath() const { return _path; }
     const Model& getModel() const { return *_model; }
     Model& getModel() { return *_model; }
 private:
     size_t _id{0};
-    std::string _name;
-    std::string _path;
+    Boxf _bounds;
     ModelMetadata _metadata;
-    bool _visible{true};
-    bool _boundingBox{false};
-    Transformation _transformation;
     ModelPtr _model;
 
     SERIALIZATION_FRIEND(ModelDescriptor)

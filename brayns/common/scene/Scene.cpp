@@ -51,6 +51,8 @@ Scene& Scene::operator=(const Scene& rhs)
     if (this == &rhs)
         return *this;
 
+    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+    std::unique_lock<std::shared_timed_mutex> rhsLock(rhs._modelMutex);
     _modelDescriptors = rhs._modelDescriptors;
     _backgroundMaterial = rhs._backgroundMaterial;
     _lights = rhs._lights;
@@ -68,10 +70,18 @@ void Scene::reset()
 
 size_t Scene::getSizeInBytes() const
 {
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
     size_t sizeInBytes = 0;
     for (auto modelDescriptor : _modelDescriptors)
         sizeInBytes += modelDescriptor->getModel().getSizeInBytes();
     return sizeInBytes;
+}
+
+size_t Scene::getNumModels() const
+{
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    const auto size = _modelDescriptors.size();
+    return size;
 }
 
 void Scene::addLight(LightPtr light)
@@ -99,19 +109,25 @@ void Scene::clearLights()
     _lights.clear();
 }
 
-void Scene::addModel(ModelPtr model, const std::string& name,
-                     const std::string& path, const ModelMetadata& metadata)
+ModelDescriptorPtr Scene::addModel(ModelPtr model, const std::string& name,
+                                   const std::string& path,
+                                   const ModelMetadata& metadata)
 {
     model->buildBoundingBox();
     model->commit();
-    _modelDescriptors.push_back(
+
+    auto modelDesc =
         std::make_shared<ModelDescriptor>(_modelID++, name, path, metadata,
-                                          std::move(model)));
+                                          std::move(model));
+    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+    _modelDescriptors.push_back(modelDesc);
     markModified();
+    return modelDesc;
 }
 
 void Scene::removeModel(const size_t id)
 {
+    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
     auto i = std::remove_if(_modelDescriptors.begin(), _modelDescriptors.end(),
                             [id](auto desc) { return id == desc->getID(); });
     if (i == _modelDescriptors.end())
@@ -252,25 +268,31 @@ VolumeHandlerPtr Scene::getVolumeHandler()
 
 bool Scene::empty() const
 {
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
     for (auto modelDescriptor : _modelDescriptors)
         if (!modelDescriptor->getModel().empty())
             return false;
     return true;
 }
 
-void Scene::load(Blob&& blob, const Matrix4f& transformation,
-                 const size_t materialID, Loader::UpdateCallback cb)
+ModelDescriptorPtr Scene::load(Blob&& blob, const Matrix4f& transformation,
+                               const size_t materialID,
+                               Loader::UpdateCallback cb)
 {
     auto loader = _loaderRegistry.createLoader(blob.type);
     loader->setProgressCallback(cb);
-    loader->importFromBlob(std::move(blob), *this, 0, transformation,
-                           materialID);
+    auto model = loader->importFromBlob(std::move(blob), *this, 0,
+                                        transformation, materialID);
     saveToCacheFile();
+    return model;
 }
 
-void Scene::load(const std::string& path, const Matrix4f& transformation,
-                 const size_t materialID, Loader::UpdateCallback cb)
+ModelDescriptorPtr Scene::load(const std::string& path,
+                               const Matrix4f& transformation,
+                               const size_t materialID,
+                               Loader::UpdateCallback cb)
 {
+    ModelDescriptorPtr model;
     if (fs::is_directory(path))
     {
         fs::directory_iterator begin(path), end;
@@ -304,8 +326,8 @@ void Scene::load(const std::string& path, const Matrix4f& transformation,
             };
 
             loader->setProgressCallback(progressCb);
-            loader->importFromFile(currentPath, *this, index++, transformation,
-                                   materialID);
+            model = loader->importFromFile(currentPath, *this, index++,
+                                           transformation, materialID);
 
             totalProgress += 1.f / numFiles;
         }
@@ -314,9 +336,11 @@ void Scene::load(const std::string& path, const Matrix4f& transformation,
     {
         auto loader = _loaderRegistry.createLoader(path);
         loader->setProgressCallback(cb);
-        loader->importFromFile(path, *this, 0, transformation, materialID);
+        model =
+            loader->importFromFile(path, *this, 0, transformation, materialID);
     }
     saveToCacheFile();
+    return model;
 }
 
 void Scene::saveToCacheFile()
@@ -342,6 +366,7 @@ void Scene::saveToCacheFile()
     BRAYNS_INFO << "Version: " << version << std::endl;
 
     // Save geometry
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
     size_t nbElements = _modelDescriptors.size();
     file.write((char*)&nbElements, sizeof(size_t));
     for (auto modelDescriptor : _modelDescriptors)
@@ -817,6 +842,7 @@ void Scene::buildDefault()
 
 void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 {
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
     for (auto modelDescriptors : _modelDescriptors)
         modelDescriptors->getModel().setMaterialsColorMap(colorMap);
     markModified();
@@ -824,6 +850,7 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 
 void Scene::_computeBounds()
 {
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
     size_t nbEnabledModels{0};
     _bounds.reset();
     for (auto modelDescriptor : _modelDescriptors)

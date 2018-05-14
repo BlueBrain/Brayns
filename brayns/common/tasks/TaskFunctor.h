@@ -40,6 +40,7 @@ namespace brayns
 class TaskFunctor
 {
 public:
+    /** message, increment, amount */
     using ProgressFunc = std::function<void(std::string, float, float)>;
 
     /** Set the function when progress() is called. */

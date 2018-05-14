@@ -27,7 +27,6 @@ namespace brayns
 {
 struct BinaryError
 {
-    size_t index{0}; // which file param had error
     std::vector<std::string> supportedTypes;
 };
 

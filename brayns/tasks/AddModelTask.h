@@ -20,35 +20,17 @@
 
 #pragma once
 
-#include <brayns/common/tasks/TaskFunctor.h>
-#include <brayns/common/types.h>
+#include <brayns/common/tasks/Task.h>
 
 namespace brayns
 {
 /**
- * A task functor which loads data from blob or file path and adds the loaded
- * data to the scene.
+ * A task which loads data from the path of the given params and adds the loaded
+ * model to the engines' scene.
  */
-class LoadDataFunctor : public TaskFunctor
+class AddModelTask : public Task<ModelDescriptorPtr>
 {
 public:
-    LoadDataFunctor(EnginePtr engine);
-    LoadDataFunctor(LoadDataFunctor&&) = default;
-    void operator()(Blob&& blob);
-    void operator()(const std::string& path);
-
-private:
-    void _performLoad(const std::function<void()>& loadData);
-
-    void _loadData(Blob&& blob);
-    void _loadData(const std::string& path);
-
-    void _updateProgress(const std::string& message, const size_t increment);
-
-    std::function<void(std::string, float)> _getProgressFunc();
-
-    EnginePtr _engine;
-    size_t _currentProgress{0};
-    size_t _nextTic{0};
+    AddModelTask(const ModelParams& model, EnginePtr engine);
 };
 }

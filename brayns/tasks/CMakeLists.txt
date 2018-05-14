@@ -4,16 +4,16 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSTASKS_SOURCES
-  LoadDataFunctor.cpp
-  UploadBinaryTask.cpp
-  UploadPathTask.cpp
+  AddModelFromBlobTask.cpp
+  AddModelTask.cpp
+  LoadModelFunctor.cpp
 )
 
 set(BRAYNSTASKS_PUBLIC_HEADERS
+  AddModelFromBlobTask.h
+  AddModelTask.h
+  LoadModelFunctor.h
   errors.h
-  LoadDataFunctor.h
-  UploadBinaryTask.h
-  UploadPathTask.h
 )
 
 set(BRAYNSTASKS_INCLUDE_NAME brayns/tasks)

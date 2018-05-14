@@ -45,8 +45,9 @@ public:
      * @param index Index of the element, mainly used for material assignment
      * @param transformation the transformation to apply for the added model
      * @param defaultMaterialId the default material to use
+     * @return the model that has been added to the scene
      */
-    virtual void importFromBlob(
+    virtual ModelDescriptorPtr importFromBlob(
         Blob&& blob, Scene& scene, const size_t index = 0,
         const Matrix4f& transformation = Matrix4f(),
         const size_t defaultMaterialId = NO_MATERIAL) = 0;
@@ -59,8 +60,9 @@ public:
      * @param index Index of the element, mainly used for material assignment
      * @param transformation the transformation to apply for the added model
      * @param defaultMaterialId the default material to use
+     * @return the model that has been added to the scene
      */
-    virtual void importFromFile(
+    virtual ModelDescriptorPtr importFromFile(
         const std::string& filename, Scene& scene, const size_t index = 0,
         const Matrix4f& transformation = Matrix4f(),
         const size_t defaultMaterialId = NO_MATERIAL) = 0;
