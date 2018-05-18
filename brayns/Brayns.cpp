@@ -38,7 +38,6 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/io/CircuitLoader.h>
 #include <brayns/io/MeshLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
@@ -59,6 +58,7 @@
 #endif
 
 #ifdef BRAYNS_USE_BRION
+#include <brayns/io/CircuitLoader.h>
 #include <brayns/io/MorphologyLoader.h>
 #include <brayns/io/NESTLoader.h>
 #include <servus/uri.h>
@@ -298,6 +298,7 @@ struct Brayns::Impl : public PluginAPI
                                 _parametersManager.getGeometryParameters()] {
                             return std::make_unique<XYZBLoader>(params);
                         });
+#if (BRAYNS_USE_BRION)
         REGISTER_LOADER(MorphologyLoader,
                         [& params =
                                 _parametersManager.getGeometryParameters()] {
@@ -308,6 +309,7 @@ struct Brayns::Impl : public PluginAPI
                 params.getApplicationParameters(),
                 params.getGeometryParameters());
         });
+#endif
 
         const auto& paths =
             _parametersManager.getApplicationParameters().getInputPaths();

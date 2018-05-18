@@ -5,7 +5,6 @@
 
 set(BRAYNSIO_SOURCES
   algorithms/MetaballsGenerator.cpp
-  CircuitLoader.cpp
   MeshLoader.cpp
   MolecularSystemReader.cpp
   ProteinLoader.cpp
@@ -17,7 +16,6 @@ set(BRAYNSIO_SOURCES
 
 set(BRAYNSIO_PUBLIC_HEADERS
   algorithms/MetaballsGenerator.h
-  CircuitLoader.h
   MeshLoader.h
   MolecularSystemReader.h
   ProteinLoader.h
@@ -38,15 +36,17 @@ set(BRAYNSIO_LINK_LIBRARIES
 
 if(BRAYNS_BRION_ENABLED)
   list(APPEND BRAYNSIO_SOURCES
-      MorphologyLoader.cpp
-      NESTLoader.cpp
-      simulation/CircuitSimulationHandler.cpp)
+    CircuitLoader.cpp
+    MorphologyLoader.cpp
+    NESTLoader.cpp
+    simulation/CircuitSimulationHandler.cpp)
   list(APPEND BRAYNSIO_HEADERS
-      MorphologyLoader.h
-      NESTLoader.h
-      simulation/CircuitSimulationHandler.h)
+    CircuitLoader.h
+    MorphologyLoader.h
+    NESTLoader.h
+    simulation/CircuitSimulationHandler.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES
-      PUBLIC Brion PRIVATE Brain ${HDF5_LIBRARIES})
+    PUBLIC Brion PRIVATE Brain ${HDF5_LIBRARIES})
 endif()
 
 set(BRAYNSIO_OMIT_LIBRARY_HEADER ON)
