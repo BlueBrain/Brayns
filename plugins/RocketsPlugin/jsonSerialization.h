@@ -147,9 +147,15 @@ STATICJSON_DECLARE_ENUM(brayns::TextureType,
 
 namespace staticjson
 {
+inline void init(brayns::Chunk* c, ObjectHandler* h)
+{
+    h->add_property("id", &c->id, Flags::Optional);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
 inline void init(brayns::BinaryParam* s, ObjectHandler* h)
 {
     h->add_property("bounding_box", &s->_boundingBox, Flags::Optional);
+    h->add_property("chunks_id", &s->chunksID);
     h->add_property("name", &s->_name, Flags::Optional);
     h->add_property("path", &s->_path);
     h->add_property("size", &s->size);

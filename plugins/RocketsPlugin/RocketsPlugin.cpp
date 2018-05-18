@@ -48,7 +48,7 @@
 namespace
 {
 const std::string ENDPOINT_API_VERSION = "v1/";
-const std::string ENDPOINT_ANIMATION_PARAMS = "animation-params";
+const std::string ENDPOINT_ANIMATION_PARAMS = "animation-parameters";
 const std::string ENDPOINT_APP_PARAMS = "application-parameters";
 const std::string ENDPOINT_CAMERA = "camera";
 const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
@@ -67,6 +67,7 @@ const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
 const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 const std::string METHOD_ADD_MODEL = "add-model";
+const std::string METHOD_CHUNK = "chunk";
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_QUIT = "quit";
 const std::string METHOD_REMOVE_MODEL = "remove-model";
@@ -197,22 +198,19 @@ public:
 #ifdef BRAYNS_USE_LIBUV
             if (uvw::Loop::getDefault()->alive())
             {
-                _rocketsServer.reset(
-                    new rockets::Server{uv_default_loop(),
-                                        appParams.getHttpServerURI(),
-                                        "rockets"});
+                _rocketsServer = std::make_unique<rockets::Server>(
+                    uv_default_loop(), appParams.getHttpServerURI(), "rockets");
                 _manualProcessing = false;
             }
             else
 #endif
-                _rocketsServer.reset(
-                    new rockets::Server{appParams.getHttpServerURI(), "rockets",
-                                        0});
+                _rocketsServer = std::make_unique<rockets::Server>(
+                    appParams.getHttpServerURI(), "rockets", 0);
 
             BRAYNS_INFO << "Rockets server running on "
                         << _rocketsServer->getURI() << std::endl;
 
-            _jsonrpcServer.reset(new JsonRpcServer(*_rocketsServer));
+            _jsonrpcServer = std::make_unique<JsonRpcServer>(*_rocketsServer);
 
             _parametersManager.getApplicationParameters().setHttpServerURI(
                 _rocketsServer->getURI());
@@ -350,6 +348,14 @@ public:
     {
         _jsonrpcServer->bind<P, R>(method, action);
         _handleSchema(method, buildJsonRpcSchema<P, R>(method, doc));
+    }
+
+    template <class P>
+    void _handleRPC(const std::string& method, const RpcDocumentation& doc,
+                    std::function<void(P)> action)
+    {
+        _jsonrpcServer->connect<P>(method, action);
+        _handleSchema(method, buildJsonRpcSchema<P>(method, doc));
     }
 
     void _handleRPC(const std::string& method, const std::string& description,
@@ -558,6 +564,7 @@ public:
         _handleSnapshot();
 
         _handleRequestModelUpload();
+        _handleChunk();
         _handleAddModel();
 
         _handleRemoveModel();
@@ -786,6 +793,18 @@ public:
             METHOD_REQUEST_MODEL_UPLOAD, doc,
             std::bind(&BinaryRequests::createTask, std::ref(_binaryRequests),
                       std::placeholders::_1, std::placeholders::_2, _engine));
+    }
+
+    void _handleChunk()
+    {
+        RpcDocumentation doc{
+            "Indicate sending of a binary chunk after this message", "chunk",
+            "object with an ID of the chunk"};
+
+        _handleRPC<Chunk>(METHOD_CHUNK, doc,
+                          [& req = _binaryRequests](const auto& chunk) {
+                              req.setNextChunkID(chunk.id);
+                          });
     }
 
     void _handleAddModel()
