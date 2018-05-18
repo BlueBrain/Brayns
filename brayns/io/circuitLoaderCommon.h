@@ -22,7 +22,9 @@
 
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
+#include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/types.h>
 
 namespace brayns
 {
@@ -30,12 +32,13 @@ struct ParallelModelContainer
 {
 public:
     ParallelModelContainer(SpheresMap& s, CylindersMap& cy, ConesMap& co,
-                           TrianglesMeshMap& tm, Boxf& wb)
+                           TrianglesMeshMap& tm, Boxf& wb, Model& m)
         : spheres(s)
         , cylinders(cy)
         , cones(co)
         , trianglesMeshes(tm)
         , bounds(wb)
+        , model(m)
     {
     }
 
@@ -64,5 +67,6 @@ public:
     ConesMap& cones;
     TrianglesMeshMap& trianglesMeshes;
     Boxf& bounds;
+    Model& model;
 };
 }

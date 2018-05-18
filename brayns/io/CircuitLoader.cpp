@@ -401,7 +401,8 @@ private:
                 TrianglesMeshMap triangleMeshes;
                 Boxf bounds;
                 ParallelModelContainer modelContainer(spheres, cylinders, cones,
-                                                      triangleMeshes, bounds);
+                                                      triangleMeshes, bounds,
+                                                      model);
                 const auto& uri = uris[morphologyIndex];
 
                 if (!morphLoader._importMorphology(

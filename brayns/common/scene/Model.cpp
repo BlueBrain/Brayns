@@ -118,10 +118,78 @@ void Model::addModel(ModelPtr model, const Transformations& transform)
     _modelsDirty = true;
 }
 
+uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
+                               const std::vector<size_t>& neighbours)
+{
+    _SDFGeometriesDirty = true;
+    const uint32_t geomIdx = _SDFGeometries.size();
+    _SDFGeometryIndices[materialId].push_back(geomIdx);
+
+    assert(_SDFGeometries.size() == _SDFNeighbours.size());
+
+    _SDFNeighbours.push_back(neighbours);
+    _SDFGeometries.push_back(geom);
+
+    switch (geom.type)
+    {
+    case brayns::SDFType::Sphere:
+    {
+        _bounds.merge(geom.center - Vector3f(geom.radius));
+        _bounds.merge(geom.center + Vector3f(geom.radius));
+        break;
+    }
+    case brayns::SDFType::Pill:
+    case brayns::SDFType::ConePill:
+    case brayns::SDFType::ConePillSigmoid:
+    {
+        const auto min = Vector3f{
+            std::min(geom.p0.x() - geom.radius, geom.p1.x() - geom.radius),
+            std::min(geom.p0.y() - geom.radius, geom.p1.y() - geom.radius),
+            std::min(geom.p0.z() - geom.radius, geom.p1.z() - geom.radius)};
+        const auto max = Vector3f{
+            std::max(geom.p0.x() + geom.radius, geom.p1.x() + geom.radius),
+            std::max(geom.p0.y() + geom.radius, geom.p1.y() + geom.radius),
+            std::max(geom.p0.z() + geom.radius, geom.p1.z() + geom.radius)};
+
+        _bounds.merge(min);
+        _bounds.merge(max);
+        break;
+    }
+    }
+
+    return geomIdx;
+}
+
+void Model::setSDFGeometryNeighbours(
+    size_t geometryIdx, const std::vector<size_t>& neighbourIndices)
+{
+    _SDFNeighbours[geometryIdx] = neighbourIndices;
+}
+
+void Model::buildSDFGeometryNeighboursFlat()
+{
+    const size_t numGeoms = _SDFGeometries.size();
+
+    _SDFNeighboursFlat.clear();
+
+    for (size_t geomI = 0; geomI < numGeoms; geomI++)
+    {
+        const size_t currOffset = _SDFNeighboursFlat.size();
+        const auto& neighsI = _SDFNeighbours[geomI];
+        if (!neighsI.empty())
+        {
+            _SDFGeometries[geomI].numNeighbours = neighsI.size();
+            _SDFGeometries[geomI].neighboursIndex = currOffset;
+            _SDFNeighboursFlat.insert(std::end(_SDFNeighboursFlat),
+                                      std::begin(neighsI), std::end(neighsI));
+        }
+    }
+}
+
 bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
-           _trianglesMeshesDirty || _modelsDirty;
+           _trianglesMeshesDirty || _SDFGeometriesDirty || _modelsDirty;
 }
 
 void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)

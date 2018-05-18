@@ -284,6 +284,12 @@ public:
         return _connectivityConfiguration._connectivityScale;
     }
 
+    bool getDampenBranchThicknessChangerate() const
+    {
+        return _dampenBranchThicknessChangerate;
+    }
+
+    bool getUseSDFGeometries() const { return _useSDFGeometries; }
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -311,6 +317,8 @@ protected:
     size_t _metaballsGridSize;
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
+    bool _dampenBranchThicknessChangerate;
+    bool _useSDFGeometries;
 
     // System parameters
     MemoryMode _memoryMode;
