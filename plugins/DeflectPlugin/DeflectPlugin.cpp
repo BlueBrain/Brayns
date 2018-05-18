@@ -333,9 +333,7 @@ private:
         deflectImage.compressionPolicy = _params.getCompression()
                                              ? deflect::COMPRESSION_ON
                                              : deflect::COMPRESSION_OFF;
-        deflect::ImageWrapper::swapYAxis((void*)_lastImage.data.data(),
-                                         _lastImage.size.x(),
-                                         _lastImage.size.y(), 4);
+        deflectImage.rowOrder = deflect::RowOrder::bottom_up;
 
         return static_cast<deflect::Stream&>(*_stream).sendAndFinish(
             deflectImage);
