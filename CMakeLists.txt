@@ -96,11 +96,15 @@ common_find_package(BBPTestData)
 common_find_package(Lunchbox)
 
 # OSPRay rendering engine
-common_find_package(ospray SYSTEM)
-if(OSPRAY_FOUND)
+common_find_package(ospray 1.3 SYSTEM)
+set(_ospray_unsupported_version 1.6)
+if(OSPRAY_FOUND AND OSPRAY_VERSION VERSION_LESS _ospray_unsupported_version)
   option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
 else()
   unset(BRAYNS_OSPRAY_ENABLED)
+  if(OSPRAY_FOUND)
+    message(WARNING "OSPRay version >= ${_ospray_unsupported_version} not supported")
+  endif()
 endif()
 
 # Image processing
