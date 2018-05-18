@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#pragma once
+
 #include <brayns/common/log.h>
 #include <brayns/tasks/AddModelFromBlobTask.h>
 #include <brayns/tasks/errors.h>
@@ -38,60 +40,71 @@ public:
     /**
      * Create and remember the AddModelFromBlobTask for upcoming receives of
      * binary data to delegate them to the task.
-     *
-     * Only one upload per client at a time is permitted.
      */
     auto createTask(const BinaryParam& param, uintptr_t clientID,
                     EnginePtr engine)
     {
-        if (_binaryRequests.count(clientID) != 0)
-            throw ALREADY_PENDING_REQUEST;
-
         auto task = std::make_shared<AddModelFromBlobTask>(param, engine);
-        _binaryRequests.emplace(clientID, task);
-        _requests.emplace(task, clientID);
+
+        std::lock_guard<std::mutex> lock(_mutex);
+        _requests.emplace(std::make_pair(clientID, param.chunksID), task);
+        _nextChunkID = param.chunksID;
 
         return task;
     }
 
+    void setNextChunkID(const size_t id) { _nextChunkID = id; }
     /** The receive and delegate of blobs to the AddModelFromBlobTask. */
     rockets::ws::Response processMessage(const rockets::ws::Request& wsRequest)
     {
-        if (_binaryRequests.count(wsRequest.clientID) == 0)
+        std::lock_guard<std::mutex> lock(_mutex);
+        const auto key = std::make_pair(wsRequest.clientID, _nextChunkID);
+        if (_requests.count(key) == 0)
         {
             BRAYNS_ERROR << "Missing RPC " << METHOD_REQUEST_MODEL_UPLOAD
                          << " or cancelled?" << std::endl;
             return {};
         }
 
-        _binaryRequests[wsRequest.clientID]->appendBlob(wsRequest.message);
+        _requests[key]->appendBlob(wsRequest.message);
         return {};
     }
 
     /** Remove pending request in case the client connection closed. */
     void removeRequest(const uintptr_t clientID)
     {
-        auto i = _binaryRequests.find(clientID);
-        if (i == _binaryRequests.end())
-            return;
-
-        i->second->cancel();
-        _binaryRequests.erase(i);
+        std::lock_guard<std::mutex> lock(_mutex);
+        for (auto i = _requests.begin(); i != _requests.end();)
+        {
+            if (i->first.first != clientID)
+            {
+                ++i;
+                continue;
+            }
+            i->second->cancel();
+            i = _requests.erase(i);
+        }
     }
 
     /** Remove finished task. */
     void removeTask(TaskPtr task)
     {
-        auto i = _requests.find(task);
-        if (i == _requests.end())
-            return;
-
-        removeRequest(i->second);
-        _requests.erase(i);
+        std::lock_guard<std::mutex> lock(_mutex);
+        for (auto i = _requests.begin(); i != _requests.end();)
+        {
+            if (i->second != task)
+            {
+                ++i;
+                continue;
+            }
+            i = _requests.erase(i);
+        }
     }
 
 private:
-    std::map<uintptr_t, std::shared_ptr<AddModelFromBlobTask>> _binaryRequests;
-    std::map<TaskPtr, uintptr_t> _requests;
+    using ClientRequestID = std::pair<uintptr_t, size_t>;
+    std::map<ClientRequestID, std::shared_ptr<AddModelFromBlobTask>> _requests;
+    size_t _nextChunkID{0};
+    std::mutex _mutex;
 };
 }

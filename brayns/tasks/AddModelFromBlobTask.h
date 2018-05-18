@@ -31,10 +31,16 @@ SERIALIZATION_ACCESS(BinaryParam)
 
 namespace brayns
 {
+struct Chunk
+{
+    size_t id;
+};
+
 struct BinaryParam : ModelParams
 {
     size_t size{0};   //!< size in bytes of file
     std::string type; //!< file extension or type (MESH, POINTS, CIRCUIT)
+    size_t chunksID{0};
     SERIALIZATION_FRIEND(BinaryParam)
 };
 

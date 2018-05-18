@@ -29,6 +29,7 @@
 #include <fstream>
 
 const std::string REQUEST_MODEL_UPLOAD("request-model-upload");
+const std::string CHUNK("chunk");
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
@@ -354,25 +355,113 @@ BOOST_AUTO_TEST_CASE(obj)
     BOOST_CHECK_EQUAL(model.getName(), "bennu");
 }
 
-BOOST_AUTO_TEST_CASE(second_request_with_first_one_not_finished)
+BOOST_AUTO_TEST_CASE(concurrent_requests)
 {
-    brayns::BinaryParam params;
-    params.size = 4;
-    params.type = "xyz";
+    brayns::BinaryParam xyzParams;
+    xyzParams.size = [] {
+        std::ifstream file(BRAYNS_TESTDATA + std::string("files/monkey.xyz"),
+                           std::ios::binary | std::ios::ate);
+        return file.tellg();
+    }();
+    xyzParams.type = "xyz";
+    xyzParams.chunksID = 1;
+    xyzParams.setPath("monkey.xyz");
 
-    auto responseFuture =
+    auto xyzRequest =
         getJsonRpcClient()
             .request<brayns::BinaryParam, brayns::ModelDescriptor>(
-                REQUEST_MODEL_UPLOAD, {params});
+                REQUEST_MODEL_UPLOAD, {xyzParams});
 
-    try
+    std::ifstream xyzFile(BRAYNS_TESTDATA + std::string("files/monkey.xyz"),
+                          std::ios::binary);
+
+    ///////////////////
+
+    brayns::BinaryParam objParams;
+    objParams.size = [] {
+        std::ifstream file(BRAYNS_TESTDATA + std::string("files/bennu.obj"),
+                           std::ios::binary | std::ios::ate);
+        return file.tellg();
+    }();
+    objParams.type = "obj";
+    objParams.chunksID = 2;
+    objParams.setName("bennu");
+
+    auto objRequest =
+        getJsonRpcClient()
+            .request<brayns::BinaryParam, brayns::ModelDescriptor>(
+                REQUEST_MODEL_UPLOAD, {objParams});
+
+    std::ifstream objFile(BRAYNS_TESTDATA + std::string("files/bennu.obj"),
+                          std::ios::binary);
+
+    ///////////////////
+
+    auto asyncWait = std::async(std::launch::async, [&xyzRequest, &objRequest] {
+        while (!xyzRequest.is_ready() || !objRequest.is_ready())
+            process();
+    });
+
+    std::array<char, 1024> buffer;
+    bool xyzDone = false;
+    bool objDone = false;
+    while (!xyzDone || !objDone)
     {
-        makeRequest<brayns::BinaryParam, brayns::ModelDescriptor>(
-            REQUEST_MODEL_UPLOAD, {params});
-        BOOST_REQUIRE(false);
+        if (!xyzDone)
+        {
+            if (xyzFile.read(buffer.data(), buffer.size()))
+            {
+                getJsonRpcClient().notify<brayns::Chunk>(CHUNK,
+                                                         {xyzParams.chunksID});
+                const std::streamsize size = xyzFile.gcount();
+                getWsClient().sendBinary(buffer.data(), size);
+            }
+            else
+            {
+                // read & send last chunk
+                const std::streamsize size = xyzFile.gcount();
+                if (size != 0)
+                {
+                    getJsonRpcClient().notify<brayns::Chunk>(
+                        CHUNK, {xyzParams.chunksID});
+                    xyzFile.read(buffer.data(), size);
+                    getWsClient().sendBinary(buffer.data(), size);
+                }
+                xyzDone = true;
+            }
+        }
+
+        if (!objDone)
+        {
+            if (objFile.read(buffer.data(), buffer.size()))
+            {
+                getJsonRpcClient().notify<brayns::Chunk>(CHUNK,
+                                                         {objParams.chunksID});
+                const std::streamsize size = objFile.gcount();
+                getWsClient().sendBinary(buffer.data(), size);
+            }
+            else
+            {
+                // read & send last chunk
+                const std::streamsize size = objFile.gcount();
+                if (size != 0)
+                {
+                    getJsonRpcClient().notify<brayns::Chunk>(
+                        CHUNK, {objParams.chunksID});
+                    objFile.read(buffer.data(), size);
+                    getWsClient().sendBinary(buffer.data(), size);
+                }
+                objDone = true;
+            }
+        }
     }
-    catch (const rockets::jsonrpc::response_error& e)
-    {
-        BOOST_CHECK_EQUAL(e.code, -1730);
-    }
+
+    asyncWait.get();
+
+    const auto& xyzModel = xyzRequest.get();
+    BOOST_CHECK_EQUAL(xyzModel.getName(), "monkey");
+    BOOST_CHECK_EQUAL(xyzModel.getPath(), "monkey.xyz");
+
+    const auto& objModel = objRequest.get();
+    BOOST_CHECK_EQUAL(objModel.getName(), "bennu");
 }

@@ -43,8 +43,6 @@ public:
     const BinaryError error;
 };
 
-const TaskRuntimeError ALREADY_PENDING_REQUEST{"Already pending binary request",
-                                               -1730};
 const TaskRuntimeError MISSING_PARAMS{"Missing params", -1731};
 
 inline BinaryTaskError UNSUPPORTED_TYPE(const BinaryError& error)

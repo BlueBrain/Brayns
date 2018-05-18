@@ -187,7 +187,7 @@ public:
     auto& getJsonRpcClient() { return _client; }
     void process()
     {
-        _wsClient.process(10);
+        _wsClient.process(CLIENT_PROCESS_TIMEOUT);
         _brayns->preRender();
     }
 

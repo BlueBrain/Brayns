@@ -118,6 +118,37 @@ std::string buildJsonRpcSchema(const std::string& title,
     return buffer.GetString();
 }
 
+/**
+ * @return JSON schema for RPC with one parameter and no return value, according
+ * to
+ * http://www.simple-is-better.org/json-rpc/jsonrpc20-schema-service-descriptor.html
+ */
+template <class P>
+std::string buildJsonRpcSchema(const std::string& title,
+                               const RpcDocumentation& doc)
+{
+    using namespace rapidjson;
+    Document schema(kObjectType);
+    schema.AddMember(StringRef("title"), StringRef(title.c_str()),
+                     schema.GetAllocator());
+    schema.AddMember(StringRef("description"),
+                     StringRef(doc.functionDescription.c_str()),
+                     schema.GetAllocator());
+    schema.AddMember(StringRef("type"), StringRef("method"),
+                     schema.GetAllocator());
+
+    Value params(kArrayType);
+    auto paramSchema =
+        getRPCParameterSchema<P>(doc.paramName, doc.paramDescription);
+    params.PushBack(paramSchema, schema.GetAllocator());
+    schema.AddMember(StringRef("params"), params, schema.GetAllocator());
+
+    StringBuffer buffer;
+    PrettyWriter<StringBuffer> writer(buffer);
+    schema.Accept(writer);
+    return buffer.GetString();
+}
+
 /** @return JSON schema for RPC with no parameter and no return value. */
 std::string buildJsonRpcSchema(const std::string& title,
                                const std::string& description)
