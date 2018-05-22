@@ -632,7 +632,8 @@ private:
                 enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
 
             const bool dampenThickness =
-                _geometryParameters.getDampenBranchThicknessChangerate();
+                _geometryParameters
+                    .getMorphologyDampenBranchThicknessChangerate();
 
             const bool useSDFGeometries =
                 _geometryParameters.getUseSDFGeometries();

@@ -284,9 +284,9 @@ public:
         return _connectivityConfiguration._connectivityScale;
     }
 
-    bool getDampenBranchThicknessChangerate() const
+    bool getMorphologyDampenBranchThicknessChangerate() const
     {
-        return _dampenBranchThicknessChangerate;
+        return _morphologyDampenBranchThicknessChangerate;
     }
 
     bool getUseSDFGeometries() const { return _useSDFGeometries; }
@@ -317,7 +317,7 @@ protected:
     size_t _metaballsGridSize;
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
-    bool _dampenBranchThicknessChangerate;
+    bool _morphologyDampenBranchThicknessChangerate;
     bool _useSDFGeometries;
 
     // System parameters

@@ -66,8 +66,8 @@ const std::string PARAM_METABALLS_GRIDSIZE = "metaballs-grid-size";
 const std::string PARAM_METABALLS_THRESHOLD = "metaballs-threshold";
 const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
-const std::string PARAM_DAMPEN_BRANCH_THICKNESS_CHANGERATE =
-    "dampen-branch-thickness-changerate";
+const std::string PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE =
+    "morphology-dampen-branch-thickness-changerate";
 const std::string PARAM_USE_SDF_GEOMETRIES = "use-sdf-geometries";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_CONNECTIVITY_FILE = "connectivity-file";
@@ -111,7 +111,7 @@ GeometryParameters::GeometryParameters()
     , _metaballsGridSize(0)
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
-    , _dampenBranchThicknessChangerate(false)
+    , _morphologyDampenBranchThicknessChangerate(false)
     , _useSDFGeometries(false)
     , _memoryMode(MemoryMode::shared)
 {
@@ -178,7 +178,8 @@ GeometryParameters::GeometryParameters()
         PARAM_METABALLS_SAMPLES_FROM_SOMA.c_str(), po::value<size_t>(),
         "Number of morphology samples (or segments) from soma used by "
         "automated meshing [int]")(
-        PARAM_DAMPEN_BRANCH_THICKNESS_CHANGERATE.c_str(), po::value<bool>(),
+        PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE.c_str(),
+        po::value<bool>(),
         "Dampens the thickness rate of change for branches in the "
         "morphology.")(PARAM_USE_SDF_GEOMETRIES.c_str(), po::value<bool>(),
                        "Use SDF geometries for drawing the morphology.")(
@@ -329,9 +330,9 @@ void GeometryParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_METABALLS_SAMPLES_FROM_SOMA))
         _metaballsSamplesFromSoma =
             vm[PARAM_METABALLS_SAMPLES_FROM_SOMA].as<size_t>();
-    if (vm.count(PARAM_DAMPEN_BRANCH_THICKNESS_CHANGERATE))
-        _dampenBranchThicknessChangerate =
-            vm[PARAM_DAMPEN_BRANCH_THICKNESS_CHANGERATE].as<bool>();
+    if (vm.count(PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE))
+        _morphologyDampenBranchThicknessChangerate =
+            vm[PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE].as<bool>();
     if (vm.count(PARAM_USE_SDF_GEOMETRIES))
         _useSDFGeometries = vm[PARAM_USE_SDF_GEOMETRIES].as<bool>();
     if (vm.count(PARAM_CIRCUIT_USES_SIMULATION_MODEL))
