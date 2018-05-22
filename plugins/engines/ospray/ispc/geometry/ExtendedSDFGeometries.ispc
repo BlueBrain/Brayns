@@ -47,8 +47,8 @@ inline float sdSphere(const vec3f &p, const vec3f c, float r)
 
 inline float sdCapsule(const vec3f &p, const vec3f a, const vec3f b, float r)
 {
-    vec3f pa = p - a, ba = b - a;
-    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    const vec3f pa = p - a, ba = b - a;
+    const float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
     return length(pa - ba * h) - r;
 }
 
@@ -60,7 +60,7 @@ inline float mix(const float x, const float y, const float a)
 // polynomial smooth min (k = 0.1);
 inline float sminPoly(const float a, const float b, const float k)
 {
-    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+    const float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
     return mix(b, a, h) - k * h * (1.0 - h);
 }
 
@@ -108,11 +108,11 @@ inline varying bool intersectBox(Ray &ray, const vec3f aabbMin,
     if (r.dir.z == 0)
         r.dir.z = epsilon;
 
-    vec3f invR = 1.f / r.dir;
-    vec3f tbot = invR * (aabbMin - r.org);
-    vec3f ttop = invR * (aabbMax - r.org);
-    vec3f tmin = min(ttop, tbot);
-    vec3f tmax = max(ttop, tbot);
+    const vec3f invR = 1.f / r.dir;
+    const vec3f tbot = invR * (aabbMin - r.org);
+    const vec3f ttop = invR * (aabbMax - r.org);
+    const vec3f tmin = min(ttop, tbot);
+    const vec3f tmax = max(ttop, tbot);
     vec2f t = make_vec2f(max(tmin.x, tmin.y), max(tmin.x, tmin.z));
     t0 = max(t.x, t.y);
     t = make_vec2f(min(tmax.x, tmax.y), min(tmax.x, tmax.z));
