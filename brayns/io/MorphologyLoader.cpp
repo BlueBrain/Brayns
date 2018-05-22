@@ -677,19 +677,20 @@ private:
                 const size_t materialId =
                     materialFunc(brain::neuron::SectionType::soma);
                 const auto somaPosition = soma.getCentroid() + translation;
-                const auto radius = _getCorrectedRadius(soma.getMeanRadius());
+                const auto somaRadius =
+                    _getCorrectedRadius(soma.getMeanRadius());
                 const auto textureCoordinates =
                     _getIndexAsTextureCoordinates(offset);
 
                 if (useSDFGeometries)
                 {
-                    _connectSDFSomaChildren(somaPosition, radius, materialId,
-                                            soma.getChildren(),
+                    _connectSDFSomaChildren(somaPosition, somaRadius,
+                                            materialId, soma.getChildren(),
                                             sdfMorphologyData);
                 }
                 else
                 {
-                    model.addSphere(materialId, {somaPosition, radius, 0.f,
+                    model.addSphere(materialId, {somaPosition, somaRadius, 0.f,
                                                  textureCoordinates});
 
                     if (_geometryParameters.getCircuitUseSimulationModel())
@@ -706,7 +707,7 @@ private:
                                                   samples[0].y(),
                                                   samples[0].z()};
                             model.addCone(materialId,
-                                          {somaPosition, sample, radius,
+                                          {somaPosition, sample, somaRadius,
                                            _getCorrectedRadius(samples[0].w() *
                                                                0.5f),
                                            0.f, textureCoordinates});
