@@ -182,11 +182,9 @@ struct Brayns::Impl : public PluginAPI
             return false;
 
         auto& scene = _engine->getScene();
+        scene.commit();
         if (scene.isModified())
-        {
-            scene.commit();
             _finishLoadScene();
-        }
 
         _updateAnimation();
 
