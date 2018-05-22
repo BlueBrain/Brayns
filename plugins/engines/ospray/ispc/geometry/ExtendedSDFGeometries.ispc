@@ -21,7 +21,6 @@
  */
 
 // ospray
-#include "math/random.ih"
 #include "ospray/SDK/common/Model.ih"
 #include "ospray/SDK/common/Ray.ih"
 #include "ospray/SDK/geometry/Geometry.ih"
