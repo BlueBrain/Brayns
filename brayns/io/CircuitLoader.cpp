@@ -192,6 +192,11 @@ public:
         return {};
     }
 
+    const GeometryParameters& geometryParameters() const
+    {
+        return _geometryParameters;
+    }
+
 private:
     /**
      * @brief _getMaterialFromSectionType return a material determined by the
@@ -481,7 +486,9 @@ ModelDescriptorPtr CircuitLoader::importFromFile(
     const std::string& filename, Scene& scene, const size_t /*index*/,
     const Matrix4f& /*transformation*/, const size_t /*materialID*/)
 {
-    return _impl->importCircuit(filename, {}, "", scene);
+    return _impl->importCircuit(
+        filename, _impl->geometryParameters().getCircuitTargetsAsStrings(),
+        _impl->geometryParameters().getCircuitReport(), scene);
 }
 
 bool CircuitLoader::importCircuit(const servus::URI& uri,
