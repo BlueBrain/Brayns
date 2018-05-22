@@ -346,8 +346,8 @@ private:
     };
 
     /**
-     * @brief _connectSDFSomaChildren Creates an SDF soma by adding and
-     * connecting the soma children using cone pills
+     * Creates an SDF soma by adding and connecting the soma children using cone
+     * pills
      */
     void _connectSDFSomaChildren(const Vector3f& somaPosition,
                                  const float somaRadius,
@@ -380,8 +380,8 @@ private:
     }
 
     /**
-     * @brief _connectSDFBifurcations Goes through all bifurcation spheres and
-     * connects to all SDF geometries it is overlapping.
+     * Goes through all bifurcation spheres and connects to all SDF geometries
+     * it is overlapping.
      */
     void _connectSDFBifurcations(SDFMorphologyData& sdfMorphologyData) const
     {
@@ -412,8 +412,7 @@ private:
     }
 
     /**
-     * @brief _finalizeSDFGeometries Calculates all neighbours and adds the
-     * geometries to the model.
+     * Calculates all neighbours and adds the geometries to the model container.
      */
     void _finalizeSDFGeometries(ParallelModelContainer& modelContainer,
                                 SDFMorphologyData& sdfMorphologyData) const
@@ -461,9 +460,8 @@ private:
     }
 
     /**
-     * @brief _calculateMorphologyTreeStructure Calculates the structure of the
-     * morphology tree by finding overlapping beginnings and endings of the
-     * sections.
+     * Calculates the structure of the morphology tree by finding overlapping
+     * beginnings and endings of the sections.
      */
     MorphologyTreeStructure _calculateMorphologyTreeStructure(
         const brain::neuron::Sections& sections,
