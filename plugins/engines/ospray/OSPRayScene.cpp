@@ -241,7 +241,6 @@ bool OSPRayScene::commitTransferFunctionData()
         ospCommit(impl);
     }
     _transferFunction.resetModified();
-    markModified();
     return true;
 }
 
@@ -303,7 +302,6 @@ bool OSPRayScene::commitVolumeData()
             ospSet1f(impl, "volumeEpsilon", epsilon);
         }
     }
-    markModified();
     return true;
 }
 
@@ -337,7 +335,6 @@ bool OSPRayScene::commitSimulationData()
         ospSet1i(impl, "simulationDataSize",
                  _simulationHandler->getFrameSize());
     }
-    markModified();
     return true;
 }
 
