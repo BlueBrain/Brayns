@@ -610,11 +610,12 @@ private:
        * URI
        * @param uri URI of the morphology
        * @param index Index of the current morphology
+       * @param materialFunc A function mapping brain::neuron::SectionType to a
+       * material id
        * @param transformation Transformation to apply to the morphology
-       * @param material Material that is forced in case geometry parameters
-       * do not apply
        * @param compartmentReport Compartment report to map to the morphology
-       * @param scene Scene to which the morphology should be loaded into
+       * @param model Model container to whichh the morphology should be loaded
+       * into
        * @return True if the loading was successful, false otherwise
        */
     bool _importMorphologyFromURI(const servus::URI& uri, const uint64_t index,
