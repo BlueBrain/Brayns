@@ -473,9 +473,20 @@ private:
      * sections.
      */
     MorphologyTreeStructure _calculateMorphologyTreeStructure(
-        const brain::neuron::Sections& sections) const
+        const brain::neuron::Sections& sections,
+        const bool dampenThickness) const
     {
         const size_t numSections = sections.size();
+
+        if (!dampenThickness)
+        {
+            MorphologyTreeStructure mts;
+            mts.sectionTraverseOrder.resize(numSections);
+            mts.bifurcationParent.resize(numSections, -1);
+            std::iota(mts.sectionTraverseOrder.begin(),
+                      mts.sectionTraverseOrder.end(), 0);
+            return mts;
+        }
 
         std::vector<std::pair<float, Vector3f>> bifurcationPosition(
             numSections,
@@ -734,7 +745,7 @@ private:
             float previousRadius = 0;
             const auto& sections = morphology.getSections(sectionTypes);
             const auto morphologyTree =
-                _calculateMorphologyTreeStructure(sections);
+                _calculateMorphologyTreeStructure(sections, dampenThickness);
             std::vector<float> sectionEndRadius(sections.size(), -1.0f);
 
             // Dendrites and axon
