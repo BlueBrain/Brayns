@@ -395,14 +395,7 @@ private:
                 ++current;
                 _parent.updateProgress(message.str(), current, uris.size());
 
-                SpheresMap spheres;
-                CylindersMap cylinders;
-                ConesMap cones;
-                TrianglesMeshMap triangleMeshes;
-                Boxf bounds;
-                ParallelModelContainer modelContainer(spheres, cylinders, cones,
-                                                      triangleMeshes, bounds,
-                                                      model);
+                ParallelModelContainer modelContainer;
                 const auto& uri = uris[morphologyIndex];
 
                 if (!morphLoader._importMorphology(
@@ -416,31 +409,15 @@ private:
 #pragma omp atomic
                     ++loadingFailures;
 #pragma omp critical
-                for (const auto& sphere : spheres)
-                {
-                    const auto index = sphere.first;
-                    model.getSpheres()[index].insert(
-                        model.getSpheres()[index].end(), sphere.second.begin(),
-                        sphere.second.end());
-                }
+                modelContainer.addSpheresToModel(model);
 #pragma omp critical
-                for (const auto& cylinder : cylinders)
-                {
-                    const auto index = cylinder.first;
-                    model.getCylinders()[index].insert(
-                        model.getCylinders()[index].end(),
-                        cylinder.second.begin(), cylinder.second.end());
-                }
+                modelContainer.addCylindersToModel(model);
 #pragma omp critical
-                for (const auto& cone : cones)
-                {
-                    const auto index = cone.first;
-                    model.getCones()[index].insert(
-                        model.getCones()[index].end(), cone.second.begin(),
-                        cone.second.end());
-                }
+                modelContainer.addConesToModel(model);
 #pragma omp critical
-                model.getBounds().merge(bounds);
+                modelContainer.addBoundsToModel(model);
+#pragma omp critical
+                modelContainer.addSDFGeometriesToModel(model);
             }
         }
 

@@ -77,12 +77,6 @@ public:
                           const size_t defaultMaterialId = NO_MATERIAL,
                           CompartmentReportPtr compartmentReport = nullptr)
     {
-        ParallelModelContainer modelContainer(model.getSpheres(),
-                                              model.getCylinders(),
-                                              model.getCones(),
-                                              model.getTrianglesMeshes(),
-                                              model.getBounds(), model);
-
         auto materialFunc = [
             defaultMaterialId,
             colorScheme = _geometryParameters.getColorScheme(), index
@@ -123,9 +117,17 @@ public:
             return materialId;
         };
 
+        ParallelModelContainer modelContainer;
         const bool returnValue =
             importMorphology(source, index, materialFunc, transformation,
                              compartmentReport, modelContainer);
+
+        modelContainer.addSpheresToModel(model);
+        modelContainer.addCylindersToModel(model);
+        modelContainer.addConesToModel(model);
+        modelContainer.addBoundsToModel(model);
+        modelContainer.addSDFGeometriesToModel(model);
+
         model.createMissingMaterials();
         return returnValue;
     }
@@ -413,7 +415,7 @@ private:
      * @brief _finalizeSDFGeometries Calculates all neighbours and adds the
      * geometries to the model.
      */
-    void _finalizeSDFGeometries(Model& model,
+    void _finalizeSDFGeometries(ParallelModelContainer& modelContainer,
                                 SDFMorphologyData& sdfMorphologyData) const
     {
         const size_t numGeoms = sdfMorphologyData.geometries.size();
@@ -441,13 +443,6 @@ private:
 
         for (size_t i = 0; i < numGeoms; i++)
         {
-            sdfMorphologyData.localToGlobalIdx[i] =
-                model.addSDFGeometry(sdfMorphologyData.materials[i],
-                                     sdfMorphologyData.geometries[i], {});
-        }
-
-        for (size_t i = 0; i < numGeoms; i++)
-        {
             // Convert neighbours from set to vector and erase itself from its
             // neighbours
             std::vector<size_t> neighbours;
@@ -459,11 +454,9 @@ private:
                                [i](size_t elem) { return elem == i; }),
                 neighbours.end());
 
-            for (auto& idx : neighbours)
-                idx = sdfMorphologyData.localToGlobalIdx[idx];
-
-            model.setSDFGeometryNeighbours(
-                sdfMorphologyData.localToGlobalIdx[i], neighbours);
+            modelContainer.addSDFGeometry(sdfMorphologyData.materials[i],
+                                          sdfMorphologyData.geometries[i],
+                                          neighbours);
         }
     }
 
@@ -959,7 +952,7 @@ private:
             if (useSDFGeometries)
             {
                 _connectSDFBifurcations(sdfMorphologyData);
-                _finalizeSDFGeometries(model.model, sdfMorphologyData);
+                _finalizeSDFGeometries(model, sdfMorphologyData);
             }
         }
         catch (const std::runtime_error& e)
