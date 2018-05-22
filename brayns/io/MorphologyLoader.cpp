@@ -807,7 +807,7 @@ private:
                 bool done = false;
                 for (size_t i = step; !done && i < numSamples + step; i += step)
                 {
-                    if (i >= numSamples || i == (numSamples - 1))
+                    if (i >= (numSamples - 1))
                     {
                         i = numSamples - 1;
                         done = true;
