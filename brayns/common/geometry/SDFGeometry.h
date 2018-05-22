@@ -66,8 +66,7 @@ inline SDFGeometry createSDFPill(const Vector3f& p0, const Vector3f& p1,
 
 inline SDFGeometry createSDFConePill(const Vector3f& p0, const Vector3f& p1,
                                      const float radiusBottom,
-                                     const float radiusTip,
-                                     const float sigmoid = false)
+                                     const float radiusTip)
 {
     SDFGeometry geom;
     geom.p0 = p0;
@@ -81,7 +80,17 @@ inline SDFGeometry createSDFConePill(const Vector3f& p0, const Vector3f& p1,
         std::swap(geom.radius, geom.radius_tip);
     }
 
-    geom.type = sigmoid ? SDFType::ConePillSigmoid : SDFType::ConePill;
+    geom.type = SDFType::ConePill;
+    return geom;
+}
+
+inline SDFGeometry createSDFConePillSigmoid(const Vector3f& p0,
+                                            const Vector3f& p1,
+                                            const float radiusBottom,
+                                            const float radiusTip)
+{
+    SDFGeometry geom = createSDFConePill(p0, p1, radiusBottom, radiusTip);
+    geom.type = SDFType::ConePillSigmoid;
     return geom;
 }
 

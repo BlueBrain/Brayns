@@ -365,8 +365,8 @@ private:
             // to give it an organic look.
             const float radiusEnd = _getCorrectedRadius(samples[0].w() * 0.5f);
             SDFGeometry geom =
-                createSDFConePill(somaPosition, sample, somaRadius * 0.5f,
-                                  radiusEnd, true);
+                createSDFConePillSigmoid(somaPosition, sample,
+                                         somaRadius * 0.5f, radiusEnd);
             sdfMorphologyData.geometries.push_back(geom);
             sdfMorphologyData.neighbours.push_back({});
             sdfMorphologyData.materials.push_back(materialId);
