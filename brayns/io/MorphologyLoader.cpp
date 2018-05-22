@@ -494,7 +494,7 @@ private:
         std::vector<bool> skipSection(numSections, true);
         std::vector<bool> addedSection(numSections, false);
 
-        // Build tree
+        // Find section bifurcations and end positions
         for (size_t sectionI = 0; sectionI < numSections; sectionI++)
         {
             const auto& section = sections[sectionI];
@@ -540,6 +540,7 @@ private:
             return (d < r);
         };
 
+        // Find overlapping section bifurcations and end positions
         for (size_t sectionI = 0; sectionI < numSections; sectionI++)
         {
             if (skipSection[sectionI])
@@ -574,6 +575,7 @@ private:
             }
         }
 
+        // Fill stack with root sections
         std::vector<size_t> sectionStack;
         for (size_t sectionI = 0; sectionI < numSections; sectionI++)
         {
@@ -583,6 +585,7 @@ private:
                 sectionStack.push_back(sectionI);
         }
 
+        // Starting from the roots fill the tree traversal order
         std::vector<size_t> sectionOrder;
         while (!sectionStack.empty())
         {
