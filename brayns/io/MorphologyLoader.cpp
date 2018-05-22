@@ -706,11 +706,13 @@ private:
                             const Vector3f sample{samples[0].x(),
                                                   samples[0].y(),
                                                   samples[0].z()};
+                            const float sampleRadius =
+                                _getCorrectedRadius(samples[0].w() * 0.5f);
+
                             model.addCone(materialId,
                                           {somaPosition, sample, somaRadius,
-                                           _getCorrectedRadius(samples[0].w() *
-                                                               0.5f),
-                                           0.f, textureCoordinates});
+                                           sampleRadius, 0.f,
+                                           textureCoordinates});
                         }
                     }
                 }
