@@ -113,10 +113,11 @@ Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
 
 bool Engine::continueRendering() const
 {
-    return _renderers.at(_activeRenderer)->getVariance() > 1 &&
-           _frameBuffer->getAccumulation() &&
-           (_frameBuffer->numAccumFrames() <
-            _parametersManager.getRenderingParameters().getMaxAccumFrames());
+    return _parametersManager.getAnimationParameters().getDelta() != 0 ||
+           (_renderers.at(_activeRenderer)->getVariance() > 1 &&
+            _frameBuffer->getAccumulation() &&
+            (_frameBuffer->numAccumFrames() <
+             _parametersManager.getRenderingParameters().getMaxAccumFrames()));
 }
 
 void Engine::_writeFrameToFile()
