@@ -289,7 +289,11 @@ public:
         return _morphologyDampenBranchThicknessChangerate;
     }
 
-    bool getUseSDFGeometries() const { return _useSDFGeometries; }
+    bool getMorphologyUseSDFGeometries() const
+    {
+        return _morphologyUseSDFGeometries;
+    }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -318,7 +322,7 @@ protected:
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
     bool _morphologyDampenBranchThicknessChangerate;
-    bool _useSDFGeometries;
+    bool _morphologyUseSDFGeometries;
 
     // System parameters
     MemoryMode _memoryMode;

@@ -68,7 +68,8 @@ const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
 const std::string PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE =
     "morphology-dampen-branch-thickness-changerate";
-const std::string PARAM_USE_SDF_GEOMETRIES = "use-sdf-geometries";
+const std::string PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES =
+    "morphology-use-sdf-geometries";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_CONNECTIVITY_FILE = "connectivity-file";
 const std::string PARAM_CONNECTIVITY_MATRIX_ID = "connectivity-matrix-id";
@@ -112,7 +113,7 @@ GeometryParameters::GeometryParameters()
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
     , _morphologyDampenBranchThicknessChangerate(false)
-    , _useSDFGeometries(false)
+    , _morphologyUseSDFGeometries(false)
     , _memoryMode(MemoryMode::shared)
 {
     _parameters.add_options()(PARAM_NEST_CIRCUIT.c_str(),
@@ -181,7 +182,8 @@ GeometryParameters::GeometryParameters()
         PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE.c_str(),
         po::value<bool>(),
         "Dampens the thickness rate of change for branches in the "
-        "morphology.")(PARAM_USE_SDF_GEOMETRIES.c_str(), po::value<bool>(),
+        "morphology.")(PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES.c_str(),
+                       po::value<bool>(),
                        "Use SDF geometries for drawing the morphology.")(
         PARAM_CIRCUIT_USES_SIMULATION_MODEL.c_str(), po::value<bool>(),
         "Defines if a different model is used to "
@@ -333,8 +335,9 @@ void GeometryParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE))
         _morphologyDampenBranchThicknessChangerate =
             vm[PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE].as<bool>();
-    if (vm.count(PARAM_USE_SDF_GEOMETRIES))
-        _useSDFGeometries = vm[PARAM_USE_SDF_GEOMETRIES].as<bool>();
+    if (vm.count(PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES))
+        _morphologyUseSDFGeometries =
+            vm[PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES].as<bool>();
     if (vm.count(PARAM_CIRCUIT_USES_SIMULATION_MODEL))
         _circuitConfiguration.useSimulationModel =
             vm[PARAM_CIRCUIT_USES_SIMULATION_MODEL].as<bool>();
