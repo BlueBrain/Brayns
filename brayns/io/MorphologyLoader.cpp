@@ -559,8 +559,10 @@ private:
     const GeometryParameters& _geometryParameters;
 };
 
-MorphologyLoader::MorphologyLoader(const GeometryParameters& geometryParameters)
-    : _impl(new MorphologyLoader::Impl(geometryParameters))
+MorphologyLoader::MorphologyLoader(Scene& scene,
+                                   const GeometryParameters& geometryParameters)
+    : Loader(scene)
+    , _impl(new MorphologyLoader::Impl(geometryParameters))
 {
 }
 
@@ -573,26 +575,24 @@ std::set<std::string> MorphologyLoader::getSupportedDataTypes()
     return {"h5", "swc"};
 }
 
-ModelDescriptorPtr MorphologyLoader::importFromBlob(
-    Blob&& /*blob*/, Scene& /*scene*/, const size_t /*index*/,
-    const Matrix4f& /*transformation*/, const size_t /*materialID*/)
+ModelDescriptorPtr MorphologyLoader::importFromBlob(Blob&& /*blob*/,
+                                                    const size_t /*index*/,
+                                                    const size_t /*materialID*/)
 {
     throw std::runtime_error("Load morphology from memory not supported");
 }
 
 ModelDescriptorPtr MorphologyLoader::importFromFile(
-    const std::string& fileName, Scene& scene, const size_t index,
-    const Matrix4f& transformation,
+    const std::string& fileName, const size_t index,
     const size_t defaultMaterialId BRAYNS_UNUSED)
 {
     const auto modelName = boost::filesystem::basename({fileName});
     updateProgress("Loading " + modelName + " ...", 0, 100);
-    auto model = scene.createModel();
-    importMorphology(servus::URI(fileName), *model, index, transformation);
+    auto model = _scene.createModel();
+    importMorphology(servus::URI(fileName), *model, index);
     model->createMissingMaterials();
-    auto modelDesc = scene.addModel(std::move(model), modelName, fileName);
     updateProgress("Loading " + modelName + " ...", 100, 100);
-    return modelDesc;
+    return std::make_shared<ModelDescriptor>(std::move(model), fileName);
 }
 
 bool MorphologyLoader::importMorphology(const servus::URI& uri, Model& model,

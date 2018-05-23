@@ -310,8 +310,10 @@ static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
      {"OXT", 25.f, 112},
      {"P", 25.f, 113}};
 
-ProteinLoader::ProteinLoader(const GeometryParameters& geometryParameters)
-    : _geometryParameters(geometryParameters)
+ProteinLoader::ProteinLoader(Scene& scene,
+                             const GeometryParameters& geometryParameters)
+    : Loader(scene)
+    , _geometryParameters(geometryParameters)
 {
 }
 
@@ -321,8 +323,7 @@ std::set<std::string> ProteinLoader::getSupportedDataTypes()
 }
 
 ModelDescriptorPtr ProteinLoader::importFromFile(
-    const std::string& fileName, Scene& scene, const size_t index,
-    const Matrix4f& transformation,
+    const std::string& fileName, const size_t index,
     const size_t defaultMaterialId BRAYNS_UNUSED)
 {
     std::ifstream file(fileName.c_str());
@@ -435,8 +436,7 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
             }
 
             // Convert position from nanometers
-            const auto center =
-                transformation.getTranslation() + 0.01f * atom.position;
+            const auto center = 0.01f * atom.position;
 
             // Convert radius from angstrom
             const auto radius = 0.0001f * atom.radius *
@@ -450,7 +450,7 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
     }
     file.close();
 
-    auto model = scene.createModel();
+    auto model = _scene.createModel();
 
     // Add materials and spheres
     for (const auto& spheresPerMaterial : spheres)
@@ -465,7 +465,6 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
             model->addSphere(materialId, sphere);
     }
 
-    const auto modelName = boost::filesystem::basename({fileName});
-    return scene.addModel(std::move(model), modelName, fileName);
+    return std::make_shared<ModelDescriptor>(std::move(model), fileName);
 }
 }

@@ -40,6 +40,7 @@ namespace brayns
 {
 const size_t TOTAL_PROGRESS = 100;
 const size_t LOADING_FRACTION = 50;
+const size_t POST_PROCESSING_FRACTION = TOTAL_PROGRESS - LOADING_FRACTION;
 #ifdef BRAYNS_USE_ASSIMP
 class ProgressWatcher : public Assimp::ProgressHandler
 {
@@ -64,8 +65,10 @@ private:
 };
 #endif
 
-MeshLoader::MeshLoader(const GeometryParameters& geometryParameters)
-    : _geometryParameters(geometryParameters)
+MeshLoader::MeshLoader(Scene& scene,
+                       const GeometryParameters& geometryParameters)
+    : Loader(scene)
+    , _geometryParameters(geometryParameters)
 {
 }
 
@@ -90,8 +93,7 @@ std::set<std::string> MeshLoader::getSupportedDataTypes()
 
 #ifdef BRAYNS_USE_ASSIMP
 ModelDescriptorPtr MeshLoader::importFromFile(const std::string& fileName,
-                                              Scene& scene, const size_t index,
-                                              const Matrix4f& transformation,
+                                              const size_t index,
                                               const size_t defaultMaterialId)
 {
     const boost::filesystem::path file = fileName;
@@ -123,16 +125,13 @@ ModelDescriptorPtr MeshLoader::importFromFile(const std::string& fileName,
         throw std::runtime_error("Error finding meshes in scene");
 
     boost::filesystem::path filepath = fileName;
-    auto model = scene.createModel();
-    _postLoad(aiScene, *model, index, transformation, defaultMaterialId,
+    auto model = _scene.createModel();
+    _postLoad(aiScene, *model, index, defaultMaterialId,
               filepath.parent_path().string());
-    return scene.addModel(std::move(model),
-                          boost::filesystem::basename(filepath), fileName);
+    return std::make_shared<ModelDescriptor>(std::move(model), fileName);
 }
 
-ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, Scene& scene,
-                                              const size_t index,
-                                              const Matrix4f& transformation,
+ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, const size_t index,
                                               const size_t defaultMaterialId)
 {
     Assimp::Importer importer;
@@ -148,10 +147,9 @@ ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, Scene& scene,
     if (!aiScene->HasMeshes())
         throw std::runtime_error("No meshes found");
 
-    auto model = scene.createModel();
-    _postLoad(aiScene, *model, index, transformation, defaultMaterialId);
-    return scene.addModel(std::move(model),
-                          boost::filesystem::basename({blob.name}), blob.name);
+    auto model = _scene.createModel();
+    _postLoad(aiScene, *model, index, defaultMaterialId);
+    return std::make_shared<ModelDescriptor>(std::move(model), blob.name);
 }
 
 void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
@@ -240,8 +238,7 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 }
 
 void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
-                           const size_t index, const Matrix4f& transformation,
-                           const size_t defaultMaterialId,
+                           const size_t index, const size_t defaultMaterialId,
                            const std::string& folder)
 {
     const size_t materialId =
@@ -269,19 +266,13 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
         for (size_t i = 0; i < mesh->mNumVertices; ++i)
         {
             const auto& v = mesh->mVertices[i];
-            const Vector4f vertex =
-                transformation * Vector4f(v.x, v.y, v.z, 1.f);
-            const Vector3f transformedVertex = {vertex.x(), vertex.y(),
-                                                vertex.z()};
+            const Vector3f transformedVertex = {v.x, v.y, v.z};
             triangleMeshes.vertices.push_back(transformedVertex);
             model.getBounds().merge(transformedVertex);
             if (mesh->HasNormals())
             {
                 const auto& n = mesh->mNormals[i];
-                const Vector4f normal =
-                    transformation * Vector4f(n.x, n.y, n.z, 0.f);
-                const Vector3f transformedNormal = {normal.x(), normal.y(),
-                                                    normal.z()};
+                const Vector3f transformedNormal = {n.x, n.y, n.z};
                 triangleMeshes.normals.push_back(transformedNormal);
             }
 
@@ -313,6 +304,11 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                 << "Some faces are not triangulated and have been removed"
                 << std::endl;
         indexOffsets[mesh->mMaterialIndex] += mesh->mNumVertices;
+
+        const auto currentProgress =
+            ((m + 1) * POST_PROCESSING_FRACTION) / float(aiScene->mNumMeshes);
+        updateProgress("Post-processing mesh ...",
+                       LOADING_FRACTION + currentProgress, TOTAL_PROGRESS);
     }
 
     BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and " << nbFaces
@@ -348,29 +344,35 @@ std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
     return meshedMorphologiesFolder + "/" + meshFilenamePattern;
 }
 #else
-namespace
+const std::runtime_error NO_ASSIMP(
+    "The assimp library is required to load meshes");
+
+ModelDescriptorPtr MeshLoader::importFromFile(const std::string&, const size_t,
+                                              const size_t)
 {
-const std::string NO_ASSIMP_MESSAGE =
-    "The assimp library is required to load meshes";
+    throw NO_ASSIMP;
 }
 
-bool MeshLoader::importMeshFromFile(const std::string&, Scene&, const Matrix4f&,
-                                    const size_t)
+ModelDescriptorPtr MeshLoader::importFromBlob(Blob&&, const size_t,
+                                              const size_t)
 {
-    BRAYNS_ERROR << NO_ASSIMP_MESSAGE << std::endl;
-    return false;
+    throw NO_ASSIMP;
 }
 
-bool MeshLoader::exportMeshToFile(const std::string&, Scene&) const
+void MeshLoader::_createMaterials(Model&, const aiScene*, const std::string&)
 {
-    BRAYNS_ERROR << NO_ASSIMP_MESSAGE << std::endl;
-    return false;
+    throw NO_ASSIMP;
 }
 
-std::string MeshLoader::getMeshFilenameFromGID(const uint64_t)
+void MeshLoader::_postLoad(const aiScene*, Model&, const size_t, const size_t,
+                           const std::string&)
 {
-    BRAYNS_ERROR << NO_ASSIMP_MESSAGE << std::endl;
-    return "";
+    throw NO_ASSIMP;
+}
+
+size_t MeshLoader::_getQuality() const
+{
+    throw NO_ASSIMP;
 }
 #endif
 }

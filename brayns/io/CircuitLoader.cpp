@@ -48,7 +48,7 @@ public:
 
     ModelDescriptorPtr importCircuit(const std::string& source,
                                      const strings& targets,
-                                     const std::string& report, Scene& scene)
+                                     const std::string& report)
     {
         bool returnValue = true;
         ModelDescriptorPtr modelDesc;
@@ -63,7 +63,7 @@ public:
                 {"mesh-filename-pattern",
                  _geometryParameters.getCircuitMeshFilenamePattern()},
                 {"mesh-folder", _geometryParameters.getCircuitMeshFolder()}};
-            auto model = scene.createModel();
+            auto model = _parent._scene.createModel();
 
             // Open Circuit and select GIDs according to specified target
             const brion::BlueConfig bc(source);
@@ -137,7 +137,7 @@ public:
                     if (compartmentReport)
                         allGids = compartmentReport->getGIDs();
                     // Attach simulation handler
-                    scene.setSimulationHandler(simulationHandler);
+                    _parent._scene.setSimulationHandler(simulationHandler);
                 }
                 catch (const std::exception& e)
                 {
@@ -157,7 +157,7 @@ public:
 
             // Import meshes
             returnValue =
-                returnValue && _importMeshes(allGids, scene, transformations,
+                returnValue && _importMeshes(*model, allGids, transformations,
                                              targetGIDOffsets);
 
             // Import morphologies
@@ -167,7 +167,8 @@ public:
             if (_geometryParameters.getCircuitMeshFolder().empty() ||
                 useSimulationModel)
             {
-                MorphologyLoader morphLoader(_geometryParameters);
+                MorphologyLoader morphLoader(_parent._scene,
+                                             _geometryParameters);
                 returnValue =
                     returnValue &&
                     _importMorphologies(circuit, *model, allGids,
@@ -178,7 +179,8 @@ public:
             model->createMissingMaterials();
 
             modelDesc =
-                scene.addModel(std::move(model), "Circuit", source, metadata);
+                std::make_shared<ModelDescriptor>(std::move(model), "Circuit",
+                                                  source, metadata);
         }
         catch (const std::exception& error)
         {
@@ -316,11 +318,11 @@ private:
     }
 
 #if (BRAYNS_USE_ASSIMP)
-    bool _importMeshes(const brain::GIDSet& gids, Scene& scene,
+    bool _importMeshes(Model& model, const brain::GIDSet& gids,
                        const Matrix4fs& transformations,
                        const GIDOffsets& targetGIDOffsets)
     {
-        MeshLoader meshLoader(_geometryParameters);
+        MeshLoader meshLoader(_parent._scene, _geometryParameters);
         size_t loadingFailures = 0;
         const auto meshedMorphologiesFolder =
             _geometryParameters.getCircuitMeshFolder();
@@ -344,10 +346,11 @@ private:
                     : Matrix4f();
             try
             {
-                meshLoader.importFromFile(meshLoader.getMeshFilenameFromGID(
-                                              gid),
-                                          scene, meshIndex, transformation,
-                                          materialId);
+                auto meshModel =
+                    meshLoader.importFromFile(meshLoader.getMeshFilenameFromGID(
+                                                  gid),
+                                              meshIndex, materialId);
+                model.addModel(meshModel->getModelPtr(), {transformation});
             }
             catch (...)
             {
@@ -362,7 +365,7 @@ private:
         return true;
     }
 #else
-    bool _importMeshes(const brain::GIDSet&, Scene&, const Matrix4fs&,
+    bool _importMeshes(Model&, const brain::GIDSet&, const Matrix4fs&,
                        const GIDOffsets&)
     {
         BRAYNS_ERROR << "assimp dependency is required to load meshes"
@@ -459,9 +462,11 @@ private:
     size_t _materialsOffset;
 };
 
-CircuitLoader::CircuitLoader(const ApplicationParameters& applicationParameters,
+CircuitLoader::CircuitLoader(Scene& scene,
+                             const ApplicationParameters& applicationParameters,
                              const GeometryParameters& geometryParameters)
-    : _impl(new CircuitLoader::Impl(applicationParameters, geometryParameters,
+    : Loader(scene)
+    , _impl(new CircuitLoader::Impl(applicationParameters, geometryParameters,
                                     *this))
 {
 }
@@ -475,26 +480,26 @@ std::set<std::string> CircuitLoader::getSupportedDataTypes()
     return {"BlueConfig", "BlueConfig3", "CircuitConfig", "circuit"};
 }
 
-ModelDescriptorPtr CircuitLoader::importFromBlob(
-    Blob&& /*blob*/, Scene& /*scene*/, const size_t /*index*/,
-    const Matrix4f& /*transformation*/, const size_t /*materialID*/)
+ModelDescriptorPtr CircuitLoader::importFromBlob(Blob&& /*blob*/,
+                                                 const size_t /*index*/,
+                                                 const size_t /*materialID*/)
 {
     throw std::runtime_error("Loading circuit from blob is not supported");
 }
 
-ModelDescriptorPtr CircuitLoader::importFromFile(
-    const std::string& filename, Scene& scene, const size_t /*index*/,
-    const Matrix4f& /*transformation*/, const size_t /*materialID*/)
+ModelDescriptorPtr CircuitLoader::importFromFile(const std::string& filename,
+                                                 const size_t /*index*/,
+                                                 const size_t /*materialID*/)
 {
     return _impl->importCircuit(
         filename, _impl->geometryParameters().getCircuitTargetsAsStrings(),
-        _impl->geometryParameters().getCircuitReport(), scene);
+        _impl->geometryParameters().getCircuitReport());
 }
 
-bool CircuitLoader::importCircuit(const servus::URI& uri,
-                                  const strings& targets,
-                                  const std::string& report, Scene& scene)
+ModelDescriptorPtr CircuitLoader::importCircuit(const servus::URI& uri,
+                                                const strings& targets,
+                                                const std::string& report)
 {
-    return !(!_impl->importCircuit(uri.getPath(), targets, report, scene));
+    return _impl->importCircuit(uri.getPath(), targets, report);
 }
 }

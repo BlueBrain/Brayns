@@ -95,16 +95,20 @@ public:
     ModelDescriptor(ModelDescriptor&& rhs) = default;
     ModelDescriptor& operator=(ModelDescriptor&& rhs) = default;
 
-    ModelDescriptor(const size_t id, const std::string& name,
-                    const std::string& path, const ModelMetadata& metadata,
-                    ModelPtr model);
+    ModelDescriptor(ModelPtr model, const std::string& path);
+    ModelDescriptor(ModelPtr model, const std::string& path,
+                    const ModelMetadata& metadata);
+    ModelDescriptor(ModelPtr model, const std::string& name,
+                    const std::string& path, const ModelMetadata& metadata);
 
     ModelDescriptor& operator=(const ModelParams& rhs);
 
     const ModelMetadata& getMetadata() const { return _metadata; }
+    void setID(const size_t id) { _updateValue(_id, id); }
     size_t getID() const { return _id; }
     const Model& getModel() const { return *_model; }
     Model& getModel() { return *_model; }
+    ModelPtr getModelPtr() { return std::move(_model); }
 private:
     size_t _id{0};
     Boxf _bounds;

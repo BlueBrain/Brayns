@@ -109,20 +109,16 @@ void Scene::clearLights()
     _lights.clear();
 }
 
-ModelDescriptorPtr Scene::addModel(ModelPtr model, const std::string& name,
-                                   const std::string& path,
-                                   const ModelMetadata& metadata)
+size_t Scene::addModel(ModelDescriptorPtr model)
 {
-    model->buildBoundingBox();
-    model->commit();
+    model->getModel().buildBoundingBox();
+    model->getModel().commit();
 
-    auto modelDesc =
-        std::make_shared<ModelDescriptor>(_modelID++, name, path, metadata,
-                                          std::move(model));
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    _modelDescriptors.push_back(modelDesc);
+    model->setID(_modelID++);
+    _modelDescriptors.push_back(model);
     markModified();
-    return modelDesc;
+    return model->getID();
 }
 
 void Scene::removeModel(const size_t id)
@@ -234,19 +230,19 @@ VolumeHandlerPtr Scene::getVolumeHandler()
             const auto& dimensions = _volumeHandler->getDimensions();
             const auto& spacing = _volumeHandler->getElementSpacing();
             const auto& offset = _volumeHandler->getOffset();
-            const auto name = shortenString(volumeFile);
             auto model = createModel();
-            addModel(std::move(model), name, volumeFile,
-                     {{"dimensions", std::to_string(dimensions.x()) + " " +
-                                         std::to_string(dimensions.y()) + " " +
-                                         std::to_string(dimensions.z())},
-                      {"element-spacing", std::to_string(spacing.x()) + " " +
-                                              std::to_string(spacing.y()) +
-                                              " " +
-                                              std::to_string(spacing.z())},
-                      {"offset", std::to_string(offset.x()) + " " +
-                                     std::to_string(offset.y()) + " " +
-                                     std::to_string(offset.z())}});
+            addModel(std::make_shared<ModelDescriptor>(
+                std::move(model), volumeFile,
+                ModelMetadata{
+                    {"dimensions", std::to_string(dimensions.x()) + " " +
+                                       std::to_string(dimensions.y()) + " " +
+                                       std::to_string(dimensions.z())},
+                    {"element-spacing", std::to_string(spacing.x()) + " " +
+                                            std::to_string(spacing.y()) + " " +
+                                            std::to_string(spacing.z())},
+                    {"offset", std::to_string(offset.x()) + " " +
+                                   std::to_string(offset.y()) + " " +
+                                   std::to_string(offset.z())}}));
             model->getBounds().merge(offset);
             model->getBounds().merge(offset + dimensions);
             _parametersManager.getVolumeParameters().resetModified();
@@ -275,20 +271,22 @@ bool Scene::empty() const
     return true;
 }
 
-ModelDescriptorPtr Scene::load(Blob&& blob, const Matrix4f& transformation,
+ModelDescriptorPtr Scene::load(Blob&& blob,
+                               const Transformation& transformation,
                                const size_t materialID,
                                Loader::UpdateCallback cb)
 {
     auto loader = _loaderRegistry.createLoader(blob.type);
     loader->setProgressCallback(cb);
-    auto model = loader->importFromBlob(std::move(blob), *this, 0,
-                                        transformation, materialID);
+    auto model = loader->importFromBlob(std::move(blob), 0, materialID);
+    model->setTransformation(transformation);
+    addModel(model);
     saveToCacheFile();
     return model;
 }
 
 ModelDescriptorPtr Scene::load(const std::string& path,
-                               const Matrix4f& transformation,
+                               const Transformation& transformation,
                                const size_t materialID,
                                Loader::UpdateCallback cb)
 {
@@ -326,8 +324,9 @@ ModelDescriptorPtr Scene::load(const std::string& path,
             };
 
             loader->setProgressCallback(progressCb);
-            model = loader->importFromFile(currentPath, *this, index++,
-                                           transformation, materialID);
+            model = loader->importFromFile(currentPath, index++, materialID);
+            model->setTransformation(transformation);
+            addModel(model);
 
             totalProgress += 1.f / numFiles;
         }
@@ -336,8 +335,9 @@ ModelDescriptorPtr Scene::load(const std::string& path,
     {
         auto loader = _loaderRegistry.createLoader(path);
         loader->setProgressCallback(cb);
-        model =
-            loader->importFromFile(path, *this, 0, transformation, materialID);
+        model = loader->importFromFile(path, 0, materialID);
+        model->setTransformation(transformation);
+        addModel(model);
     }
     saveToCacheFile();
     return model;
@@ -373,11 +373,11 @@ void Scene::saveToCacheFile()
     {
         uint64_t bufferSize{0};
 
-        // Model name
-        auto name = modelDescriptor->getName();
-        nbElements = name.length();
+        // Model path
+        auto path = modelDescriptor->getPath();
+        nbElements = path.length();
         file.write((char*)&nbElements, sizeof(size_t));
-        file.write((char*)name.c_str(), nbElements * sizeof(char));
+        file.write((char*)path.c_str(), nbElements * sizeof(char));
 
         auto& model = modelDescriptor->getModel();
         const auto& materials = model.getMaterials();
@@ -390,7 +390,7 @@ void Scene::saveToCacheFile()
         {
             file.write((char*)&material.first, sizeof(size_t));
 
-            name = material.second->getName();
+            auto name = material.second->getName();
             nbElements = name.length();
             file.write((char*)&nbElements, sizeof(size_t));
             file.write((char*)name.c_str(), nbElements * sizeof(char));
@@ -562,12 +562,12 @@ void Scene::loadFromCacheFile()
     file.read((char*)&nbModels, sizeof(size_t));
     for (size_t modelId = 0; modelId < nbModels; ++modelId)
     {
-        // Model name
+        // Model path
         size_t nbElements;
         file.read((char*)&nbElements, sizeof(size_t));
-        char name[255];
-        file.read((char*)&name, nbElements * sizeof(char));
-        name[nbElements] = 0;
+        char path[255];
+        file.read((char*)&path, nbElements * sizeof(char));
+        path[nbElements] = 0;
 
         // Create model
         auto model = createModel();
@@ -661,7 +661,7 @@ void Scene::loadFromCacheFile()
         {
             file.read((char*)&materialId, sizeof(size_t));
             auto& meshes = model->getTrianglesMeshes()[materialId];
-            // VerticesdelDescriptor(name, metadata);
+            // Vertices
             file.read((char*)&nbVertices, sizeof(size_t));
             if (nbVertices != 0)
             {
@@ -716,7 +716,7 @@ void Scene::loadFromCacheFile()
         Boxf bounds;
         file.read((char*)&bounds, sizeof(Boxf));
         model->getBounds().merge(bounds);
-        addModel(std::move(model), name);
+        addModel(std::make_shared<ModelDescriptor>(std::move(model), path));
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
 
@@ -837,7 +837,8 @@ void Scene::buildDefault()
         trianglesMesh.indices.push_back(Vector3i(0, 3, 2));
     }
 
-    addModel(std::move(model), "DefaultScene");
+    addModel(
+        std::make_shared<ModelDescriptor>(std::move(model), "DefaultScene"));
 }
 
 void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)

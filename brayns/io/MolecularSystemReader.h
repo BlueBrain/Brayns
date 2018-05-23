@@ -50,26 +50,21 @@ typedef std::map<size_t, Vector3fs> ProteinPositions;
 class MolecularSystemReader : public Loader
 {
 public:
-    /**
-     * @brief Constructor
-     * @param geometryParameters Geometry parameters
-     */
-    MolecularSystemReader(const GeometryParameters& geometryParameters);
+    MolecularSystemReader(Scene& scene,
+                          const GeometryParameters& geometryParameters);
 
-    ModelDescriptorPtr importFromFile(
-        const std::string& fileName, Scene& scene, const size_t index = 0,
-        const Matrix4f& transformation = Matrix4f(),
-        const size_t = NO_MATERIAL) final;
+    ModelDescriptorPtr importFromFile(const std::string& fileName,
+                                      const size_t index = 0,
+                                      const size_t = NO_MATERIAL) final;
 
-    ModelDescriptorPtr importFromBlob(Blob&&, Scene&, const size_t = 0,
-                                      const Matrix4f& = Matrix4f(),
+    ModelDescriptorPtr importFromBlob(Blob&&, const size_t = 0,
                                       const size_t = NO_MATERIAL) final
     {
         throw std::runtime_error("Unsupported");
     }
 
 private:
-    bool _createScene(Scene& scene);
+    bool _createScene();
     bool _loadConfiguration(const std::string& fileName);
     bool _loadProteins();
     bool _loadPositions();

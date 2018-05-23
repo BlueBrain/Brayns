@@ -31,8 +31,10 @@
 
 namespace brayns
 {
-XYZBLoader::XYZBLoader(const GeometryParameters& geometryParameters)
-    : _geometryParameters(geometryParameters)
+XYZBLoader::XYZBLoader(Scene& scene,
+                       const GeometryParameters& geometryParameters)
+    : Loader(scene)
+    , _geometryParameters(geometryParameters)
 {
 }
 
@@ -42,8 +44,7 @@ std::set<std::string> XYZBLoader::getSupportedDataTypes()
 }
 
 ModelDescriptorPtr XYZBLoader::importFromBlob(
-    Blob&& blob, Scene& scene, const size_t index BRAYNS_UNUSED,
-    const Matrix4f& transformation,
+    Blob&& blob, const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED)
 {
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
@@ -56,7 +57,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     }
     stream.seekg(0);
 
-    auto model = scene.createModel();
+    auto model = _scene.createModel();
 
     const auto name = boost::filesystem::basename({blob.name});
     const auto materialId =
@@ -86,7 +87,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
         {
             const Vector4f position(lineData[0], lineData[1], lineData[2], 1.f);
             model->addSphere(materialId,
-                             {transformation * position,
+                             {position,
                               _geometryParameters.getRadiusMultiplier()});
             break;
         }
@@ -110,12 +111,11 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
             spheres[i + startOffset].radius = newRadius;
     }
 
-    return scene.addModel(std::move(model), name, blob.name);
+    return std::make_shared<ModelDescriptor>(std::move(model), blob.name);
 }
 
 ModelDescriptorPtr XYZBLoader::importFromFile(const std::string& filename,
-                                              Scene& scene, const size_t index,
-                                              const Matrix4f& transformation,
+                                              const size_t index,
                                               const size_t defaultMaterialId)
 {
     std::ifstream file(filename);
@@ -125,6 +125,6 @@ ModelDescriptorPtr XYZBLoader::importFromFile(const std::string& filename,
                            filename,
                            {std::istreambuf_iterator<char>(file),
                             std::istreambuf_iterator<char>()}},
-                          scene, index, transformation, defaultMaterialId);
+                          index, defaultMaterialId);
 }
 }

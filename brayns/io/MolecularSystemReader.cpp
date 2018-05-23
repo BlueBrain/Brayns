@@ -33,14 +33,14 @@
 namespace brayns
 {
 MolecularSystemReader::MolecularSystemReader(
-    const GeometryParameters& geometryParameters)
-    : _geometryParameters(geometryParameters)
+    Scene& scene, const GeometryParameters& geometryParameters)
+    : Loader(scene)
+    , _geometryParameters(geometryParameters)
 {
 }
 
 ModelDescriptorPtr MolecularSystemReader::importFromFile(
-    const std::string& fileName, Scene& scene, const size_t index BRAYNS_UNUSED,
-    const Matrix4f& transformation BRAYNS_UNUSED,
+    const std::string& fileName, const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED)
 {
     _nbProteins = 0;
@@ -51,15 +51,15 @@ ModelDescriptorPtr MolecularSystemReader::importFromFile(
     if (!_loadPositions())
         throw std::runtime_error("Failed to load positions");
 
-    if (!_createScene(scene))
+    if (!_createScene())
         throw std::runtime_error("Failed to load scene");
 
     if (!_calciumSimulationFolder.empty())
     {
         CADiffusionSimulationHandlerPtr handler(
             new CADiffusionSimulationHandler(_calciumSimulationFolder));
-        handler->setFrame(scene, 0);
-        scene.setCADiffusionSimulationHandler(handler);
+        handler->setFrame(_scene, 0);
+        _scene.setCADiffusionSimulationHandler(handler);
     }
     BRAYNS_INFO << "Total number of different proteins: " << _proteins.size()
                 << std::endl;
@@ -68,7 +68,7 @@ ModelDescriptorPtr MolecularSystemReader::importFromFile(
     return {};
 }
 
-bool MolecularSystemReader::_createScene(Scene& scene)
+bool MolecularSystemReader::_createScene()
 {
     uint64_t proteinCount = 0;
     for (const auto& proteinPosition : _proteinPositions)
@@ -82,9 +82,8 @@ bool MolecularSystemReader::_createScene(Scene& scene)
                     _proteinFolder + '/' + protein->second + ".pdb";
                 Matrix4f transformation;
                 transformation.setTranslation(position);
-                ProteinLoader loader(_geometryParameters);
-                loader.importFromFile(pdbFilename, scene, proteinCount,
-                                      transformation, NO_MATERIAL);
+                ProteinLoader loader(_scene, _geometryParameters);
+                loader.importFromFile(pdbFilename, proteinCount, NO_MATERIAL);
                 ++proteinCount;
             }
 
@@ -102,11 +101,10 @@ bool MolecularSystemReader::_createScene(Scene& scene)
 
                 // Scale mesh to match PDB units. PDB are in angstrom, and
                 // positions are in micrometers
-                MeshLoader meshLoader(_geometryParameters);
+                MeshLoader meshLoader(_scene, _geometryParameters);
                 const std::string fileName =
                     _meshFolder + '/' + protein->second + ".obj";
-                meshLoader.importFromFile(fileName, scene, proteinCount,
-                                          transformation, materialId);
+                meshLoader.importFromFile(fileName, proteinCount, materialId);
 
                 if (_proteinFolder.empty())
                     ++proteinCount;

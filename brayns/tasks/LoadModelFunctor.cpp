@@ -111,13 +111,13 @@ ModelDescriptorPtr LoadModelFunctor::_performLoad(
 
 ModelDescriptorPtr LoadModelFunctor::_loadData(Blob&& blob)
 {
-    return _engine->getScene().load(std::move(blob), Matrix4f(), NO_MATERIAL,
-                                    _getProgressFunc());
+    return _engine->getScene().load(std::move(blob), Transformation{},
+                                    NO_MATERIAL, _getProgressFunc());
 }
 
 ModelDescriptorPtr LoadModelFunctor::_loadData(const std::string& path)
 {
-    return _engine->getScene().load(path, Matrix4f(), NO_MATERIAL,
+    return _engine->getScene().load(path, Transformation{}, NO_MATERIAL,
                                     _getProgressFunc());
 }
 

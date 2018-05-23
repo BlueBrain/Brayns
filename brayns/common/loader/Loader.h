@@ -35,36 +35,35 @@ namespace brayns
 class Loader
 {
 public:
+    Loader(Scene& scene)
+        : _scene(scene)
+    {
+    }
+
     virtual ~Loader() = default;
 
     /**
-     * Import the data from the blob and add it to the scene.
+     * Import the data from the blob and return the created model.
      *
      * @param blob the blob containing the data to import
-     * @param scene the scene where to add the loaded model to
      * @param index Index of the element, mainly used for material assignment
-     * @param transformation the transformation to apply for the added model
      * @param defaultMaterialId the default material to use
-     * @return the model that has been added to the scene
+     * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromBlob(
-        Blob&& blob, Scene& scene, const size_t index = 0,
-        const Matrix4f& transformation = Matrix4f(),
+        Blob&& blob, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) = 0;
 
     /**
-     * Import the data from the given file and add it to the scene.
+     * Import the data from the given file and return the created model.
      *
      * @param filename the file containing the data to import
-     * @param scene the scene where to add the loaded model to
      * @param index Index of the element, mainly used for material assignment
-     * @param transformation the transformation to apply for the added model
      * @param defaultMaterialId the default material to use
-     * @return the model that has been added to the scene
+     * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromFile(
-        const std::string& filename, Scene& scene, const size_t index = 0,
-        const Matrix4f& transformation = Matrix4f(),
+        const std::string& filename, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) = 0;
 
     /**
@@ -92,6 +91,9 @@ public:
             if (_progressUpdate)
                 _progressUpdate(message, float(current) / expected);
     }
+
+protected:
+    Scene& _scene;
 
 private:
     UpdateCallback _progressUpdate;

@@ -44,15 +44,18 @@ const float DEFAULT_ALPHA = 1.f;
 
 namespace brayns
 {
-NESTLoader::NESTLoader(const GeometryParameters& geometryParameters)
-    : _geometryParameters(geometryParameters)
+NESTLoader::NESTLoader(Scene& scene,
+                       const GeometryParameters& geometryParameters)
+    : Loader(scene)
+    , _geometryParameters(geometryParameters)
     , _spikesStart(0.f)
     , _spikesEnd(0.f)
 {
 }
 
 #if (BRAYNS_USE_BRION)
-void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
+ModelDescriptorPtr NESTLoader::importFromFile(const std::string& filepath,
+                                              const size_t, const size_t)
 {
     BRAYNS_INFO << "Loading NEST cells from circuit " << filepath << std::endl;
 
@@ -99,7 +102,7 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
                      float(zColor[gid]) / 256.f, DEFAULT_ALPHA);
     }
 
-    auto& transferFunction = scene.getTransferFunction();
+    auto& transferFunction = _scene.getTransferFunction();
     transferFunction.clear();
 
     // Realign materials
@@ -117,7 +120,7 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
     BRAYNS_INFO << "Number of materials: " << materialMapping.size()
                 << std::endl;
 
-    auto model = scene.createModel();
+    auto model = _scene.createModel();
     SpheresMap& spheres = model->getSpheres();
     spheres[0].reserve(_frameSize);
     _positions.reserve(_frameSize);
@@ -137,9 +140,10 @@ void NESTLoader::importCircuit(const std::string& filepath, Scene& scene)
         updateProgress("Loading neurons...", spheres[0].size(), _frameSize);
     }
 
-    scene.addModel(std::move(model), "NESTCircuit");
-
     BRAYNS_INFO << "Finished loading " << _frameSize << " neurons" << std::endl;
+
+    return std::make_shared<ModelDescriptor>(std::move(model), "NESTCircuit",
+                                             filepath, ModelMetadata{});
 }
 
 bool NESTLoader::importSpikeReport(const std::string& filename)
@@ -279,7 +283,8 @@ bool NESTLoader::_load(const float timestamp)
     return true;
 }
 #else
-void NESTLoader::importCircuit(const std::string&, Scene&, size_t&)
+ModelDescriptorPtr NESTLoader::importFromFile(const std::string&, const size_t,
+                                              const size_t)
 {
     BRAYNS_ERROR << "Brion is required to load circuits" << std::endl;
 }
