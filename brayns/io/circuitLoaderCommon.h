@@ -119,7 +119,7 @@ struct ParallelModelContainer
                 neighboursTmp.push_back(
                     localToGlobalIndex[localNeighbourIndex]);
 
-            model.setSDFGeometryNeighbours(globalIndex, neighboursTmp);
+            model.updateSDFGeometryNeighbours(globalIndex, neighboursTmp);
         }
     }
 

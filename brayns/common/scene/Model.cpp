@@ -119,7 +119,7 @@ void Model::addModel(ModelPtr model, const Transformations& transform)
 }
 
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
-                               const std::vector<size_t>& neighbours)
+                               const std::vector<size_t>& neighbourIndices)
 {
     _SDFGeometriesDirty = true;
     const uint32_t geomIdx = _SDFGeometries.size();
@@ -127,7 +127,7 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
 
     assert(_SDFGeometries.size() == _SDFNeighbours.size());
 
-    _SDFNeighbours.push_back(neighbours);
+    _SDFNeighbours.push_back(neighbourIndices);
     _SDFGeometries.push_back(geom);
 
     switch (geom.type)
@@ -160,7 +160,7 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
     return geomIdx;
 }
 
-void Model::setSDFGeometryNeighbours(
+void Model::updateSDFGeometryNeighbours(
     size_t geometryIdx, const std::vector<size_t>& neighbourIndices)
 {
     _SDFNeighbours[geometryIdx] = neighbourIndices;

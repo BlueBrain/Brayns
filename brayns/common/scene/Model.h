@@ -199,18 +199,20 @@ public:
       Adds a SDFGeometry to the scene
       @param materialId Material of the geometry
       @param geom Geometry to add
-      @param neighbours List of global indices of the geometry neighbours
+      @param neighbourIndices Global indices of the geometries to smoothly blend
+      together with
       @return Global index of the geometry
       */
     uint64_t addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
-                            const std::vector<size_t>& neighbours);
+                            const std::vector<size_t>& neighbourIndices);
 
-    /** Set the list of neighbours for a SDF geometry
+    /** Update the list of neighbours for a SDF geometry
       @param geometryIdx Index of the geometry
-      @param neighbourIndices Indices of the neighbours
+      @param neighbourIndices Global indices of the geometries to smoothly blend
+      together with
       */
-    void setSDFGeometryNeighbours(size_t geometryIdx,
-                                  const std::vector<size_t>& neighbourIndices);
+    void updateSDFGeometryNeighbours(
+        size_t geometryIdx, const std::vector<size_t>& neighbourIndices);
 
     /**
         Returns triangle meshes handled by the model
