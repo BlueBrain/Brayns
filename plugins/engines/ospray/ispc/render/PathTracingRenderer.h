@@ -1,6 +1,9 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Authors: Samuel Lapere <samuel.lapere@epfl.ch>
+ *                      Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Based on OSPRay implementation
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,16 +23,21 @@
 
 #pragma once
 
-#define ALPHA_THRESHOLD (.05f)
-#define DEFAULT_LIGHT_EMISSION (2.f)
-#define DEFAULT_LIGHT_THRESHOLD (0.2f)
+#include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.h>
 
-#define MATERIAL_SKYBOX 0
+namespace brayns
+{
+class PathTracingRenderer : public AbstractRenderer
+{
+public:
+    PathTracingRenderer();
 
-#define NB_MAX_REBOUNDS 10
-#define NB_MAX_PATH_TRACING_REBOUNDS 4
-#define VOLUME_NB_MAX_REBOUNDS 1
-#define NB_MAX_SAMPLES_PER_RAY 32
+    /**
+       Returns the class name as a string
+       @return string containing the full name of the class
+    */
+    std::string toString() const final { return "brayns::PathTracingRenderer"; }
+    void commit() final;
+};
 
-#define DEFAULT_SKY_POWER 4.f
-#define DEFAULT_SKY_POWER_ZERO_BOUNCE 2.f
+} // ::brayns

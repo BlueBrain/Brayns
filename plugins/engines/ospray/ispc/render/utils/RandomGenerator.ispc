@@ -1121,16 +1121,15 @@ inline float rotate(float x, const float dx)
     return x;
 }
 
-inline float getRandomValue(varying ScreenSample& sample,
-                            const int randomNumber)
+float getRandomValue(varying ScreenSample& sample, const int randomNumber)
 {
     const int x = sample.sampleID.x % RANDOM_SET_SIZE;
     const int y = sample.sampleID.y % RANDOM_SET_SIZE;
     return rotate(randomDistribution[x][y], sample.sampleID.z % 8);
 }
 
-inline vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
-                             const int randomNumber)
+vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
+                      const int randomNumber)
 {
     vec3f tangent, biTangent;
     getTangentVectors(normal, tangent, biTangent);
@@ -1151,6 +1150,7 @@ inline vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
     const float cz = sqrt(ry);
     return normalize(cx * tangent + cy * biTangent + cz * normal);
 }
+#endif
 
 void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent)
 {
@@ -1160,4 +1160,55 @@ void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent)
     biTangent = normalize(cross(tangent, normal));
     tangent = normalize(cross(biTangent, normal));
 }
-#endif
+
+vec3f getRandomDir(varying RandomTEA* uniform rng, const vec3f biNorm0,
+                   const vec3f biNorm1, const vec3f gNormal, const float rot_x,
+                   const float rot_y, const uniform float epsilon)
+{
+    const vec2f rn = RandomTEA__getFloats(rng);
+    const float r0 = rotate(rn.x, rot_x);
+    const float r1 = rotate(rn.y, rot_y);
+
+    const float w = sqrt(1.f - r1);
+    const float x = cos((2.f * M_PI) * r0) * w;
+    const float y = sin((2.f * M_PI) * r0) * w;
+    const float z = sqrt(r1) + epsilon;
+    return x * biNorm0 + y * biNorm1 + z * gNormal;
+}
+
+//  http://lolengine.net/blog/2013/09/21/picking-orthogonal-vector-combing-coconuts
+vec3f ortho(const vec3f& v)
+{
+    return abs(v.x) > abs(v.z) ? make_vec3f(-v.y, v.x, 0.0f)
+                               : make_vec3f(0.0f, -v.z, v.y);
+}
+
+vec3f getConeSample(const vec3f& direction, varying RandomTEA* uniform rng,
+                    float extent)
+{
+    const vec2f s = RandomTEA__getFloats(rng);
+    // Formula 34 in GI Compendium
+
+    const vec3f o1 = normalize(ortho(direction));
+    const vec3f o2 = normalize(cross(direction, o1));
+    const float phi = s.x * 2.f * M_PI;
+    const float cosTheta = 1.f - s.y * extent;
+    const float sinTheta =
+        sqrtf(1.f - cosTheta * cosTheta); // sin^2 = 1 - cos^2
+    return cosf(phi) * sinTheta * o1 + sinf(phi) * sinTheta * o2 +
+           cosTheta * direction;
+}
+
+varying RandomTEA* uniform createRandomNumberGenerator(
+    const uniform Renderer* uniform self, varying ScreenSample& sample)
+{
+    // create and seed random number generator (RNG)
+    uniform FrameBuffer* uniform fb = self->fb;
+    RandomTEA rng_state;
+    varying RandomTEA* uniform rng = &rng_state;
+    const int accumID = reduce_max(sample.sampleID.z) * self->spp;
+    RandomTEA__Constructor(rng,
+                           (fb->size.x * sample.sampleID.y) + sample.sampleID.x,
+                           accumID);
+    return rng;
+}

@@ -136,6 +136,10 @@ inline void indirectShading(const uniform AbstractRenderer* uniform self,
             indirectShadingColor = make_vec3f(geometry.color.w);
             indirectShadingPower = -geometry.color.w;
         }
+
+        const varying float angle = abs(dot(normal, randomDirection));
+        indirectShadingPower *= angle;
+        return true;
     }
     else
     {

@@ -52,9 +52,9 @@ ModelDescriptorPtr LoadModelFunctor::operator()(Blob&& blob)
         {
             Scope() { fs::create_directories(_path); }
             ~Scope() { fs::remove_all(_path); }
-            ModelDescriptorPtr operator()(Blob&& blob, LoadModelFunctor& parent)
+            ModelDescriptorPtr operator()(Blob&& b, LoadModelFunctor& parent)
             {
-                extractBlob(std::move(blob), _path.string());
+                extractBlob(std::move(b), _path.string());
                 return parent._performLoad(
                     [&] { return parent._loadData(_path.string()); });
             }

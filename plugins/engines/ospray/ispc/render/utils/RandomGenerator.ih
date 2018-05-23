@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <ospray/SDK/math/random.ih>
 #include <ospray/SDK/math/vec.ih>
 
 float getRandomValue(varying ScreenSample& sample, const int randomNumber);
@@ -34,6 +35,7 @@ float getRandomValue(varying ScreenSample& sample, const int randomNumber);
    distribution
     @return A random direction based on specified parameters
 */
+
 vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
                       const int randomNumber);
 
@@ -48,3 +50,29 @@ vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
    and the chosen tangent vector
 */
 void getTangentVectors(const vec3f& normal, vec3f& tangent, vec3f& biTangent);
+
+/**
+    @return An orthogonal vector (and combining coconuts)
+    http://lolengine.net/blog/2013/09/21/picking-orthogonal-vector-combing-coconuts
+*/
+vec3f ortho(const vec3f& v);
+
+/**
+    @brief Returns a random direction according to specified parameters
+*/
+vec3f getRandomDir(varying RandomTEA* uniform rng, const vec3f& biNorm0,
+                   const vec3f& biNorm1, const vec3f& gNormal,
+                   const float rot_x, const float rot_y,
+                   const uniform float epsilon);
+
+/**
+    @return A random vector within a specified cone
+ */
+vec3f getConeSample(const vec3f& direction, varying RandomTEA* uniform rng,
+                    float extent);
+
+/**
+    @return A random generator according to the location in the frame buffer
+*/
+varying RandomTEA* uniform createRandomNumberGenerator(
+    const uniform Renderer* uniform self, varying ScreenSample& sample);
