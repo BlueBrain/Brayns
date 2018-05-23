@@ -166,26 +166,6 @@ void Model::setSDFGeometryNeighbours(
     _SDFNeighbours[geometryIdx] = neighbourIndices;
 }
 
-void Model::buildSDFGeometryNeighboursFlat()
-{
-    const size_t numGeoms = _SDFGeometries.size();
-
-    _SDFNeighboursFlat.clear();
-
-    for (size_t geomI = 0; geomI < numGeoms; geomI++)
-    {
-        const size_t currOffset = _SDFNeighboursFlat.size();
-        const auto& neighsI = _SDFNeighbours[geomI];
-        if (!neighsI.empty())
-        {
-            _SDFGeometries[geomI].numNeighbours = neighsI.size();
-            _SDFGeometries[geomI].neighboursIndex = currOffset;
-            _SDFNeighboursFlat.insert(std::end(_SDFNeighboursFlat),
-                                      std::begin(neighsI), std::end(neighsI));
-        }
-    }
-}
-
 bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||

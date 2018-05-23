@@ -194,7 +194,7 @@ public:
      * now on.
      */
     BRAYNS_API void addModel(ModelPtr model, const Transformations& transform);
-    
+
     /**
       Adds a SDFGeometry to the scene
       @param materialId Material of the geometry
@@ -205,16 +205,12 @@ public:
     uint64_t addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
                             const std::vector<size_t>& neighbours);
 
-
     /** Set the list of neighbours for a SDF geometry
       @param geometryIdx Index of the geometry
       @param neighbourIndices Indices of the neighbours
       */
     void setSDFGeometryNeighbours(size_t geometryIdx,
                                   const std::vector<size_t>& neighbourIndices);
-
-    /** Builds the flat list of neighbours for the SDF geometries */
-    void buildSDFGeometryNeighboursFlat();
 
     /**
         Returns triangle meshes handled by the model
@@ -295,7 +291,6 @@ protected:
     bool _useSimulationModel{false};
 
     std::map<size_t, std::vector<uint32_t>> _SDFGeometryIndices;
-    std::vector<size_t> _SDFNeighboursFlat;
     std::vector<std::vector<size_t>> _SDFNeighbours;
     std::vector<SDFGeometry> _SDFGeometries;
     bool _SDFGeometriesDirty{false};

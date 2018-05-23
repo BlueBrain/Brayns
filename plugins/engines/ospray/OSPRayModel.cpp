@@ -288,14 +288,29 @@ void OSPRayModel::_commitSDFGeometries()
     assert(_ospSDFGeometryData == nullptr);
     assert(_ospSDFNeighboursData == nullptr);
 
-    buildSDFGeometryNeighboursFlat();
-
     _ospSDFGeometryData =
         ospNewData(_SDFGeometries.size() * sizeof(_SDFGeometries) /
                        sizeof(OSP_CHAR),
                    OSP_CHAR, _SDFGeometries.data(), _memoryManagementFlags);
 
     ospCommit(_ospSDFGeometryData);
+
+    // Create and upload flat list of neighbours
+    const size_t numGeoms = _SDFGeometries.size();
+    _SDFNeighboursFlat.clear();
+
+    for (size_t geomI = 0; geomI < numGeoms; geomI++)
+    {
+        const size_t currOffset = _SDFNeighboursFlat.size();
+        const auto& neighsI = _SDFNeighbours[geomI];
+        if (!neighsI.empty())
+        {
+            _SDFGeometries[geomI].numNeighbours = neighsI.size();
+            _SDFGeometries[geomI].neighboursIndex = currOffset;
+            _SDFNeighboursFlat.insert(std::end(_SDFNeighboursFlat),
+                                      std::begin(neighsI), std::end(neighsI));
+        }
+    }
 
     _ospSDFNeighboursData =
         ospNewData(_SDFNeighboursFlat.size() *
