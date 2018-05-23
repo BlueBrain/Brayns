@@ -636,7 +636,7 @@ private:
                     .getMorphologyDampenBranchThicknessChangerate();
 
             const bool useSDFGeometries =
-                _geometryParameters.getUseSDFGeometries();
+                _geometryParameters.getMorphologyUseSDFGeometries();
 
             SDFMorphologyData sdfMorphologyData;
 
