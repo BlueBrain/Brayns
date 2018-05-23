@@ -40,18 +40,16 @@ namespace brayns
 class MeshLoader : public Loader
 {
 public:
-    MeshLoader(const GeometryParameters& geometryParameters);
+    MeshLoader(Scene& scene, const GeometryParameters& geometryParameters);
 
     static std::set<std::string> getSupportedDataTypes();
 
     ModelDescriptorPtr importFromFile(
-        const std::string& fileName, Scene& scene, const size_t index = 0,
-        const Matrix4f& transformation = Matrix4f(),
+        const std::string& fileName, const size_t index = 0,
         const size_t defaultMaterial = NO_MATERIAL) final;
 
     ModelDescriptorPtr importFromBlob(
-        Blob&& blob, Scene& scene, const size_t index = 0,
-        const Matrix4f& transformation = Matrix4f(),
+        Blob&& blob, const size_t index = 0,
         const size_t defaultMaterial = NO_MATERIAL) final;
 
     /**
@@ -64,15 +62,13 @@ public:
     std::string getMeshFilenameFromGID(const uint64_t gid);
 
 private:
-#if (BRAYNS_USE_ASSIMP)
     void _createMaterials(Model& model, const aiScene* aiScene,
                           const std::string& folder);
 
     void _postLoad(const aiScene* aiScene, Model& model, const size_t index,
-                   const Matrix4f& transformation, const size_t defaultMaterial,
+                   const size_t defaultMaterial,
                    const std::string& folder = "");
     size_t _getQuality() const;
-#endif
     const GeometryParameters& _geometryParameters;
 };
 }

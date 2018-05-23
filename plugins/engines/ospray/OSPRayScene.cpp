@@ -110,6 +110,9 @@ void OSPRayScene::commit()
                 BRAYNS_INFO << "Committing " << modelDescriptor->getName()
                             << std::endl;
                 _addInstance(_rootModel, impl.getModel(), transformation);
+
+                impl.commitSubModels(_rootModel);
+
                 if (impl.getUseSimulationModel())
                 {
                     if (!_rootSimulationModel)

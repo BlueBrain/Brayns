@@ -39,20 +39,18 @@ namespace brayns
 class CircuitLoader : public Loader
 {
 public:
-    CircuitLoader(const ApplicationParameters& applicationParameters,
+    CircuitLoader(Scene& scene,
+                  const ApplicationParameters& applicationParameters,
                   const GeometryParameters& geometryParameters);
     ~CircuitLoader();
 
     static std::set<std::string> getSupportedDataTypes();
 
-    ModelDescriptorPtr importFromBlob(Blob&& blob, Scene& scene,
-                                      const size_t index,
-                                      const Matrix4f& transformation,
+    ModelDescriptorPtr importFromBlob(Blob&& blob, const size_t index,
                                       const size_t materialID) final;
 
-    ModelDescriptorPtr importFromFile(const std::string& filename, Scene& scene,
+    ModelDescriptorPtr importFromFile(const std::string& filename,
                                       const size_t index,
-                                      const Matrix4f& transformation,
                                       const size_t materialID) final;
 
     /**
@@ -66,8 +64,9 @@ public:
      * @return True if the circuit is successfully loaded, false if the circuit
      * contains no cells.
      */
-    bool importCircuit(const servus::URI& circuitConfig, const strings& targets,
-                       const std::string& report, Scene& scene);
+    ModelDescriptorPtr importCircuit(const servus::URI& circuitConfig,
+                                     const strings& targets,
+                                     const std::string& report);
 
 private:
     class Impl;

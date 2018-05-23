@@ -29,18 +29,16 @@ namespace brayns
 class XYZBLoader : public Loader
 {
 public:
-    XYZBLoader(const GeometryParameters& geometryParameters);
+    XYZBLoader(Scene& scene, const GeometryParameters& geometryParameters);
 
     static std::set<std::string> getSupportedDataTypes();
 
     ModelDescriptorPtr importFromBlob(
-        Blob&& blob, Scene& scene, const size_t index = 0,
-        const Matrix4f& transformation = Matrix4f(),
+        Blob&& blob, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) final;
 
     ModelDescriptorPtr importFromFile(
-        const std::string& filename, Scene& scene, const size_t index = 0,
-        const Matrix4f& transformation = Matrix4f(),
+        const std::string& filename, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) final;
 
 private:

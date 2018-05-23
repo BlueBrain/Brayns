@@ -69,26 +69,25 @@ public:
     BRAYNS_API virtual void commit() = 0;
 
     /**
-     * @brief commitLights commits lights to renderers
+     * Commits lights to renderers.
      * @return True if lights were committed, false otherwise
      */
     BRAYNS_API virtual bool commitLights() = 0;
 
     /**
-     * @brief commitSimulationData commits simulation data to renderers
+     * Commits simulation data to renderers.
      * @return True if data was committed, false otherwise
      */
     BRAYNS_API virtual bool commitSimulationData() = 0;
 
     /**
-     * @brief commitVolumeData commits volume data to renderers
+     * Commits volume data to renderers.
      * @return True if data was committed, false otherwise
      */
     BRAYNS_API virtual bool commitVolumeData() = 0;
 
     /**
-     * @brief commitTransferFunctionData commits transfer function data to
-     * renderers
+     * Commits transfer function data to renderers.
      * @return True if data was committed, false otherwise
      */
     BRAYNS_API virtual bool commitTransferFunctionData() = 0;
@@ -125,10 +124,7 @@ public:
     /**
         Adds a model to the scene
       */
-    BRAYNS_API ModelDescriptorPtr addModel(ModelPtr model,
-                                           const std::string& name,
-                                           const std::string& path = "",
-                                           const ModelMetadata& metadata = {});
+    BRAYNS_API size_t addModel(ModelDescriptorPtr model);
 
     /**
         Removes a model from the scene
@@ -143,8 +139,8 @@ public:
     BRAYNS_API void buildDefault();
 
     /**
-        Return true if the scene does not contain any geometry. False otherwise
-    */
+     * @return true if the scene does not contain any geometry, false otherwise
+     */
     BRAYNS_API bool empty() const;
 
     BRAYNS_API ParametersManager& getParametersManager()
@@ -255,7 +251,7 @@ public:
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
-    ModelDescriptorPtr load(Blob&& blob, const Matrix4f& transformation,
+    ModelDescriptorPtr load(Blob&& blob, const Transformation& transformation,
                             const size_t materialID, Loader::UpdateCallback cb);
 
     /**
@@ -268,7 +264,7 @@ public:
      * @return the model that has been added to the scene
      */
     ModelDescriptorPtr load(const std::string& path,
-                            const Matrix4f& transformation,
+                            const Transformation& transformation,
                             const size_t materialID, Loader::UpdateCallback cb);
 
     /** @return the registry for all supported loaders of this scene. */

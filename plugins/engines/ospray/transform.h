@@ -29,8 +29,6 @@ inline osp::affine3f transformationToAffine3f(
     const Transformation& transformation)
 {
     ospcommon::affine3f t(ospcommon::one);
-    const auto& scale = transformation.getScale();
-    t *= t.scale({scale.x(), scale.y(), scale.z()});
     const auto& translation = transformation.getTranslation();
     t *= t.translate({translation.x(), translation.y(), translation.z()});
 
@@ -45,6 +43,9 @@ inline osp::affine3f transformationToAffine3f(
         t *= t.rotate({0, 1, 0}, y);
     if (z != 0.f)
         t *= t.rotate({0, 0, 1}, z);
+
+    const auto& scale = transformation.getScale();
+    t *= t.scale({scale.x(), scale.y(), scale.z()});
     return (osp::affine3f&)t;
 }
 }

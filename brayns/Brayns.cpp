@@ -282,31 +282,32 @@ struct Brayns::Impl : public PluginAPI
 
         auto& registry = _engine->getScene().getLoaderRegistry();
         REGISTER_LOADER(MeshLoader,
-                        [& params =
-                                _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<MeshLoader>(params);
-                        });
+                        ([&scene = _engine->getScene(), & params = _parametersManager.getGeometryParameters()] {
+                            return std::make_unique<MeshLoader>(scene, params);
+                        }));
         REGISTER_LOADER(ProteinLoader,
-                        [& params =
+                        ([&scene = _engine->getScene(), & params =
                                 _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<ProteinLoader>(params);
-                        });
+                            return std::make_unique<ProteinLoader>(scene, params);
+                        }));
         REGISTER_LOADER(XYZBLoader,
-                        [& params =
+                        ([&scene = _engine->getScene(), & params =
                                 _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<XYZBLoader>(params);
-                        });
+                            return std::make_unique<XYZBLoader>(scene, params);
+                        }));
 #if (BRAYNS_USE_BRION)
         REGISTER_LOADER(MorphologyLoader,
-                        [& params =
+                        ([&scene = _engine->getScene(), & params =
                                 _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<MorphologyLoader>(params);
-                        });
-        REGISTER_LOADER(CircuitLoader, [& params = _parametersManager] {
-            return std::make_unique<CircuitLoader>(
-                params.getApplicationParameters(),
-                params.getGeometryParameters());
-        });
+                            return std::make_unique<MorphologyLoader>(scene, params);
+                        }));
+        REGISTER_LOADER(
+            CircuitLoader,
+            ([& scene = _engine->getScene(), &params = _parametersManager ] {
+                return std::make_unique<CircuitLoader>(
+                    scene, params.getApplicationParameters(),
+                    params.getGeometryParameters());
+            }));
 #endif
 
         const auto& paths =
@@ -549,11 +550,11 @@ private:
         const std::string& circuit(geometryParameters.getNESTCircuit());
         if (!circuit.empty())
         {
-            NESTLoader loader(geometryParameters);
+            NESTLoader loader(scene, geometryParameters);
 
             // need to import circuit first to determine _frameSize for report
             // loading
-            loader.importCircuit(circuit, scene);
+            auto model = loader.importFromFile(circuit);
 
             const std::string& cacheFile(geometryParameters.getNESTCacheFile());
             if (!geometryParameters.getNESTReport().empty() &&
@@ -585,6 +586,7 @@ private:
 
                 scene.setSimulationHandler(simulationHandler);
             }
+            scene.addModel(model);
         }
     }
 
@@ -605,11 +607,12 @@ private:
         BRAYNS_INFO << "Loading circuit configuration from " << filename
                     << std::endl;
         const std::string& report = geometryParameters.getCircuitReport();
-        CircuitLoader circuitLoader(applicationParameters, geometryParameters);
+        CircuitLoader circuitLoader(scene, applicationParameters,
+                                    geometryParameters);
         circuitLoader.setProgressCallback(progressUpdate);
 
         const servus::URI uri(filename);
-        circuitLoader.importCircuit(uri, targets, report, scene);
+        scene.addModel(circuitLoader.importCircuit(uri, targets, report));
     }
 #endif // BRAYNS_USE_BRION
 
@@ -621,10 +624,10 @@ private:
     {
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& scene = _engine->getScene();
-        MolecularSystemReader molecularSystemReader(geometryParameters);
+        MolecularSystemReader molecularSystemReader(scene, geometryParameters);
         molecularSystemReader.setProgressCallback(progressUpdate);
         const auto fileName = geometryParameters.getMolecularSystemConfig();
-        molecularSystemReader.importFromFile(fileName, scene);
+        scene.addModel(molecularSystemReader.importFromFile(fileName));
     }
 
     void _setupCameraManipulator(const CameraMode mode)

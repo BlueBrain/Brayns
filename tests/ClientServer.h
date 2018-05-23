@@ -45,9 +45,8 @@ const size_t SERVER_PROCESS_RETRIES = 10; /*ms*/
 class ForeverLoader : public brayns::Loader
 {
 public:
-    brayns::ModelDescriptorPtr importFromBlob(brayns::Blob&&, brayns::Scene&,
-                                              const size_t,
-                                              const brayns::Matrix4f&,
+    using brayns::Loader::Loader;
+    brayns::ModelDescriptorPtr importFromBlob(brayns::Blob&&, const size_t,
                                               const size_t) final
     {
         for (;;)
@@ -58,9 +57,7 @@ public:
         return {};
     }
 
-    brayns::ModelDescriptorPtr importFromFile(const std::string&,
-                                              brayns::Scene&, const size_t,
-                                              const brayns::Matrix4f&,
+    brayns::ModelDescriptorPtr importFromFile(const std::string&, const size_t,
                                               const size_t) final
     {
         for (;;)
@@ -99,9 +96,10 @@ public:
             .setImageStreamFPS(0);
         _brayns->render();
 
-        _brayns->getEngine().getScene().getLoaderRegistry().registerLoader(
+        auto& scene = _brayns->getEngine().getScene();
+        scene.getLoaderRegistry().registerLoader(
             {[] { return std::set<std::string>{std::string("forever")}; },
-             [] { return std::make_unique<ForeverLoader>(); }});
+             [&scene] { return std::make_unique<ForeverLoader>(scene); }});
 
         connect(_wsClient);
         _instance = this;

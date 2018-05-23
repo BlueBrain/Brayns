@@ -35,6 +35,14 @@ namespace brayns
 class Transformation : public BaseObject
 {
 public:
+    Transformation() = default;
+    Transformation(const Matrix4f& mat)
+        : _translation(mat.getTranslation())
+        , _scale(mat(3, 0), mat(3, 1), mat(3, 2))
+        , _rotation(mat)
+    {
+    }
+
     const Vector3f& getTranslation() const { return _translation; }
     void setTranslation(const Vector3f& value)
     {

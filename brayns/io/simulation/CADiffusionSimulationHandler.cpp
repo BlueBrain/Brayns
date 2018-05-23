@@ -111,6 +111,7 @@ void CADiffusionSimulationHandler::setFrame(Scene& scene, const size_t frame)
                 << std::endl;
     for (const auto position : _calciumPositions)
         model->addSphere(CALCIUM_MATERIAL_ID, {position, CALCIUM_RADIUS});
-    _modelID = scene.addModel(std::move(model), modelName)->getID();
+    _modelID = scene.addModel(
+        std::make_shared<ModelDescriptor>(std::move(model), modelName));
 }
 }

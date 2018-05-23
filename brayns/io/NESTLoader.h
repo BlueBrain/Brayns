@@ -54,16 +54,9 @@ namespace brayns
 class NESTLoader : public Loader
 {
 public:
-    NESTLoader(const GeometryParameters& geometryParameters);
+    NESTLoader(Scene& scene, const GeometryParameters& geometryParameters);
 
-    ModelDescriptorPtr importFromBlob(Blob&&, Scene&, const size_t,
-                                      const Matrix4f&, const size_t) final
-    {
-        throw std::runtime_error("Unsupported");
-    }
-
-    ModelDescriptorPtr importFromFile(const std::string&, Scene&, const size_t,
-                                      const Matrix4f&, const size_t) final
+    ModelDescriptorPtr importFromBlob(Blob&&, const size_t, const size_t) final
     {
         throw std::runtime_error("Unsupported");
     }
@@ -75,9 +68,10 @@ public:
      * --radius-multiplier command line
      * argument.
      * @param filename File containing the circuit
-     * @param scene Scene in which spheres should be added
      */
-    void importCircuit(const std::string& filename, Scene& scene);
+    ModelDescriptorPtr importFromFile(
+        const std::string& filename, const size_t index = 0,
+        const size_t defaultMaterialId = NO_MATERIAL) final;
 
     /**
      * Imports a spike report into the memory mapped cache file that will be

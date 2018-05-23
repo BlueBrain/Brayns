@@ -314,29 +314,34 @@ void OSPRayModel::commit()
         _trianglesMeshesDirty = false;
     }
 
-    if (_modelsDirty)
-    {
-        for (const auto& entry : _models)
-        {
-            entry.model->commit();
-            auto ospModel = static_cast<OSPRayModel*>(entry.model.get());
-            for (const auto& transform : entry.transforms)
-            {
-                auto instance =
-                    ospNewInstance(ospModel->getModel(),
-                                   transformationToAffine3f(transform));
-                ospCommit(instance);
-                ospAddGeometry(_model, instance);
-                ospRelease(instance);
-            }
-        }
-        _modelsDirty = false;
-    }
-
     // Commit models
     ospCommit(_model);
-    ospCommit(_boundingBoxModel);
+    if (_boundingBoxModel)
+        ospCommit(_boundingBoxModel);
     ospCommit(_simulationModel);
+}
+
+void OSPRayModel::commitSubModels(OSPModel rootModel)
+{
+    // why submodels have to go to the root model:
+    // https://github.com/ospray/ospray/issues/256
+    for (const auto& entry : _models)
+    {
+        auto& ospModel = static_cast<OSPRayModel&>(*entry.model);
+
+        ospModel.commit();
+        ospModel.commitSubModels(rootModel);
+
+        for (const auto& transform : entry.transforms)
+        {
+            auto instance = ospNewInstance(ospModel.getModel(),
+                                           transformationToAffine3f(transform));
+            ospCommit(instance);
+            ospAddGeometry(rootModel, instance);
+            ospRelease(instance);
+        }
+    }
+    _modelsDirty = false;
 }
 
 MaterialPtr OSPRayModel::createMaterial(const size_t materialId,

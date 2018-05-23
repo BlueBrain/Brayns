@@ -39,7 +39,7 @@ common_find_package(Boost REQUIRED COMPONENTS
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
 common_find_package(LibArchive)
-common_find_package(libuv)
+common_find_package(libuv 1.8)
 
 if(libuv_FOUND)
   # The libuv version of Ubuntu 16.04 is too old to have this definition that is

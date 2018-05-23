@@ -37,6 +37,9 @@ public:
     void setMemoryFlags(const size_t memoryManagementFlags);
 
     void commit() final;
+
+    void commitSubModels(OSPModel rootModel);
+
     OSPModel getModel() const { return _model; }
     OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
     OSPModel getSimulationModel() const { return _simulationModel; }

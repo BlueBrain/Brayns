@@ -41,11 +41,24 @@ ModelParams::ModelParams(const std::string& name, const std::string& path)
 {
 }
 
-ModelDescriptor::ModelDescriptor(const size_t id, const std::string& name,
+ModelDescriptor::ModelDescriptor(ModelPtr model, const std::string& path)
+    : ModelParams(path)
+    , _model(std::move(model))
+{
+}
+
+ModelDescriptor::ModelDescriptor(ModelPtr model, const std::string& path,
+                                 const ModelMetadata& metadata)
+    : ModelParams(path)
+    , _metadata(metadata)
+    , _model(std::move(model))
+{
+}
+
+ModelDescriptor::ModelDescriptor(ModelPtr model, const std::string& name,
                                  const std::string& path,
-                                 const ModelMetadata& metadata, ModelPtr model)
+                                 const ModelMetadata& metadata)
     : ModelParams(name, path)
-    , _id(id)
     , _metadata(metadata)
     , _model(std::move(model))
 {
@@ -253,6 +266,11 @@ void Model::logInformation()
         _sizeInBytes += mesh.indices.size() * sizeof(Vector3ui);
         _sizeInBytes += mesh.textureCoordinates.size() * sizeof(Vector2f);
         ++nbMeshes;
+    }
+    for (const auto& model : _models)
+    {
+        model.model->logInformation();
+        _sizeInBytes += model.model->getSizeInBytes();
     }
 
     BRAYNS_INFO << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders

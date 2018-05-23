@@ -45,19 +45,17 @@ using GIDOffsets = std::vector<uint64_t>;
 class MorphologyLoader : public Loader
 {
 public:
-    MorphologyLoader(const GeometryParameters& geometryParameters);
+    MorphologyLoader(Scene& scene,
+                     const GeometryParameters& geometryParameters);
     ~MorphologyLoader();
 
     static std::set<std::string> getSupportedDataTypes();
 
-    ModelDescriptorPtr importFromBlob(Blob&& blob, Scene& scene,
-                                      const size_t index,
-                                      const Matrix4f& transformation,
+    ModelDescriptorPtr importFromBlob(Blob&& blob, const size_t index,
                                       const size_t materialID) final;
 
-    ModelDescriptorPtr importFromFile(const std::string& filename, Scene& scene,
+    ModelDescriptorPtr importFromFile(const std::string& filename,
                                       const size_t index,
-                                      const Matrix4f& transformation,
                                       const size_t materialID) final;
 
     /**
