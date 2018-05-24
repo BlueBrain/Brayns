@@ -156,6 +156,8 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
         _bounds.merge(max);
         break;
     }
+    default:
+        throw std::runtime_error("No bounds found for SDF type.");
     }
 
     return geomIdx;
