@@ -22,7 +22,7 @@
 #include "OSPRayMaterial.h"
 #include "OSPRayModel.h"
 #include "OSPRayRenderer.h"
-#include "transform.h"
+#include "utils.h"
 
 #include <brayns/common/ImageManager.h>
 #include <brayns/common/Transformation.h>
@@ -97,32 +97,52 @@ void OSPRayScene::commit()
     std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
     for (auto modelDescriptor : _modelDescriptors)
     {
-        if (modelDescriptor->getEnabled())
+        if (!modelDescriptor->getEnabled())
+            continue;
+
+        auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
+        const auto& transformation = modelDescriptor->getTransformation();
+
+        BRAYNS_INFO << "Committing " << modelDescriptor->getName() << std::endl;
+
+        if (modelDescriptor->getVisible() && impl.getUseSimulationModel())
         {
-            auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
-            const auto& transformation = modelDescriptor->getTransformation();
-            if (modelDescriptor->getBoundingBox())
-                _addInstance(_rootModel, impl.getBoundingBoxModel(),
-                             transformation);
-
-            if (modelDescriptor->getVisible())
-            {
-                BRAYNS_INFO << "Committing " << modelDescriptor->getName()
-                            << std::endl;
-                _addInstance(_rootModel, impl.getModel(), transformation);
-
-                impl.commitSubModels(_rootModel);
-
-                if (impl.getUseSimulationModel())
-                {
-                    if (!_rootSimulationModel)
-                        _rootSimulationModel = ospNewModel();
-                    _addInstance(_rootSimulationModel,
-                                 impl.getSimulationModel(), transformation);
-                }
-            }
-            impl.logInformation();
+            if (!_rootSimulationModel)
+                _rootSimulationModel = ospNewModel();
+            addInstance(_rootSimulationModel, impl.getSimulationModel(),
+                        transformation);
         }
+
+        Boxf instancesBounds;
+        const auto& modelBounds = modelDescriptor->getModel().getBounds();
+        for (const auto& instance : modelDescriptor->getInstances())
+        {
+            const auto instanceTransform =
+                transformation * instance.getTransformation();
+
+            if (modelDescriptor->getBoundingBox() && instance.getBoundingBox())
+                addInstance(_rootModel, impl.getBoundingBoxModel(),
+                            instanceTransform);
+
+            if (modelDescriptor->getVisible() && instance.getVisible())
+                addInstance(_rootModel, impl.getModel(), instanceTransform);
+
+            instancesBounds.merge(transformBox(modelBounds, instanceTransform));
+        }
+
+        if (modelDescriptor->getBoundingBox())
+        {
+            Transformation instancesTransform;
+            instancesTransform.setTranslation(instancesBounds.getCenter() -
+                                              modelBounds.getCenter());
+            instancesTransform.setScale(instancesBounds.getSize() /
+                                        modelBounds.getSize());
+
+            addInstance(_rootModel, impl.getBoundingBoxModel(),
+                        instancesTransform);
+        }
+
+        impl.logInformation();
     }
 
     BRAYNS_INFO << "Committing root models" << std::endl;
@@ -349,15 +369,5 @@ bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
 ModelPtr OSPRayScene::createModel() const
 {
     return std::make_unique<OSPRayModel>();
-}
-
-void OSPRayScene::_addInstance(OSPModel rootModel, OSPModel modelToAdd,
-                               const Transformation& transform)
-{
-    OSPGeometry instance =
-        ospNewInstance(modelToAdd, transformationToAffine3f(transform));
-    ospCommit(instance);
-    ospAddGeometry(rootModel, instance);
-    ospRelease(instance);
 }
 }

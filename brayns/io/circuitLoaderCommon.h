@@ -92,11 +92,7 @@ struct ParallelModelContainer
         }
     }
 
-    void addBoundsToModel(Model& model) const
-    {
-        model.getBounds().merge(bounds);
-    }
-
+    void addBoundsToModel(Model& model) const { model.updateBounds(bounds); }
     void addSDFGeometriesToModel(Model& model) const
     {
         const size_t numGeoms = sdfGeometries.size();

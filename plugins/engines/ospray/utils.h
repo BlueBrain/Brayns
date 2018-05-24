@@ -48,4 +48,13 @@ inline osp::affine3f transformationToAffine3f(
     t *= t.scale({scale.x(), scale.y(), scale.z()});
     return (osp::affine3f&)t;
 }
+
+inline void addInstance(OSPModel rootModel, OSPModel modelToAdd, const Transformation& transform)
+{
+    OSPGeometry instance =
+        ospNewInstance(modelToAdd, transformationToAffine3f(transform));
+    ospCommit(instance);
+    ospAddGeometry(rootModel, instance);
+    ospRelease(instance);
+}
 }

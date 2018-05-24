@@ -54,6 +54,15 @@
 #pragma GCC diagnostic pop
 #endif
 
+namespace brayns
+{
+struct GetInstances
+{
+    size_t modelID;
+    Vector2ui resultRange;
+};
+}
+
 STATICJSON_DECLARE_ENUM(brayns::CameraType,
                         {"default", brayns::CameraType::default_},
                         {"orthographic", brayns::CameraType::orthographic},
@@ -147,6 +156,13 @@ STATICJSON_DECLARE_ENUM(brayns::TextureType,
 
 namespace staticjson
 {
+inline void init(brayns::GetInstances* g, ObjectHandler* h)
+{
+    h->add_property("id", &g->modelID);
+    h->add_property("result_range", Vector2uiArray(g->resultRange),
+                    Flags::Optional);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
 inline void init(brayns::Chunk* c, ObjectHandler* h)
 {
     h->add_property("id", &c->id, Flags::Optional);
@@ -302,6 +318,16 @@ inline void init(brayns::Transformation* g, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::ModelInstance* i, ObjectHandler* h)
+{
+    h->add_property("model_id", &i->_modelID);
+    h->add_property("instance_id", &i->_instanceID);
+    h->add_property("bounding_box", &i->_boundingBox, Flags::Optional);
+    h->add_property("transformation", &i->_transformation, Flags::Optional);
+    h->add_property("visible", &i->_visible, Flags::Optional);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 inline void init(brayns::ModelParams* g, ObjectHandler* h)
 {
     h->add_property("bounding_box", &g->_boundingBox, Flags::Optional);
@@ -316,9 +342,9 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
 {
     h->add_property("bounding_box", &g->_boundingBox, Flags::Optional);
     if (g->_model)
-        g->_bounds = g->_model->getBounds();
+        g->_bounds = g->getInstancesBounds();
     h->add_property("bounds", &g->_bounds, Flags::Optional);
-    h->add_property("id", &g->_id);
+    h->add_property("id", &g->_modelID);
     h->add_property("metadata", &g->_metadata, Flags::Optional);
     h->add_property("name", &g->_name, Flags::Optional);
     h->add_property("path", &g->_path, Flags::Optional);

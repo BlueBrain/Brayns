@@ -68,11 +68,13 @@ const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 const std::string METHOD_ADD_MODEL = "add-model";
 const std::string METHOD_CHUNK = "chunk";
+const std::string METHOD_GET_INSTANCES = "get-instances";
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_QUIT = "quit";
 const std::string METHOD_REMOVE_MODEL = "remove-model";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
 const std::string METHOD_SNAPSHOT = "snapshot";
+const std::string METHOD_UPDATE_INSTANCE = "update-instance";
 const std::string METHOD_UPDATE_MODEL = "update-model";
 
 const std::string JSON_TYPE = "application/json";
@@ -565,10 +567,13 @@ public:
 
         _handleRequestModelUpload();
         _handleChunk();
-        _handleAddModel();
 
+        _handleAddModel();
         _handleRemoveModel();
         _handleUpdateModel();
+
+        _handleGetInstances();
+        _handleUpdateInstance();
     }
 
     void _handleFrameBuffer()
@@ -847,8 +852,8 @@ public:
 
                 auto& models = engine->getScene().getModelDescriptors();
                 auto i = std::find_if(models.begin(), models.end(),
-                                      [id = newDesc.getID()](auto desc) {
-                                          return id == desc->getID();
+                                      [id = newDesc.getModelID()](auto desc) {
+                                          return id == desc->getModelID();
                                       });
                 if (i == models.end())
                     return Response{to_json(false)};
@@ -863,6 +868,63 @@ public:
         _handleSchema(METHOD_UPDATE_MODEL,
                       buildJsonRpcSchema<ModelDescriptor, bool>(
                           METHOD_UPDATE_MODEL, doc));
+    }
+
+    void _handleGetInstances()
+    {
+        RpcDocumentation doc{"Get instances", "id, range",
+                             "ModelID and result range"};
+        _handleRPC<GetInstances, ModelInstances>(
+            METHOD_GET_INSTANCES, doc,
+            [engine = _engine](const GetInstances& param)->ModelInstances {
+                auto id = param.modelID;
+                auto& scene = engine->getScene();
+                auto model = scene.getModel(id);
+                if (!model)
+                    throw rockets::jsonrpc::response_error("Model not found",
+                                                           -12345);
+
+                const auto& instances = model->getInstances();
+                const Vector2ui range{std::min(param.resultRange.x(),
+                                               unsigned(instances.size())),
+                                      std::min(param.resultRange.y(),
+                                               unsigned(instances.size()))};
+                return {instances.begin() + range.x(),
+                        instances.begin() + range.y()};
+            });
+    }
+
+    void _handleUpdateInstance()
+    {
+        _jsonrpcServer->bind(
+            METHOD_UPDATE_INSTANCE,
+            [engine = _engine](const rockets::jsonrpc::Request& request) {
+                ModelInstance newDesc;
+                if (!::from_json(newDesc, request.message))
+                    return Response::invalidParams();
+
+                auto& scene = engine->getScene();
+                auto model = scene.getModel(newDesc.getModelID());
+                if (!model)
+                    throw rockets::jsonrpc::response_error("Model not found",
+                                                           -12345);
+
+                auto instance = model->getInstance(newDesc.getInstanceID());
+                if (!instance)
+                    throw rockets::jsonrpc::response_error("Instance not found",
+                                                           -12346);
+
+                ::from_json(*instance, request.message);
+                model->getModel().markInstancesDirty();
+                scene.markModified();
+                engine->triggerRender();
+                return Response{to_json(true)};
+            });
+        RpcDocumentation doc{"Update the instance with the given values",
+                             "model_instance", "Model instance"};
+        _handleSchema(METHOD_UPDATE_INSTANCE,
+                      buildJsonRpcSchema<ModelInstance, bool>(
+                          METHOD_UPDATE_INSTANCE, doc));
     }
 
     EnginePtr _engine;

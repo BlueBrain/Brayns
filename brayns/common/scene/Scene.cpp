@@ -118,22 +118,35 @@ size_t Scene::addModel(ModelDescriptorPtr model)
     model->getModel().commit();
 
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    model->setID(_modelID++);
+    model->setModelID(_modelID++);
     _modelDescriptors.push_back(model);
     markModified();
-    return model->getID();
+
+    // add default instance of this model to render something
+    if (model->getInstances().empty())
+        model->addInstance({true, true, {}});
+    return model->getModelID();
 }
 
 void Scene::removeModel(const size_t id)
 {
     std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    auto i = std::remove_if(_modelDescriptors.begin(), _modelDescriptors.end(),
-                            [id](auto desc) { return id == desc->getID(); });
+    auto i =
+        std::remove_if(_modelDescriptors.begin(), _modelDescriptors.end(),
+                       [id](auto desc) { return id == desc->getModelID(); });
     if (i == _modelDescriptors.end())
         return;
 
     _modelDescriptors.erase(i, _modelDescriptors.end());
     markModified();
+}
+
+ModelDescriptorPtr Scene::getModel(const size_t id) const
+{
+    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    auto i = std::find_if(_modelDescriptors.begin(), _modelDescriptors.end(),
+                          [id](auto desc) { return id == desc->getModelID(); });
+    return i == _modelDescriptors.end() ? ModelDescriptorPtr{} : *i;
 }
 
 void Scene::setSimulationHandler(AbstractSimulationHandlerPtr handler)
@@ -246,8 +259,8 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                     {"offset", std::to_string(offset.x()) + " " +
                                    std::to_string(offset.y()) + " " +
                                    std::to_string(offset.z())}}));
-            model->getBounds().merge(offset);
-            model->getBounds().merge(offset + dimensions);
+            model->updateBounds(offset);
+            model->updateBounds(offset + dimensions);
             _parametersManager.getVolumeParameters().resetModified();
         }
     }
@@ -328,7 +341,8 @@ ModelDescriptorPtr Scene::load(const std::string& path,
 
             loader->setProgressCallback(progressCb);
             model = loader->importFromFile(currentPath, index++, materialID);
-            model->setTransformation(transformation);
+            model->setTransformation(model->getTransformation() *
+                                     transformation);
             addModel(model);
 
             totalProgress += 1.f / numFiles;
@@ -718,7 +732,7 @@ void Scene::loadFromCacheFile()
         // Bounds
         Boxf bounds;
         file.read((char*)&bounds, sizeof(Boxf));
-        model->getBounds().merge(bounds);
+        model->updateBounds(bounds);
         addModel(std::make_shared<ModelDescriptor>(std::move(model), path));
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
@@ -780,7 +794,7 @@ void Scene::buildDefault()
         }
         trianglesMesh.indices.push_back(Vector3ui(0, 1, 2));
         trianglesMesh.indices.push_back(Vector3ui(3, 4, 5));
-        model->getBounds().merge(positions[i]);
+        model->updateBounds(positions[i]);
         ++materialId;
     }
 
@@ -855,16 +869,25 @@ void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 void Scene::_computeBounds()
 {
     std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
-    size_t nbEnabledModels{0};
+    size_t nbEnabledInstances{0};
     _bounds.reset();
     for (auto modelDescriptor : _modelDescriptors)
-        if (modelDescriptor->getEnabled())
+    {
+        const auto& transformation = modelDescriptor->getTransformation();
+        for (const auto& instance : modelDescriptor->getInstances())
         {
-            _bounds.merge(modelDescriptor->getModel().getBounds());
-            ++nbEnabledModels;
-        }
+            if (!instance.getVisible())
+                continue;
 
-    if (nbEnabledModels == 0)
+            const auto instanceTransform =
+                transformation * instance.getTransformation();
+            _bounds.merge(transformBox(modelDescriptor->getModel().getBounds(),
+                                       instanceTransform));
+            ++nbEnabledInstances;
+        }
+    }
+
+    if (nbEnabledInstances == 0)
         // If no model is enabled. return empty bounding box
         _bounds.merge({0, 0, 0});
 }

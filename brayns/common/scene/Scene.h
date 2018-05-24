@@ -133,6 +133,8 @@ public:
       */
     BRAYNS_API void removeModel(const size_t id);
 
+    BRAYNS_API ModelDescriptorPtr getModel(const size_t id) const;
+
     /**
         Builds a default scene made of a Cornell box, a reflective cube, and
         a transparent sphere

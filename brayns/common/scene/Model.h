@@ -34,10 +34,49 @@
 SERIALIZATION_ACCESS(Model)
 SERIALIZATION_ACCESS(ModelParams)
 SERIALIZATION_ACCESS(ModelDescriptor)
+SERIALIZATION_ACCESS(ModelInstance)
 
 namespace brayns
 {
-class ModelParams : public BaseObject
+class ModelInstance : public BaseObject
+{
+public:
+    ModelInstance() = default;
+    ModelInstance(const bool visible, const bool boundingBox,
+                  const Transformation& transformation)
+        : _visible(visible)
+        , _boundingBox(boundingBox)
+        , _transformation(transformation)
+    {
+    }
+    bool getVisible() const { return _visible; }
+    void setVisible(const bool visible) { _updateValue(_visible, visible); }
+    bool getBoundingBox() const { return _boundingBox; }
+    void setBoundingBox(const bool enabled)
+    {
+        _updateValue(_boundingBox, enabled);
+    }
+    const Transformation& getTransformation() const { return _transformation; }
+    void setTransformation(const Transformation& transformation)
+    {
+        _updateValue(_transformation, transformation);
+    }
+
+    void setModelID(const size_t id) { _updateValue(_modelID, id); }
+    size_t getModelID() const { return _modelID; }
+    void setInstanceID(const size_t id) { _updateValue(_instanceID, id); }
+    size_t getInstanceID() const { return _instanceID; }
+protected:
+    size_t _modelID{0};
+    size_t _instanceID{0};
+    bool _visible{true};
+    bool _boundingBox{false};
+    Transformation _transformation;
+
+    SERIALIZATION_FRIEND(ModelInstance)
+};
+
+class ModelParams : public ModelInstance
 {
 public:
     ModelParams() = default;
@@ -51,19 +90,6 @@ public:
     ModelParams(const ModelParams& rhs) = default;
     ModelParams& operator=(const ModelParams& rhs) = default;
 
-    bool getEnabled() const { return _visible || _boundingBox; }
-    bool getVisible() const { return _visible; }
-    void setVisible(const bool visible) { _updateValue(_visible, visible); }
-    bool getBoundingBox() const { return _boundingBox; }
-    void setBoundingBox(const bool enabled)
-    {
-        _updateValue(_boundingBox, enabled);
-    }
-    const Transformation& getTransformation() const { return _transformation; }
-    void setTransformation(const Transformation& transformation)
-    {
-        _updateValue(_transformation, transformation);
-    }
     void setName(const std::string& name) { _updateValue(_name, name); }
     const std::string& getName() const { return _name; }
     void setPath(const std::string& path) { _updateValue(_path, path); }
@@ -71,9 +97,6 @@ public:
 protected:
     std::string _name;
     std::string _path;
-    bool _visible{true};
-    bool _boundingBox{false};
-    Transformation _transformation;
 
     SERIALIZATION_FRIEND(ModelParams)
 };
@@ -104,17 +127,22 @@ public:
 
     ModelDescriptor& operator=(const ModelParams& rhs);
 
+    bool getEnabled() const { return _visible || _boundingBox; }
     const ModelMetadata& getMetadata() const { return _metadata; }
-    void setID(const size_t id) { _updateValue(_id, id); }
-    size_t getID() const { return _id; }
     const Model& getModel() const { return *_model; }
     Model& getModel() { return *_model; }
-    ModelPtr getModelPtr() { return std::move(_model); }
+    void addInstance(const ModelInstance& instance);
+    void removeInstance(const size_t id);
+    ModelInstance* getInstance(const size_t id);
+    const ModelInstances& getInstances() const { return _instances; }
+    Boxf getInstancesBounds() const;
+
 private:
-    size_t _id{0};
+    size_t _nextInstanceID{0};
     Boxf _bounds;
     ModelMetadata _metadata;
     ModelPtr _model;
+    ModelInstances _instances;
 
     SERIALIZATION_FRIEND(ModelDescriptor)
 };
@@ -148,7 +176,12 @@ public:
         Returns the bounds for the Model
     */
     const Boxf& getBounds() const { return _bounds; }
-    Boxf& getBounds() { return _bounds; }
+    template <typename T>
+    void updateBounds(const T& value)
+    {
+        _bounds.merge(value);
+    }
+    void setBounds(const Boxf& box) { _bounds = box; }
     /**
         Returns spheres handled by the Model
     */
@@ -185,16 +218,6 @@ public:
       @return Index of the sphere for the specified material
       */
     BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
-
-    /**
-     * Add a model to the model. The submodel will be added as an
-     * instance/reference at the given transformations as part of commit().
-     *
-     * Note that model is 'moved', so this model will own the added model from
-     * now on.
-     * @throw std::runtime_error if model is empty
-     */
-    BRAYNS_API void addModel(ModelPtr model, const Transformations& transform);
 
     /**
       Adds a SDFGeometry to the scene
@@ -273,6 +296,7 @@ public:
 
     /** @return the size in bytes of all geometries. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
+    void markInstancesDirty() { _instancesDirty = true; }
 protected:
     MaterialMap _materials;
     SpheresMap _spheres;
@@ -283,13 +307,6 @@ protected:
     bool _conesDirty{true};
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
-    struct SubModel
-    {
-        ModelPtr model;
-        Transformations transforms;
-    };
-    std::vector<SubModel> _models;
-    bool _modelsDirty{true};
     Boxf _bounds;
     bool _useSimulationModel{false};
 
@@ -304,6 +321,7 @@ protected:
 
     SDFGeometryData _sdf;
     bool _sdfGeometriesDirty{false};
+    bool _instancesDirty{true};
 
     size_t _sizeInBytes{0};
 

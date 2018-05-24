@@ -346,11 +346,9 @@ private:
                     : Matrix4f();
             try
             {
-                auto meshModel =
-                    meshLoader.importFromFile(meshLoader.getMeshFilenameFromGID(
-                                                  gid),
-                                              meshIndex, materialId);
-                model.addModel(meshModel->getModelPtr(), {transformation});
+                meshLoader.importMesh(meshLoader.getMeshFilenameFromGID(gid),
+                                      model, meshIndex, transformation,
+                                      materialId);
             }
             catch (...)
             {

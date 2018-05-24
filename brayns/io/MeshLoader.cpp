@@ -96,38 +96,9 @@ ModelDescriptorPtr MeshLoader::importFromFile(const std::string& fileName,
                                               const size_t index,
                                               const size_t defaultMaterialId)
 {
-    const boost::filesystem::path file = fileName;
-    Assimp::Importer importer;
-    importer.SetProgressHandler(new ProgressWatcher(*this, fileName));
-    if (!importer.IsExtensionSupported(file.extension().c_str()))
-    {
-        std::stringstream msg;
-        msg << "File extension " << file.extension() << " is not supported";
-        throw std::runtime_error(msg.str());
-    }
-
-    std::ifstream meshFile(fileName, std::ios::in);
-    if (!meshFile.good())
-        throw std::runtime_error("Could not open file " + fileName);
-    meshFile.close();
-
-    const aiScene* aiScene = importer.ReadFile(fileName.c_str(), _getQuality());
-
-    if (!aiScene)
-    {
-        std::stringstream msg;
-        msg << "Error parsing mesh " << fileName.c_str() << ": "
-            << importer.GetErrorString();
-        throw std::runtime_error(msg.str());
-    }
-
-    if (!aiScene->HasMeshes())
-        throw std::runtime_error("Error finding meshes in scene");
-
-    boost::filesystem::path filepath = fileName;
     auto model = _scene.createModel();
-    _postLoad(aiScene, *model, index, defaultMaterialId,
-              filepath.parent_path().string());
+    importMesh(fileName, *model, index, {}, defaultMaterialId);
+
     return std::make_shared<ModelDescriptor>(std::move(model), fileName);
 }
 
@@ -148,7 +119,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, const size_t index,
         throw std::runtime_error("No meshes found");
 
     auto model = _scene.createModel();
-    _postLoad(aiScene, *model, index, defaultMaterialId);
+    _postLoad(aiScene, *model, index, {}, defaultMaterialId);
     return std::make_shared<ModelDescriptor>(std::move(model), blob.name);
 }
 
@@ -238,7 +209,8 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 }
 
 void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
-                           const size_t index, const size_t defaultMaterialId,
+                           const size_t index, const Matrix4f& transformation,
+                           const size_t defaultMaterialId,
                            const std::string& folder)
 {
     const size_t materialId =
@@ -268,11 +240,14 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
             const auto& v = mesh->mVertices[i];
             const Vector3f transformedVertex = {v.x, v.y, v.z};
             triangleMeshes.vertices.push_back(transformedVertex);
-            model.getBounds().merge(transformedVertex);
+            model.updateBounds(transformedVertex);
             if (mesh->HasNormals())
             {
                 const auto& n = mesh->mNormals[i];
-                const Vector3f transformedNormal = {n.x, n.y, n.z};
+                const Vector4f normal =
+                    transformation * Vector4f(n.x, n.y, n.z, 0.f);
+                const Vector3f transformedNormal = {normal.x(), normal.y(),
+                                                    normal.z()};
                 triangleMeshes.normals.push_back(transformedNormal);
             }
 
@@ -304,11 +279,6 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                 << "Some faces are not triangulated and have been removed"
                 << std::endl;
         indexOffsets[mesh->mMaterialIndex] += mesh->mNumVertices;
-
-        const auto currentProgress =
-            ((m + 1) * POST_PROCESSING_FRACTION) / float(aiScene->mNumMeshes);
-        updateProgress("Post-processing mesh ...",
-                       LOADING_FRACTION + currentProgress, TOTAL_PROGRESS);
     }
 
     BRAYNS_DEBUG << "Loaded " << nbVertices << " vertices and " << nbFaces
@@ -342,6 +312,45 @@ std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
     else
         meshFilenamePattern = gidAsString;
     return meshedMorphologiesFolder + "/" + meshFilenamePattern;
+}
+
+void MeshLoader::importMesh(const std::string& fileName, Model& model,
+                            const size_t index,
+                            const vmml::Matrix4f& transformation,
+                            const size_t defaultMaterialId)
+{
+    const boost::filesystem::path file = fileName;
+    Assimp::Importer importer;
+    importer.SetProgressHandler(new ProgressWatcher(*this, fileName));
+    if (!importer.IsExtensionSupported(file.extension().c_str()))
+    {
+        std::stringstream msg;
+        msg << "File extension " << file.extension() << " is not supported";
+        throw std::runtime_error(msg.str());
+    }
+
+    std::ifstream meshFile(fileName, std::ios::in);
+    if (!meshFile.good())
+        throw std::runtime_error("Could not open file " + fileName);
+    meshFile.close();
+
+    const aiScene* aiScene = importer.ReadFile(fileName.c_str(), _getQuality());
+
+    if (!aiScene)
+    {
+        std::stringstream msg;
+        msg << "Error parsing mesh " << fileName.c_str() << ": "
+            << importer.GetErrorString();
+        throw std::runtime_error(msg.str());
+    }
+
+    if (!aiScene->HasMeshes())
+        throw std::runtime_error("Error finding meshes in scene");
+
+    boost::filesystem::path filepath = fileName;
+
+    _postLoad(aiScene, model, index, transformation, defaultMaterialId,
+              filepath.parent_path().string());
 }
 #else
 const std::runtime_error NO_ASSIMP(

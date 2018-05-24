@@ -69,7 +69,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_HEADERS
-  transform.h
+  utils.h
 )
 
 set_source_files_properties(
