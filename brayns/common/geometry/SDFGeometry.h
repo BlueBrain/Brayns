@@ -37,42 +37,55 @@ struct SDFGeometry
     Vector3f center;
     Vector3f p0;
     Vector3f p1;
+    Vector2f textureCoords;
     float radius = -1.f;
     float radius_tip = -1.f;
-    SDFType type;
-    uint8_t numNeighbours = 0;
+    float timestamp = 0.0f;
     uint32_t neighboursIndex = 0;
+    uint8_t numNeighbours = 0;
+    SDFType type;
 };
 
-inline SDFGeometry createSDFSphere(const Vector3f& center, const float radius)
+inline SDFGeometry createSDFSphere(
+    const Vector3f& center, const float radius, const float timestamp = 0.0f,
+    const Vector2f& textureCoords = Vector2f(0.f, 0.f))
 {
     SDFGeometry geom;
     geom.center = center;
     geom.radius = radius;
+    geom.timestamp = timestamp;
+    geom.textureCoords = textureCoords;
     geom.type = SDFType::Sphere;
     return geom;
 }
 
 inline SDFGeometry createSDFPill(const Vector3f& p0, const Vector3f& p1,
-                                 const float radius)
+                                 const float radius,
+                                 const float timestamp = 0.0f,
+                                 const Vector2f& textureCoords = Vector2f(0.f,
+                                                                          0.f))
 {
     SDFGeometry geom;
     geom.p0 = p0;
     geom.p1 = p1;
     geom.radius = radius;
+    geom.timestamp = timestamp;
+    geom.textureCoords = textureCoords;
     geom.type = SDFType::Pill;
     return geom;
 }
 
-inline SDFGeometry createSDFConePill(const Vector3f& p0, const Vector3f& p1,
-                                     const float radiusBottom,
-                                     const float radiusTip)
+inline SDFGeometry createSDFConePill(
+    const Vector3f& p0, const Vector3f& p1, const float radiusBottom,
+    const float radiusTip, const float timestamp = 0.0f,
+    const Vector2f& textureCoords = Vector2f(0.f, 0.f))
 {
     SDFGeometry geom;
     geom.p0 = p0;
     geom.p1 = p1;
     geom.radius = radiusBottom;
     geom.radius_tip = radiusTip;
+    geom.timestamp = timestamp;
 
     if (radiusBottom < radiusTip)
     {
@@ -80,16 +93,18 @@ inline SDFGeometry createSDFConePill(const Vector3f& p0, const Vector3f& p1,
         std::swap(geom.radius, geom.radius_tip);
     }
 
+    geom.textureCoords = textureCoords;
     geom.type = SDFType::ConePill;
     return geom;
 }
 
-inline SDFGeometry createSDFConePillSigmoid(const Vector3f& p0,
-                                            const Vector3f& p1,
-                                            const float radiusBottom,
-                                            const float radiusTip)
+inline SDFGeometry createSDFConePillSigmoid(
+    const Vector3f& p0, const Vector3f& p1, const float radiusBottom,
+    const float radiusTip, const float timestamp = 0.0f,
+    const Vector2f& textureCoords = Vector2f(0.f, 0.f))
 {
-    SDFGeometry geom = createSDFConePill(p0, p1, radiusBottom, radiusTip);
+    SDFGeometry geom = createSDFConePill(p0, p1, radiusBottom, radiusTip,
+                                         timestamp, textureCoords);
     geom.type = SDFType::ConePillSigmoid;
     return geom;
 }

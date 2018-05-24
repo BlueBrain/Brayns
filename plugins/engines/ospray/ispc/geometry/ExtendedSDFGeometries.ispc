@@ -154,11 +154,13 @@ struct ExtendedSDFGeometry
     vec3f center;
     vec3f p0;
     vec3f p1;
+    vec2f textureCoords;
     float radius;
     float radius_tip;
-    uint8 type;
-    uint8 numNeighbours;
+    float timestamp;
     uint32 neighboursIndex;
+    uint8 numNeighbours;
+    uint8 type;
 };
 
 uniform uint32 primToIdx(uniform ExtendedSDFGeometries *uniform geometry,
@@ -208,6 +210,18 @@ static void ExtendedSDFGeometries_postIntersect(
 #endif
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
+
+    { // Set texture coordinates
+        const int idx =
+            *(this->data + this->bytesPerExtendedSDFGeometryIndex * ray.primID);
+
+        uniform ExtendedSDFGeometry *geom =
+            (ExtendedSDFGeometry *)(this->geometries +
+                                    (this->bytesPerSDFGeometry * idx));
+
+        dg.st.x = geom->textureCoords.x;
+        dg.st.y = geom->textureCoords.y;
+    }
 
     if (flags & DG_NORMALIZE)
     {
@@ -367,6 +381,12 @@ void ExtendedSDFGeometries_intersect(uniform ExtendedSDFGeometries *uniform
                                          geometry,
                                      varying Ray &ray, uniform size_t primID)
 {
+    uniform int idx = primToIdx(geometry, primID);
+    uniform ExtendedSDFGeometry *geom = getGeometry(geometry, idx);
+
+    if (ray.time > 0 && geom->timestamp > ray.time)
+        return;
+
     const float t_in = intersect(geometry, ray.org, ray.dir, primID);
     if (t_in > 0 && t_in > ray.t0 && t_in < ray.t)
     {

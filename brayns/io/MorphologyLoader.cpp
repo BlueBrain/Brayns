@@ -351,7 +351,8 @@ private:
      */
     void _connectSDFSomaChildren(const Vector3f& somaPosition,
                                  const float somaRadius,
-                                 const size_t materialId,
+                                 const size_t materialId, const float distance,
+                                 const Vector2f& textureCoordinates,
                                  const brain::neuron::Sections& somaChildren,
                                  SDFMorphologyData& sdfMorphologyData) const
     {
@@ -368,7 +369,8 @@ private:
             const float radiusEnd = _getCorrectedRadius(samples[0].w() * 0.5f);
             SDFGeometry geom =
                 createSDFConePillSigmoid(somaPosition, sample,
-                                         somaRadius * 0.5f, radiusEnd);
+                                         somaRadius * 0.5f, radiusEnd, distance,
+                                         textureCoordinates);
             sdfMorphologyData.geometries.push_back(geom);
             sdfMorphologyData.neighbours.push_back({});
             sdfMorphologyData.materials.push_back(materialId);
@@ -623,8 +625,9 @@ private:
 
         if (useSDFGeometries)
         {
-            _connectSDFSomaChildren(somaPosition, somaRadius, materialId,
-                                    children, sdfMorphologyData);
+            _connectSDFSomaChildren(somaPosition, somaRadius, materialId, 0.f,
+                                    textureCoordinates, children,
+                                    sdfMorphologyData);
         }
         else
         {
@@ -674,7 +677,8 @@ private:
 
                 const size_t idx = sdfMorphologyData.geometries.size();
 
-                const auto geom = createSDFSphere(position, radius);
+                const auto geom = createSDFSphere(position, radius, distance,
+                                                  textureCoordinates);
                 sdfMorphologyData.geometries.push_back(geom);
                 sdfMorphologyData.neighbours.push_back({});
                 sdfMorphologyData.materials.push_back(materialId);
@@ -706,11 +710,13 @@ private:
             SDFGeometry geom;
 
             if (almost_equal(radius, previousRadius, 100000))
-                geom = createSDFPill(position, target, radius);
+                geom = createSDFPill(position, target, radius, distance,
+                                     textureCoordinates);
             else
 
                 geom =
-                    createSDFConePill(position, target, radius, previousRadius);
+                    createSDFConePill(position, target, radius, previousRadius,
+                                      distance, textureCoordinates);
 
             sdfMorphologyData.geometries.push_back(geom);
             sdfMorphologyData.neighbours.push_back({});
