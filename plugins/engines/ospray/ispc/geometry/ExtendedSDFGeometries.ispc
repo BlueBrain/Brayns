@@ -174,6 +174,17 @@ uniform uint32 primToIdx(uniform ExtendedSDFGeometries *uniform geometry,
     return idx;
 }
 
+varying uint32 primToIdxVarying(uniform ExtendedSDFGeometries *geometry,
+                                varying size_t primID)
+{
+    uniform uint8 *indexPtr =
+        geometry->data +
+        geometry->bytesPerExtendedSDFGeometryIndex * ((int64)primID);
+
+    varying int idx = *((varying int *)(indexPtr));
+    return idx;
+}
+
 uniform uint64 getNeighbourIdx(uniform ExtendedSDFGeometries *uniform geometry,
                                uniform uint32 startIdx, uniform int neigh_idx)
 {
@@ -197,6 +208,17 @@ uniform ExtendedSDFGeometry *uniform getGeometry(
     return geom;
 }
 
+uniform ExtendedSDFGeometry *getGeometryVarying(
+    uniform ExtendedSDFGeometries *geometry, varying int idx)
+{
+    uniform uint8 *geometriesPtr =
+        geometry->geometries + (geometry->bytesPerSDFGeometry * idx);
+
+    uniform ExtendedSDFGeometry *geom =
+        (uniform ExtendedSDFGeometry *)(geometriesPtr);
+    return geom;
+}
+
 static void ExtendedSDFGeometries_postIntersect(
     uniform Geometry *uniform geometry, uniform Model *uniform model,
     varying DifferentialGeometry &dg, const varying Ray &ray,
@@ -212,12 +234,8 @@ static void ExtendedSDFGeometries_postIntersect(
     vec3f Ns = Ng;
 
     { // Set texture coordinates
-        const int idx =
-            *(this->data + this->bytesPerExtendedSDFGeometryIndex * ray.primID);
-
-        uniform ExtendedSDFGeometry *geom =
-            (ExtendedSDFGeometry *)(this->geometries +
-                                    (this->bytesPerSDFGeometry * idx));
+        const uint32 idx = primToIdxVarying(this, ray.primID);
+        uniform ExtendedSDFGeometry *geom = getGeometryVarying(this, idx);
 
         dg.st.x = geom->textureCoords.x;
         dg.st.y = geom->textureCoords.y;
