@@ -387,7 +387,7 @@ inline void init(brayns::ConnectivityConfiguration* c, ObjectHandler* h)
 
 inline void init(brayns::StreamParameters* s, ObjectHandler* h)
 {
-    h->add_property("host", &s->_host, Flags::Optional);
+    h->add_property("host", &s->_host);
     h->add_property("enabled", &s->_enabled, Flags::Optional);
     h->add_property("id", &s->_id, Flags::Optional);
     h->add_property("port", &s->_port, Flags::Optional);
