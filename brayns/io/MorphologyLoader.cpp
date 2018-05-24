@@ -606,6 +606,129 @@ private:
     }
 
     /**
+     * Adds a Soma geometry to the model
+     */
+    void _addSomaGeometry(const brain::neuron::Soma& soma,
+                          const Vector3f& translation, uint64_t offset,
+                          bool useSDFGeometries, MaterialFunc materialFunc,
+                          ParallelModelContainer& model,
+                          SDFMorphologyData& sdfMorphologyData) const
+    {
+        const size_t materialId =
+            materialFunc(brain::neuron::SectionType::soma);
+        const auto somaPosition = soma.getCentroid() + translation;
+        const auto somaRadius = _getCorrectedRadius(soma.getMeanRadius());
+        const auto textureCoordinates = _getIndexAsTextureCoordinates(offset);
+        const auto& children = soma.getChildren();
+
+        if (useSDFGeometries)
+        {
+            _connectSDFSomaChildren(somaPosition, somaRadius, materialId,
+                                    children, sdfMorphologyData);
+        }
+        else
+        {
+            model.addSphere(materialId, {somaPosition, somaRadius, 0.f,
+                                         textureCoordinates});
+
+            if (_geometryParameters.getCircuitUseSimulationModel())
+            {
+                // When using a simulation model, parametric geometries
+                // must occupy as much space as possible in the mesh.
+                // This code inserts a Cone between the soma and the
+                // beginning of each branch.
+                for (const auto& child : children)
+                {
+                    const auto& samples = child.getSamples();
+                    const Vector3f sample{samples[0].x(), samples[0].y(),
+                                          samples[0].z()};
+                    const float sampleRadius =
+                        _getCorrectedRadius(samples[0].w() * 0.5f);
+
+                    model.addCone(materialId,
+                                  {somaPosition, sample, somaRadius,
+                                   sampleRadius, 0.f, textureCoordinates});
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds the sphere between the steps in the sections
+     */
+    void _addStepSphereGeometry(const bool useSDFGeometries, const bool isDone,
+                                const Vector3f& position, const float radius,
+                                const size_t materialId, const float distance,
+                                const Vector2f& textureCoordinates,
+                                ParallelModelContainer& model,
+                                SDFMorphologyData& sdfMorphologyData) const
+    {
+        if (useSDFGeometries)
+        {
+            if (isDone)
+            {
+                // Since our cone pills already give us a sphere
+                // at the end points we don't need to add any
+                // sphere between segments except at the
+                // bifurcation
+
+                const size_t idx = sdfMorphologyData.geometries.size();
+
+                const auto geom = createSDFSphere(position, radius);
+                sdfMorphologyData.geometries.push_back(geom);
+                sdfMorphologyData.neighbours.push_back({});
+                sdfMorphologyData.materials.push_back(materialId);
+
+                sdfMorphologyData.bifurcationIndices.push_back(idx);
+            }
+        }
+        else
+        {
+            model.addSphere(materialId,
+                            {position, radius, distance, textureCoordinates});
+        }
+    }
+
+    /**
+     * Adds the cone between the steps in the sections
+     */
+    void _addStepConeGeometry(const bool useSDFGeometries,
+                              const Vector3f& position, const float radius,
+                              const Vector3f& target,
+                              const float previousRadius,
+                              const size_t materialId, const float distance,
+                              const Vector2f& textureCoordinates,
+                              ParallelModelContainer& model,
+                              SDFMorphologyData& sdfMorphologyData) const
+    {
+        if (useSDFGeometries)
+        {
+            SDFGeometry geom;
+
+            if (almost_equal(radius, previousRadius, 100000))
+                geom = createSDFPill(position, target, radius);
+            else
+
+                geom =
+                    createSDFConePill(position, target, radius, previousRadius);
+
+            sdfMorphologyData.geometries.push_back(geom);
+            sdfMorphologyData.neighbours.push_back({});
+            sdfMorphologyData.materials.push_back(materialId);
+        }
+        else
+        {
+            if (almost_equal(radius, previousRadius, 100000))
+                model.addCylinder(materialId, {position, target, radius,
+                                               distance, textureCoordinates});
+            else
+                model.addCone(materialId,
+                              {position, target, radius, previousRadius,
+                               distance, textureCoordinates});
+        }
+    }
+
+    /**
        * @brief _importMorphologyFromURI imports a morphology from the specified
        * URI
        * @param uri URI of the morphology
@@ -674,49 +797,9 @@ private:
                 morphologySectionTypes &
                     static_cast<size_t>(MorphologySectionType::soma))
             {
-                const auto& soma = morphology.getSoma();
-                const size_t materialId =
-                    materialFunc(brain::neuron::SectionType::soma);
-                const auto somaPosition = soma.getCentroid() + translation;
-                const auto somaRadius =
-                    _getCorrectedRadius(soma.getMeanRadius());
-                const auto textureCoordinates =
-                    _getIndexAsTextureCoordinates(offset);
-
-                if (useSDFGeometries)
-                {
-                    _connectSDFSomaChildren(somaPosition, somaRadius,
-                                            materialId, soma.getChildren(),
-                                            sdfMorphologyData);
-                }
-                else
-                {
-                    model.addSphere(materialId, {somaPosition, somaRadius, 0.f,
-                                                 textureCoordinates});
-
-                    if (_geometryParameters.getCircuitUseSimulationModel())
-                    {
-                        // When using a simulation model, parametric geometries
-                        // must occupy as much space as possible in the mesh.
-                        // This code inserts a Cone between the soma and the
-                        // beginning of each branch.
-                        const auto& children = soma.getChildren();
-                        for (const auto& child : children)
-                        {
-                            const auto& samples = child.getSamples();
-                            const Vector3f sample{samples[0].x(),
-                                                  samples[0].y(),
-                                                  samples[0].z()};
-                            const float sampleRadius =
-                                _getCorrectedRadius(samples[0].w() * 0.5f);
-
-                            model.addCone(materialId,
-                                          {somaPosition, sample, somaRadius,
-                                           sampleRadius, 0.f,
-                                           textureCoordinates});
-                        }
-                    }
-                }
+                _addSomaGeometry(morphology.getSoma(), translation, offset,
+                                 useSDFGeometries, materialFunc, model,
+                                 sdfMorphologyData);
             }
 
             // Only the first one or two axon sections are reported, so find the
@@ -882,71 +965,18 @@ private:
 
                     if (radius > 0.f)
                     {
-                        if (useSDFGeometries)
-                        {
-                            if (done)
-                            {
-                                // Since our cone pills already give us a sphere
-                                // at the end points we don't need to add any
-                                // sphere between segments except at the
-                                // bifurcation
-
-                                const size_t idx =
-                                    sdfMorphologyData.geometries.size();
-
-                                const auto geom =
-                                    createSDFSphere(position, radius);
-                                sdfMorphologyData.geometries.push_back(geom);
-                                sdfMorphologyData.neighbours.push_back({});
-                                sdfMorphologyData.materials.push_back(
-                                    materialId);
-
-                                sdfMorphologyData.bifurcationIndices.push_back(
-                                    idx);
-                            }
-                        }
-                        else
-                        {
-                            model.addSphere(materialId,
-                                            {position, radius, distance,
-                                             textureCoordinates});
-                        }
+                        _addStepSphereGeometry(useSDFGeometries, done, position,
+                                               radius, materialId, distance,
+                                               textureCoordinates, model,
+                                               sdfMorphologyData);
 
                         if (position != target && previousRadius > 0.f)
                         {
-                            if (useSDFGeometries)
-                            {
-                                SDFGeometry geom;
-
-                                if (almost_equal(radius, previousRadius,
-                                                 100000))
-                                    geom =
-                                        createSDFPill(position, target, radius);
-                                else
-
-                                    geom = createSDFConePill(position, target,
-                                                             radius,
-                                                             previousRadius);
-
-                                sdfMorphologyData.geometries.push_back(geom);
-                                sdfMorphologyData.neighbours.push_back({});
-                                sdfMorphologyData.materials.push_back(
-                                    materialId);
-                            }
-                            else
-                            {
-                                if (almost_equal(radius, previousRadius,
-                                                 100000))
-                                    model.addCylinder(materialId,
-                                                      {position, target, radius,
-                                                       distance,
-                                                       textureCoordinates});
-                                else
-                                    model.addCone(materialId,
-                                                  {position, target, radius,
-                                                   previousRadius, distance,
-                                                   textureCoordinates});
-                            }
+                            _addStepConeGeometry(useSDFGeometries, position,
+                                                 radius, target, previousRadius,
+                                                 materialId, distance,
+                                                 textureCoordinates, model,
+                                                 sdfMorphologyData);
                         }
                     }
                     previousSample = sample;
