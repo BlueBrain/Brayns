@@ -38,7 +38,7 @@ public:
     Transformation() = default;
     Transformation(const Matrix4f& mat)
         : _translation(mat.getTranslation())
-        , _scale(mat(3, 0), mat(3, 1), mat(3, 2))
+        , _scale(mat(0, 0), mat(1, 1), mat(2, 2))
         , _rotation(mat)
     {
     }
@@ -62,6 +62,13 @@ public:
                _scale == rhs._scale;
     }
     bool operator!=(const Transformation& rhs) const { return !(*this == rhs); }
+    Matrix4f toMatrix() const
+    {
+        Matrix4f matrix(getRotation(), getTranslation());
+        matrix.scale(getScale());
+        return matrix;
+    }
+
 private:
     Vector3f _translation{0.f, 0.f, 0.f};
     Vector3f _scale{1.f, 1.f, 1.f};
@@ -69,6 +76,16 @@ private:
 
     SERIALIZATION_FRIEND(Transformation)
 };
+inline Transformation operator*(const Transformation& a,
+                                const Transformation& b)
+{
+    return {a.toMatrix() * b.toMatrix()};
+}
+
+inline Boxf transformBox(const Boxf& box, const Transformation& trafo)
+{
+    return {trafo.toMatrix() * box.getMin(), trafo.toMatrix() * box.getMax()};
+}
 }
 
 #endif // TRANSFORMATION_H

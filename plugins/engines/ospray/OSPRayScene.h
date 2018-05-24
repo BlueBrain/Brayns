@@ -30,7 +30,7 @@ namespace brayns
 {
 /**
 
-   OSPRray specific scene
+   OSPRay specific scene
 
    This object is the OSPRay specific implementation of a scene
 
@@ -66,9 +66,6 @@ public:
     OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _rootSimulationModel; }
 private:
-    void _addInstance(OSPModel rootModel, OSPModel modelToAdd,
-                      const Transformation& transform);
-
     OSPModel _rootModel{nullptr};
     OSPModel _rootSimulationModel{nullptr};
 

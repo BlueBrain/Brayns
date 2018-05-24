@@ -79,11 +79,58 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
     return *this;
 }
 
+void ModelDescriptor::addInstance(const ModelInstance& instance)
+{
+    _instances.push_back(instance);
+    _instances.rbegin()->setInstanceID(_nextInstanceID++);
+    if (_model)
+        _model->markInstancesDirty();
+}
+
+void ModelDescriptor::removeInstance(const size_t id)
+{
+    auto i = std::remove_if(_instances.begin(), _instances.end(),
+                            [id](const auto& instance) {
+                                return id == instance.getInstanceID();
+                            });
+    if (i == _instances.end())
+        return;
+
+    _instances.erase(i, _instances.end());
+
+    if (_model)
+        _model->markInstancesDirty();
+}
+
+ModelInstance* ModelDescriptor::getInstance(const size_t id)
+{
+    auto i = std::find_if(_instances.begin(), _instances.end(),
+                          [id](const auto& instance) {
+                              return id == instance.getInstanceID();
+                          });
+    return i == _instances.end() ? nullptr : &(*i);
+}
+
+Boxf ModelDescriptor::getInstancesBounds() const
+{
+    Boxf bounds;
+    const auto& transformation = getTransformation();
+    for (const auto& instance : getInstances())
+    {
+        if (!instance.getVisible() || !_model)
+            continue;
+
+        const auto instanceTransform =
+            transformation * instance.getTransformation();
+        bounds.merge(transformBox(getModel().getBounds(), instanceTransform));
+    }
+    return bounds;
+}
+
 bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-           _trianglesMeshes.empty() && _models.empty() &&
-           _sdf.geometries.empty();
+           _trianglesMeshes.empty() && _sdf.geometries.empty();
 }
 
 uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
@@ -112,16 +159,6 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
     return _cones[materialId].size() - 1;
 }
 
-void Model::addModel(ModelPtr model, const Transformations& transform)
-{
-    if (model->empty())
-        throw std::runtime_error("Empty models not supported.");
-
-    _bounds.merge(model->getBounds());
-    _models.push_back({std::move(model), transform});
-    _modelsDirty = true;
-}
-
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
                                const std::vector<size_t>& neighbourIndices)
 {
@@ -146,7 +183,7 @@ void Model::updateSDFGeometryNeighbours(
 bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
-           _trianglesMeshesDirty || _sdfGeometriesDirty || _modelsDirty;
+           _trianglesMeshesDirty || _sdfGeometriesDirty || _instancesDirty;
 }
 
 void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
@@ -291,11 +328,6 @@ void Model::logInformation()
         _sizeInBytes += mesh.indices.size() * sizeof(Vector3ui);
         _sizeInBytes += mesh.textureCoordinates.size() * sizeof(Vector2f);
         ++nbMeshes;
-    }
-    for (const auto& model : _models)
-    {
-        model.model->logInformation();
-        _sizeInBytes += model.model->getSizeInBytes();
     }
 
     BRAYNS_INFO << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders

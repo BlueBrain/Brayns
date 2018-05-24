@@ -61,12 +61,16 @@ public:
      */
     std::string getMeshFilenameFromGID(const uint64_t gid);
 
+    void importMesh(const std::string& fileName, Model& model,
+                    const size_t index, const Matrix4f& transformation,
+                    const size_t defaultMaterialId = NO_MATERIAL);
+
 private:
     void _createMaterials(Model& model, const aiScene* aiScene,
                           const std::string& folder);
 
     void _postLoad(const aiScene* aiScene, Model& model, const size_t index,
-                   const size_t defaultMaterial,
+                   const Matrix4f& transformation, const size_t defaultMaterial,
                    const std::string& folder = "");
     size_t _getQuality() const;
     const GeometryParameters& _geometryParameters;

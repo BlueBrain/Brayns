@@ -111,10 +111,12 @@ typedef std::map<std::string, std::string> ModelMetadata;
 class Transformation;
 using Transformations = std::vector<Transformation>;
 
+class ModelInstance;
 class ModelParams;
 class ModelDescriptor;
 using ModelDescriptorPtr = std::shared_ptr<ModelDescriptor>;
-typedef std::vector<ModelDescriptorPtr> ModelDescriptors;
+using ModelDescriptors = std::vector<ModelDescriptorPtr>;
+using ModelInstances = std::vector<ModelInstance>;
 
 class Material;
 typedef std::shared_ptr<Material> MaterialPtr;
