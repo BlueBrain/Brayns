@@ -78,7 +78,6 @@ private:
     OSPData _ospSDFNeighboursData = nullptr;
 
     size_t _memoryManagementFlags{OSP_DATA_SHARED_BUFFER};
-    std::vector<size_t> _SDFNeighboursFlat;
 };
 }
 #endif // OSPRAYGEOMETRYGROUP_H

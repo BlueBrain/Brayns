@@ -292,10 +292,17 @@ protected:
     Boxf _bounds;
     bool _useSimulationModel{false};
 
-    std::map<size_t, std::vector<uint32_t>> _SDFGeometryIndices;
-    std::vector<std::vector<size_t>> _SDFNeighbours;
-    std::vector<SDFGeometry> _SDFGeometries;
-    bool _SDFGeometriesDirty{false};
+    struct SDFGeometryData
+    {
+        std::vector<SDFGeometry> geometries;
+        std::map<size_t, std::vector<uint32_t>> geometryIndices;
+
+        std::vector<std::vector<size_t>> neighbours;
+        std::vector<size_t> neighboursFlat;
+        bool isDirty{false};
+    };
+
+    SDFGeometryData _sdfGeometryData;
 
     size_t _sizeInBytes{0};
 

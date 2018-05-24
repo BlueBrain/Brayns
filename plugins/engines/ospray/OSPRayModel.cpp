@@ -289,43 +289,48 @@ void OSPRayModel::_commitSDFGeometries()
     assert(_ospSDFNeighboursData == nullptr);
 
     _ospSDFGeometryData =
-        ospNewData(_SDFGeometries.size() * sizeof(_SDFGeometries) /
-                       sizeof(OSP_CHAR),
-                   OSP_CHAR, _SDFGeometries.data(), _memoryManagementFlags);
+        ospNewData(_sdfGeometryData.geometries.size() *
+                       sizeof(_sdfGeometryData.geometries) / sizeof(OSP_CHAR),
+                   OSP_CHAR, _sdfGeometryData.geometries.data(),
+                   _memoryManagementFlags);
 
     ospCommit(_ospSDFGeometryData);
 
     // Create and upload flat list of neighbours
-    const size_t numGeoms = _SDFGeometries.size();
-    _SDFNeighboursFlat.clear();
+    const size_t numGeoms = _sdfGeometryData.geometries.size();
+    _sdfGeometryData.neighboursFlat.clear();
 
     for (size_t geomI = 0; geomI < numGeoms; geomI++)
     {
-        const size_t currOffset = _SDFNeighboursFlat.size();
-        const auto& neighsI = _SDFNeighbours[geomI];
+        const size_t currOffset = _sdfGeometryData.neighboursFlat.size();
+        const auto& neighsI = _sdfGeometryData.neighbours[geomI];
         if (!neighsI.empty())
         {
-            _SDFGeometries[geomI].numNeighbours = neighsI.size();
-            _SDFGeometries[geomI].neighboursIndex = currOffset;
-            _SDFNeighboursFlat.insert(std::end(_SDFNeighboursFlat),
-                                      std::begin(neighsI), std::end(neighsI));
+            _sdfGeometryData.geometries[geomI].numNeighbours = neighsI.size();
+            _sdfGeometryData.geometries[geomI].neighboursIndex = currOffset;
+            _sdfGeometryData.neighboursFlat.insert(
+                std::end(_sdfGeometryData.neighboursFlat), std::begin(neighsI),
+                std::end(neighsI));
         }
     }
 
     _ospSDFNeighboursData =
-        ospNewData(_SDFNeighboursFlat.size() *
-                       sizeof(decltype(_SDFNeighboursFlat.back())) /
+        ospNewData(_sdfGeometryData.neighboursFlat.size() *
+                       sizeof(
+                           decltype(_sdfGeometryData.neighboursFlat.back())) /
                        sizeof(OSP_CHAR),
-                   OSP_CHAR, _SDFNeighboursFlat.data(), _memoryManagementFlags);
+                   OSP_CHAR, _sdfGeometryData.neighboursFlat.data(),
+                   _memoryManagementFlags);
 
     ospCommit(_ospSDFNeighboursData);
 
     for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
     {
-        if (_SDFGeometryIndices.find(materialId) == _SDFGeometryIndices.end())
+        if (_sdfGeometryData.geometryIndices.find(materialId) ==
+            _sdfGeometryData.geometryIndices.end())
             continue;
 
-        const auto& sdfRefs = _SDFGeometryIndices[materialId];
+        const auto& sdfRefs = _sdfGeometryData.geometryIndices[materialId];
         const auto bufferSize =
             sdfRefs.size() * sizeof(decltype(sdfRefs.back()));
         if (_ospSDFGeometryRefs.find(materialId) != _ospSDFGeometryRefs.end())
@@ -408,10 +413,10 @@ void OSPRayModel::commit()
         _trianglesMeshesDirty = false;
     }
 
-    if (_SDFGeometriesDirty)
+    if (_sdfGeometryData.isDirty)
     {
         _commitSDFGeometries();
-        _SDFGeometriesDirty = false;
+        _sdfGeometryData.isDirty = false;
     }
 
     // Commit models

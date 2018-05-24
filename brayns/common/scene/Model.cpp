@@ -121,14 +121,15 @@ void Model::addModel(ModelPtr model, const Transformations& transform)
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
                                const std::vector<size_t>& neighbourIndices)
 {
-    _SDFGeometriesDirty = true;
-    const uint32_t geomIdx = _SDFGeometries.size();
-    _SDFGeometryIndices[materialId].push_back(geomIdx);
+    _sdfGeometryData.isDirty = true;
+    const uint32_t geomIdx = _sdfGeometryData.geometries.size();
+    _sdfGeometryData.geometryIndices[materialId].push_back(geomIdx);
 
-    assert(_SDFGeometries.size() == _SDFNeighbours.size());
+    assert(_sdfGeometryData.geometries.size() ==
+           _sdfGeometryData.neighbours.size());
 
-    _SDFNeighbours.push_back(neighbourIndices);
-    _SDFGeometries.push_back(geom);
+    _sdfGeometryData.neighbours.push_back(neighbourIndices);
+    _sdfGeometryData.geometries.push_back(geom);
 
     switch (geom.type)
     {
@@ -163,13 +164,13 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
 void Model::updateSDFGeometryNeighbours(
     size_t geometryIdx, const std::vector<size_t>& neighbourIndices)
 {
-    _SDFNeighbours[geometryIdx] = neighbourIndices;
+    _sdfGeometryData.neighbours[geometryIdx] = neighbourIndices;
 }
 
 bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
-           _trianglesMeshesDirty || _SDFGeometriesDirty || _modelsDirty;
+           _trianglesMeshesDirty || _sdfGeometryData.isDirty || _modelsDirty;
 }
 
 void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
