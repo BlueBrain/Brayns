@@ -324,8 +324,10 @@ void OSPRayModel::_commitSDFGeometries()
 
     ospCommit(_ospSDFNeighboursData);
 
-    for (size_t materialId = 0; materialId < _materials.size(); ++materialId)
+    for (const auto& mat : _materials)
     {
+        const size_t materialId = mat.first;
+
         if (_sdfGeometryData.geometryIndices.find(materialId) ==
             _sdfGeometryData.geometryIndices.end())
             continue;

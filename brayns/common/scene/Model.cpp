@@ -349,6 +349,8 @@ void Model::createMissingMaterials()
         materialIds.insert(cones.first);
     for (auto& meshes : _trianglesMeshes)
         materialIds.insert(meshes.first);
+    for (auto& sdfGeometries : _sdfGeometryData.geometryIndices)
+        materialIds.insert(sdfGeometries.first);
 
     for (const auto materialId : materialIds)
     {
