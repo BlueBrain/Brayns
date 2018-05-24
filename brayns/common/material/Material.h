@@ -28,7 +28,6 @@
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(Material)
-SERIALIZATION_ACCESS(TextureDescriptor)
 
 namespace brayns
 {

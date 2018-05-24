@@ -154,7 +154,7 @@ private:
             _params.setHost(_stream->getHost());
             return true;
         }
-        catch (std::runtime_error& ex)
+        catch (const std::runtime_error& ex)
         {
             BRAYNS_ERROR << "Deflect failed to initialize. " << ex.what()
                          << std::endl;
@@ -169,6 +169,13 @@ private:
 
         _sendFuture.wait();
         _sendFuture = make_ready_future(true);
+#ifdef BRAYNS_USE_LIBUV
+        if (_pollHandle)
+        {
+            _pollHandle->stop();
+            _pollHandle.reset();
+        }
+#endif
         _stream.reset();
     }
 
@@ -176,13 +183,13 @@ private:
     {
 #ifdef BRAYNS_USE_LIBUV
         auto loop = uvw::Loop::getDefault();
-        auto handle = loop->resource<uvw::PollHandle>(_stream->getDescriptor());
+        _pollHandle = loop->resource<uvw::PollHandle>(_stream->getDescriptor());
 
-        handle->on<uvw::PollEvent>([engine = _engine](const auto&, auto&) {
+        _pollHandle->on<uvw::PollEvent>([engine = _engine](const auto&, auto&) {
             engine->triggerRender();
         });
 
-        handle->start(uvw::PollHandle::Event::READABLE);
+        _pollHandle->start(uvw::PollHandle::Event::READABLE);
 #endif
     }
 
@@ -380,6 +387,10 @@ private:
     std::string _previousHost;
     Image _lastImage;
     deflect::Stream::Future _sendFuture;
+
+#ifdef BRAYNS_USE_LIBUV
+    std::shared_ptr<uvw::PollHandle> _pollHandle;
+#endif
 };
 
 DeflectPlugin::DeflectPlugin(EnginePtr engine, PluginAPI* api)
