@@ -82,7 +82,8 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
 bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-           _trianglesMeshes.empty() && _models.empty();
+           _trianglesMeshes.empty() && _models.empty() &&
+           _sdf.geometries.empty();
 }
 
 uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
