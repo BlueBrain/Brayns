@@ -121,20 +121,20 @@ inline Boxf getSDFBoundingBox(const SDFGeometry& geom)
         break;
     }
     case brayns::SDFType::Pill:
+    {
+        bounds.merge(geom.p0 - Vector3f(geom.radius));
+        bounds.merge(geom.p0 + Vector3f(geom.radius));
+        bounds.merge(geom.p1 - Vector3f(geom.radius));
+        bounds.merge(geom.p1 + Vector3f(geom.radius));
+        break;
+    }
     case brayns::SDFType::ConePill:
     case brayns::SDFType::ConePillSigmoid:
     {
-        const auto min = Vector3f{
-            std::min(geom.p0.x() - geom.radius, geom.p1.x() - geom.radius),
-            std::min(geom.p0.y() - geom.radius, geom.p1.y() - geom.radius),
-            std::min(geom.p0.z() - geom.radius, geom.p1.z() - geom.radius)};
-        const auto max = Vector3f{
-            std::max(geom.p0.x() + geom.radius, geom.p1.x() + geom.radius),
-            std::max(geom.p0.y() + geom.radius, geom.p1.y() + geom.radius),
-            std::max(geom.p0.z() + geom.radius, geom.p1.z() + geom.radius)};
-
-        bounds.merge(min);
-        bounds.merge(max);
+        bounds.merge(geom.p0 - Vector3f(geom.radius));
+        bounds.merge(geom.p0 + Vector3f(geom.radius));
+        bounds.merge(geom.p1 - Vector3f(geom.radius_tip));
+        bounds.merge(geom.p1 + Vector3f(geom.radius_tip));
         break;
     }
     default:
