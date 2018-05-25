@@ -111,6 +111,9 @@ void Scene::clearLights()
 
 size_t Scene::addModel(ModelDescriptorPtr model)
 {
+    if (model->getModel().empty())
+        throw std::runtime_error("Empty models not supported.");
+
     model->getModel().buildBoundingBox();
     model->getModel().commit();
 
