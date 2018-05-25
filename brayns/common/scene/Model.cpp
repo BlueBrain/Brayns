@@ -140,6 +140,7 @@ void Model::updateSDFGeometryNeighbours(
     size_t geometryIdx, const std::vector<size_t>& neighbourIndices)
 {
     _sdfGeometryData.neighbours[geometryIdx] = neighbourIndices;
+    _sdfGeometriesDirty = true;
 }
 
 bool Model::dirty() const
