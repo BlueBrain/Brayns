@@ -338,20 +338,14 @@ inline float map(uniform ExtendedSDFGeometries *uniform geometry, vec3f &p,
 inline vec3f calcNormal(uniform ExtendedSDFGeometries *uniform geometry,
                         const vec3f &pos, uniform size_t primID)
 {
-    vec3f eps = make_vec3f(0.0001f, 0.f, 0.f);
+    const float eps = 0.0001f;
 
-    const float x0 =
-        map(geometry, pos + make_vec3f(eps.x, eps.y, eps.y), primID);
-    const float x1 =
-        map(geometry, pos - make_vec3f(eps.x, eps.y, eps.y), primID);
-    const float y0 =
-        map(geometry, pos + make_vec3f(eps.y, eps.x, eps.y), primID);
-    const float y1 =
-        map(geometry, pos - make_vec3f(eps.y, eps.x, eps.y), primID);
-    const float z0 =
-        map(geometry, pos + make_vec3f(eps.y, eps.y, eps.x), primID);
-    const float z1 =
-        map(geometry, pos - make_vec3f(eps.y, eps.y, eps.x), primID);
+    const float x0 = map(geometry, pos + make_vec3f(eps, 0.f, 0.f), primID);
+    const float x1 = map(geometry, pos - make_vec3f(eps, 0.f, 0.f), primID);
+    const float y0 = map(geometry, pos + make_vec3f(0.f, eps, 0.f), primID);
+    const float y1 = map(geometry, pos - make_vec3f(0.f, eps, 0.f), primID);
+    const float z0 = map(geometry, pos + make_vec3f(0.f, 0.f, eps), primID);
+    const float z1 = map(geometry, pos - make_vec3f(0.f, 0.f, eps), primID);
 
     return normalize(make_vec3f(x0 - x1, y0 - y1, z0 - z1));
 }
