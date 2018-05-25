@@ -123,6 +123,7 @@ public:
 
     /**
         Adds a model to the scene
+        @throw std::runtime_error if model is empty
       */
     BRAYNS_API size_t addModel(ModelDescriptorPtr model);
 
