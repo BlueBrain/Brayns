@@ -131,34 +131,7 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
     _sdfGeometryData.neighbours.push_back(neighbourIndices);
     _sdfGeometryData.geometries.push_back(geom);
 
-    switch (geom.type)
-    {
-    case brayns::SDFType::Sphere:
-    {
-        _bounds.merge(geom.center - Vector3f(geom.radius));
-        _bounds.merge(geom.center + Vector3f(geom.radius));
-        break;
-    }
-    case brayns::SDFType::Pill:
-    case brayns::SDFType::ConePill:
-    case brayns::SDFType::ConePillSigmoid:
-    {
-        const auto min = Vector3f{
-            std::min(geom.p0.x() - geom.radius, geom.p1.x() - geom.radius),
-            std::min(geom.p0.y() - geom.radius, geom.p1.y() - geom.radius),
-            std::min(geom.p0.z() - geom.radius, geom.p1.z() - geom.radius)};
-        const auto max = Vector3f{
-            std::max(geom.p0.x() + geom.radius, geom.p1.x() + geom.radius),
-            std::max(geom.p0.y() + geom.radius, geom.p1.y() + geom.radius),
-            std::max(geom.p0.z() + geom.radius, geom.p1.z() + geom.radius)};
-
-        _bounds.merge(min);
-        _bounds.merge(max);
-        break;
-    }
-    default:
-        throw std::runtime_error("No bounds found for SDF type.");
-    }
+    _bounds.merge(getSDFBoundingBox(geom));
 
     return geomIdx;
 }
