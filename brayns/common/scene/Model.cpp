@@ -113,6 +113,9 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
 
 void Model::addModel(ModelPtr model, const Transformations& transform)
 {
+    if (model->empty())
+        throw std::runtime_error("Empty models not supported.");
+
     _bounds.merge(model->getBounds());
     _models.push_back({std::move(model), transform});
     _modelsDirty = true;

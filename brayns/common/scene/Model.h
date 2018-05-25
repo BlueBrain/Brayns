@@ -192,6 +192,7 @@ public:
      *
      * Note that model is 'moved', so this model will own the added model from
      * now on.
+     * @throw std::runtime_error if model is empty
      */
     BRAYNS_API void addModel(ModelPtr model, const Transformations& transform);
 
