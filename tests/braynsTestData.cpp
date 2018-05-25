@@ -113,6 +113,34 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
 #endif
     compareTestData("testdataLayer1.bin", brayns.getEngine().getFrameBuffer());
 }
+
+BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app,
+                          "--synchronous-mode",
+                          "on",
+                          "--accumulation",
+                          "off",
+                          "--circuit-config",
+                          BBP_TEST_BLUECONFIG3,
+                          "--circuit-targets",
+                          "Layer1",
+                          "--morphology-dampen-branch-thickness-changerate",
+                          "true",
+                          "--morphology-use-sdf-geometries",
+                          "true"};
+    const int argc = sizeof(argv) / sizeof(char*);
+
+    brayns::Brayns brayns(argc, argv);
+    brayns.render();
+#ifdef GENERATE_TESTDATA
+    writeTestData("testSdfCircuit.bin", brayns.getEngine().getFrameBuffer());
+#endif
+    compareTestData("testSdfCircuit.bin", brayns.getEngine().getFrameBuffer());
+}
 #endif
 
 BOOST_AUTO_TEST_CASE(render_protein_and_compare)

@@ -40,6 +40,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   exceptions.h
   geometry/Cone.h
   geometry/Cylinder.h
+  geometry/SDFGeometry.h
   geometry/Sphere.h
   geometry/TrianglesMesh.h
   input/KeyboardHandler.h

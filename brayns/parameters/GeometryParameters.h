@@ -284,6 +284,16 @@ public:
         return _connectivityConfiguration._connectivityScale;
     }
 
+    bool getMorphologyDampenBranchThicknessChangerate() const
+    {
+        return _morphologyDampenBranchThicknessChangerate;
+    }
+
+    bool getMorphologyUseSDFGeometries() const
+    {
+        return _morphologyUseSDFGeometries;
+    }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -311,6 +321,8 @@ protected:
     size_t _metaballsGridSize;
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
+    bool _morphologyDampenBranchThicknessChangerate;
+    bool _morphologyUseSDFGeometries;
 
     // System parameters
     MemoryMode _memoryMode;

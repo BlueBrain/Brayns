@@ -38,6 +38,8 @@ OSPRayModel::~OSPRayModel()
             ospRemoveGeometry(_simulationModel, geom.second);
         for (auto geom : _ospExtendedCones)
             ospRemoveGeometry(_simulationModel, geom.second);
+        for (auto geom : _ospSDFGeometryRefs)
+            ospRemoveGeometry(_simulationModel, geom.second);
     }
     else
     {
@@ -46,6 +48,8 @@ OSPRayModel::~OSPRayModel()
         for (auto geom : _ospExtendedCylinders)
             ospRemoveGeometry(_model, geom.second);
         for (auto geom : _ospExtendedCones)
+            ospRemoveGeometry(_model, geom.second);
+        for (auto geom : _ospSDFGeometryRefs)
             ospRemoveGeometry(_model, geom.second);
     }
 
@@ -70,12 +74,21 @@ OSPRayModel::~OSPRayModel()
     for (auto& geom : _ospMeshes)
         ospRelease(geom.second);
     _ospMeshes.clear();
+    for (auto& geom : _ospSDFGeometryRefsData)
+        ospRelease(geom.second);
+    _ospSDFGeometryRefsData.clear();
 
     if (_simulationModel)
         ospRelease(_simulationModel);
 
     if (_boundingBoxModel)
         ospRelease(_boundingBoxModel);
+
+    if (_ospSDFGeometryData)
+        ospRelease(_ospSDFGeometryData);
+
+    if (_ospSDFNeighboursData)
+        ospRelease(_ospSDFNeighboursData);
 
     if (_model)
         ospRelease(_model);
@@ -270,6 +283,90 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
     ospAddGeometry(_model, _ospMeshes[materialId]);
 }
 
+void OSPRayModel::_commitSDFGeometries()
+{
+    assert(_ospSDFGeometryData == nullptr);
+    assert(_ospSDFNeighboursData == nullptr);
+
+    _ospSDFGeometryData =
+        ospNewData(_sdf.geometries.size() * sizeof(_sdf.geometries) /
+                       sizeof(OSP_CHAR),
+                   OSP_CHAR, _sdf.geometries.data(), _memoryManagementFlags);
+
+    ospCommit(_ospSDFGeometryData);
+
+    // Create and upload flat list of neighbours
+    const size_t numGeoms = _sdf.geometries.size();
+    _sdf.neighboursFlat.clear();
+
+    for (size_t geomI = 0; geomI < numGeoms; geomI++)
+    {
+        const size_t currOffset = _sdf.neighboursFlat.size();
+        const auto& neighsI = _sdf.neighbours[geomI];
+        if (!neighsI.empty())
+        {
+            _sdf.geometries[geomI].numNeighbours = neighsI.size();
+            _sdf.geometries[geomI].neighboursIndex = currOffset;
+            _sdf.neighboursFlat.insert(std::end(_sdf.neighboursFlat),
+                                       std::begin(neighsI), std::end(neighsI));
+        }
+    }
+
+    _ospSDFNeighboursData =
+        ospNewData(_sdf.neighboursFlat.size() *
+                       sizeof(decltype(_sdf.neighboursFlat.back())) /
+                       sizeof(OSP_CHAR),
+                   OSP_CHAR, _sdf.neighboursFlat.data(),
+                   _memoryManagementFlags);
+
+    ospCommit(_ospSDFNeighboursData);
+
+    for (const auto& mat : _materials)
+    {
+        const size_t materialId = mat.first;
+
+        if (_sdf.geometryIndices.find(materialId) == _sdf.geometryIndices.end())
+            continue;
+
+        const auto& sdfRefs = _sdf.geometryIndices[materialId];
+        const auto bufferSize =
+            sdfRefs.size() * sizeof(decltype(sdfRefs.back()));
+        if (_ospSDFGeometryRefs.find(materialId) != _ospSDFGeometryRefs.end())
+            ospRemoveGeometry(_model, _ospSDFGeometryRefs[materialId]);
+
+        _ospSDFGeometryRefs[materialId] =
+            ospNewGeometry("extendedsdfgeometries");
+        const auto dSize = bufferSize / sizeof(uint32_t);
+        _ospSDFGeometryRefsData[materialId] =
+            ospNewData(dSize, OSP_UINT, sdfRefs.data(), _memoryManagementFlags);
+
+        ospSetObject(_ospSDFGeometryRefs[materialId], "extendedsdfgeometries",
+                     _ospSDFGeometryRefsData[materialId]);
+
+        ospSetData(_ospSDFGeometryRefs[materialId], "neighbours",
+                   _ospSDFNeighboursData);
+
+        ospSetData(_ospSDFGeometryRefs[materialId], "geometries",
+                   _ospSDFGeometryData);
+
+        if (_materials[materialId] != nullptr)
+        {
+            auto impl = std::static_pointer_cast<OSPRayMaterial>(
+                _materials[materialId]);
+
+            ospSetMaterial(_ospSDFGeometryRefs[materialId],
+                           impl->getOSPMaterial());
+        }
+
+        ospCommit(_ospSDFGeometryRefs[materialId]);
+
+        if (_useSimulationModel)
+            ospAddGeometry(_simulationModel, _ospSDFGeometryRefs[materialId]);
+        else
+            ospAddGeometry(_model, _ospSDFGeometryRefs[materialId]);
+    }
+}
+
 void OSPRayModel::commit()
 {
     if (!dirty())
@@ -312,6 +409,12 @@ void OSPRayModel::commit()
         for (const auto& meshes : _trianglesMeshes)
             _commitMeshes(meshes.first);
         _trianglesMeshesDirty = false;
+    }
+
+    if (_sdfGeometriesDirty)
+    {
+        _commitSDFGeometries();
+        _sdfGeometriesDirty = false;
     }
 
     // Commit models

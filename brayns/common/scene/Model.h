@@ -26,6 +26,7 @@
 #include <brayns/common/Transformation.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
+#include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/types.h>
@@ -195,6 +196,25 @@ public:
     BRAYNS_API void addModel(ModelPtr model, const Transformations& transform);
 
     /**
+      Adds a SDFGeometry to the scene
+      @param materialId Material of the geometry
+      @param geom Geometry to add
+      @param neighbourIndices Global indices of the geometries to smoothly blend
+      together with
+      @return Global index of the geometry
+      */
+    uint64_t addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
+                            const std::vector<size_t>& neighbourIndices);
+
+    /** Update the list of neighbours for a SDF geometry
+      @param geometryIdx Index of the geometry
+      @param neighbourIndices Global indices of the geometries to smoothly blend
+      together with
+      */
+    void updateSDFGeometryNeighbours(
+        size_t geometryIdx, const std::vector<size_t>& neighbourIndices);
+
+    /**
         Returns triangle meshes handled by the model
     */
     BRAYNS_API TrianglesMeshMap& getTrianglesMeshes()
@@ -271,6 +291,18 @@ protected:
     bool _modelsDirty{true};
     Boxf _bounds;
     bool _useSimulationModel{false};
+
+    struct SDFGeometryData
+    {
+        std::vector<SDFGeometry> geometries;
+        std::map<size_t, std::vector<uint32_t>> geometryIndices;
+
+        std::vector<std::vector<size_t>> neighbours;
+        std::vector<size_t> neighboursFlat;
+    };
+
+    SDFGeometryData _sdf;
+    bool _sdfGeometriesDirty{false};
 
     size_t _sizeInBytes{0};
 

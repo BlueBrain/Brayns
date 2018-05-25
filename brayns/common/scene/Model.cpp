@@ -118,10 +118,31 @@ void Model::addModel(ModelPtr model, const Transformations& transform)
     _modelsDirty = true;
 }
 
+uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
+                               const std::vector<size_t>& neighbourIndices)
+{
+    const uint32_t geomIdx = _sdf.geometries.size();
+    _sdf.geometryIndices[materialId].push_back(geomIdx);
+    _sdf.neighbours.push_back(neighbourIndices);
+    _sdf.geometries.push_back(geom);
+
+    _bounds.merge(getSDFBoundingBox(geom));
+    _sdfGeometriesDirty = true;
+
+    return geomIdx;
+}
+
+void Model::updateSDFGeometryNeighbours(
+    size_t geometryIdx, const std::vector<size_t>& neighbourIndices)
+{
+    _sdf.neighbours[geometryIdx] = neighbourIndices;
+    _sdfGeometriesDirty = true;
+}
+
 bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
-           _trianglesMeshesDirty || _modelsDirty;
+           _trianglesMeshesDirty || _sdfGeometriesDirty || _modelsDirty;
 }
 
 void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
@@ -300,6 +321,8 @@ void Model::createMissingMaterials()
         materialIds.insert(cones.first);
     for (auto& meshes : _trianglesMeshes)
         materialIds.insert(meshes.first);
+    for (auto& sdfGeometries : _sdf.geometryIndices)
+        materialIds.insert(sdfGeometries.first);
 
     for (const auto materialId : materialIds)
     {

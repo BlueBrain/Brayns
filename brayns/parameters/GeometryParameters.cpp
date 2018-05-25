@@ -66,6 +66,10 @@ const std::string PARAM_METABALLS_GRIDSIZE = "metaballs-grid-size";
 const std::string PARAM_METABALLS_THRESHOLD = "metaballs-threshold";
 const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
     "metaballs-samples-from-soma";
+const std::string PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE =
+    "morphology-dampen-branch-thickness-changerate";
+const std::string PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES =
+    "morphology-use-sdf-geometries";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 const std::string PARAM_CONNECTIVITY_FILE = "connectivity-file";
 const std::string PARAM_CONNECTIVITY_MATRIX_ID = "connectivity-matrix-id";
@@ -108,6 +112,8 @@ GeometryParameters::GeometryParameters()
     , _metaballsGridSize(0)
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
+    , _morphologyDampenBranchThicknessChangerate(false)
+    , _morphologyUseSDFGeometries(false)
     , _memoryMode(MemoryMode::shared)
 {
     _parameters.add_options()(PARAM_NEST_CIRCUIT.c_str(),
@@ -172,18 +178,28 @@ GeometryParameters::GeometryParameters()
                                "Metaballs threshold [float]")(
         PARAM_METABALLS_SAMPLES_FROM_SOMA.c_str(), po::value<size_t>(),
         "Number of morphology samples (or segments) from soma used by "
-        "automated meshing [int]")(PARAM_CIRCUIT_USES_SIMULATION_MODEL.c_str(),
-                                   po::value<bool>(),
-                                   "Defines if a different model is used to "
-                                   "handle the simulation geometry [bool]")(
+        "automated meshing [int]")(
+        PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE.c_str(),
+        po::value<bool>(),
+        "Dampens the thickness rate of change for branches in the "
+        "morphology.")(PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES.c_str(),
+                       po::value<bool>(),
+                       "Use SDF geometries for drawing the morphology.")(
+        PARAM_CIRCUIT_USES_SIMULATION_MODEL.c_str(), po::value<bool>(),
+        "Defines if a different model is used to "
+        "handle the simulation geometry [bool]")(
         PARAM_CIRCUIT_BOUNDING_BOX.c_str(), po::value<floats>()->multitoken(),
-        "Does not load circuit geometry outside of the specified bounding box"
+        "Does not load circuit geometry outside of the specified "
+        "bounding "
+        "box"
         "[float float float float float float]")(
         PARAM_MEMORY_MODE.c_str(), po::value<std::string>(),
-        "Defines what memory mode should be used between Brayns and the "
+        "Defines what memory mode should be used between Brayns and "
+        "the "
         "underlying renderer [shared|replicated]")(
         PARAM_CIRCUIT_MESH_FILENAME_PATTERN.c_str(), po::value<std::string>(),
-        "Pattern used to determine the name of the file containing a meshed "
+        "Pattern used to determine the name of the file containing a "
+        "meshed "
         "morphology [string]")(PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(),
                                po::value<bool>(),
                                "Enable/Disable mesh transformation according "
@@ -316,6 +332,12 @@ void GeometryParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_METABALLS_SAMPLES_FROM_SOMA))
         _metaballsSamplesFromSoma =
             vm[PARAM_METABALLS_SAMPLES_FROM_SOMA].as<size_t>();
+    if (vm.count(PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE))
+        _morphologyDampenBranchThicknessChangerate =
+            vm[PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE].as<bool>();
+    if (vm.count(PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES))
+        _morphologyUseSDFGeometries =
+            vm[PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES].as<bool>();
     if (vm.count(PARAM_CIRCUIT_USES_SIMULATION_MODEL))
         _circuitConfiguration.useSimulationModel =
             vm[PARAM_CIRCUIT_USES_SIMULATION_MODEL].as<bool>();
