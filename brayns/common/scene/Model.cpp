@@ -121,17 +121,13 @@ void Model::addModel(ModelPtr model, const Transformations& transform)
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
                                const std::vector<size_t>& neighbourIndices)
 {
-    _sdfGeometriesDirty = true;
-    const uint32_t geomIdx = _sdfGeometryData.geometries.size();
-    _sdfGeometryData.geometryIndices[materialId].push_back(geomIdx);
-
-    assert(_sdfGeometryData.geometries.size() ==
-           _sdfGeometryData.neighbours.size());
-
-    _sdfGeometryData.neighbours.push_back(neighbourIndices);
-    _sdfGeometryData.geometries.push_back(geom);
+    const uint32_t geomIdx = _sdf.geometries.size();
+    _sdf.geometryIndices[materialId].push_back(geomIdx);
+    _sdf.neighbours.push_back(neighbourIndices);
+    _sdf.geometries.push_back(geom);
 
     _bounds.merge(getSDFBoundingBox(geom));
+    _sdfGeometriesDirty = true;
 
     return geomIdx;
 }
@@ -139,7 +135,7 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
 void Model::updateSDFGeometryNeighbours(
     size_t geometryIdx, const std::vector<size_t>& neighbourIndices)
 {
-    _sdfGeometryData.neighbours[geometryIdx] = neighbourIndices;
+    _sdf.neighbours[geometryIdx] = neighbourIndices;
     _sdfGeometriesDirty = true;
 }
 
@@ -325,7 +321,7 @@ void Model::createMissingMaterials()
         materialIds.insert(cones.first);
     for (auto& meshes : _trianglesMeshes)
         materialIds.insert(meshes.first);
-    for (auto& sdfGeometries : _sdfGeometryData.geometryIndices)
+    for (auto& sdfGeometries : _sdf.geometryIndices)
         materialIds.insert(sdfGeometries.first);
 
     for (const auto materialId : materialIds)

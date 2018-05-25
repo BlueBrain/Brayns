@@ -301,7 +301,7 @@ protected:
         std::vector<size_t> neighboursFlat;
     };
 
-    SDFGeometryData _sdfGeometryData;
+    SDFGeometryData _sdf;
     bool _sdfGeometriesDirty{false};
 
     size_t _sizeInBytes{0};
