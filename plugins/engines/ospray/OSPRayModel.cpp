@@ -415,10 +415,10 @@ void OSPRayModel::commit()
         _trianglesMeshesDirty = false;
     }
 
-    if (_sdfGeometryData.isDirty)
+    if (_sdfGeometriesDirty)
     {
         _commitSDFGeometries();
-        _sdfGeometryData.isDirty = false;
+        _sdfGeometriesDirty = false;
     }
 
     // Commit models

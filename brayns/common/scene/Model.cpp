@@ -121,7 +121,7 @@ void Model::addModel(ModelPtr model, const Transformations& transform)
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
                                const std::vector<size_t>& neighbourIndices)
 {
-    _sdfGeometryData.isDirty = true;
+    _sdfGeometriesDirty = true;
     const uint32_t geomIdx = _sdfGeometryData.geometries.size();
     _sdfGeometryData.geometryIndices[materialId].push_back(geomIdx);
 
@@ -172,7 +172,7 @@ void Model::updateSDFGeometryNeighbours(
 bool Model::dirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
-           _trianglesMeshesDirty || _sdfGeometryData.isDirty || _modelsDirty;
+           _trianglesMeshesDirty || _sdfGeometriesDirty || _modelsDirty;
 }
 
 void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)

@@ -299,10 +299,10 @@ protected:
 
         std::vector<std::vector<size_t>> neighbours;
         std::vector<size_t> neighboursFlat;
-        bool isDirty{false};
     };
 
     SDFGeometryData _sdfGeometryData;
+    bool _sdfGeometriesDirty{false};
 
     size_t _sizeInBytes{0};
 
