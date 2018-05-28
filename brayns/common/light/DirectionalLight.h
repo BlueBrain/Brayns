@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-const Vector3f DEFAULT_SUN_DIRECTION = {0.1f, -0.2f, -0.5f};
-const Vector3f DEFAULT_SUN_COLOR = {1.f, 1.f, 1.f};
+const Vector3f DEFAULT_SUN_DIRECTION = {1.f, -1.f, -1.f};
+const Vector3f DEFAULT_SUN_COLOR = {0.9f, 0.9f, 0.9f};
 const float DEFAULT_SUN_INTENSITY = 1.f;
 
 /**
