@@ -46,14 +46,14 @@ Camera& Camera::operator=(const Camera& rhs)
     _initialTarget = rhs._initialTarget;
     _initialUp = rhs._initialUp;
 
-    setAspectRatio(getAspectRatio());
-    setAperture(getAperture());
-    setFocalLength(getFocalLength());
-    setFieldOfView(getFieldOfView());
-    setStereoMode(getStereoMode());
-    setEyeSeparation(getEyeSeparation());
+    setAspectRatio(rhs.getAspectRatio());
+    setAperture(rhs.getAperture());
+    setFocalLength(rhs.getFocalLength());
+    setFieldOfView(rhs.getFieldOfView());
+    setStereoMode(rhs.getStereoMode());
+    setEyeSeparation(rhs.getEyeSeparation());
 
-    setClipPlanes(getClipPlanes());
+    setClipPlanes(rhs.getClipPlanes());
 
     _matrix = rhs._matrix;
 

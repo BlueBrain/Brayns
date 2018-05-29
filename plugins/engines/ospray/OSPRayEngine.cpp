@@ -110,6 +110,7 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
     _camera = createCamera(rp.getCameraType());
+    _camera->setStereoMode(rp.getStereoMode());
 
     _camera->setEnvironmentMap(
         !parametersManager.getSceneParameters().getEnvironmentMap().empty());
@@ -189,8 +190,8 @@ void OSPRayEngine::commit()
     const auto& streamParams = _parametersManager.getStreamParameters();
     if (streamParams.isModified() || _camera->isModified())
     {
-        const auto& rp = _parametersManager.getRenderingParameters();
-        const auto isStereo = rp.getStereoMode() == StereoMode::side_by_side;
+        const auto isStereo =
+            _camera->getStereoMode() == StereoMode::side_by_side;
         osprayFrameBuffer->setStreamingParams(streamParams, isStereo);
     }
 }
@@ -211,8 +212,7 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
         return Engine::getSupportedFrameSize(size);
 
     Vector2f result = size;
-    const auto& rp = _parametersManager.getRenderingParameters();
-    const auto isStereo = rp.getStereoMode() == StereoMode::side_by_side;
+    const auto isStereo = _camera->getStereoMode() == StereoMode::side_by_side;
     if (isStereo)
     {
         if (size.x() % (TILE_SIZE * 2) != 0)
@@ -232,8 +232,7 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const
 {
-    const auto& rp = _parametersManager.getRenderingParameters();
-    const auto isStereo = rp.getStereoMode() == StereoMode::side_by_side;
+    const auto isStereo = _camera->getStereoMode() == StereoMode::side_by_side;
     if (isStereo)
         return {TILE_SIZE * 2, TILE_SIZE};
     return {TILE_SIZE, TILE_SIZE};
