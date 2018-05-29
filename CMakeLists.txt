@@ -216,6 +216,7 @@ endif()
 
 include(CommonCPack)
 
-set(DOXYGEN_EXTRA_INPUT "${PROJECT_SOURCE_DIR}/Changelog.md")
+set(DOXYGEN_MAINPAGE_MD README.md)
+set(DOXYGEN_EXTRA_INPUT "${PROJECT_SOURCE_DIR}/README.md ${PROJECT_SOURCE_DIR}/Changelog.md")
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 include(DoxygenRule)

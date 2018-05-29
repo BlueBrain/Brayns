@@ -40,7 +40,7 @@ The following platforms and build environments are tested:
 
 * Linux: Ubuntu 16.04, Debian 9, RHEL 6.8 (Makefile, x64)
 
-The [API documentation](http://bluebrain.github.io/Brayns-0.1/index.html)
+The [API documentation](http://bluebrain.github.io/Brayns-0.6/index.html)
 can be found on [bluebrain.github.io](http://bluebrain.github.io/).
 
 ## Using Docker images
@@ -70,15 +70,14 @@ following tree structure:
 
 ```
 - src
-  +- ispc-v1.9.1-linux
+  +- ispc-v1.9.2-linux
   +- OSPRay
-  +- OptiX
-  +- BRayns
+  +- Brayns
 ```
 
 #### Intel ISPC compiler
 
-Download and extract [ISPC compiler 1.9.1 archive](https://ispc.github.io/downloads.html).
+Download and extract [ISPC compiler 1.9.2 archive](https://ispc.github.io/downloads.html).
 
 #### Embree
 
@@ -88,7 +87,7 @@ Clone embree in the same folder level as ISPC compiler
   git clone https://github.com/embree/embree.git
   mkdir embree/Build
   cd embree/Build
-  git checkout <latest_release>
+  git checkout v2.17.4
   cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
 ```
@@ -101,7 +100,7 @@ Clone OSPRay in the same folder level as ISPC compiler
   git clone https://github.com/ospray/OSPRay.git
   mkdir OSPRay/Build
   cd OSPRay/Build
-  git checkout <latest_release>
+  git checkout v1.5.0
   export CMAKE_PREFIX_PATH=<Brayns_installation_folder>
   cmake .. -DCMAKE_INSTALL_PREFIX=<Brayns_installation_folder>
   make install
