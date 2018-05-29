@@ -61,7 +61,6 @@ class DeflectPlugin::Impl
 public:
     Impl(EnginePtr engine, PluginAPI* api)
         : _engine(engine)
-        , _renderingParams{api->getParametersManager().getRenderingParameters()}
         , _appParams{api->getParametersManager().getApplicationParameters()}
         , _params{api->getParametersManager().getStreamParameters()}
         , _keyboardHandler(api->getKeyboardHandler())
@@ -247,7 +246,7 @@ private:
             case deflect::Event::EVT_VIEW_SIZE_CHANGED:
             {
                 Vector2ui newSize(event.dx, event.dy);
-                const auto isStereo = _renderingParams.getStereoMode() ==
+                const auto isStereo = _engine->getCamera().getStereoMode() ==
                                       StereoMode::side_by_side;
                 if (isStereo)
                     newSize.x() *= 2;
@@ -332,7 +331,7 @@ private:
                                            _lastImage.size.x(),
                                            _lastImage.size.y(), format);
         const auto isStereo =
-            _renderingParams.getStereoMode() == StereoMode::side_by_side;
+            _engine->getCamera().getStereoMode() == StereoMode::side_by_side;
         if (isStereo)
             deflectImage.view = deflect::View::side_by_side;
 
@@ -375,7 +374,6 @@ private:
     }
 
     EnginePtr _engine;
-    RenderingParameters& _renderingParams;
     ApplicationParameters& _appParams;
     StreamParameters& _params;
     KeyboardHandler& _keyboardHandler;

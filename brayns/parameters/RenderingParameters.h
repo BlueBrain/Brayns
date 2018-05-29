@@ -169,6 +169,8 @@ public:
     void initializeDefaultCameras();
     CameraType getCameraType() const { return _cameraType; }
     const std::string& getCameraTypeAsString(const CameraType value) const;
+    StereoMode getStereoMode() const { return _stereoMode; }
+    const std::string& getStereoModeAsString(const StereoMode value) const;
 
     /**
        Epsilon. All intersection distances less than the epsilon value are
@@ -216,18 +218,6 @@ public:
      */
     void setSamplesPerRay(const size_t spr) { _updateValue(_spr, spr); }
     size_t getSamplesPerRay() const { return _spr; }
-    /**
-     * @brief Defines the stereo mode
-     * @param stereoMode Stereo mode can be none, left eye, right eye or
-     * side-by-side
-     */
-    void setStereoMode(const StereoMode stereoMode)
-    {
-        _updateValue(_stereoMode, stereoMode);
-    }
-    StereoMode getStereoMode() const { return _stereoMode; }
-    const std::string& getStereoModeAsString(const StereoMode value) const;
-
 protected:
     void parse(const po::variables_map& vm) final;
 
