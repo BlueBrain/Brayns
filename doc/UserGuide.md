@@ -4,26 +4,31 @@
 
 ### Morphologies
 
+#### Loading data
+
+The generic (optional) argument --input-paths can be used command line argument
+can be used to specify files and/or folders where to load data from.
+
 #### Loading morphologies
 
-The --morphology-folder command line argument specifies the location of the
-SWC or H5 morphology files to be loaded.
+SWC or H5 morphology files (supported by the Brion library) can be loaded
+easily.
 
 ```
-braynsViewer --morphology-folder ~/morphologies
+braynsViewer ~/morphologies
 ```
 
 ### Loading a circuit
 
-The --circuit-config command line argument define the BlueConfig or
-CircuitConfig to be loaded by Brayns. The --circuit-targets command line argument
-specified the circuit target (or multiples separated by comma), and the --circuit-report
-command line argument specifies the simulation report to be rendered.
+BlueConfig or CircuitConfig files (supported by the Brion library) can be
+loaded. The --circuit-targets command line argument specified the circuit target
+(or multiples separated by comma), and the --circuit-report command line
+argument specifies the simulation report to be rendered.
 
 Example of how to load a circuit with voltages simulation for layer 1 cells
+
 ```
-braynsViewer --circuit-config ~/circuits/BlueConfig --circuit-targets Layer1 
---circuit-report voltages
+braynsViewer ~/circuits/BlueConfig --circuit-targets Layer1 --circuit-report voltages
 ```
 
 ![Layer1](images/Layer1.png)
@@ -37,7 +42,7 @@ next three values defining the upper bound.
 
 Example of how to define a circuit bounding box:
 ```
-braynsViewer --circuit-config ~/circuits/BlueConfig --circuit-bounding-box -100 -100 -100 100 100 100
+braynsViewer ~/circuits/BlueConfig --circuit-bounding-box -100 -100 -100 100 100 100
 ```
 
 #### Density
@@ -48,7 +53,7 @@ in 20 will be loaded. Brayns reads the cells in GID order.
 
 Example of how to load 10% of the circuit:
 ```
-braynsViewer --circuit-config ~/circuits/BlueConfig --circuit-density 10
+braynsViewer ~/circuits/BlueConfig --circuit-density 10
 ```
 
 ### Loading a NEST circuit
@@ -71,7 +76,7 @@ of those cells. Units used for the horizontal and vertical spacing are the ones
 from the H5 and SWC files.
 
 ```
-braynsViewer --morphology-folder ~/morphologies --morphology-layout 5 100 100
+braynsViewer ~/morphologies --morphology-layout 5 100 100
 ```
 
 #### Section types
@@ -84,19 +89,19 @@ wants to visualize the somas and the axons, the --morphology-section-types
 command line argument should then be set to 3.
 
 ```
-braynsViewer --morphology-folder ~/morphologies --morphology-section-types 3
+braynsViewer ~/morphologies --morphology-section-types 3
 ```
 
 ![SectionTypes](images/SectionTypesAxonSoma.png)
 
 ```
-braynsViewer --morphology-folder ~/morphologies --morphology-section-types 5
+braynsViewer ~/morphologies --morphology-section-types 5
 ```
 
 ![SectionTypesSomaDendrites](images/SectionTypesAxonDendrites.png)
 
 ```
-braynsViewer --morphology-folder ~/morphologies --morphology-section-types 9
+braynsViewer ~/morphologies --morphology-section-types 9
 ```
 
 ![SectionTypesSomaApicalDendrites](images/SectionTypesAxonApicalDendrites.png)
@@ -108,21 +113,21 @@ one line per section, the medium quality divides the number of segment by 4, and
 the high quality renders the full morphology.
 
 ```
-braynsViewer --morphology-folder ~/morphologies --geometry-quality low
+braynsViewer ~/morphologies --geometry-quality low
 ```
 
 ![GeometryQualityLow](images/GeometryQualityLow.png)
 
 
 ```
-braynsViewer --morphology-folder ~/morphologies --geometry-quality medium
+braynsViewer ~/morphologies --geometry-quality medium
 ```
 
 ![GeometryQualityMedium](images/GeometryQualityMedium.png)
 
 
 ```
-braynsViewer --morphology-folder ~/morphologies --geometry-quality high
+braynsViewer ~/morphologies --geometry-quality high
 ```
 
 ![GeometryQualityHigh](images/GeometryQualityHigh.png)
@@ -133,7 +138,7 @@ The --radius-multiplier command line parameters specifies the multiplier applied
 to morphology radii. Typically, a value of 3 multipliers all radii by 3.
 
 ```
-braynsViewer --morphology-folder ~/morphologies --radius-multiplier 3
+braynsViewer ~/morphologies --radius-multiplier 3
 ```
 
 ![RadiusMultiplier](images/RadiusMultiplier3.png)
@@ -145,7 +150,7 @@ applied to all segments of the morphology. The unit is the one of the loaded
 H5/SWC files.
 
 ```
-braynsViewer --morphology-folder ~/morphologies --radius-correction 1
+braynsViewer ~/morphologies --radius-correction 1
 ```
 
 ![RadiusCorrection](images/RadiusCorrection1.png)
@@ -166,14 +171,13 @@ belonging to a specific layer as the same color
 - protein-chains: Each chain has a different color
 
 ```
-braynsViewer --morphology-folder ~/morphologies --color-scheme neuron-by-id
+braynsViewer ~/morphologies --color-scheme neuron-by-id
 ```
 
 ![ColorSchemeNeuronById](images/ColorSchemeID.png)
 
 ```
-braynsViewer --morphology-folder ~/morphologies
-  --color-scheme neuron-by-segment-type
+braynsViewer ~/morphologies --color-scheme neuron-by-segment-type
 ```
 
 ![ColorSchemeNeuronBySegmentType](images/ColorSchemeSegmentType.png)
@@ -185,8 +189,7 @@ to the 3D scene. Available values are:
 - bounding-box: Adds a bounding box to the loaded dataset
 
 ```
-braynsViewer --morphology-folder ~/morphologies
-  --scene-environment bounding-box
+braynsViewer ~/morphologies --scene-environment bounding-box
 ```
 
 ![SceneEnvironmentBoundingBox](images/SceneEnvironmentBoundingBox.png)
@@ -202,8 +205,7 @@ command line argument defines how many samples from around the should be
 considered to generate the mesh.
 
 ```
-braynsViewer --morphology-folder ~/morphologies --metaballs-grid-size 60
-  --metaballs-threshold 1 --metaballs-samples-from-soma 5
+braynsViewer ~/morphologies --metaballs-grid-size 60 --metaballs-threshold 1 --metaballs-samples-from-soma 5
 ```
 
 ![EnhancedSomas](images/EnhancedSoma.png)
@@ -212,22 +214,20 @@ braynsViewer --morphology-folder ~/morphologies --metaballs-grid-size 60
 
 ### Loading a single molecule
 
-The --pdb-file command line argument specifies the PDB file to be loaded by
-Brayns.
+PDB files can be easily loaded:
 
 ```
-braynsViewer --pdb-file 4IMY.pdb
+braynsViewer 4IMY.pdb
 ```
 
 ![PDBFile](images/PDBFile.png)
 
 ### Loading molecules from folder
 
-The --pdb-folder command line argument loads all PDB file located in the
-specified folder.
+Loads all PDB file located in the specified folder.
 
 ```
-braynsViewer --pdb-folder ~/hiv --color-scheme protein-chains
+braynsViewer ~/hiv --color-scheme protein-chains
 ```
 
 ![PDBFolder](images/PDBFolder.png)
@@ -236,22 +236,20 @@ braynsViewer --pdb-folder ~/hiv --color-scheme protein-chains
 
 ### Loading meshes
 
-The --mesh-folder command line argument specifies the folder from which meshes
-are loaded. Brayns can load file formats supported by the [assimp|https://github.com/assimp/assimp] library.
+Brayns can load file formats supported by the [assimp|https://github.com/assimp/assimp] library.
 
 ```
-braynsViewer --mesh-folder ~/meshes
+braynsViewer ~/meshes
 ```
 
-![Meshes](images/Meshes.png)
+![Mesh](images/Mesh.png)
 
 ## Point cloud
 
-The --xyzb-file command line argument specifies the XYZB file to be loaded. A
-XYZB file is a binary encoded list of x,y and z double positions.
+A XYZ file is a binary encoded list of x,y and z double positions.
 
 ```
-braynsViewer --xyzb-file sample.xyzb
+braynsViewer sample.xyz
 ```
 
 ## Cache file
