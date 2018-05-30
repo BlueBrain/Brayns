@@ -40,12 +40,16 @@ void ExtendedCylinders::finalize(ospray::Model *model)
     materialID = getParam1i("materialID", 0);
     bytesPerCylinder =
         getParam1i("bytes_per_cylinder", sizeof(brayns::Cylinder));
-    offset_center = getParam1i("offset_center", 0);
-    offset_up = getParam1i("offset_up", 3 * sizeof(float));
-    offset_radius = getParam1i("offset_radius", 6 * sizeof(float));
-    offset_timestamp = getParam1i("offset_timestamp", 7 * sizeof(float));
-    offset_value_x = getParam1i("offset_value_x", 8 * sizeof(float));
-    offset_value_y = getParam1i("offset_value_y", 9 * sizeof(float));
+    offset_center =
+        getParam1i("offset_center", offsetof(struct brayns::Cylinder, center));
+    offset_up = getParam1i("offset_up", offsetof(struct brayns::Cylinder, up));
+    offset_radius =
+        getParam1i("offset_radius", offsetof(struct brayns::Cylinder, radius));
+    offset_timestamp = getParam1i("offset_timestamp",
+                                  offsetof(struct brayns::Cylinder, timestamp));
+    offset_texture_coords =
+        getParam1i("offset_texture_coords",
+                   offsetof(struct brayns::Cylinder, texture_coords));
     offset_materialID = getParam1i("offset_materialID", -1);
     data = getParamData("extendedcylinders", nullptr);
 
@@ -58,8 +62,8 @@ void ExtendedCylinders::finalize(ospray::Model *model)
                                         numExtendedCylinders, bytesPerCylinder,
                                         radius, materialID, offset_center,
                                         offset_up, offset_radius,
-                                        offset_timestamp, offset_value_x,
-                                        offset_value_y, offset_materialID);
+                                        offset_timestamp, offset_texture_coords,
+                                        offset_materialID);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedCylinders, extendedcylinders);

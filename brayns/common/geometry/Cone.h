@@ -28,13 +28,13 @@ namespace brayns
 struct Cone
 {
     Cone(const Vector3f c, const Vector3f u, const float cr, const float ur,
-         const float ts = 0.f, const Vector2f v = Vector2f(0.f, 0.f))
+         const float ts = 0.f, const Vector2f t = Vector2f(0.f, 0.f))
         : center{c}
         , up{u}
         , centerRadius{cr}
         , upRadius{ur}
         , timestamp{ts}
-        , values{v}
+        , texture_coords{t}
     {
     }
 
@@ -45,7 +45,7 @@ struct Cone
     float centerRadius{0};
     float upRadius{0};
     float timestamp{0};
-    Vector2f values;
+    Vector2f texture_coords{0.f, 0.f};
 };
 }
 

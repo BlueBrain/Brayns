@@ -38,8 +38,7 @@ struct ExtendedCylinders : public ospray::Geometry
     int64 offset_up;
     int64 offset_radius;
     int64 offset_timestamp;
-    int64 offset_value_x;
-    int64 offset_value_y;
+    int64 offset_texture_coords;
     int64 offset_materialID;
 
     ospray::Ref<ospray::Data> data;

@@ -44,8 +44,7 @@ struct ExtendedSpheres
     int offset_center;
     int offset_radius;
     int offset_timestamp;
-    int offset_value_x;
-    int offset_value_y;
+    int offset_texture_coords;
     int offset_materialID;
     int32 numExtendedSpheres;
     int32 bytesPerExtendedSphere;
@@ -71,8 +70,11 @@ static void ExtendedSpheres_postIntersect(uniform Geometry *uniform geometry,
     // Store timestamp as texture coordinate
     uniform uint8 *spherePtr =
         this->data + this->bytesPerExtendedSphere * ray.primID;
-    dg.st.x = *((varying float *)(spherePtr + this->offset_value_x));
-    dg.st.y = *((varying float *)(spherePtr + this->offset_value_y));
+    const vec2f tex =
+        *((uniform vec2f *)(spherePtr + this->offset_texture_coords));
+
+    dg.st.x = tex.x;
+    dg.st.y = tex.y;
 
     if (flags & DG_NORMALIZE)
     {
@@ -208,8 +210,7 @@ export void ExtendedSpheresGeometry_set(
     int uniform bytesPerExtendedSphere, float uniform radius,
     int uniform materialID, int uniform offset_center,
     int uniform offset_radius, int uniform offset_timestamp,
-    int uniform offset_value_x, int uniform offset_value_y,
-    int uniform offset_materialID)
+    int uniform offset_texture_coords, int uniform offset_materialID)
 {
     uniform ExtendedSpheres *uniform geom =
         (uniform ExtendedSpheres * uniform)_geom;
@@ -230,8 +231,7 @@ export void ExtendedSpheresGeometry_set(
     geom->offset_center = offset_center;
     geom->offset_radius = offset_radius;
     geom->offset_timestamp = offset_timestamp;
-    geom->offset_value_x = offset_value_x;
-    geom->offset_value_y = offset_value_y;
+    geom->offset_texture_coords = offset_texture_coords;
     geom->offset_materialID = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);

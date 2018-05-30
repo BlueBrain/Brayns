@@ -40,11 +40,15 @@ void ExtendedSpheres::finalize(ospray::Model *model)
     materialID = getParam1i("materialID", 0);
     bytesPerExtendedSphere =
         getParam1i("bytes_per_extended_sphere", sizeof(brayns::Sphere));
-    offset_center = getParam1i("offset_center", 0);
-    offset_radius = getParam1i("offset_radius", 3 * sizeof(float));
-    offset_timestamp = getParam1i("offset_timestamp", 4 * sizeof(float));
-    offset_value_x = getParam1i("offset_value_x", 5 * sizeof(float));
-    offset_value_y = getParam1i("offset_value_y", 6 * sizeof(float));
+    offset_center =
+        getParam1i("offset_center", offsetof(struct brayns::Sphere, center));
+    offset_radius =
+        getParam1i("offset_radius", offsetof(struct brayns::Sphere, radius));
+    offset_timestamp = getParam1i("offset_timestamp",
+                                  offsetof(struct brayns::Sphere, timestamp));
+    offset_texture_coords =
+        getParam1i("offset_texture_coords",
+                   offsetof(struct brayns::Sphere, texture_coords));
     offset_materialID = getParam1i("offset_materialID", -1);
     data = getParamData("extendedspheres", nullptr);
     materialList = getParamData("materialList", nullptr);
@@ -86,8 +90,8 @@ void ExtendedSpheres::finalize(ospray::Model *model)
                                       ispcMaterialList, numExtendedSpheres,
                                       bytesPerExtendedSphere, radius,
                                       materialID, offset_center, offset_radius,
-                                      offset_timestamp, offset_value_x,
-                                      offset_value_y, offset_materialID);
+                                      offset_timestamp, offset_texture_coords,
+                                      offset_materialID);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSpheres, extendedspheres);
