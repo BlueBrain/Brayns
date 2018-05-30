@@ -28,12 +28,12 @@ namespace brayns
 struct Cylinder
 {
     Cylinder(const Vector3f c, const Vector3f u, const float r,
-             const float ts = 0.f, const Vector2f v = Vector2f())
+             const float ts = 0.f, const Vector2f t = Vector2f())
         : center{c}
         , up{u}
         , radius{r}
         , timestamp{ts}
-        , values{v}
+        , texture_coords{t}
     {
     }
 
@@ -43,7 +43,7 @@ struct Cylinder
     Vector3f up;
     float radius{0};
     float timestamp{0};
-    Vector2f values;
+    Vector2f texture_coords{0.f, 0.f};
 };
 }
 

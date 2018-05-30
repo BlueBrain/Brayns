@@ -28,11 +28,11 @@ namespace brayns
 struct Sphere
 {
     Sphere(const Vector3f c, float r, float ts = 0.f,
-           const Vector2f v = Vector2f())
+           const Vector2f t = Vector2f())
         : center{c}
         , radius{r}
         , timestamp{ts}
-        , values{v}
+        , texture_coords{t}
     {
     }
 
@@ -41,7 +41,7 @@ struct Sphere
     Vector3f center;
     float radius{0};
     float timestamp{0};
-    Vector2f values;
+    Vector2f texture_coords{0.f, 0.f};
 };
 }
 #endif // SPHERE_H
