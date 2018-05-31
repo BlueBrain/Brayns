@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -58,7 +57,7 @@ public:
     unsigned getPort() const { return _port; }
     void setPort(const unsigned port) { _updateValue(_port, port); }
 private:
-    void parse(const po::variables_map&) final {}
+    void parse(const po::variables_map& vm);
     std::string _host;
     bool _enabled{true};
     std::string _id;
