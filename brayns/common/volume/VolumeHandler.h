@@ -50,7 +50,7 @@ public:
     VolumeHandler(const VolumeParameters& volumeParameters,
                   IndexMode indexMode);
 
-    ~VolumeHandler();
+    VolumeHandler& operator=(const VolumeHandler& rhs);
 
     void clear();
 

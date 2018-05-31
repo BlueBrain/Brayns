@@ -44,6 +44,8 @@ public:
      */
     virtual ~AbstractSimulationHandler();
 
+    AbstractSimulationHandler& operator=(const AbstractSimulationHandler& rhs);
+
     /**
     * @brief Attaches a memory mapped file to the scene so that renderers can
     * access the data
@@ -76,7 +78,10 @@ public:
      * @brief returns a void pointer to the simulation data for the given frame
      * or nullptr if the frame is not loaded yet.
      */
-    virtual void* getFrameData(uint32_t frame) = 0;
+    virtual void* getFrameData(uint32_t frame BRAYNS_UNUSED)
+    {
+        return _frameData.data();
+    }
 
     /**
      * @brief getFrameSize return the size of the current simulation frame
@@ -136,7 +141,7 @@ protected:
     void* _memoryMapPtr{nullptr};
     int _cacheFileDescriptor{-1};
     Histogram _histogram;
-    float* _frameData{nullptr};
+    floats _frameData;
 };
 }
 #endif // ABSTRACTSIMULATIONHANDLER_H

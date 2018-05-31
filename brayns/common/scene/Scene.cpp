@@ -51,15 +51,41 @@ Scene& Scene::operator=(const Scene& rhs)
     if (this == &rhs)
         return *this;
 
-    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    std::unique_lock<std::shared_timed_mutex> rhsLock(rhs._modelMutex);
-    _modelDescriptors = rhs._modelDescriptors;
-    _backgroundMaterial = rhs._backgroundMaterial;
+    {
+        std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+        std::unique_lock<std::shared_timed_mutex> rhsLock(rhs._modelMutex);
+        _modelDescriptors = rhs._modelDescriptors;
+    }
+
+    *_backgroundMaterial = *rhs._backgroundMaterial;
+    _backgroundMaterial->markModified();
+
     _lights = rhs._lights;
-    _volumeHandler = rhs._volumeHandler;
-    _simulationHandler = rhs._simulationHandler;
+
+    if (rhs._volumeHandler)
+    {
+        _volumeHandler = std::make_shared<VolumeHandler>(
+            _parametersManager.getVolumeParameters(), IndexMode::modulo);
+        *_volumeHandler = *rhs._volumeHandler;
+    }
+
+    if (rhs._simulationHandler)
+    {
+        _simulationHandler = std::make_shared<AbstractSimulationHandler>(
+            _parametersManager.getGeometryParameters());
+        *_simulationHandler = *rhs._simulationHandler;
+    }
     _transferFunction = rhs._transferFunction;
-    _caDiffusionSimulationHandler = rhs._caDiffusionSimulationHandler;
+    _transferFunction.markModified();
+
+    if (rhs._caDiffusionSimulationHandler)
+    {
+        _caDiffusionSimulationHandler =
+            std::make_shared<CADiffusionSimulationHandler>();
+        *_caDiffusionSimulationHandler = *rhs._caDiffusionSimulationHandler;
+    }
+
+    markModified();
     return *this;
 }
 
@@ -247,6 +273,8 @@ VolumeHandlerPtr Scene::getVolumeHandler()
             const auto& spacing = _volumeHandler->getElementSpacing();
             const auto& offset = _volumeHandler->getOffset();
             auto model = createModel();
+            model->updateBounds(offset);
+            model->updateBounds(offset + dimensions);
             addModel(std::make_shared<ModelDescriptor>(
                 std::move(model), volumeFile,
                 ModelMetadata{
@@ -259,8 +287,6 @@ VolumeHandlerPtr Scene::getVolumeHandler()
                     {"offset", std::to_string(offset.x()) + " " +
                                    std::to_string(offset.y()) + " " +
                                    std::to_string(offset.z())}}));
-            model->updateBounds(offset);
-            model->updateBounds(offset + dimensions);
             _parametersManager.getVolumeParameters().resetModified();
         }
     }

@@ -42,9 +42,18 @@ VolumeHandler::VolumeHandler(const VolumeParameters& volumeParameters,
 {
 }
 
-VolumeHandler::~VolumeHandler()
+VolumeHandler& VolumeHandler::operator=(const VolumeHandler& rhs)
 {
-    clear();
+    if (this == &rhs)
+        return *this;
+
+    _volumeDescriptors = rhs._volumeDescriptors;
+    _currentIndex = rhs._currentIndex;
+    _indexMode = rhs._indexMode;
+    _histograms = rhs._histograms;
+    _nbFrames = rhs._nbFrames;
+
+    return *this;
 }
 
 void VolumeHandler::clear()

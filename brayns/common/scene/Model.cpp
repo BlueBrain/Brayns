@@ -130,7 +130,8 @@ Boxf ModelDescriptor::getInstancesBounds() const
 bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
-           _trianglesMeshes.empty() && _sdf.geometries.empty();
+           _trianglesMeshes.empty() && _sdf.geometries.empty() &&
+           _bounds.isEmpty();
 }
 
 uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
