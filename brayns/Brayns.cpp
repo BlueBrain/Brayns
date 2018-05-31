@@ -317,6 +317,7 @@ struct Brayns::Impl : public PluginAPI
             if (paths.size() == 1 && paths[0] == "demo")
             {
                 _engine->getScene().buildDefault();
+                _engine->getScene().buildEnvironmentMap();
                 return;
             }
 
@@ -481,14 +482,6 @@ private:
         auto& sceneParameters = _parametersManager.getSceneParameters();
         auto& scene = _engine->getScene();
 
-        const auto& environmentMap =
-            _parametersManager.getSceneParameters().getEnvironmentMap();
-        if (!environmentMap.empty())
-        {
-            auto bgMaterial = scene.getBackgroundMaterial();
-            bgMaterial->setTexture(environmentMap, TT_DIFFUSE);
-        }
-
         const std::string& colorMapFilename =
             sceneParameters.getColorMapFilename();
         if (!colorMapFilename.empty())
@@ -535,6 +528,7 @@ private:
                          Vector3f(volumeDimensions) * volumeElementSpacing);
         }
         scene.saveToCacheFile();
+        scene.buildEnvironmentMap();
     }
 
 #if (BRAYNS_USE_BRION)
