@@ -26,30 +26,31 @@
 
 namespace
 {
-const std::string PARAM_ENGINE = "engine";
-const std::string PARAM_MODULE = "module";
-const std::string PARAM_RENDERER = "renderer";
-const std::string PARAM_SPP = "samples-per-pixel";
 const std::string PARAM_ACCUMULATION = "accumulation";
 const std::string PARAM_AMBIENT_OCCLUSION = "ambient-occlusion";
 const std::string PARAM_AMBIENT_OCCLUSION_DISTANCE =
     "ambient-occlusion-distance";
-const std::string PARAM_SHADOWS = "shadows";
-const std::string PARAM_SOFT_SHADOWS = "soft-shadows";
-const std::string PARAM_SHADING = "shading";
-const std::string PARAM_RADIANCE = "radiance";
 const std::string PARAM_BACKGROUND_COLOR = "background-color";
+const std::string PARAM_CAMERA = "camera";
 const std::string PARAM_DETECTION_DISTANCE = "detection-distance";
+const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
+const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
 const std::string PARAM_DETECTION_ON_DIFFERENT_MATERIAL =
     "detection-on-different-material";
-const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
-const std::string PARAM_DETECTION_FAR_COLOR = "detection-far-color";
+const std::string PARAM_ENGINE = "engine";
 const std::string PARAM_EPSILON = "epsilon";
-const std::string PARAM_CAMERA = "camera";
-const std::string PARAM_STEREO_MODE = "stereo-mode";
 const std::string PARAM_HEAD_LIGHT = "head-light";
-const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
+const std::string PARAM_MAX_ACCUMULATION_FRAMES = "max-accumulation-frames";
+const std::string PARAM_MODULE = "module";
+const std::string PARAM_RADIANCE = "radiance";
+const std::string PARAM_RENDERER = "renderer";
+const std::string PARAM_SHADING = "shading";
+const std::string PARAM_SHADOWS = "shadows";
+const std::string PARAM_SOFT_SHADOWS = "soft-shadows";
+const std::string PARAM_SPP = "samples-per-pixel";
 const std::string PARAM_SPR = "samples-per-ray";
+const std::string PARAM_STEREO_MODE = "stereo-mode";
+const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
 const std::array<std::string, 2> ENGINES = {{"ospray", "optix"}};
 const std::array<std::string, 7> RENDERERS = {
@@ -119,7 +120,9 @@ RenderingParameters::RenderingParameters()
         PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),
         "Threshold for adaptive accumulation [float]")(PARAM_SPR.c_str(),
                                                        po::value<size_t>(),
-                                                       "Samples per ray [int]");
+                                                       "Samples per ray [int]")(
+        PARAM_MAX_ACCUMULATION_FRAMES.c_str(), po::value<size_t>(),
+        "Maximum number of accumulation frames");
 
     initializeDefaultRenderers();
     initializeDefaultCameras();
@@ -249,6 +252,8 @@ void RenderingParameters::parse(const po::variables_map& vm)
         _varianceThreshold = vm[PARAM_VARIANCE_THRESHOLD].as<float>();
     if (vm.count(PARAM_SPR))
         _spr = vm[PARAM_SPR].as<size_t>();
+    if (vm.count(PARAM_MAX_ACCUMULATION_FRAMES))
+        _maxAccumFrames = vm[PARAM_MAX_ACCUMULATION_FRAMES].as<size_t>();
     markModified();
 }
 
@@ -296,6 +301,8 @@ void RenderingParameters::print()
     BRAYNS_INFO << "Accumulation                      : "
                 << (_accumulation ? "on" : "off") << std::endl;
     BRAYNS_INFO << "Samples per ray                   : " << _spr << std::endl;
+    BRAYNS_INFO << "Max. accumulation frames          : " << _maxAccumFrames
+                << std::endl;
 }
 
 const std::string& RenderingParameters::getEngineAsString(
