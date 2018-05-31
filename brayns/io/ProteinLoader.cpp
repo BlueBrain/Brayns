@@ -319,7 +319,7 @@ ProteinLoader::ProteinLoader(Scene& scene,
 
 std::set<std::string> ProteinLoader::getSupportedDataTypes()
 {
-    return {"pdb"};
+    return {"pdb", "pdb1"};
 }
 
 ModelDescriptorPtr ProteinLoader::importFromFile(

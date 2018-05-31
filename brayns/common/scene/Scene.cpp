@@ -357,6 +357,7 @@ ModelDescriptorPtr Scene::load(const std::string& path,
         addModel(model);
     }
     saveToCacheFile();
+    buildEnvironmentMap();
     return model;
 }
 
@@ -890,5 +891,13 @@ void Scene::_computeBounds()
     if (nbEnabledInstances == 0)
         // If no model is enabled. return empty bounding box
         _bounds.merge({0, 0, 0});
+}
+
+void Scene::buildEnvironmentMap()
+{
+    const auto& environmentMap =
+        _parametersManager.getSceneParameters().getEnvironmentMap();
+    if (!environmentMap.empty())
+        _backgroundMaterial->setTexture(environmentMap, TT_DIFFUSE);
 }
 }

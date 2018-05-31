@@ -275,6 +275,11 @@ public:
     /** @internal not safe w/o modelMutex() */
     ModelDescriptors& getModelDescriptors() { return _modelDescriptors; }
     auto& modelMutex() const { return _modelMutex; }
+    /** @brief Builds environment map according to command line parameter
+     * --environment-map
+     */
+    void buildEnvironmentMap();
+
 protected:
     void _computeBounds();
 

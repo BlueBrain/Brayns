@@ -73,7 +73,7 @@ inline vec3f refractedVector(const varying vec3f& direction,
     return direction;
 }
 
-inline bool indirectShading(const uniform AbstractRenderer* uniform self,
+inline void indirectShading(const uniform AbstractRenderer* uniform self,
                             varying ScreenSample& sample,
                             const varying vec3f& intersection,
                             const varying vec3f& normal,
@@ -81,12 +81,12 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
                             varying vec3f& indirectShadingColor,
                             varying float& indirectShadingPower)
 {
-    varying vec3f backgroundColor;
-    varying float distanceToIntersection = infinity;
+    vec3f backgroundColor;
+    float distanceToIntersection = infinity;
     indirectShadingPower = 0.f;
 
     // Launch a random ray
-    varying vec3f randomDirection;
+    vec3f randomDirection;
     if (launchRandomRay((AbstractRenderer*)self, sample, intersection, normal,
                         geometry, backgroundColor, distanceToIntersection,
                         randomDirection))
@@ -119,13 +119,13 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
                     // Returned color is the one material with weight according
                     // intensity and distance to intersection
                     indirectShadingColor = localDiffuseColor * Ka;
-                    indirectShadingPower /= distanceToIntersection;
+                    indirectShadingPower = 1.f / distanceToIntersection;
                 }
                 else
                 {
                     // Material does not emit light, occlusion is considered
                     // according to surface localOpacity
-                    indirectShadingColor = make_vec3f(mat->d);
+                    indirectShadingColor = make_vec3f(1.f);
                     indirectShadingPower = -mat->d;
                 }
             }
@@ -136,17 +136,13 @@ inline bool indirectShading(const uniform AbstractRenderer* uniform self,
             indirectShadingColor = make_vec3f(geometry.color.w);
             indirectShadingPower = -geometry.color.w;
         }
-
-        const varying float angle = abs(dot(normal, randomDirection));
-        indirectShadingPower *= angle;
-        return true;
     }
     else
     {
-        indirectShadingPower = DEFAULT_SKYBOX_INTENSITY;
         indirectShadingColor = backgroundColor;
+        indirectShadingPower = DEFAULT_SKYBOX_INTENSITY;
     }
-    return false;
+    indirectShadingPower *= self->ambientOcclusionStrength;
 }
 
 inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
