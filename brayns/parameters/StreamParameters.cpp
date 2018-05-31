@@ -1,6 +1,5 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,15 +19,57 @@
 
 #include "StreamParameters.h"
 
+namespace
+{
+const std::string PARAM_STREAM_COMPRESSION = "stream-use-compression";
+const std::string PARAM_STREAM_HOST = "stream-host";
+const std::string PARAM_STREAM_ID = "stream-id";
+const std::string PARAM_STREAM_PORT = "stream-port";
+const std::string PARAM_STREAM_QUALITY = "stream-quality";
+}
+
 namespace brayns
 {
 StreamParameters::StreamParameters()
-    : AbstractParameters("Stream")
+    : AbstractParameters("Streaming")
 {
+    _parameters.add_options()(PARAM_STREAM_COMPRESSION.c_str(),
+                              po::value<bool>(),
+                              "Enable/disable JPEG compression")(
+        PARAM_STREAM_HOST.c_str(), po::value<std::string>(),
+        "Hostname of Deflect server")(PARAM_STREAM_ID.c_str(),
+                                      po::value<std::string>(),
+                                      "Name of stream")(
+        PARAM_STREAM_PORT.c_str(), po::value<unsigned>(),
+        "Port of Deflect server")(PARAM_STREAM_QUALITY.c_str(),
+                                  po::value<unsigned>(),
+                                  "JPEG quality of stream");
+}
+
+void StreamParameters::parse(const po::variables_map& vm)
+{
+    if (vm.count(PARAM_STREAM_COMPRESSION))
+        _compression = vm[PARAM_STREAM_COMPRESSION].as<bool>();
+    if (vm.count(PARAM_STREAM_HOST))
+        _host = vm[PARAM_STREAM_HOST].as<std::string>();
+    if (vm.count(PARAM_STREAM_ID))
+        _id = vm[PARAM_STREAM_ID].as<std::string>();
+    if (vm.count(PARAM_STREAM_PORT))
+        _port = vm[PARAM_STREAM_PORT].as<unsigned>();
+    if (vm.count(PARAM_STREAM_QUALITY))
+        _quality = vm[PARAM_STREAM_QUALITY].as<unsigned>();
+    markModified();
 }
 
 void StreamParameters::print()
 {
     AbstractParameters::print();
+    BRAYNS_INFO << "Stream compression                :"
+                << (_compression ? "on" : "off") << std::endl;
+    BRAYNS_INFO << "Stream host                       :" << _host << std::endl;
+    BRAYNS_INFO << "Stream ID                         :" << _id << std::endl;
+    BRAYNS_INFO << "Stream port                       :" << _port << std::endl;
+    BRAYNS_INFO << "Stream quality                    :" << _quality
+                << std::endl;
 }
 }
