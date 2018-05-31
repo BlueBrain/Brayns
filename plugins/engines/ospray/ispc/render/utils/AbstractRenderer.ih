@@ -123,7 +123,7 @@ vec3f refractedVector(const varying vec3f& direction,
    intersection between the intersection and the geometry intersect by the
    random ray.
 */
-bool indirectShading(const uniform AbstractRenderer* uniform self,
+void indirectShading(const uniform AbstractRenderer* uniform self,
                      varying ScreenSample& sample,
                      const varying vec3f& intersection,
                      const varying vec3f& normal,

@@ -149,7 +149,7 @@ inline void setGeometryShadingAttributes(
 
         // Opacity
         if (valid(mat->map_d))
-            attributes.opacity = mat->d * get1f(mat->map_d, dg.st, 1.f);
+            attributes.opacity = mat->d * get1f(mat->map_d, dg.st);
         else
             attributes.opacity = mat->d;
 
@@ -160,14 +160,13 @@ inline void setGeometryShadingAttributes(
             const vec4f diffuseColorFromMap = get4f(mat->map_Kd, dg.st);
             attributes.diffuseColor =
                 attributes.diffuseColor * make_vec3f(diffuseColorFromMap);
-            attributes.opacity = diffuseColorFromMap.w;
+            attributes.opacity *= diffuseColorFromMap.w;
         }
 
         // Specular color
         if (valid(mat->map_Ks))
-            attributes.specularColor =
-                max(attributes.specularColor,
-                    mat->Ks * get3f(mat->map_Ks, dg.st, make_vec3f(1.f)));
+            attributes.specularColor = max(attributes.specularColor,
+                                           mat->Ks * get3f(mat->map_Ks, dg.st));
         else
             attributes.specularColor = max(attributes.specularColor, mat->Ks);
 
@@ -175,7 +174,7 @@ inline void setGeometryShadingAttributes(
         if (valid(mat->map_Ns))
             attributes.specularExponent =
                 max(attributes.specularExponent,
-                    mat->Ns * get1f(mat->map_Ns, dg.st, 1.f));
+                    mat->Ns * get1f(mat->map_Ns, dg.st));
         else
             attributes.specularExponent =
                 max(attributes.specularExponent, mat->Ns);
@@ -196,8 +195,7 @@ inline void setGeometryShadingAttributes(
         attributes.reflection = mat->reflection;
         if (valid(mat->map_reflection))
         {
-            const vec3f value =
-                get3f(mat->map_reflection, dg.st, make_vec3f(0.f));
+            const vec3f value = get3f(mat->map_reflection, dg.st);
             attributes.reflection *= (value.x + value.y + value.z) / 3.f;
         }
 
@@ -315,14 +313,14 @@ inline void processBackgroundColor(varying ScreenSample& sample, Ray& ray,
                                         attributes.self->abstract.bgMaterial);
 
     attributes.shadingContribution = make_vec3f(bgColor);
+    attributes.opacity = 1.f;
 }
 
 inline void computeIndirectShading(varying ScreenSample& sample,
                                    ShadingAttributes& attributes)
 
 {
-    if (attributes.self->abstract.ambientOcclusionStrength == 0.f ||
-        attributes.lightEmissionIntensity > 0.01f)
+    if (attributes.self->abstract.ambientOcclusionStrength < 0.01f)
         return;
 
     DifferentialGeometry dg;
@@ -335,39 +333,45 @@ inline void processLightShading(DifferentialGeometry& dg,
                                 varying ScreenSample& sample,
                                 ShadingAttributes& attributes)
 {
+    if (!attributes.self->abstract.lights)
+    {
+        attributes.shadingContribution = attributes.diffuseColor;
+        return;
+    }
+
     // Shading for all lights defined in the scene
     attributes.shadingContribution = make_vec3f(0.f);
-    for (uniform int i = 0; attributes.self->abstract.lights &&
-                            i < attributes.self->abstract.numLights;
-         ++i)
+    for (uniform int i = 0; i < attributes.self->abstract.numLights; ++i)
     {
         const uniform Light* uniform light =
             attributes.self->abstract.lights[i];
         const vec2f s = make_vec2f(0.5f);
         const varying Light_SampleRes lightSample = light->sample(light, dg, s);
-        const vec3f radiance = lightSample.weight;
-        const varying vec3f lightDirection = lightSample.dir;
+        const float radiance = reduce_max(lightSample.weight);
+        const vec3f lightDirection = lightSample.dir;
 
-        if (reduce_max(radiance) > 0.f)
+        if (radiance > 0.f)
         {
             float cosNL = 1.f;
 
-            // Phong + Blinn shading
             const bool shadingEnabled =
                 attributes.self->abstract.shadingEnabled;
             if (shadingEnabled)
             {
+                // Phong + Blinn shading
+                cosNL = max(0.f, dot(lightDirection, attributes.normal));
+
                 // Specular color
-                cosNL = dot(lightDirection, attributes.normal);
                 const float cosLR =
                     dot(lightDirection, attributes.reflectedNormal);
-                const vec3f specularColor =
+                attributes.specularColor =
                     attributes.specularColor *
                     powf(cosLR, attributes.specularExponent);
-                attributes.specularColor =
-                    (i == 0 ? specularColor
-                            : max(specularColor, attributes.specularColor));
             }
+            else
+                attributes.specularColor = make_vec3f(0.f);
+
+            attributes.diffuseColor = cosNL * attributes.diffuseColor;
 
             // Process shadows
             const bool shadowsEnabled =
@@ -381,7 +385,10 @@ inline void processLightShading(DifferentialGeometry& dg,
                     : 1.f;
             attributes.shadingContribution =
                 attributes.shadingContribution +
-                alpha * cosNL * attributes.diffuseColor;
+                radiance * alpha * attributes.diffuseColor;
+
+            if (alpha < 1.f)
+                attributes.specularColor = make_vec3f(0.f);
         }
     }
 }
@@ -393,6 +400,7 @@ inline void processElectronShading(varying ScreenSample& sample,
     const float el = max(0.f, dot(viewer, attributes.normal));
     const float cosNL = 1.f - el;
     attributes.shadingContribution = attributes.diffuseColor * cosNL;
+    attributes.specularColor = make_vec3f(0.f);
 }
 
 inline void processVolumeContribution(varying ScreenSample& sample,
@@ -410,14 +418,15 @@ inline void processVolumeContribution(varying ScreenSample& sample,
 inline void processFinalContribution(ShadingAttributes& attributes)
 {
     // Indirect light contribution
-    const vec3f indirectContribution =
-        attributes.indirectColor * attributes.indirectIntensity;
+    const vec3f indirectContribution = attributes.opacity *
+                                       attributes.indirectColor *
+                                       attributes.indirectIntensity;
 
     // Simulation contribution
     const vec3f simulationColor = make_vec3f(attributes.simulationColor);
     float alpha = attributes.simulationColor.w;
 
-    // Surface + volume final contribution
+    // Surface shading + volume final contribution
     vec3f totalContributions =
         (attributes.shadingContribution + simulationColor) * (1.f - alpha) +
         attributes.shadingContribution * simulationColor * alpha +
@@ -426,22 +435,25 @@ inline void processFinalContribution(ShadingAttributes& attributes)
     // Specular contribution
     totalContributions = totalContributions + attributes.specularColor;
 
-    // Volume contribution
-    vec4f dst =
-        make_vec4f(totalContributions, 1.f - attributes.volumeIntensity);
-    const vec4f src =
-        make_vec4f(attributes.volumeColor, attributes.volumeIntensity);
-    composite(src, dst, attributes.self->abstract.volumeSamplesPerRay);
-
     // Light emission contribution
-    const vec3f finalContribution =
-        make_vec3f(dst) +
+    totalContributions =
+        make_vec3f(totalContributions) +
         attributes.lightEmissionIntensity * attributes.lightEmissionColor;
 
+    // Volume contribution
+    if (attributes.volumeIntensity > 0.f)
+    {
+        vec4f dst =
+            make_vec4f(totalContributions, 1.f - attributes.volumeIntensity);
+        const vec4f src =
+            make_vec4f(attributes.volumeColor, attributes.volumeIntensity);
+        composite(src, dst, attributes.self->abstract.volumeSamplesPerRay);
+        totalContributions = make_vec3f(dst);
+    }
+
     // Store final contribution
-    attributes.finalContribution.x = max(0.f, min(1.f, finalContribution.x));
-    attributes.finalContribution.y = max(0.f, min(1.f, finalContribution.y));
-    attributes.finalContribution.z = max(0.f, min(1.f, finalContribution.z));
+    attributes.finalContribution =
+        clamp(totalContributions, make_vec3f(0.f), make_vec3f(1.f));
 }
 
 inline vec3f SimulationRenderer_shadeRay(
@@ -451,15 +463,16 @@ inline vec3f SimulationRenderer_shadeRay(
     Ray ray = sample.ray;
     vec3f color = make_vec3f(0.f);
 
-    float pathOpacity = 1.f;
     unsigned int depth = 0;
     float oldlocalRefraction = 1.f;
     bool moreRebounds = true;
+    float pathOpacity = 1.f;
+    float totalOpacity = 0.f;
 
     sample.z = inf;
     sample.alpha = 0.f;
 
-    while (moreRebounds && depth < NB_MAX_REBOUNDS)
+    while (moreRebounds && depth < NB_MAX_REBOUNDS && pathOpacity > 0.f)
     {
         // Shading attributes store all color contributions for the current ray
         ShadingAttributes attributes;
@@ -478,6 +491,9 @@ inline vec3f SimulationRenderer_shadeRay(
 
             // No Geometry intersection. No need to iterate more
             moreRebounds = false;
+
+            if (depth == 0)
+                totalOpacity = 0.f;
         }
         else
         {
@@ -485,27 +501,18 @@ inline vec3f SimulationRenderer_shadeRay(
             DifferentialGeometry dg;
             postIntersect(self->abstract.super.model, dg, ray,
                           DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
-                              DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
-
-            // Z-Depth
-            if (depth == 0)
-                sample.z = ray.t;
+                              DG_TANGENTS | DG_MATERIALID | DG_COLOR |
+                              DG_TEXCOORD);
 
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
 
-            if (attributes.opacity == 0.f)
-            {
-                ray.t0 = ray.t + self->abstract.super.epsilon;
-                ray.t = inf;
-                ray.primID = -1;
-                ray.geomID = -1;
-                ray.instID = -1;
-                continue;
-            }
-
             // Compute simulation contribution
             processSimulationContribution(sample, attributes, dg.materialID);
+
+            // Z-Depth
+            if (depth == 0)
+                sample.z = ray.t;
 
             if (attributes.opacity > 0.01f && moreRebounds)
             {
@@ -524,11 +531,15 @@ inline vec3f SimulationRenderer_shadeRay(
             else
                 // Fully transparent object. Ignore intersection
                 ray.t0 = ray.t + 1.f;
+
+            // Alpha
+            totalOpacity += attributes.opacity;
         }
 
         // Combine all contributions
         processFinalContribution(attributes);
 
+        // Pixel Color
         color = attributes.finalContribution * pathOpacity +
                 color * (1.f - pathOpacity);
 
@@ -538,12 +549,17 @@ inline vec3f SimulationRenderer_shadeRay(
         if (doRefraction && doReflection)
         {
             // Switch between refraction and reflection
-            const bool refract = sample.sampleID.z % 2 == 1;
-            doRefraction = refract;
-            doReflection = !refract;
+            const bool reflect = sample.sampleID.z % 4 == 1;
+            doRefraction = !reflect;
+            doReflection = reflect;
         }
 
-        float alpha = 1.f;
+        ray.t0 = self->abstract.super.epsilon;
+        ray.t = inf;
+        ray.primID = -1;
+        ray.geomID = -1;
+        ray.instID = -1;
+
         if (doRefraction)
         {
             // Refraction
@@ -557,39 +573,30 @@ inline vec3f SimulationRenderer_shadeRay(
                 correctedNormal = correctedNormal * -1.f;
             }
 
-            ray.t0 = 0.f;
             ray.dir =
                 refractedVector(ray.dir, correctedNormal, oldlocalRefraction,
                                 attributes.refraction);
             ray.org =
                 attributes.origin + self->abstract.super.epsilon * ray.dir;
 
-            pathOpacity *= (1.f - attributes.opacity);
+            pathOpacity *= 1.f - attributes.opacity;
             oldlocalRefraction = attributes.refraction;
-            ++depth;
         }
         else if (doReflection)
         {
             // Reflection
-            ray.t0 = 0.f;
             ray.dir = attributes.reflectedNormal;
             ray.org = attributes.origin +
                       self->abstract.super.epsilon * attributes.reflectedNormal;
             pathOpacity *= attributes.reflection;
-            ++depth;
         }
         else
             moreRebounds = false;
 
-        // Alpha
-        sample.alpha += attributes.opacity;
-
-        ray.t = inf;
-        ray.primID = -1;
-        ray.geomID = -1;
-        ray.instID = -1;
+        ++depth;
     }
 
+    sample.alpha = min(1.f, totalOpacity);
     return color;
 }
 
