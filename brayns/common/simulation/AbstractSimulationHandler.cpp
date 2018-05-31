@@ -137,8 +137,10 @@ Histogram& AbstractSimulationHandler::getHistogram()
         _geometryParameters.getCircuitSimulationHistogramSize();
     _histogram.values.clear();
     _histogram.values.resize(histogramSize, 0);
-    const float normalizationValue =
+    float normalizationValue =
         (range.y() - range.x()) / float(histogramSize - 1);
+    if (normalizationValue == 0)
+        normalizationValue = 1;
     for (uint64_t i = 0; i < _frameSize; ++i)
     {
         const size_t idx = (data[i] - range.x()) / normalizationValue;
