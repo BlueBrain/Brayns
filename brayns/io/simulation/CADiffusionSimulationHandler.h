@@ -36,6 +36,7 @@ namespace brayns
 class CADiffusionSimulationHandler
 {
 public:
+    CADiffusionSimulationHandler() = default;
     /**
      * @brief Default constructor
      * @param simulationFolder Folder containing files with the CA atom

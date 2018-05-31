@@ -86,7 +86,7 @@ void* CircuitSimulationHandler::getFrameData(uint32_t frame)
     if (!_makeFrameReady(frame))
         return nullptr;
 
-    return _frameValues ? _frameValues.get()->data() : nullptr;
+    return _frameData.data();
 }
 
 void CircuitSimulationHandler::_triggerLoading(const uint32_t frame)
@@ -123,7 +123,7 @@ bool CircuitSimulationHandler::_makeFrameReady(const uint32_t frame)
     {
         try
         {
-            _frameValues = _currentFrameFuture.get();
+            _frameData = std::move(*_currentFrameFuture.get());
         }
         catch (const std::exception& e)
         {

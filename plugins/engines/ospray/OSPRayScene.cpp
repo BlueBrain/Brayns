@@ -77,13 +77,11 @@ OSPRayScene::~OSPRayScene()
 
 void OSPRayScene::commit()
 {
-    const bool isModified_ = isModified();
-
     commitVolumeData();
     commitSimulationData();
     commitTransferFunctionData();
 
-    if (!isModified_)
+    if (!isModified())
         return;
 
     if (_rootModel)
@@ -324,6 +322,7 @@ bool OSPRayScene::commitVolumeData()
                 _parametersManager.getRenderingParameters().getSamplesPerRay());
             ospSet1f(impl, "volumeEpsilon", epsilon);
         }
+        markModified(); // to update scene bounds
     }
     return true;
 }
@@ -336,7 +335,8 @@ bool OSPRayScene::commitSimulationData()
     const auto animationFrame =
         _parametersManager.getAnimationParameters().getFrame();
 
-    if (_simulationHandler->getCurrentFrame() == animationFrame)
+    if (_ospSimulationData &&
+        _simulationHandler->getCurrentFrame() == animationFrame)
         return false;
 
     auto frameData = _simulationHandler->getFrameData(animationFrame);

@@ -47,9 +47,23 @@ AbstractSimulationHandler::~AbstractSimulationHandler()
     }
     if (_cacheFileDescriptor != -1)
         ::close(_cacheFileDescriptor);
+}
 
-    if (_frameData)
-        delete[] _frameData;
+AbstractSimulationHandler& AbstractSimulationHandler::operator=(
+    const AbstractSimulationHandler& rhs)
+{
+    if (this == &rhs)
+        return *this;
+
+    _currentFrame = rhs._currentFrame;
+    _nbFrames = rhs._nbFrames;
+    _frameSize = rhs._frameSize;
+    _dt = rhs._dt;
+    _unit = rhs._unit;
+    _histogram = rhs._histogram;
+    _frameData = rhs._frameData;
+
+    return *this;
 }
 
 bool AbstractSimulationHandler::attachSimulationToCacheFile(

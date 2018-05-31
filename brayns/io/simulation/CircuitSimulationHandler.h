@@ -67,7 +67,6 @@ private:
     CompartmentReportPtr _compartmentReport;
     double _startTime;
     double _endTime;
-    brion::floatsPtr _frameValues;
     std::future<brion::floatsPtr> _currentFrameFuture;
     bool _ready{false};
 };
