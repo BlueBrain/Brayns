@@ -202,7 +202,8 @@ enum class RendererType
     particle,
     geometryNormals,
     shadingNormals,
-    scientificvisualization
+    scientificvisualization,
+    path_tracing
 };
 typedef std::vector<RendererType> RendererTypes;
 typedef std::map<RendererType, RendererPtr> RendererMap;

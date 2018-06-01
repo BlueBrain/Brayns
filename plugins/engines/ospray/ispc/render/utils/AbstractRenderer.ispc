@@ -137,14 +137,12 @@ inline void indirectShading(const uniform AbstractRenderer* uniform self,
             indirectShadingPower = -geometry.color.w;
         }
 
-        const varying float angle = abs(dot(normal, randomDirection));
-        indirectShadingPower *= angle;
-        return true;
+        indirectShadingPower *= abs(dot(normal, randomDirection));
     }
     else
     {
         indirectShadingColor = backgroundColor;
-        indirectShadingPower = DEFAULT_SKYBOX_INTENSITY;
+        indirectShadingPower = DEFAULT_SKY_POWER;
     }
     indirectShadingPower *= self->ambientOcclusionStrength;
 }
