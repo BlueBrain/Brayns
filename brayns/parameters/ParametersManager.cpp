@@ -68,7 +68,6 @@ void ParametersManager::parse(int argc, const char** argv)
                 .positional(_applicationParameters.posArgs())
                 .style(po::command_line_style::unix_style ^
                        po::command_line_style::allow_short)
-                .allow_unregistered()
                 .run();
         po::store(parsedOptions, vm);
         po::notify(vm);
@@ -79,6 +78,7 @@ void ParametersManager::parse(int argc, const char** argv)
     catch (po::error& e)
     {
         BRAYNS_ERROR << e.what() << std::endl;
+        exit(0);
     }
 }
 
