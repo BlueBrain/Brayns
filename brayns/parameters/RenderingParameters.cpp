@@ -52,13 +52,13 @@ const std::string PARAM_STEREO_MODE = "stereo-mode";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
 const std::array<std::string, 2> ENGINES = {{"ospray", "optix"}};
-const std::array<std::string, 7> RENDERERS = {
+const std::array<std::string, 8> RENDERERS = {
     {"default", "proximity", "simulation", "particle", "geometrynormals",
-     "shadingnormals", "scientificvisualization"}};
+     "shadingnormals", "scientificvisualization", "pathtracing"}};
 
-const std::array<std::string, 7> RENDERER_INTERNAL_NAMES = {
+const std::array<std::string, 8> RENDERER_INTERNAL_NAMES = {
     {"basic", "proximityrenderer", "simulationrenderer", "particlerenderer",
-     "raycast_Ng", "raycast_Ns", "scivis"}};
+     "raycast_Ng", "raycast_Ns", "scivis", "pathtracingrenderer"}};
 
 const std::array<std::string, 4> CAMERA_TYPE_NAMES = {
     {"perspective", "orthographic", "panoramic", "clipped"}};
@@ -136,6 +136,7 @@ void RenderingParameters::initializeDefaultRenderers()
     _renderers.push_back(RendererType::geometryNormals);
     _renderers.push_back(RendererType::shadingNormals);
     _renderers.push_back(RendererType::scientificvisualization);
+    _renderers.push_back(RendererType::path_tracing);
 }
 
 void RenderingParameters::initializeDefaultCameras()

@@ -24,6 +24,7 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   ispc/render/ProximityRenderer.ispc
   ispc/render/SimulationRenderer.ispc
   ispc/render/ParticleRenderer.ispc
+  ispc/render/PathTracingRenderer.ispc
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
@@ -38,6 +39,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/render/ProximityRenderer.cpp
   ispc/render/SimulationRenderer.cpp
   ispc/render/ParticleRenderer.cpp
+  ispc/render/PathTracingRenderer.cpp
   OSPRayMaterial.cpp
   OSPRayEngine.cpp
   OSPRayModel.cpp
@@ -59,6 +61,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   ispc/render/ProximityRenderer.h
   ispc/render/SimulationRenderer.h
   ispc/render/ParticleRenderer.h
+  ispc/render/PathTracingRenderer.h
   OSPRayEngine.h
   OSPRayScene.h
   OSPRayModel.h

@@ -136,11 +136,13 @@ inline void indirectShading(const uniform AbstractRenderer* uniform self,
             indirectShadingColor = make_vec3f(geometry.color.w);
             indirectShadingPower = -geometry.color.w;
         }
+
+        indirectShadingPower *= abs(dot(normal, randomDirection));
     }
     else
     {
         indirectShadingColor = backgroundColor;
-        indirectShadingPower = DEFAULT_SKYBOX_INTENSITY;
+        indirectShadingPower = DEFAULT_SKY_POWER;
     }
     indirectShadingPower *= self->ambientOcclusionStrength;
 }

@@ -119,8 +119,8 @@ STATICJSON_DECLARE_ENUM(
     {"particle", brayns::RendererType::particle},
     {"geometry_normals", brayns::RendererType::geometryNormals},
     {"shading_normals", brayns::RendererType::shadingNormals},
-    {"scientific_visualization",
-     brayns::RendererType::scientificvisualization});
+    {"scientific_visualization", brayns::RendererType::scientificvisualization},
+    {"path_tracing", brayns::RendererType::path_tracing});
 
 STATICJSON_DECLARE_ENUM(brayns::ShadingType,
                         {"none", brayns::ShadingType::none},
