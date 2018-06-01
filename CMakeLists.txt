@@ -96,7 +96,7 @@ common_find_package(BBPTestData)
 common_find_package(Lunchbox)
 
 # OSPRay rendering engine
-common_find_package(ospray 1.3 SYSTEM)
+common_find_package(ospray 1.5 SYSTEM)
 set(_ospray_unsupported_version 1.6)
 if(OSPRAY_FOUND AND OSPRAY_VERSION VERSION_LESS _ospray_unsupported_version)
   option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
@@ -190,13 +190,7 @@ add_subdirectory(tests)
 # OSPRay modules
 if(BRAYNS_OSPRAY_ENABLED)
   # Optix module
-  # Needs OSPRay version with a fix, so enable on your risk
-  # https://github.com/ospray/ospray/commit/851b3e52120982470276ce2cbc04b5de654ddbde
-  if(OSPRAY_VERSION VERSION_LESS 1.5.0)
-    option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" OFF)
-  else()
-    option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" ON)
-  endif()
+  option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" ON)
   if(BRAYNS_OPTIX_ENABLED)
     add_subdirectory(ospray_modules/optix)
     if(TARGET ospray_module_optix)
