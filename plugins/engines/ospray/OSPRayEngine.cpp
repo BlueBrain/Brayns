@@ -35,32 +35,31 @@
 
 namespace brayns
 {
-OSPRayEngine::OSPRayEngine(int argc, const char** argv,
-                           ParametersManager& parametersManager)
+OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     : Engine(parametersManager)
 {
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     try
     {
-        // Ospray messes up with argv, need to pass a copy
-        strings arguments;
-        for (int i = 0; i < argc; ++i)
-            arguments.push_back(argv[i]);
-
-        std::vector<const char*> newArgv;
-        for (const auto& arg : arguments)
-            newArgv.push_back(arg.c_str());
+        int argc = 0;
+        std::vector<const char*> argv;
 
         if (parametersManager.getRenderingParameters().getEngine() ==
             EngineType::optix)
         {
             _type = EngineType::optix;
             argc += 2;
-            newArgv.push_back("--osp:module:optix");
-            newArgv.push_back("--osp:device:optix");
+            argv.push_back("--osp:module:optix");
+            argv.push_back("--osp:device:optix");
         }
 
-        ospInit(&argc, newArgv.data());
+        if (parametersManager.getApplicationParameters().getParallelRendering())
+        {
+            argc++;
+            argv.push_back("--osp:mpi");
+        }
+
+        ospInit(&argc, argv.data());
     }
     catch (const std::exception& e)
     {

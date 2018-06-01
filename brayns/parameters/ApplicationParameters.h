@@ -82,6 +82,8 @@ public:
         _updateValue(_synchronousMode, synchronousMode);
     }
 
+    bool getParallelRendering() { return _parallelRendering; }
+
     const std::string& getHttpServerURI() const { return _httpServerURI; }
     void setHttpServerURI(const std::string& httpServerURI)
     {
@@ -90,6 +92,7 @@ public:
 
     const strings& getInputPaths() const { return _inputPaths; }
     po::positional_options_description& posArgs() { return _positionalArgs; }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -104,6 +107,7 @@ protected:
     size_t _imageStreamFPS{60};
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
     std::string _httpServerURI;
+    bool _parallelRendering{false};
 
     strings _inputPaths;
 

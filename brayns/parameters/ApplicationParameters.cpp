@@ -35,6 +35,7 @@ const std::string PARAM_INPUT_PATHS = "input-paths";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_MAX_RENDER_FPS = "max-render-fps";
+const std::string PARAM_PARALLEL_RENDERING = "parallel-rendering";
 const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
 const std::string PARAM_TMP_FOLDER = "tmp-folder";
@@ -72,6 +73,8 @@ ApplicationParameters::ApplicationParameters()
                                po::value<std::string>(),
                                "Folder used by the application to "
                                "store temporary files [string")(
+        PARAM_PARALLEL_RENDERING.c_str(), po::value<bool>(),
+        "Enable|Disable parallel rendering, equivalent to --osp:mpi")(
         PARAM_SYNCHRONOUS_MODE.c_str(), po::value<bool>(),
         "Enable|Disable synchronous mode rendering vs data loading [bool]")(
         PARAM_IMAGE_STREAM_FPS.c_str(), po::value<size_t>(),
@@ -114,6 +117,8 @@ void ApplicationParameters::parse(const po::variables_map& vm)
         _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
     if (vm.count(PARAM_IMAGE_STREAM_FPS))
         _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();
+    if (vm.count(PARAM_PARALLEL_RENDERING))
+        _parallelRendering = vm[PARAM_PARALLEL_RENDERING].as<bool>();
     if (vm.count(PARAM_MAX_RENDER_FPS))
         _maxRenderFPS = vm[PARAM_MAX_RENDER_FPS].as<size_t>();
 
