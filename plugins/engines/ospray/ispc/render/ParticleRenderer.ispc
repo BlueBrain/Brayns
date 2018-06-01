@@ -118,7 +118,7 @@ inline vec3f ParticleRenderer_shadeRay(
                     }
 
                 const varying vec3f intersection =
-                    dg.P + self->abstract.super.epsilon * dg.Ng;
+                    dg.P + self->abstract.braynsEpsilon * dg.Ng;
                 const varying vec3f viewer = normalize(ray.org - intersection);
                 const varying float el = max(0.f, dot(viewer, dg.Ng));
                 varying float cosNL = 1.f - el;
@@ -155,7 +155,7 @@ inline vec3f ParticleRenderer_shadeRay(
             sample.z = log(zDepth) / 10.f;
 
             // Next ray
-            ray.t0 = ray.t + self->abstract.super.epsilon * 5.f;
+            ray.t0 = ray.t + self->abstract.braynsEpsilon * 5.f;
             ray.t = infinity;
             ray.primID = -1;
             ray.geomID = -1;
@@ -194,7 +194,7 @@ export void* uniform ParticleRenderer_create(void* uniform cppE)
 export void ParticleRenderer_set(
     void* uniform _self, void* uniform bgMaterial,
     const uniform int& randomNumber, const uniform float& timestamp,
-    const uniform int& spp, uniform float* uniform simulationData,
+    const uniform float& braynsEpsilon, uniform float* uniform simulationData,
     const uniform int64 simulationDataSize,
     uniform vec4f* uniform transferFunction,
     uniform float* uniform transferFunctionEmissionData,
@@ -208,7 +208,7 @@ export void ParticleRenderer_set(
 
     self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
-    self->abstract.spp = spp;
+    self->abstract.braynsEpsilon = braynsEpsilon;
 
     self->abstract.volumeData = 0;
 

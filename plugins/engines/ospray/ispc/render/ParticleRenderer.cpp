@@ -45,7 +45,7 @@ void ParticleRenderer::commit()
 
     ispc::ParticleRenderer_set(
         getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _randomNumber,
-        _timestamp, _spp,
+        _timestamp, _braynsEpsilon,
         (_simulationData ? (float*)_simulationData->data : nullptr),
         _simulationDataSize,
         _transferFunctionDiffuseData

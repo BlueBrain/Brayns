@@ -38,7 +38,7 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
                                     varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
-    varying vec3f color = make_vec3f(0.f);
+    vec3f color = make_vec3f(0.f);
 
     sample.z = inf;
     sample.alpha = 0.f;
@@ -70,7 +70,8 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
         foreach_unique(mat in objMaterial) Kd = mat->Kd * make_vec3f(dg.color);
 
     // Head-light shading
-    const vec3f intersection = dg.P + self->abstract.super.epsilon * dg.Ns;
+    const float epsilon = 0.001f;
+    const vec3f intersection = dg.P + epsilon * dg.Ns;
     const vec3f headLight = normalize(ray.org - intersection);
     color = Kd * max(0.f, dot(headLight, dg.Ns));
     sample.alpha = 1.f;
@@ -103,8 +104,8 @@ export void* uniform BasicRenderer_create(void* uniform cppE)
 
 export void BasicRenderer_set(void* uniform _self, void* uniform bgMaterial,
                               const uniform float& timestamp,
-                              const uniform int& spp, void** uniform lights,
-                              uniform int32 numLights)
+                              const uniform float& braynsEpsilon,
+                              void** uniform lights, uniform int32 numLights)
 {
     uniform BasicRenderer* uniform self =
         (uniform BasicRenderer * uniform)_self;
@@ -112,7 +113,7 @@ export void BasicRenderer_set(void* uniform _self, void* uniform bgMaterial,
     self->abstract.bgMaterial =
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
     self->abstract.timestamp = timestamp;
-    self->abstract.spp = spp;
+    self->abstract.braynsEpsilon = braynsEpsilon;
 
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;

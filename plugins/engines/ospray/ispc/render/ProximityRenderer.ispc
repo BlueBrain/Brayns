@@ -73,7 +73,7 @@ inline vec3f ProximityRenderer_shadeRay(
     varying vec3f Kd = make_vec3f(0.0f, 0.0f, 0.0f);
     varying vec3f Ks = make_vec3f(0.f);
     varying vec3f normal = dg.Ns;
-    varying const vec3f P = dg.P + self->abstract.super.epsilon * dg.Ng;
+    varying const vec3f P = dg.P + self->abstract.braynsEpsilon * dg.Ng;
 
     if (!objMaterial)
     {
@@ -224,8 +224,9 @@ export void ProximityRenderer_set(
     const uniform float& detectionDistance,
     const uniform bool& detectionOnDifferentMaterial,
     const uniform int& randomNumber, const uniform float& timestamp,
-    const uniform int& spp, const uniform bool& electronShadingEnabled,
-    void** uniform lights, uniform int32 numLights)
+    const uniform float& braynsEpsilon,
+    const uniform bool& electronShadingEnabled, void** uniform lights,
+    uniform int32 numLights)
 {
     uniform ProximityRenderer* uniform self =
         (uniform ProximityRenderer * uniform)_self;
@@ -235,7 +236,8 @@ export void ProximityRenderer_set(
 
     self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
-    self->abstract.spp = spp;
+    self->abstract.braynsEpsilon = braynsEpsilon;
+
     self->abstract.electronShadingEnabled = electronShadingEnabled;
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
