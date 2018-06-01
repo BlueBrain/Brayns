@@ -64,6 +64,8 @@ public:
         _updateValue(_imageStreamFPS, fps);
     }
 
+    /** Max render FPS to limit */
+    size_t getMaxRenderFPS() const { return _maxRenderFPS; }
     const strings& getFilters() const { return _filters; }
     void setFrameExportFolder(const std::string& folder)
     {
@@ -100,6 +102,7 @@ protected:
     std::string _tmpFolder;
     bool _synchronousMode{false};
     size_t _imageStreamFPS{60};
+    size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
     std::string _httpServerURI;
 
     strings _inputPaths;

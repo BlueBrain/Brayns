@@ -34,6 +34,7 @@ const std::string PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
 const std::string PARAM_INPUT_PATHS = "input-paths";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
+const std::string PARAM_MAX_RENDER_FPS = "max-render-fps";
 const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
 const std::string PARAM_TMP_FOLDER = "tmp-folder";
@@ -78,7 +79,8 @@ ApplicationParameters::ApplicationParameters()
         PARAM_FILTERS.c_str(), po::value<strings>()->multitoken(),
         "Screen space filters [string]")(
         PARAM_FRAME_EXPORT_FOLDER.c_str(), po::value<std::string>(),
-        "Folder where frames are exported as PNG images [string]");
+        "Folder where frames are exported as PNG images [string]")(
+        PARAM_MAX_RENDER_FPS.c_str(), po::value<size_t>(), "Max. render FPS");
 
     _positionalArgs.add(PARAM_INPUT_PATHS.c_str(), -1);
 }
@@ -112,6 +114,8 @@ void ApplicationParameters::parse(const po::variables_map& vm)
         _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
     if (vm.count(PARAM_IMAGE_STREAM_FPS))
         _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();
+    if (vm.count(PARAM_MAX_RENDER_FPS))
+        _maxRenderFPS = vm[PARAM_MAX_RENDER_FPS].as<size_t>();
 
     markModified();
 }
@@ -128,6 +132,8 @@ void ApplicationParameters::print()
     BRAYNS_INFO << "Synchronous mode            : " << _synchronousMode
                 << std::endl;
     BRAYNS_INFO << "Image stream FPS            : " << _imageStreamFPS
+                << std::endl;
+    BRAYNS_INFO << "Max. render  FPS            : " << _maxRenderFPS
                 << std::endl;
 }
 }
