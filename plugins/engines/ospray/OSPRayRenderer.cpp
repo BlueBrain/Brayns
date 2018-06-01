@@ -86,7 +86,7 @@ void OSPRayRenderer::commit()
     ospSet1i(_renderer, "randomNumber", rand() % 10000);
     ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
     ospSet1i(_renderer, "electronShading", (mt == ShadingType::electron));
-    ospSet1f(_renderer, "epsilon", rp.getEpsilon());
+    ospSet1f(_renderer, "braynsEpsilon", rp.getEpsilon());
     ospSet1f(_renderer, "detectionDistance", rp.getDetectionDistance());
     ospSet1i(_renderer, "detectionOnDifferentMaterial",
              rp.getDetectionOnDifferentMaterial());

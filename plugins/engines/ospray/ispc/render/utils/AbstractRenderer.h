@@ -69,7 +69,7 @@ protected:
     bool _gradientBackgroundEnabled;
     int _randomNumber;
     float _timestamp;
-    int _spp;
+    float _braynsEpsilon;
 };
 }
 

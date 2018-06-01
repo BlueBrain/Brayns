@@ -554,7 +554,7 @@ inline vec3f SimulationRenderer_shadeRay(
             doReflection = reflect;
         }
 
-        ray.t0 = self->abstract.super.epsilon;
+        ray.t0 = self->abstract.braynsEpsilon;
         ray.t = inf;
         ray.primID = -1;
         ray.geomID = -1;
@@ -577,7 +577,7 @@ inline vec3f SimulationRenderer_shadeRay(
                 refractedVector(ray.dir, correctedNormal, oldlocalRefraction,
                                 attributes.refraction);
             ray.org =
-                attributes.origin + self->abstract.super.epsilon * ray.dir;
+                attributes.origin + self->abstract.braynsEpsilon * ray.dir;
 
             pathOpacity *= 1.f - attributes.opacity;
             oldlocalRefraction = attributes.refraction;
@@ -587,7 +587,7 @@ inline vec3f SimulationRenderer_shadeRay(
             // Reflection
             ray.dir = attributes.reflectedNormal;
             ray.org = attributes.origin +
-                      self->abstract.super.epsilon * attributes.reflectedNormal;
+                      self->abstract.braynsEpsilon * attributes.reflectedNormal;
             pathOpacity *= attributes.reflection;
         }
         else
@@ -627,7 +627,7 @@ export void SimulationRenderer_set(
     const uniform float& ambientOcclusionStrength,
     const uniform float& ambientOcclusionDistance,
     const uniform bool& shadingEnabled, const uniform int& randomNumber,
-    const uniform float& timestamp, const uniform int& spp,
+    const uniform float& timestamp, const uniform float& braynsEpsilon,
     const uniform bool& electronShadingEnabled, void** uniform lights,
     const uniform int32 numLights, uniform uint8* uniform volumeData,
     const uniform vec3i& volumeDimensions,
@@ -654,7 +654,7 @@ export void SimulationRenderer_set(
     self->abstract.shadingEnabled = shadingEnabled;
     self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
-    self->abstract.spp = spp;
+    self->abstract.braynsEpsilon = braynsEpsilon;
     self->abstract.electronShadingEnabled = electronShadingEnabled;
 
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;

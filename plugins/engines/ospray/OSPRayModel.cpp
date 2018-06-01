@@ -106,7 +106,7 @@ void OSPRayModel::buildBoundingBox()
     _boundingBoxModel = ospNewModel();
 
     auto material = createMaterial(BOUNDINGBOX_MATERIAL_ID, "bounding_box");
-    material->setDiffuseColor({1, 1, 1});
+    material->setDiffuseColor({1.f, 1.f, 1.f});
     material->setEmission(1.f);
     material->setCastSimulationData(false);
     material->commit();
