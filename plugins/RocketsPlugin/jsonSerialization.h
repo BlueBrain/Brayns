@@ -117,7 +117,6 @@ STATICJSON_DECLARE_ENUM(
     {"proximity", brayns::RendererType::proximity},
     {"simulation", brayns::RendererType::simulation},
     {"particle", brayns::RendererType::particle},
-    {"pathtracing", brayns::RendererType::pathtracing},
     {"geometry_normals", brayns::RendererType::geometryNormals},
     {"shading_normals", brayns::RendererType::shadingNormals},
     {"scientific_visualization", brayns::RendererType::scientificvisualization},
