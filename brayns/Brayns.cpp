@@ -389,11 +389,23 @@ struct Brayns::Impl : public PluginAPI
 
     void render()
     {
-        std::lock_guard<std::mutex> lock{_renderMutex};
+        {
+            std::lock_guard<std::mutex> lock{_renderMutex};
 
-        _renderTimer.start();
-        _engine->render();
-        _renderTimer.stop();
+            _renderTimer.start();
+            _engine->render();
+            _renderTimer.stop();
+        }
+
+        const auto& params = _parametersManager.getApplicationParameters();
+        const auto fps = params.getMaxRenderFPS();
+        const auto delta = _renderTimer.perSecondSmoothed() - fps;
+        if (delta > 0)
+        {
+            const int64_t targetTime = (1. / fps) * 1000.f;
+            std::this_thread::sleep_for(std::chrono::milliseconds(
+                targetTime - _renderTimer.milliseconds()));
+        }
     }
 
     Engine& getEngine() { return *_engine; }
