@@ -85,82 +85,79 @@ inline vec3f ParticleRenderer_shadeRay(
             sample.z = 1.f - log(zDepth) / 10.f;
             break;
         }
-        else
+
+        // Intersection found
+        if (depth == 0)
+            sample.alpha = 1.f;
+
+        // Retrieve information about the geometry, typically geometry ID,
+        // normal to the surface, material ID, texture coordinates, etc.
+        DifferentialGeometry dg;
+        postIntersect(self->abstract.super.model, dg, ray,
+                      DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
+                          DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
+
+        if (ray.geomID == 1)
         {
-            // Intersection found
-            if (depth == 0)
-                sample.alpha = 1.f;
-
-            // Retrieve information about the geometry, typically geometry ID,
-            // normal to the surface, material ID, texture coordinates, etc.
-            DifferentialGeometry dg;
-            postIntersect(self->abstract.super.model, dg, ray,
-                          DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
-                              DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
-
-            if (ray.geomID == 1)
+            // Non simulated geometry
+            const uniform Material* material = dg.material;
+            const uniform ExtendedOBJMaterial* objMaterial =
+                (const uniform ExtendedOBJMaterial*)material;
+            varying vec3f Kd;
+            if (!objMaterial)
             {
-                // Non simulated geometry
-                const uniform Material* material = dg.material;
-                const uniform ExtendedOBJMaterial* objMaterial =
-                    (const uniform ExtendedOBJMaterial*)material;
-                varying vec3f Kd;
-                if (!objMaterial)
-                {
-                    Kd = make_vec3f(dg.color);
-                    opacity = dg.color.w;
-                }
-                else
-                    foreach_unique(mat in objMaterial)
-                    {
-                        Kd = mat->Kd;
-                        opacity = mat->d;
-                    }
-
-                const varying vec3f intersection =
-                    dg.P + self->abstract.super.epsilon * dg.Ng;
-                const varying vec3f viewer = normalize(ray.org - intersection);
-                const varying float el = max(0.f, dot(viewer, dg.Ng));
-                varying float cosNL = 1.f - el;
-                intersectionColor =
-                    intersectionColor * (1.f - opacity) + opacity * Kd * cosNL;
+                Kd = make_vec3f(dg.color);
+                opacity = dg.color.w;
             }
             else
-            {
-                if (depth == 0)
-                    sample.z = ray.primID;
-
-                // Get simulation value from geometry
-                const vec4f simulationValue =
-                    getSimulationValue(self, dg, ray.primID);
-
-                // Spike value is different from zero, meaning that the neuron
-                // is activated and
-                // neuron color should be considered. If the spike value is
-                // zero, the
-                // intersection is ignored
-                opacity = simulationValue.w;
-                if (opacity > 0.f)
+                foreach_unique(mat in objMaterial)
                 {
-                    intersectionColor = intersectionColor +
-                                        make_vec3f(simulationValue) * opacity *
-                                            (1.f - path_opacity);
-                    path_opacity =
-                        path_opacity + opacity * (1.f - path_opacity);
+                    Kd = mat->Kd;
+                    opacity = mat->d;
                 }
-            }
 
-            // Z-Depth
-            zDepth += opacity * ray.t;
-            sample.z = log(zDepth) / 10.f;
-
-            // Next ray
-            ray.t0 = ray.t + self->abstract.super.epsilon * 5.f;
-            ray.t = infinity;
-            ray.primID = -1;
-            ray.geomID = -1;
-            ray.instID = -1;
+            const varying vec3f intersection = dg.P + dg.epsilon * dg.Ng;
+            const varying vec3f viewer = normalize(ray.org - intersection);
+            const varying float el = max(0.f, dot(viewer, dg.Ng));
+            varying float cosNL = 1.f - el;
+            intersectionColor =
+                intersectionColor * (1.f - opacity) + opacity * Kd * cosNL;
         }
+        else
+        {
+            if (depth == 0)
+                sample.z = ray.primID;
+
+            // Get simulation value from geometry
+            const vec4f simulationValue =
+                getSimulationValue(self, dg, ray.primID);
+
+            // Spike value is different from zero, meaning that the neuron
+            // is activated and
+            // neuron color should be considered. If the spike value is
+            // zero, the
+            // intersection is ignored
+            opacity = simulationValue.w;
+            if (opacity > 0.f)
+            {
+                intersectionColor = intersectionColor +
+                                    make_vec3f(simulationValue) * opacity *
+                                        (1.f - path_opacity);
+                path_opacity = path_opacity + opacity * (1.f - path_opacity);
+            }
+        }
+
+        // Z-Depth
+        zDepth += opacity * ray.t;
+        sample.z = log(zDepth) / 10.f;
+
+        // Next ray
+        ray.t0 = ray.t + dg.epsilon * 5.f;
+        ray.t = infinity;
+        ray.primID = -1;
+        ray.geomID = -1;
+        ray.instID = -1;
+
         ++depth;
     }
 

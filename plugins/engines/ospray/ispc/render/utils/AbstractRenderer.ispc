@@ -36,7 +36,7 @@ inline bool launchRandomRay(
 
     varying Ray randomRay = sample.ray;
     setRay(randomRay, intersection, randomDirection);
-    randomRay.t0 = self->super.epsilon;
+    randomRay.t0 = geometry.epsilon;
     randomRay.t = self->ambientOcclusionDistance;
     randomRay.primID = -1;
     randomRay.geomID = -1;
@@ -149,7 +149,8 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
                                   varying ScreenSample& sample,
                                   const varying vec3f& intersection,
                                   const varying vec3f& normal,
-                                  const varying vec3f& lightDirection)
+                                  const varying vec3f& lightDirection,
+                                  const varying float epsilon)
 {
     vec3f ld = lightDirection;
     if (self->softShadows != 0.f)
@@ -160,7 +161,7 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
 
     Ray shadowRay;
     setRay(shadowRay, intersection, ld);
-    shadowRay.t0 = self->super.epsilon;
+    shadowRay.t0 = epsilon;
     shadowRay.time = sample.ray.time;
     shadowRay.t = infinity;
 
@@ -223,7 +224,7 @@ inline float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
             if (intensity < ALPHA_THRESHOLD || opacity >= 1.f)
                 moreRebounds = false;
 
-            shadowRay.t0 = shadowRay.t + self->super.epsilon;
+            shadowRay.t0 = shadowRay.t + dg.epsilon;
             shadowRay.t = infinity;
             shadowRay.primID = -1;
             shadowRay.geomID = -1;
@@ -254,16 +255,17 @@ inline varying bool intersectBox(const uniform AbstractRenderer* uniform self,
                                  const vec3f& aabbMax, varying float& t0,
                                  varying float& t1)
 {
+    const float epsilon = 0.0001f;
     Ray r = ray;
     // We need to avoid division by zero in "vec3 invR = 1.0 / r.Dir;"
     if (r.dir.x == 0)
-        r.dir.x = self->super.epsilon;
+        r.dir.x = epsilon;
 
     if (r.dir.y == 0)
-        r.dir.y = self->super.epsilon;
+        r.dir.y = epsilon;
 
     if (r.dir.z == 0)
-        r.dir.z = self->super.epsilon;
+        r.dir.z = epsilon;
 
     vec3f invR = 1.f / r.dir;
     vec3f tbot = invR * (aabbMin - r.org);
@@ -405,7 +407,7 @@ inline varying vec4f
                         lightRay.dir = lightSample.dir;
 
                     lightRay.t = length(make_vec3f(self->volumeDimensions));
-                    lightRay.t0 = self->super.epsilon;
+                    lightRay.t0 = dg.epsilon;
                     lightRay.org = point;
                     lightRay.dir = lightSample.dir;
 

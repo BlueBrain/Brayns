@@ -443,9 +443,6 @@ private:
         if (_dataLoadingFuture.valid())
             _dataLoadingFuture.get();
 
-        // Set default epsilon according to scene bounding box
-        _engine->setDefaultEpsilon();
-
         _engine->getStatistics().setSceneSizeInBytes(
             _engine->getScene().getSizeInBytes());
 

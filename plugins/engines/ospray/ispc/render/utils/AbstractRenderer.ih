@@ -145,7 +145,8 @@ float shadedLightIntensity(const uniform AbstractRenderer* uniform self,
                            varying ScreenSample& sample,
                            const varying vec3f& intersection,
                            const varying vec3f& normal,
-                           const varying vec3f& lightDirection);
+                           const varying vec3f& lightDirection,
+                           const varying float epsilon);
 
 /**
     Returns the contribution (color and alpha) of a ray going through the volume

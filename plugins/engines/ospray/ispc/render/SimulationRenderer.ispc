@@ -316,14 +316,14 @@ inline void processBackgroundColor(varying ScreenSample& sample, Ray& ray,
     attributes.opacity = 1.f;
 }
 
-inline void computeIndirectShading(varying ScreenSample& sample,
+inline void computeIndirectShading(DifferentialGeometry& dg,
+                                   varying ScreenSample& sample,
                                    ShadingAttributes& attributes)
 
 {
     if (attributes.self->abstract.ambientOcclusionStrength < 0.01f)
         return;
 
-    DifferentialGeometry dg;
     indirectShading(&(attributes.self->abstract), sample, attributes.origin,
                     attributes.normal, dg, attributes.indirectColor,
                     attributes.indirectIntensity);
@@ -381,7 +381,7 @@ inline void processLightShading(DifferentialGeometry& dg,
                 shadowsEnabled
                     ? shadedLightIntensity(&(attributes.self->abstract), sample,
                                            attributes.origin, attributes.normal,
-                                           lightDirection)
+                                           lightDirection, dg.epsilon)
                     : 1.f;
             attributes.shadingContribution =
                 attributes.shadingContribution +
@@ -481,6 +481,8 @@ inline vec3f SimulationRenderer_shadeRay(
         // Trace ray
         traceRay(self->abstract.super.model, ray);
 
+        float epsilon = self->abstract.super.epsilon;
+
         if (ray.geomID < 0)
         {
             // Background contribution
@@ -517,7 +519,7 @@ inline vec3f SimulationRenderer_shadeRay(
             if (attributes.opacity > 0.01f && moreRebounds)
             {
                 // Compute indirect lighting contribution
-                computeIndirectShading(sample, attributes);
+                computeIndirectShading(dg, sample, attributes);
 
                 // Compute surface shading
                 if (self->abstract.electronShadingEnabled)
@@ -534,6 +536,8 @@ inline vec3f SimulationRenderer_shadeRay(
 
             // Alpha
             totalOpacity += attributes.opacity;
+
+            epsilon = dg.epsilon;
         }
 
         // Combine all contributions
@@ -554,7 +558,7 @@ inline vec3f SimulationRenderer_shadeRay(
             doReflection = reflect;
         }
 
-        ray.t0 = self->abstract.super.epsilon;
+        ray.t0 = epsilon;
         ray.t = inf;
         ray.primID = -1;
         ray.geomID = -1;
@@ -576,8 +580,7 @@ inline vec3f SimulationRenderer_shadeRay(
             ray.dir =
                 refractedVector(ray.dir, correctedNormal, oldlocalRefraction,
                                 attributes.refraction);
-            ray.org =
-                attributes.origin + self->abstract.super.epsilon * ray.dir;
+            ray.org = attributes.origin + epsilon * ray.dir;
 
             pathOpacity *= 1.f - attributes.opacity;
             oldlocalRefraction = attributes.refraction;
@@ -586,8 +589,7 @@ inline vec3f SimulationRenderer_shadeRay(
         {
             // Reflection
             ray.dir = attributes.reflectedNormal;
-            ray.org = attributes.origin +
-                      self->abstract.super.epsilon * attributes.reflectedNormal;
+            ray.org = attributes.origin + epsilon * attributes.reflectedNormal;
             pathOpacity *= attributes.reflection;
         }
         else

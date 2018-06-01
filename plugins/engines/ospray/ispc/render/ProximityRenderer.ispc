@@ -73,7 +73,7 @@ inline vec3f ProximityRenderer_shadeRay(
     varying vec3f Kd = make_vec3f(0.0f, 0.0f, 0.0f);
     varying vec3f Ks = make_vec3f(0.f);
     varying vec3f normal = dg.Ns;
-    varying const vec3f P = dg.P + self->abstract.super.epsilon * dg.Ng;
+    varying const vec3f P = dg.P + dg.epsilon * dg.Ng;
 
     if (!objMaterial)
     {
