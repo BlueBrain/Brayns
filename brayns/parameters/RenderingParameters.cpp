@@ -38,7 +38,6 @@ const std::string PARAM_DETECTION_NEAR_COLOR = "detection-near-color";
 const std::string PARAM_DETECTION_ON_DIFFERENT_MATERIAL =
     "detection-on-different-material";
 const std::string PARAM_ENGINE = "engine";
-const std::string PARAM_EPSILON = "epsilon";
 const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_MAX_ACCUMULATION_FRAMES = "max-accumulation-frames";
 const std::string PARAM_MODULE = "module";
@@ -108,9 +107,6 @@ RenderingParameters::RenderingParameters()
         "Detection near color [float float float]")(
         PARAM_DETECTION_FAR_COLOR.c_str(), po::value<floats>()->multitoken(),
         "Detection far color [float float float]")(
-        PARAM_EPSILON.c_str(), po::value<float>(),
-        "All intersection distances less than the "
-        "epsilon value are ignored by the ray-tracer [float]")(
         PARAM_CAMERA.c_str(), po::value<std::string>(),
         "Camera [perspective|stereo|orthographic|panoramic]")(
         PARAM_STEREO_MODE.c_str(), po::value<std::string>(),
@@ -220,8 +216,6 @@ void RenderingParameters::parse(const po::variables_map& vm)
         if (values.size() == 3)
             _detectionFarColor = Vector3f(values[0], values[1], values[2]);
     }
-    if (vm.count(PARAM_EPSILON))
-        _epsilon = vm[PARAM_EPSILON].as<float>();
     if (vm.count(PARAM_CAMERA))
     {
         _cameraType = CameraType::default_;
@@ -291,8 +285,6 @@ void RenderingParameters::print()
     BRAYNS_INFO << "- Detection near color            : " << _detectionNearColor
                 << std::endl;
     BRAYNS_INFO << "- Detection far color             : " << _detectionFarColor
-                << std::endl;
-    BRAYNS_INFO << "Epsilon                           : " << _epsilon
                 << std::endl;
     BRAYNS_INFO << "Camera                            : "
                 << getCameraTypeAsString(_cameraType) << std::endl;

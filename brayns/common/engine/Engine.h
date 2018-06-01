@@ -81,11 +81,6 @@ public:
     void reshape(const Vector2ui& frameSize);
 
     /**
-       Sets default epsilon to scene bounding box
-    */
-    void setDefaultEpsilon();
-
-    /**
        Sets initial camera position for the scene handled by the engine
     */
     void setDefaultCamera();

@@ -62,18 +62,6 @@ void Engine::reshape(const Vector2ui& frameSize)
     _camera->commit();
 }
 
-void Engine::setDefaultEpsilon()
-{
-    float epsilon = _parametersManager.getRenderingParameters().getEpsilon();
-    if (epsilon == 0.f)
-    {
-        const Vector3f& boundsSize = _scene->getBounds().getSize();
-        epsilon = boundsSize.length() / 1e6f;
-        BRAYNS_INFO << "Default epsilon: " << epsilon << std::endl;
-        _parametersManager.getRenderingParameters().setEpsilon(epsilon);
-    }
-}
-
 void Engine::commit()
 {
     _renderers[_activeRenderer]->commit();

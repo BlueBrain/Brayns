@@ -483,7 +483,8 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
                     Flags::Optional);
     h->add_property("accumulation", &r->_accumulation, Flags::Optional);
     h->add_property("radiance", &r->_lightEmittingMaterials, Flags::Optional);
-    h->add_property("epsilon", &r->_epsilon, Flags::Optional);
+    float dummy{0};
+    h->add_property("epsilon", &dummy, Flags::Optional);
     h->add_property("head_light", &r->_headLight, Flags::Optional);
     h->add_property("variance_threshold", &r->_varianceThreshold,
                     Flags::Optional);

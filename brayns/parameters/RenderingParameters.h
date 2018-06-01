@@ -155,15 +155,6 @@ public:
     }
 
     /**
-        Raytracers have to deal with the finite precision of computer
-        calculations. Since the origin of the reflected ray lies on the surface
-        of the object, there will be an intersection point at zero distance.
-        Since we do not want that, all intersection distances less than the
-        epsilon value are ignored.
-     */
-    float getEpsilon() const { return _epsilon; }
-    void setEpsilon(const float epsilon) { _updateValue(_epsilon, epsilon); }
-    /**
        Camera type
     */
     void initializeDefaultCameras();
@@ -172,14 +163,6 @@ public:
     StereoMode getStereoMode() const { return _stereoMode; }
     const std::string& getStereoModeAsString(const StereoMode value) const;
 
-    /**
-       Epsilon. All intersection distances less than the epsilon value are
-       ignored by the raytracer.
-    */
-    void setEpsilon(const CameraType cameraType)
-    {
-        _updateValue(_cameraType, cameraType);
-    }
     /**
        Light source follow camera origin
     */
@@ -242,7 +225,6 @@ protected:
     bool _detectionOnDifferentMaterial{true};
     Vector3f _detectionNearColor{1.f, 0.f, 0.f};
     Vector3f _detectionFarColor{0.f, 1.f, 0.f};
-    float _epsilon{0.f};
     bool _headLight{false};
     bool _dynamicLoadBalancer{false};
     float _varianceThreshold{-1.f};
