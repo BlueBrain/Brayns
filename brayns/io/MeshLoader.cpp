@@ -176,35 +176,39 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 
         aiColor4D value4f(0.f);
         float value1f;
-        aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value4f);
-        material->setDiffuseColor(Vector3f(value4f.r, value4f.g, value4f.b));
+        if (aimaterial->Get(AI_MATKEY_COLOR_DIFFUSE, value4f) == AI_SUCCESS)
+            material->setDiffuseColor({value4f.r, value4f.g, value4f.b});
 
         value1f = 0.f;
         if (aimaterial->Get(AI_MATKEY_OPACITY, value1f) != AI_SUCCESS)
             material->setOpacity(value4f.a);
         else
-            material->setOpacity(fabs(value1f) < 0.01f ? 1.f : value1f);
+            material->setOpacity(value1f);
 
         value1f = 0.f;
-        aimaterial->Get(AI_MATKEY_REFLECTIVITY, value1f);
-        material->setReflectionIndex(value1f);
+        if (aimaterial->Get(AI_MATKEY_REFLECTIVITY, value1f) == AI_SUCCESS)
+            material->setReflectionIndex(value1f);
 
         value4f = aiColor4D(0.f);
-        aimaterial->Get(AI_MATKEY_COLOR_SPECULAR, value4f);
-        material->setSpecularColor(Vector3f(value4f.r, value4f.g, value4f.b));
+        if (aimaterial->Get(AI_MATKEY_COLOR_SPECULAR, value4f) == AI_SUCCESS)
+            material->setSpecularColor({value4f.r, value4f.g, value4f.b});
 
         value1f = 0.f;
-        aimaterial->Get(AI_MATKEY_SHININESS, value1f);
-        material->setSpecularExponent(fabs(value1f) < 0.01f ? 100.f : value1f);
+        if (aimaterial->Get(AI_MATKEY_SHININESS, value1f) == AI_SUCCESS)
+        {
+            if (value1f == 0.f)
+                material->setSpecularColor({0.f, 0.f, 0.f});
+            material->setSpecularExponent(value1f);
+        }
 
         value4f = aiColor4D(0.f);
-        aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, value4f);
-        material->setEmission(value4f.r);
+        if (aimaterial->Get(AI_MATKEY_COLOR_EMISSIVE, value4f) == AI_SUCCESS)
+            material->setEmission(value4f.r);
 
         value1f = 0.f;
-        aimaterial->Get(AI_MATKEY_REFRACTI, value1f);
-        material->setRefractionIndex(fabs(value1f - 1.f) < 0.01f ? 1.0f
-                                                                 : value1f);
+        if (aimaterial->Get(AI_MATKEY_REFRACTI, value1f) == AI_SUCCESS)
+            if (value1f != 0.f)
+                material->setRefractionIndex(value1f);
     }
 }
 
