@@ -101,13 +101,6 @@ STATICJSON_DECLARE_ENUM(
     {"protein_chains", brayns::ColorScheme::protein_chains},
     {"protein_residues", brayns::ColorScheme::protein_residues});
 
-STATICJSON_DECLARE_ENUM(brayns::SceneEnvironment,
-                        {"none", brayns::SceneEnvironment::none},
-                        {"ground", brayns::SceneEnvironment::ground},
-                        {"wall", brayns::SceneEnvironment::wall},
-                        {"bounding_box",
-                         brayns::SceneEnvironment::bounding_box});
-
 STATICJSON_DECLARE_ENUM(brayns::MemoryMode,
                         {"shared", brayns::MemoryMode::shared},
                         {"replicated", brayns::MemoryMode::replicated});
@@ -446,8 +439,6 @@ inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
     h->add_property("radius_correction", &g->_radiusCorrection,
                     Flags::Optional);
     h->add_property("color_scheme", &g->_colorScheme, Flags::Optional);
-    h->add_property("scene_environment", &g->_sceneEnvironment,
-                    Flags::Optional);
     h->add_property("geometry_quality", &g->_geometryQuality, Flags::Optional);
     h->add_property("morphology_section_types", &g->_morphologySectionTypes,
                     Flags::Optional);

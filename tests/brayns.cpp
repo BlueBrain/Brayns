@@ -104,8 +104,6 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(geomParams.getRadiusMultiplier(), 1.f);
     BOOST_CHECK_EQUAL(geomParams.getRadiusCorrection(), 0.f);
     BOOST_CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
-    BOOST_CHECK(geomParams.getSceneEnvironment() ==
-                brayns::SceneEnvironment::none);
     BOOST_CHECK(geomParams.getGeometryQuality() ==
                 brayns::GeometryQuality::high);
     BOOST_CHECK_EQUAL(

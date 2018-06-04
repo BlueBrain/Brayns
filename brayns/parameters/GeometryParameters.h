@@ -176,18 +176,14 @@ public:
     }
     float getRadiusCorrection() const { return _radiusCorrection; }
     /** Enables a different color for every molecule/morphology/mesh when
-    * loading them from a given folder
-    */
+     * loading them from a given folder
+     */
     ColorScheme getColorScheme() const { return _colorScheme; }
     const std::string& getColorSchemeAsString(const ColorScheme value) const;
     void setColorScheme(const ColorScheme value)
     {
         _updateValue(_colorScheme, value);
     }
-    /** Scene environment (none, ground, wall, bounding_box ) */
-    SceneEnvironment getSceneEnvironment() const { return _sceneEnvironment; }
-    const std::string& getSceneEnvironmentAsString(
-        const SceneEnvironment value) const;
 
     /** Morphology quality */
     GeometryQuality getGeometryQuality() const { return _geometryQuality; }
@@ -308,7 +304,6 @@ protected:
     // Scene
     std::string _loadCacheFile;
     std::string _saveCacheFile;
-    SceneEnvironment _sceneEnvironment;
 
     // Morphology
     float _radiusMultiplier;

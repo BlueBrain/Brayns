@@ -182,18 +182,6 @@ braynsViewer ~/morphologies --color-scheme neuron-by-segment-type
 
 ![ColorSchemeNeuronBySegmentType](images/ColorSchemeSegmentType.png)
 
-#### Scene environment
-
-The ```--scene-environment``` command line argument specifies adds predefined elements
-to the 3D scene. Available values are:
-- bounding-box: Adds a bounding box to the loaded dataset
-
-```
-braynsViewer ~/morphologies --scene-environment bounding-box
-```
-
-![SceneEnvironmentBoundingBox](images/SceneEnvironmentBoundingBox.png)
-
 #### Realistic somas
 
 Command lines argument starting with metaballs tell Brayns to reconstruct somas
