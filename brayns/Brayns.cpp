@@ -150,13 +150,10 @@ struct Brayns::Impl : public PluginAPI
                 // Build argc, argv
                 const int argc = pluginParam.arguments.size();
                 std::vector<char*> argv(argc, nullptr);
-                std::vector<std::string> tmpArgs(argc);
+                std::vector<std::string> tmpArgs = pluginParam.arguments;
 
                 for (int i = 0; i < argc; i++)
-                {
-                    tmpArgs[i] = pluginParam.arguments[i];
                     argv[i] = &tmpArgs[i].front();
-                }
 
                 ExtensionPlugin* (*createFunc)(PluginAPI*, int, char**) =
                     (ExtensionPlugin * (*)(PluginAPI*, int, char**)) createSym;
