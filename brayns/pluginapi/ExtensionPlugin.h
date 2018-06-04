@@ -33,7 +33,8 @@ namespace brayns
  * must be available in the library:
  *
  * @code
- * extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI*)
+ * extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI*,
+ * int argc, char** argv)
  * @endcode
  *
  * It must return the instance of the plugin, and from hereon Brayns owns the

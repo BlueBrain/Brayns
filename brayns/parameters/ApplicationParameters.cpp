@@ -22,6 +22,8 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/ParametersManager.h>
 
+#include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
+#include <boost/algorithm/string/split.hpp>          // Include for boost::split
 #include <boost/lexical_cast.hpp>
 
 namespace
@@ -60,9 +62,11 @@ ApplicationParameters::ApplicationParameters()
                               po::value<std::string>(), "HTTP interface")(
         PARAM_INPUT_PATHS.c_str(), po::value<std::vector<std::string>>(),
         "List of files/folders to load data from")(
-        PARAM_PLUGIN.c_str(), po::value<strings>(&_plugins)->composing(),
+        PARAM_PLUGIN.c_str(), po::value<strings>(&_pluginsRaw)->composing(),
         "Dynamic plugin to load from LD_LIBRARY_PATH; "
-        "can be repeated to load multiple plugins")(
+        "can be repeated to load multiple plugins. "
+        "Arguments to plugins can be added by inserting a space followed by "
+        "the arguments like: --plugin 'myPluginName arg0 arg1'")(
         PARAM_WINDOW_SIZE.c_str(), po::value<uints>()->multitoken(),
         "Window size [int int]")(PARAM_BENCHMARKING.c_str(), po::value<bool>(),
                                  "Enable|Disable benchmarking [bool]")(
@@ -121,6 +125,21 @@ void ApplicationParameters::parse(const po::variables_map& vm)
         _parallelRendering = vm[PARAM_PARALLEL_RENDERING].as<bool>();
     if (vm.count(PARAM_MAX_RENDER_FPS))
         _maxRenderFPS = vm[PARAM_MAX_RENDER_FPS].as<size_t>();
+
+    // Explode plugin arguments
+    for (auto& pluginString : _pluginsRaw)
+    {
+        std::vector<std::string> words;
+        boost::split(words, pluginString, boost::is_any_of(" "),
+                     boost::token_compress_on);
+
+        PluginParam plugin;
+        plugin.name = words.front();
+        plugin.arguments =
+            std::vector<std::string>(words.begin() + 1, words.end());
+
+        _plugins.emplace_back(std::move(plugin));
+    }
 
     markModified();
 }

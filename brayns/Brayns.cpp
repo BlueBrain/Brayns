@@ -130,11 +130,12 @@ struct Brayns::Impl : public PluginAPI
     void loadPlugins()
     {
 #ifdef BRAYNS_USE_OSPRAY
-        for (const auto& pluginName :
+        for (const auto& pluginParam :
              _parametersManager.getApplicationParameters().getPlugins())
         {
             try
             {
+                const auto& pluginName = pluginParam.name;
                 ospcommon::Library library(pluginName);
                 auto createSym = library.getSymbol("brayns_plugin_create");
                 if (!createSym)
@@ -146,9 +147,20 @@ struct Brayns::Impl : public PluginAPI
                     return;
                 }
 
-                ExtensionPlugin* (*createFunc)(PluginAPI*) =
-                    (ExtensionPlugin * (*)(PluginAPI*))createSym;
-                auto plugin = createFunc(this);
+                // Build argc, argv
+                const int argc = pluginParam.arguments.size();
+                std::vector<char*> argv(argc, nullptr);
+                std::vector<std::string> tmpArgs(argc);
+
+                for (int i = 0; i < argc; i++)
+                {
+                    tmpArgs[i] = pluginParam.arguments[i];
+                    argv[i] = &tmpArgs[i].front();
+                }
+
+                ExtensionPlugin* (*createFunc)(PluginAPI*, int, char**) =
+                    (ExtensionPlugin * (*)(PluginAPI*, int, char**)) createSym;
+                auto plugin = createFunc(this, argc, argv.data());
 
                 _extensionPluginFactory.add(ExtensionPluginPtr{plugin});
                 BRAYNS_INFO << "Loaded plugin '" << pluginName << "'"
@@ -1076,9 +1088,7 @@ Brayns::Brayns(int argc, const char** argv)
 {
 }
 
-Brayns::~Brayns()
-{
-}
+Brayns::~Brayns() {}
 
 void Brayns::render(const RenderInput& renderInput, RenderOutput& renderOutput)
 {

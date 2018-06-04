@@ -31,6 +31,12 @@ SERIALIZATION_ACCESS(ApplicationParameters)
 
 namespace brayns
 {
+struct PluginParam
+{
+    std::string name;
+    std::vector<std::string> arguments;
+};
+
 /** Manages application parameters
  */
 class ApplicationParameters : public AbstractParameters
@@ -42,7 +48,7 @@ public:
     void print() final;
 
     /** Runtime plugins to load in Brayns::loadPlugins. */
-    const strings& getPlugins() const { return _plugins; }
+    const std::vector<PluginParam>& getPlugins() const { return _plugins; }
     /** window size */
     const Vector2ui& getWindowSize() const { return _windowSize; }
     void setWindowSize(const Vector2ui& size)
@@ -96,7 +102,8 @@ public:
 protected:
     void parse(const po::variables_map& vm) final;
 
-    strings _plugins;
+    strings _pluginsRaw;
+    std::vector<PluginParam> _plugins;
     Vector2ui _windowSize;
     bool _benchmarking;
     size_t _jpegCompression;
