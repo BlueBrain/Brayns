@@ -144,7 +144,7 @@ struct Brayns::Impl : public PluginAPI
                                  << "' is not a valid Brayns plugin; missing "
                                     "brayns_plugin_create()"
                                  << std::endl;
-                    return;
+                    exit(0);
                 }
 
                 // Build argc, argv
@@ -169,6 +169,7 @@ struct Brayns::Impl : public PluginAPI
             catch (const std::runtime_error& exc)
             {
                 BRAYNS_ERROR << exc.what() << std::endl;
+                exit(0);
             }
         }
 #endif
