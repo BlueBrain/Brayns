@@ -22,8 +22,7 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
-#include <boost/algorithm/string/split.hpp>          // Include for boost::split
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace
@@ -127,8 +126,9 @@ void ApplicationParameters::parse(const po::variables_map& vm)
         _maxRenderFPS = vm[PARAM_MAX_RENDER_FPS].as<size_t>();
 
     // Explode plugin arguments
-    for (auto& pluginString : _pluginsRaw)
+    for (auto pluginString : _pluginsRaw)
     {
+        boost::trim(pluginString);
         std::vector<std::string> words;
         boost::split(words, pluginString, boost::is_any_of(" "),
                      boost::token_compress_on);
