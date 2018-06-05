@@ -283,7 +283,7 @@ braynsViewer --volume-file volume.raw --volume-dimensions 512 512 256 --shadows 
 ## Engines
 
 The ```--engine``` command line argument specifies the underlying rendering engine
-used by Brayns. Three engines are currently supported:
+used by Brayns. Two engines are currently supported:
 - [OSPRay](http://www.ospray.org/): A Ray Tracing Based Rendering Engine for High-Fidelity Visualization
 
 - [OptiX](https://developer.nvidia.com/optix): A software development kit for achieving high performance ray tracing
@@ -300,10 +300,10 @@ Four renderers are currently supported:
 
 | Argument  | Description
 | ----------| -------------
-| Default   | Common renderer to all engines. Provides basic features such as phong/blinn shading, shadows, ambient occlusion, light emission, reflection and refraction.
-| Simulation| Same as default with extra features such as support for simulations and volumes.
-| Particles |
-| Proximity | Displays information about element proximity in 3D space. Typically used to find touches between neurons.
+| default   | Common renderer to all engines. Provides basic features such as phong/blinn shading, shadows, ambient occlusion, light emission, reflection and refraction.
+| simulation| Same as default with extra features such as support for simulations and volumes.
+| particle |
+| proximity | Displays information about element proximity in 3D space. Typically used to find touches between neurons.
 
 ## Camera types
 
