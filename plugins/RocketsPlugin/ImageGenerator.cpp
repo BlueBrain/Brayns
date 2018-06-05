@@ -21,42 +21,12 @@
 #include "ImageGenerator.h"
 
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/utils/ImageUtils.h>
+#include <brayns/common/utils/base64/base64.h>
 #include <brayns/parameters/ApplicationParameters.h>
-
-#ifdef BRAYNS_USE_MAGICKPP
-#include <Magick++.h>
-#endif
-
-#include "base64/base64.h"
 
 namespace brayns
 {
-namespace
-{
-#ifdef BRAYNS_USE_MAGICKPP
-std::string getImageMagickPixelFormat(const FrameBufferFormat format)
-{
-    std::string pixelFormat;
-    switch (format)
-    {
-    case FrameBufferFormat::rgba_i8:
-        pixelFormat = "RGBA";
-        break;
-    case FrameBufferFormat::bgra_i8:
-        pixelFormat = "BGRA";
-        break;
-    case FrameBufferFormat::rgb_i8:
-        pixelFormat = "RGB";
-        break;
-    case FrameBufferFormat::rgb_f32:
-    default:
-        throw std::runtime_error("Unsupported frame buffer format");
-    }
-    return pixelFormat;
-}
-#endif
-}
-
 ImageGenerator::~ImageGenerator()
 {
 #ifdef BRAYNS_USE_LIBJPEGTURBO
@@ -70,33 +40,8 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
     const std::string& format BRAYNS_UNUSED,
     const uint8_t quality BRAYNS_UNUSED)
 {
-#ifdef BRAYNS_USE_MAGICKPP
-    try
-    {
-        frameBuffer.map();
-
-        const auto& pixelFormat =
-            getImageMagickPixelFormat(frameBuffer.getFrameBufferFormat());
-        auto colorBuffer = frameBuffer.getColorBuffer();
-        Magick::Image image(frameBuffer.getSize().x(),
-                            frameBuffer.getSize().y(), pixelFormat,
-                            MagickCore::CharPixel, colorBuffer);
-        image.magick(format);
-        image.quality(quality);
-        image.depth(8); // force 8 bit to avoid 16-bit tiff
-        image.flip();
-
-        Magick::Blob blob;
-        image.write(&blob);
-
-        frameBuffer.unmap();
-
-        return {blob.base64()};
-    }
-    catch (const std::exception& e)
-    {
-        throw std::runtime_error(e.what());
-    }
+#ifdef BRAYNS_USE_FREEIMAGE
+    return {freeimage::getBase64Image(frameBuffer, format, quality)};
 #elif defined BRAYNS_USE_LIBJPEGTURBO
     BRAYNS_WARN << "No assimp found, will take TurboJPEG snapshot; "
                 << "ignoring format '" << format << "'" << std::endl;
@@ -104,7 +49,7 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
     return {base64_encode(jpeg.data.get(), jpeg.size)};
 #else
     throw std::runtime_error(
-        "Neither ImageMagick not TurboJPEG available; cannot create any image");
+        "Neither FreeImage nor TurboJPEG available; cannot create any image");
 #endif
 }
 

@@ -8,7 +8,7 @@ set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
                    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} brayns)
 
 if(TARGET pdiff)
-  list(APPEND TEST_LIBRARIES pdiff ${Magick++_LIBRARIES})
+  list(APPEND TEST_LIBRARIES pdiff ${FREEIMAGE_LIBRARIES})
 else()
   list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp snapshot.cpp)
 endif()
@@ -50,7 +50,7 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
 
-list(APPEND LCOV_EXCLUDE 'plugins/RocketsPlugin/base64/*'
+list(APPEND LCOV_EXCLUDE 'brayns/common/utils/base64/*'
                          'plugins/RocketsPlugin/rapidjson/*'
                          'plugins/RocketsPlugin/staticjson/*')
 include(CommonCTest)

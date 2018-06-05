@@ -134,11 +134,6 @@ cmake .. -DBRAYNS_BRION_ENABLED=ON:OFF
 cmake .. -DBRAYNS_DEFLECT_ENABLED=ON:OFF
 ```
 
-#### Enable/Disable [ImageMagick](http://www.imagemagick.org) image loading
-```
-cmake .. -DBRAYNS_IMAGEMAGICK_ENABLED=ON:OFF
-```
-
 #### Enable/Disable HTTP/REST/Websockets interface.
  [LibJpegTurbo](http://libjpeg-turbo.virtualgl.org) and
  [Rockets](https://github.com/BlueBrain/Rockets).

@@ -47,12 +47,12 @@ public:
      * image format and quality.
      *
      * @param frameBuffer the framebuffer to use for getting the pixels
-     * @param format ImageMagick format string, or JPEG if ImageMagick is not
+     * @param format FreeImage format string, or JPEG if FreeImage is not
      *               available
      * @param quality image format specific quality number
      * @return base64-encoded image
-     * @throw std::runtime_error if image conversion failed or neither
-     *                           ImageMagick nor TurboJPEG is available
+     * @throw std::runtime_error if image conversion failed or neither FreeImage
+     *                           nor TurboJPEG is available
      */
     ImageBase64 createImage(FrameBuffer& frameBuffer, const std::string& format,
                             uint8_t quality);
