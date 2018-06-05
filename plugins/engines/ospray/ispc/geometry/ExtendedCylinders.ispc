@@ -78,62 +78,70 @@ void ExtendedCylinders_intersect(uniform ExtendedCylinders *uniform geometry,
         return;
 
     if (geometry->offset_radius >= 0)
-        radius = *((uniform float *)(cylinderPtr + geometry->offset_radius));
-    uniform vec3f v0 = *((uniform vec3f *)(cylinderPtr + geometry->offset_v0));
-    uniform vec3f v1 = *((uniform vec3f *)(cylinderPtr + geometry->offset_v1));
-    const vec3f A = v0 - ray.org;
-    const vec3f B = v1 - ray.org;
-    const float r = radius;
+        radius = *((float *uniform)(cylinderPtr + geometry->offset_radius));
+    uniform vec3f v0 = *((vec3f * uniform)(cylinderPtr + geometry->offset_v0));
+    uniform vec3f v1 = *((vec3f * uniform)(cylinderPtr + geometry->offset_v1));
 
-    const vec3f O = make_vec3f(0.f);
+    const vec3f center = 0.5f * (v0 + v1);
+    const float approxDist = dot(center - ray.org, ray.dir);
+    const vec3f closeOrg = ray.org + approxDist * ray.dir;
+
+    const vec3f A = v0 - closeOrg;
+    const vec3f B = v1 - closeOrg;
+
     const vec3f V = ray.dir;
-
     const vec3f AB = B - A;
-    const vec3f AO = O - A;
 
-    const vec3f AOxAB = cross(AO, AB);
+    const vec3f AOxAB = cross(AB, A);
     const vec3f VxAB = cross(V, AB);
     const float ab2 = dot(AB, AB);
     const float a = dot(VxAB, VxAB);
     const float b = 2 * dot(VxAB, AOxAB);
-    const float c = dot(AOxAB, AOxAB) - (r * r * ab2);
+    const float c = dot(AOxAB, AOxAB) - (sqr(radius) * ab2);
 
     // clip to near and far cap of cylinder
-    const float tA = dot(AB, A) * rcp(dot(V, AB));
-    const float tB = dot(AB, B) * rcp(dot(V, AB));
+    const float rVAB = rcp(dot(V, AB));
+    const float tA = dot(AB, A) * rVAB + approxDist;
+    const float tB = dot(AB, B) * rVAB + approxDist;
     const float tAB0 = max(ray.t0, min(tA, tB));
     const float tAB1 = min(ray.t, max(tA, tB));
 
+    // ------------------------------------------------------------------
+    // abc formula: t0,1 = (-b +- sqrt(b^2-4*a*c)) / 2a
+    //
     const float radical = b * b - 4.f * a * c;
     if (radical < 0.f)
         return;
 
     const float srad = sqrt(radical);
 
-    const float t_in = (-b - srad) * rcpf(2.f * a);
-    const float t_out = (-b + srad) * rcpf(2.f * a);
+    const float t_in = (-b - srad) * rcpf(2.f * a) + approxDist;
+    const float t_out = (-b + srad) * rcpf(2.f * a) + approxDist;
 
-    if (t_in >= tAB0 && t_in <= tAB1)
+    bool hit = false;
+
+    if (t_in >= (tAB0) && t_in <= (tAB1))
+    {
+        hit = true;
+        ray.t = t_in;
+    }
+    else if (t_out >= (tAB0) && t_out <= (tAB1))
+    {
+        hit = true;
+        ray.t = t_out;
+    }
+
+    if (hit)
     {
         ray.primID = primID;
         ray.geomID = geometry->geometry.geomID;
-        ray.t = t_in;
+        // cannot easily be moved to postIntersect
+        // we need hit in object-space, in postIntersect it is in world-space
         const vec3f P = ray.org + ray.t * ray.dir - v0;
         const vec3f V = cross(P, AB);
         ray.Ng = cross(AB, V);
-        return;
+        ray.u = (ray.t - tA) * rcp(tB - tA);
     }
-    else if (t_out >= tAB0 && t_out <= tAB1)
-    {
-        ray.primID = primID;
-        ray.geomID = geometry->geometry.geomID;
-        ray.t = t_out;
-        const vec3f P = ray.t * ray.dir - A;
-        const vec3f V = cross(P, AB);
-        ray.Ng = cross(AB, V);
-        return;
-    }
-    return;
 }
 
 static void ExtendedCylinders_postIntersect(uniform Geometry *uniform geometry,
