@@ -26,6 +26,7 @@ RUN apt-get update \
     libboost-serialization-dev \
     libboost-system-dev \
     libboost-test-dev \
+    libfreeimage-dev \
     libhdf5-serial-dev \
     libmagick++-dev \
     libtbb-dev \
@@ -123,7 +124,7 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
     -DCOMMON_DISABLE_WERROR=TRUE \
- && ninja mvd-tool Brayns-install \
+ && ninja mvd-tool perceptualdiff Brayns-install Brayns-tests \
  && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it

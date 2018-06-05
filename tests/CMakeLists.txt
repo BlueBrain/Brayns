@@ -4,7 +4,14 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} brayns)
+set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} brayns)
+
+if(TARGET pdiff)
+  list(APPEND TEST_LIBRARIES pdiff ${Magick++_LIBRARIES})
+else()
+  list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp snapshot.cpp)
+endif()
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 if(TARGET BBPTestData AND TARGET Lunchbox)

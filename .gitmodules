@@ -7,3 +7,6 @@
 [submodule "async++"]
 	path = async++
 	url = https://github.com/Amanieu/asyncplusplus.git
+[submodule "perceptualdiff"]
+	path = perceptualdiff
+	url = https://github.com/myint/perceptualdiff.git

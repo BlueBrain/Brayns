@@ -95,6 +95,12 @@ endif()
 common_find_package(BBPTestData)
 common_find_package(Lunchbox)
 
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/perceptualdiff)
+common_find_package(FreeImage)
+if(FreeImage_FOUND)
+  add_subdirectory(perceptualdiff)
+endif()
+
 # OSPRay rendering engine
 common_find_package(ospray 1.5 SYSTEM)
 set(_ospray_unsupported_version 1.6)
