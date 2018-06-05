@@ -140,11 +140,10 @@ struct Brayns::Impl : public PluginAPI
                 auto createSym = library.getSymbol("brayns_plugin_create");
                 if (!createSym)
                 {
-                    BRAYNS_ERROR << "Plugin '" << pluginName
-                                 << "' is not a valid Brayns plugin; missing "
-                                    "brayns_plugin_create()"
-                                 << std::endl;
-                    exit(0);
+                    throw std::runtime_error(
+                        "Plugin '" + pluginName +
+                        "' is not a valid Brayns plugin; missing " +
+                        "brayns_plugin_create()");
                 }
 
                 // Build argc, argv
