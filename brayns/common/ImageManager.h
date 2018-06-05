@@ -27,15 +27,13 @@
 namespace brayns
 {
 /**
- * @brief The ImageManager class uses the ImageMagick++ libray to manipulate
+ * @brief The ImageManager class uses the FreeImage libray to manipulate
  * images. This class provide an API for encoding into a specific format (PNG,
  * JPEG, etc), and exporting frame buffers to the file system
  */
 class ImageManager
 {
 public:
-    ImageManager();
-
     /**
      * @brief Exports the contents of a frame buffer to a file. The format of
      * the file (PNG, JPG, etc) is determined by the extension of the specified

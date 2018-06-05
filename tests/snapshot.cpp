@@ -27,8 +27,8 @@
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/Renderer.h>
 
-#include "../plugins/RocketsPlugin/base64/base64.h"
 #include <ImageGenerator.h>
+#include <brayns/common/utils/base64/base64.h>
 
 #include <boost/filesystem.hpp>
 #include <fstream>
@@ -40,7 +40,6 @@ namespace fs = boost::filesystem;
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
-#ifdef BRAYNS_USE_MAGICKPP
 BOOST_AUTO_TEST_CASE(snapshot)
 {
     brayns::SnapshotParams params;
@@ -79,10 +78,6 @@ BOOST_AUTO_TEST_CASE(snapshot_with_render_params)
     *camera = getCamera();
     camera->setPosition({0, 0, 50});
 
-    // use a red background, as opposed to the default black
-    auto renderingParams{std::make_unique<brayns::RenderingParameters>()};
-    renderingParams->setBackgroundColor({1, 0, 0});
-
     brayns::SnapshotParams params;
     params.camera = std::move(camera);
     params.format = "jpg";
@@ -94,6 +89,9 @@ BOOST_AUTO_TEST_CASE(snapshot_with_render_params)
         makeRequest<brayns::SnapshotParams,
                     brayns::ImageGenerator::ImageBase64>("snapshot", params);
 
+    // use a red background, as opposed to the default black
+    auto renderingParams{std::make_unique<brayns::RenderingParameters>()};
+    renderingParams->setBackgroundColor({1, 0, 0});
     params.renderingParams = std::move(renderingParams);
     params.name = "red_image";
     auto image_with_red_background =
@@ -102,7 +100,6 @@ BOOST_AUTO_TEST_CASE(snapshot_with_render_params)
 
     BOOST_CHECK_NE(image.data, image_with_red_background.data);
 }
-#endif
 
 BOOST_AUTO_TEST_CASE(snapshot_empty_params)
 {

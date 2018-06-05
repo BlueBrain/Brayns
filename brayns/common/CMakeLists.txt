@@ -24,6 +24,8 @@ set(BRAYNSCOMMON_SOURCES
   light/PointLight.cpp
   light/DirectionalLight.cpp
   loader/LoaderRegistry.cpp
+  utils/base64/base64.cpp
+  utils/ImageUtils.cpp
   utils/Utils.cpp
 )
 
@@ -70,11 +72,17 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   volume/VolumeHandler.h
 )
 
+set(BRAYNSCOMMON_HEADERS
+  utils/ImageUtils.h
+  utils/base64/base64.h
+)
+
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
   PUBLIC vmmlib Async++
   PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-          ${LibArchive_LIBRARIES} ${Magick++_LIBRARIES}
+          ${LibArchive_LIBRARIES} ${FREEIMAGE_LIBRARIES}
 )
 
 common_library(braynsCommon)
+target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})

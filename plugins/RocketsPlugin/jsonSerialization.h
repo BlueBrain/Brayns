@@ -30,6 +30,7 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
+#include <brayns/common/utils/base64/base64.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -43,7 +44,6 @@
 
 #include "ImageGenerator.h"
 #include "SnapshotTask.h"
-#include "base64/base64.h"
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -474,7 +474,7 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
                     Flags::Optional);
     h->add_property("accumulation", &r->_accumulation, Flags::Optional);
     h->add_property("radiance", &r->_lightEmittingMaterials, Flags::Optional);
-    float dummy{0};
+    static float dummy{0};
     h->add_property("epsilon", &dummy, Flags::Optional);
     h->add_property("head_light", &r->_headLight, Flags::Optional);
     h->add_property("variance_threshold", &r->_varianceThreshold,
