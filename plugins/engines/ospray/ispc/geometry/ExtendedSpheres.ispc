@@ -158,14 +158,16 @@ void ExtendedSpheres_intersect(uniform ExtendedSpheres *uniform geometry,
 
     uniform float radius = geometry->radius;
     if (geometry->offset_radius >= 0)
-        radius = *((uniform float *)(spherePtr + geometry->offset_radius));
-
+        radius =
+            *((uniform float *uniform)(spherePtr + geometry->offset_radius));
     uniform vec3f center =
-        *((uniform vec3f *)(spherePtr + geometry->offset_center));
-    const vec3f A = center - ray.org;
+        *((uniform vec3f * uniform)(spherePtr + geometry->offset_center));
+    const float approxDist = dot(center - ray.org, ray.dir);
+    const vec3f closeOrg = ray.org + approxDist * ray.dir;
+    const vec3f A = center - closeOrg;
 
     const float a = dot(ray.dir, ray.dir);
-    const float b = -2.f * dot(ray.dir, A);
+    const float b = 2.f * dot(ray.dir, A);
     const float c = dot(A, A) - radius * radius;
 
     const float radical = b * b - 4.f * a * c;
@@ -174,26 +176,28 @@ void ExtendedSpheres_intersect(uniform ExtendedSpheres *uniform geometry,
 
     const float srad = sqrt(radical);
 
-    const float t_in = (-b - srad) * rcpf(2.f * a);
-    const float t_out = (-b + srad) * rcpf(2.f * a);
+    const float t_in = (b - srad) * rcpf(2.f * a) + approxDist;
+    const float t_out = (b + srad) * rcpf(2.f * a) + approxDist;
 
+    bool hit = false;
     if (t_in > ray.t0 && t_in < ray.t)
     {
-        ray.primID = primID;
-        ray.geomID = geometry->geometry.geomID;
+        hit = true;
         ray.t = t_in;
-        ray.Ng = ray.org + ray.t * ray.dir - center;
-        return;
     }
     else if (t_out > ray.t0 && t_out < ray.t)
     {
+        hit = true;
+        ray.t = t_out;
+    }
+    if (hit)
+    {
         ray.primID = primID;
         ray.geomID = geometry->geometry.geomID;
-        ray.t = t_out;
+        // cannot easily be moved to postIntersect
+        // we need hit in object space, in postIntersect it is in world-space
         ray.Ng = ray.org + ray.t * ray.dir - center;
-        return;
     }
-    return;
 }
 
 export void *uniform ExtendedSpheres_create(void *uniform cppEquivalent)
