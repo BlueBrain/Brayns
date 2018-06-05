@@ -88,7 +88,7 @@ public:
         _updateValue(_synchronousMode, synchronousMode);
     }
 
-    bool getParallelRendering() { return _parallelRendering; }
+    bool getParallelRendering() const { return _parallelRendering; }
 
     const std::string& getHttpServerURI() const { return _httpServerURI; }
     void setHttpServerURI(const std::string& httpServerURI)
