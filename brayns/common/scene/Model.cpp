@@ -331,11 +331,11 @@ void Model::logInformation()
         ++nbMeshes;
     }
 
-    BRAYNS_INFO << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders
-                << ", Cones: " << nbCones << ", Meshes: " << nbMeshes
-                << ", Memory: " << _sizeInBytes << " bytes ("
-                << _sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
-                << std::endl;
+    BRAYNS_DEBUG << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders
+                 << ", Cones: " << nbCones << ", Meshes: " << nbMeshes
+                 << ", Memory: " << _sizeInBytes << " bytes ("
+                 << _sizeInBytes / 1048576 << " MB), Bounds: " << _bounds
+                 << std::endl;
 }
 
 MaterialPtr Model::getMaterial(const size_t materialId) const

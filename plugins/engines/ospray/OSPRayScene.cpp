@@ -107,7 +107,8 @@ void OSPRayScene::commit()
         auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
         const auto& transformation = modelDescriptor->getTransformation();
 
-        BRAYNS_INFO << "Committing " << modelDescriptor->getName() << std::endl;
+        BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
+                     << std::endl;
 
         if (modelDescriptor->getVisible() && impl.getUseSimulationModel())
         {
@@ -149,7 +150,7 @@ void OSPRayScene::commit()
         impl.logInformation();
     }
 
-    BRAYNS_INFO << "Committing root models" << std::endl;
+    BRAYNS_DEBUG << "Committing root models" << std::endl;
     ospCommit(_rootModel);
     if (_rootSimulationModel)
         ospCommit(_rootSimulationModel);
