@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
     BOOST_CHECK(renderParams.getStereoMode() == brayns::StereoMode::none);
     BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::default_);
-    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 7);
+    BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 8);
     BOOST_CHECK(!renderParams.getShadows());
     BOOST_CHECK(!renderParams.getSoftShadows());
     BOOST_CHECK_EQUAL(renderParams.getAmbientOcclusionStrength(), 0.f);
@@ -140,38 +140,4 @@ BOOST_AUTO_TEST_CASE(defaults)
     defaultBoundingBox.merge(brayns::Vector3f(1, 1, 1));
     BOOST_CHECK_EQUAL(scene.getBounds(), defaultBoundingBox);
     BOOST_CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
-}
-
-BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
-{
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "demo", "--synchronous-mode", "on"};
-    const int argc = sizeof(argv) / sizeof(char*);
-    brayns::Brayns brayns(argc, argv);
-
-    auto& fb = brayns.getEngine().getFrameBuffer();
-    const auto& size = fb.getSize();
-    fb.setAccumulation(false);
-    fb.resize(size);
-
-    uint16_t depth = fb.getColorDepth();
-    const size_t bytes = size[0] * size[1] * depth;
-    std::vector<uint8_t> oldBuffer(bytes, 0);
-
-    fb.clear();
-    brayns.render();
-
-    fb.map();
-    memcpy(oldBuffer.data(), fb.getColorBuffer(), bytes);
-    fb.unmap();
-
-    fb.clear();
-    brayns.render();
-
-    fb.map();
-    BOOST_CHECK_EQUAL_COLLECTIONS(oldBuffer.begin(), oldBuffer.end(),
-                                  fb.getColorBuffer(),
-                                  fb.getColorBuffer() + bytes);
-    fb.unmap();
 }

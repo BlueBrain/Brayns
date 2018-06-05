@@ -21,12 +21,22 @@
 #define BOOST_TEST_MODULE braynsSnapshot
 
 #include <jsonSerialization.h>
+#include <tests/paths.h>
 
 #include "ClientServer.h"
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/Renderer.h>
 
+#include "../plugins/RocketsPlugin/base64/base64.h"
 #include <ImageGenerator.h>
+
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <perceptualdiff/metric.h>
+#include <perceptualdiff/rgba_image.h>
+namespace fs = boost::filesystem;
+
+//#define GENERATE_REFERENCE_SNAPSHOT
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
 
@@ -34,25 +44,32 @@ BOOST_GLOBAL_FIXTURE(ClientServer);
 BOOST_AUTO_TEST_CASE(snapshot)
 {
     brayns::SnapshotParams params;
-    params.format = "jpg";
-    params.size = {5, 5};
+    params.format = "png";
+    params.size = {50, 50};
     params.quality = 75;
 
     auto image =
         makeRequest<brayns::SnapshotParams,
                     brayns::ImageGenerator::ImageBase64>("snapshot", params);
-    BOOST_CHECK_EQUAL(image.data,
-                      "/9j/4AAQSkZJRgABAQAAAQABAAD/"
-                      "2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4n"
-                      "ICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/"
-                      "2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy"
-                      "MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/"
-                      "wAARCAAFAAUDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAX/"
-                      "xAAgEAABAwMFAQAAAAAAAAAAAAACAAEEAwURBxIhMkGB/"
-                      "8QAFQEBAQAAAAAAAAAAAAAAAAAABAb/"
-                      "xAAcEQACAgIDAAAAAAAAAAAAAAABAgADBEEFEdH/2gAMAwEAAhEDEQA/"
-                      "AJ0PVMbfBjwxsrmMekFJiKU3O0WHPT3GfqIir6OLxGqUlNDZ9hVsboT/"
-                      "2Q==");
+    auto decodedImage = base64_decode(image.data);
+    const std::string referenceFilename(BRAYNS_TESTDATA +
+                                        std::string("snapshot.png"));
+#ifdef GENERATE_REFERENCE_SNAPSHOT
+    {
+        std::fstream file(referenceFilename, std::ios::out);
+        file << decodedImage;
+    }
+#endif
+
+    const std::string newFilename(
+        (fs::temp_directory_path() / fs::unique_path()).string());
+    {
+        std::fstream file(newFilename, std::ios::out);
+        file << decodedImage;
+    }
+    const auto newImage{pdiff::read_from_file(referenceFilename)};
+    const auto referenceImage{pdiff::read_from_file(referenceFilename)};
+    BOOST_CHECK(pdiff::yee_compare(*referenceImage, *newImage));
 }
 
 BOOST_AUTO_TEST_CASE(snapshot_with_render_params)

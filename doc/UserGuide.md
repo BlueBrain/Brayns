@@ -317,14 +317,6 @@ simulations and volumes.
 - Proximity: Displays information about element proximity in 3D space. Typically
 used to find touches between neurons.
 
-## Epsilon
-
-The --epsilon command line argument defines the precision of the ray-tracer.
-
-```
-braynsViewer --epsilon 0.001
-```
-
 ## Camera types
 
 The --camera command line argument defines the type of camera to be used

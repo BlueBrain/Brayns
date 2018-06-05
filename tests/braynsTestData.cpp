@@ -28,48 +28,70 @@
 #define BOOST_TEST_MODULE braynsTestData
 #include <boost/test/unit_test.hpp>
 
-#include <lunchbox/memoryMap.h>
+#include <perceptualdiff/metric.h>
+#include <perceptualdiff/rgba_image.h>
 
 //#define GENERATE_TESTDATA
 
 #ifdef GENERATE_TESTDATA
+#include <Magick++.h>
+
 void writeTestData(const std::string& filename, brayns::FrameBuffer& fb)
 {
     fb.map();
-    const auto& size = fb.getSize();
-    const size_t bytes = size[0] * size[1] * fb.getColorDepth();
-    lunchbox::MemoryMap file(BRAYNS_TESTDATA + filename, bytes);
-    memcpy(file.getAddress(), fb.getColorBuffer(), bytes);
+    Magick::Image image(fb.getSize().x(), fb.getSize().y(), "BGRA",
+                        Magick::CharPixel, fb.getColorBuffer());
+    image.write(BRAYNS_TESTDATA + filename);
     fb.unmap();
 }
 #endif
 
 void compareTestData(const std::string& filename, brayns::FrameBuffer& fb)
 {
-    const lunchbox::MemoryMap file(BRAYNS_TESTDATA + filename);
-    const auto& size = fb.getSize();
     fb.map();
-    BOOST_CHECK_EQUAL(memcmp(file.getAddress(), fb.getColorBuffer(),
-                             size[0] * size[1] * fb.getColorDepth()),
-                      0);
+    const auto& size = fb.getSize();
+    pdiff::RGBAImage image(size[0], size[1]);
+    memcpy(image.get_data(), fb.getColorBuffer(),
+           size[0] * size[1] * fb.getColorDepth());
     fb.unmap();
+
+    const auto referenceImage{
+        pdiff::read_from_file(BRAYNS_TESTDATA + filename)};
+    BOOST_CHECK(pdiff::yee_compare(*referenceImage, image));
 }
 
-void checkFiles(const std::string& filenameA, const std::string& filenameB,
-                bool same)
+BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
-    const lunchbox::MemoryMap fileA(BRAYNS_TESTDATA + filenameA);
-    const lunchbox::MemoryMap fileB(BRAYNS_TESTDATA + filenameB);
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app, "demo"};
+    const int argc = sizeof(argv) / sizeof(char*);
+    brayns::Brayns brayns(argc, argv);
 
-    BOOST_REQUIRE_EQUAL(fileA.getSize(), fileB.getSize());
-    if (same)
-        BOOST_CHECK_EQUAL(memcmp(fileA.getAddress(), fileB.getAddress(),
-                                 fileA.getSize()),
-                          0);
-    else
-        BOOST_CHECK_NE(memcmp(fileA.getAddress(), fileB.getAddress(),
-                              fileA.getSize()),
-                       0);
+    auto& fb = brayns.getEngine().getFrameBuffer();
+    const auto& size = fb.getSize();
+    fb.setAccumulation(false);
+    fb.resize(size);
+
+    const uint16_t depth = fb.getColorDepth();
+    const size_t bytes = size[0] * size[1] * depth;
+
+    fb.clear();
+    brayns.render();
+
+    fb.map();
+    pdiff::RGBAImage oldImage(size[0], size[1]);
+    memcpy(oldImage.get_data(), fb.getColorBuffer(), bytes);
+    fb.unmap();
+
+    fb.clear();
+    brayns.render();
+
+    fb.map();
+    pdiff::RGBAImage newImage(size[0], size[1]);
+    memcpy(newImage.get_data(), fb.getColorBuffer(), bytes);
+    BOOST_CHECK(pdiff::yee_compare(oldImage, newImage));
+    fb.unmap();
 }
 
 BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
@@ -84,9 +106,9 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
     brayns::Brayns brayns(argc, argv);
     brayns.render();
 #ifdef GENERATE_TESTDATA
-    writeTestData("testdataMonkey.bin", brayns.getEngine().getFrameBuffer());
+    writeTestData("testdataMonkey.png", brayns.getEngine().getFrameBuffer());
 #endif
-    compareTestData("testdataMonkey.bin", brayns.getEngine().getFrameBuffer());
+    compareTestData("testdataMonkey.png", brayns.getEngine().getFrameBuffer());
 }
 
 #ifdef BRAYNS_USE_BBPTESTDATA
@@ -96,22 +118,21 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
 
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
-                          "--synchronous-mode",
-                          "on",
+                          BBP_TEST_BLUECONFIG3,
                           "--accumulation",
                           "off",
-                          "--circuit-config",
-                          BBP_TEST_BLUECONFIG3,
                           "--circuit-targets",
-                          "Layer1"};
+                          "Layer1",
+                          "--samples-per-pixel",
+                          "16"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
 #ifdef GENERATE_TESTDATA
-    writeTestData("testdataLayer1.bin", brayns.getEngine().getFrameBuffer());
+    writeTestData("testdataLayer1.png", brayns.getEngine().getFrameBuffer());
 #endif
-    compareTestData("testdataLayer1.bin", brayns.getEngine().getFrameBuffer());
+    compareTestData("testdataLayer1.png", brayns.getEngine().getFrameBuffer());
 }
 
 BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
@@ -120,26 +141,25 @@ BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
 
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
-                          "--synchronous-mode",
-                          "on",
+                          BBP_TEST_BLUECONFIG3,
                           "--accumulation",
                           "off",
-                          "--circuit-config",
-                          BBP_TEST_BLUECONFIG3,
                           "--circuit-targets",
                           "Layer1",
                           "--morphology-dampen-branch-thickness-changerate",
                           "true",
                           "--morphology-use-sdf-geometries",
-                          "true"};
+                          "true",
+                          "--samples-per-pixel",
+                          "16"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
 #ifdef GENERATE_TESTDATA
-    writeTestData("testSdfCircuit.bin", brayns.getEngine().getFrameBuffer());
+    writeTestData("testSdfCircuit.png", brayns.getEngine().getFrameBuffer());
 #endif
-    compareTestData("testSdfCircuit.bin", brayns.getEngine().getFrameBuffer());
+    compareTestData("testSdfCircuit.png", brayns.getEngine().getFrameBuffer());
 }
 #endif
 
@@ -149,45 +169,33 @@ BOOST_AUTO_TEST_CASE(render_protein_and_compare)
 
     const char* app = testSuite.argv[0];
     const std::string pdbFile(BRAYNS_TESTDATA + std::string("1bna.pdb"));
-    const char* argv[] = {
-        app,   "--synchronous-mode", "on",           "--accumulation",
-        "off", "--pdb-file",         pdbFile.c_str()};
+    const char* argv[] = {app, pdbFile.c_str(), "--accumulation", "off"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
 #ifdef GENERATE_TESTDATA
-    writeTestData("testdataProtein.bin", brayns.getEngine().getFrameBuffer());
+    writeTestData("testdataProtein.png", brayns.getEngine().getFrameBuffer());
 #endif
-    compareTestData("testdataProtein.bin", brayns.getEngine().getFrameBuffer());
+    compareTestData("testdataProtein.png", brayns.getEngine().getFrameBuffer());
 }
 
-#ifdef NDEBUG
 BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
     const std::string pdbFile(BRAYNS_TESTDATA + std::string("1bna.pdb"));
-    const char* argv[] = {app,
-                          "--synchronous-mode",
-                          "on",
-                          "--accumulation",
-                          "off",
-                          "--pdb-file",
-                          pdbFile.c_str(),
-                          "--stereo-mode",
-                          "side-by-side"};
+    const char* argv[] = {app,   pdbFile.c_str(), "--accumulation",
+                          "off", "--stereo-mode", "side-by-side"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
 #ifdef GENERATE_TESTDATA
-    writeTestData("testdataProteinStereo.bin",
+    writeTestData("testdataProteinStereo.png",
                   brayns.getEngine().getFrameBuffer());
 #endif
-    compareTestData("testdataProteinStereo.bin",
+    compareTestData("testdataProteinStereo.png",
                     brayns.getEngine().getFrameBuffer());
-    checkFiles("testdataProtein.bin", "testdataProteinStereo.bin", false);
 }
-#endif
