@@ -159,16 +159,17 @@ braynsViewer ~/morphologies --radius-correction 1
 
 The ```--color-scheme``` command line argument specifies how materials are applied to
 the morphology. Available values are:
-- neuron-by-id: Each neuron has a different color
-- neuron-by-segment-id: Somas are white, axons are blue, dendrites are red, and
-apical dendrites are purple
-- neuron-by-layer: A different color is assigned for every layer. All neurons
-belonging to a specific layer as the same color
-- neuron-by-mtype: Each morphological type has a different color
-- neuron-by-etype: Each electro-physiologic type has a different color
-- protein-by-id: Each protein has a different color
-- protein-atoms: Atoms have standard colors
-- protein-chains: Each chain has a different color
+
+| Argument             | Description
+| ---------------------| -------------
+| neuron-by-id         | Each neuron has a different color
+| neuron-by-segment-id | Somas are white, axons are blue, dendrites are red, and apical dendrites are purple
+| neuron-by-layer      | A different color is assigned for every layer. All neurons belonging to a specific layer as the same color
+| neuron-by-mtype      | Each morphological type has a different color
+| neuron-by-etype      | Each electro-physiologic type has a different color
+| protein-by-id        | Each protein has a different color
+| protein-atoms        | Atoms have standard colors
+| protein-chains       | Each chain has a different color
 
 ```
 braynsViewer ~/morphologies --color-scheme neuron-by-id
@@ -296,24 +297,26 @@ braynsViewer --engine <ospray|optix>
 
 The ```--renderer``` command line argument specifies which renderer used by Brayns.
 Four renderers are currently supported:
-- Default: Common renderer to all engines. Provides basic features such as
-phong/blinn shading, shadows, ambient occlusion, light emission, reflection and
-refraction.
-- Simulation: Same as default with extra features such as support for
-simulations and volumes.
-- Particles:
-- Proximity: Displays information about element proximity in 3D space. Typically
-used to find touches between neurons.
+
+| Argument  | Description
+| ----------| -------------
+| Default   | Common renderer to all engines. Provides basic features such as phong/blinn shading, shadows, ambient occlusion, light emission, reflection and refraction.
+| Simulation| Same as default with extra features such as support for simulations and volumes.
+| Particles |
+| Proximity | Displays information about element proximity in 3D space. Typically used to find touches between neurons.
 
 ## Camera types
 
 The ```--camera``` command line argument defines the type of camera to be used
-by the renderer. Four cameras are currently supported.
-- perspective: Perspective camera
-- stereo: Side-by-side camera
-- orthographic: Orthographic camera
-- panoramic: 360 degrees camera
-- clipped: Perspective camera allowing clipping planes
+by the renderer. Four cameras are currently supported:
+
+| Argument             | Description
+| ---------------------| -------------
+| perspective          | Perspective camera
+| stereo               | Side-by-side camera
+| orthographic         | Orthographic camera
+| panoramic            | 360 degrees camera
+| clipped              | Perspective camera allowing clipping planes
 
 ```
 braynsViewer --camera orthographic
