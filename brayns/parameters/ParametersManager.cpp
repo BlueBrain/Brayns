@@ -55,7 +55,7 @@ void ParametersManager::parse(int argc, const char** argv)
     if (help)
     {
         usage();
-        exit(0);
+        exit(EXIT_SUCCESS);
         return;
     }
 
@@ -78,7 +78,7 @@ void ParametersManager::parse(int argc, const char** argv)
     catch (po::error& e)
     {
         BRAYNS_ERROR << e.what() << std::endl;
-        exit(0);
+        exit(EXIT_FAILURE);
     }
 }
 

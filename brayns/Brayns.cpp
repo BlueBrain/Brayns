@@ -165,7 +165,7 @@ struct Brayns::Impl : public PluginAPI
             catch (const std::runtime_error& exc)
             {
                 BRAYNS_ERROR << exc.what() << std::endl;
-                exit(0);
+                exit(EXIT_FAILURE);
             }
         }
 #endif
