@@ -84,6 +84,8 @@ void OSPRayScene::commit()
     if (!isModified())
         return;
 
+    _activeModels.clear();
+
     if (_rootModel)
         ospRelease(_rootModel);
     _rootModel = ospNewModel();
@@ -97,6 +99,10 @@ void OSPRayScene::commit()
     {
         if (!modelDescriptor->getEnabled())
             continue;
+
+        // keep models from being deleted via removeModel() as long as we use
+        // them here
+        _activeModels.push_back(modelDescriptor);
 
         auto& impl = static_cast<OSPRayModel&>(modelDescriptor->getModel());
         const auto& transformation = modelDescriptor->getTransformation();

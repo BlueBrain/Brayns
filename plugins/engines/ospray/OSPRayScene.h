@@ -81,6 +81,8 @@ private:
     OSPData _ospTransferFunctionDiffuseData{nullptr};
 
     size_t _memoryManagementFlags{0};
+
+    ModelDescriptors _activeModels;
 };
 }
 #endif // OSPRAYSCENE_H
