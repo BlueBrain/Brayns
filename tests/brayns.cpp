@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(defaults)
 
     const auto& renderParams = pm.getRenderingParameters();
     BOOST_CHECK(renderParams.getEngine() == brayns::EngineType::ospray);
-    BOOST_CHECK_EQUAL(renderParams.getModule(), "");
+    BOOST_CHECK(renderParams.getOsprayModules().empty());
     BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
     BOOST_CHECK(renderParams.getStereoMode() == brayns::StereoMode::none);
     BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::default_);

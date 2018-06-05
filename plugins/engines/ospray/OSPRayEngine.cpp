@@ -72,12 +72,12 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     }
 
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
-    if (!rp.getModule().empty())
+    for (const auto& module : rp.getOsprayModules())
     {
         try
         {
-            const auto error = ospLoadModule(rp.getModule().c_str());
-            if (rp.getModule() == "deflect")
+            const auto error = ospLoadModule(module.c_str());
+            if (module == "deflect")
             {
                 if (error != OSP_NO_ERROR)
                     BRAYNS_WARN
@@ -91,11 +91,14 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
                 else
                     _haveDeflectPixelOp = true;
             }
+            else if (error != OSP_NO_ERROR)
+                throw std::runtime_error(
+                    ospDeviceGetLastErrorMsg(ospGetCurrentDevice()));
         }
         catch (const std::exception& e)
         {
-            BRAYNS_ERROR << "Error while loading module " << rp.getModule()
-                         << ": " << e.what() << std::endl;
+            BRAYNS_ERROR << "Error while loading module " << module << ": "
+                         << e.what() << std::endl;
         }
     }
 
