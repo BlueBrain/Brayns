@@ -333,7 +333,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
                 Vector3f(values[0], values[1], values[2]));
             _circuitConfiguration.boundingBox.merge(
                 Vector3f(values[3], values[4], values[5]));
-            BRAYNS_ERROR << _circuitConfiguration.boundingBox << std::endl;
         }
         else
             BRAYNS_ERROR << "Invalid number of values for "
