@@ -1085,7 +1085,7 @@ Brayns::Brayns(int argc, const char** argv)
 {
 }
 
-Brayns::~Brayns() {}
+Brayns::~Brayns() = default;
 
 void Brayns::render(const RenderInput& renderInput, RenderOutput& renderOutput)
 {
