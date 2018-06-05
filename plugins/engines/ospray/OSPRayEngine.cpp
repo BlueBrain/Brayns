@@ -41,8 +41,11 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     try
     {
-        int argc = 0;
+        int argc = 1;
         std::vector<const char*> argv;
+
+        // Ospray expects but ignores the application name as the first argument
+        argv.push_back("Brayns");
 
         if (parametersManager.getRenderingParameters().getEngine() ==
             EngineType::optix)
