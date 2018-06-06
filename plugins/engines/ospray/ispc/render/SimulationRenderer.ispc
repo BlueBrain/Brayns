@@ -481,7 +481,7 @@ inline vec3f SimulationRenderer_shadeRay(
         // Trace ray
         traceRay(self->abstract.super.model, ray);
 
-        float epsilon = self->abstract.super.epsilon;
+        float epsilon = 0.f;
 
         if (ray.geomID < 0)
         {
@@ -558,6 +558,7 @@ inline vec3f SimulationRenderer_shadeRay(
             doReflection = reflect;
         }
 
+        ray.org = attributes.origin;
         ray.t0 = epsilon;
         ray.t = inf;
         ray.primID = -1;
@@ -567,21 +568,9 @@ inline vec3f SimulationRenderer_shadeRay(
         if (doRefraction)
         {
             // Refraction
-            vec3f correctedNormal = attributes.normal;
-            const float angle = dot(ray.dir, correctedNormal);
-            if (abs(attributes.refraction - oldlocalRefraction) < 0.001f &&
-                angle < 0.f)
-            {
-                // Exiting object, back to air (refraction index = 1)
-                attributes.refraction = 1.f;
-                correctedNormal = correctedNormal * -1.f;
-            }
-
             ray.dir =
-                refractedVector(ray.dir, correctedNormal, oldlocalRefraction,
+                refractedVector(ray.dir, attributes.normal, oldlocalRefraction,
                                 attributes.refraction);
-            ray.org = attributes.origin + epsilon * ray.dir;
-
             pathOpacity *= 1.f - attributes.opacity;
             oldlocalRefraction = attributes.refraction;
         }
@@ -589,7 +578,6 @@ inline vec3f SimulationRenderer_shadeRay(
         {
             // Reflection
             ray.dir = attributes.reflectedNormal;
-            ray.org = attributes.origin + epsilon * attributes.reflectedNormal;
             pathOpacity *= attributes.reflection;
         }
         else
