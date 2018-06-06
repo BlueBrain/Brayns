@@ -56,7 +56,6 @@ const std::string PARAM_SAVE_CACHE_FILE = "save-cache-file";
 const std::string PARAM_RADIUS_MULTIPLIER = "radius-multiplier";
 const std::string PARAM_RADIUS_CORRECTION = "radius-correction";
 const std::string PARAM_COLOR_SCHEME = "color-scheme";
-const std::string PARAM_SCENE_ENVIRONMENT = "scene-environment";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
 const std::string PARAM_NEST_CACHE_FILENAME = "nest-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
@@ -92,9 +91,6 @@ const std::string COLOR_SCHEMES[12] = {"none",
                                        "protein-chains",
                                        "protein-residues"};
 
-const std::string SCENE_ENVIRONMENTS[4] = {"none", "ground", "wall",
-                                           "bounding-box"};
-
 const std::string GEOMETRY_QUALITIES[3] = {"low", "medium", "high"};
 const std::string GEOMETRY_MEMORY_MODES[2] = {"shared", "replicated"};
 }
@@ -103,7 +99,6 @@ namespace brayns
 {
 GeometryParameters::GeometryParameters()
     : AbstractParameters("Geometry")
-    , _sceneEnvironment(SceneEnvironment::none)
     , _radiusMultiplier(1.f)
     , _radiusCorrection(0.f)
     , _colorScheme(ColorScheme::none)
@@ -136,8 +131,6 @@ GeometryParameters::GeometryParameters()
         "Color scheme to be applied to the geometry [none|"
         "neuron_by_id|neuron_by_type|neuron_by_segment_type|"
         "protein_atoms|protein_chains|protein_residues|protein_backbones]")(
-        PARAM_SCENE_ENVIRONMENT.c_str(), po::value<std::string>(),
-        "Scene environment [none|ground|wall|bounding-box]")(
         PARAM_GEOMETRY_QUALITY.c_str(), po::value<std::string>(),
         "Geometry rendering quality [low|medium|high]")(
         PARAM_CIRCUIT_TARGETS.c_str(), po::value<std::string>(),
@@ -242,17 +235,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
         _radiusMultiplier = vm[PARAM_RADIUS_MULTIPLIER].as<float>();
     if (vm.count(PARAM_RADIUS_CORRECTION))
         _radiusCorrection = vm[PARAM_RADIUS_CORRECTION].as<float>();
-    if (vm.count(PARAM_SCENE_ENVIRONMENT))
-    {
-        _sceneEnvironment = SceneEnvironment::none;
-        const auto& sceneEnvironment =
-            vm[PARAM_SCENE_ENVIRONMENT].as<std::string>();
-        for (size_t i = 0;
-             i < sizeof(SCENE_ENVIRONMENTS) / sizeof(SCENE_ENVIRONMENTS[0]);
-             ++i)
-            if (sceneEnvironment == SCENE_ENVIRONMENTS[i])
-                _sceneEnvironment = static_cast<SceneEnvironment>(i);
-    }
     if (vm.count(PARAM_GEOMETRY_QUALITY))
     {
         _geometryQuality = GeometryQuality::low;
@@ -351,7 +333,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
                 Vector3f(values[0], values[1], values[2]));
             _circuitConfiguration.boundingBox.merge(
                 Vector3f(values[3], values[4], values[5]));
-            BRAYNS_ERROR << _circuitConfiguration.boundingBox << std::endl;
         }
         else
             BRAYNS_ERROR << "Invalid number of values for "
@@ -424,8 +405,6 @@ void GeometryParameters::print()
                 << std::endl;
     BRAYNS_INFO << "Radius correction          : " << _radiusCorrection
                 << std::endl;
-    BRAYNS_INFO << "Scene environment          : "
-                << getSceneEnvironmentAsString(_sceneEnvironment) << std::endl;
     BRAYNS_INFO << "Geometry quality           : "
                 << getGeometryQualityAsString(_geometryQuality) << std::endl;
     BRAYNS_INFO << "Circuit configuration      : " << std::endl;
@@ -503,13 +482,6 @@ const std::string& GeometryParameters::getColorSchemeAsString(
 {
     return COLOR_SCHEMES[static_cast<size_t>(value)];
 }
-
-const std::string& GeometryParameters::getSceneEnvironmentAsString(
-    const SceneEnvironment value) const
-{
-    return SCENE_ENVIRONMENTS[static_cast<size_t>(value)];
-}
-
 const std::string& GeometryParameters::getGeometryQualityAsString(
     const GeometryQuality value) const
 {
