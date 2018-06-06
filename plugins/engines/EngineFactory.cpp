@@ -44,8 +44,7 @@ std::unique_ptr<Engine> EngineFactory::create(
     {
 #if (BRAYNS_USE_OSPRAY)
         if (name == EngineType::ospray || name == EngineType::optix)
-            return std::make_unique<OSPRayEngine>(_argc, _argv,
-                                                  _parametersManager);
+            return std::make_unique<OSPRayEngine>(_parametersManager);
 #endif
     }
     catch (const std::runtime_error& e)

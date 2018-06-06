@@ -45,8 +45,11 @@ public:
     EngineType getEngine() const { return _engine; }
     void setEngine(const EngineType name) { _updateValue(_engine, name); }
     const std::string& getEngineAsString(const EngineType value) const;
-    /** OSPRay module */
-    const std::string& getModule() const { return _module; }
+    /** OSPRay modules */
+    const std::vector<std::string>& getOsprayModules() const
+    {
+        return _modules;
+    }
     /** OSPRay renderer */
     void initializeDefaultRenderers();
     RendererType getRenderer() const { return _renderer; }
@@ -201,11 +204,12 @@ public:
      */
     void setSamplesPerRay(const size_t spr) { _updateValue(_spr, spr); }
     size_t getSamplesPerRay() const { return _spr; }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
     EngineType _engine{EngineType::ospray};
-    std::string _module;
+    std::vector<std::string> _modules;
     RendererType _renderer{RendererType::default_};
     RendererTypes _renderers;
     strings _rendererNames;

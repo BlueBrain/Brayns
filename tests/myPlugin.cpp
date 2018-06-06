@@ -32,8 +32,16 @@ const Vec2 vecVal{{1, 1}};
 class MyPlugin : public brayns::ExtensionPlugin
 {
 public:
-    MyPlugin(brayns::PluginAPI* api)
+    MyPlugin(brayns::PluginAPI* api, int argc, char** argv)
     {
+        if (argc > 0)
+        {
+            std::cout << "Creating plugin with arguments:";
+            for (int i = 0; i < argc; i++)
+                std::cout << " " << std::string(argv[i]);
+            std::cout << std::endl;
+        }
+
         auto actions = api->getActionInterface();
         BOOST_REQUIRE(actions);
 
@@ -57,7 +65,8 @@ public:
     size_t numCalls{0};
 };
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api)
+extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
+                                                         int argc, char** argv)
 {
-    return new MyPlugin(api);
+    return new MyPlugin(api, argc, argv);
 }

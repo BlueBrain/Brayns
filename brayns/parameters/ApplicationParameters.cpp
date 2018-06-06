@@ -22,6 +22,7 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/ParametersManager.h>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace
@@ -35,6 +36,7 @@ const std::string PARAM_INPUT_PATHS = "input-paths";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_MAX_RENDER_FPS = "max-render-fps";
+const std::string PARAM_PARALLEL_RENDERING = "parallel-rendering";
 const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
 const std::string PARAM_TMP_FOLDER = "tmp-folder";
@@ -59,9 +61,11 @@ ApplicationParameters::ApplicationParameters()
                               po::value<std::string>(), "HTTP interface")(
         PARAM_INPUT_PATHS.c_str(), po::value<std::vector<std::string>>(),
         "List of files/folders to load data from")(
-        PARAM_PLUGIN.c_str(), po::value<strings>(&_plugins)->composing(),
+        PARAM_PLUGIN.c_str(), po::value<strings>(&_pluginsRaw)->composing(),
         "Dynamic plugin to load from LD_LIBRARY_PATH; "
-        "can be repeated to load multiple plugins")(
+        "can be repeated to load multiple plugins. "
+        "Arguments to plugins can be added by inserting a space followed by "
+        "the arguments like: --plugin 'myPluginName arg0 arg1'")(
         PARAM_WINDOW_SIZE.c_str(), po::value<uints>()->multitoken(),
         "Window size [int int]")(PARAM_BENCHMARKING.c_str(), po::value<bool>(),
                                  "Enable|Disable benchmarking [bool]")(
@@ -72,6 +76,8 @@ ApplicationParameters::ApplicationParameters()
                                po::value<std::string>(),
                                "Folder used by the application to "
                                "store temporary files [string")(
+        PARAM_PARALLEL_RENDERING.c_str(), po::value<bool>(),
+        "Enable|Disable parallel rendering, equivalent to --osp:mpi")(
         PARAM_SYNCHRONOUS_MODE.c_str(), po::value<bool>(),
         "Enable|Disable synchronous mode rendering vs data loading [bool]")(
         PARAM_IMAGE_STREAM_FPS.c_str(), po::value<size_t>(),
@@ -114,8 +120,26 @@ void ApplicationParameters::parse(const po::variables_map& vm)
         _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
     if (vm.count(PARAM_IMAGE_STREAM_FPS))
         _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();
+    if (vm.count(PARAM_PARALLEL_RENDERING))
+        _parallelRendering = vm[PARAM_PARALLEL_RENDERING].as<bool>();
     if (vm.count(PARAM_MAX_RENDER_FPS))
         _maxRenderFPS = vm[PARAM_MAX_RENDER_FPS].as<size_t>();
+
+    // Explode plugin arguments
+    for (auto pluginString : _pluginsRaw)
+    {
+        boost::trim(pluginString);
+        std::vector<std::string> words;
+        boost::split(words, pluginString, boost::is_any_of(" "),
+                     boost::token_compress_on);
+
+        PluginParam plugin;
+        plugin.name = words.front();
+        plugin.arguments =
+            std::vector<std::string>(words.begin() + 1, words.end());
+
+        _plugins.emplace_back(std::move(plugin));
+    }
 
     markModified();
 }

@@ -31,6 +31,12 @@ SERIALIZATION_ACCESS(ApplicationParameters)
 
 namespace brayns
 {
+struct PluginParam
+{
+    std::string name;
+    std::vector<std::string> arguments;
+};
+
 /** Manages application parameters
  */
 class ApplicationParameters : public AbstractParameters
@@ -42,7 +48,7 @@ public:
     void print() final;
 
     /** Runtime plugins to load in Brayns::loadPlugins. */
-    const strings& getPlugins() const { return _plugins; }
+    const std::vector<PluginParam>& getPlugins() const { return _plugins; }
     /** window size */
     const Vector2ui& getWindowSize() const { return _windowSize; }
     void setWindowSize(const Vector2ui& size)
@@ -82,6 +88,8 @@ public:
         _updateValue(_synchronousMode, synchronousMode);
     }
 
+    bool getParallelRendering() const { return _parallelRendering; }
+
     const std::string& getHttpServerURI() const { return _httpServerURI; }
     void setHttpServerURI(const std::string& httpServerURI)
     {
@@ -90,10 +98,12 @@ public:
 
     const strings& getInputPaths() const { return _inputPaths; }
     po::positional_options_description& posArgs() { return _positionalArgs; }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
-    strings _plugins;
+    strings _pluginsRaw;
+    std::vector<PluginParam> _plugins;
     Vector2ui _windowSize;
     bool _benchmarking;
     size_t _jpegCompression;
@@ -104,6 +114,7 @@ protected:
     size_t _imageStreamFPS{60};
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
     std::string _httpServerURI;
+    bool _parallelRendering{false};
 
     strings _inputPaths;
 

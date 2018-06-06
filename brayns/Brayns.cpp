@@ -130,25 +130,33 @@ struct Brayns::Impl : public PluginAPI
     void loadPlugins()
     {
 #ifdef BRAYNS_USE_OSPRAY
-        for (const auto& pluginName :
+        for (const auto& pluginParam :
              _parametersManager.getApplicationParameters().getPlugins())
         {
             try
             {
+                const auto& pluginName = pluginParam.name;
                 ospcommon::Library library(pluginName);
                 auto createSym = library.getSymbol("brayns_plugin_create");
                 if (!createSym)
                 {
-                    BRAYNS_ERROR << "Plugin '" << pluginName
-                                 << "' is not a valid Brayns plugin; missing "
-                                    "brayns_plugin_create()"
-                                 << std::endl;
-                    return;
+                    throw std::runtime_error(
+                        "Plugin '" + pluginName +
+                        "' is not a valid Brayns plugin; missing " +
+                        "brayns_plugin_create()");
                 }
 
-                ExtensionPlugin* (*createFunc)(PluginAPI*) =
-                    (ExtensionPlugin * (*)(PluginAPI*))createSym;
-                auto plugin = createFunc(this);
+                // Build argc, argv
+                const int argc = pluginParam.arguments.size();
+                std::vector<char*> argv(argc, nullptr);
+                std::vector<std::string> tmpArgs = pluginParam.arguments;
+
+                for (int i = 0; i < argc; i++)
+                    argv[i] = &tmpArgs[i].front();
+
+                ExtensionPlugin* (*createFunc)(PluginAPI*, int, char**) =
+                    (ExtensionPlugin * (*)(PluginAPI*, int, char**)) createSym;
+                auto plugin = createFunc(this, argc, argv.data());
 
                 _extensionPluginFactory.add(ExtensionPluginPtr{plugin});
                 BRAYNS_INFO << "Loaded plugin '" << pluginName << "'"
@@ -157,6 +165,7 @@ struct Brayns::Impl : public PluginAPI
             catch (const std::runtime_error& exc)
             {
                 BRAYNS_ERROR << exc.what() << std::endl;
+                exit(EXIT_FAILURE);
             }
         }
 #endif
@@ -1076,9 +1085,7 @@ Brayns::Brayns(int argc, const char** argv)
 {
 }
 
-Brayns::~Brayns()
-{
-}
+Brayns::~Brayns() = default;
 
 void Brayns::render(const RenderInput& renderInput, RenderOutput& renderOutput)
 {

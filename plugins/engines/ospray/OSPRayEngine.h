@@ -31,8 +31,7 @@ namespace brayns
 class OSPRayEngine : public Engine
 {
 public:
-    OSPRayEngine(int argc, const char** argv,
-                 ParametersManager& parametersManager);
+    OSPRayEngine(ParametersManager& parametersManager);
 
     ~OSPRayEngine();
 

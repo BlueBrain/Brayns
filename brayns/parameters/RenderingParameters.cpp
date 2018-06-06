@@ -77,7 +77,7 @@ RenderingParameters::RenderingParameters()
 {
     _parameters.add_options()(PARAM_ENGINE.c_str(), po::value<std::string>(),
                               "Engine name [ospray|optix]")(
-        PARAM_MODULE.c_str(), po::value<std::string>(),
+        PARAM_MODULE.c_str(), po::value<strings>(&_modules)->composing(),
         "OSPRay module name [string]")(
         PARAM_RENDERER.c_str(), po::value<std::string>(),
         "OSPRay active renderer [default|simulation|proximity|particle]")(
@@ -154,8 +154,6 @@ void RenderingParameters::parse(const po::variables_map& vm)
             if (engine == ENGINES[i])
                 _engine = static_cast<EngineType>(i);
     }
-    if (vm.count(PARAM_MODULE))
-        _module = vm[PARAM_MODULE].as<std::string>();
     if (vm.count(PARAM_RENDERER))
     {
         _renderer = RendererType::default_;
@@ -257,8 +255,9 @@ void RenderingParameters::print()
     AbstractParameters::print();
     BRAYNS_INFO << "Engine                            :"
                 << getEngineAsString(_engine) << std::endl;
-    BRAYNS_INFO << "Module                            :" << _module
-                << std::endl;
+    BRAYNS_INFO << "Ospray modules                    :" << std::endl;
+    for (const auto& module : _modules)
+        BRAYNS_INFO << "- " << module << std::endl;
     BRAYNS_INFO << "Supported renderers               :" << std::endl;
     for (const auto& renderer : _renderers)
         BRAYNS_INFO << "- " << getRendererAsString(renderer) << std::endl;

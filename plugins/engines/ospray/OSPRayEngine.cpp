@@ -35,32 +35,34 @@
 
 namespace brayns
 {
-OSPRayEngine::OSPRayEngine(int argc, const char** argv,
-                           ParametersManager& parametersManager)
+OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     : Engine(parametersManager)
 {
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
     try
     {
-        // Ospray messes up with argv, need to pass a copy
-        strings arguments;
-        for (int i = 0; i < argc; ++i)
-            arguments.push_back(argv[i]);
+        int argc = 1;
+        std::vector<const char*> argv;
 
-        std::vector<const char*> newArgv;
-        for (const auto& arg : arguments)
-            newArgv.push_back(arg.c_str());
+        // Ospray expects but ignores the application name as the first argument
+        argv.push_back("Brayns");
 
         if (parametersManager.getRenderingParameters().getEngine() ==
             EngineType::optix)
         {
             _type = EngineType::optix;
             argc += 2;
-            newArgv.push_back("--osp:module:optix");
-            newArgv.push_back("--osp:device:optix");
+            argv.push_back("--osp:module:optix");
+            argv.push_back("--osp:device:optix");
         }
 
-        ospInit(&argc, newArgv.data());
+        if (parametersManager.getApplicationParameters().getParallelRendering())
+        {
+            argc++;
+            argv.push_back("--osp:mpi");
+        }
+
+        ospInit(&argc, argv.data());
     }
     catch (const std::exception& e)
     {
@@ -70,12 +72,12 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
     }
 
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
-    if (!rp.getModule().empty())
+    for (const auto& module : rp.getOsprayModules())
     {
         try
         {
-            const auto error = ospLoadModule(rp.getModule().c_str());
-            if (rp.getModule() == "deflect")
+            const auto error = ospLoadModule(module.c_str());
+            if (module == "deflect")
             {
                 if (error != OSP_NO_ERROR)
                     BRAYNS_WARN
@@ -89,11 +91,14 @@ OSPRayEngine::OSPRayEngine(int argc, const char** argv,
                 else
                     _haveDeflectPixelOp = true;
             }
+            else if (error != OSP_NO_ERROR)
+                throw std::runtime_error(
+                    ospDeviceGetLastErrorMsg(ospGetCurrentDevice()));
         }
         catch (const std::exception& e)
         {
-            BRAYNS_ERROR << "Error while loading module " << rp.getModule()
-                         << ": " << e.what() << std::endl;
+            BRAYNS_ERROR << "Error while loading module " << module << ": "
+                         << e.what() << std::endl;
         }
     }
 
