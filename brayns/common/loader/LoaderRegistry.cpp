@@ -29,7 +29,7 @@ namespace brayns
 {
 void LoaderRegistry::registerLoader(LoaderInfo loaderInfo)
 {
-    _loaders.push_back(loaderInfo);
+    _loaders.insert(_loaders.begin(), loaderInfo);
 }
 
 bool LoaderRegistry::isSupported(const std::string& type) const
