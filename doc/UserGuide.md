@@ -6,8 +6,7 @@
 
 #### Loading data
 
-The generic (optional) argument ```--input-paths``` can be used command line argument
-can be used to specify files and/or folders where to load data from.
+The generic (optional) command line argument ```--input-paths``` can be used to specify files and/or folders to load data from.
 
 #### Loading morphologies
 
