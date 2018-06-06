@@ -10,7 +10,7 @@ The generic (optional) command line argument ```--input-paths``` can be used to 
 
 #### Loading morphologies
 
-SWC or H5 morphology files (supported by the Brion library) can be loaded
+SWC or H5 morphology files (supported by the [Brion](https://github.com/BlueBrain/Brion) library) can be loaded
 easily.
 
 ```
