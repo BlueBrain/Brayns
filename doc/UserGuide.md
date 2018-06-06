@@ -184,13 +184,12 @@ braynsViewer ~/morphologies --color-scheme neuron-by-segment-type
 
 #### Realistic somas
 
-Command lines argument starting with metaballs tell Brayns to reconstruct somas
-according using the metaballs algorithm. The ```--metaballs-grid-size``` command line
+Command lines argument starting with metaballs tell Brayns to reconstruct somas using the metaballs algorithm. The ```--metaballs-grid-size``` command line
 argument defines the precision of the generated mesh. The ```--metaballs-threshold```
 command line argument specifies the threshold for the isosurface defined by
 function [f(x,y,z) = x^2 + y^2 + z^2]. The ```--metaballs-samples-from-soma```
-command line argument defines how many samples from around the should be
-considered to generate the mesh.
+command line argument defines how many samples from around the soma should be
+considered when generating the mesh.
 
 ```
 braynsViewer ~/morphologies --metaballs-grid-size 60 --metaballs-threshold 1 --metaballs-samples-from-soma 5
