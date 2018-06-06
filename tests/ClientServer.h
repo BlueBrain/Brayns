@@ -79,13 +79,13 @@ public:
         return *_instance;
     }
 
-    ClientServer(
-        std::vector<const char*> additionalArgv = std::vector<const char*>())
+    ClientServer(std::vector<const char*> additionalArgv = {})
     {
         auto& testSuite = boost::unit_test::framework::master_test_suite();
         const char* app = testSuite.argv[0];
         std::vector<const char*> argv{
-            app, "demo", "--http-server", ":0", "--circuit-density", "1"};
+            app, "demo", "--http-server", "localhost:0", "--circuit-density",
+            "1"};
         for (const auto& arg : additionalArgv)
             argv.push_back(arg);
         const int argc = argv.size();
