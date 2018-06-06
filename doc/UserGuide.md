@@ -24,7 +24,7 @@ loaded. The ```--circuit-targets``` command line argument specified the circuit 
 (or multiples separated by comma), and the ```--circuit-report``` command line
 argument specifies the simulation report to be rendered.
 
-Example of how to load a circuit with voltages simulation for layer 1 cells
+Example of how to load a circuit with voltages simulation for layer 1 cells:
 
 ```
 braynsViewer ~/circuits/BlueConfig --circuit-targets Layer1 --circuit-report voltages
@@ -134,7 +134,7 @@ braynsViewer ~/morphologies --geometry-quality high
 #### Radius multiplier
 
 The ```--radius-multiplier``` command line parameters specifies the multiplier applied
-to morphology radii. Typically, a value of 3 multipliers all radii by 3.
+to morphology radii. Typically, a value of 3 multiplies all radii by 3.
 
 ```
 braynsViewer ~/morphologies --radius-multiplier 3
@@ -212,7 +212,7 @@ braynsViewer 4IMY.pdb
 
 ### Loading molecules from folder
 
-Loads all PDB file located in the specified folder.
+Loads all PDB file located in the specified folder:
 
 ```
 braynsViewer ~/hiv --color-scheme protein-chains
@@ -261,9 +261,7 @@ The ```--volume-file``` command line argument specifies the volume file to load.
 Brayns currently only supports 8-bit raw volume. The ```--volume-dimensions```
 command line argument specifies the size of the volume and is always required.
 The ```--volume-element-spacing``` defines the size of the voxels. The ```--volume-offset```
-command line argument defines the volume position in world coordinates. Finally,
-The volume-samples-per-ray command line argument specifies the precision of the
-rendering (number of steps taken by the ray when walking through the volume.
+command line argument defines the volume position in world coordinates.
 
 ```
 braynsViewer --volume-file volume.raw --volume-dimensions 512 512 256
@@ -294,7 +292,7 @@ braynsViewer --engine <ospray|optix>
 
 ## Renderers
 
-The ```--renderer``` command line argument specifies which renderer used by Brayns.
+The ```--renderer``` command line argument specifies which renderer is used by Brayns.
 Four renderers are currently supported:
 
 | Argument  | Description
@@ -307,7 +305,7 @@ Four renderers are currently supported:
 ## Camera types
 
 The ```--camera``` command line argument defines the type of camera to be used
-by the renderer. Four cameras are currently supported:
+by the renderer. Five cameras are currently supported:
 
 | Argument             | Description
 | ---------------------| -------------
@@ -332,7 +330,7 @@ braynsViewer --head-light 1
 
 ## Shadows
 
-The ```--shadows``` command line argument determines if the intensity of the shadows.
+The ```--shadows``` command line argument determines the intensity of the shadows.
 A value of 1 activates full shadows, 0 deactivates it. By default, shadows are
 hard. The ```--soft-Shadows``` command line argument defines the softness of the
 shadows.
