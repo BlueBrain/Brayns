@@ -98,9 +98,9 @@ OSPTexture2D OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
     if (texture->getDepth() == 1)
     {
         if (texture->getNbChannels() == 3)
-            type = OSP_TEXTURE_SRGB;
+            type = OSP_TEXTURE_RGB8;
         if (texture->getNbChannels() == 4)
-            type = OSP_TEXTURE_SRGBA;
+            type = OSP_TEXTURE_RGBA8;
     }
     else if (texture->getDepth() == 4)
     {
