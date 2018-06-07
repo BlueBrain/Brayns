@@ -176,7 +176,7 @@ public:
                                         compartmentReport, morphLoader);
             }
             // Create materials
-            model->createMissingMaterials();
+            model->createMissingMaterials(_parent._scene.getSimulationHandler() != nullptr);
 
             modelDesc =
                 std::make_shared<ModelDescriptor>(std::move(model), "Circuit",

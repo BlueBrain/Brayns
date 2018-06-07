@@ -276,7 +276,8 @@ public:
      * existing geometry in the model. Missing materials are created with the
      * default parameters
      */
-    BRAYNS_API void createMissingMaterials();
+    BRAYNS_API void createMissingMaterials(
+        const bool castSimulationData = false);
 
     /**
      * @brief getMaterials Returns a reference to the map of materials handled
