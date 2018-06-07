@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK(renderParams.getStereoMode() == brayns::StereoMode::none);
     BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::default_);
     BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 8);
-    BOOST_CHECK(!renderParams.getShadows());
+    BOOST_CHECK(!renderParams.getShadowIntensity());
     BOOST_CHECK(!renderParams.getSoftShadows());
     BOOST_CHECK_EQUAL(renderParams.getAmbientOcclusionStrength(), 0.f);
     BOOST_CHECK(renderParams.getShading() == brayns::ShadingType::diffuse);

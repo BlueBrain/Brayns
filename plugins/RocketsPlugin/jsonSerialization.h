@@ -462,11 +462,13 @@ inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
 
 inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 {
+    static float dummy; // until brayns-ui is updated
+    h->add_property("shadows", &dummy, Flags::Optional);
     h->add_property("engine", &r->_engine, Flags::IgnoreRead | Flags::Optional);
     h->add_property("samples_per_pixel", &r->_spp, Flags::Optional);
     h->add_property("shader", &r->_renderer, Flags::Optional);
     h->add_property("shading", &r->_shading, Flags::Optional);
-    h->add_property("shadows", &r->_shadows, Flags::Optional);
+    h->add_property("shadow_intensity", &r->_shadowIntensity, Flags::Optional);
     h->add_property("soft_shadows", &r->_softShadows, Flags::Optional);
     h->add_property("ambient_occlusion", &r->_ambientOcclusionStrength,
                     Flags::Optional);
@@ -474,8 +476,6 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
                     Flags::Optional);
     h->add_property("accumulation", &r->_accumulation, Flags::Optional);
     h->add_property("radiance", &r->_lightEmittingMaterials, Flags::Optional);
-    static float dummy{0};
-    h->add_property("epsilon", &dummy, Flags::Optional);
     h->add_property("head_light", &r->_headLight, Flags::Optional);
     h->add_property("variance_threshold", &r->_varianceThreshold,
                     Flags::Optional);

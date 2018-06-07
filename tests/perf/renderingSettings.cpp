@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     reference = timer.milliseconds();
 
     // Shadows
-    params.getRenderingParameters().setShadows(true);
+    params.getRenderingParameters().setShadowIntensity(1.f);
     brayns.getEngine().commit();
 
     timer.start();
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     BOOST_CHECK(t < 1.85f);
 
     // Ambient occlustion
-    params.getRenderingParameters().setShadows(0.f);
+    params.getRenderingParameters().setShadowIntensity(0.f);
     params.getRenderingParameters().setSoftShadows(0.f);
     params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
     brayns.getEngine().commit();
@@ -97,8 +97,8 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     BOOST_CHECK(t < 2.5f);
 
     // All options
-    params.getRenderingParameters().setShadows(true);
-    params.getRenderingParameters().setSoftShadows(true);
+    params.getRenderingParameters().setShadowIntensity(1.f);
+    params.getRenderingParameters().setSoftShadows(1.f);
     params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
     brayns.getEngine().commit();
 
