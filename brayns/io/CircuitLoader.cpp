@@ -385,6 +385,7 @@ private:
         std::stringstream message;
         message << "Loading " << uris.size() << " morphologies...";
         std::atomic_size_t current{0};
+        std::exception_ptr cancelException;
 #pragma omp parallel
         {
 #pragma omp for nowait
@@ -392,33 +393,45 @@ private:
                  ++morphologyIndex)
             {
                 ++current;
-                _parent.updateProgress(message.str(), current, uris.size());
 
-                ParallelModelContainer modelContainer;
-                const auto& uri = uris[morphologyIndex];
+                try
+                {
+                    _parent.updateProgress(message.str(), current, uris.size());
 
-                if (!morphLoader._importMorphology(
-                        uri, morphologyIndex,
-                        std::bind(&Impl::_getMaterialFromGeometryParameters,
-                                  this, morphologyIndex, NO_MATERIAL,
-                                  std::placeholders::_1, targetGIDOffsets,
-                                  false),
-                        transformations[morphologyIndex], compartmentReport,
-                        modelContainer))
+                    ParallelModelContainer modelContainer;
+                    const auto& uri = uris[morphologyIndex];
+
+                    if (!morphLoader._importMorphology(
+                            uri, morphologyIndex,
+                            std::bind(&Impl::_getMaterialFromGeometryParameters,
+                                      this, morphologyIndex, NO_MATERIAL,
+                                      std::placeholders::_1, targetGIDOffsets,
+                                      false),
+                            transformations[morphologyIndex], compartmentReport,
+                            modelContainer))
 #pragma omp atomic
-                    ++loadingFailures;
+                        ++loadingFailures;
 #pragma omp critical
-                modelContainer.addSpheresToModel(model);
+                    modelContainer.addSpheresToModel(model);
 #pragma omp critical
-                modelContainer.addCylindersToModel(model);
+                    modelContainer.addCylindersToModel(model);
 #pragma omp critical
-                modelContainer.addConesToModel(model);
+                    modelContainer.addConesToModel(model);
 #pragma omp critical
-                modelContainer.addBoundsToModel(model);
+                    modelContainer.addBoundsToModel(model);
 #pragma omp critical
-                modelContainer.addSDFGeometriesToModel(model);
+                    modelContainer.addSDFGeometriesToModel(model);
+                }
+                catch (...)
+                {
+                    cancelException = std::current_exception();
+                    morphologyIndex = uris.size();
+                }
             }
         }
+
+        if (cancelException)
+            std::rethrow_exception(cancelException);
 
         if (loadingFailures != 0)
         {
