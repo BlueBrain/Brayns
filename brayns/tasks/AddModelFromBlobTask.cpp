@@ -62,7 +62,7 @@ AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
 
 void AddModelFromBlobTask::appendBlob(const std::string& blob)
 {
-    // if bytes than expected are received, error and stop
+    // if more bytes than expected are received, error and stop
     if (_blob.size() + blob.size() > _param.size)
     {
         _errorEvent.set_exception(
@@ -84,12 +84,10 @@ void AddModelFromBlobTask::appendBlob(const std::string& blob)
 
 void AddModelFromBlobTask::_checkValidity(EnginePtr engine)
 {
-    const auto& registry = engine->getScene().getLoaderRegistry();
-
-    // pre-check for validity of given params
     if (_param.type.empty() || _param.size == 0)
         throw MISSING_PARAMS;
 
+    const auto& registry = engine->getScene().getLoaderRegistry();
     if (!registry.isSupported(_param.type))
     {
         const auto& types = registry.supportedTypes();

@@ -97,6 +97,8 @@ OSPTexture2D OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
     OSPTextureFormat type = OSP_TEXTURE_R8; // smallest valid type as default
     if (texture->getDepth() == 1)
     {
+        if (texture->getNbChannels() == 1)
+            type = OSP_TEXTURE_R8;
         if (texture->getNbChannels() == 3)
             type = OSP_TEXTURE_RGB8;
         if (texture->getNbChannels() == 4)
@@ -104,6 +106,8 @@ OSPTexture2D OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
     }
     else if (texture->getDepth() == 4)
     {
+        if (texture->getNbChannels() == 1)
+            type = OSP_TEXTURE_R32F;
         if (texture->getNbChannels() == 3)
             type = OSP_TEXTURE_RGB32F;
         if (texture->getNbChannels() == 4)
