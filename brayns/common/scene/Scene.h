@@ -75,18 +75,6 @@ public:
     BRAYNS_API virtual bool commitLights() = 0;
 
     /**
-     * Commits simulation data to renderers.
-     * @return True if data was committed, false otherwise
-     */
-    BRAYNS_API virtual bool commitSimulationData() = 0;
-
-    /**
-     * Commits volume data to renderers.
-     * @return True if data was committed, false otherwise
-     */
-    BRAYNS_API virtual bool commitVolumeData() = 0;
-
-    /**
      * Commits transfer function data to renderers.
      * @return True if data was committed, false otherwise
      */

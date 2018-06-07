@@ -49,11 +49,8 @@ public:
     /** @copydoc Scene::commitLights */
     bool commitLights() final;
 
-    /** @copydoc Scene::commitSimulationData */
-    bool commitSimulationData() final;
-
-    /** @copydoc Scene::commitVolumeData */
-    bool commitVolumeData() final;
+    void commitSimulationData();
+    void commitVolumeData();
 
     /** @copydoc Scene::commitTransferFunctionData */
     bool commitTransferFunctionData() final;
