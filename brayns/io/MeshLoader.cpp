@@ -228,6 +228,15 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
     size_t nbVertices = 0;
     size_t nbFaces = 0;
     std::map<size_t, size_t> indexOffsets;
+
+    const auto trfm = aiScene->mRootNode->mTransformation;
+    Matrix4f matrix;
+    matrix.setRow(0, {trfm.a1, trfm.a2, trfm.a3, trfm.a4});
+    matrix.setRow(1, {trfm.b1, trfm.b2, trfm.b3, trfm.b4});
+    matrix.setRow(2, {trfm.c1, trfm.c2, trfm.c3, trfm.c4});
+    matrix.setRow(3, {trfm.d1, trfm.d2, trfm.d3, trfm.d4});
+    matrix = matrix * transformation;
+
     for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
     {
         auto mesh = aiScene->mMeshes[m];
@@ -242,14 +251,14 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
         for (size_t i = 0; i < mesh->mNumVertices; ++i)
         {
             const auto& v = mesh->mVertices[i];
-            const Vector3f transformedVertex = {v.x, v.y, v.z};
+            const Vector3f transformedVertex =
+                matrix * Vector4f(v.x, v.y, v.z, 1.f);
             triangleMeshes.vertices.push_back(transformedVertex);
             model.updateBounds(transformedVertex);
             if (mesh->HasNormals())
             {
                 const auto& n = mesh->mNormals[i];
-                const Vector4f normal =
-                    transformation * Vector4f(n.x, n.y, n.z, 0.f);
+                const Vector4f normal = matrix * Vector4f(n.x, n.y, n.z, 0.f);
                 const Vector3f transformedNormal = {normal.x(), normal.y(),
                                                     normal.z()};
                 triangleMeshes.normals.push_back(transformedNormal);
