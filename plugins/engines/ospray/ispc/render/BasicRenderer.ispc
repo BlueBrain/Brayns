@@ -57,7 +57,7 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     DifferentialGeometry dg;
     postIntersect(self->abstract.super.model, dg, ray,
                   DG_NS | DG_NG | DG_NORMALIZE | DG_FACEFORWARD |
-                      DG_MATERIALID | DG_COLOR);
+                      DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
     uniform Material* material = dg.material;
     uniform ExtendedOBJMaterial* objMaterial =
@@ -67,12 +67,18 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     if (!objMaterial)
         Kd = make_vec3f(dg.color);
     else
-        foreach_unique(mat in objMaterial) Kd = mat->Kd * make_vec3f(dg.color);
+        foreach_unique(mat in objMaterial)
+        {
+            Kd = mat->Kd * make_vec3f(dg.color);
+            if (valid(mat->map_Kd))
+            {
+                const vec4f diffuseColorFromMap = get4f(mat->map_Kd, dg.st);
+                Kd = make_vec3f(dg.color * diffuseColorFromMap);
+            }
+        }
 
     // Head-light shading
-    const vec3f intersection = dg.P + dg.epsilon * dg.Ns;
-    const vec3f headLight = normalize(ray.org - intersection);
-    color = Kd * max(0.f, dot(headLight, dg.Ns));
+    color = Kd * max(0.f, dot(neg(ray.dir), dg.Ns));
     sample.alpha = 1.f;
 
     // Z-Depth
