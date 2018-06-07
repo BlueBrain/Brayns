@@ -21,61 +21,22 @@
 #include "ImageManager.h"
 #include <brayns/common/log.h>
 #include <brayns/common/renderer/FrameBuffer.h>
-
-#if (BRAYNS_USE_MAGICKPP)
-#include <Magick++.h>
-#endif
+#include <brayns/common/utils/ImageUtils.h>
 
 namespace brayns
 {
-ImageManager::ImageManager()
-{
-}
-
 bool ImageManager::exportFrameBufferToFile(
     FrameBuffer& frameBuffer BRAYNS_UNUSED,
     const std::string& filename BRAYNS_UNUSED)
 {
-#if (BRAYNS_USE_MAGICKPP)
-    try
-    {
-        std::string format;
-        switch (frameBuffer.getFrameBufferFormat())
-        {
-        case FrameBufferFormat::rgba_i8:
-            format = "RGBA";
-            break;
-        case FrameBufferFormat::rgb_i8:
-            format = "RGB";
-            break;
-        default:
-            BRAYNS_ERROR << "Unsupported frame buffer format. Cannot export "
-                            "frame to file as PNG image"
-                         << std::endl;
-            return false;
-        }
-        frameBuffer.map();
-        uint8_t* colorBuffer = frameBuffer.getColorBuffer();
-        const auto& size = frameBuffer.getSize();
-        Magick::Image image(size.x(), size.y(), format, Magick::CharPixel,
-                            colorBuffer);
-        image.flip();
-        image.write(filename);
-        frameBuffer.unmap();
-    }
-    catch (Magick::Warning& warning)
-    {
-        BRAYNS_WARN << warning.what() << std::endl;
-        return false;
-    }
-    catch (Magick::Error& error)
-    {
-        BRAYNS_ERROR << error.what() << std::endl;
-        return false;
-    }
+#ifdef BRAYNS_USE_FREEIMAGE
+    auto image = freeimage::getImageFromFrameBuffer(frameBuffer);
+    FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()), image.get(),
+                   filename.c_str());
+
     return true;
 #else
-    BRAYNS_DEBUG << "ImageMagick is required to export frames to file"
+    BRAYNS_DEBUG << "FreeImage is required to export frames to file"
                  << std::endl;
     return false;
 #endif
@@ -84,47 +45,40 @@ bool ImageManager::exportFrameBufferToFile(
 Texture2DPtr ImageManager::importTextureFromFile(
     const std::string& filename BRAYNS_UNUSED)
 {
-#if (BRAYNS_USE_MAGICKPP)
-    try
+#ifdef BRAYNS_USE_FREEIMAGE
+    freeimage::ImagePtr image;
+    if (auto temporary = FreeImage_Load(FreeImage_GetFileType(filename.c_str()),
+                                        filename.c_str()))
     {
-        Magick::Image image(filename);
-        Magick::Blob blob;
-#if MagickLibVersion >= 0x700
-        image.magick(image.alpha() ? "RGBA" : "RGB"); // Set JPEG output format
-#else
-        image.magick(image.matte() ? "RGBA" : "RGB"); // Set JPEG output format
-#endif
-        image.write(&blob);
+        image.reset(FreeImage_IsTransparent(temporary)
+                        ? FreeImage_ConvertTo32Bits(temporary)
+                        : FreeImage_ConvertTo24Bits(temporary));
+        FreeImage_Unload(temporary);
+    }
+    else
+        return nullptr;
 
-        Texture2DPtr texture(new Texture2D);
-        texture->setWidth(image.columns());
-        texture->setHeight(image.rows());
-#if MagickLibVersion >= 0x700
-        texture->setNbChannels(image.alpha() ? 4 : 3);
-#else
-        texture->setNbChannels(image.matte() ? 4 : 3);
+    FreeImage_FlipVertical(image.get());
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_BGR
+    freeimage::SwapRedBlue32(image.get());
 #endif
-        texture->setDepth(1);
-        texture->setRawData((unsigned char*)blob.data(), blob.length());
 
-        BRAYNS_DEBUG << filename << ": " << texture->getWidth() << "x"
-                     << texture->getHeight() << "x" << texture->getNbChannels()
-                     << "x" << texture->getDepth()
-                     << " added to the texture cache" << std::endl;
-        return texture;
-    }
-    catch (const Magick::Warning& warning)
-    {
-        // Handle any other Magick++ warning.
-        BRAYNS_WARN << warning.what() << std::endl;
-    }
-    catch (const Magick::Error& error)
-    {
-        BRAYNS_ERROR << error.what() << std::endl;
-    }
-    return nullptr;
+    Texture2DPtr texture(new Texture2D);
+    texture->setWidth(FreeImage_GetWidth(image.get()));
+    texture->setHeight(FreeImage_GetHeight(image.get()));
+    texture->setNbChannels(FreeImage_IsTransparent(image.get()) ? 4 : 3);
+    texture->setDepth(1);
+    texture->setRawData((unsigned char*)FreeImage_GetBits(image.get()),
+                        texture->getWidth() * texture->getHeight() *
+                            texture->getNbChannels());
+
+    BRAYNS_DEBUG << filename << ": " << texture->getWidth() << "x"
+                 << texture->getHeight() << "x" << texture->getNbChannels()
+                 << "x" << texture->getDepth() << " added to the texture cache"
+                 << std::endl;
+    return texture;
 #else
-    BRAYNS_DEBUG << "ImageMagick is required to load images from file"
+    BRAYNS_DEBUG << "FreeImage is required to load images from file"
                  << std::endl;
     return nullptr;
 #endif

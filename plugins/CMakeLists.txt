@@ -32,18 +32,15 @@ if(BRAYNS_NETWORKING_ENABLED)
   list(APPEND BRAYNSPLUGINS_SOURCES
     RocketsPlugin/ImageGenerator.cpp
     RocketsPlugin/RocketsPlugin.cpp
-    RocketsPlugin/base64/base64.cpp
     RocketsPlugin/staticjson/staticjson.cpp
   )
   set_source_files_properties(RocketsPlugin/staticjson/staticjson.cpp
     PROPERTIES COMPILE_FLAGS -Wno-shadow)
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS RocketsPlugin/RocketsPlugin.h)
-  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE Rockets braynsParameters braynsTasks)
+  list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
+    PRIVATE Rockets braynsParameters braynsTasks ${FREEIMAGE_LIBRARIES})
   if(LibJpegTurbo_FOUND)
     list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
-  endif()
-  if(BRAYNS_IMAGEMAGICK_ENABLED)
-    list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES PRIVATE ${Magick++_LIBRARIES})
   endif()
 endif()
 
@@ -65,6 +62,7 @@ set(BRAYNSPLUGINS_OMIT_VERSION_HEADERS ON)
 set(BRAYNSPLUGINS_OMIT_EXPORT ON)
 set(BRAYNSPLUGINS_INCLUDE_NAME plugins)
 common_library(braynsPlugins)
+target_include_directories(braynsPlugins SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
 
 # needed for staticjson and rapidjson
 if(BRAYNS_NETWORKING_ENABLED)

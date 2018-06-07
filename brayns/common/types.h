@@ -64,11 +64,6 @@ typedef std::vector<int64_t> int64_ts;
 typedef std::vector<uint64_t> uint64_ts;
 typedef std::vector<size_t> size_ts;
 
-#if BRAYNS_USE_MAGICKPP
-#define MAGICKCORE_HDRI_ENABLE true
-#define MAGICKCORE_QUANTUM_DEPTH 32
-#endif
-
 #ifdef __GNUC__
 #define BRAYNS_UNUSED __attribute__((unused))
 #else

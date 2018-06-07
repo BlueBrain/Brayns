@@ -17,7 +17,7 @@ endif()
 
 set(BRAYNS_LICENSE LGPL)
 set(BRAYNS_DESCRIPTION "Hardware Agnostic Ray-Tracer")
-set(BRAYNS_PORT_DEPEND "assimp boost ImageMagick glew tbb")
+set(BRAYNS_PORT_DEPEND "assimp boost freeimage glew tbb")
 
 # Enable cloning of all optional subprojects for CI builds
 if($ENV{TRAVIS})
@@ -111,14 +111,6 @@ else()
   if(OSPRAY_FOUND)
     message(WARNING "OSPRay version >= ${_ospray_unsupported_version} not supported")
   endif()
-endif()
-
-# Image processing
-common_find_package(Magick++ SYSTEM)
-if(Magick++_FOUND)
-  option(BRAYNS_IMAGEMAGICK_ENABLED "Activate IMAGEMAGICK library for standard image file format management" ON)
-else()
-  unset(BRAYNS_IMAGEMAGICK_ENABLED)
 endif()
 
 # Mesh loading

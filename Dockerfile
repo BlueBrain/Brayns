@@ -28,7 +28,6 @@ RUN apt-get update \
     libboost-test-dev \
     libfreeimage-dev \
     libhdf5-serial-dev \
-    libmagick++-dev \
     libtbb-dev \
     libturbojpeg0-dev \
     libuv1-dev \
@@ -144,7 +143,6 @@ RUN apt-get update \
     libgomp1 \
     libhdf5-100 \
     libhdf5-cpp-100 \
-    libmagick++-6.q16-8 \
     libturbojpeg0 \
     libuv1 \
  && apt-get clean \

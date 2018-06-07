@@ -42,7 +42,7 @@ struct SnapshotParams
     int samplesPerPixel{1};
     Vector2ui size;
     size_t quality{100};
-    std::string format; // ImageMagick formats apply
+    std::string format; // FreeImage formats apply
     std::string name;
 };
 

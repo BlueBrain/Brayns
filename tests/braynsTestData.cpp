@@ -24,6 +24,7 @@
 
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/utils/ImageUtils.h>
 
 #define BOOST_TEST_MODULE braynsTestData
 #include <boost/test/unit_test.hpp>
@@ -34,15 +35,12 @@
 //#define GENERATE_TESTDATA
 
 #ifdef GENERATE_TESTDATA
-#include <Magick++.h>
 
 void writeTestData(const std::string& filename, brayns::FrameBuffer& fb)
 {
-    fb.map();
-    Magick::Image image(fb.getSize().x(), fb.getSize().y(), "BGRA",
-                        Magick::CharPixel, fb.getColorBuffer());
-    image.write(BRAYNS_TESTDATA + filename);
-    fb.unmap();
+    auto image = brayns::freeimage::getImageFromFrameBuffer(fb);
+    FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()), image.get(),
+                   std::string(BRAYNS_TESTDATA + filename).c_str());
 }
 #endif
 
