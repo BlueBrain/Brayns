@@ -44,7 +44,7 @@ const std::string PARAM_MODULE = "module";
 const std::string PARAM_RADIANCE = "radiance";
 const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SHADING = "shading";
-const std::string PARAM_SHADOWS = "shadows";
+const std::string PARAM_SHADOW_INTENSITY = "shadow-intensity";
 const std::string PARAM_SOFT_SHADOWS = "soft-shadows";
 const std::string PARAM_SPP = "samples-per-pixel";
 const std::string PARAM_SPR = "samples-per-ray";
@@ -88,7 +88,7 @@ RenderingParameters::RenderingParameters()
         PARAM_AMBIENT_OCCLUSION.c_str(), po::value<float>(),
         "Ambient occlusion distance [float]")(
         PARAM_AMBIENT_OCCLUSION_DISTANCE.c_str(), po::value<float>(),
-        "Ambient occlusion distance [float]")(PARAM_SHADOWS.c_str(),
+        "Ambient occlusion distance [float]")(PARAM_SHADOW_INTENSITY.c_str(),
                                               po::value<float>(),
                                               "Shadows intensity [float]")(
         PARAM_SOFT_SHADOWS.c_str(), po::value<float>(),
@@ -179,8 +179,8 @@ void RenderingParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_AMBIENT_OCCLUSION_DISTANCE))
         _ambientOcclusionDistance =
             vm[PARAM_AMBIENT_OCCLUSION_DISTANCE].as<float>();
-    if (vm.count(PARAM_SHADOWS))
-        _shadows = vm[PARAM_SHADOWS].as<float>();
+    if (vm.count(PARAM_SHADOW_INTENSITY))
+        _shadowIntensity = vm[PARAM_SHADOW_INTENSITY].as<float>();
     if (vm.count(PARAM_SOFT_SHADOWS))
         _softShadows = vm[PARAM_SOFT_SHADOWS].as<float>();
     if (vm.count(PARAM_SHADING))
@@ -269,7 +269,7 @@ void RenderingParameters::print()
                 << _ambientOcclusionStrength << std::endl;
     BRAYNS_INFO << "- Distance                        :"
                 << _ambientOcclusionDistance << std::endl;
-    BRAYNS_INFO << "Shadows                           :" << _shadows
+    BRAYNS_INFO << "Shadow intensity                  :" << _shadowIntensity
                 << std::endl;
     BRAYNS_INFO << "Soft shadows                      :" << _softShadows
                 << std::endl;
