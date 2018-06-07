@@ -125,7 +125,7 @@ protected:
     float _refractionIndex{1.f};
     float _emission{0.f};
     float _glossiness{1.f};
-    bool _castSimulationData{true};
+    bool _castSimulationData{false};
     TexturesMap _textures;
     TextureDescriptors _textureDescriptors;
 

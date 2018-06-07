@@ -347,7 +347,7 @@ MaterialPtr Model::getMaterial(const size_t materialId) const
     return it->second;
 }
 
-void Model::createMissingMaterials()
+void Model::createMissingMaterials(const bool castSimulationData)
 {
     std::set<size_t> materialIds;
     for (auto& spheres : _spheres)
@@ -365,7 +365,11 @@ void Model::createMissingMaterials()
     {
         const auto it = _materials.find(materialId);
         if (it == _materials.end())
-            createMaterial(materialId, std::to_string(materialId));
+        {
+            auto material =
+                createMaterial(materialId, std::to_string(materialId));
+            material->setCastSimulationData(castSimulationData);
+        }
     }
 }
 }
