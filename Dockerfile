@@ -140,6 +140,7 @@ RUN apt-get update \
     libboost-serialization1.62.0 \
     libboost-system1.62.0 \
     libboost-iostreams1.62.0 \
+    libfreeimage3 \
     libgomp1 \
     libhdf5-100 \
     libhdf5-cpp-100 \
