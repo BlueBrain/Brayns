@@ -77,11 +77,13 @@ OSPRayScene::~OSPRayScene()
 
 void OSPRayScene::commit()
 {
+    const bool rebuildScene = isModified();
+
     commitVolumeData();
     commitSimulationData();
     commitTransferFunctionData();
 
-    if (!isModified())
+    if (!rebuildScene)
         return;
 
     _activeModels.clear();
@@ -272,11 +274,11 @@ bool OSPRayScene::commitTransferFunctionData()
     return true;
 }
 
-bool OSPRayScene::commitVolumeData()
+void OSPRayScene::commitVolumeData()
 {
     const auto volumeHandler = getVolumeHandler();
     if (!volumeHandler)
-        return false;
+        return;
 
     const auto& vp = _parametersManager.getVolumeParameters();
     if (vp.isModified())
@@ -331,25 +333,26 @@ bool OSPRayScene::commitVolumeData()
         }
         markModified(); // to update scene bounds
     }
-    return true;
 }
 
-bool OSPRayScene::commitSimulationData()
+void OSPRayScene::commitSimulationData()
 {
     if (!_simulationHandler)
-        return false;
+        return;
 
     const auto animationFrame =
         _parametersManager.getAnimationParameters().getFrame();
 
     if (_ospSimulationData &&
         _simulationHandler->getCurrentFrame() == animationFrame)
-        return false;
+    {
+        return;
+    }
 
     auto frameData = _simulationHandler->getFrameData(animationFrame);
 
     if (!frameData)
-        return false;
+        return;
 
     if (_ospSimulationData)
         ospRelease(_ospSimulationData);
@@ -364,8 +367,9 @@ bool OSPRayScene::commitSimulationData()
         ospSetData(impl, "simulationData", _ospSimulationData);
         ospSet1i(impl, "simulationDataSize",
                  _simulationHandler->getFrameSize());
+        ospCommit(impl);
     }
-    return true;
+    markModified(); // triggers framebuffer clear
 }
 
 bool OSPRayScene::isVolumeSupported(const std::string& volumeFile) const
