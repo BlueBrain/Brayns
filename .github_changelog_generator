@@ -5,3 +5,4 @@ output=Changelog.md
 compare-link=false
 date-format=%d-%m-%Y
 author=false
+enhancement-labels=enhancement,feature
