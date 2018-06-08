@@ -192,6 +192,7 @@ struct Brayns::Impl : public PluginAPI
 
         auto& scene = _engine->getScene();
         scene.commit();
+        _sceneWasModified = _sceneWasModified || scene.isModified();
         if (scene.isModified())
             _finishLoadScene();
 
@@ -249,10 +250,15 @@ struct Brayns::Impl : public PluginAPI
             _fpsUpdateElapsed = 0;
         }
 
-        // WAR to keep clients updated about current animation frame
+        // WAR to keep clients updated about current animation frame, or if the
+        // scene was modified, a simulation might have been attached. To fix
+        // this properly, we would need the simulation/animation state in model.
         auto& ap = _parametersManager.getAnimationParameters();
-        if (ap.getDelta() != 0)
+        if (ap.getDelta() != 0 || _sceneWasModified)
+        {
             ap.markModified();
+            _sceneWasModified = false;
+        }
 
         _extensionPluginFactory.postRender();
 
@@ -1076,6 +1082,7 @@ private:
 
     ExtensionPluginFactory _extensionPluginFactory;
     std::shared_ptr<ActionInterface> _actionInterface;
+    bool _sceneWasModified{false};
 };
 
 // -------------------------------------------------------------------------------------------------

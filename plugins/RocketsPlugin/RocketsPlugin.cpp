@@ -185,9 +185,10 @@ public:
         if (!_rocketsServer)
             return;
 
-        _wsBroadcastOperations[ENDPOINT_CAMERA]();
-        _wsBroadcastOperations[ENDPOINT_SCENE](); // bounds
-        _wsBroadcastOperations[ENDPOINT_STATISTICS]();
+        // simulation was potentially loaded
+        _wsBroadcastOperations[ENDPOINT_ANIMATION_PARAMS]();
+        _wsBroadcastOperations[ENDPOINT_SCENE]();      // bounds
+        _wsBroadcastOperations[ENDPOINT_STATISTICS](); // scene size
     }
 
     void _setupRocketsServer()
