@@ -1,6 +1,99 @@
 # Change Log
 
+## [0.6.0](https://github.com/BlueBrain/Brayns/tree/0.6.0) (08-06-2018)
+
+**Implemented enhancements:**
+
+- Add dynamic loading of plugins [\#316](https://github.com/BlueBrain/Brayns/issues/316)
+- Rename shadows -\> shadow\_intensity [\#416](https://github.com/BlueBrain/Brayns/pull/416)
+- Added texture support to basic renderer [\#415](https://github.com/BlueBrain/Brayns/pull/415)
+- Give precedence to later added loaders [\#414](https://github.com/BlueBrain/Brayns/pull/414)
+- Remove ImageMagick, use FreeImage instead [\#413](https://github.com/BlueBrain/Brayns/pull/413)
+- Userguide improvements [\#410](https://github.com/BlueBrain/Brayns/pull/410)
+- Stricter arguments parsing [\#406](https://github.com/BlueBrain/Brayns/pull/406)
+- Deflect-related improvements: stream & accum frames cmdline, render throttling [\#402](https://github.com/BlueBrain/Brayns/pull/402)
+- Remove submodels in favor of proper instances support [\#396](https://github.com/BlueBrain/Brayns/pull/396)
+- Added path tracing renderer [\#393](https://github.com/BlueBrain/Brayns/pull/393)
+- Fix submodel instances due to lack of support in OSPRay; cleanup create- and addModel usage [\#392](https://github.com/BlueBrain/Brayns/pull/392)
+- SDF geometries support [\#391](https://github.com/BlueBrain/Brayns/pull/391)
+- Add chunk ID and chunk RPC to support concurrent request-model-upload RPCs; bugfixes [\#389](https://github.com/BlueBrain/Brayns/pull/389)
+- Transform 'old' upload- RPCs to proper add-model and request-model-upload RPCs [\#385](https://github.com/BlueBrain/Brayns/pull/385)
+- Add support to load data from archives [\#381](https://github.com/BlueBrain/Brayns/pull/381)
+- Added scene management [\#379](https://github.com/BlueBrain/Brayns/pull/379)
+- Add positional cmdline argument for loading data [\#378](https://github.com/BlueBrain/Brayns/pull/378)
+- Extend snapshot params; fix \#360; bugfixes [\#376](https://github.com/BlueBrain/Brayns/pull/376)
+- Add loader API and registry [\#375](https://github.com/BlueBrain/Brayns/pull/375)
+- Resolve \#368: RPC for data receive and load [\#374](https://github.com/BlueBrain/Brayns/pull/374)
+- Combine reflection and refraction in simulation renderer [\#362](https://github.com/BlueBrain/Brayns/pull/362)
+- Added cylindric omni-stereo camera [\#358](https://github.com/BlueBrain/Brayns/pull/358)
+- Added stereo-mode rendering parameter [\#350](https://github.com/BlueBrain/Brayns/pull/350)
+- Add support for dynamic plugin loading [\#349](https://github.com/BlueBrain/Brayns/pull/349)
+- Added colormap range scene parameter [\#346](https://github.com/BlueBrain/Brayns/pull/346)
+- Support for OSPRay 1.5 [\#344](https://github.com/BlueBrain/Brayns/pull/344)
+- Add Topology Viewer plugin with action interface [\#340](https://github.com/BlueBrain/Brayns/pull/340)
+- Add ActionInterface for plugins to register custom notifications and requests [\#339](https://github.com/BlueBrain/Brayns/pull/339)
+- Added cylindrical camera for Opendeck [\#332](https://github.com/BlueBrain/Brayns/pull/332)
+- Logic for adding Topology Viewer as a usecase plugin [\#331](https://github.com/BlueBrain/Brayns/pull/331)
+- Event-driven architecture for braynsService, resolve \#286 [\#314](https://github.com/BlueBrain/Brayns/pull/314)
+
+**Fixed bugs:**
+
+- Reduce frequency of progress updates [\#289](https://github.com/BlueBrain/Brayns/issues/289)
+- Fixed missing default transformation when loading meshes [\#419](https://github.com/BlueBrain/Brayns/pull/419)
+- Fixed loading of textures to RGB instead of SRGB [\#418](https://github.com/BlueBrain/Brayns/pull/418)
+- Fixed transparency issue in simulation renderer [\#412](https://github.com/BlueBrain/Brayns/pull/412)
+- Fix deadlock/crash when removing a model while rendering [\#408](https://github.com/BlueBrain/Brayns/pull/408)
+- Fixed loading of material attributes in MeshLoader [\#407](https://github.com/BlueBrain/Brayns/pull/407)
+- Use perceptual diff for more robust image comparison in tests  [\#405](https://github.com/BlueBrain/Brayns/pull/405)
+- Use dg.epsilon in favor of renderer epsilon to fix rendering artifacts [\#404](https://github.com/BlueBrain/Brayns/pull/404)
+- Fix missing simulation data and volumes in snapshot [\#401](https://github.com/BlueBrain/Brayns/pull/401)
+- Fix crash w/ histogram and simulation data being all the same values [\#400](https://github.com/BlueBrain/Brayns/pull/400)
+- Fixed simulation renderer [\#399](https://github.com/BlueBrain/Brayns/pull/399)
+- Fix missing stereo camera for snapshots [\#397](https://github.com/BlueBrain/Brayns/pull/397)
+- Throw exception if model is empty [\#395](https://github.com/BlueBrain/Brayns/pull/395)
+- Fix crash when starting deflect stream more than once [\#394](https://github.com/BlueBrain/Brayns/pull/394)
+- Correct CMake target exports for plugins [\#384](https://github.com/BlueBrain/Brayns/pull/384)
+- Remove wrong 'required' field from schema [\#383](https://github.com/BlueBrain/Brayns/pull/383)
+- Fix \#289; fix textures for scivis renderer [\#380](https://github.com/BlueBrain/Brayns/pull/380)
+- Fix wrong image stream FPS limiting [\#357](https://github.com/BlueBrain/Brayns/pull/357)
+- Set default camera only on first scene build [\#354](https://github.com/BlueBrain/Brayns/pull/354)
+- Fix broken install rules; now plugins can be build from Brayns install tree [\#353](https://github.com/BlueBrain/Brayns/pull/353)
+- Fix leaking Rockets dependency [\#352](https://github.com/BlueBrain/Brayns/pull/352)
+- Trigger always one frame after braynsService is setup'd [\#351](https://github.com/BlueBrain/Brayns/pull/351)
+- Fix Docker build; tag was not visible anymore after 1.5 release [\#348](https://github.com/BlueBrain/Brayns/pull/348)
+- Add postSceneLoading\(\) to fix broadcasting missing camera updates [\#347](https://github.com/BlueBrain/Brayns/pull/347)
+- Fix out-of-order broadcasts which lead to camera jitters with braynsService [\#343](https://github.com/BlueBrain/Brayns/pull/343)
+- Fixed runtime loading of volumes [\#338](https://github.com/BlueBrain/Brayns/pull/338)
+- Fix docker build; add option for OpenDeck module, default OFF [\#337](https://github.com/BlueBrain/Brayns/pull/337)
+- Fixed OpenDeck module compilation [\#335](https://github.com/BlueBrain/Brayns/pull/335)
+- Fixed MacOSX build [\#334](https://github.com/BlueBrain/Brayns/pull/334)
+
+**Closed issues:**
+
+- Brayns build compilation fails on Ubuntu 16.04 with libuv-dev \(0.10\) installed [\#390](https://github.com/BlueBrain/Brayns/issues/390)
+- Add transparency [\#377](https://github.com/BlueBrain/Brayns/issues/377)
+- Cannot connect to the renderer error [\#370](https://github.com/BlueBrain/Brayns/issues/370)
+- RPC for data receive and load [\#368](https://github.com/BlueBrain/Brayns/issues/368)
+- Use signed distance fields for approximating organic shapes \(synapses, soma\) [\#367](https://github.com/BlueBrain/Brayns/issues/367)
+- Save state [\#365](https://github.com/BlueBrain/Brayns/issues/365)
+- Visualize bounding boxes [\#364](https://github.com/BlueBrain/Brayns/issues/364)
+- Add scene management [\#363](https://github.com/BlueBrain/Brayns/issues/363)
+- Rename /frame endpoint [\#360](https://github.com/BlueBrain/Brayns/issues/360)
+- Investigate performance regression from Brayns 0.5.0-beta to latest [\#341](https://github.com/BlueBrain/Brayns/issues/341)
+- Simple path tracing mode [\#324](https://github.com/BlueBrain/Brayns/issues/324)
+- Add meshes to scene [\#321](https://github.com/BlueBrain/Brayns/issues/321)
+
+**Merged pull requests:**
+
+- Upgrade to Deflect 1.0,  fix build without Brion [\#388](https://github.com/BlueBrain/Brayns/pull/388)
+- Cleanups after introduction of models [\#382](https://github.com/BlueBrain/Brayns/pull/382)
+- Updated Brayns UI information [\#356](https://github.com/BlueBrain/Brayns/pull/356)
+- Keep installing ospray plugin; needed for Docker deployment [\#355](https://github.com/BlueBrain/Brayns/pull/355)
+- Add CMake logic for membraneless organelles use case plugin fix [\#345](https://github.com/BlueBrain/Brayns/pull/345)
+- Updated documentation [\#333](https://github.com/BlueBrain/Brayns/pull/333)
+
 ## [0.5.0](https://github.com/BlueBrain/Brayns/tree/0.5.0) (23-02-2018)
+
 **Implemented enhancements:**
 
 - Allow use of renderers and cameras defined in external modules [\#310](https://github.com/BlueBrain/Brayns/pull/310)
@@ -10,13 +103,16 @@
 - Fix frame end/current params for no simulation [\#312](https://github.com/BlueBrain/Brayns/issues/312)
 - Report 0 for end and current in animation params/frame if appropriate; fix \#312 [\#318](https://github.com/BlueBrain/Brayns/pull/318)
 - Fixed realistic soma for single morphologies [\#317](https://github.com/BlueBrain/Brayns/pull/317)
+- Fix very nasty linking Bug on BraynsViewer due to the indirect OpenGL linking [\#304](https://github.com/BlueBrain/Brayns/pull/304)
 
 **Merged pull requests:**
 
 - Misc. typos [\#309](https://github.com/BlueBrain/Brayns/pull/309)
 - Adapt to latest Rockets [\#308](https://github.com/BlueBrain/Brayns/pull/308)
+- Release preparations [\#307](https://github.com/BlueBrain/Brayns/pull/307)
 
 ## [0.5.0-beta](https://github.com/BlueBrain/Brayns/tree/0.5.0-beta) (08-02-2018)
+
 **Implemented enhancements:**
 
 - Snapshot feature as RPC for frontend [\#287](https://github.com/BlueBrain/Brayns/issues/287)
@@ -29,10 +125,10 @@
 - Respond full object to other clients on incoming websocket message [\#279](https://github.com/BlueBrain/Brayns/pull/279)
 - Be more defensive for incoming websocket messages, Expose dt and time unit in animation parameters [\#274](https://github.com/BlueBrain/Brayns/pull/274)
 - Transfom optix engine into an ospray module [\#270](https://github.com/BlueBrain/Brayns/pull/270)
+- Full websocket support; automatic broadcast of modified objects [\#265](https://github.com/BlueBrain/Brayns/pull/265)
 
 **Fixed bugs:**
 
-- Reduce frequency of progress updates [\#289](https://github.com/BlueBrain/Brayns/issues/289)
 - Bugfixes [\#306](https://github.com/BlueBrain/Brayns/pull/306)
 - Bugfixes [\#300](https://github.com/BlueBrain/Brayns/pull/300)
 - Performance and build fixes [\#295](https://github.com/BlueBrain/Brayns/pull/295)
@@ -49,17 +145,17 @@
 
 **Merged pull requests:**
 
-- Release preparations [\#307](https://github.com/BlueBrain/Brayns/pull/307)
 - Force 8-bit tiff creation; fixes usage in python with PIL [\#305](https://github.com/BlueBrain/Brayns/pull/305)
-- Fix very nasty linking Bug on BraynsViewer due to the indirect OpenGL [\#304](https://github.com/BlueBrain/Brayns/pull/304)
 - Move to C++14 [\#303](https://github.com/BlueBrain/Brayns/pull/303)
 - Cleanups [\#298](https://github.com/BlueBrain/Brayns/pull/298)
 - No more zeroeq; fixes default Docker image entrypoint [\#296](https://github.com/BlueBrain/Brayns/pull/296)
 - Fix docker build [\#294](https://github.com/BlueBrain/Brayns/pull/294)
 - Update Dockerfile to lower image size to 271MB [\#275](https://github.com/BlueBrain/Brayns/pull/275)
 - Update Dockerfile [\#272](https://github.com/BlueBrain/Brayns/pull/272)
+- Version 0.4.0 [\#267](https://github.com/BlueBrain/Brayns/pull/267)
 
 ## [0.4.0](https://github.com/BlueBrain/Brayns/tree/0.4.0) (04-01-2018)
+
 **Implemented enhancements:**
 
 - Improve CMake options handling [\#200](https://github.com/BlueBrain/Brayns/issues/200)
@@ -70,9 +166,7 @@
 
 **Merged pull requests:**
 
-- Version 0.4.0 [\#267](https://github.com/BlueBrain/Brayns/pull/267)
 - Fixed docker build [\#266](https://github.com/BlueBrain/Brayns/pull/266)
-- Full websocket support; automatic broadcast of modified objects [\#265](https://github.com/BlueBrain/Brayns/pull/265)
 - Reworked material management [\#264](https://github.com/BlueBrain/Brayns/pull/264)
 - Remove livre engine [\#263](https://github.com/BlueBrain/Brayns/pull/263)
 - Always triangulate meshes [\#262](https://github.com/BlueBrain/Brayns/pull/262)
@@ -161,8 +255,10 @@
 - Fix for livre change [\#175](https://github.com/BlueBrain/Brayns/pull/175)
 - Activate optional dependencies for continuous integration [\#174](https://github.com/BlueBrain/Brayns/pull/174)
 - Added --mesh-file command line argument to load single mesh file [\#173](https://github.com/BlueBrain/Brayns/pull/173)
+- Release preparations [\#172](https://github.com/BlueBrain/Brayns/pull/172)
 
 ## [0.3.0](https://github.com/BlueBrain/Brayns/tree/0.3.0) (01-06-2017)
+
 **Closed issues:**
 
 - assimp [\#101](https://github.com/BlueBrain/Brayns/issues/101)
@@ -173,7 +269,6 @@
 
 **Merged pull requests:**
 
-- Release preparations [\#172](https://github.com/BlueBrain/Brayns/pull/172)
 - Removed need for external colormap from NEST simulations [\#171](https://github.com/BlueBrain/Brayns/pull/171)
 - Fix missing deflect w/o networking in braynsService [\#170](https://github.com/BlueBrain/Brayns/pull/170)
 - Fix build w/ Deflect and w/o networking [\#169](https://github.com/BlueBrain/Brayns/pull/169)
@@ -253,11 +348,12 @@
 - Use proper way to register stream-to HTTP endpoint [\#88](https://github.com/BlueBrain/Brayns/pull/88)
 - Added morphology layout feature to Parameters event [\#87](https://github.com/BlueBrain/Brayns/pull/87)
 - Added simulation histogram [\#86](https://github.com/BlueBrain/Brayns/pull/86)
+- Version 0.2.0 [\#85](https://github.com/BlueBrain/Brayns/pull/85)
 
 ## [0.2.0](https://github.com/BlueBrain/Brayns/tree/0.2.0) (09-12-2016)
+
 **Merged pull requests:**
 
-- Version 0.2.0 [\#85](https://github.com/BlueBrain/Brayns/pull/85)
 - Updated changelog and images [\#84](https://github.com/BlueBrain/Brayns/pull/84)
 - Added ALL as a section type [\#83](https://github.com/BlueBrain/Brayns/pull/83)
 - Fixed head-light bug in OSPRay plugin [\#82](https://github.com/BlueBrain/Brayns/pull/82)
@@ -325,6 +421,7 @@
 - Ispc correctness [\#15](https://github.com/BlueBrain/Brayns/pull/15)
 
 ## [0.1.0](https://github.com/BlueBrain/Brayns/tree/0.1.0) (06-07-2016)
+
 **Merged pull requests:**
 
 - Improved random generator used by OSPRay renderers [\#9](https://github.com/BlueBrain/Brayns/pull/9)
