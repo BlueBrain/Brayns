@@ -184,11 +184,11 @@ struct Brayns::Impl : public PluginAPI
 #endif
         }
 
-        _extensionPluginFactory.preRender();
-
         std::unique_lock<std::mutex> lock{_renderMutex, std::defer_lock};
         if (!lock.try_lock())
             return false;
+
+        _extensionPluginFactory.preRender();
 
         auto& scene = _engine->getScene();
         scene.commit();
