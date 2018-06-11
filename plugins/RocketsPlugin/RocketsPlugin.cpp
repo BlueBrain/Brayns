@@ -558,7 +558,6 @@ public:
 
         _handleFrameBuffer();
         _handleSimulationHistogram();
-        _handleVolumeHistogram();
 
         _handleInspect();
         _handleQuit();
