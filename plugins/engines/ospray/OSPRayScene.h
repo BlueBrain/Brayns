@@ -62,6 +62,8 @@ public:
 
     OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _rootSimulationModel; }
+    void resetVolumeHandler() final;
+
 private:
     OSPModel _rootModel{nullptr};
     OSPModel _rootSimulationModel{nullptr};

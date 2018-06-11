@@ -47,7 +47,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         // Ospray expects but ignores the application name as the first argument
         argv.push_back("Brayns");
 
-        if (parametersManager.getRenderingParameters().getEngine() ==
+        if (_parametersManager.getRenderingParameters().getEngine() ==
             EngineType::optix)
         {
             _type = EngineType::optix;
@@ -56,7 +56,8 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
             argv.push_back("--osp:device:optix");
         }
 
-        if (parametersManager.getApplicationParameters().getParallelRendering())
+        if (_parametersManager.getApplicationParameters()
+                .getParallelRendering())
         {
             argc++;
             argv.push_back("--osp:mpi");

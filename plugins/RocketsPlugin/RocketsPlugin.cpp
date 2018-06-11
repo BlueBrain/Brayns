@@ -733,6 +733,8 @@ public:
     {
         auto& params = _parametersManager.getVolumeParameters();
         auto postUpdate = [this](VolumeParameters&) {
+            // Cleanup existing volume data
+            // _engine->getScene().resetVolumeHandler();
             _engine->markRebuildScene();
         };
         _handleGET(ENDPOINT_VOLUME_PARAMS, params);
@@ -763,7 +765,7 @@ public:
     {
         _handleRPC(METHOD_RESET_CAMERA,
                    "Resets the camera to its initial values", [this] {
-                       _engine->getCamera().reset();
+                       _engine->setDefaultCamera();
                        _jsonrpcServer->notify(ENDPOINT_CAMERA,
                                               _engine->getCamera());
                        _engine->triggerRender();

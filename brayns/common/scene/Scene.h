@@ -152,7 +152,8 @@ public:
     /**
         Returns volume data
     */
-    BRAYNS_API VolumeHandlerPtr getVolumeHandler();
+    BRAYNS_API VolumeHandlerPtr getVolumeHandler() { return _volumeHandler; }
+    BRAYNS_API virtual void resetVolumeHandler();
 
     /**
         Sets the Calcium diffusion simulation handler
@@ -284,6 +285,7 @@ protected:
 
     // Volume
     VolumeHandlerPtr _volumeHandler{nullptr};
+    size_t _volumeModelId{0};
 
     // Simulation
     AbstractSimulationHandlerPtr _simulationHandler{nullptr};

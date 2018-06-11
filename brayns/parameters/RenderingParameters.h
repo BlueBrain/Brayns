@@ -219,7 +219,7 @@ protected:
     StereoMode _stereoMode{StereoMode::none};
     strings _cameraTypeNames;
     float _ambientOcclusionStrength{0.f};
-    float _ambientOcclusionDistance{1.2f};
+    float _ambientOcclusionDistance{1e6f};
     ShadingType _shading{ShadingType::diffuse};
     bool _lightEmittingMaterials{false};
     int _spp{1};
