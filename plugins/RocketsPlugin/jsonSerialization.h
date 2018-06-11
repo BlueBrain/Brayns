@@ -61,6 +61,11 @@ struct GetInstances
     size_t modelID;
     Vector2ui resultRange;
 };
+
+struct SchemaParam
+{
+    std::string endpoint;
+};
 }
 
 STATICJSON_DECLARE_ENUM(brayns::CameraType,
@@ -154,6 +159,11 @@ inline void init(brayns::GetInstances* g, ObjectHandler* h)
     h->add_property("id", &g->modelID);
     h->add_property("result_range", Vector2uiArray(g->resultRange),
                     Flags::Optional);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+inline void init(brayns::SchemaParam* s, ObjectHandler* h)
+{
+    h->add_property("endpoint", &s->endpoint);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 inline void init(brayns::Chunk* c, ObjectHandler* h)

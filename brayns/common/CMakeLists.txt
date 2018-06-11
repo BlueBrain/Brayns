@@ -85,4 +85,7 @@ set(BRAYNSCOMMON_LINK_LIBRARIES
 )
 
 common_library(braynsCommon)
-target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
+
+if(FreeImage_FOUND)
+  target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
+endif()
