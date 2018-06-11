@@ -191,7 +191,16 @@ struct Brayns::Impl : public PluginAPI
         _extensionPluginFactory.preRender();
 
         auto& scene = _engine->getScene();
+        auto& camera = _engine->getCamera();
+
+        if (_parametersManager.isAnyModified() || camera.isModified() ||
+            scene.isModified() || scene.getTransferFunction().isModified())
+        {
+            _engine->getFrameBuffer().clear();
+        }
+
         scene.commit();
+
         _sceneWasModified = _sceneWasModified || scene.isModified();
         if (scene.isModified())
             _finishLoadScene();
@@ -209,7 +218,6 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->commit();
 
-        Camera& camera = _engine->getCamera();
         camera.commit();
 
         if (_parametersManager.getRenderingParameters().getHeadLight())
@@ -225,13 +233,7 @@ struct Brayns::Impl : public PluginAPI
             }
         }
 
-        if (_parametersManager.isAnyModified() || camera.isModified() ||
-            scene.isModified())
-        {
-            _engine->getFrameBuffer().clear();
-        }
-
-        _engine->getScene().getTransferFunction().resetModified();
+        scene.getTransferFunction().resetModified();
         _parametersManager.resetModified();
         _engine->getCamera().resetModified();
         _engine->getScene().resetModified();
