@@ -47,35 +47,46 @@
 
 namespace
 {
-const std::string ENDPOINT_API_VERSION = "v1/";
+// REST PUT & GET, JSONRPC set-* notification, JSONRPC get-* request
 const std::string ENDPOINT_ANIMATION_PARAMS = "animation-parameters";
 const std::string ENDPOINT_APP_PARAMS = "application-parameters";
 const std::string ENDPOINT_CAMERA = "camera";
-const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
 const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
-const std::string ENDPOINT_IMAGE_JPEG = "image-jpeg";
 const std::string ENDPOINT_TRANSFER_FUNCTION = "transfer-function";
 const std::string ENDPOINT_RENDERING_PARAMS = "rendering-parameters";
 const std::string ENDPOINT_SCENE = "scene";
 const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
-const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
-const std::string ENDPOINT_STATISTICS = "statistics";
 const std::string ENDPOINT_STREAM = "stream";
-const std::string ENDPOINT_STREAM_TO = "stream-to";
-const std::string ENDPOINT_VERSION = "version";
-const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
 const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
+// REST GET, JSONRPC get-* request
+const std::string ENDPOINT_STATISTICS = "statistics";
+const std::string ENDPOINT_VERSION = "version";
+
+// REST GET
+const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
+const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
+const std::string ENDPOINT_VOLUME_HISTOGRAM = "volume-histogram";
+
+// JSONRPC async requests
 const std::string METHOD_ADD_MODEL = "add-model";
-const std::string METHOD_CHUNK = "chunk";
-const std::string METHOD_GET_INSTANCES = "get-instances";
-const std::string METHOD_INSPECT = "inspect";
-const std::string METHOD_QUIT = "quit";
-const std::string METHOD_REMOVE_MODEL = "remove-model";
-const std::string METHOD_RESET_CAMERA = "reset-camera";
 const std::string METHOD_SNAPSHOT = "snapshot";
+// METHOD_REQUEST_MODEL_UPLOAD from BinaryRequests.h
+
+// JSONRPC synchronous requests
+const std::string METHOD_GET_INSTANCES = "get-instances";
+const std::string METHOD_IMAGE_JPEG = "image-jpeg";
+const std::string METHOD_INSPECT = "inspect";
+const std::string METHOD_REMOVE_MODEL = "remove-model";
+const std::string METHOD_SCHEMA = "schema";
 const std::string METHOD_UPDATE_INSTANCE = "update-instance";
 const std::string METHOD_UPDATE_MODEL = "update-model";
+
+// JSONRPC notifications
+const std::string METHOD_CHUNK = "chunk";
+const std::string METHOD_QUIT = "quit";
+const std::string METHOD_RESET_CAMERA = "reset-camera";
+const std::string METHOD_STREAM_TO = "stream-to";
 
 const std::string JSON_TYPE = "application/json";
 
@@ -100,6 +111,16 @@ std::string hyphenatedToCamelCase(const std::string& hyphenated)
     }
     camel[0] = toupper(camel[0]);
     return camel;
+}
+
+std::string getNotificationEndpointName(const std::string& endpoint)
+{
+    return "set-" + endpoint;
+}
+
+std::string getRequestEndpointName(const std::string& endpoint)
+{
+    return "get-" + endpoint;
 }
 }
 
@@ -176,7 +197,7 @@ public:
         // only broadcast changes that are a result of the rendering. All other
         // changes are already broadcasted in preRender().
         _wsBroadcastOperations[ENDPOINT_ANIMATION_PARAMS]();
-        _wsBroadcastOperations[ENDPOINT_IMAGE_JPEG]();
+        _wsBroadcastOperations[METHOD_IMAGE_JPEG]();
         _wsBroadcastOperations[ENDPOINT_STATISTICS]();
     }
 
@@ -233,9 +254,6 @@ public:
     {
         _rocketsServer->handleOpen([this](const uintptr_t) {
             std::vector<rockets::ws::Response> responses;
-            for (auto& i : _wsClientConnectNotifications)
-                responses.push_back({i.second(), rockets::ws::Recipient::sender,
-                                     rockets::ws::Format::text});
 
             const auto image =
                 _imageGenerator.createJPEG(_engine->getFrameBuffer(),
@@ -276,24 +294,28 @@ public:
     {
         using namespace rockets::http;
 
-        _rocketsServer->handle(Method::GET, ENDPOINT_API_VERSION + endpoint,
-                               [&obj](const Request&) {
-                                   return make_ready_response(Code::OK,
-                                                              to_json(obj),
-                                                              JSON_TYPE);
-                               });
+        _rocketsServer->handle(Method::GET, endpoint, [&obj](const Request&) {
+            return make_ready_response(Code::OK, to_json(obj), JSON_TYPE);
+        });
 
         _handleObjectSchema(endpoint, obj);
 
-        _wsClientConnectNotifications[endpoint] = [&obj, endpoint] {
-            return rockets::jsonrpc::makeNotification(endpoint, obj);
+        _wsBroadcastOperations[endpoint] =
+            [& server = _jsonrpcServer, &obj, endpoint, modifiedFunc ]
+        {
+            if (modifiedFunc(obj))
+                server->notify(getNotificationEndpointName(endpoint), obj);
         };
 
-        _wsBroadcastOperations[endpoint] = [this, &obj, endpoint,
-                                            modifiedFunc] {
-            if (modifiedFunc(obj))
-                _jsonrpcServer->notify(endpoint, obj);
-        };
+        const std::string rpcEndpoint = getRequestEndpointName(endpoint);
+
+        _jsonrpcServer->bind(rpcEndpoint,
+                             std::function<const T&()>(
+                                 [&obj]() -> const T& { return obj; }));
+        _handleSchema(rpcEndpoint,
+                      buildJsonRpcSchema(rpcEndpoint,
+                                         "Get the current state of " +
+                                             endpoint));
     }
 
     template <class T>
@@ -312,29 +334,36 @@ public:
     void _handlePUT(const std::string& endpoint, T& obj, F postUpdateFunc)
     {
         using namespace rockets::http;
-        _rocketsServer->handle(Method::PUT, ENDPOINT_API_VERSION + endpoint,
-                               [&obj, postUpdateFunc](const Request& req) {
-                                   return make_ready_response(
-                                       from_json(obj, req.body, postUpdateFunc)
+        _rocketsServer->handle(Method::PUT, endpoint, [&obj, postUpdateFunc](
+                                                          const Request& req) {
+            return make_ready_response(from_json(obj, req.body, postUpdateFunc)
                                            ? Code::OK
                                            : Code::BAD_REQUEST);
-                               });
+        });
 
         _handleObjectSchema(endpoint, obj);
 
-        _jsonrpcServer->bind(endpoint, [this, endpoint, &obj, postUpdateFunc](
-                                           rockets::jsonrpc::Request request) {
+        const std::string rpcEndpoint = getNotificationEndpointName(endpoint);
+
+        _jsonrpcServer->bind(rpcEndpoint, [
+            engine = _engine, &server = _rocketsServer, rpcEndpoint, &obj,
+            postUpdateFunc
+        ](rockets::jsonrpc::Request request) {
             if (from_json(obj, request.message, postUpdateFunc))
             {
-                _engine->triggerRender();
+                engine->triggerRender();
 
                 const auto& msg =
-                    rockets::jsonrpc::makeNotification(endpoint, obj);
-                _rocketsServer->broadcastText(msg, {request.clientID});
+                    rockets::jsonrpc::makeNotification(rpcEndpoint, obj);
+                server->broadcastText(msg, {request.clientID});
                 return rockets::jsonrpc::Response{"null"};
             }
             return rockets::jsonrpc::Response::invalidParams();
         });
+        RpcDocumentation doc{"Set the new state of " + endpoint, "param",
+                             endpoint};
+        _handleSchema(rpcEndpoint,
+                      buildJsonRpcSchema<T>(rpcEndpoint, doc, obj));
     }
 
     template <class T>
@@ -524,12 +553,13 @@ public:
     void _handleSchema(const std::string& endpoint, const std::string& schema)
     {
         using namespace rockets::http;
-        _rocketsServer->handle(Method::GET,
-                               ENDPOINT_API_VERSION + endpoint + "/schema",
+        _rocketsServer->handle(Method::GET, endpoint + "/schema",
                                [schema](const Request&) {
                                    return make_ready_response(Code::OK, schema,
                                                               JSON_TYPE);
                                });
+
+        _schemas[endpoint] = schema;
     }
 
     void _registerEndpoints()
@@ -559,10 +589,13 @@ public:
         _handleFrameBuffer();
         _handleSimulationHistogram();
 
+        _handleSchemaRPC();
+
         _handleInspect();
         _handleQuit();
         _handleResetCamera();
         _handleSnapshot();
+        _handleStreamTo();
 
         _handleRequestModelUpload();
         _handleChunk();
@@ -579,7 +612,7 @@ public:
     {
         // don't add framebuffer to websockets for performance
         using namespace rockets::http;
-        _rocketsServer->handleGET(ENDPOINT_API_VERSION + ENDPOINT_FRAME_BUFFERS,
+        _rocketsServer->handleGET(ENDPOINT_FRAME_BUFFERS,
                                   _engine->getFrameBuffer());
         _handleObjectSchema(ENDPOINT_FRAME_BUFFERS, _engine->getFrameBuffer());
     }
@@ -596,38 +629,20 @@ public:
 
     void _handleImageJPEG()
     {
-        using namespace rockets::http;
+        _jsonrpcServer->bind(METHOD_IMAGE_JPEG,
+                             std::function<ImageGenerator::ImageBase64()>([&] {
+                                 return _imageGenerator.createImage(
+                                     _engine->getFrameBuffer(), "jpg",
+                                     _parametersManager
+                                         .getApplicationParameters()
+                                         .getJpegCompression());
+                             }));
+        _handleSchema(METHOD_IMAGE_JPEG,
+                      buildJsonRpcSchema(METHOD_IMAGE_JPEG,
+                                         "Get the current state of " +
+                                             METHOD_IMAGE_JPEG));
 
-        auto func = [&](const Request&) {
-            try
-            {
-                const auto obj =
-                    _imageGenerator.createImage(_engine->getFrameBuffer(),
-                                                "jpg",
-                                                _parametersManager
-                                                    .getApplicationParameters()
-                                                    .getJpegCompression());
-                return make_ready_response(Code::OK, to_json(obj), JSON_TYPE);
-            }
-            catch (const std::runtime_error& e)
-            {
-                return make_ready_response(Code::BAD_REQUEST, e.what());
-            }
-        };
-        _rocketsServer->handle(Method::GET,
-                               ENDPOINT_API_VERSION + ENDPOINT_IMAGE_JPEG,
-                               func);
-
-        _rocketsServer->handle(
-            Method::GET, ENDPOINT_API_VERSION + ENDPOINT_IMAGE_JPEG + "/schema",
-            [&](const Request&) {
-                return make_ready_response(
-                    Code::OK, getSchema<ImageGenerator::ImageBase64>(
-                                  hyphenatedToCamelCase(ENDPOINT_IMAGE_JPEG)),
-                    JSON_TYPE);
-            });
-
-        _wsBroadcastOperations[ENDPOINT_IMAGE_JPEG] = [this] {
+        _wsBroadcastOperations[METHOD_IMAGE_JPEG] = [this] {
             if (_engine->getFrameBuffer().isModified())
             {
                 const auto& params =
@@ -666,8 +681,7 @@ public:
             const auto& histo = simulationHandler->getHistogram();
             return make_ready_response(Code::OK, to_json(histo), JSON_TYPE);
         };
-        _rocketsServer->handle(Method::GET, ENDPOINT_API_VERSION +
-                                                ENDPOINT_SIMULATION_HISTOGRAM,
+        _rocketsServer->handle(Method::GET, ENDPOINT_SIMULATION_HISTOGRAM,
                                func);
     }
 
@@ -675,8 +689,6 @@ public:
     {
 #if BRAYNS_USE_DEFLECT
         _handle(ENDPOINT_STREAM, _parametersManager.getStreamParameters());
-        _handlePUT(ENDPOINT_STREAM_TO,
-                   _parametersManager.getStreamParameters());
 #else
         _handleGET(ENDPOINT_STREAM, _parametersManager.getStreamParameters());
         using namespace rockets::http;
@@ -687,8 +699,6 @@ public:
         };
         _rocketsServer->handle(Method::PUT, ENDPOINT_STREAM,
                                respondNotImplemented);
-        _rocketsServer->handle(Method::PUT, ENDPOINT_STREAM_TO,
-                               respondNotImplemented);
 #endif
     }
 
@@ -696,18 +706,17 @@ public:
     {
         static brayns::Version version;
         using namespace rockets::http;
-        _rocketsServer->handleGET(ENDPOINT_API_VERSION + ENDPOINT_VERSION,
-                                  version);
+        _rocketsServer->handleGET(ENDPOINT_VERSION, version);
         _rocketsServer->handle(
-            Method::GET, ENDPOINT_API_VERSION + ENDPOINT_VERSION + "/schema",
-            [&](const Request&) {
+            Method::GET, ENDPOINT_VERSION + "/schema", [&](const Request&) {
                 return make_ready_response(Code::OK, version.getSchema(),
                                            JSON_TYPE);
             });
-        _wsClientConnectNotifications[ENDPOINT_VERSION] = [] {
-            return rockets::jsonrpc::makeNotification(ENDPOINT_VERSION,
-                                                      version);
-        };
+
+        _jsonrpcServer->bind(ENDPOINT_VERSION,
+                             (std::function<brayns::Version()>)[] {
+                                 return brayns::Version();
+                             });
     }
 
     void _handleVolumeHistogram()
@@ -716,17 +725,16 @@ public:
 
         using namespace rockets::http;
 
-        auto func = [this](const Request&) {
-            auto volumeHandler = _engine->getScene().getVolumeHandler();
+        auto func = [engine = _engine](const Request&)
+        {
+            auto volumeHandler = engine->getScene().getVolumeHandler();
             if (!volumeHandler)
                 return make_ready_response(Code::NOT_SUPPORTED);
             const auto& histo = volumeHandler->getHistogram();
             return make_ready_response(Code::OK, to_json(histo), JSON_TYPE);
         };
 
-        _rocketsServer->handle(Method::GET,
-                               ENDPOINT_API_VERSION + ENDPOINT_VOLUME_HISTOGRAM,
-                               func);
+        _rocketsServer->handle(Method::GET, ENDPOINT_VOLUME_HISTOGRAM, func);
     }
 
     void _handleVolumeParams()
@@ -739,15 +747,39 @@ public:
         _handlePUT(ENDPOINT_VOLUME_PARAMS, params, postUpdate);
     }
 
+    void _handleSchemaRPC()
+    {
+        RpcDocumentation doc{"Get the schema of the given endpoint", "endpoint",
+                             "name of the endpoint to get its schema"};
+
+        _jsonrpcServer->bind(METHOD_SCHEMA, [& schemas = _schemas](
+                                                const auto& request) {
+            SchemaParam param;
+            if (::from_json(param, request.message))
+            {
+                if (schemas.count(param.endpoint) == 0)
+                    return Response{
+                        Response::Error{"Endpoint not found", -12347}};
+
+                auto schema = schemas[param.endpoint];
+                return Response{std::move(schema)};
+            }
+            return rockets::jsonrpc::Response::invalidParams();
+        });
+
+        _handleSchema(
+            METHOD_SCHEMA,
+            buildJsonRpcSchema<SchemaParam, std::string>(METHOD_SCHEMA, doc));
+    }
+
     void _handleInspect()
     {
         using Position = std::array<float, 2>;
         RpcDocumentation doc{"Inspect the scene at x-y position", "position",
                              "x-y position in normalized coordinates"};
         _handleRPC<Position, Renderer::PickResult>(
-            METHOD_INSPECT, doc, [this](const Position& position) {
-                return _engine->getRenderer().pick(
-                    Vector2f(position[0], position[1]));
+            METHOD_INSPECT, doc, [engine = _engine](const auto& position) {
+                return engine->getRenderer().pick({position[0], position[1]});
             });
     }
 
@@ -764,7 +796,7 @@ public:
         _handleRPC(METHOD_RESET_CAMERA,
                    "Resets the camera to its initial values", [this] {
                        _engine->setDefaultCamera();
-                       _jsonrpcServer->notify(ENDPOINT_CAMERA,
+                       _jsonrpcServer->notify(getNotificationEndpointName(ENDPOINT_CAMERA),
                                               _engine->getCamera());
                        _engine->triggerRender();
                    });
@@ -784,6 +816,35 @@ public:
         };
         _handleTask<SnapshotParams, ImageGenerator::ImageBase64>(
             METHOD_SNAPSHOT, doc, func);
+    }
+
+    void _handleStreamTo()
+    {
+        RpcDocumentation doc{"Stream to a displawall", "param",
+                             "Stream parameters"};
+
+        _jsonrpcServer->bind(METHOD_STREAM_TO, [
+            engine = _engine, &server = _rocketsServer
+        ](const auto& request) {
+            auto& streamParams =
+                engine->getParametersManager().getStreamParameters();
+            if (::from_json(streamParams, request.message))
+            {
+                streamParams.markModified();
+                engine->triggerRender();
+
+                const auto& msg =
+                    rockets::jsonrpc::makeNotification(METHOD_STREAM_TO,
+                                                       streamParams);
+                server->broadcastText(msg, {request.clientID});
+                return rockets::jsonrpc::Response{"null"};
+            }
+            return rockets::jsonrpc::Response::invalidParams();
+        });
+
+        _handleSchema(METHOD_STREAM_TO,
+                      buildJsonRpcSchema<StreamParameters>(METHOD_STREAM_TO,
+                                                           doc));
     }
 
     void _handleRequestModelUpload()
@@ -928,12 +989,10 @@ public:
 
     EnginePtr _engine;
 
-    using WsClientConnectNotifications =
-        std::map<std::string, std::function<std::string()>>;
-    WsClientConnectNotifications _wsClientConnectNotifications;
-
     using WsBroadcastOperations = std::map<std::string, std::function<void()>>;
     WsBroadcastOperations _wsBroadcastOperations;
+
+    std::unordered_map<std::string, std::string> _schemas;
 
     ParametersManager& _parametersManager;
 

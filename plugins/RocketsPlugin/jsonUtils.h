@@ -60,10 +60,10 @@ std::string getSchema(T& obj, const std::string& title)
 /** @return JSON schema for JSON RPC parameter */
 template <class T>
 rapidjson::Document getRPCParameterSchema(const std::string& paramName,
-                                          const std::string& paramDescription)
+                                          const std::string& paramDescription,
+                                          T& obj)
 {
-    T paramVal;
-    rapidjson::Document schema = staticjson::export_json_schema(&paramVal);
+    rapidjson::Document schema = staticjson::export_json_schema(&obj);
 
     using namespace rapidjson;
     schema.AddMember(StringRef("name"),
@@ -90,7 +90,7 @@ struct RpcDocumentation
  */
 template <class P, class R>
 std::string buildJsonRpcSchema(const std::string& title,
-                               const RpcDocumentation& doc)
+                               const RpcDocumentation& doc, P& obj)
 {
     using namespace rapidjson;
     Document schema(kObjectType);
@@ -108,7 +108,7 @@ std::string buildJsonRpcSchema(const std::string& title,
 
     Value params(kArrayType);
     auto paramSchema =
-        getRPCParameterSchema<P>(doc.paramName, doc.paramDescription);
+        getRPCParameterSchema<P>(doc.paramName, doc.paramDescription, obj);
     params.PushBack(paramSchema, schema.GetAllocator());
     schema.AddMember(StringRef("params"), params, schema.GetAllocator());
 
@@ -118,6 +118,14 @@ std::string buildJsonRpcSchema(const std::string& title,
     return buffer.GetString();
 }
 
+template <class P, class R>
+std::string buildJsonRpcSchema(const std::string& title,
+                               const RpcDocumentation& doc)
+{
+    P obj;
+    return buildJsonRpcSchema<P, R>(title, doc, obj);
+}
+
 /**
  * @return JSON schema for RPC with one parameter and no return value, according
  * to
@@ -125,7 +133,7 @@ std::string buildJsonRpcSchema(const std::string& title,
  */
 template <class P>
 std::string buildJsonRpcSchema(const std::string& title,
-                               const RpcDocumentation& doc)
+                               const RpcDocumentation& doc, P& obj)
 {
     using namespace rapidjson;
     Document schema(kObjectType);
@@ -139,7 +147,7 @@ std::string buildJsonRpcSchema(const std::string& title,
 
     Value params(kArrayType);
     auto paramSchema =
-        getRPCParameterSchema<P>(doc.paramName, doc.paramDescription);
+        getRPCParameterSchema<P>(doc.paramName, doc.paramDescription, obj);
     params.PushBack(paramSchema, schema.GetAllocator());
     schema.AddMember(StringRef("params"), params, schema.GetAllocator());
 
@@ -147,6 +155,14 @@ std::string buildJsonRpcSchema(const std::string& title,
     PrettyWriter<StringBuffer> writer(buffer);
     schema.Accept(writer);
     return buffer.GetString();
+}
+
+template <class P>
+std::string buildJsonRpcSchema(const std::string& title,
+                               const RpcDocumentation& doc)
+{
+    P obj;
+    return buildJsonRpcSchema<P>(title, doc, obj);
 }
 
 /** @return JSON schema for RPC with no parameter and no return value. */
