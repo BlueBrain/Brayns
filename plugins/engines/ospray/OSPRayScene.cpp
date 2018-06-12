@@ -271,6 +271,7 @@ bool OSPRayScene::commitTransferFunctionData()
         ospCommit(impl);
     }
     _transferFunction.resetModified();
+    markModified();
     return true;
 }
 
