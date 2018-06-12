@@ -529,8 +529,7 @@ private:
             loadingProgress += tic;
         }
 
-        if (!geometryParameters.getCircuitConfiguration().empty() &&
-            geometryParameters.getConnectivityFile().empty())
+        if (!geometryParameters.getCircuitConfiguration().empty())
             _loadCircuitConfiguration(updateProgress);
 #endif
 

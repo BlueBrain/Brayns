@@ -70,13 +70,6 @@ const std::string PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE =
 const std::string PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES =
     "morphology-use-sdf-geometries";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
-const std::string PARAM_CONNECTIVITY_FILE = "connectivity-file";
-const std::string PARAM_CONNECTIVITY_MATRIX_ID = "connectivity-matrix-id";
-const std::string PARAM_CONNECTIVITY_SHOW_CONNECTIONS =
-    "connectivity-show-connections";
-const std::string PARAM_CONNECTIVITY_DIMENSION_RANGE =
-    "connectivity-dimension-range";
-const std::string PARAM_CONNECTIVITY_SCALE = "connectivity-scale";
 
 const std::string COLOR_SCHEMES[12] = {"none",
                                        "neuron-by-id",
@@ -196,17 +189,7 @@ GeometryParameters::GeometryParameters()
         "morphology [string]")(PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(),
                                po::value<bool>(),
                                "Enable/Disable mesh transformation according "
-                               "to circuit information [bool]")(
-        PARAM_CONNECTIVITY_FILE.c_str(), po::value<std::string>(),
-        "H5 file containing neuron connectivity [string]")(
-        PARAM_CONNECTIVITY_MATRIX_ID.c_str(), po::value<size_t>(),
-        "Connectivity matrix id [int]")(
-        PARAM_CONNECTIVITY_SHOW_CONNECTIONS.c_str(), po::value<bool>(),
-        "Show connections between cells [bool]")(
-        PARAM_CONNECTIVITY_DIMENSION_RANGE.c_str(),
-        po::value<size_ts>()->multitoken(), "Range of dimensions [int int]")(
-        PARAM_CONNECTIVITY_SCALE.c_str(), po::value<floats>()->multitoken(),
-        "Connectivity scaling [float float float]");
+                               "to circuit information [bool]");
 }
 
 void GeometryParameters::parse(const po::variables_map& vm)
@@ -354,37 +337,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
         _circuitConfiguration.meshTransformation =
             vm[PARAM_CIRCUIT_MESH_TRANSFORMATION].as<bool>();
 
-    // Neuron connectivity
-    if (vm.count(PARAM_CONNECTIVITY_FILE))
-        _connectivityConfiguration._connectivityFile =
-            vm[PARAM_CONNECTIVITY_FILE].as<std::string>();
-    if (vm.count(PARAM_CONNECTIVITY_MATRIX_ID))
-        _connectivityConfiguration._connectivityMatrixId =
-            vm[PARAM_CONNECTIVITY_MATRIX_ID].as<size_t>();
-    if (vm.count(PARAM_CONNECTIVITY_SHOW_CONNECTIONS))
-        _connectivityConfiguration._connectivityShowConnections =
-            vm[PARAM_CONNECTIVITY_SHOW_CONNECTIONS].as<bool>();
-    if (vm.count(PARAM_CONNECTIVITY_DIMENSION_RANGE))
-    {
-        const size_ts values =
-            vm[PARAM_CONNECTIVITY_DIMENSION_RANGE].as<size_ts>();
-        if (values.size() == 2)
-            _connectivityConfiguration._connectivityDimensionRange =
-                Vector2ui(values[0], values[1]);
-        else
-            BRAYNS_ERROR << "Invalid number of values for "
-                         << PARAM_CONNECTIVITY_DIMENSION_RANGE << std::endl;
-    }
-    if (vm.count(PARAM_CONNECTIVITY_SCALE))
-    {
-        const floats values = vm[PARAM_CONNECTIVITY_SCALE].as<floats>();
-        if (values.size() == 3)
-            _connectivityConfiguration._connectivityScale =
-                Vector3f(values[0], values[1], values[2]);
-        else
-            BRAYNS_ERROR << "Invalid number of values for "
-                         << PARAM_CONNECTIVITY_SCALE << std::endl;
-    }
     markModified();
 }
 
@@ -459,22 +411,6 @@ void GeometryParameters::print()
                 << std::endl;
     BRAYNS_INFO << "Mesh filename pattern      : "
                 << _circuitConfiguration.meshFilenamePattern << std::endl;
-    BRAYNS_INFO << "Connectivity               : " << std::endl;
-    BRAYNS_INFO << " - File                    : "
-                << _connectivityConfiguration._connectivityFile << std::endl;
-    BRAYNS_INFO << " - Matrix Id               : "
-                << _connectivityConfiguration._connectivityMatrixId
-                << std::endl;
-    BRAYNS_INFO << " - Show connections        : "
-                << (_connectivityConfiguration._connectivityShowConnections
-                        ? "Yes"
-                        : "No")
-                << std::endl;
-    BRAYNS_INFO << " - Dimension range         : "
-                << _connectivityConfiguration._connectivityDimensionRange
-                << std::endl;
-    BRAYNS_INFO << " - Scale                   : "
-                << _connectivityConfiguration._connectivityScale << std::endl;
 }
 
 const std::string& GeometryParameters::getColorSchemeAsString(
