@@ -390,20 +390,6 @@ inline void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::ConnectivityConfiguration* c, ObjectHandler* h)
-{
-    h->add_property("filename", &c->_connectivityFile, Flags::Optional);
-    h->add_property("matrix_id", &c->_connectivityMatrixId, Flags::Optional);
-    h->add_property("show_connections", &c->_connectivityShowConnections,
-                    Flags::Optional);
-    h->add_property("dimension_range",
-                    Vector2uiArray(c->_connectivityDimensionRange),
-                    Flags::Optional);
-    h->add_property("scale", Vector3fArray(c->_connectivityScale),
-                    Flags::Optional);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
 inline void init(brayns::StreamParameters* s, ObjectHandler* h)
 {
     h->add_property("host", &s->_host);
@@ -455,15 +441,11 @@ inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
     h->add_property("memory_mode", &g->_memoryMode, Flags::Optional);
     h->add_property("circuit_configuration", &g->_circuitConfiguration,
                     Flags::Optional);
-    h->add_property("connectivity_configuration",
-                    &g->_connectivityConfiguration, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 {
-    static float dummy; // until brayns-ui is updated
-    h->add_property("shadows", &dummy, Flags::Optional);
     h->add_property("engine", &r->_engine, Flags::IgnoreRead | Flags::Optional);
     h->add_property("samples_per_pixel", &r->_spp, Flags::Optional);
     h->add_property("shader", &r->_renderer, Flags::Optional);

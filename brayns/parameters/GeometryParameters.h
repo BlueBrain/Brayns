@@ -61,16 +61,6 @@ struct CircuitConfiguration
     bool meshTransformation{false};
 };
 
-struct ConnectivityConfiguration
-{
-    std::string _connectivityFile;
-    size_t _connectivityMatrixId{0};
-    bool _connectivityShowConnections{false};
-    Vector2ui _connectivityDimensionRange{
-        0, std::numeric_limits<unsigned int>::max()};
-    Vector3f _connectivityScale{1.f, 1.f, 1.f};
-};
-
 /** Manages geometry parameters
  */
 class GeometryParameters : public AbstractParameters
@@ -254,32 +244,6 @@ public:
      * underlying renderer
      */
     MemoryMode getMemoryMode() const { return _memoryMode; };
-    /** File containing neuron matrix */
-    const std::string& getConnectivityFile() const
-    {
-        return _connectivityConfiguration._connectivityFile;
-    }
-    /** Matrix id */
-    size_t getConnectivityMatrixId() const
-    {
-        return _connectivityConfiguration._connectivityMatrixId;
-    }
-    /** Show/Hide connection in matrix */
-    size_t getConnectivityShowConnections() const
-    {
-        return _connectivityConfiguration._connectivityShowConnections;
-    }
-    /** Range of dimensions */
-    Vector2ui getConnectivityDimensionRange() const
-    {
-        return _connectivityConfiguration._connectivityDimensionRange;
-    }
-    /** Range of dimensions */
-    Vector3f getConnectivityScale() const
-    {
-        return _connectivityConfiguration._connectivityScale;
-    }
-
     bool getMorphologyDampenBranchThicknessChangerate() const
     {
         return _morphologyDampenBranchThicknessChangerate;
@@ -321,8 +285,6 @@ protected:
 
     // System parameters
     MemoryMode _memoryMode;
-
-    ConnectivityConfiguration _connectivityConfiguration;
 
     SERIALIZATION_FRIEND(GeometryParameters)
 };
