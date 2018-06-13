@@ -306,9 +306,12 @@ RendererPtr OSPRayEngine::createRenderer(
     const RendererType type, const AnimationParameters& animationParameters,
     const RenderingParameters& renderingParameters) const
 {
-    return std::make_shared<OSPRayRenderer>(
-        renderingParameters.getRendererAsString(type), animationParameters,
-        renderingParameters);
+    // take the renderer string from the internal params as it might have been
+    // patched to account for plugin renderers
+    const auto& rp = _parametersManager.getRenderingParameters();
+    return std::make_shared<OSPRayRenderer>(rp.getRendererAsString(type),
+                                            animationParameters,
+                                            renderingParameters);
 }
 
 uint32_t OSPRayEngine::_getOSPDataFlags() const
