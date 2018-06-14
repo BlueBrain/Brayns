@@ -1,26 +1,32 @@
 # Brayns user guide
 
-## Data sources
+## Basic usage
 
-### Morphologies
+Brayns takes any number of files or folders as argument. To open a single file:
+```
+braynsViewer model.obj
+```
 
-#### Loading data
+Alternatively, to open all supported files in a folder:
+```
+braynsViewer ~/datasets/
+```
 
-The generic (optional) command line argument ```--input-paths``` can be used to specify files and/or folders to load data from.
+## Neurons
 
-#### Loading morphologies
+### Loading individual morphologies
 
-SWC or H5 morphology files (supported by the [Brion](https://github.com/BlueBrain/Brion) library) can be loaded
-easily.
+SWC or H5 morphology files (supported by the
+[Brion](https://github.com/BlueBrain/Brion) library) can be loaded easily.
 
 ```
 braynsViewer ~/morphologies
 ```
 
-### Loading a circuit
+### Loading a NEURON simulation
 
 BlueConfig or CircuitConfig files (supported by the Brion library) can be
-loaded. The ```--circuit-targets``` command line argument specified the circuit target
+loaded. The ```--circuit-targets``` command line argument specifies the circuit target
 (or multiples separated by comma), and the ```--circuit-report``` command line
 argument specifies the simulation report to be rendered.
 
@@ -55,7 +61,7 @@ Example of how to load 10% of the circuit:
 braynsViewer ~/circuits/BlueConfig --circuit-density 10
 ```
 
-### Loading a NEST circuit
+### Loading a NEST simulation
 
 The ```--nest-config``` command line argument define the NEST circuit to be loaded by
 Brayns. The ```--nest-report``` command line argument specifies the report to be
