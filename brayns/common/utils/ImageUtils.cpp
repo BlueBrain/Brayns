@@ -22,6 +22,8 @@
 
 #include <brayns/common/renderer/FrameBuffer.h>
 
+#ifdef BRAYNS_USE_FREEIMAGE
+
 namespace
 {
 template <class T>
@@ -108,3 +110,5 @@ std::string getBase64Image(FrameBuffer& frameBuffer, const std::string& format,
 }
 }
 }
+
+#endif
