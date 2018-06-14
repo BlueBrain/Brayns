@@ -240,7 +240,9 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
     for (size_t m = 0; m < aiScene->mNumMeshes; ++m)
     {
         auto mesh = aiScene->mMeshes[m];
-        auto& triangleMeshes = model.getTrianglesMeshes()[mesh->mMaterialIndex];
+        auto id =
+            (materialId != NO_MATERIAL ? materialId : mesh->mMaterialIndex);
+        auto& triangleMeshes = model.getTrianglesMeshes()[id];
 
         nbVertices += mesh->mNumVertices;
         triangleMeshes.vertices.reserve(nbVertices);
