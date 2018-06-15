@@ -977,34 +977,39 @@ void RocketsPlugin::postSceneLoading()
 void RocketsPlugin::_registerRequest(const std::string& name,
                                      const RetParamFunc& action)
 {
-    _impl->_jsonrpcServer->bind(name,
-                                [action](
-                                    const rockets::jsonrpc::Request& request) {
-                                    return Response{action(request.message)};
-                                });
+    _impl->_jsonrpcServer->bind(name, [ action, engine = _impl->_engine ](
+                                          const auto& request) {
+        engine->triggerRender();
+        return Response{action(request.message)};
+    });
 }
 
 void RocketsPlugin::_registerRequest(const std::string& name,
                                      const RetFunc& action)
 {
-    _impl->_jsonrpcServer->bind(name,
-                                [action](const rockets::jsonrpc::Request&) {
-                                    return Response{action()};
-                                });
+    _impl->_jsonrpcServer->bind(name, [ action,
+                                        engine = _impl->_engine ](const auto&) {
+        engine->triggerRender();
+        return Response{action()};
+    });
 }
 
 void RocketsPlugin::_registerNotification(const std::string& name,
                                           const ParamFunc& action)
 {
-    _impl->_jsonrpcServer->connect(
-        name, [action](const rockets::jsonrpc::Request& request) {
-            action(request.message);
-        });
+    _impl->_jsonrpcServer->connect(name, [ action, engine = _impl->_engine ](
+                                             const auto& request) {
+        engine->triggerRender();
+        action(request.message);
+    });
 }
 
 void RocketsPlugin::_registerNotification(const std::string& name,
                                           const VoidFunc& action)
 {
-    _impl->_jsonrpcServer->connect(name, [action] { action(); });
+    _impl->_jsonrpcServer->connect(name, [ action, engine = _impl->_engine ] {
+        engine->triggerRender();
+        action();
+    });
 }
 }

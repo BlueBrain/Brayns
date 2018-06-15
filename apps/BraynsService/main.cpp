@@ -154,7 +154,7 @@ private:
             if (_timeSinceLastEvent.elapsed() < _idleRenderingDelay)
                 return;
 
-            if (_brayns.preRender() && _brayns.getEngine().continueRendering())
+            if (_brayns.getEngine().continueRendering() && _brayns.preRender())
                 _triggerRendering->send();
 
             _accumRendering->stop();
