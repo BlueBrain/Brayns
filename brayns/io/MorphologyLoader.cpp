@@ -34,6 +34,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <unordered_map>
+
 namespace
 {
 // needs to be the same in SimulationRenderer.ispc
@@ -337,11 +339,14 @@ private:
         std::vector<size_t> materials;
         std::vector<size_t> localToGlobalIdx;
         std::vector<size_t> bifurcationIndices;
+        std::unordered_map<int, int> geometrySection;
+        std::unordered_map<int, std::vector<size_t>> sectionGeometries;
     };
 
     struct MorphologyTreeStructure
     {
         std::vector<int> bifurcationParent;
+        std::vector<std::vector<size_t>> bifurcationChildren;
         std::vector<size_t> sectionTraverseOrder;
     };
 
@@ -371,9 +376,12 @@ private:
                 createSDFConePillSigmoid(somaPosition, sample,
                                          somaRadius * 0.5f, radiusEnd, distance,
                                          textureCoordinates);
+            const size_t geomIdx = sdfMorphologyData.geometries.size();
             sdfMorphologyData.geometries.push_back(geom);
             sdfMorphologyData.neighbours.push_back({});
             sdfMorphologyData.materials.push_back(materialId);
+            sdfMorphologyData.geometrySection[geomIdx] = -1;
+            sdfMorphologyData.sectionGeometries[-1].push_back(geomIdx);
             child_indices.insert(child_indices.size());
         }
 
@@ -382,34 +390,77 @@ private:
     }
 
     /**
-     * Goes through all bifurcation spheres and connects to all SDF geometries
-     * it is overlapping.
+     * Goes through all bifurcations and connects to all connected SDF
+     * geometries it is overlapping. Every section that has a bifurcation will
+     * traverse its children and blend the geometries inside the bifurcation.
      */
-    void _connectSDFBifurcations(SDFMorphologyData& sdfMorphologyData) const
+    void _connectSDFBifurcations(SDFMorphologyData& sdfMorphologyData,
+                                 const MorphologyTreeStructure& mts) const
     {
-        const size_t numGeoms = sdfMorphologyData.geometries.size();
+        const size_t numSections = mts.bifurcationChildren.size();
 
-        // Connect all bifurcations to close points
-        for (size_t bifId : sdfMorphologyData.bifurcationIndices)
+        for (size_t section = 0; section < numSections; section++)
         {
-            const auto& bifGeom = sdfMorphologyData.geometries[bifId];
-
-            for (size_t geomIdx = 0; geomIdx < numGeoms; geomIdx++)
+            // Find the bifurction geometry id for this section
+            size_t bifurcationId = 0;
+            bool bifurcationIdFound = false;
+            for (size_t bifId : sdfMorphologyData.bifurcationIndices)
             {
-                if (geomIdx == bifId)
-                    continue;
+                const int bifSection =
+                    sdfMorphologyData.geometrySection.at(bifId);
 
-                const auto& geom = sdfMorphologyData.geometries[geomIdx];
-                const float dist0 = (geom.p0 - bifGeom.center).length();
-                const float dist1 = (geom.p1 - bifGeom.center).length();
-                const float radiusSum = geom.radius + bifGeom.radius;
-
-                if (dist0 < radiusSum || dist1 < radiusSum)
+                if (bifSection == static_cast<int>(section))
                 {
-                    sdfMorphologyData.neighbours[bifId].insert(geomIdx);
-                    sdfMorphologyData.neighbours[geomIdx].insert(bifId);
+                    bifurcationId = bifId;
+                    bifurcationIdFound = true;
+                    break;
                 }
             }
+
+            if (!bifurcationIdFound)
+                continue;
+
+            // Function for connecting overlapping geometries with current
+            // bifurcation
+            const auto connectGeometriesToBifurcation = [&](
+                const std::vector<size_t>& geometries) {
+                const auto& bifGeom =
+                    sdfMorphologyData.geometries[bifurcationId];
+
+                for (size_t geomIdx : geometries)
+                {
+                    // Do not blend yourself
+                    if (geomIdx == bifurcationId)
+                        continue;
+
+                    const auto& geom = sdfMorphologyData.geometries[geomIdx];
+                    const float dist0 =
+                        geom.p0.squared_distance(bifGeom.center);
+                    const float dist1 =
+                        geom.p1.squared_distance(bifGeom.center);
+                    const float radiusSum = geom.radius + bifGeom.radius;
+                    const float radiusSumSq = radiusSum * radiusSum;
+
+                    if (dist0 < radiusSumSq || dist1 < radiusSumSq)
+                    {
+                        sdfMorphologyData.neighbours[bifurcationId].insert(
+                            geomIdx);
+                        sdfMorphologyData.neighbours[geomIdx].insert(
+                            bifurcationId);
+                    }
+                }
+            };
+
+            // Connect all child sections
+            for (const size_t sectionChild : mts.bifurcationChildren[section])
+            {
+                connectGeometriesToBifurcation(
+                    sdfMorphologyData.sectionGeometries.at(sectionChild));
+            }
+
+            // Connect with own section
+            connectGeometriesToBifurcation(
+                sdfMorphologyData.sectionGeometries.at(section));
         }
     }
 
@@ -604,6 +655,7 @@ private:
         MorphologyTreeStructure mts;
         mts.sectionTraverseOrder = std::move(sectionOrder);
         mts.bifurcationParent = std::move(bifurcationParent);
+        mts.bifurcationChildren = std::move(bifurcationChildren);
         return mts;
     }
 
@@ -664,6 +716,7 @@ private:
                                 const size_t materialId, const float distance,
                                 const Vector2f& textureCoordinates,
                                 ParallelModelContainer& model,
+                                const size_t section,
                                 SDFMorphologyData& sdfMorphologyData) const
     {
         if (useSDFGeometries)
@@ -679,9 +732,12 @@ private:
 
                 const auto geom = createSDFSphere(position, radius, distance,
                                                   textureCoordinates);
+                const size_t geomIdx = sdfMorphologyData.geometries.size();
                 sdfMorphologyData.geometries.push_back(geom);
                 sdfMorphologyData.neighbours.push_back({});
                 sdfMorphologyData.materials.push_back(materialId);
+                sdfMorphologyData.geometrySection[geomIdx] = section;
+                sdfMorphologyData.sectionGeometries[section].push_back(geomIdx);
 
                 sdfMorphologyData.bifurcationIndices.push_back(idx);
             }
@@ -696,14 +752,12 @@ private:
     /**
      * Adds the cone between the steps in the sections
      */
-    void _addStepConeGeometry(const bool useSDFGeometries,
-                              const Vector3f& position, const float radius,
-                              const Vector3f& target,
-                              const float previousRadius,
-                              const size_t materialId, const float distance,
-                              const Vector2f& textureCoordinates,
-                              ParallelModelContainer& model,
-                              SDFMorphologyData& sdfMorphologyData) const
+    void _addStepConeGeometry(
+        const bool useSDFGeometries, const Vector3f& position,
+        const float radius, const Vector3f& target, const float previousRadius,
+        const size_t materialId, const float distance,
+        const Vector2f& textureCoordinates, ParallelModelContainer& model,
+        const size_t section, SDFMorphologyData& sdfMorphologyData) const
     {
         if (useSDFGeometries)
         {
@@ -718,9 +772,12 @@ private:
                     createSDFConePill(position, target, radius, previousRadius,
                                       distance, textureCoordinates);
 
+            const size_t geomIdx = sdfMorphologyData.geometries.size();
             sdfMorphologyData.geometries.push_back(geom);
             sdfMorphologyData.neighbours.push_back({});
             sdfMorphologyData.materials.push_back(materialId);
+            sdfMorphologyData.geometrySection[geomIdx] = section;
+            sdfMorphologyData.sectionGeometries[section].push_back(geomIdx);
         }
         else
         {
@@ -974,7 +1031,7 @@ private:
                         _addStepSphereGeometry(useSDFGeometries, done, position,
                                                radius, materialId, distance,
                                                textureCoordinates, model,
-                                               sdfMorphologyData);
+                                               sectionI, sdfMorphologyData);
 
                         if (position != target && previousRadius > 0.f)
                         {
@@ -982,7 +1039,7 @@ private:
                                                  radius, target, previousRadius,
                                                  materialId, distance,
                                                  textureCoordinates, model,
-                                                 sdfMorphologyData);
+                                                 sectionI, sdfMorphologyData);
                         }
                     }
                     previousSample = sample;
@@ -993,7 +1050,7 @@ private:
 
             if (useSDFGeometries)
             {
-                _connectSDFBifurcations(sdfMorphologyData);
+                _connectSDFBifurcations(sdfMorphologyData, morphologyTree);
                 _finalizeSDFGeometries(model, sdfMorphologyData);
             }
         }
