@@ -350,6 +350,20 @@ private:
         std::vector<size_t> sectionTraverseOrder;
     };
 
+    size_t _addSDFGeometry(SDFMorphologyData& sdfMorphologyData,
+                           const SDFGeometry& geometry,
+                           const std::set<size_t>& neighbours,
+                           const size_t materialId, const int section) const
+    {
+        const size_t idx = sdfMorphologyData.geometries.size();
+        sdfMorphologyData.geometries.push_back(geometry);
+        sdfMorphologyData.neighbours.push_back(neighbours);
+        sdfMorphologyData.materials.push_back(materialId);
+        sdfMorphologyData.geometrySection[idx] = section;
+        sdfMorphologyData.sectionGeometries[section].push_back(idx);
+        return idx;
+    }
+
     /**
      * Creates an SDF soma by adding and connecting the soma children using cone
      * pills
@@ -372,17 +386,14 @@ private:
             // Create a sigmoid cone with half of soma radius to center of soma
             // to give it an organic look.
             const float radiusEnd = _getCorrectedRadius(samples[0].w() * 0.5f);
-            SDFGeometry geom =
-                createSDFConePillSigmoid(somaPosition, sample,
-                                         somaRadius * 0.5f, radiusEnd, distance,
-                                         textureCoordinates);
-            const size_t geomIdx = sdfMorphologyData.geometries.size();
-            sdfMorphologyData.geometries.push_back(geom);
-            sdfMorphologyData.neighbours.push_back({});
-            sdfMorphologyData.materials.push_back(materialId);
-            sdfMorphologyData.geometrySection[geomIdx] = -1;
-            sdfMorphologyData.sectionGeometries[-1].push_back(geomIdx);
-            child_indices.insert(child_indices.size());
+            const size_t geomIdx =
+                _addSDFGeometry(sdfMorphologyData,
+                                createSDFConePillSigmoid(somaPosition, sample,
+                                                         somaRadius * 0.5f,
+                                                         radiusEnd, distance,
+                                                         textureCoordinates),
+                                {}, materialId, -1);
+            child_indices.insert(geomIdx);
         }
 
         for (size_t c : child_indices)
@@ -728,16 +739,11 @@ private:
                 // sphere between segments except at the
                 // bifurcation
 
-                const size_t idx = sdfMorphologyData.geometries.size();
-
-                const auto geom = createSDFSphere(position, radius, distance,
-                                                  textureCoordinates);
-                const size_t geomIdx = sdfMorphologyData.geometries.size();
-                sdfMorphologyData.geometries.push_back(geom);
-                sdfMorphologyData.neighbours.push_back({});
-                sdfMorphologyData.materials.push_back(materialId);
-                sdfMorphologyData.geometrySection[geomIdx] = section;
-                sdfMorphologyData.sectionGeometries[section].push_back(geomIdx);
+                const size_t idx =
+                    _addSDFGeometry(sdfMorphologyData,
+                                    createSDFSphere(position, radius, distance,
+                                                    textureCoordinates),
+                                    {}, materialId, section);
 
                 sdfMorphologyData.bifurcationIndices.push_back(idx);
             }
@@ -761,23 +767,13 @@ private:
     {
         if (useSDFGeometries)
         {
-            SDFGeometry geom;
-
-            if (almost_equal(radius, previousRadius, 100000))
-                geom = createSDFPill(position, target, radius, distance,
-                                     textureCoordinates);
-            else
-
-                geom =
-                    createSDFConePill(position, target, radius, previousRadius,
-                                      distance, textureCoordinates);
-
-            const size_t geomIdx = sdfMorphologyData.geometries.size();
-            sdfMorphologyData.geometries.push_back(geom);
-            sdfMorphologyData.neighbours.push_back({});
-            sdfMorphologyData.materials.push_back(materialId);
-            sdfMorphologyData.geometrySection[geomIdx] = section;
-            sdfMorphologyData.sectionGeometries[section].push_back(geomIdx);
+            const auto geom = (almost_equal(radius, previousRadius, 100000))
+                                  ? createSDFPill(position, target, radius,
+                                                  distance, textureCoordinates)
+                                  : createSDFConePill(position, target, radius,
+                                                      previousRadius, distance,
+                                                      textureCoordinates);
+            _addSDFGeometry(sdfMorphologyData, geom, {}, materialId, section);
         }
         else
         {
