@@ -62,10 +62,7 @@ set(BRAYNSPLUGINS_OMIT_VERSION_HEADERS ON)
 set(BRAYNSPLUGINS_OMIT_EXPORT ON)
 set(BRAYNSPLUGINS_INCLUDE_NAME plugins)
 common_library(braynsPlugins)
-
-if(FreeImage_FOUND)
-  target_include_directories(braynsPlugins SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
-endif()
+target_include_directories(braynsPlugins SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
 
 # needed for staticjson and rapidjson
 if(BRAYNS_NETWORKING_ENABLED)
