@@ -339,14 +339,14 @@ private:
         std::vector<size_t> materials;
         std::vector<size_t> localToGlobalIdx;
         std::vector<size_t> bifurcationIndices;
-        std::unordered_map<int, int> geometrySection;
+        std::unordered_map<size_t, int> geometrySection;
         std::unordered_map<int, std::vector<size_t>> sectionGeometries;
     };
 
     struct MorphologyTreeStructure
     {
-        std::vector<int> bifurcationParent;
-        std::vector<std::vector<size_t>> bifurcationChildren;
+        std::vector<int> sectionParent;
+        std::vector<std::vector<size_t>> sectionChildren;
         std::vector<size_t> sectionTraverseOrder;
     };
 
@@ -408,7 +408,7 @@ private:
     void _connectSDFBifurcations(SDFMorphologyData& sdfMorphologyData,
                                  const MorphologyTreeStructure& mts) const
     {
-        const size_t numSections = mts.bifurcationChildren.size();
+        const size_t numSections = mts.sectionChildren.size();
 
         for (size_t section = 0; section < numSections; section++)
         {
@@ -463,7 +463,7 @@ private:
             };
 
             // Connect all child sections
-            for (const size_t sectionChild : mts.bifurcationChildren[section])
+            for (const size_t sectionChild : mts.sectionChildren[section])
             {
                 connectGeometriesToBifurcation(
                     sdfMorphologyData.sectionGeometries.at(sectionChild));
@@ -537,7 +537,7 @@ private:
         {
             MorphologyTreeStructure mts;
             mts.sectionTraverseOrder.resize(numSections);
-            mts.bifurcationParent.resize(numSections, -1);
+            mts.sectionParent.resize(numSections, -1);
             std::iota(mts.sectionTraverseOrder.begin(),
                       mts.sectionTraverseOrder.end(), 0);
             return mts;
@@ -551,10 +551,10 @@ private:
             numSections,
             std::make_pair<float, Vector3f>(0.0f, Vector3f(0.f, 0.f, 0.f)));
 
-        std::vector<std::vector<size_t>> bifurcationChildren(
-            numSections, std::vector<size_t>());
+        std::vector<std::vector<size_t>> sectionChildren(numSections,
+                                                         std::vector<size_t>());
 
-        std::vector<int> bifurcationParent(numSections, -1);
+        std::vector<int> sectionParent(numSections, -1);
         std::vector<bool> skipSection(numSections, true);
         std::vector<bool> addedSection(numSections, false);
 
@@ -619,21 +619,19 @@ private:
                 if (overlaps(bifurcationPosition[sectionJ],
                              sectionEndPosition[sectionI]))
                 {
-                    if (bifurcationParent[sectionJ] == -1)
+                    if (sectionParent[sectionJ] == -1)
                     {
-                        bifurcationChildren[sectionI].push_back(sectionJ);
-                        bifurcationParent[sectionJ] =
-                            static_cast<size_t>(sectionI);
+                        sectionChildren[sectionI].push_back(sectionJ);
+                        sectionParent[sectionJ] = static_cast<size_t>(sectionI);
                     }
                 }
                 else if (overlaps(bifurcationPosition[sectionI],
                                   sectionEndPosition[sectionJ]))
                 {
-                    if (bifurcationParent[sectionI] == -1)
+                    if (sectionParent[sectionI] == -1)
                     {
-                        bifurcationChildren[sectionJ].push_back(sectionI);
-                        bifurcationParent[sectionI] =
-                            static_cast<size_t>(sectionJ);
+                        sectionChildren[sectionJ].push_back(sectionI);
+                        sectionParent[sectionI] = static_cast<size_t>(sectionJ);
                     }
                 }
             }
@@ -645,7 +643,7 @@ private:
         {
             if (skipSection[sectionI])
                 continue;
-            else if (bifurcationParent[sectionI] == -1)
+            else if (sectionParent[sectionI] == -1)
                 sectionStack.push_back(sectionI);
         }
 
@@ -659,14 +657,14 @@ private:
             addedSection[sectionI] = true;
 
             sectionOrder.push_back(sectionI);
-            for (const size_t childI : bifurcationChildren[sectionI])
+            for (const size_t childI : sectionChildren[sectionI])
                 sectionStack.push_back(childI);
         }
 
         MorphologyTreeStructure mts;
         mts.sectionTraverseOrder = std::move(sectionOrder);
-        mts.bifurcationParent = std::move(bifurcationParent);
-        mts.bifurcationChildren = std::move(bifurcationChildren);
+        mts.sectionParent = std::move(sectionParent);
+        mts.sectionChildren = std::move(sectionChildren);
         return mts;
     }
 
@@ -934,7 +932,7 @@ private:
                 }
 
                 const int sectionParent =
-                    morphologyTree.bifurcationParent[sectionI];
+                    morphologyTree.sectionParent[sectionI];
 
                 bool resetRadius = false;
                 if (sectionParent < 0)
