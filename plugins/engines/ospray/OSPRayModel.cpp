@@ -47,68 +47,42 @@ namespace brayns
 {
 OSPRayModel::~OSPRayModel()
 {
-    if (_useSimulationModel)
-    {
-        for (auto geom : _ospExtendedSpheres)
-            ospRemoveGeometry(_simulationModel, geom.second);
-        for (auto geom : _ospExtendedCylinders)
-            ospRemoveGeometry(_simulationModel, geom.second);
-        for (auto geom : _ospExtendedCones)
-            ospRemoveGeometry(_simulationModel, geom.second);
-        for (auto geom : _ospSDFGeometryRefs)
-            ospRemoveGeometry(_simulationModel, geom.second);
-    }
-    else
-    {
-        for (auto geom : _ospExtendedSpheres)
-            ospRemoveGeometry(_model, geom.second);
-        for (auto geom : _ospExtendedCylinders)
-            ospRemoveGeometry(_model, geom.second);
-        for (auto geom : _ospExtendedCones)
-            ospRemoveGeometry(_model, geom.second);
-        for (auto geom : _ospSDFGeometryRefs)
-            ospRemoveGeometry(_model, geom.second);
-    }
+    const auto removeGeometry = [&](const auto& geometryMap) {
+        auto& model = _useSimulationModel ? _simulationModel : _model;
+        for (auto geom : geometryMap)
+            ospRemoveGeometry(model, geom.second);
+    };
 
-    for (auto& geom : _ospExtendedSpheres)
-        ospRelease(geom.second);
-    _ospExtendedSpheres.clear();
-    for (auto& geom : _ospExtendedSpheresData)
-        ospRelease(geom.second);
-    _ospExtendedSpheresData.clear();
-    for (auto& geom : _ospExtendedCylinders)
-        ospRelease(geom.second);
-    _ospExtendedCylinders.clear();
-    for (auto& geom : _ospExtendedCylindersData)
-        ospRelease(geom.second);
-    _ospExtendedCylindersData.clear();
-    for (auto& geom : _ospExtendedCones)
-        ospRelease(geom.second);
-    _ospExtendedCones.clear();
-    for (auto& geom : _ospExtendedConesData)
-        ospRelease(geom.second);
-    _ospExtendedConesData.clear();
-    for (auto& geom : _ospMeshes)
-        ospRelease(geom.second);
-    _ospMeshes.clear();
-    for (auto& geom : _ospSDFGeometryRefsData)
-        ospRelease(geom.second);
-    _ospSDFGeometryRefsData.clear();
+    const auto releaseAndClearGeometry = [&](auto& geometryMap) {
+        for (auto geom : geometryMap)
+            ospRelease(geom.second);
+        geometryMap.clear();
+    };
 
-    if (_simulationModel)
-        ospRelease(_simulationModel);
+    const auto releaseModel = [&](const auto& model) {
+        if (model)
+            ospRelease(model);
+    };
 
-    if (_boundingBoxModel)
-        ospRelease(_boundingBoxModel);
+    removeGeometry(_ospExtendedSpheres);
+    removeGeometry(_ospExtendedCylinders);
+    removeGeometry(_ospExtendedCones);
+    removeGeometry(_ospSDFGeometryRefs);
 
-    if (_ospSDFGeometryData)
-        ospRelease(_ospSDFGeometryData);
+    releaseAndClearGeometry(_ospExtendedSpheres);
+    releaseAndClearGeometry(_ospExtendedSpheresData);
+    releaseAndClearGeometry(_ospExtendedCylinders);
+    releaseAndClearGeometry(_ospExtendedCylindersData);
+    releaseAndClearGeometry(_ospExtendedCones);
+    releaseAndClearGeometry(_ospExtendedConesData);
+    releaseAndClearGeometry(_ospMeshes);
+    releaseAndClearGeometry(_ospSDFGeometryRefsData);
 
-    if (_ospSDFNeighboursData)
-        ospRelease(_ospSDFNeighboursData);
-
-    if (_model)
-        ospRelease(_model);
+    releaseModel(_simulationModel);
+    releaseModel(_boundingBoxModel);
+    releaseModel(_ospSDFGeometryData);
+    releaseModel(_ospSDFNeighboursData);
+    releaseModel(_model);
 }
 
 void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
