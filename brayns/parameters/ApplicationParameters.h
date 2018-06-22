@@ -50,10 +50,11 @@ public:
     /** Runtime plugins to load in Brayns::loadPlugins. */
     const std::vector<PluginParam>& getPlugins() const { return _plugins; }
     /** window size */
-    const Vector2ui& getWindowSize() const { return _windowSize; }
+    const Vector2ui getWindowSize() const { return Vector2ui(_windowSize); }
     void setWindowSize(const Vector2ui& size)
     {
-        _updateValue(_windowSize, size);
+        Vector2f value(size);
+        _updateValue(_windowSize, value);
     }
     /** Benchmarking */
     bool isBenchmarking() const { return _benchmarking; }
@@ -89,7 +90,6 @@ public:
     }
 
     bool getParallelRendering() const { return _parallelRendering; }
-
     const std::string& getHttpServerURI() const { return _httpServerURI; }
     void setHttpServerURI(const std::string& httpServerURI)
     {
@@ -98,13 +98,12 @@ public:
 
     const strings& getInputPaths() const { return _inputPaths; }
     po::positional_options_description& posArgs() { return _positionalArgs; }
-
 protected:
     void parse(const po::variables_map& vm) final;
 
     strings _pluginsRaw;
     std::vector<PluginParam> _plugins;
-    Vector2ui _windowSize;
+    Vector2f _windowSize;
     bool _benchmarking;
     size_t _jpegCompression;
     strings _filters;
