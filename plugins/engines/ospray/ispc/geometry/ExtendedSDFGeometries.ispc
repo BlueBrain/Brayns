@@ -32,6 +32,16 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+#define SDF_TYPE_SPHERE 0
+#define SDF_TYPE_PILL 1
+#define SDF_TYPE_CONE_PILL 2
+#define SDF_TYPE_CONE_PILL_SIGMOID 3
+
+#define SDF_BLEND_FACTOR 0.1
+#define SDF_BLEND_LERP_FACTOR 0.2
+
+#define SDF_EPSILON 0.000001
+
 /////////////////////////////////////////////////////////////////////////////
 
 // https://en.wikipedia.org/wiki/Smoothstep
@@ -96,7 +106,8 @@ inline float sdConePill(const vec3f &p, const vec3f p0, const vec3f p1,
 inline varying bool intersectBox(Ray &ray, const vec3f aabbMin,
                                  const vec3f aabbMax, float &t0, float &t1)
 {
-    const float epsilon = 0.0001f;
+    const float epsilon = SDF_EPSILON;
+
     Ray r = ray;
     // We need to avoid division by zero in "vec3 invR = 1.0 / r.Dir;"
     if (r.dir.x == 0)
@@ -121,14 +132,6 @@ inline varying bool intersectBox(Ray &ray, const vec3f aabbMin,
 }
 
 /////////////////////////////////////////////////////////////////////////////
-
-#define SDF_TYPE_SPHERE 0
-#define SDF_TYPE_PILL 1
-#define SDF_TYPE_CONE_PILL 2
-#define SDF_TYPE_CONE_PILL_SIGMOID 3
-
-#define SDF_BLEND_FACTOR 0.1
-#define SDF_BLEND_LERP_FACTOR 0.2
 
 struct ExtendedSDFGeometries
 {
@@ -336,10 +339,9 @@ inline float map(uniform ExtendedSDFGeometries *uniform geometry, vec3f &p,
 }
 
 inline vec3f calcNormal(uniform ExtendedSDFGeometries *uniform geometry,
-                        const vec3f &pos, uniform size_t primID)
+                        const float eps, const vec3f &pos,
+                        uniform size_t primID)
 {
-    const float eps = 0.0001f;
-
     const float x0 = map(geometry, pos + make_vec3f(eps, 0.f, 0.f), primID);
     const float x1 = map(geometry, pos - make_vec3f(eps, 0.f, 0.f), primID);
     const float y0 = map(geometry, pos + make_vec3f(0.f, eps, 0.f), primID);
@@ -378,7 +380,7 @@ inline float intersect(uniform ExtendedSDFGeometries *uniform geometry,
     float h = 1.f;
     for (int i = 0; i < samplesPerRay; ++i)
     {
-        if (h < 0.0001f || t > t1)
+        if (h < SDF_EPSILON || t > t1)
             break;
         h = map(geometry, ro + rd * t, primID);
         res = t;
@@ -407,7 +409,8 @@ void ExtendedSDFGeometries_intersect(uniform ExtendedSDFGeometries *uniform
         ray.primID = primID;
         ray.geomID = geometry->geometry.geomID;
         ray.t = t_in;
-        ray.Ng = calcNormal(geometry, pos, primID);
+        ray.Ng = calcNormal(geometry, getIntersectionError(ray.org, t_in), pos,
+                            primID);
     }
 }
 
