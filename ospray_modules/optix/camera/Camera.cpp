@@ -25,6 +25,8 @@
 #include <ospray_module_optix_generated_Camera.cu.ptx.h>
 #include <ospray_module_optix_generated_Constantbg.cu.ptx.h>
 
+#include <ospray/SDK/common/Data.h>
+
 namespace bbp
 {
 namespace optix
@@ -49,6 +51,7 @@ const std::string CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE = "focal_scale";
 const std::string CUDA_CLIP_PLANES[6] = {"clip_plane1", "clip_plane2",
                                          "clip_plane3", "clip_plane4",
                                          "clip_plane5", "clip_plane6"};
+const std::string CUDA_NUM_CLIP_PLANES = "num_clip_planes";
 
 Camera::Camera()
 {
@@ -138,25 +141,18 @@ void Camera::commit()
     _context[CUDA_ATTRIBUTE_CAMERA_APERTURE_RADIUS]->setFloat(apertureRadius);
     _context[CUDA_ATTRIBUTE_CAMERA_FOCAL_SCALE]->setFloat(focusDistance);
 
-    ospray::vec4f clipPlanes[6];
-    clipPlanes[0] =
-        getParam4f("clipPlane1", ospray::vec4f(0.f, -1.f, 0.f, -INFINITY));
-    clipPlanes[1] =
-        getParam4f("clipPlane2", ospray::vec4f(0.f, 1.f, 0.f, INFINITY));
-    clipPlanes[2] =
-        getParam4f("clipPlane3", ospray::vec4f(-1.f, 0.f, 0.f, -INFINITY));
-    clipPlanes[3] =
-        getParam4f("clipPlane4", ospray::vec4f(1.f, 0.f, 0.f, INFINITY));
-    clipPlanes[4] =
-        getParam4f("clipPlane5", ospray::vec4f(0.f, 0.f, -1.f, -INFINITY));
-    clipPlanes[5] =
-        getParam4f("clipPlane6", ospray::vec4f(0.f, 0.f, 1.f, INFINITY));
-    for (size_t i = 0; i < 6; ++i)
+    ospray::Ref<ospray::Data> clipPlanes = getParamData("clipPlanes", nullptr);
+    const auto clipPlaneData =
+        static_cast<ospray::vec4f*>(clipPlanes ? clipPlanes->data : nullptr);
+    const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
+
+    for (size_t i = 0; i < 6 && i < numClipPlanes; ++i)
     {
-        const auto& clipPlane = clipPlanes[i];
+        const auto& clipPlane = clipPlaneData[i];
         _context[CUDA_CLIP_PLANES[i]]->setFloat(clipPlane.x, clipPlane.y,
                                                 clipPlane.z, clipPlane.w);
     }
+    _context[CUDA_NUM_CLIP_PLANES]->setUint(std::min(6ul, numClipPlanes));
 }
 
 OSP_REGISTER_CAMERA(Camera, perspective);

@@ -50,18 +50,16 @@ void OSPRayCamera::commit()
 
     // Clip planes
     const auto& clipPlanes = getClipPlanes();
-    if (clipPlanes.size() == 6)
+    if (!clipPlanes.empty())
     {
-        const std::string clipPlaneNames[6] = {"clipPlane1", "clipPlane2",
-                                               "clipPlane3", "clipPlane4",
-                                               "clipPlane5", "clipPlane6"};
-        for (size_t i = 0; i < clipPlanes.size(); ++i)
-        {
-            const auto& clipPlane = clipPlanes[i];
-            ospSet4f(_camera, clipPlaneNames[i].c_str(), clipPlane.x(),
-                     clipPlane.y(), clipPlane.z(), clipPlane.w());
-        }
+        auto clipPlaneData =
+            ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
+        ospSetData(_camera, "clipPlanes", clipPlaneData);
+        ospRelease(clipPlaneData);
     }
+    else
+        ospRemoveParam(_camera, "clipPlanes");
+
     ospCommit(_camera);
 }
 
