@@ -374,6 +374,7 @@ struct RenderInput
 
 struct RenderOutput
 {
+    Vector2i frameSize;
     uint8_ts colorBuffer;
     floats depthBuffer;
     FrameBufferFormat colorBufferFormat;
