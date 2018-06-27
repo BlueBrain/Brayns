@@ -733,8 +733,6 @@ public:
     {
         auto& params = _parametersManager.getVolumeParameters();
         auto postUpdate = [this](VolumeParameters&) {
-            // Cleanup existing volume data
-            // _engine->getScene().resetVolumeHandler();
             _engine->markRebuildScene();
         };
         _handleGET(ENDPOINT_VOLUME_PARAMS, params);

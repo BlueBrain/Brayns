@@ -47,7 +47,6 @@
 
 #include <brayns/tasks/AddModelTask.h>
 
-#include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/pluginapi/ExtensionPluginFactory.h>
 #include <brayns/pluginapi/PluginAPI.h>
 #include <plugins/engines/EngineFactory.h>
@@ -194,12 +193,6 @@ struct Brayns::Impl : public PluginAPI
         auto& scene = _engine->getScene();
         auto& camera = _engine->getCamera();
 
-        if (_parametersManager.isAnyModified() || camera.isModified() ||
-            scene.isModified() || scene.getTransferFunction().isModified())
-        {
-            _engine->getFrameBuffer().clear();
-        }
-
         scene.commit();
 
         _sceneWasModified = _sceneWasModified || scene.isModified();
@@ -232,6 +225,12 @@ struct Brayns::Impl : public PluginAPI
                 sun->setDirection(camera.getTarget() - camera.getPosition());
                 scene.commitLights();
             }
+        }
+
+        if (_parametersManager.isAnyModified() || camera.isModified() ||
+            scene.isModified())
+        {
+            _engine->getFrameBuffer().clear();
         }
 
         _parametersManager.resetModified();
