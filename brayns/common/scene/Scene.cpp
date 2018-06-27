@@ -210,85 +210,69 @@ CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
     return _caDiffusionSimulationHandler;
 }
 
-VolumeHandlerPtr Scene::getVolumeHandler()
+void Scene::resetVolumeHandler()
 {
-    const auto& volumeFile =
-        _parametersManager.getVolumeParameters().getFilename();
-    const auto& volumeFolder =
-        _parametersManager.getVolumeParameters().getFolder();
+    const auto& vp = _parametersManager.getVolumeParameters();
+    const auto& volumeFile = vp.getFilename();
+    const auto& volumeFolder = vp.getFolder();
     if (volumeFile.empty() && volumeFolder.empty())
-        return nullptr;
+        return;
 
     try
     {
-        if (!_volumeHandler)
+        if (_volumeHandler)
+            removeModel(_volumeModelId);
+
+        std::string modelPath;
+        _volumeHandler.reset(new VolumeHandler(vp, IndexMode::modulo));
+        if (!volumeFile.empty())
         {
-            _volumeHandler.reset(
-                new VolumeHandler(_parametersManager.getVolumeParameters(),
-                                  IndexMode::modulo));
-            if (!volumeFile.empty())
+            if (!isVolumeSupported(volumeFile))
             {
-                if (!isVolumeSupported(volumeFile))
-                {
-                    _volumeHandler.reset();
-                    return nullptr;
-                }
-                _volumeHandler->attachVolumeToFile(0.f, volumeFile);
+                _volumeHandler.reset();
+                return;
             }
-            else
-            {
-                strings filenames;
-
-                fs::directory_iterator endIter;
-                if (fs::is_directory(volumeFolder))
-                {
-                    for (fs::directory_iterator dirIter(volumeFolder);
-                         dirIter != endIter; ++dirIter)
-                    {
-                        if (fs::is_regular_file(dirIter->status()))
-                        {
-                            const std::string& filename =
-                                dirIter->path().string();
-                            if (isVolumeSupported(filename))
-                                filenames.push_back(filename);
-                        }
-                    }
-                }
-
-                if (filenames.empty())
-                {
-                    _volumeHandler.reset();
-                    return nullptr;
-                }
-
-                std::sort(filenames.begin(), filenames.end());
-                uint32_t index = 0;
-                for (const auto& filename : filenames)
-                    _volumeHandler->attachVolumeToFile(index++, filename);
-            }
-
-            // Add volume model
-            _volumeHandler->setCurrentIndex(0);
-            const auto& dimensions = _volumeHandler->getDimensions();
-            const auto& spacing = _volumeHandler->getElementSpacing();
-            const auto& offset = _volumeHandler->getOffset();
-            auto model = createModel();
-            model->updateBounds(offset);
-            model->updateBounds(offset + dimensions);
-            addModel(std::make_shared<ModelDescriptor>(
-                std::move(model), volumeFile,
-                ModelMetadata{
-                    {"dimensions", std::to_string(dimensions.x()) + " " +
-                                       std::to_string(dimensions.y()) + " " +
-                                       std::to_string(dimensions.z())},
-                    {"element-spacing", std::to_string(spacing.x()) + " " +
-                                            std::to_string(spacing.y()) + " " +
-                                            std::to_string(spacing.z())},
-                    {"offset", std::to_string(offset.x()) + " " +
-                                   std::to_string(offset.y()) + " " +
-                                   std::to_string(offset.z())}}));
-            _parametersManager.getVolumeParameters().resetModified();
+            _volumeHandler->attachVolumeToFile(0, volumeFile);
+            modelPath = volumeFile;
         }
+        else
+        {
+            strings filenames = parseFolder(volumeFolder, {".raw"});
+            if (filenames.empty())
+            {
+                _volumeHandler.reset();
+                return;
+            }
+
+            std::sort(filenames.begin(), filenames.end());
+            uint32_t index = 0;
+            for (const auto& filename : filenames)
+                _volumeHandler->attachVolumeToFile(index++, filename);
+            modelPath = filenames[0];
+        }
+
+        // Add volume model
+        const auto& dimensions = vp.getDimensions();
+        const auto& spacing = vp.getElementSpacing();
+        const auto& offset = vp.getOffset();
+        auto model = createModel();
+        model->updateBounds(offset);
+        model->updateBounds(offset + dimensions);
+        model->buildBoundingBox();
+        _volumeModelId = addModel(std::make_shared<ModelDescriptor>(
+            std::move(model), "Volume", modelPath,
+            ModelMetadata{
+                {"dimensions", std::to_string(dimensions.x()) + " " +
+                                   std::to_string(dimensions.y()) + " " +
+                                   std::to_string(dimensions.z())},
+                {"element-spacing", std::to_string(spacing.x()) + " " +
+                                        std::to_string(spacing.y()) + " " +
+                                        std::to_string(spacing.z())},
+                {"offset", std::to_string(offset.x()) + " " +
+                               std::to_string(offset.y()) + " " +
+                               std::to_string(offset.z())}}));
+
+        _transferFunction.markModified();
     }
     catch (const std::runtime_error& e)
     {
@@ -301,7 +285,7 @@ VolumeHandlerPtr Scene::getVolumeHandler()
     else
         _parametersManager.getAnimationParameters().reset();
 
-    return _volumeHandler;
+    return;
 }
 
 bool Scene::empty() const

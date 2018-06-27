@@ -763,7 +763,7 @@ public:
     {
         _handleRPC(METHOD_RESET_CAMERA,
                    "Resets the camera to its initial values", [this] {
-                       _engine->getCamera().reset();
+                       _engine->setDefaultCamera();
                        _jsonrpcServer->notify(ENDPOINT_CAMERA,
                                               _engine->getCamera());
                        _engine->triggerRender();

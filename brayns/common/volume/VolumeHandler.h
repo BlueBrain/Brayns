@@ -21,6 +21,7 @@
 #ifndef VOLUMEHANDLER_H
 #define VOLUMEHANDLER_H
 
+#include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
 #include <brayns/parameters/VolumeParameters.h>
 
@@ -33,7 +34,7 @@ namespace brayns
    volumes are accessed via memory maps and each volume is assigned to a given
    index.
  */
-class VolumeHandler
+class VolumeHandler : public BaseObject
 {
 public:
     /**

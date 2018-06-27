@@ -506,7 +506,6 @@ private:
         };
 
         auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& volumeParameters = _parametersManager.getVolumeParameters();
         auto& sceneParameters = _parametersManager.getSceneParameters();
         auto& scene = _engine->getScene();
 
@@ -539,6 +538,7 @@ private:
         if (!geometryParameters.getMolecularSystemConfig().empty())
             _loadMolecularSystem(updateProgress);
 
+        auto& volumeParameters = _parametersManager.getVolumeParameters();
         if (scene.getVolumeHandler())
         {
             scene.commitTransferFunctionData();
@@ -554,6 +554,7 @@ private:
             bounds.merge(volumeOffset +
                          Vector3f(volumeDimensions) * volumeElementSpacing);
         }
+
         scene.saveToCacheFile();
         scene.buildEnvironmentMap();
     }
@@ -1091,7 +1092,7 @@ private:
 // -------------------------------------------------------------------------------------------------
 
 Brayns::Brayns(int argc, const char** argv)
-    : _impl(new Impl(argc, argv))
+    : _impl(std::make_unique<Impl>(argc, argv))
 {
 }
 
