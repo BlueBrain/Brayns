@@ -239,13 +239,7 @@ private:
     StereoMode _stereoMode{StereoMode::none};
     float _eyeSeparation{0.0635f};
 
-    ClipPlanes _clipPlanes{
-        {{-1.f, 0.f, 0.f, std::numeric_limits<float>::max()},
-         {1.f, 0.f, 0.f, std::numeric_limits<float>::max()},
-         {0.f, -1.f, 0.f, std::numeric_limits<float>::max()},
-         {0.f, 1.f, 0.f, std::numeric_limits<float>::max()},
-         {0.f, 0.f, -1.f, std::numeric_limits<float>::max()},
-         {0.f, 0.f, 1.f, std::numeric_limits<float>::max()}}};
+    ClipPlanes _clipPlanes;
 
     /*! rotation matrice along x and y axis */
     Matrix4f _matrix;
