@@ -71,6 +71,11 @@ public:
     */
     CameraType getType() const { return _type; }
     /**
+       Sets camera type
+       @param The type of camera (Perpective, Stereo, etc)
+    */
+    void setType(const CameraType type) { _updateValue(_type, type); }
+    /**
        Sets camera position
        @param position The x, y, z coordinates of the camera position
     */
@@ -207,7 +212,7 @@ public:
     /**
       Sets the camera clip planes
     */
-    void setClipPlanes(const ClipPlanes clipPlanes)
+    void setClipPlanes(const ClipPlanes& clipPlanes)
     {
         _updateValue(_clipPlanes, clipPlanes);
     }
