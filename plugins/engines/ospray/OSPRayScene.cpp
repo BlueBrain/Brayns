@@ -151,7 +151,6 @@ void OSPRayScene::commit()
 
         impl.logInformation();
     }
-
     BRAYNS_DEBUG << "Committing root models" << std::endl;
     ospCommit(_rootModel);
     if (_rootSimulationModel)
@@ -275,64 +274,78 @@ bool OSPRayScene::commitTransferFunctionData()
     return true;
 }
 
+void OSPRayScene::resetVolumeHandler()
+{
+    Scene::resetVolumeHandler();
+
+    // Release previous data
+    if (_ospVolumeData)
+        ospRelease(_ospVolumeData);
+    _ospVolumeData = nullptr;
+    _ospVolumeDataSize = 0;
+
+    // An empty array has to be assigned to the renderers
+    for (const auto& renderer : _renderers)
+    {
+        auto impl = std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
+        ospSetData(impl, "volumeData", 0);
+    }
+}
+
 void OSPRayScene::commitVolumeData()
 {
-    const auto volumeHandler = getVolumeHandler();
-    if (!volumeHandler)
-        return;
-
-    const auto& vp = _parametersManager.getVolumeParameters();
-    if (vp.isModified())
-    {
-        // Cleanup existing volume data in handler and renderers
-        volumeHandler->clear();
-
-        // An empty array has to be assigned to the renderers
-        _ospVolumeDataSize = 0;
-        _ospVolumeData = ospNewData(_ospVolumeDataSize, OSP_UCHAR, 0,
-                                    _memoryManagementFlags);
-        ospCommit(_ospVolumeData);
-        for (const auto& renderer : _renderers)
-        {
-            auto impl =
-                std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
-            ospSetData(impl, "volumeData", _ospVolumeData);
-        }
-    }
-
+    auto& vp = _parametersManager.getVolumeParameters();
     const auto& ap = _parametersManager.getAnimationParameters();
-    const auto animationFrame = ap.getFrame();
-    volumeHandler->setCurrentIndex(animationFrame);
-    auto data = volumeHandler->getData();
-    if (data && _ospVolumeDataSize == 0)
+    if ((_volumeHandler && _volumeHandler->isModified()) || ap.isModified() ||
+        vp.isModified())
     {
-        // Set volume data to renderers
-        _ospVolumeDataSize = volumeHandler->getSize();
-        _ospVolumeData = ospNewData(_ospVolumeDataSize, OSP_UCHAR, data,
-                                    _memoryManagementFlags);
-        ospCommit(_ospVolumeData);
-        for (const auto& renderer : _renderers)
-        {
-            auto impl =
-                std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
+        resetVolumeHandler();
 
-            ospSetData(impl, "volumeData", _ospVolumeData);
-            const auto& dimensions = volumeHandler->getDimensions();
-            ospSet3i(impl, "volumeDimensions", dimensions.x(), dimensions.y(),
-                     dimensions.z());
-            const auto& elementSpacing =
-                _parametersManager.getVolumeParameters().getElementSpacing();
-            ospSet3f(impl, "volumeElementSpacing", elementSpacing.x(),
-                     elementSpacing.y(), elementSpacing.z());
-            const auto& offset =
-                _parametersManager.getVolumeParameters().getOffset();
-            ospSet3f(impl, "volumeOffset", offset.x(), offset.y(), offset.z());
-            const auto epsilon = volumeHandler->getEpsilon(
-                elementSpacing,
-                _parametersManager.getRenderingParameters().getSamplesPerRay());
-            ospSet1f(impl, "volumeEpsilon", epsilon);
+        if (!getVolumeHandler())
+            return;
+
+        const auto animationFrame = ap.getFrame();
+        _volumeHandler->setCurrentIndex(animationFrame);
+        _volumeHandler->resetModified();
+        auto data = _volumeHandler->getData();
+        if (data)
+        {
+            // Mark volume parameters as unmodified
+            vp.resetModified();
+
+            // Set volume data to renderers
+            _ospVolumeDataSize = _volumeHandler->getSize();
+            _ospVolumeData = ospNewData(_ospVolumeDataSize, OSP_UCHAR, data,
+                                        _memoryManagementFlags);
+            ospCommit(_ospVolumeData);
+
+            const auto& dimensions = _volumeHandler->getDimensions();
+            for (const auto& renderer : _renderers)
+            {
+                auto impl =
+                    std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
+
+                ospSetData(impl, "volumeData", _ospVolumeData);
+                ospSet3i(impl, "volumeDimensions", dimensions.x(),
+                         dimensions.y(), dimensions.z());
+                const auto& elementSpacing =
+                    _parametersManager.getVolumeParameters()
+                        .getElementSpacing();
+                ospSet3f(impl, "volumeElementSpacing", elementSpacing.x(),
+                         elementSpacing.y(), elementSpacing.z());
+                const auto& offset =
+                    _parametersManager.getVolumeParameters().getOffset();
+                ospSet3f(impl, "volumeOffset", offset.x(), offset.y(),
+                         offset.z());
+                const auto epsilon = _volumeHandler->getEpsilon(
+                    elementSpacing, _parametersManager.getRenderingParameters()
+                                        .getSamplesPerRay());
+                ospSet1f(impl, "volumeEpsilon", epsilon);
+            }
+            BRAYNS_INFO << "Commited volume data. Dimensions: " << dimensions
+                        << std::endl;
+            markModified();
         }
-        markModified(); // to update scene bounds
     }
 }
 
