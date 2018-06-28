@@ -304,8 +304,8 @@ void BaseWindow::display()
 
         if (buffer)
         {
-            glDrawPixels(_windowSize.x(), _windowSize.y(), format, type,
-                         buffer);
+            glDrawPixels(renderOutput.frameSize.x(), renderOutput.frameSize.y(),
+                         format, type, buffer);
         }
     }
     else
