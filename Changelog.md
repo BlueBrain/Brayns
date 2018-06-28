@@ -1,5 +1,30 @@
 # Change Log
 
+## [0.6.1](https://github.com/BlueBrain/Brayns/tree/0.6.1) (28-06-2018)
+
+**Implemented enhancements:**
+
+- Added a stereo camera with the ability to change the zero-parallax plane [\#440](https://github.com/BlueBrain/Brayns/pull/440)
+- SDF morphology loading speedup [\#436](https://github.com/BlueBrain/Brayns/pull/436)
+
+**Fixed bugs:**
+
+- Fix segfault when using Viewer and browser UI [\#444](https://github.com/BlueBrain/Brayns/pull/444)
+- Fixed volume management [\#443](https://github.com/BlueBrain/Brayns/pull/443)
+- Changed viewport to floats in order to increase browser compatibility [\#438](https://github.com/BlueBrain/Brayns/pull/438)
+- Add missing triggerRender\(\) for plugin actions [\#433](https://github.com/BlueBrain/Brayns/pull/433)
+- Fixed material issue in the mesh loader [\#431](https://github.com/BlueBrain/Brayns/pull/431)
+- Account for custom renderers in snaphots [\#429](https://github.com/BlueBrain/Brayns/pull/429)
+- Fixes related to volume handling [\#425](https://github.com/BlueBrain/Brayns/pull/425)
+- Call plugin prerender only with locked mutex [\#422](https://github.com/BlueBrain/Brayns/pull/422)
+
+**Merged pull requests:**
+
+- Use custom epsilon when calculating SDF normals [\#439](https://github.com/BlueBrain/Brayns/pull/439)
+- Throw error when allocating too large ospray buffer. [\#437](https://github.com/BlueBrain/Brayns/pull/437)
+- Clarify beginning of user guide \(loading data\)  [\#430](https://github.com/BlueBrain/Brayns/pull/430)
+- Add minimal example plugin [\#427](https://github.com/BlueBrain/Brayns/pull/427)
+
 ## [0.6.0](https://github.com/BlueBrain/Brayns/tree/0.6.0) (08-06-2018)
 
 **Implemented enhancements:**
