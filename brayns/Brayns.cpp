@@ -398,6 +398,9 @@ struct Brayns::Impl : public PluginAPI
             const size_t size = frameSize.x() * frameSize.y();
             renderOutput.depthBuffer.assign(depthBuffer, depthBuffer + size);
         }
+
+        renderOutput.frameSize = frameSize;
+
         frameBuffer.unmap();
 
         postRender();
