@@ -28,6 +28,7 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/geometry/Streamlines.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/types.h>
 
@@ -220,6 +221,22 @@ public:
     BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
 
     /**
+        Returns streamlines handled by the model
+      */
+    BRAYNS_API StreamlinesMap& getStreamlines() { return _streamlines; }
+    /**
+      Adds a streamline to the model
+      @param materialId Id of the material for the streamline
+      @param vertices Vertices of the streamline
+      @param colors Colors of the vertices (RGBA)
+      @param radii Radius of the vertices (optional)
+      */
+    BRAYNS_API void addStreamline(const size_t materialId,
+                                  const Vector3fs& vertices,
+                                  const Vector4fs& colors,
+                                  const std::vector<float>& radii = {});
+
+    /**
       Adds a SDFGeometry to the scene
       @param materialId Material of the geometry
       @param geom Geometry to add
@@ -308,6 +325,8 @@ protected:
     bool _conesDirty{true};
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
+    StreamlinesMap _streamlines;
+    bool _streamlinesDirty{true};
     Boxf _bounds;
     bool _useSimulationModel{false};
 

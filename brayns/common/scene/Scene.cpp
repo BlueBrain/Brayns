@@ -828,9 +828,41 @@ void Scene::buildDefault()
         material->setDiffuseColor({0.1f, 0.1f, 0.8f});
         material->setSpecularColor(WHITE);
         material->setSpecularExponent(10.f);
-        model->addCylinder(materialId, {{0.25f, 0.126f, 0.75f},
-                                        {0.75f, 0.126f, 0.75f},
+        model->addCylinder(materialId, {{0.05f, 0.126f, 0.75f},
+                                        {0.55f, 0.126f, 0.75f},
                                         0.125f});
+        ++materialId;
+    }
+
+    {
+        // Streamline spiral
+        auto material = model->createMaterial(materialId, "streamline");
+        material->setDiffuseColor(WHITE);
+        material->setSpecularColor(WHITE);
+        material->setSpecularExponent(10.f);
+
+        Vector3fs vertices;
+        Vector4fs vertexColors;
+        std::vector<float> radii;
+
+        const auto offset = Vector3f{0.75f, 0.025f, 0.75f};
+        const float thicknessStart = 0.03f;
+        const float thicknessEnd = 0.005f;
+
+        constexpr size_t numVertices = 30;
+        for (size_t i = 0; i < numVertices; ++i)
+        {
+            const float t = i / static_cast<float>(numVertices);
+            const auto v = Vector3f(0.1f * std::cos(i * 0.5f), i * 0.01f,
+                                    0.1f * std::sin(i * 0.5f));
+            vertices.push_back(v + offset);
+            radii.push_back((1.f - t) * thicknessStart + t * thicknessEnd);
+            const auto col = Vector4f(t, 0.0f, 1.0f - t, 1.0f);
+            vertexColors.push_back(col);
+        }
+
+        model->addStreamline(materialId, vertices, vertexColors, radii);
+
         ++materialId;
     }
 
