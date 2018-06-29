@@ -10,7 +10,7 @@ set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 if(TARGET pdiff)
   list(APPEND TEST_LIBRARIES pdiff ${FREEIMAGE_LIBRARIES})
 else()
-  list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp snapshot.cpp)
+  list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp snapshot.cpp streamlines.cpp)
 endif()
 
 configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
@@ -28,6 +28,7 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     model.cpp
     plugin.cpp
     snapshot.cpp
+    streamlines.cpp
     webAPI.cpp
 )
 endif()

@@ -24,87 +24,30 @@
 
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/utils/ImageUtils.h>
 
 #define BOOST_TEST_MODULE braynsTestData
 #include <boost/test/unit_test.hpp>
 
-#include <perceptualdiff/metric.h>
-#include <perceptualdiff/rgba_image.h>
-
-//#define GENERATE_TESTDATA
-
-#ifdef GENERATE_TESTDATA
-void writeTestData(const std::string& filename, brayns::FrameBuffer& fb)
-{
-    auto image = brayns::freeimage::getImageFromFrameBuffer(fb);
-    FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()), image.get(),
-                   std::string(BRAYNS_TESTDATA + filename).c_str());
-}
-#endif
-
-std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(brayns::FrameBuffer& fb)
-{
-    brayns::freeimage::ImagePtr image(FreeImage_ConvertTo32Bits(
-        brayns::freeimage::getImageFromFrameBuffer(fb).get()));
-
-    const auto w = FreeImage_GetWidth(image.get());
-    const auto h = FreeImage_GetHeight(image.get());
-
-    auto result = std::make_unique<pdiff::RGBAImage>(w, h, "");
-    // Copy the image over to our internal format, FreeImage has the scanlines
-    // bottom to top though.
-    auto dest = result->get_data();
-    for (unsigned int y = 0; y < h; y++, dest += w)
-    {
-        const auto scanline = reinterpret_cast<const unsigned int*>(
-            FreeImage_GetScanLine(image.get(), h - y - 1));
-        memcpy(dest, scanline, sizeof(dest[0]) * w);
-    }
-
-    return std::move(result);
-}
-
-void compareTestData(const std::string& filename, brayns::FrameBuffer& fb)
-{
-    auto testImage = createPDiffRGBAImage(fb);
-    const auto referenceImage{
-        pdiff::read_from_file(BRAYNS_TESTDATA + filename)};
-    BOOST_CHECK(pdiff::yee_compare(*referenceImage, *testImage));
-}
+#include "PDiffHelpers.h"
 
 BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "demo"};
+    const char* argv[] = {app, "--accumulation", "off", "demo"};
     const int argc = sizeof(argv) / sizeof(char*);
     brayns::Brayns brayns(argc, argv);
 
-    auto& fb = brayns.getEngine().getFrameBuffer();
-    const auto& size = fb.getSize();
-    fb.setAccumulation(false);
-    fb.resize(size);
-
-    const uint16_t depth = fb.getColorDepth();
-    const size_t bytes = size[0] * size[1] * depth;
-
-    fb.clear();
     brayns.render();
+    const auto oldImage =
+        createPDiffRGBAImage(brayns.getEngine().getFrameBuffer());
 
-    fb.map();
-    pdiff::RGBAImage oldImage(size[0], size[1]);
-    memcpy(oldImage.get_data(), fb.getColorBuffer(), bytes);
-    fb.unmap();
-
-    fb.clear();
+    brayns.getEngine().getFrameBuffer().clear();
     brayns.render();
+    const auto newImage =
+        createPDiffRGBAImage(brayns.getEngine().getFrameBuffer());
 
-    fb.map();
-    pdiff::RGBAImage newImage(size[0], size[1]);
-    memcpy(newImage.get_data(), fb.getColorBuffer(), bytes);
-    BOOST_CHECK(pdiff::yee_compare(oldImage, newImage));
-    fb.unmap();
+    BOOST_CHECK(pdiff::yee_compare(*oldImage, *newImage));
 }
 
 BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
@@ -118,10 +61,8 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
-#ifdef GENERATE_TESTDATA
-    writeTestData("testdataMonkey.png", brayns.getEngine().getFrameBuffer());
-#endif
-    compareTestData("testdataMonkey.png", brayns.getEngine().getFrameBuffer());
+    BOOST_CHECK(compareTestImage("testdataMonkey.png",
+                                 brayns.getEngine().getFrameBuffer()));
 }
 
 #ifdef BRAYNS_USE_BBPTESTDATA
@@ -142,10 +83,8 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
-#ifdef GENERATE_TESTDATA
-    writeTestData("testdataLayer1.png", brayns.getEngine().getFrameBuffer());
-#endif
-    compareTestData("testdataLayer1.png", brayns.getEngine().getFrameBuffer());
+    BOOST_CHECK(compareTestImage("testdataLayer1.png",
+                                 brayns.getEngine().getFrameBuffer()));
 }
 
 BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
@@ -169,10 +108,8 @@ BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
-#ifdef GENERATE_TESTDATA
-    writeTestData("testSdfCircuit.png", brayns.getEngine().getFrameBuffer());
-#endif
-    compareTestData("testSdfCircuit.png", brayns.getEngine().getFrameBuffer());
+    BOOST_CHECK(compareTestImage("testSdfCircuit.png",
+                                 brayns.getEngine().getFrameBuffer()));
 }
 #endif
 
@@ -187,10 +124,8 @@ BOOST_AUTO_TEST_CASE(render_protein_and_compare)
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
-#ifdef GENERATE_TESTDATA
-    writeTestData("testdataProtein.png", brayns.getEngine().getFrameBuffer());
-#endif
-    compareTestData("testdataProtein.png", brayns.getEngine().getFrameBuffer());
+    BOOST_CHECK(compareTestImage("testdataProtein.png",
+                                 brayns.getEngine().getFrameBuffer()));
 }
 
 BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
@@ -205,10 +140,6 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
 
     brayns::Brayns brayns(argc, argv);
     brayns.render();
-#ifdef GENERATE_TESTDATA
-    writeTestData("testdataProteinStereo.png",
-                  brayns.getEngine().getFrameBuffer());
-#endif
-    compareTestData("testdataProteinStereo.png",
-                    brayns.getEngine().getFrameBuffer());
+    BOOST_CHECK(compareTestImage("testdataProteinStereo.png",
+                                 brayns.getEngine().getFrameBuffer()));
 }
