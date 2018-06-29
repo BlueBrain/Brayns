@@ -35,7 +35,6 @@
 //#define GENERATE_TESTDATA
 
 #ifdef GENERATE_TESTDATA
-
 void writeTestData(const std::string& filename, brayns::FrameBuffer& fb)
 {
     auto image = brayns::freeimage::getImageFromFrameBuffer(fb);
@@ -44,18 +43,34 @@ void writeTestData(const std::string& filename, brayns::FrameBuffer& fb)
 }
 #endif
 
+std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(brayns::FrameBuffer& fb)
+{
+    brayns::freeimage::ImagePtr image(FreeImage_ConvertTo32Bits(
+        brayns::freeimage::getImageFromFrameBuffer(fb).get()));
+
+    const auto w = FreeImage_GetWidth(image.get());
+    const auto h = FreeImage_GetHeight(image.get());
+
+    auto result = std::make_unique<pdiff::RGBAImage>(w, h, "");
+    // Copy the image over to our internal format, FreeImage has the scanlines
+    // bottom to top though.
+    auto dest = result->get_data();
+    for (unsigned int y = 0; y < h; y++, dest += w)
+    {
+        const auto scanline = reinterpret_cast<const unsigned int*>(
+            FreeImage_GetScanLine(image.get(), h - y - 1));
+        memcpy(dest, scanline, sizeof(dest[0]) * w);
+    }
+
+    return std::move(result);
+}
+
 void compareTestData(const std::string& filename, brayns::FrameBuffer& fb)
 {
-    fb.map();
-    const auto& size = fb.getSize();
-    pdiff::RGBAImage image(size[0], size[1]);
-    memcpy(image.get_data(), fb.getColorBuffer(),
-           size[0] * size[1] * fb.getColorDepth());
-    fb.unmap();
-
+    auto testImage = createPDiffRGBAImage(fb);
     const auto referenceImage{
         pdiff::read_from_file(BRAYNS_TESTDATA + filename)};
-    BOOST_CHECK(pdiff::yee_compare(*referenceImage, image));
+    BOOST_CHECK(pdiff::yee_compare(*referenceImage, *testImage));
 }
 
 BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
