@@ -164,9 +164,16 @@ void Model::addStreamline(const size_t materialId, const Vector3fs& vertices,
                           const Vector4fs& colors,
                           const std::vector<float>& radii)
 {
-    assert(vertices.size() > 1);
-    assert(vertices.size() == colors.size());
-    assert(radii.empty() || vertices.size() == radii.size());
+    if (vertices.size() < 2)
+        throw std::runtime_error(
+            "Number of vertices is less than two which is minimum needed for a "
+            "streamline.");
+
+    if (vertices.size() != colors.size())
+        throw std::runtime_error("Number of vertices and colors do not match.");
+
+    if (!radii.empty() && vertices.size() != radii.size())
+        throw std::runtime_error("Number of vertices and radii do not match.");
 
     _streamlinesDirty = true;
     Streamlines& streamlines = _streamlines[materialId];
