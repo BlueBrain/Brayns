@@ -86,7 +86,9 @@ BOOST_AUTO_TEST_CASE(streamlines)
                                          1.0f));
                 }
 
-                model->addStreamline(materialId, vertices, vertexColors, radii);
+                model->addStreamline(materialId,
+                                     brayns::Streamline(vertices, vertexColors,
+                                                        radii));
             }
         }
 

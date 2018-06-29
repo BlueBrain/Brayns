@@ -28,7 +28,7 @@
 #include <brayns/common/geometry/Cylinder.h>
 #include <brayns/common/geometry/SDFGeometry.h>
 #include <brayns/common/geometry/Sphere.h>
-#include <brayns/common/geometry/Streamlines.h>
+#include <brayns/common/geometry/Streamline.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/types.h>
 
@@ -227,14 +227,11 @@ public:
     /**
       Adds a streamline to the model
       @param materialId Id of the material for the streamline
-      @param vertices Vertices of the streamline
-      @param colors Colors of the vertices (RGBA)
-      @param radii Radius of the vertices (optional)
+      @param streamline Streamline to add
+      @return Index of the streamline for the specified material
       */
-    BRAYNS_API void addStreamline(const size_t materialId,
-                                  const Vector3fs& vertices,
-                                  const Vector4fs& colors,
-                                  const std::vector<float>& radii = {});
+    BRAYNS_API uint64_t addStreamline(const size_t materialId,
+                                      const Streamline& streamline);
 
     /**
       Adds a SDFGeometry to the scene

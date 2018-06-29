@@ -24,15 +24,8 @@
 
 namespace brayns
 {
-struct Streamlines
+struct OSPRayStreamlines
 {
-    // Global radius of all streamlines (if per-vertex radius is not used).
-    float radius = 0.01f;
-
-    // Enable curve interpolation, default off (always on if per-vertex radius
-    // is used)
-    bool smooth = false;
-
     // Data array of all vertex position (and optional radius) for all
     // streamlines
     Vector4fs vertex;

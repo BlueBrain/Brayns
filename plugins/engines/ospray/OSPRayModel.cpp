@@ -20,6 +20,7 @@
 
 #include "OSPRayModel.h"
 #include "OSPRayMaterial.h"
+#include "OSPRayStreamlines.h"
 #include "utils.h"
 
 #include <brayns/common/Transformation.h>
@@ -269,30 +270,47 @@ void OSPRayModel::_commitStreamlines(const size_t materialId)
 {
     auto streamlineGeometry = ospNewGeometry("streamlines");
 
-    const auto& streamlines = _streamlines[materialId];
+    OSPRayStreamlines ospStreamlines;
+
+    for (const auto& streamline : _streamlines[materialId])
+    {
+        const size_t startIndex = ospStreamlines.vertex.size();
+        const size_t endIndex = startIndex + streamline.position.size() - 1;
+
+        for (size_t index = startIndex; index < endIndex; ++index)
+            ospStreamlines.indices.push_back(index);
+
+        for (size_t i = 0; i < streamline.position.size(); i++)
+            ospStreamlines.vertex.push_back(
+                Vector4f(streamline.position[i], streamline.radius[i]));
+
+        for (const auto& color : streamline.color)
+            ospStreamlines.vertexColor.push_back(color);
+    }
+
+    const size_t memoryFlags = 0; // Tell OSPRay to keep its own copy in memory
 
     {
-        OSPData vertex = allocateVectorData(streamlines.vertex, OSP_FLOAT4,
-                                            _memoryManagementFlags);
+        OSPData vertex =
+            allocateVectorData(ospStreamlines.vertex, OSP_FLOAT4, memoryFlags);
         ospSetObject(streamlineGeometry, "vertex", vertex);
         ospRelease(vertex);
     }
     {
-        OSPData vertexColor =
-            allocateVectorData(streamlines.vertexColor, OSP_FLOAT4,
-                               _memoryManagementFlags);
+        OSPData vertexColor = allocateVectorData(ospStreamlines.vertexColor,
+                                                 OSP_FLOAT4, memoryFlags);
         ospSetObject(streamlineGeometry, "vertex.color", vertexColor);
         ospRelease(vertexColor);
     }
     {
-        OSPData index = allocateVectorData(streamlines.indices, OSP_INT,
-                                           _memoryManagementFlags);
+        OSPData index =
+            allocateVectorData(ospStreamlines.indices, OSP_INT, memoryFlags);
         ospSetObject(streamlineGeometry, "index", index);
         ospRelease(index);
     }
 
-    ospSetf(streamlineGeometry, "radius", streamlines.radius);
-    ospSet1i(streamlineGeometry, "smooth", streamlines.smooth);
+    // Since we allow custom radius per point we always smooth
+    ospSet1i(streamlineGeometry, "smooth", true);
 
     auto impl =
         std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);

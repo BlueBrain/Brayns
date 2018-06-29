@@ -160,53 +160,33 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
     return _cones[materialId].size() - 1;
 }
 
-void Model::addStreamline(const size_t materialId, const Vector3fs& vertices,
-                          const Vector4fs& colors,
-                          const std::vector<float>& radii)
+uint64_t Model::addStreamline(const size_t materialId,
+                              const Streamline& streamline)
 {
-    if (vertices.size() < 2)
+    if (streamline.position.size() < 2)
         throw std::runtime_error(
             "Number of vertices is less than two which is minimum needed for a "
             "streamline.");
 
-    if (vertices.size() != colors.size())
+    if (streamline.position.size() != streamline.color.size())
         throw std::runtime_error("Number of vertices and colors do not match.");
 
-    if (!radii.empty() && vertices.size() != radii.size())
+    if (streamline.position.size() != streamline.radius.size())
         throw std::runtime_error("Number of vertices and radii do not match.");
 
-    _streamlinesDirty = true;
-    Streamlines& streamlines = _streamlines[materialId];
-
-    const size_t startIndex = streamlines.vertex.size();
-    const size_t endIndex = startIndex + vertices.size() - 1;
-
-    for (size_t index = startIndex; index < endIndex; ++index)
-        streamlines.indices.push_back(index);
-
-    for (const auto& vertex : vertices)
-        streamlines.vertex.push_back(
-            Vector4f(vertex.x(), vertex.y(), vertex.z(), streamlines.radius));
-
-    for (const auto& color : colors)
-        streamlines.vertexColor.push_back(color);
-
-    for (size_t i = 0; i < radii.size(); i++)
-        streamlines.vertex[startIndex + i].w() = radii[i];
-
-    // If we have custom radii then enable smoothing
-    streamlines.smooth |= !radii.empty();
-
     // Calculate bounds
-    for (size_t index = startIndex; index <= endIndex; ++index)
+    for (size_t index = 0; index < streamline.position.size(); ++index)
     {
-        const auto& vertex = streamlines.vertex[index];
-        const float radius = vertex.w();
+        const auto& pos = streamline.position[index];
+        const float radius = streamline.radius[index];
         const auto radiusVec = Vector3f(radius, radius, radius);
-        const auto pos = Vector3f(vertex.x(), vertex.y(), vertex.z());
         _bounds.merge(pos + radiusVec);
         _bounds.merge(pos - radiusVec);
     }
+
+    _streamlinesDirty = true;
+    _streamlines[materialId].push_back(streamline);
+    return _streamlines[materialId].size() - 1;
 }
 
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
