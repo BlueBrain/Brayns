@@ -394,6 +394,8 @@ struct Blob
 
 class Loader;
 using LoaderPtr = std::unique_ptr<Loader>;
+
+class PropertyMap;
 }
 
 #endif // TYPES_H

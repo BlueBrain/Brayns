@@ -57,6 +57,9 @@ if(CPPCHECK_VERSION VERSION_LESS 1.78)
   list(APPEND CPPCHECK_EXTRA_ARGS --error-exitcode=0 --force)
 endif()
 
+list(APPEND LCOV_EXCLUDE 'plugins/RocketsPlugin/rapidjson/*'
+                         'plugins/RocketsPlugin/staticjson/*')
+
 set(BRAYNSPLUGINS_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSPLUGINS_OMIT_VERSION_HEADERS ON)
 set(BRAYNSPLUGINS_OMIT_EXPORT ON)
