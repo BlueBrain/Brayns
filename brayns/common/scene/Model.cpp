@@ -131,7 +131,8 @@ bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
            _trianglesMeshes.empty() && _sdf.geometries.empty() &&
-           _bounds.isEmpty();
+           _streamlines.empty() &&
+           _bounds.isEmpty(); // _bounds only used for volumes, will disappear.
 }
 
 uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
