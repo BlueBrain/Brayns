@@ -221,17 +221,12 @@ public:
     BRAYNS_API uint64_t addCone(const size_t materialId, const Cone& cone);
 
     /**
-        Returns streamlines handled by the model
-      */
-    BRAYNS_API StreamlinesMap& getStreamlines() { return _streamlines; }
-    /**
       Adds a streamline to the model
       @param materialId Id of the material for the streamline
       @param streamline Streamline to add
-      @return Index of the streamline for the specified material
       */
-    BRAYNS_API uint64_t addStreamline(const size_t materialId,
-                                      const Streamline& streamline);
+    BRAYNS_API void addStreamline(const size_t materialId,
+                                  const Streamline& streamline);
 
     /**
       Adds a SDFGeometry to the scene
@@ -322,7 +317,7 @@ protected:
     bool _conesDirty{true};
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
-    StreamlinesMap _streamlines;
+    StreamlinesDataMap _streamlines;
     bool _streamlinesDirty{true};
     Boxf _bounds;
     bool _useSimulationModel{false};

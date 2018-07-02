@@ -20,7 +20,6 @@
 
 #include "OSPRayModel.h"
 #include "OSPRayMaterial.h"
-#include "OSPRayStreamlines.h"
 #include "utils.h"
 
 #include <brayns/common/Transformation.h>
@@ -269,42 +268,24 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
 void OSPRayModel::_commitStreamlines(const size_t materialId)
 {
     auto streamlineGeometry = ospNewGeometry("streamlines");
-
-    OSPRayStreamlines ospStreamlines;
-
-    for (const auto& streamline : _streamlines[materialId])
-    {
-        const size_t startIndex = ospStreamlines.vertex.size();
-        const size_t endIndex = startIndex + streamline.position.size() - 1;
-
-        for (size_t index = startIndex; index < endIndex; ++index)
-            ospStreamlines.indices.push_back(index);
-
-        for (size_t i = 0; i < streamline.position.size(); i++)
-            ospStreamlines.vertex.push_back(
-                Vector4f(streamline.position[i], streamline.radius[i]));
-
-        for (const auto& color : streamline.color)
-            ospStreamlines.vertexColor.push_back(color);
-    }
-
-    const size_t memoryFlags = 0; // Tell OSPRay to keep its own copy in memory
+    auto& streamlinesData = _streamlines[materialId];
 
     {
-        OSPData vertex =
-            allocateVectorData(ospStreamlines.vertex, OSP_FLOAT4, memoryFlags);
+        OSPData vertex = allocateVectorData(streamlinesData.vertex, OSP_FLOAT4,
+                                            _memoryManagementFlags);
         ospSetObject(streamlineGeometry, "vertex", vertex);
         ospRelease(vertex);
     }
     {
-        OSPData vertexColor = allocateVectorData(ospStreamlines.vertexColor,
-                                                 OSP_FLOAT4, memoryFlags);
+        OSPData vertexColor =
+            allocateVectorData(streamlinesData.vertexColor, OSP_FLOAT4,
+                               _memoryManagementFlags);
         ospSetObject(streamlineGeometry, "vertex.color", vertexColor);
         ospRelease(vertexColor);
     }
     {
-        OSPData index =
-            allocateVectorData(ospStreamlines.indices, OSP_INT, memoryFlags);
+        OSPData index = allocateVectorData(streamlinesData.indices, OSP_INT,
+                                           _memoryManagementFlags);
         ospSetObject(streamlineGeometry, "index", index);
         ospRelease(index);
     }

@@ -160,8 +160,7 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
     return _cones[materialId].size() - 1;
 }
 
-uint64_t Model::addStreamline(const size_t materialId,
-                              const Streamline& streamline)
+void Model::addStreamline(const size_t materialId, const Streamline& streamline)
 {
     if (streamline.position.size() < 2)
         throw std::runtime_error(
@@ -184,9 +183,22 @@ uint64_t Model::addStreamline(const size_t materialId,
         _bounds.merge(pos - radiusVec);
     }
 
+    auto& streamlinesData = _streamlines[materialId];
+
+    const size_t startIndex = streamlinesData.vertex.size();
+    const size_t endIndex = startIndex + streamline.position.size() - 1;
+
+    for (size_t index = startIndex; index < endIndex; ++index)
+        streamlinesData.indices.push_back(index);
+
+    for (size_t i = 0; i < streamline.position.size(); i++)
+        streamlinesData.vertex.push_back(
+            Vector4f(streamline.position[i], streamline.radius[i]));
+
+    for (const auto& color : streamline.color)
+        streamlinesData.vertexColor.push_back(color);
+
     _streamlinesDirty = true;
-    _streamlines[materialId].push_back(streamline);
-    return _streamlines[materialId].size() - 1;
 }
 
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,

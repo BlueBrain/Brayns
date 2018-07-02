@@ -43,4 +43,27 @@ struct Streamline
     // Array of vertex radii
     std::vector<float> radius;
 };
+
+struct StreamlinesData
+{
+    // Data array of all vertex position (and optional radius) for all
+    // streamlines
+    Vector4fs vertex;
+
+    // Data array of corresponding vertex colors (RGBA)
+    Vector4fs vertexColor;
+
+    // Data array of indices to the first vertex of a link.
+    //
+    // A streamlines geometry can contain multiple disjoint streamlines, each
+    // streamline is specified as a list of segments (or links) referenced via
+    // index: each entry e of the index array points the first vertex of a link
+    // (vertex[index[e]]) and the second vertex of the link is implicitly the
+    // directly following one (vertex[index[e]+1]). For example, two streamlines
+    // of vertices (A-B-C-D) and (E-F-G), respectively, would internally
+    // correspond to five links (A-B, B-C, C-D, E-F, and F-G), and would be
+    // specified via an array of vertices [A,B,C,D,E,F,G], plus an array of link
+    // indices [0,1,2,4,5].
+    std::vector<int32_t> indices;
+};
 }
