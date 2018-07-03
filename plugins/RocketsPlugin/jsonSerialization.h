@@ -316,7 +316,7 @@ inline void init(brayns::Material* m, ObjectHandler* h)
 inline void init(brayns::Transformation* g, ObjectHandler* h)
 {
     h->add_property("translation", Vector3fArray(g->_translation));
-    h->add_property("scaling", Vector3fArray(g->_scale));
+    h->add_property("scale", Vector3fArray(g->_scale));
     h->add_property("rotation", Vector4fArray(g->_rotation));
     h->set_flags(Flags::DisallowUnknownKey);
 }
