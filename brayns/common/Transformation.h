@@ -29,17 +29,19 @@ SERIALIZATION_ACCESS(Transformation)
 namespace brayns
 {
 /**
-* @brief Defines the translation, rotation and scaling parameters to be applied
+* @brief Defines the translation, rotation and scale parameters to be applied
 * to a scene asset.
 */
 class Transformation : public BaseObject
 {
 public:
     Transformation() = default;
-    Transformation(const Matrix4f& mat)
-        : _translation(mat.getTranslation())
-        , _scale(mat(0, 0), mat(1, 1), mat(2, 2))
-        , _rotation(mat)
+
+    Transformation(const Vector3f& translation, const Vector3f& scale,
+                   const Quaternionf& rotation)
+        : _translation(translation)
+        , _scale(scale)
+        , _rotation(rotation)
     {
     }
 
@@ -62,10 +64,10 @@ public:
                _scale == rhs._scale;
     }
     bool operator!=(const Transformation& rhs) const { return !(*this == rhs); }
+    // only applies rotation and translation, use scaling separately if needed
     Matrix4f toMatrix() const
     {
         Matrix4f matrix(getRotation(), getTranslation());
-        matrix.scale(getScale());
         return matrix;
     }
 
@@ -79,7 +81,8 @@ private:
 inline Transformation operator*(const Transformation& a,
                                 const Transformation& b)
 {
-    return {a.toMatrix() * b.toMatrix()};
+    const auto matrix = a.toMatrix() * b.toMatrix();
+    return {matrix.getTranslation(), a.getScale() * b.getScale(), matrix};
 }
 
 inline Boxf transformBox(const Boxf& box, const Transformation& trafo)
