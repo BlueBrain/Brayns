@@ -45,6 +45,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   geometry/Cylinder.h
   geometry/SDFGeometry.h
   geometry/Sphere.h
+  geometry/Streamline.h
   geometry/TrianglesMesh.h
   input/KeyboardHandler.h
   light/DirectionalLight.h

@@ -131,7 +131,8 @@ bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
            _trianglesMeshes.empty() && _sdf.geometries.empty() &&
-           _bounds.isEmpty();
+           _streamlines.empty() &&
+           _bounds.isEmpty(); // _bounds only used for volumes, will disappear.
 }
 
 uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
@@ -158,6 +159,47 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
     _bounds.merge(cone.center);
     _bounds.merge(cone.up);
     return _cones[materialId].size() - 1;
+}
+
+void Model::addStreamline(const size_t materialId, const Streamline& streamline)
+{
+    if (streamline.position.size() < 2)
+        throw std::runtime_error(
+            "Number of vertices is less than two which is minimum needed for a "
+            "streamline.");
+
+    if (streamline.position.size() != streamline.color.size())
+        throw std::runtime_error("Number of vertices and colors do not match.");
+
+    if (streamline.position.size() != streamline.radius.size())
+        throw std::runtime_error("Number of vertices and radii do not match.");
+
+    // Calculate bounds
+    for (size_t index = 0; index < streamline.position.size(); ++index)
+    {
+        const auto& pos = streamline.position[index];
+        const float radius = streamline.radius[index];
+        const auto radiusVec = Vector3f(radius, radius, radius);
+        _bounds.merge(pos + radiusVec);
+        _bounds.merge(pos - radiusVec);
+    }
+
+    auto& streamlinesData = _streamlines[materialId];
+
+    const size_t startIndex = streamlinesData.vertex.size();
+    const size_t endIndex = startIndex + streamline.position.size() - 1;
+
+    for (size_t index = startIndex; index < endIndex; ++index)
+        streamlinesData.indices.push_back(index);
+
+    for (size_t i = 0; i < streamline.position.size(); i++)
+        streamlinesData.vertex.push_back(
+            Vector4f(streamline.position[i], streamline.radius[i]));
+
+    for (const auto& color : streamline.color)
+        streamlinesData.vertexColor.push_back(color);
+
+    _streamlinesDirty = true;
 }
 
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,

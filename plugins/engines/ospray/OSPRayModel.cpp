@@ -76,6 +76,7 @@ OSPRayModel::~OSPRayModel()
     releaseAndClearGeometry(_ospExtendedCones);
     releaseAndClearGeometry(_ospExtendedConesData);
     releaseAndClearGeometry(_ospMeshes);
+    releaseAndClearGeometry(_ospStreamlines);
     releaseAndClearGeometry(_ospSDFGeometryRefsData);
 
     releaseModel(_simulationModel);
@@ -264,6 +265,43 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
     ospAddGeometry(_model, _ospMeshes[materialId]);
 }
 
+void OSPRayModel::_commitStreamlines(const size_t materialId)
+{
+    auto streamlineGeometry = ospNewGeometry("streamlines");
+    auto& streamlinesData = _streamlines[materialId];
+
+    {
+        OSPData vertex = allocateVectorData(streamlinesData.vertex, OSP_FLOAT4,
+                                            _memoryManagementFlags);
+        ospSetObject(streamlineGeometry, "vertex", vertex);
+        ospRelease(vertex);
+    }
+    {
+        OSPData vertexColor =
+            allocateVectorData(streamlinesData.vertexColor, OSP_FLOAT4,
+                               _memoryManagementFlags);
+        ospSetObject(streamlineGeometry, "vertex.color", vertexColor);
+        ospRelease(vertexColor);
+    }
+    {
+        OSPData index = allocateVectorData(streamlinesData.indices, OSP_INT,
+                                           _memoryManagementFlags);
+        ospSetObject(streamlineGeometry, "index", index);
+        ospRelease(index);
+    }
+
+    // Since we allow custom radius per point we always smooth
+    ospSet1i(streamlineGeometry, "smooth", true);
+
+    auto impl =
+        std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
+    ospSetMaterial(streamlineGeometry, impl->getOSPMaterial());
+    ospCommit(streamlineGeometry);
+
+    ospAddGeometry(_model, streamlineGeometry);
+    _ospStreamlines[materialId] = streamlineGeometry;
+}
+
 void OSPRayModel::_commitSDFGeometries()
 {
     assert(_ospSDFGeometryData == nullptr);
@@ -385,6 +423,13 @@ void OSPRayModel::commit()
         for (const auto& meshes : _trianglesMeshes)
             _commitMeshes(meshes.first);
         _trianglesMeshesDirty = false;
+    }
+
+    if (_streamlinesDirty)
+    {
+        for (const auto& streamlines : _streamlines)
+            _commitStreamlines(streamlines.first);
+        _streamlinesDirty = false;
     }
 
     if (_sdfGeometriesDirty)

@@ -132,6 +132,9 @@ typedef std::map<size_t, Cones> ConesMap;
 struct TrianglesMesh;
 typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 
+struct StreamlinesData;
+typedef std::map<size_t, StreamlinesData> StreamlinesDataMap;
+
 class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;
 typedef std::map<std::string, Texture2DPtr> TexturesMap;

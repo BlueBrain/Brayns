@@ -51,6 +51,7 @@ private:
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);
     void _commitMeshes(const size_t materialId);
+    void _commitStreamlines(const size_t materialId);
     void _commitSDFGeometries();
 
     OSPModel _model{nullptr};
@@ -70,6 +71,8 @@ private:
     std::map<size_t, OSPGeometry> _ospExtendedCones;
     std::map<size_t, OSPData> _ospExtendedConesData;
     std::map<size_t, OSPGeometry> _ospMeshes;
+    std::map<size_t, OSPGeometry> _ospStreamlines;
+
     std::map<size_t, OSPGeometry> _ospSDFGeometryRefs;
     std::map<size_t, OSPData> _ospSDFGeometryRefsData;
     OSPData _ospSDFGeometryData = nullptr;
