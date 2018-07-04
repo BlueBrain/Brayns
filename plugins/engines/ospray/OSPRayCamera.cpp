@@ -68,6 +68,7 @@ void OSPRayCamera::commit()
     ospSet1f(_camera, "interpupillaryDistance", getEyeSeparation());
     ospSet1f(_camera, "fovy", getFieldOfView());
     ospSet1f(_camera, "architectural", true);
+    ospSet1f(_camera, "zeroParallaxPlane", getZeroParallaxPlane());
 
     for (const auto& prop : _properties.getProperties())
     {

@@ -237,6 +237,8 @@ inline void init(brayns::Camera* c, ObjectHandler* h)
     h->add_property("stereo_mode", &c->_stereoMode, Flags::Optional);
     h->add_property("type", &c->_type, Flags::Optional);
     h->add_property("up", Vector3fArray(c->_up), Flags::Optional);
+    h->add_property("zero_parallax_plane", &c->_zeroParallaxPlane,
+                    Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
