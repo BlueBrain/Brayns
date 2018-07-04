@@ -39,12 +39,12 @@ void StereoCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
         if(screen.x < 0.5)
         {
             pixelPos.x = org.x + (2.0 * screen.x - 0.5) * self->imgPlane_size_x;
-            org.x = org.x + self->interpupillaryDistance * 0.5f;
+            org.x = org.x - self->interpupillaryDistance * 0.5f;
         }
         else
         {
             pixelPos.x = org.x + (2.0 * screen.x - 1.5) * self->imgPlane_size_x; 
-            org.x = org.x - self->interpupillaryDistance * 0.5f;
+            org.x = org.x + self->interpupillaryDistance * 0.5f;
         }
     }
     else

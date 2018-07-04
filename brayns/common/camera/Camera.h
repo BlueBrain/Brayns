@@ -24,6 +24,7 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
+#include <brayns/common/PropertyMap.h>
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(Camera)
@@ -216,6 +217,27 @@ public:
       @return the camera clip planes
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
+    /**
+     * Set custom/plugin-specific properties to this camera. They are
+     * automatically applied in commit() on the implementation-specific object.
+     */
+    void setProperties(const PropertyMap& properties)
+    {
+        _properties = properties;
+        markModified();
+    }
+
+    /** Update or add the given properties to the existing ones. */
+    void updateProperties(const PropertyMap& properties)
+    {
+        for (auto prop : properties.getProperties())
+            _properties.setProperty(*prop);
+        markModified();
+    }
+
+protected:
+    PropertyMap _properties;
+
 private:
     CameraType _type{CameraType::default_};
     Vector3f _position;

@@ -28,28 +28,31 @@ namespace brayns
 inline osp::affine3f transformationToAffine3f(
     const Transformation& transformation)
 {
-    ospcommon::affine3f t(ospcommon::one);
+    // https://stackoverflow.com/a/18436193
+    const auto& quat = transformation.getRotation();
+    const float x = atan2(2 * (quat.w() * quat.x() + quat.y() * quat.z()),
+                          1 - 2 * (quat.x() * quat.x() + quat.y() * quat.y()));
+    const float y = asin(2 * (quat.w() * quat.y() - quat.z() * quat.x()));
+    const float z = atan2(2 * (quat.w() * quat.z() + quat.x() * quat.y()),
+                          1 - 2 * (quat.y() * quat.y() + quat.z() * quat.z()));
+
+    ospcommon::affine3f rot{ospcommon::one};
+    rot = ospcommon::affine3f::rotate({1, 0, 0}, x) * rot;
+    rot = ospcommon::affine3f::rotate({0, 1, 0}, y) * rot;
+    rot = ospcommon::affine3f::rotate({0, 0, 1}, z) * rot;
+
     const auto& translation = transformation.getTranslation();
-    t *= t.translate({translation.x(), translation.y(), translation.z()});
-
-    const auto& matrix = transformation.getRotation().getRotationMatrix();
-    const float x = atan2(matrix(2, 1), matrix(2, 2));
-    const float y = atan2(-matrix(2, 0),
-                          sqrt(powf(matrix(2, 1), 2) + powf(matrix(2, 2), 2)));
-    const float z = atan2(matrix(1, 0), matrix(0, 0));
-    if (x != 0.f)
-        t *= t.rotate({1, 0, 0}, x);
-    if (y != 0.f)
-        t *= t.rotate({0, 1, 0}, y);
-    if (z != 0.f)
-        t *= t.rotate({0, 0, 1}, z);
-
     const auto& scale = transformation.getScale();
-    t *= t.scale({scale.x(), scale.y(), scale.z()});
+
+    const auto t =
+        ospcommon::affine3f::translate(
+            {translation.x(), translation.y(), translation.z()}) *
+        rot * ospcommon::affine3f::scale({scale.x(), scale.y(), scale.z()});
     return (osp::affine3f&)t;
 }
 
-inline void addInstance(OSPModel rootModel, OSPModel modelToAdd, const Transformation& transform)
+inline void addInstance(OSPModel rootModel, OSPModel modelToAdd,
+                        const Transformation& transform)
 {
     OSPGeometry instance =
         ospNewInstance(modelToAdd, transformationToAffine3f(transform));

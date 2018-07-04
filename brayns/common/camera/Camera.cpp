@@ -56,6 +56,7 @@ Camera& Camera::operator=(const Camera& rhs)
     setClipPlanes(rhs.getClipPlanes());
 
     _matrix = rhs._matrix;
+    _properties = rhs._properties;
 
     return *this;
 }
