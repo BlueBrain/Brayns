@@ -388,8 +388,8 @@ void MeshLoader::_createMaterials(Model&, const aiScene*, const std::string&)
     throw NO_ASSIMP;
 }
 
-void MeshLoader::_postLoad(const aiScene*, Model&, const size_t, const size_t,
-                           const std::string&)
+void MeshLoader::_postLoad(const aiScene*, Model&, const size_t,
+                           const Matrix4f&, size_t, const std::string&)
 {
     throw NO_ASSIMP;
 }
@@ -399,4 +399,4 @@ size_t MeshLoader::_getQuality() const
     throw NO_ASSIMP;
 }
 #endif
-}
+} // namespace brayns
