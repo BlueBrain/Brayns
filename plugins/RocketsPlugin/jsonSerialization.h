@@ -450,6 +450,11 @@ inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
     h->add_property("memory_mode", &g->_memoryMode, Flags::Optional);
     h->add_property("circuit_configuration", &g->_circuitConfiguration,
                     Flags::Optional);
+    h->add_property("morphology_dampen_branch_thickness_changerate",
+                    &g->_morphologyDampenBranchThicknessChangerate,
+                    Flags::Optional);
+    h->add_property("morphology_use_sdf_geometries",
+                    &g->_morphologyUseSDFGeometries, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
