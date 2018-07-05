@@ -648,6 +648,9 @@ public:
                 const auto& params =
                     _parametersManager.getApplicationParameters();
                 const auto fps = params.getImageStreamFPS();
+                if (fps == 0)
+                    return;
+
                 const auto elapsed = _timer.elapsed() + _leftover;
                 const auto duration = 1.0 / fps;
                 if (elapsed < duration)
@@ -796,7 +799,8 @@ public:
         _handleRPC(METHOD_RESET_CAMERA,
                    "Resets the camera to its initial values", [this] {
                        _engine->setDefaultCamera();
-                       _jsonrpcServer->notify(getNotificationEndpointName(ENDPOINT_CAMERA),
+                       _jsonrpcServer->notify(getNotificationEndpointName(
+                                                  ENDPOINT_CAMERA),
                                               _engine->getCamera());
                        _engine->triggerRender();
                    });
