@@ -39,7 +39,7 @@ void StereoCamera::commit()
     Camera::commit();
 
     const float fovy = getParamf("fovy", 60.f);
-    const float fovx = getParamf("fovx", 90.f);
+    const float aspectRatio = getParamf("aspect", 1.5f);
     const StereoMode stereoMode =
         (StereoMode)getParam1i("stereoMode", OSP_STEREO_NONE);
     const float interpupillaryDistance =
@@ -72,8 +72,7 @@ void StereoCamera::commit()
     const vec3f org = pos;
     const float imgPlane_size_y =
         2.f * zeroParallaxPlane * tanf(deg2rad(0.5f * fovy));
-    const float imgPlane_size_x =
-        2.f * zeroParallaxPlane * tanf(deg2rad(0.5f * fovx));
+    const float imgPlane_size_x = imgPlane_size_y * aspectRatio;
 
     ispc::StereoCamera_set(getIE(), (const ispc::vec3f&)org,
                            (const ispc::vec3f&)dir, (const ispc::vec3f&)dir_du,
