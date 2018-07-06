@@ -22,8 +22,6 @@
 #include "StereoCamera.h"
 #include "StereoCamera_ispc.h"
 
-const float distanceToPlane = 10000.0f;
-
 namespace ospray
 {
 StereoCamera::StereoCamera()
@@ -42,10 +40,13 @@ void StereoCamera::commit()
 
     const float fovy = getParamf("fovy", 60.f);
     const float fovx = getParamf("fovx", 90.f);
-    const StereoMode stereoMode = (StereoMode)getParam1i("stereoMode", OSP_STEREO_NONE);
-    const float interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
+    const StereoMode stereoMode =
+        (StereoMode)getParam1i("stereoMode", OSP_STEREO_NONE);
+    const float interpupillaryDistance =
+        getParamf("interpupillaryDistance", 0.0635f);
+    const float zeroParallaxPlane = getParamf("zeroParallaxPlane", 1.f);
 
-    float ipd = 0.0f;
+    float ipd = 0.f;
     bool sideBySide = false;
     switch (stereoMode)
     {
@@ -63,22 +64,21 @@ void StereoCamera::commit()
         break;
     }
 
-
     dir = normalize(dir);
     const vec3f dir_du = normalize(cross(dir, up));
     const vec3f dir_dv = normalize(up);
     dir = -dir;
 
     const vec3f org = pos;
-    const float imgPlane_size_y = 2.0f * distanceToPlane * tanf(deg2rad(0.5f * fovy));
-    const float imgPlane_size_x = 2.0f * distanceToPlane * tanf(deg2rad(0.5f * fovx));
+    const float imgPlane_size_y =
+        2.f * zeroParallaxPlane * tanf(deg2rad(0.5f * fovy));
+    const float imgPlane_size_x =
+        2.f * zeroParallaxPlane * tanf(deg2rad(0.5f * fovx));
 
     ispc::StereoCamera_set(getIE(), (const ispc::vec3f&)org,
-                                    (const ispc::vec3f&)dir,
-                                    (const ispc::vec3f&)dir_du,
-                                    (const ispc::vec3f&)dir_dv,
-                                    distanceToPlane, imgPlane_size_y,
-                                    imgPlane_size_x, ipd, sideBySide);
+                           (const ispc::vec3f&)dir, (const ispc::vec3f&)dir_du,
+                           (const ispc::vec3f&)dir_dv, zeroParallaxPlane,
+                           imgPlane_size_y, imgPlane_size_x, ipd, sideBySide);
 }
 
 OSP_REGISTER_CAMERA(StereoCamera, stereoFull);

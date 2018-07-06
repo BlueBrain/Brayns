@@ -41,7 +41,6 @@ void CylindricCamera::commit()
     Camera::commit();
 
     const float fovy = OPENDECK_FOV_Y;
-    std::cout << "FOV::::::::::::::: " << fovy << std::endl;
 
     dir = normalize(dir);
     const vec3f dir_du = normalize(cross(dir, up));
@@ -52,10 +51,9 @@ void CylindricCamera::commit()
     const float imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * fovy));
 
     ispc::CylindricCamera_set(getIE(), (const ispc::vec3f&)org,
-                                       (const ispc::vec3f&)dir,
-                                       (const ispc::vec3f&)dir_du,
-                                       (const ispc::vec3f&)dir_dv,
-                                       imgPlane_size_y);
+                              (const ispc::vec3f&)dir,
+                              (const ispc::vec3f&)dir_du,
+                              (const ispc::vec3f&)dir_dv, imgPlane_size_y);
 }
 
 OSP_REGISTER_CAMERA(CylindricCamera, cylindric);

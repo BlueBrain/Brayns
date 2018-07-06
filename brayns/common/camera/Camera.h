@@ -198,6 +198,19 @@ public:
       @return the eye separation of the stereo Camera
     */
     float getEyeSeparation() const { return _eyeSeparation; }
+    /**
+       @brief Sets the eye separation of the stereo camera
+       @param eyeSeparation The new distance between eyes
+    */
+    void setZeroParallaxPlane(float zeroParallaxPlane)
+    {
+        _updateValue(_zeroParallaxPlane, zeroParallaxPlane);
+    }
+
+    /**
+      @return the eye separation of the stereo Camera
+    */
+    float getZeroParallaxPlane() const { return _zeroParallaxPlane; }
     /** Resets the camera to its initial values */
     BRAYNS_API void reset();
 
@@ -255,6 +268,7 @@ private:
 
     StereoMode _stereoMode{StereoMode::none};
     float _eyeSeparation{0.0635f};
+    float _zeroParallaxPlane{1.f};
 
     ClipPlanes _clipPlanes{
         {{-1.f, 0.f, 0.f, std::numeric_limits<float>::max()},

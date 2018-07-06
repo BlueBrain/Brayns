@@ -25,43 +25,45 @@
 #include "math/sampling.ih"
 
 void StereoCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
-                             const varying CameraSample &sample)
+                          const varying CameraSample &sample)
 {
-    uniform StereoCamera *uniform self =
-        (uniform StereoCamera * uniform)_self;
+    uniform StereoCamera *uniform self = (uniform StereoCamera * uniform)_self;
 
     vec2f screen = sample.screen;
     screen = Camera_subRegion(_self, screen);
     vec3f pixelPos;
-    vec3f org = self->org;
-    if( self->side_by_side )
+    vec3f org = make_vec3f(0.f);
+    if (self->side_by_side)
     {
-        if(screen.x < 0.5)
+        if (screen.x < 0.5f)
         {
-            pixelPos.x = org.x + (2.0 * screen.x - 0.5) * self->imgPlane_size_x;
-            org.x = org.x - self->interpupillaryDistance * 0.5f;
+            pixelPos.x = (2.f * screen.x - 0.5f) * self->imgPlane_size_x;
+            org.x = -self->interpupillaryDistance * 0.5f;
         }
         else
         {
-            pixelPos.x = org.x + (2.0 * screen.x - 1.5) * self->imgPlane_size_x; 
-            org.x = org.x + self->interpupillaryDistance * 0.5f;
+            pixelPos.x = (2.f * screen.x - 1.5f) * self->imgPlane_size_x;
+            org.x = self->interpupillaryDistance * 0.5f;
         }
     }
     else
     {
-        pixelPos.x = org.x + (screen.x - 0.5) * self->imgPlane_size_x;
+        pixelPos.x = (screen.x - 0.5f) * self->imgPlane_size_x;
         org.x = self->interpupillaryDistance * 0.5f;
     }
 
-    pixelPos.y = org.y + (screen.y - 0.5) * self->imgPlane_size_y;
-    pixelPos.z = org.z - self->distanceToPlane;
+    pixelPos.y = (screen.y - 0.5f) * self->imgPlane_size_y;
+    pixelPos.z = -self->distanceToPlane;
 
-    vec3f dir = normalize( pixelPos - org);
+    vec3f dir = normalize(pixelPos - org);
 
-    const LinearSpace3f cameraSpace = make_LinearSpace3f( self->dir_du, self->dir_dv, self->dir_cam);
+    const LinearSpace3f cameraSpace =
+        make_LinearSpace3f(self->dir_du, self->dir_dv, self->dir_cam);
     dir = normalize(cameraSpace * dir);
+    org = cameraSpace * org;
 
     const float time = Camera_shutterTime(_self, sample.time);
+    org = self->org + org;
     setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
 }
 
@@ -78,18 +80,14 @@ export void *uniform StereoCamera_create(void *uniform cppE)
     return self;
 }
 
-export void StereoCamera_set(void *uniform _self, const uniform vec3f &org,
-                             const uniform vec3f &dir_cam,
-                             const uniform vec3f &dir_du,
-                             const uniform vec3f &dir_dv,
-                             const uniform float distanceToPlane,
-                             const uniform float imgPlane_size_y,
-                             const uniform float imgPlane_size_x,
-                             const uniform float interpupillaryDistance, 
-                             const uniform bool side_by_side)
+export void StereoCamera_set(
+    void *uniform _self, const uniform vec3f &org, const uniform vec3f &dir_cam,
+    const uniform vec3f &dir_du, const uniform vec3f &dir_dv,
+    const uniform float distanceToPlane, const uniform float imgPlane_size_y,
+    const uniform float imgPlane_size_x,
+    const uniform float interpupillaryDistance, const uniform bool side_by_side)
 {
-    uniform StereoCamera *uniform self =
-        (uniform StereoCamera * uniform)_self;
+    uniform StereoCamera *uniform self = (uniform StereoCamera * uniform)_self;
     self->org = org;
     self->dir_cam = dir_cam;
     self->dir_du = dir_du;
