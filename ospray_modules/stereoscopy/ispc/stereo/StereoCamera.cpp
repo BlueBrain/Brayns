@@ -39,7 +39,7 @@ void StereoCamera::commit()
     Camera::commit();
 
     const float fovy = getParamf("fovy", 60.f);
-    const float aspectRatio = getParamf("aspect", 1.5f);
+    float aspectRatio = getParamf("aspect", 1.5f);
     const StereoMode stereoMode =
         (StereoMode)getParam1i("stereoMode", OSP_STEREO_NONE);
     const float interpupillaryDistance =
@@ -59,6 +59,7 @@ void StereoCamera::commit()
     case OSP_STEREO_SIDE_BY_SIDE:
         ipd = interpupillaryDistance;
         sideBySide = true;
+        aspectRatio *= 0.5f;
         break;
     case OSP_STEREO_NONE:
         break;
