@@ -29,6 +29,8 @@ struct ParticleRenderer
 {
     AbstractRenderer abstract;
 
+    int randomNumber;
+
     uniform float* uniform simulationData;
     int64 simulationDataSize;
     uniform vec4f* uniform transferFunction;
@@ -200,13 +202,12 @@ export void ParticleRenderer_set(
     uniform ParticleRenderer* uniform self =
         (uniform ParticleRenderer * uniform)_self;
 
+    self->abstract.super.spp = spp;
     self->abstract.bgMaterial =
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
-
-    self->abstract.randomNumber = randomNumber;
     self->abstract.timestamp = timestamp;
-    self->abstract.spp = spp;
 
+    self->randomNumber = randomNumber;
     self->simulationData = (uniform float* uniform)simulationData;
     self->simulationDataSize = simulationDataSize;
     self->transferFunction = (uniform vec4f * uniform)transferFunction;

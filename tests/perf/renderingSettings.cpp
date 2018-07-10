@@ -25,6 +25,7 @@
 #include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 
@@ -51,8 +52,12 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     timer.stop();
     reference = timer.milliseconds();
 
+    auto& renderer = brayns.getEngine().getRenderer();
+
     // Shadows
-    params.getRenderingParameters().setShadowIntensity(1.f);
+    auto props = renderer.getPropertyMap();
+    props.updateProperty("shadows", 1.f);
+    renderer.updateProperties(props);
     brayns.getEngine().commit();
 
     timer.start();
@@ -65,7 +70,8 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     BOOST_TEST_MESSAGE("Shadows cost. expected: 165%, realized: " << t * 100.f);
     BOOST_CHECK(t < 1.65f);
 
-    params.getRenderingParameters().setSoftShadows(1.f);
+    props.updateProperty("softShadows", 1.f);
+    renderer.updateProperties(props);
     brayns.getEngine().commit();
 
     timer.start();
@@ -80,9 +86,10 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     BOOST_CHECK(t < 1.85f);
 
     // Ambient occlustion
-    params.getRenderingParameters().setShadowIntensity(0.f);
-    params.getRenderingParameters().setSoftShadows(0.f);
-    params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
+    props.updateProperty("shadows", 0.f);
+    props.updateProperty("softShadows", 0.f);
+    props.updateProperty("aoWeight", 1.f);
+    renderer.updateProperties(props);
     brayns.getEngine().commit();
 
     timer.start();
@@ -97,9 +104,10 @@ BOOST_AUTO_TEST_CASE(default_scene_benckmark)
     BOOST_CHECK(t < 2.5f);
 
     // All options
-    params.getRenderingParameters().setShadowIntensity(1.f);
-    params.getRenderingParameters().setSoftShadows(1.f);
-    params.getRenderingParameters().setAmbientOcclusionStrength(1.f);
+    props.updateProperty("shadows", 1.f);
+    props.updateProperty("softShadows", 1.f);
+    props.updateProperty("aoWeight", 1.f);
+    renderer.updateProperties(props);
     brayns.getEngine().commit();
 
     timer.start();

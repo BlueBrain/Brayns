@@ -48,5 +48,8 @@ public:
 
     /** @return access to the camera of Brayns. */
     virtual Camera& getCamera() = 0;
+
+    /** @return access to the renderer of Brayns. */
+    virtual Renderer& getRenderer() = 0;
 };
 }

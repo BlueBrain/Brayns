@@ -36,6 +36,11 @@ class PropertyMap
 public:
     PropertyMap() = default;
 
+    /**
+     * Defines a single property which always has a name, a label for e.g. UIs
+     * and a typed value. Additionally, a user-defined minimum and maximum value
+     * range can be specified, otherwise the types' limits apply.
+     */
     struct Property
     {
         enum class Type
@@ -43,6 +48,7 @@ public:
             Int,
             Float,
             String,
+            Bool,
             Vec2i,
             Vec2f,
             Vec3i,
@@ -50,14 +56,32 @@ public:
             Vec4f
         };
 
-        Property(const std::string &name_, Type type_)
+        template <typename T>
+        Property(const std::string& name_, const std::string& title_,
+                 const T& value)
             : name(name_)
-            , type(type_)
+            , title(title_)
+            , type(_getType<T>())
+            , _data(value)
+            , _min(std::numeric_limits<T>::min())
+            , _max(std::numeric_limits<T>::max())
         {
         }
 
         template <typename T>
-        void set(const T &v)
+        Property(const std::string& name_, const std::string& title_,
+                 const T& value, const T& min_, const T& max_)
+            : name(name_)
+            , title(title_)
+            , type(_getType<T>())
+            , _data(value)
+            , _min(min_)
+            , _max(max_)
+        {
+        }
+
+        template <typename T>
+        void set(const T& v)
         {
             _data = v;
         }
@@ -68,52 +92,65 @@ public:
             return boost::any_cast<T>(_data);
         }
 
-        void setData(const boost::any &data) { _data = data; }
-        const boost::any &getData() const { return _data; }
+        template <typename T>
+        T min() const
+        {
+            return boost::any_cast<T>(_min);
+        }
+
+        template <typename T>
+        T max() const
+        {
+            return boost::any_cast<T>(_max);
+        }
+
         const std::string name;
+        const std::string title;
         const Type type;
 
     private:
+        friend class PropertyMap;
         boost::any _data;
+        const boost::any _min;
+        const boost::any _max;
+        template <typename T>
+        Type _getType();
     };
 
-    /**
-     * Set the property of the given name; will create the property if it does
-     * not exist.
-     */
+    /** Update the property of the given name */
     template <typename T>
-    inline void setProperty(const std::string &name, const T &t)
+    inline void updateProperty(const std::string& name, const T& t)
     {
-        auto property = findProperty(name);
-        if (!property)
+        if (auto property = findProperty(name))
         {
-            _properties.push_back(
-                std::make_shared<Property>(name, getType<T>()));
-            property = _properties[_properties.size() - 1].get();
+            if (property->type != property->_getType<T>())
+                throw std::runtime_error(
+                    "updateProperty does not allow for changing the type");
+            property->set(t);
         }
-        property->set(t);
     }
 
     /** Update or add the given property. */
-    void setProperty(const Property &newProperty)
+    void setProperty(const Property& newProperty)
     {
-        auto property = findProperty(newProperty.name);
-        if (!property)
+        if (auto property = findProperty(newProperty.name))
         {
-            _properties.push_back(std::make_shared<Property>(newProperty));
+            if (property->type != newProperty.type)
+                throw std::runtime_error(
+                    "setProperty does not allow for changing the type");
+            property->_data = newProperty._data;
         }
         else
-            property->setData(newProperty.getData());
+            _properties.push_back(std::make_shared<Property>(newProperty));
     }
 
     /**
      * @return the property value of the given name or valIfNotFound otherwise.
      */
     template <typename T>
-    inline T getProperty(const std::string &name, T valIfNotFound)
+    inline T getProperty(const std::string& name, T valIfNotFound) const
     {
-        auto property = findProperty(name);
-        if (property)
+        if (auto property = findProperty(name))
             return property->get<T>();
         return valIfNotFound;
     }
@@ -123,25 +160,35 @@ public:
      * @throw std::runtime_error if value property value was not found.
      */
     template <typename T>
-    inline T getProperty(const std::string &name)
+    inline T getProperty(const std::string& name) const
     {
-        auto property = findProperty(name);
-        if (property)
+        if (auto property = findProperty(name))
             return property->get<T>();
         throw std::runtime_error("No property found with name " + name);
     }
 
-    /** @return all the registered properties. */
-    const auto &getProperties() const { return _properties; }
-private:
-    template <typename T>
-    PropertyMap::Property::Type getType();
+    /** @return true if the property with the given name exists. */
+    bool hasProperty(const std::string& name) const
+    {
+        return findProperty(name) != nullptr;
+    }
 
-    Property *findProperty(const std::string &name)
+    /** @return the type of the given property name. */
+    Property::Type getPropertyType(const std::string& name) const
+    {
+        if (auto property = findProperty(name))
+            return property->type;
+        throw std::runtime_error("No property found with name " + name);
+    }
+
+    /** @return all the registered properties. */
+    const auto& getProperties() const { return _properties; }
+private:
+    Property* findProperty(const std::string& name) const
     {
         auto foundProperty =
             std::find_if(_properties.begin(), _properties.end(),
-                         [&](const auto &p) { return p->name == name; });
+                         [&](const auto& p) { return p->name == name; });
 
         return foundProperty != _properties.end() ? foundProperty->get()
                                                   : nullptr;
@@ -151,44 +198,59 @@ private:
 };
 
 template <>
-inline PropertyMap::Property::Type PropertyMap::getType<float>()
+inline PropertyMap::Property::Type PropertyMap::Property::_getType<float>()
 {
     return PropertyMap::Property::Type::Float;
 }
 template <>
-inline PropertyMap::Property::Type PropertyMap::getType<int32_t>()
+inline PropertyMap::Property::Type PropertyMap::Property::_getType<int32_t>()
 {
     return PropertyMap::Property::Type::Int;
 }
 template <>
-inline PropertyMap::Property::Type PropertyMap::getType<std::string>()
+inline PropertyMap::Property::Type
+    PropertyMap::Property::_getType<std::string>()
 {
     return PropertyMap::Property::Type::String;
 }
 template <>
-inline PropertyMap::Property::Type PropertyMap::getType<std::array<float, 2>>()
+inline PropertyMap::Property::Type
+    PropertyMap::Property::_getType<const char*>()
+{
+    return PropertyMap::Property::Type::String;
+}
+template <>
+inline PropertyMap::Property::Type PropertyMap::Property::_getType<bool>()
+{
+    return PropertyMap::Property::Type::Bool;
+}
+template <>
+inline PropertyMap::Property::Type
+    PropertyMap::Property::_getType<std::array<float, 2>>()
 {
     return PropertyMap::Property::Type::Vec2f;
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::getType<std::array<int32_t, 2>>()
+    PropertyMap::Property::_getType<std::array<int32_t, 2>>()
 {
     return PropertyMap::Property::Type::Vec2i;
 }
 template <>
-inline PropertyMap::Property::Type PropertyMap::getType<std::array<float, 3>>()
+inline PropertyMap::Property::Type
+    PropertyMap::Property::_getType<std::array<float, 3>>()
 {
     return PropertyMap::Property::Type::Vec3f;
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::getType<std::array<int32_t, 3>>()
+    PropertyMap::Property::_getType<std::array<int32_t, 3>>()
 {
     return PropertyMap::Property::Type::Vec3i;
 }
 template <>
-inline PropertyMap::Property::Type PropertyMap::getType<std::array<float, 4>>()
+inline PropertyMap::Property::Type
+    PropertyMap::Property::_getType<std::array<float, 4>>()
 {
     return PropertyMap::Property::Type::Vec4f;
 }

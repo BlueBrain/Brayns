@@ -37,9 +37,9 @@ BraynsViewer::BraynsViewer(Brayns& brayns)
 
 void BraynsViewer::display()
 {
-    const auto& rp = _brayns.getParametersManager().getRenderingParameters();
+    const auto& ap = _brayns.getParametersManager().getApplicationParameters();
     std::stringstream ss;
-    ss << "Brayns Viewer [" << rp.getEngineAsString(rp.getEngine()) << "] ";
+    ss << "Brayns Viewer [" << ap.getEngineAsString(ap.getEngine()) << "] ";
     auto animationFrame =
         _brayns.getParametersManager().getAnimationParameters().getFrame();
     if (animationFrame != std::numeric_limits<uint32_t>::max())

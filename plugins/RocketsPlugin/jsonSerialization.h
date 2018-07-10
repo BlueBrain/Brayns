@@ -45,14 +45,7 @@
 #include "ImageGenerator.h"
 #include "SnapshotTask.h"
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#endif
-#include "staticjson/staticjson.hpp"
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+#include "jsonUtils.h"
 
 namespace brayns
 {
@@ -109,16 +102,6 @@ STATICJSON_DECLARE_ENUM(
 STATICJSON_DECLARE_ENUM(brayns::MemoryMode,
                         {"shared", brayns::MemoryMode::shared},
                         {"replicated", brayns::MemoryMode::replicated});
-
-STATICJSON_DECLARE_ENUM(
-    brayns::RendererType, {"default", brayns::RendererType::default_},
-    {"proximity", brayns::RendererType::proximity},
-    {"simulation", brayns::RendererType::simulation},
-    {"particle", brayns::RendererType::particle},
-    {"geometry_normals", brayns::RendererType::geometryNormals},
-    {"shading_normals", brayns::RendererType::shadingNormals},
-    {"scientific_visualization", brayns::RendererType::scientificvisualization},
-    {"path_tracing", brayns::RendererType::path_tracing});
 
 STATICJSON_DECLARE_ENUM(brayns::ShadingType,
                         {"none", brayns::ShadingType::none},
@@ -197,8 +180,7 @@ inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
     h->add_property("format", &s->format);
     h->add_property("name", &s->name, Flags::Optional);
     h->add_property("quality", &s->quality, Flags::Optional);
-    h->add_property("rendering_parameters", &s->renderingParams,
-                    Flags::Optional);
+    h->add_property("renderer", &s->renderingParams, Flags::Optional);
     h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
     h->add_property("size", Vector2uiArray(s->size));
     h->set_flags(Flags::DisallowUnknownKey);
@@ -415,6 +397,7 @@ inline void init(brayns::StreamParameters* s, ObjectHandler* h)
 
 inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
 {
+    h->add_property("engine", &a->_engine, Flags::IgnoreRead | Flags::Optional);
     h->add_property("jpeg_compression", &a->_jpegCompression, Flags::Optional);
     h->add_property("frame_export_folder", &a->_frameExportFolder,
                     Flags::Optional);
@@ -457,35 +440,18 @@ inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
 
 inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 {
-    h->add_property("engine", &r->_engine, Flags::IgnoreRead | Flags::Optional);
-    h->add_property("samples_per_pixel", &r->_spp, Flags::Optional);
-    h->add_property("shader", &r->_renderer, Flags::Optional);
-    h->add_property("shading", &r->_shading, Flags::Optional);
-    h->add_property("shadow_intensity", &r->_shadowIntensity, Flags::Optional);
-    h->add_property("soft_shadows", &r->_softShadows, Flags::Optional);
-    h->add_property("ambient_occlusion", &r->_ambientOcclusionStrength,
-                    Flags::Optional);
-    h->add_property("ambient_occlusion_distance", &r->_ambientOcclusionDistance,
-                    Flags::Optional);
     h->add_property("accumulation", &r->_accumulation, Flags::Optional);
-    h->add_property("radiance", &r->_lightEmittingMaterials, Flags::Optional);
-    h->add_property("head_light", &r->_headLight, Flags::Optional);
-    h->add_property("variance_threshold", &r->_varianceThreshold,
-                    Flags::Optional);
-    h->add_property("max_accum_frames", &r->_maxAccumFrames, Flags::Optional);
     h->add_property("background_color", Vector3fArray(r->_backgroundColor),
                     Flags::Optional);
-    h->add_property("detection_distance", &r->_detectionDistance,
-                    Flags::Optional);
-    h->add_property("detection_on_different_material",
-                    &r->_detectionOnDifferentMaterial, Flags::Optional);
-    h->add_property("detection_near_color",
-                    Vector3fArray(r->_detectionNearColor), Flags::Optional);
-    h->add_property("detection_far_color", Vector3fArray(r->_detectionFarColor),
+    h->add_property("current", &r->_renderer, Flags::Optional);
+    h->add_property("head_light", &r->_headLight, Flags::Optional);
+    h->add_property("max_accum_frames", &r->_maxAccumFrames, Flags::Optional);
+    h->add_property("samples_per_pixel", &r->_spp, Flags::Optional);
+    h->add_property("types", &r->_renderers,
+                    Flags::IgnoreRead | Flags::Optional);
+    h->add_property("variance_threshold", &r->_varianceThreshold,
                     Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
-    h->add_property("samples_per_ray", &r->_spr, Flags::Optional);
-    h->add_property("stereo_mode", &r->_stereoMode, Flags::Optional);
 }
 
 inline void init(brayns::SceneParameters* s, ObjectHandler* h)
@@ -542,7 +508,7 @@ inline void init(brayns::AnimationParameters* a, ObjectHandler* h)
 template <class T>
 inline std::string to_json(const T& obj)
 {
-    return staticjson::to_pretty_json_string(obj);
+    return staticjson::to_json_string(obj);
 }
 
 template <>

@@ -25,18 +25,14 @@
 #include "OSPRayMaterial.h"
 #include "OSPRayRenderer.h"
 #include "OSPRayScene.h"
+#include "utils.h"
 
 namespace brayns
 {
-OSPRayRenderer::OSPRayRenderer(const std::string& name,
-                               const AnimationParameters& animationParameters,
+OSPRayRenderer::OSPRayRenderer(const AnimationParameters& animationParameters,
                                const RenderingParameters& renderingParameters)
     : Renderer(animationParameters, renderingParameters)
-    , _name(name)
-    , _renderer{ospNewRenderer(name.c_str())}
 {
-    if (!_renderer)
-        throw std::runtime_error(name + " is not a registered renderer");
 }
 
 OSPRayRenderer::~OSPRayRenderer()
@@ -64,60 +60,78 @@ void OSPRayRenderer::commit()
     const RenderingParameters& rp = _renderingParameters;
 
     if (!ap.isModified() && !rp.isModified() && !_scene->isModified() &&
-        !_dirty)
+        !isModified())
     {
         return;
     }
 
-    ShadingType mt = rp.getShading();
+    const bool rendererChanged = _currentOSPRenderer != getCurrentType();
+    if (rendererChanged)
+        createOSPRenderer();
 
-    Vector3f color = rp.getBackgroundColor();
-    ospSet3f(_renderer, "bgColor", color.x(), color.y(), color.z());
-    ospSet1i(_renderer, "shadowsEnabled", rp.getShadowIntensity() > 0.f);
-    ospSet1f(_renderer, "shadows", rp.getShadowIntensity());
-    ospSet1f(_renderer, "softShadows", rp.getSoftShadows());
-    ospSet1f(_renderer, "aoWeight", rp.getAmbientOcclusionStrength());
-    ospSet1i(_renderer, "aoSamples", 1);
-    ospSet1f(_renderer, "aoDistance", rp.getAmbientOcclusionDistance());
-    ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
-
-    ospSet1i(_renderer, "shadingEnabled", (mt == ShadingType::diffuse));
-    ospSet1f(_renderer, "timestamp", ap.getFrame());
-    ospSet1i(_renderer, "randomNumber", rand() % 10000);
-    ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
-    ospSet1i(_renderer, "electronShading", (mt == ShadingType::electron));
-    ospSet1f(_renderer, "detectionDistance", rp.getDetectionDistance());
-    ospSet1i(_renderer, "detectionOnDifferentMaterial",
-             rp.getDetectionOnDifferentMaterial());
-    color = rp.getDetectionNearColor();
-    ospSet3f(_renderer, "detectionNearColor", color.x(), color.y(), color.z());
-    color = rp.getDetectionFarColor();
-    ospSet3f(_renderer, "detectionFarColor", color.x(), color.y(), color.z());
-    ospSet1i(_renderer, "volumeSamplesPerRay", rp.getSamplesPerRay());
+    setOSPRayProperties(*this, _renderer);
 
     auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
+    if (isModified() || rendererChanged || _scene->isModified())
+    {
+        ospSetData(_renderer, "lights", scene->lightData());
+
+        if (_scene->getSimulationHandler())
+        {
+            ospSetData(_renderer, "simulationData", scene->simulationData());
+            ospSet1i(_renderer, "simulationDataSize",
+                     _scene->getSimulationHandler()->getFrameSize());
+        }
+
+        // Transfer function Diffuse colors
+        ospSetData(_renderer, "transferFunctionDiffuseData",
+                   scene->transferFunctionDiffuseData());
+
+        // Transfer function emission data
+        ospSetData(_renderer, "transferFunctionEmissionData",
+                   scene->transferFunctionEmissionData());
+
+        // Transfer function size
+        ospSet1i(_renderer, "transferFunctionSize",
+                 _scene->getTransferFunction().getDiffuseColors().size());
+
+        // Transfer function range
+        ospSet1f(_renderer, "transferFunctionMinValue",
+                 _scene->getTransferFunction().getValuesRange().x());
+        ospSet1f(_renderer, "transferFunctionRange",
+                 _scene->getTransferFunction().getValuesRange().y() -
+                     _scene->getTransferFunction().getValuesRange().x());
+    }
+
+    ospSet1f(_renderer, "timestamp", ap.getFrame());
+    ospSet1i(_renderer, "randomNumber", rand() % 10000);
+
+    const auto& color = rp.getBackgroundColor();
+    ospSet3f(_renderer, "bgColor", color.x(), color.y(), color.z());
+    ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
+    ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
+
     auto bgMaterial = std::static_pointer_cast<OSPRayMaterial>(
         scene->getBackgroundMaterial());
     if (bgMaterial)
     {
         bgMaterial->setDiffuseColor(rp.getBackgroundColor());
         bgMaterial->commit();
-        auto ospBgMaterial = bgMaterial->getOSPMaterial();
-        ospSetObject(_renderer, "bgMaterial", ospBgMaterial);
+        ospSetObject(_renderer, "bgMaterial", bgMaterial->getOSPMaterial());
     }
 
     ospSetObject(_renderer, "world", scene->getModel());
     ospSetObject(_renderer, "simulationModel", scene->simulationModelImpl());
     ospCommit(_renderer);
-    _dirty = false;
 }
 
 void OSPRayRenderer::setCamera(CameraPtr camera)
 {
     _camera = static_cast<OSPRayCamera*>(camera.get());
     assert(_camera);
+    createOSPRenderer();
     ospSetObject(_renderer, "camera", _camera->impl());
-    _dirty = true;
+    markModified();
 }
 
 Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
@@ -145,5 +159,20 @@ Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
         result.pos = {ospResult.position.x, ospResult.position.y,
                       ospResult.position.z};
     return result;
+}
+
+void OSPRayRenderer::createOSPRenderer()
+{
+    auto newRenderer = ospNewRenderer(getCurrentType().c_str());
+    if (!newRenderer)
+        throw std::runtime_error(getCurrentType() +
+                                 " is not a registered renderer");
+    if (_renderer)
+        ospRelease(_renderer);
+    _renderer = newRenderer;
+    if (_camera)
+        ospSetObject(_renderer, "camera", _camera->impl());
+    _currentOSPRenderer = getCurrentType();
+    markModified();
 }
 }

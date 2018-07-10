@@ -38,7 +38,7 @@ void BasicRenderer::commit()
     AbstractRenderer::commit();
     ispc::BasicRenderer_set(getIE(),
                             (_bgMaterial ? _bgMaterial->getIE() : nullptr),
-                            _timestamp, _spp, _lightPtr, _lightArray.size());
+                            _timestamp, spp, _lightPtr, _lightArray.size());
 }
 
 BasicRenderer::BasicRenderer()

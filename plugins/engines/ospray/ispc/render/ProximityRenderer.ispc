@@ -26,11 +26,15 @@ struct ProximityRenderer
 {
     AbstractRenderer abstract;
 
+    int randomNumber;
+
+    bool shadingEnabled;
+    bool electronShadingEnabled;
+
     vec3f nearColor;
     vec3f farColor;
     float detectionDistance;
     bool detectionOnDifferentMaterial;
-    bool electronShadingEnabled;
 };
 
 inline vec3f ProximityRenderer_shadeRay(
@@ -89,11 +93,10 @@ inline vec3f ProximityRenderer_shadeRay(
 
             // glossiness
             if (mat->glossiness < 1.f)
-                normal =
-                    normalize(normal +
-                              (1.f - mat->glossiness) *
-                                  getRandomVector(sample, normal,
-                                                  self->abstract.randomNumber));
+                normal = normalize(
+                    normal +
+                    (1.f - mat->glossiness) *
+                        getRandomVector(sample, normal, self->randomNumber));
             // Opacity
             opacity = mat->d;
             if (valid(mat->map_d))
@@ -132,7 +135,7 @@ inline vec3f ProximityRenderer_shadeRay(
                 // Any potential contribution?
                 varying float cosNL = 0.0;
                 varying float cosLR = 0.0;
-                if (self->abstract.electronShadingEnabled)
+                if (self->electronShadingEnabled)
                 {
                     // Electron shading
                     vec3f me = normalize(ray.org - P);
@@ -158,7 +161,7 @@ inline vec3f ProximityRenderer_shadeRay(
         {
             // Generate random ray and trace it
             varying vec3f ao_dir =
-                getRandomVector(sample, normal, self->abstract.randomNumber);
+                getRandomVector(sample, normal, self->randomNumber);
 
             if (dot(ao_dir, normal) < 0.f)
                 ao_dir = ao_dir * -1.f;
@@ -230,16 +233,15 @@ export void ProximityRenderer_set(
     uniform ProximityRenderer* uniform self =
         (uniform ProximityRenderer * uniform)_self;
 
+    self->abstract.super.spp = spp;
     self->abstract.bgMaterial =
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
-
-    self->abstract.randomNumber = randomNumber;
-    self->abstract.timestamp = timestamp;
-    self->abstract.spp = spp;
-    self->abstract.electronShadingEnabled = electronShadingEnabled;
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
+    self->abstract.timestamp = timestamp;
 
+    self->randomNumber = randomNumber;
+    self->electronShadingEnabled = electronShadingEnabled;
     self->nearColor = nearColor;
     self->farColor = farColor;
     self->detectionDistance = detectionDistance;

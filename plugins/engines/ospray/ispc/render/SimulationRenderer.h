@@ -41,6 +41,14 @@ public:
 private:
     ospray::Model *_simulationModel;
 
+    float _shadows;
+    float _softShadows;
+    float _ambientOcclusionStrength;
+    float _ambientOcclusionDistance;
+    bool _shadingEnabled;
+    bool _electronShadingEnabled;
+    int _randomNumber;
+
     ospray::Ref<ospray::Data> _simulationData;
     ospray::uint64 _simulationDataSize;
     ospray::Ref<ospray::Data> _transferFunctionDiffuseData;

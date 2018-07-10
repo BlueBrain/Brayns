@@ -38,6 +38,12 @@ public:
     */
     std::string toString() const final { return "brayns::PathTracingRenderer"; }
     void commit() final;
+
+private:
+    float _shadows;
+    float _softShadows;
+    float _ambientOcclusionStrength;
+    float _ambientOcclusionDistance;
 };
 
 } // ::brayns

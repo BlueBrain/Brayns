@@ -42,10 +42,11 @@ void ParticleRenderer::commit()
     _transferFunctionEmissionData =
         getParamData("transferFunctionEmissionData");
     _transferFunctionSize = getParam1i("transferFunctionSize", 0);
+    _randomNumber = getParam1i("randomNumber", 0);
 
     ispc::ParticleRenderer_set(
         getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _randomNumber,
-        _timestamp, _spp,
+        _timestamp, spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
         _simulationDataSize,
         _transferFunctionDiffuseData

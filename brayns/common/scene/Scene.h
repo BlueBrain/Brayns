@@ -46,17 +46,13 @@ class Scene : public BaseObject
 {
 public:
     /**
-        Creates a scene object responsible for handling geometry, volumes,
-       materials and
-        light sources.
-        @param renderers Renderers to be used to render the scene
-        @param parametersManager Parameters for the scene (Geometry, volume,
-       rendering, etc)
-        @todo The scene must not know about the renderer
-              https://bbpteam.epfl.ch/project/issues/browse/VIZTM-574
-    */
-    BRAYNS_API Scene(const Renderers& renderers,
-                     ParametersManager& parametersManager);
+     * Creates a scene object responsible for handling models, simulations and
+     * light sources.
+     *
+     * @param parametersManager Parameters for the scene (Geometry, volume,
+     *                          rendering, etc)
+     */
+    BRAYNS_API Scene(ParametersManager& parametersManager);
 
     virtual ~Scene() = default;
 
@@ -217,12 +213,6 @@ public:
     */
     BRAYNS_API void saveToCacheFile();
 
-    /**
-     * @internal needed to ensure deletion wrt cyclic dependency
-     *           scene<->renderer
-     */
-    virtual void reset();
-
     /** @return the current size in bytes of the loaded geometry. */
     size_t getSizeInBytes() const;
 
@@ -276,7 +266,6 @@ public:
 protected:
     void _computeBounds();
 
-    Renderers _renderers;
     ParametersManager& _parametersManager;
     MaterialPtr _backgroundMaterial;
 

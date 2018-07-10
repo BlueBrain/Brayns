@@ -38,8 +38,7 @@ namespace brayns
 class OSPRayScene : public Scene
 {
 public:
-    OSPRayScene(const Renderers& renderers,
-                ParametersManager& parametersManager,
+    OSPRayScene(ParametersManager& parametersManager,
                 const size_t memoryManagementFlags);
     ~OSPRayScene();
 
@@ -62,6 +61,17 @@ public:
 
     OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _rootSimulationModel; }
+    OSPData lightData() { return _ospLightData; }
+    OSPData simulationData() { return _ospSimulationData; }
+    OSPData transferFunctionDiffuseData()
+    {
+        return _ospTransferFunctionDiffuseData;
+    }
+    OSPData transferFunctionEmissionData()
+    {
+        return _ospTransferFunctionEmissionData;
+    }
+
 private:
     void _commitSimulationData();
     bool _commitVolumeData();

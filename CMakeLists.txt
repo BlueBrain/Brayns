@@ -52,14 +52,14 @@ if(libuv_FOUND)
     message(FATAL_ERROR "uvw missing, run: git submodule update --init")
   endif()
   include_directories(SYSTEM uvw/src)
-  list(APPEND LCOV_EXCLUDE 'uvw/*')
+  list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/uvw/*')
   # TODO: use tag v1.6.0_libuv-v1.18 for Docker
 endif()
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
 add_subdirectory(async++)
-list(APPEND LCOV_EXCLUDE 'async++/include/async++/*'
-                         'async++/src/*')
+list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/async++/include/async++/*'
+                         '${PROJECT_SOURCE_DIR}/async++/src/*')
 
 # HTTP messaging
 common_find_package(LibJpegTurbo)
@@ -100,6 +100,7 @@ common_find_package(FreeImage)
 if(FreeImage_FOUND)
   add_subdirectory(perceptualdiff)
 endif()
+list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/perceptualdiff/*')
 
 # OSPRay rendering engine
 common_find_package(ospray 1.5 SYSTEM)

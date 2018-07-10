@@ -26,15 +26,8 @@
 #include <ospray/SDK/common/Data.h>
 #include <ospray/SDK/lights/Light.h>
 
-// sys
-#include <vector>
-
 namespace brayns
 {
-AbstractRenderer::AbstractRenderer()
-{
-}
-
 void AbstractRenderer::commit()
 {
     Renderer::commit();
@@ -49,15 +42,7 @@ void AbstractRenderer::commit()
 
     _lightPtr = _lightArray.empty() ? nullptr : &_lightArray[0];
 
-    _shadows = getParam1f("shadows", 0.f);
-    _softShadows = getParam1f("softShadows", 0.f);
-    _ambientOcclusionStrength = getParam1f("aoWeight", 0.f);
-    _ambientOcclusionDistance = getParam1f("aoDistance", 1e20f);
-    _shadingEnabled = bool(getParam1i("shadingEnabled", 1));
-    _randomNumber = getParam1i("randomNumber", 0);
     _timestamp = getParam1f("timestamp", 0.f);
-    _spp = getParam1i("spp", 1);
-    _electronShadingEnabled = bool(getParam1i("electronShading", 0));
     _bgMaterial =
         (brayns::obj::ExtendedOBJMaterial*)getParamObject("bgMaterial",
                                                           nullptr);
@@ -66,7 +51,6 @@ void AbstractRenderer::commit()
 /*! \brief create a material of given type */
 ospray::Material* AbstractRenderer::createMaterial(const char*)
 {
-    ospray::Material* mat = new brayns::obj::ExtendedOBJMaterial;
-    return mat;
+    return new brayns::obj::ExtendedOBJMaterial;
 }
 }

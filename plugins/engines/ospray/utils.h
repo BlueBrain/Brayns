@@ -20,44 +20,21 @@
 
 #pragma once
 
-#include <brayns/common/Transformation.h>
+#include <brayns/common/types.h>
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
 {
-inline osp::affine3f transformationToAffine3f(
-    const Transformation& transformation)
-{
-    // https://stackoverflow.com/a/18436193
-    const auto& quat = transformation.getRotation();
-    const float x = atan2(2 * (quat.w() * quat.x() + quat.y() * quat.z()),
-                          1 - 2 * (quat.x() * quat.x() + quat.y() * quat.y()));
-    const float y = asin(2 * (quat.w() * quat.y() - quat.z() * quat.x()));
-    const float z = atan2(2 * (quat.w() * quat.z() + quat.x() * quat.y()),
-                          1 - 2 * (quat.y() * quat.y() + quat.z() * quat.z()));
+/**
+ * Set all the properties from the current property map of the given object to
+ * the given ospray object.
+ */
+void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject);
 
-    ospcommon::affine3f rot{ospcommon::one};
-    rot = ospcommon::affine3f::rotate({1, 0, 0}, x) * rot;
-    rot = ospcommon::affine3f::rotate({0, 1, 0}, y) * rot;
-    rot = ospcommon::affine3f::rotate({0, 0, 1}, z) * rot;
+/** Convert a brayns::Transformation to an osp::affine3f. */
+osp::affine3f transformationToAffine3f(const Transformation& transformation);
 
-    const auto& translation = transformation.getTranslation();
-    const auto& scale = transformation.getScale();
-
-    const auto t =
-        ospcommon::affine3f::translate(
-            {translation.x(), translation.y(), translation.z()}) *
-        rot * ospcommon::affine3f::scale({scale.x(), scale.y(), scale.z()});
-    return (osp::affine3f&)t;
-}
-
-inline void addInstance(OSPModel rootModel, OSPModel modelToAdd,
-                        const Transformation& transform)
-{
-    OSPGeometry instance =
-        ospNewInstance(modelToAdd, transformationToAffine3f(transform));
-    ospCommit(instance);
-    ospAddGeometry(rootModel, instance);
-    ospRelease(instance);
-}
+/** Helper to add the given model as an instance to the given root model. */
+void addInstance(OSPModel rootModel, OSPModel modelToAdd,
+                 const Transformation& transform);
 }

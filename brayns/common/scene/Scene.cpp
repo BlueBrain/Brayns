@@ -39,9 +39,8 @@ const size_t CACHE_VERSION = 9;
 
 namespace brayns
 {
-Scene::Scene(const Renderers& renderers, ParametersManager& parametersManager)
-    : _renderers(renderers)
-    , _parametersManager(parametersManager)
+Scene::Scene(ParametersManager& parametersManager)
+    : _parametersManager(parametersManager)
 {
 }
 
@@ -79,11 +78,6 @@ Scene& Scene::operator=(const Scene& rhs)
 
     markModified();
     return *this;
-}
-
-void Scene::reset()
-{
-    _renderers.clear();
 }
 
 size_t Scene::getSizeInBytes() const

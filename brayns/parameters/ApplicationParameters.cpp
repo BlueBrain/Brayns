@@ -28,6 +28,7 @@
 namespace
 {
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
+const std::string PARAM_ENGINE = "engine";
 const std::string PARAM_FILTERS = "filters";
 const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
 const std::string PARAM_HTTP_SERVER = "http-server";
@@ -36,6 +37,7 @@ const std::string PARAM_INPUT_PATHS = "input-paths";
 const std::string PARAM_JPEG_COMPRESSION = "jpeg-compression";
 const std::string PARAM_JPEG_SIZE = "jpeg-size";
 const std::string PARAM_MAX_RENDER_FPS = "max-render-fps";
+const std::string PARAM_MODULE = "module";
 const std::string PARAM_PARALLEL_RENDERING = "parallel-rendering";
 const std::string PARAM_PLUGIN = "plugin";
 const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
@@ -46,6 +48,8 @@ const size_t DEFAULT_WINDOW_WIDTH = 800;
 const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_COMPRESSION = 90;
 const std::string DEFAULT_TMP_FOLDER = "/tmp";
+
+const std::array<std::string, 2> ENGINES = {{"ospray", "optix"}};
 }
 
 namespace brayns
@@ -53,12 +57,15 @@ namespace brayns
 ApplicationParameters::ApplicationParameters()
     : AbstractParameters("Application")
     , _windowSize(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)
-    , _benchmarking(false)
     , _jpegCompression(DEFAULT_JPEG_COMPRESSION)
     , _tmpFolder(DEFAULT_TMP_FOLDER)
 {
-    _parameters.add_options()(PARAM_HTTP_SERVER.c_str(),
-                              po::value<std::string>(), "HTTP interface")(
+    _parameters.add_options()(PARAM_ENGINE.c_str(), po::value<std::string>(),
+                              "Engine name [ospray|optix]")(
+        PARAM_MODULE.c_str(), po::value<strings>(&_modules)->composing(),
+        "OSPRay module name [string]")(PARAM_HTTP_SERVER.c_str(),
+                                       po::value<std::string>(),
+                                       "HTTP interface")(
         PARAM_INPUT_PATHS.c_str(), po::value<std::vector<std::string>>(),
         "List of files/folders to load data from")(
         PARAM_PLUGIN.c_str(), po::value<strings>(&_pluginsRaw)->composing(),
@@ -93,6 +100,14 @@ ApplicationParameters::ApplicationParameters()
 
 void ApplicationParameters::parse(const po::variables_map& vm)
 {
+    if (vm.count(PARAM_ENGINE))
+    {
+        _engine = EngineType::ospray;
+        const std::string& engine = vm[PARAM_ENGINE].as<std::string>();
+        for (size_t i = 0; i < sizeof(ENGINES) / sizeof(ENGINES[0]); ++i)
+            if (engine == ENGINES[i])
+                _engine = static_cast<EngineType>(i);
+    }
     if (vm.count(PARAM_INPUT_PATHS))
         _inputPaths = vm[PARAM_INPUT_PATHS].as<strings>();
     if (vm.count(PARAM_HTTP_SERVER))
@@ -147,6 +162,11 @@ void ApplicationParameters::parse(const po::variables_map& vm)
 void ApplicationParameters::print()
 {
     AbstractParameters::print();
+    BRAYNS_INFO << "Engine                            :"
+                << getEngineAsString(_engine) << std::endl;
+    BRAYNS_INFO << "Ospray modules                    :" << std::endl;
+    for (const auto& module : _modules)
+        BRAYNS_INFO << "- " << module << std::endl;
     BRAYNS_INFO << "Window size                 : " << _windowSize << std::endl;
     BRAYNS_INFO << "Benchmarking                : "
                 << (_benchmarking ? "on" : "off") << std::endl;
@@ -159,5 +179,11 @@ void ApplicationParameters::print()
                 << std::endl;
     BRAYNS_INFO << "Max. render  FPS            : " << _maxRenderFPS
                 << std::endl;
+}
+
+const std::string& ApplicationParameters::getEngineAsString(
+    const EngineType value) const
+{
+    return ENGINES[static_cast<size_t>(value)];
 }
 }

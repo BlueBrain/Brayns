@@ -22,7 +22,6 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   ispc/render/PathTracingRenderer.ispc
   ispc/render/ProximityRenderer.ispc
   ispc/render/SimulationRenderer.ispc
-  ispc/render/utils/AbstractRenderer.ispc
   ispc/render/utils/RandomGenerator.ispc
   ispc/render/utils/SkyBox.ispc
 )
@@ -36,6 +35,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   OSPRayRenderer.cpp
   OSPRayScene.cpp
   OSPRayVolume.cpp
+  utils.cpp
   ispc/camera/ClippedPerspectiveCamera.cpp
   ispc/geometry/ExtendedCones.cpp
   ispc/geometry/ExtendedCylinders.cpp
@@ -49,6 +49,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/render/SimulationRenderer.cpp
   ispc/render/utils/AbstractRenderer.cpp
 )
+list(APPEND BRAYNSOSPRAYENGINEPLUGIN_SOURCES ${BRAYNSOSPRAYPLUGIN_ISPC_SOURCES})
 
 set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   OSPRayCamera.h

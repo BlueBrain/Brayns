@@ -22,12 +22,13 @@
 #define RENDERER_H
 
 #include <brayns/api.h>
+#include <brayns/common/PropertyObject.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
 
 namespace brayns
 {
-class Renderer
+class Renderer : public PropertyObject
 {
 public:
     BRAYNS_API Renderer(const AnimationParameters& animationParameters,

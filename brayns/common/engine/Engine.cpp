@@ -37,18 +37,6 @@ Engine::Engine(ParametersManager& parametersManager)
 {
 }
 
-Engine::~Engine()
-{
-    if (_scene)
-        _scene->reset();
-}
-
-void Engine::setActiveRenderer(const RendererType renderer)
-{
-    if (_activeRenderer != renderer)
-        _activeRenderer = renderer;
-}
-
 void Engine::reshape(const Vector2ui& frameSize)
 {
     const auto size = getSupportedFrameSize(frameSize);
@@ -64,12 +52,12 @@ void Engine::reshape(const Vector2ui& frameSize)
 
 void Engine::commit()
 {
-    _renderers[_activeRenderer]->commit();
+    _renderer->commit();
 }
 
 void Engine::render()
 {
-    _renderers[_activeRenderer]->render(_frameBuffer);
+    _renderer->render(_frameBuffer);
 }
 
 void Engine::postRender()
@@ -79,7 +67,7 @@ void Engine::postRender()
 
 Renderer& Engine::getRenderer()
 {
-    return *_renderers[_activeRenderer];
+    return *_renderer;
 }
 
 Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
@@ -97,8 +85,7 @@ Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
 bool Engine::continueRendering() const
 {
     return _parametersManager.getAnimationParameters().getDelta() != 0 ||
-           (_renderers.at(_activeRenderer)->getVariance() > 1 &&
-            _frameBuffer->getAccumulation() &&
+           (_renderer->getVariance() > 1 && _frameBuffer->getAccumulation() &&
             (_frameBuffer->numAccumFrames() <
              _parametersManager.getRenderingParameters().getMaxAccumFrames()));
 }

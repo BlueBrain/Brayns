@@ -37,6 +37,16 @@ void SimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
+    _shadows = getParam1f("shadows", 0.f);
+    _softShadows = getParam1f("softShadows", 0.f);
+    _ambientOcclusionStrength = getParam1f("aoWeight", 0.f);
+    _ambientOcclusionDistance = getParam1f("aoDistance", 1e20f);
+    _shadingEnabled = bool(getParam1i("shadingEnabled", 1));
+    _electronShadingEnabled = bool(getParam1i("electronShading", 0));
+    _detectionDistance = getParam1f("detectionDistance", 15.f);
+
+    _randomNumber = getParam1i("randomNumber", 0);
+
     _simulationModel = (ospray::Model*)getParamObject("simulationModel", 0);
     _volumeSamplesPerRay = getParam1i("volumeSamplesPerRay", 32);
     _simulationData = getParamData("simulationData");
@@ -48,13 +58,12 @@ void SimulationRenderer::commit()
     _transferFunctionMinValue = getParam1f("transferFunctionMinValue", 0.f);
     _transferFunctionRange = getParam1f("transferFunctionRange", 0.f);
     _threshold = getParam1f("threshold", _transferFunctionMinValue);
-    _detectionDistance = getParam1f("detectionDistance", 15.f);
 
     ispc::SimulationRenderer_set(
         getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
         _ambientOcclusionStrength, _ambientOcclusionDistance, _shadingEnabled,
-        _randomNumber, _timestamp, _spp, _electronShadingEnabled, _lightPtr,
+        _randomNumber, _timestamp, spp, _electronShadingEnabled, _lightPtr,
         _lightArray.size(), _volumeSamplesPerRay,
         _simulationData ? (float*)_simulationData->data : NULL,
         _simulationDataSize,

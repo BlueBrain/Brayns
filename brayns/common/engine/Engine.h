@@ -42,7 +42,7 @@ public:
      * rendering, etc)
      */
     explicit Engine(ParametersManager& parametersManager);
-    virtual ~Engine();
+    virtual ~Engine() = default;
 
     /** @return the name of the engine */
     virtual EngineType name() const = 0;
@@ -69,9 +69,6 @@ public:
     Camera& getCamera() { return *_camera; }
     /** Gets the renderer */
     Renderer& getRenderer();
-    /** Active renderer */
-    void setActiveRenderer(const RendererType renderer);
-    RendererType getActiveRenderer() { return _activeRenderer; }
     /**
        Reshapes the current frame buffers
        @param frameSize New size for the buffers
@@ -148,14 +145,13 @@ public:
         bool accumulation) const = 0;
 
     virtual ScenePtr createScene(
-        const Renderers& renderers,
         ParametersManager& parametersManager) const = 0;
 
     /** Factory method to create an engine-specific camera. */
     virtual CameraPtr createCamera(const CameraType type) const = 0;
 
     virtual RendererPtr createRenderer(
-        const RendererType type, const AnimationParameters& animationParameters,
+        const AnimationParameters& animationParameters,
         const RenderingParameters& renderingParameters) const = 0;
 
     auto& getParametersManager() { return _parametersManager; }
@@ -168,8 +164,7 @@ protected:
     ParametersManager& _parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;
-    RendererType _activeRenderer;
-    RendererMap _renderers;
+    RendererPtr _renderer;
     Vector2i _frameSize;
     FrameBufferPtr _frameBuffer;
     Statistics _statistics;

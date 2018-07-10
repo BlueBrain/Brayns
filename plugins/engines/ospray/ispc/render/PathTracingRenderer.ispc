@@ -29,6 +29,11 @@
 struct PathTracingRenderer
 {
     AbstractRenderer abstract;
+
+    float shadows;
+    float softShadows;
+    float ambientOcclusionStrength;
+    float ambientOcclusionDistance;
 };
 
 inline vec3f mix(const vec3f a, const vec3f b, float t)
@@ -121,7 +126,7 @@ inline vec3f PathTracingRenderer_shadeRay(
 
     // some stuff about RNG like Halton
     const uniform int accumID =
-        reduce_max(sample.sampleID.z) * self->abstract.spp;
+        reduce_max(sample.sampleID.z) * self->abstract.super.spp;
     const uniform float rot_x = 1.f - precomputedHalton3(accumID);
     const uniform float rot_y = 1.f - precomputedHalton5(accumID);
 
@@ -179,7 +184,7 @@ inline vec3f PathTracingRenderer_shadeRay(
         localray.t0 = epsilon;
         localray.t = inf;
 
-        if (self->abstract.shadows > 0.f)
+        if (self->shadows > 0.f)
         {
             // Direct lighting
             for (uniform int i = 0;
@@ -195,8 +200,7 @@ inline vec3f PathTracingRenderer_shadeRay(
                 {
                     const vec3f lightDirection = lightSample.dir;
                     const vec3f lightSampleDirection =
-                        getConeSample(lightDirection, rng,
-                                      self->abstract.softShadows);
+                        getConeSample(lightDirection, rng, self->softShadows);
                     const float cosNL = dot(dg.Ns, lightSampleDirection);
 
                     if (cosNL > 0.f) // if surface is facing light
@@ -257,13 +261,13 @@ export void PathTracingRenderer_set(
     self->abstract.bgMaterial =
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
     self->abstract.timestamp = timestamp;
-    self->abstract.spp = spp;
+    self->abstract.super.spp = spp;
 
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;
 
-    self->abstract.shadows = shadows;
-    self->abstract.softShadows = softShadows;
-    self->abstract.ambientOcclusionStrength = ambientOcclusionStrength;
-    self->abstract.ambientOcclusionDistance = ambientOcclusionDistance;
+    self->shadows = shadows;
+    self->softShadows = softShadows;
+    self->ambientOcclusionStrength = ambientOcclusionStrength;
+    self->ambientOcclusionDistance = ambientOcclusionDistance;
 }
