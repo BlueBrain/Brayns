@@ -44,7 +44,7 @@ public:
     /** Engine*/
     EngineType getEngine() const { return _engine; }
     void setEngine(const EngineType name) { _updateValue(_engine, name); }
-    const std::string& getEngineAsString(const EngineType value) const;
+    static const std::string& getEngineAsString(const EngineType value);
     /** OSPRay modules */
     const std::vector<std::string>& getOsprayModules() const
     {
@@ -53,13 +53,13 @@ public:
     /** OSPRay renderer */
     void initializeDefaultRenderers();
     RendererType getRenderer() const { return _renderer; }
-    const std::string& getRendererAsString(const RendererType value) const;
+    static const std::string& getRendererAsString(const RendererType value);
     void setRenderer(const RendererType renderer)
     {
         _updateValue(_renderer, renderer);
     }
     /** OSPRay supported renderers */
-    const RendererTypes& getRenderers() const { return _renderers; }
+    static const RendererTypes& getRenderers();
     /** Shadows */
     float getShadowIntensity() const { return _shadowIntensity; }
     void setShadowIntensity(const float value)
@@ -93,7 +93,7 @@ public:
     /** Shading applied to the geometry
      */
     ShadingType getShading() const { return _shading; }
-    const std::string& getShadingAsString(const ShadingType value) const;
+    static const std::string& getShadingAsString(const ShadingType value);
     void setShading(const ShadingType value) { _updateValue(_shading, value); }
     /** Number of samples per pixel */
     int getSamplesPerPixel() const { return _spp; }
@@ -163,11 +163,11 @@ public:
     /**
        Camera type
     */
-    void initializeDefaultCameras();
     CameraType getCameraType() const { return _cameraType; }
-    const std::string& getCameraTypeAsString(const CameraType value) const;
     StereoMode getStereoMode() const { return _stereoMode; }
-    const std::string& getStereoModeAsString(const StereoMode value) const;
+
+    static const std::string& getCameraTypeAsString(const CameraType value);
+    static const std::string& getStereoModeAsString(const StereoMode value);
 
     /**
        Light source follow camera origin
@@ -207,17 +207,20 @@ public:
      */
     void setSamplesPerRay(const size_t spr) { _updateValue(_spr, spr); }
     size_t getSamplesPerRay() const { return _spr; }
-protected:
+
+    static void parseDefaults(const po::variables_map& vm);
+    static void resetDefaultCamera();
+    static void resetDefaultRenderer();
+
     void parse(const po::variables_map& vm) final;
+
+protected:
 
     EngineType _engine{EngineType::ospray};
     std::vector<std::string> _modules;
     RendererType _renderer{RendererType::default_};
-    RendererTypes _renderers;
-    strings _rendererNames;
     CameraType _cameraType{CameraType::default_};
     StereoMode _stereoMode{StereoMode::none};
-    strings _cameraTypeNames;
     float _ambientOcclusionStrength{0.f};
     float _ambientOcclusionDistance{1e6f};
     ShadingType _shading{ShadingType::diffuse};

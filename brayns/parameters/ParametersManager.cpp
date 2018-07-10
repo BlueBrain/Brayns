@@ -72,6 +72,7 @@ void ParametersManager::parse(int argc, const char** argv)
         po::store(parsedOptions, vm);
         po::notify(vm);
 
+        RenderingParameters::parseDefaults(vm);
         for (auto parameters : _parameterSets)
             parameters->parse(vm);
     }

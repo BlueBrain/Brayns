@@ -72,6 +72,11 @@ public:
     */
     CameraType getType() const { return _type; }
     /**
+       Sets camera type
+       @param The type of camera (Perpective, Stereo, etc)
+    */
+    void setType(const CameraType type) { _updateValue(_type, type); }
+    /**
        Sets camera position
        @param position The x, y, z coordinates of the camera position
     */
@@ -221,7 +226,7 @@ public:
     /**
       Sets the camera clip planes
     */
-    void setClipPlanes(const ClipPlanes clipPlanes)
+    void setClipPlanes(const ClipPlanes& clipPlanes)
     {
         _updateValue(_clipPlanes, clipPlanes);
     }
@@ -270,13 +275,7 @@ private:
     float _eyeSeparation{0.0635f};
     float _zeroParallaxPlane{1.f};
 
-    ClipPlanes _clipPlanes{
-        {{-1.f, 0.f, 0.f, std::numeric_limits<float>::max()},
-         {1.f, 0.f, 0.f, std::numeric_limits<float>::max()},
-         {0.f, -1.f, 0.f, std::numeric_limits<float>::max()},
-         {0.f, 1.f, 0.f, std::numeric_limits<float>::max()},
-         {0.f, 0.f, -1.f, std::numeric_limits<float>::max()},
-         {0.f, 0.f, 1.f, std::numeric_limits<float>::max()}}};
+    ClipPlanes _clipPlanes;
 
     /*! rotation matrice along x and y axis */
     Matrix4f _matrix;

@@ -24,6 +24,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+namespace brayns
+{
 namespace
 {
 const std::string PARAM_ACCUMULATION = "accumulation";
@@ -52,26 +54,34 @@ const std::string PARAM_STEREO_MODE = "stereo-mode";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
 const std::array<std::string, 2> ENGINES = {{"ospray", "optix"}};
-const std::array<std::string, 8> RENDERERS = {
-    {"default", "proximity", "simulation", "particle", "geometrynormals",
-     "shadingnormals", "scientificvisualization", "pathtracing"}};
+
+RendererTypes RENDERERS{RendererType::default_,
+                        RendererType::basic,
+                        RendererType::simulation,
+                        RendererType::particle,
+                        RendererType::proximity,
+                        RendererType::geometryNormals,
+                        RendererType::shadingNormals,
+                        RendererType::scientificvisualization,
+                        RendererType::path_tracing};
 
 const std::array<std::string, 8> RENDERER_INTERNAL_NAMES = {
     {"basic", "proximityrenderer", "simulationrenderer", "particlerenderer",
      "raycast_Ng", "raycast_Ns", "scivis", "pathtracingrenderer"}};
 
 const std::array<std::string, 4> CAMERA_TYPE_NAMES = {
-    {"perspective", "orthographic", "panoramic", "clipped"}};
+    {"perspective", "orthographic", "panoramic", "clippedperspective"}};
 
 const std::array<std::string, 4> STEREO_MODES = {
     {"none", "left", "right", "side-by-side"}};
 
 const std::array<std::string, 3> SHADING_TYPES = {
     {"none", "diffuse", "electron"}};
+
+std::string _defaultRendererName = "basic";
+std::string _defaultCameraName = "perspective";
 }
 
-namespace brayns
-{
 RenderingParameters::RenderingParameters()
     : AbstractParameters("Rendering")
 {
@@ -119,29 +129,37 @@ RenderingParameters::RenderingParameters()
                                                        "Samples per ray [int]")(
         PARAM_MAX_ACCUMULATION_FRAMES.c_str(), po::value<size_t>(),
         "Maximum number of accumulation frames");
-
-    initializeDefaultRenderers();
-    initializeDefaultCameras();
 }
 
-void RenderingParameters::initializeDefaultRenderers()
+void RenderingParameters::parseDefaults(const po::variables_map& vm)
 {
-    _rendererNames = {RENDERER_INTERNAL_NAMES.begin(),
-                      RENDERER_INTERNAL_NAMES.end()};
-    _renderers.clear();
-    _renderers.push_back(RendererType::default_);
-    _renderers.push_back(RendererType::simulation);
-    _renderers.push_back(RendererType::particle);
-    _renderers.push_back(RendererType::proximity);
-    _renderers.push_back(RendererType::geometryNormals);
-    _renderers.push_back(RendererType::shadingNormals);
-    _renderers.push_back(RendererType::scientificvisualization);
-    _renderers.push_back(RendererType::path_tracing);
+    if (vm.count(PARAM_RENDERER))
+    {
+        const std::string& name = vm[PARAM_RENDERER].as<const std::string&>();
+        const auto it = std::find(RENDERER_INTERNAL_NAMES.begin(),
+                                  RENDERER_INTERNAL_NAMES.end(), name);
+        if (it == RENDERER_INTERNAL_NAMES.end())
+            _defaultRendererName = name;
+    }
+    if (vm.count(PARAM_CAMERA))
+    {
+        const std::string& name = vm[PARAM_CAMERA].as<const std::string&>();
+        const auto it = std::find(CAMERA_TYPE_NAMES.begin(),
+                                  CAMERA_TYPE_NAMES.end(), name);
+        if (it == CAMERA_TYPE_NAMES.end())
+            _defaultCameraName = name;
+    }
+
 }
 
-void RenderingParameters::initializeDefaultCameras()
+void RenderingParameters::resetDefaultCamera()
 {
-    _cameraTypeNames = {CAMERA_TYPE_NAMES.begin(), CAMERA_TYPE_NAMES.end()};
+    _defaultCameraName = "perspective";
+}
+
+void RenderingParameters::resetDefaultRenderer()
+{
+    _defaultRendererName = "basic";
 }
 
 void RenderingParameters::parse(const po::variables_map& vm)
@@ -149,7 +167,7 @@ void RenderingParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_ENGINE))
     {
         _engine = EngineType::ospray;
-        const std::string& engine = vm[PARAM_ENGINE].as<std::string>();
+        const std::string& engine = vm[PARAM_ENGINE].as<const std::string&>();
         for (size_t i = 0; i < sizeof(ENGINES) / sizeof(ENGINES[0]); ++i)
             if (engine == ENGINES[i])
                 _engine = static_cast<EngineType>(i);
@@ -157,18 +175,18 @@ void RenderingParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_RENDERER))
     {
         _renderer = RendererType::default_;
-        const std::string& rendererName = vm[PARAM_RENDERER].as<std::string>();
-        auto it = std::find(_rendererNames.begin(), _rendererNames.end(),
-                            rendererName);
-        if (it == _rendererNames.end())
+        const std::string& name = vm[PARAM_RENDERER].as<const std::string&>();
+        if (name != _defaultRendererName)
         {
-            BRAYNS_INFO << "'" << rendererName << "' replaces default renderer"
-                        << std::endl;
-            _rendererNames[0] = rendererName;
+            const auto it = std::find(RENDERER_INTERNAL_NAMES.begin(),
+                                      RENDERER_INTERNAL_NAMES.end(), name);
+            if (it == RENDERER_INTERNAL_NAMES.end())
+                BRAYNS_WARN << "Invalid renderer type " << name << " defaulting"
+                            << " to " << _defaultRendererName << std::endl;
+            else
+                _renderer = static_cast<RendererType>(
+                    std::distance(RENDERER_INTERNAL_NAMES.begin(), it) + 1);
         }
-        else
-            _renderer = static_cast<RendererType>(
-                std::distance(_rendererNames.begin(), it));
     }
     if (vm.count(PARAM_SPP))
         _spp = vm[PARAM_SPP].as<size_t>();
@@ -186,7 +204,7 @@ void RenderingParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_SHADING))
     {
         _shading = ShadingType::diffuse;
-        const std::string& shading = vm[PARAM_SHADING].as<std::string>();
+        const std::string& shading = vm[PARAM_SHADING].as<const std::string&>();
         for (size_t i = 0; i < sizeof(SHADING_TYPES) / sizeof(SHADING_TYPES[0]);
              ++i)
             if (shading == SHADING_TYPES[i])
@@ -218,23 +236,24 @@ void RenderingParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_CAMERA))
     {
         _cameraType = CameraType::default_;
-        const std::string& cameraTypeName = vm[PARAM_CAMERA].as<std::string>();
-        auto it = std::find(_cameraTypeNames.begin(), _cameraTypeNames.end(),
-                            cameraTypeName);
-        if (it == _cameraTypeNames.end())
+        const std::string& name = vm[PARAM_CAMERA].as<const std::string&>();
+        if (name != _defaultCameraName)
         {
-            BRAYNS_INFO << "'" << cameraTypeName << "' replaces default camera"
-                        << std::endl;
-            _cameraTypeNames[0] = cameraTypeName;
+            const auto it = std::find(CAMERA_TYPE_NAMES.begin(),
+                                      CAMERA_TYPE_NAMES.end(), name);
+            if (it == CAMERA_TYPE_NAMES.end())
+                BRAYNS_WARN << "Invalid renderer type " << name << " defaulting"
+                            << " to " << _defaultRendererName << std::endl;
+            else
+                _cameraType = static_cast<CameraType>(
+                    std::distance(CAMERA_TYPE_NAMES.begin(), it) + 1);
         }
-        else
-            _cameraType = static_cast<CameraType>(
-                std::distance(_cameraTypeNames.begin(), it));
     }
     if (vm.count(PARAM_STEREO_MODE))
     {
         _stereoMode = StereoMode::none;
-        const std::string& stereoMode = vm[PARAM_STEREO_MODE].as<std::string>();
+        const std::string& stereoMode =
+            vm[PARAM_STEREO_MODE].as<const std::string&>();
         for (size_t i = 0; i < STEREO_MODES.size(); ++i)
             if (stereoMode == STEREO_MODES[i])
                 _stereoMode = static_cast<StereoMode>(i);
@@ -259,8 +278,10 @@ void RenderingParameters::print()
     for (const auto& module : _modules)
         BRAYNS_INFO << "- " << module << std::endl;
     BRAYNS_INFO << "Supported renderers               :" << std::endl;
-    for (const auto& renderer : _renderers)
-        BRAYNS_INFO << "- " << getRendererAsString(renderer) << std::endl;
+    if (_defaultRendererName != "basic")
+        BRAYNS_INFO << "- " << _defaultRendererName << std::endl;
+    for (const auto& renderer : RENDERER_INTERNAL_NAMES)
+        BRAYNS_INFO << "- " << renderer << std::endl;
     BRAYNS_INFO << "Renderer                          :"
                 << getRendererAsString(_renderer) << std::endl;
     BRAYNS_INFO << "Samples per pixel                 :" << _spp << std::endl;
@@ -298,31 +319,40 @@ void RenderingParameters::print()
 }
 
 const std::string& RenderingParameters::getEngineAsString(
-    const EngineType value) const
+    const EngineType value)
 {
     return ENGINES[static_cast<size_t>(value)];
 }
 
 const std::string& RenderingParameters::getRendererAsString(
-    const RendererType value) const
+    const RendererType value)
 {
-    return _rendererNames[static_cast<size_t>(value)];
+    if (value == RendererType::default_)
+        return _defaultRendererName;
+    return RENDERER_INTERNAL_NAMES[static_cast<size_t>(value) - 1];
+}
+
+const RendererTypes& RenderingParameters::getRenderers()
+{
+    return RENDERERS;
 }
 
 const std::string& RenderingParameters::getCameraTypeAsString(
-    const CameraType value) const
+    const CameraType value)
 {
-    return _cameraTypeNames[static_cast<size_t>(value)];
+    if (value == CameraType::default_)
+        return _defaultCameraName;
+    return CAMERA_TYPE_NAMES[static_cast<size_t>(value) - 1];
 }
 
 const std::string& RenderingParameters::getStereoModeAsString(
-    const StereoMode value) const
+    const StereoMode value)
 {
     return STEREO_MODES[static_cast<size_t>(value)];
 }
 
 const std::string& RenderingParameters::getShadingAsString(
-    const ShadingType value) const
+    const ShadingType value)
 {
     return SHADING_TYPES[static_cast<size_t>(value)];
 }

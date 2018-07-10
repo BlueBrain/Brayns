@@ -14,17 +14,41 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#include "ClippedPerspectiveCamera.ih"
 #include "math/sampling.ih"
+#include "ospray/SDK/camera/Camera.ih"
 
 const float EPSILON = 0.0000001f;
+
+struct ClippedPerspectiveCamera
+{
+    Camera super;
+
+    vec3f org;    //!< position of camera, already contains shift when
+                  //! STEREO_{LEFT|RIGHT}
+    vec3f dir_00; //!< direction of ray with screenSample=(0,0); scaled to
+                  //! focusDistance
+    vec3f dir_du; //!< delta of ray direction between two pixels in X; scaled to
+                  //! focusDistance
+    vec3f dir_dv; //!< delta of ray direction between two pixels in Y; scaled to
+                  //! focusDistance
+    float scaledAperture; //!< radius of aperture, divided by horizontal image
+                          //! plane size
+    float aspect;         //!< image plane size x / y
+    bool side_by_side;    //!< stereo mode SIDE_BY_SIDE
+    vec3f ipd_offset;     //!< shift of camera position for left/right eye (only
+                          //! when SIDE_BY_SIDE)
+
+    // Clip planes
+    const uniform vec4f* clipPlanes;
+    unsigned int numClipPlanes;
+};
 
 void getClippingValues(uniform ClippedPerspectiveCamera* uniform self,
                        const varying vec3f& worldEyePosition,
                        const varying vec3f& rayDirection, varying float& near,
                        varying float& far)
 {
-    for (int i = 0; i < NB_CLIP_PLANES; ++i)
+    for (int i = 0; i < self->numClipPlanes; ++i)
     {
         const vec3f planeNormal = {self->clipPlanes[i].x, self->clipPlanes[i].y,
                                    self->clipPlanes[i].z};
@@ -99,6 +123,7 @@ export void* uniform ClippedPerspectiveCamera_create(void* uniform cppE)
     self->super.cppEquivalent = cppE;
     self->super.initRay = ClippedPerspectiveCamera_initRay;
     self->super.doesDOF = false;
+    self->numClipPlanes = 0;
     return self;
 }
 
@@ -107,9 +132,7 @@ export void ClippedPerspectiveCamera_set(
     const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
     const uniform float scaledAperture, const uniform float aspect,
     const uniform bool side_by_side, const uniform vec3f& ipd_offset,
-    const uniform vec4f& clipPlane1, const uniform vec4f& clipPlane2,
-    const uniform vec4f& clipPlane3, const uniform vec4f& clipPlane4,
-    const uniform vec4f& clipPlane5, const uniform vec4f& clipPlane6)
+    const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes)
 {
     uniform ClippedPerspectiveCamera* uniform self =
         (uniform ClippedPerspectiveCamera * uniform)_self;
@@ -122,10 +145,6 @@ export void ClippedPerspectiveCamera_set(
     self->aspect = aspect;
     self->side_by_side = side_by_side;
     self->ipd_offset = ipd_offset;
-    self->clipPlanes[0] = clipPlane1;
-    self->clipPlanes[1] = clipPlane2;
-    self->clipPlanes[2] = clipPlane3;
-    self->clipPlanes[3] = clipPlane4;
-    self->clipPlanes[4] = clipPlane5;
-    self->clipPlanes[5] = clipPlane6;
+    self->clipPlanes = clipPlanes;
+    self->numClipPlanes = numClipPlanes;
 }

@@ -250,7 +250,13 @@ Renderers OSPRayEngine::_createRenderers()
     auto& rp = _parametersManager.getRenderingParameters();
     for (const auto& renderer : rp.getRenderers())
     {
-        auto name = rp.getRendererAsString(renderer);
+        auto name = RenderingParameters::getRendererAsString(renderer);
+
+        // Do not repeat the default one if it appears twice
+        if (renderer != RendererType::default_ &&
+            name == rp.getRendererAsString(RendererType::default_))
+            continue;
+
         try
         {
             _renderers[renderer] = std::make_shared<OSPRayRenderer>(
@@ -258,10 +264,11 @@ Renderers OSPRayEngine::_createRenderers()
         }
         catch (const std::runtime_error& e)
         {
-            BRAYNS_WARN << e.what() << ". Using default renderer instead"
-                        << std::endl;
-            rp.initializeDefaultRenderers();
+            if (renderer == RendererType::default_)
+                RenderingParameters::resetDefaultRenderer();
             name = rp.getRendererAsString(RendererType::default_);
+            BRAYNS_WARN << e.what() << ". Using " << name << " renderer instead"
+                        << std::endl;
             _renderers[renderer] = std::make_shared<OSPRayRenderer>(
                 name, _parametersManager.getAnimationParameters(), rp);
         }
@@ -287,19 +294,16 @@ ScenePtr OSPRayEngine::createScene(const Renderers& renderers,
 
 CameraPtr OSPRayEngine::createCamera(const CameraType type) const
 {
-    auto& rp = _parametersManager.getRenderingParameters();
-    auto name = rp.getCameraTypeAsString(type);
     try
     {
-        return std::make_shared<OSPRayCamera>(type, name);
+        return std::make_shared<OSPRayCamera>(type);
     }
     catch (const std::runtime_error& e)
     {
         BRAYNS_WARN << e.what() << ". Using default camera instead"
                     << std::endl;
-        rp.initializeDefaultCameras();
-        name = rp.getCameraTypeAsString(CameraType::default_);
-        return std::make_shared<OSPRayCamera>(type, name);
+        RenderingParameters::resetDefaultCamera();
+        return std::make_shared<OSPRayCamera>(CameraType::default_);
     }
 }
 

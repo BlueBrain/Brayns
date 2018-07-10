@@ -34,7 +34,7 @@ namespace brayns
 class OSPRayCamera : public brayns::Camera
 {
 public:
-    OSPRayCamera(const CameraType type, const std::string& name);
+    OSPRayCamera(const CameraType type);
     ~OSPRayCamera();
 
     /**
@@ -52,6 +52,7 @@ public:
     void setEnvironmentMap(const bool environmentMap) final;
 
 private:
+    CameraType _currentType;
     OSPCamera _camera;
 };
 }

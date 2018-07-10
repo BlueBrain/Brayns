@@ -27,12 +27,16 @@
 
 namespace brayns
 {
-OSPRayCamera::OSPRayCamera(const CameraType type, const std::string& name)
+OSPRayCamera::OSPRayCamera(const CameraType type)
     : Camera(type)
-    , _camera{ospNewCamera(name.c_str())}
+    , _currentType(type)
+    , _camera{ospNewCamera(
+        RenderingParameters::getCameraTypeAsString(type).c_str())}
 {
     if (!_camera)
-        throw std::runtime_error(name + " is not a registered camera");
+        throw std::runtime_error(
+            RenderingParameters::getCameraTypeAsString(type) +
+            " is not a registered camera");
 }
 
 OSPRayCamera::~OSPRayCamera()
@@ -52,6 +56,27 @@ void OSPRayCamera::commit()
 {
     if (!isModified())
         return;
+
+    const auto type = getType();
+    if (_currentType != type)
+    {
+        auto name = RenderingParameters::getCameraTypeAsString(type);
+        auto camera = ospNewCamera(name.c_str());
+        if (type == CameraType::default_)
+        {
+            BRAYNS_WARN << name << "is not a registered camera. Using default"
+                " camera instead" << std::endl;
+            RenderingParameters::resetDefaultCamera();
+            name = RenderingParameters::getCameraTypeAsString(type);
+            camera = ospNewCamera(name.c_str());
+        }
+        if (!camera)
+            throw std::runtime_error(name + " is not a registered camera");
+
+        ospRelease(_camera);
+        _camera = camera;
+        _currentType = type;
+    }
 
     const auto& position = getPosition();
     const auto& target = getTarget();
@@ -103,18 +128,16 @@ void OSPRayCamera::commit()
 
     // Clip planes
     const auto& clipPlanes = getClipPlanes();
-    if (clipPlanes.size() == 6)
+    if (!clipPlanes.empty())
     {
-        const std::string clipPlaneNames[6] = {"clipPlane1", "clipPlane2",
-                                               "clipPlane3", "clipPlane4",
-                                               "clipPlane5", "clipPlane6"};
-        for (size_t i = 0; i < clipPlanes.size(); ++i)
-        {
-            const auto& clipPlane = clipPlanes[i];
-            ospSet4f(_camera, clipPlaneNames[i].c_str(), clipPlane.x(),
-                     clipPlane.y(), clipPlane.z(), clipPlane.w());
-        }
+        auto clipPlaneData =
+            ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
+        ospSetData(_camera, "clipPlanes", clipPlaneData);
+        ospRelease(clipPlaneData);
     }
+    else
+        ospRemoveParam(_camera, "clipPlanes");
+
     ospCommit(_camera);
 }
 
