@@ -38,12 +38,6 @@ void SimulationRenderer::commit()
     AbstractRenderer::commit();
 
     _simulationModel = (ospray::Model*)getParamObject("simulationModel", 0);
-    _volumeData = getParamData("volumeData");
-    _volumeDimensions = getParam3i("volumeDimensions", ospray::vec3i(0));
-    _volumeElementSpacing =
-        getParam3f("volumeElementSpacing", ospray::vec3f(1.f));
-    _volumeOffset = getParam3f("volumeOffset", ospray::vec3f(0.f));
-    _volumeEpsilon = getParam1f("volumeEpsilon", 1.f);
     _volumeSamplesPerRay = getParam1i("volumeSamplesPerRay", 32);
     _simulationData = getParamData("simulationData");
     _simulationDataSize = getParam1i("simulationDataSize", 0);
@@ -61,9 +55,7 @@ void SimulationRenderer::commit()
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
         _ambientOcclusionStrength, _ambientOcclusionDistance, _shadingEnabled,
         _randomNumber, _timestamp, _spp, _electronShadingEnabled, _lightPtr,
-        _lightArray.size(), _volumeData ? (uint8*)_volumeData->data : NULL,
-        (ispc::vec3i&)_volumeDimensions, (ispc::vec3f&)_volumeElementSpacing,
-        (ispc::vec3f&)_volumeOffset, _volumeEpsilon, _volumeSamplesPerRay,
+        _lightArray.size(), _volumeSamplesPerRay,
         _simulationData ? (float*)_simulationData->data : NULL,
         _simulationDataSize,
         _transferFunctionDiffuseData

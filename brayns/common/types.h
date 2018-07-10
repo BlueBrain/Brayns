@@ -135,6 +135,14 @@ typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
 struct StreamlinesData;
 typedef std::map<size_t, StreamlinesData> StreamlinesDataMap;
 
+class Volume;
+class BrickedVolume;
+class SharedDataVolume;
+using VolumePtr = std::shared_ptr<Volume>;
+using SharedDataVolumePtr = std::shared_ptr<SharedDataVolume>;
+using BrickedVolumePtr = std::shared_ptr<BrickedVolume>;
+using Volumes = std::vector<VolumePtr>;
+
 class Texture2D;
 typedef std::shared_ptr<Texture2D> Texture2DPtr;
 typedef std::map<std::string, Texture2DPtr> TexturesMap;
@@ -160,9 +168,6 @@ typedef std::shared_ptr<SpikeSimulationHandler> SpikeSimulationHandlerPtr;
 class CADiffusionSimulationHandler;
 typedef std::shared_ptr<CADiffusionSimulationHandler>
     CADiffusionSimulationHandlerPtr;
-
-class VolumeHandler;
-typedef std::shared_ptr<VolumeHandler> VolumeHandlerPtr;
 
 class AbstractParameters;
 class AnimationParameters;
@@ -399,6 +404,18 @@ class Loader;
 using LoaderPtr = std::unique_ptr<Loader>;
 
 class PropertyMap;
+
+enum class DataType
+{
+    FLOAT,
+    DOUBLE,
+    UINT8,
+    UINT16,
+    UINT32,
+    INT8,
+    INT16,
+    INT32
+};
 }
 
 #endif // TYPES_H

@@ -110,6 +110,23 @@ public:
     BRAYNS_API virtual ModelPtr createModel() const = 0;
 
     /**
+     * Create a volume with the given dimensions, voxel spacing and data type
+     * where the are voxels are set via setVoxels() from any memory location.
+     */
+    BRAYNS_API virtual SharedDataVolumePtr createSharedDataVolume(
+        const Vector3ui& dimensions, const Vector3f& spacing,
+        const DataType type) const = 0;
+
+    /**
+     * Create a volume with the given dimensions, voxel spacing and data type
+     * where the voxels are copied via setBrick() into an optimized internal
+     * storage.
+     */
+    BRAYNS_API virtual BrickedVolumePtr createBrickedVolume(
+        const Vector3ui& dimensions, const Vector3f& spacing,
+        const DataType type) const = 0;
+
+    /**
         Adds a model to the scene
         @throw std::runtime_error if model is empty
       */
@@ -148,12 +165,6 @@ public:
         Sets the simulation handler
     */
     BRAYNS_API void setSimulationHandler(AbstractSimulationHandlerPtr handler);
-
-    /**
-        Returns volume data
-    */
-    BRAYNS_API VolumeHandlerPtr getVolumeHandler() { return _volumeHandler; }
-    BRAYNS_API virtual void resetVolumeHandler();
 
     /**
         Sets the Calcium diffusion simulation handler
@@ -205,13 +216,6 @@ public:
        command line parameter. See loadFromCacheFile for file structure
     */
     BRAYNS_API void saveToCacheFile();
-
-    /**
-     * @return true if the given volume file is supported by the engines' scene.
-     *         If false, a default scene will be constructed.
-     */
-    BRAYNS_API virtual bool isVolumeSupported(
-        const std::string& volumeFile) const = 0;
 
     /**
      * @internal needed to ensure deletion wrt cyclic dependency
@@ -282,10 +286,6 @@ protected:
     mutable std::shared_timed_mutex _modelMutex;
 
     Lights _lights;
-
-    // Volume
-    VolumeHandlerPtr _volumeHandler{nullptr};
-    size_t _volumeModelId{0};
 
     // Simulation
     AbstractSimulationHandlerPtr _simulationHandler{nullptr};

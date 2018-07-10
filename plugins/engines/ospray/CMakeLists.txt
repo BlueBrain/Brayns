@@ -12,63 +12,65 @@
 
 set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   ispc/camera/ClippedPerspectiveCamera.ispc
+  ispc/geometry/ExtendedCones.ispc
+  ispc/geometry/ExtendedCylinders.ispc
+  ispc/geometry/ExtendedSDFGeometries.ispc
+  ispc/geometry/ExtendedSpheres.ispc
+  ispc/render/BasicRenderer.ispc
+  ispc/render/ExtendedOBJMaterial.ispc
+  ispc/render/ParticleRenderer.ispc
+  ispc/render/PathTracingRenderer.ispc
+  ispc/render/ProximityRenderer.ispc
+  ispc/render/SimulationRenderer.ispc
   ispc/render/utils/AbstractRenderer.ispc
   ispc/render/utils/RandomGenerator.ispc
   ispc/render/utils/SkyBox.ispc
-  ispc/geometry/ExtendedCylinders.ispc
-  ispc/geometry/ExtendedCones.ispc
-  ispc/geometry/ExtendedSpheres.ispc
-  ispc/geometry/ExtendedSDFGeometries.ispc
-  ispc/render/ExtendedOBJMaterial.ispc
-  ispc/render/BasicRenderer.ispc
-  ispc/render/ProximityRenderer.ispc
-  ispc/render/SimulationRenderer.ispc
-  ispc/render/ParticleRenderer.ispc
-  ispc/render/PathTracingRenderer.ispc
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
+  OSPRayCamera.cpp
+  OSPRayEngine.cpp
+  OSPRayFrameBuffer.cpp
+  OSPRayMaterial.cpp
+  OSPRayModel.cpp
+  OSPRayRenderer.cpp
+  OSPRayScene.cpp
+  OSPRayVolume.cpp
   ispc/camera/ClippedPerspectiveCamera.cpp
-  ispc/render/utils/AbstractRenderer.cpp
   ispc/geometry/ExtendedCones.cpp
   ispc/geometry/ExtendedCylinders.cpp
-  ispc/geometry/ExtendedSpheres.cpp
   ispc/geometry/ExtendedSDFGeometries.cpp
-  ispc/render/ExtendedOBJMaterial.cpp
+  ispc/geometry/ExtendedSpheres.cpp
   ispc/render/BasicRenderer.cpp
-  ispc/render/ProximityRenderer.cpp
-  ispc/render/SimulationRenderer.cpp
+  ispc/render/ExtendedOBJMaterial.cpp
   ispc/render/ParticleRenderer.cpp
   ispc/render/PathTracingRenderer.cpp
-  OSPRayMaterial.cpp
-  OSPRayEngine.cpp
-  OSPRayModel.cpp
-  OSPRayScene.cpp
-  OSPRayRenderer.cpp
-  OSPRayFrameBuffer.cpp
-  OSPRayCamera.cpp
+  ispc/render/ProximityRenderer.cpp
+  ispc/render/SimulationRenderer.cpp
+  ispc/render/utils/AbstractRenderer.cpp
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
+  OSPRayCamera.h
+  OSPRayEngine.h
+  OSPRayFrameBuffer.h
+  OSPRayMaterial.h
+  OSPRayModel.h
+  OSPRayRenderer.h
+  OSPRayScene.h
+  OSPRayVolume.h
   ispc/camera/ClippedPerspectiveCamera.h
-  ispc/render/utils/AbstractRenderer.h
   ispc/geometry/ExtendedCones.h
   ispc/geometry/ExtendedCylinders.h
-  ispc/geometry/ExtendedSpheres.h
   ispc/geometry/ExtendedSDFGeometries.h
-  ispc/render/ExtendedOBJMaterial.h
+  ispc/geometry/ExtendedSpheres.h
   ispc/render/BasicRenderer.h
-  ispc/render/ProximityRenderer.h
-  ispc/render/SimulationRenderer.h
+  ispc/render/ExtendedOBJMaterial.h
   ispc/render/ParticleRenderer.h
   ispc/render/PathTracingRenderer.h
-  OSPRayEngine.h
-  OSPRayScene.h
-  OSPRayModel.h
-  OSPRayMaterial.h
-  OSPRayRenderer.h
-  OSPRayFrameBuffer.h
-  OSPRayCamera.h
+  ispc/render/ProximityRenderer.h
+  ispc/render/SimulationRenderer.h
+  ispc/render/utils/AbstractRenderer.h
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_HEADERS

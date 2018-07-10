@@ -24,6 +24,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/material/Texture2D.h>
+#include <brayns/common/volume/Volume.h>
 
 #include <boost/filesystem.hpp>
 
@@ -131,7 +132,7 @@ bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
            _trianglesMeshes.empty() && _sdf.geometries.empty() &&
-           _streamlines.empty() &&
+           _streamlines.empty() && _volumes.empty() &&
            _bounds.isEmpty(); // _bounds only used for volumes, will disappear.
 }
 
@@ -221,6 +222,23 @@ void Model::updateSDFGeometryNeighbours(
 {
     _sdf.neighbours[geometryIdx] = neighbourIndices;
     _sdfGeometriesDirty = true;
+}
+
+void Model::addVolume(VolumePtr volume)
+{
+    _volumes.push_back(volume);
+    _bounds.merge(volume->getBounds());
+    _volumesDirty = true;
+}
+
+void Model::removeVolume(VolumePtr volume)
+{
+    auto i = std::find(_volumes.begin(), _volumes.end(), volume);
+    if (i == _volumes.end())
+        return;
+
+    _volumes.erase(i);
+    _volumesDirty = true;
 }
 
 bool Model::dirty() const
@@ -342,36 +360,18 @@ void Model::setMaterialsColorMap(const MaterialsColorMap colorMap)
 
 void Model::logInformation()
 {
-    _sizeInBytes = 0;
+    updateSizeInBytes();
+
     uint64_t nbSpheres = 0;
     uint64_t nbCylinders = 0;
     uint64_t nbCones = 0;
-    uint64_t nbMeshes = 0;
+    uint64_t nbMeshes = _trianglesMeshes.size();
     for (const auto& spheres : _spheres)
-    {
-        _sizeInBytes += spheres.second.size() * sizeof(Sphere);
         nbSpheres += spheres.second.size();
-    }
     for (const auto& cylinders : _cylinders)
-    {
-        _sizeInBytes += cylinders.second.size() * sizeof(Cylinder);
         nbCylinders += cylinders.second.size();
-    }
     for (const auto& cones : _cones)
-    {
-        _sizeInBytes += cones.second.size() * sizeof(Cones);
         nbCones += cones.second.size();
-    }
-    for (const auto& trianglesMesh : _trianglesMeshes)
-    {
-        const auto& mesh = trianglesMesh.second;
-        _sizeInBytes += mesh.indices.size() * sizeof(Vector3f);
-        _sizeInBytes += mesh.normals.size() * sizeof(Vector3f);
-        _sizeInBytes += mesh.colors.size() * sizeof(Vector4f);
-        _sizeInBytes += mesh.indices.size() * sizeof(Vector3ui);
-        _sizeInBytes += mesh.textureCoordinates.size() * sizeof(Vector2f);
-        ++nbMeshes;
-    }
 
     BRAYNS_DEBUG << "Spheres: " << nbSpheres << ", Cylinders: " << nbCylinders
                  << ", Cones: " << nbCones << ", Meshes: " << nbMeshes
@@ -387,6 +387,28 @@ MaterialPtr Model::getMaterial(const size_t materialId) const
         throw std::runtime_error("Material " + std::to_string(materialId) +
                                  " is not registered in the model");
     return it->second;
+}
+
+void Model::updateSizeInBytes()
+{
+    _sizeInBytes = 0;
+    for (const auto& spheres : _spheres)
+        _sizeInBytes += spheres.second.size() * sizeof(Sphere);
+    for (const auto& cylinders : _cylinders)
+        _sizeInBytes += cylinders.second.size() * sizeof(Cylinder);
+    for (const auto& cones : _cones)
+        _sizeInBytes += cones.second.size() * sizeof(Cones);
+    for (const auto& trianglesMesh : _trianglesMeshes)
+    {
+        const auto& mesh = trianglesMesh.second;
+        _sizeInBytes += mesh.indices.size() * sizeof(Vector3f);
+        _sizeInBytes += mesh.normals.size() * sizeof(Vector3f);
+        _sizeInBytes += mesh.colors.size() * sizeof(Vector4f);
+        _sizeInBytes += mesh.indices.size() * sizeof(Vector3ui);
+        _sizeInBytes += mesh.textureCoordinates.size() * sizeof(Vector2f);
+    }
+    for (const auto& volume : _volumes)
+        _sizeInBytes += volume->getSizeInBytes();
 }
 
 void Model::createMissingMaterials(const bool castSimulationData)
