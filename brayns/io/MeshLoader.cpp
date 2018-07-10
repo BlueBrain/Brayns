@@ -38,9 +38,6 @@
 
 namespace brayns
 {
-const size_t TOTAL_PROGRESS = 100;
-const size_t LOADING_FRACTION = 50;
-const size_t POST_PROCESSING_FRACTION = TOTAL_PROGRESS - LOADING_FRACTION;
 #ifdef BRAYNS_USE_ASSIMP
 class ProgressWatcher : public Assimp::ProgressHandler
 {
@@ -53,6 +50,8 @@ public:
 
     bool Update(const float percentage) final
     {
+        constexpr size_t TOTAL_PROGRESS = 100;
+        constexpr size_t LOADING_FRACTION = 50;
         _parent.updateProgress(_msg.str(), percentage * LOADING_FRACTION,
                                TOTAL_PROGRESS);
         return true;
@@ -388,8 +387,8 @@ void MeshLoader::_createMaterials(Model&, const aiScene*, const std::string&)
     throw NO_ASSIMP;
 }
 
-void MeshLoader::_postLoad(const aiScene*, Model&, const size_t, const size_t,
-                           const std::string&)
+void MeshLoader::_postLoad(const aiScene*, Model&, const size_t,
+                           const Matrix4f&, size_t, const std::string&)
 {
     throw NO_ASSIMP;
 }
@@ -399,4 +398,4 @@ size_t MeshLoader::_getQuality() const
     throw NO_ASSIMP;
 }
 #endif
-}
+} // namespace brayns

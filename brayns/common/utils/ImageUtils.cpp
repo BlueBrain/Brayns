@@ -83,8 +83,9 @@ ImagePtr getImageFromFrameBuffer(FrameBuffer& frameBuffer)
 std::string getBase64Image(FrameBuffer& frameBuffer, const std::string& format,
                            const int quality)
 {
-    FreeImage_SetOutputMessage(
-        [](auto, auto message) { throw std::runtime_error(message); });
+    FreeImage_SetOutputMessage([](FREE_IMAGE_FORMAT, const char* message) {
+        throw std::runtime_error(message);
+    });
 
     auto image = freeimage::getImageFromFrameBuffer(frameBuffer);
 
