@@ -20,7 +20,7 @@
 
 #define BOOST_TEST_MODULE braynsPlugin
 
-#include "jsonSerialization.h"
+#include <jsonPropertyMap.h>
 
 #include "ClientServer.h"
 
@@ -34,4 +34,24 @@ BOOST_AUTO_TEST_CASE(plugin_actions)
     makeNotification<Vec2>("foo", vecVal);
     BOOST_CHECK_EQUAL(makeRequest<std::string>("who"), "me");
     BOOST_CHECK((makeRequest<Vec2, Vec2>("echo", vecVal) == vecVal));
+
+    clientServer.getBrayns()
+        .getParametersManager()
+        .getRenderingParameters()
+        .setCurrentRenderer("myrenderer");
+    clientServer.getBrayns().render();
+
+    auto props =
+        clientServer.getBrayns().getEngine().getRenderer().getPropertyMap();
+    BOOST_CHECK(props.hasProperty("awesome"));
+    BOOST_CHECK_EQUAL(props.getProperty<int>("awesome"), 42);
+
+    props.updateProperty("awesome", 10);
+
+    BOOST_CHECK(
+        (makeRequest<brayns::PropertyMap, bool>("set-renderer-params", props)));
+
+    const auto& newProps =
+        clientServer.getBrayns().getEngine().getRenderer().getPropertyMap();
+    BOOST_CHECK_EQUAL(newProps.getProperty<int>("awesome"), 10);
 }

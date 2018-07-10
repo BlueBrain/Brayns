@@ -41,10 +41,9 @@
 
 namespace brayns
 {
-OSPRayScene::OSPRayScene(const Renderers& renderers,
-                         ParametersManager& parametersManager,
+OSPRayScene::OSPRayScene(ParametersManager& parametersManager,
                          const size_t memoryManagementFlags)
-    : Scene(renderers, parametersManager)
+    : Scene(parametersManager)
     , _memoryManagementFlags(memoryManagementFlags)
 {
     _backgroundMaterial = std::make_shared<OSPRayMaterial>();
@@ -223,12 +222,6 @@ bool OSPRayScene::commitLights()
         _ospLightData = ospNewData(_ospLights.size(), OSP_OBJECT,
                                    &_ospLights[0], _memoryManagementFlags);
         ospCommit(_ospLightData);
-        for (auto renderer : _renderers)
-        {
-            auto impl =
-                std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
-            ospSetData(impl, "lights", _ospLightData);
-        }
     }
     return true;
 }
@@ -282,30 +275,6 @@ bool OSPRayScene::commitTransferFunctionData()
                    _memoryManagementFlags);
     ospCommit(_ospTransferFunctionEmissionData);
 
-    for (const auto& renderer : _renderers)
-    {
-        auto impl = std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
-
-        // Transfer function Diffuse colors
-        ospSetData(impl, "transferFunctionDiffuseData",
-                   _ospTransferFunctionDiffuseData);
-
-        // Transfer function emission data
-        ospSetData(impl, "transferFunctionEmissionData",
-                   _ospTransferFunctionEmissionData);
-
-        // Transfer function size
-        ospSet1i(impl, "transferFunctionSize",
-                 _transferFunction.getDiffuseColors().size());
-
-        // Transfer function range
-        ospSet1f(impl, "transferFunctionMinValue",
-                 _transferFunction.getValuesRange().x());
-        ospSet1f(impl, "transferFunctionRange",
-                 _transferFunction.getValuesRange().y() -
-                     _transferFunction.getValuesRange().x());
-        ospCommit(impl);
-    }
     _transferFunction.resetModified();
     markModified();
     return true;
@@ -325,7 +294,8 @@ bool OSPRayScene::_commitVolumeData()
         }
         for (auto volume : model.getVolumes())
         {
-            if (volume->isModified() || rebuildScene)
+            if (volume->isModified() || rebuildScene ||
+                _parametersManager.getVolumeParameters().isModified())
             {
                 volume->commit();
                 markModified(); // to reset accumulation if new blocks are added
@@ -362,14 +332,6 @@ void OSPRayScene::_commitSimulationData()
                    _memoryManagementFlags);
     ospCommit(_ospSimulationData);
 
-    for (const auto& renderer : _renderers)
-    {
-        auto impl = std::static_pointer_cast<OSPRayRenderer>(renderer)->impl();
-        ospSetData(impl, "simulationData", _ospSimulationData);
-        ospSet1i(impl, "simulationDataSize",
-                 _simulationHandler->getFrameSize());
-        ospCommit(impl);
-    }
     markModified(); // triggers framebuffer clear
 }
 

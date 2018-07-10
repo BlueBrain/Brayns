@@ -59,17 +59,16 @@ public:
                                      FrameBufferFormat frameBufferFormat,
                                      bool accumulation) const final;
 
-    ScenePtr createScene(const Renderers& renderers,
-                         ParametersManager& parametersManager) const final;
+    ScenePtr createScene(ParametersManager& parametersManager) const final;
     CameraPtr createCamera(const CameraType type) const final;
     RendererPtr createRenderer(
-        const RendererType type, const AnimationParameters& animationParameters,
+        const AnimationParameters& animationParameters,
         const RenderingParameters& renderingParameters) const final;
 
 private:
     uint32_t _getOSPDataFlags() const;
 
-    Renderers _createRenderers();
+    void _createRenderers();
 
     bool _haveDeflectPixelOp{false};
     bool _useDynamicLoadBalancer{false};

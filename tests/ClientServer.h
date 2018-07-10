@@ -161,6 +161,39 @@ public:
         return request.get();
     }
 
+    template <typename RetVal>
+    RetVal makeRequestUpdate(const std::string& method, RetVal baseObject)
+    {
+        auto promise = std::make_shared<std::promise<RetVal>>();
+        auto callback = [promise, &baseObject](auto response) {
+            if (response.isError())
+                promise->set_exception(std::make_exception_ptr(
+                    rockets::jsonrpc::response_error(response.error)));
+            else
+            {
+                if (!from_json(baseObject, response.result))
+                    promise->set_exception(std::make_exception_ptr(
+                        rockets::jsonrpc::response_error(
+                            "Response JSON conversion failed",
+                            rockets::jsonrpc::ErrorCode::
+                                invalid_json_response)));
+                else
+                    promise->set_value(std::move(baseObject));
+            }
+        };
+
+        _client.request(method, "", callback);
+        auto future = promise->get_future();
+
+        while (!rockets::is_ready(future))
+        {
+            _wsClient.process(0);
+            _brayns->render();
+        }
+
+        return future.get();
+    }
+
     template <typename Params>
     void makeNotification(const std::string& method, const Params& params)
     {
@@ -216,6 +249,13 @@ RetVal makeRequest(const std::string& method)
     return ClientServer::instance().makeRequest<RetVal>(method);
 }
 
+template <typename RetVal>
+RetVal makeRequestUpdate(const std::string& method, RetVal baseObject)
+{
+    return ClientServer::instance().makeRequestUpdate<RetVal>(method,
+                                                              baseObject);
+}
+
 template <typename Params>
 void makeNotification(const std::string& method, const Params& params)
 {
@@ -235,6 +275,11 @@ brayns::Camera& getCamera()
 brayns::Scene& getScene()
 {
     return ClientServer::instance().getBrayns().getEngine().getScene();
+}
+
+brayns::Renderer& getRenderer()
+{
+    return ClientServer::instance().getBrayns().getEngine().getRenderer();
 }
 
 auto& getWsClient()

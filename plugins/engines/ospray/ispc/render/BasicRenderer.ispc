@@ -118,7 +118,7 @@ export void BasicRenderer_set(void* uniform _self, void* uniform bgMaterial,
     self->abstract.bgMaterial =
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
     self->abstract.timestamp = timestamp;
-    self->abstract.spp = spp;
+    self->abstract.super.spp = spp;
 
     self->abstract.lights = (const uniform Light* uniform* uniform)lights;
     self->abstract.numLights = numLights;

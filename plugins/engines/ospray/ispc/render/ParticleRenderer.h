@@ -44,6 +44,7 @@ private:
     ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
     ospray::Ref<ospray::Data> _transferFunctionEmissionData;
     ospray::uint32 _transferFunctionSize;
+    int _randomNumber;
 };
 
 } // ::brayns

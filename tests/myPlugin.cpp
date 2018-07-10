@@ -24,6 +24,9 @@
 #include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
+#include "BasicRenderer_ispc.h"
+#include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.h>
+
 #include <boost/test/unit_test.hpp>
 
 using Vec2 = std::array<unsigned, 2>;
@@ -59,11 +62,30 @@ public:
             ++numCalls;
             return vec;
         });
+
+        brayns::PropertyMap props;
+        props.setProperty({"awesome", "Best property", 42, 0, 50});
+        api->getRenderer().setProperties("myrenderer", props);
     }
 
     ~MyPlugin() { BOOST_REQUIRE_EQUAL(numCalls, 4); }
     size_t numCalls{0};
 };
+
+class MyRenderer : public brayns::AbstractRenderer
+{
+public:
+    MyRenderer() { ispcEquivalent = ispc::BasicRenderer_create(this); }
+    void commit() final
+    {
+        AbstractRenderer::commit();
+        ispc::BasicRenderer_set(getIE(),
+                                (_bgMaterial ? _bgMaterial->getIE() : nullptr),
+                                _timestamp, spp, _lightPtr, _lightArray.size());
+    }
+};
+
+OSP_REGISTER_RENDERER(MyRenderer, myrenderer);
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
                                                          int argc, char** argv)

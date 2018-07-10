@@ -38,6 +38,8 @@ Camera& Camera::operator=(const Camera& rhs)
     if (this == &rhs)
         return *this;
 
+    PropertyObject::operator=(rhs);
+
     setPosition(rhs.getPosition());
     setTarget(rhs.getTarget());
     setUp(rhs.getUp());
@@ -56,8 +58,6 @@ Camera& Camera::operator=(const Camera& rhs)
     setClipPlanes(rhs.getClipPlanes());
 
     _matrix = rhs._matrix;
-    _properties = rhs._properties;
-
     return *this;
 }
 

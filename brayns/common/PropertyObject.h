@@ -1,0 +1,128 @@
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+ *
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#pragma once
+
+#include <brayns/common/BaseObject.h>
+#include <brayns/common/PropertyMap.h>
+#include <brayns/common/types.h>
+
+#include <map>
+
+namespace brayns
+{
+/**
+ * Maps generic properties to user-defined types/keys/names and tracks the
+ * current type/key/name for querying, setting and updating its properties.
+ */
+class PropertyObject : public BaseObject
+{
+public:
+    /** Set the current type to use for 'type-less' queries and updates. */
+    void setCurrentType(const std::string& type)
+    {
+        _updateValue(_currentType, type);
+    }
+
+    /** @return the current set type. */
+    const std::string& getCurrentType() const { return _currentType; }
+    /** Update the value of the given property for the current type. */
+    template <typename T>
+    inline void updateProperty(const std::string& name, const T& value)
+    {
+        _mappedProperties.at(_currentType).updateProperty(name, value);
+        markModified();
+    }
+
+    /**
+     * @return true if the property with the given name exists for the current
+     *         type.
+     */
+    bool hasProperty(const std::string& name) const
+    {
+        return _mappedProperties.at(_currentType).hasProperty(name);
+    }
+
+    /**
+     * @return the value of the property with the given name for the current
+     *         type.
+     */
+    template <typename T>
+    inline T getProperty(const std::string& name) const
+    {
+        return _mappedProperties.at(_currentType).getProperty<T>(name);
+    }
+
+    /** Assign a new set of properties to the current type. */
+    void setProperties(const PropertyMap& properties)
+    {
+        _mappedProperties[_currentType] = properties;
+        markModified();
+    }
+
+    /** Assign a new set of properties to the given type. */
+    void setProperties(const std::string& type, const PropertyMap& properties)
+    {
+        _mappedProperties[type] = properties;
+        markModified();
+    }
+
+    /**
+     * Update or add all the properties from the given map to the current type.
+     */
+    void updateProperties(const PropertyMap& properties)
+    {
+        for (auto prop : properties.getProperties())
+            _mappedProperties.at(_currentType).setProperty(*prop);
+        markModified();
+    }
+
+    /** @return true if the current type has any properties. */
+    bool hasProperties() const
+    {
+        return _mappedProperties.count(_currentType) != 0;
+    }
+
+    /** @return the entire property map for the current type. */
+    const auto& getPropertyMap() const
+    {
+        return _mappedProperties.at(_currentType);
+    }
+
+    /** @return the entire property map for the given type. */
+    const auto& getPropertyMap(const std::string& type) const
+    {
+        return _mappedProperties.at(type);
+    }
+
+    /** @return the list of all registered types. */
+    strings getTypes() const
+    {
+        strings types;
+        for (const auto& i : _mappedProperties)
+            types.push_back(i.first);
+        return types;
+    }
+
+private:
+    std::string _currentType;
+    std::map<std::string, PropertyMap> _mappedProperties;
+};
+}

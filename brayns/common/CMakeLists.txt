@@ -36,6 +36,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   ImageManager.h
   Progress.h
   PropertyMap.h
+  PropertyObject.h
   Statistics.h
   Timer.h
   Transformation.h
@@ -88,8 +89,6 @@ set(BRAYNSCOMMON_LINK_LIBRARIES
   PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
           ${LibArchive_LIBRARIES} ${FREEIMAGE_LIBRARIES}
 )
-
-list(APPEND LCOV_EXCLUDE 'brayns/common/utils/base64/*')
 
 common_library(braynsCommon)
 target_include_directories(braynsCommon SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})

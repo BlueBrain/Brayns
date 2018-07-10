@@ -116,11 +116,12 @@ inline bool to_pretty_json_file(const std::string& filename, const T& value)
 }
 
 template <class T>
-inline Document export_json_schema(T* value)
+inline Document export_json_schema(T* value,
+                                   Document::AllocatorType* allocator = nullptr)
 {
     Handler<T> h(value);
     Document d;
-    h.generate_schema(d, d.GetAllocator());
+    h.generate_schema(d, allocator ? *allocator : d.GetAllocator());
     return d;
 }
 }

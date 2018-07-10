@@ -47,6 +47,22 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
+    /** Engine*/
+    EngineType getEngine() const { return _engine; }
+    void setEngine(const EngineType name) { _updateValue(_engine, name); }
+    const std::string& getEngineAsString(const EngineType value) const;
+    /** OSPRay modules */
+    const std::vector<std::string>& getOsprayModules() const
+    {
+        return _modules;
+    }
+
+    bool getDynamicLoadBalancer() const { return _dynamicLoadBalancer; }
+    void setDynamicLoadBalancer(const bool value)
+    {
+        _updateValue(_dynamicLoadBalancer, value);
+    }
+
     /** Runtime plugins to load in Brayns::loadPlugins. */
     const std::vector<PluginParam>& getPlugins() const { return _plugins; }
     /** window size */
@@ -101,10 +117,12 @@ public:
 protected:
     void parse(const po::variables_map& vm) final;
 
+    EngineType _engine{EngineType::ospray};
+    std::vector<std::string> _modules;
     strings _pluginsRaw;
     std::vector<PluginParam> _plugins;
     Vector2f _windowSize;
-    bool _benchmarking;
+    bool _benchmarking{false};
     size_t _jpegCompression;
     strings _filters;
     std::string _frameExportFolder;
@@ -114,6 +132,7 @@ protected:
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};
     std::string _httpServerURI;
     bool _parallelRendering{false};
+    bool _dynamicLoadBalancer{false};
 
     strings _inputPaths;
 

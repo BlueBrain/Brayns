@@ -37,9 +37,15 @@ namespace brayns
 void PathTracingRenderer::commit()
 {
     AbstractRenderer::commit();
+
+    _shadows = getParam1f("shadows", 0.f);
+    _softShadows = getParam1f("softShadows", 0.f);
+    _ambientOcclusionStrength = getParam1f("aoWeight", 0.f);
+    _ambientOcclusionDistance = getParam1f("aoDistance", 1e20f);
+
     ispc::PathTracingRenderer_set(
         getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _timestamp,
-        _spp, _lightPtr, _lightArray.size(), _shadows, _softShadows,
+        spp, _lightPtr, _lightArray.size(), _shadows, _softShadows,
         _ambientOcclusionStrength, _ambientOcclusionDistance);
 }
 

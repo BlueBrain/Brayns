@@ -66,34 +66,22 @@ BOOST_AUTO_TEST_CASE(defaults)
 
     auto& pm = brayns.getParametersManager();
     const auto& appParams = pm.getApplicationParameters();
+    BOOST_CHECK(appParams.getEngine() == brayns::EngineType::ospray);
+    BOOST_CHECK(appParams.getOsprayModules().empty());
     BOOST_CHECK_EQUAL(appParams.getWindowSize(), brayns::Vector2ui(800, 600));
     BOOST_CHECK(!appParams.isBenchmarking());
     BOOST_CHECK_EQUAL(appParams.getJpegCompression(), 90);
     BOOST_CHECK_EQUAL(appParams.getImageStreamFPS(), 60);
 
     const auto& renderParams = pm.getRenderingParameters();
-    BOOST_CHECK(renderParams.getEngine() == brayns::EngineType::ospray);
-    BOOST_CHECK(renderParams.getOsprayModules().empty());
     BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
     BOOST_CHECK(renderParams.getStereoMode() == brayns::StereoMode::none);
-    BOOST_CHECK(renderParams.getRenderer() == brayns::RendererType::default_);
+    BOOST_CHECK(renderParams.getCurrentRenderer() == "basic");
     BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 8);
-    BOOST_CHECK(!renderParams.getShadowIntensity());
-    BOOST_CHECK(!renderParams.getSoftShadows());
-    BOOST_CHECK_EQUAL(renderParams.getAmbientOcclusionStrength(), 0.f);
-    BOOST_CHECK(renderParams.getShading() == brayns::ShadingType::diffuse);
     BOOST_CHECK_EQUAL(renderParams.getSamplesPerPixel(), 1);
-    BOOST_CHECK(!renderParams.getLightEmittingMaterials());
     BOOST_CHECK_EQUAL(renderParams.getBackgroundColor(),
                       brayns::Vector3f(0, 0, 0));
-    BOOST_CHECK_EQUAL(renderParams.getDetectionDistance(), 1.f);
-    BOOST_CHECK(renderParams.getDetectionOnDifferentMaterial());
-    BOOST_CHECK_EQUAL(renderParams.getDetectionNearColor(),
-                      brayns::Vector3f(1, 0, 0));
-    BOOST_CHECK_EQUAL(renderParams.getDetectionFarColor(),
-                      brayns::Vector3f(0, 1, 0));
     BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
-    BOOST_CHECK_EQUAL(renderParams.getSamplesPerRay(), 128);
 
     const auto& geomParams = pm.getGeometryParameters();
     BOOST_CHECK_EQUAL(geomParams.getCircuitConfiguration(), "");

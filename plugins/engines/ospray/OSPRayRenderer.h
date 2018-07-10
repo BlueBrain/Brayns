@@ -30,11 +30,10 @@
 
 namespace brayns
 {
-class OSPRayRenderer : public brayns::Renderer
+class OSPRayRenderer : public Renderer
 {
 public:
-    OSPRayRenderer(const std::string& name,
-                   const AnimationParameters& animationParameters,
+    OSPRayRenderer(const AnimationParameters& animationParameters,
                    const RenderingParameters& renderingParameters);
     ~OSPRayRenderer();
 
@@ -45,14 +44,14 @@ public:
 
     PickResult pick(const Vector2f& pickPos) final;
 
-    const std::string& getName() const { return _name; }
     OSPRenderer impl() const { return _renderer; }
+    void createOSPRenderer();
+
 private:
-    std::string _name;
     OSPRayCamera* _camera{nullptr};
-    OSPRenderer _renderer;
+    OSPRenderer _renderer{nullptr};
     float _variance{std::numeric_limits<float>::max()};
-    bool _dirty{true};
+    std::string _currentOSPRenderer;
 };
 }
 

@@ -94,7 +94,6 @@ typedef std::shared_ptr<Camera> CameraPtr;
 class TransferFunction;
 class Renderer;
 typedef std::shared_ptr<Renderer> RendererPtr;
-typedef std::vector<RendererPtr> Renderers;
 
 class FrameBuffer;
 typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
@@ -195,21 +194,6 @@ class KeyboardHandler;
 class MeshLoader;
 
 class Statistics;
-
-/** Types of renderers */
-enum class RendererType
-{
-    default_,
-    proximity,
-    simulation,
-    particle,
-    geometryNormals,
-    shadingNormals,
-    scientificvisualization,
-    path_tracing
-};
-typedef std::vector<RendererType> RendererTypes;
-typedef std::map<RendererType, RendererPtr> RendererMap;
 
 enum class EngineType
 {
@@ -403,8 +387,6 @@ struct Blob
 class Loader;
 using LoaderPtr = std::unique_ptr<Loader>;
 
-class PropertyMap;
-
 enum class DataType
 {
     FLOAT,
@@ -416,6 +398,9 @@ enum class DataType
     INT16,
     INT32
 };
+
+class PropertyMap;
+class PropertyObject;
 }
 
 #endif // TYPES_H

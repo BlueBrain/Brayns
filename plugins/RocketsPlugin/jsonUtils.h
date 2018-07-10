@@ -30,7 +30,7 @@
 #endif
 
 #include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
+#include "rapidjson/writer.h"
 
 namespace brayns
 {
@@ -52,7 +52,7 @@ std::string getSchema(T& obj, const std::string& title)
                      schema.GetAllocator());
 
     StringBuffer buffer;
-    PrettyWriter<StringBuffer> writer(buffer);
+    Writer<StringBuffer> writer(buffer);
     schema.Accept(writer);
     return buffer.GetString();
 }
@@ -113,7 +113,7 @@ std::string buildJsonRpcSchema(const std::string& title,
     schema.AddMember(StringRef("params"), params, schema.GetAllocator());
 
     StringBuffer buffer;
-    PrettyWriter<StringBuffer> writer(buffer);
+    Writer<StringBuffer> writer(buffer);
     schema.Accept(writer);
     return buffer.GetString();
 }
@@ -152,7 +152,7 @@ std::string buildJsonRpcSchema(const std::string& title,
     schema.AddMember(StringRef("params"), params, schema.GetAllocator());
 
     StringBuffer buffer;
-    PrettyWriter<StringBuffer> writer(buffer);
+    Writer<StringBuffer> writer(buffer);
     schema.Accept(writer);
     return buffer.GetString();
 }
@@ -185,7 +185,7 @@ std::string buildJsonRpcSchema(const std::string& title,
     schema.AddMember(StringRef("params"), params, schema.GetAllocator());
 
     StringBuffer buffer;
-    PrettyWriter<StringBuffer> writer(buffer);
+    Writer<StringBuffer> writer(buffer);
     schema.Accept(writer);
     return buffer.GetString();
 }

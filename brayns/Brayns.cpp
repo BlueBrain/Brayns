@@ -192,6 +192,7 @@ struct Brayns::Impl : public PluginAPI
 
         auto& scene = _engine->getScene();
         auto& camera = _engine->getCamera();
+        auto& renderer = _engine->getRenderer();
 
         scene.commit();
 
@@ -204,8 +205,8 @@ struct Brayns::Impl : public PluginAPI
 
         _updateAnimation();
 
-        _engine->setActiveRenderer(
-            _parametersManager.getRenderingParameters().getRenderer());
+        renderer.setCurrentType(
+            _parametersManager.getRenderingParameters().getCurrentRenderer());
 
         const auto windowSize =
             _parametersManager.getApplicationParameters().getWindowSize();
@@ -231,14 +232,15 @@ struct Brayns::Impl : public PluginAPI
         }
 
         if (_parametersManager.isAnyModified() || camera.isModified() ||
-            scene.isModified())
+            scene.isModified() || renderer.isModified())
         {
             _engine->getFrameBuffer().clear();
         }
 
         _parametersManager.resetModified();
-        _engine->getCamera().resetModified();
-        _engine->getScene().resetModified();
+        camera.resetModified();
+        scene.resetModified();
+        renderer.resetModified();
 
         return true;
     }
@@ -282,12 +284,12 @@ struct Brayns::Impl : public PluginAPI
         _engine.reset(); // Free resources before creating a new engine
 
         const auto& engineName =
-            _parametersManager.getRenderingParameters().getEngine();
+            _parametersManager.getApplicationParameters().getEngine();
         _engine = _engineFactory.create(engineName);
         if (!_engine)
             throw std::runtime_error(
                 "Unsupported engine: " +
-                _parametersManager.getRenderingParameters().getEngineAsString(
+                _parametersManager.getApplicationParameters().getEngineAsString(
                     engineName));
 
         _setupCameraManipulator(CameraMode::inspect);
@@ -446,6 +448,7 @@ struct Brayns::Impl : public PluginAPI
         return *_cameraManipulator;
     }
     Camera& getCamera() final { return _engine->getCamera(); }
+    Renderer& getRenderer() final { return _engine->getRenderer(); }
     ActionInterface* getActionInterface() final
     {
         return _actionInterface.get();
@@ -736,9 +739,6 @@ private:
             'T', "Divide samples per ray by 2",
             std::bind(&Brayns::Impl::_decreaseSamplesPerRay, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'y', "Enable/Disable light emitting materials",
-            std::bind(&Brayns::Impl::_toggleLightEmittingMaterials, this));
-        _keyboardHandler.registerKeyboardShortcut(
             'l', "Toggle load dynamic/static load balancer",
             std::bind(&Brayns::Impl::_toggleLoadBalancer, this));
         _keyboardHandler.registerKeyboardShortcut(
@@ -805,35 +805,35 @@ private:
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setRenderer(RendererType::scientificvisualization);
+        renderParams.setCurrentRenderer("scivis");
     }
 
     void _defaultRenderer()
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setRenderer(RendererType::default_);
+        renderParams.setCurrentRenderer("basic");
     }
 
     void _particleRenderer()
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setRenderer(RendererType::particle);
+        renderParams.setCurrentRenderer("particlerenderer");
     }
 
     void _proximityRenderer()
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setRenderer(RendererType::proximity);
+        renderParams.setCurrentRenderer("proximityrenderer");
     }
 
     void _simulationRenderer()
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setRenderer(RendererType::simulation);
+        renderParams.setCurrentRenderer("simulationrenderer");
     }
 
     void _increaseAnimationFrame()
@@ -865,45 +865,46 @@ private:
 
     void _diffuseShading()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        renderParams.setShading(ShadingType::diffuse);
+        _engine->getRenderer().updateProperty("shadingEnabled", true);
+        _engine->getRenderer().updateProperty("electronShading", false);
     }
 
     void _electronShading()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        renderParams.setShading(ShadingType::electron);
+        _engine->getRenderer().updateProperty("shadingEnabled", false);
+        _engine->getRenderer().updateProperty("electronShading", true);
     }
 
     void _disableShading()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        renderParams.setShading(ShadingType::none);
+        _engine->getRenderer().updateProperty("shadingEnabled", false);
+        _engine->getRenderer().updateProperty("electronShading", false);
     }
 
     void _increaseAmbientOcclusionStrength()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        float aaStrength = renderParams.getAmbientOcclusionStrength();
-        aaStrength += 0.1f;
-        if (aaStrength > 1.f)
-            aaStrength = 1.f;
-        renderParams.setAmbientOcclusionStrength(aaStrength);
+        auto& renderer = _engine->getRenderer();
+        if (!renderer.hasProperty("aoWeight"))
+            return;
+
+        auto aoStrength = renderer.getProperty<float>("aoWeight");
+        aoStrength += 0.1f;
+        if (aoStrength > 1.f)
+            aoStrength = 1.f;
+        renderer.updateProperty("aoWeight", aoStrength);
     }
 
     void _decreaseAmbientOcclusionStrength()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        float aaStrength = renderParams.getAmbientOcclusionStrength();
-        aaStrength -= 0.1f;
-        if (aaStrength < 0.f)
-            aaStrength = 0.f;
-        renderParams.setAmbientOcclusionStrength(aaStrength);
+        auto& renderer = _engine->getRenderer();
+        if (!renderer.hasProperty("aoWeight"))
+            return;
+
+        auto aoStrength = renderer.getProperty<float>("aoWeight");
+        aoStrength -= 0.1f;
+        if (aoStrength < 0.f)
+            aoStrength = 0.f;
+        renderer.updateProperty("aoWeight", aoStrength);
     }
 
     void _resetAnimationFrame()
@@ -914,49 +915,44 @@ private:
 
     void _toggleShadows()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        renderParams.setShadowIntensity(
-            renderParams.getShadowIntensity() == 0.f ? 1.f : 0.f);
+        auto& renderer = _engine->getRenderer();
+        if (!renderer.hasProperty("shadows"))
+            return;
+
+        renderer.updateProperty("shadows",
+                                renderer.getProperty<float>("shadows") == 0.f
+                                    ? 1.f
+                                    : 0.f);
     }
 
     void _toggleSoftShadows()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        renderParams.setSoftShadows(renderParams.getSoftShadows() == 0.f ? 0.1f
-                                                                         : 0.f);
+        auto& renderer = _engine->getRenderer();
+        if (!renderer.hasProperty("softShadows"))
+            return;
+
+        renderer.updateProperty("softShadows", renderer.getProperty<float>(
+                                                   "softShadows") == 0.f
+                                                   ? 1.f
+                                                   : 0.f);
     }
 
     void _increaseSamplesPerRay()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        renderParams.setSamplesPerRay(renderParams.getSamplesPerRay() * 2);
+        auto& vp = _parametersManager.getVolumeParameters();
+        vp.setSamplingRate(vp.getSamplingRate() * 2);
     }
 
     void _decreaseSamplesPerRay()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        if (renderParams.getSamplesPerRay() >= 4)
-            renderParams.setSamplesPerRay(renderParams.getSamplesPerRay() / 2);
-    }
-
-    void _toggleLightEmittingMaterials()
-    {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        renderParams.setLightEmittingMaterials(
-            !renderParams.getLightEmittingMaterials());
+        auto& vp = _parametersManager.getVolumeParameters();
+        vp.setSamplingRate(vp.getSamplingRate() / 2);
     }
 
     void _toggleLoadBalancer()
     {
-        RenderingParameters& renderParams =
-            _parametersManager.getRenderingParameters();
-        renderParams.setDynamicLoadBalancer(
-            !renderParams.getDynamicLoadBalancer());
+        auto& appParams = _parametersManager.getApplicationParameters();
+        appParams.setDynamicLoadBalancer(!appParams.getDynamicLoadBalancer());
     }
 
     void _decreaseFieldOfView()

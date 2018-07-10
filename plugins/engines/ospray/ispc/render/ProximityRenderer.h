@@ -68,6 +68,8 @@ private:
     ospray::vec3f _farColor;
     float _detectionDistance;
     bool _detectionOnDifferentMaterial;
+    bool _electronShadingEnabled;
+    int _randomNumber;
 };
 }
 

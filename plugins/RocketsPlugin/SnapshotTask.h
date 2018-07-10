@@ -63,16 +63,18 @@ public:
                                           ? _params.camera->getType()
                                           : engine.getCamera().getType()))
         , _renderer(engine.createRenderer(
-              engine.getActiveRenderer(),
               _params.animParams
                   ? *_params.animParams
                   : engine.getParametersManager().getAnimationParameters(),
               _params.renderingParams
                   ? *_params.renderingParams
                   : engine.getParametersManager().getRenderingParameters()))
-        , _scene(engine.createScene({_renderer}, engine.getParametersManager()))
+        , _scene(engine.createScene(engine.getParametersManager()))
         , _imageGenerator(imageGenerator)
     {
+        const auto& renderer = engine.getRenderer();
+        _renderer->setCurrentType(renderer.getCurrentType());
+        _renderer->setProperties(renderer.getPropertyMap());
         if (_params.camera)
             *_camera = *_params.camera;
         else
@@ -110,8 +112,6 @@ public:
                      float(_frameBuffer->numAccumFrames()) /
                          _params.samplesPerPixel);
         }
-
-        _scene->reset();
 
         return _imageGenerator.createImage(*_frameBuffer, _params.format,
                                            _params.quality);

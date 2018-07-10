@@ -31,7 +31,7 @@ namespace brayns
 
    This object is the OSPRay specific implementation of a Camera
 */
-class OSPRayCamera : public brayns::Camera
+class OSPRayCamera : public Camera
 {
 public:
     OSPRayCamera(const CameraType type, const std::string& name);

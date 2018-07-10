@@ -39,6 +39,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     : Engine(parametersManager)
 {
     BRAYNS_INFO << "Initializing OSPRay" << std::endl;
+    auto& ap = _parametersManager.getApplicationParameters();
     try
     {
         int argc = 1;
@@ -47,8 +48,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         // Ospray expects but ignores the application name as the first argument
         argv.push_back("Brayns");
 
-        if (_parametersManager.getRenderingParameters().getEngine() ==
-            EngineType::optix)
+        if (ap.getEngine() == EngineType::optix)
         {
             _type = EngineType::optix;
             argc += 2;
@@ -72,8 +72,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         BRAYNS_ERROR << "Error during ospInit(): " << e.what() << std::endl;
     }
 
-    RenderingParameters& rp = _parametersManager.getRenderingParameters();
-    for (const auto& module : rp.getOsprayModules())
+    for (const auto& module : ap.getOsprayModules())
     {
         try
         {
@@ -103,16 +102,15 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         }
     }
 
+    RenderingParameters& rp = _parametersManager.getRenderingParameters();
     BRAYNS_INFO << "Initializing renderers" << std::endl;
-    _activeRenderer = rp.getRenderer();
 
-    Renderers renderersForScene = _createRenderers();
+    _createRenderers();
 
     const auto ospFlags = _getOSPDataFlags();
 
     BRAYNS_INFO << "Initializing scene" << std::endl;
-    _scene = std::make_shared<OSPRayScene>(renderersForScene,
-                                           _parametersManager, ospFlags);
+    _scene = std::make_shared<OSPRayScene>(_parametersManager, ospFlags);
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
     _camera = createCamera(rp.getCameraType());
@@ -138,22 +136,17 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer)
             ->enableDeflectPixelOp();
 
-    for (const auto& renderer : _renderers)
-    {
-        _renderers[renderer.first]->setScene(_scene);
-        _renderers[renderer.first]->setCamera(_camera);
-    }
+    _renderer->setScene(_scene);
+    _renderer->setCamera(_camera);
 
     BRAYNS_INFO << "Engine initialization complete" << std::endl;
 }
 
 OSPRayEngine::~OSPRayEngine()
 {
-    if (_scene)
-        _scene->reset();
     _scene.reset();
     _frameBuffer.reset();
-    _renderers.clear();
+    _renderer.reset();
     _camera.reset();
 
     // HACK: need ospFinish() here; currently used by optix module to properly
@@ -176,7 +169,7 @@ void OSPRayEngine::commit()
     if (device && _parametersManager.getRenderingParameters().isModified())
     {
         const auto useDynamicLoadBalancer =
-            _parametersManager.getRenderingParameters()
+            _parametersManager.getApplicationParameters()
                 .getDynamicLoadBalancer();
         if (_useDynamicLoadBalancer != useDynamicLoadBalancer)
         {
@@ -244,30 +237,76 @@ Vector2ui OSPRayEngine::getMinimumFrameSize() const
     return {TILE_SIZE, TILE_SIZE};
 }
 
-Renderers OSPRayEngine::_createRenderers()
+void OSPRayEngine::_createRenderers()
 {
-    Renderers renderersForScene;
     auto& rp = _parametersManager.getRenderingParameters();
+    auto ospRenderer = std::make_shared<OSPRayRenderer>(
+        _parametersManager.getAnimationParameters(), rp);
+
     for (const auto& renderer : rp.getRenderers())
     {
-        auto name = rp.getRendererAsString(renderer);
-        try
+        PropertyMap properties;
+        if (renderer == "pathtracingrenderer")
         {
-            _renderers[renderer] = std::make_shared<OSPRayRenderer>(
-                name, _parametersManager.getAnimationParameters(), rp);
+            properties.setProperty({"aoDistance", "Ambient occlusion distance",
+                                    10000.f, 1e-20f, 1e20f});
+            properties.setProperty(
+                {"aoWeight", "Ambient occlusion weight", 0.f, 0.f, 1.f});
+            properties.setProperty(
+                {"shadows", "Shadow intensity", 0.f, 0.f, 1.f});
+            properties.setProperty(
+                {"softShadows", "Shadow softness", 0.f, 0.f, 1.f});
         }
-        catch (const std::runtime_error& e)
+        if (renderer == "proximityrenderer")
         {
-            BRAYNS_WARN << e.what() << ". Using default renderer instead"
-                        << std::endl;
-            rp.initializeDefaultRenderers();
-            name = rp.getRendererAsString(RendererType::default_);
-            _renderers[renderer] = std::make_shared<OSPRayRenderer>(
-                name, _parametersManager.getAnimationParameters(), rp);
+            properties.setProperty(
+                {"detectionDistance", "Detection distance", 1.f});
+            properties.setProperty({"detectionFarColor", "Detection far color",
+                                    std::array<float, 3>{{1.f, 0.f, 0.f}}});
+            properties.setProperty({"detectionNearColor",
+                                    "Detection near color",
+                                    std::array<float, 3>{{0.f, 1.f, 0.f}}});
+            properties.setProperty({"detectionOnDifferentMaterial",
+                                    "Detection on different material", false});
+            properties.setProperty(
+                {"electronShading", "Electron shading", false});
         }
-        renderersForScene.push_back(_renderers[renderer]);
+        if (renderer == "simulationrenderer")
+        {
+            properties.setProperty({"aoDistance", "Ambient occlusion distance",
+                                    10000.f, 1e-20f, 1e20f});
+            properties.setProperty(
+                {"aoWeight", "Ambient occlusion weight", 0.f, 0.f, 1.f});
+            properties.setProperty({"detectionDistance", "Detection distance",
+                                    15.f, 0.f, 10000.f});
+            properties.setProperty(
+                {"electronShading", "Electron shading", false});
+            properties.setProperty(
+                {"shadingEnabled", "Diffuse shading", false});
+            properties.setProperty(
+                {"shadows", "Shadow intensity", 0.f, 0.f, 1.f});
+            properties.setProperty(
+                {"softShadows", "Shadow softness", 0.f, 0.f, 1.f});
+        }
+        if (renderer == "scivis")
+        {
+            properties.setProperty({"aoDistance", "Ambient occlusion distance",
+                                    10000.f, 1e-20f, 1e20f});
+            properties.setProperty(
+                {"aoSamples", "Ambient occlusion samples", 1, 0, 128});
+            properties.setProperty({"aoTransparencyEnabled",
+                                    "Ambient occlusion transpareny", true});
+            properties.setProperty(
+                {"aoWeight", "Ambient occlusion weight", 0.f, 0.f, 1.f});
+            properties.setProperty(
+                {"oneSidedLighting", "One-sided lighting", true});
+            properties.setProperty({"shadowsEnabled", "Shadows", false});
+        }
+        ospRenderer->setProperties(renderer, properties);
     }
-    return renderersForScene;
+    ospRenderer->setCurrentType(rp.getCurrentRenderer());
+    ospRenderer->createOSPRenderer();
+    _renderer = ospRenderer;
 }
 
 FrameBufferPtr OSPRayEngine::createFrameBuffer(
@@ -278,11 +317,9 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
                                                accumulation);
 }
 
-ScenePtr OSPRayEngine::createScene(const Renderers& renderers,
-                                   ParametersManager& parametersManager) const
+ScenePtr OSPRayEngine::createScene(ParametersManager& parametersManager) const
 {
-    return std::make_shared<OSPRayScene>(renderers, parametersManager,
-                                         _getOSPDataFlags());
+    return std::make_shared<OSPRayScene>(parametersManager, _getOSPDataFlags());
 }
 
 CameraPtr OSPRayEngine::createCamera(const CameraType type) const
@@ -304,14 +341,10 @@ CameraPtr OSPRayEngine::createCamera(const CameraType type) const
 }
 
 RendererPtr OSPRayEngine::createRenderer(
-    const RendererType type, const AnimationParameters& animationParameters,
+    const AnimationParameters& animationParameters,
     const RenderingParameters& renderingParameters) const
 {
-    // take the renderer string from the internal params as it might have been
-    // patched to account for plugin renderers
-    const auto& rp = _parametersManager.getRenderingParameters();
-    return std::make_shared<OSPRayRenderer>(rp.getRendererAsString(type),
-                                            animationParameters,
+    return std::make_shared<OSPRayRenderer>(animationParameters,
                                             renderingParameters);
 }
 

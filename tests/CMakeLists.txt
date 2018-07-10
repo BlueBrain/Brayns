@@ -27,14 +27,19 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     braynsTestData.cpp
     model.cpp
     plugin.cpp
+    renderer.cpp
     snapshot.cpp
     streamlines.cpp
     webAPI.cpp
 )
 endif()
 list(APPEND EXCLUDE_FROM_TESTS myPlugin.cpp)
-if(BRAYNS_NETWORKING_ENABLED)
-  add_library(myPlugin SHARED myPlugin.cpp)
+if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
+  list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
+  include(ispc)
+  include_directories_ispc(${PROJECT_SOURCE_DIR} ${OSPRAY_INCLUDE_DIRS})
+  ospray_ispc_compile(${PROJECT_SOURCE_DIR}/plugins/engines/ospray/ispc/render/BasicRenderer.ispc)
+  add_library(myPlugin SHARED myPlugin.cpp ${ISPC_OBJECTS})
   target_link_libraries(myPlugin brayns braynsPlugins ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
   target_include_directories(myPlugin SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
   list(APPEND TEST_LIBRARIES Rockets braynsPlugins myPlugin)
@@ -44,6 +49,7 @@ else()
     addModelFromBlob.cpp
     model.cpp
     plugin.cpp
+    renderer.cpp
     snapshot.cpp
     webAPI.cpp
 )
@@ -51,4 +57,7 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
 
+list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/brayns/common/utils/base64/*'
+                         '${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/*'
+                         '${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/staticjson/*')
 include(CommonCTest)
