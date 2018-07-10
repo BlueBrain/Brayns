@@ -35,6 +35,9 @@ EngineFactory::EngineFactory(const int argc, const char** argv,
     , _argv{argv}
     , _parametersManager{parametersManager}
 {
+    BRAYNS_UNUSED_VAR(_argc);
+    BRAYNS_UNUSED_VAR(_argv);
+    BRAYNS_UNUSED_VAR(_parametersManager);
 }
 
 std::unique_ptr<Engine> EngineFactory::create(
@@ -53,4 +56,4 @@ std::unique_ptr<Engine> EngineFactory::create(
     }
     return std::unique_ptr<Engine>();
 }
-}
+} // namespace brayns
