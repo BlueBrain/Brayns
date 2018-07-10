@@ -1,18 +1,18 @@
 # -*- mode: cmake -*-
-git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 6bfad3c)
+git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git b75b7b6)
 
 if(BRAYNS_NETWORKING_ENABLED)
-  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git 9b166cd)
+  git_subproject(Rockets https://github.com/BlueBrain/Rockets.git 7877344)
 endif()
 
 # Streaming to display walls
 if(BRAYNS_DEFLECT_ENABLED)
-  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 574bc3d)
+  git_subproject(Deflect https://github.com/BlueBrain/Deflect.git 427458e)
 endif()
 
 # Data access
 if(BRAYNS_BRION_ENABLED)
-  git_subproject(Servus https://github.com/HBPVIS/Servus.git 2e9a23a)
-  git_subproject(Brion https://github.com/BlueBrain/Brion.git ab687bc)
-  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 41ac72b)
+  git_subproject(Servus https://github.com/HBPVIS/Servus.git 574bc70)
+  git_subproject(Brion https://github.com/BlueBrain/Brion.git f74dcc5)
+  git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git dd85ecc)
 endif()
