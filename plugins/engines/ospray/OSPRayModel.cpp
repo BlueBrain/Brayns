@@ -37,7 +37,8 @@ OSPData allocateVectorData(const std::vector<VecT>& vec,
     const size_t totBytes = vec.size() * sizeof(decltype(vec.back()));
 
     if (totBytes >= INT_MAX)
-        throw std::runtime_error("Buffer allocation too big.");
+        throw std::runtime_error("Buffer allocation (" +
+                                 std::to_string(totBytes) + " bytes) too big.");
 
     return ospNewData(totBytes / ospray::sizeOf(ospType), ospType, vec.data(),
                       memoryManagementFlags);
