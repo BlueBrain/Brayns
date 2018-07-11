@@ -39,6 +39,7 @@ public:
         , _accumRendering{_mainLoop->resource<uvw::IdleHandle>()}
         , _progressUpdate{_mainLoop->resource<uvw::TimerHandle>()}
         , _checkIdleRendering{_mainLoop->resource<uvw::CheckHandle>()}
+        , _sigintHandle{_mainLoop->resource<uvw::SignalHandle>()}
         , _triggerRendering{_renderLoop->resource<uvw::AsyncHandle>()}
         , _stopRenderThread{_renderLoop->resource<uvw::AsyncHandle>()}
     {
@@ -51,6 +52,14 @@ public:
 
         // launch first frame; after that, only events will trigger that
         _eventRendering->start();
+
+        // stop the application on Ctrl+C
+        _sigintHandle->once<uvw::SignalEvent>([&](const auto&, auto&) {
+            _brayns.getEngine().triggerRender = [] {};
+            _stopRenderThread->send();
+            _mainLoop->stop();
+        });
+        _sigintHandle->start(SIGINT);
     }
 
     void run()
@@ -182,6 +191,7 @@ private:
     std::shared_ptr<uvw::IdleHandle> _accumRendering;
     std::shared_ptr<uvw::TimerHandle> _progressUpdate;
     std::shared_ptr<uvw::CheckHandle> _checkIdleRendering;
+    std::shared_ptr<uvw::SignalHandle> _sigintHandle;
 
     std::shared_ptr<uvw::Loop> _renderLoop{uvw::Loop::create()};
     std::shared_ptr<uvw::AsyncHandle> _triggerRendering;

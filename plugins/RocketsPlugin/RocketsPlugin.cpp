@@ -66,7 +66,6 @@ const std::string ENDPOINT_VERSION = "version";
 const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
 const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
 
-
 // JSONRPC async requests
 const std::string METHOD_ADD_MODEL = "add-model";
 const std::string METHOD_SNAPSHOT = "snapshot";
@@ -575,7 +574,8 @@ public:
         _handle(ENDPOINT_RENDERING_PARAMS,
                 _parametersManager.getRenderingParameters());
         _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
-        _handle(ENDPOINT_VOLUME_PARAMS, _parametersManager.getVolumeParameters());
+        _handle(ENDPOINT_VOLUME_PARAMS,
+                _parametersManager.getVolumeParameters());
 
         // following endpoints need a valid engine
         _handle(ENDPOINT_CAMERA, _engine->getCamera());
@@ -715,7 +715,7 @@ public:
                                            JSON_TYPE);
             });
 
-        _jsonrpcServer->bind(ENDPOINT_VERSION,
+        _jsonrpcServer->bind(getRequestEndpointName(ENDPOINT_VERSION),
                              (std::function<brayns::Version()>)[] {
                                  return brayns::Version();
                              });
