@@ -30,11 +30,11 @@ BOOST_AUTO_TEST_CASE(set_property)
     properties.setProperty({"foo", "Foo", 1});
     BOOST_REQUIRE_EQUAL(properties.getProperties().size(), 1);
     BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<int32_t>(), 1);
-    BOOST_CHECK_EQUAL(properties.getProperties()[0]->title, "Foo");
+    BOOST_CHECK_EQUAL(properties.getProperties()[0]->label, "Foo");
 
-    properties.setProperty({"limit", "With limits", 0.5f, 0.f, 1.f});
+    properties.setProperty({"limit", "With limits", 0.5f, {0.f, 1.f}});
     BOOST_CHECK_EQUAL(properties.getProperties()[1]->get<float>(), 0.5f);
-    BOOST_CHECK_EQUAL(properties.getProperties()[1]->title, "With limits");
+    BOOST_CHECK_EQUAL(properties.getProperties()[1]->label, "With limits");
     BOOST_CHECK_EQUAL(properties.getProperties()[1]->min<float>(), 0.f);
     BOOST_CHECK_EQUAL(properties.getProperties()[1]->max<float>(), 1.f);
 
@@ -82,6 +82,7 @@ BOOST_AUTO_TEST_CASE(set_and_get_all_supported_types)
 {
     brayns::PropertyMap properties;
     properties.setProperty({"int", "Int", 42});
+    properties.setProperty({"enum", "Enum", 0, {"Zero", "One", "Two"}});
     properties.setProperty({"float", "Float", 1.2f});
     properties.setProperty({"string", "String", std::string("foo")});
     properties.setProperty({"const char", "ConstChar", (const char*)"bar"});
@@ -95,6 +96,8 @@ BOOST_AUTO_TEST_CASE(set_and_get_all_supported_types)
         {"vec4f", "Vec4f", std::array<float, 4>{{1, 2, 3, 4}}});
 
     BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("int"), 42);
+    BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("enum"), 0);
+    BOOST_CHECK_EQUAL(properties.getEnums("enum").size(), 3);
     BOOST_CHECK_EQUAL(properties.getProperty<float>("float"), 1.2f);
     BOOST_CHECK_EQUAL(properties.getProperty<std::string>("string"), "foo");
     BOOST_CHECK_EQUAL(properties.getProperty<const char*>("const char"), "bar");

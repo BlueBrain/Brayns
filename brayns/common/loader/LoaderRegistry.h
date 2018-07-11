@@ -22,6 +22,8 @@
 
 #include <brayns/common/loader/Loader.h>
 
+#include <set>
+
 namespace brayns
 {
 /**

@@ -57,10 +57,10 @@ public:
         };
 
         template <typename T>
-        Property(const std::string& name_, const std::string& title_,
+        Property(const std::string& name_, const std::string& label_,
                  const T& value)
             : name(name_)
-            , title(title_)
+            , label(label_)
             , type(_getType<T>())
             , _data(value)
             , _min(std::numeric_limits<T>::min())
@@ -69,14 +69,34 @@ public:
         }
 
         template <typename T>
-        Property(const std::string& name_, const std::string& title_,
-                 const T& value, const T& min_, const T& max_)
+        Property(const std::string& name_, const std::string& label_,
+                 const T& value, const std::pair<T, T>& limit)
             : name(name_)
-            , title(title_)
+            , label(label_)
             , type(_getType<T>())
             , _data(value)
-            , _min(min_)
-            , _max(max_)
+            , _min(limit.first)
+            , _max(limit.second)
+        {
+        }
+
+        /**
+         * Specialized for enum properties: type is int32_t, and the possible
+         * enum values are passed in enums_. The enum/int value and the
+         * corresponding string maps to the index in the vector.
+         */
+        template <typename T>
+        Property(
+            const std::string& name_, const std::string& label_, const T& value,
+            const std::vector<std::string>& enums_,
+            typename std::enable_if<std::is_same<T, int32_t>::value>::type* = 0)
+            : name(name_)
+            , label(label_)
+            , type(_getType<T>())
+            , enums(enums_)
+            , _data(value)
+            , _min(0)
+            , _max(enums_.size())
         {
         }
 
@@ -104,15 +124,28 @@ public:
             return boost::any_cast<T>(_max);
         }
 
+        /**
+         * Read-only property shall not be modified from the outside aka web API
+         * via JSON.
+         */
+        void markReadOnly() { _readOnly = true; }
+        bool readOnly() const { return _readOnly; }
         const std::string name;
-        const std::string title;
+        const std::string label; //!< user-friendly name of the property
         const Type type;
+
+        /**
+         * Name of enum values that are mapped to the integer value based on
+         * the index.
+         */
+        const std::vector<std::string> enums;
 
     private:
         friend class PropertyMap;
         boost::any _data;
         const boost::any _min;
         const boost::any _max;
+        bool _readOnly{false};
         template <typename T>
         Type _getType();
     };
@@ -171,6 +204,17 @@ public:
     bool hasProperty(const std::string& name) const
     {
         return findProperty(name) != nullptr;
+    }
+
+    /**
+     * @return the enum values for the given property, empty if no enum
+     *         property.
+     */
+    const auto& getEnums(const std::string& name) const
+    {
+        if (auto property = findProperty(name))
+            return property->enums;
+        throw std::runtime_error("No property found with name " + name);
     }
 
     /** @return the type of the given property name. */

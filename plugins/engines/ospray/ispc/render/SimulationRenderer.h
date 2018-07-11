@@ -31,6 +31,13 @@ class SimulationRenderer : public AbstractRenderer
 public:
     SimulationRenderer();
 
+    enum class Shading
+    {
+        none,
+        diffuse,
+        electron
+    };
+
     /**
        Returns the class name as a string
        @return string containing the full name of the class
@@ -39,7 +46,7 @@ public:
     void commit() final;
 
 private:
-    ospray::Model *_simulationModel;
+    ospray::Model* _simulationModel;
 
     float _shadows;
     float _softShadows;

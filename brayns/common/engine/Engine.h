@@ -23,6 +23,8 @@
 
 #include <brayns/common/Statistics.h>
 
+#include <functional>
+
 namespace brayns
 {
 /**
@@ -112,7 +114,7 @@ public:
      * @param size New size of the frame buffer
      * @return Size that matches the camera requirements
      */
-    virtual Vector2ui getSupportedFrameSize(const Vector2ui& size);
+    virtual Vector2ui getSupportedFrameSize(const Vector2ui& size) const = 0;
 
     /** @return the minimum frame size in pixels supported by this engine. */
     virtual Vector2ui getMinimumFrameSize() const = 0;
@@ -148,7 +150,7 @@ public:
         ParametersManager& parametersManager) const = 0;
 
     /** Factory method to create an engine-specific camera. */
-    virtual CameraPtr createCamera(const CameraType type) const = 0;
+    virtual CameraPtr createCamera() const = 0;
 
     virtual RendererPtr createRenderer(
         const AnimationParameters& animationParameters,

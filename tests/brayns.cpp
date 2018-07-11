@@ -47,13 +47,10 @@ BOOST_AUTO_TEST_CASE(defaults)
     brayns::Brayns brayns(argc, argv);
 
     auto& camera = brayns.getEngine().getCamera();
-    BOOST_CHECK(camera.getType() == brayns::CameraType::default_);
+    BOOST_CHECK_EQUAL(camera.getCurrentType(), "perspective");
     BOOST_CHECK_EQUAL(camera.getPosition(), brayns::Vector3f(0.5f, 0.5f, 1.5f));
     BOOST_CHECK_EQUAL(camera.getTarget(), brayns::Vector3f(0.5f, 0.5f, 0.5f));
     BOOST_CHECK_EQUAL(camera.getUp(), brayns::Vector3f(0, 1, 0));
-    BOOST_CHECK_EQUAL(camera.getAspectRatio(), 4.f / 3.f);
-    BOOST_CHECK_EQUAL(camera.getAperture(), 0.f);
-    BOOST_CHECK_EQUAL(camera.getFocalLength(), 0.f);
 
     auto& manipulator = brayns.getCameraManipulator();
     BOOST_CHECK(dynamic_cast<brayns::InspectCenterManipulator*>(&manipulator));
@@ -74,14 +71,12 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(appParams.getImageStreamFPS(), 60);
 
     const auto& renderParams = pm.getRenderingParameters();
-    BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
-    BOOST_CHECK(renderParams.getStereoMode() == brayns::StereoMode::none);
-    BOOST_CHECK(renderParams.getCurrentRenderer() == "basic");
+    BOOST_CHECK_EQUAL(renderParams.getCameraType(), "perspective");
+    BOOST_CHECK_EQUAL(renderParams.getCurrentRenderer(), "basic");
     BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 8);
     BOOST_CHECK_EQUAL(renderParams.getSamplesPerPixel(), 1);
     BOOST_CHECK_EQUAL(renderParams.getBackgroundColor(),
                       brayns::Vector3f(0, 0, 0));
-    BOOST_CHECK(renderParams.getCameraType() == brayns::CameraType::default_);
 
     const auto& geomParams = pm.getGeometryParameters();
     BOOST_CHECK_EQUAL(geomParams.getCircuitConfiguration(), "");

@@ -23,14 +23,6 @@
 
 namespace brayns
 {
-OSPRayCamera::OSPRayCamera(const CameraType type, const std::string& name)
-    : Camera(type)
-    , _camera{ospNewCamera(name.c_str())}
-{
-    if (!_camera)
-        throw std::runtime_error(name + " is not a registered camera");
-}
-
 OSPRayCamera::~OSPRayCamera()
 {
     ospRelease(_camera);
@@ -41,6 +33,10 @@ void OSPRayCamera::commit()
     if (!isModified())
         return;
 
+    const bool cameraChanged = _currentOSPCamera != getCurrentType();
+    if (cameraChanged)
+        createOSPCamera();
+
     const auto& position = getPosition();
     const auto& target = getTarget();
     const auto dir = normalize(target - position);
@@ -49,14 +45,6 @@ void OSPRayCamera::commit()
     ospSet3f(_camera, "pos", position.x(), position.y(), position.z());
     ospSet3f(_camera, "dir", dir.x(), dir.y(), dir.z());
     ospSet3f(_camera, "up", up.x(), up.y(), up.z());
-    ospSet1f(_camera, "aspect", getAspectRatio());
-    ospSet1f(_camera, "apertureRadius", getAperture());
-    ospSet1f(_camera, "focusDistance", getFocalLength());
-    ospSet1i(_camera, "stereoMode", static_cast<uint>(getStereoMode()));
-    ospSet1f(_camera, "interpupillaryDistance", getEyeSeparation());
-    ospSet1f(_camera, "fovy", getFieldOfView());
-    ospSet1f(_camera, "architectural", true);
-    ospSet1f(_camera, "zeroParallaxPlane", getZeroParallaxPlane());
 
     setOSPRayProperties(*this, _camera);
 
@@ -81,5 +69,23 @@ void OSPRayCamera::setEnvironmentMap(const bool environmentMap)
 {
     ospSet1i(_camera, "environmentMap", environmentMap);
     ospCommit(_camera);
+}
+
+bool OSPRayCamera::isSideBySideStereo() const
+{
+    return hasProperty("stereoMode") && getProperty<int>("stereoMode") == 3;
+}
+
+void OSPRayCamera::createOSPCamera()
+{
+    auto newCamera = ospNewCamera(getCurrentType().c_str());
+    if (!newCamera)
+        throw std::runtime_error(getCurrentType() +
+                                 " is not a registered camera");
+    if (_camera)
+        ospRelease(_camera);
+    _camera = newCamera;
+    _currentOSPCamera = getCurrentType();
+    markModified();
 }
 }

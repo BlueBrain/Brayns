@@ -39,14 +39,9 @@ namespace brayns
 class Camera : public PropertyObject
 {
 public:
-    Camera() = default;
-    /**
-       Default constructor
-       @param cameraType Type of camera (Perpective, orthographic, etc)
-    */
-    BRAYNS_API Camera(const CameraType cameraType);
+    BRAYNS_API Camera() = default;
 
-    BRAYNS_API virtual ~Camera();
+    BRAYNS_API virtual ~Camera() = default;
 
     BRAYNS_API Camera& operator=(const Camera& rhs);
 
@@ -65,11 +60,6 @@ public:
 
     BRAYNS_API void setInitialState(const Boxf& boundingBox);
 
-    /**
-       Gets camera type
-       @return The type of camera (Perpective, Stereo, etc)
-    */
-    CameraType getType() const { return _type; }
     /**
        Sets camera position
        @param position The x, y, z coordinates of the camera position
@@ -117,99 +107,6 @@ public:
     */
     BRAYNS_API virtual void commit(){};
 
-    /**
-       The field of view is the extent of the observable world that is seen at
-       any given moment.
-       In case of optical instruments or sensors it is a solid angle through
-       which a detector is
-       sensitive to electromagnetic radiation.
-    */
-    /** @return the field of view of the camera */
-    float getFieldOfView() const { return _fieldOfView; }
-    /**
-       Set the field of view of the camera
-       @param fov The field of view
-    */
-    void setFieldOfView(const float fov) { _updateValue(_fieldOfView, fov); }
-    /**
-       Set the aspect ratio of the camera
-       @param aspectRatio The new aspect ratio
-    */
-    void setAspectRatio(float aspectRatio)
-    {
-        _updateValue(_aspectRatio, aspectRatio);
-    }
-
-    /** @return the aspect ration of the camera */
-    float getAspectRatio() const { return _aspectRatio; }
-    /**
-       @copydoc Camera::getAperture
-       @param aperture The new aperture
-    */
-    void setAperture(float aperture) { _updateValue(_aperture, aperture); }
-    /**
-       The aperture determines how collimated the admitted rays are, which is of
-       great importance for the appearance at the image plane. If an aperture is
-       narrow, then highly collimated rays are admitted, resulting in a sharp
-       focus at the image plane. If an aperture is wide, then uncollimated rays
-       are admitted, resulting in a sharp focus only for rays with a certain
-       focal length.
-    */
-    float getAperture() const { return _aperture; }
-    /**
-       @copydoc Camera::getFocalLength
-       @param focalLength The new focal length
-    */
-    void setFocalLength(float focalLength)
-    {
-        _updateValue(_focalLength, focalLength);
-    }
-
-    /**
-      The focal length of an optical system is a measure of how strongly the
-      system converges or diverges light. For an optical system in air, it is
-      the distance over which initially collimated rays are brought to a focus.
-      A system with a shorter focal length has greater optical power than one
-      with a long focal length; that is, it bends the rays more sharply,
-      bringing them to a focus in a shorter distance.
-    */
-    float getFocalLength() const { return _focalLength; }
-    /**
-       @brief Sets the stereo mode of the camera (Left eye, Right eye or Side by
-       Side)
-       @param stereoMode The new stereo mode
-    */
-    void setStereoMode(StereoMode stereoMode)
-    {
-        _updateValue(_stereoMode, stereoMode);
-    }
-    StereoMode getStereoMode() const { return _stereoMode; }
-    /**
-       @brief Sets the eye separation of the stereo camera
-       @param eyeSeparation The new distance between eyes
-    */
-    void setEyeSeparation(float eyeSeparation)
-    {
-        _updateValue(_eyeSeparation, eyeSeparation);
-    }
-
-    /**
-      @return the eye separation of the stereo Camera
-    */
-    float getEyeSeparation() const { return _eyeSeparation; }
-    /**
-       @brief Sets the eye separation of the stereo camera
-       @param eyeSeparation The new distance between eyes
-    */
-    void setZeroParallaxPlane(float zeroParallaxPlane)
-    {
-        _updateValue(_zeroParallaxPlane, zeroParallaxPlane);
-    }
-
-    /**
-      @return the eye separation of the stereo Camera
-    */
-    float getZeroParallaxPlane() const { return _zeroParallaxPlane; }
     /** Resets the camera to its initial values */
     BRAYNS_API void reset();
 
@@ -229,8 +126,8 @@ public:
       @return the camera clip planes
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
+    virtual bool isSideBySideStereo() const { return false; }
 private:
-    CameraType _type{CameraType::default_};
     Vector3f _position;
     Vector3f _target;
     Vector3f _up;
@@ -238,15 +135,6 @@ private:
     Vector3f _initialPosition;
     Vector3f _initialTarget;
     Vector3f _initialUp;
-
-    float _aspectRatio{1.f};
-    float _aperture{0.f};
-    float _focalLength{0.f};
-    float _fieldOfView{45.f};
-
-    StereoMode _stereoMode{StereoMode::none};
-    float _eyeSeparation{0.0635f};
-    float _zeroParallaxPlane{1.f};
 
     ClipPlanes _clipPlanes{
         {{-1.f, 0.f, 0.f, std::numeric_limits<float>::max()},

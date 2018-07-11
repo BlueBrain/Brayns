@@ -60,7 +60,7 @@ void OSPRayRenderer::commit()
     const RenderingParameters& rp = _renderingParameters;
 
     if (!ap.isModified() && !rp.isModified() && !_scene->isModified() &&
-        !isModified())
+        !isModified() && !_camera->isModified())
     {
         return;
     }
@@ -120,6 +120,7 @@ void OSPRayRenderer::commit()
         ospSetObject(_renderer, "bgMaterial", bgMaterial->getOSPMaterial());
     }
 
+    ospSetObject(_renderer, "camera", _camera->impl());
     ospSetObject(_renderer, "world", scene->getModel());
     ospSetObject(_renderer, "simulationModel", scene->simulationModelImpl());
     ospCommit(_renderer);
@@ -170,8 +171,6 @@ void OSPRayRenderer::createOSPRenderer()
     if (_renderer)
         ospRelease(_renderer);
     _renderer = newRenderer;
-    if (_camera)
-        ospSetObject(_renderer, "camera", _camera->impl());
     _currentOSPRenderer = getCurrentType();
     markModified();
 }

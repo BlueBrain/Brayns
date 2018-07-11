@@ -28,6 +28,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <set>
+
 namespace brayns
 {
 ModelParams::ModelParams(const std::string& path)

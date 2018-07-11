@@ -48,7 +48,7 @@ public:
      * Constrain size to multiples of the OSPRay tile size in case of streaming
      * using the DeflectPixelOp.
      */
-    Vector2ui getSupportedFrameSize(const Vector2ui& size) final;
+    Vector2ui getSupportedFrameSize(const Vector2ui& size) const final;
 
     /** @copydoc Engine::getMinimumFrameSize */
     Vector2ui getMinimumFrameSize() const final;
@@ -60,7 +60,7 @@ public:
                                      bool accumulation) const final;
 
     ScenePtr createScene(ParametersManager& parametersManager) const final;
-    CameraPtr createCamera(const CameraType type) const final;
+    CameraPtr createCamera() const final;
     RendererPtr createRenderer(
         const AnimationParameters& animationParameters,
         const RenderingParameters& renderingParameters) const final;
@@ -68,6 +68,7 @@ public:
 private:
     uint32_t _getOSPDataFlags() const;
 
+    void _createCameras();
     void _createRenderers();
 
     bool _haveDeflectPixelOp{false};

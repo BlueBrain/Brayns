@@ -33,7 +33,6 @@ const std::string PARAM_HEAD_LIGHT = "head-light";
 const std::string PARAM_MAX_ACCUMULATION_FRAMES = "max-accumulation-frames";
 const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "samples-per-pixel";
-const std::string PARAM_STEREO_MODE = "stereo-mode";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
 const std::array<std::string, 8> RENDERER_NAMES = {
@@ -41,7 +40,7 @@ const std::array<std::string, 8> RENDERER_NAMES = {
      "raycast_Ng", "raycast_Ns", "scivis", "pathtracingrenderer"}};
 
 const std::array<std::string, 4> CAMERA_TYPE_NAMES = {
-    {"perspective", "orthographic", "panoramic", "clipped"}};
+    {"perspective", "orthographic", "panoramic", "clippedperspective"}};
 
 const std::array<std::string, 4> STEREO_MODES = {
     {"none", "left", "right", "side-by-side"}};
@@ -61,13 +60,12 @@ RenderingParameters::RenderingParameters()
         PARAM_SPP.c_str(), po::value<size_t>(),
         "Number of samples per pixel [int]")(
         PARAM_ACCUMULATION.c_str(), po::value<bool>(),
-        "Enable/Disable accumulation [bool]")(
-        PARAM_BACKGROUND_COLOR.c_str(), po::value<floats>()->multitoken(),
-        "Background color [float "
-        "float float]")(PARAM_CAMERA.c_str(), po::value<std::string>(),
-                        "Camera [perspective|stereo|orthographic|panoramic]")(
-        PARAM_STEREO_MODE.c_str(), po::value<std::string>(),
-        "Stereo mode [none|left|right|side-by-side]")(
+        "Enable/Disable accumulation [bool]")(PARAM_BACKGROUND_COLOR.c_str(),
+                                              po::value<floats>()->multitoken(),
+                                              "Background color [float "
+                                              "float float]")(
+        PARAM_CAMERA.c_str(), po::value<std::string>(),
+        "Camera [perspective|orthographic|panoramic|clippedperspective]")(
         PARAM_HEAD_LIGHT.c_str(), po::value<bool>(),
         "Enable/Disable light source attached to camera origin [bool]")(
         PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),
@@ -111,27 +109,11 @@ void RenderingParameters::parse(const po::variables_map& vm)
     }
     if (vm.count(PARAM_CAMERA))
     {
-        _cameraType = CameraType::default_;
-        const std::string& cameraTypeName = vm[PARAM_CAMERA].as<std::string>();
-        auto it = std::find(_cameraTypeNames.begin(), _cameraTypeNames.end(),
-                            cameraTypeName);
-        if (it == _cameraTypeNames.end())
-        {
-            BRAYNS_INFO << "'" << cameraTypeName << "' replaces default camera"
-                        << std::endl;
-            _cameraTypeNames[0] = cameraTypeName;
-        }
-        else
-            _cameraType = static_cast<CameraType>(
-                std::distance(_cameraTypeNames.begin(), it));
-    }
-    if (vm.count(PARAM_STEREO_MODE))
-    {
-        _stereoMode = StereoMode::none;
-        const std::string& stereoMode = vm[PARAM_STEREO_MODE].as<std::string>();
-        for (size_t i = 0; i < STEREO_MODES.size(); ++i)
-            if (stereoMode == STEREO_MODES[i])
-                _stereoMode = static_cast<StereoMode>(i);
+        const std::string& cameraName = vm[PARAM_CAMERA].as<std::string>();
+        _cameraType = cameraName;
+        if (std::find(_cameraTypeNames.begin(), _cameraTypeNames.end(),
+                      cameraName) == _cameraTypeNames.end())
+            _cameraTypeNames.push_front(cameraName);
     }
     if (vm.count(PARAM_HEAD_LIGHT))
         _headLight = vm[PARAM_HEAD_LIGHT].as<bool>();
@@ -153,25 +135,11 @@ void RenderingParameters::print()
     BRAYNS_INFO << "Samples per pixel                 :" << _spp << std::endl;
     BRAYNS_INFO << "Background color                  :" << _backgroundColor
                 << std::endl;
-    BRAYNS_INFO << "Camera                            : "
-                << getCameraTypeAsString(_cameraType) << std::endl;
-    BRAYNS_INFO << "Stereo mode                       : "
-                << getStereoModeAsString(_stereoMode) << std::endl;
+    BRAYNS_INFO << "Camera                            : " << _cameraType
+                << std::endl;
     BRAYNS_INFO << "Accumulation                      : "
                 << (_accumulation ? "on" : "off") << std::endl;
     BRAYNS_INFO << "Max. accumulation frames          : " << _maxAccumFrames
                 << std::endl;
-}
-
-const std::string& RenderingParameters::getCameraTypeAsString(
-    const CameraType value) const
-{
-    return _cameraTypeNames[static_cast<size_t>(value)];
-}
-
-const std::string& RenderingParameters::getStereoModeAsString(
-    const StereoMode value) const
-{
-    return STEREO_MODES[static_cast<size_t>(value)];
 }
 }

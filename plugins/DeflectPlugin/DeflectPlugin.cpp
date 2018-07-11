@@ -246,9 +246,7 @@ private:
             case deflect::Event::EVT_VIEW_SIZE_CHANGED:
             {
                 Vector2ui newSize(event.dx, event.dy);
-                const auto isStereo = _engine->getCamera().getStereoMode() ==
-                                      StereoMode::side_by_side;
-                if (isStereo)
+                if (_engine->getCamera().isSideBySideStereo())
                     newSize.x() *= 2;
 
                 _appParams.setWindowSize(
@@ -330,9 +328,7 @@ private:
         deflect::ImageWrapper deflectImage(_lastImage.data.data(),
                                            _lastImage.size.x(),
                                            _lastImage.size.y(), format);
-        const auto isStereo =
-            _engine->getCamera().getStereoMode() == StereoMode::side_by_side;
-        if (isStereo)
+        if (_engine->getCamera().isSideBySideStereo())
             deflectImage.view = deflect::View::side_by_side;
 
         deflectImage.compressionQuality = _params.getQuality();

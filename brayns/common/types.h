@@ -32,8 +32,6 @@
 
 #include <brayns/common/mathTypes.h>
 
-#include <boost/program_options.hpp>
-
 #include <cstdint>
 #include <limits>
 #include <map>
@@ -312,22 +310,6 @@ enum class ShadingType
     none,
     diffuse,
     electron,
-};
-
-enum class CameraType
-{
-    default_, // Perspective
-    orthographic,
-    panoramic,
-    clipped
-};
-
-enum class StereoMode
-{
-    none = 0,
-    left,
-    right,
-    side_by_side
 };
 
 enum class IndexMode

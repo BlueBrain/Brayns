@@ -41,13 +41,9 @@ void Engine::reshape(const Vector2ui& frameSize)
 {
     const auto size = getSupportedFrameSize(frameSize);
 
-    if (_frameBuffer->getSize() == size)
-        return;
-
     _frameBuffer->resize(size);
-    _camera->setAspectRatio(static_cast<float>(size.x()) /
-                            static_cast<float>(size.y()));
-    _camera->commit();
+    _camera->updateProperty("aspect", static_cast<float>(size.x()) /
+                                          static_cast<float>(size.y()));
 }
 
 void Engine::commit()
@@ -68,18 +64,6 @@ void Engine::postRender()
 Renderer& Engine::getRenderer()
 {
     return *_renderer;
-}
-
-Vector2ui Engine::getSupportedFrameSize(const Vector2ui& size)
-{
-    Vector2f result = size;
-    if (_camera->getStereoMode() == StereoMode::side_by_side &&
-        size.x() % 2 != 0)
-    {
-        // In case of 3D stereo vision, make sure the width is even
-        result.x() = size.x() - 1;
-    }
-    return result;
 }
 
 bool Engine::continueRendering() const
@@ -108,6 +92,6 @@ void Engine::setDefaultCamera()
 {
     const auto frameSize = Vector2f(_frameBuffer->getSize());
     _camera->setInitialState(_scene->getBounds());
-    _camera->setAspectRatio(frameSize.x() / frameSize.y());
+    _camera->updateProperty("aspect", frameSize.x() / frameSize.y());
 }
 }

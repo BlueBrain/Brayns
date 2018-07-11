@@ -25,6 +25,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 
+#include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
 namespace brayns

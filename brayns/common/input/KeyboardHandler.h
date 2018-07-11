@@ -23,6 +23,8 @@
 
 #include <brayns/common/types.h>
 
+#include <functional>
+
 namespace brayns
 {
 struct ShortcutInformation
