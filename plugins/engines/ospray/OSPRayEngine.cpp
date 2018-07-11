@@ -30,7 +30,10 @@
 #include <plugins/engines/ospray/OSPRayRenderer.h>
 #include <plugins/engines/ospray/OSPRayScene.h>
 
-#include <ospray/OSPConfig.h> // TILE_SIZE
+#include "ispc/render/SimulationRenderer.h" // enum Shading
+
+#include <ospray/OSPConfig.h>                    // TILE_SIZE
+#include <ospray/SDK/camera/PerspectiveCamera.h> // enum StereoMode
 #include <ospray/version.h>
 
 namespace brayns
@@ -113,11 +116,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     _scene = std::make_shared<OSPRayScene>(_parametersManager, ospFlags);
 
     BRAYNS_INFO << "Initializing camera" << std::endl;
-    _camera = createCamera(rp.getCameraType());
-    _camera->setStereoMode(rp.getStereoMode());
-
-    _camera->setEnvironmentMap(
-        !parametersManager.getSceneParameters().getEnvironmentMap().empty());
+    _createCameras();
 
     BRAYNS_INFO << "Initializing frame buffer" << std::endl;
     _frameSize = getSupportedFrameSize(
@@ -189,9 +188,8 @@ void OSPRayEngine::commit()
     const auto& streamParams = _parametersManager.getStreamParameters();
     if (streamParams.isModified() || _camera->isModified())
     {
-        const auto isStereo =
-            _camera->getStereoMode() == StereoMode::side_by_side;
-        osprayFrameBuffer->setStreamingParams(streamParams, isStereo);
+        osprayFrameBuffer->setStreamingParams(streamParams,
+                                              _camera->isSideBySideStereo());
     }
 }
 
@@ -205,14 +203,23 @@ void OSPRayEngine::preRender()
     }
 }
 
-Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
+Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size) const
 {
+    const auto isSideBySideStereo = _camera->isSideBySideStereo();
+
     if (!haveDeflectPixelOp())
-        return Engine::getSupportedFrameSize(size);
+    {
+        Vector2f result = size;
+        if (isSideBySideStereo && size.x() % 2 != 0)
+        {
+            // In case of 3D stereo vision, make sure the width is even
+            result.x() = size.x() - 1;
+        }
+        return result;
+    }
 
     Vector2f result = size;
-    const auto isStereo = _camera->getStereoMode() == StereoMode::side_by_side;
-    if (isStereo)
+    if (isSideBySideStereo)
     {
         if (size.x() % (TILE_SIZE * 2) != 0)
             result.x() = size.x() - size.x() % (TILE_SIZE * 2);
@@ -231,8 +238,7 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size)
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const
 {
-    const auto isStereo = _camera->getStereoMode() == StereoMode::side_by_side;
-    if (isStereo)
+    if (_camera->isSideBySideStereo())
         return {TILE_SIZE * 2, TILE_SIZE};
     return {TILE_SIZE, TILE_SIZE};
 }
@@ -248,14 +254,16 @@ void OSPRayEngine::_createRenderers()
         PropertyMap properties;
         if (renderer == "pathtracingrenderer")
         {
-            properties.setProperty({"aoDistance", "Ambient occlusion distance",
-                                    10000.f, 1e-20f, 1e20f});
+            properties.setProperty({"aoDistance",
+                                    "Ambient occlusion distance",
+                                    10000.f,
+                                    {1e-20f, 1e20f}});
             properties.setProperty(
-                {"aoWeight", "Ambient occlusion weight", 0.f, 0.f, 1.f});
+                {"aoWeight", "Ambient occlusion weight", 0.f, {0.f, 1.f}});
             properties.setProperty(
-                {"shadows", "Shadow intensity", 0.f, 0.f, 1.f});
+                {"shadows", "Shadow intensity", 0.f, {0.f, 1.f}});
             properties.setProperty(
-                {"softShadows", "Shadow softness", 0.f, 0.f, 1.f});
+                {"softShadows", "Shadow softness", 0.f, {0.f, 1.f}});
         }
         if (renderer == "proximityrenderer")
         {
@@ -273,31 +281,37 @@ void OSPRayEngine::_createRenderers()
         }
         if (renderer == "simulationrenderer")
         {
-            properties.setProperty({"aoDistance", "Ambient occlusion distance",
-                                    10000.f, 1e-20f, 1e20f});
+            properties.setProperty({"aoDistance",
+                                    "Ambient occlusion distance",
+                                    10000.f,
+                                    {1e-20f, 1e20f}});
             properties.setProperty(
-                {"aoWeight", "Ambient occlusion weight", 0.f, 0.f, 1.f});
-            properties.setProperty({"detectionDistance", "Detection distance",
-                                    15.f, 0.f, 10000.f});
+                {"aoWeight", "Ambient occlusion weight", 0.f, {0.f, 1.f}});
+            properties.setProperty({"detectionDistance",
+                                    "Detection distance",
+                                    15.f,
+                                    {0.f, 10000.f}});
+            properties.setProperty({"shading",
+                                    "Shading",
+                                    (int)SimulationRenderer::Shading::none,
+                                    {"None", "Diffuse", "Electron"}});
             properties.setProperty(
-                {"electronShading", "Electron shading", false});
+                {"shadows", "Shadow intensity", 0.f, {0.f, 1.f}});
             properties.setProperty(
-                {"shadingEnabled", "Diffuse shading", false});
-            properties.setProperty(
-                {"shadows", "Shadow intensity", 0.f, 0.f, 1.f});
-            properties.setProperty(
-                {"softShadows", "Shadow softness", 0.f, 0.f, 1.f});
+                {"softShadows", "Shadow softness", 0.f, {0.f, 1.f}});
         }
         if (renderer == "scivis")
         {
-            properties.setProperty({"aoDistance", "Ambient occlusion distance",
-                                    10000.f, 1e-20f, 1e20f});
+            properties.setProperty({"aoDistance",
+                                    "Ambient occlusion distance",
+                                    10000.f,
+                                    {1e-20f, 1e20f}});
             properties.setProperty(
-                {"aoSamples", "Ambient occlusion samples", 1, 0, 128});
+                {"aoSamples", "Ambient occlusion samples", 1, {0, 128}});
             properties.setProperty({"aoTransparencyEnabled",
-                                    "Ambient occlusion transpareny", true});
+                                    "Ambient occlusion transparency", true});
             properties.setProperty(
-                {"aoWeight", "Ambient occlusion weight", 0.f, 0.f, 1.f});
+                {"aoWeight", "Ambient occlusion weight", 0.f, {0.f, 1.f}});
             properties.setProperty(
                 {"oneSidedLighting", "One-sided lighting", true});
             properties.setProperty({"shadowsEnabled", "Shadows", false});
@@ -322,22 +336,9 @@ ScenePtr OSPRayEngine::createScene(ParametersManager& parametersManager) const
     return std::make_shared<OSPRayScene>(parametersManager, _getOSPDataFlags());
 }
 
-CameraPtr OSPRayEngine::createCamera(const CameraType type) const
+CameraPtr OSPRayEngine::createCamera() const
 {
-    auto& rp = _parametersManager.getRenderingParameters();
-    auto name = rp.getCameraTypeAsString(type);
-    try
-    {
-        return std::make_shared<OSPRayCamera>(type, name);
-    }
-    catch (const std::runtime_error& e)
-    {
-        BRAYNS_WARN << e.what() << ". Using default camera instead"
-                    << std::endl;
-        rp.initializeDefaultCameras();
-        name = rp.getCameraTypeAsString(CameraType::default_);
-        return std::make_shared<OSPRayCamera>(type, name);
-    }
+    return std::make_shared<OSPRayCamera>();
 }
 
 RendererPtr OSPRayEngine::createRenderer(
@@ -354,5 +355,67 @@ uint32_t OSPRayEngine::_getOSPDataFlags() const
                    MemoryMode::shared
                ? OSP_DATA_SHARED_BUFFER
                : 0;
+}
+
+void OSPRayEngine::_createCameras()
+{
+    auto ospCamera = std::make_shared<OSPRayCamera>();
+
+    using StereoMode = ospray::PerspectiveCamera::StereoMode;
+    PropertyMap::Property stereoProperty{"stereoMode",
+                                         "Stereo mode",
+                                         (int)StereoMode::OSP_STEREO_NONE,
+                                         {"None", "Left eye", "Right eye",
+                                          "Side by side"}};
+    PropertyMap::Property fovy{"fovy", "Field of view", 45.f, {.1f, 360.f}};
+    PropertyMap::Property aspect{"aspect",
+                                 "Aspect ratio",
+                                 1.f,
+                                 {1e-31f, 1e31f}};
+    aspect.markReadOnly();
+    PropertyMap::Property eyeSeparation{"interpupillaryDistance",
+                                        "Eye separation",
+                                        0.0635f,
+                                        {0.f, 10.f}};
+
+    RenderingParameters& rp = _parametersManager.getRenderingParameters();
+    for (const auto& camera : rp.getCameras())
+    {
+        PropertyMap properties;
+        if (camera == "perspective" || camera == "clippedperspective")
+        {
+            properties.setProperty(fovy);
+            properties.setProperty(aspect);
+            properties.setProperty(
+                {"apertureRadius", "Aperture radius", 0.f, {0.f, 1e31f}});
+            properties.setProperty(
+                {"focusDistance", "Focus Distance", 1.f, {0.f, 1e31f}});
+            properties.setProperty(stereoProperty);
+            properties.setProperty(eyeSeparation);
+        }
+        if (camera == "orthographic")
+        {
+            properties.setProperty({"height", "Height", 1.f, {0.001f, 100.f}});
+            properties.setProperty(aspect);
+        }
+        if (camera == "stereoFull")
+        {
+            properties.setProperty(fovy);
+            properties.setProperty(aspect);
+            properties.setProperty(stereoProperty);
+            properties.setProperty(eyeSeparation);
+            properties.setProperty({"zeroParallaxPlane",
+                                    "Zero parallax plane",
+                                    1.f,
+                                    {0.f, 1e31f}});
+        }
+        ospCamera->setProperties(camera, properties);
+    }
+    ospCamera->setCurrentType(rp.getCameraType());
+    ospCamera->createOSPCamera();
+    _camera = ospCamera;
+
+    _camera->setEnvironmentMap(
+        !_parametersManager.getSceneParameters().getEnvironmentMap().empty());
 }
 }

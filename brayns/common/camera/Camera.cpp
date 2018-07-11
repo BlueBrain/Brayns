@@ -24,15 +24,6 @@
 
 namespace brayns
 {
-Camera::Camera(const CameraType cameraType)
-    : _type{cameraType}
-{
-}
-
-Camera::~Camera()
-{
-}
-
 Camera& Camera::operator=(const Camera& rhs)
 {
     if (this == &rhs)
@@ -47,13 +38,6 @@ Camera& Camera::operator=(const Camera& rhs)
     _initialPosition = rhs._initialPosition;
     _initialTarget = rhs._initialTarget;
     _initialUp = rhs._initialUp;
-
-    setAspectRatio(rhs.getAspectRatio());
-    setAperture(rhs.getAperture());
-    setFocalLength(rhs.getFocalLength());
-    setFieldOfView(rhs.getFieldOfView());
-    setStereoMode(rhs.getStereoMode());
-    setEyeSeparation(rhs.getEyeSeparation());
 
     setClipPlanes(rhs.getClipPlanes());
 

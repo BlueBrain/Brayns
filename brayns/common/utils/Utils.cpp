@@ -25,6 +25,8 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
+#include <set>
+
 #ifdef BRAYNS_USE_LIBARCHIVE
 #include <archive.h>
 #include <archive_entry.h>

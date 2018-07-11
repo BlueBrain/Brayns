@@ -23,6 +23,7 @@
 #include <brayns/common/utils/Utils.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/range/iterator_range_core.hpp>
 namespace fs = boost::filesystem;
 
 namespace brayns

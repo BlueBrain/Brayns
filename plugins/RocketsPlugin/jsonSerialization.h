@@ -61,17 +61,6 @@ struct SchemaParam
 };
 }
 
-STATICJSON_DECLARE_ENUM(brayns::CameraType,
-                        {"default", brayns::CameraType::default_},
-                        {"orthographic", brayns::CameraType::orthographic},
-                        {"panoramic", brayns::CameraType::panoramic},
-                        {"clipped", brayns::CameraType::clipped});
-
-STATICJSON_DECLARE_ENUM(brayns::StereoMode, {"none", brayns::StereoMode::none},
-                        {"left", brayns::StereoMode::left},
-                        {"right", brayns::StereoMode::right},
-                        {"side_by_side", brayns::StereoMode::side_by_side});
-
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
                         {"low", brayns::GeometryQuality::low},
                         {"medium", brayns::GeometryQuality::medium},
@@ -209,18 +198,13 @@ inline void init(brayns::ClipPlane* c, ObjectHandler* h)
 
 inline void init(brayns::Camera* c, ObjectHandler* h)
 {
-    h->add_property("aperture", &c->_aperture, Flags::Optional);
     h->add_property("clip_planes", &c->_clipPlanes, Flags::Optional);
-    h->add_property("eye_separation", &c->_eyeSeparation, Flags::Optional);
-    h->add_property("field_of_view", &c->_fieldOfView, Flags::Optional);
-    h->add_property("focal_length", &c->_focalLength, Flags::Optional);
     h->add_property("look_at", Vector3fArray(c->_target), Flags::Optional);
     h->add_property("origin", Vector3fArray(c->_position), Flags::Optional);
-    h->add_property("stereo_mode", &c->_stereoMode, Flags::Optional);
-    h->add_property("type", &c->_type, Flags::Optional);
+    h->add_property("current", &c->_currentType, Flags::Optional);
+    static auto types = c->getTypes();
+    h->add_property("types", &types, Flags::IgnoreRead | Flags::Optional);
     h->add_property("up", Vector3fArray(c->_up), Flags::Optional);
-    h->add_property("zero_parallax_plane", &c->_zeroParallaxPlane,
-                    Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

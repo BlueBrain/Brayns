@@ -60,6 +60,9 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     if (frameSize.product() == 0)
         throw std::runtime_error("Invalid size for framebuffer resize");
 
+    if (_frameBuffer && getSize() == frameSize)
+        return;
+
     _frameSize = frameSize;
 
     if (_frameBuffer)

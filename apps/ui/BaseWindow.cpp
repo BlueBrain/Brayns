@@ -223,9 +223,6 @@ void BaseWindow::reshape(const Vector2i& newSize)
 {
     Engine& engine = _brayns.getEngine();
     _windowSize = engine.getSupportedFrameSize(newSize);
-
-    engine.getCamera().setAspectRatio(float(_windowSize.x()) /
-                                      float(_windowSize.y()));
     engine.reshape(_windowSize);
 
     auto& applicationParameters = _brayns.getParametersManager();

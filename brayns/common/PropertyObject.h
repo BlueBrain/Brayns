@@ -47,8 +47,13 @@ public:
     template <typename T>
     inline void updateProperty(const std::string& name, const T& value)
     {
-        _mappedProperties.at(_currentType).updateProperty(name, value);
-        markModified();
+        const auto oldValue =
+            _properties.at(_currentType).getProperty<T>(name, value);
+        if (oldValue != value)
+        {
+            _properties.at(_currentType).updateProperty(name, value);
+            markModified();
+        }
     }
 
     /**
@@ -57,7 +62,7 @@ public:
      */
     bool hasProperty(const std::string& name) const
     {
-        return _mappedProperties.at(_currentType).hasProperty(name);
+        return _properties.at(_currentType).hasProperty(name);
     }
 
     /**
@@ -67,20 +72,20 @@ public:
     template <typename T>
     inline T getProperty(const std::string& name) const
     {
-        return _mappedProperties.at(_currentType).getProperty<T>(name);
+        return _properties.at(_currentType).getProperty<T>(name);
     }
 
     /** Assign a new set of properties to the current type. */
     void setProperties(const PropertyMap& properties)
     {
-        _mappedProperties[_currentType] = properties;
+        _properties[_currentType] = properties;
         markModified();
     }
 
     /** Assign a new set of properties to the given type. */
     void setProperties(const std::string& type, const PropertyMap& properties)
     {
-        _mappedProperties[type] = properties;
+        _properties[type] = properties;
         markModified();
     }
 
@@ -90,39 +95,31 @@ public:
     void updateProperties(const PropertyMap& properties)
     {
         for (auto prop : properties.getProperties())
-            _mappedProperties.at(_currentType).setProperty(*prop);
+            _properties.at(_currentType).setProperty(*prop);
         markModified();
     }
 
     /** @return true if the current type has any properties. */
-    bool hasProperties() const
-    {
-        return _mappedProperties.count(_currentType) != 0;
-    }
-
+    bool hasProperties() const { return _properties.count(_currentType) != 0; }
     /** @return the entire property map for the current type. */
-    const auto& getPropertyMap() const
-    {
-        return _mappedProperties.at(_currentType);
-    }
-
+    const auto& getPropertyMap() const { return _properties.at(_currentType); }
     /** @return the entire property map for the given type. */
     const auto& getPropertyMap(const std::string& type) const
     {
-        return _mappedProperties.at(type);
+        return _properties.at(type);
     }
 
     /** @return the list of all registered types. */
     strings getTypes() const
     {
         strings types;
-        for (const auto& i : _mappedProperties)
+        for (const auto& i : _properties)
             types.push_back(i.first);
         return types;
     }
 
-private:
+protected:
     std::string _currentType;
-    std::map<std::string, PropertyMap> _mappedProperties;
+    std::map<std::string, PropertyMap> _properties;
 };
 }

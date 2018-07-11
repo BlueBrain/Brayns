@@ -22,6 +22,7 @@
 #include <brayns/Brayns.h>
 #include <tests/paths.h>
 
+#include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 
@@ -134,11 +135,11 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
 
     const char* app = testSuite.argv[0];
     const std::string pdbFile(BRAYNS_TESTDATA + std::string("1bna.pdb"));
-    const char* argv[] = {app,   pdbFile.c_str(), "--accumulation",
-                          "off", "--stereo-mode", "side-by-side"};
+    const char* argv[] = {app, pdbFile.c_str(), "--accumulation", "off"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    brayns.getEngine().getCamera().updateProperty("stereoMode", 3);
     brayns.render();
     BOOST_CHECK(compareTestImage("testdataProteinStereo.png",
                                  brayns.getEngine().getFrameBuffer()));

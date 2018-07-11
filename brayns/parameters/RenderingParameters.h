@@ -53,11 +53,8 @@ public:
        Camera type
     */
     void initializeDefaultCameras();
-    CameraType getCameraType() const { return _cameraType; }
-    const std::string& getCameraTypeAsString(const CameraType value) const;
-    StereoMode getStereoMode() const { return _stereoMode; }
-    const std::string& getStereoModeAsString(const StereoMode value) const;
-
+    const std::string& getCameraType() const { return _cameraType; }
+    const auto& getCameras() const { return _cameraTypeNames; }
     /** Number of samples per pixel */
     int getSamplesPerPixel() const { return _spp; }
     void setSamplesPerPixel(const int value) { _updateValue(_spp, value); }
@@ -104,9 +101,8 @@ protected:
 
     std::string _renderer{"basic"};
     std::deque<std::string> _renderers;
-    CameraType _cameraType{CameraType::default_};
-    StereoMode _stereoMode{StereoMode::none};
-    strings _cameraTypeNames;
+    std::string _cameraType{"perspective"};
+    std::deque<std::string> _cameraTypeNames;
     int _spp{1};
     bool _accumulation{true};
     Vector3f _backgroundColor{0.f, 0.f, 0.f};

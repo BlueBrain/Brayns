@@ -22,6 +22,8 @@
 
 #include <brayns/common/types.h>
 
+#include <functional>
+
 #ifdef BRAYNS_USE_OPENMP
 #include <omp.h>
 #endif

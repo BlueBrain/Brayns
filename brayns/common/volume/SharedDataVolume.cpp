@@ -27,6 +27,7 @@
 #include <future>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 namespace
 {

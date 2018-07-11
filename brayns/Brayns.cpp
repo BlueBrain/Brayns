@@ -214,9 +214,8 @@ struct Brayns::Impl : public PluginAPI
         _engine->reshape(windowSize);
         _engine->preRender();
 
-        _engine->commit();
-
         camera.commit();
+        _engine->commit();
 
         if (_parametersManager.getRenderingParameters().getHeadLight())
         {
@@ -959,7 +958,7 @@ private:
     {
         _fieldOfView -= 1.f;
         //_fieldOfView = std::max(1.f, _fieldOfView);
-        _engine->getCamera().setFieldOfView(_fieldOfView);
+        _engine->getCamera().updateProperty("fovy", _fieldOfView);
         BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
     }
 
@@ -967,7 +966,7 @@ private:
     {
         _fieldOfView += 1.f;
         //    _fieldOfView = std::min(179.f, _fieldOfView);
-        _engine->getCamera().setFieldOfView(_fieldOfView);
+        _engine->getCamera().updateProperty("fovy", _fieldOfView);
         BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
     }
 
@@ -975,7 +974,8 @@ private:
     {
         _eyeSeparation -= 0.01f;
         //_eyeSeparation = std::max(0.1f, _eyeSeparation);
-        _engine->getCamera().setEyeSeparation(_eyeSeparation);
+        _engine->getCamera().updateProperty("interpupillaryDistance",
+                                            _eyeSeparation);
         BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
     }
 
@@ -983,7 +983,8 @@ private:
     {
         _eyeSeparation += 0.01f;
         //_eyeSeparation = std::min(1.0f, _eyeSeparation);
-        _engine->getCamera().setEyeSeparation(_eyeSeparation);
+        _engine->getCamera().updateProperty("interpupillaryDistance",
+                                            _eyeSeparation);
         BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
     }
 

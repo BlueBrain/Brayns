@@ -22,6 +22,8 @@
 
 #include <brayns/common/log.h>
 
+#include <cassert>
+
 namespace brayns
 {
 struct TextureTypeMaterialAttribute

@@ -34,7 +34,7 @@ namespace brayns
 class OSPRayCamera : public Camera
 {
 public:
-    OSPRayCamera(const CameraType type, const std::string& name);
+    OSPRayCamera() = default;
     ~OSPRayCamera();
 
     /**
@@ -43,16 +43,20 @@ public:
     */
     void commit() final;
 
+    /** @copydoc Camera::setEnvironmentMap */
+    void setEnvironmentMap(const bool environmentMap) final;
+
+    bool isSideBySideStereo() const final;
     /**
        Gets the OSPRay implementation of the camera object
        @return OSPRay implementation of the camera object
     */
     OSPCamera impl() { return _camera; }
-    /** @copydoc Camera::setEnvironmentMap */
-    void setEnvironmentMap(const bool environmentMap) final;
+    void createOSPCamera();
 
 private:
-    OSPCamera _camera;
+    OSPCamera _camera{nullptr};
+    std::string _currentOSPCamera;
 };
 }
 #endif // OSPRAYCAMERA_H

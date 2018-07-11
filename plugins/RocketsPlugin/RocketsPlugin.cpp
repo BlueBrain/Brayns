@@ -48,6 +48,7 @@ namespace
 const std::string ENDPOINT_ANIMATION_PARAMS = "animation-parameters";
 const std::string ENDPOINT_APP_PARAMS = "application-parameters";
 const std::string ENDPOINT_CAMERA = "camera";
+const std::string ENDPOINT_CAMERA_PARAMS = "camera-params";
 const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
 const std::string ENDPOINT_RENDERER = "renderer";
 const std::string ENDPOINT_RENDERER_PARAMS = "renderer-params";
@@ -592,6 +593,7 @@ public:
 
     void _registerEndpoints()
     {
+        _handleCamera();
         _handleGeometryParams();
         _handleImageJPEG();
         _handleRenderer();
@@ -607,7 +609,6 @@ public:
                 _parametersManager.getVolumeParameters());
 
         // following endpoints need a valid engine
-        _handle(ENDPOINT_CAMERA, _engine->getCamera());
         _handle(ENDPOINT_TRANSFER_FUNCTION,
                 _engine->getScene().getTransferFunction());
         _handle(ENDPOINT_SCENE, _engine->getScene());
@@ -635,7 +636,10 @@ public:
         _handleGetInstances();
         _handleUpdateInstance();
 
-        _handleRendererParams();
+        _handlePropertyObject(_engine->getCamera(), ENDPOINT_CAMERA_PARAMS,
+                              "camera");
+        _handlePropertyObject(_engine->getRenderer(), ENDPOINT_RENDERER_PARAMS,
+                              "renderer");
     }
 
     void _handleFrameBuffer()
@@ -763,6 +767,21 @@ public:
         _handleGET(ENDPOINT_VOLUME_PARAMS, params);
         _handlePUT(ENDPOINT_VOLUME_PARAMS, params,
                    std::function<bool(const VolumeParameters&)>(), postUpdate);
+    }
+
+    void _handleCamera()
+    {
+        auto& camera = _engine->getCamera();
+        auto preUpdate = [types = camera.getTypes()](const Camera& obj)
+        {
+            if (obj.getCurrentType().empty())
+                return true;
+            return std::find(types.begin(), types.end(),
+                             obj.getCurrentType()) != types.end();
+        };
+        _handleGET(ENDPOINT_CAMERA, camera);
+        _handlePUT(ENDPOINT_CAMERA, camera, preUpdate,
+                   std::function<void(Camera&)>());
     }
 
     void _handleRenderer()
@@ -1020,26 +1039,30 @@ public:
                           METHOD_UPDATE_INSTANCE, doc));
     }
 
-    void _handleRendererParams()
+    void _handlePropertyObject(PropertyObject& object,
+                               const std::string& endpoint,
+                               const std::string objectName)
     {
-        auto& renderer = _engine->getRenderer();
+        const auto requestEndpoint = getRequestEndpointName(endpoint);
+        const auto notifyEndpoint = getNotificationEndpointName(endpoint);
 
-        _jsonrpcServer->bind<PropertyMap>(
-            getRequestEndpointName(ENDPOINT_RENDERER_PARAMS),
-            [& renderer = renderer] { return renderer.getPropertyMap(); });
+        _jsonrpcServer->bind<PropertyMap>(requestEndpoint, [& object = object] {
+            return object.getPropertyMap();
+        });
 
         _jsonrpcServer->bind(
-            getNotificationEndpointName(ENDPOINT_RENDERER_PARAMS),
+            notifyEndpoint,
             [& engine = _engine,
-             &server = _rocketsServer ](const auto& request) {
-                PropertyMap props = engine->getRenderer().getPropertyMap();
+             &object = object,
+             &server = _rocketsServer, notifyEndpoint ](const auto& request) {
+                PropertyMap props = object.getPropertyMap();
                 if (::from_json(props, request.message))
                 {
-                    engine->getRenderer().updateProperties(props);
+                    object.updateProperties(props);
                     engine->triggerRender();
 
                     const auto& msg = rockets::jsonrpc::makeNotification(
-                        getNotificationEndpointName(ENDPOINT_RENDERER_PARAMS),
+                        notifyEndpoint,
                         props);
                     server->broadcastText(msg, {request.clientID});
 
@@ -1049,28 +1072,26 @@ public:
             });
 
         std::vector<std::pair<std::string, PropertyMap>> props;
-        for (const auto& type : renderer.getTypes())
-            props.push_back(
-                std::make_pair(type, renderer.getPropertyMap(type)));
+        for (const auto& type : object.getTypes())
+            props.push_back(std::make_pair(type, object.getPropertyMap(type)));
 
-        // get-renderer-params RPC schema
-        _handleSchema(getRequestEndpointName(ENDPOINT_RENDERER_PARAMS),
+        // get-<object>-params RPC schema
+        _handleSchema(requestEndpoint,
                       buildJsonRpcSchemaGetProperties(
-                          getRequestEndpointName(ENDPOINT_RENDERER_PARAMS),
-                          "Get the params of the current renderer", props));
+                          requestEndpoint,
+                          "Get the params of the current " + objectName,
+                          props));
 
-        // set-renderer-params RPC schema
-        RpcDocumentation doc{"Set the params on the current renderer", "params",
-                             "new renderer params"};
-        _handleSchema(getNotificationEndpointName(ENDPOINT_RENDERER_PARAMS),
-                      buildJsonRpcSchemaSetProperties(
-                          getNotificationEndpointName(ENDPOINT_RENDERER_PARAMS),
-                          doc, props));
+        // set-<object>-params RPC schema
+        RpcDocumentation doc{"Set the params on the current " + objectName,
+                             "params", "new " + objectName + " params"};
+        _handleSchema(notifyEndpoint,
+                      buildJsonRpcSchemaSetProperties(notifyEndpoint, doc,
+                                                      props));
 
-        // renderer-params object schema
-        _handleSchema(ENDPOINT_RENDERER_PARAMS,
-                      getSchema(props, hyphenatedToCamelCase(
-                                           ENDPOINT_RENDERER_PARAMS)));
+        // <object>-params object schema
+        _handleSchema(endpoint,
+                      getSchema(props, hyphenatedToCamelCase(endpoint)));
     }
 
     EnginePtr _engine;

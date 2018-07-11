@@ -59,9 +59,7 @@ public:
         , _frameBuffer(engine.createFrameBuffer(_params.size,
                                                 FrameBufferFormat::rgba_i8,
                                                 true))
-        , _camera(engine.createCamera(_params.camera
-                                          ? _params.camera->getType()
-                                          : engine.getCamera().getType()))
+        , _camera(engine.createCamera())
         , _renderer(engine.createRenderer(
               _params.animParams
                   ? *_params.animParams
@@ -76,7 +74,11 @@ public:
         _renderer->setCurrentType(renderer.getCurrentType());
         _renderer->setProperties(renderer.getPropertyMap());
         if (_params.camera)
+        {
             *_camera = *_params.camera;
+            _camera->setCurrentType(engine.getCamera().getCurrentType());
+            _camera->setProperties(engine.getCamera().getPropertyMap());
+        }
         else
             *_camera = engine.getCamera();
 
@@ -85,7 +87,8 @@ public:
 
     ImageGenerator::ImageBase64 operator()()
     {
-        _camera->setAspectRatio(float(_params.size.x()) / _params.size.y());
+        _camera->updateProperty("aspect",
+                                float(_params.size.x()) / _params.size.y());
         _camera->commit();
 
         _scene->commitLights();
