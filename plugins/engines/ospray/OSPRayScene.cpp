@@ -21,7 +21,6 @@
 #include "OSPRayScene.h"
 #include "OSPRayMaterial.h"
 #include "OSPRayModel.h"
-#include "OSPRayRenderer.h"
 #include "OSPRayVolume.h"
 #include "utils.h"
 
@@ -66,6 +65,8 @@ OSPRayScene::~OSPRayScene()
     for (auto& light : _ospLights)
         ospRelease(light);
     _ospLights.clear();
+    if (_ospLightData)
+        ospRelease(_ospLightData);
 
     if (_rootModel)
         ospRelease(_rootModel);
