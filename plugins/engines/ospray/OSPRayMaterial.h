@@ -38,7 +38,6 @@ public:
 private:
     OSPTexture2D _createOSPTexture2D(Texture2DPtr texture);
     OSPMaterial _ospMaterial;
-    std::map<TextureType, OSPTexture2D> _ospTextures;
 };
 }
 
