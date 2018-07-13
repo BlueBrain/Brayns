@@ -74,19 +74,17 @@ void OSPRayMaterial::commit()
     for (const auto& textureType : textureTypeMaterialAttribute)
         ospSetObject(_ospMaterial, textureType.attribute.c_str(), nullptr);
 
-    for (auto& ospTexture : _ospTextures)
-        ospRelease(ospTexture.second);
-
     for (const auto& textureDescriptor : _textureDescriptors)
     {
         const auto texType = textureDescriptor.first;
         auto texture = getTexture(texType);
         if (texture)
         {
-            _ospTextures[texType] = _createOSPTexture2D(texture);
+            auto ospTexture = _createOSPTexture2D(texture);
             const auto str =
                 textureTypeMaterialAttribute[texType].attribute.c_str();
-            ospSetObject(_ospMaterial, str, _ospTextures[texType]);
+            ospSetObject(_ospMaterial, str, ospTexture);
+            ospRelease(ospTexture);
         }
     }
 
@@ -122,7 +120,8 @@ OSPTexture2D OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
 
     osp::vec2i texSize{int(texture->getWidth()), int(texture->getHeight())};
     OSPTexture2D ospTexture =
-        ospNewTexture2D(texSize, type, texture->getRawData(), 0);
+        ospNewTexture2D(texSize, type, texture->getRawData(),
+                        OSP_TEXTURE_SHARED_BUFFER);
 
     assert(ospTexture);
     ospCommit(ospTexture);
