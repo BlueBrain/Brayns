@@ -49,27 +49,16 @@ namespace brayns
 {
 OSPRayModel::~OSPRayModel()
 {
-    const auto removeGeometry = [&](const auto& geometryMap) {
-        auto& model = _useSimulationModel ? _simulationModel : _model;
-        for (auto geom : geometryMap)
-            ospRemoveGeometry(model, geom.second);
-    };
-
-    const auto releaseAndClearGeometry = [&](auto& geometryMap) {
+    const auto releaseAndClearGeometry = [](auto& geometryMap) {
         for (auto geom : geometryMap)
             ospRelease(geom.second);
         geometryMap.clear();
     };
 
-    const auto releaseModel = [&](const auto& model) {
+    const auto releaseModel = [](const auto& model) {
         if (model)
             ospRelease(model);
     };
-
-    removeGeometry(_ospExtendedSpheres);
-    removeGeometry(_ospExtendedCylinders);
-    removeGeometry(_ospExtendedCones);
-    removeGeometry(_ospSDFGeometryRefs);
 
     releaseAndClearGeometry(_ospExtendedSpheres);
     releaseAndClearGeometry(_ospExtendedSpheresData);
