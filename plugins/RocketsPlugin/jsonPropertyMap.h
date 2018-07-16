@@ -116,6 +116,21 @@ void _addPropertySchema(const PropertyMap::Property& prop,
 }
 
 template <>
+void _addPropertySchema<bool>(const PropertyMap::Property& prop,
+                              rapidjson::Value& properties,
+                              rapidjson::Document::AllocatorType& allocator)
+{
+    using namespace rapidjson;
+    auto value = prop.get<bool>();
+    auto jsonSchema = staticjson::export_json_schema(&value, &allocator);
+    jsonSchema.AddMember(StringRef("title"), StringRef(prop.label.c_str()),
+                         allocator);
+    jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
+    properties.AddMember(make_json_string(prop.name, allocator).Move(),
+                         jsonSchema, allocator);
+}
+
+template <>
 void _addPropertySchema<std::string>(
     const PropertyMap::Property& prop, rapidjson::Value& properties,
     rapidjson::Document::AllocatorType& allocator)
@@ -406,6 +421,9 @@ inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
     using brayns::PropertyMap;
     Document document;
     document.Parse(json.c_str());
+
+    if (!document.IsObject())
+        return false;
 
     for (const auto& m : document.GetObject())
     {
