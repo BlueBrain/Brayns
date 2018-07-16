@@ -62,13 +62,13 @@ RUN mkdir -p ${DIST_PATH} \
 
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
-ARG OSPRAY_VERSION=1.5.0
+ARG OSPRAY_VERSION=1.5.0-patch
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
- && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
+ && git clone https://github.com/BlueBrain/ospray.git ${OSPRAY_SRC} \
  && cd ${OSPRAY_SRC} \
- && git checkout v${OSPRAY_VERSION} \
+ && git checkout ${OSPRAY_VERSION} \
  && mkdir -p build \
  && cd build \
  && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
@@ -122,7 +122,6 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
     -DBUILD_PYTHON_BINDINGS=OFF \
-    -DCOMMON_DISABLE_WERROR=TRUE \
  && ninja mvd-tool perceptualdiff Brayns-install Brayns-tests \
  && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
