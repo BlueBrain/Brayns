@@ -149,18 +149,6 @@ void OSPRayScene::commit()
             instancesBounds.merge(transformBox(modelBounds, instanceTransform));
         }
 
-        if (modelDescriptor->getBoundingBox())
-        {
-            Transformation instancesTransform;
-            instancesTransform.setTranslation(instancesBounds.getCenter() -
-                                              modelBounds.getCenter());
-            instancesTransform.setScale(instancesBounds.getSize() /
-                                        modelBounds.getSize());
-
-            addInstance(_rootModel, impl.getBoundingBoxModel(),
-                        instancesTransform);
-        }
-
         impl.logInformation();
     }
     BRAYNS_DEBUG << "Committing root models" << std::endl;
