@@ -41,12 +41,6 @@ const std::array<std::string, 8> RENDERER_NAMES = {
 
 const std::array<std::string, 4> CAMERA_TYPE_NAMES = {
     {"perspective", "orthographic", "panoramic", "clippedperspective"}};
-
-const std::array<std::string, 4> STEREO_MODES = {
-    {"none", "left", "right", "side-by-side"}};
-
-const std::array<std::string, 3> SHADING_TYPES = {
-    {"none", "diffuse", "electron"}};
 }
 
 namespace brayns
