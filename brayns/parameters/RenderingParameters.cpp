@@ -36,8 +36,8 @@ const std::string PARAM_SPP = "samples-per-pixel";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
 const std::array<std::string, 8> RENDERER_NAMES = {
-    {"basic", "proximityrenderer", "simulationrenderer", "particlerenderer",
-     "raycast_Ng", "raycast_Ns", "scivis", "pathtracingrenderer"}};
+    {"basic", "proximity", "simulation", "particle", "raycast_Ng", "raycast_Ns",
+     "scivis", "pathtracing"}};
 
 const std::array<std::string, 4> CAMERA_TYPE_NAMES = {
     {"perspective", "orthographic", "panoramic", "clippedperspective"}};

@@ -252,20 +252,14 @@ void OSPRayEngine::_createRenderers()
     for (const auto& renderer : rp.getRenderers())
     {
         PropertyMap properties;
-        if (renderer == "pathtracingrenderer")
+        if (renderer == "pathtracing")
         {
-            properties.setProperty({"aoDistance",
-                                    "Ambient occlusion distance",
-                                    10000.f,
-                                    {1e-20f, 1e20f}});
-            properties.setProperty(
-                {"aoWeight", "Ambient occlusion weight", 0.f, {0.f, 1.f}});
             properties.setProperty(
                 {"shadows", "Shadow intensity", 0.f, {0.f, 1.f}});
             properties.setProperty(
                 {"softShadows", "Shadow softness", 0.f, {0.f, 1.f}});
         }
-        if (renderer == "proximityrenderer")
+        if (renderer == "proximity")
         {
             properties.setProperty(
                 {"detectionDistance", "Detection distance", 1.f});
@@ -279,7 +273,7 @@ void OSPRayEngine::_createRenderers()
             properties.setProperty(
                 {"electronShading", "Electron shading", false});
         }
-        if (renderer == "simulationrenderer")
+        if (renderer == "simulation")
         {
             properties.setProperty({"aoDistance",
                                     "Ambient occlusion distance",
@@ -298,7 +292,7 @@ void OSPRayEngine::_createRenderers()
             properties.setProperty(
                 {"shadows", "Shadow intensity", 0.f, {0.f, 1.f}});
             properties.setProperty(
-                {"softShadows", "Shadow softness", 0.f, {0.f, 1.f}});
+                {"softShadows", "Shadow softness", 0.f, {0.f, 0.1f}});
         }
         if (renderer == "scivis")
         {
@@ -387,9 +381,9 @@ void OSPRayEngine::_createCameras()
             properties.setProperty(fovy);
             properties.setProperty(aspect);
             properties.setProperty(
-                {"apertureRadius", "Aperture radius", 0.f, {0.f, 1e31f}});
+                {"apertureRadius", "Aperture radius", 0.f, {0.f, 1.0f}});
             properties.setProperty(
-                {"focusDistance", "Focus Distance", 1.f, {0.f, 1e31f}});
+                {"focusDistance", "Focus Distance", 1.f, {0.f, 10.f}});
             properties.setProperty(stereoProperty);
             properties.setProperty(eyeSeparation);
         }

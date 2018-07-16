@@ -32,8 +32,6 @@ struct PathTracingRenderer
 
     float shadows;
     float softShadows;
-    float ambientOcclusionStrength;
-    float ambientOcclusionDistance;
 };
 
 inline vec3f mix(const vec3f a, const vec3f b, float t)
@@ -251,9 +249,7 @@ export void PathTracingRenderer_set(
     void* uniform _self, void* uniform bgMaterial,
     const uniform float& timestamp, const uniform int& spp,
     void** uniform lights, uniform int32 numLights,
-    const uniform float& shadows, const uniform float& softShadows,
-    const uniform float& ambientOcclusionStrength,
-    const uniform float& ambientOcclusionDistance)
+    const uniform float& shadows, const uniform float& softShadows)
 {
     uniform PathTracingRenderer* uniform self =
         (uniform PathTracingRenderer * uniform)_self;
@@ -268,6 +264,4 @@ export void PathTracingRenderer_set(
 
     self->shadows = shadows;
     self->softShadows = softShadows;
-    self->ambientOcclusionStrength = ambientOcclusionStrength;
-    self->ambientOcclusionDistance = ambientOcclusionDistance;
 }

@@ -42,8 +42,6 @@ public:
 private:
     float _shadows;
     float _softShadows;
-    float _ambientOcclusionStrength;
-    float _ambientOcclusionDistance;
 };
 
 } // ::brayns
