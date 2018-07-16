@@ -59,6 +59,5 @@ ProximityRenderer::ProximityRenderer()
     ispcEquivalent = ispc::ProximityRenderer_create(this);
 }
 
-OSP_REGISTER_EXRENDERER(ProximityRenderer, PROXIMITYRENDERER);
-OSP_REGISTER_EXRENDERER(ProximityRenderer, proximityrenderer);
+OSP_REGISTER_EXRENDERER(ProximityRenderer, proximity);
 }

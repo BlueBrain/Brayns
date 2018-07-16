@@ -818,21 +818,21 @@ private:
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setCurrentRenderer("particlerenderer");
+        renderParams.setCurrentRenderer("particle");
     }
 
     void _proximityRenderer()
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setCurrentRenderer("proximityrenderer");
+        renderParams.setCurrentRenderer("proximity");
     }
 
     void _simulationRenderer()
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setCurrentRenderer("simulationrenderer");
+        renderParams.setCurrentRenderer("simulation");
     }
 
     void _increaseAnimationFrame()

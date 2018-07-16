@@ -63,6 +63,5 @@ ParticleRenderer::ParticleRenderer()
     ispcEquivalent = ispc::ParticleRenderer_create(this);
 }
 
-OSP_REGISTER_RENDERER(ParticleRenderer, PARTICLERENDERER);
-OSP_REGISTER_RENDERER(ParticleRenderer, particlerenderer);
+OSP_REGISTER_RENDERER(ParticleRenderer, particle);
 } // ::brayns

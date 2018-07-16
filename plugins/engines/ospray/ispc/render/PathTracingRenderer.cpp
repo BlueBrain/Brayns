@@ -40,13 +40,11 @@ void PathTracingRenderer::commit()
 
     _shadows = getParam1f("shadows", 0.f);
     _softShadows = getParam1f("softShadows", 0.f);
-    _ambientOcclusionStrength = getParam1f("aoWeight", 0.f);
-    _ambientOcclusionDistance = getParam1f("aoDistance", 1e20f);
 
-    ispc::PathTracingRenderer_set(
-        getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _timestamp,
-        spp, _lightPtr, _lightArray.size(), _shadows, _softShadows,
-        _ambientOcclusionStrength, _ambientOcclusionDistance);
+    ispc::PathTracingRenderer_set(getIE(), (_bgMaterial ? _bgMaterial->getIE()
+                                                        : nullptr),
+                                  _timestamp, spp, _lightPtr,
+                                  _lightArray.size(), _shadows, _softShadows);
 }
 
 PathTracingRenderer::PathTracingRenderer()
@@ -54,5 +52,5 @@ PathTracingRenderer::PathTracingRenderer()
     ispcEquivalent = ispc::PathTracingRenderer_create(this);
 }
 
-OSP_REGISTER_EXRENDERER(PathTracingRenderer, pathtracingrenderer);
+OSP_REGISTER_EXRENDERER(PathTracingRenderer, pathtracing);
 } // ::brayns
