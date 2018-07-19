@@ -128,6 +128,7 @@ archive* _openArchive(const Blob& blob)
     {
         return archive;
     }
+    archive_read_free(archive);
     return nullptr;
 }
 
