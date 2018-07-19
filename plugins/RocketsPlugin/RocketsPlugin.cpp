@@ -787,15 +787,17 @@ public:
     void _handleRenderer()
     {
         auto& params = _parametersManager.getRenderingParameters();
-        auto preUpdate = [](const RenderingParameters& obj) {
-            return std::find(obj.getRenderers().begin(),
-                             obj.getRenderers().end(),
-                             obj.getCurrentRenderer()) !=
-                   obj.getRenderers().end();
+        auto preUpdate = [](const auto& rp) {
+            return std::find(rp.getRenderers().begin(), rp.getRenderers().end(),
+                             rp.getCurrentRenderer()) !=
+                   rp.getRenderers().end();
+        };
+        auto postUpdate = [& renderer = _engine->getRenderer()](auto& rp)
+        {
+            renderer.setCurrentType(rp.getCurrentRenderer());
         };
         _handleGET(ENDPOINT_RENDERER, params);
-        _handlePUT(ENDPOINT_RENDERER, params, preUpdate,
-                   std::function<void(RenderingParameters&)>());
+        _handlePUT(ENDPOINT_RENDERER, params, preUpdate, postUpdate);
     }
 
     void _handleSchemaRPC()
