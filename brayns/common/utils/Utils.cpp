@@ -106,7 +106,10 @@ archive* _openArchive(const std::string& filename)
     }
     if (archive_read_open_filename(archive, filename.c_str(), 10240) ==
         ARCHIVE_OK)
+    {
         return archive;
+    }
+    archive_read_free(archive);
     return nullptr;
 }
 
