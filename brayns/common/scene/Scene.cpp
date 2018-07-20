@@ -258,6 +258,8 @@ ModelDescriptorPtr Scene::load(const std::string& path,
 
             loader->setProgressCallback(progressCb);
             model = loader->importFromFile(currentPath, index++, materialID);
+            if (!model)
+                throw std::runtime_error("No model returned by loader");
             model->setTransformation(model->getTransformation() *
                                      transformation);
             addModel(model);
@@ -270,6 +272,8 @@ ModelDescriptorPtr Scene::load(const std::string& path,
         auto loader = _loaderRegistry.createLoader(path);
         loader->setProgressCallback(cb);
         model = loader->importFromFile(path, 0, materialID);
+        if (!model)
+            throw std::runtime_error("No model returned by loader");
         model->setTransformation(transformation);
         addModel(model);
     }
