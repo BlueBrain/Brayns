@@ -34,6 +34,7 @@ public:
                  const DataType type, VolumeParameters& params,
                  OSPTransferFunction transferFunction,
                  const std::string& volumeType);
+    ~OSPRayVolume();
 
     void setDataRange(const Vector2f& range) final;
     void commit() final;
