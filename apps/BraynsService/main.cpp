@@ -54,11 +54,8 @@ public:
         _eventRendering->start();
 
         // stop the application on Ctrl+C
-        _sigintHandle->once<uvw::SignalEvent>([&](const auto&, auto&) {
-            _brayns.getEngine().triggerRender = [] {};
-            _stopRenderThread->send();
-            _mainLoop->stop();
-        });
+        _sigintHandle->once<uvw::SignalEvent>(
+            [&](const auto&, auto&) { this->_stopMainLoop(); });
         _sigintHandle->start(SIGINT);
     }
 
@@ -97,9 +94,7 @@ private:
             // stop event loop(s) and exit application
             if (!_brayns.getEngine().getKeepRunning())
             {
-                _brayns.getEngine().triggerRender = [] {};
-                _stopRenderThread->send();
-                _mainLoop->stop();
+                this->_stopMainLoop();
                 return;
             }
 
@@ -179,8 +174,32 @@ private:
         });
 
         // stop render loop, triggered from main thread
-        _stopRenderThread->once<uvw::AsyncEvent>([& renderLoop = _renderLoop](
-            const auto&, auto&) { renderLoop->stop(); });
+        _stopRenderThread->once<uvw::AsyncEvent>(
+            [&](const auto&, auto&) { this->_stopRenderLoop(); });
+    }
+
+    void _stopMainLoop()
+    {
+        // send stop render loop message
+        _brayns.getEngine().triggerRender = [] {};
+        _stopRenderThread->send();
+
+        // close all main loop resources to avoid memleaks
+        _renderingDone->close();
+        _eventRendering->close();
+        _accumRendering->close();
+        _progressUpdate->close();
+        _checkIdleRendering->close();
+        _sigintHandle->close();
+
+        _mainLoop->stop();
+    }
+
+    void _stopRenderLoop()
+    {
+        _triggerRendering->close();
+        _stopRenderThread->close();
+        _renderLoop->stop();
     }
 
     brayns::Brayns _brayns;
