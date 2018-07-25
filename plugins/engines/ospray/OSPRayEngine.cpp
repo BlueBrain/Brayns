@@ -197,10 +197,7 @@ void OSPRayEngine::preRender()
 {
     const auto& renderParams = _parametersManager.getRenderingParameters();
     if (renderParams.getAccumulation() != _frameBuffer->getAccumulation())
-    {
         _frameBuffer->setAccumulation(renderParams.getAccumulation());
-        _frameBuffer->resize(_frameBuffer->getSize());
-    }
 }
 
 Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size) const

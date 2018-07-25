@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-class OSPRayFrameBuffer : public brayns::FrameBuffer
+class OSPRayFrameBuffer : public FrameBuffer
 {
 public:
     OSPRayFrameBuffer(const Vector2ui& frameSize, FrameBufferFormat colorDepth,
@@ -39,6 +39,7 @@ public:
     void resize(const Vector2ui& frameSize) final;
     void map() final;
     void unmap() final;
+    void setAccumulation(const bool accumulation) final;
 
     void lock() { _mapMutex.lock(); }
     void unlock() { _mapMutex.unlock(); }
@@ -49,6 +50,8 @@ public:
     void setStreamingParams(const StreamParameters& params, bool stereo);
 
 private:
+    void _recreate();
+
     OSPFrameBuffer _frameBuffer;
     uint8_t* _colorBuffer;
     float* _depthBuffer;
