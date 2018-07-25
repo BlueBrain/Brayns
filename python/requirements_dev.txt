@@ -1,0 +1,32 @@
+# Copyright (c) 2016-2018, Blue Brain Project
+#                          Raphael Dumusc <raphael.dumusc@epfl.ch>
+#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+#                          Cyrille Favreau <cyrille.favreau@epfl.ch>
+#
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+#
+# This library is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License version 3.0 as published
+# by the Free Software Foundation.
+#
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# All rights reserved. Do not distribute without further notice.
+
+pylint~=1.8.4
+pycodestyle~=2.4.0
+pydocstyle~=2.1.1
+nose~=1.3.7
+coverage~=4.5.1
+nosexcover~=1.0.11
+tox~=3.1.2
+mock~=2.0.0
+Sphinx~=1.7.6
+sphinx_rtd_theme~=0.4.0
+pandoc~=1.0.2
