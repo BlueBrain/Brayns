@@ -11,7 +11,6 @@ install:
 script:
   - tox
 before_deploy:
-  - cd python
   - pip install twine
 deploy:
   provider: pypi
