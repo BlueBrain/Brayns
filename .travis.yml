@@ -1,0 +1,24 @@
+dist: trusty
+language: python
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+install:
+  - cd python
+  - pip install
+  - pip install tox-travis
+script:
+  - tox
+before_deploy:
+  - cd python
+  - pip install twine
+deploy:
+  provider: pypi
+  user: nachbaur
+  password:
+    secure: QT9y2YUvHLKhT5Tn8P23REtj8yeyxtmsSymr2IG0oqBn4sfmQbEpf7GO/NYiK1h+XQwh/h9iLSvqNXYtNc/hGJotP/6Jw0JXVrkI3tqepvQY0X0AzJATX1A2ioI1q09+SJQXgEdaDZj7Dafy0vyj+nIK+Ig1zjrb1wbv89EvpVi/QMh825tQPKlZk/Y7kOyJVWWqWQOuKxSfcc4suqiPEUplUFnOXtLJZr+Q5eNX2BcaiTmlzJ+IasVZYIZUatHTiDrL5j35VnXRYfGfn+CBp/CzfJBqPMKtzk+QJwla3UYYjreG4Z35xSHR83/ErYE3GOCFrmsIZ/fnu0cMMbMzQ6kz/DhblTiPqwO+clhqZlMqkpzV2WILLZsB19tld7hNQhBLP9W2qLnMg/2rWMfuqk4sqOgMBXzbuBUSAGKZLXXXe8W0uoVbRhIeh9Kf6CKTb+SXDPh8zxsuLpgdazultK2hXQcRIIf4NEFvzKlC+12+OVtuFkeKtSrUPSAcwlWNH28aJ/URuKMK7RjkqC5ATJrdtTmg1T5FQUA2Hf+fv7vHAQnAPM8gp2lD37MG34qRkhbc1icMCxc62mJ14atwgLk5jKqOAmKjV7EIHT4bZhtn0uyukWQYUIu5NaNswvHhHR5XyJbQMjZJ3dSGN/UJNpZKdXXsDHFpH/AwqYf8HA8=
+  on:
+    tags: true
+    branch: master
+    condition: "$TRAVIS_PYTHON_VERSION == 3.6"

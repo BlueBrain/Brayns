@@ -1,0 +1,50 @@
+## look at http://docutils.sourceforge.net/sandbox/py-rest-doc/utils/pylintrc
+# for some of the options that are available
+
+[MASTER]
+load-plugins=pylint.extensions.docparams,pylint.extensions.docstyle
+
+[MESSAGES CONTROL]
+#C0103 - Invalid name "%s" (should match %s) - matches too many things, like variables w/ single char names
+#C0199 - First line empty in function docstring
+#C0325 - superfluous-parens
+#R0903 - Too Few public methods
+disable=C0103,C0199,C0325,R0903
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=100
+
+[DESIGN]
+# Maximum number of arguments for function / method
+max-args=8
+# Argument names that match this expression will be ignored. Default to name
+# with leading underscore
+ignored-argument-names=_.*
+# Maximum number of locals for function / method body
+max-locals=15
+# Maximum number of return / yield for function / method body
+max-returns=6
+# Maximum number of branch for function / method body
+max-branchs=12
+# Maximum number of statements in function / method body
+max-statements=50
+# Maximum number of parents for a class (see R0901).
+max-parents=7
+# Maximum number of attributes for a class (see R0902).
+max-attributes=40
+# Minimum number of public methods for a class (see R0903).
+min-public-methods=2
+# Maximum number of public methods for a class (see R0904).
+max-public-methods=60
+# checks for similarities and duplicated code. This computation may be
+# memory / CPU intensive, so you should disable it if you experiments some
+# problems.
+
+[SIMILARITIES]
+# Minimum lines number of a similarity.
+min-similarity-lines=25
+# Ignore comments when computing similarities.
+ignore-comments=yes
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
