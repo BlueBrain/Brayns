@@ -65,6 +65,27 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
 
     _frameSize = frameSize;
 
+    _recreate();
+}
+
+void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params,
+                                           const bool stereo)
+{
+    if (_pixelOp)
+    {
+        ospSetString(_pixelOp, "id", params.getId().c_str());
+        ospSetString(_pixelOp, "hostname", params.getHostname().c_str());
+        ospSet1i(_pixelOp, "port", params.getPort());
+        ospSet1i(_pixelOp, "enabled", params.getEnabled());
+        ospSet1i(_pixelOp, "compression", params.getCompression());
+        ospSet1i(_pixelOp, "quality", params.getQuality());
+        ospSet1i(_pixelOp, "stereo", stereo);
+        ospCommit(_pixelOp);
+    }
+}
+
+void OSPRayFrameBuffer::_recreate()
+{
     if (_frameBuffer)
     {
         unmap();
@@ -84,7 +105,7 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
         format = OSP_FB_NONE;
     }
 
-    osp::vec2i size = {int(_frameSize.x()), int(_frameSize.y())};
+    const osp::vec2i size = {int(_frameSize.x()), int(_frameSize.y())};
 
     size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
     if (_accumulation)
@@ -95,22 +116,6 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
         ospSetPixelOp(_frameBuffer, _pixelOp);
     ospCommit(_frameBuffer);
     clear();
-}
-
-void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params,
-                                           const bool stereo)
-{
-    if (_pixelOp)
-    {
-        ospSetString(_pixelOp, "id", params.getId().c_str());
-        ospSetString(_pixelOp, "hostname", params.getHostname().c_str());
-        ospSet1i(_pixelOp, "port", params.getPort());
-        ospSet1i(_pixelOp, "enabled", params.getEnabled());
-        ospSet1i(_pixelOp, "compression", params.getCompression());
-        ospSet1i(_pixelOp, "quality", params.getQuality());
-        ospSet1i(_pixelOp, "stereo", stereo);
-        ospCommit(_pixelOp);
-    }
 }
 
 void OSPRayFrameBuffer::clear()
@@ -150,5 +155,14 @@ void OSPRayFrameBuffer::unmap()
     }
 
     unlock();
+}
+
+void OSPRayFrameBuffer::setAccumulation(const bool accumulation)
+{
+    if (_accumulation != accumulation)
+    {
+        FrameBuffer::setAccumulation(accumulation);
+        _recreate();
+    }
 }
 }

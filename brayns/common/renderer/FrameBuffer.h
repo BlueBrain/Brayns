@@ -45,7 +45,7 @@ public:
     virtual void resize(const Vector2ui& frameSize) = 0;
 
     Vector2ui getSize() const { return _frameSize; }
-    void setAccumulation(const bool accumulation)
+    virtual void setAccumulation(const bool accumulation)
     {
         _accumulation = accumulation;
     }
