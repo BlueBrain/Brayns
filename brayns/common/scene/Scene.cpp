@@ -212,6 +212,8 @@ ModelDescriptorPtr Scene::load(Blob&& blob,
     auto loader = _loaderRegistry.createLoader(blob.type);
     loader->setProgressCallback(cb);
     auto model = loader->importFromBlob(std::move(blob), 0, materialID);
+    if (!model)
+        throw std::runtime_error("No model returned by loader");
     model->setTransformation(transformation);
     addModel(model);
     saveToCacheFile();
