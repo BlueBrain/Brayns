@@ -96,7 +96,7 @@ def _try_add_property(target_object, url, registry_entry, writeable):
         value = class_type(())
 
     # add member and property to target_object
-    member = '_' + os.path.basename(registry_entry).replace('-', '_')
+    member = '_' + utils.underscorize(os.path.basename(registry_entry))
     setattr(target_object, member, value)
     _add_property(target_object, member, registry_entry, schema['type'])
 
@@ -203,7 +203,7 @@ def _create_method_with_oneof_parameter(target_object, param, method, descriptio
                 break
 
         # create class name <Type><Method w/o set->, e.g. Perspective+CameraParams
-        pretty_class_name = method[4:].replace("-", "_")
+        pretty_class_name = utils.underscorize(method[4:])
         pretty_class_name = inflection.camelize(pretty_class_name)
         pretty_class_name = class_name + pretty_class_name
 
@@ -235,11 +235,12 @@ def _add_enums(root_object, target_object):
     """
     for i in root_object.keys():
         enum = None
-        if 'enum' in root_object.propinfo(i):
-            enum = root_object.propinfo(i)
-        if root_object.propinfo(i)['type'] == 'array':
-            if 'enum' in root_object.propinfo(i)['items']:
-                enum = root_object.propinfo(i)['items']
+        propinfo = root_object.propinfo(i)
+        if 'enum' in propinfo:
+            enum = propinfo
+        if propinfo['type'] == 'array':
+            if 'enum' in propinfo['items']:
+                enum = propinfo['items']
         if not enum:
             continue
 
@@ -264,7 +265,7 @@ def _add_method(target_object, schema):
         return
 
     method = schema['title']
-    func_name = str(os.path.basename(method).replace('-', '_'))
+    func_name = str(utils.underscorize(os.path.basename(method)))
 
     if 'params' in schema and len(schema['params']) > 1:
         print("Multiple parameters for RPC '{0}' not supported".format(method))
@@ -342,7 +343,7 @@ def _add_property(target_object, member, property_name, property_type):
         return function
 
     endpoint_name = os.path.basename(property_name)
-    snake_case_name = endpoint_name.replace('-', '_')
+    snake_case_name = utils.underscorize(endpoint_name)
     setattr(type(target_object), snake_case_name,
             property(fget=getter_builder(member, property_name),
                      doc='Access to the {0} property'.format(endpoint_name)))

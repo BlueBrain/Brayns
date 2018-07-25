@@ -29,3 +29,5 @@ try:
     VERSION = get_distribution('brayns').version  # pylint: disable=no-member
 except DistributionNotFound:  # pragma: no cover
     VERSION = 'brayns-local'
+
+MINIMAL_VERSION = '0.7.0'

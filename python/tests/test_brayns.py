@@ -316,7 +316,7 @@ def test_init():
         app = brayns.Client('localhost:8200')
         assert_equal(app.url(), 'http://localhost:8200/')
         assert_equal(app.version.as_dict(), TEST_VERSION)
-        assert_equal(str(app), 'Brayns version 0.7.0.12345 running on http://localhost:8200/')
+        assert_equal(str(app), 'Brayns version 0.7.0 running on http://localhost:8200/')
 
 
 @raises(Exception)

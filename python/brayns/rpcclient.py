@@ -33,7 +33,9 @@ import threading
 import time
 import websocket
 
-from .utils import set_http_protocol, set_ws_protocol, WS_PATH
+from .utils import set_http_protocol, set_ws_protocol, WS_PATH, underscorize
+
+JSON_RPC_VERSION = '2.0'
 
 
 class RpcClient(object):
@@ -86,7 +88,7 @@ class RpcClient(object):
         :raises Exception: if request was not answered within given response_timeout
         """
         data = dict()
-        data['jsonrpc'] = "2.0"
+        data['jsonrpc'] = JSON_RPC_VERSION
         data['id'] = self._request_id
         data['method'] = method
         if params:
@@ -133,7 +135,7 @@ class RpcClient(object):
         :param str params: params for the method
         """
         data = dict()
-        data['jsonrpc'] = "2.0"
+        data['jsonrpc'] = JSON_RPC_VERSION
         data['method'] = method
         if params:
             data['params'] = params
@@ -171,7 +173,7 @@ class RpcClient(object):
 
                 # remove the 'set-' part of the data method to find the property to update its
                 # content
-                prop_name = data['method'].replace('-', '_')[4:]
+                prop_name = underscorize(data['method'][4:])
                 prop = getattr(self, '_' + prop_name, None)
                 if prop is None:
                     return

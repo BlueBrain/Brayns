@@ -119,7 +119,7 @@ def set_http_protocol(url):
     Set the http protocol to the url if it is not present.
 
     :param str url: Url to be checked
-    :return: url with protocol
+    :return: Url with protocol
     :rtype: str
     """
     if url.find(HTTP_PREFIX) == -1 and url.find(HTTPS_PREFIX) == -1:
@@ -131,8 +131,8 @@ def set_ws_protocol(url):
     """
     Set the WebSocket protocol according to the resource url.
 
-    :param str url:
-    :return: ws for http, wss for https
+    :param str url: Url to be checked
+    :return: Url preprend with ws for http, wss for https
     :rtype: str
     """
     if url.find(HTTPS_PREFIX) != -1:
@@ -140,3 +140,14 @@ def set_ws_protocol(url):
     if url.find(HTTP_PREFIX) != -1:
         return WS_PREFIX + url[len(HTTP_PREFIX):]
     return WS_PREFIX + url
+
+
+def underscorize(word):
+    """
+    Opposite of inflection.dasherize; replace dashes with underscore in the word.
+
+    :param str word: the word to underscorize
+    :return: the underscorized word
+    :rtype: str
+    """
+    return word.replace('-', '_')

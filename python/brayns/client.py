@@ -30,9 +30,8 @@ import io
 from PIL import Image
 from .api_generator import build_api
 from .rpcclient import RpcClient
-from .utils import in_notebook
-
-from .utils import HTTP_METHOD_GET, HTTP_STATUS_OK
+from .utils import in_notebook, HTTP_METHOD_GET, HTTP_STATUS_OK
+from .version import MINIMAL_VERSION
 from . import utils
 
 
@@ -58,17 +57,21 @@ class Client(RpcClient):
         version = 'unknown'
         if self.version:
             version = '.'.join(str(x) for x in [self.version.major, self.version.minor,
-                                                self.version.patch, self.version.revision])
+                                                self.version.patch])
         return "Brayns version {0} running on {1}".format(version, self.url())
 
     # pylint: disable=W0613,W0622,E1101
-    def image(self, size, format='jpg', quality=None, samples_per_pixel=None):
+    def image(self, size, format='jpg', animation_parameters=None, camera=None, quality=None,
+              renderer=None, samples_per_pixel=None):
         """
         Request a snapshot from Brayns and return a PIL image.
 
         :param tuple size: (width,height) of the resulting image
         :param str format: image type as recognized by FreeImage
+        :param object animation_parameters: animation params to use instead of current params
+        :param object camera: camera to use instead of current camera
         :param int quality: compression quality between 1 (worst) and 100 (best)
+        :param object renderer: renderer to use instead of current renderer
         :param int samples_per_pixel: samples per pixel to increase render quality
         :return: the PIL image of the current rendering, None on error obtaining the image
         :rtype: :py:class:`~PIL.Image.Image`
@@ -129,14 +132,13 @@ class Client(RpcClient):
         if status.code != HTTP_STATUS_OK:
             raise Exception('Cannot obtain version from Brayns')
 
-        minimal_version = '0.7.0'
         version = '.'.join(str(x) for x in [status.contents['major'], status.contents['minor'],
                                             status.contents['patch']])
 
         import semver
-        if semver.match(version, '<{0}'.format(minimal_version)):
+        if semver.match(version, '<{0}'.format(MINIMAL_VERSION)):
             raise Exception('Brayns does not satisfy minimal required version; '
-                            'needed {0}, got {1}'.format(minimal_version, version))
+                            'needed {0}, got {1}'.format(MINIMAL_VERSION, version))
 
     def _add_widgets(self):  # pragma: no cover
         """Add functions to the Brayns object to provide widgets for appropriate properties."""
