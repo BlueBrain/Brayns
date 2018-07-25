@@ -2,7 +2,7 @@
 
 [![C++ Build Status](https://bbpcode.epfl.ch/ci/buildStatus/icon?job=oss.Brayns)](https://bbpcode.epfl.ch/ci/job/oss.Brayns/)
 [![Docker Build Status](https://bbpcode.epfl.ch/ci/buildStatus/icon?job=oss.Brayns.docker)](https://bbpcode.epfl.ch/ci/job/oss.Brayns.docker/)
-[![Python Build Status](https://travis-ci.org/BlueBrain/Brayns.svg?branch=pypi)](https://travis-ci.org/BlueBrain/Brayns)
+[![Python Build Status](https://travis-ci.org/BlueBrain/Brayns.svg)](https://travis-ci.org/BlueBrain/Brayns)
 [![Read the Docs](https://readthedocs.org/projects/brayns/badge/?version=latest)](http://brayns.readthedocs.io/en/latest/?badge=latest)
 [![Docker Pulls](https://img.shields.io/docker/pulls/bluebrain/brayns.svg)](https://hub.docker.com/r/bluebrain/brayns/)
 [![GitHub release](https://img.shields.io/github/release/BlueBrain/Brayns.svg)](https://github.com/BlueBrain/Brayns/releases)

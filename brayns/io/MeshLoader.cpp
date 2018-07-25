@@ -249,6 +249,8 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
             triangleMeshes.normals.reserve(nbVertices);
         if (mesh->HasTextureCoords(0))
             triangleMeshes.textureCoordinates.reserve(nbVertices);
+        if (mesh->HasVertexColors(0))
+            triangleMeshes.colors.reserve(nbVertices);
         for (size_t i = 0; i < mesh->mNumVertices; ++i)
         {
             const auto& v = mesh->mVertices[i];
@@ -268,8 +270,13 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
             if (mesh->HasTextureCoords(0))
             {
                 const auto& t = mesh->mTextureCoords[0][i];
-                const Vector2f texCoord(t.x, -t.y);
-                triangleMeshes.textureCoordinates.push_back(texCoord);
+                triangleMeshes.textureCoordinates.push_back({t.x, -t.y});
+            }
+
+            if (mesh->HasVertexColors(0))
+            {
+                const auto& c = mesh->mColors[0][i];
+                triangleMeshes.colors.push_back({c.r, c.g, c.b, c.a});
             }
         }
         bool nonTriangulatedFaces = false;
