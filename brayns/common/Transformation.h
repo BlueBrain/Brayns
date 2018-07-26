@@ -38,10 +38,11 @@ public:
     Transformation() = default;
 
     Transformation(const Vector3f& translation, const Vector3f& scale,
-                   const Quaternionf& rotation)
+                   const Quaternionf& rotation, const Vector3f& rotationCenter)
         : _translation(translation)
         , _scale(scale)
         , _rotation(rotation)
+        , _rotationCenter(rotationCenter)
     {
     }
 
@@ -57,11 +58,16 @@ public:
     {
         _updateValue(_rotation, value);
     }
+    const Vector3f& getRotationCenter() const { return _rotationCenter; }
+    void setRotationCenter(const Vector3f& value)
+    {
+        _updateValue(_rotationCenter, value);
+    }
 
     bool operator==(const Transformation& rhs) const
     {
         return _translation == rhs._translation && _rotation == rhs._rotation &&
-               _scale == rhs._scale;
+               _scale == rhs._scale && _rotationCenter == rhs._rotationCenter;
     }
     bool operator!=(const Transformation& rhs) const { return !(*this == rhs); }
     // only applies rotation and translation, use scaling separately if needed
@@ -75,6 +81,7 @@ private:
     Vector3f _translation{0.f, 0.f, 0.f};
     Vector3f _scale{1.f, 1.f, 1.f};
     Quaternionf _rotation;
+    Vector3f _rotationCenter{0.f, 0.f, 0.f};
 
     SERIALIZATION_FRIEND(Transformation)
 };
@@ -82,7 +89,8 @@ inline Transformation operator*(const Transformation& a,
                                 const Transformation& b)
 {
     const auto matrix = a.toMatrix() * b.toMatrix();
-    return {matrix.getTranslation(), a.getScale() * b.getScale(), matrix};
+    return {matrix.getTranslation(), a.getScale() * b.getScale(), matrix,
+            a.getRotationCenter()};
 }
 
 inline Boxf transformBox(const Boxf& box, const Transformation& trafo)

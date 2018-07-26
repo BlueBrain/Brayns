@@ -29,12 +29,12 @@
 
 namespace brayns
 {
-AddModelTask::AddModelTask(const ModelParams& model, EnginePtr engine)
+AddModelTask::AddModelTask(const ModelParams& modelParams, EnginePtr engine)
 {
     const auto& registry = engine->getScene().getLoaderRegistry();
 
     // pre-check for validity of given paths
-    const auto& path = model.getPath();
+    const auto& path = modelParams.getPath();
     if (path.empty())
         throw MISSING_PARAMS;
 
@@ -53,14 +53,15 @@ AddModelTask::AddModelTask(const ModelParams& model, EnginePtr engine)
     });
 
     // load data, trigger rendering, return model descriptor
-    _task = async::spawn([path = model.getPath()] { return path; })
+    _task = async::spawn([path = modelParams.getPath()] { return path; })
                 .then(std::move(functor))
-                .then([engine, model](async::task<ModelDescriptorPtr> result) {
-                    auto modelDesc = result.get();
-                    if (modelDesc)
-                        *modelDesc = model;
+                .then([engine,
+                       modelParams](async::task<ModelDescriptorPtr> result) {
+                    auto modelDescriptor = result.get();
+                    if (modelDescriptor)
+                        *modelDescriptor = modelParams;
                     engine->triggerRender();
-                    return modelDesc;
+                    return modelDescriptor;
                 });
 }
 }

@@ -465,6 +465,11 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
             model->addSphere(materialId, sphere);
     }
 
-    return std::make_shared<ModelDescriptor>(std::move(model), fileName);
+    Transformation transformation;
+    transformation.setRotationCenter(model->getBounds().getCenter());
+    auto modelDescriptor =
+        std::make_shared<ModelDescriptor>(std::move(model), fileName);
+    modelDescriptor->setTransformation(transformation);
+    return modelDescriptor;
 }
 }

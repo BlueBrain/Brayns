@@ -179,9 +179,17 @@ public:
             model->createMissingMaterials(
                 _parent._scene.getSimulationHandler() != nullptr);
 
+            // Compute circuit center
+            Boxf circuitCenter;
+            for (const auto& transformation : transformations)
+                circuitCenter.merge(transformation.getTranslation());
+
+            Transformation transformation;
+            transformation.setRotationCenter(circuitCenter.getCenter());
             modelDesc =
                 std::make_shared<ModelDescriptor>(std::move(model), "Circuit",
                                                   source, metadata);
+            modelDesc->setTransformation(transformation);
         }
         catch (const std::exception& error)
         {

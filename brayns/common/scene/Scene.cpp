@@ -135,7 +135,7 @@ size_t Scene::addModel(ModelDescriptorPtr model)
 
     // add default instance of this model to render something
     if (model->getInstances().empty())
-        model->addInstance({true, true, {}});
+        model->addInstance({true, true, model->getTransformation()});
     return model->getModelID();
 }
 
@@ -204,28 +204,24 @@ bool Scene::empty() const
     return true;
 }
 
-ModelDescriptorPtr Scene::load(Blob&& blob,
-                               const Transformation& transformation,
-                               const size_t materialID,
+ModelDescriptorPtr Scene::load(Blob&& blob, const size_t materialID,
                                Loader::UpdateCallback cb)
 {
     auto loader = _loaderRegistry.createLoader(blob.type);
     loader->setProgressCallback(cb);
-    auto model = loader->importFromBlob(std::move(blob), 0, materialID);
-    if (!model)
+    auto modelDescriptor =
+        loader->importFromBlob(std::move(blob), 0, materialID);
+    if (!modelDescriptor)
         throw std::runtime_error("No model returned by loader");
-    model->setTransformation(transformation);
-    addModel(model);
+    addModel(modelDescriptor);
     saveToCacheFile();
-    return model;
+    return modelDescriptor;
 }
 
-ModelDescriptorPtr Scene::load(const std::string& path,
-                               const Transformation& transformation,
-                               const size_t materialID,
+ModelDescriptorPtr Scene::load(const std::string& path, const size_t materialID,
                                Loader::UpdateCallback cb)
 {
-    ModelDescriptorPtr model;
+    ModelDescriptorPtr modelDescriptor;
     if (fs::is_directory(path))
     {
         fs::directory_iterator begin(path), end;
@@ -259,12 +255,11 @@ ModelDescriptorPtr Scene::load(const std::string& path,
             };
 
             loader->setProgressCallback(progressCb);
-            model = loader->importFromFile(currentPath, index++, materialID);
-            if (!model)
+            modelDescriptor =
+                loader->importFromFile(currentPath, index++, materialID);
+            if (!modelDescriptor)
                 throw std::runtime_error("No model returned by loader");
-            model->setTransformation(model->getTransformation() *
-                                     transformation);
-            addModel(model);
+            addModel(modelDescriptor);
 
             totalProgress += 1.f / numFiles;
         }
@@ -273,15 +268,14 @@ ModelDescriptorPtr Scene::load(const std::string& path,
     {
         auto loader = _loaderRegistry.createLoader(path);
         loader->setProgressCallback(cb);
-        model = loader->importFromFile(path, 0, materialID);
-        if (!model)
+        modelDescriptor = loader->importFromFile(path, 0, materialID);
+        if (!modelDescriptor)
             throw std::runtime_error("No model returned by loader");
-        model->setTransformation(transformation);
-        addModel(model);
+        addModel(modelDescriptor);
     }
     saveToCacheFile();
     buildEnvironmentMap();
-    return model;
+    return modelDescriptor;
 }
 
 void Scene::saveToCacheFile()

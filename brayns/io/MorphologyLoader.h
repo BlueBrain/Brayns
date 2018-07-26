@@ -64,11 +64,12 @@ public:
      * @param index Specifies an index for the morphology. This is mainly used
      * to give a specific color to every morphology
      * @param transformation Transformation to apply to the morphology
+     * @param somaPosition Position of the soma
      * @return True if the morphology is successfully loaded, false otherwise
      */
     bool importMorphology(const servus::URI& source, Model& model,
-                          const size_t index = 0,
-                          const Matrix4f& transformation = Matrix4f());
+                          const size_t index, const Matrix4f& transformation,
+                          Vector3f& somaPosition);
 
 private:
     using CompartmentReportPtr = std::shared_ptr<brion::CompartmentReport>;

@@ -76,6 +76,7 @@ public:
      */
     bool importMorphology(const servus::URI& source, Model& model,
                           const uint64_t index, const Matrix4f& transformation,
+                          Vector3f& somaPosition,
                           const size_t defaultMaterialId = NO_MATERIAL,
                           CompartmentReportPtr compartmentReport = nullptr)
     {
@@ -122,7 +123,7 @@ public:
         ParallelModelContainer modelContainer;
         const bool returnValue =
             importMorphology(source, index, materialFunc, transformation,
-                             compartmentReport, modelContainer);
+                             compartmentReport, modelContainer, somaPosition);
 
         modelContainer.addSpheresToModel(model);
         modelContainer.addCylindersToModel(model);
@@ -138,11 +139,12 @@ public:
                           MaterialFunc materialFunc,
                           const Matrix4f& transformation,
                           CompartmentReportPtr compartmentReport,
-                          ParallelModelContainer& model)
+                          ParallelModelContainer& model, Vector3f& somaPosition)
     {
         bool returnValue = true;
         const size_t morphologySectionTypes =
             enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
+        somaPosition = transformation.getTranslation();
         if (morphologySectionTypes ==
             static_cast<size_t>(MorphologySectionType::soma))
             return _importMorphologyAsPoint(index, materialFunc, transformation,
@@ -150,10 +152,11 @@ public:
         else if (_geometryParameters.useRealisticSomas())
             returnValue = _createRealisticSoma(source, materialFunc,
                                                transformation, model);
-        returnValue =
-            returnValue &&
-            _importMorphologyFromURI(source, index, materialFunc,
-                                     transformation, compartmentReport, model);
+        else
+            returnValue =
+                _importMorphologyFromURI(source, index, materialFunc,
+                                         transformation, compartmentReport,
+                                         model, somaPosition);
         return returnValue;
     }
 
@@ -802,7 +805,8 @@ private:
                                   MaterialFunc materialFunc,
                                   const Matrix4f& transformation,
                                   CompartmentReportPtr compartmentReport,
-                                  ParallelModelContainer& model) const
+                                  ParallelModelContainer& model,
+                                  Vector3f& somaPosition) const
     {
         try
         {
@@ -850,6 +854,7 @@ private:
                 offset = compartmentReport->getOffsets()[index][0];
 
             // Soma
+            somaPosition = morphology.getSoma().getCentroid() + translation;
             if (!_geometryParameters.useRealisticSomas() &&
                 morphologySectionTypes &
                     static_cast<size_t>(MorphologySectionType::soma))
@@ -1089,17 +1094,26 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     const auto modelName = boost::filesystem::basename({fileName});
     updateProgress("Loading " + modelName + " ...", 0, 100);
     auto model = _scene.createModel();
-    importMorphology(servus::URI(fileName), *model, index);
+    Vector3f somaPosition;
+    importMorphology(servus::URI(fileName), *model, index, {}, somaPosition);
     model->createMissingMaterials();
     updateProgress("Loading " + modelName + " ...", 100, 100);
-    return std::make_shared<ModelDescriptor>(std::move(model), fileName);
+
+    Transformation transformation;
+    transformation.setRotationCenter(somaPosition);
+    auto modelDescriptor =
+        std::make_shared<ModelDescriptor>(std::move(model), fileName);
+    modelDescriptor->setTransformation(transformation);
+    return modelDescriptor;
 }
 
 bool MorphologyLoader::importMorphology(const servus::URI& uri, Model& model,
                                         const size_t index,
-                                        const Matrix4f& transformation)
+                                        const Matrix4f& transformation,
+                                        Vector3f& somaPosition)
 {
-    return _impl->importMorphology(uri, model, index, transformation);
+    return _impl->importMorphology(uri, model, index, transformation,
+                                   somaPosition);
 }
 
 bool MorphologyLoader::_importMorphology(const servus::URI& source,
@@ -1109,7 +1123,8 @@ bool MorphologyLoader::_importMorphology(const servus::URI& source,
                                          CompartmentReportPtr compartmentReport,
                                          ParallelModelContainer& model)
 {
+    Vector3f somaPosition;
     return _impl->importMorphology(source, index, materialFunc, transformation,
-                                   compartmentReport, model);
+                                   compartmentReport, model, somaPosition);
 }
 }

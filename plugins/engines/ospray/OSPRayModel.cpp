@@ -23,7 +23,6 @@
 #include "OSPRayVolume.h"
 #include "utils.h"
 
-#include <brayns/common/Transformation.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Scene.h>
 
