@@ -23,6 +23,7 @@
 #include <brayns/common/scene/Scene.h>
 
 #include <fstream>
+#include <sstream>
 
 #include "TransferFunctionLoader.h"
 

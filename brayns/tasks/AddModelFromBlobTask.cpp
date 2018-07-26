@@ -26,6 +26,8 @@
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/scene/Scene.h>
 
+#include <sstream>
+
 namespace brayns
 {
 AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
