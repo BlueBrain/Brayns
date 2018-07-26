@@ -35,9 +35,6 @@
 
 namespace brayns
 {
-struct Camera;
-struct Model;
-
 /**
  * The AbstractRenderer class implements a base renderer for all Brayns custom
  * implementations
