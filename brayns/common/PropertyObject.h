@@ -118,6 +118,24 @@ public:
         return types;
     }
 
+    /** Clear all current properties and clone new properties from object  */
+    void clonePropertiesFrom(const PropertyObject& obj)
+    {
+        _currentType = obj._currentType;
+        _properties.clear();
+        for (const auto& kv : obj._properties)
+        {
+            const auto& key = kv.first;
+            const auto& properties = kv.second.getProperties();
+
+            PropertyMap propertyMapClone;
+            for (const auto& property : properties)
+                propertyMapClone.setProperty(*property);
+
+            _properties[key] = propertyMapClone;
+        }
+    }
+
 protected:
     std::string _currentType;
     std::map<std::string, PropertyMap> _properties;

@@ -60,16 +60,24 @@ public:
                                                 FrameBufferFormat::rgba_i8,
                                                 true))
         , _camera(engine.createCamera())
-        , _renderer(engine.createRenderer(
-              _params.animParams
-                  ? *_params.animParams
-                  : engine.getParametersManager().getAnimationParameters(),
-              _params.renderingParams
-                  ? *_params.renderingParams
-                  : engine.getParametersManager().getRenderingParameters()))
         , _scene(engine.createScene(engine.getParametersManager()))
         , _imageGenerator(imageGenerator)
     {
+        if (_params.animParams == nullptr)
+        {
+            _params.animParams = std::make_unique<AnimationParameters>(
+                engine.getParametersManager().getAnimationParameters());
+        }
+
+        if (_params.renderingParams == nullptr)
+        {
+            _params.renderingParams = std::make_unique<RenderingParameters>(
+                engine.getParametersManager().getRenderingParameters());
+        }
+
+        _renderer = engine.createRenderer(*_params.animParams,
+                                          *_params.renderingParams);
+
         const auto& renderer = engine.getRenderer();
         _renderer->setCurrentType(renderer.getCurrentType());
         _renderer->setProperties(renderer.getPropertyMap());
@@ -80,7 +88,10 @@ public:
             _camera->setProperties(engine.getCamera().getPropertyMap());
         }
         else
+        {
             *_camera = engine.getCamera();
+            _camera->clonePropertiesFrom(engine.getCamera());
+        }
 
         *_scene = engine.getScene();
     }
