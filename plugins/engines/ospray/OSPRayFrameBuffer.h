@@ -51,6 +51,8 @@ public:
 
 private:
     void _recreate();
+    void _unmapUnsafe();
+    void _mapUnsafe();
 
     OSPFrameBuffer _frameBuffer;
     uint8_t* _colorBuffer;

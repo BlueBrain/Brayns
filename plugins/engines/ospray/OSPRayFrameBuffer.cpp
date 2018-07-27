@@ -39,10 +39,12 @@ OSPRayFrameBuffer::OSPRayFrameBuffer(const Vector2ui& frameSize,
 
 OSPRayFrameBuffer::~OSPRayFrameBuffer()
 {
-    unmap();
+    lock();
+    _unmapUnsafe();
     if (_pixelOp)
         ospRelease(_pixelOp);
     ospFreeFrameBuffer(_frameBuffer);
+    unlock();
 }
 
 void OSPRayFrameBuffer::enableDeflectPixelOp()
@@ -86,9 +88,10 @@ void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params,
 
 void OSPRayFrameBuffer::_recreate()
 {
+    lock();
     if (_frameBuffer)
     {
-        unmap();
+        _unmapUnsafe();
         ospFreeFrameBuffer(_frameBuffer);
     }
 
@@ -116,6 +119,7 @@ void OSPRayFrameBuffer::_recreate()
         ospSetPixelOp(_frameBuffer, _pixelOp);
     ospCommit(_frameBuffer);
     clear();
+    unlock();
 }
 
 void OSPRayFrameBuffer::clear()
@@ -129,15 +133,26 @@ void OSPRayFrameBuffer::clear()
 
 void OSPRayFrameBuffer::map()
 {
+    lock();
+    _mapUnsafe();
+}
+
+void OSPRayFrameBuffer::_mapUnsafe()
+{
     if (_frameBufferFormat == FrameBufferFormat::none)
         return;
 
-    lock();
     _colorBuffer = (uint8_t*)ospMapFrameBuffer(_frameBuffer, OSP_FB_COLOR);
     _depthBuffer = (float*)ospMapFrameBuffer(_frameBuffer, OSP_FB_DEPTH);
 }
 
 void OSPRayFrameBuffer::unmap()
+{
+    _unmapUnsafe();
+    unlock();
+}
+
+void OSPRayFrameBuffer::_unmapUnsafe()
 {
     if (_frameBufferFormat == FrameBufferFormat::none)
         return;
@@ -153,8 +168,6 @@ void OSPRayFrameBuffer::unmap()
         ospUnmapFrameBuffer(_depthBuffer, _frameBuffer);
         _depthBuffer = 0;
     }
-
-    unlock();
 }
 
 void OSPRayFrameBuffer::setAccumulation(const bool accumulation)
