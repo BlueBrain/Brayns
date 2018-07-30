@@ -39,12 +39,12 @@ OSPRayFrameBuffer::OSPRayFrameBuffer(const Vector2ui& frameSize,
 
 OSPRayFrameBuffer::~OSPRayFrameBuffer()
 {
-    lock();
+    auto lock = getScopeLock();
+
     _unmapUnsafe();
     if (_pixelOp)
         ospRelease(_pixelOp);
     ospFreeFrameBuffer(_frameBuffer);
-    unlock();
 }
 
 void OSPRayFrameBuffer::enableDeflectPixelOp()
@@ -88,7 +88,8 @@ void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params,
 
 void OSPRayFrameBuffer::_recreate()
 {
-    lock();
+    auto lock = getScopeLock();
+
     if (_frameBuffer)
     {
         _unmapUnsafe();
@@ -119,7 +120,6 @@ void OSPRayFrameBuffer::_recreate()
         ospSetPixelOp(_frameBuffer, _pixelOp);
     ospCommit(_frameBuffer);
     clear();
-    unlock();
 }
 
 void OSPRayFrameBuffer::clear()
@@ -133,7 +133,7 @@ void OSPRayFrameBuffer::clear()
 
 void OSPRayFrameBuffer::map()
 {
-    lock();
+    _mapMutex.lock();
     _mapUnsafe();
 }
 
@@ -149,7 +149,7 @@ void OSPRayFrameBuffer::_mapUnsafe()
 void OSPRayFrameBuffer::unmap()
 {
     _unmapUnsafe();
-    unlock();
+    _mapMutex.unlock();
 }
 
 void OSPRayFrameBuffer::_unmapUnsafe()
