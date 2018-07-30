@@ -73,6 +73,7 @@ void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
                      << object.getCurrentType() << std::endl;
     }
 }
+
 osp::affine3f transformationToAffine3f(const Transformation& transformation)
 {
     // https://stackoverflow.com/a/18436193
@@ -88,13 +89,16 @@ osp::affine3f transformationToAffine3f(const Transformation& transformation)
     rot = ospcommon::affine3f::rotate({0, 1, 0}, y) * rot;
     rot = ospcommon::affine3f::rotate({0, 0, 1}, z) * rot;
 
+    const auto& center = transformation.getRotationCenter();
     const auto& translation = transformation.getTranslation();
     const auto& scale = transformation.getScale();
 
     const auto t =
-        ospcommon::affine3f::translate(
-            {translation.x(), translation.y(), translation.z()}) *
-        rot * ospcommon::affine3f::scale({scale.x(), scale.y(), scale.z()});
+        ospcommon::affine3f::translate({center.x(), center.y(), center.z()}) *
+        rot * ospcommon::affine3f::scale({scale.x(), scale.y(), scale.z()}) *
+        ospcommon::affine3f::translate({translation.x() - center.x(),
+                                        translation.y() - center.y(),
+                                        translation.z() - center.z()});
     return (osp::affine3f&)t;
 }
 
