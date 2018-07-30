@@ -64,21 +64,20 @@ public:
      * @param index Specifies an index for the morphology. This is mainly used
      * to give a specific color to every morphology
      * @param transformation Transformation to apply to the morphology
-     * @param somaPosition Position of the soma
-     * @return True if the morphology is successfully loaded, false otherwise
+     * @return Position of the soma
      */
-    bool importMorphology(const servus::URI& source, Model& model,
-                          const size_t index, const Matrix4f& transformation,
-                          Vector3f& somaPosition);
+    Vector3f importMorphology(const servus::URI& source, Model& model,
+                              const size_t index,
+                              const Matrix4f& transformation);
 
 private:
     using CompartmentReportPtr = std::shared_ptr<brion::CompartmentReport>;
     using MaterialFunc = std::function<size_t(brain::neuron::SectionType)>;
-    bool _importMorphology(const servus::URI& source, const uint64_t index,
-                           MaterialFunc materialFunc,
-                           const Matrix4f& transformation,
-                           CompartmentReportPtr compartmentReport,
-                           ParallelModelContainer& model);
+    Vector3f _importMorphology(const servus::URI& source, const uint64_t index,
+                               MaterialFunc materialFunc,
+                               const Matrix4f& transformation,
+                               CompartmentReportPtr compartmentReport,
+                               ParallelModelContainer& model);
     friend class CircuitLoader;
     class Impl;
     std::unique_ptr<Impl> _impl;
