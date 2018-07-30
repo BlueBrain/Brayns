@@ -41,8 +41,10 @@ public:
     void unmap() final;
     void setAccumulation(const bool accumulation) final;
 
-    void lock() { _mapMutex.lock(); }
-    void unlock() { _mapMutex.unlock(); }
+    std::unique_lock<std::mutex> getScopeLock()
+    {
+        return std::unique_lock<std::mutex>(_mapMutex);
+    }
     uint8_t* getColorBuffer() final { return _colorBuffer; }
     float* getDepthBuffer() final { return _depthBuffer; }
     OSPFrameBuffer impl() { return _frameBuffer; }
@@ -51,6 +53,8 @@ public:
 
 private:
     void _recreate();
+    void _unmapUnsafe();
+    void _mapUnsafe();
 
     OSPFrameBuffer _frameBuffer;
     uint8_t* _colorBuffer;
