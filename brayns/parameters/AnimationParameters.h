@@ -60,6 +60,8 @@ public:
 
     void setUnit(const std::string& unit) { _updateValue(_unit, unit); }
     void setDt(const double dt) { _updateValue(_dt, dt); }
+    double getDt() const { return _dt; }
+    uint32_t getStart() const { return _start; }
 private:
     void parse(const po::variables_map& vm) final;
 
