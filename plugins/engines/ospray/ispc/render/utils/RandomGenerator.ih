@@ -29,6 +29,7 @@ float getRandomValue(varying ScreenSample& sample, const int randomNumber);
     Returns a random direction based on location in the frame buffer, the normal
    to the surface and rotation parameters for the precomputed hard-coded random
    distribution.
+    @param fb Frame buffer
     @param sample Frame buffer sample being rendered
     @param normal Normal vector to the surface
     @param randomNumber A random number that introduces noise in the
@@ -36,7 +37,8 @@ float getRandomValue(varying ScreenSample& sample, const int randomNumber);
     @return A random direction based on specified parameters
 */
 
-vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
+vec3f getRandomVector(uniform FrameBuffer* uniform fb,
+                      varying ScreenSample& sample, const vec3f& normal,
                       const int randomNumber);
 
 /**

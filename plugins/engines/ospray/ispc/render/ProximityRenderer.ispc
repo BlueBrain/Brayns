@@ -93,10 +93,11 @@ inline vec3f ProximityRenderer_shadeRay(
 
             // glossiness
             if (mat->glossiness < 1.f)
-                normal = normalize(
-                    normal +
-                    (1.f - mat->glossiness) *
-                        getRandomVector(sample, normal, self->randomNumber));
+                normal = normalize(normal +
+                                   (1.f - mat->glossiness) *
+                                       getRandomVector(self->abstract.super.fb,
+                                                       sample, normal,
+                                                       self->randomNumber));
             // Opacity
             opacity = mat->d;
             if (valid(mat->map_d))
@@ -161,7 +162,8 @@ inline vec3f ProximityRenderer_shadeRay(
         {
             // Generate random ray and trace it
             varying vec3f ao_dir =
-                getRandomVector(sample, normal, self->randomNumber);
+                getRandomVector(self->abstract.super.fb, sample, normal,
+                                self->randomNumber);
 
             if (dot(ao_dir, normal) < 0.f)
                 ao_dir = ao_dir * -1.f;
