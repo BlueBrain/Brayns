@@ -131,19 +131,6 @@ inline float shadedLightIntensity(
     varying int depth = 0;
     varying bool moreRebounds = true;
 
-#if 0
-    // Light attenuation altered by volume
-    // TO BE DONE?
-    if (self->volumeData)
-    {
-        const vec4f volumetricValue =
-            getVolumeContribution(self, shadowRay, sample,
-                                  self->volumeSamplesPerRay);
-        intensity = volumetricValue.w;
-        moreRebounds = (intensity > 0.f);
-    }
-#endif
-
     while (moreRebounds && depth < NB_MAX_REBOUNDS)
     {
         traceRay(self->abstract.super.model, shadowRay);
@@ -232,6 +219,14 @@ inline varying float getVolumeShadowContribution(
     Volume* uniform volume, const uniform SimulationRenderer* uniform self,
     const varying Ray& ray, varying ScreenSample& sample)
 {
+    // Intersection with Geometry?
+    varying Ray shadowRay = ray;
+    shadowRay.geomID = -1;
+
+    traceRay(self->abstract.super.model, shadowRay);
+    if (shadowRay.geomID != -1)
+        return 1.f;
+
     // Find volume intersections
     float t0, t1;
     intersectBox(ray, volume->boundingBox, t0, t1);
@@ -239,22 +234,16 @@ inline varying float getVolumeShadowContribution(
     // Ray marching from light source to voxel
     const float epsilon = 1.f;
     float shadowIntensity = 0.f;
-    int x = max(1, (int)(1.f / volume->samplingRate));
-    int c = 0;
     for (float t = t1; t > epsilon && shadowIntensity < 1.f; t -= epsilon)
     {
         float sampleOpacity = 0.f;
-        if (c % x == 0)
-        {
-            const vec3f point = ray.org + ray.dir * t;
-            const float sample = volume->sample(volume, point);
+        const vec3f point = ray.org + ray.dir * t;
+        const float sample = volume->sample(volume, point);
 
-            // Look up the opacity associated with the volume sample.
-            sampleOpacity = volume->transferFunction->getOpacityForValue(
-                volume->transferFunction, sample);
-        }
+        // Look up the opacity associated with the volume sample.
+        sampleOpacity = volume->transferFunction->getOpacityForValue(
+            volume->transferFunction, sample);
         shadowIntensity += sampleOpacity;
-        ++c;
     }
     return clamp(shadowIntensity, 0.f, 1.f);
 }
@@ -304,27 +293,38 @@ inline vec4f getVolumeContribution(
     // Ray marching
     vec4f pathColor = make_vec4f(0.f);
     const float epsilon = 1.f;
-    int x = max(1, (int)(1.f / volume->samplingRate));
-    int c = 0;
-    for (float t = t0; t < t1 && pathColor.w < 1.f; t += epsilon)
+    int samplingStep = max(1, (int)(1.f / volume->samplingRate));
+    int samplingCounter = 0;
+    float shadowIntensity = 1.f;
+
+    t0 += (0.2f * getRandomValue(sample, self->randomNumber)) - 0.1f;
+    t1 = min(ray.t, t1);
+
+    for (float t = t0; t < t1 && pathColor.w < 0.9f; t += epsilon)
     {
         vec3f volumeSampleColor;
         float sampleOpacity = 0.f;
-        if (c % x == 0)
+
+        const vec3f point = ray.org + t * ray.dir;
+        const float volumeSample = volume->sample(volume, point);
+
+        // Look up the opacity associated with the volume sample.
+        sampleOpacity = volume->transferFunction->getOpacityForValue(
+            volume->transferFunction, volumeSample);
+        if (samplingCounter == 0 && sampleOpacity < 0.01f)
+            continue;
+
+        if (samplingCounter % samplingStep == 0)
         {
-            const vec3f point = ray.org + t * ray.dir;
-            const float volumeSample = volume->sample(volume, point);
-
-            // Look up the opacity associated with the volume sample.
-            sampleOpacity = volume->transferFunction->getOpacityForValue(
-                volume->transferFunction, volumeSample);
-
             // Look up the color associated with the volume sample.
             volumeSampleColor = volume->transferFunction->getColorForValue(
                 volume->transferFunction, volumeSample);
 
             // Voxel shading
-            if (self->shadingEnabled)
+            bool shadingEnabled = volume->gradientShadingEnabled;
+            if (volume->singleShade)
+                shadingEnabled &= (samplingCounter == 0);
+            if (shadingEnabled)
             {
                 vec3f gradient =
                     safe_normalize(volume->computeGradient(volume, point));
@@ -351,35 +351,29 @@ inline vec4f getVolumeContribution(
 
                 volumeSampleColor = volumeSampleColor * cosNL * light.weight;
 
-                /*
                 // Specular
                 const vec3f reflectedNormal = normalize(
-                    ray.dir - 2.f * dot(ray.dir, normal) * normal);
-                const float specularAngle =
-                    powf(max(0.f, dot(lightDirection, reflectedNormal)),
-                         20.f);
-                angle = max(angle, specularAngle);
-                specularColor =
-                    make_vec4f(0.5f * make_vec3f(specularAngle), 0.f);
-                */
+                    ray.dir - 2.f * dot(ray.dir, gradient) * gradient);
+                const float angle =
+                    powf(max(0.f, dot(light.dir, reflectedNormal)), 20.f);
+                volumeSampleColor =
+                    volumeSampleColor + volume->specular * angle;
             }
 
-            // Compute shadow contributions
-            float shadowIntensity = 0.f;
-            if (self->shadows > 0.f && sampleOpacity > 0.9f)
-            {
+            if (samplingCounter == 0 && self->shadows > 0.f)
+                // Compute shadow contributions
                 shadowIntensity =
                     getVolumeShadowContributions(volume, self, ray, sample,
                                                  point);
-                volumeSampleColor = volumeSampleColor * shadowIntensity;
-            }
         }
         composite(make_vec4f(volumeSampleColor, sampleOpacity), pathColor,
-                  epsilon);
+                  2.0f);
 
-        ++c;
+        ++samplingCounter;
     }
-    return pathColor;
+
+    // Apply shadow to RGB values only
+    return pathColor * make_vec4f(make_vec3f(shadowIntensity), 1.f);
 }
 
 inline bool launchRandomRay(const uniform SimulationRenderer* uniform self,
@@ -849,12 +843,12 @@ inline void processElectronShading(varying ScreenSample& sample,
 inline void processVolumeContribution(varying ScreenSample& sample,
                                       ShadingAttributes& attributes, Ray& ray)
 {
-    // if (attributes.self->abstract.volumeData)
     for (uniform int32 i = 0;
          i < attributes.self->abstract.super.model->volumeCount; i++)
     {
         Volume* uniform volume_i =
             attributes.self->abstract.super.model->volumes[i];
+
         const vec4f volumetricValue =
             getVolumeContribution(volume_i, attributes.self, ray, sample);
         attributes.volumeColor = make_vec3f(volumetricValue);
@@ -890,14 +884,9 @@ inline void processFinalContribution(ShadingAttributes& attributes)
 
     // Volume contribution
     if (attributes.volumeIntensity > 0.f)
-    {
-        vec4f dst =
-            make_vec4f(totalContributions, 1.f - attributes.volumeIntensity);
-        const vec4f src =
-            make_vec4f(attributes.volumeColor, attributes.volumeIntensity);
-        composite(src, dst, attributes.self->volumeSamplesPerRay);
-        totalContributions = make_vec3f(dst);
-    }
+        totalContributions =
+            attributes.volumeColor * attributes.volumeIntensity +
+            totalContributions * (1.f - attributes.volumeIntensity);
 
     // Store final contribution
     attributes.finalContribution =
