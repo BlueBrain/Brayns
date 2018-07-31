@@ -38,15 +38,18 @@ public:
     }
 
     ~SharedDataVolume();
+
     virtual void setVoxels(const void* voxels) = 0;
 
     /**
-     * Convenience function to use voxels from given file and pass them to
+     * Convenience functions to use voxels from given file and pass them to
      * setVoxels().
      */
     void mapData(const std::string& filename);
+    void mapData(const std::vector<char>& buffer);
 
 private:
+    std::vector<char> _memoryBuffer;
     void* _memoryMapPtr{nullptr};
     int _cacheFileDescriptor{-1};
     size_t _size{0};

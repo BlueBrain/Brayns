@@ -40,7 +40,7 @@ SharedDataVolume::~SharedDataVolume()
 {
     if (_memoryMapPtr)
     {
-        ::munmap((void *)_memoryMapPtr, _size);
+        ::munmap((void*)_memoryMapPtr, _size);
         _memoryMapPtr = nullptr;
     }
     if (_cacheFileDescriptor != NO_DESCRIPTOR)
@@ -50,7 +50,7 @@ SharedDataVolume::~SharedDataVolume()
     }
 }
 
-void SharedDataVolume::mapData(const std::string &filename)
+void SharedDataVolume::mapData(const std::string& filename)
 {
     _cacheFileDescriptor = open(filename.c_str(), O_RDONLY);
     if (_cacheFileDescriptor == NO_DESCRIPTOR)
@@ -76,5 +76,11 @@ void SharedDataVolume::mapData(const std::string &filename)
     }
 
     setVoxels(_memoryMapPtr);
+}
+
+void SharedDataVolume::mapData(const std::vector<char>& buffer)
+{
+    _memoryBuffer.insert(_memoryBuffer.begin(), buffer.begin(), buffer.end());
+    setVoxels(_memoryBuffer.data());
 }
 }
