@@ -47,6 +47,7 @@
 
 #include <brayns/tasks/AddModelTask.h>
 
+#include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/pluginapi/ExtensionPluginFactory.h>
 #include <brayns/pluginapi/PluginAPI.h>
 #include <plugins/engines/EngineFactory.h>
