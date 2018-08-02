@@ -1128,9 +1128,16 @@ float getRandomValue(varying ScreenSample& sample, const int randomNumber)
     return rotate(randomDistribution[x][y], sample.sampleID.z % 8);
 }
 
-vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
-                      const int randomNumber)
+inline vec3f getRandomVector(const unsigned int frameBufferWidth,
+                             varying ScreenSample& sample, const vec3f& normal,
+                             const int randomNumber)
 {
+    RandomTEA rng_state;
+    varying RandomTEA* const uniform rng = &rng_state;
+    RandomTEA__Constructor(rng, (frameBufferWidth * sample.sampleID.y) +
+                                    sample.sampleID.x,
+                           sample.sampleID.z);
+
     vec3f tangent, biTangent;
     getTangentVectors(normal, tangent, biTangent);
     const int accumID = sample.sampleID.z + randomNumber;
