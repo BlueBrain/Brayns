@@ -35,10 +35,9 @@ namespace internal
 #ifdef __GNUC__
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(effc++)
-#if (defined(__clang__) && !defined(__APPLE__))
-RAPIDJSON_DIAG_OFF(array - bounds) // some gcc versions generate wrong warnings
-// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59124
-#endif
+// clang-format off
+RAPIDJSON_DIAG_OFF(array-bounds) // some gcc versions generate wrong warnings https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59124
+// clang-format on
 #endif
 
 inline void GrisuRound(char* buffer, int len, uint64_t delta, uint64_t rest,
@@ -53,7 +52,7 @@ inline void GrisuRound(char* buffer, int len, uint64_t delta, uint64_t rest,
     }
 }
 
-inline unsigned CountDecimalDigit32(uint32_t n)
+inline int CountDecimalDigit32(uint32_t n)
 {
     // Simple pure C++ implementation was faster than __builtin_clz version in
     // this situation.
@@ -89,7 +88,7 @@ inline void DigitGen(const DiyFp& W, const DiyFp& Mp, uint64_t delta,
     const DiyFp wp_w = Mp - W;
     uint32_t p1 = static_cast<uint32_t>(Mp.f >> -one.e);
     uint64_t p2 = Mp.f & (one.f - 1);
-    unsigned kappa = CountDecimalDigit32(p1); // kappa in [0, 9]
+    int kappa = CountDecimalDigit32(p1); // kappa in [0, 9]
     *len = 0;
 
     while (kappa > 0)
@@ -161,10 +160,9 @@ inline void DigitGen(const DiyFp& W, const DiyFp& Mp, uint64_t delta,
         if (p2 < delta)
         {
             *K += kappa;
-            int index = -static_cast<int>(kappa);
+            int index = -kappa;
             GrisuRound(buffer, *len, delta, p2, one.f,
-                       wp_w.f *
-                           (index < 9 ? kPow10[-static_cast<int>(kappa)] : 0));
+                       wp_w.f * (index < 9 ? kPow10[index] : 0));
             return;
         }
     }

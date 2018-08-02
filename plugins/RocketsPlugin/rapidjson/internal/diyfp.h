@@ -26,8 +26,9 @@
 #define RAPIDJSON_DIYFP_H_
 
 #include "../rapidjson.h"
+#include <limits>
 
-#if defined(_MSC_VER) && defined(_M_AMD64)
+#if defined(_MSC_VER) && defined(_M_AMD64) && !defined(__INTEL_COMPILER)
 #include <intrin.h>
 #pragma intrinsic(_BitScanReverse64)
 #pragma intrinsic(_umul128)
@@ -119,6 +120,7 @@ struct DiyFp
 
     DiyFp Normalize() const
     {
+        RAPIDJSON_ASSERT(f != 0); // https://stackoverflow.com/a/26809183/291737
 #if defined(_MSC_VER) && defined(_M_AMD64)
         unsigned long index;
         _BitScanReverse64(&index, f);
@@ -167,6 +169,17 @@ struct DiyFp
             double d;
             uint64_t u64;
         } u;
+        RAPIDJSON_ASSERT(f <= kDpHiddenBit + kDpSignificandMask);
+        if (e < kDpDenormalExponent)
+        {
+            // Underflow.
+            return 0.0;
+        }
+        if (e >= kDpMaxExponent)
+        {
+            // Overflow.
+            return std::numeric_limits<double>::infinity();
+        }
         const uint64_t be =
             (e == kDpDenormalExponent && (f & kDpHiddenBit) == 0)
                 ? 0
@@ -293,6 +306,7 @@ inline DiyFp GetCachedPowerByIndex(size_t index)
         375,   402,   428,   455,   481,   508,   534,   561,   588,   614,
         641,   667,   694,   720,   747,   774,   800,   827,   853,   880,
         907,   933,   960,   986,   1013,  1039,  1066};
+    RAPIDJSON_ASSERT(index < 87);
     return DiyFp(kCachedPowers_F[index], kCachedPowers_E[index]);
 }
 
@@ -314,7 +328,8 @@ inline DiyFp GetCachedPower(int e, int* K)
 
 inline DiyFp GetCachedPower10(int exp, int* outExp)
 {
-    unsigned index = (static_cast<unsigned>(exp) + 348u) / 8u;
+    RAPIDJSON_ASSERT(exp >= -348);
+    unsigned index = static_cast<unsigned>(exp + 348) / 8u;
     *outExp = -348 + static_cast<int>(index) * 8;
     return GetCachedPowerByIndex(index);
 }
