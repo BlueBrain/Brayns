@@ -48,6 +48,46 @@ public:
         auto actions = api->getActionInterface();
         BOOST_REQUIRE(actions);
 
+        // test property map for actions
+        actions->registerNotification(
+            brayns::RpcDescription{"notify", "A notification with no params"},
+            [&] { ++numCalls; });
+
+        brayns::PropertyMap input;
+        input.setProperty({"value", "my nice int value", 0});
+        actions->registerNotification(
+            brayns::RpcParameterDescription{"notify-param",
+                                            "A notification with property map",
+                                            "param", "a beautiful input param"},
+            input,
+            [&](const brayns::PropertyMap& prop) {
+                BOOST_CHECK_EQUAL(prop.getProperty<int>("value"), 42);
+                ++numCalls;
+            });
+
+        brayns::PropertyMap output;
+        output.setProperty({"result", "a good result", true});
+        actions->registerRequest(
+            brayns::RpcDescription{"request",
+                                   "A request returning a property map"},
+            output, [&, output = output ] {
+                ++numCalls;
+                return output;
+            });
+
+        actions->registerRequest(
+            brayns::RpcParameterDescription{
+                "request-param",
+                "A request with a param and returning a property map", "param",
+                "another nice input param"},
+            input, output,
+            [&, output = output ](const brayns::PropertyMap& prop) {
+                ++numCalls;
+                BOOST_CHECK_EQUAL(prop.getProperty<int>("value"), 42);
+                return output;
+            });
+
+        // test "arbitrary" objects for actions
         actions->registerNotification("hello", [&] { ++numCalls; });
         actions->registerNotification<Vec2>("foo", [&](const Vec2& vec) {
             ++numCalls;
@@ -63,12 +103,13 @@ public:
             return vec;
         });
 
+        // test properties from custom renderer
         brayns::PropertyMap props;
         props.setProperty({"awesome", "Best property", 42, {0, 50}});
         api->getRenderer().setProperties("myrenderer", props);
     }
 
-    ~MyPlugin() { BOOST_REQUIRE_EQUAL(numCalls, 4); }
+    ~MyPlugin() { BOOST_REQUIRE_EQUAL(numCalls, 8); }
     size_t numCalls{0};
 };
 

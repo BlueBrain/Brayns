@@ -161,6 +161,40 @@ public:
         return request.get();
     }
 
+    template <typename Params, typename RetVal>
+    RetVal makeRequestUpdate(const std::string& method, const Params& params,
+                             RetVal baseObject)
+    {
+        auto promise = std::make_shared<std::promise<RetVal>>();
+        auto callback = [promise, &baseObject](auto response) {
+            if (response.isError())
+                promise->set_exception(std::make_exception_ptr(
+                    rockets::jsonrpc::response_error(response.error)));
+            else
+            {
+                if (!from_json(baseObject, response.result))
+                    promise->set_exception(std::make_exception_ptr(
+                        rockets::jsonrpc::response_error(
+                            "Response JSON conversion failed",
+                            rockets::jsonrpc::ErrorCode::
+                                invalid_json_response)));
+                else
+                    promise->set_value(std::move(baseObject));
+            }
+        };
+
+        _client.request(method, to_json(params), callback);
+        auto future = promise->get_future();
+
+        while (!rockets::is_ready(future))
+        {
+            _wsClient.process(0);
+            _brayns->render();
+        }
+
+        return future.get();
+    }
+
     template <typename RetVal>
     RetVal makeRequestUpdate(const std::string& method, RetVal baseObject)
     {
@@ -247,6 +281,14 @@ template <typename RetVal>
 RetVal makeRequest(const std::string& method)
 {
     return ClientServer::instance().makeRequest<RetVal>(method);
+}
+
+template <typename Params, typename RetVal>
+RetVal makeRequestUpdate(const std::string& method, const Params& params,
+                         RetVal baseObject)
+{
+    return ClientServer::instance().makeRequestUpdate<Params, RetVal>(
+        method, params, baseObject);
 }
 
 template <typename RetVal>

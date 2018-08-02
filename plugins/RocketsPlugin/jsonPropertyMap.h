@@ -64,6 +64,7 @@ std::string snakeCaseToCamelCase(const std::string& hyphenated)
     return camel;
 }
 
+// Make a (movable) rapidjson snake_case string from the given camelCase string.
 rapidjson::Value make_json_string(const std::string& camelCase,
                                   rapidjson::Document::AllocatorType& allocator)
 {
@@ -73,6 +74,8 @@ rapidjson::Value make_json_string(const std::string& camelCase,
     return val;
 }
 
+// Create JSON schema for given property and add it to the given properties
+// parent.
 template <typename T>
 void _addPropertySchema(const PropertyMap::Property& prop,
                         rapidjson::Value& properties,
@@ -115,6 +118,8 @@ void _addPropertySchema(const PropertyMap::Property& prop,
                          jsonSchema, allocator);
 }
 
+// Create JSON schema for given bool property and add it to the given properties
+// parent.
 template <>
 void _addPropertySchema<bool>(const PropertyMap::Property& prop,
                               rapidjson::Value& properties,
@@ -130,6 +135,8 @@ void _addPropertySchema<bool>(const PropertyMap::Property& prop,
                          jsonSchema, allocator);
 }
 
+// Create JSON schema for string property and add it to the given properties
+// parent.
 template <>
 void _addPropertySchema<std::string>(
     const PropertyMap::Property& prop, rapidjson::Value& properties,
@@ -145,6 +152,8 @@ void _addPropertySchema<std::string>(
                          jsonSchema, allocator);
 }
 
+// Create JSON schema for given array property and add it to the given
+// properties parent.
 template <typename T, int S>
 void _addArrayPropertySchema(const PropertyMap::Property& prop,
                              rapidjson::Value& properties,
@@ -159,9 +168,10 @@ void _addArrayPropertySchema(const PropertyMap::Property& prop,
                          jsonSchema, allocator);
 }
 
+// Serialize given array property to JSON.
 template <typename T>
-void _addArrayPropertyJSON(rapidjson::Document& document,
-                           PropertyMap::Property& prop)
+void _arrayPropertyToJson(rapidjson::Document& document,
+                          PropertyMap::Property& prop)
 {
     rapidjson::Value array(rapidjson::kArrayType);
     for (const auto& val : prop.get<T>())
@@ -173,7 +183,59 @@ void _addArrayPropertyJSON(rapidjson::Document& document,
 }
 }
 
-void getPropsSchema(
+// Create JSON schema for a property map and add it to the given propSchema
+// parent.
+void _addPropertyMapSchema(const PropertyMap& propertyMap,
+                           const std::string& title,
+                           rapidjson::Document::AllocatorType& allocator,
+                           rapidjson::Value& propSchema)
+{
+    using namespace rapidjson;
+    propSchema.AddMember(StringRef("title"), StringRef(title.c_str()),
+                         allocator);
+    propSchema.AddMember(StringRef("type"), StringRef("object"), allocator);
+
+    Value properties(kObjectType);
+    for (auto prop : propertyMap.getProperties())
+    {
+        switch (prop->type)
+        {
+        case PropertyMap::Property::Type::Float:
+            _addPropertySchema<float>(*prop, properties, allocator);
+            break;
+        case PropertyMap::Property::Type::Int:
+            _addPropertySchema<int32_t>(*prop, properties, allocator);
+            break;
+        case PropertyMap::Property::Type::String:
+            _addPropertySchema<std::string>(*prop, properties, allocator);
+            break;
+        case PropertyMap::Property::Type::Bool:
+            _addPropertySchema<bool>(*prop, properties, allocator);
+            break;
+        case PropertyMap::Property::Type::Vec2f:
+            _addArrayPropertySchema<float, 2>(*prop, properties, allocator);
+            break;
+        case PropertyMap::Property::Type::Vec2i:
+            _addArrayPropertySchema<int32_t, 2>(*prop, properties, allocator);
+            break;
+        case PropertyMap::Property::Type::Vec3f:
+            _addArrayPropertySchema<float, 3>(*prop, properties, allocator);
+            break;
+        case PropertyMap::Property::Type::Vec3i:
+            _addArrayPropertySchema<int32_t, 3>(*prop, properties, allocator);
+            break;
+        case PropertyMap::Property::Type::Vec4f:
+            _addArrayPropertySchema<float, 4>(*prop, properties, allocator);
+            break;
+        }
+    }
+
+    propSchema.AddMember(StringRef("properties"), properties, allocator);
+}
+
+// Create JSON schema for a list of property maps and add it to the given oneOf
+// parent.
+void _addPropertyMapOneOfSchema(
     const std::vector<std::pair<std::string, PropertyMap>>& objs,
     rapidjson::Document::AllocatorType& allocator, rapidjson::Value& oneOf)
 {
@@ -181,68 +243,29 @@ void getPropsSchema(
     for (const auto& obj : objs)
     {
         Value propSchema(kObjectType);
-        propSchema.AddMember(StringRef("title"), StringRef(obj.first.c_str()),
-                             allocator);
-        propSchema.AddMember(StringRef("type"), StringRef("object"), allocator);
-
-        Value properties(kObjectType);
-        for (auto prop : obj.second.getProperties())
-        {
-            switch (prop->type)
-            {
-            case PropertyMap::Property::Type::Float:
-                _addPropertySchema<float>(*prop, properties, allocator);
-                break;
-            case PropertyMap::Property::Type::Int:
-                _addPropertySchema<int32_t>(*prop, properties, allocator);
-                break;
-            case PropertyMap::Property::Type::String:
-                _addPropertySchema<std::string>(*prop, properties, allocator);
-                break;
-            case PropertyMap::Property::Type::Bool:
-                _addPropertySchema<bool>(*prop, properties, allocator);
-                break;
-            case PropertyMap::Property::Type::Vec2f:
-                _addArrayPropertySchema<float, 2>(*prop, properties, allocator);
-                break;
-            case PropertyMap::Property::Type::Vec2i:
-                _addArrayPropertySchema<int32_t, 2>(*prop, properties,
-                                                    allocator);
-                break;
-            case PropertyMap::Property::Type::Vec3f:
-                _addArrayPropertySchema<float, 3>(*prop, properties, allocator);
-                break;
-            case PropertyMap::Property::Type::Vec3i:
-                _addArrayPropertySchema<int32_t, 3>(*prop, properties,
-                                                    allocator);
-                break;
-            case PropertyMap::Property::Type::Vec4f:
-                _addArrayPropertySchema<float, 4>(*prop, properties, allocator);
-                break;
-            }
-        }
-
-        propSchema.AddMember(StringRef("properties"), properties, allocator);
-
+        _addPropertyMapSchema(obj.second, obj.first, allocator, propSchema);
         oneOf.PushBack(propSchema, allocator);
     }
 }
 
-std::string buildJsonRpcSchemaGetProperties(
-    const std::string& title, const std::string& description,
+// Create JSON schema for an RPC request returning one of the provided property
+// maps.
+std::string buildJsonRpcSchemaRequestPropertyMaps(
+    const RpcDescription& desc,
     const std::vector<std::pair<std::string, PropertyMap>>& objs)
 {
     using namespace rapidjson;
     Document schema(kObjectType);
     auto& allocator = schema.GetAllocator();
-    schema.AddMember(StringRef("title"), StringRef(title.c_str()), allocator);
-    schema.AddMember(StringRef("description"), StringRef(description.c_str()),
+    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
                      allocator);
+    schema.AddMember(StringRef("description"),
+                     StringRef(desc.methodDescription.c_str()), allocator);
     schema.AddMember(StringRef("type"), StringRef("method"), allocator);
 
     Value returns(kObjectType);
     Value oneOf(kArrayType);
-    getPropsSchema(objs, allocator, oneOf);
+    _addPropertyMapOneOfSchema(objs, allocator, oneOf);
     returns.AddMember(StringRef("oneOf"), oneOf, allocator);
     schema.AddMember(StringRef("returns"), returns, allocator);
 
@@ -255,16 +278,76 @@ std::string buildJsonRpcSchemaGetProperties(
     return buffer.GetString();
 }
 
-std::string buildJsonRpcSchemaSetProperties(
-    const std::string& title, const RpcDocumentation& doc,
+// Create JSON schema for an RPC request returning the provided property map.
+std::string buildJsonRpcSchemaRequestPropertyMap(const RpcDescription& desc,
+                                                 const PropertyMap& obj)
+{
+    using namespace rapidjson;
+    Document schema(kObjectType);
+    auto& allocator = schema.GetAllocator();
+    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
+                     allocator);
+    schema.AddMember(StringRef("description"),
+                     StringRef(desc.methodDescription.c_str()), allocator);
+    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
+
+    Value returns(kObjectType);
+    _addPropertyMapSchema(obj, "", allocator, returns);
+    schema.AddMember(StringRef("returns"), returns, allocator);
+
+    Value params(kArrayType);
+    schema.AddMember(StringRef("params"), params, allocator);
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    schema.Accept(writer);
+    return buffer.GetString();
+}
+
+// Create JSON schema for an RPC request accepting the input property map and
+// returning the output property map.
+std::string buildJsonRpcSchemaRequestPropertyMap(
+    const RpcParameterDescription& desc, const PropertyMap& input,
+    const PropertyMap& output)
+{
+    using namespace rapidjson;
+    Document schema(kObjectType);
+    auto& allocator = schema.GetAllocator();
+    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
+                     allocator);
+    schema.AddMember(StringRef("description"),
+                     StringRef(desc.methodDescription.c_str()), allocator);
+    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
+
+    Value returns(kObjectType);
+    _addPropertyMapSchema(output, "", allocator, returns);
+    schema.AddMember(StringRef("returns"), returns, allocator);
+
+    Value params(kArrayType);
+    Value param(kObjectType);
+    _addPropertyMapSchema(input, desc.paramName, allocator, param);
+    params.PushBack(param, allocator);
+    schema.AddMember(StringRef("params"), params, allocator);
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    schema.Accept(writer);
+    return buffer.GetString();
+}
+
+// Create JSON schema for an RPC notification accepting one of the provided
+// property maps.
+std::string buildJsonRpcSchemaNotifyPropertyMaps(
+    const RpcParameterDescription& desc,
     const std::vector<std::pair<std::string, PropertyMap>>& objs)
 {
     using namespace rapidjson;
     Document schema(kObjectType);
     auto& allocator = schema.GetAllocator();
-    schema.AddMember(StringRef("title"), StringRef(title.c_str()), allocator);
+    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
+                     allocator);
     schema.AddMember(StringRef("description"),
-                     StringRef(doc.functionDescription.c_str()), allocator);
+                     StringRef(desc.methodDescription.c_str()), allocator);
     schema.AddMember(StringRef("type"), StringRef("method"), allocator);
 
     bool retVal;
@@ -274,7 +357,7 @@ std::string buildJsonRpcSchemaSetProperties(
     Value params(kArrayType);
     Value oneOf(kArrayType);
     Value returns(kObjectType);
-    getPropsSchema(objs, allocator, oneOf);
+    _addPropertyMapOneOfSchema(objs, allocator, oneOf);
     returns.AddMember(StringRef("oneOf"), oneOf, allocator);
     params.PushBack(returns, allocator);
     schema.AddMember(StringRef("params"), params, allocator);
@@ -285,9 +368,42 @@ std::string buildJsonRpcSchemaSetProperties(
     return buffer.GetString();
 }
 
+// Create JSON schema for an RPC notification accepting the provided property
+// map.
+std::string buildJsonRpcSchemaNotifyPropertyMap(
+    const RpcParameterDescription& desc, const PropertyMap& properties)
+{
+    using namespace rapidjson;
+    Document schema(kObjectType);
+    auto& allocator = schema.GetAllocator();
+    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
+                     allocator);
+    schema.AddMember(StringRef("description"),
+                     StringRef(desc.methodDescription.c_str()), allocator);
+    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
+
+    bool retVal;
+    auto retSchema = staticjson::export_json_schema(&retVal);
+    schema.AddMember(StringRef("returns"), retSchema, allocator);
+
+    Value params(kArrayType);
+    Value returns(kObjectType);
+    _addPropertyMapSchema(properties, desc.paramName, allocator, returns);
+    params.PushBack(returns, allocator);
+    schema.AddMember(StringRef("params"), params, allocator);
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    schema.Accept(writer);
+    return buffer.GetString();
+}
+
+// Create JSON schema for an object where its properties is a oneOf list of the
+// given property maps.
 template <>
-std::string getSchema(std::vector<std::pair<std::string, PropertyMap>>& objs,
-                      const std::string& title)
+std::string buildJsonSchema(
+    std::vector<std::pair<std::string, PropertyMap>>& objs,
+    const std::string& title)
 {
     using namespace rapidjson;
 
@@ -296,7 +412,7 @@ std::string getSchema(std::vector<std::pair<std::string, PropertyMap>>& objs,
     schema.AddMember(StringRef("type"), StringRef("object"), allocator);
     schema.AddMember(StringRef("title"), StringRef(title.c_str()), allocator);
     Value oneOf(kArrayType);
-    getPropsSchema(objs, allocator, oneOf);
+    _addPropertyMapOneOfSchema(objs, allocator, oneOf);
     schema.AddMember(StringRef("oneOf"), oneOf, allocator);
 
     StringBuffer buffer;
@@ -349,19 +465,19 @@ inline std::string to_json(const brayns::PropertyMap& obj)
                 prop->get<bool>(), allocator);
             break;
         case PropertyMap::Property::Type::Vec2f:
-            brayns::_addArrayPropertyJSON<std::array<float, 2>>(json, *prop);
+            brayns::_arrayPropertyToJson<std::array<float, 2>>(json, *prop);
             break;
         case PropertyMap::Property::Type::Vec2i:
-            brayns::_addArrayPropertyJSON<std::array<int32_t, 2>>(json, *prop);
+            brayns::_arrayPropertyToJson<std::array<int32_t, 2>>(json, *prop);
             break;
         case PropertyMap::Property::Type::Vec3f:
-            brayns::_addArrayPropertyJSON<std::array<float, 3>>(json, *prop);
+            brayns::_arrayPropertyToJson<std::array<float, 3>>(json, *prop);
             break;
         case PropertyMap::Property::Type::Vec3i:
-            brayns::_addArrayPropertyJSON<std::array<int32_t, 3>>(json, *prop);
+            brayns::_arrayPropertyToJson<std::array<int32_t, 3>>(json, *prop);
             break;
         case PropertyMap::Property::Type::Vec4f:
-            brayns::_addArrayPropertyJSON<std::array<float, 4>>(json, *prop);
+            brayns::_arrayPropertyToJson<std::array<float, 4>>(json, *prop);
             break;
         }
     }

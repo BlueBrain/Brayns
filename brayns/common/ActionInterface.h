@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <brayns/common/types.h>
+
 #include <functional>
 #include <string>
 
@@ -46,6 +48,55 @@ class ActionInterface
 {
 public:
     virtual ~ActionInterface() = default;
+
+    /**
+     * Register an action with no parameter and no return value.
+     *
+     * @param desc description of the action/RPC
+     * @param action the action to perform on an incoming notification
+     */
+    virtual void registerNotification(const RpcDescription& desc,
+                                      const std::function<void()>& action) = 0;
+
+    /**
+     * Register an action with a property map as the parameter and no return
+     * value.
+     *
+     * @param desc description of the action/RPC
+     * @param input the acceptable property map as the parameter for the RPC
+     * @param action the action to perform on an incoming notification
+     */
+    virtual void registerNotification(
+        const RpcParameterDescription& desc, const PropertyMap& input,
+        const std::function<void(PropertyMap)>& action) = 0;
+
+    /**
+     * Register an action with a property map as the parameter and a property
+     * map as the return value.
+     *
+     * @param desc description of the action/RPC
+     * @param input the acceptable property map as the parameter for the RPC
+     * @param output the property map layout that is returned on a successful
+     *               request
+     * @param action the action to perform on an incoming request
+     */
+    virtual void registerRequest(
+        const RpcParameterDescription& desc, const PropertyMap& input,
+        const PropertyMap& output,
+        const std::function<PropertyMap(PropertyMap)>& action) = 0;
+
+    /**
+     * Register an action with no parameter and a property map as the return
+     * value.
+     *
+     * @param desc description of the action/RPC
+     * @param output the property map layout that is returned on a successful
+     *               request
+     * @param action the action to perform on an incoming request
+     */
+    virtual void registerRequest(
+        const RpcDescription& desc, const PropertyMap& output,
+        const std::function<PropertyMap()>& action) = 0;
 
     /** Register an action with no parameter and no return value. */
     void registerNotification(const std::string& name,

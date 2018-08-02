@@ -383,6 +383,22 @@ enum class DataType
 
 class PropertyMap;
 class PropertyObject;
+
+/** Description for RPC with no parameter. */
+struct RpcDescription
+{
+    std::string methodName;
+    std::string methodDescription;
+};
+
+/** Description for RPC with one parameter. */
+struct RpcParameterDescription
+{
+    std::string methodName;
+    std::string methodDescription;
+    std::string paramName;
+    std::string paramDescription;
+};
 }
 
 #endif // TYPES_H
