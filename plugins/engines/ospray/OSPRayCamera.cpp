@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/common/scene/Scene.h>
+
 #include "OSPRayCamera.h"
 #include "utils.h"
 
@@ -49,11 +51,10 @@ void OSPRayCamera::commit()
     setOSPRayProperties(*this, _camera);
 
     // Clip planes
-    const auto& clipPlanes = getClipPlanes();
-    if (!clipPlanes.empty())
+    if (!_clipPlanes.empty())
     {
         auto clipPlaneData =
-            ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
+            ospNewData(_clipPlanes.size(), OSP_FLOAT4, _clipPlanes.data());
         ospSetData(_camera, "clipPlanes", clipPlaneData);
         ospRelease(clipPlaneData);
     }
@@ -67,6 +68,14 @@ void OSPRayCamera::setEnvironmentMap(const bool environmentMap)
 {
     ospSet1i(_camera, "environmentMap", environmentMap);
     ospCommit(_camera);
+}
+
+void OSPRayCamera::setClipPlanes(const ClipPlanes& clipPlanes)
+{
+    if (_clipPlanes == clipPlanes)
+        return;
+    _clipPlanes = clipPlanes;
+    markModified();
 }
 
 bool OSPRayCamera::isSideBySideStereo() const

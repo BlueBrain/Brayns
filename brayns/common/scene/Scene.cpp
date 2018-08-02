@@ -59,6 +59,7 @@ Scene& Scene::operator=(const Scene& rhs)
     _backgroundMaterial->markModified();
 
     _lights = rhs._lights;
+    _clipPlanes = rhs._clipPlanes;
 
     if (rhs._simulationHandler)
     {
