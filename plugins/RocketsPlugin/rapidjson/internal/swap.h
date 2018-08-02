@@ -21,7 +21,7 @@
 
 #include "../rapidjson.h"
 
-#if (defined(__clang__) && !defined(__APPLE__))
+#if defined(__clang__)
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++ 98 - compat)
 #endif
