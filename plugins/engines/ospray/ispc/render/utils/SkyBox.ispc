@@ -59,7 +59,7 @@ vec4f skyboxMapping(const uniform Renderer* uniform renderer,
     else
         t = (t1 < t2) ? t1 : t2;
 
-    if (t < epsilon)
+    if (t < epsilon || t > ray.t)
         return result; // Too close to intersection
 
     const varying vec3f intersection = normalize(ray.org + t * ray.dir);
