@@ -24,6 +24,7 @@
 
 from nose.tools import assert_true, assert_false, assert_equal, raises
 from mock import Mock, patch
+import numpy
 import brayns
 
 TEST_VERSION = {
@@ -420,6 +421,7 @@ def test_rpc_one_of_parameter():
         param.fov = 10.2
         assert_true(app.set_camera(param))
 
+
 def test_rpc_one_of_parameter_weird_casings():
     with patch('brayns.utils.http_request', new=mock_http_request), \
          patch('brayns.RpcClient.request', new=mock_rpc_request):
@@ -462,6 +464,14 @@ def test_rpc_invalid_type():
         assert_false(hasattr(app, 'test-rpc-invalid-type'))
 
 
+def test_encoder():
+    from brayns.rpcclient import Encoder
+    import json
+    a = json.dumps([1, 2], cls=Encoder)
+    b = json.dumps(numpy.array([1, 2]), cls=Encoder)
+    assert(a == b)
+
+
 @raises(Exception)
 def test_rpc_invalid_param():
     with patch('brayns.utils.http_request', new=mock_http_request_invalid_rpc_param):
@@ -502,6 +512,7 @@ class MockTransferFunction(object):
         self.commit_called = True
 
 
+
 def test_set_colormap():
     with patch('brayns.utils.http_request', new=mock_http_request):
         app = brayns.Client('localhost:8200')
@@ -520,6 +531,8 @@ def test_set_colormap_unknown_colormap():
         app = brayns.Client('localhost:8200')
         setattr(app, 'transfer_function', MockTransferFunction())
         app.set_colormap(colormap='foo')
+
+
 
 
 def mock_webbrowser_open(url):

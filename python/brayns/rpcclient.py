@@ -37,6 +37,20 @@ from .utils import set_http_protocol, set_ws_protocol, WS_PATH, underscorize
 
 JSON_RPC_VERSION = '2.0'
 
+try:
+    import numpy as _np
+
+    class Encoder(json.JSONEncoder):
+        """Extends the default JSONEncoder to support numpy arrays"""
+
+        def default(self, o):  # pylint: disable=E0202
+            """Encoder for numpy arrays, for other types call super"""
+            if isinstance(o, _np.ndarray):
+                return o.tolist()
+            return json.JSONEncoder.default(self, o)  # pragma: no cover
+except ImportError:  # pragma: no cover
+    Encoder = json.JSONEncoder
+
 
 class RpcClient(object):
     """
@@ -109,7 +123,7 @@ class RpcClient(object):
         self._request_id += 1
 
         self._setup_websocket()
-        self._ws.send(json.dumps(data))
+        self._ws.send(json.dumps(data, cls=Encoder))
 
         if response_timeout:
             timeout = response_timeout * 10
@@ -141,7 +155,7 @@ class RpcClient(object):
             data['params'] = params
 
         self._setup_websocket()
-        self._ws.send(json.dumps(data))
+        self._ws.send(json.dumps(data, cls=Encoder))
 
     def _setup_websocket(self):  # pragma: no cover
         """
