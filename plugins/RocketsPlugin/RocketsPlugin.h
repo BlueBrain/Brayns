@@ -64,6 +64,20 @@ private:
     class Impl;
     std::shared_ptr<Impl> _impl;
 
+    void registerNotification(
+        const RpcParameterDescription& desc, const PropertyMap& input,
+        const std::function<void(PropertyMap)>& action) final;
+
+    void registerNotification(const RpcDescription& desc,
+                              const std::function<void()>& action) final;
+    void registerRequest(
+        const RpcParameterDescription& desc, const PropertyMap& input,
+        const PropertyMap& output,
+        const std::function<PropertyMap(PropertyMap)>& action) final;
+
+    void registerRequest(const RpcDescription& desc, const PropertyMap& output,
+                         const std::function<PropertyMap()>& action) final;
+
     void _registerRequest(const std::string& name,
                           const RetParamFunc& action) final;
     void _registerRequest(const std::string& name, const RetFunc& action) final;

@@ -30,8 +30,29 @@ const Vec2 vecVal{{1, 1}};
 BOOST_AUTO_TEST_CASE(plugin_actions)
 {
     ClientServer clientServer({"--plugin", "myPlugin"});
+
+    makeNotification("notify");
+    brayns::PropertyMap input;
+    input.setProperty({"value", "my nice int value", 42});
+    makeNotification("notify-param", input);
+
+    // wrong input, cannot test though
+    makeNotification("notify-param", vecVal);
+
+    brayns::PropertyMap output;
+    output.setProperty({"result", "a good result", false});
+    auto result = makeRequestUpdate("request", output);
+    BOOST_CHECK(result.getProperty<bool>("result"));
+
+    result = makeRequestUpdate("request-param", input, output);
+    BOOST_CHECK(result.getProperty<bool>("result"));
+
+    // wrong input
+    BOOST_CHECK_THROW(makeRequestUpdate("request-param", vecVal, output),
+                      std::runtime_error);
+
     makeNotification("hello");
-    makeNotification<Vec2>("foo", vecVal);
+    makeNotification("foo", vecVal);
     BOOST_CHECK_EQUAL(makeRequest<std::string>("who"), "me");
     BOOST_CHECK((makeRequest<Vec2, Vec2>("echo", vecVal) == vecVal));
 
