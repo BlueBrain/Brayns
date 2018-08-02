@@ -25,9 +25,7 @@
 #ifdef __clang__
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(padded)
-#endif
-
-#ifdef _MSC_VER
+#elif defined(_MSC_VER)
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4351) // new behavior: elements of array 'array' will be
                          // default initialized
@@ -68,7 +66,7 @@ public:
         typename StreamType::int_type c = stream_.peek();
         return RAPIDJSON_LIKELY(c != StreamType::traits_type::eof())
                    ? static_cast<Ch>(c)
-                   : '\0';
+                   : static_cast<Ch>('\0');
     }
 
     Ch Take()

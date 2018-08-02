@@ -71,26 +71,26 @@ enum ParseErrorCode
 
     kParseErrorDocumentEmpty,           //!< The document is empty.
     kParseErrorDocumentRootNotSingular, //!< The document root must not follow
-                                        //! by other values.
+                                        //!by other values.
 
     kParseErrorValueInvalid, //!< Invalid value.
 
     kParseErrorObjectMissName,  //!< Missing a name for object member.
     kParseErrorObjectMissColon, //!< Missing a colon after a name of object
-                                //! member.
+                                //!member.
     kParseErrorObjectMissCommaOrCurlyBracket, //!< Missing a comma or '}' after
-                                              //! an object member.
+                                              //!an object member.
 
     kParseErrorArrayMissCommaOrSquareBracket, //!< Missing a comma or ']' after
-                                              //! an array element.
+                                              //!an array element.
 
     kParseErrorStringUnicodeEscapeInvalidHex, //!< Incorrect hex digit after \\u
-                                              //! escape in string.
+                                              //!escape in string.
     kParseErrorStringUnicodeSurrogateInvalid, //!< The surrogate pair in string
-                                              //! is invalid.
+                                              //!is invalid.
     kParseErrorStringEscapeInvalid,     //!< Invalid escape character in string.
     kParseErrorStringMissQuotationMark, //!< Missing a closing quotation mark in
-                                        //! string.
+                                        //!string.
     kParseErrorStringInvalidEncoding,   //!< Invalid encoding in string.
 
     kParseErrorNumberTooBig,       //!< Number too big to be stored in double.
@@ -117,6 +117,9 @@ enum ParseErrorCode
 */
 struct ParseResult
 {
+    //!! Unspecified boolean type
+    typedef bool (ParseResult::*BooleanType)() const;
+
 public:
     //! Default constructor, no error.
     ParseResult()
@@ -135,8 +138,11 @@ public:
     ParseErrorCode Code() const { return code_; }
     //! Get the error offset, if \ref IsError(), 0 otherwise.
     size_t Offset() const { return offset_; }
-    //! Conversion to \c bool, returns \c true, iff !\ref IsError().
-    operator bool() const { return !IsError(); }
+    //! Explicit conversion to \c bool, returns \c true, iff !\ref IsError().
+    operator BooleanType() const
+    {
+        return !IsError() ? &ParseResult::IsError : NULL;
+    }
     //! Whether the result is an error.
     bool IsError() const { return code_ != kParseErrorNone; }
     bool operator==(const ParseResult& that) const
@@ -147,6 +153,13 @@ public:
     friend bool operator==(ParseErrorCode code, const ParseResult& err)
     {
         return code == err.code_;
+    }
+
+    bool operator!=(const ParseResult& that) const { return !(*this == that); }
+    bool operator!=(ParseErrorCode code) const { return !(*this == code); }
+    friend bool operator!=(ParseErrorCode code, const ParseResult& err)
+    {
+        return err != code;
     }
 
     //! Reset error code.

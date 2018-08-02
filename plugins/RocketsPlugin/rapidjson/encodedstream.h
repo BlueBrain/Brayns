@@ -309,8 +309,8 @@ private:
 
         if (!hasBOM_)
         {
-            unsigned pattern = (c[0] ? 1 : 0) | (c[1] ? 2 : 0) |
-                               (c[2] ? 4 : 0) | (c[3] ? 8 : 0);
+            int pattern = (c[0] ? 1 : 0) | (c[1] ? 2 : 0) | (c[2] ? 4 : 0) |
+                          (c[3] ? 8 : 0);
             switch (pattern)
             {
             case 0x08:

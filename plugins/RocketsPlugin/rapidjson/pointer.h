@@ -25,9 +25,7 @@
 #ifdef __clang__
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(switch - enum)
-#endif
-
-#ifdef _MSC_VER
+#elif defined(_MSC_VER)
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
 #endif
@@ -49,9 +47,9 @@ enum PointerParseErrorCode
                                                  //!'/'
     kPointerParseErrorInvalidEscape,             //!< Invalid escape
     kPointerParseErrorInvalidPercentEncoding, //!< Invalid percent encoding in
-                                              //! URI fragment
+                                              //!URI fragment
     kPointerParseErrorCharacterMustPercentEncode //!< A character must percent
-                                                 //! encoded in URI fragment
+                                                 //!encoded in URI fragment
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,7 +94,7 @@ class GenericPointer
 {
 public:
     typedef typename ValueType::EncodingType EncodingType; //!< Encoding type
-                                                           //! from Value
+                                                           //!from Value
     typedef typename ValueType::Ch Ch; //!< Character type from Value
 
     //! A token is the basic units of internal representation.
@@ -117,10 +115,10 @@ public:
     struct Token
     {
         const Ch* name; //!< Name of the token. It has null character at the end
-                        //! but it can contain null character.
+                        //!but it can contain null character.
         SizeType length; //!< Length of the name.
         SizeType index;  //!< A valid array index, if it is not equal to
-                         //! kPointerInvalidIndex.
+                         //!kPointerInvalidIndex.
     };
 
     //!@name Constructors and destructor.
@@ -236,7 +234,20 @@ public:
     }
 
     //! Copy constructor.
-    GenericPointer(const GenericPointer& rhs, Allocator* allocator = 0)
+    GenericPointer(const GenericPointer& rhs)
+        : allocator_(rhs.allocator_)
+        , ownAllocator_()
+        , nameBuffer_()
+        , tokens_()
+        , tokenCount_()
+        , parseErrorOffset_()
+        , parseErrorCode_(kPointerParseErrorNone)
+    {
+        *this = rhs;
+    }
+
+    //! Copy constructor.
+    GenericPointer(const GenericPointer& rhs, Allocator* allocator)
         : allocator_(allocator)
         , ownAllocator_()
         , nameBuffer_()
@@ -332,7 +343,7 @@ public:
         (GenericPointer))
     Append(T* name, Allocator* allocator = 0) const
     {
-        return Append(name, StrLen(name), allocator);
+        return Append(name, internal::StrLen(name), allocator);
     }
 
 #if RAPIDJSON_HAS_STDSTRING
@@ -373,7 +384,7 @@ public:
         {
             Ch name[21];
             for (size_t i = 0; i <= length; i++)
-                name[i] = buffer[i];
+                name[i] = static_cast<Ch>(buffer[i]);
             Token token = {name, length, index};
             return Append(token, allocator);
         }
@@ -676,7 +687,7 @@ public:
         typename ValueType::AllocatorType& allocator) const
     {
         bool alreadyExist;
-        Value& v = Create(root, allocator, &alreadyExist);
+        ValueType& v = Create(root, allocator, &alreadyExist);
         return alreadyExist ? v : v.CopyFrom(defaultValue, allocator);
     }
 
@@ -686,7 +697,7 @@ public:
         typename ValueType::AllocatorType& allocator) const
     {
         bool alreadyExist;
-        Value& v = Create(root, allocator, &alreadyExist);
+        ValueType& v = Create(root, allocator, &alreadyExist);
         return alreadyExist ? v : v.SetString(defaultValue, allocator);
     }
 
@@ -697,7 +708,7 @@ public:
         typename ValueType::AllocatorType& allocator) const
     {
         bool alreadyExist;
-        Value& v = Create(root, allocator, &alreadyExist);
+        ValueType& v = Create(root, allocator, &alreadyExist);
         return alreadyExist ? v : v.SetString(defaultValue, allocator);
     }
 #endif
@@ -992,7 +1003,7 @@ private:
                     size_t extraNameBufferSize = 0)
     {
         if (!allocator_) // allocator is independently owned.
-            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator());
+            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator)();
 
         size_t nameBufferSize = rhs.tokenCount_; // null terminators for tokens
         for (Token* t = rhs.tokens_; t != rhs.tokens_ + rhs.tokenCount_; ++t)
@@ -1035,13 +1046,13 @@ private:
 
 //! Parse a JSON String or its URI fragment representation into tokens.
 #ifndef __clang__ // -Wdocumentation
-                  /*!
-                      \param source Either a JSON Pointer string, or its URI fragment
-                     representation. Not need to be null terminated.
-                      \param length Length of the source string.
-                      \note Source cannot be JSON String Representation of JSON Pointer, e.g. In
-                     "/\u0000", \u0000 will not be unescaped.
-                  */
+/*!
+    \param source Either a JSON Pointer string, or its URI fragment
+   representation. Not need to be null terminated.
+    \param length Length of the source string.
+    \note Source cannot be JSON String Representation of JSON Pointer, e.g. In
+   "/\u0000", \u0000 will not be unescaped.
+*/
 #endif
     void Parse(const Ch* source, size_t length)
     {
@@ -1051,7 +1062,7 @@ private:
 
         // Create own allocator if user did not supply.
         if (!allocator_)
-            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator());
+            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator)();
 
         // Count number of '/' as tokenCount
         tokenCount_ = 0;
@@ -1330,8 +1341,8 @@ private:
                                                '6', '7', '8', '9', 'A', 'B',
                                                'C', 'D', 'E', 'F'};
             os_.Put('%');
-            os_.Put(hexDigits[u >> 4]);
-            os_.Put(hexDigits[u & 15]);
+            os_.Put(static_cast<typename OutputStream::Ch>(hexDigits[u >> 4]));
+            os_.Put(static_cast<typename OutputStream::Ch>(hexDigits[u & 15]));
         }
 
     private:
@@ -1339,7 +1350,7 @@ private:
     };
 
     Allocator* allocator_;    //!< The current allocator. It is either
-                              //! user-supplied or equal to ownAllocator_.
+                              //!user-supplied or equal to ownAllocator_.
     Allocator* ownAllocator_; //!< Allocator owned by this Pointer.
     Ch* nameBuffer_;          //!< A buffer containing all names in tokens.
     Token* tokens_;           //!< A list of tokens.
@@ -1841,11 +1852,7 @@ bool EraseValueByPointer(T& root, const CharType (&source)[N])
 
 RAPIDJSON_NAMESPACE_END
 
-#ifdef __clang__
-RAPIDJSON_DIAG_POP
-#endif
-
-#ifdef _MSC_VER
+#if defined(__clang__) || defined(_MSC_VER)
 RAPIDJSON_DIAG_POP
 #endif
 

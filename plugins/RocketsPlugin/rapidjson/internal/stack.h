@@ -22,7 +22,7 @@
 #include "../allocators.h"
 #include "swap.h"
 
-#if (defined(__clang__) && !defined(__APPLE__))
+#if defined(__clang__)
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(c++ 98 - compat)
 #endif
@@ -35,7 +35,7 @@ namespace internal
 
 //! A type-unsafe stack for storing different types of data.
 /*! \tparam Allocator Allocator for allocating stack memory.
- */
+*/
 template <typename Allocator>
 class Stack
 {
@@ -112,7 +112,7 @@ public:
         if (Empty())
         {
             // If the stack is empty, completely deallocate the memory.
-            Allocator::Free(stack_);
+            Allocator::Free(stack_); // NOLINT (+clang-analyzer-unix.Malloc)
             stack_ = 0;
             stackTop_ = 0;
             stackEnd_ = 0;
@@ -143,6 +143,7 @@ public:
     template <typename T>
     RAPIDJSON_FORCEINLINE T* PushUnsafe(size_t count = 1)
     {
+        RAPIDJSON_ASSERT(stackTop_);
         RAPIDJSON_ASSERT(stackTop_ + sizeof(T) * count <= stackEnd_);
         T* ret = reinterpret_cast<T*>(stackTop_);
         stackTop_ += sizeof(T) * count;
@@ -219,7 +220,7 @@ private:
         if (stack_ == 0)
         {
             if (!allocator_)
-                ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator());
+                ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator)();
             newCapacity = initialCapacity_;
         }
         else
