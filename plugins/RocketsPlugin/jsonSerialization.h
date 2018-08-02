@@ -198,7 +198,6 @@ inline void init(brayns::ClipPlane* c, ObjectHandler* h)
 
 inline void init(brayns::Camera* c, ObjectHandler* h)
 {
-    h->add_property("clip_planes", &c->_clipPlanes, Flags::Optional);
     h->add_property("look_at", Vector3fArray(c->_target), Flags::Optional);
     h->add_property("origin", Vector3fArray(c->_position), Flags::Optional);
     h->add_property("current", &c->_currentType, Flags::Optional);
@@ -330,8 +329,10 @@ inline void init(brayns::Scene* s, ObjectHandler* h)
 {
     h->add_property("bounds", &s->getBounds(),
                     Flags::IgnoreRead | Flags::Optional);
+    h->add_property("clip_planes", &s->_clipPlanes, Flags::Optional);
     std::shared_lock<std::shared_timed_mutex> lock(s->modelMutex());
-    h->add_property("models", &s->getModelDescriptors(), Flags::IgnoreRead);
+    h->add_property("models", &s->getModelDescriptors(),
+                    Flags::Optional | Flags::IgnoreRead);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

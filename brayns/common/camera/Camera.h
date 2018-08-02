@@ -114,19 +114,8 @@ public:
     BRAYNS_API virtual void setEnvironmentMap(
         const bool environmentMap BRAYNS_UNUSED){};
 
-    /**
-      Sets the camera clip planes
-    */
-    void setClipPlanes(const ClipPlanes clipPlanes)
-    {
-        _updateValue(_clipPlanes, clipPlanes);
-    }
-
-    /**
-      @return the camera clip planes
-    */
-    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
     virtual bool isSideBySideStereo() const { return false; }
+
 private:
     Vector3f _position;
     Vector3f _target;
@@ -135,8 +124,6 @@ private:
     Vector3f _initialPosition;
     Vector3f _initialTarget;
     Vector3f _initialUp;
-
-    ClipPlanes _clipPlanes;
 
     /*! rotation matrice along x and y axis */
     Matrix4f _matrix;
