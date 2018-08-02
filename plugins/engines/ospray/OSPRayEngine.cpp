@@ -296,7 +296,7 @@ void OSPRayEngine::_createRenderers()
                                     {0.01f, 1.f}});
             properties.setProperty({"volumeSpecularExponent",
                                     "Volume specular exponent",
-                                    1.f,
+                                    20.f,
                                     {1.f, 100.f}});
         }
         if (renderer == "scivis")
