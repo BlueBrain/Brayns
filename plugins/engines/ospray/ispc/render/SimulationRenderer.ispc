@@ -55,6 +55,7 @@ struct SimulationRenderer
 
     float samplingThreshold;
     float volumeSpecularExponent;
+    float volumeAlphaCorrection;
 };
 
 struct ShadingAttributes
@@ -263,7 +264,7 @@ inline vec4f getVolumeContribution(
                                                  point, epsilon);
         }
         composite(make_vec4f(volumeSampleColor, sampleOpacity), pathColor,
-                  DEFAULT_COMPOSITE_ALPHA_CORRECTION);
+                  self->volumeAlphaCorrection);
 
         ++samplingCounter;
     }
@@ -1046,7 +1047,8 @@ export void SimulationRenderer_set(
     const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
     const uniform float& colorMapRange, const uniform float& samplingThreshold,
     const uniform float& detectionDistance,
-    const uniform float& volumeSpecularExponent)
+    const uniform float& volumeSpecularExponent,
+    const uniform float& volumeAlphaCorrection)
 {
     uniform SimulationRenderer* uniform self =
         (uniform SimulationRenderer * uniform)_self;
@@ -1083,4 +1085,5 @@ export void SimulationRenderer_set(
     self->detectionDistance = detectionDistance;
 
     self->volumeSpecularExponent = volumeSpecularExponent;
+    self->volumeAlphaCorrection = volumeAlphaCorrection;
 }

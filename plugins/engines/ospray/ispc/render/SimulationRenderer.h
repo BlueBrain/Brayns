@@ -67,6 +67,7 @@ private:
     float _detectionDistance;
     float _samplingThreshold;
     float _volumeSpecularExponent;
+    float _volumeAlphaCorrection;
 };
 
 } // ::brayns

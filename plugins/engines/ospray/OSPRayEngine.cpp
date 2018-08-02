@@ -298,6 +298,10 @@ void OSPRayEngine::_createRenderers()
                                     "Volume specular exponent",
                                     20.f,
                                     {1.f, 100.f}});
+            properties.setProperty({"volumeAlphaCorrection",
+                                    "Volume alpha correction",
+                                    4.f,
+                                    {0.01f, 10.f}});
         }
         if (renderer == "scivis")
         {
