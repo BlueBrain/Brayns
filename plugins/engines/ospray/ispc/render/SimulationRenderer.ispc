@@ -51,8 +51,10 @@ struct SimulationRenderer
     Model* simulationModel;
     uniform float* uniform simulationData;
     uint64 simulationDataSize;
-    float threshold;
     float detectionDistance;
+
+    float samplingThreshold;
+    float volumeSpecularExponent;
 };
 
 struct ShadingAttributes
@@ -154,9 +156,9 @@ inline float getVolumeShadowContributions(
         if (self->softShadows > 0.f)
             lightRay.dir = normalize(
                 lightSample.dir +
-                self->softShadows * getRandomVector(self->abstract.super.fb,
-                                                    sample, lightSample.dir,
-                                                    self->randomNumber));
+                self->softShadows *
+                    getRandomVector(self->abstract.super.fb->size.x, sample,
+                                    lightSample.dir, self->randomNumber));
         else
             lightRay.dir = lightSample.dir;
 
@@ -205,7 +207,7 @@ inline vec4f getVolumeContribution(
         // Look up the opacity associated with the volume sample.
         sampleOpacity = volume->transferFunction->getOpacityForValue(
             volume->transferFunction, volumeSample);
-        if (samplingCounter == 0 && sampleOpacity < 0.01f)
+        if (samplingCounter == 0 && sampleOpacity < self->samplingThreshold)
             continue;
 
         if (samplingCounter % samplingStep == 0)
@@ -248,7 +250,8 @@ inline vec4f getVolumeContribution(
                 const vec3f reflectedNormal = normalize(
                     ray.dir - 2.f * dot(ray.dir, gradient) * gradient);
                 const float angle =
-                    powf(max(0.f, dot(light.dir, reflectedNormal)), 20.f);
+                    powf(max(0.f, dot(light.dir, reflectedNormal)),
+                         self->volumeSpecularExponent);
                 volumeSampleColor =
                     volumeSampleColor + volume->specular * angle;
             }
@@ -260,7 +263,7 @@ inline vec4f getVolumeContribution(
                                                  point, epsilon);
         }
         composite(make_vec4f(volumeSampleColor, sampleOpacity), pathColor,
-                  2.0f);
+                  DEFAULT_COMPOSITE_ALPHA_CORRECTION);
 
         ++samplingCounter;
     }
@@ -280,11 +283,12 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
     vec3f ld = lightDirection;
     if (attributes.self->softShadows != 0.f)
         // Slightly alter light direction for Soft shadows
-        ld = normalize(ld +
-                       attributes.self->softShadows *
-                           getRandomVector(attributes.self->abstract.super.fb,
-                                           sample, attributes.normal,
-                                           attributes.self->randomNumber));
+        ld = normalize(
+            ld +
+            attributes.self->softShadows *
+                getRandomVector(attributes.self->abstract.super.fb->size.x,
+                                sample, attributes.normal,
+                                attributes.self->randomNumber));
 
     Ray shadowRay = ray;
     setRay(shadowRay, dg.P, ld);
@@ -300,36 +304,37 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
         if (shadowRay.geomID == -1)
             break;
 
-        DifferentialGeometry dg2;
-        postIntersect(attributes.self->abstract.super.model, dg2, shadowRay,
-                      DG_MATERIALID | DG_TEXCOORD | DG_COLOR);
+        DifferentialGeometry shadowingGeometry;
+        postIntersect(attributes.self->abstract.super.model, shadowingGeometry,
+                      shadowRay, DG_MATERIALID | DG_TEXCOORD | DG_COLOR);
 
         uniform ExtendedOBJMaterial* objMaterial =
-            (uniform ExtendedOBJMaterial*)dg2.material;
+            (uniform ExtendedOBJMaterial*)shadowingGeometry.material;
 
         float opacity = 1.f;
 
         if (objMaterial == 0)
-            opacity = 1.f - dg2.color.w;
+            opacity = 1.f - shadowingGeometry.color.w;
         else
             foreach_unique(mat in objMaterial)
             {
                 opacity = mat->d;
                 if (valid(mat->map_d))
                 {
-                    vec4f d_map = get4f(mat->map_d, dg2.st);
+                    vec4f d_map = get4f(mat->map_d, shadowingGeometry.st);
                     opacity = d_map.x;
                 }
                 else if (valid(mat->map_Kd))
                 {
-                    vec4f localDiffuseColor_map = get4f(mat->map_Kd, dg2.st);
+                    vec4f localDiffuseColor_map =
+                        get4f(mat->map_Kd, shadowingGeometry.st);
                     opacity = 1.f - localDiffuseColor_map.w;
                 }
             }
 
         shadowIntensity += opacity * attributes.self->shadows;
 
-        shadowRay.t0 = shadowRay.t + dg2.epsilon;
+        shadowRay.t0 = shadowRay.t + shadowingGeometry.epsilon;
         shadowRay.t = inf;
         shadowRay.primID = -1;
         shadowRay.geomID = -1;
@@ -364,8 +369,8 @@ inline bool launchRandomRay(const uniform SimulationRenderer* uniform self,
                             varying float& distanceToIntersection,
                             varying vec3f& randomDirection)
 {
-    randomDirection = getRandomVector(self->abstract.super.fb, sample, normal,
-                                      self->randomNumber);
+    randomDirection = getRandomVector(self->abstract.super.fb->size.x, sample,
+                                      normal, self->randomNumber);
     backgroundColor = make_vec3f(0.f);
 
     if (dot(randomDirection, normal) < 0.f)
@@ -550,7 +555,7 @@ inline void setGeometryShadingAttributes(
         {
             const vec3f randomNormal =
                 (1.f - mat->glossiness) *
-                getRandomVector(self->abstract.super.fb, sample,
+                getRandomVector(self->abstract.super.fb->size.x, sample,
                                 attributes.normal, self->randomNumber);
             attributes.normal = normalize(attributes.normal + randomNormal);
         }
@@ -574,7 +579,7 @@ inline void setGeometryShadingAttributes(
             attributes.opacity *= diffuseColorFromMap.w;
         }
 
-        // Specular coloboundingBoxr
+        // Specular color
         if (valid(mat->map_Ks))
             attributes.specularColor = max(attributes.specularColor,
                                            mat->Ks * get3f(mat->map_Ks, dg.st));
@@ -639,7 +644,7 @@ inline void processSimulationValue(
         // Value offset is out of range, return error color
         return;
 
-    if (value < attributes.self->threshold)
+    if (value < attributes.self->samplingThreshold)
         return;
 
     // Normalize the value according colormap size
@@ -686,7 +691,7 @@ inline void processSimulationContribution(
     // Get simulation color from simulation model
     Ray colorRay;
     colorRay.org = attributes.origin;
-    colorRay.dir = getRandomVector(self->abstract.super.fb, sample,
+    colorRay.dir = getRandomVector(self->abstract.super.fb->size.x, sample,
                                    attributes.normal * -1.f,
                                    attributes.self->randomNumber);
     colorRay.t0 = 0.f;
@@ -733,7 +738,8 @@ inline void computeIndirectShading(DifferentialGeometry& dg,
                                    ShadingAttributes& attributes)
 
 {
-    if (attributes.self->ambientOcclusionStrength < 0.01f)
+    if (attributes.self->ambientOcclusionStrength <
+        attributes.self->samplingThreshold)
         return;
 
     indirectShading(attributes.self, sample, attributes.origin,
@@ -786,9 +792,9 @@ inline void processLightShading(DifferentialGeometry& dg,
             attributes.diffuseColor = cosNL * attributes.diffuseColor;
 
             // Process shadows
-            const bool shadowsEnabled =
-                attributes.self->shadows > 0.f &&
-                attributes.lightEmissionIntensity < 0.01f;
+            const bool shadowsEnabled = attributes.self->shadows > 0.f &&
+                                        attributes.lightEmissionIntensity <
+                                            attributes.self->samplingThreshold;
             const float alpha =
                 shadowsEnabled ? shadedLightIntensity(sample, ray, attributes,
                                                       lightDirection, dg)
@@ -929,7 +935,7 @@ inline vec3f SimulationRenderer_shadeRay(
             if (depth == 0)
                 sample.z = ray.t;
 
-            if (attributes.opacity > 0.01f && moreRebounds)
+            if (attributes.opacity > self->samplingThreshold && moreRebounds)
             {
                 // Compute indirect lighting contribution
                 computeIndirectShading(dg, sample, attributes);
@@ -1037,8 +1043,9 @@ export void SimulationRenderer_set(
     const uniform uint64& simulationDataSize, uniform vec4f* uniform colormap,
     uniform vec3f* uniform emissionIntensitiesMap,
     const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
-    const uniform float& colorMapRange, const uniform float& threshold,
-    const uniform float& detectionDistance)
+    const uniform float& colorMapRange, const uniform float& samplingThreshold,
+    const uniform float& detectionDistance,
+    const uniform float& volumeSpecularExponent)
 {
     uniform SimulationRenderer* uniform self =
         (uniform SimulationRenderer * uniform)_self;
@@ -1071,6 +1078,8 @@ export void SimulationRenderer_set(
     self->simulationData = (uniform float* uniform)simulationData;
     self->simulationDataSize = simulationDataSize;
 
-    self->threshold = threshold;
+    self->samplingThreshold = samplingThreshold;
     self->detectionDistance = detectionDistance;
+
+    self->volumeSpecularExponent = volumeSpecularExponent;
 }

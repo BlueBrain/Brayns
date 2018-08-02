@@ -63,9 +63,10 @@ private:
     ospray::int32 _transferFunctionSize;
     float _transferFunctionMinValue;
     float _transferFunctionRange;
-    float _threshold;
     ospray::int32 _volumeSamplesPerRay;
     float _detectionDistance;
+    float _samplingThreshold;
+    float _volumeSpecularExponent;
 };
 
 } // ::brayns
