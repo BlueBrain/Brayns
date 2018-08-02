@@ -730,7 +730,6 @@ inline void processBackgroundColor(varying ScreenSample& sample,
                                         attributes.self->abstract.bgMaterial);
 
     attributes.shadingContribution = make_vec3f(bgColor);
-    attributes.opacity = 1.f;
 }
 
 inline void computeIndirectShading(DifferentialGeometry& dg,
@@ -864,9 +863,12 @@ inline void processFinalContribution(ShadingAttributes& attributes)
 
     // Volume contribution
     if (attributes.volumeIntensity > 0.f)
+    {
         totalContributions =
             attributes.volumeColor * attributes.volumeIntensity +
             totalContributions * (1.f - attributes.volumeIntensity);
+        attributes.opacity += attributes.volumeIntensity;
+    }
 
     // Store final contribution
     attributes.finalContribution =
@@ -887,7 +889,6 @@ inline vec3f SimulationRenderer_shadeRay(
     float totalOpacity = 0.f;
 
     sample.z = inf;
-    sample.alpha = 0.f;
 
     while (moreRebounds && depth < NB_MAX_REBOUNDS && pathOpacity > 0.f)
     {
@@ -912,8 +913,8 @@ inline vec3f SimulationRenderer_shadeRay(
             // No Geometry intersection. No need to iterate more
             moreRebounds = false;
 
-            if (depth == 0)
-                totalOpacity = 0.f;
+            // Alpha
+            totalOpacity += attributes.volumeIntensity;
         }
         else
         {
