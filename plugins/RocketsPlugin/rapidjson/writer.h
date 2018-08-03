@@ -43,8 +43,10 @@
 #ifdef __clang__
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(padded)
-RAPIDJSON_DIAG_OFF(unreachable - code)
-RAPIDJSON_DIAG_OFF(c++ 98 - compat)
+// clang-format off
+RAPIDJSON_DIAG_OFF(unreachable-code)
+RAPIDJSON_DIAG_OFF(c++98-compat)
+// clang-format on
 #elif defined(_MSC_VER)
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
@@ -73,8 +75,8 @@ enum WriteFlag
     kWriteNanAndInfFlag = 2, //!< Allow writing of Infinity, -Infinity and NaN.
     kWriteDefaultFlags =
         RAPIDJSON_WRITE_DEFAULT_FLAGS //!< Default write flags. Can be
-                                      //!customized by defining
-                                      //!RAPIDJSON_WRITE_DEFAULT_FLAGS
+                                      //! customized by defining
+    //! RAPIDJSON_WRITE_DEFAULT_FLAGS
 };
 
 //! JSON writer
