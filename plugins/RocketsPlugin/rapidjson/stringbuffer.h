@@ -30,7 +30,9 @@
 
 #if defined(__clang__)
 RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(c++ 98 - compat)
+// clang-format off
+RAPIDJSON_DIAG_OFF(c++98-compat)
+// clang-format on
 #endif
 
 RAPIDJSON_NAMESPACE_BEGIN
