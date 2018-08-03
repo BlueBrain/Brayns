@@ -55,22 +55,6 @@ else()
 )
 endif()
 
-# Ignore broken warnings given by Rapidjson when using clang
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-set_source_files_properties(
-    addModel.cpp
-    addModelFromBlob.cpp
-    brayns.cpp
-    braynsTestData.cpp
-    model.cpp
-    plugin.cpp
-    renderer.cpp
-    snapshot.cpp
-    streamlines.cpp
-    webAPI.cpp
-    PROPERTIES COMPILE_FLAGS "-Wno-unknown-warning-option")
-endif()
-
 include_directories(${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
 
 list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/brayns/common/utils/base64/*'

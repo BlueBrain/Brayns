@@ -36,11 +36,7 @@ if(BRAYNS_NETWORKING_ENABLED)
     RocketsPlugin/staticjson/staticjson.cpp
   )
   set_source_files_properties(RocketsPlugin/staticjson/staticjson.cpp
-    PROPERTIES COMPILE_FLAGS "-Wno-unknown-warning-option -Wno-shadow")
-  set_source_files_properties(
-    RocketsPlugin/ImageGenerator.cpp
-    RocketsPlugin/RocketsPlugin.cpp
-    PROPERTIES COMPILE_FLAGS "-Wno-unknown-warning-option")
+    PROPERTIES COMPILE_FLAGS "-Wno-shadow")
   list(APPEND BRAYNSPLUGINS_PUBLIC_HEADERS RocketsPlugin/RocketsPlugin.h)
   list(APPEND BRAYNSPLUGINS_LINK_LIBRARIES
     PRIVATE Rockets braynsParameters braynsTasks ${FREEIMAGE_LIBRARIES})
