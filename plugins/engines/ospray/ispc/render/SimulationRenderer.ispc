@@ -236,9 +236,9 @@ inline float getVolumeShadowContribution(
     intersectBox(ray, volume->boundingBox, t0, t1);
 
     // Ray marching from light source to voxel
-    const float epsilon = 1.f;
     float shadowIntensity = 0.f;
-    for (float t = t1; t > epsilon && shadowIntensity < 1.f; t -= epsilon)
+    for (float t = t1; t > volume->samplingRate && shadowIntensity < 1.f;
+         t -= volume->samplingRate)
     {
         const vec3f point = ray.org + ray.dir * t;
         const float sample = volume->sample(volume, point);
@@ -307,15 +307,16 @@ inline vec4f getVolumeContribution(
 
     // Ray marching
     vec4f pathColor = make_vec4f(0.f);
-    const float epsilon = 1.f;
     int samplingStep = max(1, (int)(1.f / volume->samplingRate));
     unsigned int samplingCounter = 0;
     float shadowIntensity = 0.f;
 
-    t0 += (0.2f * getRandomValue(sample, self->randomNumber)) - 0.1f;
+    const float random =
+        getRandomValue(sample, self->randomNumber) * volume->samplingRate;
+    t0 -= random;
     t1 = min(ray.t, t1);
 
-    for (float t = t0; t < t1 && pathColor.w < 0.9f; t += epsilon)
+    for (float t = t0; t < t1 && pathColor.w < 1.f; t += volume->samplingRate)
     {
         vec3f volumeSampleColor;
         float sampleOpacity = 0.f;
@@ -351,15 +352,14 @@ inline vec4f getVolumeContribution(
                     safe_normalize(volume->computeGradient(volume, point));
                 // Setup differential geometry for the volume sample point.
                 dg.P = point;
-                dg.epsilon = epsilon;
+                dg.epsilon = volume->samplingRate;
                 dg.Ns = gradient;
             }
 
             if (shadingEnabled)
             {
-                uniform int i = 0;
-                //                for (uniform int i = 0; i <
-                //                self->abstract.numLights; ++i)
+                vec3f shadedColor = make_vec3f(0.f);
+                for (uniform int i = 0; i < self->abstract.numLights; ++i)
                 {
                     // Shading according to computed normal
                     const vec2f s = make_vec2f(0.5f);
@@ -372,8 +372,8 @@ inline vec4f getVolumeContribution(
                             ? 1.f
                             : abs(dot(safe_normalize(light.dir), gradient));
 
-                    volumeSampleColor =
-                        volumeSampleColor * cosNL * light.weight;
+                    shadedColor =
+                        shadedColor + volumeSampleColor * cosNL * light.weight;
 
                     // Specular
                     const vec3f reflectedNormal = normalize(
@@ -381,9 +381,9 @@ inline vec4f getVolumeContribution(
                     const float angle =
                         powf(max(0.f, dot(light.dir, reflectedNormal)),
                              self->volumeSpecularExponent);
-                    volumeSampleColor =
-                        volumeSampleColor + volume->specular * angle;
+                    shadedColor = shadedColor + volume->specular * angle;
                 }
+                volumeSampleColor = volumeSampleColor + shadedColor;
             }
 
             // Ambient occlusion
@@ -401,10 +401,10 @@ inline vec4f getVolumeContribution(
                 // Compute shadow contributions
                 shadowIntensity =
                     getVolumeShadowContributions(volume, self, ray, sample,
-                                                 point, epsilon);
+                                                 point, volume->samplingRate);
         }
         composite(make_vec4f(volumeSampleColor, sampleOpacity), pathColor,
-                  self->volumeAlphaCorrection);
+                  self->volumeAlphaCorrection * volume->samplingRate);
 
         ++samplingCounter;
     }
