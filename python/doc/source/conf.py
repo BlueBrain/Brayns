@@ -14,10 +14,9 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../../brayns'))
 
-from brayns import __version__ as VERSION
-
+from version import VERSION
 
 # -- Project information -----------------------------------------------------
 
