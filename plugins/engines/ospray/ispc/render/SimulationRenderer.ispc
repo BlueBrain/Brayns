@@ -55,6 +55,7 @@ struct SimulationRenderer
 
     float samplingThreshold;
     float volumeSpecularExponent;
+    float volumeAlphaCorrection;
 };
 
 struct ShadingAttributes
@@ -108,6 +109,124 @@ inline void composite(const varying vec4f& src, varying vec4f& dst,
     dst.w += (alpha * (1.f - dst.w));
 }
 
+inline bool launchRandomRay(const uniform SimulationRenderer* uniform self,
+                            varying ScreenSample& sample,
+                            const varying vec3f& intersection,
+                            const varying vec3f& normal,
+                            DifferentialGeometry& geometry,
+                            varying vec3f& backgroundColor,
+                            varying float& distanceToIntersection,
+                            varying vec3f& randomDirection)
+{
+    randomDirection = getRandomVector(self->abstract.super.fb->size.x, sample,
+                                      normal, self->randomNumber);
+    backgroundColor = make_vec3f(0.f);
+
+    if (dot(randomDirection, normal) < 0.f)
+        // Invert direction of random ray direction is opposite to surface
+        // normal
+        randomDirection = neg(randomDirection);
+
+    varying Ray randomRay = sample.ray;
+    setRay(randomRay, intersection, randomDirection);
+    randomRay.t0 = geometry.epsilon;
+    randomRay.t = self->ambientOcclusionDistance;
+    randomRay.primID = -1;
+    randomRay.geomID = -1;
+    randomRay.instID = -1;
+
+    traceRay(self->abstract.super.model, randomRay);
+
+    if (randomRay.geomID < 0)
+    {
+        // No intersection
+        backgroundColor = make_vec3f(skyboxMapping((Renderer*)self, randomRay,
+                                                   self->abstract.bgMaterial));
+        return false;
+    }
+
+    // Random ray hits a primitive
+    distanceToIntersection = randomRay.t * randomRay.t;
+    postIntersect(self->abstract.super.model, geometry, randomRay,
+                  DG_NG | DG_NS | DG_NORMALIZE | DG_MATERIALID | DG_COLOR |
+                      DG_TEXCOORD);
+    return true;
+}
+
+inline void indirectShading(const uniform SimulationRenderer* uniform self,
+                            varying ScreenSample& sample,
+                            const varying vec3f& intersection,
+                            const varying vec3f& normal,
+                            DifferentialGeometry& geometry,
+                            varying vec3f& indirectShadingColor,
+                            varying float& indirectShadingPower)
+{
+    vec3f backgroundColor = make_vec3f(0.f);
+    float distanceToIntersection = infinity;
+    indirectShadingPower = 0.f;
+
+    // Launch a random ray
+    vec3f randomDirection;
+    if (launchRandomRay(self, sample, intersection, normal, geometry,
+                        backgroundColor, distanceToIntersection,
+                        randomDirection))
+    {
+        // Determine material of intersected geometry
+        const uniform Material* material = geometry.material;
+        const uniform ExtendedOBJMaterial* objMaterial =
+            (const uniform ExtendedOBJMaterial*)material;
+        if (objMaterial)
+            foreach_unique(mat in objMaterial)
+            {
+                // Check if material emits light and is random rays hits the
+                // surface in the opposite direction from the surface normal
+                if (mat->a != 0.f && dot(geometry.Ns, randomDirection) < 0.f)
+                {
+                    // Light emitting material
+                    vec3f localDiffuseColor = mat->Kd;
+                    if (valid(mat->map_Kd))
+                        localDiffuseColor = get3f(mat->map_Kd, geometry.st);
+
+                    // intensity
+                    vec3f Ka = make_vec3f(mat->a);
+                    indirectShadingPower = mat->a;
+                    if (valid(mat->map_a))
+                    {
+                        Ka = get3f(mat->map_a, geometry.st);
+                        indirectShadingPower = reduce_max(Ka);
+                    }
+
+                    // Returned color is the one material with weight according
+                    // intensity and distance to intersection
+                    indirectShadingColor = localDiffuseColor * Ka;
+                    indirectShadingPower = 1.f / distanceToIntersection;
+                }
+                else
+                {
+                    // Material does not emit light, occlusion is considered
+                    // according to surface localOpacity
+                    indirectShadingColor = make_vec3f(1.f);
+                    indirectShadingPower = -mat->d;
+                }
+            }
+        else
+        {
+            // Material does not emit light, occlusion is considered
+            // according to surface localOpacity
+            indirectShadingColor = make_vec3f(geometry.color.w);
+            indirectShadingPower = -geometry.color.w;
+        }
+
+        indirectShadingPower *= abs(dot(normal, randomDirection));
+    }
+    else
+    {
+        indirectShadingColor = backgroundColor;
+        indirectShadingPower = DEFAULT_SKY_POWER;
+    }
+    indirectShadingPower *= self->ambientOcclusionStrength;
+}
+
 inline float getVolumeShadowContribution(
     Volume* uniform volume, const uniform SimulationRenderer* uniform self,
     const varying Ray& ray, varying ScreenSample& sample)
@@ -117,9 +236,9 @@ inline float getVolumeShadowContribution(
     intersectBox(ray, volume->boundingBox, t0, t1);
 
     // Ray marching from light source to voxel
-    const float epsilon = 1.f;
     float shadowIntensity = 0.f;
-    for (float t = t1; t > epsilon && shadowIntensity < 1.f; t -= epsilon)
+    for (float t = t1; t > volume->samplingRate && shadowIntensity < 1.f;
+         t -= volume->samplingRate)
     {
         const vec3f point = ray.org + ray.dir * t;
         const float sample = volume->sample(volume, point);
@@ -188,15 +307,16 @@ inline vec4f getVolumeContribution(
 
     // Ray marching
     vec4f pathColor = make_vec4f(0.f);
-    const float epsilon = 1.f;
     int samplingStep = max(1, (int)(1.f / volume->samplingRate));
-    int samplingCounter = 0;
+    unsigned int samplingCounter = 0;
     float shadowIntensity = 0.f;
 
-    t0 += (0.2f * getRandomValue(sample, self->randomNumber)) - 0.1f;
+    const float random =
+        getRandomValue(sample, self->randomNumber) * volume->samplingRate;
+    t0 -= random;
     t1 = min(ray.t, t1);
 
-    for (float t = t0; t < t1 && pathColor.w < 0.9f; t += epsilon)
+    for (float t = t0; t < t1 && pathColor.w < 1.f; t += volume->samplingRate)
     {
         vec3f volumeSampleColor;
         float sampleOpacity = 0.f;
@@ -217,53 +337,74 @@ inline vec4f getVolumeContribution(
                 volume->transferFunction, volumeSample);
 
             // Voxel shading
+            vec3f gradient;
+            DifferentialGeometry dg;
             bool shadingEnabled = volume->gradientShadingEnabled;
             if (volume->singleShade)
                 shadingEnabled &= (samplingCounter == 0);
-            if (shadingEnabled)
-            {
-                vec3f gradient =
-                    safe_normalize(volume->computeGradient(volume, point));
-                // Setup differential geometry for the volume sample point.
-                DifferentialGeometry dg;
-                dg.P = point;
-                dg.epsilon = epsilon;
-                dg.Ns = gradient;
 
+            const bool aoEnabled =
+                samplingCounter == 0 && self->ambientOcclusionStrength > 0.f;
+
+            if (shadingEnabled || aoEnabled)
+            {
                 gradient =
                     safe_normalize(volume->computeGradient(volume, point));
+                // Setup differential geometry for the volume sample point.
+                dg.P = point;
+                dg.epsilon = volume->samplingRate;
+                dg.Ns = gradient;
+            }
 
-                // Shading according to computed normal
-                const vec2f s = make_vec2f(0.5f);
-                const Light_SampleRes light =
-                    self->abstract.lights[0]->sample(self->abstract.lights[0],
-                                                     dg, s);
-                const float cosNL =
-                    (gradient.x == 0.f && gradient.y == 0.f &&
-                     gradient.z == 0.f)
-                        ? 1.f
-                        : abs(dot(safe_normalize(light.dir), gradient));
+            if (shadingEnabled)
+            {
+                vec3f shadedColor = make_vec3f(0.f);
+                for (uniform int i = 0; i < self->abstract.numLights; ++i)
+                {
+                    // Shading according to computed normal
+                    const vec2f s = make_vec2f(0.5f);
+                    const Light_SampleRes light =
+                        self->abstract.lights[i]->sample(
+                            self->abstract.lights[i], dg, s);
+                    const float cosNL =
+                        (gradient.x == 0.f && gradient.y == 0.f &&
+                         gradient.z == 0.f)
+                            ? 1.f
+                            : abs(dot(safe_normalize(light.dir), gradient));
 
-                volumeSampleColor = volumeSampleColor * cosNL * light.weight;
+                    shadedColor =
+                        shadedColor + volumeSampleColor * cosNL * light.weight;
 
-                // Specular
-                const vec3f reflectedNormal = normalize(
-                    ray.dir - 2.f * dot(ray.dir, gradient) * gradient);
-                const float angle =
-                    powf(max(0.f, dot(light.dir, reflectedNormal)),
-                         self->volumeSpecularExponent);
+                    // Specular
+                    const vec3f reflectedNormal = normalize(
+                        ray.dir - 2.f * dot(ray.dir, gradient) * gradient);
+                    const float angle =
+                        powf(max(0.f, dot(light.dir, reflectedNormal)),
+                             self->volumeSpecularExponent);
+                    shadedColor = shadedColor + volume->specular * angle;
+                }
+                volumeSampleColor = volumeSampleColor + shadedColor;
+            }
+
+            // Ambient occlusion
+            if (aoEnabled)
+            {
+                vec3f indirectColor;
+                float indirectIntensity;
+                indirectShading(self, sample, point, gradient, dg,
+                                indirectColor, indirectIntensity);
                 volumeSampleColor =
-                    volumeSampleColor + volume->specular * angle;
+                    volumeSampleColor + indirectColor * indirectIntensity;
             }
 
             if (samplingCounter == 0 && self->shadows > 0.f)
                 // Compute shadow contributions
                 shadowIntensity =
                     getVolumeShadowContributions(volume, self, ray, sample,
-                                                 point, epsilon);
+                                                 point, volume->samplingRate);
         }
         composite(make_vec4f(volumeSampleColor, sampleOpacity), pathColor,
-                  DEFAULT_COMPOSITE_ALPHA_CORRECTION);
+                  self->volumeAlphaCorrection * volume->samplingRate);
 
         ++samplingCounter;
     }
@@ -358,123 +499,6 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                            attributes.self->shadows;
     }
     return clamp(1.f - shadowIntensity, 0.f, 1.f);
-}
-
-inline bool launchRandomRay(const uniform SimulationRenderer* uniform self,
-                            varying ScreenSample& sample,
-                            const varying vec3f& intersection,
-                            const varying vec3f& normal,
-                            DifferentialGeometry& geometry,
-                            varying vec3f& backgroundColor,
-                            varying float& distanceToIntersection,
-                            varying vec3f& randomDirection)
-{
-    randomDirection = getRandomVector(self->abstract.super.fb->size.x, sample,
-                                      normal, self->randomNumber);
-    backgroundColor = make_vec3f(0.f);
-
-    if (dot(randomDirection, normal) < 0.f)
-        // Invert direction of random ray direction is opposite to surface
-        // normal
-        randomDirection = neg(randomDirection);
-
-    varying Ray randomRay = sample.ray;
-    setRay(randomRay, intersection, randomDirection);
-    randomRay.t0 = geometry.epsilon;
-    randomRay.t = self->ambientOcclusionDistance;
-    randomRay.primID = -1;
-    randomRay.geomID = -1;
-    randomRay.instID = -1;
-
-    traceRay(self->abstract.super.model, randomRay);
-    if (randomRay.geomID < 0)
-    {
-        // No intersection
-        backgroundColor = make_vec3f(skyboxMapping((Renderer*)self, randomRay,
-                                                   self->abstract.bgMaterial));
-        return false;
-    }
-
-    // Random ray hits a primitive
-    distanceToIntersection = randomRay.t * randomRay.t;
-    postIntersect(self->abstract.super.model, geometry, randomRay,
-                  DG_NG | DG_NS | DG_NORMALIZE | DG_MATERIALID | DG_COLOR |
-                      DG_TEXCOORD);
-    return true;
-}
-
-inline void indirectShading(const uniform SimulationRenderer* uniform self,
-                            varying ScreenSample& sample,
-                            const varying vec3f& intersection,
-                            const varying vec3f& normal,
-                            DifferentialGeometry& geometry,
-                            varying vec3f& indirectShadingColor,
-                            varying float& indirectShadingPower)
-{
-    vec3f backgroundColor;
-    float distanceToIntersection = infinity;
-    indirectShadingPower = 0.f;
-
-    // Launch a random ray
-    vec3f randomDirection;
-    if (launchRandomRay(self, sample, intersection, normal, geometry,
-                        backgroundColor, distanceToIntersection,
-                        randomDirection))
-    {
-        // Determine material of intersected geometry
-        const uniform Material* material = geometry.material;
-        const uniform ExtendedOBJMaterial* objMaterial =
-            (const uniform ExtendedOBJMaterial*)material;
-        if (objMaterial)
-            foreach_unique(mat in objMaterial)
-            {
-                // Check if material emits light and is random rays hits the
-                // surface in the opposite direction from the surface normal
-                if (mat->a != 0.f && dot(geometry.Ns, randomDirection) < 0.f)
-                {
-                    // Light emitting material
-                    vec3f localDiffuseColor = mat->Kd;
-                    if (valid(mat->map_Kd))
-                        localDiffuseColor = get3f(mat->map_Kd, geometry.st);
-
-                    // intensity
-                    vec3f Ka = make_vec3f(mat->a);
-                    indirectShadingPower = mat->a;
-                    if (valid(mat->map_a))
-                    {
-                        Ka = get3f(mat->map_a, geometry.st);
-                        indirectShadingPower = reduce_max(Ka);
-                    }
-
-                    // Returned color is the one material with weight according
-                    // intensity and distance to intersection
-                    indirectShadingColor = localDiffuseColor * Ka;
-                    indirectShadingPower = 1.f / distanceToIntersection;
-                }
-                else
-                {
-                    // Material does not emit light, occlusion is considered
-                    // according to surface localOpacity
-                    indirectShadingColor = make_vec3f(1.f);
-                    indirectShadingPower = -mat->d;
-                }
-            }
-        else
-        {
-            // Material does not emit light, occlusion is considered
-            // according to surface localOpacity
-            indirectShadingColor = make_vec3f(geometry.color.w);
-            indirectShadingPower = -geometry.color.w;
-        }
-
-        indirectShadingPower *= abs(dot(normal, randomDirection));
-    }
-    else
-    {
-        indirectShadingColor = backgroundColor;
-        indirectShadingPower = DEFAULT_SKY_POWER;
-    }
-    indirectShadingPower *= self->ambientOcclusionStrength;
 }
 
 inline void initializeShadingAttributes(
@@ -1046,7 +1070,8 @@ export void SimulationRenderer_set(
     const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
     const uniform float& colorMapRange, const uniform float& samplingThreshold,
     const uniform float& detectionDistance,
-    const uniform float& volumeSpecularExponent)
+    const uniform float& volumeSpecularExponent,
+    const uniform float& volumeAlphaCorrection)
 {
     uniform SimulationRenderer* uniform self =
         (uniform SimulationRenderer * uniform)_self;
@@ -1083,4 +1108,5 @@ export void SimulationRenderer_set(
     self->detectionDistance = detectionDistance;
 
     self->volumeSpecularExponent = volumeSpecularExponent;
+    self->volumeAlphaCorrection = volumeAlphaCorrection;
 }

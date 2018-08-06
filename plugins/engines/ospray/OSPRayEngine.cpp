@@ -289,7 +289,7 @@ void OSPRayEngine::_createRenderers()
             properties.setProperty(
                 {"shadows", "Shadow intensity", 0.f, {0.f, 1.f}});
             properties.setProperty(
-                {"softShadows", "Shadow softness", 0.f, {0.f, 0.1f}});
+                {"softShadows", "Shadow softness", 0.f, {0.f, 1.f}});
             properties.setProperty({"samplingThreshold",
                                     "Threshold under which sampling is ignored",
                                     0.01f,
@@ -298,6 +298,10 @@ void OSPRayEngine::_createRenderers()
                                     "Volume specular exponent",
                                     20.f,
                                     {1.f, 100.f}});
+            properties.setProperty({"volumeAlphaCorrection",
+                                    "Volume alpha correction",
+                                    1.f,
+                                    {0.01f, 1.f}});
         }
         if (renderer == "scivis")
         {
@@ -386,9 +390,9 @@ void OSPRayEngine::_createCameras()
             properties.setProperty(fovy);
             properties.setProperty(aspect);
             properties.setProperty(
-                {"apertureRadius", "Aperture radius", 0.f, {0.f, 1.0f}});
+                {"apertureRadius", "Aperture radius", 0.f, {0.f, 18.0f}});
             properties.setProperty(
-                {"focusDistance", "Focus Distance", 1.f, {0.f, 10.f}});
+                {"focusDistance", "Focus Distance", 1.f, {0.f, 1e31f}});
             properties.setProperty(stereoProperty);
             properties.setProperty(eyeSeparation);
         }
