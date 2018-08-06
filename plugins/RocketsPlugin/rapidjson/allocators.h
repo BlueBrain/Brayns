@@ -59,6 +59,17 @@ allocator may not book-keep this, explicitly pass to it can save memory.)
 \endcode
 */
 
+/*! \def RAPIDJSON_ALLOCATOR_DEFUALT_CHUNK_CAPACITY
+    \ingroup RAPIDJSON_CONFIG
+    \brief User-defined kDefaultChunkCapacity definition.
+
+    User can define this as any \c size that is a power of 2.
+*/
+
+#ifndef RAPIDJSON_ALLOCATOR_DEFAULT_CHUNK_CAPACITY
+#define RAPIDJSON_ALLOCATOR_DEFAULT_CHUNK_CAPACITY (64 * 1024)
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // CrtAllocator
 
@@ -117,8 +128,8 @@ class MemoryPoolAllocator
 {
 public:
     static const bool kNeedFree = false; //!< Tell users that no need to call
-    //! Free() with this allocator. (concept
-    //! Allocator)
+                                         //!Free() with this allocator. (concept
+                                         //!Allocator)
 
     //! Constructor with chunkSize.
     /*! \param chunkSize The size of memory chunk. The default is
@@ -286,7 +297,7 @@ private:
     bool AddChunk(size_t capacity)
     {
         if (!baseAllocator_)
-            ownBaseAllocator_ = baseAllocator_ = RAPIDJSON_NEW(BaseAllocator());
+            ownBaseAllocator_ = baseAllocator_ = RAPIDJSON_NEW(BaseAllocator)();
         if (ChunkHeader* chunk =
                 reinterpret_cast<ChunkHeader*>(baseAllocator_->Malloc(
                     RAPIDJSON_ALIGN(sizeof(ChunkHeader)) + capacity)))
@@ -302,7 +313,7 @@ private:
     }
 
     static const int kDefaultChunkCapacity =
-        64 * 1024; //!< Default chunk capacity.
+        RAPIDJSON_ALLOCATOR_DEFAULT_CHUNK_CAPACITY; //!< Default chunk capacity.
 
     //! Chunk header for perpending to each chunk.
     /*! Chunks are stored as a singly linked list.
@@ -310,20 +321,20 @@ private:
     struct ChunkHeader
     {
         size_t capacity;   //!< Capacity of the chunk in bytes (excluding the
-                           //! header itself).
+                           //!header itself).
         size_t size;       //!< Current size of allocated memory in bytes.
         ChunkHeader* next; //!< Next chunk in the linked list.
     };
 
     ChunkHeader* chunkHead_; //!< Head of the chunk linked-list. Only the head
-                             //! chunk serves allocation.
+                             //!chunk serves allocation.
     size_t chunk_capacity_;  //!< The minimum capacity of chunk when they are
-                             //! allocated.
+                             //!allocated.
     void* userBuffer_;       //!< User supplied buffer.
     BaseAllocator* baseAllocator_;    //!< base allocator for allocating memory
-                                      //! chunks.
+                                      //!chunks.
     BaseAllocator* ownBaseAllocator_; //!< base allocator created by this
-                                      //! object.
+                                      //!object.
 };
 
 RAPIDJSON_NAMESPACE_END

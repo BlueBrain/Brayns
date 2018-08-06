@@ -44,14 +44,13 @@ void OSPRayRenderer::render(FrameBufferPtr frameBuffer)
 {
     auto osprayFrameBuffer =
         std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
-    osprayFrameBuffer->lock();
+    auto lock = osprayFrameBuffer->getScopeLock();
 
     _variance = ospRenderFrame(osprayFrameBuffer->impl(), _renderer,
                                OSP_FB_COLOR | OSP_FB_DEPTH | OSP_FB_ACCUM);
 
     osprayFrameBuffer->incrementAccumFrames();
     osprayFrameBuffer->markModified();
-    osprayFrameBuffer->unlock();
 }
 
 void OSPRayRenderer::commit()

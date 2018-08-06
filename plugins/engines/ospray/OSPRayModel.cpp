@@ -23,7 +23,6 @@
 #include "OSPRayVolume.h"
 #include "utils.h"
 
-#include <brayns/common/Transformation.h>
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Scene.h>
 
@@ -68,6 +67,7 @@ OSPRayModel::~OSPRayModel()
     releaseAndClearGeometry(_ospExtendedConesData);
     releaseAndClearGeometry(_ospMeshes);
     releaseAndClearGeometry(_ospStreamlines);
+    releaseAndClearGeometry(_ospSDFGeometryRefs);
     releaseAndClearGeometry(_ospSDFGeometryRefsData);
 
     releaseModel(_simulationModel);
@@ -219,6 +219,7 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
         OSPData normals = allocateVectorData(trianglesMesh.normals, OSP_FLOAT3,
                                              _memoryManagementFlags);
         ospSetObject(_ospMeshes[materialId], "vertex.normal", normals);
+        ospRelease(normals);
     }
 
     OSPData indices = allocateVectorData(trianglesMesh.indices, OSP_INT3,
@@ -298,6 +299,8 @@ void OSPRayModel::_commitSDFGeometries()
     assert(_ospSDFGeometryData == nullptr);
     assert(_ospSDFNeighboursData == nullptr);
 
+    if (_ospSDFGeometryData)
+        ospRelease(_ospSDFGeometryData);
     _ospSDFGeometryData =
         allocateVectorData(_sdf.geometries, OSP_CHAR, _memoryManagementFlags);
     ospCommit(_ospSDFGeometryData);
@@ -323,6 +326,8 @@ void OSPRayModel::_commitSDFGeometries()
     if (_sdf.neighboursFlat.empty())
         _sdf.neighboursFlat.resize(1, 0);
 
+    if (_ospSDFNeighboursData)
+        ospRelease(_ospSDFNeighboursData);
     _ospSDFNeighboursData = allocateVectorData(_sdf.neighboursFlat, OSP_CHAR,
                                                _memoryManagementFlags);
 
@@ -336,11 +341,18 @@ void OSPRayModel::_commitSDFGeometries()
             continue;
 
         if (_ospSDFGeometryRefs.find(materialId) != _ospSDFGeometryRefs.end())
+        {
             ospRemoveGeometry(_model, _ospSDFGeometryRefs[materialId]);
+            ospRemoveGeometry(_simulationModel,
+                              _ospSDFGeometryRefs[materialId]);
+            ospRelease(_ospSDFGeometryRefs[materialId]);
+        }
 
         _ospSDFGeometryRefs[materialId] =
             ospNewGeometry("extendedsdfgeometries");
 
+        if (_ospSDFGeometryRefsData[materialId])
+            ospRelease(_ospSDFGeometryRefsData[materialId]);
         _ospSDFGeometryRefsData[materialId] =
             allocateVectorData(_sdf.geometryIndices[materialId], OSP_UINT,
                                _memoryManagementFlags);

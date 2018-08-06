@@ -28,9 +28,11 @@
 
 #include "internal/stack.h"
 
-#if (defined(__clang__) && !defined(__APPLE__))
+#if defined(__clang__)
 RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(c++ 98 - compat)
+// clang-format off
+RAPIDJSON_DIAG_OFF(c++98-compat)
+// clang-format on
 #endif
 
 RAPIDJSON_NAMESPACE_BEGIN
@@ -94,7 +96,10 @@ public:
         return stack_.template Bottom<Ch>();
     }
 
+    //! Get the size of string in bytes in the string buffer.
     size_t GetSize() const { return stack_.GetSize(); }
+    //! Get the length of string in Ch in the string buffer.
+    size_t GetLength() const { return stack_.GetSize() / sizeof(Ch); }
     static const size_t kDefaultCapacity = 256;
     mutable internal::Stack<Allocator> stack_;
 

@@ -98,7 +98,13 @@ ModelDescriptorPtr MeshLoader::importFromFile(const std::string& fileName,
     auto model = _scene.createModel();
     importMesh(fileName, *model, index, {}, defaultMaterialId);
 
-    return std::make_shared<ModelDescriptor>(std::move(model), fileName);
+    Transformation transformation;
+    transformation.setRotationCenter(model->getBounds().getCenter());
+
+    auto modelDescriptor =
+        std::make_shared<ModelDescriptor>(std::move(model), fileName);
+    modelDescriptor->setTransformation(transformation);
+    return modelDescriptor;
 }
 
 ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, const size_t index,
@@ -119,7 +125,14 @@ ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, const size_t index,
 
     auto model = _scene.createModel();
     _postLoad(aiScene, *model, index, {}, defaultMaterialId);
-    return std::make_shared<ModelDescriptor>(std::move(model), blob.name);
+
+    Transformation transformation;
+    transformation.setRotationCenter(model->getBounds().getCenter());
+
+    auto modelDescriptor =
+        std::make_shared<ModelDescriptor>(std::move(model), blob.name);
+    modelDescriptor->setTransformation(transformation);
+    return modelDescriptor;
 }
 
 void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
@@ -394,8 +407,8 @@ void MeshLoader::_createMaterials(Model&, const aiScene*, const std::string&)
     throw NO_ASSIMP;
 }
 
-void MeshLoader::_postLoad(const aiScene*, Model&, const size_t,
-                           const Matrix4f&, size_t, const std::string&)
+Vector3f MeshLoader::_postLoad(const aiScene*, Model&, const size_t,
+                               const Matrix4f&, size_t, const std::string&)
 {
     throw NO_ASSIMP;
 }

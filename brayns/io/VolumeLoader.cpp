@@ -176,9 +176,14 @@ ModelDescriptorPtr VolumeLoader::importFromFile(
     updateProgress("Creating model ...", 2, 2);
     auto model = _scene.createModel();
     model->addVolume(volume);
-    return std::make_shared<ModelDescriptor>(
+
+    Transformation transformation;
+    transformation.setRotationCenter(model->getBounds().getCenter());
+    auto modelDescriptor = std::make_shared<ModelDescriptor>(
         std::move(model), filename,
         ModelMetadata{{"dimensions", to_string(dimensions)},
                       {"element-spacing", to_string(spacing)}});
+    modelDescriptor->setTransformation(transformation);
+    return modelDescriptor;
 }
 }

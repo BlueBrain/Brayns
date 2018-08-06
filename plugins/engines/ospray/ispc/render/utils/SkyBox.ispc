@@ -24,7 +24,8 @@
 #include <plugins/engines/ospray/ispc/render/ExtendedOBJMaterial.ih>
 #include <plugins/engines/ospray/ispc/render/utils/Consts.ih>
 
-vec4f skyboxMapping(const uniform Renderer* uniform renderer, Ray& ray,
+vec4f skyboxMapping(const uniform Renderer* uniform renderer,
+                    const varying Ray& ray,
                     const uniform ExtendedOBJMaterial* uniform bgMaterial)
 {
     varying vec4f result = make_vec4f(bgMaterial->Kd);

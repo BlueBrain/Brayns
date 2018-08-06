@@ -19,7 +19,6 @@
  */
 
 #include "RenderingParameters.h"
-#include <brayns/common/exceptions.h>
 #include <brayns/common/log.h>
 
 #include <boost/lexical_cast.hpp>

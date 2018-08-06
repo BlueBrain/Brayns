@@ -19,7 +19,6 @@
  */
 
 #include "GeometryParameters.h"
-#include <brayns/common/exceptions.h>
 #include <brayns/common/log.h>
 #include <brayns/common/types.h>
 

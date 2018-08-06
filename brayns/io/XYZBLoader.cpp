@@ -111,7 +111,13 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
             spheres[i + startOffset].radius = newRadius;
     }
 
-    return std::make_shared<ModelDescriptor>(std::move(model), blob.name);
+    Transformation transformation;
+    transformation.setRotationCenter(model->getBounds().getCenter());
+
+    auto modelDescriptor =
+        std::make_shared<ModelDescriptor>(std::move(model), blob.name);
+    modelDescriptor->setTransformation(transformation);
+    return modelDescriptor;
 }
 
 ModelDescriptorPtr XYZBLoader::importFromFile(const std::string& filename,

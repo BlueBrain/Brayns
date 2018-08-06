@@ -77,8 +77,17 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
     else
         _updateValue(_name, rhs.getName());
     _updateValue(_path, rhs.getPath());
-    _updateValue(_transformation, rhs.getTransformation());
     _updateValue(_visible, rhs.getVisible());
+
+    // Transformation
+    const auto oldRotationCenter = _transformation.getRotationCenter();
+    const auto newRotationCenter = rhs.getTransformation().getRotationCenter();
+    _updateValue(_transformation, rhs.getTransformation());
+    if (newRotationCenter == Vector3f())
+        // If no rotation center is specified in the model params, the one set
+        // by the model loader is used
+        _transformation.setRotationCenter(oldRotationCenter);
+
     return *this;
 }
 
@@ -117,15 +126,13 @@ ModelInstance* ModelDescriptor::getInstance(const size_t id)
 Boxf ModelDescriptor::getInstancesBounds() const
 {
     Boxf bounds;
-    const auto& transformation = getTransformation();
     for (const auto& instance : getInstances())
     {
         if (!instance.getVisible() || !_model)
             continue;
 
-        const auto instanceTransform =
-            transformation * instance.getTransformation();
-        bounds.merge(transformBox(getModel().getBounds(), instanceTransform));
+        bounds.merge(
+            transformBox(getModel().getBounds(), instance.getTransformation()));
     }
     return bounds;
 }

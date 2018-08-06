@@ -45,7 +45,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   camera/FlyingModeManipulator.h
   camera/InspectCenterManipulator.h
   engine/Engine.h
-  exceptions.h
   geometry/Cone.h
   geometry/Cylinder.h
   geometry/SDFGeometry.h

@@ -21,7 +21,7 @@
 
 #include "stream.h"
 
-#if (defined(__clang__) && !defined(__APPLE__))
+#ifdef __clang__
 RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(unreachable - code)
 RAPIDJSON_DIAG_OFF(missing - noreturn)
