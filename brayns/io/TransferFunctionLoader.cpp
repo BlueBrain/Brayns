@@ -58,38 +58,54 @@ bool TransferFunctionLoader::loadFromFile(const std::string& filename,
 
     size_t nbEntries = 0;
 
+    bool firstLine = true;
+
+    Vector4fs diffuseColors;
+
     while (validParsing && std::getline(file, line))
     {
-        std::vector<uint> lineData;
+        std::vector<double> lineData;
         std::stringstream lineStream(line);
 
-        size_t value;
+        double value;
         while (lineStream >> value)
             lineData.push_back(value);
 
         switch (lineData.size())
         {
+        case 1:
+        {
+            // Special case where some files store the number of entries on the
+            // first line
+            if (!firstLine)
+                validParsing = false;
+            break;
+        }
         case 3:
         {
-            Vector4f diffuse(lineData[0] / 255.f, lineData[1] / 255.f,
-                             lineData[2] / 255.f, DEFAULT_ALPHA);
-            transferFunction.getDiffuseColors().push_back(diffuse);
+            diffuseColors.emplace_back(lineData[0], lineData[1], lineData[2],
+                                       DEFAULT_ALPHA);
             break;
         }
         case 4:
         {
-            Vector4f diffuse(lineData[0] / 255.f, lineData[1] / 255.f,
-                             lineData[2] / 255.f, lineData[3] / 255.f);
-            transferFunction.getDiffuseColors().push_back(diffuse);
+            diffuseColors.emplace_back(lineData[0], lineData[1], lineData[2],
+                                       lineData[3]);
             break;
         }
         default:
-            BRAYNS_ERROR << "Invalid line: " << line << std::endl;
             validParsing = false;
             break;
         }
+
+        if (!validParsing)
+            BRAYNS_ERROR << "Invalid line: " << line << std::endl;
+
         ++nbEntries;
+        firstLine = false;
     }
+
+    transferFunction.getDiffuseColors() = diffuseColors;
 
     transferFunction.setValuesRange(range);
     BRAYNS_INFO << "Transfer function values range: " << range << std::endl;

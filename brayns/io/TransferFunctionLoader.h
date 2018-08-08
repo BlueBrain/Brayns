@@ -25,20 +25,19 @@
 
 namespace brayns
 {
-/** Loads transfer function from text file where every line contains a space
- * separated
- *  list of integers for the following attributes:
- *  red: 0..1 value for the RGBA red component
- *  green: 0..1 value for the RGBA green component
- *  blue: 0..1 value for the RGBA blue component
- *  alpha: 0..1 value for the RGBA alpha component defining the opacity of the
- *     surface. This component is optional and is set to DEFAULT_ALPHA if not
- * present
- *  emission: 0..1 value for the light emission component defining the intensity
- * of light
- *     emitted by the surface. This component is optional and is set to
- * DEFAULT_EMISSION if
- *     not present
+/**
+ * Loads transfer function from text file where every line contains a space
+ * separated list of floating point numbers between 0 and 1 for the following
+ * attributes:
+ *
+ * Red - RGBA red component.
+ * Green -RGBA green component.
+ * Blue - RGBA blue component.
+ * Alpha - RGBA alpha component defining the opacity of the surface. This
+ * component is optional and is set to DEFAULT_ALPHA if not present.
+ * Emission - Light emission component defining the intensity  of light emitted
+ * by the surface. This component is optional and is set to DEFAULT_EMISSION if
+ * not present
  */
 class TransferFunctionLoader
 {
