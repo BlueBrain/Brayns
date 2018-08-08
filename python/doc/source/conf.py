@@ -18,6 +18,9 @@ sys.path.insert(0, os.path.abspath('../../brayns'))
 
 from version import VERSION
 
+from os import path
+sys.path.insert(0, path.dirname(path.dirname(path.abspath('../python'))))
+
 # -- Project information -----------------------------------------------------
 
 project = u'Brayns'
