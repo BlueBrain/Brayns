@@ -97,6 +97,21 @@ bool loadTransferFunctionFromFile(const std::string& filename,
         if (!validParsing)
             BRAYNS_ERROR << "Invalid line: " << line << std::endl;
 
+        if (!firstLine)
+        {
+            bool rangeOK = true;
+            for (auto v : lineData)
+                if (v < 0.0 || v > 1.0)
+                    rangeOK = false;
+
+            if (!rangeOK)
+            {
+                BRAYNS_ERROR << "Number not in range 0..1 on line: " << line
+                             << std::endl;
+                validParsing = false;
+            }
+        }
+
         ++nbEntries;
         firstLine = false;
     }
