@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -34,12 +34,9 @@ const float DEFAULT_ALPHA = 1.f;
 
 namespace brayns
 {
-TransferFunctionLoader::TransferFunctionLoader()
-{
-}
-
-bool TransferFunctionLoader::loadFromFile(const std::string& filename,
-                                          const Vector2f& range, Scene& scene)
+bool loadTransferFunctionFromFile(const std::string& filename,
+                                  const Vector2f& range,
+                                  TransferFunction& transferFunction)
 {
     BRAYNS_INFO << "Loading transfer function color map from " << filename
                 << std::endl;
@@ -53,7 +50,6 @@ bool TransferFunctionLoader::loadFromFile(const std::string& filename,
     bool validParsing = true;
     std::string line;
 
-    TransferFunction& transferFunction = scene.getTransferFunction();
     transferFunction.clear();
 
     size_t nbEntries = 0;

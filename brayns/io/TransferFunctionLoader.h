@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -26,6 +26,8 @@
 namespace brayns
 {
 /**
+ * @brief Loads values from a transfer function file
+ *
  * Loads transfer function from text file where every line contains a space
  * separated list of floating point numbers between 0 and 1 for the following
  * attributes:
@@ -38,26 +40,16 @@ namespace brayns
  * Emission - Light emission component defining the intensity  of light emitted
  * by the surface. This component is optional and is set to DEFAULT_EMISSION if
  * not present
+ *
+ * @param filename Full file name of the transfer function file
+ * @param range Range of values to which the transfer function is applied
+ * @param transferFunction Transfer function for storing output
+ * @return True if the transfer function file was successfully loaded, false
+ *         otherwise
  */
-class TransferFunctionLoader
-{
-public:
-    TransferFunctionLoader();
-
-    /**
-     * @brief Loads values from a transfer function file
-     * @param filename Full file name of the transfer function file
-     * @param range Range of values to which the transfer function is applied
-     * @param scene Scene holding the transfer function
-     * @return True if the transfer function file was successfully loaded, false
-     *         otherwise
-     */
-    bool loadFromFile(const std::string& filename, const Vector2f& range,
-                      Scene& scene);
-
-private:
-    Vector2f _range;
-};
+bool loadTransferFunctionFromFile(const std::string& filename,
+                                  const Vector2f& range,
+                                  TransferFunction& transferFunction);
 }
 
 #endif // TRANSFERFUNCTIONLOADER_H
