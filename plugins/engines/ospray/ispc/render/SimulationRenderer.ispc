@@ -74,7 +74,8 @@ struct ShadingAttributes
     vec3f lightEmissionColor;
     float lightEmissionIntensity;
     bool castSimulationData;
-    vec4f simulationColor;
+    vec3f simulationColor;
+    float simulationIntensity;
     vec3f indirectColor;
     float indirectIntensity;
     vec3f volumeColor;
@@ -513,7 +514,8 @@ inline void initializeShadingAttributes(
 
     // Simulation contribution
     attributes.castSimulationData = true;
-    attributes.simulationColor = make_vec4f(0.f);
+    attributes.simulationColor = make_vec3f(0.f);
+    attributes.simulationIntensity = 0.f;
 
     // Indirect light contribution
     attributes.indirectColor = make_vec3f(0.f);
@@ -526,6 +528,9 @@ inline void initializeShadingAttributes(
     // Volume
     attributes.volumeColor = make_vec3f(0.f);
     attributes.volumeIntensity = 0.f;
+
+    // Diffuse color
+    attributes.diffuseColor = make_vec3f(0.f);
 
     // Specular color
     attributes.specularColor = make_vec3f(0.f);
@@ -654,9 +659,8 @@ inline void setGeometryShadingAttributes(
   coordinates.The value from the simulation data buffer is then converted into
   a color, according to the colormap.
   */
-inline void processSimulationValue(
-    const uniform SimulationRenderer* uniform self,
-    ShadingAttributes& attributes, varying DifferentialGeometry* dg)
+inline void processSimulationValue(ShadingAttributes& attributes,
+                                   varying DifferentialGeometry* dg)
 {
     float value = 0.f;
     const uint64 index = (uint64)(dg->st.x * OFFSET_MAGIC) << 32 |
@@ -668,9 +672,6 @@ inline void processSimulationValue(
         // Value offset is out of range, return error color
         return;
 
-    if (value < attributes.self->samplingThreshold)
-        return;
-
     // Normalize the value according colormap size
     const float normalizedValue = (value - attributes.self->colorMapMinValue) /
                                   attributes.self->colorMapRange;
@@ -678,7 +679,9 @@ inline void processSimulationValue(
     const uint32 lookupIndex = max(0.f, min(normalizedValue, 1.f)) *
                                (attributes.self->colorMapSize - 1);
 
-    attributes.simulationColor = attributes.self->colorMap[lookupIndex];
+    const vec4f colorMapColor = attributes.self->colorMap[lookupIndex];
+    attributes.simulationColor = make_vec3f(colorMapColor);
+    attributes.simulationIntensity = colorMapColor.w;
 
     if (attributes.self->emissionIntensitiesMap)
         attributes.lightEmissionColor =
@@ -698,25 +701,24 @@ inline void processSimulationValue(
   the secondary model. When the secondary model is intersected, the simulation
   value is retrieved and used to shade the surface of the mesh.
 */
-inline void processSimulationContribution(
-    const uniform SimulationRenderer* uniform self,
-    varying ScreenSample& sample, ShadingAttributes& attributes,
-    const int materialID)
+inline void processSimulationContribution(varying ScreenSample& sample,
+                                          ShadingAttributes& attributes,
+                                          const int materialID)
 {
     if (!attributes.castSimulationData)
         return;
 
     if (!attributes.self->simulationModel)
     {
-        processSimulationValue(self, attributes, attributes.dg);
+        processSimulationValue(attributes, attributes.dg);
         return;
     }
 
     // Get simulation color from simulation model
     Ray colorRay;
     colorRay.org = attributes.origin;
-    colorRay.dir = getRandomVector(self->abstract.super.fb->size.x, sample,
-                                   attributes.normal * -1.f,
+    colorRay.dir = getRandomVector(attributes.self->abstract.super.fb->size.x,
+                                   sample, attributes.normal * -1.f,
                                    attributes.self->randomNumber);
     colorRay.t0 = 0.f;
     colorRay.time = inf;
@@ -729,20 +731,18 @@ inline void processSimulationContribution(
     traceRay(attributes.self->simulationModel, colorRay);
 
     if (colorRay.geomID < 0)
-        attributes.simulationColor = make_vec4f(0.f);
-    else
-    {
-        // Intersection found. Simulation ray hit a primitive
-        varying DifferentialGeometry colorDg;
-        postIntersect(attributes.self->simulationModel, colorDg, colorRay,
-                      DG_MATERIALID | DG_TEXCOORD);
-        if (materialID == colorDg.materialID && attributes.self->simulationData)
-            // The mesh and it's corresponding representation in the simulation
-            // model must use the same material ID. This is to make sure that
-            // one neuron is not shaded with the simulation value of another
-            // neuron.
-            processSimulationValue(self, attributes, &colorDg);
-    }
+        return;
+
+    // Intersection found. Simulation ray hit a primitive
+    varying DifferentialGeometry colorDg;
+    postIntersect(attributes.self->simulationModel, colorDg, colorRay,
+                  DG_MATERIALID | DG_TEXCOORD);
+    if (materialID == colorDg.materialID && attributes.self->simulationData)
+        // The mesh and it's corresponding representation in the simulation
+        // model must use the same material ID. This is to make sure that
+        // one neuron is not shaded with the simulation value of another
+        // neuron.
+        processSimulationValue(attributes, &colorDg);
 }
 
 inline void processBackgroundColor(varying ScreenSample& sample,
@@ -775,14 +775,9 @@ inline void processLightShading(DifferentialGeometry& dg,
                                 const varying Ray& ray,
                                 ShadingAttributes& attributes)
 {
-    if (!attributes.self->abstract.lights)
-    {
-        attributes.shadingContribution = attributes.diffuseColor;
-        return;
-    }
-
     // Shading for all lights defined in the scene
     attributes.shadingContribution = make_vec3f(0.f);
+
     for (uniform int i = 0; i < attributes.self->abstract.numLights; ++i)
     {
         const uniform Light* uniform light =
@@ -813,6 +808,7 @@ inline void processLightShading(DifferentialGeometry& dg,
                 attributes.specularColor = make_vec3f(0.f);
 
             attributes.diffuseColor = cosNL * attributes.diffuseColor;
+            attributes.simulationColor = cosNL * attributes.simulationColor;
 
             // Process shadows
             const bool shadowsEnabled = attributes.self->shadows > 0.f &&
@@ -867,18 +863,15 @@ inline void processFinalContribution(ShadingAttributes& attributes)
                                        attributes.indirectColor *
                                        attributes.indirectIntensity;
 
-    // Simulation contribution
-    const vec3f simulationColor = make_vec3f(attributes.simulationColor);
-    float alpha = attributes.simulationColor.w;
+    // Specular contribution
+    vec3f totalContributions =
+        attributes.shadingContribution + attributes.specularColor;
 
     // Surface shading + volume final contribution
-    vec3f totalContributions =
-        (attributes.shadingContribution + simulationColor) * (1.f - alpha) +
-        attributes.shadingContribution * simulationColor * alpha +
+    totalContributions =
+        attributes.simulationColor * attributes.simulationIntensity +
+        totalContributions * (1.f - attributes.simulationIntensity) +
         indirectContribution;
-
-    // Specular contribution
-    totalContributions = totalContributions + attributes.specularColor;
 
     // Light emission contribution
     totalContributions =
@@ -953,8 +946,7 @@ inline vec3f SimulationRenderer_shadeRay(
             setGeometryShadingAttributes(self, dg, sample, ray, attributes);
 
             // Compute simulation contribution
-            processSimulationContribution(self, sample, attributes,
-                                          dg.materialID);
+            processSimulationContribution(sample, attributes, dg.materialID);
 
             // Z-Depth
             if (depth == 0)
