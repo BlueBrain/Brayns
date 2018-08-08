@@ -153,6 +153,19 @@ public:
     }
 
     /**
+      Sets the clip planes
+    */
+    void setClipPlanes(const ClipPlanes& clipPlanes)
+    {
+        _clipPlanes = clipPlanes;
+        markModified();
+    }
+    /**
+      @return the clip planes
+    */
+    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
+
+    /**
         Returns the simulutation handler
     */
     BRAYNS_API AbstractSimulationHandlerPtr getSimulationHandler() const;
@@ -272,6 +285,7 @@ protected:
     mutable std::shared_timed_mutex _modelMutex;
 
     Lights _lights;
+    ClipPlanes _clipPlanes;
 
     // Simulation
     AbstractSimulationHandlerPtr _simulationHandler{nullptr};

@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/common/scene/Scene.h>
+
 #include "OSPRayCamera.h"
 #include "utils.h"
 
@@ -49,19 +51,16 @@ void OSPRayCamera::commit()
     setOSPRayProperties(*this, _camera);
 
     // Clip planes
-    const auto& clipPlanes = getClipPlanes();
-    if (clipPlanes.size() == 6)
+    if (!_clipPlanes.empty())
     {
-        const std::string clipPlaneNames[6] = {"clipPlane1", "clipPlane2",
-                                               "clipPlane3", "clipPlane4",
-                                               "clipPlane5", "clipPlane6"};
-        for (size_t i = 0; i < clipPlanes.size(); ++i)
-        {
-            const auto& clipPlane = clipPlanes[i];
-            ospSet4f(_camera, clipPlaneNames[i].c_str(), clipPlane.x(),
-                     clipPlane.y(), clipPlane.z(), clipPlane.w());
-        }
+        auto clipPlaneData =
+            ospNewData(_clipPlanes.size(), OSP_FLOAT4, _clipPlanes.data());
+        ospSetData(_camera, "clipPlanes", clipPlaneData);
+        ospRelease(clipPlaneData);
     }
+    else
+        ospRemoveParam(_camera, "clipPlanes");
+
     ospCommit(_camera);
 }
 
@@ -69,6 +68,14 @@ void OSPRayCamera::setEnvironmentMap(const bool environmentMap)
 {
     ospSet1i(_camera, "environmentMap", environmentMap);
     ospCommit(_camera);
+}
+
+void OSPRayCamera::setClipPlanes(const ClipPlanes& clipPlanes)
+{
+    if (_clipPlanes == clipPlanes)
+        return;
+    _clipPlanes = clipPlanes;
+    markModified();
 }
 
 bool OSPRayCamera::isSideBySideStereo() const

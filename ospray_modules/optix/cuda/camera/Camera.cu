@@ -64,6 +64,7 @@ rtDeclareVariable(float4, clip_plane3, , );
 rtDeclareVariable(float4, clip_plane4, , );
 rtDeclareVariable(float4, clip_plane5, , );
 rtDeclareVariable(float4, clip_plane6, , );
+rtDeclareVariable(unsigned int, num_clip_planes, , );
 
 // For MPI rendering
 //rtDeclareVariable(float2, offset, , );
@@ -75,7 +76,7 @@ __device__ void getClippingValues(
     float4 clip_planes[ NB_CLIP_PLANES ] = {
         clip_plane1, clip_plane2, clip_plane3, clip_plane4, clip_plane5, clip_plane6
     };
-    for( int i = 0; i < NB_CLIP_PLANES; ++i )
+    for( int i = 0; i < num_clip_planes; ++i )
     {
         const float3 planeNormal = { clip_planes[i].x, clip_planes[i].y, clip_planes[i].z };
         float rn = dot( ray_direction, planeNormal );

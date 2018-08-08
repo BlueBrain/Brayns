@@ -19,6 +19,8 @@
 // ispc-side stuff
 #include "ClippedPerspectiveCamera_ispc.h"
 
+#include <ospray/SDK/common/Data.h>
+
 #ifdef _WIN32
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
@@ -46,12 +48,7 @@ void ClippedPerspectiveCamera::commit()
     stereoMode = (StereoMode)getParam1i("stereoMode", OSP_STEREO_NONE);
     // the default 63.5mm represents the average human IPD
     interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
-    clipPlanes[0] = getParam4f("clipPlane1", vec4f(0.f, -1.f, 0.f, -INFINITY));
-    clipPlanes[1] = getParam4f("clipPlane2", vec4f(0.f, 1.f, 0.f, INFINITY));
-    clipPlanes[2] = getParam4f("clipPlane3", vec4f(-1.f, 0.f, 0.f, -INFINITY));
-    clipPlanes[3] = getParam4f("clipPlane4", vec4f(1.f, 0.f, 0.f, INFINITY));
-    clipPlanes[4] = getParam4f("clipPlane5", vec4f(0.f, 0.f, -1.f, -INFINITY));
-    clipPlanes[5] = getParam4f("clipPlane6", vec4f(0.f, 0.f, 1.f, INFINITY));
+    clipPlanes = getParamData("clipPlanes", nullptr);
 
     // ------------------------------------------------------------------
     // now, update the local precomputed values
@@ -101,14 +98,15 @@ void ClippedPerspectiveCamera::commit()
         scaledAperture = apertureRadius / imgPlane_size_x;
     }
 
+    const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
+    const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
+
     ispc::ClippedPerspectiveCamera_set(
         getIE(), (const ispc::vec3f&)org, (const ispc::vec3f&)dir_00,
         (const ispc::vec3f&)dir_du, (const ispc::vec3f&)dir_dv, scaledAperture,
         aspect, stereoMode == OSP_STEREO_SIDE_BY_SIDE,
-        (const ispc::vec3f&)ipd_offset, (const ispc::vec4f&)clipPlanes[0],
-        (const ispc::vec4f&)clipPlanes[1], (const ispc::vec4f&)clipPlanes[2],
-        (const ispc::vec4f&)clipPlanes[3], (const ispc::vec4f&)clipPlanes[4],
-        (const ispc::vec4f&)clipPlanes[5]);
+        (const ispc::vec3f&)ipd_offset, (const ispc::vec4f*)clipPlaneData,
+        numClipPlanes);
 }
 
 OSP_REGISTER_CAMERA(ClippedPerspectiveCamera, clippedperspective);
