@@ -54,7 +54,7 @@ bool loadTransferFunctionFromFile(const std::string& filename,
 
     transferFunction.clear();
 
-    bool firstLine = true;
+    size_t lineNumber = 1;
 
     Vector4fs diffuseColors;
 
@@ -67,7 +67,10 @@ bool loadTransferFunctionFromFile(const std::string& filename,
         while (lineStream >> value)
             lineData.push_back(value);
 
-        switch (lineData.size())
+        const bool firstLine = lineNumber == 1;
+        const size_t numEntries = lineData.size();
+
+        switch (numEntries)
         {
         case 1:
         {
@@ -95,24 +98,27 @@ bool loadTransferFunctionFromFile(const std::string& filename,
         }
 
         if (!validParsing)
-            BRAYNS_ERROR << "Invalid line: " << line << std::endl;
+        {
+            BRAYNS_ERROR << filename << ":" << lineNumber
+                         << ": Invalid number of entries '" << numEntries << "'"
+                         << std::endl;
+        }
 
         if (!firstLine)
         {
-            bool rangeOK = true;
             for (auto v : lineData)
-                if (v < 0.0 || v > 1.0)
-                    rangeOK = false;
-
-            if (!rangeOK)
             {
-                BRAYNS_ERROR << "Number not in range 0..1 on line: " << line
-                             << std::endl;
-                validParsing = false;
+                if (v < 0.0 || v > 1.0)
+                {
+                    BRAYNS_ERROR << filename << ":" << lineNumber
+                                 << ": Number '" << v << "' not in range 0..1"
+                                 << std::endl;
+                    validParsing = false;
+                }
             }
         }
 
-        firstLine = false;
+        ++lineNumber;
     }
 
     const size_t nbEntries = diffuseColors.size();
