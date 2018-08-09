@@ -238,8 +238,8 @@ inline float getVolumeShadowContribution(
 
     // Ray marching from light source to voxel
     float shadowIntensity = 0.f;
-    for (float t = t1; t > volume->samplingRate && shadowIntensity < 1.f;
-         t -= volume->samplingRate)
+    const float epsilon = volume->samplingStep / volume->samplingRate;
+    for (float t = t1; t > epsilon && shadowIntensity < 1.f; t -= epsilon)
     {
         const vec3f point = ray.org + ray.dir * t;
         const float sample = volume->sample(volume, point);
@@ -308,16 +308,16 @@ inline vec4f getVolumeContribution(
 
     // Ray marching
     vec4f pathColor = make_vec4f(0.f);
-    int samplingStep = max(1, (int)(1.f / volume->samplingRate));
-    unsigned int samplingCounter = 0;
+    float epsilon = volume->samplingStep;
+    const int sampleStep = max(1, (int)(1.f / volume->samplingRate));
     float shadowIntensity = 0.f;
 
-    const float random =
-        getRandomValue(sample, self->randomNumber) * volume->samplingRate;
+    const float random = getRandomValue(sample, self->randomNumber) * epsilon;
     t0 -= random;
     t1 = min(ray.t, t1);
+    unsigned int iteration = 0;
 
-    for (float t = t0; t < t1 && pathColor.w < 1.f; t += volume->samplingRate)
+    for (float t = t0; t < t1 && pathColor.w < 1.f; t += epsilon)
     {
         vec3f volumeSampleColor;
         float sampleOpacity = 0.f;
@@ -328,86 +328,87 @@ inline vec4f getVolumeContribution(
         // Look up the opacity associated with the volume sample.
         sampleOpacity = volume->transferFunction->getOpacityForValue(
             volume->transferFunction, volumeSample);
-        if (samplingCounter == 0 && sampleOpacity < self->samplingThreshold)
+        if (sampleOpacity < self->samplingThreshold)
             continue;
 
-        if (samplingCounter % samplingStep == 0)
+        if (iteration == 0)
+            epsilon = volume->samplingStep / volume->samplingRate;
+
+        // Look up the color associated with the volume sample.
+        volumeSampleColor =
+            volume->transferFunction->getColorForValue(volume->transferFunction,
+                                                       volumeSample);
+
+        // Voxel shading
+        vec3f gradient;
+        DifferentialGeometry dg;
+        const bool shadingEnabled =
+            (iteration == 0 && volume->gradientShadingEnabled);
+
+        const bool aoEnabled =
+            (iteration == 0 && self->ambientOcclusionStrength > 0.f);
+
+        const bool shadowsEnabled = (iteration == 0 && self->shadows > 0.f);
+
+        if (shadingEnabled || aoEnabled)
         {
-            // Look up the color associated with the volume sample.
-            volumeSampleColor = volume->transferFunction->getColorForValue(
-                volume->transferFunction, volumeSample);
-
-            // Voxel shading
-            vec3f gradient;
-            DifferentialGeometry dg;
-            bool shadingEnabled = volume->gradientShadingEnabled;
-            if (volume->singleShade)
-                shadingEnabled &= (samplingCounter == 0);
-
-            const bool aoEnabled =
-                samplingCounter == 0 && self->ambientOcclusionStrength > 0.f;
-
-            if (shadingEnabled || aoEnabled)
-            {
-                gradient =
-                    safe_normalize(volume->computeGradient(volume, point));
-                // Setup differential geometry for the volume sample point.
-                dg.P = point;
-                dg.epsilon = volume->samplingRate;
-                dg.Ns = gradient;
-            }
-
-            if (shadingEnabled)
-            {
-                vec3f shadedColor = make_vec3f(0.f);
-                for (uniform int i = 0; i < self->abstract.numLights; ++i)
-                {
-                    // Shading according to computed normal
-                    const vec2f s = make_vec2f(0.5f);
-                    const Light_SampleRes light =
-                        self->abstract.lights[i]->sample(
-                            self->abstract.lights[i], dg, s);
-                    const float cosNL =
-                        (gradient.x == 0.f && gradient.y == 0.f &&
-                         gradient.z == 0.f)
-                            ? 1.f
-                            : abs(dot(safe_normalize(light.dir), gradient));
-
-                    shadedColor =
-                        shadedColor + volumeSampleColor * cosNL * light.weight;
-
-                    // Specular
-                    const vec3f reflectedNormal = normalize(
-                        ray.dir - 2.f * dot(ray.dir, gradient) * gradient);
-                    const float angle =
-                        powf(max(0.f, dot(light.dir, reflectedNormal)),
-                             self->volumeSpecularExponent);
-                    shadedColor = shadedColor + volume->specular * angle;
-                }
-                volumeSampleColor = volumeSampleColor + shadedColor;
-            }
-
-            // Ambient occlusion
-            if (aoEnabled)
-            {
-                vec3f indirectColor;
-                float indirectIntensity;
-                indirectShading(self, sample, point, gradient, dg,
-                                indirectColor, indirectIntensity);
-                volumeSampleColor =
-                    volumeSampleColor + indirectColor * indirectIntensity;
-            }
-
-            if (samplingCounter == 0 && self->shadows > 0.f)
-                // Compute shadow contributions
-                shadowIntensity =
-                    getVolumeShadowContributions(volume, self, ray, sample,
-                                                 point, volume->samplingRate);
+            gradient = safe_normalize(volume->computeGradient(volume, point));
+            // Setup differential geometry for the volume sample point.
+            dg.P = point;
+            dg.epsilon = epsilon;
+            dg.Ns = gradient;
         }
-        composite(make_vec4f(volumeSampleColor, sampleOpacity), pathColor,
-                  self->volumeAlphaCorrection * volume->samplingRate);
 
-        ++samplingCounter;
+        if (shadingEnabled)
+        {
+            vec3f shadedColor = make_vec3f(0.f);
+            for (uniform int i = 0; i < self->abstract.numLights; ++i)
+            {
+                // Shading according to computed normal
+                const vec2f s = make_vec2f(0.5f);
+                const Light_SampleRes light =
+                    self->abstract.lights[i]->sample(self->abstract.lights[i],
+                                                     dg, s);
+                const float cosNL =
+                    (gradient.x == 0.f && gradient.y == 0.f &&
+                     gradient.z == 0.f)
+                        ? 1.f
+                        : abs(dot(safe_normalize(light.dir), gradient));
+
+                shadedColor =
+                    shadedColor + volumeSampleColor * cosNL * light.weight;
+
+                // Specular
+                const vec3f reflectedNormal = normalize(
+                    ray.dir - 2.f * dot(ray.dir, gradient) * gradient);
+                const float angle =
+                    powf(max(0.f, dot(light.dir, reflectedNormal)),
+                         self->volumeSpecularExponent);
+                shadedColor = shadedColor + volume->specular * angle;
+            }
+            volumeSampleColor = volumeSampleColor + shadedColor;
+        }
+
+        // Ambient occlusion
+        if (aoEnabled)
+        {
+            vec3f indirectColor;
+            float indirectIntensity;
+            indirectShading(self, sample, point, gradient, dg, indirectColor,
+                            indirectIntensity);
+            volumeSampleColor =
+                volumeSampleColor + indirectColor * indirectIntensity;
+        }
+
+        if (shadowsEnabled)
+            // Compute shadow contributions
+            shadowIntensity =
+                getVolumeShadowContributions(volume, self, ray, sample, point,
+                                             epsilon);
+        composite(make_vec4f(volumeSampleColor, sampleOpacity), pathColor,
+                  self->volumeAlphaCorrection * epsilon);
+
+        ++iteration;
     }
 
     // Apply shadow to RGB values only
