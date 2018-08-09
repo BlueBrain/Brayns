@@ -37,9 +37,6 @@ namespace brayns
  * Blue - RGBA blue component.
  * Alpha - RGBA alpha component defining the opacity of the surface. This
  * component is optional and is set to DEFAULT_ALPHA if not present.
- * Emission - Light emission component defining the intensity  of light emitted
- * by the surface. This component is optional and is set to DEFAULT_EMISSION if
- * not present
  *
  * @param filename Full file name of the transfer function file
  * @param range Range of values to which the transfer function is applied

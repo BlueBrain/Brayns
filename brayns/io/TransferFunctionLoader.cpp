@@ -29,7 +29,9 @@
 
 namespace
 {
-const float DEFAULT_ALPHA = 1.f;
+const auto DEFAULT_ALPHA = 1.f;
+const auto DEFAULT_CONTRIBUTION = 1.0f;
+const auto DEFAULT_EMISSION = brayns::Vector3f(0.0f, 0.0f, 0.0f);
 }
 
 namespace brayns
@@ -51,8 +53,6 @@ bool loadTransferFunctionFromFile(const std::string& filename,
     std::string line;
 
     transferFunction.clear();
-
-    size_t nbEntries = 0;
 
     bool firstLine = true;
 
@@ -112,13 +112,17 @@ bool loadTransferFunctionFromFile(const std::string& filename,
             }
         }
 
-        ++nbEntries;
         firstLine = false;
     }
 
-    transferFunction.getDiffuseColors() = diffuseColors;
+    const size_t nbEntries = diffuseColors.size();
 
+    transferFunction.getDiffuseColors() = diffuseColors;
+    transferFunction.getEmissionIntensities().resize(nbEntries,
+                                                     DEFAULT_EMISSION);
+    transferFunction.getContributions().resize(nbEntries, DEFAULT_CONTRIBUTION);
     transferFunction.setValuesRange(range);
+
     BRAYNS_INFO << "Transfer function values range: " << range << std::endl;
     file.close();
     return validParsing;
