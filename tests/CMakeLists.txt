@@ -5,7 +5,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} brayns)
+                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} brayns braynsIO)
 
 if(TARGET pdiff)
   list(APPEND TEST_LIBRARIES pdiff ${FREEIMAGE_LIBRARIES})
@@ -42,7 +42,7 @@ if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   add_library(myPlugin SHARED myPlugin.cpp ${ISPC_OBJECTS})
   target_link_libraries(myPlugin brayns braynsPlugins ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${OSPRAY_LIBRARIES})
   target_include_directories(myPlugin SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
-  list(APPEND TEST_LIBRARIES Rockets braynsPlugins myPlugin braynsIO)
+  list(APPEND TEST_LIBRARIES Rockets braynsPlugins myPlugin)
 else()
   list(APPEND EXCLUDE_FROM_TESTS
     addModel.cpp
