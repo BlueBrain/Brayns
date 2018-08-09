@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(xyz)
 {
     brayns::BinaryParam params;
     params.size = [] {
-        std::ifstream file(BRYNAS_TESTDATA_MODEL_MONKEY_PATH,
+        std::ifstream file(BRAYNS_TESTDATA_MODEL_MONKEY_PATH,
                            std::ios::binary | std::ios::ate);
         return file.tellg();
     }();
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(xyz)
             process();
     });
 
-    std::ifstream file(BRYNAS_TESTDATA_MODEL_MONKEY_PATH, std::ios::binary);
+    std::ifstream file(BRAYNS_TESTDATA_MODEL_MONKEY_PATH, std::ios::binary);
 
     std::vector<char> buffer(1024, 0);
 
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(concurrent_requests)
 {
     brayns::BinaryParam xyzParams;
     xyzParams.size = [] {
-        std::ifstream file(BRYNAS_TESTDATA_MODEL_MONKEY_PATH,
+        std::ifstream file(BRAYNS_TESTDATA_MODEL_MONKEY_PATH,
                            std::ios::binary | std::ios::ate);
         return file.tellg();
     }();
@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE(concurrent_requests)
             .request<brayns::BinaryParam, brayns::ModelDescriptor>(
                 REQUEST_MODEL_UPLOAD, {xyzParams});
 
-    std::ifstream xyzFile(BRYNAS_TESTDATA_MODEL_MONKEY_PATH, std::ios::binary);
+    std::ifstream xyzFile(BRAYNS_TESTDATA_MODEL_MONKEY_PATH, std::ios::binary);
 
     ///////////////////
 

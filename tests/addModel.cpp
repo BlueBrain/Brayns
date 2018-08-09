@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(xyz)
     const auto numModels = getScene().getNumModels();
     BOOST_CHECK_NO_THROW(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL, {"monkey", BRYNAS_TESTDATA_MODEL_MONKEY_PATH})));
+            ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH})));
     BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
 }
 
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(xyz_obj)
     const auto initialNbModels = getScene().getNumModels();
     BOOST_CHECK_NO_THROW(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL, {"monkey", BRYNAS_TESTDATA_MODEL_MONKEY_PATH})));
+            ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH})));
     BOOST_CHECK_NO_THROW(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
             ADD_MODEL, {"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH})));
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
     auto responseFuture =
         rockets::jsonrpc::Client<rockets::ws::Client>{*wsClient}
             .request<brayns::ModelParams, brayns::ModelDescriptor>(
-                ADD_MODEL, {"monkey", BRYNAS_TESTDATA_MODEL_MONKEY_PATH});
+                ADD_MODEL, {"monkey", BRAYNS_TESTDATA_MODEL_MONKEY_PATH});
 
     auto asyncWait =
         std::async(std::launch::async, [&responseFuture, &wsClient] {

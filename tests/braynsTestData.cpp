@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const auto path = BRYNAS_TESTDATA_MODEL_MONKEY_PATH;
+    const auto path = BRAYNS_TESTDATA_MODEL_MONKEY_PATH;
     const char* argv[] = {app, path, "--accumulation", "off"};
     const int argc = sizeof(argv) / sizeof(char*);
 
