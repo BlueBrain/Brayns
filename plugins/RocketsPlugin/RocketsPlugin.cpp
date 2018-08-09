@@ -79,10 +79,13 @@ const std::string METHOD_SNAPSHOT = "snapshot";
 
 // JSONRPC synchronous requests
 const std::string METHOD_GET_INSTANCES = "get-instances";
+const std::string METHOD_GET_MODEL_PROPERTIES = "get-model-properties";
 const std::string METHOD_IMAGE_JPEG = "image-jpeg";
 const std::string METHOD_INSPECT = "inspect";
+const std::string METHOD_MODEL_PROPERTIES_SCHEMA = "model-properties-schema";
 const std::string METHOD_REMOVE_MODEL = "remove-model";
 const std::string METHOD_SCHEMA = "schema";
+const std::string METHOD_SET_MODEL_PROPERTIES = "set-model-properties";
 const std::string METHOD_UPDATE_INSTANCE = "update-instance";
 const std::string METHOD_UPDATE_MODEL = "update-model";
 
@@ -640,6 +643,9 @@ public:
         _handleAddModel();
         _handleRemoveModel();
         _handleUpdateModel();
+        _handleSetModelProperties();
+        _handleGetModelProperties();
+        _handleModelPropertiesSchema();
 
         _handleGetInstances();
         _handleUpdateInstance();
@@ -997,6 +1003,103 @@ public:
             "model", "Model descriptor"};
         _handleSchema(METHOD_UPDATE_MODEL,
                       buildJsonRpcSchemaRequest<ModelDescriptor, bool>(desc));
+    }
+
+    void _handleGetModelProperties()
+    {
+        const RpcParameterDescription desc{
+            METHOD_GET_MODEL_PROPERTIES,
+            "Get the properties of the given model", "id", "the model ID"};
+
+        _jsonrpcServer->bind<ModelID, PropertyMap>(
+            desc.methodName, [engine = _engine](const ModelID& id) {
+                auto model = engine->getScene().getModel(id.modelID);
+                if (!model)
+                    throw rockets::jsonrpc::response_error("Model not found",
+                                                           MODEL_NOT_FOUND);
+                return model->getProperties();
+            });
+
+        _handleSchema(METHOD_GET_MODEL_PROPERTIES,
+                      buildJsonRpcSchemaRequest<ModelID, PropertyMap>(desc));
+    }
+
+    void _handleSetModelProperties()
+    {
+        const RpcParameterDescription desc{
+            METHOD_SET_MODEL_PROPERTIES,
+            "Set the properties of the given model", "param",
+            "model ID and its properties"};
+
+        _jsonrpcServer->bind(
+            METHOD_SET_MODEL_PROPERTIES,
+            [& engine = _engine,
+             &server = _rocketsServer ](const auto& request) {
+                using namespace rapidjson;
+                Document document;
+                document.Parse(request.message.c_str());
+
+                if (!document.HasMember("id") ||
+                    !document.HasMember("properties"))
+                    return Response::invalidParams();
+
+                const auto modelID = document["id"].GetInt();
+                auto model = engine->getScene().getModel(modelID);
+                if (!model)
+                    return Response{
+                        Response::Error{"Model not found", MODEL_NOT_FOUND}};
+
+                Document propertyDoc;
+                propertyDoc.SetObject() = document["properties"].GetObject();
+                rapidjson::StringBuffer buffer;
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                propertyDoc.Accept(writer);
+
+                auto props = model->getProperties();
+                if (::from_json(props, buffer.GetString()))
+                {
+                    model->setProperties(props);
+                    engine->triggerRender();
+
+                    const auto& msg = rockets::jsonrpc::makeNotification(
+                        METHOD_SET_MODEL_PROPERTIES, request.message);
+                    server->broadcastText(msg, {request.clientID});
+
+                    return Response{to_json(true)};
+                }
+                return Response::invalidParams();
+            });
+
+        _handleSchema(METHOD_SET_MODEL_PROPERTIES,
+                      buildJsonRpcSchemaRequest<ModelProperties, bool>(desc));
+    }
+
+    void _handleModelPropertiesSchema()
+    {
+        const RpcParameterDescription desc{
+            METHOD_MODEL_PROPERTIES_SCHEMA,
+            "Get the property schema of the model", "id",
+            "ID of the model get its properties schema"};
+
+        _jsonrpcServer->bind(
+            METHOD_MODEL_PROPERTIES_SCHEMA,
+            [engine = _engine](const auto& request) {
+                ModelID modelID;
+                if (::from_json(modelID, request.message))
+                {
+                    auto model = engine->getScene().getModel(modelID.modelID);
+                    if (!model)
+                        return Response{Response::Error{"Model not found",
+                                                        MODEL_NOT_FOUND}};
+
+                    return Response{buildJsonSchema(model->getProperties(),
+                                                    "ModelProperties")};
+                }
+                return Response::invalidParams();
+            });
+
+        _handleSchema(METHOD_MODEL_PROPERTIES_SCHEMA,
+                      buildJsonRpcSchemaRequest<ModelID, std::string>(desc));
     }
 
     void _handleGetInstances()

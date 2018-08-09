@@ -59,6 +59,17 @@ struct SchemaParam
 {
     std::string endpoint;
 };
+
+struct ModelID
+{
+    size_t modelID;
+};
+
+struct ModelProperties
+{
+    size_t modelID;
+    PropertyMap properties;
+};
 }
 
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
@@ -126,6 +137,25 @@ STATICJSON_DECLARE_ENUM(brayns::TextureType,
 
 namespace staticjson
 {
+inline void init(brayns::PropertyMap* /*g*/, ObjectHandler* h)
+{
+    // beware that this should only be used for creating JSON RPC schema which
+    // uses PropertyMap as an argument and a oneOf list is not possible. To
+    // properly serialize a property map to/from JSON, use from_json/to_json
+    // from jsonPropertyMap.h directly.
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+inline void init(brayns::ModelProperties* s, ObjectHandler* h)
+{
+    h->add_property("id", &s->modelID);
+    h->add_property("properties", &s->properties);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+inline void init(brayns::ModelID* s, ObjectHandler* h)
+{
+    h->add_property("id", &s->modelID);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
 inline void init(brayns::GetInstances* g, ObjectHandler* h)
 {
     h->add_property("id", &g->modelID);
