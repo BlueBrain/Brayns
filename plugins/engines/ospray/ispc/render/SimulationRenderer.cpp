@@ -59,9 +59,9 @@ void SimulationRenderer::commit()
     _transferFunctionMinValue = getParam1f("transferFunctionMinValue", 0.f);
     _transferFunctionRange = getParam1f("transferFunctionRange", 0.f);
 
-    _samplingThreshold = getParam1f("samplingThreshold", 0.01f);
+    _samplingThreshold = getParam1f("samplingThreshold", 0.001f);
     _volumeSpecularExponent = getParam1f("volumeSpecularExponent", 20.f);
-    _volumeAlphaCorrection = getParam1f("volumeAlphaCorrection", 4.f);
+    _volumeAlphaCorrection = getParam1f("volumeAlphaCorrection", 0.5f);
 
     ispc::SimulationRenderer_set(
         getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
