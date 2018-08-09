@@ -961,6 +961,7 @@ private:
         //_fieldOfView = std::max(1.f, _fieldOfView);
         _engine->getCamera().updateProperty("fovy", _fieldOfView);
         BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
+        BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
     }
 
     void _increaseFieldOfView()
