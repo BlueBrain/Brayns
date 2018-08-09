@@ -22,6 +22,7 @@
 
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
+#include <jsonPropertyMap.h>
 #include <jsonSerialization.h>
 
 #include "ClientServer.h"
@@ -30,8 +31,51 @@ const std::string GET_INSTANCES("get-instances");
 const std::string REMOVE_MODEL("remove-model");
 const std::string UPDATE_INSTANCE("update-instance");
 const std::string UPDATE_MODEL("update-model");
+const std::string SET_PROPERTIES("set-model-properties");
+const std::string GET_PROPERTIES("get-model-properties");
+const std::string MODEL_PROPERTIES_SCHEMA("model-properties-schema");
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
+
+BOOST_AUTO_TEST_CASE(set_properties)
+{
+    const auto& models = getScene().getModelDescriptors();
+    BOOST_REQUIRE_EQUAL(models.size(), 1);
+
+    auto model = models[0];
+
+    brayns::PropertyMap props;
+    props.setProperty({"bla", "bla property", 0});
+    model->setProperties(props);
+
+    props.updateProperty("bla", 42);
+    BOOST_CHECK((makeRequest<brayns::ModelProperties, bool>(
+        SET_PROPERTIES, {model->getModelID(), props})));
+
+    BOOST_CHECK_EQUAL(model->getProperties().getProperty<int32_t>("bla"), 42);
+
+    auto result = makeRequestUpdate<brayns::ModelID, brayns::PropertyMap>(
+        GET_PROPERTIES, {model->getModelID()}, props);
+    BOOST_REQUIRE(result.hasProperty("bla"));
+    BOOST_CHECK_EQUAL(result.getProperty<int32_t>("bla"), 42);
+}
+
+BOOST_AUTO_TEST_CASE(model_properties_schema)
+{
+    const auto& models = getScene().getModelDescriptors();
+    BOOST_REQUIRE_EQUAL(models.size(), 1);
+
+    auto model = models[0];
+
+    auto result =
+        makeRequestJSONReturn<brayns::ModelID>(MODEL_PROPERTIES_SCHEMA,
+                                               {model->getModelID()});
+
+    using namespace rapidjson;
+    Document json(kObjectType);
+    json.Parse(result.c_str());
+    BOOST_CHECK(json["properties"].HasMember("bla"));
+}
 
 BOOST_AUTO_TEST_CASE(update_model)
 {

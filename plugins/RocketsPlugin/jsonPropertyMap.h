@@ -420,6 +420,23 @@ std::string buildJsonSchema(
     schema.Accept(writer);
     return buffer.GetString();
 }
+
+// Create JSON schema for the given property map.
+template <>
+std::string buildJsonSchema(const PropertyMap& property,
+                            const std::string& title)
+{
+    using namespace rapidjson;
+
+    Document schema(kObjectType);
+    auto& allocator = schema.GetAllocator();
+    _addPropertyMapSchema(property, title, allocator, schema);
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    schema.Accept(writer);
+    return buffer.GetString();
+}
 }
 
 template <>

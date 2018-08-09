@@ -23,6 +23,7 @@
 
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
+#include <brayns/common/PropertyMap.h>
 #include <brayns/common/Transformation.h>
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>
@@ -138,12 +139,20 @@ public:
     const ModelInstances& getInstances() const { return _instances; }
     Boxf getInstancesBounds() const;
 
+    void setProperties(const PropertyMap& properties)
+    {
+        _properties = properties;
+        markModified();
+    }
+
+    const PropertyMap& getProperties() const { return _properties; }
 private:
     size_t _nextInstanceID{0};
     Boxf _bounds;
     ModelMetadata _metadata;
     ModelPtr _model;
     ModelInstances _instances;
+    PropertyMap _properties;
 
     SERIALIZATION_FRIEND(ModelDescriptor)
 };
