@@ -31,6 +31,8 @@
 
 #include "PDiffHelpers.h"
 
+constexpr auto PDB_FILE = BRAYNS_TESTDATA_PATH "1bna.pdb";
+
 BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
@@ -56,8 +58,8 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    auto path = BRAYNS_TESTDATA + std::string("files/monkey.xyz");
-    const char* argv[] = {app, path.c_str(), "--accumulation", "off"};
+    const auto path = BRYNAS_TESTDATA_MODEL_MONKEY_PATH;
+    const char* argv[] = {app, path, "--accumulation", "off"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -85,6 +87,40 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
     brayns::Brayns brayns(argc, argv);
     brayns.render();
     BOOST_CHECK(compareTestImage("testdataLayer1.png",
+                                 brayns.getEngine().getFrameBuffer()));
+}
+
+BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const auto transfer_file = BRAYNS_TESTDATA_PATH "rat0.1dt";
+
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app,
+                          "--circuit-config",
+                          BBP_TEST_BLUECONFIG3,
+                          "--circuit-targets",
+                          "allmini50",
+                          "--circuit-report",
+                          "voltages",
+                          "--renderer",
+                          "simulation",
+                          "--samples-per-pixel",
+                          "16",
+                          "--color-map-file",
+                          transfer_file,
+                          "--color-map-range",
+                          "-66",
+                          "-62",
+                          "--animation-frame",
+                          "50"};
+    const int argc = sizeof(argv) / sizeof(char*);
+
+    brayns::Brayns brayns(argc, argv);
+
+    brayns.render();
+    BOOST_CHECK(compareTestImage("testdataallmini50color.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
 
@@ -119,8 +155,7 @@ BOOST_AUTO_TEST_CASE(render_protein_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const std::string pdbFile(BRAYNS_TESTDATA + std::string("1bna.pdb"));
-    const char* argv[] = {app, pdbFile.c_str(), "--accumulation", "off"};
+    const char* argv[] = {app, PDB_FILE, "--accumulation", "off"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -134,8 +169,7 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const std::string pdbFile(BRAYNS_TESTDATA + std::string("1bna.pdb"));
-    const char* argv[] = {app, pdbFile.c_str(), "--accumulation", "off"};
+    const char* argv[] = {app, PDB_FILE, "--accumulation", "off"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);

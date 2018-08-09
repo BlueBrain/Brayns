@@ -47,7 +47,7 @@ public:
     void setEnd(const uint32_t end)
     {
         _updateValue(_end, end);
-        _updateValue(_current, 0u);
+        _updateValue(_current, std::min(_current, _end));
     }
     uint32_t getEnd() const { return _end; }
     void reset()

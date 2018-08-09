@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(load_transfer_function)
 {
     brayns::TransferFunction tf;
 
-    const auto fullPath = std::string(BRAYNS_TESTDATA) + "files/rat0.1dt";
+    const auto fullPath = BRAYNS_TESTDATA_PATH "rat0.1dt";
     const auto v = brayns::Vector2f(-100.0f, 100.0f);
 
     BOOST_CHECK(brayns::loadTransferFunctionFromFile(fullPath, v, tf));

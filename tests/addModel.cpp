@@ -67,8 +67,7 @@ BOOST_AUTO_TEST_CASE(unsupported_type)
     try
     {
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL,
-            {"unsupported", BRAYNS_TESTDATA + std::string("unsupported.abc")});
+            ADD_MODEL, {"unsupported", BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH});
         BOOST_REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
@@ -86,16 +85,14 @@ BOOST_AUTO_TEST_CASE(xyz)
     const auto numModels = getScene().getNumModels();
     BOOST_CHECK_NO_THROW(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL,
-            {"monkey", BRAYNS_TESTDATA + std::string("files/monkey.xyz")})));
+            ADD_MODEL, {"monkey", BRYNAS_TESTDATA_MODEL_MONKEY_PATH})));
     BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
 }
 
 BOOST_AUTO_TEST_CASE(obj)
 {
     const auto numModels = getScene().getNumModels();
-    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA +
-                                            std::string("files/bennu.obj")};
+    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
     params.setVisible(false);
     auto model =
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
@@ -111,12 +108,10 @@ BOOST_AUTO_TEST_CASE(xyz_obj)
     const auto initialNbModels = getScene().getNumModels();
     BOOST_CHECK_NO_THROW(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL,
-            {"monkey", BRAYNS_TESTDATA + std::string("files/monkey.xyz")})));
+            ADD_MODEL, {"monkey", BRYNAS_TESTDATA_MODEL_MONKEY_PATH})));
     BOOST_CHECK_NO_THROW(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL,
-            {"bennu", BRAYNS_TESTDATA + std::string("files/bennu.obj")})));
+            ADD_MODEL, {"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH})));
     auto newNbModels = getScene().getNumModels();
     BOOST_CHECK_EQUAL(initialNbModels + 2, newNbModels);
     getScene().removeModel(newNbModels - 1);
@@ -129,7 +124,7 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
     try
     {
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-            ADD_MODEL, {"broken", BRAYNS_TESTDATA + std::string("broken.xyz")});
+            ADD_MODEL, {"broken", BRAYNS_TESTDATA_MODEL_BROKEN_PATH});
         BOOST_REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
@@ -166,8 +161,7 @@ BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
     auto responseFuture =
         rockets::jsonrpc::Client<rockets::ws::Client>{*wsClient}
             .request<brayns::ModelParams, brayns::ModelDescriptor>(
-                ADD_MODEL,
-                {"monkey", BRAYNS_TESTDATA + std::string("files/monkey.xyz")});
+                ADD_MODEL, {"monkey", BRYNAS_TESTDATA_MODEL_MONKEY_PATH});
 
     auto asyncWait =
         std::async(std::launch::async, [&responseFuture, &wsClient] {
@@ -187,7 +181,7 @@ BOOST_AUTO_TEST_CASE(folder)
 {
     BOOST_CHECK_NO_THROW(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptorPtr>(
-            ADD_MODEL, {"folder", BRAYNS_TESTDATA + std::string("files")})));
+            ADD_MODEL, {"folder", BRAYNS_TESTDATA_VALID_MODELS_PATH})));
 }
 
 #ifdef BRAYNS_USE_BBPTESTDATA
