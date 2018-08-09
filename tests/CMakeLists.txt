@@ -5,7 +5,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} brayns)
+                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} brayns braynsIO)
 
 if(TARGET pdiff)
   list(APPEND TEST_LIBRARIES pdiff ${FREEIMAGE_LIBRARIES})

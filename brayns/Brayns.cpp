@@ -521,9 +521,9 @@ private:
             sceneParameters.getColorMapFilename();
         if (!colorMapFilename.empty())
         {
-            TransferFunctionLoader transferFunctionLoader;
-            transferFunctionLoader.loadFromFile(
-                colorMapFilename, sceneParameters.getColorMapRange(), scene);
+            loadTransferFunctionFromFile(colorMapFilename,
+                                         sceneParameters.getColorMapRange(),
+                                         scene.getTransferFunction());
         }
 
         if (!geometryParameters.getLoadCacheFile().empty())

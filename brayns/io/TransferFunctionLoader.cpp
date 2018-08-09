@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -29,17 +29,16 @@
 
 namespace
 {
-const float DEFAULT_ALPHA = 1.f;
+const auto DEFAULT_ALPHA = 1.f;
+const auto DEFAULT_CONTRIBUTION = 1.0f;
+const auto DEFAULT_EMISSION = brayns::Vector3f(0.0f, 0.0f, 0.0f);
 }
 
 namespace brayns
 {
-TransferFunctionLoader::TransferFunctionLoader()
-{
-}
-
-bool TransferFunctionLoader::loadFromFile(const std::string& filename,
-                                          const Vector2f& range, Scene& scene)
+bool loadTransferFunctionFromFile(const std::string& filename,
+                                  const Vector2f& range,
+                                  TransferFunction& transferFunction)
 {
     BRAYNS_INFO << "Loading transfer function color map from " << filename
                 << std::endl;
@@ -53,45 +52,83 @@ bool TransferFunctionLoader::loadFromFile(const std::string& filename,
     bool validParsing = true;
     std::string line;
 
-    TransferFunction& transferFunction = scene.getTransferFunction();
     transferFunction.clear();
 
-    size_t nbEntries = 0;
+    size_t lineNumber = 1;
+
+    Vector4fs diffuseColors;
 
     while (validParsing && std::getline(file, line))
     {
-        std::vector<uint> lineData;
+        std::vector<double> lineData;
         std::stringstream lineStream(line);
 
-        size_t value;
+        double value;
         while (lineStream >> value)
             lineData.push_back(value);
 
-        switch (lineData.size())
+        const bool firstLine = lineNumber == 1;
+        const size_t numEntries = lineData.size();
+
+        switch (numEntries)
         {
+        case 1:
+        {
+            // Special case where some files store the number of entries on the
+            // first line
+            if (!firstLine)
+                validParsing = false;
+            break;
+        }
         case 3:
         {
-            Vector4f diffuse(lineData[0] / 255.f, lineData[1] / 255.f,
-                             lineData[2] / 255.f, DEFAULT_ALPHA);
-            transferFunction.getDiffuseColors().push_back(diffuse);
+            diffuseColors.emplace_back(lineData[0], lineData[1], lineData[2],
+                                       DEFAULT_ALPHA);
             break;
         }
         case 4:
         {
-            Vector4f diffuse(lineData[0] / 255.f, lineData[1] / 255.f,
-                             lineData[2] / 255.f, lineData[3] / 255.f);
-            transferFunction.getDiffuseColors().push_back(diffuse);
+            diffuseColors.emplace_back(lineData[0], lineData[1], lineData[2],
+                                       lineData[3]);
             break;
         }
         default:
-            BRAYNS_ERROR << "Invalid line: " << line << std::endl;
             validParsing = false;
             break;
         }
-        ++nbEntries;
+
+        if (!validParsing)
+        {
+            BRAYNS_ERROR << filename << ":" << lineNumber
+                         << ": Invalid number of entries '" << numEntries << "'"
+                         << std::endl;
+        }
+
+        if (!firstLine)
+        {
+            for (auto v : lineData)
+            {
+                if (v < 0.0 || v > 1.0)
+                {
+                    BRAYNS_ERROR << filename << ":" << lineNumber
+                                 << ": Number '" << v << "' not in range 0..1"
+                                 << std::endl;
+                    validParsing = false;
+                }
+            }
+        }
+
+        ++lineNumber;
     }
 
+    const size_t nbEntries = diffuseColors.size();
+
+    transferFunction.getDiffuseColors() = diffuseColors;
+    transferFunction.getEmissionIntensities().resize(nbEntries,
+                                                     DEFAULT_EMISSION);
+    transferFunction.getContributions().resize(nbEntries, DEFAULT_CONTRIBUTION);
     transferFunction.setValuesRange(range);
+
     BRAYNS_INFO << "Transfer function values range: " << range << std::endl;
     file.close();
     return validParsing;
