@@ -379,7 +379,7 @@ void OSPRayEngine::_createCameras()
     PropertyMap::Property eyeSeparation{"interpupillaryDistance",
                                         "Eye separation",
                                         0.0635f,
-                                        {0.f, 10.f}};
+                                        {0.f, 1e31f}};
 
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
     for (const auto& camera : rp.getCameras())
