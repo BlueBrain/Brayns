@@ -79,7 +79,7 @@ public:
     float interpupillaryDistance; // distance between the two cameras (stereo)
 
     // Clip planes
-    vec4f clipPlanes[6];
+    Ref<Data> clipPlanes;
 };
 
 } // ::ospray
