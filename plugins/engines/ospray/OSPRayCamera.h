@@ -43,10 +43,17 @@ public:
     */
     void commit() final;
 
+    /**
+       Set the clipping planes to use in this camera.
+       Currently, this only works for the clippedperspective camera.
+    */
+    void setClipPlanes(const ClipPlanes& clipPlanes);
+
     /** @copydoc Camera::setEnvironmentMap */
     void setEnvironmentMap(const bool environmentMap) final;
 
     bool isSideBySideStereo() const final;
+
     /**
        Gets the OSPRay implementation of the camera object
        @return OSPRay implementation of the camera object
@@ -57,6 +64,7 @@ public:
 private:
     OSPCamera _camera{nullptr};
     std::string _currentOSPCamera;
+    ClipPlanes _clipPlanes;
 };
 }
 #endif // OSPRAYCAMERA_H

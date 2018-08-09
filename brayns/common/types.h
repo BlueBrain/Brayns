@@ -333,7 +333,7 @@ enum class CameraMode
  * in a Vector4, with the following order: nx, ny, nz and d
  */
 using ClipPlane = Vector4f;
-using ClipPlanes = std::array<ClipPlane, 6>;
+using ClipPlanes = std::vector<ClipPlane>;
 
 struct RenderInput
 {

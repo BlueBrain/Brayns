@@ -100,6 +100,10 @@ void OSPRayRenderer::commit()
         ospSet1f(_renderer, "transferFunctionRange",
                  _scene->getTransferFunction().getValuesRange().y() -
                      _scene->getTransferFunction().getValuesRange().x());
+
+        // Setting the clip planes in the camera
+        _camera->setClipPlanes(_scene->getClipPlanes());
+        _camera->commit();
     }
 
     ospSet1f(_renderer, "timestamp", ap.getFrame());
