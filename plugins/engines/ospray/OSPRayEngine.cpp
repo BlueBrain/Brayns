@@ -292,16 +292,16 @@ void OSPRayEngine::_createRenderers()
                 {"softShadows", "Shadow softness", 0.f, {0.f, 1.f}});
             properties.setProperty({"samplingThreshold",
                                     "Threshold under which sampling is ignored",
-                                    0.01f,
-                                    {0.01f, 1.f}});
+                                    0.001f,
+                                    {0.001f, 1.f}});
             properties.setProperty({"volumeSpecularExponent",
                                     "Volume specular exponent",
                                     20.f,
                                     {1.f, 100.f}});
             properties.setProperty({"volumeAlphaCorrection",
                                     "Volume alpha correction",
-                                    1.f,
-                                    {0.01f, 1.f}});
+                                    0.5f,
+                                    {0.001f, 1.f}});
         }
         if (renderer == "scivis")
         {
