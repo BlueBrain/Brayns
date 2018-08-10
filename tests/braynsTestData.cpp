@@ -25,6 +25,8 @@
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/scene/Model.h>
+#include <brayns/common/scene/Scene.h>
 
 #define BOOST_TEST_MODULE braynsTestData
 #include <boost/test/unit_test.hpp>
@@ -118,6 +120,18 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+
+    const auto rotCenter = brayns.getEngine()
+                               .getScene()
+                               .getModel(0)
+                               ->getTransformation()
+                               .getRotationCenter();
+
+    auto& camera = brayns.getEngine().getCamera();
+    const auto camPos = camera.getPosition();
+
+    camera.setTarget(rotCenter);
+    camera.setPosition(camPos + 0.9f * (rotCenter - camPos));
 
     brayns.render();
     BOOST_CHECK(compareTestImage("testdataallmini50color.png",
