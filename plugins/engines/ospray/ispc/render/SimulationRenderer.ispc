@@ -370,10 +370,10 @@ inline vec4f getVolumeContribution(
             vec3f shadedColor = make_vec3f(0.f);
             for (uniform int i = 0; i < self->abstract.numLights; ++i)
             {
-                const vec2f s = make_vec2f(0.5f);
+                const vec2f samplingLocation = make_vec2f(0.5f);
                 const Light_SampleRes light =
                     self->abstract.lights[i]->sample(self->abstract.lights[i],
-                                                     dg, s);
+                                                     dg, samplingLocation);
                 // Diffuse
                 const float cosNL =
                     (gradient.x == 0.f && gradient.y == 0.f &&
@@ -792,8 +792,9 @@ inline void processShadows(DifferentialGeometry& dg,
     {
         const uniform Light* uniform light =
             attributes.self->abstract.lights[i];
-        const vec2f s = make_vec2f(0.5f);
-        const varying Light_SampleRes lightSample = light->sample(light, dg, s);
+        const vec2f samplingLocation = make_vec2f(0.5f);
+        const varying Light_SampleRes lightSample =
+            light->sample(light, dg, samplingLocation);
         const float radiance = reduce_max(lightSample.weight);
         const vec3f lightDirection = lightSample.dir;
 
@@ -809,7 +810,7 @@ inline void processShadows(DifferentialGeometry& dg,
     }
 
     if (attributes.shadowIntensity > 0.f)
-        // Remove specular color is surface is in the shades
+        // Remove specular color if surface is in the shades
         attributes.specularColor = make_vec3f(0.f);
 }
 
@@ -825,8 +826,9 @@ inline void processLightShading(DifferentialGeometry& dg,
     {
         const uniform Light* uniform light =
             attributes.self->abstract.lights[i];
-        const vec2f s = make_vec2f(0.5f);
-        const varying Light_SampleRes lightSample = light->sample(light, dg, s);
+        const vec2f samplingLocation = make_vec2f(0.5f);
+        const varying Light_SampleRes lightSample =
+            light->sample(light, dg, samplingLocation);
         const float radiance = reduce_max(lightSample.weight);
         const vec3f lightDirection = lightSample.dir;
 
