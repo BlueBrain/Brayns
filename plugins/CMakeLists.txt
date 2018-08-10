@@ -67,5 +67,7 @@ target_include_directories(braynsPlugins SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS
 
 # needed for staticjson and rapidjson
 if(BRAYNS_NETWORKING_ENABLED)
-  target_include_directories(braynsPlugins SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/RocketsPlugin)
+  target_include_directories(braynsPlugins SYSTEM PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/RocketsPlugin
+    ${CMAKE_CURRENT_SOURCE_DIR}/RocketsPlugin/rapidjson/include)
 endif()

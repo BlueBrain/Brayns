@@ -41,7 +41,9 @@ if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   ospray_ispc_compile(${PROJECT_SOURCE_DIR}/plugins/engines/ospray/ispc/render/BasicRenderer.ispc)
   add_library(myPlugin SHARED myPlugin.cpp ${ISPC_OBJECTS})
   target_link_libraries(myPlugin brayns braynsPlugins ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${OSPRAY_LIBRARIES})
-  target_include_directories(myPlugin SYSTEM PRIVATE ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
+  target_include_directories(myPlugin SYSTEM PRIVATE
+    ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin
+    ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/include)
   list(APPEND TEST_LIBRARIES Rockets braynsPlugins myPlugin)
 else()
   list(APPEND EXCLUDE_FROM_TESTS
@@ -55,7 +57,10 @@ else()
 )
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin)
+include_directories(
+  ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin
+  ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/include
+)
 
 list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/brayns/common/utils/base64/*'
                          '${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/*'
