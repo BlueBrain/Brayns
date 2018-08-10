@@ -41,11 +41,30 @@ BOOST_AUTO_TEST_CASE(inspect)
         makeRequest<std::array<float, 2>, brayns::Renderer::PickResult>(
             "inspect", {{0.5, 0.5}});
     BOOST_CHECK(inspectResult.hit);
-    BOOST_CHECK(inspectResult.pos.equals(
-       {0.500001490116119, 0.500001490116119, 1.19209289550781e-7}, 0.000001f));
+    BOOST_CHECK(inspectResult.pos.equals({0.500001490116119, 0.500001490116119,
+                                          1.19209289550781e-7},
+                                         0.000001f));
 
     auto failedInspectResult =
         makeRequest<std::array<float, 2>, brayns::Renderer::PickResult>(
             "inspect", {{10, -10}});
     BOOST_CHECK(!failedInspectResult.hit);
+}
+
+BOOST_AUTO_TEST_CASE(schema_non_existing_endpoint)
+{
+    BOOST_CHECK_THROW((makeRequest<brayns::SchemaParam, std::string>("schema",
+                                                                     {"foo"})),
+                      std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(schema)
+{
+    std::string result = makeRequestJSONReturn<brayns::SchemaParam>(
+        "schema", brayns::SchemaParam{"camera"});
+
+    using namespace rapidjson;
+    Document json(kObjectType);
+    json.Parse(result.c_str());
+    BOOST_CHECK(json.HasMember("title"));
 }
