@@ -132,8 +132,6 @@ void OSPRayScene::commit()
             }
         }
 
-        Boxf instancesBounds;
-        const auto& modelBounds = modelDescriptor->getModel().getBounds();
         for (const auto& instance : modelDescriptor->getInstances())
         {
             const auto instanceTransform =
@@ -145,8 +143,6 @@ void OSPRayScene::commit()
 
             if (modelDescriptor->getVisible() && instance.getVisible())
                 addInstance(_rootModel, impl.getModel(), instanceTransform);
-
-            instancesBounds.merge(transformBox(modelBounds, instanceTransform));
         }
 
         impl.logInformation();
