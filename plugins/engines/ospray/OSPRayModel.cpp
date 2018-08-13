@@ -132,7 +132,11 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
     const auto& spheres = _spheres[materialId];
 
     if (_ospExtendedSpheres.find(materialId) != _ospExtendedSpheres.end())
+    {
         ospRemoveGeometry(_model, _ospExtendedSpheres[materialId]);
+        ospRelease(_ospExtendedSpheres[materialId]);
+        ospRelease(_ospExtendedSpheresData[materialId]);
+    }
 
     _ospExtendedSpheres[materialId] = ospNewGeometry("extendedspheres");
     _ospExtendedSpheresData[materialId] =
@@ -158,7 +162,11 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
 {
     const auto& cylinders = _cylinders[materialId];
     if (_ospExtendedCylinders.find(materialId) != _ospExtendedCylinders.end())
+    {
         ospRemoveGeometry(_model, _ospExtendedCylinders[materialId]);
+        ospRelease(_ospExtendedCylinders[materialId]);
+        ospRelease(_ospExtendedCylindersData[materialId]);
+    }
 
     _ospExtendedCylinders[materialId] = ospNewGeometry("extendedcylinders");
     _ospExtendedCylindersData[materialId] =
@@ -184,7 +192,11 @@ void OSPRayModel::_commitCones(const size_t materialId)
 {
     const auto& cones = _cones[materialId];
     if (_ospExtendedCones.find(materialId) != _ospExtendedCones.end())
+    {
         ospRemoveGeometry(_model, _ospExtendedCones[materialId]);
+        ospRelease(_ospExtendedCones[materialId]);
+        ospRelease(_ospExtendedConesData[materialId]);
+    }
 
     _ospExtendedCones[materialId] = ospNewGeometry("extendedcones");
     _ospExtendedConesData[materialId] =
@@ -208,6 +220,12 @@ void OSPRayModel::_commitCones(const size_t materialId)
 
 void OSPRayModel::_commitMeshes(const size_t materialId)
 {
+    if (_ospMeshes.find(materialId) != _ospMeshes.end())
+    {
+        ospRemoveGeometry(_model, _ospMeshes[materialId]);
+        ospRelease(_ospMeshes[materialId]);
+    }
+
     _ospMeshes[materialId] = ospNewGeometry("trianglemesh");
 
     auto& trianglesMesh = _trianglesMeshes[materialId];
