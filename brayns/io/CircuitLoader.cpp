@@ -307,10 +307,13 @@ private:
         }
         catch (...)
         {
-            BRAYNS_WARN << "Only MVD2 format is currently supported by Brion "
-                           "circuits. Color scheme by layer not available for "
-                           "this circuit"
-                        << std::endl;
+            if (_geometryParameters.getColorScheme() ==
+                ColorScheme::neuron_by_layer)
+                BRAYNS_ERROR
+                    << "Only MVD2 format is currently supported by Brion "
+                       "circuits. Color scheme by layer not available for "
+                       "this circuit"
+                    << std::endl;
         }
     }
 
