@@ -149,7 +149,11 @@ uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _spheresDirty = true;
     _spheres[materialId].push_back(sphere);
-    _bounds.merge(sphere.center);
+    if (materialId != BOUNDINGBOX_MATERIAL_ID)
+    {
+        _bounds.merge(sphere.center + sphere.radius);
+        _bounds.merge(sphere.center - sphere.radius);
+    }
     return _spheres[materialId].size() - 1;
 }
 
@@ -157,8 +161,11 @@ uint64_t Model::addCylinder(const size_t materialId, const Cylinder& cylinder)
 {
     _cylindersDirty = true;
     _cylinders[materialId].push_back(cylinder);
-    _bounds.merge(cylinder.center);
-    _bounds.merge(cylinder.up);
+    if (materialId != BOUNDINGBOX_MATERIAL_ID)
+    {
+        _bounds.merge(cylinder.center);
+        _bounds.merge(cylinder.up);
+    }
     return _cylinders[materialId].size() - 1;
 }
 
@@ -166,8 +173,11 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
 {
     _conesDirty = true;
     _cones[materialId].push_back(cone);
-    _bounds.merge(cone.center);
-    _bounds.merge(cone.up);
+    if (materialId != BOUNDINGBOX_MATERIAL_ID)
+    {
+        _bounds.merge(cone.center);
+        _bounds.merge(cone.up);
+    }
     return _cones[materialId].size() - 1;
 }
 
