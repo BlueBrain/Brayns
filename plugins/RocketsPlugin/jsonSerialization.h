@@ -189,13 +189,6 @@ inline void init(brayns::Renderer::PickResult* p, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::ClipPlane* c, ObjectHandler* h)
-{
-    h->add_property("normal", Vector3fArray(*c));
-    h->add_property("d", &c->array[3]);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
 inline void init(brayns::Camera* c, ObjectHandler* h)
 {
     h->add_property("look_at", Vector3fArray(c->_target), Flags::Optional);
