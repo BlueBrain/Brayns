@@ -319,6 +319,11 @@ void OSPRayEngine::_createRenderers()
                 {"oneSidedLighting", "One-sided lighting", true});
             properties.setProperty({"shadowsEnabled", "Shadows", false});
         }
+        if (renderer == "particle")
+        {
+            properties.setProperty(
+                {"alphaCorrection", "Alpha correction", 0.5f, {0.001f, 1.f}});
+        }
         ospRenderer->setProperties(renderer, properties);
     }
     ospRenderer->setCurrentType(rp.getCurrentRenderer());

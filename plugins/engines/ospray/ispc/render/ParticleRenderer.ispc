@@ -1,8 +1,6 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
- *
- * Based on OSPRay implementation
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,154 +18,142 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// Brayns
 #include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.ih>
-
-const float NEST_TIMESTEP = 0.1f;
 
 struct ParticleRenderer
 {
     AbstractRenderer abstract;
 
-    int randomNumber;
+    // Transfer function / Color map attributes
+    uniform vec4f* uniform colorMap;
+    uniform vec3f* uniform emissionIntensitiesMap;
+    uint32 colorMapSize;
+    float colorMapMinValue;
+    float colorMapRange;
 
+    // Simulation data
     uniform float* uniform simulationData;
     int64 simulationDataSize;
-    uniform vec4f* uniform transferFunction;
-    uniform float* uniform transferFunctionEmissionData;
-    uint32 transferFunctionSize;
+
+    // Alpha correction
+    float alphaCorrection;
 };
 
 inline varying vec4f
     getSimulationValue(const uniform ParticleRenderer* uniform self,
                        DifferentialGeometry& dg, const int32 index)
 {
-    varying vec4f color = make_vec4f(1.f, 0.f, 0.f, 0.5f);
-    if (!self->simulationData || !self->transferFunction)
+    // needs to be the same in MorphologyLoader.cpp
+    const float OFFSET_MAGIC = 1e6;
+
+    vec4f color = make_vec4f(1.f, 0.f, 0.f, 0.5f);
+    if (!self->simulationData || !self->colorMap)
         return color;
 
-    varying int32 idx = max(0, min(index, self->simulationDataSize));
-    const varying float timestamp = self->simulationData[idx];
-    const varying float spikeValue =
-        (timestamp < 0.f)
-            ? 0.f
-            : min(1.f,
-                  max(0.f, 1.f - (NEST_TIMESTEP * self->abstract.timestamp -
-                                  timestamp)));
+    float value = 0.f;
+    const uint64 index = (uint64)(dg.st.x * OFFSET_MAGIC) << 32 |
+                         (uint32)(dg.st.y * OFFSET_MAGIC);
 
-    if (dg.st.x > self->transferFunctionSize)
+    if (index < self->simulationDataSize)
+        value = self->simulationData[index];
+    else
+        // Value offset is out of range, return error color
         return color;
 
-    color = self->transferFunction[dg.st.x];
-    color.w = spikeValue;
-    return color;
+    // Normalize the value according colormap size
+    const float normalizedValue =
+        (value - self->colorMapMinValue) / self->colorMapRange;
+
+    const uint32 lookupIndex =
+        max(0.f, min(normalizedValue, 1.f)) * (self->colorMapSize - 1);
+
+    return self->colorMap[lookupIndex];
 }
 
 inline vec3f ParticleRenderer_shadeRay(
     const uniform ParticleRenderer* uniform self, varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
+    ray.time = inf;
+    sample.z = inf;
 
-    varying float zDepth = 0.f;
-    sample.z = 1.f;
-    sample.alpha = 0.f;
-    varying int depth = 0;
-    varying float path_opacity = 0.f;
-    varying float opacity = 0.f;
+    float zDepth = 0.f;
+    int depth = 0;
+    float opacity = 0.f;
+    float pathOpacity = 0.f;
 
-    varying vec3f intersectionColor = make_vec3f(
-        skyboxMapping((Renderer*)self, ray, self->abstract.bgMaterial));
+    vec4f intersectionColor = make_vec4f(0.f);
+    vec4f colorContribution = make_vec4f(0.f);
 
-    while (path_opacity < 1.f && depth < NB_MAX_REBOUNDS)
+    while (pathOpacity < 1.f)
     {
         traceRay(self->abstract.super.model, ray);
 
         if (ray.geomID < 0)
         {
-            sample.z = 1.f - log(zDepth) / 10.f;
+            // No intersection
+            colorContribution =
+                skyboxMapping((Renderer*)self, ray, self->abstract.bgMaterial);
+            colorContribution.w = 1.f;
+            composite(colorContribution, intersectionColor,
+                      self->alphaCorrection);
             break;
         }
 
         // Intersection found
-        if (depth == 0)
-            sample.alpha = 1.f;
-
-        // Retrieve information about the geometry, typically geometry ID,
+        // Retreive information about the geometry, typically geometry ID,
         // normal to the surface, material ID, texture coordinates, etc.
         DifferentialGeometry dg;
         postIntersect(self->abstract.super.model, dg, ray,
                       DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                           DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
-        if (ray.geomID == 1)
+        const uniform Material* material = dg.material;
+        const uniform ExtendedOBJMaterial* objMaterial =
+            (const uniform ExtendedOBJMaterial*)material;
+        vec3f Kd;
+        if (!objMaterial)
         {
-            // Non simulated geometry
-            const uniform Material* material = dg.material;
-            const uniform ExtendedOBJMaterial* objMaterial =
-                (const uniform ExtendedOBJMaterial*)material;
-            varying vec3f Kd;
-            if (!objMaterial)
-            {
-                Kd = make_vec3f(dg.color);
-                opacity = dg.color.w;
-            }
-            else
-                foreach_unique(mat in objMaterial)
-                {
-                    Kd = mat->Kd;
-                    opacity = mat->d;
-                }
-
-            const varying vec3f intersection = dg.P + dg.epsilon * dg.Ng;
-            const varying vec3f viewer = normalize(ray.org - intersection);
-            const varying float el = max(0.f, dot(viewer, dg.Ng));
-            varying float cosNL = 1.f - el;
-            intersectionColor =
-                intersectionColor * (1.f - opacity) + opacity * Kd * cosNL;
+            Kd = make_vec3f(dg.color);
+            opacity = dg.color.w;
         }
         else
-        {
-            if (depth == 0)
-                sample.z = ray.primID;
-
-            // Get simulation value from geometry
-            const vec4f simulationValue =
-                getSimulationValue(self, dg, ray.primID);
-
-            // Spike value is different from zero, meaning that the neuron
-            // is activated and
-            // neuron color should be considered. If the spike value is
-            // zero, the
-            // intersection is ignored
-            opacity = simulationValue.w;
-            if (opacity > 0.f)
+            foreach_unique(mat in objMaterial)
             {
-                intersectionColor = intersectionColor +
-                                    make_vec3f(simulationValue) * opacity *
-                                        (1.f - path_opacity);
-                path_opacity = path_opacity + opacity * (1.f - path_opacity);
+                Kd = make_vec3f(dg.color) * mat->Kd;
+                opacity = dg.color.w * mat->d;
             }
-        }
 
-        // Z-Depth
-        zDepth += opacity * ray.t;
-        sample.z = log(zDepth) / 10.f;
+        if (depth == 0)
+        {
+            pathOpacity = opacity;
+            sample.z = ray.t;
+        }
+        pathOpacity *= 1.f + opacity;
+
+        // Head-light shading
+        const float cosNL = max(0.f, dot(neg(ray.dir), dg.Ns));
+        colorContribution = make_vec4f(Kd * cosNL, pathOpacity);
+
+        if (objMaterial->castSimulationData)
+            // Get simulation value from geometry
+            colorContribution = getSimulationValue(self, dg, ray.primID);
+
+        composite(colorContribution, intersectionColor, self->alphaCorrection);
 
         // Next ray
-        ray.t0 = ray.t + dg.epsilon * 5.f;
+        ray.t0 = ray.t + dg.epsilon;
         ray.t = infinity;
         ray.primID = -1;
         ray.geomID = -1;
         ray.instID = -1;
-
         ++depth;
     }
 
-    // Z-Depth
-    if (depth >= NB_MAX_REBOUNDS)
-        sample.z = 1.f - log(zDepth) / 10.f;
+    // Alpha
+    sample.alpha = pathOpacity;
 
-    return intersectionColor;
+    return make_vec3f(intersectionColor);
 }
 
 void ParticleRenderer_renderSample(uniform Renderer* uniform _self,
@@ -192,26 +178,31 @@ export void* uniform ParticleRenderer_create(void* uniform cppE)
 
 export void ParticleRenderer_set(
     void* uniform _self, void* uniform bgMaterial,
-    const uniform int& randomNumber, const uniform float& timestamp,
-    const uniform int& spp, uniform float* uniform simulationData,
-    const uniform int64 simulationDataSize,
-    uniform vec4f* uniform transferFunction,
-    uniform float* uniform transferFunctionEmissionData,
-    const uniform uint32 transferFunctionSize)
+    const uniform float& timestamp, const uniform int& spp,
+    uniform float* uniform simulationData,
+    const uniform int64 simulationDataSize, uniform vec4f* uniform colormap,
+    uniform vec3f* uniform emissionIntensitiesMap,
+    const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
+    const uniform float& colorMapRange, const uniform float& alphaCorrection)
 {
     uniform ParticleRenderer* uniform self =
         (uniform ParticleRenderer * uniform)_self;
 
-    self->abstract.super.spp = spp;
     self->abstract.bgMaterial =
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
-    self->abstract.timestamp = timestamp;
 
-    self->randomNumber = randomNumber;
+    self->abstract.timestamp = timestamp;
+    self->abstract.super.spp = spp;
+
+    self->colorMap = (uniform vec4f * uniform)colormap;
+    self->emissionIntensitiesMap =
+        (uniform vec3f * uniform)emissionIntensitiesMap;
+    self->colorMapSize = colorMapSize;
+    self->colorMapMinValue = colorMapMinValue;
+    self->colorMapRange = colorMapRange;
+
     self->simulationData = (uniform float* uniform)simulationData;
     self->simulationDataSize = simulationDataSize;
-    self->transferFunction = (uniform vec4f * uniform)transferFunction;
-    self->transferFunctionEmissionData =
-        (uniform float* uniform)transferFunctionEmissionData;
-    self->transferFunctionSize = transferFunctionSize;
+
+    self->alphaCorrection = alphaCorrection;
 }

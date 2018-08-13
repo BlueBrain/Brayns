@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,7 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/log.h>
 #include <plugins/engines/ospray/ispc/render/ParticleRenderer.h>
 
 // ospray
@@ -38,9 +37,11 @@ void ParticleRenderer::commit()
     AbstractRenderer::commit();
 
     _simulationData = getParamData("simulationData");
+    _simulationDataSize = getParam1i("simulationDataSize", 0);
     _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
     _transferFunctionEmissionData =
         getParamData("transferFunctionEmissionData");
+    _transferFunctionSize = getParam1i("transferFunctionSize", 0);
     _randomNumber = getParam1i("randomNumber", 0);
 
     const auto transferFunctionDiffuseSize =

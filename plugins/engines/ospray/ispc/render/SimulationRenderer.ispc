@@ -85,32 +85,6 @@ struct ShadingAttributes
     vec3f finalContribution;
 };
 
-inline vec3f refractedVector(const varying vec3f& direction,
-                             const varying vec3f& normal,
-                             const varying float n1, const varying float n2)
-{
-    if (n2 == 0.f)
-        return direction;
-    const float eta = n1 / n2;
-    const float cos1 = -dot(direction, normal);
-    const float cos2 = 1.f - eta * eta * (1.f - cos1 * cos1);
-    if (cos2 > 0.f)
-        return eta * direction + (eta * cos1 - sqrt(cos2)) * normal;
-    return direction;
-}
-
-inline void composite(const varying vec4f& src, varying vec4f& dst,
-                      const varying float alphaCorrection)
-{
-    const float alpha =
-        1.f - pow(1.f - min(src.w, 1.f - 1.f / 256.f), alphaCorrection);
-    const float a = alpha * (1.f - dst.w);
-    dst.x = dst.x + src.x * a;
-    dst.y = dst.y + src.y * a;
-    dst.z = dst.z + src.z * a;
-    dst.w += (alpha * (1.f - dst.w));
-}
-
 inline bool launchRandomRay(const uniform SimulationRenderer* uniform self,
                             varying ScreenSample& sample,
                             const varying vec3f& intersection,
