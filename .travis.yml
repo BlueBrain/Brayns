@@ -6,7 +6,7 @@ python:
   - 3.6
 install:
   - cd python
-  - pip install
+  - pip install .
   - pip install tox-travis
 script:
   - tox
