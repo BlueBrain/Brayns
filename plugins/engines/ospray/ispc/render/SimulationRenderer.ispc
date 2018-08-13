@@ -73,6 +73,7 @@ struct ShadingAttributes
     float specularExponent;
     vec3f lightEmissionColor;
     float lightEmissionIntensity;
+    float shadowIntensity;
     bool castSimulationData;
     vec3f simulationColor;
     float simulationIntensity;
@@ -369,10 +370,10 @@ inline vec4f getVolumeContribution(
             vec3f shadedColor = make_vec3f(0.f);
             for (uniform int i = 0; i < self->abstract.numLights; ++i)
             {
-                const vec2f s = make_vec2f(0.5f);
+                const vec2f samplingLocation = make_vec2f(0.5f);
                 const Light_SampleRes light =
                     self->abstract.lights[i]->sample(self->abstract.lights[i],
-                                                     dg, s);
+                                                     dg, samplingLocation);
                 // Diffuse
                 const float cosNL =
                     (gradient.x == 0.f && gradient.y == 0.f &&
@@ -509,7 +510,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                                                        shadowRay, sample) *
                            attributes.self->shadows;
     }
-    return clamp(1.f - shadowIntensity, 0.f, 1.f);
+    return clamp(shadowIntensity, 0.f, 1.f);
 }
 
 inline void initializeShadingAttributes(
@@ -534,6 +535,9 @@ inline void initializeShadingAttributes(
     // Light emission
     attributes.lightEmissionColor = make_vec3f(0.f);
     attributes.lightEmissionIntensity = 0.f;
+
+    // Shadows
+    attributes.shadowIntensity = 0.f;
 
     // Volume
     attributes.volumeColor = make_vec3f(0.f);
@@ -780,6 +784,36 @@ inline void computeIndirectShading(DifferentialGeometry& dg,
                     attributes.indirectIntensity);
 }
 
+inline void processShadows(DifferentialGeometry& dg,
+                           varying ScreenSample& sample, const varying Ray& ray,
+                           ShadingAttributes& attributes)
+{
+    for (uniform int i = 0; i < attributes.self->abstract.numLights; ++i)
+    {
+        const uniform Light* uniform light =
+            attributes.self->abstract.lights[i];
+        const vec2f samplingLocation = make_vec2f(0.5f);
+        const varying Light_SampleRes lightSample =
+            light->sample(light, dg, samplingLocation);
+        const float radiance = reduce_max(lightSample.weight);
+        const vec3f lightDirection = lightSample.dir;
+
+        if (radiance <= 0.f)
+            continue;
+
+        const bool shadowsEnabled = attributes.lightEmissionIntensity <
+                                    attributes.self->samplingThreshold;
+        attributes.shadowIntensity +=
+            shadowsEnabled ? shadedLightIntensity(sample, ray, attributes,
+                                                  lightDirection, dg)
+                           : 0.f;
+    }
+
+    if (attributes.shadowIntensity > 0.f)
+        // Remove specular color if surface is in the shades
+        attributes.specularColor = make_vec3f(0.f);
+}
+
 inline void processLightShading(DifferentialGeometry& dg,
                                 varying ScreenSample& sample,
                                 const varying Ray& ray,
@@ -792,49 +826,37 @@ inline void processLightShading(DifferentialGeometry& dg,
     {
         const uniform Light* uniform light =
             attributes.self->abstract.lights[i];
-        const vec2f s = make_vec2f(0.5f);
-        const varying Light_SampleRes lightSample = light->sample(light, dg, s);
+        const vec2f samplingLocation = make_vec2f(0.5f);
+        const varying Light_SampleRes lightSample =
+            light->sample(light, dg, samplingLocation);
         const float radiance = reduce_max(lightSample.weight);
         const vec3f lightDirection = lightSample.dir;
 
-        if (radiance > 0.f)
+        if (radiance <= 0.f)
+            continue;
+
+        float cosNL = 1.f;
+
+        const bool shadingEnabled = attributes.self->shadingEnabled;
+        if (shadingEnabled)
         {
-            float cosNL = 1.f;
+            // Phong + Blinn shading
+            cosNL = max(0.f, dot(lightDirection, attributes.normal));
 
-            const bool shadingEnabled = attributes.self->shadingEnabled;
-            if (shadingEnabled)
-            {
-                // Phong + Blinn shading
-                cosNL = max(0.f, dot(lightDirection, attributes.normal));
-
-                // Specular color
-                const float cosLR =
-                    dot(lightDirection, attributes.reflectedNormal);
-                attributes.specularColor =
-                    attributes.specularColor *
-                    powf(cosLR, attributes.specularExponent);
-            }
-            else
-                attributes.specularColor = make_vec3f(0.f);
-
-            attributes.diffuseColor = cosNL * attributes.diffuseColor;
-            attributes.simulationColor = cosNL * attributes.simulationColor;
-
-            // Process shadows
-            const bool shadowsEnabled = attributes.self->shadows > 0.f &&
-                                        attributes.lightEmissionIntensity <
-                                            attributes.self->samplingThreshold;
-            const float alpha =
-                shadowsEnabled ? shadedLightIntensity(sample, ray, attributes,
-                                                      lightDirection, dg)
-                               : 1.f;
-            attributes.shadingContribution =
-                attributes.shadingContribution +
-                radiance * alpha * attributes.diffuseColor;
-
-            if (alpha < 1.f)
-                attributes.specularColor = make_vec3f(0.f);
+            // Specular color
+            const float cosLR = dot(lightDirection, attributes.reflectedNormal);
+            attributes.specularColor = attributes.specularColor *
+                                       powf(cosLR, attributes.specularExponent);
         }
+        else
+            attributes.specularColor = make_vec3f(0.f);
+
+        attributes.diffuseColor = cosNL * attributes.diffuseColor;
+        attributes.simulationColor = cosNL * attributes.simulationColor;
+
+        // Process light contribution
+        attributes.shadingContribution =
+            attributes.shadingContribution + radiance * attributes.diffuseColor;
     }
 }
 
@@ -844,7 +866,8 @@ inline void processElectronShading(varying ScreenSample& sample,
     const vec3f viewer = normalize(sample.ray.org - attributes.origin);
     const float el = max(0.f, dot(viewer, attributes.normal));
     const float cosNL = 1.f - el;
-    attributes.shadingContribution = attributes.diffuseColor * cosNL;
+    attributes.shadingContribution = cosNL * attributes.diffuseColor;
+    attributes.simulationColor = cosNL * attributes.simulationColor;
     attributes.specularColor = make_vec3f(0.f);
 }
 
@@ -882,6 +905,10 @@ inline void processFinalContribution(ShadingAttributes& attributes)
         attributes.simulationColor * attributes.simulationIntensity +
         totalContributions * (1.f - attributes.simulationIntensity) +
         indirectContribution;
+
+    // Shadow contribution
+    totalContributions =
+        totalContributions * make_vec3f(1.f - attributes.shadowIntensity);
 
     // Light emission contribution
     totalContributions =
@@ -972,6 +999,10 @@ inline vec3f SimulationRenderer_shadeRay(
                     processElectronShading(sample, attributes);
                 else
                     processLightShading(dg, sample, ray, attributes);
+
+                // Compute shadows
+                if (attributes.self->shadows > 0.f)
+                    processShadows(dg, sample, ray, attributes);
 
                 // Compute volume contribution
                 processVolumeContribution(sample, ray, attributes);
