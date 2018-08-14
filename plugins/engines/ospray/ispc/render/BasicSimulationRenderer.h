@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -22,50 +22,28 @@
 
 #pragma once
 
-#include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.h>
+#include <plugins/engines/ospray/ispc/render/utils/SimulationRenderer.h>
 
 namespace brayns
 {
-class SimulationRenderer : public AbstractRenderer
+/**
+ * @brief The BasicSimulationRenderer class can perform fast transparency and
+ * mapping of simulation data on the geometry
+ */
+class BasicSimulationRenderer : public SimulationRenderer
 {
 public:
-    SimulationRenderer();
-
-    enum class Shading
-    {
-        none,
-        diffuse,
-        electron
-    };
+    BasicSimulationRenderer();
 
     /**
        Returns the class name as a string
        @return string containing the full name of the class
     */
-    std::string toString() const final { return "brayns::SimulationRenderer"; }
+    std::string toString() const final
+    {
+        return "brayns::BasicSimulationRenderer";
+    }
     void commit() final;
-
-private:
-    ospray::Model* _simulationModel;
-
-    float _shadows;
-    float _softShadows;
-    float _ambientOcclusionStrength;
-    float _ambientOcclusionDistance;
-    bool _shadingEnabled;
-    bool _electronShadingEnabled;
-    int _randomNumber;
-
-    ospray::Ref<ospray::Data> _simulationData;
-    ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
-    ospray::Ref<ospray::Data> _transferFunctionEmissionData;
-    float _transferFunctionMinValue;
-    float _transferFunctionRange;
-    ospray::int32 _volumeSamplesPerRay;
-    float _detectionDistance;
-    float _samplingThreshold;
-    float _volumeSpecularExponent;
-    float _volumeAlphaCorrection;
 };
 
 } // ::brayns

@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
                           "--circuit-report",
                           "voltages",
                           "--renderer",
-                          "simulation",
+                          "advanced_simulation",
                           "--samples-per-pixel",
                           "16",
                           "--color-map-file",
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_particle_renderer)
                           "--circuit-report",
                           "voltages",
                           "--renderer",
-                          "particle",
+                          "basic_simulation",
                           "--samples-per-pixel",
                           "16",
                           "--color-map-file",
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_particle_renderer)
     camera.setPosition(camPos + 0.9f * (rotCenter - camPos));
 
     brayns.render();
-    BOOST_CHECK(compareTestImage("testdataallmini50particle.png",
+    BOOST_CHECK(compareTestImage("testdataallmini50basicsimulation.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
 

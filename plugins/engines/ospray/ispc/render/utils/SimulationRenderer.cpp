@@ -1,10 +1,8 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
- *
- * Based on OSPRay implementation
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -21,19 +19,14 @@
  */
 
 #include <brayns/common/log.h>
-#include <plugins/engines/ospray/ispc/render/ParticleRenderer.h>
-
-// ospray
-#include <ospray/SDK/common/Data.h>
+#include <plugins/engines/ospray/ispc/render/utils/SimulationRenderer.h>
 
 // ispc exports
-#include "ParticleRenderer_ispc.h"
-
-using namespace ospray;
+#include "SimulationRenderer_ispc.h"
 
 namespace brayns
 {
-void ParticleRenderer::commit()
+void SimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
@@ -56,30 +49,10 @@ void ParticleRenderer::commit()
                      << "'" << transferFunctionDiffuseSize << "' vs '"
                      << transferFunctionEmissionSize << "'" << std::endl;
 
-    const auto transferFunctionSize =
+    _transferFunctionSize =
         std::min(transferFunctionDiffuseSize, transferFunctionEmissionSize);
 
-    const auto simulationDataSize =
-        _simulationData ? _simulationData->size() : 0;
-
-    ispc::ParticleRenderer_set(
-        getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _timestamp,
-        spp, (_simulationData ? (float*)_simulationData->data : nullptr),
-        simulationDataSize,
-        _transferFunctionDiffuseData
-            ? (ispc::vec4f*)_transferFunctionDiffuseData->data
-            : nullptr,
-        (_transferFunctionEmissionData
-             ? (ispc::vec3f*)_transferFunctionEmissionData->data
-             : nullptr),
-        transferFunctionSize, _transferFunctionMinValue, _transferFunctionRange,
-        _alphaCorrection);
+    _simulationDataSize = _simulationData ? _simulationData->size() : 0;
 }
 
-ParticleRenderer::ParticleRenderer()
-{
-    ispcEquivalent = ispc::ParticleRenderer_create(this);
-}
-
-OSP_REGISTER_RENDERER(ParticleRenderer, particle);
 } // ::brayns
