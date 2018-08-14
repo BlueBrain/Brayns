@@ -29,6 +29,7 @@
 #include <perceptualdiff/rgba_image.h>
 
 // #define GENERATE_TESTDATA
+// #define WRITE_TEMP_IMAGES
 
 inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
     brayns::FrameBuffer& fb)
@@ -56,12 +57,23 @@ inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
 inline bool compareTestImage(const std::string& filename,
                              brayns::FrameBuffer& fb)
 {
-    const auto fullPath = std::string(BRAYNS_TESTDATA) + filename;
+    const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
 #ifdef GENERATE_TESTDATA
     {
         auto image = brayns::freeimage::getImageFromFrameBuffer(fb);
         FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()),
                        image.get(), fullPath.c_str());
+    }
+#endif
+
+#ifdef WRITE_TEMP_IMAGES
+    {
+        const auto tmpPath =
+            std::string(BRAYNS_TESTDATA_IMAGES_PATH) + "tmp_" + filename;
+
+        auto image = brayns::freeimage::getImageFromFrameBuffer(fb);
+        FreeImage_Save(FreeImage_GetFIFFromFilename(filename.c_str()),
+                       image.get(), tmpPath.c_str());
     }
 #endif
 

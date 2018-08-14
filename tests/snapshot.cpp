@@ -51,8 +51,7 @@ BOOST_AUTO_TEST_CASE(snapshot)
         makeRequest<brayns::SnapshotParams,
                     brayns::ImageGenerator::ImageBase64>("snapshot", params);
     auto decodedImage = base64_decode(image.data);
-    const std::string referenceFilename(BRAYNS_TESTDATA +
-                                        std::string("snapshot.png"));
+    const auto referenceFilename = BRAYNS_TESTDATA_IMAGES_PATH "snapshot.png";
 #ifdef GENERATE_REFERENCE_SNAPSHOT
     {
         std::fstream file(referenceFilename, std::ios::out);

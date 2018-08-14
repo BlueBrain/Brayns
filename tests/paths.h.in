@@ -9,9 +9,20 @@
 #define BRAYNS_TEST_PATHS
 
 #ifdef BRAYNS_USE_BBPTESTDATA
-#  include <BBP/TestDatasets.h>
+#include <BBP/TestDatasets.h>
 #endif
 
-static char const *const BRAYNS_TESTDATA = "${CMAKE_CURRENT_SOURCE_DIR}/";
+#define BRAYNS_TESTDATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/files/"
 
+#define BRAYNS_TESTDATA_IMAGES_PATH BRAYNS_TESTDATA_PATH "images/"
+#define BRAYNS_TESTDATA_VALID_MODELS_PATH BRAYNS_TESTDATA_PATH "modelsValid/"
+
+constexpr auto BRAYNS_TESTDATA_MODEL_BENNU_PATH =
+    BRAYNS_TESTDATA_PATH "modelsValid/bennu.obj";
+constexpr auto BRAYNS_TESTDATA_MODEL_MONKEY_PATH =
+    BRAYNS_TESTDATA_PATH "modelsValid/monkey.xyz";
+constexpr auto BRAYNS_TESTDATA_MODEL_BROKEN_PATH =
+    BRAYNS_TESTDATA_PATH "modelsInvalid/broken.xyz";
+constexpr auto BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH =
+    BRAYNS_TESTDATA_PATH "modelsInvalid/unsupported.abc";
 #endif
