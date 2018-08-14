@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/common/log.h>
 #include <plugins/engines/ospray/ispc/render/ParticleRenderer.h>
 
 // ospray
@@ -37,42 +38,42 @@ void ParticleRenderer::commit()
     AbstractRenderer::commit();
 
     _simulationData = getParamData("simulationData");
-    _simulationDataSize = getParam1i("simulationDataSize", 0);
     _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
     _transferFunctionEmissionData =
         getParamData("transferFunctionEmissionData");
-    _transferFunctionSize = getParam1i("transferFunctionSize", 0);
-    _randomNumber = getParam1i("randomNumber", 0);
+    _transferFunctionMinValue = getParam1f("transferFunctionMinValue", 0.f);
+    _transferFunctionRange = getParam1f("transferFunctionRange", 0.f);
+    _alphaCorrection = getParam1f("alphaCorrection", 0.5f);
 
     const auto transferFunctionDiffuseSize =
         _transferFunctionDiffuseData ? _transferFunctionDiffuseData->size() : 0;
-    const auto transferFunctionEmissionize =
+    const auto transferFunctionEmissionSize =
         _transferFunctionEmissionData ? _transferFunctionEmissionData->size()
                                       : 0;
 
-    if (transferFunctionDiffuseSize != transferFunctionEmissionize)
+    if (transferFunctionDiffuseSize != transferFunctionEmissionSize)
         BRAYNS_ERROR << "Transfer function diffuse/emission size not the same: "
                      << "'" << transferFunctionDiffuseSize << "' vs '"
-                     << transferFunctionEmissionize << "'" << std::endl;
+                     << transferFunctionEmissionSize << "'" << std::endl;
 
     const auto transferFunctionSize =
-        std::min(transferFunctionDiffuseSize, transferFunctionEmissionize);
+        std::min(transferFunctionDiffuseSize, transferFunctionEmissionSize);
 
     const auto simulationDataSize =
         _simulationData ? _simulationData->size() : 0;
 
     ispc::ParticleRenderer_set(
-        getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _randomNumber,
-        _timestamp, spp,
-        (_simulationData ? (float*)_simulationData->data : nullptr),
+        getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _timestamp,
+        spp, (_simulationData ? (float*)_simulationData->data : nullptr),
         simulationDataSize,
         _transferFunctionDiffuseData
             ? (ispc::vec4f*)_transferFunctionDiffuseData->data
-            : NULL,
+            : nullptr,
         (_transferFunctionEmissionData
-             ? (float*)_transferFunctionEmissionData->data
+             ? (ispc::vec3f*)_transferFunctionEmissionData->data
              : nullptr),
-        transferFunctionSize);
+        transferFunctionSize, _transferFunctionMinValue, _transferFunctionRange,
+        _alphaCorrection);
 }
 
 ParticleRenderer::ParticleRenderer()

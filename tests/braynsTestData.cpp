@@ -164,6 +164,55 @@ BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
     BOOST_CHECK(compareTestImage("testSdfCircuit.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
+
+BOOST_AUTO_TEST_CASE(render_circuit_with_particle_renderer)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const auto transfer_file = BRAYNS_TESTDATA_PATH "bbp.1dt";
+
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app,
+                          "--circuit-config",
+                          BBP_TEST_BLUECONFIG3,
+                          "--circuit-targets",
+                          "allmini50",
+                          "--circuit-report",
+                          "voltages",
+                          "--renderer",
+                          "particle",
+                          "--samples-per-pixel",
+                          "16",
+                          "--color-map-file",
+                          transfer_file,
+                          "--color-map-range",
+                          "-80",
+                          "-10",
+                          "--animation-frame",
+                          "95",
+                          "--synchronous-mode",
+                          "true"};
+    const int argc = sizeof(argv) / sizeof(char*);
+
+    brayns::Brayns brayns(argc, argv);
+
+    const auto rotCenter = brayns.getEngine()
+                               .getScene()
+                               .getModel(0)
+                               ->getTransformation()
+                               .getRotationCenter();
+
+    auto& camera = brayns.getEngine().getCamera();
+    const auto camPos = camera.getPosition();
+
+    camera.setTarget(rotCenter);
+    camera.setPosition(camPos + 0.9f * (rotCenter - camPos));
+
+    brayns.render();
+    BOOST_CHECK(compareTestImage("testdataallmini50particle.png",
+                                 brayns.getEngine().getFrameBuffer()));
+}
+
 #endif
 
 BOOST_AUTO_TEST_CASE(render_protein_and_compare)

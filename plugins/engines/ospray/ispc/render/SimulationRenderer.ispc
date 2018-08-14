@@ -23,9 +23,6 @@
 // Brayns
 #include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.ih>
 
-// needs to be the same in MorphologyLoader.cpp
-uniform const uniform float OFFSET_MAGIC = 1e6;
-
 struct SimulationRenderer
 {
     AbstractRenderer abstract;
@@ -642,9 +639,9 @@ inline void setGeometryShadingAttributes(
 }
 
 /**
-  The processSimulationContribution reads simulation value from the simulation
-  data buffer.The geometry contains the offset of the buffer in it's X texture
-  coordinates.The value from the simulation data buffer is then converted into
+  The processSimulationValue reads simulation value from the simulation
+  data buffer. The geometry contains the offset of the buffer in it's texture
+  coordinates. The value from the simulation data buffer is then converted into
   a color, according to the colormap.
   */
 inline void processSimulationValue(ShadingAttributes& attributes,

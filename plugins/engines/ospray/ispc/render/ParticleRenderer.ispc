@@ -39,13 +39,9 @@ struct ParticleRenderer
     float alphaCorrection;
 };
 
-inline varying vec4f
-    getSimulationValue(const uniform ParticleRenderer* uniform self,
-                       DifferentialGeometry& dg, const int32 index)
+inline vec4f getSimulationValue(const uniform ParticleRenderer* uniform self,
+                                DifferentialGeometry& dg)
 {
-    // needs to be the same in MorphologyLoader.cpp
-    const float OFFSET_MAGIC = 1e6;
-
     vec4f color = make_vec4f(1.f, 0.f, 0.f, 0.5f);
     if (!self->simulationData || !self->colorMap)
         return color;
@@ -66,8 +62,13 @@ inline varying vec4f
 
     const uint32 lookupIndex =
         max(0.f, min(normalizedValue, 1.f)) * (self->colorMapSize - 1);
+    color = self->colorMap[lookupIndex];
 
-    return self->colorMap[lookupIndex];
+    if (self->emissionIntensitiesMap)
+        color = make_vec4f(make_vec3f(color) +
+                               self->emissionIntensitiesMap[lookupIndex],
+                           color.w);
+    return color;
 }
 
 inline vec3f ParticleRenderer_shadeRay(
@@ -135,10 +136,16 @@ inline vec3f ParticleRenderer_shadeRay(
         const float cosNL = max(0.f, dot(neg(ray.dir), dg.Ns));
         colorContribution = make_vec4f(Kd * cosNL, pathOpacity);
 
-        if (objMaterial->castSimulationData)
+        if (objMaterial->castSimulationData == 1)
+        {
             // Get simulation value from geometry
-            colorContribution = getSimulationValue(self, dg, ray.primID);
-
+            const vec4f simulationColor = getSimulationValue(self, dg);
+            colorContribution =
+                make_vec4f(make_vec3f(colorContribution) *
+                                   (1.f - simulationColor.w) +
+                               make_vec3f(simulationColor) * simulationColor.w,
+                           colorContribution.w);
+        }
         composite(colorContribution, intersectionColor, self->alphaCorrection);
 
         // Next ray

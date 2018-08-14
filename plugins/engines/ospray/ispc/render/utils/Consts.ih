@@ -31,3 +31,6 @@
 
 #define DEFAULT_SKY_POWER 2.f
 #define DEFAULT_SKY_POWER_ZERO_BOUNCE 4.f
+
+// needs to be the same in MorphologyLoader.cpp
+#define OFFSET_MAGIC 1e6f
