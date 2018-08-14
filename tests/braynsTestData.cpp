@@ -116,7 +116,9 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
                           "-66",
                           "-62",
                           "--animation-frame",
-                          "50"};
+                          "50",
+                          "--synchronous-mode",
+                          "true"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
