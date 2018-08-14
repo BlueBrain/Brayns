@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/common/log.h>
 #include <plugins/engines/ospray/ispc/render/ParticleRenderer.h>
 
 // ospray
@@ -37,25 +38,40 @@ void ParticleRenderer::commit()
     AbstractRenderer::commit();
 
     _simulationData = getParamData("simulationData");
-    _simulationDataSize = getParam1i("simulationDataSize", 0);
     _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
     _transferFunctionEmissionData =
         getParamData("transferFunctionEmissionData");
-    _transferFunctionSize = getParam1i("transferFunctionSize", 0);
     _randomNumber = getParam1i("randomNumber", 0);
+
+    const auto transferFunctionDiffuseSize =
+        _transferFunctionDiffuseData ? _transferFunctionDiffuseData->size() : 0;
+    const auto transferFunctionEmissionize =
+        _transferFunctionEmissionData ? _transferFunctionEmissionData->size()
+                                      : 0;
+
+    if (transferFunctionDiffuseSize != transferFunctionEmissionize)
+        BRAYNS_ERROR << "Transfer function diffuse/emission size not the same: "
+                     << "'" << transferFunctionDiffuseSize << "' vs '"
+                     << transferFunctionEmissionize << "'" << std::endl;
+
+    const auto transferFunctionSize =
+        std::min(transferFunctionDiffuseSize, transferFunctionEmissionize);
+
+    const auto simulationDataSize =
+        _simulationData ? _simulationData->size() : 0;
 
     ispc::ParticleRenderer_set(
         getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _randomNumber,
         _timestamp, spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
-        _simulationDataSize,
+        simulationDataSize,
         _transferFunctionDiffuseData
             ? (ispc::vec4f*)_transferFunctionDiffuseData->data
             : NULL,
         (_transferFunctionEmissionData
              ? (float*)_transferFunctionEmissionData->data
              : nullptr),
-        _transferFunctionSize);
+        transferFunctionSize);
 }
 
 ParticleRenderer::ParticleRenderer()

@@ -40,10 +40,8 @@ public:
 
 private:
     ospray::Ref<ospray::Data> _simulationData;
-    ospray::uint64 _simulationDataSize;
     ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
     ospray::Ref<ospray::Data> _transferFunctionEmissionData;
-    ospray::uint32 _transferFunctionSize;
     int _randomNumber;
 };
 

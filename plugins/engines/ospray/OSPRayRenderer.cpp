@@ -75,12 +75,8 @@ void OSPRayRenderer::commit()
     {
         ospSetData(_renderer, "lights", scene->lightData());
 
-        if (_scene->getSimulationHandler())
-        {
+        if (scene->simulationData())
             ospSetData(_renderer, "simulationData", scene->simulationData());
-            ospSet1i(_renderer, "simulationDataSize",
-                     _scene->getSimulationHandler()->getFrameSize());
-        }
 
         // Transfer function Diffuse colors
         ospSetData(_renderer, "transferFunctionDiffuseData",
@@ -89,10 +85,6 @@ void OSPRayRenderer::commit()
         // Transfer function emission data
         ospSetData(_renderer, "transferFunctionEmissionData",
                    scene->transferFunctionEmissionData());
-
-        // Transfer function size
-        ospSet1i(_renderer, "transferFunctionSize",
-                 _scene->getTransferFunction().getDiffuseColors().size());
 
         // Transfer function range
         ospSet1f(_renderer, "transferFunctionMinValue",

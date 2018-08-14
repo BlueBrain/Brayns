@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <brayns/common/log.h>
 #include <plugins/engines/ospray/ispc/render/SimulationRenderer.h>
 
 // ospray
@@ -51,17 +52,32 @@ void SimulationRenderer::commit()
     _simulationModel = (ospray::Model*)getParamObject("simulationModel", 0);
     _volumeSamplesPerRay = getParam1i("volumeSamplesPerRay", 32);
     _simulationData = getParamData("simulationData");
-    _simulationDataSize = getParam1i("simulationDataSize", 0);
     _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
     _transferFunctionEmissionData =
         getParamData("transferFunctionEmissionData");
-    _transferFunctionSize = getParam1i("transferFunctionSize", 0);
     _transferFunctionMinValue = getParam1f("transferFunctionMinValue", 0.f);
     _transferFunctionRange = getParam1f("transferFunctionRange", 0.f);
 
     _samplingThreshold = getParam1f("samplingThreshold", 0.001f);
     _volumeSpecularExponent = getParam1f("volumeSpecularExponent", 20.f);
     _volumeAlphaCorrection = getParam1f("volumeAlphaCorrection", 0.5f);
+
+    const auto transferFunctionDiffuseSize =
+        _transferFunctionDiffuseData ? _transferFunctionDiffuseData->size() : 0;
+    const auto transferFunctionEmissionize =
+        _transferFunctionEmissionData ? _transferFunctionEmissionData->size()
+                                      : 0;
+
+    if (transferFunctionDiffuseSize != transferFunctionEmissionize)
+        BRAYNS_ERROR << "Transfer function diffuse/emission size not the same: "
+                     << "'" << transferFunctionDiffuseSize << "' vs '"
+                     << transferFunctionEmissionize << "'" << std::endl;
+
+    const auto transferFunctionSize =
+        std::min(transferFunctionDiffuseSize, transferFunctionEmissionize);
+
+    const auto simulationDataSize =
+        _simulationData ? _simulationData->size() : 0;
 
     ispc::SimulationRenderer_set(
         getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
@@ -70,16 +86,16 @@ void SimulationRenderer::commit()
         _randomNumber, _timestamp, spp, _electronShadingEnabled, _lightPtr,
         _lightArray.size(), _volumeSamplesPerRay,
         _simulationData ? (float*)_simulationData->data : NULL,
-        _simulationDataSize,
+        simulationDataSize,
         _transferFunctionDiffuseData
             ? (ispc::vec4f*)_transferFunctionDiffuseData->data
             : NULL,
         _transferFunctionEmissionData
             ? (ispc::vec3f*)_transferFunctionEmissionData->data
             : NULL,
-        _transferFunctionSize, _transferFunctionMinValue,
-        _transferFunctionRange, _samplingThreshold, _detectionDistance,
-        _volumeSpecularExponent, _volumeAlphaCorrection);
+        transferFunctionSize, _transferFunctionMinValue, _transferFunctionRange,
+        _samplingThreshold, _detectionDistance, _volumeSpecularExponent,
+        _volumeAlphaCorrection);
 }
 
 SimulationRenderer::SimulationRenderer()
