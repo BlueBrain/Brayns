@@ -94,7 +94,9 @@ osp::affine3f transformationToAffine3f(const Transformation& transformation)
     const auto& scale = transformation.getScale();
 
     const auto t =
-        ospcommon::affine3f::translate({center.x(), center.y(), center.z()}) *
+        ospcommon::affine3f::translate({center.x() / (1.f / scale.x()),
+                                        center.y() / (1.f / scale.y()),
+                                        center.z() / (1.f / scale.z())}) *
         rot * ospcommon::affine3f::scale({scale.x(), scale.y(), scale.z()}) *
         ospcommon::affine3f::translate({translation.x() - center.x(),
                                         translation.y() - center.y(),
