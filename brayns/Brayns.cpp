@@ -147,10 +147,12 @@ struct Brayns::Impl : public PluginAPI
                         "brayns_plugin_create()");
                 }
 
+                auto tmpArgs = pluginParam.arguments;
+                tmpArgs.insert(tmpArgs.begin(), pluginName);
+
                 // Build argc, argv
-                const int argc = pluginParam.arguments.size();
+                const int argc = tmpArgs.size();
                 std::vector<char*> argv(argc, nullptr);
-                std::vector<std::string> tmpArgs = pluginParam.arguments;
 
                 for (int i = 0; i < argc; i++)
                     argv[i] = &tmpArgs[i].front();
