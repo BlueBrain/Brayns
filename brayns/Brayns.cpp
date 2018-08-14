@@ -147,7 +147,7 @@ struct Brayns::Impl : public PluginAPI
                         "brayns_plugin_create()");
                 }
 
-                std::vector<std::string> tmpArgs = pluginParam.arguments;
+                auto tmpArgs = pluginParam.arguments;
                 tmpArgs.insert(tmpArgs.begin(), pluginName);
 
                 // Build argc, argv
