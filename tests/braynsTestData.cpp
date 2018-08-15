@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
     camera.setPosition(camPos + 0.9f * (rotCenter - camPos));
 
     brayns.render();
-    BOOST_CHECK(compareTestImage("testdataallmini50color.png",
+    BOOST_CHECK(compareTestImage("testdataallmini50advancedsimulation.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
 
