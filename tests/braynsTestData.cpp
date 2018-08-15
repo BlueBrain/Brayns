@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
                                  brayns.getEngine().getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(render_circuit_with_particle_renderer)
+BOOST_AUTO_TEST_CASE(render_circuit_with_basic_simulation_renderer)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
@@ -222,6 +222,31 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_particle_renderer)
                                  brayns.getEngine().getFrameBuffer()));
 }
 
+BOOST_AUTO_TEST_CASE(render_circuit_with_proximity_renderer)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app,         "--renderer",
+                          "proximity", "--samples-per-pixel",
+                          "16",        "--synchronous-mode",
+                          "true",      "demo"};
+    const int argc = sizeof(argv) / sizeof(char*);
+
+    brayns::Brayns brayns(argc, argv);
+
+    const brayns::Vector3f rotCenter = {0.5f, 0.5f, 0.5f};
+
+    auto& camera = brayns.getEngine().getCamera();
+    const auto camPos = camera.getPosition();
+
+    camera.setTarget(rotCenter);
+    camera.setPosition(camPos - (rotCenter - camPos));
+
+    brayns.render();
+    BOOST_CHECK(compareTestImage("testdataallmini50proximity.png",
+                                 brayns.getEngine().getFrameBuffer()));
+}
 #endif
 
 BOOST_AUTO_TEST_CASE(render_protein_and_compare)

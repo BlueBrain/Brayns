@@ -259,6 +259,8 @@ void OSPRayEngine::_createRenderers()
         if (renderer == "proximity")
         {
             properties.setProperty(
+                {"alphaCorrection", "Alpha correction", 0.5f, {0.001f, 1.f}});
+            properties.setProperty(
                 {"detectionDistance", "Detection distance", 1.f});
             properties.setProperty({"detectionFarColor", "Detection far color",
                                     std::array<float, 3>{{1.f, 0.f, 0.f}}});
@@ -268,7 +270,9 @@ void OSPRayEngine::_createRenderers()
             properties.setProperty({"detectionOnDifferentMaterial",
                                     "Detection on different material", false});
             properties.setProperty(
-                {"electronShading", "Electron shading", false});
+                {"electronShadingEnabled", "Electron shading", false});
+            properties.setProperty(
+                {"surfaceShadingEnabled", "Surface shading", true});
         }
         if (renderer == "basic_simulation")
         {
