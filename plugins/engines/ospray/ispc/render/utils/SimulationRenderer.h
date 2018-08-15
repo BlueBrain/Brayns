@@ -35,8 +35,8 @@
 namespace brayns
 {
 /**
- * The AbstractRenderer class implements a base renderer for all Brayns custom
- * implementations
+ * The SimulationRenderer class implements a parent renderer for all Brayns
+ * renderers that need to render simulation data
  */
 class SimulationRenderer : public AbstractRenderer
 {

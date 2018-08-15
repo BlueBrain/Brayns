@@ -23,7 +23,7 @@
 
 struct SimulationRenderer
 {
-    AbstractRenderer abstract;
+    AbstractRenderer super;
 
     // Transfer function attributes
     uniform vec4f* uniform colorMap;
@@ -54,7 +54,7 @@ inline vec4f getSimulationValue(const uniform SimulationRenderer* uniform self,
         // Value offset is out of range, return error color
         return color;
 
-    // Normalize the value according colormap size
+    // Normalize the value according to colormap size
     const float normalizedValue =
         (value - self->colorMapMinValue) / self->colorMapRange;
 

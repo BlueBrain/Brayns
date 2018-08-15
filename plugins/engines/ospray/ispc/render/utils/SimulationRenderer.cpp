@@ -21,9 +21,6 @@
 #include <brayns/common/log.h>
 #include <plugins/engines/ospray/ispc/render/utils/SimulationRenderer.h>
 
-// ispc exports
-#include "SimulationRenderer_ispc.h"
-
 namespace brayns
 {
 void SimulationRenderer::commit()

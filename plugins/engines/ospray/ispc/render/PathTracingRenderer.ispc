@@ -28,7 +28,7 @@
 
 struct PathTracingRenderer
 {
-    AbstractRenderer abstract;
+    AbstractRenderer super;
 
     float shadows;
     float softShadows;
@@ -95,20 +95,20 @@ inline vec3f PathTracingRenderer_shadeRay(
     sample.z = inf;
     sample.alpha = 0.f;
 
-    traceRay(self->abstract.super.model, ray);
+    traceRay(self->super.super.model, ray);
 
     if (ray.geomID < 0)
     {
         // No intersection. Return skybox color
         sample.alpha = 0.f;
         return make_vec3f(skyboxMapping((Renderer*)self, ray,
-                                        self->abstract.bgMaterial)) *
+                                        self->super.bgMaterial)) *
                DEFAULT_SKY_POWER_ZERO_BOUNCE;
     }
 
     // else, we've got a hit!
     DifferentialGeometry dg;
-    postIntersect(self->abstract.super.model, dg, ray,
+    postIntersect(self->super.super.model, dg, ray,
                   DG_NS | DG_NG | DG_NORMALIZE | DG_FACEFORWARD |
                       DG_MATERIALID | DG_COLOR);
 
@@ -124,12 +124,12 @@ inline vec3f PathTracingRenderer_shadeRay(
 
     // some stuff about RNG like Halton
     const uniform int accumID =
-        reduce_max(sample.sampleID.z) * self->abstract.super.spp;
+        reduce_max(sample.sampleID.z) * self->super.super.spp;
     const uniform float rot_x = 1.f - precomputedHalton3(accumID);
     const uniform float rot_y = 1.f - precomputedHalton5(accumID);
 
     // more RNG stuff
-    uniform FrameBuffer* uniform fb = self->abstract.super.fb;
+    uniform FrameBuffer* uniform fb = self->super.super.fb;
     RandomTEA rng_state;
     varying RandomTEA* const uniform rng = &rng_state;
     RandomTEA__Constructor(rng,
@@ -140,21 +140,21 @@ inline vec3f PathTracingRenderer_shadeRay(
     Ray localray = ray;
     for (int bounces = 0; bounces < NB_MAX_PATH_TRACING_REBOUNDS; bounces++)
     {
-        traceRay(self->abstract.super.model, localray);
+        traceRay(self->super.super.model, localray);
 
         // if ray misses scene (no hit occurs), return background colour
         if (localray.geomID < 0)
         {
             const vec3f bgcol =
                 make_vec3f(skyboxMapping((Renderer*)self, localray,
-                                         self->abstract.bgMaterial)) *
+                                         self->super.bgMaterial)) *
                 DEFAULT_SKY_POWER_ZERO_BOUNCE;
 
             accucolor = accucolor + mask * bgcol;
             break;
         }
         DifferentialGeometry dg;
-        postIntersect(self->abstract.super.model, dg, localray,
+        postIntersect(self->super.super.model, dg, localray,
                       DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                           DG_MATERIALID | DG_COLOR);
 
@@ -186,9 +186,9 @@ inline vec3f PathTracingRenderer_shadeRay(
         {
             // Direct lighting
             for (uniform int i = 0;
-                 self->abstract.lights && i < self->abstract.numLights; ++i)
+                 self->super.lights && i < self->super.numLights; ++i)
             {
-                const uniform Light* uniform light = self->abstract.lights[i];
+                const uniform Light* uniform light = self->super.lights[i];
                 const vec2f s = make_vec2f(0.5f);
                 const varying Light_SampleRes lightSample =
                     light->sample(light, dg, s);
@@ -206,7 +206,7 @@ inline vec3f PathTracingRenderer_shadeRay(
                         // create and trace a shadowray towards the sun
                         Ray lightRay;
                         setRay(lightRay, hitpoint, lightSampleDirection);
-                        if (!isOccluded(self->abstract.super.model, lightRay))
+                        if (!isOccluded(self->super.super.model, lightRay))
                             // take surface color at this bounce's hitpoint into
                             // account
                             accucolor =
@@ -231,7 +231,7 @@ void PathTracingRenderer_renderSample(uniform Renderer* uniform _self,
 {
     uniform PathTracingRenderer* uniform self =
         (uniform PathTracingRenderer * uniform)_self;
-    sample.ray.time = self->abstract.timestamp;
+    sample.ray.time = self->super.timestamp;
     sample.rgb = PathTracingRenderer_shadeRay(self, sample);
 }
 
@@ -240,8 +240,8 @@ export void* uniform PathTracingRenderer_create(void* uniform cppE)
 {
     uniform PathTracingRenderer* uniform self =
         uniform new uniform PathTracingRenderer;
-    Renderer_Constructor(&self->abstract.super, cppE);
-    self->abstract.super.renderSample = PathTracingRenderer_renderSample;
+    Renderer_Constructor(&self->super.super, cppE);
+    self->super.super.renderSample = PathTracingRenderer_renderSample;
     return self;
 }
 
@@ -254,13 +254,12 @@ export void PathTracingRenderer_set(
     uniform PathTracingRenderer* uniform self =
         (uniform PathTracingRenderer * uniform)_self;
 
-    self->abstract.bgMaterial =
-        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
-    self->abstract.timestamp = timestamp;
-    self->abstract.super.spp = spp;
+    self->super.bgMaterial = (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+    self->super.timestamp = timestamp;
+    self->super.super.spp = spp;
 
-    self->abstract.lights = (const uniform Light* uniform* uniform)lights;
-    self->abstract.numLights = numLights;
+    self->super.lights = (const uniform Light* uniform* uniform)lights;
+    self->super.numLights = numLights;
 
     self->shadows = shadows;
     self->softShadows = softShadows;

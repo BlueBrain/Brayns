@@ -22,7 +22,7 @@
 
 struct BasicSimulationRenderer
 {
-    SimulationRenderer abstract;
+    SimulationRenderer super;
 
     // Shading attributes
     float alphaCorrection;
@@ -46,14 +46,13 @@ inline vec3f BasicSimulationRenderer_shadeRay(
 
     while (pathOpacity < 1.f)
     {
-        traceRay(self->abstract.abstract.super.model, ray);
+        traceRay(self->super.super.super.model, ray);
 
         if (ray.geomID < 0)
         {
             // No intersection
-            colorContribution =
-                skyboxMapping((Renderer*)self, ray,
-                              self->abstract.abstract.bgMaterial);
+            colorContribution = skyboxMapping((Renderer*)self, ray,
+                                              self->super.super.bgMaterial);
             colorContribution.w = 1.f;
             composite(colorContribution, intersectionColor,
                       self->alphaCorrection);
@@ -64,7 +63,7 @@ inline vec3f BasicSimulationRenderer_shadeRay(
         // Retreive information about the geometry, typically geometry ID,
         // normal to the surface, material ID, texture coordinates, etc.
         DifferentialGeometry dg;
-        postIntersect(self->abstract.abstract.super.model, dg, ray,
+        postIntersect(self->super.super.super.model, dg, ray,
                       DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                           DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
@@ -96,8 +95,7 @@ inline vec3f BasicSimulationRenderer_shadeRay(
         if (objMaterial->castSimulationData == 1)
         {
             // Get simulation value from geometry
-            const vec4f simulationColor =
-                getSimulationValue(&self->abstract, &dg);
+            const vec4f simulationColor = getSimulationValue(&self->super, &dg);
             colorContribution =
                 make_vec4f(make_vec3f(colorContribution) *
                                    (1.f - simulationColor.w) +
@@ -141,9 +139,8 @@ export void* uniform BasicSimulationRenderer_create(void* uniform cppE)
 {
     uniform BasicSimulationRenderer* uniform self =
         uniform new uniform BasicSimulationRenderer;
-    Renderer_Constructor(&self->abstract.abstract.super, cppE);
-    self->abstract.abstract.super.renderSample =
-        BasicSimulationRenderer_renderSample;
+    Renderer_Constructor(&self->super.super.super, cppE);
+    self->super.super.super.renderSample = BasicSimulationRenderer_renderSample;
     return self;
 }
 
@@ -158,20 +155,20 @@ export void BasicSimulationRenderer_set(
     uniform BasicSimulationRenderer* uniform self =
         (uniform BasicSimulationRenderer * uniform)_self;
 
-    self->abstract.abstract.bgMaterial =
+    self->super.super.bgMaterial =
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
 
-    self->abstract.abstract.super.spp = spp;
+    self->super.super.super.spp = spp;
 
-    self->abstract.colorMap = (uniform vec4f * uniform)colormap;
-    self->abstract.emissionIntensitiesMap =
+    self->super.colorMap = (uniform vec4f * uniform)colormap;
+    self->super.emissionIntensitiesMap =
         (uniform vec3f * uniform)emissionIntensitiesMap;
-    self->abstract.colorMapSize = colorMapSize;
-    self->abstract.colorMapMinValue = colorMapMinValue;
-    self->abstract.colorMapRange = colorMapRange;
+    self->super.colorMapSize = colorMapSize;
+    self->super.colorMapMinValue = colorMapMinValue;
+    self->super.colorMapRange = colorMapRange;
 
-    self->abstract.simulationData = (uniform float* uniform)simulationData;
-    self->abstract.simulationDataSize = simulationDataSize;
+    self->super.simulationData = (uniform float* uniform)simulationData;
+    self->super.simulationDataSize = simulationDataSize;
 
     self->alphaCorrection = alphaCorrection;
 }

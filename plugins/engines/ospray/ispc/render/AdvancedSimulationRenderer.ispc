@@ -25,7 +25,7 @@
 
 struct AdvancedSimulationRenderer
 {
-    SimulationRenderer abstract;
+    SimulationRenderer super;
 
     // Shading attributes
     int randomNumber;
@@ -81,7 +81,7 @@ inline bool launchRandomRay(
     varying vec3f& backgroundColor, varying float& distanceToIntersection,
     varying vec3f& randomDirection)
 {
-    randomDirection = getRandomVector(self->abstract.abstract.super.fb->size.x,
+    randomDirection = getRandomVector(self->super.super.super.fb->size.x,
                                       sample, normal, self->randomNumber);
     backgroundColor = make_vec3f(0.f);
 
@@ -98,20 +98,20 @@ inline bool launchRandomRay(
     randomRay.geomID = -1;
     randomRay.instID = -1;
 
-    traceRay(self->abstract.abstract.super.model, randomRay);
+    traceRay(self->super.super.super.model, randomRay);
 
     if (randomRay.geomID < 0)
     {
         // No intersection
         backgroundColor =
             make_vec3f(skyboxMapping((Renderer*)self, randomRay,
-                                     self->abstract.abstract.bgMaterial));
+                                     self->super.super.bgMaterial));
         return false;
     }
 
     // Random ray hits a primitive
     distanceToIntersection = randomRay.t * randomRay.t;
-    postIntersect(self->abstract.abstract.super.model, geometry, randomRay,
+    postIntersect(self->super.super.super.model, geometry, randomRay,
                   DG_NG | DG_NS | DG_NORMALIZE | DG_MATERIALID | DG_COLOR |
                       DG_TEXCOORD);
     return true;
@@ -220,12 +220,11 @@ inline float getVolumeShadowContributions(
     const float epsilon)
 {
     float shadowIntensity = 0.f;
-    for (uniform int i = 0;
-         shadowIntensity < 1.f && self->abstract.abstract.lights &&
-         i < self->abstract.abstract.numLights;
+    for (uniform int i = 0; shadowIntensity < 1.f && self->super.super.lights &&
+                            i < self->super.super.numLights;
          ++i)
     {
-        const uniform Light* uniform light = self->abstract.abstract.lights[i];
+        const uniform Light* uniform light = self->super.super.lights[i];
         const varying vec2f s = make_vec2f(0.5f);
         DifferentialGeometry dg;
         dg.P = point;
@@ -241,15 +240,14 @@ inline float getVolumeShadowContributions(
             lightRay.dir = normalize(
                 lightSample.dir +
                 self->softShadows *
-                    getRandomVector(self->abstract.abstract.super.fb->size.x,
-                                    sample, lightSample.dir,
-                                    self->randomNumber));
+                    getRandomVector(self->super.super.super.fb->size.x, sample,
+                                    lightSample.dir, self->randomNumber));
         else
             lightRay.dir = lightSample.dir;
 
         // Intersection with Geometry
 
-        traceRay(self->abstract.abstract.super.model, lightRay);
+        traceRay(self->super.super.super.model, lightRay);
         if (lightRay.geomID != -1)
         {
             shadowIntensity += 1.f;
@@ -333,13 +331,12 @@ inline vec4f getVolumeContribution(
         {
             // Compute light contributions
             vec3f shadedColor = make_vec3f(0.f);
-            for (uniform int i = 0; i < self->abstract.abstract.numLights; ++i)
+            for (uniform int i = 0; i < self->super.super.numLights; ++i)
             {
                 const vec2f samplingLocation = make_vec2f(0.5f);
                 const Light_SampleRes light =
-                    self->abstract.abstract.lights[i]->sample(
-                        self->abstract.abstract.lights[i], dg,
-                        samplingLocation);
+                    self->super.super.lights[i]->sample(
+                        self->super.super.lights[i], dg, samplingLocation);
                 // Diffuse
                 const float cosNL =
                     (gradient.x == 0.f && gradient.y == 0.f &&
@@ -405,9 +402,9 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
         ld = normalize(
             ld +
             attributes.self->softShadows *
-                getRandomVector(
-                    attributes.self->abstract.abstract.super.fb->size.x, sample,
-                    attributes.normal, attributes.self->randomNumber));
+                getRandomVector(attributes.self->super.super.super.fb->size.x,
+                                sample, attributes.normal,
+                                attributes.self->randomNumber));
 
     Ray shadowRay = ray;
     setRay(shadowRay, dg.P, ld);
@@ -418,13 +415,13 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
 
     while (shadowIntensity < 1.f)
     {
-        traceRay(attributes.self->abstract.abstract.super.model, shadowRay);
+        traceRay(attributes.self->super.super.super.model, shadowRay);
 
         if (shadowRay.geomID == -1)
             break;
 
         DifferentialGeometry shadowingGeometry;
-        postIntersect(attributes.self->abstract.abstract.super.model,
+        postIntersect(attributes.self->super.super.super.model,
                       shadowingGeometry, shadowRay,
                       DG_MATERIALID | DG_TEXCOORD | DG_COLOR);
 
@@ -467,11 +464,11 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
 
     for (uniform int32 i = 0;
          shadowIntensity < 1.f &&
-         i < attributes.self->abstract.abstract.super.model->volumeCount;
+         i < attributes.self->super.super.super.model->volumeCount;
          ++i)
     {
         Volume* uniform volume =
-            attributes.self->abstract.abstract.super.model->volumes[i];
+            attributes.self->super.super.super.model->volumes[i];
 
         shadowIntensity += getVolumeShadowContribution(volume, attributes.self,
                                                        shadowRay, sample) *
@@ -565,8 +562,8 @@ inline void setGeometryShadingAttributes(
         {
             const vec3f randomNormal =
                 (1.f - mat->glossiness) *
-                getRandomVector(self->abstract.abstract.super.fb->size.x,
-                                sample, attributes.normal, self->randomNumber);
+                getRandomVector(self->super.super.super.fb->size.x, sample,
+                                attributes.normal, self->randomNumber);
             attributes.normal = normalize(attributes.normal + randomNormal);
         }
 
@@ -656,7 +653,7 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     if (!attributes.self->simulationModel)
     {
         const vec4f simulationColor =
-            getSimulationValue(&attributes.self->abstract, attributes.dg);
+            getSimulationValue(&attributes.self->super, attributes.dg);
         attributes.simulationColor = make_vec3f(simulationColor);
         attributes.simulationIntensity = simulationColor.w;
         return;
@@ -666,8 +663,8 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     Ray colorRay;
     colorRay.org = attributes.origin;
     colorRay.dir =
-        getRandomVector(attributes.self->abstract.abstract.super.fb->size.x,
-                        sample, attributes.normal * -1.f,
+        getRandomVector(attributes.self->super.super.super.fb->size.x, sample,
+                        attributes.normal * -1.f,
                         attributes.self->randomNumber);
     colorRay.t0 = 0.f;
     colorRay.time = inf;
@@ -687,14 +684,14 @@ inline void processSimulationContribution(varying ScreenSample& sample,
     postIntersect(attributes.self->simulationModel, colorDg, colorRay,
                   DG_MATERIALID | DG_TEXCOORD);
     if (materialID == colorDg.materialID &&
-        attributes.self->abstract.simulationData)
+        attributes.self->super.simulationData)
     {
         // The mesh and it's corresponding representation in the simulation
         // model must use the same material ID. This is to make sure that
         // one neuron is not shaded with the simulation value of another
         // neuron.
         const vec4f simulationColor =
-            getSimulationValue(&attributes.self->abstract, &colorDg);
+            getSimulationValue(&attributes.self->super, &colorDg);
         attributes.simulationColor = make_vec3f(simulationColor);
         attributes.simulationIntensity = simulationColor.w;
     }
@@ -707,7 +704,7 @@ inline void processBackgroundColor(varying ScreenSample& sample,
     // No intersection. Return volume contribution + skybox color
     const vec4f bgColor =
         skyboxMapping((Renderer*)attributes.self, ray,
-                      attributes.self->abstract.abstract.bgMaterial);
+                      attributes.self->super.super.bgMaterial);
 
     attributes.shadingContribution = make_vec3f(bgColor);
 }
@@ -730,11 +727,10 @@ inline void processShadows(DifferentialGeometry& dg,
                            varying ScreenSample& sample, const varying Ray& ray,
                            ShadingAttributes& attributes)
 {
-    for (uniform int i = 0; i < attributes.self->abstract.abstract.numLights;
-         ++i)
+    for (uniform int i = 0; i < attributes.self->super.super.numLights; ++i)
     {
         const uniform Light* uniform light =
-            attributes.self->abstract.abstract.lights[i];
+            attributes.self->super.super.lights[i];
         const vec2f samplingLocation = make_vec2f(0.5f);
         const varying Light_SampleRes lightSample =
             light->sample(light, dg, samplingLocation);
@@ -765,11 +761,10 @@ inline void processLightShading(DifferentialGeometry& dg,
     // Shading for all lights defined in the scene
     attributes.shadingContribution = make_vec3f(0.f);
 
-    for (uniform int i = 0; i < attributes.self->abstract.abstract.numLights;
-         ++i)
+    for (uniform int i = 0; i < attributes.self->super.super.numLights; ++i)
     {
         const uniform Light* uniform light =
-            attributes.self->abstract.abstract.lights[i];
+            attributes.self->super.super.lights[i];
         const vec2f samplingLocation = make_vec2f(0.5f);
         const varying Light_SampleRes lightSample =
             light->sample(light, dg, samplingLocation);
@@ -820,10 +815,10 @@ inline void processVolumeContribution(varying ScreenSample& sample,
                                       ShadingAttributes& attributes)
 {
     for (uniform int32 i = 0;
-         i < attributes.self->abstract.abstract.super.model->volumeCount; i++)
+         i < attributes.self->super.super.super.model->volumeCount; i++)
     {
         Volume* uniform volume =
-            attributes.self->abstract.abstract.super.model->volumes[i];
+            attributes.self->super.super.super.model->volumes[i];
 
         const vec4f volumetricValue =
             getVolumeContribution(volume, attributes.self, ray, sample);
@@ -896,7 +891,7 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
         initializeShadingAttributes(self, attributes);
 
         // Trace ray
-        traceRay(self->abstract.abstract.super.model, ray);
+        traceRay(self->super.super.super.model, ray);
 
         float epsilon = 0.f;
 
@@ -918,7 +913,7 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
         {
             // Get intersection information
             DifferentialGeometry dg;
-            postIntersect(self->abstract.abstract.super.model, dg, ray,
+            postIntersect(self->super.super.super.model, dg, ray,
                           DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                               DG_TANGENTS | DG_MATERIALID | DG_COLOR |
                               DG_TEXCOORD);
@@ -1026,8 +1021,8 @@ export void* uniform AdvancedSimulationRenderer_create(void* uniform cppE)
 {
     uniform AdvancedSimulationRenderer* uniform self =
         uniform new uniform AdvancedSimulationRenderer;
-    Renderer_Constructor(&self->abstract.abstract.super, cppE);
-    self->abstract.abstract.super.renderSample =
+    Renderer_Constructor(&self->super.super.super, cppE);
+    self->super.super.super.renderSample =
         AdvancedSimulationRenderer_renderSample;
     return self;
 }
@@ -1054,13 +1049,12 @@ export void AdvancedSimulationRenderer_set(
     uniform AdvancedSimulationRenderer* uniform self =
         (uniform AdvancedSimulationRenderer * uniform)_self;
 
-    self->abstract.abstract.super.spp = spp;
-    self->abstract.abstract.bgMaterial =
+    self->super.super.super.spp = spp;
+    self->super.super.bgMaterial =
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
-    self->abstract.abstract.lights =
-        (const uniform Light* uniform* uniform)lights;
-    self->abstract.abstract.numLights = numLights;
-    self->abstract.abstract.timestamp = timestamp;
+    self->super.super.lights = (const uniform Light* uniform* uniform)lights;
+    self->super.super.numLights = numLights;
+    self->super.super.timestamp = timestamp;
 
     self->shadows = shadows;
     self->softShadows = softShadows;
@@ -1072,15 +1066,15 @@ export void AdvancedSimulationRenderer_set(
 
     self->volumeSamplesPerRay = volumeSamplesPerRay;
 
-    self->abstract.colorMap = (uniform vec4f * uniform)colormap;
-    self->abstract.emissionIntensitiesMap =
+    self->super.colorMap = (uniform vec4f * uniform)colormap;
+    self->super.emissionIntensitiesMap =
         (uniform vec3f * uniform)emissionIntensitiesMap;
-    self->abstract.colorMapSize = colorMapSize;
-    self->abstract.colorMapMinValue = colorMapMinValue;
-    self->abstract.colorMapRange = colorMapRange;
+    self->super.colorMapSize = colorMapSize;
+    self->super.colorMapMinValue = colorMapMinValue;
+    self->super.colorMapRange = colorMapRange;
 
-    self->abstract.simulationData = (uniform float* uniform)simulationData;
-    self->abstract.simulationDataSize = simulationDataSize;
+    self->super.simulationData = (uniform float* uniform)simulationData;
+    self->super.simulationDataSize = simulationDataSize;
 
     self->simulationModel = (uniform Model * uniform)simulationModel;
     self->detectionDistance = detectionDistance;
