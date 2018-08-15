@@ -180,12 +180,11 @@ struct Brayns::Impl : public PluginAPI
         {
 #ifdef BRAYNS_USE_LUNCHBOX
             if (isAsyncMode())
-            {
-                postSceneLoading();
                 return false;
-            }
 #endif
         }
+        else
+            _finishLoadScene();
 
         std::unique_lock<std::mutex> lock{_renderMutex, std::defer_lock};
         if (!lock.try_lock())
@@ -201,10 +200,6 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getStatistics().setSceneSizeInBytes(
             _engine->getScene().getSizeInBytes());
-
-        _sceneWasModified = _sceneWasModified || scene.isModified();
-        if (scene.isModified())
-            _finishLoadScene();
 
         _updateAnimation();
 
@@ -239,6 +234,10 @@ struct Brayns::Impl : public PluginAPI
             _engine->getFrameBuffer().clear();
         }
 
+        auto& ap = _parametersManager.getAnimationParameters();
+        _sceneWasModified = scene.isModified();
+        _animationParamsWereModified = ap.isModified();
+
         _parametersManager.resetModified();
         camera.resetModified();
         scene.resetModified();
@@ -258,26 +257,24 @@ struct Brayns::Impl : public PluginAPI
             _fpsUpdateElapsed = 0;
         }
 
-        // WAR to keep clients updated about current animation frame, or if the
-        // scene was modified, a simulation might have been attached. To fix
-        // this properly, we would need the simulation/animation state in model.
+        // broadcast changes on animations (playback) and scene (model
+        // add/remove)
         auto& ap = _parametersManager.getAnimationParameters();
-        if (ap.getDelta() != 0 || _sceneWasModified)
-        {
+        if (ap.getDelta() != 0 || _animationParamsWereModified)
             ap.markModified();
-            _sceneWasModified = false;
-        }
+
+        auto& scene = _engine->getScene();
+        if (_sceneWasModified)
+            scene.markModified();
 
         _extensionPluginFactory.postRender();
 
+        _sceneWasModified = false;
+        _animationParamsWereModified = false;
+
+        scene.resetModified();
         ap.resetModified();
         _engine->getFrameBuffer().resetModified();
-        _engine->getStatistics().resetModified();
-    }
-
-    void postSceneLoading()
-    {
-        _extensionPluginFactory.postSceneLoading();
         _engine->getStatistics().resetModified();
     }
 
@@ -474,9 +471,6 @@ private:
     {
         if (_dataLoadingFuture.valid())
             _dataLoadingFuture.get();
-
-        // finish reporting of progress
-        postSceneLoading();
     }
 
     void _updateAnimation()
@@ -1075,6 +1069,7 @@ private:
     ExtensionPluginFactory _extensionPluginFactory;
     std::shared_ptr<ActionInterface> _actionInterface;
     bool _sceneWasModified{false};
+    bool _animationParamsWereModified{false};
 };
 
 // -------------------------------------------------------------------------------------------------

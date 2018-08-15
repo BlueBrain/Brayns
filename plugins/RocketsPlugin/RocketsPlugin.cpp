@@ -233,17 +233,7 @@ public:
         _wsBroadcastOperations[ENDPOINT_ANIMATION_PARAMS]();
         _wsBroadcastOperations[METHOD_IMAGE_JPEG]();
         _wsBroadcastOperations[ENDPOINT_STATISTICS]();
-    }
-
-    void postSceneLoading()
-    {
-        if (!_rocketsServer)
-            return;
-
-        // simulation was potentially loaded
-        _wsBroadcastOperations[ENDPOINT_ANIMATION_PARAMS]();
-        _wsBroadcastOperations[ENDPOINT_SCENE]();      // bounds
-        _wsBroadcastOperations[ENDPOINT_STATISTICS](); // scene size
+        _wsBroadcastOperations[ENDPOINT_SCENE](); // bounds
     }
 
     void _setupRocketsServer()
@@ -1256,11 +1246,6 @@ void RocketsPlugin::preRender()
 void RocketsPlugin::postRender()
 {
     _impl->postRender();
-}
-
-void RocketsPlugin::postSceneLoading()
-{
-    _impl->postSceneLoading();
 }
 
 void RocketsPlugin::registerNotification(

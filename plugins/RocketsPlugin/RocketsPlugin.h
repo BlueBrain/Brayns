@@ -54,12 +54,6 @@ public:
      */
     BRAYNS_API void postRender() final;
 
-    /**
-     * Enqueue modified and registered objects for broadcast that have changed
-     * after scene loading is finished (camera, progress, statistics).
-     */
-    BRAYNS_API void postSceneLoading() final;
-
 private:
     class Impl;
     std::shared_ptr<Impl> _impl;
