@@ -31,10 +31,13 @@ namespace brayns
  */
 void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject);
 
-/** Convert a brayns::Transformation to an osp::affine3f. */
-osp::affine3f transformationToAffine3f(const Transformation& transformation);
+/** Convert a brayns::Transformation to an ospcommon::affine3f. */
+ospcommon::affine3f transformationToAffine3f(
+    const Transformation& transformation);
 
 /** Helper to add the given model as an instance to the given root model. */
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,
                  const Transformation& transform);
+void addInstance(OSPModel rootModel, OSPModel modelToAdd,
+                 const ospcommon::affine3f& affine);
 }

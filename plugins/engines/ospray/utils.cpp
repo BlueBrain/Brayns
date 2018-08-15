@@ -74,7 +74,8 @@ void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
     }
 }
 
-osp::affine3f transformationToAffine3f(const Transformation& transformation)
+ospcommon::affine3f transformationToAffine3f(
+    const Transformation& transformation)
 {
     // https://stackoverflow.com/a/18436193
     const auto& quat = transformation.getRotation();
@@ -101,14 +102,23 @@ osp::affine3f transformationToAffine3f(const Transformation& transformation)
         ospcommon::affine3f::translate({translation.x() - center.x(),
                                         translation.y() - center.y(),
                                         translation.z() - center.z()});
-    return (osp::affine3f&)t;
+    return t;
 }
 
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,
                  const Transformation& transform)
 {
-    OSPGeometry instance =
-        ospNewInstance(modelToAdd, transformationToAffine3f(transform));
+    auto affine = transformationToAffine3f(transform);
+    OSPGeometry instance = ospNewInstance(modelToAdd, (osp::affine3f&)affine);
+    ospCommit(instance);
+    ospAddGeometry(rootModel, instance);
+    ospRelease(instance);
+}
+
+void addInstance(OSPModel rootModel, OSPModel modelToAdd,
+                 const ospcommon::affine3f& affine)
+{
+    OSPGeometry instance = ospNewInstance(modelToAdd, (osp::affine3f&)affine);
     ospCommit(instance);
     ospAddGeometry(rootModel, instance);
     ospRelease(instance);
