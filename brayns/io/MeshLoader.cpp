@@ -270,7 +270,6 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
             const Vector3f transformedVertex =
                 matrix * Vector4f(v.x, v.y, v.z, 1.f);
             triangleMeshes.vertices.push_back(transformedVertex);
-            model.updateBounds(transformedVertex);
             if (mesh->HasNormals())
             {
                 const auto& n = mesh->mNormals[i];

@@ -141,19 +141,13 @@ bool Model::empty() const
 {
     return _spheres.empty() && _cylinders.empty() && _cones.empty() &&
            _trianglesMeshes.empty() && _sdf.geometries.empty() &&
-           _streamlines.empty() && _volumes.empty() &&
-           _bounds.isEmpty(); // _bounds only used for volumes, will disappear.
+           _streamlines.empty() && _volumes.empty() && _bounds.isEmpty();
 }
 
 uint64_t Model::addSphere(const size_t materialId, const Sphere& sphere)
 {
     _spheresDirty = true;
     _spheres[materialId].push_back(sphere);
-    if (materialId != BOUNDINGBOX_MATERIAL_ID)
-    {
-        _bounds.merge(sphere.center + sphere.radius);
-        _bounds.merge(sphere.center - sphere.radius);
-    }
     return _spheres[materialId].size() - 1;
 }
 
@@ -161,11 +155,6 @@ uint64_t Model::addCylinder(const size_t materialId, const Cylinder& cylinder)
 {
     _cylindersDirty = true;
     _cylinders[materialId].push_back(cylinder);
-    if (materialId != BOUNDINGBOX_MATERIAL_ID)
-    {
-        _bounds.merge(cylinder.center);
-        _bounds.merge(cylinder.up);
-    }
     return _cylinders[materialId].size() - 1;
 }
 
@@ -173,11 +162,6 @@ uint64_t Model::addCone(const size_t materialId, const Cone& cone)
 {
     _conesDirty = true;
     _cones[materialId].push_back(cone);
-    if (materialId != BOUNDINGBOX_MATERIAL_ID)
-    {
-        _bounds.merge(cone.center);
-        _bounds.merge(cone.up);
-    }
     return _cones[materialId].size() - 1;
 }
 
@@ -193,16 +177,6 @@ void Model::addStreamline(const size_t materialId, const Streamline& streamline)
 
     if (streamline.position.size() != streamline.radius.size())
         throw std::runtime_error("Number of vertices and radii do not match.");
-
-    // Calculate bounds
-    for (size_t index = 0; index < streamline.position.size(); ++index)
-    {
-        const auto& pos = streamline.position[index];
-        const float radius = streamline.radius[index];
-        const auto radiusVec = Vector3f(radius, radius, radius);
-        _bounds.merge(pos + radiusVec);
-        _bounds.merge(pos - radiusVec);
-    }
 
     auto& streamlinesData = _streamlines[materialId];
 
@@ -229,10 +203,7 @@ uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
     _sdf.geometryIndices[materialId].push_back(geomIdx);
     _sdf.neighbours.push_back(neighbourIndices);
     _sdf.geometries.push_back(geom);
-
-    _bounds.merge(getSDFBoundingBox(geom));
     _sdfGeometriesDirty = true;
-
     return geomIdx;
 }
 
@@ -246,7 +217,6 @@ void Model::updateSDFGeometryNeighbours(
 void Model::addVolume(VolumePtr volume)
 {
     _volumes.push_back(volume);
-    _bounds.merge(volume->getBounds());
     _volumesDirty = true;
 }
 
@@ -428,6 +398,100 @@ void Model::updateSizeInBytes()
     }
     for (const auto& volume : _volumes)
         _sizeInBytes += volume->getSizeInBytes();
+}
+
+void Model::_updateBounds()
+{
+    if (_spheresDirty)
+    {
+        _spheresDirty = false;
+        _sphereBounds.reset();
+        for (const auto& spheres : _spheres)
+            if (spheres.first != BOUNDINGBOX_MATERIAL_ID)
+                for (const auto& sphere : spheres.second)
+                {
+                    _sphereBounds.merge(sphere.center + sphere.radius);
+                    _sphereBounds.merge(sphere.center - sphere.radius);
+                }
+    }
+
+    if (_cylindersDirty)
+    {
+        _cylindersDirty = false;
+        _cylindersBounds.reset();
+        for (const auto& cylinders : _cylinders)
+            if (cylinders.first != BOUNDINGBOX_MATERIAL_ID)
+                for (const auto& cylinder : cylinders.second)
+                {
+                    _cylindersBounds.merge(cylinder.center);
+                    _cylindersBounds.merge(cylinder.up);
+                }
+    }
+
+    if (_conesDirty)
+    {
+        _conesDirty = false;
+        _conesBounds.reset();
+        for (const auto& cones : _cones)
+            if (cones.first != BOUNDINGBOX_MATERIAL_ID)
+                for (const auto& cone : cones.second)
+                {
+                    _conesBounds.merge(cone.center);
+                    _conesBounds.merge(cone.up);
+                }
+    }
+
+    if (_trianglesMeshesDirty)
+    {
+        _trianglesMeshesDirty = false;
+        _trianglesMeshesBounds.reset();
+        for (const auto& mesh : _trianglesMeshes)
+            if (mesh.first != BOUNDINGBOX_MATERIAL_ID)
+                for (const auto& vertex : mesh.second.vertices)
+                    _trianglesMeshesBounds.merge(vertex);
+    }
+
+    if (_streamlinesDirty)
+    {
+        _streamlinesDirty = false;
+        _streamlinesBounds.reset();
+        for (const auto& streamline : _streamlines)
+            for (size_t index = 0; index < streamline.second.vertex.size();
+                 ++index)
+            {
+                const auto& pos =
+                    streamline.second.vertex[index].get_sub_vector<3, 0>();
+                const float radius = streamline.second.vertex[index][3];
+                const auto radiusVec = Vector3f(radius, radius, radius);
+                _streamlinesBounds.merge(pos + radiusVec);
+                _streamlinesBounds.merge(pos - radiusVec);
+            }
+    }
+
+    if (_sdfGeometriesDirty)
+    {
+        _sdfGeometriesDirty = false;
+        _sdfGeometriesBounds.reset();
+        for (const auto& geom : _sdf.geometries)
+            _sdfGeometriesBounds.merge(getSDFBoundingBox(geom));
+    }
+
+    if (_volumesDirty)
+    {
+        _volumesDirty = false;
+        _volumesBounds.reset();
+        for (const auto& volume : _volumes)
+            _volumesBounds.merge(volume->getBounds());
+    }
+
+    _bounds.reset();
+    _bounds.merge(_sphereBounds);
+    _bounds.merge(_cylindersBounds);
+    _bounds.merge(_conesBounds);
+    _bounds.merge(_trianglesMeshesBounds);
+    _bounds.merge(_streamlinesBounds);
+    _bounds.merge(_sdfGeometriesBounds);
+    _bounds.merge(_volumesBounds);
 }
 
 void Model::createMissingMaterials(const bool castSimulationData)

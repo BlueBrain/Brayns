@@ -129,7 +129,6 @@ public:
         modelContainer.addSpheresToModel(model);
         modelContainer.addCylindersToModel(model);
         modelContainer.addConesToModel(model);
-        modelContainer.addBoundsToModel(model);
         modelContainer.addSDFGeometriesToModel(model);
 
         model.createMissingMaterials();
@@ -282,7 +281,6 @@ private:
             const auto radius = _getCorrectedRadius(soma.getMeanRadius());
             metaballs.push_back(
                 {somaPosition.x(), somaPosition.y(), somaPosition.z(), radius});
-            model.bounds.merge(somaPosition);
         }
 
         // Dendrites and axon
@@ -312,8 +310,6 @@ private:
                 if (radius > 0.f)
                     metaballs.push_back(Vector4f(position.x(), position.y(),
                                                  position.z(), radius));
-
-                model.bounds.merge(position);
             }
         }
 

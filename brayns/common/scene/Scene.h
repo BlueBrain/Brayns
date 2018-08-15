@@ -79,7 +79,7 @@ public:
     /**
         Returns the bounding box of the scene
     */
-    Boxf& getBounds() { return _bounds; }
+    const Boxf& getBounds() const { return _bounds; }
     /**
         Attaches a light source to the scene
         @param light Object representing the light source
@@ -164,7 +164,6 @@ public:
       @return the clip planes
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
-
     /**
         Returns the simulutation handler
     */

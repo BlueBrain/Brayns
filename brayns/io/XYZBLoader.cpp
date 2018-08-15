@@ -68,6 +68,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     const size_t startOffset = spheres.size();
     spheres.reserve(spheres.size() + numlines);
 
+    Boxf bbox;
     size_t i = 0;
     std::string line;
     std::stringstream msg;
@@ -85,7 +86,8 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
         {
         case 3:
         {
-            const Vector4f position(lineData[0], lineData[1], lineData[2], 1.f);
+            const Vector3f position(lineData[0], lineData[1], lineData[2]);
+            bbox.merge(position);
             model->addSphere(materialId,
                              {position,
                               _geometryParameters.getRadiusMultiplier()});
@@ -98,22 +100,18 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
         updateProgress(msg.str(), i++, numlines);
     }
 
-    const float maxDim = model->getBounds().getSize().find_max();
-    if (maxDim < 100 * _geometryParameters.getRadiusMultiplier())
-    {
-        const float newRadius = maxDim / 100.f;
-        BRAYNS_WARN << "Given radius "
-                    << _geometryParameters.getRadiusMultiplier()
-                    << " is too big for this scene, using radius " << newRadius
-                    << " now" << std::endl;
+    // Find an appropriate mean radius to avoid overlaps of the spheres, see
+    // https://en.wikipedia.org/wiki/Wigner%E2%80%93Seitz_radius
+    const auto volume = bbox.getSize().product();
+    const float meanRadius =
+        std::pow((3.f / (4.f * M_PI * (numlines / volume))), 1.f / 3.f);
 
-        for (i = 0; i < numlines; ++i)
-            spheres[i + startOffset].radius = newRadius;
-    }
+    // resize the spheres to the new mean radius
+    for (i = 0; i < numlines; ++i)
+        spheres[i + startOffset].radius = meanRadius;
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
-
     auto modelDescriptor =
         std::make_shared<ModelDescriptor>(std::move(model), blob.name);
     modelDescriptor->setTransformation(transformation);

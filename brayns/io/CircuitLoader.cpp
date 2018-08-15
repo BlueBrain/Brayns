@@ -429,8 +429,6 @@ private:
 #pragma omp critical
                     modelContainer.addConesToModel(model);
 #pragma omp critical
-                    modelContainer.addBoundsToModel(model);
-#pragma omp critical
                     modelContainer.addSDFGeometriesToModel(model);
                 }
                 catch (...)
