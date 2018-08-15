@@ -83,8 +83,31 @@ void OSPRayScene::commit()
     _commitSimulationData();
     commitTransferFunctionData();
 
+    // copy the list to avoid locking the mutex
+    ModelDescriptors modelDescriptors;
+    {
+        std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+        modelDescriptors = _modelDescriptors;
+    }
+
     if (!rebuildScene && !addRemoveVolumes)
-        return;
+    {
+        // check for dirty models aka their geometry has been altered
+        bool doUpdate = false;
+        for (auto& modelDescriptor : modelDescriptors)
+        {
+            auto& model = modelDescriptor->getModel();
+            if (model.dirty())
+            {
+                model.commit();
+                // need to continue re-adding the models to update the bounding
+                // box model to reflect the new model size
+                doUpdate = true;
+            }
+        }
+        if (!doUpdate)
+            return;
+    }
 
     _activeModels.clear();
 
@@ -96,8 +119,7 @@ void OSPRayScene::commit()
         ospRelease(_rootSimulationModel);
     _rootSimulationModel = nullptr;
 
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
-    for (auto modelDescriptor : _modelDescriptors)
+    for (auto modelDescriptor : modelDescriptors)
     {
         if (!modelDescriptor->getEnabled())
             continue;

@@ -350,8 +350,7 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
 
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
-    h->add_property("bounds", &s->getBounds(),
-                    Flags::IgnoreRead | Flags::Optional);
+    h->add_property("bounds", &s->_bounds, Flags::IgnoreRead | Flags::Optional);
     h->add_property("clip_planes", &s->_clipPlanes, Flags::Optional);
     std::shared_lock<std::shared_timed_mutex> lock(s->modelMutex());
     h->add_property("models", &s->getModelDescriptors(),

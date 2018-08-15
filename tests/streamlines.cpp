@@ -92,11 +92,13 @@ BOOST_AUTO_TEST_CASE(streamlines)
             }
         }
 
-        brayns.getEngine().getCamera().setInitialState(model->getBounds());
-
-        scene.addModel(
+        auto modelDesc =
             std::make_shared<brayns::ModelDescriptor>(std::move(model),
-                                                      "Streamlines"));
+                                                      "Streamlines");
+        scene.addModel(modelDesc);
+
+        brayns.getEngine().getCamera().setInitialState(
+            modelDesc->getModel().getBounds());
     }
 
     brayns.render();

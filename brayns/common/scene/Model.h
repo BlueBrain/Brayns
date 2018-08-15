@@ -186,16 +186,15 @@ public:
         Returns the bounds for the Model
     */
     const Boxf& getBounds() const { return _bounds; }
-    template <typename T>
-    void updateBounds(const T& value)
-    {
-        _bounds.merge(value);
-    }
-    void setBounds(const Boxf& box) { _bounds = box; }
     /**
         Returns spheres handled by the Model
     */
-    BRAYNS_API SpheresMap& getSpheres() { return _spheres; }
+    const SpheresMap& getSpheres() const { return _spheres; }
+    SpheresMap& getSpheres()
+    {
+        _spheresDirty = true;
+        return _spheres;
+    }
     /**
       Adds a sphere to the model
       @param materialId Id of the material for the sphere
@@ -208,7 +207,12 @@ public:
     /**
         Returns cylinders handled by the model
       */
-    BRAYNS_API CylindersMap& getCylinders() { return _cylinders; }
+    const CylindersMap& getCylinders() const { return _cylinders; }
+    CylindersMap& getCylinders()
+    {
+        _cylindersDirty = true;
+        return _cylinders;
+    }
     /**
       Adds a cylinder to the model
       @param materialId Id of the material for the cylinder
@@ -220,7 +224,12 @@ public:
     /**
         Returns cones handled by the model
     */
-    BRAYNS_API ConesMap& getCones() { return _cones; }
+    const ConesMap& getCones() const { return _cones; }
+    ConesMap& getCones()
+    {
+        _conesDirty = true;
+        return _cones;
+    }
     /**
       Adds a cone to the model
       @param materialId Id of the material for thecone
@@ -259,8 +268,13 @@ public:
     /**
         Returns triangle meshes handled by the model
     */
-    BRAYNS_API TrianglesMeshMap& getTrianglesMeshes()
+    const TrianglesMeshMap& getTrianglesMeshes() const
     {
+        return _trianglesMeshes;
+    }
+    TrianglesMeshMap& getTrianglesMeshes()
+    {
+        _trianglesMeshesDirty = true;
         return _trianglesMeshes;
     }
 
@@ -329,17 +343,30 @@ public:
     void updateSizeInBytes();
 
 protected:
+    void _updateBounds();
+
     MaterialMap _materials;
+
     SpheresMap _spheres;
     bool _spheresDirty{true};
+    Boxf _sphereBounds;
+
     CylindersMap _cylinders;
     bool _cylindersDirty{true};
+    Boxf _cylindersBounds;
+
     ConesMap _cones;
     bool _conesDirty{true};
+    Boxf _conesBounds;
+
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
+    Boxf _trianglesMeshesBounds;
+
     StreamlinesDataMap _streamlines;
     bool _streamlinesDirty{true};
+    Boxf _streamlinesBounds;
+
     Boxf _bounds;
     bool _useSimulationModel{false};
 
@@ -354,10 +381,13 @@ protected:
 
     SDFGeometryData _sdf;
     bool _sdfGeometriesDirty{false};
+    Boxf _sdfGeometriesBounds;
+
     bool _instancesDirty{true};
 
     Volumes _volumes;
     bool _volumesDirty{true};
+    Boxf _volumesBounds;
 
     size_t _sizeInBytes{0};
 

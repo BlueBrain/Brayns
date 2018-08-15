@@ -428,42 +428,36 @@ void OSPRayModel::commit()
     {
         for (const auto& spheres : _spheres)
             _commitSpheres(spheres.first);
-        _spheresDirty = false;
     }
 
     if (_cylindersDirty)
     {
         for (const auto& cylinders : _cylinders)
             _commitCylinders(cylinders.first);
-        _cylindersDirty = false;
     }
 
     if (_conesDirty)
     {
         for (const auto& cones : _cones)
             _commitCones(cones.first);
-        _conesDirty = false;
     }
 
     if (_trianglesMeshesDirty)
     {
         for (const auto& meshes : _trianglesMeshes)
             _commitMeshes(meshes.first);
-        _trianglesMeshesDirty = false;
     }
 
     if (_streamlinesDirty)
     {
         for (const auto& streamlines : _streamlines)
             _commitStreamlines(streamlines.first);
-        _streamlinesDirty = false;
     }
 
     if (_sdfGeometriesDirty)
-    {
         _commitSDFGeometries();
-        _sdfGeometriesDirty = false;
-    }
+
+    _updateBounds();
 
     // handled by the scene
     _instancesDirty = false;

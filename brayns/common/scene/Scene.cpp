@@ -654,7 +654,6 @@ void Scene::loadFromCacheFile()
         // Bounds
         Boxf bounds;
         file.read((char*)&bounds, sizeof(Boxf));
-        model->updateBounds(bounds);
         addModel(std::make_shared<ModelDescriptor>(std::move(model), path));
         BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
@@ -716,7 +715,6 @@ void Scene::buildDefault()
         }
         trianglesMesh.indices.push_back(Vector3ui(0, 1, 2));
         trianglesMesh.indices.push_back(Vector3ui(3, 4, 5));
-        model->updateBounds(positions[i]);
         ++materialId;
     }
 

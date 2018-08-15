@@ -34,21 +34,16 @@ struct ParallelModelContainer
     void addSphere(const size_t materialId, const Sphere& sphere)
     {
         spheres[materialId].push_back(sphere);
-        bounds.merge(sphere.center);
     }
 
     void addCylinder(const size_t materialId, const Cylinder& cylinder)
     {
         cylinders[materialId].push_back(cylinder);
-        bounds.merge(cylinder.center);
-        bounds.merge(cylinder.up);
     }
 
     void addCone(const size_t materialId, const Cone& cone)
     {
         cones[materialId].push_back(cone);
-        bounds.merge(cone.center);
-        bounds.merge(cone.up);
     }
 
     void addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
@@ -92,7 +87,6 @@ struct ParallelModelContainer
         }
     }
 
-    void addBoundsToModel(Model& model) const { model.updateBounds(bounds); }
     void addSDFGeometriesToModel(Model& model) const
     {
         const size_t numGeoms = sdfGeometries.size();
@@ -126,6 +120,5 @@ struct ParallelModelContainer
     std::vector<SDFGeometry> sdfGeometries;
     std::vector<std::vector<size_t>> sdfNeighbours;
     std::vector<size_t> sdfMaterials;
-    Boxf bounds;
 };
 }
