@@ -22,14 +22,15 @@
 #define XYZBLOADER_H
 
 #include <brayns/common/loader/Loader.h>
-#include <brayns/parameters/GeometryParameters.h>
+
+#include <set>
 
 namespace brayns
 {
 class XYZBLoader : public Loader
 {
 public:
-    XYZBLoader(Scene& scene, const GeometryParameters& geometryParameters);
+    XYZBLoader(Scene& scene);
 
     static std::set<std::string> getSupportedDataTypes();
 
@@ -40,9 +41,6 @@ public:
     ModelDescriptorPtr importFromFile(
         const std::string& filename, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) final;
-
-private:
-    const GeometryParameters& _geometryParameters;
 };
 }
 

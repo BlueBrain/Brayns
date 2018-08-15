@@ -100,10 +100,20 @@ public:
         {
         }
 
+        /**
+         * Set a function that is called after this property has been changed.
+         */
+        void setChangedCallback(const std::function<void(const Property&)>& cb)
+        {
+            _changedCallback = cb;
+        }
+
         template <typename T>
         void set(const T& v)
         {
             _data = v;
+            if (_changedCallback)
+                _changedCallback(*this);
         }
 
         template <typename T>
@@ -146,6 +156,7 @@ public:
         const boost::any _min;
         const boost::any _max;
         bool _readOnly{false};
+        std::function<void(const Property&)> _changedCallback;
         template <typename T>
         Type _getType();
     };
