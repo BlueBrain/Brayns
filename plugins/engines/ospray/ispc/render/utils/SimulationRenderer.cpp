@@ -4,8 +4,6 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * Based on OSPRay implementation
- *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -21,19 +19,11 @@
  */
 
 #include <brayns/common/log.h>
-#include <plugins/engines/ospray/ispc/render/ParticleRenderer.h>
-
-// ospray
-#include <ospray/SDK/common/Data.h>
-
-// ispc exports
-#include "ParticleRenderer_ispc.h"
-
-using namespace ospray;
+#include <plugins/engines/ospray/ispc/render/utils/SimulationRenderer.h>
 
 namespace brayns
 {
-void ParticleRenderer::commit()
+void SimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
@@ -41,43 +31,25 @@ void ParticleRenderer::commit()
     _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
     _transferFunctionEmissionData =
         getParamData("transferFunctionEmissionData");
-    _randomNumber = getParam1i("randomNumber", 0);
+    _transferFunctionMinValue = getParam1f("transferFunctionMinValue", 0.f);
+    _transferFunctionRange = getParam1f("transferFunctionRange", 0.f);
+    _alphaCorrection = getParam1f("alphaCorrection", 0.5f);
 
     const auto transferFunctionDiffuseSize =
         _transferFunctionDiffuseData ? _transferFunctionDiffuseData->size() : 0;
-    const auto transferFunctionEmissionize =
+    const auto transferFunctionEmissionSize =
         _transferFunctionEmissionData ? _transferFunctionEmissionData->size()
                                       : 0;
 
-    if (transferFunctionDiffuseSize != transferFunctionEmissionize)
+    if (transferFunctionDiffuseSize != transferFunctionEmissionSize)
         BRAYNS_ERROR << "Transfer function diffuse/emission size not the same: "
                      << "'" << transferFunctionDiffuseSize << "' vs '"
-                     << transferFunctionEmissionize << "'" << std::endl;
+                     << transferFunctionEmissionSize << "'" << std::endl;
 
-    const auto transferFunctionSize =
-        std::min(transferFunctionDiffuseSize, transferFunctionEmissionize);
+    _transferFunctionSize =
+        std::min(transferFunctionDiffuseSize, transferFunctionEmissionSize);
 
-    const auto simulationDataSize =
-        _simulationData ? _simulationData->size() : 0;
-
-    ispc::ParticleRenderer_set(
-        getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _randomNumber,
-        _timestamp, spp,
-        (_simulationData ? (float*)_simulationData->data : nullptr),
-        simulationDataSize,
-        _transferFunctionDiffuseData
-            ? (ispc::vec4f*)_transferFunctionDiffuseData->data
-            : NULL,
-        (_transferFunctionEmissionData
-             ? (float*)_transferFunctionEmissionData->data
-             : nullptr),
-        transferFunctionSize);
+    _simulationDataSize = _simulationData ? _simulationData->size() : 0;
 }
 
-ParticleRenderer::ParticleRenderer()
-{
-    ispcEquivalent = ispc::ParticleRenderer_create(this);
-}
-
-OSP_REGISTER_RENDERER(ParticleRenderer, particle);
 } // ::brayns

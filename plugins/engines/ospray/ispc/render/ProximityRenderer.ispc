@@ -24,7 +24,7 @@
 
 struct ProximityRenderer
 {
-    AbstractRenderer abstract;
+    AbstractRenderer super;
 
     int randomNumber;
 
@@ -46,7 +46,7 @@ inline vec3f ProximityRenderer_shadeRay(
     varying float path_opacity = 1.f;
     varying vec3f colorKs = make_vec3f(0.f);
 
-    traceRay(self->abstract.super.model, ray);
+    traceRay(self->super.super.model, ray);
     varying float zDepth = 0.f;
     sample.z = 1.f;
     sample.alpha = 1.f;
@@ -57,13 +57,13 @@ inline vec3f ProximityRenderer_shadeRay(
         color =
             color +
             path_opacity * make_vec3f(skyboxMapping((Renderer*)self, ray,
-                                                    self->abstract.bgMaterial));
+                                                    self->super.bgMaterial));
         sample.alpha = 0.f;
         return color;
     }
 
     DifferentialGeometry dg;
-    postIntersect(self->abstract.super.model, dg, ray,
+    postIntersect(self->super.super.model, dg, ray,
                   DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
                       DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
@@ -96,7 +96,7 @@ inline vec3f ProximityRenderer_shadeRay(
                 normal = normalize(
                     normal +
                     (1.f - mat->glossiness) *
-                        getRandomVector(self->abstract.super.fb->size.x, sample,
+                        getRandomVector(self->super.super.fb->size.x, sample,
                                         normal, self->randomNumber));
             // Opacity
             opacity = mat->d;
@@ -115,10 +115,10 @@ inline vec3f ProximityRenderer_shadeRay(
         const varying vec3f R = ray.dir - (2.f * dot(ray.dir, normal)) * normal;
 
         // calculate shading for all lights
-        for (uniform int i = 0;
-             self->abstract.lights && i < self->abstract.numLights; i++)
+        for (uniform int i = 0; self->super.lights && i < self->super.numLights;
+             i++)
         {
-            const uniform Light* uniform l = self->abstract.lights[i];
+            const uniform Light* uniform l = self->super.lights[i];
 
             const varying vec2f s = make_vec2f(0.f);
             const varying Light_SampleRes lightSample = l->sample(l, dg, s);
@@ -162,7 +162,7 @@ inline vec3f ProximityRenderer_shadeRay(
         {
             // Generate random ray and trace it
             varying vec3f ao_dir =
-                getRandomVector(self->abstract.super.fb->size.x, sample, normal,
+                getRandomVector(self->super.super.fb->size.x, sample, normal,
                                 self->randomNumber);
 
             if (dot(ao_dir, normal) < 0.f)
@@ -174,11 +174,11 @@ inline vec3f ProximityRenderer_shadeRay(
             ao_ray.t0 = self->detectionDistance * 0.1f;
             ao_ray.t = t_max;
 
-            traceRay(self->abstract.super.model, ao_ray);
+            traceRay(self->super.super.model, ao_ray);
             if (ao_ray.t != t_max)
             {
                 // Intersection detected
-                postIntersect(self->abstract.super.model, dg, ao_ray,
+                postIntersect(self->super.super.model, dg, ao_ray,
                               DG_MATERIALID);
 
                 varying bool test = true;
@@ -208,7 +208,7 @@ void ProximityRenderer_renderSample(uniform Renderer* uniform _self,
 {
     uniform ProximityRenderer* uniform self =
         (uniform ProximityRenderer * uniform)_self;
-    sample.ray.time = self->abstract.timestamp;
+    sample.ray.time = self->super.timestamp;
     sample.rgb = ProximityRenderer_shadeRay(self, sample);
 }
 
@@ -218,8 +218,8 @@ export void* uniform ProximityRenderer_create(void* uniform cppE)
     uniform ProximityRenderer* uniform self =
         uniform new uniform ProximityRenderer;
 
-    Renderer_Constructor(&self->abstract.super, cppE);
-    self->abstract.super.renderSample = ProximityRenderer_renderSample;
+    Renderer_Constructor(&self->super.super, cppE);
+    self->super.super.renderSample = ProximityRenderer_renderSample;
     return self;
 }
 
@@ -235,12 +235,11 @@ export void ProximityRenderer_set(
     uniform ProximityRenderer* uniform self =
         (uniform ProximityRenderer * uniform)_self;
 
-    self->abstract.super.spp = spp;
-    self->abstract.bgMaterial =
-        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
-    self->abstract.lights = (const uniform Light* uniform* uniform)lights;
-    self->abstract.numLights = numLights;
-    self->abstract.timestamp = timestamp;
+    self->super.super.spp = spp;
+    self->super.bgMaterial = (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+    self->super.lights = (const uniform Light* uniform* uniform)lights;
+    self->super.numLights = numLights;
+    self->super.timestamp = timestamp;
 
     self->randomNumber = randomNumber;
     self->electronShadingEnabled = electronShadingEnabled;

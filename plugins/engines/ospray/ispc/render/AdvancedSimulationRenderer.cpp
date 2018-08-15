@@ -21,20 +21,20 @@
  */
 
 #include <brayns/common/log.h>
-#include <plugins/engines/ospray/ispc/render/SimulationRenderer.h>
+#include <plugins/engines/ospray/ispc/render/AdvancedSimulationRenderer.h>
 
 // ospray
 #include <ospray/SDK/common/Data.h>
 #include <ospray/SDK/common/Model.h>
 
 // ispc exports
-#include "SimulationRenderer_ispc.h"
+#include "AdvancedSimulationRenderer_ispc.h"
 
 using namespace ospray;
 
 namespace brayns
 {
-void SimulationRenderer::commit()
+void AdvancedSimulationRenderer::commit()
 {
     AbstractRenderer::commit();
 
@@ -79,7 +79,7 @@ void SimulationRenderer::commit()
     const auto simulationDataSize =
         _simulationData ? _simulationData->size() : 0;
 
-    ispc::SimulationRenderer_set(
+    ispc::AdvancedSimulationRenderer_set(
         getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
         _ambientOcclusionStrength, _ambientOcclusionDistance, _shadingEnabled,
@@ -98,10 +98,10 @@ void SimulationRenderer::commit()
         _volumeAlphaCorrection);
 }
 
-SimulationRenderer::SimulationRenderer()
+AdvancedSimulationRenderer::AdvancedSimulationRenderer()
 {
-    ispcEquivalent = ispc::SimulationRenderer_create(this);
+    ispcEquivalent = ispc::AdvancedSimulationRenderer_create(this);
 }
 
-OSP_REGISTER_RENDERER(SimulationRenderer, simulation);
+OSP_REGISTER_RENDERER(AdvancedSimulationRenderer, advanced_simulation);
 } // ::brayns

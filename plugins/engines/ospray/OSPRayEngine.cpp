@@ -30,7 +30,7 @@
 #include <plugins/engines/ospray/OSPRayRenderer.h>
 #include <plugins/engines/ospray/OSPRayScene.h>
 
-#include "ispc/render/SimulationRenderer.h" // enum Shading
+#include "ispc/render/AdvancedSimulationRenderer.h" // enum Shading
 
 #include <ospray/OSPConfig.h>                    // TILE_SIZE
 #include <ospray/SDK/camera/PerspectiveCamera.h> // enum StereoMode
@@ -270,7 +270,12 @@ void OSPRayEngine::_createRenderers()
             properties.setProperty(
                 {"electronShading", "Electron shading", false});
         }
-        if (renderer == "simulation")
+        if (renderer == "basic_simulation")
+        {
+            properties.setProperty(
+                {"alphaCorrection", "Alpha correction", 0.5f, {0.001f, 1.f}});
+        }
+        if (renderer == "advanced_simulation")
         {
             properties.setProperty({"aoDistance",
                                     "Ambient occlusion distance",
@@ -282,10 +287,11 @@ void OSPRayEngine::_createRenderers()
                                     "Detection distance",
                                     15.f,
                                     {0.f, 10000.f}});
-            properties.setProperty({"shading",
-                                    "Shading",
-                                    (int)SimulationRenderer::Shading::none,
-                                    {"None", "Diffuse", "Electron"}});
+            properties.setProperty(
+                {"shading",
+                 "Shading",
+                 (int)AdvancedSimulationRenderer::Shading::none,
+                 {"None", "Diffuse", "Electron"}});
             properties.setProperty(
                 {"shadows", "Shadow intensity", 0.f, {0.f, 1.f}});
             properties.setProperty(

@@ -1,8 +1,10 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * Based on OSPRay implementation
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,17 +22,28 @@
 
 #pragma once
 
-#define ALPHA_THRESHOLD (.05f)
-#define DEFAULT_LIGHT_EMISSION (2.f)
-#define DEFAULT_LIGHT_THRESHOLD (0.2f)
+#include <plugins/engines/ospray/ispc/render/utils/SimulationRenderer.h>
 
-#define NB_MAX_REBOUNDS 10
-#define NB_MAX_PATH_TRACING_REBOUNDS 5
-#define VOLUME_NB_MAX_REBOUNDS 1
-#define NB_MAX_SAMPLES_PER_RAY 32
+namespace brayns
+{
+/**
+ * @brief The BasicSimulationRenderer class can perform fast transparency and
+ * mapping of simulation data on the geometry
+ */
+class BasicSimulationRenderer : public SimulationRenderer
+{
+public:
+    BasicSimulationRenderer();
 
-#define DEFAULT_SKY_POWER 2.f
-#define DEFAULT_SKY_POWER_ZERO_BOUNCE 4.f
+    /**
+       Returns the class name as a string
+       @return string containing the full name of the class
+    */
+    std::string toString() const final
+    {
+        return "brayns::BasicSimulationRenderer";
+    }
+    void commit() final;
+};
 
-// needs to be the same in MorphologyLoader.cpp
-#define OFFSET_MAGIC 1e6f
+} // ::brayns

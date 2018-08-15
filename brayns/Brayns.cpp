@@ -688,14 +688,14 @@ private:
             '6', "Default renderer",
             std::bind(&Brayns::Impl::_defaultRenderer, this));
         _keyboardHandler.registerKeyboardShortcut(
-            '7', "Particle renderer",
-            std::bind(&Brayns::Impl::_particleRenderer, this));
+            '7', "Basic simulation renderer",
+            std::bind(&Brayns::Impl::_basicSimulationRenderer, this));
         _keyboardHandler.registerKeyboardShortcut(
-            '8', "Proximity renderer",
+            '8', "Advanced Simulation renderer",
+            std::bind(&Brayns::Impl::_advancedSimulationRenderer, this));
+        _keyboardHandler.registerKeyboardShortcut(
+            '9', "Proximity renderer",
             std::bind(&Brayns::Impl::_proximityRenderer, this));
-        _keyboardHandler.registerKeyboardShortcut(
-            '9', "Simulation renderer",
-            std::bind(&Brayns::Impl::_simulationRenderer, this));
         _keyboardHandler.registerKeyboardShortcut(
             '[', "Decrease animation frame by 1",
             std::bind(&Brayns::Impl::_decreaseAnimationFrame, this));
@@ -817,11 +817,11 @@ private:
         renderParams.setCurrentRenderer("basic");
     }
 
-    void _particleRenderer()
+    void _basicSimulationRenderer()
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setCurrentRenderer("particle");
+        renderParams.setCurrentRenderer("basic_simulation");
     }
 
     void _proximityRenderer()
@@ -831,11 +831,11 @@ private:
         renderParams.setCurrentRenderer("proximity");
     }
 
-    void _simulationRenderer()
+    void _advancedSimulationRenderer()
     {
         RenderingParameters& renderParams =
             _parametersManager.getRenderingParameters();
-        renderParams.setCurrentRenderer("simulation");
+        renderParams.setCurrentRenderer("advanced_simulation");
     }
 
     void _increaseAnimationFrame()

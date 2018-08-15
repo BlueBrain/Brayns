@@ -18,10 +18,10 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   ispc/geometry/ExtendedSpheres.ispc
   ispc/render/BasicRenderer.ispc
   ispc/render/ExtendedOBJMaterial.ispc
-  ispc/render/ParticleRenderer.ispc
+  ispc/render/BasicSimulationRenderer.ispc
   ispc/render/PathTracingRenderer.ispc
   ispc/render/ProximityRenderer.ispc
-  ispc/render/SimulationRenderer.ispc
+  ispc/render/AdvancedSimulationRenderer.ispc
   ispc/render/utils/RandomGenerator.ispc
   ispc/render/utils/SkyBox.ispc
 )
@@ -43,11 +43,12 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/geometry/ExtendedSpheres.cpp
   ispc/render/BasicRenderer.cpp
   ispc/render/ExtendedOBJMaterial.cpp
-  ispc/render/ParticleRenderer.cpp
+  ispc/render/BasicSimulationRenderer.cpp
   ispc/render/PathTracingRenderer.cpp
   ispc/render/ProximityRenderer.cpp
-  ispc/render/SimulationRenderer.cpp
+  ispc/render/AdvancedSimulationRenderer.cpp
   ispc/render/utils/AbstractRenderer.cpp
+  ispc/render/utils/SimulationRenderer.cpp
 )
 list(APPEND BRAYNSOSPRAYENGINEPLUGIN_SOURCES ${BRAYNSOSPRAYPLUGIN_ISPC_SOURCES})
 
@@ -67,11 +68,12 @@ set(BRAYNSOSPRAYENGINEPLUGIN_PUBLIC_HEADERS
   ispc/geometry/ExtendedSpheres.h
   ispc/render/BasicRenderer.h
   ispc/render/ExtendedOBJMaterial.h
-  ispc/render/ParticleRenderer.h
+  ispc/render/BasicSimulationRenderer.h
   ispc/render/PathTracingRenderer.h
   ispc/render/ProximityRenderer.h
-  ispc/render/SimulationRenderer.h
+  ispc/render/AdvancedSimulationRenderer.h
   ispc/render/utils/AbstractRenderer.h
+  ispc/render/utils/SimulationRenderer.h
 )
 
 set(BRAYNSOSPRAYENGINEPLUGIN_HEADERS
