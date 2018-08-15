@@ -31,10 +31,10 @@
 
 namespace brayns
 {
-XYZBLoader::XYZBLoader(Scene& scene,
-                       const GeometryParameters& geometryParameters)
+constexpr float DEFAULT_POINT_SIZE = 0.0001f;
+
+XYZBLoader::XYZBLoader(Scene& scene)
     : Loader(scene)
-    , _geometryParameters(geometryParameters)
 {
 }
 
@@ -88,9 +88,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
         {
             const Vector3f position(lineData[0], lineData[1], lineData[2]);
             bbox.merge(position);
-            model->addSphere(materialId,
-                             {position,
-                              _geometryParameters.getRadiusMultiplier()});
+            model->addSphere(materialId, {position, DEFAULT_POINT_SIZE});
             break;
         }
         default:
@@ -115,6 +113,22 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     auto modelDescriptor =
         std::make_shared<ModelDescriptor>(std::move(model), blob.name);
     modelDescriptor->setTransformation(transformation);
+
+    PropertyMap::Property radiusProperty("radius", "Point size", meanRadius,
+                                         {0, meanRadius * 2});
+    radiusProperty.setChangedCallback([
+        materialId, modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)
+    ](const auto& property) {
+        if (auto modelDesc_ = modelDesc.lock())
+        {
+            const auto newRadius = property.template get<float>();
+            for (auto& sphere : modelDesc_->getModel().getSpheres()[materialId])
+                sphere.radius = newRadius;
+        }
+    });
+    PropertyMap properties;
+    properties.setProperty(radiusProperty);
+    modelDescriptor->setProperties(properties);
     return modelDescriptor;
 }
 

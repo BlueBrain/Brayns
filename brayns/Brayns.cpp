@@ -315,10 +315,8 @@ struct Brayns::Impl : public PluginAPI
                                 _parametersManager.getVolumeParameters()] {
                             return std::make_unique<VolumeLoader>(scene, params);
                         }));
-        REGISTER_LOADER(XYZBLoader,
-                        ([&scene = _engine->getScene(), & params =
-                                _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<XYZBLoader>(scene, params);
+        REGISTER_LOADER(XYZBLoader, ([& scene = _engine->getScene()] {
+                            return std::make_unique<XYZBLoader>(scene);
                         }));
 #if (BRAYNS_USE_BRION)
         REGISTER_LOADER(MorphologyLoader,

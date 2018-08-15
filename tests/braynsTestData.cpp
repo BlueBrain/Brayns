@@ -68,6 +68,15 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
     brayns.render();
     BOOST_CHECK(compareTestImage("testdataMonkey.png",
                                  brayns.getEngine().getFrameBuffer()));
+
+    auto model = brayns.getEngine().getScene().getModel(0);
+    auto props = model->getProperties();
+    props.updateProperty("radius", props.getProperty<float>("radius") / 2.f);
+    model->setProperties(props);
+
+    brayns.render();
+    BOOST_CHECK(compareTestImage("testdataMonkey_smaller.png",
+                                 brayns.getEngine().getFrameBuffer()));
 }
 
 #ifdef BRAYNS_USE_BBPTESTDATA
