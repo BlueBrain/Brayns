@@ -92,9 +92,9 @@ void OSPRayModel::buildBoundingBox()
     material->setDiffuseColor({1, 1, 1});
     material->setEmission(1.f);
     material->commit();
-    const Vector3f s = _bounds.getSize() / 2.f;
-    const Vector3f c = _bounds.getCenter();
-    const float radius = s.length() / 200.f;
+    const Vector3f s(0.5f);
+    const Vector3f c(0.5f);
+    const float radius = 0.005f;
     const Vector3f positions[8] = {
         {c.x() - s.x(), c.y() - s.y(), c.z() - s.z()},
         {c.x() + s.x(), c.y() - s.y(), c.z() - s.z()}, //    6--------7

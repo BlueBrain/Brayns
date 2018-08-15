@@ -160,13 +160,27 @@ void OSPRayScene::commit()
                 transformation * instance.getTransformation();
 
             if (modelDescriptor->getBoundingBox() && instance.getBoundingBox())
+            {
+                // scale and move the unit-sized bounding box geometry to the
+                // model size/scale first, then apply the instance transform
+                const auto& modelBounds =
+                    modelDescriptor->getModel().getBounds();
+                Transformation modelTransform;
+                modelTransform.setTranslation(modelBounds.getCenter() /
+                                                  modelBounds.getSize() -
+                                              Vector3f(0.5f));
+                modelTransform.setScale(modelBounds.getSize());
+
                 addInstance(_rootModel, impl.getBoundingBoxModel(),
-                            instanceTransform);
+                            transformationToAffine3f(instanceTransform) *
+                                transformationToAffine3f(modelTransform));
+            }
 
             if (modelDescriptor->getVisible() && instance.getVisible())
                 addInstance(_rootModel, impl.getModel(), instanceTransform);
         }
 
+        impl.markInstancesClean();
         impl.logInformation();
     }
     BRAYNS_DEBUG << "Committing root models" << std::endl;
@@ -175,6 +189,8 @@ void OSPRayScene::commit()
         ospCommit(_rootSimulationModel);
 
     _computeBounds();
+
+    markModified();
 }
 
 bool OSPRayScene::commitLights()

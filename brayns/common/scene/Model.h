@@ -336,6 +336,7 @@ public:
     /** @return the size in bytes of all geometries. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
     void markInstancesDirty() { _instancesDirty = true; }
+    void markInstancesClean() { _instancesDirty = false; }
     const Volumes& getVolumes() const { return _volumes; }
     bool isVolumesDirty() const { return _volumesDirty; }
     void resetVolumesDirty() { _volumesDirty = false; }
