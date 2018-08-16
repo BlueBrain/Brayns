@@ -277,16 +277,12 @@ void OSPRayEngine::_createRenderers()
         }
         if (renderer == "advanced_simulation")
         {
-            properties.setProperty({"aoDistance",
-                                    "Ambient occlusion distance",
-                                    10000.f,
-                                    {1e-20f, 1e20f}});
+            properties.setProperty(
+                {"aoDistance", "Ambient occlusion distance", 10000.f});
             properties.setProperty(
                 {"aoWeight", "Ambient occlusion weight", 0.f, {0.f, 1.f}});
-            properties.setProperty({"detectionDistance",
-                                    "Detection distance",
-                                    15.f,
-                                    {0.f, 10000.f}});
+            properties.setProperty(
+                {"detectionDistance", "Detection distance", 15.f});
             properties.setProperty(
                 {"shading",
                  "Shading",
@@ -311,10 +307,8 @@ void OSPRayEngine::_createRenderers()
         }
         if (renderer == "scivis")
         {
-            properties.setProperty({"aoDistance",
-                                    "Ambient occlusion distance",
-                                    10000.f,
-                                    {1e-20f, 1e20f}});
+            properties.setProperty(
+                {"aoDistance", "Ambient occlusion distance", 10000.f});
             properties.setProperty(
                 {"aoSamples", "Ambient occlusion samples", 1, {0, 128}});
             properties.setProperty({"aoTransparencyEnabled",
@@ -377,15 +371,10 @@ void OSPRayEngine::_createCameras()
                                          {"None", "Left eye", "Right eye",
                                           "Side by side"}};
     PropertyMap::Property fovy{"fovy", "Field of view", 45.f, {.1f, 360.f}};
-    PropertyMap::Property aspect{"aspect",
-                                 "Aspect ratio",
-                                 1.f,
-                                 {1e-31f, 1e31f}};
+    PropertyMap::Property aspect{"aspect", "Aspect ratio", 1.f};
     aspect.markReadOnly();
     PropertyMap::Property eyeSeparation{"interpupillaryDistance",
-                                        "Eye separation",
-                                        0.0635f,
-                                        {0.f, 1e31f}};
+                                        "Eye separation", 0.0635f};
 
     RenderingParameters& rp = _parametersManager.getRenderingParameters();
     for (const auto& camera : rp.getCameras())
@@ -395,16 +384,14 @@ void OSPRayEngine::_createCameras()
         {
             properties.setProperty(fovy);
             properties.setProperty(aspect);
-            properties.setProperty(
-                {"apertureRadius", "Aperture radius", 0.f, {0.f, 18.0f}});
-            properties.setProperty(
-                {"focusDistance", "Focus Distance", 1.f, {0.f, 1e31f}});
+            properties.setProperty({"apertureRadius", "Aperture radius", 0.f});
+            properties.setProperty({"focusDistance", "Focus Distance", 1.f});
             properties.setProperty(stereoProperty);
             properties.setProperty(eyeSeparation);
         }
         if (camera == "orthographic")
         {
-            properties.setProperty({"height", "Height", 1.f, {0.001f, 100.f}});
+            properties.setProperty({"height", "Height", 1.f});
             properties.setProperty(aspect);
         }
         if (camera == "stereoFull")
@@ -413,10 +400,8 @@ void OSPRayEngine::_createCameras()
             properties.setProperty(aspect);
             properties.setProperty(stereoProperty);
             properties.setProperty(eyeSeparation);
-            properties.setProperty({"zeroParallaxPlane",
-                                    "Zero parallax plane",
-                                    1.f,
-                                    {0.f, 1e31f}});
+            properties.setProperty(
+                {"zeroParallaxPlane", "Zero parallax plane", 1.f});
         }
         ospCamera->setProperties(camera, properties);
     }

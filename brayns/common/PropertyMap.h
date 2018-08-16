@@ -64,8 +64,8 @@ public:
             , label(label_)
             , type(_getType<T>())
             , _data(value)
-            , _min(std::numeric_limits<T>::min())
-            , _max(std::numeric_limits<T>::max())
+            , _min(T())
+            , _max(T())
         {
         }
 
