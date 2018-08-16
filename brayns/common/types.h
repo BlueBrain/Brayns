@@ -332,7 +332,7 @@ enum class CameraMode
  * in absolute value of the coordinate system. Values are stored
  * in a Vector4, with the following order: nx, ny, nz and d
  */
-using ClipPlane = std::array<float, 4>;
+using ClipPlane = std::array<double, 4>;
 using ClipPlanes = std::vector<ClipPlane>;
 
 struct RenderInput
