@@ -43,12 +43,12 @@ BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
     const int argc = sizeof(argv) / sizeof(char*);
     brayns::Brayns brayns(argc, argv);
 
-    brayns.render();
+    brayns.commitAndRender();
     const auto oldImage =
         createPDiffRGBAImage(brayns.getEngine().getFrameBuffer());
 
     brayns.getEngine().getFrameBuffer().clear();
-    brayns.render();
+    brayns.commitAndRender();
     const auto newImage =
         createPDiffRGBAImage(brayns.getEngine().getFrameBuffer());
 
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataMonkey.png",
                                  brayns.getEngine().getFrameBuffer()));
 
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
     props.updateProperty("radius", props.getProperty<float>("radius") / 2.f);
     model->setProperties(props);
 
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataMonkey_smaller.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataLayer1.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
     camera.setTarget(rotCenter);
     camera.setPosition(camPos + 0.9f * (rotCenter - camPos));
 
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50advancedsimulation.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testSdfCircuit.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_particle_renderer)
     camera.setTarget(rotCenter);
     camera.setPosition(camPos + 0.9f * (rotCenter - camPos));
 
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50basicsimulation.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(render_protein_and_compare)
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataProtein.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
 
     brayns::Brayns brayns(argc, argv);
     brayns.getEngine().getCamera().updateProperty("stereoMode", 3);
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataProteinStereo.png",
                                  brayns.getEngine().getFrameBuffer()));
 }

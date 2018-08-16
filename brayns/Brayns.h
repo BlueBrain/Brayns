@@ -68,15 +68,14 @@ public:
      * Renders color and depth buffers of the current scene, according to
      * specified parameters.
      *
-     * Combines preRender(), renderOnly() and postRender() together in a
-     * synchronized fashion.
+     * Combines commit() and render() together in a synchronized fashion.
      *
      * @param renderInput Rendering parameters such as the position of the
      *        camera and according model and projection matrices
      * @param renderOutput Color and depth buffers
      */
-    BRAYNS_API void render(const RenderInput& renderInput,
-                           RenderOutput& renderOutput);
+    BRAYNS_API void commitAndRender(const RenderInput& renderInput,
+                                    RenderOutput& renderOutput);
 
     /**
      * Renders color and depth buffers of the current scene, according to
@@ -87,13 +86,12 @@ public:
      * event triggers the rendering and gathers the results in a form of a
      * base64 encoded JPEG image.
      *
-     * Combines preRender(), renderOnly() and postRender() together in a
-     * synchronized fashion.
+     * Combines commit() and render() together in a synchronized fashion.
      *
      * @return true if rendering should continue or false if user inputs
      *         requested to stop.
     */
-    BRAYNS_API bool render();
+    BRAYNS_API bool commitAndRender();
     //@}
 
     /** @name Low-level execution API */
@@ -103,23 +101,17 @@ public:
      * changes on the engine, scene, camera, renderer, etc. to prepare rendering
      * of a new frame.
      *
-     * @return true if renderOnly() is allowed/needed after all states have been
+     * @return true if render() is allowed/needed after all states have been
      *         evaluated (accum rendering, data loading, etc.)
-     * @note threadsafe with renderOnly()
+     * @note threadsafe with render()
      */
-    BRAYNS_API bool preRender();
+    BRAYNS_API bool commit();
 
     /**
      * Render a frame into the current framebuffer.
-     * @note threadsafe with preRender()
+     * @note threadsafe with commit()
      */
-    BRAYNS_API void renderOnly();
-
-    /**
-     * Call postRender() on engine and plugins to signal finish of renderOnly().
-     * Shall only be called after renderOnly() has finished.
-     */
-    BRAYNS_API void postRender();
+    BRAYNS_API void render();
 
     /**
      * Unloads current scene and loads new scene according to parameters. Can be

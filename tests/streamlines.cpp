@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(streamlines)
             modelDesc->getModel().getBounds());
     }
 
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("streamlines.png",
                                  brayns.getEngine().getFrameBuffer()));
 }

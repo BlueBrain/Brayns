@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(plugin_actions)
         .getParametersManager()
         .getRenderingParameters()
         .setCurrentRenderer("myrenderer");
-    clientServer.getBrayns().render();
+    clientServer.getBrayns().commitAndRender();
 
     auto props =
         clientServer.getBrayns().getEngine().getRenderer().getPropertyMap();

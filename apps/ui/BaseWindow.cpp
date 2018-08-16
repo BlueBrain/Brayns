@@ -262,7 +262,7 @@ void BaseWindow::display()
     renderInput.target = camera.getTarget();
     renderInput.up = camera.getUp();
 
-    _brayns.render(renderInput, renderOutput);
+    _brayns.commitAndRender(renderInput, renderOutput);
 
     GLenum format = GL_RGBA;
     switch (renderOutput.colorBufferFormat)
