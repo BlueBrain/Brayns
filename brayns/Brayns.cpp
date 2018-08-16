@@ -257,23 +257,31 @@ struct Brayns::Impl : public PluginAPI
             _fpsUpdateElapsed = 0;
         }
 
-        // broadcast changes on animations (playback) and scene (model
-        // add/remove)
+        std::lock_guard<std::mutex> lock{_renderMutex};
+
         auto& ap = _parametersManager.getAnimationParameters();
         if (ap.getDelta() != 0 || _animationParamsWereModified)
+        {
+            _animationParamsWereModified = true;
             ap.markModified();
+        }
 
         auto& scene = _engine->getScene();
         if (_sceneWasModified)
             scene.markModified();
 
+        // broadcast changes on animations (playback) and scene (model
+        // add/remove)
         _extensionPluginFactory.postRender();
 
-        _sceneWasModified = false;
+        if (_animationParamsWereModified)
+            ap.resetModified();
         _animationParamsWereModified = false;
 
-        scene.resetModified();
-        ap.resetModified();
+        if (_sceneWasModified)
+            scene.resetModified();
+        _sceneWasModified = false;
+
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();
     }
