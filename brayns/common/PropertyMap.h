@@ -21,6 +21,7 @@
 #pragma once
 
 #include <boost/any.hpp>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
