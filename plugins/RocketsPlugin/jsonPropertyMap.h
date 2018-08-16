@@ -91,16 +91,28 @@ void _addPropertySchema(const PropertyMap::Property& prop,
         jsonSchema.AddMember(StringRef("title"), StringRef(prop.label.c_str()),
                              allocator);
         jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
-        if (jsonSchema.HasMember("minimum"))
-            jsonSchema["minimum"] = prop.min<T>();
+        const auto minValue = prop.min<T>();
+        const auto maxValue = prop.max<T>();
+        const bool hasLimits = maxValue - minValue != 0;
+        if (hasLimits)
+        {
+            if (jsonSchema.HasMember("minimum"))
+                jsonSchema["minimum"] = minValue;
+            else
+                jsonSchema.AddMember(StringRef("minimum"), minValue, allocator);
+
+            if (jsonSchema.HasMember("maximum"))
+                jsonSchema["maximum"] = maxValue;
+            else
+                jsonSchema.AddMember(StringRef("maximum"), maxValue, allocator);
+        }
         else
-            jsonSchema.AddMember(StringRef("minimum"), prop.min<T>(),
-                                 allocator);
-        if (jsonSchema.HasMember("maximum"))
-            jsonSchema["maximum"] = prop.max<T>();
-        else
-            jsonSchema.AddMember(StringRef("maximum"), prop.max<T>(),
-                                 allocator);
+        {
+            if (jsonSchema.HasMember("minimum"))
+                jsonSchema.RemoveMember("minimum");
+            if (jsonSchema.HasMember("maximum"))
+                jsonSchema.RemoveMember("maximum");
+        }
     }
     else
     {
