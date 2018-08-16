@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(render_demo_with_proximity_renderer)
     camera.setTarget(rotCenter);
     camera.setPosition(camPos - (rotCenter - camPos));
 
-    brayns.render();
+    brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdemoproximity.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
