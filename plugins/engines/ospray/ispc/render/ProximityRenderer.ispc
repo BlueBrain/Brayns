@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -21,6 +21,8 @@
  */
 
 #include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.ih>
+
+uniform const float nearFarThreshold = 0.2f;
 
 struct ProximityRenderer
 {
@@ -72,44 +74,40 @@ inline vec3f ProximityRenderer_shadeRay(
         const vec3f P = dg.P + dg.epsilon * dg.Ng;
 
         bool continueWithSurfaceShading = true;
-        if (self->detectionDistance)
+        varying vec3f ao_dir =
+            getRandomVector(self->super.super.fb->size.x, sample, normal,
+                            self->randomNumber);
+
+        if (dot(ao_dir, normal) < 0.f)
+            ao_dir = ao_dir * -1.f;
+        Ray ao_ray = ray;
+        ao_ray.org = P;
+        ao_ray.dir = ao_dir;
+        ao_ray.t0 = dg.epsilon;
+        ao_ray.t = self->detectionDistance;
+        ao_ray.geomID = -1;
+
+        traceRay(self->super.super.model, ao_ray);
+        if (ao_ray.geomID >= 0)
         {
-            varying vec3f ao_dir =
-                getRandomVector(self->super.super.fb->size.x, sample, normal,
-                                self->randomNumber);
+            continueWithSurfaceShading = false;
 
-            if (dot(ao_dir, normal) < 0.f)
-                ao_dir = ao_dir * -1.f;
-            Ray ao_ray = ray;
-            ao_ray.org = P;
-            ao_ray.dir = ao_dir;
-            ao_ray.t0 = dg.epsilon;
-            ao_ray.t = self->detectionDistance;
-            ao_ray.geomID = -1;
+            postIntersect(self->super.super.model, dg, ao_ray, DG_MATERIALID);
 
-            traceRay(self->super.super.model, ao_ray);
-            if (ao_ray.geomID >= 0)
+            const bool doDetectionTest = self->detectionOnDifferentMaterial
+                                             ? material != dg.material
+                                             : true;
+            if (doDetectionTest)
             {
-                continueWithSurfaceShading = false;
-
-                postIntersect(self->super.super.model, dg, ao_ray,
-                              DG_MATERIALID);
-
-                bool test = true;
-                if (self->detectionOnDifferentMaterial)
-                    test = (material != dg.material);
-
-                if (test)
-                {
-                    const float a = ao_ray.t / self->detectionDistance;
-                    const vec4f touchColor =
-                        make_vec4f(a > 0.2f ? self->nearColor : self->farColor,
-                                   1.f);
-                    composite(touchColor, color, self->alphaCorrection);
-                    sample.alpha = 1.f;
-                    if (iteration == 0)
-                        sample.z = ray.t;
-                }
+                const float a = ao_ray.t / self->detectionDistance;
+                const vec4f touchColor =
+                    make_vec4f(a > nearFarThreshold ? self->nearColor
+                                                    : self->farColor,
+                               1.f);
+                composite(touchColor, color, self->alphaCorrection);
+                sample.alpha = 1.f;
+                if (iteration == 0)
+                    sample.z = ray.t;
             }
         }
 
