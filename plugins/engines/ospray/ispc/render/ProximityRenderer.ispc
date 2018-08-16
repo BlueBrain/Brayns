@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -22,184 +22,151 @@
 
 #include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.ih>
 
+uniform const float nearFarThreshold = 0.2f;
+
 struct ProximityRenderer
 {
     AbstractRenderer super;
 
     int randomNumber;
 
-    bool shadingEnabled;
+    bool surfaceShadingEnabled;
     bool electronShadingEnabled;
 
     vec3f nearColor;
     vec3f farColor;
     float detectionDistance;
     bool detectionOnDifferentMaterial;
+
+    float alphaCorrection;
 };
 
 inline vec3f ProximityRenderer_shadeRay(
     const uniform ProximityRenderer* uniform self, varying ScreenSample& sample)
 {
     Ray ray = sample.ray;
+    vec4f color = make_vec4f(0.f);
+    sample.alpha = 0.f;
 
-    varying vec3f color = make_vec3f(0.f);
-    varying float path_opacity = 1.f;
-    varying vec3f colorKs = make_vec3f(0.f);
-
-    traceRay(self->super.super.model, ray);
-    varying float zDepth = 0.f;
-    sample.z = 1.f;
-    sample.alpha = 1.f;
-
-    if (ray.geomID < 0)
+    int iteration = 0;
+    while (color.w < 1.f && iteration < NB_MAX_REBOUNDS)
     {
-        // No intersection. Return skybox color
-        color =
-            color +
-            path_opacity * make_vec3f(skyboxMapping((Renderer*)self, ray,
-                                                    self->super.bgMaterial));
-        sample.alpha = 0.f;
-        return color;
-    }
+        traceRay(self->super.super.model, ray);
 
-    DifferentialGeometry dg;
-    postIntersect(self->super.super.model, dg, ray,
-                  DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
-                      DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
-
-    uniform Material* material = dg.material;
-    uniform ExtendedOBJMaterial* objMaterial =
-        (uniform ExtendedOBJMaterial*)material;
-
-    varying float emission = 0.f;
-    varying float opacity = 0.f;
-    varying float Ns = 0.f;
-    varying vec3f Kd = make_vec3f(0.0f, 0.0f, 0.0f);
-    varying vec3f Ks = make_vec3f(0.f);
-    varying vec3f normal = dg.Ns;
-    varying const vec3f P = dg.P + dg.epsilon * dg.Ng;
-
-    if (!objMaterial)
-    {
-        opacity = dg.color.w;
-        Kd = make_vec3f(dg.color);
-    }
-    else
-    {
-        foreach_unique(mat in objMaterial)
+        if (ray.geomID < 0)
         {
-            // Light emission strength
-            emission = mat->a;
-
-            // glossiness
-            if (mat->glossiness < 1.f)
-                normal = normalize(
-                    normal +
-                    (1.f - mat->glossiness) *
-                        getRandomVector(self->super.super.fb->size.x, sample,
-                                        normal, self->randomNumber));
-            // Opacity
-            opacity = mat->d;
-            if (valid(mat->map_d))
-                opacity *= get1f(mat->map_d, dg.st, 1.f);
-
-            // Diffuse color
-            Kd = mat->Kd * make_vec3f(dg.color);
+            const vec4f bgColor =
+                skyboxMapping((Renderer*)self, ray, self->super.bgMaterial);
+            composite(bgColor, color, self->alphaCorrection);
+            return make_vec3f(color);
         }
-    }
 
-    const varying float local_opacity = path_opacity * abs(opacity);
+        DifferentialGeometry dg;
+        postIntersect(self->super.super.model, dg, ray,
+                      DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
+                          DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
-    if (local_opacity > 0.01f)
-    {
-        const varying vec3f R = ray.dir - (2.f * dot(ray.dir, normal)) * normal;
+        uniform Material* material = dg.material;
+        uniform ExtendedOBJMaterial* objMaterial =
+            (uniform ExtendedOBJMaterial*)material;
 
-        // calculate shading for all lights
-        for (uniform int i = 0; self->super.lights && i < self->super.numLights;
-             i++)
+        vec3f normal = dg.Ns;
+        const vec3f P = dg.P + dg.epsilon * dg.Ng;
+
+        bool continueWithSurfaceShading = true;
+        varying vec3f ao_dir =
+            getRandomVector(self->super.super.fb->size.x, sample, normal,
+                            self->randomNumber);
+
+        if (dot(ao_dir, normal) < 0.f)
+            ao_dir = ao_dir * -1.f;
+        Ray ao_ray = ray;
+        ao_ray.org = P;
+        ao_ray.dir = ao_dir;
+        ao_ray.t0 = dg.epsilon;
+        ao_ray.t = self->detectionDistance;
+        ao_ray.geomID = -1;
+
+        traceRay(self->super.super.model, ao_ray);
+        if (ao_ray.geomID >= 0)
         {
-            const uniform Light* uniform l = self->super.lights[i];
+            continueWithSurfaceShading = false;
 
-            const varying vec2f s = make_vec2f(0.f);
-            const varying Light_SampleRes lightSample = l->sample(l, dg, s);
-            float varying radiance = 1.f;
-            varying vec3f L = lightSample.dir;
-            varying float dist;
+            postIntersect(self->super.super.model, dg, ao_ray, DG_MATERIALID);
 
-            if (emission != 0.f)
-                radiance = emission;
+            const bool doDetectionTest = self->detectionOnDifferentMaterial
+                                             ? material != dg.material
+                                             : true;
+            if (doDetectionTest)
+            {
+                const float a = ao_ray.t / self->detectionDistance;
+                const vec4f touchColor =
+                    make_vec4f(a > nearFarThreshold ? self->nearColor
+                                                    : self->farColor,
+                               1.f);
+                composite(touchColor, color, self->alphaCorrection);
+                sample.alpha = 1.f;
+                if (iteration == 0)
+                    sample.z = ray.t;
+            }
+        }
+
+        if (continueWithSurfaceShading && self->surfaceShadingEnabled)
+        {
+            sample.alpha = 1.f;
+            if (iteration == 0)
+                sample.z = ray.t;
+
+            vec3f Kd;
+            if (!objMaterial)
+                Kd = make_vec3f(dg.color);
             else
-                radiance = reduce_max(lightSample.weight);
+                foreach_unique(mat in objMaterial) Kd =
+                    mat->Kd * make_vec3f(dg.color);
 
-            if (reduce_max(radiance) > 0.f)
+            for (uniform int i = 0;
+                 self->super.lights && i < self->super.numLights; i++)
             {
-                // Any potential contribution?
-                varying float cosNL = 0.0;
-                varying float cosLR = 0.0;
-                if (self->electronShadingEnabled)
+                const uniform Light* uniform light = self->super.lights[i];
+
+                const vec2f samplingLocation = make_vec2f(0.f);
+                const Light_SampleRes lightSample =
+                    light->sample(light, dg, samplingLocation);
+                const float radiance = reduce_max(lightSample.weight);
+
+                if (reduce_max(radiance) > 0.f)
                 {
-                    // Electron shading
-                    vec3f me = normalize(ray.org - P);
-                    cosNL = 1.f - max(0.f, dot(me, normal));
-                }
-                else
-                {
-                    cosNL = max(0, dot(L, normal));
-                    cosLR = max(0, dot(L, R));
-                }
-
-                const varying vec3f unshaded_light_contrib =
-                    local_opacity * Kd * cosNL * radiance;
-                // Specular
-                colorKs = max(colorKs, Ks * powf(cosLR, Ns));
-
-                color = color + unshaded_light_contrib;
-            }
-        }
-
-        if (self->detectionDistance > 0.f &&
-            ray.t < self->detectionDistance * 1000.f)
-        {
-            // Generate random ray and trace it
-            varying vec3f ao_dir =
-                getRandomVector(self->super.super.fb->size.x, sample, normal,
-                                self->randomNumber);
-
-            if (dot(ao_dir, normal) < 0.f)
-                ao_dir = ao_dir * -1.f;
-            varying Ray ao_ray = ray;
-            ao_ray.org = P;
-            ao_ray.dir = ao_dir;
-            varying float t_max = self->detectionDistance;
-            ao_ray.t0 = self->detectionDistance * 0.1f;
-            ao_ray.t = t_max;
-
-            traceRay(self->super.super.model, ao_ray);
-            if (ao_ray.t != t_max)
-            {
-                // Intersection detected
-                postIntersect(self->super.super.model, dg, ao_ray,
-                              DG_MATERIALID);
-
-                varying bool test = true;
-                if (self->detectionOnDifferentMaterial)
-                    test = material != dg.material;
-
-                if (test)
-                {
-                    if (ao_ray.t < t_max * 0.2f)
-                        color = self->nearColor * opacity / ao_ray.t;
+                    float cosNL = 0.f;
+                    if (self->electronShadingEnabled)
+                    {
+                        const vec3f me = normalize(ray.org - P);
+                        const float angle = max(0.f, dot(me, normal));
+                        cosNL = 1.f - angle;
+                    }
                     else
-                        color = self->farColor * opacity / ao_ray.t;
+                        cosNL = max(0.f, dot(lightSample.dir, normal));
+
+                    const vec4f shadedColor =
+                        make_vec4f(Kd * cosNL * radiance, 1.f);
+
+                    composite(shadedColor, color, self->alphaCorrection);
                 }
             }
+            break;
         }
+
+        setRay(ray, dg.P, ray.dir);
+        ray.t0 = dg.epsilon;
+        ray.t = inf;
+        ray.primID = -1;
+        ray.geomID = -1;
+        ray.instID = -1;
+        ++iteration;
     }
 
-    // Z-Depth
-    sample.z = log(opacity * ray.t) / 10.f;
+    // Depth and Alpha
 
-    return color;
+    return make_vec3f(color);
 }
 
 void ProximityRenderer_renderSample(uniform Renderer* uniform _self,
@@ -229,8 +196,9 @@ export void ProximityRenderer_set(
     const uniform float& detectionDistance,
     const uniform bool& detectionOnDifferentMaterial,
     const uniform int& randomNumber, const uniform float& timestamp,
-    const uniform int& spp, const uniform bool& electronShadingEnabled,
-    void** uniform lights, uniform int32 numLights)
+    const uniform int& spp, const uniform bool& surfaceShadingEnabled,
+    const uniform bool& electronShadingEnabled, void** uniform lights,
+    uniform int32 numLights, const uniform float& alphaCorrection)
 {
     uniform ProximityRenderer* uniform self =
         (uniform ProximityRenderer * uniform)_self;
@@ -242,9 +210,12 @@ export void ProximityRenderer_set(
     self->super.timestamp = timestamp;
 
     self->randomNumber = randomNumber;
+    self->surfaceShadingEnabled = surfaceShadingEnabled;
     self->electronShadingEnabled = electronShadingEnabled;
     self->nearColor = nearColor;
     self->farColor = farColor;
     self->detectionDistance = detectionDistance;
     self->detectionOnDifferentMaterial = detectionOnDifferentMaterial;
+
+    self->alphaCorrection = alphaCorrection;
 }
