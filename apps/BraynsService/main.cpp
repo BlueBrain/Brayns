@@ -37,7 +37,6 @@ public:
         , _renderingDone{_mainLoop->resource<uvw::AsyncHandle>()}
         , _eventRendering{_mainLoop->resource<uvw::IdleHandle>()}
         , _accumRendering{_mainLoop->resource<uvw::IdleHandle>()}
-        , _progressUpdate{_mainLoop->resource<uvw::TimerHandle>()}
         , _checkIdleRendering{_mainLoop->resource<uvw::CheckHandle>()}
         , _sigintHandle{_mainLoop->resource<uvw::SignalHandle>()}
         , _triggerRendering{_renderLoop->resource<uvw::AsyncHandle>()}
@@ -73,11 +72,9 @@ public:
 private:
     void _setupMainThread()
     {
-        // triggered after rendering, send events to rockets
-        _renderingDone->on<uvw::AsyncEvent>([& brayns = _brayns](const auto&,
-                                                                 auto&) {
-            brayns.postRender();
-        });
+        // triggered after rendering, needed somehow to trigger accumulation
+        // frames afterwards
+        _renderingDone->on<uvw::AsyncEvent>([](const auto&, auto&) {});
 
         // events from rockets, trigger rendering
         _brayns.getEngine().triggerRender = [& eventRendering = _eventRendering]
@@ -108,10 +105,6 @@ private:
 
                 _checkIdleRendering->stop();
 
-                // broadcast progress updates every 100ms
-                _progressUpdate->start(std::chrono::milliseconds(0),
-                                       std::chrono::milliseconds(100));
-
                 // async load execution
                 auto work = _mainLoop->resource<uvw::WorkReq>(
                     [&] { _brayns.buildScene(); });
@@ -119,8 +112,6 @@ private:
                 // async load finished, restore everything to continue rendering
                 work->template on<uvw::WorkEvent>([&](const auto&, auto&) {
                     _brayns.getEngine().markRebuildScene(false);
-                    _progressUpdate->stop();
-                    _progressUpdate->close();
                     _isLoading = false;
 
                     _checkIdleRendering->start();
@@ -132,20 +123,8 @@ private:
             }
 
             // rendering
-            if (_brayns.preRender())
+            if (_brayns.commit())
                 _triggerRendering->send();
-        });
-
-        // send progress updates while we are loading
-        _progressUpdate->on<uvw::TimerEvent>([& brayns = _brayns](const auto&,
-                                                                  auto&) {
-            brayns.postRender();
-        });
-
-        // send final progress update, once loading is finished
-        _progressUpdate->on<uvw::CloseEvent>([& brayns = _brayns](const auto&,
-                                                                  auto&) {
-            brayns.postRender();
         });
 
         // start accum rendering when we have no more other events
@@ -158,7 +137,7 @@ private:
             if (_timeSinceLastEvent.elapsed() < _idleRenderingDelay)
                 return;
 
-            if (_brayns.getEngine().continueRendering() && _brayns.preRender())
+            if (_brayns.getEngine().continueRendering() && _brayns.commit())
                 _triggerRendering->send();
 
             _accumRendering->stop();
@@ -169,7 +148,7 @@ private:
     {
         // rendering, triggered from main thread
         _triggerRendering->on<uvw::AsyncEvent>([&](const auto&, auto&) {
-            _brayns.renderOnly();
+            _brayns.render();
             _renderingDone->send();
         });
 
@@ -188,7 +167,6 @@ private:
         _renderingDone->close();
         _eventRendering->close();
         _accumRendering->close();
-        _progressUpdate->close();
         _checkIdleRendering->close();
         _sigintHandle->close();
 
@@ -208,7 +186,6 @@ private:
     std::shared_ptr<uvw::AsyncHandle> _renderingDone;
     std::shared_ptr<uvw::IdleHandle> _eventRendering;
     std::shared_ptr<uvw::IdleHandle> _accumRendering;
-    std::shared_ptr<uvw::TimerHandle> _progressUpdate;
     std::shared_ptr<uvw::CheckHandle> _checkIdleRendering;
     std::shared_ptr<uvw::SignalHandle> _sigintHandle;
 

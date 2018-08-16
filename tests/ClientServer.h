@@ -94,7 +94,7 @@ public:
         _brayns->getParametersManager()
             .getApplicationParameters()
             .setImageStreamFPS(0);
-        _brayns->render();
+        _brayns->commitAndRender();
 
         auto& scene = _brayns->getEngine().getScene();
         scene.getLoaderRegistry().registerLoader(
@@ -115,7 +115,7 @@ public:
         while (!is_ready(connectFuture))
         {
             client.process(CLIENT_PROCESS_TIMEOUT);
-            _brayns->render();
+            _brayns->commitAndRender();
         }
         connectFuture.get();
     }
@@ -127,7 +127,7 @@ public:
         while (!request.is_ready())
         {
             _wsClient.process(0);
-            _brayns->render();
+            _brayns->commitAndRender();
         }
 
         return request.get();
@@ -140,7 +140,7 @@ public:
         while (!request.is_ready())
         {
             _wsClient.process(0);
-            _brayns->render();
+            _brayns->commitAndRender();
         }
 
         RetVal retVal;
@@ -155,7 +155,7 @@ public:
         while (!request.is_ready())
         {
             _wsClient.process(0);
-            _brayns->render();
+            _brayns->commitAndRender();
         }
 
         return request.get();
@@ -169,7 +169,7 @@ public:
         while (!request.is_ready())
         {
             _wsClient.process(0);
-            _brayns->render();
+            _brayns->commitAndRender();
         }
 
         return request.get().result;
@@ -203,7 +203,7 @@ public:
         while (!rockets::is_ready(future))
         {
             _wsClient.process(0);
-            _brayns->render();
+            _brayns->commitAndRender();
         }
 
         return future.get();
@@ -236,7 +236,7 @@ public:
         while (!rockets::is_ready(future))
         {
             _wsClient.process(0);
-            _brayns->render();
+            _brayns->commitAndRender();
         }
 
         return future.get();
@@ -249,7 +249,7 @@ public:
 
         _wsClient.process(CLIENT_PROCESS_TIMEOUT);
         for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
-            _brayns->render();
+            _brayns->commitAndRender();
     }
 
     void makeNotification(const std::string& method)
@@ -258,7 +258,7 @@ public:
 
         _wsClient.process(CLIENT_PROCESS_TIMEOUT);
         for (size_t i = 0; i < SERVER_PROCESS_RETRIES; ++i)
-            _brayns->render();
+            _brayns->commitAndRender();
     }
 
     auto& getBrayns() { return *_brayns; }
@@ -267,7 +267,7 @@ public:
     void process()
     {
         _wsClient.process(CLIENT_PROCESS_TIMEOUT);
-        _brayns->preRender();
+        _brayns->commit();
     }
 
 private:

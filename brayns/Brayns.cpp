@@ -174,7 +174,7 @@ struct Brayns::Impl : public PluginAPI
 #endif
     }
 
-    bool preRender()
+    bool commit()
     {
         if (!isLoadingFinished())
         {
@@ -246,8 +246,27 @@ struct Brayns::Impl : public PluginAPI
         return true;
     }
 
-    void postRender()
+    void render(RenderOutput* output)
     {
+        std::lock_guard<std::mutex> lock{_renderMutex};
+
+        _renderTimer.start();
+        _engine->render();
+        _renderTimer.stop();
+
+        const auto& params = _parametersManager.getApplicationParameters();
+        const auto fps = params.getMaxRenderFPS();
+        const auto delta = _renderTimer.perSecondSmoothed() - fps;
+        if (delta > 0)
+        {
+            const int64_t targetTime = (1. / fps) * 1000.f;
+            std::this_thread::sleep_for(std::chrono::milliseconds(
+                targetTime - _renderTimer.milliseconds()));
+        }
+
+        if (output)
+            _updateRenderOutput(*output);
+
         _engine->postRender();
 
         _fpsUpdateElapsed += _renderTimer.milliseconds();
@@ -257,28 +276,32 @@ struct Brayns::Impl : public PluginAPI
             _fpsUpdateElapsed = 0;
         }
 
-        std::lock_guard<std::mutex> lock{_renderMutex};
-
+        bool resetApParams = false;
         auto& ap = _parametersManager.getAnimationParameters();
         if (ap.getDelta() != 0 || _animationParamsWereModified)
         {
             _animationParamsWereModified = true;
+            resetApParams = !ap.isModified();
             ap.markModified();
         }
 
+        bool resetScene = false;
         auto& scene = _engine->getScene();
         if (_sceneWasModified)
+        {
+            resetScene = !scene.isModified();
             scene.markModified();
+        }
 
         // broadcast changes on animations (playback) and scene (model
         // add/remove)
         _extensionPluginFactory.postRender();
 
-        if (_animationParamsWereModified)
+        if (resetApParams)
             ap.resetModified();
         _animationParamsWereModified = false;
 
-        if (_sceneWasModified)
+        if (resetScene)
             scene.resetModified();
         _sceneWasModified = false;
 
@@ -383,17 +406,17 @@ struct Brayns::Impl : public PluginAPI
         promise.set_value();
     }
 
-    bool preRender(const RenderInput& renderInput)
+    bool commit(const RenderInput& renderInput)
     {
         _engine->getCamera().set(renderInput.position, renderInput.target,
                                  renderInput.up);
         _parametersManager.getApplicationParameters().setWindowSize(
             renderInput.windowSize);
 
-        return preRender();
+        return commit();
     }
 
-    void postRender(RenderOutput& renderOutput)
+    void _updateRenderOutput(RenderOutput& renderOutput)
     {
         FrameBuffer& frameBuffer = _engine->getFrameBuffer();
         frameBuffer.map();
@@ -417,29 +440,6 @@ struct Brayns::Impl : public PluginAPI
         renderOutput.frameSize = frameSize;
 
         frameBuffer.unmap();
-
-        postRender();
-    }
-
-    void render()
-    {
-        {
-            std::lock_guard<std::mutex> lock{_renderMutex};
-
-            _renderTimer.start();
-            _engine->render();
-            _renderTimer.stop();
-        }
-
-        const auto& params = _parametersManager.getApplicationParameters();
-        const auto fps = params.getMaxRenderFPS();
-        const auto delta = _renderTimer.perSecondSmoothed() - fps;
-        if (delta > 0)
-        {
-            const int64_t targetTime = (1. / fps) * 1000.f;
-            std::this_thread::sleep_for(std::chrono::milliseconds(
-                targetTime - _renderTimer.milliseconds()));
-        }
     }
 
     Engine& getEngine() { return *_engine; }
@@ -1058,7 +1058,7 @@ private:
 
     std::future<void> _dataLoadingFuture;
 
-    // protect render() vs preRender() when doing all the commit()
+    // protect render() vs commit() when doing all the commits
     std::mutex _renderMutex;
 
     Timer _renderTimer;
@@ -1087,22 +1087,17 @@ Brayns::Brayns(int argc, const char** argv)
 
 Brayns::~Brayns() = default;
 
-void Brayns::render(const RenderInput& renderInput, RenderOutput& renderOutput)
+void Brayns::commitAndRender(const RenderInput& renderInput,
+                             RenderOutput& renderOutput)
 {
-    if (_impl->preRender(renderInput))
-    {
-        _impl->render();
-        _impl->postRender(renderOutput);
-    }
+    if (_impl->commit(renderInput))
+        _impl->render(&renderOutput);
 }
 
-bool Brayns::render()
+bool Brayns::commitAndRender()
 {
-    if (_impl->preRender())
-    {
-        _impl->render();
-        _impl->postRender();
-    }
+    if (_impl->commit())
+        _impl->render(nullptr);
     return _impl->getEngine().getKeepRunning();
 }
 
@@ -1112,19 +1107,14 @@ void Brayns::loadPlugins()
     _impl->loadPlugins();
 }
 
-bool Brayns::preRender()
+bool Brayns::commit()
 {
-    return _impl->preRender();
+    return _impl->commit();
 }
 
-void Brayns::renderOnly()
+void Brayns::render()
 {
-    return _impl->render();
-}
-
-void Brayns::postRender()
-{
-    _impl->postRender();
+    return _impl->render(nullptr);
 }
 
 void Brayns::buildScene()
