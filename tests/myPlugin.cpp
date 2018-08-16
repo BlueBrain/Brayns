@@ -25,7 +25,7 @@
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include "BasicRenderer_ispc.h"
-#include <plugins/engines/ospray/ispc/render/utils/AbstractRenderer.h>
+#include <engines/ospray/ispc/render/utils/AbstractRenderer.h>
 
 #include <boost/test/unit_test.hpp>
 

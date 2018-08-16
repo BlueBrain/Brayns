@@ -16,7 +16,19 @@ set(BRAYNS_SOURCES Brayns.cpp)
 
 set(BRAYNS_LINK_LIBRARIES
   PUBLIC braynsParameters braynsCommon
-  PRIVATE braynsIO braynsPlugins braynsPluginAPI braynsTasks ${OSPRAY_COMMON_LIBRARY})
+  PRIVATE braynsIO braynsPluginAPI braynsTasks ${OSPRAY_COMMON_LIBRARY})
+
+if(TARGET braynsOSPRayEnginePlugin)
+  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsOSPRayEnginePlugin)
+endif()
+
+if(TARGET DeflectPlugin)
+  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE DeflectPlugin)
+endif()
+
+if(TARGET RocketsPlugin)
+  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE RocketsPlugin)
+endif()
 
 if(TARGET Lunchbox)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE Lunchbox)

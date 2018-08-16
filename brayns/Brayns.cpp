@@ -19,13 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/Brayns.h>
+#include "Brayns.h"
 
 #include <brayns/common/Timer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/camera/FlyingModeManipulator.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/engine/Engine.h>
+#include <brayns/common/engine/EngineFactory.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/log.h>
@@ -50,7 +51,6 @@
 #include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/pluginapi/ExtensionPluginFactory.h>
 #include <brayns/pluginapi/PluginAPI.h>
-#include <plugins/engines/EngineFactory.h>
 #ifdef BRAYNS_USE_NETWORKING
 #include <plugins/RocketsPlugin/RocketsPlugin.h>
 #endif
@@ -117,14 +117,35 @@ struct Brayns::Impl : public PluginAPI
 
     void addPlugins()
     {
+        const bool haveHttpServerURI =
+            !_parametersManager.getApplicationParameters()
+                 .getHttpServerURI()
+                 .empty();
+        if (haveHttpServerURI)
 #ifdef BRAYNS_USE_NETWORKING
-        auto plugin{std::make_shared<RocketsPlugin>(_engine, this)};
-        _extensionPluginFactory.add(plugin);
-        _actionInterface = plugin;
+        {
+            auto plugin{std::make_shared<RocketsPlugin>(_engine, this)};
+            _extensionPluginFactory.add(plugin);
+            _actionInterface = plugin;
+        }
+#else
+            throw std::runtime_error(
+                "BRAYNS_NETWORKING_ENABLED was not set, but HTTP server URI "
+                "was specified");
 #endif
+        const bool haveDeflectHost =
+            getenv("DEFLECT_HOST") ||
+            !_parametersManager.getStreamParameters().getHostname().empty();
+        if (haveDeflectHost)
 #ifdef BRAYNS_USE_DEFLECT
-        _extensionPluginFactory.add(
-            std::make_shared<DeflectPlugin>(_engine, this));
+        {
+            _extensionPluginFactory.add(
+                std::make_shared<DeflectPlugin>(_engine, this));
+        }
+#else
+            throw std::runtime_error(
+                "BRAYNS_DEFLECT_ENABLED was not set, but Deflect host was "
+                "specified");
 #endif
     }
 
