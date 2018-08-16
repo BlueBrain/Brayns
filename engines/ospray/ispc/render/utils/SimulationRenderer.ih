@@ -1,0 +1,70 @@
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+// Brayns
+#include "AbstractRenderer.ih"
+
+struct SimulationRenderer
+{
+    AbstractRenderer super;
+
+    // Transfer function attributes
+    uniform vec4f* uniform colorMap;
+    uniform vec3f* uniform emissionIntensitiesMap;
+    uint32 colorMapSize;
+    float colorMapMinValue;
+    float colorMapRange;
+
+    // Simulation data
+    uniform float* uniform simulationData;
+    uint64 simulationDataSize;
+};
+
+inline vec4f getSimulationValue(const uniform SimulationRenderer* uniform self,
+                                varying DifferentialGeometry* dg)
+{
+    vec4f color = make_vec4f(1.f, 0.f, 0.f, 0.5f);
+    if (!self->simulationData || !self->colorMap || !dg)
+        return color;
+
+    float value = 0.f;
+    const uint64 index = (uint64)(dg->st.x * OFFSET_MAGIC) << 32 |
+                         (uint32)(dg->st.y * OFFSET_MAGIC);
+
+    if (index < self->simulationDataSize)
+        value = self->simulationData[index];
+    else
+        // Value offset is out of range, return error color
+        return color;
+
+    // Normalize the value according to colormap size
+    const float normalizedValue =
+        (value - self->colorMapMinValue) / self->colorMapRange;
+
+    const uint32 lookupIndex =
+        max(0.f, min(normalizedValue, 1.f)) * (self->colorMapSize - 1);
+    color = self->colorMap[lookupIndex];
+
+    if (self->emissionIntensitiesMap)
+        color = make_vec4f(make_vec3f(color) +
+                               self->emissionIntensitiesMap[lookupIndex],
+                           color.w);
+    return color;
+}
