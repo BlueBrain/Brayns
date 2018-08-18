@@ -406,8 +406,8 @@ void MeshLoader::_createMaterials(Model&, const aiScene*, const std::string&)
     throw NO_ASSIMP;
 }
 
-Vector3f MeshLoader::_postLoad(const aiScene*, Model&, const size_t,
-                               const Matrix4f&, size_t, const std::string&)
+void MeshLoader::_postLoad(const aiScene*, Model&, const size_t,
+                           const Matrix4f&, size_t, const std::string&)
 {
     throw NO_ASSIMP;
 }
