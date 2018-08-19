@@ -24,6 +24,73 @@
 
 #include <boost/algorithm/string.hpp>
 
+namespace
+{
+// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C++
+unsigned int levenshtein_distance(const std::string& s1, const std::string& s2)
+{
+    const std::size_t len1 = s1.size(), len2 = s2.size();
+    std::vector<unsigned int> col(len2 + 1), prevCol(len2 + 1);
+
+    for (unsigned int i = 0; i < prevCol.size(); i++)
+        prevCol[i] = i;
+    for (unsigned int i = 0; i < len1; i++)
+    {
+        col[0] = i + 1;
+        for (unsigned int j = 0; j < len2; j++)
+            // note that std::min({arg1, arg2, arg3}) works only in C++11,
+            // for C++98 use std::min(std::min(arg1, arg2), arg3)
+            col[j + 1] = std::min({prevCol[1 + j] + 1, col[j] + 1,
+                                   prevCol[j] + (s1[i] == s2[j] ? 0 : 1)});
+        col.swap(prevCol);
+    }
+    return prevCol[len2];
+}
+
+std::vector<std::string> findSimilarOptions(
+    const std::string& name, const std::vector<std::string>& options)
+{
+    size_t bestDist = UINT_MAX;
+    std::vector<std::string> bestOptions;
+    constexpr size_t MAX_SUGGESTIONS = 7;
+
+    for (const auto& optionName : options)
+    {
+        const auto dist = levenshtein_distance(name, optionName);
+        if (dist < bestDist)
+        {
+            bestOptions.clear();
+            bestDist = dist;
+        }
+
+        if (dist == bestDist && bestOptions.size() < MAX_SUGGESTIONS)
+            bestOptions.push_back(optionName);
+    }
+
+    // Strip dashes
+    auto nameStrip = name;
+    nameStrip.erase(std::remove(nameStrip.begin(), nameStrip.end(), '-'),
+                    nameStrip.end());
+
+    // Also suggest options containing the substring
+    for (const auto& optionName : options)
+    {
+        if (bestOptions.size() >= MAX_SUGGESTIONS)
+            break;
+
+        // Skip already present suggestions
+        if (std::find(bestOptions.begin(), bestOptions.end(), optionName) !=
+            bestOptions.end())
+            continue;
+
+        if (optionName.find(nameStrip) != std::string::npos)
+            bestOptions.push_back(optionName);
+    }
+
+    return bestOptions;
+}
+}
+
 namespace brayns
 {
 ParametersManager::ParametersManager()
@@ -65,10 +132,37 @@ void ParametersManager::parse(int argc, const char** argv)
         po::parsed_options parsedOptions =
             po::command_line_parser(argc, argv)
                 .options(_parameters)
+                .allow_unregistered()
                 .positional(_applicationParameters.posArgs())
-                .style(po::command_line_style::unix_style ^
-                       po::command_line_style::allow_short)
+                .style(po::command_line_style::unix_style &
+                       ~po::command_line_style::allow_short &
+                       ~po::command_line_style::allow_guessing)
                 .run();
+
+        const auto unrecognizedOptions =
+            po::collect_unrecognized(parsedOptions.options,
+                                     po::exclude_positional);
+
+        if (!unrecognizedOptions.empty())
+        {
+            const auto& unrecognized = unrecognizedOptions.front();
+
+            std::vector<std::string> availableOptions;
+            for (auto option : _parameters.options())
+                availableOptions.push_back(option->format_name());
+
+            const auto suggestions =
+                findSimilarOptions(unrecognized, availableOptions);
+
+            std::string errorMessage = "Unrecognized option '" + unrecognized +
+                                       "'.\n\nMost similar options are:";
+
+            for (const auto& suggestion : suggestions)
+                errorMessage += "\n\t" + suggestion;
+
+            throw po::error(errorMessage);
+        }
+
         po::store(parsedOptions, vm);
         po::notify(vm);
 
