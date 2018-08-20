@@ -58,6 +58,7 @@ struct CircuitConfiguration
     Vector2f simulationValuesRange{std::numeric_limits<float>::max(),
                                    std::numeric_limits<float>::min()};
     size_t simulationHistogramSize{128};
+    size_t randomSeed = 0;
     bool meshTransformation{false};
 };
 
@@ -219,6 +220,12 @@ public:
     size_t getCircuitMeshTransformation() const
     {
         return _circuitConfiguration.meshTransformation;
+    }
+
+    /** Random seed of the circuit */
+    size_t getCircuitRandomSeed() const
+    {
+        return _circuitConfiguration.randomSeed;
     }
 
     /** Biological assembly */

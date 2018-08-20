@@ -83,10 +83,9 @@ public:
 
             for (const auto& target : localTargets)
             {
-                const auto targetGids =
-                    (target.empty()
-                         ? circuit.getRandomGIDs(circuitDensity)
-                         : circuit.getRandomGIDs(circuitDensity, target));
+                const auto targetGids = circuit.getRandomGIDs(
+                    circuitDensity, target,
+                    _geometryParameters.getCircuitRandomSeed());
                 const Matrix4fs& allTransformations =
                     circuit.getTransforms(targetGids);
 
