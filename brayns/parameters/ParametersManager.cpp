@@ -96,8 +96,8 @@ std::vector<std::string> findSimilarOptions(
 
     // Merge suggestions giving precedence to substrings
     auto output = subStringOptions;
-    output.insert(std::end(output), std::begin(levenshteinOptions),
-                  std::end(levenshteinOptions));
+    for (const auto& option : levenshteinOptions)
+        output.push_back(option);
     output.resize(std::min(output.size(), MAX_SUGGESTIONS));
 
     return output;
@@ -257,24 +257,23 @@ void ParametersManager::set(const std::string& key, const std::string& value)
 void ParametersManager::_processUnrecognizedOptions(
     const std::vector<std::string>& unrecognizedOptions) const
 {
-    if (!unrecognizedOptions.empty())
-    {
-        const auto& unrecognized = unrecognizedOptions.front();
+    if (unrecognizedOptions.empty())
+        return;
 
-        std::vector<std::string> availableOptions;
-        for (auto option : _parameters.options())
-            availableOptions.push_back(option->format_name());
+    const auto& unrecognized = unrecognizedOptions.front();
 
-        const auto suggestions =
-            findSimilarOptions(unrecognized, availableOptions);
+    std::vector<std::string> availableOptions;
+    for (auto option : _parameters.options())
+        availableOptions.push_back(option->format_name());
 
-        std::string errorMessage = "Unrecognized option '" + unrecognized +
-                                   "'.\n\nMost similar options are:";
+    const auto suggestions = findSimilarOptions(unrecognized, availableOptions);
 
-        for (const auto& suggestion : suggestions)
-            errorMessage += "\n\t" + suggestion;
+    std::string errorMessage = "Unrecognized option '" + unrecognized +
+                               "'.\n\nMost similar options are:";
 
-        throw po::error(errorMessage);
-    }
+    for (const auto& suggestion : suggestions)
+        errorMessage += "\n\t" + suggestion;
+
+    throw po::error(errorMessage);
 }
 }
