@@ -128,6 +128,9 @@ public:
     bool isAnyModified() const;
 
 private:
+    void _processUnrecognizedOptions(
+        const std::vector<std::string>& unrecognizedOptions) const;
+
     po::options_description _parameters;
 
     std::vector<AbstractParameters*> _parameterSets;
