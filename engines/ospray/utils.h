@@ -40,4 +40,20 @@ void addInstance(OSPModel rootModel, OSPModel modelToAdd,
                  const Transformation& transform);
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,
                  const ospcommon::affine3f& affine);
+
+/** Helper to convert a vector of double tuples to a vector of float tuples. */
+template <size_t S>
+std::vector<std::array<float, S>> convertVectorToFloat(
+    const std::vector<std::array<double, S>>& input)
+{
+    std::vector<std::array<float, S>> output;
+    output.reserve(input.size());
+    for (const auto& value : input)
+    {
+        std::array<float, S> converted;
+        std::copy(value.data(), value.data() + S, converted.data());
+        output.push_back(converted);
+    }
+    return output;
+}
 }
