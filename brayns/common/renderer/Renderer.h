@@ -45,7 +45,7 @@ public:
     struct PickResult
     {
         bool hit{false};
-        Vector3f pos;
+        Vector3d pos;
     };
     virtual PickResult pick(const Vector2f& /*pickPos*/)
     {

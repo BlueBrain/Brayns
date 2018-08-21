@@ -60,7 +60,7 @@ void Camera::setInitialState(const Vector3f& position, const Vector3f& target,
     set(position, target, upVector);
 }
 
-BRAYNS_API void Camera::setInitialState(const Boxf& boundingBox)
+BRAYNS_API void Camera::setInitialState(const Boxd& boundingBox)
 {
     const Vector3f& target = boundingBox.getCenter();
     const Vector3f& diag = boundingBox.getSize();

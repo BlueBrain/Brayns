@@ -33,6 +33,15 @@ namespace brayns
     ospSet##OSP(ospObject, prop->name.c_str(),              \
                 prop->get<std::array<TYPE, NUM>>().data()); \
     break;
+#define SET_ARRAY_FLOAT(OSP, NUM)                                \
+    {                                                            \
+        std::array<float, NUM> data;                             \
+        const auto input = prop->get<std::array<double, NUM>>(); \
+        for (size_t i = 0; i < NUM; ++i)                         \
+            data[i] = input[i];                                  \
+        ospSet##OSP(ospObject, prop->name.c_str(), data.data()); \
+        break;                                                   \
+    }
 
 void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
 {
@@ -45,7 +54,7 @@ void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
             switch (prop->type)
             {
             case PropertyMap::Property::Type::Float:
-                SET_SCALAR(f, float);
+                SET_SCALAR(f, double);
             case PropertyMap::Property::Type::Int:
                 SET_SCALAR(i, int32_t);
             case PropertyMap::Property::Type::Bool:
@@ -55,15 +64,15 @@ void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
                              prop->get<std::string>().c_str());
                 break;
             case PropertyMap::Property::Type::Vec2f:
-                SET_ARRAY(2fv, float, 2);
+                SET_ARRAY_FLOAT(2fv, 2);
             case PropertyMap::Property::Type::Vec2i:
                 SET_ARRAY(2iv, int32_t, 2);
             case PropertyMap::Property::Type::Vec3f:
-                SET_ARRAY(3fv, float, 3);
+                SET_ARRAY_FLOAT(3fv, 3);
             case PropertyMap::Property::Type::Vec3i:
                 SET_ARRAY(3iv, int32_t, 3);
             case PropertyMap::Property::Type::Vec4f:
-                SET_ARRAY(4fv, float, 4);
+                SET_ARRAY_FLOAT(4fv, 4);
             }
         }
     }
@@ -94,15 +103,16 @@ ospcommon::affine3f transformationToAffine3f(
     const auto& translation = transformation.getTranslation();
     const auto& scale = transformation.getScale();
 
-    const auto t =
-        ospcommon::affine3f::translate({center.x() / (1.f / scale.x()),
-                                        center.y() / (1.f / scale.y()),
-                                        center.z() / (1.f / scale.z())}) *
-        rot * ospcommon::affine3f::scale({scale.x(), scale.y(), scale.z()}) *
-        ospcommon::affine3f::translate({translation.x() - center.x(),
-                                        translation.y() - center.y(),
-                                        translation.z() - center.z()});
-    return t;
+    return ospcommon::affine3f::translate(
+               {float(center.x() / (1. / scale.x())),
+                float(center.y() / (1. / scale.y())),
+                float(center.z() / (1. / scale.z()))}) *
+           rot * ospcommon::affine3f::scale(
+                     {float(scale.x()), float(scale.y()), float(scale.z())}) *
+           ospcommon::affine3f::translate(
+               {float(translation.x() - center.x()),
+                float(translation.y() - center.y()),
+                float(translation.z() - center.z())});
 }
 
 void addInstance(OSPModel rootModel, OSPModel modelToAdd,

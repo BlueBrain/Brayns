@@ -38,7 +38,7 @@ public:
     virtual void commit() = 0;
 
     size_t getSizeInBytes() const { return _sizeInBytes; }
-    Boxf getBounds() const
+    Boxd getBounds() const
     {
         return {{0, 0, 0},
                 {_dimensions.x() * _spacing.x(), _dimensions.y() * _spacing.y(),

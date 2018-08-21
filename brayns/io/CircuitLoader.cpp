@@ -98,7 +98,8 @@ public:
                     auto gidIterator = targetGids.begin();
                     for (size_t i = 0; i < allTransformations.size(); ++i)
                     {
-                        if (aabb.isIn(allTransformations[i].getTranslation()))
+                        if (aabb.isIn(Vector3d(
+                                allTransformations[i].getTranslation())))
                             gids.insert(*gidIterator);
                         ++gidIterator;
                     }

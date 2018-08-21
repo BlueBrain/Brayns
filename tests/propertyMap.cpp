@@ -32,19 +32,19 @@ BOOST_AUTO_TEST_CASE(set_property)
     BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<int32_t>(), 1);
     BOOST_CHECK_EQUAL(properties.getProperties()[0]->label, "Foo");
 
-    properties.setProperty({"limit", "With limits", 0.5f, {0.f, 1.f}});
-    BOOST_CHECK_EQUAL(properties.getProperties()[1]->get<float>(), 0.5f);
+    properties.setProperty({"limit", "With limits", 0.5, {0., 1.}});
+    BOOST_CHECK_EQUAL(properties.getProperties()[1]->get<double>(), 0.5);
     BOOST_CHECK_EQUAL(properties.getProperties()[1]->label, "With limits");
-    BOOST_CHECK_EQUAL(properties.getProperties()[1]->min<float>(), 0.f);
-    BOOST_CHECK_EQUAL(properties.getProperties()[1]->max<float>(), 1.f);
+    BOOST_CHECK_EQUAL(properties.getProperties()[1]->min<double>(), 0.);
+    BOOST_CHECK_EQUAL(properties.getProperties()[1]->max<double>(), 1.);
 
     brayns::PropertyMap otherProperties;
-    otherProperties.setProperty({"bar", "Bar", 42.f});
+    otherProperties.setProperty({"bar", "Bar", 42.});
     properties.setProperty(*otherProperties.getProperties()[0]);
-    BOOST_CHECK_EQUAL(properties.getProperties()[2]->get<float>(), 42.f);
+    BOOST_CHECK_EQUAL(properties.getProperties()[2]->get<double>(), 42.);
 
     BOOST_CHECK_THROW(otherProperties.setProperty(
-                          {"bar", "Bar", std::string("no float")}),
+                          {"bar", "Bar", std::string("no double")}),
                       std::runtime_error);
 }
 
@@ -83,39 +83,40 @@ BOOST_AUTO_TEST_CASE(set_and_get_all_supported_types)
     brayns::PropertyMap properties;
     properties.setProperty({"int", "Int", 42});
     properties.setProperty({"enum", "Enum", 0, {"Zero", "One", "Two"}});
-    properties.setProperty({"float", "Float", 1.2f});
+    properties.setProperty({"double", "Double", 1.2});
     properties.setProperty({"string", "String", std::string("foo")});
     properties.setProperty({"const char", "ConstChar", (const char*)"bar"});
     properties.setProperty({"bool", "bool", true});
     properties.setProperty({"vec2i", "Vec2i", std::array<int32_t, 2>{{1, 2}}});
-    properties.setProperty({"vec2f", "Vec2f", std::array<float, 2>{{1, 2}}});
+    properties.setProperty({"vec2f", "Vec2f", std::array<double, 2>{{1, 2}}});
     properties.setProperty(
         {"vec3i", "Vec3i", std::array<int32_t, 3>{{1, 2, 3}}});
-    properties.setProperty({"vec3f", "Vec3f", std::array<float, 3>{{1, 2, 3}}});
     properties.setProperty(
-        {"vec4f", "Vec4f", std::array<float, 4>{{1, 2, 3, 4}}});
+        {"vec3f", "Vec3f", std::array<double, 3>{{1, 2, 3}}});
+    properties.setProperty(
+        {"vec4f", "Vec4f", std::array<double, 4>{{1, 2, 3, 4}}});
 
     BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("int"), 42);
     BOOST_CHECK_EQUAL(properties.getProperty<int32_t>("enum"), 0);
     BOOST_CHECK_EQUAL(properties.getEnums("enum").size(), 3);
-    BOOST_CHECK_EQUAL(properties.getProperty<float>("float"), 1.2f);
+    BOOST_CHECK_EQUAL(properties.getProperty<double>("double"), 1.2);
     BOOST_CHECK_EQUAL(properties.getProperty<std::string>("string"), "foo");
     BOOST_CHECK_EQUAL(properties.getProperty<const char*>("const char"), "bar");
     BOOST_CHECK(properties.getProperty<bool>("bool"));
     BOOST_CHECK((properties.getProperty<std::array<int32_t, 2>>("vec2i") ==
                  std::array<int32_t, 2>{{1, 2}}));
-    BOOST_CHECK((properties.getProperty<std::array<float, 2>>("vec2f") ==
-                 std::array<float, 2>{{1, 2}}));
+    BOOST_CHECK((properties.getProperty<std::array<double, 2>>("vec2f") ==
+                 std::array<double, 2>{{1, 2}}));
     BOOST_CHECK((properties.getProperty<std::array<int32_t, 3>>("vec3i") ==
                  std::array<int32_t, 3>{{1, 2, 3}}));
-    BOOST_CHECK((properties.getProperty<std::array<float, 3>>("vec3f") ==
-                 std::array<float, 3>{{1, 2, 3}}));
-    BOOST_CHECK((properties.getProperty<std::array<float, 4>>("vec4f") ==
-                 std::array<float, 4>{{1, 2, 3, 4}}));
+    BOOST_CHECK((properties.getProperty<std::array<double, 3>>("vec3f") ==
+                 std::array<double, 3>{{1, 2, 3}}));
+    BOOST_CHECK((properties.getProperty<std::array<double, 4>>("vec4f") ==
+                 std::array<double, 4>{{1, 2, 3, 4}}));
 
     using Type = brayns::PropertyMap::Property::Type;
     BOOST_CHECK(properties.getPropertyType("int") == Type::Int);
-    BOOST_CHECK(properties.getPropertyType("float") == Type::Float);
+    BOOST_CHECK(properties.getPropertyType("double") == Type::Float);
     BOOST_CHECK(properties.getPropertyType("string") == Type::String);
     BOOST_CHECK(properties.getPropertyType("const char") == Type::String);
     BOOST_CHECK(properties.getPropertyType("bool") == Type::Bool);

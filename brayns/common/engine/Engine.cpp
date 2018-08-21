@@ -42,8 +42,8 @@ void Engine::reshape(const Vector2ui& frameSize)
     const auto size = getSupportedFrameSize(frameSize);
 
     _frameBuffer->resize(size);
-    _camera->updateProperty("aspect", static_cast<float>(size.x()) /
-                                          static_cast<float>(size.y()));
+    _camera->updateProperty("aspect", static_cast<double>(size.x()) /
+                                          static_cast<double>(size.y()));
 }
 
 void Engine::commit()
@@ -90,7 +90,7 @@ void Engine::_writeFrameToFile()
 
 void Engine::setDefaultCamera()
 {
-    const auto frameSize = Vector2f(_frameBuffer->getSize());
+    const auto frameSize = Vector2d(_frameBuffer->getSize());
     _camera->setInitialState(_scene->getBounds());
     _camera->updateProperty("aspect", frameSize.x() / frameSize.y());
 }

@@ -262,7 +262,7 @@ bool OSPRayScene::commitTransferFunctionData()
 
     for (const auto& i : _transferFunction.getDiffuseColors())
     {
-        colors.push_back({i.x(), i.y(), i.z()});
+        colors.push_back({float(i.x()), float(i.y()), float(i.z())});
         opacities.push_back(i.w());
     }
 

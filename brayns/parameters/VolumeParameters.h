@@ -39,13 +39,13 @@ public:
     const Vector3ui& getDimensions() const { return _dimensions; }
     void setDimensions(const Vector3ui& dim) { _updateValue(_dimensions, dim); }
     /** Volume scale  */
-    const Vector3f& getElementSpacing() const { return _elementSpacing; }
-    void setElementSpacing(const Vector3f& spacing)
+    const Vector3d& getElementSpacing() const { return _elementSpacing; }
+    void setElementSpacing(const Vector3d& spacing)
     {
         _updateValue(_elementSpacing, spacing);
     }
     /** Volume offset */
-    const Vector3f& getOffset() const { return _offset; }
+    const Vector3d& getOffset() const { return _offset; }
     void setGradientShading(const bool enabled)
     {
         _updateValue(_gradientShading, enabled);
@@ -66,39 +66,39 @@ public:
         _updateValue(_adaptiveSampling, enabled);
     }
     bool getAdaptiveSampling() const { return _adaptiveSampling; }
-    void setAdaptiveMaxSamplingRate(const float value)
+    void setAdaptiveMaxSamplingRate(const double value)
     {
         _updateValue(_adaptiveMaxSamplingRate, value);
     }
-    float getAdaptiveMaxSamplingRate() const
+    double getAdaptiveMaxSamplingRate() const
     {
         return _adaptiveMaxSamplingRate;
     }
 
-    void setSamplingRate(const float value)
+    void setSamplingRate(const double value)
     {
         _updateValue(_samplingRate, value);
     }
-    float getSamplingRate() const { return _samplingRate; }
-    void setSpecular(const Vector3f& value) { _updateValue(_specular, value); }
-    const Vector3f& getSpecular() const { return _specular; }
-    void setClipBox(const Boxf& value) { _updateValue(_clipBox, value); }
-    const Boxf& getClipBox() const { return _clipBox; }
+    double getSamplingRate() const { return _samplingRate; }
+    void setSpecular(const Vector3d& value) { _updateValue(_specular, value); }
+    const Vector3d& getSpecular() const { return _specular; }
+    void setClipBox(const Boxd& value) { _updateValue(_clipBox, value); }
+    const Boxd& getClipBox() const { return _clipBox; }
 protected:
     void parse(const po::variables_map& vm) final;
 
     Vector3ui _dimensions;
-    Vector3f _elementSpacing;
-    Vector3f _offset;
+    Vector3d _elementSpacing;
+    Vector3d _offset;
 
     bool _gradientShading{false};
     bool _singleShade{true};
     bool _preIntegration{false};
-    float _adaptiveMaxSamplingRate{2.f};
+    double _adaptiveMaxSamplingRate{2.};
     bool _adaptiveSampling{true};
-    float _samplingRate{0.125f};
-    Vector3f _specular{0.3f, 0.3f, 0.3f};
-    Boxf _clipBox;
+    double _samplingRate{0.125};
+    Vector3d _specular{0.3, 0.3, 0.3};
+    Boxd _clipBox;
 
     SERIALIZATION_FRIEND(VolumeParameters)
 };

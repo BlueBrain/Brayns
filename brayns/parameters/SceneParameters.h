@@ -36,7 +36,7 @@ public:
     void print() final;
 
     const std::string& getColorMapFilename() const { return _colorMapFilename; }
-    const Vector2f& getColorMapRange() const { return _colorMapRange; }
+    const Vector2d& getColorMapRange() const { return _colorMapRange; }
     /**
        file name of the environment map
     */
@@ -45,7 +45,7 @@ protected:
     void parse(const po::variables_map& vm) final;
 
     std::string _colorMapFilename;
-    Vector2f _colorMapRange{0.f, 255.f};
+    Vector2d _colorMapRange{0., 255.};
     std::string _environmentMap;
 
     SERIALIZATION_FRIEND(SceneParameters)

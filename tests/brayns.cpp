@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_CASE(defaults)
 
     auto& camera = brayns.getEngine().getCamera();
     BOOST_CHECK_EQUAL(camera.getCurrentType(), "perspective");
-    BOOST_CHECK_EQUAL(camera.getPosition(), brayns::Vector3f(0.5f, 0.5f, 1.5f));
-    BOOST_CHECK_EQUAL(camera.getTarget(), brayns::Vector3f(0.5f, 0.5f, 0.5f));
-    BOOST_CHECK_EQUAL(camera.getUp(), brayns::Vector3f(0, 1, 0));
+    BOOST_CHECK_EQUAL(camera.getPosition(), brayns::Vector3d(0.5, 0.5, 1.5));
+    BOOST_CHECK_EQUAL(camera.getTarget(), brayns::Vector3d(0.5, 0.5, 0.5));
+    BOOST_CHECK_EQUAL(camera.getUp(), brayns::Vector3d(0, 1, 0));
 
     auto& manipulator = brayns.getCameraManipulator();
     BOOST_CHECK(dynamic_cast<brayns::InspectCenterManipulator*>(&manipulator));
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(renderParams.getRenderers().size(), 8);
     BOOST_CHECK_EQUAL(renderParams.getSamplesPerPixel(), 1);
     BOOST_CHECK_EQUAL(renderParams.getBackgroundColor(),
-                      brayns::Vector3f(0, 0, 0));
+                      brayns::Vector3d(0, 0, 0));
 
     const auto& geomParams = pm.getGeometryParameters();
     BOOST_CHECK_EQUAL(geomParams.getCircuitConfiguration(), "");
@@ -98,9 +98,9 @@ BOOST_AUTO_TEST_CASE(defaults)
     BOOST_CHECK_EQUAL(geomParams.getCircuitEndSimulationTime(),
                       std::numeric_limits<float>::max());
     BOOST_CHECK_EQUAL(geomParams.getCircuitSimulationValuesRange().x(),
-                      std::numeric_limits<float>::max());
+                      std::numeric_limits<double>::max());
     BOOST_CHECK_EQUAL(geomParams.getCircuitSimulationValuesRange().y(),
-                      std::numeric_limits<float>::min());
+                      std::numeric_limits<double>::min());
 
     const auto& animParams = pm.getAnimationParameters();
     BOOST_CHECK_EQUAL(animParams.getFrame(), 0);
@@ -108,17 +108,16 @@ BOOST_AUTO_TEST_CASE(defaults)
     const auto& volumeParams = pm.getVolumeParameters();
     BOOST_CHECK_EQUAL(volumeParams.getDimensions(), brayns::Vector3ui(0, 0, 0));
     BOOST_CHECK_EQUAL(volumeParams.getElementSpacing(),
-                      brayns::Vector3f(1.f, 1.f, 1.f));
-    BOOST_CHECK_EQUAL(volumeParams.getOffset(),
-                      brayns::Vector3f(0.f, 0.f, 0.f));
+                      brayns::Vector3d(1., 1., 1.));
+    BOOST_CHECK_EQUAL(volumeParams.getOffset(), brayns::Vector3d(0., 0., 0.));
 
     const auto& sceneParams = pm.getSceneParameters();
     BOOST_CHECK_EQUAL(sceneParams.getEnvironmentMap(), "");
 
     auto& scene = brayns.getEngine().getScene();
-    brayns::Boxf defaultBoundingBox;
-    defaultBoundingBox.merge(brayns::Vector3f(0, 0, 0));
-    defaultBoundingBox.merge(brayns::Vector3f(1, 1, 1));
+    brayns::Boxd defaultBoundingBox;
+    defaultBoundingBox.merge(brayns::Vector3d(0, 0, 0));
+    defaultBoundingBox.merge(brayns::Vector3d(1, 1, 1));
     BOOST_CHECK_EQUAL(scene.getBounds(), defaultBoundingBox);
     BOOST_CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
 }

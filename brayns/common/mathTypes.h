@@ -29,8 +29,7 @@ namespace brayns
  * AABB definitions
  */
 typedef vmml::AABB<float> Boxf;
-typedef vmml::AABB<int32_t> Boxi;
-typedef vmml::AABB<uint32_t> Boxui;
+typedef vmml::AABB<double> Boxd;
 
 /**
  * Matrix definitions

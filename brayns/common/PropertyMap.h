@@ -21,6 +21,7 @@
 #pragma once
 
 #include <boost/any.hpp>
+#include <boost/static_assert.hpp>
 #include <functional>
 #include <memory>
 #include <string>
@@ -254,7 +255,7 @@ private:
 };
 
 template <>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType<float>()
+inline PropertyMap::Property::Type PropertyMap::Property::_getType<double>()
 {
     return PropertyMap::Property::Type::Float;
 }
@@ -282,7 +283,7 @@ inline PropertyMap::Property::Type PropertyMap::Property::_getType<bool>()
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<float, 2>>()
+    PropertyMap::Property::_getType<std::array<double, 2>>()
 {
     return PropertyMap::Property::Type::Vec2f;
 }
@@ -294,7 +295,7 @@ inline PropertyMap::Property::Type
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<float, 3>>()
+    PropertyMap::Property::_getType<std::array<double, 3>>()
 {
     return PropertyMap::Property::Type::Vec3f;
 }
@@ -306,8 +307,14 @@ inline PropertyMap::Property::Type
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<float, 4>>()
+    PropertyMap::Property::_getType<std::array<double, 4>>()
 {
     return PropertyMap::Property::Type::Vec4f;
+}
+template <typename T>
+inline PropertyMap::Property::Type PropertyMap::Property::_getType()
+{
+    BOOST_STATIC_ASSERT(!std::is_same<T, float>());
+    return PropertyMap::Property::Type::Float;
 }
 }
