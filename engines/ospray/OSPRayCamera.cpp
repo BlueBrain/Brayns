@@ -53,8 +53,9 @@ void OSPRayCamera::commit()
     // Clip planes
     if (!_clipPlanes.empty())
     {
+        const auto clipPlanes = convertVectorToFloat(_clipPlanes);
         auto clipPlaneData =
-            ospNewData(_clipPlanes.size(), OSP_FLOAT4, _clipPlanes.data());
+            ospNewData(clipPlanes.size(), OSP_FLOAT4, clipPlanes.data());
         ospSetData(_camera, "clipPlanes", clipPlaneData);
         ospRelease(clipPlaneData);
     }
