@@ -181,12 +181,6 @@ class ExtensionPlugin;
 typedef std::shared_ptr<ExtensionPlugin> ExtensionPluginPtr;
 typedef std::vector<ExtensionPluginPtr> ExtensionPlugins;
 
-class ExtensionPluginFactory;
-
-class RocketsPlugin;
-
-class DeflectPlugin;
-
 class KeyboardHandler;
 
 class MeshLoader;
@@ -226,22 +220,6 @@ enum class ColorScheme
     protein_residues = 11
 };
 
-/** Define the environment that is added to the default scene */
-enum class SceneEnvironment
-{
-    none,
-    ground,
-    wall,
-    bounding_box
-};
-
-/** Define light types */
-enum class LightType
-{
-    point = 0,
-    directional,
-};
-
 /** Geometry quality */
 enum class GeometryQuality
 {
@@ -278,7 +256,7 @@ size_t enumsToBitmask(const std::vector<T> enums)
 struct Histogram
 {
     uint64_ts values;
-    Vector2f range;
+    Vector2d range;
     uint32_t frame;
     bool empty() const { return values.empty(); }
 };
@@ -303,20 +281,6 @@ enum class MaterialsColorMap
     shades_of_grey, // 255 shades of grey
     gradient,       // Gradient from red to yellow
     pastel          // Random pastel colors
-};
-
-enum class ShadingType
-{
-    none,
-    diffuse,
-    electron,
-};
-
-enum class IndexMode
-{
-    unchanged,
-    modulo,
-    bounded
 };
 
 /**

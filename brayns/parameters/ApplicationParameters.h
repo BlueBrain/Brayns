@@ -69,7 +69,7 @@ public:
     const Vector2ui getWindowSize() const { return Vector2ui(_windowSize); }
     void setWindowSize(const Vector2ui& size)
     {
-        Vector2f value(size);
+        Vector2d value(size);
         _updateValue(_windowSize, value);
     }
     /** Benchmarking */
@@ -121,7 +121,7 @@ protected:
     std::vector<std::string> _modules;
     strings _pluginsRaw;
     std::vector<PluginParam> _plugins;
-    Vector2f _windowSize;
+    Vector2d _windowSize;
     bool _benchmarking{false};
     size_t _jpegCompression;
     strings _filters;

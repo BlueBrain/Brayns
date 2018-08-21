@@ -137,7 +137,7 @@ public:
     void removeInstance(const size_t id);
     ModelInstance* getInstance(const size_t id);
     const ModelInstances& getInstances() const { return _instances; }
-    Boxf getInstancesBounds() const;
+    Boxd getInstancesBounds() const;
 
     void setProperties(const PropertyMap& properties)
     {
@@ -148,7 +148,7 @@ public:
     const PropertyMap& getProperties() const { return _properties; }
 private:
     size_t _nextInstanceID{0};
-    Boxf _bounds;
+    Boxd _bounds;
     ModelMetadata _metadata;
     ModelPtr _model;
     ModelInstances _instances;
@@ -185,7 +185,7 @@ public:
     /**
         Returns the bounds for the Model
     */
-    const Boxf& getBounds() const { return _bounds; }
+    const Boxd& getBounds() const { return _bounds; }
     /**
         Returns spheres handled by the Model
     */
@@ -350,25 +350,25 @@ protected:
 
     SpheresMap _spheres;
     bool _spheresDirty{true};
-    Boxf _sphereBounds;
+    Boxd _sphereBounds;
 
     CylindersMap _cylinders;
     bool _cylindersDirty{true};
-    Boxf _cylindersBounds;
+    Boxd _cylindersBounds;
 
     ConesMap _cones;
     bool _conesDirty{true};
-    Boxf _conesBounds;
+    Boxd _conesBounds;
 
     TrianglesMeshMap _trianglesMeshes;
     bool _trianglesMeshesDirty{true};
-    Boxf _trianglesMeshesBounds;
+    Boxd _trianglesMeshesBounds;
 
     StreamlinesDataMap _streamlines;
     bool _streamlinesDirty{true};
-    Boxf _streamlinesBounds;
+    Boxd _streamlinesBounds;
 
-    Boxf _bounds;
+    Boxd _bounds;
     bool _useSimulationModel{false};
 
     struct SDFGeometryData
@@ -382,13 +382,13 @@ protected:
 
     SDFGeometryData _sdf;
     bool _sdfGeometriesDirty{false};
-    Boxf _sdfGeometriesBounds;
+    Boxd _sdfGeometriesBounds;
 
     bool _instancesDirty{true};
 
     Volumes _volumes;
     bool _volumesDirty{true};
-    Boxf _volumesBounds;
+    Boxd _volumesBounds;
 
     size_t _sizeInBytes{0};
 

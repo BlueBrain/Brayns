@@ -79,7 +79,7 @@ public:
     /**
         Returns the bounding box of the scene
     */
-    const Boxf& getBounds() const { return _bounds; }
+    const Boxd& getBounds() const { return _bounds; }
     /**
         Attaches a light source to the scene
         @param light Object representing the light source
@@ -292,7 +292,7 @@ protected:
     CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler{nullptr};
 
     LoaderRegistry _loaderRegistry;
-    Boxf _bounds;
+    Boxd _bounds;
 
 private:
     SERIALIZATION_FRIEND(Scene)

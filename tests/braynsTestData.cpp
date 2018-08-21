@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
 
     auto model = brayns.getEngine().getScene().getModel(0);
     auto props = model->getProperties();
-    props.updateProperty("radius", props.getProperty<float>("radius") / 2.f);
+    props.updateProperty("radius", props.getProperty<double>("radius") / 2.);
     model->setProperties(props);
 
     brayns.commitAndRender();
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
     const auto camPos = camera.getPosition();
 
     camera.setTarget(rotCenter);
-    camera.setPosition(camPos + 0.9f * (rotCenter - camPos));
+    camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
 
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50advancedsimulation.png",
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_basic_simulation_renderer)
     const auto camPos = camera.getPosition();
 
     camera.setTarget(rotCenter);
-    camera.setPosition(camPos + 0.9f * (rotCenter - camPos));
+    camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
 
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50basicsimulation.png",

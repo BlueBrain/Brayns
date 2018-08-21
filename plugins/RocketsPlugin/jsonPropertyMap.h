@@ -213,7 +213,7 @@ void _addPropertyMapSchema(const PropertyMap& propertyMap,
         switch (prop->type)
         {
         case PropertyMap::Property::Type::Float:
-            _addPropertySchema<float>(*prop, properties, allocator);
+            _addPropertySchema<double>(*prop, properties, allocator);
             break;
         case PropertyMap::Property::Type::Int:
             _addPropertySchema<int32_t>(*prop, properties, allocator);
@@ -225,19 +225,19 @@ void _addPropertyMapSchema(const PropertyMap& propertyMap,
             _addPropertySchema<bool>(*prop, properties, allocator);
             break;
         case PropertyMap::Property::Type::Vec2f:
-            _addArrayPropertySchema<float, 2>(*prop, properties, allocator);
+            _addArrayPropertySchema<double, 2>(*prop, properties, allocator);
             break;
         case PropertyMap::Property::Type::Vec2i:
             _addArrayPropertySchema<int32_t, 2>(*prop, properties, allocator);
             break;
         case PropertyMap::Property::Type::Vec3f:
-            _addArrayPropertySchema<float, 3>(*prop, properties, allocator);
+            _addArrayPropertySchema<double, 3>(*prop, properties, allocator);
             break;
         case PropertyMap::Property::Type::Vec3i:
             _addArrayPropertySchema<int32_t, 3>(*prop, properties, allocator);
             break;
         case PropertyMap::Property::Type::Vec4f:
-            _addArrayPropertySchema<float, 4>(*prop, properties, allocator);
+            _addArrayPropertySchema<double, 4>(*prop, properties, allocator);
             break;
         }
     }
@@ -466,7 +466,7 @@ inline std::string to_json(const brayns::PropertyMap& obj)
         case PropertyMap::Property::Type::Float:
             json.AddMember(
                 brayns::make_json_string(prop->name, allocator).Move(),
-                prop->get<float>(), allocator);
+                prop->get<double>(), allocator);
             break;
         case PropertyMap::Property::Type::Int:
             if (prop->enums.empty())
@@ -494,19 +494,19 @@ inline std::string to_json(const brayns::PropertyMap& obj)
                 prop->get<bool>(), allocator);
             break;
         case PropertyMap::Property::Type::Vec2f:
-            brayns::_arrayPropertyToJson<std::array<float, 2>>(json, *prop);
+            brayns::_arrayPropertyToJson<std::array<double, 2>>(json, *prop);
             break;
         case PropertyMap::Property::Type::Vec2i:
             brayns::_arrayPropertyToJson<std::array<int32_t, 2>>(json, *prop);
             break;
         case PropertyMap::Property::Type::Vec3f:
-            brayns::_arrayPropertyToJson<std::array<float, 3>>(json, *prop);
+            brayns::_arrayPropertyToJson<std::array<double, 3>>(json, *prop);
             break;
         case PropertyMap::Property::Type::Vec3i:
             brayns::_arrayPropertyToJson<std::array<int32_t, 3>>(json, *prop);
             break;
         case PropertyMap::Property::Type::Vec4f:
-            brayns::_arrayPropertyToJson<std::array<float, 4>>(json, *prop);
+            brayns::_arrayPropertyToJson<std::array<double, 4>>(json, *prop);
             break;
         }
     }
@@ -578,7 +578,7 @@ inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
         switch (obj.getPropertyType(propName))
         {
         case PropertyMap::Property::Type::Float:
-            SET_PROPERTY_NUMBER(Float)
+            SET_PROPERTY_NUMBER(Double)
         case PropertyMap::Property::Type::Int:
             SET_PROPERTY(Int)
         case PropertyMap::Property::Type::String:
@@ -586,15 +586,15 @@ inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
         case PropertyMap::Property::Type::Bool:
             SET_PROPERTY(Bool)
         case PropertyMap::Property::Type::Vec2f:
-            SET_ARRAY(float, Float, 2)
+            SET_ARRAY(double, Double, 2)
         case PropertyMap::Property::Type::Vec2i:
             SET_ARRAY(int32_t, Int, 2)
         case PropertyMap::Property::Type::Vec3f:
-            SET_ARRAY(float, Float, 3)
+            SET_ARRAY(double, Double, 3)
         case PropertyMap::Property::Type::Vec3i:
             SET_ARRAY(int32_t, Int, 3)
         case PropertyMap::Property::Type::Vec4f:
-            SET_ARRAY(float, Float, 4)
+            SET_ARRAY(double, Double, 4)
         }
     }
     return true;

@@ -99,7 +99,7 @@ public:
     ImageGenerator::ImageBase64 operator()()
     {
         _camera->updateProperty("aspect",
-                                float(_params.size.x()) / _params.size.y());
+                                double(_params.size.x()) / _params.size.y());
         _camera->commit();
 
         _scene->commitLights();

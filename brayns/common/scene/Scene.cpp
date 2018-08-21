@@ -34,7 +34,7 @@ namespace fs = boost::filesystem;
 
 namespace
 {
-const size_t CACHE_VERSION = 9;
+const size_t CACHE_VERSION = 10;
 }
 
 namespace brayns
@@ -452,11 +452,6 @@ void Scene::saveToCacheFile()
                 BRAYNS_DEBUG << "[" << materialId << "] " << nbElements
                              << " texture coordinates" << std::endl;
         }
-
-        // Bounds
-        const auto& bounds = model.getBounds();
-        file.write((char*)&bounds, sizeof(Boxf));
-        BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
 
     file.close();
@@ -651,11 +646,7 @@ void Scene::loadFromCacheFile()
                     << nbNormals << " normals, " << nbTexCoords
                     << " texture coordinates" << std::endl;
 
-        // Bounds
-        Boxf bounds;
-        file.read((char*)&bounds, sizeof(Boxf));
         addModel(std::make_shared<ModelDescriptor>(std::move(model), path));
-        BRAYNS_DEBUG << "AABB: " << bounds << std::endl;
     }
 
     file.close();

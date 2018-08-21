@@ -145,11 +145,12 @@ void OSPRayVolume::commit()
         ospSet1i(_volume, "singleShade", _parameters.getSingleShade());
         ospSet1i(_volume, "preIntegration", _parameters.getPreIntegration());
         ospSet1f(_volume, "samplingRate", _parameters.getSamplingRate());
-        ospSet3fv(_volume, "specular", &_parameters.getSpecular().x());
-        ospSet3fv(_volume, "volumeClippingBoxLower",
-                  &_parameters.getClipBox().getMin().x());
-        ospSet3fv(_volume, "volumeClippingBoxUpper",
-                  &_parameters.getClipBox().getMax().x());
+        Vector3f specular(_parameters.getSpecular());
+        ospSet3fv(_volume, "specular", &specular.x());
+        Vector3f clipMin(_parameters.getClipBox().getMin());
+        ospSet3fv(_volume, "volumeClippingBoxLower", &clipMin.x());
+        Vector3f clipMax(_parameters.getClipBox().getMax());
+        ospSet3fv(_volume, "volumeClippingBoxUpper", &clipMax.x());
     }
     if (isModified() || _parameters.isModified())
         ospCommit(_volume);

@@ -101,8 +101,8 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     // Find an appropriate mean radius to avoid overlaps of the spheres, see
     // https://en.wikipedia.org/wiki/Wigner%E2%80%93Seitz_radius
     const auto volume = bbox.getSize().product();
-    const float meanRadius =
-        std::pow((3.f / (4.f * M_PI * (numlines / volume))), 1.f / 3.f);
+    const double meanRadius =
+        std::pow((3. / (4. * M_PI * (numlines / volume))), 1. / 3.);
 
     // resize the spheres to the new mean radius
     for (i = 0; i < numlines; ++i)
@@ -115,13 +115,13 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     modelDescriptor->setTransformation(transformation);
 
     PropertyMap::Property radiusProperty("radius", "Point size", meanRadius,
-                                         {0, meanRadius * 2});
+                                         {0., meanRadius * 2.});
     radiusProperty.setChangedCallback([
         materialId, modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)
     ](const auto& property) {
         if (auto modelDesc_ = modelDesc.lock())
         {
-            const auto newRadius = property.template get<float>();
+            const auto newRadius = property.template get<double>();
             for (auto& sphere : modelDesc_->getModel().getSpheres()[materialId])
                 sphere.radius = newRadius;
         }

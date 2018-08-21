@@ -58,8 +58,8 @@ public:
     /** Number of samples per pixel */
     int getSamplesPerPixel() const { return _spp; }
     void setSamplesPerPixel(const int value) { _updateValue(_spp, value); }
-    const Vector3f& getBackgroundColor() const { return _backgroundColor; }
-    void setBackgroundColor(const Vector3f& value)
+    const Vector3d& getBackgroundColor() const { return _backgroundColor; }
+    void setBackgroundColor(const Vector3d& value)
     {
         _updateValue(_backgroundColor, value);
     }
@@ -74,12 +74,12 @@ public:
      * @return the threshold where accumulation stops if the variance error
      * reaches this value.
      */
-    float getVarianceThreshold() const { return _varianceThreshold; }
+    double getVarianceThreshold() const { return _varianceThreshold; }
     /**
      * The threshold where accumulation stops if the variance error reaches this
      * value.
      */
-    void setVarianceThreshold(const float value)
+    void setVarianceThreshold(const double value)
     {
         _updateValue(_varianceThreshold, value);
     }
@@ -105,9 +105,9 @@ protected:
     std::deque<std::string> _cameraTypeNames;
     int _spp{1};
     bool _accumulation{true};
-    Vector3f _backgroundColor{0.f, 0.f, 0.f};
+    Vector3d _backgroundColor{0., 0., 0.};
     bool _headLight{true};
-    float _varianceThreshold{-1.f};
+    double _varianceThreshold{-1.};
     size_t _maxAccumFrames{100};
 
     SERIALIZATION_FRIEND(RenderingParameters)

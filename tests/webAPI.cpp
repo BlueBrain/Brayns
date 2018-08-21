@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(reset_camera)
 BOOST_AUTO_TEST_CASE(inspect)
 {
     auto inspectResult =
-        makeRequest<std::array<float, 2>, brayns::Renderer::PickResult>(
+        makeRequest<std::array<double, 2>, brayns::Renderer::PickResult>(
             "inspect", {{0.5, 0.5}});
     BOOST_CHECK(inspectResult.hit);
     BOOST_CHECK(inspectResult.pos.equals({0.500001490116119, 0.500001490116119,
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(inspect)
                                          0.000001f));
 
     auto failedInspectResult =
-        makeRequest<std::array<float, 2>, brayns::Renderer::PickResult>(
+        makeRequest<std::array<double, 2>, brayns::Renderer::PickResult>(
             "inspect", {{10, -10}});
     BOOST_CHECK(!failedInspectResult.hit);
 }

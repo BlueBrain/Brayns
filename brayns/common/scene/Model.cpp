@@ -123,9 +123,9 @@ ModelInstance* ModelDescriptor::getInstance(const size_t id)
     return i == _instances.end() ? nullptr : &(*i);
 }
 
-Boxf ModelDescriptor::getInstancesBounds() const
+Boxd ModelDescriptor::getInstancesBounds() const
 {
-    Boxf bounds;
+    Boxd bounds;
     for (const auto& instance : getInstances())
     {
         if (!instance.getVisible() || !_model)

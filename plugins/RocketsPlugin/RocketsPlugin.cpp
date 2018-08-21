@@ -834,13 +834,14 @@ public:
 
     void _handleInspect()
     {
-        using Position = std::array<float, 2>;
+        using Position = std::array<double, 2>;
         const RpcParameterDescription desc{
             METHOD_INSPECT, "Inspect the scene at x-y position", "position",
             "x-y position in normalized coordinates"};
         _handleRPC<Position, Renderer::PickResult>(
             desc, [engine = _engine](const auto& position) {
-                return engine->getRenderer().pick({position[0], position[1]});
+                return engine->getRenderer().pick(
+                    {float(position[0]), float(position[1])});
             });
     }
 

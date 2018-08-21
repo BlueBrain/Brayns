@@ -109,9 +109,9 @@ inline SDFGeometry createSDFConePillSigmoid(
     return geom;
 }
 
-inline Boxf getSDFBoundingBox(const SDFGeometry& geom)
+inline Boxd getSDFBoundingBox(const SDFGeometry& geom)
 {
-    Boxf bounds;
+    Boxd bounds;
     switch (geom.type)
     {
     case brayns::SDFType::Sphere:

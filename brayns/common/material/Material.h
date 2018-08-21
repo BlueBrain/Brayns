@@ -59,43 +59,46 @@ public:
     {
         _updateValue(_name, value);
     }
-    BRAYNS_API void setDiffuseColor(const Vector3f& value)
+    BRAYNS_API void setDiffuseColor(const Vector3d& value)
     {
         _updateValue(_diffuseColor, value);
     }
-    BRAYNS_API const Vector3f& getDiffuseColor() const { return _diffuseColor; }
-    BRAYNS_API void setSpecularColor(const Vector3f& value)
+    BRAYNS_API const Vector3d& getDiffuseColor() const { return _diffuseColor; }
+    BRAYNS_API void setSpecularColor(const Vector3d& value)
     {
         _updateValue(_specularColor, value);
     }
-    BRAYNS_API const Vector3f& getSpecularColor() const
+    BRAYNS_API const Vector3d& getSpecularColor() const
     {
         return _specularColor;
     }
-    BRAYNS_API void setSpecularExponent(float value)
+    BRAYNS_API void setSpecularExponent(double value)
     {
         _updateValue(_specularExponent, value);
     }
-    BRAYNS_API float getSpecularExponent() const { return _specularExponent; }
-    BRAYNS_API void setReflectionIndex(float value)
+    BRAYNS_API double getSpecularExponent() const { return _specularExponent; }
+    BRAYNS_API void setReflectionIndex(double value)
     {
         _updateValue(_reflectionIndex, value);
     }
-    BRAYNS_API float getReflectionIndex() const { return _reflectionIndex; }
-    BRAYNS_API void setOpacity(float value) { _updateValue(_opacity, value); }
-    BRAYNS_API float getOpacity() const { return _opacity; }
-    BRAYNS_API void setRefractionIndex(float value)
+    BRAYNS_API double getReflectionIndex() const { return _reflectionIndex; }
+    BRAYNS_API void setOpacity(double value) { _updateValue(_opacity, value); }
+    BRAYNS_API double getOpacity() const { return _opacity; }
+    BRAYNS_API void setRefractionIndex(double value)
     {
         _updateValue(_refractionIndex, value);
     }
-    BRAYNS_API float getRefractionIndex() const { return _refractionIndex; }
-    BRAYNS_API void setEmission(float value) { _updateValue(_emission, value); }
-    BRAYNS_API float getEmission() const { return _emission; }
-    BRAYNS_API void setGlossiness(float value)
+    BRAYNS_API double getRefractionIndex() const { return _refractionIndex; }
+    BRAYNS_API void setEmission(double value)
+    {
+        _updateValue(_emission, value);
+    }
+    BRAYNS_API double getEmission() const { return _emission; }
+    BRAYNS_API void setGlossiness(double value)
     {
         _updateValue(_glossiness, value);
     }
-    BRAYNS_API float getGlossiness() const { return _glossiness; }
+    BRAYNS_API double getGlossiness() const { return _glossiness; }
     BRAYNS_API void setCastSimulationData(bool value)
     {
         _updateValue(_castSimulationData, value);
@@ -117,14 +120,14 @@ protected:
     bool _loadTexture(const std::string& fileName);
 
     std::string _name{"undefined"};
-    Vector3f _diffuseColor{1.f, 1.f, 1.f};
-    Vector3f _specularColor{1.f, 1.f, 1.f};
-    float _specularExponent{10.f};
-    float _reflectionIndex{0.f};
-    float _opacity{1.f};
-    float _refractionIndex{1.f};
-    float _emission{0.f};
-    float _glossiness{1.f};
+    Vector3d _diffuseColor{1., 1., 1.};
+    Vector3d _specularColor{1., 1., 1.};
+    double _specularExponent{10.};
+    double _reflectionIndex{0.};
+    double _opacity{1.};
+    double _refractionIndex{1.};
+    double _emission{0.};
+    double _glossiness{1.};
     bool _castSimulationData{false};
     TexturesMap _textures;
     TextureDescriptors _textureDescriptors;

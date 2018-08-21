@@ -58,13 +58,13 @@ public:
     BRAYNS_API void setInitialState(const Vector3f& position,
                                     const Vector3f& target, const Vector3f& up);
 
-    BRAYNS_API void setInitialState(const Boxf& boundingBox);
+    BRAYNS_API void setInitialState(const Boxd& boundingBox);
 
     /**
        Sets camera position
        @param position The x, y, z coordinates of the camera position
     */
-    void setPosition(const Vector3f& position)
+    void setPosition(const Vector3d& position)
     {
         _updateValue(_position, position);
     }
@@ -73,29 +73,29 @@ public:
        Gets camera position
        @return The x, y, z coordinates of the camera position
     */
-    const Vector3f& getPosition() const { return _position; }
+    const Vector3d& getPosition() const { return _position; }
     /**
        Sets camera target
        @param target The x, y, z coordinates of the camera target: the point the
               camera is "looking at" or focused on
     */
-    void setTarget(const Vector3f& target) { _updateValue(_target, target); }
+    void setTarget(const Vector3d& target) { _updateValue(_target, target); }
     /**
        Gets camera target
        @return The x, y, z coordinates of the camera target: the point the
                camera is "looking at" or focused on
     */
-    const Vector3f& getTarget() const { return _target; }
+    const Vector3d& getTarget() const { return _target; }
     /**
        Sets camera up vector
        @param up the x, y, z coordinates of the up vector's end point
     */
-    void setUp(const Vector3f& up) { _updateValue(_up, up); }
+    void setUp(const Vector3d& up) { _updateValue(_up, up); }
     /**
        Gets camera up vector
        @return the x, y, z coordinates of the up vector's end point
     */
-    const Vector3f& getUp() const { return _up; }
+    const Vector3d& getUp() const { return _up; }
     /**
        Gets the camera rotation matrix
        @return the rotation matrix from the original *target* and *up* vectors
@@ -115,15 +115,14 @@ public:
         const bool environmentMap BRAYNS_UNUSED){};
 
     virtual bool isSideBySideStereo() const { return false; }
-
 private:
-    Vector3f _position;
-    Vector3f _target;
-    Vector3f _up;
+    Vector3d _position;
+    Vector3d _target;
+    Vector3d _up;
 
-    Vector3f _initialPosition;
-    Vector3f _initialTarget;
-    Vector3f _initialUp;
+    Vector3d _initialPosition;
+    Vector3d _initialTarget;
+    Vector3d _initialUp;
 
     /*! rotation matrice along x and y axis */
     Matrix4f _matrix;

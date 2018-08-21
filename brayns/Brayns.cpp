@@ -910,10 +910,10 @@ private:
         if (!renderer.hasProperty("aoWeight"))
             return;
 
-        auto aoStrength = renderer.getProperty<float>("aoWeight");
-        aoStrength += 0.1f;
-        if (aoStrength > 1.f)
-            aoStrength = 1.f;
+        auto aoStrength = renderer.getProperty<double>("aoWeight");
+        aoStrength += 0.1;
+        if (aoStrength > 1.)
+            aoStrength = 1.;
         renderer.updateProperty("aoWeight", aoStrength);
     }
 
@@ -923,10 +923,10 @@ private:
         if (!renderer.hasProperty("aoWeight"))
             return;
 
-        auto aoStrength = renderer.getProperty<float>("aoWeight");
-        aoStrength -= 0.1f;
-        if (aoStrength < 0.f)
-            aoStrength = 0.f;
+        auto aoStrength = renderer.getProperty<double>("aoWeight");
+        aoStrength -= 0.1;
+        if (aoStrength < 0.)
+            aoStrength = 0.;
         renderer.updateProperty("aoWeight", aoStrength);
     }
 
@@ -942,10 +942,8 @@ private:
         if (!renderer.hasProperty("shadows"))
             return;
 
-        renderer.updateProperty("shadows",
-                                renderer.getProperty<float>("shadows") == 0.f
-                                    ? 1.f
-                                    : 0.f);
+        renderer.updateProperty(
+            "shadows", renderer.getProperty<double>("shadows") == 0. ? 1. : 0.);
     }
 
     void _toggleSoftShadows()
@@ -954,10 +952,10 @@ private:
         if (!renderer.hasProperty("softShadows"))
             return;
 
-        renderer.updateProperty("softShadows", renderer.getProperty<float>(
-                                                   "softShadows") == 0.f
-                                                   ? 1.f
-                                                   : 0.f);
+        renderer.updateProperty("softShadows", renderer.getProperty<double>(
+                                                   "softShadows") == 0.
+                                                   ? 1.
+                                                   : 0.);
     }
 
     void _increaseSamplesPerRay()
@@ -1074,8 +1072,8 @@ private:
     KeyboardHandler _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
 
-    float _fieldOfView{45.f};
-    float _eyeSeparation{0.0635f};
+    double _fieldOfView{45.};
+    double _eyeSeparation{0.0635};
 
     std::future<void> _dataLoadingFuture;
 

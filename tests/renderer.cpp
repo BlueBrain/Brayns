@@ -85,8 +85,8 @@ BOOST_AUTO_TEST_CASE(update_current_renderer_property)
     BOOST_CHECK_EQUAL(renderer.getCurrentType(), "scivis");
 
     BOOST_CHECK(renderer.hasProperty("aoWeight"));
-    BOOST_CHECK_EQUAL(renderer.getProperty<float>("aoWeight"), 0.f);
+    BOOST_CHECK_EQUAL(renderer.getProperty<double>("aoWeight"), 0.);
 
-    renderer.updateProperty("aoWeight", 1.5f);
-    BOOST_CHECK_EQUAL(renderer.getProperty<float>("aoWeight"), 1.5f);
+    renderer.updateProperty("aoWeight", 1.5);
+    BOOST_CHECK_EQUAL(renderer.getProperty<double>("aoWeight"), 1.5);
 }

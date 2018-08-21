@@ -33,17 +33,16 @@ BOOST_AUTO_TEST_CASE(bounding_box)
     const auto pill =
         brayns::createSDFPill({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, 2.0f);
 
-    const brayns::Boxf boxSphere = getSDFBoundingBox(sphere);
-    const brayns::Boxf boxConePill = getSDFBoundingBox(conePill);
-    const brayns::Boxf boxPill = getSDFBoundingBox(pill);
+    const auto boxSphere = getSDFBoundingBox(sphere);
+    const auto boxConePill = getSDFBoundingBox(conePill);
+    const auto boxPill = getSDFBoundingBox(pill);
 
-    BOOST_CHECK_EQUAL(boxSphere.getMin(), brayns::Vector3f(0.0f, 0.0f, 0.0f));
-    BOOST_CHECK_EQUAL(boxSphere.getMax(), brayns::Vector3f(2.0f, 2.0f, 2.0f));
+    BOOST_CHECK_EQUAL(boxSphere.getMin(), brayns::Vector3d(0.0, 0.0, 0.0));
+    BOOST_CHECK_EQUAL(boxSphere.getMax(), brayns::Vector3d(2.0, 2.0, 2.0));
 
-    BOOST_CHECK_EQUAL(boxConePill.getMin(),
-                      brayns::Vector3f(-2.0f, -2.0f, -2.0f));
-    BOOST_CHECK_EQUAL(boxConePill.getMax(), brayns::Vector3f(2.0f, 2.0f, 2.0f));
+    BOOST_CHECK_EQUAL(boxConePill.getMin(), brayns::Vector3d(-2.0, -2.0, -2.0));
+    BOOST_CHECK_EQUAL(boxConePill.getMax(), brayns::Vector3d(2.0, 2.0f, 2.0));
 
-    BOOST_CHECK_EQUAL(boxPill.getMin(), brayns::Vector3f(-2.0f, -2.0f, -2.0f));
-    BOOST_CHECK_EQUAL(boxPill.getMax(), brayns::Vector3f(3.0f, 3.0f, 3.0f));
+    BOOST_CHECK_EQUAL(boxPill.getMin(), brayns::Vector3d(-2.0, -2.0, -2.0));
+    BOOST_CHECK_EQUAL(boxPill.getMax(), brayns::Vector3d(3.0, 3.0, 3.0));
 }

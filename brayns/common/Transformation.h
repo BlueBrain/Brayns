@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TRANSFORMATION_H
-#define TRANSFORMATION_H
+#pragma once
 
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
@@ -37,8 +36,8 @@ class Transformation : public BaseObject
 public:
     Transformation() = default;
 
-    Transformation(const Vector3f& translation, const Vector3f& scale,
-                   const Quaternionf& rotation, const Vector3f& rotationCenter)
+    Transformation(const Vector3d& translation, const Vector3d& scale,
+                   const Quaterniond& rotation, const Vector3d& rotationCenter)
         : _translation(translation)
         , _scale(scale)
         , _rotation(rotation)
@@ -46,20 +45,20 @@ public:
     {
     }
 
-    const Vector3f& getTranslation() const { return _translation; }
-    void setTranslation(const Vector3f& value)
+    const Vector3d& getTranslation() const { return _translation; }
+    void setTranslation(const Vector3d& value)
     {
         _updateValue(_translation, value);
     }
-    const Vector3f& getScale() const { return _scale; }
-    void setScale(const Vector3f& value) { _updateValue(_scale, value); }
-    const Quaternionf& getRotation() const { return _rotation; }
-    void setRotation(const Quaternionf& value)
+    const Vector3d& getScale() const { return _scale; }
+    void setScale(const Vector3d& value) { _updateValue(_scale, value); }
+    const Quaterniond& getRotation() const { return _rotation; }
+    void setRotation(const Quaterniond& value)
     {
         _updateValue(_rotation, value);
     }
-    const Vector3f& getRotationCenter() const { return _rotationCenter; }
-    void setRotationCenter(const Vector3f& value)
+    const Vector3d& getRotationCenter() const { return _rotationCenter; }
+    void setRotationCenter(const Vector3d& value)
     {
         _updateValue(_rotationCenter, value);
     }
@@ -71,17 +70,17 @@ public:
     }
     bool operator!=(const Transformation& rhs) const { return !(*this == rhs); }
     // only applies rotation and translation, use scaling separately if needed
-    Matrix4f toMatrix() const
+    Matrix4d toMatrix() const
     {
-        Matrix4f matrix(getRotation(), getTranslation());
+        Matrix4d matrix(getRotation(), getTranslation());
         return matrix;
     }
 
 private:
-    Vector3f _translation{0.f, 0.f, 0.f};
-    Vector3f _scale{1.f, 1.f, 1.f};
-    Quaternionf _rotation;
-    Vector3f _rotationCenter{0.f, 0.f, 0.f};
+    Vector3d _translation{0., 0., 0.};
+    Vector3d _scale{1., 1., 1.};
+    Quaterniond _rotation;
+    Vector3d _rotationCenter{0., 0., 0.};
 
     SERIALIZATION_FRIEND(Transformation)
 };
@@ -93,10 +92,9 @@ inline Transformation operator*(const Transformation& a,
             a.getRotationCenter()};
 }
 
-inline Boxf transformBox(const Boxf& box, const Transformation& trafo)
+inline Boxd transformBox(const Boxd& box, const Transformation& transformation)
 {
-    return {trafo.toMatrix() * box.getMin(), trafo.toMatrix() * box.getMax()};
+    return {transformation.toMatrix() * box.getMin(),
+            transformation.toMatrix() * box.getMax()};
 }
 }
-
-#endif // TRANSFORMATION_H

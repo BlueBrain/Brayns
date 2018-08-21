@@ -46,7 +46,7 @@ struct CircuitConfiguration
 {
     std::string circuitConfigFile;
     bool useSimulationModel{false};
-    Boxf boundingBox{{0, 0, 0}, {0, 0, 0}};
+    Boxd boundingBox{{0, 0, 0}, {0, 0, 0}};
     float density{100};
     std::string meshFilenamePattern;
     std::string meshFolder;
@@ -55,8 +55,8 @@ struct CircuitConfiguration
     double startSimulationTime{0};
     double endSimulationTime{std::numeric_limits<float>::max()};
     double simulationStep{0};
-    Vector2f simulationValuesRange{std::numeric_limits<float>::max(),
-                                   std::numeric_limits<float>::min()};
+    Vector2d simulationValuesRange{std::numeric_limits<double>::max(),
+                                   std::numeric_limits<double>::min()};
     size_t simulationHistogramSize{128};
     size_t randomSeed = 0;
     bool meshTransformation{false};
@@ -118,11 +118,11 @@ public:
      * Defines a bounding box outside of which geometry of a circuit will not be
      * loaded
      */
-    const Boxf& getCircuitBoundingBox() const
+    const Boxd& getCircuitBoundingBox() const
     {
         return _circuitConfiguration.boundingBox;
     }
-    void setCircuitBoundingBox(const Boxf& value)
+    void setCircuitBoundingBox(const Boxd& value)
     {
         _updateValue(_circuitConfiguration.boundingBox, value);
     }
@@ -205,7 +205,7 @@ public:
     {
         return _circuitConfiguration.simulationStep;
     }
-    Vector2f getCircuitSimulationValuesRange() const
+    Vector2d getCircuitSimulationValuesRange() const
     {
         return _circuitConfiguration.simulationValuesRange;
     }

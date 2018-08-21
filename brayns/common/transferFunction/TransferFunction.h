@@ -55,8 +55,8 @@ public:
      * @brief Get transfer function range of values
      * @return A tuple of 2 floats with min and max value
      */
-    Vector2f& getValuesRange() { return _valuesRange; }
-    void setValuesRange(const Vector2f& valuesRange)
+    Vector2d& getValuesRange() { return _valuesRange; }
+    void setValuesRange(const Vector2d& valuesRange)
     {
         _updateValue(_valuesRange, valuesRange);
     }
@@ -65,7 +65,7 @@ private:
     Vector4fs _diffuseColors;
     Vector3fs _emissionIntensities;
     floats _contributions;
-    Vector2f _valuesRange;
+    Vector2d _valuesRange;
 };
 }
 
