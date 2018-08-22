@@ -41,7 +41,7 @@ struct SDFGeometry
     float radius = -1.f;
     float radius_tip = -1.f;
     float timestamp = 0.0f;
-    uint32_t neighboursIndex = 0;
+    uint64_t neighboursIndex = 0;
     uint8_t numNeighbours = 0;
     SDFType type;
 };

@@ -50,12 +50,12 @@ inline float smootherstep(const float x)
     return x * x * x * (x * (x * 6 - 15) + 10);
 }
 
-inline float sdSphere(const vec3f &p, const vec3f c, float r)
+inline float sdSphere(const vec3f& p, const vec3f c, float r)
 {
     return length(p - c) - r;
 }
 
-inline float sdCapsule(const vec3f &p, const vec3f a, const vec3f b, float r)
+inline float sdCapsule(const vec3f& p, const vec3f a, const vec3f b, float r)
 {
     const vec3f pa = p - a, ba = b - a;
     const float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
@@ -74,7 +74,7 @@ inline float sminPoly(const float a, const float b, const float k)
     return mix(b, a, h) - k * h * (1.0 - h);
 }
 
-inline float sdConePill(const vec3f &p, const vec3f p0, const vec3f p1,
+inline float sdConePill(const vec3f& p, const vec3f p0, const vec3f p1,
                         const float radius_bottom, const float radius_top,
                         const bool useSigmoid)
 {
@@ -103,8 +103,8 @@ inline float sdConePill(const vec3f &p, const vec3f p0, const vec3f p1,
 }
 
 // AABB-Ray intersection ( http://prideout.net/blog/?p=64 ).
-inline varying bool intersectBox(Ray &ray, const vec3f aabbMin,
-                                 const vec3f aabbMax, float &t0, float &t1)
+inline varying bool intersectBox(Ray& ray, const vec3f aabbMin,
+                                 const vec3f aabbMax, float& t0, float& t1)
 {
     const float epsilon = SDF_EPSILON;
 
@@ -133,23 +133,6 @@ inline varying bool intersectBox(Ray &ray, const vec3f aabbMin,
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct ExtendedSDFGeometries
-{
-    uniform Geometry geometry;
-
-    uniform uint8 *uniform data;
-    uniform uint8 *uniform neighbours;
-    uniform uint8 *uniform geometries;
-    uniform Material *uniform *materialList;
-
-    int materialID;
-
-    int32 numExtendedSDFGeometries;
-    int32 bytesPerExtendedSDFGeometryIndex;
-    int32 bytesPerSDFGeometry;
-    int32 bytesPerNeighbours;
-};
-
 // NOTE: This layout must match exactly the 'SDFGeometry' struct in
 // 'SDFGeometry.h'
 struct ExtendedSDFGeometry
@@ -161,73 +144,89 @@ struct ExtendedSDFGeometry
     float radius;
     float radius_tip;
     float timestamp;
-    uint32 neighboursIndex;
+    uint64 neighboursIndex;
     uint8 numNeighbours;
     uint8 type;
 };
 
-uniform uint32 primToIdx(uniform ExtendedSDFGeometries *uniform geometry,
-                         uniform size_t primID)
+struct ExtendedSDFGeometries
 {
-    uniform uint8 *uniform indexPtr =
-        geometry->data +
-        geometry->bytesPerExtendedSDFGeometryIndex * ((uniform int64)primID);
+    uniform Geometry geometry;
 
-    uniform int idx = *((uniform int *)(indexPtr));
-    return idx;
+    uniform uint64* uniform geometryRefs;
+    uniform uint64* uniform neighbours;
+    uniform ExtendedSDFGeometry* uniform geometries;
+    uniform Material* uniform* materialList;
+
+    int materialID;
+
+    uint64 numExtendedSDFGeometries;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+// These are functions needed to handle > 2GB buffers in ispc.
+
+#define __define_safe_index(T)                                              \
+    inline const uniform T* uniform safe_index(const T* uniform const base, \
+                                               const uniform uint64 index)  \
+    {                                                                       \
+        const uniform uint64 tSize = sizeof(uniform T);                     \
+        const uniform uint64 offsetBytes = tSize * index;                   \
+        return (const T* uniform const)((uint64)base + offsetBytes);        \
+    }                                                                       \
+                                                                            \
+    inline const uniform T* varying safe_index(const T* varying const base, \
+                                               const varying uint64 index)  \
+    {                                                                       \
+        const uniform uint64 tSize = sizeof(uniform T);                     \
+        const varying uint64 offsetBytes = tSize * index;                   \
+        return (const T* varying const)((uint64)base + offsetBytes);        \
+    }
+
+__define_safe_index(ExtendedSDFGeometry);
+__define_safe_index(uint64);
+__define_safe_index(int64);
+__define_safe_index(uint32);
+__define_safe_index(int32);
+
+/////////////////////////////////////////////////////////////////////////////
+
+uniform uint64 primToIdx(uniform ExtendedSDFGeometries* uniform geometry,
+                         uniform uint64 primID)
+{
+    return *safe_index(geometry->geometryRefs, primID);
 }
 
-varying uint32 primToIdxVarying(uniform ExtendedSDFGeometries *geometry,
-                                varying size_t primID)
+varying uint64 primToIdxVarying(uniform ExtendedSDFGeometries* geometry,
+                                varying uint64 primID)
 {
-    uniform uint8 *indexPtr =
-        geometry->data +
-        geometry->bytesPerExtendedSDFGeometryIndex * ((int64)primID);
-
-    varying int idx = *((varying int *)(indexPtr));
-    return idx;
+    return *safe_index(geometry->geometryRefs, primID);
 }
 
-uniform uint64 getNeighbourIdx(uniform ExtendedSDFGeometries *uniform geometry,
-                               uniform uint32 startIdx, uniform int neigh_idx)
+uniform uint64 getNeighbourIdx(uniform ExtendedSDFGeometries* uniform geometry,
+                               uniform uint64 startIdx, uniform uint64 neighIdx)
 {
-    uniform uint64 *uniform neighboursPtr =
-        (uniform uint64 *)(geometry->neighbours +
-                           (geometry->bytesPerNeighbours * startIdx));
-
-    uniform uint64 neighbour = *(neighboursPtr + neigh_idx);
-
-    return neighbour;
+    return *safe_index(geometry->neighbours, startIdx + neighIdx);
 }
 
-uniform ExtendedSDFGeometry *uniform getGeometry(
-    uniform ExtendedSDFGeometries *uniform geometry, uniform int idx)
+uniform ExtendedSDFGeometry uniform getGeometry(
+    uniform ExtendedSDFGeometries* uniform geometry, uniform uint64 idx)
 {
-    uniform uint8 *uniform geometriesPtr =
-        geometry->geometries + (geometry->bytesPerSDFGeometry * idx);
-
-    uniform ExtendedSDFGeometry *uniform geom =
-        (uniform ExtendedSDFGeometry *)(geometriesPtr);
-    return geom;
+    return *safe_index(geometry->geometries, idx);
 }
 
-uniform ExtendedSDFGeometry *getGeometryVarying(
-    uniform ExtendedSDFGeometries *geometry, varying int idx)
+varying ExtendedSDFGeometry getGeometryVarying(
+    uniform ExtendedSDFGeometries* geometry, varying uint64 idx)
 {
-    uniform uint8 *geometriesPtr =
-        geometry->geometries + (geometry->bytesPerSDFGeometry * idx);
-
-    uniform ExtendedSDFGeometry *geom =
-        (uniform ExtendedSDFGeometry *)(geometriesPtr);
-    return geom;
+    return *safe_index(geometry->geometries, idx);
 }
 
 static void ExtendedSDFGeometries_postIntersect(
-    uniform Geometry *uniform geometry, uniform Model *uniform model,
-    varying DifferentialGeometry &dg, const varying Ray &ray,
+    uniform Geometry* uniform geometry, uniform Model* uniform model,
+    varying DifferentialGeometry& dg, const varying Ray& ray,
     uniform int64 flags)
 {
-    uniform ExtendedSDFGeometries *uniform this =
+    uniform ExtendedSDFGeometries* uniform this =
         (uniform ExtendedSDFGeometries * uniform)geometry;
     dg.geometry = geometry;
 #if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR < 5))
@@ -238,10 +237,10 @@ static void ExtendedSDFGeometries_postIntersect(
 
     { // Set texture coordinates
         const uint32 idx = primToIdxVarying(this, ray.primID);
-        uniform ExtendedSDFGeometry *geom = getGeometryVarying(this, idx);
+        varying ExtendedSDFGeometry geom = getGeometryVarying(this, idx);
 
-        dg.st.x = geom->textureCoords.x;
-        dg.st.y = geom->textureCoords.y;
+        dg.st.x = geom.textureCoords.x;
+        dg.st.y = geom.textureCoords.y;
     }
 
     if (flags & DG_NORMALIZE)
@@ -261,74 +260,74 @@ static void ExtendedSDFGeometries_postIntersect(
     dg.Ns = Ns;
 }
 
-void ExtendedSDFGeometries_bounds(uniform ExtendedSDFGeometries *uniform
+void ExtendedSDFGeometries_bounds(uniform ExtendedSDFGeometries* uniform
                                       geometry,
-                                  uniform size_t primID, uniform box3fa &bbox)
+                                  uniform uint64 primID, uniform box3fa& bbox)
 {
     const uniform int idx = primToIdx(geometry, primID);
-    uniform ExtendedSDFGeometry *uniform geom = getGeometry(geometry, idx);
+    uniform ExtendedSDFGeometry uniform geom = getGeometry(geometry, idx);
 
-    if (geom->type == SDF_TYPE_SPHERE)
+    if (geom.type == SDF_TYPE_SPHERE)
     {
-        bbox = make_box3fa(geom->center - make_vec3f(geom->radius),
-                           geom->center + make_vec3f(geom->radius));
+        bbox = make_box3fa(geom.center - make_vec3f(geom.radius),
+                           geom.center + make_vec3f(geom.radius));
     }
-    else if (geom->type == SDF_TYPE_CONE_PILL || geom->type == SDF_TYPE_PILL ||
-             geom->type == SDF_TYPE_CONE_PILL_SIGMOID)
+    else if (geom.type == SDF_TYPE_CONE_PILL || geom.type == SDF_TYPE_PILL ||
+             geom.type == SDF_TYPE_CONE_PILL_SIGMOID)
     {
         uniform vec3f minV =
-            make_vec3f(min(geom->p0.x, geom->p1.x), min(geom->p0.y, geom->p1.y),
-                       min(geom->p0.z, geom->p1.z));
+            make_vec3f(min(geom.p0.x, geom.p1.x), min(geom.p0.y, geom.p1.y),
+                       min(geom.p0.z, geom.p1.z));
 
         uniform vec3f maxV =
-            make_vec3f(max(geom->p0.x, geom->p1.x), max(geom->p0.y, geom->p1.y),
-                       max(geom->p0.z, geom->p1.z));
+            make_vec3f(max(geom.p0.x, geom.p1.x), max(geom.p0.y, geom.p1.y),
+                       max(geom.p0.z, geom.p1.z));
 
-        bbox = make_box3fa(minV - make_vec3f(geom->radius),
-                           maxV + make_vec3f(geom->radius));
+        bbox = make_box3fa(minV - make_vec3f(geom.radius),
+                           maxV + make_vec3f(geom.radius));
     }
 }
 
-inline float calcGeometryDistance(uniform ExtendedSDFGeometries *uniform
+inline float calcGeometryDistance(uniform ExtendedSDFGeometries* uniform
                                       geometry,
-                                  vec3f &p, uniform int32 idx)
+                                  vec3f& p, uniform int32 idx)
 {
-    uniform ExtendedSDFGeometry *geom = getGeometry(geometry, idx);
+    uniform ExtendedSDFGeometry geom = getGeometry(geometry, idx);
 
-    if (geom->type == SDF_TYPE_SPHERE)
-        return sdSphere(p, geom->center, geom->radius);
-    else if (geom->type == SDF_TYPE_PILL)
-        return sdCapsule(p, geom->p0, geom->p1, geom->radius);
-    else if (geom->type == SDF_TYPE_CONE_PILL ||
-             geom->type == SDF_TYPE_CONE_PILL_SIGMOID)
+    if (geom.type == SDF_TYPE_SPHERE)
+        return sdSphere(p, geom.center, geom.radius);
+    else if (geom.type == SDF_TYPE_PILL)
+        return sdCapsule(p, geom.p0, geom.p1, geom.radius);
+    else if (geom.type == SDF_TYPE_CONE_PILL ||
+             geom.type == SDF_TYPE_CONE_PILL_SIGMOID)
     {
-        return sdConePill(p, geom->p0, geom->p1, geom->radius, geom->radius_tip,
-                          geom->type == SDF_TYPE_CONE_PILL_SIGMOID);
+        return sdConePill(p, geom.p0, geom.p1, geom.radius, geom.radius_tip,
+                          geom.type == SDF_TYPE_CONE_PILL_SIGMOID);
     }
 
     return -1.0;
 }
 
-inline float map(uniform ExtendedSDFGeometries *uniform geometry, vec3f &p,
-                 uniform size_t primID)
+inline float map(uniform ExtendedSDFGeometries* uniform geometry, vec3f& p,
+                 uniform uint64 primID)
 {
     uniform int idx = primToIdx(geometry, primID);
-    uniform ExtendedSDFGeometry *uniform geom = getGeometry(geometry, idx);
+    uniform ExtendedSDFGeometry uniform geom = getGeometry(geometry, idx);
 
     float d = calcGeometryDistance(geometry, p, idx);
-    const float r0 = geom->radius;
+    const float r0 = geom.radius;
 
-    const uint8 numNeighs = geom->numNeighbours;
+    const uint8 numNeighs = geom.numNeighbours;
 
     for (uniform int i = 0; i < numNeighs; i++)
     {
         uniform int32 nei_i =
-            getNeighbourIdx(geometry, geom->neighboursIndex, i);
+            getNeighbourIdx(geometry, geom.neighboursIndex, i);
 
-        uniform ExtendedSDFGeometry *geomNei = getGeometry(geometry, nei_i);
+        uniform ExtendedSDFGeometry geomNei = getGeometry(geometry, nei_i);
 
         const float dOther = calcGeometryDistance(geometry, p, nei_i);
-        const float r1 = geomNei->radius;
+        const float r1 = geomNei.radius;
         const float blendFactor =
             mix(min(r0, r1), max(r0, r1), SDF_BLEND_LERP_FACTOR);
 
@@ -338,9 +337,9 @@ inline float map(uniform ExtendedSDFGeometries *uniform geometry, vec3f &p,
     return d;
 }
 
-inline vec3f calcNormal(uniform ExtendedSDFGeometries *uniform geometry,
-                        const float eps, const vec3f &pos,
-                        uniform size_t primID)
+inline vec3f calcNormal(uniform ExtendedSDFGeometries* uniform geometry,
+                        const float eps, const vec3f& pos,
+                        uniform uint64 primID)
 {
     const float x0 = map(geometry, pos + make_vec3f(eps, 0.f, 0.f), primID);
     const float x1 = map(geometry, pos - make_vec3f(eps, 0.f, 0.f), primID);
@@ -352,8 +351,8 @@ inline vec3f calcNormal(uniform ExtendedSDFGeometries *uniform geometry,
     return normalize(make_vec3f(x0 - x1, y0 - y1, z0 - z1));
 }
 
-inline float intersect(uniform ExtendedSDFGeometries *uniform geometry,
-                       const vec3f &ro, const vec3f &rd, uniform size_t primID)
+inline float intersect(uniform ExtendedSDFGeometries* uniform geometry,
+                       const vec3f& ro, const vec3f& rd, uniform uint64 primID)
 {
     Ray ray;
     ray.dir = rd;
@@ -391,14 +390,14 @@ inline float intersect(uniform ExtendedSDFGeometries *uniform geometry,
     return res;
 }
 
-void ExtendedSDFGeometries_intersect(uniform ExtendedSDFGeometries *uniform
+void ExtendedSDFGeometries_intersect(uniform ExtendedSDFGeometries* uniform
                                          geometry,
-                                     varying Ray &ray, uniform size_t primID)
+                                     varying Ray& ray, uniform uint64 primID)
 {
     uniform int idx = primToIdx(geometry, primID);
-    uniform ExtendedSDFGeometry *geom = getGeometry(geometry, idx);
+    uniform ExtendedSDFGeometry geom = getGeometry(geometry, idx);
 
-    if (ray.time > 0 && geom->timestamp > ray.time)
+    if (ray.time > 0 && geom.timestamp > ray.time)
         return;
 
     const float t_in = intersect(geometry, ray.org, ray.dir, primID);
@@ -414,9 +413,9 @@ void ExtendedSDFGeometries_intersect(uniform ExtendedSDFGeometries *uniform
     }
 }
 
-export void *uniform ExtendedSDFGeometries_create(void *uniform cppEquivalent)
+export void* uniform ExtendedSDFGeometries_create(void* uniform cppEquivalent)
 {
-    uniform ExtendedSDFGeometries *uniform geom =
+    uniform ExtendedSDFGeometries* uniform geom =
         uniform new uniform ExtendedSDFGeometries;
     Geometry_Constructor(&geom->geometry, cppEquivalent,
                          ExtendedSDFGeometries_postIntersect, 0, 0, 0);
@@ -424,30 +423,25 @@ export void *uniform ExtendedSDFGeometries_create(void *uniform cppEquivalent)
 }
 
 export void ExtendedSDFGeometriesGeometry_set(
-    void *uniform _geom, void *uniform _model, void *uniform data,
-    void *uniform materialList, int uniform numExtendedSDFGeometries,
-    int uniform bytesPerExtendedSDFGeometryIndex, int uniform materialID,
-    void *uniform neighbours, void *uniform geometries,
-    int uniform bytesPerSDFGeometry, int uniform bytesPerNeighbours)
+    void* uniform _geom, void* uniform _model, void* uniform data,
+    void* uniform materialList, int uniform numExtendedSDFGeometries,
+    int uniform materialID, void* uniform neighbours, void* uniform geometries)
 {
-    uniform ExtendedSDFGeometries *uniform geom =
+    uniform ExtendedSDFGeometries* uniform geom =
         (uniform ExtendedSDFGeometries * uniform)_geom;
-    uniform Model *uniform model = (uniform Model * uniform)_model;
+    uniform Model* uniform model = (uniform Model * uniform)_model;
 
     uniform uint32 geomID =
         rtcNewUserGeometry(model->embreeSceneHandle, numExtendedSDFGeometries);
 
     geom->geometry.model = model;
     geom->geometry.geomID = geomID;
-    geom->materialList = (Material **)materialList;
+    geom->materialList = (Material**)materialList;
     geom->numExtendedSDFGeometries = numExtendedSDFGeometries;
-    geom->data = (uniform uint8 * uniform)data;
-    geom->neighbours = (uniform uint8 * uniform)neighbours;
-    geom->geometries = (uniform uint8 * uniform)geometries;
+    geom->geometryRefs = (uniform uint64 * uniform)data;
+    geom->neighbours = (uniform uint64 * uniform)neighbours;
+    geom->geometries = (uniform ExtendedSDFGeometry * uniform)geometries;
     geom->materialID = materialID;
-    geom->bytesPerExtendedSDFGeometryIndex = bytesPerExtendedSDFGeometryIndex;
-    geom->bytesPerSDFGeometry = bytesPerSDFGeometry;
-    geom->bytesPerNeighbours = bytesPerNeighbours;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

@@ -36,8 +36,9 @@ OSPData allocateVectorData(const std::vector<VecT>& vec,
     const size_t totBytes = vec.size() * sizeof(decltype(vec.back()));
 
     if (totBytes >= INT_MAX)
-        throw std::runtime_error("Buffer allocation (" +
-                                 std::to_string(totBytes) + " bytes) too big.");
+        BRAYNS_WARN << "Buffer allocation (" << std::to_string(totBytes)
+                    << " bytes) exceeds ipsc 32-bit address space."
+                    << std::endl;
 
     return ospNewData(totBytes / ospray::sizeOf(ospType), ospType, vec.data(),
                       memoryManagementFlags);
@@ -346,7 +347,7 @@ void OSPRayModel::_commitSDFGeometries()
 
     if (_ospSDFNeighboursData)
         ospRelease(_ospSDFNeighboursData);
-    _ospSDFNeighboursData = allocateVectorData(_sdf.neighboursFlat, OSP_CHAR,
+    _ospSDFNeighboursData = allocateVectorData(_sdf.neighboursFlat, OSP_ULONG,
                                                _memoryManagementFlags);
 
     ospCommit(_ospSDFNeighboursData);
@@ -372,7 +373,7 @@ void OSPRayModel::_commitSDFGeometries()
         if (_ospSDFGeometryRefsData[materialId])
             ospRelease(_ospSDFGeometryRefsData[materialId]);
         _ospSDFGeometryRefsData[materialId] =
-            allocateVectorData(_sdf.geometryIndices[materialId], OSP_UINT,
+            allocateVectorData(_sdf.geometryIndices[materialId], OSP_ULONG,
                                _memoryManagementFlags);
 
         ospSetObject(_ospSDFGeometryRefs[materialId], "extendedsdfgeometries",

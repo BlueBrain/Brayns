@@ -374,10 +374,10 @@ protected:
     struct SDFGeometryData
     {
         std::vector<SDFGeometry> geometries;
-        std::map<size_t, std::vector<uint32_t>> geometryIndices;
+        std::map<size_t, std::vector<uint64_t>> geometryIndices;
 
         std::vector<std::vector<size_t>> neighbours;
-        std::vector<size_t> neighboursFlat;
+        std::vector<uint64_t> neighboursFlat;
     };
 
     SDFGeometryData _sdf;

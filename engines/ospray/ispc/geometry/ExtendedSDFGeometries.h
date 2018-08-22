@@ -29,14 +29,9 @@ namespace ospray
 struct ExtendedSDFGeometries : public ospray::Geometry
 {
     std::string toString() const final { return "hbp::ExtendedSDFGeometries"; }
-    void finalize(ospray::Model *model) final;
+    void finalize(ospray::Model* model) final;
 
     int32 materialID;
-
-    size_t numExtendedSDFGeometries;
-    size_t bytesPerExtendedSDFGeometryIndex;
-    size_t bytesPerSDFGeometry;
-    size_t bytesPerNeighbour;
 
     ospray::Ref<ospray::Data> data;
     ospray::Ref<ospray::Data> materialList;
@@ -47,7 +42,7 @@ struct ExtendedSDFGeometries : public ospray::Geometry
     ExtendedSDFGeometries();
 
 private:
-    std::vector<void *> ispcMaterials_;
+    std::vector<void*> ispcMaterials_;
 };
 
 } // namespace ospray

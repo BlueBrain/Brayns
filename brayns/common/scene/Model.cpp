@@ -199,7 +199,7 @@ void Model::addStreamline(const size_t materialId, const Streamline& streamline)
 uint64_t Model::addSDFGeometry(const size_t materialId, const SDFGeometry& geom,
                                const std::vector<size_t>& neighbourIndices)
 {
-    const uint32_t geomIdx = _sdf.geometries.size();
+    const uint64_t geomIdx = _sdf.geometries.size();
     _sdf.geometryIndices[materialId].push_back(geomIdx);
     _sdf.neighbours.push_back(neighbourIndices);
     _sdf.geometries.push_back(geom);
