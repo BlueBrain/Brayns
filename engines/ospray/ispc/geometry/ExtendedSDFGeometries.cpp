@@ -36,13 +36,9 @@ ExtendedSDFGeometries::ExtendedSDFGeometries()
     this->ispcEquivalent = ispc::ExtendedSDFGeometries_create(this);
 }
 
-void ExtendedSDFGeometries::finalize(ospray::Model *model)
+void ExtendedSDFGeometries::finalize(ospray::Model* model)
 {
     materialID = getParam1i("materialID", 0);
-
-    bytesPerExtendedSDFGeometryIndex = sizeof(uint32_t);
-    bytesPerSDFGeometry = sizeof(brayns::SDFGeometry);
-    bytesPerNeighbour = sizeof(size_t);
 
     data = getParamData("extendedsdfgeometries", nullptr);
     materialList = getParamData("materialList", nullptr);
@@ -53,8 +49,7 @@ void ExtendedSDFGeometries::finalize(ospray::Model *model)
         throw std::runtime_error(
             "#ospray:geometry/ExtendedSDFGeometries: "
             "no 'ExtendedSDFGeometries' data specified");
-    numExtendedSDFGeometries =
-        data->numBytes / bytesPerExtendedSDFGeometryIndex;
+    const size_t numExtendedSDFGeometries = data->numItems;
 
     if (numExtendedSDFGeometries >= (1ULL << 30))
     {
@@ -69,7 +64,7 @@ void ExtendedSDFGeometries::finalize(ospray::Model *model)
             "without causing address overflows)");
     }
 
-    void *ispcMaterialList = nullptr;
+    void* ispcMaterialList = nullptr;
 
     if (materialList)
     {
@@ -77,17 +72,17 @@ void ExtendedSDFGeometries::finalize(ospray::Model *model)
         ispcMaterials_.resize(materialList->numItems);
         for (size_t i = 0; i < materialList->numItems; ++i)
         {
-            ospray::Material *m =
-                static_cast<ospray::Material **>(materialList->data)[i];
+            ospray::Material* m =
+                static_cast<ospray::Material**>(materialList->data)[i];
             ispcMaterials_[i] = m ? m->getIE() : nullptr;
         }
-        ispcMaterialList = static_cast<void *>(ispcMaterials_.data());
+        ispcMaterialList = static_cast<void*>(ispcMaterials_.data());
     }
-    ispc::ExtendedSDFGeometriesGeometry_set(
-        getIE(), model->getIE(), data->data, ispcMaterialList,
-        numExtendedSDFGeometries, bytesPerExtendedSDFGeometryIndex, materialID,
-        neighbours->data, geometries->data, bytesPerSDFGeometry,
-        bytesPerNeighbour);
+    ispc::ExtendedSDFGeometriesGeometry_set(getIE(), model->getIE(), data->data,
+                                            ispcMaterialList,
+                                            numExtendedSDFGeometries,
+                                            materialID, neighbours->data,
+                                            geometries->data);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSDFGeometries, extendedsdfgeometries);

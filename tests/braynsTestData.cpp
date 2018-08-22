@@ -169,6 +169,19 @@ BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+
+    const auto rotCenter = brayns.getEngine()
+                               .getScene()
+                               .getModel(0)
+                               ->getTransformation()
+                               .getRotationCenter();
+
+    auto& camera = brayns.getEngine().getCamera();
+    const auto camPos = camera.getPosition();
+
+    camera.setTarget(rotCenter);
+    camera.setPosition(camPos + 0.92 * (rotCenter - camPos));
+
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testSdfCircuit.png",
                                  brayns.getEngine().getFrameBuffer()));
