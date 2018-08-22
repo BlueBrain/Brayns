@@ -101,29 +101,10 @@ class RpcClient(object):
         :rtype: dict
         :raises Exception: if request was not answered within given response_timeout
         """
-        data = dict()
-        data['jsonrpc'] = JSON_RPC_VERSION
-        data['id'] = self._request_id
-        data['method'] = method
-        if params:
-            data['params'] = params
-
-        result = {'done': False, 'result': None}
-
-        def callback(payload):
-            """
-            The callback for the response.
-
-            :param dict payload: the actual response data
-            """
-            result['result'] = payload
-            result['done'] = True
-
-        self._ws_requests[self._request_id] = callback
-        self._request_id += 1
+        request, result = self._make_request(method, params)
 
         self._setup_websocket()
-        self._ws.send(json.dumps(data, cls=Encoder))
+        self._ws.send(json.dumps(request, cls=Encoder))
 
         if response_timeout:
             timeout = response_timeout * 10
@@ -141,6 +122,52 @@ class RpcClient(object):
 
         return result['result']
 
+    def batch_request(self, methods, params, response_timeout=5):  # pragma: no cover
+        """
+        Invoke a batch RPC on the remote running Brayns instance and wait for its reponse.
+
+        :param list methods: name of the methods to invoke
+        :param list params: params for the methods
+        :param int response_timeout: number of seconds to wait for the response
+        :return: list of responses and/or errors of RPC
+        :rtype: list
+        :raises Exception: if methods and/or params are not a list
+        :raises Exception: if request was not answered within given response_timeout
+        """
+        if not isinstance(methods, list) and not isinstance(params, list):
+            raise Exception('Not a list of methods')
+
+        requests = list()
+        responses = list()
+        for method, param in zip(methods, params):
+            request, response = self._make_request(method, param)
+            requests.append(request)
+            responses.append(response)
+
+        self._setup_websocket()
+        self._ws.send(json.dumps(requests, cls=Encoder))
+
+        result = responses[0]
+        if response_timeout:
+            timeout = response_timeout * 10
+
+            while not result['done'] and timeout:
+                time.sleep(0.1)
+                timeout -= 1
+
+            if 'done' not in result:
+                raise Exception('Request was not answered within {0} seconds'
+                                .format(response_timeout))
+        else:
+            while not result['done']:
+                time.sleep(0.0001)
+
+        results = list()
+        for response in responses:
+            results.append(response['result'])
+
+        return results
+
     def notify(self, method, params=None):  # pragma: no cover
         """
         Invoke an RPC on the remote running Brayns instance without waiting for a response.
@@ -156,6 +183,38 @@ class RpcClient(object):
 
         self._setup_websocket()
         self._ws.send(json.dumps(data, cls=Encoder))
+
+    def _make_request(self, method, params=None):  # pragma: no cover
+        """
+        Create a request object with given method and params and setup the response callback.
+
+        :param str method: name of the method to invoke
+        :param str params: params for the method
+        :return: request and response dict
+        :rtype: dict
+        """
+        request = dict()
+        request['jsonrpc'] = JSON_RPC_VERSION
+        request['id'] = self._request_id
+        request['method'] = method
+        if params:
+            request['params'] = params
+
+        response = {'done': False, 'result': None}
+
+        def callback(payload):
+            """
+            The callback for the response.
+
+            :param dict payload: the actual response data
+            """
+            response['result'] = payload
+            response['done'] = True
+
+        self._ws_requests[self._request_id] = callback
+        self._request_id += 1
+
+        return request, response
 
     def _setup_websocket(self):  # pragma: no cover
         """
@@ -227,13 +286,27 @@ class RpcClient(object):
         """
         Handle a potential JSON-RPC response message.
 
-        :param dict data: data of the reply
+        :param dict data: data of the reply, either a dict or a list (batch request)
         :return: True if a request was handled, False otherwise
         :rtype: bool
         """
-        if 'id' not in data:
+        if 'id' not in data and not isinstance(data, list):
             return False
 
+        if isinstance(data, list):
+            for response in data:
+                self._finish_request(response)
+        else:
+            self._finish_request(data)
+
+        return True
+
+    def _finish_request(self, data):  # pragma: no cover
+        """
+        Extract payload from data which can be result or error and invoke the response callback.
+
+        :param dict data: data of the reply
+        """
         payload = None
         if 'result' in data:
             payload = None if data['result'] == '' or data['result'] == 'OK' else data['result']
@@ -245,4 +318,3 @@ class RpcClient(object):
             self._ws_requests.pop(data['id'])
         else:
             print('Invalid reply for request ' + str(data['id']))
-        return True

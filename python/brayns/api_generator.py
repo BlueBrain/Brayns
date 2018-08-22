@@ -33,48 +33,53 @@ import os
 import python_jsonschema_objects as pjs
 import inflection
 
-from .utils import HTTP_METHOD_GET, HTTP_METHOD_PUT, HTTP_STATUS_OK
+from .utils import HTTP_METHOD_GET, HTTP_METHOD_PUT, HTTP_STATUS_OK, SCHEMA_ENDPOINT
 
 from . import utils
 
 
-def build_api(target_object, url):
+def build_api(target_object, registry, schemas):
     """
-    Add the API (types, properties, methods) to the given object from the information found at url.
-
-    Fetches the registry from the remote running Brayns instance and adds all found properties,
-    RPCs and types to the given target_object.
+    Add the API (types, properties, methods) to the given object from registry and schemas.
 
     :param object target_object: The target object where to add all generated properties, RPCs and
                                  types to
-    :param str url: The address of the remote running Brayns instance.
+    :param dict registry: The registry of all endpoints which are properties and methods
+    :param dict schemas: The schemas matching the endpoints from the registry
     """
-    registry = _obtain_registry(url)
     for registry_entry in registry.keys():
-        if _try_add_method(target_object, url, registry_entry):
+        if registry_entry in schemas:
+            schema = schemas[registry_entry]
+        elif registry_entry.endswith(SCHEMA_ENDPOINT):
+            method_name = registry_entry[:-len(SCHEMA_ENDPOINT)]
+            schema = schemas[method_name]
+
+        if 'type' not in schema:
+            continue
+
+        if 'method' in schema['type']:
+            _add_method(target_object, schema)
+            continue
+        if registry_entry.endswith(SCHEMA_ENDPOINT):
             continue
 
         writeable = HTTP_METHOD_PUT in registry[registry_entry]
-        _try_add_property(target_object, url, registry_entry, writeable)
+        _try_add_property(target_object, registry_entry, schema, writeable)
 
 
-def _try_add_property(target_object, url, registry_entry, writeable):
+def _try_add_property(target_object, registry_entry, schema, writeable):
     """
     Try to add registry_entry as a property.
 
     This will add a property with the name registry_entry which initializes itself with current
-    value from Brayns on first access. Furthermore, it add potential enum values as string constants
-    and adds a commit() function if the property is writeable.
+    value from Brayns on first access. Furthermore, it adds potential enum values as string
+    constants and adds a commit() function if the property is writeable.
 
     :param object target_object: The target object where to add the property to
-    :param str url: The address of the remote running Brayns instance.
     :param str registry_entry: registry endpoint, e.g. foo[/schema]
+    :param dict schema: The schema of the object behind the endpoint.
     :param bool writeable: if the property is writeable or not
     """
-    schema, ret_code = _obtain_schema(url, registry_entry)
-    if ret_code != HTTP_STATUS_OK:
-        return
-
     classes = pjs.ObjectBuilder(schema).build_classes()
     class_names = dir(classes)
 
@@ -99,28 +104,6 @@ def _try_add_property(target_object, url, registry_entry, writeable):
     member = '_' + utils.underscorize(os.path.basename(registry_entry))
     setattr(target_object, member, value)
     _add_property(target_object, member, registry_entry, schema['type'])
-
-
-def _try_add_method(target_object, url, registry_entry):
-    """
-    Try to add registry_entry as a method to target_object if it is an RPC.
-
-    :param object target_object: The target object where to add the method to
-    :param str url: The address of the remote running Brayns instance.
-    :param str registry_entry: registry endpoint, e.g. foo[/schema]
-    :return: True if registry_entry was an RPC, False otherwise
-    :rtype: bool
-    """
-    if not registry_entry.endswith('/schema'):
-        return False
-
-    method = registry_entry[:-len('/schema')]
-    status = utils.http_request(HTTP_METHOD_GET, url, method)
-    schema, ret_code = _obtain_schema(url, method)
-    if status.code != HTTP_STATUS_OK and ret_code == HTTP_STATUS_OK:
-        _add_method(target_object, schema)
-        return True
-    return False
 
 
 def _create_method_with_object_parameter(param, method, description):
@@ -261,9 +244,6 @@ def _add_method(target_object, schema):
     :param dict schema: schema containing name, description, params of the RPC
     :raises Exception: if the param type of the RPC does not match oneOf, object or array
     """
-    if schema['type'] != 'method':
-        return
-
     method = schema['title']
     func_name = str(utils.underscorize(os.path.basename(method)))
 
@@ -347,17 +327,3 @@ def _add_property(target_object, member, property_name, property_type):
     setattr(type(target_object), snake_case_name,
             property(fget=getter_builder(member, property_name),
                      doc='Access to the {0} property'.format(endpoint_name)))
-
-
-def _obtain_registry(url):
-    """Obtain the registry of exposed objects and RPCs from Brayns."""
-    status = utils.http_request(HTTP_METHOD_GET, url, 'registry')
-    if status.code != HTTP_STATUS_OK:
-        raise Exception('Failed to obtain registry from Brayns')
-    return status.contents
-
-
-def _obtain_schema(url, object_name):
-    """Returns the JSON schema for the given object."""
-    status = utils.http_request(HTTP_METHOD_GET, url, object_name + '/schema')
-    return status.contents, status.code
