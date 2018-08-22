@@ -42,6 +42,8 @@ WSS_PREFIX = 'wss://'
 
 WS_PATH = '/ws'
 
+SCHEMA_ENDPOINT = '/schema'
+
 
 class Status(object):
     """Holds the execution status of an HTTP request."""

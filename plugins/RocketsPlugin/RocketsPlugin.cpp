@@ -761,6 +761,8 @@ public:
                              (std::function<brayns::Version()>)[] {
                                  return brayns::Version();
                              });
+
+        _handleSchema(ENDPOINT_VERSION, version.getSchema());
     }
 
     void _handleVolumeParams()

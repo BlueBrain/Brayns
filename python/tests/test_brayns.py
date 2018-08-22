@@ -226,33 +226,36 @@ TEST_REGISTRY = {
     'version': ['GET']
 }
 
+def mock_batch_request(self, methods, params, response_timeout=5):
+    results = list()
+    mapping = {
+        'test-rpc': TEST_RPC_ONE_PARAMETER,
+        'set-camera': TEST_RPC_ONEOF_PARAMETER,
+        'set-mode': TEST_RPC_ONEOF_PARAMETER_WEIRD_CASING,
+        'inspect': TEST_RPC_ARRAY_PARAMETER,
+        'test-rpc-invalid-type': TEST_RPC_INVALID_TYPE,
+        'test-rpc-two-params': TEST_RPC_TWO_PARAMETERS,
+        'test-rpc-return': TEST_RPC_ONLY_RETURN,
+        'test-object': TEST_OBJECT_SCHEMA,
+        'test-array': TEST_ARRAY_SCHEMA,
+        'version': VERSION_SCHEMA
+    }
+    for param in params:
+        schema = param['endpoint']
+        if schema in mapping:
+            results.append(mapping[schema])
+        else:
+            results.append({'code': -42, 'message': 'Invalid stuff'})
+    return results
+
+
 def mock_http_request(method, url, command, body=None, query_params=None):
-    if command == 'test-rpc/schema':
-        return brayns.utils.Status(200, TEST_RPC_ONE_PARAMETER)
-    if command == 'set-camera/schema':
-        return brayns.utils.Status(200, TEST_RPC_ONEOF_PARAMETER)
-    if command == 'set-mode/schema':
-        return brayns.utils.Status(200, TEST_RPC_ONEOF_PARAMETER_WEIRD_CASING)
-    if command == 'inspect/schema':
-        return brayns.utils.Status(200, TEST_RPC_ARRAY_PARAMETER)
-    if command == 'test-rpc-invalid-type/schema':
-        return brayns.utils.Status(200, TEST_RPC_INVALID_TYPE)
-    if command == 'test-rpc-two-params/schema':
-        return brayns.utils.Status(200, TEST_RPC_TWO_PARAMETERS)
-    if command == 'test-rpc-return/schema':
-        return brayns.utils.Status(200, TEST_RPC_ONLY_RETURN)
-    if command == 'test-object/schema':
-        return brayns.utils.Status(200, TEST_OBJECT_SCHEMA)
     if command == 'test-object':
         return brayns.utils.Status(200, TEST_OBJECT)
-    if command == 'test-array/schema':
-        return brayns.utils.Status(200, TEST_ARRAY_SCHEMA)
     if command == 'test-array':
         return brayns.utils.Status(200, TEST_ARRAY)
     if command == 'version':
         return brayns.utils.Status(200, TEST_VERSION)
-    if command == 'version/schema':
-        return brayns.utils.Status(200, VERSION_SCHEMA)
     if command == 'registry':
         return brayns.utils.Status(200, TEST_REGISTRY)
     return brayns.utils.Status(404, None)
@@ -278,13 +281,21 @@ def mock_http_request_no_registry(method, url, command, body=None, query_params=
 
 
 def mock_http_request_invalid_rpc_param(method, url, command, body=None, query_params=None):
-    if command == 'test-rpc-invalid-param/schema':
-        return brayns.utils.Status(200, TEST_RPC_INVALID_PARAM)
     if command == 'version':
         return brayns.utils.Status(200, TEST_VERSION)
     if command == 'registry':
         return brayns.utils.Status(200, TEST_REGISTRY)
     return brayns.utils.Status(404, None)
+
+
+def mock_batch_request_invalid_rpc_param(self, methods, params, response_timeout=5):
+    results = list()
+    for param in params:
+        if param['endpoint'] == 'test-rpc-invalid-param':
+            results.append(TEST_RPC_INVALID_PARAM)
+        else:
+            results.append({'code': -42, 'message': 'Invalid stuff'})
+    return results
 
 
 def mock_rpc_request(self, method, params=None, response_timeout=5):
@@ -313,7 +324,8 @@ def mock_snapshot(format, size, animation_parameters=None, camera=None, name=Non
 
 
 def test_init():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         assert_equal(app.url(), 'http://localhost:8200/')
         assert_equal(app.version.as_dict(), TEST_VERSION)
@@ -339,7 +351,8 @@ def test_init_no_registry():
 
 
 def test_object_properties():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         assert_equal(app.test_object.integer, TEST_OBJECT['integer'])
         assert_equal(app.test_object.number, TEST_OBJECT['number'])
@@ -348,7 +361,8 @@ def test_object_properties():
 
 
 def test_object_properties_enum():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         assert_equal(app.test_object.enum, TEST_OBJECT['enum'])
         assert_true(hasattr(app, 'ENUM_VALUE_A'))
@@ -356,7 +370,8 @@ def test_object_properties_enum():
 
 
 def test_object_properties_enum_with_title():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         assert_equal(app.test_object.enum_title, TEST_OBJECT['enum_title'])
         assert_true(hasattr(app, 'MY_ENUM_MINE'))
@@ -364,7 +379,8 @@ def test_object_properties_enum_with_title():
 
 
 def test_object_properties_enum_array():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         assert_equal(app.test_object.enum_array, TEST_OBJECT['enum_array'])
 
@@ -374,21 +390,24 @@ def test_object_properties_enum_array():
 
 
 def test_object_properties_array():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         assert_equal(app.test_object.array, TEST_OBJECT['array'])
 
 
 @raises(AttributeError)
 def test_object_replace():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         app.test_object = [1,2,3]
 
 
 def test_object_commit():
     with patch('brayns.utils.http_request', new=mock_http_request), \
-            patch('brayns.RpcClient.request', new=mock_rpc_request_object_commit):
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
+         patch('brayns.RpcClient.request', new=mock_rpc_request_object_commit):
         app = brayns.Client('localhost:8200')
         app._ws_connected = True
         app.test_object.integer = 42
@@ -396,13 +415,15 @@ def test_object_commit():
 
 
 def test_array():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         assert_equal(app.test_array, TEST_ARRAY)
 
 
 def test_rpc_one_parameter():
     with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
             patch('brayns.RpcClient.request', new=mock_rpc_request):
         app = brayns.Client('localhost:8200')
         import inspect
@@ -412,6 +433,7 @@ def test_rpc_one_parameter():
 
 def test_rpc_one_of_parameter():
     with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
          patch('brayns.RpcClient.request', new=mock_rpc_request):
         app = brayns.Client('localhost:8200')
         import inspect
@@ -424,6 +446,7 @@ def test_rpc_one_of_parameter():
 
 def test_rpc_one_of_parameter_weird_casings():
     with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
          patch('brayns.RpcClient.request', new=mock_rpc_request):
         app = brayns.Client('localhost:8200')
         assert_true(hasattr(app, 'StereofullMode'))
@@ -434,6 +457,7 @@ def test_rpc_one_of_parameter_weird_casings():
 
 def test_rpc_array_parameter():
     with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
             patch('brayns.RpcClient.request', new=mock_rpc_request):
         app = brayns.Client('localhost:8200')
         import inspect
@@ -443,6 +467,7 @@ def test_rpc_array_parameter():
 
 def test_rpc_two_parameters():
     with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
          patch('brayns.RpcClient.request', new=mock_rpc_request):
         app = brayns.Client('localhost:8200')
         assert_false(hasattr(app, 'test-rpc-two-params'))
@@ -450,6 +475,7 @@ def test_rpc_two_parameters():
 
 def test_rpc_only_return():
     with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
          patch('brayns.RpcClient.request', new=mock_rpc_request):
         app = brayns.Client('localhost:8200')
         import inspect
@@ -459,6 +485,7 @@ def test_rpc_only_return():
 
 def test_rpc_invalid_type():
     with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
             patch('brayns.RpcClient.request', new=mock_rpc_request):
         app = brayns.Client('localhost:8200')
         assert_false(hasattr(app, 'test-rpc-invalid-type'))
@@ -474,19 +501,22 @@ def test_encoder():
 
 @raises(Exception)
 def test_rpc_invalid_param():
-    with patch('brayns.utils.http_request', new=mock_http_request_invalid_rpc_param):
+    with patch('brayns.utils.http_request', new=mock_http_request_invalid_rpc_param), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request_invalid_rpc_param):
         brayns.Client('localhost:8200')
 
 
 def test_image():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         setattr(app, 'snapshot', mock_snapshot)
         assert_true(app.image(size=[50,50], format='png'))
 
 
 def test_image_wrong_format():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         setattr(app, 'snapshot', mock_snapshot)
         assert_false(app.image(size=[50,50], format='foo'))
@@ -494,7 +524,8 @@ def test_image_wrong_format():
 
 @raises(TypeError)
 def test_image_not_base64():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         setattr(app, 'snapshot', mock_snapshot)
         app.image(size=[50, 50], format='jpg')
@@ -514,7 +545,8 @@ class MockTransferFunction(object):
 
 
 def test_set_colormap():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         setattr(app, 'transfer_function', MockTransferFunction())
         app.set_colormap(colormap_size=123, data_range=(0, 42))
@@ -527,7 +559,8 @@ def test_set_colormap():
 
 @raises(ValueError)
 def test_set_colormap_unknown_colormap():
-    with patch('brayns.utils.http_request', new=mock_http_request):
+    with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request):
         app = brayns.Client('localhost:8200')
         setattr(app, 'transfer_function', MockTransferFunction())
         app.set_colormap(colormap='foo')
@@ -541,6 +574,7 @@ def mock_webbrowser_open(url):
 
 def test_open_ui():
     with patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('brayns.RpcClient.batch_request', new=mock_batch_request), \
             patch('webbrowser.open', new=mock_webbrowser_open):
         app = brayns.Client('localhost:8200')
         app.open_ui()

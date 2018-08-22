@@ -30,9 +30,17 @@ import io
 from PIL import Image
 from .api_generator import build_api
 from .rpcclient import RpcClient
-from .utils import in_notebook, HTTP_METHOD_GET, HTTP_STATUS_OK
+from .utils import in_notebook, HTTP_METHOD_GET, HTTP_STATUS_OK, SCHEMA_ENDPOINT
 from .version import MINIMAL_VERSION
 from . import utils
+
+
+def _obtain_registry(url):
+    """Obtain the registry of exposed objects and RPCs from Brayns."""
+    status = utils.http_request(HTTP_METHOD_GET, url, 'registry')
+    if status.code != HTTP_STATUS_OK:
+        raise Exception('Failed to obtain registry from Brayns')
+    return status.contents
 
 
 class Client(RpcClient):
@@ -46,7 +54,7 @@ class Client(RpcClient):
         """
         super(Client, self).__init__(url)
         self._check_version()
-        build_api(self, self.url())
+        self._build_api()
 
         if in_notebook():
             self._add_widgets()  # pragma: no cover
@@ -139,6 +147,23 @@ class Client(RpcClient):
         if semver.match(version, '<{0}'.format(MINIMAL_VERSION)):
             raise Exception('Brayns does not satisfy minimal required version; '
                             'needed {0}, got {1}'.format(MINIMAL_VERSION, version))
+
+    def _build_api(self):
+        """Fetch the registry and all schemas from the remote running Brayns to build the API."""
+        registry = _obtain_registry(self.url())
+        endpoints = {x.replace(SCHEMA_ENDPOINT, '') for x in registry}
+
+        # batch request all schemas from all endpoints
+        params = list()
+        for endpoint in endpoints:
+            params.append({'endpoint': endpoint})
+        methods = ['schema']*len(params)
+        schemas = self.batch_request(methods, params)
+
+        schemas_dict = dict()
+        for param, schema in zip(params, schemas):
+            schemas_dict[param['endpoint']] = schema
+        build_api(self, registry, schemas_dict)
 
     def _add_widgets(self):  # pragma: no cover
         """Add functions to the Brayns object to provide widgets for appropriate properties."""
