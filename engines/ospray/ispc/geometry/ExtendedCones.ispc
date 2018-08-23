@@ -32,44 +32,42 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+struct ExtendedCone
+{
+    vec3f center;
+    vec3f up;
+    float centerRadius;
+    float upRadius;
+    float timestamp;
+    vec2f texture_coords;
+    int32 materialID;
+};
+
 struct ExtendedCones
 {
     uniform Geometry geometry;
 
-    uniform uint8* uniform data;
+    uniform ExtendedCone* uniform data;
 
     float radius;
     float length;
     int materialID;
-    int offset_center;
-    int offset_up;
-    int offset_centerRadius;
-    int offset_upRadius;
-    int offset_timestamp;
-    int offset_texture_coords;
-    int offset_materialID;
     int32 numExtendedCones;
-    int32 bytesPerCone;
 };
 
 void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
                           uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform uint8* uniform conePtr =
-        geometry->data + geometry->bytesPerCone * primID;
+    uniform ExtendedCone* uniform conePtr = geometry->data + primID;
     uniform float extent = geometry->radius;
-    if (geometry->offset_centerRadius >= 0)
-        extent = *((uniform float*)(conePtr + geometry->offset_centerRadius));
+    extent = conePtr->centerRadius;
 
-    if (geometry->offset_upRadius >= 0)
-    {
-        uniform float upRadius =
-            *((uniform float*)(conePtr + geometry->offset_upRadius));
-        if (upRadius > extent)
-            extent = upRadius;
-    }
-    uniform vec3f v0 = *((uniform vec3f*)(conePtr + geometry->offset_center));
-    uniform vec3f v1 = *((uniform vec3f*)(conePtr + geometry->offset_up));
+    uniform float upRadius = conePtr->upRadius;
+    if (upRadius > extent)
+        extent = upRadius;
+
+    uniform vec3f v0 = conePtr->center;
+    uniform vec3f v1 = conePtr->up;
     bbox = make_box3fa(min(v0, v1) - make_vec3f(extent),
                        max(v0, v1) + make_vec3f(extent));
 }
@@ -77,25 +75,21 @@ void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
 void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
                              varying Ray& ray, uniform size_t primID)
 {
-    uniform uint8* uniform conePtr =
-        geometry->data + geometry->bytesPerCone * primID;
+    uniform ExtendedCone* uniform conePtr = geometry->data + primID;
 
     uniform float radius0 = geometry->radius;
-    if (geometry->offset_centerRadius >= 0)
-        radius0 = *((uniform float*)(conePtr + geometry->offset_centerRadius));
+    radius0 = conePtr->centerRadius;
 
     uniform float radius1 = geometry->radius;
-    if (geometry->offset_upRadius >= 0)
-        radius1 = *((uniform float*)(conePtr + geometry->offset_upRadius));
+    radius1 = conePtr->upRadius;
 
-    uniform float timestamp =
-        *((uniform float*)(conePtr + geometry->offset_timestamp));
+    uniform float timestamp = conePtr->timestamp;
 
     if (ray.time > 0 && timestamp > ray.time)
         return;
 
-    uniform vec3f v0 = *((uniform vec3f*)(conePtr + geometry->offset_center));
-    uniform vec3f v1 = *((uniform vec3f*)(conePtr + geometry->offset_up));
+    uniform vec3f v0 = conePtr->center;
+    uniform vec3f v1 = conePtr->up;
 
     if (radius0 < radius1)
     {
@@ -230,10 +224,9 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform uint8* conePtr = this->data + this->bytesPerCone * ray.primID;
+    uniform ExtendedCone* conePtr = this->data + ray.primID;
     // Store value as texture coordinate
-    const vec2f tex =
-        *((uniform vec2f*)(conePtr + this->offset_texture_coords));
+    const vec2f tex = conePtr->texture_coords;
 
     dg.st.x = tex.x;
     dg.st.y = tex.y;
@@ -250,9 +243,8 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
         if (dot(ray.dir, Ns) >= 0.f)
             Ns = neg(Ns);
     }
-    if ((flags & DG_MATERIALID) && (this->offset_materialID >= 0))
-        dg.materialID =
-            *((uniform uint32 * varying)(conePtr + this->offset_materialID));
+    if ((flags & DG_MATERIALID) && conePtr->materialID >= 0)
+        dg.materialID = conePtr->materialID;
     dg.Ng = Ng;
     dg.Ns = Ns;
 }
@@ -265,14 +257,12 @@ export void* uniform ExtendedCones_create(void* uniform cppEquivalent)
     return geom;
 }
 
-export void ExtendedConesGeometry_set(
-    void* uniform _geom, void* uniform _model, void* uniform data,
-    int uniform numExtendedCones, int uniform bytesPerCone,
-    float uniform radius, float uniform length, int uniform materialID,
-    int uniform offset_center, int uniform offset_up,
-    int uniform offset_centerRadius, int uniform offset_upRadius,
-    int uniform offset_timestamp, int uniform offset_texture_coords,
-    int uniform offset_materialID)
+export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
+                                      void* uniform data,
+                                      int uniform numExtendedCones,
+                                      float uniform radius,
+                                      float uniform length,
+                                      int uniform materialID)
 {
     uniform ExtendedCones* uniform geom =
         (uniform ExtendedCones * uniform)_geom;
@@ -286,17 +276,8 @@ export void ExtendedConesGeometry_set(
     geom->numExtendedCones = numExtendedCones;
     geom->radius = radius;
     geom->length = length;
-    geom->data = (uniform uint8 * uniform)data;
+    geom->data = (uniform ExtendedCone * uniform)data;
     geom->materialID = materialID;
-    geom->bytesPerCone = bytesPerCone;
-
-    geom->offset_center = offset_center;
-    geom->offset_up = offset_up;
-    geom->offset_centerRadius = offset_centerRadius;
-    geom->offset_upRadius = offset_upRadius;
-    geom->offset_timestamp = offset_timestamp;
-    geom->offset_texture_coords = offset_texture_coords;
-    geom->offset_materialID = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

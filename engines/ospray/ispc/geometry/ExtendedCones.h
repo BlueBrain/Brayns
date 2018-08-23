@@ -35,16 +35,6 @@ struct ExtendedCones : public ospray::Geometry
     float length;
     int32 materialID;
 
-    size_t numExtendedCones;
-    size_t bytesPerCone;
-    int64 offset_center;
-    int64 offset_up;
-    int64 offset_centerRadius;
-    int64 offset_upRadius;
-    int64 offset_timestamp;
-    int64 offset_texture_coords;
-    int64 offset_materialID;
-
     ospray::Ref<ospray::Data> data;
 
     ExtendedCones();

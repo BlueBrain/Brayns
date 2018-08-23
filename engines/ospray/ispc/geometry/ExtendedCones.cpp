@@ -40,34 +40,17 @@ void ExtendedCones::finalize(ospray::Model* model)
     radius = getParam1f("radius", 0.01f);
     length = getParam1f("length", 0.01f);
     materialID = getParam1i("materialID", 0);
-    bytesPerCone = getParam1i("bytes_per_extended_cone", sizeof(brayns::Cone));
-    offset_center =
-        getParam1i("offset_center", offsetof(struct brayns::Cone, center));
-    offset_up = getParam1i("offset_up", offsetof(struct brayns::Cone, up));
-    offset_centerRadius =
-        getParam1i("offset_centerRadius",
-                   offsetof(struct brayns::Cone, centerRadius));
-    offset_upRadius =
-        getParam1i("offset_upRadius", offsetof(struct brayns::Cone, upRadius));
-    offset_timestamp = getParam1i("offset_timestamp",
-                                  offsetof(struct brayns::Cone, timestamp));
-    offset_texture_coords =
-        getParam1i("offset_texture_coords",
-                   offsetof(struct brayns::Cone, texture_coords));
-    offset_materialID = getParam1i("offset_materialID", -1);
     data = getParamData("extendedcones", nullptr);
+    constexpr size_t bytesPerCone = sizeof(brayns::Cone);
 
     if (data.ptr == nullptr || bytesPerCone == 0)
         throw std::runtime_error(
             "#ospray:geometry/extendedcones: "
             "no 'extendedcones' data specified");
-    numExtendedCones = data->numBytes / bytesPerCone;
+    const size_t numExtendedCones = data->numBytes / bytesPerCone;
     ispc::ExtendedConesGeometry_set(getIE(), model->getIE(), data->data,
-                                    numExtendedCones, bytesPerCone, radius,
-                                    length, materialID, offset_center,
-                                    offset_up, offset_centerRadius,
-                                    offset_upRadius, offset_timestamp,
-                                    offset_texture_coords, offset_materialID);
+                                    numExtendedCones, radius, length,
+                                    materialID);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedCones, extendedcones);
