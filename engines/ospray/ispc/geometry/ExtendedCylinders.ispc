@@ -28,22 +28,25 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+struct ExtendedCylinder
+{
+    vec3f center;
+    vec3f up;
+    float radius;
+    float timestamp;
+    vec2f texture_coords;
+    int32 materialID;
+};
+
 struct ExtendedCylinders
 {
     uniform Geometry geometry; //!< inherited geometry fields
 
-    uniform uint8* uniform data;
+    uniform ExtendedCylinder* uniform data;
 
     float radius;
     int materialID;
-    int offset_v0;
-    int offset_v1;
-    int offset_radius;
-    int offset_timestamp;
-    int offset_texture_coords;
-    int offset_materialID;
     int32 numExtendedCylinders;
-    int32 bytesPerCylinder;
 };
 
 typedef uniform float uniform_float;
@@ -51,15 +54,13 @@ typedef uniform float uniform_float;
 void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
                               uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform uint8* uniform cylinderPtr =
-        geometry->data + geometry->bytesPerCylinder * primID;
+    uniform ExtendedCylinder* uniform cylinderPtr = geometry->data + primID;
 
     uniform float radius = geometry->radius;
-    if (geometry->offset_radius >= 0)
-        radius = *((uniform float*)(cylinderPtr + geometry->offset_radius));
+    radius = cylinderPtr->radius;
 
-    uniform vec3f v0 = *((uniform vec3f*)(cylinderPtr + geometry->offset_v0));
-    uniform vec3f v1 = *((uniform vec3f*)(cylinderPtr + geometry->offset_v1));
+    uniform vec3f v0 = cylinderPtr->center;
+    uniform vec3f v1 = cylinderPtr->up;
     bbox = make_box3fa(min(v0, v1) - make_vec3f(radius),
                        max(v0, v1) + make_vec3f(radius));
 }
@@ -67,20 +68,17 @@ void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
 void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
                                  varying Ray& ray, uniform size_t primID)
 {
-    uniform uint8* uniform cylinderPtr =
-        geometry->data + geometry->bytesPerCylinder * primID;
+    uniform ExtendedCylinder* uniform cylinderPtr = geometry->data + primID;
     uniform float radius = geometry->radius;
 
-    uniform float timestamp =
-        *((uniform float*)(cylinderPtr + geometry->offset_timestamp));
+    uniform float timestamp = cylinderPtr->timestamp;
 
     if (ray.time > 0 && timestamp > ray.time)
         return;
 
-    if (geometry->offset_radius >= 0)
-        radius = *((float* uniform)(cylinderPtr + geometry->offset_radius));
-    uniform vec3f v0 = *((vec3f * uniform)(cylinderPtr + geometry->offset_v0));
-    uniform vec3f v1 = *((vec3f * uniform)(cylinderPtr + geometry->offset_v1));
+    radius = cylinderPtr->radius;
+    uniform vec3f v0 = cylinderPtr->center;
+    uniform vec3f v1 = cylinderPtr->up;
 
     const vec3f center = 0.5f * (v0 + v1);
     const float approxDist = dot(center - ray.org, ray.dir);
@@ -159,11 +157,9 @@ static void ExtendedCylinders_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform uint8* cylinderPtr =
-        this->data + this->bytesPerCylinder * ray.primID;
+    uniform ExtendedCylinder* cylinderPtr = this->data + ray.primID;
     // Store value as texture coordinate
-    const vec2f tex =
-        *((uniform vec2f*)(cylinderPtr + this->offset_texture_coords));
+    const vec2f tex = cylinderPtr->texture_coords;
 
     dg.st.x = tex.x;
     dg.st.y = tex.y;
@@ -180,9 +176,8 @@ static void ExtendedCylinders_postIntersect(uniform Geometry* uniform geometry,
         if (dot(ray.dir, Ns) >= 0.f)
             Ns = neg(Ns);
     }
-    if ((flags & DG_MATERIALID) && (this->offset_materialID >= 0))
-        dg.materialID = *(
-            (uniform uint32 * varying)(cylinderPtr + this->offset_materialID));
+    if ((flags & DG_MATERIALID) && cylinderPtr->materialID >= 0)
+        dg.materialID = cylinderPtr->materialID;
     dg.Ng = Ng;
     dg.Ns = Ns;
 }
@@ -197,13 +192,12 @@ export void* uniform ExtendedCylinders_create(void* uniform cppEquivalent)
     return geom;
 }
 
-export void ExtendedCylindersGeometry_set(
-    void* uniform _geom, void* uniform _model, void* uniform data,
-    int uniform numExtendedCylinders, int uniform bytesPerCylinder,
-    float uniform radius, int uniform materialID, int uniform offset_v0,
-    int uniform offset_v1, int uniform offset_radius,
-    int uniform offset_timestamp, int uniform offset_texture_coords,
-    int uniform offset_materialID)
+export void ExtendedCylindersGeometry_set(void* uniform _geom,
+                                          void* uniform _model,
+                                          void* uniform data,
+                                          int uniform numExtendedCylinders,
+                                          float uniform radius,
+                                          int uniform materialID)
 {
     uniform ExtendedCylinders* uniform geom =
         (uniform ExtendedCylinders * uniform)_geom;
@@ -216,16 +210,8 @@ export void ExtendedCylindersGeometry_set(
     geom->geometry.geomID = geomID;
     geom->numExtendedCylinders = numExtendedCylinders;
     geom->radius = radius;
-    geom->data = (uniform uint8 * uniform)data;
+    geom->data = (uniform ExtendedCylinder * uniform)data;
     geom->materialID = materialID;
-    geom->bytesPerCylinder = bytesPerCylinder;
-
-    geom->offset_v0 = offset_v0;
-    geom->offset_v1 = offset_v1;
-    geom->offset_radius = offset_radius;
-    geom->offset_timestamp = offset_timestamp;
-    geom->offset_texture_coords = offset_texture_coords;
-    geom->offset_materialID = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,
