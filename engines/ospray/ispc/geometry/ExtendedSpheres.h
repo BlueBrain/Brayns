@@ -29,7 +29,7 @@ namespace ospray
 struct ExtendedSpheres : public ospray::Geometry
 {
     std::string toString() const final { return "hbp::ExtendedSpheres"; }
-    void finalize(ospray::Model *model) final;
+    void finalize(ospray::Model* model) final;
 
     float radius;
     int32 materialID;
@@ -48,7 +48,7 @@ struct ExtendedSpheres : public ospray::Geometry
     ExtendedSpheres();
 
 private:
-    std::vector<void *> ispcMaterials_;
+    std::vector<void*> ispcMaterials_;
 };
 
 } // ::brayns

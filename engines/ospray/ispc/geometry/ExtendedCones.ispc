@@ -36,7 +36,7 @@ struct ExtendedCones
 {
     uniform Geometry geometry;
 
-    uniform uint8 *uniform data;
+    uniform uint8* uniform data;
 
     float radius;
     float length;
@@ -52,50 +52,50 @@ struct ExtendedCones
     int32 bytesPerCone;
 };
 
-void ExtendedCones_bounds(uniform ExtendedCones *uniform geometry,
-                          uniform size_t primID, uniform box3fa &bbox)
+void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
+                          uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform uint8 *uniform conePtr =
+    uniform uint8* uniform conePtr =
         geometry->data + geometry->bytesPerCone * primID;
     uniform float extent = geometry->radius;
     if (geometry->offset_centerRadius >= 0)
-        extent = *((uniform float *)(conePtr + geometry->offset_centerRadius));
+        extent = *((uniform float*)(conePtr + geometry->offset_centerRadius));
 
     if (geometry->offset_upRadius >= 0)
     {
         uniform float upRadius =
-            *((uniform float *)(conePtr + geometry->offset_upRadius));
+            *((uniform float*)(conePtr + geometry->offset_upRadius));
         if (upRadius > extent)
             extent = upRadius;
     }
-    uniform vec3f v0 = *((uniform vec3f *)(conePtr + geometry->offset_center));
-    uniform vec3f v1 = *((uniform vec3f *)(conePtr + geometry->offset_up));
+    uniform vec3f v0 = *((uniform vec3f*)(conePtr + geometry->offset_center));
+    uniform vec3f v1 = *((uniform vec3f*)(conePtr + geometry->offset_up));
     bbox = make_box3fa(min(v0, v1) - make_vec3f(extent),
                        max(v0, v1) + make_vec3f(extent));
 }
 
-void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
-                             varying Ray &ray, uniform size_t primID)
+void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
+                             varying Ray& ray, uniform size_t primID)
 {
-    uniform uint8 *uniform conePtr =
+    uniform uint8* uniform conePtr =
         geometry->data + geometry->bytesPerCone * primID;
 
     uniform float radius0 = geometry->radius;
     if (geometry->offset_centerRadius >= 0)
-        radius0 = *((uniform float *)(conePtr + geometry->offset_centerRadius));
+        radius0 = *((uniform float*)(conePtr + geometry->offset_centerRadius));
 
     uniform float radius1 = geometry->radius;
     if (geometry->offset_upRadius >= 0)
-        radius1 = *((uniform float *)(conePtr + geometry->offset_upRadius));
+        radius1 = *((uniform float*)(conePtr + geometry->offset_upRadius));
 
     uniform float timestamp =
-        *((uniform float *)(conePtr + geometry->offset_timestamp));
+        *((uniform float*)(conePtr + geometry->offset_timestamp));
 
     if (ray.time > 0 && timestamp > ray.time)
         return;
 
-    uniform vec3f v0 = *((uniform vec3f *)(conePtr + geometry->offset_center));
-    uniform vec3f v1 = *((uniform vec3f *)(conePtr + geometry->offset_up));
+    uniform vec3f v0 = *((uniform vec3f*)(conePtr + geometry->offset_center));
+    uniform vec3f v1 = *((uniform vec3f*)(conePtr + geometry->offset_up));
 
     if (radius0 < radius1)
     {
@@ -215,13 +215,13 @@ void ExtendedCones_intersect(uniform ExtendedCones *uniform geometry,
     return;
 }
 
-static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
-                                        uniform Model *uniform model,
-                                        varying DifferentialGeometry &dg,
-                                        const varying Ray &ray,
+static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
+                                        uniform Model* uniform model,
+                                        varying DifferentialGeometry& dg,
+                                        const varying Ray& ray,
                                         uniform int64 flags)
 {
-    uniform ExtendedCones *uniform this =
+    uniform ExtendedCones* uniform this =
         (uniform ExtendedCones * uniform)geometry;
     dg.geometry = geometry;
 #if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR < 5))
@@ -230,10 +230,10 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform uint8 *conePtr = this->data + this->bytesPerCone * ray.primID;
+    uniform uint8* conePtr = this->data + this->bytesPerCone * ray.primID;
     // Store value as texture coordinate
     const vec2f tex =
-        *((uniform vec2f *)(conePtr + this->offset_texture_coords));
+        *((uniform vec2f*)(conePtr + this->offset_texture_coords));
 
     dg.st.x = tex.x;
     dg.st.y = tex.y;
@@ -257,16 +257,16 @@ static void ExtendedCones_postIntersect(uniform Geometry *uniform geometry,
     dg.Ns = Ns;
 }
 
-export void *uniform ExtendedCones_create(void *uniform cppEquivalent)
+export void* uniform ExtendedCones_create(void* uniform cppEquivalent)
 {
-    uniform ExtendedCones *uniform geom = uniform new uniform ExtendedCones;
+    uniform ExtendedCones* uniform geom = uniform new uniform ExtendedCones;
     Geometry_Constructor(&geom->geometry, cppEquivalent,
                          ExtendedCones_postIntersect, 0, 0, 0);
     return geom;
 }
 
 export void ExtendedConesGeometry_set(
-    void *uniform _geom, void *uniform _model, void *uniform data,
+    void* uniform _geom, void* uniform _model, void* uniform data,
     int uniform numExtendedCones, int uniform bytesPerCone,
     float uniform radius, float uniform length, int uniform materialID,
     int uniform offset_center, int uniform offset_up,
@@ -274,9 +274,9 @@ export void ExtendedConesGeometry_set(
     int uniform offset_timestamp, int uniform offset_texture_coords,
     int uniform offset_materialID)
 {
-    uniform ExtendedCones *uniform geom =
+    uniform ExtendedCones* uniform geom =
         (uniform ExtendedCones * uniform)_geom;
-    uniform Model *uniform model = (uniform Model * uniform)_model;
+    uniform Model* uniform model = (uniform Model * uniform)_model;
 
     uniform uint32 geomID =
         rtcNewUserGeometry(model->embreeSceneHandle, numExtendedCones);

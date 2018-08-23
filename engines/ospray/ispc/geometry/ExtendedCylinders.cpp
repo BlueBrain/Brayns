@@ -34,7 +34,7 @@ ExtendedCylinders::ExtendedCylinders()
     this->ispcEquivalent = ispc::ExtendedCylinders_create(this);
 }
 
-void ExtendedCylinders::finalize(ospray::Model *model)
+void ExtendedCylinders::finalize(ospray::Model* model)
 {
     radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);

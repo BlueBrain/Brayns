@@ -27,7 +27,7 @@ namespace ospray
 struct ExtendedCylinders : public ospray::Geometry
 {
     std::string toString() const final { return "ospray::Cylinders"; }
-    void finalize(ospray::Model *model) final;
+    void finalize(ospray::Model* model) final;
 
     float radius;
     int32 materialID;

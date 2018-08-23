@@ -29,7 +29,7 @@ namespace ospray
 struct ExtendedCones : public ospray::Geometry
 {
     std::string toString() const final { return "ospray::Cones"; }
-    void finalize(ospray::Model *model) final;
+    void finalize(ospray::Model* model) final;
 
     float radius;
     float length;

@@ -35,7 +35,7 @@ ExtendedCones::ExtendedCones()
     this->ispcEquivalent = ispc::ExtendedCones_create(this);
 }
 
-void ExtendedCones::finalize(ospray::Model *model)
+void ExtendedCones::finalize(ospray::Model* model)
 {
     radius = getParam1f("radius", 0.01f);
     length = getParam1f("length", 0.01f);

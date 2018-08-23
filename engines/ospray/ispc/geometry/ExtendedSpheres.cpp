@@ -34,7 +34,7 @@ ExtendedSpheres::ExtendedSpheres()
     this->ispcEquivalent = ispc::ExtendedSpheres_create(this);
 }
 
-void ExtendedSpheres::finalize(ospray::Model *model)
+void ExtendedSpheres::finalize(ospray::Model* model)
 {
     radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);
@@ -72,7 +72,7 @@ void ExtendedSpheres::finalize(ospray::Model *model)
             "without causing address overflows)");
     }
 
-    void *ispcMaterialList = nullptr;
+    void* ispcMaterialList = nullptr;
 
     if (materialList)
     {
@@ -80,11 +80,11 @@ void ExtendedSpheres::finalize(ospray::Model *model)
         ispcMaterials_.resize(materialList->numItems);
         for (size_t i = 0; i < materialList->numItems; ++i)
         {
-            ospray::Material *m =
-                static_cast<ospray::Material **>(materialList->data)[i];
+            ospray::Material* m =
+                static_cast<ospray::Material**>(materialList->data)[i];
             ispcMaterials_[i] = m ? m->getIE() : nullptr;
         }
-        ispcMaterialList = static_cast<void *>(ispcMaterials_.data());
+        ispcMaterialList = static_cast<void*>(ispcMaterials_.data());
     }
     ispc::ExtendedSpheresGeometry_set(getIE(), model->getIE(), data->data,
                                       ispcMaterialList, numExtendedSpheres,
