@@ -255,10 +255,6 @@ struct Brayns::Impl : public PluginAPI
             _engine->getFrameBuffer().clear();
         }
 
-        auto& ap = _parametersManager.getAnimationParameters();
-        _sceneWasModified = scene.isModified();
-        _animationParamsWereModified = ap.isModified();
-
         _parametersManager.resetModified();
         camera.resetModified();
         scene.resetModified();
@@ -275,6 +271,8 @@ struct Brayns::Impl : public PluginAPI
         _engine->render();
         _renderTimer.stop();
 
+        _engine->getStatistics().setFPS(_renderTimer.perSecondSmoothed());
+
         const auto& params = _parametersManager.getApplicationParameters();
         const auto fps = params.getMaxRenderFPS();
         const auto delta = _renderTimer.perSecondSmoothed() - fps;
@@ -290,41 +288,8 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->postRender();
 
-        _fpsUpdateElapsed += _renderTimer.milliseconds();
-        if (_fpsUpdateElapsed > 750)
-        {
-            _engine->getStatistics().setFPS(_renderTimer.perSecondSmoothed());
-            _fpsUpdateElapsed = 0;
-        }
-
-        bool resetApParams = false;
-        auto& ap = _parametersManager.getAnimationParameters();
-        if (ap.getDelta() != 0 || _animationParamsWereModified)
-        {
-            _animationParamsWereModified = true;
-            resetApParams = !ap.isModified();
-            ap.markModified();
-        }
-
-        bool resetScene = false;
-        auto& scene = _engine->getScene();
-        if (_sceneWasModified)
-        {
-            resetScene = !scene.isModified();
-            scene.markModified();
-        }
-
-        // broadcast changes on animations (playback) and scene (model
-        // add/remove)
+        // broadcast image JPEG from RocketsPlugin
         _extensionPluginFactory.postRender();
-
-        if (resetApParams)
-            ap.resetModified();
-        _animationParamsWereModified = false;
-
-        if (resetScene)
-            scene.resetModified();
-        _sceneWasModified = false;
 
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();
@@ -978,24 +943,21 @@ private:
 
     void _decreaseFieldOfView()
     {
-        _fieldOfView -= 1.f;
-        //_fieldOfView = std::max(1.f, _fieldOfView);
+        _fieldOfView -= 1.;
         _engine->getCamera().updateProperty("fovy", _fieldOfView);
         BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
     }
 
     void _increaseFieldOfView()
     {
-        _fieldOfView += 1.f;
-        //    _fieldOfView = std::min(179.f, _fieldOfView);
+        _fieldOfView += 1.;
         _engine->getCamera().updateProperty("fovy", _fieldOfView);
         BRAYNS_INFO << "Field of view: " << _fieldOfView << std::endl;
     }
 
     void _decreaseEyeSeparation()
     {
-        _eyeSeparation -= 0.01f;
-        //_eyeSeparation = std::max(0.1f, _eyeSeparation);
+        _eyeSeparation -= 0.01;
         _engine->getCamera().updateProperty("interpupillaryDistance",
                                             _eyeSeparation);
         BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
@@ -1003,8 +965,7 @@ private:
 
     void _increaseEyeSeparation()
     {
-        _eyeSeparation += 0.01f;
-        //_eyeSeparation = std::min(1.0f, _eyeSeparation);
+        _eyeSeparation += 0.01;
         _engine->getCamera().updateProperty("interpupillaryDistance",
                                             _eyeSeparation);
         BRAYNS_INFO << "Eye separation: " << _eyeSeparation << std::endl;
@@ -1081,7 +1042,6 @@ private:
     std::mutex _renderMutex;
 
     Timer _renderTimer;
-    int64_t _fpsUpdateElapsed{0};
 
 #ifdef BRAYNS_USE_LUNCHBOX
     // it is important to perform loading and unloading in the same thread,
@@ -1093,8 +1053,6 @@ private:
 
     ExtensionPluginFactory _extensionPluginFactory;
     std::shared_ptr<ActionInterface> _actionInterface;
-    bool _sceneWasModified{false};
-    bool _animationParamsWereModified{false};
 };
 
 // -------------------------------------------------------------------------------------------------

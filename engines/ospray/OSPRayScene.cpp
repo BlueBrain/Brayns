@@ -190,6 +190,8 @@ void OSPRayScene::commit()
 
     _computeBounds();
 
+    // TODO: triggers the change callback to re-broadcast the scene if the clip
+    // planes have changed. Provide an RPC to update/set clip planes.
     markModified();
 }
 
@@ -299,7 +301,7 @@ bool OSPRayScene::commitTransferFunctionData()
     ospCommit(_ospTransferFunctionEmissionData);
 
     _transferFunction.resetModified();
-    markModified();
+    markModified(false);
     return true;
 }
 
@@ -321,7 +323,8 @@ bool OSPRayScene::_commitVolumeData()
                 _parametersManager.getVolumeParameters().isModified())
             {
                 volume->commit();
-                markModified(); // to reset accumulation if new blocks are added
+                // to reset accumulation if new blocks are added
+                markModified(false);
             }
         }
         modelDescriptor->getModel().updateSizeInBytes();
@@ -355,7 +358,7 @@ void OSPRayScene::_commitSimulationData()
                    _memoryManagementFlags);
     ospCommit(_ospSimulationData);
 
-    markModified(); // triggers framebuffer clear
+    markModified(false); // triggers framebuffer clear
 }
 
 ModelPtr OSPRayScene::createModel() const

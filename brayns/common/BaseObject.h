@@ -21,6 +21,7 @@
 #pragma once
 
 #include <cmath>
+#include <functional>
 #include <type_traits>
 
 namespace brayns
@@ -29,6 +30,16 @@ class BaseObject
 {
 public:
     virtual ~BaseObject() = default;
+
+    /** Custom assignment operator that does not copy the changedCallback. */
+    BaseObject& operator=(const BaseObject& rhs)
+    {
+        if (this == &rhs)
+            return *this;
+
+        _modified = true;
+        return *this;
+    }
 
     /**
      * @return true if any parameter has been modified since the last
@@ -39,7 +50,18 @@ public:
      * Reset the modified state, typically done after changes have been applied.
      */
     void resetModified() { _modified = false; }
-    void markModified() { _modified = true; }
+    void markModified(const bool triggerCallback = true)
+    {
+        _modified = true;
+        if (_changedCallback && triggerCallback)
+            _changedCallback(*this);
+    }
+
+    void setChangedCallback(const std::function<void(const BaseObject&)>& cb)
+    {
+        _changedCallback = cb;
+    }
+
 protected:
     /**
      * Helper function for derived classes to update a parameter and mark it
@@ -51,7 +73,7 @@ protected:
         if (!_isEqual(member, newValue))
         {
             member = newValue;
-            _modified = true;
+            markModified();
         }
     }
 
@@ -73,5 +95,6 @@ private:
     }
 
     bool _modified{true};
+    std::function<void(const BaseObject&)> _changedCallback;
 };
 }

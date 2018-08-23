@@ -41,9 +41,14 @@
 
 #include "BinaryRequests.h"
 #include "ImageGenerator.h"
+#include "Throttle.h"
 
 namespace
 {
+constexpr int64_t INTERACTIVE_THROTTLE = 1;
+constexpr int64_t DEFAULT_THROTTLE = 50;
+constexpr int64_t SLOW_THROTTLE = 750;
+
 const int MODEL_NOT_FOUND = -12345;
 const int INSTANCE_NOT_FOUND = -12346;
 const int TASK_RESULT_TO_JSON_ERROR = -12347;
@@ -168,7 +173,7 @@ inline bool from_json(T& obj, const std::string& json,
         staticjson::from_json_string(json.c_str(), &obj, &status);
     if (success)
     {
-        obj.markModified();
+        obj.markModified(false);
         if (std::function<void(T&)>(postUpdateFunc))
             postUpdateFunc(obj);
     }
@@ -189,13 +194,16 @@ public:
 
     ~Impl()
     {
-        // cancel all pending tasks; cancel() will remove itself from _tasks
-        while (!_tasks.empty())
+        // cancel all pending tasks
+        std::vector<TaskPtr> tasksToCancel;
         {
-            auto task = _tasks.begin()->second;
-            _tasks.begin()->first->cancel();
-            task->wait();
+            std::lock_guard<std::mutex> lock(_tasksMutex);
+            for (const auto& entry : _tasks)
+                tasksToCancel.push_back(entry.first);
         }
+
+        for (auto task : tasksToCancel)
+            task->cancel();
 
         if (_rocketsServer)
             _rocketsServer->setSocketListener(nullptr);
@@ -205,12 +213,6 @@ public:
     {
         if (!_rocketsServer || !_manualProcessing)
             return;
-
-        // https://github.com/BlueBrain/Brayns/issues/342
-        // WAR: modifications by braynsViewer have to be broadcasted. Don't do
-        // this for braynsService, as otherwise messages that arrive while we're
-        // rendering (async rendering!) are re-broadcasted.
-        _broadcastWebsocketMessages();
 
         try
         {
@@ -228,12 +230,7 @@ public:
         if (!_rocketsServer || _rocketsServer->getConnectionCount() == 0)
             return;
 
-        // only broadcast changes that are a result of the rendering. All other
-        // changes are already broadcasted in preRender().
-        _wsBroadcastOperations[ENDPOINT_ANIMATION_PARAMS]();
-        _wsBroadcastOperations[METHOD_IMAGE_JPEG]();
-        _wsBroadcastOperations[ENDPOINT_STATISTICS]();
-        _wsBroadcastOperations[ENDPOINT_SCENE](); // bounds
+        _broadcastImageJpeg();
     }
 
     void _setupRocketsServer()
@@ -304,17 +301,9 @@ public:
                                                std::placeholders::_1));
     }
 
-    void _broadcastWebsocketMessages()
-    {
-        if (_rocketsServer->getConnectionCount() == 0)
-            return;
-
-        for (auto& op : _wsBroadcastOperations)
-            op.second();
-    }
-
-    template <class T, class F>
-    void _handleGET(const std::string& endpoint, T& obj, F modifiedFunc)
+    template <class T>
+    void _handleGET(const std::string& endpoint, T& obj,
+                    const int64_t throttleTime = DEFAULT_THROTTLE)
     {
         using namespace rockets::http;
 
@@ -323,13 +312,6 @@ public:
         });
 
         _handleObjectSchema(endpoint, obj);
-
-        _wsBroadcastOperations[endpoint] =
-            [& server = _jsonrpcServer, &obj, endpoint, modifiedFunc ]
-        {
-            if (modifiedFunc(obj))
-                server->notify(getNotificationEndpointName(endpoint), obj);
-        };
 
         const std::string rpcEndpoint = getRequestEndpointName(endpoint);
 
@@ -340,12 +322,20 @@ public:
                       buildJsonRpcSchemaRequestReturnOnly(
                           {rpcEndpoint, "Get the current state of " + endpoint},
                           obj));
-    }
 
-    template <class T>
-    void _handleGET(const std::string& endpoint, T& obj)
-    {
-        _handleGET(endpoint, obj, [](const T& o) { return o.isModified(); });
+        _throttle[endpoint];
+
+        obj.setChangedCallback(
+            [&rocketsServer = _rocketsServer, &throttle = _throttle[endpoint], & jsonrpcServer = _jsonrpcServer, endpoint=getNotificationEndpointName(endpoint), throttleTime ](const auto& base) {
+                if(rocketsServer->getConnectionCount() == 0)
+                    return;
+
+                const auto& castedObj = static_cast<const T&>(base);
+
+                throttle([&jsonrpcServer, &castedObj, endpoint]{
+                    jsonrpcServer->notify(endpoint, castedObj);
+                }, throttleTime);
+            });
     }
 
     template <class T>
@@ -396,9 +386,10 @@ public:
     }
 
     template <class T>
-    void _handle(const std::string& endpoint, T& obj)
+    void _handle(const std::string& endpoint, T& obj,
+                 const int64_t throttleTime = DEFAULT_THROTTLE)
     {
-        _handleGET(endpoint, obj);
+        _handleGET(endpoint, obj, throttleTime);
         _handlePUT(endpoint, obj);
     }
 
@@ -502,7 +493,8 @@ public:
                     };
 
                     progressUpdate->start(std::chrono::milliseconds(0),
-                                          std::chrono::milliseconds(800));
+                                          std::chrono::milliseconds(
+                                              SLOW_THROTTLE));
                 }
 #endif
 
@@ -604,7 +596,8 @@ public:
         _handle(ENDPOINT_APP_PARAMS,
                 _parametersManager.getApplicationParameters());
         _handle(ENDPOINT_ANIMATION_PARAMS,
-                _parametersManager.getAnimationParameters());
+                _parametersManager.getAnimationParameters(),
+                INTERACTIVE_THROTTLE);
         _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
         _handle(ENDPOINT_VOLUME_PARAMS,
                 _parametersManager.getVolumeParameters());
@@ -614,7 +607,8 @@ public:
                 _engine->getScene().getTransferFunction());
         _handle(ENDPOINT_SCENE, _engine->getScene());
 
-        _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics());
+        _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics(),
+                   SLOW_THROTTLE);
 
         _handleFrameBuffer();
         _handleSimulationHistogram();
@@ -682,34 +676,35 @@ public:
             buildJsonRpcSchemaRequestReturnOnly<ImageGenerator::ImageBase64>(
                 {METHOD_IMAGE_JPEG,
                  "Get the current state of " + METHOD_IMAGE_JPEG}));
+    }
 
-        _wsBroadcastOperations[METHOD_IMAGE_JPEG] = [this] {
-            if (_engine->getFrameBuffer().isModified())
-            {
-                const auto& params =
-                    _parametersManager.getApplicationParameters();
-                const auto fps = params.getImageStreamFPS();
-                if (fps == 0)
-                    return;
+    void _broadcastImageJpeg()
+    {
+        auto& frameBuffer = _engine->getFrameBuffer();
+        if (!frameBuffer.isModified())
+            return;
 
-                const auto elapsed = _timer.elapsed() + _leftover;
-                const auto duration = 1.0 / fps;
-                if (elapsed < duration)
-                    return;
+        const auto& params = _parametersManager.getApplicationParameters();
+        const auto fps = params.getImageStreamFPS();
+        if (fps == 0)
+            return;
 
-                _leftover = elapsed - duration;
-                for (; _leftover > duration;)
-                    _leftover -= duration;
-                _timer.start();
+        const auto elapsed = _timer.elapsed() + _leftover;
+        const auto duration = 1.0 / fps;
+        if (elapsed < duration)
+            return;
 
-                const auto image =
-                    _imageGenerator.createJPEG(_engine->getFrameBuffer(),
-                                               params.getJpegCompression());
-                if (image.size > 0)
-                    _rocketsServer->broadcastBinary(
-                        (const char*)image.data.get(), image.size);
-            }
-        };
+        _leftover = elapsed - duration;
+        for (; _leftover > duration;)
+            _leftover -= duration;
+        _timer.start();
+
+        const auto image =
+            _imageGenerator.createJPEG(frameBuffer,
+                                       params.getJpegCompression());
+        if (image.size > 0)
+            _rocketsServer->broadcastBinary((const char*)image.data.get(),
+                                            image.size);
     }
 
     void _handleSimulationHistogram()
@@ -862,9 +857,6 @@ public:
                     "Resets the camera to its initial values"},
                    [this] {
                        _engine->setDefaultCamera();
-                       _jsonrpcServer->notify(getNotificationEndpointName(
-                                                  ENDPOINT_CAMERA),
-                                              _engine->getCamera());
                        _engine->triggerRender();
                    });
     }
@@ -898,7 +890,7 @@ public:
                 engine->getParametersManager().getStreamParameters();
             if (::from_json(streamParams, request.message))
             {
-                streamParams.markModified();
+                streamParams.markModified(false);
                 engine->triggerRender();
 
                 const auto& msg =
@@ -987,7 +979,7 @@ public:
                     return Response{to_json(false)};
 
                 ::from_json(**i, request.message);
-                engine->getScene().markModified();
+                engine->getScene().markModified(false);
                 engine->triggerRender();
                 return Response{to_json(true)};
             });
@@ -1142,7 +1134,7 @@ public:
 
                 ::from_json(*instance, request.message);
                 model->getModel().markInstancesDirty();
-                scene.markModified();
+                scene.markModified(false);
                 engine->triggerRender();
                 return Response{to_json(true)};
             });
@@ -1212,8 +1204,7 @@ public:
 
     EnginePtr _engine;
 
-    using WsBroadcastOperations = std::map<std::string, std::function<void()>>;
-    WsBroadcastOperations _wsBroadcastOperations;
+    std::unordered_map<std::string, Throttle> _throttle;
 
     std::unordered_map<std::string, std::string> _schemas;
 

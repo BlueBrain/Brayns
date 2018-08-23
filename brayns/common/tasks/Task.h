@@ -105,7 +105,7 @@ public:
     template <typename F>
     Task(F&& functor)
     {
-        _task = async::spawn(_setupFunctor(functor));
+        _task = async::spawn(_setupFunctor(std::move(functor)));
     }
 
     /** NOP for this task; tasks are running after construction. */

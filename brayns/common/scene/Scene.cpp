@@ -129,9 +129,11 @@ size_t Scene::addModel(ModelDescriptorPtr model)
     model->getModel().buildBoundingBox();
     model->getModel().commit();
 
-    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    model->setModelID(_modelID++);
-    _modelDescriptors.push_back(model);
+    {
+        std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+        model->setModelID(_modelID++);
+        _modelDescriptors.push_back(model);
+    }
     markModified();
 
     // add default instance of this model to render something
@@ -142,17 +144,20 @@ size_t Scene::addModel(ModelDescriptorPtr model)
 
 void Scene::removeModel(const size_t id)
 {
-    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-    auto i =
-        std::remove_if(_modelDescriptors.begin(), _modelDescriptors.end(),
-                       [id](auto desc) { return id == desc->getModelID(); });
-    if (i == _modelDescriptors.end())
-        return;
+    {
+        std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+        auto i = std::remove_if(_modelDescriptors.begin(),
+                                _modelDescriptors.end(), [id](auto desc) {
+                                    return id == desc->getModelID();
+                                });
+        if (i == _modelDescriptors.end())
+            return;
 
-    // we don't know which model used simulations, but we safely unset it.
-    setSimulationHandler(nullptr);
+        // we don't know which model used simulations, but we safely unset it.
+        setSimulationHandler(nullptr);
 
-    _modelDescriptors.erase(i, _modelDescriptors.end());
+        _modelDescriptors.erase(i, _modelDescriptors.end());
+    }
     markModified();
 }
 

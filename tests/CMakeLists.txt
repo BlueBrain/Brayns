@@ -53,6 +53,7 @@ else()
     plugin.cpp
     renderer.cpp
     snapshot.cpp
+    throttle.cpp
     webAPI.cpp
 )
 endif()

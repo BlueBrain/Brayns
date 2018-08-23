@@ -9,6 +9,8 @@ set(ROCKETSPLUGIN_HEADERS
   ImageGenerator.h
   RocketsPlugin.h
   SnapshotTask.h
+  Throttle.h
+  Timeout.h
   jsonPropertyMap.h
   jsonSerialization.h
   jsonUtils.h
@@ -17,6 +19,8 @@ set(ROCKETSPLUGIN_HEADERS
 set(ROCKETSPLUGIN_SOURCES
   ImageGenerator.cpp
   RocketsPlugin.cpp
+  Throttle.cpp
+  Timeout.cpp
   staticjson/staticjson.cpp
 )
 
