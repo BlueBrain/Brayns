@@ -76,7 +76,7 @@ void OSPRayCamera::setClipPlanes(const ClipPlanes& clipPlanes)
     if (_clipPlanes == clipPlanes)
         return;
     _clipPlanes = clipPlanes;
-    markModified();
+    markModified(false);
 }
 
 bool OSPRayCamera::isSideBySideStereo() const
