@@ -35,6 +35,8 @@ struct Cone
         , upRadius{ur}
         , timestamp{ts}
         , texture_coords{t}
+        , materialID(-1)
+
     {
     }
 
@@ -46,6 +48,7 @@ struct Cone
     float upRadius{0};
     float timestamp{0};
     Vector2f texture_coords{0.f, 0.f};
+    int32 materialID = -1;
 };
 }
 

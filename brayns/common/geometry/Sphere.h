@@ -33,6 +33,7 @@ struct Sphere
         , radius{r}
         , timestamp{ts}
         , texture_coords{t}
+        , materialID(-1)
     {
     }
 
@@ -42,6 +43,7 @@ struct Sphere
     float radius{0};
     float timestamp{0};
     Vector2f texture_coords{0.f, 0.f};
+    int32 materialID = -1;
 };
 }
 #endif // SPHERE_H
