@@ -34,14 +34,6 @@ struct ExtendedSpheres : public ospray::Geometry
     float radius;
     int32 materialID;
 
-    size_t numExtendedSpheres;
-    size_t bytesPerExtendedSphere;
-    int64 offset_center;
-    int64 offset_radius;
-    int64 offset_timestamp;
-    int64 offset_texture_coords;
-    int64 offset_materialID;
-
     ospray::Ref<ospray::Data> data;
     ospray::Ref<ospray::Data> materialList;
 

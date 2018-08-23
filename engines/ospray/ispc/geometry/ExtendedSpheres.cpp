@@ -38,26 +38,16 @@ void ExtendedSpheres::finalize(ospray::Model* model)
 {
     radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);
-    bytesPerExtendedSphere =
-        getParam1i("bytes_per_extended_sphere", sizeof(brayns::Sphere));
-    offset_center =
-        getParam1i("offset_center", offsetof(struct brayns::Sphere, center));
-    offset_radius =
-        getParam1i("offset_radius", offsetof(struct brayns::Sphere, radius));
-    offset_timestamp = getParam1i("offset_timestamp",
-                                  offsetof(struct brayns::Sphere, timestamp));
-    offset_texture_coords =
-        getParam1i("offset_texture_coords",
-                   offsetof(struct brayns::Sphere, texture_coords));
-    offset_materialID = getParam1i("offset_materialID", -1);
     data = getParamData("extendedspheres", nullptr);
     materialList = getParamData("materialList", nullptr);
+
+    constexpr size_t bytesPerExtendedSphere = sizeof(brayns::Sphere);
 
     if (data.ptr == nullptr)
         throw std::runtime_error(
             "#ospray:geometry/extendedspheres: "
             "no 'extendedspheres' data specified");
-    numExtendedSpheres = data->numBytes / bytesPerExtendedSphere;
+    const size_t numExtendedSpheres = data->numBytes / bytesPerExtendedSphere;
 
     if (numExtendedSpheres >= (1ULL << 30))
     {
@@ -88,10 +78,7 @@ void ExtendedSpheres::finalize(ospray::Model* model)
     }
     ispc::ExtendedSpheresGeometry_set(getIE(), model->getIE(), data->data,
                                       ispcMaterialList, numExtendedSpheres,
-                                      bytesPerExtendedSphere, radius,
-                                      materialID, offset_center, offset_radius,
-                                      offset_timestamp, offset_texture_coords,
-                                      offset_materialID);
+                                      radius, materialID);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSpheres, extendedspheres);

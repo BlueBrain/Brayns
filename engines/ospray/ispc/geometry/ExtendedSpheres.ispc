@@ -32,22 +32,25 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+struct ExtendedSphere
+{
+    vec3f center;
+    float radius;
+    float timestamp;
+    vec2f texture_coords;
+    int32 materialID;
+};
+
 struct ExtendedSpheres
 {
     uniform Geometry geometry;
 
-    uniform uint8* uniform data;
+    uniform ExtendedSphere* uniform data;
     uniform Material* uniform* materialList;
 
     float radius;
     int materialID;
-    int offset_center;
-    int offset_radius;
-    int offset_timestamp;
-    int offset_texture_coords;
-    int offset_materialID;
     int32 numExtendedSpheres;
-    int32 bytesPerExtendedSphere;
 };
 
 typedef uniform float uniform_float;
@@ -68,10 +71,8 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ns = Ng;
 
     // Store timestamp as texture coordinate
-    uniform uint8* spherePtr =
-        this->data + this->bytesPerExtendedSphere * ray.primID;
-    const vec2f tex =
-        *((uniform vec2f*)(spherePtr + this->offset_texture_coords));
+    uniform ExtendedSphere* spherePtr = this->data + ray.primID;
+    const vec2f tex = spherePtr->texture_coords;
 
     dg.st.x = tex.x;
     dg.st.y = tex.y;
@@ -88,39 +89,13 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
         if (dot(ray.dir, Ns) >= 0.f)
             Ns = neg(Ns);
     }
-    if ((flags & DG_MATERIALID) && (this->offset_materialID >= 0))
+    if ((flags & DG_MATERIALID) && spherePtr->materialID >= 0)
     {
-        const uniform int32 primsPerPage = (1024 * 1024 * 128);
-        if (any(ray.primID >= primsPerPage))
-        {
-            const int primPageID = ray.primID / primsPerPage;
-            const int localPrimID = ray.primID % primsPerPage;
-            foreach_unique(primPage in primPageID)
-            {
-                uniform uint8* uniform pagePtr =
-                    this->data + (((int64)primPage) * primsPerPage *
-                                  this->bytesPerExtendedSphere);
+        uniform ExtendedSphere* spherePtr = this->data + ray.primID;
+        dg.materialID = spherePtr->materialID;
 
-                uniform uint8* spherePtr =
-                    pagePtr + this->bytesPerExtendedSphere * localPrimID;
-
-                dg.materialID = *((uniform uint32 * varying)(
-                    spherePtr + this->offset_materialID));
-
-                if (this->materialList)
-                    dg.material = this->materialList[dg.materialID];
-            }
-        }
-        else
-        {
-            uniform uint8* spherePtr =
-                this->data + this->bytesPerExtendedSphere * ray.primID;
-            dg.materialID = *((uniform uint32 *
-                               varying)(spherePtr + this->offset_materialID));
-
-            if (this->materialList)
-                dg.material = this->materialList[dg.materialID];
-        }
+        if (this->materialList)
+            dg.material = this->materialList[dg.materialID];
     }
     dg.Ng = Ng;
     dg.Ns = Ns;
@@ -129,16 +104,12 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
 void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
                             uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform uint8* uniform spherePtr =
-        geometry->data +
-        geometry->bytesPerExtendedSphere * ((uniform int64)primID);
+    uniform ExtendedSphere* uniform spherePtr = geometry->data + primID;
 
     uniform float radius = geometry->radius;
-    if (geometry->offset_radius >= 0)
-        radius = *((uniform float*)(spherePtr + geometry->offset_radius));
+    radius = spherePtr->radius;
 
-    uniform vec3f center =
-        *((uniform vec3f*)(spherePtr + geometry->offset_center));
+    uniform vec3f center = spherePtr->center;
     bbox =
         make_box3fa(center - make_vec3f(radius), center + make_vec3f(radius));
 }
@@ -146,22 +117,16 @@ void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
 void ExtendedSpheres_intersect(uniform ExtendedSpheres* uniform geometry,
                                varying Ray& ray, uniform size_t primID)
 {
-    uniform uint8* uniform spherePtr =
-        geometry->data +
-        geometry->bytesPerExtendedSphere * ((uniform int64)primID);
+    uniform ExtendedSphere* uniform spherePtr = geometry->data + primID;
 
-    uniform float timestamp =
-        *((uniform float*)(spherePtr + geometry->offset_timestamp));
+    uniform float timestamp = spherePtr->timestamp;
 
     if (ray.time > 0 && timestamp > ray.time)
         return;
 
     uniform float radius = geometry->radius;
-    if (geometry->offset_radius >= 0)
-        radius =
-            *((uniform float* uniform)(spherePtr + geometry->offset_radius));
-    uniform vec3f center =
-        *((uniform vec3f * uniform)(spherePtr + geometry->offset_center));
+    radius = spherePtr->radius;
+    uniform vec3f center = spherePtr->center;
     const float approxDist = dot(center - ray.org, ray.dir);
     const vec3f closeOrg = ray.org + approxDist * ray.dir;
     const vec3f A = center - closeOrg;
@@ -211,10 +176,7 @@ export void* uniform ExtendedSpheres_create(void* uniform cppEquivalent)
 export void ExtendedSpheresGeometry_set(
     void* uniform _geom, void* uniform _model, void* uniform data,
     void* uniform materialList, int uniform numExtendedSpheres,
-    int uniform bytesPerExtendedSphere, float uniform radius,
-    int uniform materialID, int uniform offset_center,
-    int uniform offset_radius, int uniform offset_timestamp,
-    int uniform offset_texture_coords, int uniform offset_materialID)
+    float uniform radius, int uniform materialID)
 {
     uniform ExtendedSpheres* uniform geom =
         (uniform ExtendedSpheres * uniform)_geom;
@@ -228,15 +190,8 @@ export void ExtendedSpheresGeometry_set(
     geom->materialList = (Material**)materialList;
     geom->numExtendedSpheres = numExtendedSpheres;
     geom->radius = radius;
-    geom->data = (uniform uint8 * uniform)data;
+    geom->data = (uniform ExtendedSphere * uniform)data;
     geom->materialID = materialID;
-    geom->bytesPerExtendedSphere = bytesPerExtendedSphere;
-
-    geom->offset_center = offset_center;
-    geom->offset_radius = offset_radius;
-    geom->offset_timestamp = offset_timestamp;
-    geom->offset_texture_coords = offset_texture_coords;
-    geom->offset_materialID = offset_materialID;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,
