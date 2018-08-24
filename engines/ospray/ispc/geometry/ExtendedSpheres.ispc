@@ -32,6 +32,8 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+#include "utils/SafeIndex.ih"
+
 struct ExtendedSphere
 {
     vec3f center;
@@ -40,6 +42,8 @@ struct ExtendedSphere
     vec2f texture_coords;
     int32 materialID;
 };
+
+__define_safe_index(ExtendedSphere);
 
 struct ExtendedSpheres
 {
@@ -71,7 +75,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ns = Ng;
 
     // Store timestamp as texture coordinate
-    uniform ExtendedSphere* spherePtr = this->data + ray.primID;
+    uniform ExtendedSphere* spherePtr = safe_index(this->data, ray.primID);
     const vec2f tex = spherePtr->texture_coords;
 
     dg.st.x = tex.x;
@@ -91,7 +95,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     }
     if ((flags & DG_MATERIALID) && spherePtr->materialID >= 0)
     {
-        uniform ExtendedSphere* spherePtr = this->data + ray.primID;
+        uniform ExtendedSphere* spherePtr = safe_index(this->data, ray.primID);
         dg.materialID = spherePtr->materialID;
 
         if (this->materialList)
@@ -104,7 +108,8 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
 void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
                             uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform ExtendedSphere* uniform spherePtr = geometry->data + primID;
+    uniform ExtendedSphere* uniform spherePtr =
+        safe_index(geometry->data, primID);
 
     uniform float radius = geometry->radius;
     radius = spherePtr->radius;
@@ -117,7 +122,8 @@ void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
 void ExtendedSpheres_intersect(uniform ExtendedSpheres* uniform geometry,
                                varying Ray& ray, uniform size_t primID)
 {
-    uniform ExtendedSphere* uniform spherePtr = geometry->data + primID;
+    uniform ExtendedSphere* uniform spherePtr =
+        safe_index(geometry->data, primID);
 
     uniform float timestamp = spherePtr->timestamp;
 
