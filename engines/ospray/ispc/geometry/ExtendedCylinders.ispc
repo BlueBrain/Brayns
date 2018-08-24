@@ -28,6 +28,8 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+#include "utils/SafeIndex.ih"
+
 struct ExtendedCylinder
 {
     vec3f center;
@@ -37,6 +39,8 @@ struct ExtendedCylinder
     vec2f texture_coords;
     int32 materialID;
 };
+
+__define_safe_index(ExtendedCylinder);
 
 struct ExtendedCylinders
 {
@@ -54,7 +58,8 @@ typedef uniform float uniform_float;
 void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
                               uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform ExtendedCylinder* uniform cylinderPtr = geometry->data + primID;
+    uniform ExtendedCylinder* uniform cylinderPtr =
+        safe_index(geometry->data, primID);
 
     uniform float radius = geometry->radius;
     radius = cylinderPtr->radius;
@@ -68,7 +73,8 @@ void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
 void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
                                  varying Ray& ray, uniform size_t primID)
 {
-    uniform ExtendedCylinder* uniform cylinderPtr = geometry->data + primID;
+    uniform ExtendedCylinder* uniform cylinderPtr =
+        safe_index(geometry->data, primID);
     uniform float radius = geometry->radius;
 
     uniform float timestamp = cylinderPtr->timestamp;
@@ -157,7 +163,7 @@ static void ExtendedCylinders_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform ExtendedCylinder* cylinderPtr = this->data + ray.primID;
+    uniform ExtendedCylinder* cylinderPtr = safe_index(this->data, ray.primID);
     // Store value as texture coordinate
     const vec2f tex = cylinderPtr->texture_coords;
 
