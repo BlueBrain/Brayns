@@ -32,6 +32,8 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+#include "utils/SafeIndex.ih"
+
 struct ExtendedCone
 {
     vec3f center;
@@ -42,6 +44,8 @@ struct ExtendedCone
     vec2f texture_coords;
     int32 materialID;
 };
+
+__define_safe_index(ExtendedCone);
 
 struct ExtendedCones
 {
@@ -58,7 +62,7 @@ struct ExtendedCones
 void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
                           uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform ExtendedCone* uniform conePtr = geometry->data + primID;
+    uniform ExtendedCone* uniform conePtr = safe_index(geometry->data, primID);
     uniform float extent = geometry->radius;
     extent = conePtr->centerRadius;
 
@@ -75,7 +79,7 @@ void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
 void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
                              varying Ray& ray, uniform size_t primID)
 {
-    uniform ExtendedCone* uniform conePtr = geometry->data + primID;
+    uniform ExtendedCone* uniform conePtr = safe_index(geometry->data, primID);
 
     uniform float radius0 = geometry->radius;
     radius0 = conePtr->centerRadius;
@@ -224,7 +228,7 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform ExtendedCone* conePtr = this->data + ray.primID;
+    uniform ExtendedCone* conePtr = safe_index(this->data, ray.primID);
     // Store value as texture coordinate
     const vec2f tex = conePtr->texture_coords;
 
