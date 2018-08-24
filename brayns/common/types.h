@@ -305,9 +305,9 @@ struct RenderInput
     Matrix4f modelview;
     Matrix4f projection;
 
-    Vector3f position;
-    Vector3f target;
-    Vector3f up;
+    Vector3d position;
+    Vector3d target;
+    Vector3d up;
 };
 
 struct RenderOutput

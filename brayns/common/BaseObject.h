@@ -20,6 +20,9 @@
 
 #pragma once
 
+#include <cmath>
+#include <type_traits>
+
 namespace brayns
 {
 class BaseObject
@@ -45,7 +48,7 @@ protected:
     template <typename T>
     void _updateValue(T& member, const T& newValue)
     {
-        if (member != newValue)
+        if (!_isEqual(member, newValue))
         {
             member = newValue;
             _modified = true;
@@ -53,6 +56,22 @@ protected:
     }
 
 private:
+    template <class T>
+    bool _isEqual(
+        const T& a, const T& b,
+        typename std::enable_if<std::is_floating_point<T>::value>::type* = 0)
+    {
+        return std::fabs(a - b) < 0.000001;
+    }
+
+    template <class T>
+    bool _isEqual(
+        const T& a, const T& b,
+        typename std::enable_if<!std::is_floating_point<T>::value>::type* = 0)
+    {
+        return a == b;
+    }
+
     bool _modified{true};
 };
 }

@@ -52,11 +52,11 @@ public:
               camera is "looking at" or focused on
        @param up the x, y, z coordinates of the up vector's end point
     */
-    BRAYNS_API void set(const Vector3f& position, const Vector3f& target,
-                        const Vector3f& up);
+    BRAYNS_API void set(const Vector3d& position, const Vector3d& target,
+                        const Vector3d& up);
 
-    BRAYNS_API void setInitialState(const Vector3f& position,
-                                    const Vector3f& target, const Vector3f& up);
+    BRAYNS_API void setInitialState(const Vector3d& position,
+                                    const Vector3d& target, const Vector3d& up);
 
     BRAYNS_API void setInitialState(const Boxd& boundingBox);
 
