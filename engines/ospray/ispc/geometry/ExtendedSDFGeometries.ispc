@@ -32,6 +32,8 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+#include "utils/SafeIndex.ih"
+
 #define SDF_TYPE_SPHERE 0
 #define SDF_TYPE_PILL 1
 #define SDF_TYPE_CONE_PILL 2
@@ -149,6 +151,8 @@ struct ExtendedSDFGeometry
     uint8 type;
 };
 
+__define_safe_index(ExtendedSDFGeometry);
+
 struct ExtendedSDFGeometries
 {
     uniform Geometry geometry;
@@ -162,32 +166,6 @@ struct ExtendedSDFGeometries
 
     uint64 numExtendedSDFGeometries;
 };
-
-//////////////////////////////////////////////////////////////////////////////
-// These are functions needed to handle > 2GB buffers in ispc.
-
-#define __define_safe_index(T)                                              \
-    inline const uniform T* uniform safe_index(const T* uniform const base, \
-                                               const uniform uint64 index)  \
-    {                                                                       \
-        const uniform uint64 tSize = sizeof(uniform T);                     \
-        const uniform uint64 offsetBytes = tSize * index;                   \
-        return (const T* uniform const)((uint64)base + offsetBytes);        \
-    }                                                                       \
-                                                                            \
-    inline const uniform T* varying safe_index(const T* varying const base, \
-                                               const varying uint64 index)  \
-    {                                                                       \
-        const uniform uint64 tSize = sizeof(uniform T);                     \
-        const varying uint64 offsetBytes = tSize * index;                   \
-        return (const T* varying const)((uint64)base + offsetBytes);        \
-    }
-
-__define_safe_index(ExtendedSDFGeometry);
-__define_safe_index(uint64);
-__define_safe_index(int64);
-__define_safe_index(uint32);
-__define_safe_index(int32);
 
 /////////////////////////////////////////////////////////////////////////////
 
