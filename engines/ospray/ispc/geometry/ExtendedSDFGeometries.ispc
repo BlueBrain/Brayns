@@ -151,8 +151,6 @@ struct ExtendedSDFGeometry
     uint8 type;
 };
 
-__define_safe_index(ExtendedSDFGeometry);
-
 struct ExtendedSDFGeometries
 {
     uniform Geometry geometry;
@@ -167,6 +165,12 @@ struct ExtendedSDFGeometries
     uint64 numExtendedSDFGeometries;
     uniform bool useSafeIndex;
 };
+
+__define_safe_index(ExtendedSDFGeometry);
+__define_safe_index(uint64);
+__define_safe_index(int64);
+__define_safe_index(uint32);
+__define_safe_index(int32);
 
 /////////////////////////////////////////////////////////////////////////////
 

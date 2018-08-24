@@ -48,8 +48,3 @@
     __define_safe_index_internal(T, uniform, );      \
     __define_safe_index_internal(T, varying, const); \
     __define_safe_index_internal(T, varying, );
-
-__define_safe_index(uint64);
-__define_safe_index(int64);
-__define_safe_index(uint32);
-__define_safe_index(int32);
