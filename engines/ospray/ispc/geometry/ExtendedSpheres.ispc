@@ -55,6 +55,7 @@ struct ExtendedSpheres
     float radius;
     int materialID;
     int32 numExtendedSpheres;
+    uniform bool useSafeIndex;
 };
 
 typedef uniform float uniform_float;
@@ -75,7 +76,8 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ns = Ng;
 
     // Store timestamp as texture coordinate
-    uniform ExtendedSphere* spherePtr = safe_index(this->data, ray.primID);
+    uniform ExtendedSphere* spherePtr =
+        safe_index(this->useSafeIndex, this->data, ray.primID);
     const vec2f tex = spherePtr->texture_coords;
 
     dg.st.x = tex.x;
@@ -95,7 +97,8 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     }
     if ((flags & DG_MATERIALID) && spherePtr->materialID >= 0)
     {
-        uniform ExtendedSphere* spherePtr = safe_index(this->data, ray.primID);
+        uniform ExtendedSphere* spherePtr =
+            safe_index(this->useSafeIndex, this->data, ray.primID);
         dg.materialID = spherePtr->materialID;
 
         if (this->materialList)
@@ -109,7 +112,7 @@ void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
                             uniform size_t primID, uniform box3fa& bbox)
 {
     uniform ExtendedSphere* uniform spherePtr =
-        safe_index(geometry->data, primID);
+        safe_index(geometry->useSafeIndex, geometry->data, primID);
 
     uniform float radius = geometry->radius;
     radius = spherePtr->radius;
@@ -123,7 +126,7 @@ void ExtendedSpheres_intersect(uniform ExtendedSpheres* uniform geometry,
                                varying Ray& ray, uniform size_t primID)
 {
     uniform ExtendedSphere* uniform spherePtr =
-        safe_index(geometry->data, primID);
+        safe_index(geometry->useSafeIndex, geometry->data, primID);
 
     uniform float timestamp = spherePtr->timestamp;
 
@@ -182,7 +185,7 @@ export void* uniform ExtendedSpheres_create(void* uniform cppEquivalent)
 export void ExtendedSpheresGeometry_set(
     void* uniform _geom, void* uniform _model, void* uniform data,
     void* uniform materialList, int uniform numExtendedSpheres,
-    float uniform radius, int uniform materialID)
+    float uniform radius, int uniform materialID, bool uniform useSafeIndex)
 {
     uniform ExtendedSpheres* uniform geom =
         (uniform ExtendedSpheres * uniform)_geom;
@@ -198,6 +201,7 @@ export void ExtendedSpheresGeometry_set(
     geom->radius = radius;
     geom->data = (uniform ExtendedSphere * uniform)data;
     geom->materialID = materialID;
+    geom->useSafeIndex = useSafeIndex;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

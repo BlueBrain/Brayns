@@ -165,6 +165,7 @@ struct ExtendedSDFGeometries
     int materialID;
 
     uint64 numExtendedSDFGeometries;
+    uniform bool useSafeIndex;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -172,31 +173,32 @@ struct ExtendedSDFGeometries
 uniform uint64 primToIdx(uniform ExtendedSDFGeometries* uniform geometry,
                          uniform uint64 primID)
 {
-    return *safe_index(geometry->geometryRefs, primID);
+    return *safe_index(geometry->useSafeIndex, geometry->geometryRefs, primID);
 }
 
 varying uint64 primToIdxVarying(uniform ExtendedSDFGeometries* geometry,
                                 varying uint64 primID)
 {
-    return *safe_index(geometry->geometryRefs, primID);
+    return *safe_index(geometry->useSafeIndex, geometry->geometryRefs, primID);
 }
 
 uniform uint64 getNeighbourIdx(uniform ExtendedSDFGeometries* uniform geometry,
                                uniform uint64 startIdx, uniform uint64 neighIdx)
 {
-    return *safe_index(geometry->neighbours, startIdx + neighIdx);
+    return *safe_index(geometry->useSafeIndex, geometry->neighbours,
+                       startIdx + neighIdx);
 }
 
 uniform ExtendedSDFGeometry uniform getGeometry(
     uniform ExtendedSDFGeometries* uniform geometry, uniform uint64 idx)
 {
-    return *safe_index(geometry->geometries, idx);
+    return *safe_index(geometry->useSafeIndex, geometry->geometries, idx);
 }
 
 varying ExtendedSDFGeometry getGeometryVarying(
     uniform ExtendedSDFGeometries* geometry, varying uint64 idx)
 {
-    return *safe_index(geometry->geometries, idx);
+    return *safe_index(geometry->useSafeIndex, geometry->geometries, idx);
 }
 
 static void ExtendedSDFGeometries_postIntersect(
@@ -403,7 +405,8 @@ export void* uniform ExtendedSDFGeometries_create(void* uniform cppEquivalent)
 export void ExtendedSDFGeometriesGeometry_set(
     void* uniform _geom, void* uniform _model, void* uniform data,
     void* uniform materialList, int uniform numExtendedSDFGeometries,
-    int uniform materialID, void* uniform neighbours, void* uniform geometries)
+    int uniform materialID, void* uniform neighbours, void* uniform geometries,
+    bool uniform useSafeIndex)
 {
     uniform ExtendedSDFGeometries* uniform geom =
         (uniform ExtendedSDFGeometries * uniform)_geom;
@@ -420,6 +423,7 @@ export void ExtendedSDFGeometriesGeometry_set(
     geom->neighbours = (uniform uint64 * uniform)neighbours;
     geom->geometries = (uniform ExtendedSDFGeometry * uniform)geometries;
     geom->materialID = materialID;
+    geom->useSafeIndex = useSafeIndex;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

@@ -27,6 +27,7 @@
 // ispc-generated files
 #include "ExtendedSDFGeometries_ispc.h"
 
+#include <climits>
 #include <cstddef>
 
 namespace ospray
@@ -64,6 +65,10 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
             "without causing address overflows)");
     }
 
+    const bool useSafeIndex = data->numBytes >= INT_MAX ||
+                              neighbours->numBytes >= INT_MAX ||
+                              geometries->numBytes >= INT_MAX;
+
     void* ispcMaterialList = nullptr;
 
     if (materialList)
@@ -82,7 +87,7 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
                                             ispcMaterialList,
                                             numExtendedSDFGeometries,
                                             materialID, neighbours->data,
-                                            geometries->data);
+                                            geometries->data, useSafeIndex);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSDFGeometries, extendedsdfgeometries);

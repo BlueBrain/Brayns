@@ -32,6 +32,8 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+#include "ospray/SDK/math/vec.ih"
+
 #include "utils/SafeIndex.ih"
 
 struct ExtendedCone
@@ -57,12 +59,14 @@ struct ExtendedCones
     float length;
     int materialID;
     int32 numExtendedCones;
+    uniform bool useSafeIndex;
 };
 
 void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
                           uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform ExtendedCone* uniform conePtr = safe_index(geometry->data, primID);
+    uniform ExtendedCone* uniform conePtr =
+        safe_index(geometry->useSafeIndex, geometry->data, primID);
     uniform float extent = geometry->radius;
     extent = conePtr->centerRadius;
 
@@ -79,7 +83,8 @@ void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
 void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
                              varying Ray& ray, uniform size_t primID)
 {
-    uniform ExtendedCone* uniform conePtr = safe_index(geometry->data, primID);
+    uniform ExtendedCone* uniform conePtr =
+        safe_index(geometry->useSafeIndex, geometry->data, primID);
 
     uniform float radius0 = geometry->radius;
     radius0 = conePtr->centerRadius;
@@ -228,7 +233,8 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform ExtendedCone* conePtr = safe_index(this->data, ray.primID);
+    uniform ExtendedCone* conePtr =
+        safe_index(this->useSafeIndex, this->data, ray.primID);
     // Store value as texture coordinate
     const vec2f tex = conePtr->texture_coords;
 
@@ -261,12 +267,10 @@ export void* uniform ExtendedCones_create(void* uniform cppEquivalent)
     return geom;
 }
 
-export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
-                                      void* uniform data,
-                                      int uniform numExtendedCones,
-                                      float uniform radius,
-                                      float uniform length,
-                                      int uniform materialID)
+export void ExtendedConesGeometry_set(
+    void* uniform _geom, void* uniform _model, void* uniform data,
+    int uniform numExtendedCones, float uniform radius, float uniform length,
+    int uniform materialID, bool uniform useSafeIndex)
 {
     uniform ExtendedCones* uniform geom =
         (uniform ExtendedCones * uniform)_geom;
@@ -282,6 +286,7 @@ export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
     geom->length = length;
     geom->data = (uniform ExtendedCone * uniform)data;
     geom->materialID = materialID;
+    geom->useSafeIndex = useSafeIndex;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

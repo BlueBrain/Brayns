@@ -24,38 +24,30 @@
 
 // These are functions needed to handle > 2GB buffers in ispc.
 
-#define __define_safe_index(T)                                              \
-    inline const uniform T* uniform safe_index(const T* uniform const base, \
-                                               const uniform uint64 index)  \
-    {                                                                       \
-        const uniform uint64 tSize = sizeof(uniform T);                     \
-        const uniform uint64 offsetBytes = tSize * index;                   \
-        return (const T* uniform const)((uint64)base + offsetBytes);        \
-    }                                                                       \
-                                                                            \
-    inline uniform T* uniform safe_index(T* uniform const base,             \
-                                         const uniform uint64 index)        \
-    {                                                                       \
-        const uniform uint64 tSize = sizeof(uniform T);                     \
-        const uniform uint64 offsetBytes = tSize * index;                   \
-        return (T* uniform const)((uint64)base + offsetBytes);              \
-    }                                                                       \
-                                                                            \
-    inline const uniform T* varying safe_index(const T* varying const base, \
-                                               const varying uint64 index)  \
-    {                                                                       \
-        const uniform uint64 tSize = sizeof(uniform T);                     \
-        const varying uint64 offsetBytes = tSize * index;                   \
-        return (const T* varying const)((uint64)base + offsetBytes);        \
-    }                                                                       \
-                                                                            \
-    inline uniform T* varying safe_index(T* varying const base,             \
-                                         const varying uint64 index)        \
-    {                                                                       \
-        const uniform uint64 tSize = sizeof(uniform T);                     \
-        const varying uint64 offsetBytes = tSize * index;                   \
-        return (T* varying const)((uint64)base + offsetBytes);              \
+#define __define_safe_index_internal(T, UNIFORM_VARYING, CONST)       \
+    inline CONST uniform T* UNIFORM_VARYING                           \
+        safe_index(const UNIFORM_VARYING bool useSafeIndex,           \
+                   CONST T* UNIFORM_VARYING const base,               \
+                   const UNIFORM_VARYING uint64 index)                \
+    {                                                                 \
+        if (useSafeIndex)                                             \
+        {                                                             \
+            const uniform uint64 tSize = sizeof(uniform T);           \
+            const UNIFORM_VARYING uint64 offsetBytes = tSize * index; \
+            return (CONST T * UNIFORM_VARYING const)((uint64)base +   \
+                                                     offsetBytes);    \
+        }                                                             \
+        else                                                          \
+        {                                                             \
+            return base + index;                                      \
+        }                                                             \
     }
+
+#define __define_safe_index(T)                       \
+    __define_safe_index_internal(T, uniform, const); \
+    __define_safe_index_internal(T, uniform, );      \
+    __define_safe_index_internal(T, varying, const); \
+    __define_safe_index_internal(T, varying, );
 
 __define_safe_index(uint64);
 __define_safe_index(int64);

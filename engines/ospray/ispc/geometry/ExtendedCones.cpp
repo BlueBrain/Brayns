@@ -28,6 +28,8 @@
 // ispc-generated files
 #include "ExtendedCones_ispc.h"
 
+#include <climits>
+
 namespace ospray
 {
 ExtendedCones::ExtendedCones()
@@ -42,6 +44,7 @@ void ExtendedCones::finalize(ospray::Model* model)
     materialID = getParam1i("materialID", 0);
     data = getParamData("extendedcones", nullptr);
     constexpr size_t bytesPerCone = sizeof(brayns::Cone);
+    const bool useSafeIndex = data->numBytes > INT_MAX;
 
     if (data.ptr == nullptr || bytesPerCone == 0)
         throw std::runtime_error(
@@ -50,7 +53,7 @@ void ExtendedCones::finalize(ospray::Model* model)
     const size_t numExtendedCones = data->numBytes / bytesPerCone;
     ispc::ExtendedConesGeometry_set(getIE(), model->getIE(), data->data,
                                     numExtendedCones, radius, length,
-                                    materialID);
+                                    materialID, useSafeIndex);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedCones, extendedcones);

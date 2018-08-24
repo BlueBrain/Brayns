@@ -51,6 +51,7 @@ struct ExtendedCylinders
     float radius;
     int materialID;
     int32 numExtendedCylinders;
+    uniform bool useSafeIndex;
 };
 
 typedef uniform float uniform_float;
@@ -59,8 +60,7 @@ void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
                               uniform size_t primID, uniform box3fa& bbox)
 {
     uniform ExtendedCylinder* uniform cylinderPtr =
-        safe_index(geometry->data, primID);
-
+        safe_index(geometry->useSafeIndex, geometry->data, primID);
     uniform float radius = geometry->radius;
     radius = cylinderPtr->radius;
 
@@ -74,7 +74,7 @@ void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
                                  varying Ray& ray, uniform size_t primID)
 {
     uniform ExtendedCylinder* uniform cylinderPtr =
-        safe_index(geometry->data, primID);
+        safe_index(geometry->useSafeIndex, geometry->data, primID);
     uniform float radius = geometry->radius;
 
     uniform float timestamp = cylinderPtr->timestamp;
@@ -163,7 +163,8 @@ static void ExtendedCylinders_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform ExtendedCylinder* cylinderPtr = safe_index(this->data, ray.primID);
+    uniform ExtendedCylinder* cylinderPtr =
+        safe_index(this->useSafeIndex, this->data, ray.primID);
     // Store value as texture coordinate
     const vec2f tex = cylinderPtr->texture_coords;
 
@@ -198,12 +199,10 @@ export void* uniform ExtendedCylinders_create(void* uniform cppEquivalent)
     return geom;
 }
 
-export void ExtendedCylindersGeometry_set(void* uniform _geom,
-                                          void* uniform _model,
-                                          void* uniform data,
-                                          int uniform numExtendedCylinders,
-                                          float uniform radius,
-                                          int uniform materialID)
+export void ExtendedCylindersGeometry_set(
+    void* uniform _geom, void* uniform _model, void* uniform data,
+    int uniform numExtendedCylinders, float uniform radius,
+    int uniform materialID, bool uniform useSafeIndex)
 {
     uniform ExtendedCylinders* uniform geom =
         (uniform ExtendedCylinders * uniform)_geom;
@@ -218,6 +217,7 @@ export void ExtendedCylindersGeometry_set(void* uniform _geom,
     geom->radius = radius;
     geom->data = (uniform ExtendedCylinder * uniform)data;
     geom->materialID = materialID;
+    geom->useSafeIndex = useSafeIndex;
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,
