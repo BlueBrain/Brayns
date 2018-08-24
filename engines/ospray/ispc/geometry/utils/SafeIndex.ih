@@ -33,12 +33,28 @@
         return (const T* uniform const)((uint64)base + offsetBytes);        \
     }                                                                       \
                                                                             \
+    inline uniform T* uniform safe_index(T* uniform const base,             \
+                                         const uniform uint64 index)        \
+    {                                                                       \
+        const uniform uint64 tSize = sizeof(uniform T);                     \
+        const uniform uint64 offsetBytes = tSize * index;                   \
+        return (T* uniform const)((uint64)base + offsetBytes);              \
+    }                                                                       \
+                                                                            \
     inline const uniform T* varying safe_index(const T* varying const base, \
                                                const varying uint64 index)  \
     {                                                                       \
         const uniform uint64 tSize = sizeof(uniform T);                     \
         const varying uint64 offsetBytes = tSize * index;                   \
         return (const T* varying const)((uint64)base + offsetBytes);        \
+    }                                                                       \
+                                                                            \
+    inline uniform T* varying safe_index(T* varying const base,             \
+                                         const varying uint64 index)        \
+    {                                                                       \
+        const uniform uint64 tSize = sizeof(uniform T);                     \
+        const varying uint64 offsetBytes = tSize * index;                   \
+        return (T* varying const)((uint64)base + offsetBytes);              \
     }
 
 __define_safe_index(uint64);
