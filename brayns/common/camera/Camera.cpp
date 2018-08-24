@@ -43,16 +43,16 @@ Camera& Camera::operator=(const Camera& rhs)
     return *this;
 }
 
-void Camera::set(const Vector3f& position, const Vector3f& target,
-                 const Vector3f& upVector)
+void Camera::set(const Vector3d& position, const Vector3d& target,
+                 const Vector3d& upVector)
 {
     setPosition(position);
     setTarget(target);
     setUp(upVector);
 }
 
-void Camera::setInitialState(const Vector3f& position, const Vector3f& target,
-                             const Vector3f& upVector)
+void Camera::setInitialState(const Vector3d& position, const Vector3d& target,
+                             const Vector3d& upVector)
 {
     _initialPosition = position;
     _initialTarget = target;
@@ -62,12 +62,12 @@ void Camera::setInitialState(const Vector3f& position, const Vector3f& target,
 
 BRAYNS_API void Camera::setInitialState(const Boxd& boundingBox)
 {
-    const Vector3f& target = boundingBox.getCenter();
-    const Vector3f& diag = boundingBox.getSize();
-    Vector3f position = target;
+    const auto& target = boundingBox.getCenter();
+    const auto& diag = boundingBox.getSize();
+    auto position = target;
     position.z() += diag.find_max();
 
-    const Vector3f up = Vector3f(0.f, 1.f, 0.f);
+    const Vector3d up(0., 1., 0.);
     setInitialState(position, target, up);
 
     BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
