@@ -48,7 +48,6 @@ struct ExtendedCylinders
 
     uniform ExtendedCylinder* uniform data;
 
-    float radius;
     int materialID;
     int32 numExtendedCylinders;
     uniform bool useSafeIndex;
@@ -61,8 +60,7 @@ void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
 {
     uniform ExtendedCylinder* uniform cylinderPtr =
         safe_index(geometry->useSafeIndex, geometry->data, primID);
-    uniform float radius = geometry->radius;
-    radius = cylinderPtr->radius;
+    uniform float radius = cylinderPtr->radius;
 
     uniform vec3f v0 = cylinderPtr->center;
     uniform vec3f v1 = cylinderPtr->up;
@@ -75,14 +73,13 @@ void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
 {
     uniform ExtendedCylinder* uniform cylinderPtr =
         safe_index(geometry->useSafeIndex, geometry->data, primID);
-    uniform float radius = geometry->radius;
 
     uniform float timestamp = cylinderPtr->timestamp;
 
     if (ray.time > 0 && timestamp > ray.time)
         return;
 
-    radius = cylinderPtr->radius;
+    uniform float radius = cylinderPtr->radius;
     uniform vec3f v0 = cylinderPtr->center;
     uniform vec3f v1 = cylinderPtr->up;
 
@@ -199,10 +196,12 @@ export void* uniform ExtendedCylinders_create(void* uniform cppEquivalent)
     return geom;
 }
 
-export void ExtendedCylindersGeometry_set(
-    void* uniform _geom, void* uniform _model, void* uniform data,
-    int uniform numExtendedCylinders, float uniform radius,
-    int uniform materialID, bool uniform useSafeIndex)
+export void ExtendedCylindersGeometry_set(void* uniform _geom,
+                                          void* uniform _model,
+                                          void* uniform data,
+                                          int uniform numExtendedCylinders,
+                                          int uniform materialID,
+                                          bool uniform useSafeIndex)
 {
     uniform ExtendedCylinders* uniform geom =
         (uniform ExtendedCylinders * uniform)_geom;
@@ -214,7 +213,6 @@ export void ExtendedCylindersGeometry_set(
     geom->geometry.model = model;
     geom->geometry.geomID = geomID;
     geom->numExtendedCylinders = numExtendedCylinders;
-    geom->radius = radius;
     geom->data = (uniform ExtendedCylinder * uniform)data;
     geom->materialID = materialID;
     geom->useSafeIndex = useSafeIndex;

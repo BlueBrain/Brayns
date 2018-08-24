@@ -38,7 +38,6 @@ ExtendedSpheres::ExtendedSpheres()
 
 void ExtendedSpheres::finalize(ospray::Model* model)
 {
-    radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);
     data = getParamData("extendedspheres", nullptr);
     materialList = getParamData("materialList", nullptr);
@@ -81,7 +80,7 @@ void ExtendedSpheres::finalize(ospray::Model* model)
     }
     ispc::ExtendedSpheresGeometry_set(getIE(), model->getIE(), data->data,
                                       ispcMaterialList, numExtendedSpheres,
-                                      radius, materialID, useSafeIndex);
+                                      materialID, useSafeIndex);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSpheres, extendedspheres);

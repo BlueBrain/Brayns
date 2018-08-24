@@ -52,7 +52,6 @@ struct ExtendedSpheres
     uniform ExtendedSphere* uniform data;
     uniform Material* uniform* materialList;
 
-    float radius;
     int materialID;
     int32 numExtendedSpheres;
     uniform bool useSafeIndex;
@@ -114,8 +113,7 @@ void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
     uniform ExtendedSphere* uniform spherePtr =
         safe_index(geometry->useSafeIndex, geometry->data, primID);
 
-    uniform float radius = geometry->radius;
-    radius = spherePtr->radius;
+    uniform float radius = spherePtr->radius;
 
     uniform vec3f center = spherePtr->center;
     bbox =
@@ -133,8 +131,7 @@ void ExtendedSpheres_intersect(uniform ExtendedSpheres* uniform geometry,
     if (ray.time > 0 && timestamp > ray.time)
         return;
 
-    uniform float radius = geometry->radius;
-    radius = spherePtr->radius;
+    uniform float radius = spherePtr->radius;
     uniform vec3f center = spherePtr->center;
     const float approxDist = dot(center - ray.org, ray.dir);
     const vec3f closeOrg = ray.org + approxDist * ray.dir;
@@ -185,7 +182,7 @@ export void* uniform ExtendedSpheres_create(void* uniform cppEquivalent)
 export void ExtendedSpheresGeometry_set(
     void* uniform _geom, void* uniform _model, void* uniform data,
     void* uniform materialList, int uniform numExtendedSpheres,
-    float uniform radius, int uniform materialID, bool uniform useSafeIndex)
+    int uniform materialID, bool uniform useSafeIndex)
 {
     uniform ExtendedSpheres* uniform geom =
         (uniform ExtendedSpheres * uniform)_geom;
@@ -198,7 +195,6 @@ export void ExtendedSpheresGeometry_set(
     geom->geometry.geomID = geomID;
     geom->materialList = (Material**)materialList;
     geom->numExtendedSpheres = numExtendedSpheres;
-    geom->radius = radius;
     geom->data = (uniform ExtendedSphere * uniform)data;
     geom->materialID = materialID;
     geom->useSafeIndex = useSafeIndex;

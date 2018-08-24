@@ -31,7 +31,6 @@ struct ExtendedSpheres : public ospray::Geometry
     std::string toString() const final { return "hbp::ExtendedSpheres"; }
     void finalize(ospray::Model* model) final;
 
-    float radius;
     int32 materialID;
 
     ospray::Ref<ospray::Data> data;

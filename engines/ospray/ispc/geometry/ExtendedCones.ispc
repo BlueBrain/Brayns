@@ -55,8 +55,6 @@ struct ExtendedCones
 
     uniform ExtendedCone* uniform data;
 
-    float radius;
-    float length;
     int materialID;
     int32 numExtendedCones;
     uniform bool useSafeIndex;
@@ -67,10 +65,10 @@ void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
 {
     uniform ExtendedCone* uniform conePtr =
         safe_index(geometry->useSafeIndex, geometry->data, primID);
-    uniform float extent = geometry->radius;
-    extent = conePtr->centerRadius;
 
+    uniform float extent = conePtr->centerRadius;
     uniform float upRadius = conePtr->upRadius;
+
     if (upRadius > extent)
         extent = upRadius;
 
@@ -86,11 +84,8 @@ void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
     uniform ExtendedCone* uniform conePtr =
         safe_index(geometry->useSafeIndex, geometry->data, primID);
 
-    uniform float radius0 = geometry->radius;
-    radius0 = conePtr->centerRadius;
-
-    uniform float radius1 = geometry->radius;
-    radius1 = conePtr->upRadius;
+    uniform float radius0 = conePtr->centerRadius;
+    uniform float radius1 = conePtr->upRadius;
 
     uniform float timestamp = conePtr->timestamp;
 
@@ -267,10 +262,11 @@ export void* uniform ExtendedCones_create(void* uniform cppEquivalent)
     return geom;
 }
 
-export void ExtendedConesGeometry_set(
-    void* uniform _geom, void* uniform _model, void* uniform data,
-    int uniform numExtendedCones, float uniform radius, float uniform length,
-    int uniform materialID, bool uniform useSafeIndex)
+export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
+                                      void* uniform data,
+                                      int uniform numExtendedCones,
+                                      int uniform materialID,
+                                      bool uniform useSafeIndex)
 {
     uniform ExtendedCones* uniform geom =
         (uniform ExtendedCones * uniform)_geom;
@@ -282,8 +278,6 @@ export void ExtendedConesGeometry_set(
     geom->geometry.model = model;
     geom->geometry.geomID = geomID;
     geom->numExtendedCones = numExtendedCones;
-    geom->radius = radius;
-    geom->length = length;
     geom->data = (uniform ExtendedCone * uniform)data;
     geom->materialID = materialID;
     geom->useSafeIndex = useSafeIndex;

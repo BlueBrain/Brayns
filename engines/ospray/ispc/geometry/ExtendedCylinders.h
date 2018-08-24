@@ -29,7 +29,6 @@ struct ExtendedCylinders : public ospray::Geometry
     std::string toString() const final { return "ospray::Cylinders"; }
     void finalize(ospray::Model* model) final;
 
-    float radius;
     int32 materialID;
 
     ospray::Ref<ospray::Data> data;

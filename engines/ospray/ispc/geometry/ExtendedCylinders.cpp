@@ -38,7 +38,6 @@ ExtendedCylinders::ExtendedCylinders()
 
 void ExtendedCylinders::finalize(ospray::Model* model)
 {
-    radius = getParam1f("radius", 0.01f);
     materialID = getParam1i("materialID", 0);
     data = getParamData("extendedcylinders", nullptr);
 
@@ -52,8 +51,8 @@ void ExtendedCylinders::finalize(ospray::Model* model)
     const bool useSafeIndex = data->numBytes >= INT_MAX;
     const size_t numExtendedCylinders = data->numBytes / bytesPerCylinder;
     ispc::ExtendedCylindersGeometry_set(getIE(), model->getIE(), data->data,
-                                        numExtendedCylinders, radius,
-                                        materialID, useSafeIndex);
+                                        numExtendedCylinders, materialID,
+                                        useSafeIndex);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedCylinders, extendedcylinders);
