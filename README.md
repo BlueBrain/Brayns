@@ -149,6 +149,18 @@ cmake .. -DBRAYNS_DEFLECT_ENABLED=ON:OFF
 cmake .. -DBRAYNS_NETWORKING_ENABLED=ON:OFF
 ```
 
+#### Enable/Disable [VRPN](https://github.com/assimp/assimp) tracking plugin.
+```
+cmake .. -DBRAYNS_VRPN_ENABLED=ON:OFF
+```
+
+#### Enable/Disable optional OSPRay modules.
+```
+cmake .. -DBRAYNS_OPTIX_ENABLED=ON:OFF
+cmake .. -DBRAYNS_OPENDECK_ENABLED=ON:OFF
+cmake .. -DBRAYNS_STEREOSCOPY_ENABLED=ON:OFF
+```
+
 ## Running Brayns viewer
 
 ```

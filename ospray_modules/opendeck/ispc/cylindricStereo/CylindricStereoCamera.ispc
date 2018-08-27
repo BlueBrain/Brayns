@@ -23,6 +23,8 @@
 #include "math/math.ih"
 #include "math/sampling.ih"
 
+const float openDeckRadius = 2.55f;
+
 void CylindricStereoCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
                                    const varying CameraSample &sample)
 {
@@ -35,12 +37,14 @@ void CylindricStereoCamera_initRay(uniform Camera *uniform _self, varying Ray &r
     vec3f dir;
     float radius;
     float alpha;
+    float beta = atan(self->interpupillaryDistance / (2.0f * openDeckRadius));
     if( self->side_by_side )
     {
         if(screen.x < 0.5)
         {
             radius = self->interpupillaryDistance * 0.5f;
             alpha = 2.0f * screen.x * -pi;
+            beta = -beta;
         }
         else
         {
@@ -55,7 +59,7 @@ void CylindricStereoCamera_initRay(uniform Camera *uniform _self, varying Ray &r
     }
 
     const float y = self->imgPlane_size_y * (screen.y - 0.5f);
-    dir = normalize(make_vec3f(sinf(alpha), y, -cosf(alpha)));
+    dir = normalize(make_vec3f(sinf(alpha + beta), y, -cosf(alpha + beta)));
 
     const LinearSpace3f cameraSpace = make_LinearSpace3f( self->dir_cam, self->dir_dv, self->dir_du);
     dir = normalize( cameraSpace * dir );
@@ -65,7 +69,6 @@ void CylindricStereoCamera_initRay(uniform Camera *uniform _self, varying Ray &r
     org.z = self->org.z + self->dir_cam.z * radius * cosf(alpha) + self->dir_du.z * radius * sinf(alpha);
 
     const float time = Camera_shutterTime(_self, sample.time);
-    //vec3f org = self->org;
     setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
 }
 

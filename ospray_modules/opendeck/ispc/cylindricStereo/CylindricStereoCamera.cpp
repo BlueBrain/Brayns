@@ -41,7 +41,7 @@ void CylindricStereoCamera::commit()
     Camera::commit();
 
     const float fovY = OPENDECK_FOV_Y;
-    const StereoMode stereoMode = (StereoMode)getParam1i("stereoMode", OSP_STEREO_NONE);
+    const StereoMode stereoMode = (StereoMode)getParam1i("stereoMode", OSP_STEREO_SIDE_BY_SIDE);
     const float interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
 
     dir = normalize(dir);

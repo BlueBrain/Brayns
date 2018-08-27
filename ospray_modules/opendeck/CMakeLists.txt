@@ -14,11 +14,13 @@ include(Common)
 set(OSPRAY_MODULE_OPENDECK_SOURCES
     opendeck.cpp
     ispc/cylindric/CylindricCamera.cpp
-    ispc/cylindricStereo/CylindricStereoCamera.cpp)
+    ispc/cylindricStereo/CylindricStereoCamera.cpp
+    ispc/cylindricStereoTracked/CylindricStereoTrackedCamera.cpp)
 
 set(OSPRAY_MODULE_OPENDECK_ISPC_SOURCES
     ispc/cylindric/CylindricCamera.ispc
-    ispc/cylindricStereo/CylindricStereoCamera.ispc)
+    ispc/cylindricStereo/CylindricStereoCamera.ispc
+    ispc/cylindricStereoTracked/CylindricStereoTrackedCamera.ispc)
 
 # Compile ispc code
 list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
@@ -34,4 +36,5 @@ common_library(ospray_module_opendeck)
 
 set(DOXYGEN_MAINPAGE_MD README.md)
 set(DOXYGEN_EXTRA_INPUT "${PROJECT_SOURCE_DIR}/README.md")
+set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 include(DoxygenRule)

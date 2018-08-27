@@ -31,4 +31,5 @@ common_library(ospray_module_stereoscopy)
 
 set(DOXYGEN_MAINPAGE_MD README.md)
 set(DOXYGEN_EXTRA_INPUT "${PROJECT_SOURCE_DIR}/README.md")
+set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 include(DoxygenRule)
