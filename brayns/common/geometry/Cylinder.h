@@ -20,16 +20,16 @@
 
 #pragma once
 
-#include "ExtendedCylinder.h"
+#include "ISPCCylinder.h"
 
 namespace brayns
 {
-struct Cylinder : ExtendedCylinder
+struct Cylinder : ISPCCylinder
 {
     Cylinder(const Vector3f c = {0.f, 0.f, 0.f},
              const Vector3f u = {0.f, 0.f, 0.f}, const float r = 0.f,
              const float ts = 0.f, const Vector2f t = Vector2f(), int32 m = -1)
-        : ExtendedCylinder{c, u, r, ts, t, m}
+        : ISPCCylinder{c, u, r, ts, t, m}
     {
     }
 };

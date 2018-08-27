@@ -22,10 +22,9 @@
 
 #include "CommonDefines.h"
 
-struct ExtendedCylinder
+struct ISPCSphere
 {
     VEC3_TYPE center;
-    VEC3_TYPE up;
     float radius;
     float timestamp;
     VEC2_TYPE texture_coords;

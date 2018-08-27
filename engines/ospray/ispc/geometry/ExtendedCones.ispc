@@ -36,15 +36,15 @@
 
 #include "utils/SafeIncrement.ih"
 
-#include "brayns/common/geometry/ExtendedCone.h"
+#include "brayns/common/geometry/ISPCCone.h"
 
-DEFINE_SAFE_INCREMENT(ExtendedCone);
+DEFINE_SAFE_INCREMENT(ISPCCone);
 
 struct ExtendedCones
 {
     uniform Geometry geometry;
 
-    uniform ExtendedCone* uniform data;
+    uniform ISPCCone* uniform data;
 
     int materialID;
     int32 numExtendedCones;
@@ -54,7 +54,7 @@ struct ExtendedCones
 void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
                           uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform ExtendedCone* uniform conePtr =
+    uniform ISPCCone* uniform conePtr =
         safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float extent = conePtr->centerRadius;
@@ -72,7 +72,7 @@ void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
 void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
                              varying Ray& ray, uniform size_t primID)
 {
-    uniform ExtendedCone* uniform conePtr =
+    uniform ISPCCone* uniform conePtr =
         safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float radius0 = conePtr->centerRadius;
@@ -219,7 +219,7 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform ExtendedCone* conePtr =
+    uniform ISPCCone* conePtr =
         safeIncrement(this->useSafeIncrement, this->data, ray.primID);
     // Store value as texture coordinate
     const vec2f tex = conePtr->texture_coords;
@@ -268,7 +268,7 @@ export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
     geom->geometry.model = model;
     geom->geometry.geomID = geomID;
     geom->numExtendedCones = numExtendedCones;
-    geom->data = (uniform ExtendedCone * uniform)data;
+    geom->data = (uniform ISPCCone * uniform)data;
     geom->materialID = materialID;
     geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedCones);
 

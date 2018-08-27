@@ -22,10 +22,12 @@
 
 #include "CommonDefines.h"
 
-struct ExtendedSphere
+struct ISPCCone
 {
     VEC3_TYPE center;
-    float radius;
+    VEC3_TYPE up;
+    float centerRadius;
+    float upRadius;
     float timestamp;
     VEC2_TYPE texture_coords;
     int32 materialID;

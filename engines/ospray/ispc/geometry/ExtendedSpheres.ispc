@@ -34,15 +34,15 @@
 
 #include "utils/SafeIncrement.ih"
 
-#include "brayns/common/geometry/ExtendedSphere.h"
+#include "brayns/common/geometry/ISPCSphere.h"
 
-DEFINE_SAFE_INCREMENT(ExtendedSphere);
+DEFINE_SAFE_INCREMENT(ISPCSphere);
 
 struct ExtendedSpheres
 {
     uniform Geometry geometry;
 
-    uniform ExtendedSphere* uniform data;
+    uniform ISPCSphere* uniform data;
     uniform Material* uniform* materialList;
 
     int materialID;
@@ -68,7 +68,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ns = Ng;
 
     // Store timestamp as texture coordinate
-    uniform ExtendedSphere* spherePtr =
+    uniform ISPCSphere* spherePtr =
         safeIncrement(this->useSafeIncrement, this->data, ray.primID);
     const vec2f tex = spherePtr->texture_coords;
 
@@ -89,7 +89,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     }
     if ((flags & DG_MATERIALID) && spherePtr->materialID >= 0)
     {
-        uniform ExtendedSphere* spherePtr =
+        uniform ISPCSphere* spherePtr =
             safeIncrement(this->useSafeIncrement, this->data, ray.primID);
         dg.materialID = spherePtr->materialID;
 
@@ -103,7 +103,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
 void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
                             uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform ExtendedSphere* uniform spherePtr =
+    uniform ISPCSphere* uniform spherePtr =
         safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float radius = spherePtr->radius;
@@ -116,7 +116,7 @@ void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
 void ExtendedSpheres_intersect(uniform ExtendedSpheres* uniform geometry,
                                varying Ray& ray, uniform size_t primID)
 {
-    uniform ExtendedSphere* uniform spherePtr =
+    uniform ISPCSphere* uniform spherePtr =
         safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float timestamp = spherePtr->timestamp;
@@ -190,7 +190,7 @@ export void ExtendedSpheresGeometry_set(void* uniform _geom,
     geom->geometry.geomID = geomID;
     geom->materialList = (Material**)materialList;
     geom->numExtendedSpheres = numExtendedSpheres;
-    geom->data = (uniform ExtendedSphere * uniform)data;
+    geom->data = (uniform ISPCSphere * uniform)data;
     geom->materialID = materialID;
     geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedSpheres);
 

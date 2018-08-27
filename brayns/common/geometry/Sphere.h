@@ -20,15 +20,15 @@
 
 #pragma once
 
-#include "ExtendedSphere.h"
+#include "ISPCSphere.h"
 
 namespace brayns
 {
-struct Sphere : ExtendedSphere
+struct Sphere : ISPCSphere
 {
     Sphere(const Vector3f c = {0.f, 0.f, 0.f}, float r = 0.f, float ts = 0.f,
            const Vector2f t = {0.f, 0.f}, int32 m = -1)
-        : ExtendedSphere{c, r, ts, t, m}
+        : ISPCSphere{c, r, ts, t, m}
     {
     }
 };

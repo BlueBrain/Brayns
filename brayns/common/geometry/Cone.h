@@ -20,16 +20,16 @@
 
 #pragma once
 
-#include "ExtendedCone.h"
+#include "ISPCCone.h"
 
 namespace brayns
 {
-struct Cone : ExtendedCone
+struct Cone : ISPCCone
 {
     Cone(const Vector3f c = {0.f, 0.f, 0.f}, const Vector3f u = {0.f, 0.f, 0.f},
          const float cr = 0.f, const float ur = 0.f, const float ts = 0.f,
          const Vector2f t = Vector2f(0.f, 0.f), int32 m = -1)
-        : ExtendedCone{c, u, cr, ur, ts, t, m}
+        : ISPCCone{c, u, cr, ur, ts, t, m}
     {
     }
 };

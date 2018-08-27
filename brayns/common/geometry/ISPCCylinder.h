@@ -22,12 +22,11 @@
 
 #include "CommonDefines.h"
 
-struct ExtendedCone
+struct ISPCCylinder
 {
     VEC3_TYPE center;
     VEC3_TYPE up;
-    float centerRadius;
-    float upRadius;
+    float radius;
     float timestamp;
     VEC2_TYPE texture_coords;
     int32 materialID;
