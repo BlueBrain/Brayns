@@ -407,6 +407,14 @@ void OSPRayEngine::_createCameras()
             properties.setProperty(
                 {"zeroParallaxPlane", "Zero parallax plane", 1.});
         }
+        if(camera == "cylindricStereo")
+        {
+            properties.setProperty({"stereoMode",
+                                    "Stereo mode",
+                                    (int)StereoMode::OSP_STEREO_SIDE_BY_SIDE,
+                                    {"None", "Left eye", "Right eye",
+                                    "Side by side"}});
+        }
         ospCamera->setProperties(camera, properties);
     }
     ospCamera->setCurrentType(rp.getCameraType());

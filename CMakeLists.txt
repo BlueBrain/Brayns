@@ -6,7 +6,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(Brayns VERSION 0.7.1)
+project(Brayns VERSION 0.8.0)
 set(Brayns_VERSION_ABI 1)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
@@ -79,6 +79,14 @@ if(TARGET Deflect)
   option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
 else()
   unset(BRAYNS_DEFLECT_ENABLED)
+endif()
+
+# vrpn plugin
+common_find_package(VRPN)
+if(VRPN_FOUND)
+  option(BRAYNS_VRPN_ENABLED "Activate vrpn plugin" ON)
+else()
+  unset(BRAYNS_VRPN_ENABLED)
 endif()
 
 # Data access
@@ -182,41 +190,11 @@ endif()
 
 if(BRAYNS_OSPRAY_ENABLED)
   add_subdirectory(engines/ospray)
+  add_subdirectory(ospray_modules)
 endif()
 add_subdirectory(plugins)
 add_subdirectory(brayns)
 add_subdirectory(tests)
-
-# OSPRay modules
-if(BRAYNS_OSPRAY_ENABLED)
-  # Optix module
-  option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" OFF)
-  if(BRAYNS_OPTIX_ENABLED)
-    add_subdirectory(ospray_modules/optix)
-    if(TARGET ospray_module_optix)
-      add_dependencies(braynsOSPRayEnginePlugin ospray_module_optix)
-    endif()
-  endif()
-
-  # OpenDeck module
-  option(BRAYNS_OPENDECK_ENABLED "Activate OpenDeck module" OFF)
-  if(BRAYNS_OPENDECK_ENABLED)
-    add_subdirectory(ospray_modules/opendeck)
-    if(TARGET ospray_module_opendeck)
-      add_dependencies(braynsOSPRayEnginePlugin ospray_module_opendeck)
-    endif()
-  endif()
-
-  # Stereoscopy module
-  option(BRAYNS_STEREOSCOPY_ENABLED "Activate Stereoscopy module" OFF)
-  if(BRAYNS_STEREOSCOPY_ENABLED)
-    add_subdirectory(ospray_modules/stereoscopy)
-    if(TARGET ospray_module_stereoscopy)
-      add_dependencies(braynsOSPRayEnginePlugin ospray_module_stereoscopy)
-    endif()
-  endif()
-
-endif()
 
 include(CommonCPack)
 
