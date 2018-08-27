@@ -34,14 +34,7 @@
 
 #include "utils/SafeIndex.ih"
 
-struct ExtendedSphere
-{
-    vec3f center;
-    float radius;
-    float timestamp;
-    vec2f texture_coords;
-    int32 materialID;
-};
+#include "brayns/common/geometry/ExtendedSphere.h"
 
 __define_safe_index(ExtendedSphere);
 

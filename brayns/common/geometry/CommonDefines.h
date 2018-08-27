@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,25 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#if __cplusplus
+#include <brayns/common/types.h>
+#define VEC2_TYPE brayns::Vector2f
+#define VEC3_TYPE brayns::Vector3f
+#endif
 
-#include "ExtendedCylinder.h"
-
-namespace brayns
-{
-struct Cylinder : ExtendedCylinder
-{
-    Cylinder(const Vector3f c = {0.f, 0.f, 0.f},
-             const Vector3f u = {0.f, 0.f, 0.f}, const float r = 0.f,
-             const float ts = 0.f, const Vector2f t = Vector2f(), int32 m = -1)
-
-    {
-        center = c;
-        up = u;
-        radius = r;
-        timestamp = ts;
-        texture_coords = t;
-        materialID = m;
-    }
-};
-}
+#if ISPC
+#define VEC2_TYPE vec2f
+#define VEC3_TYPE vec3f
+#endif

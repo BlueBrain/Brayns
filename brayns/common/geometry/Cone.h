@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,38 +18,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CONE_H
-#define CONE_H
+#pragma once
 
-#include <brayns/common/types.h>
+#include "ExtendedCone.h"
 
 namespace brayns
 {
-struct Cone
+struct Cone : ExtendedCone
 {
-    Cone(const Vector3f c, const Vector3f u, const float cr, const float ur,
-         const float ts = 0.f, const Vector2f t = Vector2f(0.f, 0.f))
-        : center{c}
-        , up{u}
-        , centerRadius{cr}
-        , upRadius{ur}
-        , timestamp{ts}
-        , texture_coords{t}
-        , materialID(-1)
+    Cone(const Vector3f c = {0.f, 0.f, 0.f}, const Vector3f u = {0.f, 0.f, 0.f},
+         const float cr = 0.f, const float ur = 0.f, const float ts = 0.f,
+         const Vector2f t = Vector2f(0.f, 0.f), int32 m = -1)
 
     {
+        center = c;
+        up = u;
+        centerRadius = cr;
+        upRadius = ur;
+        timestamp = ts;
+        texture_coords = t;
+        materialID = m;
     }
-
-    Cone() = default;
-
-    Vector3f center;
-    Vector3f up;
-    float centerRadius{0};
-    float upRadius{0};
-    float timestamp{0};
-    Vector2f texture_coords{0.f, 0.f};
-    int32 materialID = -1;
 };
 }
-
-#endif // CONE_H

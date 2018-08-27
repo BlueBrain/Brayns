@@ -28,17 +28,8 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
+#include "brayns/common/geometry/ExtendedCylinder.h"
 #include "utils/SafeIndex.ih"
-
-struct ExtendedCylinder
-{
-    vec3f center;
-    vec3f up;
-    float radius;
-    float timestamp;
-    vec2f texture_coords;
-    int32 materialID;
-};
 
 __define_safe_index(ExtendedCylinder);
 

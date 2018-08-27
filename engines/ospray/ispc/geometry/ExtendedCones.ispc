@@ -36,16 +36,7 @@
 
 #include "utils/SafeIndex.ih"
 
-struct ExtendedCone
-{
-    vec3f center;
-    vec3f up;
-    float centerRadius;
-    float upRadius;
-    float timestamp;
-    vec2f texture_coords;
-    int32 materialID;
-};
+#include "brayns/common/geometry/ExtendedCone.h"
 
 __define_safe_index(ExtendedCone);
 
