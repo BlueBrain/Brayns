@@ -28,13 +28,8 @@ struct Sphere : ExtendedSphere
 {
     Sphere(const Vector3f c = {0.f, 0.f, 0.f}, float r = 0.f, float ts = 0.f,
            const Vector2f t = {0.f, 0.f}, int32 m = -1)
-
+        : ExtendedSphere{c, r, ts, t, m}
     {
-        center = c;
-        radius = r;
-        timestamp = ts;
-        texture_coords = t;
-        materialID = m;
     }
 };
 }

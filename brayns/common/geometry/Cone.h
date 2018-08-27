@@ -29,15 +29,8 @@ struct Cone : ExtendedCone
     Cone(const Vector3f c = {0.f, 0.f, 0.f}, const Vector3f u = {0.f, 0.f, 0.f},
          const float cr = 0.f, const float ur = 0.f, const float ts = 0.f,
          const Vector2f t = Vector2f(0.f, 0.f), int32 m = -1)
-
+        : ExtendedCone{c, u, cr, ur, ts, t, m}
     {
-        center = c;
-        up = u;
-        centerRadius = cr;
-        upRadius = ur;
-        timestamp = ts;
-        texture_coords = t;
-        materialID = m;
     }
 };
 }
