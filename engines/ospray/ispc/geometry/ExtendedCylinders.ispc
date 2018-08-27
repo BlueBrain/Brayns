@@ -200,8 +200,7 @@ export void ExtendedCylindersGeometry_set(void* uniform _geom,
                                           void* uniform _model,
                                           void* uniform data,
                                           int uniform numExtendedCylinders,
-                                          int uniform materialID,
-                                          bool uniform useSafeIndex)
+                                          int uniform materialID)
 {
     uniform ExtendedCylinders* uniform geom =
         (uniform ExtendedCylinders * uniform)_geom;
@@ -215,7 +214,7 @@ export void ExtendedCylindersGeometry_set(void* uniform _geom,
     geom->numExtendedCylinders = numExtendedCylinders;
     geom->data = (uniform ExtendedCylinder * uniform)data;
     geom->materialID = materialID;
-    geom->useSafeIndex = useSafeIndex;
+    geom->useSafeIndex = needs_safe_index(geom->data, numExtendedCylinders);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

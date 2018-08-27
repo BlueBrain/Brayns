@@ -51,6 +51,7 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
             "#ospray:geometry/ExtendedSDFGeometries: "
             "no 'ExtendedSDFGeometries' data specified");
     const size_t numExtendedSDFGeometries = data->numItems;
+    const size_t numNeighbours = neighbours->numItems;
 
     if (numExtendedSDFGeometries >= (1ULL << 30))
     {
@@ -64,10 +65,6 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
             "SDF geometries into a single geometry "
             "without causing address overflows)");
     }
-
-    const bool useSafeIndex = data->numBytes >= INT_MAX ||
-                              neighbours->numBytes >= INT_MAX ||
-                              geometries->numBytes >= INT_MAX;
 
     void* ispcMaterialList = nullptr;
 
@@ -87,7 +84,7 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
                                             ispcMaterialList,
                                             numExtendedSDFGeometries,
                                             materialID, neighbours->data,
-                                            geometries->data, useSafeIndex);
+                                            numNeighbours, geometries->data);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSDFGeometries, extendedsdfgeometries);

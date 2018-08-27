@@ -179,10 +179,12 @@ export void* uniform ExtendedSpheres_create(void* uniform cppEquivalent)
     return geom;
 }
 
-export void ExtendedSpheresGeometry_set(
-    void* uniform _geom, void* uniform _model, void* uniform data,
-    void* uniform materialList, int uniform numExtendedSpheres,
-    int uniform materialID, bool uniform useSafeIndex)
+export void ExtendedSpheresGeometry_set(void* uniform _geom,
+                                        void* uniform _model,
+                                        void* uniform data,
+                                        void* uniform materialList,
+                                        int uniform numExtendedSpheres,
+                                        int uniform materialID)
 {
     uniform ExtendedSpheres* uniform geom =
         (uniform ExtendedSpheres * uniform)_geom;
@@ -197,7 +199,7 @@ export void ExtendedSpheresGeometry_set(
     geom->numExtendedSpheres = numExtendedSpheres;
     geom->data = (uniform ExtendedSphere * uniform)data;
     geom->materialID = materialID;
-    geom->useSafeIndex = useSafeIndex;
+    geom->useSafeIndex = needs_safe_index(geom->data, numExtendedSpheres);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

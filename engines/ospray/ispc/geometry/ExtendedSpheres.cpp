@@ -49,7 +49,6 @@ void ExtendedSpheres::finalize(ospray::Model* model)
             "#ospray:geometry/extendedspheres: "
             "no 'extendedspheres' data specified");
     const size_t numExtendedSpheres = data->numBytes / bytesPerExtendedSphere;
-    const bool useSafeIndex = data->numBytes >= INT_MAX;
 
     if (numExtendedSpheres >= (1ULL << 30))
     {
@@ -80,7 +79,7 @@ void ExtendedSpheres::finalize(ospray::Model* model)
     }
     ispc::ExtendedSpheresGeometry_set(getIE(), model->getIE(), data->data,
                                       ispcMaterialList, numExtendedSpheres,
-                                      materialID, useSafeIndex);
+                                      materialID);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSpheres, extendedspheres);

@@ -168,9 +168,6 @@ struct ExtendedSDFGeometries
 
 __define_safe_index(ExtendedSDFGeometry);
 __define_safe_index(uint64);
-__define_safe_index(int64);
-__define_safe_index(uint32);
-__define_safe_index(int32);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -180,7 +177,7 @@ uniform uint64 primToIdx(uniform ExtendedSDFGeometries* uniform geometry,
     return *safe_index(geometry->useSafeIndex, geometry->geometryRefs, primID);
 }
 
-varying uint64 primToIdxVarying(uniform ExtendedSDFGeometries* geometry,
+varying uint64 primToIdxVarying(uniform ExtendedSDFGeometries* uniform geometry,
                                 varying uint64 primID)
 {
     return *safe_index(geometry->useSafeIndex, geometry->geometryRefs, primID);
@@ -200,7 +197,7 @@ uniform ExtendedSDFGeometry uniform getGeometry(
 }
 
 varying ExtendedSDFGeometry getGeometryVarying(
-    uniform ExtendedSDFGeometries* geometry, varying uint64 idx)
+    uniform ExtendedSDFGeometries* uniform geometry, varying uint64 idx)
 {
     return *safe_index(geometry->useSafeIndex, geometry->geometries, idx);
 }
@@ -409,8 +406,8 @@ export void* uniform ExtendedSDFGeometries_create(void* uniform cppEquivalent)
 export void ExtendedSDFGeometriesGeometry_set(
     void* uniform _geom, void* uniform _model, void* uniform data,
     void* uniform materialList, int uniform numExtendedSDFGeometries,
-    int uniform materialID, void* uniform neighbours, void* uniform geometries,
-    bool uniform useSafeIndex)
+    int uniform materialID, void* uniform neighbours, int uniform numNeighbours,
+    void* uniform geometries)
 {
     uniform ExtendedSDFGeometries* uniform geom =
         (uniform ExtendedSDFGeometries * uniform)_geom;
@@ -427,7 +424,11 @@ export void ExtendedSDFGeometriesGeometry_set(
     geom->neighbours = (uniform uint64 * uniform)neighbours;
     geom->geometries = (uniform ExtendedSDFGeometry * uniform)geometries;
     geom->materialID = materialID;
-    geom->useSafeIndex = useSafeIndex;
+
+    // NOTE: geom->data is always smaller than geom->geometries
+    geom->useSafeIndex =
+        needs_safe_index(geom->geometries, numExtendedSDFGeometries) ||
+        needs_safe_index(geom->neighbours, numNeighbours);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

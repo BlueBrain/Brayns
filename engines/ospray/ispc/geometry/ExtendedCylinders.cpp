@@ -48,11 +48,9 @@ void ExtendedCylinders::finalize(ospray::Model* model)
             "#ospray:geometry/extendedcylinders: "
             "no 'extendedcylinders' data specified");
 
-    const bool useSafeIndex = data->numBytes >= INT_MAX;
     const size_t numExtendedCylinders = data->numBytes / bytesPerCylinder;
     ispc::ExtendedCylindersGeometry_set(getIE(), model->getIE(), data->data,
-                                        numExtendedCylinders, materialID,
-                                        useSafeIndex);
+                                        numExtendedCylinders, materialID);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedCylinders, extendedcylinders);

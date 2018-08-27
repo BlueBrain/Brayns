@@ -24,27 +24,36 @@
 
 // These are functions needed to handle > 2GB buffers in ispc.
 
-#define __define_safe_index_internal(T, UNIFORM_VARYING, CONST)       \
-    inline CONST uniform T* UNIFORM_VARYING                           \
-        safe_index(const UNIFORM_VARYING bool useSafeIndex,           \
-                   CONST T* UNIFORM_VARYING const base,               \
-                   const UNIFORM_VARYING uint64 index)                \
-    {                                                                 \
-        if (useSafeIndex)                                             \
-        {                                                             \
-            const uniform uint64 tSize = sizeof(uniform T);           \
-            const UNIFORM_VARYING uint64 offsetBytes = tSize * index; \
-            return (CONST T * UNIFORM_VARYING const)((uint64)base +   \
-                                                     offsetBytes);    \
-        }                                                             \
-        else                                                          \
-        {                                                             \
-            return base + index;                                      \
-        }                                                             \
+#define INT_MAX 2147483647
+
+#define __define_safe_index_internal(T, UNIFORM_VARYING, CONST)               \
+    inline CONST uniform T* UNIFORM_VARYING safe_index(                       \
+        const uniform bool useSafeIndex, CONST T* UNIFORM_VARYING const base, \
+        const UNIFORM_VARYING uint64 index)                                   \
+    {                                                                         \
+        if (useSafeIndex)                                                     \
+        {                                                                     \
+            const uniform uint64 tSize = sizeof(uniform T);                   \
+            const UNIFORM_VARYING uint64 offsetBytes = tSize * index;         \
+            return (CONST T * UNIFORM_VARYING const)((uint64)base +           \
+                                                     offsetBytes);            \
+        }                                                                     \
+        else                                                                  \
+        {                                                                     \
+            return base + index;                                              \
+        }                                                                     \
+    }
+
+#define __define_needs_safe_index(T)                                         \
+    inline uniform bool needs_safe_index(const T* uniform ptr,               \
+                                         const uniform uint64 numGeometries) \
+    {                                                                        \
+        return (sizeof(uniform T) * numGeometries) >= INT_MAX;               \
     }
 
 #define __define_safe_index(T)                       \
     __define_safe_index_internal(T, uniform, const); \
     __define_safe_index_internal(T, uniform, );      \
     __define_safe_index_internal(T, varying, const); \
-    __define_safe_index_internal(T, varying, );
+    __define_safe_index_internal(T, varying, );      \
+    __define_needs_safe_index(T);

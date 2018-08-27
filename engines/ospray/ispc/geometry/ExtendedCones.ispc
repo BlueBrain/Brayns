@@ -265,8 +265,7 @@ export void* uniform ExtendedCones_create(void* uniform cppEquivalent)
 export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
                                       void* uniform data,
                                       int uniform numExtendedCones,
-                                      int uniform materialID,
-                                      bool uniform useSafeIndex)
+                                      int uniform materialID)
 {
     uniform ExtendedCones* uniform geom =
         (uniform ExtendedCones * uniform)_geom;
@@ -280,7 +279,7 @@ export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
     geom->numExtendedCones = numExtendedCones;
     geom->data = (uniform ExtendedCone * uniform)data;
     geom->materialID = materialID;
-    geom->useSafeIndex = useSafeIndex;
+    geom->useSafeIndex = needs_safe_index(geom->data, numExtendedCones);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,
