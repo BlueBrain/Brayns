@@ -32,11 +32,11 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
-#include "utils/SafeIndex.ih"
+#include "utils/SafeIncrement.ih"
 
 #include "brayns/common/geometry/ExtendedSphere.h"
 
-__define_safe_index(ExtendedSphere);
+DEFINE_SAFE_INCREMENT(ExtendedSphere);
 
 struct ExtendedSpheres
 {
@@ -47,7 +47,7 @@ struct ExtendedSpheres
 
     int materialID;
     int32 numExtendedSpheres;
-    uniform bool useSafeIndex;
+    uniform bool useSafeIncrement;
 };
 
 typedef uniform float uniform_float;
@@ -69,7 +69,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
 
     // Store timestamp as texture coordinate
     uniform ExtendedSphere* spherePtr =
-        safe_index(this->useSafeIndex, this->data, ray.primID);
+        safeIncrement(this->useSafeIncrement, this->data, ray.primID);
     const vec2f tex = spherePtr->texture_coords;
 
     dg.st.x = tex.x;
@@ -90,7 +90,7 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     if ((flags & DG_MATERIALID) && spherePtr->materialID >= 0)
     {
         uniform ExtendedSphere* spherePtr =
-            safe_index(this->useSafeIndex, this->data, ray.primID);
+            safeIncrement(this->useSafeIncrement, this->data, ray.primID);
         dg.materialID = spherePtr->materialID;
 
         if (this->materialList)
@@ -104,7 +104,7 @@ void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
                             uniform size_t primID, uniform box3fa& bbox)
 {
     uniform ExtendedSphere* uniform spherePtr =
-        safe_index(geometry->useSafeIndex, geometry->data, primID);
+        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float radius = spherePtr->radius;
 
@@ -117,7 +117,7 @@ void ExtendedSpheres_intersect(uniform ExtendedSpheres* uniform geometry,
                                varying Ray& ray, uniform size_t primID)
 {
     uniform ExtendedSphere* uniform spherePtr =
-        safe_index(geometry->useSafeIndex, geometry->data, primID);
+        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float timestamp = spherePtr->timestamp;
 
@@ -192,7 +192,7 @@ export void ExtendedSpheresGeometry_set(void* uniform _geom,
     geom->numExtendedSpheres = numExtendedSpheres;
     geom->data = (uniform ExtendedSphere * uniform)data;
     geom->materialID = materialID;
-    geom->useSafeIndex = needs_safe_index(geom->data, numExtendedSpheres);
+    geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedSpheres);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

@@ -34,11 +34,11 @@
 
 #include "ospray/SDK/math/vec.ih"
 
-#include "utils/SafeIndex.ih"
+#include "utils/SafeIncrement.ih"
 
 #include "brayns/common/geometry/ExtendedCone.h"
 
-__define_safe_index(ExtendedCone);
+DEFINE_SAFE_INCREMENT(ExtendedCone);
 
 struct ExtendedCones
 {
@@ -48,14 +48,14 @@ struct ExtendedCones
 
     int materialID;
     int32 numExtendedCones;
-    uniform bool useSafeIndex;
+    uniform bool useSafeIncrement;
 };
 
 void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
                           uniform size_t primID, uniform box3fa& bbox)
 {
     uniform ExtendedCone* uniform conePtr =
-        safe_index(geometry->useSafeIndex, geometry->data, primID);
+        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float extent = conePtr->centerRadius;
     uniform float upRadius = conePtr->upRadius;
@@ -73,7 +73,7 @@ void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
                              varying Ray& ray, uniform size_t primID)
 {
     uniform ExtendedCone* uniform conePtr =
-        safe_index(geometry->useSafeIndex, geometry->data, primID);
+        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float radius0 = conePtr->centerRadius;
     uniform float radius1 = conePtr->upRadius;
@@ -220,7 +220,7 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ns = Ng;
 
     uniform ExtendedCone* conePtr =
-        safe_index(this->useSafeIndex, this->data, ray.primID);
+        safeIncrement(this->useSafeIncrement, this->data, ray.primID);
     // Store value as texture coordinate
     const vec2f tex = conePtr->texture_coords;
 
@@ -270,7 +270,7 @@ export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
     geom->numExtendedCones = numExtendedCones;
     geom->data = (uniform ExtendedCone * uniform)data;
     geom->materialID = materialID;
-    geom->useSafeIndex = needs_safe_index(geom->data, numExtendedCones);
+    geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedCones);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

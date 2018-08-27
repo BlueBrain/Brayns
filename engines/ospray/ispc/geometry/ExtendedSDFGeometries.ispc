@@ -32,7 +32,7 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
-#include "utils/SafeIndex.ih"
+#include "utils/SafeIncrement.ih"
 
 #define SDF_TYPE_SPHERE 0
 #define SDF_TYPE_PILL 1
@@ -163,43 +163,47 @@ struct ExtendedSDFGeometries
     int materialID;
 
     uint64 numExtendedSDFGeometries;
-    uniform bool useSafeIndex;
+    uniform bool useSafeIncrement;
 };
 
-__define_safe_index(ExtendedSDFGeometry);
-__define_safe_index(uint64);
+DEFINE_SAFE_INCREMENT(ExtendedSDFGeometry);
+DEFINE_SAFE_INCREMENT(uint64);
 
 /////////////////////////////////////////////////////////////////////////////
 
 uniform uint64 primToIdx(uniform ExtendedSDFGeometries* uniform geometry,
                          uniform uint64 primID)
 {
-    return *safe_index(geometry->useSafeIndex, geometry->geometryRefs, primID);
+    return *safeIncrement(geometry->useSafeIncrement, geometry->geometryRefs,
+                          primID);
 }
 
 varying uint64 primToIdxVarying(uniform ExtendedSDFGeometries* uniform geometry,
                                 varying uint64 primID)
 {
-    return *safe_index(geometry->useSafeIndex, geometry->geometryRefs, primID);
+    return *safeIncrement(geometry->useSafeIncrement, geometry->geometryRefs,
+                          primID);
 }
 
 uniform uint64 getNeighbourIdx(uniform ExtendedSDFGeometries* uniform geometry,
                                uniform uint64 startIdx, uniform uint64 neighIdx)
 {
-    return *safe_index(geometry->useSafeIndex, geometry->neighbours,
-                       startIdx + neighIdx);
+    return *safeIncrement(geometry->useSafeIncrement, geometry->neighbours,
+                          startIdx + neighIdx);
 }
 
 uniform ExtendedSDFGeometry uniform getGeometry(
     uniform ExtendedSDFGeometries* uniform geometry, uniform uint64 idx)
 {
-    return *safe_index(geometry->useSafeIndex, geometry->geometries, idx);
+    return *safeIncrement(geometry->useSafeIncrement, geometry->geometries,
+                          idx);
 }
 
 varying ExtendedSDFGeometry getGeometryVarying(
     uniform ExtendedSDFGeometries* uniform geometry, varying uint64 idx)
 {
-    return *safe_index(geometry->useSafeIndex, geometry->geometries, idx);
+    return *safeIncrement(geometry->useSafeIncrement, geometry->geometries,
+                          idx);
 }
 
 static void ExtendedSDFGeometries_postIntersect(
@@ -426,9 +430,9 @@ export void ExtendedSDFGeometriesGeometry_set(
     geom->materialID = materialID;
 
     // NOTE: geom->data is always smaller than geom->geometries
-    geom->useSafeIndex =
-        needs_safe_index(geom->geometries, numExtendedSDFGeometries) ||
-        needs_safe_index(geom->neighbours, numNeighbours);
+    geom->useSafeIncrement =
+        needsSafeIncrement(geom->geometries, numExtendedSDFGeometries) ||
+        needsSafeIncrement(geom->neighbours, numNeighbours);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,

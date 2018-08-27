@@ -29,9 +29,9 @@
 #include "embree2/rtcore_scene.isph"
 
 #include "brayns/common/geometry/ExtendedCylinder.h"
-#include "utils/SafeIndex.ih"
+#include "utils/SafeIncrement.ih"
 
-__define_safe_index(ExtendedCylinder);
+DEFINE_SAFE_INCREMENT(ExtendedCylinder);
 
 struct ExtendedCylinders
 {
@@ -41,7 +41,7 @@ struct ExtendedCylinders
 
     int materialID;
     int32 numExtendedCylinders;
-    uniform bool useSafeIndex;
+    uniform bool useSafeIncrement;
 };
 
 typedef uniform float uniform_float;
@@ -50,7 +50,7 @@ void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
                               uniform size_t primID, uniform box3fa& bbox)
 {
     uniform ExtendedCylinder* uniform cylinderPtr =
-        safe_index(geometry->useSafeIndex, geometry->data, primID);
+        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
     uniform float radius = cylinderPtr->radius;
 
     uniform vec3f v0 = cylinderPtr->center;
@@ -63,7 +63,7 @@ void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
                                  varying Ray& ray, uniform size_t primID)
 {
     uniform ExtendedCylinder* uniform cylinderPtr =
-        safe_index(geometry->useSafeIndex, geometry->data, primID);
+        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float timestamp = cylinderPtr->timestamp;
 
@@ -152,7 +152,7 @@ static void ExtendedCylinders_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ns = Ng;
 
     uniform ExtendedCylinder* cylinderPtr =
-        safe_index(this->useSafeIndex, this->data, ray.primID);
+        safeIncrement(this->useSafeIncrement, this->data, ray.primID);
     // Store value as texture coordinate
     const vec2f tex = cylinderPtr->texture_coords;
 
@@ -205,7 +205,8 @@ export void ExtendedCylindersGeometry_set(void* uniform _geom,
     geom->numExtendedCylinders = numExtendedCylinders;
     geom->data = (uniform ExtendedCylinder * uniform)data;
     geom->materialID = materialID;
-    geom->useSafeIndex = needs_safe_index(geom->data, numExtendedCylinders);
+    geom->useSafeIncrement =
+        needsSafeIncrement(geom->data, numExtendedCylinders);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);
     rtcSetBoundsFunction(model->embreeSceneHandle, geomID,
