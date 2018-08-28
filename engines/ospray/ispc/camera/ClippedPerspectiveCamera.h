@@ -20,30 +20,6 @@
 
 namespace ospray
 {
-/*! \defgroup clipped_perspective_camera The Perspective Camera
-   ("clipped_perspective")
-
-    \brief Implements a straightforward perspective (or "pinhole"
-    camera) for perspective rendering, without support for Depth of Field or
-   Motion Blur
-
-    A simple perspective camera. This camera type is loaded by passing
-    the type string "perspective" to ospNewCamera
-
-    The perspective camera supports the following parameters
-    <pre>
-    vec3f(a) pos;    // camera position
-    vec3f(a) dir;    // camera direction
-    vec3f(a) up;     // up vector
-    float    fovy;   // field of view (camera opening angle) in frame's y
-   dimension
-    float    aspect; // aspect ratio (x/y)
-    </pre>
-
-    The functionality for a perspective camera is implemented via the
-    ospray::ClippedPerspectiveCamera class.
-  */
-
 //! Implements a clipped perspective camera
 struct OSPRAY_SDK_INTERFACE ClippedPerspectiveCamera : public Camera
 {

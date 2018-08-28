@@ -45,6 +45,6 @@ void AnimationParameters::parse(const po::variables_map& vm)
 void AnimationParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Animation frame          :" << _current << std::endl;
+    BRAYNS_INFO << "Animation frame          : " << _current << std::endl;
 }
 }

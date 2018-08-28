@@ -59,9 +59,9 @@ void SceneParameters::parse(const po::variables_map& vm)
 void SceneParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Color Map filename       :" << _colorMapFilename
+    BRAYNS_INFO << "Color Map filename       : " << _colorMapFilename
                 << std::endl;
-    BRAYNS_INFO << "Color Map range          :" << _colorMapRange << std::endl;
+    BRAYNS_INFO << "Color Map range          : " << _colorMapRange << std::endl;
     BRAYNS_INFO << "Environment map filename : " << _environmentMap
                 << std::endl;
 }

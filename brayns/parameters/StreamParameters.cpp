@@ -64,12 +64,12 @@ void StreamParameters::parse(const po::variables_map& vm)
 void StreamParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Stream compression                :"
+    BRAYNS_INFO << "Stream compression                : "
                 << (_compression ? "on" : "off") << std::endl;
-    BRAYNS_INFO << "Stream host                       :" << _host << std::endl;
-    BRAYNS_INFO << "Stream ID                         :" << _id << std::endl;
-    BRAYNS_INFO << "Stream port                       :" << _port << std::endl;
-    BRAYNS_INFO << "Stream quality                    :" << _quality
+    BRAYNS_INFO << "Stream host                       : " << _host << std::endl;
+    BRAYNS_INFO << "Stream ID                         : " << _id << std::endl;
+    BRAYNS_INFO << "Stream port                       : " << _port << std::endl;
+    BRAYNS_INFO << "Stream quality                    : " << _quality
                 << std::endl;
 }
 }

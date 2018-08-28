@@ -162,9 +162,9 @@ void ApplicationParameters::parse(const po::variables_map& vm)
 void ApplicationParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Engine                            :"
+    BRAYNS_INFO << "Engine                            : "
                 << getEngineAsString(_engine) << std::endl;
-    BRAYNS_INFO << "Ospray modules                    :" << std::endl;
+    BRAYNS_INFO << "Ospray modules                    : " << std::endl;
     for (const auto& module : _modules)
         BRAYNS_INFO << "- " << module << std::endl;
     BRAYNS_INFO << "Window size                 : " << _windowSize << std::endl;
