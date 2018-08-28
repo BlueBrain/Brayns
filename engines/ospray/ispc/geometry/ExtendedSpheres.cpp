@@ -39,45 +39,16 @@ ExtendedSpheres::ExtendedSpheres()
 void ExtendedSpheres::finalize(ospray::Model* model)
 {
     data = getParamData("extendedspheres", nullptr);
-    materialList = getParamData("materialList", nullptr);
-
     constexpr size_t bytesPerExtendedSphere = sizeof(brayns::Sphere);
 
     if (data.ptr == nullptr)
         throw std::runtime_error(
             "#ospray:geometry/extendedspheres: "
             "no 'extendedspheres' data specified");
+
     const size_t numExtendedSpheres = data->numBytes / bytesPerExtendedSphere;
-
-    if (numExtendedSpheres >= (1ULL << 30))
-    {
-        throw std::runtime_error(
-            "#brayns::ExtendedSpheres: too many extended "
-            "spheres in this sphere geometry. Consider "
-            "splitting this geometry in multiple "
-            "geometries with fewer extended spheres (you "
-            "can still put all those geometries into a "
-            "single model, but you can't put that many "
-            "extended spheres into a single geometry "
-            "without causing address overflows)");
-    }
-
-    void* ispcMaterialList = nullptr;
-
-    if (materialList)
-    {
-        ispcMaterials_.clear();
-        ispcMaterials_.resize(materialList->numItems);
-        for (size_t i = 0; i < materialList->numItems; ++i)
-        {
-            ospray::Material* m =
-                static_cast<ospray::Material**>(materialList->data)[i];
-            ispcMaterials_[i] = m ? m->getIE() : nullptr;
-        }
-        ispcMaterialList = static_cast<void*>(ispcMaterials_.data());
-    }
     ispc::ExtendedSpheresGeometry_set(getIE(), model->getIE(), data->data,
-                                      ispcMaterialList, numExtendedSpheres);
+                                      numExtendedSpheres);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSpheres, extendedspheres);

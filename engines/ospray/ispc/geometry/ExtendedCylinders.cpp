@@ -39,7 +39,6 @@ ExtendedCylinders::ExtendedCylinders()
 void ExtendedCylinders::finalize(ospray::Model* model)
 {
     data = getParamData("extendedcylinders", nullptr);
-
     constexpr size_t bytesPerCylinder = sizeof(brayns::Cylinder);
 
     if (data.ptr == nullptr || bytesPerCylinder == 0)

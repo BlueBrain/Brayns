@@ -46,6 +46,7 @@ void ExtendedCones::finalize(ospray::Model* model)
         throw std::runtime_error(
             "#ospray:geometry/extendedcones: "
             "no 'extendedcones' data specified");
+
     const size_t numExtendedCones = data->numBytes / bytesPerCone;
     ispc::ExtendedConesGeometry_set(getIE(), model->getIE(), data->data,
                                     numExtendedCones);

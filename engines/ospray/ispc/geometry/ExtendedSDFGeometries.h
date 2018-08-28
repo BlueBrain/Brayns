@@ -32,8 +32,6 @@ struct ExtendedSDFGeometries : public ospray::Geometry
     void finalize(ospray::Model* model) final;
 
     ospray::Ref<ospray::Data> data;
-    ospray::Ref<ospray::Data> materialList;
-
     ospray::Ref<ospray::Data> neighbours;
     ospray::Ref<ospray::Data> geometries;
 

@@ -43,7 +43,6 @@ struct ExtendedSpheres
     uniform Geometry geometry;
 
     uniform Sphere* uniform data;
-    uniform Material* uniform* materialList;
 
     int32 numExtendedSpheres;
     uniform bool useSafeIncrement;
@@ -165,7 +164,6 @@ export void* uniform ExtendedSpheres_create(void* uniform cppEquivalent)
 export void ExtendedSpheresGeometry_set(void* uniform _geom,
                                         void* uniform _model,
                                         void* uniform data,
-                                        void* uniform materialList,
                                         int uniform numExtendedSpheres)
 {
     uniform ExtendedSpheres* uniform geom =
@@ -177,7 +175,6 @@ export void ExtendedSpheresGeometry_set(void* uniform _geom,
 
     geom->geometry.model = model;
     geom->geometry.geomID = geomID;
-    geom->materialList = (Material**)materialList;
     geom->numExtendedSpheres = numExtendedSpheres;
     geom->data = (uniform Sphere * uniform)data;
     geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedSpheres);
