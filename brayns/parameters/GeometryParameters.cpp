@@ -71,18 +71,11 @@ const std::string PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES =
     "morphology-use-sdf-geometries";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 
-const std::array<std::string, 12> COLOR_SCHEMES = {"none",
-                                                   "neuron-by-id",
-                                                   "neuron-by-type",
-                                                   "neuron-by-segment-type",
-                                                   "neuron-by-layer",
-                                                   "neuron-by-mtype",
-                                                   "neuron-by-etype",
-                                                   "neuron-by-target",
-                                                   "protein-by-id",
-                                                   "protein-atoms",
-                                                   "protein-chains",
-                                                   "protein-residues"};
+const std::array<std::string, 12> COLOR_SCHEMES = {
+    {"none", "neuron-by-id", "neuron-by-type", "neuron-by-segment-type",
+     "neuron-by-layer", "neuron-by-mtype", "neuron-by-etype",
+     "neuron-by-target", "protein-by-id", "protein-atoms", "protein-chains",
+     "protein-residues"}};
 
 const std::string GEOMETRY_QUALITIES[3] = {"low", "medium", "high"};
 const std::string GEOMETRY_MEMORY_MODES[2] = {"shared", "replicated"};
