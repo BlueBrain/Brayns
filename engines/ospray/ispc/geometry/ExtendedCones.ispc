@@ -46,7 +46,6 @@ struct ExtendedCones
 
     uniform Cone* uniform data;
 
-    int materialID;
     int32 numExtendedCones;
     uniform bool useSafeIncrement;
 };
@@ -239,8 +238,6 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
         if (dot(ray.dir, Ns) >= 0.f)
             Ns = neg(Ns);
     }
-    if ((flags & DG_MATERIALID) && conePtr->materialID >= 0)
-        dg.materialID = conePtr->materialID;
     dg.Ng = Ng;
     dg.Ns = Ns;
 }
@@ -255,8 +252,7 @@ export void* uniform ExtendedCones_create(void* uniform cppEquivalent)
 
 export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
                                       void* uniform data,
-                                      int uniform numExtendedCones,
-                                      int uniform materialID)
+                                      int uniform numExtendedCones)
 {
     uniform ExtendedCones* uniform geom =
         (uniform ExtendedCones * uniform)_geom;
@@ -269,7 +265,6 @@ export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
     geom->geometry.geomID = geomID;
     geom->numExtendedCones = numExtendedCones;
     geom->data = (uniform Cone * uniform)data;
-    geom->materialID = materialID;
     geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedCones);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);

@@ -39,7 +39,6 @@ ExtendedCones::ExtendedCones()
 
 void ExtendedCones::finalize(ospray::Model* model)
 {
-    materialID = getParam1i("materialID", 0);
     data = getParamData("extendedcones", nullptr);
     constexpr size_t bytesPerCone = sizeof(brayns::Cone);
 
@@ -49,7 +48,7 @@ void ExtendedCones::finalize(ospray::Model* model)
             "no 'extendedcones' data specified");
     const size_t numExtendedCones = data->numBytes / bytesPerCone;
     ispc::ExtendedConesGeometry_set(getIE(), model->getIE(), data->data,
-                                    numExtendedCones, materialID);
+                                    numExtendedCones);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedCones, extendedcones);

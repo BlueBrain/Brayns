@@ -31,13 +31,12 @@ struct Cylinder
 #if __cplusplus
     Cylinder(const Vector3f c = {0.f, 0.f, 0.f},
              const Vector3f u = {0.f, 0.f, 0.f}, const float r = 0.f,
-             const float ts = 0.f, const Vector2f t = Vector2f(), int32 m = -1)
+             const float ts = 0.f, const Vector2f t = Vector2f())
         : center(c)
         , up(u)
         , radius(r)
         , timestamp(ts)
         , texture_coords(t)
-        , materialID(m)
     {
     }
 #endif
@@ -47,7 +46,6 @@ struct Cylinder
     float radius;
     float timestamp;
     VEC2_TYPE texture_coords;
-    int32 materialID;
 };
 
 #if __cplusplus

@@ -31,8 +31,6 @@ struct ExtendedSDFGeometries : public ospray::Geometry
     std::string toString() const final { return "hbp::ExtendedSDFGeometries"; }
     void finalize(ospray::Model* model) final;
 
-    int32 materialID;
-
     ospray::Ref<ospray::Data> data;
     ospray::Ref<ospray::Data> materialList;
 

@@ -39,7 +39,6 @@ struct ExtendedCylinders
 
     uniform Cylinder* uniform data;
 
-    int materialID;
     int32 numExtendedCylinders;
     uniform bool useSafeIncrement;
 };
@@ -171,8 +170,6 @@ static void ExtendedCylinders_postIntersect(uniform Geometry* uniform geometry,
         if (dot(ray.dir, Ns) >= 0.f)
             Ns = neg(Ns);
     }
-    if ((flags & DG_MATERIALID) && cylinderPtr->materialID >= 0)
-        dg.materialID = cylinderPtr->materialID;
     dg.Ng = Ng;
     dg.Ns = Ns;
 }
@@ -190,8 +187,7 @@ export void* uniform ExtendedCylinders_create(void* uniform cppEquivalent)
 export void ExtendedCylindersGeometry_set(void* uniform _geom,
                                           void* uniform _model,
                                           void* uniform data,
-                                          int uniform numExtendedCylinders,
-                                          int uniform materialID)
+                                          int uniform numExtendedCylinders)
 {
     uniform ExtendedCylinders* uniform geom =
         (uniform ExtendedCylinders * uniform)_geom;
@@ -204,7 +200,6 @@ export void ExtendedCylindersGeometry_set(void* uniform _geom,
     geom->geometry.geomID = geomID;
     geom->numExtendedCylinders = numExtendedCylinders;
     geom->data = (uniform Cylinder * uniform)data;
-    geom->materialID = materialID;
     geom->useSafeIncrement =
         needsSafeIncrement(geom->data, numExtendedCylinders);
 

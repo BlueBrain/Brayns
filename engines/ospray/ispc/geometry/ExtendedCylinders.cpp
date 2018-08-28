@@ -38,7 +38,6 @@ ExtendedCylinders::ExtendedCylinders()
 
 void ExtendedCylinders::finalize(ospray::Model* model)
 {
-    materialID = getParam1i("materialID", 0);
     data = getParamData("extendedcylinders", nullptr);
 
     constexpr size_t bytesPerCylinder = sizeof(brayns::Cylinder);
@@ -50,7 +49,7 @@ void ExtendedCylinders::finalize(ospray::Model* model)
 
     const size_t numExtendedCylinders = data->numBytes / bytesPerCylinder;
     ispc::ExtendedCylindersGeometry_set(getIE(), model->getIE(), data->data,
-                                        numExtendedCylinders, materialID);
+                                        numExtendedCylinders);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedCylinders, extendedcylinders);

@@ -31,8 +31,6 @@ struct ExtendedCones : public ospray::Geometry
     std::string toString() const final { return "ospray::Cones"; }
     void finalize(ospray::Model* model) final;
 
-    int32 materialID;
-
     ospray::Ref<ospray::Data> data;
 
     ExtendedCones();

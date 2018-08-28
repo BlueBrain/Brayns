@@ -45,7 +45,6 @@ struct ExtendedSpheres
     uniform Sphere* uniform data;
     uniform Material* uniform* materialList;
 
-    int materialID;
     int32 numExtendedSpheres;
     uniform bool useSafeIncrement;
 };
@@ -86,15 +85,6 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
             Ng = neg(Ng);
         if (dot(ray.dir, Ns) >= 0.f)
             Ns = neg(Ns);
-    }
-    if ((flags & DG_MATERIALID) && spherePtr->materialID >= 0)
-    {
-        uniform Sphere* spherePtr =
-            safeIncrement(this->useSafeIncrement, this->data, ray.primID);
-        dg.materialID = spherePtr->materialID;
-
-        if (this->materialList)
-            dg.material = this->materialList[dg.materialID];
     }
     dg.Ng = Ng;
     dg.Ns = Ns;
@@ -176,8 +166,7 @@ export void ExtendedSpheresGeometry_set(void* uniform _geom,
                                         void* uniform _model,
                                         void* uniform data,
                                         void* uniform materialList,
-                                        int uniform numExtendedSpheres,
-                                        int uniform materialID)
+                                        int uniform numExtendedSpheres)
 {
     uniform ExtendedSpheres* uniform geom =
         (uniform ExtendedSpheres * uniform)_geom;
@@ -191,7 +180,6 @@ export void ExtendedSpheresGeometry_set(void* uniform _geom,
     geom->materialList = (Material**)materialList;
     geom->numExtendedSpheres = numExtendedSpheres;
     geom->data = (uniform Sphere * uniform)data;
-    geom->materialID = materialID;
     geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedSpheres);
 
     rtcSetUserData(model->embreeSceneHandle, geomID, geom);

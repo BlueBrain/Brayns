@@ -38,7 +38,6 @@ ExtendedSpheres::ExtendedSpheres()
 
 void ExtendedSpheres::finalize(ospray::Model* model)
 {
-    materialID = getParam1i("materialID", 0);
     data = getParamData("extendedspheres", nullptr);
     materialList = getParamData("materialList", nullptr);
 
@@ -78,8 +77,7 @@ void ExtendedSpheres::finalize(ospray::Model* model)
         ispcMaterialList = static_cast<void*>(ispcMaterials_.data());
     }
     ispc::ExtendedSpheresGeometry_set(getIE(), model->getIE(), data->data,
-                                      ispcMaterialList, numExtendedSpheres,
-                                      materialID);
+                                      ispcMaterialList, numExtendedSpheres);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSpheres, extendedspheres);

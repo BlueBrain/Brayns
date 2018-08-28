@@ -39,8 +39,6 @@ ExtendedSDFGeometries::ExtendedSDFGeometries()
 
 void ExtendedSDFGeometries::finalize(ospray::Model* model)
 {
-    materialID = getParam1i("materialID", 0);
-
     data = getParamData("extendedsdfgeometries", nullptr);
     materialList = getParamData("materialList", nullptr);
     neighbours = getParamData("neighbours", nullptr);
@@ -83,8 +81,8 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
     ispc::ExtendedSDFGeometriesGeometry_set(getIE(), model->getIE(), data->data,
                                             ispcMaterialList,
                                             numExtendedSDFGeometries,
-                                            materialID, neighbours->data,
-                                            numNeighbours, geometries->data);
+                                            neighbours->data, numNeighbours,
+                                            geometries->data);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedSDFGeometries, extendedsdfgeometries);

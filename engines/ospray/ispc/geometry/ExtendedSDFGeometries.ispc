@@ -160,8 +160,6 @@ struct ExtendedSDFGeometries
     uniform ExtendedSDFGeometry* uniform geometries;
     uniform Material* uniform* materialList;
 
-    int materialID;
-
     uint64 numExtendedSDFGeometries;
     uniform bool useSafeIncrement;
 };
@@ -410,7 +408,7 @@ export void* uniform ExtendedSDFGeometries_create(void* uniform cppEquivalent)
 export void ExtendedSDFGeometriesGeometry_set(
     void* uniform _geom, void* uniform _model, void* uniform data,
     void* uniform materialList, int uniform numExtendedSDFGeometries,
-    int uniform materialID, void* uniform neighbours, int uniform numNeighbours,
+    void* uniform neighbours, int uniform numNeighbours,
     void* uniform geometries)
 {
     uniform ExtendedSDFGeometries* uniform geom =
@@ -427,7 +425,6 @@ export void ExtendedSDFGeometriesGeometry_set(
     geom->geometryRefs = (uniform uint64 * uniform)data;
     geom->neighbours = (uniform uint64 * uniform)neighbours;
     geom->geometries = (uniform ExtendedSDFGeometry * uniform)geometries;
-    geom->materialID = materialID;
 
     // NOTE: geom->data is always smaller than geom->geometries
     geom->useSafeIncrement =

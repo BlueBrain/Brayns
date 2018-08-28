@@ -31,12 +31,11 @@ struct Sphere
 {
 #if __cplusplus
     Sphere(const Vector3f c = {0.f, 0.f, 0.f}, float r = 0.f, float ts = 0.f,
-           const Vector2f t = {0.f, 0.f}, int32 m = -1)
+           const Vector2f t = {0.f, 0.f})
         : center(c)
         , radius(r)
         , timestamp(ts)
         , texture_coords(t)
-        , materialID(m)
     {
     }
 #endif
@@ -45,7 +44,6 @@ struct Sphere
     float radius;
     float timestamp;
     VEC2_TYPE texture_coords;
-    int32 materialID;
 };
 
 #if __cplusplus
