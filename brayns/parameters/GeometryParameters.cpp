@@ -71,18 +71,18 @@ const std::string PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES =
     "morphology-use-sdf-geometries";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
 
-const std::string COLOR_SCHEMES[12] = {"none",
-                                       "neuron-by-id",
-                                       "neuron-by-type",
-                                       "neuron-by-segment-type",
-                                       "neuron-by-layer",
-                                       "neuron-by-mtype",
-                                       "neuron-by-etype",
-                                       "neuron-by-target",
-                                       "protein-by-id",
-                                       "protein-atoms",
-                                       "protein-chains",
-                                       "protein-residues"};
+const std::array<std::string, 12> COLOR_SCHEMES = {"none",
+                                                   "neuron-by-id",
+                                                   "neuron-by-type",
+                                                   "neuron-by-segment-type",
+                                                   "neuron-by-layer",
+                                                   "neuron-by-mtype",
+                                                   "neuron-by-etype",
+                                                   "neuron-by-target",
+                                                   "protein-by-id",
+                                                   "protein-atoms",
+                                                   "protein-chains",
+                                                   "protein-residues"};
 
 const std::string GEOMETRY_QUALITIES[3] = {"low", "medium", "high"};
 const std::string GEOMETRY_MEMORY_MODES[2] = {"shared", "replicated"};
@@ -119,13 +119,14 @@ GeometryParameters::GeometryParameters()
         "Radius multiplier for spheres, cones and cylinders [float]")(
         PARAM_RADIUS_CORRECTION.c_str(), po::value<float>(),
         "Forces radius of spheres and cylinders to the specified value "
-        "[float]")(
-        PARAM_COLOR_SCHEME.c_str(), po::value<std::string>(),
-        "Color scheme to be applied to the geometry [none|"
-        "neuron_by_id|neuron_by_type|neuron_by_segment_type|"
-        "protein_atoms|protein_chains|protein_residues|protein_backbones]")(
-        PARAM_GEOMETRY_QUALITY.c_str(), po::value<std::string>(),
-        "Geometry rendering quality [low|medium|high]")(
+        "[float]")(PARAM_COLOR_SCHEME.c_str(), po::value<std::string>(),
+                   "Color scheme to be applied to the geometry "
+                   "[none|neuron-by-id|neuron-by-type|neuron-by-segment-type|"
+                   "neuron-by-layer|neuron-by-mtype|neuron-by-etype|neuron-by-"
+                   "target|protein-by-id|protein-atoms|protein-chains|protein-"
+                   "residues]")(PARAM_GEOMETRY_QUALITY.c_str(),
+                                po::value<std::string>(),
+                                "Geometry rendering quality [low|medium|high]")(
         PARAM_CIRCUIT_TARGETS.c_str(), po::value<std::string>(),
         "Circuit targets [comma separated strings]")(
         PARAM_CIRCUIT_DENSITY.c_str(), po::value<float>(),
@@ -211,10 +212,20 @@ void GeometryParameters::parse(const po::variables_map& vm)
     {
         _colorScheme = ColorScheme::none;
         const auto& colorScheme = vm[PARAM_COLOR_SCHEME].as<std::string>();
-        for (size_t i = 0; i < sizeof(COLOR_SCHEMES) / sizeof(COLOR_SCHEMES[0]);
-             ++i)
-            if (colorScheme == COLOR_SCHEMES[i])
-                _colorScheme = static_cast<ColorScheme>(i);
+        if (!colorScheme.empty())
+        {
+            bool matchedScheme = false;
+            for (size_t i = 0; i < COLOR_SCHEMES.size(); i++)
+                if (colorScheme == COLOR_SCHEMES[i])
+                {
+                    _colorScheme = static_cast<ColorScheme>(i);
+                    matchedScheme = true;
+                    break;
+                }
+
+            if (!matchedScheme)
+                throw po::error("No match for color scheme '" + colorScheme);
+        }
     }
     if (vm.count(PARAM_RADIUS_MULTIPLIER))
         _radiusMultiplier = vm[PARAM_RADIUS_MULTIPLIER].as<float>();
