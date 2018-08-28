@@ -27,6 +27,7 @@
 // ispc-generated files
 #include "ExtendedSDFGeometries_ispc.h"
 
+#include <climits>
 #include <cstddef>
 
 namespace ospray
@@ -38,10 +39,7 @@ ExtendedSDFGeometries::ExtendedSDFGeometries()
 
 void ExtendedSDFGeometries::finalize(ospray::Model* model)
 {
-    materialID = getParam1i("materialID", 0);
-
     data = getParamData("extendedsdfgeometries", nullptr);
-    materialList = getParamData("materialList", nullptr);
     neighbours = getParamData("neighbours", nullptr);
     geometries = getParamData("geometries", nullptr);
 
@@ -49,39 +47,13 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
         throw std::runtime_error(
             "#ospray:geometry/ExtendedSDFGeometries: "
             "no 'ExtendedSDFGeometries' data specified");
+
     const size_t numExtendedSDFGeometries = data->numItems;
+    const size_t numNeighbours = neighbours->numItems;
 
-    if (numExtendedSDFGeometries >= (1ULL << 30))
-    {
-        throw std::runtime_error(
-            "#brayns::ExtendedSDFGeometries: too many extended "
-            "SDF geometries in this sphere geometry. Consider "
-            "splitting this geometry in multiple "
-            "geometries with fewer SDF geometries (you "
-            "can still put all those geometries into a "
-            "single model, but you can't put that many "
-            "SDF geometries into a single geometry "
-            "without causing address overflows)");
-    }
-
-    void* ispcMaterialList = nullptr;
-
-    if (materialList)
-    {
-        ispcMaterials_.clear();
-        ispcMaterials_.resize(materialList->numItems);
-        for (size_t i = 0; i < materialList->numItems; ++i)
-        {
-            ospray::Material* m =
-                static_cast<ospray::Material**>(materialList->data)[i];
-            ispcMaterials_[i] = m ? m->getIE() : nullptr;
-        }
-        ispcMaterialList = static_cast<void*>(ispcMaterials_.data());
-    }
     ispc::ExtendedSDFGeometriesGeometry_set(getIE(), model->getIE(), data->data,
-                                            ispcMaterialList,
                                             numExtendedSDFGeometries,
-                                            materialID, neighbours->data,
+                                            neighbours->data, numNeighbours,
                                             geometries->data);
 }
 

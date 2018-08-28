@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,30 +18,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SPHERE_H
-#define SPHERE_H
+#pragma once
 
-#include <brayns/common/types.h>
+#include "CommonDefines.h"
 
+#if __cplusplus
 namespace brayns
 {
+#endif
+
 struct Sphere
 {
-    Sphere(const Vector3f c, float r, float ts = 0.f,
-           const Vector2f t = Vector2f())
-        : center{c}
-        , radius{r}
-        , timestamp{ts}
-        , texture_coords{t}
+#if __cplusplus
+    Sphere(const Vector3f c = {0.f, 0.f, 0.f}, float r = 0.f, float ts = 0.f,
+           const Vector2f t = {0.f, 0.f})
+        : center(c)
+        , radius(r)
+        , timestamp(ts)
+        , texture_coords(t)
     {
     }
+#endif
 
-    Sphere() = default;
-
-    Vector3f center;
-    float radius{0};
-    float timestamp{0};
-    Vector2f texture_coords{0.f, 0.f};
+    VEC3_TYPE center;
+    float radius;
+    float timestamp;
+    VEC2_TYPE texture_coords;
 };
-}
-#endif // SPHERE_H
+
+#if __cplusplus
+} // brayns
+#endif

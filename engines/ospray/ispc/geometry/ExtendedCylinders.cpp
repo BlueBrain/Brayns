@@ -27,6 +27,8 @@
 // ispc-generated files
 #include "ExtendedCylinders_ispc.h"
 
+#include <climits>
+
 namespace ospray
 {
 ExtendedCylinders::ExtendedCylinders()
@@ -34,36 +36,19 @@ ExtendedCylinders::ExtendedCylinders()
     this->ispcEquivalent = ispc::ExtendedCylinders_create(this);
 }
 
-void ExtendedCylinders::finalize(ospray::Model *model)
+void ExtendedCylinders::finalize(ospray::Model* model)
 {
-    radius = getParam1f("radius", 0.01f);
-    materialID = getParam1i("materialID", 0);
-    bytesPerCylinder =
-        getParam1i("bytes_per_cylinder", sizeof(brayns::Cylinder));
-    offset_center =
-        getParam1i("offset_center", offsetof(struct brayns::Cylinder, center));
-    offset_up = getParam1i("offset_up", offsetof(struct brayns::Cylinder, up));
-    offset_radius =
-        getParam1i("offset_radius", offsetof(struct brayns::Cylinder, radius));
-    offset_timestamp = getParam1i("offset_timestamp",
-                                  offsetof(struct brayns::Cylinder, timestamp));
-    offset_texture_coords =
-        getParam1i("offset_texture_coords",
-                   offsetof(struct brayns::Cylinder, texture_coords));
-    offset_materialID = getParam1i("offset_materialID", -1);
     data = getParamData("extendedcylinders", nullptr);
+    constexpr size_t bytesPerCylinder = sizeof(brayns::Cylinder);
 
     if (data.ptr == nullptr || bytesPerCylinder == 0)
         throw std::runtime_error(
             "#ospray:geometry/extendedcylinders: "
             "no 'extendedcylinders' data specified");
-    numExtendedCylinders = data->numBytes / bytesPerCylinder;
+
+    const size_t numExtendedCylinders = data->numBytes / bytesPerCylinder;
     ispc::ExtendedCylindersGeometry_set(getIE(), model->getIE(), data->data,
-                                        numExtendedCylinders, bytesPerCylinder,
-                                        radius, materialID, offset_center,
-                                        offset_up, offset_radius,
-                                        offset_timestamp, offset_texture_coords,
-                                        offset_materialID);
+                                        numExtendedCylinders);
 }
 
 OSP_REGISTER_GEOMETRY(ExtendedCylinders, extendedcylinders);

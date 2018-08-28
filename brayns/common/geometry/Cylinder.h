@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,33 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CYLINDER_H
-#define CYLINDER_H
+#pragma once
 
-#include <brayns/common/types.h>
+#include "CommonDefines.h"
 
+#if __cplusplus
 namespace brayns
 {
+#endif
 struct Cylinder
 {
-    Cylinder(const Vector3f c, const Vector3f u, const float r,
+#if __cplusplus
+    Cylinder(const Vector3f c = {0.f, 0.f, 0.f},
+             const Vector3f u = {0.f, 0.f, 0.f}, const float r = 0.f,
              const float ts = 0.f, const Vector2f t = Vector2f())
-        : center{c}
-        , up{u}
-        , radius{r}
-        , timestamp{ts}
-        , texture_coords{t}
+        : center(c)
+        , up(u)
+        , radius(r)
+        , timestamp(ts)
+        , texture_coords(t)
     {
     }
+#endif
 
-    Cylinder() = default;
-
-    Vector3f center;
-    Vector3f up;
-    float radius{0};
-    float timestamp{0};
-    Vector2f texture_coords{0.f, 0.f};
+    VEC3_TYPE center;
+    VEC3_TYPE up;
+    float radius;
+    float timestamp;
+    VEC2_TYPE texture_coords;
 };
-}
 
-#endif // CYLINDER_H
+#if __cplusplus
+} // brayns
+#endif

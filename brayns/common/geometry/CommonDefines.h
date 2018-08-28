@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Based on OSPRay implementation
+ * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,26 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include "ospray/SDK/geometry/Geometry.h"
+#if __cplusplus
 #include <brayns/common/types.h>
+#define VEC2_TYPE brayns::Vector2f
+#define VEC3_TYPE brayns::Vector3f
+#endif
 
-namespace ospray
-{
-struct ExtendedSDFGeometries : public ospray::Geometry
-{
-    std::string toString() const final { return "hbp::ExtendedSDFGeometries"; }
-    void finalize(ospray::Model* model) final;
-
-    ospray::Ref<ospray::Data> data;
-    ospray::Ref<ospray::Data> neighbours;
-    ospray::Ref<ospray::Data> geometries;
-
-    ExtendedSDFGeometries();
-
-private:
-    std::vector<void*> ispcMaterials_;
-};
-
-} // namespace ospray
+#if ISPC
+#define VEC2_TYPE vec2f
+#define VEC3_TYPE vec3f
+#endif
