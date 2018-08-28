@@ -104,95 +104,128 @@ GeometryParameters::GeometryParameters()
     , _morphologyUseSDFGeometries(false)
     , _memoryMode(MemoryMode::shared)
 {
-    _parameters.add_options()(PARAM_NEST_CIRCUIT.c_str(),
-                              po::value<std::string>(),
-                              "H5 file containing the NEST circuit [string]")(
-        PARAM_NEST_REPORT.c_str(), po::value<std::string>(),
-        "NEST simulation report file [string]")(
-        PARAM_CIRCUIT_CONFIG.c_str(), po::value<std::string>(),
-        "Circuit configuration filename [string]")(
-        PARAM_LOAD_CACHE_FILE.c_str(), po::value<std::string>(),
-        "Load binary container of a scene [string]")(
-        PARAM_SAVE_CACHE_FILE.c_str(), po::value<std::string>(),
-        "Save binary container of a scene [string]")(
-        PARAM_RADIUS_MULTIPLIER.c_str(), po::value<float>(),
-        "Radius multiplier for spheres, cones and cylinders [float]")(
-        PARAM_RADIUS_CORRECTION.c_str(), po::value<float>(),
-        "Forces radius of spheres and cylinders to the specified value "
-        "[float]")(PARAM_COLOR_SCHEME.c_str(), po::value<std::string>(),
-                   "Color scheme to be applied to the geometry "
-                   "[none|neuron-by-id|neuron-by-type|neuron-by-segment-type|"
-                   "neuron-by-layer|neuron-by-mtype|neuron-by-etype|neuron-by-"
-                   "target|protein-by-id|protein-atoms|protein-chains|protein-"
-                   "residues]")(PARAM_GEOMETRY_QUALITY.c_str(),
-                                po::value<std::string>(),
-                                "Geometry rendering quality [low|medium|high]")(
-        PARAM_CIRCUIT_TARGETS.c_str(), po::value<std::string>(),
-        "Circuit targets [comma separated strings]")(
-        PARAM_CIRCUIT_DENSITY.c_str(), po::value<float>(),
-        "Density of cells in the circuit in percent [float]")(
-        PARAM_CIRCUIT_MESH_FOLDER.c_str(), po::value<std::string>(),
-        "Folder containing meshed morphologies [string]")(
-        PARAM_CIRCUIT_REPORT.c_str(), po::value<std::string>(),
-        "Circuit report [string]")(
-        PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value<size_t>(),
-        "Morphology section types (1: soma, 2: axon, 4: dendrite, "
-        "8: apical dendrite). Values can be added to select more than "
-        "one type of section")(PARAM_MORPHOLOGY_LAYOUT.c_str(),
-                               po::value<size_ts>()->multitoken(),
-                               "Morphology layout defined by number of "
-                               "columns, vertical spacing, horizontal spacing "
-                               "[int int int]")(
-        PARAM_CIRCUIT_START_SIMULATION_TIME.c_str(), po::value<double>(),
-        "Start simulation timestamp [double]")(
-        PARAM_CIRCUIT_END_SIMULATION_TIME.c_str(), po::value<double>(),
-        "End simulation timestamp [double]")(
-        PARAM_CIRCUIT_SIMULATION_STEP.c_str(), po::value<double>(),
-        "Step between simulation frames [double]")(
-        PARAM_CIRCUIT_SIMULATION_RANGE.c_str(),
-        po::value<floats>()->multitoken(),
-        "Minimum and maximum values for the simulation [float float]")(
-        PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value<size_t>(),
-        "Number of values defining the simulation histogram [int]")(
-        PARAM_CIRCUIT_RANDOM_SEED.c_str(), po::value<size_t>(),
-        "Random seed for circuit [int]")(
-        PARAM_NEST_CACHE_FILENAME.c_str(), po::value<std::string>(),
-        "Cache file containing nest data [string]")(
-        PARAM_MOLECULAR_SYSTEM_CONFIG.c_str(), po::value<std::string>(),
-        "Molecular system configuration [string]")(
-        PARAM_METABALLS_GRIDSIZE.c_str(), po::value<size_t>(),
-        "Metaballs grid size [int]. Activates automated meshing of somas "
-        "if different from 0")(PARAM_METABALLS_THRESHOLD.c_str(),
-                               po::value<float>(),
-                               "Metaballs threshold [float]")(
-        PARAM_METABALLS_SAMPLES_FROM_SOMA.c_str(), po::value<size_t>(),
-        "Number of morphology samples (or segments) from soma used by "
-        "automated meshing [int]")(
-        PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE.c_str(),
-        po::value<bool>(),
-        "Dampens the thickness rate of change for branches in the "
-        "morphology.")(PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES.c_str(),
-                       po::value<bool>(),
-                       "Use SDF geometries for drawing the morphology.")(
-        PARAM_CIRCUIT_USES_SIMULATION_MODEL.c_str(), po::value<bool>(),
-        "Defines if a different model is used to "
-        "handle the simulation geometry [bool]")(
-        PARAM_CIRCUIT_BOUNDING_BOX.c_str(), po::value<floats>()->multitoken(),
-        "Does not load circuit geometry outside of the specified "
-        "bounding "
-        "box"
-        "[float float float float float float]")(
-        PARAM_MEMORY_MODE.c_str(), po::value<std::string>(),
-        "Defines what memory mode should be used between Brayns and "
-        "the "
-        "underlying renderer [shared|replicated]")(
-        PARAM_CIRCUIT_MESH_FILENAME_PATTERN.c_str(), po::value<std::string>(),
-        "Pattern used to determine the name of the file containing a "
-        "meshed "
-        "morphology [string]")(PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(),
-                               po::value<bool>(),
-                               "Enable/Disable mesh transformation according "
-                               "to circuit information [bool]");
+    _parameters.add_options() //
+        (PARAM_NEST_CIRCUIT.c_str(), po::value<std::string>(),
+         "H5 file containing the NEST circuit [string]")
+        //
+        (PARAM_NEST_REPORT.c_str(), po::value<std::string>(),
+         "NEST simulation report file [string]")
+        //
+        (PARAM_CIRCUIT_CONFIG.c_str(), po::value<std::string>(),
+         "Circuit configuration filename [string]")
+        //
+        (PARAM_LOAD_CACHE_FILE.c_str(), po::value<std::string>(),
+         "Load binary container of a scene [string]")
+        //
+        (PARAM_SAVE_CACHE_FILE.c_str(), po::value<std::string>(),
+         "Save binary container of a scene [string]")
+        //
+        (PARAM_RADIUS_MULTIPLIER.c_str(), po::value<float>(),
+         "Radius multiplier for spheres, cones and cylinders [float]")
+        //
+        (PARAM_RADIUS_CORRECTION.c_str(), po::value<float>(),
+         "Forces radius of spheres and cylinders to the specified value "
+         "[float]")
+        //
+        (PARAM_COLOR_SCHEME.c_str(), po::value<std::string>(),
+         "Color scheme to be applied to the geometry "
+         "[none|neuron-by-id|neuron-by-type|neuron-by-segment-type|"
+         "neuron-by-layer|neuron-by-mtype|neuron-by-etype|neuron-by-"
+         "target|protein-by-id|protein-atoms|protein-chains|protein-"
+         "residues]")
+        //
+        (PARAM_GEOMETRY_QUALITY.c_str(), po::value<std::string>(),
+         "Geometry rendering quality [low|medium|high]")
+        //
+        (PARAM_CIRCUIT_TARGETS.c_str(), po::value<std::string>(),
+         "Circuit targets [comma separated strings]")
+        //
+        (PARAM_CIRCUIT_DENSITY.c_str(), po::value<float>(),
+         "Density of cells in the circuit in percent [float]")
+        //
+        (PARAM_CIRCUIT_MESH_FOLDER.c_str(), po::value<std::string>(),
+         "Folder containing meshed morphologies [string]")
+        //
+        (PARAM_CIRCUIT_REPORT.c_str(), po::value<std::string>(),
+         "Circuit report [string]")
+        //
+        (PARAM_MORPHOLOGY_SECTION_TYPES.c_str(), po::value<size_t>(),
+         "Morphology section types (1: soma, 2: axon, 4: dendrite, "
+         "8: apical dendrite). Values can be added to select more than "
+         "one type of section")
+        //
+        (PARAM_MORPHOLOGY_LAYOUT.c_str(), po::value<size_ts>()->multitoken(),
+         "Morphology layout defined by number of "
+         "columns, vertical spacing, horizontal spacing "
+         "[int int int]")
+        //
+        (PARAM_CIRCUIT_START_SIMULATION_TIME.c_str(), po::value<double>(),
+         "Start simulation timestamp [double]")
+        //
+        (PARAM_CIRCUIT_END_SIMULATION_TIME.c_str(), po::value<double>(),
+         "End simulation timestamp [double]")
+        //
+        (PARAM_CIRCUIT_SIMULATION_STEP.c_str(), po::value<double>(),
+         "Step between simulation frames [double]")
+        //
+        (PARAM_CIRCUIT_SIMULATION_RANGE.c_str(),
+         po::value<floats>()->multitoken(),
+         "Minimum and maximum values for the simulation [float float]")
+        //
+        (PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value<size_t>(),
+         "Number of values defining the simulation histogram [int]")
+        //
+        (PARAM_CIRCUIT_RANDOM_SEED.c_str(), po::value<size_t>(),
+         "Random seed for circuit [int]")
+        //
+        (PARAM_NEST_CACHE_FILENAME.c_str(), po::value<std::string>(),
+         "Cache file containing nest data [string]")
+        //
+        (PARAM_MOLECULAR_SYSTEM_CONFIG.c_str(), po::value<std::string>(),
+         "Molecular system configuration [string]")
+        //
+        (PARAM_METABALLS_GRIDSIZE.c_str(), po::value<size_t>(),
+         "Metaballs grid size [int]. Activates automated meshing of somas "
+         "if different from 0")
+        //
+        (PARAM_METABALLS_THRESHOLD.c_str(), po::value<float>(),
+         "Metaballs threshold [float]")
+        //
+        (PARAM_METABALLS_SAMPLES_FROM_SOMA.c_str(), po::value<size_t>(),
+         "Number of morphology samples (or segments) from soma used by "
+         "automated meshing [int]")
+        //
+        (PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE.c_str(),
+         po::value<bool>(),
+         "Dampens the thickness rate of change for branches in the "
+         "morphology.")
+        //
+        (PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES.c_str(), po::value<bool>(),
+         "Use SDF geometries for drawing the morphology.")
+        //
+        (PARAM_CIRCUIT_USES_SIMULATION_MODEL.c_str(), po::value<bool>(),
+         "Defines if a different model is used to "
+         "handle the simulation geometry [bool]")
+        //
+        (PARAM_CIRCUIT_BOUNDING_BOX.c_str(), po::value<floats>()->multitoken(),
+         "Does not load circuit geometry outside of the specified "
+         "bounding "
+         "box"
+         "[float float float float float float]")
+        //
+        (PARAM_MEMORY_MODE.c_str(), po::value<std::string>(),
+         "Defines what memory mode should be used between Brayns and "
+         "the "
+         "underlying renderer [shared|replicated]")
+        //
+        (PARAM_CIRCUIT_MESH_FILENAME_PATTERN.c_str(), po::value<std::string>(),
+         "Pattern used to determine the name of the file containing a "
+         "meshed "
+         "morphology [string]")
+        //
+        (PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(), po::value<bool>(),
+         "Enable/Disable mesh transformation according "
+         "to circuit information [bool]");
 }
 
 void GeometryParameters::parse(const po::variables_map& vm)
@@ -214,17 +247,13 @@ void GeometryParameters::parse(const po::variables_map& vm)
         const auto& colorScheme = vm[PARAM_COLOR_SCHEME].as<std::string>();
         if (!colorScheme.empty())
         {
-            bool matchedScheme = false;
-            for (size_t i = 0; i < COLOR_SCHEMES.size(); i++)
-                if (colorScheme == COLOR_SCHEMES[i])
-                {
-                    _colorScheme = static_cast<ColorScheme>(i);
-                    matchedScheme = true;
-                    break;
-                }
-
-            if (!matchedScheme)
+            auto it = std::find(COLOR_SCHEMES.begin(), COLOR_SCHEMES.end(),
+                                colorScheme);
+            if (it == COLOR_SCHEMES.end())
                 throw po::error("No match for color scheme '" + colorScheme);
+
+            const auto index = std::distance(COLOR_SCHEMES.begin(), it);
+            _colorScheme = static_cast<ColorScheme>(index);
         }
     }
     if (vm.count(PARAM_RADIUS_MULTIPLIER))
