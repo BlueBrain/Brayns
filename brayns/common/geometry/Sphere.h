@@ -20,16 +20,34 @@
 
 #pragma once
 
-#include "ISPCSphere.h"
+#include "CommonDefines.h"
 
+#if __cplusplus
 namespace brayns
 {
-struct Sphere : ISPCSphere
+#endif
+
+struct Sphere
 {
+#if __cplusplus
     Sphere(const Vector3f c = {0.f, 0.f, 0.f}, float r = 0.f, float ts = 0.f,
            const Vector2f t = {0.f, 0.f}, int32 m = -1)
-        : ISPCSphere{c, r, ts, t, m}
+        : center(c)
+        , radius(r)
+        , timestamp(ts)
+        , texture_coords(t)
+        , materialID(m)
     {
     }
+#endif
+
+    VEC3_TYPE center;
+    float radius;
+    float timestamp;
+    VEC2_TYPE texture_coords;
+    int32 materialID;
 };
-}
+
+#if __cplusplus
+} // brayns
+#endif

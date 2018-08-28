@@ -28,16 +28,16 @@
 #include "embree2/rtcore_geometry_user.isph"
 #include "embree2/rtcore_scene.isph"
 
-#include "brayns/common/geometry/ISPCCylinder.h"
+#include "brayns/common/geometry/Cylinder.h"
 #include "utils/SafeIncrement.ih"
 
-DEFINE_SAFE_INCREMENT(ISPCCylinder);
+DEFINE_SAFE_INCREMENT(Cylinder);
 
 struct ExtendedCylinders
 {
     uniform Geometry geometry; //!< inherited geometry fields
 
-    uniform ISPCCylinder* uniform data;
+    uniform Cylinder* uniform data;
 
     int materialID;
     int32 numExtendedCylinders;
@@ -49,7 +49,7 @@ typedef uniform float uniform_float;
 void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
                               uniform size_t primID, uniform box3fa& bbox)
 {
-    uniform ISPCCylinder* uniform cylinderPtr =
+    uniform Cylinder* uniform cylinderPtr =
         safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
     uniform float radius = cylinderPtr->radius;
 
@@ -62,7 +62,7 @@ void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
 void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
                                  varying Ray& ray, uniform size_t primID)
 {
-    uniform ISPCCylinder* uniform cylinderPtr =
+    uniform Cylinder* uniform cylinderPtr =
         safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
 
     uniform float timestamp = cylinderPtr->timestamp;
@@ -151,7 +151,7 @@ static void ExtendedCylinders_postIntersect(uniform Geometry* uniform geometry,
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
-    uniform ISPCCylinder* cylinderPtr =
+    uniform Cylinder* cylinderPtr =
         safeIncrement(this->useSafeIncrement, this->data, ray.primID);
     // Store value as texture coordinate
     const vec2f tex = cylinderPtr->texture_coords;
@@ -203,7 +203,7 @@ export void ExtendedCylindersGeometry_set(void* uniform _geom,
     geom->geometry.model = model;
     geom->geometry.geomID = geomID;
     geom->numExtendedCylinders = numExtendedCylinders;
-    geom->data = (uniform ISPCCylinder * uniform)data;
+    geom->data = (uniform Cylinder * uniform)data;
     geom->materialID = materialID;
     geom->useSafeIncrement =
         needsSafeIncrement(geom->data, numExtendedCylinders);
