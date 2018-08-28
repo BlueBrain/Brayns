@@ -74,8 +74,6 @@ public:
     /**
        Reshapes the current frame buffers
        @param frameSize New size for the buffers
-
-       @todo Must be removed and held by the render method above
     */
     void reshape(const Vector2ui& frameSize);
 

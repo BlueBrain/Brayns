@@ -262,50 +262,37 @@ braynsViewer --load-cache-file cache
 
 ## Volumes
 
-The ```--volume-file``` command line argument specifies the volume file to load.
 Brayns currently only supports 8-bit raw volume. The ```--volume-dimensions```
-command line argument specifies the size of the volume and is always required.
-The ```--volume-element-spacing``` defines the size of the voxels. The ```--volume-offset```
-command line argument defines the volume position in world coordinates.
+command line argument specifies the size of the volume and is required if the raw
+volume file is specified. It is recommended though to use the MHD format.
+Otherwise, ```--volume-element-spacing``` that defines the size of the voxels
+and ```--volume-offset``` that defines the volume position in world coordinates,
+are required.
 
 ```
-braynsViewer --volume-file volume.raw --volume-dimensions 512 512 256
+braynsViewer volume.raw --volume-dimensions 512 512 256
+braynsViewer volume.mhd
 ```
 
-![Shadows](images/Volume.png)
+![Volume](images/Volume.png)
 
-```
-braynsViewer --volume-file volume.raw --volume-dimensions 512 512 256 --shadows 1 --soft-shadows 1
-```
-
-![Shadows](images/VolumeGI.png)
 
 # Rendering parameters
-
-## Engines
-
-The ```--engine``` command line argument specifies the underlying rendering engine
-used by Brayns. Two engines are currently supported:
-- [OSPRay](http://www.ospray.org/): A Ray Tracing Based Rendering Engine for High-Fidelity Visualization
-
-- [OptiX](https://developer.nvidia.com/optix): A software development kit for achieving high performance ray tracing
-on the GPU
-
-```
-braynsViewer --engine <ospray|optix>
-```
 
 ## Renderers
 
 The ```--renderer``` command line argument specifies which renderer is used by Brayns.
 Four renderers are currently supported:
 
-| Argument  | Description
-| ----------| -------------
-| default   | Common renderer to all engines. Provides basic features such as phong/blinn shading, shadows, ambient occlusion, light emission, reflection and refraction.
-| simulation| Same as default with extra features such as support for simulations and volumes.
-| particle |
-| proximity | Displays information about element proximity in 3D space. Typically used to find touches between neurons.
+| Argument            | Description
+| --------------------| -------------
+| basic               | Provides basic features like phong/blinn shading and light emission
+| basic_simulation    | Enhances ```basic``` with transparency and simulation rendering
+| advanced_simulation | Enhances ```basic_simulation``` with reflection, refraction, volume rendering, shadows and ambient occlusion
+| proximity           | Displays information about element proximity in 3D space. Typically used to find touches between neurons.
+| pathtracing         | Path tracing renderer
+| scivis              | Scientific visualization example renderer provided by OSPRay
+
 
 ## Camera types
 
@@ -315,7 +302,6 @@ by the renderer. Five cameras are currently supported:
 | Argument             | Description
 | ---------------------| -------------
 | perspective          | Perspective camera
-| stereo               | Side-by-side camera
 | orthographic         | Orthographic camera
 | panoramic            | 360 degrees camera
 | clipped              | Perspective camera allowing clipping planes
@@ -332,34 +318,3 @@ of the camera. A value of 1 activate the feature, 0 deactivates it.
 ```
 braynsViewer --head-light 1
 ```
-
-## Shadows
-
-The ```--shadows``` command line argument determines the intensity of the shadows.
-A value of 1 activates full shadows, 0 deactivates it. By default, shadows are
-hard. The ```--soft-Shadows``` command line argument defines the softness of the
-shadows.
-
-```
-braynsViewer --shadows 0.3
-```
-
-![Shadows](images/Shadows.png)
-
-```
-braynsViewer --shadows 0.6 --soft-shadows 0.1
-```
-
-![SoftShadows](images/SoftShadows.png)
-
-## Ambient occlusion
-
-The ```--ambient-occlusion``` command line argument determines the strength of the
-ambient occlusion. The value is a float between 0 and 1 (0 for no occlusion,
-and 1 for maximum occlusion).
-
-```
-braynsViewer --ambient-occlusion 1
-```
-
-![AmbientOcclusion](images/AmbientOcclusion.png)

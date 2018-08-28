@@ -120,13 +120,13 @@ void RenderingParameters::parse(const po::variables_map& vm)
 void RenderingParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "Supported renderers               :" << std::endl;
+    BRAYNS_INFO << "Supported renderers               : " << std::endl;
     for (const auto& renderer : _renderers)
         BRAYNS_INFO << "- " << renderer << std::endl;
-    BRAYNS_INFO << "Renderer                          :" << _renderer
+    BRAYNS_INFO << "Renderer                          : " << _renderer
                 << std::endl;
-    BRAYNS_INFO << "Samples per pixel                 :" << _spp << std::endl;
-    BRAYNS_INFO << "Background color                  :" << _backgroundColor
+    BRAYNS_INFO << "Samples per pixel                 : " << _spp << std::endl;
+    BRAYNS_INFO << "Background color                  : " << _backgroundColor
                 << std::endl;
     BRAYNS_INFO << "Camera                            : " << _cameraType
                 << std::endl;
