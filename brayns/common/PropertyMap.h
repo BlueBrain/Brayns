@@ -102,20 +102,22 @@ public:
         {
         }
 
+        using ModifiedCallback = std::function<void(const Property&)>;
+
         /**
          * Set a function that is called after this property has been changed.
          */
-        void setChangedCallback(const std::function<void(const Property&)>& cb)
+        void onModified(const ModifiedCallback& callback)
         {
-            _changedCallback = cb;
+            _modifiedCallback = callback;
         }
 
         template <typename T>
         void set(const T& v)
         {
             _data = v;
-            if (_changedCallback)
-                _changedCallback(*this);
+            if (_modifiedCallback)
+                _modifiedCallback(*this);
         }
 
         template <typename T>
@@ -158,7 +160,7 @@ public:
         const boost::any _min;
         const boost::any _max;
         bool _readOnly{false};
-        std::function<void(const Property&)> _changedCallback;
+        ModifiedCallback _modifiedCallback;
         template <typename T>
         Type _getType();
     };

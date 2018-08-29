@@ -64,13 +64,18 @@ public:
     void markModified(const bool triggerCallback = true)
     {
         _modified = true;
-        if (_changedCallback && triggerCallback)
-            _changedCallback(*this);
+        if (_modifiedCallback && triggerCallback)
+            _modifiedCallback(*this);
     }
 
-    void setChangedCallback(const std::function<void(const BaseObject&)>& cb)
+    using ModifiedCallback = std::function<void(const BaseObject&)>;
+
+    /**
+     * Set a function that is called after this object has been modified.
+     */
+    void onModified(const ModifiedCallback& callback)
     {
-        _changedCallback = cb;
+        _modifiedCallback = callback;
     }
 
 protected:
@@ -106,6 +111,6 @@ protected:
 
 private:
     std::atomic_bool _modified{true};
-    std::function<void(const BaseObject&)> _changedCallback;
+    ModifiedCallback _modifiedCallback;
 };
 }
