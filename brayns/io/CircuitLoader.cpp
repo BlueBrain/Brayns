@@ -190,6 +190,12 @@ public:
                 std::make_shared<ModelDescriptor>(std::move(model), "Circuit",
                                                   source, metadata);
             modelDesc->setTransformation(transformation);
+
+            // unset the simulation handler once the model is removed
+            if (compartmentReport)
+                modelDesc->onRemoved([& scene = _parent._scene](const auto&) {
+                    scene.setSimulationHandler(nullptr);
+                });
         }
         catch (const std::exception& error)
         {

@@ -355,7 +355,7 @@ public:
         // Create new throttle for that endpoint
         _throttle[endpoint];
 
-        obj.setChangedCallback(
+        obj.onModified(
             [&, endpoint=getNotificationEndpointName(endpoint), throttleTime](const auto& base) {
                 if(_rocketsServer->getConnectionCount() == 0)
                     return;

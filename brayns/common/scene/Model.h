@@ -147,6 +147,23 @@ public:
     }
 
     const PropertyMap& getProperties() const { return _properties; }
+    using RemovedCallback = std::function<void(const ModelDescriptor&)>;
+
+    /**
+     * Set a function that is called when this model is about to be removed.
+     */
+    void onRemoved(const RemovedCallback& callback)
+    {
+        _onRemovedCallback = callback;
+    }
+
+    /** @internal */
+    void callOnRemoved()
+    {
+        if (_onRemovedCallback)
+            _onRemovedCallback(*this);
+    }
+
 private:
     size_t _nextInstanceID{0};
     Boxd _bounds;
@@ -154,6 +171,7 @@ private:
     ModelPtr _model;
     ModelInstances _instances;
     PropertyMap _properties;
+    RemovedCallback _onRemovedCallback;
 
     SERIALIZATION_FRIEND(ModelDescriptor)
 };

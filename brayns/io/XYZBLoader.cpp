@@ -116,7 +116,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
 
     PropertyMap::Property radiusProperty("radius", "Point size", meanRadius,
                                          {0., meanRadius * 2.});
-    radiusProperty.setChangedCallback([
+    radiusProperty.onModified([
         materialId, modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)
     ](const auto& property) {
         if (auto modelDesc_ = modelDesc.lock())

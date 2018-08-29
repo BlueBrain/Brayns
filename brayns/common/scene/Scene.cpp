@@ -154,8 +154,7 @@ void Scene::removeModel(const size_t id)
         if (i == _modelDescriptors.end())
             return;
 
-        // we don't know which model used simulations, but we safely unset it.
-        setSimulationHandler(nullptr);
+        (*i)->callOnRemoved();
 
         _modelDescriptors.erase(i, _modelDescriptors.end());
     }
