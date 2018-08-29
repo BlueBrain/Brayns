@@ -275,10 +275,18 @@ private:
         const auto minSize = engine.getMinimumFrameSize();
 
         auto sizeHints = deflect::SizeHints();
+        sizeHints.maxWidth = std::numeric_limits<unsigned int>::max();
+        sizeHints.maxHeight = std::numeric_limits<unsigned int>::max();
         sizeHints.preferredWidth = size.x();
         sizeHints.preferredHeight = size.y();
         sizeHints.minWidth = minSize.x();
         sizeHints.minHeight = minSize.y();
+
+        if (_engine->getCamera().isSideBySideStereo())
+        {
+            sizeHints.preferredWidth /= 2;
+            sizeHints.minWidth /= 2;
+        }
         _stream->sendSizeHints(sizeHints);
     }
 
