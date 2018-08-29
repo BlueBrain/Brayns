@@ -216,6 +216,12 @@ public:
 
         try
         {
+            // call pending notifies from delayed throttle threads here as
+            // notify() and process() are not threadsafe within Rockets.
+            std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
+            for (const auto& func : _delayedNotifies)
+                func();
+            _delayedNotifies.clear();
             _rocketsServer->process(0);
         }
         catch (const std::exception& exc)
@@ -301,6 +307,29 @@ public:
                                                std::placeholders::_1));
     }
 
+    void _delayedNotify(const std::function<void()>& notify)
+    {
+        std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
+
+#ifdef BRAYNS_USE_LIBUV
+        if (uvw::Loop::getDefault()->alive())
+        {
+            // dispatch delayed notify from throttle thread to main thread
+            // (where the default loop runs) as notify() and process() are not
+            // threadsafe within Rockets.
+            auto delayedExecution =
+                uvw::Loop::getDefault()->resource<uvw::CheckHandle>();
+
+            delayedExecution->once<uvw::CheckEvent>(
+                [notify](const auto&, auto&) { notify(); });
+
+            delayedExecution->start();
+        }
+        else
+#endif
+            _delayedNotifies.push_back(notify);
+    }
+
     template <class T>
     void _handleGET(const std::string& endpoint, T& obj,
                     const int64_t throttleTime = DEFAULT_THROTTLE)
@@ -323,18 +352,31 @@ public:
                           {rpcEndpoint, "Get the current state of " + endpoint},
                           obj));
 
+        // Create new throttle for that endpoint
         _throttle[endpoint];
 
         obj.setChangedCallback(
-            [&rocketsServer = _rocketsServer, &throttle = _throttle[endpoint], & jsonrpcServer = _jsonrpcServer, endpoint=getNotificationEndpointName(endpoint), throttleTime ](const auto& base) {
-                if(rocketsServer->getConnectionCount() == 0)
+            [&, endpoint=getNotificationEndpointName(endpoint), throttleTime](const auto& base) {
+                if(_rocketsServer->getConnectionCount() == 0)
                     return;
 
-                const auto& castedObj = static_cast<const T&>(base);
+                auto& throttle = _throttle[endpoint];
 
-                throttle([&jsonrpcServer, &castedObj, endpoint]{
+                // throttle itself is not thread-safe, but we can get called
+                // from different threads (c.f. async model load)
+                std::lock_guard<std::mutex> lock(throttle.first);
+
+                const auto& castedObj = static_cast<const T&>(base);
+                const auto notify = [&jsonrpcServer=_jsonrpcServer, &castedObj, endpoint]{
                     jsonrpcServer->notify(endpoint, castedObj);
-                }, throttleTime);
+                };
+                const auto delayedNotify = [&, notify]{
+                    this->_delayedNotify(notify);
+                };
+
+                // non-throttled, direct notify can happen directly; delayed
+                // notify must be dispatched to the main thread
+                throttle.second(notify, delayedNotify, throttleTime);
             });
     }
 
@@ -492,9 +534,8 @@ public:
                         progressUpdate->close();
                     };
 
-                    progressUpdate->start(std::chrono::milliseconds(0),
-                                          std::chrono::milliseconds(
-                                              SLOW_THROTTLE));
+                    using ms = std::chrono::milliseconds;
+                    progressUpdate->start(ms(0), ms(SLOW_THROTTLE));
                 }
 #endif
 
@@ -1204,7 +1245,9 @@ public:
 
     EnginePtr _engine;
 
-    std::unordered_map<std::string, Throttle> _throttle;
+    std::unordered_map<std::string, std::pair<std::mutex, Throttle>> _throttle;
+    std::vector<std::function<void()>> _delayedNotifies;
+    std::mutex _delayedNotifiesMutex;
 
     std::unordered_map<std::string, std::string> _schemas;
 

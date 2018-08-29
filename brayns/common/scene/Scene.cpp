@@ -51,7 +51,7 @@ Scene& Scene::operator=(const Scene& rhs)
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-        std::unique_lock<std::shared_timed_mutex> rhsLock(rhs._modelMutex);
+        std::shared_lock<std::shared_timed_mutex> rhsLock(rhs._modelMutex);
         _modelDescriptors = rhs._modelDescriptors;
     }
 
@@ -133,12 +133,13 @@ size_t Scene::addModel(ModelDescriptorPtr model)
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
         model->setModelID(_modelID++);
         _modelDescriptors.push_back(model);
-    }
-    markModified();
 
-    // add default instance of this model to render something
-    if (model->getInstances().empty())
-        model->addInstance({true, true, model->getTransformation()});
+        // add default instance of this model to render something
+        if (model->getInstances().empty())
+            model->addInstance({true, true, model->getTransformation()});
+    }
+
+    markModified();
     return model->getModelID();
 }
 
@@ -776,34 +777,25 @@ void Scene::buildDefault()
 
 void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 {
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
-    for (auto modelDescriptors : _modelDescriptors)
-        modelDescriptors->getModel().setMaterialsColorMap(colorMap);
+    {
+        std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+        for (auto modelDescriptors : _modelDescriptors)
+            modelDescriptors->getModel().setMaterialsColorMap(colorMap);
+    }
     markModified();
 }
 
 void Scene::_computeBounds()
 {
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
-    size_t nbEnabledInstances{0};
+    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
     _bounds.reset();
     for (auto modelDescriptor : _modelDescriptors)
     {
-        const auto& transformation = modelDescriptor->getTransformation();
-        for (const auto& instance : modelDescriptor->getInstances())
-        {
-            if (!instance.getVisible())
-                continue;
-
-            const auto instanceTransform =
-                transformation * instance.getTransformation();
-            _bounds.merge(transformBox(modelDescriptor->getModel().getBounds(),
-                                       instanceTransform));
-            ++nbEnabledInstances;
-        }
+        modelDescriptor->computeBounds();
+        _bounds.merge(modelDescriptor->getBounds());
     }
 
-    if (nbEnabledInstances == 0)
+    if (_bounds.isEmpty())
         // If no model is enabled. return empty bounding box
         _bounds.merge({0, 0, 0});
 }

@@ -31,11 +31,17 @@ namespace brayns
  */
 struct Throttle
 {
-    void operator()(const std::function<void()>& fn, const int64_t wait = 100);
+    using Function = std::function<void()>;
+    void operator()(const Function& fn, const int64_t wait = 100);
+    void operator()(const Function& fn, const Function& later,
+                    const int64_t wait = 100);
 
 private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> _last;
+    using time_point =
+        std::chrono::time_point<std::chrono::high_resolution_clock>;
+    time_point _last;
     bool _haveLast = false;
     Timeout _timeout;
+    std::mutex _mutex;
 };
 }

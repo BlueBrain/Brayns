@@ -72,9 +72,12 @@ public:
 private:
     void _setupMainThread()
     {
-        // triggered after rendering, needed somehow to trigger accumulation
-        // frames afterwards
-        _renderingDone->on<uvw::AsyncEvent>([](const auto&, auto&) {});
+        // triggered after rendering, send events to rockets from the main
+        // thread
+        _renderingDone->on<uvw::AsyncEvent>([& brayns = _brayns](const auto&,
+                                                                 auto&) {
+            brayns.postRender();
+        });
 
         // events from rockets, trigger rendering
         _brayns.getEngine().triggerRender = [& eventRendering = _eventRendering]

@@ -35,25 +35,35 @@ auto elapsedSince(const time_point<high_resolution_clock>& last)
 }
 }
 
-void Throttle::operator()(const std::function<void()>& fn, const int64_t wait)
+void Throttle::operator()(const Throttle::Function& fn, const int64_t wait)
 {
-    [&] {
-        if (_haveLast && (elapsedSince(_last) <= wait))
+    operator()(fn, fn, wait);
+}
+
+void Throttle::operator()(const Throttle::Function& fn,
+                          const Throttle::Function& later, const int64_t wait)
+{
+    time_point last;
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        last = _last;
+    }
+    if (_haveLast && (elapsedSince(last) <= wait))
+    {
+        _timeout.clear();
+        auto delayed = [& _last = _last, &mutex = _mutex, later ]
         {
-            _timeout.clear();
-            auto later = [& _last = _last, fn ]
-            {
-                _last = now();
-                fn();
-            };
-            _timeout.set(later, wait);
-        }
-        else
-        {
+            std::lock_guard<std::mutex> lock(mutex);
+            later();
             _last = now();
-            _haveLast = true;
-            fn();
-        }
-    }();
+        };
+        _timeout.set(delayed, wait);
+    }
+    else
+    {
+        fn();
+        _haveLast = true;
+        _last = now();
+    }
 }
 }

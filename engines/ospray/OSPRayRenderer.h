@@ -50,7 +50,7 @@ public:
 private:
     OSPRayCamera* _camera{nullptr};
     OSPRenderer _renderer{nullptr};
-    float _variance{std::numeric_limits<float>::max()};
+    std::atomic<float> _variance{std::numeric_limits<float>::max()};
     std::string _currentOSPRenderer;
 };
 }

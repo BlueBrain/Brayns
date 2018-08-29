@@ -331,8 +331,6 @@ inline void init(brayns::ModelParams* g, ObjectHandler* h)
 inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
 {
     h->add_property("bounding_box", &g->_boundingBox, Flags::Optional);
-    if (g->_model)
-        g->_bounds = g->getInstancesBounds();
     h->add_property("bounds", &g->_bounds, Flags::Optional);
     h->add_property("id", &g->_modelID);
     h->add_property("metadata", &g->_metadata, Flags::Optional);
@@ -345,9 +343,8 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
 
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
-    h->add_property("bounds", &s->_bounds, Flags::IgnoreRead | Flags::Optional);
     h->add_property("clip_planes", &s->_clipPlanes, Flags::Optional);
-    std::shared_lock<std::shared_timed_mutex> lock(s->modelMutex());
+    h->add_property("bounds", &s->_bounds, Flags::IgnoreRead | Flags::Optional);
     h->add_property("models", &s->getModelDescriptors(),
                     Flags::Optional | Flags::IgnoreRead);
     h->set_flags(Flags::DisallowUnknownKey);
@@ -519,6 +516,13 @@ template <>
 inline std::string to_json(const brayns::Version& obj)
 {
     return obj.toJSON();
+}
+
+template <>
+inline std::string to_json(const brayns::Scene& scene)
+{
+    std::shared_lock<std::shared_timed_mutex> lock(scene.modelMutex());
+    return staticjson::to_json_string(scene);
 }
 
 template <class T>

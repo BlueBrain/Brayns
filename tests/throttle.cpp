@@ -29,7 +29,7 @@
 BOOST_AUTO_TEST_CASE(timeout_not_cleared)
 {
     brayns::Timeout timeout;
-    bool called = false;
+    std::atomic_bool called{false};
     timeout.set([&called] { called = true; }, 1);
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     BOOST_CHECK(called);
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(timeout_with_clear)
 
     brayns::Timeout timeout;
 
-    bool called = false;
+    std::atomic_bool called{false};
     timeout.set([&called] { called = true; }, 500);
     timeout.clear();
     BOOST_CHECK(!called);
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(timeout_with_clear)
 BOOST_AUTO_TEST_CASE(timeout_set_while_not_cleared)
 {
     brayns::Timeout timeout;
-    bool called = false;
+    std::atomic_bool called{false};
     timeout.set([&called] { called = true; }, 10000);
     BOOST_CHECK_THROW(timeout.set([&called] { called = true; }, 10000),
                       std::logic_error);
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(timeout_set_while_not_cleared)
 BOOST_AUTO_TEST_CASE(timeout_clear_while_already_done)
 {
     brayns::Timeout timeout;
-    bool called = false;
+    std::atomic_bool called{false};
     timeout.set([&called] { called = true; }, 1);
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     BOOST_CHECK(called);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(timeout_clear_while_already_done)
 BOOST_AUTO_TEST_CASE(throttle_spam_limit)
 {
     brayns::Throttle throttle;
-    size_t numCalls = 0;
+    std::atomic_size_t numCalls{0};
 
     brayns::Timer timer;
     timer.start();
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(throttle_spam_limit)
 BOOST_AUTO_TEST_CASE(throttle_spam_check_delayed_call)
 {
     brayns::Throttle throttle;
-    size_t numCalls = 0;
+    std::atomic_size_t numCalls{0};
 
     while (numCalls < 2)
         throttle([&] { ++numCalls; }, 5);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(throttle_spam_check_delayed_call)
 BOOST_AUTO_TEST_CASE(throttle_one)
 {
     brayns::Throttle throttle;
-    size_t numCalls = 0;
+    std::atomic_size_t numCalls{0};
 
     throttle([&] { ++numCalls; }, 1);
     BOOST_CHECK_EQUAL(numCalls, 1);

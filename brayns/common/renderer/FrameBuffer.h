@@ -61,7 +61,7 @@ protected:
     Vector2ui _frameSize;
     FrameBufferFormat _frameBufferFormat;
     bool _accumulation;
-    size_t _accumFrames{0};
+    std::atomic_size_t _accumFrames{0};
 };
 }
 #endif // FRAMEBUFFER_H
