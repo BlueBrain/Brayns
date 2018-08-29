@@ -29,7 +29,7 @@ Camera& Camera::operator=(const Camera& rhs)
     if (this == &rhs)
         return *this;
 
-    PropertyObject::operator=(rhs);
+    clonePropertiesFrom(rhs);
 
     setPosition(rhs.getPosition());
     setTarget(rhs.getTarget());
@@ -60,7 +60,7 @@ void Camera::setInitialState(const Vector3d& position, const Vector3d& target,
     set(position, target, upVector);
 }
 
-BRAYNS_API void Camera::setInitialState(const Boxd& boundingBox)
+void Camera::setInitialState(const Boxd& boundingBox)
 {
     const auto& target = boundingBox.getCenter();
     const auto& diag = boundingBox.getSize();

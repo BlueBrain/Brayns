@@ -137,7 +137,8 @@ public:
     void removeInstance(const size_t id);
     ModelInstance* getInstance(const size_t id);
     const ModelInstances& getInstances() const { return _instances; }
-    Boxd getInstancesBounds() const;
+    Boxd getBounds() const { return _bounds; }
+    void computeBounds();
 
     void setProperties(const PropertyMap& properties)
     {

@@ -80,18 +80,15 @@ public:
 
         const auto& renderer = engine.getRenderer();
         _renderer->setCurrentType(renderer.getCurrentType());
-        _renderer->setProperties(renderer.getPropertyMap());
+        _renderer->clonePropertiesFrom(renderer);
         if (_params.camera)
         {
             *_camera = *_params.camera;
             _camera->setCurrentType(engine.getCamera().getCurrentType());
-            _camera->setProperties(engine.getCamera().getPropertyMap());
-        }
-        else
-        {
-            *_camera = engine.getCamera();
             _camera->clonePropertiesFrom(engine.getCamera());
         }
+        else
+            *_camera = engine.getCamera();
 
         *_scene = engine.getScene();
     }

@@ -86,7 +86,8 @@ public:
      * event triggers the rendering and gathers the results in a form of a
      * base64 encoded JPEG image.
      *
-     * Combines commit() and render() together in a synchronized fashion.
+     * Combines commit(), render() and postRender() together in a synchronized
+     * fashion.
      *
      * @return true if rendering should continue or false if user inputs
      *         requested to stop.
@@ -112,6 +113,13 @@ public:
      * @note threadsafe with commit()
      */
     BRAYNS_API void render();
+
+    /**
+     * Call postRender() on engine and plugins to signal finish of render().
+     * Shall only be called after render() has finished. This is only needed if
+     * commit() and render() are called individually.
+     */
+    BRAYNS_API void postRender();
 
     /**
      * Unloads current scene and loads new scene according to parameters. Can be

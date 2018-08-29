@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <cmath>
 #include <functional>
 #include <type_traits>
@@ -29,7 +30,17 @@ namespace brayns
 class BaseObject
 {
 public:
+    BaseObject() = default;
     virtual ~BaseObject() = default;
+
+    /**
+     * Custom copy constructor to not copy changedCallback and solve
+     * non-copyable atomic modified state.
+     */
+    BaseObject(const BaseObject&)
+        : _modified(true)
+    {
+    }
 
     /** Custom assignment operator that does not copy the changedCallback. */
     BaseObject& operator=(const BaseObject& rhs)
@@ -77,7 +88,6 @@ protected:
         }
     }
 
-private:
     template <class T>
     bool _isEqual(
         const T& a, const T& b,
@@ -94,7 +104,8 @@ private:
         return a == b;
     }
 
-    bool _modified{true};
+private:
+    std::atomic_bool _modified{true};
     std::function<void(const BaseObject&)> _changedCallback;
 };
 }

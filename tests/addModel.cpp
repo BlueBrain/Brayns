@@ -141,15 +141,12 @@ BOOST_AUTO_TEST_CASE(cancel)
                        .request<brayns::ModelParams, brayns::ModelDescriptor>(
                            ADD_MODEL, {"forever", "forever"});
 
-    auto asyncWait = std::async(std::launch::async, [&request] {
-        while (!request.is_ready())
-            process();
-        request.get();
-    });
-
     request.cancel();
 
-    BOOST_CHECK_THROW(asyncWait.get(), std::runtime_error);
+    while (!request.is_ready())
+        process();
+
+    BOOST_CHECK_THROW(request.get(), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(close_client_while_pending_request)

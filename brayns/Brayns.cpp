@@ -263,28 +263,32 @@ struct Brayns::Impl : public PluginAPI
         return true;
     }
 
-    void render(RenderOutput* output)
+    void render()
     {
         std::lock_guard<std::mutex> lock{_renderMutex};
 
         _renderTimer.start();
         _engine->render();
         _renderTimer.stop();
-
-        _engine->getStatistics().setFPS(_renderTimer.perSecondSmoothed());
+        _lastFPS = _renderTimer.perSecondSmoothed();
 
         const auto& params = _parametersManager.getApplicationParameters();
         const auto fps = params.getMaxRenderFPS();
-        const auto delta = _renderTimer.perSecondSmoothed() - fps;
+        const auto delta = _lastFPS - fps;
         if (delta > 0)
         {
             const int64_t targetTime = (1. / fps) * 1000.f;
             std::this_thread::sleep_for(std::chrono::milliseconds(
                 targetTime - _renderTimer.milliseconds()));
         }
+    }
 
+    void postRender(RenderOutput* output)
+    {
         if (output)
             _updateRenderOutput(*output);
+
+        _engine->getStatistics().setFPS(_lastFPS);
 
         _engine->postRender();
 
@@ -1042,6 +1046,7 @@ private:
     std::mutex _renderMutex;
 
     Timer _renderTimer;
+    std::atomic<double> _lastFPS;
 
 #ifdef BRAYNS_USE_LUNCHBOX
     // it is important to perform loading and unloading in the same thread,
@@ -1068,13 +1073,19 @@ void Brayns::commitAndRender(const RenderInput& renderInput,
                              RenderOutput& renderOutput)
 {
     if (_impl->commit(renderInput))
-        _impl->render(&renderOutput);
+    {
+        _impl->render();
+        _impl->postRender(&renderOutput);
+    }
 }
 
 bool Brayns::commitAndRender()
 {
     if (_impl->commit())
-        _impl->render(nullptr);
+    {
+        _impl->render();
+        _impl->postRender(nullptr);
+    }
     return _impl->getEngine().getKeepRunning();
 }
 
@@ -1091,7 +1102,12 @@ bool Brayns::commit()
 
 void Brayns::render()
 {
-    return _impl->render(nullptr);
+    return _impl->render();
+}
+
+void Brayns::postRender()
+{
+    _impl->postRender(nullptr);
 }
 
 void Brayns::buildScene()

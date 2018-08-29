@@ -49,7 +49,7 @@ public:
     {
         const auto oldValue =
             _properties.at(_currentType).getProperty<T>(name, value);
-        if (oldValue != value)
+        if (!_isEqual(oldValue, value))
         {
             _properties.at(_currentType).updateProperty(name, value);
             markModified();

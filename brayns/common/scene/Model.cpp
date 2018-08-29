@@ -123,18 +123,18 @@ ModelInstance* ModelDescriptor::getInstance(const size_t id)
     return i == _instances.end() ? nullptr : &(*i);
 }
 
-Boxd ModelDescriptor::getInstancesBounds() const
+void ModelDescriptor::computeBounds()
 {
-    Boxd bounds;
+    _bounds.reset();
     for (const auto& instance : getInstances())
     {
         if (!instance.getVisible() || !_model)
             continue;
 
-        bounds.merge(
-            transformBox(getModel().getBounds(), instance.getTransformation()));
+        _bounds.merge(
+            transformBox(getModel().getBounds(),
+                         getTransformation() * instance.getTransformation()));
     }
-    return bounds;
 }
 
 bool Model::empty() const

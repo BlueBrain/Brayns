@@ -126,11 +126,6 @@ BOOST_AUTO_TEST_CASE(xyz)
                        .request<brayns::BinaryParam, brayns::ModelDescriptor>(
                            REQUEST_MODEL_UPLOAD, {params});
 
-    auto asyncWait = std::async(std::launch::async, [&request] {
-        while (!request.is_ready())
-            process();
-    });
-
     std::ifstream file(BRAYNS_TESTDATA_MODEL_MONKEY_PATH, std::ios::binary);
 
     std::vector<char> buffer(1024, 0);
@@ -139,6 +134,7 @@ BOOST_AUTO_TEST_CASE(xyz)
     {
         const std::streamsize size = file.gcount();
         getWsClient().sendBinary(buffer.data(), size);
+        process();
     }
 
     // read & send last chunk
@@ -149,7 +145,8 @@ BOOST_AUTO_TEST_CASE(xyz)
         getWsClient().sendBinary(buffer.data(), size);
     }
 
-    asyncWait.get();
+    while (!request.is_ready())
+        process();
     const auto& model = request.get();
     BOOST_CHECK_EQUAL(model.getName(), "monkey");
     BOOST_CHECK_EQUAL(model.getPath(), "monkey.xyz");
@@ -169,11 +166,6 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
                        .request<brayns::BinaryParam, brayns::ModelDescriptor>(
                            REQUEST_MODEL_UPLOAD, {params});
 
-    auto asyncWait = std::async(std::launch::async, [&request] {
-        while (!request.is_ready())
-            process();
-    });
-
     std::ifstream file(BRAYNS_TESTDATA_MODEL_BROKEN_PATH, std::ios::binary);
 
     std::vector<char> buffer(1024, 0);
@@ -182,6 +174,7 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
     {
         const std::streamsize size = file.gcount();
         getWsClient().sendBinary(buffer.data(), size);
+        process();
     }
 
     // read & send last chunk
@@ -192,7 +185,8 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
         getWsClient().sendBinary(buffer.data(), size);
     }
 
-    asyncWait.get();
+    while (!request.is_ready())
+        process();
     try
     {
         request.get();
@@ -215,15 +209,12 @@ BOOST_AUTO_TEST_CASE(cancel)
                        .request<brayns::BinaryParam, brayns::ModelDescriptor>(
                            REQUEST_MODEL_UPLOAD, {params});
 
-    auto asyncWait = std::async(std::launch::async, [&request] {
-        while (!request.is_ready())
-            process();
-        request.get();
-    });
-
     request.cancel();
 
-    BOOST_CHECK_THROW(asyncWait.get(), std::runtime_error);
+    while (!request.is_ready())
+        process();
+
+    BOOST_CHECK_THROW(request.get(), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(send_wrong_number_of_bytes)
@@ -236,18 +227,14 @@ BOOST_AUTO_TEST_CASE(send_wrong_number_of_bytes)
                        .request<brayns::BinaryParam, brayns::ModelDescriptor>(
                            REQUEST_MODEL_UPLOAD, {params});
 
-    auto asyncWait = std::async(std::launch::async, [&request] {
-        while (!request.is_ready())
-            process();
-        request.get();
-    });
-
     const std::string wrong("not_four_bytes");
     getWsClient().sendBinary(wrong.data(), wrong.size());
 
     try
     {
-        asyncWait.get();
+        while (!request.is_ready())
+            process();
+        request.get();
         BOOST_REQUIRE(false);
     }
     catch (const rockets::jsonrpc::response_error& e)
@@ -266,18 +253,17 @@ BOOST_AUTO_TEST_CASE(cancel_while_loading)
                        .request<brayns::BinaryParam, brayns::ModelDescriptor>(
                            REQUEST_MODEL_UPLOAD, {params});
 
-    auto asyncWait = std::async(std::launch::async, [&request] {
-        while (!request.is_ready())
-            process();
-        request.get();
-    });
-
     const std::string fourBytes("four");
     getWsClient().sendBinary(fourBytes.data(), fourBytes.size());
 
+    process();
+
     request.cancel();
 
-    BOOST_CHECK_THROW(asyncWait.get(), std::runtime_error);
+    while (!request.is_ready())
+        process();
+
+    BOOST_CHECK_THROW(request.get(), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
@@ -324,11 +310,6 @@ BOOST_AUTO_TEST_CASE(obj)
                        .request<brayns::BinaryParam, brayns::ModelDescriptor>(
                            REQUEST_MODEL_UPLOAD, {params});
 
-    auto asyncWait = std::async(std::launch::async, [&request] {
-        while (!request.is_ready())
-            process();
-    });
-
     std::ifstream file(BRAYNS_TESTDATA_MODEL_BENNU_PATH, std::ios::binary);
 
     std::vector<char> buffer(1024, 0);
@@ -337,6 +318,7 @@ BOOST_AUTO_TEST_CASE(obj)
     {
         const std::streamsize size = file.gcount();
         getWsClient().sendBinary(buffer.data(), size);
+        process();
     }
 
     // read & send last chunk
@@ -347,7 +329,8 @@ BOOST_AUTO_TEST_CASE(obj)
         getWsClient().sendBinary(buffer.data(), size);
     }
 
-    asyncWait.get();
+    while (!request.is_ready())
+        process();
     const auto& model = request.get();
     BOOST_CHECK_EQUAL(model.getName(), "bennu");
 }
@@ -392,10 +375,7 @@ BOOST_AUTO_TEST_CASE(concurrent_requests)
 
     ///////////////////
 
-    auto asyncWait = std::async(std::launch::async, [&xyzRequest, &objRequest] {
-        while (!xyzRequest.is_ready() || !objRequest.is_ready())
-            process();
-    });
+    process();
 
     std::array<char, 1024> buffer;
     bool xyzDone = false;
@@ -449,9 +429,11 @@ BOOST_AUTO_TEST_CASE(concurrent_requests)
                 objDone = true;
             }
         }
+        process();
     }
 
-    asyncWait.get();
+    while (!xyzRequest.is_ready() || !objRequest.is_ready())
+        process();
 
     const auto& xyzModel = xyzRequest.get();
     BOOST_CHECK_EQUAL(xyzModel.getName(), "monkey");
