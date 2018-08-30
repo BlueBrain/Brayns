@@ -63,6 +63,7 @@ void Throttle::operator()(const Throttle::Function& fn,
     {
         fn();
         _haveLast = true;
+        std::lock_guard<std::mutex> lock(_mutex);
         _last = now();
     }
 }

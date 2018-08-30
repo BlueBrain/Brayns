@@ -190,10 +190,25 @@ public:
         , _parametersManager(api->getParametersManager())
     {
         _setupRocketsServer();
+
+#ifdef BRAYNS_USE_LIBUV
+        if (uvw::Loop::getDefault()->alive())
+        {
+            _processDelayedNotifies =
+                uvw::Loop::getDefault()->resource<uvw::AsyncHandle>();
+            _processDelayedNotifies->on<uvw::AsyncEvent>(
+                [&](const auto&, auto&) { this->processDelayedNotifies(); });
+        }
+#endif
     }
 
     ~Impl()
     {
+#ifdef BRAYNS_USE_LIBUV
+        if (_processDelayedNotifies)
+            _processDelayedNotifies->close();
+#endif
+
         // cancel all pending tasks
         std::vector<TaskPtr> tasksToCancel;
         {
@@ -216,12 +231,7 @@ public:
 
         try
         {
-            // call pending notifies from delayed throttle threads here as
-            // notify() and process() are not threadsafe within Rockets.
-            std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
-            for (const auto& func : _delayedNotifies)
-                func();
-            _delayedNotifies.clear();
+            processDelayedNotifies();
             _rocketsServer->process(0);
         }
         catch (const std::exception& exc)
@@ -237,6 +247,16 @@ public:
             return;
 
         _broadcastImageJpeg();
+    }
+
+    void processDelayedNotifies()
+    {
+        // call pending notifies from delayed throttle threads here as
+        // notify() and process() are not threadsafe within Rockets.
+        std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
+        for (const auto& func : _delayedNotifies)
+            func();
+        _delayedNotifies.clear();
     }
 
     void _setupRocketsServer()
@@ -310,24 +330,17 @@ public:
     void _delayedNotify(const std::function<void()>& notify)
     {
         std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
+        _delayedNotifies.push_back(notify);
 
 #ifdef BRAYNS_USE_LIBUV
-        if (uvw::Loop::getDefault()->alive())
+        if (_processDelayedNotifies)
         {
             // dispatch delayed notify from throttle thread to main thread
             // (where the default loop runs) as notify() and process() are not
             // threadsafe within Rockets.
-            auto delayedExecution =
-                uvw::Loop::getDefault()->resource<uvw::CheckHandle>();
-
-            delayedExecution->once<uvw::CheckEvent>(
-                [notify](const auto&, auto&) { notify(); });
-
-            delayedExecution->start();
+            _processDelayedNotifies->send();
         }
-        else
 #endif
-            _delayedNotifies.push_back(notify);
     }
 
     template <class T>
@@ -480,28 +493,34 @@ public:
         // - setup progress reporting during the task execution using libuv
         // - wire the cancel request from rockets to the task
 
-        auto action = [&tasks = _tasks, &binaryRequests = _binaryRequests,
-                createTask,  &mutex = _tasksMutex]
-                (P params, auto clientID, auto respond, auto progressCb)
-        {
+        auto action = [&, createTask](P params, auto clientID, auto respond,
+                                      auto progressCb) {
             // transform task error to rockets error response
-            auto errorCallback = [respond](const TaskRuntimeError& error) {
-                respond(
-                    {Response::Error{error.what(), error.code, error.data}});
+            auto errorCallback = [&, respond](const TaskRuntimeError& error) {
+                const Response response(
+                    Response::Error{error.what(), error.code, error.data});
+                std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
+                _delayedNotifies.push_back(
+                    [respond, response] { respond(response); });
             };
 
             try
             {
                 // transform task result to rockets response
-                auto readyCallback = [respond](const R& result) {
+                auto readyCallback = [&, respond](const R& result) {
+                    std::lock_guard<std::mutex> lock(_delayedNotifiesMutex);
                     try
                     {
-                        respond({to_json(result)});
+                        _delayedNotifies.push_back(
+                            [respond, result] { respond({to_json(result)}); });
                     }
                     catch (const std::runtime_error& e)
                     {
-                        respond({Response::Error{e.what(),
-                                                 TASK_RESULT_TO_JSON_ERROR}});
+                        const Response response(
+                            Response::Error{e.what(),
+                                            TASK_RESULT_TO_JSON_ERROR});
+                        _delayedNotifies.push_back(
+                            [respond, response] { respond(response); });
                     }
                 };
 
@@ -541,36 +560,36 @@ public:
 
                 // setup the continuation task that handles the result or error
                 // of the task to handle the responses to rockets accordingly.
-                auto responseTask = std::make_shared<async::task<void>>(
-                    task->get().then([readyCallback, errorCallback, &tasks,
-                                      &binaryRequests, task, finishProgress,
-                                      &mutex](typename Task<R>::Type result) {
-                        finishProgress();
+                auto responseTask =
+                    std::make_shared<async::task<void>>(task->get().then(
+                        [&, readyCallback, errorCallback, task,
+                         finishProgress](typename Task<R>::Type result) {
+                            finishProgress();
 
-                        try
-                        {
-                            readyCallback(result.get());
-                        }
-                        catch (const TaskRuntimeError& e)
-                        {
-                            errorCallback(e);
-                        }
-                        catch (const std::exception& e)
-                        {
-                            errorCallback({e.what()});
-                        }
-                        catch (const async::task_canceled&)
-                        {
-                            task->finishCancel();
-                        }
+                            try
+                            {
+                                readyCallback(result.get());
+                            }
+                            catch (const TaskRuntimeError& e)
+                            {
+                                errorCallback(e);
+                            }
+                            catch (const std::exception& e)
+                            {
+                                errorCallback({e.what()});
+                            }
+                            catch (const async::task_canceled&)
+                            {
+                                task->finishCancel();
+                            }
 
-                        std::lock_guard<std::mutex> lock(mutex);
-                        tasks.erase(task);
-                        binaryRequests.removeTask(task);
-                    }));
+                            std::lock_guard<std::mutex> lock(_tasksMutex);
+                            _tasks.erase(task);
+                            _binaryRequests.removeTask(task);
+                        }));
 
-                std::lock_guard<std::mutex> lock(mutex);
-                tasks.emplace(task, responseTask);
+                std::lock_guard<std::mutex> lock(_tasksMutex);
+                _tasks.emplace(task, responseTask);
 
                 // forward the cancel request from rockets to the task
                 auto cancel = [task, responseTask](auto done) {
@@ -1248,6 +1267,10 @@ public:
     std::unordered_map<std::string, std::pair<std::mutex, Throttle>> _throttle;
     std::vector<std::function<void()>> _delayedNotifies;
     std::mutex _delayedNotifiesMutex;
+
+#ifdef BRAYNS_USE_LIBUV
+    std::shared_ptr<uvw::AsyncHandle> _processDelayedNotifies;
+#endif
 
     std::unordered_map<std::string, std::string> _schemas;
 
