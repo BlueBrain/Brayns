@@ -46,7 +46,7 @@ public:
     }
 
 protected:
-    size_t _sizeInBytes{0};
+    std::atomic_size_t _sizeInBytes{0};
     const Vector3ui _dimensions;
     const Vector3f _spacing;
     const DataType _dataType;
