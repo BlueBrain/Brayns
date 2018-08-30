@@ -51,5 +51,8 @@ public:
 
     /** @return access to the renderer of Brayns. */
     virtual Renderer& getRenderer() = 0;
+
+    /** Triggers a new preRender() and potentially render() and postRender(). */
+    virtual void triggerRender() = 0;
 };
 }
