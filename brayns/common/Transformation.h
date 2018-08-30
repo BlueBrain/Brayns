@@ -94,7 +94,8 @@ inline Transformation operator*(const Transformation& a,
 
 inline Boxd transformBox(const Boxd& box, const Transformation& transformation)
 {
-    return {transformation.toMatrix() * box.getMin(),
-            transformation.toMatrix() * box.getMax()};
+    const auto& scale = transformation.getScale();
+    return {transformation.toMatrix() * box.getMin() * scale,
+            transformation.toMatrix() * box.getMax() * scale};
 }
 }
