@@ -444,6 +444,7 @@ struct Brayns::Impl : public PluginAPI
     }
     Camera& getCamera() final { return _engine->getCamera(); }
     Renderer& getRenderer() final { return _engine->getRenderer(); }
+    void triggerRender() final { _engine->triggerRender(); }
     ActionInterface* getActionInterface() final
     {
         return _actionInterface.get();
