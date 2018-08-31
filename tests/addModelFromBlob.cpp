@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(concurrent_requests)
         return file.tellg();
     }();
     xyzParams.type = "xyz";
-    xyzParams.chunksID = 1;
+    xyzParams.chunksID = "coffee";
     xyzParams.setPath("monkey.xyz");
 
     auto xyzRequest =
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(concurrent_requests)
         return file.tellg();
     }();
     objParams.type = "obj";
-    objParams.chunksID = 2;
+    objParams.chunksID = "1plus1equals2";
     objParams.setName("bennu");
 
     auto objRequest =
