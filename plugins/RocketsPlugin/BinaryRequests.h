@@ -53,7 +53,7 @@ public:
         return task;
     }
 
-    void setNextChunkID(const size_t id) { _nextChunkID = id; }
+    void setNextChunkID(const std::string& id) { _nextChunkID = id; }
     /** The receive and delegate of blobs to the AddModelFromBlobTask. */
     rockets::ws::Response processMessage(const rockets::ws::Request& wsRequest)
     {
@@ -102,9 +102,9 @@ public:
     }
 
 private:
-    using ClientRequestID = std::pair<uintptr_t, size_t>;
+    using ClientRequestID = std::pair<uintptr_t, std::string>;
     std::map<ClientRequestID, std::shared_ptr<AddModelFromBlobTask>> _requests;
-    size_t _nextChunkID{0};
+    std::string _nextChunkID;
     std::mutex _mutex;
 };
 }

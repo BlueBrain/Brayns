@@ -33,14 +33,14 @@ namespace brayns
 {
 struct Chunk
 {
-    size_t id;
+    std::string id;
 };
 
 struct BinaryParam : ModelParams
 {
     size_t size{0};   //!< size in bytes of file
     std::string type; //!< file extension or type (MESH, POINTS, CIRCUIT)
-    size_t chunksID{0};
+    std::string chunksID;
     SERIALIZATION_FRIEND(BinaryParam)
 };
 
