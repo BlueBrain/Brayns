@@ -43,7 +43,7 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
 #ifdef BRAYNS_USE_FREEIMAGE
     return {freeimage::getBase64Image(frameBuffer, format, quality)};
 #elif defined BRAYNS_USE_LIBJPEGTURBO
-    BRAYNS_WARN << "No assimp found, will take TurboJPEG snapshot; "
+    BRAYNS_WARN << "No FreeImage found, will take TurboJPEG snapshot; "
                 << "ignoring format '" << format << "'" << std::endl;
     const auto& jpeg = createJPEG(frameBuffer, quality);
     return {base64_encode(jpeg.data.get(), jpeg.size)};
