@@ -647,7 +647,6 @@ public:
     void _registerEndpoints()
     {
         _handleCamera();
-        _handleGeometryParams();
         _handleImageJPEG();
         _handleRenderer();
         _handleStreaming();
@@ -658,6 +657,8 @@ public:
         _handle(ENDPOINT_ANIMATION_PARAMS,
                 _parametersManager.getAnimationParameters(),
                 INTERACTIVE_THROTTLE);
+        _handle(ENDPOINT_GEOMETRY_PARAMS,
+                _parametersManager.getGeometryParameters());
         _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
         _handle(ENDPOINT_VOLUME_PARAMS,
                 _parametersManager.getVolumeParameters());
@@ -707,18 +708,6 @@ public:
         _rocketsServer->handleGET(ENDPOINT_FRAME_BUFFERS,
                                   _engine->getFrameBuffer());
         _handleObjectSchema(ENDPOINT_FRAME_BUFFERS, _engine->getFrameBuffer());
-    }
-
-    void _handleGeometryParams()
-    {
-        auto& params = _parametersManager.getGeometryParameters();
-        auto postUpdate = [this](GeometryParameters&) {
-            _engine->markRebuildScene();
-        };
-        _handleGET(ENDPOINT_GEOMETRY_PARAMS, params);
-        _handlePUT(ENDPOINT_GEOMETRY_PARAMS, params,
-                   std::function<bool(const GeometryParameters&)>(),
-                   postUpdate);
     }
 
     void _handleImageJPEG()
@@ -818,17 +807,6 @@ public:
                              });
 
         _handleSchema(ENDPOINT_VERSION, version.getSchema());
-    }
-
-    void _handleVolumeParams()
-    {
-        auto& params = _parametersManager.getVolumeParameters();
-        auto postUpdate = [this](VolumeParameters&) {
-            _engine->markRebuildScene();
-        };
-        _handleGET(ENDPOINT_VOLUME_PARAMS, params);
-        _handlePUT(ENDPOINT_VOLUME_PARAMS, params,
-                   std::function<bool(const VolumeParameters&)>(), postUpdate);
     }
 
     void _handleCamera()

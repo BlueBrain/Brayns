@@ -98,33 +98,6 @@ private:
                 return;
             }
 
-            // data loading
-            if (_brayns.getEngine().rebuildScene())
-            {
-                if (_isLoading)
-                    return;
-
-                _isLoading = true;
-
-                _checkIdleRendering->stop();
-
-                // async load execution
-                auto work = _mainLoop->resource<uvw::WorkReq>(
-                    [&] { _brayns.buildScene(); });
-
-                // async load finished, restore everything to continue rendering
-                work->template on<uvw::WorkEvent>([&](const auto&, auto&) {
-                    _brayns.getEngine().markRebuildScene(false);
-                    _isLoading = false;
-
-                    _checkIdleRendering->start();
-                    _eventRendering->start();
-                });
-
-                work->queue();
-                return;
-            }
-
             // rendering
             if (_brayns.commit())
                 _triggerRendering->send();
@@ -197,7 +170,6 @@ private:
     std::shared_ptr<uvw::AsyncHandle> _stopRenderThread;
 
     const float _idleRenderingDelay{0.1f};
-    bool _isLoading{false};
     brayns::Timer _timeSinceLastEvent;
 };
 

@@ -89,14 +89,6 @@ public:
     void initializeMaterials(
         MaterialsColorMap colorMap = MaterialsColorMap::none);
 
-    /** Mark the scene for building with Brayns::buildScene(). */
-    void markRebuildScene(const bool rebuild = true)
-    {
-        _rebuildScene = rebuild;
-    }
-
-    /** @return true if Brayns::buildScene() shall be called. */
-    bool rebuildScene() const { return _rebuildScene; }
     /**
      * Callback when a new frame shall be triggered. Currently called by event
      * plugins Deflect and Rockets.
@@ -170,7 +162,6 @@ protected:
     Statistics _statistics;
 
     bool _keepRunning{true};
-    bool _rebuildScene{false};
 };
 }
 

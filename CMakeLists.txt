@@ -93,8 +93,10 @@ endif()
 
 # Data access unit tests
 common_find_package(BBPTestData)
-common_find_package(Lunchbox)
 
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/perceptualdiff/FindFreeImage.cmake)
+  message(FATAL_ERROR "FindFreeImage.cmake missing, run: git submodule update --init")
+endif()
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/perceptualdiff)
 common_find_package(FreeImage)
 if(FreeImage_FOUND)

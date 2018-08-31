@@ -65,11 +65,6 @@
 #include <servus/uri.h>
 #endif
 
-#include <future>
-#ifdef BRAYNS_USE_LUNCHBOX
-#include <lunchbox/threadPool.h>
-#endif
-
 #ifdef BRAYNS_USE_OSPRAY
 #include <ospcommon/library.h>
 #endif
@@ -111,8 +106,6 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getScene().commit();
         _engine->setDefaultCamera();
-        _finishLoadScene();
-        _engine->getScene().resetModified();
     }
 
     void addPlugins()
@@ -197,16 +190,6 @@ struct Brayns::Impl : public PluginAPI
 
     bool commit()
     {
-        if (!isLoadingFinished())
-        {
-#ifdef BRAYNS_USE_LUNCHBOX
-            if (isAsyncMode())
-                return false;
-#endif
-        }
-        else
-            _finishLoadScene();
-
         std::unique_lock<std::mutex> lock{_renderMutex, std::defer_lock};
         if (!lock.try_lock())
             return false;
@@ -374,26 +357,7 @@ struct Brayns::Impl : public PluginAPI
         }
 
         // 'legacy' loading from geometry params
-        buildScene();
-    }
-
-    void buildScene()
-    {
-        if (!isLoadingFinished())
-            throw std::runtime_error("Build scene already in progress");
-
-        std::promise<void> promise;
-        _dataLoadingFuture = promise.get_future();
-
-#ifdef BRAYNS_USE_LUNCHBOX
-        if (isAsyncMode())
-            _loadingThread.post(std::bind(&Brayns::Impl::_loadData, this))
-                .get();
-        else
-#endif
-            _loadData();
-
-        promise.set_value();
+        _loadData();
     }
 
     bool commit(const RenderInput& renderInput)
@@ -450,31 +414,9 @@ struct Brayns::Impl : public PluginAPI
         return _actionInterface.get();
     }
     Scene& getScene() final { return _engine->getScene(); }
-    bool isLoadingFinished() const
-    {
-        return !_dataLoadingFuture.valid() ||
-               _dataLoadingFuture.wait_for(std::chrono::milliseconds(0)) ==
-                   std::future_status::ready;
-    }
-    bool isAsyncMode() const
-    {
-        return !_parametersManager.getApplicationParameters()
-                    .getSynchronousMode();
-    }
-
 private:
-    // do this in the main thread again to avoid race conditions
-    void _finishLoadScene()
-    {
-        if (_dataLoadingFuture.valid())
-            _dataLoadingFuture.get();
-    }
-
     void _updateAnimation()
     {
-        if (!isLoadingFinished())
-            return;
-
         auto simHandler = _engine->getScene().getSimulationHandler();
         auto& animParams = _parametersManager.getAnimationParameters();
         if ((animParams.isModified() || animParams.getDelta() != 0) &&
@@ -1041,21 +983,11 @@ private:
     double _fieldOfView{45.};
     double _eyeSeparation{0.0635};
 
-    std::future<void> _dataLoadingFuture;
-
     // protect render() vs commit() when doing all the commits
     std::mutex _renderMutex;
 
     Timer _renderTimer;
     std::atomic<double> _lastFPS;
-
-#ifdef BRAYNS_USE_LUNCHBOX
-    // it is important to perform loading and unloading in the same thread,
-    // otherwise we leak memory from within ospray/embree. So we don't use
-    // std::async(std::launch::async), but rather a thread pool with one thread
-    // that remains for the entire application lifetime.
-    lunchbox::ThreadPool _loadingThread{1};
-#endif
 
     ExtensionPluginFactory _extensionPluginFactory;
     std::shared_ptr<ActionInterface> _actionInterface;
@@ -1109,11 +1041,6 @@ void Brayns::render()
 void Brayns::postRender()
 {
     _impl->postRender(nullptr);
-}
-
-void Brayns::buildScene()
-{
-    _impl->buildScene();
 }
 
 Engine& Brayns::getEngine()
