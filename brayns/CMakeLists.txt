@@ -30,9 +30,5 @@ if(TARGET RocketsPlugin)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE RocketsPlugin)
 endif()
 
-if(TARGET Lunchbox)
-  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE Lunchbox)
-endif()
-
 set(BRAYNS_OMIT_EXPORT ON)
 common_library(brayns)

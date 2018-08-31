@@ -120,15 +120,6 @@ public:
      * commit() and render() are called individually.
      */
     BRAYNS_API void postRender();
-
-    /**
-     * Unloads current scene and loads new scene according to parameters. Can be
-     * called from a different thread to notify on updates during loading with
-     * postRender().
-     *
-     * @throw std::runtime_error if a previous buildScene() has not finished yet
-     */
-    BRAYNS_API void buildScene();
     //@}
 
     /**

@@ -53,11 +53,5 @@ void BraynsViewer::display()
     setTitle(ss.str());
 
     BaseWindow::display();
-
-    if (_brayns.getEngine().rebuildScene())
-    {
-        _brayns.getEngine().markRebuildScene(false);
-        std::thread([& brayns = _brayns]() { brayns.buildScene(); }).detach();
-    }
 }
 }
