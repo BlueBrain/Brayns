@@ -317,4 +317,7 @@ class RpcClient(object):
             self._ws_requests[data['id']](payload)
             self._ws_requests.pop(data['id'])
         else:
-            print('Invalid reply for request ' + str(data['id']))
+            if 'id' in data and data['id']:
+                print('Got error response for request ' + str(data['id']) + ': ' + str(payload))
+            else:
+                print('Got error response: ' + str(payload))
