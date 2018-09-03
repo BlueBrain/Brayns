@@ -583,6 +583,11 @@ public:
                                 task->finishCancel();
                             }
 
+#ifdef BRAYNS_USE_LIBUV
+                            if (_processDelayedNotifies)
+                                _processDelayedNotifies->send();
+#endif
+
                             std::lock_guard<std::mutex> lock(_tasksMutex);
                             _tasks.erase(task);
                             _binaryRequests.removeTask(task);
