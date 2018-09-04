@@ -204,21 +204,23 @@ public:
 
     ~Impl()
     {
+        // cancel all pending tasks
+        decltype(_tasks) tasksToCancel;
+        {
+            std::lock_guard<std::mutex> lock(_tasksMutex);
+            tasksToCancel = _tasks;
+        }
+
+        for (const auto& entry : tasksToCancel)
+        {
+            entry.first->cancel();
+            entry.second->wait();
+        }
+
 #ifdef BRAYNS_USE_LIBUV
         if (_processDelayedNotifies)
             _processDelayedNotifies->close();
 #endif
-
-        // cancel all pending tasks
-        std::vector<TaskPtr> tasksToCancel;
-        {
-            std::lock_guard<std::mutex> lock(_tasksMutex);
-            for (const auto& entry : _tasks)
-                tasksToCancel.push_back(entry.first);
-        }
-
-        for (auto task : tasksToCancel)
-            task->cancel();
 
         if (_rocketsServer)
             _rocketsServer->setSocketListener(nullptr);
