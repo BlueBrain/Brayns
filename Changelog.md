@@ -1,5 +1,139 @@
 # Change Log
 
+## [0.7.0](https://github.com/BlueBrain/Brayns/tree/0.7.0) (05-09-2018)
+
+**Breaking changes:**
+
+- Use string for chunkID to support UUIDs [\#544](https://github.com/BlueBrain/Brayns/pull/544)
+- Remove runtime data loading from geometry parameters [\#542](https://github.com/BlueBrain/Brayns/pull/542)
+
+**Implemented enhancements:**
+
+- Optimize python connect [\#502](https://github.com/BlueBrain/Brayns/issues/502)
+- Provide model properties to update models on-the-fly [\#501](https://github.com/BlueBrain/Brayns/issues/501)
+- Section planes + web UI [\#329](https://github.com/BlueBrain/Brayns/issues/329)
+- Expose triggerRender\(\) in plugin API & more data race fixes [\#540](https://github.com/BlueBrain/Brayns/pull/540)
+- Add onRemoved callback for model descriptor to handle plugin-specific model cleanups [\#539](https://github.com/BlueBrain/Brayns/pull/539)
+- Throw exception on invalid color scheme name. [\#534](https://github.com/BlueBrain/Brayns/pull/534)
+- Immediate notify changes on the websocket [\#533](https://github.com/BlueBrain/Brayns/pull/533)
+- Fix ispc 32-bit address limits in all geometries. [\#532](https://github.com/BlueBrain/Brayns/pull/532)
+- Support batch JSON-RPC in python client [\#531](https://github.com/BlueBrain/Brayns/pull/531)
+- Add --circuit-random-seed command line flag. [\#527](https://github.com/BlueBrain/Brayns/pull/527)
+- Add suggestions for unrecognized command line options. [\#526](https://github.com/BlueBrain/Brayns/pull/526)
+- Reworked proximity renderer [\#518](https://github.com/BlueBrain/Brayns/pull/518)
+- Add point size property to point cloud models [\#515](https://github.com/BlueBrain/Brayns/pull/515)
+- Reworked simulations renderers [\#512](https://github.com/BlueBrain/Brayns/pull/512)
+- Add model properties to allow updates on model data from plugins [\#506](https://github.com/BlueBrain/Brayns/pull/506)
+- Add property map to ActionInterface to ease JSON schema generation for plugin actions [\#493](https://github.com/BlueBrain/Brayns/pull/493)
+- Exposed volume alpha correction parameters to WS API [\#488](https://github.com/BlueBrain/Brayns/pull/488)
+- Clipping planes [\#486](https://github.com/BlueBrain/Brayns/pull/486)
+- Added Memory buffer support to SharedDataVolume class [\#481](https://github.com/BlueBrain/Brayns/pull/481)
+- Added rotation center to model transformation [\#479](https://github.com/BlueBrain/Brayns/pull/479)
+- Support vertex colors for meshes [\#475](https://github.com/BlueBrain/Brayns/pull/475)
+
+**Fixed bugs:**
+
+- Events from Deflect are not broadcasted via Rockets [\#342](https://github.com/BlueBrain/Brayns/issues/342)
+- Fix missing scale on model bounding box [\#541](https://github.com/BlueBrain/Brayns/pull/541)
+- Correct deflect size hints for side-by-side stereo [\#538](https://github.com/BlueBrain/Brayns/pull/538)
+- Fix a couple of data races [\#537](https://github.com/BlueBrain/Brayns/pull/537)
+- Precision must be double for JSON [\#528](https://github.com/BlueBrain/Brayns/pull/528)
+- Fix missing scene updates on model bounding box and visibility [\#521](https://github.com/BlueBrain/Brayns/pull/521)
+- Use double precision for clip planes to overcome JSON precision issues [\#520](https://github.com/BlueBrain/Brayns/pull/520)
+- Fix broadcast of animation params and scene updates [\#519](https://github.com/BlueBrain/Brayns/pull/519)
+- Fix sporadic segfault [\#513](https://github.com/BlueBrain/Brayns/pull/513)
+- Fix memleaks when re-committing models, improve spheres bounds calculation [\#509](https://github.com/BlueBrain/Brayns/pull/509)
+- Fixed shadows  on simulation data [\#508](https://github.com/BlueBrain/Brayns/pull/508)
+- Fixed performance issue with volume rendering [\#505](https://github.com/BlueBrain/Brayns/pull/505)
+- Fixed rendering of simulation data in simulation shader [\#497](https://github.com/BlueBrain/Brayns/pull/497)
+- Fix transfer function loader [\#496](https://github.com/BlueBrain/Brayns/pull/496)
+- Fix memleaks with streamlines and mesh normals [\#491](https://github.com/BlueBrain/Brayns/pull/491)
+- Fixed simulation renderer to use OSPVolumes [\#484](https://github.com/BlueBrain/Brayns/pull/484)
+- Fix 'unlock of already unlocked mutex' error [\#478](https://github.com/BlueBrain/Brayns/pull/478)
+- Fix race condition causing deformed snapshots when using UI. [\#477](https://github.com/BlueBrain/Brayns/pull/477)
+
+**Closed issues:**
+
+- Support for per-vertex colours to visually distinguish neuronal segments [\#442](https://github.com/BlueBrain/Brayns/issues/442)
+- Use case: rendering white matter tracts for neocortex project \(smooth curved geometry\) [\#435](https://github.com/BlueBrain/Brayns/issues/435)
+
+**Merged pull requests:**
+
+- Fix OSX build [\#552](https://github.com/BlueBrain/Brayns/pull/552)
+- Fix crash when closing Brayns with pending snapshot [\#550](https://github.com/BlueBrain/Brayns/pull/550)
+- Cleanup and optimize re-broadcasting [\#549](https://github.com/BlueBrain/Brayns/pull/549)
+- Print JSON-RPC errors in python client [\#548](https://github.com/BlueBrain/Brayns/pull/548)
+- Fix missing trigger for task responses, e.g. snapshot result [\#547](https://github.com/BlueBrain/Brayns/pull/547)
+- Fix braynsViewer execution from install tree \(missing braynsUI library\) [\#546](https://github.com/BlueBrain/Brayns/pull/546)
+- Bump Brion to fix gcc 8 compilation for Docker image [\#545](https://github.com/BlueBrain/Brayns/pull/545)
+- Update CMake/common to allow external GIT\_REVISION update for Nix build [\#543](https://github.com/BlueBrain/Brayns/pull/543)
+- Add missing public header [\#536](https://github.com/BlueBrain/Brayns/pull/536)
+- Documentation tweaks [\#535](https://github.com/BlueBrain/Brayns/pull/535)
+- Fix ispc 32-bit address limits in SDF geometries. [\#530](https://github.com/BlueBrain/Brayns/pull/530)
+- Fix clip planes after changing from float to double [\#529](https://github.com/BlueBrain/Brayns/pull/529)
+- Fix non-assimp compilation [\#525](https://github.com/BlueBrain/Brayns/pull/525)
+- Make RocketsPlugin and DeflectPlugin separate libraries [\#524](https://github.com/BlueBrain/Brayns/pull/524)
+- Do not expose limits for certain camera and renderer properties [\#523](https://github.com/BlueBrain/Brayns/pull/523)
+- Use plugin name as first argument for extension plugins. [\#514](https://github.com/BlueBrain/Brayns/pull/514)
+- Improve clipping planes JSON layout [\#511](https://github.com/BlueBrain/Brayns/pull/511)
+- Changed warning trace to error if color scheme by layer is choosen for MVD2 circuits [\#510](https://github.com/BlueBrain/Brayns/pull/510)
+- Integrate RapidJSON as a submodule [\#507](https://github.com/BlueBrain/Brayns/pull/507)
+- Add unit test for simulation renderer with colors [\#504](https://github.com/BlueBrain/Brayns/pull/504)
+- Allow bigger eye separation [\#498](https://github.com/BlueBrain/Brayns/pull/498)
+- Another fix for Read the Docs [\#495](https://github.com/BlueBrain/Brayns/pull/495)
+- Fix missing generation of \(static\) python API documentation [\#494](https://github.com/BlueBrain/Brayns/pull/494)
+- fix in webapi test \(precision error in clang and icc\) [\#492](https://github.com/BlueBrain/Brayns/pull/492)
+- Remove unnecessary compile flags [\#490](https://github.com/BlueBrain/Brayns/pull/490)
+- Fix clang build [\#489](https://github.com/BlueBrain/Brayns/pull/489)
+- Downscaled README image [\#487](https://github.com/BlueBrain/Brayns/pull/487)
+- Update rapidjson to fix gcc 8 compilation in Docker image [\#485](https://github.com/BlueBrain/Brayns/pull/485)
+- Expose animation parameters [\#483](https://github.com/BlueBrain/Brayns/pull/483)
+- Fix compilation error when no plugin is enabled [\#482](https://github.com/BlueBrain/Brayns/pull/482)
+- Fix clang rapidjson issues [\#480](https://github.com/BlueBrain/Brayns/pull/480)
+- Fix build on OSX [\#476](https://github.com/BlueBrain/Brayns/pull/476)
+
+## [0.7.0-alpha](https://github.com/BlueBrain/Brayns/tree/0.7.0-alpha) (25-07-2018)
+
+**Breaking changes:**
+
+- Introduce camera-specific properties and runtime type switching [\#462](https://github.com/BlueBrain/Brayns/pull/462)
+- Introduce renderer-specific properties [\#459](https://github.com/BlueBrain/Brayns/pull/459)
+- RPC for requesting objects, schema & version [\#424](https://github.com/BlueBrain/Brayns/pull/424)
+
+**Implemented enhancements:**
+
+- Add python client library [\#474](https://github.com/BlueBrain/Brayns/pull/474)
+- Stop braynsService on Ctrl+C [\#460](https://github.com/BlueBrain/Brayns/pull/460)
+- Fixed stereo camera issues and exposed zeroparallax attribute [\#454](https://github.com/BlueBrain/Brayns/pull/454)
+- Explicitly handle image\_stream\_fps == 0 to disable streaming [\#453](https://github.com/BlueBrain/Brayns/pull/453)
+- Add property map for plugin-specific camera attributes [\#449](https://github.com/BlueBrain/Brayns/pull/449)
+- Add SharedData- and BrickedVolume support [\#448](https://github.com/BlueBrain/Brayns/pull/448)
+- Add support for streamlines [\#447](https://github.com/BlueBrain/Brayns/pull/447)
+
+**Fixed bugs:**
+
+- Fix memleak with volumes [\#472](https://github.com/BlueBrain/Brayns/pull/472)
+- Fix segfault when loaders return an empty model rather than throwing an exception [\#471](https://github.com/BlueBrain/Brayns/pull/471)
+- Fix memleak with archives [\#469](https://github.com/BlueBrain/Brayns/pull/469)
+- Property tweaks, JSON schema fix [\#467](https://github.com/BlueBrain/Brayns/pull/467)
+- Memleak fixes [\#466](https://github.com/BlueBrain/Brayns/pull/466)
+- Fixed aspect ratio for stereoscopy [\#457](https://github.com/BlueBrain/Brayns/pull/457)
+- Using aspectRatio instead of fovx for the stereoFull camera [\#455](https://github.com/BlueBrain/Brayns/pull/455)
+- Fix broken model rotation and scale [\#451](https://github.com/BlueBrain/Brayns/pull/451)
+- Fixed a sign error for the full stereo camera [\#450](https://github.com/BlueBrain/Brayns/pull/450)
+
+**Merged pull requests:**
+
+- Fix missing recreation of osp framebuffer when accumulation state changed [\#473](https://github.com/BlueBrain/Brayns/pull/473)
+- Update current renderer type directly on set-renderer RPC [\#470](https://github.com/BlueBrain/Brayns/pull/470)
+- Remove model bounding box as per-instance bounding box is enough [\#468](https://github.com/BlueBrain/Brayns/pull/468)
+- Remove obsolete js/python code [\#465](https://github.com/BlueBrain/Brayns/pull/465)
+- fix in test/CMakeLists \(OSPRAY\_LIBRARIES to be linked\) [\#463](https://github.com/BlueBrain/Brayns/pull/463)
+- Trace size information in case OSPRay buffer allocation fails [\#461](https://github.com/BlueBrain/Brayns/pull/461)
+- Various GCC8 and clang fixes [\#458](https://github.com/BlueBrain/Brayns/pull/458)
+- Add doc to illustrate how to run Brayns on GCP's infrastructure [\#456](https://github.com/BlueBrain/Brayns/pull/456)
+- Fix pdiff image tests [\#446](https://github.com/BlueBrain/Brayns/pull/446)
+
 ## [0.6.1](https://github.com/BlueBrain/Brayns/tree/0.6.1) (28-06-2018)
 
 **Implemented enhancements:**
