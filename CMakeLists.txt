@@ -161,10 +161,6 @@ if(BRAYNS_OSPRAY_ENABLED)
   endif()
 endif()
 
-if(APPLE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework OpenGL -Wno-narrowing -Wno-deprecated-declarations")
-endif()
-
 if(BRAYNS_VIEWER_ENABLED)
   add_subdirectory(apps/ui)
   add_subdirectory(apps/BraynsViewer)

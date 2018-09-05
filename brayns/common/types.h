@@ -32,6 +32,7 @@
 
 #include <brayns/common/mathTypes.h>
 
+#include <array>
 #include <cstdint>
 #include <limits>
 #include <map>

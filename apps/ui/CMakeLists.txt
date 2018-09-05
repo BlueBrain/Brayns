@@ -30,3 +30,8 @@ set(BRAYNSUI_LINK_LIBRARIES
 
 set(BRAYNSUI_OMIT_EXPORT ON)
 common_library(braynsUI)
+
+if(APPLE)
+  target_compile_options(braynsUI PRIVATE -Wno-deprecated-declarations)
+  target_link_libraries(braynsUI PRIVATE "-framework OpenGL")
+endif()

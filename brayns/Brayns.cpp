@@ -20,13 +20,13 @@
  */
 
 #include "Brayns.h"
+#include "EngineFactory.h"
 
 #include <brayns/common/Timer.h>
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/camera/FlyingModeManipulator.h>
 #include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/engine/Engine.h>
-#include <brayns/common/engine/EngineFactory.h>
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/light/DirectionalLight.h>
 #include <brayns/common/log.h>
