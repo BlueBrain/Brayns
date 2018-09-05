@@ -190,7 +190,7 @@ add_subdirectory(tests)
 # OSPRay modules
 if(BRAYNS_OSPRAY_ENABLED)
   # Optix module
-  option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" ON)
+  option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" OFF)
   if(BRAYNS_OPTIX_ENABLED)
     add_subdirectory(ospray_modules/optix)
     if(TARGET ospray_module_optix)
