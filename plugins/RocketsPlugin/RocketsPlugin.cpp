@@ -349,12 +349,14 @@ public:
     void _rebroadcast(const std::string& endpoint, const T& obj,
                       const uintptr_t clientID)
     {
-        if (_rocketsServer->getConnectionCount() > 1)
-        {
-            const auto& msg =
-                rockets::jsonrpc::makeNotification(endpoint, to_json(obj));
-            _rocketsServer->broadcastText(msg, {clientID});
-        }
+        _delayedNotify([&] {
+            if (_rocketsServer->getConnectionCount() > 1)
+            {
+                const auto& msg =
+                    rockets::jsonrpc::makeNotification(endpoint, to_json(obj));
+                _rocketsServer->broadcastText(msg, {clientID});
+            }
+        });
     }
 
     template <class T>
@@ -384,9 +386,6 @@ public:
 
         obj.onModified(
             [&, endpoint=getNotificationEndpointName(endpoint), throttleTime](const auto& base) {
-                if(_rocketsServer->getConnectionCount() == 0)
-                    return;
-
                 auto& throttle = _throttle[endpoint];
 
                 // throttle itself is not thread-safe, but we can get called
@@ -900,11 +899,10 @@ public:
 
     void _handleQuit()
     {
-        _handleRPC({METHOD_QUIT, "Quit the application"},
-                   [engine = _engine] {
-                       engine->setKeepRunning(false);
-                       engine->triggerRender();
-                   });
+        _handleRPC({METHOD_QUIT, "Quit the application"}, [engine = _engine] {
+            engine->setKeepRunning(false);
+            engine->triggerRender();
+        });
     }
 
     void _handleResetCamera()
