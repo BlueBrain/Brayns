@@ -11,8 +11,11 @@ add_subdirectory(tasks)
 add_subdirectory(pluginapi)
 
 set(BRAYNS_PUBLIC_HEADERS Brayns.h)
-
-set(BRAYNS_SOURCES Brayns.cpp)
+set(BRAYNS_HEADERS EngineFactory.h)
+set(BRAYNS_SOURCES
+  Brayns.cpp
+  EngineFactory.cpp
+)
 
 set(BRAYNS_LINK_LIBRARIES
   PUBLIC braynsParameters braynsCommon

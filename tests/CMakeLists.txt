@@ -39,8 +39,17 @@ if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   include(ispc)
   include_directories_ispc(${PROJECT_SOURCE_DIR} ${OSPRAY_INCLUDE_DIRS})
   ospray_ispc_compile(${PROJECT_SOURCE_DIR}/engines/ospray/ispc/render/BasicRenderer.ispc)
-  add_library(myPlugin SHARED myPlugin.cpp ${ISPC_OBJECTS})
-  target_link_libraries(myPlugin brayns ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${OSPRAY_LIBRARIES})
+  add_library(myPlugin SHARED
+    myPlugin.cpp
+    ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/staticjson/staticjson.cpp
+    ${ISPC_OBJECTS}
+  )
+  target_link_libraries(myPlugin
+    brayns
+    braynsOSPRayEnginePlugin
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    ${OSPRAY_LIBRARIES}
+  )
   target_include_directories(myPlugin SYSTEM PRIVATE
     ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin
     ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/include)

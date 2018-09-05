@@ -6,7 +6,6 @@
 set(BRAYNSCOMMON_SOURCES
   ImageManager.cpp
   engine/Engine.cpp
-  engine/EngineFactory.cpp
   simulation/AbstractSimulationHandler.cpp
   input/KeyboardHandler.cpp
   transferFunction/TransferFunction.cpp
@@ -46,7 +45,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   camera/FlyingModeManipulator.h
   camera/InspectCenterManipulator.h
   engine/Engine.h
-  engine/EngineFactory.h
   geometry/Cone.h
   geometry/Cylinder.h
   geometry/SDFGeometry.h
