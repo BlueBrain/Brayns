@@ -5,6 +5,12 @@
 # This file is part of https://github.com/BlueBrain/ospray-modules
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+
+if(CMAKE_VERSION VERSION_GREATER "3.6" AND CMAKE_VERSION VERSION_LESS "3.10")
+  # https://gitlab.kitware.com/cmake/cmake/commit/037beeddd1d434e22040310bc6b88310496d3814#185864a642a40d10362afc05c79aea97451b1058
+  message(SEND_ERROR "Unsupported CMake version for OptiX plugin")
+endif()
+
 project(ospray_module_optix VERSION 1.0.0)
 set(ospray_module_optix_VERSION_ABI 1)
 
