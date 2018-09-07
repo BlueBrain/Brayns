@@ -21,11 +21,14 @@
 #include "CylindricStereoCamera.h"
 #include "CylindricStereoCamera_ispc.h"
 
-#define OPENDECK_FOV_Y 48.549f
+namespace
+{
+constexpr float opendeckFovY = 48.549f;
+constexpr float defaultInterpupillaryDistance = 0.0635f;
+}
 
 namespace ospray
 {
-
 CylindricStereoCamera::CylindricStereoCamera()
 {
     ispcEquivalent = ispc::CylindricStereoCamera_create(this);
@@ -40,44 +43,49 @@ void CylindricStereoCamera::commit()
 {
     Camera::commit();
 
-    const float fovY = OPENDECK_FOV_Y;
-    const StereoMode stereoMode = (StereoMode)getParam1i("stereoMode", OSP_STEREO_SIDE_BY_SIDE);
-    const float interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
+    const auto stereoMode = getStereoMode();
+    const auto ipd = getInterpupillaryDistance(stereoMode);
+    const auto sideBySide = stereoMode == StereoMode::OSP_STEREO_SIDE_BY_SIDE;
 
     dir = normalize(dir);
-    const vec3f dir_du = normalize(cross(dir, up));
-    const vec3f dir_dv = normalize(up);
+    const auto dir_du = normalize(cross(dir, up));
+    const auto dir_dv = normalize(up);
     dir = -dir;
 
-    float ipd = 0.0f;
-    bool sideBySide = false;
+    const auto imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * opendeckFovY));
+
+    ispc::CylindricStereoCamera_set(getIE(), (const ispc::vec3f&)pos,
+                                    (const ispc::vec3f&)dir,
+                                    (const ispc::vec3f&)dir_du,
+                                    (const ispc::vec3f&)dir_dv, imgPlane_size_y,
+                                    ipd, sideBySide);
+}
+
+CylindricStereoCamera::StereoMode CylindricStereoCamera::getStereoMode()
+{
+    return static_cast<StereoMode>(
+        getParam1i("stereoMode", StereoMode::OSP_STEREO_SIDE_BY_SIDE));
+}
+
+float CylindricStereoCamera::getInterpupillaryDistance(
+    const StereoMode stereoMode)
+{
+    const auto interpupillaryDistance =
+        getParamf("interpupillaryDistance", defaultInterpupillaryDistance);
+
     switch (stereoMode)
     {
-    case OSP_STEREO_LEFT:
-        ipd = -interpupillaryDistance;
-        break;
-    case OSP_STEREO_RIGHT:
-        ipd = interpupillaryDistance;
-        break;
-    case OSP_STEREO_SIDE_BY_SIDE:
-        ipd = interpupillaryDistance;
-        sideBySide = true;
-        break;
-    case OSP_STEREO_NONE:
-        break;
+    case StereoMode::OSP_STEREO_LEFT:
+        return -interpupillaryDistance;
+    case StereoMode::OSP_STEREO_RIGHT:
+        return interpupillaryDistance;
+    case StereoMode::OSP_STEREO_SIDE_BY_SIDE:
+        return interpupillaryDistance;
+    case StereoMode::OSP_STEREO_NONE:
+    default:
+        return 0.0f;
     }
-
-    const vec3f org = pos;
-    const float imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * fovY));
-
-    ispc::CylindricStereoCamera_set(getIE(), (const ispc::vec3f&)org,
-                                             (const ispc::vec3f&)dir,
-                                             (const ispc::vec3f&)dir_du,
-                                             (const ispc::vec3f&)dir_dv,
-                                             imgPlane_size_y, ipd,
-                                             sideBySide);
 }
 
 OSP_REGISTER_CAMERA(CylindricStereoCamera, cylindricStereo);
-
-} // ::ospray
+}

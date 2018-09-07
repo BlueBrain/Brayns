@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <ospray/SDK/camera/Camera.h>
+#include "../cylindricStereo/CylindricStereoCamera.h"
 
 namespace ospray
 {
@@ -30,17 +30,14 @@ namespace ospray
  * perspective projection for the y axis of an image. This camera
  * can create a stereo pair of images.
  */
-struct CylindricStereoTrackedCamera : public Camera
+struct CylindricStereoTrackedCamera : public CylindricStereoCamera
 {
     CylindricStereoTrackedCamera();
     std::string toString() const override;
     void commit() override;
 
-    typedef enum {
-        OSP_STEREO_NONE,
-        OSP_STEREO_LEFT,
-        OSP_STEREO_RIGHT,
-        OSP_STEREO_SIDE_BY_SIDE
-    } StereoMode;
+private:
+    vec3f _getOpendeckOrg();
+    vec3f _getOpendeckCamDU();
 };
 }

@@ -23,21 +23,20 @@
 #include "math/math.ih"
 #include "math/sampling.ih"
 
-void CylindricStereoTrackedCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
-                                          const varying CameraSample &sample)
+void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
+                                          varying Ray& ray,
+                                          const varying CameraSample& sample)
 {
-    uniform CylindricStereoTrackedCamera *uniform self =
+    uniform CylindricStereoTrackedCamera* uniform self =
         (uniform CylindricStereoTrackedCamera * uniform)_self;
 
-    vec2f screen = sample.screen;
-    screen = Camera_subRegion(_self, screen);
-    vec3f org;
-    vec3f dir;
-    float eyeDelta = 0;
-    float alpha;
-    if( self->side_by_side )
+    const vec2f screen = Camera_subRegion(_self, sample.screen);
+
+    float eyeDelta = 0.0f;
+    float alpha = 0.0f;
+    if (self->side_by_side)
     {
-        if(screen.x < 0.5)
+        if (screen.x < 0.5f)
         {
             eyeDelta = -self->interpupillaryDistance * 0.5f;
             alpha = 2.0f * screen.x * pi;
@@ -58,29 +57,29 @@ void CylindricStereoTrackedCamera_initRay(uniform Camera *uniform _self, varying
     pixelPos.y = self->openDeckVerticalSize * screen.y;
     pixelPos.z = self->openDeckRadius * -sinf(alpha);
 
-    vec3f eyeAxis = self->od_dir_du;/*normalize(cameraSpace * self->od_dir_du);*/
-    vec3f eyeDeltaPos = eyeAxis * eyeDelta;  
+    const vec3f eyeAxis = self->od_dir_du;
+    const vec3f eyeDeltaPos = eyeAxis * eyeDelta;
 
-    dir = normalize( pixelPos - self->openDeckOrg + eyeDeltaPos);
+    const LinearSpace3f cameraSpace =
+        make_LinearSpace3f(self->dir_du, self->dir_dv, self->dir_cam);
 
-    const LinearSpace3f cameraSpace = make_LinearSpace3f( self->dir_du, self->dir_dv, self->dir_cam);
-    dir = normalize( cameraSpace * dir );
+    vec3f dir = normalize(pixelPos - self->openDeckOrg + eyeDeltaPos);
+    dir = normalize(cameraSpace * dir);
 
-    org.x = self->org.x + self->openDeckOrg.x - eyeDeltaPos.x;
-    org.y = self->org.y + self->openDeckOrg.y - eyeDeltaPos.y;
-    org.z = self->org.z + self->openDeckOrg.z - eyeDeltaPos.z;
-
+    const vec3f org = self->org + self->openDeckOrg + eyeDeltaPos;
     const float time = Camera_shutterTime(_self, sample.time);
     setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
 }
 
-/*! create a new ispc-side version of a OpenDeckCylinderStereoCamera - with given
+/*! create a new ispc-side version of a OpenDeckCylinderStereoCamera - with
+   given
     pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference
     parameters */
-export void *uniform CylindricStereoTrackedCamera_create(void *uniform cppE)
+export void* uniform CylindricStereoTrackedCamera_create(void* uniform cppE)
 {
-    uniform CylindricStereoTrackedCamera *uniform self = uniform new uniform CylindricStereoTrackedCamera;
+    uniform CylindricStereoTrackedCamera* uniform self =
+        uniform new uniform CylindricStereoTrackedCamera;
     self->super.cppEquivalent = cppE;
     self->super.initRay = CylindricStereoTrackedCamera_initRay;
     self->super.doesDOF = false;
@@ -88,12 +87,14 @@ export void *uniform CylindricStereoTrackedCamera_create(void *uniform cppE)
 }
 
 export void CylindricStereoTrackedCamera_set(
-    void *uniform _self, const uniform vec3f &org, const uniform vec3f &openDeckOrg, const uniform vec3f &dir_cam,
-    const uniform vec3f &dir_du, const uniform vec3f &dir_dv, const uniform vec3f &od_dir_du, 
-    const uniform float openDeckVerticalSize, const float uniform openDeckRadius,
+    void* uniform _self, const uniform vec3f& org,
+    const uniform vec3f& openDeckOrg, const uniform vec3f& dir_cam,
+    const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
+    const uniform vec3f& od_dir_du, const uniform float openDeckVerticalSize,
+    const float uniform openDeckRadius,
     const uniform float interpupillaryDistance, const uniform bool side_by_side)
 {
-    uniform CylindricStereoTrackedCamera *uniform self =
+    uniform CylindricStereoTrackedCamera* uniform self =
         (uniform CylindricStereoTrackedCamera * uniform)_self;
     self->org = org;
     self->openDeckOrg = openDeckOrg;

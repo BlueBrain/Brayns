@@ -28,10 +28,10 @@ namespace brayns
 {
 namespace
 {
-const vrpn_int32 trackedSensorId = 0;
+constexpr vrpn_int32 headSensorId = 0;
 
-const std::array<double, 3> openDeckInitPos{0.0, 0.0, 0.0};
-const Vector3d openDeckRightDirection{1.0f, 0.0f, 0.0f};
+constexpr std::array<double, 3> openDeckInitPos{0.0, 0.0, 0.0};
+const Vector3d openDeckRightDirection{1.0, 0.0, 0.0};
 
 const std::string cameraType = "cylindricStereoTracked";
 const std::string openDeckPositionProp = "openDeckPosition";
@@ -76,7 +76,8 @@ PropertyMap::Property getStereoModeProperty()
 {
     return {"stereoMode",
             "Stereo mode",
-            (int)ospray::PerspectiveCamera::StereoMode::OSP_STEREO_SIDE_BY_SIDE,
+            static_cast<int>(
+                ospray::PerspectiveCamera::StereoMode::OSP_STEREO_SIDE_BY_SIDE),
             {"None", "Left eye", "Right eye", "Side by side"}};
 }
 
@@ -111,7 +112,7 @@ VRPNPlugin::VRPNPlugin(PluginAPI* api, const std::string& vrpnName)
     , _vrpnTracker{vrpnName.c_str()}
 {
     if (_vrpnTracker.register_change_handler(&_camera, trackerCallback,
-                                             trackedSensorId) == -1)
+                                             headSensorId) == -1)
     {
         throw std::runtime_error("VRPN couldn't connect to: " + vrpnName);
     }
@@ -121,7 +122,7 @@ VRPNPlugin::VRPNPlugin(PluginAPI* api, const std::string& vrpnName)
 VRPNPlugin::~VRPNPlugin()
 {
     _vrpnTracker.unregister_change_handler(&_camera, trackerCallback,
-                                           trackedSensorId);
+                                           headSensorId);
 }
 
 void VRPNPlugin::preRender()
