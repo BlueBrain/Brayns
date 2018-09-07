@@ -25,7 +25,6 @@
 
 namespace ospray
 {
-
 /**
  * This camera is designed for the opendeck. It has a fixed
  * vertical field of view of 48.549 degrees. The rays are using
@@ -35,9 +34,7 @@ namespace ospray
 struct CylindricCamera : public Camera
 {
     CylindricCamera();
-    virtual ~CylindricCamera() override = default;
-    virtual std::string toString() const override;
-    virtual void commit() override;
+    std::string toString() const override;
+    void commit() override;
 };
-
-} // ::ospray
+}

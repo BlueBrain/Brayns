@@ -30,7 +30,7 @@ struct CylindricStereoCamera
     vec3f dir_cam;
     vec3f dir_du;
     vec3f dir_dv;
-    float interpupillaryDistance;
     float imgPlane_size_y;
+    float interpupillaryDistance;
     bool side_by_side;
 };

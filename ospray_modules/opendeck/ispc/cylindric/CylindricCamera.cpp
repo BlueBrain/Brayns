@@ -22,7 +22,10 @@
 #include "CylindricCamera.h"
 #include "CylindricCamera_ispc.h"
 
-#define OPENDECK_FOV_Y 48.549f
+namespace
+{
+constexpr float opendeckFovY = 48.549f;
+}
 
 namespace ospray
 {
@@ -40,22 +43,18 @@ void CylindricCamera::commit()
 {
     Camera::commit();
 
-    const float fovy = OPENDECK_FOV_Y;
-
     dir = normalize(dir);
-    const vec3f dir_du = normalize(cross(dir, up));
-    const vec3f dir_dv = normalize(up);
+    const auto dir_du = normalize(cross(dir, up));
+    const auto dir_dv = normalize(up);
     dir = -dir;
 
-    const vec3f org = pos;
-    const float imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * fovy));
+    const auto imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * opendeckFovY));
 
-    ispc::CylindricCamera_set(getIE(), (const ispc::vec3f&)org,
+    ispc::CylindricCamera_set(getIE(), (const ispc::vec3f&)pos,
                               (const ispc::vec3f&)dir,
                               (const ispc::vec3f&)dir_du,
                               (const ispc::vec3f&)dir_dv, imgPlane_size_y);
 }
 
 OSP_REGISTER_CAMERA(CylindricCamera, cylindric);
-
-} // ::ospray
+}

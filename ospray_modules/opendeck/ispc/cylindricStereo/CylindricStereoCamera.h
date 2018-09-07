@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <ospray/SDK/camera/Camera.h>
+#include <ospray/SDK/camera/PerspectiveCamera.h>
 
 namespace ospray
 {
@@ -34,16 +34,12 @@ namespace ospray
 struct CylindricStereoCamera : public Camera
 {
     CylindricStereoCamera();
-    virtual ~CylindricStereoCamera() override = default;
-    virtual std::string toString() const override;
-    virtual void commit() override;
+    std::string toString() const override;
+    void commit() override;
 
-    typedef enum {
-        OSP_STEREO_NONE,
-        OSP_STEREO_LEFT,
-        OSP_STEREO_RIGHT,
-        OSP_STEREO_SIDE_BY_SIDE
-    } StereoMode;
+protected:
+    using StereoMode = ospray::PerspectiveCamera::StereoMode;
+    StereoMode getStereoMode();
+    float getInterpupillaryDistance(StereoMode stereoMode);
 };
-
-} // ::ospray
+}
