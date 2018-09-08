@@ -414,6 +414,7 @@ struct Brayns::Impl : public PluginAPI
         return _actionInterface.get();
     }
     Scene& getScene() final { return _engine->getScene(); }
+    FrameBuffer& getFrameBuffer() final { return _engine->getFrameBuffer(); }
 private:
     void _updateAnimation()
     {
