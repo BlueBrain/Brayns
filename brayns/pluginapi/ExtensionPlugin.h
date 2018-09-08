@@ -52,7 +52,7 @@ public:
      */
     virtual void preRender() {}
     /** Called from Brayns::postRender() after render() has finished. */
-    virtual void postRender() {}
+    virtual void postRender(FrameBuffer&) {}
 };
 } // namespace brayns
 
