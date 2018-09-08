@@ -43,8 +43,6 @@ namespace brayns
     - detectionDistance: Maximum distance for surrounding geometry detection
     - materialTestEnabled: If true, detection will be disabled for geometry that
     has the same material as the hit surface.
-    - electronShadingEnabled: If true, geometries are renderered using the
-    electron shading algorithm.
     - spp: Unsigned integer defining the number of samples per pixel
 */
 class ProximityRenderer : public AbstractRenderer
@@ -69,10 +67,9 @@ private:
     float _detectionDistance;
     bool _detectionOnDifferentMaterial;
     bool _surfaceShadingEnabled;
-    bool _electronShadingEnabled;
     int _randomNumber;
     float _alphaCorrection;
 };
-}
+} // namespace brayns
 
 #endif

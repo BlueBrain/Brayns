@@ -49,9 +49,6 @@ void Renderer::commit()
     _context["shadow_ray_type"]->setUint(1);
     _context["scene_epsilon"]->setFloat(epsilon);
 
-    _context["shading_enabled"]->setUint(getParam1i("shadingEnabled", 1));
-    _context["electron_shading_enabled"]->setUint(
-        getParam1i("electronShading", 0));
     _context["shadows"]->setFloat(getParam1f("shadows", 0.f));
     _context["soft_shadows"]->setFloat(getParam1f("softShadows", 0.f));
     _context["ambient_occlusion_strength"]->setFloat(
@@ -332,5 +329,5 @@ float Renderer::renderFrame(ospray::FrameBuffer* fb,
     endFrame(perFrameData, channelFlags);
     return fb->endFrame(errorThreshold);
 }
-}
-}
+} // namespace optix
+} // namespace bbp

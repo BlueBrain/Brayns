@@ -31,7 +31,6 @@ struct ProximityRenderer
     int randomNumber;
 
     bool surfaceShadingEnabled;
-    bool electronShadingEnabled;
 
     vec3f nearColor;
     vec3f farColor;
@@ -117,12 +116,16 @@ inline vec3f ProximityRenderer_shadeRay(
             if (iteration == 0)
                 sample.z = ray.t;
 
+            MaterialShadingMode shadingMode = none;
             vec3f Kd;
             if (!objMaterial)
                 Kd = make_vec3f(dg.color);
             else
-                foreach_unique(mat in objMaterial) Kd =
-                    mat->Kd * make_vec3f(dg.color);
+                foreach_unique(mat in objMaterial)
+                {
+                    Kd = mat->Kd * make_vec3f(dg.color);
+                    shadingMode = mat->shadingMode;
+                }
 
             for (uniform int i = 0;
                  self->super.lights && i < self->super.numLights; i++)
@@ -137,7 +140,7 @@ inline vec3f ProximityRenderer_shadeRay(
                 if (reduce_max(radiance) > 0.f)
                 {
                     float cosNL = 0.f;
-                    if (self->electronShadingEnabled)
+                    if (shadingMode == electron)
                     {
                         const vec3f me = normalize(ray.org - P);
                         const float angle = max(0.f, dot(me, normal));
@@ -174,7 +177,7 @@ void ProximityRenderer_renderSample(uniform Renderer* uniform _self,
                                     varying ScreenSample& sample)
 {
     uniform ProximityRenderer* uniform self =
-        (uniform ProximityRenderer * uniform)_self;
+        (uniform ProximityRenderer * uniform) _self;
     sample.ray.time = self->super.timestamp;
     sample.rgb = ProximityRenderer_shadeRay(self, sample);
 }
@@ -197,21 +200,20 @@ export void ProximityRenderer_set(
     const uniform bool& detectionOnDifferentMaterial,
     const uniform int& randomNumber, const uniform float& timestamp,
     const uniform int& spp, const uniform bool& surfaceShadingEnabled,
-    const uniform bool& electronShadingEnabled, void** uniform lights,
-    uniform int32 numLights, const uniform float& alphaCorrection)
+    void** uniform lights, uniform int32 numLights,
+    const uniform float& alphaCorrection)
 {
     uniform ProximityRenderer* uniform self =
-        (uniform ProximityRenderer * uniform)_self;
+        (uniform ProximityRenderer * uniform) _self;
 
     self->super.super.spp = spp;
-    self->super.bgMaterial = (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+    self->super.bgMaterial = (uniform ExtendedOBJMaterial * uniform) bgMaterial;
     self->super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.numLights = numLights;
     self->super.timestamp = timestamp;
 
     self->randomNumber = randomNumber;
     self->surfaceShadingEnabled = surfaceShadingEnabled;
-    self->electronShadingEnabled = electronShadingEnabled;
     self->nearColor = nearColor;
     self->farColor = farColor;
     self->detectionDistance = detectionDistance;

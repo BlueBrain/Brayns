@@ -50,6 +50,7 @@ void Material::commit()
         getParam3f("ks", getParam3f("Ks", ospray::vec3f(0.f)));
     const float Ns = getParam1f("ns", getParam1f("Ns", 10.f));
     const bool skybox = getParam1i("skybox", 0) == 1;
+    const unsigned int shadingMode = getParam1i("shading_mode", 0);
 
     if (!optixMaterial)
         optixMaterial = Context::get().createMaterial(map_Kd);
@@ -75,6 +76,7 @@ void Material::commit()
     optixMaterial["Ko"]->setFloat(d, d, d);
     optixMaterial["refraction_index"]->setFloat(refraction);
     optixMaterial["glossiness"]->setFloat(g);
+    optixMaterial["shading_mode"]->setInt(shadingMode);
 }
-}
-}
+} // namespace optix
+} // namespace bbp

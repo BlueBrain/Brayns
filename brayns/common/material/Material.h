@@ -107,6 +107,14 @@ public:
     {
         return _castSimulationData;
     }
+    BRAYNS_API void setShadingMode(const MaterialShadingMode value)
+    {
+        _updateValue(_shadingMode, value);
+    }
+    BRAYNS_API MaterialShadingMode getShadingMode() const
+    {
+        return _shadingMode;
+    }
     BRAYNS_API const TextureDescriptors& getTextureDescriptors() const
     {
         return _textureDescriptors;
@@ -129,10 +137,11 @@ protected:
     double _emission{0.};
     double _glossiness{1.};
     bool _castSimulationData{false};
+    MaterialShadingMode _shadingMode{MaterialShadingMode::diffuse};
     TexturesMap _textures;
     TextureDescriptors _textureDescriptors;
 
     SERIALIZATION_FRIEND(Material)
 };
-}
+} // namespace brayns
 #endif // MATERIAL_H

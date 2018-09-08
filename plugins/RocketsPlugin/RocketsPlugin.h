@@ -51,7 +51,7 @@ public:
      * Enqueue modified and registered objects for broadcast that have changed
      * after the rendering is finished (framebuffer).
      */
-    BRAYNS_API void postRender() final;
+    BRAYNS_API void postRender(FrameBuffer& frameBuffer) final;
 
 private:
     class Impl;
@@ -79,6 +79,6 @@ private:
     void _registerNotification(const std::string& name,
                                const VoidFunc& action) final;
 };
-}
+} // namespace brayns
 
 #endif

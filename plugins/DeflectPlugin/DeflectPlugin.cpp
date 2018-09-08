@@ -52,7 +52,7 @@ std::future<T> make_ready_future(const T value)
     promise.set_value(value);
     return promise.get_future();
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -408,8 +408,8 @@ void DeflectPlugin::preRender()
     _impl->preRender();
 }
 
-void DeflectPlugin::postRender()
+void DeflectPlugin::postRender(FrameBuffer&)
 {
     _impl->postRender();
 }
-}
+} // namespace brayns

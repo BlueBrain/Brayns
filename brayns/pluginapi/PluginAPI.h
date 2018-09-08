@@ -55,4 +55,4 @@ public:
     /** Triggers a new preRender() and potentially render() and postRender(). */
     virtual void triggerRender() = 0;
 };
-}
+} // namespace brayns

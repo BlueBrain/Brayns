@@ -42,7 +42,6 @@ void ProximityRenderer::commit()
     _detectionDistance = getParam1f("detectionDistance", 1.f);
     _detectionOnDifferentMaterial =
         bool(getParam1i("detectionOnDifferentMaterial", 0));
-    _electronShadingEnabled = bool(getParam1i("electronShadingEnabled", 0));
     _surfaceShadingEnabled = bool(getParam1i("surfaceShadingEnabled", 0));
     _randomNumber = getParam1i("randomNumber", 0);
     _alphaCorrection = getParam1f("alphaCorrection", 0.5f);
@@ -53,8 +52,8 @@ void ProximityRenderer::commit()
                                 (ispc::vec3f&)_farColor, _detectionDistance,
                                 _detectionOnDifferentMaterial, _randomNumber,
                                 _timestamp, spp, _surfaceShadingEnabled,
-                                _electronShadingEnabled, _lightPtr,
-                                _lightArray.size(), _alphaCorrection);
+                                _lightPtr, _lightArray.size(),
+                                _alphaCorrection);
 }
 
 ProximityRenderer::ProximityRenderer()
@@ -63,4 +62,4 @@ ProximityRenderer::ProximityRenderer()
 }
 
 OSP_REGISTER_EXRENDERER(ProximityRenderer, proximity);
-}
+} // namespace brayns

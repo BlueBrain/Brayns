@@ -42,9 +42,6 @@ void AdvancedSimulationRenderer::commit()
     _softShadows = getParam1f("softShadows", 0.f);
     _ambientOcclusionStrength = getParam1f("aoWeight", 0.f);
     _ambientOcclusionDistance = getParam1f("aoDistance", 1e20f);
-    _shadingEnabled = getParam1i("shading", 0) == int(Shading::diffuse);
-    _electronShadingEnabled =
-        getParam1i("shading", 0) == int(Shading::electron);
     _detectionDistance = getParam1f("detectionDistance", 15.f);
 
     _randomNumber = getParam1i("randomNumber", 0);
@@ -82,9 +79,8 @@ void AdvancedSimulationRenderer::commit()
     ispc::AdvancedSimulationRenderer_set(
         getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
-        _ambientOcclusionStrength, _ambientOcclusionDistance, _shadingEnabled,
-        _randomNumber, _timestamp, spp, _electronShadingEnabled, _lightPtr,
-        _lightArray.size(), _volumeSamplesPerRay,
+        _ambientOcclusionStrength, _ambientOcclusionDistance, _randomNumber,
+        _timestamp, spp, _lightPtr, _lightArray.size(), _volumeSamplesPerRay,
         _simulationData ? (float*)_simulationData->data : NULL,
         simulationDataSize,
         _transferFunctionDiffuseData
@@ -104,4 +100,4 @@ AdvancedSimulationRenderer::AdvancedSimulationRenderer()
 }
 
 OSP_REGISTER_RENDERER(AdvancedSimulationRenderer, advanced_simulation);
-} // ::brayns
+} // namespace brayns

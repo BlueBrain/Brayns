@@ -33,8 +33,6 @@ struct AdvancedSimulationRenderer
     float softShadows;
     float ambientOcclusionStrength;
     float ambientOcclusionDistance;
-    bool shadingEnabled;
-    bool electronShadingEnabled;
 
     // Simulation model
     Model* simulationModel;
@@ -64,6 +62,7 @@ struct ShadingAttributes
     float lightEmissionIntensity;
     float shadowIntensity;
     bool castSimulationData;
+    MaterialShadingMode shadingMode;
     vec3f simulationColor;
     float simulationIntensity;
     vec3f indirectColor;
@@ -343,10 +342,9 @@ inline vec4f getVolumeContribution(
                      gradient.z == 0.f)
                         ? 1.f
                         : abs(dot(safe_normalize(light.dir), gradient));
-                shadedColor =
-                    clamp(shadedColor +
-                              volumeSampleColor * cosNL * light.weight,
-                          make_vec3f(0.f), make_vec3f(1.f));
+                shadedColor = clamp(shadedColor + volumeSampleColor * cosNL *
+                                                      light.weight,
+                                    make_vec3f(0.f), make_vec3f(1.f));
 
                 // Specular
                 const vec3f reflectedNormal = normalize(
@@ -366,9 +364,9 @@ inline vec4f getVolumeContribution(
             float indirectIntensity;
             indirectShading(self, sample, point, gradient, dg, indirectColor,
                             indirectIntensity);
-            volumeSampleColor =
-                volumeSampleColor +
-                sampleOpacity * indirectColor * indirectIntensity;
+            volumeSampleColor = volumeSampleColor + sampleOpacity *
+                                                        indirectColor *
+                                                        indirectIntensity;
         }
 
         if (shadowsEnabled)
@@ -536,6 +534,9 @@ inline void setGeometryShadingAttributes(
     // Shading normal
     attributes.normal = dg.Ns;
 
+    // Shading mode
+    attributes.shadingMode = none;
+
     // Reflected shading normal
     attributes.reflectedNormal =
         ray.dir - 2.f * dot(ray.dir, attributes.normal) * attributes.normal;
@@ -624,6 +625,9 @@ inline void setGeometryShadingAttributes(
 
         // Cast simulation data
         attributes.castSimulationData = mat->castSimulationData;
+
+        // Shading mode
+        attributes.shadingMode = mat->shadingMode;
     }
 
     // Update reflected shading normal
@@ -776,8 +780,7 @@ inline void processLightShading(DifferentialGeometry& dg,
 
         float cosNL = 1.f;
 
-        const bool shadingEnabled = attributes.self->shadingEnabled;
-        if (shadingEnabled)
+        if (attributes.shadingMode == diffuse)
         {
             // Phong + Blinn shading
             cosNL = max(0.f, dot(lightDirection, attributes.normal));
@@ -934,7 +937,7 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
                 computeIndirectShading(dg, sample, attributes);
 
                 // Compute surface shading
-                if (self->electronShadingEnabled)
+                if (attributes.shadingMode == electron)
                     processElectronShading(sample, attributes);
                 else
                     processLightShading(dg, sample, ray, attributes);
@@ -1011,7 +1014,7 @@ void AdvancedSimulationRenderer_renderSample(uniform Renderer* uniform _self,
                                              varying ScreenSample& sample)
 {
     uniform AdvancedSimulationRenderer* uniform self =
-        (uniform AdvancedSimulationRenderer * uniform)_self;
+        (uniform AdvancedSimulationRenderer * uniform) _self;
     sample.ray.time = infinity;
     sample.rgb = AdvancedSimulationRenderer_shadeRay(self, sample);
 }
@@ -1033,9 +1036,8 @@ export void AdvancedSimulationRenderer_set(
     const uniform float& softShadows,
     const uniform float& ambientOcclusionStrength,
     const uniform float& ambientOcclusionDistance,
-    const uniform bool& shadingEnabled, const uniform int& randomNumber,
-    const uniform float& timestamp, const uniform int& spp,
-    const uniform bool& electronShadingEnabled, void** uniform lights,
+    const uniform int& randomNumber, const uniform float& timestamp,
+    const uniform int& spp, void** uniform lights,
     const uniform int32 numLights, const uniform int32& volumeSamplesPerRay,
     uniform float* uniform simulationData,
     const uniform uint64& simulationDataSize, uniform vec4f* uniform colormap,
@@ -1047,11 +1049,11 @@ export void AdvancedSimulationRenderer_set(
     const uniform float& volumeAlphaCorrection)
 {
     uniform AdvancedSimulationRenderer* uniform self =
-        (uniform AdvancedSimulationRenderer * uniform)_self;
+        (uniform AdvancedSimulationRenderer * uniform) _self;
 
     self->super.super.super.spp = spp;
     self->super.super.bgMaterial =
-        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+        (uniform ExtendedOBJMaterial * uniform) bgMaterial;
     self->super.super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.super.numLights = numLights;
     self->super.super.timestamp = timestamp;
@@ -1060,15 +1062,13 @@ export void AdvancedSimulationRenderer_set(
     self->softShadows = softShadows;
     self->ambientOcclusionStrength = ambientOcclusionStrength;
     self->ambientOcclusionDistance = ambientOcclusionDistance;
-    self->shadingEnabled = shadingEnabled;
     self->randomNumber = randomNumber;
-    self->electronShadingEnabled = electronShadingEnabled;
 
     self->volumeSamplesPerRay = volumeSamplesPerRay;
 
-    self->super.colorMap = (uniform vec4f * uniform)colormap;
+    self->super.colorMap = (uniform vec4f * uniform) colormap;
     self->super.emissionIntensitiesMap =
-        (uniform vec3f * uniform)emissionIntensitiesMap;
+        (uniform vec3f * uniform) emissionIntensitiesMap;
     self->super.colorMapSize = colorMapSize;
     self->super.colorMapMinValue = colorMapMinValue;
     self->super.colorMapRange = colorMapRange;
@@ -1076,7 +1076,7 @@ export void AdvancedSimulationRenderer_set(
     self->super.simulationData = (uniform float* uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;
 
-    self->simulationModel = (uniform Model * uniform)simulationModel;
+    self->simulationModel = (uniform Model * uniform) simulationModel;
     self->detectionDistance = detectionDistance;
 
     self->samplingThreshold = samplingThreshold;

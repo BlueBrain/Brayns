@@ -76,7 +76,7 @@ namespace
 const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const size_t LOADING_PROGRESS_DATA = 100;
-}
+} // namespace
 
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
@@ -172,7 +172,7 @@ struct Brayns::Impl : public PluginAPI
                     argv[i] = &tmpArgs[i].front();
 
                 ExtensionPlugin* (*createFunc)(PluginAPI*, int, char**) =
-                    (ExtensionPlugin * (*)(PluginAPI*, int, char**))createSym;
+                    (ExtensionPlugin * (*)(PluginAPI*, int, char**)) createSym;
                 auto plugin = createFunc(this, argc, argv.data());
 
                 _extensionPluginFactory.add(ExtensionPluginPtr{plugin});
@@ -276,7 +276,7 @@ struct Brayns::Impl : public PluginAPI
         _engine->postRender();
 
         // broadcast image JPEG from RocketsPlugin
-        _extensionPluginFactory.postRender();
+        _extensionPluginFactory.postRender(_engine->getFrameBuffer());
 
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();
@@ -306,35 +306,41 @@ struct Brayns::Impl : public PluginAPI
 
         auto& registry = _engine->getScene().getLoaderRegistry();
         REGISTER_LOADER(MeshLoader,
-                        ([&scene = _engine->getScene(), & params = _parametersManager.getGeometryParameters()] {
+                        ([& scene = _engine->getScene(),
+                          &params =
+                              _parametersManager.getGeometryParameters()] {
                             return std::make_unique<MeshLoader>(scene, params);
                         }));
         REGISTER_LOADER(ProteinLoader,
-                        ([&scene = _engine->getScene(), & params =
-                                _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<ProteinLoader>(scene, params);
+                        ([& scene = _engine->getScene(),
+                          &params =
+                              _parametersManager.getGeometryParameters()] {
+                            return std::make_unique<ProteinLoader>(scene,
+                                                                   params);
                         }));
         REGISTER_LOADER(VolumeLoader,
-                        ([&scene = _engine->getScene(), & params =
-                                _parametersManager.getVolumeParameters()] {
-                            return std::make_unique<VolumeLoader>(scene, params);
+                        ([& scene = _engine->getScene(),
+                          &params = _parametersManager.getVolumeParameters()] {
+                            return std::make_unique<VolumeLoader>(scene,
+                                                                  params);
                         }));
         REGISTER_LOADER(XYZBLoader, ([& scene = _engine->getScene()] {
                             return std::make_unique<XYZBLoader>(scene);
                         }));
 #if (BRAYNS_USE_BRION)
         REGISTER_LOADER(MorphologyLoader,
-                        ([&scene = _engine->getScene(), & params =
-                                _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<MorphologyLoader>(scene, params);
+                        ([& scene = _engine->getScene(),
+                          &params =
+                              _parametersManager.getGeometryParameters()] {
+                            return std::make_unique<MorphologyLoader>(scene,
+                                                                      params);
                         }));
-        REGISTER_LOADER(
-            CircuitLoader,
-            ([& scene = _engine->getScene(), &params = _parametersManager ] {
-                return std::make_unique<CircuitLoader>(
-                    scene, params.getApplicationParameters(),
-                    params.getGeometryParameters());
-            }));
+        REGISTER_LOADER(CircuitLoader, ([& scene = _engine->getScene(),
+                                         &params = _parametersManager] {
+                            return std::make_unique<CircuitLoader>(
+                                scene, params.getApplicationParameters(),
+                                params.getGeometryParameters());
+                        }));
 #endif
 
         const auto& paths =
@@ -414,6 +420,7 @@ struct Brayns::Impl : public PluginAPI
         return _actionInterface.get();
     }
     Scene& getScene() final { return _engine->getScene(); }
+
 private:
     void _updateAnimation()
     {
@@ -640,9 +647,6 @@ private:
             ']', "Increase animation frame by 1",
             std::bind(&Brayns::Impl::_increaseAnimationFrame, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'e', "Enable eletron shading",
-            std::bind(&Brayns::Impl::_electronShading, this));
-        _keyboardHandler.registerKeyboardShortcut(
             'f', "Enable fly mode", [this]() {
                 Brayns::Impl::_setupCameraManipulator(CameraMode::flying);
             });
@@ -656,12 +660,6 @@ private:
         _keyboardHandler.registerKeyboardShortcut(
             'O', "Increase ambient occlusion strength",
             std::bind(&Brayns::Impl::_increaseAmbientOcclusionStrength, this));
-        _keyboardHandler.registerKeyboardShortcut(
-            'p', "Enable diffuse shading",
-            std::bind(&Brayns::Impl::_diffuseShading, this));
-        _keyboardHandler.registerKeyboardShortcut(
-            'P', "Disable shading",
-            std::bind(&Brayns::Impl::_disableShading, this));
         _keyboardHandler.registerKeyboardShortcut(
             'r', "Set animation frame to 0",
             std::bind(&Brayns::Impl::_resetAnimationFrame, this));
@@ -684,8 +682,9 @@ private:
             'g', "Enable/Disable animation playback",
             std::bind(&Brayns::Impl::_toggleAnimationPlayback, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'x', "Set animation frame to " +
-                     std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
+            'x',
+            "Set animation frame to " +
+                std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
             std::bind(&Brayns::Impl::_defaultAnimationFrame, this));
         _keyboardHandler.registerKeyboardShortcut(
             '|', "Create cache file ",
@@ -800,24 +799,6 @@ private:
         const auto animationFrame = animParams.getFrame();
         if (animationFrame > 0)
             animParams.setFrame(animationFrame - 1);
-    }
-
-    void _diffuseShading()
-    {
-        _engine->getRenderer().updateProperty("shadingEnabled", true);
-        _engine->getRenderer().updateProperty("electronShading", false);
-    }
-
-    void _electronShading()
-    {
-        _engine->getRenderer().updateProperty("shadingEnabled", false);
-        _engine->getRenderer().updateProperty("electronShading", true);
-    }
-
-    void _disableShading()
-    {
-        _engine->getRenderer().updateProperty("shadingEnabled", false);
-        _engine->getRenderer().updateProperty("electronShading", false);
     }
 
     void _increaseAmbientOcclusionStrength()
@@ -1066,4 +1047,4 @@ AbstractManipulator& Brayns::getCameraManipulator()
 {
     return _impl->getCameraManipulator();
 }
-}
+} // namespace brayns

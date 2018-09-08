@@ -138,7 +138,7 @@ std::string getRequestEndpointName(const std::string& endpoint)
 {
     return "get-" + endpoint;
 }
-}
+} // namespace
 
 namespace brayns
 {
@@ -1580,4 +1580,4 @@ void RocketsPlugin::_registerNotification(const std::string& name,
         engine->triggerRender();
     });
 }
-}
+} // namespace brayns

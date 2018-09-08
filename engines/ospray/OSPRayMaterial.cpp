@@ -69,6 +69,7 @@ void OSPRayMaterial::commit()
     ospSet1f(_ospMaterial, "a", _emission);
     ospSet1f(_ospMaterial, "glossiness", _glossiness);
     ospSet1i(_ospMaterial, "cast_simulation_data", _castSimulationData);
+    ospSet1i(_ospMaterial, "shading_mode", static_cast<uint16_t>(_shadingMode));
 
     // Textures
     for (const auto& textureType : textureTypeMaterialAttribute)
@@ -128,4 +129,4 @@ OSPTexture2D OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
 
     return ospTexture;
 }
-}
+} // namespace brayns

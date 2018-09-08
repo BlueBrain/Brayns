@@ -87,6 +87,11 @@ void ExtendedOBJMaterial::commit()
     // Cast simulation data
     castSimulationData = getParam1i("cast_simulation_data", true);
 
+    // Shading mode
+    shadingMode = static_cast<MaterialShadingMode>(
+        getParam1i("shading_mode",
+                   static_cast<int>(MaterialShadingMode::none)));
+
     ispc::ExtendedOBJMaterial_set(
         getIE(), map_d ? map_d->getIE() : nullptr,
         (const ispc::AffineSpace2f&)xform_d, d,
@@ -103,9 +108,10 @@ void ExtendedOBJMaterial::commit()
         (const ispc::AffineSpace2f&)xform_Ns, Ns,
         map_Bump ? map_Bump->getIE() : nullptr,
         (const ispc::AffineSpace2f&)xform_Bump,
-        (const ispc::LinearSpace2f&)rot_Bump);
+        (const ispc::LinearSpace2f&)rot_Bump,
+        (const ispc::MaterialShadingMode&)shadingMode);
 }
 
 OSP_REGISTER_EXMATERIAL(ExtendedOBJMaterial, ExtendedOBJMaterial);
-} // ::brayns::obj
-} // ::brayns
+} // namespace obj
+} // namespace brayns

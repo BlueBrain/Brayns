@@ -35,13 +35,6 @@ class AdvancedSimulationRenderer : public AbstractRenderer
 public:
     AdvancedSimulationRenderer();
 
-    enum class Shading
-    {
-        none,
-        diffuse,
-        electron
-    };
-
     /**
        Returns the class name as a string
        @return string containing the full name of the class
@@ -59,8 +52,6 @@ private:
     float _softShadows;
     float _ambientOcclusionStrength;
     float _ambientOcclusionDistance;
-    bool _shadingEnabled;
-    bool _electronShadingEnabled;
     int _randomNumber;
 
     ospray::Ref<ospray::Data> _simulationData;
@@ -75,4 +66,4 @@ private:
     float _volumeAlphaCorrection;
 };
 
-} // ::brayns
+} // namespace brayns
