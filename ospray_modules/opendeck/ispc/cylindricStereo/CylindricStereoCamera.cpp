@@ -23,8 +23,8 @@
 
 namespace
 {
-constexpr float opendeckFovY = 48.549f;
-constexpr float defaultInterpupillaryDistance = 0.0635f;
+constexpr float OPENDECK_FOV_Y = 48.549f;
+constexpr float DEFAULT_INTERPUPILLARY_DISTANCE = 0.0635f;
 }
 
 namespace ospray
@@ -52,7 +52,7 @@ void CylindricStereoCamera::commit()
     const auto dir_dv = normalize(up);
     dir = -dir;
 
-    const auto imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * opendeckFovY));
+    const auto imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * OPENDECK_FOV_Y));
 
     ispc::CylindricStereoCamera_set(getIE(), (const ispc::vec3f&)pos,
                                     (const ispc::vec3f&)dir,
@@ -71,7 +71,7 @@ float CylindricStereoCamera::getInterpupillaryDistance(
     const StereoMode stereoMode)
 {
     const auto interpupillaryDistance =
-        getParamf("interpupillaryDistance", defaultInterpupillaryDistance);
+        getParamf("interpupillaryDistance", DEFAULT_INTERPUPILLARY_DISTANCE);
 
     switch (stereoMode)
     {

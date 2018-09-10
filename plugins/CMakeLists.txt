@@ -7,9 +7,12 @@
 if(BRAYNS_DEFLECT_ENABLED)
   add_subdirectory(DeflectPlugin)
 endif()
+
 if(BRAYNS_NETWORKING_ENABLED)
   add_subdirectory(RocketsPlugin)
 endif()
+
+option(BRAYNS_VRPN_ENABLED "Activate vrpn plugin" OFF)
 if(BRAYNS_VRPN_ENABLED)
   add_subdirectory(VRPNPlugin)
 endif()

@@ -3,9 +3,21 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+
+project(VRPNPlugin VERSION 1.0.0)
+set(VRPNPlugin_VERSION_ABI 1)
+
+include(Common)
+
+#common_find_package(Brayns REQUIRED)
+common_find_package(VRPN REQUIRED)
+common_find_package(libuv)
+common_find_package_post()
+
 set(VRPNPLUGIN_HEADERS VRPNPlugin.h)
 set(VRPNPLUGIN_SOURCES VRPNPlugin.cpp)
-set(VRPNPLUGIN_LINK_LIBRARIES PRIVATE braynsPluginAPI vmmlib ${VRPN_LIBRARIES})
+set(VRPNPLUGIN_LINK_LIBRARIES PRIVATE braynsPluginAPI ${VRPN_LIBRARIES})
 
 set(VRPNPLUGIN_OMIT_LIBRARY_HEADER ON)
 set(VRPNPLUGIN_OMIT_VERSION_HEADERS ON)

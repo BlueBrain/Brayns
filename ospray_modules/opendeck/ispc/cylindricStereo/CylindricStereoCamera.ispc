@@ -23,7 +23,7 @@
 #include "math/math.ih"
 #include "math/sampling.ih"
 
-const float openDeckRadius = 2.55f;
+static const float OPENDECK_RADIUS = 2.55f;
 
 void CylindricStereoCamera_initRay(uniform Camera* uniform _self,
                                    varying Ray& ray,
@@ -36,7 +36,7 @@ void CylindricStereoCamera_initRay(uniform Camera* uniform _self,
 
     float radius = 0.0f;
     float alpha = 0.0f;
-    float beta = atan(self->interpupillaryDistance / (2.0f * openDeckRadius));
+    float beta = atan(self->interpupillaryDistance / (2.0f * OPENDECK_RADIUS));
     if (self->side_by_side)
     {
         if (screen.x < 0.5)
@@ -78,10 +78,8 @@ void CylindricStereoCamera_initRay(uniform Camera* uniform _self,
 }
 
 /*! create a new ispc-side version of a OpenDeckCylinderStereoCamera - with
-   given
-    pointer to the c-class version - and return both class pointer and
-    pointer to internal data back via the supplied reference
-    parameters */
+    given pointer to the c-class version - and return both class pointer and
+    pointer to internal data back via the supplied reference parameters. */
 export void* uniform CylindricStereoCamera_create(void* uniform cppE)
 {
     uniform CylindricStereoCamera* uniform self =

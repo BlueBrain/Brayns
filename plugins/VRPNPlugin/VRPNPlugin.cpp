@@ -20,6 +20,7 @@
 #include "VRPNPlugin.h"
 
 #include <brayns/common/camera/Camera.h>
+#include <brayns/common/log.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include <ospray/SDK/camera/PerspectiveCamera.h>
@@ -28,48 +29,42 @@ namespace brayns
 {
 namespace
 {
-constexpr vrpn_int32 headSensorId = 0;
+constexpr vrpn_int32 HEAD_SENSOR_ID = 0;
+const std::string DEFAULT_VRPN_NAME = "DTrack@cave1";
+#ifdef VRPNPLUGIN_USE_LIBUV
+constexpr int VRPN_IDLE_TIMEOUT_MS = 5000;
+#endif
 
-constexpr std::array<double, 3> openDeckInitPos{0.0, 0.0, 0.0};
-const Vector3d openDeckRightDirection{1.0, 0.0, 0.0};
+const std::string CAMERA_TYPE = "cylindricStereoTracked";
+const std::string HEAD_POSITION_PROP = "headPosition";
+const std::string HEAD_ROTATION_PROP = "headRotation";
 
-const std::string cameraType = "cylindricStereoTracked";
-const std::string openDeckPositionProp = "openDeckPosition";
-const std::string openDeckCamDUProp = "openDeckCamDU";
+constexpr std::array<double, 3> HEAD_INIT_POS{{0.0, 0.0, 0.0}};
+constexpr std::array<double, 4> HEAD_INIT_ROT{{0.0, 0.0, 0.0, 1.0}};
 
 constexpr std::array<double, 3> to_array_3d(const vrpn_float64* pos)
 {
-    return {pos[0], pos[1], pos[2]};
+    return {{pos[0], pos[1], pos[2]}};
 }
-inline std::array<double, 3> to_array_3d(const Vector3d& v)
+constexpr std::array<double, 4> to_array_4d(const vrpn_float64* quat)
 {
-    return {v.x(), v.y(), v.z()};
-}
-
-Vector3d rotateVectorByQuat(const Vector3d& v, const vrpn_float64* q)
-{
-    const auto u = Vector3d{q[0], q[1], q[2]}; // vector part of the quaternion
-    const auto s = q[3];                       // scalar part of the quaternion
-
-    return 2.0 * vmml::dot(u, v) * u + (s * s - vmml::dot(u, u)) * v +
-           2.0 * s * vmml::cross(u, v);
+    return {{quat[0], quat[1], quat[2], quat[3]}};
 }
 
-PropertyMap::Property getOpenDeckPositionProperty()
+PropertyMap::Property getHeadPositionProperty()
 {
-    PropertyMap::Property openDeckPosition{openDeckPositionProp,
-                                           openDeckPositionProp,
-                                           openDeckInitPos};
-    openDeckPosition.markReadOnly();
-    return openDeckPosition;
+    PropertyMap::Property headPosition{HEAD_POSITION_PROP, "Head position",
+                                       HEAD_INIT_POS};
+    headPosition.markReadOnly();
+    return headPosition;
 }
 
-PropertyMap::Property getOpenDeckCameraDUProperty()
+PropertyMap::Property getHeadRotationProperty()
 {
-    PropertyMap::Property openDeckCamDU{openDeckCamDUProp, openDeckCamDUProp,
-                                        to_array_3d(openDeckRightDirection)};
-    openDeckCamDU.markReadOnly();
-    return openDeckCamDU;
+    PropertyMap::Property headRotation{HEAD_ROTATION_PROP, "Head rotation",
+                                       HEAD_INIT_ROT};
+    headRotation.markReadOnly();
+    return headRotation;
 }
 
 PropertyMap::Property getStereoModeProperty()
@@ -89,50 +84,91 @@ PropertyMap::Property getInterpupillaryDistanceProperty()
 PropertyMap getDefaultCameraProperties()
 {
     PropertyMap properties;
-    properties.setProperty(getOpenDeckPositionProperty());
-    properties.setProperty(getOpenDeckCameraDUProperty());
+    properties.setProperty(getHeadPositionProperty());
+    properties.setProperty(getHeadRotationProperty());
     properties.setProperty(getStereoModeProperty());
     properties.setProperty(getInterpupillaryDistanceProperty());
     return properties;
 }
 
-void trackerCallback(void* userData, const vrpn_TRACKERCB t)
+void trackerCallback(void* userData, const vrpn_TRACKERCB tracker)
 {
     auto camera = static_cast<Camera*>(userData);
-
-    const auto cameraDU = rotateVectorByQuat(openDeckRightDirection, t.quat);
-
-    camera->updateProperty(openDeckPositionProp, to_array_3d(t.pos));
-    camera->updateProperty(openDeckCamDUProp, to_array_3d(cameraDU));
+    camera->updateProperty(HEAD_POSITION_PROP, to_array_3d(tracker.pos));
+    camera->updateProperty(HEAD_ROTATION_PROP, to_array_4d(tracker.quat));
 }
 }
 
 VRPNPlugin::VRPNPlugin(PluginAPI* api, const std::string& vrpnName)
-    : _camera{api->getCamera()}
+    : _api{api}
+    , _camera{api->getCamera()}
     , _vrpnTracker{vrpnName.c_str()}
 {
-    if (_vrpnTracker.register_change_handler(&_camera, trackerCallback,
-                                             headSensorId) == -1)
-    {
+    if (!_vrpnTracker.connectionPtr()->doing_okay())
         throw std::runtime_error("VRPN couldn't connect to: " + vrpnName);
-    }
-    _camera.setProperties(cameraType, getDefaultCameraProperties());
+
+    _vrpnTracker.register_change_handler(&_camera, trackerCallback,
+                                         HEAD_SENSOR_ID);
+
+    BRAYNS_INFO << "VRPN successfully connected to " << vrpnName << std::endl;
+
+    _camera.setProperties(CAMERA_TYPE, getDefaultCameraProperties());
+
+#ifdef VRPNPLUGIN_USE_LIBUV
+    _setupIdleTimer();
+#endif
 }
 
 VRPNPlugin::~VRPNPlugin()
 {
     _vrpnTracker.unregister_change_handler(&_camera, trackerCallback,
-                                           headSensorId);
+                                           HEAD_SENSOR_ID);
 }
 
 void VRPNPlugin::preRender()
 {
     _vrpnTracker.mainloop();
 }
+
+#ifdef VRPNPLUGIN_USE_LIBUV
+void VRPNPlugin::resumeRenderingIfTrackerIsActive()
+{
+    _vrpnTracker.mainloop();
+    if (_camera.isModified())
+        _api->triggerRender();
 }
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(
-    brayns::PluginAPI* api, int argc BRAYNS_UNUSED, char** argv BRAYNS_UNUSED)
+void VRPNPlugin::_setupIdleTimer()
 {
-    return new brayns::VRPNPlugin(api, "DTrack@cave1");
+    if (auto uvLoop = uv_default_loop())
+    {
+        _idleTimer.reset(new uv_timer_t);
+        uv_timer_init(uvLoop, _idleTimer.get());
+        _idleTimer->data = this;
+
+        constexpr int repeat = 1; // true
+        uv_timer_start(_idleTimer.get(),
+                       [](uv_timer_t* timer) {
+                           auto plugin = static_cast<VRPNPlugin*>(timer->data);
+                           plugin->resumeRenderingIfTrackerIsActive();
+                       },
+                       VRPN_IDLE_TIMEOUT_MS, repeat);
+    }
+}
+#endif
+}
+
+extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
+                                                         const int argc,
+                                                         char** argv)
+{
+    if (argc > 2)
+    {
+        throw std::runtime_error(
+            "VRPN plugin expects at most one argument, the name of the VRPN "
+            "device to connect to (eg: Tracker0@localhost)");
+    }
+
+    const auto vrpnName = (argc >= 2) ? argv[1] : brayns::DEFAULT_VRPN_NAME;
+    return new brayns::VRPNPlugin(api, vrpnName);
 }
