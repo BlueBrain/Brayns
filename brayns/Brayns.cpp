@@ -276,7 +276,7 @@ struct Brayns::Impl : public PluginAPI
         _engine->postRender();
 
         // broadcast image JPEG from RocketsPlugin
-        _extensionPluginFactory.postRender();
+        _extensionPluginFactory.postRender(_engine->getFrameBuffer());
 
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();
@@ -414,7 +414,6 @@ struct Brayns::Impl : public PluginAPI
         return _actionInterface.get();
     }
     Scene& getScene() final { return _engine->getScene(); }
-    FrameBuffer& getFrameBuffer() final { return _engine->getFrameBuffer(); }
 private:
     void _updateAnimation()
     {
