@@ -349,11 +349,11 @@ public:
     void _rebroadcast(const std::string& endpoint, const T& obj,
                       const uintptr_t clientID)
     {
-        _delayedNotify([&] {
+        _delayedNotify([&, json = to_json(obj) ] {
             if (_rocketsServer->getConnectionCount() > 1)
             {
                 const auto& msg =
-                    rockets::jsonrpc::makeNotification(endpoint, to_json(obj));
+                    rockets::jsonrpc::makeNotification(endpoint, json);
                 _rocketsServer->broadcastText(msg, {clientID});
             }
         });
@@ -393,8 +393,8 @@ public:
                 std::lock_guard<std::mutex> lock(throttle.first);
 
                 const auto& castedObj = static_cast<const T&>(base);
-                const auto notify = [&jsonrpcServer=_jsonrpcServer, &castedObj, endpoint]{
-                    jsonrpcServer->notify(endpoint, castedObj);
+                const auto notify = [&jsonrpcServer=_jsonrpcServer, endpoint, json=to_json(castedObj)]{
+                    jsonrpcServer->notify(endpoint, json);
                 };
                 const auto delayedNotify = [&, notify]{
                     this->_delayedNotify(notify);
@@ -899,10 +899,11 @@ public:
 
     void _handleQuit()
     {
-        _handleRPC({METHOD_QUIT, "Quit the application"}, [engine = _engine] {
-            engine->setKeepRunning(false);
-            engine->triggerRender();
-        });
+        _handleRPC({METHOD_QUIT, "Quit the application"},
+                   [engine = _engine] {
+                       engine->setKeepRunning(false);
+                       engine->triggerRender();
+                   });
     }
 
     void _handleResetCamera()
