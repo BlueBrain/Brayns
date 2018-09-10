@@ -24,7 +24,7 @@
 
 namespace
 {
-constexpr float opendeckFovY = 48.549f;
+constexpr float OPENDECK_FOV_Y = 48.549f;
 }
 
 namespace ospray
@@ -48,7 +48,7 @@ void CylindricCamera::commit()
     const auto dir_dv = normalize(up);
     dir = -dir;
 
-    const auto imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * opendeckFovY));
+    const auto imgPlane_size_y = 2.0f * tanf(deg2rad(0.5f * OPENDECK_FOV_Y));
 
     ispc::CylindricCamera_set(getIE(), (const ispc::vec3f&)pos,
                               (const ispc::vec3f&)dir,

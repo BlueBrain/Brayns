@@ -6,7 +6,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(Brayns VERSION 0.8.0)
+project(Brayns VERSION 0.7.1)
 set(Brayns_VERSION_ABI 1)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
@@ -79,14 +79,6 @@ if(TARGET Deflect)
   option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
 else()
   unset(BRAYNS_DEFLECT_ENABLED)
-endif()
-
-# vrpn plugin
-common_find_package(VRPN)
-if(VRPN_FOUND)
-  option(BRAYNS_VRPN_ENABLED "Activate vrpn plugin" ON)
-else()
-  unset(BRAYNS_VRPN_ENABLED)
 endif()
 
 # Data access

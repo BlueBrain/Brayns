@@ -19,10 +19,16 @@
 
 #pragma once
 
+#include <vrpnplugin/defines.h>
+
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 #include <vrpn_Tracker.h>
+
+#ifdef VRPNPLUGIN_USE_LIBUV
+#include <uv.h>
+#endif
 
 namespace brayns
 {
@@ -34,8 +40,28 @@ public:
 
     void preRender() final;
 
+#ifdef VRPNPLUGIN_USE_LIBUV
+    void resumeRenderingIfTrackerIsActive();
+#endif
+
 private:
+    PluginAPI* _api = nullptr;
     Camera& _camera;
     vrpn_Tracker_Remote _vrpnTracker;
+
+#ifdef VRPNPLUGIN_USE_LIBUV
+    struct LibuvDeleter
+    {
+        void operator()(uv_timer_t* timer)
+        {
+            uv_timer_stop(timer);
+            uv_close(reinterpret_cast<uv_handle_t*>(timer),
+                     [](uv_handle_t* handle) { delete handle; });
+        }
+    };
+    std::unique_ptr<uv_timer_t, LibuvDeleter> _idleTimer;
+
+    void _setupIdleTimer();
+#endif
 };
 }

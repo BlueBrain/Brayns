@@ -23,6 +23,9 @@
 #include "math/math.ih"
 #include "math/sampling.ih"
 
+static const float OPENDECK_RADIUS = 2.55f;
+static const float OPENDECK_HEIGHT = 2.3f;
+
 void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
                                           varying Ray& ray,
                                           const varying CameraSample& sample)
@@ -53,9 +56,9 @@ void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
     }
 
     vec3f pixelPos;
-    pixelPos.x = self->openDeckRadius * -cosf(alpha);
-    pixelPos.y = self->openDeckVerticalSize * screen.y;
-    pixelPos.z = self->openDeckRadius * -sinf(alpha);
+    pixelPos.x = OPENDECK_RADIUS * -cosf(alpha);
+    pixelPos.y = OPENDECK_HEIGHT * screen.y;
+    pixelPos.z = OPENDECK_RADIUS * -sinf(alpha);
 
     const vec3f eyeAxis = self->od_dir_du;
     const vec3f eyeDeltaPos = eyeAxis * eyeDelta;
@@ -63,19 +66,17 @@ void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
     const LinearSpace3f cameraSpace =
         make_LinearSpace3f(self->dir_du, self->dir_dv, self->dir_cam);
 
-    vec3f dir = normalize(pixelPos - self->openDeckOrg + eyeDeltaPos);
+    vec3f dir = normalize(pixelPos - self->headPos + eyeDeltaPos);
     dir = normalize(cameraSpace * dir);
 
-    const vec3f org = self->org + self->openDeckOrg + eyeDeltaPos;
+    const vec3f org = self->org + self->headPos - eyeDeltaPos;
     const float time = Camera_shutterTime(_self, sample.time);
     setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
 }
 
 /*! create a new ispc-side version of a OpenDeckCylinderStereoCamera - with
-   given
-    pointer to the c-class version - and return both class pointer and
-    pointer to internal data back via the supplied reference
-    parameters */
+    given pointer to the c-class version - and return both class pointer and
+    pointer to internal data back via the supplied reference parameters. */
 export void* uniform CylindricStereoTrackedCamera_create(void* uniform cppE)
 {
     uniform CylindricStereoTrackedCamera* uniform self =
@@ -87,23 +88,19 @@ export void* uniform CylindricStereoTrackedCamera_create(void* uniform cppE)
 }
 
 export void CylindricStereoTrackedCamera_set(
-    void* uniform _self, const uniform vec3f& org,
-    const uniform vec3f& openDeckOrg, const uniform vec3f& dir_cam,
-    const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
-    const uniform vec3f& od_dir_du, const uniform float openDeckVerticalSize,
-    const float uniform openDeckRadius,
+    void* uniform _self, const uniform vec3f& org, const uniform vec3f& headPos,
+    const uniform vec3f& dir_cam, const uniform vec3f& dir_du,
+    const uniform vec3f& dir_dv, const uniform vec3f& od_dir_du,
     const uniform float interpupillaryDistance, const uniform bool side_by_side)
 {
     uniform CylindricStereoTrackedCamera* uniform self =
         (uniform CylindricStereoTrackedCamera * uniform)_self;
     self->org = org;
-    self->openDeckOrg = openDeckOrg;
+    self->headPos = headPos;
     self->dir_cam = dir_cam;
     self->dir_du = dir_du;
     self->dir_dv = dir_dv;
     self->od_dir_du = od_dir_du;
-    self->openDeckVerticalSize = openDeckVerticalSize;
-    self->openDeckRadius = openDeckRadius;
     self->interpupillaryDistance = interpupillaryDistance;
     self->side_by_side = side_by_side;
 }

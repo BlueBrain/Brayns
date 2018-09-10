@@ -24,10 +24,10 @@
 #include "math/math.ih"
 #include "math/sampling.ih"
 
-void CylindricCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
-                             const varying CameraSample &sample)
+void CylindricCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
+                             const varying CameraSample& sample)
 {
-    uniform CylindricCamera *uniform self =
+    uniform CylindricCamera* uniform self =
         (uniform CylindricCamera * uniform)_self;
 
     vec2f screen = sample.screen;
@@ -45,26 +45,25 @@ void CylindricCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
     setRay(ray, org, normalize(dir), self->super.nearClip, infinity, time);
 }
 
-/*! create a new ispc-side version of a OpenDeckcamera - with given
-    pointer to the c-class version - and return both class pointer and
-    pointer to internal data back via the supplied reference
-    parameters */
-export void *uniform CylindricCamera_create(void *uniform cppE)
+/*! create a new ispc-side version of a OpenDeckcamera - with given pointer to
+    the c-class version - and return both class pointer and pointer to internal
+    data back via the supplied reference parameters. */
+export void* uniform CylindricCamera_create(void* uniform cppE)
 {
-    uniform CylindricCamera *uniform self = uniform new uniform CylindricCamera;
+    uniform CylindricCamera* uniform self = uniform new uniform CylindricCamera;
     self->super.cppEquivalent = cppE;
     self->super.initRay = CylindricCamera_initRay;
     self->super.doesDOF = false;
     return self;
 }
 
-export void CylindricCamera_set(void *uniform _self, const uniform vec3f &org,
-                                const uniform vec3f &dir_cam,
-                                const uniform vec3f &dir_du,
-                                const uniform vec3f &dir_dv,
+export void CylindricCamera_set(void* uniform _self, const uniform vec3f& org,
+                                const uniform vec3f& dir_cam,
+                                const uniform vec3f& dir_du,
+                                const uniform vec3f& dir_dv,
                                 const uniform float imgPlane_size_y)
 {
-    uniform CylindricCamera *uniform self =
+    uniform CylindricCamera* uniform self =
         (uniform CylindricCamera * uniform)_self;
     self->org = org;
     self->dir_cam = dir_cam;

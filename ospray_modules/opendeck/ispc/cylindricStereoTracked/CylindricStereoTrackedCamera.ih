@@ -27,13 +27,11 @@ struct CylindricStereoTrackedCamera
     Camera super;
 
     vec3f org;
-    vec3f openDeckOrg;
     vec3f dir_cam;
     vec3f dir_du;
     vec3f dir_dv;
+    vec3f headPos;
     vec3f od_dir_du;
     float interpupillaryDistance;
-    float openDeckVerticalSize;
-    float openDeckRadius;
     bool side_by_side;
 };

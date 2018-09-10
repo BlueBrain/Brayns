@@ -21,14 +21,22 @@
 #include "CylindricStereoTrackedCamera.h"
 #include "CylindricStereoTrackedCamera_ispc.h"
 
-namespace
-{
-constexpr float opendeckHeight = 2.3f;
-constexpr float opendeckRadius = 2.55f;
-}
-
 namespace ospray
 {
+namespace
+{
+const vec3f OPENDECK_RIGHT_DIRECTION{1.0f, 0.0f, 0.0f};
+
+vec3f _rotateVectorByQuat(const vec3f& v, const vec4f& q)
+{
+    const auto u = vec3f{q[0], q[1], q[2]}; // vector part of the quaternion
+    const auto s = q[3];                    // scalar part of the quaternion
+
+    return 2.0f * dot(u, v) * u + (s * s - dot(u, u)) * v +
+           2.0f * s * cross(u, v);
+}
+}
+
 CylindricStereoTrackedCamera::CylindricStereoTrackedCamera()
 {
     ispcEquivalent = ispc::CylindricStereoTrackedCamera_create(this);
@@ -47,7 +55,7 @@ void CylindricStereoTrackedCamera::commit()
     const auto ipd = getInterpupillaryDistance(stereoMode);
     const auto sideBySide = stereoMode == StereoMode::OSP_STEREO_SIDE_BY_SIDE;
 
-    const auto openDeckOrg = _getOpendeckOrg();
+    const auto headPosition = _getHeadPosition();
     const auto openDeckCamDU = _getOpendeckCamDU();
 
     dir = vec3f(0, 0, 1);
@@ -55,21 +63,25 @@ void CylindricStereoTrackedCamera::commit()
     const auto dir_du = vec3f(1, 0, 0);
     const auto dir_dv = vec3f(0, 1, 0);
 
-    ispc::CylindricStereoTrackedCamera_set(
-        getIE(), (const ispc::vec3f&)org, (const ispc::vec3f&)openDeckOrg,
-        (const ispc::vec3f&)dir, (const ispc::vec3f&)dir_du,
-        (const ispc::vec3f&)dir_dv, (const ispc::vec3f&)openDeckCamDU,
-        opendeckHeight, opendeckRadius, ipd, sideBySide);
+    ispc::CylindricStereoTrackedCamera_set(getIE(), (const ispc::vec3f&)org,
+                                           (const ispc::vec3f&)headPosition,
+                                           (const ispc::vec3f&)dir,
+                                           (const ispc::vec3f&)dir_du,
+                                           (const ispc::vec3f&)dir_dv,
+                                           (const ispc::vec3f&)openDeckCamDU,
+                                           ipd, sideBySide);
 }
 
-vec3f CylindricStereoTrackedCamera::_getOpendeckOrg()
+vec3f CylindricStereoTrackedCamera::_getHeadPosition()
 {
-    return getParam3f("openDeckPosition", vec3f(0.0f, 0.0f, 0.0f));
+    return getParam3f("headPosition", vec3f(0.0f, 0.0f, 0.0f));
 }
 
 vec3f CylindricStereoTrackedCamera::_getOpendeckCamDU()
 {
-    return normalize(getParam3f("openDeckCamDU", vec3f(1.0, 0.0f, 0.0f)));
+    const auto quat = getParam4f("headRotation", vec4f(0.0f, 0.0f, 0.0f, 1.0f));
+    const auto cameraDU = _rotateVectorByQuat(OPENDECK_RIGHT_DIRECTION, quat);
+    return normalize(cameraDU);
 }
 
 OSP_REGISTER_CAMERA(CylindricStereoTrackedCamera, cylindricStereoTracked);

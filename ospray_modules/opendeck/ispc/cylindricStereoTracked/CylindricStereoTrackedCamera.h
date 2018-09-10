@@ -37,7 +37,7 @@ struct CylindricStereoTrackedCamera : public CylindricStereoCamera
     void commit() override;
 
 private:
-    vec3f _getOpendeckOrg();
+    vec3f _getHeadPosition();
     vec3f _getOpendeckCamDU();
 };
 }
