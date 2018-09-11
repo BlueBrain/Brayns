@@ -211,9 +211,6 @@ static void ExtendedSDFGeometries_postIntersect(
     uniform ExtendedSDFGeometries* uniform this =
         (uniform ExtendedSDFGeometries * uniform)geometry;
     dg.geometry = geometry;
-#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR < 5))
-    dg.material = geometry->material;
-#endif
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 

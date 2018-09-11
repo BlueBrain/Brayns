@@ -297,11 +297,7 @@ float Renderer::_mpiRenderFrame(ospray::FrameBuffer* fb,
 void* Renderer::beginFrame(ospray::FrameBuffer* fb)
 {
     this->currentFB = fb;
-#ifdef NEW_OSPRAY
-    fb->beginFrame(errorThreshold);
-#else
     fb->beginFrame();
-#endif
 
     // Provide a random seed to the renderer
     ::optix::float4 jitter = {(float)rand() / (float)RAND_MAX,
@@ -330,22 +326,11 @@ float Renderer::renderFrame(ospray::FrameBuffer* fb,
     auto perFrameData = beginFrame(fb);
 
     // Render
+    auto lock = Context::get().getScopeLock();
     _context->launch(0, fb->size.x, fb->size.y);
 
     endFrame(perFrameData, channelFlags);
     return fb->endFrame(errorThreshold);
 }
-
-OSP_REGISTER_RENDERER(Renderer, basic);
-OSP_REGISTER_RENDERER(Renderer, exobj);
-OSP_REGISTER_RENDERER(Renderer, simulationrenderer);
-OSP_REGISTER_RENDERER(Renderer, particlerenderer);
-OSP_REGISTER_RENDERER(Renderer, proximityrenderer);
-
-OSP_REGISTER_RENDERER(Renderer, raytracer);
-OSP_REGISTER_RENDERER(Renderer, rt);
-OSP_REGISTER_RENDERER(Renderer, scivis);
-OSP_REGISTER_RENDERER(Renderer, raycast_Ng);
-OSP_REGISTER_RENDERER(Renderer, raycast_Ns);
 }
 }

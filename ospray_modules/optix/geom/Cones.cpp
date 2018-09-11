@@ -46,7 +46,5 @@ void Cones::finalize(Model* optixModel)
 
     _setBuffer("cones", data);
 }
-
-OSP_REGISTER_GEOMETRY(Cones, extendedcones);
 }
 }

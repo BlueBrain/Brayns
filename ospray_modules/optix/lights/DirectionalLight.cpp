@@ -33,10 +33,5 @@ void DirectionalLight::commit()
     optixLight.pos.z = direction.z;
     Light::commit();
 }
-
-OSP_REGISTER_LIGHT(DirectionalLight, DirectionalLight);
-OSP_REGISTER_LIGHT(DirectionalLight, DistantLight);
-OSP_REGISTER_LIGHT(DirectionalLight, distant);
-OSP_REGISTER_LIGHT(DirectionalLight, directional);
 }
 }

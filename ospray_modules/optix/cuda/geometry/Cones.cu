@@ -43,7 +43,7 @@ void intersect_cone( int primIdx )
 {
     const int idx = primIdx * cone_size;
     const float ts = cones[ idx + 8 ];
-    if( ts >= timestamp )
+    if (ts > 0 && timestamp > ts)
         return;
 
     float3 v0 = { cones[ idx ], cones[ idx + 1 ], cones[ idx + 2 ] };

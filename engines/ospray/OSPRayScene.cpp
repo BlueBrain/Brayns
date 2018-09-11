@@ -46,7 +46,9 @@ OSPRayScene::OSPRayScene(ParametersManager& parametersManager,
     , _memoryManagementFlags(memoryManagementFlags)
 {
     _backgroundMaterial = std::make_shared<OSPRayMaterial>();
-    ospCommit(_ospTransferFunction);
+    _ospTransferFunction = ospNewTransferFunction("piecewise_linear");
+    if (_ospTransferFunction)
+        ospCommit(_ospTransferFunction);
 }
 
 OSPRayScene::~OSPRayScene()
@@ -184,6 +186,8 @@ void OSPRayScene::commit()
         impl.logInformation();
     }
     BRAYNS_DEBUG << "Committing root models" << std::endl;
+
+    ospSet1i(_rootModel, "isRootModel", 1); // Needed for OptiX
     ospCommit(_rootModel);
     if (_rootSimulationModel)
         ospCommit(_rootSimulationModel);
@@ -256,29 +260,33 @@ bool OSPRayScene::commitTransferFunctionData()
     if (!_transferFunction.isModified())
         return false;
 
-    // for volumes
-    Vector3fs colors;
-    colors.reserve(_transferFunction.getDiffuseColors().size());
-    floats opacities;
-    opacities.reserve(_transferFunction.getDiffuseColors().size());
-
-    for (const auto& i : _transferFunction.getDiffuseColors())
+    if (_ospTransferFunction)
     {
-        colors.push_back({float(i.x()), float(i.y()), float(i.z())});
-        opacities.push_back(i.w());
-    }
+        // for volumes
+        Vector3fs colors;
+        colors.reserve(_transferFunction.getDiffuseColors().size());
+        floats opacities;
+        opacities.reserve(_transferFunction.getDiffuseColors().size());
 
-    OSPData colorsData = ospNewData(colors.size(), OSP_FLOAT3, colors.data());
-    ospSetData(_ospTransferFunction, "colors", colorsData);
-    ospRelease(colorsData);
-    ospSet2f(_ospTransferFunction, "valueRange",
-             _transferFunction.getValuesRange().x(),
-             _transferFunction.getValuesRange().y());
-    OSPData opacityValuesData =
-        ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
-    ospSetData(_ospTransferFunction, "opacities", opacityValuesData);
-    ospRelease(opacityValuesData);
-    ospCommit(_ospTransferFunction);
+        for (const auto& i : _transferFunction.getDiffuseColors())
+        {
+            colors.push_back({float(i.x()), float(i.y()), float(i.z())});
+            opacities.push_back(i.w());
+        }
+
+        OSPData colorsData =
+            ospNewData(colors.size(), OSP_FLOAT3, colors.data());
+        ospSetData(_ospTransferFunction, "colors", colorsData);
+        ospRelease(colorsData);
+        ospSet2f(_ospTransferFunction, "valueRange",
+                 _transferFunction.getValuesRange().x(),
+                 _transferFunction.getValuesRange().y());
+        OSPData opacityValuesData =
+            ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
+        ospSetData(_ospTransferFunction, "opacities", opacityValuesData);
+        ospRelease(opacityValuesData);
+        ospCommit(_ospTransferFunction);
+    }
 
     // for simulation
     if (_ospTransferFunctionDiffuseData)

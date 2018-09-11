@@ -125,7 +125,8 @@ void OSPRayRenderer::setCamera(CameraPtr camera)
 {
     _camera = static_cast<OSPRayCamera*>(camera.get());
     assert(_camera);
-    createOSPRenderer();
+    if (_renderer == nullptr)
+        createOSPRenderer();
     ospSetObject(_renderer, "camera", _camera->impl());
     markModified();
 }

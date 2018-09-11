@@ -25,6 +25,7 @@
 #include <optixu/optixpp_namespace.h>
 
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 #include "geom/Geometry.h"
@@ -55,6 +56,11 @@ public:
 
     ::optix::Geometry createGeometry(Geometry::Type type);
 
+    std::unique_lock<std::mutex> getScopeLock()
+    {
+        return std::unique_lock<std::mutex>(_mutex);
+    }
+
 private:
     Context();
 
@@ -72,6 +78,7 @@ private:
     ::optix::Buffer _lightBuffer;
 
     std::unordered_map<void*, ::optix::TextureSampler> _optixTextureSamplers;
+    std::mutex _mutex;
 };
 }
 }

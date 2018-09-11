@@ -1,6 +1,6 @@
-/* Copyright (c) 2017, EPFL/Blue Brain Project
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
  * This file is part of https://github.com/BlueBrain/ospray-modules
  *
@@ -17,23 +17,26 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#pragma once
 
-#include "PointLight.h"
-
-#include "../Context.h"
+#include "Geometry.h"
 
 namespace bbp
 {
 namespace optix
 {
-void PointLight::commit()
+struct Instance : public Geometry
 {
-    const ospray::vec3f position =
-        getParam3f("position", ospray::vec3f(0.f, 0.f, 1.f));
-    optixLight.pos.x = position.x;
-    optixLight.pos.y = position.y;
-    optixLight.pos.z = position.z;
-    Light::commit();
-}
+    Instance()
+        : Geometry(Type::Instance)
+    {
+    }
+    ~Instance() = default;
+
+    std::string toString() const override;
+    void finalize(Model* model) override;
+
+    ::optix::Transform _transform;
+};
 }
 }

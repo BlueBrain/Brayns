@@ -27,8 +27,15 @@
 #include "Model.h"
 #include "camera/Camera.h"
 #include "framebuffer/FrameBuffer.h"
+#include "geom/Cones.h"
+#include "geom/Cylinders.h"
+#include "geom/Geometry.h"
+#include "geom/Instance.h"
 #include "geom/Spheres.h"
+#include "geom/TriangleMesh.h"
+#include "lights/DirectionalLight.h"
 #include "lights/Light.h"
+#include "lights/PointLight.h"
 #include "render/Material.h"
 #include "render/Renderer.h"
 
@@ -109,6 +116,7 @@ OSPModel Device::newModel()
 
 void Device::commit(OSPObject _object)
 {
+    auto lock = Context::get().getScopeLock();
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
     Assert2(object, "null object in LocalDevice::commit()");
     object->commit();
@@ -142,6 +150,7 @@ void Device::setVoidPtr(OSPObject _object, const char* bufName, void* v)
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
+
     object->setParam(bufName, v);
 }
 
@@ -165,6 +174,7 @@ void Device::setString(OSPObject _object, const char* bufName, const char* s)
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
     Assert(object != nullptr && "invalid object handle");
     Assert(bufName != nullptr && "invalid identifier for object parameter");
+
     object->setParam<std::string>(bufName, s);
 }
 
@@ -268,17 +278,7 @@ void Device::setPixelOp(OSPFrameBuffer /*_fb*/, OSPPixelOp /*_op*/)
 OSPRenderer Device::newRenderer(const char* type)
 {
     Assert(type != nullptr && "invalid render type identifier");
-    Renderer* renderer = (Renderer*)Renderer::createInstance(type);
-    if (!renderer)
-    {
-        if (debugMode)
-        {
-            throw std::runtime_error("unknown renderer type '" +
-                                     std::string(type) + "'");
-        }
-        else
-            return nullptr;
-    }
+    auto renderer = new bbp::optix::Renderer();
     renderer->refInc();
     return (OSPRenderer)renderer;
 }
@@ -286,18 +286,7 @@ OSPRenderer Device::newRenderer(const char* type)
 OSPCamera Device::newCamera(const char* type)
 {
     Assert(type != nullptr && "invalid camera type identifier");
-    Camera* camera = (Camera*)Camera::createInstance(type);
-    if (!camera)
-    {
-        if (debugMode)
-        {
-            throw std::runtime_error("unknown camera type '" +
-                                     std::string(type) + "'");
-        }
-        else
-            return nullptr;
-    }
-
+    auto camera = new bbp::optix::Camera();
     camera->refInc();
     return (OSPCamera)camera;
 }
@@ -310,9 +299,24 @@ OSPVolume Device::newVolume(const char* /*type*/)
 OSPGeometry Device::newGeometry(const char* type)
 {
     Assert(type != nullptr && "invalid render type identifier");
-    Geometry* geometry = Geometry::createInstance(type);
-    if (!geometry)
-        return nullptr;
+    Geometry* geometry = nullptr;
+
+    const auto typeStr = std::string(type);
+    if (typeStr == "extendedcones")
+        geometry = new bbp::optix::Cones;
+    else if (typeStr == "extendedcylinders")
+        geometry = new bbp::optix::Cylinders;
+    else if (typeStr == "extendedspheres")
+        geometry = new bbp::optix::Spheres;
+    else if (typeStr == "trianglemesh" || typeStr == "triangles")
+        geometry = new bbp::optix::TriangleMesh;
+    else if (typeStr == "instance")
+        geometry = new bbp::optix::Instance;
+    else
+        geometry = nullptr;
+
+    Assert2(geometry != nullptr, "invalid geometry type");
+
     geometry->refInc();
     return (OSPGeometry)geometry;
 }
@@ -322,14 +326,11 @@ OSPMaterial Device::newMaterial(OSPRenderer _renderer, const char* type)
     UNUSED(_renderer);
     Assert2(type != nullptr, "invalid material type identifier");
 
-    Material* material = (Material*)Material::createMaterial(type);
-    if (!material)
-        return nullptr;
+    auto material = new bbp::optix::Material();
     material->refInc();
     return (OSPMaterial)material;
 }
 
-#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR > 4))
 OSPMaterial Device::newMaterial(const char* renderer_type,
                                 const char* material_type)
 {
@@ -338,7 +339,6 @@ OSPMaterial Device::newMaterial(const char* renderer_type,
     release(renderer);
     return material;
 }
-#endif
 
 OSPTransferFunction Device::newTransferFunction(const char* /*type*/)
 {
@@ -348,14 +348,24 @@ OSPTransferFunction Device::newTransferFunction(const char* /*type*/)
 OSPLight Device::newLight(OSPRenderer _renderer, const char* type)
 {
     UNUSED(_renderer);
-    ospray::Light* light = ospray::Light::createLight(type);
-    if (!light)
-        return nullptr;
+    ospray::Light* light = nullptr;
+
+    const auto typeStr = std::string(type);
+    if (typeStr == "DirectionalLight" || typeStr == "DistantLight" ||
+        typeStr == "distant" || typeStr == "directional")
+        light = new bbp::optix::DirectionalLight();
+    else if (typeStr == "PointLight" || typeStr == "point" ||
+             typeStr == "SphereLight" || typeStr == "sphere")
+        light = new bbp::optix::PointLight();
+    else
+        light = nullptr;
+
+    Assert2(light != nullptr, "invalid light type");
+
     light->refInc();
     return (OSPLight)light;
 }
 
-#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR > 4))
 OSPLight Device::newLight(const char* renderer_type, const char* light_type)
 {
     auto renderer = newRenderer(renderer_type);
@@ -363,7 +373,6 @@ OSPLight Device::newLight(const char* renderer_type, const char* light_type)
     release(renderer);
     return light;
 }
-#endif
 
 void Device::frameBufferClear(OSPFrameBuffer _fb,
                               const ospray::uint32 fbChannelFlags)

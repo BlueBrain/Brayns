@@ -59,9 +59,6 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     uniform ExtendedSpheres* uniform this =
         (uniform ExtendedSpheres * uniform)geometry;
     dg.geometry = geometry;
-#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR < 5))
-    dg.material = geometry->material;
-#endif
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 

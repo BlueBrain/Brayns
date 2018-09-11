@@ -43,11 +43,7 @@ struct FrameBuffer : public ospray::FrameBuffer
     void setTile(ospray::Tile& tile) override;
     ospray::int32 accumID(const ospray::vec2i& tile) override;
     float tileError(const ospray::vec2i& tile) override;
-#ifdef NEW_OSPRAY
-    void beginFrame(const float errorThreshold) override;
-#else
     void beginFrame() override;
-#endif
     float endFrame(const float errorThreshold) override;
 
     const void* mapColorBuffer() override;

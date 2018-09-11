@@ -84,8 +84,7 @@ private:
 
     OSPData _ospSimulationData{nullptr};
 
-    OSPTransferFunction _ospTransferFunction{
-        ospNewTransferFunction("piecewise_linear")};
+    OSPTransferFunction _ospTransferFunction{nullptr};
 
     OSPData _ospTransferFunctionEmissionData{nullptr};
     OSPData _ospTransferFunctionDiffuseData{nullptr};

@@ -76,10 +76,5 @@ void Material::commit()
     optixMaterial["refraction_index"]->setFloat(refraction);
     optixMaterial["glossiness"]->setFloat(g);
 }
-
-OSP_REGISTER_MATERIAL(Material, ExtendedOBJMaterial);
-OSP_REGISTER_MATERIAL(Material, SciVisMaterial);
-OSP_REGISTER_MATERIAL(Material, OBJMaterial);
-OSP_REGISTER_MATERIAL(Material, default);
 }
 }

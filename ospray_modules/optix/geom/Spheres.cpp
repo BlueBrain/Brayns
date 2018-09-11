@@ -48,7 +48,5 @@ void Spheres::finalize(Model* optixModel)
 
     _setBuffer("spheres", data);
 }
-
-OSP_REGISTER_GEOMETRY(Spheres, extendedspheres);
 }
 }

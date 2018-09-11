@@ -84,13 +84,8 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
             {
                 if (error != OSP_NO_ERROR)
                     BRAYNS_WARN
-#if ((OSPRAY_VERSION_MAJOR == 1) && (OSPRAY_VERSION_MINOR < 3))
-                        << "Could not load DeflectPixelOp module, error code "
-                        << (int)error << std::endl;
-#else
                         << ospDeviceGetLastErrorMsg(ospGetCurrentDevice())
                         << std::endl;
-#endif
                 else
                     _haveDeflectPixelOp = true;
             }

@@ -71,11 +71,6 @@ void Geometry::finalize(Model* optixModel)
     optixModel->addGeometryInstance(_geometry, optixMaterial->optixMaterial);
 }
 
-Geometry* Geometry::createInstance(const char* type)
-{
-    return ospray::createInstanceHelper<Geometry, OSP_GEOMETRY>(type);
-}
-
 void Geometry::_setBuffer(const std::string& uniform,
                           ospray::Ref<ospray::Data> data)
 {

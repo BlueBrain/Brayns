@@ -100,11 +100,7 @@ float FrameBuffer::tileError(const ospray::vec2i&)
     NOTIMPLEMENTED
 }
 
-#ifdef NEW_OSPRAY
-void FrameBuffer::beginFrame(const float /*errorThreshold*/)
-#else
 void FrameBuffer::beginFrame()
-#endif
 {
     frameID++;
     if (pixelOp)
