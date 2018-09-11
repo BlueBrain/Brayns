@@ -276,7 +276,7 @@ struct Brayns::Impl : public PluginAPI
         _engine->postRender();
 
         // broadcast image JPEG from RocketsPlugin
-        _extensionPluginFactory.postRender();
+        _extensionPluginFactory.postRender(_engine->getFrameBuffer());
 
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();

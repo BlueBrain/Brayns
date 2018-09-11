@@ -1290,7 +1290,7 @@ void RocketsPlugin::preRender()
     _impl->preRender();
 }
 
-void RocketsPlugin::postRender()
+void RocketsPlugin::postRender(FrameBuffer&)
 {
     _impl->postRender();
 }

@@ -73,13 +73,13 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   transferFunction/TransferFunction.h
   types.h
   utils/Utils.h
+  utils/ImageUtils.h
   volume/BrickedVolume.h
   volume/SharedDataVolume.h
   volume/Volume.h
 )
 
 set(BRAYNSCOMMON_HEADERS
-  utils/ImageUtils.h
   utils/base64/base64.h
 )
 
