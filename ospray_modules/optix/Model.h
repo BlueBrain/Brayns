@@ -36,7 +36,7 @@ struct Model : public ospray::ManagedObject
     std::string toString() const override;
     void commit() override;
 
-    static Model *createInstance(const char *type);
+    static Model* createInstance(const char* type);
 
     void addGeometryInstance(::optix::Geometry geometry,
                              ::optix::Material material);

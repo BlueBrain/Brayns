@@ -42,7 +42,7 @@ Geometry::~Geometry()
         _buffer->destroy();
 }
 
-void Geometry::setMaterial(ospray::Material *mat)
+void Geometry::setMaterial(ospray::Material* mat)
 {
     if (!mat)
     {
@@ -56,27 +56,27 @@ void Geometry::setMaterial(ospray::Material *mat)
     _material = mat;
 }
 
-ospray::Material *Geometry::getMaterial() const
+ospray::Material* Geometry::getMaterial() const
 {
     return _material.ptr;
 }
 
-void Geometry::finalize(Model *optixModel)
+void Geometry::finalize(Model* optixModel)
 {
     if (_geometry)
         _geometry->destroy();
 
     _geometry = Context::get().createGeometry(_type);
-    Material *optixMaterial = (Material *)_material.ptr;
+    Material* optixMaterial = (Material*)_material.ptr;
     optixModel->addGeometryInstance(_geometry, optixMaterial->optixMaterial);
 }
 
-Geometry *Geometry::createInstance(const char *type)
+Geometry* Geometry::createInstance(const char* type)
 {
     return ospray::createInstanceHelper<Geometry, OSP_GEOMETRY>(type);
 }
 
-void Geometry::_setBuffer(const std::string &uniform,
+void Geometry::_setBuffer(const std::string& uniform,
                           ospray::Ref<ospray::Data> data)
 {
     if (_buffer)

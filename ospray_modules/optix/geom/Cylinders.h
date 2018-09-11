@@ -31,7 +31,7 @@ struct Cylinders : public Geometry
     ~Cylinders() = default;
 
     std::string toString() const override;
-    void finalize(Model *model) override;
+    void finalize(Model* model) override;
 };
 }
 }

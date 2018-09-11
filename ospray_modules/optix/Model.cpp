@@ -42,7 +42,7 @@ Model::Model()
 
 Model::~Model()
 {
-    for (auto &i : _geometryInstances)
+    for (auto& i : _geometryInstances)
         i->destroy();
     if (_geometryGroup)
         _geometryGroup->destroy();
@@ -60,7 +60,7 @@ void Model::commit()
         << "Finalizing model, has " << geometry.size()
         << " geometries and 0 volumes";
 
-    for (auto &i : _geometryInstances)
+    for (auto& i : _geometryInstances)
         i->destroy();
     _geometryInstances.clear();
 
@@ -89,7 +89,7 @@ void Model::commit()
     _context["top_shadower"]->set(_geometryGroup);
 }
 
-Model *Model::createInstance(const char *type)
+Model* Model::createInstance(const char* type)
 {
     return ospray::createInstanceHelper<Model, OSP_MODEL>(type);
 }
@@ -108,9 +108,9 @@ void Model::addGeometryInstance(::optix::Geometry geometry_,
 
 namespace ospray
 {
-extern "C" ::bbp::optix::Model *ospray_create_model__()
+extern "C" ::bbp::optix::Model* ospray_create_model__()
 {
     return new ::bbp::optix::Model;
 }
-::bbp::optix::Model *ospray_create_model__();
+::bbp::optix::Model* ospray_create_model__();
 }

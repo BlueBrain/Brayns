@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/log.h>
 #include "SimulationRenderer.h"
+#include <brayns/common/log.h>
 
 namespace brayns
 {

@@ -25,9 +25,8 @@
 
 namespace ospray
 {
-
 /**
- * This camera is extension of the regular ospray 
+ * This camera is extension of the regular ospray
  * stereoscopic camera. It has an additional option
  * to select the distance of the zero-parallax plane.
  */

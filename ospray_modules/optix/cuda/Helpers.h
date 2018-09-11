@@ -33,7 +33,7 @@
 // Convert a float3 in [0,1)^3 to a uchar4 in [0,255]^4 -- 4th channel is set to
 // 255
 #ifdef __CUDACC__
-static __device__ __inline__ optix::uchar4 make_color(const optix::float3 &c)
+static __device__ __inline__ optix::uchar4 make_color(const optix::float3& c)
 {
     return optix::make_uchar4(
         static_cast<unsigned char>(__saturatef(c.z) * 255.99f), /* B */
@@ -61,8 +61,8 @@ static __host__ __device__ __inline__ optix::float3 sample_phong_lobe(
 
 // Sample Phong lobe relative to U, V, W frame
 static __host__ __device__ __inline__ optix::float3 sample_phong_lobe(
-    const optix::float2 &sample, float exponent, const optix::float3 &U,
-    const optix::float3 &V, const optix::float3 &W, float &pdf, float &bdf_val)
+    const optix::float2& sample, float exponent, const optix::float3& U,
+    const optix::float3& V, const optix::float3& W, float& pdf, float& bdf_val)
 {
     const float cos_theta = powf(sample.y, 1.0f / (exponent + 1.0f));
 
@@ -82,8 +82,8 @@ static __host__ __device__ __inline__ optix::float3 sample_phong_lobe(
 
 // Get Phong lobe PDF for local frame
 static __host__ __device__ __inline__ float get_phong_lobe_pdf(
-    float exponent, const optix::float3 &normal, const optix::float3 &dir_out,
-    const optix::float3 &dir_in, float &bdf_val)
+    float exponent, const optix::float3& normal, const optix::float3& dir_out,
+    const optix::float3& dir_in, float& bdf_val)
 {
     using namespace optix;
 
@@ -96,10 +96,10 @@ static __host__ __device__ __inline__ float get_phong_lobe_pdf(
 }
 
 // Create ONB from normal.  Resulting W is parallel to normal
-static __host__ __device__ __inline__ void create_onb(const optix::float3 &n,
-                                                      optix::float3 &U,
-                                                      optix::float3 &V,
-                                                      optix::float3 &W)
+static __host__ __device__ __inline__ void create_onb(const optix::float3& n,
+                                                      optix::float3& U,
+                                                      optix::float3& V,
+                                                      optix::float3& W)
 {
     using namespace optix;
 
@@ -114,8 +114,8 @@ static __host__ __device__ __inline__ void create_onb(const optix::float3 &n,
 }
 
 // Create ONB from normalized vector
-static __device__ __inline__ void create_onb(const optix::float3 &n,
-                                             optix::float3 &U, optix::float3 &V)
+static __device__ __inline__ void create_onb(const optix::float3& n,
+                                             optix::float3& U, optix::float3& V)
 {
     using namespace optix;
 
@@ -189,7 +189,7 @@ static __host__ __device__ __inline__ optix::float3
 
 // Color space conversions
 static __host__ __device__ __inline__ optix::float3 Yxy2XYZ(
-    const optix::float3 &Yxy)
+    const optix::float3& Yxy)
 {
     // avoid division by zero
     if (Yxy.z < 1e-4)
@@ -200,7 +200,7 @@ static __host__ __device__ __inline__ optix::float3 Yxy2XYZ(
 }
 
 static __host__ __device__ __inline__ optix::float3 XYZ2rgb(
-    const optix::float3 &xyz)
+    const optix::float3& xyz)
 {
     const float R =
         optix::dot(xyz, optix::make_float3(3.2410f, -1.5374f, -0.4986f));
@@ -249,7 +249,7 @@ static __host__ __device__ __inline__ optix::float3 rgb2Yxy(optix::float3 rgb)
 }
 
 static __host__ __device__ __inline__ optix::float3 tonemap(
-    const optix::float3 &hdr_value, float Y_log_av, float Y_max)
+    const optix::float3& hdr_value, float Y_log_av, float Y_max)
 {
     using namespace optix;
 

@@ -30,7 +30,7 @@ struct TriangleMesh : public Geometry
     }
     ~TriangleMesh() override;
     std::string toString() const override;
-    void finalize(Model *model) override;
+    void finalize(Model* model) override;
 
 private:
     ::optix::Buffer _verticesBuffer;

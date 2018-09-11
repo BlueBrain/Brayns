@@ -26,7 +26,7 @@ namespace bbp
 {
 namespace optix
 {
-FrameBuffer::FrameBuffer(const ospray::vec2i &size_,
+FrameBuffer::FrameBuffer(const ospray::vec2i& size_,
                          ColorBufferFormat colorBufferFormat_,
                          bool hasDepthBuffer_, bool hasAccumBuffer_,
                          bool hasVarianceBuffer_)
@@ -82,7 +82,7 @@ void FrameBuffer::clear(const ospray::uint32 fbChannelFlags)
         _accumulationFrame = 1;
 }
 
-void FrameBuffer::setTile(ospray::Tile &tile)
+void FrameBuffer::setTile(ospray::Tile& tile)
 {
     if (pixelOp)
         pixelOp->preAccum(tile);
@@ -90,12 +90,12 @@ void FrameBuffer::setTile(ospray::Tile &tile)
         pixelOp->postAccum(tile);
 }
 
-ospray::int32 FrameBuffer::accumID(const ospray::vec2i &)
+ospray::int32 FrameBuffer::accumID(const ospray::vec2i&)
 {
     NOTIMPLEMENTED
 }
 
-float FrameBuffer::tileError(const ospray::vec2i &)
+float FrameBuffer::tileError(const ospray::vec2i&)
 {
     NOTIMPLEMENTED
 }
@@ -118,27 +118,27 @@ float FrameBuffer::endFrame(const float /*errorThreshold*/)
     return ospcommon::inf; // keep rendering by lying of still having errors
 }
 
-const void *FrameBuffer::mapDepthBuffer()
+const void* FrameBuffer::mapDepthBuffer()
 {
     this->refInc();
     if (colorBuffer)
-        depthBuffer = (float *)colorBuffer;
-    return (const void *)depthBuffer;
+        depthBuffer = (float*)colorBuffer;
+    return (const void*)depthBuffer;
 }
 
-const void *FrameBuffer::mapColorBuffer()
+const void* FrameBuffer::mapColorBuffer()
 {
     this->refInc();
     rtBufferMap(_frameBuffer->get(), &colorBuffer);
-    depthBuffer = (float *)colorBuffer;
+    depthBuffer = (float*)colorBuffer;
     if (_accumulation)
         _context["frame_number"]->setUint(_accumulationFrame++);
     else
         _context["frame_number"]->setUint(1u);
-    return (const void *)colorBuffer;
+    return (const void*)colorBuffer;
 }
 
-void FrameBuffer::unmap(const void *mappedMem)
+void FrameBuffer::unmap(const void* mappedMem)
 {
     if (!(mappedMem == colorBuffer || mappedMem == depthBuffer))
     {

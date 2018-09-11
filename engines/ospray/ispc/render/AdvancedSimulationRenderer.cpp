@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/common/log.h>
 #include "AdvancedSimulationRenderer.h"
+#include <brayns/common/log.h>
 
 // ospray
 #include <ospray/SDK/common/Data.h>

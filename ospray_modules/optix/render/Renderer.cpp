@@ -40,7 +40,7 @@ void Renderer::commit()
 
     _updateTransferFunction();
 
-    Context::get().updateLights((ospray::Data *)getParamData("lights"));
+    Context::get().updateLights((ospray::Data*)getParamData("lights"));
 
     _context["timestamp"]->setFloat(getParam1f("timestamp", 0.f));
 
@@ -93,7 +93,7 @@ Renderer::~Renderer()
     _emissionIntensityMapBuffer = nullptr;
 }
 
-void Renderer::renderTile(void * /*perFrameData*/, ospray::Tile & /*tile*/,
+void Renderer::renderTile(void* /*perFrameData*/, ospray::Tile& /*tile*/,
                           size_t /*jobID*/) const
 {
     // should never come here
@@ -200,7 +200,7 @@ void Renderer::_updateTransferFunction()
         getParam1f("transferFunctionRange", 0.f));
 }
 
-float Renderer::_mpiRenderFrame(ospray::FrameBuffer *fb,
+float Renderer::_mpiRenderFrame(ospray::FrameBuffer* fb,
                                 const ospray::uint32 channelFlags)
 {
     if (ospray::TiledLoadBalancer::instance->toString() ==
@@ -208,7 +208,7 @@ float Renderer::_mpiRenderFrame(ospray::FrameBuffer *fb,
         return ospray::TiledLoadBalancer::instance->renderFrame(this, fb,
                                                                 channelFlags);
 
-    void *perFrameData = beginFrame(fb);
+    void* perFrameData = beginFrame(fb);
     int xSize = fb->size.x / 1; // mpicommon::numWorkers();
     xSize += xSize % TILE_SIZE;
     int xOffset = 0 /*mpicommon::workerRank()*/ * xSize;
@@ -244,7 +244,7 @@ float Renderer::_mpiRenderFrame(ospray::FrameBuffer *fb,
     // decompose 2D region into tiles for dfb
     {
         auto buffer = _frameBuffer->mapColorBuffer();
-        uint8_t *colorBuffer = (uint8_t *)buffer;
+        uint8_t* colorBuffer = (uint8_t*)buffer;
 
         const int32_t xTiles = (region.size().x + TILE_SIZE - 1) / TILE_SIZE;
         const int32_t yTiles = (region.size().y + TILE_SIZE - 1) / TILE_SIZE;
@@ -266,7 +266,7 @@ float Renderer::_mpiRenderFrame(ospray::FrameBuffer *fb,
             // TODO tasking::parallel_for(NTASKS, [&](int taskIndex) {}
             for (int32_t idx = 0; idx < TILE_SIZE * xTiles; ++idx)
             {
-                ospray::Tile &tile = tiles[idx % xTiles];
+                ospray::Tile& tile = tiles[idx % xTiles];
 
                 const int32_t j = idx / xTiles;
 #pragma omp simd
@@ -281,7 +281,7 @@ float Renderer::_mpiRenderFrame(ospray::FrameBuffer *fb,
             }
 
             // send tiles
-            for (auto &tile : tiles)
+            for (auto& tile : tiles)
                 fb->setTile(tile);
         }
 
@@ -294,7 +294,7 @@ float Renderer::_mpiRenderFrame(ospray::FrameBuffer *fb,
     return fb->endFrame(ospray::inf);
 }
 
-void *Renderer::beginFrame(ospray::FrameBuffer *fb)
+void* Renderer::beginFrame(ospray::FrameBuffer* fb)
 {
     this->currentFB = fb;
 #ifdef NEW_OSPRAY
@@ -313,12 +313,12 @@ void *Renderer::beginFrame(ospray::FrameBuffer *fb)
     return nullptr;
 }
 
-void Renderer::endFrame(void * /*perFrameData*/,
+void Renderer::endFrame(void* /*perFrameData*/,
                         const ospray::int32 /*fbChannelFlags*/)
 {
 }
 
-float Renderer::renderFrame(ospray::FrameBuffer *fb,
+float Renderer::renderFrame(ospray::FrameBuffer* fb,
                             const ospray::uint32 channelFlags)
 {
     // device.getParamString("mpiMode", "")

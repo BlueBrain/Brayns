@@ -42,21 +42,21 @@ struct Renderer : public ospray::Renderer
     std::string toString() const override;
     void commit() override;
 
-    float renderFrame(ospray::FrameBuffer *fb,
+    float renderFrame(ospray::FrameBuffer* fb,
                       const ospray::uint32 fbChannelFlags) override;
 
-    void *beginFrame(ospray::FrameBuffer *fb) override;
+    void* beginFrame(ospray::FrameBuffer* fb) override;
 
-    void endFrame(void *perFrameData,
+    void endFrame(void* perFrameData,
                   const ospray::int32 fbChannelFlags) override;
 
-    void renderTile(void *perFrameData, ospray::Tile &tile,
+    void renderTile(void* perFrameData, ospray::Tile& tile,
                     size_t jobID) const override;
 
 private:
     void _updateVolume();
     void _updateTransferFunction();
-    float _mpiRenderFrame(ospray::FrameBuffer *fb,
+    float _mpiRenderFrame(ospray::FrameBuffer* fb,
                           const ospray::uint32 fbChannelFlags);
 
     ::optix::Context _context;
@@ -67,7 +67,7 @@ private:
     ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
     ospray::Ref<ospray::Data> _transferFunctionEmissionData;
 
-    FrameBuffer *_frameBuffer{nullptr}; // MPI slave only
+    FrameBuffer* _frameBuffer{nullptr}; // MPI slave only
 
     ::optix::Buffer _volumeBuffer{nullptr};
 };
