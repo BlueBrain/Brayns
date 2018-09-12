@@ -148,8 +148,8 @@ OSPData Device::newData(size_t nitems, OSPDataType format, const void* init,
 void Device::setVoidPtr(OSPObject _object, const char* bufName, void* v)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam(bufName, v);
 }
@@ -157,8 +157,8 @@ void Device::setVoidPtr(OSPObject _object, const char* bufName, void* v)
 void Device::removeParam(OSPObject _object, const char* name)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(name != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(name, "invalid identifier for object parameter");
     object->removeParam(name);
 }
 
@@ -172,8 +172,8 @@ int Device::setRegion(OSPVolume /*_volume*/, const void* /*source*/,
 void Device::setString(OSPObject _object, const char* bufName, const char* s)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam<std::string>(bufName, s);
 }
@@ -190,8 +190,8 @@ int Device::loadModule(const char* name)
 void Device::setFloat(OSPObject _object, const char* bufName, const float f)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam(bufName, f);
 }
@@ -199,8 +199,8 @@ void Device::setFloat(OSPObject _object, const char* bufName, const float f)
 void Device::setInt(OSPObject _object, const char* bufName, const int i)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam(bufName, i);
 }
@@ -209,8 +209,8 @@ void Device::setVec2f(OSPObject _object, const char* bufName,
                       const ospray::vec2f& v)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam(bufName, v);
 }
@@ -219,8 +219,8 @@ void Device::setVec3f(OSPObject _object, const char* bufName,
                       const ospray::vec3f& v)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam(bufName, v);
 }
@@ -229,8 +229,8 @@ void Device::setVec4f(OSPObject _object, const char* bufName,
                       const ospray::vec4f& v)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam(bufName, v);
 }
@@ -239,8 +239,8 @@ void Device::setVec2i(OSPObject _object, const char* bufName,
                       const ospray::vec2i& v)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam(bufName, v);
 }
@@ -249,8 +249,8 @@ void Device::setVec3i(OSPObject _object, const char* bufName,
                       const ospray::vec3i& v)
 {
     ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
-    Assert(object != nullptr && "invalid object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     object->setParam(bufName, v);
 }
@@ -260,8 +260,8 @@ void Device::setObject(OSPObject _target, const char* bufName, OSPObject _value)
     ospray::ManagedObject* target = (ospray::ManagedObject*)_target;
     ospray::ManagedObject* value = (ospray::ManagedObject*)_value;
 
-    Assert(target != nullptr && "invalid target object handle");
-    Assert(bufName != nullptr && "invalid identifier for object parameter");
+    Assert2(target, "invalid target object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
 
     target->setParam(bufName, value);
 }
@@ -277,7 +277,8 @@ void Device::setPixelOp(OSPFrameBuffer /*_fb*/, OSPPixelOp /*_op*/)
 
 OSPRenderer Device::newRenderer(const char* type)
 {
-    Assert(type != nullptr && "invalid render type identifier");
+    UNUSED(type);
+    Assert2(type, "invalid render type identifier");
     auto renderer = new bbp::optix::Renderer();
     renderer->refInc();
     return (OSPRenderer)renderer;
@@ -285,7 +286,8 @@ OSPRenderer Device::newRenderer(const char* type)
 
 OSPCamera Device::newCamera(const char* type)
 {
-    Assert(type != nullptr && "invalid camera type identifier");
+    UNUSED(type);
+    Assert2(type, "invalid camera type identifier");
     auto camera = new bbp::optix::Camera();
     camera->refInc();
     return (OSPCamera)camera;
@@ -298,7 +300,7 @@ OSPVolume Device::newVolume(const char* /*type*/)
 
 OSPGeometry Device::newGeometry(const char* type)
 {
-    Assert(type != nullptr && "invalid render type identifier");
+    Assert2(type, "invalid render type identifier");
     Geometry* geometry = nullptr;
 
     const auto typeStr = std::string(type);
@@ -323,6 +325,7 @@ OSPGeometry Device::newGeometry(const char* type)
 
 OSPMaterial Device::newMaterial(OSPRenderer _renderer, const char* type)
 {
+    UNUSED(type);
     UNUSED(_renderer);
     Assert2(type != nullptr, "invalid material type identifier");
 
@@ -410,8 +413,8 @@ float Device::renderFrame(OSPFrameBuffer _fb, OSPRenderer _renderer,
     FrameBuffer* fb = (FrameBuffer*)_fb;
     Renderer* renderer = (Renderer*)_renderer;
 
-    Assert(fb != nullptr && "invalid frame buffer handle");
-    Assert(renderer != nullptr && "invalid renderer handle");
+    Assert2(fb, "invalid frame buffer handle");
+    Assert2(renderer, "invalid renderer handle");
 
     try
     {
@@ -446,8 +449,8 @@ void Device::setMaterial(OSPGeometry _geometry, OSPMaterial _material)
 {
     Geometry* geometry = (Geometry*)_geometry;
     Material* material = (Material*)_material;
-    assert(geometry);
-    assert(material);
+    assert(geometry != nullptr);
+    assert(material != nullptr);
     geometry->setMaterial(material);
 }
 
@@ -455,10 +458,10 @@ OSPTexture2D Device::newTexture2D(const ospray::vec2i& size,
                                   const OSPTextureFormat type, void* data,
                                   const ospray::uint32 flags)
 {
-    Assert(size.x > 0 &&
-           "Width must be greater than 0 in optix::Device::newTexture2D");
-    Assert(size.y > 0 &&
-           "Height must be greater than 0 in optix::Device::newTexture2D");
+    Assert2(size.x > 0,
+            "Width must be greater than 0 in optix::Device::newTexture2D");
+    Assert2(size.y > 0,
+            "Height must be greater than 0 in optix::Device::newTexture2D");
 
     auto* tx = new ospray::Texture2D;
     tx->refInc();
@@ -469,7 +472,7 @@ OSPTexture2D Device::newTexture2D(const ospray::vec2i& size,
     tx->flags = flags;
     tx->managedObjectType = OSP_TEXTURE;
 
-    assert(data);
+    assert(data != nullptr);
 
     if (flags & OSP_TEXTURE_SHARED_BUFFER)
         tx->data = data;
