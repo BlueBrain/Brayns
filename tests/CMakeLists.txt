@@ -67,6 +67,11 @@ else()
 )
 endif()
 
+if(NOT BRAYNS_OPTIX_ENABLED)
+    list(APPEND EXCLUDE_FROM_TESTS demoOptiX.cpp)
+endif()
+
+
 include_directories(
   ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin
   ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/include
