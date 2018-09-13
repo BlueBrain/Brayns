@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(timeout_with_clear)
     BOOST_CHECK(!called);
 
     timer.stop();
-    BOOST_CHECK_LT(timer.milliseconds(), 500);
+    BOOST_CHECK_LE(timer.milliseconds(), 500);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     BOOST_CHECK(!called);
