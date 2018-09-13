@@ -116,7 +116,6 @@ float FrameBuffer::endFrame(const float /*errorThreshold*/)
 
 const void* FrameBuffer::mapDepthBuffer()
 {
-    this->refInc();
     if (colorBuffer)
         depthBuffer = (float*)colorBuffer;
     return (const void*)depthBuffer;
@@ -124,7 +123,6 @@ const void* FrameBuffer::mapDepthBuffer()
 
 const void* FrameBuffer::mapColorBuffer()
 {
-    this->refInc();
     rtBufferMap(_frameBuffer->get(), &colorBuffer);
     depthBuffer = (float*)colorBuffer;
     if (_accumulation)
@@ -142,7 +140,6 @@ void FrameBuffer::unmap(const void* mappedMem)
             "ERROR: unmapping a pointer not created by "
             "OSPRay!");
     }
-    this->refDec();
     rtBufferUnmap(_frameBuffer->get());
     colorBuffer = nullptr;
     depthBuffer = nullptr;
