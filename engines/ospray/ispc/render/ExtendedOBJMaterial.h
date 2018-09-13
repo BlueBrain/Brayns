@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <brayns/common/types.h>
 #include <ospray/SDK/common/Material.h>
 #include <ospray/SDK/texture/Texture2D.h>
 
@@ -78,6 +79,9 @@ struct ExtendedOBJMaterial : public ospray::Material
 
     /*! Casts simulation data */
     bool castSimulationData;
+
+    /*! Shading mode (none, diffuse, electron, etc) */
+    MaterialShadingMode shadingMode;
 
     std::string toString() const final
     {

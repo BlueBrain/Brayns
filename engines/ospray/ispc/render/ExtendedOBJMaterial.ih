@@ -28,6 +28,14 @@
 #include <ospray/SDK/texture/TextureParam.ih>
 #include <ospray/SDK/volume/Volume.ih>
 
+// Caution: This has to match the Brayns::MaterialShadingMode
+enum MaterialShadingMode
+{
+    none,
+    diffuse,
+    electron
+};
+
 struct ExtendedOBJMaterial
 {
     uniform Material super;
@@ -42,7 +50,7 @@ struct ExtendedOBJMaterial
     float Ns;
     TextureParam map_Bump;
     linear2f rot_Bump;
-    uniform Volume *uniform volume;
+    uniform Volume* uniform volume;
 
     float glossiness;
     bool castSimulationData;
@@ -52,4 +60,5 @@ struct ExtendedOBJMaterial
     float refraction;
     TextureParam map_reflection;
     float reflection;
+    MaterialShadingMode shadingMode;
 };
