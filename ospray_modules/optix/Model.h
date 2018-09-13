@@ -51,7 +51,9 @@ struct Model : public ospray::ManagedObject
 private:
     ::optix::Context _context;
     ::optix::GeometryGroup _geometryGroup;
+    ::optix::Acceleration _geometryGroupAcceleration;
     ::optix::Group _rootGroup;
+    ::optix::Acceleration _rootGroupAcceleration;
     std::vector<::optix::GeometryInstance> _geometryInstances;
 };
 }

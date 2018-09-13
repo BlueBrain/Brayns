@@ -38,6 +38,12 @@ std::string Instance::toString() const
     return "ospray::Instance";
 }
 
+Instance::~Instance()
+{
+    if (_transform)
+        _transform->destroy();
+}
+
 void Instance::finalize(Model* parentModel)
 {
     if (_transform)

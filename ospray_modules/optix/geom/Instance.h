@@ -31,7 +31,7 @@ struct Instance : public Geometry
         : Geometry(Type::Instance)
     {
     }
-    ~Instance() = default;
+    ~Instance();
 
     std::string toString() const override;
     void finalize(Model* model) override;

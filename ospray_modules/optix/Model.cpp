@@ -46,6 +46,21 @@ Model::~Model()
         i->destroy();
     if (_geometryGroup)
         _geometryGroup->destroy();
+
+    if (_rootGroup)
+        _rootGroup->destroy();
+
+    if (_geometryGroupAcceleration)
+        _geometryGroupAcceleration->destroy();
+
+    if (_rootGroupAcceleration)
+        _rootGroupAcceleration->destroy();
+
+    if (getParam1i("isRootModel", false))
+    {
+        _context["top_object"] = nullptr;
+        _context["top_shadower"] = nullptr;
+    }
 }
 
 std::string Model::toString() const
@@ -67,18 +82,28 @@ void Model::commit()
     if (_geometryGroup)
         _geometryGroup->destroy();
 
-    _geometryGroup = _context->createGeometryGroup();
-    _geometryGroup->setAcceleration(
+    if (_geometryGroupAcceleration)
+        _geometryGroupAcceleration->destroy();
+
+    _geometryGroupAcceleration =
         _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
-                                     DEFAULT_ACCELERATION_STRUCTURE));
+                                     DEFAULT_ACCELERATION_STRUCTURE);
+
+    _geometryGroup = _context->createGeometryGroup();
+    _geometryGroup->setAcceleration(_geometryGroupAcceleration);
 
     if (_rootGroup)
         _rootGroup->destroy();
 
-    _rootGroup = _context->createGroup();
-    _rootGroup->setAcceleration(
+    if (_rootGroupAcceleration)
+        _rootGroupAcceleration->destroy();
+
+    _rootGroupAcceleration =
         _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
-                                     DEFAULT_ACCELERATION_STRUCTURE));
+                                     DEFAULT_ACCELERATION_STRUCTURE);
+
+    _rootGroup = _context->createGroup();
+    _rootGroup->setAcceleration(_rootGroupAcceleration);
 
     _rootGroup->setChildCount(1);
     _rootGroup->setChild(0, _geometryGroup);

@@ -81,7 +81,6 @@ OSPFrameBuffer Device::frameBufferCreate(const ospray::vec2i& size,
 
     FrameBuffer* fb = new FrameBuffer(size, colorBufferFormat, hasDepthBuffer,
                                       hasAccumBuffer, hasVarianceBuffer);
-    fb->refInc();
     return (OSPFrameBuffer)fb;
 }
 
@@ -110,7 +109,6 @@ void Device::frameBufferUnmap(const void* mapped, OSPFrameBuffer _fb)
 OSPModel Device::newModel()
 {
     Model* model = new Model();
-    model->refInc();
     return (OSPModel)model;
 }
 
@@ -141,7 +139,6 @@ OSPData Device::newData(size_t nitems, OSPDataType format, const void* init,
                         int flags)
 {
     ospray::Data* data = new ospray::Data(nitems, format, init, flags);
-    data->refInc();
     return (OSPData)data;
 }
 
@@ -280,7 +277,6 @@ OSPRenderer Device::newRenderer(const char* type)
     UNUSED(type);
     Assert2(type, "invalid render type identifier");
     auto renderer = new bbp::optix::Renderer();
-    renderer->refInc();
     return (OSPRenderer)renderer;
 }
 
@@ -289,7 +285,6 @@ OSPCamera Device::newCamera(const char* type)
     UNUSED(type);
     Assert2(type, "invalid camera type identifier");
     auto camera = new bbp::optix::Camera();
-    camera->refInc();
     return (OSPCamera)camera;
 }
 
@@ -319,7 +314,6 @@ OSPGeometry Device::newGeometry(const char* type)
 
     Assert2(geometry != nullptr, "invalid geometry type");
 
-    geometry->refInc();
     return (OSPGeometry)geometry;
 }
 
@@ -330,7 +324,6 @@ OSPMaterial Device::newMaterial(OSPRenderer _renderer, const char* type)
     Assert2(type != nullptr, "invalid material type identifier");
 
     auto material = new bbp::optix::Material();
-    material->refInc();
     return (OSPMaterial)material;
 }
 
@@ -365,7 +358,6 @@ OSPLight Device::newLight(OSPRenderer _renderer, const char* type)
 
     Assert2(light != nullptr, "invalid light type");
 
-    light->refInc();
     return (OSPLight)light;
 }
 
@@ -464,7 +456,6 @@ OSPTexture2D Device::newTexture2D(const ospray::vec2i& size,
             "Height must be greater than 0 in optix::Device::newTexture2D");
 
     auto* tx = new ospray::Texture2D;
-    tx->refInc();
 
     // from ospray::Texture2D::createTexture(), w/o the ispc part
     tx->size = size;
