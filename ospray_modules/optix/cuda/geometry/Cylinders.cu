@@ -39,7 +39,7 @@ void intersect_cylinder( int primIdx )
 {
     const int idx = primIdx * cylinder_size;
     const float ts = cylinders[ idx + 7 ];
-    if( ts >= timestamp )
+    if (ts > 0 && timestamp > ts)
         return;
 
     const float3 v0 = { cylinders[ idx ], cylinders[ idx + 1 ], cylinders[ idx + 2 ] };

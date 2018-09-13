@@ -37,8 +37,8 @@ Material::~Material()
 void Material::commit()
 {
     auto map_Kd =
-        (ospray::Texture2D *)getParamObject("map_Kd",
-                                            getParamObject("map_kd", nullptr));
+        (ospray::Texture2D*)getParamObject("map_Kd",
+                                           getParamObject("map_kd", nullptr));
 
     const float d = getParam1f("d", 1.f);
     const float refraction = getParam1f("refraction", 0.f);
@@ -76,10 +76,5 @@ void Material::commit()
     optixMaterial["refraction_index"]->setFloat(refraction);
     optixMaterial["glossiness"]->setFloat(g);
 }
-
-OSP_REGISTER_MATERIAL(Material, ExtendedOBJMaterial);
-OSP_REGISTER_MATERIAL(Material, SciVisMaterial);
-OSP_REGISTER_MATERIAL(Material, OBJMaterial);
-OSP_REGISTER_MATERIAL(Material, default);
 }
 }

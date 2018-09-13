@@ -119,8 +119,5 @@ void TriangleMesh::finalize(Model* optixModel)
     _geometry["normal_buffer"]->setBuffer(_normalsBuffer);
     _geometry["texcoord_buffer"]->setBuffer(_textureCoordsBuffer);
 }
-
-OSP_REGISTER_GEOMETRY(TriangleMesh, triangles);
-OSP_REGISTER_GEOMETRY(TriangleMesh, trianglemesh);
 }
 }

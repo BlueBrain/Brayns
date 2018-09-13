@@ -48,7 +48,5 @@ void Cylinders::finalize(Model* optixModel)
 
     _setBuffer("cylinders", data);
 }
-
-OSP_REGISTER_GEOMETRY(Cylinders, extendedcylinders);
 }
 }

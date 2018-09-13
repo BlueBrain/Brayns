@@ -51,8 +51,9 @@ void intersect_sphere( int primIdx )
 {
     const int idx = primIdx * sphere_size;
     const float ts = spheres[ idx + 4 ];
-    if( ts >= timestamp )
+    if (ts > 0 && timestamp > ts)
         return;
+
 
     const float3 center = { spheres[ idx ], spheres[ idx + 1 ], spheres[ idx + 2 ] };
     const float3 O = ray.origin - center;

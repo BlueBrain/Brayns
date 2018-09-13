@@ -31,7 +31,7 @@ struct Cones : public Geometry
     ~Cones() = default;
 
     std::string toString() const override;
-    void finalize(Model *model) override;
+    void finalize(Model* model) override;
 };
 }
 }

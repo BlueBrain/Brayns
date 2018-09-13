@@ -31,7 +31,7 @@ namespace optix
 {
 struct FrameBuffer : public ospray::FrameBuffer
 {
-    FrameBuffer(const ospray::vec2i &size, ColorBufferFormat colorBufferFormat,
+    FrameBuffer(const ospray::vec2i& size, ColorBufferFormat colorBufferFormat,
                 bool hasDepthBuffer, bool hasAccumBuffer,
                 bool hasVarianceBuffer);
     ~FrameBuffer();
@@ -40,24 +40,20 @@ struct FrameBuffer : public ospray::FrameBuffer
     /*! \detailed Every derived class should override this! */
     std::string toString() const override;
 
-    void setTile(ospray::Tile &tile) override;
-    ospray::int32 accumID(const ospray::vec2i &tile) override;
-    float tileError(const ospray::vec2i &tile) override;
-#ifdef NEW_OSPRAY
-    void beginFrame(const float errorThreshold) override;
-#else
+    void setTile(ospray::Tile& tile) override;
+    ospray::int32 accumID(const ospray::vec2i& tile) override;
+    float tileError(const ospray::vec2i& tile) override;
     void beginFrame() override;
-#endif
     float endFrame(const float errorThreshold) override;
 
-    const void *mapColorBuffer() override;
-    const void *mapDepthBuffer() override;
-    void unmap(const void *mappedMem) override;
+    const void* mapColorBuffer() override;
+    const void* mapDepthBuffer() override;
+    void unmap(const void* mappedMem) override;
     void clear(const ospray::uint32 fbChannelFlags) override;
 
 private:
-    void *colorBuffer{nullptr};
-    float *depthBuffer{nullptr};
+    void* colorBuffer{nullptr};
+    float* depthBuffer{nullptr};
 
     ::optix::Buffer _frameBuffer;
     ::optix::Buffer _accumBuffer;

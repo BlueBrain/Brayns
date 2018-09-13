@@ -71,6 +71,7 @@ set(OSPRAY_MODULE_OPTIX_HEADERS
   geom/Geometry.h
   geom/Spheres.h
   geom/TriangleMesh.h
+  geom/Instance.h
   lights/DirectionalLight.h
   lights/Light.h
   lights/PointLight.h
@@ -90,6 +91,7 @@ set(OSPRAY_MODULE_OPTIX_SOURCES
   geom/Geometry.cpp
   geom/Spheres.cpp
   geom/TriangleMesh.cpp
+  geom/Instance.cpp
   lights/DirectionalLight.cpp
   lights/Light.cpp
   lights/PointLight.cpp

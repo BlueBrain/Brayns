@@ -108,9 +108,11 @@ Context::~Context()
     _phong_ch_textured->destroy();
 
     for (auto& i : _bounds)
-        i->destroy();
+        if (i)
+            i->destroy();
     for (auto& i : _intersects)
-        i->destroy();
+        if (i)
+            i->destroy();
 
     _lightBuffer->destroy();
     _optixContext->destroy();

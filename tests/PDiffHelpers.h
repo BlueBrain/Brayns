@@ -28,6 +28,8 @@
 #include <perceptualdiff/metric.h>
 #include <perceptualdiff/rgba_image.h>
 
+#include <tests/paths.h>
+
 // #define GENERATE_TESTDATA
 // #define WRITE_TEMP_IMAGES
 

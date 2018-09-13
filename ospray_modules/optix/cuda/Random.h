@@ -47,7 +47,7 @@ static __host__ __device__ __inline__ unsigned int tea(unsigned int val0,
 }
 
 // Generate random unsigned int in [0, 2^24)
-static __host__ __device__ __inline__ unsigned int lcg(unsigned int &prev)
+static __host__ __device__ __inline__ unsigned int lcg(unsigned int& prev)
 {
     const unsigned int LCG_A = 1664525u;
     const unsigned int LCG_C = 1013904223u;
@@ -55,14 +55,14 @@ static __host__ __device__ __inline__ unsigned int lcg(unsigned int &prev)
     return prev & 0x00FFFFFF;
 }
 
-static __host__ __device__ __inline__ unsigned int lcg2(unsigned int &prev)
+static __host__ __device__ __inline__ unsigned int lcg2(unsigned int& prev)
 {
     prev = (prev * 8121 + 28411) % 134456;
     return prev;
 }
 
 // Generate random float in [0, 1)
-static __host__ __device__ __inline__ float rnd(unsigned int &prev)
+static __host__ __device__ __inline__ float rnd(unsigned int& prev)
 {
     return ((float)lcg(prev) / (float)0x01000000);
 }
@@ -108,7 +108,7 @@ static __host__ __inline__ optix::uint2 random2u()
     return optix::make_uint2(random1u(), random1u());
 }
 
-static __host__ __inline__ void fillRandBuffer(unsigned int *seeds,
+static __host__ __inline__ void fillRandBuffer(unsigned int* seeds,
                                                unsigned int N)
 {
     for (unsigned int i = 0; i < N; ++i)

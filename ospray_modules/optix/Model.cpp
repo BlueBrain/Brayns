@@ -42,7 +42,7 @@ Model::Model()
 
 Model::~Model()
 {
-    for (auto &i : _geometryInstances)
+    for (auto& i : _geometryInstances)
         i->destroy();
     if (_geometryGroup)
         _geometryGroup->destroy();
@@ -60,13 +60,28 @@ void Model::commit()
         << "Finalizing model, has " << geometry.size()
         << " geometries and 0 volumes";
 
-    for (auto &i : _geometryInstances)
+    for (auto& i : _geometryInstances)
         i->destroy();
     _geometryInstances.clear();
 
     if (_geometryGroup)
         _geometryGroup->destroy();
-    _geometryGroup = nullptr;
+
+    _geometryGroup = _context->createGeometryGroup();
+    _geometryGroup->setAcceleration(
+        _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
+                                     DEFAULT_ACCELERATION_STRUCTURE));
+
+    if (_rootGroup)
+        _rootGroup->destroy();
+
+    _rootGroup = _context->createGroup();
+    _rootGroup->setAcceleration(
+        _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
+                                     DEFAULT_ACCELERATION_STRUCTURE));
+
+    _rootGroup->setChildCount(1);
+    _rootGroup->setChild(0, _geometryGroup);
 
     for (size_t i = 0; i < geometry.size(); i++)
     {
@@ -77,21 +92,15 @@ void Model::commit()
         geometry[i]->finalize(this);
     }
 
-    _geometryGroup = _context->createGeometryGroup();
-    _geometryGroup->setAcceleration(
-        _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
-                                     DEFAULT_ACCELERATION_STRUCTURE));
     _geometryGroup->setChildCount(_geometryInstances.size());
     for (size_t i = 0; i < _geometryInstances.size(); ++i)
         _geometryGroup->setChild(i, _geometryInstances[i]);
 
-    _context["top_object"]->set(_geometryGroup);
-    _context["top_shadower"]->set(_geometryGroup);
-}
-
-Model *Model::createInstance(const char *type)
-{
-    return ospray::createInstanceHelper<Model, OSP_MODEL>(type);
+    if (getParam1i("isRootModel", false))
+    {
+        _context["top_object"]->set(_rootGroup);
+        _context["top_shadower"]->set(_rootGroup);
+    }
 }
 
 void Model::addGeometryInstance(::optix::Geometry geometry_,
@@ -103,14 +112,17 @@ void Model::addGeometryInstance(::optix::Geometry geometry_,
     geomInstance->setMaterial(0, material);
     _geometryInstances.push_back(geomInstance);
 }
-}
+
+void Model::addTransformInstance(::optix::Transform instance)
+{
+    const size_t count = _rootGroup->getChildCount();
+    _rootGroup->setChildCount(count + 1);
+    _rootGroup->setChild(count, instance);
 }
 
-namespace ospray
+::optix::Group Model::getRootGroup() const
 {
-extern "C" ::bbp::optix::Model *ospray_create_model__()
-{
-    return new ::bbp::optix::Model;
+    return _rootGroup;
 }
-::bbp::optix::Model *ospray_create_model__();
+}
 }

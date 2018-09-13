@@ -21,6 +21,7 @@
 #pragma once
 
 #include "geom/Geometry.h"
+#include "geom/Instance.h"
 
 #include <vector>
 
@@ -36,10 +37,12 @@ struct Model : public ospray::ManagedObject
     std::string toString() const override;
     void commit() override;
 
-    static Model *createInstance(const char *type);
-
     void addGeometryInstance(::optix::Geometry geometry,
                              ::optix::Material material);
+
+    void addTransformInstance(::optix::Transform instance);
+
+    ::optix::Group getRootGroup() const;
 
     using GeometryVector = std::vector<ospray::Ref<Geometry>>;
 
@@ -48,6 +51,7 @@ struct Model : public ospray::ManagedObject
 private:
     ::optix::Context _context;
     ::optix::GeometryGroup _geometryGroup;
+    ::optix::Group _rootGroup;
     std::vector<::optix::GeometryInstance> _geometryInstances;
 };
 }
