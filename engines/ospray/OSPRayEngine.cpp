@@ -45,16 +45,20 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     auto& ap = _parametersManager.getApplicationParameters();
     try
     {
-        int argc = 1;
         std::vector<const char*> argv;
 
         // Ospray expects but ignores the application name as the first argument
         argv.push_back("Brayns");
 
+        // Setup log and error output
+        argv.push_back("--osp:logoutput");
+        argv.push_back("cout");
+        argv.push_back("--osp:erroroutput");
+        argv.push_back("cerr");
+
         if (ap.getEngine() == EngineType::optix)
         {
             _type = EngineType::optix;
-            argc += 2;
             argv.push_back("--osp:module:optix");
             argv.push_back("--osp:device:optix");
         }
@@ -62,10 +66,10 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         if (_parametersManager.getApplicationParameters()
                 .getParallelRendering())
         {
-            argc++;
             argv.push_back("--osp:mpi");
         }
 
+        int argc = argv.size();
         ospInit(&argc, argv.data());
     }
     catch (const std::exception& e)
