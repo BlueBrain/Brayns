@@ -44,6 +44,7 @@ rtDeclareVariable(float3,       Ks, , );
 rtDeclareVariable(float3,       Kr, , );
 rtDeclareVariable(float3,       Ko, , );
 rtDeclareVariable(float,        glossiness, , );
+rtDeclareVariable(unsigned int, shading_mode, , );
 rtDeclareVariable(float,        refraction_index, , );
 rtDeclareVariable(float,        phong_exp, , );
 
@@ -67,7 +68,7 @@ RT_PROGRAM void closest_hit_radiance()
     float3 world_geometric_normal = normalize( rtTransformNormal( RT_OBJECT_TO_WORLD, geometric_normal ) );
 
     float3 ffnormal = faceforward( world_shading_normal, -ray.direction, world_geometric_normal );
-    phongShade( Kd, Ka, Ks, Kr, Ko, refraction_index, phong_exp, glossiness, ffnormal, ray.tmax );
+    phongShade( Kd, Ka, Ks, Kr, Ko, refraction_index, phong_exp, glossiness, shading_mode, ffnormal, ray.tmax );
 }
 
 
@@ -79,5 +80,5 @@ RT_PROGRAM void closest_hit_radiance_textured()
     float3 ffnormal = faceforward( world_shading_normal, -ray.direction, world_geometric_normal );
 
     const float3 Kd = make_float3( tex2D( diffuse_map, texcoord.x, texcoord.y ) );
-    phongShade( Kd, Ka, Ks, Kr, Ko, refraction_index, phong_exp, glossiness, ffnormal, ray.tmax );
+    phongShade( Kd, Ka, Ks, Kr, Ko, refraction_index, phong_exp, glossiness, shading_mode, ffnormal, ray.tmax );
 }

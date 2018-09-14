@@ -65,11 +65,9 @@ rtDeclareVariable(float, scene_epsilon, , );
 rtDeclareVariable(rtObject, top_object, , );
 rtDeclareVariable(rtObject, top_shadower, , );
 rtDeclareVariable(float3, eye, , );
-rtDeclareVariable(uint, shading_enabled, , );
 rtDeclareVariable(float, shadows, , );
 rtDeclareVariable(float, soft_shadows, , );
 rtDeclareVariable(float, ambient_occlusion_strength, , );
-rtDeclareVariable(uint, electron_shading_enabled, , );
 rtDeclareVariable(float4, jitter4, , );
 rtDeclareVariable(float3, bg_color, , );
 
@@ -263,7 +261,8 @@ static __device__ void phongShadowed(float3 p_Ko)
 static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
                                   float3 p_Kr, float3 p_Ko,
                                   float p_refractionIndex, float p_phong_exp,
-                                  float p_glossiness, float3 p_normal,
+                                  float p_glossiness,
+                                  unsigned int p_shadindMode, float3 p_normal,
                                   float p_ray_tmax)
 {
     float3 result = make_float3(0.f);
@@ -290,11 +289,11 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
 
     if (fmaxf(p_Ko) < epsilon)
         result += p_Ko * p_Kd;
-    else if (electron_shading_enabled == 1)
+    else if (p_shadindMode == electron)
         result +=
             p_Kd * (1.f - abs(optix::dot(optix::normalize(hit_point - eye),
                                          p_normal)));
-    else if (shading_enabled == 0)
+    else if (p_shadindMode == none)
         result += p_Kd;
     else
     {

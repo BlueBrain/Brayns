@@ -265,8 +265,6 @@ void OSPRayEngine::_createRenderers()
             properties.setProperty({"detectionOnDifferentMaterial",
                                     "Detection on different material", false});
             properties.setProperty(
-                {"electronShadingEnabled", "Electron shading", false});
-            properties.setProperty(
                 {"surfaceShadingEnabled", "Surface shading", true});
         }
         if (renderer == "basic_simulation")
@@ -282,11 +280,6 @@ void OSPRayEngine::_createRenderers()
                 {"aoWeight", "Ambient occlusion weight", 0., {0., 1.}});
             properties.setProperty(
                 {"detectionDistance", "Detection distance", 15.});
-            properties.setProperty(
-                {"shading",
-                 "Shading",
-                 (int)AdvancedSimulationRenderer::Shading::none,
-                 {"None", "Diffuse", "Electron"}});
             properties.setProperty(
                 {"shadows", "Shadow intensity", 0., {0., 1.}});
             properties.setProperty(
