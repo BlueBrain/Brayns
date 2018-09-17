@@ -312,9 +312,9 @@ braynsViewer --camera orthographic
 
 ## Head light
 
-The ```--head-light``` command line argument aligns the light direction to the one
-of the camera. A value of 1 activate the feature, 0 deactivates it.
+The ```--no-head-light``` command line argument deactivates the light in
+direction of the camera.
 
 ```
-braynsViewer --head-light 1
+braynsViewer --no-head-light
 ```

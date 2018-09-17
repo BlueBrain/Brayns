@@ -189,16 +189,17 @@ GeometryParameters::GeometryParameters()
          "automated meshing [int]")
         //
         (PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE.c_str(),
-         po::value<bool>(),
-         "Dampens the thickness rate of change for branches in the "
-         "morphology.")
+         po::bool_switch()->default_value(false),
+         "Dampen the thickness rate of change for branches in the morphology.")
         //
-        (PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES.c_str(), po::value<bool>(),
-         "Use SDF geometries for drawing the morphology.")
+        (PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES.c_str(),
+         po::bool_switch()->default_value(false),
+         "Use SDF geometries for drawing the morphologies.")
         //
-        (PARAM_CIRCUIT_USES_SIMULATION_MODEL.c_str(), po::value<bool>(),
-         "Defines if a different model is used to "
-         "handle the simulation geometry [bool]")
+        (PARAM_CIRCUIT_USES_SIMULATION_MODEL.c_str(),
+         po::bool_switch()->default_value(false),
+         "Defines if a different model is used to handle the simulation "
+         "geometry.")
         //
         (PARAM_CIRCUIT_BOUNDING_BOX.c_str(), po::value<floats>()->multitoken(),
          "Does not load circuit geometry outside of the specified "
@@ -216,9 +217,9 @@ GeometryParameters::GeometryParameters()
          "meshed "
          "morphology [string]")
         //
-        (PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(), po::value<bool>(),
-         "Enable/Disable mesh transformation according "
-         "to circuit information [bool]");
+        (PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(),
+         po::bool_switch()->default_value(false),
+         "Enable mesh transformation according to circuit information.");
 }
 
 void GeometryParameters::parse(const po::variables_map& vm)
@@ -335,15 +336,12 @@ void GeometryParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_METABALLS_SAMPLES_FROM_SOMA))
         _metaballsSamplesFromSoma =
             vm[PARAM_METABALLS_SAMPLES_FROM_SOMA].as<size_t>();
-    if (vm.count(PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE))
-        _morphologyDampenBranchThicknessChangerate =
-            vm[PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE].as<bool>();
-    if (vm.count(PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES))
-        _morphologyUseSDFGeometries =
-            vm[PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES].as<bool>();
-    if (vm.count(PARAM_CIRCUIT_USES_SIMULATION_MODEL))
-        _circuitConfiguration.useSimulationModel =
-            vm[PARAM_CIRCUIT_USES_SIMULATION_MODEL].as<bool>();
+    _morphologyDampenBranchThicknessChangerate =
+        vm[PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE].as<bool>();
+    _morphologyUseSDFGeometries =
+        vm[PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES].as<bool>();
+    _circuitConfiguration.useSimulationModel =
+        vm[PARAM_CIRCUIT_USES_SIMULATION_MODEL].as<bool>();
     if (vm.count(PARAM_CIRCUIT_BOUNDING_BOX))
     {
         const floats values = vm[PARAM_CIRCUIT_BOUNDING_BOX].as<floats>();
@@ -371,9 +369,8 @@ void GeometryParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_CIRCUIT_MESH_FILENAME_PATTERN))
         _circuitConfiguration.meshFilenamePattern =
             vm[PARAM_CIRCUIT_MESH_FILENAME_PATTERN].as<std::string>();
-    if (vm.count(PARAM_CIRCUIT_MESH_TRANSFORMATION))
-        _circuitConfiguration.meshTransformation =
-            vm[PARAM_CIRCUIT_MESH_TRANSFORMATION].as<bool>();
+    _circuitConfiguration.meshTransformation =
+        vm[PARAM_CIRCUIT_MESH_TRANSFORMATION].as<bool>();
 
     markModified();
 }

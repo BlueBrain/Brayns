@@ -63,6 +63,8 @@ protected:
     std::string _name;
 
     po::options_description _parameters;
+
+    static std::string asString(const bool flag) { return flag ? "on" : "off"; }
 };
 }
 #endif // ABSTRACTPARAMETERS_H

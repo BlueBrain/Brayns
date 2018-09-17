@@ -39,8 +39,7 @@ BOOST_AUTO_TEST_CASE(streamlines)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app,    "--accumulation",
-                          "off",  "--window-size",
+    const char* argv[] = {app, "--disable-accumulation", "--window-size",
                           "1600", "900"};
     const int argc = sizeof(argv) / sizeof(char*);
 
