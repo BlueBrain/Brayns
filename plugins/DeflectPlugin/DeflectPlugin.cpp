@@ -249,8 +249,11 @@ private:
                 if (_engine->getCamera().isSideBySideStereo())
                     newSize.x() *= 2;
 
-                _appParams.setWindowSize(
-                    _engine->getSupportedFrameSize(newSize));
+                if (_params.getResizing())
+                {
+                    _appParams.setWindowSize(
+                        _engine->getSupportedFrameSize(newSize));
+                }
                 break;
             }
             case deflect::Event::EVT_CLOSE:
