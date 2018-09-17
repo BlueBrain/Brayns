@@ -26,6 +26,7 @@ const std::string PARAM_STREAM_HOST = "stream-host";
 const std::string PARAM_STREAM_ID = "stream-id";
 const std::string PARAM_STREAM_PORT = "stream-port";
 const std::string PARAM_STREAM_QUALITY = "stream-quality";
+const std::string PARAM_STREAM_RESIZING = "stream-disable-resizing";
 }
 
 namespace brayns
@@ -37,13 +38,14 @@ StreamParameters::StreamParameters()
                               po::bool_switch()->default_value(false),
                               "Disable JPEG compression")(
         PARAM_STREAM_HOST.c_str(), po::value<std::string>(),
-        "Hostname of Deflect server")(PARAM_STREAM_ID.c_str(),
-                                      po::value<std::string>(),
-                                      "Name of stream")(
-        PARAM_STREAM_PORT.c_str(), po::value<unsigned>(),
-        "Port of Deflect server")(PARAM_STREAM_QUALITY.c_str(),
-                                  po::value<unsigned>(),
-                                  "JPEG quality of stream");
+        "Hostname of Deflect server")(
+        PARAM_STREAM_ID.c_str(), po::value<std::string>(),
+        "Name of stream")(PARAM_STREAM_PORT.c_str(), po::value<unsigned>(),
+                          "Port of Deflect server")(
+        PARAM_STREAM_QUALITY.c_str(), po::value<unsigned>(),
+        "JPEG quality of stream")(PARAM_STREAM_RESIZING.c_str(),
+                                  po::bool_switch()->default_value(false),
+                                  "Disable stream resizing");
 }
 
 void StreamParameters::parse(const po::variables_map& vm)
@@ -57,6 +59,7 @@ void StreamParameters::parse(const po::variables_map& vm)
         _port = vm[PARAM_STREAM_PORT].as<unsigned>();
     if (vm.count(PARAM_STREAM_QUALITY))
         _quality = vm[PARAM_STREAM_QUALITY].as<unsigned>();
+    _resizing = !vm[PARAM_STREAM_RESIZING].as<bool>();
     markModified();
 }
 
@@ -69,6 +72,9 @@ void StreamParameters::print()
     BRAYNS_INFO << "Stream ID                         : " << _id << std::endl;
     BRAYNS_INFO << "Stream port                       : " << _port << std::endl;
     BRAYNS_INFO << "Stream quality                    : " << _quality
+                << std::endl;
+    BRAYNS_INFO << "Stream resizing                   : " << asString(_resizing)
+                << std::endl
                 << std::endl;
 }
 }

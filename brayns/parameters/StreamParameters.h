@@ -56,6 +56,9 @@ public:
     /** Stream port; defaults to 1701 if empty */
     unsigned getPort() const { return _port; }
     void setPort(const unsigned port) { _updateValue(_port, port); }
+    /** Stream resizing enabled */
+    bool getResizing() const { return _resizing; }
+    void setResizing(const bool enabled) { _updateValue(_resizing, enabled); }
 private:
     void parse(const po::variables_map& vm);
     std::string _host;
@@ -64,6 +67,7 @@ private:
     unsigned _port{1701};
     bool _compression{true};
     unsigned _quality{80};
+    bool _resizing{true};
 
     SERIALIZATION_FRIEND(StreamParameters)
 };
