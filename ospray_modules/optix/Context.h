@@ -65,6 +65,8 @@ private:
     Context();
 
     void _initialize();
+    void _printSystemInformation() const;
+
     static std::unique_ptr<Context> _context;
 
     ::optix::Context _optixContext;
