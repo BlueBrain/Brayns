@@ -74,8 +74,9 @@ ApplicationParameters::ApplicationParameters()
         "Arguments to plugins can be added by inserting a space followed by "
         "the arguments like: --plugin 'myPluginName arg0 arg1'")(
         PARAM_WINDOW_SIZE.c_str(), po::value<uints>()->multitoken(),
-        "Window size [int int]")(PARAM_BENCHMARKING.c_str(), po::value<bool>(),
-                                 "Enable|Disable benchmarking [bool]")(
+        "Window size [int int]")(PARAM_BENCHMARKING.c_str(),
+                                 po::bool_switch()->default_value(false),
+                                 "Enable benchmarking")(
         PARAM_JPEG_COMPRESSION.c_str(), po::value<size_t>(),
         "JPEG compression rate (100 is full quality) [int]")(
         PARAM_JPEG_SIZE.c_str(), po::value<uints>()->multitoken(),
@@ -83,10 +84,11 @@ ApplicationParameters::ApplicationParameters()
                                po::value<std::string>(),
                                "Folder used by the application to "
                                "store temporary files [string")(
-        PARAM_PARALLEL_RENDERING.c_str(), po::value<bool>(),
-        "Enable|Disable parallel rendering, equivalent to --osp:mpi")(
-        PARAM_SYNCHRONOUS_MODE.c_str(), po::value<bool>(),
-        "Enable|Disable synchronous mode rendering vs data loading [bool]")(
+        PARAM_PARALLEL_RENDERING.c_str(),
+        po::bool_switch()->default_value(false),
+        "Enable parallel rendering, equivalent to --osp:mpi")(
+        PARAM_SYNCHRONOUS_MODE.c_str(), po::bool_switch()->default_value(false),
+        "Enable synchronous mode rendering vs data loading")(
         PARAM_IMAGE_STREAM_FPS.c_str(), po::value<size_t>(),
         "Image stream FPS (60 default), [int]")(
         PARAM_FILTERS.c_str(), po::value<strings>()->multitoken(),
@@ -121,8 +123,7 @@ void ApplicationParameters::parse(const po::variables_map& vm)
             _windowSize.y() = values[1];
         }
     }
-    if (vm.count(PARAM_BENCHMARKING))
-        _benchmarking = vm[PARAM_BENCHMARKING].as<bool>();
+    _benchmarking = vm[PARAM_BENCHMARKING].as<bool>();
     if (vm.count(PARAM_JPEG_COMPRESSION))
         _jpegCompression = vm[PARAM_JPEG_COMPRESSION].as<size_t>();
     if (vm.count(PARAM_FILTERS))
@@ -131,12 +132,10 @@ void ApplicationParameters::parse(const po::variables_map& vm)
         _frameExportFolder = vm[PARAM_FRAME_EXPORT_FOLDER].as<std::string>();
     if (vm.count(PARAM_TMP_FOLDER))
         _tmpFolder = vm[PARAM_TMP_FOLDER].as<std::string>();
-    if (vm.count(PARAM_SYNCHRONOUS_MODE))
-        _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
+    _parallelRendering = vm[PARAM_PARALLEL_RENDERING].as<bool>();
+    _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
     if (vm.count(PARAM_IMAGE_STREAM_FPS))
         _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();
-    if (vm.count(PARAM_PARALLEL_RENDERING))
-        _parallelRendering = vm[PARAM_PARALLEL_RENDERING].as<bool>();
     if (vm.count(PARAM_MAX_RENDER_FPS))
         _maxRenderFPS = vm[PARAM_MAX_RENDER_FPS].as<size_t>();
 
@@ -168,13 +167,13 @@ void ApplicationParameters::print()
     for (const auto& module : _modules)
         BRAYNS_INFO << "- " << module << std::endl;
     BRAYNS_INFO << "Window size                 : " << _windowSize << std::endl;
-    BRAYNS_INFO << "Benchmarking                : "
-                << (_benchmarking ? "on" : "off") << std::endl;
+    BRAYNS_INFO << "Benchmarking                : " << asString(_benchmarking)
+                << std::endl;
     BRAYNS_INFO << "JPEG Compression            : " << _jpegCompression
                 << std::endl;
     BRAYNS_INFO << "Temporary folder            : " << _tmpFolder << std::endl;
-    BRAYNS_INFO << "Synchronous mode            : " << _synchronousMode
-                << std::endl;
+    BRAYNS_INFO << "Synchronous mode            : "
+                << asString(_synchronousMode) << std::endl;
     BRAYNS_INFO << "Image stream FPS            : " << _imageStreamFPS
                 << std::endl;
     BRAYNS_INFO << "Max. render  FPS            : " << _maxRenderFPS

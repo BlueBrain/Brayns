@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "--accumulation", "off", "demo"};
+    const char* argv[] = {app, "--disable-accumulation", "demo"};
     const int argc = sizeof(argv) / sizeof(char*);
     brayns::Brayns brayns(argc, argv);
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
 
     const char* app = testSuite.argv[0];
     const auto path = BRAYNS_TESTDATA_MODEL_MONKEY_PATH;
-    const char* argv[] = {app, path, "--accumulation", "off"};
+    const char* argv[] = {app, path, "--disable-accumulation"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -87,8 +87,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
                           BBP_TEST_BLUECONFIG3,
-                          "--accumulation",
-                          "off",
+                          "--disable-accumulation",
                           "--circuit-targets",
                           "Layer1",
                           "--samples-per-pixel",
@@ -126,8 +125,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
                           "-62",
                           "--animation-frame",
                           "50",
-                          "--synchronous-mode",
-                          "true"};
+                          "--synchronous-mode"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -156,14 +154,11 @@ BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
                           BBP_TEST_BLUECONFIG3,
-                          "--accumulation",
-                          "off",
+                          "--disable-accumulation",
                           "--circuit-targets",
                           "Layer1",
                           "--morphology-dampen-branch-thickness-changerate",
-                          "true",
                           "--morphology-use-sdf-geometries",
-                          "true",
                           "--samples-per-pixel",
                           "16"};
     const int argc = sizeof(argv) / sizeof(char*);
@@ -212,8 +207,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_basic_simulation_renderer)
                           "-10",
                           "--animation-frame",
                           "95",
-                          "--synchronous-mode",
-                          "true"};
+                          "--synchronous-mode"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -243,7 +237,7 @@ BOOST_AUTO_TEST_CASE(render_demo_with_proximity_renderer)
     const char* argv[] = {app,         "--renderer",
                           "proximity", "--samples-per-pixel",
                           "16",        "--synchronous-mode",
-                          "true",      "demo"};
+                          "demo"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -267,7 +261,7 @@ BOOST_AUTO_TEST_CASE(render_protein_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, PDB_FILE, "--accumulation", "off"};
+    const char* argv[] = {app, PDB_FILE, "--disable-accumulation"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -281,7 +275,7 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, PDB_FILE, "--accumulation", "off"};
+    const char* argv[] = {app, PDB_FILE, "--disable-accumulation"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
