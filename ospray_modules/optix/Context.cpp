@@ -192,7 +192,7 @@ void Context::deleteTexture(ospray::Texture2D* tx)
     return _optixTextureSamplers[tx];
 }
 
-void Context::updateLights(ospray::Ref<ospray::Data> lightData)
+void Context::updateLights(ospray::Data* lightData)
 {
     if (_lightBuffer)
         _lightBuffer->destroy();
