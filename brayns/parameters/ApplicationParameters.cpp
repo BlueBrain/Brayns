@@ -104,11 +104,20 @@ void ApplicationParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_ENGINE))
     {
-        _engine = EngineType::ospray;
+        bool matched = false;
         const std::string& engine = vm[PARAM_ENGINE].as<std::string>();
-        for (size_t i = 0; i < sizeof(ENGINES) / sizeof(ENGINES[0]); ++i)
+        for (size_t i = 0; i < ENGINES.size(); ++i)
+        {
             if (engine == ENGINES[i])
+            {
                 _engine = static_cast<EngineType>(i);
+                matched = true;
+                break;
+            }
+        }
+
+        if (!matched)
+            throw std::runtime_error("Invalid engine '" + engine + "'.");
     }
     if (vm.count(PARAM_INPUT_PATHS))
         _inputPaths = vm[PARAM_INPUT_PATHS].as<strings>();
