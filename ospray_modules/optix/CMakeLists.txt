@@ -6,19 +6,21 @@
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
-if(CMAKE_VERSION VERSION_GREATER "3.6" AND CMAKE_VERSION VERSION_LESS "3.10")
-  # https://gitlab.kitware.com/cmake/cmake/commit/037beeddd1d434e22040310bc6b88310496d3814#185864a642a40d10362afc05c79aea97451b1058
-  message(SEND_ERROR "Unsupported CMake version for OptiX plugin")
-endif()
-
 project(ospray_module_optix VERSION 1.0.0)
 set(ospray_module_optix_VERSION_ABI 1)
 
 include(Common)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+# For FindOptix and CUDA patch
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 
 common_find_package(CUDA REQUIRED SYSTEM)
+
+# Patch for cmake 3.7->3.9
+if(CMAKE_VERSION VERSION_GREATER "3.6" AND CMAKE_VERSION VERSION_LESS "3.10")
+  set(CUDA_run_nvcc "${CMAKE_CURRENT_SOURCE_DIR}/CMake/run_nvcc.cmake")
+endif()
+
 common_find_package(OpenMP)
 common_find_package(OptiX REQUIRED SYSTEM)
 common_find_package(ospray REQUIRED SYSTEM)
