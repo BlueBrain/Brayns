@@ -117,14 +117,15 @@ float FrameBuffer::endFrame(const float /*errorThreshold*/)
 const void* FrameBuffer::mapDepthBuffer()
 {
     if (colorBuffer)
-        depthBuffer = (float*)colorBuffer;
+        depthBuffer = colorBuffer;
     return (const void*)depthBuffer;
 }
 
 const void* FrameBuffer::mapColorBuffer()
 {
     rtBufferMap(_frameBuffer->get(), &colorBuffer);
-    depthBuffer = (float*)colorBuffer;
+    depthBuffer = colorBuffer;
+
     if (_accumulation)
         _context["frame_number"]->setUint(_accumulationFrame++);
     else
@@ -134,15 +135,19 @@ const void* FrameBuffer::mapColorBuffer()
 
 void FrameBuffer::unmap(const void* mappedMem)
 {
-    if (!(mappedMem == colorBuffer || mappedMem == depthBuffer))
-    {
+    if (mappedMem != colorBuffer && mappedMem != depthBuffer)
         throw std::runtime_error(
-            "ERROR: unmapping a pointer not created by "
-            "OSPRay!");
+            "ERROR: unmapping a pointer not created by OSPRay!");
+
+    if (mappedMem == colorBuffer)
+    {
+        rtBufferUnmap(_frameBuffer->get());
+        colorBuffer = nullptr;
     }
-    rtBufferUnmap(_frameBuffer->get());
-    colorBuffer = nullptr;
-    depthBuffer = nullptr;
+    else if (mappedMem == depthBuffer)
+    {
+        depthBuffer = nullptr;
+    }
 }
 }
 }

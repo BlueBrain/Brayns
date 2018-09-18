@@ -53,7 +53,7 @@ struct FrameBuffer : public ospray::FrameBuffer
 
 private:
     void* colorBuffer{nullptr};
-    float* depthBuffer{nullptr};
+    void* depthBuffer{nullptr};
 
     ::optix::Buffer _frameBuffer;
     ::optix::Buffer _accumBuffer;
