@@ -14,10 +14,10 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
+#include "utils.ih"
+
 #include "math/sampling.ih"
 #include "ospray/SDK/camera/Camera.ih"
-
-const float EPSILON = 0.0000001f;
 
 struct PerspectiveCamera
 {
@@ -42,27 +42,6 @@ struct PerspectiveCamera
     const uniform vec4f* clipPlanes;
     unsigned int numClipPlanes;
 };
-
-void getClippingValues(uniform PerspectiveCamera* uniform self,
-                       const varying vec3f& worldEyePosition,
-                       const varying vec3f& rayDirection, varying float& near,
-                       varying float& far)
-{
-    for (int i = 0; i < self->numClipPlanes; ++i)
-    {
-        const vec3f planeNormal = {self->clipPlanes[i].x, self->clipPlanes[i].y,
-                                   self->clipPlanes[i].z};
-        float rn = dot(rayDirection, planeNormal);
-        if (rn == 0.f)
-            rn = EPSILON;
-        float d = self->clipPlanes[i].w;
-        float t = -(dot(planeNormal, worldEyePosition) + d) / rn;
-        if (rn > 0.f) // opposite direction plane
-            near = max(near, t);
-        else
-            far = min(far, t);
-    }
-}
 
 void PerspectiveCamera_initRay(uniform Camera* uniform _self,
                                       varying Ray& ray,
@@ -102,14 +81,15 @@ void PerspectiveCamera_initRay(uniform Camera* uniform _self,
         dir = dir - lp;
     }
 
-    // Define clipping min and max
     float nearClip = self->super.nearClip;
     float farClip = infinity;
     const varying vec3f direction = normalize(dir);
-    getClippingValues(self, org, direction, nearClip, farClip);
 
-    // Sets clipped ray
-    setRay(ray, org, direction, nearClip, farClip);
+    clipRay(self->clipPlanes, self->numClipPlanes, org, direction,
+            nearClip, farClip);
+
+    const float time = Camera_shutterTime(_self, sample.time);
+    setRay(ray, org, direction, nearClip, farClip, time);
 }
 
 /*! create a new ispc-side version of a PerspectiveCamera - with given
