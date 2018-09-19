@@ -14,10 +14,10 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#include "ClippedPerspectiveCamera.h"
+#include "PerspectiveCamera.h"
 #include <limits>
 // ispc-side stuff
-#include "ClippedPerspectiveCamera_ispc.h"
+#include "PerspectiveCamera_ispc.h"
 
 #include <ospray/SDK/common/Data.h>
 
@@ -28,12 +28,12 @@
 
 namespace ospray
 {
-ClippedPerspectiveCamera::ClippedPerspectiveCamera()
+PerspectiveCamera::PerspectiveCamera()
 {
-    ispcEquivalent = ispc::ClippedPerspectiveCamera_create(this);
+    ispcEquivalent = ispc::PerspectiveCamera_create(this);
 }
 
-void ClippedPerspectiveCamera::commit()
+void PerspectiveCamera::commit()
 {
     Camera::commit();
 
@@ -101,7 +101,7 @@ void ClippedPerspectiveCamera::commit()
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
-    ispc::ClippedPerspectiveCamera_set(
+    ispc::PerspectiveCamera_set(
         getIE(), (const ispc::vec3f&)org, (const ispc::vec3f&)dir_00,
         (const ispc::vec3f&)dir_du, (const ispc::vec3f&)dir_dv, scaledAperture,
         aspect, stereoMode == OSP_STEREO_SIDE_BY_SIDE,
@@ -109,6 +109,6 @@ void ClippedPerspectiveCamera::commit()
         numClipPlanes);
 }
 
-OSP_REGISTER_CAMERA(ClippedPerspectiveCamera, clippedperspective);
+OSP_REGISTER_CAMERA(PerspectiveCamera, perspective);
 
 } // ::ospray

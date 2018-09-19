@@ -11,7 +11,7 @@
 # directories (names 'intel64' and 'mic', respectively)
 
 set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
-  ispc/camera/ClippedPerspectiveCamera.ispc
+  ispc/camera/PerspectiveCamera.ispc
   ispc/geometry/ExtendedCones.ispc
   ispc/geometry/ExtendedCylinders.ispc
   ispc/geometry/ExtendedSDFGeometries.ispc
@@ -36,7 +36,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   OSPRayScene.cpp
   OSPRayVolume.cpp
   utils.cpp
-  ispc/camera/ClippedPerspectiveCamera.cpp
+  ispc/camera/PerspectiveCamera.cpp
   ispc/geometry/ExtendedCones.cpp
   ispc/geometry/ExtendedCylinders.cpp
   ispc/geometry/ExtendedSDFGeometries.cpp
@@ -61,7 +61,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_HEADERS
   OSPRayRenderer.h
   OSPRayScene.h
   OSPRayVolume.h
-  ispc/camera/ClippedPerspectiveCamera.h
+  ispc/camera/PerspectiveCamera.h
   ispc/geometry/ExtendedCones.h
   ispc/geometry/ExtendedCylinders.h
   ispc/geometry/ExtendedSDFGeometries.h
