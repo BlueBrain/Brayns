@@ -104,19 +104,13 @@ void ApplicationParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_ENGINE))
     {
-        bool matched = false;
         const std::string& engine = vm[PARAM_ENGINE].as<std::string>();
-        for (size_t i = 0; i < ENGINES.size(); ++i)
-        {
-            if (engine == ENGINES[i])
-            {
-                _engine = static_cast<EngineType>(i);
-                matched = true;
-                break;
-            }
-        }
-
-        if (!matched)
+        const size_t pos =
+            std::distance(ENGINES.begin(),
+                          std::find(ENGINES.begin(), ENGINES.end(), engine));
+        if (pos != ENGINES.size())
+            _engine = static_cast<EngineType>(pos);
+        else
             throw std::runtime_error("Invalid engine '" + engine + "'.");
     }
     if (vm.count(PARAM_INPUT_PATHS))
