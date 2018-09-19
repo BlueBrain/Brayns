@@ -383,7 +383,7 @@ void OSPRayEngine::_createCameras()
     for (const auto& camera : rp.getCameras())
     {
         PropertyMap properties;
-        if (camera == "perspective" || camera == "clippedperspective")
+        if (camera == "perspective")
         {
             properties.setProperty(fovy);
             properties.setProperty(aspect);

@@ -38,8 +38,8 @@ const std::array<std::string, 8> RENDERER_NAMES = {
     {"basic", "proximity", "basic_simulation", "advanced_simulation",
      "raycast_Ng", "raycast_Ns", "scivis", "pathtracing"}};
 
-const std::array<std::string, 4> CAMERA_TYPE_NAMES = {
-    {"perspective", "orthographic", "panoramic", "clippedperspective"}};
+const std::array<std::string, 3> CAMERA_TYPE_NAMES = {
+    {"perspective", "orthographic", "panoramic"}};
 }
 
 namespace brayns
@@ -57,7 +57,7 @@ RenderingParameters::RenderingParameters()
                                 po::value<floats>()->multitoken(),
                                 "Background color [float float float]")(
         PARAM_CAMERA.c_str(), po::value<std::string>(),
-        "Camera [perspective|orthographic|panoramic|clippedperspective]")(
+        "Camera [perspective|orthographic|panoramic]")(
         PARAM_HEAD_LIGHT.c_str(), po::bool_switch()->default_value(false),
         "Disable light source attached to camera origin.")(
         PARAM_VARIANCE_THRESHOLD.c_str(), po::value<float>(),

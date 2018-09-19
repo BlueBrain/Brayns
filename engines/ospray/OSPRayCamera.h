@@ -45,7 +45,7 @@ public:
 
     /**
        Set the clipping planes to use in this camera.
-       Currently, this only works for the clippedperspective camera.
+       Only implemented in the perspective and orthographic cameras.
     */
     void setClipPlanes(const ClipPlanes& clipPlanes);
 

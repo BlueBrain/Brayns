@@ -21,17 +21,17 @@
 namespace ospray
 {
 //! Implements a clipped perspective camera
-struct OSPRAY_SDK_INTERFACE ClippedPerspectiveCamera : public Camera
+struct OSPRAY_SDK_INTERFACE PerspectiveCamera : public Camera
 {
     /*! \brief constructor \internal also creates the ispc-side data structure
      */
-    ClippedPerspectiveCamera();
+    PerspectiveCamera();
 
     //! \brief common function to help printf-debugging
     /*! Every derived class should override this! */
     virtual std::string toString() const
     {
-        return "ospray::ClippedPerspectiveCamera";
+        return "ospray::PerspectiveCamera";
     }
     virtual void commit();
 

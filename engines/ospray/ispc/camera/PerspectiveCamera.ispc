@@ -19,7 +19,7 @@
 
 const float EPSILON = 0.0000001f;
 
-struct ClippedPerspectiveCamera
+struct PerspectiveCamera
 {
     Camera super;
 
@@ -43,7 +43,7 @@ struct ClippedPerspectiveCamera
     unsigned int numClipPlanes;
 };
 
-void getClippingValues(uniform ClippedPerspectiveCamera* uniform self,
+void getClippingValues(uniform PerspectiveCamera* uniform self,
                        const varying vec3f& worldEyePosition,
                        const varying vec3f& rayDirection, varying float& near,
                        varying float& far)
@@ -64,12 +64,12 @@ void getClippingValues(uniform ClippedPerspectiveCamera* uniform self,
     }
 }
 
-void ClippedPerspectiveCamera_initRay(uniform Camera* uniform _self,
+void PerspectiveCamera_initRay(uniform Camera* uniform _self,
                                       varying Ray& ray,
                                       const varying CameraSample& sample)
 {
-    uniform ClippedPerspectiveCamera* uniform self =
-        (uniform ClippedPerspectiveCamera * uniform)_self;
+    uniform PerspectiveCamera* uniform self =
+        (uniform PerspectiveCamera * uniform)_self;
 
     vec2f screen = sample.screen;
     vec3f org = self->org;
@@ -112,30 +112,30 @@ void ClippedPerspectiveCamera_initRay(uniform Camera* uniform _self,
     setRay(ray, org, direction, nearClip, farClip);
 }
 
-/*! create a new ispc-side version of a ClippedPerspectiveCamera - with given
+/*! create a new ispc-side version of a PerspectiveCamera - with given
     pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference
     parameters */
-export void* uniform ClippedPerspectiveCamera_create(void* uniform cppE)
+export void* uniform PerspectiveCamera_create(void* uniform cppE)
 {
-    uniform ClippedPerspectiveCamera* uniform self =
-        uniform new uniform ClippedPerspectiveCamera;
+    uniform PerspectiveCamera* uniform self =
+        uniform new uniform PerspectiveCamera;
     self->super.cppEquivalent = cppE;
-    self->super.initRay = ClippedPerspectiveCamera_initRay;
+    self->super.initRay = PerspectiveCamera_initRay;
     self->super.doesDOF = false;
     self->numClipPlanes = 0;
     return self;
 }
 
-export void ClippedPerspectiveCamera_set(
+export void PerspectiveCamera_set(
     void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir_00,
     const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
     const uniform float scaledAperture, const uniform float aspect,
     const uniform bool side_by_side, const uniform vec3f& ipd_offset,
     const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes)
 {
-    uniform ClippedPerspectiveCamera* uniform self =
-        (uniform ClippedPerspectiveCamera * uniform)_self;
+    uniform PerspectiveCamera* uniform self =
+       (uniform PerspectiveCamera * uniform)_self;
     self->org = org;
     self->dir_00 = dir_00;
     self->dir_du = dir_du;
