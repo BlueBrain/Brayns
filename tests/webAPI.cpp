@@ -20,12 +20,20 @@
 
 #define BOOST_TEST_MODULE braynsWebAPI
 
-#include <jsonSerialization.h>
+#include <jsonPropertyMap.h>
 
 #include "ClientServer.h"
 #include <brayns/common/renderer/Renderer.h>
 
 BOOST_GLOBAL_FIXTURE(ClientServer);
+
+BOOST_AUTO_TEST_CASE(change_fov)
+{
+    brayns::PropertyMap cameraParams;
+    cameraParams.setProperty({"fovy", "Field of view", 10., {.1, 360.}});
+    BOOST_CHECK((makeRequest<brayns::PropertyMap, bool>("set-camera-params",
+                                                        cameraParams)));
+}
 
 BOOST_AUTO_TEST_CASE(reset_camera)
 {

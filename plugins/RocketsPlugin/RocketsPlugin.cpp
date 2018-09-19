@@ -1075,13 +1075,17 @@ public:
 
                 if (!document.HasMember("id") ||
                     !document.HasMember("properties"))
+                {
                     return Response::invalidParams();
+                }
 
                 const auto modelID = document["id"].GetInt();
                 auto model = _engine->getScene().getModel(modelID);
                 if (!model)
+                {
                     return Response{
                         Response::Error{"Model not found", MODEL_NOT_FOUND}};
+                }
 
                 Document propertyDoc;
                 propertyDoc.SetObject() = document["properties"].GetObject();
@@ -1214,7 +1218,7 @@ public:
             PropertyMap props = object.getPropertyMap();
             if (::from_json(props, request.message))
             {
-                object.updateProperties(props);
+                object.updateProperties(props, false);
                 _engine->triggerRender();
 
                 this->_rebroadcast(notifyEndpoint, props, request.clientID);

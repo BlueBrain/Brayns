@@ -45,14 +45,15 @@ public:
     const std::string& getCurrentType() const { return _currentType; }
     /** Update the value of the given property for the current type. */
     template <typename T>
-    inline void updateProperty(const std::string& name, const T& value)
+    inline void updateProperty(const std::string& name, const T& value,
+                               const bool triggerCallback = true)
     {
         const auto oldValue =
             _properties.at(_currentType).getProperty<T>(name, value);
         if (!_isEqual(oldValue, value))
         {
             _properties.at(_currentType).updateProperty(name, value);
-            markModified();
+            markModified(triggerCallback);
         }
     }
 
@@ -76,27 +77,30 @@ public:
     }
 
     /** Assign a new set of properties to the current type. */
-    void setProperties(const PropertyMap& properties)
+    void setProperties(const PropertyMap& properties,
+                       const bool triggerCallback = true)
     {
         _properties[_currentType] = properties;
-        markModified();
+        markModified(triggerCallback);
     }
 
     /** Assign a new set of properties to the given type. */
-    void setProperties(const std::string& type, const PropertyMap& properties)
+    void setProperties(const std::string& type, const PropertyMap& properties,
+                       const bool triggerCallback = true)
     {
         _properties[type] = properties;
-        markModified();
+        markModified(triggerCallback);
     }
 
     /**
      * Update or add all the properties from the given map to the current type.
      */
-    void updateProperties(const PropertyMap& properties)
+    void updateProperties(const PropertyMap& properties,
+                          const bool triggerCallback = true)
     {
         for (auto prop : properties.getProperties())
             _properties.at(_currentType).setProperty(*prop);
-        markModified();
+        markModified(triggerCallback);
     }
 
     /** @return true if the current type has any properties. */
