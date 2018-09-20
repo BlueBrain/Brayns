@@ -55,7 +55,10 @@ void Timeout::clear()
     _cleared = true;
     if (_timeout.valid())
     {
-        _condition.notify_one();
+        {
+            std::unique_lock<std::mutex> lock(_mutex);
+            _condition.notify_one();
+        }
         _timeout.get();
     }
 }
