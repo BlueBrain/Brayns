@@ -26,32 +26,69 @@
 
 #include "../plugins/RocketsPlugin/Throttle.h"
 
+struct TestTimer
+{
+    void start() { timer.start(); }
+    void onCalled()
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+        timer.stop();
+        called = true;
+        condition.notify_one();
+    }
+
+    void wait()
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+        while (!called)
+            condition.wait(lock);
+    }
+
+    void wait_for(const int64_t waitTime)
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+        condition.wait_for(lock, std::chrono::milliseconds(waitTime));
+    }
+
+    auto milliseconds() const { return timer.milliseconds(); }
+    auto wasCalled() const { return called; }
+private:
+    bool called = false;
+    std::mutex mutex;
+    std::condition_variable condition;
+    brayns::Timer timer;
+};
+
 BOOST_AUTO_TEST_CASE(timeout_not_cleared)
 {
     brayns::Timeout timeout;
-    std::atomic_bool called{false};
-    timeout.set([&called] { called = true; }, 1);
-    std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    BOOST_CHECK(called);
+
+    const int64_t waitTime = 5;
+    TestTimer timer;
+    timer.start();
+    timeout.set([&] { timer.onCalled(); }, waitTime);
+    timer.wait();
+
+    BOOST_CHECK_GE(timer.milliseconds(), waitTime);
+    BOOST_CHECK(timer.wasCalled());
 }
 
 BOOST_AUTO_TEST_CASE(timeout_with_clear)
 {
-    brayns::Timer timer;
-    timer.start();
-
     brayns::Timeout timeout;
 
-    std::atomic_bool called{false};
-    timeout.set([&called] { called = true; }, 500);
+    const int64_t waitTime = 10;
+    TestTimer timer;
+    timer.start();
+    timeout.set([&] { timer.onCalled(); }, waitTime);
     timeout.clear();
-    BOOST_CHECK(!called);
+    timer.wait_for(waitTime);
 
-    timer.stop();
-    BOOST_CHECK_LE(timer.milliseconds(), 500);
+    BOOST_CHECK_LT(timer.milliseconds(), waitTime);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    BOOST_CHECK(!called);
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(waitTime - timer.milliseconds() + 1));
+    BOOST_CHECK(!timer.wasCalled());
 }
 
 BOOST_AUTO_TEST_CASE(timeout_set_while_not_cleared)
@@ -79,16 +116,23 @@ BOOST_AUTO_TEST_CASE(throttle_spam_limit)
 {
     brayns::Throttle throttle;
     std::atomic_size_t numCalls{0};
+    std::atomic_bool done{false};
 
+    const int64_t waitTime = 10;
     brayns::Timer timer;
     timer.start();
-    while (true)
+    while (!done)
     {
-        throttle([&] { ++numCalls; }, 10);
-        if (timer.elapsed() >= 0.1)
-            break;
+        throttle(
+            [&] {
+                ++numCalls;
+                if (timer.elapsed() >= 0.1)
+                    done = true;
+            },
+            waitTime);
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+    // throttle time of 10ms within a 100ms time window should yield 10 calls
     BOOST_CHECK_MESSAGE(numCalls >= 10 && numCalls <= 12,
                         std::to_string(numCalls));
 }
