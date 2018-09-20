@@ -47,7 +47,8 @@ struct TestTimer
     void wait_for(const int64_t waitTime)
     {
         std::unique_lock<std::mutex> lock(mutex);
-        condition.wait_for(lock, std::chrono::milliseconds(waitTime));
+        condition.wait_for(lock, std::chrono::milliseconds(waitTime),
+                           [&] { return !called; });
     }
 
     auto milliseconds() const { return timer.milliseconds(); }
@@ -84,10 +85,6 @@ BOOST_AUTO_TEST_CASE(timeout_with_clear)
     timeout.clear();
     timer.wait_for(waitTime);
 
-    BOOST_CHECK_LT(timer.milliseconds(), waitTime);
-
-    std::this_thread::sleep_for(
-        std::chrono::milliseconds(waitTime - timer.milliseconds() + 1));
     BOOST_CHECK(!timer.wasCalled());
 }
 
@@ -105,17 +102,17 @@ BOOST_AUTO_TEST_CASE(timeout_set_while_not_cleared)
 BOOST_AUTO_TEST_CASE(timeout_clear_while_already_done)
 {
     brayns::Timeout timeout;
-    std::atomic_bool called{false};
-    timeout.set([&called] { called = true; }, 1);
-    std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    BOOST_CHECK(called);
+    TestTimer timer;
+    timeout.set([&] { timer.onCalled(); }, 1);
+    timer.wait();
+    BOOST_CHECK(timer.wasCalled());
     BOOST_CHECK_NO_THROW(timeout.clear());
 }
 
 BOOST_AUTO_TEST_CASE(throttle_spam_limit)
 {
     brayns::Throttle throttle;
-    std::atomic_size_t numCalls{0};
+    size_t numCalls{0};
     std::atomic_bool done{false};
 
     const int64_t waitTime = 10;
@@ -140,18 +137,28 @@ BOOST_AUTO_TEST_CASE(throttle_spam_limit)
 BOOST_AUTO_TEST_CASE(throttle_spam_check_delayed_call)
 {
     brayns::Throttle throttle;
-    std::atomic_size_t numCalls{0};
+    size_t numCalls{0};
+    std::atomic_bool done{false};
+    TestTimer timer;
 
-    while (numCalls < 2)
-        throttle([&] { ++numCalls; }, 5);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    while (!done)
+        throttle(
+            [&] {
+                if (++numCalls > 2)
+                {
+                    done = true;
+                    timer.onCalled();
+                }
+            },
+            5);
+    timer.wait();
     BOOST_CHECK_EQUAL(numCalls, 3);
 }
 
 BOOST_AUTO_TEST_CASE(throttle_one)
 {
     brayns::Throttle throttle;
-    std::atomic_size_t numCalls{0};
+    size_t numCalls{0};
 
     throttle([&] { ++numCalls; }, 1);
     BOOST_CHECK_EQUAL(numCalls, 1);
