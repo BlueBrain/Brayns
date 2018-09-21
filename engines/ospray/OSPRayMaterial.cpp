@@ -69,7 +69,7 @@ void OSPRayMaterial::commit()
     ospSet1f(_ospMaterial, "a", _emission);
     ospSet1f(_ospMaterial, "glossiness", _glossiness);
     ospSet1i(_ospMaterial, "cast_simulation_data", _castSimulationData);
-    ospSet1i(_ospMaterial, "shading_mode", static_cast<uint16_t>(_shadingMode));
+    ospSet1i(_ospMaterial, "shading_mode", static_cast<uint8_t>(_shadingMode));
 
     // Textures
     for (const auto& textureType : textureTypeMaterialAttribute)

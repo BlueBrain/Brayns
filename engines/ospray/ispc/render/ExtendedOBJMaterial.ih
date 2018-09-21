@@ -31,9 +31,9 @@
 // Caution: This has to match the Brayns::MaterialShadingMode
 enum MaterialShadingMode
 {
-    none,
-    diffuse,
-    electron
+    none = 0,
+    diffuse = 1,
+    electron = 2
 };
 
 struct ExtendedOBJMaterial
