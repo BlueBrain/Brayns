@@ -56,9 +56,8 @@ public:
 
     /**
      * Calls postRender() on all registered plugins from Brayns::postRender().
-     * @param frameBuffer Current frame buffer
      */
-    void postRender(FrameBuffer& frameBuffer);
+    void postRender();
 
 private:
     ExtensionPlugins _plugins;

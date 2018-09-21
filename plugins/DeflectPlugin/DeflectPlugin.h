@@ -36,7 +36,7 @@ public:
     BRAYNS_API void preRender() final;
 
     /** Send rendered frame. */
-    BRAYNS_API void postRender(FrameBuffer& frameBuffer) final;
+    BRAYNS_API void postRender() final;
 
 private:
     class Impl;

@@ -408,7 +408,7 @@ void DeflectPlugin::preRender()
     _impl->preRender();
 }
 
-void DeflectPlugin::postRender(FrameBuffer&)
+void DeflectPlugin::postRender()
 {
     _impl->postRender();
 }

@@ -54,9 +54,9 @@ void ExtensionPluginFactory::preRender()
         plugin->preRender();
 }
 
-void ExtensionPluginFactory::postRender(FrameBuffer& frameBuffer)
+void ExtensionPluginFactory::postRender()
 {
     for (ExtensionPluginPtr plugin : _plugins)
-        plugin->postRender(frameBuffer);
+        plugin->postRender();
 }
 } // namespace brayns

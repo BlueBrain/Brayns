@@ -51,7 +51,7 @@ public:
      * Enqueue modified and registered objects for broadcast that have changed
      * after the rendering is finished (framebuffer).
      */
-    BRAYNS_API void postRender(FrameBuffer& frameBuffer) final;
+    BRAYNS_API void postRender() final;
 
 private:
     class Impl;
