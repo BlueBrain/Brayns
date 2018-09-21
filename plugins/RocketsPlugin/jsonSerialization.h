@@ -345,7 +345,7 @@ inline void init(brayns::Scene* s, ObjectHandler* h)
 {
     h->add_property("clip_planes", &s->_clipPlanes, Flags::Optional);
     h->add_property("bounds", &s->_bounds, Flags::IgnoreRead | Flags::Optional);
-    h->add_property("models", &s->getModelDescriptors(),
+    h->add_property("models", &s->_modelDescriptors,
                     Flags::Optional | Flags::IgnoreRead);
     h->set_flags(Flags::DisallowUnknownKey);
 }
@@ -521,7 +521,7 @@ inline std::string to_json(const brayns::Version& obj)
 template <>
 inline std::string to_json(const brayns::Scene& scene)
 {
-    std::shared_lock<std::shared_timed_mutex> lock(scene.modelMutex());
+    auto lock = scene.acquireReadAccess();
     return staticjson::to_json_string(scene);
 }
 

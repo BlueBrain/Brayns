@@ -83,7 +83,7 @@ Scene& Scene::operator=(const Scene& rhs)
 
 size_t Scene::getSizeInBytes() const
 {
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    auto lock = acquireReadAccess();
     size_t sizeInBytes = 0;
     for (auto modelDescriptor : _modelDescriptors)
         sizeInBytes += modelDescriptor->getModel().getSizeInBytes();
@@ -92,7 +92,7 @@ size_t Scene::getSizeInBytes() const
 
 size_t Scene::getNumModels() const
 {
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    auto lock = acquireReadAccess();
     return _modelDescriptors.size();
 }
 
@@ -163,7 +163,7 @@ void Scene::removeModel(const size_t id)
 
 ModelDescriptorPtr Scene::getModel(const size_t id) const
 {
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    auto lock = acquireReadAccess();
     auto i = std::find_if(_modelDescriptors.begin(), _modelDescriptors.end(),
                           [id](auto desc) { return id == desc->getModelID(); });
     return i == _modelDescriptors.end() ? ModelDescriptorPtr{} : *i;
@@ -206,7 +206,7 @@ CADiffusionSimulationHandlerPtr Scene::getCADiffusionSimulationHandler() const
 
 bool Scene::empty() const
 {
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    auto lock = acquireReadAccess();
     for (auto modelDescriptor : _modelDescriptors)
         if (!modelDescriptor->getModel().empty())
             return false;
@@ -310,7 +310,7 @@ void Scene::saveToCacheFile()
     BRAYNS_INFO << "Version: " << version << std::endl;
 
     // Save geometry
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    auto lock = acquireReadAccess();
     size_t nbElements = _modelDescriptors.size();
     file.write((char*)&nbElements, sizeof(size_t));
     for (auto modelDescriptor : _modelDescriptors)
@@ -777,7 +777,7 @@ void Scene::buildDefault()
 void Scene::setMaterialsColorMap(MaterialsColorMap colorMap)
 {
     {
-        std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+        auto lock = acquireReadAccess();
         for (auto modelDescriptors : _modelDescriptors)
             modelDescriptors->getModel().setMaterialsColorMap(colorMap);
     }

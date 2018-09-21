@@ -39,10 +39,7 @@ BOOST_GLOBAL_FIXTURE(ClientServer);
 
 BOOST_AUTO_TEST_CASE(set_properties)
 {
-    const auto& models = getScene().getModelDescriptors();
-    BOOST_REQUIRE_EQUAL(models.size(), 1);
-
-    auto model = models[0];
+    auto model = getScene().getModel(0);
 
     brayns::PropertyMap props;
     props.setProperty({"bla", "bla property", 0});
@@ -62,10 +59,7 @@ BOOST_AUTO_TEST_CASE(set_properties)
 
 BOOST_AUTO_TEST_CASE(model_properties_schema)
 {
-    const auto& models = getScene().getModelDescriptors();
-    BOOST_REQUIRE_EQUAL(models.size(), 1);
-
-    auto model = models[0];
+    auto model = getScene().getModel(0);
 
     auto result =
         makeRequestJSONReturn<brayns::ModelID>(MODEL_PROPERTIES_SCHEMA,
@@ -79,15 +73,14 @@ BOOST_AUTO_TEST_CASE(model_properties_schema)
 
 BOOST_AUTO_TEST_CASE(update_model)
 {
-    const auto& models = getScene().getModelDescriptors();
-    BOOST_REQUIRE_EQUAL(models.size(), 1);
+    auto model = getScene().getModel(0);
 
-    const uint32_t id = models[0]->getModelID();
+    const uint32_t id = model->getModelID();
 
-    models[0]->setBoundingBox(true); // different from default
+    model->setBoundingBox(true); // different from default
 
-    BOOST_CHECK(models[0]->getVisible());
-    BOOST_CHECK(models[0]->getBoundingBox());
+    BOOST_CHECK(model->getVisible());
+    BOOST_CHECK(model->getBoundingBox());
 
     // create partial model description to only update visible state
     using namespace rapidjson;
@@ -100,16 +93,14 @@ BOOST_AUTO_TEST_CASE(update_model)
 
     BOOST_CHECK((makeRequest<bool>(UPDATE_MODEL, buffer.GetString())));
 
-    BOOST_CHECK(!models[0]->getVisible());
-    BOOST_CHECK(models[0]->getBoundingBox()); // shall remain untouched
+    BOOST_CHECK(!model->getVisible());
+    BOOST_CHECK(model->getBoundingBox()); // shall remain untouched
 }
 
 BOOST_AUTO_TEST_CASE(add_instance)
 {
-    const auto& models = getScene().getModelDescriptors();
-    BOOST_REQUIRE_EQUAL(models.size(), 1);
+    auto model = getScene().getModel(0);
 
-    auto model = models[0];
     brayns::Transformation trafo;
     trafo.setTranslation({10, 200, -400});
     model->addInstance({true, false, trafo});
@@ -133,10 +124,7 @@ BOOST_AUTO_TEST_CASE(add_instance)
 
 BOOST_AUTO_TEST_CASE(update_instance)
 {
-    const auto& models = getScene().getModelDescriptors();
-    BOOST_REQUIRE_EQUAL(models.size(), 1);
-
-    auto model = models[0];
+    auto model = getScene().getModel(0);
     BOOST_REQUIRE_EQUAL(model->getInstances().size(), 2);
     auto instance = model->getInstances()[1];
 
@@ -159,10 +147,7 @@ BOOST_AUTO_TEST_CASE(update_instance)
 
 BOOST_AUTO_TEST_CASE(remove_instance)
 {
-    const auto& models = getScene().getModelDescriptors();
-    BOOST_REQUIRE_EQUAL(models.size(), 1);
-
-    auto model = models[0];
+    auto model = getScene().getModel(0);
     BOOST_REQUIRE_EQUAL(model->getInstances().size(), 2);
 
     model->removeInstance(model->getInstances()[1].getInstanceID());
@@ -173,13 +158,10 @@ BOOST_AUTO_TEST_CASE(remove_instance)
 
 BOOST_AUTO_TEST_CASE(remove_model)
 {
-    const auto& models = getScene().getModelDescriptors();
-    BOOST_REQUIRE_EQUAL(models.size(), 1);
-
-    const auto desc = models[0];
+    const auto desc = getScene().getModel(0);
 
     BOOST_CHECK(
         (makeRequest<size_ts, bool>(REMOVE_MODEL, {desc->getModelID()})));
 
-    BOOST_CHECK_EQUAL(getScene().getModelDescriptors().size(), 0);
+    BOOST_CHECK_EQUAL(getScene().getNumModels(), 0);
 }
