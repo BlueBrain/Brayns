@@ -5,24 +5,35 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} brayns braynsIO)
+                   ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+                   brayns braynsIO)
+
+configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
+
+list(APPEND EXCLUDE_FROM_TESTS myPlugin.cpp)
 
 if(TARGET pdiff)
   list(APPEND TEST_LIBRARIES pdiff ${FREEIMAGE_LIBRARIES})
 else()
-  list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp snapshot.cpp streamlines.cpp)
+  list(APPEND EXCLUDE_FROM_TESTS
+    braynsTestData.cpp
+    clipPlaneRendering.cpp
+    snapshot.cpp
+    streamlines.cpp
+  )
 endif()
 
-configure_file(paths.h.in ${PROJECT_BINARY_DIR}/tests/paths.h)
 if(TARGET BBPTestData)
   list(APPEND TEST_LIBRARIES BBPTestData)
 else()
   list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp)
 endif()
+
 if(NOT BRAYNS_OSPRAY_ENABLED)
   list(APPEND EXCLUDE_FROM_TESTS
     addModel.cpp
     addModelFromBlob.cpp
+    clipPlaneRendering.cpp
     brayns.cpp
     braynsTestData.cpp
     model.cpp
@@ -32,9 +43,9 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     streamlines.cpp
     testImages.cpp
     webAPI.cpp
-)
+  )
 endif()
-list(APPEND EXCLUDE_FROM_TESTS myPlugin.cpp)
+
 if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
   include(ispc)
@@ -59,20 +70,20 @@ else()
   list(APPEND EXCLUDE_FROM_TESTS
     addModel.cpp
     addModelFromBlob.cpp
+    clipPlanes.cpp
     model.cpp
     plugin.cpp
     renderer.cpp
     snapshot.cpp
     throttle.cpp
     webAPI.cpp
-)
+  )
 endif()
 
 option(BRAYNS_OPTIX_TESTS_ENABLED "Activate OptiX tests" ON)
 if(NOT BRAYNS_OPTIX_ENABLED OR NOT BRAYNS_OPTIX_TESTS_ENABLED)
     list(APPEND EXCLUDE_FROM_TESTS demoOptiX.cpp)
 endif()
-
 
 include_directories(
   ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin

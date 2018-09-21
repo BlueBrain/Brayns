@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(snapshot)
     brayns::SnapshotParams params;
     params.format = "png";
     params.size = {50, 50};
-    params.quality = 75;
+    params.quality = 90;
 
     auto image =
         makeRequest<brayns::SnapshotParams,

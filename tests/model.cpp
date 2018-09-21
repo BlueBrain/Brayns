@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(set_properties)
 
     BOOST_CHECK_EQUAL(model->getProperties().getProperty<int32_t>("bla"), 42);
 
-    auto result = makeRequestUpdate<brayns::ModelID, brayns::PropertyMap>(
+    auto result = makeRequestUpdate<brayns::ObjectID, brayns::PropertyMap>(
         GET_PROPERTIES, {model->getModelID()}, props);
     BOOST_REQUIRE(result.hasProperty("bla"));
     BOOST_CHECK_EQUAL(result.getProperty<int32_t>("bla"), 42);
@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(model_properties_schema)
     auto model = getScene().getModel(0);
 
     auto result =
-        makeRequestJSONReturn<brayns::ModelID>(MODEL_PROPERTIES_SCHEMA,
-                                               {model->getModelID()});
+        makeRequestJSONReturn<brayns::ObjectID>(MODEL_PROPERTIES_SCHEMA,
+                                                {model->getModelID()});
 
     using namespace rapidjson;
     Document json(kObjectType);

@@ -6,7 +6,7 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(Brayns VERSION 0.7.1)
+project(Brayns VERSION 0.8.0)
 set(Brayns_VERSION_ABI 1)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
@@ -64,7 +64,7 @@ list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/async++/include/async++/*'
 # HTTP messaging
 common_find_package(LibJpegTurbo)
 common_find_package(Rockets)
-if(TARGET Rockets)
+if(ROCKETS_FOUND AND ROCKETS_USE_LIBWEBSOCKETS)
   option(BRAYNS_NETWORKING_ENABLED "Activate networking interfaces" ON)
   if(BRAYNS_NETWORKING_ENABLED)
     list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_NETWORKING)

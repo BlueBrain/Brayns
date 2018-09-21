@@ -27,6 +27,7 @@
 #include <brayns/common/material/Material.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
+#include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
@@ -60,14 +61,14 @@ struct SchemaParam
     std::string endpoint;
 };
 
-struct ModelID
+struct ObjectID
 {
-    size_t modelID;
+    size_t id;
 };
 
 struct ModelProperties
 {
-    size_t modelID;
+    size_t id;
     PropertyMap properties;
 };
 }
@@ -140,17 +141,20 @@ inline void init(brayns::PropertyMap* /*g*/, ObjectHandler* h)
     // from jsonPropertyMap.h directly.
     h->set_flags(Flags::DisallowUnknownKey);
 }
+
+inline void init(brayns::ObjectID* s, ObjectHandler* h)
+{
+    h->add_property("id", &s->id);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 inline void init(brayns::ModelProperties* s, ObjectHandler* h)
 {
-    h->add_property("id", &s->modelID);
+    h->add_property("id", &s->id);
     h->add_property("properties", &s->properties);
     h->set_flags(Flags::DisallowUnknownKey);
 }
-inline void init(brayns::ModelID* s, ObjectHandler* h)
-{
-    h->add_property("id", &s->modelID);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
+
 inline void init(brayns::GetInstances* g, ObjectHandler* h)
 {
     h->add_property("id", &g->modelID);
@@ -158,16 +162,19 @@ inline void init(brayns::GetInstances* g, ObjectHandler* h)
                     Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
+
 inline void init(brayns::SchemaParam* s, ObjectHandler* h)
 {
     h->add_property("endpoint", &s->endpoint);
     h->set_flags(Flags::DisallowUnknownKey);
 }
+
 inline void init(brayns::Chunk* c, ObjectHandler* h)
 {
     h->add_property("id", &c->id, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
+
 inline void init(brayns::BinaryParam* s, ObjectHandler* h)
 {
     h->add_property("bounding_box", &s->_boundingBox, Flags::Optional);
@@ -341,9 +348,15 @@ inline void init(brayns::ModelDescriptor* g, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::ClipPlane* g, ObjectHandler* h)
+{
+    h->add_property("id", &g->_id);
+    h->add_property("plane", &g->_plane);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 inline void init(brayns::Scene* s, ObjectHandler* h)
 {
-    h->add_property("clip_planes", &s->_clipPlanes, Flags::Optional);
     h->add_property("bounds", &s->_bounds, Flags::IgnoreRead | Flags::Optional);
     h->add_property("models", &s->_modelDescriptors,
                     Flags::Optional | Flags::IgnoreRead);
