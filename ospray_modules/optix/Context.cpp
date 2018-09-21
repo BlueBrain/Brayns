@@ -32,12 +32,15 @@
 #include "CommonStructs.h"
 #include "lights/Light.h"
 
-#define RT_CHECK_ERROR(func)                             \
-    do                                                   \
-    {                                                    \
-        RTresult code = func;                            \
-        if (code != RT_SUCCESS)                          \
-            throw std::runtime_error("OptiX exception"); \
+// For rtDevice*() function error checking. No OptiX context present at that
+// time.
+#define RT_CHECK_ERROR_NO_CONTEXT(func)                            \
+    do                                                             \
+    {                                                              \
+        RTresult code = func;                                      \
+        if (code != RT_SUCCESS)                                    \
+            throw std::runtime_error("Optix error in function '" + \
+                                     std::string(#func) + "'");    \
     } while (0)
 
 namespace bbp
@@ -59,46 +62,8 @@ std::unique_ptr<Context> Context::_context;
 
 Context::Context()
 {
-    _optixContext = ::optix::Context::create();
+    _printSystemInformation();
     _initialize();
-
-    _phong_ch =
-        _optixContext->createProgramFromPTXString(CUDA_PHONG,
-                                                  "closest_hit_radiance");
-
-    _phong_ch_textured = _optixContext->createProgramFromPTXString(
-        CUDA_PHONG, "closest_hit_radiance_textured");
-
-    _phong_ah =
-        _optixContext->createProgramFromPTXString(CUDA_PHONG, "any_hit_shadow");
-
-    _bounds[Geometry::Type::Cones] =
-        _optixContext->createProgramFromPTXString(CUDA_CONES,
-                                                  CUDA_FUNCTION_BOUNDS);
-    _intersects[Geometry::Type::Cones] =
-        _optixContext->createProgramFromPTXString(CUDA_CONES,
-                                                  CUDA_FUNCTION_INTERSECTION);
-
-    _bounds[Geometry::Type::Cylinders] =
-        _optixContext->createProgramFromPTXString(CUDA_CYLINDERS,
-                                                  CUDA_FUNCTION_BOUNDS);
-    _intersects[Geometry::Type::Cylinders] =
-        _optixContext->createProgramFromPTXString(CUDA_CYLINDERS,
-                                                  CUDA_FUNCTION_INTERSECTION);
-
-    _bounds[Geometry::Type::Spheres] =
-        _optixContext->createProgramFromPTXString(CUDA_SPHERES,
-                                                  CUDA_FUNCTION_BOUNDS);
-    _intersects[Geometry::Type::Spheres] =
-        _optixContext->createProgramFromPTXString(CUDA_SPHERES,
-                                                  CUDA_FUNCTION_INTERSECTION);
-
-    _bounds[Geometry::Type::TriangleMesh] =
-        _optixContext->createProgramFromPTXString(CUDA_TRIANGLES_MESH,
-                                                  CUDA_FUNCTION_BOUNDS);
-    _intersects[Geometry::Type::TriangleMesh] =
-        _optixContext->createProgramFromPTXString(CUDA_TRIANGLES_MESH,
-                                                  CUDA_FUNCTION_INTERSECTION);
 }
 
 Context::~Context()
@@ -227,7 +192,7 @@ void Context::deleteTexture(ospray::Texture2D* tx)
     return _optixTextureSamplers[tx];
 }
 
-void Context::updateLights(ospray::Ref<ospray::Data> lightData)
+void Context::updateLights(const ospray::Data* lightData)
 {
     if (_lightBuffer)
         _lightBuffer->destroy();
@@ -283,6 +248,8 @@ void Context::destroy()
 
 void Context::_initialize()
 {
+    _optixContext = ::optix::Context::create();
+
     if (!_optixContext)
         throw(std::runtime_error("Failed to initialize OptiX"));
 
@@ -290,43 +257,146 @@ void Context::_initialize()
     _optixContext->setEntryPointCount(1);
     _optixContext->setStackSize(4096);
 
-    unsigned int num_devices;
-    unsigned int version;
-    rtDeviceGetDeviceCount(&num_devices);
-    rtGetVersion(&version);
+    _phong_ch =
+        _optixContext->createProgramFromPTXString(CUDA_PHONG,
+                                                  "closest_hit_radiance");
 
-    ospray::postStatusMsg()
-        << "Number of CUDA Devices: " + std::to_string(num_devices);
+    _phong_ch_textured = _optixContext->createProgramFromPTXString(
+        CUDA_PHONG, "closest_hit_radiance_textured");
 
-    for (unsigned int i = 0; i < num_devices; ++i)
+    _phong_ah =
+        _optixContext->createProgramFromPTXString(CUDA_PHONG, "any_hit_shadow");
+
+    _bounds[Geometry::Type::Cones] =
+        _optixContext->createProgramFromPTXString(CUDA_CONES,
+                                                  CUDA_FUNCTION_BOUNDS);
+    _intersects[Geometry::Type::Cones] =
+        _optixContext->createProgramFromPTXString(CUDA_CONES,
+                                                  CUDA_FUNCTION_INTERSECTION);
+
+    _bounds[Geometry::Type::Cylinders] =
+        _optixContext->createProgramFromPTXString(CUDA_CYLINDERS,
+                                                  CUDA_FUNCTION_BOUNDS);
+    _intersects[Geometry::Type::Cylinders] =
+        _optixContext->createProgramFromPTXString(CUDA_CYLINDERS,
+                                                  CUDA_FUNCTION_INTERSECTION);
+
+    _bounds[Geometry::Type::Spheres] =
+        _optixContext->createProgramFromPTXString(CUDA_SPHERES,
+                                                  CUDA_FUNCTION_BOUNDS);
+    _intersects[Geometry::Type::Spheres] =
+        _optixContext->createProgramFromPTXString(CUDA_SPHERES,
+                                                  CUDA_FUNCTION_INTERSECTION);
+
+    _bounds[Geometry::Type::TriangleMesh] =
+        _optixContext->createProgramFromPTXString(CUDA_TRIANGLES_MESH,
+                                                  CUDA_FUNCTION_BOUNDS);
+    _intersects[Geometry::Type::TriangleMesh] =
+        _optixContext->createProgramFromPTXString(CUDA_TRIANGLES_MESH,
+                                                  CUDA_FUNCTION_INTERSECTION);
+}
+
+void Context::_printSystemInformation() const
+{
+    unsigned int optixVersion;
+    RT_CHECK_ERROR_NO_CONTEXT(rtGetVersion(&optixVersion));
+
+    unsigned int major = optixVersion / 1000; // Check major with old formula.
+    unsigned int minor;
+    unsigned int micro;
+    if (3 < major) // New encoding since OptiX 4.0.0 to get two digits micro
+                   // numbers?
     {
-        char deviceName[256];
-        int computeCaps[2];
-        int clock_rate;
-        uint64_t totalMemory{0};
+        major = optixVersion / 10000;
+        minor = (optixVersion % 10000) / 100;
+        micro = optixVersion % 100;
+    }
+    else // Old encoding with only one digit for the micro number.
+    {
+        minor = (optixVersion % 1000) / 10;
+        micro = optixVersion % 10;
+    }
+    ospray::postStatusMsg() << "OptiX " << major << "." << minor << "."
+                            << micro;
 
-        RT_CHECK_ERROR(rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_NAME,
-                                            sizeof(deviceName), deviceName));
-        ospray::postStatusMsg()
-            << "Device " + std::to_string(i) + ": " + std::string(deviceName);
+    unsigned int numberOfDevices = 0;
+    RT_CHECK_ERROR_NO_CONTEXT(rtDeviceGetDeviceCount(&numberOfDevices));
+    ospray::postStatusMsg() << "Number of Devices = " << numberOfDevices
+                            << std::endl;
 
-        RT_CHECK_ERROR(
+    for (unsigned int i = 0; i < numberOfDevices; ++i)
+    {
+        char name[256];
+        RT_CHECK_ERROR_NO_CONTEXT(rtDeviceGetAttribute(i,
+                                                       RT_DEVICE_ATTRIBUTE_NAME,
+                                                       sizeof(name), name));
+        ospray::postStatusMsg() << "Device " << i << ": " << name;
+
+        int computeCapability[2] = {0, 0};
+        RT_CHECK_ERROR_NO_CONTEXT(
             rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY,
-                                 sizeof(computeCaps), &computeCaps));
-        ospray::postStatusMsg() << "- Compute Support: " +
-                                       std::to_string(computeCaps[0]) +
-                                       std::to_string(computeCaps[1]);
+                                 sizeof(computeCapability),
+                                 &computeCapability));
+        ospray::postStatusMsg() << "  Compute Support: " << computeCapability[0]
+                                << "." << computeCapability[1];
 
-        RT_CHECK_ERROR(rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_TOTAL_MEMORY,
-                                            sizeof(totalMemory), &totalMemory));
+        RTsize totalMemory = 0;
+        RT_CHECK_ERROR_NO_CONTEXT(
+            rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_TOTAL_MEMORY,
+                                 sizeof(totalMemory), &totalMemory));
         ospray::postStatusMsg()
-            << "- Total Memory: " + std::to_string(totalMemory) + " bytes [" +
-                   std::to_string(totalMemory / 1024 / 1024) + " MB]";
+            << "  Total Memory: "
+            << (unsigned long long)(totalMemory / 1024 / 1024) << " MB";
 
-        RT_CHECK_ERROR(rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_CLOCK_RATE,
-                                            sizeof(clock_rate), &clock_rate));
+        int clockRate = 0;
+        RT_CHECK_ERROR_NO_CONTEXT(
+            rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_CLOCK_RATE,
+                                 sizeof(clockRate), &clockRate));
+        ospray::postStatusMsg() << "  Clock Rate: " << (clockRate / 1000)
+                                << " MHz";
+
+        int maxThreadsPerBlock = 0;
+        RT_CHECK_ERROR_NO_CONTEXT(
+            rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK,
+                                 sizeof(maxThreadsPerBlock),
+                                 &maxThreadsPerBlock));
+        ospray::postStatusMsg() << "  Max. Threads per Block: "
+                                << maxThreadsPerBlock;
+
+        int smCount = 0;
+        RT_CHECK_ERROR_NO_CONTEXT(
+            rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT,
+                                 sizeof(smCount), &smCount));
+        ospray::postStatusMsg() << "  Streaming Multiprocessor Count: "
+                                << smCount;
+
+        int executionTimeoutEnabled = 0;
+        RT_CHECK_ERROR_NO_CONTEXT(rtDeviceGetAttribute(
+            i, RT_DEVICE_ATTRIBUTE_EXECUTION_TIMEOUT_ENABLED,
+            sizeof(executionTimeoutEnabled), &executionTimeoutEnabled));
+        ospray::postStatusMsg() << "  Execution Timeout Enabled: "
+                                << executionTimeoutEnabled;
+
+        int maxHardwareTextureCount = 0;
+        RT_CHECK_ERROR_NO_CONTEXT(rtDeviceGetAttribute(
+            i, RT_DEVICE_ATTRIBUTE_MAX_HARDWARE_TEXTURE_COUNT,
+            sizeof(maxHardwareTextureCount), &maxHardwareTextureCount));
+        ospray::postStatusMsg() << "  Max. Hardware Texture Count: "
+                                << maxHardwareTextureCount;
+
+        int tccDriver = 0;
+        RT_CHECK_ERROR_NO_CONTEXT(
+            rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_TCC_DRIVER,
+                                 sizeof(tccDriver), &tccDriver));
+        ospray::postStatusMsg() << "  TCC Driver enabled: " << tccDriver;
+
+        int cudaDeviceOrdinal = 0;
+        RT_CHECK_ERROR_NO_CONTEXT(
+            rtDeviceGetAttribute(i, RT_DEVICE_ATTRIBUTE_CUDA_DEVICE_ORDINAL,
+                                 sizeof(cudaDeviceOrdinal),
+                                 &cudaDeviceOrdinal));
         ospray::postStatusMsg()
-            << "- Clock Rate: " + std::to_string(clock_rate / 1000) + " MHz";
+            << "  CUDA Device Ordinal: " << cudaDeviceOrdinal << std::endl;
     }
 }
 }

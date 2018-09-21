@@ -36,9 +36,9 @@
 static __device__ __inline__ optix::uchar4 make_color(const optix::float3& c)
 {
     return optix::make_uchar4(
-        static_cast<unsigned char>(__saturatef(c.z) * 255.99f), /* B */
-        static_cast<unsigned char>(__saturatef(c.y) * 255.99f), /* G */
         static_cast<unsigned char>(__saturatef(c.x) * 255.99f), /* R */
+        static_cast<unsigned char>(__saturatef(c.y) * 255.99f), /* G */
+        static_cast<unsigned char>(__saturatef(c.z) * 255.99f), /* B */
         255u);                                                  /* A */
 }
 #endif

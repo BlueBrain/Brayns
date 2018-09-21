@@ -51,8 +51,7 @@ public:
     void createTexture(ospray::Texture2D* tx);
     void deleteTexture(ospray::Texture2D* tx);
     ::optix::TextureSampler getTextureSampler(ospray::Texture2D* tx);
-    void updateLights(
-        ospray::Ref<ospray::Data> lightData = ospray::Ref<ospray::Data>());
+    void updateLights(const ospray::Data* lightData = nullptr);
 
     ::optix::Geometry createGeometry(Geometry::Type type);
 
@@ -65,6 +64,8 @@ private:
     Context();
 
     void _initialize();
+    void _printSystemInformation() const;
+
     static std::unique_ptr<Context> _context;
 
     ::optix::Context _optixContext;
@@ -74,7 +75,7 @@ private:
     std::array<::optix::Program, Geometry::Type::SIZE> _bounds;
     std::array<::optix::Program, Geometry::Type::SIZE> _intersects;
 
-    ospray::Ref<ospray::Data> _lightData;
+    const ospray::Data* _lightData = nullptr;
     ::optix::Buffer _lightBuffer;
 
     std::unordered_map<void*, ::optix::TextureSampler> _optixTextureSamplers;
