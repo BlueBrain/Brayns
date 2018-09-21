@@ -1096,26 +1096,23 @@ public:
 
     void _handleUpdateModel()
     {
-        _bindEndpoint(
-            METHOD_UPDATE_MODEL,
-            [engine = _engine](const rockets::jsonrpc::Request& request) {
-                ModelDescriptor newDesc;
-                if (!::from_json(newDesc, request.message))
-                    return Response::invalidParams();
+        _bindEndpoint(METHOD_UPDATE_MODEL,
+                      [engine =
+                           _engine](const rockets::jsonrpc::Request& request) {
+                          ModelDescriptor newDesc;
+                          if (!::from_json(newDesc, request.message))
+                              return Response::invalidParams();
 
-                auto& models = engine->getScene().getModelDescriptors();
-                auto i = std::find_if(models.begin(), models.end(),
-                                      [id = newDesc.getModelID()](auto desc) {
-                                          return id == desc->getModelID();
-                                      });
-                if (i == models.end())
-                    return Response{to_json(false)};
-
-                ::from_json(**i, request.message);
-                engine->getScene().markModified();
-                engine->triggerRender();
-                return Response{to_json(true)};
-            });
+                          auto& scene = engine->getScene();
+                          if (auto model = scene.getModel(newDesc.getModelID()))
+                          {
+                              ::from_json(*model, request.message);
+                              scene.markModified();
+                              engine->triggerRender();
+                              return Response{to_json(true)};
+                          }
+                          return Response{to_json(false)};
+                      });
         const RpcParameterDescription desc{
             METHOD_UPDATE_MODEL, "Update the model with the given values",
             "model", "Model descriptor"};

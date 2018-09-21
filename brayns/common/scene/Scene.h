@@ -264,9 +264,11 @@ public:
 
     /** @return the registry for all supported loaders of this scene. */
     LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
-    /** @internal not safe w/o modelMutex() */
-    ModelDescriptors& getModelDescriptors() { return _modelDescriptors; }
-    auto& modelMutex() const { return _modelMutex; }
+    /** @internal */
+    auto acquireReadAccess() const
+    {
+        return std::shared_lock<std::shared_timed_mutex>(_modelMutex);
+    }
     /** @brief Builds environment map according to command line parameter
      * --environment-map
      */

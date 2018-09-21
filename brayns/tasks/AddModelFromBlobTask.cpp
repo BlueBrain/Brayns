@@ -57,8 +57,7 @@ AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
                     auto modelDesc = results.tasks[results.index].get();
                     if (modelDesc)
                     {
-                        std::unique_lock<std::shared_timed_mutex> lock(
-                            engine->getScene().modelMutex());
+                        auto lock = engine->getScene().acquireReadAccess();
                         *modelDesc = param;
                     }
                     engine->triggerRender();

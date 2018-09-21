@@ -88,7 +88,7 @@ void OSPRayScene::commit()
     // copy the list to avoid locking the mutex
     ModelDescriptors modelDescriptors;
     {
-        std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+        auto lock = acquireReadAccess();
         modelDescriptors = _modelDescriptors;
     }
 
@@ -316,7 +316,7 @@ bool OSPRayScene::commitTransferFunctionData()
 bool OSPRayScene::_commitVolumeData()
 {
     bool rebuildScene = false;
-    std::shared_lock<std::shared_timed_mutex> lock(_modelMutex);
+    auto lock = acquireReadAccess();
     for (auto modelDescriptor : _modelDescriptors)
     {
         auto& model = modelDescriptor->getModel();

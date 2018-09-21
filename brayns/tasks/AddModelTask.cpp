@@ -60,8 +60,7 @@ AddModelTask::AddModelTask(const ModelParams& modelParams, EnginePtr engine)
                     auto modelDescriptor = result.get();
                     if (modelDescriptor)
                     {
-                        std::unique_lock<std::shared_timed_mutex> lock(
-                            engine->getScene().modelMutex());
+                        auto lock = engine->getScene().acquireReadAccess();
                         *modelDescriptor = modelParams;
                     }
                     engine->triggerRender();
