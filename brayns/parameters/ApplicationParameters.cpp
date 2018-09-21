@@ -49,7 +49,9 @@ const size_t DEFAULT_WINDOW_HEIGHT = 600;
 const size_t DEFAULT_JPEG_COMPRESSION = 90;
 const std::string DEFAULT_TMP_FOLDER = "/tmp";
 
-const std::array<std::string, 2> ENGINES = {{"ospray", "optix"}};
+const std::map<std::string, brayns::EngineType> ENGINES = {
+    {"ospray", brayns::EngineType::ospray},
+    {"optix", brayns::EngineType::optix}};
 }
 
 namespace brayns
@@ -105,11 +107,9 @@ void ApplicationParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_ENGINE))
     {
         const std::string& engine = vm[PARAM_ENGINE].as<std::string>();
-        const size_t pos =
-            std::distance(ENGINES.begin(),
-                          std::find(ENGINES.begin(), ENGINES.end(), engine));
-        if (pos != ENGINES.size())
-            _engine = static_cast<EngineType>(pos);
+        const auto kv = ENGINES.find(engine);
+        if (kv != ENGINES.end())
+            _engine = kv->second;
         else
             throw std::runtime_error("Invalid engine '" + engine + "'.");
     }
@@ -186,6 +186,9 @@ void ApplicationParameters::print()
 const std::string& ApplicationParameters::getEngineAsString(
     const EngineType value) const
 {
-    return ENGINES[static_cast<size_t>(value)];
+    for (auto& kv : ENGINES)
+        if (kv.second == value)
+            return kv.first;
+    throw std::runtime_error("Could not get engine as string");
 }
 }
