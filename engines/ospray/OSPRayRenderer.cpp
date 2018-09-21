@@ -19,6 +19,7 @@
  */
 
 #include <brayns/common/log.h>
+#include <brayns/common/scene/ClipPlane.h>
 
 #include "OSPRayCamera.h"
 #include "OSPRayFrameBuffer.h"
@@ -94,7 +95,10 @@ void OSPRayRenderer::commit()
                      _scene->getTransferFunction().getValuesRange().x());
 
         // Setting the clip planes in the camera
-        _camera->setClipPlanes(_scene->getClipPlanes());
+        Planes planes;
+        for (const auto& clipPlane : _scene->getClipPlanes())
+            planes.push_back(clipPlane->getPlane());
+        _camera->setClipPlanes(planes);
         _camera->commit();
     }
 

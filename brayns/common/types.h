@@ -79,27 +79,27 @@ class Brayns;
 class ActionInterface;
 
 class Engine;
-typedef std::shared_ptr<Engine> EnginePtr;
+using EnginePtr = std::shared_ptr<Engine>;
 
 class Scene;
-typedef std::shared_ptr<Scene> ScenePtr;
+using ScenePtr = std::shared_ptr<Scene>;
 
 class AbstractManipulator;
-typedef std::shared_ptr<AbstractManipulator> AbstractManipulatorPtr;
+using AbstractManipulatorPtr = std::shared_ptr<AbstractManipulator>;
 
 class Camera;
-typedef std::shared_ptr<Camera> CameraPtr;
+using CameraPtr = std::shared_ptr<Camera>;
 
 class TransferFunction;
 class Renderer;
-typedef std::shared_ptr<Renderer> RendererPtr;
+using RendererPtr = std::shared_ptr<Renderer>;
 
 class FrameBuffer;
-typedef std::shared_ptr<FrameBuffer> FrameBufferPtr;
+using FrameBufferPtr = std::shared_ptr<FrameBuffer>;
 
 class Model;
-typedef std::unique_ptr<Model> ModelPtr;
-typedef std::map<std::string, std::string> ModelMetadata;
+using ModelPtr = std::unique_ptr<Model>;
+using ModelMetadata = std::map<std::string, std::string>;
 
 class Transformation;
 using Transformations = std::vector<Transformation>;
@@ -112,26 +112,30 @@ using ModelDescriptors = std::vector<ModelDescriptorPtr>;
 using ModelInstances = std::vector<ModelInstance>;
 
 class Material;
-typedef std::shared_ptr<Material> MaterialPtr;
-typedef std::map<size_t, MaterialPtr> MaterialMap;
+using MaterialPtr = std::shared_ptr<Material>;
+using MaterialMap = std::map<size_t, MaterialPtr>;
+
+class ClipPlane;
+using ClipPlanePtr = std::shared_ptr<ClipPlane>;
+using ClipPlanes = std::vector<ClipPlanePtr>;
 
 struct Sphere;
-typedef std::vector<Sphere> Spheres;
-typedef std::map<size_t, Spheres> SpheresMap;
+using Spheres = std::vector<Sphere>;
+using SpheresMap = std::map<size_t, Spheres>;
 
 struct Cylinder;
-typedef std::vector<Cylinder> Cylinders;
-typedef std::map<size_t, Cylinders> CylindersMap;
+using Cylinders = std::vector<Cylinder>;
+using CylindersMap = std::map<size_t, Cylinders>;
 
 struct Cone;
-typedef std::vector<Cone> Cones;
-typedef std::map<size_t, Cones> ConesMap;
+using Cones = std::vector<Cone>;
+using ConesMap = std::map<size_t, Cones>;
 
 struct TrianglesMesh;
-typedef std::map<size_t, TrianglesMesh> TrianglesMeshMap;
+using TrianglesMeshMap = std::map<size_t, TrianglesMesh>;
 
 struct StreamlinesData;
-typedef std::map<size_t, StreamlinesData> StreamlinesDataMap;
+using StreamlinesDataMap = std::map<size_t, StreamlinesData>;
 
 class Volume;
 class BrickedVolume;
@@ -142,30 +146,30 @@ using BrickedVolumePtr = std::shared_ptr<BrickedVolume>;
 using Volumes = std::vector<VolumePtr>;
 
 class Texture2D;
-typedef std::shared_ptr<Texture2D> Texture2DPtr;
-typedef std::map<std::string, Texture2DPtr> TexturesMap;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
+using TexturesMap = std::map<std::string, Texture2DPtr>;
 
 class Light;
-typedef std::shared_ptr<Light> LightPtr;
-typedef std::vector<LightPtr> Lights;
+using LightPtr = std::shared_ptr<Light>;
+using Lights = std::vector<LightPtr>;
 
 class DirectionalLight;
-typedef std::shared_ptr<DirectionalLight> DirectionalLightPtr;
+using DirectionalLightPtr = std::shared_ptr<DirectionalLight>;
 
 class PointLight;
 
 class AbstractSimulationHandler;
-typedef std::shared_ptr<AbstractSimulationHandler> AbstractSimulationHandlerPtr;
+using AbstractSimulationHandlerPtr = std::shared_ptr<AbstractSimulationHandler>;
 
 class CircuitSimulationHandler;
-typedef std::shared_ptr<CircuitSimulationHandler> CircuitSimulationHandlerPtr;
+using CircuitSimulationHandlerPtr = std::shared_ptr<CircuitSimulationHandler>;
 
 class SpikeSimulationHandler;
-typedef std::shared_ptr<SpikeSimulationHandler> SpikeSimulationHandlerPtr;
+using SpikeSimulationHandlerPtr = std::shared_ptr<SpikeSimulationHandler>;
 
 class CADiffusionSimulationHandler;
-typedef std::shared_ptr<CADiffusionSimulationHandler>
-    CADiffusionSimulationHandlerPtr;
+using CADiffusionSimulationHandlerPtr =
+    std::shared_ptr<CADiffusionSimulationHandler>;
 
 class AbstractParameters;
 class AnimationParameters;
@@ -179,8 +183,8 @@ class VolumeParameters;
 
 class PluginAPI;
 class ExtensionPlugin;
-typedef std::shared_ptr<ExtensionPlugin> ExtensionPluginPtr;
-typedef std::vector<ExtensionPluginPtr> ExtensionPlugins;
+using ExtensionPluginPtr = std::shared_ptr<ExtensionPlugin>;
+using ExtensionPlugins = std::vector<ExtensionPluginPtr>;
 
 class KeyboardHandler;
 
@@ -297,8 +301,8 @@ enum class CameraMode
  * in absolute value of the coordinate system. Values are stored
  * in a Vector4, with the following order: nx, ny, nz and d
  */
-using ClipPlane = std::array<double, 4>;
-using ClipPlanes = std::vector<ClipPlane>;
+using Plane = std::array<double, 4>;
+using Planes = std::vector<Plane>;
 
 struct RenderInput
 {

@@ -71,11 +71,11 @@ void OSPRayCamera::setEnvironmentMap(const bool environmentMap)
     ospCommit(_camera);
 }
 
-void OSPRayCamera::setClipPlanes(const ClipPlanes& clipPlanes)
+void OSPRayCamera::setClipPlanes(const Planes& planes)
 {
-    if (_clipPlanes == clipPlanes)
+    if (_clipPlanes == planes)
         return;
-    _clipPlanes = clipPlanes;
+    _clipPlanes = planes;
     markModified(false);
 }
 

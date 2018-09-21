@@ -13,6 +13,7 @@ set(BRAYNSCOMMON_SOURCES
   camera/Camera.cpp
   camera/FlyingModeManipulator.cpp
   camera/InspectCenterManipulator.cpp
+  scene/ClipPlane.cpp
   scene/Model.cpp
   scene/Scene.cpp
   material/Material.cpp
@@ -64,6 +65,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   mathTypes.h
   renderer/FrameBuffer.h
   renderer/Renderer.h
+  scene/ClipPlane.h
   scene/Model.h
   scene/Scene.h
   simulation/AbstractSimulationHandler.h

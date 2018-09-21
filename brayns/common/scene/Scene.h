@@ -34,6 +34,7 @@ SERIALIZATION_ACCESS(Scene)
 
 namespace brayns
 {
+
 /**
 
    Scene object
@@ -152,18 +153,29 @@ public:
         return _parametersManager;
     }
 
+    /** Add a clip plane to the scene.
+     * @param plane The coefficients of the clip plane equation.
+     * @return The clip plane ID.
+     */
+    BRAYNS_API size_t addClipPlane(const Plane& plane);
+
+    /** Get a clip plane by its ID.
+        @param id the plane ID.
+        @return A pointer to the clip plane or null if not found.
+     */
+    BRAYNS_API ClipPlanePtr getClipPlane(const size_t id) const;
+
+    /** Remove a clip plane by its ID, or nop if not found. */
+    BRAYNS_API void removeClipPlane(const size_t id);
+
     /**
-      Sets the clip planes
+       @return the clip planes
     */
-    void setClipPlanes(const ClipPlanes& clipPlanes)
+    const ClipPlanes& getClipPlanes() const
     {
-        _clipPlanes = clipPlanes;
-        markModified();
+        return _clipPlanes;
     }
-    /**
-      @return the clip planes
-    */
-    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
+
     /**
         Returns the simulutation handler
     */
