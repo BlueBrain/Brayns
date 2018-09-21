@@ -147,7 +147,7 @@ void Scene::removeModel(const size_t id)
 {
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-        auto i = std::remove_if(_modelDescriptors.begin(),
+        auto i = std::find_if(_modelDescriptors.begin(),
                                 _modelDescriptors.end(), [id](auto desc) {
                                     return id == desc->getModelID();
                                 });
@@ -156,7 +156,7 @@ void Scene::removeModel(const size_t id)
 
         (*i)->callOnRemoved();
 
-        _modelDescriptors.erase(i, _modelDescriptors.end());
+        _modelDescriptors.erase(i);
     }
     markModified();
 }
