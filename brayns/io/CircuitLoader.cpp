@@ -58,6 +58,8 @@ public:
             ModelMetadata metadata = {
                 {"density",
                  std::to_string(_geometryParameters.getCircuitDensity())},
+                {"color-scheme", _geometryParameters.getColorSchemeAsString(
+                                     _geometryParameters.getColorScheme())},
                 {"report", _geometryParameters.getCircuitReport()},
                 {"targets", _geometryParameters.getCircuitTargets()},
                 {"mesh-filename-pattern",
@@ -275,19 +277,19 @@ private:
             if (index < _electrophysiologyTypes.size())
                 materialId = _electrophysiologyTypes[index];
             else
-                BRAYNS_DEBUG << "Failed to get neuron E-type" << std::endl;
+                BRAYNS_ERROR << "Failed to get neuron E-type" << std::endl;
             break;
         case ColorScheme::neuron_by_mtype:
             if (index < _morphologyTypes.size())
                 materialId = _morphologyTypes[index];
             else
-                BRAYNS_DEBUG << "Failed to get neuron M-type" << std::endl;
+                BRAYNS_ERROR << "Failed to get neuron M-type" << std::endl;
             break;
         case ColorScheme::neuron_by_layer:
             if (index < _layerIds.size())
                 materialId = _layerIds[index];
             else
-                BRAYNS_DEBUG << "Failed to get neuron layer" << std::endl;
+                BRAYNS_ERROR << "Failed to get neuron layer" << std::endl;
             break;
         default:
             materialId = NO_MATERIAL;

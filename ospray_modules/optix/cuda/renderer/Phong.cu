@@ -44,7 +44,7 @@ rtDeclareVariable(float3,       Ks, , );
 rtDeclareVariable(float3,       Kr, , );
 rtDeclareVariable(float3,       Ko, , );
 rtDeclareVariable(float,        glossiness, , );
-rtDeclareVariable(unsigned int, shading_mode, , );
+rtDeclareVariable(int,          shading_mode, , );
 rtDeclareVariable(float,        refraction_index, , );
 rtDeclareVariable(float,        phong_exp, , );
 
