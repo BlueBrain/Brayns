@@ -376,8 +376,8 @@ public:
         uintptr_t* _currentClientID;
     };
 
-    void bindEndpoint(const std::string& method,
-                      rockets::jsonrpc::ResponseCallback action)
+    void _bindEndpoint(const std::string& method,
+                       rockets::jsonrpc::ResponseCallback action)
     {
         _jsonrpcServer->bind(method, [&, action](
                                          rockets::jsonrpc::Request request) {
@@ -387,8 +387,8 @@ public:
     }
 
     template <typename Params, typename RetVal>
-    void bindEndpoint(const std::string& method,
-                      std::function<RetVal(Params)> action)
+    void _bindEndpoint(const std::string& method,
+                       std::function<RetVal(Params)> action)
     {
         _jsonrpcServer->bind(method, [&, action](
                                          rockets::jsonrpc::Request request) {
@@ -410,8 +410,8 @@ public:
     }
 
     template <typename Params>
-    void connectEndpoint(const std::string& method,
-                         std::function<void(Params)> action)
+    void _bindEndpoint(const std::string& method,
+                       std::function<void(Params)> action)
     {
         _jsonrpcServer->bind(method, [&, action](
                                          rockets::jsonrpc::Request request) {
@@ -425,8 +425,8 @@ public:
         });
     }
 
-    void connectEndpoint(const std::string& method,
-                         rockets::jsonrpc::VoidCallback action)
+    void _bindEndpoint(const std::string& method,
+                       rockets::jsonrpc::VoidCallback action)
     {
         _jsonrpcServer->connect(method, [&, action](
                                             rockets::jsonrpc::Request request) {
@@ -470,7 +470,10 @@ public:
                 std::lock_guard<std::mutex> lock(throttle.first);
 
                 const auto& castedObj = static_cast<const T&>(base);
-                const auto notify = [&rocketsServer=_rocketsServer, clientID=_currentClientID, endpoint, json=to_json(castedObj)]{
+                const auto notify = [&rocketsServer=_rocketsServer,
+                                     clientID=_currentClientID, endpoint,
+                                     json=to_json(castedObj)]
+                {
                     const auto& msg =
                         rockets::jsonrpc::makeNotification(endpoint, json);
                     if(clientID == NO_CURRENT_CLIENT)
@@ -517,9 +520,9 @@ public:
 
         const std::string rpcEndpoint = getNotificationEndpointName(endpoint);
 
-        bindEndpoint(rpcEndpoint, [&, rpcEndpoint, preUpdateFunc,
-                                   postUpdateFunc](
-                                      rockets::jsonrpc::Request request) {
+        _bindEndpoint(rpcEndpoint, [&, rpcEndpoint, preUpdateFunc,
+                                    postUpdateFunc](
+                                       rockets::jsonrpc::Request request) {
             if (from_json(obj, request.message, preUpdateFunc, postUpdateFunc))
             {
                 _engine->triggerRender();
@@ -546,7 +549,7 @@ public:
     void _handleRPC(const RpcParameterDescription& desc,
                     std::function<R(P)> action)
     {
-        bindEndpoint<P, R>(desc.methodName, action);
+        _bindEndpoint<P, R>(desc.methodName, action);
         _handleSchema(desc.methodName, buildJsonRpcSchemaRequest<P, R>(desc));
     }
 
@@ -554,13 +557,13 @@ public:
     void _handleRPC(const RpcParameterDescription& desc,
                     std::function<void(P)> action)
     {
-        connectEndpoint<P>(desc.methodName, action);
+        _bindEndpoint<P>(desc.methodName, action);
         _handleSchema(desc.methodName, buildJsonRpcSchemaNotify<P>(desc));
     }
 
     void _handleRPC(const RpcDescription& desc, std::function<void()> action)
     {
-        connectEndpoint(desc.methodName, action);
+        _bindEndpoint(desc.methodName, action);
         _handleSchema(desc.methodName, buildJsonRpcSchemaNotify(desc));
     }
 
@@ -1020,7 +1023,7 @@ public:
                                            "Stream to a displaywall", "param",
                                            "Stream parameters"};
 
-        bindEndpoint(METHOD_STREAM_TO, [&](const auto& request) {
+        _bindEndpoint(METHOD_STREAM_TO, [&](const auto& request) {
             auto& streamParams =
                 _engine->getParametersManager().getStreamParameters();
             if (::from_json(streamParams, request.message))
@@ -1093,7 +1096,7 @@ public:
 
     void _handleUpdateModel()
     {
-        bindEndpoint(
+        _bindEndpoint(
             METHOD_UPDATE_MODEL,
             [engine = _engine](const rockets::jsonrpc::Request& request) {
                 ModelDescriptor newDesc;
@@ -1146,7 +1149,7 @@ public:
             "Set the properties of the given model", "param",
             "model ID and its properties"};
 
-        bindEndpoint(METHOD_SET_MODEL_PROPERTIES, [&](const auto& request) {
+        _bindEndpoint(METHOD_SET_MODEL_PROPERTIES, [&](const auto& request) {
             using namespace rapidjson;
             Document document;
             document.Parse(request.message.c_str());
@@ -1242,7 +1245,7 @@ public:
 
     void _handleUpdateInstance()
     {
-        bindEndpoint(
+        _bindEndpoint(
             METHOD_UPDATE_INSTANCE,
             [&](const rockets::jsonrpc::Request& request) {
                 ModelInstance newDesc;
@@ -1287,7 +1290,7 @@ public:
             return object.getPropertyMap();
         });
 
-        bindEndpoint(notifyEndpoint, [&, notifyEndpoint](const auto& request) {
+        _bindEndpoint(notifyEndpoint, [&, notifyEndpoint](const auto& request) {
             PropertyMap props = object.getPropertyMap();
             if (::from_json(props, request.message))
             {
@@ -1328,8 +1331,7 @@ public:
     std::unordered_map<std::string, std::pair<std::mutex, Throttle>> _throttle;
     std::vector<std::function<void()>> _delayedNotifies;
     std::mutex _delayedNotifiesMutex;
-    static constexpr uintptr_t NO_CURRENT_CLIENT{
-        std::numeric_limits<uintptr_t>::max()};
+    static constexpr uintptr_t NO_CURRENT_CLIENT{0};
     uintptr_t _currentClientID{NO_CURRENT_CLIENT};
 
 #ifdef BRAYNS_USE_LIBUV
@@ -1410,7 +1412,7 @@ void RocketsPlugin::registerRequest(
     const PropertyMap& output,
     const std::function<PropertyMap(PropertyMap)>& action)
 {
-    _impl->bindEndpoint(desc.methodName, [
+    _impl->_bindEndpoint(desc.methodName, [
         name = desc.methodName, input, action, engine = _impl->_engine
     ](const auto& request) {
         PropertyMap params = input;
