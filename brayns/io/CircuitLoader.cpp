@@ -231,10 +231,10 @@ private:
         const GIDOffsets& targetGIDOffsets, bool isMesh = false) const
     {
         if (material != NO_MATERIAL)
-            return _materialsOffset + material;
+            return material;
 
         if (!isMesh && _geometryParameters.getCircuitUseSimulationModel())
-            return _materialsOffset;
+            return 0;
 
         size_t materialId = 0;
         switch (_geometryParameters.getColorScheme())
@@ -292,7 +292,7 @@ private:
         default:
             materialId = NO_MATERIAL;
         }
-        return _materialsOffset + materialId;
+        return materialId;
     }
 
     /**
@@ -464,7 +464,6 @@ private:
     size_ts _layerIds;
     size_ts _electrophysiologyTypes;
     size_ts _morphologyTypes;
-    size_t _materialsOffset;
 };
 
 CircuitLoader::CircuitLoader(Scene& scene,

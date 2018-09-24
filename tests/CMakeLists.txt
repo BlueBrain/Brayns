@@ -30,6 +30,7 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     renderer.cpp
     snapshot.cpp
     streamlines.cpp
+    testImages.cpp
     webAPI.cpp
 )
 endif()

@@ -33,53 +33,6 @@
 
 #include "PDiffHelpers.h"
 
-constexpr auto PDB_FILE = BRAYNS_TESTDATA_PATH "1bna.pdb";
-
-BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
-{
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, "--disable-accumulation", "demo"};
-    const int argc = sizeof(argv) / sizeof(char*);
-    brayns::Brayns brayns(argc, argv);
-
-    brayns.commitAndRender();
-    const auto oldImage =
-        createPDiffRGBAImage(brayns.getEngine().getFrameBuffer());
-
-    brayns.getEngine().getFrameBuffer().clear();
-    brayns.commitAndRender();
-    const auto newImage =
-        createPDiffRGBAImage(brayns.getEngine().getFrameBuffer());
-
-    BOOST_CHECK(pdiff::yee_compare(*oldImage, *newImage));
-}
-
-BOOST_AUTO_TEST_CASE(render_xyz_and_compare)
-{
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const auto path = BRAYNS_TESTDATA_MODEL_MONKEY_PATH;
-    const char* argv[] = {app, path, "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    brayns::Brayns brayns(argc, argv);
-    brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataMonkey.png",
-                                 brayns.getEngine().getFrameBuffer()));
-
-    auto model = brayns.getEngine().getScene().getModel(0);
-    auto props = model->getProperties();
-    props.updateProperty("radius", props.getProperty<double>("radius") / 2.);
-    model->setProperties(props);
-
-    brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataMonkey_smaller.png",
-                                 brayns.getEngine().getFrameBuffer()));
-}
-
-#ifdef BRAYNS_USE_BBPTESTDATA
 BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
@@ -97,6 +50,30 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
     brayns::Brayns brayns(argc, argv);
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataLayer1.png",
+                                 brayns.getEngine().getFrameBuffer()));
+}
+
+BOOST_AUTO_TEST_CASE(render_circuit_mtypes_and_compare)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {app,
+                          BBP_TEST_BLUECONFIG3,
+                          "--disable-accumulation",
+                          "--circuit-targets",
+                          "MiniColumn_0",
+                          "--samples-per-pixel",
+                          "16",
+                          "--color-scheme",
+                          "neuron-by-mtype"};
+    const int argc = sizeof(argv) / sizeof(char*);
+
+    brayns::Brayns brayns(argc, argv);
+    brayns.getEngine().getScene().setMaterialsColorMap(
+        brayns::MaterialsColorMap::gradient);
+    brayns.commitAndRender();
+    BOOST_CHECK(compareTestImage("testdataMiniColumn0_mtypes.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
 
@@ -226,61 +203,5 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_basic_simulation_renderer)
 
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50basicsimulation.png",
-                                 brayns.getEngine().getFrameBuffer()));
-}
-
-BOOST_AUTO_TEST_CASE(render_demo_with_proximity_renderer)
-{
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app,         "--renderer",
-                          "proximity", "--samples-per-pixel",
-                          "16",        "--synchronous-mode",
-                          "demo"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    brayns::Brayns brayns(argc, argv);
-
-    const brayns::Vector3f rotCenter = {0.5f, 0.5f, 0.5f};
-
-    auto& camera = brayns.getEngine().getCamera();
-    const auto camPos = camera.getPosition();
-
-    camera.setTarget(rotCenter);
-    camera.setPosition(camPos - (rotCenter - camPos));
-
-    brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdemoproximity.png",
-                                 brayns.getEngine().getFrameBuffer()));
-}
-#endif
-
-BOOST_AUTO_TEST_CASE(render_protein_and_compare)
-{
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, PDB_FILE, "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    brayns::Brayns brayns(argc, argv);
-    brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataProtein.png",
-                                 brayns.getEngine().getFrameBuffer()));
-}
-
-BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
-{
-    auto& testSuite = boost::unit_test::framework::master_test_suite();
-
-    const char* app = testSuite.argv[0];
-    const char* argv[] = {app, PDB_FILE, "--disable-accumulation"};
-    const int argc = sizeof(argv) / sizeof(char*);
-
-    brayns::Brayns brayns(argc, argv);
-    brayns.getEngine().getCamera().updateProperty("stereoMode", 3);
-    brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataProteinStereo.png",
                                  brayns.getEngine().getFrameBuffer()));
 }

@@ -69,7 +69,7 @@ Renderer& Engine::getRenderer()
 bool Engine::continueRendering() const
 {
     return _parametersManager.getAnimationParameters().getDelta() != 0 ||
-           (_renderer->getVariance() > 1 && _frameBuffer->getAccumulation() &&
+           (_frameBuffer->getAccumulation() &&
             (_frameBuffer->numAccumFrames() <
              _parametersManager.getRenderingParameters().getMaxAccumFrames()));
 }
