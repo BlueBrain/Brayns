@@ -57,7 +57,8 @@ inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
 }
 
 inline bool compareTestImage(const std::string& filename,
-                             brayns::FrameBuffer& fb)
+                             brayns::FrameBuffer& fb,
+                             const pdiff::PerceptualDiffParameters &parameters=pdiff::PerceptualDiffParameters())
 {
     const auto fullPath = std::string(BRAYNS_TESTDATA_IMAGES_PATH) + filename;
 #ifdef GENERATE_TESTDATA
@@ -81,5 +82,5 @@ inline bool compareTestImage(const std::string& filename,
 
     auto testImage = createPDiffRGBAImage(fb);
     const auto referenceImage{pdiff::read_from_file(fullPath)};
-    return pdiff::yee_compare(*referenceImage, *testImage);
+    return pdiff::yee_compare(*referenceImage, *testImage, parameters);
 }

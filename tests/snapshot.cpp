@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(snapshot)
         std::fstream file(newFilename, std::ios::out);
         file << decodedImage;
     }
-    const auto newImage{pdiff::read_from_file(referenceFilename)};
+    const auto newImage{pdiff::read_from_file(newFilename)};
     const auto referenceImage{pdiff::read_from_file(referenceFilename)};
     BOOST_CHECK(pdiff::yee_compare(*referenceImage, *newImage));
 }
