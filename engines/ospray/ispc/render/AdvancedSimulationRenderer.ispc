@@ -449,7 +449,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                 }
             }
 
-        shadowIntensity += opacity * attributes.self->shadows;
+        shadowIntensity += opacity;
 
         shadowRay.t0 = shadowRay.t + shadowingGeometry.epsilon;
         shadowRay.t = inf;
@@ -474,7 +474,7 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                                                        shadowRay, sample) *
                            attributes.self->shadows;
     }
-    return clamp(shadowIntensity, 0.f, 1.f);
+    return clamp(shadowIntensity * attributes.self->shadows, 0.f, 1.f);
 }
 
 inline void initializeShadingAttributes(
