@@ -74,7 +74,6 @@ void StreamParameters::print()
     BRAYNS_INFO << "Stream quality                    : " << _quality
                 << std::endl;
     BRAYNS_INFO << "Stream resizing                   : " << asString(_resizing)
-                << std::endl
                 << std::endl;
 }
 }
