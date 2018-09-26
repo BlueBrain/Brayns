@@ -1,5 +1,21 @@
 # Change Log
 
+## [0.7.1](https://github.com/BlueBrain/Brayns/tree/0.7.1) (26-09-2018)
+
+**Implemented enhancements:**
+
+- Use regular command line flags for applicable options [\#566](https://github.com/BlueBrain/Brayns/pull/566)
+- Add stereo camera with VRPN tracking for the OpenDeck [\#554](https://github.com/BlueBrain/Brayns/pull/554)
+
+**Fixed bugs:**
+
+- Fix random materials being used when specifying color-scheme for circuits [\#575](https://github.com/BlueBrain/Brayns/pull/575)
+- Fix shadow bug [\#574](https://github.com/BlueBrain/Brayns/pull/574)
+- Fix crash when not deleting the last model [\#573](https://github.com/BlueBrain/Brayns/pull/573)
+- Fix deadlock when updating camera & renderer properties via Rockets [\#569](https://github.com/BlueBrain/Brayns/pull/569)
+- Revive OptiX [\#559](https://github.com/BlueBrain/Brayns/pull/559)
+- Fix crash in delayed re-broadcasts of potentially deleted objects [\#556](https://github.com/BlueBrain/Brayns/pull/556)
+
 ## [0.7.0](https://github.com/BlueBrain/Brayns/tree/0.7.0) (05-09-2018)
 
 **Breaking changes:**
