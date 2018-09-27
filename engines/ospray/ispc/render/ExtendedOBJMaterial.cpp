@@ -24,12 +24,6 @@
 #include "ExtendedOBJMaterial_ispc.h"
 #include <ospray/SDK/common/Data.h>
 
-#define OSP_REGISTER_EXMATERIAL(InternalClassName, external_name)          \
-    extern "C" ospray::Material* ospray_create_material__##external_name() \
-    {                                                                      \
-        return new InternalClassName;                                      \
-    }
-
 namespace brayns
 {
 namespace obj
@@ -106,6 +100,8 @@ void ExtendedOBJMaterial::commit()
         (const ispc::LinearSpace2f&)rot_Bump);
 }
 
-OSP_REGISTER_EXMATERIAL(ExtendedOBJMaterial, ExtendedOBJMaterial);
+// This material is not renderer specific
+OSP_REGISTER_MATERIAL(, ExtendedOBJMaterial, ExtendedOBJMaterial);
+
 } // ::brayns::obj
 } // ::brayns

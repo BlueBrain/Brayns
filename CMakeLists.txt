@@ -113,15 +113,11 @@ endif()
 list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/perceptualdiff/*')
 
 # OSPRay rendering engine
-common_find_package(ospray 1.5 SYSTEM)
-set(_ospray_unsupported_version 1.6)
-if(OSPRAY_FOUND AND OSPRAY_VERSION VERSION_LESS _ospray_unsupported_version)
+common_find_package(ospray 1.7 SYSTEM)
+if(OSPRAY_FOUND)
   option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
 else()
   unset(BRAYNS_OSPRAY_ENABLED)
-  if(OSPRAY_FOUND)
-    message(WARNING "OSPRay version >= ${_ospray_unsupported_version} not supported")
-  endif()
 endif()
 
 # Mesh loading

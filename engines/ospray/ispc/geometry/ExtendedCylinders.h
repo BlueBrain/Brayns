@@ -26,7 +26,7 @@ namespace ospray
 {
 struct ExtendedCylinders : public ospray::Geometry
 {
-    std::string toString() const final { return "ospray::Cylinders"; }
+    std::string toString() const final { return "brayns::Cylinders"; }
     void finalize(ospray::Model* model) final;
 
     ospray::Ref<ospray::Data> data;

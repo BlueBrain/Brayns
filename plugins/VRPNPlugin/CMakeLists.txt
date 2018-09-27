@@ -10,7 +10,6 @@ set(VRPNPlugin_VERSION_ABI 1)
 
 include(Common)
 
-#common_find_package(Brayns REQUIRED)
 common_find_package(VRPN REQUIRED)
 common_find_package(libuv)
 common_find_package_post()

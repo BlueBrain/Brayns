@@ -47,10 +47,4 @@ void AbstractRenderer::commit()
         (brayns::obj::ExtendedOBJMaterial*)getParamObject("bgMaterial",
                                                           nullptr);
 }
-
-/*! \brief create a material of given type */
-ospray::Material* AbstractRenderer::createMaterial(const char*)
-{
-    return new brayns::obj::ExtendedOBJMaterial;
-}
 }

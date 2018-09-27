@@ -28,7 +28,7 @@ namespace ospray
 {
 struct ExtendedSpheres : public ospray::Geometry
 {
-    std::string toString() const final { return "hbp::ExtendedSpheres"; }
+    std::string toString() const final { return "brayns::ExtendedSpheres"; }
     void finalize(ospray::Model* model) final;
 
     ospray::Ref<ospray::Data> data;

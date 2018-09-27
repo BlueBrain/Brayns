@@ -44,7 +44,7 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
     _unmapUnsafe();
     if (_pixelOp)
         ospRelease(_pixelOp);
-    ospFreeFrameBuffer(_frameBuffer);
+    ospRelease(_frameBuffer);
 }
 
 void OSPRayFrameBuffer::enableDeflectPixelOp()
@@ -93,7 +93,7 @@ void OSPRayFrameBuffer::_recreate()
     if (_frameBuffer)
     {
         _unmapUnsafe();
-        ospFreeFrameBuffer(_frameBuffer);
+        ospRelease(_frameBuffer);
     }
 
     OSPFrameBufferFormat format;
