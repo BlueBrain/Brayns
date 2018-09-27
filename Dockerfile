@@ -52,9 +52,8 @@ ENV PATH $PATH:${ISPC_PATH}
 
 # Install embree
 # https://github.com/embree/embree/releases
-ARG EMBREE_VERSION=2.17.4
+ARG EMBREE_VERSION=3.2.3
 ARG EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
-
 RUN mkdir -p ${DIST_PATH} \
   && wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE} \
   && tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1 \
@@ -62,13 +61,13 @@ RUN mkdir -p ${DIST_PATH} \
 
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
-ARG OSPRAY_VERSION=1.5.0-patch
+ARG OSPRAY_BRANCH=release-1.7.x
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
- && git clone https://github.com/BlueBrain/ospray.git ${OSPRAY_SRC} \
+ && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
  && cd ${OSPRAY_SRC} \
- && git checkout ${OSPRAY_VERSION} \
+ && git checkout ${OSPRAY_BRANCH} \
  && mkdir -p build \
  && cd build \
  && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \

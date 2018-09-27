@@ -72,7 +72,7 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
             Kd = mat->Kd * make_vec3f(dg.color);
             if (valid(mat->map_Kd))
             {
-                const vec4f diffuseColorFromMap = get4f(mat->map_Kd, dg.st);
+                const vec4f diffuseColorFromMap = get4f(mat->map_Kd, dg);
                 Kd = make_vec3f(dg.color * diffuseColorFromMap);
             }
         }

@@ -32,18 +32,22 @@ class Texture2D
 public:
     BRAYNS_API Texture2D();
 
-    BRAYNS_API const std::string& getFilename() const { return _filename; }
-    BRAYNS_API void setFilename(const std::string& value) { _filename = value; }
-    BRAYNS_API size_t getNbChannels() const { return _nbChannels; }
-    BRAYNS_API void setNbChannels(size_t value) { _nbChannels = value; }
-    BRAYNS_API size_t getDepth() const { return _depth; }
-    BRAYNS_API void setDepth(size_t value) { _depth = value; }
-    BRAYNS_API size_t getWidth() const { return _width; }
-    BRAYNS_API void setWidth(size_t value) { _width = value; }
-    BRAYNS_API size_t getHeight() const { return _height; }
-    BRAYNS_API void setHeight(size_t value) { _height = value; }
-    BRAYNS_API unsigned char* getRawData() { return _rawData.data(); }
-    BRAYNS_API void setRawData(unsigned char* data, size_t size);
+    const std::string& getFilename() const { return _filename; }
+    void setFilename(const std::string& value) { _filename = value; }
+    size_t getNbChannels() const { return _nbChannels; }
+    void setNbChannels(size_t value) { _nbChannels = value; }
+    size_t getDepth() const { return _depth; }
+    void setDepth(size_t value) { _depth = value; }
+    size_t getWidth() const { return _width; }
+    void setWidth(size_t value) { _width = value; }
+    size_t getHeight() const { return _height; }
+    void setHeight(size_t value) { _height = value; }
+    size_t getSizeInBytes() const
+    {
+        return _height * _width * _depth * _nbChannels;
+    }
+    unsigned char* getRawData() { return _rawData.data(); }
+    void setRawData(unsigned char* data, size_t size);
 
 private:
     std::string _filename;

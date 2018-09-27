@@ -22,6 +22,8 @@
 
 #include <brayns/common/log.h>
 
+#include <ospray/SDK/common/OSPCommon.h>
+
 #include <cassert>
 
 namespace brayns
@@ -43,7 +45,7 @@ static TextureTypeMaterialAttribute textureTypeMaterialAttribute[8] = {
     {TT_REFRACTION, "map_refraction"}};
 
 OSPRayMaterial::OSPRayMaterial()
-    : _ospMaterial(ospNewMaterial(nullptr, "ExtendedOBJMaterial"))
+    : _ospMaterial(ospNewMaterial2("", "ExtendedOBJMaterial"))
 {
 }
 
@@ -92,7 +94,7 @@ void OSPRayMaterial::commit()
     resetModified();
 }
 
-OSPTexture2D OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
+OSPTexture OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
 {
     OSPTextureFormat type = OSP_TEXTURE_R8; // smallest valid type as default
     if (texture->getDepth() == 1)
@@ -118,12 +120,17 @@ OSPTexture2D OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
                  << ": " << texture->getWidth() << "x" << texture->getHeight()
                  << "x" << (int)type << std::endl;
 
-    osp::vec2i texSize{int(texture->getWidth()), int(texture->getHeight())};
-    OSPTexture2D ospTexture =
-        ospNewTexture2D(texSize, type, texture->getRawData(),
-                        OSP_TEXTURE_SHARED_BUFFER);
+    OSPTexture ospTexture = ospNewTexture("texture2d");
 
-    assert(ospTexture);
+    const osp::vec2i size{int(texture->getWidth()), int(texture->getHeight())};
+
+    ospSet1i(ospTexture, "type", static_cast<int>(type));
+    ospSet2i(ospTexture, "size", size.x, size.y);
+    auto textureData =
+        ospNewData(texture->getSizeInBytes(), OSP_RAW, texture->getRawData(),
+                   OSP_DATA_SHARED_BUFFER);
+    ospSetObject(ospTexture, "data", textureData);
+    ospRelease(textureData);
     ospCommit(ospTexture);
 
     return ospTexture;

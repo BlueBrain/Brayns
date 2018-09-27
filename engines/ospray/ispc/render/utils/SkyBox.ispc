@@ -64,10 +64,11 @@ vec4f skyboxMapping(const uniform Renderer* uniform renderer,
 
     const varying vec3f intersection = normalize(ray.org + t * ray.dir);
 
-    // Intersection found, now get skybox color
-    const varying vec2f
-        st = {((atan2(intersection.x, intersection.z) / PI) + 1.f) * .5f,
-              -(asin(intersection.y) / PI) + .5f};
+    // Only st needs to be set to sample from Texture2D
+    varying DifferentialGeometry dg;
+    dg.st = make_vec2f(
+        ((atan2(intersection.x, intersection.z) / PI) + 1.f) * .5f,
+        -(asin(intersection.y) / PI) + .5f);
 
-    return get4f(bgMaterial->map_Kd, st);
+    return get4f(bgMaterial->map_Kd.map, dg);
 }

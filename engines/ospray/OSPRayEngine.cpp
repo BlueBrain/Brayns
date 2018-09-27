@@ -359,7 +359,7 @@ uint32_t OSPRayEngine::_getOSPDataFlags() const
 {
     return _parametersManager.getGeometryParameters().getMemoryMode() ==
                    MemoryMode::shared
-               ? OSP_DATA_SHARED_BUFFER
+               ? uint32_t(OSP_DATA_SHARED_BUFFER)
                : 0;
 }
 

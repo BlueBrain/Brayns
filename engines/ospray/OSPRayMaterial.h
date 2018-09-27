@@ -36,7 +36,7 @@ public:
 
     OSPMaterial getOSPMaterial() { return _ospMaterial; }
 private:
-    OSPTexture2D _createOSPTexture2D(Texture2DPtr texture);
+    OSPTexture _createOSPTexture2D(Texture2DPtr texture);
     OSPMaterial _ospMaterial;
 };
 }

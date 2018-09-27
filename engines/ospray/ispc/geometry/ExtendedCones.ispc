@@ -28,9 +28,9 @@
 #include "ospray/SDK/math/box.ih"
 #include "ospray/SDK/math/vec.ih"
 // embree
-#include "embree2/rtcore.isph"
-#include "embree2/rtcore_geometry_user.isph"
-#include "embree2/rtcore_scene.isph"
+#include "embree3/rtcore.isph"
+#include "embree3/rtcore_geometry.isph"
+#include "embree3/rtcore_scene.isph"
 
 #include "ospray/SDK/math/vec.ih"
 
@@ -42,44 +42,53 @@ DEFINE_SAFE_INCREMENT(Cone);
 
 struct ExtendedCones
 {
-    uniform Geometry geometry;
+    uniform Geometry super;
 
     uniform Cone* uniform data;
 
-    int32 numExtendedCones;
     uniform bool useSafeIncrement;
 };
 
-void ExtendedCones_bounds(uniform ExtendedCones* uniform geometry,
-                          uniform size_t primID, uniform box3fa& bbox)
+unmasked void ExtendedCones_bounds(
+    const RTCBoundsFunctionArguments* uniform args)
 {
-    uniform Cone* uniform conePtr =
-        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
+    const uniform ExtendedCones* uniform self =
+        (uniform ExtendedCones * uniform)args->geometryUserPtr;
+    const uniform Cone* uniform conePtr =
+        safeIncrement(self->useSafeIncrement, self->data, args->primID);
 
     uniform float extent = conePtr->centerRadius;
-    uniform float upRadius = conePtr->upRadius;
+    const uniform float upRadius = conePtr->upRadius;
 
     if (upRadius > extent)
         extent = upRadius;
 
-    uniform vec3f v0 = conePtr->center;
-    uniform vec3f v1 = conePtr->up;
-    bbox = make_box3fa(min(v0, v1) - make_vec3f(extent),
-                       max(v0, v1) + make_vec3f(extent));
+    const uniform vec3f v0 = conePtr->center;
+    const uniform vec3f v1 = conePtr->up;
+
+    box3fa* uniform bbox = (box3fa * uniform)args->bounds_o;
+    *bbox = make_box3fa(min(v0, v1) - make_vec3f(extent),
+                        max(v0, v1) + make_vec3f(extent));
 }
 
-void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
-                             varying Ray& ray, uniform size_t primID)
+unmasked void ExtendedCones_intersect(
+    const RTCIntersectFunctionNArguments *uniform args)
 {
-    uniform Cone* uniform conePtr =
-        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
+    const uniform ExtendedCones* uniform self =
+        (uniform ExtendedCones * uniform)args->geometryUserPtr;
+    const uniform int primID = args->primID;
+
+    const uniform Cone* uniform conePtr =
+        safeIncrement(self->useSafeIncrement, self->data, primID);
 
     uniform float radius0 = conePtr->centerRadius;
     uniform float radius1 = conePtr->upRadius;
 
-    uniform float timestamp = conePtr->timestamp;
+    const uniform float timestamp = conePtr->timestamp;
 
-    if (ray.time > 0 && timestamp > ray.time)
+    varying Ray* uniform ray = (varying Ray* uniform)args->rayhit;
+
+    if (ray->time > 0 && timestamp > ray->time)
         return;
 
     uniform vec3f v0 = conePtr->center;
@@ -114,7 +123,7 @@ void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
     const vec3f v = normalize(v0 - V);
 
     // Normal of the plane P determined by V and ray
-    vec3f n = normalize(cross(ray.dir, V - ray.org));
+    vec3f n = normalize(cross(ray->dir, V - ray->org));
     const float dotNV = dot(n, v);
     if (dotNV > 0.f)
         n = neg(n);
@@ -139,9 +148,9 @@ void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
     const vec3f vwComponent = v + tanTheta * w;
     const vec3f delta1 = vwComponent + uComponent;
     const vec3f delta2 = vwComponent - uComponent;
-    const vec3f rayApex = V - ray.org;
+    const vec3f rayApex = V - ray->org;
 
-    const vec3f normal1 = cross(ray.dir, delta1);
+    const vec3f normal1 = cross(ray->dir, delta1);
     const float length1 = length(normal1);
 
     if (length1 == 0.f)
@@ -149,7 +158,7 @@ void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
 
     const float r1 = dot(cross(rayApex, delta1), normal1) / (length1 * length1);
 
-    const vec3f normal2 = cross(ray.dir, delta2);
+    const vec3f normal2 = cross(ray->dir, delta2);
     const float length2 = length(normal2);
 
     if (length2 == 0.f)
@@ -173,31 +182,33 @@ void ExtendedCones_intersect(uniform ExtendedCones* uniform geometry,
             t_in = r2;
     }
 
-    if (t_in > ray.t0 && t_in < ray.t)
+    if (t_in > ray->t0 && t_in < ray->t)
     {
-        const vec3f p1 = ray.org + t_in * ray.dir;
+        const vec3f p1 = ray->org + t_in * ray->dir;
         // consider only the parts within the extents of the truncated cone
         if (dot(p1 - v1, v) > 0.f && dot(p1 - v0, v) < 0.f)
         {
-            ray.primID = primID;
-            ray.geomID = geometry->geometry.geomID;
-            ray.t = t_in;
+            ray->primID = primID;
+            ray->geomID = self->super.geomID;
+            ray->instID = args->context->instID[0];
+            ray->t = t_in;
             const vec3f surfaceVec = normalize(p1 - V);
-            ray.Ng = cross(cross(v, surfaceVec), surfaceVec);
+            ray->Ng = cross(cross(v, surfaceVec), surfaceVec);
             return;
         }
     }
-    if (t_out > ray.t0 && t_out < ray.t)
+    if (t_out > ray->t0 && t_out < ray->t)
     {
-        const vec3f p2 = ray.org + t_out * ray.dir;
+        const vec3f p2 = ray->org + t_out * ray->dir;
         // consider only the parts within the extents of the truncated cone
         if (dot(p2 - v1, v) > 0.f && dot(p2 - v0, v) < 0.f)
         {
-            ray.primID = primID;
-            ray.geomID = geometry->geometry.geomID;
-            ray.t = t_out;
+            ray->primID = primID;
+            ray->geomID = self->super.geomID;
+            ray->instID = args->context->instID[0];
+            ray->t = t_out;
             const vec3f surfaceVec = normalize(p2 - V);
-            ray.Ng = cross(cross(v, surfaceVec), surfaceVec);
+            ray->Ng = cross(cross(v, surfaceVec), surfaceVec);
         }
     }
     return;
@@ -242,36 +253,37 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
 export void* uniform ExtendedCones_create(void* uniform cppEquivalent)
 {
     uniform ExtendedCones* uniform geom = uniform new uniform ExtendedCones;
-    Geometry_Constructor(&geom->geometry, cppEquivalent,
-                         ExtendedCones_postIntersect, 0, 0, 0);
+    Geometry_Constructor(&geom->super, cppEquivalent,
+                         ExtendedCones_postIntersect, NULL, NULL, 0, NULL);
     return geom;
 }
 
-export void ExtendedConesGeometry_set(void* uniform _geom, void* uniform _model,
+export void ExtendedConesGeometry_set(void* uniform _self, void* uniform _model,
                                       void* uniform data,
-                                      int uniform numExtendedCones)
+                                      int uniform numPrimitives)
 {
-    uniform ExtendedCones* uniform geom =
-        (uniform ExtendedCones * uniform)_geom;
+    uniform ExtendedCones* uniform self =
+        (uniform ExtendedCones * uniform)_self;
     uniform Model* uniform model = (uniform Model * uniform)_model;
 
-    uniform uint32 geomID =
-        rtcNewUserGeometry(model->embreeSceneHandle, numExtendedCones);
+    RTCGeometry geom =
+        rtcNewGeometry(ispc_embreeDevice(), RTC_GEOMETRY_TYPE_USER);
+    uniform uint32 geomID = rtcAttachGeometry(model->embreeSceneHandle, geom);
 
-    geom->geometry.model = model;
-    geom->geometry.geomID = geomID;
-    geom->numExtendedCones = numExtendedCones;
-    geom->data = (uniform Cone * uniform)data;
-    geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedCones);
+    self->super.model = model;
+    self->super.geomID = geomID;
+    self->super.numPrimitives = numPrimitives;
+    self->data = (uniform Cone * uniform)data;
+    self->useSafeIncrement = needsSafeIncrement(self->data, numPrimitives);
 
-    rtcSetUserData(model->embreeSceneHandle, geomID, geom);
-    rtcSetBoundsFunction(model->embreeSceneHandle, geomID,
-                         (uniform RTCBoundsFunc)&ExtendedCones_bounds);
-    rtcSetIntersectFunction(
-        model->embreeSceneHandle, geomID,
-        (uniform RTCIntersectFuncVarying)&ExtendedCones_intersect);
-    rtcSetOccludedFunction(
-        model->embreeSceneHandle, geomID,
-        (uniform RTCOccludedFuncVarying)&ExtendedCones_intersect);
-    rtcEnable(model->embreeSceneHandle, geomID);
+    rtcSetGeometryUserData(geom, self);
+    rtcSetGeometryUserPrimitiveCount(geom, numPrimitives);
+    rtcSetGeometryBoundsFunction(
+        geom, (uniform RTCBoundsFunction)&ExtendedCones_bounds, self);
+    rtcSetGeometryIntersectFunction(
+        geom, (uniform RTCIntersectFunctionN)&ExtendedCones_intersect);
+    rtcSetGeometryOccludedFunction(
+        geom, (uniform RTCOccludedFunctionN)&ExtendedCones_intersect);
+    rtcCommitGeometry(geom);
+    rtcReleaseGeometry(geom);
 }
