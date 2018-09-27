@@ -253,7 +253,8 @@ void Scene::removeClipPlane(const size_t id)
 }
 
 ModelDescriptorPtr Scene::load(Blob&& blob, const size_t materialID,
-                               Loader::UpdateCallback cb)
+                               Loader::UpdateCallback cb,
+                               const ModelParams& params)
 {
     auto loader = _loaderRegistry.createLoader(blob.type);
     loader->setProgressCallback(cb);
@@ -261,6 +262,7 @@ ModelDescriptorPtr Scene::load(Blob&& blob, const size_t materialID,
         loader->importFromBlob(std::move(blob), 0, materialID);
     if (!modelDescriptor)
         throw std::runtime_error("No model returned by loader");
+    *modelDescriptor = params;
     addModel(modelDescriptor);
     saveToCacheFile();
     markModified();
@@ -268,7 +270,8 @@ ModelDescriptorPtr Scene::load(Blob&& blob, const size_t materialID,
 }
 
 ModelDescriptorPtr Scene::load(const std::string& path, const size_t materialID,
-                               Loader::UpdateCallback cb)
+                               Loader::UpdateCallback cb,
+                               const ModelParams& params)
 {
     ModelDescriptorPtr modelDescriptor;
     if (fs::is_directory(path))
@@ -308,6 +311,7 @@ ModelDescriptorPtr Scene::load(const std::string& path, const size_t materialID,
                 loader->importFromFile(currentPath, index++, materialID);
             if (!modelDescriptor)
                 throw std::runtime_error("No model returned by loader");
+            *modelDescriptor = params;
             addModel(modelDescriptor);
 
             totalProgress += 1.f / numFiles;
@@ -320,6 +324,7 @@ ModelDescriptorPtr Scene::load(const std::string& path, const size_t materialID,
         modelDescriptor = loader->importFromFile(path, 0, materialID);
         if (!modelDescriptor)
             throw std::runtime_error("No model returned by loader");
+        *modelDescriptor = params;
         addModel(modelDescriptor);
     }
     saveToCacheFile();

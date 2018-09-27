@@ -45,26 +45,18 @@ AddModelTask::AddModelTask(const ModelParams& modelParams, EnginePtr engine)
             {{supportedTypes.begin(), supportedTypes.end()}});
     }
 
-    LoadModelFunctor functor{engine};
+    LoadModelFunctor functor{engine, modelParams};
     functor.setCancelToken(_cancelToken);
     functor.setProgressFunc([& progress = progress](const auto& msg, auto,
                                                     auto amount) {
         progress.update(msg, amount);
     });
 
-    // load data, trigger rendering, return model descriptor
+    // load data, return model descriptor
     _task = async::spawn([path = modelParams.getPath()] { return path; })
                 .then(std::move(functor))
-                .then([engine,
-                       modelParams](async::task<ModelDescriptorPtr> result) {
-                    auto modelDescriptor = result.get();
-                    if (modelDescriptor)
-                    {
-                        auto lock = engine->getScene().acquireReadAccess();
-                        *modelDescriptor = modelParams;
-                    }
-                    engine->triggerRender();
-                    return modelDescriptor;
+                .then([](async::task<ModelDescriptorPtr> result) {
+                    return result.get();
                 });
 }
 }

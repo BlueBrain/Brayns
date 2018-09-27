@@ -38,8 +38,9 @@ namespace brayns
 {
 const float TOTAL_PROGRESS = 100.f;
 
-LoadModelFunctor::LoadModelFunctor(EnginePtr engine)
+LoadModelFunctor::LoadModelFunctor(EnginePtr engine, const ModelParams& params)
     : _engine(engine)
+    , _params(params)
 {
 }
 
@@ -52,20 +53,21 @@ ModelDescriptorPtr LoadModelFunctor::operator()(Blob&& blob)
         {
             Scope() { fs::create_directories(_path); }
             ~Scope() { fs::remove_all(_path); }
-            ModelDescriptorPtr operator()(Blob&& b, LoadModelFunctor& parent)
+            ModelDescriptorPtr operator()(Blob&& b, LoadModelFunctor& parent,
+                                          const ModelParams& params)
             {
                 extractBlob(std::move(b), _path.string());
                 return parent._performLoad(
-                    [&] { return parent._loadData(_path.string()); });
+                    [&] { return parent._loadData(_path.string(), params); });
             }
 
         private:
             fs::path _path = fs::temp_directory_path() / fs::unique_path();
         } scope;
-        return scope(std::move(blob), *this);
+        return scope(std::move(blob), *this, _params);
     }
 
-    return _performLoad([&] { return _loadData(std::move(blob)); });
+    return _performLoad([&] { return _loadData(std::move(blob), _params); });
 }
 
 ModelDescriptorPtr LoadModelFunctor::operator()(const std::string& path)
@@ -78,20 +80,21 @@ ModelDescriptorPtr LoadModelFunctor::operator()(const std::string& path)
             Scope() { fs::create_directories(_path); }
             ~Scope() { fs::remove_all(_path); }
             ModelDescriptorPtr operator()(const std::string& file,
-                                          LoadModelFunctor& parent)
+                                          LoadModelFunctor& parent,
+                                          const ModelParams& params)
             {
                 extractFile(file, _path.string());
                 return parent._performLoad(
-                    [&] { return parent._loadData(_path.string()); });
+                    [&] { return parent._loadData(_path.string(), params); });
             }
 
         private:
             fs::path _path = fs::temp_directory_path() / fs::unique_path();
         } scope;
-        return scope(path, *this);
+        return scope(path, *this, _params);
     }
 
-    return _performLoad([&] { return _loadData(path); });
+    return _performLoad([&] { return _loadData(path, _params); });
 }
 
 ModelDescriptorPtr LoadModelFunctor::_performLoad(
@@ -109,15 +112,18 @@ ModelDescriptorPtr LoadModelFunctor::_performLoad(
     }
 }
 
-ModelDescriptorPtr LoadModelFunctor::_loadData(Blob&& blob)
+ModelDescriptorPtr LoadModelFunctor::_loadData(Blob&& blob,
+                                               const ModelParams& params)
 {
     return _engine->getScene().load(std::move(blob), NO_MATERIAL,
-                                    _getProgressFunc());
+                                    _getProgressFunc(), params);
 }
 
-ModelDescriptorPtr LoadModelFunctor::_loadData(const std::string& path)
+ModelDescriptorPtr LoadModelFunctor::_loadData(const std::string& path,
+                                               const ModelParams& params)
 {
-    return _engine->getScene().load(path, NO_MATERIAL, _getProgressFunc());
+    return _engine->getScene().load(path, NO_MATERIAL, _getProgressFunc(),
+                                    params);
 }
 
 void LoadModelFunctor::_updateProgress(const std::string& message,

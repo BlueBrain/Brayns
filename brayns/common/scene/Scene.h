@@ -257,7 +257,8 @@ public:
      * @return the model that has been added to the scene
      */
     ModelDescriptorPtr load(Blob&& blob, const size_t materialID,
-                            Loader::UpdateCallback cb);
+                            Loader::UpdateCallback cb,
+                            const ModelParams& params);
 
     /**
      * Load the data from the given file.
@@ -268,7 +269,8 @@ public:
      * @return the model that has been added to the scene
      */
     ModelDescriptorPtr load(const std::string& path, const size_t materialID,
-                            Loader::UpdateCallback cb);
+                            Loader::UpdateCallback cb,
+                            const ModelParams& params);
 
     /** @return the registry for all supported loaders of this scene. */
     LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }

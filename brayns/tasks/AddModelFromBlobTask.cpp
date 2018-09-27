@@ -38,30 +38,21 @@ AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
 
     _blob.reserve(param.size);
 
-    LoadModelFunctor functor{engine};
+    LoadModelFunctor functor{engine, param};
     functor.setCancelToken(_cancelToken);
     functor.setProgressFunc([& progress = progress](const auto& msg, auto,
                                                     auto amount) {
         progress.update(msg, amount);
     });
 
-    // load data, trigger rendering, return model descriptor or stop if blob
-    // receive was invalid
+    // load data, return model descriptor or stop if blob receive was invalid
     _finishTasks.emplace_back(_errorEvent.get_task());
     _finishTasks.emplace_back(_chunkEvent.get_task().then(std::move(functor)));
     _task = async::when_any(_finishTasks)
-                .then([ engine, &param = _param ](
-                    async::when_any_result<
-                        std::vector<async::task<ModelDescriptorPtr>>>
-                        results) {
-                    auto modelDesc = results.tasks[results.index].get();
-                    if (modelDesc)
-                    {
-                        auto lock = engine->getScene().acquireReadAccess();
-                        *modelDesc = param;
-                    }
-                    engine->triggerRender();
-                    return modelDesc;
+                .then([](async::when_any_result<
+                         std::vector<async::task<ModelDescriptorPtr>>>
+                             results) {
+                    return results.tasks[results.index].get();
                 });
 }
 
