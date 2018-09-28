@@ -60,7 +60,11 @@ void OSPRayCamera::commit()
         ospRelease(clipPlaneData);
     }
     else
+    {
+        // ospRemoveParam leaks objects, so we set it to null first
+        ospSetData(_camera, "clipPlanes", nullptr);
         ospRemoveParam(_camera, "clipPlanes");
+    }
 
     ospCommit(_camera);
 }
