@@ -253,24 +253,26 @@ public:
      *
      * @param blob the blob containing the data to import
      * @param materialID the default material ot use
+     * @param params Parameters for the model to be loaded
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
     ModelDescriptorPtr load(Blob&& blob, const size_t materialID,
-                            Loader::UpdateCallback cb,
-                            const ModelParams& params);
+                            const ModelParams& params,
+                            Loader::UpdateCallback cb);
 
     /**
      * Load the data from the given file.
      *
      * @param path the file or folder containing the data to import
      * @param materialID the default material ot use
+     * @param params Parameters for the model to be loaded
      * @param cb the callback for progress updates from the loader
      * @return the model that has been added to the scene
      */
     ModelDescriptorPtr load(const std::string& path, const size_t materialID,
-                            Loader::UpdateCallback cb,
-                            const ModelParams& params);
+                            const ModelParams& params,
+                            Loader::UpdateCallback cb);
 
     /** @return the registry for all supported loaders of this scene. */
     LoaderRegistry& getLoaderRegistry() { return _loaderRegistry; }
