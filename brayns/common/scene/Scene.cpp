@@ -252,9 +252,9 @@ void Scene::removeClipPlane(const size_t id)
         markModified();
 }
 
-ModelDescriptorPtr Scene::load(Blob&& blob, const size_t materialID,
-                               const ModelParams& params,
-                               Loader::UpdateCallback cb)
+ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
+                                    const ModelParams& params,
+                                    Loader::UpdateCallback cb)
 {
     auto loader = _loaderRegistry.createLoader(blob.type);
     loader->setProgressCallback(cb);
@@ -269,9 +269,10 @@ ModelDescriptorPtr Scene::load(Blob&& blob, const size_t materialID,
     return modelDescriptor;
 }
 
-ModelDescriptorPtr Scene::load(const std::string& path, const size_t materialID,
-                               const ModelParams& params,
-                               Loader::UpdateCallback cb)
+ModelDescriptorPtr Scene::loadModel(const std::string& path,
+                                    const size_t materialID,
+                                    const ModelParams& params,
+                                    Loader::UpdateCallback cb)
 {
     ModelDescriptorPtr modelDescriptor;
     if (fs::is_directory(path))
