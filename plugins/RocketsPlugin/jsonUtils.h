@@ -63,17 +63,31 @@ rapidjson::Document getRPCParameterSchema(const std::string& paramName,
                                           const std::string& paramDescription,
                                           T& obj)
 {
-    rapidjson::Document schema = staticjson::export_json_schema(&obj);
-
     using namespace rapidjson;
-    schema.AddMember(StringRef("name"),
-                     Value(paramName.c_str(), schema.GetAllocator()),
-                     schema.GetAllocator());
+    auto schema = staticjson::export_json_schema(&obj);
+    auto& allocator = schema.GetAllocator();
+
+    schema.AddMember(StringRef("name"), Value(paramName.c_str(), allocator),
+                     allocator);
     schema.AddMember(StringRef("description"),
-                     Value(paramDescription.c_str(), schema.GetAllocator()),
-                     schema.GetAllocator());
+                     Value(paramDescription.c_str(), allocator), allocator);
     return schema;
 };
+
+rapidjson::Document _buildJsonRpcSchema(const RpcDescription& desc)
+{
+    using namespace rapidjson;
+    Document schema(kObjectType);
+    auto& allocator = schema.GetAllocator();
+    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
+                     allocator);
+    schema.AddMember(StringRef("description"),
+                     StringRef(desc.methodDescription.c_str()), allocator);
+    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
+    schema.AddMember(StringRef("async"), desc.type == RpcDescription::ASYNC,
+                     allocator);
+    return schema;
+}
 
 /**
  * @return JSON schema for RPC with one parameter and a return value, according
@@ -85,24 +99,18 @@ std::string buildJsonRpcSchemaRequest(const RpcParameterDescription& desc,
                                       P& obj)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     schema.GetAllocator());
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()),
-                     schema.GetAllocator());
-    schema.AddMember(StringRef("type"), StringRef("method"),
-                     schema.GetAllocator());
+    auto schema = _buildJsonRpcSchema(desc);
+    auto& allocator = schema.GetAllocator();
 
     R retVal;
     auto retSchema = staticjson::export_json_schema(&retVal);
-    schema.AddMember(StringRef("returns"), retSchema, schema.GetAllocator());
+    schema.AddMember(StringRef("returns"), retSchema, allocator);
 
     Value params(kArrayType);
     auto paramSchema =
         getRPCParameterSchema<P>(desc.paramName, desc.paramDescription, obj);
-    params.PushBack(paramSchema, schema.GetAllocator());
-    schema.AddMember(StringRef("params"), params, schema.GetAllocator());
+    params.PushBack(paramSchema, allocator);
+    schema.AddMember(StringRef("params"), params, allocator);
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
@@ -127,20 +135,14 @@ std::string buildJsonRpcSchemaRequestReturnOnly(const RpcDescription& desc,
                                                 R& retVal)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     schema.GetAllocator());
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()),
-                     schema.GetAllocator());
-    schema.AddMember(StringRef("type"), StringRef("method"),
-                     schema.GetAllocator());
+    auto schema = _buildJsonRpcSchema(desc);
+    auto& allocator = schema.GetAllocator();
 
     auto retSchema = staticjson::export_json_schema(&retVal);
-    schema.AddMember(StringRef("returns"), retSchema, schema.GetAllocator());
+    schema.AddMember(StringRef("returns"), retSchema, allocator);
 
     Value params(kArrayType);
-    schema.AddMember(StringRef("params"), params, schema.GetAllocator());
+    schema.AddMember(StringRef("params"), params, allocator);
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
@@ -165,20 +167,14 @@ std::string buildJsonRpcSchemaNotify(const RpcParameterDescription& desc,
                                      P& obj)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     schema.GetAllocator());
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()),
-                     schema.GetAllocator());
-    schema.AddMember(StringRef("type"), StringRef("method"),
-                     schema.GetAllocator());
+    auto schema = _buildJsonRpcSchema(desc);
+    auto& allocator = schema.GetAllocator();
 
     Value params(kArrayType);
     auto paramSchema =
         getRPCParameterSchema<P>(desc.paramName, desc.paramDescription, obj);
-    params.PushBack(paramSchema, schema.GetAllocator());
-    schema.AddMember(StringRef("params"), params, schema.GetAllocator());
+    params.PushBack(paramSchema, allocator);
+    schema.AddMember(StringRef("params"), params, allocator);
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
@@ -197,20 +193,13 @@ std::string buildJsonRpcSchemaNotify(const RpcParameterDescription& desc)
 std::string buildJsonRpcSchemaNotify(const RpcDescription& desc)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     schema.GetAllocator());
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()),
-                     schema.GetAllocator());
-    schema.AddMember(StringRef("type"), StringRef("method"),
-                     schema.GetAllocator());
+    auto schema = _buildJsonRpcSchema(desc);
+    auto& allocator = schema.GetAllocator();
 
-    schema.AddMember(StringRef("returns"), Value(kNullType),
-                     schema.GetAllocator());
+    schema.AddMember(StringRef("returns"), Value(kNullType), allocator);
 
     Value params(kArrayType);
-    schema.AddMember(StringRef("params"), params, schema.GetAllocator());
+    schema.AddMember(StringRef("params"), params, allocator);
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);

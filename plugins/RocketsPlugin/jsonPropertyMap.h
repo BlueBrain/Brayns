@@ -267,13 +267,8 @@ std::string buildJsonRpcSchemaRequestPropertyMaps(
     const std::vector<std::pair<std::string, PropertyMap>>& objs)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
+    auto schema = _buildJsonRpcSchema(desc);
     auto& allocator = schema.GetAllocator();
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     allocator);
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()), allocator);
-    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
 
     Value returns(kObjectType);
     Value oneOf(kArrayType);
@@ -295,13 +290,8 @@ std::string buildJsonRpcSchemaRequestPropertyMap(const RpcDescription& desc,
                                                  const PropertyMap& obj)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
+    auto schema = _buildJsonRpcSchema(desc);
     auto& allocator = schema.GetAllocator();
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     allocator);
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()), allocator);
-    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
 
     Value returns(kObjectType);
     _addPropertyMapSchema(obj, "", allocator, returns);
@@ -323,13 +313,8 @@ std::string buildJsonRpcSchemaRequestPropertyMap(
     const PropertyMap& output)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
+    auto schema = _buildJsonRpcSchema(desc);
     auto& allocator = schema.GetAllocator();
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     allocator);
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()), allocator);
-    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
 
     Value returns(kObjectType);
     _addPropertyMapSchema(output, "", allocator, returns);
@@ -354,13 +339,8 @@ std::string buildJsonRpcSchemaNotifyPropertyMaps(
     const std::vector<std::pair<std::string, PropertyMap>>& objs)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
+    auto schema = _buildJsonRpcSchema(desc);
     auto& allocator = schema.GetAllocator();
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     allocator);
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()), allocator);
-    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
 
     bool retVal;
     auto retSchema = staticjson::export_json_schema(&retVal);
@@ -386,13 +366,8 @@ std::string buildJsonRpcSchemaNotifyPropertyMap(
     const RpcParameterDescription& desc, const PropertyMap& properties)
 {
     using namespace rapidjson;
-    Document schema(kObjectType);
+    auto schema = _buildJsonRpcSchema(desc);
     auto& allocator = schema.GetAllocator();
-    schema.AddMember(StringRef("title"), StringRef(desc.methodName.c_str()),
-                     allocator);
-    schema.AddMember(StringRef("description"),
-                     StringRef(desc.methodDescription.c_str()), allocator);
-    schema.AddMember(StringRef("type"), StringRef("method"), allocator);
 
     bool retVal;
     auto retSchema = staticjson::export_json_schema(&retVal);
