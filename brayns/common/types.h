@@ -358,13 +358,37 @@ struct RpcDescription
 {
     std::string methodName;
     std::string methodDescription;
+    enum Type
+    {
+        SYNC,
+        ASYNC
+    } type{SYNC};
 };
 
 /** Description for RPC with one parameter. */
-struct RpcParameterDescription
+struct RpcParameterDescription : public RpcDescription
 {
-    std::string methodName;
-    std::string methodDescription;
+    RpcParameterDescription(const std::string& methodName_,
+                            const std::string& methodDescription_,
+                            const RpcDescription::Type type_,
+                            const std::string& paramName_,
+                            const std::string& paramDescription_)
+        : RpcDescription{methodName_, methodDescription_, type_}
+        , paramName(paramName_)
+        , paramDescription(paramDescription_)
+    {
+    }
+
+    RpcParameterDescription(const std::string& methodName_,
+                            const std::string& methodDescription_,
+                            const std::string& paramName_,
+                            const std::string& paramDescription_)
+        : RpcDescription{methodName_, methodDescription_, SYNC}
+        , paramName(paramName_)
+        , paramDescription(paramDescription_)
+    {
+    }
+
     std::string paramName;
     std::string paramDescription;
 };
