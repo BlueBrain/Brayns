@@ -43,6 +43,7 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     streamlines.cpp
     testImages.cpp
     webAPI.cpp
+    shadows.cpp
   )
 endif()
 
