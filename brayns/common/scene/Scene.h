@@ -131,8 +131,9 @@ public:
     /**
         Removes a model from the scene
         @param id id of the model (descriptor)
+        @return True if model was found and removed, false otherwise
       */
-    BRAYNS_API void removeModel(const size_t id);
+    BRAYNS_API bool removeModel(const size_t id);
 
     BRAYNS_API ModelDescriptorPtr getModel(const size_t id) const;
 

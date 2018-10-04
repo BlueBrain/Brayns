@@ -483,6 +483,7 @@ private:
 
         scene.saveToCacheFile();
         scene.buildEnvironmentMap();
+        scene.markModified();
     }
 
 #if (BRAYNS_USE_BRION)
@@ -535,6 +536,7 @@ private:
                 scene.setSimulationHandler(simulationHandler);
             }
             scene.addModel(model);
+            scene.markModified();
         }
     }
 
@@ -561,6 +563,7 @@ private:
 
         const servus::URI uri(filename);
         scene.addModel(circuitLoader.importCircuit(uri, targets, report));
+        scene.markModified();
     }
 #endif // BRAYNS_USE_BRION
 
@@ -576,6 +579,7 @@ private:
         molecularSystemReader.setProgressCallback(progressUpdate);
         const auto fileName = geometryParameters.getMolecularSystemConfig();
         scene.addModel(molecularSystemReader.importFromFile(fileName));
+        scene.markModified();
     }
 
     void _setupCameraManipulator(const CameraMode mode)

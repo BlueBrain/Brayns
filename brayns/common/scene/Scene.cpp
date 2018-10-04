@@ -167,25 +167,19 @@ size_t Scene::addModel(ModelDescriptorPtr model)
             model->addInstance({true, true, model->getTransformation()});
     }
 
-    markModified();
     return model->getModelID();
 }
 
-void Scene::removeModel(const size_t id)
+bool Scene::removeModel(const size_t id)
 {
-    bool removed = false;
+    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+    auto model = _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
+    if (model)
     {
-        std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-        auto model =
-            _remove(_modelDescriptors, id, &ModelDescriptor::getModelID);
-        if (model)
-        {
-            model->callOnRemoved();
-            removed = true;
-        }
+        model->callOnRemoved();
+        return true;
     }
-    if (removed)
-        markModified();
+    return false;
 }
 
 ModelDescriptorPtr Scene::getModel(const size_t id) const
@@ -269,6 +263,7 @@ ModelDescriptorPtr Scene::load(Blob&& blob, const size_t materialID,
         throw std::runtime_error("No model returned by loader");
     addModel(modelDescriptor);
     saveToCacheFile();
+    markModified();
     return modelDescriptor;
 }
 
@@ -329,6 +324,7 @@ ModelDescriptorPtr Scene::load(const std::string& path, const size_t materialID,
     }
     saveToCacheFile();
     buildEnvironmentMap();
+    markModified();
     return modelDescriptor;
 }
 
