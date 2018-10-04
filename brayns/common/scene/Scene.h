@@ -34,7 +34,6 @@ SERIALIZATION_ACCESS(Scene)
 
 namespace brayns
 {
-
 /**
 
    Scene object
@@ -132,8 +131,9 @@ public:
     /**
         Removes a model from the scene
         @param id id of the model (descriptor)
+        @return True if model was found and removed, false otherwise
       */
-    BRAYNS_API void removeModel(const size_t id);
+    BRAYNS_API bool removeModel(const size_t id);
 
     BRAYNS_API ModelDescriptorPtr getModel(const size_t id) const;
 
@@ -171,11 +171,7 @@ public:
     /**
        @return the clip planes
     */
-    const ClipPlanes& getClipPlanes() const
-    {
-        return _clipPlanes;
-    }
-
+    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
     /**
         Returns the simulutation handler
     */

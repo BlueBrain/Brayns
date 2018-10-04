@@ -349,8 +349,7 @@ public:
 #endif
     }
 
-    void _rebroadcast(const std::string& endpoint,
-                      const std::string& message,
+    void _rebroadcast(const std::string& endpoint, const std::string& message,
                       const std::set<uintptr_t>& filter)
     {
         _delayedNotify([&, message, filter] {
@@ -1187,6 +1186,7 @@ public:
         _handleRPC<size_ts, bool>(desc, [engine = _engine](const size_ts& ids) {
             for (const auto id : ids)
                 engine->getScene().removeModel(id);
+            engine->getScene().markModified();
             engine->triggerRender();
             return true;
         });
@@ -1274,8 +1274,8 @@ public:
                 model->setProperties(props);
                 _engine->triggerRender();
 
-                this->_rebroadcast(METHOD_SET_MODEL_PROPERTIES,
-                                   request.message, {request.clientID});
+                this->_rebroadcast(METHOD_SET_MODEL_PROPERTIES, request.message,
+                                   {request.clientID});
 
                 return Response{to_json(true)};
             }
