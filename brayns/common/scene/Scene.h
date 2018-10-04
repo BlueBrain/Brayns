@@ -34,7 +34,6 @@ SERIALIZATION_ACCESS(Scene)
 
 namespace brayns
 {
-
 /**
 
    Scene object
@@ -171,11 +170,7 @@ public:
     /**
        @return the clip planes
     */
-    const ClipPlanes& getClipPlanes() const
-    {
-        return _clipPlanes;
-    }
-
+    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
     /**
         Returns the simulutation handler
     */

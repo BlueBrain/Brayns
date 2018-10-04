@@ -241,7 +241,7 @@ bool Scene::empty() const
 size_t Scene::addClipPlane(const Plane& plane)
 {
     auto clipPlane = std::make_shared<ClipPlane>(plane);
-    clipPlane->onModified([&](const BaseObject&){ markModified(); });
+    clipPlane->onModified([&](const BaseObject&) { markModified(); });
     _clipPlanes.emplace_back(std::move(clipPlane));
     markModified();
     return _clipPlanes.back()->getID();
