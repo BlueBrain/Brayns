@@ -53,8 +53,7 @@ AddModelTask::AddModelTask(const ModelParams& modelParams, EnginePtr engine)
     });
 
     // load data, return model descriptor
-    _task = async::spawn([path = modelParams.getPath()] { return path; })
-                .then(std::move(functor))
+    _task = async::spawn(std::move(functor))
                 .then([](async::task<ModelDescriptorPtr> result) {
                     return result.get();
                 });

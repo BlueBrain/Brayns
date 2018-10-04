@@ -70,8 +70,9 @@ ModelDescriptorPtr LoadModelFunctor::operator()(Blob&& blob)
     return _performLoad([&] { return _loadData(std::move(blob), _params); });
 }
 
-ModelDescriptorPtr LoadModelFunctor::operator()(const std::string& path)
+ModelDescriptorPtr LoadModelFunctor::operator()()
 {
+    const auto& path = _params.getPath();
     // extract the archive and treat it as 'load from folder'
     if (isArchive(path))
     {

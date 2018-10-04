@@ -36,7 +36,7 @@ public:
     LoadModelFunctor(EnginePtr engine, const ModelParams& params);
     LoadModelFunctor(LoadModelFunctor&&) = default;
     ModelDescriptorPtr operator()(Blob&& blob);
-    ModelDescriptorPtr operator()(const std::string& path);
+    ModelDescriptorPtr operator()();
 
 private:
     ModelDescriptorPtr _performLoad(
