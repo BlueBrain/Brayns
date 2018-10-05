@@ -47,6 +47,19 @@ void ExtendedSpheres::finalize(ospray::Model* model)
             "no 'extendedspheres' data specified");
 
     const size_t numExtendedSpheres = data->numBytes / bytesPerExtendedSphere;
+
+    bounds = empty;
+    const auto geoms = static_cast<brayns::Sphere*>(data->data);
+    for (size_t i = 0; i < numExtendedSpheres; i++)
+    {
+        const brayns::Sphere& geom = geoms[i];
+        const auto center =
+            vec3f(geom.center[0], geom.center[1], geom.center[2]);
+
+        bounds.extend(center - geom.radius);
+        bounds.extend(center + geom.radius);
+    }
+
     ispc::ExtendedSpheresGeometry_set(getIE(), model->getIE(), data->data,
                                       numExtendedSpheres);
 }

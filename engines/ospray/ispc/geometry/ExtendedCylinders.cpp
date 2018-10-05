@@ -47,6 +47,22 @@ void ExtendedCylinders::finalize(ospray::Model* model)
             "no 'extendedcylinders' data specified");
 
     const size_t numExtendedCylinders = data->numBytes / bytesPerCylinder;
+
+    bounds = empty;
+    const auto geoms = static_cast<brayns::Cylinder*>(data->data);
+    for (size_t i = 0; i < numExtendedCylinders; i++)
+    {
+        const brayns::Cylinder& geom = geoms[i];
+        const auto center =
+            vec3f(geom.center[0], geom.center[1], geom.center[2]);
+        const auto up = vec3f(geom.up[0], geom.up[1], geom.up[2]);
+
+        bounds.extend(center - geom.radius);
+        bounds.extend(center + geom.radius);
+        bounds.extend(up - geom.radius);
+        bounds.extend(up + geom.radius);
+    }
+
     ispc::ExtendedCylindersGeometry_set(getIE(), model->getIE(), data->data,
                                         numExtendedCylinders);
 }
