@@ -51,6 +51,20 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
     const size_t numExtendedSDFGeometries = data->numItems;
     const size_t numNeighbours = neighbours->numItems;
 
+    bounds = empty;
+    const auto geoms = static_cast<brayns::SDFGeometry*>(geometries->data);
+    for (size_t i = 0; i < numExtendedSDFGeometries; i++)
+    {
+        const auto bd = getSDFBoundingBox(geoms[i]);
+        const auto& bMind = bd.getMin();
+        const auto& bMaxd = bd.getMax();
+        const auto bMinf = vec3f(bMind[0], bMind[1], bMind[2]);
+        const auto bMaxf = vec3f(bMaxd[0], bMaxd[1], bMaxd[2]);
+
+        bounds.extend(bMinf);
+        bounds.extend(bMaxf);
+    }
+
     ispc::ExtendedSDFGeometriesGeometry_set(getIE(), model->getIE(), data->data,
                                             numExtendedSDFGeometries,
                                             neighbours->data, numNeighbours,
