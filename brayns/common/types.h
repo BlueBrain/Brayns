@@ -30,6 +30,7 @@
 #define SERIALIZATION_FRIEND(type) \
     friend void staticjson::init(type*, staticjson::ObjectHandler*);
 
+#include "commonTypes.h"
 #include <brayns/common/mathTypes.h>
 
 #include <array>
@@ -286,13 +287,6 @@ enum class MaterialsColorMap
     shades_of_grey, // 255 shades of grey
     gradient,       // Gradient from red to yellow
     pastel          // Random pastel colors
-};
-
-enum class MaterialShadingMode
-{
-    none = 0,
-    diffuse = 1,
-    electron = 2
 };
 
 /**

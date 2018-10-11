@@ -9,6 +9,7 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(Brayns VERSION 0.8.0)
 set(Brayns_VERSION_ABI 1)
 
+set(BRAYNS_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake/common)
 if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake)

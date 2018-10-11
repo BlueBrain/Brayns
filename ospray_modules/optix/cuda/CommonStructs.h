@@ -40,11 +40,3 @@ struct BasicLight
     int casts_shadow;
     int type; // Point or Directional
 };
-
-// Caution: This has to match the Brayns::MaterialShadingMode
-enum MaterialShadingMode
-{
-    none = 0,
-    diffuse = 1,
-    electron = 2
-};

@@ -74,6 +74,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   tasks/TaskRuntimeError.h
   transferFunction/TransferFunction.h
   types.h
+  commonTypes.h
   utils/Utils.h
   volume/BrickedVolume.h
   volume/SharedDataVolume.h

@@ -32,6 +32,8 @@
  * occlusion
  */
 
+#include <brayns/common/commonTypes.h>
+
 #include "../CommonStructs.h"
 #include "../Helpers.h"
 #include "../Random.h"
@@ -262,7 +264,7 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
                                   float3 p_Kr, float3 p_Ko,
                                   float p_refractionIndex, float p_phong_exp,
                                   float p_glossiness,
-                                  unsigned int p_shadindMode, float3 p_normal,
+                                  unsigned int p_shadingMode, float3 p_normal,
                                   float p_ray_tmax)
 {
     float3 result = make_float3(0.f);
@@ -273,10 +275,11 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
 
     // Glossiness
     if (p_glossiness < 1.f)
-        p_normal = optix::normalize(
-            p_normal + (1.f - p_glossiness) * make_float3(rnd(seed) - 0.5f,
-                                                          rnd(seed) - 0.5f,
-                                                          rnd(seed) - 0.5f));
+        p_normal =
+            optix::normalize(p_normal +
+                             (1.f - p_glossiness) *
+                                 make_float3(rnd(seed) - 0.5f, rnd(seed) - 0.5f,
+                                             rnd(seed) - 0.5f));
     // Volume
     float4 volumeColor = make_float4(0.f, 0.f, 0.f, 0.f);
     if (volumeDiag != 0.f)
@@ -288,11 +291,11 @@ static __device__ void phongShade(float3 p_Kd, float3 p_Ka, float3 p_Ks,
 
     if (fmaxf(p_Ko) < epsilon)
         result += p_Ko * p_Kd;
-    else if (p_shadindMode == electron)
+    else if (p_shadingMode == brayns::electron)
         result +=
             p_Kd * (1.f - abs(optix::dot(optix::normalize(hit_point - eye),
                                          p_normal)));
-    else if (p_shadindMode == none)
+    else if (p_shadingMode == brayns::none)
         result += p_Kd;
     else
     {
