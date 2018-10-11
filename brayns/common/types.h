@@ -353,24 +353,26 @@ enum class DataType
 class PropertyMap;
 class PropertyObject;
 
+enum class Execution
+{
+    sync,
+    async
+};
+
 /** Description for RPC with no parameter. */
 struct RpcDescription
 {
     std::string methodName;
     std::string methodDescription;
-    enum Type
-    {
-        SYNC,
-        ASYNC
-    } type{SYNC};
+    Execution type{Execution::sync};
 };
 
 /** Description for RPC with one parameter. */
-struct RpcParameterDescription : public RpcDescription
+struct RpcParameterDescription : RpcDescription
 {
     RpcParameterDescription(const std::string& methodName_,
                             const std::string& methodDescription_,
-                            const RpcDescription::Type type_,
+                            const Execution type_,
                             const std::string& paramName_,
                             const std::string& paramDescription_)
         : RpcDescription{methodName_, methodDescription_, type_}
@@ -383,7 +385,7 @@ struct RpcParameterDescription : public RpcDescription
                             const std::string& methodDescription_,
                             const std::string& paramName_,
                             const std::string& paramDescription_)
-        : RpcDescription{methodName_, methodDescription_, SYNC}
+        : RpcDescription{methodName_, methodDescription_, Execution::sync}
         , paramName(paramName_)
         , paramDescription(paramDescription_)
     {

@@ -84,7 +84,7 @@ rapidjson::Document _buildJsonRpcSchema(const RpcDescription& desc)
     schema.AddMember(StringRef("description"),
                      StringRef(desc.methodDescription.c_str()), allocator);
     schema.AddMember(StringRef("type"), StringRef("method"), allocator);
-    schema.AddMember(StringRef("async"), desc.type == RpcDescription::ASYNC,
+    schema.AddMember(StringRef("async"), desc.type == Execution::async,
                      allocator);
     return schema;
 }

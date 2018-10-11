@@ -34,13 +34,6 @@ def test_set_http_protocol():
     assert_equal(brayns.utils.set_http_protocol('https://foo:8080'), 'https://foo:8080')
 
 
-def test_set_ws_protocol():
-    assert_equal(brayns.utils.set_ws_protocol(''), 'ws://')
-    assert_equal(brayns.utils.set_ws_protocol('foo'), 'ws://foo')
-    assert_equal(brayns.utils.set_ws_protocol('foo:8080'), 'ws://foo:8080')
-    assert_equal(brayns.utils.set_ws_protocol('http://foo:8080'), 'ws://foo:8080')
-    assert_equal(brayns.utils.set_ws_protocol('https://foo:8080'), 'wss://foo:8080')
-
 if __name__ == '__main__':
     import nose
     nose.run(defaultTest=__name__)

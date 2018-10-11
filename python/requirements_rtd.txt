@@ -21,4 +21,3 @@
 
 nbsphinx~=0.3.3
 python-jsonschema-objects~=0.3.3
-websocket-client~=0.48.0

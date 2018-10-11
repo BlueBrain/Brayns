@@ -24,16 +24,28 @@
 
 """Client that connects to a remote running Brayns instance which provides the supported API."""
 
+import asyncio
 import rockets
 
 from .base import BaseClient
 from .utils import build_schema_requests_from_registry, convert_snapshot_response_to_PIL
+from . import utils
 
 
-class Client(BaseClient):
+class aobject(object):
+    """Inheriting from this class allows to define an async __init__."""
+
+    async def __new__(cls, *a, **kw):
+        """Allow to create objects by calling `await MyClass(params)`"""
+        instance = super().__new__(cls)
+        await instance.__init__(*a, **kw)
+        return instance
+
+
+class AsyncClient(BaseClient, aobject):
     """Client that connects to a remote running Brayns instance which provides the supported API."""
 
-    def __init__(self, url, loop=None):
+    async def __init__(self, url, loop=None):
         """
         Create a new client instance by connecting to the given URL.
 
@@ -42,10 +54,10 @@ class Client(BaseClient):
         """
         super().__init__(url)
 
-        self.rockets_client = rockets.Client(url, subprotocols=['rockets'], loop=loop)
+        self.rockets_client = rockets.AsyncClient(url, subprotocols=['rockets'], loop=loop)
 
         registry, requests = build_schema_requests_from_registry(self.http_url)
-        schemas = self.rockets_client.batch(requests)
+        schemas = await self.rockets_client.batch(requests)
         super()._build_api(registry, requests, schemas)
 
     # pylint: disable=W0613,W0622,E1101
@@ -67,4 +79,27 @@ class Client(BaseClient):
         args = locals()
         del args['self']
         result = self.snapshot(**{k: v for k, v in args.items() if v})
-        return convert_snapshot_response_to_PIL(result)
+
+        future = asyncio.get_event_loop().create_future()
+
+        def _on_done(task):
+            try:
+                if task.exception():  # pragma: no cover
+                    print("image() failed:", task.exception())
+                else:
+                    image = convert_snapshot_response_to_PIL(task.result())
+                    if utils.in_notebook():  # pragma: no cover
+                        if image:
+                            from IPython.display import display
+                            display(image)
+                    else:
+                        future.set_result(image)
+            except rockets.RequestError as e:  # pragma: no cover
+                print("Error", e.code, e.message)
+            except ConnectionRefusedError as e:  # pragma: no cover
+                print(e)
+
+        result.add_done_callback(_on_done)
+        if utils.in_notebook():  # pragma: no cover
+            return None
+        return future

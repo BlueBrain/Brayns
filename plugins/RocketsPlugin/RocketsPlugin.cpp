@@ -982,7 +982,7 @@ public:
     {
         const RpcParameterDescription desc{
             METHOD_SCHEMA, "Get the schema of the given endpoint",
-            RpcDescription::SYNC, "endpoint",
+            Execution::sync, "endpoint",
             "name of the endpoint to get its schema"};
 
         _jsonrpcServer->bind(METHOD_SCHEMA, [& schemas = _schemas](
@@ -1011,7 +1011,7 @@ public:
         using Position = std::array<double, 2>;
         const RpcParameterDescription desc{
             METHOD_INSPECT, "Inspect the scene at x-y position",
-            RpcDescription::SYNC, "position",
+            Execution::sync, "position",
             "x-y position in normalized coordinates"};
         _handleRPC<Position, Renderer::PickResult>(
             desc, [engine = _engine](const auto& position) {
@@ -1043,7 +1043,7 @@ public:
     {
         const RpcParameterDescription desc{
             METHOD_SNAPSHOT, "Make a snapshot of the current view",
-            RpcDescription::ASYNC, "settings",
+            Execution::async, "settings",
             "Snapshot settings for quality and size"};
         auto func =
             [ engine = _engine,
@@ -1060,7 +1060,7 @@ public:
     {
         const RpcParameterDescription desc{METHOD_STREAM_TO,
                                            "Stream to a displaywall",
-                                           RpcDescription::SYNC, "param",
+                                           Execution::sync, "param",
                                            "Stream parameters"};
 
         _bindEndpoint(METHOD_STREAM_TO, [&](const auto& request) {
@@ -1085,7 +1085,7 @@ public:
             METHOD_REQUEST_MODEL_UPLOAD,
             "Request upload of blob to trigger adding of model after blob has "
             "been received; returns model descriptor on success",
-            RpcDescription::ASYNC, "param",
+            Execution::async, "param",
             "size, type, name, transformation, etc."};
 
         _handleTask<BinaryParam, ModelDescriptorPtr>(
@@ -1172,7 +1172,7 @@ public:
         const RpcParameterDescription desc{
             METHOD_ADD_MODEL,
             "Add model from remote path; returns model descriptor on success",
-            RpcDescription::ASYNC, "model_param",
+            Execution::async, "model_param",
             "Model parameters including name, path, transformation, etc."};
 
         auto func = [engine = _engine](const auto& modelParam, const auto)

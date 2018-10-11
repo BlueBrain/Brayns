@@ -22,10 +22,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # All rights reserved. Do not distribute without further notice.
 
+from nose.tools import assert_equal
+from mock import patch
+import brayns
 
-def test_import_brayns():
-    try:
-        import brayns
-        return True
-    except Exception:
-        return False
+from .mocks import *
+
+
+def test_array():
+    with patch('rockets.Client.connected', new=mock_connected), \
+         patch('brayns.utils.http_request', new=mock_http_request), \
+         patch('rockets.Client.request', new=mock_rpc_request), \
+         patch('rockets.Client.batch', new=mock_batch):
+        app = brayns.Client('localhost:8200')
+        assert_equal(app.test_array, TEST_ARRAY)
+
+
+if __name__ == '__main__':
+    import nose
+    nose.run(defaultTest=__name__)
