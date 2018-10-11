@@ -59,6 +59,7 @@ BOOST_AUTO_TEST_CASE(cylinders)
     materialRed->setDiffuseColor(RED);
     materialRed->setSpecularColor(RED);
     materialRed->setSpecularExponent(10.f);
+    materialRed->setShadingMode(brayns::MaterialShadingMode::none);
 
     constexpr size_t materialIdGreen = 1;
     auto materialGreen =
@@ -67,6 +68,7 @@ BOOST_AUTO_TEST_CASE(cylinders)
     materialGreen->setSpecularColor(GREEN);
     materialGreen->setSpecularExponent(10.f);
     materialGreen->setOpacity(0.25f);
+    materialGreen->setShadingMode(brayns::MaterialShadingMode::none);
 
     constexpr float row_stride = 0.2f;
     constexpr float thickness = 0.05f;

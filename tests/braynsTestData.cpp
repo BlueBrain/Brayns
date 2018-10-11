@@ -24,6 +24,7 @@
 
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
@@ -118,6 +119,24 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
 
     camera.setTarget(rotCenter);
     camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
+
+    auto& scene = brayns.getEngine().getScene();
+    for (size_t i = 0; i < scene.getNumModels(); ++i)
+    {
+        auto modelDescriptor = scene.getModel(i);
+        if (modelDescriptor)
+        {
+            auto& model = modelDescriptor->getModel();
+            auto& materials = model.getMaterials();
+            for (auto& material : materials)
+                if (material.second)
+                {
+                    material.second->setShadingMode(
+                        brayns::MaterialShadingMode::none);
+                    material.second->commit();
+                }
+        }
+    }
 
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50advancedsimulation.png",

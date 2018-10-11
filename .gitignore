@@ -24,3 +24,5 @@ CMakeFiles
 *.includes
 *.creator*
 *.user
+tmp_*
+*.orig
