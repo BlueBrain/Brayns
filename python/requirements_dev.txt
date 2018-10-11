@@ -30,4 +30,4 @@ mock~=2.0.0
 Sphinx~=1.7.6
 sphinx_rtd_theme~=0.4.0
 pandoc~=1.0.2
-numpy~=1.10
+websockets~=6.0
