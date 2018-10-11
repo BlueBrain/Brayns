@@ -100,4 +100,4 @@ AdvancedSimulationRenderer::AdvancedSimulationRenderer()
 }
 
 OSP_REGISTER_RENDERER(AdvancedSimulationRenderer, advanced_simulation);
-} // namespace brayns
+}

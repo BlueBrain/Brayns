@@ -76,7 +76,7 @@ namespace
 const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const size_t LOADING_PROGRESS_DATA = 100;
-} // namespace
+}
 
 #define REGISTER_LOADER(LOADER, FUNC) \
     registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
@@ -172,7 +172,7 @@ struct Brayns::Impl : public PluginAPI
                     argv[i] = &tmpArgs[i].front();
 
                 ExtensionPlugin* (*createFunc)(PluginAPI*, int, char**) =
-                    (ExtensionPlugin * (*)(PluginAPI*, int, char**)) createSym;
+                    (ExtensionPlugin * (*)(PluginAPI*, int, char**))createSym;
                 auto plugin = createFunc(this, argc, argv.data());
 
                 _extensionPluginFactory.add(ExtensionPluginPtr{plugin});
@@ -335,12 +335,13 @@ struct Brayns::Impl : public PluginAPI
                             return std::make_unique<MorphologyLoader>(scene,
                                                                       params);
                         }));
-        REGISTER_LOADER(CircuitLoader, ([& scene = _engine->getScene(),
-                                         &params = _parametersManager] {
-                            return std::make_unique<CircuitLoader>(
-                                scene, params.getApplicationParameters(),
-                                params.getGeometryParameters());
-                        }));
+        REGISTER_LOADER(
+            CircuitLoader,
+            ([& scene = _engine->getScene(), &params = _parametersManager ] {
+                return std::make_unique<CircuitLoader>(
+                    scene, params.getApplicationParameters(),
+                    params.getGeometryParameters());
+            }));
 #endif
 
         const auto& paths =
@@ -420,7 +421,6 @@ struct Brayns::Impl : public PluginAPI
         return _actionInterface.get();
     }
     Scene& getScene() final { return _engine->getScene(); }
-
 private:
     void _updateAnimation()
     {
@@ -682,9 +682,8 @@ private:
             'g', "Enable/Disable animation playback",
             std::bind(&Brayns::Impl::_toggleAnimationPlayback, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'x',
-            "Set animation frame to " +
-                std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
+            'x', "Set animation frame to " +
+                     std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
             std::bind(&Brayns::Impl::_defaultAnimationFrame, this));
         _keyboardHandler.registerKeyboardShortcut(
             '|', "Create cache file ",
@@ -1047,4 +1046,4 @@ AbstractManipulator& Brayns::getCameraManipulator()
 {
     return _impl->getCameraManipulator();
 }
-} // namespace brayns
+}

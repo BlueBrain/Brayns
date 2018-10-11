@@ -62,5 +62,5 @@ public:
 private:
     ExtensionPlugins _plugins;
 };
-} // namespace brayns
+}
 #endif // EXTENSIONPLUGINFACTORY_H

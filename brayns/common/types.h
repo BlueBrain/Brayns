@@ -375,6 +375,6 @@ struct RpcParameterDescription
     std::string paramName;
     std::string paramDescription;
 };
-} // namespace brayns
+}
 
 #endif // TYPES_H

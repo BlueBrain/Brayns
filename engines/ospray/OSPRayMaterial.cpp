@@ -129,4 +129,4 @@ OSPTexture2D OSPRayMaterial::_createOSPTexture2D(Texture2DPtr texture)
 
     return ospTexture;
 }
-} // namespace brayns
+}

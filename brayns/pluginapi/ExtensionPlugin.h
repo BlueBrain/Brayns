@@ -54,6 +54,6 @@ public:
     /** Called from Brayns::postRender() after render() has finished. */
     virtual void postRender() {}
 };
-} // namespace brayns
+}
 
 #endif

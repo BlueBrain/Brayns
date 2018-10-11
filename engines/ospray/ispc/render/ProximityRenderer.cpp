@@ -62,4 +62,4 @@ ProximityRenderer::ProximityRenderer()
 }
 
 OSP_REGISTER_EXRENDERER(ProximityRenderer, proximity);
-} // namespace brayns
+}

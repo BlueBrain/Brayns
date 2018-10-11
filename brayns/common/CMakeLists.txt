@@ -75,7 +75,6 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   transferFunction/TransferFunction.h
   types.h
   utils/Utils.h
-  utils/ImageUtils.h
   volume/BrickedVolume.h
   volume/SharedDataVolume.h
   volume/Volume.h

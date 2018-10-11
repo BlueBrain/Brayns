@@ -78,5 +78,5 @@ void Material::commit()
     optixMaterial["glossiness"]->setFloat(g);
     optixMaterial["shading_mode"]->setInt(shadingMode);
 }
-} // namespace optix
-} // namespace bbp
+}
+}

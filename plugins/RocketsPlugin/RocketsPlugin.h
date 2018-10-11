@@ -79,6 +79,6 @@ private:
     void _registerNotification(const std::string& name,
                                const VoidFunc& action) final;
 };
-} // namespace brayns
+}
 
 #endif

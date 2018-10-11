@@ -90,6 +90,5 @@ struct ExtendedOBJMaterial : public ospray::Material
 
     void commit() final;
 };
-
-} // namespace obj
-} // namespace brayns
+}
+}

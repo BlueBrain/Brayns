@@ -65,5 +65,4 @@ private:
     float _volumeSpecularExponent;
     float _volumeAlphaCorrection;
 };
-
-} // namespace brayns
+}

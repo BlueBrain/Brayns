@@ -113,5 +113,5 @@ void ExtendedOBJMaterial::commit()
 }
 
 OSP_REGISTER_EXMATERIAL(ExtendedOBJMaterial, ExtendedOBJMaterial);
-} // namespace obj
-} // namespace brayns
+}
+}

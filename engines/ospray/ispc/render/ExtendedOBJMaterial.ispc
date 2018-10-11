@@ -49,7 +49,7 @@ export void ExtendedOBJMaterial_set(
     const uniform MaterialShadingMode& shadingMode)
 {
     uniform ExtendedOBJMaterial* uniform self =
-        (uniform ExtendedOBJMaterial * uniform) _mat;
+        (uniform ExtendedOBJMaterial * uniform)_mat;
 
     self->map_d = make_TextureParam((Texture2D*)map_d, xform_d);
     self->d = d;

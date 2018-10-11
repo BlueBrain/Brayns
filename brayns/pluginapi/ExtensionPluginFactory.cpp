@@ -59,4 +59,4 @@ void ExtensionPluginFactory::postRender()
     for (ExtensionPluginPtr plugin : _plugins)
         plugin->postRender();
 }
-} // namespace brayns
+}

@@ -416,4 +416,4 @@ void OSPRayEngine::_createCameras()
     _camera->setEnvironmentMap(
         !_parametersManager.getSceneParameters().getEnvironmentMap().empty());
 }
-} // namespace brayns
+}

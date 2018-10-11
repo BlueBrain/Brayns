@@ -70,6 +70,6 @@ private:
     int _randomNumber;
     float _alphaCorrection;
 };
-} // namespace brayns
+}
 
 #endif

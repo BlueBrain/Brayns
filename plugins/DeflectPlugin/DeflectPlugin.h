@@ -42,6 +42,6 @@ private:
     class Impl;
     std::shared_ptr<Impl> _impl;
 };
-} // namespace brayns
+}
 
 #endif

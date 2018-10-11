@@ -329,5 +329,5 @@ float Renderer::renderFrame(ospray::FrameBuffer* fb,
     endFrame(perFrameData, channelFlags);
     return fb->endFrame(errorThreshold);
 }
-} // namespace optix
-} // namespace bbp
+}
+}

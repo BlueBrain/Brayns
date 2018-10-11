@@ -1580,4 +1580,4 @@ void RocketsPlugin::_registerNotification(const std::string& name,
         engine->triggerRender();
     });
 }
-} // namespace brayns
+}
