@@ -82,6 +82,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
 )
 
 set(BRAYNSCOMMON_HEADERS
+  utils/ImageUtils.h
   utils/base64/base64.h
 )
 
