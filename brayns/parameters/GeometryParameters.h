@@ -44,7 +44,6 @@ struct MorphologyLayout
 
 struct CircuitConfiguration
 {
-    std::string circuitConfigFile;
     bool useSimulationModel{false};
     Boxd boundingBox{{0, 0, 0}, {0, 0, 0}};
     float density{100};
@@ -75,18 +74,6 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    /**
-     * @brief getNESTCircuit
-     * @return
-     */
-    const std::string& getNESTCircuit() const { return _NESTCircuit; }
-    const std::string& getNESTReport() const { return _NESTReport; }
-    const std::string& getNESTCacheFile() const { return _NESTCacheFile; }
-    /** file containing circuit configuration */
-    const std::string& getCircuitConfiguration() const
-    {
-        return _circuitConfiguration.circuitConfigFile;
-    }
     /** Binary representation of a scene to load */
     const std::string& getLoadCacheFile() const { return _loadCacheFile; }
     /** Binary representation of a scene to save */
@@ -228,12 +215,6 @@ public:
         return _circuitConfiguration.randomSeed;
     }
 
-    /** Biological assembly */
-    const std::string& getMolecularSystemConfig() const
-    {
-        return _molecularSystemConfig;
-    }
-
     /** Metaballs grid size */
     size_t getMetaballsGridSize() const { return _metaballsGridSize; }
     /** Metaballs threshold */
@@ -264,11 +245,6 @@ public:
 protected:
     void parse(const po::variables_map& vm) final;
 
-    // Nest
-    std::string _NESTCircuit;
-    std::string _NESTReport;
-    std::string _NESTCacheFile;
-
     // Circuit
     CircuitConfiguration _circuitConfiguration;
 
@@ -283,7 +259,6 @@ protected:
     GeometryQuality _geometryQuality;
     MorphologySectionTypes _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
-    std::string _molecularSystemConfig;
     size_t _metaballsGridSize;
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;

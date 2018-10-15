@@ -44,14 +44,18 @@ public:
                   const GeometryParameters& geometryParameters);
     ~CircuitLoader();
 
-    static std::set<std::string> getSupportedDataTypes();
+    virtual bool isSupported(const std::string& filename,
+                             const std::string& extension) const final;
 
-    ModelDescriptorPtr importFromBlob(Blob&& blob, const size_t index,
-                                      const size_t materialID) final;
+    ModelDescriptorPtr importFromBlob(Blob&& blob,
+                                      const LoaderProgress& callback,
+                                      const size_t index,
+                                      const size_t materialID) const final;
 
     ModelDescriptorPtr importFromFile(const std::string& filename,
+                                      const LoaderProgress& callback,
                                       const size_t index,
-                                      const size_t materialID) final;
+                                      const size_t materialID) const final;
 
     /**
      * @brief Imports morphology from a circuit for the given target name
@@ -65,6 +69,7 @@ public:
      * contains no cells.
      */
     ModelDescriptorPtr importCircuit(const servus::URI& circuitConfig,
+                                     const LoaderProgress& callback,
                                      const strings& targets,
                                      const std::string& report);
 

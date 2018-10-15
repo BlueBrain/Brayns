@@ -61,13 +61,13 @@
 #ifdef BRAYNS_USE_BRION
 #include <brayns/io/CircuitLoader.h>
 #include <brayns/io/MorphologyLoader.h>
-#include <brayns/io/NESTLoader.h>
-#include <servus/uri.h>
 #endif
 
 #ifdef BRAYNS_USE_OSPRAY
 #include <ospcommon/library.h>
 #endif
+
+#include <brayns/io/ArchiveLoader.h>
 
 #include <boost/progress.hpp>
 
@@ -77,9 +77,6 @@ const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
 const size_t LOADING_PROGRESS_DATA = 100;
 }
-
-#define REGISTER_LOADER(LOADER, FUNC) \
-    registry.registerLoader({std::bind(&LOADER::getSupportedDataTypes), FUNC});
 
 namespace brayns
 {
@@ -304,59 +301,7 @@ struct Brayns::Impl : public PluginAPI
         _engine->getScene().addLight(sunLight);
         _engine->getScene().commitLights();
 
-        auto& registry = _engine->getScene().getLoaderRegistry();
-        REGISTER_LOADER(MeshLoader,
-                        ([&scene = _engine->getScene(), & params = _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<MeshLoader>(scene, params);
-                        }));
-        REGISTER_LOADER(ProteinLoader,
-                        ([&scene = _engine->getScene(), & params =
-                                _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<ProteinLoader>(scene, params);
-                        }));
-        REGISTER_LOADER(VolumeLoader,
-                        ([&scene = _engine->getScene(), & params =
-                                _parametersManager.getVolumeParameters()] {
-                            return std::make_unique<VolumeLoader>(scene, params);
-                        }));
-        REGISTER_LOADER(XYZBLoader, ([& scene = _engine->getScene()] {
-                            return std::make_unique<XYZBLoader>(scene);
-                        }));
-#if (BRAYNS_USE_BRION)
-        REGISTER_LOADER(MorphologyLoader,
-                        ([&scene = _engine->getScene(), & params =
-                                _parametersManager.getGeometryParameters()] {
-                            return std::make_unique<MorphologyLoader>(scene, params);
-                        }));
-        REGISTER_LOADER(
-            CircuitLoader,
-            ([& scene = _engine->getScene(), &params = _parametersManager ] {
-                return std::make_unique<CircuitLoader>(
-                    scene, params.getApplicationParameters(),
-                    params.getGeometryParameters());
-            }));
-#endif
-
-        const auto& paths =
-            _parametersManager.getApplicationParameters().getInputPaths();
-        if (!paths.empty())
-        {
-            if (paths.size() == 1 && paths[0] == "demo")
-            {
-                _engine->getScene().buildDefault();
-                _engine->getScene().buildEnvironmentMap();
-                return;
-            }
-
-            for (const auto& path : paths)
-            {
-                AddModelTask task({path}, _engine);
-                task.result();
-            }
-            return;
-        }
-
-        // 'legacy' loading from geometry params
+        _registerLoaders();
         _loadData();
     }
 
@@ -426,31 +371,55 @@ private:
         }
     }
 
+    void _registerLoaders()
+    {
+        auto& registry = _engine->getScene().getLoaderRegistry();
+        auto& scene = _engine->getScene();
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
+
+        registry.registerLoader(
+            std::make_unique<MeshLoader>(scene, geometryParameters));
+        registry.registerLoader(
+            std::make_unique<ProteinLoader>(scene, geometryParameters));
+        registry.registerLoader(std::make_unique<VolumeLoader>(
+            scene, _parametersManager.getVolumeParameters()));
+        registry.registerLoader(std::make_unique<XYZBLoader>(scene));
+        registry.registerLoader(
+            std::make_unique<MolecularSystemReader>(scene, geometryParameters));
+        registry.registerLoader(
+            std::make_unique<ArchiveLoader>(scene, registry));
+#if (BRAYNS_USE_BRION)
+        registry.registerLoader(
+            std::make_unique<MorphologyLoader>(scene, geometryParameters));
+        registry.registerLoader(std::make_unique<CircuitLoader>(
+            scene, _parametersManager.getApplicationParameters(),
+            geometryParameters));
+#endif
+    }
+
     void _loadData()
     {
-        boost::progress_display loadingProgress(
-            LOADING_PROGRESS_DATA, std::cout,
-            "[INFO ] Loading scene ...\n[INFO ] ", "[INFO ] ", "[INFO ] ");
-
-        size_t nextTic = 0;
-        const size_t tic = LOADING_PROGRESS_DATA;
-        auto updateProgress = [&nextTic,
-                               &loadingProgress](const std::string&,
-                                                 const float progress) {
-#pragma omp critical
-            {
-                const size_t newProgress = progress * tic;
-                if (newProgress % tic > nextTic)
-                {
-                    loadingProgress += newProgress - nextTic;
-                    nextTic = newProgress;
-                }
-            }
-        };
-
         auto& geometryParameters = _parametersManager.getGeometryParameters();
         auto& sceneParameters = _parametersManager.getSceneParameters();
         auto& scene = _engine->getScene();
+
+        const auto& paths =
+            _parametersManager.getApplicationParameters().getInputPaths();
+        if (!paths.empty())
+        {
+            if (paths.size() == 1 && paths[0] == "demo")
+            {
+                _engine->getScene().buildDefault();
+                _engine->getScene().buildEnvironmentMap();
+                return;
+            }
+
+            for (const auto& path : paths)
+            {
+                AddModelTask task({path}, _engine);
+                task.result();
+            }
+        }
 
         const std::string& colorMapFilename =
             sceneParameters.getColorMapFilename();
@@ -462,123 +431,10 @@ private:
         }
 
         if (!geometryParameters.getLoadCacheFile().empty())
-        {
             scene.loadFromCacheFile();
-            loadingProgress += tic;
-        }
-
-#if (BRAYNS_USE_BRION)
-        if (!geometryParameters.getNESTCircuit().empty())
-        {
-            _loadNESTCircuit();
-            loadingProgress += tic;
-        }
-
-        if (!geometryParameters.getCircuitConfiguration().empty())
-            _loadCircuitConfiguration(updateProgress);
-#endif
-
-        if (!geometryParameters.getMolecularSystemConfig().empty())
-            _loadMolecularSystem(updateProgress);
 
         scene.saveToCacheFile();
         scene.buildEnvironmentMap();
-        scene.markModified();
-    }
-
-#if (BRAYNS_USE_BRION)
-    /**
-     * Loads data from a NEST circuit file (command line parameter
-     * --nest-circuit)
-     */
-    void _loadNESTCircuit()
-    {
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-
-        const std::string& circuit(geometryParameters.getNESTCircuit());
-        if (!circuit.empty())
-        {
-            NESTLoader loader(scene, geometryParameters);
-
-            // need to import circuit first to determine _frameSize for report
-            // loading
-            auto model = loader.importFromFile(circuit);
-
-            const std::string& cacheFile(geometryParameters.getNESTCacheFile());
-            if (!geometryParameters.getNESTReport().empty() &&
-                cacheFile.empty())
-                throw std::runtime_error(
-                    "Need cache file to visualize simulation data");
-
-            if (!cacheFile.empty())
-            {
-                SpikeSimulationHandlerPtr simulationHandler(
-                    new SpikeSimulationHandler(
-                        _parametersManager.getGeometryParameters()));
-                if (!simulationHandler->attachSimulationToCacheFile(cacheFile))
-                {
-                    if (!loader.importSpikeReport(
-                            geometryParameters.getNESTReport()))
-                    {
-                        throw std::runtime_error(
-                            "Could not load spike report, aborting");
-                    }
-
-                    if (!simulationHandler->attachSimulationToCacheFile(
-                            cacheFile))
-                    {
-                        throw std::runtime_error(
-                            "Could load cache file, aborting");
-                    }
-                }
-
-                scene.setSimulationHandler(simulationHandler);
-            }
-            scene.addModel(model);
-            scene.markModified();
-        }
-    }
-
-    /**
-        Loads morphologies from circuit configuration (command line
-       parameter --circuit-configuration)
-    */
-    void _loadCircuitConfiguration(const Loader::UpdateCallback& progressUpdate)
-    {
-        auto& applicationParameters =
-            _parametersManager.getApplicationParameters();
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-        const std::string& filename =
-            geometryParameters.getCircuitConfiguration();
-        const auto& targets = geometryParameters.getCircuitTargetsAsStrings();
-
-        BRAYNS_INFO << "Loading circuit configuration from " << filename
-                    << std::endl;
-        const std::string& report = geometryParameters.getCircuitReport();
-        CircuitLoader circuitLoader(scene, applicationParameters,
-                                    geometryParameters);
-        circuitLoader.setProgressCallback(progressUpdate);
-
-        const servus::URI uri(filename);
-        scene.addModel(circuitLoader.importCircuit(uri, targets, report));
-        scene.markModified();
-    }
-#endif // BRAYNS_USE_BRION
-
-    /**
-        Loads molecular system from configuration (command line parameter
-       --molecular-system-config )
-    */
-    void _loadMolecularSystem(const Loader::UpdateCallback& progressUpdate)
-    {
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& scene = _engine->getScene();
-        MolecularSystemReader molecularSystemReader(scene, geometryParameters);
-        molecularSystemReader.setProgressCallback(progressUpdate);
-        const auto fileName = geometryParameters.getMolecularSystemConfig();
-        scene.addModel(molecularSystemReader.importFromFile(fileName));
         scene.markModified();
     }
 
@@ -1036,22 +892,18 @@ bool Brayns::commit()
 {
     return _impl->commit();
 }
-
 void Brayns::render()
 {
     return _impl->render();
 }
-
 void Brayns::postRender()
 {
     _impl->postRender(nullptr);
 }
-
 Engine& Brayns::getEngine()
 {
     return _impl->getEngine();
 }
-
 ParametersManager& Brayns::getParametersManager()
 {
     return _impl->getParametersManager();

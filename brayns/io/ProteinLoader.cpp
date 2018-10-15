@@ -317,14 +317,16 @@ ProteinLoader::ProteinLoader(Scene& scene,
 {
 }
 
-std::set<std::string> ProteinLoader::getSupportedDataTypes()
+bool ProteinLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+                                const std::string& extension) const
 {
-    return {"pdb", "pdb1"};
+    const std::set<std::string> types = {"pdb", "pdb1"};
+    return types.find(extension) != types.end();
 }
 
 ModelDescriptorPtr ProteinLoader::importFromFile(
-    const std::string& fileName, const size_t index,
-    const size_t defaultMaterialId BRAYNS_UNUSED)
+    const std::string& fileName, const LoaderProgress&, const size_t index,
+    const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     std::ifstream file(fileName.c_str());
     if (!file.is_open())

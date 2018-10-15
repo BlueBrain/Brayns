@@ -734,10 +734,6 @@ public:
                 return rockets::jsonrpc::CancelRequestCallback(cancel);
             }
             // respond errors during the setup of the task
-            catch (const BinaryTaskError& e)
-            {
-                errorCallback({e.what(), e.code, to_json(e.error)});
-            }
             catch (const TaskRuntimeError& e)
             {
                 errorCallback(e);

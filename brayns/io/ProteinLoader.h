@@ -36,14 +36,16 @@ class ProteinLoader : public Loader
 public:
     ProteinLoader(Scene& scene, const GeometryParameters& geometryParameters);
 
-    static std::set<std::string> getSupportedDataTypes();
-
+    virtual bool isSupported(const std::string& filename,
+                             const std::string& extension) const final;
     ModelDescriptorPtr importFromFile(
-        const std::string& fileName, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) final;
+        const std::string& fileName, const LoaderProgress& callback,
+        const size_t index = 0,
+        const size_t defaultMaterialId = NO_MATERIAL) const final;
 
-    ModelDescriptorPtr importFromBlob(Blob&&, const size_t = 0,
-                                      const size_t = NO_MATERIAL) final
+    ModelDescriptorPtr importFromBlob(Blob&&, const LoaderProgress&,
+                                      const size_t = 0,
+                                      const size_t = NO_MATERIAL) const final
     {
         throw std::runtime_error("Unsupported");
     }

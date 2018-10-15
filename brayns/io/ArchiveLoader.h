@@ -1,5 +1,6 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright (c) 2018 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,16 +21,16 @@
 #pragma once
 
 #include <brayns/common/loader/Loader.h>
-#include <brayns/parameters/VolumeParameters.h>
+#include <brayns/common/loader/LoaderRegistry.h>
+
+#include <set>
 
 namespace brayns
 {
-/** A volume loader for raw (*.raw with params for dimensions or *.mhd) volumes.
- */
-class VolumeLoader : public Loader
+class ArchiveLoader : public Loader
 {
 public:
-    VolumeLoader(Scene& scene, VolumeParameters& volumeParameters);
+    ArchiveLoader(Scene& scene, LoaderRegistry& registry);
 
     virtual bool isSupported(const std::string& filename,
                              const std::string& extension) const final;
@@ -43,6 +44,10 @@ public:
         const size_t defaultMaterialId = NO_MATERIAL) const final;
 
 private:
-    VolumeParameters& _volumeParameters;
+    ModelDescriptorPtr loadExtracted(const std::string& path,
+                                     const LoaderProgress& callback,
+                                     const size_t index,
+                                     const size_t defaultMaterialId) const;
+    LoaderRegistry& _registry;
 };
 }

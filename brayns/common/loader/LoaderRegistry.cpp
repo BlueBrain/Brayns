@@ -26,79 +26,67 @@
 #include <boost/range/iterator_range_core.hpp>
 namespace fs = boost::filesystem;
 
-namespace brayns
+namespace
 {
-void LoaderRegistry::registerLoader(LoaderInfo loaderInfo)
+std::string extract_extension(const std::string& filename)
 {
-    _loaders.insert(_loaders.begin(), loaderInfo);
+    auto extension = fs::extension(filename);
+    if (!extension.empty())
+        extension = extension.erase(0, 1);
+
+    return extension;
+}
 }
 
-bool LoaderRegistry::isSupported(const std::string& type) const
+namespace brayns
 {
-    for (const auto& entry : _loaders)
-    {
-        if (_isSupported(entry, type))
+void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
+{
+    _loaders.push_back(std::move(loader));
+}
+
+bool LoaderRegistry::isSupportedFile(const std::string& filename) const
+{
+    if (fs::is_directory(filename))
+        return false;
+
+    const auto extension = extract_extension(filename);
+    for (const auto& loader : _loaders)
+        if (loader->isSupported(filename, extension))
             return true;
-    }
     return false;
 }
 
-std::set<std::string> LoaderRegistry::supportedTypes() const
+bool LoaderRegistry::isSupportedType(const std::string& type) const
 {
-    std::set<std::string> result;
-    for (const auto& entry : _loaders)
-    {
-        const auto& types = entry.supportedTypes();
-        result.insert(types.begin(), types.end());
-    }
-    return result;
+    for (const auto& loader : _loaders)
+        if (loader->isSupported("", type))
+            return true;
+    return false;
 }
 
-LoaderPtr LoaderRegistry::createLoader(const std::string& type) const
+const Loader& LoaderRegistry::getLoaderFromFilename(
+    const std::string& filename) const
 {
-    for (const auto& entry : _loaders)
-    {
-        if (!_isSupported(entry, type))
-            continue;
-        return entry.createLoader();
-    }
-    throw std::runtime_error("No loader found for " + type);
+    if (fs::is_directory(filename))
+        throw std::runtime_error("'" + filename + "' is a directory");
+
+    const auto extension = extract_extension(filename);
+
+    for (const auto& loader : _loaders)
+        if (loader->isSupported(filename, extension))
+            return *loader;
+
+    throw std::runtime_error("No loader found for filename '" + filename + "'");
 }
 
-bool LoaderRegistry::_isSupported(const LoaderInfo& loader,
-                                  const std::string& type) const
+const Loader& LoaderRegistry::getLoaderFromFiletype(
+    const std::string& filetype) const
 {
-    // the first file in the folder that is supported by this loader wins
-    if (fs::is_directory(type))
-    {
-        for (const auto& i :
-             boost::make_iterator_range(fs::directory_iterator(type), {}))
-        {
-            if (_isSupported(loader, i.path().string()))
-                return true;
-        }
-        return false;
-    }
-    auto extension = fs::extension(type);
-    if (extension.empty())
-    {
-        // if the path has no extension, treat the filename as the type
-        if (fs::is_regular_file(type))
-            extension = fs::path(type).filename().string();
-        else
-            extension = type; // just the type from blob, e.g. xyz, obj, ...
-    }
-    else
-        extension = extension.erase(0, 1);
+    for (const auto& loader : _loaders)
+        if (loader->isSupported("", filetype))
+            return *loader;
 
-    if (isSupportedArchiveType(extension))
-        return true;
-
-    const auto& types = loader.supportedTypes();
-    const auto found =
-        std::find_if(types.cbegin(), types.cend(), [extension](auto val) {
-            return lowerCase(val) == lowerCase(extension);
-        });
-    return found != types.end();
+    throw std::runtime_error("No loader found for type '" + filetype + "'");
 }
 }

@@ -25,38 +25,24 @@
 
 namespace brayns
 {
-struct BinaryError
-{
-    std::vector<std::string> supportedTypes;
-};
+const auto ERROR_ID_MISSING_PARAMS = -1731;
+const auto ERROR_ID_UNSUPPORTED_TYPE = -1732;
+const auto ERROR_ID_INVALID_BINARY_RECEIVE = -1733;
+const auto ERROR_ID_LOADING_BINARY_FAILED = -1734;
 
-class BinaryTaskError : public TaskRuntimeError
-{
-public:
-    BinaryTaskError(const std::string& message, const int code_,
-                    const BinaryError& error_)
-        : TaskRuntimeError(message, code_)
-        , error(error_)
-    {
-    }
+const TaskRuntimeError MISSING_PARAMS{"Missing params",
+                                      ERROR_ID_MISSING_PARAMS};
 
-    const BinaryError error;
-};
-
-const TaskRuntimeError MISSING_PARAMS{"Missing params", -1731};
-
-inline BinaryTaskError UNSUPPORTED_TYPE(const BinaryError& error)
-{
-    return {"Unsupported type", -1732, error};
-}
+const TaskRuntimeError UNSUPPORTED_TYPE{"Unsupported type",
+                                        ERROR_ID_UNSUPPORTED_TYPE};
 
 const TaskRuntimeError INVALID_BINARY_RECEIVE{
     "Invalid binary received; no more files expected or "
     "current file is complete",
-    -1733};
+    ERROR_ID_INVALID_BINARY_RECEIVE};
 
 inline TaskRuntimeError LOADING_BINARY_FAILED(const std::string& error)
 {
-    return {error, -1734};
+    return {error, ERROR_ID_LOADING_BINARY_FAILED};
 }
 }

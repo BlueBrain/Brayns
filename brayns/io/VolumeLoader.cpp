@@ -111,23 +111,27 @@ VolumeLoader::VolumeLoader(Scene& scene, VolumeParameters& volumeParameters)
 {
 }
 
-std::set<std::string> VolumeLoader::getSupportedDataTypes()
+bool VolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+                               const std::string& extension) const
 {
-    return {"raw", "mhd"};
+    const std::set<std::string> types = {"raw", "mhd"};
+    return types.find(extension) != types.end();
 }
 
 ModelDescriptorPtr VolumeLoader::importFromBlob(
-    Blob&& blob BRAYNS_UNUSED, const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED)
+    Blob&& blob BRAYNS_UNUSED, const LoaderProgress&,
+    const size_t index BRAYNS_UNUSED,
+    const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     throw std::runtime_error("Volume loading from blob is not supported");
 }
 
 ModelDescriptorPtr VolumeLoader::importFromFile(
-    const std::string& filename, const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED)
+    const std::string& filename, const LoaderProgress& callback,
+    const size_t index BRAYNS_UNUSED,
+    const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
-    updateProgress("Parsing volume file ...", 0, 2);
+    callback.updateProgress("Parsing volume file ...", 0.f);
 
     Vector3ui dimensions;
     Vector3f spacing;
@@ -170,10 +174,10 @@ ModelDescriptorPtr VolumeLoader::importFromFile(
     auto volume = _scene.createSharedDataVolume(dimensions, spacing, type);
     volume->setDataRange(dataRange);
 
-    updateProgress("Loading voxels ...", 1, 2);
+    callback.updateProgress("Loading voxels ...", 0.5f);
     volume->mapData(volumeFile);
 
-    updateProgress("Creating model ...", 2, 2);
+    callback.updateProgress("Creating model ...", 1.f);
     auto model = _scene.createModel();
     model->addVolume(volume);
 

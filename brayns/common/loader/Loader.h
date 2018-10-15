@@ -31,6 +31,41 @@
 namespace brayns
 {
 /**
+ * A class for providing progress feedback
+ */
+class LoaderProgress
+{
+public:
+    /**
+     * The callback for each progress update with the signature (message,
+     * fraction of progress in 0..1 range)
+     */
+    using CallbackFn = std::function<void(const std::string&, float)>;
+
+    LoaderProgress(CallbackFn callback)
+        : _callback(std::move(callback))
+    {
+    }
+
+    LoaderProgress() = default;
+    ~LoaderProgress() = default;
+
+    /**
+     * Update the current progress of an operation and call the callback
+     */
+    void updateProgress(const std::string& message, const float fraction) const
+    {
+#ifdef BRAYNS_USE_OPENMP
+        if (omp_get_thread_num() == 0)
+#endif
+            if (_callback)
+                _callback(message, fraction);
+    }
+
+    CallbackFn _callback;
+};
+
+/**
  * A base class for data loaders to unify loading data from blobs and files, and
  * provide progress feedback.
  */
@@ -53,8 +88,8 @@ public:
      * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromBlob(
-        Blob&& blob, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) = 0;
+        Blob&& blob, const LoaderProgress& callback, const size_t index = 0,
+        const size_t defaultMaterialId = NO_MATERIAL) const = 0;
 
     /**
      * Import the data from the given file and return the created model.
@@ -65,39 +100,17 @@ public:
      * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromFile(
-        const std::string& filename, const size_t index = 0,
-        const size_t defaultMaterialId = NO_MATERIAL) = 0;
+        const std::string& filename, const LoaderProgress& callback,
+        const size_t index = 0,
+        const size_t defaultMaterialId = NO_MATERIAL) const = 0;
 
     /**
-     * The callback for each progress update with the signature (message,
-     * fraction of progress in 0..1 range)
+     * Query the loader if it can load the given file
      */
-    using UpdateCallback = std::function<void(const std::string&, float)>;
-
-    /** Set a new callback function which is called on each updateProgress(). */
-    void setProgressCallback(const UpdateCallback& func)
-    {
-        _progressUpdate = func;
-    }
-
-    /**
-     * Update the current progress of an operation. Will call the provided
-     * callback from setProgressUpdate().
-     */
-    void updateProgress(const std::string& message, const size_t current,
-                        const size_t expected)
-    {
-#ifdef BRAYNS_USE_OPENMP
-        if (omp_get_thread_num() == 0)
-#endif
-            if (_progressUpdate)
-                _progressUpdate(message, float(current) / expected);
-    }
+    virtual bool isSupported(const std::string& filename,
+                             const std::string& extension) const = 0;
 
 protected:
     Scene& _scene;
-
-private:
-    UpdateCallback _progressUpdate;
 };
 }

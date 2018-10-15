@@ -33,36 +33,30 @@ namespace brayns
 class LoaderRegistry
 {
 public:
-    struct LoaderInfo
-    {
-        /**
-         * The function that returns the supported types (extension, filename
-         * patterns) of the loader.
-         */
-        std::function<std::set<std::string>()> supportedTypes;
-
-        /** The function to create the loader. */
-        std::function<LoaderPtr()> createLoader;
-    };
-
     /** Register the given loader. */
-    void registerLoader(LoaderInfo loaderInfo);
+    void registerLoader(std::unique_ptr<Loader> loader);
+
+    /**
+     * @return true if any of the registered loaders can handle the given file
+     */
+    bool isSupportedFile(const std::string& filename) const;
 
     /**
      * @return true if any of the registered loaders can handle the given type
-     *         (extension, filename).
      */
-    bool isSupported(const std::string& type) const;
-
-    /** @return supported types from all registered loaders. */
-    std::set<std::string> supportedTypes() const;
+    bool isSupportedType(const std::string& type) const;
 
     /**
-     * Create a loader that can load the given type (from blob or filename).
-     *
-     * @param type the type of blob or file for choosing the right loader
+     * Get a loader that can load the given filename.
+     * @throw std::runtime_error if no loader found.
      */
-    LoaderPtr createLoader(const std::string& type) const;
+    const Loader& getLoaderFromFilename(const std::string& filename) const;
+
+    /**
+     * Get a loader that can load the given filetype.
+     * @throw std::runtime_error if no loader found.
+     */
+    const Loader& getLoaderFromFiletype(const std::string& filetype) const;
 
     /**
      * Load the given file or folder into the given scene by choosing the first
@@ -76,11 +70,9 @@ public:
      */
     void load(const std::string& path, Scene& scene,
               const Matrix4f& transformation, const size_t materialID,
-              Loader::UpdateCallback cb);
+              LoaderProgress cb);
 
 private:
-    std::vector<LoaderInfo> _loaders;
-
-    bool _isSupported(const LoaderInfo& loader, const std::string& type) const;
+    std::vector<std::unique_ptr<Loader>> _loaders;
 };
 }

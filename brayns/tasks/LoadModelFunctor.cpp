@@ -46,55 +46,12 @@ LoadModelFunctor::LoadModelFunctor(EnginePtr engine, const ModelParams& params)
 
 ModelDescriptorPtr LoadModelFunctor::operator()(Blob&& blob)
 {
-    // extract the archive and treat it as 'load from folder'
-    if (isArchive(blob))
-    {
-        struct Scope
-        {
-            Scope() { fs::create_directories(_path); }
-            ~Scope() { fs::remove_all(_path); }
-            ModelDescriptorPtr operator()(Blob&& b, LoadModelFunctor& parent,
-                                          const ModelParams& params)
-            {
-                extractBlob(std::move(b), _path.string());
-                return parent._performLoad(
-                    [&] { return parent._loadData(_path.string(), params); });
-            }
-
-        private:
-            fs::path _path = fs::temp_directory_path() / fs::unique_path();
-        } scope;
-        return scope(std::move(blob), *this, _params);
-    }
-
     return _performLoad([&] { return _loadData(std::move(blob), _params); });
 }
 
 ModelDescriptorPtr LoadModelFunctor::operator()()
 {
     const auto& path = _params.getPath();
-    // extract the archive and treat it as 'load from folder'
-    if (isArchive(path))
-    {
-        struct Scope
-        {
-            Scope() { fs::create_directories(_path); }
-            ~Scope() { fs::remove_all(_path); }
-            ModelDescriptorPtr operator()(const std::string& file,
-                                          LoadModelFunctor& parent,
-                                          const ModelParams& params)
-            {
-                extractFile(file, _path.string());
-                return parent._performLoad(
-                    [&] { return parent._loadData(_path.string(), params); });
-            }
-
-        private:
-            fs::path _path = fs::temp_directory_path() / fs::unique_path();
-        } scope;
-        return scope(path, *this, _params);
-    }
-
     return _performLoad([&] { return _loadData(path, _params); });
 }
 
@@ -117,14 +74,14 @@ ModelDescriptorPtr LoadModelFunctor::_loadData(Blob&& blob,
                                                const ModelParams& params)
 {
     return _engine->getScene().loadModel(std::move(blob), NO_MATERIAL, params,
-                                         _getProgressFunc());
+                                         {_getProgressFunc()});
 }
 
 ModelDescriptorPtr LoadModelFunctor::_loadData(const std::string& path,
                                                const ModelParams& params)
 {
     return _engine->getScene().loadModel(path, NO_MATERIAL, params,
-                                         _getProgressFunc());
+                                         {_getProgressFunc()});
 }
 
 void LoadModelFunctor::_updateProgress(const std::string& message,

@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(illegal_no_params)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1731);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_MISSING_PARAMS);
         BOOST_CHECK(e.data.empty());
     }
 }
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(missing_params)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1731);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_MISSING_PARAMS);
         BOOST_CHECK(e.data.empty());
     }
 }
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(invalid_size)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1731);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_MISSING_PARAMS);
         BOOST_CHECK(e.data.empty());
     }
 }
@@ -103,11 +103,8 @@ BOOST_AUTO_TEST_CASE(unsupported_type)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1732);
-        BOOST_REQUIRE(!e.data.empty());
-        brayns::BinaryError error;
-        BOOST_CHECK(from_json(error, e.data));
-        BOOST_CHECK_GT(error.supportedTypes.size(), 0);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_UNSUPPORTED_TYPE);
+        BOOST_REQUIRE(e.data.empty());
     }
 }
 
@@ -193,7 +190,7 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1734);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
         BOOST_CHECK_EQUAL(e.what(),
                           "Invalid content in line 1: 2.500000 3.437500");
     }
@@ -239,7 +236,7 @@ BOOST_AUTO_TEST_CASE(send_wrong_number_of_bytes)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1733);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_INVALID_BINARY_RECEIVE);
     }
 }
 

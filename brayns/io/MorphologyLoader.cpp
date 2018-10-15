@@ -1052,29 +1052,32 @@ MorphologyLoader::MorphologyLoader(Scene& scene,
 MorphologyLoader::~MorphologyLoader()
 {
 }
-std::set<std::string> MorphologyLoader::getSupportedDataTypes()
+
+bool MorphologyLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+                                   const std::string& extension) const
 {
-    return {"h5", "swc"};
+    const std::set<std::string> types = {"h5", "swc"};
+    return types.find(extension) != types.end();
 }
 
-ModelDescriptorPtr MorphologyLoader::importFromBlob(Blob&& /*blob*/,
-                                                    const size_t /*index*/,
-                                                    const size_t /*materialID*/)
+ModelDescriptorPtr MorphologyLoader::importFromBlob(
+    Blob&& /*blob*/, const LoaderProgress& /*callback*/, const size_t /*index*/,
+    const size_t /*materialID*/) const
 {
     throw std::runtime_error("Load morphology from memory not supported");
 }
 
 ModelDescriptorPtr MorphologyLoader::importFromFile(
-    const std::string& fileName, const size_t index,
-    const size_t defaultMaterialId BRAYNS_UNUSED)
+    const std::string& fileName, const LoaderProgress& callback,
+    const size_t index, const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     const auto modelName = boost::filesystem::basename({fileName});
-    updateProgress("Loading " + modelName + " ...", 0, 100);
+    callback.updateProgress("Loading " + modelName + " ...", 0.f);
     auto model = _scene.createModel();
     Vector3f somaPosition =
         importMorphology(servus::URI(fileName), *model, index, {});
     model->createMissingMaterials();
-    updateProgress("Loading " + modelName + " ...", 100, 100);
+    callback.updateProgress("Loading " + modelName + " ...", 1.f);
 
     Transformation transformation;
     transformation.setRotationCenter(somaPosition);
@@ -1084,9 +1087,9 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     return modelDescriptor;
 }
 
-Vector3f MorphologyLoader::importMorphology(const servus::URI& uri,
-                                            Model& model, const size_t index,
-                                            const Matrix4f& transformation)
+Vector3f MorphologyLoader::importMorphology(
+    const servus::URI& uri, Model& model, const size_t index,
+    const Matrix4f& transformation) const
 {
     return _impl->importMorphology(uri, model, index, transformation);
 }
@@ -1094,7 +1097,7 @@ Vector3f MorphologyLoader::importMorphology(const servus::URI& uri,
 Vector3f MorphologyLoader::_importMorphology(
     const servus::URI& source, const uint64_t index, MaterialFunc materialFunc,
     const Matrix4f& transformation, CompartmentReportPtr compartmentReport,
-    ParallelModelContainer& model)
+    ParallelModelContainer& model) const
 {
     return _impl->importMorphology(source, index, materialFunc, transformation,
                                    compartmentReport, model);

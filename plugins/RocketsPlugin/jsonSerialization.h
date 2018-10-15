@@ -188,12 +188,6 @@ inline void init(brayns::BinaryParam* s, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::BinaryError* s, ObjectHandler* h)
-{
-    h->add_property("supported_types", &s->supportedTypes);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
 inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
 {
     h->add_property("animation_parameters", &s->animParams, Flags::Optional);
@@ -373,8 +367,6 @@ inline void init(brayns::MorphologyLayout* m, ObjectHandler* h)
 
 inline void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
 {
-    h->add_property("circuit_config_file", &c->circuitConfigFile,
-                    Flags::Optional);
     h->add_property("density", &c->density, Flags::Optional);
     h->add_property("bounding_box", &c->boundingBox, Flags::Optional);
     h->add_property("mesh_filename_pattern", &c->meshFilenamePattern,
@@ -423,9 +415,6 @@ inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
 
 inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
 {
-    h->add_property("nest_circuit", &g->_NESTCircuit, Flags::Optional);
-    h->add_property("nest_report", &g->_NESTReport, Flags::Optional);
-    h->add_property("nest_cache_file", &g->_NESTCacheFile, Flags::Optional);
     h->add_property("load_cache_file", &g->_loadCacheFile, Flags::Optional);
     h->add_property("save_cache_file", &g->_saveCacheFile, Flags::Optional);
     h->add_property("radius_multiplier", &g->_radiusMultiplier,
