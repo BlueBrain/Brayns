@@ -427,8 +427,6 @@ inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
                     Flags::Optional);
     h->add_property("morphology_layout", &g->_morphologyLayout,
                     Flags::Optional);
-    h->add_property("molecular_system_config", &g->_molecularSystemConfig,
-                    Flags::Optional);
     h->add_property("metaballs_grid_size", &g->_metaballsGridSize,
                     Flags::Optional);
     h->add_property("metaballs_threshold", &g->_metaballsThreshold,

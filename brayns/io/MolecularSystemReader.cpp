@@ -124,7 +124,8 @@ bool MolecularSystemReader::_createScene(
             }
 
         data._callback.updateProgress("Loading proteins...",
-                                      proteinCount / (1.f * data._nbProteins));
+                                      proteinCount /
+                                          static_cast<float>(data._nbProteins));
     }
     return true;
 }

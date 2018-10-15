@@ -54,8 +54,8 @@ public:
     MolecularSystemReader(Scene& scene,
                           const GeometryParameters& geometryParameters);
 
-    virtual bool isSupported(const std::string& filename,
-                             const std::string& extension) const final;
+    bool isSupported(const std::string& filename,
+                     const std::string& extension) const final;
     ModelDescriptorPtr importFromFile(const std::string& fileName,
                                       const LoaderProgress& callback,
                                       const size_t index = 0,

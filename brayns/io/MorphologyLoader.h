@@ -49,8 +49,8 @@ public:
                      const GeometryParameters& geometryParameters);
     ~MorphologyLoader();
 
-    virtual bool isSupported(const std::string& filename,
-                             const std::string& extension) const final;
+    bool isSupported(const std::string& filename,
+                     const std::string& extension) const final;
     ModelDescriptorPtr importFromBlob(Blob&& blob,
                                       const LoaderProgress& callback,
                                       const size_t index,

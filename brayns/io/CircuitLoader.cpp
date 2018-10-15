@@ -376,7 +376,8 @@ private:
             }
             ++meshIndex;
             callback.updateProgress(message.str(),
-                                    meshIndex / (1.f * gids.size()));
+                                    meshIndex /
+                                        static_cast<float>(gids.size()));
         }
         if (loadingFailures != 0)
             BRAYNS_WARN << "Failed to import " << loadingFailures << " meshes"
@@ -418,7 +419,8 @@ private:
                 try
                 {
                     callback.updateProgress(message.str(),
-                                            current / (1.f * uris.size()));
+                                            current / static_cast<float>(
+                                                          uris.size()));
 
                     ParallelModelContainer modelContainer;
                     const auto& uri = uris[morphologyIndex];
@@ -488,8 +490,8 @@ bool CircuitLoader::isSupported(const std::string& filename,
                                 const std::string& extension
                                     BRAYNS_UNUSED) const
 {
-    const auto ends_with = [](std::string const& value,
-                              std::string const& ending) {
+    const auto ends_with = [](const std::string& value,
+                              const std::string& ending) {
         if (ending.size() > value.size())
             return false;
         return std::equal(ending.rbegin(), ending.rend(), value.rbegin());

@@ -31,8 +31,8 @@ class VolumeLoader : public Loader
 public:
     VolumeLoader(Scene& scene, VolumeParameters& volumeParameters);
 
-    virtual bool isSupported(const std::string& filename,
-                             const std::string& extension) const final;
+    bool isSupported(const std::string& filename,
+                     const std::string& extension) const final;
     ModelDescriptorPtr importFromBlob(
         Blob&& blob, const LoaderProgress& callback, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const final;

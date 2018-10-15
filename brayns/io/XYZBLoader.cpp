@@ -98,7 +98,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
             throw std::runtime_error("Invalid content in line " +
                                      std::to_string(i + 1) + ": " + line);
         }
-        callback.updateProgress(msg.str(), i++ / (1.f * numlines));
+        callback.updateProgress(msg.str(), i++ / static_cast<float>(numlines));
     }
 
     // Find an appropriate mean radius to avoid overlaps of the spheres, see

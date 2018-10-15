@@ -172,6 +172,14 @@ BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
     BOOST_CHECK_THROW(asyncWait.get(), rockets::jsonrpc::response_error);
 }
 
+BOOST_AUTO_TEST_CASE(folder)
+{
+    BOOST_CHECK_THROW(
+        (makeRequest<brayns::ModelParams, brayns::ModelDescriptorPtr>(
+            ADD_MODEL, {"folder", BRAYNS_TESTDATA_VALID_MODELS_PATH})),
+        rockets::jsonrpc::response_error);
+}
+
 #ifdef BRAYNS_USE_BBPTESTDATA
 BOOST_AUTO_TEST_CASE(file_no_extension_blueconfig)
 {
