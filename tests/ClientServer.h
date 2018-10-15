@@ -287,15 +287,8 @@ private:
 public:
     rockets::jsonrpc::Client<rockets::ws::Client> client{_wsClient};
 
-    Client(ClientServer& server)
-    {
-        server.connect(_wsClient);
-    }
-
-    void process()
-    {
-        _wsClient.process(CLIENT_PROCESS_TIMEOUT);
-    }
+    Client(ClientServer& server) { server.connect(_wsClient); }
+    void process() { _wsClient.process(CLIENT_PROCESS_TIMEOUT); }
 };
 
 ClientServer* ClientServer::_instance{nullptr};
