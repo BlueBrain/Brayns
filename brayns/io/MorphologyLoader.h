@@ -49,14 +49,17 @@ public:
                      const GeometryParameters& geometryParameters);
     ~MorphologyLoader();
 
-    static std::set<std::string> getSupportedDataTypes();
-
-    ModelDescriptorPtr importFromBlob(Blob&& blob, const size_t index,
-                                      const size_t materialID) final;
+    bool isSupported(const std::string& filename,
+                     const std::string& extension) const final;
+    ModelDescriptorPtr importFromBlob(Blob&& blob,
+                                      const LoaderProgress& callback,
+                                      const size_t index,
+                                      const size_t materialID) const final;
 
     ModelDescriptorPtr importFromFile(const std::string& filename,
+                                      const LoaderProgress& callback,
                                       const size_t index,
-                                      const size_t materialID) final;
+                                      const size_t materialID) const final;
 
     /**
      * @brief Imports morphology from a given SWC or H5 file
@@ -68,7 +71,7 @@ public:
      */
     Vector3f importMorphology(const servus::URI& source, Model& model,
                               const size_t index,
-                              const Matrix4f& transformation);
+                              const Matrix4f& transformation) const;
 
 private:
     using CompartmentReportPtr = std::shared_ptr<brion::CompartmentReport>;
@@ -77,7 +80,7 @@ private:
                                MaterialFunc materialFunc,
                                const Matrix4f& transformation,
                                CompartmentReportPtr compartmentReport,
-                               ParallelModelContainer& model);
+                               ParallelModelContainer& model) const;
     friend class CircuitLoader;
     class Impl;
     std::unique_ptr<Impl> _impl;

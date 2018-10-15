@@ -38,12 +38,8 @@ AddModelTask::AddModelTask(const ModelParams& modelParams, EnginePtr engine)
     if (path.empty())
         throw MISSING_PARAMS;
 
-    if (!registry.isSupported(path))
-    {
-        const auto& supportedTypes = registry.supportedTypes();
-        throw UNSUPPORTED_TYPE(
-            {{supportedTypes.begin(), supportedTypes.end()}});
-    }
+    if (!registry.isSupportedFile(path))
+        throw UNSUPPORTED_TYPE;
 
     LoadModelFunctor functor{engine, modelParams};
     functor.setCancelToken(_cancelToken);

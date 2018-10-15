@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2018 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,41 +18,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PROTEINLOADER_H
-#define PROTEINLOADER_H
+#pragma once
 
 #include <brayns/common/loader/Loader.h>
-#include <brayns/common/types.h>
-#include <brayns/parameters/GeometryParameters.h>
-#include <string>
+#include <brayns/common/loader/LoaderRegistry.h>
+
+#include <set>
 
 namespace brayns
 {
-/** Loads protein from PDB files
- * http://www.rcsb.org
- */
-class ProteinLoader : public Loader
+class ArchiveLoader : public Loader
 {
 public:
-    ProteinLoader(Scene& scene, const GeometryParameters& geometryParameters);
+    ArchiveLoader(Scene& scene, LoaderRegistry& registry);
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
+    ModelDescriptorPtr importFromBlob(
+        Blob&& blob, const LoaderProgress& callback, const size_t index = 0,
+        const size_t defaultMaterialId = NO_MATERIAL) const final;
+
     ModelDescriptorPtr importFromFile(
-        const std::string& fileName, const LoaderProgress& callback,
+        const std::string& filename, const LoaderProgress& callback,
         const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const final;
 
-    ModelDescriptorPtr importFromBlob(Blob&&, const LoaderProgress&,
-                                      const size_t = 0,
-                                      const size_t = NO_MATERIAL) const final
-    {
-        throw std::runtime_error("Unsupported");
-    }
-
 private:
-    const GeometryParameters& _geometryParameters;
+    ModelDescriptorPtr loadExtracted(const std::string& path,
+                                     const LoaderProgress& callback,
+                                     const size_t index,
+                                     const size_t defaultMaterialId) const;
+    LoaderRegistry& _registry;
 };
 }
-
-#endif // PROTEINLOADER_H

@@ -61,15 +61,6 @@ Example of how to load 10% of the circuit:
 braynsViewer ~/circuits/BlueConfig --circuit-density 10
 ```
 
-### Loading a NEST simulation
-
-The ```--nest-config``` command line argument define the NEST circuit to be loaded by
-Brayns. The ```--nest-report``` command line argument specifies the report to be
-rendered. The ```--nest-cache-file``` command line argument needs to be specified in
-order to generate the cache file that Brayns uses to render the simulation. If
-the simulation cache file already exists, Brayns connects to it. If it does not,
- Brayns creates it.
-
 ### Options
 
 #### Layout

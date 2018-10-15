@@ -84,10 +84,7 @@ void AddModelFromBlobTask::_checkValidity(EnginePtr engine)
         throw MISSING_PARAMS;
 
     const auto& registry = engine->getScene().getLoaderRegistry();
-    if (!registry.isSupported(_param.type))
-    {
-        const auto& types = registry.supportedTypes();
-        throw UNSUPPORTED_TYPE({{types.begin(), types.end()}});
-    }
+    if (!registry.isSupportedType(_param.type))
+        throw UNSUPPORTED_TYPE;
 }
 }

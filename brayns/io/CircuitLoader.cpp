@@ -47,6 +47,7 @@ public:
     }
 
     ModelDescriptorPtr importCircuit(const std::string& source,
+                                     const LoaderProgress& callback,
                                      const strings& targets,
                                      const std::string& report)
     {
@@ -157,8 +158,8 @@ public:
 
             // Import meshes
             returnValue =
-                returnValue && _importMeshes(*model, allGids, transformations,
-                                             targetGIDOffsets);
+                returnValue && _importMeshes(callback, *model, allGids,
+                                             transformations, targetGIDOffsets);
 
             // Import morphologies
             const auto useSimulationModel =
@@ -171,7 +172,7 @@ public:
                                              _geometryParameters);
                 returnValue =
                     returnValue &&
-                    _importMorphologies(circuit, *model, allGids,
+                    _importMorphologies(circuit, callback, *model, allGids,
                                         transformations, targetGIDOffsets,
                                         compartmentReport, morphLoader);
             }
@@ -336,9 +337,10 @@ private:
     }
 
 #if (BRAYNS_USE_ASSIMP)
-    bool _importMeshes(Model& model, const brain::GIDSet& gids,
+    bool _importMeshes(const LoaderProgress& callback, Model& model,
+                       const brain::GIDSet& gids,
                        const Matrix4fs& transformations,
-                       const GIDOffsets& targetGIDOffsets)
+                       const GIDOffsets& targetGIDOffsets) const
     {
         MeshLoader meshLoader(_parent._scene, _geometryParameters);
         size_t loadingFailures = 0;
@@ -365,15 +367,17 @@ private:
             try
             {
                 meshLoader.importMesh(meshLoader.getMeshFilenameFromGID(gid),
-                                      model, meshIndex, transformation,
-                                      materialId);
+                                      callback, model, meshIndex,
+                                      transformation, materialId);
             }
             catch (...)
             {
                 ++loadingFailures;
             }
             ++meshIndex;
-            _parent.updateProgress(message.str(), meshIndex, gids.size());
+            callback.updateProgress(message.str(),
+                                    meshIndex /
+                                        static_cast<float>(gids.size()));
         }
         if (loadingFailures != 0)
             BRAYNS_WARN << "Failed to import " << loadingFailures << " meshes"
@@ -390,7 +394,8 @@ private:
     }
 #endif
 
-    bool _importMorphologies(const brain::Circuit& circuit, Model& model,
+    bool _importMorphologies(const brain::Circuit& circuit,
+                             const LoaderProgress& callback, Model& model,
                              const brain::GIDSet& gids,
                              const Matrix4fs& transformations,
                              const GIDOffsets& targetGIDOffsets,
@@ -413,7 +418,9 @@ private:
 
                 try
                 {
-                    _parent.updateProgress(message.str(), current, uris.size());
+                    callback.updateProgress(message.str(),
+                                            current / static_cast<float>(
+                                                          uris.size()));
 
                     ParallelModelContainer modelContainer;
                     const auto& uri = uris[morphologyIndex];
@@ -479,31 +486,49 @@ CircuitLoader::~CircuitLoader()
 {
 }
 
-std::set<std::string> CircuitLoader::getSupportedDataTypes()
+bool CircuitLoader::isSupported(const std::string& filename,
+                                const std::string& extension
+                                    BRAYNS_UNUSED) const
 {
-    return {"BlueConfig", "BlueConfig3", "CircuitConfig", "circuit"};
+    const auto ends_with = [](const std::string& value,
+                              const std::string& ending) {
+        if (ending.size() > value.size())
+            return false;
+        return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+    };
+
+    const std::set<std::string> names = {"BlueConfig", "BlueConfig3",
+                                         "CircuitConfig", "circuit"};
+
+    for (const auto& name : names)
+        if (ends_with(filename, name))
+            return true;
+
+    return false;
 }
 
-ModelDescriptorPtr CircuitLoader::importFromBlob(Blob&& /*blob*/,
-                                                 const size_t /*index*/,
-                                                 const size_t /*materialID*/)
+ModelDescriptorPtr CircuitLoader::importFromBlob(
+    Blob&& /*blob*/, const LoaderProgress& /*callback*/, const size_t /*index*/,
+    const size_t /*materialID*/) const
 {
     throw std::runtime_error("Loading circuit from blob is not supported");
 }
 
-ModelDescriptorPtr CircuitLoader::importFromFile(const std::string& filename,
-                                                 const size_t /*index*/,
-                                                 const size_t /*materialID*/)
+ModelDescriptorPtr CircuitLoader::importFromFile(
+    const std::string& filename, const LoaderProgress& callback,
+    const size_t /*index*/, const size_t /*materialID*/) const
 {
     return _impl->importCircuit(
-        filename, _impl->geometryParameters().getCircuitTargetsAsStrings(),
+        filename, callback,
+        _impl->geometryParameters().getCircuitTargetsAsStrings(),
         _impl->geometryParameters().getCircuitReport());
 }
 
 ModelDescriptorPtr CircuitLoader::importCircuit(const servus::URI& uri,
+                                                const LoaderProgress& callback,
                                                 const strings& targets,
                                                 const std::string& report)
 {
-    return _impl->importCircuit(uri.getPath(), targets, report);
+    return _impl->importCircuit(uri.getPath(), callback, targets, report);
 }
 }

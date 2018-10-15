@@ -23,6 +23,7 @@
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
+#include <set>
 #include <string>
 
 namespace brayns
@@ -53,32 +54,42 @@ public:
     MolecularSystemReader(Scene& scene,
                           const GeometryParameters& geometryParameters);
 
+    bool isSupported(const std::string& filename,
+                     const std::string& extension) const final;
     ModelDescriptorPtr importFromFile(const std::string& fileName,
+                                      const LoaderProgress& callback,
                                       const size_t index = 0,
-                                      const size_t = NO_MATERIAL) final;
+                                      const size_t = NO_MATERIAL) const final;
 
-    ModelDescriptorPtr importFromBlob(Blob&&, const size_t = 0,
-                                      const size_t = NO_MATERIAL) final
+    ModelDescriptorPtr importFromBlob(Blob&&, const LoaderProgress&,
+                                      const size_t, const size_t) const final
     {
         throw std::runtime_error("Unsupported");
     }
 
 private:
-    bool _createScene();
-    bool _loadConfiguration(const std::string& fileName);
-    bool _loadProteins();
-    bool _loadPositions();
-    void _writePositionstoFile(const std::string& fileName);
-
     const GeometryParameters& _geometryParameters;
-    std::string _proteinFolder;
-    std::string _meshFolder;
-    std::string _descriptorFilename;
-    std::string _positionsFilename;
-    std::string _calciumSimulationFolder;
-    uint64_t _nbProteins;
-    Proteins _proteins;
-    ProteinPositions _proteinPositions;
+
+    struct LoaderData
+    {
+        std::string _proteinFolder;
+        std::string _meshFolder;
+        std::string _descriptorFilename;
+        std::string _positionsFilename;
+        std::string _calciumSimulationFolder;
+        uint64_t _nbProteins;
+        Proteins _proteins;
+        ProteinPositions _proteinPositions;
+        LoaderProgress _callback;
+    };
+
+    bool _createScene(LoaderData& data) const;
+    bool _loadConfiguration(const std::string& fileName,
+                            LoaderData& data) const;
+    bool _loadProteins(LoaderData& data) const;
+    bool _loadPositions(LoaderData& data) const;
+    void _writePositionstoFile(const std::string& fileName,
+                               const LoaderData& data) const;
 };
 }
 

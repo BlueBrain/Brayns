@@ -38,14 +38,17 @@ XYZBLoader::XYZBLoader(Scene& scene)
 {
 }
 
-std::set<std::string> XYZBLoader::getSupportedDataTypes()
+bool XYZBLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+                             const std::string& extension) const
 {
-    return {"xyz"};
+    const std::set<std::string> types = {"xyz"};
+    return types.find(extension) != types.end();
 }
 
 ModelDescriptorPtr XYZBLoader::importFromBlob(
-    Blob&& blob, const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED)
+    Blob&& blob, const LoaderProgress& callback,
+    const size_t index BRAYNS_UNUSED,
+    const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     BRAYNS_INFO << "Loading xyz " << blob.name << std::endl;
 
@@ -95,7 +98,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
             throw std::runtime_error("Invalid content in line " +
                                      std::to_string(i + 1) + ": " + line);
         }
-        updateProgress(msg.str(), i++, numlines);
+        callback.updateProgress(msg.str(), i++ / static_cast<float>(numlines));
     }
 
     // Find an appropriate mean radius to avoid overlaps of the spheres, see
@@ -132,9 +135,9 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     return modelDescriptor;
 }
 
-ModelDescriptorPtr XYZBLoader::importFromFile(const std::string& filename,
-                                              const size_t index,
-                                              const size_t defaultMaterialId)
+ModelDescriptorPtr XYZBLoader::importFromFile(
+    const std::string& filename, const LoaderProgress& callback,
+    const size_t index, const size_t defaultMaterialId) const
 {
     std::ifstream file(filename);
     if (!file.good())
@@ -143,6 +146,6 @@ ModelDescriptorPtr XYZBLoader::importFromFile(const std::string& filename,
                            filename,
                            {std::istreambuf_iterator<char>(file),
                             std::istreambuf_iterator<char>()}},
-                          index, defaultMaterialId);
+                          callback, index, defaultMaterialId);
 }
 }

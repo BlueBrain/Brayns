@@ -27,9 +27,6 @@
 
 namespace
 {
-const std::string PARAM_NEST_CIRCUIT = "nest-circuit";
-const std::string PARAM_NEST_REPORT = "nest-report";
-const std::string PARAM_CIRCUIT_CONFIG = "circuit-config";
 const std::string PARAM_CIRCUIT_DENSITY = "circuit-density";
 const std::string PARAM_CIRCUIT_USES_SIMULATION_MODEL =
     "circuit-uses-simulation-model";
@@ -57,10 +54,8 @@ const std::string PARAM_RADIUS_MULTIPLIER = "radius-multiplier";
 const std::string PARAM_RADIUS_CORRECTION = "radius-correction";
 const std::string PARAM_COLOR_SCHEME = "color-scheme";
 const std::string PARAM_GEOMETRY_QUALITY = "geometry-quality";
-const std::string PARAM_NEST_CACHE_FILENAME = "nest-cache-file";
 const std::string PARAM_MORPHOLOGY_SECTION_TYPES = "morphology-section-types";
 const std::string PARAM_MORPHOLOGY_LAYOUT = "morphology-layout";
-const std::string PARAM_MOLECULAR_SYSTEM_CONFIG = "molecular-system-config";
 const std::string PARAM_METABALLS_GRIDSIZE = "metaballs-grid-size";
 const std::string PARAM_METABALLS_THRESHOLD = "metaballs-threshold";
 const std::string PARAM_METABALLS_SAMPLES_FROM_SOMA =
@@ -98,15 +93,6 @@ GeometryParameters::GeometryParameters()
     , _memoryMode(MemoryMode::shared)
 {
     _parameters.add_options() //
-        (PARAM_NEST_CIRCUIT.c_str(), po::value<std::string>(),
-         "H5 file containing the NEST circuit [string]")
-        //
-        (PARAM_NEST_REPORT.c_str(), po::value<std::string>(),
-         "NEST simulation report file [string]")
-        //
-        (PARAM_CIRCUIT_CONFIG.c_str(), po::value<std::string>(),
-         "Circuit configuration filename [string]")
-        //
         (PARAM_LOAD_CACHE_FILE.c_str(), po::value<std::string>(),
          "Load binary container of a scene [string]")
         //
@@ -171,12 +157,6 @@ GeometryParameters::GeometryParameters()
         (PARAM_CIRCUIT_RANDOM_SEED.c_str(), po::value<size_t>(),
          "Random seed for circuit [int]")
         //
-        (PARAM_NEST_CACHE_FILENAME.c_str(), po::value<std::string>(),
-         "Cache file containing nest data [string]")
-        //
-        (PARAM_MOLECULAR_SYSTEM_CONFIG.c_str(), po::value<std::string>(),
-         "Molecular system configuration [string]")
-        //
         (PARAM_METABALLS_GRIDSIZE.c_str(), po::value<size_t>(),
          "Metaballs grid size [int]. Activates automated meshing of somas "
          "if different from 0")
@@ -224,13 +204,6 @@ GeometryParameters::GeometryParameters()
 
 void GeometryParameters::parse(const po::variables_map& vm)
 {
-    if (vm.count(PARAM_NEST_CIRCUIT))
-        _NESTCircuit = vm[PARAM_NEST_CIRCUIT].as<std::string>();
-    if (vm.count(PARAM_NEST_REPORT))
-        _NESTReport = vm[PARAM_NEST_REPORT].as<std::string>();
-    if (vm.count(PARAM_CIRCUIT_CONFIG))
-        _circuitConfiguration.circuitConfigFile =
-            vm[PARAM_CIRCUIT_CONFIG].as<std::string>();
     if (vm.count(PARAM_LOAD_CACHE_FILE))
         _loadCacheFile = vm[PARAM_LOAD_CACHE_FILE].as<std::string>();
     if (vm.count(PARAM_SAVE_CACHE_FILE))
@@ -323,11 +296,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_CIRCUIT_RANDOM_SEED))
         _circuitConfiguration.randomSeed =
             vm[PARAM_CIRCUIT_RANDOM_SEED].as<size_t>();
-    if (vm.count(PARAM_NEST_CACHE_FILENAME))
-        _NESTCacheFile = vm[PARAM_NEST_CACHE_FILENAME].as<std::string>();
-    if (vm.count(PARAM_MOLECULAR_SYSTEM_CONFIG))
-        _molecularSystemConfig =
-            vm[PARAM_MOLECULAR_SYSTEM_CONFIG].as<std::string>();
 
     if (vm.count(PARAM_METABALLS_GRIDSIZE))
         _metaballsGridSize = vm[PARAM_METABALLS_GRIDSIZE].as<size_t>();
@@ -378,10 +346,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
 void GeometryParameters::print()
 {
     AbstractParameters::print();
-    BRAYNS_INFO << "NEST circuit file          : " << _NESTCircuit << std::endl;
-    BRAYNS_INFO << "NEST simulation report file: " << _NESTReport << std::endl;
-    BRAYNS_INFO << "NEST cache file            : " << _NESTCacheFile
-                << std::endl;
     BRAYNS_INFO << "Cache file to load         : " << _loadCacheFile
                 << std::endl;
     BRAYNS_INFO << "Cache file to save         : " << _saveCacheFile
@@ -395,8 +359,6 @@ void GeometryParameters::print()
     BRAYNS_INFO << "Geometry quality           : "
                 << getGeometryQualityAsString(_geometryQuality) << std::endl;
     BRAYNS_INFO << "Circuit configuration      : " << std::endl;
-    BRAYNS_INFO << "- Config file              : "
-                << _circuitConfiguration.circuitConfigFile << std::endl;
     BRAYNS_INFO << " - Targets                 : "
                 << _circuitConfiguration.targets << std::endl;
     BRAYNS_INFO << " - Report                  : "
@@ -429,8 +391,6 @@ void GeometryParameters::print()
                 << _morphologyLayout.verticalSpacing << std::endl;
     BRAYNS_INFO << " - Horizontal spacing      : "
                 << _morphologyLayout.horizontalSpacing << std::endl;
-    BRAYNS_INFO << "Molecular system config    : " << _molecularSystemConfig
-                << std::endl;
     BRAYNS_INFO << "Metaballs                  : " << std::endl;
     BRAYNS_INFO << " - Grid size               : " << _metaballsGridSize
                 << std::endl;

@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(missing_params)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1731);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_MISSING_PARAMS);
         BOOST_CHECK(e.data.empty());
     }
 }
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(nonexistant_file)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1734);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
         BOOST_CHECK(e.data.empty());
     }
 }
@@ -72,11 +72,8 @@ BOOST_AUTO_TEST_CASE(unsupported_type)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1732);
-        BOOST_REQUIRE(!e.data.empty());
-        brayns::BinaryError error;
-        BOOST_CHECK(from_json(error, e.data));
-        BOOST_CHECK_GT(error.supportedTypes.size(), 0);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_UNSUPPORTED_TYPE);
+        BOOST_REQUIRE(e.data.empty());
     }
 }
 
@@ -130,7 +127,7 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
     }
     catch (const rockets::jsonrpc::response_error& e)
     {
-        BOOST_CHECK_EQUAL(e.code, -1734);
+        BOOST_CHECK_EQUAL(e.code, brayns::ERROR_ID_LOADING_BINARY_FAILED);
         BOOST_CHECK_EQUAL(e.what(),
                           "Invalid content in line 1: 2.500000 3.437500");
     }
@@ -177,9 +174,10 @@ BOOST_AUTO_TEST_CASE(close_client_while_pending_request)
 
 BOOST_AUTO_TEST_CASE(folder)
 {
-    BOOST_CHECK_NO_THROW(
+    BOOST_CHECK_THROW(
         (makeRequest<brayns::ModelParams, brayns::ModelDescriptorPtr>(
-            ADD_MODEL, {"folder", BRAYNS_TESTDATA_VALID_MODELS_PATH})));
+            ADD_MODEL, {"folder", BRAYNS_TESTDATA_VALID_MODELS_PATH})),
+        rockets::jsonrpc::response_error);
 }
 
 #ifdef BRAYNS_USE_BBPTESTDATA

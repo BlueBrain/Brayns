@@ -79,7 +79,6 @@ BOOST_AUTO_TEST_CASE(defaults)
                       brayns::Vector3d(0, 0, 0));
 
     const auto& geomParams = pm.getGeometryParameters();
-    BOOST_CHECK_EQUAL(geomParams.getCircuitConfiguration(), "");
     BOOST_CHECK_EQUAL(geomParams.getLoadCacheFile(), "");
     BOOST_CHECK_EQUAL(geomParams.getSaveCacheFile(), "");
     BOOST_CHECK_EQUAL(geomParams.getCircuitTargets(), "");

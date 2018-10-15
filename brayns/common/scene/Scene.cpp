@@ -254,12 +254,11 @@ void Scene::removeClipPlane(const size_t id)
 
 ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
                                     const ModelParams& params,
-                                    Loader::UpdateCallback cb)
+                                    LoaderProgress cb)
 {
-    auto loader = _loaderRegistry.createLoader(blob.type);
-    loader->setProgressCallback(cb);
+    const auto& loader = _loaderRegistry.getLoaderFromFiletype(blob.type);
     auto modelDescriptor =
-        loader->importFromBlob(std::move(blob), 0, materialID);
+        loader.importFromBlob(std::move(blob), cb, 0, materialID);
     if (!modelDescriptor)
         throw std::runtime_error("No model returned by loader");
     *modelDescriptor = params;
@@ -272,18 +271,18 @@ ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
 ModelDescriptorPtr Scene::loadModel(const std::string& path,
                                     const size_t materialID,
                                     const ModelParams& params,
-                                    Loader::UpdateCallback cb)
+                                    LoaderProgress cb)
 {
     ModelDescriptorPtr modelDescriptor;
     if (fs::is_directory(path))
     {
         fs::directory_iterator begin(path), end;
         const int numFiles =
-            std::count_if(begin, end,
-                          [& registry = _loaderRegistry](const auto& d) {
-                              return !fs::is_directory(d.path()) &&
-                                     registry.isSupported(d.path().string());
-                          });
+            std::count_if(begin, end, [& registry =
+                                           _loaderRegistry](const auto& d) {
+                return !fs::is_directory(d.path()) &&
+                       registry.isSupportedFile(d.path().string());
+            });
 
         if (numFiles == 0)
             throw std::runtime_error("No supported file found to load");
@@ -296,20 +295,20 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
         {
             const auto& currentPath = i.path().string();
             if (fs::is_directory(i.path()) ||
-                !_loaderRegistry.isSupported(currentPath))
+                !_loaderRegistry.isSupportedFile(currentPath))
             {
                 continue;
             }
-            auto loader = _loaderRegistry.createLoader(currentPath);
+            const auto& loader =
+                _loaderRegistry.getLoaderFromFilename(currentPath);
 
             auto progressCb = [cb, numFiles, totalProgress](auto msg,
                                                             auto amount) {
-                cb(msg, totalProgress + (amount / numFiles));
+                cb.updateProgress(msg, totalProgress + (amount / numFiles));
             };
 
-            loader->setProgressCallback(progressCb);
-            modelDescriptor =
-                loader->importFromFile(currentPath, index++, materialID);
+            modelDescriptor = loader.importFromFile(currentPath, {progressCb},
+                                                    index++, materialID);
             if (!modelDescriptor)
                 throw std::runtime_error("No model returned by loader");
             *modelDescriptor = params;
@@ -320,9 +319,8 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
     }
     else
     {
-        auto loader = _loaderRegistry.createLoader(path);
-        loader->setProgressCallback(cb);
-        modelDescriptor = loader->importFromFile(path, 0, materialID);
+        const auto& loader = _loaderRegistry.getLoaderFromFilename(path);
+        modelDescriptor = loader.importFromFile(path, cb, 0, materialID);
         if (!modelDescriptor)
             throw std::runtime_error("No model returned by loader");
         *modelDescriptor = params;

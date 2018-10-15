@@ -42,23 +42,24 @@ namespace brayns
 class ProgressWatcher : public Assimp::ProgressHandler
 {
 public:
-    ProgressWatcher(Loader& parent, const std::string& filename)
-        : _parent(parent)
+    ProgressWatcher(const LoaderProgress& callback, const std::string& filename)
+        : _callback(callback)
+
     {
         _msg << "Loading " << shortenString(filename) << " ..." << std::endl;
     }
 
     bool Update(const float percentage) final
     {
-        constexpr size_t TOTAL_PROGRESS = 100;
-        constexpr size_t LOADING_FRACTION = 50;
-        _parent.updateProgress(_msg.str(), percentage * LOADING_FRACTION,
-                               TOTAL_PROGRESS);
+        constexpr float TOTAL_PROGRESS = 100.f;
+        constexpr float LOADING_FRACTION = 50.f;
+        _callback.updateProgress(_msg.str(), (percentage * LOADING_FRACTION) /
+                                                 TOTAL_PROGRESS);
         return true;
     }
 
 private:
-    Loader& _parent;
+    const LoaderProgress& _callback;
     std::function<void()> _cancelCheck;
     std::stringstream _msg;
 };
@@ -71,7 +72,8 @@ MeshLoader::MeshLoader(Scene& scene,
 {
 }
 
-std::set<std::string> MeshLoader::getSupportedDataTypes()
+bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+                             const std::string& extension) const
 {
     std::set<std::string> types;
 #ifdef BRAYNS_USE_ASSIMP
@@ -87,16 +89,16 @@ std::set<std::string> MeshLoader::getSupportedDataTypes()
         types.insert(pos == std::string::npos ? s : s.substr(pos + 1));
     }
 #endif
-    return types;
+    return types.find(extension) != types.end();
 }
 
 #ifdef BRAYNS_USE_ASSIMP
-ModelDescriptorPtr MeshLoader::importFromFile(const std::string& fileName,
-                                              const size_t index,
-                                              const size_t defaultMaterialId)
+ModelDescriptorPtr MeshLoader::importFromFile(
+    const std::string& fileName, const LoaderProgress& callback,
+    const size_t index, const size_t defaultMaterialId) const
 {
     auto model = _scene.createModel();
-    importMesh(fileName, *model, index, {}, defaultMaterialId);
+    importMesh(fileName, callback, *model, index, {}, defaultMaterialId);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -107,11 +109,12 @@ ModelDescriptorPtr MeshLoader::importFromFile(const std::string& fileName,
     return modelDescriptor;
 }
 
-ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, const size_t index,
-                                              const size_t defaultMaterialId)
+ModelDescriptorPtr MeshLoader::importFromBlob(
+    Blob&& blob, const LoaderProgress& callback, const size_t index,
+    const size_t defaultMaterialId) const
 {
     Assimp::Importer importer;
-    importer.SetProgressHandler(new ProgressWatcher(*this, blob.name));
+    importer.SetProgressHandler(new ProgressWatcher(callback, blob.name));
 
     const aiScene* aiScene =
         importer.ReadFileFromMemory(blob.data.data(), blob.data.size(),
@@ -136,7 +139,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(Blob&& blob, const size_t index,
 }
 
 void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
-                                  const std::string& folder)
+                                  const std::string& folder) const
 {
     BRAYNS_DEBUG << "Loading " << aiScene->mNumMaterials << " materials"
                  << std::endl;
@@ -227,7 +230,7 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                            const size_t index, const Matrix4f& transformation,
                            const size_t defaultMaterialId,
-                           const std::string& folder)
+                           const std::string& folder) const
 {
     const size_t materialId =
         _geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
@@ -331,7 +334,7 @@ size_t MeshLoader::_getQuality() const
     }
 }
 
-std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
+std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid) const
 {
     const auto meshedMorphologiesFolder =
         _geometryParameters.getCircuitMeshFolder();
@@ -347,14 +350,15 @@ std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid)
     return meshedMorphologiesFolder + "/" + meshFilenamePattern;
 }
 
-void MeshLoader::importMesh(const std::string& fileName, Model& model,
+void MeshLoader::importMesh(const std::string& fileName,
+                            const LoaderProgress& callback, Model& model,
                             const size_t index,
                             const vmml::Matrix4f& transformation,
-                            const size_t defaultMaterialId)
+                            const size_t defaultMaterialId) const
 {
     const boost::filesystem::path file = fileName;
     Assimp::Importer importer;
-    importer.SetProgressHandler(new ProgressWatcher(*this, fileName));
+    importer.SetProgressHandler(new ProgressWatcher(callback, fileName));
     if (!importer.IsExtensionSupported(file.extension().c_str()))
     {
         std::stringstream msg;

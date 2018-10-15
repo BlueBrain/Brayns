@@ -48,24 +48,33 @@ class ForeverLoader : public brayns::Loader
 {
 public:
     using brayns::Loader::Loader;
-    brayns::ModelDescriptorPtr importFromBlob(brayns::Blob&&, const size_t,
-                                              const size_t) final
+
+    bool isSupported(const std::string& filename,
+                     const std::string& extension BRAYNS_UNUSED) const final
+    {
+        return filename == "forever";
+    }
+
+    brayns::ModelDescriptorPtr importFromBlob(
+        brayns::Blob&&, const brayns::LoaderProgress& callback, const size_t,
+        const size_t) const final
     {
         for (;;)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            updateProgress("still not done", 0, 1);
+            callback.updateProgress("still not done", 0.f);
         }
         return {};
     }
 
-    brayns::ModelDescriptorPtr importFromFile(const std::string&, const size_t,
-                                              const size_t) final
+    brayns::ModelDescriptorPtr importFromFile(
+        const std::string&, const brayns::LoaderProgress& callback,
+        const size_t, const size_t) const final
     {
         for (;;)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            updateProgress("still not done", 0, 1);
+            callback.updateProgress("still not done", 0.f);
         }
         return {};
     }
@@ -100,8 +109,7 @@ public:
 
         auto& scene = _brayns->getEngine().getScene();
         scene.getLoaderRegistry().registerLoader(
-            {[] { return std::set<std::string>{std::string("forever")}; },
-             [&scene] { return std::make_unique<ForeverLoader>(scene); }});
+            std::make_unique<ForeverLoader>(scene));
 
         connect(_wsClient);
         _instance = this;
@@ -287,15 +295,8 @@ private:
 public:
     rockets::jsonrpc::Client<rockets::ws::Client> client{_wsClient};
 
-    Client(ClientServer& server)
-    {
-        server.connect(_wsClient);
-    }
-
-    void process()
-    {
-        _wsClient.process(CLIENT_PROCESS_TIMEOUT);
-    }
+    Client(ClientServer& server) { server.connect(_wsClient); }
+    void process() { _wsClient.process(CLIENT_PROCESS_TIMEOUT); }
 };
 
 ClientServer* ClientServer::_instance{nullptr};

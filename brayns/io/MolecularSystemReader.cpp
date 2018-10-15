@@ -39,55 +39,67 @@ MolecularSystemReader::MolecularSystemReader(
 {
 }
 
-ModelDescriptorPtr MolecularSystemReader::importFromFile(
-    const std::string& fileName, const size_t index BRAYNS_UNUSED,
-    const size_t defaultMaterialId BRAYNS_UNUSED)
+bool MolecularSystemReader::isSupported(const std::string& filename
+                                            BRAYNS_UNUSED,
+                                        const std::string& extension) const
 {
-    _nbProteins = 0;
-    if (!_loadConfiguration(fileName))
+    return extension == "molsys";
+}
+
+ModelDescriptorPtr MolecularSystemReader::importFromFile(
+    const std::string& fileName, const LoaderProgress& callback,
+    const size_t index BRAYNS_UNUSED,
+    const size_t defaultMaterialId BRAYNS_UNUSED) const
+{
+    LoaderData data;
+    data._callback = callback;
+    data._nbProteins = 0;
+    if (!_loadConfiguration(fileName, data))
         throw std::runtime_error("Failed to load " + fileName);
-    if (!_loadProteins())
+    if (!_loadProteins(data))
         throw std::runtime_error("Failed to load proteins");
-    if (!_loadPositions())
+    if (!_loadPositions(data))
         throw std::runtime_error("Failed to load positions");
 
-    if (!_createScene())
+    if (!_createScene(data))
         throw std::runtime_error("Failed to load scene");
 
-    if (!_calciumSimulationFolder.empty())
+    if (!data._calciumSimulationFolder.empty())
     {
         CADiffusionSimulationHandlerPtr handler(
-            new CADiffusionSimulationHandler(_calciumSimulationFolder));
+            new CADiffusionSimulationHandler(data._calciumSimulationFolder));
         handler->setFrame(_scene, 0);
         _scene.setCADiffusionSimulationHandler(handler);
     }
-    BRAYNS_INFO << "Total number of different proteins: " << _proteins.size()
-                << std::endl;
-    BRAYNS_INFO << "Total number of proteins          : " << _nbProteins
+    BRAYNS_INFO << "Total number of different proteins: "
+                << data._proteins.size() << std::endl;
+    BRAYNS_INFO << "Total number of proteins          : " << data._nbProteins
                 << std::endl;
     return {};
 }
 
-bool MolecularSystemReader::_createScene()
+bool MolecularSystemReader::_createScene(
+    MolecularSystemReader::LoaderData& data) const
 {
     uint64_t proteinCount = 0;
-    for (const auto& proteinPosition : _proteinPositions)
+    for (const auto& proteinPosition : data._proteinPositions)
     {
-        const auto& protein = _proteins.find(proteinPosition.first);
-        if (!_proteinFolder.empty())
+        const auto& protein = data._proteins.find(proteinPosition.first);
+        if (!data._proteinFolder.empty())
             // Load PDB files
             for (const auto& position : proteinPosition.second)
             {
                 const auto pdbFilename =
-                    _proteinFolder + '/' + protein->second + ".pdb";
+                    data._proteinFolder + '/' + protein->second + ".pdb";
                 Matrix4f transformation;
                 transformation.setTranslation(position);
                 ProteinLoader loader(_scene, _geometryParameters);
-                loader.importFromFile(pdbFilename, proteinCount, NO_MATERIAL);
+                loader.importFromFile(pdbFilename, data._callback, proteinCount,
+                                      NO_MATERIAL);
                 ++proteinCount;
             }
 
-        if (!_meshFolder.empty())
+        if (!data._meshFolder.empty())
             // Load meshes
             for (const auto& position : proteinPosition.second)
             {
@@ -103,19 +115,23 @@ bool MolecularSystemReader::_createScene()
                 // positions are in micrometers
                 MeshLoader meshLoader(_scene, _geometryParameters);
                 const std::string fileName =
-                    _meshFolder + '/' + protein->second + ".obj";
-                meshLoader.importFromFile(fileName, proteinCount, materialId);
+                    data._meshFolder + '/' + protein->second + ".obj";
+                meshLoader.importFromFile(fileName, data._callback,
+                                          proteinCount, materialId);
 
-                if (_proteinFolder.empty())
+                if (data._proteinFolder.empty())
                     ++proteinCount;
             }
 
-        updateProgress("Loading proteins...", proteinCount, _nbProteins);
+        data._callback.updateProgress("Loading proteins...",
+                                      proteinCount /
+                                          static_cast<float>(data._nbProteins));
     }
     return true;
 }
 
-bool MolecularSystemReader::_loadConfiguration(const std::string& fileName)
+bool MolecularSystemReader::_loadConfiguration(
+    const std::string& fileName, MolecularSystemReader::LoaderData& data) const
 {
     // Load molecular system configuration
     std::ifstream configurationFile(fileName, std::ios::in);
@@ -136,28 +152,31 @@ bool MolecularSystemReader::_loadConfiguration(const std::string& fileName)
     }
     configurationFile.close();
 
-    _proteinFolder = parameters["ProteinFolder"];
-    _meshFolder = parameters["MeshFolder"];
-    _descriptorFilename = parameters["SystemDescriptor"];
-    _positionsFilename = parameters["ProteinPositions"];
-    _calciumSimulationFolder = parameters["CalciumPositions"];
+    data._proteinFolder = parameters["ProteinFolder"];
+    data._meshFolder = parameters["MeshFolder"];
+    data._descriptorFilename = parameters["SystemDescriptor"];
+    data._positionsFilename = parameters["ProteinPositions"];
+    data._calciumSimulationFolder = parameters["CalciumPositions"];
 
     BRAYNS_INFO << "Loading molecular system" << std::endl;
-    BRAYNS_INFO << "Protein folder    : " << _proteinFolder << std::endl;
-    BRAYNS_INFO << "Mesh folder       : " << _meshFolder << std::endl;
-    BRAYNS_INFO << "System descriptor : " << _descriptorFilename << std::endl;
-    BRAYNS_INFO << "Protein positions : " << _positionsFilename << std::endl;
-    BRAYNS_INFO << "Calcium positions : " << _calciumSimulationFolder
+    BRAYNS_INFO << "Protein folder    : " << data._proteinFolder << std::endl;
+    BRAYNS_INFO << "Mesh folder       : " << data._meshFolder << std::endl;
+    BRAYNS_INFO << "System descriptor : " << data._descriptorFilename
+                << std::endl;
+    BRAYNS_INFO << "Protein positions : " << data._positionsFilename
+                << std::endl;
+    BRAYNS_INFO << "Calcium positions : " << data._calciumSimulationFolder
                 << std::endl;
     return true;
 }
 
-bool MolecularSystemReader::_loadProteins()
+bool MolecularSystemReader::_loadProteins(
+    MolecularSystemReader::LoaderData& data) const
 {
-    std::ifstream descriptorFile(_descriptorFilename, std::ios::in);
+    std::ifstream descriptorFile(data._descriptorFilename, std::ios::in);
     if (!descriptorFile.good())
     {
-        BRAYNS_ERROR << "Could not open file " << _descriptorFilename
+        BRAYNS_ERROR << "Could not open file " << data._descriptorFilename
                      << std::endl;
         return false;
     }
@@ -174,12 +193,12 @@ bool MolecularSystemReader::_loadProteins()
         if (protein.empty())
             continue;
 
-        _proteins[id] = protein;
+        data._proteins[id] = protein;
 
-        if (_proteinFolder.empty())
+        if (data._proteinFolder.empty())
             continue;
 
-        const auto pdbFilename(_proteinFolder + '/' + protein + ".pdb");
+        const auto pdbFilename(data._proteinFolder + '/' + protein + ".pdb");
         std::ifstream pdbFile(pdbFilename, std::ios::in);
         if (pdbFile.good())
             pdbFile.close();
@@ -191,7 +210,7 @@ bool MolecularSystemReader::_loadProteins()
             command += protein;
             command += ".pdb";
             command += " -P ";
-            command += _proteinFolder;
+            command += data._proteinFolder;
             int status = system(command.c_str());
             BRAYNS_INFO << command << ": " << status << std::endl;
         }
@@ -200,19 +219,20 @@ bool MolecularSystemReader::_loadProteins()
     return true;
 }
 
-bool MolecularSystemReader::_loadPositions()
+bool MolecularSystemReader::_loadPositions(
+    MolecularSystemReader::LoaderData& data) const
 {
     // Load proteins according to specified positions
-    std::ifstream filePositions(_positionsFilename, std::ios::in);
+    std::ifstream filePositions(data._positionsFilename, std::ios::in);
     if (!filePositions.good())
     {
-        BRAYNS_ERROR << "Could not open file " << _positionsFilename
+        BRAYNS_ERROR << "Could not open file " << data._positionsFilename
                      << std::endl;
         return false;
     }
 
     // Load protein positions
-    _nbProteins = 0;
+    data._nbProteins = 0;
     std::string line;
     while (filePositions.good() && std::getline(filePositions, line))
     {
@@ -221,21 +241,23 @@ bool MolecularSystemReader::_loadPositions()
         Vector3f position;
         lineStream >> id >> position.x() >> position.y() >> position.z();
 
-        if (_proteins.find(id) != _proteins.end())
+        if (data._proteins.find(id) != data._proteins.end())
         {
-            auto& proteinPosition = _proteinPositions[id];
+            auto& proteinPosition = data._proteinPositions[id];
             proteinPosition.push_back(position);
-            ++_nbProteins;
+            ++data._nbProteins;
         }
     }
     filePositions.close();
     return true;
 }
 
-void MolecularSystemReader::_writePositionstoFile(const std::string& filename)
+void MolecularSystemReader::_writePositionstoFile(
+    const std::string& filename,
+    const MolecularSystemReader::LoaderData& data) const
 {
     std::ofstream outfile(filename, std::ios::binary);
-    for (const auto& position : _proteinPositions)
+    for (const auto& position : data._proteinPositions)
     {
         for (const auto& element : position.second)
         {

@@ -85,7 +85,6 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
 
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
-                          "--circuit-config",
                           BBP_TEST_BLUECONFIG3,
                           "--circuit-targets",
                           "allmini50",
@@ -167,7 +166,6 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_basic_simulation_renderer)
 
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
-                          "--circuit-config",
                           BBP_TEST_BLUECONFIG3,
                           "--circuit-targets",
                           "allmini50",

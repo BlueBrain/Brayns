@@ -42,15 +42,17 @@ class MeshLoader : public Loader
 public:
     MeshLoader(Scene& scene, const GeometryParameters& geometryParameters);
 
-    static std::set<std::string> getSupportedDataTypes();
+    bool isSupported(const std::string& filename,
+                     const std::string& extension) const final;
 
     ModelDescriptorPtr importFromFile(
-        const std::string& fileName, const size_t index = 0,
-        const size_t defaultMaterial = NO_MATERIAL) final;
+        const std::string& fileName, const LoaderProgress& callback,
+        const size_t index = 0,
+        const size_t defaultMaterial = NO_MATERIAL) const final;
 
     ModelDescriptorPtr importFromBlob(
-        Blob&& blob, const size_t index = 0,
-        const size_t defaultMaterial = NO_MATERIAL) final;
+        Blob&& blob, const LoaderProgress& callback, const size_t index = 0,
+        const size_t defaultMaterial = NO_MATERIAL) const final;
 
     /**
      * @brief getMeshFilenameFromGID Returns the name of the mesh file according
@@ -59,19 +61,20 @@ public:
      * @param gid GID of the cell
      * @return A string with the full path of the mesh file
      */
-    std::string getMeshFilenameFromGID(const uint64_t gid);
+    std::string getMeshFilenameFromGID(const uint64_t gid) const;
 
-    void importMesh(const std::string& fileName, Model& model,
-                    const size_t index, const Matrix4f& transformation,
-                    const size_t defaultMaterialId = NO_MATERIAL);
+    void importMesh(const std::string& fileName, const LoaderProgress& callback,
+                    Model& model, const size_t index,
+                    const Matrix4f& transformation,
+                    const size_t defaultMaterialId = NO_MATERIAL) const;
 
 private:
     void _createMaterials(Model& model, const aiScene* aiScene,
-                          const std::string& folder);
+                          const std::string& folder) const;
 
     void _postLoad(const aiScene* aiScene, Model& model, const size_t index,
                    const Matrix4f& transformation, const size_t defaultMaterial,
-                   const std::string& folder = "");
+                   const std::string& folder = "") const;
     size_t _getQuality() const;
     const GeometryParameters& _geometryParameters;
 };
