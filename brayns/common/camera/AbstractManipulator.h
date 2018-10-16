@@ -31,7 +31,14 @@ namespace brayns
 class AbstractManipulator
 {
 public:
-    AbstractManipulator(Camera& camera, KeyboardHandler& keyboardHandler);
+    enum class AxisMode
+    {
+        globalY = 0,
+        localY
+    };
+
+    AbstractManipulator(Camera& camera, KeyboardHandler& keyboardHandler,
+                        const Boxd& boundingBox);
     virtual ~AbstractManipulator();
 
     virtual void dragLeft(const Vector2i& to, const Vector2i& from) = 0;
@@ -44,7 +51,7 @@ public:
 
     float getRotationSpeed() const;
     float getWheelSpeed() const;
-    void rotate(const Vector3f& pivot, float du, float dv, bool updateTarget);
+    void rotate(const Vector3f& pivot, float du, float dv, AxisMode axisMode);
 
 protected:
     /*! target camera */
@@ -61,7 +68,7 @@ protected:
      * _rotates_ with each unit on the screen */
     float _rotationSpeed;
 
-    void translate(const Vector3f& v, bool updateTarget);
+    void translate(const Vector3f& v);
 };
 }
 

@@ -22,22 +22,33 @@
 
 #include "Camera.h"
 #include <brayns/common/input/KeyboardHandler.h>
+#include <brayns/common/log.h>
 
 namespace brayns
 {
 namespace
 {
-const float DEFAULT_MOTION_SPEED = 0.001f;
-const float DEFAULT_ROTATION_SPEED = 0.005f;
+constexpr float DEFAULT_MOTION_SPEED = 0.03f;
+constexpr float DEFAULT_ROTATION_SPEED = 0.006f;
 }
 
 AbstractManipulator::AbstractManipulator(Camera& camera,
-                                         KeyboardHandler& keyboardHandler)
+                                         KeyboardHandler& keyboardHandler,
+                                         const Boxd& boundingBox)
     : _camera(camera)
     , _keyboardHandler(keyboardHandler)
     , _motionSpeed{DEFAULT_MOTION_SPEED}
     , _rotationSpeed{DEFAULT_ROTATION_SPEED}
 {
+    auto position = boundingBox.getCenter();
+    position.z() += boundingBox.getSize().find_max();
+
+    const Quaterniond identity;
+    _camera.setInitialState(position, identity);
+
+    BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
+    BRAYNS_INFO << "World center      : " << boundingBox.getCenter()
+                << std::endl;
 }
 
 AbstractManipulator::~AbstractManipulator()
@@ -51,14 +62,12 @@ float AbstractManipulator::getRotationSpeed() const
 
 float AbstractManipulator::getWheelSpeed() const
 {
-    return getMotionSpeed() * 100.f;
+    return getMotionSpeed() * 10.f;
 }
 
 float AbstractManipulator::getMotionSpeed() const
 {
-    const auto& position = _camera.getPosition();
-    const auto& target = _camera.getTarget();
-    return Vector3f{target - position}.length() * _motionSpeed;
+    return _motionSpeed;
 }
 
 void AbstractManipulator::updateMotionSpeed(const float speed)
@@ -66,33 +75,34 @@ void AbstractManipulator::updateMotionSpeed(const float speed)
     _motionSpeed *= speed;
 }
 
-void AbstractManipulator::translate(const Vector3f& vector,
-                                    const bool updateTarget)
+void AbstractManipulator::translate(const Vector3f& vector)
 {
-    auto& matrix = _camera.getRotationMatrix();
-    const auto translation = Vector3f{matrix * vector};
+    auto orientation = _camera.getOrientation();
+    const auto translation = orientation.rotate(vector);
 
     _camera.setPosition(_camera.getPosition() + translation);
-    if (updateTarget)
-        _camera.setTarget(_camera.getTarget() + translation);
 }
 
 void AbstractManipulator::rotate(const Vector3f& pivot, const float du,
-                                 const float dv, const bool updateTarget)
+                                 const float dv, AxisMode axisMode)
 {
-    auto& matrix = _camera.getRotationMatrix();
-    matrix.rotate_x(-dv);
-    matrix.rotate_y(-du);
+    const Vector3d axisX =
+        _camera.getOrientation().rotate(Vector3d(1.0, 0.0, 0.0));
 
-    const auto dir = _camera.getTarget() - _camera.getPosition();
-    const auto newPivotToCam =
-        Vector3f{matrix * Vector3f::unitZ()} * dir.length();
+    const Vector3d axisY =
+        axisMode == AxisMode::localY
+            ? _camera.getOrientation().rotate(Vector3d(0.0, 1.0, 0.0))
+            : Vector3d(0.0, 1.0, 0.0);
 
-    if (updateTarget)
-        _camera.setTarget(_camera.getPosition() - newPivotToCam);
-    else
-        _camera.setPosition(pivot + newPivotToCam);
+    const Quaterniond deltaU(-du, axisY);
+    const Quaterniond deltaV(-dv, axisX);
 
-    _camera.setUp(matrix * Vector3f::unitY());
+    const Quaterniond final = deltaU * deltaV * _camera.getOrientation();
+    const Vector3d dir = final.rotate(Vector3d(0.0, 0.0, -1.0));
+
+    const double rotationRadius =
+        Vector3d(_camera.getPosition() - pivot).length();
+    _camera.setPosition(pivot + rotationRadius * -dir);
+    _camera.setOrientation(final);
 }
 }

@@ -28,8 +28,9 @@
 namespace brayns
 {
 FlyingModeManipulator::FlyingModeManipulator(Camera& camera,
-                                             KeyboardHandler& keyboardHandler)
-    : AbstractManipulator(camera, keyboardHandler)
+                                             KeyboardHandler& keyboardHandler,
+                                             const Boxd& boundingBox)
+    : AbstractManipulator(camera, keyboardHandler, boundingBox)
 {
     _keyboardHandler.registerKeyboardShortcut(
         'a', "Strafe left",
@@ -57,45 +58,45 @@ void FlyingModeManipulator::dragLeft(const Vector2i& to, const Vector2i& from)
 {
     const float du = (to.x() - from.x()) * getRotationSpeed();
     const float dv = (to.y() - from.y()) * getRotationSpeed();
-    rotate(_camera.getPosition(), du, dv, true);
+    rotate(_camera.getPosition(), du, dv, AxisMode::globalY);
 }
 
 void FlyingModeManipulator::dragRight(const Vector2i& to, const Vector2i& from)
 {
     const float distance = -(to.y() - from.y()) * getMotionSpeed();
-    translate(Vector3f::forward() * distance, false);
+    translate(Vector3f::forward() * distance);
 }
 
 void FlyingModeManipulator::dragMiddle(const Vector2i& to, const Vector2i& from)
 {
     const float x = (to.x() - from.x()) * getMotionSpeed();
     const float y = (to.y() - from.y()) * getMotionSpeed();
-    translate({-x, y, 0.f}, true);
+    translate({-x, y, 0.f});
 }
 
 void FlyingModeManipulator::wheel(const Vector2i& /*position*/,
                                   const float delta)
 {
-    translate(Vector3f::forward() * delta * getWheelSpeed(), false);
+    translate(Vector3f::forward() * delta * getWheelSpeed());
 }
 
 void FlyingModeManipulator::_strafeLeft()
 {
-    translate(Vector3f::left() * getMotionSpeed(), true);
+    translate(Vector3f::left() * getMotionSpeed());
 }
 
 void FlyingModeManipulator::_strafeRight()
 {
-    translate(Vector3f::right() * getMotionSpeed(), true);
+    translate(Vector3f::right() * getMotionSpeed());
 }
 
 void FlyingModeManipulator::_flyForward()
 {
-    translate(Vector3f::forward() * getWheelSpeed(), true);
+    translate(Vector3f::forward() * getMotionSpeed());
 }
 
 void FlyingModeManipulator::_flyBackwards()
 {
-    translate(Vector3f::backward() * getWheelSpeed(), true);
+    translate(Vector3f::backward() * getMotionSpeed());
 }
 }

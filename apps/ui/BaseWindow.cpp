@@ -161,9 +161,9 @@ void BaseWindow::mouseButton(const int button, const bool released,
         _brayns.getEngine().getFrameBuffer().clear();
         if (result.hit)
         {
-            _brayns.getEngine().getCamera().setTarget(result.pos);
             // updates position based on new target and current rotation
-            _brayns.getCameraManipulator().rotate(result.pos, 0, 0, false);
+            _brayns.getCameraManipulator().rotate(
+                result.pos, 0, 0, AbstractManipulator::AxisMode::localY);
         }
     }
 
@@ -259,9 +259,7 @@ void BaseWindow::display()
     const auto& camera = _brayns.getEngine().getCamera();
     renderInput.windowSize = windowSize;
     renderInput.position = camera.getPosition();
-    renderInput.target = camera.getTarget();
-    renderInput.up = camera.getUp();
-
+    renderInput.orientation = camera.getOrientation();
     _brayns.commitAndRender(renderInput, renderOutput);
 
     GLenum format = GL_RGBA;

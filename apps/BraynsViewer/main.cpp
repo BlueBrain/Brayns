@@ -44,7 +44,6 @@ int main(int argc, const char** argv)
         const brayns::Vector2ui& size = braynsInstance->getParametersManager()
                                             .getApplicationParameters()
                                             .getWindowSize();
-
         braynsViewer.create("Brayns Viewer", size.x(), size.y());
         atexit(cleanup);
         brayns::runGLUT();

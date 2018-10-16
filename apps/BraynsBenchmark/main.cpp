@@ -44,18 +44,16 @@ int main(int argc, const char** argv)
         auto& engine = brayns.getEngine();
         auto& scene = engine.getScene();
         const auto bounds = scene.getBounds();
-        const float radius = bounds.getSize().find_max();
+        const double radius = bounds.getSize().find_max();
         timer.start();
         for (size_t frame = 0; frame < nbFrames; ++frame)
         {
-            const brayns::Vector3f target = bounds.getCenter();
-            const brayns::Vector3f origin =
-                target + brayns::Vector3f(radius * cos(frame * M_PI / 180.f),
-                                          0.f,
-                                          radius * sin(frame * M_PI / 180.f));
-            const brayns::Vector3f up = {0.f, 1.f, 0.f};
-            engine.getCamera().set(origin, target, up);
-
+            const brayns::Vector3d& center = bounds.getCenter();
+            const brayns::Quaterniond quat(frame * M_PI / 180.0,
+                                           brayns::Vector3d(0.0, 1.0, 0.0));
+            const brayns::Vector3d dir =
+                quat.rotate(brayns::Vector3d(0.0, 0.0, -1.0));
+            engine.getCamera().set(center + radius * -dir, quat);
             brayns.render();
         }
         timer.stop();
