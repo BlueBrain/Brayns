@@ -29,8 +29,6 @@
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
 #include <fstream>
 
 namespace
@@ -273,59 +271,12 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
                                     const ModelParams& params,
                                     LoaderProgress cb)
 {
-    ModelDescriptorPtr modelDescriptor;
-    if (fs::is_directory(path))
-    {
-        fs::directory_iterator begin(path), end;
-        const int numFiles =
-            std::count_if(begin, end, [& registry =
-                                           _loaderRegistry](const auto& d) {
-                return !fs::is_directory(d.path()) &&
-                       registry.isSupportedFile(d.path().string());
-            });
-
-        if (numFiles == 0)
-            throw std::runtime_error("No supported file found to load");
-
-        float totalProgress = 0.f;
-
-        size_t index = 0;
-        for (const auto& i :
-             boost::make_iterator_range(fs::directory_iterator(path), {}))
-        {
-            const auto& currentPath = i.path().string();
-            if (fs::is_directory(i.path()) ||
-                !_loaderRegistry.isSupportedFile(currentPath))
-            {
-                continue;
-            }
-            const auto& loader =
-                _loaderRegistry.getLoaderFromFilename(currentPath);
-
-            auto progressCb = [cb, numFiles, totalProgress](auto msg,
-                                                            auto amount) {
-                cb.updateProgress(msg, totalProgress + (amount / numFiles));
-            };
-
-            modelDescriptor = loader.importFromFile(currentPath, {progressCb},
-                                                    index++, materialID);
-            if (!modelDescriptor)
-                throw std::runtime_error("No model returned by loader");
-            *modelDescriptor = params;
-            addModel(modelDescriptor);
-
-            totalProgress += 1.f / numFiles;
-        }
-    }
-    else
-    {
-        const auto& loader = _loaderRegistry.getLoaderFromFilename(path);
-        modelDescriptor = loader.importFromFile(path, cb, 0, materialID);
-        if (!modelDescriptor)
-            throw std::runtime_error("No model returned by loader");
-        *modelDescriptor = params;
-        addModel(modelDescriptor);
-    }
+    const auto& loader = _loaderRegistry.getLoaderFromFilename(path);
+    auto modelDescriptor = loader.importFromFile(path, cb, 0, materialID);
+    if (!modelDescriptor)
+        throw std::runtime_error("No model returned by loader");
+    *modelDescriptor = params;
+    addModel(modelDescriptor);
     saveToCacheFile();
     buildEnvironmentMap();
     markModified();
