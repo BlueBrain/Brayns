@@ -30,8 +30,8 @@
 
 #include <tests/paths.h>
 
-// #define GENERATE_TESTDATA
-// #define WRITE_TEMP_IMAGES
+//#define GENERATE_TESTDATA
+//#define WRITE_TEMP_IMAGES
 
 inline std::unique_ptr<pdiff::RGBAImage> createPDiffRGBAImage(
     brayns::FrameBuffer& fb)

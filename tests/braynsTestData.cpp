@@ -108,11 +108,9 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
 
     brayns::Brayns brayns(argc, argv);
 
-    const auto rotCenter = brayns.getEngine()
-                               .getScene()
-                               .getModel(0)
-                               ->getTransformation()
-                               .getRotationCenter();
+    auto modelDescriptor = brayns.getEngine().getScene().getModel(0);
+    const auto rotCenter =
+        modelDescriptor->getTransformation().getRotationCenter();
 
     auto& camera = brayns.getEngine().getCamera();
     const auto camPos = camera.getPosition();
@@ -120,23 +118,13 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
     camera.setTarget(rotCenter);
     camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
 
-    auto& scene = brayns.getEngine().getScene();
-    for (size_t i = 0; i < scene.getNumModels(); ++i)
-    {
-        auto modelDescriptor = scene.getModel(i);
-        if (modelDescriptor)
+    auto& model = modelDescriptor->getModel();
+    for (auto& material : model.getMaterials())
+        if (material.second)
         {
-            auto& model = modelDescriptor->getModel();
-            auto& materials = model.getMaterials();
-            for (auto& material : materials)
-                if (material.second)
-                {
-                    material.second->setShadingMode(
-                        brayns::MaterialShadingMode::none);
-                    material.second->commit();
-                }
+            material.second->setShadingMode(brayns::MaterialShadingMode::none);
+            material.second->commit();
         }
-    }
 
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50advancedsimulation.png",

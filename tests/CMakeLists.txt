@@ -44,6 +44,7 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     testImages.cpp
     webAPI.cpp
     shadows.cpp
+    materials.cpp
   )
 endif()
 

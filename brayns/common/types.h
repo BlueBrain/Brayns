@@ -30,7 +30,7 @@
 #define SERIALIZATION_FRIEND(type) \
     friend void staticjson::init(type*, staticjson::ObjectHandler*);
 
-#include "commonTypes.h"
+#include <brayns/common/commonTypes.h>
 #include <brayns/common/mathTypes.h>
 
 #include <array>
