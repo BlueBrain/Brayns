@@ -79,7 +79,8 @@ Context::~Context()
         if (i)
             i->destroy();
 
-    _lightBuffer->destroy();
+    if (_lightBuffer)
+        _lightBuffer->destroy();
     _optixContext->destroy();
 }
 
@@ -104,90 +105,19 @@ Context& Context::get()
     return optixMaterial;
 }
 
-void Context::createTexture(ospray::Texture2D* tx)
+::optix::TextureSampler Context::createTexture(Texture* tx)
 {
-    const uint16_t nx = tx->size.x;
-    const uint16_t ny = tx->size.y;
-    uint16_t channels = 3;
-    switch (tx->type)
-    {
-    case OSP_TEXTURE_RGBA8:
-    case OSP_TEXTURE_SRGBA:
-    case OSP_TEXTURE_RGBA32F:
-        channels = 4;
-        break;
-    default:
-        channels = 3;
-    }
-    const uint16_t optixChannels = 4;
-
-    // Create texture sampler
     ::optix::TextureSampler sampler = _optixContext->createTextureSampler();
-    sampler->setWrapMode(0, RT_WRAP_REPEAT);
-    sampler->setWrapMode(1, RT_WRAP_REPEAT);
-    sampler->setWrapMode(2, RT_WRAP_REPEAT);
-    sampler->setIndexingMode(RT_TEXTURE_INDEX_NORMALIZED_COORDINATES);
-    sampler->setReadMode(RT_TEXTURE_READ_NORMALIZED_FLOAT);
-    sampler->setMaxAnisotropy(1.0f);
-    sampler->setMipLevelCount(1u);
-    sampler->setArraySize(1u);
-
-    // Create buffer and populate with texture data
-    ::optix::Buffer buffer =
-        _optixContext->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, nx, ny);
-    float* buffer_data = static_cast<float*>(buffer->map());
-
-    size_t idx_src = 0;
-    size_t idx_dst = 0;
-    for (uint16_t y = 0; y < ny; ++y)
-        for (uint16_t x = 0; x < nx; ++x)
-        {
-            switch (tx->type)
-            {
-            case OSP_TEXTURE_RGBA32F:
-            case OSP_TEXTURE_RGB32F:
-            case OSP_TEXTURE_R32F:
-            {
-                auto data = (float*)tx->data;
-                buffer_data[idx_dst + 0] = data[idx_src + 2];
-                buffer_data[idx_dst + 1] = data[idx_src + 1];
-                buffer_data[idx_dst + 2] = data[idx_src + 0];
-                buffer_data[idx_dst + 3] =
-                    (channels == optixChannels) ? data[idx_src + 4] : 1.f;
-            }
-            break;
-            default:
-            {
-                auto data = (unsigned char*)tx->data;
-                buffer_data[idx_dst + 0] = float(data[idx_src + 2]) / 255.f;
-                buffer_data[idx_dst + 1] = float(data[idx_src + 1]) / 255.f;
-                buffer_data[idx_dst + 2] = float(data[idx_src + 0]) / 255.f;
-                buffer_data[idx_dst + 3] =
-                    (channels == optixChannels)
-                        ? float(data[idx_src + 4]) / 255.f
-                        : 1.f;
-            }
-            }
-
-            idx_dst += 4;
-            idx_src += (channels == optixChannels) ? 4 : 3;
-        }
-
-    buffer->unmap();
-
-    // Assign buffer to sampler
-    sampler->setBuffer(buffer);
-    sampler->setFilteringModes(RT_FILTER_LINEAR, RT_FILTER_LINEAR,
-                               RT_FILTER_NONE);
     _optixTextureSamplers[tx] = sampler;
+    return sampler;
 }
 
-void Context::deleteTexture(ospray::Texture2D* tx)
+void Context::deleteTexture(Texture* tx)
 {
     _optixTextureSamplers.erase(tx);
 }
 
-::optix::TextureSampler Context::getTextureSampler(ospray::Texture2D* tx)
+::optix::TextureSampler Context::getTextureSampler(Texture* tx)
 {
     return _optixTextureSamplers[tx];
 }

@@ -28,8 +28,9 @@ namespace optix
 {
 struct Model;
 
-struct Geometry : public ospray::ManagedObject
+class Geometry : public ospray::ManagedObject
 {
+public:
     enum Type
     {
         Cones,
@@ -51,15 +52,12 @@ struct Geometry : public ospray::ManagedObject
         c++-side's material gets changed */
     virtual void setMaterial(ospray::Material* mat);
 
-    //! get material assigned to this geometry
-    virtual ospray::Material* getMaterial() const;
-
     //! \brief common function to help printf-debugging
     virtual std::string toString() const = 0;
 
     /*! \brief integrates this geometry's primitives into the respective
         model's acceleration structure */
-    virtual void finalize(Model*);
+    virtual void finalize(Model* model);
 
 protected:
     void _setBuffer(const std::string& uniform, ospray::Ref<ospray::Data> data);

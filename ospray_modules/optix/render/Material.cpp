@@ -36,9 +36,8 @@ Material::~Material()
 
 void Material::commit()
 {
-    auto map_Kd =
-        (ospray::Texture2D*)getParamObject("map_Kd",
-                                           getParamObject("map_kd", nullptr));
+    auto map_Kd = (optix::Texture*)getParamObject(
+        "map_Kd", getParamObject("map_kd", nullptr));
 
     const float d = getParam1f("d", 1.f);
     const float refraction = getParam1f("refraction", 0.f);

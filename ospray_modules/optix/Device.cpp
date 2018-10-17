@@ -21,7 +21,6 @@
 #include "Device.h"
 
 #include <ospray/SDK/common/Data.h>
-#include <ospray/SDK/texture/Texture2D.h>
 
 #include "Context.h"
 #include "Model.h"
@@ -38,6 +37,7 @@
 #include "lights/PointLight.h"
 #include "render/Material.h"
 #include "render/Renderer.h"
+#include "texture/Texture2D.h"
 
 namespace bbp
 {
@@ -74,29 +74,15 @@ OSPFrameBuffer Device::frameBufferCreate(const ospray::vec2i& size,
                                          const OSPFrameBufferFormat mode,
                                          const ospray::uint32 channels)
 {
-    FrameBuffer::ColorBufferFormat colorBufferFormat = mode;
-    bool hasDepthBuffer = (channels & OSP_FB_DEPTH) != 0;
-    bool hasAccumBuffer = (channels & OSP_FB_ACCUM) != 0;
-    bool hasVarianceBuffer = (channels & OSP_FB_VARIANCE) != 0;
-
-    FrameBuffer* fb = new FrameBuffer(size, colorBufferFormat, hasDepthBuffer,
-                                      hasAccumBuffer, hasVarianceBuffer);
-    return (OSPFrameBuffer)fb;
+    return (OSPFrameBuffer)new FrameBuffer(
+        size, FrameBuffer::ColorBufferFormat{mode}, channels);
 }
 
 const void* Device::frameBufferMap(OSPFrameBuffer _fb,
                                    OSPFrameBufferChannel channel)
 {
     FrameBuffer* fb = (FrameBuffer*)_fb;
-    switch (channel)
-    {
-    case OSP_FB_COLOR:
-        return fb->mapColorBuffer();
-    case OSP_FB_DEPTH:
-        return fb->mapDepthBuffer();
-    default:
-        return nullptr;
-    }
+    return fb->mapBuffer(channel);
 }
 
 void Device::frameBufferUnmap(const void* mapped, OSPFrameBuffer _fb)
@@ -175,13 +161,18 @@ void Device::setString(OSPObject _object, const char* bufName, const char* s)
     object->setParam<std::string>(bufName, s);
 }
 
-int Device::loadModule(const char* name)
+int Device::loadModule(const char*)
 {
-    // HACK: would need ospFinish() to destroy this device which would destroy
-    // the optix context
-    if (std::string(name) == "exit")
-        Context::destroy();
     return 0;
+}
+
+void Device::setBool(OSPObject _object, const char* bufName, const bool b)
+{
+    ospray::ManagedObject* object = (ospray::ManagedObject*)_object;
+    Assert2(object, "invalid object handle");
+    Assert2(bufName, "invalid identifier for object parameter");
+
+    object->setParam(bufName, b);
 }
 
 void Device::setFloat(OSPObject _object, const char* bufName, const float f)
@@ -309,8 +300,6 @@ OSPGeometry Device::newGeometry(const char* type)
         geometry = new bbp::optix::TriangleMesh;
     else if (typeStr == "instance")
         geometry = new bbp::optix::Instance;
-    else
-        geometry = nullptr;
 
     Assert2(geometry != nullptr, "invalid geometry type");
 
@@ -341,9 +330,8 @@ OSPTransferFunction Device::newTransferFunction(const char* /*type*/)
     return nullptr;
 }
 
-OSPLight Device::newLight(OSPRenderer _renderer, const char* type)
+OSPLight Device::newLight(const char* type)
 {
-    UNUSED(_renderer);
     ospray::Light* light = nullptr;
 
     const auto typeStr = std::string(type);
@@ -359,14 +347,6 @@ OSPLight Device::newLight(OSPRenderer _renderer, const char* type)
     Assert2(light != nullptr, "invalid light type");
 
     return (OSPLight)light;
-}
-
-OSPLight Device::newLight(const char* renderer_type, const char* light_type)
-{
-    auto renderer = newRenderer(renderer_type);
-    auto light = newLight(renderer, light_type);
-    release(renderer);
-    return light;
 }
 
 void Device::frameBufferClear(OSPFrameBuffer _fb,
@@ -427,14 +407,7 @@ void Device::release(OSPObject _obj)
 {
     if (!_obj)
         return;
-    ospray::ManagedObject* obj = (ospray::ManagedObject*)_obj;
-
-    // TODO: would need to check for refcount == 1, but private. So better move
-    // this to our own Texture2D class' dtor.
-    if (auto* tx = dynamic_cast<ospray::Texture2D*>(obj))
-        Context::get().deleteTexture(tx);
-
-    obj->refDec();
+    ((ospray::ManagedObject*)_obj)->refDec();
 }
 
 void Device::setMaterial(OSPGeometry _geometry, OSPMaterial _material)
@@ -446,37 +419,18 @@ void Device::setMaterial(OSPGeometry _geometry, OSPMaterial _material)
     geometry->setMaterial(material);
 }
 
-OSPTexture2D Device::newTexture2D(const ospray::vec2i& size,
-                                  const OSPTextureFormat type, void* data,
-                                  const ospray::uint32 flags)
+OSPTexture Device::newTexture(const char* type)
 {
-    Assert2(size.x > 0,
-            "Width must be greater than 0 in optix::Device::newTexture2D");
-    Assert2(size.y > 0,
-            "Height must be greater than 0 in optix::Device::newTexture2D");
+    Assert2(type, "invalid render type identifier");
+    Texture* texture = nullptr;
 
-    auto* tx = new ospray::Texture2D;
+    const auto typeStr = std::string(type);
+    if (typeStr == "texture2d")
+        texture = new bbp::optix::Texture2D;
 
-    // from ospray::Texture2D::createTexture(), w/o the ispc part
-    tx->size = size;
-    tx->type = type;
-    tx->flags = flags;
-    tx->managedObjectType = OSP_TEXTURE;
+    Assert2(texture != nullptr, "invalid geometry type");
 
-    assert(data != nullptr);
-
-    if (flags & OSP_TEXTURE_SHARED_BUFFER)
-        tx->data = data;
-    else
-    {
-        const size_t bytes = ospray::sizeOf(type) * size.x * size.y;
-        tx->data = bytes ? new unsigned char[bytes] : NULL;
-        memcpy(tx->data, data, bytes);
-    }
-
-    Context::get().createTexture(tx);
-
-    return (OSPTexture2D)tx;
+    return (OSPTexture)texture;
 }
 
 OSPPickResult Device::pick(OSPRenderer /*renderer*/,

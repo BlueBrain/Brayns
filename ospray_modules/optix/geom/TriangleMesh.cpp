@@ -40,7 +40,7 @@ TriangleMesh::~TriangleMesh()
 
 std::string TriangleMesh::toString() const
 {
-    return "ospray::TriangleMesh";
+    return "optix::TriangleMesh";
 }
 
 void TriangleMesh::finalize(Model* optixModel)
