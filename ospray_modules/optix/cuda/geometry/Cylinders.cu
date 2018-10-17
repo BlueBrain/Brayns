@@ -31,105 +31,106 @@ rtBuffer<float> cylinders;
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
-rtDeclareVariable(unsigned int, cylinder_size, ,);
+rtDeclareVariable(unsigned int, cylinder_size, , );
 
-template<bool use_robust_method>
-static __device__
-void intersect_cylinder( int primIdx )
+template <bool use_robust_method>
+static __device__ void intersect_cylinder(int primIdx)
 {
     const int idx = primIdx * cylinder_size;
-    const float ts = cylinders[ idx + 7 ];
+    const float ts = cylinders[idx + 7];
     if (ts > 0 && timestamp > ts)
         return;
 
-    const float3 v0 = { cylinders[ idx ], cylinders[ idx + 1 ], cylinders[ idx + 2 ] };
-    const float3 v1 = { cylinders[ idx + 3 ], cylinders[ idx + 4 ], cylinders[ idx + 5 ] };
-    const float radius = cylinders[ idx + 6 ];
+    const float3 v0 = {cylinders[idx], cylinders[idx + 1], cylinders[idx + 2]};
+    const float3 v1 = {cylinders[idx + 3], cylinders[idx + 4],
+                       cylinders[idx + 5]};
+    const float radius = cylinders[idx + 6];
 
     const float3 A = v0 - ray.origin;
     const float3 B = v1 - ray.origin;
 
-    const float3 O = make_float3( 0.f );
+    const float3 O = make_float3(0.f);
     const float3 V = ray.direction;
 
     const float3 AB = B - A;
     const float3 AO = O - A;
 
-    const float3 AOxAB = cross( AO, AB );
-    const float3 VxAB = cross( V, AB );
-    const float ab2 = dot( AB, AB );
-    const float a = dot( VxAB, VxAB );
-    const float b = 2.f * dot( VxAB, AOxAB );
-    const float c = dot( AOxAB, AOxAB ) - ( radius * radius * ab2 );
+    const float3 AOxAB = cross(AO, AB);
+    const float3 VxAB = cross(V, AB);
+    const float ab2 = dot(AB, AB);
+    const float a = dot(VxAB, VxAB);
+    const float b = 2.f * dot(VxAB, AOxAB);
+    const float c = dot(AOxAB, AOxAB) - (radius * radius * ab2);
 
     const float radical = b * b - 4.f * a * c;
-    if( radical >= 0.f )
+    if (radical >= 0.f)
     {
         // clip to near and far cap of cylinder
-        const float tA = dot( AB, A ) / dot( V, AB );
-        const float tB = dot( AB, B ) / dot( V, AB );
-        //const float tAB0 = max( 0.f, min( tA, tB ));
-        //const float tAB1 = min( RT_DEFAULT_MAX, max( tA, tB ));
-        const float tAB0 = min( tA, tB );
-        const float tAB1 = max( tA, tB );
+        const float tA = dot(AB, A) / dot(V, AB);
+        const float tB = dot(AB, B) / dot(V, AB);
+        // const float tAB0 = max( 0.f, min( tA, tB ));
+        // const float tAB1 = min( RT_DEFAULT_MAX, max( tA, tB ));
+        const float tAB0 = min(tA, tB);
+        const float tAB1 = max(tA, tB);
 
-        const float srad = sqrt( radical );
+        const float srad = sqrt(radical);
 
-        const float t_in = ( -b - srad ) / ( 2.f * a );
+        const float t_in = (-b - srad) / (2.f * a);
 
         bool check_second = true;
-        if( t_in >= tAB0 && t_in <= tAB1 )
+        if (t_in >= tAB0 && t_in <= tAB1)
         {
-            if( rtPotentialIntersection( t_in ))
+            if (rtPotentialIntersection(t_in))
             {
                 const float3 P = ray.origin + t_in * ray.direction - v0;
-                const float3 V = cross( P, AB );
-                geometric_normal = shading_normal = cross( AB, V );
-                if( rtReportIntersection( 0 ))
+                const float3 V = cross(P, AB);
+                geometric_normal = shading_normal = cross(AB, V);
+                if (rtReportIntersection(0))
                     check_second = false;
             }
         }
 
-        if( check_second )
+        if (check_second)
         {
-            const float t_out= ( -b + srad ) / ( 2.f * a );
-            if( t_out >= tAB0 && t_out <= tAB1 )
+            const float t_out = (-b + srad) / (2.f * a);
+            if (t_out >= tAB0 && t_out <= tAB1)
             {
-                if( rtPotentialIntersection( t_out ))
+                if (rtPotentialIntersection(t_out))
                 {
                     const float3 P = t_out * ray.direction - A;
-                    const float3 V = cross( P, AB);
-                    geometric_normal = shading_normal = cross( AB, V );
-                    rtReportIntersection( 0 );
+                    const float3 V = cross(P, AB);
+                    geometric_normal = shading_normal = cross(AB, V);
+                    rtReportIntersection(0);
                 }
             }
         }
     }
 }
 
-RT_PROGRAM void intersect( int primIdx )
+RT_PROGRAM void intersect(int primIdx)
 {
-    intersect_cylinder<false>( primIdx );
+    intersect_cylinder<false>(primIdx);
 }
 
-RT_PROGRAM void robust_intersect( int primIdx )
+RT_PROGRAM void robust_intersect(int primIdx)
 {
-    intersect_cylinder<true>( primIdx );
+    intersect_cylinder<true>(primIdx);
 }
 
-RT_PROGRAM void bounds( int primIdx, float result[6] )
+RT_PROGRAM void bounds(int primIdx, float result[6])
 {
     const int idx = primIdx * cylinder_size;
-    const float3 v0 = { cylinders[ idx ], cylinders[ idx + 1 ], cylinders[ idx + 2 ] };
-    const float3 v1 = { cylinders[ idx + 3 ], cylinders[ idx + 4 ], cylinders[ idx + 5 ] };
-    const float radius = cylinders[ idx + 6 ];
+    const float3 v0 = {cylinders[idx], cylinders[idx + 1], cylinders[idx + 2]};
+    const float3 v1 = {cylinders[idx + 3], cylinders[idx + 4],
+                       cylinders[idx + 5]};
+    const float radius = cylinders[idx + 6];
 
     optix::Aabb* aabb = (optix::Aabb*)result;
 
-    if( radius > 0.f  && !isinf( radius ))
+    if (radius > 0.f && !isinf(radius))
     {
-        aabb->m_min = fminf(v0,v1) - radius;
-        aabb->m_max = fmaxf(v0,v1) + radius;
+        aabb->m_min = fminf(v0, v1) - radius;
+        aabb->m_max = fmaxf(v0, v1) + radius;
     }
     else
         aabb->invalidate();
