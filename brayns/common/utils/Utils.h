@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
 
 #include <brayns/common/types.h>
 
@@ -35,12 +34,4 @@ inline auto lowerCase(std::string str)
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
-
-bool isSupportedArchiveType(const std::string& extension);
-bool isArchive(const std::string& filename);
-bool isArchive(const Blob& blob);
-void extractFile(const std::string& filename, const std::string& destination);
-void extractBlob(Blob&& blob, const std::string& destination);
 }
-
-#endif // UTILS_H

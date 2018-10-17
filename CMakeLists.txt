@@ -56,6 +56,13 @@ if(libuv_FOUND)
   # TODO: use tag v1.6.0_libuv-v1.18 for Docker
 endif()
 
+if(LibArchive_FOUND)
+  option(BRAYNS_LIBARCHIVE_ENABLED "Activate libarchive for archive loading" ON)
+else()
+  unset(BRAYNS_LIBARCHIVE_ENABLED)
+endif()
+
+
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
 add_subdirectory(async++)
 list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/async++/include/async++/*'

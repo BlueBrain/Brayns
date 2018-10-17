@@ -38,8 +38,6 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/io/MeshLoader.h>
-#include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/VolumeLoader.h>
@@ -58,16 +56,25 @@
 #include <plugins/DeflectPlugin/DeflectPlugin.h>
 #endif
 
-#ifdef BRAYNS_USE_BRION
+#if BRAYNS_ASSIMP_ENABLED
+#include <brayns/io/MeshLoader.h>
+#endif
+
+#if BRAYNS_USE_BRION
+#if BRAYNS_ASSIMP_ENABLED
 #include <brayns/io/CircuitLoader.h>
+#include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/MorphologyLoader.h>
+#endif
 #endif
 
 #ifdef BRAYNS_USE_OSPRAY
 #include <ospcommon/library.h>
 #endif
 
+#if BRAYNS_LIBARCHIVE_ENABLED
 #include <brayns/io/ArchiveLoader.h>
+#endif
 
 #include <boost/progress.hpp>
 
@@ -378,22 +385,28 @@ private:
         auto& geometryParameters = _parametersManager.getGeometryParameters();
 
         registry.registerLoader(
-            std::make_unique<MeshLoader>(scene, geometryParameters));
-        registry.registerLoader(
             std::make_unique<ProteinLoader>(scene, geometryParameters));
         registry.registerLoader(std::make_unique<VolumeLoader>(
             scene, _parametersManager.getVolumeParameters()));
         registry.registerLoader(std::make_unique<XYZBLoader>(scene));
+#if BRAYNS_ASSIMP_ENABLED
         registry.registerLoader(
-            std::make_unique<MolecularSystemReader>(scene, geometryParameters));
+            std::make_unique<MeshLoader>(scene, geometryParameters));
+#endif
+#if BRAYNS_LIBARCHIVE_ENABLED
         registry.registerLoader(
             std::make_unique<ArchiveLoader>(scene, registry));
+#endif
 #if (BRAYNS_USE_BRION)
+#if BRAYNS_ASSIMP_ENABLED
         registry.registerLoader(
-            std::make_unique<MorphologyLoader>(scene, geometryParameters));
+            std::make_unique<MolecularSystemReader>(scene, geometryParameters));
         registry.registerLoader(std::make_unique<CircuitLoader>(
             scene, _parametersManager.getApplicationParameters(),
             geometryParameters));
+        registry.registerLoader(
+            std::make_unique<MorphologyLoader>(scene, geometryParameters));
+#endif
 #endif
     }
 

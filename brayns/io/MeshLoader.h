@@ -18,8 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MESHLOADER_H
-#define MESHLOADER_H
+#pragma once
 
 #include <brayns/common/geometry/TrianglesMesh.h>
 #include <brayns/common/loader/Loader.h>
@@ -79,5 +78,3 @@ private:
     const GeometryParameters& _geometryParameters;
 };
 }
-
-#endif // MESHLOADER_H
