@@ -26,32 +26,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <optix.h>
-#include <optixu/optixu_math_namespace.h>
 #include "../Helpers.h"
 #include "../Random.h"
+#include <optix.h>
+#include <optixu/optixu_math_namespace.h>
 
 using namespace optix;
 
 struct PerRayData_radiance
 {
     float3 result;
-    float  importance;
-    int    depth;
+    float importance;
+    int depth;
 };
 
-rtDeclareVariable(float3,        eye, , );
-rtDeclareVariable(float3,        U, , );
-rtDeclareVariable(float3,        V, , );
-rtDeclareVariable(float3,        W, , );
-rtDeclareVariable(float3,        bad_color, , );
-rtDeclareVariable(float,         scene_epsilon, , );
-rtBuffer<uchar4, 2>              output_buffer;
-rtBuffer<float4, 2>              accum_buffer;
-rtDeclareVariable(rtObject,      top_object, , );
-rtDeclareVariable(unsigned int,  radiance_ray_type, , );
-rtDeclareVariable(unsigned int,  frame_number, , );
-rtDeclareVariable(uint2,         launch_index, rtLaunchIndex, );
+rtDeclareVariable(float3, eye, , );
+rtDeclareVariable(float3, U, , );
+rtDeclareVariable(float3, V, , );
+rtDeclareVariable(float3, W, , );
+rtDeclareVariable(float3, bad_color, , );
+rtDeclareVariable(float, scene_epsilon, , );
+rtBuffer<uchar4, 2> output_buffer;
+rtBuffer<float4, 2> accum_buffer;
+rtDeclareVariable(rtObject, top_object, , );
+rtDeclareVariable(unsigned int, radiance_ray_type, , );
+rtDeclareVariable(unsigned int, frame_number, , );
+rtDeclareVariable(uint2, launch_index, rtLaunchIndex, );
 
 rtDeclareVariable(float, aperture_radius, , );
 rtDeclareVariable(float, focal_scale, , );
@@ -67,27 +67,28 @@ rtDeclareVariable(float4, clip_plane6, , );
 rtDeclareVariable(unsigned int, num_clip_planes, , );
 
 // For MPI rendering
-//rtDeclareVariable(float2, offset, , );
+// rtDeclareVariable(float2, offset, , );
 
-__device__ void getClippingValues(
-        const float3& ray_origin, const float3& ray_direction,
-        float& near, float& far )
+__device__ void getClippingValues(const float3& ray_origin,
+                                  const float3& ray_direction, float& near,
+                                  float& far)
 {
-    float4 clip_planes[ NB_CLIP_PLANES ] = {
-        clip_plane1, clip_plane2, clip_plane3, clip_plane4, clip_plane5, clip_plane6
-    };
-    for( int i = 0; i < num_clip_planes; ++i )
+    float4 clip_planes[NB_CLIP_PLANES] = {clip_plane1, clip_plane2,
+                                          clip_plane3, clip_plane4,
+                                          clip_plane5, clip_plane6};
+    for (int i = 0; i < num_clip_planes; ++i)
     {
-        const float3 planeNormal = { clip_planes[i].x, clip_planes[i].y, clip_planes[i].z };
-        float rn = dot( ray_direction, planeNormal );
-        if( rn == 0.f )
+        const float3 planeNormal = {clip_planes[i].x, clip_planes[i].y,
+                                    clip_planes[i].z};
+        float rn = dot(ray_direction, planeNormal);
+        if (rn == 0.f)
             rn = scene_epsilon;
         float d = clip_planes[i].w;
-        float t = -( dot( planeNormal, ray_origin ) + d ) / rn;
-        if( rn > 0.f ) // opposite direction plane
-            near = max( near, t );
+        float t = -(dot(planeNormal, ray_origin) + d) / rn;
+        if (rn > 0.f) // opposite direction plane
+            near = max(near, t);
         else
-            far = min( far, t );
+            far = min(far, t);
     }
 }
 
@@ -95,19 +96,21 @@ RT_PROGRAM void camera()
 {
     size_t2 screen = output_buffer.size();
     unsigned int seed =
-        tea< 16 >( screen.x * launch_index.y + launch_index.x, frame_number );
+        tea<16>(screen.x * launch_index.y + launch_index.x, frame_number);
 
-    // Subpixel jitter: send the ray through a different position inside the pixel each time,
+    // Subpixel jitter: send the ray through a different position inside the
+    // pixel each time,
     // to provide antialiasing.
     float2 subpixel_jitter =
-        frame_number == 1 ?
-        make_float2(0.0f, 0.0f) :
-        make_float2( rnd( seed ) - 0.5f, rnd( seed ) - 0.5f );
+        frame_number == 1 ? make_float2(0.0f, 0.0f)
+                          : make_float2(rnd(seed) - 0.5f, rnd(seed) - 0.5f);
 
-    float2 d = (make_float2(launch_index) + subpixel_jitter) / make_float2(screen) * 2.f - 1.f;
+    float2 d = (make_float2(launch_index) + subpixel_jitter) /
+                   make_float2(screen) * 2.f -
+               1.f;
 
-//    d.x += offset.x;
-//    d.y += offset.y;
+    //    d.x += offset.x;
+    //    d.y += offset.y;
     float3 ray_origin = eye;
     float3 ray_direction = d.x * U + d.y * V + W;
 
@@ -115,44 +118,42 @@ RT_PROGRAM void camera()
     float3 ray_target = ray_origin + fs * ray_direction;
 
     // lens sampling
-    float2 sample =
-        optix::square_to_disk( make_float2( jitter4.z, jitter4.w ));
+    float2 sample = optix::square_to_disk(make_float2(jitter4.z, jitter4.w));
 
     ray_origin =
-        ray_origin + aperture_radius *
-        ( sample.x * normalize( U ) +  sample.y * normalize( V ) );
+        ray_origin +
+        aperture_radius * (sample.x * normalize(U) + sample.y * normalize(V));
 
-    ray_direction = normalize( ray_target - ray_origin );
+    ray_direction = normalize(ray_target - ray_origin);
 
     float near = scene_epsilon;
     float far = INFINITY;
-    getClippingValues( ray_origin, ray_direction, near, far );
-    optix::Ray ray( ray_origin, ray_direction, radiance_ray_type, near, far );
+    getClippingValues(ray_origin, ray_direction, near, far);
+    optix::Ray ray(ray_origin, ray_direction, radiance_ray_type, near, far);
 
     PerRayData_radiance prd;
     prd.result = make_float3(0.f);
     prd.importance = 1.f;
     prd.depth = 0;
 
-    rtTrace( top_object, ray, prd );
+    rtTrace(top_object, ray, prd);
 
-    float4 acc_val = accum_buffer[ launch_index ];
+    float4 acc_val = accum_buffer[launch_index];
 
-    if( frame_number > 1 )
-        acc_val = lerp(
-            acc_val,
-            make_float4( prd.result, 1.f), 1.f / (float)frame_number );
+    if (frame_number > 1)
+        acc_val = lerp(acc_val, make_float4(prd.result, 1.f),
+                       1.f / (float)frame_number);
     else
-        acc_val = make_float4( prd.result, 1.f );
+        acc_val = make_float4(prd.result, 1.f);
 
-    output_buffer[ launch_index ] = make_color( make_float3( acc_val ) );
-    accum_buffer[ launch_index ] = acc_val;
+    output_buffer[launch_index] = make_color(make_float3(acc_val));
+    accum_buffer[launch_index] = acc_val;
 }
 
 RT_PROGRAM void exception()
 {
     const unsigned int code = rtGetExceptionCode();
-    rtPrintf( "Caught exception 0x%X at launch index (%d,%d)\n", code, launch_index.x, launch_index.y );
-    output_buffer[ launch_index ] = make_color( bad_color );
+    rtPrintf("Caught exception 0x%X at launch index (%d,%d)\n", code,
+             launch_index.x, launch_index.y);
+    output_buffer[launch_index] = make_color(bad_color);
 }
-
