@@ -101,6 +101,8 @@ set(OSPRAY_MODULE_OPTIX_SOURCES
   ${PTX_SOURCES}
   render/Material.cpp
   render/Renderer.cpp
+  texture/Texture.cpp
+  texture/Texture2D.cpp
 )
 
 set(OSPRAY_MODULE_OPTIX_LINK_LIBRARIES PRIVATE ${OptiX_LIBRARIES})

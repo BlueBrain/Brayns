@@ -75,38 +75,43 @@ void Model::commit()
         << "Finalizing model, has " << geometry.size()
         << " geometries and 0 volumes";
 
-    for (auto& i : _geometryInstances)
-        i->destroy();
-    _geometryInstances.clear();
+    if (getParam1i("isRootModel", false))
+    {
+        if (_rootGroup)
+            _rootGroup->destroy();
 
-    if (_geometryGroup)
-        _geometryGroup->destroy();
+        if (_rootGroupAcceleration)
+            _rootGroupAcceleration->destroy();
 
-    if (_geometryGroupAcceleration)
-        _geometryGroupAcceleration->destroy();
+        _rootGroupAcceleration =
+            _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
+                                         DEFAULT_ACCELERATION_STRUCTURE);
 
-    _geometryGroupAcceleration =
-        _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
-                                     DEFAULT_ACCELERATION_STRUCTURE);
+        _rootGroup = _context->createGroup();
+        _rootGroup->setAcceleration(_rootGroupAcceleration);
 
-    _geometryGroup = _context->createGeometryGroup();
-    _geometryGroup->setAcceleration(_geometryGroupAcceleration);
+        _context["top_object"]->set(_rootGroup);
+        _context["top_shadower"]->set(_rootGroup);
+    }
+    else
+    {
+        for (auto& i : _geometryInstances)
+            i->destroy();
+        _geometryInstances.clear();
 
-    if (_rootGroup)
-        _rootGroup->destroy();
+        if (_geometryGroup)
+            _geometryGroup->destroy();
 
-    if (_rootGroupAcceleration)
-        _rootGroupAcceleration->destroy();
+        if (_geometryGroupAcceleration)
+            _geometryGroupAcceleration->destroy();
 
-    _rootGroupAcceleration =
-        _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
-                                     DEFAULT_ACCELERATION_STRUCTURE);
+        _geometryGroupAcceleration =
+            _context->createAcceleration(DEFAULT_ACCELERATION_STRUCTURE,
+                                         DEFAULT_ACCELERATION_STRUCTURE);
 
-    _rootGroup = _context->createGroup();
-    _rootGroup->setAcceleration(_rootGroupAcceleration);
-
-    _rootGroup->setChildCount(1);
-    _rootGroup->setChild(0, _geometryGroup);
+        _geometryGroup = _context->createGeometryGroup();
+        _geometryGroup->setAcceleration(_geometryGroupAcceleration);
+    }
 
     for (size_t i = 0; i < geometry.size(); i++)
     {
@@ -117,9 +122,6 @@ void Model::commit()
         geometry[i]->finalize(this);
     }
 
-    _geometryGroup->setChildCount(_geometryInstances.size());
-    for (size_t i = 0; i < _geometryInstances.size(); ++i)
-        _geometryGroup->setChild(i, _geometryInstances[i]);
 
     if (getParam1i("isRootModel", false))
     {
@@ -128,26 +130,35 @@ void Model::commit()
     }
 }
 
-void Model::addGeometryInstance(::optix::Geometry geometry_,
-                                ::optix::Material material)
+void Model::addGeometryInstance(const ::optix::GeometryInstance& instance)
 {
-    ::optix::GeometryInstance geomInstance = _context->createGeometryInstance();
-    geomInstance->setGeometry(geometry_);
-    geomInstance->setMaterialCount(1);
-    geomInstance->setMaterial(0, material);
-    _geometryInstances.push_back(geomInstance);
+    assert(_geometryGroup);
+
+    _geometryInstances.push_back(instance);
+
+    _geometryGroup->setChildCount(_geometryInstances.size());
+    _geometryGroup->setChild(_geometryInstances.size() - 1,
+                             _geometryInstances.back());
 }
 
-void Model::addTransformInstance(::optix::Transform instance)
+void Model::addTransformInstance(const ::optix::Transform& instance)
 {
+    assert(_rootGroup);
+
     const size_t count = _rootGroup->getChildCount();
     _rootGroup->setChildCount(count + 1);
     _rootGroup->setChild(count, instance);
 }
 
-::optix::Group Model::getRootGroup() const
+::optix::Transform Model::instance(::optix::Matrix4x4&& matrix)
 {
-    return _rootGroup;
+    assert(!_rootGroup);
+
+    auto transform = _context->createTransform();
+    transform->setChild(_geometryGroup);
+    transform->setMatrix(false, matrix.getData(), matrix.inverse().getData());
+
+    return transform;
 }
 }
 }

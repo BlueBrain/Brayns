@@ -56,19 +56,20 @@ void Geometry::setMaterial(ospray::Material* mat)
     _material = mat;
 }
 
-ospray::Material* Geometry::getMaterial() const
-{
-    return _material.ptr;
-}
-
-void Geometry::finalize(Model* optixModel)
+void Geometry::finalize(Model* model)
 {
     if (_geometry)
         _geometry->destroy();
 
     _geometry = Context::get().createGeometry(_type);
-    Material* optixMaterial = (Material*)_material.ptr;
-    optixModel->addGeometryInstance(_geometry, optixMaterial->optixMaterial);
+
+    Material* material = (Material*)_material.ptr;
+    auto instance = _context->createGeometryInstance();
+    instance->setGeometry(_geometry);
+    instance->setMaterialCount(1);
+    instance->setMaterial(0, material->optixMaterial);
+
+    model->addGeometryInstance(instance);
 }
 
 void Geometry::_setBuffer(const std::string& uniform,

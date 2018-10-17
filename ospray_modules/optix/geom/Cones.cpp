@@ -26,7 +26,7 @@ namespace optix
 {
 std::string Cones::toString() const
 {
-    return "ospray::Cones";
+    return "optix::Cones";
 }
 
 void Cones::finalize(Model* optixModel)

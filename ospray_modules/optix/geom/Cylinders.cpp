@@ -28,7 +28,7 @@ namespace optix
 {
 std::string Cylinders::toString() const
 {
-    return "ospray::Cylinders";
+    return "optix::Cylinders";
 }
 
 void Cylinders::finalize(Model* optixModel)

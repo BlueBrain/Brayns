@@ -1,6 +1,6 @@
-/* Copyright (c) 2017, EPFL/Blue Brain Project
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+ * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
  * This file is part of https://github.com/BlueBrain/ospray-modules
  *
@@ -20,42 +20,22 @@
 
 #pragma once
 
-#include "geom/Geometry.h"
-#include "geom/Instance.h"
-
-#include <optixu/optixu_matrix_namespace.h>
-
-#include <vector>
+#include "Texture.h"
 
 namespace bbp
 {
 namespace optix
 {
-struct Model : public ospray::ManagedObject
+struct Texture2D : public Texture
 {
-    Model();
-    ~Model();
+    Texture2D()
+        : Texture()
+    {
+    }
+    ~Texture2D() = default;
 
     std::string toString() const override;
     void commit() override;
-
-    void addGeometryInstance(const ::optix::GeometryInstance& instance);
-
-    void addTransformInstance(const ::optix::Transform& instance);
-
-    ::optix::Transform instance(::optix::Matrix4x4&& matrix);
-
-    using GeometryVector = std::vector<ospray::Ref<Geometry>>;
-
-    GeometryVector geometry;
-
-private:
-    ::optix::Context _context;
-    ::optix::GeometryGroup _geometryGroup;
-    ::optix::Acceleration _geometryGroupAcceleration;
-    ::optix::Group _rootGroup;
-    ::optix::Acceleration _rootGroupAcceleration;
-    std::vector<::optix::GeometryInstance> _geometryInstances;
 };
 }
 }

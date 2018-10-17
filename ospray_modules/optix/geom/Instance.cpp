@@ -54,18 +54,13 @@ void Instance::finalize(Model* parentModel)
     ospray::vec3f vz = getParam3f("xfm.l.vz", ospray::vec3f(0.f, 0.f, 0.f));
     ospray::vec3f p = getParam3f("xfm.p", ospray::vec3f(0.f, 0.f, 0.f));
 
-    auto modelInstance = (Model*)getParamObject("model", nullptr);
+    auto subModel = (Model*)getParamObject("model", nullptr);
 
-    float trafo[16] = {vx.x, vx.y, vx.z, p.x, //
-                       vy.x, vy.y, vy.z, p.y, //
-                       vz.x, vz.y, vz.z, p.z, //
-                       0.0f, 0.0f, 0.0f, 1.0f};
-
-    ::optix::Matrix4x4 matrix(trafo);
-
-    _transform = _context->createTransform();
-    _transform->setChild(modelInstance->getRootGroup());
-    _transform->setMatrix(false, matrix.getData(), matrix.inverse().getData());
+    const float matrixData[16] = {vx.x, vx.y, vx.z, p.x, //
+                                  vy.x, vy.y, vy.z, p.y, //
+                                  vz.x, vz.y, vz.z, p.z, //
+                                  0.0f, 0.0f, 0.0f, 1.0f};
+    _transform = subModel->instance(::optix::Matrix4x4(matrixData));
 
     parentModel->addTransformInstance(_transform);
 }

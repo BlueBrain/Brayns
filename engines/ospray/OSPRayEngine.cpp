@@ -147,10 +147,7 @@ OSPRayEngine::~OSPRayEngine()
     _renderer.reset();
     _camera.reset();
 
-    // HACK: need ospFinish() here; currently used by optix module to properly
-    // destroy optix context
-    if (name() == EngineType::optix)
-        ospLoadModule("exit");
+    ospShutdown();
 }
 
 EngineType OSPRayEngine::name() const
