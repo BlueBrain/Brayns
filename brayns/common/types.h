@@ -250,19 +250,6 @@ size_t enumsToBitmask(const std::vector<T> enums)
     return bit;
 }
 
-/**
- * @brief The Histogram struct contains the range as well as the values of the
- *        simulation histogram for a given simulation frame, determined by the
- *        frame
- */
-struct Histogram
-{
-    uint64_ts values;
-    Vector2d range;
-    uint32_t frame;
-    bool empty() const { return values.empty(); }
-};
-
 /** Some 'special' materials are used by Brayns to accomplish specific features
  *  such as bounding boxes.
  */
