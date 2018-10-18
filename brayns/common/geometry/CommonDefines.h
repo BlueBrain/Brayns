@@ -20,11 +20,11 @@
 
 #if __cplusplus
 #include <brayns/common/types.h>
-#define VEC2_TYPE brayns::Vector2f
 #define VEC3_TYPE brayns::Vector3f
+#define UINT64_T uint64_t
 #endif
 
 #if ISPC
-#define VEC2_TYPE vec2f
 #define VEC3_TYPE vec3f
+#define UINT64_T unsigned int64
 #endif

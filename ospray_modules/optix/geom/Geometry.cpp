@@ -77,8 +77,8 @@ void Geometry::_setBuffer(const std::string& uniform,
 {
     if (_buffer)
         _buffer->destroy();
-    _buffer = _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT,
-                                     data->numItems);
+    _buffer = _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_BYTE,
+                                     data->numBytes);
     memcpy(_buffer->map(), data->data, data->numBytes);
     _buffer->unmap();
     _geometry[uniform]->setBuffer(_buffer);

@@ -31,18 +31,17 @@ std::string Cones::toString() const
 
 void Cones::finalize(Model* optixModel)
 {
-    ospray::Ref<ospray::Data> data = getParamData("extendedcones", nullptr);
+    ospray::Ref<ospray::Data> data = getParamData("cones", nullptr);
     if (!data.ptr)
-        throw std::runtime_error(
-            "#optix:geometry/extendedcones: "
-            "no 'extendedcones' data specified");
+        throw std::runtime_error("#optix:geometry/cones: "
+                                 "no 'cones' data specified");
 
     Geometry::finalize(optixModel);
 
     const size_t bytesPerCone =
-        getParam1i("bytes_per_extended_cone", 11 * sizeof(float));
+        getParam1i("bytes_per_cone", 11 * sizeof(float));
+    _context["cone_size"]->setUint(bytesPerCone);
     _geometry->setPrimitiveCount(data->numBytes / bytesPerCone);
-    _context["cone_size"]->setUint(bytesPerCone / sizeof(float));
 
     _setBuffer("cones", data);
 }

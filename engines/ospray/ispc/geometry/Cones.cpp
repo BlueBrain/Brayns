@@ -1,5 +1,6 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ * Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,52 +19,53 @@
  */
 
 // Brayns
-#include <brayns/common/geometry/Sphere.h>
+#include <brayns/common/geometry/Cone.h>
 
 // ospray
-#include "ExtendedSpheres.h"
+#include "Cones.h"
 #include "ospray/SDK/common/Data.h"
 #include "ospray/SDK/common/Model.h"
 // ispc-generated files
-#include "ExtendedSpheres_ispc.h"
+#include "Cones_ispc.h"
 
 #include <climits>
 
 namespace ospray
 {
-ExtendedSpheres::ExtendedSpheres()
+Cones::Cones()
 {
-    this->ispcEquivalent = ispc::ExtendedSpheres_create(this);
+    this->ispcEquivalent = ispc::Cones_create(this);
 }
 
-void ExtendedSpheres::finalize(ospray::Model* model)
+void Cones::finalize(ospray::Model* model)
 {
-    data = getParamData("extendedspheres", nullptr);
-    constexpr size_t bytesPerExtendedSphere = sizeof(brayns::Sphere);
+    data = getParamData("cones", nullptr);
+    constexpr size_t bytesPerCone = sizeof(brayns::Cone);
 
-    if (data.ptr == nullptr)
+    if (data.ptr == nullptr || bytesPerCone == 0)
         throw std::runtime_error(
-            "#ospray:geometry/extendedspheres: "
-            "no 'extendedspheres' data specified");
+            "#ospray:geometry/cones: no 'cones' data specified");
 
-    const size_t numExtendedSpheres = data->numBytes / bytesPerExtendedSphere;
+    const size_t numCones = data->numBytes / bytesPerCone;
 
     bounds = empty;
-    const auto geoms = static_cast<brayns::Sphere*>(data->data);
-    for (size_t i = 0; i < numExtendedSpheres; i++)
+    const auto geoms = static_cast<brayns::Cone*>(data->data);
+    for (size_t i = 0; i < numCones; i++)
     {
-        const brayns::Sphere& geom = geoms[i];
+        const brayns::Cone& geom = geoms[i];
         const auto center =
             vec3f(geom.center[0], geom.center[1], geom.center[2]);
+        const auto up = vec3f(geom.up[0], geom.up[1], geom.up[2]);
 
-        bounds.extend(center - geom.radius);
-        bounds.extend(center + geom.radius);
+        bounds.extend(center - geom.centerRadius);
+        bounds.extend(center + geom.centerRadius);
+        bounds.extend(up - geom.upRadius);
+        bounds.extend(up + geom.upRadius);
     }
 
-    ispc::ExtendedSpheresGeometry_set(getIE(), model->getIE(), data->data,
-                                      numExtendedSpheres);
+    ispc::ConesGeometry_set(getIE(), model->getIE(), data->data, numCones);
 }
 
-OSP_REGISTER_GEOMETRY(ExtendedSpheres, extendedspheres);
+OSP_REGISTER_GEOMETRY(Cones, cones);
 
 } // ::brayns

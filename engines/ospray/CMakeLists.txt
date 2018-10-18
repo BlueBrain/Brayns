@@ -14,10 +14,8 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/utils.ispc
   ispc/camera/OrthographicCamera.ispc
   ispc/camera/PerspectiveCamera.ispc
-  ispc/geometry/ExtendedCones.ispc
-  ispc/geometry/ExtendedCylinders.ispc
-  ispc/geometry/ExtendedSDFGeometries.ispc
-  ispc/geometry/ExtendedSpheres.ispc
+  ispc/geometry/Cones.ispc
+  ispc/geometry/SDFGeometries.ispc
   ispc/render/BasicRenderer.ispc
   ispc/render/ExtendedOBJMaterial.ispc
   ispc/render/BasicSimulationRenderer.ispc
@@ -41,10 +39,8 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   utils.cpp
   ispc/camera/OrthographicCamera.cpp
   ispc/camera/PerspectiveCamera.cpp
-  ispc/geometry/ExtendedCones.cpp
-  ispc/geometry/ExtendedCylinders.cpp
-  ispc/geometry/ExtendedSDFGeometries.cpp
-  ispc/geometry/ExtendedSpheres.cpp
+  ispc/geometry/Cones.cpp
+  ispc/geometry/SDFGeometries.cpp
   ispc/render/BasicRenderer.cpp
   ispc/render/ExtendedOBJMaterial.cpp
   ispc/render/BasicSimulationRenderer.cpp
@@ -68,10 +64,8 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   OSPRayVolume.h
   ispc/camera/OrthographicCamera.h
   ispc/camera/PerspectiveCamera.h
-  ispc/geometry/ExtendedCones.h
-  ispc/geometry/ExtendedCylinders.h
-  ispc/geometry/ExtendedSDFGeometries.h
-  ispc/geometry/ExtendedSpheres.h
+  ispc/geometry/Cones.h
+  ispc/geometry/SDFGeometries.h
   ispc/render/BasicRenderer.h
   ispc/render/ExtendedOBJMaterial.h
   ispc/render/BasicSimulationRenderer.h

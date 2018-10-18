@@ -33,18 +33,17 @@ std::string Spheres::toString() const
 
 void Spheres::finalize(Model* optixModel)
 {
-    ospray::Ref<ospray::Data> data = getParamData("extendedspheres", nullptr);
+    ospray::Ref<ospray::Data> data = getParamData("spheres", nullptr);
     if (!data.ptr)
-        throw std::runtime_error(
-            "#optix:geometry/extendedspheres: "
-            "no 'extendedspheres' data specified");
+        throw std::runtime_error("#optix:geometry/spheres: "
+                                 "no 'spheres' data specified");
 
     Geometry::finalize(optixModel);
 
     const size_t bytesPerSphere =
-        getParam1i("bytes_per_extended_sphere", 7 * sizeof(float));
+        getParam1i("bytes_per_sphere", 7 * sizeof(float));
+    _context["bytes_per_sphere"]->setUint(bytesPerSphere);
     _geometry->setPrimitiveCount(data->numBytes / bytesPerSphere);
-    _context["sphere_size"]->setUint(bytesPerSphere / sizeof(float));
 
     _setBuffer("spheres", data);
 }

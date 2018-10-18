@@ -89,19 +89,14 @@ private:
     OSPTransferFunction _ospTransferFunction{nullptr};
 
     // OSPRay data
-    std::map<size_t, OSPGeometry> _ospExtendedSpheres;
-    std::map<size_t, OSPData> _ospExtendedSpheresData;
-    std::map<size_t, OSPGeometry> _ospExtendedCylinders;
-    std::map<size_t, OSPData> _ospExtendedCylindersData;
-    std::map<size_t, OSPGeometry> _ospExtendedCones;
-    std::map<size_t, OSPData> _ospExtendedConesData;
+    std::map<size_t, OSPGeometry> _ospSpheres;
+    std::map<size_t, OSPGeometry> _ospCylinders;
+    std::map<size_t, OSPGeometry> _ospCones;
     std::map<size_t, OSPGeometry> _ospMeshes;
     std::map<size_t, OSPGeometry> _ospStreamlines;
 
     std::map<size_t, OSPGeometry> _ospSDFGeometryRefs;
     std::map<size_t, OSPData> _ospSDFGeometryRefsData;
-    OSPData _ospSDFGeometryData = nullptr;
-    OSPData _ospSDFNeighboursData = nullptr;
 
     size_t _memoryManagementFlags{OSP_DATA_SHARED_BUFFER};
 };

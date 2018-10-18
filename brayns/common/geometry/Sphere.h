@@ -30,20 +30,18 @@ namespace brayns
 struct Sphere
 {
 #if __cplusplus
-    Sphere(const Vector3f c = {0.f, 0.f, 0.f}, float r = 0.f, float ts = 0.f,
-           const Vector2f t = {0.f, 0.f})
-        : center(c)
+    Sphere(const Vector3f& c = {0.f, 0.f, 0.f}, const float r = 0.f,
+           const uint64_t data = 0)
+        : userData(data)
+        , center(c)
         , radius(r)
-        , timestamp(ts)
-        , texture_coords(t)
     {
     }
 #endif
 
+    uint64_t userData;
     VEC3_TYPE center;
     float radius;
-    float timestamp;
-    VEC2_TYPE texture_coords;
 };
 
 #if __cplusplus

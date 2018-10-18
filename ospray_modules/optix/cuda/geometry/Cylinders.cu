@@ -23,28 +23,27 @@
 using namespace optix;
 
 // Global variables
-rtDeclareVariable(float, timestamp, , );
-
-rtBuffer<float> cylinders;
+rtBuffer<char> cylinders;
 
 // Geometry specific variables
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
-rtDeclareVariable(unsigned int, cylinder_size, , );
+rtDeclareVariable(unsigned int, bytes_per_cylinder, , );
+
+__device__ inline const float* get_cylinder(const int primIdx)
+{
+    // We have to skip the first 8 bytes, which contain user data not used here
+    return (float*)(&cylinders[primIdx * bytes_per_cylinder + 8]);
+}
 
 template <bool use_robust_method>
 static __device__ void intersect_cylinder(int primIdx)
 {
-    const int idx = primIdx * cylinder_size;
-    const float ts = cylinders[idx + 7];
-    if (ts > 0 && timestamp > ts)
-        return;
-
-    const float3 v0 = {cylinders[idx], cylinders[idx + 1], cylinders[idx + 2]};
-    const float3 v1 = {cylinders[idx + 3], cylinders[idx + 4],
-                       cylinders[idx + 5]};
-    const float radius = cylinders[idx + 6];
+    const float* cylinder = get_cylinder(primIdx);
+    const float3 v0 = {cylinder[0], cylinder[1], cylinder[2]};
+    const float3 v1 = {cylinder[3], cylinder[4], cylinder[5]};
+    const float radius = cylinder[6];
 
     const float3 A = v0 - ray.origin;
     const float3 B = v1 - ray.origin;
@@ -119,11 +118,10 @@ RT_PROGRAM void robust_intersect(int primIdx)
 
 RT_PROGRAM void bounds(int primIdx, float result[6])
 {
-    const int idx = primIdx * cylinder_size;
-    const float3 v0 = {cylinders[idx], cylinders[idx + 1], cylinders[idx + 2]};
-    const float3 v1 = {cylinders[idx + 3], cylinders[idx + 4],
-                       cylinders[idx + 5]};
-    const float radius = cylinders[idx + 6];
+    const float* cylinder = get_cylinder(primIdx);
+    const float3 v0 = {cylinder[0], cylinder[1], cylinder[2]};
+    const float3 v1 = {cylinder[3], cylinder[4], cylinder[5]};
+    const float radius = cylinder[6];
 
     optix::Aabb* aabb = (optix::Aabb*)result;
 

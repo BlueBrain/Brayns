@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
@@ -40,7 +40,7 @@
 
 DEFINE_SAFE_INCREMENT(Cone);
 
-struct ExtendedCones
+struct Cones
 {
     uniform Geometry super;
 
@@ -49,11 +49,10 @@ struct ExtendedCones
     uniform bool useSafeIncrement;
 };
 
-unmasked void ExtendedCones_bounds(
-    const RTCBoundsFunctionArguments* uniform args)
+unmasked void Cones_bounds(const RTCBoundsFunctionArguments* uniform args)
 {
-    const uniform ExtendedCones* uniform self =
-        (uniform ExtendedCones * uniform)args->geometryUserPtr;
+    const uniform Cones* uniform self =
+        (uniform Cones * uniform)args->geometryUserPtr;
     const uniform Cone* uniform conePtr =
         safeIncrement(self->useSafeIncrement, self->data, args->primID);
 
@@ -71,11 +70,11 @@ unmasked void ExtendedCones_bounds(
                         max(v0, v1) + make_vec3f(extent));
 }
 
-unmasked void ExtendedCones_intersect(
-    const RTCIntersectFunctionNArguments *uniform args)
+unmasked void Cones_intersect(
+    const RTCIntersectFunctionNArguments* uniform args)
 {
-    const uniform ExtendedCones* uniform self =
-        (uniform ExtendedCones * uniform)args->geometryUserPtr;
+    const uniform Cones* uniform self =
+        (uniform Cones * uniform)args->geometryUserPtr;
     const uniform int primID = args->primID;
 
     const uniform Cone* uniform conePtr =
@@ -83,13 +82,6 @@ unmasked void ExtendedCones_intersect(
 
     uniform float radius0 = conePtr->centerRadius;
     uniform float radius1 = conePtr->upRadius;
-
-    const uniform float timestamp = conePtr->timestamp;
-
-    varying Ray* uniform ray = (varying Ray* uniform)args->rayhit;
-
-    if (ray->time > 0 && timestamp > ray->time)
-        return;
 
     uniform vec3f v0 = conePtr->center;
     uniform vec3f v1 = conePtr->up;
@@ -123,6 +115,7 @@ unmasked void ExtendedCones_intersect(
     const vec3f v = normalize(v0 - V);
 
     // Normal of the plane P determined by V and ray
+    varying Ray* uniform ray = (varying Ray * uniform)args->rayhit;
     vec3f n = normalize(cross(ray->dir, V - ray->org));
     const float dotNV = dot(n, v);
     if (dotNV > 0.f)
@@ -214,25 +207,15 @@ unmasked void ExtendedCones_intersect(
     return;
 }
 
-static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
-                                        uniform Model* uniform model,
-                                        varying DifferentialGeometry& dg,
-                                        const varying Ray& ray,
-                                        uniform int64 flags)
+static void Cones_postIntersect(uniform Geometry* uniform geometry,
+                                uniform Model* uniform model,
+                                varying DifferentialGeometry& dg,
+                                const varying Ray& ray, uniform int64 flags)
 {
-    uniform ExtendedCones* uniform this =
-        (uniform ExtendedCones * uniform)geometry;
+    uniform Cones* uniform this = (uniform Cones * uniform)geometry;
     dg.geometry = geometry;
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
-
-    uniform Cone* conePtr =
-        safeIncrement(this->useSafeIncrement, this->data, ray.primID);
-    // Store value as texture coordinate
-    const vec2f tex = conePtr->texture_coords;
-
-    dg.st.x = tex.x;
-    dg.st.y = tex.y;
 
     if (flags & DG_NORMALIZE)
     {
@@ -250,20 +233,18 @@ static void ExtendedCones_postIntersect(uniform Geometry* uniform geometry,
     dg.Ns = Ns;
 }
 
-export void* uniform ExtendedCones_create(void* uniform cppEquivalent)
+export void* uniform Cones_create(void* uniform cppEquivalent)
 {
-    uniform ExtendedCones* uniform geom = uniform new uniform ExtendedCones;
-    Geometry_Constructor(&geom->super, cppEquivalent,
-                         ExtendedCones_postIntersect, NULL, NULL, 0, NULL);
+    uniform Cones* uniform geom = uniform new uniform Cones;
+    Geometry_Constructor(&geom->super, cppEquivalent, Cones_postIntersect, NULL,
+                         NULL, 0, NULL);
     return geom;
 }
 
-export void ExtendedConesGeometry_set(void* uniform _self, void* uniform _model,
-                                      void* uniform data,
-                                      int uniform numPrimitives)
+export void ConesGeometry_set(void* uniform _self, void* uniform _model,
+                              void* uniform data, int uniform numPrimitives)
 {
-    uniform ExtendedCones* uniform self =
-        (uniform ExtendedCones * uniform)_self;
+    uniform Cones* uniform self = (uniform Cones * uniform)_self;
     uniform Model* uniform model = (uniform Model * uniform)_model;
 
     RTCGeometry geom =
@@ -278,12 +259,12 @@ export void ExtendedConesGeometry_set(void* uniform _self, void* uniform _model,
 
     rtcSetGeometryUserData(geom, self);
     rtcSetGeometryUserPrimitiveCount(geom, numPrimitives);
-    rtcSetGeometryBoundsFunction(
-        geom, (uniform RTCBoundsFunction)&ExtendedCones_bounds, self);
+    rtcSetGeometryBoundsFunction(geom, (uniform RTCBoundsFunction)&Cones_bounds,
+                                 self);
     rtcSetGeometryIntersectFunction(
-        geom, (uniform RTCIntersectFunctionN)&ExtendedCones_intersect);
+        geom, (uniform RTCIntersectFunctionN)&Cones_intersect);
     rtcSetGeometryOccludedFunction(
-        geom, (uniform RTCOccludedFunctionN)&ExtendedCones_intersect);
+        geom, (uniform RTCOccludedFunctionN)&Cones_intersect);
     rtcCommitGeometry(geom);
     rtcReleaseGeometry(geom);
 }
