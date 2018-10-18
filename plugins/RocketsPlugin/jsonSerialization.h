@@ -71,6 +71,12 @@ struct ModelProperties
     size_t id;
     PropertyMap properties;
 };
+
+struct ModelTransferFunction
+{
+    size_t id;
+    TransferFunction transferFunction;
+};
 }
 
 STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
@@ -120,16 +126,23 @@ STATICJSON_DECLARE_ENUM(brayns::TextureType,
                         {"occlusion", brayns::TextureType::TT_OCCLUSION});
 
 // c-array to std.array: https://stackoverflow.com/questions/11205186
-#define Vector2uiArray(vec) \
-    reinterpret_cast<std::array<unsigned, 2>*>(&(vec).array[0])
-#define Vector3uiArray(vec) \
-    reinterpret_cast<std::array<unsigned, 3>*>(&(vec).array[0])
-#define Vector2dArray(vec) \
-    reinterpret_cast<std::array<double, 2>*>(&(vec).array[0])
-#define Vector3dArray(vec) \
-    reinterpret_cast<std::array<double, 3>*>(&(vec).array[0])
-#define Vector4dArray(vec) \
-    reinterpret_cast<std::array<double, 4>*>(&(vec).array[0])
+template <size_t M, typename T>
+auto toArray(vmml::vector<M, T>& vec)
+{
+    return reinterpret_cast<std::array<T, M>*>(&(vec).array[0]);
+}
+
+template <typename T>
+auto toArray(vmml::Quaternion<T>& quat)
+{
+    return reinterpret_cast<std::array<T, 4>*>(&(quat).array[0]);
+}
+
+template <size_t M, typename T>
+auto toArray(std::vector<vmml::vector<M, T>>& vecVec)
+{
+    return reinterpret_cast<std::vector<std::array<T, M>>*>(&vecVec);
+}
 
 namespace staticjson
 {
@@ -155,11 +168,17 @@ inline void init(brayns::ModelProperties* s, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::ModelTransferFunction* s, ObjectHandler* h)
+{
+    h->add_property("id", &s->id);
+    h->add_property("transfer_function", &s->transferFunction);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
+
 inline void init(brayns::GetInstances* g, ObjectHandler* h)
 {
     h->add_property("id", &g->modelID);
-    h->add_property("result_range", Vector2uiArray(g->resultRange),
-                    Flags::Optional);
+    h->add_property("result_range", toArray(g->resultRange), Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -197,7 +216,7 @@ inline void init(brayns::SnapshotParams* s, ObjectHandler* h)
     h->add_property("quality", &s->quality, Flags::Optional);
     h->add_property("renderer", &s->renderingParams, Flags::Optional);
     h->add_property("samples_per_pixel", &s->samplesPerPixel, Flags::Optional);
-    h->add_property("size", Vector2uiArray(s->size));
+    h->add_property("size", toArray(s->size));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -211,15 +230,15 @@ inline void init(brayns::Statistics* s, ObjectHandler* h)
 inline void init(brayns::Renderer::PickResult* p, ObjectHandler* h)
 {
     h->add_property("hit", &p->hit);
-    h->add_property("position", Vector3dArray(p->pos));
+    h->add_property("position", toArray(p->pos));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::Camera* c, ObjectHandler* h)
 {
-    h->add_property("orientation", Vector4dArray(c->_orientation),
+    h->add_property("orientation", toArray(c->_orientation),
                     Flags::Optional);
-    h->add_property("position", Vector3dArray(c->_position), Flags::Optional);
+    h->add_property("position", toArray(c->_position), Flags::Optional);
     h->add_property("current", &c->_currentType, Flags::Optional);
     static auto types = c->getTypes();
     h->add_property("types", &types, Flags::IgnoreRead | Flags::Optional);
@@ -257,35 +276,34 @@ inline void init(brayns::ImageGenerator::ImageBase64* i, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
+inline void init(brayns::ColorMap* t, ObjectHandler* h)
+{
+    h->add_property("name", &t->name, Flags::Optional);
+    h->add_property("colors", toArray(t->colors));
+}
+
 inline void init(brayns::TransferFunction* t, ObjectHandler* h)
 {
-    h->add_property("range", Vector2dArray(t->getValuesRange()),
+    h->add_property("range", toArray(t->_valuesRange), Flags::Optional);
+    h->add_property("opacity_curve", toArray(t->_controlPoints),
                     Flags::Optional);
-    h->add_property("diffuse",
-                    reinterpret_cast<std::vector<std::array<float, 4>>*>(
-                        &t->getDiffuseColors()),
-                    Flags::Optional);
-    h->add_property("emission",
-                    reinterpret_cast<std::vector<std::array<float, 3>>*>(
-                        &t->getEmissionIntensities()),
-                    Flags::Optional);
-    h->add_property("contribution", &t->getContributions(), Flags::Optional);
+    h->add_property("colormap", &t->_colorMap, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::Boxd* b, ObjectHandler* h)
 {
-    h->add_property("min", Vector3dArray(b->_min));
-    h->add_property("max", Vector3dArray(b->_max));
+    h->add_property("min", toArray(b->_min));
+    h->add_property("max", toArray(b->_max));
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::Material* m, ObjectHandler* h)
 {
     h->add_property("name", &m->_name, Flags::Optional);
-    h->add_property("diffuse_color", Vector3dArray(m->_diffuseColor),
+    h->add_property("diffuse_color", toArray(m->_diffuseColor),
                     Flags::Optional);
-    h->add_property("specular_color", Vector3dArray(m->_specularColor),
+    h->add_property("specular_color", toArray(m->_specularColor),
                     Flags::Optional);
     h->add_property("specular_exponent", &m->_specularExponent,
                     Flags::Optional);
@@ -301,10 +319,10 @@ inline void init(brayns::Material* m, ObjectHandler* h)
 
 inline void init(brayns::Transformation* g, ObjectHandler* h)
 {
-    h->add_property("translation", Vector3dArray(g->_translation));
-    h->add_property("scale", Vector3dArray(g->_scale));
-    h->add_property("rotation", Vector4dArray(g->_rotation));
-    h->add_property("rotation_center", Vector3dArray(g->_rotationCenter),
+    h->add_property("translation", toArray(g->_translation));
+    h->add_property("scale", toArray(g->_scale));
+    h->add_property("rotation", toArray(g->_rotation));
+    h->add_property("rotation_center", toArray(g->_rotationCenter),
                     Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
@@ -384,9 +402,7 @@ inline void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
                     Flags::Optional);
     h->add_property("simulation_step", &c->simulationStep, Flags::Optional);
     h->add_property("simulation_values_range",
-                    Vector2dArray(c->simulationValuesRange), Flags::Optional);
-    h->add_property("histogram_size", &c->simulationHistogramSize,
-                    Flags::Optional);
+                    toArray(c->simulationValuesRange), Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -409,7 +425,7 @@ inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
                     Flags::Optional);
     h->add_property("synchronous_mode", &a->_synchronousMode, Flags::Optional);
     h->add_property("image_stream_fps", &a->_imageStreamFPS, Flags::Optional);
-    h->add_property("viewport", Vector2dArray(a->_windowSize), Flags::Optional);
+    h->add_property("viewport", toArray(a->_windowSize), Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -442,7 +458,7 @@ inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
 inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 {
     h->add_property("accumulation", &r->_accumulation, Flags::Optional);
-    h->add_property("background_color", Vector3dArray(r->_backgroundColor),
+    h->add_property("background_color", toArray(r->_backgroundColor),
                     Flags::Optional);
     h->add_property("current", &r->_renderer, Flags::Optional);
     h->add_property("head_light", &r->_headLight, Flags::Optional);
@@ -457,21 +473,17 @@ inline void init(brayns::RenderingParameters* r, ObjectHandler* h)
 
 inline void init(brayns::SceneParameters* s, ObjectHandler* h)
 {
-    h->add_property("color_map_file", &s->_colorMapFilename, Flags::Optional);
-    h->add_property("color_map_range", Vector2dArray(s->_colorMapRange),
-                    Flags::Optional);
     h->add_property("environment_map", &s->_environmentMap, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
 inline void init(brayns::VolumeParameters* v, ObjectHandler* h)
 {
-    h->add_property("volume_dimensions", Vector3uiArray(v->_dimensions),
+    h->add_property("volume_dimensions", toArray(v->_dimensions),
                     Flags::Optional);
-    h->add_property("volume_element_spacing", Vector3dArray(v->_elementSpacing),
+    h->add_property("volume_element_spacing", toArray(v->_elementSpacing),
                     Flags::Optional);
-    h->add_property("volume_offset", Vector3dArray(v->_offset),
-                    Flags::Optional);
+    h->add_property("volume_offset", toArray(v->_offset), Flags::Optional);
 
     h->add_property("gradient_shading", &v->_gradientShading, Flags::Optional);
     h->add_property("single_shade", &v->_singleShade, Flags::Optional);
@@ -481,7 +493,7 @@ inline void init(brayns::VolumeParameters* v, ObjectHandler* h)
     h->add_property("adaptive_sampling", &v->_adaptiveSampling,
                     Flags::Optional);
     h->add_property("sampling_rate", &v->_samplingRate, Flags::Optional);
-    h->add_property("specular", Vector3dArray(v->_specular), Flags::Optional);
+    h->add_property("specular", toArray(v->_specular), Flags::Optional);
     h->add_property("clip_box", &v->_clipBox, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
@@ -526,6 +538,5 @@ inline bool from_json(T& obj, const std::string& json)
 template <>
 inline bool from_json(brayns::Vector2d& obj, const std::string& json)
 {
-    return staticjson::from_json_string(json.c_str(), Vector2dArray(obj),
-                                        nullptr);
+    return staticjson::from_json_string(json.c_str(), toArray(obj), nullptr);
 }

@@ -30,7 +30,6 @@
 #include <brayns/common/light/PointLight.h>
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Model.h>
-#include <brayns/common/simulation/AbstractSimulationHandler.h>
 
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -46,24 +45,10 @@ OSPRayScene::OSPRayScene(ParametersManager& parametersManager,
     , _memoryManagementFlags(memoryManagementFlags)
 {
     _backgroundMaterial = std::make_shared<OSPRayMaterial>();
-    _ospTransferFunction = ospNewTransferFunction("piecewise_linear");
-    if (_ospTransferFunction)
-        ospCommit(_ospTransferFunction);
 }
 
 OSPRayScene::~OSPRayScene()
 {
-    ospRelease(_ospTransferFunction);
-
-    if (_ospSimulationData)
-        ospRelease(_ospSimulationData);
-
-    if (_ospTransferFunctionDiffuseData)
-        ospRelease(_ospTransferFunctionDiffuseData);
-
-    if (_ospTransferFunctionEmissionData)
-        ospRelease(_ospTransferFunctionEmissionData);
-
     for (auto& light : _ospLights)
         ospRelease(light);
     _ospLights.clear();
@@ -79,18 +64,16 @@ OSPRayScene::~OSPRayScene()
 
 void OSPRayScene::commit()
 {
-    const bool rebuildScene = isModified();
-    const bool addRemoveVolumes = _commitVolumeData();
-
-    _commitSimulationData();
-    commitTransferFunctionData();
-
     // copy the list to avoid locking the mutex
     ModelDescriptors modelDescriptors;
     {
         auto lock = acquireReadAccess();
         modelDescriptors = _modelDescriptors;
     }
+
+    const bool rebuildScene = isModified();
+    const bool addRemoveVolumes =
+        _commitVolumeAndTransferFunction(modelDescriptors);
 
     if (!rebuildScene && !addRemoveVolumes)
     {
@@ -99,9 +82,9 @@ void OSPRayScene::commit()
         for (auto& modelDescriptor : modelDescriptors)
         {
             auto& model = modelDescriptor->getModel();
-            if (model.dirty())
+            if (model.isDirty())
             {
-                model.commit();
+                model.commitGeometry();
                 // need to continue re-adding the models to update the bounding
                 // box model to reflect the new model size
                 doUpdate = true;
@@ -255,71 +238,15 @@ bool OSPRayScene::commitLights()
     return true;
 }
 
-bool OSPRayScene::commitTransferFunctionData()
-{
-    if (!_transferFunction.isModified())
-        return false;
-
-    if (_ospTransferFunction)
-    {
-        // for volumes
-        Vector3fs colors;
-        colors.reserve(_transferFunction.getDiffuseColors().size());
-        floats opacities;
-        opacities.reserve(_transferFunction.getDiffuseColors().size());
-
-        for (const auto& i : _transferFunction.getDiffuseColors())
-        {
-            colors.push_back({float(i.x()), float(i.y()), float(i.z())});
-            opacities.push_back(i.w());
-        }
-
-        OSPData colorsData =
-            ospNewData(colors.size(), OSP_FLOAT3, colors.data());
-        ospSetData(_ospTransferFunction, "colors", colorsData);
-        ospRelease(colorsData);
-        ospSet2f(_ospTransferFunction, "valueRange",
-                 _transferFunction.getValuesRange().x(),
-                 _transferFunction.getValuesRange().y());
-        OSPData opacityValuesData =
-            ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
-        ospSetData(_ospTransferFunction, "opacities", opacityValuesData);
-        ospRelease(opacityValuesData);
-        ospCommit(_ospTransferFunction);
-    }
-
-    // for simulation
-    if (_ospTransferFunctionDiffuseData)
-        ospRelease(_ospTransferFunctionDiffuseData);
-
-    if (_ospTransferFunctionEmissionData)
-        ospRelease(_ospTransferFunctionEmissionData);
-
-    _ospTransferFunctionDiffuseData =
-        ospNewData(_transferFunction.getDiffuseColors().size(), OSP_FLOAT4,
-                   _transferFunction.getDiffuseColors().data(),
-                   _memoryManagementFlags);
-    ospCommit(_ospTransferFunctionDiffuseData);
-
-    _ospTransferFunctionEmissionData =
-        ospNewData(_transferFunction.getEmissionIntensities().size(),
-                   OSP_FLOAT3,
-                   _transferFunction.getEmissionIntensities().data(),
-                   _memoryManagementFlags);
-    ospCommit(_ospTransferFunctionEmissionData);
-
-    _transferFunction.resetModified();
-    markModified(false);
-    return true;
-}
-
-bool OSPRayScene::_commitVolumeData()
+bool OSPRayScene::_commitVolumeAndTransferFunction(
+    ModelDescriptors& modelDescriptors)
 {
     bool rebuildScene = false;
-    auto lock = acquireReadAccess();
-    for (auto modelDescriptor : _modelDescriptors)
+    for (auto& modelDescriptor : modelDescriptors)
     {
         auto& model = modelDescriptor->getModel();
+        if (model.commitTransferFunction())
+            markModified(false);
         if (model.isVolumesDirty())
         {
             rebuildScene = true;
@@ -340,55 +267,23 @@ bool OSPRayScene::_commitVolumeData()
     return rebuildScene;
 }
 
-void OSPRayScene::_commitSimulationData()
-{
-    if (!_simulationHandler)
-        return;
-
-    const auto animationFrame =
-        _parametersManager.getAnimationParameters().getFrame();
-
-    if (_ospSimulationData &&
-        _simulationHandler->getCurrentFrame() == animationFrame)
-    {
-        return;
-    }
-
-    auto frameData = _simulationHandler->getFrameData(animationFrame);
-
-    if (!frameData)
-        return;
-
-    if (_ospSimulationData)
-        ospRelease(_ospSimulationData);
-    _ospSimulationData =
-        ospNewData(_simulationHandler->getFrameSize(), OSP_FLOAT, frameData,
-                   _memoryManagementFlags);
-    ospCommit(_ospSimulationData);
-
-    markModified(false); // triggers framebuffer clear
-}
-
 ModelPtr OSPRayScene::createModel() const
 {
-    return std::make_unique<OSPRayModel>();
+    return std::make_unique<OSPRayModel>(
+        _parametersManager.getAnimationParameters(),
+        _parametersManager.getVolumeParameters());
 }
 
-SharedDataVolumePtr OSPRayScene::createSharedDataVolume(
-    const Vector3ui& dimensions, const Vector3f& spacing,
-    const DataType type) const
+ModelDescriptorPtr OSPRayScene::getSimulatedModel()
 {
-    return std::make_shared<OSPRaySharedDataVolume>(
-        dimensions, spacing, type, _parametersManager.getVolumeParameters(),
-        _ospTransferFunction);
-}
-
-BrickedVolumePtr OSPRayScene::createBrickedVolume(const Vector3ui& dimensions,
-                                                  const Vector3f& spacing,
-                                                  const DataType type) const
-{
-    return std::make_shared<OSPRayBrickedVolume>(
-        dimensions, spacing, type, _parametersManager.getVolumeParameters(),
-        _ospTransferFunction);
+    auto lock = acquireReadAccess();
+    for (auto model : _modelDescriptors)
+    {
+        const auto& ospModel =
+            static_cast<const OSPRayModel&>(model->getModel());
+        if (ospModel.simulationData())
+            return model;
+    }
+    return ModelDescriptorPtr{};
 }
 }

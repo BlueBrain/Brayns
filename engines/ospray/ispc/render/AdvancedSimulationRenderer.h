@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "utils/AbstractRenderer.h"
+#include "utils/SimulationRenderer.h"
 
 namespace brayns
 {
@@ -30,7 +30,7 @@ namespace brayns
  * bleeding, light emission), mapping of simulation on the geometry, and
  * advanced rendering of volumes
  */
-class AdvancedSimulationRenderer : public AbstractRenderer
+class AdvancedSimulationRenderer : public SimulationRenderer
 {
 public:
     AdvancedSimulationRenderer();
@@ -63,11 +63,6 @@ private:
     bool _electronShadingEnabled;
     int _randomNumber;
 
-    ospray::Ref<ospray::Data> _simulationData;
-    ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
-    ospray::Ref<ospray::Data> _transferFunctionEmissionData;
-    float _transferFunctionMinValue;
-    float _transferFunctionRange;
     ospray::int32 _volumeSamplesPerRay;
     float _detectionDistance;
     float _samplingThreshold;

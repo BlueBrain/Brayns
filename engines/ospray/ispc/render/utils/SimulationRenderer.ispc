@@ -18,27 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimulationRenderer.h"
-#include "SimulationRenderer_ispc.h"
+#include "SimulationRenderer.ih"
 
-#include <ospray/SDK/transferFunction/TransferFunction.h>
-
-namespace brayns
+export void SimulationRenderer_setTransferFunction(void* uniform _self,
+                                                   void* uniform value)
 {
-void SimulationRenderer::commit()
-{
-    AbstractRenderer::commit();
-
-    _simulationData = getParamData("simulationData");
-    _alphaCorrection = getParam1f("alphaCorrection", 0.5f);
-
-    ospray::TransferFunction* transferFunction =
-        (ospray::TransferFunction*)getParamObject("transferFunction", nullptr);
-    if (transferFunction)
-        ispc::SimulationRenderer_setTransferFunction(getIE(),
-                                                     transferFunction->getIE());
-
-    _simulationDataSize = _simulationData ? _simulationData->size() : 0;
+    uniform SimulationRenderer* uniform self =
+        (uniform SimulationRenderer * uniform)_self;
+    self->transferFunction = (TransferFunction * uniform)value;
 }
-
-} // ::brayns

@@ -41,7 +41,6 @@ struct AdvancedSimulationRenderer
     float detectionDistance;
 
     // Volumes
-    uint32 volumeSamplesPerRay;
     float samplingThreshold;
     float volumeSpecularExponent;
     float volumeAlphaCorrection;
@@ -1036,12 +1035,9 @@ export void AdvancedSimulationRenderer_set(
     const uniform bool& shadingEnabled, const uniform int& randomNumber,
     const uniform float& timestamp, const uniform int& spp,
     const uniform bool& electronShadingEnabled, void** uniform lights,
-    const uniform int32 numLights, const uniform int32& volumeSamplesPerRay,
-    uniform float* uniform simulationData,
-    const uniform uint64& simulationDataSize, uniform vec4f* uniform colormap,
-    uniform vec3f* uniform emissionIntensitiesMap,
-    const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
-    const uniform float& colorMapRange, const uniform float& samplingThreshold,
+    const uniform int32 numLights, uniform float* uniform simulationData,
+    const uniform uint64& simulationDataSize,
+    const uniform float& samplingThreshold,
     const uniform float& detectionDistance,
     const uniform float& volumeSpecularExponent,
     const uniform float& volumeAlphaCorrection)
@@ -1063,15 +1059,6 @@ export void AdvancedSimulationRenderer_set(
     self->shadingEnabled = shadingEnabled;
     self->randomNumber = randomNumber;
     self->electronShadingEnabled = electronShadingEnabled;
-
-    self->volumeSamplesPerRay = volumeSamplesPerRay;
-
-    self->super.colorMap = (uniform vec4f * uniform)colormap;
-    self->super.emissionIntensitiesMap =
-        (uniform vec3f * uniform)emissionIntensitiesMap;
-    self->super.colorMapSize = colorMapSize;
-    self->super.colorMapMinValue = colorMapMinValue;
-    self->super.colorMapRange = colorMapRange;
 
     self->super.simulationData = (uniform float* uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;

@@ -56,7 +56,6 @@ struct CircuitConfiguration
     double simulationStep{0};
     Vector2d simulationValuesRange{std::numeric_limits<double>::max(),
                                    std::numeric_limits<double>::min()};
-    size_t simulationHistogramSize{128};
     size_t randomSeed = 0;
     bool meshTransformation{false};
 };
@@ -197,13 +196,6 @@ public:
         return _circuitConfiguration.simulationValuesRange;
     }
 
-    /** Size of the simulation histogram */
-    size_t getCircuitSimulationHistogramSize() const
-    {
-        return _circuitConfiguration.simulationHistogramSize;
-    }
-
-    /** Size of the simulation histogram */
     size_t getCircuitMeshTransformation() const
     {
         return _circuitConfiguration.meshTransformation;

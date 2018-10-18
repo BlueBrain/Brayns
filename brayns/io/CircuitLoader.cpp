@@ -123,27 +123,28 @@ public:
                 return {};
 
             // Load simulation information from compartment report
-            CompartmentReportPtr compartmentReport = nullptr;
+            CompartmentReportPtr compartmentReport;
+            AbstractSimulationHandlerPtr simulationHandler;
             if (!report.empty())
+            {
                 try
                 {
-                    CircuitSimulationHandlerPtr simulationHandler(
-                        new CircuitSimulationHandler(_applicationParameters,
-                                                     _geometryParameters,
-                                                     bc.getReportSource(report),
-                                                     allGids));
-                    compartmentReport =
-                        simulationHandler->getCompartmentReport();
+                    auto handler = std::make_shared<CircuitSimulationHandler>(
+                        _applicationParameters, _geometryParameters,
+                        bc.getReportSource(report), allGids);
+                    compartmentReport = handler->getCompartmentReport();
                     // Only keep simulated GIDs
                     if (compartmentReport)
+                    {
                         allGids = compartmentReport->getGIDs();
-                    // Attach simulation handler
-                    _parent._scene.setSimulationHandler(simulationHandler);
+                        simulationHandler = handler;
+                    }
                 }
                 catch (const std::exception& e)
                 {
                     BRAYNS_ERROR << e.what() << std::endl;
                 }
+            }
 
             if (!_geometryParameters.getLoadCacheFile().empty())
                 return {};
@@ -180,9 +181,13 @@ public:
                                         layerIds, morphologyTypes,
                                         electrophysiologyTypes);
             }
+
+            // Attach simulation handler
+            if (simulationHandler)
+                model->setSimulationHandler(simulationHandler);
+
             // Create materials
-            model->createMissingMaterials(
-                _parent._scene.getSimulationHandler() != nullptr);
+            model->createMissingMaterials(simulationHandler != nullptr);
 
             // Compute circuit center
             Boxf circuitCenter;
@@ -195,12 +200,6 @@ public:
                 std::make_shared<ModelDescriptor>(std::move(model), "Circuit",
                                                   source, metadata);
             modelDesc->setTransformation(transformation);
-
-            // unset the simulation handler once the model is removed
-            if (compartmentReport)
-                modelDesc->onRemoved([& scene = _parent._scene](const auto&) {
-                    scene.setSimulationHandler(nullptr);
-                });
         }
         catch (const std::exception& error)
         {

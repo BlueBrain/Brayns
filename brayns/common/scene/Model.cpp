@@ -26,6 +26,8 @@
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/volume/Volume.h>
 
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
+
 #include <boost/filesystem.hpp>
 
 #include <set>
@@ -230,7 +232,7 @@ void Model::removeVolume(VolumePtr volume)
     _volumesDirty = true;
 }
 
-bool Model::dirty() const
+bool Model::isDirty() const
 {
     return _spheresDirty || _cylindersDirty || _conesDirty ||
            _trianglesMeshesDirty || _sdfGeometriesDirty || _instancesDirty;
@@ -518,5 +520,15 @@ void Model::createMissingMaterials(const bool castSimulationData)
             material->setCastSimulationData(castSimulationData);
         }
     }
+}
+
+void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
+{
+    _simulationHandler = handler;
+}
+
+AbstractSimulationHandlerPtr Model::getSimulationHandler() const
+{
+    return _simulationHandler;
 }
 }

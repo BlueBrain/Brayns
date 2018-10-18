@@ -45,8 +45,6 @@ const std::string PARAM_CIRCUIT_END_SIMULATION_TIME =
 const std::string PARAM_CIRCUIT_SIMULATION_STEP = "circuit-simulation-step";
 const std::string PARAM_CIRCUIT_SIMULATION_RANGE =
     "circuit-simulation-values-range";
-const std::string PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE =
-    "circuit-simulation-histogram-size";
 const std::string PARAM_CIRCUIT_RANDOM_SEED = "circuit-random-seed";
 const std::string PARAM_LOAD_CACHE_FILE = "load-cache-file";
 const std::string PARAM_SAVE_CACHE_FILE = "save-cache-file";
@@ -150,9 +148,6 @@ GeometryParameters::GeometryParameters()
         (PARAM_CIRCUIT_SIMULATION_RANGE.c_str(),
          po::value<floats>()->multitoken(),
          "Minimum and maximum values for the simulation [float float]")
-        //
-        (PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE.c_str(), po::value<size_t>(),
-         "Number of values defining the simulation histogram [int]")
         //
         (PARAM_CIRCUIT_RANDOM_SEED.c_str(), po::value<size_t>(),
          "Random seed for circuit [int]")
@@ -290,9 +285,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
             _circuitConfiguration.simulationValuesRange =
                 Vector2f(values[0], values[1]);
     }
-    if (vm.count(PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE))
-        _circuitConfiguration.simulationHistogramSize =
-            vm[PARAM_CIRCUIT_SIMULATION_HISTOGRAM_SIZE].as<size_t>();
     if (vm.count(PARAM_CIRCUIT_RANDOM_SEED))
         _circuitConfiguration.randomSeed =
             vm[PARAM_CIRCUIT_RANDOM_SEED].as<size_t>();
@@ -375,8 +367,6 @@ void GeometryParameters::print()
                 << _circuitConfiguration.simulationStep << std::endl;
     BRAYNS_INFO << " - Simulation values range : "
                 << _circuitConfiguration.simulationValuesRange << std::endl;
-    BRAYNS_INFO << " - Histogram size          : "
-                << _circuitConfiguration.simulationHistogramSize << std::endl;
     BRAYNS_INFO << " - Bounding box            : "
                 << _circuitConfiguration.boundingBox << std::endl;
     BRAYNS_INFO << " - Mesh transformation     : "

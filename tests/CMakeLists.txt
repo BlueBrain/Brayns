@@ -44,6 +44,7 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     testImages.cpp
     webAPI.cpp
     shadows.cpp
+    transferFunction.cpp
   )
 endif()
 
@@ -85,6 +86,7 @@ else()
     renderer.cpp
     snapshot.cpp
     throttle.cpp
+    transferFunction.cpp
     webAPI.cpp
   )
 endif()

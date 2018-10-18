@@ -25,6 +25,7 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   ispc/render/ProximityRenderer.ispc
   ispc/render/AdvancedSimulationRenderer.ispc
   ispc/render/utils/RandomGenerator.ispc
+  ispc/render/utils/SimulationRenderer.ispc
   ispc/render/utils/SkyBox.ispc
 )
 
@@ -52,6 +53,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/render/AdvancedSimulationRenderer.cpp
   ispc/render/utils/AbstractRenderer.cpp
   ispc/render/utils/SimulationRenderer.cpp
+  ispc/render/utils/SimulationRenderer.ih
 )
 list(APPEND BRAYNSOSPRAYENGINEPLUGIN_SOURCES ${BRAYNSOSPRAYPLUGIN_ISPC_SOURCES})
 

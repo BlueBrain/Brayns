@@ -144,13 +144,12 @@ export void* uniform BasicSimulationRenderer_create(void* uniform cppE)
     return self;
 }
 
-export void BasicSimulationRenderer_set(
-    void* uniform _self, void* uniform bgMaterial, const uniform int& spp,
-    uniform float* uniform simulationData,
-    const uniform int64 simulationDataSize, uniform vec4f* uniform colormap,
-    uniform vec3f* uniform emissionIntensitiesMap,
-    const uniform int32 colorMapSize, const uniform float& colorMapMinValue,
-    const uniform float& colorMapRange, const uniform float& alphaCorrection)
+export void BasicSimulationRenderer_set(void* uniform _self,
+                                        void* uniform bgMaterial,
+                                        const uniform int& spp,
+                                        uniform float* uniform simulationData,
+                                        const uniform int64 simulationDataSize,
+                                        const uniform float& alphaCorrection)
 {
     uniform BasicSimulationRenderer* uniform self =
         (uniform BasicSimulationRenderer * uniform)_self;
@@ -159,13 +158,6 @@ export void BasicSimulationRenderer_set(
         (uniform ExtendedOBJMaterial * uniform)bgMaterial;
 
     self->super.super.super.spp = spp;
-
-    self->super.colorMap = (uniform vec4f * uniform)colormap;
-    self->super.emissionIntensitiesMap =
-        (uniform vec3f * uniform)emissionIntensitiesMap;
-    self->super.colorMapSize = colorMapSize;
-    self->super.colorMapMinValue = colorMapMinValue;
-    self->super.colorMapRange = colorMapRange;
 
     self->super.simulationData = (uniform float* uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;

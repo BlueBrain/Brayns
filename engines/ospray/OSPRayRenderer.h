@@ -44,7 +44,6 @@ public:
 
     PickResult pick(const Vector2f& pickPos) final;
 
-    OSPRenderer impl() const { return _renderer; }
     void createOSPRenderer();
 
 private:

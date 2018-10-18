@@ -24,8 +24,6 @@
 #include <brayns/api.h>
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/loader/LoaderRegistry.h>
-#include <brayns/common/simulation/AbstractSimulationHandler.h>
-#include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
 #include <shared_mutex>
@@ -71,12 +69,6 @@ public:
     BRAYNS_API virtual bool commitLights() = 0;
 
     /**
-     * Commits transfer function data to renderers.
-     * @return True if data was committed, false otherwise
-     */
-    BRAYNS_API virtual bool commitTransferFunctionData() = 0;
-
-    /**
         Returns the bounding box of the scene
     */
     const Boxd& getBounds() const { return _bounds; }
@@ -104,23 +96,6 @@ public:
     BRAYNS_API void clearLights();
 
     BRAYNS_API virtual ModelPtr createModel() const = 0;
-
-    /**
-     * Create a volume with the given dimensions, voxel spacing and data type
-     * where the are voxels are set via setVoxels() from any memory location.
-     */
-    BRAYNS_API virtual SharedDataVolumePtr createSharedDataVolume(
-        const Vector3ui& dimensions, const Vector3f& spacing,
-        const DataType type) const = 0;
-
-    /**
-     * Create a volume with the given dimensions, voxel spacing and data type
-     * where the voxels are copied via setBrick() into an optimized internal
-     * storage.
-     */
-    BRAYNS_API virtual BrickedVolumePtr createBrickedVolume(
-        const Vector3ui& dimensions, const Vector3f& spacing,
-        const DataType type) const = 0;
 
     /**
         Adds a model to the scene
@@ -173,16 +148,6 @@ public:
     */
     const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
     /**
-        Returns the simulutation handler
-    */
-    BRAYNS_API AbstractSimulationHandlerPtr getSimulationHandler() const;
-
-    /**
-        Sets the simulation handler
-    */
-    BRAYNS_API void setSimulationHandler(AbstractSimulationHandlerPtr handler);
-
-    /**
         Sets the Calcium diffusion simulation handler
     */
     void setCADiffusionSimulationHandler(
@@ -192,15 +157,6 @@ public:
         Gets the Calcium diffusion simulation handler
     */
     CADiffusionSimulationHandlerPtr getCADiffusionSimulationHandler() const;
-
-    /**
-        Build a color map from a file, according to the colormap-file scene
-       parameters
-    */
-    BRAYNS_API TransferFunction& getTransferFunction()
-    {
-        return _transferFunction;
-    }
 
     /** Loads geometry a binary cache file defined by the --load-cache-file
        command line parameter. The cache file is a binary representation of the
@@ -300,8 +256,6 @@ protected:
     ClipPlanes _clipPlanes;
 
     // Simulation
-    AbstractSimulationHandlerPtr _simulationHandler{nullptr};
-    TransferFunction _transferFunction;
     CADiffusionSimulationHandlerPtr _caDiffusionSimulationHandler{nullptr};
 
     LoaderRegistry _loaderRegistry;

@@ -37,15 +37,7 @@ void BasicSimulationRenderer::commit()
     ispc::BasicSimulationRenderer_set(
         getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), spp,
         (_simulationData ? (float*)_simulationData->data : nullptr),
-        _simulationDataSize,
-        _transferFunctionDiffuseData
-            ? (ispc::vec4f*)_transferFunctionDiffuseData->data
-            : nullptr,
-        (_transferFunctionEmissionData
-             ? (ispc::vec3f*)_transferFunctionEmissionData->data
-             : nullptr),
-        _transferFunctionSize, _transferFunctionMinValue,
-        _transferFunctionRange, _alphaCorrection);
+        _simulationDataSize, _alphaCorrection);
 }
 
 BasicSimulationRenderer::BasicSimulationRenderer()

@@ -38,6 +38,11 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
+#if BRAYNS_USE_LIBARCHIVE
+#include <brayns/io/ArchiveLoader.h>
+#endif
+#include <brayns/io/MeshLoader.h>
+#include <brayns/io/MolecularSystemReader.h>
 #include <brayns/io/ProteinLoader.h>
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
@@ -68,17 +73,10 @@
 #include <ospcommon/library.h>
 #endif
 
-#if BRAYNS_USE_LIBARCHIVE
-#include <brayns/io/ArchiveLoader.h>
-#endif
-
-#include <boost/progress.hpp>
-
 namespace
 {
 const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
 const float DEFAULT_MOTION_ACCELERATION = 1.5f;
-const size_t LOADING_PROGRESS_DATA = 100;
 }
 
 namespace brayns
@@ -198,18 +196,15 @@ struct Brayns::Impl : public PluginAPI
         _extensionPluginFactory.preRender();
 
         auto& scene = _engine->getScene();
-        auto& camera = _engine->getCamera();
-        auto& renderer = _engine->getRenderer();
-
         scene.commit();
 
-        _engine->getStatistics().setSceneSizeInBytes(
-            _engine->getScene().getSizeInBytes());
+        _engine->getStatistics().setSceneSizeInBytes(scene.getSizeInBytes());
 
-        _updateAnimation();
+        _parametersManager.getAnimationParameters().update();
 
-        renderer.setCurrentType(
-            _parametersManager.getRenderingParameters().getCurrentRenderer());
+        auto& renderer = _engine->getRenderer();
+        const auto& rp = _parametersManager.getRenderingParameters();
+        renderer.setCurrentType(rp.getCurrentRenderer());
 
         const auto windowSize =
             _parametersManager.getApplicationParameters().getWindowSize();
@@ -217,16 +212,15 @@ struct Brayns::Impl : public PluginAPI
         _engine->reshape(windowSize);
         _engine->preRender();
 
+        auto& camera = _engine->getCamera();
         camera.commit();
         _engine->commit();
 
-        if (_parametersManager.getRenderingParameters().getHeadLight())
+        if (rp.getHeadLight())
         {
             LightPtr sunLight = scene.getLight(0);
             auto sun = std::dynamic_pointer_cast<DirectionalLight>(sunLight);
-            if (sun &&
-                (camera.isModified() ||
-                 _parametersManager.getRenderingParameters().isModified()))
+            if (sun && (camera.isModified() || rp.isModified()))
             {
                 sun->setDirection(camera.getOrientation().rotate(
                     Vector3f(0.0f, 0.0f, -1.0f)));
@@ -362,17 +356,6 @@ struct Brayns::Impl : public PluginAPI
     }
     Scene& getScene() final { return _engine->getScene(); }
 private:
-    void _updateAnimation()
-    {
-        auto simHandler = _engine->getScene().getSimulationHandler();
-        auto& animParams = _parametersManager.getAnimationParameters();
-        if ((animParams.isModified() || animParams.getDelta() != 0) &&
-            simHandler && simHandler->isReady())
-        {
-            animParams.setFrame(animParams.getFrame() + animParams.getDelta());
-        }
-    }
-
     void _registerLoaders()
     {
         auto& registry = _engine->getScene().getLoaderRegistry();
@@ -631,29 +614,12 @@ private:
 
     void _increaseAnimationFrame()
     {
-        if (_engine->getScene().getSimulationHandler() &&
-            !_engine->getScene().getSimulationHandler()->isReady())
-        {
-            return;
-        }
-
-        auto& animParams = _parametersManager.getAnimationParameters();
-        const auto animationFrame = animParams.getFrame();
-        animParams.setFrame(animationFrame + 1);
+        _parametersManager.getAnimationParameters().jumpFrames(1);
     }
 
     void _decreaseAnimationFrame()
     {
-        if (_engine->getScene().getSimulationHandler() &&
-            !_engine->getScene().getSimulationHandler()->isReady())
-        {
-            return;
-        }
-
-        auto& animParams = _parametersManager.getAnimationParameters();
-        const auto animationFrame = animParams.getFrame();
-        if (animationFrame > 0)
-            animParams.setFrame(animationFrame - 1);
+        _parametersManager.getAnimationParameters().jumpFrames(-1);
     }
 
     void _diffuseShading()

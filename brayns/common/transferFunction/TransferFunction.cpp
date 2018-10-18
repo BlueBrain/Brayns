@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -24,20 +24,28 @@
 
 namespace brayns
 {
+bool ColorMap::operator==(const ColorMap& rhs) const
+{
+    if (this == &rhs)
+        return true;
+    return name == rhs.name && colors == rhs.colors;
+}
+
+void ColorMap::clear()
+{
+    colors = {{0, 0, 0}, {1, 1, 1}};
+}
+
 TransferFunction::TransferFunction()
 {
-    _diffuseColors.resize(256, {1.f, 0.f, 0.f, 0.5f});
-    _emissionIntensities.resize(256, {0.f, 0.f, 0.f});
-    _contributions.resize(256, 1.f);
-    _valuesRange = {0, 255.f};
+    clear();
 }
 
 void TransferFunction::clear()
 {
-    _diffuseColors.clear();
-    _emissionIntensities.clear();
-    _contributions.clear();
-    _valuesRange = Vector2f();
+    _colorMap.clear();
+    _controlPoints = {{0, 0}, {1, 1}};
+    _valuesRange = {0, 255};
     markModified();
 }
 }

@@ -36,7 +36,7 @@ namespace brayns
 {
 void AdvancedSimulationRenderer::commit()
 {
-    AbstractRenderer::commit();
+    SimulationRenderer::commit();
 
     _shadows = getParam1f("shadows", 0.f);
     _softShadows = getParam1f("softShadows", 0.f);
@@ -50,52 +50,20 @@ void AdvancedSimulationRenderer::commit()
     _randomNumber = getParam1i("randomNumber", 0);
 
     _simulationModel = (ospray::Model*)getParamObject("simulationModel", 0);
-    _volumeSamplesPerRay = getParam1i("volumeSamplesPerRay", 32);
-    _simulationData = getParamData("simulationData");
-    _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
-    _transferFunctionEmissionData =
-        getParamData("transferFunctionEmissionData");
-    _transferFunctionMinValue = getParam1f("transferFunctionMinValue", 0.f);
-    _transferFunctionRange = getParam1f("transferFunctionRange", 0.f);
 
     _samplingThreshold = getParam1f("samplingThreshold", 0.001f);
     _volumeSpecularExponent = getParam1f("volumeSpecularExponent", 20.f);
     _volumeAlphaCorrection = getParam1f("volumeAlphaCorrection", 0.5f);
-
-    const auto transferFunctionDiffuseSize =
-        _transferFunctionDiffuseData ? _transferFunctionDiffuseData->size() : 0;
-    const auto transferFunctionEmissionize =
-        _transferFunctionEmissionData ? _transferFunctionEmissionData->size()
-                                      : 0;
-
-    if (transferFunctionDiffuseSize != transferFunctionEmissionize)
-        BRAYNS_ERROR << "Transfer function diffuse/emission size not the same: "
-                     << "'" << transferFunctionDiffuseSize << "' vs '"
-                     << transferFunctionEmissionize << "'" << std::endl;
-
-    const auto transferFunctionSize =
-        std::min(transferFunctionDiffuseSize, transferFunctionEmissionize);
-
-    const auto simulationDataSize =
-        _simulationData ? _simulationData->size() : 0;
 
     ispc::AdvancedSimulationRenderer_set(
         getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
         (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
         _ambientOcclusionStrength, _ambientOcclusionDistance, _shadingEnabled,
         _randomNumber, _timestamp, spp, _electronShadingEnabled, _lightPtr,
-        _lightArray.size(), _volumeSamplesPerRay,
+        _lightArray.size(),
         _simulationData ? (float*)_simulationData->data : NULL,
-        simulationDataSize,
-        _transferFunctionDiffuseData
-            ? (ispc::vec4f*)_transferFunctionDiffuseData->data
-            : NULL,
-        _transferFunctionEmissionData
-            ? (ispc::vec3f*)_transferFunctionEmissionData->data
-            : NULL,
-        transferFunctionSize, _transferFunctionMinValue, _transferFunctionRange,
-        _samplingThreshold, _detectionDistance, _volumeSpecularExponent,
-        _volumeAlphaCorrection);
+        _simulationDataSize, _samplingThreshold, _detectionDistance,
+        _volumeSpecularExponent, _volumeAlphaCorrection);
 }
 
 AdvancedSimulationRenderer::AdvancedSimulationRenderer()

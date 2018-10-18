@@ -46,11 +46,6 @@ public:
 protected:
     ospray::Ref<ospray::Data> _simulationData;
     ospray::uint64 _simulationDataSize;
-    ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
-    ospray::Ref<ospray::Data> _transferFunctionEmissionData;
-    float _transferFunctionMinValue;
-    float _transferFunctionRange;
-    ospray::int32 _transferFunctionSize;
 
     float _alphaCorrection;
 };

@@ -25,7 +25,12 @@
 
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
 
+#include <brayns/parameters/ParametersManager.h>
+
+namespace brayns
+{
 namespace
 {
 template <typename VecT>
@@ -43,22 +48,54 @@ OSPData allocateVectorData(const std::vector<VecT>& vec,
     return ospNewData(totBytes / ospray::sizeOf(ospType), ospType, vec.data(),
                       memoryManagementFlags);
 }
+
+double interpolatedOpacity(const Vector2ds& controlPoints, const double x)
+{
+    const auto& firstPoint = controlPoints.front();
+    if (x <= firstPoint.x())
+        return firstPoint.y();
+
+    for (size_t i = 1; i < controlPoints.size(); ++i)
+    {
+        const auto& current = controlPoints[i];
+        const auto& previous = controlPoints[i - 1];
+        if (x <= current.x())
+        {
+            const auto t = (x - previous.x()) / (current.x() - previous.x());
+            return (1.0 - t) * previous.y() + t * current.y();
+        }
+    }
+
+    const auto& lastPoint = controlPoints.back();
+    return lastPoint.y();
+}
 }
 
-namespace brayns
+OSPRayModel::OSPRayModel(AnimationParameters& animationParameters,
+                         VolumeParameters& volumeParameters)
+    : Model()
+    , _animationParameters(animationParameters)
+    , _volumeParameters(volumeParameters)
 {
+    _ospTransferFunction = ospNewTransferFunction("piecewise_linear");
+    if (_ospTransferFunction)
+        ospCommit(_ospTransferFunction);
+}
+
 OSPRayModel::~OSPRayModel()
 {
+    if (_setIsReadyCallback)
+        _animationParameters.removeIsReadyCallback();
+    ospRelease(_ospTransferFunction);
+    ospRelease(_ospSimulationData);
+
     const auto releaseAndClearGeometry = [](auto& geometryMap) {
         for (auto geom : geometryMap)
             ospRelease(geom.second);
         geometryMap.clear();
     };
 
-    const auto releaseModel = [](const auto& model) {
-        if (model)
-            ospRelease(model);
-    };
+    const auto releaseModel = [](const auto& model) { ospRelease(model); };
 
     releaseAndClearGeometry(_ospExtendedSpheres);
     releaseAndClearGeometry(_ospExtendedSpheresData);
@@ -401,7 +438,79 @@ void OSPRayModel::_commitSDFGeometries()
     }
 }
 
-void OSPRayModel::commit()
+bool OSPRayModel::_commitSimulationData()
+{
+    if (!_simulationHandler)
+        return false;
+
+    if (!_setIsReadyCallback && !_animationParameters.hasIsReadyCallback())
+    {
+        auto& ap = _animationParameters;
+        ap.setIsReadyCallback(
+            [handler = _simulationHandler] { return handler->isReady(); });
+        ap.setDt(_simulationHandler->getDt());
+        ap.setUnit(_simulationHandler->getUnit());
+        ap.setEnd(_simulationHandler->getNbFrames());
+        _setIsReadyCallback = true;
+    }
+
+    const auto animationFrame = _animationParameters.getFrame();
+
+    if (_ospSimulationData &&
+        _simulationHandler->getCurrentFrame() == animationFrame)
+    {
+        return false;
+    }
+
+    auto frameData = _simulationHandler->getFrameData(animationFrame);
+
+    if (!frameData)
+        return false;
+
+    ospRelease(_ospSimulationData);
+    _ospSimulationData =
+        ospNewData(_simulationHandler->getFrameSize(), OSP_FLOAT, frameData,
+                   _memoryManagementFlags);
+    ospCommit(_ospSimulationData);
+    return true;
+}
+
+bool OSPRayModel::_commitTransferFunction()
+{
+    if (!_transferFunction.isModified() || !_ospTransferFunction)
+        return false;
+
+    // colors
+    const auto& colors = _transferFunction.getColorMap().colors;
+    OSPData colorsData = ospNewData(colors.size(), OSP_FLOAT3, colors.data());
+    ospSetData(_ospTransferFunction, "colors", colorsData);
+    ospRelease(colorsData);
+
+    // opacities
+    auto tfPoints = _transferFunction.getControlPoints();
+    std::sort(tfPoints.begin(), tfPoints.end(),
+              [](auto a, auto b) { return a.x() < b.x(); });
+    floats opacities;
+    opacities.reserve(tfPoints.size());
+    constexpr size_t numSamples = 256u;
+    constexpr double dx = 1. / (numSamples - 1);
+    for (size_t i = 0; i < numSamples; ++i)
+        opacities.push_back(interpolatedOpacity(tfPoints, i * dx));
+    OSPData opacityData =
+        ospNewData(opacities.size(), OSP_FLOAT, opacities.data());
+    ospSetData(_ospTransferFunction, "opacities", opacityData);
+    ospRelease(opacityData);
+
+    ospSet2f(_ospTransferFunction, "valueRange",
+             _transferFunction.getValuesRange().x(),
+             _transferFunction.getValuesRange().y());
+    ospCommit(_ospTransferFunction);
+
+    _transferFunction.resetModified();
+    return true;
+}
+
+void OSPRayModel::commitGeometry()
 {
     for (auto volume : _volumes)
     {
@@ -409,7 +518,7 @@ void OSPRayModel::commit()
         ospVolume->commit();
     }
 
-    if (!dirty())
+    if (!isDirty())
         return;
 
     if (!_model)
@@ -468,6 +577,13 @@ void OSPRayModel::commit()
     ospCommit(_simulationModel);
 }
 
+bool OSPRayModel::commitTransferFunction()
+{
+    const auto dirtyTransferFunction = _commitTransferFunction();
+    const auto dirtySimulationData = _commitSimulationData();
+    return dirtyTransferFunction || dirtySimulationData;
+}
+
 MaterialPtr OSPRayModel::createMaterial(const size_t materialId,
                                         const std::string& name)
 {
@@ -475,5 +591,23 @@ MaterialPtr OSPRayModel::createMaterial(const size_t materialId,
     material->setName(name);
     _materials[materialId] = material;
     return material;
+}
+
+SharedDataVolumePtr OSPRayModel::createSharedDataVolume(
+    const Vector3ui& dimensions, const Vector3f& spacing,
+    const DataType type) const
+{
+    return std::make_shared<OSPRaySharedDataVolume>(dimensions, spacing, type,
+                                                    _volumeParameters,
+                                                    _ospTransferFunction);
+}
+
+BrickedVolumePtr OSPRayModel::createBrickedVolume(const Vector3ui& dimensions,
+                                                  const Vector3f& spacing,
+                                                  const DataType type) const
+{
+    return std::make_shared<OSPRayBrickedVolume>(dimensions, spacing, type,
+                                                 _volumeParameters,
+                                                 _ospTransferFunction);
 }
 }
