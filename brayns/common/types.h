@@ -164,9 +164,6 @@ using AbstractSimulationHandlerPtr = std::shared_ptr<AbstractSimulationHandler>;
 class CircuitSimulationHandler;
 using CircuitSimulationHandlerPtr = std::shared_ptr<CircuitSimulationHandler>;
 
-class SpikeSimulationHandler;
-using SpikeSimulationHandlerPtr = std::shared_ptr<SpikeSimulationHandler>;
-
 class CADiffusionSimulationHandler;
 using CADiffusionSimulationHandlerPtr =
     std::shared_ptr<CADiffusionSimulationHandler>;
