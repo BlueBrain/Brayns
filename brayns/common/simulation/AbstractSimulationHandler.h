@@ -106,24 +106,6 @@ public:
     double getDt() const { return _dt; }
     /** @return the time unit of the simulation; empty if not reported. */
     const std::string& getUnit() const { return _unit; }
-    /**
-     * @brief getHistogram returns the Histogram of the values in the current
-     * simulation frame. The
-     *        size of the histogram is defined by the
-     * --simulation-histogram-size command line
-     *        parameter (128 by default). To build the histogram, occurrences of
-     * the same value are
-     *        counted and spread along the histogram according to the calculated
-     * range. The
-     *        range is defined by the minimum and maximum value of the current
-     * frame. The Histogram
-     *        is specific to the current frame, not to the whole simulation.
-     */
-    Histogram& getHistogram();
-
-    /** @return true if the histogram has changed since the last update. */
-    bool histogramChanged() const;
-
     /** @return true if the requested frame from getFrameData() is ready to
      * consume and if it is allowed to advance to the next frame. */
     virtual bool isReady() const { return true; }
@@ -140,7 +122,6 @@ protected:
     uint64_t _headerSize{0};
     void* _memoryMapPtr{nullptr};
     int _cacheFileDescriptor{-1};
-    Histogram _histogram;
     floats _frameData;
 };
 }

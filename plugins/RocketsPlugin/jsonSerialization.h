@@ -486,13 +486,6 @@ inline void init(brayns::VolumeParameters* v, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::Histogram* hi, ObjectHandler* h)
-{
-    h->add_property("values", &hi->values);
-    h->add_property("range", Vector2dArray(hi->range));
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
 inline void init(brayns::AnimationParameters* a, ObjectHandler* h)
 {
     h->add_property("start", &a->_start, Flags::Optional);

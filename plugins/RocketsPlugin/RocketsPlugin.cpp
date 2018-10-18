@@ -75,7 +75,6 @@ const std::string ENDPOINT_VERSION = "version";
 
 // REST GET
 const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
-const std::string ENDPOINT_SIMULATION_HISTOGRAM = "simulation-histogram";
 
 // JSONRPC async requests
 const std::string METHOD_ADD_MODEL = "add-model";
@@ -801,7 +800,6 @@ public:
                    SLOW_THROTTLE);
 
         _handleFrameBuffer();
-        _handleSimulationHistogram();
 
         _handleSchemaRPC();
 
@@ -888,23 +886,6 @@ public:
         if (image.size > 0)
             _rocketsServer->broadcastBinary((const char*)image.data.get(),
                                             image.size);
-    }
-
-    void _handleSimulationHistogram()
-    {
-        _handleObjectSchema<Histogram>(ENDPOINT_SIMULATION_HISTOGRAM);
-
-        using namespace rockets::http;
-
-        auto func = [this](const Request&) {
-            auto simulationHandler = _engine->getScene().getSimulationHandler();
-            if (!simulationHandler)
-                return make_ready_response(Code::NOT_SUPPORTED);
-            const auto& histo = simulationHandler->getHistogram();
-            return make_ready_response(Code::OK, to_json(histo), JSON_TYPE);
-        };
-        _rocketsServer->handle(Method::GET, ENDPOINT_SIMULATION_HISTOGRAM,
-                               func);
     }
 
     void _handleStreaming()

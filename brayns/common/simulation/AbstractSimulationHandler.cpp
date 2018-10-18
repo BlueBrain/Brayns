@@ -34,7 +34,6 @@ AbstractSimulationHandler::AbstractSimulationHandler(
     const GeometryParameters& geometryParameters)
     : _geometryParameters(geometryParameters)
 {
-    _histogram.frame = _currentFrame;
 }
 
 AbstractSimulationHandler::~AbstractSimulationHandler()
@@ -60,7 +59,6 @@ AbstractSimulationHandler& AbstractSimulationHandler::operator=(
     _frameSize = rhs._frameSize;
     _dt = rhs._dt;
     _unit = rhs._unit;
-    _histogram = rhs._histogram;
     _frameData = rhs._frameData;
 
     return *this;
@@ -125,52 +123,6 @@ void AbstractSimulationHandler::writeFrame(std::ofstream& stream,
                                            const floats& values)
 {
     stream.write((char*)values.data(), values.size() * sizeof(float));
-}
-
-Histogram& AbstractSimulationHandler::getHistogram()
-{
-    if (!histogramChanged())
-        return _histogram;
-
-    float* data = (float*)getFrameData(_currentFrame);
-    if (!data)
-        return _histogram;
-
-    // Determine range
-    Vector2f range(std::numeric_limits<float>::max(),
-                   -std::numeric_limits<float>::max());
-    for (uint64_t i = 0; i < _frameSize; ++i)
-    {
-        float value = data[i];
-        range.x() = std::min(range.x(), value);
-        range.y() = std::max(range.y(), value);
-    }
-
-    // Normalize values
-    const auto histogramSize =
-        _geometryParameters.getCircuitSimulationHistogramSize();
-    _histogram.values.clear();
-    _histogram.values.resize(histogramSize, 0);
-    float normalizationValue =
-        (range.y() - range.x()) / float(histogramSize - 1);
-    if (normalizationValue == 0)
-        normalizationValue = 1;
-    for (uint64_t i = 0; i < _frameSize; ++i)
-    {
-        const size_t idx = (data[i] - range.x()) / normalizationValue;
-        assert(idx < histogramSize);
-        ++_histogram.values[idx];
-    }
-
-    // Build histogram
-    _histogram.range = range;
-    _histogram.frame = _currentFrame;
-    return _histogram;
-}
-
-bool AbstractSimulationHandler::histogramChanged() const
-{
-    return _currentFrame != _histogram.frame;
 }
 
 uint32_t AbstractSimulationHandler::_getBoundedFrame(const uint32_t frame) const
