@@ -62,6 +62,9 @@ else()
   unset(BRAYNS_LIBARCHIVE_ENABLED)
 endif()
 
+if(BRAYNS_LIBARCHIVE_ENABLED)
+  add_definitions(-DBRAYNS_LIBARCHIVE_ENABLED=1)
+endif()
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
 add_subdirectory(async++)
@@ -130,6 +133,11 @@ if(ASSIMP_FOUND)
 else()
   unset(BRAYNS_ASSIMP_ENABLED)
 endif()
+
+if(BRAYNS_ASSIMP_ENABLED)
+  add_definitions(-DBRAYNS_ASSIMP_ENABLED=1)
+endif()
+
 
 # Brayns viewer application
 common_find_package(GLUT SYSTEM)
