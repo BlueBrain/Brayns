@@ -42,7 +42,6 @@
 #include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
-#include <brayns/io/simulation/SpikeSimulationHandler.h>
 
 #include <brayns/tasks/AddModelTask.h>
 
