@@ -29,7 +29,7 @@
 #include <brion/brion.h>
 
 #include <brayns/io/MorphologyLoader.h>
-#if BRAYNS_ASSIMP_ENABLED
+#if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif
 
@@ -342,7 +342,7 @@ private:
                        const Matrix4fs& transformations BRAYNS_UNUSED,
                        const GIDOffsets& targetGIDOffsets BRAYNS_UNUSED) const
     {
-#if BRAYNS_ASSIMP_ENABLED
+#if BRAYNS_USE_ASSIMP
         MeshLoader meshLoader(_parent._scene, _geometryParameters);
         size_t loadingFailures = 0;
         const auto meshedMorphologiesFolder =

@@ -56,7 +56,7 @@
 #include <plugins/DeflectPlugin/DeflectPlugin.h>
 #endif
 
-#if BRAYNS_ASSIMP_ENABLED
+#if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif
 
@@ -70,7 +70,7 @@
 #include <ospcommon/library.h>
 #endif
 
-#if BRAYNS_LIBARCHIVE_ENABLED
+#if BRAYNS_USE_LIBARCHIVE
 #include <brayns/io/ArchiveLoader.h>
 #endif
 
@@ -387,11 +387,11 @@ private:
         registry.registerLoader(std::make_unique<VolumeLoader>(
             scene, _parametersManager.getVolumeParameters()));
         registry.registerLoader(std::make_unique<XYZBLoader>(scene));
-#if BRAYNS_ASSIMP_ENABLED
+#if BRAYNS_USE_ASSIMP
         registry.registerLoader(
             std::make_unique<MeshLoader>(scene, geometryParameters));
 #endif
-#if BRAYNS_LIBARCHIVE_ENABLED
+#if BRAYNS_USE_LIBARCHIVE
         registry.registerLoader(
             std::make_unique<ArchiveLoader>(scene, registry));
 #endif

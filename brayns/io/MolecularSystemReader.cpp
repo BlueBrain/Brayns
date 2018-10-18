@@ -24,7 +24,7 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
-#if BRAYNS_ASSIMP_ENABLED
+#if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif
 #include <brayns/io/ProteinLoader.h>
@@ -103,7 +103,7 @@ bool MolecularSystemReader::_createScene(
 
         if (!data._meshFolder.empty())
         {
-#if BRAYNS_ASSIMP_ENABLED
+#if BRAYNS_USE_ASSIMP
             // Load meshes
             for (const auto& position : proteinPosition.second)
             {

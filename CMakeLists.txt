@@ -38,7 +38,6 @@ common_find_package(Boost REQUIRED COMPONENTS
   filesystem system program_options unit_test_framework)
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
-common_find_package(LibArchive)
 common_find_package(libuv 1.8)
 
 if(libuv_FOUND)
@@ -56,14 +55,13 @@ if(libuv_FOUND)
   # TODO: use tag v1.6.0_libuv-v1.18 for Docker
 endif()
 
-if(LibArchive_FOUND)
-  option(BRAYNS_LIBARCHIVE_ENABLED "Activate libarchive for archive loading" ON)
-else()
-  unset(BRAYNS_LIBARCHIVE_ENABLED)
-endif()
-
+# Archive loading
+common_find_package(LibArchive)
+option(BRAYNS_LIBARCHIVE_ENABLED "Activate libarchive for archive loading" ${LibArchive_FOUND})
 if(BRAYNS_LIBARCHIVE_ENABLED)
-  add_definitions(-DBRAYNS_LIBARCHIVE_ENABLED=1)
+  common_find_package(LibArchive REQUIRED)
+else()
+  common_find_package_disable(LibArchive)
 endif()
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
@@ -128,16 +126,12 @@ endif()
 
 # Mesh loading
 common_find_package(assimp SYSTEM)
-if(ASSIMP_FOUND)
-  option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ON)
-else()
-  unset(BRAYNS_ASSIMP_ENABLED)
-endif()
-
+option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ${assimp_FOUND})
 if(BRAYNS_ASSIMP_ENABLED)
-  add_definitions(-DBRAYNS_ASSIMP_ENABLED=1)
+  common_find_package(assimp SYSTEM REQUIRED)
+else()
+  common_find_package_disable(assimp)
 endif()
-
 
 # Brayns viewer application
 common_find_package(GLUT SYSTEM)
