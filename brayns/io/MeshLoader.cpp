@@ -20,7 +20,6 @@
 
 #include "MeshLoader.h"
 
-#ifdef BRAYNS_USE_ASSIMP
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp> // must come before Exporter.hpp
 #include <assimp/Importer.hpp>
@@ -30,7 +29,6 @@
 #include <boost/filesystem.hpp>
 #include <brayns/common/log.h>
 #include <fstream>
-#endif
 
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
@@ -38,7 +36,6 @@
 
 namespace brayns
 {
-#ifdef BRAYNS_USE_ASSIMP
 class ProgressWatcher : public Assimp::ProgressHandler
 {
 public:
@@ -63,7 +60,6 @@ private:
     std::function<void()> _cancelCheck;
     std::stringstream _msg;
 };
-#endif
 
 MeshLoader::MeshLoader(Scene& scene,
                        const GeometryParameters& geometryParameters)
@@ -76,7 +72,6 @@ bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
                              const std::string& extension) const
 {
     std::set<std::string> types;
-#ifdef BRAYNS_USE_ASSIMP
     std::string extensions;
     Assimp::Importer importer;
     importer.GetExtensionList(extensions);
@@ -88,11 +83,9 @@ bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
         auto pos = s.find_last_of(".");
         types.insert(pos == std::string::npos ? s : s.substr(pos + 1));
     }
-#endif
     return types.find(extension) != types.end();
 }
 
-#ifdef BRAYNS_USE_ASSIMP
 ModelDescriptorPtr MeshLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
     const size_t index, const size_t defaultMaterialId) const
@@ -389,36 +382,4 @@ void MeshLoader::importMesh(const std::string& fileName,
     _postLoad(aiScene, model, index, transformation, defaultMaterialId,
               filepath.parent_path().string());
 }
-#else
-const std::runtime_error NO_ASSIMP(
-    "The assimp library is required to load meshes");
-
-ModelDescriptorPtr MeshLoader::importFromFile(const std::string&, const size_t,
-                                              const size_t)
-{
-    throw NO_ASSIMP;
-}
-
-ModelDescriptorPtr MeshLoader::importFromBlob(Blob&&, const size_t,
-                                              const size_t)
-{
-    throw NO_ASSIMP;
-}
-
-void MeshLoader::_createMaterials(Model&, const aiScene*, const std::string&)
-{
-    throw NO_ASSIMP;
-}
-
-void MeshLoader::_postLoad(const aiScene*, Model&, const size_t,
-                           const Matrix4f&, size_t, const std::string&)
-{
-    throw NO_ASSIMP;
-}
-
-size_t MeshLoader::_getQuality() const
-{
-    throw NO_ASSIMP;
-}
-#endif
 } // namespace brayns
