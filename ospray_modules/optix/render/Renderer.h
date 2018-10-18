@@ -54,22 +54,12 @@ struct Renderer : public ospray::Renderer
                     size_t jobID) const override;
 
 private:
-    void _updateVolume();
-    void _updateTransferFunction();
     float _mpiRenderFrame(ospray::FrameBuffer* fb,
                           const ospray::uint32 fbChannelFlags);
 
     ::optix::Context _context;
 
-    ::optix::Buffer _colorMapBuffer{nullptr};
-    ::optix::Buffer _emissionIntensityMapBuffer{nullptr};
-
-    ospray::Ref<ospray::Data> _transferFunctionDiffuseData;
-    ospray::Ref<ospray::Data> _transferFunctionEmissionData;
-
     FrameBuffer* _frameBuffer{nullptr}; // MPI slave only
-
-    ::optix::Buffer _volumeBuffer{nullptr};
 };
 
 // Inlined member functions ///////////////////////////////////////////////
