@@ -34,10 +34,6 @@ void Renderer::commit()
 {
     ospray::Renderer::commit();
 
-    _updateVolume();
-
-    _updateTransferFunction();
-
     Context::get().updateLights((ospray::Data*)getParamData("lights"));
 
     _context["timestamp"]->setFloat(getParam1f("timestamp", 0.f));
@@ -57,9 +53,6 @@ void Renderer::commit()
 
     _context["ambient_light_color"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
     _context["bg_color"]->setFloat(bgColor.x, bgColor.y, bgColor.z);
-
-    _context["volumeSamplesPerRay"]->setUint(
-        getParam1i("volumeSamplesPerRay", 128));
 }
 
 Renderer::Renderer()
@@ -72,121 +65,12 @@ Renderer::~Renderer()
     if (_frameBuffer)
         _frameBuffer->refDec();
     _frameBuffer = nullptr;
-
-    if (_colorMapBuffer)
-        _colorMapBuffer->destroy();
-    _colorMapBuffer = nullptr;
-
-    if (_emissionIntensityMapBuffer)
-        _emissionIntensityMapBuffer->destroy();
-    _emissionIntensityMapBuffer = nullptr;
 }
 
 void Renderer::renderTile(void* /*perFrameData*/, ospray::Tile& /*tile*/,
                           size_t /*jobID*/) const
 {
     // should never come here
-}
-
-void Renderer::_updateVolume()
-{
-    ospray::Ref<ospray::Data> volumeData = getParamData("volumeData");
-    const ospray::vec3i volumeDimensions =
-        getParam3i("volumeDimensions", ospray::vec3i(0));
-    const ospray::vec3f volumeElementSpacing =
-        getParam3f("volumeElementSpacing", ospray::vec3f(1.f));
-    const ospray::vec3f volumeOffset =
-        getParam3f("volumeOffset", ospray::vec3f(0.f));
-    const float volumeEpsilon = getParam1f("volumeEpsilon", 1.f);
-    const auto diag = ospray::vec3f(volumeDimensions) * volumeElementSpacing;
-    const float volumeDiag = ospray::reduce_max(diag);
-
-    if (_volumeBuffer)
-        _volumeBuffer->destroy();
-
-    if (volumeData && volumeData->numBytes > 0)
-    {
-        _volumeBuffer =
-            _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE,
-                                   volumeData->numItems);
-
-        memcpy(_volumeBuffer->map(), volumeData->data, volumeData->numBytes);
-        _volumeBuffer->unmap();
-    }
-    else
-        _volumeBuffer =
-            _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_UNSIGNED_BYTE, 0);
-
-    _context["volumeData"]->setBuffer(_volumeBuffer);
-    _context["volumeDimensions"]->setUint(volumeDimensions.x,
-                                          volumeDimensions.y,
-                                          volumeDimensions.z);
-    _context["volumeOffset"]->setFloat(volumeOffset.x, volumeOffset.y,
-                                       volumeOffset.z);
-    _context["volumeElementSpacing"]->setFloat(volumeElementSpacing.x,
-                                               volumeElementSpacing.y,
-                                               volumeElementSpacing.z);
-    _context["volumeEpsilon"]->setFloat(volumeEpsilon);
-    _context["volumeDiag"]->setFloat(volumeDiag);
-}
-
-void Renderer::_updateTransferFunction()
-{
-    if (_colorMapBuffer)
-        _colorMapBuffer->destroy();
-    _colorMapBuffer = nullptr;
-
-    if (_emissionIntensityMapBuffer)
-        _emissionIntensityMapBuffer->destroy();
-    _emissionIntensityMapBuffer = nullptr;
-
-    _transferFunctionDiffuseData = getParamData("transferFunctionDiffuseData");
-    if (_transferFunctionDiffuseData)
-        _colorMapBuffer =
-            _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT4,
-                                   _transferFunctionDiffuseData->numItems);
-    else
-        _colorMapBuffer =
-            _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT4, 0);
-
-    if (_transferFunctionDiffuseData &&
-        _transferFunctionDiffuseData->numBytes != 0)
-    {
-        memcpy(_colorMapBuffer->map(), _transferFunctionDiffuseData->data,
-               _transferFunctionDiffuseData->numBytes);
-        _colorMapBuffer->unmap();
-    }
-
-    _context["colorMap"]->setBuffer(_colorMapBuffer);
-
-    _transferFunctionEmissionData =
-        getParamData("transferFunctionEmissionData");
-    if (_transferFunctionEmissionData)
-        _emissionIntensityMapBuffer =
-            _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3,
-                                   _transferFunctionEmissionData->numItems);
-    else
-        _emissionIntensityMapBuffer =
-            _context->createBuffer(RT_BUFFER_INPUT, RT_FORMAT_FLOAT3, 0);
-
-    if (_transferFunctionEmissionData &&
-        _transferFunctionEmissionData->numBytes != 0)
-    {
-        memcpy(_emissionIntensityMapBuffer->map(),
-               _transferFunctionEmissionData->data,
-               _transferFunctionEmissionData->numBytes);
-        _emissionIntensityMapBuffer->unmap();
-
-        _context["colorMapSize"]->setUint(
-            _transferFunctionDiffuseData->numItems);
-    }
-
-    _context["emissionIntensityMap"]->setBuffer(_emissionIntensityMapBuffer);
-
-    _context["colorMapMinValue"]->setFloat(
-        getParam1f("transferFunctionMinValue", 0.f));
-    _context["colorMapRange"]->setFloat(
-        getParam1f("transferFunctionRange", 0.f));
 }
 
 void* Renderer::beginFrame(ospray::FrameBuffer* fb)
