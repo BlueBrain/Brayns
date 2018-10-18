@@ -39,7 +39,6 @@
 #include <brayns/parameters/ParametersManager.h>
 
 #include <brayns/io/ProteinLoader.h>
-#include <brayns/io/TransferFunctionLoader.h>
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
 
@@ -406,8 +405,6 @@ private:
 
     void _loadData()
     {
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
-        auto& sceneParameters = _parametersManager.getSceneParameters();
         auto& scene = _engine->getScene();
 
         const auto& paths =
@@ -428,15 +425,7 @@ private:
             }
         }
 
-        const std::string& colorMapFilename =
-            sceneParameters.getColorMapFilename();
-        if (!colorMapFilename.empty())
-        {
-            loadTransferFunctionFromFile(colorMapFilename,
-                                         sceneParameters.getColorMapRange(),
-                                         scene.getTransferFunction());
-        }
-
+        auto& geometryParameters = _parametersManager.getGeometryParameters();
         if (!geometryParameters.getLoadCacheFile().empty())
             scene.loadFromCacheFile();
 

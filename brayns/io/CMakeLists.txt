@@ -7,7 +7,6 @@ set(BRAYNSIO_SOURCES
   algorithms/MetaballsGenerator.cpp
   ProteinLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
-  TransferFunctionLoader.cpp
   VolumeLoader.cpp
   XYZBLoader.cpp
 )
@@ -16,7 +15,6 @@ set(BRAYNSIO_PUBLIC_HEADERS
   algorithms/MetaballsGenerator.h
   ProteinLoader.h
   simulation/CADiffusionSimulationHandler.h
-  TransferFunctionLoader.h
   VolumeLoader.h
   XYZBLoader.h
 )
