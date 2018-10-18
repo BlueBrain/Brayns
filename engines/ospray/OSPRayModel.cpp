@@ -95,24 +95,17 @@ OSPRayModel::~OSPRayModel()
         geometryMap.clear();
     };
 
-    const auto releaseModel = [](const auto& model) { ospRelease(model); };
-
-    releaseAndClearGeometry(_ospExtendedSpheres);
-    releaseAndClearGeometry(_ospExtendedSpheresData);
-    releaseAndClearGeometry(_ospExtendedCylinders);
-    releaseAndClearGeometry(_ospExtendedCylindersData);
-    releaseAndClearGeometry(_ospExtendedCones);
-    releaseAndClearGeometry(_ospExtendedConesData);
+    releaseAndClearGeometry(_ospSpheres);
+    releaseAndClearGeometry(_ospCylinders);
+    releaseAndClearGeometry(_ospCones);
     releaseAndClearGeometry(_ospMeshes);
     releaseAndClearGeometry(_ospStreamlines);
     releaseAndClearGeometry(_ospSDFGeometryRefs);
     releaseAndClearGeometry(_ospSDFGeometryRefsData);
 
-    releaseModel(_simulationModel);
-    releaseModel(_boundingBoxModel);
-    releaseModel(_ospSDFGeometryData);
-    releaseModel(_ospSDFNeighboursData);
-    releaseModel(_model);
+    ospRelease(_simulationModel);
+    ospRelease(_boundingBoxModel);
+    ospRelease(_model);
 }
 
 void OSPRayModel::setMemoryFlags(const size_t memoryManagementFlags)
@@ -165,125 +158,144 @@ void OSPRayModel::buildBoundingBox()
 
 void OSPRayModel::_commitSpheres(const size_t materialId)
 {
-    const auto& spheres = _spheres[materialId];
-
-    if (_ospExtendedSpheres.find(materialId) != _ospExtendedSpheres.end())
+    auto it = _ospSpheres.find(materialId);
+    if (it != _ospSpheres.end())
     {
-        ospRemoveGeometry(_model, _ospExtendedSpheres[materialId]);
-        ospRelease(_ospExtendedSpheres[materialId]);
-        ospRelease(_ospExtendedSpheresData[materialId]);
+        ospRemoveGeometry(_model, it->second);
+        ospRelease(it->second);
     }
 
-    _ospExtendedSpheres[materialId] = ospNewGeometry("extendedspheres");
-    _ospExtendedSpheresData[materialId] =
-        allocateVectorData(spheres, OSP_FLOAT, _memoryManagementFlags);
+    it->second = ospNewGeometry("spheres");
+    auto& ospSpheres = it->second;
 
-    ospSetObject(_ospExtendedSpheres[materialId], "extendedspheres",
-                 _ospExtendedSpheresData[materialId]);
+    auto spheresData = allocateVectorData(_spheres.at(materialId), OSP_FLOAT,
+                                          _memoryManagementFlags);
+
+    ospSetObject(ospSpheres, "spheres", spheresData);
+    ospRelease(spheresData);
+
+    ospSet1i(ospSpheres, "offset_center", offsetof(Sphere, center));
+    ospSet1i(ospSpheres, "offset_radius", offsetof(Sphere, radius));
+    ospSet1i(ospSpheres, "bytes_per_sphere", sizeof(Sphere));
 
     auto impl =
         std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
-    ospSetMaterial(_ospExtendedSpheres[materialId], impl->getOSPMaterial());
-    ospCommit(_ospExtendedSpheres[materialId]);
+    ospSetMaterial(ospSpheres, impl->getOSPMaterial());
+    ospCommit(ospSpheres);
 
     if (_useSimulationModel)
-        ospAddGeometry(_simulationModel, _ospExtendedSpheres[materialId]);
+        ospAddGeometry(_simulationModel, ospSpheres);
     else if (materialId == BOUNDINGBOX_MATERIAL_ID)
-        ospAddGeometry(_boundingBoxModel, _ospExtendedSpheres[materialId]);
+        ospAddGeometry(_boundingBoxModel, ospSpheres);
     else
-        ospAddGeometry(_model, _ospExtendedSpheres[materialId]);
+        ospAddGeometry(_model, ospSpheres);
 }
 
 void OSPRayModel::_commitCylinders(const size_t materialId)
 {
-    const auto& cylinders = _cylinders[materialId];
-    if (_ospExtendedCylinders.find(materialId) != _ospExtendedCylinders.end())
+    auto it = _ospCylinders.find(materialId);
+    if (it != _ospCylinders.end())
     {
-        ospRemoveGeometry(_model, _ospExtendedCylinders[materialId]);
-        ospRelease(_ospExtendedCylinders[materialId]);
-        ospRelease(_ospExtendedCylindersData[materialId]);
+        ospRemoveGeometry(_model, it->second);
+        ospRelease(it->second);
     }
 
-    _ospExtendedCylinders[materialId] = ospNewGeometry("extendedcylinders");
-    _ospExtendedCylindersData[materialId] =
-        allocateVectorData(cylinders, OSP_FLOAT, _memoryManagementFlags);
-    ospSetObject(_ospExtendedCylinders[materialId], "extendedcylinders",
-                 _ospExtendedCylindersData[materialId]);
+    it->second = ospNewGeometry("cylinders");
+    auto& ospCylinders = it->second;
+
+    auto cylinderData = allocateVectorData(_cylinders.at(materialId), OSP_FLOAT,
+                                           _memoryManagementFlags);
+    ospSetObject(ospCylinders, "cylinders", cylinderData);
+    ospRelease(cylinderData);
+
+    ospSet1i(ospCylinders, "offset_v0", offsetof(Cylinder, center));
+    ospSet1i(ospCylinders, "offset_v1", offsetof(Cylinder, up));
+    ospSet1i(ospCylinders, "offset_radius", offsetof(Cylinder, radius));
+    ospSet1i(ospCylinders, "bytes_per_cylinder", sizeof(Cylinder));
 
     auto impl =
         std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
-    ospSetMaterial(_ospExtendedCylinders[materialId], impl->getOSPMaterial());
+    ospSetMaterial(ospCylinders, impl->getOSPMaterial());
 
-    ospCommit(_ospExtendedCylinders[materialId]);
+    ospCommit(ospCylinders);
 
     if (_useSimulationModel)
-        ospAddGeometry(_simulationModel, _ospExtendedCylinders[materialId]);
+        ospAddGeometry(_simulationModel, ospCylinders);
     else if (materialId == BOUNDINGBOX_MATERIAL_ID)
-        ospAddGeometry(_boundingBoxModel, _ospExtendedCylinders[materialId]);
+        ospAddGeometry(_boundingBoxModel, ospCylinders);
     else
-        ospAddGeometry(_model, _ospExtendedCylinders[materialId]);
+        ospAddGeometry(_model, ospCylinders);
 }
 
 void OSPRayModel::_commitCones(const size_t materialId)
 {
-    const auto& cones = _cones[materialId];
-    if (_ospExtendedCones.find(materialId) != _ospExtendedCones.end())
+    auto it = _ospCones.find(materialId);
+    if (it != _ospCones.end())
     {
-        ospRemoveGeometry(_model, _ospExtendedCones[materialId]);
-        ospRelease(_ospExtendedCones[materialId]);
-        ospRelease(_ospExtendedConesData[materialId]);
+        ospRemoveGeometry(_model, it->second);
+        ospRelease(it->second);
     }
 
-    _ospExtendedCones[materialId] = ospNewGeometry("extendedcones");
-    _ospExtendedConesData[materialId] =
-        allocateVectorData(cones, OSP_FLOAT, _memoryManagementFlags);
+    it->second = ospNewGeometry("cones");
+    auto& ospCones = it->second;
 
-    ospSetObject(_ospExtendedCones[materialId], "extendedcones",
-                 _ospExtendedConesData[materialId]);
+    auto conesData = allocateVectorData(_cones.at(materialId), OSP_FLOAT,
+                                        _memoryManagementFlags);
+
+    // Needed by the OptiX module
+    ospSet1i(geometry, "bytes_per_cone", sizeof(Cone));
+    ospSetObject(ospCones, "cones", conesData);
+    ospRelease(conesData);
 
     auto impl =
         std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
-    ospSetMaterial(_ospExtendedCones[materialId], impl->getOSPMaterial());
-    ospCommit(_ospExtendedCones[materialId]);
+    ospSetMaterial(ospCones, impl->getOSPMaterial());
+    ospCommit(ospCones);
 
     if (_useSimulationModel)
-        ospAddGeometry(_simulationModel, _ospExtendedCones[materialId]);
+        ospAddGeometry(_simulationModel, ospCones);
     else if (materialId == BOUNDINGBOX_MATERIAL_ID)
-        ospAddGeometry(_boundingBoxModel, _ospExtendedCones[materialId]);
+        ospAddGeometry(_boundingBoxModel, ospCones);
     else
-        ospAddGeometry(_model, _ospExtendedCones[materialId]);
+        ospAddGeometry(_model, ospCones);
 }
 
 void OSPRayModel::_commitMeshes(const size_t materialId)
 {
-    if (_ospMeshes.find(materialId) != _ospMeshes.end())
+    auto it = _ospMeshes.find(materialId);
+    if (it != _ospMeshes.end())
     {
-        ospRemoveGeometry(_model, _ospMeshes[materialId]);
-        ospRelease(_ospMeshes[materialId]);
+        ospRemoveGeometry(_model, it->second);
+        ospRelease(it->second);
     }
 
-    _ospMeshes[materialId] = ospNewGeometry("trianglemesh");
+    it->second = ospNewGeometry("trianglemesh");
+    auto& ospMesh = it->second;
+    auto& trianglesMesh = _trianglesMeshes.at(materialId);
 
-    auto& trianglesMesh = _trianglesMeshes[materialId];
     OSPData vertices = allocateVectorData(trianglesMesh.vertices, OSP_FLOAT3,
                                           _memoryManagementFlags);
+    ospSetObject(ospMesh, "position", vertices);
+    ospRelease(vertices);
+
+    OSPData indices = allocateVectorData(trianglesMesh.indices, OSP_INT3,
+                                         _memoryManagementFlags);
+    ospSetObject(ospMesh, "index", indices);
+    ospRelease(indices);
 
     if (!trianglesMesh.normals.empty())
     {
         OSPData normals = allocateVectorData(trianglesMesh.normals, OSP_FLOAT3,
                                              _memoryManagementFlags);
-        ospSetObject(_ospMeshes[materialId], "vertex.normal", normals);
+        ospSetObject(ospMesh, "vertex.normal", normals);
         ospRelease(normals);
     }
-
-    OSPData indices = allocateVectorData(trianglesMesh.indices, OSP_INT3,
-                                         _memoryManagementFlags);
 
     if (!trianglesMesh.colors.empty())
     {
         OSPData colors = allocateVectorData(trianglesMesh.colors, OSP_FLOAT3A,
                                             _memoryManagementFlags);
-        ospSetObject(_ospMeshes[materialId], "vertex.color", colors);
+        ospSetObject(ospMesh, "vertex.color", colors);
         ospRelease(colors);
     }
 
@@ -292,23 +304,19 @@ void OSPRayModel::_commitMeshes(const size_t materialId)
         OSPData texCoords =
             allocateVectorData(trianglesMesh.textureCoordinates, OSP_FLOAT2,
                                _memoryManagementFlags);
-        ospSetObject(_ospMeshes[materialId], "vertex.texcoord", texCoords);
+        ospSetObject(ospMesh, "vertex.texcoord", texCoords);
         ospRelease(texCoords);
     }
 
-    ospSetObject(_ospMeshes[materialId], "position", vertices);
-    ospRelease(vertices);
-    ospSetObject(_ospMeshes[materialId], "index", indices);
-    ospRelease(indices);
-    ospSet1i(_ospMeshes[materialId], "alpha_type", 0);
-    ospSet1i(_ospMeshes[materialId], "alpha_component", 4);
+    ospSet1i(ospMesh, "alpha_type", 0);
+    ospSet1i(ospMesh, "alpha_component", 4);
 
     auto impl =
         std::static_pointer_cast<OSPRayMaterial>(_materials[materialId]);
-    ospSetMaterial(_ospMeshes[materialId], impl->getOSPMaterial());
-    ospCommit(_ospMeshes[materialId]);
+    ospSetMaterial(ospMesh, impl->getOSPMaterial());
+    ospCommit(ospMesh);
 
-    ospAddGeometry(_model, _ospMeshes[materialId]);
+    ospAddGeometry(_model, ospMesh);
 }
 
 void OSPRayModel::_commitStreamlines(const size_t materialId)
@@ -350,14 +358,8 @@ void OSPRayModel::_commitStreamlines(const size_t materialId)
 
 void OSPRayModel::_commitSDFGeometries()
 {
-    assert(_ospSDFGeometryData == nullptr);
-    assert(_ospSDFNeighboursData == nullptr);
-
-    if (_ospSDFGeometryData)
-        ospRelease(_ospSDFGeometryData);
-    _ospSDFGeometryData =
+    auto ospSDFGeometryData =
         allocateVectorData(_sdf.geometries, OSP_CHAR, _memoryManagementFlags);
-    ospCommit(_ospSDFGeometryData);
 
     // Create and upload flat list of neighbours
     const size_t numGeoms = _sdf.geometries.size();
@@ -380,12 +382,9 @@ void OSPRayModel::_commitSDFGeometries()
     if (_sdf.neighboursFlat.empty())
         _sdf.neighboursFlat.resize(1, 0);
 
-    if (_ospSDFNeighboursData)
-        ospRelease(_ospSDFNeighboursData);
-    _ospSDFNeighboursData = allocateVectorData(_sdf.neighboursFlat, OSP_ULONG,
-                                               _memoryManagementFlags);
-
-    ospCommit(_ospSDFNeighboursData);
+    auto ospSDFNeighboursData =
+        allocateVectorData(_sdf.neighboursFlat, OSP_ULONG,
+                           _memoryManagementFlags);
 
     for (const auto& mat : _materials)
     {
@@ -402,8 +401,7 @@ void OSPRayModel::_commitSDFGeometries()
             ospRelease(_ospSDFGeometryRefs[materialId]);
         }
 
-        _ospSDFGeometryRefs[materialId] =
-            ospNewGeometry("extendedsdfgeometries");
+        _ospSDFGeometryRefs[materialId] = ospNewGeometry("sdfgeometries");
 
         if (_ospSDFGeometryRefsData[materialId])
             ospRelease(_ospSDFGeometryRefsData[materialId]);
@@ -411,14 +409,14 @@ void OSPRayModel::_commitSDFGeometries()
             allocateVectorData(_sdf.geometryIndices[materialId], OSP_ULONG,
                                _memoryManagementFlags);
 
-        ospSetObject(_ospSDFGeometryRefs[materialId], "extendedsdfgeometries",
+        ospSetObject(_ospSDFGeometryRefs[materialId], "sdfgeometries",
                      _ospSDFGeometryRefsData[materialId]);
 
         ospSetData(_ospSDFGeometryRefs[materialId], "neighbours",
-                   _ospSDFNeighboursData);
+                   ospSDFNeighboursData);
 
         ospSetData(_ospSDFGeometryRefs[materialId], "geometries",
-                   _ospSDFGeometryData);
+                   ospSDFGeometryData);
 
         if (_materials[materialId] != nullptr)
         {
@@ -436,6 +434,9 @@ void OSPRayModel::_commitSDFGeometries()
         else
             ospAddGeometry(_model, _ospSDFGeometryRefs[materialId]);
     }
+
+    ospRelease(ospSDFGeometryData);
+    ospRelease(ospSDFNeighboursData);
 }
 
 bool OSPRayModel::_commitSimulationData()

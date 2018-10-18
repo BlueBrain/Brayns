@@ -290,11 +290,11 @@ OSPGeometry Device::newGeometry(const char* type)
     Geometry* geometry = nullptr;
 
     const auto typeStr = std::string(type);
-    if (typeStr == "extendedcones")
+    if (typeStr == "cones")
         geometry = new bbp::optix::Cones;
-    else if (typeStr == "extendedcylinders")
+    else if (typeStr == "cylinders")
         geometry = new bbp::optix::Cylinders;
-    else if (typeStr == "extendedspheres")
+    else if (typeStr == "spheres")
         geometry = new bbp::optix::Spheres;
     else if (typeStr == "trianglemesh" || typeStr == "triangles")
         geometry = new bbp::optix::TriangleMesh;

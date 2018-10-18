@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Based on OSPRay implementation
+ * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -26,14 +25,19 @@
 
 namespace ospray
 {
-struct ExtendedCones : public ospray::Geometry
+struct SDFGeometries : public ospray::Geometry
 {
-    std::string toString() const final { return "brayns::Cones"; }
+    std::string toString() const final { return "brayns::SDFGeometries"; }
     void finalize(ospray::Model* model) final;
 
     ospray::Ref<ospray::Data> data;
+    ospray::Ref<ospray::Data> neighbours;
+    ospray::Ref<ospray::Data> geometries;
 
-    ExtendedCones();
+    SDFGeometries();
+
+private:
+    std::vector<void*> ispcMaterials_;
 };
 
-} // ::brayns
+} // namespace ospray

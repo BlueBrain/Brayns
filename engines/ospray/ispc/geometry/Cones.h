@@ -1,5 +1,6 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ * Author: Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -24,14 +25,14 @@
 
 namespace ospray
 {
-struct ExtendedCylinders : public ospray::Geometry
+struct Cones : public ospray::Geometry
 {
-    std::string toString() const final { return "brayns::Cylinders"; }
+    std::string toString() const final { return "brayns::Cones"; }
     void finalize(ospray::Model* model) final;
 
     ospray::Ref<ospray::Data> data;
 
-    ExtendedCylinders();
+    Cones();
 };
 
 } // ::brayns

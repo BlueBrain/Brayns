@@ -33,18 +33,17 @@ std::string Cylinders::toString() const
 
 void Cylinders::finalize(Model* optixModel)
 {
-    ospray::Ref<ospray::Data> data = getParamData("extendedcylinders", nullptr);
+    ospray::Ref<ospray::Data> data = getParamData("cylinders", nullptr);
     if (!data.ptr)
-        throw std::runtime_error(
-            "#optix:geometry/extendedcylinders: "
-            "no 'extendedcylinders' data specified");
+        throw std::runtime_error("#optix:geometry/cylinders: "
+                                 "no 'cylinders' data specified");
 
     Geometry::finalize(optixModel);
 
     const size_t bytesPerCylinder =
         getParam1i("bytes_per_cylinder", 10 * sizeof(float));
+    _context["bytes_per_cylinder"]->setUint(bytesPerCylinder);
     _geometry->setPrimitiveCount(data->numBytes / bytesPerCylinder);
-    _context["cylinder_size"]->setUint(bytesPerCylinder / sizeof(float));
 
     _setBuffer("cylinders", data);
 }

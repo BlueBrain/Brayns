@@ -31,21 +31,19 @@ struct Cylinder
 #if __cplusplus
     Cylinder(const Vector3f c = {0.f, 0.f, 0.f},
              const Vector3f u = {0.f, 0.f, 0.f}, const float r = 0.f,
-             const float ts = 0.f, const Vector2f t = Vector2f())
-        : center(c)
+             const uint64_t data = 0)
+        : userData(data)
+        , center(c)
         , up(u)
         , radius(r)
-        , timestamp(ts)
-        , texture_coords(t)
     {
     }
 #endif
 
+    uint64_t userData;
     VEC3_TYPE center;
     VEC3_TYPE up;
     float radius;
-    float timestamp;
-    VEC2_TYPE texture_coords;
 };
 
 #if __cplusplus

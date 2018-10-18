@@ -31,24 +31,21 @@ struct Cone
 {
 #if __cplusplus
     Cone(const Vector3f c = {0.f, 0.f, 0.f}, const Vector3f u = {0.f, 0.f, 0.f},
-         const float cr = 0.f, const float ur = 0.f, const float ts = 0.f,
-         const Vector2f t = Vector2f(0.f, 0.f))
-        : center(c)
+         const float cr = 0.f, const float ur = 0.f, const uint64_t data = 0)
+        : userData(data)
+        , center(c)
         , up(u)
         , centerRadius(cr)
         , upRadius(ur)
-        , timestamp(ts)
-        , texture_coords(t)
     {
     }
 #endif
 
+    UINT64_T userData;
     VEC3_TYPE center;
     VEC3_TYPE up;
     float centerRadius;
     float upRadius;
-    float timestamp;
-    VEC2_TYPE texture_coords;
 };
 
 #if __cplusplus

@@ -35,28 +35,31 @@
 
 using namespace optix;
 
-rtBuffer<float> spheres;
+rtBuffer<char> spheres;
 
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
-rtDeclareVariable(unsigned int, sphere_size, , );
+rtDeclareVariable(unsigned int, bytes_per_sphere, , );
 
 // Global variables
 rtDeclareVariable(float, timestamp, , );
 
+__device__ inline const float* get_sphere(const int primIdx)
+{
+    // We have to skip the first 8 bytes, which contain user data not used here
+    return (float*)(&spheres[primIdx * bytes_per_sphere + 8]);
+}
+
 template <bool use_robust_method>
 static __device__ void intersect_sphere(int primIdx)
 {
-    const int idx = primIdx * sphere_size;
-    const float ts = spheres[idx + 4];
-    if (ts > 0 && timestamp > ts)
-        return;
+    const float* sphere = get_sphere(primIdx);
+    const float3 center = {sphere[0], sphere[1], sphere[2]};
+    const float radius = sphere[3];
 
-    const float3 center = {spheres[idx], spheres[idx + 1], spheres[idx + 2]};
     const float3 O = ray.origin - center;
     const float3 D = ray.direction;
-    const float radius = spheres[idx + 3];
 
     float b = dot(O, D);
     float c = dot(O, O) - radius * radius;
@@ -120,16 +123,17 @@ RT_PROGRAM void robust_intersect(int primIdx)
 
 RT_PROGRAM void bounds(int primIdx, float result[6])
 {
-    const int idx = primIdx * sphere_size;
-    const float3 cen = {spheres[idx], spheres[idx + 1], spheres[idx + 2]};
-    const float3 rad = make_float3(spheres[idx + 3]);
+    const float* sphere = get_sphere(primIdx);
+    const float3 center = {sphere[0], sphere[1], sphere[2]};
+    const float radius = sphere[3];
 
     optix::Aabb* aabb = (optix::Aabb*)result;
 
-    if (rad.x > 0.0f && !isinf(rad.x))
+    if (radius > 0.0f && !isinf(radius))
     {
-        aabb->m_min = cen - rad;
-        aabb->m_max = cen + rad;
+        const float3 r = make_float3(radius);
+        aabb->m_min = center - r;
+        aabb->m_max = center + r;
     }
     else
     {

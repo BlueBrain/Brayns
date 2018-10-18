@@ -28,27 +28,29 @@ using namespace optix;
 
 // Global variables
 rtDeclareVariable(float, timestamp, , );
-rtDeclareVariable(unsigned int, cone_size, , );
+rtDeclareVariable(unsigned int, bytes_per_cone, , );
 
-rtBuffer<float> cones;
+rtBuffer<char> cones;
 
 // Geometry specific variables
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
 
+__device__ inline const float* get_cone(const int primIdx)
+{
+    // We have to skip the first 8 bytes, which contain user data not used here
+    return (float*)(&cones[primIdx * bytes_per_cone + 8]);
+}
+
 template <bool use_robust_method>
 static __device__ void intersect_cone(int primIdx)
 {
-    const int idx = primIdx * cone_size;
-    const float ts = cones[idx + 8];
-    if (ts > 0 && timestamp > ts)
-        return;
-
-    float3 v0 = {cones[idx], cones[idx + 1], cones[idx + 2]};
-    float3 v1 = {cones[idx + 3], cones[idx + 4], cones[idx + 5]};
-    float radius0 = cones[idx + 6];
-    float radius1 = cones[idx + 7];
+    const float* cone = get_cone(primIdx);
+    float3 v0 = {cone[0], cone[1], cone[2]};
+    float3 v1 = {cone[3], cone[4], cone[5]};
+    float radius0 = cone[6];
+    float radius1 = cone[7];
 
     if (radius0 < radius1)
     {
@@ -189,10 +191,10 @@ RT_PROGRAM void robust_intersect(int primIdx)
 
 RT_PROGRAM void bounds(int primIdx, float result[6])
 {
-    const int idx = primIdx * cone_size;
-    const float3 v0 = {cones[idx], cones[idx + 1], cones[idx + 2]};
-    const float3 v1 = {cones[idx + 3], cones[idx + 4], cones[idx + 5]};
-    const float radius = max(cones[idx + 6], cones[idx + 7]);
+    const float* cone = get_cone(primIdx);
+    const float3 v0 = {cone[0], cone[1], cone[2]};
+    const float3 v1 = {cone[3], cone[4], cone[5]};
+    const float radius = max(cone[6], cone[7]);
 
     const float3 V0 = {min(v0.x, v1.x), min(v0.y, v1.y), min(v0.z, v1.z)};
     const float3 V1 = {max(v0.x, v1.x), max(v0.y, v1.y), max(v0.z, v1.z)};

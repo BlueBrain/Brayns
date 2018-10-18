@@ -1,5 +1,6 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Jonas Karlsson <jonas.karlsson@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,39 +22,39 @@
 #include <brayns/common/geometry/SDFGeometry.h>
 
 // ospray
-#include "ExtendedSDFGeometries.h"
+#include "SDFGeometries.h"
 #include "ospray/SDK/common/Data.h"
 #include "ospray/SDK/common/Model.h"
 // ispc-generated files
-#include "ExtendedSDFGeometries_ispc.h"
+#include "SDFGeometries_ispc.h"
 
 #include <climits>
 #include <cstddef>
 
 namespace ospray
 {
-ExtendedSDFGeometries::ExtendedSDFGeometries()
+SDFGeometries::SDFGeometries()
 {
-    this->ispcEquivalent = ispc::ExtendedSDFGeometries_create(this);
+    this->ispcEquivalent = ispc::SDFGeometries_create(this);
 }
 
-void ExtendedSDFGeometries::finalize(ospray::Model* model)
+void SDFGeometries::finalize(ospray::Model* model)
 {
-    data = getParamData("extendedsdfgeometries", nullptr);
+    data = getParamData("sdfgeometries", nullptr);
     neighbours = getParamData("neighbours", nullptr);
     geometries = getParamData("geometries", nullptr);
 
     if (data.ptr == nullptr)
         throw std::runtime_error(
-            "#ospray:geometry/ExtendedSDFGeometries: "
-            "no 'ExtendedSDFGeometries' data specified");
+            "#ospray:geometry/SDFGeometries: "
+            "no 'sdfgeometries' data specified");
 
-    const size_t numExtendedSDFGeometries = data->numItems;
+    const size_t numSDFGeometries = data->numItems;
     const size_t numNeighbours = neighbours->numItems;
 
     bounds = empty;
     const auto geoms = static_cast<brayns::SDFGeometry*>(geometries->data);
-    for (size_t i = 0; i < numExtendedSDFGeometries; i++)
+    for (size_t i = 0; i < numSDFGeometries; i++)
     {
         const auto bd = getSDFBoundingBox(geoms[i]);
         const auto& bMind = bd.getMin();
@@ -65,12 +66,11 @@ void ExtendedSDFGeometries::finalize(ospray::Model* model)
         bounds.extend(bMaxf);
     }
 
-    ispc::ExtendedSDFGeometriesGeometry_set(getIE(), model->getIE(), data->data,
-                                            numExtendedSDFGeometries,
-                                            neighbours->data, numNeighbours,
-                                            geometries->data);
+    ispc::SDFGeometriesGeometry_set(getIE(), model->getIE(), data->data,
+                                    numSDFGeometries, neighbours->data,
+                                    numNeighbours, geometries->data);
 }
 
-OSP_REGISTER_GEOMETRY(ExtendedSDFGeometries, extendedsdfgeometries);
+OSP_REGISTER_GEOMETRY(SDFGeometries, sdfgeometries);
 
 } // namespace ospray
