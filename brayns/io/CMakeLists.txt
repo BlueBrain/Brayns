@@ -30,15 +30,17 @@ set(BRAYNSIO_LINK_LIBRARIES
 )
 
 if(BRAYNS_BRION_ENABLED)
-  if(BRAYNS_ASSIMP_ENABLED)
-    list(APPEND BRAYNSIO_SOURCES CircuitLoader.cpp MolecularSystemReader.cpp MorphologyLoader.cpp)
-    list(APPEND BRAYNSIO_HEADERS CircuitLoader.h MolecularSystemReader.h MorphologyLoader.h)
-    set(BRAYNSIO_HEADERS circuitLoaderCommon.h)
-  endif()
   list(APPEND BRAYNSIO_SOURCES
-    simulation/CircuitSimulationHandler.cpp)
+      CircuitLoader.cpp
+      MolecularSystemReader.cpp
+      MorphologyLoader.cpp
+      simulation/CircuitSimulationHandler.cpp)
   list(APPEND BRAYNSIO_HEADERS
-    simulation/CircuitSimulationHandler.h)
+      CircuitLoader.h
+      MolecularSystemReader.h
+      MorphologyLoader.h
+      simulation/CircuitSimulationHandler.h
+      circuitLoaderCommon.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES
     PUBLIC Brion PRIVATE Brain ${HDF5_LIBRARIES})
 endif()
