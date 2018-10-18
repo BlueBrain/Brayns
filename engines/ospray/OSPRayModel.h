@@ -18,11 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OSPRAYGEOMETRYGROUP_H
-#define OSPRAYGEOMETRYGROUP_H
+#pragma once
 
 #include <brayns/common/scene/Model.h>
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/parameters/VolumeParameters.h>
 
 #include <ospray.h>
 
@@ -31,20 +30,34 @@ namespace brayns
 class OSPRayModel : public Model
 {
 public:
-    OSPRayModel() = default;
+    OSPRayModel(AnimationParameters& animationParameters,
+                VolumeParameters& volumeParameters);
     ~OSPRayModel() final;
 
     void setMemoryFlags(const size_t memoryManagementFlags);
 
-    void commit() final;
+    void commitGeometry() final;
+    bool commitTransferFunction();
 
     OSPModel getModel() const { return _model; }
     OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
     OSPModel getSimulationModel() const { return _simulationModel; }
     MaterialPtr createMaterial(const size_t materialId,
                                const std::string& name) final;
+    SharedDataVolumePtr createSharedDataVolume(const Vector3ui& dimensions,
+                                               const Vector3f& spacing,
+                                               const DataType type) const final;
+    BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
+                                         const Vector3f& spacing,
+                                         const DataType type) const final;
 
     void buildBoundingBox() final;
+
+    OSPData simulationData() const { return _ospSimulationData; }
+    OSPTransferFunction transferFunction() const
+    {
+        return _ospTransferFunction;
+    }
 
 private:
     void _commitSpheres(const size_t materialId);
@@ -53,6 +66,14 @@ private:
     void _commitMeshes(const size_t materialId);
     void _commitStreamlines(const size_t materialId);
     void _commitSDFGeometries();
+    bool _commitTransferFunction();
+    bool _commitSimulationData();
+
+    AnimationParameters& _animationParameters;
+    VolumeParameters& _volumeParameters;
+
+    // Whether this model has set the AnimationParameters "is ready" callback
+    bool _setIsReadyCallback{false};
 
     OSPModel _model{nullptr};
 
@@ -62,6 +83,9 @@ private:
 
     // Simulation model
     OSPModel _simulationModel{nullptr};
+    OSPData _ospSimulationData{nullptr};
+
+    OSPTransferFunction _ospTransferFunction{nullptr};
 
     // OSPRay data
     std::map<size_t, OSPGeometry> _ospExtendedSpheres;
@@ -81,4 +105,3 @@ private:
     size_t _memoryManagementFlags{OSP_DATA_SHARED_BUFFER};
 };
 }
-#endif // OSPRAYGEOMETRYGROUP_H

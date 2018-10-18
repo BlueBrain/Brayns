@@ -47,4 +47,29 @@ void AnimationParameters::print()
     AbstractParameters::print();
     BRAYNS_INFO << "Animation frame          : " << _current << std::endl;
 }
+
+void AnimationParameters::reset()
+{
+    _updateValue(_end, 0u);
+    _updateValue(_current, 0u);
+    _updateValue(_unit, std::string());
+    _updateValue(_dt, 0.);
+}
+
+void AnimationParameters::update()
+{
+    if ((isModified() || getDelta() != 0) && _canUpdateFrame())
+        setFrame(getFrame() + getDelta());
+}
+
+void AnimationParameters::jumpFrames(int frames)
+{
+    if (_canUpdateFrame())
+        setFrame(getFrame() + frames);
+}
+
+bool AnimationParameters::_canUpdateFrame() const
+{
+    return !hasIsReadyCallback() || _isReadyCallback();
+}
 }

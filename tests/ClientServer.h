@@ -387,3 +387,8 @@ void connect(rockets::ws::Client& client)
 {
     ClientServer::instance().connect(client);
 }
+
+void commitAndRender()
+{
+    ClientServer::instance().getBrayns().commitAndRender();
+}

@@ -161,9 +161,6 @@ class PointLight;
 class AbstractSimulationHandler;
 using AbstractSimulationHandlerPtr = std::shared_ptr<AbstractSimulationHandler>;
 
-class CircuitSimulationHandler;
-using CircuitSimulationHandlerPtr = std::shared_ptr<CircuitSimulationHandler>;
-
 class CADiffusionSimulationHandler;
 using CADiffusionSimulationHandlerPtr =
     std::shared_ptr<CADiffusionSimulationHandler>;

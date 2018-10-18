@@ -42,7 +42,7 @@ namespace brayns
 {
 void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
 {
-    _loaders.push_back(std::move(loader));
+    _loaders.push_front(std::move(loader));
 }
 
 bool LoaderRegistry::isSupportedFile(const std::string& filename) const

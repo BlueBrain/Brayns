@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -18,55 +18,57 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TRANSFERFUNCTION_H
-#define TRANSFERFUNCTION_H
+#pragma once
 
 #include <brayns/common/BaseObject.h>
 #include <brayns/common/types.h>
 
+SERIALIZATION_ACCESS(TransferFunction)
+
 namespace brayns
 {
+struct ColorMap
+{
+    std::string name;
+    Vector3fs colors;
+
+    bool operator==(const ColorMap& rhs) const;
+
+    void clear();
+};
+
 class TransferFunction : public BaseObject
 {
 public:
     TransferFunction();
 
-    /**
-     * @brief Clears the data held by the transfert fonction
-     */
+    /** Reset to gray-scale with opacity [0..1] and value range [0,255]. */
     void clear();
 
-    /**
-     * @brief Get diffuse colors
-     * @return A vector of RGB floats
-     */
-    Vector4fs& getDiffuseColors() { return _diffuseColors; }
-    /**
-     * @brief Get emission color intensities
-     * @return A vector of floats
-     */
-    Vector3fs& getEmissionIntensities() { return _emissionIntensities; }
-    /**
-     * @brief Get contributions
-     * @return A vector of floats
-     */
-    floats& getContributions() { return _contributions; }
-    /**
-     * @brief Get transfer function range of values
-     * @return A tuple of 2 floats with min and max value
-     */
-    Vector2d& getValuesRange() { return _valuesRange; }
+    const Vector2ds& getControlPoints() const { return _controlPoints; }
+    void setControlPoints(const Vector2ds& controlPoints)
+    {
+        _updateValue(_controlPoints, controlPoints);
+    }
+
+    const ColorMap& getColorMap() const { return _colorMap; }
+    void setColorMap(const ColorMap& colorMap)
+    {
+        _updateValue(_colorMap, colorMap);
+    }
+
+    const auto& getColors() const { return _colorMap.colors; }
+    const Vector2d& getValuesRange() const { return _valuesRange; }
     void setValuesRange(const Vector2d& valuesRange)
     {
         _updateValue(_valuesRange, valuesRange);
     }
 
 private:
-    Vector4fs _diffuseColors;
-    Vector3fs _emissionIntensities;
-    floats _contributions;
+    ColorMap _colorMap;
+    Vector2ds _controlPoints;
     Vector2d _valuesRange;
+
+    SERIALIZATION_FRIEND(TransferFunction)
 };
 }
-
-#endif // TRANSFERFUNCTION_H

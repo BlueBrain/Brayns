@@ -31,6 +31,7 @@
 #include <brayns/common/geometry/Sphere.h>
 #include <brayns/common/geometry/Streamline.h>
 #include <brayns/common/geometry/TrianglesMesh.h>
+#include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
 SERIALIZATION_ACCESS(Model)
@@ -190,7 +191,9 @@ public:
 
     BRAYNS_API virtual ~Model() = default;
 
-    virtual void commit() = 0;
+    virtual void commitGeometry() = 0;
+
+    virtual bool commitTransferFunction() = 0;
 
     /**
      * @return true if the geometry Model does not contain any geometry, false
@@ -199,7 +202,7 @@ public:
     BRAYNS_API bool empty() const;
 
     /** @return true if the geometry Model is dirty, false otherwise */
-    BRAYNS_API bool dirty() const;
+    BRAYNS_API bool isDirty() const;
 
     /**
         Returns the bounds for the Model
@@ -328,6 +331,24 @@ public:
     /** Factory method to create an engine-specific material. */
     BRAYNS_API virtual MaterialPtr createMaterial(const size_t materialId,
                                                   const std::string& name) = 0;
+
+    /**
+     * Create a volume with the given dimensions, voxel spacing and data type
+     * where the are voxels are set via setVoxels() from any memory location.
+     */
+    BRAYNS_API virtual SharedDataVolumePtr createSharedDataVolume(
+        const Vector3ui& dimensions, const Vector3f& spacing,
+        const DataType type) const = 0;
+
+    /**
+     * Create a volume with the given dimensions, voxel spacing and data type
+     * where the voxels are copied via setBrick() into an optimized internal
+     * storage.
+     */
+    BRAYNS_API virtual BrickedVolumePtr createBrickedVolume(
+        const Vector3ui& dimensions, const Vector3f& spacing,
+        const DataType type) const = 0;
+
     /**
      * @brief createMissingMaterials Checks that all materials exist for
      * existing geometry in the model. Missing materials are created with the
@@ -352,6 +373,24 @@ public:
 
     BRAYNS_API virtual void buildBoundingBox() = 0;
 
+    /** @return the transfer function used for volumes and simulations. */
+    TransferFunction& getTransferFunction() { return _transferFunction; }
+    /** @return the transfer function used for volumes and simulations. */
+    const TransferFunction& getTransferFunction() const
+    {
+        return _transferFunction;
+    }
+
+    /**
+        Returns the simulutation handler
+    */
+    BRAYNS_API AbstractSimulationHandlerPtr getSimulationHandler() const;
+
+    /**
+        Sets the simulation handler
+    */
+    BRAYNS_API void setSimulationHandler(AbstractSimulationHandlerPtr handler);
+
     /** @return the size in bytes of all geometries. */
     size_t getSizeInBytes() const { return _sizeInBytes; }
     void markInstancesDirty() { _instancesDirty = true; }
@@ -364,6 +403,9 @@ public:
 
 protected:
     void _updateBounds();
+
+    AbstractSimulationHandlerPtr _simulationHandler;
+    TransferFunction _transferFunction;
 
     MaterialMap _materials;
 

@@ -48,46 +48,21 @@ public:
     /** @copydoc Scene::commitLights */
     bool commitLights() final;
 
-    /** @copydoc Scene::commitTransferFunctionData */
-    bool commitTransferFunctionData() final;
-
-    SharedDataVolumePtr createSharedDataVolume(const Vector3ui& dimensions,
-                                               const Vector3f& spacing,
-                                               const DataType type) const final;
-    BrickedVolumePtr createBrickedVolume(const Vector3ui& dimensions,
-                                         const Vector3f& spacing,
-                                         const DataType type) const final;
     ModelPtr createModel() const final;
 
     OSPModel getModel() { return _rootModel; }
     OSPModel simulationModelImpl() { return _rootSimulationModel; }
     OSPData lightData() { return _ospLightData; }
-    OSPData simulationData() { return _ospSimulationData; }
-    OSPData transferFunctionDiffuseData()
-    {
-        return _ospTransferFunctionDiffuseData;
-    }
-    OSPData transferFunctionEmissionData()
-    {
-        return _ospTransferFunctionEmissionData;
-    }
+    ModelDescriptorPtr getSimulatedModel();
 
 private:
-    void _commitSimulationData();
-    bool _commitVolumeData();
+    bool _commitVolumeAndTransferFunction(ModelDescriptors& modelDescriptors);
 
     OSPModel _rootModel{nullptr};
     OSPModel _rootSimulationModel{nullptr};
 
     std::vector<OSPLight> _ospLights;
     OSPData _ospLightData{nullptr};
-
-    OSPData _ospSimulationData{nullptr};
-
-    OSPTransferFunction _ospTransferFunction{nullptr};
-
-    OSPData _ospTransferFunctionEmissionData{nullptr};
-    OSPData _ospTransferFunctionDiffuseData{nullptr};
 
     size_t _memoryManagementFlags{0};
 

@@ -35,8 +35,6 @@ public:
     /** @copydoc AbstractParameters::print */
     void print() final;
 
-    const std::string& getColorMapFilename() const { return _colorMapFilename; }
-    const Vector2d& getColorMapRange() const { return _colorMapRange; }
     /**
        file name of the environment map
     */
@@ -44,8 +42,6 @@ public:
 protected:
     void parse(const po::variables_map& vm) final;
 
-    std::string _colorMapFilename;
-    Vector2d _colorMapRange{0., 255.};
     std::string _environmentMap;
 
     SERIALIZATION_FRIEND(SceneParameters)

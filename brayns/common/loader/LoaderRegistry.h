@@ -73,6 +73,6 @@ public:
               LoaderProgress cb);
 
 private:
-    std::vector<std::unique_ptr<Loader>> _loaders;
+    std::deque<std::unique_ptr<Loader>> _loaders;
 };
 }

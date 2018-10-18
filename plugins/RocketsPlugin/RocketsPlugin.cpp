@@ -66,7 +66,6 @@ const std::string ENDPOINT_RENDERER_PARAMS = "renderer-params";
 const std::string ENDPOINT_SCENE = "scene";
 const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
 const std::string ENDPOINT_STREAM = "stream";
-const std::string ENDPOINT_TRANSFER_FUNCTION = "transfer-function";
 const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 // REST GET, JSONRPC get-* request
@@ -82,20 +81,24 @@ const std::string METHOD_SNAPSHOT = "snapshot";
 // METHOD_REQUEST_MODEL_UPLOAD from BinaryRequests.h
 
 // JSONRPC synchronous requests
+const std::string METHOD_ADD_CLIP_PLANE = "add-clip-plane";
+const std::string METHOD_GET_CLIP_PLANES = "get-clip-planes";
 const std::string METHOD_GET_INSTANCES = "get-instances";
 const std::string METHOD_GET_MODEL_PROPERTIES = "get-model-properties";
+const std::string METHOD_GET_MODEL_TRANSFER_FUNCTION =
+    "get-model-transfer-function";
 const std::string METHOD_IMAGE_JPEG = "image-jpeg";
 const std::string METHOD_INSPECT = "inspect";
 const std::string METHOD_MODEL_PROPERTIES_SCHEMA = "model-properties-schema";
+const std::string METHOD_REMOVE_CLIP_PLANES = "remove-clip-planes";
 const std::string METHOD_REMOVE_MODEL = "remove-model";
 const std::string METHOD_SCHEMA = "schema";
 const std::string METHOD_SET_MODEL_PROPERTIES = "set-model-properties";
+const std::string METHOD_SET_MODEL_TRANSFER_FUNCTION =
+    "set-model-transfer-function";
+const std::string METHOD_UPDATE_CLIP_PLANE = "update-clip-plane";
 const std::string METHOD_UPDATE_INSTANCE = "update-instance";
 const std::string METHOD_UPDATE_MODEL = "update-model";
-const std::string METHOD_ADD_CLIP_PLANE = "add-clip-plane";
-const std::string METHOD_GET_CLIP_PLANES = "get-clip-planes";
-const std::string METHOD_UPDATE_CLIP_PLANE = "update-clip-plane";
-const std::string METHOD_REMOVE_CLIP_PLANES = "remove-clip-planes";
 
 // JSONRPC notifications
 const std::string METHOD_CHUNK = "chunk";
@@ -458,6 +461,47 @@ public:
         });
     }
 
+    void _bindModelEndpoint(
+        const std::string& method, const std::string& key,
+        std::function<bool(std::string, ModelDescriptorPtr)> action)
+    {
+        _jsonrpcServer->bind(method, [&, key, action](
+                                         rockets::jsonrpc::Request request) {
+            ScopedCurrentClient scope(_currentClientID, request.clientID);
+
+            using namespace rapidjson;
+            Document document;
+            document.Parse(request.message.c_str());
+
+            if (!document.HasMember("id") || !document.HasMember(key.c_str()))
+                return Response::invalidParams();
+
+            const auto modelID = document["id"].GetInt();
+            auto model = _engine->getScene().getModel(modelID);
+            if (!model)
+            {
+                return Response{
+                    Response::Error{"Model not found", MODEL_NOT_FOUND}};
+            }
+
+            // get the actual property object from the model message (e.g.
+            // transfer function) and pass it as a JSON string to the provided
+            // action to consume it.
+            Document propertyDoc;
+            propertyDoc.SetObject() = document[key.c_str()].GetObject();
+            rapidjson::StringBuffer buffer;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+            propertyDoc.Accept(writer);
+
+            if (!action(buffer.GetString(), model))
+                return Response::invalidParams();
+
+            _engine->triggerRender();
+            _rebroadcast(method, request.message, {request.clientID});
+            return Response{to_json(true)};
+        });
+    }
+
     template <class T>
     void _handleGET(const std::string& endpoint, T& obj,
                     const int64_t throttleTime = DEFAULT_THROTTLE)
@@ -792,8 +836,6 @@ public:
                 _parametersManager.getVolumeParameters());
 
         // following endpoints need a valid engine
-        _handle(ENDPOINT_TRANSFER_FUNCTION,
-                _engine->getScene().getTransferFunction());
         _handle(ENDPOINT_SCENE, _engine->getScene());
 
         _handleGET(ENDPOINT_STATISTICS, _engine->getStatistics(),
@@ -818,6 +860,9 @@ public:
         _handleSetModelProperties();
         _handleGetModelProperties();
         _handleModelPropertiesSchema();
+
+        _handleSetModelTransferFunction();
+        _handleGetModelTransferFunction();
 
         _handleAddClipPlane();
         _handleGetClipPlanes();
@@ -1083,6 +1128,51 @@ public:
         });
     }
 
+    void _handleSetModelTransferFunction()
+    {
+        const RpcParameterDescription desc{
+            METHOD_SET_MODEL_TRANSFER_FUNCTION,
+            "Set the transfer function of the given model", "param",
+            "model ID and the new transfer function"};
+
+        _bindModelEndpoint(METHOD_SET_MODEL_TRANSFER_FUNCTION,
+                           "transfer_function", [&](const std::string& json,
+                                                    ModelDescriptorPtr model) {
+                               auto& tf =
+                                   model->getModel().getTransferFunction();
+                               if (!::from_json(tf, json))
+                                   return false;
+
+                               tf.markModified();
+                               return true;
+                           });
+
+        _handleSchema(METHOD_SET_MODEL_TRANSFER_FUNCTION,
+                      buildJsonRpcSchemaRequest<ModelTransferFunction, bool>(
+                          desc));
+    }
+
+    void _handleGetModelTransferFunction()
+    {
+        const RpcParameterDescription desc{
+            METHOD_GET_MODEL_TRANSFER_FUNCTION,
+            "Get the transfer function of the given model", "id",
+            "the model ID"};
+
+        _jsonrpcServer->bind<ObjectID, TransferFunction>(
+            desc.methodName, [engine = _engine](const ObjectID& id) {
+                auto model = engine->getScene().getModel(id.id);
+                if (!model)
+                    throw rockets::jsonrpc::response_error("Model not found",
+                                                           MODEL_NOT_FOUND);
+                return model->getModel().getTransferFunction();
+            });
+
+        _handleSchema(METHOD_GET_MODEL_TRANSFER_FUNCTION,
+                      buildJsonRpcSchemaRequest<ObjectID, TransferFunction>(
+                          desc));
+    }
+
     void _handleAddClipPlane()
     {
         const RpcParameterDescription desc{
@@ -1226,43 +1316,16 @@ public:
             "Set the properties of the given model", "param",
             "model ID and its properties"};
 
-        _bindEndpoint(METHOD_SET_MODEL_PROPERTIES, [&](const auto& request) {
-            using namespace rapidjson;
-            Document document;
-            document.Parse(request.message.c_str());
+        _bindModelEndpoint(METHOD_SET_MODEL_PROPERTIES, "properties",
+                           [&](const std::string& json,
+                               ModelDescriptorPtr model) {
+                               auto props = model->getProperties();
+                               if (!::from_json(props, json))
+                                   return false;
 
-            if (!document.HasMember("id") || !document.HasMember("properties"))
-            {
-                return Response::invalidParams();
-            }
-
-            const auto modelID = document["id"].GetInt();
-            auto model = _engine->getScene().getModel(modelID);
-            if (!model)
-            {
-                return Response{
-                    Response::Error{"Model not found", MODEL_NOT_FOUND}};
-            }
-
-            Document propertyDoc;
-            propertyDoc.SetObject() = document["properties"].GetObject();
-            rapidjson::StringBuffer buffer;
-            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-            propertyDoc.Accept(writer);
-
-            auto props = model->getProperties();
-            if (::from_json(props, buffer.GetString()))
-            {
-                model->setProperties(props);
-                _engine->triggerRender();
-
-                this->_rebroadcast(METHOD_SET_MODEL_PROPERTIES, request.message,
-                                   {request.clientID});
-
-                return Response{to_json(true)};
-            }
-            return Response::invalidParams();
-        });
+                               model->setProperties(props);
+                               return true;
+                           });
 
         _handleSchema(METHOD_SET_MODEL_PROPERTIES,
                       buildJsonRpcSchemaRequest<ModelProperties, bool>(desc));

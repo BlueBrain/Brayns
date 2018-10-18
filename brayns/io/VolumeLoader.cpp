@@ -171,14 +171,14 @@ ModelDescriptorPtr VolumeLoader::importFromFile(
         throw std::runtime_error("Volume dimensions are empty");
 
     const auto dataRange = dataRangeFromType(type);
-    auto volume = _scene.createSharedDataVolume(dimensions, spacing, type);
+    auto model = _scene.createModel();
+    auto volume = model->createSharedDataVolume(dimensions, spacing, type);
     volume->setDataRange(dataRange);
 
     callback.updateProgress("Loading voxels ...", 0.5f);
     volume->mapData(volumeFile);
 
-    callback.updateProgress("Creating model ...", 1.f);
-    auto model = _scene.createModel();
+    callback.updateProgress("Adding model ...", 1.f);
     model->addVolume(volume);
 
     Transformation transformation;

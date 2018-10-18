@@ -20,10 +20,12 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/scene/ClipPlane.h>
+#include <brayns/common/scene/Model.h>
 
 #include "OSPRayCamera.h"
 #include "OSPRayFrameBuffer.h"
 #include "OSPRayMaterial.h"
+#include "OSPRayModel.h"
 #include "OSPRayRenderer.h"
 #include "OSPRayScene.h"
 #include "utils.h"
@@ -76,23 +78,14 @@ void OSPRayRenderer::commit()
     {
         ospSetData(_renderer, "lights", scene->lightData());
 
-        if (scene->simulationData())
-            ospSetData(_renderer, "simulationData", scene->simulationData());
-
-        // Transfer function Diffuse colors
-        ospSetData(_renderer, "transferFunctionDiffuseData",
-                   scene->transferFunctionDiffuseData());
-
-        // Transfer function emission data
-        ospSetData(_renderer, "transferFunctionEmissionData",
-                   scene->transferFunctionEmissionData());
-
-        // Transfer function range
-        ospSet1f(_renderer, "transferFunctionMinValue",
-                 _scene->getTransferFunction().getValuesRange().x());
-        ospSet1f(_renderer, "transferFunctionRange",
-                 _scene->getTransferFunction().getValuesRange().y() -
-                     _scene->getTransferFunction().getValuesRange().x());
+        if (auto simulationModel = scene->getSimulatedModel())
+        {
+            auto& model =
+                static_cast<OSPRayModel&>(simulationModel->getModel());
+            ospSetData(_renderer, "simulationData", model.simulationData());
+            ospSetObject(_renderer, "transferFunction",
+                         model.transferFunction());
+        }
 
         // Setting the clip planes in the camera
         Planes planes;

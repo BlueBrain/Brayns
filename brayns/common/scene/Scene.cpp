@@ -87,15 +87,6 @@ Scene& Scene::operator=(const Scene& rhs)
     _lights = rhs._lights;
     _clipPlanes = rhs._clipPlanes;
 
-    if (rhs._simulationHandler)
-    {
-        _simulationHandler = std::make_shared<AbstractSimulationHandler>(
-            _parametersManager.getGeometryParameters());
-        *_simulationHandler = *rhs._simulationHandler;
-    }
-    _transferFunction = rhs._transferFunction;
-    _transferFunction.markModified();
-
     if (rhs._caDiffusionSimulationHandler)
     {
         _caDiffusionSimulationHandler =
@@ -153,7 +144,7 @@ size_t Scene::addModel(ModelDescriptorPtr model)
         throw std::runtime_error("Empty models not supported.");
 
     model->getModel().buildBoundingBox();
-    model->getModel().commit();
+    model->getModel().commitGeometry();
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -184,25 +175,6 @@ ModelDescriptorPtr Scene::getModel(const size_t id) const
 {
     auto lock = acquireReadAccess();
     return _find(_modelDescriptors, id, &ModelDescriptor::getModelID);
-}
-
-void Scene::setSimulationHandler(AbstractSimulationHandlerPtr handler)
-{
-    auto& ap = _parametersManager.getAnimationParameters();
-    _simulationHandler = handler;
-    if (_simulationHandler)
-    {
-        ap.setDt(_simulationHandler->getDt());
-        ap.setUnit(_simulationHandler->getUnit());
-        ap.setEnd(_simulationHandler->getNbFrames());
-    }
-    else
-        ap.reset();
-}
-
-AbstractSimulationHandlerPtr Scene::getSimulationHandler() const
-{
-    return _simulationHandler;
 }
 
 void Scene::setCADiffusionSimulationHandler(
