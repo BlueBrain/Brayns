@@ -74,11 +74,11 @@ public:
      * @param compartmentReport Compartment report to map to the morphology
      * @return Position of the soma
      */
-    Vector3f importMorphology(const servus::URI& source, Model& model,
-                              const uint64_t index,
-                              const Matrix4f& transformation,
-                              const size_t defaultMaterialId = NO_MATERIAL,
-                              CompartmentReportPtr compartmentReport = nullptr)
+    Vector3f importMorphology(
+        const servus::URI& source, Model& model, const uint64_t index,
+        const Matrix4f& transformation,
+        const size_t defaultMaterialId = NO_MATERIAL,
+        CompartmentReportPtr compartmentReport = nullptr) const
     {
         Vector3f somaPosition;
         auto materialFunc = [
@@ -139,7 +139,7 @@ public:
                               MaterialFunc materialFunc,
                               const Matrix4f& transformation,
                               CompartmentReportPtr compartmentReport,
-                              ParallelModelContainer& model)
+                              ParallelModelContainer& model) const
     {
         const size_t morphologySectionTypes =
             enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
@@ -233,7 +233,7 @@ private:
                                       MaterialFunc materialFunc,
                                       const Matrix4f& transformation,
                                       CompartmentReportPtr compartmentReport,
-                                      ParallelModelContainer& model)
+                                      ParallelModelContainer& model) const
     {
         uint64_t offset = 0;
         if (compartmentReport)
@@ -262,7 +262,7 @@ private:
     Vector3f _createRealisticSoma(const servus::URI& uri,
                                   MaterialFunc materialFunc,
                                   const Matrix4f& transformation,
-                                  ParallelModelContainer& model)
+                                  ParallelModelContainer& model) const
     {
         Vector3f somaPosition;
         const size_t morphologySectionTypes =
