@@ -31,7 +31,8 @@ namespace brayns
 class FlyingModeManipulator : public AbstractManipulator
 {
 public:
-    FlyingModeManipulator(Camera& camera, KeyboardHandler& keyboardHandler);
+    FlyingModeManipulator(Camera& camera, KeyboardHandler& keyboardHandler,
+                          const Boxd& boundingBox);
     ~FlyingModeManipulator();
 
 private:

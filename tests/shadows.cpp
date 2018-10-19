@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(cylinders)
     scene.clearLights();
 
     brayns::DirectionalLightPtr sunLight(
-        new brayns::DirectionalLight(brayns::Vector3f(0.f, 0.f, 1.f), WHITE,
+        new brayns::DirectionalLight(brayns::Vector3f(0.f, 0.f, -1.f), WHITE,
                                      1.0f));
 
     scene.addLight(sunLight);
@@ -107,9 +107,12 @@ BOOST_AUTO_TEST_CASE(cylinders)
 
     auto& camera = brayns.getEngine().getCamera();
 
-    camera.setTarget(brayns::Vector3f(0.f, 0.f, 0.f));
-    camera.setUp(brayns::Vector3f(0.f, 1.f, 0.f));
-    camera.setPosition(brayns::Vector3f(0.f, 2 * height, -1.5f));
+    const double dist = 1.5;
+    const double alpha = -std::atan(2 * height / dist);
+    const brayns::Quaterniond orientation(alpha,
+                                          brayns::Vector3d(1.0, 0.0, 0.0));
+    camera.setOrientation(orientation);
+    camera.setPosition(brayns::Vector3f(0.f, 2 * height, dist));
 
     auto& renderer = brayns.getEngine().getRenderer();
     renderer.updateProperty("shadows", 1.);

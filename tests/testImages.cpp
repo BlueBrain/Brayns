@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(render_demo_with_proximity_renderer)
     auto& camera = brayns.getEngine().getCamera();
     const auto camPos = camera.getPosition();
 
-    camera.setTarget(rotCenter);
+    camera.setOrientation(brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
     camera.setPosition(camPos - (rotCenter - camPos));
 
     brayns.commitAndRender();

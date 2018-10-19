@@ -37,10 +37,10 @@ BOOST_AUTO_TEST_CASE(change_fov)
 
 BOOST_AUTO_TEST_CASE(reset_camera)
 {
-    const auto target = getCamera().getTarget();
-    getCamera().setTarget({1, 2, 3});
+    const auto& orientation = getCamera().getOrientation();
+    getCamera().setOrientation({0, 0, 0, 1});
     makeNotification("reset-camera");
-    BOOST_CHECK_EQUAL(getCamera().getTarget(), target);
+    BOOST_CHECK_EQUAL(getCamera().getOrientation(), orientation);
 }
 
 BOOST_AUTO_TEST_CASE(inspect)

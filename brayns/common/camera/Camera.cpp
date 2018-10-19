@@ -20,7 +20,6 @@
  */
 
 #include "Camera.h"
-#include <brayns/common/log.h>
 
 namespace brayns
 {
@@ -32,63 +31,41 @@ Camera& Camera::operator=(const Camera& rhs)
     clonePropertiesFrom(rhs);
 
     setPosition(rhs.getPosition());
-    setTarget(rhs.getTarget());
-    setUp(rhs.getUp());
+    setOrientation(rhs.getOrientation());
 
     _initialPosition = rhs._initialPosition;
-    _initialTarget = rhs._initialTarget;
-    _initialUp = rhs._initialUp;
+    _initialOrientation = rhs._initialOrientation;
 
-    _matrix = rhs._matrix;
     return *this;
 }
 
-void Camera::set(const Vector3d& position, const Vector3d& target,
-                 const Vector3d& upVector)
+void Camera::set(const Vector3d& position, const Quaterniond& orientation)
 {
     setPosition(position);
-    setTarget(target);
-    setUp(upVector);
+    setOrientation(orientation);
 }
 
-void Camera::setInitialState(const Vector3d& position, const Vector3d& target,
-                             const Vector3d& upVector)
+void Camera::setInitialState(const Vector3d& position,
+                             const Quaterniond& orientation)
 {
     _initialPosition = position;
-    _initialTarget = target;
-    _initialUp = upVector;
-    set(position, target, upVector);
-}
-
-void Camera::setInitialState(const Boxd& boundingBox)
-{
-    const auto& target = boundingBox.getCenter();
-    const auto& diag = boundingBox.getSize();
-    auto position = target;
-    position.z() += diag.find_max();
-
-    const Vector3d up(0., 1., 0.);
-    setInitialState(position, target, up);
-
-    BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
-    BRAYNS_INFO << "World center      : " << boundingBox.getCenter()
-                << std::endl;
+    _initialOrientation = orientation;
+    _initialOrientation.normalize();
+    set(position, orientation);
 }
 
 void Camera::reset()
 {
-    set(_initialPosition, _initialTarget, _initialUp);
-    _matrix = Matrix4f();
+    set(_initialPosition, _initialOrientation);
 }
 
 std::ostream& operator<<(std::ostream& os, Camera& camera)
 {
     const auto& position = camera.getPosition();
-    const auto& target = camera.getTarget();
-    const auto& up = camera.getUp();
+    const auto& orientation = camera.getOrientation();
     os << position.x() << "," << position.y() << "," << position.z() << ","
-       << target.x() << "," << target.y() << "," << target.z() << "," << up.x()
-       << "," << up.y() << "," << up.z();
+       << orientation.x() << "," << orientation.y() << "," << orientation.z()
+       << "," << orientation.w();
     return os;
 }
 }

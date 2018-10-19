@@ -31,7 +31,8 @@ namespace brayns
 class InspectCenterManipulator : public AbstractManipulator
 {
 public:
-    InspectCenterManipulator(Camera& camera, KeyboardHandler& handler);
+    InspectCenterManipulator(Camera& camera, KeyboardHandler& handler,
+                             const Boxd& boundingBox);
     ~InspectCenterManipulator();
 
 private:
@@ -49,6 +50,8 @@ private:
     void _turnRight();
     void _turnUp();
     void _turnDown();
+
+    Vector3d _target;
 };
 }
 

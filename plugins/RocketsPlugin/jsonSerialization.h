@@ -217,12 +217,12 @@ inline void init(brayns::Renderer::PickResult* p, ObjectHandler* h)
 
 inline void init(brayns::Camera* c, ObjectHandler* h)
 {
-    h->add_property("look_at", Vector3dArray(c->_target), Flags::Optional);
-    h->add_property("origin", Vector3dArray(c->_position), Flags::Optional);
+    h->add_property("orientation", Vector4dArray(c->_orientation),
+                    Flags::Optional);
+    h->add_property("position", Vector3dArray(c->_position), Flags::Optional);
     h->add_property("current", &c->_currentType, Flags::Optional);
     static auto types = c->getTypes();
     h->add_property("types", &types, Flags::IgnoreRead | Flags::Optional);
-    h->add_property("up", Vector3dArray(c->_up), Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

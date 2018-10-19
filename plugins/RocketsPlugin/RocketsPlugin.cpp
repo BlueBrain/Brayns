@@ -1030,7 +1030,7 @@ public:
         _handleRPC({METHOD_RESET_CAMERA,
                     "Resets the camera to its initial values"},
                    [this] {
-                       _engine->setDefaultCamera();
+                       _engine->getCamera().reset();
                        _engine->triggerRender();
                    });
     }

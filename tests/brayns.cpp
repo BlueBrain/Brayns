@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_CASE(defaults)
     auto& camera = brayns.getEngine().getCamera();
     BOOST_CHECK_EQUAL(camera.getCurrentType(), "perspective");
     BOOST_CHECK_EQUAL(camera.getPosition(), brayns::Vector3d(0.5, 0.5, 1.5));
-    BOOST_CHECK_EQUAL(camera.getTarget(), brayns::Vector3d(0.5, 0.5, 0.5));
-    BOOST_CHECK_EQUAL(camera.getUp(), brayns::Vector3d(0, 1, 0));
+    BOOST_CHECK_EQUAL(camera.getOrientation(),
+                      brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
 
     auto& manipulator = brayns.getCameraManipulator();
     BOOST_CHECK(dynamic_cast<brayns::InspectCenterManipulator*>(&manipulator));
