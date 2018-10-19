@@ -83,7 +83,7 @@ private:
                                ParallelModelContainer& model) const;
     friend class CircuitLoader;
     class Impl;
-    std::unique_ptr<Impl> _impl;
+    std::unique_ptr<const Impl> _impl;
 };
 }
 

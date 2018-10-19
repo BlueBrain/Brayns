@@ -49,7 +49,7 @@ public:
     ModelDescriptorPtr importCircuit(const std::string& source,
                                      const LoaderProgress& callback,
                                      const strings& targets,
-                                     const std::string& report)
+                                     const std::string& report) const
     {
         bool returnValue = true;
         ModelDescriptorPtr modelDesc;
@@ -151,15 +151,17 @@ public:
             const Matrix4fs& transformations = circuit.getTransforms(allGids);
             _logLoadedGIDs(allGids);
 
-            _populateLayerIds(bc, allGids);
-            _electrophysiologyTypes =
+            const auto layerIds = _populateLayerIds(bc, allGids);
+            const auto& electrophysiologyTypes =
                 circuit.getElectrophysiologyTypes(allGids);
-            _morphologyTypes = circuit.getMorphologyTypes(allGids);
+            const auto& morphologyTypes = circuit.getMorphologyTypes(allGids);
 
             // Import meshes
             returnValue =
-                returnValue && _importMeshes(callback, *model, allGids,
-                                             transformations, targetGIDOffsets);
+                returnValue &&
+                _importMeshes(callback, *model, allGids, transformations,
+                              targetGIDOffsets, layerIds, morphologyTypes,
+                              electrophysiologyTypes);
 
             // Import morphologies
             const auto useSimulationModel =
@@ -174,7 +176,9 @@ public:
                     returnValue &&
                     _importMorphologies(circuit, callback, *model, allGids,
                                         transformations, targetGIDOffsets,
-                                        compartmentReport, morphLoader);
+                                        compartmentReport, morphLoader,
+                                        layerIds, morphologyTypes,
+                                        electrophysiologyTypes);
             }
             // Create materials
             model->createMissingMaterials(
@@ -229,7 +233,9 @@ private:
     size_t _getMaterialFromGeometryParameters(
         const uint64_t index, const size_t material,
         const brain::neuron::SectionType sectionType,
-        const GIDOffsets& targetGIDOffsets, bool isMesh = false) const
+        const GIDOffsets& targetGIDOffsets, const size_ts& layerIds,
+        const size_ts& morphologyTypes, const size_ts& electrophysiologyTypes,
+        bool isMesh = false) const
     {
         if (material != NO_MATERIAL)
             return material;
@@ -273,20 +279,20 @@ private:
                 }
             break;
         case ColorScheme::neuron_by_etype:
-            if (index < _electrophysiologyTypes.size())
-                materialId = _electrophysiologyTypes[index];
+            if (index < electrophysiologyTypes.size())
+                materialId = electrophysiologyTypes[index];
             else
                 BRAYNS_DEBUG << "Failed to get neuron E-type" << std::endl;
             break;
         case ColorScheme::neuron_by_mtype:
-            if (index < _morphologyTypes.size())
-                materialId = _morphologyTypes[index];
+            if (index < morphologyTypes.size())
+                materialId = morphologyTypes[index];
             else
                 BRAYNS_DEBUG << "Failed to get neuron M-type" << std::endl;
             break;
         case ColorScheme::neuron_by_layer:
-            if (index < _layerIds.size())
-                materialId = _layerIds[index];
+            if (index < layerIds.size())
+                materialId = layerIds[index];
             else
                 BRAYNS_DEBUG << "Failed to get neuron layer" << std::endl;
             break;
@@ -302,15 +308,15 @@ private:
      * @param blueConfig Configuration of the circuit
      * @param gids GIDs of the neurons
      */
-    void _populateLayerIds(const brion::BlueConfig& blueConfig,
-                           const brain::GIDSet& gids)
+    size_ts _populateLayerIds(const brion::BlueConfig& blueConfig,
+                              const brain::GIDSet& gids) const
     {
-        _layerIds.clear();
+        size_ts layerIds;
         try
         {
             brion::Circuit brionCircuit(blueConfig.getCircuitSource());
             for (const auto& a : brionCircuit.get(gids, brion::NEURON_LAYER))
-                _layerIds.push_back(std::stoi(a[0]));
+                layerIds.push_back(std::stoi(a[0]));
         }
         catch (...)
         {
@@ -322,6 +328,7 @@ private:
                        "this circuit"
                     << std::endl;
         }
+        return layerIds;
     }
 
     /**
@@ -336,11 +343,14 @@ private:
         BRAYNS_DEBUG << "Loaded GIDs: " << gidsStr.str() << std::endl;
     }
 
-    bool _importMeshes(const LoaderProgress& callback BRAYNS_UNUSED,
-                       Model& model BRAYNS_UNUSED,
-                       const brain::GIDSet& gids BRAYNS_UNUSED,
-                       const Matrix4fs& transformations BRAYNS_UNUSED,
-                       const GIDOffsets& targetGIDOffsets BRAYNS_UNUSED) const
+    bool _importMeshes(
+        const LoaderProgress& callback BRAYNS_UNUSED,
+        Model& model BRAYNS_UNUSED, const brain::GIDSet& gids BRAYNS_UNUSED,
+        const Matrix4fs& transformations BRAYNS_UNUSED,
+        const GIDOffsets& targetGIDOffsets BRAYNS_UNUSED,
+        const size_ts& layerIds BRAYNS_UNUSED,
+        const size_ts& morphologyTypes BRAYNS_UNUSED,
+        const size_ts& electrophysiologyTypes BRAYNS_UNUSED) const
     {
 #if BRAYNS_USE_ASSIMP
         MeshLoader meshLoader(_parent._scene, _geometryParameters);
@@ -358,7 +368,8 @@ private:
         {
             const size_t materialId = _getMaterialFromGeometryParameters(
                 meshIndex, NO_MATERIAL, brain::neuron::SectionType::undefined,
-                targetGIDOffsets, true);
+                targetGIDOffsets, layerIds, morphologyTypes,
+                electrophysiologyTypes, true);
 
             // Load mesh from file
             const auto transformation =
@@ -390,13 +401,13 @@ private:
 #endif
     }
 
-    bool _importMorphologies(const brain::Circuit& circuit,
-                             const LoaderProgress& callback, Model& model,
-                             const brain::GIDSet& gids,
-                             const Matrix4fs& transformations,
-                             const GIDOffsets& targetGIDOffsets,
-                             CompartmentReportPtr compartmentReport,
-                             MorphologyLoader& morphLoader)
+    bool _importMorphologies(
+        const brain::Circuit& circuit, const LoaderProgress& callback,
+        Model& model, const brain::GIDSet& gids,
+        const Matrix4fs& transformations, const GIDOffsets& targetGIDOffsets,
+        CompartmentReportPtr compartmentReport, MorphologyLoader& morphLoader,
+        const size_ts& layerIds, const size_ts& morphologyTypes,
+        const size_ts& electrophysiologyTypes) const
     {
         const brain::URIs& uris = circuit.getMorphologyURIs(gids);
         size_t loadingFailures = 0;
@@ -426,7 +437,8 @@ private:
                             std::bind(&Impl::_getMaterialFromGeometryParameters,
                                       this, morphologyIndex, NO_MATERIAL,
                                       std::placeholders::_1, targetGIDOffsets,
-                                      false),
+                                      layerIds, morphologyTypes,
+                                      electrophysiologyTypes, false),
                             transformations[morphologyIndex], compartmentReport,
                             modelContainer))
 #pragma omp atomic
@@ -464,9 +476,6 @@ private:
     CircuitLoader& _parent;
     const ApplicationParameters& _applicationParameters;
     const GeometryParameters& _geometryParameters;
-    size_ts _layerIds;
-    size_ts _electrophysiologyTypes;
-    size_ts _morphologyTypes;
 };
 
 CircuitLoader::CircuitLoader(Scene& scene,
