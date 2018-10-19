@@ -230,6 +230,9 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
             ? index
             : defaultMaterialId;
 
+    // Always create placeholder material since it is not guaranteed to exist
+    model.createMaterial(materialId, "default");
+
     if (materialId == NO_MATERIAL)
         _createMaterials(model, aiScene, folder);
 
