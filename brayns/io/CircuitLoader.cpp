@@ -29,7 +29,7 @@
 #include <brion/brion.h>
 
 #include <brayns/io/MorphologyLoader.h>
-#if (BRAYNS_USE_ASSIMP)
+#if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif
 
@@ -336,12 +336,13 @@ private:
         BRAYNS_DEBUG << "Loaded GIDs: " << gidsStr.str() << std::endl;
     }
 
-#if (BRAYNS_USE_ASSIMP)
-    bool _importMeshes(const LoaderProgress& callback, Model& model,
-                       const brain::GIDSet& gids,
-                       const Matrix4fs& transformations,
-                       const GIDOffsets& targetGIDOffsets) const
+    bool _importMeshes(const LoaderProgress& callback BRAYNS_UNUSED,
+                       Model& model BRAYNS_UNUSED,
+                       const brain::GIDSet& gids BRAYNS_UNUSED,
+                       const Matrix4fs& transformations BRAYNS_UNUSED,
+                       const GIDOffsets& targetGIDOffsets BRAYNS_UNUSED) const
     {
+#if BRAYNS_USE_ASSIMP
         MeshLoader meshLoader(_parent._scene, _geometryParameters);
         size_t loadingFailures = 0;
         const auto meshedMorphologiesFolder =
@@ -383,16 +384,11 @@ private:
             BRAYNS_WARN << "Failed to import " << loadingFailures << " meshes"
                         << std::endl;
         return true;
-    }
 #else
-    bool _importMeshes(Model&, const brain::GIDSet&, const Matrix4fs&,
-                       const GIDOffsets&)
-    {
-        BRAYNS_ERROR << "assimp dependency is required to load meshes"
-                     << std::endl;
-        return false;
-    }
+        throw std::runtime_error(
+            "assimp dependency is required to load meshes");
 #endif
+    }
 
     bool _importMorphologies(const brain::Circuit& circuit,
                              const LoaderProgress& callback, Model& model,

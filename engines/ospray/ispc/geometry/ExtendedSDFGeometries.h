@@ -28,7 +28,8 @@ namespace ospray
 {
 struct ExtendedSDFGeometries : public ospray::Geometry
 {
-    std::string toString() const final { return "hbp::ExtendedSDFGeometries"; }
+    std::string toString() const final {
+        return "brayns::ExtendedSDFGeometries"; }
     void finalize(ospray::Model* model) final;
 
     ospray::Ref<ospray::Data> data;

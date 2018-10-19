@@ -28,7 +28,7 @@ namespace optix
 {
 std::string Spheres::toString() const
 {
-    return "ospray::Spheres";
+    return "optix::Spheres";
 }
 
 void Spheres::finalize(Model* optixModel)

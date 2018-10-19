@@ -47,6 +47,14 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
   )
 endif()
 
+if(NOT BRAYNS_ASSIMP_ENABLED)
+  list(APPEND EXCLUDE_FROM_TESTS
+    addModel.cpp
+    addModelFromBlob.cpp
+    braynsTestData.cpp
+  )
+endif()
+
 if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
   include(ispc)

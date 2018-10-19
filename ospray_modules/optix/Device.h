@@ -51,12 +51,8 @@ struct Device : public ospray::api::Device
       registered transfer function types) */
     OSPTransferFunction newTransferFunction(const char* type) override;
 
-    /*! have given renderer create a new Light */
-    OSPLight newLight(OSPRenderer _renderer, const char* type) override;
-
-    /*! have given renderer create a new Light */
-    OSPLight newLight(const char* renderer_type,
-                      const char* light_type) override;
+    /*! create a new Light by type */
+    OSPLight newLight(const char* type) override;
 
     /*! map frame buffer */
     const void* frameBufferMap(OSPFrameBuffer fb,
@@ -116,6 +112,9 @@ struct Device : public ospray::api::Device
     /*! assign (named) string parameter to an object */
     void setString(OSPObject object, const char* bufName,
                    const char* s) override;
+
+    /*! assign (named) float parameter to an object */
+    void setBool(OSPObject object, const char *bufName, const bool f) override;
 
     /*! assign (named) data item as a parameter to an object */
     void setObject(OSPObject target, const char* bufName,
@@ -196,8 +195,7 @@ struct Device : public ospray::api::Device
     void setMaterial(OSPGeometry _geom, OSPMaterial _mat) override;
 
     /*! create a new Texture2D object */
-    OSPTexture2D newTexture2D(const ospray::vec2i& size, const OSPTextureFormat,
-                              void* data, const ospray::uint32 flags) override;
+    OSPTexture newTexture(const char* type) override;
 
     OSPPickResult pick(OSPRenderer renderer,
                        const ospray::vec2f& screenPos) override;

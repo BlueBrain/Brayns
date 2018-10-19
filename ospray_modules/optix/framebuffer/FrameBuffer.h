@@ -32,8 +32,7 @@ namespace optix
 struct FrameBuffer : public ospray::FrameBuffer
 {
     FrameBuffer(const ospray::vec2i& size, ColorBufferFormat colorBufferFormat,
-                bool hasDepthBuffer, bool hasAccumBuffer,
-                bool hasVarianceBuffer);
+                const ospray::uint32 channels);
     ~FrameBuffer();
 
     //! \brief common function to help printf-debugging
@@ -46,20 +45,21 @@ struct FrameBuffer : public ospray::FrameBuffer
     void beginFrame() override;
     float endFrame(const float errorThreshold) override;
 
-    const void* mapColorBuffer() override;
-    const void* mapDepthBuffer() override;
+    const void* mapBuffer(OSPFrameBufferChannel channel) override;
     void unmap(const void* mappedMem) override;
     void clear(const ospray::uint32 fbChannelFlags) override;
 
 private:
     void* colorBuffer{nullptr};
-    void* depthBuffer{nullptr};
+    //void* depthBuffer{nullptr};
 
     ::optix::Buffer _frameBuffer;
     ::optix::Buffer _accumBuffer;
     ::optix::Context _context;
     uint16_t _accumulationFrame{0};
     bool _accumulation{true};
+
+    void _mapColorBuffer();
 };
 }
 }

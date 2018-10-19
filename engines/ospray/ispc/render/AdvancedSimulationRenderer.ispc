@@ -147,14 +147,14 @@ inline void indirectShading(
                     // Light emitting material
                     vec3f localDiffuseColor = mat->Kd;
                     if (valid(mat->map_Kd))
-                        localDiffuseColor = get3f(mat->map_Kd, geometry.st);
+                        localDiffuseColor = get3f(mat->map_Kd, geometry);
 
                     // intensity
                     vec3f Ka = make_vec3f(mat->a);
                     indirectShadingPower = mat->a;
                     if (valid(mat->map_a))
                     {
-                        Ka = get3f(mat->map_a, geometry.st);
+                        Ka = get3f(mat->map_a, geometry);
                         indirectShadingPower = reduce_max(Ka);
                     }
 
@@ -438,13 +438,13 @@ inline float shadedLightIntensity(varying ScreenSample& sample,
                 opacity = mat->d;
                 if (valid(mat->map_d))
                 {
-                    vec4f d_map = get4f(mat->map_d, shadowingGeometry.st);
+                    vec4f d_map = get4f(mat->map_d, shadowingGeometry);
                     opacity = d_map.x;
                 }
                 else if (valid(mat->map_Kd))
                 {
                     vec4f localDiffuseColor_map =
-                        get4f(mat->map_Kd, shadowingGeometry.st);
+                        get4f(mat->map_Kd, shadowingGeometry);
                     opacity = 1.f - localDiffuseColor_map.w;
                 }
             }
@@ -572,7 +572,7 @@ inline void setGeometryShadingAttributes(
 
         // Opacity
         if (valid(mat->map_d))
-            attributes.opacity = mat->d * get1f(mat->map_d, dg.st);
+            attributes.opacity = mat->d * get1f(mat->map_d, dg);
         else
             attributes.opacity = mat->d;
 
@@ -580,7 +580,7 @@ inline void setGeometryShadingAttributes(
         attributes.diffuseColor = mat->Kd * make_vec3f(dg.color);
         if (valid(mat->map_Kd))
         {
-            const vec4f diffuseColorFromMap = get4f(mat->map_Kd, dg.st);
+            const vec4f diffuseColorFromMap = get4f(mat->map_Kd, dg);
             attributes.diffuseColor =
                 attributes.diffuseColor * make_vec3f(diffuseColorFromMap);
             attributes.opacity *= diffuseColorFromMap.w;
@@ -589,7 +589,7 @@ inline void setGeometryShadingAttributes(
         // Specular color
         if (valid(mat->map_Ks))
             attributes.specularColor = max(attributes.specularColor,
-                                           mat->Ks * get3f(mat->map_Ks, dg.st));
+                                           mat->Ks * get3f(mat->map_Ks, dg));
         else
             attributes.specularColor = max(attributes.specularColor, mat->Ks);
 
@@ -597,7 +597,7 @@ inline void setGeometryShadingAttributes(
         if (valid(mat->map_Ns))
             attributes.specularExponent =
                 max(attributes.specularExponent,
-                    mat->Ns * get1f(mat->map_Ns, dg.st));
+                    mat->Ns * get1f(mat->map_Ns, dg));
         else
             attributes.specularExponent =
                 max(attributes.specularExponent, mat->Ns);
@@ -609,7 +609,7 @@ inline void setGeometryShadingAttributes(
         // Normal mapping
         if (valid(mat->map_Bump))
         {
-            const vec3f n = get3f(mat->map_Bump, dg.st, make_vec3f(0.f)) - 0.5f;
+            const vec3f n = get3f(mat->map_Bump, dg, make_vec3f(0.f)) - 0.5f;
             attributes.normal.x -= n.x;
             attributes.normal.y -= n.y;
         }
@@ -618,7 +618,7 @@ inline void setGeometryShadingAttributes(
         attributes.reflection = mat->reflection;
         if (valid(mat->map_reflection))
         {
-            const vec3f value = get3f(mat->map_reflection, dg.st);
+            const vec3f value = get3f(mat->map_reflection, dg);
             attributes.reflection *= (value.x + value.y + value.z) / 3.f;
         }
 

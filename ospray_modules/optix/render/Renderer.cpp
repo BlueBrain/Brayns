@@ -22,8 +22,6 @@
 
 #include <ospray/SDK/common/Data.h>
 #include <ospray/SDK/render/LoadBalancer.h>
-// WIP: header is not part of the public SDK
-//#include <ospray/mpiCommon/MPICommon.h>
 
 #include "../Context.h"
 #include "Material.h"
@@ -67,15 +65,6 @@ void Renderer::commit()
 Renderer::Renderer()
 {
     _context = Context::get().getOptixContext();
-
-    // in MPI mode we have no framebuffer, but we'll create one in renderTile().
-    // to keep optix happy until then, we create a output buffer here
-    _context["output_buffer"]->set(
-        _context->createBuffer(RT_BUFFER_OUTPUT, RT_FORMAT_UNSIGNED_BYTE4, 0,
-                               0));
-    _context["accum_buffer"]->set(
-        _context->createBuffer(RT_BUFFER_INPUT_OUTPUT | RT_BUFFER_GPU_LOCAL,
-                               RT_FORMAT_FLOAT4, 0, 0));
 }
 
 Renderer::~Renderer()
@@ -200,100 +189,6 @@ void Renderer::_updateTransferFunction()
         getParam1f("transferFunctionRange", 0.f));
 }
 
-float Renderer::_mpiRenderFrame(ospray::FrameBuffer* fb,
-                                const ospray::uint32 channelFlags)
-{
-    if (ospray::TiledLoadBalancer::instance->toString() ==
-        "ospray::mpi::staticLoadBalancer::Master")
-        return ospray::TiledLoadBalancer::instance->renderFrame(this, fb,
-                                                                channelFlags);
-
-    void* perFrameData = beginFrame(fb);
-    int xSize = fb->size.x / 1; // mpicommon::numWorkers();
-    xSize += xSize % TILE_SIZE;
-    int xOffset = 0 /*mpicommon::workerRank()*/ * xSize;
-
-    const ospray::region2i region{{xOffset, 0},
-                                  {std::min(fb->size.x, xOffset + xSize),
-                                   fb->size.y}};
-    // std::cout << "#" << mpicommon::workerRank() << " " << region <<
-    // std::endl;
-
-    if (_frameBuffer && _frameBuffer->size != region.size())
-    {
-        _frameBuffer->refDec();
-        _frameBuffer = nullptr;
-    }
-
-    if (!_frameBuffer)
-    {
-        _frameBuffer =
-            new FrameBuffer(region.size(), OSP_FB_RGBA8, false, true, false);
-        _frameBuffer->refInc();
-    }
-    _frameBuffer->clear(OSP_FB_COLOR | OSP_FB_ACCUM);
-
-    // render 2D sub-region
-    {
-        // XXX
-        _context["offset"]->setFloat(region.lower.x / 32.f,
-                                     region.lower.y / 32.f);
-        _context->launch(0, region.size().x, region.size().y);
-    }
-
-    // decompose 2D region into tiles for dfb
-    {
-        auto buffer = _frameBuffer->mapColorBuffer();
-        uint8_t* colorBuffer = (uint8_t*)buffer;
-
-        const int32_t xTiles = (region.size().x + TILE_SIZE - 1) / TILE_SIZE;
-        const int32_t yTiles = (region.size().y + TILE_SIZE - 1) / TILE_SIZE;
-
-        for (int32_t y = 0; y < yTiles; ++y)
-        {
-            // create tiles
-            std::vector<ospray::Tile> tiles;
-            tiles.reserve(xTiles);
-
-            for (int32_t x = 0; x < xTiles; ++x)
-            {
-                const ospray::vec2i tileId(xOffset / TILE_SIZE + x, y);
-                const ospray::int32 accumID = fb->accumID(tileId);
-
-                tiles.emplace_back(ospray::Tile{tileId, fb->size, accumID});
-            }
-
-            // TODO tasking::parallel_for(NTASKS, [&](int taskIndex) {}
-            for (int32_t idx = 0; idx < TILE_SIZE * xTiles; ++idx)
-            {
-                ospray::Tile& tile = tiles[idx % xTiles];
-
-                const int32_t j = idx / xTiles;
-#pragma omp simd
-                for (int i = 0; i < TILE_SIZE; ++i)
-                {
-                    tile.r[j * TILE_SIZE + i] = colorBuffer[i * 4 + 0] / 255.f;
-                    tile.g[j * TILE_SIZE + i] = colorBuffer[i * 4 + 1] / 255.f;
-                    tile.b[j * TILE_SIZE + i] = colorBuffer[i * 4 + 2] / 255.f;
-                    tile.a[j * TILE_SIZE + i] = colorBuffer[i * 4 + 3] / 255.f;
-                }
-                colorBuffer += TILE_SIZE * 4;
-            }
-
-            // send tiles
-            for (auto& tile : tiles)
-                fb->setTile(tile);
-        }
-
-        _frameBuffer->unmap(buffer);
-    }
-
-    // dfb->waitUntilFinished();
-    endFrame(perFrameData, channelFlags);
-
-    return fb->endFrame(ospray::inf);
-}
-
 void* Renderer::beginFrame(ospray::FrameBuffer* fb)
 {
     this->currentFB = fb;
@@ -317,10 +212,6 @@ void Renderer::endFrame(void* /*perFrameData*/,
 float Renderer::renderFrame(ospray::FrameBuffer* fb,
                             const ospray::uint32 channelFlags)
 {
-    // device.getParamString("mpiMode", "")
-    if (ospray::TiledLoadBalancer::instance)
-        return _mpiRenderFrame(fb, channelFlags);
-
     // in the local case, we need no external loadbalancer, hence we call
     // beginFrame() and endFrame() ourselves
     auto perFrameData = beginFrame(fb);

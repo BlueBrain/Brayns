@@ -147,10 +147,7 @@ OSPRayEngine::~OSPRayEngine()
     _renderer.reset();
     _camera.reset();
 
-    // HACK: need ospFinish() here; currently used by optix module to properly
-    // destroy optix context
-    if (name() == EngineType::optix)
-        ospLoadModule("exit");
+    ospShutdown();
 }
 
 EngineType OSPRayEngine::name() const
@@ -359,7 +356,7 @@ uint32_t OSPRayEngine::_getOSPDataFlags() const
 {
     return _parametersManager.getGeometryParameters().getMemoryMode() ==
                    MemoryMode::shared
-               ? OSP_DATA_SHARED_BUFFER
+               ? uint32_t(OSP_DATA_SHARED_BUFFER)
                : 0;
 }
 

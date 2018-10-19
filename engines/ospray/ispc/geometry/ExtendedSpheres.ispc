@@ -25,12 +25,14 @@
 #include "ospray/SDK/common/Ray.ih"
 #include "ospray/SDK/geometry/Geometry.ih"
 #include "ospray/SDK/math/box.ih"
+#include "ospray/SDK/math/sampling.ih"
 #include "ospray/SDK/math/vec.ih"
+#include "ospray/version.h"
 
 // embree
-#include "embree2/rtcore.isph"
-#include "embree2/rtcore_geometry_user.isph"
-#include "embree2/rtcore_scene.isph"
+#include "embree3/rtcore.isph"
+#include "embree3/rtcore_geometry.isph"
+#include "embree3/rtcore_scene.isph"
 
 #include "utils/SafeIncrement.ih"
 
@@ -40,7 +42,7 @@ DEFINE_SAFE_INCREMENT(Sphere);
 
 struct ExtendedSpheres
 {
-    uniform Geometry geometry;
+    uniform Geometry super;
 
     uniform Sphere* uniform data;
 
@@ -56,16 +58,16 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
                                           const varying Ray& ray,
                                           uniform int64 flags)
 {
-    uniform ExtendedSpheres* uniform this =
+    uniform ExtendedSpheres* uniform self =
         (uniform ExtendedSpheres * uniform)geometry;
     dg.geometry = geometry;
     vec3f Ng = ray.Ng;
     vec3f Ns = Ng;
 
     // Store timestamp as texture coordinate
-    uniform Sphere* spherePtr =
-        safeIncrement(this->useSafeIncrement, this->data, ray.primID);
-    const vec2f tex = spherePtr->texture_coords;
+    uniform Sphere* sphere =
+        safeIncrement(self->useSafeIncrement, self->data, ray.primID);
+    const vec2f tex = sphere->texture_coords;
 
     dg.st.x = tex.x;
     dg.st.y = tex.y;
@@ -86,38 +88,47 @@ static void ExtendedSpheres_postIntersect(uniform Geometry* uniform geometry,
     dg.Ns = Ns;
 }
 
-void ExtendedSpheres_bounds(uniform ExtendedSpheres* uniform geometry,
-                            uniform size_t primID, uniform box3fa& bbox)
+unmasked void ExtendedSpheres_bounds(
+    const RTCBoundsFunctionArguments* uniform args)
 {
-    uniform Sphere* uniform spherePtr =
-        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
+    const uniform ExtendedSpheres* uniform self =
+        (const uniform ExtendedSpheres * uniform)args->geometryUserPtr;
+    const uniform Sphere* uniform sphere =
+        safeIncrement(self->useSafeIncrement, self->data, args->primID);
 
-    uniform float radius = spherePtr->radius;
-
-    uniform vec3f center = spherePtr->center;
-    bbox =
-        make_box3fa(center - make_vec3f(radius), center + make_vec3f(radius));
+    const uniform float radius = sphere->radius;
+    const uniform vec3f center = sphere->center;
+    box3fa* uniform bbox = (box3fa* uniform)args->bounds_o;
+    *bbox = make_box3fa(center - radius, center + radius);
 }
 
-void ExtendedSpheres_intersect(uniform ExtendedSpheres* uniform geometry,
-                               varying Ray& ray, uniform size_t primID)
+unmasked void ExtendedSpheres_intersect(
+    const RTCIntersectFunctionNArguments* uniform args)
 {
-    uniform Sphere* uniform spherePtr =
-        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
+    if (!args->valid[programIndex]) return;
 
-    uniform float timestamp = spherePtr->timestamp;
+    const uniform ExtendedSpheres* uniform self =
+        (const uniform ExtendedSpheres * uniform)args->geometryUserPtr;
+    const uniform unsigned int primID = args->primID;
 
-    if (ray.time > 0 && timestamp > ray.time)
+    const uniform Sphere* uniform sphere =
+        safeIncrement(self->useSafeIncrement, self->data, primID);
+
+    const uniform float timestamp = sphere->timestamp;
+
+    varying Ray* uniform ray = (varying Ray* uniform)args->rayhit;
+
+    if (ray->time > 0 && timestamp > ray->time)
         return;
 
-    uniform float radius = spherePtr->radius;
-    uniform vec3f center = spherePtr->center;
-    const float approxDist = dot(center - ray.org, ray.dir);
-    const vec3f closeOrg = ray.org + approxDist * ray.dir;
+    const uniform float radius = sphere->radius;
+    const uniform vec3f center = sphere->center;
+    const float approxDist = dot(center - ray->org, ray->dir);
+    const vec3f closeOrg = ray->org + approxDist * ray->dir;
     const vec3f A = center - closeOrg;
 
-    const float a = dot(ray.dir, ray.dir);
-    const float b = 2.f * dot(ray.dir, A);
+    const float a = dot(ray->dir, ray->dir);
+    const float b = 2.f * dot(ray->dir, A);
     const float c = dot(A, A) - radius * radius;
 
     const float radical = b * b - 4.f * a * c;
@@ -130,60 +141,62 @@ void ExtendedSpheres_intersect(uniform ExtendedSpheres* uniform geometry,
     const float t_out = (b + srad) * rcpf(2.f * a) + approxDist;
 
     bool hit = false;
-    if (t_in > ray.t0 && t_in < ray.t)
+    if (t_in > ray->t0 && t_in < ray->t)
     {
         hit = true;
-        ray.t = t_in;
+        ray->t = t_in;
     }
-    else if (t_out > ray.t0 && t_out < ray.t)
+    else if (t_out > ray->t0 && t_out < ray->t)
     {
         hit = true;
-        ray.t = t_out;
+        ray->t = t_out;
     }
     if (hit)
     {
-        ray.primID = primID;
-        ray.geomID = geometry->geometry.geomID;
+        ray->primID = primID;
+        ray->geomID = self->super.geomID;
+        ray->instID = args->context->instID[0];
         // cannot easily be moved to postIntersect
         // we need hit in object space, in postIntersect it is in world-space
-        ray.Ng = ray.org + ray.t * ray.dir - center;
+        ray->Ng = ray->org + ray->t * ray->dir - center;
     }
 }
 
 export void* uniform ExtendedSpheres_create(void* uniform cppEquivalent)
 {
     uniform ExtendedSpheres* uniform geom = uniform new uniform ExtendedSpheres;
-    Geometry_Constructor(&geom->geometry, cppEquivalent,
-                         ExtendedSpheres_postIntersect, 0, 0, 0);
+    Geometry_Constructor(&geom->super, cppEquivalent,
+                         ExtendedSpheres_postIntersect, NULL, NULL, 0, NULL);
     return geom;
 }
 
-export void ExtendedSpheresGeometry_set(void* uniform _geom,
+export void ExtendedSpheresGeometry_set(void* uniform _self,
                                         void* uniform _model,
                                         void* uniform data,
-                                        int uniform numExtendedSpheres)
+                                        int uniform numPrimitives)
 {
-    uniform ExtendedSpheres* uniform geom =
-        (uniform ExtendedSpheres * uniform)_geom;
+    uniform ExtendedSpheres* uniform self =
+        (uniform ExtendedSpheres * uniform)_self;
     uniform Model* uniform model = (uniform Model * uniform)_model;
 
-    uniform uint32 geomID =
-        rtcNewUserGeometry(model->embreeSceneHandle, numExtendedSpheres);
+    RTCGeometry geom =
+        rtcNewGeometry(ispc_embreeDevice(), RTC_GEOMETRY_TYPE_USER);
+    uniform uint32 geomID = rtcAttachGeometry(model->embreeSceneHandle, geom);
 
-    geom->geometry.model = model;
-    geom->geometry.geomID = geomID;
-    geom->numExtendedSpheres = numExtendedSpheres;
-    geom->data = (uniform Sphere * uniform)data;
-    geom->useSafeIncrement = needsSafeIncrement(geom->data, numExtendedSpheres);
+    self->super.model = model;
+    self->super.geomID = geomID;
+    self->super.numPrimitives = numPrimitives;
+    self->data = (uniform Sphere * uniform)data;
+    self->useSafeIncrement = needsSafeIncrement(self->data, numPrimitives);
 
-    rtcSetUserData(model->embreeSceneHandle, geomID, geom);
-    rtcSetBoundsFunction(model->embreeSceneHandle, geomID,
-                         (uniform RTCBoundsFunc)&ExtendedSpheres_bounds);
-    rtcSetIntersectFunction(
-        model->embreeSceneHandle, geomID,
-        (uniform RTCIntersectFuncVarying)&ExtendedSpheres_intersect);
-    rtcSetOccludedFunction(
-        model->embreeSceneHandle, geomID,
-        (uniform RTCOccludedFuncVarying)&ExtendedSpheres_intersect);
-    rtcEnable(model->embreeSceneHandle, geomID);
+    rtcSetGeometryUserData(geom, self);
+    rtcSetGeometryUserPrimitiveCount(geom, numPrimitives);
+    rtcSetGeometryBoundsFunction(
+        geom, (uniform RTCBoundsFunction)&ExtendedSpheres_bounds, self);
+    rtcSetGeometryIntersectFunction(
+        geom, (uniform RTCIntersectFunctionN)&ExtendedSpheres_intersect);
+    rtcSetGeometryOccludedFunction(
+        geom, (uniform RTCOccludedFunctionN)&ExtendedSpheres_intersect);
+    rtcCommitGeometry(geom);
+    rtcReleaseGeometry(geom);
 }

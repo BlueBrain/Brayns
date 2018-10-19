@@ -40,97 +40,93 @@ rtBuffer<float> spheres;
 rtDeclareVariable(float3, geometric_normal, attribute geometric_normal, );
 rtDeclareVariable(float3, shading_normal, attribute shading_normal, );
 rtDeclareVariable(optix::Ray, ray, rtCurrentRay, );
-rtDeclareVariable(unsigned int, sphere_size, ,);
+rtDeclareVariable(unsigned int, sphere_size, , );
 
 // Global variables
 rtDeclareVariable(float, timestamp, , );
 
-template<bool use_robust_method>
-static __device__
-void intersect_sphere( int primIdx )
+template <bool use_robust_method>
+static __device__ void intersect_sphere(int primIdx)
 {
     const int idx = primIdx * sphere_size;
-    const float ts = spheres[ idx + 4 ];
+    const float ts = spheres[idx + 4];
     if (ts > 0 && timestamp > ts)
         return;
 
-
-    const float3 center = { spheres[ idx ], spheres[ idx + 1 ], spheres[ idx + 2 ] };
+    const float3 center = {spheres[idx], spheres[idx + 1], spheres[idx + 2]};
     const float3 O = ray.origin - center;
     const float3 D = ray.direction;
-    const float radius = spheres[ idx + 3 ];
+    const float radius = spheres[idx + 3];
 
-    float b = dot( O, D );
-    float c = dot( O, O ) - radius * radius;
+    float b = dot(O, D);
+    float c = dot(O, O) - radius * radius;
     float disc = b * b - c;
-    if( disc > 0.0f )
+    if (disc > 0.0f)
     {
-        float sdisc = sqrtf( disc );
-        float root1 = ( -b - sdisc );
+        float sdisc = sqrtf(disc);
+        float root1 = (-b - sdisc);
 
         bool do_refine = false;
 
         float root11 = 0.0f;
 
-        if( use_robust_method && fabsf(root1) > 10.f * radius )
+        if (use_robust_method && fabsf(root1) > 10.f * radius)
             do_refine = true;
 
-        if( do_refine )
+        if (do_refine)
         {
             // refine root1
             float3 O1 = O + root1 * ray.direction;
             b = dot(O1, D);
-            c = dot(O1, O1) - radius*radius;
-            disc = b*b - c;
+            c = dot(O1, O1) - radius * radius;
+            disc = b * b - c;
 
-            if( disc > 0.0f )
+            if (disc > 0.0f)
             {
-                sdisc = sqrtf( disc );
-                root11 = ( -b - sdisc );
+                sdisc = sqrtf(disc);
+                root11 = (-b - sdisc);
             }
         }
 
         bool check_second = true;
-        if( rtPotentialIntersection( root1 + root11 ) )
+        if (rtPotentialIntersection(root1 + root11))
         {
-            shading_normal = geometric_normal = (O + (root1 + root11)*D)/radius;
-            if( rtReportIntersection( 0 ))
+            shading_normal = geometric_normal =
+                (O + (root1 + root11) * D) / radius;
+            if (rtReportIntersection(0))
                 check_second = false;
         }
-        if(check_second)
+        if (check_second)
         {
             float root2 = (-b + sdisc) + (do_refine ? root1 : 0);
-            if( rtPotentialIntersection( root2 ) )
+            if (rtPotentialIntersection(root2))
             {
-                shading_normal = geometric_normal = (O + root2*D)/radius;
-                rtReportIntersection( 0 );
+                shading_normal = geometric_normal = (O + root2 * D) / radius;
+                rtReportIntersection(0);
             }
         }
     }
 }
 
-
-RT_PROGRAM void intersect( int primIdx )
+RT_PROGRAM void intersect(int primIdx)
 {
-    intersect_sphere<false>( primIdx );
+    intersect_sphere<false>(primIdx);
 }
 
-
-RT_PROGRAM void robust_intersect( int primIdx )
+RT_PROGRAM void robust_intersect(int primIdx)
 {
-    intersect_sphere<true>( primIdx );
+    intersect_sphere<true>(primIdx);
 }
 
-
-RT_PROGRAM void bounds( int primIdx, float result[6] )
+RT_PROGRAM void bounds(int primIdx, float result[6])
 {
     const int idx = primIdx * sphere_size;
-    const float3 cen = { spheres[ idx ], spheres[ idx + 1 ], spheres[ idx + 2 ] };
-    const float3 rad = make_float3( spheres[ idx + 3 ] );
+    const float3 cen = {spheres[idx], spheres[idx + 1], spheres[idx + 2]};
+    const float3 rad = make_float3(spheres[idx + 3]);
 
     optix::Aabb* aabb = (optix::Aabb*)result;
 
-    if( rad.x > 0.0f  && !isinf(rad.x) )
+    if (rad.x > 0.0f && !isinf(rad.x))
     {
         aabb->m_min = cen - rad;
         aabb->m_max = cen + rad;
@@ -140,4 +136,3 @@ RT_PROGRAM void bounds( int primIdx, float result[6] )
         aabb->invalidate();
     }
 }
-

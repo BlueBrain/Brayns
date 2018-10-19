@@ -44,8 +44,6 @@ class AbstractRenderer : public ospray::Renderer
 public:
     void commit() override;
 
-    ospray::Material* createMaterial(const char* type) final;
-
 protected:
     std::vector<void*> _lightArray;
     void** _lightPtr;

@@ -5,9 +5,6 @@
 
 set(BRAYNSIO_SOURCES
   algorithms/MetaballsGenerator.cpp
-  ArchiveLoader.cpp
-  MeshLoader.cpp
-  MolecularSystemReader.cpp
   ProteinLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
   simulation/SpikeSimulationHandler.cpp
@@ -18,9 +15,6 @@ set(BRAYNSIO_SOURCES
 
 set(BRAYNSIO_PUBLIC_HEADERS
   algorithms/MetaballsGenerator.h
-  ArchiveLoader.h
-  MeshLoader.h
-  MolecularSystemReader.h
   ProteinLoader.h
   simulation/CADiffusionSimulationHandler.h
   simulation/SpikeSimulationHandler.h
@@ -29,26 +23,40 @@ set(BRAYNSIO_PUBLIC_HEADERS
   XYZBLoader.h
 )
 
-set(BRAYNSIO_HEADERS
-  circuitLoaderCommon.h
-)
 
 set(BRAYNSIO_LINK_LIBRARIES
   PRIVATE braynsParameters braynsCommon vmmlib
-    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${ASSIMP_LIBRARIES} ${assimp_LIBRARIES}
+    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
 
 if(BRAYNS_BRION_ENABLED)
   list(APPEND BRAYNSIO_SOURCES
-    CircuitLoader.cpp
-    MorphologyLoader.cpp
-    simulation/CircuitSimulationHandler.cpp)
+      CircuitLoader.cpp
+      MolecularSystemReader.cpp
+      MorphologyLoader.cpp
+      simulation/CircuitSimulationHandler.cpp)
   list(APPEND BRAYNSIO_HEADERS
-    CircuitLoader.h
-    MorphologyLoader.h
-    simulation/CircuitSimulationHandler.h)
+      CircuitLoader.h
+      MolecularSystemReader.h
+      MorphologyLoader.h
+      simulation/CircuitSimulationHandler.h
+      circuitLoaderCommon.h)
   list(APPEND BRAYNSIO_LINK_LIBRARIES
     PUBLIC Brion PRIVATE Brain ${HDF5_LIBRARIES})
+endif()
+
+if(BRAYNS_LIBARCHIVE_ENABLED)
+  list(APPEND BRAYNSIO_SOURCES ArchiveLoader.cpp)
+  list(APPEND BRAYNSIO_HEADERS ArchiveLoader.h)
+  list(APPEND BRAYNSIO_LINK_LIBRARIES
+    PRIVATE ${LibArchive_LIBRARIES})
+endif()
+
+if(BRAYNS_ASSIMP_ENABLED)
+  list(APPEND BRAYNSIO_SOURCES MeshLoader.cpp)
+  list(APPEND BRAYNSIO_HEADERS MeshLoader.h)
+  list(APPEND BRAYNSIO_LINK_LIBRARIES
+    PRIVATE ${ASSIMP_LIBRARIES} ${assimp_LIBRARIES})
 endif()
 
 set(BRAYNSIO_OMIT_LIBRARY_HEADER ON)

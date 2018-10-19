@@ -24,9 +24,9 @@
 #include "ospray/SDK/math/box.ih"
 #include "ospray/SDK/math/vec.ih"
 // embree
-#include "embree2/rtcore.isph"
-#include "embree2/rtcore_geometry_user.isph"
-#include "embree2/rtcore_scene.isph"
+#include "embree3/rtcore.isph"
+#include "embree3/rtcore_geometry.isph"
+#include "embree3/rtcore_scene.isph"
 
 #include "brayns/common/geometry/Cylinder.h"
 #include "utils/SafeIncrement.ih"
@@ -35,7 +35,7 @@ DEFINE_SAFE_INCREMENT(Cylinder);
 
 struct ExtendedCylinders
 {
-    uniform Geometry geometry; //!< inherited geometry fields
+    uniform Geometry super; //!< inherited geometry fields
 
     uniform Cylinder* uniform data;
 
@@ -45,42 +45,52 @@ struct ExtendedCylinders
 
 typedef uniform float uniform_float;
 
-void ExtendedCylinders_bounds(uniform ExtendedCylinders* uniform geometry,
-                              uniform size_t primID, uniform box3fa& bbox)
+unmasked void ExtendedCylinders_bounds(
+    const RTCBoundsFunctionArguments* uniform args)
 {
-    uniform Cylinder* uniform cylinderPtr =
-        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
-    uniform float radius = cylinderPtr->radius;
+    const uniform ExtendedCylinders* uniform self =
+        (uniform ExtendedCylinders * uniform)args->geometryUserPtr;
+    const uniform Cylinder* uniform cylinderPtr =
+        safeIncrement(self->useSafeIncrement, self->data, args->primID);
 
-    uniform vec3f v0 = cylinderPtr->center;
-    uniform vec3f v1 = cylinderPtr->up;
-    bbox = make_box3fa(min(v0, v1) - make_vec3f(radius),
-                       max(v0, v1) + make_vec3f(radius));
+    const uniform float radius = cylinderPtr->radius;
+    const uniform vec3f v0 = cylinderPtr->center;
+    const uniform vec3f v1 = cylinderPtr->up;
+
+    box3fa* uniform bbox = (box3fa * uniform)args->bounds_o;
+    *bbox = make_box3fa(min(v0, v1) - make_vec3f(radius),
+                        max(v0, v1) + make_vec3f(radius));
 }
 
-void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
-                                 varying Ray& ray, uniform size_t primID)
+unmasked void ExtendedCylinders_intersect(
+    const RTCIntersectFunctionNArguments *uniform args)
 {
-    uniform Cylinder* uniform cylinderPtr =
-        safeIncrement(geometry->useSafeIncrement, geometry->data, primID);
+    const uniform ExtendedCylinders* uniform self =
+        (uniform ExtendedCylinders * uniform)args->geometryUserPtr;
+    const uniform int primID = args->primID;
 
-    uniform float timestamp = cylinderPtr->timestamp;
+    const uniform Cylinder* uniform cylinderPtr =
+        safeIncrement(self->useSafeIncrement, self->data, primID);
 
-    if (ray.time > 0 && timestamp > ray.time)
+    const uniform float timestamp = cylinderPtr->timestamp;
+
+    varying Ray* uniform ray = (varying Ray* uniform)args->rayhit;
+
+    if (ray->time > 0 && timestamp > ray->time)
         return;
 
-    uniform float radius = cylinderPtr->radius;
-    uniform vec3f v0 = cylinderPtr->center;
-    uniform vec3f v1 = cylinderPtr->up;
+    const uniform float radius = cylinderPtr->radius;
+    const uniform vec3f v0 = cylinderPtr->center;
+    const uniform vec3f v1 = cylinderPtr->up;
 
     const vec3f center = 0.5f * (v0 + v1);
-    const float approxDist = dot(center - ray.org, ray.dir);
-    const vec3f closeOrg = ray.org + approxDist * ray.dir;
+    const float approxDist = dot(center - ray->org, ray->dir);
+    const vec3f closeOrg = ray->org + approxDist * ray->dir;
 
     const vec3f A = v0 - closeOrg;
     const vec3f B = v1 - closeOrg;
 
-    const vec3f V = ray.dir;
+    const vec3f V = ray->dir;
     const vec3f AB = B - A;
 
     const vec3f AOxAB = cross(AB, A);
@@ -94,8 +104,8 @@ void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
     const float rVAB = rcp(dot(V, AB));
     const float tA = dot(AB, A) * rVAB + approxDist;
     const float tB = dot(AB, B) * rVAB + approxDist;
-    const float tAB0 = max(ray.t0, min(tA, tB));
-    const float tAB1 = min(ray.t, max(tA, tB));
+    const float tAB0 = max(ray->t0, min(tA, tB));
+    const float tAB1 = min(ray->t, max(tA, tB));
 
     // ------------------------------------------------------------------
     // abc formula: t0,1 = (-b +- sqrt(b^2-4*a*c)) / 2a
@@ -114,24 +124,25 @@ void ExtendedCylinders_intersect(uniform ExtendedCylinders* uniform geometry,
     if (t_in >= (tAB0) && t_in <= (tAB1))
     {
         hit = true;
-        ray.t = t_in;
+        ray->t = t_in;
     }
     else if (t_out >= (tAB0) && t_out <= (tAB1))
     {
         hit = true;
-        ray.t = t_out;
+        ray->t = t_out;
     }
 
     if (hit)
     {
-        ray.primID = primID;
-        ray.geomID = geometry->geometry.geomID;
+        ray->primID = primID;
+        ray->geomID = self->super.geomID;
+        ray->instID = args->context->instID[0];
         // cannot easily be moved to postIntersect
         // we need hit in object-space, in postIntersect it is in world-space
-        const vec3f P = ray.org + ray.t * ray.dir - v0;
+        const vec3f P = ray->org + ray->t * ray->dir - v0;
         const vec3f V = cross(P, AB);
-        ray.Ng = cross(AB, V);
-        ray.u = (ray.t - tA) * rcp(tB - tA);
+        ray->Ng = cross(AB, V);
+        ray->u = (ray->t - tA) * rcp(tB - tA);
     }
 }
 
@@ -176,38 +187,38 @@ export void* uniform ExtendedCylinders_create(void* uniform cppEquivalent)
     uniform ExtendedCylinders* uniform geom =
         uniform new uniform ExtendedCylinders;
 
-    Geometry_Constructor(&geom->geometry, cppEquivalent,
+    Geometry_Constructor(&geom->super, cppEquivalent,
                          ExtendedCylinders_postIntersect, 0, 0, 0);
     return geom;
 }
 
-export void ExtendedCylindersGeometry_set(void* uniform _geom,
+export void ExtendedCylindersGeometry_set(void* uniform _self,
                                           void* uniform _model,
                                           void* uniform data,
-                                          int uniform numExtendedCylinders)
+                                          int uniform numPrimitives)
 {
-    uniform ExtendedCylinders* uniform geom =
-        (uniform ExtendedCylinders * uniform)_geom;
+    uniform ExtendedCylinders* uniform self =
+        (uniform ExtendedCylinders * uniform)_self;
     uniform Model* uniform model = (uniform Model * uniform)_model;
 
-    uniform uint32 geomID =
-        rtcNewUserGeometry(model->embreeSceneHandle, numExtendedCylinders);
+    RTCGeometry geom =
+        rtcNewGeometry(ispc_embreeDevice(), RTC_GEOMETRY_TYPE_USER);
+    uniform uint32 geomID = rtcAttachGeometry(model->embreeSceneHandle, geom);
 
-    geom->geometry.model = model;
-    geom->geometry.geomID = geomID;
-    geom->numExtendedCylinders = numExtendedCylinders;
-    geom->data = (uniform Cylinder * uniform)data;
-    geom->useSafeIncrement =
-        needsSafeIncrement(geom->data, numExtendedCylinders);
+    self->super.model = model;
+    self->super.geomID = geomID;
+    self->super.numPrimitives = numPrimitives;
+    self->data = (uniform Cylinder * uniform)data;
+    self->useSafeIncrement = needsSafeIncrement(self->data, numPrimitives);
 
-    rtcSetUserData(model->embreeSceneHandle, geomID, geom);
-    rtcSetBoundsFunction(model->embreeSceneHandle, geomID,
-                         (uniform RTCBoundsFunc)&ExtendedCylinders_bounds);
-    rtcSetIntersectFunction(
-        model->embreeSceneHandle, geomID,
-        (uniform RTCIntersectFuncVarying)&ExtendedCylinders_intersect);
-    rtcSetOccludedFunction(
-        model->embreeSceneHandle, geomID,
-        (uniform RTCOccludedFuncVarying)&ExtendedCylinders_intersect);
-    rtcEnable(model->embreeSceneHandle, geomID);
+    rtcSetGeometryUserData(geom, self);
+    rtcSetGeometryUserPrimitiveCount(geom, numPrimitives);
+    rtcSetGeometryBoundsFunction(
+        geom, (uniform RTCBoundsFunction)&ExtendedCylinders_bounds, self);
+    rtcSetGeometryIntersectFunction(
+        geom, (uniform RTCIntersectFunctionN)&ExtendedCylinders_intersect);
+    rtcSetGeometryOccludedFunction(
+        geom, (uniform RTCOccludedFunctionN)&ExtendedCylinders_intersect);
+    rtcCommitGeometry(geom);
+    rtcReleaseGeometry(geom);
 }

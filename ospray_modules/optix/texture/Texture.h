@@ -1,7 +1,8 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * This file is part of https://github.com/BlueBrain/ospray-modules
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -19,19 +20,23 @@
 
 #pragma once
 
-#include "ospray/SDK/geometry/Geometry.h"
-#include <brayns/common/types.h>
+#include <ospray/SDK/common/Managed.h>
 
-namespace ospray
+#include <optixu/optixpp_namespace.h>
+
+namespace bbp
 {
-struct ExtendedCylinders : public ospray::Geometry
+namespace optix
 {
-    std::string toString() const final { return "brayns::Cylinders"; }
-    void finalize(ospray::Model* model) final;
+class Texture : public ospray::ManagedObject
+{
+public:
+    Texture();
+    virtual ~Texture();
 
-    ospray::Ref<ospray::Data> data;
-
-    ExtendedCylinders();
+protected:
+    ::optix::TextureSampler _sampler;
 };
+}
+}
 
-} // ::brayns

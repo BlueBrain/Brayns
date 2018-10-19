@@ -23,6 +23,8 @@
 #include "geom/Geometry.h"
 #include "geom/Instance.h"
 
+#include <optixu/optixu_matrix_namespace.h>
+
 #include <vector>
 
 namespace bbp
@@ -37,12 +39,11 @@ struct Model : public ospray::ManagedObject
     std::string toString() const override;
     void commit() override;
 
-    void addGeometryInstance(::optix::Geometry geometry,
-                             ::optix::Material material);
+    void addGeometryInstance(const ::optix::GeometryInstance& instance);
 
-    void addTransformInstance(::optix::Transform instance);
+    void addTransformInstance(const ::optix::Transform& instance);
 
-    ::optix::Group getRootGroup() const;
+    ::optix::Transform instance(::optix::Matrix4x4&& matrix);
 
     using GeometryVector = std::vector<ospray::Ref<Geometry>>;
 

@@ -30,15 +30,14 @@
 
 #include "geom/Geometry.h"
 
-namespace ospray
-{
-struct Texture2D;
-}
-
 namespace bbp
 {
 namespace optix
 {
+
+class Geometry;
+class Texture;
+
 class Context
 {
 public:
@@ -48,9 +47,9 @@ public:
 
     ::optix::Context getOptixContext();
     ::optix::Material createMaterial(bool textured);
-    void createTexture(ospray::Texture2D* tx);
-    void deleteTexture(ospray::Texture2D* tx);
-    ::optix::TextureSampler getTextureSampler(ospray::Texture2D* tx);
+    ::optix::TextureSampler createTexture(Texture* tx);
+    void deleteTexture(Texture* tx);
+    ::optix::TextureSampler getTextureSampler(Texture* tx);
     void updateLights(const ospray::Data* lightData = nullptr);
 
     ::optix::Geometry createGeometry(Geometry::Type type);

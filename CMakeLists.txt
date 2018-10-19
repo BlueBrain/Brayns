@@ -38,7 +38,6 @@ common_find_package(Boost REQUIRED COMPONENTS
   filesystem system program_options unit_test_framework)
 common_find_package(vmmlib REQUIRED)
 common_find_package(OpenMP)
-common_find_package(LibArchive)
 common_find_package(libuv 1.8)
 
 if(libuv_FOUND)
@@ -54,6 +53,15 @@ if(libuv_FOUND)
   include_directories(SYSTEM uvw/src)
   list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/uvw/*')
   # TODO: use tag v1.6.0_libuv-v1.18 for Docker
+endif()
+
+# Archive loading
+common_find_package(LibArchive)
+option(BRAYNS_LIBARCHIVE_ENABLED "Activate libarchive for archive loading" ${LibArchive_FOUND})
+if(BRAYNS_LIBARCHIVE_ENABLED)
+  common_find_package(LibArchive REQUIRED)
+else()
+  common_find_package_disable(LibArchive)
 endif()
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Async++ as a shared library" FORCE)
@@ -105,23 +113,20 @@ endif()
 list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/perceptualdiff/*')
 
 # OSPRay rendering engine
-common_find_package(ospray 1.5 SYSTEM)
-set(_ospray_unsupported_version 1.6)
-if(OSPRAY_FOUND AND OSPRAY_VERSION VERSION_LESS _ospray_unsupported_version)
+common_find_package(ospray 1.7 SYSTEM)
+if(OSPRAY_FOUND)
   option(BRAYNS_OSPRAY_ENABLED "Activate OSPRay rendering engine" ON)
 else()
   unset(BRAYNS_OSPRAY_ENABLED)
-  if(OSPRAY_FOUND)
-    message(WARNING "OSPRay version >= ${_ospray_unsupported_version} not supported")
-  endif()
 endif()
 
 # Mesh loading
 common_find_package(assimp SYSTEM)
-if(ASSIMP_FOUND)
-  option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ON)
+option(BRAYNS_ASSIMP_ENABLED "Activate assimp library for standard 3D file format management" ${assimp_FOUND})
+if(BRAYNS_ASSIMP_ENABLED)
+  common_find_package(assimp SYSTEM REQUIRED)
 else()
-  unset(BRAYNS_ASSIMP_ENABLED)
+  common_find_package_disable(assimp)
 endif()
 
 # Brayns viewer application

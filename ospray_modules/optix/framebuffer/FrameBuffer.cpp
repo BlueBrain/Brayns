@@ -27,13 +27,11 @@ namespace bbp
 namespace optix
 {
 FrameBuffer::FrameBuffer(const ospray::vec2i& size_,
-                         ColorBufferFormat colorBufferFormat_,
-                         bool hasDepthBuffer_, bool hasAccumBuffer_,
-                         bool hasVarianceBuffer_)
-    : ospray::FrameBuffer(size_, colorBufferFormat_, hasDepthBuffer_,
-                          hasAccumBuffer_, hasVarianceBuffer_)
+                         const ColorBufferFormat colorBufferFormat_,
+                         const ospray::uint32 channels)
+    : ospray::FrameBuffer(size_, colorBufferFormat_, channels)
     , _context(Context::get().getOptixContext())
-    , _accumulation(hasAccumBuffer_)
+    , _accumulation(channels & OSP_FB_ACCUM)
 {
     RTformat format;
     switch (colorBufferFormat)
@@ -57,7 +55,6 @@ FrameBuffer::FrameBuffer(const ospray::vec2i& size_,
 
     _accumBuffer = _context->createBuffer(RT_BUFFER_INPUT_OUTPUT,
                                           RT_FORMAT_FLOAT4, size.x, size.y);
-
     _context["accum_buffer"]->set(_accumBuffer);
 }
 
@@ -114,40 +111,36 @@ float FrameBuffer::endFrame(const float /*errorThreshold*/)
     return ospcommon::inf; // keep rendering by lying of still having errors
 }
 
-const void* FrameBuffer::mapDepthBuffer()
+const void* FrameBuffer::mapBuffer(const OSPFrameBufferChannel channel)
 {
-    if (colorBuffer)
-        depthBuffer = colorBuffer;
-    return (const void*)depthBuffer;
+    if (channel == OSP_FB_COLOR)
+    {
+        if (!colorBuffer)
+            _mapColorBuffer();
+        return colorBuffer;
+    }
+    return nullptr;
 }
 
-const void* FrameBuffer::mapColorBuffer()
+void FrameBuffer::unmap(const void* mappedMem)
+{
+    if (mappedMem != colorBuffer)
+        throw std::runtime_error(
+            "ERROR: unmapping a pointer not created by Optix!");
+
+    rtBufferUnmap(_frameBuffer->get());
+    colorBuffer = nullptr;
+}
+
+void FrameBuffer::_mapColorBuffer()
 {
     rtBufferMap(_frameBuffer->get(), &colorBuffer);
-    depthBuffer = colorBuffer;
 
     if (_accumulation)
         _context["frame_number"]->setUint(_accumulationFrame++);
     else
         _context["frame_number"]->setUint(1u);
-    return (const void*)colorBuffer;
 }
 
-void FrameBuffer::unmap(const void* mappedMem)
-{
-    if (mappedMem != colorBuffer && mappedMem != depthBuffer)
-        throw std::runtime_error(
-            "ERROR: unmapping a pointer not created by OSPRay!");
-
-    if (mappedMem == colorBuffer)
-    {
-        rtBufferUnmap(_frameBuffer->get());
-        colorBuffer = nullptr;
-    }
-    else if (mappedMem == depthBuffer)
-    {
-        depthBuffer = nullptr;
-    }
-}
 }
 }
