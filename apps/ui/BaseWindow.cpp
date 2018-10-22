@@ -259,6 +259,7 @@ void BaseWindow::display()
     const auto& camera = _brayns.getEngine().getCamera();
     renderInput.windowSize = windowSize;
     renderInput.position = camera.getPosition();
+    renderInput.target = camera.getTarget();
     renderInput.orientation = camera.getOrientation();
     _brayns.commitAndRender(renderInput, renderOutput);
 

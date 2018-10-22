@@ -50,8 +50,6 @@ private:
     void _turnRight();
     void _turnUp();
     void _turnDown();
-
-    Vector3d _target;
 };
 }
 
