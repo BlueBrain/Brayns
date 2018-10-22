@@ -389,6 +389,7 @@ private:
     void _loadData()
     {
         auto& scene = _engine->getScene();
+        const auto& registry = scene.getLoaderRegistry();
 
         const auto& paths =
             _parametersManager.getApplicationParameters().getInputPaths();
@@ -402,9 +403,44 @@ private:
             }
 
             for (const auto& path : paths)
+                if (!registry.isSupportedFile(path))
+                    throw std::runtime_error("No loader found for '" + path +
+                                             "'");
+
+            for (const auto& path : paths)
             {
-                AddModelTask task({path}, _engine);
-                task.result();
+                int percentageLast = 0;
+                std::string msgLast;
+                auto timeLast = std::chrono::steady_clock::now();
+
+                BRAYNS_INFO << "Loading '" << path << "'" << std::endl;
+
+                auto progress = [&](const std::string& msg, float t) {
+                    constexpr auto MIN_SECS = 5;
+                    constexpr auto MIN_PERCENTAGE = 10;
+
+                    const int percentage = static_cast<int>(100.0f * t);
+                    const auto time = std::chrono::steady_clock::now();
+                    const auto secondsElapsed =
+                        std::chrono::duration_cast<std::chrono::seconds>(
+                            time - timeLast)
+                            .count();
+                    const auto percentageElapsed = percentage - percentageLast;
+
+                    if ((secondsElapsed >= MIN_SECS && percentageElapsed > 0) ||
+                        msgLast != msg || (percentageElapsed >= MIN_PERCENTAGE))
+                    {
+                        std::string p = std::to_string(percentage);
+                        p.insert(p.begin(), 3 - p.size(), ' ');
+
+                        BRAYNS_INFO << "[" << p << "%] " << msg << std::endl;
+                        msgLast = msg;
+                        percentageLast = percentage;
+                        timeLast = time;
+                    }
+                };
+
+                scene.loadModel(path, NO_MATERIAL, {path, path}, {progress});
             }
         }
 
