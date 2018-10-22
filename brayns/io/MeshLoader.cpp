@@ -43,7 +43,7 @@ public:
         : _callback(callback)
 
     {
-        _msg << "Loading " << shortenString(filename) << " ..." << std::endl;
+        _msg << "Loading " << shortenString(filename) << " ...";
     }
 
     bool Update(const float percentage) final
