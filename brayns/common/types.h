@@ -373,6 +373,14 @@ struct RpcParameterDescription : RpcDescription
     std::string paramName;
     std::string paramDescription;
 };
+
+enum class BVHType
+{
+    dynamic,
+    compact,
+    robust,
+    none
+};
 }
 
 #endif // TYPES_H

@@ -143,6 +143,12 @@ size_t Scene::addModel(ModelDescriptorPtr model)
     if (model->getModel().empty())
         throw std::runtime_error("Empty models not supported.");
 
+    const auto defaultBVH =
+        _parametersManager.getGeometryParameters().getDefaultBVHType();
+    const auto modelBVH = model->getBVHType();
+    const auto bvhType = modelBVH != BVHType::none ? modelBVH : defaultBVH;
+
+    model->getModel().setBVHType(bvhType);
     model->getModel().buildBoundingBox();
     model->getModel().commitGeometry();
 

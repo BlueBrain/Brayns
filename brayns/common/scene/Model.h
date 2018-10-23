@@ -97,9 +97,12 @@ public:
     const std::string& getName() const { return _name; }
     void setPath(const std::string& path) { _updateValue(_path, path); }
     const std::string& getPath() const { return _path; }
+    void setBVHType(BVHType bvhType) { _updateValue(_bvhType, bvhType); }
+    BVHType getBVHType() const { return _bvhType; }
 protected:
     std::string _name;
     std::string _path;
+    BVHType _bvhType = BVHType::none;
 
     SERIALIZATION_FRIEND(ModelParams)
 };
@@ -400,7 +403,8 @@ public:
     void resetVolumesDirty() { _volumesDirty = false; }
     /** @internal */
     void updateSizeInBytes();
-
+    void setBVHType(BVHType bvhType) { _bvhType = bvhType; }
+    BVHType getBVHType() const { return _bvhType; }
 protected:
     void _updateBounds();
 
@@ -451,6 +455,7 @@ protected:
     bool _volumesDirty{true};
     Boxd _volumesBounds;
 
+    BVHType _bvhType = BVHType::none;
     size_t _sizeInBytes{0};
 
     SERIALIZATION_FRIEND(Model)

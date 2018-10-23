@@ -234,6 +234,7 @@ public:
         return _morphologyUseSDFGeometries;
     }
 
+    BVHType getDefaultBVHType() const { return _defaultBVHType; }
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -249,6 +250,7 @@ protected:
     float _radiusCorrection;
     ColorScheme _colorScheme;
     GeometryQuality _geometryQuality;
+    BVHType _defaultBVHType = BVHType::none;
     MorphologySectionTypes _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
     size_t _metaballsGridSize;

@@ -79,6 +79,7 @@ ModelDescriptor& ModelDescriptor::operator=(const ModelParams& rhs)
     else
         _updateValue(_name, rhs.getName());
     _updateValue(_path, rhs.getPath());
+    _updateValue(_bvhType, rhs.getBVHType());
     _updateValue(_visible, rhs.getVisible());
 
     // Transformation
