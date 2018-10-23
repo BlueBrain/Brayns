@@ -75,7 +75,7 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
     size_t i = 0;
     std::string line;
     std::stringstream msg;
-    msg << "Loading " << shortenString(blob.name) << " ..." << std::endl;
+    msg << "Loading " << shortenString(blob.name) << " ...";
     while (std::getline(stream, line))
     {
         std::vector<float> lineData;
