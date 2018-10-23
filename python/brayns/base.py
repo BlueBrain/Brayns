@@ -148,6 +148,7 @@ class BaseClient:
                 from rx import Observer
 
                 rockets_client = self.rockets_client
+                brayns = self
 
                 class ImageStreamObserver(Observer):
                     """Update a Image widget with the JPEG stream from Brayns."""
@@ -157,6 +158,9 @@ class BaseClient:
 
                         def _show_image(value):
                             self.image.value = base64decode(value['data'])
+                            viewport = brayns.application_parameters.viewport
+                            self.image.width = viewport[0]
+                            self.image.height = viewport[1]
                             display(self.image)
 
                         if isinstance(rockets_client, rockets.AsyncClient):
@@ -166,6 +170,9 @@ class BaseClient:
                             _show_image(rockets_client.request('image-jpeg'))
 
                     def on_next(self, value):
+                        viewport = brayns.application_parameters.viewport
+                        self.image.width = viewport[0]
+                        self.image.height = viewport[1]
                         self.image.value = value
 
                     def on_completed(self):

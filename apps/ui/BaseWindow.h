@@ -96,14 +96,6 @@ public:
     /*! clear the frame buffer color and depth bits */
     void clearPixels();
 
-    /*! draw uint pixels into the GLUT window (assumes window and buffer
-     * dimensions are equal) */
-    void drawPixels(const int* framebuffer);
-
-    /*! draw float4 pixels into the GLUT window (assumes window and buffer
-     * dimensions are equal) */
-    void drawPixels(const Vector3f* framebuffer);
-
     virtual void keypress(char key, const Vector2f& where);
     virtual void specialkey(int key, const Vector2f& where);
 
@@ -149,8 +141,10 @@ protected:
     bool _fullScreen;
     Vector2ui _windowPosition;
 
+    GLuint _fbTexture{0};
+
 private:
-    void _exitApplication();
+    void _onExit();
     void _toggleFrameBuffer();
 
     // ------------------------------------------------------------------

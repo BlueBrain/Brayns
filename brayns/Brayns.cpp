@@ -177,9 +177,9 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->getStatistics().setFPS(_lastFPS);
 
-        _engine->postRender();
-
         _pluginManager.postRender();
+
+        _engine->postRender();
 
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();
@@ -200,7 +200,7 @@ struct Brayns::Impl : public PluginAPI
         FrameBuffer& frameBuffer = _engine->getFrameBuffer();
         frameBuffer.map();
         const Vector2i& frameSize = frameBuffer.getSize();
-        uint8_t* colorBuffer = frameBuffer.getColorBuffer();
+        const auto colorBuffer = frameBuffer.getColorBuffer();
         if (colorBuffer)
         {
             const size_t size =
@@ -209,7 +209,7 @@ struct Brayns::Impl : public PluginAPI
             renderOutput.colorBufferFormat = frameBuffer.getFrameBufferFormat();
         }
 
-        float* depthBuffer = frameBuffer.getDepthBuffer();
+        const auto depthBuffer = frameBuffer.getDepthBuffer();
         if (depthBuffer)
         {
             const size_t size = frameSize.x() * frameSize.y();
@@ -460,8 +460,9 @@ private:
             'g', "Enable/Disable animation playback",
             std::bind(&Brayns::Impl::_toggleAnimationPlayback, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'x', "Set animation frame to " +
-                     std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
+            'x',
+            "Set animation frame to " +
+                std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
             std::bind(&Brayns::Impl::_defaultAnimationFrame, this));
         _keyboardHandler.registerKeyboardShortcut(
             '|', "Create cache file ",

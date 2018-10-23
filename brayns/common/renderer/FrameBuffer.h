@@ -38,13 +38,13 @@ public:
     virtual void map() = 0;
     virtual void unmap() = 0;
 
-    virtual uint8_t* getColorBuffer() = 0;
-    virtual size_t getColorDepth();
-    virtual float* getDepthBuffer() = 0;
+    virtual const uint8_t* getColorBuffer() const = 0;
+    virtual size_t getColorDepth() const;
+    virtual const float* getDepthBuffer() const = 0;
 
     virtual void resize(const Vector2ui& frameSize) = 0;
 
-    Vector2ui getSize() const { return _frameSize; }
+    virtual Vector2ui getSize() const { return _frameSize; }
     virtual void setAccumulation(const bool accumulation)
     {
         _accumulation = accumulation;
@@ -57,6 +57,9 @@ public:
 
     void incrementAccumFrames() { ++_accumFrames; }
     size_t numAccumFrames() const { return _accumFrames; }
+
+    virtual void setSubsampling(const size_t) {}
+
 protected:
     Vector2ui _frameSize;
     FrameBufferFormat _frameBufferFormat;

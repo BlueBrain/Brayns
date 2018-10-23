@@ -58,7 +58,7 @@ ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
 {
 #ifdef BRAYNS_USE_LIBJPEGTURBO
     frameBuffer.map();
-    auto colorBuffer = frameBuffer.getColorBuffer();
+    const auto colorBuffer = frameBuffer.getColorBuffer();
     if (!colorBuffer)
     {
         frameBuffer.unmap();

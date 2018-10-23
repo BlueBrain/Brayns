@@ -48,6 +48,11 @@ void Engine::reshape(const Vector2ui& frameSize)
 
 void Engine::commit()
 {
+    const auto spp =
+        _parametersManager.getRenderingParameters().getSamplesPerPixel();
+    const size_t factor = spp >= 0 ? 1 : std::pow(2, std::abs(spp));
+    _frameBuffer->setSubsampling(factor);
+
     _renderer->commit();
 }
 
@@ -59,6 +64,7 @@ void Engine::render()
 void Engine::postRender()
 {
     _writeFrameToFile();
+    _frameBuffer->incrementAccumFrames();
 }
 
 Renderer& Engine::getRenderer()
