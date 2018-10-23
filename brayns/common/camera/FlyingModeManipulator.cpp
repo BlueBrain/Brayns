@@ -63,14 +63,18 @@ void FlyingModeManipulator::dragLeft(const Vector2i& to, const Vector2i& from)
 
 void FlyingModeManipulator::dragRight(const Vector2i& to, const Vector2i& from)
 {
-    const float distance = -(to.y() - from.y()) * getMotionSpeed();
+    const float distance = -(to.y() - from.y()) *
+                           DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER *
+                           getMotionSpeed();
     translate(Vector3f::forward() * distance);
 }
 
 void FlyingModeManipulator::dragMiddle(const Vector2i& to, const Vector2i& from)
 {
-    const float x = (to.x() - from.x()) * getMotionSpeed();
-    const float y = (to.y() - from.y()) * getMotionSpeed();
+    const float x = (to.x() - from.x()) *
+                    DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getMotionSpeed();
+    const float y = (to.y() - from.y()) *
+                    DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER * getMotionSpeed();
     translate({-x, y, 0.f});
 }
 

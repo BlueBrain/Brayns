@@ -23,6 +23,8 @@
 
 #include <brayns/common/types.h>
 
+#define DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER 0.25f
+
 namespace brayns
 {
 /**
@@ -62,11 +64,11 @@ protected:
 
     /*! camera speed modifier - affects how many units the camera _moves_ with
      * each unit on the screen */
-    float _motionSpeed;
+    double _motionSpeed;
 
     /*! camera rotation speed modifier - affects how many units the camera
      * _rotates_ with each unit on the screen */
-    float _rotationSpeed;
+    double _rotationSpeed;
 
     void translate(const Vector3f& v);
 };

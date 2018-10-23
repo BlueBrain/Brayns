@@ -39,24 +39,28 @@ Camera& Camera::operator=(const Camera& rhs)
     return *this;
 }
 
-void Camera::set(const Vector3d& position, const Quaterniond& orientation)
+void Camera::set(const Vector3d& position, const Quaterniond& orientation,
+                 const Vector3d& target)
 {
     setPosition(position);
     setOrientation(orientation);
+    setTarget(target);
 }
 
 void Camera::setInitialState(const Vector3d& position,
-                             const Quaterniond& orientation)
+                             const Quaterniond& orientation,
+                             const Vector3d& target)
 {
     _initialPosition = position;
+    _initialTarget = target;
     _initialOrientation = orientation;
     _initialOrientation.normalize();
-    set(position, orientation);
+    set(position, orientation, target);
 }
 
 void Camera::reset()
 {
-    set(_initialPosition, _initialOrientation);
+    set(_initialPosition, _initialOrientation, _initialTarget);
 }
 
 std::ostream& operator<<(std::ostream& os, Camera& camera)

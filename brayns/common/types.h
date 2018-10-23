@@ -290,6 +290,7 @@ struct RenderInput
     Vector2i windowSize;
 
     Vector3d position;
+    Vector3d target;
     Quaterniond orientation;
 };
 

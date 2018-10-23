@@ -304,7 +304,8 @@ struct Brayns::Impl : public PluginAPI
 
     bool commit(const RenderInput& renderInput)
     {
-        _engine->getCamera().set(renderInput.position, renderInput.orientation);
+        _engine->getCamera().set(renderInput.position, renderInput.orientation,
+                                 renderInput.target);
         _parametersManager.getApplicationParameters().setWindowSize(
             renderInput.windowSize);
 

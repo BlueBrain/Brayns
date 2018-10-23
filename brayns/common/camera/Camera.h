@@ -51,11 +51,13 @@ public:
        @param quat The x, y, z, w values of the quaternion describing
               the camera orientation
     */
-    BRAYNS_API void set(const Vector3d& position,
-                        const Quaterniond& orientation);
+    BRAYNS_API void set(const Vector3d& position, const Quaterniond&,
+                        const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
 
     BRAYNS_API void setInitialState(const Vector3d& position,
-                                    const Quaterniond& orientation);
+                                    const Quaterniond& orientation,
+                                    const Vector3d& target = Vector3d(0.0, 0.0,
+                                                                      0.0));
 
     /**
        Sets camera position
@@ -66,10 +68,20 @@ public:
         _updateValue(_position, position);
     }
     /**
+       Sets camera target
+       @param position The x, y, z coordinates of the camera target
+    */
+    void setTarget(const Vector3d& target) { _updateValue(_target, target); }
+    /**
        Gets camera position
        @return The x, y, z coordinates of the camera position
     */
     const Vector3d& getPosition() const { return _position; }
+    /**
+       Gets camera target
+       @return The x, y, z coordinates of the camera target
+    */
+    const Vector3d& getTarget() const { return _target; }
     /**
        Sets camera orientation quaternion.
        @param quat The orientation quaternion
@@ -99,9 +111,11 @@ public:
 
     virtual bool isSideBySideStereo() const { return false; }
 private:
+    Vector3d _target;
     Vector3d _position;
     Quaterniond _orientation;
 
+    Vector3d _initialTarget;
     Vector3d _initialPosition;
     Quaterniond _initialOrientation;
 

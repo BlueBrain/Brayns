@@ -37,14 +37,15 @@ AbstractManipulator::AbstractManipulator(Camera& camera,
                                          const Boxd& boundingBox)
     : _camera(camera)
     , _keyboardHandler(keyboardHandler)
-    , _motionSpeed{DEFAULT_MOTION_SPEED}
+    , _motionSpeed{DEFAULT_MOTION_SPEED * boundingBox.getSize().find_max()}
     , _rotationSpeed{DEFAULT_ROTATION_SPEED}
 {
     auto position = boundingBox.getCenter();
+    auto target = position;
     position.z() += boundingBox.getSize().find_max();
 
     const Quaterniond identity;
-    _camera.setInitialState(position, identity);
+    _camera.setInitialState(position, identity, target);
 
     BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
     BRAYNS_INFO << "World center      : " << boundingBox.getCenter()
@@ -62,7 +63,7 @@ float AbstractManipulator::getRotationSpeed() const
 
 float AbstractManipulator::getWheelSpeed() const
 {
-    return getMotionSpeed() * 10.f;
+    return getMotionSpeed() * 5.f;
 }
 
 float AbstractManipulator::getMotionSpeed() const
