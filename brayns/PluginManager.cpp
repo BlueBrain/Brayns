@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Juan Hernando <cyrille.favreau@epfl.ch>
+ * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *

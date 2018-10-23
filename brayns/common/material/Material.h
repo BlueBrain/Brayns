@@ -22,7 +22,7 @@
 #define MATERIAL_H
 
 #include <brayns/api.h>
-#include <brayns/common/BaseObject.h>
+#include <brayns/common/PropertyObject.h>
 #include <brayns/common/material/Texture2D.h>
 #include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
@@ -46,9 +46,11 @@ enum TextureType
 
 typedef std::map<TextureType, Texture2DPtr> TextureDescriptors;
 
-class Material : public BaseObject
+class Material : public PropertyObject
 {
 public:
+    BRAYNS_API Material();
+
     /**
      * Called after material change
      */
@@ -99,14 +101,6 @@ public:
         _updateValue(_glossiness, value);
     }
     BRAYNS_API double getGlossiness() const { return _glossiness; }
-    BRAYNS_API void setCastSimulationData(bool value)
-    {
-        _updateValue(_castSimulationData, value);
-    }
-    BRAYNS_API bool getCastSimulationData() const
-    {
-        return _castSimulationData;
-    }
     BRAYNS_API const TextureDescriptors& getTextureDescriptors() const
     {
         return _textureDescriptors;
@@ -128,7 +122,6 @@ protected:
     double _refractionIndex{1.};
     double _emission{0.};
     double _glossiness{1.};
-    bool _castSimulationData{false};
     TexturesMap _textures;
     TextureDescriptors _textureDescriptors;
 

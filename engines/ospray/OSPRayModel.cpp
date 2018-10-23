@@ -537,6 +537,46 @@ bool OSPRayModel::commitTransferFunction()
     return dirtyTransferFunction || dirtySimulationData;
 }
 
+void OSPRayModel::commitMaterials(const std::string& renderer)
+{
+    if (renderer.empty())
+        throw std::runtime_error(
+            "Materials cannot be instanced with an empty renderer name");
+    if (_renderer != renderer)
+    {
+        for (auto kv : _materials)
+        {
+            auto& material = *kv.second;
+            static_cast<OSPRayMaterial&>(material).commit(renderer);
+        }
+        _renderer = renderer;
+
+        for (auto& map : {_ospSpheres, _ospCylinders, _ospCones, _ospMeshes,
+                          _ospStreamlines, _ospSDFGeometries})
+        {
+            auto matIt = _materials.begin();
+            auto geomIt = map.begin();
+            while (matIt != _materials.end() && geomIt != map.end())
+            {
+                while (matIt->first < geomIt->first)
+                    ++matIt;
+                if (matIt->first != geomIt->first)
+                {
+                    // This shouldn't happen
+                    BRAYNS_ERROR << "Material for geometry missing"
+                                 << std::endl;
+                    ++geomIt;
+                    continue;
+                }
+                auto& material = static_cast<OSPRayMaterial&>(*matIt->second);
+                ospSetMaterial(geomIt->second, material.getOSPMaterial());
+                ospCommit(geomIt->second);
+                ++geomIt;
+            }
+        }
+    }
+}
+
 MaterialPtr OSPRayModel::createMaterial(const size_t materialId,
                                         const std::string& name)
 {

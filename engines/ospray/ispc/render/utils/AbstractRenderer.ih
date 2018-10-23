@@ -28,10 +28,8 @@
 #include <ospray/SDK/render/Renderer.ih>
 #include <ospray/SDK/texture/Texture2D.ih>
 
-// obj renderer
-#include "../ExtendedOBJMaterial.ih"
-
 // Brayns
+#include "../DefaultMaterial.ih"
 #include "Consts.ih"
 #include "RandomGenerator.ih"
 #include "SkyBox.ih"
@@ -43,16 +41,16 @@ struct AbstractRenderer
     // Rendering attributes
     const uniform Light* uniform* uniform lights;
     uint32 numLights;
-    ExtendedOBJMaterial* bgMaterial;
+    DefaultMaterial* bgMaterial;
     float timestamp;
 };
 
 /**
-    Composes source and destination colors according to specified alpha
+   Composes source and destination colors according to specified alpha
    correction
-    @param src Source RGBA color
-    @param dst Returned destination RGBA color
-    @param alphaCorrection Alpha correction used to blend colors
+   @param src Source RGBA color
+   @param dst Returned destination RGBA color
+   @param alphaCorrection Alpha correction used to blend colors
 */
 inline void composite(const varying vec4f& src, varying vec4f& dst,
                       const varying float alphaCorrection)
@@ -67,13 +65,13 @@ inline void composite(const varying vec4f& src, varying vec4f& dst,
 }
 
 /**
-    Returns the refracted vector according to the direction of the incident ray,
+   Returns the refracted vector according to the direction of the incident ray,
    he normal to the surface, and localRefraction indices
-    @param direction Direction of the incident ray
-    @param normal Normal to the surface
-    @param n1 In localRefraction index
-    @param n2 Out localRefraction index
-    @return Refracted vector
+   @param direction Direction of the incident ray
+   @param normal Normal to the surface
+   @param n1 In localRefraction index
+   @param n2 Out localRefraction index
+   @return Refracted vector
 */
 inline vec3f refractedVector(const varying vec3f& direction,
                              const varying vec3f& normal,

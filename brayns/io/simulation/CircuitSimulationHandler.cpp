@@ -21,6 +21,7 @@
 #include "CircuitSimulationHandler.h"
 
 #include <brayns/common/log.h>
+#include <brayns/common/material/Material.h>
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 
@@ -69,6 +70,24 @@ CircuitSimulationHandler::CircuitSimulationHandler(
 
 CircuitSimulationHandler::~CircuitSimulationHandler()
 {
+    for (const auto& material : _materials)
+        material->setCurrentType("default");
+}
+
+void CircuitSimulationHandler::bind(const MaterialPtr& material)
+{
+    material->setCurrentType("simulation");
+    _materials.push_back(material);
+}
+
+void CircuitSimulationHandler::unbind(const MaterialPtr& material)
+{
+    auto i = std::find(_materials.begin(), _materials.end(), material);
+    if (i != _materials.end())
+    {
+        material->setCurrentType("default");
+        _materials.erase(i);
+    }
 }
 
 bool CircuitSimulationHandler::isReady() const

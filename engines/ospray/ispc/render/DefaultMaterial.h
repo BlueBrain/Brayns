@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -27,45 +27,36 @@
 
 namespace brayns
 {
-namespace obj
-{
 typedef ospray::vec3f Color;
 
-struct ExtendedOBJMaterial : public ospray::Material
+struct DefaultMaterial : public ospray::Material
 {
     /*! opacity: 0 (transparent), 1 (opaque) */
     ospray::Texture2D* map_d;
-    ospray::affine2f xform_d;
     float d;
 
     /*! refraction index */
     ospray::Texture2D* map_Refraction;
-    ospray::affine2f xform_Refraction;
     float refraction;
 
     /*! reflection index */
     ospray::Texture2D* map_Reflection;
-    ospray::affine2f xform_Reflection;
     float reflection;
 
     /*! radiance: 0 (none), 1 (full) */
     ospray::Texture2D* map_a;
-    ospray::affine2f xform_a;
     float a;
 
     /*! diffuse  reflectance: 0 (none), 1 (full) */
     ospray::Texture2D* map_Kd;
-    ospray::affine2f xform_Kd;
     Color Kd;
 
     /*! specular reflectance: 0 (none), 1 (full) */
     ospray::Texture2D* map_Ks;
-    ospray::affine2f xform_Ks;
     Color Ks;
 
     /*! specular exponent: 0 (diffuse), infinity (specular) */
     ospray::Texture2D* map_Ns;
-    ospray::affine2f xform_Ns;
     float Ns;
 
     /*! Glossiness: 0 (none), 1 (full) */
@@ -73,19 +64,12 @@ struct ExtendedOBJMaterial : public ospray::Material
 
     /*! bump map */
     ospray::Texture2D* map_Bump;
-    ospray::affine2f xform_Bump;
-    ospray::linear2f rot_Bump;
 
-    /*! Casts simulation data */
-    bool castSimulationData;
-
-    std::string toString() const final
+    std::string toString() const override
     {
-        return "brayns::extendedobjrenderer::ExtendedOBJMaterial";
+        return "brayns::DefaultMaterial";
     }
 
-    void commit() final;
+    void commit() override;
 };
-
-} // ::brayns::obj
 } // ::brayns

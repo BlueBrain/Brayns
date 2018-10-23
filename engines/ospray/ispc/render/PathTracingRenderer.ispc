@@ -22,9 +22,9 @@
  */
 
 // Brayns
+#include "utils/AbstractRenderer.ih"
 #include <ospray/SDK/common/Ray.ih>
 #include <ospray/SDK/render/util.ih>
-#include "utils/AbstractRenderer.ih"
 
 struct PathTracingRenderer
 {
@@ -113,8 +113,8 @@ inline vec3f PathTracingRenderer_shadeRay(
                       DG_MATERIALID | DG_COLOR);
 
     uniform Material* material = dg.material;
-    uniform ExtendedOBJMaterial* objMaterial =
-        (uniform ExtendedOBJMaterial*)material;
+    uniform DefaultMaterial* objMaterial =
+        (uniform DefaultMaterial*)material;
 
     vec3f Kd = make_vec3f(0.f);
     if (!objMaterial)
@@ -160,8 +160,8 @@ inline vec3f PathTracingRenderer_shadeRay(
 
         const float epsilon = dg.epsilon;
         uniform Material* material = dg.material;
-        uniform ExtendedOBJMaterial* objMaterial =
-            (uniform ExtendedOBJMaterial*)material;
+        uniform DefaultMaterial* objMaterial =
+            (uniform DefaultMaterial*)material;
         if (!objMaterial)
             Kd = make_vec3f(dg.color);
         else
@@ -254,7 +254,7 @@ export void PathTracingRenderer_set(
     uniform PathTracingRenderer* uniform self =
         (uniform PathTracingRenderer * uniform)_self;
 
-    self->super.bgMaterial = (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+    self->super.bgMaterial = (uniform DefaultMaterial * uniform)bgMaterial;
     self->super.timestamp = timestamp;
     self->super.super.spp = spp;
 

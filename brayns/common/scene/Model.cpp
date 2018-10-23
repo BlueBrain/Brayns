@@ -34,6 +34,26 @@
 
 namespace brayns
 {
+namespace
+{
+void _bindMaterials(const AbstractSimulationHandlerPtr& simulationHandler,
+                    MaterialMap& materials)
+{
+    if (!simulationHandler)
+        return;
+    for (const auto& material : materials)
+        simulationHandler->bind(material.second);
+}
+
+void _unbindMaterials(const AbstractSimulationHandlerPtr& simulationHandler,
+                      MaterialMap& materials)
+{
+    if (!simulationHandler)
+        return;
+    for (const auto& material : materials)
+        simulationHandler->unbind(material.second);
+}
+}
 ModelParams::ModelParams(const std::string& path)
     : _name(boost::filesystem::basename(path))
     , _path(path)
@@ -496,7 +516,7 @@ void Model::_updateBounds()
     _bounds.merge(_volumesBounds);
 }
 
-void Model::createMissingMaterials(const bool castSimulationData)
+void Model::createMissingMaterials()
 {
     std::set<size_t> materialIds;
     for (auto& spheres : _spheres)
@@ -515,16 +535,19 @@ void Model::createMissingMaterials(const bool castSimulationData)
         const auto it = _materials.find(materialId);
         if (it == _materials.end())
         {
-            auto material =
-                createMaterial(materialId, std::to_string(materialId));
-            material->setCastSimulationData(castSimulationData);
+            auto material = createMaterial(materialId,
+                                           std::to_string(materialId));
         }
     }
+    _bindMaterials(_simulationHandler, _materials);
 }
 
 void Model::setSimulationHandler(AbstractSimulationHandlerPtr handler)
 {
+    if (_simulationHandler != handler)
+        _unbindMaterials(_simulationHandler, _materials);
     _simulationHandler = handler;
+    _bindMaterials(_simulationHandler, _materials);
 }
 
 AbstractSimulationHandlerPtr Model::getSimulationHandler() const

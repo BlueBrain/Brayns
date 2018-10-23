@@ -27,7 +27,7 @@
 uniform bool seedInitialized = false;
 struct RNGState rngState;
 
-inline float getRandomValue(varying ScreenSample&, const int)
+inline float getRandomValue(const varying ScreenSample&, const int)
 {
     float r;
 #ifdef HIGH_QUALITY_RANDOM
@@ -40,8 +40,8 @@ inline float getRandomValue(varying ScreenSample&, const int)
     return r;
 }
 
-inline vec3f getRandomVector(varying ScreenSample& sample, const vec3f& normal,
-                             const int randomNumber)
+inline vec3f getRandomVector(const varying ScreenSample& sample,
+                             const vec3f& normal, const int randomNumber)
 {
     if (!seedInitialized)
     {
@@ -1121,7 +1121,7 @@ inline float rotate(float x, const float dx)
     return x;
 }
 
-float getRandomValue(varying ScreenSample& sample, const int randomNumber)
+float getRandomValue(const varying ScreenSample& sample, const int randomNumber)
 {
     const int x = sample.sampleID.x % RANDOM_SET_SIZE;
     const int y = sample.sampleID.y % RANDOM_SET_SIZE;
@@ -1129,8 +1129,8 @@ float getRandomValue(varying ScreenSample& sample, const int randomNumber)
 }
 
 inline vec3f getRandomVector(const unsigned int frameBufferWidth,
-                             varying ScreenSample& sample, const vec3f& normal,
-                             const int randomNumber)
+                             const varying ScreenSample& sample,
+                             const vec3f& normal, const int randomNumber)
 {
     RandomTEA rng_state;
     varying RandomTEA* const uniform rng = &rng_state;
@@ -1191,7 +1191,7 @@ vec3f ortho(const vec3f& v)
 }
 
 vec3f getConeSample(const vec3f& direction, varying RandomTEA* uniform rng,
-                    float extent)
+                    const float extent)
 {
     const vec2f s = RandomTEA__getFloats(rng);
     // Formula 34 in GI Compendium
@@ -1207,7 +1207,7 @@ vec3f getConeSample(const vec3f& direction, varying RandomTEA* uniform rng,
 }
 
 varying RandomTEA* uniform createRandomNumberGenerator(
-    const uniform Renderer* uniform self, varying ScreenSample& sample)
+    const uniform Renderer* uniform self, const varying ScreenSample& sample)
 {
     // create and seed random number generator (RNG)
     uniform FrameBuffer* uniform fb = self->fb;

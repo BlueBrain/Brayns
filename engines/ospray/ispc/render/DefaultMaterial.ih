@@ -28,7 +28,7 @@
 #include <ospray/SDK/texture/TextureParam.ih>
 #include <ospray/SDK/volume/Volume.ih>
 
-struct ExtendedOBJMaterial
+struct DefaultMaterial
 {
     uniform Material super;
 
@@ -40,14 +40,17 @@ struct ExtendedOBJMaterial
     vec3f Ks;
     TextureParam map_Ns;
     float Ns;
+
     TextureParam map_Bump;
     linear2f rot_Bump;
+
     uniform Volume *uniform volume;
 
     float glossiness;
-    bool castSimulationData;
+
     TextureParam map_a;
     float a;
+
     TextureParam map_refraction;
     float refraction;
     TextureParam map_reflection;

@@ -25,12 +25,6 @@
 // ispc exports
 #include "BasicRenderer_ispc.h"
 
-#define OSP_REGISTER_EXRENDERER(InternalClassName, external_name)          \
-    extern "C" ospray::Renderer* ospray_create_renderer__##external_name() \
-    {                                                                      \
-        return new InternalClassName;                                      \
-    }
-
 namespace brayns
 {
 void BasicRenderer::commit()
@@ -46,6 +40,6 @@ BasicRenderer::BasicRenderer()
     ispcEquivalent = ispc::BasicRenderer_create(this);
 }
 
-OSP_REGISTER_EXRENDERER(BasicRenderer, BASIC);
-OSP_REGISTER_EXRENDERER(BasicRenderer, basic);
+OSP_REGISTER_RENDERER(BasicRenderer, BASIC);
+OSP_REGISTER_RENDERER(BasicRenderer, basic);
 } // ::brayns
