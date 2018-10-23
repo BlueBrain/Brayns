@@ -250,7 +250,7 @@ protected:
     float _radiusCorrection;
     ColorScheme _colorScheme;
     GeometryQuality _geometryQuality;
-    BVHType _defaultBVHType = BVHType::none;
+    BVHType _defaultBVHType = BVHType::default_;
     MorphologySectionTypes _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
     size_t _metaballsGridSize;

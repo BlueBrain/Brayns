@@ -376,10 +376,11 @@ struct RpcParameterDescription : RpcDescription
 
 enum class BVHType
 {
-    dynamic,
-    compact,
-    robust,
-    none
+    default_ = 1 << 0,
+    static_ = 1 << 1,
+    dynamic = 1 << 2,
+    compact = 1 << 3,
+    robust = 1 << 4
 };
 }
 

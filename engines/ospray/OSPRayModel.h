@@ -68,7 +68,7 @@ private:
     void _commitSDFGeometries();
     bool _commitTransferFunction();
     bool _commitSimulationData();
-    void _commitBVHType();
+    void _setBVHType();
 
     AnimationParameters& _animationParameters;
     VolumeParameters& _volumeParameters;

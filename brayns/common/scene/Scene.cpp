@@ -146,7 +146,7 @@ size_t Scene::addModel(ModelDescriptorPtr model)
     const auto defaultBVH =
         _parametersManager.getGeometryParameters().getDefaultBVHType();
     const auto modelBVH = model->getBVHType();
-    const auto bvhType = modelBVH != BVHType::none ? modelBVH : defaultBVH;
+    const auto bvhType = modelBVH != BVHType::default_ ? modelBVH : defaultBVH;
 
     model->getModel().setBVHType(bvhType);
     model->getModel().buildBoundingBox();

@@ -102,7 +102,7 @@ public:
 protected:
     std::string _name;
     std::string _path;
-    BVHType _bvhType = BVHType::none;
+    BVHType _bvhType = BVHType::default_;
 
     SERIALIZATION_FRIEND(ModelParams)
 };
@@ -455,7 +455,7 @@ protected:
     bool _volumesDirty{true};
     Boxd _volumesBounds;
 
-    BVHType _bvhType = BVHType::none;
+    BVHType _bvhType = BVHType::default_;
     size_t _sizeInBytes{0};
 
     SERIALIZATION_FRIEND(Model)

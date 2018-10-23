@@ -24,7 +24,9 @@
 #include <brayns/common/camera/InspectCenterManipulator.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/FrameBuffer.h>
+#include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #define BOOST_TEST_MODULE brayns
@@ -119,4 +121,24 @@ BOOST_AUTO_TEST_CASE(defaults)
     defaultBoundingBox.merge(brayns::Vector3d(1, 1, 1));
     BOOST_CHECK_EQUAL(scene.getBounds(), defaultBoundingBox);
     BOOST_CHECK(geomParams.getMemoryMode() == brayns::MemoryMode::shared);
+}
+
+BOOST_AUTO_TEST_CASE(bvh_type)
+{
+    auto& testSuite = boost::unit_test::framework::master_test_suite();
+    const char* app = testSuite.argv[0];
+    const char* argv[] = {
+        app,       "demo", "--default-bvh-flag", "robust", "--default-bvh-flag",
+        "compact",
+    };
+    const int argc = sizeof(argv) / sizeof(char*);
+    brayns::Brayns brayns(argc, argv);
+
+    auto model = brayns.getEngine().getScene().getModel(0);
+    const auto bvhTypeModel = model->getBVHType();
+    const auto bvhTypeModelInternal = model->getModel().getBVHType();
+
+    BOOST_CHECK(bvhTypeModel == brayns::BVHType::default_);
+    BOOST_CHECK(enumHas(bvhTypeModelInternal, brayns::BVHType::robust));
+    BOOST_CHECK(enumHas(bvhTypeModelInternal, brayns::BVHType::compact));
 }

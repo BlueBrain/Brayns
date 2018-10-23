@@ -29,6 +29,8 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
+#include <brayns/common/utils/Utils.h>
+
 namespace brayns
 {
 namespace
@@ -510,27 +512,15 @@ bool OSPRayModel::_commitTransferFunction()
     return true;
 }
 
-void OSPRayModel::_commitBVHType()
+void OSPRayModel::_setBVHType()
 {
-    ospSet1i(_model, "dynamicMode", 0);
-    ospSet1i(_model, "compactMode", 0);
-    ospSet1i(_model, "robustMode", 0);
+    const bool dynamicMode = enumHas(_bvhType, BVHType::dynamic);
+    const bool compactMode = enumHas(_bvhType, BVHType::compact);
+    const bool robustMode = enumHas(_bvhType, BVHType::robust);
 
-    switch (_bvhType)
-    {
-    case BVHType::dynamic:
-        ospSet1i(_model, "dynamicMode", 1);
-        break;
-    case BVHType::compact:
-        ospSet1i(_model, "compactMode", 1);
-        break;
-    case BVHType::robust:
-        ospSet1i(_model, "robustMode", 1);
-        break;
-    case BVHType::none:
-    default:
-        break;
-    }
+    ospSet1i(_model, "dynamicMode", dynamicMode ? 1 : 0);
+    ospSet1i(_model, "compactMode", compactMode ? 1 : 0);
+    ospSet1i(_model, "robustMode", robustMode ? 1 : 0);
 }
 
 void OSPRayModel::commitGeometry()
@@ -589,7 +579,7 @@ void OSPRayModel::commitGeometry()
         _commitSDFGeometries();
 
     _updateBounds();
-    _commitBVHType();
+    _setBVHType();
 
     // handled by the scene
     _instancesDirty = false;
