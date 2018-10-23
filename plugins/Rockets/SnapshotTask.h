@@ -122,6 +122,7 @@ public:
             progress(msg.str(), 1.f / _frameBuffer->numAccumFrames(),
                      float(_frameBuffer->numAccumFrames()) /
                          _params.samplesPerPixel);
+            _frameBuffer->incrementAccumFrames();
         }
 
         return _imageGenerator.createImage(*_frameBuffer, _params.format,

@@ -198,35 +198,11 @@ void OSPRayEngine::preRender()
 
 Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size) const
 {
-    const auto isSideBySideStereo = _camera->isSideBySideStereo();
+    // In case of 3D stereo vision, make sure the width is even
+    if (_camera->isSideBySideStereo() && size.x() % 2 != 0)
+        return {size.x() - 1, size.y()};
 
-    if (!haveDeflectPixelOp())
-    {
-        Vector2f result = size;
-        if (isSideBySideStereo && size.x() % 2 != 0)
-        {
-            // In case of 3D stereo vision, make sure the width is even
-            result.x() = size.x() - 1;
-        }
-        return result;
-    }
-
-    Vector2f result = size;
-    if (isSideBySideStereo)
-    {
-        if (size.x() % (TILE_SIZE * 2) != 0)
-            result.x() = size.x() - size.x() % (TILE_SIZE * 2);
-    }
-    else
-    {
-        if (size.x() % TILE_SIZE != 0)
-            result.x() = size.x() - size.x() % TILE_SIZE;
-    }
-
-    if (size.y() % TILE_SIZE != 0)
-        result.y() = size.y() - size.y() % TILE_SIZE;
-
-    return result;
+    return size;
 }
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const

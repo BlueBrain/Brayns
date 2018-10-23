@@ -31,7 +31,7 @@ FrameBuffer::FrameBuffer(const Vector2ui& frameSize,
 {
 }
 
-size_t FrameBuffer::getColorDepth()
+size_t FrameBuffer::getColorDepth() const
 {
     switch (_frameBufferFormat)
     {

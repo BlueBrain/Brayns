@@ -31,8 +31,9 @@ namespace brayns
 class OSPRayFrameBuffer : public FrameBuffer
 {
 public:
-    OSPRayFrameBuffer(const Vector2ui& frameSize, FrameBufferFormat colorDepth,
-                      bool accumulation = true);
+    OSPRayFrameBuffer(const Vector2ui& frameSize,
+                      const FrameBufferFormat colorDepth,
+                      const bool accumulation);
     ~OSPRayFrameBuffer();
 
     void clear() final;
@@ -40,26 +41,36 @@ public:
     void map() final;
     void unmap() final;
     void setAccumulation(const bool accumulation) final;
-
+    void setSubsampling(const size_t) final;
+    Vector2ui getSize() const final
+    {
+        return _useSubsampling() ? _subsamplingSize() : _frameSize;
+    }
     std::unique_lock<std::mutex> getScopeLock()
     {
         return std::unique_lock<std::mutex>(_mapMutex);
     }
-    uint8_t* getColorBuffer() final { return _colorBuffer; }
-    float* getDepthBuffer() final { return _depthBuffer; }
-    OSPFrameBuffer impl() { return _frameBuffer; }
+    const uint8_t* getColorBuffer() const final { return _colorBuffer; }
+    const float* getDepthBuffer() const final { return _depthBuffer; }
+    OSPFrameBuffer impl() { return _currentFB(); }
     void enableDeflectPixelOp();
     void setStreamingParams(const StreamParameters& params, bool stereo);
 
 private:
     void _recreate();
+    void _recreateSubsamplingBuffer();
     void _unmapUnsafe();
     void _mapUnsafe();
+    bool _useSubsampling() const;
+    OSPFrameBuffer _currentFB() const;
+    Vector2ui _subsamplingSize() const;
 
-    OSPFrameBuffer _frameBuffer;
-    uint8_t* _colorBuffer;
-    float* _depthBuffer;
+    OSPFrameBuffer _frameBuffer{nullptr};
+    OSPFrameBuffer _subsamplingFrameBuffer{nullptr};
+    uint8_t* _colorBuffer{nullptr};
+    float* _depthBuffer{nullptr};
     OSPPixelOp _pixelOp{nullptr};
+    size_t _subsamplingFactor{1};
 
     // protect map/unmap vs ospRenderFrame
     std::mutex _mapMutex;

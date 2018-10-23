@@ -136,9 +136,7 @@ BaseWindow::BaseWindow(Brayns& brayns, const FrameBufferMode frameBufferMode)
     BRAYNS_INFO << "Motion speed :" << motionSpeed << std::endl;
 }
 
-BaseWindow::~BaseWindow()
-{
-}
+BaseWindow::~BaseWindow() {}
 
 void BaseWindow::mouseButton(const int button, const bool released,
                              const Vector2i& pos)
@@ -300,8 +298,30 @@ void BaseWindow::display()
 
         if (buffer)
         {
-            glDrawPixels(renderOutput.frameSize.x(), renderOutput.frameSize.y(),
-                         format, type, buffer);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(0.0f, windowSize.x(), 0.0f, windowSize.y(), -1.0f, 1.0f);
+
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glViewport(0, 0, windowSize.x(), windowSize.y());
+
+            glBindTexture(GL_TEXTURE_2D, _fbTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, renderOutput.frameSize.x(),
+                         renderOutput.frameSize.y(), 0, GL_RGBA, type, buffer);
+
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.f, 0.f);
+            glVertex3f(0, 0, 0);
+            glTexCoord2f(0.f, 1.f);
+            glVertex3f(0, windowSize.y(), 0);
+            glTexCoord2f(1.f, 1.f);
+            glVertex3f(windowSize.x(), windowSize.y(), 0);
+            glTexCoord2f(1.f, 0.f);
+            glVertex3f(windowSize.x(), 0, 0);
+            glEnd();
+
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
     }
     else
@@ -363,20 +383,6 @@ void BaseWindow::clearPixels()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void BaseWindow::drawPixels(const int* framebuffer)
-{
-    glDrawPixels(_windowSize.x(), _windowSize.y(), GL_RGBA, GL_UNSIGNED_BYTE,
-                 framebuffer);
-    glutSwapBuffers();
-}
-
-void BaseWindow::drawPixels(const Vector3f* framebuffer)
-{
-    glDrawPixels(_windowSize.x(), _windowSize.y(), GL_RGBA, GL_FLOAT,
-                 framebuffer);
-    glutSwapBuffers();
-}
-
 void BaseWindow::setTitle(const char* title)
 {
     assert(_windowID >= 0);
@@ -406,6 +412,13 @@ void BaseWindow::create(const char* title, const size_t width,
         _screenSpaceProcessor.init(width, height);
 
     _registerKeyboardShortcuts();
+
+    glGenTextures(1, &_fbTexture);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, _fbTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void BaseWindow::keypress(const char key, const Vector2f&)
@@ -417,6 +430,7 @@ void BaseWindow::keypress(const char key, const Vector2f&)
         break;
     case 27:
     case 'Q':
+        _onExit();
 #ifdef __APPLE__
         exit(0);
 #else
@@ -483,6 +497,15 @@ void BaseWindow::_renderBitmapString(const float x, const float y,
     glRasterPos3f(-1.f, -1.f, 0.f);
 }
 #endif
+
+void BaseWindow::_onExit()
+{
+    if (_fbTexture)
+    {
+        glDeleteTextures(1, &_fbTexture);
+        _fbTexture = 0;
+    }
+}
 
 void BaseWindow::_toggleFrameBuffer()
 {

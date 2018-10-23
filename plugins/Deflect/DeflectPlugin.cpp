@@ -324,7 +324,7 @@ private:
         const auto& size = frameBuffer.getSize();
         const size_t bufferSize =
             size.x() * size.y() * frameBuffer.getColorDepth();
-        void* data = frameBuffer.getColorBuffer();
+        const auto data = frameBuffer.getColorBuffer();
 
         _lastImage.data.resize(bufferSize);
         memcpy(_lastImage.data.data(), data, bufferSize);
