@@ -25,12 +25,6 @@
 // ispc exports
 #include "ProximityRenderer_ispc.h"
 
-#define OSP_REGISTER_EXRENDERER(InternalClassName, external_name)          \
-    extern "C" ospray::Renderer* ospray_create_renderer__##external_name() \
-    {                                                                      \
-        return new InternalClassName;                                      \
-    }
-
 namespace brayns
 {
 void ProximityRenderer::commit()
@@ -62,5 +56,5 @@ ProximityRenderer::ProximityRenderer()
     ispcEquivalent = ispc::ProximityRenderer_create(this);
 }
 
-OSP_REGISTER_EXRENDERER(ProximityRenderer, proximity);
+OSP_REGISTER_RENDERER(ProximityRenderer, proximity);
 }

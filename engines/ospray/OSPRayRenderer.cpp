@@ -69,13 +69,15 @@ void OSPRayRenderer::commit()
 
     const bool rendererChanged = _currentOSPRenderer != getCurrentType();
     if (rendererChanged)
-        createOSPRenderer();
+        _createOSPRenderer();
 
     setOSPRayProperties(*this, _renderer);
 
     auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
     if (isModified() || rendererChanged || _scene->isModified())
     {
+        _commitRendererMaterials();
+
         ospSetData(_renderer, "lights", scene->lightData());
 
         if (auto simulationModel = scene->getSimulatedModel())
@@ -103,13 +105,12 @@ void OSPRayRenderer::commit()
     ospSet1f(_renderer, "varianceThreshold", rp.getVarianceThreshold());
     ospSet1i(_renderer, "spp", rp.getSamplesPerPixel());
 
-    auto bgMaterial = std::static_pointer_cast<OSPRayMaterial>(
-        scene->getBackgroundMaterial());
-    if (bgMaterial)
+    if (auto material = std::static_pointer_cast<OSPRayMaterial>(
+            scene->getBackgroundMaterial()))
     {
-        bgMaterial->setDiffuseColor(rp.getBackgroundColor());
-        bgMaterial->commit();
-        ospSetObject(_renderer, "bgMaterial", bgMaterial->getOSPMaterial());
+        material->setDiffuseColor(rp.getBackgroundColor());
+        material->commit(_currentOSPRenderer);
+        ospSetObject(_renderer, "bgMaterial", material->getOSPMaterial());
     }
 
     ospSetObject(_renderer, "camera", _camera->impl());
@@ -122,9 +123,8 @@ void OSPRayRenderer::setCamera(CameraPtr camera)
 {
     _camera = static_cast<OSPRayCamera*>(camera.get());
     assert(_camera);
-    if (_renderer == nullptr)
-        createOSPRenderer();
-    ospSetObject(_renderer, "camera", _camera->impl());
+    if (_renderer)
+        ospSetObject(_renderer, "camera", _camera->impl());
     markModified();
 }
 
@@ -155,16 +155,24 @@ Renderer::PickResult OSPRayRenderer::pick(const Vector2f& pickPos)
     return result;
 }
 
-void OSPRayRenderer::createOSPRenderer()
+void OSPRayRenderer::_createOSPRenderer()
 {
     auto newRenderer = ospNewRenderer(getCurrentType().c_str());
     if (!newRenderer)
         throw std::runtime_error(getCurrentType() +
                                  " is not a registered renderer");
-    if (_renderer)
-        ospRelease(_renderer);
+    ospRelease(_renderer);
     _renderer = newRenderer;
+    if (_camera)
+        ospSetObject(_renderer, "camera", _camera->impl());
     _currentOSPRenderer = getCurrentType();
     markModified();
+}
+
+void OSPRayRenderer::_commitRendererMaterials()
+{
+    _scene->visitModels([&renderer = _currentOSPRenderer](Model& model) {
+            static_cast<OSPRayModel&>(model).commitMaterials(renderer);
+    });
 }
 }

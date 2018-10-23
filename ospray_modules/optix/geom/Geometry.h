@@ -63,6 +63,7 @@ protected:
     void _setBuffer(const std::string& uniform, ospray::Ref<ospray::Data> data);
     const Type _type;
     ::optix::Geometry _geometry;
+    ::optix::GeometryInstance _instance;
     ::optix::Context _context;
     ::optix::Buffer _buffer;
 
@@ -70,6 +71,9 @@ protected:
     /*! this field is private to make sure it is only set through
         'setMaterial' (see comment there) */
     ospray::Ref<ospray::Material> _material;
+
+private:
+    void _bindInstanceMaterial();
 };
 }
 }

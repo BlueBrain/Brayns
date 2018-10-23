@@ -23,7 +23,8 @@
 #include <ospray/SDK/math/random.ih>
 #include <ospray/SDK/math/vec.ih>
 
-float getRandomValue(varying ScreenSample& sample, const int randomNumber);
+float getRandomValue(const varying ScreenSample& sample,
+                     const int randomNumber);
 
 /**
     Returns a random direction based on location in the frame buffer, the normal
@@ -38,7 +39,7 @@ float getRandomValue(varying ScreenSample& sample, const int randomNumber);
 */
 
 vec3f getRandomVector(const unsigned int frameBufferWidth,
-                      varying ScreenSample& sample, const vec3f& normal,
+                      const varying ScreenSample& sample, const vec3f& normal,
                       const int randomNumber);
 
 /**
@@ -71,10 +72,10 @@ vec3f getRandomDir(varying RandomTEA* uniform rng, const vec3f& biNorm0,
     @return A random vector within a specified cone
  */
 vec3f getConeSample(const vec3f& direction, varying RandomTEA* uniform rng,
-                    float extent);
+                    const float extent);
 
 /**
     @return A random generator according to the location in the frame buffer
 */
 varying RandomTEA* uniform createRandomNumberGenerator(
-    const uniform Renderer* uniform self, varying ScreenSample& sample);
+    const uniform Renderer* uniform self, const varying ScreenSample& sample);

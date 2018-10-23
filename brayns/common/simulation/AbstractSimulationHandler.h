@@ -46,6 +46,10 @@ public:
 
     AbstractSimulationHandler& operator=(const AbstractSimulationHandler& rhs);
 
+    BRAYNS_API virtual void bind(const MaterialPtr& /* material */) {};
+
+    BRAYNS_API virtual void unbind(const MaterialPtr& /* material */) {};
+
     /**
     * @brief Attaches a memory mapped file to the scene so that renderers can
     * access the data

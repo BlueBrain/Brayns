@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include "../DefaultMaterial.ih"
 #include <ospray/SDK/math/vec.ih>
-#include "../ExtendedOBJMaterial.ih"
 
 /**
     Returns the color of the skybox for a given ray. If no material is defined
@@ -33,4 +33,4 @@
 */
 vec4f skyboxMapping(const uniform Renderer* uniform renderer,
                     const varying Ray& ray,
-                    const uniform ExtendedOBJMaterial* uniform bgMaterial);
+                    const uniform DefaultMaterial* uniform bgMaterial);

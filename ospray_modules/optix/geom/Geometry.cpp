@@ -54,6 +54,7 @@ void Geometry::setMaterial(ospray::Material* mat)
     }
 
     _material = mat;
+    _bindInstanceMaterial();
 }
 
 void Geometry::finalize(Model* model)
@@ -63,13 +64,11 @@ void Geometry::finalize(Model* model)
 
     _geometry = Context::get().createGeometry(_type);
 
-    Material* material = (Material*)_material.ptr;
-    auto instance = _context->createGeometryInstance();
-    instance->setGeometry(_geometry);
-    instance->setMaterialCount(1);
-    instance->setMaterial(0, material->optixMaterial);
+    _instance = _context->createGeometryInstance();
+    _instance->setGeometry(_geometry);
+    _bindInstanceMaterial();
 
-    model->addGeometryInstance(instance);
+    model->addGeometryInstance(_instance);
 }
 
 void Geometry::_setBuffer(const std::string& uniform,
@@ -82,6 +81,19 @@ void Geometry::_setBuffer(const std::string& uniform,
     memcpy(_buffer->map(), data->data, data->numBytes);
     _buffer->unmap();
     _geometry[uniform]->setBuffer(_buffer);
+}
+
+void Geometry::_bindInstanceMaterial()
+{
+    if (!_instance)
+        return;
+
+    const Material* material = static_cast<const Material*>(_material.ptr);
+    if (material)
+    {
+        _instance->setMaterialCount(1);
+        _instance->setMaterial(0, material->optixMaterial);
+    }
 }
 }
 }

@@ -259,6 +259,13 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
     return modelDescriptor;
 }
 
+void Scene::visitModels(const std::function<void(Model&)>& functor)
+{
+    std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
+    for (const auto& modelDescriptor : _modelDescriptors)
+        functor(modelDescriptor->getModel());
+}
+
 void Scene::saveToCacheFile()
 {
     const auto& geometryParameters = _parametersManager.getGeometryParameters();
@@ -328,8 +335,6 @@ void Scene::saveToCacheFile()
             file.write((char*)&value, sizeof(float));
             value = material.second->getGlossiness();
             file.write((char*)&value, sizeof(float));
-            const bool boolean = material.second->getCastSimulationData();
-            file.write((char*)&boolean, sizeof(bool));
         }
 
         // Spheres
@@ -518,9 +523,6 @@ void Scene::loadFromCacheFile()
             material->setEmission(value);
             file.read((char*)&value, sizeof(float));
             material->setGlossiness(value);
-            bool boolean;
-            file.read((char*)&boolean, sizeof(bool));
-            material->setCastSimulationData(boolean);
         }
 
         uint64_t bufferSize{0};

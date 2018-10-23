@@ -24,6 +24,13 @@
 
 namespace brayns
 {
+Material::Material()
+{
+    setCurrentType("default");
+    _properties["default"] = PropertyMap();
+    _properties["simulation"] = PropertyMap();
+}
+
 Texture2DPtr Material::getTexture(const TextureType& type) const
 {
     const auto it = _textureDescriptors.find(type);

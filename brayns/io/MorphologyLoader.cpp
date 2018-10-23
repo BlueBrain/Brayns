@@ -138,22 +138,22 @@ public:
                               CompartmentReportPtr compartmentReport,
                               ParallelModelContainer& model) const
     {
-        const size_t morphologySectionTypes =
-            enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
-        Vector3f somaPosition = transformation.getTranslation();
-        if (morphologySectionTypes ==
-            static_cast<size_t>(MorphologySectionType::soma))
-            somaPosition =
-                _importMorphologyAsPoint(index, materialFunc, transformation,
-                                         compartmentReport, model);
+        if (_geometryParameters.getMorphologySectionTypes() ==
+            std::vector<MorphologySectionType>{MorphologySectionType::soma})
+        {
+            return _importMorphologyAsPoint(index, materialFunc, transformation,
+                                            compartmentReport, model);
+        }
         else if (_geometryParameters.useRealisticSomas())
-            somaPosition = _createRealisticSoma(source, materialFunc,
-                                                transformation, model);
+        {
+            return _createRealisticSoma(source, materialFunc, transformation,
+                                        model);
+        }
         else
-            somaPosition = _importMorphologyFromURI(source, index, materialFunc,
-                                                    transformation,
-                                                    compartmentReport, model);
-        return somaPosition;
+        {
+            return _importMorphologyFromURI(source, index, materialFunc,
+                                            transformation, compartmentReport, model);
+        }
     }
 
 private:
@@ -747,7 +747,7 @@ private:
        * material id
        * @param transformation Transformation to apply to the morphology
        * @param compartmentReport Compartment report to map to the morphology
-       * @param model Model container to whichh the morphology should be loaded
+       * @param model Model container to which the morphology should be loaded
        * into
        * @return Position of the soma
        */

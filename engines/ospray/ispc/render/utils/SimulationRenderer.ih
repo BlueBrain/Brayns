@@ -21,6 +21,8 @@
 // Brayns
 #include "AbstractRenderer.ih"
 
+#include "../SimulationMaterial.ih"
+
 #include <ospray/SDK/transferFunction/TransferFunction.ih>
 
 struct SimulationRenderer
@@ -28,37 +30,34 @@ struct SimulationRenderer
     AbstractRenderer super;
 
     // Transfer function attributes
-    TransferFunction* uniform transferFunction;
+    const uniform TransferFunction* uniform transferFunction;
 
     // Simulation data
     uniform float* uniform simulationData;
     uint64 simulationDataSize;
 };
 
-inline vec4f getSimulationValue(const uniform SimulationRenderer* uniform self,
-                                varying DifferentialGeometry* dg)
+inline vec4f getSimulationColor(const uniform SimulationRenderer& renderer,
+                                const DifferentialGeometry& dg)
 {
-    vec4f color = make_vec4f(1.f, 0.f, 0.f, 0.5f);
-    if (!self->simulationData || !self->transferFunction || !dg)
-        return color;
+    const uniform vec4f undefined = make_vec4f(1.f, 0.f, 0.f, 0.5f);
 
-    float value = 0.f;
-    const uint64 index = (uint64)(dg->st.x * OFFSET_MAGIC) << 32 |
-                         (uint32)(dg->st.y * OFFSET_MAGIC);
+    if (!renderer.simulationData)
+        return undefined;
 
-    if (index < self->simulationDataSize)
-        value = self->simulationData[index];
-    else
-        // Value offset is out of range, return error color
-        return color;
+    const SimulationMaterial* material =
+        (const SimulationMaterial*)dg.material;
+    if (!material || !material->getSimulationOffset)
+        return undefined;
 
-    const vec3f sampleColor =
-        self->transferFunction->getColorForValue(self->transferFunction, value);
-
-    const float sampleOpacity =
-        self->transferFunction->getOpacityForValue(self->transferFunction,
-                                                   value);
-
-    color = make_vec4f(sampleColor, sampleOpacity);
-    return color;
+    const varying uint64 offset =
+        material->getSimulationOffset(dg.geometry, dg.primID);
+    if (offset < renderer.simulationDataSize)
+    {
+        const varying float value = renderer.simulationData[offset];
+        const uniform TransferFunction* uniform tf = renderer.transferFunction;
+        return make_vec4f(tf->getColorForValue(tf, value),
+                          tf->getOpacityForValue(tf, value));
+    }
+    return undefined;
 }

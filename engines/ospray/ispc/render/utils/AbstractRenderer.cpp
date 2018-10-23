@@ -44,7 +44,6 @@ void AbstractRenderer::commit()
 
     _timestamp = getParam1f("timestamp", 0.f);
     _bgMaterial =
-        (brayns::obj::ExtendedOBJMaterial*)getParamObject("bgMaterial",
-                                                          nullptr);
+        (brayns::DefaultMaterial*)getParamObject("bgMaterial", nullptr);
 }
 }

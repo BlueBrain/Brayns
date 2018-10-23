@@ -67,8 +67,8 @@ inline vec3f ProximityRenderer_shadeRay(
                           DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
         uniform Material* material = dg.material;
-        uniform ExtendedOBJMaterial* objMaterial =
-            (uniform ExtendedOBJMaterial*)material;
+        uniform DefaultMaterial* objMaterial =
+           (uniform DefaultMaterial*)material;
 
         vec3f normal = dg.Ns;
         const vec3f P = dg.P + dg.epsilon * dg.Ng;
@@ -204,7 +204,7 @@ export void ProximityRenderer_set(
         (uniform ProximityRenderer * uniform)_self;
 
     self->super.super.spp = spp;
-    self->super.bgMaterial = (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+    self->super.bgMaterial = (uniform DefaultMaterial * uniform)bgMaterial;
     self->super.lights = (const uniform Light* uniform* uniform)lights;
     self->super.numLights = numLights;
     self->super.timestamp = timestamp;

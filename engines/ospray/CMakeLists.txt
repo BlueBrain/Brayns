@@ -17,12 +17,13 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/geometry/Cones.ispc
   ispc/geometry/Cylinders.ispc
   ispc/geometry/SDFGeometries.ispc
+  ispc/render/AdvancedSimulationRenderer.ispc
   ispc/render/BasicRenderer.ispc
-  ispc/render/ExtendedOBJMaterial.ispc
   ispc/render/BasicSimulationRenderer.ispc
+  ispc/render/DefaultMaterial.ispc
   ispc/render/PathTracingRenderer.ispc
   ispc/render/ProximityRenderer.ispc
-  ispc/render/AdvancedSimulationRenderer.ispc
+  ispc/render/SimulationMaterial.ispc
   ispc/render/utils/RandomGenerator.ispc
   ispc/render/utils/SimulationRenderer.ispc
   ispc/render/utils/SkyBox.ispc
@@ -43,12 +44,13 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   ispc/geometry/Cones.cpp
   ispc/geometry/Cylinders.cpp
   ispc/geometry/SDFGeometries.cpp
+  ispc/render/AdvancedSimulationRenderer.cpp
   ispc/render/BasicRenderer.cpp
-  ispc/render/ExtendedOBJMaterial.cpp
   ispc/render/BasicSimulationRenderer.cpp
+  ispc/render/DefaultMaterial.cpp
   ispc/render/PathTracingRenderer.cpp
   ispc/render/ProximityRenderer.cpp
-  ispc/render/AdvancedSimulationRenderer.cpp
+  ispc/render/SimulationMaterial.cpp
   ispc/render/utils/AbstractRenderer.cpp
   ispc/render/utils/SimulationRenderer.cpp
   ispc/render/utils/SimulationRenderer.ih
@@ -69,12 +71,13 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   ispc/geometry/Cones.h
   ispc/geometry/Cylinders.h
   ispc/geometry/SDFGeometries.h
+  ispc/render/AdvancedSimulationRenderer.h
   ispc/render/BasicRenderer.h
-  ispc/render/ExtendedOBJMaterial.h
   ispc/render/BasicSimulationRenderer.h
+  ispc/render/DefaultMaterial.h
   ispc/render/PathTracingRenderer.h
   ispc/render/ProximityRenderer.h
-  ispc/render/AdvancedSimulationRenderer.h
+  ispc/render/SimulationMaterial.h
   ispc/render/utils/AbstractRenderer.h
   ispc/render/utils/SimulationRenderer.h
 )
@@ -94,6 +97,9 @@ set(BRAYNSOSPRAYENGINE_LINK_LIBRARIES
 
 # reuse ispc setup and macros from ospray
 list(APPEND CMAKE_MODULE_PATH ${OSPRAY_CMAKE_ROOT})
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+  set(OSPRAY_DEBUG_BUILD ON)
+endif()
 include(ispc)
 
 # Enable/disable use of hardware randomizer

@@ -24,7 +24,7 @@
 #define ABSTRACTRENDERER_H
 
 // obj
-#include "../ExtendedOBJMaterial.h"
+#include "../DefaultMaterial.h"
 
 // ospray
 #include <ospray/SDK/common/Material.h>
@@ -50,7 +50,7 @@ protected:
 
     ospray::Data* _lightData;
 
-    brayns::obj::ExtendedOBJMaterial* _bgMaterial;
+    brayns::DefaultMaterial* _bgMaterial;
     float _timestamp;
 };
 }

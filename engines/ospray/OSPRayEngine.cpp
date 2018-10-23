@@ -322,7 +322,6 @@ void OSPRayEngine::_createRenderers()
         ospRenderer->setProperties(renderer, properties);
     }
     ospRenderer->setCurrentType(rp.getCurrentRenderer());
-    ospRenderer->createOSPRenderer();
     _renderer = ospRenderer;
 }
 

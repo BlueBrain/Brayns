@@ -52,6 +52,10 @@ public:
                              const brion::GIDSet& gids);
     ~CircuitSimulationHandler();
 
+    void bind(const MaterialPtr& material) final;
+
+    void unbind(const MaterialPtr& material) final;
+
     void* getFrameData(uint32_t frame) final;
 
     CompartmentReportPtr getCompartmentReport() { return _compartmentReport; }
@@ -69,6 +73,7 @@ private:
     double _endTime;
     std::future<brion::floatsPtr> _currentFrameFuture;
     bool _ready{false};
+    std::vector<MaterialPtr> _materials;
 };
 }
 

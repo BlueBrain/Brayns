@@ -152,9 +152,10 @@ struct SDFGeometries
 {
     uniform Geometry super;
 
+    uniform SDFGeometry* uniform geometries;
     uniform uint64* uniform geometryRefs;
     uniform uint64* uniform neighbours;
-    uniform SDFGeometry* uniform geometries;
+
 
     uniform bool useSafeIncrement;
 };

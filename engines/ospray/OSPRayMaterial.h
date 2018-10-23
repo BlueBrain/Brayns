@@ -29,15 +29,21 @@ namespace brayns
 class OSPRayMaterial : public Material
 {
 public:
-    OSPRayMaterial();
+    OSPRayMaterial() = default;
     ~OSPRayMaterial();
 
+    /** Noop until commit(renderer) is called. */
     void commit() final;
+
+    /** Instance the actual renderer specific object for this material.
+        This operation always creates a new ISPC side material.
+     */
+    void commit(const std::string& renderer);
 
     OSPMaterial getOSPMaterial() { return _ospMaterial; }
 private:
     OSPTexture _createOSPTexture2D(Texture2DPtr texture);
-    OSPMaterial _ospMaterial;
+    OSPMaterial _ospMaterial{nullptr};
 };
 }
 

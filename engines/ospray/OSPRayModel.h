@@ -38,6 +38,7 @@ public:
 
     void commitGeometry() final;
     bool commitTransferFunction();
+    void commitMaterials(const std::string& renderer);
 
     OSPModel getModel() const { return _model; }
     OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
@@ -101,5 +102,7 @@ private:
     std::map<size_t, OSPGeometry> _ospSDFGeometries;
 
     size_t _memoryManagementFlags{OSP_DATA_SHARED_BUFFER};
+
+    std::string _renderer;
 };
 }

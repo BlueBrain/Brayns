@@ -187,7 +187,7 @@ public:
                 model->setSimulationHandler(simulationHandler);
 
             // Create materials
-            model->createMissingMaterials(simulationHandler != nullptr);
+            model->createMissingMaterials();
 
             // Compute circuit center
             Boxf circuitCenter;

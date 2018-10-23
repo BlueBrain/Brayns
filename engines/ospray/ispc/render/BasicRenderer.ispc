@@ -57,17 +57,15 @@ inline vec3f BasicRenderer_shadeRay(const uniform BasicRenderer* uniform self,
     DifferentialGeometry dg;
     postIntersect(self->abstract.super.model, dg, ray,
                   DG_NS | DG_NG | DG_NORMALIZE | DG_FACEFORWARD |
-                      DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
+                  DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
-    uniform Material* material = dg.material;
-    uniform ExtendedOBJMaterial* objMaterial =
-        (uniform ExtendedOBJMaterial*)material;
+    uniform DefaultMaterial* material = (uniform DefaultMaterial*)dg.material;
 
     vec3f Kd = make_vec3f(0.f);
-    if (!objMaterial)
+    if (!material)
         Kd = make_vec3f(dg.color);
     else
-        foreach_unique(mat in objMaterial)
+        foreach_unique(mat in material)
         {
             Kd = mat->Kd * make_vec3f(dg.color);
             if (valid(mat->map_Kd))
@@ -115,8 +113,7 @@ export void BasicRenderer_set(void* uniform _self, void* uniform bgMaterial,
     uniform BasicRenderer* uniform self =
         (uniform BasicRenderer * uniform)_self;
 
-    self->abstract.bgMaterial =
-        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+    self->abstract.bgMaterial = (uniform DefaultMaterial * uniform)bgMaterial;
     self->abstract.timestamp = timestamp;
     self->abstract.super.spp = spp;
 

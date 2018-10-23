@@ -312,8 +312,6 @@ inline void init(brayns::Material* m, ObjectHandler* h)
     h->add_property("refraction_index", &m->_refractionIndex, Flags::Optional);
     h->add_property("light_emission", &m->_emission, Flags::Optional);
     h->add_property("glossiness", &m->_glossiness, Flags::Optional);
-    h->add_property("cast_simulation_data", &m->_castSimulationData,
-                    Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

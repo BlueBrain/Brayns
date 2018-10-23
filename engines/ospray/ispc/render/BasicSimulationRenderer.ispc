@@ -68,21 +68,22 @@ inline vec3f BasicSimulationRenderer_shadeRay(
                           DG_MATERIALID | DG_COLOR | DG_TEXCOORD);
 
         // Material attributes
-        const uniform Material* material = dg.material;
-        const uniform ExtendedOBJMaterial* objMaterial =
-            (const uniform ExtendedOBJMaterial*)material;
+        const uniform DefaultMaterial* material =
+            (const uniform DefaultMaterial*)dg.material;
         vec3f Kd;
-        if (!objMaterial)
+        if (!material)
         {
             Kd = make_vec3f(dg.color);
             opacity = dg.color.w;
         }
         else
-            foreach_unique(mat in objMaterial)
+        {
+            foreach_unique(mat in material)
             {
                 Kd = make_vec3f(dg.color) * mat->Kd;
                 opacity = dg.color.w * mat->d;
             }
+        }
 
         if (depth == 0)
         {
@@ -92,14 +93,16 @@ inline vec3f BasicSimulationRenderer_shadeRay(
         pathOpacity *= 1.f + opacity;
         colorContribution = make_vec4f(Kd, pathOpacity);
 
-        if (objMaterial->castSimulationData == 1)
+        const uniform SimulationMaterial* simMaterial =
+            (const uniform SimulationMaterial*)dg.material;
+
+        if (simMaterial && simMaterial->getSimulationOffset)
         {
             // Get simulation value from geometry
-            const vec4f simulationColor = getSimulationValue(&self->super, &dg);
+            const vec4f color = getSimulationColor(self->super, dg);
             colorContribution =
-                make_vec4f(make_vec3f(colorContribution) *
-                                   (1.f - simulationColor.w) +
-                               make_vec3f(simulationColor) * simulationColor.w,
+                make_vec4f(make_vec3f(colorContribution) * (1.f - color.w) +
+                               make_vec3f(color) * color.w,
                            colorContribution.w);
         }
 
@@ -155,7 +158,7 @@ export void BasicSimulationRenderer_set(void* uniform _self,
         (uniform BasicSimulationRenderer * uniform)_self;
 
     self->super.super.bgMaterial =
-        (uniform ExtendedOBJMaterial * uniform)bgMaterial;
+        (uniform DefaultMaterial * uniform)bgMaterial;
 
     self->super.super.super.spp = spp;
 

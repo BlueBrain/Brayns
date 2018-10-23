@@ -44,13 +44,14 @@ public:
 
     PickResult pick(const Vector2f& pickPos) final;
 
-    void createOSPRenderer();
-
 private:
     OSPRayCamera* _camera{nullptr};
     OSPRenderer _renderer{nullptr};
     std::atomic<float> _variance{std::numeric_limits<float>::max()};
     std::string _currentOSPRenderer;
+
+    void _createOSPRenderer();
+    void _commitRendererMaterials();
 };
 }
 
