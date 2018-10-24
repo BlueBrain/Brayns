@@ -512,13 +512,9 @@ bool OSPRayModel::_commitTransferFunction()
 
 void OSPRayModel::_setBVHFlags()
 {
-    const bool dynamicMode = _bvhFlags.count(BVHFlag::dynamic);
-    const bool compactMode = _bvhFlags.count(BVHFlag::compact);
-    const bool robustMode = _bvhFlags.count(BVHFlag::robust);
-
-    ospSet1i(_model, "dynamicMode", dynamicMode ? 1 : 0);
-    ospSet1i(_model, "compactMode", compactMode ? 1 : 0);
-    ospSet1i(_model, "robustMode", robustMode ? 1 : 0);
+    ospSet1i(_model, "dynamicMode", _bvhFlags.count(BVHFlag::dynamic));
+    ospSet1i(_model, "compactMode", _bvhFlags.count(BVHFlag::compact));
+    ospSet1i(_model, "robustMode", _bvhFlags.count(BVHFlag::robust));
 }
 
 void OSPRayModel::commitGeometry()

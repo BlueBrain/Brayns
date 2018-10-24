@@ -204,7 +204,7 @@ GeometryParameters::GeometryParameters()
         (PARAM_DEFAULT_BVH_FLAG.c_str(),
          po::value<std::vector<std::string>>()->multitoken(),
          "Sets one or more property flags to be used by default when creating "
-         "a bvh [dynamic|compact|robust]");
+         "a BVH [dynamic|compact|robust]");
 }
 
 void GeometryParameters::parse(const po::variables_map& vm)
@@ -352,7 +352,7 @@ void GeometryParameters::parse(const po::variables_map& vm)
             if (kv != BVH_TYPES.end())
                 _defaultBVHFlags.insert(kv->second);
             else
-                throw std::runtime_error("Invalid bvh type '" + bvh + "'.");
+                throw std::runtime_error("Invalid bvh flag '" + bvh + "'.");
         }
     }
 

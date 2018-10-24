@@ -406,7 +406,7 @@ public:
     {
         _bvhFlags = std::move(bvhFlags);
     }
-    std::set<BVHFlag> getBVHFlags() const { return _bvhFlags; }
+    const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
 protected:
     void _updateBounds();
 
