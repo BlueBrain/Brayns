@@ -63,6 +63,7 @@ const std::string PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE =
 const std::string PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES =
     "morphology-use-sdf-geometries";
 const std::string PARAM_MEMORY_MODE = "memory-mode";
+const std::string PARAM_DEFAULT_BVH_FLAG = "default-bvh-flag";
 
 const std::array<std::string, 12> COLOR_SCHEMES = {
     {"none", "neuron-by-id", "neuron-by-type", "neuron-by-segment-type",
@@ -72,6 +73,10 @@ const std::array<std::string, 12> COLOR_SCHEMES = {
 
 const std::string GEOMETRY_QUALITIES[3] = {"low", "medium", "high"};
 const std::string GEOMETRY_MEMORY_MODES[2] = {"shared", "replicated"};
+const std::map<std::string, brayns::BVHFlag> BVH_TYPES = {
+    {"dynamic", brayns::BVHFlag::dynamic},
+    {"compact", brayns::BVHFlag::compact},
+    {"robust", brayns::BVHFlag::robust}};
 }
 
 namespace brayns
@@ -194,7 +199,12 @@ GeometryParameters::GeometryParameters()
         //
         (PARAM_CIRCUIT_MESH_TRANSFORMATION.c_str(),
          po::bool_switch()->default_value(false),
-         "Enable mesh transformation according to circuit information.");
+         "Enable mesh transformation according to circuit information.")
+        //
+        (PARAM_DEFAULT_BVH_FLAG.c_str(),
+         po::value<std::vector<std::string>>()->multitoken(),
+         "Set a default flag to apply to BVH creation, one of "
+         "[dynamic|compact|robust], may appear multiple times.");
 }
 
 void GeometryParameters::parse(const po::variables_map& vm)
@@ -331,6 +341,20 @@ void GeometryParameters::parse(const po::variables_map& vm)
             vm[PARAM_CIRCUIT_MESH_FILENAME_PATTERN].as<std::string>();
     _circuitConfiguration.meshTransformation =
         vm[PARAM_CIRCUIT_MESH_TRANSFORMATION].as<bool>();
+
+    if (vm.count(PARAM_DEFAULT_BVH_FLAG))
+    {
+        const auto& bvhs =
+            vm[PARAM_DEFAULT_BVH_FLAG].as<std::vector<std::string>>();
+        for (const auto& bvh : bvhs)
+        {
+            const auto kv = BVH_TYPES.find(bvh);
+            if (kv != BVH_TYPES.end())
+                _defaultBVHFlags.insert(kv->second);
+            else
+                throw std::runtime_error("Invalid bvh flag '" + bvh + "'.");
+        }
+    }
 
     markModified();
 }

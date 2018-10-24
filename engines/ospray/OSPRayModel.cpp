@@ -510,6 +510,13 @@ bool OSPRayModel::_commitTransferFunction()
     return true;
 }
 
+void OSPRayModel::_setBVHFlags()
+{
+    ospSet1i(_model, "dynamicMode", _bvhFlags.count(BVHFlag::dynamic));
+    ospSet1i(_model, "compactMode", _bvhFlags.count(BVHFlag::compact));
+    ospSet1i(_model, "robustMode", _bvhFlags.count(BVHFlag::robust));
+}
+
 void OSPRayModel::commitGeometry()
 {
     for (auto volume : _volumes)
@@ -566,6 +573,7 @@ void OSPRayModel::commitGeometry()
         _commitSDFGeometries();
 
     _updateBounds();
+    _setBVHFlags();
 
     // handled by the scene
     _instancesDirty = false;

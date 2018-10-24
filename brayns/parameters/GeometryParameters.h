@@ -234,6 +234,11 @@ public:
         return _morphologyUseSDFGeometries;
     }
 
+    const std::set<BVHFlag>& getDefaultBVHFlags() const
+    {
+        return _defaultBVHFlags;
+    }
+
 protected:
     void parse(const po::variables_map& vm) final;
 
@@ -249,6 +254,7 @@ protected:
     float _radiusCorrection;
     ColorScheme _colorScheme;
     GeometryQuality _geometryQuality;
+    std::set<BVHFlag> _defaultBVHFlags;
     MorphologySectionTypes _morphologySectionTypes;
     MorphologyLayout _morphologyLayout;
     size_t _metaballsGridSize;

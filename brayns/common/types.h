@@ -373,6 +373,13 @@ struct RpcParameterDescription : RpcDescription
     std::string paramName;
     std::string paramDescription;
 };
+
+enum class BVHFlag
+{
+    dynamic,
+    compact,
+    robust
+};
 }
 
 #endif // TYPES_H

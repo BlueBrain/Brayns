@@ -34,6 +34,8 @@
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
+#include <set>
+
 SERIALIZATION_ACCESS(Model)
 SERIALIZATION_ACCESS(ModelParams)
 SERIALIZATION_ACCESS(ModelDescriptor)
@@ -400,7 +402,11 @@ public:
     void resetVolumesDirty() { _volumesDirty = false; }
     /** @internal */
     void updateSizeInBytes();
-
+    void setBVHFlags(std::set<BVHFlag> bvhFlags)
+    {
+        _bvhFlags = std::move(bvhFlags);
+    }
+    const std::set<BVHFlag>& getBVHFlags() const { return _bvhFlags; }
 protected:
     void _updateBounds();
 
@@ -451,6 +457,7 @@ protected:
     bool _volumesDirty{true};
     Boxd _volumesBounds;
 
+    std::set<BVHFlag> _bvhFlags;
     size_t _sizeInBytes{0};
 
     SERIALIZATION_FRIEND(Model)
