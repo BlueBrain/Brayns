@@ -203,8 +203,8 @@ GeometryParameters::GeometryParameters()
         //
         (PARAM_DEFAULT_BVH_FLAG.c_str(),
          po::value<std::vector<std::string>>()->multitoken(),
-         "Sets one or more property flags to be used by default when creating "
-         "a BVH [dynamic|compact|robust]");
+         "Set a default flag to apply to BVH creation, one of "
+         "[dynamic|compact|robust], may appear multiple times.");
 }
 
 void GeometryParameters::parse(const po::variables_map& vm)
