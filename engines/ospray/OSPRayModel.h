@@ -60,6 +60,10 @@ public:
     }
 
 private:
+    using GeometryMap = std::map<size_t, OSPGeometry>;
+
+    OSPGeometry& _createGeometry(GeometryMap& map, size_t materialID,
+                                 const char* name);
     void _commitSpheres(const size_t materialId);
     void _commitCylinders(const size_t materialId);
     void _commitCones(const size_t materialId);
@@ -94,9 +98,7 @@ private:
     std::map<size_t, OSPGeometry> _ospCones;
     std::map<size_t, OSPGeometry> _ospMeshes;
     std::map<size_t, OSPGeometry> _ospStreamlines;
-
-    std::map<size_t, OSPGeometry> _ospSDFGeometryRefs;
-    std::map<size_t, OSPData> _ospSDFGeometryRefsData;
+    std::map<size_t, OSPGeometry> _ospSDFGeometries;
 
     size_t _memoryManagementFlags{OSP_DATA_SHARED_BUFFER};
 };
