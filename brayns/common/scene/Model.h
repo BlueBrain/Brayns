@@ -34,6 +34,8 @@
 #include <brayns/common/transferFunction/TransferFunction.h>
 #include <brayns/common/types.h>
 
+#include <set>
+
 SERIALIZATION_ACCESS(Model)
 SERIALIZATION_ACCESS(ModelParams)
 SERIALIZATION_ACCESS(ModelDescriptor)
@@ -97,12 +99,9 @@ public:
     const std::string& getName() const { return _name; }
     void setPath(const std::string& path) { _updateValue(_path, path); }
     const std::string& getPath() const { return _path; }
-    void setBVHType(BVHType bvhType) { _updateValue(_bvhType, bvhType); }
-    BVHType getBVHType() const { return _bvhType; }
 protected:
     std::string _name;
     std::string _path;
-    BVHType _bvhType = BVHType::default_;
 
     SERIALIZATION_FRIEND(ModelParams)
 };
@@ -403,8 +402,11 @@ public:
     void resetVolumesDirty() { _volumesDirty = false; }
     /** @internal */
     void updateSizeInBytes();
-    void setBVHType(BVHType bvhType) { _bvhType = bvhType; }
-    BVHType getBVHType() const { return _bvhType; }
+    void setBVHFlags(std::set<BVHFlag> bvhFlags)
+    {
+        _bvhFlags = std::move(bvhFlags);
+    }
+    std::set<BVHFlag> getBVHFlags() const { return _bvhFlags; }
 protected:
     void _updateBounds();
 
@@ -455,7 +457,7 @@ protected:
     bool _volumesDirty{true};
     Boxd _volumesBounds;
 
-    BVHType _bvhType = BVHType::default_;
+    std::set<BVHFlag> _bvhFlags;
     size_t _sizeInBytes{0};
 
     SERIALIZATION_FRIEND(Model)

@@ -26,7 +26,6 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/common/utils/Utils.h>
 #include <brayns/parameters/ParametersManager.h>
 
 #define BOOST_TEST_MODULE brayns
@@ -135,10 +134,8 @@ BOOST_AUTO_TEST_CASE(bvh_type)
     brayns::Brayns brayns(argc, argv);
 
     auto model = brayns.getEngine().getScene().getModel(0);
-    const auto bvhTypeModel = model->getBVHType();
-    const auto bvhTypeModelInternal = model->getModel().getBVHType();
+    const auto& bvhFlags = model->getModel().getBVHFlags();
 
-    BOOST_CHECK(bvhTypeModel == brayns::BVHType::default_);
-    BOOST_CHECK(enumHas(bvhTypeModelInternal, brayns::BVHType::robust));
-    BOOST_CHECK(enumHas(bvhTypeModelInternal, brayns::BVHType::compact));
+    BOOST_CHECK(bvhFlags.count(brayns::BVHFlag::robust) > 0);
+    BOOST_CHECK(bvhFlags.count(brayns::BVHFlag::compact) > 0);
 }

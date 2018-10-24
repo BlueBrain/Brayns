@@ -22,8 +22,6 @@
 
 #include <brayns/common/types.h>
 
-#include <type_traits>
-
 namespace brayns
 {
 strings parseFolder(const std::string& folder, const strings& filters);
@@ -35,19 +33,5 @@ inline auto lowerCase(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
-}
-
-template <typename T>
-inline T enumSet(const T eA, const T eB)
-{
-    using U = typename std::underlying_type<T>::type;
-    return static_cast<T>(static_cast<U>(eA) | static_cast<U>(eB));
-}
-
-template <typename T>
-inline bool enumHas(const T eA, const T eB)
-{
-    using U = typename std::underlying_type<T>::type;
-    return static_cast<T>(static_cast<U>(eA) & static_cast<U>(eB)) == eB;
 }
 }

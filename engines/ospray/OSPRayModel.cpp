@@ -29,8 +29,6 @@
 
 #include <brayns/parameters/ParametersManager.h>
 
-#include <brayns/common/utils/Utils.h>
-
 namespace brayns
 {
 namespace
@@ -512,11 +510,11 @@ bool OSPRayModel::_commitTransferFunction()
     return true;
 }
 
-void OSPRayModel::_setBVHType()
+void OSPRayModel::_setBVHFlags()
 {
-    const bool dynamicMode = enumHas(_bvhType, BVHType::dynamic);
-    const bool compactMode = enumHas(_bvhType, BVHType::compact);
-    const bool robustMode = enumHas(_bvhType, BVHType::robust);
+    const bool dynamicMode = _bvhFlags.count(BVHFlag::dynamic);
+    const bool compactMode = _bvhFlags.count(BVHFlag::compact);
+    const bool robustMode = _bvhFlags.count(BVHFlag::robust);
 
     ospSet1i(_model, "dynamicMode", dynamicMode ? 1 : 0);
     ospSet1i(_model, "compactMode", compactMode ? 1 : 0);
@@ -579,7 +577,7 @@ void OSPRayModel::commitGeometry()
         _commitSDFGeometries();
 
     _updateBounds();
-    _setBVHType();
+    _setBVHFlags();
 
     // handled by the scene
     _instancesDirty = false;

@@ -25,10 +25,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 
-#include <brayns/common/utils/Utils.h>
-
-#include <vector>
-
 namespace
 {
 const std::string PARAM_CIRCUIT_DENSITY = "circuit-density";
@@ -77,11 +73,10 @@ const std::array<std::string, 12> COLOR_SCHEMES = {
 
 const std::string GEOMETRY_QUALITIES[3] = {"low", "medium", "high"};
 const std::string GEOMETRY_MEMORY_MODES[2] = {"shared", "replicated"};
-const std::map<std::string, brayns::BVHType> BVH_TYPES = {
-    {"static", brayns::BVHType::static_},
-    {"dynamic", brayns::BVHType::dynamic},
-    {"compact", brayns::BVHType::compact},
-    {"robust", brayns::BVHType::robust}};
+const std::map<std::string, brayns::BVHFlag> BVH_TYPES = {
+    {"dynamic", brayns::BVHFlag::dynamic},
+    {"compact", brayns::BVHFlag::compact},
+    {"robust", brayns::BVHFlag::robust}};
 }
 
 namespace brayns
@@ -208,7 +203,8 @@ GeometryParameters::GeometryParameters()
         //
         (PARAM_DEFAULT_BVH_FLAG.c_str(),
          po::value<std::vector<std::string>>()->multitoken(),
-         "Default bvh type [static|dynamic|compact|robust]");
+         "Sets one or more property flags to be used by default when creating "
+         "a bvh [dynamic|compact|robust]");
 }
 
 void GeometryParameters::parse(const po::variables_map& vm)
@@ -354,15 +350,10 @@ void GeometryParameters::parse(const po::variables_map& vm)
         {
             const auto kv = BVH_TYPES.find(bvh);
             if (kv != BVH_TYPES.end())
-                _defaultBVHType = enumSet(_defaultBVHType, kv->second);
+                _defaultBVHFlags.insert(kv->second);
             else
                 throw std::runtime_error("Invalid bvh type '" + bvh + "'.");
         }
-
-        if (enumHas(_defaultBVHType, BVHType::static_) &&
-            enumHas(_defaultBVHType, BVHType::dynamic))
-            throw std::runtime_error(
-                "Invalid bvh combination 'static' and 'dynamic'.");
     }
 
     markModified();
