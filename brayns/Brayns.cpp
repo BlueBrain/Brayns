@@ -53,10 +53,10 @@
 #include <brayns/pluginapi/ExtensionPluginFactory.h>
 #include <brayns/pluginapi/PluginAPI.h>
 #ifdef BRAYNS_USE_NETWORKING
-#include <plugins/RocketsPlugin/RocketsPlugin.h>
+#include <plugins/Rockets/RocketsPlugin.h>
 #endif
 #ifdef BRAYNS_USE_DEFLECT
-#include <plugins/DeflectPlugin/DeflectPlugin.h>
+#include <plugins/Deflect/DeflectPlugin.h>
 #endif
 
 #if BRAYNS_USE_ASSIMP

@@ -63,19 +63,19 @@ if(BRAYNS_NETWORKING_ENABLED AND BRAYNS_OSPRAY_ENABLED)
   ospray_ispc_compile(${PROJECT_SOURCE_DIR}/engines/ospray/ispc/render/BasicRenderer.ispc)
   add_library(myPlugin SHARED
     myPlugin.cpp
-    ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/staticjson/staticjson.cpp
+    ${PROJECT_SOURCE_DIR}/plugins/Rockets/staticjson/staticjson.cpp
     ${ISPC_OBJECTS}
   )
   target_link_libraries(myPlugin
     brayns
-    braynsOSPRayEnginePlugin
+    braynsOSPRayEngine
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     ${OSPRAY_LIBRARIES}
   )
   target_include_directories(myPlugin SYSTEM PRIVATE
-    ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin
-    ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/include)
-  list(APPEND TEST_LIBRARIES Rockets RocketsPlugin myPlugin)
+    ${PROJECT_SOURCE_DIR}/plugins/Rockets
+    ${PROJECT_SOURCE_DIR}/plugins/Rockets/rapidjson/include)
+  list(APPEND TEST_LIBRARIES Rockets braynsRockets myPlugin)
 else()
   list(APPEND EXCLUDE_FROM_TESTS
     addModel.cpp
@@ -97,11 +97,11 @@ if(NOT BRAYNS_OPTIX_ENABLED OR NOT BRAYNS_OPTIX_TESTS_ENABLED)
 endif()
 
 include_directories(
-  ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin
-  ${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/include
+  ${PROJECT_SOURCE_DIR}/plugins/Rockets
+  ${PROJECT_SOURCE_DIR}/plugins/Rockets/rapidjson/include
 )
 
 list(APPEND LCOV_EXCLUDE '${PROJECT_SOURCE_DIR}/brayns/common/utils/base64/*'
-                         '${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/rapidjson/*'
-                         '${PROJECT_SOURCE_DIR}/plugins/RocketsPlugin/staticjson/*')
+                         '${PROJECT_SOURCE_DIR}/plugins/Rockets/rapidjson/*'
+                         '${PROJECT_SOURCE_DIR}/plugins/Rockets/staticjson/*')
 include(CommonCTest)

@@ -4,7 +4,7 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(ROCKETSPLUGIN_HEADERS
+set(BRAYNSROCKETS_HEADERS
   BinaryRequests.h
   ImageGenerator.h
   RocketsPlugin.h
@@ -16,7 +16,7 @@ set(ROCKETSPLUGIN_HEADERS
   jsonUtils.h
 )
 
-set(ROCKETSPLUGIN_SOURCES
+set(BRAYNSROCKETS_SOURCES
   ImageGenerator.cpp
   RocketsPlugin.cpp
   Throttle.cpp
@@ -27,24 +27,24 @@ set(ROCKETSPLUGIN_SOURCES
 set_source_files_properties(staticjson/staticjson.cpp
   PROPERTIES COMPILE_FLAGS "-Wno-shadow")
 
-set(ROCKETSPLUGIN_LINK_LIBRARIES PRIVATE Rockets braynsParameters braynsTasks
+set(BRAYNSROCKETS_LINK_LIBRARIES PRIVATE Rockets braynsParameters braynsTasks
   ${FREEIMAGE_LIBRARIES})
 if(LibJpegTurbo_FOUND)
-  list(APPEND ROCKETSPLUGIN_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
+  list(APPEND BRAYNSROCKETS_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
 endif()
 
 if(libuv_FOUND)
-  list(APPEND ROCKETSPLUGIN_LINK_LIBRARIES PRIVATE ${libuv_LIBRARIES})
+  list(APPEND BRAYNSROCKETS_LINK_LIBRARIES PRIVATE ${libuv_LIBRARIES})
 endif()
 
-set(ROCKETSPLUGIN_OMIT_LIBRARY_HEADER ON)
-set(ROCKETSPLUGIN_OMIT_VERSION_HEADERS ON)
-set(ROCKETSPLUGIN_OMIT_EXPORT ON)
-set(ROCKETSPLUGIN_INCLUDE_NAME rocketsplugin)
-common_library(RocketsPlugin)
-target_include_directories(RocketsPlugin SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
+set(BRAYNSROCKETS_OMIT_LIBRARY_HEADER ON)
+set(BRAYNSROCKETS_OMIT_VERSION_HEADERS ON)
+set(BRAYNSROCKETS_OMIT_EXPORT ON)
+set(BRAYNSROCKETS_INCLUDE_NAME rocketsplugin)
+common_library(braynsRockets)
+target_include_directories(braynsRockets SYSTEM PRIVATE ${FREEIMAGE_INCLUDE_DIRS})
 
 # needed for staticjson and rapidjson
-target_include_directories(RocketsPlugin SYSTEM PRIVATE
+target_include_directories(braynsRockets SYSTEM PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/rapidjson/include)
