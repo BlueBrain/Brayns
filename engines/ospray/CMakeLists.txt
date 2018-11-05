@@ -10,7 +10,7 @@
 # ".mic"-suffix trick, so we'll put libraries into separate
 # directories (names 'intel64' and 'mic', respectively)
 
-set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
+set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/utils.ispc
   ispc/camera/OrthographicCamera.ispc
   ispc/camera/PerspectiveCamera.ispc
@@ -29,7 +29,7 @@ set(BRAYNSOSPRAYPLUGIN_ISPC_SOURCES
   ispc/render/utils/SkyBox.ispc
 )
 
-set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
+set(BRAYNSOSPRAYENGINE_SOURCES
   OSPRayCamera.cpp
   OSPRayEngine.cpp
   OSPRayFrameBuffer.cpp
@@ -55,9 +55,9 @@ set(BRAYNSOSPRAYENGINEPLUGIN_SOURCES
   ispc/render/utils/SimulationRenderer.cpp
   ispc/render/utils/SimulationRenderer.ih
 )
-list(APPEND BRAYNSOSPRAYENGINEPLUGIN_SOURCES ${BRAYNSOSPRAYPLUGIN_ISPC_SOURCES})
+list(APPEND BRAYNSOSPRAYENGINE_SOURCES ${BRAYNSOSPRAYENGINE_ISPC_SOURCES})
 
-set(BRAYNSOSPRAYENGINEPLUGIN_HEADERS
+set(BRAYNSOSPRAYENGINE_HEADERS
   OSPRayCamera.h
   OSPRayEngine.h
   OSPRayFrameBuffer.h
@@ -82,7 +82,7 @@ set(BRAYNSOSPRAYENGINEPLUGIN_HEADERS
   ispc/render/utils/SimulationRenderer.h
 )
 
-set(BRAYNSOSPRAYENGINEPLUGIN_HEADERS
+set(BRAYNSOSPRAYENGINE_HEADERS
   utils.h
 )
 
@@ -91,7 +91,7 @@ set_source_files_properties(
     OSPRayMaterial.cpp
     PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
 
-set(BRAYNSOSPRAYENGINEPLUGIN_LINK_LIBRARIES
+set(BRAYNSOSPRAYENGINE_LINK_LIBRARIES
     PRIVATE vmmlib braynsCommon braynsParameters ${OSPRAY_LIBRARIES}
 )
 
@@ -107,12 +107,12 @@ endif()
 
 # Compile ispc code
 include_directories_ispc(${PROJECT_SOURCE_DIR} ${OSPRAY_INCLUDE_DIRS})
-ospray_ispc_compile(${BRAYNSOSPRAYPLUGIN_ISPC_SOURCES})
-list(APPEND BRAYNSOSPRAYENGINEPLUGIN_SOURCES ${ISPC_OBJECTS})
+ospray_ispc_compile(${BRAYNSOSPRAYENGINE_ISPC_SOURCES})
+list(APPEND BRAYNSOSPRAYENGINE_SOURCES ${ISPC_OBJECTS})
 
 # Compile C++ code
-set(BRAYNSOSPRAYENGINEPLUGIN_OMIT_LIBRARY_HEADER ON)
-set(BRAYNSOSPRAYENGINEPLUGIN_OMIT_VERSION_HEADERS ON)
-set(BRAYNSOSPRAYENGINEPLUGIN_EXPORT ON)
+set(BRAYNSOSPRAYENGINE_OMIT_LIBRARY_HEADER ON)
+set(BRAYNSOSPRAYENGINE_OMIT_VERSION_HEADERS ON)
+set(BRAYNSOSPRAYENGINE_EXPORT ON)
 
-common_library(braynsOSPRayEnginePlugin)
+common_library(braynsOSPRayEngine)

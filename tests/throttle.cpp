@@ -24,7 +24,7 @@
 
 #include <brayns/common/Timer.h>
 
-#include "../plugins/RocketsPlugin/Throttle.h"
+#include "../plugins/Rockets/Throttle.h"
 
 struct TestTimer
 {

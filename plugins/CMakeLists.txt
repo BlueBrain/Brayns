@@ -5,14 +5,14 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 if(BRAYNS_DEFLECT_ENABLED)
-  add_subdirectory(DeflectPlugin)
+  add_subdirectory(Deflect)
 endif()
 
 if(BRAYNS_NETWORKING_ENABLED)
-  add_subdirectory(RocketsPlugin)
+  add_subdirectory(Rockets)
 endif()
 
 option(BRAYNS_VRPN_ENABLED "Activate vrpn plugin" OFF)
 if(BRAYNS_VRPN_ENABLED)
-  add_subdirectory(VRPNPlugin)
+  add_subdirectory(VRPN)
 endif()

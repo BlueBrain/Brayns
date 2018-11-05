@@ -26,7 +26,7 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <plugins/RocketsPlugin/jsonSerialization.h>
+#include <plugins/Rockets/jsonSerialization.h>
 
 #include <boost/test/unit_test.hpp>
 

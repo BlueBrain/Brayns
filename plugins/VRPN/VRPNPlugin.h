@@ -19,14 +19,14 @@
 
 #pragma once
 
-#include <vrpnplugin/defines.h>
+#include <braynsvrpn/defines.h>
 
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 #include <vrpn_Tracker.h>
 
-#ifdef VRPNPLUGIN_USE_LIBUV
+#ifdef BRAYNSVRPN_USE_LIBUV
 #include <uv.h>
 #endif
 
@@ -40,7 +40,7 @@ public:
 
     void preRender() final;
 
-#ifdef VRPNPLUGIN_USE_LIBUV
+#ifdef BRAYNSVRPN_USE_LIBUV
     void resumeRenderingIfTrackerIsActive();
 #endif
 
@@ -49,7 +49,7 @@ private:
     Camera& _camera;
     vrpn_Tracker_Remote _vrpnTracker;
 
-#ifdef VRPNPLUGIN_USE_LIBUV
+#ifdef BRAYNSVRPN_USE_LIBUV
     struct LibuvDeleter
     {
         void operator()(uv_timer_t* timer)

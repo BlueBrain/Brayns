@@ -10,6 +10,6 @@
 [submodule "perceptualdiff"]
 	path = perceptualdiff
 	url = https://github.com/myint/perceptualdiff.git
-[submodule "plugins/RocketsPlugin/rapidjson"]
-	path = plugins/RocketsPlugin/rapidjson
+[submodule "plugins/Rockets/rapidjson"]
+	path = plugins/Rockets/rapidjson
 	url = https://github.com/Tencent/rapidjson.git

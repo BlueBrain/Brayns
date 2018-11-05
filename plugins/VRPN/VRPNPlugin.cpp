@@ -31,7 +31,7 @@ namespace
 {
 constexpr vrpn_int32 HEAD_SENSOR_ID = 0;
 const std::string DEFAULT_VRPN_NAME = "DTrack@cave1";
-#ifdef VRPNPLUGIN_USE_LIBUV
+#ifdef BRAYNSVRPN_USE_LIBUV
 constexpr int VRPN_IDLE_TIMEOUT_MS = 5000;
 #endif
 
@@ -114,7 +114,7 @@ VRPNPlugin::VRPNPlugin(PluginAPI* api, const std::string& vrpnName)
 
     _camera.setProperties(CAMERA_TYPE, getDefaultCameraProperties());
 
-#ifdef VRPNPLUGIN_USE_LIBUV
+#ifdef BRAYNSVRPN_USE_LIBUV
     _setupIdleTimer();
 #endif
 }
@@ -130,7 +130,7 @@ void VRPNPlugin::preRender()
     _vrpnTracker.mainloop();
 }
 
-#ifdef VRPNPLUGIN_USE_LIBUV
+#ifdef BRAYNSVRPN_USE_LIBUV
 void VRPNPlugin::resumeRenderingIfTrackerIsActive()
 {
     _vrpnTracker.mainloop();
