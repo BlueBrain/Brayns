@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -19,16 +19,17 @@
  */
 
 #include "CircuitLoader.h"
-#include "circuitLoaderCommon.h"
+#include "MorphologyLoader.h"
+#include "SimulationHandler.h"
+#include "common.h"
 
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/io/simulation/CircuitSimulationHandler.h>
+
 
 #include <brain/brain.h>
 #include <brion/brion.h>
 
-#include <brayns/io/MorphologyLoader.h>
 #if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif
@@ -129,7 +130,7 @@ public:
             {
                 try
                 {
-                    auto handler = std::make_shared<CircuitSimulationHandler>(
+                    auto handler = std::make_shared<SimulationHandler>(
                         _applicationParameters, _geometryParameters,
                         bc.getReportSource(report), allGids);
                     compartmentReport = handler->getCompartmentReport();

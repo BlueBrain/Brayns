@@ -31,6 +31,9 @@
 #ifdef BRAYNS_USE_DEFLECT
 #include <plugins/Deflect/DeflectPlugin.h>
 #endif
+#ifdef BRAYNS_USE_CIRCUITVIEWER
+#include <plugins/CircuitViewer/CircuitViewer.h>
+#endif
 
 #include <boost/algorithm/string.hpp>
 
@@ -64,6 +67,10 @@ PluginManager::PluginManager(int argc, const char** argv)
 
         _loadPlugin(name, args.size(), args.data());
     }
+
+#ifdef BRAYNS_USE_CIRCUITVIEWER
+    _extensions.push_back(std::make_shared<CircuitViewer>());
+#endif
 }
 
 void PluginManager::initPlugins(PluginAPI* api)

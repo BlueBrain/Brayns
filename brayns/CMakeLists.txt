@@ -26,6 +26,10 @@ if(TARGET braynsOSPRayEngine)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsOSPRayEngine)
 endif()
 
+if(TARGET braynsCircuitViewer)
+  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsCircuitViewer)
+endif()
+
 if(TARGET braynsDeflect)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsDeflect)
 endif()

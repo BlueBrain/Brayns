@@ -5,6 +5,7 @@
 
 set(BRAYNSIO_SOURCES
   algorithms/MetaballsGenerator.cpp
+  MolecularSystemReader.cpp
   ProteinLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
   VolumeLoader.cpp
@@ -13,33 +14,17 @@ set(BRAYNSIO_SOURCES
 
 set(BRAYNSIO_PUBLIC_HEADERS
   algorithms/MetaballsGenerator.h
+  MolecularSystemReader.h
   ProteinLoader.h
   simulation/CADiffusionSimulationHandler.h
   VolumeLoader.h
   XYZBLoader.h
 )
 
-
 set(BRAYNSIO_LINK_LIBRARIES
   PRIVATE braynsParameters braynsCommon vmmlib
     ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
 )
-
-if(BRAYNS_BRION_ENABLED)
-  list(APPEND BRAYNSIO_SOURCES
-      CircuitLoader.cpp
-      MolecularSystemReader.cpp
-      MorphologyLoader.cpp
-      simulation/CircuitSimulationHandler.cpp)
-  list(APPEND BRAYNSIO_HEADERS
-      CircuitLoader.h
-      MolecularSystemReader.h
-      MorphologyLoader.h
-      simulation/CircuitSimulationHandler.h
-      circuitLoaderCommon.h)
-  list(APPEND BRAYNSIO_LINK_LIBRARIES
-    PUBLIC Brion PRIVATE Brain ${HDF5_LIBRARIES})
-endif()
 
 if(BRAYNS_LIBARCHIVE_ENABLED)
   list(APPEND BRAYNSIO_SOURCES ArchiveLoader.cpp)
