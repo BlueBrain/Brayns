@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *
@@ -19,7 +19,7 @@
  */
 
 #include "MorphologyLoader.h"
-#include "circuitLoaderCommon.h"
+#include "common.h"
 
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Model.h>
@@ -152,7 +152,8 @@ public:
         else
         {
             return _importMorphologyFromURI(source, index, materialFunc,
-                                            transformation, compartmentReport, model);
+                                            transformation, compartmentReport,
+                                            model);
         }
     }
 

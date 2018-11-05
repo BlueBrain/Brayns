@@ -179,13 +179,3 @@ BOOST_AUTO_TEST_CASE(folder)
             ADD_MODEL, {"folder", BRAYNS_TESTDATA_VALID_MODELS_PATH})),
         rockets::jsonrpc::response_error);
 }
-
-#ifdef BRAYNS_USE_BBPTESTDATA
-BOOST_AUTO_TEST_CASE(file_no_extension_blueconfig)
-{
-    auto model = makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
-        ADD_MODEL, {"circuit", BBP_TEST_BLUECONFIG});
-    BOOST_CHECK_EQUAL(model.getName(), "circuit");
-    BOOST_CHECK_EQUAL(model.getPath(), BBP_TEST_BLUECONFIG);
-}
-#endif

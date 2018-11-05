@@ -56,11 +56,7 @@
 #include <brayns/io/MeshLoader.h>
 #endif
 
-#if BRAYNS_USE_BRION
-#include <brayns/io/CircuitLoader.h>
 #include <brayns/io/MolecularSystemReader.h>
-#include <brayns/io/MorphologyLoader.h>
-#endif
 
 #ifdef BRAYNS_USE_OSPRAY
 #include <ospcommon/library.h>
@@ -289,15 +285,8 @@ private:
         registry.registerLoader(
             std::make_unique<ArchiveLoader>(scene, registry));
 #endif
-#if (BRAYNS_USE_BRION)
         registry.registerLoader(
             std::make_unique<MolecularSystemReader>(scene, geometryParameters));
-        registry.registerLoader(std::make_unique<CircuitLoader>(
-            scene, _parametersManager.getApplicationParameters(),
-            geometryParameters));
-        registry.registerLoader(
-            std::make_unique<MorphologyLoader>(scene, geometryParameters));
-#endif
     }
 
     void _loadData()

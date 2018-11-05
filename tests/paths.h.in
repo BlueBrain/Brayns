@@ -5,15 +5,12 @@
  * This file is part of BRayns
  */
 
+// Do not use pragma once, this file needs to be orverriden from the
+// CircuitViewer plugin
 #ifndef BRAYNS_TEST_PATHS
 #define BRAYNS_TEST_PATHS
 
-#ifdef BRAYNS_USE_BBPTESTDATA
-#include <BBP/TestDatasets.h>
-#endif
-
 #define BRAYNS_TESTDATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/files/"
-
 #define BRAYNS_TESTDATA_IMAGES_PATH BRAYNS_TESTDATA_PATH "images/"
 #define BRAYNS_TESTDATA_VALID_MODELS_PATH BRAYNS_TESTDATA_PATH "modelsValid/"
 

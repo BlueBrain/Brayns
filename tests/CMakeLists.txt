@@ -16,17 +16,10 @@ if(TARGET pdiff)
   list(APPEND TEST_LIBRARIES pdiff ${FREEIMAGE_LIBRARIES})
 else()
   list(APPEND EXCLUDE_FROM_TESTS
-    braynsTestData.cpp
     clipPlaneRendering.cpp
     snapshot.cpp
     streamlines.cpp
   )
-endif()
-
-if(TARGET BBPTestData)
-  list(APPEND TEST_LIBRARIES BBPTestData)
-else()
-  list(APPEND EXCLUDE_FROM_TESTS braynsTestData.cpp)
 endif()
 
 if(NOT BRAYNS_OSPRAY_ENABLED)
@@ -35,7 +28,6 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     addModelFromBlob.cpp
     clipPlaneRendering.cpp
     brayns.cpp
-    braynsTestData.cpp
     model.cpp
     plugin.cpp
     renderer.cpp
@@ -52,7 +44,6 @@ if(NOT BRAYNS_ASSIMP_ENABLED)
   list(APPEND EXCLUDE_FROM_TESTS
     addModel.cpp
     addModelFromBlob.cpp
-    braynsTestData.cpp
   )
 endif()
 

@@ -12,7 +12,12 @@ if(BRAYNS_NETWORKING_ENABLED)
   add_subdirectory(Rockets)
 endif()
 
-option(BRAYNS_VRPN_ENABLED "Activate vrpn plugin" OFF)
+option(BRAYNS_VRPN_ENABLED "Activate VRPN plugin" OFF)
 if(BRAYNS_VRPN_ENABLED)
   add_subdirectory(VRPN)
+endif()
+
+option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" ON)
+if (BRAYNS_CIRCUITVIEWER_ENABLED)
+  add_subdirectory(CircuitViewer)
 endif()
