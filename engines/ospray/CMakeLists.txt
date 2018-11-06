@@ -15,6 +15,7 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/OrthographicCamera.ispc
   ispc/camera/PerspectiveCamera.ispc
   ispc/geometry/Cones.ispc
+  ispc/geometry/Cylinders.ispc
   ispc/geometry/SDFGeometries.ispc
   ispc/render/BasicRenderer.ispc
   ispc/render/ExtendedOBJMaterial.ispc
@@ -40,6 +41,7 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   ispc/camera/OrthographicCamera.cpp
   ispc/camera/PerspectiveCamera.cpp
   ispc/geometry/Cones.cpp
+  ispc/geometry/Cylinders.cpp
   ispc/geometry/SDFGeometries.cpp
   ispc/render/BasicRenderer.cpp
   ispc/render/ExtendedOBJMaterial.cpp
@@ -65,6 +67,7 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   ispc/camera/OrthographicCamera.h
   ispc/camera/PerspectiveCamera.h
   ispc/geometry/Cones.h
+  ispc/geometry/Cylinders.h
   ispc/geometry/SDFGeometries.h
   ispc/render/BasicRenderer.h
   ispc/render/ExtendedOBJMaterial.h
