@@ -25,6 +25,7 @@ set(BRAYNSCOMMON_SOURCES
   light/DirectionalLight.cpp
   loader/LoaderRegistry.cpp
   utils/base64/base64.cpp
+  utils/DynamicLib.cpp
   utils/ImageUtils.cpp
   utils/Utils.cpp
   volume/SharedDataVolume.cpp
@@ -83,6 +84,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
 set(BRAYNSCOMMON_HEADERS
   utils/ImageUtils.h
   utils/base64/base64.h
+  utils/DynamicLib.h
 )
 
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)

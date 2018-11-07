@@ -34,6 +34,7 @@
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/DynamicLib.h>
 #include <brayns/common/utils/Utils.h>
 
 #include <brayns/parameters/ParametersManager.h>
@@ -50,7 +51,6 @@
 #include <brayns/tasks/AddModelTask.h>
 
 #include <brayns/pluginapi/ExtensionPlugin.h>
-#include <brayns/pluginapi/ExtensionPluginFactory.h>
 #include <brayns/pluginapi/PluginAPI.h>
 #ifdef BRAYNS_USE_NETWORKING
 #include <plugins/Rockets/RocketsPlugin.h>
@@ -117,7 +117,7 @@ struct Brayns::Impl : public PluginAPI
 #ifdef BRAYNS_USE_NETWORKING
         {
             auto plugin{std::make_shared<RocketsPlugin>(_engine, this)};
-            _extensionPluginFactory.add(plugin);
+            _extensions.push_back(plugin);
             _actionInterface = plugin;
         }
 #else
@@ -131,7 +131,7 @@ struct Brayns::Impl : public PluginAPI
         if (haveDeflectHost)
 #ifdef BRAYNS_USE_DEFLECT
         {
-            _extensionPluginFactory.add(
+            _extensions.push_back(
                 std::make_shared<DeflectPlugin>(_engine, this));
         }
 #else
@@ -143,48 +143,44 @@ struct Brayns::Impl : public PluginAPI
 
     void loadPlugins()
     {
-#ifdef BRAYNS_USE_OSPRAY
         for (const auto& pluginParam :
              _parametersManager.getApplicationParameters().getPlugins())
         {
-            try
-            {
-                const auto& pluginName = pluginParam.name;
-                ospcommon::Library library(pluginName);
-                auto createSym = library.getSymbol("brayns_plugin_create");
-                if (!createSym)
-                {
-                    throw std::runtime_error(
-                        "Plugin '" + pluginName +
-                        "' is not a valid Brayns plugin; missing " +
-                        "brayns_plugin_create()");
-                }
+            const char* name = pluginParam.name.c_str();
+            std::vector<const char*> argv;
+            argv.push_back(name);
+            for (const auto& arg : pluginParam.arguments)
+                argv.push_back(arg.c_str());
 
-                auto tmpArgs = pluginParam.arguments;
-                tmpArgs.insert(tmpArgs.begin(), pluginName);
-
-                // Build argc, argv
-                const int argc = tmpArgs.size();
-                std::vector<char*> argv(argc, nullptr);
-
-                for (int i = 0; i < argc; i++)
-                    argv[i] = &tmpArgs[i].front();
-
-                ExtensionPlugin* (*createFunc)(PluginAPI*, int, char**) =
-                    (ExtensionPlugin * (*)(PluginAPI*, int, char**))createSym;
-                auto plugin = createFunc(this, argc, argv.data());
-
-                _extensionPluginFactory.add(ExtensionPluginPtr{plugin});
-                BRAYNS_INFO << "Loaded plugin '" << pluginName << "'"
-                            << std::endl;
-            }
-            catch (const std::runtime_error& exc)
-            {
-                BRAYNS_ERROR << exc.what() << std::endl;
-                exit(EXIT_FAILURE);
-            }
+            _loadPlugin(name, argv.size(), argv.data());
         }
-#endif
+    }
+
+    void _loadPlugin(const char* name, int argc, const char* argv[])
+    {
+        try
+        {
+            DynamicLib library(name);
+            auto createSym = library.getSymbolAddress("brayns_plugin_create");
+            if (!createSym)
+            {
+                throw std::runtime_error(
+                    std::string("Plugin '") + name +
+                    "' is not a valid Brayns plugin; missing " +
+                    "brayns_plugin_create()");
+            }
+
+            ExtensionPlugin* (*createFunc)(PluginAPI*, int, const char**) =
+                (ExtensionPlugin * (*)(PluginAPI*, int, const char**))createSym;
+            _extensions.emplace_back(createFunc(this, argc, argv));
+            _pluginLibs.push_back(std::move(library));
+
+            BRAYNS_INFO << "Loaded plugin '" << name << "'" << std::endl;
+        }
+        catch (const std::runtime_error& exc)
+        {
+            BRAYNS_ERROR << exc.what() << std::endl;
+        }
     }
 
     bool commit()
@@ -193,7 +189,8 @@ struct Brayns::Impl : public PluginAPI
         if (!lock.try_lock())
             return false;
 
-        _extensionPluginFactory.preRender();
+        for (const auto& extension : _extensions)
+            extension->preRender();
 
         auto& scene = _engine->getScene();
         scene.commit();
@@ -271,8 +268,8 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->postRender();
 
-        // broadcast image JPEG from RocketsPlugin
-        _extensionPluginFactory.postRender();
+        for (const auto& extension : _extensions)
+            extension->postRender();
 
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();
@@ -835,6 +832,9 @@ private:
         app.setSynchronousMode(!app.getSynchronousMode());
     }
 
+    std::vector<DynamicLib> _pluginLibs;
+    std::vector<ExtensionPluginPtr> _extensions;
+
     ParametersManager _parametersManager;
     EngineFactory _engineFactory;
     EnginePtr _engine;
@@ -850,7 +850,6 @@ private:
     Timer _renderTimer;
     std::atomic<double> _lastFPS;
 
-    ExtensionPluginFactory _extensionPluginFactory;
     std::shared_ptr<ActionInterface> _actionInterface;
 };
 
