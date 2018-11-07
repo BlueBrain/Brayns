@@ -98,8 +98,15 @@ struct Brayns::Impl : public PluginAPI
         _parametersManager.parse(argc, argv);
         _parametersManager.print();
 
-        createEngine();
-        _engine->getScene().commit();
+        _createEngine();
+
+        _addPlugins();
+        _loadPlugins();
+
+        _registerLoaders();
+        _loadData();
+
+        _engine->getScene().commit(); // Needed to obtain a bounding box
         _registerKeyboardShortcuts();
         _setupCameraManipulator(CameraMode::inspect);
         const auto frameSize = Vector2d(_engine->getFrameBuffer().getSize());
@@ -107,7 +114,7 @@ struct Brayns::Impl : public PluginAPI
                                             frameSize.x() / frameSize.y());
     }
 
-    void addPlugins()
+    void _addPlugins()
     {
         const bool haveHttpServerURI =
             !_parametersManager.getApplicationParameters()
@@ -141,7 +148,7 @@ struct Brayns::Impl : public PluginAPI
 #endif
     }
 
-    void loadPlugins()
+    void _loadPlugins()
     {
         for (const auto& pluginParam :
              _parametersManager.getApplicationParameters().getPlugins())
@@ -275,30 +282,6 @@ struct Brayns::Impl : public PluginAPI
         _engine->getStatistics().resetModified();
     }
 
-    void createEngine()
-    {
-        _engine.reset(); // Free resources before creating a new engine
-
-        const auto& engineName =
-            _parametersManager.getApplicationParameters().getEngine();
-        _engine = _engineFactory.create(engineName);
-        if (!_engine)
-            throw std::runtime_error(
-                "Unsupported engine: " +
-                _parametersManager.getApplicationParameters().getEngineAsString(
-                    engineName));
-
-        // Default sun light
-        DirectionalLightPtr sunLight(
-            new DirectionalLight(DEFAULT_SUN_DIRECTION, DEFAULT_SUN_COLOR,
-                                 DEFAULT_SUN_INTENSITY));
-        _engine->getScene().addLight(sunLight);
-        _engine->getScene().commitLights();
-
-        _registerLoaders();
-        _loadData();
-    }
-
     bool commit(const RenderInput& renderInput)
     {
         _engine->getCamera().set(renderInput.position, renderInput.orientation,
@@ -353,7 +336,29 @@ struct Brayns::Impl : public PluginAPI
         return _actionInterface.get();
     }
     Scene& getScene() final { return _engine->getScene(); }
+
 private:
+    void _createEngine()
+    {
+        _engine.reset(); // Free resources before creating a new engine
+
+        const auto& engineName =
+            _parametersManager.getApplicationParameters().getEngine();
+        _engine = _engineFactory.create(engineName);
+        if (!_engine)
+            throw std::runtime_error(
+                "Unsupported engine: " +
+                _parametersManager.getApplicationParameters().getEngineAsString(
+                    engineName));
+
+        // Default sun light
+        DirectionalLightPtr sunLight(
+            new DirectionalLight(DEFAULT_SUN_DIRECTION, DEFAULT_SUN_COLOR,
+                                 DEFAULT_SUN_INTENSITY));
+        _engine->getScene().addLight(sunLight);
+        _engine->getScene().commitLights();
+    }
+
     void _registerLoaders()
     {
         auto& registry = _engine->getScene().getLoaderRegistry();
@@ -853,7 +858,7 @@ private:
     std::shared_ptr<ActionInterface> _actionInterface;
 };
 
-// -------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 Brayns::Brayns(int argc, const char** argv)
     : _impl(std::make_unique<Impl>(argc, argv))
@@ -880,12 +885,6 @@ bool Brayns::commitAndRender()
         _impl->postRender(nullptr);
     }
     return _impl->getEngine().getKeepRunning();
-}
-
-void Brayns::loadPlugins()
-{
-    _impl->addPlugins();
-    _impl->loadPlugins();
 }
 
 bool Brayns::commit()

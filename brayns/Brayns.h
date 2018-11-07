@@ -33,34 +33,37 @@ namespace brayns
     underlying rendering engines, making it possible to use the best rendering
     engine depending on the case.
 
-    The scene is initialized according to parameters provided to the Brayns
-    constructor. Those parameters are related to the application itself, the
-    geometry and the renderer. During the initialization process, Brayns creates
-    the scene using loaders located in the braynsPlugins library.
+    Brayns uses plugins for extended function. There are a few built-in plugins
+    and additional plugins can be dynamically loaded.
 
     The underlying rendering engine (OSPRay, Optix, FireRays, etc) is specified
     in the rendering parameters and is invoked by the render method for
     generating the frames.
 
     Underlying rendering engines support CPU, GPU and heterogeneous
-   architectures
+    architectures
 
     This object exposes the basic API for Brayns
 */
 class Brayns
 {
 public:
+    /** Brayns instance initialization.
+     *
+     * Initialization involves command line parsing, engine creation, plugin
+     * loading and initialization, data loading, scene creation and setup of
+     * keyboard mouse interactions.
+     *
+     * In a setup using event loops, the event loop must be set up correctly
+     * before calling this constructor to ensure that plugins can install their
+     * event callbacks successfully.
+     *
+     * Command line parameters provide options about the application itself,
+     * the geometry and the renderer. Brayns creates the scene using built-in
+     * and plug-in provided loaders.
+     */
     BRAYNS_API Brayns(int argc, const char** argv);
     BRAYNS_API ~Brayns();
-
-    /**
-     * Creates built-in plugins and loads specified dynamic plugins. Shall be
-     * invoked before starting any rendering.
-     *
-     * In a setup using event loops, one wants to postpone this call until the
-     * event loop is setup'd correctly to use it from within a plugin.
-     */
-    BRAYNS_API void loadPlugins();
 
     /** @name Simple execution API  */
     //@{
