@@ -35,7 +35,7 @@ const Vec2 vecVal{{1, 1}};
 class MyPlugin : public brayns::ExtensionPlugin
 {
 public:
-    MyPlugin(brayns::PluginAPI* api, int argc, char** argv)
+    MyPlugin(brayns::PluginAPI* api, int argc, const char** argv)
     {
         if (argc > 0)
         {
@@ -129,7 +129,8 @@ public:
 OSP_REGISTER_RENDERER(MyRenderer, myrenderer);
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
-                                                         int argc, char** argv)
+                                                         int argc,
+                                                         const char** argv)
 {
     return new MyPlugin(api, argc, argv);
 }

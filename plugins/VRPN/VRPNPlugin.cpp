@@ -160,7 +160,7 @@ void VRPNPlugin::_setupIdleTimer()
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
                                                          const int argc,
-                                                         char** argv)
+                                                         const char** argv)
 {
     if (argc > 2)
     {
