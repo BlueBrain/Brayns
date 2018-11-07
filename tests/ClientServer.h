@@ -101,7 +101,6 @@ public:
             argv.push_back(arg);
         const int argc = argv.size();
         _brayns.reset(new brayns::Brayns(argc, argv.data()));
-        _brayns->loadPlugins();
         _brayns->getParametersManager()
             .getApplicationParameters()
             .setImageStreamFPS(0);

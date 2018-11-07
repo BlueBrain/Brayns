@@ -33,8 +33,7 @@ class BraynsService
 {
 public:
     BraynsService(int argc, const char** argv)
-        : _brayns(argc, argv)
-        , _renderingDone{_mainLoop->resource<uvw::AsyncHandle>()}
+        : _renderingDone{_mainLoop->resource<uvw::AsyncHandle>()}
         , _eventRendering{_mainLoop->resource<uvw::IdleHandle>()}
         , _accumRendering{_mainLoop->resource<uvw::IdleHandle>()}
         , _checkIdleRendering{_mainLoop->resource<uvw::CheckHandle>()}
@@ -47,7 +46,14 @@ public:
         _setupMainThread();
         _setupRenderThread();
 
-        _brayns.loadPlugins();
+        _brayns = std::make_unique<brayns::Brayns>(argc, argv);
+
+        // events from rockets, trigger rendering
+        _brayns->getEngine().triggerRender =
+            [& eventRendering = _eventRendering]
+        {
+            eventRendering->start();
+        };
 
         // launch first frame; after that, only events will trigger that
         _eventRendering->start();
@@ -76,14 +82,8 @@ private:
         // thread
         _renderingDone->on<uvw::AsyncEvent>([& brayns = _brayns](const auto&,
                                                                  auto&) {
-            brayns.postRender();
+            brayns->postRender();
         });
-
-        // events from rockets, trigger rendering
-        _brayns.getEngine().triggerRender = [& eventRendering = _eventRendering]
-        {
-            eventRendering->start();
-        };
 
         // render or data load trigger from events
         _eventRendering->on<uvw::IdleEvent>([&](const auto&, auto&) {
@@ -92,14 +92,14 @@ private:
             _timeSinceLastEvent.start();
 
             // stop event loop(s) and exit application
-            if (!_brayns.getEngine().getKeepRunning())
+            if (!_brayns->getEngine().getKeepRunning())
             {
                 this->_stopMainLoop();
                 return;
             }
 
             // rendering
-            if (_brayns.commit())
+            if (_brayns->commit())
                 _triggerRendering->send();
         });
 
@@ -113,7 +113,7 @@ private:
             if (_timeSinceLastEvent.elapsed() < _idleRenderingDelay)
                 return;
 
-            if (_brayns.getEngine().continueRendering() && _brayns.commit())
+            if (_brayns->getEngine().continueRendering() && _brayns->commit())
                 _triggerRendering->send();
 
             _accumRendering->stop();
@@ -124,7 +124,7 @@ private:
     {
         // rendering, triggered from main thread
         _triggerRendering->on<uvw::AsyncEvent>([&](const auto&, auto&) {
-            _brayns.render();
+            _brayns->render();
             _renderingDone->send();
         });
 
@@ -136,7 +136,7 @@ private:
     void _stopMainLoop()
     {
         // send stop render loop message
-        _brayns.getEngine().triggerRender = [] {};
+        _brayns->getEngine().triggerRender = [] {};
         _stopRenderThread->send();
 
         // close all main loop resources to avoid memleaks
@@ -156,7 +156,7 @@ private:
         _renderLoop->stop();
     }
 
-    brayns::Brayns _brayns;
+    std::unique_ptr<brayns::Brayns> _brayns;
 
     std::shared_ptr<uvw::Loop> _mainLoop{uvw::Loop::getDefault()};
     std::shared_ptr<uvw::AsyncHandle> _renderingDone;
