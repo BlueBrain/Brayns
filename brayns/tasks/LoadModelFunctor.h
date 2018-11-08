@@ -33,7 +33,7 @@ namespace brayns
 class LoadModelFunctor : public TaskFunctor
 {
 public:
-    LoadModelFunctor(EnginePtr engine, const ModelParams& params);
+    LoadModelFunctor(Engine& engine, const ModelParams& params);
     LoadModelFunctor(LoadModelFunctor&&) = default;
     ModelDescriptorPtr operator()(Blob&& blob);
     ModelDescriptorPtr operator()();
@@ -50,7 +50,7 @@ private:
 
     std::function<void(std::string, float)> _getProgressFunc();
 
-    EnginePtr _engine;
+    Engine& _engine;
     ModelParams _params;
     size_t _currentProgress{0};
     size_t _nextTic{0};

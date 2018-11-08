@@ -42,7 +42,7 @@ public:
      * binary data to delegate them to the task.
      */
     auto createTask(const BinaryParam& param, uintptr_t clientID,
-                    EnginePtr engine)
+                    Engine& engine)
     {
         auto task = std::make_shared<AddModelFromBlobTask>(param, engine);
 

@@ -51,12 +51,12 @@ struct BinaryParam : ModelParams
 class AddModelFromBlobTask : public Task<ModelDescriptorPtr>
 {
 public:
-    AddModelFromBlobTask(const BinaryParam& param, EnginePtr engine);
+    AddModelFromBlobTask(const BinaryParam& param, Engine& engine);
 
     void appendBlob(const std::string& blob);
 
 private:
-    void _checkValidity(EnginePtr engine);
+    void _checkValidity(Engine& engine);
     void _cancel() final
     {
         _chunkEvent.set_exception(

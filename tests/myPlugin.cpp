@@ -35,7 +35,7 @@ const Vec2 vecVal{{1, 1}};
 class MyPlugin : public brayns::ExtensionPlugin
 {
 public:
-    MyPlugin(brayns::PluginAPI* api, int argc, const char** argv)
+    MyPlugin(const int argc, const char** argv)
     {
         if (argc > 0)
         {
@@ -44,7 +44,10 @@ public:
                 std::cout << " " << std::string(argv[i]);
             std::cout << std::endl;
         }
+    }
 
+    void init(brayns::PluginAPI* api) final
+    {
         auto actions = api->getActionInterface();
         BOOST_REQUIRE(actions);
 
@@ -132,5 +135,5 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
                                                          int argc,
                                                          const char** argv)
 {
-    return new MyPlugin(api, argc, argv);
+    return new MyPlugin(argc, argv);
 }

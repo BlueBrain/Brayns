@@ -21,6 +21,7 @@
 
 #include "Brayns.h"
 #include "EngineFactory.h"
+#include "PluginManager.h"
 
 #include <brayns/common/Timer.h>
 #include <brayns/common/camera/Camera.h>
@@ -48,16 +49,8 @@
 #include <brayns/io/VolumeLoader.h>
 #include <brayns/io/XYZBLoader.h>
 
-#include <brayns/tasks/AddModelTask.h>
-
-#include <brayns/pluginapi/ExtensionPlugin.h>
 #include <brayns/pluginapi/PluginAPI.h>
-#ifdef BRAYNS_USE_NETWORKING
-#include <plugins/Rockets/RocketsPlugin.h>
-#endif
-#ifdef BRAYNS_USE_DEFLECT
-#include <plugins/Deflect/DeflectPlugin.h>
-#endif
+#include <brayns/tasks/AddModelTask.h>
 
 #if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
@@ -84,24 +77,16 @@ namespace brayns
 struct Brayns::Impl : public PluginAPI
 {
     Impl(int argc, const char** argv)
-        : _engineFactory{argc, argv, _parametersManager}
+        : _pluginManager{this, argc, argv}
+        , _engineFactory{argc, argv, _parametersManager}
     {
-        BRAYNS_INFO << "     ____                             " << std::endl;
-        BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
-        BRAYNS_INFO << "   / __  / ___/ __ `/ / / / __ \\/ ___/" << std::endl;
-        BRAYNS_INFO << "  / /_/ / /  / /_/ / /_/ / / / (__  ) " << std::endl;
-        BRAYNS_INFO << " /_____/_/   \\__,_/\\__, /_/ /_/____/  " << std::endl;
-        BRAYNS_INFO << "                  /____/              " << std::endl;
-        BRAYNS_INFO << std::endl;
-
         BRAYNS_INFO << "Parsing command line options" << std::endl;
         _parametersManager.parse(argc, argv);
         _parametersManager.print();
 
         _createEngine();
 
-        _addPlugins();
-        _loadPlugins();
+        _pluginManager.initPlugins(this);
 
         _registerLoaders();
         _loadData();
@@ -114,90 +99,13 @@ struct Brayns::Impl : public PluginAPI
                                             frameSize.x() / frameSize.y());
     }
 
-    void _addPlugins()
-    {
-        const bool haveHttpServerURI =
-            !_parametersManager.getApplicationParameters()
-                 .getHttpServerURI()
-                 .empty();
-        if (haveHttpServerURI)
-#ifdef BRAYNS_USE_NETWORKING
-        {
-            auto plugin{std::make_shared<RocketsPlugin>(_engine, this)};
-            _extensions.push_back(plugin);
-            _actionInterface = plugin;
-        }
-#else
-            throw std::runtime_error(
-                "BRAYNS_NETWORKING_ENABLED was not set, but HTTP server URI "
-                "was specified");
-#endif
-        const bool haveDeflectHost =
-            getenv("DEFLECT_HOST") ||
-            !_parametersManager.getStreamParameters().getHostname().empty();
-        if (haveDeflectHost)
-#ifdef BRAYNS_USE_DEFLECT
-        {
-            _extensions.push_back(
-                std::make_shared<DeflectPlugin>(_engine, this));
-        }
-#else
-            throw std::runtime_error(
-                "BRAYNS_DEFLECT_ENABLED was not set, but Deflect host was "
-                "specified");
-#endif
-    }
-
-    void _loadPlugins()
-    {
-        for (const auto& pluginParam :
-             _parametersManager.getApplicationParameters().getPlugins())
-        {
-            const char* name = pluginParam.name.c_str();
-            std::vector<const char*> argv;
-            argv.push_back(name);
-            for (const auto& arg : pluginParam.arguments)
-                argv.push_back(arg.c_str());
-
-            _loadPlugin(name, argv.size(), argv.data());
-        }
-    }
-
-    void _loadPlugin(const char* name, int argc, const char* argv[])
-    {
-        try
-        {
-            DynamicLib library(name);
-            auto createSym = library.getSymbolAddress("brayns_plugin_create");
-            if (!createSym)
-            {
-                throw std::runtime_error(
-                    std::string("Plugin '") + name +
-                    "' is not a valid Brayns plugin; missing " +
-                    "brayns_plugin_create()");
-            }
-
-            ExtensionPlugin* (*createFunc)(PluginAPI*, int, const char**) =
-                (ExtensionPlugin * (*)(PluginAPI*, int, const char**))createSym;
-            _extensions.emplace_back(createFunc(this, argc, argv));
-            _pluginLibs.push_back(std::move(library));
-
-            BRAYNS_INFO << "Loaded plugin '" << name << "'" << std::endl;
-        }
-        catch (const std::runtime_error& exc)
-        {
-            BRAYNS_ERROR << exc.what() << std::endl;
-        }
-    }
-
     bool commit()
     {
         std::unique_lock<std::mutex> lock{_renderMutex, std::defer_lock};
         if (!lock.try_lock())
             return false;
 
-        for (const auto& extension : _extensions)
-            extension->preRender();
+        _pluginManager.preRender();
 
         auto& scene = _engine->getScene();
         scene.commit();
@@ -275,8 +183,7 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->postRender();
 
-        for (const auto& extension : _extensions)
-            extension->postRender();
+        _pluginManager.postRender();
 
         _engine->getFrameBuffer().resetModified();
         _engine->getStatistics().resetModified();
@@ -318,7 +225,7 @@ struct Brayns::Impl : public PluginAPI
         frameBuffer.unmap();
     }
 
-    Engine& getEngine() { return *_engine; }
+    Engine& getEngine() final { return *_engine; }
     ParametersManager& getParametersManager() final
     {
         return _parametersManager;
@@ -334,6 +241,10 @@ struct Brayns::Impl : public PluginAPI
     ActionInterface* getActionInterface() final
     {
         return _actionInterface.get();
+    }
+    void setActionInterface(const ActionInterfacePtr& interface) final
+    {
+        _actionInterface = interface;
     }
     Scene& getScene() final { return _engine->getScene(); }
 
@@ -837,10 +748,8 @@ private:
         app.setSynchronousMode(!app.getSynchronousMode());
     }
 
-    std::vector<DynamicLib> _pluginLibs;
-    std::vector<ExtensionPluginPtr> _extensions;
-
     ParametersManager _parametersManager;
+    PluginManager _pluginManager;
     EngineFactory _engineFactory;
     EnginePtr _engine;
     KeyboardHandler _keyboardHandler;
@@ -861,10 +770,18 @@ private:
 // -----------------------------------------------------------------------------
 
 Brayns::Brayns(int argc, const char** argv)
-    : _impl(std::make_unique<Impl>(argc, argv))
+    : _impl([argc, argv]() {
+        BRAYNS_INFO << "     ____                             " << std::endl;
+        BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
+        BRAYNS_INFO << "   / __  / ___/ __ `/ / / / __ \\/ ___/" << std::endl;
+        BRAYNS_INFO << "  / /_/ / /  / /_/ / /_/ / / / (__  ) " << std::endl;
+        BRAYNS_INFO << " /_____/_/   \\__,_/\\__, /_/ /_/____/  " << std::endl;
+        BRAYNS_INFO << "                  /____/              " << std::endl;
+        BRAYNS_INFO << std::endl;
+        return std::make_unique<Impl>(argc, argv);
+    }())
 {
 }
-
 Brayns::~Brayns() = default;
 
 void Brayns::commitAndRender(const RenderInput& renderInput,

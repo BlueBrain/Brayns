@@ -15,6 +15,7 @@ set(BRAYNS_HEADERS EngineFactory.h)
 set(BRAYNS_SOURCES
   Brayns.cpp
   EngineFactory.cpp
+  PluginManager.cpp
 )
 
 set(BRAYNS_LINK_LIBRARIES

@@ -33,10 +33,10 @@ namespace brayns
    the outside world. The http server is configured according
    to the --http-server parameter provided by ApplicationParameters.
  */
-class RocketsPlugin : public ExtensionPlugin, public ActionInterface
+class RocketsPlugin : public ExtensionPlugin
 {
 public:
-    RocketsPlugin(EnginePtr engine, PluginAPI* api);
+    void init(PluginAPI* api) final;
 
     /**
      * In case no event loop is available, this processes in- and outgoing HTTP
@@ -56,28 +56,6 @@ public:
 private:
     class Impl;
     std::shared_ptr<Impl> _impl;
-
-    void registerNotification(
-        const RpcParameterDescription& desc, const PropertyMap& input,
-        const std::function<void(PropertyMap)>& action) final;
-
-    void registerNotification(const RpcDescription& desc,
-                              const std::function<void()>& action) final;
-    void registerRequest(
-        const RpcParameterDescription& desc, const PropertyMap& input,
-        const PropertyMap& output,
-        const std::function<PropertyMap(PropertyMap)>& action) final;
-
-    void registerRequest(const RpcDescription& desc, const PropertyMap& output,
-                         const std::function<PropertyMap()>& action) final;
-
-    void _registerRequest(const std::string& name,
-                          const RetParamFunc& action) final;
-    void _registerRequest(const std::string& name, const RetFunc& action) final;
-    void _registerNotification(const std::string& name,
-                               const ParamFunc& action) final;
-    void _registerNotification(const std::string& name,
-                               const VoidFunc& action) final;
 };
 }
 

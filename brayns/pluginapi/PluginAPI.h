@@ -31,6 +31,8 @@ class PluginAPI
 public:
     virtual ~PluginAPI() = default;
 
+    virtual Engine& getEngine() = 0;
+
     /** @return access to the scene of Brayns. */
     virtual Scene& getScene() = 0;
 
@@ -54,5 +56,8 @@ public:
 
     /** Triggers a new preRender() and potentially render() and postRender(). */
     virtual void triggerRender() = 0;
+
+    /** Set the action interface to be used by Brayns main loop. */
+    virtual void setActionInterface(const ActionInterfacePtr& interface) = 0;
 };
 }

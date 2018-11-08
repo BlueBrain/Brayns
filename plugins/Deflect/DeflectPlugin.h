@@ -30,7 +30,7 @@ namespace brayns
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
-    DeflectPlugin(EnginePtr engine, PluginAPI* api);
+    BRAYNS_API void init(PluginAPI* api) final;
 
     /** Handle stream setup and incoming events. */
     BRAYNS_API void preRender() final;
