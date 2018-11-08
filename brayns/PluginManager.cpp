@@ -36,9 +36,9 @@
 
 namespace brayns
 {
-typedef ExtensionPlugin* (*CreateFuncType)(PluginAPI*, int, const char**);
+typedef ExtensionPlugin* (*CreateFuncType)(int, const char**);
 
-PluginManager::PluginManager(PluginAPI* api, int argc, const char** argv)
+PluginManager::PluginManager(int argc, const char** argv)
 {
     for (int i = 0; i < argc; ++i)
     {
@@ -62,7 +62,7 @@ PluginManager::PluginManager(PluginAPI* api, int argc, const char** argv)
         for (const auto& w : words)
             args.push_back(w.c_str());
 
-        _loadPlugin(api, name, args.size(), args.data());
+        _loadPlugin(name, args.size(), args.data());
     }
 }
 
@@ -115,8 +115,7 @@ void PluginManager::postRender()
         extension->postRender();
 }
 
-void PluginManager::_loadPlugin(PluginAPI* api, const char* name, int argc,
-                                const char* argv[])
+void PluginManager::_loadPlugin(const char* name, int argc, const char* argv[])
 {
     try
     {
@@ -132,7 +131,7 @@ void PluginManager::_loadPlugin(PluginAPI* api, const char* name, int argc,
 
         CreateFuncType createFunc = (CreateFuncType)createSym;
 
-        _extensions.emplace_back(createFunc(api, argc, argv));
+        _extensions.emplace_back(createFunc(argc, argv));
         _libs.push_back(std::move(library));
         BRAYNS_INFO << "Loaded plugin '" << name << "'" << std::endl;
     }

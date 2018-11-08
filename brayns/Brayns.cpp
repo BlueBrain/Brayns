@@ -77,7 +77,7 @@ namespace brayns
 struct Brayns::Impl : public PluginAPI
 {
     Impl(int argc, const char** argv)
-        : _pluginManager{this, argc, argv}
+        : _pluginManager{argc, argv}
         , _engineFactory{argc, argv, _parametersManager}
     {
         BRAYNS_INFO << "Parsing command line options" << std::endl;

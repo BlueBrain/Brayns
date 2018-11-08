@@ -21,13 +21,17 @@
 
 namespace brayns
 {
-ExamplePlugin::ExamplePlugin(PluginAPI* api, int argc, const char** argv)
-    : _api(api)
+ExamplePlugin::ExamplePlugin(int argc, const char** argv)
 {
     std::cout << "Got args: ";
     for (int i = 0; i < argc; ++i)
         std::cout << argv[i] << "; ";
     std::cout << std::endl;
+}
+
+void ExamplePlugin::init(PluginAPI* api)
+{
+    std::cout << "Plugin init" << std::endl;
 }
 
 void ExamplePlugin::preRender()
@@ -46,9 +50,8 @@ void ExamplePlugin::postSceneLoading()
 }
 }
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
-                                                         int argc,
+extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc,
                                                          const char** argv)
 {
-    return new brayns::ExamplePlugin(api, argc, argv);
+    return new brayns::ExamplePlugin(argc, argv);
 }

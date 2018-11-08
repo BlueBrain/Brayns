@@ -131,8 +131,7 @@ public:
 
 OSP_REGISTER_RENDERER(MyRenderer, myrenderer);
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
-                                                         int argc,
+extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc,
                                                          const char** argv)
 {
     return new MyPlugin(argc, argv);

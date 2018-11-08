@@ -37,7 +37,7 @@ public:
      * @param argc Number of command line arguments
      * @param argv Command line arguments
      */
-    PluginManager(PluginAPI* api, int argc, const char** argv);
+    PluginManager(int argc, const char** argv);
 
     /** Calls ExtensionPlugin::init in all loaded plugins */
     void initPlugins(PluginAPI* api);
@@ -52,7 +52,6 @@ private:
     std::vector<DynamicLib> _libs;
     std::vector<ExtensionPluginPtr> _extensions;
 
-    void _loadPlugin(PluginAPI* api, const char* name, int argc,
-                     const char* argv[]);
+    void _loadPlugin(const char* name, int argc, const char* argv[]);
 };
 }
