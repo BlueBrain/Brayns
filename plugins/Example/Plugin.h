@@ -26,13 +26,11 @@ namespace brayns
 class ExamplePlugin : public ExtensionPlugin
 {
 public:
-    ExamplePlugin(PluginAPI* api, int argc, char** argv);
+    ExamplePlugin(int argc, char** argv);
 
+    void init(PluginAPI* api) final;
     void preRender() final;
     void postRender() final;
     void postSceneLoading() final;
-
-private:
-    PluginAPI* _api;
 };
 }
