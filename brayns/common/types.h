@@ -77,6 +77,7 @@ namespace brayns
 class Brayns;
 
 class ActionInterface;
+using ActionInterfacePtr = std::shared_ptr<ActionInterface>;
 
 class Engine;
 using EnginePtr = std::shared_ptr<Engine>;

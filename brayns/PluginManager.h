@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Author: Juan Hernando <cyrille.favreau@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,17 +20,39 @@
 
 #pragma once
 
-#include <brayns/common/tasks/Task.h>
+#include <brayns/common/types.h>
+#include <brayns/common/utils/DynamicLib.h>
+
+#include <vector>
 
 namespace brayns
 {
 /**
- * A task which loads data from the path of the given params and adds the loaded
- * model to the engines' scene.
  */
-class AddModelTask : public Task<ModelDescriptorPtr>
+class PluginManager
 {
 public:
-    AddModelTask(const ModelParams& model, Engine& engine);
+    /**
+     * @brief Constructor
+     * @param argc Number of command line arguments
+     * @param argv Command line arguments
+     */
+    PluginManager(PluginAPI* api, int argc, const char** argv);
+
+    /** Calls ExtensionPlugin::init in all loaded plugins */
+    void initPlugins(PluginAPI* api);
+
+    /** Calls ExtensionPlugin::preRender in all loaded plugins */
+    void preRender();
+
+    /** Calls ExtensionPlugin::postRender in all loaded plugins */
+    void postRender();
+
+private:
+    std::vector<DynamicLib> _libs;
+    std::vector<ExtensionPluginPtr> _extensions;
+
+    void _loadPlugin(PluginAPI* api, const char* name, int argc,
+                     const char* argv[]);
 };
 }

@@ -22,7 +22,6 @@
 #include <brayns/common/log.h>
 #include <brayns/parameters/ParametersManager.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace
@@ -141,22 +140,6 @@ void ApplicationParameters::parse(const po::variables_map& vm)
         _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();
     if (vm.count(PARAM_MAX_RENDER_FPS))
         _maxRenderFPS = vm[PARAM_MAX_RENDER_FPS].as<size_t>();
-
-    // Explode plugin arguments
-    for (auto pluginString : _pluginsRaw)
-    {
-        boost::trim(pluginString);
-        std::vector<std::string> words;
-        boost::split(words, pluginString, boost::is_any_of(" "),
-                     boost::token_compress_on);
-
-        PluginParam plugin;
-        plugin.name = words.front();
-        plugin.arguments =
-            std::vector<std::string>(words.begin() + 1, words.end());
-
-        _plugins.emplace_back(std::move(plugin));
-    }
 
     markModified();
 }

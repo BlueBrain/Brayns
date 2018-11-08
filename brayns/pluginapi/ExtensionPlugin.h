@@ -21,8 +21,13 @@
 #ifndef EXTENSIONPLUGIN_H
 #define EXTENSIONPLUGIN_H
 
+#include <brayns/common/types.h>
+
 namespace brayns
 {
+
+class Engine;
+
 /**
  * Defines the abstract representation of an extension plug-in. What we mean by
  * extension is a set a functionalities that are not provided by the core of the
@@ -45,6 +50,11 @@ class ExtensionPlugin
 {
 public:
     virtual ~ExtensionPlugin() = default;
+
+    /**
+     * Called from Brayns::Brayns right after the engine has been created
+     */
+    virtual void init(PluginAPI* /* api */) {}
 
     /**
      * Called from Brayns::preRender() to prepare the engine based on the

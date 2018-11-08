@@ -31,7 +31,7 @@
 namespace brayns
 {
 AddModelFromBlobTask::AddModelFromBlobTask(const BinaryParam& param,
-                                           EnginePtr engine)
+                                           Engine& engine)
     : _param(param)
 {
     _checkValidity(engine);
@@ -78,12 +78,12 @@ void AddModelFromBlobTask::appendBlob(const std::string& blob)
         _chunkEvent.set({_param.type, _param.getName(), std::move(_blob)});
 }
 
-void AddModelFromBlobTask::_checkValidity(EnginePtr engine)
+void AddModelFromBlobTask::_checkValidity(Engine& engine)
 {
     if (_param.type.empty() || _param.size == 0)
         throw MISSING_PARAMS;
 
-    const auto& registry = engine->getScene().getLoaderRegistry();
+    const auto& registry = engine.getScene().getLoaderRegistry();
     if (!registry.isSupportedType(_param.type))
         throw UNSUPPORTED_TYPE;
 }

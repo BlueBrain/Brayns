@@ -59,8 +59,8 @@ namespace brayns
 class DeflectPlugin::Impl
 {
 public:
-    Impl(EnginePtr engine, PluginAPI* api)
-        : _engine(engine)
+    Impl(PluginAPI* api)
+        : _engine(api->getEngine())
         , _appParams{api->getParametersManager().getApplicationParameters()}
         , _params{api->getParametersManager().getStreamParameters()}
         , _keyboardHandler(api->getKeyboardHandler())
@@ -93,9 +93,9 @@ public:
         if (_stream && _stream->isConnected() && !deflectEnabled)
             _closeStream();
 
-        const bool observerOnly = _engine->haveDeflectPixelOp();
+        const bool observerOnly = _engine.haveDeflectPixelOp();
         if (deflectEnabled && !_stream && _startStream(observerOnly))
-            _sendSizeHints(*_engine);
+            _sendSizeHints(_engine);
 
         if (deflectEnabled && _stream && _stream->isConnected())
             _handleDeflectEvents();
@@ -103,11 +103,11 @@ public:
 
     void postRender()
     {
-        const bool observerOnly = _engine->haveDeflectPixelOp();
+        const bool observerOnly = _engine.haveDeflectPixelOp();
         if (_params.getEnabled() && _stream && _stream->isConnected())
         {
             if (!observerOnly)
-                _sendDeflectFrame(*_engine);
+                _sendDeflectFrame(_engine);
         }
     }
 
@@ -184,8 +184,8 @@ private:
         auto loop = uvw::Loop::getDefault();
         _pollHandle = loop->resource<uvw::PollHandle>(_stream->getDescriptor());
 
-        _pollHandle->on<uvw::PollEvent>([engine = _engine](const auto&, auto&) {
-            engine->triggerRender();
+        _pollHandle->on<uvw::PollEvent>([&engine = _engine](const auto&, auto&) {
+            engine.triggerRender();
         });
 
         _pollHandle->start(uvw::PollHandle::Event::READABLE);
@@ -201,14 +201,14 @@ private:
             {
             case deflect::Event::EVT_PRESS:
                 _previousPos =
-                    _getWindowPos(event, _engine->getFrameBuffer().getSize());
+                    _getWindowPos(event, _engine.getFrameBuffer().getSize());
                 _pan = _pinch = false;
                 break;
             case deflect::Event::EVT_MOVE:
             case deflect::Event::EVT_RELEASE:
             {
                 const auto pos =
-                    _getWindowPos(event, _engine->getFrameBuffer().getSize());
+                    _getWindowPos(event, _engine.getFrameBuffer().getSize());
                 if (!_pan && !_pinch)
                     _cameraManipulator.dragLeft(pos, _previousPos);
                 _previousPos = pos;
@@ -220,7 +220,7 @@ private:
                 if (_pinch)
                     break;
                 const auto pos =
-                    _getWindowPos(event, _engine->getFrameBuffer().getSize());
+                    _getWindowPos(event, _engine.getFrameBuffer().getSize());
                 _cameraManipulator.dragMiddle(pos, _previousPos);
                 _previousPos = pos;
                 _pan = true;
@@ -231,9 +231,9 @@ private:
                 if (_pan)
                     break;
                 const auto pos =
-                    _getWindowPos(event, _engine->getFrameBuffer().getSize());
+                    _getWindowPos(event, _engine.getFrameBuffer().getSize());
                 const auto delta =
-                    _getZoomDelta(event, _engine->getFrameBuffer().getSize());
+                    _getZoomDelta(event, _engine.getFrameBuffer().getSize());
                 _cameraManipulator.wheel(pos, delta * wheelFactor);
                 _pinch = true;
                 break;
@@ -246,13 +246,13 @@ private:
             case deflect::Event::EVT_VIEW_SIZE_CHANGED:
             {
                 Vector2ui newSize(event.dx, event.dy);
-                if (_engine->getCamera().isSideBySideStereo())
+                if (_engine.getCamera().isSideBySideStereo())
                     newSize.x() *= 2;
 
                 if (_params.getResizing())
                 {
                     _appParams.setWindowSize(
-                        _engine->getSupportedFrameSize(newSize));
+                        _engine.getSupportedFrameSize(newSize));
                 }
                 break;
             }
@@ -285,7 +285,7 @@ private:
         sizeHints.minWidth = minSize.x();
         sizeHints.minHeight = minSize.y();
 
-        if (_engine->getCamera().isSideBySideStereo())
+        if (_engine.getCamera().isSideBySideStereo())
         {
             sizeHints.preferredWidth /= 2;
             sizeHints.minWidth /= 2;
@@ -339,7 +339,7 @@ private:
         deflect::ImageWrapper deflectImage(_lastImage.data.data(),
                                            _lastImage.size.x(),
                                            _lastImage.size.y(), format);
-        if (_engine->getCamera().isSideBySideStereo())
+        if (_engine.getCamera().isSideBySideStereo())
             deflectImage.view = deflect::View::side_by_side;
 
         deflectImage.compressionQuality = _params.getQuality();
@@ -380,7 +380,7 @@ private:
         return std::copysign(std::sqrt(dx * dx + dy * dy), dx + dy);
     }
 
-    EnginePtr _engine;
+    Engine& _engine;
     ApplicationParameters& _appParams;
     StreamParameters& _params;
     KeyboardHandler& _keyboardHandler;
@@ -398,9 +398,9 @@ private:
 #endif
 };
 
-DeflectPlugin::DeflectPlugin(EnginePtr engine, PluginAPI* api)
-    : _impl{std::make_shared<Impl>(engine, api)}
+void DeflectPlugin::init(PluginAPI* api)
 {
+    _impl = std::make_shared<Impl>(api);
 }
 
 void DeflectPlugin::preRender()

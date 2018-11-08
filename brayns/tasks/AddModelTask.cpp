@@ -29,9 +29,9 @@
 
 namespace brayns
 {
-AddModelTask::AddModelTask(const ModelParams& modelParams, EnginePtr engine)
+AddModelTask::AddModelTask(const ModelParams& modelParams, Engine& engine)
 {
-    const auto& registry = engine->getScene().getLoaderRegistry();
+    const auto& registry = engine.getScene().getLoaderRegistry();
 
     // pre-check for validity of given paths
     const auto& path = modelParams.getPath();
