@@ -108,6 +108,10 @@ set(OSPRAY_MODULE_OPTIX_SOURCES
 set(OSPRAY_MODULE_OPTIX_LINK_LIBRARIES PRIVATE ${OptiX_LIBRARIES})
 common_library(ospray_module_optix)
 
+if(CUDA_VERSION VERSION_GREATER 8)
+  target_compile_options(ospray_module_optix PRIVATE "-Wno-error=cpp")
+endif()
+
 set(DOXYGEN_MAINPAGE_MD README.md)
 set(DOXYGEN_EXTRA_INPUT "${PROJECT_SOURCE_DIR}/README.md")
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
