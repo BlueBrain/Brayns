@@ -29,25 +29,21 @@
 
 namespace brayns
 {
-SimulationHandler::SimulationHandler(const brion::URI& reportSource,
-                                     const brion::GIDSet& gids,
-                                     const bool synchronousMode,
-                                     const double circuitStartSimulationTime,
-                                     const double circuitEndSimulationTime,
-                                     const double circuitSimulationStep)
-    : AbstractSimulationHandler()
-    , _compartmentReport(
-          new brion::CompartmentReport(reportSource, brion::MODE_READ, gids))
+SimulationHandler::SimulationHandler(
+    const CompartmentReportPtr& compartmentReport,
+    const bool synchronousMode, const double startTime,
+    const double endTime, const double simulationStep)
+    : _compartmentReport(compartmentReport)
     , _synchronousMode(synchronousMode)
 {
     // Load simulation information from compartment reports
-    const auto reportStartTime = _compartmentReport->getStartTime();
+    const auto reportStartTime  = _compartmentReport->getStartTime();
     const auto reportEndTime = _compartmentReport->getEndTime();
     const auto reportTimeStep = _compartmentReport->getTimestep();
 
-    _startTime = std::max(reportStartTime, circuitStartSimulationTime);
-    _endTime = std::min(reportEndTime, circuitEndSimulationTime);
-    _dt = std::max(reportTimeStep, circuitSimulationStep);
+    _startTime = std::max(reportStartTime, startTime);
+    _endTime = std::min(reportEndTime, endTime);
+    _dt = std::max(reportTimeStep, simulationStep);
     _unit = _compartmentReport->getTimeUnit();
     _frameSize = _compartmentReport->getFrameSize();
     _nbFrames = (_endTime - _startTime) / _dt;

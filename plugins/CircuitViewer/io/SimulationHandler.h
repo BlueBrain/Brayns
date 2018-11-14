@@ -29,7 +29,7 @@
 
 namespace brayns
 {
-typedef std::shared_ptr<brion::CompartmentReport> CompartmentReportPtr;
+using CompartmentReportPtr = std::shared_ptr<brion::CompartmentReport>;
 
 /**
  * @brief The SimulationHandler class handles simulation frames for the
@@ -46,11 +46,9 @@ public:
      * @param reportSource path to report source
      * @param gids GIDS to load
      */
-    SimulationHandler(const brion::URI& reportSource, const brion::GIDSet& gids,
-                      const bool synchronousMode,
-                      const double circuitStartSimulationTime,
-                      const double circuitEndSimulationTime,
-                      const double circuitSimulationStep);
+    SimulationHandler(const CompartmentReportPtr& compartmentReport,
+                      const bool synchronousMode, const double startTime,
+                      const double endTime, const double simulationStep);
     ~SimulationHandler();
 
     void bind(const MaterialPtr& material) final;

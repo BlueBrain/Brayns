@@ -93,7 +93,6 @@ BOOST_AUTO_TEST_CASE(defaults)
         brayns::enumsToBitmask(geomParams.getMorphologySectionTypes()),
         brayns::enumsToBitmask(std::vector<brayns::MorphologySectionType>{
             brayns::MorphologySectionType::all}));
-    BOOST_CHECK_EQUAL(geomParams.getMorphologyLayout().nbColumns, 0);
     BOOST_CHECK_EQUAL(geomParams.getCircuitStartSimulationTime(), 0.f);
     BOOST_CHECK_EQUAL(geomParams.getCircuitEndSimulationTime(),
                       std::numeric_limits<float>::max());

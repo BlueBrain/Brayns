@@ -324,51 +324,44 @@ private:
         const GeometryParameters& geometryParameters =
             _parametersManager.getGeometryParameters();
 
-        pm.setProperty({"circuitTargets", "circuitTargets",
-                        geometryParameters.getCircuitTargets()});
-        pm.setProperty({"circuitReport", "circuitReport",
-                        geometryParameters.getCircuitReport()});
-        pm.setProperty({"circuitMeshFolder", "circuitMeshFolder",
+        pm.setProperty(
+            {"targets", "targets", geometryParameters.getCircuitTargets()});
+        pm.setProperty(
+            {"report", "report", geometryParameters.getCircuitReport()});
+        pm.setProperty({"meshFolder", "meshFolder",
                         geometryParameters.getCircuitMeshFolder()});
-        pm.setProperty({"circuitDensity", "circuitDensity",
-                        geometryParameters.getCircuitDensity()});
+        pm.setProperty(
+            {"density", "density", geometryParameters.getCircuitDensity()});
         {
             const auto bbox = geometryParameters.getCircuitBoundingBox();
             const auto p0 = toArray(bbox.getMin());
             const auto p1 = toArray(bbox.getMax());
-
-            pm.setProperty(
-                {"circuitBoundingBoxP0", "circuitBoundingBoxP0", p0});
-            pm.setProperty(
-                {"circuitBoundingBoxP1", "circuitBoundingBoxP1", p1});
+            pm.setProperty({"boundingBoxP0", "boundingBoxP0", p0});
+            pm.setProperty({"boundingBoxP1", "boundingBoxP1", p1});
         }
-
-        pm.setProperty({"morphologyDampenBranchThicknessChangerate",
-                        "morphologyDampenBranchThicknessChangerate",
+        pm.setProperty({"dampenBranchThicknessChangerate",
+                        "dampenBranchThicknessChangerate",
                         geometryParameters
                             .getMorphologyDampenBranchThicknessChangerate()});
-        pm.setProperty({"morphologyUseSdfGeometries",
-                        "morphologyUseSdfGeometries",
+        pm.setProperty({"useSdfGeometries", "useSdfGeometries",
                         geometryParameters.getMorphologyUseSdfGeometries()});
         pm.setProperty({"loadCacheFile", "loadCacheFile",
                         geometryParameters.getLoadCacheFile()});
         pm.setProperty({"saveCacheFile", "saveCacheFile",
                         geometryParameters.getSaveCacheFile()});
-        pm.setProperty({"circuitTargets", "circuitTargets",
-                        geometryParameters.getCircuitTargets()});
-        pm.setProperty({"circuitReport", "circuitReport",
-                        geometryParameters.getCircuitReport()});
-        pm.setProperty({"circuitMeshFolder", "circuitMeshFolder",
+        pm.setProperty(
+            {"targets", "targets", geometryParameters.getCircuitTargets()});
+        pm.setProperty(
+            {"report", "report", geometryParameters.getCircuitReport()});
+        pm.setProperty({"meshFolder", "meshFolder",
                         geometryParameters.getCircuitMeshFolder()});
-        pm.setProperty({"circuitRandomSeed", "circuitRandomSeed",
+        pm.setProperty({"randomSeed", "randomSeed",
                         int32_t(geometryParameters.getCircuitRandomSeed())});
-        pm.setProperty({"circuitDensity", "circuitDensity",
-                        geometryParameters.getCircuitDensity()});
-        pm.setProperty({"circuitUseSimulationModel",
-                        "circuitUseSimulationModel",
+        pm.setProperty(
+            {"density", "density", geometryParameters.getCircuitDensity()});
+        pm.setProperty({"useSimulationModel", "useSimulationModel",
                         geometryParameters.getCircuitUseSimulationModel()});
-        pm.setProperty({"circuitMeshFilenamePattern",
-                        "circuitMeshFilenamePattern",
+        pm.setProperty({"meshFilenamePattern", "meshFilenamePattern",
                         geometryParameters.getCircuitMeshFilenamePattern()});
         pm.setProperty({"radiusMultiplier", "radiusMultiplier",
                         double(geometryParameters.getRadiusMultiplier())});
@@ -380,25 +373,6 @@ private:
         pm.setProperty({"geometryQuality", "geometryQuality",
                         enumToString(geometryParameters.getGeometryQuality()),
                         enumNames<GeometryQuality>()});
-        {
-            const auto layout = geometryParameters.getMorphologyLayout();
-
-            pm.setProperty({"morphologyLayoutNbColumns",
-                            "morphologyLayoutNbColumns",
-                            int32_t(layout.nbColumns),
-                            {0, std::numeric_limits<int32_t>::max()}});
-
-            pm.setProperty({"morphologyLayoutVerticalSpacing",
-                            "morphologyLayoutVerticalSpacing",
-                            int32_t(layout.verticalSpacing),
-                            {0, std::numeric_limits<int32_t>::max()}});
-
-            pm.setProperty({"morphologyLayoutHorizontalSpacing",
-                            "morphologyLayoutHorizontalSpacing",
-                            int32_t(layout.horizontalSpacing),
-                            {0, std::numeric_limits<int32_t>::max()}});
-        }
-
         {
             bool soma = false;
             bool axon = false;
@@ -431,40 +405,25 @@ private:
                     break;
                 }
             }
-            pm.setProperty({"morphologySectionTypesSoma",
-                            "morphologySectionTypesSoma", soma});
-            pm.setProperty({"morphologySectionTypesAxon",
-                            "morphologySectionTypesAxon", axon});
-            pm.setProperty({"morphologySectionTypesDendrite",
-                            "morphologySectionTypesDendrite", dendrite});
-            pm.setProperty({"morphologySectionTypesApicalDendrite",
-                            "morphologySectionTypesApicalDendrite",
-                            apicalDendrite});
+            pm.setProperty({"sectionTypesSoma", "sectionTypesSoma", soma});
+            pm.setProperty({"sectionTypesAxon", "sectionTypesAxon", axon});
+            pm.setProperty(
+                {"sectionTypesDendrite", "sectionTypesDendrite", dendrite});
+            pm.setProperty({"sectionTypesApicalDendrite",
+                            "sectionTypesApicalDendrite", apicalDendrite});
         }
 
-        pm.setProperty({"circuitEndSimulationTime", "circuitEndSimulationTime",
+        pm.setProperty({"endSimulationTime", "endSimulationTime",
                         geometryParameters.getCircuitEndSimulationTime()});
-        pm.setProperty({"circuitStartSimulationTime",
-                        "circuitStartSimulationTime",
+        pm.setProperty({"startSimulationTime", "startSimulationTime",
                         geometryParameters.getCircuitStartSimulationTime()});
-        pm.setProperty({"circuitSimulationStep", "circuitSimulationStep",
+        pm.setProperty({"simulationStep", "simulationStep",
                         geometryParameters.getCircuitSimulationStep()});
         pm.setProperty(
-            {"circuitSimulationValuesRange", "circuitSimulationValuesRange",
+            {"simulationValuesRange", "simulationValuesRange",
              toArray(geometryParameters.getCircuitSimulationValuesRange())});
-        pm.setProperty(
-            {"circuitMeshTransformation", "circuitMeshTransformation",
-             int32_t(geometryParameters.getCircuitMeshTransformation())});
-        pm.setProperty({"metaballsGridSize", "metaballsGridSize",
-                        int32_t(geometryParameters.getMetaballsGridSize())});
-        pm.setProperty({"metaballsThreshold", "metaballsThreshold",
-                        double(geometryParameters.getMetaballsThreshold())});
-        pm.setProperty(
-            {"metaballsSamplesFromSoma", "metaballsSamplesFromSoma",
-             int32_t(geometryParameters.getMetaballsSamplesFromSoma())});
-        pm.setProperty({"useRealisticSomas", "useRealisticSomas",
-                        geometryParameters.useRealisticSomas()});
-
+        pm.setProperty({"transformMeshes", "transformMeshes",
+                        geometryParameters.getCircuitTransformMeshes()});
         return pm;
     }
     void _loadData()

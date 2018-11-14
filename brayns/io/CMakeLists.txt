@@ -4,7 +4,6 @@
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 set(BRAYNSIO_SOURCES
-  algorithms/MetaballsGenerator.cpp
   MolecularSystemReader.cpp
   ProteinLoader.cpp
   simulation/CADiffusionSimulationHandler.cpp
@@ -13,7 +12,6 @@ set(BRAYNSIO_SOURCES
 )
 
 set(BRAYNSIO_PUBLIC_HEADERS
-  algorithms/MetaballsGenerator.h
   MolecularSystemReader.h
   ProteinLoader.h
   simulation/CADiffusionSimulationHandler.h
