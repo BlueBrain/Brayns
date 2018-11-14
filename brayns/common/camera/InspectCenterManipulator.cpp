@@ -26,9 +26,8 @@
 namespace brayns
 {
 InspectCenterManipulator::InspectCenterManipulator(Camera& camera,
-                                                   KeyboardHandler& handler,
-                                                   const Boxd& boundingBox)
-    : AbstractManipulator{camera, handler, boundingBox}
+                                                   KeyboardHandler& handler)
+    : AbstractManipulator{camera, handler}
 {
     _keyboardHandler.registerKeyboardShortcut(
         'a', "Rotate left",

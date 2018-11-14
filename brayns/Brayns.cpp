@@ -80,7 +80,10 @@ struct Brayns::Impl : public PluginAPI
         _parametersManager.parse(argc, argv);
         _parametersManager.print();
 
+        // This initialization must happen before plugin intialization.
         _createEngine();
+        _registerKeyboardShortcuts();
+        _setupCameraManipulator(CameraMode::inspect);
 
         _pluginManager.initPlugins(this);
 
@@ -88,8 +91,8 @@ struct Brayns::Impl : public PluginAPI
         _loadData();
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
-        _registerKeyboardShortcuts();
-        _setupCameraManipulator(CameraMode::inspect);
+        _cameraManipulator->adjust(_engine->getScene().getBounds());
+
         const auto frameSize = Vector2d(_engine->getFrameBuffer().getSize());
         _engine->getCamera().updateProperty("aspect",
                                             frameSize.x() / frameSize.y());
@@ -365,16 +368,17 @@ private:
         case CameraMode::flying:
             _cameraManipulator.reset(
                 new FlyingModeManipulator(_engine->getCamera(),
-                                          _keyboardHandler,
-                                          _engine->getScene().getBounds()));
+                                          _keyboardHandler));
             break;
         case CameraMode::inspect:
             _cameraManipulator.reset(
                 new InspectCenterManipulator(_engine->getCamera(),
-                                             _keyboardHandler,
-                                             _engine->getScene().getBounds()));
+                                             _keyboardHandler));
             break;
         };
+
+        if (_engine->getScenePtr())
+            _cameraManipulator->adjust(_engine->getScene().getBounds());
     }
 
     void _registerKeyboardShortcuts()

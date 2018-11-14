@@ -31,8 +31,7 @@ namespace brayns
 class InspectCenterManipulator : public AbstractManipulator
 {
 public:
-    InspectCenterManipulator(Camera& camera, KeyboardHandler& handler,
-                             const Boxd& boundingBox);
+    InspectCenterManipulator(Camera& camera, KeyboardHandler& handler);
     ~InspectCenterManipulator();
 
 private:

@@ -23,7 +23,7 @@
 
 #include <brayns/common/types.h>
 
-#define DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER 0.25f
+constexpr float DEFAULT_MOUSE_MOTION_SPEED_MULTIPLIER = 0.25f;
 
 namespace brayns
 {
@@ -39,10 +39,11 @@ public:
         localY
     };
 
-    AbstractManipulator(Camera& camera, KeyboardHandler& keyboardHandler,
-                        const Boxd& boundingBox);
-    virtual ~AbstractManipulator();
+    AbstractManipulator(Camera& camera, KeyboardHandler& keyboardHandler);
+    virtual ~AbstractManipulator() = default;
 
+    /** Adjust manipulator behaviour to the given scene */
+    virtual void adjust(const Boxd& boundingBox);
     virtual void dragLeft(const Vector2i& to, const Vector2i& from) = 0;
     virtual void dragRight(const Vector2i& to, const Vector2i& from) = 0;
     virtual void dragMiddle(const Vector2i& to, const Vector2i& from) = 0;
