@@ -38,8 +38,7 @@ class Engine;
  * must be available in the library:
  *
  * @code
- * extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI*,
- * int argc, const char** argv)
+ * extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc, const char** argv)
  * @endcode
  *
  * It must return the instance of the plugin, and from hereon Brayns owns the
