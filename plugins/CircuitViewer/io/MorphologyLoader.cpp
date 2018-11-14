@@ -28,7 +28,6 @@
 #include <brayns/common/utils/Utils.h>
 
 #include <brain/brain.h>
-#include <brion/brion.h>
 
 #include <boost/filesystem.hpp>
 
@@ -146,14 +145,14 @@ public:
      * @param index Index of the morphology
      * @param defaultMaterialId Material to use
      * @param transformation Transformation to apply to the morphology
-     * @param compartmentReport Compartment report to map to the morphology
+     * @param reportMapping Mapping for applying simulation to the morphology
      * @return Position of the soma
      */
     Vector3f importMorphology(
         const servus::URI& source, Model& model, const uint64_t index,
         const Matrix4f& transformation,
         const size_t defaultMaterialId = NO_MATERIAL,
-        CompartmentReportPtr compartmentReport = nullptr) const
+        const brain::CompartmentReportMapping* reportMapping = nullptr) const
     {
         Vector3f somaPosition;
         auto materialFunc =
@@ -198,7 +197,7 @@ public:
         ParallelModelContainer modelContainer;
         somaPosition =
             importMorphology(source, index, materialFunc, transformation,
-                             compartmentReport, modelContainer);
+                             reportMapping, modelContainer);
 
         modelContainer.addSpheresToModel(model);
         modelContainer.addCylindersToModel(model);
@@ -209,21 +208,20 @@ public:
         return somaPosition;
     }
 
-    Vector3f importMorphology(const servus::URI& source, const uint64_t index,
-                              MaterialFunc materialFunc,
-                              const Matrix4f& transformation,
-                              CompartmentReportPtr compartmentReport,
-                              ParallelModelContainer& model) const
+    Vector3f importMorphology(
+        const servus::URI& source, const uint64_t index,
+        MaterialFunc materialFunc, const Matrix4f& transformation,
+        const brain::CompartmentReportMapping* reportMapping,
+        ParallelModelContainer& model) const
     {
         if (_params.sectionTypes ==
             std::vector<MorphologySectionType>{MorphologySectionType::soma})
         {
             return _importMorphologyAsPoint(index, materialFunc, transformation,
-                                            compartmentReport, model);
+                                            reportMapping, model);
         }
         return _importMorphologyFromURI(source, index, materialFunc,
-                                        transformation, compartmentReport,
-                                        model);
+                                        transformation, reportMapping, model);
     }
 
 private:
@@ -272,19 +270,19 @@ private:
      * @param transformation Transformation to apply to the morphology
      * @param material Material that is forced in case geometry parameters do
      * not apply
-     * @param compartmentReport Compartment report to map to the morphology
+     * @param reportMapping Mapping for applying simulation to the morphology
      * @param scene Scene to which the morphology should be loaded into
      * @return Position of the soma
      */
-    Vector3f _importMorphologyAsPoint(const uint64_t index,
-                                      MaterialFunc materialFunc,
-                                      const Matrix4f& transformation,
-                                      CompartmentReportPtr compartmentReport,
-                                      ParallelModelContainer& model) const
+    Vector3f _importMorphologyAsPoint(
+        const uint64_t index, MaterialFunc materialFunc,
+        const Matrix4f& transformation,
+        const brain::CompartmentReportMapping* reportMapping,
+        ParallelModelContainer& model) const
     {
         uint64_t offset = 0;
-        if (compartmentReport)
-            offset = compartmentReport->getOffsets()[index][0];
+        if (reportMapping)
+            offset = reportMapping->getOffsets()[index][0];
 
         const auto radius = static_cast<float>(_params.radiusMultiplier);
         const auto somaPosition = transformation.getTranslation();
@@ -735,24 +733,23 @@ private:
     }
 
     /**
-       * @brief _importMorphologyFromURI imports a morphology from the specified
+     * @brief _importMorphologyFromURI imports a morphology from the specified
      * URI
-       * @param uri URI of the morphology
-       * @param index Index of the current morphology
-       * @param materialFunc A function mapping brain::neuron::SectionType to a
-     * material id
-       * @param transformation Transformation to apply to the morphology
-       * @param compartmentReport Compartment report to map to the morphology
-       * @param model Model container to which the morphology should be loaded
-     * into
-       * @return Position of the soma
-       */
-    Vector3f _importMorphologyFromURI(const servus::URI& uri,
-                                      const uint64_t index,
-                                      MaterialFunc materialFunc,
-                                      const Matrix4f& transformation,
-                                      CompartmentReportPtr compartmentReport,
-                                      ParallelModelContainer& model) const
+     * @param uri URI of the morphology
+     * @param index Index of the current morphology
+     * @param materialFunc A function mapping brain::neuron::SectionType to a
+     *   material id
+     * @param transformation Transformation to apply to the morphology
+     * @param reportMapping Mapping for applying simulation to the morphology
+     * @param model Model container to which the morphology should be loaded
+     *   into
+     * @return Position of the soma
+     */
+    Vector3f _importMorphologyFromURI(
+        const servus::URI& uri, const uint64_t index, MaterialFunc materialFunc,
+        const Matrix4f& transformation,
+        const brain::CompartmentReportMapping* reportMapping,
+        ParallelModelContainer& model) const
     {
         Vector3f somaPosition;
 
@@ -766,8 +763,8 @@ private:
 
         uint64_t offset = 0;
 
-        if (compartmentReport)
-            offset = compartmentReport->getOffsets()[index][0];
+        if (reportMapping)
+            offset = reportMapping->getOffsets()[index][0];
 
         const size_t sectionMask = enumsToBitmask(_params.sectionTypes);
 
@@ -782,11 +779,10 @@ private:
         // Only the first one or two axon sections are reported, so find the
         // last one and use its offset for all the other axon sections
         uint16_t lastAxon = 0;
-        if (compartmentReport &&
+        if (reportMapping &&
             (sectionMask & static_cast<size_t>(MorphologySectionType::axon)))
         {
-            const auto& counts =
-                compartmentReport->getCompartmentCounts()[index];
+            const auto& counts = reportMapping->getCompartmentCounts()[index];
             const auto& axon =
                 morphology.getSections(brain::neuron::SectionType::axon);
             for (const auto& section : axon)
@@ -838,10 +834,10 @@ private:
             }
 
             float segmentStep = 0.f;
-            if (compartmentReport)
+            if (reportMapping)
             {
                 const auto& counts =
-                    compartmentReport->getCompartmentCounts()[index];
+                    reportMapping->getCompartmentCounts()[index];
                 // Number of compartments usually differs from number of samples
                 segmentStep = counts[section.getID()] / float(numSamples);
             }
@@ -868,12 +864,11 @@ private:
                     done = true;
                 }
 
-                if (compartmentReport)
+                if (reportMapping)
                 {
-                    const auto& offsets =
-                        compartmentReport->getOffsets()[index];
+                    const auto& offsets = reportMapping->getOffsets()[index];
                     const auto& counts =
-                        compartmentReport->getCompartmentCounts()[index];
+                        reportMapping->getCompartmentCounts()[index];
 
                     // update the offset if we have enough compartments aka a
                     // full compartment report. Otherwise we keep the soma
@@ -1017,12 +1012,13 @@ Vector3f MorphologyLoader::importMorphology(
 
 Vector3f MorphologyLoader::_importMorphology(
     const servus::URI& source, const uint64_t index, MaterialFunc materialFunc,
-    const Matrix4f& transformation, CompartmentReportPtr compartmentReport,
+    const Matrix4f& transformation,
+    const brain::CompartmentReportMapping* reportMapping,
     ParallelModelContainer& model, const MorphologyLoaderParams& params) const
 {
     auto impl = MorphologyLoader::Impl(params);
     return impl.importMorphology(source, index, materialFunc, transformation,
-                                 compartmentReport, model);
+                                 reportMapping, model);
 }
 
 std::string MorphologyLoader::getName() const

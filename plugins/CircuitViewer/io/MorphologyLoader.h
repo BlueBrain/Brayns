@@ -26,14 +26,12 @@
 #include <brayns/parameters/GeometryParameters.h>
 
 #include <brain/neuron/types.h>
+#include <brain/types.h>
 #include <brion/types.h>
 
-#include <vector>
+#include <servus/types.h>
 
-namespace servus
-{
-class URI;
-}
+#include <vector>
 
 namespace brayns
 {
@@ -94,14 +92,13 @@ public:
                               const size_t index,
                               const Matrix4f& transformation,
                               const MorphologyLoaderParams& params) const;
-    using CompartmentReportPtr = std::shared_ptr<brion::CompartmentReport>;
     using MaterialFunc = std::function<size_t(brain::neuron::SectionType)>;
-    Vector3f _importMorphology(const servus::URI& source, const uint64_t index,
-                               MaterialFunc materialFunc,
-                               const Matrix4f& transformation,
-                               CompartmentReportPtr compartmentReport,
-                               ParallelModelContainer& model,
-                               const MorphologyLoaderParams& params) const;
+    Vector3f _importMorphology(
+        const servus::URI& source, const uint64_t index,
+        MaterialFunc materialFunc, const Matrix4f& transformation,
+        const brain::CompartmentReportMapping* reportMapping,
+        ParallelModelContainer& model,
+        const MorphologyLoaderParams& params) const;
 
 private:
     friend class CircuitLoader;

@@ -25,27 +25,26 @@
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
 
+#include <brain/compartmentReport.h>
+#include <brain/compartmentReportMapping.h>
+
 #include <servus/types.h>
 
 namespace brayns
 {
 SimulationHandler::SimulationHandler(
-    const CompartmentReportPtr& compartmentReport,
-    const bool synchronousMode, const double startTime,
-    const double endTime, const double simulationStep)
+    const CompartmentReportPtr& compartmentReport, const bool synchronousMode,
+    const double startTime, const double endTime, const double simulationStep)
     : _compartmentReport(compartmentReport)
     , _synchronousMode(synchronousMode)
 {
     // Load simulation information from compartment reports
-    const auto reportStartTime  = _compartmentReport->getStartTime();
-    const auto reportEndTime = _compartmentReport->getEndTime();
-    const auto reportTimeStep = _compartmentReport->getTimestep();
-
-    _startTime = std::max(reportStartTime, startTime);
-    _endTime = std::min(reportEndTime, endTime);
-    _dt = std::max(reportTimeStep, simulationStep);
-    _unit = _compartmentReport->getTimeUnit();
-    _frameSize = _compartmentReport->getFrameSize();
+    const auto& metadata = compartmentReport->getReader().getMetaData();
+    _startTime = std::max(metadata.startTime, startTime);
+    _endTime = std::min(metadata.endTime, endTime);
+    _dt = std::max(metadata.timeStep, simulationStep);
+    _unit = metadata.timeUnit;
+    _frameSize = _compartmentReport->getMapping().getFrameSize();
     _nbFrames = (_endTime - _startTime) / _dt;
 
     BRAYNS_INFO << "-----------------------------------------------------------"
@@ -53,10 +52,10 @@ SimulationHandler::SimulationHandler(
     BRAYNS_INFO << "Simulation information" << std::endl;
     BRAYNS_INFO << "----------------------" << std::endl;
     BRAYNS_INFO << "Start frame          : " << _startTime << "/"
-                << reportStartTime << std::endl;
-    BRAYNS_INFO << "End frame            : " << _endTime << "/" << reportEndTime
-                << std::endl;
-    BRAYNS_INFO << "Steps between frames : " << _dt << "/" << reportTimeStep
+                << metadata.startTime << std::endl;
+    BRAYNS_INFO << "End frame            : " << _endTime << "/"
+                << metadata.endTime << std::endl;
+    BRAYNS_INFO << "Steps between frames : " << _dt << "/" << metadata.timeStep
                 << std::endl;
     BRAYNS_INFO << "Number of frames : " << _nbFrames << std::endl;
     BRAYNS_INFO << "-----------------------------------------------------------"
@@ -119,7 +118,7 @@ void SimulationHandler::_triggerLoading(const uint32_t frame)
         _currentFrameFuture.wait();
 
     _ready = false;
-    _currentFrameFuture = _compartmentReport->loadFrame(timestamp);
+    _currentFrameFuture = _compartmentReport->load(timestamp);
 }
 
 bool SimulationHandler::_isFrameLoaded() const
