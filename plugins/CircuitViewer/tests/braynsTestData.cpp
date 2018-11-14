@@ -19,8 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "CircuitViewer/tests/paths.h"
+#include "tests/PDiffHelpers.h"
+
 #include <brayns/Brayns.h>
-#include <tests/paths.h>
 
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
@@ -28,10 +30,10 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 
+#include <BBP/TestDatasets.h>
+
 #define BOOST_TEST_MODULE braynsTestData
 #include <boost/test/unit_test.hpp>
-
-#include "PDiffHelpers.h"
 
 BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
 {

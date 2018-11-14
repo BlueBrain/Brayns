@@ -1,0 +1,15 @@
+/* Copyright (c) 2016, EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
+ *
+ * This file is part of BRayns
+ */
+
+// Must be the same as in tests/paths.h.in
+#ifndef BRAYNS_TEST_PATHS
+#define BRAYNS_TEST_PATHS
+
+#define BRAYNS_TESTDATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/files/"
+#define BRAYNS_TESTDATA_IMAGES_PATH BRAYNS_TESTDATA_PATH "images/"
+
+#endif

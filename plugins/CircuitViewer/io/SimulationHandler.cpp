@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CircuitSimulationHandler.h"
+#include "SimulationHandler.h"
 
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
@@ -29,7 +29,7 @@
 
 namespace brayns
 {
-CircuitSimulationHandler::CircuitSimulationHandler(
+SimulationHandler::SimulationHandler(
     const ApplicationParameters& applicationParameters,
     const GeometryParameters& geometryParameters,
     const brion::URI& reportSource, const brion::GIDSet& gids)
@@ -68,19 +68,19 @@ CircuitSimulationHandler::CircuitSimulationHandler(
                 << std::endl;
 }
 
-CircuitSimulationHandler::~CircuitSimulationHandler()
+SimulationHandler::~SimulationHandler()
 {
     for (const auto& material : _materials)
         material->setCurrentType("default");
 }
 
-void CircuitSimulationHandler::bind(const MaterialPtr& material)
+void SimulationHandler::bind(const MaterialPtr& material)
 {
     material->setCurrentType("simulation");
     _materials.push_back(material);
 }
 
-void CircuitSimulationHandler::unbind(const MaterialPtr& material)
+void SimulationHandler::unbind(const MaterialPtr& material)
 {
     auto i = std::find(_materials.begin(), _materials.end(), material);
     if (i != _materials.end())
@@ -90,12 +90,12 @@ void CircuitSimulationHandler::unbind(const MaterialPtr& material)
     }
 }
 
-bool CircuitSimulationHandler::isReady() const
+bool SimulationHandler::isReady() const
 {
     return _ready;
 }
 
-void* CircuitSimulationHandler::getFrameData(uint32_t frame)
+void* SimulationHandler::getFrameData(uint32_t frame)
 {
     frame = _getBoundedFrame(frame);
 
@@ -108,7 +108,7 @@ void* CircuitSimulationHandler::getFrameData(uint32_t frame)
     return _frameData.data();
 }
 
-void CircuitSimulationHandler::_triggerLoading(const uint32_t frame)
+void SimulationHandler::_triggerLoading(const uint32_t frame)
 {
     auto timestamp = _startTime + frame * _dt;
     timestamp = std::max(_startTime, timestamp);
@@ -121,7 +121,7 @@ void CircuitSimulationHandler::_triggerLoading(const uint32_t frame)
     _currentFrameFuture = _compartmentReport->loadFrame(timestamp);
 }
 
-bool CircuitSimulationHandler::_isFrameLoaded() const
+bool SimulationHandler::_isFrameLoaded() const
 {
     if (!_currentFrameFuture.valid())
         return false;
@@ -136,7 +136,7 @@ bool CircuitSimulationHandler::_isFrameLoaded() const
            std::future_status::ready;
 }
 
-bool CircuitSimulationHandler::_makeFrameReady(const uint32_t frame)
+bool SimulationHandler::_makeFrameReady(const uint32_t frame)
 {
     if (_isFrameLoaded())
     {

@@ -32,12 +32,12 @@ namespace brayns
 typedef std::shared_ptr<brion::CompartmentReport> CompartmentReportPtr;
 
 /**
- * @brief The CircuitSimulationHandler class handles simulation frames for the
+ * @brief The SimulationHandler class handles simulation frames for the
  * current circuit. Frames are stored in a memory mapped file that is accessed
- * according to a specified timestamp. The CircuitSimulationHandler class is in
+ * according to a specified timestamp. The SimulationHandler class is in
  * charge of keeping the handle to the memory mapped file.
  */
-class CircuitSimulationHandler : public AbstractSimulationHandler
+class SimulationHandler : public AbstractSimulationHandler
 {
 public:
     /**
@@ -46,11 +46,11 @@ public:
      * @param reportSource path to report source
      * @param gids GIDS to load
      */
-    CircuitSimulationHandler(const ApplicationParameters& applicationParameters,
+    SimulationHandler(const ApplicationParameters& applicationParameters,
                              const GeometryParameters& geometryParameters,
                              const brion::URI& reportSource,
                              const brion::GIDSet& gids);
-    ~CircuitSimulationHandler();
+    ~SimulationHandler();
 
     void bind(const MaterialPtr& material) final;
 
