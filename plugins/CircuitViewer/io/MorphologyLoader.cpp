@@ -27,8 +27,6 @@
 #include <brayns/common/types.h>
 #include <brayns/common/utils/Utils.h>
 
-#include <brayns/io/algorithms/MetaballsGenerator.h>
-
 #include <brain/brain.h>
 #include <brion/brion.h>
 
@@ -61,46 +59,21 @@ const Property PROP_RADIUS_MULTIPLIER = {"radiusMultiplier",
                                          "Radius multiplier", 1.0};
 const Property PROP_RADIUS_CORRECTION = {"radiusCorrection",
                                          "Radius correction", 0.};
-const Property PROP_MORPHOLOGY_SECTION_TYPES_SOMA = {
-    "morphologySectionTypesSoma", "Enable 'Soma' section type", true};
-const Property PROP_MORPHOLOGY_SECTION_TYPES_AXON = {
-    "morphologySectionTypesAxon", "Enable 'Axon' section type", true};
-const Property PROP_MORPHOLOGY_SECTION_TYPES_DENDRITE = {
-    "morphologySectionTypesDendrite", "Enable 'Dendrite' section type", true};
-const Property PROP_MORPHOLOGY_SECTION_TYPES_APICAL_DENDRITE = {
-    "morphologySectionTypesApicalDendrite",
-    "Enable 'Apical Dendrite' section type", true};
-const Property PROP_USE_REALISTIC_SOMAS = {"useRealisticSomas",
-                                           "Use realistic somas", false};
-const Property PROP_METABALLS_SAMPLES_FROM_SOMA = {
-    "metaballsSamplesFromSoma", "Metaballs: Samples from Soma", 0};
-const Property PROP_METABALLS_GRID_SIZE = {"metaballsGridSize",
-                                           "Metaballs: Grid size", 0};
-const Property PROP_METABALLS_THRESHOLD = {"metaballsThreshold",
-                                           "Metaballs: Threshold", 0.0};
-const Property PROP_CIRCUIT_USE_SIMULATION_MODEL = {"circuitUseSimulationModel",
-                                                    "Use simulation model",
-                                                    false};
-const Property PROP_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE = {
-    "morphologyDampenBranchThicknessChangerate",
-    "Dampen branch thickness changerate", false};
-const Property PROP_MORPHOLOGY_USE_SDF_GEOMETRIES = {
-    "morphologyUseSdfGeometries", "Use SDF geometries", false};
-const Property PROP_MORPHOLOGY_LAYOUT_NB_COLUMNS = {
-    "morphologyLayoutNbColumns",
-    "Layout: Number of columns",
-    int32_t(0),
-    {0, std::numeric_limits<int32_t>::max()}};
-const Property PROP_MORPHOLOGY_LAYOUT_VERTICAL_SPACING = {
-    "morphologyLayoutVerticalSpacing",
-    "Layout: Vertical spacing",
-    int32_t(0),
-    {0, std::numeric_limits<int32_t>::max()}};
-const Property PROP_MORPHOLOGY_LAYOUT_HORIZONTAL_SPACING = {
-    "morphologyLayoutHorizontalSpacing",
-    "Layout: Horizontal spacing",
-    int32_t(0),
-    {0, std::numeric_limits<int32_t>::max()}};
+const Property PROP_SECTION_TYPES_SOMA = {"sectionTypesSoma",
+                                          "Enable 'Soma' section type", true};
+const Property PROP_SECTION_TYPES_AXON = {"sectionTypesAxon",
+                                          "Enable 'Axon' section type", true};
+const Property PROP_SECTION_TYPES_DENDRITE = {"sectionTypesDendrite",
+                                              "Enable 'Dendrite' section type",
+                                              true};
+const Property PROP_SECTION_TYPES_APICAL_DENDRITE = {
+    "sectionTypesApicalDendrite", "Enable 'Apical Dendrite' section type",
+    true};
+const Property PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE = {
+    "dampenBranchThicknessChangerate", "Dampen branch thickness changerate",
+    false};
+const Property PROP_USE_SDF_GEOMETRIES = {"useSdfGeometries",
+                                          "Use SDF geometries", false};
 const Property PROP_GEOMETRY_QUALITY = {
     "geometryQuality", "Geometry quality",
     brayns::enumToString(brayns::GeometryQuality::high),
@@ -137,42 +110,24 @@ MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
         bool axon = true;
         bool dendrite = true;
         bool apicalDendrite = true;
-        setVariable(soma, PROP_MORPHOLOGY_SECTION_TYPES_SOMA.name, true);
-        setVariable(axon, PROP_MORPHOLOGY_SECTION_TYPES_AXON.name, true);
-        setVariable(dendrite, PROP_MORPHOLOGY_SECTION_TYPES_DENDRITE.name,
+        setVariable(soma, PROP_SECTION_TYPES_SOMA.name, true);
+        setVariable(axon, PROP_SECTION_TYPES_AXON.name, true);
+        setVariable(dendrite, PROP_SECTION_TYPES_DENDRITE.name, true);
+        setVariable(apicalDendrite, PROP_SECTION_TYPES_APICAL_DENDRITE.name,
                     true);
-        setVariable(apicalDendrite,
-                    PROP_MORPHOLOGY_SECTION_TYPES_APICAL_DENDRITE.name, true);
 
         if (soma)
-            morphologySectionTypes.push_back(MorphologySectionType::soma);
+            sectionTypes.push_back(MorphologySectionType::soma);
         if (axon)
-            morphologySectionTypes.push_back(MorphologySectionType::axon);
+            sectionTypes.push_back(MorphologySectionType::axon);
         if (dendrite)
-            morphologySectionTypes.push_back(MorphologySectionType::dendrite);
+            sectionTypes.push_back(MorphologySectionType::dendrite);
         if (apicalDendrite)
-            morphologySectionTypes.push_back(
-                MorphologySectionType::apical_dendrite);
+            sectionTypes.push_back(MorphologySectionType::apical_dendrite);
     }
-    setVariable(useRealisticSomas, PROP_USE_REALISTIC_SOMAS.name, false);
-    setVariable(metaballsSamplesFromSoma, PROP_METABALLS_SAMPLES_FROM_SOMA.name,
-                0);
-    setVariable(metaballsGridSize, PROP_METABALLS_GRID_SIZE.name, 0);
-    setVariable(metaballsThreshold, PROP_METABALLS_THRESHOLD.name, 0.0);
-    setVariable(circuitUseSimulationModel,
-                PROP_CIRCUIT_USE_SIMULATION_MODEL.name, false);
-    setVariable(morphologyDampenBranchThicknessChangerate,
-                PROP_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name, false);
-    setVariable(morphologyUseSDFGeometries,
-                PROP_MORPHOLOGY_USE_SDF_GEOMETRIES.name, false);
-    {
-        setVariable(layout.nbColumns, PROP_MORPHOLOGY_LAYOUT_NB_COLUMNS.name,
-                    0);
-        setVariable(layout.verticalSpacing,
-                    PROP_MORPHOLOGY_LAYOUT_VERTICAL_SPACING.name, 0);
-        setVariable(layout.horizontalSpacing,
-                    PROP_MORPHOLOGY_LAYOUT_HORIZONTAL_SPACING.name, 0);
-    }
+    setVariable(dampenBranchThicknessChangerate,
+                PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name, false);
+    setVariable(useSDFGeometries, PROP_USE_SDF_GEOMETRIES.name, false);
     setEnumVariable(geometryQuality, PROP_GEOMETRY_QUALITY.name,
                     GeometryQuality::high);
 }
@@ -260,23 +215,15 @@ public:
                               CompartmentReportPtr compartmentReport,
                               ParallelModelContainer& model) const
     {
-        if (_params.morphologySectionTypes ==
+        if (_params.sectionTypes ==
             std::vector<MorphologySectionType>{MorphologySectionType::soma})
         {
             return _importMorphologyAsPoint(index, materialFunc, transformation,
                                             compartmentReport, model);
         }
-        else if (_params.useRealisticSomas)
-        {
-            return _createRealisticSoma(source, materialFunc, transformation,
+        return _importMorphologyFromURI(source, index, materialFunc,
+                                        transformation, compartmentReport,
                                         model);
-        }
-        else
-        {
-            return _importMorphologyFromURI(source, index, materialFunc,
-                                            transformation, compartmentReport,
-                                            model);
-        }
     }
 
 private:
@@ -343,80 +290,6 @@ private:
         const auto somaPosition = transformation.getTranslation();
         const auto materialId = materialFunc(brain::neuron::SectionType::soma);
         model.addSphere(materialId, {somaPosition, radius, offset});
-        return somaPosition;
-    }
-
-    /**
-     * @brief _createRealisticSoma Creates a realistic soma using the metaballs
-     * algorithm.
-     * @param uri URI of the morphology for which the soma is created
-     * @param index Index of the current morphology
-     * @param transformation Transformation to apply to the morphology
-     * @param material Material that is forced in case geometry parameters do
-     * not apply
-     * @param scene Scene to which the morphology should be loaded into
-     * @return Position of the soma
-     */
-    Vector3f _createRealisticSoma(const servus::URI& uri,
-                                  MaterialFunc materialFunc,
-                                  const Matrix4f& transformation,
-                                  ParallelModelContainer& model) const
-    {
-        Vector3f somaPosition;
-        const size_t morphologySectionTypes =
-            enumsToBitmask(_params.morphologySectionTypes);
-
-        brain::neuron::Morphology morphology(uri, transformation);
-        const auto sectionTypes = _getSectionTypes(morphologySectionTypes);
-        const auto& sections = morphology.getSections(sectionTypes);
-
-        Vector4fs metaballs;
-        if (morphologySectionTypes & size_t(MorphologySectionType::soma))
-        {
-            // Soma
-            const auto& soma = morphology.getSoma();
-            somaPosition = soma.getCentroid();
-            const auto radius = _getCorrectedRadius(soma.getMeanRadius());
-            metaballs.push_back(
-                {somaPosition.x(), somaPosition.y(), somaPosition.z(), radius});
-        }
-
-        // Dendrites and axon
-        for (const auto& section : sections)
-        {
-            const auto hasParent = section.hasParent();
-            if (hasParent)
-            {
-                const auto parentSectionType = section.getParent().getType();
-                if (parentSectionType != brain::neuron::SectionType::soma)
-                    continue;
-            }
-
-            const auto& samples = section.getSamples();
-            if (samples.empty())
-                continue;
-
-            const auto samplesFromSoma = _params.metaballsSamplesFromSoma;
-            const auto samplesToProcess =
-                std::min(static_cast<size_t>(samplesFromSoma), samples.size());
-            for (size_t i = 0; i < samplesToProcess; ++i)
-            {
-                const auto& sample = samples[i];
-                const Vector3f position(sample.x(), sample.y(), sample.z());
-                const auto radius = _getCorrectedRadius(sample.w() * 0.5f);
-                if (radius > 0.f)
-                    metaballs.push_back(Vector4f(position.x(), position.y(),
-                                                 position.z(), radius));
-            }
-        }
-
-        // Generate mesh from metaballs
-        const auto gridSize = _params.metaballsGridSize;
-        const auto threshold = _params.metaballsThreshold;
-        MetaballsGenerator metaballsGenerator;
-        const auto materialId = materialFunc(brain::neuron::SectionType::soma);
-        metaballsGenerator.generateMesh(metaballs, gridSize, threshold,
-                                        materialId, model.trianglesMeshes);
         return somaPosition;
     }
 
@@ -759,15 +632,14 @@ private:
     /**
      * Adds a Soma geometry to the model
      */
-    void _addSomaGeometry(const brain::neuron::Soma& soma,
-                          const Vector3f& translation, uint64_t offset,
+    void _addSomaGeometry(const brain::neuron::Soma& soma, uint64_t offset,
                           bool useSDFGeometries, MaterialFunc materialFunc,
                           ParallelModelContainer& model,
                           SDFMorphologyData& sdfMorphologyData) const
     {
         const size_t materialId =
             materialFunc(brain::neuron::SectionType::soma);
-        const auto somaPosition = soma.getCentroid() + translation;
+        const auto somaPosition = soma.getCentroid();
         const auto somaRadius = _getCorrectedRadius(soma.getMeanRadius());
         const auto& children = soma.getChildren();
 
@@ -780,7 +652,7 @@ private:
         {
             model.addSphere(materialId, {somaPosition, somaRadius, offset});
 
-            if (_params.circuitUseSimulationModel)
+            if (_params.useSimulationModel)
             {
                 // When using a simulation model, parametric geometries must
                 // occupy as much space as possible in the mesh. This code
@@ -883,60 +755,35 @@ private:
                                       ParallelModelContainer& model) const
     {
         Vector3f somaPosition;
-        Vector3f translation;
 
-        const size_t morphologySectionTypes =
-            enumsToBitmask(_params.morphologySectionTypes);
-
-        const bool dampenThickness =
-            _params.morphologyDampenBranchThicknessChangerate;
-        const bool useSDFGeometries = _params.morphologyUseSDFGeometries;
+        const bool dampenThickness = _params.dampenBranchThicknessChangerate;
+        const bool useSDFGeometries = _params.useSDFGeometries;
 
         SDFMorphologyData sdfMorphologyData;
 
         brain::neuron::Morphology morphology(uri, transformation);
         brain::neuron::SectionTypes sectionTypes;
 
-        if (_params.layout.nbColumns != 0)
-        {
-            Boxf morphologyAABB;
-            const auto& points = morphology.getPoints();
-            for (const auto& point : points)
-                morphologyAABB.merge({point.x(), point.y(), point.z()});
-
-            const Vector3f positionInGrid = {
-                -1.f * _params.layout.horizontalSpacing *
-                    static_cast<float>(index % _params.layout.nbColumns),
-                -1.f * _params.layout.verticalSpacing *
-                    static_cast<float>(index / _params.layout.nbColumns),
-                0.f};
-            translation = positionInGrid - morphologyAABB.getCenter();
-        }
-
-        sectionTypes = _getSectionTypes(morphologySectionTypes);
-
         uint64_t offset = 0;
 
         if (compartmentReport)
             offset = compartmentReport->getOffsets()[index][0];
 
+        const size_t sectionMask = enumsToBitmask(_params.sectionTypes);
+
         // Soma
-        somaPosition = morphology.getSoma().getCentroid() + translation;
-        if (!_params.useRealisticSomas &&
-            morphologySectionTypes &
-                static_cast<size_t>(MorphologySectionType::soma))
+        somaPosition = morphology.getSoma().getCentroid();
+        if (sectionMask & static_cast<size_t>(MorphologySectionType::soma))
         {
-            _addSomaGeometry(morphology.getSoma(), translation, offset,
-                             useSDFGeometries, materialFunc, model,
-                             sdfMorphologyData);
+            _addSomaGeometry(morphology.getSoma(), offset, useSDFGeometries,
+                             materialFunc, model, sdfMorphologyData);
         }
 
         // Only the first one or two axon sections are reported, so find the
         // last one and use its offset for all the other axon sections
         uint16_t lastAxon = 0;
         if (compartmentReport &&
-            (morphologySectionTypes &
-             static_cast<size_t>(MorphologySectionType::axon)))
+            (sectionMask & static_cast<size_t>(MorphologySectionType::axon)))
         {
             const auto& counts =
                 compartmentReport->getCompartmentCounts()[index];
@@ -954,7 +801,8 @@ private:
         }
 
         float previousRadius = 0;
-        const auto& sections = morphology.getSections(sectionTypes);
+        const auto& sections =
+            morphology.getSections(_getSectionTypes(sectionMask));
         const auto morphologyTree =
             _calculateMorphologyTreeStructure(sections, dampenThickness);
         std::vector<float> sectionEndRadius(sections.size(), -1.0f);
@@ -1054,10 +902,8 @@ private:
                 const auto sample = samples[i];
 
                 Vector3f position(sample.x(), sample.y(), sample.z());
-                position += translation;
                 Vector3f target(previousSample.x(), previousSample.y(),
                                 previousSample.z());
-                target += translation;
                 float radius = _getCorrectedRadius(samples[i].w() * 0.5f);
                 constexpr float maxRadiusChange = 0.1f;
 
@@ -1195,20 +1041,12 @@ PropertyMap MorphologyLoader::getProperties() const
     pm.setProperty(PROP_COLOR_SCHEME);
     pm.setProperty(PROP_RADIUS_MULTIPLIER);
     pm.setProperty(PROP_RADIUS_CORRECTION);
-    pm.setProperty(PROP_MORPHOLOGY_SECTION_TYPES_SOMA);
-    pm.setProperty(PROP_MORPHOLOGY_SECTION_TYPES_AXON);
-    pm.setProperty(PROP_MORPHOLOGY_SECTION_TYPES_DENDRITE);
-    pm.setProperty(PROP_MORPHOLOGY_SECTION_TYPES_APICAL_DENDRITE);
-    pm.setProperty(PROP_USE_REALISTIC_SOMAS);
-    pm.setProperty(PROP_METABALLS_SAMPLES_FROM_SOMA);
-    pm.setProperty(PROP_METABALLS_GRID_SIZE);
-    pm.setProperty(PROP_METABALLS_THRESHOLD);
-    pm.setProperty(PROP_CIRCUIT_USE_SIMULATION_MODEL);
-    pm.setProperty(PROP_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE);
-    pm.setProperty(PROP_MORPHOLOGY_USE_SDF_GEOMETRIES);
-    pm.setProperty(PROP_MORPHOLOGY_LAYOUT_NB_COLUMNS);
-    pm.setProperty(PROP_MORPHOLOGY_LAYOUT_VERTICAL_SPACING);
-    pm.setProperty(PROP_MORPHOLOGY_LAYOUT_HORIZONTAL_SPACING);
+    pm.setProperty(PROP_SECTION_TYPES_SOMA);
+    pm.setProperty(PROP_SECTION_TYPES_AXON);
+    pm.setProperty(PROP_SECTION_TYPES_DENDRITE);
+    pm.setProperty(PROP_SECTION_TYPES_APICAL_DENDRITE);
+    pm.setProperty(PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE);
+    pm.setProperty(PROP_USE_SDF_GEOMETRIES);
     pm.setProperty(PROP_GEOMETRY_QUALITY);
     return pm;
 }

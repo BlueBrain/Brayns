@@ -43,29 +43,18 @@ using GIDOffsets = std::vector<uint64_t>;
 
 struct MorphologyLoaderParams
 {
-    struct Layout
-    {
-        int32_t nbColumns{0};
-        int32_t verticalSpacing{0};
-        int32_t horizontalSpacing{0};
-    };
-
     MorphologyLoaderParams() = default;
     MorphologyLoaderParams(const PropertyMap& properties);
 
     ColorScheme colorScheme = ColorScheme::none;
     double radiusMultiplier = 0.0;
     double radiusCorrection = 0.0;
-    std::vector<MorphologySectionType> morphologySectionTypes;
-    bool useRealisticSomas = false;
-    int32_t metaballsSamplesFromSoma = 0;
-    int32_t metaballsGridSize = 0;
-    double metaballsThreshold = 0.0;
-    bool circuitUseSimulationModel = false;
-    bool morphologyDampenBranchThicknessChangerate = false;
-    bool morphologyUseSDFGeometries = false;
-    Layout layout{};
+    std::vector<MorphologySectionType> sectionTypes;
+    bool dampenBranchThicknessChangerate = false;
+    bool useSDFGeometries = false;
     GeometryQuality geometryQuality = GeometryQuality::high;
+    // Only used by the circuit loader
+    bool useSimulationModel = false;
 };
 
 /** Loads morphologies from SWC and H5, and Circuit Config files */

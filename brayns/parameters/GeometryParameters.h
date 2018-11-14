@@ -29,19 +29,6 @@ SERIALIZATION_ACCESS(GeometryParameters)
 
 namespace brayns
 {
-/**
- * Defines how morphologies should be organized in space when the layout mode is
- * selected. The idea is to present the morphology in a grid with a given number
- * of columns, and a spacing in between. The spacing scale is the same as the
- * one from the morphologies.
- */
-struct MorphologyLayout
-{
-    size_t nbColumns{0};
-    size_t verticalSpacing{0};
-    size_t horizontalSpacing{0};
-};
-
 struct CircuitConfiguration
 {
     bool useSimulationModel{false};
@@ -57,7 +44,7 @@ struct CircuitConfiguration
     Vector2d simulationValuesRange{std::numeric_limits<double>::max(),
                                    std::numeric_limits<double>::min()};
     size_t randomSeed = 0;
-    bool meshTransformation{false};
+    bool transformMeshes{false};
 };
 
 /** Manages geometry parameters
@@ -172,12 +159,6 @@ public:
     {
         return _morphologySectionTypes;
     }
-    /** Morphology layout */
-    const MorphologyLayout& getMorphologyLayout() const
-    {
-        return _morphologyLayout;
-    }
-
     /** Defines the range of frames to be loaded for the simulation */
     double getCircuitEndSimulationTime() const
     {
@@ -196,9 +177,9 @@ public:
         return _circuitConfiguration.simulationValuesRange;
     }
 
-    size_t getCircuitMeshTransformation() const
+    bool getCircuitTransformMeshes() const
     {
-        return _circuitConfiguration.meshTransformation;
+        return _circuitConfiguration.transformMeshes;
     }
 
     /** Random seed of the circuit */
@@ -207,18 +188,6 @@ public:
         return _circuitConfiguration.randomSeed;
     }
 
-    /** Metaballs grid size */
-    size_t getMetaballsGridSize() const { return _metaballsGridSize; }
-    /** Metaballs threshold */
-    float getMetaballsThreshold() const { return _metaballsThreshold; }
-    /** Metaballs samples from soma */
-    size_t getMetaballsSamplesFromSoma() const
-    {
-        return _metaballsSamplesFromSoma;
-    }
-
-    /** Realistic somas enabled? */
-    bool useRealisticSomas() const { return _metaballsGridSize != 0; }
     /**
      * Defines what memory mode should be used between Brayns and the
      * underlying renderer
@@ -256,10 +225,6 @@ protected:
     GeometryQuality _geometryQuality;
     std::set<BVHFlag> _defaultBVHFlags;
     MorphologySectionTypes _morphologySectionTypes;
-    MorphologyLayout _morphologyLayout;
-    size_t _metaballsGridSize;
-    float _metaballsThreshold;
-    size_t _metaballsSamplesFromSoma;
     bool _morphologyDampenBranchThicknessChangerate;
     bool _morphologyUseSdfGeometries;
 

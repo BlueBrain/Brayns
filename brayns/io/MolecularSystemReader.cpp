@@ -94,8 +94,10 @@ bool MolecularSystemReader::_createScene(
     MolecularSystemReader::LoaderData& data,
     const PropertyMap& properties) const
 {
+#if BRAYNS_USE_ASSIMP
     const auto colorScheme = stringToEnum<ColorScheme>(
         properties.getProperty<std::string>(PROP_COLORSCHEME.name));
+#endif
     uint64_t proteinCount = 0;
     for (const auto& proteinPosition : data._proteinPositions)
     {
