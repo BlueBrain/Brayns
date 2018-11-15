@@ -54,7 +54,7 @@ struct ParallelModelContainer
         sdfNeighbours.push_back(neighbours);
     }
 
-    void addSpheresToModel(Model& model) const
+    void addTo(Model& model) const
     {
         for (const auto& sphere : spheres)
         {
@@ -63,10 +63,6 @@ struct ParallelModelContainer
                                              sphere.second.begin(),
                                              sphere.second.end());
         }
-    }
-
-    void addCylindersToModel(Model& model) const
-    {
         for (const auto& cylinder : cylinders)
         {
             const auto index = cylinder.first;
@@ -74,10 +70,6 @@ struct ParallelModelContainer
                 model.getCylinders()[index].end(), cylinder.second.begin(),
                 cylinder.second.end());
         }
-    }
-
-    void addConesToModel(Model& model) const
-    {
         for (const auto& cone : cones)
         {
             const auto index = cone.first;
@@ -85,10 +77,6 @@ struct ParallelModelContainer
                                            cone.second.begin(),
                                            cone.second.end());
         }
-    }
-
-    void addSDFGeometriesToModel(Model& model) const
-    {
         const size_t numGeoms = sdfGeometries.size();
         std::vector<size_t> localToGlobalIndex(numGeoms, 0);
 
