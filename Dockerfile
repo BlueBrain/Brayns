@@ -114,8 +114,9 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && git submodule update --init --recursive \
  && mkdir -p build \
  && cd build \
- && PKG_CONFIG_PATH=${DIST_PATH}/lib/pkgconfig CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
-    -DBRAYNS_BRION_ENABLED=ON \
+ && PKG_CONFIG_PATH=${DIST_PATH}/lib/pkgconfig CMAKE_PREFIX_PATH=${DIST_PATH} \
+    cmake .. -GNinja \
+    -DBRAYNS_CIRCUITVIEWER_ENABLED=ON \
     -DBRAYNS_NETWORKING_ENABLED=ON \
     -DCLONE_SUBPROJECTS=ON \
     -DCMAKE_BUILD_TYPE=Release \
