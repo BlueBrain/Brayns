@@ -31,9 +31,8 @@ namespace brayns
 class OSPRayFrameBuffer : public FrameBuffer
 {
 public:
-    OSPRayFrameBuffer(const Vector2ui& frameSize,
-                      const FrameBufferFormat colorDepth,
-                      const bool accumulation);
+    OSPRayFrameBuffer(const std::string& name, const Vector2ui& frameSize,
+                      const FrameBufferFormat frameBufferFormat);
     ~OSPRayFrameBuffer();
 
     void clear() final;
@@ -54,7 +53,7 @@ public:
     const float* getDepthBuffer() const final { return _depthBuffer; }
     OSPFrameBuffer impl() { return _currentFB(); }
     void enableDeflectPixelOp();
-    void setStreamingParams(const StreamParameters& params, bool stereo);
+    void setStreamingParams(const StreamParameters& params);
 
 private:
     void _recreate();

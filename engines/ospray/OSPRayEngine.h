@@ -41,23 +41,14 @@ public:
     /** @copydoc Engine::commit */
     void commit() final;
 
-    /** @copydoc Engine::preRender */
-    void preRender() final;
-
-    /**
-     * Constrain size to multiples of the OSPRay tile size in case of streaming
-     * using the DeflectPixelOp.
-     */
-    Vector2ui getSupportedFrameSize(const Vector2ui& size) const final;
-
     /** @copydoc Engine::getMinimumFrameSize */
     Vector2ui getMinimumFrameSize() const final;
 
     /** @copydoc Engine::haveDeflectPixelOp */
     bool haveDeflectPixelOp() const final { return _haveDeflectPixelOp; }
-    FrameBufferPtr createFrameBuffer(const Vector2ui& frameSize,
-                                     FrameBufferFormat frameBufferFormat,
-                                     bool accumulation) const final;
+    FrameBufferPtr createFrameBuffer(
+        const std::string& name, const Vector2ui& frameSize,
+        FrameBufferFormat frameBufferFormat) const final;
 
     ScenePtr createScene(ParametersManager& parametersManager) const final;
     CameraPtr createCamera() const final;

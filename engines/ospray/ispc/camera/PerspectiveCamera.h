@@ -29,10 +29,7 @@ struct OSPRAY_SDK_INTERFACE PerspectiveCamera : public Camera
 
     //! \brief common function to help printf-debugging
     /*! Every derived class should override this! */
-    virtual std::string toString() const
-    {
-        return "ospray::PerspectiveCamera";
-    }
+    virtual std::string toString() const { return "ospray::PerspectiveCamera"; }
     virtual void commit();
 
 public:
@@ -45,13 +42,7 @@ public:
     float focusDistance;
     bool architectural; // orient image plane to be parallel to 'up' and shift
                         // the lens
-    typedef enum {
-        OSP_STEREO_NONE,
-        OSP_STEREO_LEFT,
-        OSP_STEREO_RIGHT,
-        OSP_STEREO_SIDE_BY_SIDE
-    } StereoMode;
-    StereoMode stereoMode;
+    bool stereo;
     float interpupillaryDistance; // distance between the two cameras (stereo)
 
     // Clip planes

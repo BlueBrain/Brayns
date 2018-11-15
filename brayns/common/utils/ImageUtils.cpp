@@ -81,14 +81,12 @@ ImagePtr getImageFromFrameBuffer(FrameBuffer& frameBuffer)
     return image;
 }
 
-std::string getBase64Image(FrameBuffer& frameBuffer, const std::string& format,
+std::string getBase64Image(ImagePtr image, const std::string& format,
                            const int quality)
 {
     FreeImage_SetOutputMessage([](FREE_IMAGE_FORMAT, const char* message) {
         throw std::runtime_error(message);
     });
-
-    auto image = freeimage::getImageFromFrameBuffer(frameBuffer);
 
     auto fif =
         format == "jpg" ? FIF_JPEG : FreeImage_GetFIFFromFormat(format.c_str());
@@ -109,6 +107,39 @@ std::string getBase64Image(FrameBuffer& frameBuffer, const std::string& format,
     DWORD numPixels = 0;
     FreeImage_AcquireMemory(memory.get(), &pixels, &numPixels);
     return {base64_encode(pixels, numPixels)};
+}
+
+std::string getBase64Image(FrameBuffer& frameBuffer, const std::string& format,
+                           const int quality)
+{
+    return getBase64Image(freeimage::getImageFromFrameBuffer(frameBuffer),
+                          format, quality);
+}
+
+ImagePtr mergeImages(const std::vector<ImagePtr>& images)
+{
+    int width, height, bbp;
+    width = height = bbp = 0;
+    for (const auto& image : images)
+    {
+        width += FreeImage_GetWidth(image.get());
+        height = FreeImage_GetHeight(image.get());
+        bbp = FreeImage_GetBPP(image.get());
+    }
+
+    FreeImage_SetOutputMessage([](FREE_IMAGE_FORMAT, const char* message) {
+        throw std::runtime_error(message);
+    });
+
+    ImagePtr mergedImage{FreeImage_Allocate(width, height, bbp)};
+    int offset = 0;
+    for (const auto& image : images)
+    {
+        const auto imageWidth = FreeImage_GetWidth(image.get());
+        FreeImage_Paste(mergedImage.get(), image.get(), offset, 0, 255);
+        offset += imageWidth;
+    }
+    return mergedImage;
 }
 }
 }

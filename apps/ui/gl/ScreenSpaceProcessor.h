@@ -36,8 +36,8 @@ struct ScreenSpaceProcessorData
     GLenum colorType;
     GLenum depthFormat;
     GLenum depthType;
-    GLvoid* colorBuffer;
-    GLvoid* depthBuffer;
+    const GLvoid* colorBuffer;
+    const GLvoid* depthBuffer;
 };
 
 class ScreenSpaceProcessor

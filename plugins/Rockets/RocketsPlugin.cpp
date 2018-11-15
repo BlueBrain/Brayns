@@ -72,9 +72,6 @@ const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 const std::string ENDPOINT_STATISTICS = "statistics";
 const std::string ENDPOINT_VERSION = "version";
 
-// REST GET
-const std::string ENDPOINT_FRAME_BUFFERS = "frame-buffers";
-
 // JSONRPC async requests
 const std::string METHOD_ADD_MODEL = "add-model";
 const std::string METHOD_SNAPSHOT = "snapshot";
@@ -940,8 +937,6 @@ public:
 
         _handleGET(ENDPOINT_STATISTICS, _engine.getStatistics(), SLOW_THROTTLE);
 
-        _handleFrameBuffer();
-
         _handleSchemaRPC();
 
         _handleInspect();
@@ -975,15 +970,6 @@ public:
                               "camera");
         _handlePropertyObject(_engine.getRenderer(), ENDPOINT_RENDERER_PARAMS,
                               "renderer");
-    }
-
-    void _handleFrameBuffer()
-    {
-        // don't add framebuffer to websockets for performance
-        using namespace rockets::http;
-        _rocketsServer->handleGET(ENDPOINT_FRAME_BUFFERS,
-                                  _engine.getFrameBuffer());
-        _handleObjectSchema(ENDPOINT_FRAME_BUFFERS, _engine.getFrameBuffer());
     }
 
     void _handleImageJPEG()
@@ -1210,10 +1196,9 @@ public:
             "size, type, name, transformation, etc."};
 
         _handleTask<BinaryParam, ModelDescriptorPtr>(
-            desc,
-            std::bind(&BinaryRequests::createTask, std::ref(_binaryRequests),
-                      std::placeholders::_1, std::placeholders::_2,
-                      std::ref(_engine)));
+            desc, std::bind(&BinaryRequests::createTask,
+                            std::ref(_binaryRequests), std::placeholders::_1,
+                            std::placeholders::_2, std::ref(_engine)));
     }
 
     void _handleChunk()
@@ -1398,7 +1383,7 @@ public:
             "Get the properties of the given model", "id", "the model ID"};
 
         _jsonrpcServer->bind<ObjectID, PropertyMap>(
-            desc.methodName, [&engine = _engine](const ObjectID& id) {
+            desc.methodName, [& engine = _engine](const ObjectID& id) {
                 auto model = engine.getScene().getModel(id.id);
                 if (!model)
                     throw rockets::jsonrpc::response_error("Model not found",
@@ -1441,7 +1426,7 @@ public:
 
         _jsonrpcServer->bind(
             METHOD_MODEL_PROPERTIES_SCHEMA,
-            [&engine = _engine](const auto& request) {
+            [& engine = _engine](const auto& request) {
                 ObjectID modelID;
                 if (::from_json(modelID, request.message))
                 {
@@ -1467,7 +1452,7 @@ public:
                                            "Model id and result range"};
         _handleRPC<GetInstances, ModelInstances>(
             desc,
-            [&engine = _engine](const GetInstances& param)->ModelInstances {
+            [& engine = _engine](const GetInstances& param)->ModelInstances {
                 auto id = param.modelID;
                 auto& scene = engine.getScene();
                 auto model = scene.getModel(id);

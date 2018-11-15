@@ -39,6 +39,7 @@ const std::string PARAM_MAX_RENDER_FPS = "max-render-fps";
 const std::string PARAM_MODULE = "module";
 const std::string PARAM_PARALLEL_RENDERING = "parallel-rendering";
 const std::string PARAM_PLUGIN = "plugin";
+const std::string PARAM_STEREO = "stereo";
 const std::string PARAM_SYNCHRONOUS_MODE = "synchronous-mode";
 const std::string PARAM_TMP_FOLDER = "tmp-folder";
 const std::string PARAM_WINDOW_SIZE = "window-size";
@@ -88,6 +89,8 @@ ApplicationParameters::ApplicationParameters()
         PARAM_PARALLEL_RENDERING.c_str(),
         po::bool_switch()->default_value(false),
         "Enable parallel rendering, equivalent to --osp:mpi")(
+        PARAM_STEREO.c_str(), po::bool_switch()->default_value(false),
+        "Enable stereo rendering")(
         PARAM_SYNCHRONOUS_MODE.c_str(), po::bool_switch()->default_value(false),
         "Enable synchronous mode rendering vs data loading")(
         PARAM_IMAGE_STREAM_FPS.c_str(), po::value<size_t>(),
@@ -135,6 +138,7 @@ void ApplicationParameters::parse(const po::variables_map& vm)
     if (vm.count(PARAM_TMP_FOLDER))
         _tmpFolder = vm[PARAM_TMP_FOLDER].as<std::string>();
     _parallelRendering = vm[PARAM_PARALLEL_RENDERING].as<bool>();
+    _stereo = vm[PARAM_STEREO].as<bool>();
     _synchronousMode = vm[PARAM_SYNCHRONOUS_MODE].as<bool>();
     if (vm.count(PARAM_IMAGE_STREAM_FPS))
         _imageStreamFPS = vm[PARAM_IMAGE_STREAM_FPS].as<size_t>();

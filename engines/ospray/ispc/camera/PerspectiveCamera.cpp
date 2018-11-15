@@ -45,7 +45,7 @@ void PerspectiveCamera::commit()
     apertureRadius = getParamf("apertureRadius", 0.f);
     focusDistance = getParamf("focusDistance", 1.f);
     architectural = getParam1i("architectural", false);
-    stereoMode = (StereoMode)getParam1i("stereoMode", OSP_STEREO_NONE);
+    stereo = getParam1i("stereo", false);
     // the default 63.5mm represents the average human IPD
     interpupillaryDistance = getParamf("interpupillaryDistance", 0.0635f);
     clipPlanes = getParamData("clipPlanes", nullptr);
@@ -65,19 +65,16 @@ void PerspectiveCamera::commit()
     vec3f org = pos;
     const vec3f ipd_offset = 0.5f * interpupillaryDistance * dir_du;
 
-    switch (stereoMode)
+    if (stereo)
     {
-    case OSP_STEREO_LEFT:
-        org -= ipd_offset;
-        break;
-    case OSP_STEREO_RIGHT:
-        org += ipd_offset;
-        break;
-    case OSP_STEREO_SIDE_BY_SIDE:
-        aspect *= 0.5f;
-        break;
-    default:
-        break;
+        auto bufferTarget = getParamString("buffer_target");
+        if (bufferTarget.length() == 2)
+        {
+            if (bufferTarget.at(1) == 'L')
+                org -= ipd_offset;
+            if (bufferTarget.at(1) == 'R')
+                org += ipd_offset;
+        }
     }
 
     float imgPlane_size_y = 2.f * tanf(deg2rad(0.5f * fovy));
@@ -101,12 +98,13 @@ void PerspectiveCamera::commit()
     const auto clipPlaneData = clipPlanes ? clipPlanes->data : nullptr;
     const size_t numClipPlanes = clipPlanes ? clipPlanes->numItems : 0;
 
-    ispc::PerspectiveCamera_set(
-        getIE(), (const ispc::vec3f&)org, (const ispc::vec3f&)dir_00,
-        (const ispc::vec3f&)dir_du, (const ispc::vec3f&)dir_dv, scaledAperture,
-        aspect, stereoMode == OSP_STEREO_SIDE_BY_SIDE,
-        (const ispc::vec3f&)ipd_offset, (const ispc::vec4f*)clipPlaneData,
-        numClipPlanes);
+    ispc::PerspectiveCamera_set(getIE(), (const ispc::vec3f&)org,
+                                (const ispc::vec3f&)dir_00,
+                                (const ispc::vec3f&)dir_du,
+                                (const ispc::vec3f&)dir_dv, scaledAperture,
+                                aspect, (const ispc::vec3f&)ipd_offset,
+                                (const ispc::vec4f*)clipPlaneData,
+                                numClipPlanes);
 }
 
 OSP_REGISTER_CAMERA(PerspectiveCamera, perspective);

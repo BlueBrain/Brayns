@@ -51,8 +51,11 @@ using MemoryPtr = std::unique_ptr<FIMEMORY, MemoryDeleter>;
 
 bool SwapRedBlue32(FIBITMAP* freeImage);
 ImagePtr getImageFromFrameBuffer(FrameBuffer& frameBuffer);
+std::string getBase64Image(ImagePtr image, const std::string& format,
+                           const int quality);
 std::string getBase64Image(FrameBuffer& frameBuffer, const std::string& format,
                            const int quality);
+ImagePtr mergeImages(const std::vector<ImagePtr>& images);
 }
 }
 

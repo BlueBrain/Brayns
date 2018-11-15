@@ -52,8 +52,6 @@ public:
     /** @copydoc Camera::setEnvironmentMap */
     void setEnvironmentMap(const bool environmentMap) final;
 
-    bool isSideBySideStereo() const final;
-
     /**
        Gets the OSPRay implementation of the camera object
        @return OSPRay implementation of the camera object

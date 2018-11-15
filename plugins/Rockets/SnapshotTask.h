@@ -56,12 +56,10 @@ public:
     SnapshotFunctor(Engine& engine, SnapshotParams&& params,
                     ImageGenerator& imageGenerator)
         : _params(std::move(params))
-        , _frameBuffer(engine.createFrameBuffer(_params.size,
-                                                FrameBufferFormat::rgba_i8,
-                                                true))
         , _camera(engine.createCamera())
         , _scene(engine.createScene(engine.getParametersManager()))
         , _imageGenerator(imageGenerator)
+        , _engine(engine)
     {
         if (_params.animParams == nullptr)
         {
@@ -115,17 +113,34 @@ public:
             msg << " " << shortenString(_params.name);
         msg << " ...";
 
-        while (_frameBuffer->numAccumFrames() !=
+        const auto isStereo = _camera->hasProperty("stereo") &&
+                              _camera->getProperty<bool>("stereo");
+        const auto names = isStereo ? strings{"0L", "0R"} : strings{"default"};
+        std::vector<FrameBufferPtr> frameBuffers;
+        for (const auto& name : names)
+            frameBuffers.push_back(
+                _engine.createFrameBuffer(name, _params.size,
+                                          FrameBufferFormat::rgba_i8));
+
+        while (frameBuffers[0]->numAccumFrames() !=
                size_t(_params.samplesPerPixel))
         {
-            _renderer->render(_frameBuffer);
-            progress(msg.str(), 1.f / _frameBuffer->numAccumFrames(),
-                     float(_frameBuffer->numAccumFrames()) /
+            for (auto frameBuffer : frameBuffers)
+            {
+                _camera->setBufferTarget(frameBuffer->getName());
+                _camera->markModified(false);
+                _camera->commit();
+                _camera->resetModified();
+                _renderer->render(frameBuffer);
+                frameBuffer->incrementAccumFrames();
+            }
+
+            progress(msg.str(), 1.f / frameBuffers[0]->numAccumFrames(),
+                     float(frameBuffers[0]->numAccumFrames()) /
                          _params.samplesPerPixel);
-            _frameBuffer->incrementAccumFrames();
         }
 
-        return _imageGenerator.createImage(*_frameBuffer, _params.format,
+        return _imageGenerator.createImage(frameBuffers, _params.format,
                                            _params.quality);
     }
 
@@ -136,5 +151,6 @@ private:
     RendererPtr _renderer;
     ScenePtr _scene;
     ImageGenerator& _imageGenerator;
+    Engine& _engine;
 };
 }

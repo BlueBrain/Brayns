@@ -104,7 +104,6 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         }
     }
 
-    RenderingParameters& rp = _parametersManager.getRenderingParameters();
     BRAYNS_INFO << "Initializing renderers" << std::endl;
 
     _createRenderers();
@@ -117,23 +116,6 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
     BRAYNS_INFO << "Initializing camera" << std::endl;
     _createCameras();
 
-    BRAYNS_INFO << "Initializing frame buffer" << std::endl;
-    _frameSize = getSupportedFrameSize(
-        _parametersManager.getApplicationParameters().getWindowSize());
-
-    bool accumulation = rp.getAccumulation();
-    if (!_parametersManager.getApplicationParameters().getFilters().empty())
-        accumulation = false;
-
-    _frameBuffer =
-        createFrameBuffer(_frameSize,
-                          haveDeflectPixelOp() ? FrameBufferFormat::none
-                                               : FrameBufferFormat::rgba_i8,
-                          accumulation);
-    if (haveDeflectPixelOp())
-        std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer)
-            ->enableDeflectPixelOp();
-
     _renderer->setScene(_scene);
     _renderer->setCamera(_camera);
 
@@ -143,7 +125,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
 OSPRayEngine::~OSPRayEngine()
 {
     _scene.reset();
-    _frameBuffer.reset();
+    _frameBuffers.clear();
     _renderer.reset();
     _camera.reset();
 
@@ -179,52 +161,24 @@ void OSPRayEngine::commit()
         }
     }
 
-    auto osprayFrameBuffer =
-        std::static_pointer_cast<OSPRayFrameBuffer>(_frameBuffer);
-    const auto& streamParams = _parametersManager.getStreamParameters();
-    if (streamParams.isModified() || _camera->isModified())
+    for (auto frameBuffer : _frameBuffers)
     {
-        osprayFrameBuffer->setStreamingParams(streamParams,
-                                              _camera->isSideBySideStereo());
-    }
-}
+        auto osprayFrameBuffer =
+            std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
+        const auto& streamParams = _parametersManager.getStreamParameters();
 
-void OSPRayEngine::preRender()
-{
-    const auto& renderParams = _parametersManager.getRenderingParameters();
-    if (renderParams.getAccumulation() != _frameBuffer->getAccumulation())
-        _frameBuffer->setAccumulation(renderParams.getAccumulation());
-}
+        if (haveDeflectPixelOp())
+            osprayFrameBuffer->enableDeflectPixelOp();
 
-Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size) const
-{
-    const auto isSideBySideStereo = _camera->isSideBySideStereo();
-
-    if (!haveDeflectPixelOp())
-    {
-        Vector2f result = size;
-        if (isSideBySideStereo && size.x() % 2 != 0)
+        if (streamParams.isModified())
         {
-            // In case of 3D stereo vision, make sure the width is even
-            result.x() = size.x() - 1;
+            osprayFrameBuffer->setStreamingParams(streamParams);
         }
-        return result;
     }
-
-    Vector2f result = size;
-    if (isSideBySideStereo)
-    {
-        if (size.x() % (TILE_SIZE * 2) != 0)
-            result.x() = size.x() - size.x() % (TILE_SIZE * 2);
-    }
-
-    return result;
 }
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const
 {
-    if (_camera->isSideBySideStereo())
-        return {TILE_SIZE * 2, TILE_SIZE};
     return {TILE_SIZE, TILE_SIZE};
 }
 
@@ -318,11 +272,11 @@ void OSPRayEngine::_createRenderers()
 }
 
 FrameBufferPtr OSPRayEngine::createFrameBuffer(
-    const Vector2ui& frameSize, const FrameBufferFormat frameBufferFormat,
-    const bool accumulation) const
+    const std::string& name, const Vector2ui& frameSize,
+    const FrameBufferFormat frameBufferFormat) const
 {
-    return std::make_shared<OSPRayFrameBuffer>(frameSize, frameBufferFormat,
-                                               accumulation);
+    return std::make_shared<OSPRayFrameBuffer>(name, frameSize,
+                                               frameBufferFormat);
 }
 
 ScenePtr OSPRayEngine::createScene(ParametersManager& parametersManager) const
@@ -355,12 +309,10 @@ void OSPRayEngine::_createCameras()
 {
     auto ospCamera = std::make_shared<OSPRayCamera>();
 
-    using StereoMode = ospray::PerspectiveCamera::StereoMode;
-    PropertyMap::Property stereoProperty{"stereoMode",
-                                         "Stereo mode",
-                                         (int)StereoMode::OSP_STEREO_NONE,
-                                         {"None", "Left eye", "Right eye",
-                                          "Side by side"}};
+    const bool isStereo =
+        _parametersManager.getApplicationParameters().isStereo();
+    PropertyMap::Property stereoProperty{"stereo", "Stereo", isStereo};
+    stereoProperty.markReadOnly();
     PropertyMap::Property fovy{"fovy", "Field of view", 45., {.1, 360.}};
     PropertyMap::Property aspect{"aspect", "Aspect ratio", 1.};
     aspect.markReadOnly();
@@ -377,8 +329,11 @@ void OSPRayEngine::_createCameras()
             properties.setProperty(aspect);
             properties.setProperty({"apertureRadius", "Aperture radius", 0.});
             properties.setProperty({"focusDistance", "Focus Distance", 1.});
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
+            if (isStereo)
+            {
+                properties.setProperty(stereoProperty);
+                properties.setProperty(eyeSeparation);
+            }
         }
         if (camera == "orthographic")
         {
@@ -389,18 +344,13 @@ void OSPRayEngine::_createCameras()
         {
             properties.setProperty(fovy);
             properties.setProperty(aspect);
-            properties.setProperty(stereoProperty);
-            properties.setProperty(eyeSeparation);
-            properties.setProperty(
-                {"zeroParallaxPlane", "Zero parallax plane", 1.});
-        }
-        if (camera == "cylindricStereo")
-        {
-            properties.setProperty(
-                {"stereoMode",
-                 "Stereo mode",
-                 static_cast<int>(StereoMode::OSP_STEREO_SIDE_BY_SIDE),
-                 {"None", "Left eye", "Right eye", "Side by side"}});
+            if (isStereo)
+            {
+                properties.setProperty(stereoProperty);
+                properties.setProperty(eyeSeparation);
+                properties.setProperty(
+                    {"zeroParallaxPlane", "Zero parallax plane", 1.});
+            }
         }
         ospCamera->setProperties(camera, properties);
     }

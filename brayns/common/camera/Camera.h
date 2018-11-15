@@ -48,10 +48,12 @@ public:
     /**
        Sets position, and quaternion
        @param position The x, y, z coordinates of the camera position
-       @param quat The x, y, z, w values of the quaternion describing
+       @param orientation The x, y, z, w values of the quaternion describing
               the camera orientation
+       @param target The x, y, z coordinates of the camera target
     */
-    BRAYNS_API void set(const Vector3d& position, const Quaterniond&,
+    BRAYNS_API void set(const Vector3d& position,
+                        const Quaterniond& orientation,
                         const Vector3d& target = Vector3d(0.0, 0.0, 0.0));
 
     BRAYNS_API void setInitialState(const Vector3d& position,
@@ -69,7 +71,7 @@ public:
     }
     /**
        Sets camera target
-       @param position The x, y, z coordinates of the camera target
+       @param target The x, y, z coordinates of the camera target
     */
     void setTarget(const Vector3d& target) { _updateValue(_target, target); }
     /**
@@ -84,7 +86,7 @@ public:
     const Vector3d& getTarget() const { return _target; }
     /**
        Sets camera orientation quaternion.
-       @param quat The orientation quaternion
+       @param orientation The orientation quaternion
     */
     void setOrientation(Quaterniond orientation)
     {
@@ -107,9 +109,14 @@ public:
 
     /** Enable/disables environment mapping */
     BRAYNS_API virtual void setEnvironmentMap(
-        const bool environmentMap BRAYNS_UNUSED){};
+        const bool environmentMap BRAYNS_UNUSED)
+    {
+    }
 
-    virtual bool isSideBySideStereo() const { return false; }
+    /** @internal Sets the name of current rendered frame buffer. */
+    void setBufferTarget(const std::string& target) { _bufferTarget = target; }
+    /** @internal @return the current rendererd frame buffer. */
+    const std::string& getBufferTarget() const { return _bufferTarget; }
 private:
     Vector3d _target;
     Vector3d _position;
@@ -118,6 +125,8 @@ private:
     Vector3d _initialTarget;
     Vector3d _initialPosition;
     Quaterniond _initialOrientation;
+
+    std::string _bufferTarget;
 
     SERIALIZATION_FRIEND(Camera)
 };

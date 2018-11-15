@@ -43,7 +43,6 @@ public:
         std::string hostname;
         uint16_t port{deflect::Stream::defaultPortNumber};
         bool compression{true};
-        bool stereo{false}; // side-by-side
         bool streamEnabled{true};
         unsigned int quality{80};
     };
@@ -79,9 +78,6 @@ public:
      *                            uncompressed pixels, 1 default
      * - "quality" (param1i): 1 (worst, smallest) - 100 (best, biggest) for JPEG
      *                        quality, 80 default
-     * - "stereo" (param1i): 0 (off), 1 (on) to indicate side-by-side stereo to
-     *                       to stream left half of tiles as
-     *                       deflect::View::left_eye and right eye accordingly.
      */
     void commit() final;
 

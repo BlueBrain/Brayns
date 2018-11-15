@@ -30,9 +30,8 @@ namespace brayns
 class FrameBuffer : public BaseObject
 {
 public:
-    BRAYNS_API FrameBuffer(const Vector2ui& frameSize,
-                           FrameBufferFormat frameBufferFormat,
-                           bool accumulation = true);
+    BRAYNS_API FrameBuffer(const std::string& name, const Vector2ui& frameSize,
+                           FrameBufferFormat frameBufferFormat);
     virtual ~FrameBuffer() {}
     virtual void clear() { _accumFrames = 0; }
     virtual void map() = 0;
@@ -45,6 +44,7 @@ public:
     virtual void resize(const Vector2ui& frameSize) = 0;
 
     virtual Vector2ui getSize() const { return _frameSize; }
+    const Vector2ui& getFrameSize() const { return _frameSize; }
     virtual void setAccumulation(const bool accumulation)
     {
         _accumulation = accumulation;
@@ -54,16 +54,15 @@ public:
     {
         return _frameBufferFormat;
     }
-
+    const std::string& getName() const { return _name; }
     void incrementAccumFrames() { ++_accumFrames; }
     size_t numAccumFrames() const { return _accumFrames; }
-
     virtual void setSubsampling(const size_t) {}
-
 protected:
+    const std::string _name;
     Vector2ui _frameSize;
-    FrameBufferFormat _frameBufferFormat;
-    bool _accumulation;
+    const FrameBufferFormat _frameBufferFormat;
+    bool _accumulation{true};
     std::atomic_size_t _accumFrames{0};
 };
 }

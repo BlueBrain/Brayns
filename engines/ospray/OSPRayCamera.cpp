@@ -46,6 +46,7 @@ void OSPRayCamera::commit()
     ospSet3f(_camera, "pos", position.x(), position.y(), position.z());
     ospSet3f(_camera, "dir", dir.x(), dir.y(), dir.z());
     ospSet3f(_camera, "up", up.x(), up.y(), up.z());
+    ospSetString(_camera, "buffer_target", getBufferTarget().c_str());
 
     setOSPRayProperties(*this, _camera);
 
@@ -80,11 +81,6 @@ void OSPRayCamera::setClipPlanes(const Planes& planes)
         return;
     _clipPlanes = planes;
     markModified(false);
-}
-
-bool OSPRayCamera::isSideBySideStereo() const
-{
-    return hasProperty("stereoMode") && getProperty<int>("stereoMode") == 3;
 }
 
 void OSPRayCamera::createOSPCamera()

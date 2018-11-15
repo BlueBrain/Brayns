@@ -126,7 +126,6 @@ BaseWindow::BaseWindow(Brayns& brayns, const FrameBufferMode frameBufferMode)
     , _currModifiers(0)
     , _frameBufferMode(frameBufferMode)
     , _windowID(-1)
-    , _windowSize(-1, -1)
     , _displayHelp(false)
     , _fullScreen(false)
 {
@@ -136,7 +135,7 @@ BaseWindow::BaseWindow(Brayns& brayns, const FrameBufferMode frameBufferMode)
     BRAYNS_INFO << "Motion speed :" << motionSpeed << std::endl;
 }
 
-BaseWindow::~BaseWindow() {}
+BaseWindow::~BaseWindow() = default;
 
 void BaseWindow::mouseButton(const int button, const bool released,
                              const Vector2i& pos)
@@ -153,10 +152,12 @@ void BaseWindow::mouseButton(const int button, const bool released,
 
     if (_currModifiers & GLUT_ACTIVE_SHIFT && released)
     {
+        const auto& windowSize = _brayns.getParametersManager()
+                                     .getApplicationParameters()
+                                     .getWindowSize();
         const auto& result = _brayns.getEngine().getRenderer().pick(
-            {pos.x() / float(_windowSize.x()),
-             1.f - pos.y() / float(_windowSize.y())});
-        _brayns.getEngine().getFrameBuffer().clear();
+            {pos.x() / float(windowSize.x()),
+             1.f - pos.y() / float(windowSize.y())});
         if (result.hit)
         {
             // updates position based on new target and current rotation
@@ -217,17 +218,25 @@ void BaseWindow::idle()
     usleep(1000);
 }
 
-void BaseWindow::reshape(const Vector2i& newSize)
+void BaseWindow::reshape(Vector2ui newSize)
 {
-    Engine& engine = _brayns.getEngine();
-    _windowSize = engine.getSupportedFrameSize(newSize);
-    engine.reshape(_windowSize);
+    auto& applicationParameters =
+        _brayns.getParametersManager().getApplicationParameters();
 
-    auto& applicationParameters = _brayns.getParametersManager();
-    applicationParameters.getApplicationParameters().setWindowSize(_windowSize);
+    // In case of 3D stereo vision, make sure the width is even
+    if (applicationParameters.isStereo())
+    {
+        if (newSize.x() % 2 != 0)
+            newSize.x() = (newSize.x() - 1) / 2;
+        else
+            newSize.x() /= 2;
+    }
 
-    if (!applicationParameters.getApplicationParameters().getFilters().empty())
-        _screenSpaceProcessor.resize(_windowSize.x(), _windowSize.y());
+    _windowSize = newSize;
+    applicationParameters.setWindowSize(newSize);
+
+    if (!applicationParameters.getFilters().empty())
+        _screenSpaceProcessor.resize(newSize.x(), newSize.y());
 }
 
 void BaseWindow::activate()
@@ -243,103 +252,104 @@ void BaseWindow::forceRedraw()
 
 void BaseWindow::display()
 {
-    const Vector2ui windowSize = _brayns.getParametersManager()
-                                     .getApplicationParameters()
-                                     .getWindowSize();
-    if (windowSize != _windowSize)
-        glutReshapeWindow(windowSize.x(), windowSize.y());
+    const auto& newWindowSize = _getWindowSize();
+    if (newWindowSize != _windowSize)
+        glutReshapeWindow(newWindowSize.x(), newWindowSize.y());
 
     _timer.start();
+    _brayns.commitAndRender();
 
-    RenderInput renderInput;
-    RenderOutput renderOutput;
-
-    const auto& camera = _brayns.getEngine().getCamera();
-    renderInput.windowSize = windowSize;
-    renderInput.position = camera.getPosition();
-    renderInput.target = camera.getTarget();
-    renderInput.orientation = camera.getOrientation();
-    _brayns.commitAndRender(renderInput, renderOutput);
-
-    GLenum format = GL_RGBA;
-    switch (renderOutput.colorBufferFormat)
+    size_t offset = 0;
+    for (auto frameBuffer : _brayns.getEngine().getFrameBuffers())
     {
-    case FrameBufferFormat::bgra_i8:
-        format = GL_BGRA;
-        break;
-    case FrameBufferFormat::rgb_i8:
-        format = GL_RGB;
-        break;
-    default:
-        format = GL_RGBA;
-    }
-
-    if (_brayns.getParametersManager()
-            .getApplicationParameters()
-            .getFilters()
-            .empty())
-    {
-        GLenum type = GL_FLOAT;
-        GLvoid* buffer = 0;
-        switch (_frameBufferMode)
+        GLenum format = GL_RGBA;
+        switch (frameBuffer->getFrameBufferFormat())
         {
-        case FrameBufferMode::COLOR:
-            type = GL_UNSIGNED_BYTE;
-            buffer = renderOutput.colorBuffer.data();
+        case FrameBufferFormat::bgra_i8:
+            format = GL_BGRA;
             break;
-        case FrameBufferMode::DEPTH:
-            format = GL_LUMINANCE;
-            buffer = renderOutput.depthBuffer.data();
+        case FrameBufferFormat::rgb_i8:
+            format = GL_RGB;
             break;
         default:
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            format = GL_RGBA;
         }
 
-        if (buffer)
+        const auto& frameSize = frameBuffer->getFrameSize();
+
+        frameBuffer->map();
+        if (_brayns.getParametersManager()
+                .getApplicationParameters()
+                .getFilters()
+                .empty())
         {
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
-            glOrtho(0.0f, windowSize.x(), 0.0f, windowSize.y(), -1.0f, 1.0f);
+            glOrtho(0, frameSize.x(), 0.0f, frameSize.y(), -1.0f, 1.0f);
 
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
-            glViewport(0, 0, windowSize.x(), windowSize.y());
+            glViewport(offset, 0, frameSize.x(), frameSize.y());
 
-            glBindTexture(GL_TEXTURE_2D, _fbTexture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, renderOutput.frameSize.x(),
-                         renderOutput.frameSize.y(), 0, GL_RGBA, type, buffer);
+            GLenum type = GL_FLOAT;
+            const GLvoid* buffer = 0;
+            switch (_frameBufferMode)
+            {
+            case FrameBufferMode::COLOR:
+                type = GL_UNSIGNED_BYTE;
+                buffer = frameBuffer->getColorBuffer();
+                break;
+            case FrameBufferMode::DEPTH:
+                format = GL_LUMINANCE;
+                buffer = frameBuffer->getDepthBuffer();
+                break;
+            default:
+                glClearColor(0.f, 0.f, 0.f, 1.f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            }
 
-            glBegin(GL_QUADS);
-            glTexCoord2f(0.f, 0.f);
-            glVertex3f(0, 0, 0);
-            glTexCoord2f(0.f, 1.f);
-            glVertex3f(0, windowSize.y(), 0);
-            glTexCoord2f(1.f, 1.f);
-            glVertex3f(windowSize.x(), windowSize.y(), 0);
-            glTexCoord2f(1.f, 0.f);
-            glVertex3f(windowSize.x(), 0, 0);
-            glEnd();
+            if (buffer)
+            {
+                glBindTexture(GL_TEXTURE_2D, _fbTexture);
+                glTexImage2D(GL_TEXTURE_2D, 0, format,
+                             frameBuffer->getSize().x(),
+                             frameBuffer->getSize().y(), 0, format, type,
+                             buffer);
 
-            glBindTexture(GL_TEXTURE_2D, 0);
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.f, 0.f);
+                glVertex3f(0, 0, 0);
+                glTexCoord2f(0.f, 1.f);
+                glVertex3f(0, frameSize.y(), 0);
+                glTexCoord2f(1.f, 1.f);
+                glVertex3f(frameSize.x(), frameSize.y(), 0);
+                glTexCoord2f(1.f, 0.f);
+                glVertex3f(frameSize.x(), 0, 0);
+                glEnd();
+
+                glBindTexture(GL_TEXTURE_2D, 0);
+            }
         }
-    }
-    else
-    {
-        ScreenSpaceProcessorData ssProcData;
+        else
+        {
+            ScreenSpaceProcessorData ssProcData;
 
-        ssProcData.width = _windowSize.x();
-        ssProcData.height = _windowSize.y();
+            ssProcData.width = frameSize.x();
+            ssProcData.height = frameSize.y();
 
-        ssProcData.colorFormat = format;
-        ssProcData.colorBuffer = renderOutput.colorBuffer.data();
-        ssProcData.colorType = GL_UNSIGNED_BYTE;
+            ssProcData.colorFormat = format;
+            ssProcData.colorBuffer = frameBuffer->getColorBuffer();
+            ssProcData.colorType = GL_UNSIGNED_BYTE;
 
-        ssProcData.depthFormat = GL_LUMINANCE;
-        ssProcData.depthBuffer = renderOutput.depthBuffer.data();
-        ssProcData.depthType = GL_FLOAT;
+            ssProcData.depthFormat = GL_LUMINANCE;
+            ssProcData.depthBuffer = frameBuffer->getDepthBuffer();
+            ssProcData.depthType = GL_FLOAT;
 
-        _screenSpaceProcessor.draw(ssProcData);
+            _screenSpaceProcessor.draw(ssProcData);
+        }
+
+        frameBuffer->unmap();
+        offset += frameSize.x();
     }
 
     if (_displayHelp)
@@ -349,17 +359,6 @@ void BaseWindow::display()
         glEnable(GL_COLOR_LOGIC_OP);
         _renderBitmapString(-0.98f, 0.95f, keyHandler.help());
         glDisable(GL_COLOR_LOGIC_OP);
-    }
-
-    float* buffer = renderOutput.depthBuffer.data();
-    _gid = -1;
-    if (buffer &&
-        _brayns.getEngine().getRenderer().getCurrentType() == "particle")
-    {
-        size_t index =
-            (_windowSize.y() - _mouse.y()) * _windowSize.x() + _mouse.x();
-        if (index < _windowSize.x() * _windowSize.y())
-            _gid = buffer[index];
     }
 
     _timer.stop();
@@ -390,10 +389,10 @@ void BaseWindow::setTitle(const char* title)
     glutSetWindowTitle(title);
 }
 
-void BaseWindow::create(const char* title, const size_t width,
-                        const size_t height)
+void BaseWindow::create(const char* title)
 {
-    glutInitWindowSize(width, height);
+    const auto windowSize = _getWindowSize();
+    glutInitWindowSize(windowSize.x(), windowSize.y());
     _windowID = glutCreateWindow(title);
     _activeWindow = this;
     glutDisplayFunc(glut3dDisplay);
@@ -409,7 +408,7 @@ void BaseWindow::create(const char* title, const size_t width,
              .getApplicationParameters()
              .getFilters()
              .empty())
-        _screenSpaceProcessor.init(width, height);
+        _screenSpaceProcessor.init(windowSize.x(), windowSize.y());
 
     _registerKeyboardShortcuts();
 
@@ -497,6 +496,18 @@ void BaseWindow::_renderBitmapString(const float x, const float y,
     glRasterPos3f(-1.f, -1.f, 0.f);
 }
 #endif
+
+Vector2ui BaseWindow::_getWindowSize() const
+{
+    Vector2ui newWindowSize;
+    for (auto frameBuffer : _brayns.getEngine().getFrameBuffers())
+    {
+        newWindowSize.x() += frameBuffer->getFrameSize().x();
+        newWindowSize.y() =
+            std::max(newWindowSize.y(), frameBuffer->getFrameSize().y());
+    }
+    return newWindowSize;
+}
 
 void BaseWindow::_onExit()
 {
