@@ -87,31 +87,41 @@ void DeflectPixelOp::Instance::endFrame()
         i.second = sharedFuture;
 }
 
+uint8_t _getChannel(const std::string& name)
+{
+    if (name.length() == 2)
+        return std::atoi(&name.at(0));
+    return 0;
+}
+
+deflect::View _getView(const std::string& name)
+{
+    if (name.length() == 2)
+    {
+        if (name.at(1) == 'L')
+            return deflect::View::left_eye;
+        if (name.at(1) == 'R')
+            return deflect::View::right_eye;
+        return deflect::View::mono;
+    }
+    return deflect::View::mono;
+}
+
 void DeflectPixelOp::Instance::postAccum(ospray::Tile& tile)
 {
     if (!_parent._deflectStream)
         return;
 
-    unsigned int x = tile.region.lower.x;
-    bool isRightEye = false;
-    if (_parent._settings.stereo)
-    {
-        unsigned int widthHalf = fb->getNumPixels().x / 2;
-        isRightEye = x >= widthHalf;
-        if (isRightEye)
-            x -= widthHalf;
-    }
-
     const auto& fbSize = fb->getNumPixels();
     ospray::vec2i tileSize{TILE_SIZE, TILE_SIZE};
 
-    if (tile.region.lower.x + TILE_SIZE >= fbSize.x)
+    if (tile.region.lower.x + TILE_SIZE > fbSize.x)
         tileSize.x = fbSize.x % TILE_SIZE;
-    if (tile.region.lower.y + TILE_SIZE >= fbSize.y)
+    if (tile.region.lower.y + TILE_SIZE > fbSize.y)
         tileSize.y = fbSize.y % TILE_SIZE;
 
     deflect::ImageWrapper image(_copyPixels(tile, tileSize), tileSize.x,
-                                tileSize.y, deflect::RGBA, x,
+                                tileSize.y, deflect::RGBA, tile.region.lower.x,
                                 tile.region.lower.y);
     image.compressionPolicy = _parent._settings.compression
                                   ? deflect::COMPRESSION_ON
@@ -119,9 +129,10 @@ void DeflectPixelOp::Instance::postAccum(ospray::Tile& tile)
     image.compressionQuality = _parent._settings.quality;
     image.subsampling = deflect::ChromaSubsampling::YUV420;
     image.rowOrder = deflect::RowOrder::bottom_up;
-    if (_parent._settings.stereo)
-        image.view =
-            isRightEye ? deflect::View::right_eye : deflect::View::left_eye;
+
+    const auto name = fb->getParamString("name");
+    image.view = _getView(name);
+    image.channel = _getChannel(name);
 
     try
     {
@@ -224,7 +235,6 @@ void DeflectPixelOp::commit()
     _settings.hostname = hostname;
     _settings.port = getParam1i("port", deflect::Stream::defaultPortNumber);
     _settings.compression = getParam1i("compression", 1);
-    _settings.stereo = getParam1i("stereo", 0);
     _settings.quality = getParam1i("quality", 80);
     _settings.streamEnabled = getParam1i("enabled", 1);
 

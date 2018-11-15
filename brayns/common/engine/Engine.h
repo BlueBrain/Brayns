@@ -58,24 +58,19 @@ public:
     /** Renders the current scene and populates the frame buffer accordingly */
     void render();
     /** Executes engine specific pre-render operations */
-    virtual void preRender() {}
+    virtual void preRender();
     /** Executes engine specific post-render operations */
     virtual void postRender();
     /** Gets the scene */
     Scene& getScene() { return *_scene; }
     auto getScenePtr() { return _scene; }
     /** Gets the frame buffer */
-    FrameBuffer& getFrameBuffer() { return *_frameBuffer; }
+    FrameBuffer& getFrameBuffer() { return *_frameBuffers[0]; }
     /** Gets the camera */
     const Camera& getCamera() const { return *_camera; }
     Camera& getCamera() { return *_camera; }
     /** Gets the renderer */
     Renderer& getRenderer();
-    /**
-       Reshapes the current frame buffers
-       @param frameSize New size for the buffers
-    */
-    void reshape(const Vector2ui& frameSize);
 
     /**
        Initializes materials for the current scene
@@ -89,17 +84,6 @@ public:
      * plugins Deflect and Rockets.
      */
     std::function<void()> triggerRender{[] {}};
-
-    /**
-     * Adapts the size of the frame buffer according to camera
-     * requirements. Typically, in case of 3D stereo vision, the frame buffer
-     * width has to be an even number.
-     * Can be overridden by the engine implementation for specific requirements.
-     *
-     * @param size New size of the frame buffer
-     * @return Size that matches the camera requirements
-     */
-    virtual Vector2ui getSupportedFrameSize(const Vector2ui& size) const = 0;
 
     /** @return the minimum frame size in pixels supported by this engine. */
     virtual Vector2ui getMinimumFrameSize() const = 0;
@@ -128,8 +112,8 @@ public:
 
     /** Factory method to create an engine-specific framebuffer. */
     virtual FrameBufferPtr createFrameBuffer(
-        const Vector2ui& frameSize, FrameBufferFormat frameBufferFormat,
-        bool accumulation) const = 0;
+        const std::string& name, const Vector2ui& frameSize,
+        FrameBufferFormat frameBufferFormat) const = 0;
 
     virtual ScenePtr createScene(
         ParametersManager& parametersManager) const = 0;
@@ -142,18 +126,41 @@ public:
         const RenderingParameters& renderingParameters) const = 0;
 
     auto& getParametersManager() { return _parametersManager; }
+    /**
+     * Add the given frame buffer to the list of buffers that shall be filled
+     * during rendering.
+     */
+    void addFrameBuffer(FrameBufferPtr frameBuffer);
+
+    /**
+     * Remove the given frame buffer from the list of buffers that are filled
+     * during rendering.
+     */
+    void removeFrameBuffer(FrameBufferPtr frameBuffer);
+
+    /** @return all registered frame buffers that are used during rendering. */
+    const std::vector<FrameBufferPtr>& getFrameBuffers() const
+    {
+        return _frameBuffers;
+    }
+
+    /** @internal Clear all frame buffers. */
+    void clearFrameBuffers();
+
+    /** @internal resetModified() all frame buffers. */
+    void resetFrameBuffers();
+
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
 
-    void _writeFrameToFile();
+    void _writeFrameToFile(FrameBuffer& frameBuffer);
 
     ParametersManager& _parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;
     RendererPtr _renderer;
-    Vector2i _frameSize;
-    FrameBufferPtr _frameBuffer;
+    std::vector<FrameBufferPtr> _frameBuffers;
     Statistics _statistics;
 
     bool _keepRunning{true};

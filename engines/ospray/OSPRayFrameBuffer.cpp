@@ -42,10 +42,10 @@ OSPFrameBufferFormat toOSPFrameBufferFormat(
     }
 }
 }
-OSPRayFrameBuffer::OSPRayFrameBuffer(const Vector2ui& frameSize,
-                                     const FrameBufferFormat colorDepth,
-                                     const bool accumulation)
-    : FrameBuffer(frameSize, colorDepth, accumulation)
+OSPRayFrameBuffer::OSPRayFrameBuffer(const std::string& name,
+                                     const Vector2ui& frameSize,
+                                     const FrameBufferFormat frameBufferFormat)
+    : FrameBuffer(name, frameSize, frameBufferFormat)
 {
     resize(frameSize);
 }
@@ -62,6 +62,9 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
 
 void OSPRayFrameBuffer::enableDeflectPixelOp()
 {
+    if (_pixelOp)
+        return;
+
     _pixelOp = ospNewPixelOp("DeflectPixelOp");
     if (_pixelOp)
     {
@@ -85,8 +88,7 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     _recreate();
 }
 
-void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params,
-                                           const bool stereo)
+void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params)
 {
     if (_pixelOp)
     {
@@ -96,7 +98,6 @@ void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params,
         ospSet1i(_pixelOp, "enabled", params.getEnabled());
         ospSet1i(_pixelOp, "compression", params.getCompression());
         ospSet1i(_pixelOp, "quality", params.getQuality());
-        ospSet1i(_pixelOp, "stereo", stereo);
         ospCommit(_pixelOp);
     }
 }
@@ -119,6 +120,7 @@ void OSPRayFrameBuffer::_recreate()
                           attributes);
     if (_pixelOp)
         ospSetPixelOp(_frameBuffer, _pixelOp);
+    ospSetString(_frameBuffer, "name", getName().c_str());
     ospCommit(_frameBuffer);
 
     _recreateSubsamplingBuffer();

@@ -127,12 +127,13 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, PDB_FILE, "--disable-accumulation"};
+    const char* argv[] = {app, PDB_FILE, "--disable-accumulation", "--stereo"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
-    brayns.getEngine().getCamera().updateProperty("stereoMode", 3);
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataProteinStereo.png",
-                                 brayns.getEngine().getFrameBuffer()));
+    BOOST_CHECK(compareTestImage("testdataProtein_left_eye.png",
+                                 *brayns.getEngine().getFrameBuffers()[0]));
+    BOOST_CHECK(compareTestImage("testdataProtein_right_eye.png",
+                                 *brayns.getEngine().getFrameBuffers()[1]));
 }

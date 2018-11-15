@@ -34,36 +34,22 @@ struct PerspectiveCamera
     float scaledAperture; //!< radius of aperture, divided by horizontal image
                           //! plane size
     float aspect;         //!< image plane size x / y
-    bool side_by_side;    //!< stereo mode SIDE_BY_SIDE
     vec3f ipd_offset;     //!< shift of camera position for left/right eye (only
-                          //! when SIDE_BY_SIDE)
+                          //! when stereo)
 
     // Clip planes
     const uniform vec4f* clipPlanes;
     unsigned int numClipPlanes;
 };
 
-void PerspectiveCamera_initRay(uniform Camera* uniform _self,
-                                      varying Ray& ray,
-                                      const varying CameraSample& sample)
+void PerspectiveCamera_initRay(uniform Camera* uniform _self, varying Ray& ray,
+                               const varying CameraSample& sample)
 {
     uniform PerspectiveCamera* uniform self =
         (uniform PerspectiveCamera * uniform)_self;
 
     vec2f screen = sample.screen;
     vec3f org = self->org;
-
-    if (self->side_by_side)
-    {
-        screen.x *= 2.f;
-        if (screen.x < 1.f)
-            org = org - self->ipd_offset;
-        else
-        {
-            org = org + self->ipd_offset;
-            screen.x -= 1.f;
-        }
-    }
 
     screen = Camera_subRegion(_self, screen);
 
@@ -85,8 +71,8 @@ void PerspectiveCamera_initRay(uniform Camera* uniform _self,
     float farClip = infinity;
     const varying vec3f direction = normalize(dir);
 
-    clipRay(self->clipPlanes, self->numClipPlanes, org, direction,
-            nearClip, farClip);
+    clipRay(self->clipPlanes, self->numClipPlanes, org, direction, nearClip,
+            farClip);
 
     const float time = Camera_shutterTime(_self, sample.time);
     setRay(ray, org, direction, nearClip, farClip, time);
@@ -111,11 +97,11 @@ export void PerspectiveCamera_set(
     void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir_00,
     const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
     const uniform float scaledAperture, const uniform float aspect,
-    const uniform bool side_by_side, const uniform vec3f& ipd_offset,
-    const uniform vec4f clipPlanes[], const uniform unsigned int numClipPlanes)
+    const uniform vec3f& ipd_offset, const uniform vec4f clipPlanes[],
+    const uniform unsigned int numClipPlanes)
 {
     uniform PerspectiveCamera* uniform self =
-       (uniform PerspectiveCamera * uniform)_self;
+        (uniform PerspectiveCamera * uniform)_self;
     self->org = org;
     self->dir_00 = dir_00;
     self->dir_du = dir_du;
@@ -123,7 +109,6 @@ export void PerspectiveCamera_set(
     self->scaledAperture = scaledAperture;
     self->super.doesDOF = scaledAperture > 0.f;
     self->aspect = aspect;
-    self->side_by_side = side_by_side;
     self->ipd_offset = ipd_offset;
     self->clipPlanes = clipPlanes;
     self->numClipPlanes = numClipPlanes;

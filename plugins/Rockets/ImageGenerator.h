@@ -56,6 +56,8 @@ public:
      */
     ImageBase64 createImage(FrameBuffer& frameBuffer, const std::string& format,
                             uint8_t quality);
+    ImageBase64 createImage(const std::vector<FrameBufferPtr>& frameBuffers,
+                            const std::string& format, uint8_t quality);
 
     struct ImageJPEG
     {

@@ -53,6 +53,25 @@ ImageGenerator::ImageBase64 ImageGenerator::createImage(
 #endif
 }
 
+ImageGenerator::ImageBase64 ImageGenerator::createImage(
+    const std::vector<FrameBufferPtr>& frameBuffers BRAYNS_UNUSED,
+    const std::string& format BRAYNS_UNUSED,
+    const uint8_t quality BRAYNS_UNUSED)
+{
+#ifdef BRAYNS_USE_FREEIMAGE
+    if (frameBuffers.size() == 1)
+        return createImage(*frameBuffers[0], format, quality);
+
+    std::vector<freeimage::ImagePtr> images;
+    for (auto frameBuffer : frameBuffers)
+        images.push_back(freeimage::getImageFromFrameBuffer(*frameBuffer));
+    return {freeimage::getBase64Image(freeimage::mergeImages(images), format,
+                                      quality)};
+#else
+    throw std::runtime_error("Need FreeImage; cannot create any image");
+#endif
+}
+
 ImageGenerator::ImageJPEG ImageGenerator::createJPEG(
     FrameBuffer& frameBuffer BRAYNS_UNUSED, const uint8_t quality BRAYNS_UNUSED)
 {

@@ -37,34 +37,44 @@ Engine::Engine(ParametersManager& parametersManager)
 {
 }
 
-void Engine::reshape(const Vector2ui& frameSize)
-{
-    const auto size = getSupportedFrameSize(frameSize);
-
-    _frameBuffer->resize(size);
-    _camera->updateProperty("aspect", static_cast<double>(size.x()) /
-                                          static_cast<double>(size.y()));
-}
-
 void Engine::commit()
 {
-    const auto spp =
-        _parametersManager.getRenderingParameters().getSamplesPerPixel();
-    const size_t factor = spp >= 0 ? 1 : std::pow(2, std::abs(spp));
-    _frameBuffer->setSubsampling(factor);
-
     _renderer->commit();
+}
+
+void Engine::preRender()
+{
+    for (auto frameBuffer : _frameBuffers)
+    {
+        const auto& renderParams = _parametersManager.getRenderingParameters();
+        frameBuffer->setAccumulation(renderParams.getAccumulation());
+
+        const auto spp =
+            _parametersManager.getRenderingParameters().getSamplesPerPixel();
+        const size_t factor = spp >= 0 ? 1 : std::pow(2, std::abs(spp));
+        frameBuffer->setSubsampling(factor);
+    }
 }
 
 void Engine::render()
 {
-    _renderer->render(_frameBuffer);
+    for (auto frameBuffer : _frameBuffers)
+    {
+        _camera->setBufferTarget(frameBuffer->getName());
+        _camera->markModified(false);
+        _camera->commit();
+        _camera->resetModified();
+        _renderer->render(frameBuffer);
+    }
 }
 
 void Engine::postRender()
 {
-    _writeFrameToFile();
-    _frameBuffer->incrementAccumFrames();
+    for (auto frameBuffer : _frameBuffers)
+    {
+        _writeFrameToFile(*frameBuffer);
+        frameBuffer->incrementAccumFrames();
+    }
 }
 
 Renderer& Engine::getRenderer()
@@ -74,13 +84,38 @@ Renderer& Engine::getRenderer()
 
 bool Engine::continueRendering() const
 {
+    auto frameBuffer = _frameBuffers[0];
     return _parametersManager.getAnimationParameters().getDelta() != 0 ||
-           (_frameBuffer->getAccumulation() &&
-            (_frameBuffer->numAccumFrames() <
+           (frameBuffer->getAccumulation() &&
+            (frameBuffer->numAccumFrames() <
              _parametersManager.getRenderingParameters().getMaxAccumFrames()));
 }
 
-void Engine::_writeFrameToFile()
+void Engine::addFrameBuffer(FrameBufferPtr frameBuffer)
+{
+    _frameBuffers.push_back(frameBuffer);
+}
+
+void Engine::removeFrameBuffer(FrameBufferPtr frameBuffer)
+{
+    _frameBuffers.erase(std::remove(_frameBuffers.begin(), _frameBuffers.end(),
+                                    frameBuffer),
+                        _frameBuffers.end());
+}
+
+void Engine::clearFrameBuffers()
+{
+    for (auto frameBuffer : _frameBuffers)
+        frameBuffer->clear();
+}
+
+void Engine::resetFrameBuffers()
+{
+    for (auto frameBuffer : _frameBuffers)
+        frameBuffer->resetModified();
+}
+
+void Engine::_writeFrameToFile(FrameBuffer& frameBuffer)
 {
     const auto& frameExportFolder =
         _parametersManager.getApplicationParameters().getFrameExportFolder();
@@ -88,9 +123,8 @@ void Engine::_writeFrameToFile()
         return;
     char str[7];
     const auto frame = _parametersManager.getAnimationParameters().getFrame();
-    snprintf(str, 7, "%06d", int(frame));
+    snprintf(str, 7, "%s_%06d", frameBuffer.getName().c_str(), int(frame));
     const auto filename = frameExportFolder + "/" + str + ".png";
-    FrameBuffer& frameBuffer = getFrameBuffer();
     ImageManager::exportFrameBufferToFile(frameBuffer, filename);
 }
 }

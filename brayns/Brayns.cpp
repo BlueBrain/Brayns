@@ -87,15 +87,13 @@ struct Brayns::Impl : public PluginAPI
 
         _pluginManager.initPlugins(this);
 
+        _createFrameBuffer();
+
         _registerLoaders();
         _loadData();
 
         _engine->getScene().commit(); // Needed to obtain a bounding box
         _cameraManipulator->adjust(_engine->getScene().getBounds());
-
-        const auto frameSize = Vector2d(_engine->getFrameBuffer().getSize());
-        _engine->getCamera().updateProperty("aspect",
-                                            frameSize.x() / frameSize.y());
     }
 
     bool commit()
@@ -120,10 +118,15 @@ struct Brayns::Impl : public PluginAPI
         const auto windowSize =
             _parametersManager.getApplicationParameters().getWindowSize();
 
-        _engine->reshape(windowSize);
+        auto& camera = _engine->getCamera();
+        camera.updateProperty("aspect",
+                              static_cast<double>(windowSize.x()) /
+                                  static_cast<double>(windowSize.y()));
+        for (auto frameBuffer : _frameBuffers)
+            frameBuffer->resize(windowSize);
+
         _engine->preRender();
 
-        auto& camera = _engine->getCamera();
         camera.commit();
         _engine->commit();
 
@@ -142,7 +145,7 @@ struct Brayns::Impl : public PluginAPI
         if (_parametersManager.isAnyModified() || camera.isModified() ||
             scene.isModified() || renderer.isModified())
         {
-            _engine->getFrameBuffer().clear();
+            _engine->clearFrameBuffers();
         }
 
         _parametersManager.resetModified();
@@ -184,7 +187,7 @@ struct Brayns::Impl : public PluginAPI
 
         _engine->postRender();
 
-        _engine->getFrameBuffer().resetModified();
+        _engine->resetFrameBuffers();
         _engine->getStatistics().resetModified();
     }
 
@@ -246,7 +249,6 @@ struct Brayns::Impl : public PluginAPI
         _actionInterface = interface;
     }
     Scene& getScene() final { return _engine->getScene(); }
-
 private:
     void _createEngine()
     {
@@ -267,6 +269,30 @@ private:
                                  DEFAULT_SUN_INTENSITY));
         _engine->getScene().addLight(sunLight);
         _engine->getScene().commitLights();
+    }
+
+    void _createFrameBuffer()
+    {
+        if (!_engine->getFrameBuffers().empty())
+            return;
+
+        const auto& ap = _parametersManager.getApplicationParameters();
+        const auto names =
+            ap.isStereo() ? strings{"0L", "0R"} : strings{"default"};
+        for (const auto& name : names)
+            _addFrameBuffer(name);
+    }
+
+    void _addFrameBuffer(const std::string& name)
+    {
+        const auto& ap = _parametersManager.getApplicationParameters();
+        const auto frameSize = ap.getWindowSize();
+
+        auto frameBuffer =
+            _engine->createFrameBuffer(name, frameSize,
+                                       FrameBufferFormat::rgba_i8);
+        _engine->addFrameBuffer(frameBuffer);
+        _frameBuffers.push_back(frameBuffer);
     }
 
     void _registerLoaders()
@@ -464,9 +490,8 @@ private:
             'g', "Enable/Disable animation playback",
             std::bind(&Brayns::Impl::_toggleAnimationPlayback, this));
         _keyboardHandler.registerKeyboardShortcut(
-            'x',
-            "Set animation frame to " +
-                std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
+            'x', "Set animation frame to " +
+                     std::to_string(DEFAULT_TEST_ANIMATION_FRAME),
             std::bind(&Brayns::Impl::_defaultAnimationFrame, this));
         _keyboardHandler.registerKeyboardShortcut(
             '|', "Create cache file ",
@@ -748,6 +773,7 @@ private:
     EnginePtr _engine;
     KeyboardHandler _keyboardHandler;
     AbstractManipulatorPtr _cameraManipulator;
+    std::vector<FrameBufferPtr> _frameBuffers;
 
     double _fieldOfView{45.};
     double _eyeSeparation{0.0635};

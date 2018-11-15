@@ -78,8 +78,7 @@ public:
     /** Assign a new set of properties to the current type. */
     void setProperties(const PropertyMap& properties)
     {
-        _properties[_currentType] = properties;
-        markModified();
+        setProperties(_currentType, properties);
     }
 
     /** Assign a new set of properties to the given type. */

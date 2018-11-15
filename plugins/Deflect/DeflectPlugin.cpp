@@ -45,12 +45,11 @@ namespace
 {
 const float wheelFactor = 1.f / 40.f;
 
-template <typename T>
-std::future<T> make_ready_future(const T value)
+uint8_t _getChannel(const std::string& name)
 {
-    std::promise<T> promise;
-    promise.set_value(value);
-    return promise.get_future();
+    if (name.length() == 2)
+        return std::atoi(&name.at(0));
+    return 0;
 }
 }
 
@@ -65,7 +64,6 @@ public:
         , _params{api->getParametersManager().getStreamParameters()}
         , _keyboardHandler(api->getKeyboardHandler())
         , _cameraManipulator(api->getCameraManipulator())
-        , _sendFuture{make_ready_future(true)}
     {
         // Streaming will only be activated if the DEFLECT_HOST environment
         // variable is defined
@@ -166,8 +164,8 @@ private:
     {
         BRAYNS_INFO << "Closing Deflect stream" << std::endl;
 
-        _sendFuture.wait();
-        _sendFuture = make_ready_future(true);
+        _waitOnFutures();
+        _lastImages.clear();
 #ifdef BRAYNS_USE_LIBUV
         if (_pollHandle)
         {
@@ -184,7 +182,8 @@ private:
         auto loop = uvw::Loop::getDefault();
         _pollHandle = loop->resource<uvw::PollHandle>(_stream->getDescriptor());
 
-        _pollHandle->on<uvw::PollEvent>([&engine = _engine](const auto&, auto&) {
+        _pollHandle->on<uvw::PollEvent>([& engine = _engine](const auto&,
+                                                             auto&) {
             engine.triggerRender();
         });
 
@@ -194,21 +193,20 @@ private:
 
     void _handleDeflectEvents()
     {
+        const auto& windowSize = _appParams.getWindowSize();
         while (_stream->hasEvent())
         {
             const deflect::Event& event = _stream->getEvent();
             switch (event.type)
             {
             case deflect::Event::EVT_PRESS:
-                _previousPos =
-                    _getWindowPos(event, _engine.getFrameBuffer().getSize());
+                _previousPos = _getWindowPos(event, windowSize);
                 _pan = _pinch = false;
                 break;
             case deflect::Event::EVT_MOVE:
             case deflect::Event::EVT_RELEASE:
             {
-                const auto pos =
-                    _getWindowPos(event, _engine.getFrameBuffer().getSize());
+                const auto pos = _getWindowPos(event, windowSize);
                 if (!_pan && !_pinch)
                     _cameraManipulator.dragLeft(pos, _previousPos);
                 _previousPos = pos;
@@ -219,8 +217,7 @@ private:
             {
                 if (_pinch)
                     break;
-                const auto pos =
-                    _getWindowPos(event, _engine.getFrameBuffer().getSize());
+                const auto pos = _getWindowPos(event, windowSize);
                 _cameraManipulator.dragMiddle(pos, _previousPos);
                 _previousPos = pos;
                 _pan = true;
@@ -230,10 +227,8 @@ private:
             {
                 if (_pan)
                     break;
-                const auto pos =
-                    _getWindowPos(event, _engine.getFrameBuffer().getSize());
-                const auto delta =
-                    _getZoomDelta(event, _engine.getFrameBuffer().getSize());
+                const auto pos = _getWindowPos(event, windowSize);
+                const auto delta = _getZoomDelta(event, windowSize);
                 _cameraManipulator.wheel(pos, delta * wheelFactor);
                 _pinch = true;
                 break;
@@ -246,14 +241,8 @@ private:
             case deflect::Event::EVT_VIEW_SIZE_CHANGED:
             {
                 Vector2ui newSize(event.dx, event.dy);
-                if (_engine.getCamera().isSideBySideStereo())
-                    newSize.x() *= 2;
-
                 if (_params.getResizing())
-                {
-                    _appParams.setWindowSize(
-                        _engine.getSupportedFrameSize(newSize));
-                }
+                    _appParams.setWindowSize(newSize);
                 break;
             }
             case deflect::Event::EVT_CLOSE:
@@ -273,29 +262,41 @@ private:
 
     void _sendSizeHints(Engine& engine)
     {
-        const auto size =
-            engine.getSupportedFrameSize(_appParams.getWindowSize());
-        const auto minSize = engine.getMinimumFrameSize();
+        const auto& frameBuffers = engine.getFrameBuffers();
+        if (frameBuffers.empty())
+            return;
+
+        const auto& minSize = engine.getMinimumFrameSize();
 
         auto sizeHints = deflect::SizeHints();
         sizeHints.maxWidth = std::numeric_limits<unsigned int>::max();
         sizeHints.maxHeight = std::numeric_limits<unsigned int>::max();
-        sizeHints.preferredWidth = size.x();
-        sizeHints.preferredHeight = size.y();
         sizeHints.minWidth = minSize.x();
         sizeHints.minHeight = minSize.y();
 
-        if (_engine.getCamera().isSideBySideStereo())
+        // only send preferred size if we have no multi-channel setup (e.g.
+        // OpenDeck)
+        const uint8_t channel = _getChannel(frameBuffers[0]->getName());
+        Vector2ui preferredSize = frameBuffers[0]->getSize();
+        for (auto frameBuffer : frameBuffers)
         {
-            sizeHints.preferredWidth /= 2;
-            sizeHints.minWidth /= 2;
+            if (channel != _getChannel(frameBuffer->getName()))
+            {
+                preferredSize = {0, 0};
+                break;
+            }
         }
+
+        sizeHints.preferredWidth = preferredSize.x();
+        sizeHints.preferredHeight = preferredSize.y();
         _stream->sendSizeHints(sizeHints);
     }
 
     void _sendDeflectFrame(Engine& engine)
     {
-        if (!_sendFuture.get())
+        const bool error = _waitOnFutures();
+
+        if (error)
         {
             if (!_stream->isConnected())
                 BRAYNS_INFO << "Stream closed, exiting." << std::endl;
@@ -307,49 +308,72 @@ private:
             return;
         }
 
-        auto& frameBuffer = engine.getFrameBuffer();
-        frameBuffer.map();
-        if (frameBuffer.getColorBuffer())
+        const auto& frameBuffers = engine.getFrameBuffers();
+        for (size_t i = 0; i < frameBuffers.size(); ++i)
         {
-            _copyToLastImage(frameBuffer);
-            _sendFuture = _sendLastImage();
+            auto frameBuffer = frameBuffers[i];
+            frameBuffer->map();
+            if (frameBuffer->getColorBuffer())
+            {
+                const deflect::View view = _getView(frameBuffer->getName());
+                const uint8_t channel = _getChannel(frameBuffer->getName());
+
+                if (i <= _lastImages.size())
+                    _lastImages.push_back({});
+                auto& image = _lastImages[i];
+                _copyToImage(image, *frameBuffer);
+                _futures.push_back(_sendImage(image, view, channel));
+            }
+            frameBuffer->unmap();
         }
-        else
-            _sendFuture = make_ready_future(true);
-        frameBuffer.unmap();
+        _futures.push_back(
+            static_cast<deflect::Stream&>(*_stream).finishFrame());
     }
 
-    void _copyToLastImage(FrameBuffer& frameBuffer)
+    deflect::View _getView(const std::string& name) const
+    {
+        if (name.length() == 2)
+        {
+            if (name.at(1) == 'L')
+                return deflect::View::left_eye;
+            if (name.at(1) == 'R')
+                return deflect::View::right_eye;
+            return deflect::View::mono;
+        }
+        return deflect::View::mono;
+    }
+
+    void _copyToImage(Image& image, FrameBuffer& frameBuffer)
     {
         const auto& size = frameBuffer.getSize();
         const size_t bufferSize =
             size.x() * size.y() * frameBuffer.getColorDepth();
         const auto data = frameBuffer.getColorBuffer();
 
-        _lastImage.data.resize(bufferSize);
-        memcpy(_lastImage.data.data(), data, bufferSize);
-        _lastImage.size = size;
-        _lastImage.format = frameBuffer.getFrameBufferFormat();
+        image.data.resize(bufferSize);
+        memcpy(image.data.data(), data, bufferSize);
+        image.size = size;
+        image.format = frameBuffer.getFrameBufferFormat();
     }
 
-    deflect::Stream::Future _sendLastImage()
+    deflect::Stream::Future _sendImage(const Image& image,
+                                       const deflect::View& view,
+                                       const uint8_t channel)
     {
-        const auto format = _getDeflectImageFormat(_lastImage.format);
+        const auto format = _getDeflectImageFormat(image.format);
 
-        deflect::ImageWrapper deflectImage(_lastImage.data.data(),
-                                           _lastImage.size.x(),
-                                           _lastImage.size.y(), format);
-        if (_engine.getCamera().isSideBySideStereo())
-            deflectImage.view = deflect::View::side_by_side;
+        deflect::ImageWrapper deflectImage(image.data.data(), image.size.x(),
+                                           image.size.y(), format);
 
+        deflectImage.view = view;
+        deflectImage.channel = channel;
         deflectImage.compressionQuality = _params.getQuality();
         deflectImage.compressionPolicy = _params.getCompression()
                                              ? deflect::COMPRESSION_ON
                                              : deflect::COMPRESSION_OFF;
         deflectImage.rowOrder = deflect::RowOrder::bottom_up;
 
-        return static_cast<deflect::Stream&>(*_stream).sendAndFinish(
-            deflectImage);
+        return static_cast<deflect::Stream&>(*_stream).send(deflectImage);
     }
 
     deflect::PixelFormat _getDeflectImageFormat(
@@ -380,6 +404,18 @@ private:
         return std::copysign(std::sqrt(dx * dx + dy * dy), dx + dy);
     }
 
+    bool _waitOnFutures()
+    {
+        bool error = false;
+        for (auto& future : _futures)
+        {
+            if (!future.get())
+                error = true;
+        }
+        _futures.clear();
+        return error;
+    }
+
     Engine& _engine;
     ApplicationParameters& _appParams;
     StreamParameters& _params;
@@ -390,8 +426,8 @@ private:
     bool _pinch = false;
     std::unique_ptr<deflect::Observer> _stream;
     std::string _previousHost;
-    Image _lastImage;
-    deflect::Stream::Future _sendFuture;
+    std::vector<Image> _lastImages;
+    std::vector<deflect::Stream::Future> _futures;
 
 #ifdef BRAYNS_USE_LIBUV
     std::shared_ptr<uvw::PollHandle> _pollHandle;

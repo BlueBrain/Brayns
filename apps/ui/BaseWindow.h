@@ -54,9 +54,6 @@ public:
                FrameBufferMode frameBufferMode = FrameBufferMode::COLOR);
     virtual ~BaseWindow();
 
-    /*! size we'll create a window at */
-    static Vector2i _defaultInitSize;
-
     /*! tell GLUT that this window is 'dirty' and needs redrawing */
     virtual void forceRedraw();
 
@@ -75,7 +72,7 @@ public:
 
     virtual void passiveMotion(const Vector2i& pos);
 
-    virtual void reshape(const Vector2i& newSize);
+    virtual void reshape(Vector2ui newSize);
 
     virtual void idle();
 
@@ -91,7 +88,7 @@ public:
         events get routed to this window instance */
     virtual void activate();
 
-    void create(const char* title, size_t width, size_t height);
+    void create(const char* title);
 
     /*! clear the frame buffer color and depth bits */
     void clearPixels();
@@ -115,6 +112,7 @@ public:
 protected:
     virtual void _registerKeyboardShortcuts();
     void _renderBitmapString(float x, float y, const std::string& text);
+    Vector2ui _getWindowSize() const;
 
     Brayns& _brayns;
 

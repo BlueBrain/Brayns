@@ -25,7 +25,6 @@
 #include <brayns/common/camera/Camera.h>
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/material/Material.h>
-#include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/scene/Model.h>
@@ -242,31 +241,6 @@ inline void init(brayns::Camera* c, ObjectHandler* h)
     h->add_property("current", &c->_currentType, Flags::Optional);
     static auto types = c->getTypes();
     h->add_property("types", &types, Flags::IgnoreRead | Flags::Optional);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
-inline void init(brayns::FrameBuffer* f, ObjectHandler* h)
-{
-    static brayns::Vector2ui frameSize;
-    static std::string diffuse, depth;
-
-    frameSize = f->getSize();
-    f->map();
-    diffuse = base64_encode(f->getColorBuffer(),
-                            frameSize.x() * frameSize.y() * f->getColorDepth());
-
-    if (f->getDepthBuffer())
-    {
-        depth =
-            base64_encode(reinterpret_cast<const uint8_t*>(f->getDepthBuffer()),
-                          frameSize.x() * frameSize.y() * sizeof(float));
-    }
-    f->unmap();
-
-    h->add_property("width", &frameSize[0]);
-    h->add_property("height", &frameSize[1]);
-    h->add_property("diffuse", &diffuse);
-    h->add_property("depth", &depth, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

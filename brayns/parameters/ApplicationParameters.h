@@ -97,6 +97,7 @@ public:
         _updateValue(_synchronousMode, synchronousMode);
     }
 
+    bool isStereo() const { return _stereo; }
     bool getParallelRendering() const { return _parallelRendering; }
     const std::string& getHttpServerURI() const { return _httpServerURI; }
     void setHttpServerURI(const std::string& httpServerURI)
@@ -118,6 +119,7 @@ protected:
     strings _filters;
     std::string _frameExportFolder;
     std::string _tmpFolder;
+    bool _stereo{false};
     bool _synchronousMode{false};
     size_t _imageStreamFPS{60};
     size_t _maxRenderFPS{std::numeric_limits<size_t>::max()};

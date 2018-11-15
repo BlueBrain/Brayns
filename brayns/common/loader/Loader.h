@@ -83,6 +83,7 @@ public:
      * Import the data from the blob and return the created model.
      *
      * @param blob the blob containing the data to import
+     * @param callback the callback for progress updates
      * @param index Index of the element, mainly used for material assignment
      * @param defaultMaterialId the default material to use
      * @return the model that has been created by the loader
@@ -95,6 +96,7 @@ public:
      * Import the data from the given file and return the created model.
      *
      * @param filename the file containing the data to import
+     * @param callback the callback for progress updates
      * @param index Index of the element, mainly used for material assignment
      * @param defaultMaterialId the default material to use
      * @return the model that has been created by the loader
