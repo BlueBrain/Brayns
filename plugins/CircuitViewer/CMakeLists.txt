@@ -33,11 +33,11 @@ set(BRAYNSCIRCUITVIEWER_LINK_LIBRARIES PRIVATE braynsPluginAPI Brion Brain)
 set(BRAYNSCIRCUITVIEWER_OMIT_LIBRARY_HEADER ON)
 set(BRAYNSCIRCUITVIEWER_OMIT_VERSION_HEADERS ON)
 set(BRAYNSCIRCUITVIEWER_OMIT_EXPORT ON)
-set(BRAYNSVRPN_INCLUDE_NAME vrpnplugin)
 common_library(braynsCircuitViewer)
 
 add_subdirectory(tests)
 
 if (TARGET Brayns-all)
   add_dependencies(Brayns-all BraynsCircuitViewer-all)
+  add_dependencies(Brayns-install BraynsCircuitViewer-install)
 endif()
