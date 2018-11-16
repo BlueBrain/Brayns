@@ -69,8 +69,9 @@ ImagePtr getImageFromFrameBuffer(FrameBuffer& frameBuffer)
     const auto& size = frameBuffer.getSize();
 
     ImagePtr image(FreeImage_ConvertFromRawBits(
-        colorBuffer, size.x(), size.y(), frameBuffer.getColorDepth() * size.x(),
-        8 * frameBuffer.getColorDepth(), 0xFF0000, 0x00FF00, 0x0000FF, false));
+        const_cast<uint8_t*>(colorBuffer), size.x(), size.y(),
+        frameBuffer.getColorDepth() * size.x(), 8 * frameBuffer.getColorDepth(),
+        0xFF0000, 0x00FF00, 0x0000FF, false));
 
     frameBuffer.unmap();
 

@@ -11,7 +11,6 @@ if(BRAYNS_DEFLECT_ENABLED)
 endif()
 
 # Data access
-if(BRAYNS_BRION_ENABLED)
-  git_subproject(Servus https://github.com/HBPVIS/Servus.git 574bc70)
+if(BRAYNS_CIRCUITVIEWER_ENABLED)
   git_subproject(Brion https://github.com/BlueBrain/Brion.git 70508da)
 endif()

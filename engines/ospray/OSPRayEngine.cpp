@@ -217,14 +217,6 @@ Vector2ui OSPRayEngine::getSupportedFrameSize(const Vector2ui& size) const
         if (size.x() % (TILE_SIZE * 2) != 0)
             result.x() = size.x() - size.x() % (TILE_SIZE * 2);
     }
-    else
-    {
-        if (size.x() % TILE_SIZE != 0)
-            result.x() = size.x() - size.x() % TILE_SIZE;
-    }
-
-    if (size.y() % TILE_SIZE != 0)
-        result.y() = size.y() - size.y() % TILE_SIZE;
 
     return result;
 }

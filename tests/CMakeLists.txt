@@ -36,6 +36,7 @@ if(NOT BRAYNS_OSPRAY_ENABLED)
     testImages.cpp
     webAPI.cpp
     shadows.cpp
+    subsampling.cpp
     transferFunction.cpp
   )
 endif()

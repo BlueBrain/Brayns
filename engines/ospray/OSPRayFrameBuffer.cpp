@@ -26,13 +26,26 @@
 
 namespace brayns
 {
+namespace
+{
+OSPFrameBufferFormat toOSPFrameBufferFormat(
+    const FrameBufferFormat frameBufferFormat)
+{
+    switch (frameBufferFormat)
+    {
+    case FrameBufferFormat::rgba_i8:
+        return OSP_FB_RGBA8;
+    case FrameBufferFormat::rgb_f32:
+        return OSP_FB_RGBA32F;
+    default:
+        return OSP_FB_NONE;
+    }
+}
+}
 OSPRayFrameBuffer::OSPRayFrameBuffer(const Vector2ui& frameSize,
                                      const FrameBufferFormat colorDepth,
                                      const bool accumulation)
     : FrameBuffer(frameSize, colorDepth, accumulation)
-    , _frameBuffer(0)
-    , _colorBuffer(0)
-    , _depthBuffer(0)
 {
     resize(frameSize);
 }
@@ -42,9 +55,9 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
     auto lock = getScopeLock();
 
     _unmapUnsafe();
-    if (_pixelOp)
-        ospRelease(_pixelOp);
+    ospRelease(_pixelOp);
     ospRelease(_frameBuffer);
+    ospRelease(_subsamplingFrameBuffer);
 }
 
 void OSPRayFrameBuffer::enableDeflectPixelOp()
@@ -54,6 +67,8 @@ void OSPRayFrameBuffer::enableDeflectPixelOp()
     {
         ospCommit(_pixelOp);
         ospSetPixelOp(_frameBuffer, _pixelOp);
+        if (_subsamplingFrameBuffer)
+            ospSetPixelOp(_subsamplingFrameBuffer, _pixelOp);
     }
 }
 
@@ -62,7 +77,7 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     if (frameSize.product() == 0)
         throw std::runtime_error("Invalid size for framebuffer resize");
 
-    if (_frameBuffer && getSize() == frameSize)
+    if (_frameBuffer && _frameSize == frameSize)
         return;
 
     _frameSize = frameSize;
@@ -90,24 +105,8 @@ void OSPRayFrameBuffer::_recreate()
 {
     auto lock = getScopeLock();
 
-    if (_frameBuffer)
-    {
-        _unmapUnsafe();
-        ospRelease(_frameBuffer);
-    }
-
-    OSPFrameBufferFormat format;
-    switch (_frameBufferFormat)
-    {
-    case FrameBufferFormat::rgba_i8:
-        format = OSP_FB_RGBA8;
-        break;
-    case FrameBufferFormat::rgb_f32:
-        format = OSP_FB_RGBA32F;
-        break;
-    default:
-        format = OSP_FB_NONE;
-    }
+    _unmapUnsafe();
+    ospRelease(_frameBuffer);
 
     const osp::vec2i size = {int(_frameSize.x()), int(_frameSize.y())};
 
@@ -115,17 +114,42 @@ void OSPRayFrameBuffer::_recreate()
     if (_accumulation)
         attributes |= OSP_FB_ACCUM | OSP_FB_VARIANCE;
 
-    _frameBuffer = ospNewFrameBuffer(size, format, attributes);
+    _frameBuffer =
+        ospNewFrameBuffer(size, toOSPFrameBufferFormat(_frameBufferFormat),
+                          attributes);
     if (_pixelOp)
         ospSetPixelOp(_frameBuffer, _pixelOp);
     ospCommit(_frameBuffer);
+
+    _recreateSubsamplingBuffer();
+
     clear();
+}
+
+void OSPRayFrameBuffer::_recreateSubsamplingBuffer()
+{
+    ospRelease(_subsamplingFrameBuffer);
+    _subsamplingFrameBuffer = nullptr;
+    const auto subsamplingSize = _subsamplingSize();
+    if (_frameSize != subsamplingSize)
+    {
+        _subsamplingFrameBuffer =
+            ospNewFrameBuffer({int(subsamplingSize.x()),
+                               int(subsamplingSize.y())},
+                              toOSPFrameBufferFormat(_frameBufferFormat),
+                              OSP_FB_COLOR | OSP_FB_DEPTH);
+        if (_pixelOp)
+            ospSetPixelOp(_subsamplingFrameBuffer, _pixelOp);
+        ospCommit(_subsamplingFrameBuffer);
+    }
 }
 
 void OSPRayFrameBuffer::clear()
 {
     FrameBuffer::clear();
     size_t attributes = OSP_FB_COLOR | OSP_FB_DEPTH;
+    if (_subsamplingFrameBuffer)
+        ospFrameBufferClear(_subsamplingFrameBuffer, attributes);
     if (_accumulation)
         attributes |= OSP_FB_ACCUM | OSP_FB_VARIANCE;
     ospFrameBufferClear(_frameBuffer, attributes);
@@ -142,8 +166,8 @@ void OSPRayFrameBuffer::_mapUnsafe()
     if (_frameBufferFormat == FrameBufferFormat::none)
         return;
 
-    _colorBuffer = (uint8_t*)ospMapFrameBuffer(_frameBuffer, OSP_FB_COLOR);
-    _depthBuffer = (float*)ospMapFrameBuffer(_frameBuffer, OSP_FB_DEPTH);
+    _colorBuffer = (uint8_t*)ospMapFrameBuffer(_currentFB(), OSP_FB_COLOR);
+    _depthBuffer = (float*)ospMapFrameBuffer(_currentFB(), OSP_FB_DEPTH);
 }
 
 void OSPRayFrameBuffer::unmap()
@@ -159,15 +183,30 @@ void OSPRayFrameBuffer::_unmapUnsafe()
 
     if (_colorBuffer)
     {
-        ospUnmapFrameBuffer(_colorBuffer, _frameBuffer);
-        _colorBuffer = 0;
+        ospUnmapFrameBuffer(_colorBuffer, _currentFB());
+        _colorBuffer = nullptr;
     }
 
     if (_depthBuffer)
     {
-        ospUnmapFrameBuffer(_depthBuffer, _frameBuffer);
-        _depthBuffer = 0;
+        ospUnmapFrameBuffer(_depthBuffer, _currentFB());
+        _depthBuffer = nullptr;
     }
+}
+
+bool OSPRayFrameBuffer::_useSubsampling() const
+{
+    return _subsamplingFrameBuffer && numAccumFrames() <= 1;
+}
+
+OSPFrameBuffer OSPRayFrameBuffer::_currentFB() const
+{
+    return _useSubsampling() ? _subsamplingFrameBuffer : _frameBuffer;
+}
+
+Vector2ui OSPRayFrameBuffer::_subsamplingSize() const
+{
+    return _frameSize / _subsamplingFactor;
 }
 
 void OSPRayFrameBuffer::setAccumulation(const bool accumulation)
@@ -177,5 +216,17 @@ void OSPRayFrameBuffer::setAccumulation(const bool accumulation)
         FrameBuffer::setAccumulation(accumulation);
         _recreate();
     }
+}
+
+void OSPRayFrameBuffer::setSubsampling(size_t factor)
+{
+    factor = std::max(1ul, factor);
+    if (_subsamplingFactor == factor)
+        return;
+
+    _subsamplingFactor = factor;
+    auto lock = getScopeLock();
+    _unmapUnsafe();
+    _recreateSubsamplingBuffer();
 }
 }
