@@ -46,7 +46,7 @@ struct CircuitConfiguration
 {
     bool useSimulationModel{false};
     Boxd boundingBox{{0, 0, 0}, {0, 0, 0}};
-    float density{100};
+    double density{100};
     std::string meshFilenamePattern;
     std::string meshFolder;
     std::string targets;
@@ -98,7 +98,7 @@ public:
     }
     /** ensity of cells in the circuit in percent (Mainly for testing
      * purposes) */
-    float getCircuitDensity() const;
+    double getCircuitDensity() const;
 
     /**
      * Defines a bounding box outside of which geometry of a circuit will not be

@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/PropertyMap.h>
 #include <brayns/common/types.h>
 
 #include <functional>
@@ -80,30 +81,49 @@ public:
     virtual ~Loader() = default;
 
     /**
+     * Get the loaders supported file extensions
+     */
+    virtual std::vector<std::string> getSupportedExtensions() const = 0;
+
+    /**
+     * Get the loader name
+     */
+    virtual std::string getName() const = 0;
+
+    /**
+     * Get the loader properties
+     */
+    virtual PropertyMap getProperties() const = 0;
+
+    /**
      * Import the data from the blob and return the created model.
      *
      * @param blob the blob containing the data to import
-     * @param callback the callback for progress updates
-     * @param index Index of the element, mainly used for material assignment
+     * @param callback Callback for loader progress
+     * @param properties Properties used for loading
+     * @param index Index of the element, mainly used for material
+     * assignment
      * @param defaultMaterialId the default material to use
      * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, const size_t index = 0,
+        Blob&& blob, const LoaderProgress& callback,
+        const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const = 0;
 
     /**
      * Import the data from the given file and return the created model.
      *
      * @param filename the file containing the data to import
-     * @param callback the callback for progress updates
+     * @param callback Callback for loader progress
+     * @param properties Properties used for loading
      * @param index Index of the element, mainly used for material assignment
-     * @param defaultMaterialId the default material to use
+     * @param properties Properties used for loading
      * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const size_t index = 0,
+        const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const = 0;
 
     /**

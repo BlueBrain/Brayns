@@ -62,6 +62,9 @@
 #include <ospcommon/library.h>
 #endif
 
+#include <brayns/common/PropertyMap.h>
+#include <brayns/common/mathTypes.h>
+
 namespace
 {
 const float DEFAULT_TEST_ANIMATION_FRAME = 10000;
@@ -299,29 +302,192 @@ private:
     {
         auto& registry = _engine->getScene().getLoaderRegistry();
         auto& scene = _engine->getScene();
-        auto& geometryParameters = _parametersManager.getGeometryParameters();
 
-        registry.registerLoader(
-            std::make_unique<ProteinLoader>(scene, geometryParameters));
-        registry.registerLoader(std::make_unique<VolumeLoader>(
-            scene, _parametersManager.getVolumeParameters()));
+        registry.registerLoader(std::make_unique<ProteinLoader>(scene));
+        registry.registerLoader(std::make_unique<RawVolumeLoader>(scene));
+        registry.registerLoader(std::make_unique<MHDVolumeLoader>(scene));
         registry.registerLoader(std::make_unique<XYZBLoader>(scene));
 #if BRAYNS_USE_ASSIMP
-        registry.registerLoader(
-            std::make_unique<MeshLoader>(scene, geometryParameters));
+        registry.registerLoader(std::make_unique<MeshLoader>(scene));
 #endif
 #if BRAYNS_USE_LIBARCHIVE
         registry.registerLoader(
             std::make_unique<ArchiveLoader>(scene, registry));
 #endif
-        registry.registerLoader(
-            std::make_unique<MolecularSystemReader>(scene, geometryParameters));
+        registry.registerLoader(std::make_unique<MolecularSystemReader>(scene));
     }
 
+    PropertyMap _createPropertyMap()
+    {
+        PropertyMap pm;
+
+        const GeometryParameters& geometryParameters =
+            _parametersManager.getGeometryParameters();
+
+        pm.setProperty({"circuitTargets", "circuitTargets",
+                        geometryParameters.getCircuitTargets()});
+        pm.setProperty({"circuitReport", "circuitReport",
+                        geometryParameters.getCircuitReport()});
+        pm.setProperty({"circuitMeshFolder", "circuitMeshFolder",
+                        geometryParameters.getCircuitMeshFolder()});
+        pm.setProperty({"circuitDensity", "circuitDensity",
+                        geometryParameters.getCircuitDensity()});
+        {
+            const auto bbox = geometryParameters.getCircuitBoundingBox();
+            const auto p0 = vmmlVecToArray(bbox.getMin());
+            const auto p1 = vmmlVecToArray(bbox.getMax());
+
+            pm.setProperty(
+                {"circuitBoundingBoxP0", "circuitBoundingBoxP0", p0});
+            pm.setProperty(
+                {"circuitBoundingBoxP1", "circuitBoundingBoxP1", p1});
+        }
+        pm.setProperty({"circuitUseSimulationModel",
+                        "circuitUseSimulationModel",
+                        geometryParameters.getCircuitUseSimulationModel()});
+        pm.setProperty({"circuitMeshFilenamePattern",
+                        "circuitMeshFilenamePattern",
+                        geometryParameters.getCircuitMeshFilenamePattern()});
+        pm.setProperty({"circuitUseSimulationModel",
+                        "circuitUseSimulationModel",
+                        geometryParameters.getCircuitUseSimulationModel()});
+        pm.setProperty({"circuitUseSimulationModel",
+                        "circuitUseSimulationModel",
+                        geometryParameters.getCircuitUseSimulationModel()});
+        pm.setProperty({"circuitUseSimulationModel",
+                        "circuitUseSimulationModel",
+                        geometryParameters.getCircuitUseSimulationModel()});
+        pm.setProperty({"morphologyDampenBranchThicknessChangerate",
+                        "morphologyDampenBranchThicknessChangerate",
+                        geometryParameters
+                            .getMorphologyDampenBranchThicknessChangerate()});
+        pm.setProperty({"morphologyUseSDFGeometries",
+                        "morphologyUseSDFGeometries",
+                        geometryParameters.getMorphologyUseSDFGeometries()});
+
+        pm.setProperty({"loadCacheFile", "loadCacheFile",
+                        geometryParameters.getLoadCacheFile()});
+        pm.setProperty({"saveCacheFile", "saveCacheFile",
+                        geometryParameters.getSaveCacheFile()});
+        pm.setProperty({"circuitTargets", "circuitTargets",
+                        geometryParameters.getCircuitTargets()});
+        pm.setProperty({"circuitReport", "circuitReport",
+                        geometryParameters.getCircuitReport()});
+        pm.setProperty({"circuitMeshFolder", "circuitMeshFolder",
+                        geometryParameters.getCircuitMeshFolder()});
+        pm.setProperty({"circuitRandomSeed", "circuitRandomSeed",
+                        int32_t(geometryParameters.getCircuitRandomSeed())});
+        pm.setProperty({"circuitDensity", "circuitDensity",
+                        geometryParameters.getCircuitDensity()});
+        pm.setProperty({"circuitUseSimulationModel",
+                        "circuitUseSimulationModel",
+                        geometryParameters.getCircuitUseSimulationModel()});
+        pm.setProperty({"circuitMeshFilenamePattern",
+                        "circuitMeshFilenamePattern",
+                        geometryParameters.getCircuitMeshFilenamePattern()});
+        pm.setProperty({"radiusMultiplier", "radiusMultiplier",
+                        double(geometryParameters.getRadiusMultiplier())});
+        pm.setProperty({"radiusCorrection", "radiusCorrection",
+                        double(geometryParameters.getRadiusCorrection())});
+        pm.setProperty({"colorScheme", "colorScheme",
+                        enumToString(geometryParameters.getColorScheme()),
+                        enumNames<ColorScheme>()});
+        pm.setProperty({"geometryQuality", "geometryQuality",
+                        enumToString(geometryParameters.getGeometryQuality()),
+                        enumNames<GeometryQuality>()});
+        {
+            const auto layout = geometryParameters.getMorphologyLayout();
+
+            pm.setProperty({"morphologyLayoutNbColumns",
+                            "morphologyLayoutNbColumns",
+                            int32_t(layout.nbColumns),
+                            {0, std::numeric_limits<int32_t>::max()}});
+
+            pm.setProperty({"morphologyLayoutVerticalSpacing",
+                            "morphologyLayoutVerticalSpacing",
+                            int32_t(layout.verticalSpacing),
+                            {0, std::numeric_limits<int32_t>::max()}});
+
+            pm.setProperty({"morphologyLayoutHorizontalSpacing",
+                            "morphologyLayoutHorizontalSpacing",
+                            int32_t(layout.horizontalSpacing),
+                            {0, std::numeric_limits<int32_t>::max()}});
+        }
+
+        {
+            bool soma = false;
+            bool axon = false;
+            bool dendrite = false;
+            bool apical_dendrite = false;
+
+            for (const MorphologySectionType mst :
+                 geometryParameters.getMorphologySectionTypes())
+            {
+                switch (mst)
+                {
+                case MorphologySectionType::soma:
+                    soma = true;
+                    break;
+                case MorphologySectionType::axon:
+                    axon = true;
+                    break;
+                case MorphologySectionType::dendrite:
+                    dendrite = true;
+                    break;
+                case MorphologySectionType::apical_dendrite:
+                    apical_dendrite = true;
+                    break;
+                case MorphologySectionType::all:
+                    soma = true;
+                    axon = true;
+                    dendrite = true;
+                    apical_dendrite = true;
+                default:
+                    break;
+                }
+            }
+            pm.setProperty({"morphologySectionTypesSoma",
+                            "morphologySectionTypesSoma", soma});
+            pm.setProperty({"morphologySectionTypesAxon",
+                            "morphologySectionTypesAxon", axon});
+            pm.setProperty({"morphologySectionTypesDendrite",
+                            "morphologySectionTypesDendrite", dendrite});
+            pm.setProperty({"morphologySectionTypesApicalDendrite",
+                            "morphologySectionTypesApicalDendrite",
+                            apical_dendrite});
+        }
+
+        pm.setProperty({"circuitEndSimulationTime", "circuitEndSimulationTime",
+                        geometryParameters.getCircuitEndSimulationTime()});
+        pm.setProperty({"circuitStartSimulationTime",
+                        "circuitStartSimulationTime",
+                        geometryParameters.getCircuitStartSimulationTime()});
+        pm.setProperty({"circuitSimulationStep", "circuitSimulationStep",
+                        geometryParameters.getCircuitSimulationStep()});
+        pm.setProperty(
+            {"circuitSimulationValuesRange", "circuitSimulationValuesRange",
+             vmmlVecToArray(
+                 geometryParameters.getCircuitSimulationValuesRange())});
+        pm.setProperty(
+            {"circuitMeshTransformation", "circuitMeshTransformation",
+             int32_t(geometryParameters.getCircuitMeshTransformation())});
+        pm.setProperty({"metaballsGridSize", "metaballsGridSize",
+                        int32_t(geometryParameters.getMetaballsGridSize())});
+        pm.setProperty({"metaballsThreshold", "metaballsThreshold",
+                        double(geometryParameters.getMetaballsThreshold())});
+        pm.setProperty(
+            {"metaballsSamplesFromSoma", "metaballsSamplesFromSoma",
+             int32_t(geometryParameters.getMetaballsSamplesFromSoma())});
+        pm.setProperty({"useRealisticSomas", "useRealisticSomas",
+                        geometryParameters.useRealisticSomas()});
+
+        return pm;
+    }
     void _loadData()
     {
         auto& scene = _engine->getScene();
         const auto& registry = scene.getLoaderRegistry();
+        const auto properties = _createPropertyMap();
 
         const auto& paths =
             _parametersManager.getApplicationParameters().getInputPaths();
@@ -372,7 +538,10 @@ private:
                     }
                 };
 
-                scene.loadModel(path, NO_MATERIAL, {path, path}, {progress});
+                ModelParams params(path, path);
+                params._loaderProperties = properties;
+
+                scene.loadModel(path, NO_MATERIAL, params, {progress});
             }
         }
 

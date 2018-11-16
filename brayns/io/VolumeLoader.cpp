@@ -21,12 +21,25 @@
 
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/common/volume/SharedDataVolume.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 using boost::property_tree::ptree;
+
+namespace
+{
+using Property = brayns::PropertyMap::Property;
+const Property PROP_DIMENSIONS = {"dimensions", "Dimensions",
+                                  std::array<int32_t, 3>({{0, 0, 0}})};
+const Property PROP_SPACING = {"spacing", "Spacing",
+                               std::array<double, 3>({{0, 0, 0}})};
+const Property PROP_TYPE = {"type", "Type",
+                            brayns::enumToString(brayns::DataType::UINT8),
+                            brayns::enumNames<brayns::DataType>()};
+}
 
 namespace brayns
 {
@@ -105,67 +118,44 @@ Vector2f dataRangeFromType(DataType type)
 }
 }
 
-VolumeLoader::VolumeLoader(Scene& scene, VolumeParameters& volumeParameters)
+RawVolumeLoader::RawVolumeLoader(Scene& scene)
     : Loader(scene)
-    , _volumeParameters(volumeParameters)
 {
 }
 
-bool VolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
-                               const std::string& extension) const
+bool RawVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+                                  const std::string& extension) const
 {
-    const std::set<std::string> types = {"raw", "mhd"};
-    return types.find(extension) != types.end();
+    return extension == "raw";
 }
 
-ModelDescriptorPtr VolumeLoader::importFromBlob(
+ModelDescriptorPtr RawVolumeLoader::importFromBlob(
     Blob&& blob BRAYNS_UNUSED, const LoaderProgress&,
+    const PropertyMap& properties BRAYNS_UNUSED,
     const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     throw std::runtime_error("Volume loading from blob is not supported");
 }
 
-ModelDescriptorPtr VolumeLoader::importFromFile(
+ModelDescriptorPtr RawVolumeLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const size_t index BRAYNS_UNUSED,
+    const PropertyMap& propertiesTmp, const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
+    PropertyMap properties = getProperties();
+    properties.fillPropertyMap(propertiesTmp);
+
     callback.updateProgress("Parsing volume file ...", 0.f);
 
-    Vector3ui dimensions;
-    Vector3f spacing;
-    DataType type;
-    std::string volumeFile = filename;
-    const bool mhd = boost::filesystem::extension(filename) == ".mhd";
-    if (mhd)
-    {
-        boost::property_tree::ptree pt;
-        boost::property_tree::ini_parser::read_ini(filename, pt);
-
-        if (pt.get<std::string>("ObjectType") != "Image")
-            throw std::runtime_error("Wrong object type for mhd file");
-
-        dimensions = to_Vector3<unsigned>(pt.get<std::string>("DimSize"));
-        spacing = to_Vector3<float>(pt.get<std::string>("ElementSpacing"));
-        type = dataTypeFromMET(pt.get<std::string>("ElementType"));
-        boost::filesystem::path path = pt.get<std::string>("ElementDataFile");
-        if (!path.is_absolute())
-        {
-            boost::filesystem::path basePath(filename);
-            path = boost::filesystem::canonical(path, basePath.parent_path());
-        }
-        volumeFile = path.string();
-
-        _volumeParameters.setDimensions(dimensions);
-        _volumeParameters.setElementSpacing(spacing);
-    }
-    else
-    {
-        dimensions = _volumeParameters.getDimensions();
-        spacing = _volumeParameters.getElementSpacing();
-        type = DataType::UINT8;
-    }
+    const auto dimensions = arrayToVmmlVec(
+        properties.getProperty(PROP_DIMENSIONS.name,
+                               std::array<int32_t, 3>({{0, 0, 0}})));
+    const auto spacing = arrayToVmmlVec(
+        properties.getProperty(PROP_SPACING.name,
+                               std::array<double, 3>({{0, 0, 0}})));
+    const auto type = stringToEnum<DataType>(
+        properties.getProperty<std::string>(PROP_TYPE.name));
 
     if (dimensions.product() == 0)
         throw std::runtime_error("Volume dimensions are empty");
@@ -176,7 +166,7 @@ ModelDescriptorPtr VolumeLoader::importFromFile(
     volume->setDataRange(dataRange);
 
     callback.updateProgress("Loading voxels ...", 0.5f);
-    volume->mapData(volumeFile);
+    volume->mapData(filename);
 
     callback.updateProgress("Adding model ...", 1.f);
     model->addVolume(volume);
@@ -189,5 +179,100 @@ ModelDescriptorPtr VolumeLoader::importFromFile(
                       {"element-spacing", to_string(spacing)}});
     modelDescriptor->setTransformation(transformation);
     return modelDescriptor;
+}
+
+std::string RawVolumeLoader::getName() const
+{
+    return "raw-volume";
+}
+
+std::vector<std::string> RawVolumeLoader::getSupportedExtensions() const
+{
+    return {"raw"};
+}
+
+PropertyMap RawVolumeLoader::getProperties() const
+{
+    PropertyMap pm;
+    pm.setProperty(PROP_DIMENSIONS);
+    pm.setProperty(PROP_SPACING);
+    pm.setProperty(PROP_TYPE);
+    return pm;
+}
+////////////////////////////////////////////////////////////////////////////
+
+MHDVolumeLoader::MHDVolumeLoader(Scene& scene)
+    : Loader(scene)
+{
+}
+
+bool MHDVolumeLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
+                                  const std::string& extension) const
+{
+    return extension == "mhd";
+}
+
+ModelDescriptorPtr MHDVolumeLoader::importFromBlob(
+    Blob&& blob BRAYNS_UNUSED, const LoaderProgress&,
+    const PropertyMap& properties BRAYNS_UNUSED,
+    const size_t index BRAYNS_UNUSED,
+    const size_t defaultMaterialId BRAYNS_UNUSED) const
+{
+    throw std::runtime_error("Volume loading from blob is not supported");
+}
+
+ModelDescriptorPtr MHDVolumeLoader::importFromFile(
+    const std::string& filename, const LoaderProgress& callback,
+    const PropertyMap&, const size_t index BRAYNS_UNUSED,
+    const size_t defaultMaterialId BRAYNS_UNUSED) const
+{
+    callback.updateProgress("Parsing volume file ...", 0.f);
+
+    std::string volumeFile = filename;
+    boost::property_tree::ptree pt;
+    boost::property_tree::ini_parser::read_ini(filename, pt);
+
+    if (pt.get<std::string>("ObjectType") != "Image")
+        throw std::runtime_error("Wrong object type for mhd file");
+
+    const auto dimensions =
+        vmmlVecToArray(to_Vector3<int32_t>(pt.get<std::string>("DimSize")));
+    const auto spacing = vmmlVecToArray(
+        to_Vector3<double>(pt.get<std::string>("ElementSpacing")));
+    const auto type = dataTypeFromMET(pt.get<std::string>("ElementType"));
+
+    boost::filesystem::path path = pt.get<std::string>("ElementDataFile");
+    if (!path.is_absolute())
+    {
+        boost::filesystem::path basePath(filename);
+        path = boost::filesystem::canonical(path, basePath.parent_path());
+    }
+    volumeFile = path.string();
+
+    PropertyMap properties;
+    properties.setProperty(
+        {PROP_DIMENSIONS.name, PROP_DIMENSIONS.label, dimensions});
+    properties.setProperty({PROP_SPACING.name, PROP_SPACING.label, spacing});
+    properties.setProperty({PROP_TYPE.name, PROP_TYPE.label,
+                            brayns::enumToString(type), PROP_TYPE.enums});
+
+    return RawVolumeLoader(_scene).importFromFile(volumeFile, callback,
+                                                  properties, index,
+                                                  defaultMaterialId);
+}
+
+std::string MHDVolumeLoader::getName() const
+{
+    return "mhd-volume";
+}
+
+std::vector<std::string> MHDVolumeLoader::getSupportedExtensions() const
+{
+    return {"mhd"};
+}
+
+PropertyMap MHDVolumeLoader::getProperties() const
+{
+    return {};
 }
 }

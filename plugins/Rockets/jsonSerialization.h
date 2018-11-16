@@ -203,6 +203,9 @@ inline void init(brayns::BinaryParam* s, ObjectHandler* h)
     h->add_property("transformation", &s->_transformation, Flags::Optional);
     h->add_property("type", &s->type);
     h->add_property("visible", &s->_visible, Flags::Optional);
+    h->add_property("loader_name", &s->_loaderName, Flags::Optional);
+    h->add_property("loader_properties", &s->_loaderProperties,
+                    Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -316,6 +319,10 @@ inline void init(brayns::ModelParams* g, ObjectHandler* h)
     h->add_property("path", &g->_path);
     h->add_property("transformation", &g->_transformation, Flags::Optional);
     h->add_property("visible", &g->_visible, Flags::Optional);
+    h->add_property("loader_name", &g->_loaderName, Flags::Optional);
+    h->add_property("loader_properties", &g->_loaderProperties,
+                    Flags::Optional);
+
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
@@ -478,6 +485,13 @@ inline void init(brayns::AnimationParameters* a, ObjectHandler* h)
     h->add_property("unit", &a->_unit, Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
+
+inline void init(brayns::LoaderSupport* a, ObjectHandler* h)
+{
+    h->add_property("name", &a->name);
+    h->add_property("extensions", &a->extensions);
+    h->set_flags(Flags::DisallowUnknownKey);
+}
 }
 
 // for rockets::jsonrpc
@@ -486,6 +500,8 @@ inline std::string to_json(const T& obj)
 {
     return staticjson::to_json_string(obj);
 }
+template <>
+std::string to_json(const brayns::PropertyMap& obj);
 
 template <>
 inline std::string to_json(const brayns::Version& obj)
@@ -500,6 +516,42 @@ inline std::string to_json(const brayns::Scene& scene)
     return staticjson::to_json_string(scene);
 }
 
+template <typename T>
+inline std::string modelBinaryParamsToJson(const T& params)
+{
+    const auto replaceFirstOccurrence = [](std::string s,
+                                           const std::string& toReplace,
+                                           const std::string& replaceWith) {
+        std::size_t pos = s.find(toReplace);
+        if (pos == std::string::npos)
+            return s;
+        return s.replace(pos, toReplace.length(), replaceWith);
+    };
+
+    const auto jsonOriginal = staticjson::to_json_string(params);
+
+    const std::string propertiesJson =
+        "\"loader_properties\":" + to_json(params._loaderProperties);
+
+    const auto result =
+        replaceFirstOccurrence(jsonOriginal, "\"loader_properties\":{}",
+                               propertiesJson);
+
+    return result;
+}
+
+template <>
+inline std::string to_json(const brayns::ModelParams& params)
+{
+    return modelBinaryParamsToJson(params);
+}
+
+template <>
+inline std::string to_json(const brayns::BinaryParam& params)
+{
+    return modelBinaryParamsToJson(params);
+}
+
 template <class T>
 inline bool from_json(T& obj, const std::string& json)
 {
@@ -509,4 +561,44 @@ template <>
 inline bool from_json(brayns::Vector2d& obj, const std::string& json)
 {
     return staticjson::from_json_string(json.c_str(), toArray(obj), nullptr);
+}
+
+brayns::PropertyMap jsonToPropertyMap(const std::string& json);
+
+template <typename T>
+inline bool modelBinaryParamsFromJson(T& params, const std::string& json)
+{
+    using namespace rapidjson;
+    Document document;
+    document.Parse(json.c_str());
+
+    {
+        Document propertyDoc;
+        propertyDoc.SetObject() = document["loader_properties"].GetObject();
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        propertyDoc.Accept(writer);
+
+        params._loaderProperties = jsonToPropertyMap(buffer.GetString());
+    }
+
+    // Clear loader_properties to be able to parse rest of values
+    document["loader_properties"].SetObject();
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    document.Accept(writer);
+    const auto str = buffer.GetString();
+    return staticjson::from_json_string(str, &params, nullptr);
+}
+
+template <>
+inline bool from_json(brayns::BinaryParam& params, const std::string& json)
+{
+    return modelBinaryParamsFromJson(params, json);
+}
+
+template <>
+inline bool from_json(brayns::ModelParams& params, const std::string& json)
+{
+    return modelBinaryParamsFromJson(params, json);
 }

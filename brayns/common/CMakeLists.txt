@@ -13,6 +13,7 @@ set(BRAYNSCOMMON_SOURCES
   camera/Camera.cpp
   camera/FlyingModeManipulator.cpp
   camera/InspectCenterManipulator.cpp
+  PropertyMap.cpp
   scene/ClipPlane.cpp
   scene/Model.cpp
   scene/Scene.cpp
@@ -76,6 +77,7 @@ set(BRAYNSCOMMON_PUBLIC_HEADERS
   transferFunction/TransferFunction.h
   types.h
   utils/Utils.h
+  utils/EnumUtils.h
   volume/BrickedVolume.h
   volume/SharedDataVolume.h
   volume/Volume.h

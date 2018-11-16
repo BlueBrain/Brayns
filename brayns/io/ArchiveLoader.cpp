@@ -180,6 +180,8 @@ void extractBlob(brayns::Blob&& blob, const std::string& destination)
         throw std::runtime_error("Blob is not a supported archive type");
     _extractArchive(archive, fs::basename(blob.name), destination);
 }
+
+const auto LOADER_NAME = "archive";
 }
 
 namespace brayns
@@ -197,39 +199,72 @@ bool ArchiveLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 }
 
 ModelDescriptorPtr ArchiveLoader::loadExtracted(
-    const std::string& path, const LoaderProgress& callback, const size_t index,
+    const std::string& path, const LoaderProgress& callback,
+    const PropertyMap& properties, const size_t index,
     const size_t defaultMaterialId) const
 {
+    const auto loaderName =
+        properties.getProperty<std::string>("loaderName", "");
+    const Loader* loader =
+        loaderName.empty() ? nullptr
+                           : &_registry.getSuitableLoader("", "", loaderName);
+
     for (const auto& i :
          boost::make_iterator_range(fs::directory_iterator(path), {}))
     {
         const std::string currPath = i.path().string();
-        if (_registry.isSupportedFile(currPath))
+        const std::string extension = extractExtension(currPath);
+
+        if (loader && loader->isSupported(currPath, extension))
         {
-            const auto& loader = _registry.getLoaderFromFilename(currPath);
-            return loader.importFromFile(currPath, callback, index,
-                                         defaultMaterialId);
+            return loader->importFromFile(currPath, callback, properties, index,
+                                          defaultMaterialId);
+        }
+        else if (!loader && _registry.isSupportedFile(currPath))
+        {
+            const auto& loaderMatch =
+                _registry.getSuitableLoader(currPath, "", "");
+            return loaderMatch.importFromFile(currPath, callback, properties,
+                                              index, defaultMaterialId);
         }
     }
     throw std::runtime_error("No loader found for archive.");
 }
 
 ModelDescriptorPtr ArchiveLoader::importFromBlob(
-    Blob&& blob, const LoaderProgress& callback,
+    Blob&& blob, const LoaderProgress& callback, const PropertyMap& properties,
     const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     fs::path path = fs::temp_directory_path() / fs::unique_path();
     extractBlob(std::move(blob), path.string());
-    return loadExtracted(path.string(), callback, index, defaultMaterialId);
+    return loadExtracted(path.string(), callback, properties, index,
+                         defaultMaterialId);
 }
 
 ModelDescriptorPtr ArchiveLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const size_t index, const size_t defaultMaterialId) const
+    const PropertyMap& properties, const size_t index,
+    const size_t defaultMaterialId) const
 {
     fs::path path = fs::temp_directory_path() / fs::unique_path();
     extractFile(filename, path.string());
-    return loadExtracted(path.string(), callback, index, defaultMaterialId);
+    return loadExtracted(path.string(), callback, properties, index,
+                         defaultMaterialId);
+}
+
+std::string ArchiveLoader::getName() const
+{
+    return LOADER_NAME;
+}
+
+std::vector<std::string> ArchiveLoader::getSupportedExtensions() const
+{
+    return {"zip", "gz", "tgz", "bz2", "rar"};
+}
+
+PropertyMap ArchiveLoader::getProperties() const
+{
+    return {};
 }
 }

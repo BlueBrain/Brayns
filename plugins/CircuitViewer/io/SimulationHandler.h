@@ -46,10 +46,11 @@ public:
      * @param reportSource path to report source
      * @param gids GIDS to load
      */
-    SimulationHandler(const ApplicationParameters& applicationParameters,
-                      const GeometryParameters& geometryParameters,
-                      const brion::URI& reportSource,
-                      const brion::GIDSet& gids);
+    SimulationHandler(const brion::URI& reportSource, const brion::GIDSet& gids,
+                      const bool synchronousMode,
+                      const double circuitStartSimulationTime,
+                      const double circuitEndSimulationTime,
+                      const double circuitSimulationStep);
     ~SimulationHandler();
 
     void bind(const MaterialPtr& material) final;
@@ -68,14 +69,13 @@ private:
     bool _isFrameLoaded() const;
     bool _makeFrameReady(uint32_t frame);
 
-    const ApplicationParameters& _applicationParameters;
-
     CompartmentReportPtr _compartmentReport;
     double _startTime;
     double _endTime;
-    std::future<brion::floatsPtr> _currentFrameFuture;
+    std::future<brion::Frame> _currentFrameFuture;
     bool _ready{false};
     std::vector<MaterialPtr> _materials;
+    bool _synchronousMode{false};
 };
 }
 

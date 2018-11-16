@@ -39,33 +39,31 @@ namespace brayns
 class MeshLoader : public Loader
 {
 public:
-    MeshLoader(Scene& scene, const GeometryParameters& geometryParameters);
+    MeshLoader(Scene& scene);
+
+    std::vector<std::string> getSupportedExtensions() const final;
+    std::string getName() const final;
+    PropertyMap getProperties() const final;
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
 
     ModelDescriptorPtr importFromFile(
         const std::string& fileName, const LoaderProgress& callback,
-        const size_t index = 0,
+        const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterial = NO_MATERIAL) const final;
 
     ModelDescriptorPtr importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, const size_t index = 0,
+        Blob&& blob, const LoaderProgress& callback,
+        const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterial = NO_MATERIAL) const final;
-
-    /**
-     * @brief getMeshFilenameFromGID Returns the name of the mesh file according
-     * to the --circuit-mesh-folder, --circuit-mesh-filename-pattern command
-     * line arguments and a GID
-     * @param gid GID of the cell
-     * @return A string with the full path of the mesh file
-     */
-    std::string getMeshFilenameFromGID(const uint64_t gid) const;
 
     void importMesh(const std::string& fileName, const LoaderProgress& callback,
                     Model& model, const size_t index,
                     const Matrix4f& transformation,
-                    const size_t defaultMaterialId = NO_MATERIAL) const;
+                    const size_t defaultMaterialId,
+                    const ColorScheme colorScheme,
+                    const GeometryQuality geometryQuality) const;
 
 private:
     void _createMaterials(Model& model, const aiScene* aiScene,
@@ -73,8 +71,8 @@ private:
 
     void _postLoad(const aiScene* aiScene, Model& model, const size_t index,
                    const Matrix4f& transformation, const size_t defaultMaterial,
-                   const std::string& folder = "") const;
-    size_t _getQuality() const;
-    const GeometryParameters& _geometryParameters;
+                   const std::string& folder,
+                   const ColorScheme colorScheme) const;
+    size_t _getQuality(const GeometryQuality geometryQuality) const;
 };
 }

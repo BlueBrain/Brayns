@@ -34,6 +34,41 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/Utils.h>
 
+namespace
+{
+std::vector<std::string> getSupportedTypes()
+{
+    std::set<std::string> types;
+    std::string extensions;
+    Assimp::Importer importer;
+    importer.GetExtensionList(extensions);
+
+    std::istringstream stream(extensions);
+    std::string s;
+    while (std::getline(stream, s, ';'))
+    {
+        auto pos = s.find_last_of(".");
+        types.insert(pos == std::string::npos ? s : s.substr(pos + 1));
+    }
+
+    std::vector<std::string> output;
+    std::copy(types.begin(), types.end(), std::back_inserter(output));
+    return output;
+}
+
+using Property = brayns::PropertyMap::Property;
+const Property PROP_GEOMETRY_QUALITY = {
+    "geometryQuality", "Geometry quality",
+    brayns::enumToString(brayns::GeometryQuality::high),
+    brayns::enumNames<brayns::GeometryQuality>()};
+const Property PROP_COLOR_SCHEME = {"colorScheme", "Color scheme",
+                                    brayns::enumToString(
+                                        brayns::ColorScheme::none),
+                                    brayns::enumNames<brayns::ColorScheme>()};
+
+const auto LOADER_NAME = "mesh";
+}
+
 namespace brayns
 {
 class ProgressWatcher : public Assimp::ProgressHandler
@@ -61,37 +96,36 @@ private:
     std::stringstream _msg;
 };
 
-MeshLoader::MeshLoader(Scene& scene,
-                       const GeometryParameters& geometryParameters)
+MeshLoader::MeshLoader(Scene& scene)
     : Loader(scene)
-    , _geometryParameters(geometryParameters)
 {
 }
 
 bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
                              const std::string& extension) const
 {
-    std::set<std::string> types;
-    std::string extensions;
-    Assimp::Importer importer;
-    importer.GetExtensionList(extensions);
-
-    std::istringstream stream(extensions);
-    std::string s;
-    while (std::getline(stream, s, ';'))
-    {
-        auto pos = s.find_last_of(".");
-        types.insert(pos == std::string::npos ? s : s.substr(pos + 1));
-    }
-    return types.find(extension) != types.end();
+    const auto types = getSupportedTypes();
+    return std::find(types.begin(), types.end(), extension) != types.end();
 }
 
 ModelDescriptorPtr MeshLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const size_t index, const size_t defaultMaterialId) const
+    const PropertyMap& propertiesTmp, const size_t index,
+    const size_t defaultMaterialId) const
 {
+    PropertyMap properties = getProperties();
+    properties.fillPropertyMap(propertiesTmp);
+
+    const auto geometryQuality =
+        stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
+            PROP_GEOMETRY_QUALITY.name, enumToString(GeometryQuality::high)));
+    const auto colorScheme = stringToEnum<ColorScheme>(
+        properties.getProperty<std::string>(PROP_COLOR_SCHEME.name,
+                                            enumToString(ColorScheme::none)));
+
     auto model = _scene.createModel();
-    importMesh(fileName, callback, *model, index, {}, defaultMaterialId);
+    importMesh(fileName, callback, *model, index, {}, defaultMaterialId,
+               colorScheme, geometryQuality);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -103,15 +137,27 @@ ModelDescriptorPtr MeshLoader::importFromFile(
 }
 
 ModelDescriptorPtr MeshLoader::importFromBlob(
-    Blob&& blob, const LoaderProgress& callback, const size_t index,
+    Blob&& blob, const LoaderProgress& callback,
+    const PropertyMap& propertiesTmp, const size_t index,
     const size_t defaultMaterialId) const
 {
+    PropertyMap properties = getProperties();
+    properties.fillPropertyMap(propertiesTmp);
+
+    const auto geometryQuality =
+        stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
+            PROP_GEOMETRY_QUALITY.name, enumToString(GeometryQuality::high)));
+    const auto colorScheme = stringToEnum<ColorScheme>(
+        properties.getProperty<std::string>(PROP_COLOR_SCHEME.name,
+                                            enumToString(ColorScheme::none)));
+
     Assimp::Importer importer;
     importer.SetProgressHandler(new ProgressWatcher(callback, blob.name));
 
     const aiScene* aiScene =
         importer.ReadFileFromMemory(blob.data.data(), blob.data.size(),
-                                    _getQuality(), blob.type.c_str());
+                                    _getQuality(geometryQuality),
+                                    blob.type.c_str());
 
     if (!aiScene)
         throw std::runtime_error(importer.GetErrorString());
@@ -120,7 +166,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
         throw std::runtime_error("No meshes found");
 
     auto model = _scene.createModel();
-    _postLoad(aiScene, *model, index, {}, defaultMaterialId);
+    _postLoad(aiScene, *model, index, {}, defaultMaterialId, "", colorScheme);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -223,12 +269,11 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                            const size_t index, const Matrix4f& transformation,
                            const size_t defaultMaterialId,
-                           const std::string& folder) const
+                           const std::string& folder,
+                           const ColorScheme colorScheme) const
 {
     const size_t materialId =
-        _geometryParameters.getColorScheme() == ColorScheme::neuron_by_id
-            ? index
-            : defaultMaterialId;
+        colorScheme == ColorScheme::neuron_by_id ? index : defaultMaterialId;
 
     // Always create placeholder material since it is not guaranteed to exist
     model.createMaterial(materialId, "default");
@@ -317,9 +362,9 @@ void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
                  << " faces" << std::endl;
 }
 
-size_t MeshLoader::_getQuality() const
+size_t MeshLoader::_getQuality(const GeometryQuality geometryQuality) const
 {
-    switch (_geometryParameters.getGeometryQuality())
+    switch (geometryQuality)
     {
     case GeometryQuality::low:
     case GeometryQuality::medium:
@@ -330,27 +375,13 @@ size_t MeshLoader::_getQuality() const
     }
 }
 
-std::string MeshLoader::getMeshFilenameFromGID(const uint64_t gid) const
-{
-    const auto meshedMorphologiesFolder =
-        _geometryParameters.getCircuitMeshFolder();
-    auto meshFilenamePattern =
-        _geometryParameters.getCircuitMeshFilenamePattern();
-    const std::string gidAsString = std::to_string(gid);
-    const std::string GID = "{gid}";
-    if (!meshFilenamePattern.empty())
-        meshFilenamePattern.replace(meshFilenamePattern.find(GID), GID.length(),
-                                    gidAsString);
-    else
-        meshFilenamePattern = gidAsString;
-    return meshedMorphologiesFolder + "/" + meshFilenamePattern;
-}
-
 void MeshLoader::importMesh(const std::string& fileName,
                             const LoaderProgress& callback, Model& model,
                             const size_t index,
                             const vmml::Matrix4f& transformation,
-                            const size_t defaultMaterialId) const
+                            const size_t defaultMaterialId,
+                            const ColorScheme colorScheme,
+                            const GeometryQuality geometryQuality) const
 {
     const boost::filesystem::path file = fileName;
     Assimp::Importer importer;
@@ -367,7 +398,8 @@ void MeshLoader::importMesh(const std::string& fileName,
         throw std::runtime_error("Could not open file " + fileName);
     meshFile.close();
 
-    const aiScene* aiScene = importer.ReadFile(fileName.c_str(), _getQuality());
+    const aiScene* aiScene =
+        importer.ReadFile(fileName.c_str(), _getQuality(geometryQuality));
 
     if (!aiScene)
     {
@@ -383,6 +415,24 @@ void MeshLoader::importMesh(const std::string& fileName,
     boost::filesystem::path filepath = fileName;
 
     _postLoad(aiScene, model, index, transformation, defaultMaterialId,
-              filepath.parent_path().string());
+              filepath.parent_path().string(), colorScheme);
+}
+
+std::string MeshLoader::getName() const
+{
+    return LOADER_NAME;
+}
+
+std::vector<std::string> MeshLoader::getSupportedExtensions() const
+{
+    return getSupportedTypes();
+}
+
+PropertyMap MeshLoader::getProperties() const
+{
+    PropertyMap pm;
+    pm.setProperty(PROP_COLOR_SCHEME);
+    pm.setProperty(PROP_GEOMETRY_QUALITY);
+    return pm;
 }
 } // namespace brayns

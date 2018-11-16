@@ -230,9 +230,15 @@ ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
                                     const ModelParams& params,
                                     LoaderProgress cb)
 {
-    const auto& loader = _loaderRegistry.getLoaderFromFiletype(blob.type);
+    const auto& loader =
+        _loaderRegistry.getSuitableLoader("", blob.type,
+                                          params.getLoaderName());
+
+    // HACK: Add loader name in properties for archive loader
+    auto propCopy = params._loaderProperties;
+    propCopy.setProperty({"loaderName", "loaderName", params.getLoaderName()});
     auto modelDescriptor =
-        loader.importFromBlob(std::move(blob), cb, 0, materialID);
+        loader.importFromBlob(std::move(blob), cb, propCopy, 0, materialID);
     if (!modelDescriptor)
         throw std::runtime_error("No model returned by loader");
     *modelDescriptor = params;
@@ -247,8 +253,13 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
                                     const ModelParams& params,
                                     LoaderProgress cb)
 {
-    const auto& loader = _loaderRegistry.getLoaderFromFilename(path);
-    auto modelDescriptor = loader.importFromFile(path, cb, 0, materialID);
+    const auto& loader =
+        _loaderRegistry.getSuitableLoader(path, "", params.getLoaderName());
+    // HACK: Add loader name in properties for archive loader
+    auto propCopy = params._loaderProperties;
+    propCopy.setProperty({"loaderName", "loaderName", params.getLoaderName()});
+    auto modelDescriptor =
+        loader.importFromFile(path, cb, propCopy, 0, materialID);
     if (!modelDescriptor)
         throw std::runtime_error("No model returned by loader");
     *modelDescriptor = params;

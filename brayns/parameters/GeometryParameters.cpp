@@ -433,9 +433,9 @@ const std::string& GeometryParameters::getGeometryQualityAsString(
     return GEOMETRY_QUALITIES[static_cast<size_t>(value)];
 }
 
-float GeometryParameters::getCircuitDensity() const
+double GeometryParameters::getCircuitDensity() const
 {
-    return std::max(0.f, std::min(100.f, _circuitConfiguration.density));
+    return std::max(0., std::min(100., _circuitConfiguration.density));
 }
 
 strings GeometryParameters::getCircuitTargetsAsStrings() const

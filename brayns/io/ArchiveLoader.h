@@ -32,20 +32,26 @@ class ArchiveLoader : public Loader
 public:
     ArchiveLoader(Scene& scene, LoaderRegistry& registry);
 
+    std::vector<std::string> getSupportedExtensions() const final;
+    std::string getName() const final;
+    PropertyMap getProperties() const final;
+
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
     ModelDescriptorPtr importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, const size_t index = 0,
+        Blob&& blob, const LoaderProgress& callback,
+        const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const final;
 
     ModelDescriptorPtr importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const size_t index = 0,
+        const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const final;
 
 private:
     ModelDescriptorPtr loadExtracted(const std::string& path,
                                      const LoaderProgress& callback,
+                                     const PropertyMap& properties,
                                      const size_t index,
                                      const size_t defaultMaterialId) const;
     LoaderRegistry& _registry;

@@ -29,6 +29,11 @@
 
 #include <boost/filesystem.hpp>
 
+namespace
+{
+const auto LOADER_NAME = "xyzb";
+}
+
 namespace brayns
 {
 constexpr float DEFAULT_POINT_SIZE = 0.0001f;
@@ -47,6 +52,7 @@ bool XYZBLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr XYZBLoader::importFromBlob(
     Blob&& blob, const LoaderProgress& callback,
+    const PropertyMap& properties BRAYNS_UNUSED,
     const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
@@ -129,15 +135,16 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
                 sphere.radius = newRadius;
         }
     });
-    PropertyMap properties;
-    properties.setProperty(radiusProperty);
-    modelDescriptor->setProperties(properties);
+    PropertyMap modelProperties;
+    modelProperties.setProperty(radiusProperty);
+    modelDescriptor->setProperties(modelProperties);
     return modelDescriptor;
 }
 
 ModelDescriptorPtr XYZBLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const size_t index, const size_t defaultMaterialId) const
+    const PropertyMap& properties, const size_t index,
+    const size_t defaultMaterialId) const
 {
     std::ifstream file(filename);
     if (!file.good())
@@ -146,6 +153,21 @@ ModelDescriptorPtr XYZBLoader::importFromFile(
                            filename,
                            {std::istreambuf_iterator<char>(file),
                             std::istreambuf_iterator<char>()}},
-                          callback, index, defaultMaterialId);
+                          callback, properties, index, defaultMaterialId);
+}
+
+std::string XYZBLoader::getName() const
+{
+    return LOADER_NAME;
+}
+
+std::vector<std::string> XYZBLoader::getSupportedExtensions() const
+{
+    return {"xyz"};
+}
+
+PropertyMap XYZBLoader::getProperties() const
+{
+    return {};
 }
 }

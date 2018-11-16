@@ -26,18 +26,6 @@
 #include <boost/range/iterator_range_core.hpp>
 namespace fs = boost::filesystem;
 
-namespace
-{
-std::string extract_extension(const std::string& filename)
-{
-    auto extension = fs::extension(filename);
-    if (!extension.empty())
-        extension = extension.erase(0, 1);
-
-    return extension;
-}
-}
-
 namespace brayns
 {
 void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
@@ -45,12 +33,47 @@ void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
     _loaders.push_front(std::move(loader));
 }
 
+std::vector<LoaderSupport> LoaderRegistry::getLoaderSupport() const
+{
+    std::vector<LoaderSupport> ret(_loaders.size());
+
+    std::transform(_loaders.begin(), _loaders.end(), ret.begin(),
+                   [](const auto& loader) {
+                       return LoaderSupport{loader->getName(),
+                                            loader->getSupportedExtensions()};
+                   });
+
+    ret.erase(std::remove_if(ret.begin(), ret.end(),
+                             [](const auto& p) { return p.name == "archive"; }),
+              ret.end());
+    return ret;
+}
+
+std::vector<std::pair<std::string, PropertyMap>>
+    LoaderRegistry::getLoaderPropertyMaps() const
+{
+    std::vector<std::pair<std::string, PropertyMap>> ret(_loaders.size());
+
+    std::transform(_loaders.begin(), _loaders.end(), ret.begin(),
+                   [](const auto& loader) {
+                       return std::pair<std::string, PropertyMap>{
+                           loader->getName(), loader->getProperties()};
+                   });
+
+    ret.erase(std::remove_if(ret.begin(), ret.end(),
+                             [](const auto& p) {
+                                 return p.first == "archive";
+                             }),
+              ret.end());
+    return ret;
+}
+
 bool LoaderRegistry::isSupportedFile(const std::string& filename) const
 {
     if (fs::is_directory(filename))
         return false;
 
-    const auto extension = extract_extension(filename);
+    const auto extension = extractExtension(filename);
     for (const auto& loader : _loaders)
         if (loader->isSupported(filename, extension))
             return true;
@@ -65,28 +88,41 @@ bool LoaderRegistry::isSupportedType(const std::string& type) const
     return false;
 }
 
-const Loader& LoaderRegistry::getLoaderFromFilename(
-    const std::string& filename) const
+const Loader& LoaderRegistry::getSuitableLoader(
+    const std::string& filename, const std::string& filetype,
+    const std::string& loaderName) const
 {
     if (fs::is_directory(filename))
         throw std::runtime_error("'" + filename + "' is a directory");
 
-    const auto extension = extract_extension(filename);
+    const auto extension =
+        filetype.empty() ? extractExtension(filename) : filetype;
+
+    // If we have a specific loader we first check if it is an archive
+    if (!loaderName.empty())
+    {
+        Loader* archiveLoader = nullptr;
+        for (const auto& loader : _loaders)
+            if (loader->getName() == "archive")
+                archiveLoader = loader.get();
+
+        if (archiveLoader && archiveLoader->isSupported(filename, extension))
+            return *archiveLoader;
+
+        // Do not use archive loader, find specified one
+        for (const auto& loader : _loaders)
+            if (loader->getName() == loaderName)
+                return *loader.get();
+
+        throw std::runtime_error("No loader found with name '" + loaderName +
+                                 "'");
+    }
 
     for (const auto& loader : _loaders)
         if (loader->isSupported(filename, extension))
             return *loader;
 
-    throw std::runtime_error("No loader found for filename '" + filename + "'");
-}
-
-const Loader& LoaderRegistry::getLoaderFromFiletype(
-    const std::string& filetype) const
-{
-    for (const auto& loader : _loaders)
-        if (loader->isSupported("", filetype))
-            return *loader;
-
-    throw std::runtime_error("No loader found for type '" + filetype + "'");
+    throw std::runtime_error("No loader found for filename '" + filename +
+                             "' and filetype '" + filetype + "'");
 }
 }

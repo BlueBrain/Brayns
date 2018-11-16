@@ -32,14 +32,9 @@ namespace brayns
 void CircuitViewer::init(PluginAPI* api)
 {
     auto& scene = api->getScene();
-    auto& parametersManager = api->getParametersManager();
-    auto& geometryParameters = parametersManager.getGeometryParameters();
     auto& registry = scene.getLoaderRegistry();
 
-    registry.registerLoader(std::make_unique<CircuitLoader>(
-        scene, parametersManager.getApplicationParameters(),
-        geometryParameters));
-    registry.registerLoader(
-        std::make_unique<MorphologyLoader>(scene, geometryParameters));
+    registry.registerLoader(std::make_unique<CircuitLoader>(scene));
+    registry.registerLoader(std::make_unique<MorphologyLoader>(scene));
 }
 }

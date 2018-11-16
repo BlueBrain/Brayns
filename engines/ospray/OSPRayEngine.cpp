@@ -230,10 +230,9 @@ void OSPRayEngine::_createRenderers()
             properties.setProperty(
                 {"detectionDistance", "Detection distance", 15.});
             properties.setProperty(
-                {"shading",
-                 "Shading",
-                 (int)AdvancedSimulationRenderer::Shading::none,
-                 {"None", "Diffuse", "Electron"}});
+                {"shading", "Shading",
+                 int32_t(AdvancedSimulationRenderer::Shading::none),
+                 brayns::enumNames<AdvancedSimulationRenderer::Shading>()});
             properties.setProperty(
                 {"shadows", "Shadow intensity", 0., {0., 1.}});
             properties.setProperty(
@@ -255,8 +254,9 @@ void OSPRayEngine::_createRenderers()
         {
             properties.setProperty(
                 {"aoDistance", "Ambient occlusion distance", 10000.});
-            properties.setProperty(
-                {"aoSamples", "Ambient occlusion samples", 1, {0, 128}});
+            properties.setProperty({"aoSamples", "Ambient occlusion samples",
+                                    int32_t(1),
+                                    std::pair<int32_t, int32_t>{0, 128}});
             properties.setProperty({"aoTransparencyEnabled",
                                     "Ambient occlusion transparency", true});
             properties.setProperty(

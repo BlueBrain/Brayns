@@ -72,4 +72,13 @@ std::string shortenString(const std::string& string, const size_t maxLength)
 
     return beforeEllipsis + ELLIPSIS + afterEllipsis;
 }
+
+std::string extractExtension(const std::string& filename)
+{
+    auto extension = fs::extension(filename);
+    if (!extension.empty())
+        extension = extension.erase(0, 1);
+
+    return extension;
+}
 }

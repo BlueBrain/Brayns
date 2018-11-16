@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/loader/Loader.h>
 #include <brayns/common/tasks/Task.h>
 
 namespace brayns

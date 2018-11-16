@@ -26,6 +26,8 @@
 
 #include <rockets/jsonrpc/types.h>
 
+#include "jsonPropertyMap.h"
+
 namespace brayns
 {
 const std::string METHOD_REQUEST_MODEL_UPLOAD = "request-model-upload";

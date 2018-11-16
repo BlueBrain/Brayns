@@ -99,9 +99,18 @@ public:
     const std::string& getName() const { return _name; }
     void setPath(const std::string& path) { _updateValue(_path, path); }
     const std::string& getPath() const { return _path; }
+    void setLoaderName(const std::string& loaderName)
+    {
+        _updateValue(_loaderName, loaderName);
+    }
+    const std::string& getLoaderName() const { return _loaderName; }
 protected:
     std::string _name;
     std::string _path;
+    std::string _loaderName;
+
+public:
+    PropertyMap _loaderProperties;
 
     SERIALIZATION_FRIEND(ModelParams)
 };

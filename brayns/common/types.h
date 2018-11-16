@@ -31,6 +31,7 @@
     friend void staticjson::init(type*, staticjson::ObjectHandler*);
 
 #include <brayns/common/mathTypes.h>
+#include <brayns/common/utils/EnumUtils.h>
 
 #include <array>
 #include <cstdint>
@@ -381,6 +382,58 @@ enum class BVHFlag
     compact,
     robust
 };
+
+enum class StereoMode
+{
+    none = 0,
+    left = 1,
+    right = 2,
+    side_by_side = 3
+};
+
+///////////////////////////////////////////////////////////////////////////
+
+template <>
+inline std::vector<std::pair<std::string, ColorScheme>> enumMap()
+{
+    return {{"none", ColorScheme::none},
+            {"neuron_by_id", ColorScheme::neuron_by_id},
+            {"neuron_by_type", ColorScheme::neuron_by_type},
+            {"neuron_by_segment_type", ColorScheme::neuron_by_segment_type},
+            {"neuron_by_layer", ColorScheme::neuron_by_layer},
+            {"neuron_by_mtype", ColorScheme::neuron_by_mtype},
+            {"neuron_by_etype", ColorScheme::neuron_by_etype},
+            {"neuron_by_target", ColorScheme::neuron_by_target},
+            {"protein_by_id", ColorScheme::protein_by_id},
+            {"protein_atoms", ColorScheme::protein_atoms},
+            {"protein_chains", ColorScheme::protein_chains},
+            {"protein_residues", ColorScheme::protein_residues}};
 }
 
+template <>
+inline std::vector<std::pair<std::string, GeometryQuality>> enumMap()
+{
+    return {{"low", GeometryQuality::low},
+            {"medium", GeometryQuality::medium},
+            {"high", GeometryQuality::high}};
+}
+
+template <>
+inline std::vector<std::pair<std::string, DataType>> enumMap()
+{
+    return {{"FLOAT", DataType::FLOAT},   {"DOUBLE", DataType::DOUBLE},
+            {"UINT8", DataType::UINT8},   {"UINT16", DataType::UINT16},
+            {"UINT32", DataType::UINT32}, {"INT8", DataType::INT8},
+            {"INT16", DataType::INT16},   {"INT32", DataType::INT32}};
+}
+
+template <>
+inline std::vector<std::pair<std::string, StereoMode>> enumMap()
+{
+    return {{"None", StereoMode::none},
+            {"Left eye", StereoMode::left},
+            {"Right eye", StereoMode::right},
+            {"Side by side", StereoMode::side_by_side}};
+}
+}
 #endif // TYPES_H

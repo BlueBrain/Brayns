@@ -24,25 +24,51 @@
 
 namespace brayns
 {
-/** A volume loader for raw (*.raw with params for dimensions or *.mhd) volumes.
+/** A volume loader for mhd volumes.
  */
-class VolumeLoader : public Loader
+class MHDVolumeLoader : public Loader
 {
 public:
-    VolumeLoader(Scene& scene, VolumeParameters& volumeParameters);
+    MHDVolumeLoader(Scene& scene);
+
+    std::vector<std::string> getSupportedExtensions() const final;
+    std::string getName() const final;
+    PropertyMap getProperties() const final;
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
     ModelDescriptorPtr importFromBlob(
-        Blob&& blob, const LoaderProgress& callback, const size_t index = 0,
+        Blob&& blob, const LoaderProgress& callback,
+        const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const final;
 
     ModelDescriptorPtr importFromFile(
         const std::string& filename, const LoaderProgress& callback,
-        const size_t index = 0,
+        const PropertyMap& properties, const size_t index = 0,
+        const size_t defaultMaterialId = NO_MATERIAL) const final;
+};
+
+/** A volume loader for raw volumes with params for dimensions.
+ */
+class RawVolumeLoader : public Loader
+{
+public:
+    RawVolumeLoader(Scene& scene);
+
+    std::vector<std::string> getSupportedExtensions() const final;
+    std::string getName() const final;
+    PropertyMap getProperties() const final;
+
+    bool isSupported(const std::string& filename,
+                     const std::string& extension) const final;
+    ModelDescriptorPtr importFromBlob(
+        Blob&& blob, const LoaderProgress& callback,
+        const PropertyMap& properties, const size_t index = 0,
         const size_t defaultMaterialId = NO_MATERIAL) const final;
 
-private:
-    VolumeParameters& _volumeParameters;
+    ModelDescriptorPtr importFromFile(
+        const std::string& filename, const LoaderProgress& callback,
+        const PropertyMap& properties, const size_t index = 0,
+        const size_t defaultMaterialId = NO_MATERIAL) const final;
 };
 }

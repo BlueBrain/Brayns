@@ -30,12 +30,6 @@
 
 namespace brayns
 {
-AbstractSimulationHandler::AbstractSimulationHandler(
-    const GeometryParameters& geometryParameters)
-    : _geometryParameters(geometryParameters)
-{
-}
-
 AbstractSimulationHandler::~AbstractSimulationHandler()
 {
     if (_memoryMapPtr)
