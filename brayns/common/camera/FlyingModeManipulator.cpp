@@ -28,9 +28,8 @@
 namespace brayns
 {
 FlyingModeManipulator::FlyingModeManipulator(Camera& camera,
-                                             KeyboardHandler& keyboardHandler,
-                                             const Boxd& boundingBox)
-    : AbstractManipulator(camera, keyboardHandler, boundingBox)
+                                             KeyboardHandler& keyboardHandler)
+    : AbstractManipulator(camera, keyboardHandler)
 {
     _keyboardHandler.registerKeyboardShortcut(
         'a', "Strafe left",

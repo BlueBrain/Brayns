@@ -23,6 +23,7 @@
 #include "Camera.h"
 #include <brayns/common/input/KeyboardHandler.h>
 #include <brayns/common/log.h>
+#include <brayns/common/scene/Scene.h>
 
 namespace brayns
 {
@@ -33,12 +34,15 @@ constexpr float DEFAULT_ROTATION_SPEED = 0.006f;
 }
 
 AbstractManipulator::AbstractManipulator(Camera& camera,
-                                         KeyboardHandler& keyboardHandler,
-                                         const Boxd& boundingBox)
+                                         KeyboardHandler& keyboardHandler)
     : _camera(camera)
     , _keyboardHandler(keyboardHandler)
-    , _motionSpeed{DEFAULT_MOTION_SPEED * boundingBox.getSize().find_max()}
+    , _motionSpeed{DEFAULT_ROTATION_SPEED}
     , _rotationSpeed{DEFAULT_ROTATION_SPEED}
+{
+}
+
+void AbstractManipulator::adjust(const Boxd& boundingBox)
 {
     auto position = boundingBox.getCenter();
     auto target = position;
@@ -47,13 +51,11 @@ AbstractManipulator::AbstractManipulator(Camera& camera,
     const Quaterniond identity;
     _camera.setInitialState(position, identity, target);
 
+    _motionSpeed = DEFAULT_MOTION_SPEED * boundingBox.getSize().find_max();
+
     BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
     BRAYNS_INFO << "World center      : " << boundingBox.getCenter()
                 << std::endl;
-}
-
-AbstractManipulator::~AbstractManipulator()
-{
 }
 
 float AbstractManipulator::getRotationSpeed() const
