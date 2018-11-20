@@ -24,7 +24,7 @@ if(BRAYNS_OPTIX_ENABLED)
 endif()
 
 # OpenDeck module
-option(BRAYNS_OPENDECK_ENABLED "Activate OpenDeck module" OFF)
+option(BRAYNS_OPENDECK_ENABLED "Activate opendeck plugin and module" OFF)
 if(BRAYNS_OPENDECK_ENABLED)
   add_subdirectory(opendeck)
   if(TARGET ospray_module_opendeck)

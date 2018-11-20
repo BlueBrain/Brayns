@@ -19,50 +19,20 @@
 
 #pragma once
 
-#include <braynsvrpn/defines.h>
-
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
-#include <vrpn_Tracker.h>
-
-#ifdef BRAYNSVRPN_USE_LIBUV
-#include <uv.h>
-#endif
-
 namespace brayns
 {
-class VRPNPlugin : public ExtensionPlugin
+class OpenDeckPlugin : public ExtensionPlugin
 {
 public:
-    VRPNPlugin(const std::string& vrpnName);
-    ~VRPNPlugin();
+    OpenDeckPlugin(const Vector2ui& wallRes, const Vector2ui& floorRes);
 
     void init(PluginAPI* api) final;
 
-    void preRender() final;
-
-#ifdef BRAYNSVRPN_USE_LIBUV
-    void resumeRenderingIfTrackerIsActive();
-#endif
-
 private:
-    PluginAPI* _api = nullptr;
-    vrpn_Tracker_Remote _vrpnTracker;
-
-#ifdef BRAYNSVRPN_USE_LIBUV
-    struct LibuvDeleter
-    {
-        void operator()(uv_timer_t* timer)
-        {
-            uv_timer_stop(timer);
-            uv_close(reinterpret_cast<uv_handle_t*>(timer),
-                     [](uv_handle_t* handle) { delete handle; });
-        }
-    };
-    std::unique_ptr<uv_timer_t, LibuvDeleter> _idleTimer;
-
-    void _setupIdleTimer();
-#endif
+    Vector2ui _wallRes;
+    Vector2ui _floorRes;
 };
 }

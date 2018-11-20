@@ -25,6 +25,12 @@
 
 static const float OPENDECK_RADIUS = 2.55f;
 static const float OPENDECK_HEIGHT = 2.3f;
+static const float OPENDECK_METALSTRIPE_HEIGHT = 0.045f;
+
+static const uint8 leftWall = 0;
+static const uint8 rightWall = 1;
+static const uint8 leftFloor = 2;
+static const uint8 rightFloor = 3;
 
 void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
                                           varying Ray& ray,
@@ -37,28 +43,42 @@ void CylindricStereoTrackedCamera_initRay(uniform Camera* uniform _self,
 
     float eyeDelta = 0.0f;
     float alpha = 0.0f;
-    if (self->side_by_side)
+    if (self->bufferId == leftWall)
     {
-        if (screen.x < 0.5f)
-        {
-            eyeDelta = -self->interpupillaryDistance * 0.5f;
-            alpha = 2.0f * screen.x * pi;
-        }
-        else
-        {
-            eyeDelta = self->interpupillaryDistance * 0.5f;
-            alpha = 2.0f * (screen.x - 0.5f) * pi;
-        }
-    }
-    else
-    {
+        eyeDelta = -self->interpupillaryDistance * 0.5f;
         alpha = screen.x * pi;
+    }
+    else if (self->bufferId == rightWall)
+    {
+        eyeDelta = self->interpupillaryDistance * 0.5f;
+        alpha = screen.x * pi;
+    }
+    else if (self->bufferId == leftFloor)
+    {
+        eyeDelta = -self->interpupillaryDistance * 0.5f;
+    }
+    else if (self->bufferId == rightFloor)
+    {
+        eyeDelta = self->interpupillaryDistance * 0.5f;
     }
 
     vec3f pixelPos;
-    pixelPos.x = OPENDECK_RADIUS * -cosf(alpha);
-    pixelPos.y = OPENDECK_HEIGHT * screen.y;
-    pixelPos.z = OPENDECK_RADIUS * -sinf(alpha);
+    if (self->bufferId == leftWall || self->bufferId == rightWall)
+    {
+        pixelPos.x = OPENDECK_RADIUS * -cosf(alpha);
+        // pixelPos.y = OPENDECK_METALSTRIPE_HEIGHT + OPENDECK_HEIGHT *
+        // screen.y;
+        pixelPos.y = OPENDECK_METALSTRIPE_HEIGHT + OPENDECK_HEIGHT -
+                     OPENDECK_HEIGHT * screen.y;
+        pixelPos.z = OPENDECK_RADIUS * -sinf(alpha);
+    }
+    else if (self->bufferId == leftFloor || self->bufferId == rightFloor)
+    {
+        pixelPos.x = 2.0f * OPENDECK_RADIUS * (screen.x - 0.5f);
+        pixelPos.y = 0.0f;
+        pixelPos.z = -OPENDECK_RADIUS + OPENDECK_RADIUS * screen.y;
+        // pixelPos.z = -OPENDECK_RADIUS * screen.y;
+    }
 
     const vec3f eyeAxis = self->od_dir_du;
     const vec3f eyeDeltaPos = eyeAxis * eyeDelta;
@@ -91,7 +111,7 @@ export void CylindricStereoTrackedCamera_set(
     void* uniform _self, const uniform vec3f& org, const uniform vec3f& headPos,
     const uniform vec3f& dir_cam, const uniform vec3f& dir_du,
     const uniform vec3f& dir_dv, const uniform vec3f& od_dir_du,
-    const uniform float interpupillaryDistance, const uniform bool side_by_side)
+    const uniform float interpupillaryDistance, const uniform uint8 bufferId)
 {
     uniform CylindricStereoTrackedCamera* uniform self =
         (uniform CylindricStereoTrackedCamera * uniform)_self;
@@ -102,5 +122,5 @@ export void CylindricStereoTrackedCamera_set(
     self->dir_dv = dir_dv;
     self->od_dir_du = od_dir_du;
     self->interpupillaryDistance = interpupillaryDistance;
-    self->side_by_side = side_by_side;
+    self->bufferId = bufferId;
 }
