@@ -29,8 +29,22 @@
 
 namespace brayns
 {
-struct ParallelModelContainer
+struct ModelData
 {
+    ModelData() = default;
+
+    // std::vector move constructor is not noexcept until C++17, if we want
+    // this class to be movable we have to do it by hand.
+    ModelData(ModelData&& other) noexcept
+       : spheres(std::move(other.spheres))
+       , cylinders(std::move(other.cylinders))
+       , cones(std::move(other.cones))
+       , sdfGeometries(std::move(other.sdfGeometries))
+       , sdfNeighbours(std::move(other.sdfNeighbours))
+       , sdfMaterials(std::move(other.sdfMaterials))
+    {
+    }
+
     void addSphere(const size_t materialId, const Sphere& sphere)
     {
         spheres[materialId].push_back(sphere);
@@ -104,7 +118,6 @@ struct ParallelModelContainer
     SpheresMap spheres;
     CylindersMap cylinders;
     ConesMap cones;
-    TrianglesMeshMap trianglesMeshes;
     std::vector<SDFGeometry> sdfGeometries;
     std::vector<std::vector<size_t>> sdfNeighbours;
     std::vector<size_t> sdfMaterials;

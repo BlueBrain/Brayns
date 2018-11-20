@@ -36,7 +36,7 @@
 #define BOOST_TEST_MODULE braynsTestData
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
+BOOST_AUTO_TEST_CASE(simple_circuit)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
                                  brayns.getEngine().getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(render_circuit_mtypes_and_compare)
+BOOST_AUTO_TEST_CASE(curcuit_with_color_by_mtype)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_mtypes_and_compare)
                                  brayns.getEngine().getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
+BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
@@ -148,23 +148,25 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
                                  brayns.getEngine().getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
+void testSdfGeometries(bool dampened)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app,
-                          BBP_TEST_BLUECONFIG3,
-                          "--disable-accumulation",
-                          "--circuit-targets",
-                          "Layer1",
-                          "--morphology-dampen-branch-thickness-changerate",
-                          "--morphology-use-sdf-geometries",
-                          "--samples-per-pixel",
-                          "16"};
-    const int argc = sizeof(argv) / sizeof(char*);
+    auto argv = std::vector<const char*>{app,
+                                         BBP_TEST_BLUECONFIG3,
+                                         "--disable-accumulation",
+                                         "--circuit-targets",
+                                         "Layer1",
+                                         "--morphology-use-sdf-geometries",
+                                         "--samples-per-pixel",
+                                         "16"};
+    if (dampened)
+        argv.push_back("--morphology-dampen-branch-thickness-changerate");
 
-    brayns::Brayns brayns(argc, argv);
+    const int argc = argv.size();
+
+    brayns::Brayns brayns(argc, argv.data());
 
     const auto rotCenter = brayns.getEngine()
                                .getScene()
@@ -179,6 +181,17 @@ BOOST_AUTO_TEST_CASE(render_sdf_circuit_and_compare)
     camera.setPosition(camPos + 0.92 * (rotCenter - camPos));
 
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testSdfCircuit.png",
+    BOOST_CHECK(compareTestImage(dampened ? "testDampenedSdfCircuit.png"
+                                          : "testSdfCircuit.png",
                                  brayns.getEngine().getFrameBuffer()));
+}
+
+BOOST_AUTO_TEST_CASE(circuit_with_sdf_geometries)
+{
+    testSdfGeometries(false);
+}
+
+BOOST_AUTO_TEST_CASE(circuit_with_dampened_sdf_geometries)
+{
+    testSdfGeometries(true);
 }

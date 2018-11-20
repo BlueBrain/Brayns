@@ -19,9 +19,9 @@
  */
 
 #include "CircuitLoader.h"
+#include "ModelData.h"
 #include "MorphologyLoader.h"
 #include "SimulationHandler.h"
-#include "common.h"
 
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
@@ -622,15 +622,15 @@ private:
                                                       perCellMaterialIds);
                         };
 
-                    ParallelModelContainer modelContainer;
+                    ModelData modelData;
                     if (!morphLoader._importMorphology(
                             uri, morphologyIndex, materialFunc,
                             transformations[morphologyIndex], reportMapping,
-                            modelContainer, _morphologyParams))
+                            modelData, _morphologyParams))
 #pragma omp atomic
                         ++loadingFailures;
 #pragma omp critical
-                    modelContainer.addTo(model);
+                    modelData.addTo(model);
                 }
                 catch (...)
                 {

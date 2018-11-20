@@ -19,7 +19,7 @@
  */
 
 #include "MorphologyLoader.h"
-#include "common.h"
+#include "ModelData.h"
 
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/Model.h>
@@ -33,17 +33,20 @@
 
 #include <unordered_map>
 
+namespace brayns
+{
 namespace
 {
 // From http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
 template <class T>
 typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-    almost_equal(T x, T y, int ulp)
+    _almostEqual(T x, T y)
 {
+    constexpr auto ULPs{100000.f};
     // the machine epsilon has to be scaled to the magnitude of the values used
     // and multiplied by the desired precision in ULPs (units in the last place)
     return std::abs(x - y) <=
-               std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
+               std::numeric_limits<T>::epsilon() * std::abs(x + y) * ULPs
            // unless the result is subnormal
            || std::abs(x - y) < std::numeric_limits<T>::min();
 }
@@ -87,10 +90,214 @@ const Property PROP_GEOMETRY_QUALITY = {
     {"Geometry quality"}};
 
 const auto LOADER_NAME = "morphology";
+
+struct SDFData
+{
+    std::vector<SDFGeometry> geometries;
+    std::vector<std::set<size_t>> neighbours;
+    std::vector<size_t> materials;
+    // Bifurcation section ID to geometry ID map.
+    std::unordered_map<uint32_t, size_t> bifurcations;
+    std::unordered_map<uint32_t, std::vector<size_t>> sectionGeometries;
+};
+
+bool _isInMask(const brain::neuron::SectionType type, const size_t mask)
+{
+    switch (type)
+    {
+    case brain::neuron::SectionType::soma:
+        return mask & static_cast<size_t>(MorphologySectionType::soma);
+    case brain::neuron::SectionType::axon:
+        return mask & static_cast<size_t>(MorphologySectionType::axon);
+    case brain::neuron::SectionType::dendrite:
+        return mask & static_cast<size_t>(MorphologySectionType::dendrite);
+    case brain::neuron::SectionType::apicalDendrite:
+        return mask &
+               static_cast<size_t>(MorphologySectionType::apical_dendrite);
+    case brain::neuron::SectionType::undefined:
+    default:
+        return true; // Unclassified sections will always be visible.
+    }
 }
 
-namespace brayns
+inline float _getLastSampleRadius(const brain::neuron::Section& section)
 {
+    return section[-1][3] * 0.5;
+}
+
+/* Morphology tree processing */
+
+uint32_ts computeTreeTraversalOrder(const brain::neuron::Morphology& morphology,
+                                    const size_t sectionTypeMask)
+{
+    uint32_ts visited;
+    uint32_ts stack;
+
+    for (const auto& section : morphology.getSoma().getChildren())
+        stack.push_back(section.getID());
+
+    while (!stack.empty())
+    {
+        auto id = stack.back();
+        stack.pop_back();
+
+        // The section types are the same for all the sections comprised by
+        // a neurite (i.e. a tree spanned from a first order section). This
+        // means that e.g. an apical dendrite section cannot have normal
+        // dendrite children. For that reason, if the current section type is
+        // discarded, we can discard all its children as well.
+        if (!_isInMask(morphology.getSection(id).getType(), sectionTypeMask))
+            continue;
+
+        visited.push_back(id);
+        for (const auto& section : morphology.getSection(id).getChildren())
+            stack.push_back(section.getID());
+    }
+    return visited;
+}
+
+size_t _addSDFGeometry(SDFData& sdfData, const SDFGeometry& geometry,
+                       const std::set<size_t>& neighbours,
+                       const size_t materialId, const uint32_t sectionId)
+{
+    const size_t idx = sdfData.geometries.size();
+    sdfData.geometries.push_back(geometry);
+    sdfData.neighbours.push_back(neighbours);
+    sdfData.materials.push_back(materialId);
+    sdfData.sectionGeometries[sectionId].push_back(idx);
+    return idx;
+}
+
+void _addRegularSample(ModelData& model, const Vector3f& current,
+                       const Vector3f& previous, const float radius,
+                       const float previousRadius, const size_t materialId,
+                       const uint64_t offset)
+{
+    model.addSphere(materialId, {current, radius, offset});
+    if (current != previous && previousRadius > 0.f)
+    {
+        if (_almostEqual(radius, previousRadius))
+            model.addCylinder(materialId, {current, previous, radius, offset});
+        else
+            model.addCone(materialId,
+                          {current, previous, radius, previousRadius, offset});
+    }
+}
+
+void _addSDFSample(SDFData& sdfData, const brain::neuron::Section section,
+                   const bool isLast, const Vector3f& current,
+                   const Vector3f& previous, const float radius,
+                   const float previousRadius, const size_t materialId,
+                   const uint64_t offset)
+{
+    auto sectionId = section.getID();
+
+    {
+        const auto geom = (_almostEqual(radius, previousRadius))
+                              ? createSDFPill(current, previous, radius, offset)
+                              : createSDFConePill(current, previous, radius,
+                                                  previousRadius, offset);
+        _addSDFGeometry(sdfData, geom, {}, materialId, sectionId);
+    }
+
+    const auto connectGeometriesToBifurcation =
+        [&sdfData](const std::vector<size_t>& geometries,
+                   size_t bifurcationId) {
+            const auto& bifGeom = sdfData.geometries[bifurcationId];
+
+            for (size_t geomIdx : geometries)
+            {
+                // Do not blend yourself
+                if (geomIdx == bifurcationId)
+                    continue;
+
+                const auto& geom = sdfData.geometries[geomIdx];
+                const float dist0 = geom.p0.squared_distance(bifGeom.center);
+                const float dist1 = geom.p1.squared_distance(bifGeom.center);
+                const float radiusSum = geom.radius + bifGeom.radius;
+                const float radiusSumSq = radiusSum * radiusSum;
+
+                if (dist0 < radiusSumSq || dist1 < radiusSumSq)
+                {
+                    sdfData.neighbours[bifurcationId].insert(geomIdx);
+                    sdfData.neighbours[geomIdx].insert(bifurcationId);
+                }
+            }
+        };
+
+    if (isLast)
+    {
+        const auto& geometries = sdfData.sectionGeometries[sectionId];
+        // Since our cone pills already give us a sphere at the end points we
+        // don't need to add any sphere between segments except at the
+        // bifurcation
+        if (!section.getChildren().empty())
+        {
+            const size_t bifurcationId =
+                _addSDFGeometry(sdfData,
+                                createSDFSphere(current, radius, offset), {},
+                                materialId, sectionId);
+            sdfData.bifurcations[sectionId] = bifurcationId;
+
+            // Connect to bifurcation at terminal point
+            connectGeometriesToBifurcation(geometries, bifurcationId);
+        }
+
+        // And then at initial point
+        if (section.hasParent())
+        {
+            connectGeometriesToBifurcation(
+                geometries, sdfData.bifurcations[section.getParent().getID()]);
+        }
+    }
+}
+
+/**
+ * Calculates all neighbours and adds the geometries to the model
+ * container.
+ */
+void _finalizeSDFGeometries(ModelData& modelData, SDFData& sdfData)
+{
+    const size_t numGeoms = sdfData.geometries.size();
+
+    // Extend neighbours to make sure smoothing is applied on all closely
+    // connected geometries
+    for (size_t rep = 0; rep < 4; rep++)
+    {
+        const size_t numNeighs = sdfData.neighbours.size();
+        auto neighsCopy = sdfData.neighbours;
+        for (size_t i = 0; i < numNeighs; i++)
+        {
+            for (size_t j : sdfData.neighbours[i])
+            {
+                for (size_t newNei : sdfData.neighbours[j])
+                {
+                    neighsCopy[i].insert(newNei);
+                    neighsCopy[newNei].insert(i);
+                }
+            }
+        }
+        sdfData.neighbours = neighsCopy;
+    }
+
+    for (size_t i = 0; i < numGeoms; i++)
+    {
+        // Convert neighbours from set to vector and erase itself from  its
+        // neighbours
+        std::vector<size_t> neighbours;
+        const auto& neighSet = sdfData.neighbours[i];
+        std::copy(neighSet.begin(), neighSet.end(),
+                  std::back_inserter(neighbours));
+        neighbours.erase(std::remove_if(neighbours.begin(), neighbours.end(),
+                                        [i](size_t elem) { return elem == i; }),
+                         neighbours.end());
+
+        modelData.addSDFGeometry(sdfData.materials[i], sdfData.geometries[i],
+                                 neighbours);
+    }
+}
+}
+
 MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
 {
     const auto setVariable = [&](auto& variable, const std::string& name,
@@ -202,7 +409,7 @@ public:
             return materialId;
         };
 
-        ParallelModelContainer modelContainer;
+        ModelData modelContainer;
         somaPosition =
             importMorphology(source, index, materialFunc, transformation,
                              reportMapping, modelContainer);
@@ -216,13 +423,19 @@ public:
         const servus::URI& source, const uint64_t index,
         MaterialFunc materialFunc, const Matrix4f& transformation,
         const brain::CompartmentReportMapping* reportMapping,
-        ParallelModelContainer& model) const
+        ModelData& model) const
     {
         if (_params.sectionTypes ==
             std::vector<MorphologySectionType>{MorphologySectionType::soma})
         {
-            return _importMorphologyAsPoint(index, materialFunc, transformation,
-                                            reportMapping, model);
+            const auto radius = static_cast<float>(_params.radiusMultiplier);
+            const auto position = transformation.getTranslation();
+            const auto materialId =
+                materialFunc(brain::neuron::SectionType::soma);
+            const uint64_t offset =
+                reportMapping ? reportMapping->getOffsets()[index][0] : 0;
+            model.addSphere(materialId, {position, radius, offset});
+            return position;
         }
         return _importMorphologyFromURI(source, index, materialFunc,
                                         transformation, reportMapping, model);
@@ -243,91 +456,6 @@ private:
     }
 
     /**
-     * @brief _getSectionTypes converts Brayns section types into brain::neuron
-     * section types
-     * @param morphologySectionTypes Brayns section types
-     * @return brain::neuron section types
-     */
-    brain::neuron::SectionTypes _getSectionTypes(
-        const size_t morphologySectionTypes) const
-    {
-        brain::neuron::SectionTypes sectionTypes;
-        if (morphologySectionTypes &
-            static_cast<size_t>(MorphologySectionType::soma))
-            sectionTypes.push_back(brain::neuron::SectionType::soma);
-        if (morphologySectionTypes &
-            static_cast<size_t>(MorphologySectionType::axon))
-            sectionTypes.push_back(brain::neuron::SectionType::axon);
-        if (morphologySectionTypes &
-            static_cast<size_t>(MorphologySectionType::dendrite))
-            sectionTypes.push_back(brain::neuron::SectionType::dendrite);
-        if (morphologySectionTypes &
-            static_cast<size_t>(MorphologySectionType::apical_dendrite))
-            sectionTypes.push_back(brain::neuron::SectionType::apicalDendrite);
-        return sectionTypes;
-    }
-
-    /**
-     * @brief _importMorphologyAsPoint places sphere at the specified morphology
-     * position
-     * @param index Index of the current morphology
-     * @param transformation Transformation to apply to the morphology
-     * @param material Material that is forced in case geometry parameters do
-     * not apply
-     * @param reportMapping Mapping for applying simulation to the morphology
-     * @param scene Scene to which the morphology should be loaded into
-     * @return Position of the soma
-     */
-    Vector3f _importMorphologyAsPoint(
-        const uint64_t index, MaterialFunc materialFunc,
-        const Matrix4f& transformation,
-        const brain::CompartmentReportMapping* reportMapping,
-        ParallelModelContainer& model) const
-    {
-        uint64_t offset = 0;
-        if (reportMapping)
-            offset = reportMapping->getOffsets()[index][0];
-
-        const auto radius = static_cast<float>(_params.radiusMultiplier);
-        const auto somaPosition = transformation.getTranslation();
-        const auto materialId = materialFunc(brain::neuron::SectionType::soma);
-        model.addSphere(materialId, {somaPosition, radius, offset});
-        return somaPosition;
-    }
-
-    struct SDFMorphologyData
-    {
-        std::vector<SDFGeometry> geometries;
-        std::vector<std::set<size_t>> neighbours;
-        std::vector<size_t> materials;
-        std::vector<size_t> localToGlobalIdx;
-        std::vector<size_t> bifurcationIndices;
-        std::unordered_map<size_t, int> geometrySection;
-        std::unordered_map<int, std::vector<size_t>> sectionGeometries;
-    };
-
-    struct MorphologyTreeStructure
-    {
-        std::vector<int> sectionParent;
-        std::vector<std::vector<size_t>> sectionChildren;
-        std::vector<size_t> sectionTraverseOrder;
-    };
-
-    size_t _addSDFGeometry(SDFMorphologyData& sdfMorphologyData,
-                           const SDFGeometry& geometry,
-                           const std::set<size_t>& neighbours,
-                           const size_t materialId, const int section) const
-    {
-        const size_t idx = sdfMorphologyData.geometries.size();
-        sdfMorphologyData.geometries.push_back(geometry);
-        sdfMorphologyData.neighbours.push_back(neighbours);
-        sdfMorphologyData.materials.push_back(materialId);
-        sdfMorphologyData.geometrySection[idx] = section;
-        sdfMorphologyData.sectionGeometries[section].push_back(idx);
-        return idx;
-    }
-
-    /**
      * Creates an SDF soma by adding and connecting the soma children using cone
      * pills
      */
@@ -335,9 +463,9 @@ private:
                                  const float somaRadius,
                                  const size_t materialId, const uint64_t offset,
                                  const brain::neuron::Sections& somaChildren,
-                                 SDFMorphologyData& sdfMorphologyData) const
+                                 SDFData& sdfData) const
     {
-        std::set<size_t> child_indices;
+        std::set<size_t> childIndices;
         for (const auto& child : somaChildren)
         {
             const auto& samples = child.getSamples();
@@ -348,287 +476,16 @@ private:
             // to give it an organic look.
             const float radiusEnd = _getCorrectedRadius(samples[0].w() * 0.5f);
             const size_t geomIdx =
-                _addSDFGeometry(sdfMorphologyData,
+                _addSDFGeometry(sdfData,
                                 createSDFConePillSigmoid(somaPosition, sample,
                                                          somaRadius * 0.5f,
                                                          radiusEnd, offset),
                                 {}, materialId, -1);
-            child_indices.insert(geomIdx);
+            childIndices.insert(geomIdx);
         }
 
-        for (size_t c : child_indices)
-            sdfMorphologyData.neighbours[c] = child_indices;
-    }
-
-    /**
-     * Goes through all bifurcations and connects to all connected SDF
-     * geometries it is overlapping. Every section that has a bifurcation
-     * will
-     * traverse its children and blend the geometries inside the
-     * bifurcation.
-     */
-    void _connectSDFBifurcations(SDFMorphologyData& sdfMorphologyData,
-                                 const MorphologyTreeStructure& mts) const
-    {
-        const size_t numSections = mts.sectionChildren.size();
-
-        for (size_t section = 0; section < numSections; section++)
-        {
-            // Find the bifurction geometry id for this section
-            size_t bifurcationId = 0;
-            bool bifurcationIdFound = false;
-            for (size_t bifId : sdfMorphologyData.bifurcationIndices)
-            {
-                const int bifSection =
-                    sdfMorphologyData.geometrySection.at(bifId);
-
-                if (bifSection == static_cast<int>(section))
-                {
-                    bifurcationId = bifId;
-                    bifurcationIdFound = true;
-                    break;
-                }
-            }
-
-            if (!bifurcationIdFound)
-                continue;
-
-            // Function for connecting overlapping geometries with current
-            // bifurcation
-            const auto connectGeometriesToBifurcation = [&](
-                const std::vector<size_t>& geometries) {
-                const auto& bifGeom =
-                    sdfMorphologyData.geometries[bifurcationId];
-
-                for (size_t geomIdx : geometries)
-                {
-                    // Do not blend yourself
-                    if (geomIdx == bifurcationId)
-                        continue;
-
-                    const auto& geom = sdfMorphologyData.geometries[geomIdx];
-                    const float dist0 =
-                        geom.p0.squared_distance(bifGeom.center);
-                    const float dist1 =
-                        geom.p1.squared_distance(bifGeom.center);
-                    const float radiusSum = geom.radius + bifGeom.radius;
-                    const float radiusSumSq = radiusSum * radiusSum;
-
-                    if (dist0 < radiusSumSq || dist1 < radiusSumSq)
-                    {
-                        sdfMorphologyData.neighbours[bifurcationId].insert(
-                            geomIdx);
-                        sdfMorphologyData.neighbours[geomIdx].insert(
-                            bifurcationId);
-                    }
-                }
-            };
-
-            // Connect all child sections
-            for (const size_t sectionChild : mts.sectionChildren[section])
-            {
-                connectGeometriesToBifurcation(
-                    sdfMorphologyData.sectionGeometries.at(sectionChild));
-            }
-
-            // Connect with own section
-            connectGeometriesToBifurcation(
-                sdfMorphologyData.sectionGeometries.at(section));
-        }
-    }
-
-    /**
-     * Calculates all neighbours and adds the geometries to the model
-     * container.
-     */
-    void _finalizeSDFGeometries(ParallelModelContainer& modelContainer,
-                                SDFMorphologyData& sdfMorphologyData) const
-    {
-        const size_t numGeoms = sdfMorphologyData.geometries.size();
-        sdfMorphologyData.localToGlobalIdx.resize(numGeoms, 0);
-
-        // Extend neighbours to make sure smoothing is applied on all closely
-        // connected geometries
-        for (size_t rep = 0; rep < 4; rep++)
-        {
-            const size_t numNeighs = sdfMorphologyData.neighbours.size();
-            auto neighsCopy = sdfMorphologyData.neighbours;
-            for (size_t i = 0; i < numNeighs; i++)
-            {
-                for (size_t j : sdfMorphologyData.neighbours[i])
-                {
-                    for (size_t newNei : sdfMorphologyData.neighbours[j])
-                    {
-                        neighsCopy[i].insert(newNei);
-                        neighsCopy[newNei].insert(i);
-                    }
-                }
-            }
-            sdfMorphologyData.neighbours = neighsCopy;
-        }
-
-        for (size_t i = 0; i < numGeoms; i++)
-        {
-            // Convert neighbours from set to vector and erase itself from  its
-            // neighbours
-            std::vector<size_t> neighbours;
-            const auto& neighSet = sdfMorphologyData.neighbours[i];
-            std::copy(neighSet.begin(), neighSet.end(),
-                      std::back_inserter(neighbours));
-            neighbours.erase(
-                std::remove_if(neighbours.begin(), neighbours.end(),
-                               [i](size_t elem) { return elem == i; }),
-                neighbours.end());
-
-            modelContainer.addSDFGeometry(sdfMorphologyData.materials[i],
-                                          sdfMorphologyData.geometries[i],
-                                          neighbours);
-        }
-    }
-
-    /**
-     * Calculates the structure of the morphology tree by finding overlapping
-     * beginnings and endings of the sections.
-     */
-    MorphologyTreeStructure _calculateMorphologyTreeStructure(
-        const brain::neuron::Sections& sections,
-        const bool dampenThickness) const
-    {
-        const size_t numSections = sections.size();
-
-        if (!dampenThickness)
-        {
-            MorphologyTreeStructure mts;
-            mts.sectionTraverseOrder.resize(numSections);
-            mts.sectionParent.resize(numSections, -1);
-            std::iota(mts.sectionTraverseOrder.begin(),
-                      mts.sectionTraverseOrder.end(), 0);
-            return mts;
-        }
-
-        std::vector<std::pair<float, Vector3f>> bifurcationPosition(
-            numSections,
-            std::make_pair<float, Vector3f>(0.0f, Vector3f(0.f, 0.f, 0.f)));
-
-        std::vector<std::pair<float, Vector3f>> sectionEndPosition(
-            numSections,
-            std::make_pair<float, Vector3f>(0.0f, Vector3f(0.f, 0.f, 0.f)));
-
-        std::vector<std::vector<size_t>> sectionChildren(numSections,
-                                                         std::vector<size_t>());
-
-        std::vector<int> sectionParent(numSections, -1);
-        std::vector<bool> skipSection(numSections, true);
-        std::vector<bool> addedSection(numSections, false);
-
-        // Find section bifurcations and end positions
-        for (size_t sectionI = 0; sectionI < numSections; sectionI++)
-        {
-            const auto& section = sections[sectionI];
-
-            if (section.getType() == brain::neuron::SectionType::soma)
-                continue;
-
-            const auto& samples = section.getSamples();
-            if (samples.empty())
-                continue;
-
-            skipSection[sectionI] = false;
-
-            { // Branch beginning
-                const auto& sample = samples[0];
-
-                const auto radius = _getCorrectedRadius(sample.w() * 0.5f);
-
-                const Vector3f position(sample.x(), sample.y(), sample.z());
-
-                bifurcationPosition[sectionI].first = radius;
-                bifurcationPosition[sectionI].second = position;
-            }
-
-            { // Branch end
-                const auto& sample = samples.back();
-
-                const auto radius = _getCorrectedRadius(sample.w() * 0.5f);
-
-                const Vector3f position(sample.x(), sample.y(), sample.z());
-
-                sectionEndPosition[sectionI].first = radius;
-                sectionEndPosition[sectionI].second = position;
-            }
-        }
-
-        const auto overlaps = [](const std::pair<float, Vector3f>& p0,
-                                 const std::pair<float, Vector3f>& p1) {
-
-            const float d = (p0.second - p1.second).length();
-            const float r = p0.first + p1.first;
-
-            return (d < r);
-        };
-
-        // Find overlapping section bifurcations and end positions
-        for (size_t sectionI = 0; sectionI < numSections; sectionI++)
-        {
-            if (skipSection[sectionI])
-                continue;
-
-            for (size_t sectionJ = sectionI + 1; sectionJ < numSections;
-                 sectionJ++)
-            {
-                if (skipSection[sectionJ])
-                    continue;
-
-                if (overlaps(bifurcationPosition[sectionJ],
-                             sectionEndPosition[sectionI]))
-                {
-                    if (sectionParent[sectionJ] == -1)
-                    {
-                        sectionChildren[sectionI].push_back(sectionJ);
-                        sectionParent[sectionJ] = static_cast<size_t>(sectionI);
-                    }
-                }
-                else if (overlaps(bifurcationPosition[sectionI],
-                                  sectionEndPosition[sectionJ]))
-                {
-                    if (sectionParent[sectionI] == -1)
-                    {
-                        sectionChildren[sectionJ].push_back(sectionI);
-                        sectionParent[sectionI] = static_cast<size_t>(sectionJ);
-                    }
-                }
-            }
-        }
-
-        // Fill stack with root sections
-        std::vector<size_t> sectionStack;
-        for (size_t sectionI = 0; sectionI < numSections; sectionI++)
-        {
-            if (skipSection[sectionI])
-                continue;
-            else if (sectionParent[sectionI] == -1)
-                sectionStack.push_back(sectionI);
-        }
-
-        // Starting from the roots fill the tree traversal order
-        std::vector<size_t> sectionOrder;
-        while (!sectionStack.empty())
-        {
-            const size_t sectionI = sectionStack.back();
-            sectionStack.pop_back();
-            assert(!addedSection[sectionI]);
-            addedSection[sectionI] = true;
-
-            sectionOrder.push_back(sectionI);
-            for (const size_t childI : sectionChildren[sectionI])
-                sectionStack.push_back(childI);
-        }
-
-        MorphologyTreeStructure mts;
-        mts.sectionTraverseOrder = std::move(sectionOrder);
-        mts.sectionParent = std::move(sectionParent);
-        mts.sectionChildren = std::move(sectionChildren);
-        return mts;
+        for (size_t c : childIndices)
+            sdfData.neighbours[c] = childIndices;
     }
 
     /**
@@ -636,8 +493,7 @@ private:
      */
     void _addSomaGeometry(const brain::neuron::Soma& soma, uint64_t offset,
                           bool useSDFGeometries, MaterialFunc materialFunc,
-                          ParallelModelContainer& model,
-                          SDFMorphologyData& sdfMorphologyData) const
+                          ModelData& model, SDFData& sdfData) const
     {
         const size_t materialId =
             materialFunc(brain::neuron::SectionType::soma);
@@ -648,7 +504,7 @@ private:
         if (useSDFGeometries)
         {
             _connectSDFSomaChildren(somaPosition, somaRadius, materialId,
-                                    offset, children, sdfMorphologyData);
+                                    offset, children, sdfData);
         }
         else
         {
@@ -676,67 +532,6 @@ private:
     }
 
     /**
-     * Adds the sphere between the steps in the sections
-     */
-    void _addStepSphereGeometry(const bool useSDFGeometries, const bool isDone,
-                                const Vector3f& position, const float radius,
-                                const size_t materialId, const uint64_t offset,
-                                ParallelModelContainer& model,
-                                const size_t section,
-                                SDFMorphologyData& sdfMorphologyData) const
-    {
-        if (useSDFGeometries)
-        {
-            if (isDone)
-            {
-                // Since our cone pills already give us a sphere at the end
-                // points we don't need to add any sphere between segments
-                // except at the bifurcation
-                const size_t idx =
-                    _addSDFGeometry(sdfMorphologyData,
-                                    createSDFSphere(position, radius, offset),
-                                    {}, materialId, section);
-
-                sdfMorphologyData.bifurcationIndices.push_back(idx);
-            }
-        }
-        else
-            model.addSphere(materialId, {position, radius, offset});
-    }
-
-    /**
-     * Adds the cone between the steps in the sections
-     */
-    void _addStepConeGeometry(const bool useSDFGeometries,
-                              const Vector3f& position, const float radius,
-                              const Vector3f& target,
-                              const float previousRadius,
-                              const size_t materialId, const uint64_t offset,
-                              ParallelModelContainer& model,
-                              const size_t section,
-                              SDFMorphologyData& sdfMorphologyData) const
-    {
-        if (useSDFGeometries)
-        {
-            const auto geom =
-                (almost_equal(radius, previousRadius, 100000))
-                    ? createSDFPill(position, target, radius, offset)
-                    : createSDFConePill(position, target, radius,
-                                        previousRadius, offset);
-            _addSDFGeometry(sdfMorphologyData, geom, {}, materialId, section);
-        }
-        else
-        {
-            if (almost_equal(radius, previousRadius, 100000))
-                model.addCylinder(materialId,
-                                  {position, target, radius, offset});
-            else
-                model.addCone(materialId, {position, target, radius,
-                                           previousRadius, offset});
-        }
-    }
-
-    /**
      * @brief _importMorphologyFromURI imports a morphology from the specified
      * URI
      * @param uri URI of the morphology
@@ -753,22 +548,16 @@ private:
         const servus::URI& uri, const uint64_t index, MaterialFunc materialFunc,
         const Matrix4f& transformation,
         const brain::CompartmentReportMapping* reportMapping,
-        ParallelModelContainer& model) const
+        ModelData& model) const
     {
         Vector3f somaPosition;
 
         const bool dampenThickness = _params.dampenBranchThicknessChangerate;
         const bool useSDFGeometries = _params.useSDFGeometries;
 
-        SDFMorphologyData sdfMorphologyData;
+        SDFData sdfData;
 
         brain::neuron::Morphology morphology(uri, transformation);
-        brain::neuron::SectionTypes sectionTypes;
-
-        uint64_t offset = 0;
-
-        if (reportMapping)
-            offset = reportMapping->getOffsets()[index][0];
 
         const size_t sectionMask = enumsToBitmask(_params.sectionTypes);
 
@@ -776,8 +565,10 @@ private:
         somaPosition = morphology.getSoma().getCentroid();
         if (sectionMask & static_cast<size_t>(MorphologySectionType::soma))
         {
+            const uint64_t offset =
+                reportMapping ? reportMapping->getOffsets()[index][0] : 0;
             _addSomaGeometry(morphology.getSoma(), offset, useSDFGeometries,
-                             materialFunc, model, sdfMorphologyData);
+                             materialFunc, model, sdfData);
         }
 
         // Only the first one or two axon sections are reported, so find the
@@ -800,25 +591,16 @@ private:
             }
         }
 
-        float previousRadius = 0;
-        const auto& sections =
-            morphology.getSections(_getSectionTypes(sectionMask));
-        const auto morphologyTree =
-            _calculateMorphologyTreeStructure(sections, dampenThickness);
-        std::vector<float> sectionEndRadius(sections.size(), -1.0f);
-
         // Dendrites and axon
-        for (const size_t sectionI : morphologyTree.sectionTraverseOrder)
+        for (const auto sectionId :
+             computeTreeTraversalOrder(morphology, sectionMask))
         {
-            const auto& section = sections[sectionI];
-
-            if (section.getType() == brain::neuron::SectionType::soma)
-                continue;
-
-            const auto materialId = materialFunc(section.getType());
+            const auto& section = morphology.getSection(sectionId);
             const auto& samples = section.getSamples();
             if (samples.empty())
                 continue;
+
+            const auto materialId = materialFunc(section.getType());
 
             const size_t numSamples = samples.size();
 
@@ -843,21 +625,12 @@ private:
                 const auto& counts =
                     reportMapping->getCompartmentCounts()[index];
                 // Number of compartments usually differs from number of samples
-                segmentStep = counts[section.getID()] / float(numSamples);
+                segmentStep = counts[sectionId] / float(numSamples);
             }
 
-            const int sectionParent = morphologyTree.sectionParent[sectionI];
-
-            bool resetRadius = false;
-            if (sectionParent < 0)
-            {
-                resetRadius = true;
-            }
-            else
-            {
-                previousRadius = sectionEndRadius[sectionParent];
-                assert(previousRadius >= 0.0f);
-            }
+            float previousRadius = _getCorrectedRadius(
+                section.hasParent() ? _getLastSampleRadius(section.getParent())
+                                    : samples[0].w() * 0.5);
 
             bool done = false;
             for (size_t i = step; !done && i < numSamples + step; i += step)
@@ -868,6 +641,7 @@ private:
                     done = true;
                 }
 
+                uint64_t offset = 0;
                 if (reportMapping)
                 {
                     const auto& offsets = reportMapping->getOffsets()[index];
@@ -900,21 +674,17 @@ private:
 
                 const auto sample = samples[i];
 
-                Vector3f position(sample.x(), sample.y(), sample.z());
-                Vector3f target(previousSample.x(), previousSample.y(),
-                                previousSample.z());
+                const Vector3f position(sample.x(), sample.y(), sample.z());
+                const Vector3f target(previousSample.x(), previousSample.y(),
+                                      previousSample.z());
                 float radius = _getCorrectedRadius(samples[i].w() * 0.5f);
                 constexpr float maxRadiusChange = 0.1f;
 
-                if (resetRadius)
-                {
-                    previousRadius =
-                        _getCorrectedRadius(samples[i - step].w() * 0.5f);
-                    resetRadius = false;
-                }
-
                 const float dist = (target - position).length();
-                if (dist > 0.0001f && dampenThickness)
+                // The radius of the last sample of a section is never
+                // modified
+                if (dist > 0.0001f && i != samples.size() - 1 &&
+                    dampenThickness)
                 {
                     const float radiusChange =
                         std::min(std::abs(previousRadius - radius),
@@ -927,29 +697,26 @@ private:
 
                 if (radius > 0.f)
                 {
-                    _addStepSphereGeometry(useSDFGeometries, done, position,
-                                           radius, materialId, offset, model,
-                                           sectionI, sdfMorphologyData);
-
-                    if (position != target && previousRadius > 0.f)
+                    if (useSDFGeometries)
                     {
-                        _addStepConeGeometry(useSDFGeometries, position, radius,
-                                             target, previousRadius, materialId,
-                                             offset, model, sectionI,
-                                             sdfMorphologyData);
+                        _addSDFSample(sdfData, section, done, position, target,
+                                      radius, previousRadius, materialId,
+                                      offset);
+                    }
+                    else
+                    {
+                        _addRegularSample(model, position, target, radius,
+                                          previousRadius, materialId, offset);
                     }
                 }
                 previousSample = sample;
                 previousRadius = radius;
-                sectionEndRadius[sectionI] = radius;
             }
         }
 
         if (useSDFGeometries)
-        {
-            _connectSDFBifurcations(sdfMorphologyData, morphologyTree);
-            _finalizeSDFGeometries(model, sdfMorphologyData);
-        }
+            _finalizeSDFGeometries(model, sdfData);
+
         return somaPosition;
     }
 
@@ -1017,8 +784,8 @@ Vector3f MorphologyLoader::importMorphology(
 Vector3f MorphologyLoader::_importMorphology(
     const servus::URI& source, const uint64_t index, MaterialFunc materialFunc,
     const Matrix4f& transformation,
-    const brain::CompartmentReportMapping* reportMapping,
-    ParallelModelContainer& model, const MorphologyLoaderParams& params) const
+    const brain::CompartmentReportMapping* reportMapping, ModelData& model,
+    const MorphologyLoaderParams& params) const
 {
     auto impl = MorphologyLoader::Impl(params);
     return impl.importMorphology(source, index, materialFunc, transformation,
