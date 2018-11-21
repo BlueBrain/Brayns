@@ -71,10 +71,7 @@ void Engine::render()
 void Engine::postRender()
 {
     for (auto frameBuffer : _frameBuffers)
-    {
-        _writeFrameToFile(*frameBuffer);
         frameBuffer->incrementAccumFrames();
-    }
 }
 
 Renderer& Engine::getRenderer()
@@ -113,18 +110,5 @@ void Engine::resetFrameBuffers()
 {
     for (auto frameBuffer : _frameBuffers)
         frameBuffer->resetModified();
-}
-
-void Engine::_writeFrameToFile(FrameBuffer& frameBuffer)
-{
-    const auto& frameExportFolder =
-        _parametersManager.getApplicationParameters().getFrameExportFolder();
-    if (frameExportFolder.empty())
-        return;
-    char str[7];
-    const auto frame = _parametersManager.getAnimationParameters().getFrame();
-    snprintf(str, 7, "%s_%06d", frameBuffer.getName().c_str(), int(frame));
-    const auto filename = frameExportFolder + "/" + str + ".png";
-    ImageManager::exportFrameBufferToFile(frameBuffer, filename);
 }
 }

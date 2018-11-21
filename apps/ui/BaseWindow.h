@@ -25,7 +25,8 @@
 #include <unistd.h>
 #endif
 
-#include <apps/ui/gl/ScreenSpaceProcessor.h>
+#include <GL/glew.h>
+
 #include <brayns/common/Timer.h>
 #include <brayns/common/types.h>
 
@@ -130,8 +131,6 @@ protected:
     Vector2ui _windowSize;
 
     Timer _timer;
-
-    ScreenSpaceProcessor _screenSpaceProcessor;
 
     uint64_t _gid;
 
