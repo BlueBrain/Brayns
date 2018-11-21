@@ -158,20 +158,16 @@ public:
         bool _readOnly{false};
         ModifiedCallback _modifiedCallback;
         template <typename T>
-        Type _getType();
+        Type _getType() const;
 
         template <typename T>
         T _castValue(const boost::any& v) const
         {
-            try
-            {
-                return boost::any_cast<T>(v);
-            }
-            catch (boost::bad_any_cast&)
-            {
-                throw std::runtime_error("Could not cast value for property '" +
-                                         name + "'");
-            }
+            const auto requestedType = _getType<T>();
+            if (requestedType != type)
+                throw std::runtime_error("Type mismatch for property '" + name +
+                                         "'");
+            return boost::any_cast<T>(v);
         }
     };
 
@@ -273,58 +269,62 @@ private:
 
 template <>
 inline PropertyMap::Property::Type PropertyMap::Property::_getType<double>()
+    const
 {
     return PropertyMap::Property::Type::Double;
 }
 template <>
 inline PropertyMap::Property::Type PropertyMap::Property::_getType<int32_t>()
+    const
+
 {
     return PropertyMap::Property::Type::Int;
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::string>()
+    PropertyMap::Property::_getType<std::string>() const
+
 {
     return PropertyMap::Property::Type::String;
 }
 template <>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType<bool>()
+inline PropertyMap::Property::Type PropertyMap::Property::_getType<bool>() const
 {
     return PropertyMap::Property::Type::Bool;
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 2>>()
+    PropertyMap::Property::_getType<std::array<double, 2>>() const
 {
     return PropertyMap::Property::Type::Vec2d;
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<int32_t, 2>>()
+    PropertyMap::Property::_getType<std::array<int32_t, 2>>() const
 {
     return PropertyMap::Property::Type::Vec2i;
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 3>>()
+    PropertyMap::Property::_getType<std::array<double, 3>>() const
 {
     return PropertyMap::Property::Type::Vec3d;
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<int32_t, 3>>()
+    PropertyMap::Property::_getType<std::array<int32_t, 3>>() const
 {
     return PropertyMap::Property::Type::Vec3i;
 }
 template <>
 inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 4>>()
+    PropertyMap::Property::_getType<std::array<double, 4>>() const
 {
     return PropertyMap::Property::Type::Vec4d;
 }
 
 template <typename T>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType()
+inline PropertyMap::Property::Type PropertyMap::Property::_getType() const
 {
     static_assert(sizeof(T) == -1, "Type not allowed in property map!");
     return PropertyMap::Property::Type::Double;
