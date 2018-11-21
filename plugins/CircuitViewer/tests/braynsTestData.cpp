@@ -29,6 +29,7 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/simulation/AbstractSimulationHandler.h>
 
 #include <BBP/TestDatasets.h>
 
@@ -101,8 +102,8 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
 
     brayns::Brayns brayns(argc, argv);
 
-    auto model = brayns.getEngine().getScene().getModel(0);
-    const auto rotCenter = model->getTransformation().getRotationCenter();
+    auto modelDesc = brayns.getEngine().getScene().getModel(0);
+    const auto rotCenter = modelDesc->getTransformation().getRotationCenter();
 
     auto& camera = brayns.getEngine().getCamera();
     const auto camPos = camera.getPosition();
@@ -113,7 +114,7 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
     camera.setOrientation(brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
     camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
 
-    auto& tf = model->getModel().getTransferFunction();
+    auto& tf = modelDesc->getModel().getTransferFunction();
     tf.setValuesRange({-66, -62});
     tf.setColorMap(
         {"test_f",
@@ -140,6 +141,8 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
         controlPoints.push_back({i / 15., 1.});
     tf.setControlPoints(controlPoints);
 
+    brayns.commit();
+    modelDesc->getModel().getSimulationHandler()->waitReady();
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50advancedsimulation.png",
                                  brayns.getEngine().getFrameBuffer()));
