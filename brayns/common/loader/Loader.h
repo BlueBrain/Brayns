@@ -81,17 +81,17 @@ public:
     virtual ~Loader() = default;
 
     /**
-     * Get the loaders supported file extensions
+     * @return The loaders supported file extensions
      */
     virtual std::vector<std::string> getSupportedExtensions() const = 0;
 
     /**
-     * Get the loader name
+     * @return The loader name
      */
     virtual std::string getName() const = 0;
 
     /**
-     * Get the loader properties
+     * @return The loader properties
      */
     virtual PropertyMap getProperties() const = 0;
 
