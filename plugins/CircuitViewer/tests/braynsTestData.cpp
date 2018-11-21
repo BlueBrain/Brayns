@@ -36,28 +36,6 @@
 #define BOOST_TEST_MODULE braynsTestData
 #include <boost/test/unit_test.hpp>
 
-#include <chrono>
-#include <thread>
-
-namespace
-{
-constexpr size_t WAIT_MILLISECONDS = 5000;
-const auto waitForSimulationUpload = [&](const auto& simulationHandler) {
-    using namespace std::chrono_literals;
-
-    auto start = std::chrono::high_resolution_clock::now();
-    auto elapsed = 0.0;
-
-    while (elapsed < WAIT_MILLISECONDS && !simulationHandler->isReady())
-    {
-        std::this_thread::sleep_for(100ms);
-        const auto now = std::chrono::high_resolution_clock::now();
-        elapsed =
-            std::chrono::duration<double, std::milli>(now - start).count();
-    }
-};
-}
-
 BOOST_AUTO_TEST_CASE(render_circuit_and_compare)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
@@ -163,10 +141,8 @@ BOOST_AUTO_TEST_CASE(render_circuit_with_color_and_compare)
         controlPoints.push_back({i / 15., 1.});
     tf.setControlPoints(controlPoints);
 
-    auto simulationHandler = modelDesc->getModel().getSimulationHandler();
     brayns.commit();
-    waitForSimulationUpload(simulationHandler);
-
+    modelDesc->getModel().getSimulationHandler()->waitReady();
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataallmini50advancedsimulation.png",
                                  brayns.getEngine().getFrameBuffer()));

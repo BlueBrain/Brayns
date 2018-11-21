@@ -47,9 +47,9 @@ public:
      * @param gids GIDS to load
      */
     SimulationHandler(const ApplicationParameters& applicationParameters,
-                             const GeometryParameters& geometryParameters,
-                             const brion::URI& reportSource,
-                             const brion::GIDSet& gids);
+                      const GeometryParameters& geometryParameters,
+                      const brion::URI& reportSource,
+                      const brion::GIDSet& gids);
     ~SimulationHandler();
 
     void bind(const MaterialPtr& material) final;
@@ -60,6 +60,8 @@ public:
 
     CompartmentReportPtr getCompartmentReport() { return _compartmentReport; }
     bool isReady() const final;
+
+    void waitReady() const final;
 
 private:
     void _triggerLoading(uint32_t frame);

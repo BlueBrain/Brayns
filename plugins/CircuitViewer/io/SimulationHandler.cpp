@@ -95,6 +95,12 @@ bool SimulationHandler::isReady() const
     return _ready;
 }
 
+void SimulationHandler::waitReady() const
+{
+    if (_currentFrameFuture.valid())
+        _currentFrameFuture.wait();
+}
+
 void* SimulationHandler::getFrameData(uint32_t frame)
 {
     frame = _getBoundedFrame(frame);

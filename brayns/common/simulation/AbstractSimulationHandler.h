@@ -46,9 +46,9 @@ public:
 
     AbstractSimulationHandler& operator=(const AbstractSimulationHandler& rhs);
 
-    BRAYNS_API virtual void bind(const MaterialPtr& /* material */) {};
+    BRAYNS_API virtual void bind(const MaterialPtr& /* material */){};
 
-    BRAYNS_API virtual void unbind(const MaterialPtr& /* material */) {};
+    BRAYNS_API virtual void unbind(const MaterialPtr& /* material */){};
 
     /**
     * @brief Attaches a memory mapped file to the scene so that renderers can
@@ -113,6 +113,8 @@ public:
     /** @return true if the requested frame from getFrameData() is ready to
      * consume and if it is allowed to advance to the next frame. */
     virtual bool isReady() const { return true; }
+    /** Wait until current frame is ready */
+    virtual void waitReady() const {}
 protected:
     uint32_t _getBoundedFrame(const uint32_t frame) const;
 
