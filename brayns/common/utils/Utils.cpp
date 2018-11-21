@@ -81,4 +81,13 @@ std::string extractExtension(const std::string& filename)
 
     return extension;
 }
+std::string replaceFirstOccurrence(std::string input,
+                                   const std::string& toReplace,
+                                   const std::string& replaceWith)
+{
+    std::size_t pos = input.find(toReplace);
+    if (pos == std::string::npos)
+        return input;
+    return input.replace(pos, toReplace.length(), replaceWith);
+}
 }

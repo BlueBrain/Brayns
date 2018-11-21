@@ -32,6 +32,10 @@ std::string shortenString(const std::string& string,
 
 std::string extractExtension(const std::string& filename);
 
+std::string replaceFirstOccurrence(std::string input,
+                                   const std::string& toReplace,
+                                   const std::string& replaceWith);
+
 inline auto lowerCase(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);

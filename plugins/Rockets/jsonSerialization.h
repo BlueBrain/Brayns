@@ -30,6 +30,7 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
+#include <brayns/common/utils/Utils.h>
 #include <brayns/common/utils/base64/base64.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
@@ -519,23 +520,14 @@ inline std::string to_json(const brayns::Scene& scene)
 template <typename T>
 inline std::string modelBinaryParamsToJson(const T& params)
 {
-    const auto replaceFirstOccurrence = [](std::string s,
-                                           const std::string& toReplace,
-                                           const std::string& replaceWith) {
-        std::size_t pos = s.find(toReplace);
-        if (pos == std::string::npos)
-            return s;
-        return s.replace(pos, toReplace.length(), replaceWith);
-    };
-
     const auto jsonOriginal = staticjson::to_json_string(params);
 
     const std::string propertiesJson =
         "\"loader_properties\":" + to_json(params._loaderProperties);
 
     const auto result =
-        replaceFirstOccurrence(jsonOriginal, "\"loader_properties\":{}",
-                               propertiesJson);
+        brayns::replaceFirstOccurrence(jsonOriginal, "\"loader_properties\":{}",
+                                       propertiesJson);
 
     return result;
 }

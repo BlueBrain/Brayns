@@ -21,7 +21,9 @@
 #pragma once
 
 #include "jsonSerialization.h"
+
 #include <brayns/common/PropertyMap.h>
+#include <brayns/common/utils/Utils.h>
 
 namespace
 {
@@ -801,23 +803,14 @@ inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
 template <>
 inline std::string to_json(const brayns::ModelProperties& props)
 {
-    const auto replaceFirstOccurrence = [](std::string s,
-                                           const std::string& toReplace,
-                                           const std::string& replaceWith) {
-        std::size_t pos = s.find(toReplace);
-        if (pos == std::string::npos)
-            return s;
-        return s.replace(pos, toReplace.length(), replaceWith);
-    };
-
     const auto jsonOriginal = staticjson::to_json_string(props);
 
     const std::string propertiesJson =
         "\"properties\":" + to_json(props.properties);
 
     const auto result =
-        replaceFirstOccurrence(jsonOriginal, "\"properties\":{}",
-                               propertiesJson);
+        brayns::replaceFirstOccurrence(jsonOriginal, "\"properties\":{}",
+                                       propertiesJson);
 
     return result;
 }
