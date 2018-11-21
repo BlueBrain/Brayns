@@ -684,6 +684,7 @@ ModelDescriptorPtr CircuitLoader::importFromFile(
     const PropertyMap& propertiesTmp, const size_t /*index*/,
     const size_t /*materialID*/) const
 {
+    // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
     properties.fillPropertyMap(propertiesTmp);
     auto impl = Impl(_scene, properties);

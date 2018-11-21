@@ -1140,6 +1140,7 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     const PropertyMap& propertiesTmp, const size_t index,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
+    // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
     properties.fillPropertyMap(propertiesTmp);
 
