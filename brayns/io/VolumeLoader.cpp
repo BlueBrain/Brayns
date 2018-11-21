@@ -226,8 +226,6 @@ ModelDescriptorPtr MHDVolumeLoader::importFromFile(
     const PropertyMap&, const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
-    callback.updateProgress("Parsing volume file ...", 0.f);
-
     std::string volumeFile = filename;
     boost::property_tree::ptree pt;
     boost::property_tree::ini_parser::read_ini(filename, pt);
