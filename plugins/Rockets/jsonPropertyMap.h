@@ -800,21 +800,6 @@ inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
     return true;
 }
 
-template <>
-inline std::string to_json(const brayns::ModelProperties& props)
-{
-    const auto jsonOriginal = staticjson::to_json_string(props);
-
-    const std::string propertiesJson =
-        "\"properties\":" + to_json(props.properties);
-
-    const auto result =
-        brayns::replaceFirstOccurrence(jsonOriginal, "\"properties\":{}",
-                                       propertiesJson);
-
-    return result;
-}
-
 brayns::PropertyMap jsonToPropertyMap(const std::string& json)
 {
     using namespace rapidjson;

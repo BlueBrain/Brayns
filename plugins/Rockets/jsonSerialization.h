@@ -517,6 +517,21 @@ inline std::string to_json(const brayns::Scene& scene)
     return staticjson::to_json_string(scene);
 }
 
+template <>
+inline std::string to_json(const brayns::ModelProperties& props)
+{
+    const auto jsonOriginal = staticjson::to_json_string(props);
+
+    const std::string propertiesJson =
+        "\"properties\":" + to_json(props.properties);
+
+    const auto result =
+        brayns::replaceFirstOccurrence(jsonOriginal, "\"properties\":{}",
+                                       propertiesJson);
+
+    return result;
+}
+
 template <typename T>
 inline std::string modelBinaryParamsToJson(const T& params)
 {
