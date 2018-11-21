@@ -342,7 +342,7 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
     PropertyMap properties = getProperties();
     properties.fillPropertyMap(propertiesTmp);
 
-    const float radiusMultiplier =
+    const double radiusMultiplier =
         properties.getProperty<double>(PROP_RADIUS_MULTIPLIER.name, 1.0);
 
     const auto colorScheme = stringToEnum<ColorScheme>(
@@ -460,7 +460,7 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
             const auto center = 0.01f * atom.position;
 
             // Convert radius from angstrom
-            const auto radius = 0.0001f * atom.radius * radiusMultiplier;
+            const float radius = 0.0001f * atom.radius * radiusMultiplier;
 
             const auto materialId = colorScheme == ColorScheme::protein_by_id
                                         ? index
