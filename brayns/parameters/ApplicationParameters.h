@@ -81,12 +81,6 @@ public:
 
     /** Max render FPS to limit */
     size_t getMaxRenderFPS() const { return _maxRenderFPS; }
-    const strings& getFilters() const { return _filters; }
-    void setFrameExportFolder(const std::string& folder)
-    {
-        _updateValue(_frameExportFolder, folder);
-    }
-    std::string getFrameExportFolder() const { return _frameExportFolder; }
     /** Folder used by the application to store temporary files */
     std::string getTmpFolder() const { return _tmpFolder; }
     /** @return true if synchronous mode is enabled, aka rendering waits for
@@ -116,8 +110,6 @@ protected:
     Vector2d _windowSize;
     bool _benchmarking{false};
     size_t _jpegCompression;
-    strings _filters;
-    std::string _frameExportFolder;
     std::string _tmpFolder;
     bool _stereo{false};
     bool _synchronousMode{false};

@@ -234,9 +234,6 @@ void BaseWindow::reshape(Vector2ui newSize)
 
     _windowSize = newSize;
     applicationParameters.setWindowSize(newSize);
-
-    if (!applicationParameters.getFilters().empty())
-        _screenSpaceProcessor.resize(newSize.x(), newSize.y());
 }
 
 void BaseWindow::activate()
@@ -278,74 +275,49 @@ void BaseWindow::display()
         const auto& frameSize = frameBuffer->getFrameSize();
 
         frameBuffer->map();
-        if (_brayns.getParametersManager()
-                .getApplicationParameters()
-                .getFilters()
-                .empty())
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, frameSize.x(), 0.0f, frameSize.y(), -1.0f, 1.0f);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glViewport(offset, 0, frameSize.x(), frameSize.y());
+
+        GLenum type = GL_FLOAT;
+        const GLvoid* buffer = 0;
+        switch (_frameBufferMode)
         {
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(0, frameSize.x(), 0.0f, frameSize.y(), -1.0f, 1.0f);
-
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            glViewport(offset, 0, frameSize.x(), frameSize.y());
-
-            GLenum type = GL_FLOAT;
-            const GLvoid* buffer = 0;
-            switch (_frameBufferMode)
-            {
-            case FrameBufferMode::COLOR:
-                type = GL_UNSIGNED_BYTE;
-                buffer = frameBuffer->getColorBuffer();
-                break;
-            case FrameBufferMode::DEPTH:
-                format = GL_LUMINANCE;
-                buffer = frameBuffer->getDepthBuffer();
-                break;
-            default:
-                glClearColor(0.f, 0.f, 0.f, 1.f);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            }
-
-            if (buffer)
-            {
-                glBindTexture(GL_TEXTURE_2D, _fbTexture);
-                glTexImage2D(GL_TEXTURE_2D, 0, format,
-                             frameBuffer->getSize().x(),
-                             frameBuffer->getSize().y(), 0, format, type,
-                             buffer);
-
-                glBegin(GL_QUADS);
-                glTexCoord2f(0.f, 0.f);
-                glVertex3f(0, 0, 0);
-                glTexCoord2f(0.f, 1.f);
-                glVertex3f(0, frameSize.y(), 0);
-                glTexCoord2f(1.f, 1.f);
-                glVertex3f(frameSize.x(), frameSize.y(), 0);
-                glTexCoord2f(1.f, 0.f);
-                glVertex3f(frameSize.x(), 0, 0);
-                glEnd();
-
-                glBindTexture(GL_TEXTURE_2D, 0);
-            }
+        case FrameBufferMode::COLOR:
+            type = GL_UNSIGNED_BYTE;
+            buffer = frameBuffer->getColorBuffer();
+            break;
+        case FrameBufferMode::DEPTH:
+            format = GL_LUMINANCE;
+            buffer = frameBuffer->getDepthBuffer();
+            break;
+        default:
+            glClearColor(0.f, 0.f, 0.f, 1.f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
-        else
+
+        if (buffer)
         {
-            ScreenSpaceProcessorData ssProcData;
+            glBindTexture(GL_TEXTURE_2D, _fbTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, format, frameBuffer->getSize().x(),
+                         frameBuffer->getSize().y(), 0, format, type, buffer);
 
-            ssProcData.width = frameSize.x();
-            ssProcData.height = frameSize.y();
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.f, 0.f);
+            glVertex3f(0, 0, 0);
+            glTexCoord2f(0.f, 1.f);
+            glVertex3f(0, frameSize.y(), 0);
+            glTexCoord2f(1.f, 1.f);
+            glVertex3f(frameSize.x(), frameSize.y(), 0);
+            glTexCoord2f(1.f, 0.f);
+            glVertex3f(frameSize.x(), 0, 0);
+            glEnd();
 
-            ssProcData.colorFormat = format;
-            ssProcData.colorBuffer = frameBuffer->getColorBuffer();
-            ssProcData.colorType = GL_UNSIGNED_BYTE;
-
-            ssProcData.depthFormat = GL_LUMINANCE;
-            ssProcData.depthBuffer = frameBuffer->getDepthBuffer();
-            ssProcData.depthType = GL_FLOAT;
-
-            _screenSpaceProcessor.draw(ssProcData);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
 
         frameBuffer->unmap();
@@ -372,12 +344,6 @@ void BaseWindow::display()
 
 void BaseWindow::clearPixels()
 {
-    if (!_brayns.getParametersManager()
-             .getApplicationParameters()
-             .getFilters()
-             .empty())
-        _screenSpaceProcessor.clear();
-
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -403,12 +369,6 @@ void BaseWindow::create(const char* title)
     glutMouseFunc(glut3dMouseFunc);
     glutPassiveMotionFunc(glut3dPassiveMouseFunc);
     glutIdleFunc(glut3dIdle);
-
-    if (!_brayns.getParametersManager()
-             .getApplicationParameters()
-             .getFilters()
-             .empty())
-        _screenSpaceProcessor.init(windowSize.x(), windowSize.y());
 
     _registerKeyboardShortcuts();
 

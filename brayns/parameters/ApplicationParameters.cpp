@@ -28,8 +28,6 @@ namespace
 {
 const std::string PARAM_BENCHMARKING = "enable-benchmark";
 const std::string PARAM_ENGINE = "engine";
-const std::string PARAM_FILTERS = "filters";
-const std::string PARAM_FRAME_EXPORT_FOLDER = "frame-export-folder";
 const std::string PARAM_HTTP_SERVER = "http-server";
 const std::string PARAM_IMAGE_STREAM_FPS = "image-stream-fps";
 const std::string PARAM_INPUT_PATHS = "input-paths";
@@ -94,12 +92,9 @@ ApplicationParameters::ApplicationParameters()
         PARAM_SYNCHRONOUS_MODE.c_str(), po::bool_switch()->default_value(false),
         "Enable synchronous mode rendering vs data loading")(
         PARAM_IMAGE_STREAM_FPS.c_str(), po::value<size_t>(),
-        "Image stream FPS (60 default), [int]")(
-        PARAM_FILTERS.c_str(), po::value<strings>()->multitoken(),
-        "Screen space filters [string]")(
-        PARAM_FRAME_EXPORT_FOLDER.c_str(), po::value<std::string>(),
-        "Folder where frames are exported as PNG images [string]")(
-        PARAM_MAX_RENDER_FPS.c_str(), po::value<size_t>(), "Max. render FPS");
+        "Image stream FPS (60 default), [int]")(PARAM_MAX_RENDER_FPS.c_str(),
+                                                po::value<size_t>(),
+                                                "Max. render FPS");
 
     _positionalArgs.add(PARAM_INPUT_PATHS.c_str(), -1);
 }
@@ -131,10 +126,6 @@ void ApplicationParameters::parse(const po::variables_map& vm)
     _benchmarking = vm[PARAM_BENCHMARKING].as<bool>();
     if (vm.count(PARAM_JPEG_COMPRESSION))
         _jpegCompression = vm[PARAM_JPEG_COMPRESSION].as<size_t>();
-    if (vm.count(PARAM_FILTERS))
-        _filters = vm[PARAM_FILTERS].as<strings>();
-    if (vm.count(PARAM_FRAME_EXPORT_FOLDER))
-        _frameExportFolder = vm[PARAM_FRAME_EXPORT_FOLDER].as<std::string>();
     if (vm.count(PARAM_TMP_FOLDER))
         _tmpFolder = vm[PARAM_TMP_FOLDER].as<std::string>();
     _parallelRendering = vm[PARAM_PARALLEL_RENDERING].as<bool>();

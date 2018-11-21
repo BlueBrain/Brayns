@@ -154,8 +154,6 @@ protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);
     void _render();
 
-    void _writeFrameToFile(FrameBuffer& frameBuffer);
-
     ParametersManager& _parametersManager;
     ScenePtr _scene;
     CameraPtr _camera;

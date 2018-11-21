@@ -393,8 +393,6 @@ inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
 {
     h->add_property("engine", &a->_engine, Flags::IgnoreRead | Flags::Optional);
     h->add_property("jpeg_compression", &a->_jpegCompression, Flags::Optional);
-    h->add_property("frame_export_folder", &a->_frameExportFolder,
-                    Flags::Optional);
     h->add_property("synchronous_mode", &a->_synchronousMode, Flags::Optional);
     h->add_property("image_stream_fps", &a->_imageStreamFPS, Flags::Optional);
     h->add_property("viewport", toArray(a->_windowSize), Flags::Optional);
