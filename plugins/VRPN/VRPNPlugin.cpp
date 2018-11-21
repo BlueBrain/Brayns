@@ -69,8 +69,11 @@ PropertyMap::Property getHeadRotationProperty()
 
 PropertyMap::Property getStereoModeProperty()
 {
-    return {"stereoMode", "Stereo mode", int32_t(StereoMode::side_by_side),
-            enumNames<StereoMode>()};
+    return {"stereoMode",
+            "Stereo mode",
+            static_cast<int>(
+                ospray::PerspectiveCamera::StereoMode::OSP_STEREO_SIDE_BY_SIDE),
+            {"None", "Left eye", "Right eye", "Side by side"}};
 }
 
 PropertyMap::Property getInterpupillaryDistanceProperty()
