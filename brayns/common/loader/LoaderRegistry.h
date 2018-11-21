@@ -87,5 +87,6 @@ public:
 
 private:
     std::deque<std::unique_ptr<Loader>> _loaders;
+    std::unique_ptr<Loader> _archiveLoader;
 };
 }

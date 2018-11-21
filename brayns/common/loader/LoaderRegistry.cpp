@@ -20,6 +20,10 @@
 
 #include "LoaderRegistry.h"
 
+#ifdef BRAYNS_USE_LIBARCHIVE
+#include <brayns/io/ArchiveLoader.h>
+#endif
+
 #include <brayns/common/utils/Utils.h>
 
 #include <boost/filesystem.hpp>
@@ -30,6 +34,13 @@ namespace brayns
 {
 void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
 {
+#ifdef BRAYNS_USE_LIBARCHIVE
+    if (dynamic_cast<ArchiveLoader*>(loader.get()) != nullptr)
+    {
+        _archiveLoader = std::move(loader);
+        return;
+    }
+#endif
     _loaders.push_front(std::move(loader));
 }
 
@@ -42,10 +53,6 @@ std::vector<LoaderSupport> LoaderRegistry::getLoaderSupport() const
                        return LoaderSupport{loader->getName(),
                                             loader->getSupportedExtensions()};
                    });
-
-    ret.erase(std::remove_if(ret.begin(), ret.end(),
-                             [](const auto& p) { return p.name == "archive"; }),
-              ret.end());
     return ret;
 }
 
@@ -59,12 +66,6 @@ std::vector<std::pair<std::string, PropertyMap>>
                        return std::pair<std::string, PropertyMap>{
                            loader->getName(), loader->getProperties()};
                    });
-
-    ret.erase(std::remove_if(ret.begin(), ret.end(),
-                             [](const auto& p) {
-                                 return p.first == "archive";
-                             }),
-              ret.end());
     return ret;
 }
 
@@ -101,13 +102,8 @@ const Loader& LoaderRegistry::getSuitableLoader(
     // If we have a specific loader we first check if it is an archive
     if (!loaderName.empty())
     {
-        Loader* archiveLoader = nullptr;
-        for (const auto& loader : _loaders)
-            if (loader->getName() == "archive")
-                archiveLoader = loader.get();
-
-        if (archiveLoader && archiveLoader->isSupported(filename, extension))
-            return *archiveLoader;
+        if (_archiveLoader && _archiveLoader->isSupported(filename, extension))
+            return *_archiveLoader;
 
         // Do not use archive loader, find specified one
         for (const auto& loader : _loaders)
