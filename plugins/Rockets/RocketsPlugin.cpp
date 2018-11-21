@@ -971,7 +971,7 @@ public:
         _handleUpdateInstance();
 
         _handleGetLoaders();
-        _handleloadersSchema();
+        _handleLoadersSchema();
         _handlePropertyObject(_engine.getCamera(), ENDPOINT_CAMERA_PARAMS,
                               "camera");
         _handlePropertyObject(_engine.getRenderer(), ENDPOINT_RENDERER_PARAMS,
@@ -1569,7 +1569,7 @@ public:
                       buildJsonSchema(props, hyphenatedToCamelCase(endpoint)));
     }
 
-    void _handleloadersSchema()
+    void _handleLoadersSchema()
     {
         const RpcDescription desc{LOADERS_SCHEMA,
                                   "Get the schema for all loaders"};
