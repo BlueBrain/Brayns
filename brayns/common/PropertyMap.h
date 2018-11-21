@@ -97,6 +97,10 @@ public:
             , _min(0)
             , _max(enums_.size())
         {
+            static_assert(
+                std::is_same<T, int32_t>::value ||
+                    std::is_same<T, std::string>::value,
+                "Enum property must be either a string or an integer.");
         }
 
         using ModifiedCallback = std::function<void(const Property&)>;
