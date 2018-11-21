@@ -361,10 +361,9 @@ private:
                         "morphologyDampenBranchThicknessChangerate",
                         geometryParameters
                             .getMorphologyDampenBranchThicknessChangerate()});
-        pm.setProperty({"morphologyUseSDFGeometries",
-                        "morphologyUseSDFGeometries",
-                        geometryParameters.getMorphologyUseSDFGeometries()});
-
+        pm.setProperty({"morphologyUseSdfGeometries",
+                        "morphologyUseSdfGeometries",
+                        geometryParameters.getMorphologyUseSdfGeometries()});
         pm.setProperty({"loadCacheFile", "loadCacheFile",
                         geometryParameters.getLoadCacheFile()});
         pm.setProperty({"saveCacheFile", "saveCacheFile",

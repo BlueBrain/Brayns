@@ -229,9 +229,9 @@ public:
         return _morphologyDampenBranchThicknessChangerate;
     }
 
-    bool getMorphologyUseSDFGeometries() const
+    bool getMorphologyUseSdfGeometries() const
     {
-        return _morphologyUseSDFGeometries;
+        return _morphologyUseSdfGeometries;
     }
 
     const std::set<BVHFlag>& getDefaultBVHFlags() const
@@ -261,7 +261,7 @@ protected:
     float _metaballsThreshold;
     size_t _metaballsSamplesFromSoma;
     bool _morphologyDampenBranchThicknessChangerate;
-    bool _morphologyUseSDFGeometries;
+    bool _morphologyUseSdfGeometries;
 
     // System parameters
     MemoryMode _memoryMode;
