@@ -24,4 +24,6 @@ constexpr auto BRAYNS_TESTDATA_MODEL_BROKEN_PATH =
     BRAYNS_TESTDATA_PATH "modelsInvalid/broken.xyz";
 constexpr auto BRAYNS_TESTDATA_MODEL_UNSUPPORTED_PATH =
     BRAYNS_TESTDATA_PATH "modelsInvalid/unsupported.abc";
+constexpr auto BRAYNS_TESTDATA_MODEL_PDB_PATH = BRAYNS_TESTDATA_PATH "1bna.pdb";
+
 #endif

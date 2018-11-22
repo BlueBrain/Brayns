@@ -184,6 +184,28 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_invalid)
     }
 }
 
+BOOST_AUTO_TEST_CASE(protein_loader)
+{
+    brayns::PropertyMap properties;
+    properties.setProperty({"radiusMultiplier", "Radius multiplier", 2.5});
+    properties.setProperty(
+        {"colorScheme", "Color scheme",
+         brayns::enumToString(brayns::ColorScheme::protein_chains),
+         brayns::enumNames<brayns::ColorScheme>()});
+
+    const auto numModels = getScene().getNumModels();
+
+    brayns::ModelParams params{"1mbs", BRAYNS_TESTDATA_MODEL_PDB_PATH};
+    params._loaderProperties = properties;
+
+    auto model =
+        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
+                                                                  params);
+    BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
+    BOOST_CHECK_EQUAL(model.getName(), params.getName());
+    BOOST_CHECK_EQUAL(model.getPath(), params.getPath());
+}
+
 BOOST_AUTO_TEST_CASE(cancel)
 {
     auto request = getJsonRpcClient()

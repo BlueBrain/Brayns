@@ -33,8 +33,6 @@
 
 #include "PDiffHelpers.h"
 
-constexpr auto PDB_FILE = BRAYNS_TESTDATA_PATH "1bna.pdb";
-
 BOOST_AUTO_TEST_CASE(render_two_frames_and_compare_they_are_same)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
@@ -113,7 +111,8 @@ BOOST_AUTO_TEST_CASE(render_protein_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, PDB_FILE, "--disable-accumulation"};
+    const char* argv[] = {app, BRAYNS_TESTDATA_MODEL_PDB_PATH,
+                          "--disable-accumulation"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -127,7 +126,8 @@ BOOST_AUTO_TEST_CASE(render_protein_in_stereo_and_compare)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app, PDB_FILE, "--disable-accumulation", "--stereo"};
+    const char* argv[] = {app, BRAYNS_TESTDATA_MODEL_PDB_PATH,
+                          "--disable-accumulation", "--stereo"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
