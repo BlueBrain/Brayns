@@ -86,6 +86,9 @@ public:
               LoaderProgress cb);
 
 private:
+    bool _archiveSupported(const std::string& filename,
+                           const std::string& filetype) const;
+
     std::deque<std::unique_ptr<Loader>> _loaders;
     std::unique_ptr<Loader> _archiveLoader;
 };

@@ -75,6 +75,8 @@ bool LoaderRegistry::isSupportedFile(const std::string& filename) const
         return false;
 
     const auto extension = extractExtension(filename);
+    if (_archiveSupported(filename, extension))
+        return true;
     for (const auto& loader : _loaders)
         if (loader->isSupported(filename, extension))
             return true;
@@ -83,6 +85,8 @@ bool LoaderRegistry::isSupportedFile(const std::string& filename) const
 
 bool LoaderRegistry::isSupportedType(const std::string& type) const
 {
+    if (_archiveSupported("", type))
+        return true;
     for (const auto& loader : _loaders)
         if (loader->isSupported("", type))
             return true;
@@ -99,13 +103,14 @@ const Loader& LoaderRegistry::getSuitableLoader(
     const auto extension =
         filetype.empty() ? extractExtension(filename) : filetype;
 
-    // If we have a specific loader we first check if it is an archive
+    // If we have an archive we always use the archive loader even if a specific
+    // loader is specified
+    if (_archiveSupported(filename, extension))
+        return *_archiveLoader;
+
+    // Find specific loader
     if (!loaderName.empty())
     {
-        if (_archiveLoader && _archiveLoader->isSupported(filename, extension))
-            return *_archiveLoader;
-
-        // Do not use archive loader, find specified one
         for (const auto& loader : _loaders)
             if (loader->getName() == loaderName)
                 return *loader.get();
@@ -120,5 +125,11 @@ const Loader& LoaderRegistry::getSuitableLoader(
 
     throw std::runtime_error("No loader found for filename '" + filename +
                              "' and filetype '" + filetype + "'");
+}
+
+bool LoaderRegistry::_archiveSupported(const std::string& filename,
+                                       const std::string& filetype) const
+{
+    return _archiveLoader && _archiveLoader->isSupported(filename, filetype);
 }
 }
