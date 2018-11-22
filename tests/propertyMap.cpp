@@ -124,3 +124,48 @@ BOOST_AUTO_TEST_CASE(set_and_get_all_supported_types)
     BOOST_CHECK(properties.getPropertyType("vec3d") == Type::Vec3d);
     BOOST_CHECK(properties.getPropertyType("vec4d") == Type::Vec4d);
 }
+
+BOOST_AUTO_TEST_CASE(fill_property_map)
+{
+    using Type = brayns::PropertyMap::Property::Type;
+
+    brayns::PropertyMap propInts;
+    propInts.setProperty({"number", "number", 42});
+    propInts.setProperty({"vec2", "vec2", std::array<int32_t, 2>{{1, 2}}});
+    propInts.setProperty({"vec3", "vec3", std::array<int32_t, 3>{{1, 2, 3}}});
+
+    brayns::PropertyMap propDoubles;
+    propDoubles.setProperty({"number", "number", -42.0});
+    propDoubles.setProperty({"vec2", "Vec2", std::array<double, 2>{{-1, -2}}});
+    propDoubles.setProperty(
+        {"vec3", "Vec3", std::array<double, 3>{{-1, -2, -3}}});
+
+    propInts.fillPropertyMap(propDoubles);
+    propDoubles.fillPropertyMap(propInts);
+
+    BOOST_CHECK(propInts.getPropertyType("number") == Type::Int);
+    BOOST_CHECK(propInts.getPropertyType("vec2") == Type::Vec2i);
+    BOOST_CHECK(propInts.getPropertyType("vec3") == Type::Vec3i);
+
+    BOOST_CHECK(propDoubles.getPropertyType("number") == Type::Double);
+    BOOST_CHECK(propDoubles.getPropertyType("vec2") == Type::Vec2d);
+    BOOST_CHECK(propDoubles.getPropertyType("vec3") == Type::Vec3d);
+
+    BOOST_CHECK_EQUAL(propInts.getProperty<int32_t>("number"),
+                      propDoubles.getProperty<double>("number"));
+    {
+        const auto aInts = propInts.getProperty<std::array<int, 2>>("vec2");
+        const auto aDoubles =
+            propDoubles.getProperty<std::array<double, 2>>("vec2");
+        BOOST_CHECK_EQUAL(aInts[0], aDoubles[0]);
+        BOOST_CHECK_EQUAL(aInts[1], aDoubles[1]);
+    }
+    {
+        const auto aInts = propInts.getProperty<std::array<int, 3>>("vec3");
+        const auto aDoubles =
+            propDoubles.getProperty<std::array<double, 3>>("vec3");
+        BOOST_CHECK_EQUAL(aInts[0], aDoubles[0]);
+        BOOST_CHECK_EQUAL(aInts[1], aDoubles[1]);
+        BOOST_CHECK_EQUAL(aInts[2], aDoubles[2]);
+    }
+}
