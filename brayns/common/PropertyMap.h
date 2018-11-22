@@ -59,6 +59,29 @@ public:
         };
 
         template <typename T>
+        void assert_valid_type() const
+        {
+            static_assert(std::is_same<T, double>::value ||
+                              std::is_same<T, int32_t>::value ||
+                              std::is_same<T, std::string>::value ||
+                              std::is_same<T, bool>::value ||
+                              std::is_same<T, std::array<double, 2>>::value ||
+                              std::is_same<T, std::array<int32_t, 2>>::value ||
+                              std::is_same<T, std::array<double, 3>>::value ||
+                              std::is_same<T, std::array<int32_t, 3>>::value ||
+                              std::is_same<T, std::array<double, 4>>::value,
+                          "Invalid property type.");
+        }
+
+        template <typename T>
+        void assert_valid_enum_type() const
+        {
+            static_assert(std::is_same<T, int32_t>::value ||
+                              std::is_same<T, std::string>::value,
+                          "Invalid enum type.");
+        }
+
+        template <typename T>
         Property(const std::string& name_, const std::string& label_,
                  const T value)
             : name(name_)
@@ -68,6 +91,7 @@ public:
             , _min(T())
             , _max(T())
         {
+            assert_valid_type<T>();
         }
 
         template <typename T>
@@ -80,6 +104,7 @@ public:
             , _min(limit.first)
             , _max(limit.second)
         {
+            assert_valid_type<T>();
         }
 
         /**
@@ -97,10 +122,7 @@ public:
             , _min(0)
             , _max(enums_.size())
         {
-            static_assert(
-                std::is_same<T, int32_t>::value ||
-                    std::is_same<T, std::string>::value,
-                "Enum property must be either a string or an integer.");
+            assert_valid_enum_type<T>();
         }
 
         using ModifiedCallback = std::function<void(const Property&)>;
@@ -124,18 +146,21 @@ public:
         template <typename T>
         T get() const
         {
+            assert_valid_type<T>();
             return _castValue<T>(_data);
         }
 
         template <typename T>
         T min() const
         {
+            assert_valid_type<T>();
             return _castValue<T>(_min);
         }
 
         template <typename T>
         T max() const
         {
+            assert_valid_type<T>();
             return _castValue<T>(_max);
         }
 
