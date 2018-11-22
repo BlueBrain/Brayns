@@ -42,6 +42,9 @@ using namespace brayns;
 
 namespace
 {
+constexpr size_t LOAD_BATCH_SIZE = 100;
+constexpr size_t DEFAULT_SOMA_RADIUS = 5;
+
 using Property = brayns::Property;
 const Property PROP_DENSITY = {"density", 100.0, {"Density"}};
 const Property PROP_RANDOM_SEED = {"randomSeed", 0, {"Random seed"}};
@@ -116,6 +119,119 @@ std::string _getMeshFilenameFromGID(const uint64_t gid,
     return folder + "/" + filenamePattern;
 }
 #endif
+
+std::vector<float> _getSomaRadii(const brain::Circuit& circuit,
+                                 const float defaultRadius)
+{
+    std::map<std::string, float> radii;
+
+    // Old nomemclature
+    radii["NGC"] = 7.46;
+    radii["CRC"] = 7.28;
+    radii["BP"] = 6.74;
+    radii["L6CTPC"] = 7.00;
+    radii["ChC"] = 8.01;
+    radii["L4PC"] = 7.84;
+    radii["L2PC"] = 8.36;
+    radii["LBC"] = 9.28;
+    radii["NBC"] = 8.61;
+    radii["L5STPC"] = 8.61;
+    radii["L6CCPC"] = 7.71;
+    radii["L3PC"] = 7.70;
+    radii["ADC"] = 7.72;
+    radii["L5TTPC"] = 11.17;
+    radii["AHC"] = 7.54;
+    radii["L5UTPC"] = 9.75;
+    radii["MC"] = 9.37;
+    radii["DBC"] = 6.58;
+    radii["SBC"] = 7.75;
+    radii["L4SS"] = 8.87;
+    radii["BTC"] = 9.15;
+    radii["L4SP"] = 7.76;
+    radii["L6CLPC"] = 7.32;
+
+    // New nomemclature
+    radii["L1_DAC"] = 7.77242212296;
+    radii["L1_NGC-DA"] = 7.71745554606;
+    radii["L1_NGC-SA"] = 7.53378756841;
+    radii["L1_HAC"] = 7.48774570227;
+    radii["L1_DLAC"] = 7.63075244427;
+    radii["L1_SLAC"] = 6.54029955183;
+    radii["L23_PC"] = 7.7618568695;
+    radii["L23_MC"] = 8.25832914484;
+    radii["L23_BTC"] = 9.30396906535;
+    radii["L23_DBC"] = 6.67491123753;
+    radii["L23_BP"] = 6.47212839127;
+    radii["L23_NGC"] = 8.40507149696;
+    radii["L23_LBC"] = 9.0722948432;
+    radii["L23_NBC"] = 8.64244471205;
+    radii["L23_SBC"] = 7.77334165573;
+    radii["L23_ChC"] = 8.38753128052;
+    radii["L4_PC"] = 7.5360350558;
+    radii["L4_SP"] = 7.97097187241;
+    radii["L4_SS"] = 8.95526583989;
+    radii["L4_MC"] = 9.64632482529;
+    radii["L4_BTC"] = 8.13213920593;
+    radii["L4_DBC"] = 9.06448200771;
+    radii["L4_BP"] = 5.80337953568;
+    radii["L4_NGC"] = 7.61350679398;
+    radii["L4_LBC"] = 8.92902739843;
+    radii["L4_NBC"] = 9.02906776877;
+    radii["L4_SBC"] = 9.16592723673;
+    radii["L4_ChC"] = 8.54107379913;
+    radii["L5_TTPC1"] = 12.4378146535;
+    radii["L5_TTPC2"] = 12.9319117383;
+    radii["L5_UTPC"] = 7.55000627041;
+    radii["L5_STPC"] = 8.84197418645;
+    radii["L5_MC"] = 9.02451186861;
+    radii["L5_BTC"] = 9.24175042372;
+    radii["L5_DBC"] = 8.92543775895;
+    radii["L5_BP"] = 5.98329114914;
+    radii["L5_NGC"] = 6.62666320801;
+    radii["L5_LBC"] = 10.0915957915;
+    radii["L5_NBC"] = 9.00336164747;
+    radii["L5_SBC"] = 10.0064823627;
+    radii["L5_ChC"] = 7.85296694438;
+    radii["L6_TPC_L1"] = 7.11837192363;
+    radii["L6_TPC_L4"] = 7.08293668837;
+    radii["L6_UTPC"] = 7.74583534818;
+    radii["L6_IPC"] = 7.71743569988;
+    radii["L6_BPC"] = 7.14034402714;
+    radii["L6_MC"] = 9.55710192858;
+    radii["L6_BTC"] = 9.97289562225;
+    radii["L6_DBC"] = 9.88600463867;
+    radii["L6_BP"] = 5.98329114914;
+    radii["L6_NGC"] = 6.62666320801;
+    radii["L6_LBC"] = 9.49501685154;
+    radii["L6_NBC"] = 9.33885664259;
+    radii["L6_SBC"] = 8.06322860718;
+    radii["L6_ChC"] = 8.15173133214;
+
+    const auto& mtypes = circuit.getMorphologyTypeNames();
+    std::vector<float> output;
+    strings missingMtypes;
+    for (auto mtype : mtypes)
+    {
+        auto iter = radii.find(mtype);
+        if (iter == radii.end())
+        {
+            missingMtypes.push_back(mtype);
+            output.push_back(defaultRadius);
+        }
+        else
+            output.push_back(iter->second);
+    }
+
+    if (!missingMtypes.empty())
+    {
+        BRAYNS_WARN << "Soma radius not found for some mtypes:";
+        for (const auto& mtype : missingMtypes)
+            BRAYNS_WARN << " " << mtype;
+        BRAYNS_WARN << std::endl;
+    }
+
+    return output;
+}
 
 /**
  * Return a vector of gids.size() elements with the layer index of each gid
@@ -560,26 +676,32 @@ public:
             _setSimulationTransferFunction(model->getTransferFunction());
         }
 
-        const Matrix4fs& transformations = circuit.getTransforms(allGids);
-        _logLoadedGIDs(allGids);
-
         const auto perCellMaterialIds =
             _createPerCellMaterialIds(circuit, allGids, targetSizes);
 
-        // Import meshes
-        _importMeshes(callback, *model, allGids, transformations,
-                      perCellMaterialIds);
+        if (_morphologyParams.sectionTypes ==
+            std::vector<MorphologySectionType>{MorphologySectionType::soma})
 
-        // Import morphologies
-        const auto useSimulationModel = _properties.useSimulationModel;
-        model->useSimulationModel(useSimulationModel);
-        if (_properties.meshFolder.empty() || useSimulationModel)
         {
-            MorphologyLoader morphLoader(_scene);
-            if (!_importMorphologies(circuit, callback, *model, allGids,
-                                     transformations, reportMapping,
-                                     morphLoader, perCellMaterialIds))
-                return {};
+            // Import soma only morphologies as spheres
+            _addSomaSpheres(circuit, allGids, callback, *model,
+                            reportMapping, perCellMaterialIds);
+        }
+        else
+        {
+            // Import meshes
+            _importMeshes(callback, *model, allGids,
+                          circuit.getTransforms(allGids),
+                          perCellMaterialIds);
+
+            // Import morphologies
+            const auto useSimulationModel = _properties.useSimulationModel;
+            model->useSimulationModel(useSimulationModel);
+            if (_properties.meshFolder.empty() || useSimulationModel)
+            {
+                _importMorphologies(circuit, allGids, callback, *model,
+                                    reportMapping, perCellMaterialIds);
+            }
         }
 
         // Create materials
@@ -596,9 +718,10 @@ public:
         }
 
         // Compute circuit center
+        auto positions = circuit.getPositions(allGids);
         Boxf center;
-        for (const auto& transformation : transformations)
-            center.merge(transformation.getTranslation());
+        for (const auto& position : positions)
+            center.merge(position);
 
         Transformation transformation;
         transformation.setRotationCenter(center.getCenter());
@@ -611,18 +734,6 @@ public:
     }
 
 private:
-    /**
-     * @brief _logLoadedGIDs Logs selected GIDs for debugging purpose
-     * @param gids to trace
-     */
-    void _logLoadedGIDs(const brain::GIDSet& gids) const
-    {
-        std::stringstream gidsStr;
-        for (const auto& gid : gids)
-            gidsStr << gid << " ";
-        BRAYNS_DEBUG << "Loaded GIDs: " << gidsStr.str() << std::endl;
-    }
-
     size_ts _createPerCellMaterialIds(const brain::Circuit& circuit,
                                       const brain::GIDSet& gids,
                                       const size_ts& targetSizes) const
@@ -656,6 +767,35 @@ private:
                         << std::endl;
             return size_ts();
         }
+    }
+
+    void _addSomaSpheres(
+        const brain::Circuit& circuit, const brain::GIDSet& gids,
+        const LoaderProgress& callback, Model& model,
+        const brain::CompartmentReportMapping* reportMapping,
+        const size_ts& perCellMaterialIds) const
+    {
+        std::stringstream message;
+        message << "Adding " << gids.size() << " spherical somas...";
+        const auto positions = circuit.getPositions(gids);
+        const auto mtypes = circuit.getMorphologyTypes(gids);
+
+        std::vector<float> mtypeRadii = _getSomaRadii(circuit,
+                                                      DEFAULT_SOMA_RADIUS);
+
+        for (size_t i = 0; i != gids.size(); ++i)
+        {
+            const auto materialId =
+                _getMaterialId(_properties.colorScheme,
+                               i, brain::neuron::SectionType::soma,
+                               perCellMaterialIds);
+            const auto offset =
+                reportMapping ? reportMapping->getOffsets()[i][0] : 0;
+            model.addSphere(materialId,
+                            {positions[i], mtypeRadii[mtypes[i]], offset});
+            callback.updateProgress(message.str(), i / float(gids.size()));
+        }
+
     }
 
     void _importMeshes(const LoaderProgress& callback BRAYNS_UNUSED,
@@ -710,8 +850,7 @@ private:
             }
             ++meshIndex;
             callback.updateProgress(message.str(),
-                                    meshIndex /
-                                        static_cast<float>(gids.size()));
+                                    meshIndex / float(gids.size()));
         }
         if (loadingFailures != 0)
             BRAYNS_WARN << "Failed to import " << loadingFailures << " meshes"
@@ -722,72 +861,74 @@ private:
 #endif
     }
 
-    bool _importMorphologies(
-        const brain::Circuit& circuit, const LoaderProgress& callback,
-        Model& model, const brain::GIDSet& gids,
-        const Matrix4fs& transformations,
+    void _importMorphologies(
+        const brain::Circuit& circuit, const brain::GIDSet& gids,
+        const LoaderProgress& callback, Model& model,
         const brain::CompartmentReportMapping* reportMapping,
-        MorphologyLoader& morphLoader, const size_ts& perCellMaterialIds) const
+        const size_ts& perCellMaterialIds) const
     {
-        const brain::URIs& uris = circuit.getMorphologyURIs(gids);
-        size_t loadingFailures = 0;
+        MorphologyLoader morphLoader(_scene);
+
         std::stringstream message;
-        message << "Loading " << uris.size() << " morphologies...";
+        message << "Loading " << gids.size() << " morphologies...";
+
+        auto next = gids.begin();
+        size_t index = 0;
         std::atomic_size_t current{0};
         std::exception_ptr cancelException;
-#pragma omp parallel
-        {
-#pragma omp for nowait
-            for (uint64_t morphologyIndex = 0; morphologyIndex < uris.size();
-                 ++morphologyIndex)
-            {
-                ++current;
 
+        while (next != gids.end() && !cancelException)
+        {
+            brain::GIDSet batch;
+            for (; batch.size() < LOAD_BATCH_SIZE && next != gids.end(); ++next)
+                batch.insert(*next);
+
+            const auto morphologies =
+                circuit.loadMorphologies(batch,
+                                         brain::Circuit::Coordinates::global);
+
+#pragma omp parallel for
+            for (uint64_t j = 0; j < morphologies.size(); ++j)
+            {
+                const auto morphologyIndex = index + j;
+                auto materialFunc =
+                    [&](const brain::neuron::SectionType type)
+                    {
+                        if (_properties.useSimulationModel)
+                            return size_t{0};
+                        else
+                            return
+                                _getMaterialId(_properties.colorScheme,
+                                               morphologyIndex,
+                                               type, perCellMaterialIds);
+                    };
+
+                const auto& morphology = morphologies[j];
+
+                auto data = morphLoader.processMorphology(
+                    *morphology, morphologyIndex, materialFunc,
+                    reportMapping, _morphologyParams);
+#pragma omp critical
+                data.addTo(model);
+
+                ++current;
+                // Throwing (happens if loading is cancelled) from inside a
+                // parallel-for is not allowed.
                 try
                 {
                     callback.updateProgress(message.str(),
-                                            current / static_cast<float>(
-                                                          uris.size()));
-                    const auto& uri = uris[morphologyIndex];
-
-                    auto materialFunc =
-                        [&](const brain::neuron::SectionType type) {
-                            if (_properties.useSimulationModel)
-                                return size_t{0};
-                            else
-                                return _getMaterialId(_properties.colorScheme,
-                                                      morphologyIndex, type,
-                                                      perCellMaterialIds);
-                        };
-
-                    ModelData modelData;
-                    if (!morphLoader._importMorphology(
-                            uri, morphologyIndex, materialFunc,
-                            transformations[morphologyIndex], reportMapping,
-                            modelData, _morphologyParams))
-#pragma omp atomic
-                        ++loadingFailures;
-#pragma omp critical
-                    modelData.addTo(model);
+                                            current / float(gids.size()));
                 }
                 catch (...)
                 {
                     cancelException = std::current_exception();
-                    morphologyIndex = uris.size();
                 }
             }
+            index += batch.size();
         }
 
         if (cancelException)
             std::rethrow_exception(cancelException);
-
-        if (loadingFailures != 0)
-        {
-            BRAYNS_ERROR << loadingFailures << " could not be loaded"
-                         << std::endl;
-            return false;
-        }
-        return true;
     }
 
 private:

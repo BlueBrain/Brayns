@@ -140,8 +140,8 @@ void testSdfGeometries(bool dampened)
     const char* app = testSuite.argv[0];
     auto argv = std::vector<const char*>{app,
                                          BBP_TEST_BLUECONFIG3,
-            "--plugin",
-            "braynsCircuitViewer",
+                                         "--plugin",
+                                         "braynsCircuitViewer",
                                          "--disable-accumulation",
                                          "--circuit-targets",
                                          "Layer1",

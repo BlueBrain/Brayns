@@ -79,25 +79,12 @@ public:
                                       const size_t index,
                                       const size_t materialID) const final;
 
-    /**
-     * @brief Imports morphology from a given SWC or H5 file
-     * @param source URI of the morphology
-     * @param index Specifies an index for the morphology. This is mainly used
-     * to give a specific color to every morphology
-     * @param transformation Transformation to apply to the morphology
-     * @return Position of the soma
-     */
-    Vector3f importMorphology(const servus::URI& source, Model& model,
-                              const size_t index,
-                              const Matrix4f& transformation,
-                              const MorphologyLoaderParams& params) const;
-
     using MaterialFunc = std::function<size_t(brain::neuron::SectionType)>;
-    Vector3f _importMorphology(
-        const servus::URI& source, const uint64_t index,
-        MaterialFunc materialFunc, const Matrix4f& transformation,
+
+    ModelData processMorphology(
+        const brain::neuron::Morphology& morphology, const uint64_t index,
+        MaterialFunc materialFunc,
         const brain::CompartmentReportMapping* reportMapping,
-        ModelData& model,
         const MorphologyLoaderParams& params) const;
 
 private:

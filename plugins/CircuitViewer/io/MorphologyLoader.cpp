@@ -354,29 +354,12 @@ public:
     {
     }
 
-    /**
-     * @brief importMorphology imports a single morphology from a specified URI
-     * @param uri URI of the morphology
-     * @param index Index of the morphology
-     * @param defaultMaterialId Material to use
-     * @param transformation Transformation to apply to the morphology
-     * @param reportMapping Mapping for applying simulation to the morphology
-     * @return Position of the soma
-     */
-    Vector3f importMorphology(
-        const servus::URI& source, Model& model, const uint64_t index,
-        const Matrix4f& transformation,
-        const size_t defaultMaterialId = NO_MATERIAL,
-        const brain::CompartmentReportMapping* reportMapping = nullptr) const
+    ModelData processMorphology(
+        const brain::neuron::Morphology& morphology, const uint64_t index) const
     {
-        Vector3f somaPosition;
         auto materialFunc =
-            [ defaultMaterialId, colorScheme = _params.colorScheme,
-              index ](auto sectionType)
+            [ colorScheme = _params.colorScheme, index ](auto sectionType)
         {
-            if (defaultMaterialId != NO_MATERIAL)
-                return defaultMaterialId;
-
             size_t materialId = 0;
             switch (colorScheme)
             {
@@ -409,160 +392,22 @@ public:
             return materialId;
         };
 
-        ModelData modelContainer;
-        somaPosition =
-            importMorphology(source, index, materialFunc, transformation,
-                             reportMapping, modelContainer);
-        modelContainer.addTo(model);
-
-        model.createMissingMaterials();
-        return somaPosition;
+        return processMorphology(morphology, index, materialFunc, nullptr);
     }
 
-    Vector3f importMorphology(
-        const servus::URI& source, const uint64_t index,
-        MaterialFunc materialFunc, const Matrix4f& transformation,
-        const brain::CompartmentReportMapping* reportMapping,
-        ModelData& model) const
+    ModelData processMorphology(
+        const brain::neuron::Morphology& morphology, const uint64_t index,
+        MaterialFunc materialFunc,
+        const brain::CompartmentReportMapping* reportMapping) const
     {
-        if (_params.sectionTypes ==
-            std::vector<MorphologySectionType>{MorphologySectionType::soma})
-        {
-            const auto radius = static_cast<float>(_params.radiusMultiplier);
-            const auto position = transformation.getTranslation();
-            const auto materialId =
-                materialFunc(brain::neuron::SectionType::soma);
-            const uint64_t offset =
-                reportMapping ? reportMapping->getOffsets()[index][0] : 0;
-            model.addSphere(materialId, {position, radius, offset});
-            return position;
-        }
-        return _importMorphologyFromURI(source, index, materialFunc,
-                                        transformation, reportMapping, model);
-    }
-
-private:
-    /**
-     * @brief _getCorrectedRadius Modifies the radius of the geometry according
-     * to --radius-multiplier and --radius-correction geometry parameters
-     * @param radius Radius to be corrected
-     * @return Corrected value of a radius according to geometry parameters
-     */
-    float _getCorrectedRadius(const float radius) const
-    {
-        return (_params.radiusCorrection != 0.f
-                    ? _params.radiusCorrection
-                    : radius * _params.radiusMultiplier);
-    }
-
-    /**
-     * Creates an SDF soma by adding and connecting the soma children using cone
-     * pills
-     */
-    void _connectSDFSomaChildren(const Vector3f& somaPosition,
-                                 const float somaRadius,
-                                 const size_t materialId, const uint64_t offset,
-                                 const brain::neuron::Sections& somaChildren,
-                                 SDFData& sdfData) const
-    {
-        std::set<size_t> childIndices;
-        for (const auto& child : somaChildren)
-        {
-            const auto& samples = child.getSamples();
-            const Vector3f sample{samples[0].x(), samples[0].y(),
-                                  samples[0].z()};
-
-            // Create a sigmoid cone with half of soma radius to center of soma
-            // to give it an organic look.
-            const float radiusEnd = _getCorrectedRadius(samples[0].w() * 0.5f);
-            const size_t geomIdx =
-                _addSDFGeometry(sdfData,
-                                createSDFConePillSigmoid(somaPosition, sample,
-                                                         somaRadius * 0.5f,
-                                                         radiusEnd, offset),
-                                {}, materialId, -1);
-            childIndices.insert(geomIdx);
-        }
-
-        for (size_t c : childIndices)
-            sdfData.neighbours[c] = childIndices;
-    }
-
-    /**
-     * Adds a Soma geometry to the model
-     */
-    void _addSomaGeometry(const brain::neuron::Soma& soma, uint64_t offset,
-                          bool useSDFGeometries, MaterialFunc materialFunc,
-                          ModelData& model, SDFData& sdfData) const
-    {
-        const size_t materialId =
-            materialFunc(brain::neuron::SectionType::soma);
-        const auto somaPosition = soma.getCentroid();
-        const auto somaRadius = _getCorrectedRadius(soma.getMeanRadius());
-        const auto& children = soma.getChildren();
-
-        if (useSDFGeometries)
-        {
-            _connectSDFSomaChildren(somaPosition, somaRadius, materialId,
-                                    offset, children, sdfData);
-        }
-        else
-        {
-            model.addSphere(materialId, {somaPosition, somaRadius, offset});
-
-            if (_params.useSimulationModel)
-            {
-                // When using a simulation model, parametric geometries must
-                // occupy as much space as possible in the mesh. This code
-                // inserts a Cone between the soma and the beginning of each
-                // branch.
-                for (const auto& child : children)
-                {
-                    const auto& samples = child.getSamples();
-                    const Vector3f sample{samples[0].x(), samples[0].y(),
-                                          samples[0].z()};
-                    const float sampleRadius =
-                        _getCorrectedRadius(samples[0].w() * 0.5f);
-
-                    model.addCone(materialId, {somaPosition, sample, somaRadius,
-                                               sampleRadius, offset});
-                }
-            }
-        }
-    }
-
-    /**
-     * @brief _importMorphologyFromURI imports a morphology from the specified
-     * URI
-     * @param uri URI of the morphology
-     * @param index Index of the current morphology
-     * @param materialFunc A function mapping brain::neuron::SectionType to a
-     *   material id
-     * @param transformation Transformation to apply to the morphology
-     * @param reportMapping Mapping for applying simulation to the morphology
-     * @param model Model container to which the morphology should be loaded
-     *   into
-     * @return Position of the soma
-     */
-    Vector3f _importMorphologyFromURI(
-        const servus::URI& uri, const uint64_t index, MaterialFunc materialFunc,
-        const Matrix4f& transformation,
-        const brain::CompartmentReportMapping* reportMapping,
-        ModelData& model) const
-    {
-        Vector3f somaPosition;
-
         const bool dampenThickness = _params.dampenBranchThicknessChangerate;
         const bool useSDFGeometries = _params.useSDFGeometries;
-
-        SDFData sdfData;
-
-        brain::neuron::Morphology morphology(uri, transformation);
-
         const size_t sectionMask = enumsToBitmask(_params.sectionTypes);
 
+        ModelData model;
+        SDFData sdfData;
+
         // Soma
-        somaPosition = morphology.getSoma().getCentroid();
         if (sectionMask & static_cast<size_t>(MorphologySectionType::soma))
         {
             const uint64_t offset =
@@ -717,7 +562,98 @@ private:
         if (useSDFGeometries)
             _finalizeSDFGeometries(model, sdfData);
 
-        return somaPosition;
+        return model;
+    }
+
+private:
+    /**
+     * @brief _getCorrectedRadius Modifies the radius of the geometry according
+     * to --radius-multiplier and --radius-correction geometry parameters
+     * @param radius Radius to be corrected
+     * @return Corrected value of a radius according to geometry parameters
+     */
+    float _getCorrectedRadius(const float radius) const
+    {
+        return (_params.radiusCorrection != 0.f
+                    ? _params.radiusCorrection
+                    : radius * _params.radiusMultiplier);
+    }
+
+    /**
+     * Creates an SDF soma by adding and connecting the soma children using cone
+     * pills
+     */
+    void _connectSDFSomaChildren(const Vector3f& somaPosition,
+                                 const float somaRadius,
+                                 const size_t materialId, const uint64_t offset,
+                                 const brain::neuron::Sections& somaChildren,
+                                 SDFData& sdfData) const
+    {
+        std::set<size_t> childIndices;
+        for (const auto& child : somaChildren)
+        {
+            const auto& samples = child.getSamples();
+            const Vector3f sample{samples[0].x(), samples[0].y(),
+                                  samples[0].z()};
+
+            // Create a sigmoid cone with half of soma radius to center of soma
+            // to give it an organic look.
+            const float radiusEnd = _getCorrectedRadius(samples[0].w() * 0.5f);
+            const size_t geomIdx =
+                _addSDFGeometry(sdfData,
+                                createSDFConePillSigmoid(somaPosition, sample,
+                                                         somaRadius * 0.5f,
+                                                         radiusEnd, offset),
+                                {}, materialId, -1);
+            childIndices.insert(geomIdx);
+        }
+
+        for (size_t c : childIndices)
+            sdfData.neighbours[c] = childIndices;
+    }
+
+    /**
+     * Adds a Soma geometry to the model
+     */
+    void _addSomaGeometry(const brain::neuron::Soma& soma,
+                          uint64_t offset, bool useSDFGeometries,
+                          MaterialFunc materialFunc,
+                          ModelData& model, SDFData& sdfData) const
+    {
+        const size_t materialId =
+            materialFunc(brain::neuron::SectionType::soma);
+        const auto somaPosition = soma.getCentroid();
+        const auto somaRadius = _getCorrectedRadius(soma.getMeanRadius());
+        const auto& children = soma.getChildren();
+
+        if (useSDFGeometries)
+        {
+            _connectSDFSomaChildren(somaPosition, somaRadius, materialId,
+                                    offset, children, sdfData);
+        }
+        else
+        {
+            model.addSphere(materialId, {somaPosition, somaRadius, offset});
+
+            if (_params.useSimulationModel)
+            {
+                // When using a simulation model, parametric geometries must
+                // occupy as much space as possible in the mesh. This code
+                // inserts a Cone between the soma and the beginning of each
+                // branch.
+                for (const auto& child : children)
+                {
+                    const auto& samples = child.getSamples();
+                    const Vector3f sample{samples[0].x(), samples[0].y(),
+                                          samples[0].z()};
+                    const float sampleRadius =
+                        _getCorrectedRadius(samples[0].w() * 0.5f);
+
+                    model.addCone(materialId, {somaPosition, sample, somaRadius,
+                                               sampleRadius, offset});
+                }
+            }
+        }
     }
 
 private:
@@ -760,36 +696,32 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
     callback.updateProgress("Loading " + modelName + " ...", 0.f);
     auto model = _scene.createModel();
     const auto params = MorphologyLoaderParams(properties);
-    Vector3f somaPosition =
-        importMorphology(servus::URI(fileName), *model, index, {}, params);
+
+    brain::neuron::Morphology morphology{servus::URI(fileName)};
+
+    auto impl = MorphologyLoader::Impl(params);
+    impl.processMorphology(morphology, index).addTo(*model);
+
     model->createMissingMaterials();
     callback.updateProgress("Loading " + modelName + " ...", 1.f);
 
     Transformation transformation;
-    transformation.setRotationCenter(somaPosition);
+    transformation.setRotationCenter(morphology.getSoma().getCentroid());
     auto modelDescriptor =
         std::make_shared<ModelDescriptor>(std::move(model), fileName);
     modelDescriptor->setTransformation(transformation);
     return modelDescriptor;
 }
 
-Vector3f MorphologyLoader::importMorphology(
-    const servus::URI& uri, Model& model, const size_t index,
-    const Matrix4f& transformation, const MorphologyLoaderParams& params) const
-{
-    auto impl = MorphologyLoader::Impl(params);
-    return impl.importMorphology(uri, model, index, transformation);
-}
-
-Vector3f MorphologyLoader::_importMorphology(
-    const servus::URI& source, const uint64_t index, MaterialFunc materialFunc,
-    const Matrix4f& transformation,
-    const brain::CompartmentReportMapping* reportMapping, ModelData& model,
+ModelData MorphologyLoader::processMorphology(
+    const brain::neuron::Morphology& morphology, const uint64_t index,
+    MaterialFunc materialFunc,
+    const brain::CompartmentReportMapping* reportMapping,
     const MorphologyLoaderParams& params) const
 {
     auto impl = MorphologyLoader::Impl(params);
-    return impl.importMorphology(source, index, materialFunc, transformation,
-                                 reportMapping, model);
+    return impl.processMorphology(morphology, index, materialFunc,
+                                  reportMapping);
 }
 
 std::string MorphologyLoader::getName() const
