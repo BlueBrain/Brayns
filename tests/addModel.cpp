@@ -133,6 +133,20 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
     }
 }
 
+#if BRAYNS_USE_LIBARCHIVE
+BOOST_AUTO_TEST_CASE(obj_zip)
+{
+    const auto numModels = getScene().getNumModels();
+    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_ZIP_PATH};
+    auto model =
+        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
+                                                                  params);
+    BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
+    BOOST_CHECK_EQUAL(model.getName(), params.getName());
+    BOOST_CHECK_EQUAL(model.getPath(), params.getPath());
+}
+#endif
+
 BOOST_AUTO_TEST_CASE(cancel)
 {
     auto request = getJsonRpcClient()

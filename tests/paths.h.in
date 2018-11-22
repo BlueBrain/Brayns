@@ -16,6 +16,8 @@
 
 constexpr auto BRAYNS_TESTDATA_MODEL_BENNU_PATH =
     BRAYNS_TESTDATA_PATH "modelsValid/bennu.obj";
+constexpr auto BRAYNS_TESTDATA_MODEL_BENNU_ZIP_PATH =
+    BRAYNS_TESTDATA_PATH "modelsValid/bennu.zip";
 constexpr auto BRAYNS_TESTDATA_MODEL_MONKEY_PATH =
     BRAYNS_TESTDATA_PATH "modelsValid/monkey.xyz";
 constexpr auto BRAYNS_TESTDATA_MODEL_BROKEN_PATH =
