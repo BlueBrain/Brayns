@@ -179,8 +179,9 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_invalid)
                                                                   params);
         BOOST_REQUIRE(false);
     }
-    catch (std::runtime_error&)
+    catch (std::runtime_error& e)
     {
+        BOOST_CHECK_EQUAL(e.what(), "Could not match enum 'INVALID'");
     }
 }
 
