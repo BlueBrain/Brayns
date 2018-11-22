@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(broken_xyz)
 BOOST_AUTO_TEST_CASE(obj_zip)
 {
     const auto numModels = getScene().getNumModels();
-    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_ZIP_PATH};
+    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
     auto model =
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
                                                                   params);
@@ -146,6 +146,43 @@ BOOST_AUTO_TEST_CASE(obj_zip)
     BOOST_CHECK_EQUAL(model.getPath(), params.getPath());
 }
 #endif
+
+BOOST_AUTO_TEST_CASE(mesh_loader_properties_valid)
+{
+    const auto numModels = getScene().getNumModels();
+    brayns::PropertyMap properties;
+    properties.setProperty(
+        {"geometryQuality", "Geometry quality", std::string("low")});
+    properties.setProperty({"unused", "Unused", 42});
+    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
+    params._loaderProperties = properties;
+
+    auto model =
+        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
+                                                                  params);
+    BOOST_CHECK_EQUAL(getScene().getNumModels(), numModels + 1);
+    BOOST_CHECK_EQUAL(model.getName(), params.getName());
+    BOOST_CHECK_EQUAL(model.getPath(), params.getPath());
+}
+
+BOOST_AUTO_TEST_CASE(mesh_loader_properties_invalid)
+{
+    brayns::PropertyMap properties;
+    properties.setProperty(
+        {"geometryQuality", "Geometry quality", std::string("INVALID")});
+    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
+    params._loaderProperties = properties;
+
+    try
+    {
+        makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
+                                                                  params);
+        BOOST_REQUIRE(false);
+    }
+    catch (std::runtime_error&)
+    {
+    }
+}
 
 BOOST_AUTO_TEST_CASE(cancel)
 {
