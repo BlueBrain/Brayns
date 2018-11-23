@@ -342,21 +342,7 @@ private:
             pm.setProperty(
                 {"circuitBoundingBoxP1", "circuitBoundingBoxP1", p1});
         }
-        pm.setProperty({"circuitUseSimulationModel",
-                        "circuitUseSimulationModel",
-                        geometryParameters.getCircuitUseSimulationModel()});
-        pm.setProperty({"circuitMeshFilenamePattern",
-                        "circuitMeshFilenamePattern",
-                        geometryParameters.getCircuitMeshFilenamePattern()});
-        pm.setProperty({"circuitUseSimulationModel",
-                        "circuitUseSimulationModel",
-                        geometryParameters.getCircuitUseSimulationModel()});
-        pm.setProperty({"circuitUseSimulationModel",
-                        "circuitUseSimulationModel",
-                        geometryParameters.getCircuitUseSimulationModel()});
-        pm.setProperty({"circuitUseSimulationModel",
-                        "circuitUseSimulationModel",
-                        geometryParameters.getCircuitUseSimulationModel()});
+
         pm.setProperty({"morphologyDampenBranchThicknessChangerate",
                         "morphologyDampenBranchThicknessChangerate",
                         geometryParameters
