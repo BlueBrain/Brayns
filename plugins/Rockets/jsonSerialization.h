@@ -357,7 +357,6 @@ inline void init(brayns::Scene* s, ObjectHandler* h)
 inline void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
 {
     h->add_property("density", &c->density, Flags::Optional);
-    h->add_property("bounding_box", &c->boundingBox, Flags::Optional);
     h->add_property("mesh_filename_pattern", &c->meshFilenamePattern,
                     Flags::Optional);
     h->add_property("mesh_folder", &c->meshFolder, Flags::Optional);

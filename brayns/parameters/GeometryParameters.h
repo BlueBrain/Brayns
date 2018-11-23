@@ -32,7 +32,6 @@ namespace brayns
 struct CircuitConfiguration
 {
     bool useSimulationModel{false};
-    Boxd boundingBox{{0, 0, 0}, {0, 0, 0}};
     double density{100};
     std::string meshFilenamePattern;
     std::string meshFolder;
@@ -86,19 +85,6 @@ public:
     /** ensity of cells in the circuit in percent (Mainly for testing
      * purposes) */
     double getCircuitDensity() const;
-
-    /**
-     * Defines a bounding box outside of which geometry of a circuit will not be
-     * loaded
-     */
-    const Boxd& getCircuitBoundingBox() const
-    {
-        return _circuitConfiguration.boundingBox;
-    }
-    void setCircuitBoundingBox(const Boxd& value)
-    {
-        _updateValue(_circuitConfiguration.boundingBox, value);
-    }
 
     /**
      * Defines if a different model is used to handle the simulation geometry.
