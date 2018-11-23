@@ -30,7 +30,6 @@ namespace
 const std::string PARAM_CIRCUIT_DENSITY = "circuit-density";
 const std::string PARAM_CIRCUIT_USES_SIMULATION_MODEL =
     "circuit-uses-simulation-model";
-const std::string PARAM_CIRCUIT_BOUNDING_BOX = "circuit-bounding-box";
 const std::string PARAM_CIRCUIT_MESH_FOLDER = "circuit-mesh-folder";
 const std::string PARAM_CIRCUIT_MESH_FILENAME_PATTERN =
     "circuit-mesh-filename-pattern";
@@ -157,12 +156,6 @@ GeometryParameters::GeometryParameters()
          "Defines if a different model is used to handle the simulation "
          "geometry.")
         //
-        (PARAM_CIRCUIT_BOUNDING_BOX.c_str(), po::value<floats>()->multitoken(),
-         "Does not load circuit geometry outside of the specified "
-         "bounding "
-         "box"
-         "[float float float float float float]")
-        //
         (PARAM_MEMORY_MODE.c_str(), po::value<std::string>(),
          "Defines what memory mode should be used between Brayns and "
          "the "
@@ -270,21 +263,6 @@ void GeometryParameters::parse(const po::variables_map& vm)
         vm[PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES].as<bool>();
     _circuitConfiguration.useSimulationModel =
         vm[PARAM_CIRCUIT_USES_SIMULATION_MODEL].as<bool>();
-    if (vm.count(PARAM_CIRCUIT_BOUNDING_BOX))
-    {
-        const floats values = vm[PARAM_CIRCUIT_BOUNDING_BOX].as<floats>();
-        if (values.size() == 6)
-        {
-            _circuitConfiguration.boundingBox.reset();
-            _circuitConfiguration.boundingBox.merge(
-                Vector3f(values[0], values[1], values[2]));
-            _circuitConfiguration.boundingBox.merge(
-                Vector3f(values[3], values[4], values[5]));
-        }
-        else
-            BRAYNS_ERROR << "Invalid number of values for "
-                         << PARAM_CIRCUIT_BOUNDING_BOX << std::endl;
-    }
     if (vm.count(PARAM_MEMORY_MODE))
     {
         const auto& memoryMode = vm[PARAM_MEMORY_MODE].as<std::string>();
@@ -349,8 +327,6 @@ void GeometryParameters::print()
                 << _circuitConfiguration.simulationStep << std::endl;
     BRAYNS_INFO << " - Simulation values range : "
                 << _circuitConfiguration.simulationValuesRange << std::endl;
-    BRAYNS_INFO << " - Bounding box            : "
-                << _circuitConfiguration.boundingBox << std::endl;
     BRAYNS_INFO << " - Transform meshes        : "
                 << (_circuitConfiguration.transformMeshes ? "Yes" : "No")
                 << std::endl;

@@ -56,12 +56,6 @@ const Property PROP_MESH_FILENAME_PATTERN = {"meshFilenamePattern",
 const Property PROP_MESH_FOLDER = {"meshFolder",
                                    std::string(""),
                                    {"Mesh folder"}};
-const Property PROP_BOUNDING_BOX_P0 = {"boundingBoxP0",
-                                       std::array<double, 3>{{0, 0, 0}},
-                                       {"First bounding box boundary point"}};
-const Property PROP_BOUNDING_BOX_P1 = {"boundingBoxP1",
-                                       std::array<double, 3>{{0, 0, 0}},
-                                       {"Second bounding box boundary point"}};
 const Property PROP_USE_SIMULATION_MODEL = {"useSimulationModel",
                                             false,
                                             {"Use simulation model"}};
@@ -358,10 +352,6 @@ struct CircuitProperties
         setVariable(targets, PROP_TARGETS.name, "");
         setVariable(meshFilenamePattern, PROP_MESH_FILENAME_PATTERN.name, "");
         setVariable(meshFolder, PROP_MESH_FOLDER.name, "");
-        setVariable(boundingBoxP0, PROP_BOUNDING_BOX_P0.name,
-                    std::array<double, 3>{{0, 0, 0}});
-        setVariable(boundingBoxP1, PROP_BOUNDING_BOX_P1.name,
-                    std::array<double, 3>{{0, 0, 0}});
         setVariable(useSimulationModel, PROP_USE_SIMULATION_MODEL.name, false);
         setVariable(transformMeshes, PROP_TRANSFORM_MESHES.name, 0);
         setEnumVariable(colorScheme, PROP_COLOR_SCHEME.name, ColorScheme::none);
@@ -379,8 +369,6 @@ struct CircuitProperties
                  [& targetList = targetList](const std::string& s) {
                      targetList.push_back(s);
                  });
-
-        boundingBox = Boxd(toVmmlVec(boundingBoxP0), toVmmlVec(boundingBoxP1));
     }
 
     double density = 0.0;
@@ -401,30 +389,7 @@ struct CircuitProperties
     bool synchronousMode = false;
 
     GeometryQuality geometryQuality = GeometryQuality::high;
-
-    std::array<double, 3> boundingBoxP0;
-    std::array<double, 3> boundingBoxP1;
-    Boxd boundingBox;
 };
-
-brain::GIDSet _getFilteredGIDs(
-    const std::function<brion::GIDSet(const std::string&)>& resolver,
-    const brain::Circuit& circuit, const std::string& target,
-    const CircuitProperties& properties)
-{
-    const auto allGIDs = resolver(target);
-    const auto& aabb = properties.boundingBox;
-    if (aabb.getSize() == Vector3f(0.f))
-        return allGIDs;
-
-    const Matrix4fs& transformations = circuit.getTransforms(allGIDs);
-    brain::GIDSet gids;
-    auto gid = allGIDs.begin();
-    for (size_t i = 0; i < transformations.size(); ++i, ++gid)
-        if (aabb.isIn(Vector3d(transformations[i].getTranslation())))
-            gids.insert(*gid);
-    return gids;
-}
 
 CompartmentReportPtr _openCompartmentReport(const brain::Simulation* simulation,
                                             const std::string& name,
@@ -632,7 +597,7 @@ public:
                                          ? strings{{""}}
                                          : _properties.targetList;
 
-        auto resolver = [&](const std::string& name) {
+        auto resolveTarget = [&](const std::string& name) {
             const float fraction = _properties.density / 100.0f;
             if (simulation)
                 return simulation->getGIDs(name, fraction,
@@ -643,8 +608,7 @@ public:
 
         for (const auto& target : localTargets)
         {
-            const auto gids =
-                _getFilteredGIDs(resolver, circuit, target, _properties);
+            const auto gids = resolveTarget(target);
             if (gids.empty())
             {
                 BRAYNS_ERROR << "Target " << target
@@ -684,15 +648,14 @@ public:
 
         {
             // Import soma only morphologies as spheres
-            _addSomaSpheres(circuit, allGids, callback, *model,
-                            reportMapping, perCellMaterialIds);
+            _addSomaSpheres(circuit, allGids, callback, *model, reportMapping,
+                            perCellMaterialIds);
         }
         else
         {
             // Import meshes
             _importMeshes(callback, *model, allGids,
-                          circuit.getTransforms(allGids),
-                          perCellMaterialIds);
+                          circuit.getTransforms(allGids), perCellMaterialIds);
 
             // Import morphologies
             const auto useSimulationModel = _properties.useSimulationModel;
@@ -769,25 +732,25 @@ private:
         }
     }
 
-    void _addSomaSpheres(
-        const brain::Circuit& circuit, const brain::GIDSet& gids,
-        const LoaderProgress& callback, Model& model,
-        const brain::CompartmentReportMapping* reportMapping,
-        const size_ts& perCellMaterialIds) const
+    void _addSomaSpheres(const brain::Circuit& circuit,
+                         const brain::GIDSet& gids,
+                         const LoaderProgress& callback, Model& model,
+                         const brain::CompartmentReportMapping* reportMapping,
+                         const size_ts& perCellMaterialIds) const
     {
         std::stringstream message;
         message << "Adding " << gids.size() << " spherical somas...";
         const auto positions = circuit.getPositions(gids);
         const auto mtypes = circuit.getMorphologyTypes(gids);
 
-        std::vector<float> mtypeRadii = _getSomaRadii(circuit,
-                                                      DEFAULT_SOMA_RADIUS);
+        std::vector<float> mtypeRadii =
+            _getSomaRadii(circuit, DEFAULT_SOMA_RADIUS);
 
         for (size_t i = 0; i != gids.size(); ++i)
         {
             const auto materialId =
-                _getMaterialId(_properties.colorScheme,
-                               i, brain::neuron::SectionType::soma,
+                _getMaterialId(_properties.colorScheme, i,
+                               brain::neuron::SectionType::soma,
                                perCellMaterialIds);
             const auto offset =
                 reportMapping ? reportMapping->getOffsets()[i][0] : 0;
@@ -795,7 +758,6 @@ private:
                             {positions[i], mtypeRadii[mtypes[i]], offset});
             callback.updateProgress(message.str(), i / float(gids.size()));
         }
-
     }
 
     void _importMeshes(const LoaderProgress& callback BRAYNS_UNUSED,
@@ -891,23 +853,21 @@ private:
             for (uint64_t j = 0; j < morphologies.size(); ++j)
             {
                 const auto morphologyIndex = index + j;
-                auto materialFunc =
-                    [&](const brain::neuron::SectionType type)
-                    {
-                        if (_properties.useSimulationModel)
-                            return size_t{0};
-                        else
-                            return
-                                _getMaterialId(_properties.colorScheme,
-                                               morphologyIndex,
-                                               type, perCellMaterialIds);
-                    };
+                auto materialFunc = [&](const brain::neuron::SectionType type) {
+                    if (_properties.useSimulationModel)
+                        return size_t{0};
+                    else
+                        return _getMaterialId(_properties.colorScheme,
+                                              morphologyIndex, type,
+                                              perCellMaterialIds);
+                };
 
                 const auto& morphology = morphologies[j];
 
-                auto data = morphLoader.processMorphology(
-                    *morphology, morphologyIndex, materialFunc,
-                    reportMapping, _morphologyParams);
+                auto data =
+                    morphLoader.processMorphology(*morphology, morphologyIndex,
+                                                  materialFunc, reportMapping,
+                                                  _morphologyParams);
 #pragma omp critical
                 data.addTo(model);
 
@@ -1005,8 +965,6 @@ PropertyMap CircuitLoader::getProperties() const
     pm.setProperty(PROP_TARGETS);
     pm.setProperty(PROP_MESH_FILENAME_PATTERN);
     pm.setProperty(PROP_MESH_FOLDER);
-    pm.setProperty(PROP_BOUNDING_BOX_P0);
-    pm.setProperty(PROP_BOUNDING_BOX_P1);
     pm.setProperty(PROP_USE_SIMULATION_MODEL);
     pm.setProperty(PROP_TRANSFORM_MESHES);
     pm.setProperty(PROP_COLOR_SCHEME);
