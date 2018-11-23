@@ -523,9 +523,7 @@ private:
                     }
                 };
 
-                ModelParams params(path, path);
-                params._loaderProperties = properties;
-
+                ModelParams params(path, path, properties);
                 scene.loadModel(path, NO_MATERIAL, params, {progress});
             }
         }

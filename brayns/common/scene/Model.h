@@ -88,6 +88,8 @@ public:
 
     ModelParams(const std::string& path);
     ModelParams(const std::string& name, const std::string& path);
+    ModelParams(const std::string& name, const std::string& path,
+                const PropertyMap& loaderProperties);
 
     ModelParams(ModelParams&& rhs) = default;
     ModelParams& operator=(ModelParams&& rhs) = default;
