@@ -577,7 +577,9 @@ inline std::string to_json(const brayns::PropertyMap& obj)
         case PropertyMap::Property::Type::String:
             json.AddMember(
                 brayns::make_json_string(prop->name, allocator).Move(),
-                StringRef(prop->get<std::string>().c_str()), allocator);
+                brayns::make_value_string(prop->get<std::string>(), allocator)
+                    .Move(),
+                allocator);
             break;
         case PropertyMap::Property::Type::Bool:
             json.AddMember(
