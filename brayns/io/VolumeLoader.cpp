@@ -149,12 +149,12 @@ ModelDescriptorPtr RawVolumeLoader::importFromFile(
 
     callback.updateProgress("Parsing volume file ...", 0.f);
 
-    const auto dimensions = arrayToVmmlVec(
-        properties.getProperty(PROP_DIMENSIONS.name,
-                               std::array<int32_t, 3>({{0, 0, 0}})));
-    const auto spacing = arrayToVmmlVec(
-        properties.getProperty(PROP_SPACING.name,
-                               std::array<double, 3>({{0, 0, 0}})));
+    const auto dimensions =
+        toVmmlVec(properties.getProperty(PROP_DIMENSIONS.name,
+                                         std::array<int32_t, 3>({{0, 0, 0}})));
+    const auto spacing =
+        toVmmlVec(properties.getProperty(PROP_SPACING.name,
+                                         std::array<double, 3>({{0, 0, 0}})));
     const auto type = stringToEnum<DataType>(
         properties.getProperty<std::string>(PROP_TYPE.name));
 
@@ -235,9 +235,9 @@ ModelDescriptorPtr MHDVolumeLoader::importFromFile(
         throw std::runtime_error("Wrong object type for mhd file");
 
     const auto dimensions =
-        vmmlVecToArray(to_Vector3<int32_t>(pt.get<std::string>("DimSize")));
-    const auto spacing = vmmlVecToArray(
-        to_Vector3<double>(pt.get<std::string>("ElementSpacing")));
+        toArray(to_Vector3<int32_t>(pt.get<std::string>("DimSize")));
+    const auto spacing =
+        toArray(to_Vector3<double>(pt.get<std::string>("ElementSpacing")));
     const auto type = dataTypeFromMET(pt.get<std::string>("ElementType"));
 
     boost::filesystem::path path = pt.get<std::string>("ElementDataFile");

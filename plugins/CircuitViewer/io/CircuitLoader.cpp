@@ -167,8 +167,8 @@ struct CircuitProperties
                      });
             circuitTargetsList = std::move(targets);
         }
-        circuitBoundingBox = Boxd(arrayToVmmlVec(circuitBoundingBoxP0),
-                                  arrayToVmmlVec(circuitBoundingBoxP1));
+        circuitBoundingBox = Boxd(toVmmlVec(circuitBoundingBoxP0),
+                                  toVmmlVec(circuitBoundingBoxP1));
     }
 
     double circuitDensity = 0.0;

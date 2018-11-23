@@ -334,8 +334,8 @@ private:
                         geometryParameters.getCircuitDensity()});
         {
             const auto bbox = geometryParameters.getCircuitBoundingBox();
-            const auto p0 = vmmlVecToArray(bbox.getMin());
-            const auto p1 = vmmlVecToArray(bbox.getMax());
+            const auto p0 = toArray(bbox.getMin());
+            const auto p1 = toArray(bbox.getMax());
 
             pm.setProperty(
                 {"circuitBoundingBoxP0", "circuitBoundingBoxP0", p0});
@@ -451,8 +451,7 @@ private:
                         geometryParameters.getCircuitSimulationStep()});
         pm.setProperty(
             {"circuitSimulationValuesRange", "circuitSimulationValuesRange",
-             vmmlVecToArray(
-                 geometryParameters.getCircuitSimulationValuesRange())});
+             toArray(geometryParameters.getCircuitSimulationValuesRange())});
         pm.setProperty(
             {"circuitMeshTransformation", "circuitMeshTransformation",
              int32_t(geometryParameters.getCircuitMeshTransformation())});

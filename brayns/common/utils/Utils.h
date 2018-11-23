@@ -43,7 +43,7 @@ inline auto lowerCase(std::string str)
 }
 
 template <size_t M, typename T>
-inline vmml::vector<M, T> arrayToVmmlVec(const std::array<T, M>& input)
+inline vmml::vector<M, T> toVmmlVec(const std::array<T, M>& input)
 {
     vmml::vector<M, T> output;
     for (size_t i = 0; i < M; i++)
@@ -52,7 +52,7 @@ inline vmml::vector<M, T> arrayToVmmlVec(const std::array<T, M>& input)
 }
 
 template <size_t M, typename T>
-inline std::array<T, M> vmmlVecToArray(const vmml::vector<M, T>& input)
+inline std::array<T, M> toArray(const vmml::vector<M, T>& input)
 {
     std::array<T, M> output;
     for (size_t i = 0; i < M; i++)
