@@ -1581,22 +1581,7 @@ public:
                         .getLoaderRegistry()
                         .getLoaderPropertyMaps();
 
-                std::vector<std::string> schemas;
-                for (const auto& kv : props)
-                    schemas.push_back(buildJsonSchema(kv.second, kv.first));
-
-                const size_t numSchemas = schemas.size();
-                if (numSchemas == 0)
-                    return Response{"[]"};
-
-                std::string result = "[\n";
-                result += schemas.front();
-
-                for (size_t i = 1; i < numSchemas; i++)
-                    result += ",\n" + schemas[i];
-                result += "\n]";
-
-                return Response{std::move(result)};
+                return Response{buildJsonSchema(props, "loaders")};
             });
 
         _handleSchema(
