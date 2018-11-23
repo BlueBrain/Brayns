@@ -277,8 +277,8 @@ public:
 
     /** @return all the registered properties. */
     const auto& getProperties() const { return _properties; }
-    /** Fill this property map with properties from another. */
-    void fillPropertyMap(const PropertyMap& input);
+    /** Merge this property map with properties from another. */
+    void merge(const PropertyMap& input);
 
 private:
     Property* findProperty(const std::string& name) const

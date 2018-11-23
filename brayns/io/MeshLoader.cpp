@@ -115,7 +115,7 @@ ModelDescriptorPtr MeshLoader::importFromFile(
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
-    properties.fillPropertyMap(propertiesTmp);
+    properties.merge(propertiesTmp);
 
     const auto geometryQuality =
         stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
@@ -144,7 +144,7 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
-    properties.fillPropertyMap(propertiesTmp);
+    properties.merge(propertiesTmp);
 
     const auto geometryQuality =
         stringToEnum<GeometryQuality>(properties.getProperty<std::string>(

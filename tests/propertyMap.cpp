@@ -140,8 +140,8 @@ BOOST_AUTO_TEST_CASE(fill_property_map)
     propDoubles.setProperty(
         {"vec3", "Vec3", std::array<double, 3>{{-1, -2, -3}}});
 
-    propInts.fillPropertyMap(propDoubles);
-    propDoubles.fillPropertyMap(propInts);
+    propInts.merge(propDoubles);
+    propDoubles.merge(propInts);
 
     BOOST_CHECK(propInts.getPropertyType("number") == Type::Int);
     BOOST_CHECK(propInts.getPropertyType("vec2") == Type::Vec2i);

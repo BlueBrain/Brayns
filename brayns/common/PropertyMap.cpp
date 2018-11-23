@@ -36,7 +36,7 @@ std::array<TDest, S> convertArray(const std::array<TSrc, S> src)
 
 namespace brayns
 {
-void PropertyMap::fillPropertyMap(const PropertyMap& input)
+void PropertyMap::merge(const PropertyMap& input)
 {
     const auto setValues = [](Property& dest, const Property& src) {
         switch (dest.type)

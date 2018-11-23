@@ -686,7 +686,7 @@ ModelDescriptorPtr CircuitLoader::importFromFile(
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
-    properties.fillPropertyMap(propertiesTmp);
+    properties.merge(propertiesTmp);
     auto impl = Impl(_scene, properties);
     return impl.importCircuit(filename, callback);
 }

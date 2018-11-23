@@ -341,7 +341,7 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
-    properties.fillPropertyMap(propertiesTmp);
+    properties.merge(propertiesTmp);
 
     const double radiusMultiplier =
         properties.getProperty<double>(PROP_RADIUS_MULTIPLIER.name, 1.0);

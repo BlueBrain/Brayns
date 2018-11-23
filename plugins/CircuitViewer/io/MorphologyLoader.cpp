@@ -1142,7 +1142,7 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
 {
     // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
-    properties.fillPropertyMap(propertiesTmp);
+    properties.merge(propertiesTmp);
 
     const auto modelName = boost::filesystem::basename({fileName});
     callback.updateProgress("Loading " + modelName + " ...", 0.f);
