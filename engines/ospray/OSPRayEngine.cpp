@@ -275,8 +275,12 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
     const std::string& name, const Vector2ui& frameSize,
     const FrameBufferFormat frameBufferFormat) const
 {
+    // Use format 'none' for the per-tile streaming to avoid tile readback
+    // to the MPI master
     return std::make_shared<OSPRayFrameBuffer>(name, frameSize,
-                                               frameBufferFormat);
+                                               haveDeflectPixelOp()
+                                                   ? FrameBufferFormat::none
+                                                   : frameBufferFormat);
 }
 
 ScenePtr OSPRayEngine::createScene(ParametersManager& parametersManager) const
