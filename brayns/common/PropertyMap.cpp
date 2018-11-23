@@ -81,7 +81,7 @@ void PropertyMap::merge(const PropertyMap& input)
     {
         const auto& name = otherProperty->name;
 
-        if (auto myProperty = findProperty(name))
+        if (auto myProperty = find(name))
         {
             const auto myType = myProperty->type;
             const auto otherType = otherProperty->type;

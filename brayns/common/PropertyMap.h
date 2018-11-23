@@ -204,7 +204,7 @@ public:
     template <typename T>
     inline void updateProperty(const std::string& name, const T& t)
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
         {
             if (property->type != property->_getType<T>())
                 throw std::runtime_error(
@@ -216,7 +216,7 @@ public:
     /** Update or add the given property. */
     void setProperty(const Property& newProperty)
     {
-        if (auto property = findProperty(newProperty.name))
+        if (auto property = find(newProperty.name))
         {
             if (property->type != newProperty.type)
                 throw std::runtime_error(
@@ -233,7 +233,7 @@ public:
     template <typename T>
     inline T getProperty(const std::string& name, T valIfNotFound) const
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
             return property->get<T>();
         return valIfNotFound;
     }
@@ -245,7 +245,7 @@ public:
     template <typename T>
     inline T getProperty(const std::string& name) const
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
             return property->get<T>();
         throw std::runtime_error("No property found with name " + name);
     }
@@ -253,7 +253,7 @@ public:
     /** @return true if the property with the given name exists. */
     bool hasProperty(const std::string& name) const
     {
-        return findProperty(name) != nullptr;
+        return find(name) != nullptr;
     }
 
     /**
@@ -262,7 +262,7 @@ public:
      */
     const auto& getEnums(const std::string& name) const
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
             return property->enums;
         throw std::runtime_error("No property found with name " + name);
     }
@@ -270,7 +270,7 @@ public:
     /** @return the type of the given property name. */
     Property::Type getPropertyType(const std::string& name) const
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
             return property->type;
         throw std::runtime_error("No property found with name " + name);
     }
@@ -281,7 +281,7 @@ public:
     void merge(const PropertyMap& input);
 
 private:
-    Property* findProperty(const std::string& name) const
+    Property* find(const std::string& name) const
     {
         auto foundProperty =
             std::find_if(_properties.begin(), _properties.end(),
