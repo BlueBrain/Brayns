@@ -59,7 +59,7 @@ public:
         };
 
         template <typename T>
-        void assert_valid_type() const
+        void assertValidType() const
         {
             static_assert(std::is_same<T, double>::value ||
                               std::is_same<T, int32_t>::value ||
@@ -74,7 +74,7 @@ public:
         }
 
         template <typename T>
-        void assert_valid_enum_type() const
+        void assertValidEnumType() const
         {
             static_assert(std::is_same<T, int32_t>::value ||
                               std::is_same<T, std::string>::value,
@@ -82,16 +82,42 @@ public:
         }
 
         template <typename T>
+        Type getType() const
+        {
+            assertValidType<T>();
+
+            if (std::is_same<T, double>::value)
+                return PropertyMap::Property::Type::Double;
+            if (std::is_same<T, int32_t>::value)
+                return PropertyMap::Property::Type::Int;
+            if (std::is_same<T, std::string>::value)
+                return PropertyMap::Property::Type::String;
+            if (std::is_same<T, bool>::value)
+                return PropertyMap::Property::Type::Bool;
+            if (std::is_same<T, std::array<double, 2>>::value)
+                return PropertyMap::Property::Type::Vec2d;
+            if (std::is_same<T, std::array<int32_t, 2>>::value)
+                return PropertyMap::Property::Type::Vec2i;
+            if (std::is_same<T, std::array<double, 3>>::value)
+                return PropertyMap::Property::Type::Vec3d;
+            if (std::is_same<T, std::array<int32_t, 3>>::value)
+                return PropertyMap::Property::Type::Vec3i;
+            if (std::is_same<T, std::array<double, 4>>::value)
+                return PropertyMap::Property::Type::Vec4d;
+            throw std::runtime_error("Could not match type for '" + name + "'");
+        }
+
+        template <typename T>
         Property(const std::string& name_, const std::string& label_,
                  const T value)
             : name(name_)
             , label(label_)
-            , type(_getType<T>())
+            , type(getType<T>())
             , _data(std::move(value))
             , _min(T())
             , _max(T())
         {
-            assert_valid_type<T>();
+            assertValidType<T>();
         }
 
         template <typename T>
@@ -99,12 +125,12 @@ public:
                  const T value, const std::pair<T, T>& limit)
             : name(name_)
             , label(label_)
-            , type(_getType<T>())
+            , type(getType<T>())
             , _data(std::move(value))
             , _min(limit.first)
             , _max(limit.second)
         {
-            assert_valid_type<T>();
+            assertValidType<T>();
         }
 
         /**
@@ -116,13 +142,13 @@ public:
                  const T value, const std::vector<std::string>& enums_)
             : name(name_)
             , label(label_)
-            , type(_getType<T>())
+            , type(getType<T>())
             , enums(enums_)
             , _data(std::move(value))
             , _min(0)
             , _max(enums_.size())
         {
-            assert_valid_enum_type<T>();
+            assertValidEnumType<T>();
         }
 
         using ModifiedCallback = std::function<void(const Property&)>;
@@ -146,21 +172,21 @@ public:
         template <typename T>
         T get() const
         {
-            assert_valid_type<T>();
+            assertValidType<T>();
             return _castValue<T>(_data);
         }
 
         template <typename T>
         T min() const
         {
-            assert_valid_type<T>();
+            assertValidType<T>();
             return _castValue<T>(_min);
         }
 
         template <typename T>
         T max() const
         {
-            assert_valid_type<T>();
+            assertValidType<T>();
             return _castValue<T>(_max);
         }
 
@@ -186,13 +212,11 @@ public:
         const boost::any _max;
         bool _readOnly{false};
         ModifiedCallback _modifiedCallback;
-        template <typename T>
-        Type _getType() const;
 
         template <typename T>
         T _castValue(const boost::any& v) const
         {
-            const auto requestedType = _getType<T>();
+            const auto requestedType = getType<T>();
             if (requestedType != type)
                 throw std::runtime_error("Type mismatch for property '" + name +
                                          "'");
@@ -206,7 +230,7 @@ public:
     {
         if (auto property = find(name))
         {
-            if (property->type != property->_getType<T>())
+            if (property->type != property->getType<T>())
                 throw std::runtime_error(
                     "updateProperty does not allow for changing the type");
             property->set(t);
@@ -293,69 +317,4 @@ private:
 
     std::vector<std::shared_ptr<Property>> _properties;
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-template <>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType<double>()
-    const
-{
-    return PropertyMap::Property::Type::Double;
-}
-template <>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType<int32_t>()
-    const
-
-{
-    return PropertyMap::Property::Type::Int;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::string>() const
-
-{
-    return PropertyMap::Property::Type::String;
-}
-template <>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType<bool>() const
-{
-    return PropertyMap::Property::Type::Bool;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 2>>() const
-{
-    return PropertyMap::Property::Type::Vec2d;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<int32_t, 2>>() const
-{
-    return PropertyMap::Property::Type::Vec2i;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 3>>() const
-{
-    return PropertyMap::Property::Type::Vec3d;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<int32_t, 3>>() const
-{
-    return PropertyMap::Property::Type::Vec3i;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 4>>() const
-{
-    return PropertyMap::Property::Type::Vec4d;
-}
-
-template <typename T>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType() const
-{
-    static_assert(sizeof(T) == -1, "Type not allowed in property map!");
-    return PropertyMap::Property::Type::Double;
-}
 }
