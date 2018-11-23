@@ -538,7 +538,7 @@ inline std::string modelBinaryParamsToJson(const T& params)
     const auto jsonOriginal = staticjson::to_json_string(params);
 
     const std::string propertiesJson =
-        "\"loader_properties\":" + to_json(params._loaderProperties);
+        "\"loader_properties\":" + to_json(params.getLoaderProperties());
 
     const auto result =
         brayns::replaceFirstOccurrence(jsonOriginal, "\"loader_properties\":{}",
@@ -587,7 +587,7 @@ inline bool modelBinaryParamsFromJson(T& params, const std::string& json)
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         propertyDoc.Accept(writer);
 
-        params._loaderProperties = jsonToPropertyMap(buffer.GetString());
+        params.setLoaderProperties(jsonToPropertyMap(buffer.GetString()));
     }
 
     // Clear loader_properties to be able to parse rest of values

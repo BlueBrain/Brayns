@@ -235,7 +235,7 @@ ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
                                           params.getLoaderName());
 
     // HACK: Add loader name in properties for archive loader
-    auto propCopy = params._loaderProperties;
+    auto propCopy = params.getLoaderProperties();
     propCopy.setProperty({"loaderName", "loaderName", params.getLoaderName()});
     auto modelDescriptor =
         loader.importFromBlob(std::move(blob), cb, propCopy, 0, materialID);
@@ -256,7 +256,7 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
     const auto& loader =
         _loaderRegistry.getSuitableLoader(path, "", params.getLoaderName());
     // HACK: Add loader name in properties for archive loader
-    auto propCopy = params._loaderProperties;
+    auto propCopy = params.getLoaderProperties();
     propCopy.setProperty({"loaderName", "loaderName", params.getLoaderName()});
     auto modelDescriptor =
         loader.importFromFile(path, cb, propCopy, 0, materialID);

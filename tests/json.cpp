@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_ModelParams)
         properties.setProperty({"int", "int", 42});
         properties.setProperty(
             {"enum", "enum", std::string("b"), {"a", "b", "c", "d"}});
-        paramsOrig._loaderProperties = properties;
+        paramsOrig.setLoaderProperties(properties);
     }
 
     const auto jsonStr = to_json(paramsOrig);
@@ -42,12 +42,12 @@ BOOST_AUTO_TEST_CASE(test_ModelParams)
     brayns::ModelParams paramsParse;
     from_json(paramsParse, jsonStr);
     BOOST_CHECK_EQUAL(
-        paramsOrig._loaderProperties.getProperty<std::string>("string"),
-        paramsParse._loaderProperties.getProperty<std::string>("string"));
-    BOOST_CHECK_EQUAL(paramsOrig._loaderProperties.getProperty<int32_t>("int"),
-                      paramsParse._loaderProperties.getProperty<int32_t>(
-                          "int"));
+        paramsOrig.getLoaderProperties().getProperty<std::string>("string"),
+        paramsParse.getLoaderProperties().getProperty<std::string>("string"));
     BOOST_CHECK_EQUAL(
-        paramsOrig._loaderProperties.getProperty<std::string>("enum"),
-        paramsParse._loaderProperties.getProperty<std::string>("enum"));
+        paramsOrig.getLoaderProperties().getProperty<int32_t>("int"),
+        paramsParse.getLoaderProperties().getProperty<int32_t>("int"));
+    BOOST_CHECK_EQUAL(
+        paramsOrig.getLoaderProperties().getProperty<std::string>("enum"),
+        paramsParse.getLoaderProperties().getProperty<std::string>("enum"));
 }

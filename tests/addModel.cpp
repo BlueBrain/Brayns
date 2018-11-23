@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_valid)
     properties.setProperty(
         {"geometryQuality", "Geometry quality", std::string("low")});
     properties.setProperty({"unused", "Unused", 42});
-    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
-    params._loaderProperties = properties;
+    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH,
+                               properties};
 
     auto model =
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,
@@ -170,8 +170,8 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_invalid)
     brayns::PropertyMap properties;
     properties.setProperty(
         {"geometryQuality", "Geometry quality", std::string("INVALID")});
-    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH};
-    params._loaderProperties = properties;
+    brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH,
+                               properties};
 
     try
     {
@@ -196,8 +196,8 @@ BOOST_AUTO_TEST_CASE(protein_loader)
 
     const auto numModels = getScene().getNumModels();
 
-    brayns::ModelParams params{"1mbs", BRAYNS_TESTDATA_MODEL_PDB_PATH};
-    params._loaderProperties = properties;
+    brayns::ModelParams params{"1mbs", BRAYNS_TESTDATA_MODEL_PDB_PATH,
+                               properties};
 
     auto model =
         makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(ADD_MODEL,

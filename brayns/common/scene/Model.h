@@ -106,12 +106,12 @@ public:
         _updateValue(_loaderName, loaderName);
     }
     const std::string& getLoaderName() const { return _loaderName; }
+    const PropertyMap& getLoaderProperties() const { return _loaderProperties; }
+    void setLoaderProperties(const PropertyMap& pm) { _loaderProperties = pm; }
 protected:
     std::string _name;
     std::string _path;
     std::string _loaderName;
-
-public:
     PropertyMap _loaderProperties;
 
     SERIALIZATION_FRIEND(ModelParams)
