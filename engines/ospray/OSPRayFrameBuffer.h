@@ -52,7 +52,6 @@ public:
     const uint8_t* getColorBuffer() const final { return _colorBuffer; }
     const float* getDepthBuffer() const final { return _depthBuffer; }
     OSPFrameBuffer impl() { return _currentFB(); }
-    void enableDeflectPixelOp();
     void setStreamingParams(const StreamParameters& params);
 
 private:
@@ -63,6 +62,7 @@ private:
     bool _useSubsampling() const;
     OSPFrameBuffer _currentFB() const;
     Vector2ui _subsamplingSize() const;
+    void _enableDeflectPixelOp();
 
     OSPFrameBuffer _frameBuffer{nullptr};
     OSPFrameBuffer _subsamplingFrameBuffer{nullptr};

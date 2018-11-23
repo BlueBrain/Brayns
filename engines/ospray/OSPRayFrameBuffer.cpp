@@ -60,7 +60,7 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
     ospRelease(_subsamplingFrameBuffer);
 }
 
-void OSPRayFrameBuffer::enableDeflectPixelOp()
+void OSPRayFrameBuffer::_enableDeflectPixelOp()
 {
     if (_pixelOp)
         return;
@@ -68,7 +68,6 @@ void OSPRayFrameBuffer::enableDeflectPixelOp()
     _pixelOp = ospNewPixelOp("DeflectPixelOp");
     if (_pixelOp)
     {
-        ospCommit(_pixelOp);
         ospSetPixelOp(_frameBuffer, _pixelOp);
         if (_subsamplingFrameBuffer)
             ospSetPixelOp(_subsamplingFrameBuffer, _pixelOp);
@@ -90,7 +89,8 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
 
 void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params)
 {
-    if (_pixelOp)
+    _enableDeflectPixelOp();
+    if (_pixelOp && params.isModified())
     {
         ospSetString(_pixelOp, "id", params.getId().c_str());
         ospSetString(_pixelOp, "hostname", params.getHostname().c_str());

@@ -161,20 +161,7 @@ void OSPRayEngine::commit()
         }
     }
 
-    for (auto frameBuffer : _frameBuffers)
-    {
-        auto osprayFrameBuffer =
-            std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
-        const auto& streamParams = _parametersManager.getStreamParameters();
-
-        if (haveDeflectPixelOp())
-            osprayFrameBuffer->enableDeflectPixelOp();
-
-        if (streamParams.isModified())
-        {
-            osprayFrameBuffer->setStreamingParams(streamParams);
-        }
-    }
+    _setupDeflectPixelOp();
 }
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const
@@ -364,5 +351,22 @@ void OSPRayEngine::_createCameras()
 
     _camera->setEnvironmentMap(
         !_parametersManager.getSceneParameters().getEnvironmentMap().empty());
+}
+
+void OSPRayEngine::_setupDeflectPixelOp()
+{
+    // distributed streaming requires a properly setup stream ID (either from
+    // DEFLECT_ID env variable or from the Observer from the DeflectPlugin).
+    const auto& streamParams = _parametersManager.getStreamParameters();
+    if (haveDeflectPixelOp() && !streamParams.getId().empty())
+    {
+        for (auto frameBuffer : _frameBuffers)
+        {
+            auto osprayFrameBuffer =
+                std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
+
+            osprayFrameBuffer->setStreamingParams(streamParams);
+        }
+    }
 }
 }
