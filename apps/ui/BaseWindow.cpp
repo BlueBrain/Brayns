@@ -249,12 +249,12 @@ void BaseWindow::forceRedraw()
 
 void BaseWindow::display()
 {
+    _timer.start();
+    _brayns.commitAndRender();
+
     const auto& newWindowSize = _getWindowSize();
     if (newWindowSize != _windowSize)
         glutReshapeWindow(newWindowSize.x(), newWindowSize.y());
-
-    _timer.start();
-    _brayns.commitAndRender();
 
     size_t offset = 0;
     for (auto frameBuffer : _brayns.getEngine().getFrameBuffers())
