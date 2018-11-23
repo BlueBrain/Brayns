@@ -706,6 +706,17 @@ bool get_enum(const rapidjson::Value& v, const std::vector<std::string>& enums,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+bool parseSetValue(const rapidjson::Value& v, brayns::PropertyMap& pm,
+                   const std::string& propName)
+{
+    T val;
+    if (!get_property<T>(v, val))
+        return false;
+    pm.updateProperty(propName, val);
+    return true;
+}
+
 template <typename T, size_t S>
 bool parseSetArray(const rapidjson::Value& v, brayns::PropertyMap& pm,
                    const std::string& propName)
@@ -717,17 +728,14 @@ bool parseSetArray(const rapidjson::Value& v, brayns::PropertyMap& pm,
     return true;
 }
 
-template <typename T>
-bool parseSetProperty(const rapidjson::Value& v, brayns::PropertyMap& pm,
-                      const std::string& propName)
+// Special case where integers are created from enum strings
+bool parseSetEnumOrInt(const rapidjson::Value& v, brayns::PropertyMap& pm,
+                       const std::string& propName)
 {
     const auto& enums = pm.getEnums(propName);
     if (enums.empty())
     {
-        T val;
-        if (!get_property<T>(v, val))
-            return false;
-        pm.updateProperty(propName, val);
+        parseSetValue<int32_t>(v, pm, propName);
     }
     else
     {
@@ -758,23 +766,19 @@ inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
         switch (obj.getPropertyType(propName))
         {
         case PropertyMap::Property::Type::Double:
-        {
-            double val;
-            if (!get_property(m.value, val))
+            if (!parseSetValue<double>(m.value, obj, propName))
                 return false;
-            obj.updateProperty(propName, val);
             break;
-        }
         case PropertyMap::Property::Type::Int:
-            if (!parseSetProperty<int32_t>(m.value, obj, propName))
+            if (!parseSetEnumOrInt(m.value, obj, propName))
                 return false;
             break;
         case PropertyMap::Property::Type::String:
-            if (!parseSetProperty<std::string>(m.value, obj, propName))
+            if (!parseSetValue<std::string>(m.value, obj, propName))
                 return false;
             break;
         case PropertyMap::Property::Type::Bool:
-            if (!parseSetProperty<bool>(m.value, obj, propName))
+            if (!parseSetValue<bool>(m.value, obj, propName))
                 return false;
             break;
         case PropertyMap::Property::Type::Vec2d:
