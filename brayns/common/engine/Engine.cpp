@@ -61,7 +61,6 @@ void Engine::render()
     for (auto frameBuffer : _frameBuffers)
     {
         _camera->setBufferTarget(frameBuffer->getName());
-        _camera->markModified(false);
         _camera->commit();
         _camera->resetModified();
         _renderer->render(frameBuffer);

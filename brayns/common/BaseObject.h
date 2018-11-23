@@ -84,12 +84,13 @@ protected:
      * modified if it has changed.
      */
     template <typename T>
-    void _updateValue(T& member, const T& newValue)
+    void _updateValue(T& member, const T& newValue,
+                      const bool triggerCallback = true)
     {
         if (!_isEqual(member, newValue))
         {
             member = newValue;
-            markModified();
+            markModified(triggerCallback);
         }
     }
 
