@@ -403,7 +403,7 @@ private:
             bool soma = false;
             bool axon = false;
             bool dendrite = false;
-            bool apical_dendrite = false;
+            bool apicalDendrite = false;
 
             for (const MorphologySectionType mst :
                  geometryParameters.getMorphologySectionTypes())
@@ -420,13 +420,13 @@ private:
                     dendrite = true;
                     break;
                 case MorphologySectionType::apical_dendrite:
-                    apical_dendrite = true;
+                    apicalDendrite = true;
                     break;
                 case MorphologySectionType::all:
                     soma = true;
                     axon = true;
                     dendrite = true;
-                    apical_dendrite = true;
+                    apicalDendrite = true;
                 default:
                     break;
                 }
@@ -439,7 +439,7 @@ private:
                             "morphologySectionTypesDendrite", dendrite});
             pm.setProperty({"morphologySectionTypesApicalDendrite",
                             "morphologySectionTypesApicalDendrite",
-                            apical_dendrite});
+                            apicalDendrite});
         }
 
         pm.setProperty({"circuitEndSimulationTime", "circuitEndSimulationTime",
