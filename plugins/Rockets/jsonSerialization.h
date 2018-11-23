@@ -581,7 +581,8 @@ inline bool modelBinaryParamsFromJson(T& params, const std::string& json)
 
     {
         Document propertyDoc;
-        propertyDoc.SetObject() = document["loader_properties"].GetObject();
+        propertyDoc.CopyFrom(document["loader_properties"],
+                             propertyDoc.GetAllocator());
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         propertyDoc.Accept(writer);
