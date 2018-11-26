@@ -45,18 +45,15 @@ inline auto lowerCase(std::string str)
 template <size_t M, typename T>
 inline vmml::vector<M, T> toVmmlVec(const std::array<T, M>& input)
 {
-    vmml::vector<M, T> output;
-    for (size_t i = 0; i < M; i++)
-        output[i] = input[i];
-    return output;
+    return vmml::vector<M, T>(input.data());
 }
 
 template <size_t M, typename T>
 inline std::array<T, M> toArray(const vmml::vector<M, T>& input)
 {
     std::array<T, M> output;
-    for (size_t i = 0; i < M; i++)
-        output[i] = input[i];
+    std::copy(std::begin(input.array), std::end(input.array),
+              std::begin(output));
     return output;
 }
 }
