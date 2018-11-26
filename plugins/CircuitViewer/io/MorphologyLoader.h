@@ -41,23 +41,55 @@ class CircuitLoader;
 struct ParallelModelContainer;
 using GIDOffsets = std::vector<uint64_t>;
 
+struct MorphologyLoaderParams
+{
+    struct Layout
+    {
+        int32_t nbColumns{0};
+        int32_t verticalSpacing{0};
+        int32_t horizontalSpacing{0};
+    };
+
+    MorphologyLoaderParams() = default;
+    MorphologyLoaderParams(const PropertyMap& properties);
+
+    ColorScheme colorScheme = ColorScheme::none;
+    double radiusMultiplier = 0.0;
+    double radiusCorrection = 0.0;
+    std::vector<MorphologySectionType> morphologySectionTypes;
+    bool useRealisticSomas = false;
+    int32_t metaballsSamplesFromSoma = 0;
+    int32_t metaballsGridSize = 0;
+    double metaballsThreshold = 0.0;
+    bool circuitUseSimulationModel = false;
+    bool morphologyDampenBranchThicknessChangerate = false;
+    bool morphologyUseSDFGeometries = false;
+    Layout layout{};
+    GeometryQuality geometryQuality = GeometryQuality::high;
+};
+
 /** Loads morphologies from SWC and H5, and Circuit Config files */
 class MorphologyLoader : public Loader
 {
 public:
-    MorphologyLoader(Scene& scene,
-                     const GeometryParameters& geometryParameters);
+    MorphologyLoader(Scene& scene);
     ~MorphologyLoader();
+
+    std::vector<std::string> getSupportedExtensions() const final;
+    std::string getName() const final;
+    PropertyMap getProperties() const final;
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;
     ModelDescriptorPtr importFromBlob(Blob&& blob,
                                       const LoaderProgress& callback,
+                                      const PropertyMap& properties,
                                       const size_t index,
                                       const size_t materialID) const final;
 
     ModelDescriptorPtr importFromFile(const std::string& filename,
                                       const LoaderProgress& callback,
+                                      const PropertyMap& properties,
                                       const size_t index,
                                       const size_t materialID) const final;
 
@@ -71,19 +103,20 @@ public:
      */
     Vector3f importMorphology(const servus::URI& source, Model& model,
                               const size_t index,
-                              const Matrix4f& transformation) const;
-
-private:
+                              const Matrix4f& transformation,
+                              const MorphologyLoaderParams& params) const;
     using CompartmentReportPtr = std::shared_ptr<brion::CompartmentReport>;
     using MaterialFunc = std::function<size_t(brain::neuron::SectionType)>;
     Vector3f _importMorphology(const servus::URI& source, const uint64_t index,
                                MaterialFunc materialFunc,
                                const Matrix4f& transformation,
                                CompartmentReportPtr compartmentReport,
-                               ParallelModelContainer& model) const;
+                               ParallelModelContainer& model,
+                               const MorphologyLoaderParams& params) const;
+
+private:
     friend class CircuitLoader;
     class Impl;
-    std::unique_ptr<const Impl> _impl;
 };
 }
 

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "brayns/common/types.h"
+#include "brayns/common/utils/EnumUtils.h"
 #include "utils/SimulationRenderer.h"
 
 namespace brayns
@@ -70,4 +72,12 @@ private:
     float _volumeAlphaCorrection;
 };
 
+template <>
+inline std::vector<std::pair<std::string, AdvancedSimulationRenderer::Shading>>
+    enumMap()
+{
+    return {{"none", AdvancedSimulationRenderer::Shading::none},
+            {"diffuse", AdvancedSimulationRenderer::Shading::diffuse},
+            {"electron", AdvancedSimulationRenderer::Shading::electron}};
+}
 } // ::brayns

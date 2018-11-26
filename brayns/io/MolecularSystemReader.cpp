@@ -23,6 +23,7 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/EnumUtils.h>
 #include <brayns/common/utils/Utils.h>
 #if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
@@ -32,12 +33,21 @@
 
 #include <fstream>
 
+namespace
+{
+using Property = brayns::PropertyMap::Property;
+const Property PROP_COLORSCHEME = {"colorScheme", "Color scheme",
+                                   brayns::enumToString(
+                                       brayns::ColorScheme::none),
+                                   brayns::enumNames<brayns::ColorScheme>()};
+
+const auto LOADER_NAME = "molecular-system";
+}
+
 namespace brayns
 {
-MolecularSystemReader::MolecularSystemReader(
-    Scene& scene, const GeometryParameters& geometryParameters)
+MolecularSystemReader::MolecularSystemReader(Scene& scene)
     : Loader(scene)
-    , _geometryParameters(geometryParameters)
 {
 }
 
@@ -50,7 +60,7 @@ bool MolecularSystemReader::isSupported(const std::string& filename
 
 ModelDescriptorPtr MolecularSystemReader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const size_t index BRAYNS_UNUSED,
+    const PropertyMap& properties, const size_t index BRAYNS_UNUSED,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     LoaderData data;
@@ -63,7 +73,7 @@ ModelDescriptorPtr MolecularSystemReader::importFromFile(
     if (!_loadPositions(data))
         throw std::runtime_error("Failed to load positions");
 
-    if (!_createScene(data))
+    if (!_createScene(data, properties))
         throw std::runtime_error("Failed to load scene");
 
     if (!data._calciumSimulationFolder.empty())
@@ -81,8 +91,11 @@ ModelDescriptorPtr MolecularSystemReader::importFromFile(
 }
 
 bool MolecularSystemReader::_createScene(
-    MolecularSystemReader::LoaderData& data) const
+    MolecularSystemReader::LoaderData& data,
+    const PropertyMap& properties) const
 {
+    const auto colorScheme = stringToEnum<ColorScheme>(
+        properties.getProperty<std::string>(PROP_COLORSCHEME.name));
     uint64_t proteinCount = 0;
     for (const auto& proteinPosition : data._proteinPositions)
     {
@@ -95,9 +108,9 @@ bool MolecularSystemReader::_createScene(
                     data._proteinFolder + '/' + protein->second + ".pdb";
                 Matrix4f transformation;
                 transformation.setTranslation(position);
-                ProteinLoader loader(_scene, _geometryParameters);
-                loader.importFromFile(pdbFilename, data._callback, proteinCount,
-                                      NO_MATERIAL);
+                ProteinLoader loader(_scene);
+                loader.importFromFile(pdbFilename, data._callback, properties,
+                                      proteinCount, NO_MATERIAL);
                 ++proteinCount;
             }
 
@@ -110,17 +123,15 @@ bool MolecularSystemReader::_createScene(
                 const Vector3f scale = {1.f, 1.f, 1.f};
                 const Matrix4f transformation(position, scale);
                 const size_t materialId =
-                    _geometryParameters.getColorScheme() ==
-                            ColorScheme::protein_by_id
-                        ? proteinCount
-                        : NO_MATERIAL;
+                    colorScheme == ColorScheme::protein_by_id ? proteinCount
+                                                              : NO_MATERIAL;
 
                 // Scale mesh to match PDB units. PDB are in angstrom, and
                 // positions are in micrometers
-                MeshLoader meshLoader(_scene, _geometryParameters);
+                MeshLoader meshLoader(_scene);
                 const std::string fileName =
                     data._meshFolder + '/' + protein->second + ".obj";
-                meshLoader.importFromFile(fileName, data._callback,
+                meshLoader.importFromFile(fileName, data._callback, properties,
                                           proteinCount, materialId);
 
                 if (data._proteinFolder.empty())
@@ -280,5 +291,32 @@ void MolecularSystemReader::_writePositionstoFile(
         }
     }
     outfile.close();
+}
+
+std::string MolecularSystemReader::getName() const
+{
+    return LOADER_NAME;
+}
+
+std::vector<std::string> MolecularSystemReader::getSupportedExtensions() const
+{
+    return {"molsys"};
+}
+
+PropertyMap MolecularSystemReader::getProperties() const
+{
+    PropertyMap pm;
+    pm.setProperty(PROP_COLORSCHEME);
+
+#if BRAYNS_USE_ASSIMP
+    { // Add all mesh loader properties
+        const auto mlpm = MeshLoader(_scene).getProperties();
+        for (const auto& prop : mlpm.getProperties())
+            if (prop && !pm.hasProperty(prop->name))
+                pm.setProperty(*prop);
+    }
+#endif
+
+    return pm;
 }
 }

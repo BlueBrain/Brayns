@@ -92,7 +92,7 @@ GeometryParameters::GeometryParameters()
     , _metaballsThreshold(1.f)
     , _metaballsSamplesFromSoma(3)
     , _morphologyDampenBranchThicknessChangerate(false)
-    , _morphologyUseSDFGeometries(false)
+    , _morphologyUseSdfGeometries(false)
     , _memoryMode(MemoryMode::shared)
 {
     _parameters.add_options() //
@@ -308,7 +308,7 @@ void GeometryParameters::parse(const po::variables_map& vm)
             vm[PARAM_METABALLS_SAMPLES_FROM_SOMA].as<size_t>();
     _morphologyDampenBranchThicknessChangerate =
         vm[PARAM_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE].as<bool>();
-    _morphologyUseSDFGeometries =
+    _morphologyUseSdfGeometries =
         vm[PARAM_MORPHOLOGY_USE_SDF_GEOMETRIES].as<bool>();
     _circuitConfiguration.useSimulationModel =
         vm[PARAM_CIRCUIT_USES_SIMULATION_MODEL].as<bool>();
@@ -433,9 +433,9 @@ const std::string& GeometryParameters::getGeometryQualityAsString(
     return GEOMETRY_QUALITIES[static_cast<size_t>(value)];
 }
 
-float GeometryParameters::getCircuitDensity() const
+double GeometryParameters::getCircuitDensity() const
 {
-    return std::max(0.f, std::min(100.f, _circuitConfiguration.density));
+    return std::max(0., std::min(100., _circuitConfiguration.density));
 }
 
 strings GeometryParameters::getCircuitTargetsAsStrings() const

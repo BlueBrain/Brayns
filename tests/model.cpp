@@ -45,9 +45,10 @@ BOOST_AUTO_TEST_CASE(set_properties)
     props.setProperty({"bla", "bla property", 0});
     model->setProperties(props);
 
-    props.updateProperty("bla", 42);
+    brayns::PropertyMap propsNew;
+    propsNew.setProperty({"bla", "bla property", 42});
     BOOST_CHECK((makeRequest<brayns::ModelProperties, bool>(
-        SET_PROPERTIES, {model->getModelID(), props})));
+        SET_PROPERTIES, {model->getModelID(), propsNew})));
 
     BOOST_CHECK_EQUAL(model->getProperties().getProperty<int32_t>("bla"), 42);
 

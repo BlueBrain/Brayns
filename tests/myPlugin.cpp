@@ -108,7 +108,7 @@ public:
 
         // test properties from custom renderer
         brayns::PropertyMap props;
-        props.setProperty({"awesome", "Best property", 42, {0, 50}});
+        props.setProperty({"awesome", "Best property", int32_t(42), {0, 50}});
         api->getRenderer().setProperties("myrenderer", props);
     }
 

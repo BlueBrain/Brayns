@@ -80,6 +80,7 @@ else()
     throttle.cpp
     transferFunction.cpp
     webAPI.cpp
+    json.cpp
   )
 endif()
 

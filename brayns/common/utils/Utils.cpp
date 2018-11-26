@@ -72,4 +72,22 @@ std::string shortenString(const std::string& string, const size_t maxLength)
 
     return beforeEllipsis + ELLIPSIS + afterEllipsis;
 }
+
+std::string extractExtension(const std::string& filename)
+{
+    auto extension = fs::extension(filename);
+    if (!extension.empty())
+        extension = extension.erase(0, 1);
+
+    return extension;
+}
+std::string replaceFirstOccurrence(std::string input,
+                                   const std::string& toReplace,
+                                   const std::string& replaceWith)
+{
+    std::size_t pos = input.find(toReplace);
+    if (pos == std::string::npos)
+        return input;
+    return input.replace(pos, toReplace.length(), replaceWith);
+}
 }

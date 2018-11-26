@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include "types.h"
 #include <boost/any.hpp>
-#include <boost/static_assert.hpp>
 #include <functional>
 #include <memory>
 #include <string>
@@ -48,58 +48,107 @@ public:
         enum class Type
         {
             Int,
-            Float,
+            Double,
             String,
             Bool,
             Vec2i,
-            Vec2f,
+            Vec2d,
             Vec3i,
-            Vec3f,
-            Vec4f
+            Vec3d,
+            Vec4d
         };
 
         template <typename T>
+        void assertValidType() const
+        {
+            static_assert(std::is_same<T, double>::value ||
+                              std::is_same<T, int32_t>::value ||
+                              std::is_same<T, std::string>::value ||
+                              std::is_same<T, bool>::value ||
+                              std::is_same<T, std::array<double, 2>>::value ||
+                              std::is_same<T, std::array<int32_t, 2>>::value ||
+                              std::is_same<T, std::array<double, 3>>::value ||
+                              std::is_same<T, std::array<int32_t, 3>>::value ||
+                              std::is_same<T, std::array<double, 4>>::value,
+                          "Invalid property type.");
+        }
+
+        template <typename T>
+        void assertValidEnumType() const
+        {
+            static_assert(std::is_same<T, int32_t>::value ||
+                              std::is_same<T, std::string>::value,
+                          "Invalid enum type.");
+        }
+
+        template <typename T>
+        Type getType() const
+        {
+            assertValidType<T>();
+
+            if (std::is_same<T, double>::value)
+                return PropertyMap::Property::Type::Double;
+            if (std::is_same<T, int32_t>::value)
+                return PropertyMap::Property::Type::Int;
+            if (std::is_same<T, std::string>::value)
+                return PropertyMap::Property::Type::String;
+            if (std::is_same<T, bool>::value)
+                return PropertyMap::Property::Type::Bool;
+            if (std::is_same<T, std::array<double, 2>>::value)
+                return PropertyMap::Property::Type::Vec2d;
+            if (std::is_same<T, std::array<int32_t, 2>>::value)
+                return PropertyMap::Property::Type::Vec2i;
+            if (std::is_same<T, std::array<double, 3>>::value)
+                return PropertyMap::Property::Type::Vec3d;
+            if (std::is_same<T, std::array<int32_t, 3>>::value)
+                return PropertyMap::Property::Type::Vec3i;
+            if (std::is_same<T, std::array<double, 4>>::value)
+                return PropertyMap::Property::Type::Vec4d;
+            throw std::runtime_error("Could not match type for '" + name + "'");
+        }
+
+        template <typename T>
         Property(const std::string& name_, const std::string& label_,
-                 const T& value)
+                 const T value)
             : name(name_)
             , label(label_)
-            , type(_getType<T>())
-            , _data(value)
+            , type(getType<T>())
+            , _data(std::move(value))
             , _min(T())
             , _max(T())
         {
+            assertValidType<T>();
         }
 
         template <typename T>
         Property(const std::string& name_, const std::string& label_,
-                 const T& value, const std::pair<T, T>& limit)
+                 const T value, const std::pair<T, T>& limit)
             : name(name_)
             , label(label_)
-            , type(_getType<T>())
-            , _data(value)
+            , type(getType<T>())
+            , _data(std::move(value))
             , _min(limit.first)
             , _max(limit.second)
         {
+            assertValidType<T>();
         }
 
         /**
-         * Specialized for enum properties: type is int32_t, and the possible
-         * enum values are passed in enums_. The enum/int value and the
-         * corresponding string maps to the index in the vector.
+         * Specialized for enum properties, the possible enum values are passed
+         * in enums_.
          */
         template <typename T>
-        Property(
-            const std::string& name_, const std::string& label_, const T& value,
-            const std::vector<std::string>& enums_,
-            typename std::enable_if<std::is_same<T, int32_t>::value>::type* = 0)
+        Property(const std::string& name_, const std::string& label_,
+                 const T value, const std::vector<std::string>& enums_)
             : name(name_)
             , label(label_)
-            , type(_getType<T>())
+            , type(getType<T>())
             , enums(enums_)
-            , _data(value)
+            , _data(std::move(value))
             , _min(0)
             , _max(enums_.size())
         {
+            assertValidEnumType<T>();
         }
 
         using ModifiedCallback = std::function<void(const Property&)>;
@@ -123,19 +172,22 @@ public:
         template <typename T>
         T get() const
         {
-            return boost::any_cast<T>(_data);
+            assertValidType<T>();
+            return _castValue<T>(_data);
         }
 
         template <typename T>
         T min() const
         {
-            return boost::any_cast<T>(_min);
+            assertValidType<T>();
+            return _castValue<T>(_min);
         }
 
         template <typename T>
         T max() const
         {
-            return boost::any_cast<T>(_max);
+            assertValidType<T>();
+            return _castValue<T>(_max);
         }
 
         /**
@@ -149,8 +201,7 @@ public:
         const Type type;
 
         /**
-         * Name of enum values that are mapped to the integer value based on
-         * the index.
+         * Name of enum values that are mapped to the integer value
          */
         const std::vector<std::string> enums;
 
@@ -161,17 +212,25 @@ public:
         const boost::any _max;
         bool _readOnly{false};
         ModifiedCallback _modifiedCallback;
+
         template <typename T>
-        Type _getType();
+        T _castValue(const boost::any& v) const
+        {
+            const auto requestedType = getType<T>();
+            if (requestedType != type)
+                throw std::runtime_error("Type mismatch for property '" + name +
+                                         "'");
+            return boost::any_cast<T>(v);
+        }
     };
 
     /** Update the property of the given name */
     template <typename T>
     inline void updateProperty(const std::string& name, const T& t)
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
         {
-            if (property->type != property->_getType<T>())
+            if (property->type != property->getType<T>())
                 throw std::runtime_error(
                     "updateProperty does not allow for changing the type");
             property->set(t);
@@ -181,7 +240,7 @@ public:
     /** Update or add the given property. */
     void setProperty(const Property& newProperty)
     {
-        if (auto property = findProperty(newProperty.name))
+        if (auto property = find(newProperty.name))
         {
             if (property->type != newProperty.type)
                 throw std::runtime_error(
@@ -198,7 +257,7 @@ public:
     template <typename T>
     inline T getProperty(const std::string& name, T valIfNotFound) const
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
             return property->get<T>();
         return valIfNotFound;
     }
@@ -210,7 +269,7 @@ public:
     template <typename T>
     inline T getProperty(const std::string& name) const
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
             return property->get<T>();
         throw std::runtime_error("No property found with name " + name);
     }
@@ -218,7 +277,7 @@ public:
     /** @return true if the property with the given name exists. */
     bool hasProperty(const std::string& name) const
     {
-        return findProperty(name) != nullptr;
+        return find(name) != nullptr;
     }
 
     /**
@@ -227,7 +286,7 @@ public:
      */
     const auto& getEnums(const std::string& name) const
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
             return property->enums;
         throw std::runtime_error("No property found with name " + name);
     }
@@ -235,15 +294,18 @@ public:
     /** @return the type of the given property name. */
     Property::Type getPropertyType(const std::string& name) const
     {
-        if (auto property = findProperty(name))
+        if (auto property = find(name))
             return property->type;
         throw std::runtime_error("No property found with name " + name);
     }
 
     /** @return all the registered properties. */
     const auto& getProperties() const { return _properties; }
+    /** Merge this property map with properties from another. */
+    void merge(const PropertyMap& input);
+
 private:
-    Property* findProperty(const std::string& name) const
+    Property* find(const std::string& name) const
     {
         auto foundProperty =
             std::find_if(_properties.begin(), _properties.end(),
@@ -255,68 +317,4 @@ private:
 
     std::vector<std::shared_ptr<Property>> _properties;
 };
-
-template <>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType<double>()
-{
-    return PropertyMap::Property::Type::Float;
-}
-template <>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType<int32_t>()
-{
-    return PropertyMap::Property::Type::Int;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::string>()
-{
-    return PropertyMap::Property::Type::String;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<const char*>()
-{
-    return PropertyMap::Property::Type::String;
-}
-template <>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType<bool>()
-{
-    return PropertyMap::Property::Type::Bool;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 2>>()
-{
-    return PropertyMap::Property::Type::Vec2f;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<int32_t, 2>>()
-{
-    return PropertyMap::Property::Type::Vec2i;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 3>>()
-{
-    return PropertyMap::Property::Type::Vec3f;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<int32_t, 3>>()
-{
-    return PropertyMap::Property::Type::Vec3i;
-}
-template <>
-inline PropertyMap::Property::Type
-    PropertyMap::Property::_getType<std::array<double, 4>>()
-{
-    return PropertyMap::Property::Type::Vec4f;
-}
-template <typename T>
-inline PropertyMap::Property::Type PropertyMap::Property::_getType()
-{
-    BOOST_STATIC_ASSERT(!std::is_same<T, float>());
-    return PropertyMap::Property::Type::Float;
-}
 }

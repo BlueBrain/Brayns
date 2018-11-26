@@ -53,7 +53,7 @@ void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
         {
             switch (prop->type)
             {
-            case PropertyMap::Property::Type::Float:
+            case PropertyMap::Property::Type::Double:
                 SET_SCALAR(f, double);
             case PropertyMap::Property::Type::Int:
                 SET_SCALAR(i, int32_t);
@@ -63,15 +63,15 @@ void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
                 ospSetString(ospObject, prop->name.c_str(),
                              prop->get<std::string>().c_str());
                 break;
-            case PropertyMap::Property::Type::Vec2f:
+            case PropertyMap::Property::Type::Vec2d:
                 SET_ARRAY_FLOAT(2fv, 2);
             case PropertyMap::Property::Type::Vec2i:
                 SET_ARRAY(2iv, int32_t, 2);
-            case PropertyMap::Property::Type::Vec3f:
+            case PropertyMap::Property::Type::Vec3d:
                 SET_ARRAY_FLOAT(3fv, 3);
             case PropertyMap::Property::Type::Vec3i:
                 SET_ARRAY(3iv, int32_t, 3);
-            case PropertyMap::Property::Type::Vec4f:
+            case PropertyMap::Property::Type::Vec4d:
                 SET_ARRAY_FLOAT(4fv, 4);
             }
         }

@@ -25,7 +25,9 @@
 
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
+#include <brayns/common/utils/Utils.h>
 
+#include <brayns/parameters/ApplicationParameters.h>
 
 #include <brain/brain.h>
 #include <brion/brion.h>
@@ -34,44 +36,201 @@
 #include <brayns/io/MeshLoader.h>
 #endif
 
-namespace brayns
+#include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
+
+using namespace brayns;
+
+namespace
 {
-class CircuitLoader::Impl
+using Property = brayns::PropertyMap::Property;
+const Property PROP_CIRCUIT_DENSITY = {"circuitDensity", "Density", 100.0};
+const Property PROP_CIRCUIT_RANDOM_SEED = {"circuitRandomSeed", "Random seed",
+                                           0};
+const Property PROP_CIRCUIT_REPORT = {"circuitReport", "Report",
+                                      std::string("")};
+const Property PROP_CIRCUIT_TARGETS = {"circuitTargets", "Targets",
+                                       std::string("")};
+const Property PROP_CIRCUIT_MESH_FILENAME_PATTERN = {
+    "circuitMeshFilenamePattern", "Mesh filename pattern", std::string("")};
+const Property PROP_CIRCUIT_MESH_FOLDER = {"circuitMeshFolder", "Mesh folder",
+                                           std::string("")};
+const Property PROP_CIRCUIT_BOUNDING_BOX_P0 = {
+    "circuitBoundingBoxP0", "First bounding box boundary point",
+    std::array<double, 3>{{0, 0, 0}}};
+const Property PROP_CIRCUIT_BOUNDING_BOX_P1 = {
+    "circuitBoundingBoxP1", "Second bounding box boundary point",
+    std::array<double, 3>{{0, 0, 0}}};
+const Property PROP_CIRCUIT_USE_SIMULATION_MODEL = {"circuitUseSimulationModel",
+                                                    "Use simulation model",
+                                                    false};
+const Property PROP_CIRCUIT_MESH_TRANSFORMATION = {"circuitMeshTransformation",
+                                                   "Mesh transformation",
+                                                   int32_t(0)};
+const Property PROP_COLOR_SCHEME = {"colorScheme", "Color scheme",
+                                    brayns::enumToString(ColorScheme::none),
+                                    brayns::enumNames<ColorScheme>()};
+const Property PROP_CIRCUIT_START_SIMULATION_TIME = {
+    "circuitStartSimulationTime", "Start simulation time", 0.0};
+const Property PROP_CIRCUIT_END_SIMULATION_TIME = {"circuitEndSimulationTime",
+                                                   "End simulation time", 0.0};
+const Property PROP_CIRCUIT_SIMULATION_STEP = {"circuitSimulationStep",
+                                               "Simulation step", 0.0};
+const Property PROP_SYNCHRONOUS_MODE = {"synchronousMode", "Synchronous mode",
+                                        false};
+const Property PROP_LOAD_CACHE_FILE = {"loadCacheFile", "Load cache file",
+                                       std::string("")};
+const Property PROP_GEOMETRY_QUALITY = {"geometryQuality", "Geometry quality",
+                                        brayns::enumToString(
+                                            GeometryQuality::high),
+                                        brayns::enumNames<GeometryQuality>()};
+const auto LOADER_NAME = "circuit";
+
+/**
+ * @brief getMeshFilenameFromGID Returns the name of the mesh file according
+ * to the --circuit-mesh-folder, --circuit-mesh-filename-pattern command
+ * line arguments and a GID
+ * @param gid GID of the cell
+ * @return A string with the full path of the mesh file
+ */
+std::string getMeshFilenameFromGID(
+    const uint64_t gid, const std::string& circuitMeshFilenamePattern,
+    const std::string& circuitMeshFolder)
+{
+    const std::string gidAsString = std::to_string(gid);
+    const std::string GID = "{gid}";
+
+    auto meshFilenamePattern = circuitMeshFilenamePattern;
+    if (!meshFilenamePattern.empty())
+        meshFilenamePattern.replace(meshFilenamePattern.find(GID), GID.length(),
+                                    gidAsString);
+    else
+        meshFilenamePattern = gidAsString;
+    return circuitMeshFolder + "/" + meshFilenamePattern;
+}
+
+struct CircuitProperties
+{
+    CircuitProperties() = default;
+    CircuitProperties(const PropertyMap& properties)
+    {
+        const auto setVariable = [&](auto& variable, const std::string& name,
+                                     auto defaultVal) {
+            using T = typename std::remove_reference<decltype(variable)>::type;
+            variable = properties.getProperty<T>(name, defaultVal);
+        };
+
+        const auto setEnumVariable =
+            [&](auto& variable, const std::string& name, auto defaultVal) {
+                using T = decltype(defaultVal);
+                const auto enumStr =
+                    properties.getProperty<std::string>(name, enumToString<T>(
+                                                                  defaultVal));
+                variable = stringToEnum<T>(enumStr);
+            };
+
+        setVariable(circuitDensity, PROP_CIRCUIT_DENSITY.name, 100.0);
+        setVariable(circuitRandomSeed, PROP_CIRCUIT_RANDOM_SEED.name, 0);
+        setVariable(circuitReport, PROP_CIRCUIT_REPORT.name, "");
+        setVariable(circuitTargets, PROP_CIRCUIT_TARGETS.name, "");
+        setVariable(circuitMeshFilenamePattern,
+                    PROP_CIRCUIT_MESH_FILENAME_PATTERN.name, "");
+        setVariable(circuitMeshFolder, PROP_CIRCUIT_MESH_FOLDER.name, "");
+        setVariable(circuitBoundingBoxP0, PROP_CIRCUIT_BOUNDING_BOX_P0.name,
+                    std::array<double, 3>{{0, 0, 0}});
+        setVariable(circuitBoundingBoxP1, PROP_CIRCUIT_BOUNDING_BOX_P1.name,
+                    std::array<double, 3>{{0, 0, 0}});
+        setVariable(circuitUseSimulationModel,
+                    PROP_CIRCUIT_USE_SIMULATION_MODEL.name, false);
+        setVariable(circuitMeshTransformation,
+                    PROP_CIRCUIT_MESH_TRANSFORMATION.name, 0);
+        setEnumVariable(colorScheme, PROP_COLOR_SCHEME.name, ColorScheme::none);
+        setVariable(circuitStartSimulationTime,
+                    PROP_CIRCUIT_START_SIMULATION_TIME.name, 0.0);
+        setVariable(circuitEndSimulationTime,
+                    PROP_CIRCUIT_END_SIMULATION_TIME.name, 0.0);
+        setVariable(circuitSimulationStep, PROP_CIRCUIT_SIMULATION_STEP.name,
+                    0.0);
+        setVariable(synchronousMode, PROP_SYNCHRONOUS_MODE.name, false);
+        setVariable(loadCacheFile, PROP_LOAD_CACHE_FILE.name, "");
+        setEnumVariable(geometryQuality, PROP_GEOMETRY_QUALITY.name,
+                        GeometryQuality::high);
+
+        {
+            strings targets;
+            boost::char_separator<char> separator(",");
+            boost::tokenizer<boost::char_separator<char>> tokens(circuitTargets,
+                                                                 separator);
+            for_each(tokens.begin(), tokens.end(),
+                     [&targets](const std::string& s) {
+                         targets.push_back(s);
+                     });
+            circuitTargetsList = std::move(targets);
+        }
+        circuitBoundingBox = Boxd(toVmmlVec(circuitBoundingBoxP0),
+                                  toVmmlVec(circuitBoundingBoxP1));
+    }
+
+    double circuitDensity = 0.0;
+    int32_t circuitRandomSeed = 0;
+    std::string circuitReport;
+    std::vector<std::string> circuitTargetsList;
+    std::string circuitTargets;
+    std::string circuitMeshFilenamePattern;
+    std::string circuitMeshFolder;
+    bool circuitUseSimulationModel = false;
+    int32_t circuitMeshTransformation = 0;
+    ColorScheme colorScheme = ColorScheme::none;
+
+    double circuitStartSimulationTime = 0;
+    double circuitEndSimulationTime = 0;
+    double circuitSimulationStep = 0;
+
+    bool synchronousMode = false;
+
+    std::string loadCacheFile;
+    GeometryQuality geometryQuality = GeometryQuality::high;
+
+    std::array<double, 3> circuitBoundingBoxP0;
+    std::array<double, 3> circuitBoundingBoxP1;
+
+    Boxd circuitBoundingBox;
+};
+
+class Impl
 {
 public:
-    Impl(const ApplicationParameters& applicationParameters,
-         const GeometryParameters& geometryParameters, CircuitLoader& parent)
-        : _parent(parent)
-        , _applicationParameters(applicationParameters)
-        , _geometryParameters(geometryParameters)
+    Impl(Scene& scene, const PropertyMap& properties)
+        : _scene(scene)
+        , _properties(properties)
+        , _morphologyParams(properties)
     {
     }
 
     ModelDescriptorPtr importCircuit(const std::string& source,
-                                     const LoaderProgress& callback,
-                                     const strings& targets,
-                                     const std::string& report) const
+                                     const LoaderProgress& callback) const
     {
+        const auto& targets = _properties.circuitTargetsList;
+        const auto& report = _properties.circuitReport;
+
         bool returnValue = true;
         ModelDescriptorPtr modelDesc;
         try
         {
             // Model (one for the whole circuit)
             ModelMetadata metadata = {
-                {"density",
-                 std::to_string(_geometryParameters.getCircuitDensity())},
-                {"report", _geometryParameters.getCircuitReport()},
-                {"targets", _geometryParameters.getCircuitTargets()},
+                {"density", std::to_string(_properties.circuitDensity)},
+                {"report", _properties.circuitReport},
+                {"targets", _properties.circuitTargets},
                 {"mesh-filename-pattern",
-                 _geometryParameters.getCircuitMeshFilenamePattern()},
-                {"mesh-folder", _geometryParameters.getCircuitMeshFolder()}};
-            auto model = _parent._scene.createModel();
+                 _properties.circuitMeshFilenamePattern},
+                {"mesh-folder", _properties.circuitMeshFolder}};
+            auto model = _scene.createModel();
 
             // Open Circuit and select GIDs according to specified target
             const brion::BlueConfig bc(source);
             const brain::Circuit circuit(bc);
-            const auto circuitDensity =
-                _geometryParameters.getCircuitDensity() / 100.f;
+            const auto circuitDensity = _properties.circuitDensity / 100.f;
 
             brain::GIDSet allGids;
             GIDOffsets targetGIDOffsets;
@@ -85,14 +244,14 @@ public:
 
             for (const auto& target : localTargets)
             {
-                const auto targetGids = circuit.getRandomGIDs(
-                    circuitDensity, target,
-                    _geometryParameters.getCircuitRandomSeed());
+                const auto targetGids =
+                    circuit.getRandomGIDs(circuitDensity, target,
+                                          _properties.circuitRandomSeed);
                 const Matrix4fs& allTransformations =
                     circuit.getTransforms(targetGids);
 
                 brain::GIDSet gids;
-                const auto& aabb = _geometryParameters.getCircuitBoundingBox();
+                const auto& aabb = _properties.circuitBoundingBox;
                 if (aabb.getSize() == Vector3f(0.f))
                     gids = targetGids;
                 else
@@ -131,8 +290,11 @@ public:
                 try
                 {
                     auto handler = std::make_shared<SimulationHandler>(
-                        _applicationParameters, _geometryParameters,
-                        bc.getReportSource(report), allGids);
+                        bc.getReportSource(report), allGids,
+                        _properties.synchronousMode,
+                        _properties.circuitStartSimulationTime,
+                        _properties.circuitEndSimulationTime,
+                        _properties.circuitSimulationStep);
                     compartmentReport = handler->getCompartmentReport();
                     // Only keep simulated GIDs
                     if (compartmentReport)
@@ -147,7 +309,7 @@ public:
                 }
             }
 
-            if (!_geometryParameters.getLoadCacheFile().empty())
+            if (!_properties.loadCacheFile.empty())
                 return {};
 
             const Matrix4fs& transformations = circuit.getTransforms(allGids);
@@ -167,13 +329,11 @@ public:
 
             // Import morphologies
             const auto useSimulationModel =
-                _geometryParameters.getCircuitUseSimulationModel();
+                _properties.circuitUseSimulationModel;
             model->useSimulationModel(useSimulationModel);
-            if (_geometryParameters.getCircuitMeshFolder().empty() ||
-                useSimulationModel)
+            if (_properties.circuitMeshFolder.empty() || useSimulationModel)
             {
-                MorphologyLoader morphLoader(_parent._scene,
-                                             _geometryParameters);
+                MorphologyLoader morphLoader(_scene);
                 returnValue =
                     returnValue &&
                     _importMorphologies(circuit, callback, *model, allGids,
@@ -214,11 +374,6 @@ public:
         return {};
     }
 
-    const GeometryParameters& geometryParameters() const
-    {
-        return _geometryParameters;
-    }
-
 private:
     /**
      * @brief _getMaterialFromSectionType return a material determined by the
@@ -235,16 +390,16 @@ private:
         const brain::neuron::SectionType sectionType,
         const GIDOffsets& targetGIDOffsets, const size_ts& layerIds,
         const size_ts& morphologyTypes, const size_ts& electrophysiologyTypes,
-        bool isMesh = false) const
+        bool isMesh) const
     {
         if (material != NO_MATERIAL)
             return material;
 
-        if (!isMesh && _geometryParameters.getCircuitUseSimulationModel())
+        if (!isMesh && _properties.circuitUseSimulationModel)
             return 0;
 
         size_t materialId = 0;
-        switch (_geometryParameters.getColorScheme())
+        switch (_properties.colorScheme)
         {
         case ColorScheme::neuron_by_id:
             materialId = index;
@@ -320,8 +475,7 @@ private:
         }
         catch (...)
         {
-            if (_geometryParameters.getColorScheme() ==
-                ColorScheme::neuron_by_layer)
+            if (_properties.colorScheme == ColorScheme::neuron_by_layer)
                 BRAYNS_ERROR
                     << "Only MVD2 format is currently supported by Brion "
                        "circuits. Color scheme by layer not available for "
@@ -353,10 +507,12 @@ private:
         const size_ts& electrophysiologyTypes BRAYNS_UNUSED) const
     {
 #if BRAYNS_USE_ASSIMP
-        MeshLoader meshLoader(_parent._scene, _geometryParameters);
+
+        const auto colorScheme = _properties.colorScheme;
+        const auto geometryQuality = _properties.geometryQuality;
+        MeshLoader meshLoader(_scene);
         size_t loadingFailures = 0;
-        const auto meshedMorphologiesFolder =
-            _geometryParameters.getCircuitMeshFolder();
+        const auto meshedMorphologiesFolder = _properties.circuitMeshFolder;
         if (meshedMorphologiesFolder.empty())
             return true;
 
@@ -372,15 +528,17 @@ private:
                 electrophysiologyTypes, true);
 
             // Load mesh from file
-            const auto transformation =
-                _geometryParameters.getCircuitMeshTransformation()
-                    ? transformations[meshIndex]
-                    : Matrix4f();
+            const auto transformation = _properties.circuitMeshTransformation
+                                            ? transformations[meshIndex]
+                                            : Matrix4f();
             try
             {
-                meshLoader.importMesh(meshLoader.getMeshFilenameFromGID(gid),
-                                      callback, model, meshIndex,
-                                      transformation, materialId);
+                meshLoader.importMesh(
+                    getMeshFilenameFromGID(
+                        gid, _properties.circuitMeshFilenamePattern,
+                        _properties.circuitMeshFolder),
+                    callback, model, meshIndex, transformation, materialId,
+                    colorScheme, geometryQuality);
             }
             catch (...)
             {
@@ -432,15 +590,17 @@ private:
                     ParallelModelContainer modelContainer;
                     const auto& uri = uris[morphologyIndex];
 
+                    auto materialFunc =
+                        std::bind(&Impl::_getMaterialFromGeometryParameters,
+                                  this, morphologyIndex, NO_MATERIAL,
+                                  std::placeholders::_1, targetGIDOffsets,
+                                  layerIds, morphologyTypes,
+                                  electrophysiologyTypes, false);
+
                     if (!morphLoader._importMorphology(
-                            uri, morphologyIndex,
-                            std::bind(&Impl::_getMaterialFromGeometryParameters,
-                                      this, morphologyIndex, NO_MATERIAL,
-                                      std::placeholders::_1, targetGIDOffsets,
-                                      layerIds, morphologyTypes,
-                                      electrophysiologyTypes, false),
+                            uri, morphologyIndex, materialFunc,
                             transformations[morphologyIndex], compartmentReport,
-                            modelContainer))
+                            modelContainer, _morphologyParams))
 #pragma omp atomic
                         ++loadingFailures;
 #pragma omp critical
@@ -473,17 +633,16 @@ private:
     }
 
 private:
-    CircuitLoader& _parent;
-    const ApplicationParameters& _applicationParameters;
-    const GeometryParameters& _geometryParameters;
+    Scene& _scene;
+    CircuitProperties _properties;
+    MorphologyLoaderParams _morphologyParams;
 };
+}
 
-CircuitLoader::CircuitLoader(Scene& scene,
-                             const ApplicationParameters& applicationParameters,
-                             const GeometryParameters& geometryParameters)
+namespace brayns
+{
+CircuitLoader::CircuitLoader(Scene& scene)
     : Loader(scene)
-    , _impl(new CircuitLoader::Impl(applicationParameters, geometryParameters,
-                                    *this))
 {
 }
 
@@ -513,7 +672,8 @@ bool CircuitLoader::isSupported(const std::string& filename,
 }
 
 ModelDescriptorPtr CircuitLoader::importFromBlob(
-    Blob&& /*blob*/, const LoaderProgress& /*callback*/, const size_t /*index*/,
+    Blob&& /*blob*/, const LoaderProgress& /*callback*/,
+    const PropertyMap& properties BRAYNS_UNUSED, const size_t /*index*/,
     const size_t /*materialID*/) const
 {
     throw std::runtime_error("Loading circuit from blob is not supported");
@@ -521,19 +681,63 @@ ModelDescriptorPtr CircuitLoader::importFromBlob(
 
 ModelDescriptorPtr CircuitLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const size_t /*index*/, const size_t /*materialID*/) const
+    const PropertyMap& propertiesTmp, const size_t /*index*/,
+    const size_t /*materialID*/) const
 {
-    return _impl->importCircuit(
-        filename, callback,
-        _impl->geometryParameters().getCircuitTargetsAsStrings(),
-        _impl->geometryParameters().getCircuitReport());
+    // Fill property map since the actual property types are known now.
+    PropertyMap properties = getProperties();
+    properties.merge(propertiesTmp);
+    auto impl = Impl(_scene, properties);
+    return impl.importCircuit(filename, callback);
 }
 
-ModelDescriptorPtr CircuitLoader::importCircuit(const servus::URI& uri,
-                                                const LoaderProgress& callback,
-                                                const strings& targets,
-                                                const std::string& report)
+std::string CircuitLoader::getName() const
 {
-    return _impl->importCircuit(uri.getPath(), callback, targets, report);
+    return LOADER_NAME;
+}
+
+std::vector<std::string> CircuitLoader::getSupportedExtensions() const
+{
+    return {"BlueConfig", "BlueConfig3", "CircuitConfig", "circuit"};
+}
+
+PropertyMap CircuitLoader::getProperties() const
+{
+    PropertyMap pm;
+    pm.setProperty(PROP_CIRCUIT_DENSITY);
+    pm.setProperty(PROP_CIRCUIT_RANDOM_SEED);
+    pm.setProperty(PROP_CIRCUIT_REPORT);
+    pm.setProperty(PROP_CIRCUIT_TARGETS);
+    pm.setProperty(PROP_CIRCUIT_MESH_FILENAME_PATTERN);
+    pm.setProperty(PROP_CIRCUIT_MESH_FOLDER);
+    pm.setProperty(PROP_CIRCUIT_BOUNDING_BOX_P0);
+    pm.setProperty(PROP_CIRCUIT_BOUNDING_BOX_P1);
+    pm.setProperty(PROP_CIRCUIT_USE_SIMULATION_MODEL);
+    pm.setProperty(PROP_CIRCUIT_MESH_TRANSFORMATION);
+    pm.setProperty(PROP_COLOR_SCHEME);
+    pm.setProperty(PROP_CIRCUIT_START_SIMULATION_TIME);
+    pm.setProperty(PROP_CIRCUIT_END_SIMULATION_TIME);
+    pm.setProperty(PROP_CIRCUIT_SIMULATION_STEP);
+    pm.setProperty(PROP_SYNCHRONOUS_MODE);
+    pm.setProperty(PROP_LOAD_CACHE_FILE);
+    pm.setProperty(PROP_GEOMETRY_QUALITY);
+
+    { // Add all morphology loader properties
+        const auto mlpm = MorphologyLoader(_scene).getProperties();
+        for (const auto& prop : mlpm.getProperties())
+            if (prop && !pm.hasProperty(prop->name))
+                pm.setProperty(*prop);
+    }
+
+#if BRAYNS_USE_ASSIMP
+    { // Add all mesh loader properties
+        const auto mlpm = MeshLoader(_scene).getProperties();
+        for (const auto& prop : mlpm.getProperties())
+            if (prop && !pm.hasProperty(prop->name))
+                pm.setProperty(*prop);
+    }
+#endif
+
+    return pm;
 }
 }

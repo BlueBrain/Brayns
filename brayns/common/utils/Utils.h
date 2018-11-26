@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/mathTypes.h>
 #include <brayns/common/types.h>
 
 namespace brayns
@@ -29,9 +30,30 @@ strings parseFolder(const std::string& folder, const strings& filters);
 std::string shortenString(const std::string& string,
                           const size_t maxLength = 32);
 
+std::string extractExtension(const std::string& filename);
+
+std::string replaceFirstOccurrence(std::string input,
+                                   const std::string& toReplace,
+                                   const std::string& replaceWith);
+
 inline auto lowerCase(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
+}
+
+template <size_t M, typename T>
+inline vmml::vector<M, T> toVmmlVec(const std::array<T, M>& input)
+{
+    return vmml::vector<M, T>(input.data());
+}
+
+template <size_t M, typename T>
+inline std::array<T, M> toArray(const vmml::vector<M, T>& input)
+{
+    std::array<T, M> output;
+    std::copy(std::begin(input.array), std::end(input.array),
+              std::begin(output));
+    return output;
 }
 }

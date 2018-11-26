@@ -50,15 +50,138 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
            // unless the result is subnormal
            || std::abs(x - y) < std::numeric_limits<T>::min();
 }
+
+using Property = brayns::PropertyMap::Property;
+
+const Property PROP_COLOR_SCHEME = {"colorScheme", "Color scheme",
+                                    brayns::enumToString(
+                                        brayns::ColorScheme::none),
+                                    brayns::enumNames<brayns::ColorScheme>()};
+const Property PROP_RADIUS_MULTIPLIER = {"radiusMultiplier",
+                                         "Radius multiplier", 1.0};
+const Property PROP_RADIUS_CORRECTION = {"radiusCorrection",
+                                         "Radius correction", 0.};
+const Property PROP_MORPHOLOGY_SECTION_TYPES_SOMA = {
+    "morphologySectionTypesSoma", "Enable 'Soma' section type", true};
+const Property PROP_MORPHOLOGY_SECTION_TYPES_AXON = {
+    "morphologySectionTypesAxon", "Enable 'Axon' section type", true};
+const Property PROP_MORPHOLOGY_SECTION_TYPES_DENDRITE = {
+    "morphologySectionTypesDendrite", "Enable 'Dendrite' section type", true};
+const Property PROP_MORPHOLOGY_SECTION_TYPES_APICAL_DENDRITE = {
+    "morphologySectionTypesApicalDendrite",
+    "Enable 'Apical Dendrite' section type", true};
+const Property PROP_USE_REALISTIC_SOMAS = {"useRealisticSomas",
+                                           "Use realistic somas", false};
+const Property PROP_METABALLS_SAMPLES_FROM_SOMA = {
+    "metaballsSamplesFromSoma", "Metaballs: Samples from Soma", 0};
+const Property PROP_METABALLS_GRID_SIZE = {"metaballsGridSize",
+                                           "Metaballs: Grid size", 0};
+const Property PROP_METABALLS_THRESHOLD = {"metaballsThreshold",
+                                           "Metaballs: Threshold", 0.0};
+const Property PROP_CIRCUIT_USE_SIMULATION_MODEL = {"circuitUseSimulationModel",
+                                                    "Use simulation model",
+                                                    false};
+const Property PROP_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE = {
+    "morphologyDampenBranchThicknessChangerate",
+    "Dampen branch thickness changerate", false};
+const Property PROP_MORPHOLOGY_USE_SDF_GEOMETRIES = {
+    "morphologyUseSdfGeometries", "Use SDF geometries", false};
+const Property PROP_MORPHOLOGY_LAYOUT_NB_COLUMNS = {
+    "morphologyLayoutNbColumns",
+    "Layout: Number of columns",
+    int32_t(0),
+    {0, std::numeric_limits<int32_t>::max()}};
+const Property PROP_MORPHOLOGY_LAYOUT_VERTICAL_SPACING = {
+    "morphologyLayoutVerticalSpacing",
+    "Layout: Vertical spacing",
+    int32_t(0),
+    {0, std::numeric_limits<int32_t>::max()}};
+const Property PROP_MORPHOLOGY_LAYOUT_HORIZONTAL_SPACING = {
+    "morphologyLayoutHorizontalSpacing",
+    "Layout: Horizontal spacing",
+    int32_t(0),
+    {0, std::numeric_limits<int32_t>::max()}};
+const Property PROP_GEOMETRY_QUALITY = {
+    "geometryQuality", "Geometry quality",
+    brayns::enumToString(brayns::GeometryQuality::high),
+    brayns::enumNames<brayns::GeometryQuality>()};
+
+const auto LOADER_NAME = "morphology";
 }
 
 namespace brayns
 {
+MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
+{
+    const auto setVariable = [&](auto& variable, const std::string& name,
+                                 const auto defaultVal) {
+        using T = typename std::remove_reference<decltype(variable)>::type;
+        variable = properties.getProperty<T>(name, defaultVal);
+    };
+
+    const auto setEnumVariable = [&](auto& variable, const std::string& name,
+                                     auto defaultVal) {
+        using T = decltype(defaultVal);
+        const auto enumStr =
+            properties.getProperty<std::string>(name,
+                                                enumToString<T>(defaultVal));
+        variable = stringToEnum<T>(enumStr);
+    };
+
+    setEnumVariable(colorScheme, PROP_COLOR_SCHEME.name, ColorScheme::none);
+    setVariable(radiusMultiplier, PROP_RADIUS_MULTIPLIER.name, 1.0);
+    setVariable(radiusCorrection, PROP_RADIUS_CORRECTION.name, 0.);
+
+    {
+        bool soma = true;
+        bool axon = true;
+        bool dendrite = true;
+        bool apicalDendrite = true;
+        setVariable(soma, PROP_MORPHOLOGY_SECTION_TYPES_SOMA.name, true);
+        setVariable(axon, PROP_MORPHOLOGY_SECTION_TYPES_AXON.name, true);
+        setVariable(dendrite, PROP_MORPHOLOGY_SECTION_TYPES_DENDRITE.name,
+                    true);
+        setVariable(apicalDendrite,
+                    PROP_MORPHOLOGY_SECTION_TYPES_APICAL_DENDRITE.name, true);
+
+        if (soma)
+            morphologySectionTypes.push_back(MorphologySectionType::soma);
+        if (axon)
+            morphologySectionTypes.push_back(MorphologySectionType::axon);
+        if (dendrite)
+            morphologySectionTypes.push_back(MorphologySectionType::dendrite);
+        if (apicalDendrite)
+            morphologySectionTypes.push_back(
+                MorphologySectionType::apical_dendrite);
+    }
+    setVariable(useRealisticSomas, PROP_USE_REALISTIC_SOMAS.name, false);
+    setVariable(metaballsSamplesFromSoma, PROP_METABALLS_SAMPLES_FROM_SOMA.name,
+                0);
+    setVariable(metaballsGridSize, PROP_METABALLS_GRID_SIZE.name, 0);
+    setVariable(metaballsThreshold, PROP_METABALLS_THRESHOLD.name, 0.0);
+    setVariable(circuitUseSimulationModel,
+                PROP_CIRCUIT_USE_SIMULATION_MODEL.name, false);
+    setVariable(morphologyDampenBranchThicknessChangerate,
+                PROP_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name, false);
+    setVariable(morphologyUseSDFGeometries,
+                PROP_MORPHOLOGY_USE_SDF_GEOMETRIES.name, false);
+    {
+        setVariable(layout.nbColumns, PROP_MORPHOLOGY_LAYOUT_NB_COLUMNS.name,
+                    0);
+        setVariable(layout.verticalSpacing,
+                    PROP_MORPHOLOGY_LAYOUT_VERTICAL_SPACING.name, 0);
+        setVariable(layout.horizontalSpacing,
+                    PROP_MORPHOLOGY_LAYOUT_HORIZONTAL_SPACING.name, 0);
+    }
+    setEnumVariable(geometryQuality, PROP_GEOMETRY_QUALITY.name,
+                    GeometryQuality::high);
+}
+
 class MorphologyLoader::Impl
 {
 public:
-    Impl(const GeometryParameters& geometryParameters)
-        : _geometryParameters(geometryParameters)
+    Impl(const MorphologyLoaderParams& params)
+        : _params(params)
     {
     }
 
@@ -78,10 +201,9 @@ public:
         CompartmentReportPtr compartmentReport = nullptr) const
     {
         Vector3f somaPosition;
-        auto materialFunc = [
-            defaultMaterialId,
-            colorScheme = _geometryParameters.getColorScheme(), index
-        ](auto sectionType)
+        auto materialFunc =
+            [ defaultMaterialId, colorScheme = _params.colorScheme,
+              index ](auto sectionType)
         {
             if (defaultMaterialId != NO_MATERIAL)
                 return defaultMaterialId;
@@ -138,13 +260,13 @@ public:
                               CompartmentReportPtr compartmentReport,
                               ParallelModelContainer& model) const
     {
-        if (_geometryParameters.getMorphologySectionTypes() ==
+        if (_params.morphologySectionTypes ==
             std::vector<MorphologySectionType>{MorphologySectionType::soma})
         {
             return _importMorphologyAsPoint(index, materialFunc, transformation,
                                             compartmentReport, model);
         }
-        else if (_geometryParameters.useRealisticSomas())
+        else if (_params.useRealisticSomas)
         {
             return _createRealisticSoma(source, materialFunc, transformation,
                                         model);
@@ -166,9 +288,9 @@ private:
      */
     float _getCorrectedRadius(const float radius) const
     {
-        return (_geometryParameters.getRadiusCorrection() != 0.f
-                    ? _geometryParameters.getRadiusCorrection()
-                    : radius * _geometryParameters.getRadiusMultiplier());
+        return (_params.radiusCorrection != 0.f
+                    ? _params.radiusCorrection
+                    : radius * _params.radiusMultiplier);
     }
 
     /**
@@ -217,7 +339,7 @@ private:
         if (compartmentReport)
             offset = compartmentReport->getOffsets()[index][0];
 
-        const auto radius = _geometryParameters.getRadiusMultiplier();
+        const auto radius = static_cast<float>(_params.radiusMultiplier);
         const auto somaPosition = transformation.getTranslation();
         const auto materialId = materialFunc(brain::neuron::SectionType::soma);
         model.addSphere(materialId, {somaPosition, radius, offset});
@@ -230,8 +352,8 @@ private:
      * @param uri URI of the morphology for which the soma is created
      * @param index Index of the current morphology
      * @param transformation Transformation to apply to the morphology
-     * @param material Material that is forced in case geometry parameters
-     * do not apply
+     * @param material Material that is forced in case geometry parameters do
+     * not apply
      * @param scene Scene to which the morphology should be loaded into
      * @return Position of the soma
      */
@@ -242,7 +364,7 @@ private:
     {
         Vector3f somaPosition;
         const size_t morphologySectionTypes =
-            enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
+            enumsToBitmask(_params.morphologySectionTypes);
 
         brain::neuron::Morphology morphology(uri, transformation);
         const auto sectionTypes = _getSectionTypes(morphologySectionTypes);
@@ -274,10 +396,9 @@ private:
             if (samples.empty())
                 continue;
 
-            const auto samplesFromSoma =
-                _geometryParameters.getMetaballsSamplesFromSoma();
+            const auto samplesFromSoma = _params.metaballsSamplesFromSoma;
             const auto samplesToProcess =
-                std::min(samplesFromSoma, samples.size());
+                std::min(static_cast<size_t>(samplesFromSoma), samples.size());
             for (size_t i = 0; i < samplesToProcess; ++i)
             {
                 const auto& sample = samples[i];
@@ -290,8 +411,8 @@ private:
         }
 
         // Generate mesh from metaballs
-        const auto gridSize = _geometryParameters.getMetaballsGridSize();
-        const auto threshold = _geometryParameters.getMetaballsThreshold();
+        const auto gridSize = _params.metaballsGridSize;
+        const auto threshold = _params.metaballsThreshold;
         MetaballsGenerator metaballsGenerator;
         const auto materialId = materialFunc(brain::neuron::SectionType::soma);
         metaballsGenerator.generateMesh(metaballs, gridSize, threshold,
@@ -366,8 +487,10 @@ private:
 
     /**
      * Goes through all bifurcations and connects to all connected SDF
-     * geometries it is overlapping. Every section that has a bifurcation will
-     * traverse its children and blend the geometries inside the bifurcation.
+     * geometries it is overlapping. Every section that has a bifurcation
+     * will
+     * traverse its children and blend the geometries inside the
+     * bifurcation.
      */
     void _connectSDFBifurcations(SDFMorphologyData& sdfMorphologyData,
                                  const MorphologyTreeStructure& mts) const
@@ -440,7 +563,8 @@ private:
     }
 
     /**
-     * Calculates all neighbours and adds the geometries to the model container.
+     * Calculates all neighbours and adds the geometries to the model
+     * container.
      */
     void _finalizeSDFGeometries(ParallelModelContainer& modelContainer,
                                 SDFMorphologyData& sdfMorphologyData) const
@@ -448,8 +572,8 @@ private:
         const size_t numGeoms = sdfMorphologyData.geometries.size();
         sdfMorphologyData.localToGlobalIdx.resize(numGeoms, 0);
 
-        // Extend neighbours to make sure smoothing is applied on all
-        // closely connected geometries
+        // Extend neighbours to make sure smoothing is applied on all closely
+        // connected geometries
         for (size_t rep = 0; rep < 4; rep++)
         {
             const size_t numNeighs = sdfMorphologyData.neighbours.size();
@@ -470,7 +594,7 @@ private:
 
         for (size_t i = 0; i < numGeoms; i++)
         {
-            // Convert neighbours from set to vector and erase itself from its
+            // Convert neighbours from set to vector and erase itself from  its
             // neighbours
             std::vector<size_t> neighbours;
             const auto& neighSet = sdfMorphologyData.neighbours[i];
@@ -656,12 +780,12 @@ private:
         {
             model.addSphere(materialId, {somaPosition, somaRadius, offset});
 
-            if (_geometryParameters.getCircuitUseSimulationModel())
+            if (_params.circuitUseSimulationModel)
             {
-                // When using a simulation model, parametric geometries
-                // must occupy as much space as possible in the mesh.
-                // This code inserts a Cone between the soma and the
-                // beginning of each branch.
+                // When using a simulation model, parametric geometries must
+                // occupy as much space as possible in the mesh. This code
+                // inserts a Cone between the soma and the beginning of each
+                // branch.
                 for (const auto& child : children)
                 {
                     const auto& samples = child.getSamples();
@@ -691,10 +815,9 @@ private:
         {
             if (isDone)
             {
-                // Since our cone pills already give us a sphere
-                // at the end points we don't need to add any
-                // sphere between segments except at the
-                // bifurcation
+                // Since our cone pills already give us a sphere at the end
+                // points we don't need to add any sphere between segments
+                // except at the bifurcation
                 const size_t idx =
                     _addSDFGeometry(sdfMorphologyData,
                                     createSDFSphere(position, radius, offset),
@@ -741,15 +864,15 @@ private:
 
     /**
        * @brief _importMorphologyFromURI imports a morphology from the specified
-       * URI
+     * URI
        * @param uri URI of the morphology
        * @param index Index of the current morphology
        * @param materialFunc A function mapping brain::neuron::SectionType to a
-       * material id
+     * material id
        * @param transformation Transformation to apply to the morphology
        * @param compartmentReport Compartment report to map to the morphology
        * @param model Model container to which the morphology should be loaded
-       * into
+     * into
        * @return Position of the soma
        */
     Vector3f _importMorphologyFromURI(const servus::URI& uri,
@@ -763,23 +886,18 @@ private:
         Vector3f translation;
 
         const size_t morphologySectionTypes =
-            enumsToBitmask(_geometryParameters.getMorphologySectionTypes());
+            enumsToBitmask(_params.morphologySectionTypes);
 
         const bool dampenThickness =
-            _geometryParameters.getMorphologyDampenBranchThicknessChangerate();
-
-        const bool useSDFGeometries =
-            _geometryParameters.getMorphologyUseSDFGeometries();
+            _params.morphologyDampenBranchThicknessChangerate;
+        const bool useSDFGeometries = _params.morphologyUseSDFGeometries;
 
         SDFMorphologyData sdfMorphologyData;
 
         brain::neuron::Morphology morphology(uri, transformation);
         brain::neuron::SectionTypes sectionTypes;
 
-        const MorphologyLayout& layout =
-            _geometryParameters.getMorphologyLayout();
-
-        if (layout.nbColumns != 0)
+        if (_params.layout.nbColumns != 0)
         {
             Boxf morphologyAABB;
             const auto& points = morphology.getPoints();
@@ -787,10 +905,10 @@ private:
                 morphologyAABB.merge({point.x(), point.y(), point.z()});
 
             const Vector3f positionInGrid = {
-                -1.f * layout.horizontalSpacing *
-                    static_cast<float>(index % layout.nbColumns),
-                -1.f * layout.verticalSpacing *
-                    static_cast<float>(index / layout.nbColumns),
+                -1.f * _params.layout.horizontalSpacing *
+                    static_cast<float>(index % _params.layout.nbColumns),
+                -1.f * _params.layout.verticalSpacing *
+                    static_cast<float>(index / _params.layout.nbColumns),
                 0.f};
             translation = positionInGrid - morphologyAABB.getCenter();
         }
@@ -804,7 +922,7 @@ private:
 
         // Soma
         somaPosition = morphology.getSoma().getCentroid() + translation;
-        if (!_geometryParameters.useRealisticSomas() &&
+        if (!_params.useRealisticSomas &&
             morphologySectionTypes &
                 static_cast<size_t>(MorphologySectionType::soma))
         {
@@ -858,7 +976,7 @@ private:
 
             auto previousSample = samples[0];
             size_t step = 1;
-            switch (_geometryParameters.getGeometryQuality())
+            switch (_params.geometryQuality)
             {
             case GeometryQuality::low:
                 step = numSamples - 1;
@@ -876,8 +994,7 @@ private:
             {
                 const auto& counts =
                     compartmentReport->getCompartmentCounts()[index];
-                // Number of compartments usually differs from number of
-                // samples
+                // Number of compartments usually differs from number of samples
                 segmentStep = counts[section.getID()] / float(numSamples);
             }
 
@@ -910,10 +1027,10 @@ private:
                     const auto& counts =
                         compartmentReport->getCompartmentCounts()[index];
 
-                    // update the offset if we have enough compartments aka
-                    // a full compartment report. Otherwise we keep the soma
-                    // offset which happens for soma reports and use this
-                    // for all the sections
+                    // update the offset if we have enough compartments aka a
+                    // full compartment report. Otherwise we keep the soma
+                    // offset which happens for soma reports and use this for
+                    // all the sections
                     if (section.getID() < counts.size())
                     {
                         if (counts[section.getID()] > 0)
@@ -927,9 +1044,8 @@ private:
                                 offset = offsets[lastAxon];
                             }
                             else
-                                // This should never happen, but just in
-                                // case use an invalid value to show an
-                                // error color
+                                // This should never happen, but just in case
+                                // use an invalid value to show an error color
                                 offset = std::numeric_limits<uint64_t>::max();
                         }
                     }
@@ -993,20 +1109,17 @@ private:
     }
 
 private:
-    const GeometryParameters& _geometryParameters;
+    const MorphologyLoaderParams _params;
 };
 
-MorphologyLoader::MorphologyLoader(Scene& scene,
-                                   const GeometryParameters& geometryParameters)
+MorphologyLoader::MorphologyLoader(Scene& scene)
     : Loader(scene)
-    , _impl(new MorphologyLoader::Impl(geometryParameters))
 {
 }
 
 MorphologyLoader::~MorphologyLoader()
 {
 }
-
 bool MorphologyLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
                                    const std::string& extension) const
 {
@@ -1015,7 +1128,8 @@ bool MorphologyLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 }
 
 ModelDescriptorPtr MorphologyLoader::importFromBlob(
-    Blob&& /*blob*/, const LoaderProgress& /*callback*/, const size_t /*index*/,
+    Blob&& /*blob*/, const LoaderProgress& /*callback*/,
+    const PropertyMap& properties BRAYNS_UNUSED, const size_t /*index*/,
     const size_t /*materialID*/) const
 {
     throw std::runtime_error("Load morphology from memory not supported");
@@ -1023,13 +1137,19 @@ ModelDescriptorPtr MorphologyLoader::importFromBlob(
 
 ModelDescriptorPtr MorphologyLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const size_t index, const size_t defaultMaterialId BRAYNS_UNUSED) const
+    const PropertyMap& propertiesTmp, const size_t index,
+    const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
+    // Fill property map since the actual property types are known now.
+    PropertyMap properties = getProperties();
+    properties.merge(propertiesTmp);
+
     const auto modelName = boost::filesystem::basename({fileName});
     callback.updateProgress("Loading " + modelName + " ...", 0.f);
     auto model = _scene.createModel();
+    const auto params = MorphologyLoaderParams(properties);
     Vector3f somaPosition =
-        importMorphology(servus::URI(fileName), *model, index, {});
+        importMorphology(servus::URI(fileName), *model, index, {}, params);
     model->createMissingMaterials();
     callback.updateProgress("Loading " + modelName + " ...", 1.f);
 
@@ -1043,17 +1163,53 @@ ModelDescriptorPtr MorphologyLoader::importFromFile(
 
 Vector3f MorphologyLoader::importMorphology(
     const servus::URI& uri, Model& model, const size_t index,
-    const Matrix4f& transformation) const
+    const Matrix4f& transformation, const MorphologyLoaderParams& params) const
 {
-    return _impl->importMorphology(uri, model, index, transformation);
+    auto impl = MorphologyLoader::Impl(params);
+    return impl.importMorphology(uri, model, index, transformation);
 }
 
 Vector3f MorphologyLoader::_importMorphology(
     const servus::URI& source, const uint64_t index, MaterialFunc materialFunc,
     const Matrix4f& transformation, CompartmentReportPtr compartmentReport,
-    ParallelModelContainer& model) const
+    ParallelModelContainer& model, const MorphologyLoaderParams& params) const
 {
-    return _impl->importMorphology(source, index, materialFunc, transformation,
-                                   compartmentReport, model);
+    auto impl = MorphologyLoader::Impl(params);
+    return impl.importMorphology(source, index, materialFunc, transformation,
+                                 compartmentReport, model);
+}
+
+std::string MorphologyLoader::getName() const
+{
+    return LOADER_NAME;
+}
+
+std::vector<std::string> MorphologyLoader::getSupportedExtensions() const
+{
+    return {"h5", "swc"};
+}
+
+PropertyMap MorphologyLoader::getProperties() const
+{
+    PropertyMap pm;
+    pm.setProperty(PROP_COLOR_SCHEME);
+    pm.setProperty(PROP_RADIUS_MULTIPLIER);
+    pm.setProperty(PROP_RADIUS_CORRECTION);
+    pm.setProperty(PROP_MORPHOLOGY_SECTION_TYPES_SOMA);
+    pm.setProperty(PROP_MORPHOLOGY_SECTION_TYPES_AXON);
+    pm.setProperty(PROP_MORPHOLOGY_SECTION_TYPES_DENDRITE);
+    pm.setProperty(PROP_MORPHOLOGY_SECTION_TYPES_APICAL_DENDRITE);
+    pm.setProperty(PROP_USE_REALISTIC_SOMAS);
+    pm.setProperty(PROP_METABALLS_SAMPLES_FROM_SOMA);
+    pm.setProperty(PROP_METABALLS_GRID_SIZE);
+    pm.setProperty(PROP_METABALLS_THRESHOLD);
+    pm.setProperty(PROP_CIRCUIT_USE_SIMULATION_MODEL);
+    pm.setProperty(PROP_MORPHOLOGY_DAMPEN_BRANCH_THICKNESS_CHANGERATE);
+    pm.setProperty(PROP_MORPHOLOGY_USE_SDF_GEOMETRIES);
+    pm.setProperty(PROP_MORPHOLOGY_LAYOUT_NB_COLUMNS);
+    pm.setProperty(PROP_MORPHOLOGY_LAYOUT_VERTICAL_SPACING);
+    pm.setProperty(PROP_MORPHOLOGY_LAYOUT_HORIZONTAL_SPACING);
+    pm.setProperty(PROP_GEOMETRY_QUALITY);
+    return pm;
 }
 }

@@ -35,9 +35,8 @@ class AbstractSimulationHandler
 public:
     /**
      * @brief Default constructor
-     * @param geometryParameters Geometry parameters
      */
-    AbstractSimulationHandler(const GeometryParameters& geometryParameters);
+    AbstractSimulationHandler() = default;
 
     /**
      * @brief Default desctuctor
@@ -118,7 +117,6 @@ public:
 protected:
     uint32_t _getBoundedFrame(const uint32_t frame) const;
 
-    const GeometryParameters& _geometryParameters;
     uint32_t _currentFrame{std::numeric_limits<uint32_t>::max()};
     uint32_t _nbFrames{0};
     uint64_t _frameSize{0};

@@ -66,6 +66,14 @@ ModelParams::ModelParams(const std::string& name, const std::string& path)
 {
 }
 
+ModelParams::ModelParams(const std::string& name, const std::string& path,
+                         const PropertyMap& loaderProperties)
+    : _name(name)
+    , _path(path)
+    , _loaderProperties(loaderProperties)
+{
+}
+
 ModelDescriptor::ModelDescriptor(ModelPtr model, const std::string& path)
     : ModelParams(path)
     , _model(std::move(model))
@@ -535,8 +543,8 @@ void Model::createMissingMaterials()
         const auto it = _materials.find(materialId);
         if (it == _materials.end())
         {
-            auto material = createMaterial(materialId,
-                                           std::to_string(materialId));
+            auto material =
+                createMaterial(materialId, std::to_string(materialId));
         }
     }
     _bindMaterials(_simulationHandler, _materials);
