@@ -33,7 +33,6 @@ public:
 
     std::vector<std::string> getSupportedExtensions() const final;
     std::string getName() const final;
-    PropertyMap getProperties() const final;
 
     bool isSupported(const std::string& filename,
                      const std::string& extension) const final;

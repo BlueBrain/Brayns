@@ -165,9 +165,4 @@ std::vector<std::string> XYZBLoader::getSupportedExtensions() const
 {
     return {"xyz"};
 }
-
-PropertyMap XYZBLoader::getProperties() const
-{
-    return {};
-}
 }

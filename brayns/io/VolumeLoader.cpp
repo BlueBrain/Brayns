@@ -269,9 +269,4 @@ std::vector<std::string> MHDVolumeLoader::getSupportedExtensions() const
 {
     return {"mhd"};
 }
-
-PropertyMap MHDVolumeLoader::getProperties() const
-{
-    return {};
-}
 }

@@ -262,9 +262,4 @@ std::vector<std::string> ArchiveLoader::getSupportedExtensions() const
 {
     return {"zip", "gz", "tgz", "bz2", "rar"};
 }
-
-PropertyMap ArchiveLoader::getProperties() const
-{
-    return {};
-}
 }

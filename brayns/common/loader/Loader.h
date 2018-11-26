@@ -93,8 +93,7 @@ public:
     /**
      * @return The loader properties
      */
-    virtual PropertyMap getProperties() const = 0;
-
+    virtual PropertyMap getProperties() const { return {}; }
     /**
      * Import the data from the blob and return the created model.
      *
