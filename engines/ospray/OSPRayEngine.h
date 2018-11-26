@@ -62,6 +62,8 @@ private:
     void _createCameras();
     void _createRenderers();
 
+    void _setupDeflectPixelOp();
+
     bool _haveDeflectPixelOp{false};
     bool _useDynamicLoadBalancer{false};
     EngineType _type{EngineType::ospray};
