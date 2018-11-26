@@ -487,10 +487,11 @@ inline void init(brayns::AnimationParameters* a, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::LoaderSupport* a, ObjectHandler* h)
+inline void init(brayns::LoaderInfo* a, ObjectHandler* h)
 {
     h->add_property("name", &a->name);
     h->add_property("extensions", &a->extensions);
+    h->add_property("properties", &a->properties);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 }

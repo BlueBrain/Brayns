@@ -1477,11 +1477,11 @@ public:
 
     void _handleGetLoaders()
     {
-        _handleRPC<std::vector<LoaderSupport>>(
+        _handleRPC<std::vector<LoaderInfo>>(
             {METHOD_GET_LOADERS, "Get all loaders"},
             [&]() {
                 auto& scene = _engine.getScene();
-                return scene.getLoaderRegistry().getLoaderSupport();
+                return scene.getLoaderRegistry().getLoaderInfos();
             });
     }
 
@@ -1576,10 +1576,12 @@ public:
 
         _bindEndpoint(
             LOADERS_SCHEMA, [&](const rockets::jsonrpc::Request& /*request*/) {
-                std::vector<std::pair<std::string, PropertyMap>> props =
-                    _engine.getScene()
-                        .getLoaderRegistry()
-                        .getLoaderPropertyMaps();
+                const auto& loaderInfos =
+                    _engine.getScene().getLoaderRegistry().getLoaderInfos();
+
+                std::vector<std::pair<std::string, PropertyMap>> props;
+                for (const LoaderInfo& li : loaderInfos)
+                    props.emplace_back(li.name, li.properties);
 
                 return Response{buildJsonSchema(props, "loaders")};
             });

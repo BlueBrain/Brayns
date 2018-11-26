@@ -20,16 +20,18 @@
 
 #pragma once
 
+#include <brayns/common/PropertyMap.h>
 #include <brayns/common/loader/Loader.h>
 
 #include <set>
 
 namespace brayns
 {
-struct LoaderSupport
+struct LoaderInfo
 {
     std::string name;
     std::vector<std::string> extensions;
+    PropertyMap properties;
 };
 
 /**
@@ -43,15 +45,9 @@ public:
     void registerLoader(std::unique_ptr<Loader> loader);
 
     /**
-     * Get a list of loaders and their supported file extensions
+     * Get a list of loaders and their supported file extensions and properties
      */
-    std::vector<LoaderSupport> getLoaderSupport() const;
-
-    /**
-     * Get a list of loaders and their properties
-     */
-    std::vector<std::pair<std::string, PropertyMap>> getLoaderPropertyMaps()
-        const;
+    const std::vector<LoaderInfo>& getLoaderInfos() const;
 
     /**
      * @return true if any of the registered loaders can handle the given file
@@ -91,5 +87,6 @@ private:
 
     std::deque<std::unique_ptr<Loader>> _loaders;
     std::unique_ptr<Loader> _archiveLoader;
+    std::vector<LoaderInfo> _loaderInfos;
 };
 }

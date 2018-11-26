@@ -41,32 +41,14 @@ void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
         return;
     }
 #endif
+    _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(),
+                            loader->getProperties()});
     _loaders.push_front(std::move(loader));
 }
 
-std::vector<LoaderSupport> LoaderRegistry::getLoaderSupport() const
+const std::vector<LoaderInfo>& LoaderRegistry::getLoaderInfos() const
 {
-    std::vector<LoaderSupport> ret(_loaders.size());
-
-    std::transform(_loaders.begin(), _loaders.end(), ret.begin(),
-                   [](const auto& loader) {
-                       return LoaderSupport{loader->getName(),
-                                            loader->getSupportedExtensions()};
-                   });
-    return ret;
-}
-
-std::vector<std::pair<std::string, PropertyMap>>
-    LoaderRegistry::getLoaderPropertyMaps() const
-{
-    std::vector<std::pair<std::string, PropertyMap>> ret(_loaders.size());
-
-    std::transform(_loaders.begin(), _loaders.end(), ret.begin(),
-                   [](const auto& loader) {
-                       return std::pair<std::string, PropertyMap>{
-                           loader->getName(), loader->getProperties()};
-                   });
-    return ret;
+    return _loaderInfos;
 }
 
 bool LoaderRegistry::isSupportedFile(const std::string& filename) const
