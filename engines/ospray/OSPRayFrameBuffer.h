@@ -40,6 +40,7 @@ public:
     void map() final;
     void unmap() final;
     void setAccumulation(const bool accumulation) final;
+    void setFormat(FrameBufferFormat frameBufferFormat) final;
     void setSubsampling(const size_t) final;
     Vector2ui getSize() const final
     {
@@ -52,7 +53,8 @@ public:
     const uint8_t* getColorBuffer() const final { return _colorBuffer; }
     const float* getDepthBuffer() const final { return _depthBuffer; }
     OSPFrameBuffer impl() { return _currentFB(); }
-    void setStreamingParams(const StreamParameters& params);
+    void createPixelOp(const std::string& name) final;
+    void updatePixelOp(const PropertyMap& properties) final;
 
 private:
     void _recreate();
@@ -62,7 +64,6 @@ private:
     bool _useSubsampling() const;
     OSPFrameBuffer _currentFB() const;
     Vector2ui _subsamplingSize() const;
-    void _enableDeflectPixelOp();
 
     OSPFrameBuffer _frameBuffer{nullptr};
     OSPFrameBuffer _subsamplingFrameBuffer{nullptr};

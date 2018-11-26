@@ -32,23 +32,31 @@ class FrameBuffer : public BaseObject
 public:
     BRAYNS_API FrameBuffer(const std::string& name, const Vector2ui& frameSize,
                            FrameBufferFormat frameBufferFormat);
-    virtual ~FrameBuffer() {}
-    virtual void clear() { _accumFrames = 0; }
+    virtual ~FrameBuffer() = default;
+
     virtual void map() = 0;
     virtual void unmap() = 0;
-
     virtual const uint8_t* getColorBuffer() const = 0;
     virtual size_t getColorDepth() const;
     virtual const float* getDepthBuffer() const = 0;
-
     virtual void resize(const Vector2ui& frameSize) = 0;
 
+    virtual void clear() { _accumFrames = 0; }
     virtual Vector2ui getSize() const { return _frameSize; }
-    const Vector2ui& getFrameSize() const { return _frameSize; }
     virtual void setAccumulation(const bool accumulation)
     {
         _accumulation = accumulation;
     }
+    virtual void setFormat(FrameBufferFormat frameBufferFormat)
+    {
+        _frameBufferFormat = frameBufferFormat;
+    }
+
+    virtual void setSubsampling(const size_t) {}
+    virtual void createPixelOp(const std::string& /*name*/){};
+    virtual void updatePixelOp(const PropertyMap& /*properties*/){};
+
+    const Vector2ui& getFrameSize() const { return _frameSize; }
     bool getAccumulation() const { return _accumulation; }
     FrameBufferFormat getFrameBufferFormat() const
     {
@@ -57,11 +65,10 @@ public:
     const std::string& getName() const { return _name; }
     void incrementAccumFrames() { ++_accumFrames; }
     size_t numAccumFrames() const { return _accumFrames; }
-    virtual void setSubsampling(const size_t) {}
 protected:
     const std::string _name;
     Vector2ui _frameSize;
-    const FrameBufferFormat _frameBufferFormat;
+    FrameBufferFormat _frameBufferFormat;
     bool _accumulation{true};
     std::atomic_size_t _accumFrames{0};
 };

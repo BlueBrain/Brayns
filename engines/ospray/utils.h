@@ -21,6 +21,7 @@
 #pragma once
 
 #include <brayns/common/types.h>
+#include <ospray/SDK/common/Managed.h>
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
@@ -29,8 +30,13 @@ namespace brayns
  * Set all the properties from the current property map of the given object to
  * the given ospray object.
  */
-void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject);
-void setOSPRayProperties(const PropertyMap& object, OSPObject ospObject);
+void toOSPRayProperties(const PropertyObject& object, OSPObject ospObject);
+void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject);
+
+/** Update all the properties in the property map from the given ospray object.
+ */
+void fromOSPRayProperties(PropertyMap& object,
+                          ospray::ManagedObject& ospObject);
 
 /** Convert a brayns::Transformation to an ospcommon::affine3f. */
 ospcommon::affine3f transformationToAffine3f(

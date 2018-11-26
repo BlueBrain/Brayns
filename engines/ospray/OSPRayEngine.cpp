@@ -84,16 +84,7 @@ OSPRayEngine::OSPRayEngine(ParametersManager& parametersManager)
         try
         {
             const auto error = ospLoadModule(module.c_str());
-            if (module == "deflect")
-            {
-                if (error != OSP_NO_ERROR)
-                    BRAYNS_WARN
-                        << ospDeviceGetLastErrorMsg(ospGetCurrentDevice())
-                        << std::endl;
-                else
-                    _haveDeflectPixelOp = true;
-            }
-            else if (error != OSP_NO_ERROR)
+            if (error != OSP_NO_ERROR)
                 throw std::runtime_error(
                     ospDeviceGetLastErrorMsg(ospGetCurrentDevice()));
         }
@@ -160,8 +151,6 @@ void OSPRayEngine::commit()
                         << " load balancer" << std::endl;
         }
     }
-
-    _setupDeflectPixelOp();
 }
 
 Vector2ui OSPRayEngine::getMinimumFrameSize() const
@@ -268,12 +257,8 @@ FrameBufferPtr OSPRayEngine::createFrameBuffer(
     const std::string& name, const Vector2ui& frameSize,
     const FrameBufferFormat frameBufferFormat) const
 {
-    // Use format 'none' for the per-tile streaming to avoid tile readback
-    // to the MPI master
     return std::make_shared<OSPRayFrameBuffer>(name, frameSize,
-                                               haveDeflectPixelOp()
-                                                   ? FrameBufferFormat::none
-                                                   : frameBufferFormat);
+                                               frameBufferFormat);
 }
 
 ScenePtr OSPRayEngine::createScene(ParametersManager& parametersManager) const
@@ -358,22 +343,5 @@ void OSPRayEngine::_createCameras()
 
     _camera->setEnvironmentMap(
         !_parametersManager.getSceneParameters().getEnvironmentMap().empty());
-}
-
-void OSPRayEngine::_setupDeflectPixelOp()
-{
-    // distributed streaming requires a properly setup stream ID (either from
-    // DEFLECT_ID env variable or from the Observer from the DeflectPlugin).
-    const auto& streamParams = _parametersManager.getStreamParameters();
-    if (haveDeflectPixelOp() && !streamParams.getId().empty())
-    {
-        for (auto frameBuffer : _frameBuffers)
-        {
-            auto osprayFrameBuffer =
-                std::static_pointer_cast<OSPRayFrameBuffer>(frameBuffer);
-
-            osprayFrameBuffer->setStreamingParams(streamParams);
-        }
-    }
 }
 }

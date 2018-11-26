@@ -48,7 +48,7 @@ void OSPRayCamera::commit()
     ospSet3f(_camera, "up", up.x(), up.y(), up.z());
     ospSetString(_camera, "buffer_target", getBufferTarget().c_str());
 
-    setOSPRayProperties(*this, _camera);
+    toOSPRayProperties(*this, _camera);
 
     // Clip planes
     if (!_clipPlanes.empty())

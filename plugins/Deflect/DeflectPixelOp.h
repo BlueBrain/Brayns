@@ -20,11 +20,13 @@
 
 #pragma once
 
+#include "DeflectParameters.h"
+
 #include <deflect/Stream.h>
 #include <map>
 #include <ospray/SDK/fb/PixelOp.h>
 
-namespace bbp
+namespace brayns
 {
 /**
  * Implements an ospray pixel op that streams each tile to a Deflect server
@@ -37,16 +39,6 @@ namespace bbp
 class DeflectPixelOp : public ospray::PixelOp
 {
 public:
-    struct Settings
-    {
-        std::string id;
-        std::string hostname;
-        uint16_t port{deflect::Stream::defaultPortNumber};
-        bool compression{true};
-        bool streamEnabled{true};
-        unsigned int quality{80};
-    };
-
     struct Instance : public ospray::PixelOp::Instance
     {
         Instance(ospray::FrameBuffer* fb_, DeflectPixelOp& parent);
@@ -84,13 +76,13 @@ public:
     ospray::PixelOp::Instance* createInstance(ospray::FrameBuffer* fb,
                                               PixelOp::Instance* prev) final;
 
-    /** @internal finish pendings sends before closing the stream. */
-    void finish();
-
 private:
+    /** @internal finish pendings sends before closing the stream. */
+    void _finish();
+
     std::unique_ptr<deflect::Stream> _deflectStream;
     std::map<pthread_t, std::shared_future<bool>> _finishFutures;
     std::mutex _mutex;
-    Settings _settings;
+    DeflectParameters _params;
 };
 }

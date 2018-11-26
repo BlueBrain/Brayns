@@ -29,7 +29,6 @@
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/SceneParameters.h>
-#include <brayns/parameters/StreamParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
 
 namespace brayns
@@ -101,12 +100,6 @@ public:
     BRAYNS_API SceneParameters& getSceneParameters();
 
     /**
-       Gets stream parameters
-       @return Parameters for streaming.
-    */
-    BRAYNS_API StreamParameters& getStreamParameters();
-
-    /**
        Gets volume parameters
        @return Parameters for the current volume
     */
@@ -139,7 +132,6 @@ private:
     GeometryParameters _geometryParameters;
     RenderingParameters _renderingParameters;
     SceneParameters _sceneParameters;
-    StreamParameters _streamParameters;
     VolumeParameters _volumeParameters;
 };
 }

@@ -212,7 +212,7 @@ void PropertyMap::merge(const PropertyMap& input)
         };
     };
 
-    const auto isCompatbileTypes = [](Property::Type t0, Property::Type t1) {
+    const auto areCompatibleTypes = [](Property::Type t0, Property::Type t1) {
         return (t0 == Property::Type::Int && t1 == Property::Type::Double) ||
                (t0 == Property::Type::Double && t1 == Property::Type::Int) ||
                (t0 == Property::Type::Vec2i && t1 == Property::Type::Vec2d) ||
@@ -221,7 +221,7 @@ void PropertyMap::merge(const PropertyMap& input)
                (t0 == Property::Type::Vec3d && t1 == Property::Type::Vec3i);
     };
 
-    for (const std::shared_ptr<Property>& otherProperty : input.getProperties())
+    for (const auto& otherProperty : input.getProperties())
     {
         const auto& name = otherProperty->name;
 
@@ -234,7 +234,7 @@ void PropertyMap::merge(const PropertyMap& input)
             {
                 myProperty->_data = otherProperty->_data;
             }
-            else if (isCompatbileTypes(myType, otherType))
+            else if (areCompatibleTypes(myType, otherType))
             {
                 setValues(*myProperty, *otherProperty);
             }
