@@ -413,10 +413,10 @@ inline std::vector<std::pair<std::string, GeometryQuality>> enumMap()
 template <>
 inline std::vector<std::pair<std::string, DataType>> enumMap()
 {
-    return {{"FLOAT", DataType::FLOAT},   {"DOUBLE", DataType::DOUBLE},
-            {"UINT8", DataType::UINT8},   {"UINT16", DataType::UINT16},
-            {"UINT32", DataType::UINT32}, {"INT8", DataType::INT8},
-            {"INT16", DataType::INT16},   {"INT32", DataType::INT32}};
+    return {{"float", DataType::FLOAT},   {"double", DataType::DOUBLE},
+            {"uint8", DataType::UINT8},   {"uint16", DataType::UINT16},
+            {"uint32", DataType::UINT32}, {"int8", DataType::INT8},
+            {"int16", DataType::INT16},   {"int32", DataType::INT32}};
 }
 }
 #endif // TYPES_H
