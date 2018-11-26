@@ -43,7 +43,7 @@ namespace brayns
         break;                                                   \
     }
 
-void setOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
+void toOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
 {
     try
     {
@@ -56,7 +56,7 @@ void setOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
             case Property::Type::Int:
                 SET_SCALAR(i, int32_t);
             case Property::Type::Bool:
-                SET_SCALAR(i, bool);
+                SET_SCALAR(b, bool);
             case Property::Type::String:
                 ospSetString(ospObject, prop->name.c_str(),
                              prop->get<std::string>().c_str());
@@ -80,11 +80,70 @@ void setOSPRayProperties(const PropertyMap& object, OSPObject ospObject)
     }
 }
 
-void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
+void toOSPRayProperties(const PropertyObject& object, OSPObject ospObject)
 {
     if (!object.hasProperties())
         return;
-    setOSPRayProperties(object.getPropertyMap(), ospObject);
+    toOSPRayProperties(object.getPropertyMap(), ospObject);
+}
+
+template <typename T, std::size_t N>
+auto _toStdArray(const ospcommon::vec_t<T, N>& input)
+{
+    std::array<T, N> array;
+    std::copy(&input[0], &input[N - 1], array.begin());
+    return array;
+}
+
+void fromOSPRayProperties(PropertyMap& object, ospray::ManagedObject& ospObject)
+{
+    for (const auto& prop : object.getProperties())
+    {
+        switch (prop->type)
+        {
+        case Property::Type::Double:
+            prop->set(double(
+                ospObject.getParam1f(prop->name.c_str(), prop->get<double>())));
+            break;
+        case Property::Type::Int:
+            prop->set(
+                ospObject.getParam1i(prop->name.c_str(), prop->get<int32_t>()));
+            break;
+        case Property::Type::Bool:
+            prop->set(
+                ospObject.getParam(prop->name.c_str(), prop->get<bool>()));
+            break;
+        case Property::Type::String:
+            prop->set(ospObject.getParamString(prop->name.c_str(),
+                                               prop->get<std::string>()));
+            break;
+        case Property::Type::Vec2d:
+            prop->set(_toStdArray<double, 2>(
+                ospObject.getParam<ospcommon::vec2f>(prop->name.c_str(),
+                                                     ospcommon::vec2f())));
+            break;
+        case Property::Type::Vec2i:
+            prop->set(_toStdArray<int32_t, 2>(
+                ospObject.getParam<ospcommon::vec2i>(prop->name.c_str(),
+                                                     ospcommon::vec2i())));
+            break;
+        case Property::Type::Vec3d:
+            prop->set(_toStdArray<double, 3>(
+                ospObject.getParam<ospcommon::vec3f>(prop->name.c_str(),
+                                                     ospcommon::vec3f())));
+            break;
+        case Property::Type::Vec3i:
+            prop->set(_toStdArray<int32_t, 3>(
+                ospObject.getParam<ospcommon::vec3i>(prop->name.c_str(),
+                                                     ospcommon::vec3i())));
+            break;
+        case Property::Type::Vec4d:
+            prop->set(_toStdArray<double, 4>(
+                ospObject.getParam<ospcommon::vec4f>(prop->name.c_str(),
+                                                     ospcommon::vec4f())));
+            break;
+        }
+    }
 }
 
 ospcommon::affine3f transformationToAffine3f(

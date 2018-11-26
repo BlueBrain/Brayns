@@ -30,10 +30,6 @@ if(TARGET braynsCircuitViewer)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsCircuitViewer)
 endif()
 
-if(TARGET braynsDeflect)
-  list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsDeflect)
-endif()
-
 if(TARGET braynsRockets)
   list(APPEND BRAYNS_LINK_LIBRARIES PRIVATE braynsRockets)
 endif()

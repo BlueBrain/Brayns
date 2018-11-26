@@ -174,7 +174,6 @@ class GeometryParameters;
 class ParametersManager;
 class RenderingParameters;
 class SceneParameters;
-class StreamParameters;
 class VolumeParameters;
 
 class PluginAPI;

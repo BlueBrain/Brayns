@@ -89,11 +89,6 @@ public:
     virtual Vector2ui getMinimumFrameSize() const = 0;
 
     /**
-     * @return true if for "--module deflect" the DeflectPixelOp was
-     *         successfully loaded. Only supported for the OSPRay engine.
-     */
-    virtual bool haveDeflectPixelOp() const { return false; }
-    /**
      * Keep continue to run the engine, aka the user did not request to stop
      * rendering.
      */

@@ -36,6 +36,8 @@ std::string replaceFirstOccurrence(std::string input,
                                    const std::string& toReplace,
                                    const std::string& replaceWith);
 
+bool containsString(const int length, const char** input, const char* toFind);
+
 inline auto lowerCase(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);

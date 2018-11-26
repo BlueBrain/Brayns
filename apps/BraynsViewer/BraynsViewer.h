@@ -26,8 +26,6 @@
 
 namespace brayns
 {
-class DeflectManager;
-
 class BraynsViewer : public BaseWindow
 {
 public:

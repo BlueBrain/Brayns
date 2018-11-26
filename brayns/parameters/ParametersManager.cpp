@@ -113,7 +113,6 @@ ParametersManager::ParametersManager()
     registerParameters(&_geometryParameters);
     registerParameters(&_renderingParameters);
     registerParameters(&_sceneParameters);
-    registerParameters(&_streamParameters);
     registerParameters(&_volumeParameters);
 
     for (auto parameters : _parameterSets)
@@ -127,10 +126,9 @@ void ParametersManager::registerParameters(AbstractParameters* parameters)
 
 void ParametersManager::parse(int argc, const char** argv)
 {
-    bool help = false;
-    for (int i = 0; i < argc && !help; ++i)
-        if (std::string(argv[i]) == "--help")
-            help = true;
+    const bool help = std::count_if(argv, argv + argc, [](const char* arg) {
+                          return std::strcmp(arg, "--help") == 0;
+                      }) > 0;
 
     if (help)
     {
@@ -226,11 +224,6 @@ GeometryParameters& ParametersManager::getGeometryParameters()
 SceneParameters& ParametersManager::getSceneParameters()
 {
     return _sceneParameters;
-}
-
-StreamParameters& ParametersManager::getStreamParameters()
-{
-    return _streamParameters;
 }
 
 VolumeParameters& ParametersManager::getVolumeParameters()

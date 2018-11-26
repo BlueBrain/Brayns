@@ -5,15 +5,6 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-# Deflect PixelOp module
-option(BRAYNS_DEFLECT_PIXELOP_ENABLED "Activate Deflect PixelOp module" OFF)
-if(BRAYNS_DEFLECT_PIXELOP_ENABLED)
-  add_subdirectory(deflect)
-  if(TARGET ospray_module_deflect)
-    add_dependencies(braynsOSPRayEngine ospray_module_deflect)
-  endif()
-endif()
-
 # Optix module
 option(BRAYNS_OPTIX_ENABLED "Activate OptiX module" OFF)
 if(BRAYNS_OPTIX_ENABLED)

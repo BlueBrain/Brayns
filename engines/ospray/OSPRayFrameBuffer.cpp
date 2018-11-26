@@ -19,9 +19,9 @@
  */
 
 #include "OSPRayFrameBuffer.h"
+#include "utils.h"
 
 #include <brayns/common/log.h>
-#include <brayns/parameters/StreamParameters.h>
 #include <ospray/SDK/common/OSPCommon.h>
 
 namespace brayns
@@ -60,20 +60,6 @@ OSPRayFrameBuffer::~OSPRayFrameBuffer()
     ospRelease(_subsamplingFrameBuffer);
 }
 
-void OSPRayFrameBuffer::_enableDeflectPixelOp()
-{
-    if (_pixelOp)
-        return;
-
-    _pixelOp = ospNewPixelOp("DeflectPixelOp");
-    if (_pixelOp)
-    {
-        ospSetPixelOp(_frameBuffer, _pixelOp);
-        if (_subsamplingFrameBuffer)
-            ospSetPixelOp(_subsamplingFrameBuffer, _pixelOp);
-    }
-}
-
 void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
 {
     if (frameSize.product() == 0)
@@ -85,21 +71,6 @@ void OSPRayFrameBuffer::resize(const Vector2ui& frameSize)
     _frameSize = frameSize;
 
     _recreate();
-}
-
-void OSPRayFrameBuffer::setStreamingParams(const StreamParameters& params)
-{
-    _enableDeflectPixelOp();
-    if (_pixelOp && params.isModified())
-    {
-        ospSetString(_pixelOp, "id", params.getId().c_str());
-        ospSetString(_pixelOp, "hostname", params.getHostname().c_str());
-        ospSet1i(_pixelOp, "port", params.getPort());
-        ospSet1i(_pixelOp, "enabled", params.getEnabled());
-        ospSet1i(_pixelOp, "compression", params.getCompression());
-        ospSet1i(_pixelOp, "quality", params.getQuality());
-        ospCommit(_pixelOp);
-    }
 }
 
 void OSPRayFrameBuffer::_recreate()
@@ -220,6 +191,15 @@ void OSPRayFrameBuffer::setAccumulation(const bool accumulation)
     }
 }
 
+void OSPRayFrameBuffer::setFormat(FrameBufferFormat frameBufferFormat)
+{
+    if (_frameBufferFormat != frameBufferFormat)
+    {
+        FrameBuffer::setFormat(frameBufferFormat);
+        _recreate();
+    }
+}
+
 void OSPRayFrameBuffer::setSubsampling(size_t factor)
 {
     factor = std::max(1ul, factor);
@@ -230,5 +210,28 @@ void OSPRayFrameBuffer::setSubsampling(size_t factor)
     auto lock = getScopeLock();
     _unmapUnsafe();
     _recreateSubsamplingBuffer();
+}
+
+void OSPRayFrameBuffer::createPixelOp(const std::string& name)
+{
+    if (_pixelOp)
+        return;
+
+    _pixelOp = ospNewPixelOp(name.c_str());
+    if (_pixelOp)
+    {
+        ospSetPixelOp(_frameBuffer, _pixelOp);
+        if (_subsamplingFrameBuffer)
+            ospSetPixelOp(_subsamplingFrameBuffer, _pixelOp);
+    }
+}
+
+void OSPRayFrameBuffer::updatePixelOp(const PropertyMap& properties)
+{
+    if (_pixelOp)
+    {
+        toOSPRayProperties(properties, _pixelOp);
+        ospCommit(_pixelOp);
+    }
 }
 }

@@ -66,7 +66,6 @@ const std::string ENDPOINT_RENDERER = "renderer";
 const std::string ENDPOINT_RENDERER_PARAMS = "renderer-params";
 const std::string ENDPOINT_SCENE = "scene";
 const std::string ENDPOINT_SCENE_PARAMS = "scene-parameters";
-const std::string ENDPOINT_STREAM = "stream";
 const std::string ENDPOINT_VOLUME_PARAMS = "volume-parameters";
 
 // REST GET, JSONRPC get-* request
@@ -103,7 +102,6 @@ const std::string METHOD_UPDATE_MODEL = "update-model";
 const std::string METHOD_CHUNK = "chunk";
 const std::string METHOD_QUIT = "quit";
 const std::string METHOD_RESET_CAMERA = "reset-camera";
-const std::string METHOD_STREAM_TO = "stream-to";
 
 const std::string LOADERS_SCHEMA = "loaders-schema";
 
@@ -261,17 +259,8 @@ public:
                               const PropertyMap& input,
                               const std::function<void(PropertyMap)>& action)
     {
-        _jsonrpcServer->connect(desc.methodName, [
-            name = desc.methodName, input, action, &engine = _engine
-        ](const auto& request) {
-            PropertyMap params = input;
-            if (::from_json(params, request.message))
-            {
-                action(params);
-                engine.triggerRender();
-                return;
-            }
-            BRAYNS_ERROR << "from_json for " << name << " failed" << std::endl;
+        _jsonrpcServer->connect(desc.methodName, [action](const auto& request) {
+            action(jsonToPropertyMap(request.message));
         });
 
         _handleSchema(desc.methodName,
@@ -281,10 +270,7 @@ public:
     void registerNotification(const RpcDescription& desc,
                               const std::function<void()>& action)
     {
-        _jsonrpcServer->connect(desc.methodName, [ action, &engine = _engine ] {
-            action();
-            engine.triggerRender();
-        });
+        _jsonrpcServer->connect(desc.methodName, [action] { action(); });
 
         _handleSchema(desc.methodName, buildJsonRpcSchemaNotify(desc));
     }
@@ -293,17 +279,19 @@ public:
                          const PropertyMap& input, const PropertyMap& output,
                          const std::function<PropertyMap(PropertyMap)>& action)
     {
-        _bindEndpoint(desc.methodName, [
-            name = desc.methodName, input, action, &engine = _engine
-        ](const auto& request) {
-            PropertyMap params = input;
-            if (::from_json(params, request.message))
+        _bindEndpoint(desc.methodName, [ name = desc.methodName,
+                                         action ](const auto& request) {
+            try
             {
-                engine.triggerRender();
-                return Response{to_json(action(params))};
+                return Response{
+                    to_json(action(jsonToPropertyMap(request.message)))};
             }
-            return Response{Response::Error{"from_json for " + name + " failed",
-                                            PARAMETER_FROM_JSON_ERROR}};
+            catch (...)
+            {
+                return Response{
+                    Response::Error{"from_json for " + name + " failed",
+                                    PARAMETER_FROM_JSON_ERROR}};
+            }
         });
 
         _handleSchema(desc.methodName,
@@ -314,11 +302,9 @@ public:
     void registerRequest(const RpcDescription& desc, const PropertyMap& output,
                          const std::function<PropertyMap()>& action)
     {
-        _jsonrpcServer->bind(desc.methodName,
-                             [ action, &engine = _engine ](const auto&) {
-                                 engine.triggerRender();
-                                 return Response{to_json(action())};
-                             });
+        _jsonrpcServer->bind(desc.methodName, [action](const auto&) {
+            return Response{to_json(action())};
+        });
 
         _handleSchema(desc.methodName,
                       buildJsonRpcSchemaRequestPropertyMap(desc, output));
@@ -326,36 +312,28 @@ public:
 
     void _registerRequest(const std::string& name, const RetParamFunc& action)
     {
-        _jsonrpcServer->bind(name, [ action,
-                                     &engine = _engine ](const auto& request) {
-            engine.triggerRender();
+        _jsonrpcServer->bind(name, [action](const auto& request) {
             return Response{action(request.message)};
         });
     }
 
     void _registerRequest(const std::string& name, const RetFunc& action)
     {
-        _jsonrpcServer->bind(name, [ action, &engine = _engine ](const auto&) {
-            engine.triggerRender();
+        _jsonrpcServer->bind(name, [action](const auto&) {
             return Response{action()};
         });
     }
 
     void _registerNotification(const std::string& name, const ParamFunc& action)
     {
-        _jsonrpcServer->connect(name, [ action, &engine = _engine ](
-                                          const auto& request) {
+        _jsonrpcServer->connect(name, [action](const auto& request) {
             action(request.message);
-            engine.triggerRender();
         });
     }
 
     void _registerNotification(const std::string& name, const VoidFunc& action)
     {
-        _jsonrpcServer->connect(name, [ action, &engine = _engine ] {
-            action();
-            engine.triggerRender();
-        });
+        _jsonrpcServer->connect(name, [action] { action(); });
     }
 
     void processDelayedNotifies()
@@ -922,7 +900,6 @@ public:
         _handleCamera();
         _handleImageJPEG();
         _handleRenderer();
-        _handleStreaming();
         _handleVersion();
 
         _handle(ENDPOINT_APP_PARAMS,
@@ -947,7 +924,6 @@ public:
         _handleQuit();
         _handleResetCamera();
         _handleSnapshot();
-        _handleStreamTo();
 
         _handleRequestModelUpload();
         _handleChunk();
@@ -1022,23 +998,6 @@ public:
         if (image.size > 0)
             _rocketsServer->broadcastBinary((const char*)image.data.get(),
                                             image.size);
-    }
-
-    void _handleStreaming()
-    {
-#if BRAYNS_USE_DEFLECT
-        _handle(ENDPOINT_STREAM, _parametersManager.getStreamParameters());
-#else
-        _handleGET(ENDPOINT_STREAM, _parametersManager.getStreamParameters());
-        using namespace rockets::http;
-        auto respondNotImplemented = [](const Request&) {
-            const auto message =
-                "Brayns was not compiled with streaming support";
-            return make_ready_response(Code::NOT_IMPLEMENTED, message);
-        };
-        _rocketsServer->handle(Method::PUT, ENDPOINT_STREAM,
-                               respondNotImplemented);
-#endif
     }
 
     void _handleVersion()
@@ -1167,29 +1126,6 @@ public:
                 SnapshotFunctor{engine, std::move(params), imageGenerator});
         };
         _handleTask<SnapshotParams, ImageGenerator::ImageBase64>(desc, func);
-    }
-
-    void _handleStreamTo()
-    {
-        const RpcParameterDescription desc{METHOD_STREAM_TO,
-                                           "Stream to a displaywall",
-                                           Execution::sync, "param",
-                                           "Stream parameters"};
-
-        _bindEndpoint(METHOD_STREAM_TO, [&](const auto& request) {
-            auto& streamParams =
-                _engine.getParametersManager().getStreamParameters();
-            if (::from_json(streamParams, request.message))
-            {
-                streamParams.markModified();
-                _engine.triggerRender();
-                return Response{to_json(true)};
-            }
-            return Response::invalidParams();
-        });
-
-        _handleSchema(METHOD_STREAM_TO,
-                      buildJsonRpcSchemaRequest<StreamParameters, bool>(desc));
     }
 
     void _handleRequestModelUpload()
@@ -1411,9 +1347,7 @@ public:
                            [&](const std::string& json,
                                ModelDescriptorPtr model) {
                                auto props = model->getProperties();
-                               if (!::from_json(props, json))
-                                   return false;
-
+                               props.merge(jsonToPropertyMap(json));
                                model->setProperties(props);
                                return true;
                            });
@@ -1534,14 +1468,9 @@ public:
         });
 
         _bindEndpoint(notifyEndpoint, [&, notifyEndpoint](const auto& request) {
-            PropertyMap props = object.getPropertyMap();
-            if (::from_json(props, request.message))
-            {
-                object.updateProperties(props);
-                _engine.triggerRender();
-                return Response{to_json(true)};
-            }
-            return Response::invalidParams();
+            object.updateProperties(jsonToPropertyMap(request.message));
+            _engine.triggerRender();
+            return Response{to_json(true)};
         });
 
         std::vector<std::pair<std::string, PropertyMap>> props;

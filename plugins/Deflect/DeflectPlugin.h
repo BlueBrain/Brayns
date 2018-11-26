@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,10 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef DEFLECTPLUGIN_H
-#define DEFLECTPLUGIN_H
+#pragma once
 
-#include <brayns/api.h>
+#include "DeflectParameters.h"
+
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
@@ -30,18 +30,19 @@ namespace brayns
 class DeflectPlugin : public ExtensionPlugin
 {
 public:
-    BRAYNS_API void init(PluginAPI* api) final;
+    DeflectPlugin(DeflectParameters&& params);
+    void init(PluginAPI* api) final;
 
     /** Handle stream setup and incoming events. */
-    BRAYNS_API void preRender() final;
+    void preRender() final;
 
     /** Send rendered frame. */
-    BRAYNS_API void postRender() final;
+    void postRender() final;
 
 private:
     class Impl;
     std::shared_ptr<Impl> _impl;
+
+    DeflectParameters _params;
 };
 }
-
-#endif

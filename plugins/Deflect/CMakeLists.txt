@@ -1,16 +1,38 @@
 # Copyright (c) 2015-2018, EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
-# Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+# Responsible Author: Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-set(BRAYNSDEFLECT_SOURCES DeflectPlugin.cpp)
-set(BRAYNSDEFLECT_HEADERS DeflectPlugin.h)
-set(BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE Deflect)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+
+project(BraynsDeflectPlugin VERSION 1.0.0)
+set(BraynsDeflectPlugin_VERSION_ABI 1)
+
+include(Common)
+
+common_find_package(Deflect REQUIRED)
+common_find_package_post()
+
+set(BRAYNSDEFLECT_SOURCES
+  DeflectParameters.cpp
+  DeflectPlugin.cpp
+)
+set(BRAYNSDEFLECT_HEADERS
+  DeflectParameters.h
+  DeflectPlugin.h
+  utils.h
+)
+
+if(BRAYNS_OSPRAY_ENABLED)
+  list(APPEND BRAYNSDEFLECT_SOURCES DeflectPixelOp.cpp)
+  list(APPEND BRAYNSDEFLECT_HEADERS DeflectPixelOp.h)
+endif()
+
+set(BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE braynsCommon braynsParameters Deflect)
 
 if(libuv_FOUND)
-  list(APPEND BRAYNSDEFLECT_LINK_LIBRARIES
-    PRIVATE braynsCommon braynsParameters ${libuv_LIBRARIES})
+  list(APPEND BRAYNSDEFLECT_LINK_LIBRARIES PRIVATE ${libuv_LIBRARIES})
 endif()
 
 set(BRAYNSDEFLECT_OMIT_LIBRARY_HEADER ON)
@@ -18,3 +40,7 @@ set(BRAYNSDEFLECT_OMIT_VERSION_HEADERS ON)
 set(BRAYNSDEFLECT_OMIT_EXPORT ON)
 set(BRAYNSDEFLECT_INCLUDE_NAME deflect)
 common_library(braynsDeflect)
+
+if(TARGET Brayns-all)
+  add_dependencies(Brayns-all braynsDeflect)
+endif()

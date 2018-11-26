@@ -70,7 +70,7 @@ void OSPRayRenderer::commit()
     if (rendererChanged)
         _createOSPRenderer();
 
-    setOSPRayProperties(*this, _renderer);
+    toOSPRayProperties(*this, _renderer);
 
     auto scene = std::static_pointer_cast<OSPRayScene>(_scene);
     if (isModified() || rendererChanged || _scene->isModified())
@@ -170,8 +170,8 @@ void OSPRayRenderer::_createOSPRenderer()
 
 void OSPRayRenderer::_commitRendererMaterials()
 {
-    _scene->visitModels([&renderer = _currentOSPRenderer](Model& model) {
-            static_cast<OSPRayModel&>(model).commitMaterials(renderer);
+    _scene->visitModels([& renderer = _currentOSPRenderer](Model & model) {
+        static_cast<OSPRayModel&>(model).commitMaterials(renderer);
     });
 }
 }

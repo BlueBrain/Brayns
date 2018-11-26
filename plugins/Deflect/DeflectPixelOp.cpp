@@ -19,16 +19,18 @@
  */
 
 #include "DeflectPixelOp.h"
+#include "utils.h"
 
 #include <ospray/SDK/fb/FrameBuffer.h>
 
+#include <engines/ospray/utils.h>
+
 namespace
 {
-template <typename T>
-std::future<T> make_ready_future(const T value)
+std::future<bool> make_ready_future()
 {
-    std::promise<T> promise;
-    promise.set_value(value);
+    std::promise<bool> promise;
+    promise.set_value(true);
     return promise.get_future();
 }
 
@@ -45,7 +47,7 @@ inline unsigned char clampCvt(float f)
 const size_t ALIGNMENT = 64;
 }
 
-namespace bbp
+namespace brayns
 {
 DeflectPixelOp::Instance::Instance(ospray::FrameBuffer* fb_,
                                    DeflectPixelOp& parent)
@@ -87,26 +89,6 @@ void DeflectPixelOp::Instance::endFrame()
         i.second = sharedFuture;
 }
 
-uint8_t _getChannel(const std::string& name)
-{
-    if (name.length() == 2)
-        return std::atoi(&name.at(0));
-    return 0;
-}
-
-deflect::View _getView(const std::string& name)
-{
-    if (name.length() == 2)
-    {
-        if (name.at(1) == 'L')
-            return deflect::View::left_eye;
-        if (name.at(1) == 'R')
-            return deflect::View::right_eye;
-        return deflect::View::mono;
-    }
-    return deflect::View::mono;
-}
-
 void DeflectPixelOp::Instance::postAccum(ospray::Tile& tile)
 {
     if (!_parent._deflectStream)
@@ -123,16 +105,17 @@ void DeflectPixelOp::Instance::postAccum(ospray::Tile& tile)
     deflect::ImageWrapper image(_copyPixels(tile, tileSize), tileSize.x,
                                 tileSize.y, deflect::RGBA, tile.region.lower.x,
                                 tile.region.lower.y);
-    image.compressionPolicy = _parent._settings.compression
+    image.compressionPolicy = _parent._params.getCompression()
                                   ? deflect::COMPRESSION_ON
                                   : deflect::COMPRESSION_OFF;
-    image.compressionQuality = _parent._settings.quality;
-    image.subsampling = deflect::ChromaSubsampling::YUV420;
-    image.rowOrder = deflect::RowOrder::bottom_up;
+    image.compressionQuality = _parent._params.getQuality();
+    image.subsampling = _parent._params.getChromaSubsampling();
+    image.rowOrder = _parent._params.isTopDown() ? deflect::RowOrder::top_down
+                                                 : deflect::RowOrder::bottom_up;
 
     const auto name = fb->getParamString("name");
-    image.view = _getView(name);
-    image.channel = _getChannel(name);
+    image.view = utils::getView(name);
+    image.channel = utils::getChannel(name);
 
     try
     {
@@ -142,7 +125,7 @@ void DeflectPixelOp::Instance::postAccum(ospray::Tile& tile)
             // only for the first frame
             std::lock_guard<std::mutex> _lock(_parent._mutex);
             _parent._finishFutures.insert(
-                {pthread_self(), make_ready_future(true)});
+                {pthread_self(), make_ready_future()});
         }
         else
             i->second.wait(); // complete previous frame
@@ -227,37 +210,26 @@ unsigned char* DeflectPixelOp::Instance::_copyPixels(
 
 void DeflectPixelOp::commit()
 {
-    const std::string hostname = getParamString("hostname", "");
-    const std::string id = getParamString("id", "");
-    const bool changed = _settings.id != id || _settings.hostname != hostname;
-
-    _settings.id = id;
-    _settings.hostname = hostname;
-    _settings.port = getParam1i("port", deflect::Stream::defaultPortNumber);
-    _settings.compression = getParam1i("compression", 1);
-    _settings.quality = getParam1i("quality", 80);
-    _settings.streamEnabled = getParam1i("enabled", 1);
-
-    if (changed || (_deflectStream && _deflectStream->isConnected() &&
-                    !_settings.streamEnabled))
+    brayns::fromOSPRayProperties(_params.getPropertyMap(), *this);
+    if (_deflectStream && utils::needsReset(*_deflectStream, _params))
     {
-        finish();
+        _finish();
         _deflectStream.reset();
     }
 
-    if (!_deflectStream && _settings.streamEnabled)
+    if (!_deflectStream && _params.getEnabled())
     {
         try
         {
-            _deflectStream.reset(new deflect::Stream(_settings.id,
-                                                     _settings.hostname,
-                                                     _settings.port));
+            _deflectStream.reset(new deflect::Stream(_params.getId(),
+                                                     _params.getHostname(),
+                                                     _params.getPort()));
         }
         catch (const std::runtime_error& ex)
         {
             std::cerr << "Deflect failed to initialize. " << ex.what()
                       << std::endl;
-            _settings.streamEnabled = false;
+            _params.setEnabled(false);
         }
     }
 }
@@ -268,20 +240,15 @@ ospray::PixelOp::Instance* DeflectPixelOp::createInstance(
     return new Instance(fb, *this);
 }
 
-void DeflectPixelOp::finish()
+void DeflectPixelOp::_finish()
 {
     for (auto& i : _finishFutures)
         i.second.wait();
     _finishFutures.clear();
 }
-
-} // namespace bbp
+}
 
 namespace ospray
 {
-extern "C" void ospray_init_module_deflect()
-{
-    std::cout << "#deflect: initializing ospray deflect plugin" << std::endl;
-}
-OSP_REGISTER_PIXEL_OP(bbp::DeflectPixelOp, DeflectPixelOp);
+OSP_REGISTER_PIXEL_OP(brayns::DeflectPixelOp, deflectPixelOp);
 }

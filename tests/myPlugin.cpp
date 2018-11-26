@@ -64,7 +64,10 @@ public:
                                             "param", "a beautiful input param"},
             input,
             [&](const brayns::PropertyMap& prop) {
-                BOOST_CHECK_EQUAL(prop.getProperty<int>("value"), 42);
+                if (prop.hasProperty("value"))
+                    BOOST_CHECK_EQUAL(prop.getProperty<int>("value"), 42);
+                else
+                    ++numFails;
                 ++numCalls;
             });
 
@@ -115,8 +118,13 @@ public:
         api->getRenderer().setProperties("myrenderer", props);
     }
 
-    ~MyPlugin() { BOOST_REQUIRE_EQUAL(numCalls, 8); }
+    ~MyPlugin()
+    {
+        BOOST_REQUIRE_EQUAL(numCalls, 10);
+        BOOST_REQUIRE_EQUAL(numFails, 1);
+    }
     size_t numCalls{0};
+    size_t numFails{0};
 };
 
 class MyRenderer : public brayns::AbstractRenderer

@@ -44,8 +44,6 @@ public:
     /** @copydoc Engine::getMinimumFrameSize */
     Vector2ui getMinimumFrameSize() const final;
 
-    /** @copydoc Engine::haveDeflectPixelOp */
-    bool haveDeflectPixelOp() const final { return _haveDeflectPixelOp; }
     FrameBufferPtr createFrameBuffer(
         const std::string& name, const Vector2ui& frameSize,
         FrameBufferFormat frameBufferFormat) const final;
@@ -62,9 +60,6 @@ private:
     void _createCameras();
     void _createRenderers();
 
-    void _setupDeflectPixelOp();
-
-    bool _haveDeflectPixelOp{false};
     bool _useDynamicLoadBalancer{false};
     EngineType _type{EngineType::ospray};
 };
