@@ -133,12 +133,12 @@ RUN apt-get update \
  && apt-get -y --no-install-recommends install \
     libarchive13 \
     libassimp4 \
-    libboost-filesystem1.62.0 \
-    libboost-program-options1.62.0 \
-    libboost-regex1.62.0 \
-    libboost-serialization1.62.0 \
-    libboost-system1.62.0 \
-    libboost-iostreams1.62.0 \
+    libboost-filesystem1.67.0 \
+    libboost-program-options1.67.0 \
+    libboost-regex1.67.0 \
+    libboost-serialization1.67.0 \
+    libboost-system1.67.0 \
+    libboost-iostreams1.67.0 \
     libfreeimage3 \
     libgomp1 \
     libhdf5-100 \
