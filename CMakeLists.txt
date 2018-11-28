@@ -30,6 +30,9 @@ if($ENV{TRAVIS})
   if(NOT DEFINED BRAYNS_CIRCUITVIEWER_ENABLED)
     set(BRAYNS_CIRCUITVIEWER_ENABLED ON)
   endif()
+  if(NOT DEFINED BRAYNS_BBIC_ENABLED)
+    set(BRAYNS_BBIC_ENABLED ON)
+  endif()
 endif()
 include(Common)
 
@@ -90,7 +93,7 @@ else()
 endif()
 
 # Data access
-option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuirViewer plugin" OFF)
+option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" OFF)
 if (BRAYNS_CIRCUITVIEWER_ENABLED)
   list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_CIRCUITVIEWER)
 endif()
