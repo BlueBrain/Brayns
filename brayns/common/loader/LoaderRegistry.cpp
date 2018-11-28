@@ -43,7 +43,7 @@ void LoaderRegistry::registerLoader(std::unique_ptr<Loader> loader)
 #endif
     _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(),
                             loader->getProperties()});
-    _loaders.push_front(std::move(loader));
+    _loaders.push_back(std::move(loader));
 }
 
 const std::vector<LoaderInfo>& LoaderRegistry::getLoaderInfos() const
