@@ -99,20 +99,13 @@ void trackerCallback(void* userData, const vrpn_TRACKERCB tracker)
 }
 }
 
-VRPNPlugin::VRPNPlugin(PluginAPI* api, const std::string& vrpnName)
-    : _api{api}
-    , _camera{api->getCamera()}
-    , _vrpnTracker{vrpnName.c_str()}
+VRPNPlugin::VRPNPlugin(const std::string& vrpnName)
+    : _vrpnTracker{vrpnName.c_str()}
 {
     if (!_vrpnTracker.connectionPtr()->doing_okay())
         throw std::runtime_error("VRPN couldn't connect to: " + vrpnName);
 
-    _vrpnTracker.register_change_handler(&_camera, trackerCallback,
-                                         HEAD_SENSOR_ID);
-
     BRAYNS_INFO << "VRPN successfully connected to " << vrpnName << std::endl;
-
-    _camera.setProperties(CAMERA_TYPE, getDefaultCameraProperties());
 
 #ifdef BRAYNSVRPN_USE_LIBUV
     _setupIdleTimer();
@@ -121,8 +114,17 @@ VRPNPlugin::VRPNPlugin(PluginAPI* api, const std::string& vrpnName)
 
 VRPNPlugin::~VRPNPlugin()
 {
-    _vrpnTracker.unregister_change_handler(&_camera, trackerCallback,
+    _vrpnTracker.unregister_change_handler(&(_api->getCamera()), trackerCallback,
                                            HEAD_SENSOR_ID);
+}
+
+void VRPNPlugin::init(PluginAPI* api)
+{
+    _api = api;
+    _api->getCamera().setProperties(CAMERA_TYPE, getDefaultCameraProperties());
+
+    _vrpnTracker.register_change_handler(&(_api->getCamera()), trackerCallback,
+                                         HEAD_SENSOR_ID);
 }
 
 void VRPNPlugin::preRender()
@@ -134,7 +136,7 @@ void VRPNPlugin::preRender()
 void VRPNPlugin::resumeRenderingIfTrackerIsActive()
 {
     _vrpnTracker.mainloop();
-    if (_camera.isModified())
+    if (_api->getCamera().isModified())
         _api->triggerRender();
 }
 
@@ -158,8 +160,7 @@ void VRPNPlugin::_setupIdleTimer()
 #endif
 }
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
-                                                         const int argc,
+extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
                                                          const char** argv)
 {
     if (argc > 2)
@@ -170,5 +171,5 @@ extern "C" brayns::ExtensionPlugin* brayns_plugin_create(brayns::PluginAPI* api,
     }
 
     const auto vrpnName = (argc >= 2) ? argv[1] : brayns::DEFAULT_VRPN_NAME;
-    return new brayns::VRPNPlugin(api, vrpnName);
+    return new brayns::VRPNPlugin(vrpnName);
 }

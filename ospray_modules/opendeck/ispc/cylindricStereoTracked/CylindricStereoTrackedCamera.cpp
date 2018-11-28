@@ -25,6 +25,11 @@ namespace ospray
 {
 namespace
 {
+constexpr uint8_t leftWall = 0u;
+constexpr uint8_t rightWall = 1u;
+constexpr uint8_t leftFloor = 2u;
+constexpr uint8_t rightFloor = 3u;
+
 const vec3f OPENDECK_RIGHT_DIRECTION{1.0f, 0.0f, 0.0f};
 
 vec3f _rotateVectorByQuat(const vec3f& v, const vec4f& q)
@@ -51,9 +56,20 @@ void CylindricStereoTrackedCamera::commit()
 {
     Camera::commit();
 
+    const std::string& bufferTarget = getParamString("buffer_target");
+
+    uint8_t bufferId = 255u;
+    if (bufferTarget == "0L")
+        bufferId = leftWall;
+    else if (bufferTarget == "0R")
+        bufferId = rightWall;
+    else if (bufferTarget == "1L")
+        bufferId = leftFloor;
+    else if (bufferTarget == "1R")
+        bufferId = rightFloor;
+
     const auto stereoMode = getStereoMode();
     const auto ipd = getInterpupillaryDistance(stereoMode);
-    const auto sideBySide = stereoMode == StereoMode::OSP_STEREO_SIDE_BY_SIDE;
 
     const auto headPosition = _getHeadPosition();
     const auto openDeckCamDU = _getOpendeckCamDU();
@@ -69,12 +85,12 @@ void CylindricStereoTrackedCamera::commit()
                                            (const ispc::vec3f&)dir_du,
                                            (const ispc::vec3f&)dir_dv,
                                            (const ispc::vec3f&)openDeckCamDU,
-                                           ipd, sideBySide);
+                                           ipd, bufferId);
 }
 
 vec3f CylindricStereoTrackedCamera::_getHeadPosition()
 {
-    return getParam3f("headPosition", vec3f(0.0f, 0.0f, 0.0f));
+    return getParam3f("headPosition", vec3f(0.0f, 2.0f, 0.0f));
 }
 
 vec3f CylindricStereoTrackedCamera::_getOpendeckCamDU()

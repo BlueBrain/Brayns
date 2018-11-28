@@ -33,5 +33,5 @@ struct CylindricStereoTrackedCamera
     vec3f headPos;
     vec3f od_dir_du;
     float interpupillaryDistance;
-    bool side_by_side;
+    uint8 bufferId;
 };

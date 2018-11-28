@@ -12,7 +12,11 @@ if(BRAYNS_NETWORKING_ENABLED)
   add_subdirectory(Rockets)
 endif()
 
-option(BRAYNS_VRPN_ENABLED "Activate VRPN plugin" OFF)
+if(BRAYNS_OPENDECK_ENABLED)
+  add_subdirectory(OpenDeck)
+endif()
+
+option(BRAYNS_VRPN_ENABLED "Activate vrpn plugin" OFF)
 if(BRAYNS_VRPN_ENABLED)
   add_subdirectory(VRPN)
 endif()
