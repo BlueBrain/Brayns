@@ -25,3 +25,8 @@ option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" ON)
 if (BRAYNS_CIRCUITVIEWER_ENABLED)
   add_subdirectory(CircuitViewer)
 endif()
+
+option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" ON)
+if(BRAYNS_BBIC_ENABLED)
+  add_subdirectory(BBIC)
+endif()
