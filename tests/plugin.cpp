@@ -33,14 +33,14 @@ BOOST_AUTO_TEST_CASE(plugin_actions)
 
     makeNotification("notify");
     brayns::PropertyMap input;
-    input.setProperty({"value", "my nice int value", 42});
+    input.setProperty({"value", 42});
     makeNotification("notify-param", input);
 
     // wrong input, cannot test though
     makeNotification("notify-param", vecVal);
 
     brayns::PropertyMap output;
-    output.setProperty({"result", "a good result", false});
+    output.setProperty({"result", false});
     auto result = makeRequestUpdate("request", output);
     BOOST_CHECK(result.getProperty<bool>("result"));
 

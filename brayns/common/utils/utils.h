@@ -56,4 +56,9 @@ inline std::array<T, M> toArray(const vmml::vector<M, T>& input)
               std::begin(output));
     return output;
 }
+
+std::string camelCaseToSeparated(const std::string& camelCase,
+                                 const char separator);
+std::string separatedToCamelCase(const std::string& separated,
+                                 const char separator);
 }

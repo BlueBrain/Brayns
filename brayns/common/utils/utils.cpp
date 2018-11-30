@@ -90,4 +90,43 @@ std::string replaceFirstOccurrence(std::string input,
         return input;
     return input.replace(pos, toReplace.length(), replaceWith);
 }
+
+std::string camelCaseToSeparated(const std::string& camelCase,
+                                 const char separator)
+{
+    if (camelCase.empty())
+        return camelCase;
+
+    std::string str(1, tolower(camelCase[0]));
+    for (auto it = camelCase.begin() + 1; it != camelCase.end(); ++it)
+    {
+        if (isupper(*it) && *(it - 1) != '-' && islower(*(it - 1)))
+            str += separator;
+        str += *it;
+    }
+
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
+
+std::string separatedToCamelCase(const std::string& separated,
+                                 const char separator)
+{
+    std::string camel = separated;
+
+    for (size_t x = 0; x < camel.length(); x++)
+    {
+        if (camel[x] == separator)
+        {
+            std::string tempString = camel.substr(x + 1, 1);
+
+            transform(tempString.begin(), tempString.end(), tempString.begin(),
+                      toupper);
+
+            camel.erase(x, 2);
+            camel.insert(x, tempString);
+        }
+    }
+    return camel;
+}
 }

@@ -117,7 +117,7 @@ public:
      * @param callback Callback for loader progress
      * @param properties Properties used for loading
      * @param index Index of the element, mainly used for material assignment
-     * @param properties Properties used for loading
+     * @param defaultMaterialId the default material to use
      * @return the model that has been created by the loader
      */
     virtual ModelDescriptorPtr importFromFile(

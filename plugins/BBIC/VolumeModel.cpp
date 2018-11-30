@@ -33,7 +33,8 @@ std::string to_string(const brayns::Vector3d& vec)
 brayns::PropertyMap createPropertyMap(const int32_t lods)
 {
     brayns::PropertyMap props;
-    props.setProperty({"lod", "Level of detail", lods, {0, lods}});
+    props.setProperty(
+        {"lod", lods, {0, lods}, {"Level of detail", "Level of detail"}});
     return props;
 }
 }

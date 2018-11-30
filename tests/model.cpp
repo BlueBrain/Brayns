@@ -42,11 +42,11 @@ BOOST_AUTO_TEST_CASE(set_properties)
     auto model = getScene().getModel(0);
 
     brayns::PropertyMap props;
-    props.setProperty({"bla", "bla property", 0});
+    props.setProperty({"bla", 0});
     model->setProperties(props);
 
     brayns::PropertyMap propsNew;
-    propsNew.setProperty({"bla", "bla property", 42});
+    propsNew.setProperty({"bla", 42});
     BOOST_CHECK((makeRequest<brayns::ModelProperties, bool>(
         SET_PROPERTIES, {model->getModelID(), propsNew})));
 

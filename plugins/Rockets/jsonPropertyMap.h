@@ -42,39 +42,12 @@ namespace
 {
 std::string camelCaseToSnakeCase(const std::string& camelCase)
 {
-    if (camelCase.empty())
-        return camelCase;
-
-    std::string str(1, tolower(camelCase[0]));
-    for (auto it = camelCase.begin() + 1; it != camelCase.end(); ++it)
-    {
-        if (isupper(*it) && *(it - 1) != '-' && islower(*(it - 1)))
-            str += "_";
-        str += *it;
-    }
-
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-    return str;
+    return camelCaseToSeparated(camelCase, '_');
 }
 
-std::string snakeCaseToCamelCase(const std::string& hyphenated)
+std::string snakeCaseToCamelCase(const std::string& snakeCase)
 {
-    std::string camel = hyphenated;
-
-    for (size_t x = 0; x < camel.length(); x++)
-    {
-        if (camel[x] == '_')
-        {
-            std::string tempString = camel.substr(x + 1, 1);
-
-            transform(tempString.begin(), tempString.end(), tempString.begin(),
-                      toupper);
-
-            camel.erase(x, 2);
-            camel.insert(x, tempString);
-        }
-    }
-    return camel;
+    return separatedToCamelCase(snakeCase, '_');
 }
 
 // Make a (movable) rapidjson string
@@ -161,8 +134,7 @@ void addDefaultValue(rapidjson::Document& document,
 // Create JSON schema for given property and add it to the given properties
 // parent.
 template <typename T>
-void _addPropertySchema(const PropertyMap::Property& prop,
-                        rapidjson::Value& properties,
+void _addPropertySchema(const Property& prop, rapidjson::Value& properties,
                         rapidjson::Document::AllocatorType& allocator)
 {
     using namespace rapidjson;
@@ -172,8 +144,8 @@ void _addPropertySchema(const PropertyMap::Property& prop,
     {
         auto value = prop.get<T>();
         jsonSchema = staticjson::export_json_schema(&value, &allocator);
-        jsonSchema.AddMember(StringRef("title"), StringRef(prop.label.c_str()),
-                             allocator);
+        jsonSchema.AddMember(StringRef("title"),
+                             StringRef(prop.metaData.label.c_str()), allocator);
         addDefaultValue(jsonSchema, allocator, value);
         jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
         const auto minValue = prop.min<T>();
@@ -203,8 +175,8 @@ void _addPropertySchema(const PropertyMap::Property& prop,
     {
         jsonSchema.SetObject();
         jsonSchema.AddMember(StringRef("type"), StringRef("string"), allocator);
-        jsonSchema.AddMember(StringRef("title"), StringRef(prop.label.c_str()),
-                             allocator);
+        jsonSchema.AddMember(StringRef("title"),
+                             StringRef(prop.metaData.label.c_str()), allocator);
         jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
 
         // Specialized enum code
@@ -225,15 +197,15 @@ void _addPropertySchema(const PropertyMap::Property& prop,
 // Create JSON schema for given bool property and add it to the given properties
 // parent.
 template <>
-void _addPropertySchema<bool>(const PropertyMap::Property& prop,
+void _addPropertySchema<bool>(const Property& prop,
                               rapidjson::Value& properties,
                               rapidjson::Document::AllocatorType& allocator)
 {
     using namespace rapidjson;
     auto value = prop.get<bool>();
     auto jsonSchema = staticjson::export_json_schema(&value, &allocator);
-    jsonSchema.AddMember(StringRef("title"), StringRef(prop.label.c_str()),
-                         allocator);
+    jsonSchema.AddMember(StringRef("title"),
+                         StringRef(prop.metaData.label.c_str()), allocator);
     addDefaultValue(jsonSchema, allocator, value);
     jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
@@ -244,7 +216,7 @@ void _addPropertySchema<bool>(const PropertyMap::Property& prop,
 // parent.
 template <>
 void _addPropertySchema<std::string>(
-    const PropertyMap::Property& prop, rapidjson::Value& properties,
+    const Property& prop, rapidjson::Value& properties,
     rapidjson::Document::AllocatorType& allocator)
 {
     using namespace rapidjson;
@@ -271,8 +243,8 @@ void _addPropertySchema<std::string>(
 
     addDefaultValue(jsonSchema, allocator, value);
     jsonSchema.AddMember(StringRef("readOnly"), prop.readOnly(), allocator);
-    jsonSchema.AddMember(StringRef("title"), StringRef(prop.label.c_str()),
-                         allocator);
+    jsonSchema.AddMember(StringRef("title"),
+                         StringRef(prop.metaData.label.c_str()), allocator);
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
                          jsonSchema, allocator);
 }
@@ -280,15 +252,14 @@ void _addPropertySchema<std::string>(
 // Create JSON schema for given array property and add it to the given
 // properties parent.
 template <typename T, int S>
-void _addArrayPropertySchema(const PropertyMap::Property& prop,
-                             rapidjson::Value& properties,
+void _addArrayPropertySchema(const Property& prop, rapidjson::Value& properties,
                              rapidjson::Document::AllocatorType& allocator)
 {
     using namespace rapidjson;
     auto value = prop.get<std::array<T, S>>();
     auto jsonSchema = staticjson::export_json_schema(&value, &allocator);
-    jsonSchema.AddMember(StringRef("title"), StringRef(prop.label.c_str()),
-                         allocator);
+    jsonSchema.AddMember(StringRef("title"),
+                         StringRef(prop.metaData.label.c_str()), allocator);
     addDefaultValue(jsonSchema, allocator, value);
 
     properties.AddMember(make_json_string(prop.name, allocator).Move(),
@@ -297,8 +268,7 @@ void _addArrayPropertySchema(const PropertyMap::Property& prop,
 
 // Serialize given array property to JSON.
 template <typename T>
-void _arrayPropertyToJson(rapidjson::Document& document,
-                          PropertyMap::Property& prop)
+void _arrayPropertyToJson(rapidjson::Document& document, Property& prop)
 {
     rapidjson::Value array(rapidjson::kArrayType);
     for (const auto& val : prop.get<T>())
@@ -327,31 +297,31 @@ void _addPropertyMapSchema(const PropertyMap& propertyMap,
     {
         switch (prop->type)
         {
-        case PropertyMap::Property::Type::Double:
+        case Property::Type::Double:
             _addPropertySchema<double>(*prop, properties, allocator);
             break;
-        case PropertyMap::Property::Type::Int:
+        case Property::Type::Int:
             _addPropertySchema<int32_t>(*prop, properties, allocator);
             break;
-        case PropertyMap::Property::Type::String:
+        case Property::Type::String:
             _addPropertySchema<std::string>(*prop, properties, allocator);
             break;
-        case PropertyMap::Property::Type::Bool:
+        case Property::Type::Bool:
             _addPropertySchema<bool>(*prop, properties, allocator);
             break;
-        case PropertyMap::Property::Type::Vec2d:
+        case Property::Type::Vec2d:
             _addArrayPropertySchema<double, 2>(*prop, properties, allocator);
             break;
-        case PropertyMap::Property::Type::Vec2i:
+        case Property::Type::Vec2i:
             _addArrayPropertySchema<int32_t, 2>(*prop, properties, allocator);
             break;
-        case PropertyMap::Property::Type::Vec3d:
+        case Property::Type::Vec3d:
             _addArrayPropertySchema<double, 3>(*prop, properties, allocator);
             break;
-        case PropertyMap::Property::Type::Vec3i:
+        case Property::Type::Vec3i:
             _addArrayPropertySchema<int32_t, 3>(*prop, properties, allocator);
             break;
-        case PropertyMap::Property::Type::Vec4d:
+        case Property::Type::Vec4d:
             _addArrayPropertySchema<double, 4>(*prop, properties, allocator);
             break;
         }
@@ -545,7 +515,7 @@ template <>
 inline std::string to_json(const brayns::PropertyMap& obj)
 {
     using namespace rapidjson;
-    using brayns::PropertyMap;
+    using brayns::Property;
     Document json(kObjectType);
     auto& allocator = json.GetAllocator();
 
@@ -553,12 +523,12 @@ inline std::string to_json(const brayns::PropertyMap& obj)
     {
         switch (prop->type)
         {
-        case PropertyMap::Property::Type::Double:
+        case Property::Type::Double:
             json.AddMember(
                 brayns::make_json_string(prop->name, allocator).Move(),
                 prop->get<double>(), allocator);
             break;
-        case PropertyMap::Property::Type::Int:
+        case Property::Type::Int:
             if (prop->enums.empty())
             {
                 json.AddMember(
@@ -574,31 +544,31 @@ inline std::string to_json(const brayns::PropertyMap& obj)
                     allocator);
             }
             break;
-        case PropertyMap::Property::Type::String:
+        case Property::Type::String:
             json.AddMember(
                 brayns::make_json_string(prop->name, allocator).Move(),
                 brayns::make_value_string(prop->get<std::string>(), allocator)
                     .Move(),
                 allocator);
             break;
-        case PropertyMap::Property::Type::Bool:
+        case Property::Type::Bool:
             json.AddMember(
                 brayns::make_json_string(prop->name, allocator).Move(),
                 prop->get<bool>(), allocator);
             break;
-        case PropertyMap::Property::Type::Vec2d:
+        case Property::Type::Vec2d:
             brayns::_arrayPropertyToJson<std::array<double, 2>>(json, *prop);
             break;
-        case PropertyMap::Property::Type::Vec2i:
+        case Property::Type::Vec2i:
             brayns::_arrayPropertyToJson<std::array<int32_t, 2>>(json, *prop);
             break;
-        case PropertyMap::Property::Type::Vec3d:
+        case Property::Type::Vec3d:
             brayns::_arrayPropertyToJson<std::array<double, 3>>(json, *prop);
             break;
-        case PropertyMap::Property::Type::Vec3i:
+        case Property::Type::Vec3i:
             brayns::_arrayPropertyToJson<std::array<int32_t, 3>>(json, *prop);
             break;
-        case PropertyMap::Property::Type::Vec4d:
+        case Property::Type::Vec4d:
             brayns::_arrayPropertyToJson<std::array<double, 4>>(json, *prop);
             break;
         }
@@ -751,7 +721,7 @@ template <>
 inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
 {
     using namespace rapidjson;
-    using brayns::PropertyMap;
+    using brayns::Property;
     Document document;
     document.Parse(json.c_str());
 
@@ -765,39 +735,39 @@ inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
             return false;
         switch (obj.getPropertyType(propName))
         {
-        case PropertyMap::Property::Type::Double:
+        case Property::Type::Double:
             if (!parseSetValue<double>(m.value, obj, propName))
                 return false;
             break;
-        case PropertyMap::Property::Type::Int:
+        case Property::Type::Int:
             if (!parseSetEnumOrInt(m.value, obj, propName))
                 return false;
             break;
-        case PropertyMap::Property::Type::String:
+        case Property::Type::String:
             if (!parseSetValue<std::string>(m.value, obj, propName))
                 return false;
             break;
-        case PropertyMap::Property::Type::Bool:
+        case Property::Type::Bool:
             if (!parseSetValue<bool>(m.value, obj, propName))
                 return false;
             break;
-        case PropertyMap::Property::Type::Vec2d:
+        case Property::Type::Vec2d:
             if (!parseSetArray<double, 2>(m.value, obj, propName))
                 return false;
             break;
-        case PropertyMap::Property::Type::Vec2i:
+        case Property::Type::Vec2i:
             if (!parseSetArray<int32_t, 2>(m.value, obj, propName))
                 return false;
             break;
-        case PropertyMap::Property::Type::Vec3d:
+        case Property::Type::Vec3d:
             if (!parseSetArray<double, 3>(m.value, obj, propName))
                 return false;
             break;
-        case PropertyMap::Property::Type::Vec3i:
+        case Property::Type::Vec3i:
             if (!parseSetArray<int32_t, 3>(m.value, obj, propName))
                 return false;
             break;
-        case PropertyMap::Property::Type::Vec4d:
+        case Property::Type::Vec4d:
             if (!parseSetArray<double, 4>(m.value, obj, propName))
                 return false;
             break;
@@ -809,11 +779,11 @@ inline bool from_json(brayns::PropertyMap& obj, const std::string& json)
 brayns::PropertyMap jsonToPropertyMap(const std::string& json)
 {
     using namespace rapidjson;
-    using brayns::PropertyMap;
+    using brayns::Property;
     Document document;
     document.Parse(json.c_str());
 
-    PropertyMap map;
+    brayns::PropertyMap map;
 
     if (!document.IsObject())
         return map;
@@ -825,7 +795,7 @@ brayns::PropertyMap jsonToPropertyMap(const std::string& json)
         const auto trySetProperty = [&](auto val) {
             if (get_property(m.value, val))
             {
-                map.setProperty({propName, propName, val});
+                map.setProperty({propName, val, {propName}});
                 return true;
             }
             return false;
@@ -834,7 +804,7 @@ brayns::PropertyMap jsonToPropertyMap(const std::string& json)
         const auto trySetArray = [&](auto val) {
             if (get_array(m.value, val))
             {
-                map.setProperty({propName, propName, val});
+                map.setProperty({propName, val, {propName}});
                 return true;
             }
             return false;

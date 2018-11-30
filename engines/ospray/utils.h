@@ -30,6 +30,7 @@ namespace brayns
  * the given ospray object.
  */
 void setOSPRayProperties(const PropertyObject& object, OSPObject ospObject);
+void setOSPRayProperties(const PropertyMap& object, OSPObject ospObject);
 
 /** Convert a brayns::Transformation to an ospcommon::affine3f. */
 ospcommon::affine3f transformationToAffine3f(

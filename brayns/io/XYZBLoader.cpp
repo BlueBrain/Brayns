@@ -123,8 +123,8 @@ ModelDescriptorPtr XYZBLoader::importFromBlob(
         std::make_shared<ModelDescriptor>(std::move(model), blob.name);
     modelDescriptor->setTransformation(transformation);
 
-    PropertyMap::Property radiusProperty("radius", "Point size", meanRadius,
-                                         {0., meanRadius * 2.});
+    Property radiusProperty("radius", meanRadius, {0., meanRadius * 2.},
+                            {"Point size"});
     radiusProperty.onModified([
         materialId, modelDesc = std::weak_ptr<ModelDescriptor>(modelDescriptor)
     ](const auto& property) {

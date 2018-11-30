@@ -30,10 +30,10 @@ BOOST_AUTO_TEST_CASE(test_ModelParams)
 
     {
         brayns::PropertyMap properties;
-        properties.setProperty({"string", "string", std::string("string")});
-        properties.setProperty({"int", "int", 42});
+        properties.setProperty({"string", std::string("string")});
+        properties.setProperty({"int", 42});
         properties.setProperty(
-            {"enum", "enum", std::string("b"), {"a", "b", "c", "d"}});
+            {"enum", std::string("b"), {"a", "b", "c", "d"}, {}});
         paramsOrig.setLoaderProperties(properties);
     }
 
