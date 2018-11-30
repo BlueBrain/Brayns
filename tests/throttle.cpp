@@ -113,25 +113,23 @@ BOOST_AUTO_TEST_CASE(throttle_spam_limit)
 {
     brayns::Throttle throttle;
     size_t numCalls{0};
+    size_t numSpam{0};
     std::atomic_bool done{false};
 
     const int64_t waitTime = 10;
-    brayns::Timer timer;
-    timer.start();
     while (!done)
     {
         throttle(
             [&] {
                 ++numCalls;
-                if (timer.elapsed() >= 0.1)
+                if (numCalls == 10)
                     done = true;
             },
             waitTime);
+        ++numSpam;
     }
 
-    // throttle time of 10ms within a 100ms time window should yield 10 calls
-    BOOST_CHECK_MESSAGE(numCalls >= 10 && numCalls <= 12,
-                        std::to_string(numCalls));
+    BOOST_CHECK_LT(numCalls, numSpam);
 }
 
 BOOST_AUTO_TEST_CASE(throttle_spam_check_delayed_call)
