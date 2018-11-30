@@ -57,7 +57,7 @@ public:
             [&] { ++numCalls; });
 
         brayns::PropertyMap input;
-        input.setProperty({"value", "my nice int value", 0});
+        input.setProperty({"value", 0});
         actions->registerNotification(
             brayns::RpcParameterDescription{"notify-param",
                                             "A notification with property map",
@@ -69,7 +69,7 @@ public:
             });
 
         brayns::PropertyMap output;
-        output.setProperty({"result", "a good result", true});
+        output.setProperty({"result", true});
         actions->registerRequest(
             brayns::RpcDescription{"request",
                                    "A request returning a property map"},
@@ -108,7 +108,10 @@ public:
 
         // test properties from custom renderer
         brayns::PropertyMap props;
-        props.setProperty({"awesome", "Best property", int32_t(42), {0, 50}});
+        props.setProperty({"awesome",
+                           int32_t(42),
+                           {0, 50},
+                           {"Best property", "Because it's the best"}});
         api->getRenderer().setProperties("myrenderer", props);
     }
 

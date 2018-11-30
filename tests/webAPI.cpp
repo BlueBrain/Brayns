@@ -30,7 +30,7 @@ BOOST_GLOBAL_FIXTURE(ClientServer);
 BOOST_AUTO_TEST_CASE(change_fov)
 {
     brayns::PropertyMap cameraParams;
-    cameraParams.setProperty({"fovy", "Field of view", 10., {.1, 360.}});
+    cameraParams.setProperty({"fovy", 10., {.1, 360.}});
     BOOST_CHECK((makeRequest<brayns::PropertyMap, bool>("set-camera-params",
                                                         cameraParams)));
 }

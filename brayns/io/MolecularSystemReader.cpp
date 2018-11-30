@@ -35,11 +35,12 @@
 
 namespace
 {
-using Property = brayns::PropertyMap::Property;
-const Property PROP_COLORSCHEME = {"colorScheme", "Color scheme",
+using Property = brayns::Property;
+const Property PROP_COLORSCHEME = {"colorScheme",
                                    brayns::enumToString(
                                        brayns::ColorScheme::none),
-                                   brayns::enumNames<brayns::ColorScheme>()};
+                                   brayns::enumNames<brayns::ColorScheme>(),
+                                   {"Color scheme"}};
 
 const auto LOADER_NAME = "molecular-system";
 }

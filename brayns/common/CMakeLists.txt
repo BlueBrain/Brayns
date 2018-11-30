@@ -92,8 +92,9 @@ set(BRAYNSCOMMON_HEADERS
 set(BRAYNSCOMMON_INCLUDE_NAME brayns/common)
 set(BRAYNSCOMMON_LINK_LIBRARIES
   PUBLIC vmmlib Async++
-  PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-           ${FREEIMAGE_LIBRARIES}
+  PRIVATE braynsParameters ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+    ${FREEIMAGE_LIBRARIES}
 )
 
 common_library(braynsCommon)

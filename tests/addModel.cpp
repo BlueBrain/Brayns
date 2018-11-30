@@ -151,9 +151,8 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_valid)
 {
     const auto numModels = getScene().getNumModels();
     brayns::PropertyMap properties;
-    properties.setProperty(
-        {"geometryQuality", "Geometry quality", std::string("low")});
-    properties.setProperty({"unused", "Unused", 42});
+    properties.setProperty({"geometryQuality", std::string("low")});
+    properties.setProperty({"unused", 42});
     brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH,
                                properties};
 
@@ -168,8 +167,7 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_valid)
 BOOST_AUTO_TEST_CASE(mesh_loader_properties_invalid)
 {
     brayns::PropertyMap properties;
-    properties.setProperty(
-        {"geometryQuality", "Geometry quality", std::string("INVALID")});
+    properties.setProperty({"geometryQuality", std::string("INVALID")});
     brayns::ModelParams params{"bennu", BRAYNS_TESTDATA_MODEL_BENNU_PATH,
                                properties};
 
@@ -188,11 +186,12 @@ BOOST_AUTO_TEST_CASE(mesh_loader_properties_invalid)
 BOOST_AUTO_TEST_CASE(protein_loader)
 {
     brayns::PropertyMap properties;
-    properties.setProperty({"radiusMultiplier", "Radius multiplier", 2.5});
+    properties.setProperty({"radiusMultiplier", 2.5});
     properties.setProperty(
-        {"colorScheme", "Color scheme",
+        {"colorScheme",
          brayns::enumToString(brayns::ColorScheme::protein_chains),
-         brayns::enumNames<brayns::ColorScheme>()});
+         brayns::enumNames<brayns::ColorScheme>(),
+         {}});
 
     const auto numModels = getScene().getNumModels();
 

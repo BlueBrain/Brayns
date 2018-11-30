@@ -42,41 +42,50 @@ using namespace brayns;
 
 namespace
 {
-using Property = brayns::PropertyMap::Property;
-const Property PROP_DENSITY = {"density", "Density", 100.0};
-const Property PROP_RANDOM_SEED = {"randomSeed", "Random seed", 0};
-const Property PROP_REPORT = {"report", "Report", std::string("")};
-const Property PROP_TARGETS = {"targets", "Targets", std::string("")};
+using Property = brayns::Property;
+const Property PROP_DENSITY = {"density", 100.0, {"Density"}};
+const Property PROP_RANDOM_SEED = {"randomSeed", 0, {"Random seed"}};
+const Property PROP_REPORT = {"report", std::string(""), {"Report"}};
+const Property PROP_TARGETS = {"targets", std::string(""), {"Targets"}};
 const Property PROP_MESH_FILENAME_PATTERN = {"meshFilenamePattern",
-                                             "Mesh filename pattern",
-                                             std::string("")};
-const Property PROP_MESH_FOLDER = {"meshFolder", "Mesh folder",
-                                   std::string("")};
+                                             std::string(""),
+                                             {"Mesh filename pattern"}};
+const Property PROP_MESH_FOLDER = {"meshFolder",
+                                   std::string(""),
+                                   {"Mesh folder"}};
 const Property PROP_BOUNDING_BOX_P0 = {"boundingBoxP0",
-                                       "First bounding box boundary point",
-                                       std::array<double, 3>{{0, 0, 0}}};
+                                       std::array<double, 3>{{0, 0, 0}},
+                                       {"First bounding box boundary point"}};
 const Property PROP_BOUNDING_BOX_P1 = {"boundingBoxP1",
-                                       "Second bounding box boundary point",
-                                       std::array<double, 3>{{0, 0, 0}}};
+                                       std::array<double, 3>{{0, 0, 0}},
+                                       {"Second bounding box boundary point"}};
 const Property PROP_USE_SIMULATION_MODEL = {"useSimulationModel",
-                                            "Use simulation model", false};
-const Property PROP_TRANSFORM_MESHES = {"transformMeshes", "Transform meshes",
-                                        false};
-const Property PROP_COLOR_SCHEME = {"colorScheme", "Color scheme",
+                                            false,
+                                            {"Use simulation model"}};
+const Property PROP_TRANSFORM_MESHES = {"transformMeshes",
+                                        false,
+                                        {"Transform meshes"}};
+const Property PROP_COLOR_SCHEME = {"colorScheme",
                                     brayns::enumToString(ColorScheme::none),
-                                    brayns::enumNames<ColorScheme>()};
+                                    brayns::enumNames<ColorScheme>(),
+                                    {"Color scheme"}};
 const Property PROP_START_SIMULATION_TIME = {"startSimulationTime",
-                                             "Start simulation time", 0.0};
+                                             0.0,
+                                             {"Start simulation time"}};
 const Property PROP_END_SIMULATION_TIME = {"endSimulationTime",
-                                           "End simulation time", 0.0};
-const Property PROP_SIMULATION_STEP = {"simulationStep", "Simulation step",
-                                       0.0};
-const Property PROP_SYNCHRONOUS_MODE = {"synchronousMode", "Synchronous mode",
-                                        false};
-const Property PROP_GEOMETRY_QUALITY = {"geometryQuality", "Geometry quality",
+                                           0.0,
+                                           {"End simulation time"}};
+const Property PROP_SIMULATION_STEP = {"simulationStep",
+                                       0.0,
+                                       {"Simulation step"}};
+const Property PROP_SYNCHRONOUS_MODE = {"synchronousMode",
+                                        false,
+                                        {"Synchronous mode"}};
+const Property PROP_GEOMETRY_QUALITY = {"geometryQuality",
                                         brayns::enumToString(
                                             GeometryQuality::high),
-                                        brayns::enumNames<GeometryQuality>()};
+                                        brayns::enumNames<GeometryQuality>(),
+                                       {"Geometry quality"}};
 constexpr auto LOADER_NAME = "circuit";
 const strings LOADER_EXTENSIONS{"BlueConfig", "BlueConfig3", "CircuitConfig",
                                 ".json", "circuit"};
