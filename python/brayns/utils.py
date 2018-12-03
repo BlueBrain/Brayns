@@ -172,6 +172,7 @@ def add_progress_cancel_widget(func):  # pragma: no cover
     :return: the decorator
     :rtype: decorator
     """
+    @wraps(func)
     def _wrapper(self, *args, **kwargs):  # pylint: disable=too-many-locals
         result = func(self, *args, **kwargs)
 
@@ -216,10 +217,10 @@ def build_schema_requests_from_registry(url):
     registry = obtain_registry(url)
     endpoints = {x.replace(SCHEMA_ENDPOINT, '') for x in registry}
 
-    requests = list()
+    request_list = list()
     for endpoint in endpoints:
-        requests.append(rockets.Request('schema', {'endpoint': endpoint}))
-    return registry, requests
+        request_list.append(rockets.Request('schema', {'endpoint': endpoint}))
+    return registry, request_list
 
 
 def convert_snapshot_response_to_PIL(response):
