@@ -395,6 +395,16 @@ public:
 
         // Create materials
         model->createMissingMaterials();
+        // Assigning some colors to not get all white
+        if (_properties.colorScheme != ColorScheme::none)
+        {
+            if (_properties.colorScheme == ColorScheme::neuron_by_segment_type)
+                // This mode already handles sections types in a hacky way. A
+                // refactoring is needed
+                model->setMaterialsColorMap(MaterialsColorMap::none);
+            else
+                model->setMaterialsColorMap(MaterialsColorMap::gradient);
+        }
 
         // Compute circuit center
         Boxf center;

@@ -267,7 +267,7 @@ enum class MaterialsColorMap
     random,         // Random materials including transparency, reflection,
                     // and light emission
     shades_of_grey, // 255 shades of grey
-    gradient,       // Gradient from red to yellow
+    gradient,       // Gradient from blue to yellow through green
     pastel          // Random pastel colors
 };
 
