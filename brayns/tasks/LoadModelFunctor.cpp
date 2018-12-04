@@ -27,7 +27,7 @@
 #include <brayns/common/renderer/FrameBuffer.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/common/utils/Utils.h>
+#include <brayns/common/utils/utils.h>
 
 #include <brayns/parameters/ParametersManager.h>
 

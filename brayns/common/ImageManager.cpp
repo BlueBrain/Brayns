@@ -21,7 +21,7 @@
 #include "ImageManager.h"
 #include <brayns/common/log.h>
 #include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/utils/ImageUtils.h>
+#include <brayns/common/utils/imageUtils.h>
 
 namespace brayns
 {

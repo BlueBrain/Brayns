@@ -21,7 +21,7 @@
 #pragma once
 
 #include "brayns/common/types.h"
-#include "brayns/common/utils/EnumUtils.h"
+#include "brayns/common/utils/enumUtils.h"
 #include "utils/SimulationRenderer.h"
 
 namespace brayns

@@ -31,7 +31,7 @@
     friend void staticjson::init(type*, staticjson::ObjectHandler*);
 
 #include <brayns/common/mathTypes.h>
-#include <brayns/common/utils/EnumUtils.h>
+#include <brayns/common/utils/enumUtils.h>
 
 #include <array>
 #include <cstdint>

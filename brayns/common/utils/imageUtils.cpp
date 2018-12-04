@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ImageUtils.h"
+#include "imageUtils.h"
 #include "base64/base64.h"
 
 #include <brayns/common/renderer/FrameBuffer.h>

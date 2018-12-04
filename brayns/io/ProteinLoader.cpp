@@ -26,7 +26,7 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
-#include <brayns/common/utils/Utils.h>
+#include <brayns/common/utils/utils.h>
 
 #include <assert.h>
 #include <fstream>
