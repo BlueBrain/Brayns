@@ -23,7 +23,7 @@
 #include "jsonSerialization.h"
 
 #include <brayns/common/PropertyMap.h>
-#include <brayns/common/utils/Utils.h>
+#include <brayns/common/utils/utils.h>
 
 namespace
 {

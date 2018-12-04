@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Utils.h"
+#include "utils.h"
 
 #include <brayns/common/log.h>
 

@@ -30,8 +30,8 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/transferFunction/TransferFunction.h>
-#include <brayns/common/utils/Utils.h>
 #include <brayns/common/utils/base64/base64.h>
+#include <brayns/common/utils/utils.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
 #include <brayns/parameters/GeometryParameters.h>
@@ -362,8 +362,7 @@ inline void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
     h->add_property("mesh_filename_pattern", &c->meshFilenamePattern,
                     Flags::Optional);
     h->add_property("mesh_folder", &c->meshFolder, Flags::Optional);
-    h->add_property("transform_meshes", &c->transformMeshes,
-                    Flags::Optional);
+    h->add_property("transform_meshes", &c->transformMeshes, Flags::Optional);
     h->add_property("use_simulation_model", &c->useSimulationModel,
                     Flags::Optional);
     h->add_property("targets", &c->targets, Flags::Optional);

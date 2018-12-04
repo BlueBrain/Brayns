@@ -23,8 +23,8 @@
 #include <brayns/common/log.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/common/utils/EnumUtils.h>
-#include <brayns/common/utils/Utils.h>
+#include <brayns/common/utils/enumUtils.h>
+#include <brayns/common/utils/utils.h>
 #if BRAYNS_USE_ASSIMP
 #include <brayns/io/MeshLoader.h>
 #endif

@@ -25,7 +25,7 @@
 #include <brayns/common/material/Material.h>
 #include <brayns/common/scene/ClipPlane.h>
 #include <brayns/common/scene/Model.h>
-#include <brayns/common/utils/Utils.h>
+#include <brayns/common/utils/utils.h>
 #include <brayns/io/simulation/CADiffusionSimulationHandler.h>
 #include <brayns/parameters/ParametersManager.h>
 

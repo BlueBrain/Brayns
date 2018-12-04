@@ -21,8 +21,8 @@
 #include "ImageGenerator.h"
 
 #include <brayns/common/renderer/FrameBuffer.h>
-#include <brayns/common/utils/ImageUtils.h>
 #include <brayns/common/utils/base64/base64.h>
+#include <brayns/common/utils/imageUtils.h>
 #include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns

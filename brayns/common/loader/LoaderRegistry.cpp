@@ -24,7 +24,7 @@
 #include <brayns/io/ArchiveLoader.h>
 #endif
 
-#include <brayns/common/utils/Utils.h>
+#include <brayns/common/utils/utils.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range_core.hpp>
