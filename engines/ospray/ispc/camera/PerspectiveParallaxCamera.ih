@@ -23,7 +23,7 @@
 
 #include <ospray/SDK/camera/Camera.ih>
 
-struct StereoCamera
+struct PerspectiveParallaxCamera
 {
     Camera super;
 
@@ -34,6 +34,5 @@ struct StereoCamera
     float distanceToPlane;
     float imgPlane_size_y;
     float imgPlane_size_x;
-    float interpupillaryDistance;
-    bool  side_by_side;
+    float idpOffset;
 };

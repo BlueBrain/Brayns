@@ -286,7 +286,7 @@ void OSPRayEngine::_createCameras()
             properties.setProperty({"height", 1., {"Height"}});
             properties.setProperty(aspect);
         }
-        if (camera == "stereoFull")
+        if (camera == "perspectiveParallax")
         {
             properties.setProperty(fovy);
             properties.setProperty(aspect);

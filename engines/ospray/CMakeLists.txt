@@ -14,6 +14,7 @@ set(BRAYNSOSPRAYENGINE_ISPC_SOURCES
   ispc/camera/utils.ispc
   ispc/camera/OrthographicCamera.ispc
   ispc/camera/PerspectiveCamera.ispc
+  ispc/camera/PerspectiveParallaxCamera.ispc
   ispc/geometry/Cones.ispc
   ispc/geometry/Cylinders.ispc
   ispc/geometry/SDFGeometries.ispc
@@ -37,6 +38,7 @@ set(BRAYNSOSPRAYENGINE_SOURCES
   utils.cpp
   ispc/camera/OrthographicCamera.cpp
   ispc/camera/PerspectiveCamera.cpp
+  ispc/camera/PerspectiveParallaxCamera.cpp
   ispc/geometry/Cones.cpp
   ispc/geometry/Cylinders.cpp
   ispc/geometry/SDFGeometries.cpp
@@ -59,6 +61,7 @@ set(BRAYNSOSPRAYENGINE_HEADERS
   OSPRayVolume.h
   ispc/camera/OrthographicCamera.h
   ispc/camera/PerspectiveCamera.h
+  ispc/camera/PerspectiveParallaxCamera.h
   ispc/geometry/Cones.h
   ispc/geometry/Cylinders.h
   ispc/geometry/SDFGeometries.h

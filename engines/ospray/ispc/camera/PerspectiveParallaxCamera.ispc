@@ -19,41 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "StereoCamera.ih"
+#include "PerspectiveParallaxCamera.ih"
 #include "math/LinearSpace.ih"
 #include "math/math.ih"
 #include "math/sampling.ih"
 
-void StereoCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
-                          const varying CameraSample &sample)
+void PerspectiveParallaxCamera_initRay(uniform Camera* uniform _self,
+                                       varying Ray& ray,
+                                       const varying CameraSample& sample)
 {
-    uniform StereoCamera *uniform self = (uniform StereoCamera * uniform)_self;
+    uniform PerspectiveParallaxCamera* uniform self =
+        (uniform PerspectiveParallaxCamera * uniform)_self;
 
     vec2f screen = sample.screen;
     screen = Camera_subRegion(_self, screen);
     vec3f pixelPos;
     vec3f org = make_vec3f(0.f);
-    if (self->side_by_side)
-    {
-        if (screen.x < 0.5f)
-        {
-            pixelPos.x = (2.f * screen.x - 0.5f) * self->imgPlane_size_x;
-            org.x = -self->interpupillaryDistance * 0.5f;
-        }
-        else
-        {
-            pixelPos.x = (2.f * screen.x - 1.5f) * self->imgPlane_size_x;
-            org.x = self->interpupillaryDistance * 0.5f;
-        }
-    }
-    else
-    {
-        pixelPos.x = (screen.x - 0.5f) * self->imgPlane_size_x;
-        org.x = self->interpupillaryDistance * 0.5f;
-    }
 
+    pixelPos.x = (screen.x - 0.5f) * self->imgPlane_size_x;
     pixelPos.y = (screen.y - 0.5f) * self->imgPlane_size_y;
     pixelPos.z = -self->distanceToPlane;
+    org.x = self->idpOffset;
 
     vec3f dir = normalize(pixelPos - org);
 
@@ -71,23 +57,24 @@ void StereoCamera_initRay(uniform Camera *uniform _self, varying Ray &ray,
     pointer to the c-class version - and return both class pointer and
     pointer to internal data back via the supplied reference
     parameters */
-export void *uniform StereoCamera_create(void *uniform cppE)
+export void* uniform PerspectiveParallaxCamera_create(void* uniform cppE)
 {
-    uniform StereoCamera *uniform self = uniform new uniform StereoCamera;
+    uniform PerspectiveParallaxCamera* uniform self =
+        uniform new uniform PerspectiveParallaxCamera;
     self->super.cppEquivalent = cppE;
-    self->super.initRay = StereoCamera_initRay;
+    self->super.initRay = PerspectiveParallaxCamera_initRay;
     self->super.doesDOF = false;
     return self;
 }
 
-export void StereoCamera_set(
-    void *uniform _self, const uniform vec3f &org, const uniform vec3f &dir_cam,
-    const uniform vec3f &dir_du, const uniform vec3f &dir_dv,
+export void PerspectiveParallaxCamera_set(
+    void* uniform _self, const uniform vec3f& org, const uniform vec3f& dir_cam,
+    const uniform vec3f& dir_du, const uniform vec3f& dir_dv,
     const uniform float distanceToPlane, const uniform float imgPlane_size_y,
-    const uniform float imgPlane_size_x,
-    const uniform float interpupillaryDistance, const uniform bool side_by_side)
+    const uniform float imgPlane_size_x, const uniform float idpOffset)
 {
-    uniform StereoCamera *uniform self = (uniform StereoCamera * uniform)_self;
+    uniform PerspectiveParallaxCamera* uniform self =
+        (uniform PerspectiveParallaxCamera * uniform)_self;
     self->org = org;
     self->dir_cam = dir_cam;
     self->dir_du = dir_du;
@@ -95,6 +82,5 @@ export void StereoCamera_set(
     self->distanceToPlane = distanceToPlane;
     self->imgPlane_size_y = imgPlane_size_y;
     self->imgPlane_size_x = imgPlane_size_x;
-    self->interpupillaryDistance = interpupillaryDistance;
-    self->side_by_side = side_by_side;
+    self->idpOffset = idpOffset;
 }
