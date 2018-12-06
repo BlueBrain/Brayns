@@ -4,8 +4,6 @@
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
- * Based on OSPRay implementation
- *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
  * by the Free Software Foundation.
@@ -20,30 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#ifndef SIMULATIONRENDERER_H
+#define SIMULATIONRENDERER_H
 
-#include "utils/SimulationRenderer.h"
+#include <engines/ospray/ispc/render/utils/AbstractRenderer.h>
+
+// ospray
+#include <ospray/SDK/common/Material.h>
+#include <ospray/SDK/render/Renderer.h>
+
+// system
+#include <vector>
 
 namespace brayns
 {
 /**
- * @brief The BasicSimulationRenderer class can perform fast transparency and
- * mapping of simulation data on the geometry
+ * The SimulationRenderer class implements a parent renderer for all Brayns
+ * renderers that need to render simulation data
  */
-class BasicSimulationRenderer : public SimulationRenderer
+class SimulationRenderer : public AbstractRenderer
 {
 public:
-    BasicSimulationRenderer();
+    void commit() override;
 
-    /**
-       Returns the class name as a string
-       @return string containing the full name of the class
-    */
-    std::string toString() const final
-    {
-        return "brayns::BasicSimulationRenderer";
-    }
-    void commit() final;
+protected:
+    ospray::Ref<ospray::Data> _simulationData;
+    ospray::uint64 _simulationDataSize;
+
+    float _alphaCorrection;
 };
+}
 
-} // ::brayns
+#endif // SIMULATIONRENDERER_H

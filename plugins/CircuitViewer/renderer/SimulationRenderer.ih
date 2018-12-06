@@ -19,9 +19,9 @@
  */
 
 // Brayns
-#include "AbstractRenderer.ih"
+#include <engines/ospray/ispc/render/utils/AbstractRenderer.ih>
 
-#include "../SimulationMaterial.ih"
+#include "SimulationMaterial.ih"
 
 #include <ospray/SDK/transferFunction/TransferFunction.ih>
 
@@ -45,8 +45,7 @@ inline vec4f getSimulationColor(const uniform SimulationRenderer& renderer,
     if (!renderer.simulationData)
         return undefined;
 
-    const SimulationMaterial* material =
-        (const SimulationMaterial*)dg.material;
+    const SimulationMaterial* material = (const SimulationMaterial*)dg.material;
     if (!material || !material->getSimulationOffset)
         return undefined;
 

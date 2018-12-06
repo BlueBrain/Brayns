@@ -21,7 +21,10 @@
 #include "CircuitViewer.h"
 #include "io/CircuitLoader.h"
 #include "io/MorphologyLoader.h"
+#include "renderer/AdvancedSimulationRenderer.h" // enum Shading
 
+#include <brayns/common/engine/Engine.h>
+#include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>
@@ -29,6 +32,46 @@
 
 namespace brayns
 {
+namespace
+{
+void _addAdvancedSimulationRenderer(Engine& engine)
+{
+    PropertyMap properties;
+    properties.setProperty(
+        {"aoDistance", 10000., {"Ambient occlusion distance"}});
+    properties.setProperty(
+        {"aoWeight", 0., {0., 1.}, {"Ambient occlusion weight"}});
+    properties.setProperty({"detectionDistance", 15., {"Detection distance"}});
+    properties.setProperty(
+        {"shading",
+         int32_t(AdvancedSimulationRenderer::Shading::none),
+         brayns::enumNames<AdvancedSimulationRenderer::Shading>(),
+         {"Shading"}});
+    properties.setProperty({"shadows", 0., {0., 1.}, {"Shadow intensity"}});
+    properties.setProperty({"softShadows", 0., {0., 1.}, {"Shadow softness"}});
+    properties.setProperty({"samplingThreshold",
+                            0.001,
+                            {0.001, 1.},
+                            {"Threshold under which sampling is ignored"}});
+    properties.setProperty({"volumeSpecularExponent",
+                            20.,
+                            {1., 100.},
+                            {"Volume specular exponent"}});
+    properties.setProperty({"volumeAlphaCorrection",
+                            0.5,
+                            {0.001, 1.},
+                            {"Volume alpha correction"}});
+    engine.addRenderer("advanced_simulation", properties);
+}
+void _addBasicSimulationRenderer(Engine& engine)
+{
+    PropertyMap properties;
+    properties.setProperty(
+        {"alphaCorrection", 0.5, {0.001, 1.}, {"Alpha correction"}});
+    engine.addRenderer("basic_simulation", properties);
+}
+}
+
 void CircuitViewer::init(PluginAPI* api)
 {
     auto& scene = api->getScene();
@@ -38,6 +81,9 @@ void CircuitViewer::init(PluginAPI* api)
 
     registry.registerLoader(std::make_unique<CircuitLoader>(scene));
     registry.registerLoader(std::make_unique<MorphologyLoader>(scene));
+
+    _addAdvancedSimulationRenderer(api->getEngine());
+    _addBasicSimulationRenderer(api->getEngine());
 }
 }
 

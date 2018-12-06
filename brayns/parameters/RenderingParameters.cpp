@@ -34,10 +34,6 @@ const std::string PARAM_RENDERER = "renderer";
 const std::string PARAM_SPP = "samples-per-pixel";
 const std::string PARAM_VARIANCE_THRESHOLD = "variance-threshold";
 
-const std::array<std::string, 8> RENDERER_NAMES = {
-    {"basic", "proximity", "basic_simulation", "advanced_simulation",
-     "raycast_Ng", "raycast_Ns", "scivis", "pathtracing"}};
-
 const std::array<std::string, 3> CAMERA_TYPE_NAMES = {
     {"perspective", "orthographic", "panoramic"}};
 }
@@ -65,13 +61,7 @@ RenderingParameters::RenderingParameters()
         PARAM_MAX_ACCUMULATION_FRAMES.c_str(), po::value<size_t>(),
         "Maximum number of accumulation frames");
 
-    initializeDefaultRenderers();
     initializeDefaultCameras();
-}
-
-void RenderingParameters::initializeDefaultRenderers()
-{
-    _renderers = {RENDERER_NAMES.begin(), RENDERER_NAMES.end()};
 }
 
 void RenderingParameters::initializeDefaultCameras()

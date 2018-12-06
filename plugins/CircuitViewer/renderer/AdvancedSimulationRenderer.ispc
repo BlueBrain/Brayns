@@ -21,7 +21,7 @@
  */
 
 // Brayns
-#include "utils/SimulationRenderer.ih"
+#include "SimulationRenderer.ih"
 
 struct AdvancedSimulationRenderer
 {
@@ -899,8 +899,8 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
             DifferentialGeometry dg;
             postIntersect(baseRenderer.model, dg, ray,
                           DG_NG | DG_NS | DG_NORMALIZE | DG_FACEFORWARD |
-                          DG_TANGENTS | DG_MATERIALID | DG_COLOR |
-                          DG_TEXCOORD);
+                              DG_TANGENTS | DG_MATERIALID | DG_COLOR |
+                              DG_TEXCOORD);
 
             // Initialize geometry shading attributes
             setGeometryShadingAttributes(self, sample, ray, dg, attributes);

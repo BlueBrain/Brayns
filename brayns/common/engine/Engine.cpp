@@ -110,4 +110,10 @@ void Engine::resetFrameBuffers()
     for (auto frameBuffer : _frameBuffers)
         frameBuffer->resetModified();
 }
+
+void Engine::addRenderer(const std::string& name, const PropertyMap& properties)
+{
+    _parametersManager.getRenderingParameters().addRenderer(name);
+    getRenderer().setProperties(name, properties);
+}
 }

@@ -21,8 +21,8 @@
 #include "SimulationMaterial.h"
 #include "SimulationMaterial_ispc.h"
 
-#include "../geometry/Cones.h"
-#include "../geometry/SDFGeometries.h"
+#include <engines/ospray/ispc/geometry/Cones.h>
+#include <engines/ospray/ispc/geometry/SDFGeometries.h>
 
 #include <brayns/common/geometry/Cone.h>
 #include <brayns/common/geometry/Cylinder.h>

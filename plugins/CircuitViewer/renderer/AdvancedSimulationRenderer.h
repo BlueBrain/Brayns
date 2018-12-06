@@ -20,9 +20,9 @@
 
 #pragma once
 
+#include "SimulationRenderer.h"
 #include "brayns/common/types.h"
 #include "brayns/common/utils/enumUtils.h"
-#include "utils/SimulationRenderer.h"
 
 namespace brayns
 {

@@ -21,6 +21,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <brayns/common/PropertyMap.h>
 #include <brayns/common/Statistics.h>
 
 #include <functional>
@@ -144,6 +145,14 @@ public:
 
     /** @internal resetModified() all frame buffers. */
     void resetFrameBuffers();
+
+    /**
+     * Add a new renderer with optional properties. The renderer registration
+     * for a concrete engine is specific to the actual engine, e.g.
+     * OSP_REGISTER_RENDERER for OSPRay.
+     */
+    void addRenderer(const std::string& name,
+                     const PropertyMap& properties = {});
 
 protected:
     void _render(const RenderInput& renderInput, RenderOutput& renderOutput);

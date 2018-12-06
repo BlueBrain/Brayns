@@ -30,6 +30,7 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
+#include <brayns/parameters/ParametersManager.h>
 
 #define BOOST_TEST_MODULE shadows
 #include <boost/test/unit_test.hpp>
@@ -43,9 +44,12 @@ BOOST_AUTO_TEST_CASE(cylinders)
     const char* app = testSuite.argv[0];
     std::vector<const char*> argv = {
         {app, "--disable-accumulation", "--window-size", "1600", "900",
-         "--renderer", "advanced_simulation", "--no-head-light"}};
+         "--plugin", "braynsCircuitViewer", "--no-head-light"}};
 
     brayns::Brayns brayns(argv.size(), argv.data());
+    brayns.getParametersManager().getRenderingParameters().setCurrentRenderer(
+        "advanced_simulation");
+    brayns.commit();
     auto& scene = brayns.getEngine().getScene();
 
     auto model = scene.createModel();

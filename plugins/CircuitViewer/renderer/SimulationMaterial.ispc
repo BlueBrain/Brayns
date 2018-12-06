@@ -35,7 +35,6 @@ static inline int getBytesPerPrimitive(const void* geometry)
     return bytesPerPrimitive;
 }
 
-
 uint64 SimulationMaterial_getOffset(const uniform Geometry* geometry,
                                     const varying int primID)
 {
@@ -44,14 +43,14 @@ uint64 SimulationMaterial_getOffset(const uniform Geometry* geometry,
 
     // The data pointer in all "derived" geometries is just after data members
     // of the base Geometry struct.
-    const uniform uint8* data =  *((const uniform uint8**)&geometry[1]);
+    const uniform uint8* data = *((const uniform uint8**)&geometry[1]);
 
     const int bytesPerPrimitive = getBytesPerPrimitive(geometry->cppEquivalent);
     const uint64 bytesPerPrimitive64 = (uint64)bytesPerPrimitive;
     if (primID * bytesPerPrimitive64 > 0x7FFFFFFF)
     {
-        data = (const uniform uint8*)(
-            (uint64)data + bytesPerPrimitive64 * primID);
+        data =
+            (const uniform uint8*)((uint64)data + bytesPerPrimitive64 * primID);
     }
     else
     {
@@ -60,7 +59,6 @@ uint64 SimulationMaterial_getOffset(const uniform Geometry* geometry,
 
     return *((const uniform uint64*)data);
 }
-
 
 export void* uniform SimulationMaterial_create(void* uniform cppE)
 {

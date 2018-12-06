@@ -49,10 +49,13 @@ public:
     }
     /** OSPRay supported renderers */
     const auto& getRenderers() const { return _renderers; }
+    void addRenderer(const std::string& renderer)
+    {
+        _renderers.push_front(renderer);
+    }
     /**
        Camera type
     */
-    void initializeDefaultCameras();
     const std::string& getCameraType() const { return _cameraType; }
     const auto& getCameras() const { return _cameraTypeNames; }
     /** Number of samples per pixel */
@@ -96,7 +99,7 @@ public:
     }
     size_t getMaxAccumFrames() const { return _maxAccumFrames; }
 protected:
-    void initializeDefaultRenderers();
+    void initializeDefaultCameras();
     void parse(const po::variables_map& vm) final;
 
     std::string _renderer{"basic"};

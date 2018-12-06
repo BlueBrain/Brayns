@@ -30,8 +30,6 @@
 #include "OSPRayRenderer.h"
 #include "OSPRayScene.h"
 
-#include "ispc/render/AdvancedSimulationRenderer.h" // enum Shading
-
 #include <ospray/OSPConfig.h>                    // TILE_SIZE
 #include <ospray/SDK/camera/PerspectiveCamera.h> // enum StereoMode
 #include <ospray/version.h>
@@ -160,97 +158,62 @@ Vector2ui OSPRayEngine::getMinimumFrameSize() const
 
 void OSPRayEngine::_createRenderers()
 {
-    auto& rp = _parametersManager.getRenderingParameters();
-    auto ospRenderer = std::make_shared<OSPRayRenderer>(
-        _parametersManager.getAnimationParameters(), rp);
+    _renderer = std::make_shared<OSPRayRenderer>(
+        _parametersManager.getAnimationParameters(),
+        _parametersManager.getRenderingParameters());
 
-    for (const auto& renderer : rp.getRenderers())
+    addRenderer("raycast_Ng");
+    addRenderer("raycast_Ns");
+
     {
         PropertyMap properties;
-        if (renderer == "pathtracing")
-        {
-            properties.setProperty(
-                {"shadows", 0., {0., 1.}, {"Shadow intensity"}});
-            properties.setProperty(
-                {"softShadows", 0., {0., 1.}, {"Shadow softness"}});
-        }
-        if (renderer == "proximity")
-        {
-            properties.setProperty(
-                {"alphaCorrection", 0.5, {0.001, 1.}, {"Alpha correction"}});
-            properties.setProperty(
-                {"detectionDistance", 1., {"Detection distance"}});
-            properties.setProperty({"detectionFarColor",
-                                    std::array<double, 3>{{1., 0., 0.}},
-                                    {"Detection far color"}});
-            properties.setProperty({"detectionNearColor",
-                                    std::array<double, 3>{{0., 1., 0.}},
-                                    {"Detection near color"}});
-            properties.setProperty({"detectionOnDifferentMaterial",
-                                    false,
-                                    {"Detection on different material"}});
-            properties.setProperty(
-                {"electronShadingEnabled", false, {"Electron shading"}});
-            properties.setProperty(
-                {"surfaceShadingEnabled", true, {"Surface shading"}});
-        }
-        if (renderer == "basic_simulation")
-        {
-            properties.setProperty(
-                {"alphaCorrection", 0.5, {0.001, 1.}, {"Alpha correction"}});
-        }
-        if (renderer == "advanced_simulation")
-        {
-            properties.setProperty(
-                {"aoDistance", 10000., {"Ambient occlusion distance"}});
-            properties.setProperty(
-                {"aoWeight", 0., {0., 1.}, {"Ambient occlusion weight"}});
-            properties.setProperty(
-                {"detectionDistance", 15., {"Detection distance"}});
-            properties.setProperty(
-                {"shading",
-                 int32_t(AdvancedSimulationRenderer::Shading::none),
-                 brayns::enumNames<AdvancedSimulationRenderer::Shading>(),
-                 {"Shading"}});
-            properties.setProperty(
-                {"shadows", 0., {0., 1.}, {"Shadow intensity"}});
-            properties.setProperty(
-                {"softShadows", 0., {0., 1.}, {"Shadow softness"}});
-            properties.setProperty(
-                {"samplingThreshold",
-                 0.001,
-                 {0.001, 1.},
-                 {"Threshold under which sampling is ignored"}});
-            properties.setProperty({"volumeSpecularExponent",
-                                    20.,
-                                    {1., 100.},
-                                    {"Volume specular exponent"}});
-            properties.setProperty({"volumeAlphaCorrection",
-                                    0.5,
-                                    {0.001, 1.},
-                                    {"Volume alpha correction"}});
-        }
-        if (renderer == "scivis")
-        {
-            properties.setProperty(
-                {"aoDistance", 10000., {"Ambient occlusion distance"}});
-            properties.setProperty({"aoSamples",
-                                    int32_t(1),
-                                    std::pair<int32_t, int32_t>{0, 128},
-                                    {"Ambient occlusion samples"}});
-            properties.setProperty({"aoTransparencyEnabled",
-                                    true,
-                                    {"Ambient occlusion transparency"}});
-            properties.setProperty(
-                {"aoWeight", 0., {0., 1.}, {"Ambient occlusion weight"}});
-            properties.setProperty(
-                {"oneSidedLighting", true, {"One-sided lighting"}});
-            properties.setProperty({"shadowsEnabled", false, {"Shadows"}});
-        }
-        ospRenderer->setProperties(renderer, properties);
+        properties.setProperty({"shadows", 0., {0., 1.}, {"Shadow intensity"}});
+        properties.setProperty(
+            {"softShadows", 0., {0., 1.}, {"Shadow softness"}});
+        addRenderer("pathtracing", properties);
     }
-    ospRenderer->setCurrentType(rp.getCurrentRenderer());
-    _renderer = ospRenderer;
+
+    {
+        PropertyMap properties;
+        properties.setProperty(
+            {"alphaCorrection", 0.5, {0.001, 1.}, {"Alpha correction"}});
+        properties.setProperty(
+            {"detectionDistance", 1., {"Detection distance"}});
+        properties.setProperty({"detectionFarColor",
+                                std::array<double, 3>{{1., 0., 0.}},
+                                {"Detection far color"}});
+        properties.setProperty({"detectionNearColor",
+                                std::array<double, 3>{{0., 1., 0.}},
+                                {"Detection near color"}});
+        properties.setProperty({"detectionOnDifferentMaterial",
+                                false,
+                                {"Detection on different material"}});
+        properties.setProperty(
+            {"electronShadingEnabled", false, {"Electron shading"}});
+        properties.setProperty(
+            {"surfaceShadingEnabled", true, {"Surface shading"}});
+        addRenderer("proximity", properties);
+    }
+    {
+        PropertyMap properties;
+        properties.setProperty(
+            {"aoDistance", 10000., {"Ambient occlusion distance"}});
+        properties.setProperty({"aoSamples",
+                                int32_t(1),
+                                std::pair<int32_t, int32_t>{0, 128},
+                                {"Ambient occlusion samples"}});
+        properties.setProperty({"aoTransparencyEnabled",
+                                true,
+                                {"Ambient occlusion transparency"}});
+        properties.setProperty(
+            {"aoWeight", 0., {0., 1.}, {"Ambient occlusion weight"}});
+        properties.setProperty(
+            {"oneSidedLighting", true, {"One-sided lighting"}});
+        properties.setProperty({"shadowsEnabled", false, {"Shadows"}});
+        addRenderer("scivis", properties);
+    }
+
+    addRenderer("basic");
 }
 
 FrameBufferPtr OSPRayEngine::createFrameBuffer(
