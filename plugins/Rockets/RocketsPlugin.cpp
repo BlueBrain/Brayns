@@ -232,6 +232,8 @@ public:
 
     void preRender()
     {
+        if (!_endpointsRegistered)
+            _registerEndpoints();
         if (!_rocketsServer || !_manualProcessing)
             return;
 
@@ -380,7 +382,6 @@ public:
         }
 
         _setupWebsocket();
-        _registerEndpoints();
         _timer.start();
     }
 
@@ -971,6 +972,8 @@ public:
                               "camera");
         _handlePropertyObject(_engine.getRenderer(), ENDPOINT_RENDERER_PARAMS,
                               "renderer");
+
+        _endpointsRegistered = true;
     }
 
     void _handleImageJPEG()
@@ -1056,10 +1059,11 @@ public:
     void _handleRenderer()
     {
         auto& params = _parametersManager.getRenderingParameters();
-        auto preUpdate = [](const auto& rp) {
-            return std::find(rp.getRenderers().begin(), rp.getRenderers().end(),
+        auto preUpdate = [&params](const auto& rp) {
+            return std::find(params.getRenderers().begin(),
+                             params.getRenderers().end(),
                              rp.getCurrentRenderer()) !=
-                   rp.getRenderers().end();
+                   params.getRenderers().end();
         };
         auto postUpdate = [& renderer = _engine.getRenderer()](auto& rp)
         {
@@ -1571,6 +1575,9 @@ public:
     std::mutex _tasksMutex;
 
     BinaryRequests _binaryRequests;
+    // need to delay those as we are initialized first, but other plugins might
+    // alter the list of renderers for instance
+    bool _endpointsRegistered{false};
 };
 
 void RocketsPlugin::init(PluginAPI* api)

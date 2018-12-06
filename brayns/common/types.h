@@ -81,13 +81,11 @@ class ActionInterface;
 using ActionInterfacePtr = std::shared_ptr<ActionInterface>;
 
 class Engine;
-using EnginePtr = std::shared_ptr<Engine>;
 
 class Scene;
 using ScenePtr = std::shared_ptr<Scene>;
 
 class AbstractManipulator;
-using AbstractManipulatorPtr = std::shared_ptr<AbstractManipulator>;
 
 class Camera;
 using CameraPtr = std::shared_ptr<Camera>;
@@ -104,7 +102,6 @@ using ModelPtr = std::unique_ptr<Model>;
 using ModelMetadata = std::map<std::string, std::string>;
 
 class Transformation;
-using Transformations = std::vector<Transformation>;
 
 class ModelInstance;
 class ModelParams;
@@ -179,7 +176,6 @@ class VolumeParameters;
 class PluginAPI;
 class ExtensionPlugin;
 using ExtensionPluginPtr = std::shared_ptr<ExtensionPlugin>;
-using ExtensionPlugins = std::vector<ExtensionPluginPtr>;
 
 class KeyboardHandler;
 

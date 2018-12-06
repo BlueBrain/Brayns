@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,35 +18,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SIMULATIONRENDERER_H
-#define SIMULATIONRENDERER_H
+#pragma once
 
-#include "AbstractRenderer.h"
+#include <engines/ospray/ispc/render/DefaultMaterial.ih>
 
-// ospray
-#include <ospray/SDK/common/Material.h>
-#include <ospray/SDK/render/Renderer.h>
-
-// system
-#include <vector>
-
-namespace brayns
-{
-/**
- * The SimulationRenderer class implements a parent renderer for all Brayns
- * renderers that need to render simulation data
+/** Type of functions to return the simulation offset of a geometry primitive
+ *
+ * Given a base geometry, the function must return the buffer with the
+ * simulation buffer offset to use for the given geometry and primitive ID. A
+ * specific function pointer expect geometry of a particular type. The
+ * behaviour may be undefined if the actual type of the geometry parameter is
+ * not the expected one.
  */
-class SimulationRenderer : public AbstractRenderer
+typedef uint64 (*SimulationMaterial_GetSimulationOffset)(
+    const uniform Geometry* geometry, const varying int primID);
+
+struct SimulationMaterial
 {
-public:
-    void commit() override;
+    uniform DefaultMaterial super;
 
-protected:
-    ospray::Ref<ospray::Data> _simulationData;
-    ospray::uint64 _simulationDataSize;
-
-    float _alphaCorrection;
+    SimulationMaterial_GetSimulationOffset getSimulationOffset;
+    bool useSimulationModel; // To dissappear once meshes carry mapping info
 };
-}
-
-#endif // SIMULATIONRENDERER_H

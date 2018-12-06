@@ -872,9 +872,9 @@ private:
     ParametersManager _parametersManager;
     PluginManager _pluginManager;
     EngineFactory _engineFactory;
-    EnginePtr _engine;
+    std::unique_ptr<Engine> _engine;
     KeyboardHandler _keyboardHandler;
-    AbstractManipulatorPtr _cameraManipulator;
+    std::unique_ptr<AbstractManipulator> _cameraManipulator;
     std::vector<FrameBufferPtr> _frameBuffers;
 
     double _fieldOfView{45.};

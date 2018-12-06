@@ -20,23 +20,13 @@
 
 #pragma once
 
-#include "DefaultMaterial.ih"
+#include <engines/ospray/ispc/render/DefaultMaterial.h>
 
-/** Type of functions to return the simulation offset of a geometry primitive
- *
- * Given a base geometry, the function must return the buffer with the
- * simulation buffer offset to use for the given geometry and primitive ID. A
- * specific function pointer expect geometry of a particular type. The
- * behaviour may be undefined if the actual type of the geometry parameter is
- * not the expected one.
- */
-typedef uint64 (*SimulationMaterial_GetSimulationOffset)(
-    const uniform Geometry* geometry, const varying int primID);
-
-struct SimulationMaterial
+namespace brayns
 {
-    uniform DefaultMaterial super;
-
-    SimulationMaterial_GetSimulationOffset getSimulationOffset;
-    bool useSimulationModel; // To dissappear once meshes carry mapping info
+struct SimulationMaterial : public brayns::DefaultMaterial
+{
+    std::string toString() const final { return "brayns::SimulationMaterial"; }
+    void commit() final;
 };
+} // ::brayns
