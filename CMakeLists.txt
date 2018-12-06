@@ -92,12 +92,6 @@ else()
   unset(BRAYNS_DEFLECT_ENABLED)
 endif()
 
-# Data access
-option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" OFF)
-if (BRAYNS_CIRCUITVIEWER_ENABLED)
-  list(APPEND COMMON_FIND_PACKAGE_DEFINES BRAYNS_USE_CIRCUITVIEWER)
-endif()
-
 if(NOT EXISTS ${PROJECT_SOURCE_DIR}/perceptualdiff/FindFreeImage.cmake)
   message(FATAL_ERROR "FindFreeImage.cmake missing, run: git submodule update --init")
 endif()

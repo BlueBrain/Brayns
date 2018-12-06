@@ -31,6 +31,8 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/simulation/AbstractSimulationHandler.h>
 
+#include <brayns/parameters/ParametersManager.h>
+
 #include <BBP/TestDatasets.h>
 
 #define BOOST_TEST_MODULE braynsTestData
@@ -43,6 +45,8 @@ BOOST_AUTO_TEST_CASE(simple_circuit)
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
                           BBP_TEST_BLUECONFIG3,
+                          "--plugin",
+                          "braynsCircuitViewer",
                           "--disable-accumulation",
                           "--circuit-targets",
                           "Layer1",
@@ -51,6 +55,8 @@ BOOST_AUTO_TEST_CASE(simple_circuit)
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    brayns.getParametersManager().getRenderingParameters().setCurrentRenderer(
+        "basic");
     brayns.commitAndRender();
     BOOST_CHECK(compareTestImage("testdataLayer1.png",
                                  brayns.getEngine().getFrameBuffer()));
@@ -63,6 +69,8 @@ BOOST_AUTO_TEST_CASE(curcuit_with_color_by_mtype)
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
                           BBP_TEST_BLUECONFIG3,
+                          "--plugin",
+                          "braynsCircuitViewer",
                           "--disable-accumulation",
                           "--circuit-targets",
                           "MiniColumn_0",
@@ -73,6 +81,8 @@ BOOST_AUTO_TEST_CASE(curcuit_with_color_by_mtype)
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
+    brayns.getParametersManager().getRenderingParameters().setCurrentRenderer(
+        "basic");
     brayns.getEngine().getScene().setMaterialsColorMap(
         brayns::MaterialsColorMap::gradient);
     brayns.commitAndRender();
@@ -87,12 +97,12 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
     const char* app = testSuite.argv[0];
     const char* argv[] = {app,
                           BBP_TEST_BLUECONFIG3,
+                          "--plugin",
+                          "braynsCircuitViewer",
                           "--circuit-targets",
                           "allmini50",
                           "--circuit-report",
                           "voltages",
-                          "--renderer",
-                          "advanced_simulation",
                           "--samples-per-pixel",
                           "16",
                           "--animation-frame",
@@ -114,37 +124,12 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
     camera.setOrientation(brayns::Quaterniond(0.0, 0.0, 0.0, 1.0));
     camera.setPosition(camPos + 0.9 * (rotCenter - camPos));
 
-    auto& tf = modelDesc->getModel().getTransferFunction();
-    tf.setValuesRange({-66, -62});
-    tf.setColorMap(
-        {"test_f",
-         {{0.996078431372549, 0.9294117647058824, 0.8666666666666667},
-          {0.996078431372549, 0.9019607843137255, 0.8117647058823529},
-          {0.9921568627450981, 0.8627450980392157, 0.7333333333333333},
-          {0.9921568627450981, 0.8235294117647058, 0.6549019607843137},
-          {0.9921568627450981, 0.7686274509803922, 0.5568627450980392},
-          {0.9921568627450981, 0.7058823529411765, 0.4549019607843137},
-          {0.9921568627450981, 0.6431372549019608, 0.36470588235294116},
-          {0.9921568627450981, 0.5803921568627451, 0.2784313725490196},
-          {0.9803921568627451, 0.5176470588235295, 0.19607843137254902},
-          {0.9568627450980393, 0.45098039215686275, 0.12156862745098039},
-          {0.9254901960784314, 0.38823529411764707, 0.058823529411764705},
-          {0.8823529411764706, 0.3254901960784314, 0.027450980392156862},
-          {0.8274509803921568, 0.27058823529411763, 0.00392156862745098},
-          {0.7333333333333333, 0.23921568627450981, 0.00784313725490196},
-          {0.6392156862745098, 0.20784313725490197, 0.011764705882352941},
-          {0.5686274509803921, 0.1803921568627451, 0.011764705882352941}}});
-    brayns::Vector2ds controlPoints;
-    controlPoints.reserve(16);
-    controlPoints.push_back({0., 1.});
-    for (size_t i = 0; i <= 15; ++i)
-        controlPoints.push_back({i / 15., 1.});
-    tf.setControlPoints(controlPoints);
+    modelDesc->getModel().getTransferFunction().setValuesRange({-66, -62});
 
     brayns.commit();
     modelDesc->getModel().getSimulationHandler()->waitReady();
     brayns.commitAndRender();
-    BOOST_CHECK(compareTestImage("testdataallmini50advancedsimulation.png",
+    BOOST_CHECK(compareTestImage("testdataallmini50basicsimulation.png",
                                  brayns.getEngine().getFrameBuffer()));
 }
 
@@ -155,6 +140,8 @@ void testSdfGeometries(bool dampened)
     const char* app = testSuite.argv[0];
     auto argv = std::vector<const char*>{app,
                                          BBP_TEST_BLUECONFIG3,
+            "--plugin",
+            "braynsCircuitViewer",
                                          "--disable-accumulation",
                                          "--circuit-targets",
                                          "Layer1",
@@ -168,6 +155,8 @@ void testSdfGeometries(bool dampened)
 
     brayns::Brayns brayns(argc, argv.data());
 
+    brayns.getParametersManager().getRenderingParameters().setCurrentRenderer(
+        "basic");
     const auto rotCenter = brayns.getEngine()
                                .getScene()
                                .getModel(0)
