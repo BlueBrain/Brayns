@@ -44,14 +44,16 @@ AbstractManipulator::AbstractManipulator(Camera& camera,
 
 void AbstractManipulator::adjust(const Boxd& boundingBox)
 {
+    const auto size =
+        boundingBox.isEmpty() ? 1 : boundingBox.getSize().find_max();
     auto position = boundingBox.getCenter();
     auto target = position;
-    position.z() += boundingBox.getSize().find_max();
+    position.z() += size;
 
     const Quaterniond identity;
     _camera.setInitialState(position, identity, target);
 
-    _motionSpeed = DEFAULT_MOTION_SPEED * boundingBox.getSize().find_max();
+    _motionSpeed = DEFAULT_MOTION_SPEED * size;
 
     BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
     BRAYNS_INFO << "World center      : " << boundingBox.getCenter()

@@ -436,9 +436,18 @@ public:
         _delayedNotify([&, message, filter] {
             if (_rocketsServer->getConnectionCount() > 1)
             {
-                const auto& msg =
-                    rockets::jsonrpc::makeNotification(endpoint, message);
-                _rocketsServer->broadcastText(msg, filter);
+                try
+                {
+                    const auto& msg =
+                        rockets::jsonrpc::makeNotification(endpoint, message);
+                    _rocketsServer->broadcastText(msg, filter);
+                }
+                catch (const std::exception& e)
+                {
+                    BRAYNS_ERROR
+                        << "Error rebroadcasting notification: " << e.what()
+                        << std::endl;
+                }
             }
         });
     }
@@ -619,12 +628,22 @@ public:
                                      clientID=_currentClientID, endpoint,
                                      json=to_json(castedObj)]
                 {
-                    const auto& msg =
-                        rockets::jsonrpc::makeNotification(endpoint, json);
-                    if(clientID == NO_CURRENT_CLIENT)
-                        rocketsServer->broadcastText(msg);
-                    else
-                        rocketsServer->broadcastText(msg, {clientID});
+                    if (rocketsServer->getConnectionCount() == 0)
+                        return;
+                    try
+                    {
+                        const auto& msg =
+                            rockets::jsonrpc::makeNotification(endpoint, json);
+                        if(clientID == NO_CURRENT_CLIENT)
+                            rocketsServer->broadcastText(msg);
+                        else
+                            rocketsServer->broadcastText(msg, {clientID});
+                    }
+                    catch(const std::exception& e)
+                    {
+                        BRAYNS_ERROR << "Error broadcasting notification: "
+                                  << e.what() << std::endl;
+                    }
                 };
                 const auto delayedNotify = [&, notify]{
                     this->_delayedNotify(notify);

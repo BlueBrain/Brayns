@@ -49,11 +49,10 @@ class DeflectPlugin::Impl
 {
 public:
     Impl(PluginAPI* api, DeflectParameters&& params)
-        : _engine(api->getEngine())
+        : _api(*api)
+        , _engine(api->getEngine())
         , _appParams{api->getParametersManager().getApplicationParameters()}
         , _params(std::move(params))
-        , _keyboardHandler(api->getKeyboardHandler())
-        , _cameraManipulator(api->getCameraManipulator())
     {
         if (auto ai = api->getActionInterface())
         {
@@ -190,6 +189,7 @@ private:
 
     void _handleDeflectEvents()
     {
+        auto& cameraManipulator = _api.getCameraManipulator();
         const auto& windowSize = _appParams.getWindowSize();
         while (_stream->hasEvent())
         {
@@ -205,7 +205,7 @@ private:
             {
                 const auto pos = _getWindowPos(event, windowSize);
                 if (!_pan && !_pinch)
-                    _cameraManipulator.dragLeft(pos, _previousPos);
+                    cameraManipulator.dragLeft(pos, _previousPos);
                 _previousPos = pos;
                 _pan = _pinch = false;
                 break;
@@ -215,7 +215,7 @@ private:
                 if (_pinch)
                     break;
                 const auto pos = _getWindowPos(event, windowSize);
-                _cameraManipulator.dragMiddle(pos, _previousPos);
+                cameraManipulator.dragMiddle(pos, _previousPos);
                 _previousPos = pos;
                 _pan = true;
                 break;
@@ -226,13 +226,13 @@ private:
                     break;
                 const auto pos = _getWindowPos(event, windowSize);
                 const auto delta = _getZoomDelta(event, windowSize);
-                _cameraManipulator.wheel(pos, delta * wheelFactor);
+                cameraManipulator.wheel(pos, delta * wheelFactor);
                 _pinch = true;
                 break;
             }
             case deflect::Event::EVT_KEY_PRESS:
             {
-                _keyboardHandler.handleKeyboardShortcut(event.text[0]);
+                _api.getKeyboardHandler().handleKeyboardShortcut(event.text[0]);
                 break;
             }
             case deflect::Event::EVT_VIEW_SIZE_CHANGED:
@@ -402,11 +402,10 @@ private:
         return error;
     }
 
+    PluginAPI& _api;
     Engine& _engine;
     ApplicationParameters& _appParams;
     DeflectParameters _params;
-    KeyboardHandler& _keyboardHandler;
-    AbstractManipulator& _cameraManipulator;
     Vector2d _previousPos;
     bool _pan = false;
     bool _pinch = false;
