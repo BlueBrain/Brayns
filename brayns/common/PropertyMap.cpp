@@ -212,13 +212,48 @@ void PropertyMap::merge(const PropertyMap& input)
         };
     };
 
-    const auto areCompatibleTypes = [](Property::Type t0, Property::Type t1) {
+    const auto compatibleTypes = [](Property::Type t0, Property::Type t1) {
         return (t0 == Property::Type::Int && t1 == Property::Type::Double) ||
                (t0 == Property::Type::Double && t1 == Property::Type::Int) ||
                (t0 == Property::Type::Vec2i && t1 == Property::Type::Vec2d) ||
                (t0 == Property::Type::Vec2d && t1 == Property::Type::Vec2i) ||
                (t0 == Property::Type::Vec3i && t1 == Property::Type::Vec3d) ||
                (t0 == Property::Type::Vec3d && t1 == Property::Type::Vec3i);
+    };
+
+    const auto compatibleEnums = [](Property& dest, const Property& src) {
+        // If we have a string to int or an int to string we can try to
+        // match the enum value
+        const bool compatible = (dest.type == Property::Type::Int &&
+                                 src.type == Property::Type::String) ||
+                                (dest.type == Property::Type::String &&
+                                 src.type == Property::Type::Int);
+        if (dest.enums.empty() || !compatible)
+            return false;
+
+        // If our source is a string we check if the string exist in destination
+        if (src.type == Property::Type::String)
+            return std::find(dest.enums.begin(), dest.enums.end(),
+                             src.get<std::string>()) != dest.enums.end();
+
+        // We know source is an int so check that the range is inside enum range
+        const int32_t v = src.get<int32_t>();
+        return v >= 0 && v < static_cast<int32_t>(dest.enums.size());
+    };
+
+    const auto setEnum = [](Property& dest, const Property& src) {
+        if (dest.type == Property::Type::Int)
+        {
+            const auto index = std::find(dest.enums.begin(), dest.enums.end(),
+                                         src.get<std::string>()) -
+                               dest.enums.begin();
+            dest.set<int32_t>(index);
+        }
+        else
+        {
+            const auto idx = src.get<int32_t>();
+            dest.set<std::string>(dest.enums[idx]);
+        }
     };
 
     for (const auto& otherProperty : input.getProperties())
@@ -234,7 +269,11 @@ void PropertyMap::merge(const PropertyMap& input)
             {
                 myProperty->_data = otherProperty->_data;
             }
-            else if (areCompatibleTypes(myType, otherType))
+            else if (compatibleEnums(*myProperty, *otherProperty))
+            {
+                setEnum(*myProperty, *otherProperty);
+            }
+            else if (compatibleTypes(myType, otherType))
             {
                 setValues(*myProperty, *otherProperty);
             }

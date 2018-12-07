@@ -93,8 +93,7 @@ public:
      */
     void updateProperties(const PropertyMap& properties)
     {
-        for (auto prop : properties.getProperties())
-            _properties.at(_currentType).setProperty(*prop);
+        _properties.at(_currentType).merge(properties);
         markModified();
     }
 
