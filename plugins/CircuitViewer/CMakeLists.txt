@@ -17,7 +17,7 @@ common_find_package_post()
 
 set(BRAYNSCIRCUITVIEWER_HEADERS
   CircuitViewer.h
-  io/common.h
+  io/ModelData.h
   io/CircuitLoader.h
   io/MorphologyLoader.h
   io/SimulationHandler.h)
