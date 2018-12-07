@@ -55,7 +55,7 @@ endif()
 include(ispc)
 
 # Compile ispc code
-include_directories_ispc(${CMAKE_SOURCE_DIR} ${PROJECT_SOURCE_DIR} ${OSPRAY_INCLUDE_DIRS})
+include_directories_ispc(${PROJECT_SOURCE_DIR}/../../ ${OSPRAY_INCLUDE_DIRS})
 ospray_ispc_compile(${BRAYNSCIRCUITVIEWER_ISPC_SOURCES})
 list(APPEND BRAYNSCIRCUITVIEWER_SOURCES ${ISPC_OBJECTS})
 
