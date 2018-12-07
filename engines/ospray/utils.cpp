@@ -91,6 +91,7 @@ template <typename T, std::size_t N>
 auto _toStdArray(const ospcommon::vec_t<T, N>& input)
 {
     std::array<T, N> array;
+    array.fill(0);
     std::copy(&input[0], &input[N - 1], array.begin());
     return array;
 }
