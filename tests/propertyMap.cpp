@@ -207,6 +207,35 @@ BOOST_AUTO_TEST_CASE(fill_property_map)
     }
 }
 
+BOOST_AUTO_TEST_CASE(merge_enums)
+{
+    using Type = brayns::Property::Type;
+
+    const std::vector<std::string> enums = {"a", "b", "c"};
+    brayns::PropertyMap propInts;
+    propInts.setProperty({"abc", 1, enums, {}});
+    brayns::PropertyMap propStrings;
+    propStrings.setProperty({"abc", std::string("c"), enums, {}});
+
+    {
+        brayns::PropertyMap propIntsTmp;
+        propIntsTmp.merge(propInts);
+        propIntsTmp.merge(propStrings);
+
+        BOOST_CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
+        BOOST_CHECK_EQUAL(propIntsTmp.getProperty<int32_t>("abc"), 2);
+    }
+
+    {
+        brayns::PropertyMap propStringsTmp;
+        propStringsTmp.merge(propStrings);
+        propStringsTmp.merge(propInts);
+
+        BOOST_CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
+        BOOST_CHECK_EQUAL(propStringsTmp.getProperty<std::string>("abc"), "b");
+    }
+}
+
 BOOST_AUTO_TEST_CASE(commandline)
 {
     brayns::PropertyMap properties;
