@@ -33,8 +33,16 @@ void CircuitViewer::init(PluginAPI* api)
 {
     auto& scene = api->getScene();
     auto& registry = scene.getLoaderRegistry();
+    api->getParametersManager().getRenderingParameters().setCurrentRenderer(
+        "basic_simulation");
 
     registry.registerLoader(std::make_unique<CircuitLoader>(scene));
     registry.registerLoader(std::make_unique<MorphologyLoader>(scene));
 }
+}
+
+extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int,
+                                                         const char**)
+{
+    return new brayns::CircuitViewer();
 }

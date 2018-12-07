@@ -21,7 +21,7 @@ if(BRAYNS_VRPN_ENABLED)
   add_subdirectory(VRPN)
 endif()
 
-option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" ON)
+option(BRAYNS_CIRCUITVIEWER_ENABLED "Activate CircuitViewer plugin" OFF)
 if (BRAYNS_CIRCUITVIEWER_ENABLED)
   add_subdirectory(CircuitViewer)
 endif()
