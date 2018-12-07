@@ -1493,6 +1493,8 @@ public:
         _bindEndpoint(notifyEndpoint, [&, notifyEndpoint](const auto& request) {
             object.updateProperties(jsonToPropertyMap(request.message));
             _engine.triggerRender();
+            this->_rebroadcast(notifyEndpoint, request.message,
+                               {request.clientID});
             return Response{to_json(true)};
         });
 
