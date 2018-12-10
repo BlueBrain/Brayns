@@ -84,14 +84,6 @@ else()
   unset(BRAYNS_NETWORKING_ENABLED)
 endif()
 
-# Streaming to display walls
-common_find_package(Deflect)
-if(TARGET Deflect)
-  option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" ON)
-else()
-  unset(BRAYNS_DEFLECT_ENABLED)
-endif()
-
 if(NOT EXISTS ${PROJECT_SOURCE_DIR}/perceptualdiff/FindFreeImage.cmake)
   message(FATAL_ERROR "FindFreeImage.cmake missing, run: git submodule update --init")
 endif()

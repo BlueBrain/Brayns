@@ -4,6 +4,7 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
+option(BRAYNS_DEFLECT_ENABLED "Activate streaming to display wall" OFF)
 if(BRAYNS_DEFLECT_ENABLED)
   add_subdirectory(Deflect)
 endif()
