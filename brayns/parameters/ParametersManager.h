@@ -124,7 +124,7 @@ private:
     void _processUnrecognizedOptions(
         const std::vector<std::string>& unrecognizedOptions) const;
 
-    po::options_description _parameters;
+    po::options_description _allOptions;
 
     std::vector<AbstractParameters*> _parameterSets;
     AnimationParameters _animationParameters;
