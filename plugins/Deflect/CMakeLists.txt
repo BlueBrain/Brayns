@@ -6,8 +6,8 @@
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
-project(BraynsDeflectPlugin VERSION 1.0.0)
-set(BraynsDeflectPlugin_VERSION_ABI 1)
+project(DeflectPlugin VERSION 1.0.0)
+set(DeflectPlugin_VERSION_ABI 1)
 
 include(Common)
 
