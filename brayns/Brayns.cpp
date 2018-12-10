@@ -892,16 +892,7 @@ private:
 // -----------------------------------------------------------------------------
 
 Brayns::Brayns(int argc, const char** argv)
-    : _impl([argc, argv]() {
-        BRAYNS_INFO << "     ____                             " << std::endl;
-        BRAYNS_INFO << "    / __ )_________ ___  ______  _____" << std::endl;
-        BRAYNS_INFO << "   / __  / ___/ __ `/ / / / __ \\/ ___/" << std::endl;
-        BRAYNS_INFO << "  / /_/ / /  / /_/ / /_/ / / / (__  ) " << std::endl;
-        BRAYNS_INFO << " /_____/_/   \\__,_/\\__, /_/ /_/____/  " << std::endl;
-        BRAYNS_INFO << "                  /____/              " << std::endl;
-        BRAYNS_INFO << std::endl;
-        return std::make_unique<Impl>(argc, argv);
-    }())
+    : _impl(std::make_unique<Impl>(argc, argv))
 {
 }
 Brayns::~Brayns() = default;

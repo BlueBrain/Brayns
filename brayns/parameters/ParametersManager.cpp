@@ -21,6 +21,7 @@
 #include "ParametersManager.h"
 
 #include <brayns/parameters/AbstractParameters.h>
+#include <brayns/version.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -102,6 +103,13 @@ std::vector<std::string> findSimilarOptions(
 
     return output;
 }
+
+void _printVersion()
+{
+    brayns::Version version;
+    std::cout << "Brayns " << version.getString() << " (" << std::hex
+              << version.getRevision() << ")" << std::dec << std::endl;
+}
 }
 
 namespace brayns
@@ -116,7 +124,7 @@ ParametersManager::ParametersManager()
     registerParameters(&_volumeParameters);
 
     for (auto parameters : _parameterSets)
-        _parameters.add(parameters->parameters());
+        _allOptions.add(parameters->parameters());
 }
 
 void ParametersManager::registerParameters(AbstractParameters* parameters)
@@ -126,23 +134,18 @@ void ParametersManager::registerParameters(AbstractParameters* parameters)
 
 void ParametersManager::parse(int argc, const char** argv)
 {
-    const bool help = std::count_if(argv, argv + argc, [](const char* arg) {
-                          return std::strcmp(arg, "--help") == 0;
-                      }) > 0;
-
-    if (help)
-    {
-        usage();
-        exit(EXIT_SUCCESS);
-        return;
-    }
-
     try
     {
+        po::options_description generalOptions("General options");
+        generalOptions.add_options()("help", "Print this help")(
+            "version", "Print the Brayns version");
+
+        _allOptions.add(generalOptions);
+
         po::variables_map vm;
         po::parsed_options parsedOptions =
             po::command_line_parser(argc, argv)
-                .options(_parameters)
+                .options(_allOptions)
                 .allow_unregistered()
                 .positional(_applicationParameters.posArgs())
                 .style(po::command_line_style::unix_style &
@@ -159,10 +162,22 @@ void ParametersManager::parse(int argc, const char** argv)
         po::store(parsedOptions, vm);
         po::notify(vm);
 
+        if (vm.count("help"))
+        {
+            usage();
+            exit(EXIT_SUCCESS);
+        }
+
+        if (vm.count("version"))
+        {
+            _printVersion();
+            exit(EXIT_SUCCESS);
+        }
+
         for (auto parameters : _parameterSets)
             parameters->parse(vm);
     }
-    catch (po::error& e)
+    catch (const po::error& e)
     {
         BRAYNS_ERROR << e.what() << std::endl;
         exit(EXIT_FAILURE);
@@ -171,11 +186,12 @@ void ParametersManager::parse(int argc, const char** argv)
 
 void ParametersManager::usage()
 {
-    std::cout << _parameters << std::endl;
+    std::cout << _allOptions << std::endl;
 }
 
 void ParametersManager::print()
 {
+    _printVersion();
     for (AbstractParameters* parameters : _parameterSets)
         parameters->print();
 }
@@ -256,7 +272,7 @@ void ParametersManager::_processUnrecognizedOptions(
     const auto& unrecognized = unrecognizedOptions.front();
 
     std::vector<std::string> availableOptions;
-    for (auto option : _parameters.options())
+    for (auto option : _allOptions.options())
         availableOptions.push_back(option->format_name());
 
     const auto suggestions = findSimilarOptions(unrecognized, availableOptions);

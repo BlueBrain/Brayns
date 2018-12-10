@@ -177,8 +177,6 @@ int main(int argc, const char** argv)
 {
     try
     {
-        BRAYNS_INFO << "Initializing Service..." << std::endl;
-
         brayns::Timer timer;
         timer.start();
 
