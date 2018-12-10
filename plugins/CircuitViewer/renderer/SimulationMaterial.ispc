@@ -65,6 +65,7 @@ export void* uniform SimulationMaterial_create(void* uniform cppE)
     uniform SimulationMaterial* uniform self =
         uniform new uniform SimulationMaterial;
     self->super.super.cppEquivalent = cppE;
+    self->getSimulationOffset = NULL;
     return self;
 }
 
