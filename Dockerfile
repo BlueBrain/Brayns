@@ -89,7 +89,7 @@ RUN mkdir -p ${LWS_SRC} \
  && cd build \
  && cmake .. -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLWS_WITH_STATIC=OFF \
+    -DLWS_STATIC_PIC=ON \
     -DLWS_WITH_SSL=OFF \
     -DLWS_WITH_ZLIB=OFF \
     -DLWS_WITH_ZIP_FOPS=OFF \
@@ -97,8 +97,7 @@ RUN mkdir -p ${LWS_SRC} \
     -DLWS_WITHOUT_TESTAPPS=ON \
     -DLWS_WITH_LIBUV=ON \
     -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
- && ninja install \
- && rm -rf ${DIST_PATH}/lib/cmake/libwebsockets
+ && ninja install
 
 
 # Set working dir and copy Brayns assets
@@ -114,7 +113,7 @@ RUN cksum ${BRAYNS_SRC}/.gitsubprojects \
  && git submodule update --init --recursive \
  && mkdir -p build \
  && cd build \
- && PKG_CONFIG_PATH=${DIST_PATH}/lib/pkgconfig CMAKE_PREFIX_PATH=${DIST_PATH} \
+ && CMAKE_PREFIX_PATH=${DIST_PATH}:${DIST_PATH}/lib/cmake/libwebsockets \
     cmake .. -GNinja \
     -DBRAYNS_CIRCUITVIEWER_ENABLED=ON \
     -DBRAYNS_NETWORKING_ENABLED=ON \
