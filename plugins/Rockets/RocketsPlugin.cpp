@@ -996,8 +996,11 @@ public:
     void _broadcastImageJpeg()
     {
         auto& frameBuffer = _engine.getFrameBuffer();
-        if (!frameBuffer.isModified())
+        if (frameBuffer.getFrameBufferFormat() == FrameBufferFormat::none ||
+            !frameBuffer.isModified())
+        {
             return;
+        }
 
         const auto& params = _parametersManager.getApplicationParameters();
         const auto fps = params.getImageStreamFPS();
