@@ -428,6 +428,19 @@ void Model::updateSizeInBytes()
     }
     for (const auto& volume : _volumes)
         _sizeInBytes += volume->getSizeInBytes();
+    for (const auto& streamline : _streamlines)
+    {
+        _sizeInBytes += streamline.second.indices.size() * sizeof(int32_t);
+        _sizeInBytes += streamline.second.vertex.size() * sizeof(Vector4f);
+        _sizeInBytes += streamline.second.vertexColor.size() * sizeof(Vector4f);
+    }
+
+    _sizeInBytes += _sdf.geometries.size() * sizeof(SDFGeometry);
+    _sizeInBytes += _sdf.neighboursFlat.size() * sizeof(uint64_t);
+    for (const auto& sdfIndices : _sdf.geometryIndices)
+        _sizeInBytes += sdfIndices.second.size() * sizeof(uint64_t);
+    for (const auto& sdfNeighbours : _sdf.neighbours)
+        _sizeInBytes += sdfNeighbours.size() * sizeof(size_t);
 }
 
 void Model::_updateBounds()
