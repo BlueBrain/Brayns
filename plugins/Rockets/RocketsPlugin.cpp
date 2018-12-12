@@ -764,7 +764,7 @@ public:
         // - wire the cancel request from rockets to the task
 
         auto action = [&, createTask](P params, auto clientID, auto respond,
-                                      auto progressCb) {
+                                      auto progressCb BRAYNS_UNUSED) {
             // transform task error to rockets error response
             auto errorCallback = [&, respond](const TaskRuntimeError& error) {
                 const Response response(
