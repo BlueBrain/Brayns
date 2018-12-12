@@ -200,8 +200,7 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
 
 void OSPRayModel::_commitCylinders(const size_t materialId)
 {
-    auto& geometry =
-        _createGeometry(_ospCylinders, materialId, "cylinders");
+    auto& geometry = _createGeometry(_ospCylinders, materialId, "cylinders");
 
     auto data = allocateVectorData(_cylinders.at(materialId), OSP_FLOAT,
                                    _memoryManagementFlags);
@@ -360,8 +359,8 @@ void OSPRayModel::_commitSDFGeometries()
         if (_sdf.geometryIndices.find(materialId) == _sdf.geometryIndices.end())
             continue;
 
-        auto& geometry = _createGeometry(_ospSDFGeometries, materialId,
-                                         "sdfgeometries");
+        auto& geometry =
+            _createGeometry(_ospSDFGeometries, materialId, "sdfgeometries");
 
         auto data = allocateVectorData(_sdf.geometryIndices[materialId],
                                        OSP_ULONG, _memoryManagementFlags);
@@ -457,7 +456,7 @@ bool OSPRayModel::_commitTransferFunction()
 
 void OSPRayModel::_setBVHFlags()
 {
-    ospSet1i(_model, "dynamicMode", _bvhFlags.count(BVHFlag::dynamic));
+    ospSet1i(_model, "dynamicScene", _bvhFlags.count(BVHFlag::dynamic));
     ospSet1i(_model, "compactMode", _bvhFlags.count(BVHFlag::compact));
     ospSet1i(_model, "robustMode", _bvhFlags.count(BVHFlag::robust));
 }
