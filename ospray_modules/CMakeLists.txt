@@ -22,12 +22,3 @@ if(BRAYNS_OPENDECK_ENABLED)
     add_dependencies(braynsOSPRayEngine ospray_module_opendeck)
   endif()
 endif()
-
-# Stereoscopy module
-option(BRAYNS_STEREOSCOPY_ENABLED "Activate Stereoscopy module" OFF)
-if(BRAYNS_STEREOSCOPY_ENABLED)
-  add_subdirectory(stereoscopy)
-  if(TARGET ospray_module_stereoscopy)
-    add_dependencies(braynsOSPRayEngine ospray_module_stereoscopy)
-  endif()
-endif()

@@ -26,15 +26,21 @@
 namespace ospray
 {
 /**
- * This camera is extension of the regular ospray
+ * This camera is an extension of the regular ospray
  * stereoscopic camera. It has an additional option
  * to select the distance of the zero-parallax plane.
  */
-struct StereoCamera : public Camera
+struct PerspectiveParallaxCamera : public Camera
 {
-    StereoCamera();
-    virtual ~StereoCamera() override = default;
-    virtual std::string toString() const override;
+    PerspectiveParallaxCamera();
+    virtual ~PerspectiveParallaxCamera() override = default;
+
+    //! \brief common function to help printf-debugging
+    /*! Every derived class should override this! */
+    virtual std::string toString() const override
+    {
+        return "ospray::PerspectiveParallaxCamera";
+    }
     virtual void commit() override;
 
     typedef enum {

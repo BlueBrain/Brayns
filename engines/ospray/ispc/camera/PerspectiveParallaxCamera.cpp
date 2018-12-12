@@ -19,68 +19,55 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "StereoCamera.h"
-#include "StereoCamera_ispc.h"
+#include "PerspectiveParallaxCamera.h"
+#include "PerspectiveParallaxCamera_ispc.h"
 
 namespace ospray
 {
-StereoCamera::StereoCamera()
+PerspectiveParallaxCamera::PerspectiveParallaxCamera()
 {
-    ispcEquivalent = ispc::StereoCamera_create(this);
+    ispcEquivalent = ispc::PerspectiveParallaxCamera_create(this);
 }
 
-std::string StereoCamera::toString() const
-{
-    return "ospray::CylindricCamera";
-}
-
-void StereoCamera::commit()
+void PerspectiveParallaxCamera::commit()
 {
     Camera::commit();
 
     const float fovy = getParamf("fovy", 60.f);
     float aspectRatio = getParamf("aspect", 1.5f);
-    const StereoMode stereoMode =
-        (StereoMode)getParam1i("stereoMode", OSP_STEREO_NONE);
+
     const float interpupillaryDistance =
         getParamf("interpupillaryDistance", 0.0635f);
     const float zeroParallaxPlane = getParamf("zeroParallaxPlane", 1.f);
 
-    float ipd = 0.f;
-    bool sideBySide = false;
-    switch (stereoMode)
+    float idpOffset = 0.0f;
+    auto bufferTarget = getParamString("buffer_target");
+    if (bufferTarget.length() == 2)
     {
-    case OSP_STEREO_LEFT:
-        ipd = -interpupillaryDistance;
-        break;
-    case OSP_STEREO_RIGHT:
-        ipd = interpupillaryDistance;
-        break;
-    case OSP_STEREO_SIDE_BY_SIDE:
-        ipd = interpupillaryDistance;
-        sideBySide = true;
-        aspectRatio *= 0.5f;
-        break;
-    case OSP_STEREO_NONE:
-        break;
+        if (bufferTarget.at(1) == 'L')
+            idpOffset = -interpupillaryDistance * 0.5f;
+        if (bufferTarget.at(1) == 'R')
+            idpOffset = +interpupillaryDistance * 0.5f;
     }
 
+    vec3f org = pos;
     dir = normalize(dir);
     const vec3f dir_du = normalize(cross(dir, up));
     const vec3f dir_dv = normalize(up);
     dir = -dir;
 
-    const vec3f org = pos;
     const float imgPlane_size_y =
         2.f * zeroParallaxPlane * tanf(deg2rad(0.5f * fovy));
     const float imgPlane_size_x = imgPlane_size_y * aspectRatio;
 
-    ispc::StereoCamera_set(getIE(), (const ispc::vec3f&)org,
-                           (const ispc::vec3f&)dir, (const ispc::vec3f&)dir_du,
-                           (const ispc::vec3f&)dir_dv, zeroParallaxPlane,
-                           imgPlane_size_y, imgPlane_size_x, ipd, sideBySide);
+    ispc::PerspectiveParallaxCamera_set(getIE(), (const ispc::vec3f&)org,
+                                        (const ispc::vec3f&)dir,
+                                        (const ispc::vec3f&)dir_du,
+                                        (const ispc::vec3f&)dir_dv,
+                                        zeroParallaxPlane, imgPlane_size_y,
+                                        imgPlane_size_x, idpOffset);
 }
 
-OSP_REGISTER_CAMERA(StereoCamera, stereoFull);
+OSP_REGISTER_CAMERA(PerspectiveParallaxCamera, perspectiveParallax);
 
 } // ::ospray
