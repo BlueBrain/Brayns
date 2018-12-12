@@ -6,10 +6,13 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(ExampleBraynsPlugin VERSION 1.0.0)
 
-find_package(Brayns REQUIRED)
+# if not superproject aka part of Brayns, we need to find it first
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  find_package(Brayns REQUIRED)
+endif()
 
 add_library(exampleBraynsPlugin SHARED
-  Example.cpp
-  Example.h)
+  Plugin.cpp
+  Plugin.h)
 
-target_link_libraries(exampleBraynsPlugin braynsPluginAPI)
+target_link_libraries(exampleBraynsPlugin braynsPluginAPI braynsCommon)

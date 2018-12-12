@@ -30,7 +30,7 @@ namespace bbic
 class Plugin : public brayns::ExtensionPlugin
 {
 public:
-    void init(brayns::PluginAPI* api) final;
+    void init() final;
 
     void preRender() final;
 

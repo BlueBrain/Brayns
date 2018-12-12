@@ -26,9 +26,8 @@
 
 namespace bbic
 {
-void Plugin::init(brayns::PluginAPI* api)
+void Plugin::init()
 {
-    _api = api;
     auto& scene = _api->getScene();
     scene.getLoaderRegistry().registerLoader(
         std::make_unique<Loader>(scene, this));

@@ -25,7 +25,6 @@
 
 namespace brayns
 {
-
 class Engine;
 
 /**
@@ -38,7 +37,8 @@ class Engine;
  * must be available in the library:
  *
  * @code
- * extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc, const char** argv)
+ * extern "C" brayns::ExtensionPlugin* brayns_plugin_create(int argc, const
+ * char** argv)
  * @endcode
  *
  * It must return the instance of the plugin, and from hereon Brayns owns the
@@ -53,8 +53,7 @@ public:
     /**
      * Called from Brayns::Brayns right after the engine has been created
      */
-    virtual void init(PluginAPI* /* api */) {}
-
+    virtual void init() {}
     /**
      * Called from Brayns::preRender() to prepare the engine based on the
      * plugins' need for an upcoming render().
@@ -62,6 +61,9 @@ public:
     virtual void preRender() {}
     /** Called from Brayns::postRender() after render() has finished. */
     virtual void postRender() {}
+protected:
+    PluginAPI* _api{nullptr};
+    friend class PluginManager;
 };
 }
 

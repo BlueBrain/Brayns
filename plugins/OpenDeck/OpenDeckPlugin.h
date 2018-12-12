@@ -29,7 +29,7 @@ class OpenDeckPlugin : public ExtensionPlugin
 public:
     OpenDeckPlugin(const Vector2ui& wallRes, const Vector2ui& floorRes);
 
-    void init(PluginAPI* api) final;
+    void init() final;
 
 private:
     Vector2ui _wallRes;

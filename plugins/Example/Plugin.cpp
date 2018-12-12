@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ExamplePlugin.h"
+#include "Plugin.h"
 
 namespace brayns
 {
@@ -29,7 +29,7 @@ ExamplePlugin::ExamplePlugin(int argc, const char** argv)
     std::cout << std::endl;
 }
 
-void ExamplePlugin::init(PluginAPI* api)
+void ExamplePlugin::init()
 {
     std::cout << "Plugin init" << std::endl;
 }
@@ -42,11 +42,6 @@ void ExamplePlugin::preRender()
 void ExamplePlugin::postRender()
 {
     std::cout << "Plugin post render" << std::endl;
-}
-
-void ExamplePlugin::postSceneLoading()
-{
-    std::cout << "Plugin post scene loading" << std::endl;
 }
 }
 

@@ -38,7 +38,7 @@ public:
     VRPNPlugin(const std::string& vrpnName);
     ~VRPNPlugin();
 
-    void init(PluginAPI* api) final;
+    void init() final;
 
     void preRender() final;
 

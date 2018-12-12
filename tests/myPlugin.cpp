@@ -46,9 +46,9 @@ public:
         }
     }
 
-    void init(brayns::PluginAPI* api) final
+    void init() final
     {
-        auto actions = api->getActionInterface();
+        auto actions = _api->getActionInterface();
         BOOST_REQUIRE(actions);
 
         // test property map for actions
@@ -115,7 +115,7 @@ public:
                            int32_t(42),
                            {0, 50},
                            {"Best property", "Because it's the best"}});
-        api->getRenderer().setProperties("myrenderer", props);
+        _api->getRenderer().setProperties("myrenderer", props);
     }
 
     ~MyPlugin()

@@ -28,6 +28,6 @@ namespace brayns
 class CircuitViewer : public ExtensionPlugin
 {
 public:
-    void init(PluginAPI* api);
+    void init() final;
 };
 }
