@@ -167,16 +167,16 @@ void OSPRayEngine::_createRenderers()
 
     {
         PropertyMap properties;
-        properties.setProperty({"shadows", 0., {0., 1.}, {"Shadow intensity"}});
+        properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
         properties.setProperty(
-            {"softShadows", 0., {0., 1.}, {"Shadow softness"}});
+            {"softShadows", 0., 0., 1., {"Shadow softness"}});
         addRenderer("pathtracing", properties);
     }
 
     {
         PropertyMap properties;
         properties.setProperty(
-            {"alphaCorrection", 0.5, {0.001, 1.}, {"Alpha correction"}});
+            {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
         properties.setProperty(
             {"detectionDistance", 1., {"Detection distance"}});
         properties.setProperty({"detectionFarColor",
@@ -200,13 +200,14 @@ void OSPRayEngine::_createRenderers()
             {"aoDistance", 10000., {"Ambient occlusion distance"}});
         properties.setProperty({"aoSamples",
                                 int32_t(1),
-                                std::pair<int32_t, int32_t>{0, 128},
+                                int32_t(0),
+                                int32_t(128),
                                 {"Ambient occlusion samples"}});
         properties.setProperty({"aoTransparencyEnabled",
                                 true,
                                 {"Ambient occlusion transparency"}});
         properties.setProperty(
-            {"aoWeight", 0., {0., 1.}, {"Ambient occlusion weight"}});
+            {"aoWeight", 0., 0., 1., {"Ambient occlusion weight"}});
         properties.setProperty(
             {"oneSidedLighting", true, {"One-sided lighting"}});
         properties.setProperty({"shadowsEnabled", false, {"Shadows"}});
@@ -258,7 +259,7 @@ void OSPRayEngine::_createCameras()
         _parametersManager.getApplicationParameters().isStereo();
     Property stereoProperty{"stereo", isStereo, {"Stereo"}};
     stereoProperty.markReadOnly();
-    Property fovy{"fovy", 45., {.1, 360.}, {"Field of view"}};
+    Property fovy{"fovy", 45., .1, 360., {"Field of view"}};
     Property aspect{"aspect", 1., {"Aspect ratio"}};
     aspect.markReadOnly();
     Property eyeSeparation{"interpupillaryDistance",

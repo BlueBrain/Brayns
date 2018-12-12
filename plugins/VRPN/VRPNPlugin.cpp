@@ -76,7 +76,7 @@ Property getStereoModeProperty()
 
 Property getInterpupillaryDistanceProperty()
 {
-    return {"interpupillaryDistance", 0.0635, {0.0, 10.0}, {"Eye separation"}};
+    return {"interpupillaryDistance", 0.0635, 0.0, 10.0, {"Eye separation"}};
 }
 
 PropertyMap getDefaultCameraProperties()

@@ -36,38 +36,34 @@ namespace
 {
 void _addAdvancedSimulationRenderer(Engine& engine)
 {
+    // clang-format off
     PropertyMap properties;
     properties.setProperty(
         {"aoDistance", 10000., {"Ambient occlusion distance"}});
     properties.setProperty(
-        {"aoWeight", 0., {0., 1.}, {"Ambient occlusion weight"}});
+        {"aoWeight", 0., 0., 1., {"Ambient occlusion weight"}});
     properties.setProperty({"detectionDistance", 15., {"Detection distance"}});
     properties.setProperty(
         {"shading",
          int32_t(AdvancedSimulationRenderer::Shading::none),
          brayns::enumNames<AdvancedSimulationRenderer::Shading>(),
          {"Shading"}});
-    properties.setProperty({"shadows", 0., {0., 1.}, {"Shadow intensity"}});
-    properties.setProperty({"softShadows", 0., {0., 1.}, {"Shadow softness"}});
-    properties.setProperty({"samplingThreshold",
-                            0.001,
-                            {0.001, 1.},
+    properties.setProperty({"shadows", 0., 0., 1., {"Shadow intensity"}});
+    properties.setProperty({"softShadows", 0., 0., 1., {"Shadow softness"}});
+    properties.setProperty({"samplingThreshold", 0.001, 0.001, 1.,
                             {"Threshold under which sampling is ignored"}});
-    properties.setProperty({"volumeSpecularExponent",
-                            20.,
-                            {1., 100.},
+    properties.setProperty({"volumeSpecularExponent", 20., 1., 100.,
                             {"Volume specular exponent"}});
-    properties.setProperty({"volumeAlphaCorrection",
-                            0.5,
-                            {0.001, 1.},
-                            {"Volume alpha correction"}});
+    properties.setProperty(
+        {"volumeAlphaCorrection", 0.5, 0.001, 1., {"Volume alpha correction"}});
+    // clang-format on
     engine.addRenderer("advanced_simulation", properties);
 }
 void _addBasicSimulationRenderer(Engine& engine)
 {
     PropertyMap properties;
     properties.setProperty(
-        {"alphaCorrection", 0.5, {0.001, 1.}, {"Alpha correction"}});
+        {"alphaCorrection", 0.5, 0.001, 1., {"Alpha correction"}});
     engine.addRenderer("basic_simulation", properties);
 }
 }

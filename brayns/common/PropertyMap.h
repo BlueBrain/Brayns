@@ -125,13 +125,13 @@ struct Property
 
     template <typename T>
     Property(const std::string& name_, const T value,
-             const std::pair<T, T>& limit, const MetaData& metaData_ = {})
+             const T min_, const T max_, const MetaData& metaData_ = {})
         : name(name_)
         , metaData(metaData_)
         , type(getType<T>())
         , _data(std::move(value))
-        , _min(limit.first)
-        , _max(limit.second)
+        , _min(min_)
+        , _max(max_)
     {
         assertValidType<T>();
     }
@@ -245,6 +245,22 @@ public:
     PropertyMap(const std::string& name)
         : _name(name)
     {
+    }
+
+    PropertyMap(const PropertyMap& other) = default;
+
+    // std::vector move constructor is not noexcept until C++17, if we want
+    // this class to be movable we have to do it by hand.
+    PropertyMap(PropertyMap&& other) noexcept
+        : _name(std::move(other._name))
+        , _properties(std::move(other._properties))
+    {}
+    // Assignment operator valid for both copy and move assignment.
+    PropertyMap& operator=(PropertyMap other) noexcept
+    {
+        std::swap(_name, other._name);
+        std::swap(_properties, other._properties);
+        return *this;
     }
 
     /**

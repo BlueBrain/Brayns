@@ -113,7 +113,8 @@ public:
         brayns::PropertyMap props;
         props.setProperty({"awesome",
                            int32_t(42),
-                           {0, 50},
+                           0,
+                           50,
                            {"Best property", "Because it's the best"}});
         _api->getRenderer().setProperties("myrenderer", props);
     }
