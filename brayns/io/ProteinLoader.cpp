@@ -35,15 +35,8 @@
 
 namespace
 {
-using Property = brayns::Property;
-const Property PROP_RADIUS_MULTIPLIER = {"radiusMultiplier",
-                                         1.0,
-                                         {"Radius multiplier"}};
-const Property PROP_COLOR_SCHEME = {"colorScheme",
-                                    brayns::enumToString(
-                                        brayns::ColorScheme::none),
-                                    brayns::enumNames<brayns::ColorScheme>(),
-                                    {"Color scheme"}};
+const auto PROP_RADIUS_MULTIPLIER = "radiusMultiplier";
+const auto PROP_COLOR_SCHEME = "colorScheme";
 const auto LOADER_NAME = "protein";
 }
 
@@ -324,9 +317,16 @@ static AtomicRadius atomic_radii[colorMapSize] = // atomic radii in microns
      {"OXT", 25.f, 112},
      {"P", 25.f, 113}};
 
-ProteinLoader::ProteinLoader(Scene& scene)
+ProteinLoader::ProteinLoader(Scene& scene, const GeometryParameters& params)
     : Loader(scene)
 {
+    _defaults.setProperty({PROP_COLOR_SCHEME,
+                           enumToString(params.getColorScheme()),
+                           brayns::enumNames<brayns::ColorScheme>(),
+                           {"Color scheme"}});
+    _defaults.setProperty({PROP_RADIUS_MULTIPLIER,
+                           static_cast<double>(params.getRadiusMultiplier()),
+                           {"Radius multiplier"}});
 }
 
 bool ProteinLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
@@ -338,18 +338,18 @@ bool ProteinLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr ProteinLoader::importFromFile(
     const std::string& fileName, const LoaderProgress&,
-    const PropertyMap& propertiesTmp, const size_t index,
+    const PropertyMap& inProperties, const size_t index,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     // Fill property map since the actual property types are known now.
-    PropertyMap properties = getProperties();
-    properties.merge(propertiesTmp);
+    PropertyMap properties = _defaults;
+    properties.merge(inProperties);
 
     const double radiusMultiplier =
-        properties.getProperty<double>(PROP_RADIUS_MULTIPLIER.name, 1.0);
+        properties.getProperty<double>(PROP_RADIUS_MULTIPLIER, 1.0);
 
     const auto colorScheme = stringToEnum<ColorScheme>(
-        properties.getProperty<std::string>(PROP_COLOR_SCHEME.name));
+        properties.getProperty<std::string>(PROP_COLOR_SCHEME));
 
     std::ifstream file(fileName.c_str());
     if (!file.is_open())
@@ -465,9 +465,8 @@ ModelDescriptorPtr ProteinLoader::importFromFile(
             // Convert radius from angstrom
             const float radius = 0.0001f * atom.radius * radiusMultiplier;
 
-            const auto materialId = colorScheme == ColorScheme::protein_by_id
-                                        ? index
-                                        : atom.materialId;
+            const auto materialId =
+                colorScheme == ColorScheme::by_id ? index : atom.materialId;
             spheres[materialId].push_back({center, radius});
         }
     }
@@ -508,9 +507,6 @@ std::vector<std::string> ProteinLoader::getSupportedExtensions() const
 
 PropertyMap ProteinLoader::getProperties() const
 {
-    PropertyMap pm;
-    pm.setProperty(PROP_COLOR_SCHEME);
-    pm.setProperty(PROP_RADIUS_MULTIPLIER);
-    return pm;
+    return _defaults;
 }
 }

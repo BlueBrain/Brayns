@@ -26,7 +26,6 @@
 #include <brayns/common/engine/Engine.h>
 #include <brayns/common/renderer/Renderer.h>
 #include <brayns/common/scene/Scene.h>
-#include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/ParametersManager.h>
 #include <brayns/pluginapi/PluginAPI.h>
 
@@ -68,23 +67,63 @@ void _addBasicSimulationRenderer(Engine& engine)
 }
 }
 
+CircuitViewer::CircuitViewer(PropertyMap&& circuitParams,
+                             PropertyMap&& morphologyParams)
+    : _circuitParams(std::move(circuitParams))
+    , _morphologyParams(std::move(morphologyParams))
+{
+}
+
 void CircuitViewer::init()
 {
     auto& scene = _api->getScene();
     auto& registry = scene.getLoaderRegistry();
-    _api->getParametersManager().getRenderingParameters().setCurrentRenderer(
-        "basic_simulation");
+    auto& params = _api->getParametersManager();
+    params.getRenderingParameters().setCurrentRenderer("basic_simulation");
 
-    registry.registerLoader(std::make_unique<CircuitLoader>(scene));
-    registry.registerLoader(std::make_unique<MorphologyLoader>(scene));
+    // This code should eventually go away. A more verbose alternative to
+    // the harcoded label is to move the PropertyMap to struct parsing code
+    // out of the circuit and morphology loader implementations.
+    const auto addGeometryQuality = [&params](PropertyMap& map) {
+        map.setProperty(
+            {"geometryQuality",
+             enumToString(params.getGeometryParameters().getGeometryQuality()),
+             enumNames<GeometryQuality>(),
+             {"Geometry Quality"}});
+    };
+
+    addGeometryQuality(_circuitParams);
+    addGeometryQuality(_morphologyParams);
+
+    registry.registerLoader(
+        std::make_unique<CircuitLoader>(scene, std::move(_circuitParams)));
+    registry.registerLoader(
+        std::make_unique<MorphologyLoader>(scene,
+                                           std::move(_morphologyParams)));
 
     _addAdvancedSimulationRenderer(_api->getEngine());
     _addBasicSimulationRenderer(_api->getEngine());
 }
 }
 
-extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int,
-                                                         const char**)
+extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,
+                                                         const char** argv)
 {
-    return new brayns::CircuitViewer();
+    using namespace brayns;
+
+    PropertyMap circuitParams = CircuitLoader::getCLIProperties();
+    PropertyMap morphologyParams = MorphologyLoader::getCLIProperties();
+    // Using a single PropertyMap for command line parsing. This way the
+    // UI for circuit loading inherits the properties from the morphology
+    // loader as well.
+    circuitParams.merge(morphologyParams);
+
+    if (!circuitParams.parse(argc, argv))
+        return nullptr;
+
+    // Update morphology parameters with command line defaults
+    morphologyParams.update(circuitParams);
+
+    return new CircuitViewer(std::move(circuitParams),
+                             std::move(morphologyParams));
 }

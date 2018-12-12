@@ -40,15 +40,8 @@ using CompartmentReportPtr = std::shared_ptr<brain::CompartmentReportView>;
 class SimulationHandler : public AbstractSimulationHandler
 {
 public:
-    /**
-     * @brief Default constructor
-     * @param geometryParameters Geometry parameters
-     * @param reportSource path to report source
-     * @param gids GIDS to load
-     */
-    SimulationHandler(const CompartmentReportPtr& compartmentReport,
-                      const bool synchronousMode, const double startTime,
-                      const double endTime, const double simulationStep);
+    SimulationHandler(const CompartmentReportPtr& report,
+                      const bool synchronousMode);
     ~SimulationHandler();
 
     void bind(const MaterialPtr& material) final;

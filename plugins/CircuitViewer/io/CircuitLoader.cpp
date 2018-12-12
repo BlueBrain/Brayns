@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -27,8 +27,6 @@
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/utils.h>
 
-#include <brayns/parameters/ApplicationParameters.h>
-
 #include <brain/brain.h>
 
 #if BRAYNS_USE_ASSIMP
@@ -38,51 +36,45 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 
-using namespace brayns;
-
+namespace brayns
+{
 namespace
 {
 constexpr size_t LOAD_BATCH_SIZE = 100;
 constexpr size_t DEFAULT_SOMA_RADIUS = 5;
 
-using Property = brayns::Property;
-const Property PROP_DENSITY = {"density", 100.0, {"Density"}};
-const Property PROP_RANDOM_SEED = {"randomSeed", 0, {"Random seed"}};
-const Property PROP_REPORT = {"report", std::string(""), {"Report"}};
-const Property PROP_TARGETS = {"targets", std::string(""), {"Targets"}};
-const Property PROP_MESH_FILENAME_PATTERN = {"meshFilenamePattern",
-                                             std::string(""),
-                                             {"Mesh filename pattern"}};
-const Property PROP_MESH_FOLDER = {"meshFolder",
-                                   std::string(""),
-                                   {"Mesh folder"}};
-const Property PROP_USE_SIMULATION_MODEL = {"useSimulationModel",
-                                            false,
-                                            {"Use simulation model"}};
-const Property PROP_TRANSFORM_MESHES = {"transformMeshes",
-                                        false,
-                                        {"Transform meshes"}};
-const Property PROP_COLOR_SCHEME = {"colorScheme",
-                                    brayns::enumToString(ColorScheme::none),
-                                    brayns::enumNames<ColorScheme>(),
-                                    {"Color scheme"}};
-const Property PROP_START_SIMULATION_TIME = {"startSimulationTime",
-                                             0.0,
-                                             {"Start simulation time"}};
-const Property PROP_END_SIMULATION_TIME = {"endSimulationTime",
-                                           0.0,
-                                           {"End simulation time"}};
-const Property PROP_SIMULATION_STEP = {"simulationStep",
-                                       0.0,
-                                       {"Simulation step"}};
-const Property PROP_SYNCHRONOUS_MODE = {"synchronousMode",
-                                        false,
-                                        {"Synchronous mode"}};
-const Property PROP_GEOMETRY_QUALITY = {"geometryQuality",
-                                        brayns::enumToString(
-                                            GeometryQuality::high),
-                                        brayns::enumNames<GeometryQuality>(),
-                                        {"Geometry quality"}};
+// clang-format off
+const Property PROP_DENSITY = {
+    "density", 100.0,
+    {"Density", "Density of cells in the circuit in percent [float]"}};
+const Property PROP_RANDOM_SEED = {
+    "randomSeed", 0,
+    {"Random seed", "Random seed for target subsetting [int]"}};
+const Property PROP_REPORT{
+    "report", std::string(),
+    {"Report", "Circuit report [string]"}};
+const Property PROP_TARGETS = {
+    "targets",  std::string(""),
+    {"Targets", "Circuit targets [comma separated strings]"}};
+const Property PROP_MESH_FILENAME_PATTERN = {
+    "meshFilenamePattern", std::string(""),
+    {"Mesh filename pattern", "Pattern used to determine the name of the file"
+     " containing a meshed morphology [string]"}};
+const Property PROP_MESH_FOLDER = {
+    "meshFolder", std::string(""),
+    {"Mesh folder", "Folder containing meshed morphologies [string]"}};
+const Property PROP_USE_SIMULATION_MODEL = {
+    "useSimulationModel", false,
+    {"Use simulation model", "Defines if a different model is used to handle"
+     " the simulation geometry."}};
+const Property PROP_TRANSFORM_MESHES = {
+    "transformMeshes", false,
+    {"Transform meshes", "Enable mesh transformation according to circuit "
+     "information."}};
+const Property PROP_SYNCHRONOUS_MODE = {
+    "synchronousMode", false, {"Synchronous mode"}};
+// clang-format on
+
 constexpr auto LOADER_NAME = "circuit";
 const strings LOADER_EXTENSIONS{"BlueConfig", "BlueConfig3", "CircuitConfig",
                                 ".json", "circuit"};
@@ -241,7 +233,7 @@ size_ts _getLayerIds(const brain::Circuit& circuit, const brain::GIDSet& gids)
     catch (const std::runtime_error& e)
     {
         // Some layer was not found by getGIDs.
-        BRAYNS_ERROR << "Color scheme neuron_by_layer unavailable: " << e.what()
+        BRAYNS_ERROR << "Color scheme by_layer unavailable: " << e.what()
                      << std::endl;
         return size_ts();
     }
@@ -277,17 +269,17 @@ size_ts _getLayerIds(const brain::Circuit& circuit, const brain::GIDSet& gids)
     return materialIds;
 }
 
-size_t _getMaterialId(const ColorScheme colorScheme, const uint64_t index,
+size_t _getMaterialId(const NeuronColorScheme colorScheme, const uint64_t index,
                       const brain::neuron::SectionType sectionType,
                       const size_ts& perCellMaterialIds)
 {
     size_t materialId = 0;
     switch (colorScheme)
     {
-    case ColorScheme::neuron_by_id:
+    case NeuronColorScheme::by_id:
         materialId = index;
         break;
-    case ColorScheme::neuron_by_segment_type:
+    case NeuronColorScheme::by_segment_type:
         switch (sectionType)
         {
         case brain::neuron::SectionType::soma:
@@ -307,10 +299,10 @@ size_t _getMaterialId(const ColorScheme colorScheme, const uint64_t index,
             break;
         }
         break;
-    case ColorScheme::neuron_by_target: // no break
-    case ColorScheme::neuron_by_etype:  // no break
-    case ColorScheme::neuron_by_mtype:  // no break
-    case ColorScheme::neuron_by_layer:  // no break
+    case NeuronColorScheme::by_target: // no break
+    case NeuronColorScheme::by_etype:  // no break
+    case NeuronColorScheme::by_mtype:  // no break
+    case NeuronColorScheme::by_layer:  // no break
         if (perCellMaterialIds.empty())
         {
             materialId = NO_MATERIAL;
@@ -337,15 +329,6 @@ struct CircuitProperties
             variable = properties.getProperty<T>(name, defaultVal);
         };
 
-        const auto setEnumVariable =
-            [&](auto& variable, const std::string& name, auto defaultVal) {
-                using T = decltype(defaultVal);
-                const auto enumStr =
-                    properties.getProperty<std::string>(name, enumToString<T>(
-                                                                  defaultVal));
-                variable = stringToEnum<T>(enumStr);
-            };
-
         setVariable(density, PROP_DENSITY.name, 100.0);
         setVariable(randomSeed, PROP_RANDOM_SEED.name, 0);
         setVariable(report, PROP_REPORT.name, "");
@@ -354,13 +337,7 @@ struct CircuitProperties
         setVariable(meshFolder, PROP_MESH_FOLDER.name, "");
         setVariable(useSimulationModel, PROP_USE_SIMULATION_MODEL.name, false);
         setVariable(transformMeshes, PROP_TRANSFORM_MESHES.name, 0);
-        setEnumVariable(colorScheme, PROP_COLOR_SCHEME.name, ColorScheme::none);
-        setVariable(startSimulationTime, PROP_START_SIMULATION_TIME.name, 0.0);
-        setVariable(endSimulationTime, PROP_END_SIMULATION_TIME.name, 0.0);
-        setVariable(simulationStep, PROP_SIMULATION_STEP.name, 0.0);
         setVariable(synchronousMode, PROP_SYNCHRONOUS_MODE.name, false);
-        setEnumVariable(geometryQuality, PROP_GEOMETRY_QUALITY.name,
-                        GeometryQuality::high);
 
         boost::char_separator<char> separator(",");
         boost::tokenizer<boost::char_separator<char>> tokens(targets,
@@ -380,15 +357,8 @@ struct CircuitProperties
     std::string meshFolder;
     bool useSimulationModel = false;
     bool transformMeshes = false;
-    ColorScheme colorScheme = ColorScheme::none;
-
-    double startSimulationTime = 0;
-    double endSimulationTime = 0;
-    double simulationStep = 0;
 
     bool synchronousMode = false;
-
-    GeometryQuality geometryQuality = GeometryQuality::high;
 };
 
 CompartmentReportPtr _openCompartmentReport(const brain::Simulation* simulation,
@@ -540,16 +510,6 @@ void _setSimulationTransferFunction(TransferFunction& tf)
     tf.setValuesRange({-80, -10});
 }
 
-SimulationHandlerPtr _createSimulationHandler(
-    const CompartmentReportPtr& report, const CircuitProperties& properties)
-{
-    return std::make_shared<SimulationHandler>(report,
-                                               properties.synchronousMode,
-                                               properties.startSimulationTime,
-                                               properties.endSimulationTime,
-                                               properties.simulationStep);
-}
-
 class Impl
 {
 public:
@@ -631,8 +591,9 @@ public:
         const brain::CompartmentReportMapping* reportMapping = nullptr;
         if (compartmentReport)
         {
-            model->setSimulationHandler(
-                _createSimulationHandler(compartmentReport, _properties));
+            model->setSimulationHandler(std::make_shared<SimulationHandler>(
+                compartmentReport, _properties.synchronousMode));
+
             // Only keep GIDs from the report
             allGids = compartmentReport->getGIDs();
             reportMapping = &compartmentReport->getMapping();
@@ -643,9 +604,7 @@ public:
         const auto perCellMaterialIds =
             _createPerCellMaterialIds(circuit, allGids, targetSizes);
 
-        if (_morphologyParams.sectionTypes ==
-            std::vector<MorphologySectionType>{MorphologySectionType::soma})
-
+        if (_morphologyParams.mode == NeuronDisplayMode::soma)
         {
             // Import soma only morphologies as spheres
             _addSomaSpheres(circuit, allGids, callback, *model, reportMapping,
@@ -670,9 +629,10 @@ public:
         // Create materials
         model->createMissingMaterials();
         // Assigning some colors to not get all white
-        if (_properties.colorScheme != ColorScheme::none)
+        if (_morphologyParams.colorScheme != NeuronColorScheme::none)
         {
-            if (_properties.colorScheme == ColorScheme::neuron_by_segment_type)
+            if (_morphologyParams.colorScheme ==
+                NeuronColorScheme::by_segment_type)
                 // This mode already handles sections types in a hacky way. A
                 // refactoring is needed
                 model->setMaterialsColorMap(MaterialsColorMap::none);
@@ -703,9 +663,9 @@ private:
     {
         try
         {
-            switch (_properties.colorScheme)
+            switch (_morphologyParams.colorScheme)
             {
-            case ColorScheme::neuron_by_target:
+            case NeuronColorScheme::by_target:
             {
                 size_ts ids;
                 ids.reserve(gids.size());
@@ -714,11 +674,11 @@ private:
                     std::fill_n(std::back_inserter(ids), size, id);
                 return ids;
             }
-            case ColorScheme::neuron_by_etype:
+            case NeuronColorScheme::by_etype:
                 return circuit.getElectrophysiologyTypes(gids);
-            case ColorScheme::neuron_by_mtype:
+            case NeuronColorScheme::by_mtype:
                 return circuit.getMorphologyTypes(gids);
-            case ColorScheme::neuron_by_layer:
+            case NeuronColorScheme::by_layer:
                 return _getLayerIds(circuit, gids);
             default:
                 return size_ts();
@@ -749,7 +709,7 @@ private:
         for (size_t i = 0; i != gids.size(); ++i)
         {
             const auto materialId =
-                _getMaterialId(_properties.colorScheme, i,
+                _getMaterialId(_morphologyParams.colorScheme, i,
                                brain::neuron::SectionType::soma,
                                perCellMaterialIds);
             const auto offset =
@@ -767,34 +727,34 @@ private:
                        const size_ts& perCellMaterialIds BRAYNS_UNUSED) const
     {
 #if BRAYNS_USE_ASSIMP
-        const auto colorScheme = _properties.colorScheme;
-        const auto geometryQuality = _properties.geometryQuality;
+        const auto colorScheme = _morphologyParams.colorScheme;
+        const auto geometryQuality = _morphologyParams.geometryQuality;
         MeshLoader meshLoader(_scene);
         size_t loadingFailures = 0;
         const auto meshedMorphologiesFolder = _properties.meshFolder;
         if (meshedMorphologiesFolder.empty())
             return;
 
-        size_t meshIndex = 0;
+        size_t index = 0;
         // Loading meshes is currently sequential. TODO: Make it parallel!!!
         std::stringstream message;
         message << "Loading " << gids.size() << " meshes...";
         for (const auto& gid : gids)
         {
             size_t materialId = 0;
-            if (colorScheme == ColorScheme::neuron_by_id)
-                materialId = meshIndex;
-            else if (colorScheme != ColorScheme::neuron_by_segment_type)
+            if (colorScheme == NeuronColorScheme::by_id)
+                materialId = index;
+            else if (colorScheme != NeuronColorScheme::by_segment_type)
             {
                 if (perCellMaterialIds.empty())
                     materialId = NO_MATERIAL;
                 else
-                    materialId = perCellMaterialIds[meshIndex];
+                    materialId = perCellMaterialIds[index];
             }
 
             // Load mesh from file
             const auto transformation = _properties.transformMeshes
-                                            ? transformations[meshIndex]
+                                            ? transformations[index]
                                             : Matrix4f();
 
             const auto filename =
@@ -802,17 +762,15 @@ private:
                                         _properties.meshFolder);
             try
             {
-                meshLoader.importMesh(filename, callback, model, meshIndex,
-                                      transformation, materialId, colorScheme,
-                                      geometryQuality);
+                meshLoader.importMesh(filename, callback, model, transformation,
+                                      materialId, geometryQuality);
             }
             catch (...)
             {
                 ++loadingFailures;
             }
-            ++meshIndex;
-            callback.updateProgress(message.str(),
-                                    meshIndex / float(gids.size()));
+            ++index;
+            callback.updateProgress(message.str(), index / float(gids.size()));
         }
         if (loadingFailures != 0)
             BRAYNS_WARN << "Failed to import " << loadingFailures << " meshes"
@@ -829,8 +787,6 @@ private:
         const brain::CompartmentReportMapping* reportMapping,
         const size_ts& perCellMaterialIds) const
     {
-        MorphologyLoader morphLoader(_scene);
-
         std::stringstream message;
         message << "Loading " << gids.size() << " morphologies...";
 
@@ -859,17 +815,16 @@ private:
                     if (_properties.useSimulationModel)
                         return size_t{0};
                     else
-                        return _getMaterialId(_properties.colorScheme,
+                        return _getMaterialId(_morphologyParams.colorScheme,
                                               morphologyIndex, type,
                                               perCellMaterialIds);
                 };
 
                 const auto& morphology = morphologies[j];
 
-                auto data =
-                    morphLoader.processMorphology(*morphology, morphologyIndex,
-                                                  materialFunc, reportMapping,
-                                                  _morphologyParams);
+                auto data = MorphologyLoader::processMorphology(
+                    *morphology, morphologyIndex, materialFunc, reportMapping,
+                    _morphologyParams);
 #pragma omp critical
                 data.addTo(model);
 
@@ -901,10 +856,9 @@ private:
 };
 }
 
-namespace brayns
-{
-CircuitLoader::CircuitLoader(Scene& scene)
+CircuitLoader::CircuitLoader(Scene& scene, PropertyMap defaults)
     : Loader(scene)
+    , _defaults(std::move(defaults))
 {
 }
 
@@ -939,15 +893,15 @@ ModelDescriptorPtr CircuitLoader::importFromBlob(
 
 ModelDescriptorPtr CircuitLoader::importFromFile(
     const std::string& filename, const LoaderProgress& callback,
-    const PropertyMap& propertiesTmp, const size_t /*index*/,
+    const PropertyMap& inProperties, const size_t /*index*/,
     const size_t /*materialID*/) const
 {
     callback.updateProgress("Loading circuit ...", 0);
 
     // Fill property map since the actual property types are known now.
-    PropertyMap properties = getProperties();
-    properties.merge(propertiesTmp);
-    auto impl = Impl(_scene, properties);
+    PropertyMap properties = _defaults;
+    properties.merge(inProperties);
+    auto impl = Impl(_scene, std::move(properties));
     return impl.importCircuit(filename, callback);
 }
 
@@ -963,7 +917,12 @@ std::vector<std::string> CircuitLoader::getSupportedExtensions() const
 
 PropertyMap CircuitLoader::getProperties() const
 {
-    PropertyMap pm;
+    return _defaults;
+}
+
+PropertyMap CircuitLoader::getCLIProperties()
+{
+    PropertyMap pm("CircuitViewer");
     pm.setProperty(PROP_DENSITY);
     pm.setProperty(PROP_RANDOM_SEED);
     pm.setProperty(PROP_REPORT);
@@ -972,29 +931,7 @@ PropertyMap CircuitLoader::getProperties() const
     pm.setProperty(PROP_MESH_FOLDER);
     pm.setProperty(PROP_USE_SIMULATION_MODEL);
     pm.setProperty(PROP_TRANSFORM_MESHES);
-    pm.setProperty(PROP_COLOR_SCHEME);
-    pm.setProperty(PROP_START_SIMULATION_TIME);
-    pm.setProperty(PROP_END_SIMULATION_TIME);
-    pm.setProperty(PROP_SIMULATION_STEP);
     pm.setProperty(PROP_SYNCHRONOUS_MODE);
-    pm.setProperty(PROP_GEOMETRY_QUALITY);
-
-    { // Add all morphology loader properties
-        const auto mlpm = MorphologyLoader(_scene).getProperties();
-        for (const auto& prop : mlpm.getProperties())
-            if (prop && !pm.hasProperty(prop->name))
-                pm.setProperty(*prop);
-    }
-
-#if BRAYNS_USE_ASSIMP
-    { // Add all mesh loader properties
-        const auto mlpm = MeshLoader(_scene).getProperties();
-        for (const auto& prop : mlpm.getProperties())
-            if (prop && !pm.hasProperty(prop->name))
-                pm.setProperty(*prop);
-    }
-#endif
-
     return pm;
 }
 }

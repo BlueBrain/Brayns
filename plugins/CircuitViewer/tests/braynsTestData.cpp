@@ -43,15 +43,10 @@ BOOST_AUTO_TEST_CASE(simple_circuit)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app,
-                          BBP_TEST_BLUECONFIG3,
-                          "--plugin",
-                          "braynsCircuitViewer",
-                          "--disable-accumulation",
-                          "--circuit-targets",
-                          "Layer1",
-                          "--samples-per-pixel",
-                          "16"};
+    const char* argv[] = {
+        app, BBP_TEST_BLUECONFIG3, "--disable-accumulation",
+        "--samples-per-pixel", "16", "--plugin",
+        "braynsCircuitViewer --targets Layer1"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -62,22 +57,19 @@ BOOST_AUTO_TEST_CASE(simple_circuit)
                                  brayns.getEngine().getFrameBuffer()));
 }
 
-BOOST_AUTO_TEST_CASE(curcuit_with_color_by_mtype)
+BOOST_AUTO_TEST_CASE(circuit_with_color_by_mtype)
 {
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app,
-                          BBP_TEST_BLUECONFIG3,
-                          "--plugin",
-                          "braynsCircuitViewer",
-                          "--disable-accumulation",
-                          "--circuit-targets",
-                          "MiniColumn_0",
-                          "--samples-per-pixel",
-                          "16",
-                          "--color-scheme",
-                          "neuron-by-mtype"};
+    const char* argv[] = {
+        app,
+        BBP_TEST_BLUECONFIG3,
+        "--disable-accumulation",
+        "--samples-per-pixel",
+        "16",
+        "--plugin",
+        "braynsCircuitViewer --targets MiniColumn_0 --color-scheme by-mtype"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -95,19 +87,11 @@ BOOST_AUTO_TEST_CASE(circuit_with_simulation_mapping)
     auto& testSuite = boost::unit_test::framework::master_test_suite();
 
     const char* app = testSuite.argv[0];
-    const char* argv[] = {app,
-                          BBP_TEST_BLUECONFIG3,
-                          "--plugin",
-                          "braynsCircuitViewer",
-                          "--circuit-targets",
-                          "allmini50",
-                          "--circuit-report",
-                          "voltages",
-                          "--samples-per-pixel",
-                          "16",
-                          "--animation-frame",
-                          "50",
-                          "--synchronous-mode"};
+    const char* argv[] = {app, BBP_TEST_BLUECONFIG3, "--samples-per-pixel",
+                          "16", "--animation-frame", "50", "--plugin",
+                          "braynsCircuitViewer --targets allmini50 --report "
+                          "voltages --synchronous-mode"};
+
     const int argc = sizeof(argv) / sizeof(char*);
 
     brayns::Brayns brayns(argc, argv);
@@ -140,16 +124,17 @@ void testSdfGeometries(bool dampened)
     const char* app = testSuite.argv[0];
     auto argv = std::vector<const char*>{app,
                                          BBP_TEST_BLUECONFIG3,
-                                         "--plugin",
-                                         "braynsCircuitViewer",
                                          "--disable-accumulation",
-                                         "--circuit-targets",
-                                         "Layer1",
-                                         "--morphology-use-sdf-geometries",
                                          "--samples-per-pixel",
-                                         "16"};
+                                         "16",
+                                         "--plugin"};
     if (dampened)
-        argv.push_back("--morphology-dampen-branch-thickness-changerate");
+        argv.push_back(
+            "braynsCircuitViewer --targets Layer1 --use-sdf-geometries "
+            "--dampen-branch-thickness-changerate");
+    else
+        argv.push_back(
+            "braynsCircuitViewer --targets Layer1 --use-sdf-geometries");
 
     const int argc = argv.size();
 

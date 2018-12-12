@@ -22,8 +22,6 @@
 
 #include <brayns/common/log.h>
 #include <brayns/common/material/Material.h>
-#include <brayns/parameters/ApplicationParameters.h>
-#include <brayns/parameters/GeometryParameters.h>
 
 #include <brain/compartmentReport.h>
 #include <brain/compartmentReportMapping.h>
@@ -32,31 +30,28 @@
 
 namespace brayns
 {
-SimulationHandler::SimulationHandler(
-    const CompartmentReportPtr& compartmentReport, const bool synchronousMode,
-    const double startTime, const double endTime, const double simulationStep)
-    : _compartmentReport(compartmentReport)
+SimulationHandler::SimulationHandler(const CompartmentReportPtr& report,
+                                     const bool synchronousMode)
+    : _compartmentReport(report)
     , _synchronousMode(synchronousMode)
 {
     // Load simulation information from compartment reports
-    const auto& metadata = compartmentReport->getReader().getMetaData();
-    _startTime = std::max(metadata.startTime, startTime);
-    _endTime = std::min(metadata.endTime, endTime);
-    _dt = std::max(metadata.timeStep, simulationStep);
+    const auto& metadata = report->getReader().getMetaData();
+    _startTime = metadata.startTime;
+    _endTime = metadata.endTime;
+    _dt = metadata.timeStep;
     _unit = metadata.timeUnit;
-    _frameSize = _compartmentReport->getMapping().getFrameSize();
-    _nbFrames = (_endTime - _startTime) / _dt;
+    _nbFrames = metadata.frameCount;
+    _frameSize = report->getMapping().getFrameSize();
+
 
     BRAYNS_INFO << "-----------------------------------------------------------"
                 << std::endl;
     BRAYNS_INFO << "Simulation information" << std::endl;
     BRAYNS_INFO << "----------------------" << std::endl;
-    BRAYNS_INFO << "Start frame          : " << _startTime << "/"
-                << metadata.startTime << std::endl;
-    BRAYNS_INFO << "End frame            : " << _endTime << "/"
-                << metadata.endTime << std::endl;
-    BRAYNS_INFO << "Steps between frames : " << _dt << "/" << metadata.timeStep
-                << std::endl;
+    BRAYNS_INFO << "Start time          : " << _startTime << std::endl;
+    BRAYNS_INFO << "End time            : " << _endTime << std::endl;
+    BRAYNS_INFO << "Steps between frames : " << _dt << std::endl;
     BRAYNS_INFO << "Number of frames : " << _nbFrames << std::endl;
     BRAYNS_INFO << "-----------------------------------------------------------"
                 << std::endl;

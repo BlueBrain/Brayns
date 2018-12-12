@@ -34,7 +34,7 @@ namespace brayns
 class ProteinLoader : public Loader
 {
 public:
-    ProteinLoader(Scene& scene);
+    ProteinLoader(Scene& scene, const GeometryParameters& params);
 
     std::vector<std::string> getSupportedExtensions() const final;
     std::string getName() const final;
@@ -54,6 +54,9 @@ public:
     {
         throw std::runtime_error("Loading from blob not supported");
     }
+
+private:
+    PropertyMap _defaults;
 };
 }
 

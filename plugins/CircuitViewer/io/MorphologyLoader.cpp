@@ -25,6 +25,7 @@
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/types.h>
+#include <brayns/common/utils/enumUtils.h>
 #include <brayns/common/utils/utils.h>
 
 #include <brain/brain.h>
@@ -35,6 +36,29 @@
 
 namespace brayns
 {
+using brain::neuron::SectionType;
+
+template <>
+inline std::vector<std::pair<std::string, NeuronColorScheme>> enumMap()
+{
+    return {{"none", NeuronColorScheme::none},
+            {"by-id", NeuronColorScheme::by_id},
+            {"by-type", NeuronColorScheme::by_type},
+            {"by-segment-type", NeuronColorScheme::by_segment_type},
+            {"by-layer", NeuronColorScheme::by_layer},
+            {"by-mtype", NeuronColorScheme::by_mtype},
+            {"by-etype", NeuronColorScheme::by_etype},
+            {"by-target", NeuronColorScheme::by_target}};
+}
+
+template <>
+inline std::vector<std::pair<std::string, NeuronDisplayMode>> enumMap()
+{
+    return {{"soma", NeuronDisplayMode::soma},
+            {"no_axon", NeuronDisplayMode::no_axon},
+            {"full", NeuronDisplayMode::full}};
+}
+
 namespace
 {
 // From http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
@@ -51,43 +75,33 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
            || std::abs(x - y) < std::numeric_limits<T>::min();
 }
 
-using Property = brayns::Property;
-
-const Property PROP_COLOR_SCHEME = {"colorScheme",
-                                    brayns::enumToString(
-                                        brayns::ColorScheme::none),
-                                    brayns::enumNames<brayns::ColorScheme>(),
-                                    {"Color scheme"}};
-const Property PROP_RADIUS_MULTIPLIER = {"radiusMultiplier",
-                                         1.0,
-                                         {"Radius multiplier"}};
-const Property PROP_RADIUS_CORRECTION = {"radiusCorrection",
-                                         0.,
-                                         {"Radius correction"}};
-const Property PROP_SECTION_TYPES_SOMA = {"sectionTypesSoma",
-                                          true,
-                                          {"Enable 'Soma' section type"}};
-const Property PROP_SECTION_TYPES_AXON = {"sectionTypesAxon",
-                                          true,
-                                          {"Enable 'Axon' section type"}};
-const Property PROP_SECTION_TYPES_DENDRITE = {
-    "sectionTypesDendrite", true, {"Enable 'Dendrite' section type"}};
-const Property PROP_SECTION_TYPES_APICAL_DENDRITE = {
-    "sectionTypesApicalDendrite",
-    true,
-    {"Enable 'Apical Dendrite' section type"}};
+// clang-format off
+const Property PROP_COLOR_SCHEME = {
+    "colorScheme", enumToString(NeuronColorScheme::none),
+    enumNames<NeuronColorScheme>(),
+    {"Color scheme", "Color scheme to be applied to the geometry [none|by-id|"
+     "by-type|by-segment-type|by-layer|by-mtype|by-etype|by-target"}};
+const Property PROP_RADIUS_MULTIPLIER = {
+    "radiusMultiplier", 1.0,
+    {"Radius multiplier", "Radius multiplier for spheres, cones and "
+     "cylinders [float]"}};
+const Property PROP_RADIUS_CORRECTION = {
+    "radiusCorrection", 0.,
+    {"Radius correction", "Forces radius of spheres and cylinders to the "
+     "specified value [float]"}};
+const Property PROP_DISPLAY_MODE = {
+    "displayMode", enumToString(NeuronDisplayMode::full),
+    enumNames<NeuronDisplayMode>(),
+    {"Display mode", "Display mode for neuronal morphologies "
+     "[soma|no_axon|full]"}};
 const Property PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE = {
-    "dampenBranchThicknessChangerate",
-    false,
-    {"Dampen branch thickness changerate"}};
-const Property PROP_USE_SDF_GEOMETRIES = {"useSdfGeometries",
-                                          false,
-                                          {"Use SDF geometries"}};
-const Property PROP_GEOMETRY_QUALITY = {
-    "geometryQuality",
-    brayns::enumToString(brayns::GeometryQuality::high),
-    brayns::enumNames<brayns::GeometryQuality>(),
-    {"Geometry quality"}};
+    "dampenBranchThicknessChangerate", false,
+    {"Dampen branch thickness changerate", "Dampen the thickness rate of change"
+     " for branches in the morphology."}};
+const Property PROP_USE_SDF_GEOMETRIES = {
+    "useSdfGeometries", false,
+    {"Use SDF geometries", "Use SDF geometries for drawing the morphologies."}};
+// clang-format on
 
 const auto LOADER_NAME = "morphology";
 
@@ -101,20 +115,21 @@ struct SDFData
     std::unordered_map<uint32_t, std::vector<size_t>> sectionGeometries;
 };
 
-bool _isInMask(const brain::neuron::SectionType type, const size_t mask)
+bool _isVisible(const SectionType type, const NeuronDisplayMode mode)
 {
     switch (type)
     {
-    case brain::neuron::SectionType::soma:
-        return mask & static_cast<size_t>(MorphologySectionType::soma);
-    case brain::neuron::SectionType::axon:
-        return mask & static_cast<size_t>(MorphologySectionType::axon);
-    case brain::neuron::SectionType::dendrite:
-        return mask & static_cast<size_t>(MorphologySectionType::dendrite);
-    case brain::neuron::SectionType::apicalDendrite:
-        return mask &
-               static_cast<size_t>(MorphologySectionType::apical_dendrite);
-    case brain::neuron::SectionType::undefined:
+    case SectionType::soma:
+        return true;
+    case SectionType::axon:
+        return mode == NeuronDisplayMode::full;
+    case SectionType::dendrite:
+        return mode == NeuronDisplayMode::full ||
+               mode == NeuronDisplayMode::no_axon;
+    case SectionType::apicalDendrite:
+        return mode == NeuronDisplayMode::full ||
+               mode == NeuronDisplayMode::no_axon;
+    case SectionType::undefined:
     default:
         return true; // Unclassified sections will always be visible.
     }
@@ -128,7 +143,7 @@ inline float _getLastSampleRadius(const brain::neuron::Section& section)
 /* Morphology tree processing */
 
 uint32_ts computeTreeTraversalOrder(const brain::neuron::Morphology& morphology,
-                                    const size_t sectionTypeMask)
+                                    const NeuronDisplayMode displayMode)
 {
     uint32_ts visited;
     uint32_ts stack;
@@ -146,7 +161,7 @@ uint32_ts computeTreeTraversalOrder(const brain::neuron::Morphology& morphology,
         // means that e.g. an apical dendrite section cannot have normal
         // dendrite children. For that reason, if the current section type is
         // discarded, we can discard all its children as well.
-        if (!_isInMask(morphology.getSection(id).getType(), sectionTypeMask))
+        if (!_isVisible(morphology.getSection(id).getType(), displayMode))
             continue;
 
         visited.push_back(id);
@@ -315,34 +330,15 @@ MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
         variable = stringToEnum<T>(enumStr);
     };
 
-    setEnumVariable(colorScheme, PROP_COLOR_SCHEME.name, ColorScheme::none);
+    setEnumVariable(colorScheme, PROP_COLOR_SCHEME.name,
+                    NeuronColorScheme::none);
     setVariable(radiusMultiplier, PROP_RADIUS_MULTIPLIER.name, 1.0);
     setVariable(radiusCorrection, PROP_RADIUS_CORRECTION.name, 0.);
-
-    {
-        bool soma = true;
-        bool axon = true;
-        bool dendrite = true;
-        bool apicalDendrite = true;
-        setVariable(soma, PROP_SECTION_TYPES_SOMA.name, true);
-        setVariable(axon, PROP_SECTION_TYPES_AXON.name, true);
-        setVariable(dendrite, PROP_SECTION_TYPES_DENDRITE.name, true);
-        setVariable(apicalDendrite, PROP_SECTION_TYPES_APICAL_DENDRITE.name,
-                    true);
-
-        if (soma)
-            sectionTypes.push_back(MorphologySectionType::soma);
-        if (axon)
-            sectionTypes.push_back(MorphologySectionType::axon);
-        if (dendrite)
-            sectionTypes.push_back(MorphologySectionType::dendrite);
-        if (apicalDendrite)
-            sectionTypes.push_back(MorphologySectionType::apical_dendrite);
-    }
+    setEnumVariable(mode, PROP_DISPLAY_MODE.name, NeuronDisplayMode::full);
     setVariable(dampenBranchThicknessChangerate,
                 PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name, false);
     setVariable(useSDFGeometries, PROP_USE_SDF_GEOMETRIES.name, false);
-    setEnumVariable(geometryQuality, PROP_GEOMETRY_QUALITY.name,
+    setEnumVariable(geometryQuality, "geometryQuality",
                     GeometryQuality::high);
 }
 
@@ -354,8 +350,8 @@ public:
     {
     }
 
-    ModelData processMorphology(
-        const brain::neuron::Morphology& morphology, const uint64_t index) const
+    ModelData processMorphology(const brain::neuron::Morphology& morphology,
+                                const uint64_t index) const
     {
         auto materialFunc =
             [ colorScheme = _params.colorScheme, index ](auto sectionType)
@@ -363,10 +359,10 @@ public:
             size_t materialId = 0;
             switch (colorScheme)
             {
-            case ColorScheme::neuron_by_id:
+            case NeuronColorScheme::by_id:
                 materialId = index;
                 break;
-            case ColorScheme::neuron_by_segment_type:
+            case NeuronColorScheme::by_segment_type:
                 switch (sectionType)
                 {
                 case brain::neuron::SectionType::soma:
@@ -402,13 +398,11 @@ public:
     {
         const bool dampenThickness = _params.dampenBranchThicknessChangerate;
         const bool useSDFGeometries = _params.useSDFGeometries;
-        const size_t sectionMask = enumsToBitmask(_params.sectionTypes);
 
         ModelData model;
         SDFData sdfData;
 
         // Soma
-        if (sectionMask & static_cast<size_t>(MorphologySectionType::soma))
         {
             const uint64_t offset =
                 reportMapping ? reportMapping->getOffsets()[index][0] : 0;
@@ -419,8 +413,7 @@ public:
         // Only the first one or two axon sections are reported, so find the
         // last one and use its offset for all the other axon sections
         uint16_t lastAxon = 0;
-        if (reportMapping &&
-            (sectionMask & static_cast<size_t>(MorphologySectionType::axon)))
+        if (reportMapping && _params.mode == NeuronDisplayMode::full)
         {
             const auto& counts = reportMapping->getCompartmentCounts()[index];
             const auto& axon =
@@ -438,7 +431,7 @@ public:
 
         // Dendrites and axon
         for (const auto sectionId :
-             computeTreeTraversalOrder(morphology, sectionMask))
+             computeTreeTraversalOrder(morphology, _params.mode))
         {
             const auto& section = morphology.getSection(sectionId);
             const auto& samples = section.getSamples();
@@ -615,9 +608,8 @@ private:
     /**
      * Adds a Soma geometry to the model
      */
-    void _addSomaGeometry(const brain::neuron::Soma& soma,
-                          uint64_t offset, bool useSDFGeometries,
-                          MaterialFunc materialFunc,
+    void _addSomaGeometry(const brain::neuron::Soma& soma, uint64_t offset,
+                          bool useSDFGeometries, MaterialFunc materialFunc,
                           ModelData& model, SDFData& sdfData) const
     {
         const size_t materialId =
@@ -657,11 +649,12 @@ private:
     }
 
 private:
-    const MorphologyLoaderParams _params;
+    const MorphologyLoaderParams& _params;
 };
 
-MorphologyLoader::MorphologyLoader(Scene& scene)
+MorphologyLoader::MorphologyLoader(Scene& scene, PropertyMap defaults)
     : Loader(scene)
+    , _defaults(std::move(defaults))
 {
 }
 
@@ -685,12 +678,12 @@ ModelDescriptorPtr MorphologyLoader::importFromBlob(
 
 ModelDescriptorPtr MorphologyLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const PropertyMap& propertiesTmp, const size_t index,
+    const PropertyMap& inProperties, const size_t index,
     const size_t defaultMaterialId BRAYNS_UNUSED) const
 {
     // Fill property map since the actual property types are known now.
-    PropertyMap properties = getProperties();
-    properties.merge(propertiesTmp);
+    PropertyMap properties = _defaults;
+    properties.merge(inProperties);
 
     const auto modelName = boost::filesystem::basename({fileName});
     callback.updateProgress("Loading " + modelName + " ...", 0.f);
@@ -717,7 +710,7 @@ ModelData MorphologyLoader::processMorphology(
     const brain::neuron::Morphology& morphology, const uint64_t index,
     MaterialFunc materialFunc,
     const brain::CompartmentReportMapping* reportMapping,
-    const MorphologyLoaderParams& params) const
+    const MorphologyLoaderParams& params)
 {
     auto impl = MorphologyLoader::Impl(params);
     return impl.processMorphology(morphology, index, materialFunc,
@@ -736,17 +729,18 @@ std::vector<std::string> MorphologyLoader::getSupportedExtensions() const
 
 PropertyMap MorphologyLoader::getProperties() const
 {
+    return _defaults;
+}
+
+PropertyMap MorphologyLoader::getCLIProperties()
+{
     PropertyMap pm;
     pm.setProperty(PROP_COLOR_SCHEME);
     pm.setProperty(PROP_RADIUS_MULTIPLIER);
     pm.setProperty(PROP_RADIUS_CORRECTION);
-    pm.setProperty(PROP_SECTION_TYPES_SOMA);
-    pm.setProperty(PROP_SECTION_TYPES_AXON);
-    pm.setProperty(PROP_SECTION_TYPES_DENDRITE);
-    pm.setProperty(PROP_SECTION_TYPES_APICAL_DENDRITE);
+    pm.setProperty(PROP_DISPLAY_MODE);
     pm.setProperty(PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE);
     pm.setProperty(PROP_USE_SDF_GEOMETRIES);
-    pm.setProperty(PROP_GEOMETRY_QUALITY);
     return pm;
 }
 }

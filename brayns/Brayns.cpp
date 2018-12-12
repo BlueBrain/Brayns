@@ -302,115 +302,27 @@ private:
         auto& registry = _engine->getScene().getLoaderRegistry();
         auto& scene = _engine->getScene();
 
-        registry.registerLoader(std::make_unique<ProteinLoader>(scene));
+        auto params = _parametersManager.getGeometryParameters();
+
+        registry.registerLoader(std::make_unique<ProteinLoader>(scene, params));
         registry.registerLoader(std::make_unique<RawVolumeLoader>(scene));
         registry.registerLoader(std::make_unique<MHDVolumeLoader>(scene));
         registry.registerLoader(std::make_unique<XYZBLoader>(scene));
 #if BRAYNS_USE_ASSIMP
-        registry.registerLoader(std::make_unique<MeshLoader>(scene));
+        registry.registerLoader(std::make_unique<MeshLoader>(scene, params));
 #endif
 #if BRAYNS_USE_LIBARCHIVE
         registry.registerLoader(
             std::make_unique<ArchiveLoader>(scene, registry));
 #endif
-        registry.registerLoader(std::make_unique<MolecularSystemReader>(scene));
+        registry.registerLoader(
+            std::make_unique<MolecularSystemReader>(scene, params));
     }
 
-    PropertyMap _createPropertyMap()
-    {
-        PropertyMap pm;
-
-        const GeometryParameters& geometryParameters =
-            _parametersManager.getGeometryParameters();
-
-        pm.setProperty({"targets", geometryParameters.getCircuitTargets()});
-        pm.setProperty({"report", geometryParameters.getCircuitReport()});
-        pm.setProperty(
-            {"meshFolder", geometryParameters.getCircuitMeshFolder()});
-        pm.setProperty({"density", geometryParameters.getCircuitDensity()});
-        pm.setProperty(
-            {"randomSeed", int32_t(geometryParameters.getCircuitRandomSeed())});
-        pm.setProperty({"dampenBranchThicknessChangerate",
-                        geometryParameters
-                            .getMorphologyDampenBranchThicknessChangerate()});
-        pm.setProperty({"useSdfGeometries",
-                        geometryParameters.getMorphologyUseSdfGeometries()});
-        pm.setProperty(
-            {"loadCacheFile", geometryParameters.getLoadCacheFile()});
-        pm.setProperty(
-            {"saveCacheFile", geometryParameters.getSaveCacheFile()});
-        pm.setProperty({"useSimulationModel",
-                        geometryParameters.getCircuitUseSimulationModel()});
-        pm.setProperty({"meshFilenamePattern",
-                        geometryParameters.getCircuitMeshFilenamePattern()});
-        pm.setProperty({"radiusMultiplier",
-                        double(geometryParameters.getRadiusMultiplier())});
-        pm.setProperty({"radiusCorrection",
-                        double(geometryParameters.getRadiusCorrection())});
-        pm.setProperty({"colorScheme",
-                        enumToString(geometryParameters.getColorScheme()),
-                        enumNames<ColorScheme>(),
-                        {}});
-        pm.setProperty({"geometryQuality",
-                        enumToString(geometryParameters.getGeometryQuality()),
-                        enumNames<GeometryQuality>(),
-                        {}});
-        {
-            bool soma = false;
-            bool axon = false;
-            bool dendrite = false;
-            bool apicalDendrite = false;
-
-            for (const MorphologySectionType mst :
-                 geometryParameters.getMorphologySectionTypes())
-            {
-                switch (mst)
-                {
-                case MorphologySectionType::soma:
-                    soma = true;
-                    break;
-                case MorphologySectionType::axon:
-                    axon = true;
-                    break;
-                case MorphologySectionType::dendrite:
-                    dendrite = true;
-                    break;
-                case MorphologySectionType::apical_dendrite:
-                    apicalDendrite = true;
-                    break;
-                case MorphologySectionType::all:
-                    soma = true;
-                    axon = true;
-                    dendrite = true;
-                    apicalDendrite = true;
-                default:
-                    break;
-                }
-            }
-            pm.setProperty({"sectionTypesSoma", soma});
-            pm.setProperty({"sectionTypesAxon", axon});
-            pm.setProperty({"sectionTypesDendrite", dendrite});
-            pm.setProperty({"sectionTypesApicalDendrite", apicalDendrite});
-        }
-
-        pm.setProperty({"endSimulationTime",
-                        geometryParameters.getCircuitEndSimulationTime()});
-        pm.setProperty({"startSimulationTime",
-                        geometryParameters.getCircuitStartSimulationTime()});
-        pm.setProperty(
-            {"simulationStep", geometryParameters.getCircuitSimulationStep()});
-        pm.setProperty(
-            {"simulationValuesRange",
-             toArray(geometryParameters.getCircuitSimulationValuesRange())});
-        pm.setProperty({"transformMeshes",
-                        geometryParameters.getCircuitTransformMeshes()});
-        return pm;
-    }
     void _loadData()
     {
         auto& scene = _engine->getScene();
         const auto& registry = scene.getLoaderRegistry();
-        const auto properties = _createPropertyMap();
 
         const auto& paths =
             _parametersManager.getApplicationParameters().getInputPaths();
@@ -460,7 +372,8 @@ private:
                     }
                 };
 
-                ModelParams params(path, path, properties);
+                // No properties passed, use command line defaults.
+                ModelParams params(path, path, {});
                 scene.loadModel(path, NO_MATERIAL, params, {progress});
             }
         }

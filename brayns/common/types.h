@@ -203,17 +203,10 @@ enum class FrameBufferFormat
 enum class ColorScheme
 {
     none = 0,
-    neuron_by_id = 1,
-    neuron_by_type = 2,
-    neuron_by_segment_type = 3,
-    neuron_by_layer = 4,
-    neuron_by_mtype = 5,
-    neuron_by_etype = 6,
-    neuron_by_target = 7,
-    protein_by_id = 8,
-    protein_atoms = 9,
-    protein_chains = 10,
-    protein_residues = 11
+    by_id = 1,
+    protein_atoms = 2,
+    protein_chains = 3,
+    protein_residues = 4
 };
 
 /** Geometry quality */
@@ -223,26 +216,6 @@ enum class GeometryQuality
     medium,
     high
 };
-
-/** Morphology element types */
-enum class MorphologySectionType
-{
-    soma = 0x01,
-    axon = 0x02,
-    dendrite = 0x04,
-    apical_dendrite = 0x08,
-    all = 0xff
-};
-using MorphologySectionTypes = std::vector<MorphologySectionType>;
-
-template <typename T>
-size_t enumsToBitmask(const std::vector<T> enums)
-{
-    size_t bit{0};
-    for (auto& val : enums)
-        bit |= size_t(val);
-    return bit;
-}
 
 /** Some 'special' materials are used by Brayns to accomplish specific features
  *  such as bounding boxes.
@@ -384,14 +357,7 @@ template <>
 inline std::vector<std::pair<std::string, ColorScheme>> enumMap()
 {
     return {{"none", ColorScheme::none},
-            {"neuron_by_id", ColorScheme::neuron_by_id},
-            {"neuron_by_type", ColorScheme::neuron_by_type},
-            {"neuron_by_segment_type", ColorScheme::neuron_by_segment_type},
-            {"neuron_by_layer", ColorScheme::neuron_by_layer},
-            {"neuron_by_mtype", ColorScheme::neuron_by_mtype},
-            {"neuron_by_etype", ColorScheme::neuron_by_etype},
-            {"neuron_by_target", ColorScheme::neuron_by_target},
-            {"protein_by_id", ColorScheme::protein_by_id},
+            {"by_id", ColorScheme::by_id},
             {"protein_atoms", ColorScheme::protein_atoms},
             {"protein_chains", ColorScheme::protein_chains},
             {"protein_residues", ColorScheme::protein_residues}};

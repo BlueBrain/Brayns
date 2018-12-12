@@ -82,24 +82,9 @@ BOOST_AUTO_TEST_CASE(defaults)
     const auto& geomParams = pm.getGeometryParameters();
     BOOST_CHECK_EQUAL(geomParams.getLoadCacheFile(), "");
     BOOST_CHECK_EQUAL(geomParams.getSaveCacheFile(), "");
-    BOOST_CHECK_EQUAL(geomParams.getCircuitTargets(), "");
-    BOOST_CHECK_EQUAL(geomParams.getCircuitReport(), "");
-    BOOST_CHECK_EQUAL(geomParams.getRadiusMultiplier(), 1.f);
-    BOOST_CHECK_EQUAL(geomParams.getRadiusCorrection(), 0.f);
     BOOST_CHECK(geomParams.getColorScheme() == brayns::ColorScheme::none);
     BOOST_CHECK(geomParams.getGeometryQuality() ==
                 brayns::GeometryQuality::high);
-    BOOST_CHECK_EQUAL(
-        brayns::enumsToBitmask(geomParams.getMorphologySectionTypes()),
-        brayns::enumsToBitmask(std::vector<brayns::MorphologySectionType>{
-            brayns::MorphologySectionType::all}));
-    BOOST_CHECK_EQUAL(geomParams.getCircuitStartSimulationTime(), 0.f);
-    BOOST_CHECK_EQUAL(geomParams.getCircuitEndSimulationTime(),
-                      std::numeric_limits<float>::max());
-    BOOST_CHECK_EQUAL(geomParams.getCircuitSimulationValuesRange().x(),
-                      std::numeric_limits<double>::max());
-    BOOST_CHECK_EQUAL(geomParams.getCircuitSimulationValuesRange().y(),
-                      std::numeric_limits<double>::min());
 
     const auto& animParams = pm.getAnimationParameters();
     BOOST_CHECK_EQUAL(animParams.getFrame(), 0);

@@ -34,7 +34,6 @@
 #include <brayns/common/utils/utils.h>
 #include <brayns/parameters/AnimationParameters.h>
 #include <brayns/parameters/ApplicationParameters.h>
-#include <brayns/parameters/GeometryParameters.h>
 #include <brayns/parameters/RenderingParameters.h>
 #include <brayns/parameters/SceneParameters.h>
 #include <brayns/parameters/VolumeParameters.h>
@@ -83,24 +82,9 @@ STATICJSON_DECLARE_ENUM(brayns::GeometryQuality,
                         {"medium", brayns::GeometryQuality::medium},
                         {"high", brayns::GeometryQuality::high});
 
-STATICJSON_DECLARE_ENUM(brayns::MorphologySectionType,
-                        {"soma", brayns::MorphologySectionType::soma},
-                        {"axon", brayns::MorphologySectionType::axon},
-                        {"dendrite", brayns::MorphologySectionType::dendrite},
-                        {"apical_dendrite",
-                         brayns::MorphologySectionType::apical_dendrite},
-                        {"all", brayns::MorphologySectionType::all});
-
 STATICJSON_DECLARE_ENUM(
     brayns::ColorScheme, {"none", brayns::ColorScheme::none},
-    {"neuron_by_id", brayns::ColorScheme::neuron_by_id},
-    {"neuron_by_type", brayns::ColorScheme::neuron_by_type},
-    {"neuron_by_segment_type", brayns::ColorScheme::neuron_by_segment_type},
-    {"neuron_by_layer", brayns::ColorScheme::neuron_by_layer},
-    {"neuron_by_mtype", brayns::ColorScheme::neuron_by_mtype},
-    {"neuron_by_etype", brayns::ColorScheme::neuron_by_etype},
-    {"neuron_by_target", brayns::ColorScheme::neuron_by_target},
-    {"protein_by_id", brayns::ColorScheme::protein_by_id},
+    {"by_id", brayns::ColorScheme::by_id},
     {"protein_atoms", brayns::ColorScheme::protein_atoms},
     {"protein_chains", brayns::ColorScheme::protein_chains},
     {"protein_residues", brayns::ColorScheme::protein_residues});
@@ -354,27 +338,6 @@ inline void init(brayns::Scene* s, ObjectHandler* h)
     h->set_flags(Flags::DisallowUnknownKey);
 }
 
-inline void init(brayns::CircuitConfiguration* c, ObjectHandler* h)
-{
-    h->add_property("density", &c->density, Flags::Optional);
-    h->add_property("mesh_filename_pattern", &c->meshFilenamePattern,
-                    Flags::Optional);
-    h->add_property("mesh_folder", &c->meshFolder, Flags::Optional);
-    h->add_property("transform_meshes", &c->transformMeshes, Flags::Optional);
-    h->add_property("use_simulation_model", &c->useSimulationModel,
-                    Flags::Optional);
-    h->add_property("targets", &c->targets, Flags::Optional);
-    h->add_property("report", &c->report, Flags::Optional);
-    h->add_property("start_simulation_time", &c->startSimulationTime,
-                    Flags::Optional);
-    h->add_property("end_simulation_time", &c->endSimulationTime,
-                    Flags::Optional);
-    h->add_property("simulation_step", &c->simulationStep, Flags::Optional);
-    h->add_property("simulation_values_range",
-                    toArray(c->simulationValuesRange), Flags::Optional);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
 inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
 {
     h->add_property("engine", &a->_engine, Flags::IgnoreRead | Flags::Optional);
@@ -382,24 +345,6 @@ inline void init(brayns::ApplicationParameters* a, ObjectHandler* h)
     h->add_property("synchronous_mode", &a->_synchronousMode, Flags::Optional);
     h->add_property("image_stream_fps", &a->_imageStreamFPS, Flags::Optional);
     h->add_property("viewport", toArray(a->_windowSize), Flags::Optional);
-    h->set_flags(Flags::DisallowUnknownKey);
-}
-
-inline void init(brayns::GeometryParameters* g, ObjectHandler* h)
-{
-    h->add_property("load_cache_file", &g->_loadCacheFile, Flags::Optional);
-    h->add_property("save_cache_file", &g->_saveCacheFile, Flags::Optional);
-    h->add_property("radius_multiplier", &g->_radiusMultiplier,
-                    Flags::Optional);
-    h->add_property("radius_correction", &g->_radiusCorrection,
-                    Flags::Optional);
-    h->add_property("color_scheme", &g->_colorScheme, Flags::Optional);
-    h->add_property("geometry_quality", &g->_geometryQuality, Flags::Optional);
-    h->add_property("morphology_section_types", &g->_morphologySectionTypes,
-                    Flags::Optional);
-    h->add_property("memory_mode", &g->_memoryMode, Flags::Optional);
-    h->add_property("circuit_configuration", &g->_circuitConfiguration,
-                    Flags::Optional);
     h->set_flags(Flags::DisallowUnknownKey);
 }
 

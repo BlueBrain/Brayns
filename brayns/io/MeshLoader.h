@@ -40,6 +40,7 @@ class MeshLoader : public Loader
 {
 public:
     MeshLoader(Scene& scene);
+    MeshLoader(Scene& scene, const GeometryParameters& geom);
 
     std::vector<std::string> getSupportedExtensions() const final;
     std::string getName() const final;
@@ -59,20 +60,19 @@ public:
         const size_t defaultMaterial = NO_MATERIAL) const final;
 
     void importMesh(const std::string& fileName, const LoaderProgress& callback,
-                    Model& model, const size_t index,
-                    const Matrix4f& transformation,
+                    Model& model, const Matrix4f& transformation,
                     const size_t defaultMaterialId,
-                    const ColorScheme colorScheme,
                     const GeometryQuality geometryQuality) const;
 
 private:
+    PropertyMap _defaults;
+
     void _createMaterials(Model& model, const aiScene* aiScene,
                           const std::string& folder) const;
 
-    void _postLoad(const aiScene* aiScene, Model& model, const size_t index,
+    void _postLoad(const aiScene* aiScene, Model& model,
                    const Matrix4f& transformation, const size_t defaultMaterial,
-                   const std::string& folder,
-                   const ColorScheme colorScheme) const;
+                   const std::string& folder) const;
     size_t _getQuality(const GeometryQuality geometryQuality) const;
 };
 }
