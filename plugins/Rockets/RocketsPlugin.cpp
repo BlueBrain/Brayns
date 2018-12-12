@@ -61,7 +61,6 @@ const std::string ENDPOINT_ANIMATION_PARAMS = "animation-parameters";
 const std::string ENDPOINT_APP_PARAMS = "application-parameters";
 const std::string ENDPOINT_CAMERA = "camera";
 const std::string ENDPOINT_CAMERA_PARAMS = "camera-params";
-const std::string ENDPOINT_GEOMETRY_PARAMS = "geometry-parameters";
 const std::string ENDPOINT_RENDERER = "renderer";
 const std::string ENDPOINT_RENDERER_PARAMS = "renderer-params";
 const std::string ENDPOINT_SCENE = "scene";
@@ -927,8 +926,6 @@ public:
         _handle(ENDPOINT_ANIMATION_PARAMS,
                 _parametersManager.getAnimationParameters(),
                 INTERACTIVE_THROTTLE);
-        _handle(ENDPOINT_GEOMETRY_PARAMS,
-                _parametersManager.getGeometryParameters());
         _handle(ENDPOINT_SCENE_PARAMS, _parametersManager.getSceneParameters());
         _handle(ENDPOINT_VOLUME_PARAMS,
                 _parametersManager.getVolumeParameters());

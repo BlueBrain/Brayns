@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <brayns/common/PropertyMap.h>
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
@@ -28,6 +29,12 @@ namespace brayns
 class CircuitViewer : public ExtensionPlugin
 {
 public:
+    CircuitViewer(PropertyMap&& circuitParams, PropertyMap&& morphologyParams);
+
     void init() final;
+
+private:
+    PropertyMap _circuitParams;
+    PropertyMap _morphologyParams;
 };
 }

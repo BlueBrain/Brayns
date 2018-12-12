@@ -33,7 +33,7 @@ const std::string ADD_MODEL("add-model");
 
 BOOST_AUTO_TEST_CASE(file_no_extension_blueconfig)
 {
-    ClientServer clientServer({"--plugin", "braynsCircuitViewer"});
+    ClientServer clientServer({"--plugin", "braynsCircuitViewer --density 1"});
 
     auto circuit = makeRequest<brayns::ModelParams, brayns::ModelDescriptor>(
         ADD_MODEL, {"circuit", BBP_TEST_BLUECONFIG});

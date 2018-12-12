@@ -1,6 +1,6 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ * Responsible Author: Juan Hernando <juan.hernando@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -22,7 +22,6 @@
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
-#include <brayns/parameters/GeometryParameters.h>
 
 #include <vector>
 
@@ -39,11 +38,12 @@ namespace brayns
 class CircuitLoader : public Loader
 {
 public:
-    CircuitLoader(Scene& scene);
+    CircuitLoader(Scene& scene, PropertyMap defaultParams);
     ~CircuitLoader();
 
     std::vector<std::string> getSupportedExtensions() const final;
     std::string getName() const final;
+    static PropertyMap getCLIProperties();
     PropertyMap getProperties() const final;
 
     bool isSupported(const std::string& filename,
@@ -60,5 +60,7 @@ public:
                                       const PropertyMap& properties,
                                       const size_t index,
                                       const size_t materialID) const final;
+private:
+    PropertyMap _defaults; // command line defaults
 };
 }

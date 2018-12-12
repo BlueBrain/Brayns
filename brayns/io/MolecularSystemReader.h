@@ -21,6 +21,8 @@
 #ifndef MOLECULARSYSTEMREADER_H
 #define MOLECULARSYSTEMREADER_H
 
+#include "ProteinLoader.h"
+
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
 #include <set>
@@ -51,7 +53,7 @@ typedef std::map<size_t, Vector3fs> ProteinPositions;
 class MolecularSystemReader : public Loader
 {
 public:
-    MolecularSystemReader(Scene& scene);
+    MolecularSystemReader(Scene& scene, const GeometryParameters& params);
 
     std::vector<std::string> getSupportedExtensions() const final;
     std::string getName() const final;
@@ -86,6 +88,9 @@ private:
         ProteinPositions _proteinPositions;
         LoaderProgress _callback;
     };
+
+    PropertyMap _defaults;
+    ProteinLoader _proteinLoader;
 
     bool _createScene(LoaderData& data,
                       const PropertyMap& properties) const;

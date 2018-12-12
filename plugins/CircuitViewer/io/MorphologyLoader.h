@@ -23,13 +23,10 @@
 
 #include <brayns/common/loader/Loader.h>
 #include <brayns/common/types.h>
-#include <brayns/parameters/GeometryParameters.h>
 
 #include <brain/neuron/types.h>
 #include <brain/types.h>
 #include <brion/types.h>
-
-#include <servus/types.h>
 
 #include <vector>
 
@@ -38,15 +35,34 @@ namespace brayns
 class CircuitLoader;
 struct ModelData;
 
+enum class NeuronColorScheme
+{
+    none = 0,
+    by_id = 1,
+    by_type = 2,
+    by_segment_type = 3,
+    by_layer = 4,
+    by_mtype = 5,
+    by_etype = 6,
+    by_target = 7,
+};
+
+enum class NeuronDisplayMode
+{
+    soma = 0,
+    no_axon = 1,
+    full = 2,
+};
+
 struct MorphologyLoaderParams
 {
     MorphologyLoaderParams() = default;
     MorphologyLoaderParams(const PropertyMap& properties);
 
-    ColorScheme colorScheme = ColorScheme::none;
+    NeuronColorScheme colorScheme = NeuronColorScheme::none;
     double radiusMultiplier = 0.0;
     double radiusCorrection = 0.0;
-    std::vector<MorphologySectionType> sectionTypes;
+    NeuronDisplayMode mode;
     bool dampenBranchThicknessChangerate = false;
     bool useSDFGeometries = false;
     GeometryQuality geometryQuality = GeometryQuality::high;
@@ -58,11 +74,12 @@ struct MorphologyLoaderParams
 class MorphologyLoader : public Loader
 {
 public:
-    MorphologyLoader(Scene& scene);
+    MorphologyLoader(Scene& scene, PropertyMap defaultParams);
     ~MorphologyLoader();
 
-    std::vector<std::string> getSupportedExtensions() const final;
+    strings getSupportedExtensions() const final;
     std::string getName() const final;
+    static PropertyMap getCLIProperties();
     PropertyMap getProperties() const final;
 
     bool isSupported(const std::string& filename,
@@ -81,15 +98,17 @@ public:
 
     using MaterialFunc = std::function<size_t(brain::neuron::SectionType)>;
 
-    ModelData processMorphology(
+    static ModelData processMorphology(
         const brain::neuron::Morphology& morphology, const uint64_t index,
         MaterialFunc materialFunc,
         const brain::CompartmentReportMapping* reportMapping,
-        const MorphologyLoaderParams& params) const;
+        const MorphologyLoaderParams& params);
 
 private:
     friend class CircuitLoader;
     class Impl;
+
+    PropertyMap _defaults; // command line defaults
 };
 }
 

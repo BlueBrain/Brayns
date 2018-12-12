@@ -57,16 +57,8 @@ std::vector<std::string> getSupportedTypes()
 }
 
 using Property = brayns::Property;
-const Property PROP_GEOMETRY_QUALITY = {
-    "geometryQuality",
-    brayns::enumToString(brayns::GeometryQuality::high),
-    brayns::enumNames<brayns::GeometryQuality>(),
-    {"Geometry quality"}};
-const Property PROP_COLOR_SCHEME = {"colorScheme",
-                                    brayns::enumToString(
-                                        brayns::ColorScheme::none),
-                                    brayns::enumNames<brayns::ColorScheme>(),
-                                    {"Color scheme"}};
+const auto PROP_GEOMETRY_QUALITY = "geometryQuality";
+const auto PROP_COLOR_SCHEME = "colorScheme";
 
 const auto LOADER_NAME = "mesh";
 }
@@ -103,6 +95,19 @@ MeshLoader::MeshLoader(Scene& scene)
 {
 }
 
+MeshLoader::MeshLoader(Scene& scene, const GeometryParameters& params)
+    : Loader(scene)
+{
+    _defaults.setProperty({PROP_COLOR_SCHEME,
+                           enumToString(params.getColorScheme()),
+                           brayns::enumNames<brayns::ColorScheme>(),
+                           {"Color scheme"}});
+    _defaults.setProperty({PROP_GEOMETRY_QUALITY,
+                           enumToString(params.getGeometryQuality()),
+                           enumNames<brayns::GeometryQuality>(),
+                           {"Geometry quality"}});
+}
+
 bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
                              const std::string& extension) const
 {
@@ -112,23 +117,24 @@ bool MeshLoader::isSupported(const std::string& filename BRAYNS_UNUSED,
 
 ModelDescriptorPtr MeshLoader::importFromFile(
     const std::string& fileName, const LoaderProgress& callback,
-    const PropertyMap& propertiesTmp, const size_t index,
+    const PropertyMap& inProperties, const size_t index,
     const size_t defaultMaterialId) const
 {
     // Fill property map since the actual property types are known now.
-    PropertyMap properties = getProperties();
-    properties.merge(propertiesTmp);
+    PropertyMap properties = _defaults;
+    properties.merge(inProperties);
 
     const auto geometryQuality =
         stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
-            PROP_GEOMETRY_QUALITY.name, enumToString(GeometryQuality::high)));
+            PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
     const auto colorScheme = stringToEnum<ColorScheme>(
-        properties.getProperty<std::string>(PROP_COLOR_SCHEME.name,
+        properties.getProperty<std::string>(PROP_COLOR_SCHEME,
                                             enumToString(ColorScheme::none)));
+    const size_t materialId =
+        colorScheme == ColorScheme::by_id ? index : defaultMaterialId;
 
     auto model = _scene.createModel();
-    importMesh(fileName, callback, *model, index, {}, defaultMaterialId,
-               colorScheme, geometryQuality);
+    importMesh(fileName, callback, *model, {}, materialId, geometryQuality);
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -150,9 +156,9 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
 
     const auto geometryQuality =
         stringToEnum<GeometryQuality>(properties.getProperty<std::string>(
-            PROP_GEOMETRY_QUALITY.name, enumToString(GeometryQuality::high)));
+            PROP_GEOMETRY_QUALITY, enumToString(GeometryQuality::high)));
     const auto colorScheme = stringToEnum<ColorScheme>(
-        properties.getProperty<std::string>(PROP_COLOR_SCHEME.name,
+        properties.getProperty<std::string>(PROP_COLOR_SCHEME,
                                             enumToString(ColorScheme::none)));
 
     Assimp::Importer importer;
@@ -170,7 +176,10 @@ ModelDescriptorPtr MeshLoader::importFromBlob(
         throw std::runtime_error("No meshes found");
 
     auto model = _scene.createModel();
-    _postLoad(aiScene, *model, index, {}, defaultMaterialId, "", colorScheme);
+
+    const size_t materialId =
+        colorScheme == ColorScheme::by_id ? index : defaultMaterialId;
+    _postLoad(aiScene, *model, {}, materialId, "");
 
     Transformation transformation;
     transformation.setRotationCenter(model->getBounds().getCenter());
@@ -271,14 +280,10 @@ void MeshLoader::_createMaterials(Model& model, const aiScene* aiScene,
 }
 
 void MeshLoader::_postLoad(const aiScene* aiScene, Model& model,
-                           const size_t index, const Matrix4f& transformation,
-                           const size_t defaultMaterialId,
-                           const std::string& folder,
-                           const ColorScheme colorScheme) const
+                           const Matrix4f& transformation,
+                           const size_t materialId,
+                           const std::string& folder) const
 {
-    const size_t materialId =
-        colorScheme == ColorScheme::neuron_by_id ? index : defaultMaterialId;
-
     // Always create placeholder material since it is not guaranteed to exist
     model.createMaterial(materialId, "default");
 
@@ -381,10 +386,8 @@ size_t MeshLoader::_getQuality(const GeometryQuality geometryQuality) const
 
 void MeshLoader::importMesh(const std::string& fileName,
                             const LoaderProgress& callback, Model& model,
-                            const size_t index,
                             const vmml::Matrix4f& transformation,
                             const size_t defaultMaterialId,
-                            const ColorScheme colorScheme,
                             const GeometryQuality geometryQuality) const
 {
     const boost::filesystem::path file = fileName;
@@ -418,8 +421,8 @@ void MeshLoader::importMesh(const std::string& fileName,
 
     boost::filesystem::path filepath = fileName;
 
-    _postLoad(aiScene, model, index, transformation, defaultMaterialId,
-              filepath.parent_path().string(), colorScheme);
+    _postLoad(aiScene, model, transformation, defaultMaterialId,
+              filepath.parent_path().string());
 }
 
 std::string MeshLoader::getName() const
@@ -434,9 +437,6 @@ std::vector<std::string> MeshLoader::getSupportedExtensions() const
 
 PropertyMap MeshLoader::getProperties() const
 {
-    PropertyMap pm;
-    pm.setProperty(PROP_COLOR_SCHEME);
-    pm.setProperty(PROP_GEOMETRY_QUALITY);
-    return pm;
+    return _defaults;
 }
 } // namespace brayns
