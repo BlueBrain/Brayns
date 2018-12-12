@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(set_property_with_metadata)
 BOOST_AUTO_TEST_CASE(set_property_with_limits)
 {
     brayns::PropertyMap properties;
-    properties.setProperty({"limit", 0.5, {0., 1.}});
+    properties.setProperty({"limit", 0.5, 0., 1.});
     BOOST_REQUIRE_EQUAL(properties.getProperties().size(), 1);
     BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<double>(), 0.5);
     BOOST_CHECK_EQUAL(properties.getProperties()[0]->min<double>(), 0.);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(set_property_with_limits_and_metadata)
 {
     brayns::PropertyMap properties;
     properties.setProperty(
-        {"limit", 0.5, {0., 1.}, {"With limits", "Limits description"}});
+        {"limit", 0.5, 0., 1., {"With limits", "Limits description"}});
     BOOST_REQUIRE_EQUAL(properties.getProperties().size(), 1);
     BOOST_CHECK_EQUAL(properties.getProperties()[0]->get<double>(), 0.5);
     BOOST_CHECK_EQUAL(properties.getProperties()[0]->min<double>(), 0.);

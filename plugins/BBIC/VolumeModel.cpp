@@ -34,7 +34,7 @@ brayns::PropertyMap createPropertyMap(const int32_t lods)
 {
     brayns::PropertyMap props;
     props.setProperty(
-        {"lod", lods, {0, lods}, {"Level of detail", "Level of detail"}});
+        {"lod", lods, 0, lods, {"Level of detail", "Level of detail"}});
     return props;
 }
 }
