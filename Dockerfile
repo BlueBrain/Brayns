@@ -31,6 +31,7 @@ RUN apt-get update \
     libtbb-dev \
     libturbojpeg0-dev \
     libuv1-dev \
+    pkg-config \
     wget \
     ca-certificates \
  && apt-get clean \
