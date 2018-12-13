@@ -852,6 +852,8 @@ private:
 #pragma omp parallel for
             for (uint64_t j = 0; j < morphologies.size(); ++j)
             {
+                if (cancelException)
+                    continue;
                 const auto morphologyIndex = index + j;
                 auto materialFunc = [&](const brain::neuron::SectionType type) {
                     if (_properties.useSimulationModel)
@@ -881,6 +883,7 @@ private:
                 }
                 catch (...)
                 {
+#pragma omp critical
                     cancelException = std::current_exception();
                 }
             }
@@ -939,6 +942,8 @@ ModelDescriptorPtr CircuitLoader::importFromFile(
     const PropertyMap& propertiesTmp, const size_t /*index*/,
     const size_t /*materialID*/) const
 {
+    callback.updateProgress("Loading circuit ...", 0);
+
     // Fill property map since the actual property types are known now.
     PropertyMap properties = getProperties();
     properties.merge(propertiesTmp);
