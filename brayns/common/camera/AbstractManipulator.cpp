@@ -55,7 +55,10 @@ void AbstractManipulator::adjust(const Boxd& boundingBox)
 
     _motionSpeed = DEFAULT_MOTION_SPEED * size;
 
-    BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
+    if (boundingBox.isEmpty())
+        BRAYNS_INFO << "World bounding box: empty" << std::endl;
+    else
+        BRAYNS_INFO << "World bounding box: " << boundingBox << std::endl;
     BRAYNS_INFO << "World center      : " << boundingBox.getCenter()
                 << std::endl;
 }
