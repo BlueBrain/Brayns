@@ -106,9 +106,10 @@ public:
         return _textureDescriptors;
     }
     BRAYNS_API void setTexture(const std::string& fileName,
-                               const TextureType& type);
+                               const TextureType type);
+    BRAYNS_API void removeTexture(const TextureType type);
 
-    BRAYNS_API Texture2DPtr getTexture(const TextureType& type) const;
+    BRAYNS_API Texture2DPtr getTexture(const TextureType type) const;
 
 protected:
     bool _loadTexture(const std::string& fileName);

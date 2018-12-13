@@ -419,7 +419,6 @@ private:
             if (paths.size() == 1 && paths[0] == "demo")
             {
                 _engine->getScene().buildDefault();
-                _engine->getScene().buildEnvironmentMap();
                 return;
             }
 
@@ -471,7 +470,6 @@ private:
             scene.loadFromCacheFile();
 
         scene.saveToCacheFile();
-        scene.buildEnvironmentMap();
         scene.markModified();
     }
 

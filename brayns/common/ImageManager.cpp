@@ -64,6 +64,7 @@ Texture2DPtr ImageManager::importTextureFromFile(
 #endif
 
     Texture2DPtr texture(new Texture2D);
+    texture->setFilename(filename);
     texture->setWidth(FreeImage_GetWidth(image.get()));
     texture->setHeight(FreeImage_GetHeight(image.get()));
     texture->setNbChannels(FreeImage_IsTransparent(image.get()) ? 4 : 3);

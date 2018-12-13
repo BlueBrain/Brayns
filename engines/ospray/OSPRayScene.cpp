@@ -64,6 +64,8 @@ OSPRayScene::~OSPRayScene()
 
 void OSPRayScene::commit()
 {
+    Scene::commit();
+
     // copy the list to avoid locking the mutex
     ModelDescriptors modelDescriptors;
     {
