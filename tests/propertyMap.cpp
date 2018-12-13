@@ -205,6 +205,31 @@ BOOST_AUTO_TEST_CASE(fill_property_map)
         BOOST_CHECK_EQUAL(aInts[1], aDoubles[1]);
         BOOST_CHECK_EQUAL(aInts[2], aDoubles[2]);
     }
+
+    propInts.setProperty({"foo", std::string("string")});
+    propDoubles.setProperty({"foo", 42});
+    BOOST_CHECK_THROW(propInts.merge(propDoubles), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(update_properties)
+{
+    brayns::PropertyMap source;
+    source.setProperty({"number", 42});
+    source.setProperty({"vec2", std::array<int32_t, 2>{{1, 2}}});
+    source.setProperty({"vec3", std::array<int32_t, 3>{{1, 2, 3}}});
+
+    brayns::PropertyMap dest;
+    dest.setProperty({"number", 27});
+    dest.setProperty({"vec2", std::array<int32_t, 2>{{0, 1}}});
+
+    dest.update(source);
+    BOOST_CHECK_EQUAL(dest.getProperty<int32_t>("number"), 42);
+    const auto array = dest.getProperty<std::array<int32_t, 2>>("vec2");
+    BOOST_CHECK_EQUAL(1, array[0]);
+    BOOST_CHECK_EQUAL(2, array[1]);
+
+    dest.setProperty({"vec3", 10});
+    BOOST_CHECK_THROW(dest.update(source), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(merge_enums)
@@ -219,9 +244,23 @@ BOOST_AUTO_TEST_CASE(merge_enums)
 
     {
         brayns::PropertyMap propIntsTmp;
+
+        propIntsTmp.update(propInts);
+        BOOST_CHECK(propIntsTmp.empty());
+        propIntsTmp.update(propStrings);
+        BOOST_CHECK(propIntsTmp.empty());
+
         propIntsTmp.merge(propInts);
         propIntsTmp.merge(propStrings);
 
+        BOOST_CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
+        BOOST_CHECK_EQUAL(propIntsTmp.getProperty<int32_t>("abc"), 2);
+
+        propIntsTmp.update(propInts);
+        BOOST_CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
+        BOOST_CHECK_EQUAL(propIntsTmp.getProperty<int32_t>("abc"), 1);
+
+        propIntsTmp.update(propStrings);
         BOOST_CHECK(propIntsTmp.getPropertyType("abc") == Type::Int);
         BOOST_CHECK_EQUAL(propIntsTmp.getProperty<int32_t>("abc"), 2);
     }
@@ -231,6 +270,14 @@ BOOST_AUTO_TEST_CASE(merge_enums)
         propStringsTmp.merge(propStrings);
         propStringsTmp.merge(propInts);
 
+        BOOST_CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
+        BOOST_CHECK_EQUAL(propStringsTmp.getProperty<std::string>("abc"), "b");
+
+        propStringsTmp.update(propStrings);
+        BOOST_CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
+        BOOST_CHECK_EQUAL(propStringsTmp.getProperty<std::string>("abc"), "c");
+
+        propStringsTmp.update(propInts);
         BOOST_CHECK(propStringsTmp.getPropertyType("abc") == Type::String);
         BOOST_CHECK_EQUAL(propStringsTmp.getProperty<std::string>("abc"), "b");
     }
