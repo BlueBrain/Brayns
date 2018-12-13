@@ -31,7 +31,7 @@ Material::Material()
     _properties["simulation"] = PropertyMap();
 }
 
-Texture2DPtr Material::getTexture(const TextureType& type) const
+Texture2DPtr Material::getTexture(const TextureType type) const
 {
     const auto it = _textureDescriptors.find(type);
     if (it == _textureDescriptors.end())
@@ -53,12 +53,26 @@ bool Material::_loadTexture(const std::string& fileName)
     return true;
 }
 
-void Material::setTexture(const std::string& fileName, const TextureType& type)
+void Material::setTexture(const std::string& fileName, const TextureType type)
 {
+    auto i = _textureDescriptors.find(type);
+    if (i != _textureDescriptors.end() && i->second->getFilename() == fileName)
+        return;
+
     if (_textures.find(fileName) == _textures.end())
         if (!_loadTexture(fileName))
             throw std::runtime_error("Failed to load texture from " + fileName);
     _textureDescriptors[type] = _textures[fileName];
+    markModified();
+}
+
+void Material::removeTexture(const TextureType type)
+{
+    auto i = _textureDescriptors.find(type);
+    if (i == _textureDescriptors.end())
+        return;
+
+    _textureDescriptors.erase(i);
     markModified();
 }
 }

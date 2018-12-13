@@ -95,6 +95,8 @@ void OSPRayMaterial::commit()
 
 void OSPRayMaterial::commit(const std::string& renderer)
 {
+    if (!isModified())
+        return;
     ospRelease(_ospMaterial);
     _ospMaterial = ospNewMaterial2(renderer.c_str(), "default_material");
     markModified(false); // Ensure commit recreates the ISPC object

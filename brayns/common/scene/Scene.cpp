@@ -98,6 +98,11 @@ Scene& Scene::operator=(const Scene& rhs)
     return *this;
 }
 
+void Scene::commit()
+{
+    _updateEnvironmentMap();
+}
+
 size_t Scene::getSizeInBytes() const
 {
     auto lock = acquireReadAccess();
@@ -147,8 +152,8 @@ size_t Scene::addModel(ModelDescriptorPtr model)
         _parametersManager.getGeometryParameters().getDefaultBVHFlags();
 
     model->getModel().setBVHFlags(defaultBVHFlags);
-    model->getModel().buildBoundingBox();
     model->getModel().commitGeometry();
+    model->getModel().buildBoundingBox();
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
@@ -265,7 +270,6 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
     *modelDescriptor = params;
     addModel(modelDescriptor);
     saveToCacheFile();
-    buildEnvironmentMap();
     markModified();
     return modelDescriptor;
 }
@@ -784,11 +788,16 @@ void Scene::_computeBounds()
         _bounds.merge({0, 0, 0});
 }
 
-void Scene::buildEnvironmentMap()
+void Scene::_updateEnvironmentMap()
 {
     const auto& environmentMap =
         _parametersManager.getSceneParameters().getEnvironmentMap();
-    if (!environmentMap.empty())
+    if (environmentMap.empty())
+        _backgroundMaterial->removeTexture(TT_DIFFUSE);
+    else
         _backgroundMaterial->setTexture(environmentMap, TT_DIFFUSE);
+
+    if (_backgroundMaterial->isModified())
+        markModified();
 }
 }

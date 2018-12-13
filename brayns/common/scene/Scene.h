@@ -60,7 +60,7 @@ public:
      * Called after scene-related changes have been made before rendering the
      * scene.
      */
-    BRAYNS_API virtual void commit() = 0;
+    BRAYNS_API virtual void commit();
 
     /**
      * Commits lights to renderers.
@@ -238,13 +238,10 @@ public:
     {
         return std::shared_lock<std::shared_timed_mutex>(_modelMutex);
     }
-    /** @brief Builds environment map according to command line parameter
-     * --environment-map
-     */
-    void buildEnvironmentMap();
 
 protected:
     void _computeBounds();
+    void _updateEnvironmentMap();
 
     ParametersManager& _parametersManager;
     MaterialPtr _backgroundMaterial;
