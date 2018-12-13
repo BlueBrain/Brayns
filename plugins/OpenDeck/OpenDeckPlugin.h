@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "OpenDeckParameters.h"
+
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
@@ -27,12 +29,13 @@ namespace brayns
 class OpenDeckPlugin : public ExtensionPlugin
 {
 public:
-    OpenDeckPlugin(const Vector2ui& wallRes, const Vector2ui& floorRes);
+    OpenDeckPlugin(OpenDeckParameters&& params);
 
     void init() final;
 
 private:
     Vector2ui _wallRes;
     Vector2ui _floorRes;
+    OpenDeckParameters _params;
 };
 }

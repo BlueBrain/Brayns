@@ -1,7 +1,7 @@
-# Copyright (c) 2015-2018, EPFL/Blue Brain Project
-# All rights reserved. Do not distribute without permission.
+#Copyright(c) 2015 - 2018, EPFL / Blue Brain Project
+#All rights reserved.Do not distribute without permission.
 #
-# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+#This file is part of Brayns < https: // github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
@@ -14,8 +14,8 @@ common_find_package(ospray 1.7 SYSTEM)
 common_find_package_post()
 
 
-set(BRAYNSOPENDECK_HEADERS OpenDeckPlugin.h)
-set(BRAYNSOPENDECK_SOURCES OpenDeckPlugin.cpp)
+set(BRAYNSOPENDECK_HEADERS OpenDeckPlugin.h OpenDeckParameters.h)
+set(BRAYNSOPENDECK_SOURCES OpenDeckPlugin.cpp OpenDeckParameters.cpp)
 set(BRAYNSOPENDECK_LINK_LIBRARIES PRIVATE braynsCommon braynsEngine braynsPluginAPI)
 
 if(OSPRAY_FOUND)

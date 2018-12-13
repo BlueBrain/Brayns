@@ -57,6 +57,7 @@ void CylindricStereoTrackedCamera::commit()
     Camera::commit();
 
     const std::string& bufferTarget = getParamString("buffer_target");
+    const float cameraScaling = getParamf("cameraScaling", 1.0);
 
     uint8_t bufferId = 255u;
     if (bufferTarget == "0L")
@@ -72,10 +73,10 @@ void CylindricStereoTrackedCamera::commit()
     const auto ipd = getInterpupillaryDistance(stereoMode);
 
     const auto headPosition = _getHeadPosition();
-    // The tracking model of the 3d glasses is inversed 
+    // The tracking model of the 3d glasses is inversed
     // so we need to negate CamDu here.
     const auto openDeckCamDU = -_getOpendeckCamDU();
-    
+
     dir = vec3f(0, 0, 1);
     const auto org = vec3f(0, 0, 0);
     const auto dir_du = vec3f(1, 0, 0);
@@ -87,7 +88,7 @@ void CylindricStereoTrackedCamera::commit()
                                            (const ispc::vec3f&)dir_du,
                                            (const ispc::vec3f&)dir_dv,
                                            (const ispc::vec3f&)openDeckCamDU,
-                                           ipd, bufferId);
+                                           ipd, bufferId, cameraScaling);
 }
 
 vec3f CylindricStereoTrackedCamera::_getHeadPosition()
