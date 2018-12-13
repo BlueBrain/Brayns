@@ -143,29 +143,32 @@ void Scene::clearLights()
     _lights.clear();
 }
 
-size_t Scene::addModel(ModelDescriptorPtr model)
+size_t Scene::addModel(ModelDescriptorPtr modelDescriptor)
 {
-    if (model->getModel().empty())
+    auto& model = modelDescriptor->getModel();
+    if (model.empty())
         throw std::runtime_error("Empty models not supported.");
 
     const auto defaultBVHFlags =
         _parametersManager.getGeometryParameters().getDefaultBVHFlags();
 
-    model->getModel().setBVHFlags(defaultBVHFlags);
-    model->getModel().commitGeometry();
-    model->getModel().buildBoundingBox();
+    model.setBVHFlags(defaultBVHFlags);
+    model.buildBoundingBox();
+    model.commitGeometry();
 
     {
         std::unique_lock<std::shared_timed_mutex> lock(_modelMutex);
-        model->setModelID(_modelID++);
-        _modelDescriptors.push_back(model);
+        modelDescriptor->setModelID(_modelID++);
+        _modelDescriptors.push_back(modelDescriptor);
 
         // add default instance of this model to render something
-        if (model->getInstances().empty())
-            model->addInstance({true, true, model->getTransformation()});
+        if (modelDescriptor->getInstances().empty())
+            modelDescriptor->addInstance(
+                {true, true, modelDescriptor->getTransformation()});
     }
 
-    return model->getModelID();
+    _computeBounds();
+    return modelDescriptor->getModelID();
 }
 
 bool Scene::removeModel(const size_t id)
@@ -249,7 +252,6 @@ ModelDescriptorPtr Scene::loadModel(Blob&& blob, const size_t materialID,
     *modelDescriptor = params;
     addModel(modelDescriptor);
     saveToCacheFile();
-    markModified();
     return modelDescriptor;
 }
 
@@ -270,7 +272,6 @@ ModelDescriptorPtr Scene::loadModel(const std::string& path,
     *modelDescriptor = params;
     addModel(modelDescriptor);
     saveToCacheFile();
-    markModified();
     return modelDescriptor;
 }
 
