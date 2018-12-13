@@ -180,9 +180,9 @@ void _commandlineToPropertyMap(const po::variables_map& vm,
 }
 }
 
-void PropertyMap::merge(const PropertyMap& input)
+void Property::_copy(const Property& from)
 {
-    const auto setValues = [](Property& dest, const Property& src) {
+    const auto setValue = [](Property& dest, const Property& src) {
         switch (dest.type)
         {
         case Property::Type::Int:
@@ -221,7 +221,7 @@ void PropertyMap::merge(const PropertyMap& input)
                (t0 == Property::Type::Vec3d && t1 == Property::Type::Vec3i);
     };
 
-    const auto compatibleEnums = [](Property& dest, const Property& src) {
+    const auto compatibleEnums = [](const Property& dest, const Property& src) {
         // If we have a string to int or an int to string we can try to
         // match the enum value
         const bool compatible = (dest.type == Property::Type::Int &&
@@ -256,37 +256,44 @@ void PropertyMap::merge(const PropertyMap& input)
         }
     };
 
+    if (from.type == type)
+    {
+        _data = from._data;
+    }
+    else if (compatibleEnums(*this, from))
+    {
+        setEnum(*this, from);
+    }
+    else if (compatibleTypes(type, from.type))
+    {
+        setValue(*this, from);
+    }
+    else
+    {
+        throw std::runtime_error("Incompatible types for property '" +
+                                 name + "'");
+    }
+}
+
+void PropertyMap::merge(const PropertyMap& input)
+{
     for (const auto& otherProperty : input.getProperties())
     {
         const auto& name = otherProperty->name;
 
         if (auto myProperty = find(name))
-        {
-            const auto myType = myProperty->type;
-            const auto otherType = otherProperty->type;
-
-            if (myType == otherType)
-            {
-                myProperty->_data = otherProperty->_data;
-            }
-            else if (compatibleEnums(*myProperty, *otherProperty))
-            {
-                setEnum(*myProperty, *otherProperty);
-            }
-            else if (compatibleTypes(myType, otherType))
-            {
-                setValues(*myProperty, *otherProperty);
-            }
-            else
-            {
-                throw std::runtime_error("Incompatible types for property '" +
-                                         name + "'");
-            }
-        }
+            myProperty->_copy(*otherProperty);
         else
-        {
             setProperty(*otherProperty.get());
-        }
+    }
+}
+
+void PropertyMap::update(const PropertyMap& input)
+{
+    for (const auto& otherProperty : input.getProperties())
+    {
+        if (auto myProperty = find(otherProperty->name))
+            myProperty->_copy(*otherProperty);
     }
 }
 

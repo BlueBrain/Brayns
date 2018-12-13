@@ -212,6 +212,7 @@ struct Property
 
 private:
     friend class PropertyMap;
+
     boost::any _data;
     const boost::any _min;
     const boost::any _max;
@@ -232,6 +233,8 @@ private:
         _checkType<T>();
         return boost::any_cast<T>(v);
     }
+
+    void _copy(const Property& from);
 };
 
 /**
@@ -252,9 +255,10 @@ public:
     // std::vector move constructor is not noexcept until C++17, if we want
     // this class to be movable we have to do it by hand.
     PropertyMap(PropertyMap&& other) noexcept
-        : _name(std::move(other._name))
-        , _properties(std::move(other._properties))
-    {}
+        : _name(std::move(other._name)),
+          _properties(std::move(other._properties))
+    {
+    }
     // Assignment operator valid for both copy and move assignment.
     PropertyMap& operator=(PropertyMap other) noexcept
     {
@@ -263,6 +267,7 @@ public:
         return *this;
     }
 
+    bool empty() const { return _properties.empty(); }
     /**
      * @return the name of this property map e.g. to name commandline option
      *         group
@@ -353,8 +358,18 @@ public:
 
     /** @return all the registered properties. */
     const auto& getProperties() const { return _properties; }
-    /** Merge this property map with properties from another. */
+    /** Merge this property map with properties from another.
+     *  @throw std::runtime error if a property with the same name but
+     *  incompatible types is found in both maps.
+     */
     void merge(const PropertyMap& input);
+
+    /** Take the values from another property map only for properties that
+     *  are known and compatible to this one.
+     *  @throw std::runtime error if a property with the same name but
+     *  incompatible types is found in both maps.
+     */
+    void update(const PropertyMap& input);
 
     /**
      * Parse and fill values from the commandline.
