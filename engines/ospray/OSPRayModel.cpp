@@ -39,12 +39,6 @@ OSPData allocateVectorData(const std::vector<VecT>& vec,
                            const size_t memoryManagementFlags)
 {
     const size_t totBytes = vec.size() * sizeof(decltype(vec.back()));
-
-    if (totBytes >= INT_MAX)
-        BRAYNS_INFO << "Buffer allocation (" << std::to_string(totBytes)
-                    << " bytes) exceeds ispc 32-bit address space."
-                    << std::endl;
-
     return ospNewData(totBytes / ospray::sizeOf(ospType), ospType, vec.data(),
                       memoryManagementFlags);
 }
