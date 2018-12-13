@@ -21,7 +21,6 @@
 #ifndef ROCKETSPLUGIN_H
 #define ROCKETSPLUGIN_H
 
-#include <brayns/api.h>
 #include <brayns/common/ActionInterface.h>
 #include <brayns/common/types.h>
 #include <brayns/pluginapi/ExtensionPlugin.h>
@@ -36,7 +35,7 @@ namespace brayns
 class RocketsPlugin : public ExtensionPlugin
 {
 public:
-    void init(PluginAPI* api) final;
+    void init() final;
 
     /**
      * In case no event loop is available, this processes in- and outgoing HTTP
@@ -45,13 +44,13 @@ public:
      * Otherwise, this is a NOP as the incoming message processing is done by
      * the SocketListener.
      */
-    BRAYNS_API void preRender() final;
+    void preRender() final;
 
     /**
      * Enqueue modified and registered objects for broadcast that have changed
      * after the rendering is finished (framebuffer).
      */
-    BRAYNS_API void postRender() final;
+    void postRender() final;
 
 private:
     class Impl;

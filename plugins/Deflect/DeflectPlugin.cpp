@@ -423,9 +423,9 @@ DeflectPlugin::DeflectPlugin(DeflectParameters&& params)
 {
 }
 
-void DeflectPlugin::init(PluginAPI* api)
+void DeflectPlugin::init()
 {
-    _impl = std::make_shared<Impl>(api, std::move(_params));
+    _impl = std::make_shared<Impl>(_api, std::move(_params));
 }
 
 void DeflectPlugin::preRender()

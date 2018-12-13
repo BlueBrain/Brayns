@@ -90,7 +90,10 @@ void PluginManager::initPlugins(PluginAPI* api)
 #endif
 
     for (const auto& extension : _extensions)
-        extension->init(api);
+    {
+        extension->_api = api;
+        extension->init();
+    }
 }
 
 void PluginManager::preRender()

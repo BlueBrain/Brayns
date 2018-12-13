@@ -47,24 +47,24 @@ OpenDeckPlugin::OpenDeckPlugin(const Vector2ui& wallRes,
 {
 }
 
-void OpenDeckPlugin::init(PluginAPI* api)
+void OpenDeckPlugin::init()
 {
     FrameBufferPtr frameBuffer =
-        api->getEngine().createFrameBuffer(leftWallBufferName, _wallRes,
+        _api->getEngine().createFrameBuffer(leftWallBufferName, _wallRes,
                                             FrameBufferFormat::rgba_i8);
-    api->getEngine().addFrameBuffer(frameBuffer);
+    _api->getEngine().addFrameBuffer(frameBuffer);
     frameBuffer =
-        api->getEngine().createFrameBuffer(rightWallBufferName, _wallRes,
+        _api->getEngine().createFrameBuffer(rightWallBufferName, _wallRes,
                                             FrameBufferFormat::rgba_i8);
-    api->getEngine().addFrameBuffer(frameBuffer);
+    _api->getEngine().addFrameBuffer(frameBuffer);
     frameBuffer =
-        api->getEngine().createFrameBuffer(leftFloorBufferName, _floorRes,
+        _api->getEngine().createFrameBuffer(leftFloorBufferName, _floorRes,
                                             FrameBufferFormat::rgba_i8);
-    api->getEngine().addFrameBuffer(frameBuffer);
+    _api->getEngine().addFrameBuffer(frameBuffer);
     frameBuffer =
-        api->getEngine().createFrameBuffer(rightFloorBufferName, _floorRes,
+        _api->getEngine().createFrameBuffer(rightFloorBufferName, _floorRes,
                                             FrameBufferFormat::rgba_i8);
-    api->getEngine().addFrameBuffer(frameBuffer);
+    _api->getEngine().addFrameBuffer(frameBuffer);
 }
 
 extern "C" brayns::ExtensionPlugin* brayns_plugin_create(const int argc,

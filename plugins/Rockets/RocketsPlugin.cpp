@@ -1585,10 +1585,10 @@ public:
     bool _endpointsRegistered{false};
 };
 
-void RocketsPlugin::init(PluginAPI* api)
+void RocketsPlugin::init()
 {
-    _impl = std::make_shared<Impl>(api);
-    api->setActionInterface(_impl);
+    _impl = std::make_shared<Impl>(_api);
+    _api->setActionInterface(_impl);
 }
 
 void RocketsPlugin::preRender()

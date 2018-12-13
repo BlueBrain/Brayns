@@ -116,9 +116,8 @@ VRPNPlugin::~VRPNPlugin()
                                            trackerCallback, HEAD_SENSOR_ID);
 }
 
-void VRPNPlugin::init(PluginAPI* api)
+void VRPNPlugin::init()
 {
-    _api = api;
     _api->getCamera().setProperties(CAMERA_TYPE, getDefaultCameraProperties());
 
     _vrpnTracker.register_change_handler(&(_api->getCamera()), trackerCallback,

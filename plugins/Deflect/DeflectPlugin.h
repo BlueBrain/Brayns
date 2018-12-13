@@ -31,7 +31,7 @@ class DeflectPlugin : public ExtensionPlugin
 {
 public:
     DeflectPlugin(DeflectParameters&& params);
-    void init(PluginAPI* api) final;
+    void init() final;
 
     /** Handle stream setup and incoming events. */
     void preRender() final;

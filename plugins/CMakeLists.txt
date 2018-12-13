@@ -31,3 +31,8 @@ option(BRAYNS_BBIC_ENABLED "Activate BBIC Volume plugin" ON)
 if(BRAYNS_BBIC_ENABLED)
   add_subdirectory(BBIC)
 endif()
+
+add_subdirectory(Example)
+if (TARGET Brayns-all)
+  add_dependencies(Brayns-all exampleBraynsPlugin)
+endif()

@@ -72,18 +72,18 @@ void _addBasicSimulationRenderer(Engine& engine)
 }
 }
 
-void CircuitViewer::init(PluginAPI* api)
+void CircuitViewer::init()
 {
-    auto& scene = api->getScene();
+    auto& scene = _api->getScene();
     auto& registry = scene.getLoaderRegistry();
-    api->getParametersManager().getRenderingParameters().setCurrentRenderer(
+    _api->getParametersManager().getRenderingParameters().setCurrentRenderer(
         "basic_simulation");
 
     registry.registerLoader(std::make_unique<CircuitLoader>(scene));
     registry.registerLoader(std::make_unique<MorphologyLoader>(scene));
 
-    _addAdvancedSimulationRenderer(api->getEngine());
-    _addBasicSimulationRenderer(api->getEngine());
+    _addAdvancedSimulationRenderer(_api->getEngine());
+    _addBasicSimulationRenderer(_api->getEngine());
 }
 }
 

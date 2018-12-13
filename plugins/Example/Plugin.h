@@ -18,7 +18,7 @@
  */
 
 #pragma once
-#include <brayns/common/types.h>
+
 #include <brayns/pluginapi/ExtensionPlugin.h>
 
 namespace brayns
@@ -26,11 +26,10 @@ namespace brayns
 class ExamplePlugin : public ExtensionPlugin
 {
 public:
-    ExamplePlugin(int argc, char** argv);
+    ExamplePlugin(int argc, const char** argv);
 
-    void init(PluginAPI* api) final;
+    void init() final;
     void preRender() final;
     void postRender() final;
-    void postSceneLoading() final;
 };
 }
