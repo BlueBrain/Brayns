@@ -22,7 +22,8 @@
 
 namespace
 {
-const std::string PARAM_ANIMATION_FRAME = "animation-frame";
+constexpr auto PARAM_ANIMATION_FRAME = "animation-frame";
+constexpr auto PARAM_PLAY_ANIMATION = "play-animation";
 }
 
 namespace brayns
@@ -30,15 +31,18 @@ namespace brayns
 AnimationParameters::AnimationParameters()
     : AbstractParameters("Animation")
 {
-    _parameters.add_options()(PARAM_ANIMATION_FRAME.c_str(),
-                              po::value<uint32_t>(),
-                              "Scene animation frame [float]");
+    _parameters.add_options()(PARAM_ANIMATION_FRAME, po::value<uint32_t>(),
+                              "Scene animation frame [uint]")(
+        PARAM_PLAY_ANIMATION, po::bool_switch()->default_value(false),
+        "Start animation playback");
 }
 
 void AnimationParameters::parse(const po::variables_map& vm)
 {
     if (vm.count(PARAM_ANIMATION_FRAME))
         _current = vm[PARAM_ANIMATION_FRAME].as<uint32_t>();
+    if (vm[PARAM_PLAY_ANIMATION].as<bool>())
+        _delta = 1;
     markModified();
 }
 
