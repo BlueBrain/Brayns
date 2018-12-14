@@ -85,10 +85,6 @@ const Property PROP_RADIUS_MULTIPLIER = {
     "radiusMultiplier", 1.0,
     {"Radius multiplier", "Radius multiplier for spheres, cones and "
      "cylinders [float]"}};
-const Property PROP_RADIUS_CORRECTION = {
-    "radiusCorrection", 0.,
-    {"Radius correction", "Forces radius of spheres and cylinders to the "
-     "specified value [float]"}};
 const Property PROP_DISPLAY_MODE = {
     "displayMode", enumToString(NeuronDisplayMode::full),
     enumNames<NeuronDisplayMode>(),
@@ -333,7 +329,6 @@ MorphologyLoaderParams::MorphologyLoaderParams(const PropertyMap& properties)
     setEnumVariable(colorScheme, PROP_COLOR_SCHEME.name,
                     NeuronColorScheme::none);
     setVariable(radiusMultiplier, PROP_RADIUS_MULTIPLIER.name, 1.0);
-    setVariable(radiusCorrection, PROP_RADIUS_CORRECTION.name, 0.);
     setEnumVariable(mode, PROP_DISPLAY_MODE.name, NeuronDisplayMode::full);
     setVariable(dampenBranchThicknessChangerate,
                 PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE.name, false);
@@ -466,9 +461,10 @@ public:
                 segmentStep = counts[sectionId] / float(numSamples);
             }
 
-            float previousRadius = _getCorrectedRadius(
+            float previousRadius =
                 section.hasParent() ? _getLastSampleRadius(section.getParent())
-                                    : samples[0].w() * 0.5);
+                                    : samples[0].w() * 0.5;
+            previousRadius *= _params.radiusMultiplier;
 
             bool done = false;
             for (size_t i = step; !done && i < numSamples + step; i += step)
@@ -515,7 +511,7 @@ public:
                 const Vector3f position(sample.x(), sample.y(), sample.z());
                 const Vector3f target(previousSample.x(), previousSample.y(),
                                       previousSample.z());
-                float radius = _getCorrectedRadius(samples[i].w() * 0.5f);
+                float radius = samples[i].w() * 0.5f * _params.radiusMultiplier;
                 constexpr float maxRadiusChange = 0.1f;
 
                 const float dist = (target - position).length();
@@ -560,19 +556,6 @@ public:
 
 private:
     /**
-     * @brief _getCorrectedRadius Modifies the radius of the geometry according
-     * to --radius-multiplier and --radius-correction geometry parameters
-     * @param radius Radius to be corrected
-     * @return Corrected value of a radius according to geometry parameters
-     */
-    float _getCorrectedRadius(const float radius) const
-    {
-        return (_params.radiusCorrection != 0.f
-                    ? _params.radiusCorrection
-                    : radius * _params.radiusMultiplier);
-    }
-
-    /**
      * Creates an SDF soma by adding and connecting the soma children using cone
      * pills
      */
@@ -591,7 +574,8 @@ private:
 
             // Create a sigmoid cone with half of soma radius to center of soma
             // to give it an organic look.
-            const float radiusEnd = _getCorrectedRadius(samples[0].w() * 0.5f);
+            const float radiusEnd =
+                samples[0].w() * 0.5f * _params.radiusMultiplier;
             const size_t geomIdx =
                 _addSDFGeometry(sdfData,
                                 createSDFConePillSigmoid(somaPosition, sample,
@@ -615,7 +599,8 @@ private:
         const size_t materialId =
             materialFunc(brain::neuron::SectionType::soma);
         const auto somaPosition = soma.getCentroid();
-        const auto somaRadius = _getCorrectedRadius(soma.getMeanRadius());
+        const float somaRadius =
+            soma.getMeanRadius() * _params.radiusMultiplier;
         const auto& children = soma.getChildren();
 
         if (useSDFGeometries)
@@ -639,7 +624,7 @@ private:
                     const Vector3f sample{samples[0].x(), samples[0].y(),
                                           samples[0].z()};
                     const float sampleRadius =
-                        _getCorrectedRadius(samples[0].w() * 0.5f);
+                        samples[0].w() * 0.5f * _params.radiusMultiplier;
 
                     model.addCone(materialId, {somaPosition, sample, somaRadius,
                                                sampleRadius, offset});
@@ -737,7 +722,6 @@ PropertyMap MorphologyLoader::getCLIProperties()
     PropertyMap pm;
     pm.setProperty(PROP_COLOR_SCHEME);
     pm.setProperty(PROP_RADIUS_MULTIPLIER);
-    pm.setProperty(PROP_RADIUS_CORRECTION);
     pm.setProperty(PROP_DISPLAY_MODE);
     pm.setProperty(PROP_DAMPEN_BRANCH_THICKNESS_CHANGERATE);
     pm.setProperty(PROP_USE_SDF_GEOMETRIES);
