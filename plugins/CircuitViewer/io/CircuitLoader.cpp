@@ -795,10 +795,10 @@ PropertyMap CircuitLoader::getCLIProperties()
 {
     PropertyMap pm("CircuitViewer");
     pm.setProperty(PROP_DENSITY);
-    pm.setProperty(PROP_RANDOM_SEED);
+    pm.setProperty(Property::makeReadOnly(PROP_RANDOM_SEED));
     pm.setProperty(PROP_REPORT);
     pm.setProperty(PROP_TARGETS);
-    pm.setProperty(PROP_SYNCHRONOUS_MODE);
+    pm.setProperty(Property::makeReadOnly(PROP_SYNCHRONOUS_MODE));
     return pm;
 }
 }

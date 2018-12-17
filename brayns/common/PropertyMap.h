@@ -154,6 +154,20 @@ struct Property
         assertValidEnumType<T>();
     }
 
+    Property(Property&& other)
+        : name(std::move(other.name))
+        , metaData(std::move(other.metaData))
+        , type(other.type)
+        , enums(std::move(other.enums))
+        , _data(std::move(other._data))
+        , _min(std::move(other._min))
+        , _max(std::move(other._max))
+        , _readOnly(other._readOnly)
+    {
+    }
+
+    Property(const Property& other) = default;
+
     using ModifiedCallback = std::function<void(const Property&)>;
 
     /**
@@ -204,6 +218,13 @@ struct Property
     const std::string name;
     const MetaData metaData; //!< user-friendly name and description
     const Type type;
+
+    static Property makeReadOnly(Property property)
+    {
+        auto prop{std::move(property)};
+        prop._readOnly = true;
+        return prop;
+    }
 
     /**
      * Name of enum values that are mapped to the integer value
