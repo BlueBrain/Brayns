@@ -45,24 +45,20 @@ void AdvancedSimulationRenderer::commit()
     _shadingEnabled = getParam1i("shading", 0) == int(Shading::diffuse);
     _electronShadingEnabled =
         getParam1i("shading", 0) == int(Shading::electron);
-    _detectionDistance = getParam1f("detectionDistance", 15.f);
 
     _randomNumber = getParam1i("randomNumber", 0);
-
-    _simulationModel = (ospray::Model*)getParamObject("simulationModel", 0);
 
     _samplingThreshold = getParam1f("samplingThreshold", 0.001f);
     _volumeSpecularExponent = getParam1f("volumeSpecularExponent", 20.f);
     _volumeAlphaCorrection = getParam1f("volumeAlphaCorrection", 0.5f);
 
     ispc::AdvancedSimulationRenderer_set(
-        getIE(), (_simulationModel ? _simulationModel->getIE() : nullptr),
-        (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows, _softShadows,
-        _ambientOcclusionStrength, _ambientOcclusionDistance, _shadingEnabled,
-        _randomNumber, _timestamp, spp, _electronShadingEnabled, _lightPtr,
-        _lightArray.size(),
+        getIE(), (_bgMaterial ? _bgMaterial->getIE() : nullptr), _shadows,
+        _softShadows, _ambientOcclusionStrength, _ambientOcclusionDistance,
+        _shadingEnabled, _randomNumber, _timestamp, spp,
+        _electronShadingEnabled, _lightPtr, _lightArray.size(),
         _simulationData ? (float*)_simulationData->data : NULL,
-        _simulationDataSize, _samplingThreshold, _detectionDistance,
+        _simulationDataSize, _samplingThreshold,
         _volumeSpecularExponent, _volumeAlphaCorrection);
 }
 

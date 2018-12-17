@@ -93,10 +93,7 @@ inline vec3f BasicSimulationRenderer_shadeRay(
         pathOpacity *= 1.f + opacity;
         colorContribution = make_vec4f(Kd, pathOpacity);
 
-        const uniform SimulationMaterial* simMaterial =
-            (const uniform SimulationMaterial*)dg.material;
-
-        if (simMaterial && simMaterial->getSimulationOffset)
+        if (hasSimulationMapping(dg))
         {
             // Get simulation value from geometry
             const vec4f color = getSimulationColor(self->super, dg);

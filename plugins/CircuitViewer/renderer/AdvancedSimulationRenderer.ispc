@@ -36,10 +36,6 @@ struct AdvancedSimulationRenderer
     bool shadingEnabled;
     bool electronShadingEnabled;
 
-    // Simulation model
-    Model* simulationModel;
-    float detectionDistance;
-
     // Volumes
     float samplingThreshold;
     float volumeSpecularExponent;
@@ -620,65 +616,6 @@ inline void setGeometryShadingAttributes(
         ray.dir - 2.f * dot(ray.dir, attributes.normal) * attributes.normal;
 }
 
-/**
-  The purpose of the processSimulationContribution function is to retrieve the
-  value of the simulation from a secondary model attached to the OSPRay
-  scene.The geometry is defined by the primary model, but the shading is
-  computed according to a second, non-visible model that contains the simulation
-  values. In the case of circuit rendering for examples, neurons are meshes, and
-  compartment reports are cones and cylinders that are inside the neuron. When
-  an intersection is found at the surface of a mesh, a ray defined by the
-  intersection point and the opposite normal to the surface is launched to hit
-  the secondary model. When the secondary model is intersected, the simulation
-  value is retrieved and used to shade the surface of the mesh.
-*/
-inline void processSimulationContribution(const varying ScreenSample& sample,
-                                          const DifferentialGeometry& dg,
-                                          ShadingAttributes& attributes)
-{
-    const uniform SimulationRenderer& simRenderer = attributes.renderer->super;
-    const uniform Renderer& renderer = simRenderer.super.super;
-
-    if (!simRenderer.simulationData)
-        return;
-
-    if (!attributes.renderer->simulationModel)
-    {
-        const vec4f color = getSimulationColor(simRenderer, dg);
-        attributes.simulationColor = make_vec3f(color);
-        attributes.simulationIntensity = color.w;
-        return;
-    }
-
-    // Get simulation color from simulation model
-    Ray colorRay;
-    colorRay.org = attributes.origin;
-    colorRay.dir =
-        getRandomVector(renderer.fb->size.x, sample, attributes.normal * -1.f,
-                        attributes.renderer->randomNumber);
-    colorRay.t0 = 0.f;
-    colorRay.time = inf;
-    colorRay.t = attributes.renderer->detectionDistance;
-    colorRay.primID = -1;
-    colorRay.geomID = -1;
-    colorRay.instID = -1;
-
-    // Trace ray to hit the simulation model
-    traceRay(attributes.renderer->simulationModel, colorRay);
-
-    if (colorRay.geomID < 0)
-        return;
-
-    // Intersection found. Simulation ray hit a primitive
-    varying DifferentialGeometry dg;
-    postIntersect(attributes.renderer->simulationModel, dg, colorRay,
-                  DG_MATERIALID | DG_TEXCOORD);
-
-    const vec4f color = getSimulationColor(simRenderer, dg);
-    attributes.simulationColor = make_vec3f(color);
-    attributes.simulationIntensity = color.w;
-}
-
 inline void processBackgroundColor(varying ScreenSample& sample,
                                    const varying Ray& ray,
                                    ShadingAttributes& attributes)
@@ -906,7 +843,12 @@ inline vec3f AdvancedSimulationRenderer_shadeRay(
             setGeometryShadingAttributes(self, sample, ray, dg, attributes);
 
             // Compute simulation contribution
-            processSimulationContribution(sample, dg, attributes);
+            if (hasSimulationMapping(dg))
+            {
+                const vec4f color = getSimulationColor(self->super, dg);
+                attributes.simulationColor = make_vec3f(color);
+                attributes.simulationIntensity = color.w;
+            }
 
             // Z-Depth
             if (depth == 0)
@@ -1012,20 +954,19 @@ export void* uniform AdvancedSimulationRenderer_create(void* uniform cppE)
 }
 
 export void AdvancedSimulationRenderer_set(
-    void* uniform _self, void* uniform simulationModel,
-    void* uniform bgMaterial, const uniform float& shadows,
-    const uniform float& softShadows,
-    const uniform float& ambientOcclusionStrength,
-    const uniform float& ambientOcclusionDistance,
-    const uniform bool& shadingEnabled, const uniform int& randomNumber,
-    const uniform float& timestamp, const uniform int& spp,
+    void* uniform _self, void* uniform bgMaterial,
+    const uniform float shadows,
+    const uniform float softShadows,
+    const uniform float ambientOcclusionStrength,
+    const uniform float ambientOcclusionDistance,
+    const uniform bool shadingEnabled, const uniform int randomNumber,
+    const uniform float timestamp, const uniform int spp,
     const uniform bool& electronShadingEnabled, void** uniform lights,
     const uniform int32 numLights, uniform float* uniform simulationData,
-    const uniform uint64& simulationDataSize,
-    const uniform float& samplingThreshold,
-    const uniform float& detectionDistance,
-    const uniform float& volumeSpecularExponent,
-    const uniform float& volumeAlphaCorrection)
+    const uniform uint64 simulationDataSize,
+    const uniform float samplingThreshold,
+    const uniform float volumeSpecularExponent,
+    const uniform float volumeAlphaCorrection)
 {
     uniform AdvancedSimulationRenderer* uniform self =
         (uniform AdvancedSimulationRenderer * uniform)_self;
@@ -1047,9 +988,6 @@ export void AdvancedSimulationRenderer_set(
 
     self->super.simulationData = (uniform float* uniform)simulationData;
     self->super.simulationDataSize = simulationDataSize;
-
-    self->simulationModel = (uniform Model * uniform)simulationModel;
-    self->detectionDistance = detectionDistance;
 
     self->samplingThreshold = samplingThreshold;
 

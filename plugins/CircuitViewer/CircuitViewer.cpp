@@ -41,7 +41,6 @@ void _addAdvancedSimulationRenderer(Engine& engine)
         {"aoDistance", 10000., {"Ambient occlusion distance"}});
     properties.setProperty(
         {"aoWeight", 0., 0., 1., {"Ambient occlusion weight"}});
-    properties.setProperty({"detectionDistance", 15., {"Detection distance"}});
     properties.setProperty(
         {"shading",
          int32_t(AdvancedSimulationRenderer::Shading::none),

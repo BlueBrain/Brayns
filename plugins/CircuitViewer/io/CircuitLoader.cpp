@@ -23,15 +23,12 @@
 #include "MorphologyLoader.h"
 #include "SimulationHandler.h"
 
+#include <brayns/common/log.h>
 #include <brayns/common/scene/Model.h>
 #include <brayns/common/scene/Scene.h>
 #include <brayns/common/utils/utils.h>
 
 #include <brain/brain.h>
-
-#if BRAYNS_USE_ASSIMP
-#include <brayns/io/MeshLoader.h>
-#endif
 
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
@@ -56,21 +53,6 @@ const Property PROP_REPORT{
 const Property PROP_TARGETS = {
     "targets",  std::string(""),
     {"Targets", "Circuit targets [comma separated strings]"}};
-const Property PROP_MESH_FILENAME_PATTERN = {
-    "meshFilenamePattern", std::string(""),
-    {"Mesh filename pattern", "Pattern used to determine the name of the file"
-     " containing a meshed morphology [string]"}};
-const Property PROP_MESH_FOLDER = {
-    "meshFolder", std::string(""),
-    {"Mesh folder", "Folder containing meshed morphologies [string]"}};
-const Property PROP_USE_SIMULATION_MODEL = {
-    "useSimulationModel", false,
-    {"Use simulation model", "Defines if a different model is used to handle"
-     " the simulation geometry."}};
-const Property PROP_TRANSFORM_MESHES = {
-    "transformMeshes", false,
-    {"Transform meshes", "Enable mesh transformation according to circuit "
-     "information."}};
 const Property PROP_SYNCHRONOUS_MODE = {
     "synchronousMode", false, {"Synchronous mode"}};
 // clang-format on
@@ -80,31 +62,6 @@ const strings LOADER_EXTENSIONS{"BlueConfig", "BlueConfig3", "CircuitConfig",
                                 ".json", "circuit"};
 
 using SimulationHandlerPtr = std::shared_ptr<SimulationHandler>;
-
-#if BRAYNS_USE_ASSIMP
-/**
- * @brief getMeshFilenameFromGID Returns the name of the mesh file according
- * to the --circuit-mesh-folder, --circuit-mesh-filename-pattern command
- * line arguments and a GID
- * @param gid GID of the cell
- * @return A string with the full path of the mesh file
- */
-std::string _getMeshFilenameFromGID(const uint64_t gid,
-                                    const std::string& pattern,
-                                    const std::string& folder)
-{
-    const std::string gidAsString = std::to_string(gid);
-    const std::string GID = "{gid}";
-
-    auto filenamePattern = pattern;
-    if (!filenamePattern.empty())
-        filenamePattern.replace(filenamePattern.find(GID), GID.length(),
-                                gidAsString);
-    else
-        filenamePattern = gidAsString;
-    return folder + "/" + filenamePattern;
-}
-#endif
 
 std::vector<float> _getSomaRadii(const brain::Circuit& circuit,
                                  const float defaultRadius)
@@ -333,10 +290,6 @@ struct CircuitProperties
         setVariable(randomSeed, PROP_RANDOM_SEED.name, 0);
         setVariable(report, PROP_REPORT.name, "");
         setVariable(targets, PROP_TARGETS.name, "");
-        setVariable(meshFilenamePattern, PROP_MESH_FILENAME_PATTERN.name, "");
-        setVariable(meshFolder, PROP_MESH_FOLDER.name, "");
-        setVariable(useSimulationModel, PROP_USE_SIMULATION_MODEL.name, false);
-        setVariable(transformMeshes, PROP_TRANSFORM_MESHES.name, 0);
         setVariable(synchronousMode, PROP_SYNCHRONOUS_MODE.name, false);
 
         boost::char_separator<char> separator(",");
@@ -353,11 +306,6 @@ struct CircuitProperties
     std::string report;
     std::vector<std::string> targetList;
     std::string targets;
-    std::string meshFilenamePattern;
-    std::string meshFolder;
-    bool useSimulationModel = false;
-    bool transformMeshes = false;
-
     bool synchronousMode = false;
 };
 
@@ -518,7 +466,6 @@ public:
         , _properties(properties)
         , _morphologyParams(properties)
     {
-        _morphologyParams.useSimulationModel = _properties.useSimulationModel;
     }
 
     ModelDescriptorPtr importCircuit(const std::string& source,
@@ -529,10 +476,7 @@ public:
         ModelMetadata metadata = {{"density",
                                    std::to_string(_properties.density)},
                                   {"report", _properties.report},
-                                  {"targets", _properties.targets},
-                                  {"mesh-filename-pattern",
-                                   _properties.meshFilenamePattern},
-                                  {"mesh-folder", _properties.meshFolder}};
+                                  {"targets", _properties.targets}};
         auto model = _scene.createModel();
 
         // Open circuit and simulation if possible
@@ -612,18 +556,9 @@ public:
         }
         else
         {
-            // Import meshes
-            _importMeshes(callback, *model, allGids,
-                          circuit.getTransforms(allGids), perCellMaterialIds);
-
             // Import morphologies
-            const auto useSimulationModel = _properties.useSimulationModel;
-            model->useSimulationModel(useSimulationModel);
-            if (_properties.meshFolder.empty() || useSimulationModel)
-            {
-                _importMorphologies(circuit, allGids, callback, *model,
-                                    reportMapping, perCellMaterialIds);
-            }
+            _importMorphologies(circuit, allGids, callback, *model,
+                                reportMapping, perCellMaterialIds);
         }
 
         // Create materials
@@ -720,67 +655,6 @@ private:
         }
     }
 
-    void _importMeshes(const LoaderProgress& callback BRAYNS_UNUSED,
-                       Model& model BRAYNS_UNUSED,
-                       const brain::GIDSet& gids BRAYNS_UNUSED,
-                       const Matrix4fs& transformations BRAYNS_UNUSED,
-                       const size_ts& perCellMaterialIds BRAYNS_UNUSED) const
-    {
-#if BRAYNS_USE_ASSIMP
-        const auto colorScheme = _morphologyParams.colorScheme;
-        const auto geometryQuality = _morphologyParams.geometryQuality;
-        MeshLoader meshLoader(_scene);
-        size_t loadingFailures = 0;
-        const auto meshedMorphologiesFolder = _properties.meshFolder;
-        if (meshedMorphologiesFolder.empty())
-            return;
-
-        size_t index = 0;
-        // Loading meshes is currently sequential. TODO: Make it parallel!!!
-        std::stringstream message;
-        message << "Loading " << gids.size() << " meshes...";
-        for (const auto& gid : gids)
-        {
-            size_t materialId = 0;
-            if (colorScheme == NeuronColorScheme::by_id)
-                materialId = index;
-            else if (colorScheme != NeuronColorScheme::by_segment_type)
-            {
-                if (perCellMaterialIds.empty())
-                    materialId = NO_MATERIAL;
-                else
-                    materialId = perCellMaterialIds[index];
-            }
-
-            // Load mesh from file
-            const auto transformation = _properties.transformMeshes
-                                            ? transformations[index]
-                                            : Matrix4f();
-
-            const auto filename =
-                _getMeshFilenameFromGID(gid, _properties.meshFilenamePattern,
-                                        _properties.meshFolder);
-            try
-            {
-                meshLoader.importMesh(filename, callback, model, transformation,
-                                      materialId, geometryQuality);
-            }
-            catch (...)
-            {
-                ++loadingFailures;
-            }
-            ++index;
-            callback.updateProgress(message.str(), index / float(gids.size()));
-        }
-        if (loadingFailures != 0)
-            BRAYNS_WARN << "Failed to import " << loadingFailures << " meshes"
-                        << std::endl;
-#else
-        throw std::runtime_error(
-            "assimp dependency is required to load meshes");
-#endif
-    }
-
     void _importMorphologies(
         const brain::Circuit& circuit, const brain::GIDSet& gids,
         const LoaderProgress& callback, Model& model,
@@ -812,12 +686,9 @@ private:
                     continue;
                 const auto morphologyIndex = index + j;
                 auto materialFunc = [&](const brain::neuron::SectionType type) {
-                    if (_properties.useSimulationModel)
-                        return size_t{0};
-                    else
-                        return _getMaterialId(_morphologyParams.colorScheme,
-                                              morphologyIndex, type,
-                                              perCellMaterialIds);
+                    return _getMaterialId(_morphologyParams.colorScheme,
+                                          morphologyIndex, type,
+                                          perCellMaterialIds);
                 };
 
                 const auto& morphology = morphologies[j];
@@ -927,10 +798,6 @@ PropertyMap CircuitLoader::getCLIProperties()
     pm.setProperty(PROP_RANDOM_SEED);
     pm.setProperty(PROP_REPORT);
     pm.setProperty(PROP_TARGETS);
-    pm.setProperty(PROP_MESH_FILENAME_PATTERN);
-    pm.setProperty(PROP_MESH_FOLDER);
-    pm.setProperty(PROP_USE_SIMULATION_MODEL);
-    pm.setProperty(PROP_TRANSFORM_MESHES);
     pm.setProperty(PROP_SYNCHRONOUS_MODE);
     return pm;
 }

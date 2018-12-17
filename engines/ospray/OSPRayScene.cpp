@@ -57,9 +57,6 @@ OSPRayScene::~OSPRayScene()
 
     if (_rootModel)
         ospRelease(_rootModel);
-
-    if (_rootSimulationModel)
-        ospRelease(_rootSimulationModel);
 }
 
 void OSPRayScene::commit()
@@ -102,10 +99,6 @@ void OSPRayScene::commit()
         ospRelease(_rootModel);
     _rootModel = ospNewModel();
 
-    if (_rootSimulationModel)
-        ospRelease(_rootSimulationModel);
-    _rootSimulationModel = nullptr;
-
     for (auto modelDescriptor : modelDescriptors)
     {
         if (!modelDescriptor->getEnabled())
@@ -120,14 +113,6 @@ void OSPRayScene::commit()
 
         BRAYNS_DEBUG << "Committing " << modelDescriptor->getName()
                      << std::endl;
-
-        if (modelDescriptor->getVisible() && impl.getUseSimulationModel())
-        {
-            if (!_rootSimulationModel)
-                _rootSimulationModel = ospNewModel();
-            addInstance(_rootSimulationModel, impl.getSimulationModel(),
-                        transformation);
-        }
 
         // add volumes to root model, because scivis renderer does not consider
         // volumes from instances
@@ -174,8 +159,6 @@ void OSPRayScene::commit()
 
     ospSet1i(_rootModel, "isRootModel", 1); // Needed for OptiX
     ospCommit(_rootModel);
-    if (_rootSimulationModel)
-        ospCommit(_rootSimulationModel);
 
     _computeBounds();
 

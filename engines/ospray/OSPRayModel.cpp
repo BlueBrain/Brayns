@@ -96,7 +96,6 @@ OSPRayModel::~OSPRayModel()
     releaseAndClearGeometry(_ospStreamlines);
     releaseAndClearGeometry(_ospSDFGeometries);
 
-    ospRelease(_simulationModel);
     ospRelease(_boundingBoxModel);
     ospRelease(_model);
 }
@@ -157,7 +156,6 @@ OSPGeometry& OSPRayModel::_createGeometry(GeometryMap& map,
     if (geometry)
     {
         ospRemoveGeometry(_model, geometry);
-        ospRemoveGeometry(_simulationModel, geometry);
         ospRelease(geometry);
     }
     geometry = ospNewGeometry(name);
@@ -184,9 +182,7 @@ void OSPRayModel::_commitSpheres(const size_t materialId)
 
     ospCommit(geometry);
 
-    if (_useSimulationModel)
-        ospAddGeometry(_simulationModel, geometry);
-    else if (materialId == BOUNDINGBOX_MATERIAL_ID)
+    if (materialId == BOUNDINGBOX_MATERIAL_ID)
         ospAddGeometry(_boundingBoxModel, geometry);
     else
         ospAddGeometry(_model, geometry);
@@ -207,9 +203,7 @@ void OSPRayModel::_commitCylinders(const size_t materialId)
     ospSet1i(geometry, "bytes_per_cylinder", sizeof(Cylinder));
     ospCommit(geometry);
 
-    if (_useSimulationModel)
-        ospAddGeometry(_simulationModel, geometry);
-    else if (materialId == BOUNDINGBOX_MATERIAL_ID)
+    if (materialId == BOUNDINGBOX_MATERIAL_ID)
         ospAddGeometry(_boundingBoxModel, geometry);
     else
         ospAddGeometry(_model, geometry);
@@ -228,9 +222,7 @@ void OSPRayModel::_commitCones(const size_t materialId)
     ospSet1i(geometry, "bytes_per_cone", sizeof(Cone));
     ospCommit(geometry);
 
-    if (_useSimulationModel)
-        ospAddGeometry(_simulationModel, geometry);
-    else if (materialId == BOUNDINGBOX_MATERIAL_ID)
+    if (materialId == BOUNDINGBOX_MATERIAL_ID)
         ospAddGeometry(_boundingBoxModel, geometry);
     else
         ospAddGeometry(_model, geometry);
@@ -366,10 +358,7 @@ void OSPRayModel::_commitSDFGeometries()
 
         ospCommit(geometry);
 
-        if (_useSimulationModel)
-            ospAddGeometry(_simulationModel, geometry);
-        else
-            ospAddGeometry(_model, geometry);
+        ospAddGeometry(_model, geometry);
     }
 
     ospRelease(globalData);
@@ -469,9 +458,6 @@ void OSPRayModel::commitGeometry()
     if (!_model)
         _model = ospNewModel();
 
-    if (!_simulationModel)
-        _simulationModel = ospNewModel();
-
     // Materials
     for (auto material : _materials)
         material.second->commit();
@@ -520,7 +506,6 @@ void OSPRayModel::commitGeometry()
     ospCommit(_model);
     if (_boundingBoxModel)
         ospCommit(_boundingBoxModel);
-    ospCommit(_simulationModel);
 }
 
 bool OSPRayModel::commitTransferFunction()

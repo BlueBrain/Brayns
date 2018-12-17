@@ -37,6 +37,13 @@ struct SimulationRenderer
     uint64 simulationDataSize;
 };
 
+inline bool hasSimulationMapping(const DifferentialGeometry& dg)
+{
+    const SimulationMaterial* material = (const SimulationMaterial*)dg.material;
+    return material && material->getSimulationOffset;
+}
+
+
 inline vec4f getSimulationColor(const uniform SimulationRenderer& renderer,
                                 const DifferentialGeometry& dg)
 {
@@ -46,8 +53,7 @@ inline vec4f getSimulationColor(const uniform SimulationRenderer& renderer,
         return undefined;
 
     const SimulationMaterial* material = (const SimulationMaterial*)dg.material;
-    if (!material || !material->getSimulationOffset)
-        return undefined;
+    assert(hasSimulationMapping(dg));
 
     const varying uint64 offset =
         material->getSimulationOffset(dg.geometry, dg.primID);

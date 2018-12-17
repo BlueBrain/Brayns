@@ -603,33 +603,10 @@ private:
         const auto& children = soma.getChildren();
 
         if (useSDFGeometries)
-        {
             _connectSDFSomaChildren(somaPosition, somaRadius, materialId,
                                     offset, children, sdfData);
-        }
         else
-        {
             model.addSphere(materialId, {somaPosition, somaRadius, offset});
-
-            if (_params.useSimulationModel)
-            {
-                // When using a simulation model, parametric geometries must
-                // occupy as much space as possible in the mesh. This code
-                // inserts a Cone between the soma and the beginning of each
-                // branch.
-                for (const auto& child : children)
-                {
-                    const auto& samples = child.getSamples();
-                    const Vector3f sample{samples[0].x(), samples[0].y(),
-                                          samples[0].z()};
-                    const float sampleRadius =
-                        samples[0].w() * 0.5f * _params.radiusMultiplier;
-
-                    model.addCone(materialId, {somaPosition, sample, somaRadius,
-                                               sampleRadius, offset});
-                }
-            }
-        }
     }
 
 private:

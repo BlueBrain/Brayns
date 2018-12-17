@@ -51,7 +51,6 @@ public:
     ModelPtr createModel() const final;
 
     OSPModel getModel() { return _rootModel; }
-    OSPModel simulationModelImpl() { return _rootSimulationModel; }
     OSPData lightData() { return _ospLightData; }
     ModelDescriptorPtr getSimulatedModel();
 
@@ -59,7 +58,6 @@ private:
     bool _commitVolumeAndTransferFunction(ModelDescriptors& modelDescriptors);
 
     OSPModel _rootModel{nullptr};
-    OSPModel _rootSimulationModel{nullptr};
 
     std::vector<OSPLight> _ospLights;
     OSPData _ospLightData{nullptr};

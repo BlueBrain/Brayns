@@ -325,14 +325,6 @@ public:
      */
     BRAYNS_API void logInformation();
 
-    BRAYNS_API void useSimulationModel(const bool value)
-    {
-        _useSimulationModel = value;
-    }
-    BRAYNS_API bool getUseSimulationModel() const
-    {
-        return _useSimulationModel;
-    }
     /**
         Sets the materials handled by the model, and available to the geometry
         @param colorMap Specifies the algorithm that is used to create the
@@ -446,7 +438,6 @@ protected:
     Boxd _streamlinesBounds;
 
     Boxd _bounds;
-    bool _useSimulationModel{false};
 
     struct SDFGeometryData
     {

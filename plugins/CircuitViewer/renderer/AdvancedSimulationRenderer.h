@@ -55,8 +55,6 @@ public:
     void commit() final;
 
 private:
-    ospray::Model* _simulationModel;
-
     float _shadows;
     float _softShadows;
     float _ambientOcclusionStrength;
