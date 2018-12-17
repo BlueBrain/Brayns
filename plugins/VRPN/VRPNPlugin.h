@@ -47,7 +47,6 @@ public:
 #endif
 
 private:
-    PluginAPI* _api = nullptr;
     vrpn_Tracker_Remote _vrpnTracker;
 
 #ifdef BRAYNSVRPN_USE_LIBUV
