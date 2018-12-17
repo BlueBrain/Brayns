@@ -43,7 +43,6 @@ inline std::vector<std::pair<std::string, NeuronColorScheme>> enumMap()
 {
     return {{"none", NeuronColorScheme::none},
             {"by-id", NeuronColorScheme::by_id},
-            {"by-type", NeuronColorScheme::by_type},
             {"by-segment-type", NeuronColorScheme::by_segment_type},
             {"by-layer", NeuronColorScheme::by_layer},
             {"by-mtype", NeuronColorScheme::by_mtype},

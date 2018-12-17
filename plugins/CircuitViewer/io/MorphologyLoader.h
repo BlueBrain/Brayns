@@ -39,12 +39,11 @@ enum class NeuronColorScheme
 {
     none = 0,
     by_id = 1,
-    by_type = 2,
-    by_segment_type = 3,
-    by_layer = 4,
-    by_mtype = 5,
-    by_etype = 6,
-    by_target = 7,
+    by_segment_type = 2,
+    by_layer = 3,
+    by_mtype = 4,
+    by_etype = 5,
+    by_target = 6,
 };
 
 enum class NeuronDisplayMode
