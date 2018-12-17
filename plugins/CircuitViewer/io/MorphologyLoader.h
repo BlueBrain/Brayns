@@ -65,8 +65,6 @@ struct MorphologyLoaderParams
     bool dampenBranchThicknessChangerate = false;
     bool useSDFGeometries = false;
     GeometryQuality geometryQuality = GeometryQuality::high;
-    // Only used by the circuit loader
-    bool useSimulationModel = false;
 };
 
 /** Loads morphologies from SWC and H5, and Circuit Config files */

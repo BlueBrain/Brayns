@@ -42,7 +42,6 @@ public:
 
     OSPModel getModel() const { return _model; }
     OSPModel getBoundingBoxModel() const { return _boundingBoxModel; }
-    OSPModel getSimulationModel() const { return _simulationModel; }
     MaterialPtr createMaterial(const size_t materialId,
                                const std::string& name) final;
     SharedDataVolumePtr createSharedDataVolume(const Vector3ui& dimensions,
@@ -88,7 +87,6 @@ private:
     OSPModel _boundingBoxModel{nullptr};
 
     // Simulation model
-    OSPModel _simulationModel{nullptr};
     OSPData _ospSimulationData{nullptr};
 
     OSPTransferFunction _ospTransferFunction{nullptr};

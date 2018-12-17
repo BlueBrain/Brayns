@@ -87,6 +87,12 @@ void OSPRayRenderer::commit()
             ospSetObject(_renderer, "transferFunction",
                          model.transferFunction());
         }
+        else
+        {
+            // ospRemoveParam leaks objects, so we set it to null first
+            ospSetData(_renderer, "simulationData", nullptr);
+            ospRemoveParam(_renderer, "simulationData");
+        }
 
         // Setting the clip planes in the camera
         Planes planes;
@@ -114,7 +120,6 @@ void OSPRayRenderer::commit()
 
     ospSetObject(_renderer, "camera", _camera->impl());
     ospSetObject(_renderer, "world", scene->getModel());
-    ospSetObject(_renderer, "simulationModel", scene->simulationModelImpl());
     ospCommit(_renderer);
 }
 
