@@ -649,8 +649,9 @@ private:
                                perCellMaterialIds);
             const auto offset =
                 reportMapping ? reportMapping->getOffsets()[i][0] : 0;
-            model.addSphere(materialId,
-                            {positions[i], mtypeRadii[mtypes[i]], offset});
+            const float radius =
+                mtypeRadii[mtypes[i]] * _morphologyParams.radiusMultiplier;
+            model.addSphere(materialId, {positions[i], radius, offset});
             callback.updateProgress(message.str(), i / float(gids.size()));
         }
     }
